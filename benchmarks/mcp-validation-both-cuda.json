@@ -1,0 +1,153 @@
+{
+  "created_utc": "2026-09-14T11:43:10.239969+00:00",
+  "transport": "both",
+  "jobs": 1,
+  "gpu": "cuda",
+  "sessions": [
+    {
+      "transport": "stdio",
+      "server": {
+        "protocolVersion": "2025-11-25",
+        "capabilities": {
+          "tools": {}
+        },
+        "serverInfo": {
+          "name": "fvid",
+          "version": "0.1.0"
+        },
+        "instructions": "Fvid edits local media within its configured root. Outputs must be new files. Native codecs run on CPU; GPU processing is exposed by fvid_process_y4m. Lossless guarantees apply only to documented operations. Concurrent operations are bounded by the server jobs setting; excess calls return busy. Cancellation does not stop an already running native codec. File paths refer to the server host."
+      },
+      "tools": [
+        "fvid_capabilities",
+        "fvid_devices",
+        "fvid_probe",
+        "fvid_remux",
+        "fvid_trim",
+        "fvid_concat",
+        "fvid_transcode_lossless",
+        "fvid_transcode",
+        "fvid_trim_pcm",
+        "fvid_decode_audio",
+        "fvid_process_y4m"
+      ],
+      "library_version": "n9.0.1-29-gad500d59cb-20260913",
+      "gpu_result": {
+        "output": "\\\\?\\C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-mcp-w4rwsth2\\root\\stdio-gpu.y4m",
+        "stats": {
+          "backend": "cuda",
+          "controlled_memory_bytes": 41728,
+          "device": "NVIDIA GeForce RTX 5090",
+          "frames": 50,
+          "input_bytes": 691200,
+          "output_bytes": 230400,
+          "transfers": {
+            "download_bytes": 230400,
+            "download_staging_bytes": 230400,
+            "downloads": 50,
+            "filter_passes": 100,
+            "upload_bytes": 691200,
+            "upload_staging_bytes": 691200,
+            "uploads": 50
+          }
+        }
+      }
+    },
+    {
+      "transport": "http",
+      "server": {
+        "protocolVersion": "2025-11-25",
+        "capabilities": {
+          "tools": {}
+        },
+        "serverInfo": {
+          "name": "fvid",
+          "version": "0.1.0"
+        },
+        "instructions": "Fvid edits local media within its configured root. Outputs must be new files. Native codecs run on CPU; GPU processing is exposed by fvid_process_y4m. Lossless guarantees apply only to documented operations. Concurrent operations are bounded by the server jobs setting; excess calls return busy. Cancellation does not stop an already running native codec. File paths refer to the server host."
+      },
+      "tools": [
+        "fvid_capabilities",
+        "fvid_devices",
+        "fvid_probe",
+        "fvid_remux",
+        "fvid_trim",
+        "fvid_concat",
+        "fvid_transcode_lossless",
+        "fvid_transcode",
+        "fvid_trim_pcm",
+        "fvid_decode_audio",
+        "fvid_process_y4m"
+      ],
+      "library_version": "n9.0.1-29-gad500d59cb-20260913",
+      "gpu_result": {
+        "output": "\\\\?\\C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-mcp-w4rwsth2\\root\\http-gpu.y4m",
+        "stats": {
+          "backend": "cuda",
+          "controlled_memory_bytes": 41728,
+          "device": "NVIDIA GeForce RTX 5090",
+          "frames": 50,
+          "input_bytes": 691200,
+          "output_bytes": 230400,
+          "transfers": {
+            "download_bytes": 230400,
+            "download_staging_bytes": 230400,
+            "downloads": 50,
+            "filter_passes": 100,
+            "upload_bytes": 691200,
+            "upload_staging_bytes": 691200,
+            "uploads": 50
+          }
+        }
+      }
+    }
+  ],
+  "checks": [
+    "stdio-initialize, ping, 11 tool schemas",
+    "stdio-capabilities, devices, probe",
+    "stdio-remux, strict trim, concat packet equality",
+    "stdio-lossless and explicit encoder pixel equality",
+    "stdio-PCM trim and decode sample equality",
+    "stdio-Rust Y4M pixel equality",
+    "stdio-cuda resident chain through MCP pixel equality",
+    "stdio-path escapes, symlinks, no-overwrite, malformed args, encoder option restrictions",
+    "stdio-1 concurrent operations, excess busy, ping, exact output pixels",
+    "http-initialize, ping, 11 tool schemas",
+    "http-capabilities, devices, probe",
+    "http-remux, strict trim, concat packet equality",
+    "http-lossless and explicit encoder pixel equality",
+    "http-PCM trim and decode sample equality",
+    "http-Rust Y4M pixel equality",
+    "http-cuda resident chain through MCP pixel equality",
+    "http-path escapes, symlinks, no-overwrite, malformed args, encoder option restrictions",
+    "http-authentication, Origin, Host and protocol version rejection"
+  ],
+  "status": "passed",
+  "binary_sha256": "91e004c58f182da6095c14afbb0bf9510206fd5399af108415e6a9554a4700bb",
+  "source_sha256": {
+    "src\\backend.rs": "903d446b36a2c218762d6ff5cc122f638e4a2bea186c7851f43650bb4d90f0f8",
+    "src\\lib.rs": "41671b2d1927c7c6bb3db30a8cd64d0946b5bb53bf7fecbe00f43326f4e298ef",
+    "src\\main.rs": "93fa2cbf2e25c883f9fb072ef66405691234d30d5b0cc2d7b1ee5de43745b116",
+    "src\\media_cli.rs": "52b55e5fbb603855905007e3994d2fc5e4d869614253debe089cd19de40823ca",
+    "src\\publish.rs": "a9640ba3e726754a38ea71307ce97cb30ac17780bf1593af0cf8651c6d0965b7",
+    "src\\resident.rs": "fb922cb57cf8083916574c5c43c82795fb207efd0d7911e42bfe433031bab1f8",
+    "src\\view.rs": "df31ea8d9b6cb98f303d9f7294c00f823108ef4349fffb23d5747872689c4896",
+    "src\\gpu\\mod.rs": "359a3b5500ee040ca4b51d920783b1e11d58ea87e8daf460612893213dfc3574",
+    "src\\mcp\\mod.rs": "8b77d9c3bb820b6177785eea0d30f7c608388b75a8ccf49d3dc7671f076f53c1",
+    "src\\mcp\\tools.rs": "53a29c038f288260f7078750ea246fc17d8033d8d67794dd7b1969619c73b0bc",
+    "src\\mcp\\transport.rs": "73f7d242fe5de6931f7a3ddfecc37832e055fa23a8f9ef28504bfd34238d758b",
+    "src\\resident\\pipeline.rs": "560d54e0045e76f2cfe6943ced68915215d0722a12cc3398c3c4f3ff443fe9fd",
+    "crates\\fvid-media\\src\\audio.rs": "a9de5c10affede2533fce0b2728ee19b629c7f07231da7d09b655bfe4c358968",
+    "crates\\fvid-media\\src\\audio_layout.rs": "92ecc6e5a1483affc4a1db40f91a34f0b42b111ee22d166d9a035c9a1f46057f",
+    "crates\\fvid-media\\src\\edit.rs": "82a92bc4f8cb1ccc2716b3b7fde8aef2044b8f275fc79a706fcb28f7cf75a6cc",
+    "crates\\fvid-media\\src\\input_policy.rs": "d42972f93fd22e9c36c0e743ff2ea74b42c41859387e17469d8bdc7c558ac181",
+    "crates\\fvid-media\\src\\lib.rs": "c603903b6cacc3b1743b55b83c0d1580ef38388eb9470bbfd299b5b973ddc53b",
+    "crates\\fvid-media\\src\\lossless.rs": "c9547d6b2910093554f8c4b7e0ec5647c35b85fe765245470057fdb7f5102db6",
+    "crates\\fvid-media\\src\\pcm.rs": "b70d03ebc14c839d9425ae110739538730d6fd44ce47a97c158bf4966e701911",
+    "Cargo.toml": "6136f5eb0da952143ddd248e53875303236b0f787c408ddf58bc842479cd0c7c",
+    "Cargo.lock": "3b5caf2ea7941913bb84d9ea7dbf0a41f72116277f97896bcf6d17275c97796b",
+    "crates\\fvid-media\\Cargo.toml": "2a29b6df8ca76c672ff048812710340a70376ae5350003eea139f98f2ece3dae",
+    "crates\\fvid-media\\build.rs": "1767f68f7f9af931f22a2820f384746217db6fb7bd0f91bd18827e65a9e6e18a",
+    "scripts\\validate_media.py": "cced5151304a5a81a48face9d3f6f98a6daa3245518d457e0277a67277859b41",
+    "scripts\\validate_mcp.py": "0010d8f0c02d2e3451a3be6569b1563abe02be620fe4ad5bd6f22f5f6c688846"
+  }
+}

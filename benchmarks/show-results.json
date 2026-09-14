@@ -1,0 +1,1089 @@
+{
+  "created_utc": "2026-09-14T17:15:03.256143+00:00",
+  "platform": "Windows-11-10.0.29599-SP0",
+  "machine": "AMD64",
+  "cpu": "AMD64 Family 25 Model 33 Stepping 0, AuthenticAMD",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "fvid": "D:\\Source\\fvid\\target\\release\\fvid.exe",
+  "ffmpeg": "ffmpeg version n9.0.1-29-gad500d59cb-20260913 Copyright (c) 2000-2026 the FFmpeg developers",
+  "ffmpeg_nvenc": true,
+  "method": "1 warmup + 5 timed rounds; editor basics = copy/crop/hflip/vflip/crop_hflip/fused on Y4M + media export variants; cold_ms = first process invoke.",
+  "metrics": [
+    {
+      "id": "fps",
+      "label": "Throughput (fps)",
+      "higher_is_better": true
+    },
+    {
+      "id": "median_ms",
+      "label": "Median wall time (ms)",
+      "higher_is_better": false
+    },
+    {
+      "id": "cold_ms",
+      "label": "Cold start (ms)",
+      "higher_is_better": false
+    },
+    {
+      "id": "ms_per_frame",
+      "label": "ms / frame",
+      "higher_is_better": false
+    },
+    {
+      "id": "peak_working_set_mb",
+      "label": "Peak working set (MiB)",
+      "higher_is_better": false
+    },
+    {
+      "id": "output_bytes",
+      "label": "Output size (bytes)",
+      "higher_is_better": false
+    },
+    {
+      "id": "host_frame_copies",
+      "label": "Host frame copies",
+      "higher_is_better": false
+    }
+  ],
+  "cases": [
+    {
+      "family": "editor_y4m",
+      "label": "1080p",
+      "resolution": "1920x1080",
+      "frames": 180,
+      "op": "copy",
+      "editor_title": "\u041f\u0440\u043e\u0433\u043e\u043d \u0431\u0435\u0437 \u043f\u0440\u0430\u0432\u043e\u043a",
+      "matrix": [
+        "fvid_cpu",
+        "fvid_gpu",
+        "ffmpeg_cpu"
+      ],
+      "engines": {
+        "fvid_cpu": {
+          "seconds": [
+            0.1856615,
+            0.1738492,
+            0.1856249,
+            0.1853151,
+            0.1840852
+          ],
+          "median_ms": 185.3151,
+          "min_ms": 173.8492,
+          "max_ms": 185.66150000000002,
+          "fps": 971.3185811625711,
+          "cold_ms": 309.65749999999997,
+          "ms_per_frame": 1.0295283333333334,
+          "peak_working_set_mb": 18.09765625,
+          "peak_working_set_mb_max": 18.21484375
+        },
+        "fvid_gpu": {
+          "seconds": [
+            0.4014623,
+            0.420801,
+            0.4025407,
+            0.4346645,
+            0.4038356
+          ],
+          "median_ms": 403.8356,
+          "min_ms": 401.46229999999997,
+          "max_ms": 434.66450000000003,
+          "fps": 445.7259340186947,
+          "cold_ms": 425.60720000000003,
+          "ms_per_frame": 2.243531111111111,
+          "peak_working_set_mb": 188.453125,
+          "peak_working_set_mb_max": 188.5
+        },
+        "ffmpeg_cpu": {
+          "seconds": [
+            0.1853772,
+            0.1901634,
+            0.2052828,
+            0.2177041,
+            0.2022572
+          ],
+          "median_ms": 202.2572,
+          "min_ms": 185.3772,
+          "max_ms": 217.7041,
+          "fps": 889.9559570685246,
+          "cold_ms": 198.4653,
+          "ms_per_frame": 1.1236511111111112,
+          "peak_working_set_mb": 37.3359375,
+          "peak_working_set_mb_max": 37.37890625
+        }
+      }
+    },
+    {
+      "family": "editor_y4m",
+      "label": "1080p",
+      "resolution": "1920x1080",
+      "frames": 180,
+      "op": "crop",
+      "editor_title": "\u041a\u0430\u0434\u0440\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435",
+      "matrix": [
+        "fvid_cpu",
+        "fvid_gpu",
+        "ffmpeg_cpu"
+      ],
+      "engines": {
+        "fvid_cpu": {
+          "seconds": [
+            0.1714223,
+            0.1704651,
+            0.1745021,
+            0.1697238,
+            0.1705425
+          ],
+          "median_ms": 170.54250000000002,
+          "min_ms": 169.7238,
+          "max_ms": 174.50209999999998,
+          "fps": 1055.455385021329,
+          "cold_ms": 166.799,
+          "ms_per_frame": 0.9474583333333334,
+          "peak_working_set_mb": 18.328125,
+          "peak_working_set_mb_max": 18.3828125
+        },
+        "fvid_gpu": {
+          "seconds": [
+            0.3581135,
+            0.3559081,
+            0.3528281,
+            0.3240433,
+            0.3283772
+          ],
+          "median_ms": 352.82809999999995,
+          "min_ms": 324.0433,
+          "max_ms": 358.1135,
+          "fps": 510.16344786597216,
+          "cold_ms": 378.0166,
+          "ms_per_frame": 1.9601561111111108,
+          "peak_working_set_mb": 180.26953125,
+          "peak_working_set_mb_max": 180.375
+        },
+        "ffmpeg_cpu": {
+          "seconds": [
+            0.1695809,
+            0.1624737,
+            0.1578502,
+            0.1579616,
+            0.164228
+          ],
+          "median_ms": 162.4737,
+          "min_ms": 157.8502,
+          "max_ms": 169.5809,
+          "fps": 1107.8716124517384,
+          "cold_ms": 165.6029,
+          "ms_per_frame": 0.9026316666666667,
+          "peak_working_set_mb": 32.89453125,
+          "peak_working_set_mb_max": 32.98046875
+        }
+      }
+    },
+    {
+      "family": "editor_y4m",
+      "label": "1080p",
+      "resolution": "1920x1080",
+      "frames": 180,
+      "op": "hflip",
+      "editor_title": "\u0417\u0435\u0440\u043a\u0430\u043b\u043e \u0433\u043e\u0440\u0438\u0437\u043e\u043d\u0442\u0430\u043b\u044c",
+      "matrix": [
+        "fvid_cpu",
+        "fvid_gpu",
+        "ffmpeg_cpu"
+      ],
+      "engines": {
+        "fvid_cpu": {
+          "seconds": [
+            0.1890154,
+            0.1842458,
+            0.1885303,
+            0.1850516,
+            0.189649
+          ],
+          "median_ms": 188.5303,
+          "min_ms": 184.24579999999997,
+          "max_ms": 189.649,
+          "fps": 954.7536921120901,
+          "cold_ms": 200.20350000000002,
+          "ms_per_frame": 1.0473905555555556,
+          "peak_working_set_mb": 18.15625,
+          "peak_working_set_mb_max": 18.17578125
+        },
+        "fvid_gpu": {
+          "seconds": [
+            0.4027354,
+            0.4392308,
+            0.4347795,
+            0.4498997,
+            0.4002686
+          ],
+          "median_ms": 434.7795,
+          "min_ms": 400.2686,
+          "max_ms": 449.8997,
+          "fps": 414.0029601211649,
+          "cold_ms": 404.0329,
+          "ms_per_frame": 2.4154416666666667,
+          "peak_working_set_mb": 188.5078125,
+          "peak_working_set_mb_max": 188.59765625
+        },
+        "ffmpeg_cpu": {
+          "seconds": [
+            0.2026721,
+            0.1814497,
+            0.1970809,
+            0.1780583,
+            0.1774619
+          ],
+          "median_ms": 181.44969999999998,
+          "min_ms": 177.4619,
+          "max_ms": 202.6721,
+          "fps": 992.010457994695,
+          "cold_ms": 194.84709999999998,
+          "ms_per_frame": 1.0080538888888888,
+          "peak_working_set_mb": 37.4765625,
+          "peak_working_set_mb_max": 37.53515625
+        }
+      }
+    },
+    {
+      "family": "editor_y4m",
+      "label": "1080p",
+      "resolution": "1920x1080",
+      "frames": 180,
+      "op": "vflip",
+      "editor_title": "\u0417\u0435\u0440\u043a\u0430\u043b\u043e \u0432\u0435\u0440\u0442\u0438\u043a\u0430\u043b\u044c",
+      "matrix": [
+        "fvid_cpu",
+        "fvid_gpu",
+        "ffmpeg_cpu"
+      ],
+      "engines": {
+        "fvid_cpu": {
+          "seconds": [
+            0.1858138,
+            0.1857081,
+            0.1844996,
+            0.1847502,
+            0.1857775
+          ],
+          "median_ms": 185.70809999999997,
+          "min_ms": 184.49960000000002,
+          "max_ms": 185.81380000000001,
+          "fps": 969.2630531463087,
+          "cold_ms": 191.33010000000002,
+          "ms_per_frame": 1.0317116666666666,
+          "peak_working_set_mb": 18.34375,
+          "peak_working_set_mb_max": 18.39453125
+        },
+        "fvid_gpu": {
+          "seconds": [
+            0.3868595,
+            0.3919075,
+            0.3857671,
+            0.4158102,
+            0.3892366
+          ],
+          "median_ms": 389.2366,
+          "min_ms": 385.76709999999997,
+          "max_ms": 415.8102,
+          "fps": 462.44366536959785,
+          "cold_ms": 390.8061,
+          "ms_per_frame": 2.1624255555555556,
+          "peak_working_set_mb": 188.4375,
+          "peak_working_set_mb_max": 188.515625
+        },
+        "ffmpeg_cpu": {
+          "seconds": [
+            0.2081141,
+            0.1686551,
+            0.1795281,
+            0.1677913,
+            0.1697081
+          ],
+          "median_ms": 169.7081,
+          "min_ms": 167.7913,
+          "max_ms": 208.1141,
+          "fps": 1060.644718784784,
+          "cold_ms": 186.29000000000002,
+          "ms_per_frame": 0.9428227777777778,
+          "peak_working_set_mb": 37.4296875,
+          "peak_working_set_mb_max": 37.4609375
+        }
+      }
+    },
+    {
+      "family": "editor_y4m",
+      "label": "1080p",
+      "resolution": "1920x1080",
+      "frames": 180,
+      "op": "crop_hflip",
+      "editor_title": "\u041a\u0430\u0434\u0440 + \u0437\u0435\u0440\u043a\u0430\u043b\u043e H",
+      "matrix": [
+        "fvid_cpu",
+        "fvid_gpu",
+        "ffmpeg_cpu"
+      ],
+      "engines": {
+        "fvid_cpu": {
+          "seconds": [
+            0.1572074,
+            0.1552657,
+            0.1538006,
+            0.1544979,
+            0.1532871
+          ],
+          "median_ms": 154.4979,
+          "min_ms": 153.2871,
+          "max_ms": 157.2074,
+          "fps": 1165.064379515838,
+          "cold_ms": 156.2275,
+          "ms_per_frame": 0.8583216666666666,
+          "peak_working_set_mb": 18.8828125,
+          "peak_working_set_mb_max": 18.96875
+        },
+        "fvid_gpu": {
+          "seconds": [
+            0.3247618,
+            0.3439889,
+            0.3399537,
+            0.3412895,
+            0.3410193
+          ],
+          "median_ms": 341.01930000000004,
+          "min_ms": 324.7618,
+          "max_ms": 343.9889,
+          "fps": 527.8293633234248,
+          "cold_ms": 327.511,
+          "ms_per_frame": 1.8945516666666669,
+          "peak_working_set_mb": 180.16015625,
+          "peak_working_set_mb_max": 180.32421875
+        },
+        "ffmpeg_cpu": {
+          "seconds": [
+            0.1645628,
+            0.1590299,
+            0.1661476,
+            0.1688497,
+            0.1581636
+          ],
+          "median_ms": 164.5628,
+          "min_ms": 158.16359999999997,
+          "max_ms": 168.84969999999998,
+          "fps": 1093.807348926975,
+          "cold_ms": 171.92350000000002,
+          "ms_per_frame": 0.9142377777777778,
+          "peak_working_set_mb": 30.796875,
+          "peak_working_set_mb_max": 31.40234375
+        }
+      }
+    },
+    {
+      "family": "editor_y4m",
+      "label": "1080p",
+      "resolution": "1920x1080",
+      "frames": 180,
+      "op": "fused",
+      "editor_title": "\u041a\u0430\u0434\u0440 + \u0437\u0435\u0440\u043a\u0430\u043b\u0430 HV",
+      "matrix": [
+        "fvid_cpu",
+        "fvid_gpu",
+        "ffmpeg_cpu"
+      ],
+      "engines": {
+        "fvid_cpu": {
+          "seconds": [
+            0.1695731,
+            0.1584743,
+            0.1528212,
+            0.1541468,
+            0.15315
+          ],
+          "median_ms": 154.1468,
+          "min_ms": 152.82119999999998,
+          "max_ms": 169.5731,
+          "fps": 1167.7180453956878,
+          "cold_ms": 161.8607,
+          "ms_per_frame": 0.8563711111111112,
+          "peak_working_set_mb": 18.9140625,
+          "peak_working_set_mb_max": 18.94921875
+        },
+        "fvid_gpu": {
+          "seconds": [
+            0.3400716,
+            0.3245538,
+            0.3236669,
+            0.3286249,
+            0.3236014
+          ],
+          "median_ms": 324.5538,
+          "min_ms": 323.60139999999996,
+          "max_ms": 340.0716,
+          "fps": 554.607587401534,
+          "cold_ms": 326.0011,
+          "ms_per_frame": 1.8030766666666669,
+          "peak_working_set_mb": 180.234375,
+          "peak_working_set_mb_max": 180.4765625
+        },
+        "ffmpeg_cpu": {
+          "seconds": [
+            0.148806,
+            0.1526685,
+            0.1538213,
+            0.1528389,
+            0.1588363
+          ],
+          "median_ms": 152.8389,
+          "min_ms": 148.80599999999998,
+          "max_ms": 158.83630000000002,
+          "fps": 1177.7106482708264,
+          "cold_ms": 159.97220000000002,
+          "ms_per_frame": 0.849105,
+          "peak_working_set_mb": 30.84375,
+          "peak_working_set_mb_max": 31.4140625
+        }
+      }
+    },
+    {
+      "family": "editor_y4m",
+      "label": "720p",
+      "resolution": "1280x720",
+      "frames": 300,
+      "op": "copy",
+      "editor_title": "\u041f\u0440\u043e\u0433\u043e\u043d \u0431\u0435\u0437 \u043f\u0440\u0430\u0432\u043e\u043a",
+      "matrix": [
+        "fvid_cpu",
+        "fvid_gpu",
+        "ffmpeg_cpu"
+      ],
+      "engines": {
+        "fvid_cpu": {
+          "seconds": [
+            0.1534266,
+            0.1533101,
+            0.1556763,
+            0.155431,
+            0.1596704
+          ],
+          "median_ms": 155.431,
+          "min_ms": 153.3101,
+          "max_ms": 159.6704,
+          "fps": 1930.116900746955,
+          "cold_ms": 156.2142,
+          "ms_per_frame": 0.5181033333333334,
+          "peak_working_set_mb": 16.73828125,
+          "peak_working_set_mb_max": 16.8203125
+        },
+        "fvid_gpu": {
+          "seconds": [
+            0.3582202,
+            0.3372346,
+            0.3754631,
+            0.3693837,
+            0.3554998
+          ],
+          "median_ms": 358.2202,
+          "min_ms": 337.2346,
+          "max_ms": 375.4631,
+          "fps": 837.473710304444,
+          "cold_ms": 356.05769999999995,
+          "ms_per_frame": 1.1940673333333331,
+          "peak_working_set_mb": 177.1796875,
+          "peak_working_set_mb_max": 177.27734375
+        },
+        "ffmpeg_cpu": {
+          "seconds": [
+            0.1484135,
+            0.147812,
+            0.1381558,
+            0.1442501,
+            0.1486419
+          ],
+          "median_ms": 147.812,
+          "min_ms": 138.1558,
+          "max_ms": 148.6419,
+          "fps": 2029.605174140124,
+          "cold_ms": 156.1042,
+          "ms_per_frame": 0.4927066666666667,
+          "peak_working_set_mb": 29.109375,
+          "peak_working_set_mb_max": 29.1484375
+        }
+      }
+    },
+    {
+      "family": "editor_y4m",
+      "label": "720p",
+      "resolution": "1280x720",
+      "frames": 300,
+      "op": "hflip",
+      "editor_title": "\u0417\u0435\u0440\u043a\u0430\u043b\u043e \u0433\u043e\u0440\u0438\u0437\u043e\u043d\u0442\u0430\u043b\u044c",
+      "matrix": [
+        "fvid_cpu",
+        "fvid_gpu",
+        "ffmpeg_cpu"
+      ],
+      "engines": {
+        "fvid_cpu": {
+          "seconds": [
+            0.1702678,
+            0.1528575,
+            0.1588755,
+            0.1684084,
+            0.155041
+          ],
+          "median_ms": 158.87550000000002,
+          "min_ms": 152.85750000000002,
+          "max_ms": 170.2678,
+          "fps": 1888.271004654588,
+          "cold_ms": 159.8104,
+          "ms_per_frame": 0.5295850000000001,
+          "peak_working_set_mb": 16.6796875,
+          "peak_working_set_mb_max": 16.76953125
+        },
+        "fvid_gpu": {
+          "seconds": [
+            0.3554519,
+            0.3554849,
+            0.3806665,
+            0.3773381,
+            0.3393255
+          ],
+          "median_ms": 355.4849,
+          "min_ms": 339.3255,
+          "max_ms": 380.66650000000004,
+          "fps": 843.9177022708982,
+          "cold_ms": 360.18850000000003,
+          "ms_per_frame": 1.1849496666666666,
+          "peak_working_set_mb": 177.1640625,
+          "peak_working_set_mb_max": 177.30859375
+        },
+        "ffmpeg_cpu": {
+          "seconds": [
+            0.142846,
+            0.1484575,
+            0.1453009,
+            0.1448275,
+            0.1392462
+          ],
+          "median_ms": 144.8275,
+          "min_ms": 139.2462,
+          "max_ms": 148.45749999999998,
+          "fps": 2071.4298044225025,
+          "cold_ms": 150.8765,
+          "ms_per_frame": 0.4827583333333333,
+          "peak_working_set_mb": 30.58203125,
+          "peak_working_set_mb_max": 30.625
+        }
+      }
+    },
+    {
+      "family": "editor_y4m",
+      "label": "720p",
+      "resolution": "1280x720",
+      "frames": 300,
+      "op": "fused",
+      "editor_title": "\u041a\u0430\u0434\u0440 + \u0437\u0435\u0440\u043a\u0430\u043b\u0430 HV",
+      "matrix": [
+        "fvid_cpu",
+        "fvid_gpu",
+        "ffmpeg_cpu"
+      ],
+      "engines": {
+        "fvid_cpu": {
+          "seconds": [
+            0.1386981,
+            0.1385761,
+            0.1555573,
+            0.1395912,
+            0.1393896
+          ],
+          "median_ms": 139.3896,
+          "min_ms": 138.5761,
+          "max_ms": 155.5573,
+          "fps": 2152.2409132388643,
+          "cold_ms": 154.1652,
+          "ms_per_frame": 0.464632,
+          "peak_working_set_mb": 16.7578125,
+          "peak_working_set_mb_max": 16.8203125
+        },
+        "fvid_gpu": {
+          "seconds": [
+            0.3079823,
+            0.3143822,
+            0.3076708,
+            0.3141893,
+            0.3226835
+          ],
+          "median_ms": 314.1893,
+          "min_ms": 307.67080000000004,
+          "max_ms": 322.68350000000004,
+          "fps": 954.838372917219,
+          "cold_ms": 310.97520000000003,
+          "ms_per_frame": 1.0472976666666667,
+          "peak_working_set_mb": 172.1640625,
+          "peak_working_set_mb_max": 172.2421875
+        },
+        "ffmpeg_cpu": {
+          "seconds": [
+            0.1482732,
+            0.1334312,
+            0.1348033,
+            0.128203,
+            0.1329105
+          ],
+          "median_ms": 133.4312,
+          "min_ms": 128.203,
+          "max_ms": 148.2732,
+          "fps": 2248.349711311897,
+          "cold_ms": 141.1287,
+          "ms_per_frame": 0.44477066666666665,
+          "peak_working_set_mb": 26.6953125,
+          "peak_working_set_mb_max": 26.78515625
+        }
+      }
+    },
+    {
+      "family": "editor_media",
+      "label": "1080p_5s",
+      "resolution": "1920x1080",
+      "frames": 150,
+      "op": "copy",
+      "editor_title": "\u042d\u043a\u0441\u043f\u043e\u0440\u0442 \u0431\u0435\u0437 \u043f\u0440\u0430\u0432\u043e\u043a",
+      "matrix": [
+        "fvid_cpu",
+        "fvid_gpu",
+        "ffmpeg_cpu",
+        "ffmpeg_gpu"
+      ],
+      "engines": {
+        "fvid_cpu": {
+          "seconds": [
+            0.4694468,
+            0.4493279,
+            0.4493286,
+            0.4666458,
+            0.4464062
+          ],
+          "median_ms": 449.3286,
+          "min_ms": 446.40619999999996,
+          "max_ms": 469.4468,
+          "fps": 333.83140979675005,
+          "cold_ms": 437.475,
+          "ms_per_frame": 2.995524,
+          "peak_working_set_mb": 889.93359375,
+          "peak_working_set_mb_max": 890.21875,
+          "output_bytes": 3098289
+        },
+        "fvid_gpu": {
+          "seconds": [
+            0.5551998,
+            0.5382067,
+            0.5447964,
+            0.5396944,
+            0.5421288
+          ],
+          "median_ms": 542.1288,
+          "min_ms": 538.2067000000001,
+          "max_ms": 555.1998,
+          "fps": 276.6870160744089,
+          "cold_ms": 611.2473,
+          "ms_per_frame": 3.6141919999999996,
+          "peak_working_set_mb": 316.7890625,
+          "peak_working_set_mb_max": 317.00390625,
+          "output_bytes": 1575862,
+          "host_frame_copies": 0
+        },
+        "ffmpeg_cpu": {
+          "seconds": [
+            0.423349,
+            0.4359207,
+            0.4503788,
+            0.4710532,
+            0.4341667
+          ],
+          "median_ms": 435.9207,
+          "min_ms": 423.349,
+          "max_ms": 471.0532,
+          "fps": 344.099282277717,
+          "cold_ms": 398.2912,
+          "ms_per_frame": 2.906138,
+          "peak_working_set_mb": 906.2734375,
+          "peak_working_set_mb_max": 906.74609375,
+          "output_bytes": 3064505
+        },
+        "ffmpeg_gpu": {
+          "seconds": [
+            0.4392627,
+            0.4354662,
+            0.4103091,
+            0.4141857,
+            0.4133976
+          ],
+          "median_ms": 414.1857,
+          "min_ms": 410.3091,
+          "max_ms": 439.2627,
+          "fps": 362.156395066271,
+          "cold_ms": 451.55600000000004,
+          "ms_per_frame": 2.761238,
+          "peak_working_set_mb": 254.15625,
+          "peak_working_set_mb_max": 254.296875,
+          "output_bytes": 1375903
+        }
+      }
+    },
+    {
+      "family": "editor_media",
+      "label": "1080p_5s",
+      "resolution": "1920x1080",
+      "frames": 150,
+      "op": "crop",
+      "editor_title": "\u042d\u043a\u0441\u043f\u043e\u0440\u0442 \u0441 \u043a\u0430\u0434\u0440\u043e\u043c",
+      "matrix": [
+        "fvid_cpu",
+        "fvid_gpu",
+        "ffmpeg_cpu",
+        "ffmpeg_gpu"
+      ],
+      "engines": {
+        "fvid_cpu": {
+          "seconds": [
+            0.2333792,
+            0.2187966,
+            0.216689,
+            0.2175635,
+            0.2326861
+          ],
+          "median_ms": 218.7966,
+          "min_ms": 216.689,
+          "max_ms": 233.3792,
+          "fps": 685.5682400914822,
+          "cold_ms": 236.0547,
+          "ms_per_frame": 1.458644,
+          "peak_working_set_mb": 267.0625,
+          "peak_working_set_mb_max": 267.31640625,
+          "output_bytes": 144090
+        },
+        "fvid_gpu": {
+          "seconds": [
+            0.4454302,
+            0.4380212,
+            0.4461187,
+            0.4337593,
+            0.438601
+          ],
+          "median_ms": 438.601,
+          "min_ms": 433.7593,
+          "max_ms": 446.1187,
+          "fps": 341.99648427614164,
+          "cold_ms": 437.2305,
+          "ms_per_frame": 2.9240066666666666,
+          "peak_working_set_mb": 298.40234375,
+          "peak_working_set_mb_max": 298.51953125,
+          "output_bytes": 541440,
+          "host_frame_copies": 0
+        },
+        "ffmpeg_cpu": {
+          "seconds": [
+            0.1810102,
+            0.1820255,
+            0.1860236,
+            0.1812816,
+            0.1803946
+          ],
+          "median_ms": 181.2816,
+          "min_ms": 180.3946,
+          "max_ms": 186.02360000000002,
+          "fps": 827.4419466730214,
+          "cold_ms": 188.3373,
+          "ms_per_frame": 1.208544,
+          "peak_working_set_mb": 282.5625,
+          "peak_working_set_mb_max": 282.84375,
+          "output_bytes": 115860
+        },
+        "ffmpeg_gpu": {
+          "seconds": [
+            0.4464995,
+            0.4503138,
+            0.4490607,
+            0.4557385,
+            0.4518523
+          ],
+          "median_ms": 450.3138,
+          "min_ms": 446.4995,
+          "max_ms": 455.7385,
+          "fps": 333.1010508671953,
+          "cold_ms": 454.0414,
+          "ms_per_frame": 3.002092,
+          "peak_working_set_mb": 323.5,
+          "peak_working_set_mb_max": 323.9921875,
+          "output_bytes": 536800
+        }
+      }
+    },
+    {
+      "family": "editor_media",
+      "label": "1080p_5s",
+      "resolution": "1920x1080",
+      "frames": 150,
+      "op": "hflip",
+      "editor_title": "\u042d\u043a\u0441\u043f\u043e\u0440\u0442 \u0441 \u0437\u0435\u0440\u043a\u0430\u043b\u043e\u043c H",
+      "matrix": [
+        "fvid_cpu",
+        "fvid_gpu",
+        "ffmpeg_cpu",
+        "ffmpeg_gpu"
+      ],
+      "engines": {
+        "fvid_cpu": {
+          "seconds": [
+            0.5090685,
+            0.5115015,
+            0.5336994,
+            0.5553477,
+            0.5133837
+          ],
+          "median_ms": 513.3837,
+          "min_ms": 509.06850000000003,
+          "max_ms": 555.3477,
+          "fps": 292.1791245027842,
+          "cold_ms": 478.5211,
+          "ms_per_frame": 3.422558,
+          "peak_working_set_mb": 892.6484375,
+          "peak_working_set_mb_max": 892.67578125,
+          "output_bytes": 3073894
+        },
+        "fvid_gpu": {
+          "seconds": [
+            0.5747967,
+            0.5757083,
+            0.5705633,
+            0.574649,
+            0.5738411
+          ],
+          "median_ms": 574.649,
+          "min_ms": 570.5633,
+          "max_ms": 575.7082999999999,
+          "fps": 261.0289063410882,
+          "cold_ms": 610.0937,
+          "ms_per_frame": 3.8309933333333333,
+          "peak_working_set_mb": 316.78125,
+          "peak_working_set_mb_max": 317.0703125,
+          "output_bytes": 1574332,
+          "host_frame_copies": 0
+        },
+        "ffmpeg_cpu": {
+          "seconds": [
+            0.5371265,
+            0.5764362,
+            0.5436342,
+            0.4949664,
+            0.509453
+          ],
+          "median_ms": 537.1265,
+          "min_ms": 494.96639999999996,
+          "max_ms": 576.4362,
+          "fps": 279.26382332653486,
+          "cold_ms": 546.8372999999999,
+          "ms_per_frame": 3.580843333333333,
+          "peak_working_set_mb": 924.43359375,
+          "peak_working_set_mb_max": 924.67578125,
+          "output_bytes": 2992130
+        },
+        "ffmpeg_gpu": {
+          "seconds": [
+            0.7342479,
+            0.5722562,
+            0.5732207,
+            0.5737303,
+            0.5650784
+          ],
+          "median_ms": 573.2207000000001,
+          "min_ms": 565.0784,
+          "max_ms": 734.2479,
+          "fps": 261.67931479096967,
+          "cold_ms": 628.7177,
+          "ms_per_frame": 3.8214713333333337,
+          "peak_working_set_mb": 344.91015625,
+          "peak_working_set_mb_max": 345.10546875,
+          "output_bytes": 1413776
+        }
+      }
+    },
+    {
+      "family": "editor_media",
+      "label": "1080p_5s",
+      "resolution": "1920x1080",
+      "frames": 150,
+      "op": "vflip",
+      "editor_title": "\u042d\u043a\u0441\u043f\u043e\u0440\u0442 \u0441 \u0437\u0435\u0440\u043a\u0430\u043b\u043e\u043c V",
+      "matrix": [
+        "fvid_cpu",
+        "fvid_gpu",
+        "ffmpeg_cpu",
+        "ffmpeg_gpu"
+      ],
+      "engines": {
+        "fvid_cpu": {
+          "seconds": [
+            0.5423177,
+            0.5445205,
+            0.5283538,
+            0.5499077,
+            0.5265674
+          ],
+          "median_ms": 542.3177000000001,
+          "min_ms": 526.5674,
+          "max_ms": 549.9077,
+          "fps": 276.5906405046341,
+          "cold_ms": 543.1043,
+          "ms_per_frame": 3.6154513333333336,
+          "peak_working_set_mb": 889.734375,
+          "peak_working_set_mb_max": 889.984375,
+          "output_bytes": 2793526
+        },
+        "fvid_gpu": {
+          "seconds": [
+            0.6282245,
+            0.5850756,
+            0.6429891,
+            0.6300467,
+            0.6163756
+          ],
+          "median_ms": 628.2244999999999,
+          "min_ms": 585.0756,
+          "max_ms": 642.9891,
+          "fps": 238.76814737406772,
+          "cold_ms": 627.0101,
+          "ms_per_frame": 4.188163333333333,
+          "peak_working_set_mb": 316.82421875,
+          "peak_working_set_mb_max": 316.86328125,
+          "output_bytes": 1586083,
+          "host_frame_copies": 0
+        },
+        "ffmpeg_cpu": {
+          "seconds": [
+            0.5139865,
+            0.5015156,
+            0.4919024,
+            0.5000672,
+            0.4978696
+          ],
+          "median_ms": 500.06720000000007,
+          "min_ms": 491.9024,
+          "max_ms": 513.9865,
+          "fps": 299.9596854182798,
+          "cold_ms": 492.38939999999997,
+          "ms_per_frame": 3.333781333333334,
+          "peak_working_set_mb": 900.79296875,
+          "peak_working_set_mb_max": 900.98046875,
+          "output_bytes": 2850539
+        },
+        "ffmpeg_gpu": {
+          "seconds": [
+            0.5803833,
+            0.5206658,
+            0.518567,
+            0.5125872,
+            0.551436
+          ],
+          "median_ms": 520.6658,
+          "min_ms": 512.5872,
+          "max_ms": 580.3833000000001,
+          "fps": 288.0926690402942,
+          "cold_ms": 566.8892,
+          "ms_per_frame": 3.4711053333333335,
+          "peak_working_set_mb": 341.81640625,
+          "peak_working_set_mb_max": 342.1953125,
+          "output_bytes": 14104
+        }
+      }
+    },
+    {
+      "family": "editor_media",
+      "label": "1080p_5s",
+      "resolution": "1920x1080",
+      "frames": 150,
+      "op": "fused",
+      "editor_title": "\u042d\u043a\u0441\u043f\u043e\u0440\u0442 \u043a\u0430\u0434\u0440+\u0437\u0435\u0440\u043a\u0430\u043b\u0430",
+      "matrix": [
+        "fvid_cpu",
+        "fvid_gpu",
+        "ffmpeg_cpu",
+        "ffmpeg_gpu"
+      ],
+      "engines": {
+        "fvid_cpu": {
+          "seconds": [
+            0.2337638,
+            0.2444436,
+            0.2324771,
+            0.253647,
+            0.2263819
+          ],
+          "median_ms": 233.7638,
+          "min_ms": 226.3819,
+          "max_ms": 253.64700000000002,
+          "fps": 641.6733471991814,
+          "cold_ms": 239.47959999999998,
+          "ms_per_frame": 1.5584253333333333,
+          "peak_working_set_mb": 267.8125,
+          "peak_working_set_mb_max": 267.96875,
+          "output_bytes": 128958
+        },
+        "fvid_gpu": {
+          "seconds": [
+            0.4333406,
+            0.4354556,
+            0.4355164,
+            0.4381368,
+            0.4455865
+          ],
+          "median_ms": 435.51640000000003,
+          "min_ms": 433.3406,
+          "max_ms": 445.5865,
+          "fps": 344.41871764186146,
+          "cold_ms": 463.9502,
+          "ms_per_frame": 2.903442666666667,
+          "peak_working_set_mb": 298.4765625,
+          "peak_working_set_mb_max": 298.59375,
+          "output_bytes": 1097260,
+          "host_frame_copies": 0
+        },
+        "ffmpeg_cpu": {
+          "seconds": [
+            0.2009322,
+            0.2088203,
+            0.1994502,
+            0.2103551,
+            0.1949916
+          ],
+          "median_ms": 200.9322,
+          "min_ms": 194.99159999999998,
+          "max_ms": 210.3551,
+          "fps": 746.5204680981943,
+          "cold_ms": 211.45510000000002,
+          "ms_per_frame": 1.339548,
+          "peak_working_set_mb": 279.79296875,
+          "peak_working_set_mb_max": 280.1015625,
+          "output_bytes": 130020
+        },
+        "ffmpeg_gpu": {
+          "seconds": [
+            0.4976585,
+            0.5290417,
+            0.5382022,
+            0.457596,
+            0.4551277
+          ],
+          "median_ms": 497.6585,
+          "min_ms": 455.1277,
+          "max_ms": 538.2022,
+          "fps": 301.41151010180675,
+          "cold_ms": 474.2666,
+          "ms_per_frame": 3.3177233333333334,
+          "peak_working_set_mb": 324.25,
+          "peak_working_set_mb_max": 324.59375,
+          "output_bytes": 562157
+        }
+      }
+    }
+  ]
+}

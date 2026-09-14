@@ -1,12 +1,22 @@
 //! Optional CUDA processing of three byte planes (for example, planar YUV420p).
 //!
-//! This adapter owns device buffers and its stream. Each `apply` uploads the input,
-//! runs one fused crop/reflection kernel, downloads the output and synchronizes.
-//! It does not provide codecs, texture interop, or asynchronous host-buffer lifetimes.
+//! This adapter owns device buffers, pinned host staging, and a stream. Each `apply`
+//! copies into pinned memory, uploads, runs one fused crop/reflection kernel,
+//! downloads into pinned memory, and synchronizes. A process-wide device pool
+//! reuses context and modules. It does not provide codecs, texture interop, or
+//! asynchronous host-buffer lifetimes.
 
 #[cfg(any(target_os = "linux", target_os = "windows"))]
+mod device_pool;
+#[cfg(any(target_os = "linux", target_os = "windows"))]
+mod host_pinned;
+#[cfg(any(target_os = "linux", target_os = "windows"))]
 mod native;
+#[cfg(any(target_os = "linux", target_os = "windows"))]
+mod ptx_embed;
+mod nv12;
 mod pipeline;
+pub use nv12::{Nv12Processor, Nv12Transform, Nv12View};
 pub use pipeline::{CudaPipeline, TransferStats};
 
 /// A validated transform with buffers reused across frames of the same size.
@@ -55,6 +65,32 @@ impl CudaProcessor {
         #[cfg(not(any(target_os = "linux", target_os = "windows")))]
         {
             let _ = (input, output);
+            Err(unsupported())
+        }
+    }
+
+    /// Depth-2 pipelined submit. When `true`, `output` holds a completed earlier frame.
+    pub fn submit(&mut self, input: &[u8], output: &mut [u8]) -> Result<bool, String> {
+        #[cfg(any(target_os = "linux", target_os = "windows"))]
+        {
+            self.inner.submit(input, output)
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+        {
+            let _ = (input, output);
+            Err(unsupported())
+        }
+    }
+
+    /// Drain one in-flight frame into `output`. Returns `false` when the queue is empty.
+    pub fn flush(&mut self, output: &mut [u8]) -> Result<bool, String> {
+        #[cfg(any(target_os = "linux", target_os = "windows"))]
+        {
+            self.inner.flush(output)
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+        {
+            let _ = output;
             Err(unsupported())
         }
     }

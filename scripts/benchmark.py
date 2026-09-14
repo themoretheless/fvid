@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Deterministic FFmpeg differential checks and warm-cache CLI benchmarks."""
-import datetime,hashlib,json,pathlib,platform,random,re,statistics,subprocess,time,os,tempfile
-ROOT=pathlib.Path(__file__).resolve().parents[1]; DATA=ROOT/'benchmarks/data'; DATA.mkdir(exist_ok=True)
-BIN=str(ROOT/'target/release/fvid')
+import datetime,hashlib,json,pathlib,platform,random,re,statistics,subprocess,tempfile
+from common import ROOT, release_binary, run_timed
+DATA=ROOT/'benchmarks/data'; DATA.mkdir(exist_ok=True)
+BIN=str(release_binary())
 def run(cmd,**kw): return subprocess.run(cmd,check=True,stderr=subprocess.PIPE,**kw)
 def make(w,h,n,fmt):
  p=DATA/f'{w}x{h}-{n}-{fmt}.y4m'
@@ -52,13 +53,13 @@ for w,h,n in [(1280,720,180),(1920,1080,120),(3840,2160,60)]:
    order=list(cmds);rng.shuffle(order)
    for engine in order:
     with tempfile.TemporaryFile() as err:
-     start=time.perf_counter_ns();p=subprocess.Popen(cmds[engine],stdout=subprocess.DEVNULL,stderr=err)
-     _,status,usage=os.wait4(p.pid,0);p.returncode=os.waitstatus_to_exitcode(status);elapsed=(time.perf_counter_ns()-start)/1e9
-     if p.returncode: err.seek(0);raise RuntimeError(err.read().decode())
+     elapsed,code,usage=run_timed(cmds[engine],stdout=subprocess.DEVNULL,stderr=err)
+     if code: err.seek(0);raise RuntimeError(err.read().decode())
     samples[engine].append(elapsed)
-    rss[engine].append(usage.ru_maxrss)
+    if usage is not None: rss[engine].append(usage)
   result={'resolution':f'{w}x{h}','frames':n,'case':name,'commands':cmds,'seconds':samples,'max_rss_bytes':rss,'median_seconds':{k:statistics.median(v) for k,v in samples.items()},'fps':{k:n/statistics.median(v) for k,v in samples.items()}}
   results.append(result);(ROOT/'benchmarks/partial-results.json').write_text(json.dumps(results,indent=2));print(result['resolution'],name,{k:round(v,4) for k,v in result['median_seconds'].items()},flush=True)
-report={'created_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'platform':platform.platform(),'machine':platform.machine(),'cpu':(subprocess.run(['sysctl','-n','machdep.cpu.brand_string'],capture_output=True,text=True).stdout.strip() or 'unavailable in sandbox'),'ffmpeg':subprocess.check_output(['ffmpeg','-version'],text=True).splitlines()[0],'rustc':subprocess.check_output(['rustc','--version'],text=True).strip(),'method':'Warm cache; local input file; Y4M serialization to OS null sink; includes process startup; per-process RSS from wait4; 1 warmup and 7 seeded randomized rounds per case; no fsync; CPU only; raw frames; no codec performance claims. RSS is platform-specific macOS bytes.','correctness':checks,'results':results}
+cpu=(subprocess.run(['sysctl','-n','machdep.cpu.brand_string'],capture_output=True,text=True).stdout.strip() if platform.system()=='Darwin' else platform.processor()) or 'unavailable'
+report={'created_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'platform':platform.platform(),'machine':platform.machine(),'cpu':cpu,'ffmpeg':subprocess.check_output(['ffmpeg','-version'],text=True).splitlines()[0],'rustc':subprocess.check_output(['rustc','--version'],text=True).strip(),'method':'Warm cache; local input file; Y4M serialization to OS null sink; includes process startup; per-process RSS from wait4 when available (macOS/Linux); 1 warmup and 7 seeded randomized rounds per case; no fsync; CPU only; raw frames; no codec performance claims.','correctness':checks,'results':results}
 (ROOT/'benchmarks/results.json').write_text(json.dumps(report,indent=2))
 print('Saved benchmarks/results.json',flush=True)

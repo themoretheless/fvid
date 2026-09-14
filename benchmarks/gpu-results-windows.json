@@ -1,0 +1,1518 @@
+{
+  "created_utc": "2026-09-14T11:33:51.436077+00:00",
+  "platform": "Windows-11-10.0.29599-SP0",
+  "machine": "AMD64",
+  "binary": "D:\\Source\\fvid\\target\\release\\fvid.exe",
+  "binary_sha256": "cc3623842e95979ea5684f5a2a6caca8bb22d9f2f6361eee8dbe9e3eb665f918",
+  "validation_script_sha256_at_execution": "39a99968647802c81b2d70725a66d20d79c309897b1ae61545e1fb39597a02d3",
+  "source_sha256": {
+    "Cargo.lock": "3b5caf2ea7941913bb84d9ea7dbf0a41f72116277f97896bcf6d17275c97796b",
+    "Cargo.toml": "6136f5eb0da952143ddd248e53875303236b0f787c408ddf58bc842479cd0c7c",
+    "crates\\fvid-cuda\\Cargo.lock": "558b871faf05222868a265c505b59b838a35fa261d156ed495c66ca9225a2441",
+    "crates\\fvid-cuda\\Cargo.toml": "dafdcc1a830e871a0cc932584bcf588afaeb417191d0377439543765d6ff8c34",
+    "crates\\fvid-cuda\\src\\lib.rs": "5884de6c10a1ed6f1a83cd95db75ab854175f28e629643a06bc26293a8cb6263",
+    "crates\\fvid-cuda\\src\\native.rs": "003a65ab7ab237aa7a575488537e9d5f78a96ba2dba5362ec9fa242c50e4ea40",
+    "crates\\fvid-cuda\\src\\pipeline.rs": "89abd914a65623a76669112dc220b6dac720a94ec9524fbd4564c40363bdf7ed",
+    "crates\\fvid-cuda\\src\\transform.cu": "000c82e45b5b89aa1c5c404b09b8136fe4d41cb5bfdd70be5ac073401e5a1dc3",
+    "crates\\fvid-media\\Cargo.lock": "acbfa754b9d44aa18ce932cee2e83d4ad624de37703d469bd46b231e5f398abd",
+    "crates\\fvid-media\\Cargo.toml": "2a29b6df8ca76c672ff048812710340a70376ae5350003eea139f98f2ece3dae",
+    "crates\\fvid-media\\src\\audio.rs": "a9de5c10affede2533fce0b2728ee19b629c7f07231da7d09b655bfe4c358968",
+    "crates\\fvid-media\\src\\audio_layout.rs": "92ecc6e5a1483affc4a1db40f91a34f0b42b111ee22d166d9a035c9a1f46057f",
+    "crates\\fvid-media\\src\\edit.rs": "82a92bc4f8cb1ccc2716b3b7fde8aef2044b8f275fc79a706fcb28f7cf75a6cc",
+    "crates\\fvid-media\\src\\input_policy.rs": "d42972f93fd22e9c36c0e743ff2ea74b42c41859387e17469d8bdc7c558ac181",
+    "crates\\fvid-media\\src\\lib.rs": "c603903b6cacc3b1743b55b83c0d1580ef38388eb9470bbfd299b5b973ddc53b",
+    "crates\\fvid-media\\src\\lossless.rs": "c9547d6b2910093554f8c4b7e0ec5647c35b85fe765245470057fdb7f5102db6",
+    "crates\\fvid-media\\src\\pcm.rs": "b70d03ebc14c839d9425ae110739538730d6fd44ce47a97c158bf4966e701911",
+    "src\\backend.rs": "903d446b36a2c218762d6ff5cc122f638e4a2bea186c7851f43650bb4d90f0f8",
+    "src\\gpu\\mod.rs": "359a3b5500ee040ca4b51d920783b1e11d58ea87e8daf460612893213dfc3574",
+    "src\\gpu\\transform.wgsl": "abecb46781237cc157216a37d034a5ed89c44729d8a5c4ce61a79134371736c7",
+    "src\\lib.rs": "41671b2d1927c7c6bb3db30a8cd64d0946b5bb53bf7fecbe00f43326f4e298ef",
+    "src\\main.rs": "93fa2cbf2e25c883f9fb072ef66405691234d30d5b0cc2d7b1ee5de43745b116",
+    "src\\mcp\\mod.rs": "8b77d9c3bb820b6177785eea0d30f7c608388b75a8ccf49d3dc7671f076f53c1",
+    "src\\mcp\\tools.rs": "53a29c038f288260f7078750ea246fc17d8033d8d67794dd7b1969619c73b0bc",
+    "src\\mcp\\transport.rs": "73f7d242fe5de6931f7a3ddfecc37832e055fa23a8f9ef28504bfd34238d758b",
+    "src\\media_cli.rs": "52b55e5fbb603855905007e3994d2fc5e4d869614253debe089cd19de40823ca",
+    "src\\publish.rs": "a9640ba3e726754a38ea71307ce97cb30ac17780bf1593af0cf8651c6d0965b7",
+    "src\\resident\\pipeline.rs": "560d54e0045e76f2cfe6943ced68915215d0722a12cc3398c3c4f3ff443fe9fd",
+    "src\\resident.rs": "fb922cb57cf8083916574c5c43c82795fb207efd0d7911e42bfe433031bab1f8",
+    "src\\view.rs": "df31ea8d9b6cb98f303d9f7294c00f823108ef4349fffb23d5747872689c4896"
+  },
+  "ffmpeg": "ffmpeg version 9.0.1-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "method": "End-to-end CLI wall time including process startup, GPU device/pipeline initialization, file reads, upload, transform, readback and Y4M serialization to OS null sink. One warmup then seeded randomized rounds. Warm file cache. No codec or steady-state resident-GPU performance claim.",
+  "benchmark_rounds": 7,
+  "status": "passed",
+  "device_listing": "backend=cpu device=0 name=CPU status=available\nbackend=metal status=unavailable reason=\"GPU: backend metal unavailable: not compiled for this platform; GL on Apple requires the angle feature and ANGLE/EGL; Vulkan on Apple requires vulkan-portability and MoltenVK\"\nbackend=vulkan device=0 name=\"NVIDIA GeForce RTX 5090\" type=DiscreteGpu status=available\nbackend=dx12 device=0 name=\"NVIDIA GeForce RTX 5090\" type=DiscreteGpu status=available\nbackend=gl device=0 name=\"NVIDIA GeForce RTX 5090/PCIe/SSE2\" type=Other status=available\nbackend=cuda device=0 name=\"NVIDIA GeForce RTX 5090\" type=cuda status=available\n",
+  "device_listing_stderr": "",
+  "backends": {
+    "dx12": {
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\probe.y4m",
+        "-",
+        "--backend",
+        "dx12",
+        "--device",
+        "0"
+      ],
+      "exit_code": 0,
+      "stderr": "frames=5 input_bytes=450 output_bytes=450 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1332\n",
+      "status": "exercised",
+      "selected_backend": "dx12"
+    },
+    "cuda": {
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\probe.y4m",
+        "-",
+        "--backend",
+        "cuda",
+        "--device",
+        "0"
+      ],
+      "exit_code": 0,
+      "stderr": "frames=5 input_bytes=450 output_bytes=450 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=488\n",
+      "status": "exercised",
+      "selected_backend": "cuda"
+    }
+  },
+  "correctness": [
+    {
+      "chroma": "420",
+      "input_dimensions": [
+        10,
+        6
+      ],
+      "crop": null,
+      "horizontal": false,
+      "vertical": false,
+      "signature": {
+        "width": 10,
+        "height": 6,
+        "chroma": "420",
+        "frames": 9,
+        "frame_sha256": [
+          "e3c25674cf87b517ee9ec11a6b85a32409493a00da4b931dfa515ce48137c65e",
+          "e3c25674cf87b517ee9ec11a6b85a32409493a00da4b931dfa515ce48137c65e",
+          "e354e827c491091e2a7c46ed8c98d503c18a327a1538c6445c3193079825b650",
+          "e354e827c491091e2a7c46ed8c98d503c18a327a1538c6445c3193079825b650",
+          "5aaf1e78a49b8b0c148ad696035d0df940ae31eb6619a782ebdc583718dd6f0a",
+          "5aaf1e78a49b8b0c148ad696035d0df940ae31eb6619a782ebdc583718dd6f0a",
+          "311afb257aa2113ad5d4c1d7e91e0a74aee45fffb66bd85d502a98a38ed6d126",
+          "311afb257aa2113ad5d4c1d7e91e0a74aee45fffb66bd85d502a98a38ed6d126",
+          "c1206166d1018ea16b82567507063508b74357d5b2b724d28e1f371ca37170d0"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=810 output_bytes=810 backend=cpu device=\"CPU\" controlled_memory_bytes=90\n",
+        "dx12": "frames=9 input_bytes=810 output_bytes=810 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1332\n",
+        "cuda": "frames=9 input_bytes=810 output_bytes=810 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=488\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "420",
+      "input_dimensions": [
+        10,
+        6
+      ],
+      "crop": null,
+      "horizontal": true,
+      "vertical": false,
+      "signature": {
+        "width": 10,
+        "height": 6,
+        "chroma": "420",
+        "frames": 9,
+        "frame_sha256": [
+          "b0cc64a5897001ea434b44da0aed1776ab2fe94b8c013043c671936bbae88a97",
+          "b0cc64a5897001ea434b44da0aed1776ab2fe94b8c013043c671936bbae88a97",
+          "113bdc48d8979c39757e67256c026215d5a769374d7803cd6bf684db89e0459e",
+          "113bdc48d8979c39757e67256c026215d5a769374d7803cd6bf684db89e0459e",
+          "8418dfb0d9d14c7f607223829bf6e02b317b473a537a8f42d3ab504966b20a7c",
+          "8418dfb0d9d14c7f607223829bf6e02b317b473a537a8f42d3ab504966b20a7c",
+          "4f6dc75b718459e4d1e79627eead84fbb165f7565c449ce399e817d3373f8b54",
+          "4f6dc75b718459e4d1e79627eead84fbb165f7565c449ce399e817d3373f8b54",
+          "eee74b33258e3cf9777ea3fc055e4ade7a09e6166d600dbba0bbe47d58e5bcc2"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=810 output_bytes=810 backend=cpu device=\"CPU\" controlled_memory_bytes=90\n",
+        "dx12": "frames=9 input_bytes=810 output_bytes=810 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1332\n",
+        "cuda": "frames=9 input_bytes=810 output_bytes=810 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=488\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "420",
+      "input_dimensions": [
+        10,
+        6
+      ],
+      "crop": null,
+      "horizontal": false,
+      "vertical": true,
+      "signature": {
+        "width": 10,
+        "height": 6,
+        "chroma": "420",
+        "frames": 9,
+        "frame_sha256": [
+          "0002e9e397eba3fcec6a2b5515037d3853642966ffdb9a2344e2bbf0135b93c2",
+          "0002e9e397eba3fcec6a2b5515037d3853642966ffdb9a2344e2bbf0135b93c2",
+          "db552cfc21deadbebe6623094cf8e30a8c39ee502bab1afe837d75bfcebba627",
+          "db552cfc21deadbebe6623094cf8e30a8c39ee502bab1afe837d75bfcebba627",
+          "09a26ead38517a27337763f76932258907871c31211c26003cde30b906d3eae0",
+          "09a26ead38517a27337763f76932258907871c31211c26003cde30b906d3eae0",
+          "7c72e31c1fd06ed9684a001b66f9980880f520940fb0e004117445b51d7315bb",
+          "7c72e31c1fd06ed9684a001b66f9980880f520940fb0e004117445b51d7315bb",
+          "bc92f84d5bb528a34eeb490206aa7aecb566fd66b46b277fd6d21eab2d362075"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=810 output_bytes=810 backend=cpu device=\"CPU\" controlled_memory_bytes=90\n",
+        "dx12": "frames=9 input_bytes=810 output_bytes=810 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1332\n",
+        "cuda": "frames=9 input_bytes=810 output_bytes=810 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=488\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "420",
+      "input_dimensions": [
+        10,
+        6
+      ],
+      "crop": null,
+      "horizontal": true,
+      "vertical": true,
+      "signature": {
+        "width": 10,
+        "height": 6,
+        "chroma": "420",
+        "frames": 9,
+        "frame_sha256": [
+          "4104ebca1656e3e2e9e9fd3fe7cce088bc341823313d8db0ea49d9ce21fd8bf8",
+          "4104ebca1656e3e2e9e9fd3fe7cce088bc341823313d8db0ea49d9ce21fd8bf8",
+          "37fd9c8334c2a553bc2a060de1845f7b093a53a9d134f42614a0776a99207015",
+          "37fd9c8334c2a553bc2a060de1845f7b093a53a9d134f42614a0776a99207015",
+          "68532286231200e3af6c780f969c98cedc029d835915f651ab2d58719e23e7ab",
+          "68532286231200e3af6c780f969c98cedc029d835915f651ab2d58719e23e7ab",
+          "93e755d728816565b3a05b037389a43d6b59fa58e57fdf9f016650724c40d854",
+          "93e755d728816565b3a05b037389a43d6b59fa58e57fdf9f016650724c40d854",
+          "99ba52e81e921de0086f4b64a63a58bc288da2dd5822c46801dfbce964858e4a"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=810 output_bytes=810 backend=cpu device=\"CPU\" controlled_memory_bytes=90\n",
+        "dx12": "frames=9 input_bytes=810 output_bytes=810 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1332\n",
+        "cuda": "frames=9 input_bytes=810 output_bytes=810 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=488\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "420",
+      "input_dimensions": [
+        10,
+        6
+      ],
+      "crop": [
+        2,
+        2,
+        6,
+        2
+      ],
+      "horizontal": false,
+      "vertical": false,
+      "signature": {
+        "width": 6,
+        "height": 2,
+        "chroma": "420",
+        "frames": 9,
+        "frame_sha256": [
+          "c342b40ede813f6b3442b627431abbf6bde35248f29bc039e3f8a11f63cd7f25",
+          "c342b40ede813f6b3442b627431abbf6bde35248f29bc039e3f8a11f63cd7f25",
+          "bc2c3d6035febedc3b6bf5f6da2267e40193b7d8def7644a59bd0a758e424b02",
+          "bc2c3d6035febedc3b6bf5f6da2267e40193b7d8def7644a59bd0a758e424b02",
+          "26da05c79c4abd853de24a3069fbb7d77cc8d7dcca08afe0238ce36e8217ae12",
+          "26da05c79c4abd853de24a3069fbb7d77cc8d7dcca08afe0238ce36e8217ae12",
+          "e23807710b369641c4997aa14a62e5ee5ec6b2ecbb1b9e76983e71a77b8d62d4",
+          "e23807710b369641c4997aa14a62e5ee5ec6b2ecbb1b9e76983e71a77b8d62d4",
+          "3d993f4cb426013cbd4f87ad56db31912fda429765e23d76a64a7e35e81e902b"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=810 output_bytes=162 backend=cpu device=\"CPU\" controlled_memory_bytes=90\n",
+        "dx12": "frames=9 input_bytes=810 output_bytes=162 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1260\n",
+        "cuda": "frames=9 input_bytes=810 output_bytes=162 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=344\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "420",
+      "input_dimensions": [
+        10,
+        6
+      ],
+      "crop": [
+        2,
+        2,
+        6,
+        2
+      ],
+      "horizontal": true,
+      "vertical": false,
+      "signature": {
+        "width": 6,
+        "height": 2,
+        "chroma": "420",
+        "frames": 9,
+        "frame_sha256": [
+          "f6c47ae698c2cb46aeaa8045d9941ac4ba467b591e132bec0990beead33daa4f",
+          "f6c47ae698c2cb46aeaa8045d9941ac4ba467b591e132bec0990beead33daa4f",
+          "032965af341ed06df654c9f8021432fb93f911da2afff352c70f9ddafe0751cd",
+          "032965af341ed06df654c9f8021432fb93f911da2afff352c70f9ddafe0751cd",
+          "c6f9d60169857af2a0eb5e41549c353c28caa2ea50310e74f612a8d1ea7a0f7a",
+          "c6f9d60169857af2a0eb5e41549c353c28caa2ea50310e74f612a8d1ea7a0f7a",
+          "b7ec8f60ad07ac5866efbe829a1f9d36cd9be4e3e1d381c185ae07517d9a6b3e",
+          "b7ec8f60ad07ac5866efbe829a1f9d36cd9be4e3e1d381c185ae07517d9a6b3e",
+          "052e3040563fc83883a129f4167967a845f5c462a844af5d185c2b3b8924e88e"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=810 output_bytes=162 backend=cpu device=\"CPU\" controlled_memory_bytes=108\n",
+        "dx12": "frames=9 input_bytes=810 output_bytes=162 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1260\n",
+        "cuda": "frames=9 input_bytes=810 output_bytes=162 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=344\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "420",
+      "input_dimensions": [
+        10,
+        6
+      ],
+      "crop": [
+        2,
+        2,
+        6,
+        2
+      ],
+      "horizontal": false,
+      "vertical": true,
+      "signature": {
+        "width": 6,
+        "height": 2,
+        "chroma": "420",
+        "frames": 9,
+        "frame_sha256": [
+          "7861a9ee05d6c50c95454cc0422cdbcbd190cce3f3d3118bc69b80ece08317b3",
+          "7861a9ee05d6c50c95454cc0422cdbcbd190cce3f3d3118bc69b80ece08317b3",
+          "b3373f61c83200069638076e7540829a8326e339397d4dc7bf4898ca2a407169",
+          "b3373f61c83200069638076e7540829a8326e339397d4dc7bf4898ca2a407169",
+          "784c03a7eed275b7d0cc70fb6032706d6d5b6338b059ad97035a46e2023c5d26",
+          "784c03a7eed275b7d0cc70fb6032706d6d5b6338b059ad97035a46e2023c5d26",
+          "e61a9204db2a35ca4ff12c9ab13c3707e3a779a9b86cf14707f9f7f6d21871ae",
+          "e61a9204db2a35ca4ff12c9ab13c3707e3a779a9b86cf14707f9f7f6d21871ae",
+          "debc4429715f616d55747de2cbe99cc4f10355d9c422cacbc6e71d095ef909ab"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=810 output_bytes=162 backend=cpu device=\"CPU\" controlled_memory_bytes=90\n",
+        "dx12": "frames=9 input_bytes=810 output_bytes=162 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1260\n",
+        "cuda": "frames=9 input_bytes=810 output_bytes=162 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=344\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "420",
+      "input_dimensions": [
+        10,
+        6
+      ],
+      "crop": [
+        2,
+        2,
+        6,
+        2
+      ],
+      "horizontal": true,
+      "vertical": true,
+      "signature": {
+        "width": 6,
+        "height": 2,
+        "chroma": "420",
+        "frames": 9,
+        "frame_sha256": [
+          "3c5efd57db06d3d0768012b1dac4969eb6592ead73c35546f046d27d2d3a1fdf",
+          "3c5efd57db06d3d0768012b1dac4969eb6592ead73c35546f046d27d2d3a1fdf",
+          "8204d4ac4c16e07743a165e34488c965216267e81edf2c1148f7d77387745f72",
+          "8204d4ac4c16e07743a165e34488c965216267e81edf2c1148f7d77387745f72",
+          "6ef5c406666d3f440a64facd76d65fe789aa1a2ee92ec2c1c9837d992205dce8",
+          "6ef5c406666d3f440a64facd76d65fe789aa1a2ee92ec2c1c9837d992205dce8",
+          "33d2e94cdf74417383671ec2ee416d6a521219df89ff3267434d4f8dae905087",
+          "33d2e94cdf74417383671ec2ee416d6a521219df89ff3267434d4f8dae905087",
+          "3cf13dc66fcb4f87e8cbb9cf8c71f18b33164d78cd6450c22f6606ebd992bfe8"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=810 output_bytes=162 backend=cpu device=\"CPU\" controlled_memory_bytes=108\n",
+        "dx12": "frames=9 input_bytes=810 output_bytes=162 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1260\n",
+        "cuda": "frames=9 input_bytes=810 output_bytes=162 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=344\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "422",
+      "input_dimensions": [
+        10,
+        5
+      ],
+      "crop": null,
+      "horizontal": false,
+      "vertical": false,
+      "signature": {
+        "width": 10,
+        "height": 5,
+        "chroma": "422",
+        "frames": 9,
+        "frame_sha256": [
+          "f983a9a4278397c183e5d84dcc55a1f42287ede759043bc35d9913b8ae917f6d",
+          "f983a9a4278397c183e5d84dcc55a1f42287ede759043bc35d9913b8ae917f6d",
+          "f99c64d06e8737b4e8ecd5b894d35bd2249a7c0836f47378798131307fa62569",
+          "f99c64d06e8737b4e8ecd5b894d35bd2249a7c0836f47378798131307fa62569",
+          "79a2f972e030a0c34755001fe2d612982411d9371bde1d0e5ee67ac4a8404f50",
+          "79a2f972e030a0c34755001fe2d612982411d9371bde1d0e5ee67ac4a8404f50",
+          "669c2da8adff48ada06ceb4c17481d820e92cbf0180fe809535cff1763b0c1d5",
+          "669c2da8adff48ada06ceb4c17481d820e92cbf0180fe809535cff1763b0c1d5",
+          "27eb756a35542c50365377659ac6bcd2748a5eae5ff32f502a08fcb5fce203bc"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=900 output_bytes=900 backend=cpu device=\"CPU\" controlled_memory_bytes=100\n",
+        "dx12": "frames=9 input_bytes=900 output_bytes=900 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1352\n",
+        "cuda": "frames=9 input_bytes=900 output_bytes=900 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=528\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "422",
+      "input_dimensions": [
+        10,
+        5
+      ],
+      "crop": null,
+      "horizontal": true,
+      "vertical": false,
+      "signature": {
+        "width": 10,
+        "height": 5,
+        "chroma": "422",
+        "frames": 9,
+        "frame_sha256": [
+          "e1a0aafb1b1cc12a535a308d0f3cc05670d1af271c4b4e6c31eed3149cdea301",
+          "e1a0aafb1b1cc12a535a308d0f3cc05670d1af271c4b4e6c31eed3149cdea301",
+          "da8b5bf998d9244cd83fc62ce9855e78c9d606c7922b8386af1ea8843b5be281",
+          "da8b5bf998d9244cd83fc62ce9855e78c9d606c7922b8386af1ea8843b5be281",
+          "395d36028806385c480f6c826eeeff45fec07909ec3de553f6266a9e546f6d55",
+          "395d36028806385c480f6c826eeeff45fec07909ec3de553f6266a9e546f6d55",
+          "48372dc37c6ea8a28245b2456898f03069bea81d137a6ebd74289000b72de113",
+          "48372dc37c6ea8a28245b2456898f03069bea81d137a6ebd74289000b72de113",
+          "7d29ff31514cca6e64201fb562d154a1f9c97c38904b5b57aa9802b47a1ba278"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=900 output_bytes=900 backend=cpu device=\"CPU\" controlled_memory_bytes=100\n",
+        "dx12": "frames=9 input_bytes=900 output_bytes=900 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1352\n",
+        "cuda": "frames=9 input_bytes=900 output_bytes=900 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=528\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "422",
+      "input_dimensions": [
+        10,
+        5
+      ],
+      "crop": null,
+      "horizontal": false,
+      "vertical": true,
+      "signature": {
+        "width": 10,
+        "height": 5,
+        "chroma": "422",
+        "frames": 9,
+        "frame_sha256": [
+          "5044caa3155c2a2656603e9cfcec7db1b194bf42ab490bdad0ecc3c07a983c0a",
+          "5044caa3155c2a2656603e9cfcec7db1b194bf42ab490bdad0ecc3c07a983c0a",
+          "a77408a27d03985117a28e02d6b4b404a9972e2bc8b74f02811a75650b0c5a22",
+          "a77408a27d03985117a28e02d6b4b404a9972e2bc8b74f02811a75650b0c5a22",
+          "13f01e0aeb29b23dbe4ead5d7a7bbdebc69d671807b990fe0b0ea76fd0d9f761",
+          "13f01e0aeb29b23dbe4ead5d7a7bbdebc69d671807b990fe0b0ea76fd0d9f761",
+          "708004b2eaf17977bad16da2fc041d5f7bea0c3a7d9b332d67604218fca69ea6",
+          "708004b2eaf17977bad16da2fc041d5f7bea0c3a7d9b332d67604218fca69ea6",
+          "ed1dabd2acfb4a8cad2c4c2f88b653e80b1f44f7b44729e42c9b48d1792f1e94"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=900 output_bytes=900 backend=cpu device=\"CPU\" controlled_memory_bytes=100\n",
+        "dx12": "frames=9 input_bytes=900 output_bytes=900 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1352\n",
+        "cuda": "frames=9 input_bytes=900 output_bytes=900 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=528\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "422",
+      "input_dimensions": [
+        10,
+        5
+      ],
+      "crop": null,
+      "horizontal": true,
+      "vertical": true,
+      "signature": {
+        "width": 10,
+        "height": 5,
+        "chroma": "422",
+        "frames": 9,
+        "frame_sha256": [
+          "c655ec37493564a320b7f486f2b530f8a61b7b34e3cafa6aee7b02b90ec7f880",
+          "c655ec37493564a320b7f486f2b530f8a61b7b34e3cafa6aee7b02b90ec7f880",
+          "5e60854c761daaca06e183e2c75f1d04d54653400bdc97e0f74cdb0636e67544",
+          "5e60854c761daaca06e183e2c75f1d04d54653400bdc97e0f74cdb0636e67544",
+          "5ad91f47f3b3851ad2cc43d959780746fa0b1b4a7b7e938abd0c2e7c486aa4ea",
+          "5ad91f47f3b3851ad2cc43d959780746fa0b1b4a7b7e938abd0c2e7c486aa4ea",
+          "a518b04a68359462c16be86222962706edfef3cd0d07fc7f539c54237fb2b786",
+          "a518b04a68359462c16be86222962706edfef3cd0d07fc7f539c54237fb2b786",
+          "fa8689ed6319735bdf530ff18d436aee74af7318915a08024b39e41e1b4f9bc0"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=900 output_bytes=900 backend=cpu device=\"CPU\" controlled_memory_bytes=100\n",
+        "dx12": "frames=9 input_bytes=900 output_bytes=900 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1352\n",
+        "cuda": "frames=9 input_bytes=900 output_bytes=900 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=528\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "422",
+      "input_dimensions": [
+        10,
+        5
+      ],
+      "crop": [
+        2,
+        1,
+        6,
+        3
+      ],
+      "horizontal": false,
+      "vertical": false,
+      "signature": {
+        "width": 6,
+        "height": 3,
+        "chroma": "422",
+        "frames": 9,
+        "frame_sha256": [
+          "0ff3d71c48530d17468763e2eecae37657818f4bb39fe927fe2023851c3c6d37",
+          "0ff3d71c48530d17468763e2eecae37657818f4bb39fe927fe2023851c3c6d37",
+          "5c51d10643769f639fdd40113df0a61fb163fd46937ba48cabaea388344cfcc0",
+          "5c51d10643769f639fdd40113df0a61fb163fd46937ba48cabaea388344cfcc0",
+          "8591c79cb61528e53dcb96ebc5603784cad8f1a39ef3435a50896d54012e54b3",
+          "8591c79cb61528e53dcb96ebc5603784cad8f1a39ef3435a50896d54012e54b3",
+          "e11280a652042fb53388ee9bc6ea0be318c770729c0a5fab951b254503cb8368",
+          "e11280a652042fb53388ee9bc6ea0be318c770729c0a5fab951b254503cb8368",
+          "9bfb5d7a3f47dd8fa56d1798d9c8300227e6abaccae1b0bc5590634fb369152d"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=900 output_bytes=324 backend=cpu device=\"CPU\" controlled_memory_bytes=100\n",
+        "dx12": "frames=9 input_bytes=900 output_bytes=324 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1288\n",
+        "cuda": "frames=9 input_bytes=900 output_bytes=324 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=400\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "422",
+      "input_dimensions": [
+        10,
+        5
+      ],
+      "crop": [
+        2,
+        1,
+        6,
+        3
+      ],
+      "horizontal": true,
+      "vertical": false,
+      "signature": {
+        "width": 6,
+        "height": 3,
+        "chroma": "422",
+        "frames": 9,
+        "frame_sha256": [
+          "56ae652eb07382d52a37a1d77b1bbd1f78aaaf72d3fe14b986d390ad9b9a612d",
+          "56ae652eb07382d52a37a1d77b1bbd1f78aaaf72d3fe14b986d390ad9b9a612d",
+          "076ea2e0773b273dd9bca8aad589261d4b7f2cc065e74b4096b1289a0ec5fa6b",
+          "076ea2e0773b273dd9bca8aad589261d4b7f2cc065e74b4096b1289a0ec5fa6b",
+          "cf1a6dc37dffdb0b6bbc05df838a43073fbacada38daccaf1e6c1b68bc4de644",
+          "cf1a6dc37dffdb0b6bbc05df838a43073fbacada38daccaf1e6c1b68bc4de644",
+          "e552f36c2a6193df88b6dbb6e392f9f1ea905636781314e8fcbd0f7337bd1a4f",
+          "e552f36c2a6193df88b6dbb6e392f9f1ea905636781314e8fcbd0f7337bd1a4f",
+          "338e38c551e6975aa986218628f86ebe492e3f219dbc8580f9e346c05f38ee38"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=900 output_bytes=324 backend=cpu device=\"CPU\" controlled_memory_bytes=136\n",
+        "dx12": "frames=9 input_bytes=900 output_bytes=324 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1288\n",
+        "cuda": "frames=9 input_bytes=900 output_bytes=324 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=400\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "422",
+      "input_dimensions": [
+        10,
+        5
+      ],
+      "crop": [
+        2,
+        1,
+        6,
+        3
+      ],
+      "horizontal": false,
+      "vertical": true,
+      "signature": {
+        "width": 6,
+        "height": 3,
+        "chroma": "422",
+        "frames": 9,
+        "frame_sha256": [
+          "bb032d579a31e9d56f452e60154465151d6989877fc116672289871af3157945",
+          "bb032d579a31e9d56f452e60154465151d6989877fc116672289871af3157945",
+          "68f6b4012d925b8b064686f892bc6ff76e8f22925622179ed8e287574f55a1fb",
+          "68f6b4012d925b8b064686f892bc6ff76e8f22925622179ed8e287574f55a1fb",
+          "73088e3b6e003fbf74574f505863a31fd7803c3ff35973ad96e7c546670bf415",
+          "73088e3b6e003fbf74574f505863a31fd7803c3ff35973ad96e7c546670bf415",
+          "bdee90992c07ba72db836441c0085cfad00cbe629236b946e839cc30eac2e9e1",
+          "bdee90992c07ba72db836441c0085cfad00cbe629236b946e839cc30eac2e9e1",
+          "b1fe974b6e16ab1dfbeb83cab465eafa2e5a6f91011876f17bbf598be53f9251"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=900 output_bytes=324 backend=cpu device=\"CPU\" controlled_memory_bytes=100\n",
+        "dx12": "frames=9 input_bytes=900 output_bytes=324 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1288\n",
+        "cuda": "frames=9 input_bytes=900 output_bytes=324 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=400\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "422",
+      "input_dimensions": [
+        10,
+        5
+      ],
+      "crop": [
+        2,
+        1,
+        6,
+        3
+      ],
+      "horizontal": true,
+      "vertical": true,
+      "signature": {
+        "width": 6,
+        "height": 3,
+        "chroma": "422",
+        "frames": 9,
+        "frame_sha256": [
+          "1f382a59d1a9362d8536a61183aae89b30dc2fccb39dc709a46678936134bff2",
+          "1f382a59d1a9362d8536a61183aae89b30dc2fccb39dc709a46678936134bff2",
+          "55bb9690ddf1503f0e72203a919ca12cb87f65f3d7a556496db6c4e3aeeab669",
+          "55bb9690ddf1503f0e72203a919ca12cb87f65f3d7a556496db6c4e3aeeab669",
+          "9de5455f70b312968413e75be9429d3f67d9b32c8240cbcb73edf8ff40aef998",
+          "9de5455f70b312968413e75be9429d3f67d9b32c8240cbcb73edf8ff40aef998",
+          "b6b9b9b128522786aa9a1084fdf30c84adb57d09268839b39872f4f899fb0842",
+          "b6b9b9b128522786aa9a1084fdf30c84adb57d09268839b39872f4f899fb0842",
+          "0b7521d8b81a316d578d9747a7c9f989767bec2a78f4a2fda3d0e4898a65745c"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=900 output_bytes=324 backend=cpu device=\"CPU\" controlled_memory_bytes=136\n",
+        "dx12": "frames=9 input_bytes=900 output_bytes=324 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1288\n",
+        "cuda": "frames=9 input_bytes=900 output_bytes=324 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=400\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "444",
+      "input_dimensions": [
+        9,
+        7
+      ],
+      "crop": null,
+      "horizontal": false,
+      "vertical": false,
+      "signature": {
+        "width": 9,
+        "height": 7,
+        "chroma": "444",
+        "frames": 9,
+        "frame_sha256": [
+          "d526912a8b1c0674176b97946e4368e4f26820b78445a30fed48a2a0fd3e95a3",
+          "d526912a8b1c0674176b97946e4368e4f26820b78445a30fed48a2a0fd3e95a3",
+          "a8cea36d4aaf0c8b66f54288a7ba40ea9a18269424f6d90ab3e4264de9a20058",
+          "a8cea36d4aaf0c8b66f54288a7ba40ea9a18269424f6d90ab3e4264de9a20058",
+          "726b3426107ee67d894e0ea58e3d2619b51199d4cf50785f206179276d052433",
+          "726b3426107ee67d894e0ea58e3d2619b51199d4cf50785f206179276d052433",
+          "06315f5478cc744231e9d88bf7819e7da97e259c7691e4ce2a2464c9fb977b15",
+          "06315f5478cc744231e9d88bf7819e7da97e259c7691e4ce2a2464c9fb977b15",
+          "c31649f36e37e35f4412b3ad3d50a73147676516b8e1e080ac8e7360d7d4ed4c"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=1701 output_bytes=1701 backend=cpu device=\"CPU\" controlled_memory_bytes=189\n",
+        "dx12": "frames=9 input_bytes=1701 output_bytes=1701 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1530\n",
+        "cuda": "frames=9 input_bytes=1701 output_bytes=1701 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=884\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "444",
+      "input_dimensions": [
+        9,
+        7
+      ],
+      "crop": null,
+      "horizontal": true,
+      "vertical": false,
+      "signature": {
+        "width": 9,
+        "height": 7,
+        "chroma": "444",
+        "frames": 9,
+        "frame_sha256": [
+          "9a0fea8e23754cc54eeb71465689c42624951d5d96a4b80b14297924b3cdb0a2",
+          "9a0fea8e23754cc54eeb71465689c42624951d5d96a4b80b14297924b3cdb0a2",
+          "ed07509dd2649fc620ff3bb096a06ff8dab74f99bb4eb0dca33fd0a73d09775c",
+          "ed07509dd2649fc620ff3bb096a06ff8dab74f99bb4eb0dca33fd0a73d09775c",
+          "e3780af3473f403c5a8135699bda4b06bc27cb87afd8664528c8caa52cc7ce95",
+          "e3780af3473f403c5a8135699bda4b06bc27cb87afd8664528c8caa52cc7ce95",
+          "ea5c19e26c1aa03fee142fdc1d6f6a0fe67caafcc7afe37af0fb4b6ed75bc5f4",
+          "ea5c19e26c1aa03fee142fdc1d6f6a0fe67caafcc7afe37af0fb4b6ed75bc5f4",
+          "54f8fd359513ad68745f4771284ade5ed1f0cf797963bb65ce960112496e7e10"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=1701 output_bytes=1701 backend=cpu device=\"CPU\" controlled_memory_bytes=189\n",
+        "dx12": "frames=9 input_bytes=1701 output_bytes=1701 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1530\n",
+        "cuda": "frames=9 input_bytes=1701 output_bytes=1701 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=884\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "444",
+      "input_dimensions": [
+        9,
+        7
+      ],
+      "crop": null,
+      "horizontal": false,
+      "vertical": true,
+      "signature": {
+        "width": 9,
+        "height": 7,
+        "chroma": "444",
+        "frames": 9,
+        "frame_sha256": [
+          "0aefa441b8ad968c26c765373dcb3d4cb1fe79ff900a8a3d784f93eeca790d67",
+          "0aefa441b8ad968c26c765373dcb3d4cb1fe79ff900a8a3d784f93eeca790d67",
+          "4891871ffe799617a793dab758a8fd03608086f8df0bd3bab6894e2f38db2c9d",
+          "4891871ffe799617a793dab758a8fd03608086f8df0bd3bab6894e2f38db2c9d",
+          "4e5d2aed3878027b43bd6da7924de3667515564f19adeb78b1efe19f1f4619ad",
+          "4e5d2aed3878027b43bd6da7924de3667515564f19adeb78b1efe19f1f4619ad",
+          "a8c54221b6948695da387e0c10d0dc153f3dba15d67e1aef69d71d8c2c24c21c",
+          "a8c54221b6948695da387e0c10d0dc153f3dba15d67e1aef69d71d8c2c24c21c",
+          "5a5e915fe1e29ca9060462bc7d4e5b0b4c199cccdd6d29c5354a3eb41aaafdc6"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=1701 output_bytes=1701 backend=cpu device=\"CPU\" controlled_memory_bytes=189\n",
+        "dx12": "frames=9 input_bytes=1701 output_bytes=1701 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1530\n",
+        "cuda": "frames=9 input_bytes=1701 output_bytes=1701 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=884\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "444",
+      "input_dimensions": [
+        9,
+        7
+      ],
+      "crop": null,
+      "horizontal": true,
+      "vertical": true,
+      "signature": {
+        "width": 9,
+        "height": 7,
+        "chroma": "444",
+        "frames": 9,
+        "frame_sha256": [
+          "aff933cc3502f4e1188ae3f082eefc21a54f43508297a5791f71b207e0b148af",
+          "aff933cc3502f4e1188ae3f082eefc21a54f43508297a5791f71b207e0b148af",
+          "d87e8af0c7ba4c8b34c4899d79b6966f0920e0571c6d9328272a315ba29cbf34",
+          "d87e8af0c7ba4c8b34c4899d79b6966f0920e0571c6d9328272a315ba29cbf34",
+          "ba6a619d8cbf7a35b33f35967c3d792bd12a634e3f539b152d5f5c8037cccfb1",
+          "ba6a619d8cbf7a35b33f35967c3d792bd12a634e3f539b152d5f5c8037cccfb1",
+          "bea554dd0d5a757031fdb6444debb6318ea87762593523a7819f7b1e4c32b1ad",
+          "bea554dd0d5a757031fdb6444debb6318ea87762593523a7819f7b1e4c32b1ad",
+          "ef625c79b14a4d07033fdaee881261dcf0805b95351c002f191281257f642a23"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=1701 output_bytes=1701 backend=cpu device=\"CPU\" controlled_memory_bytes=189\n",
+        "dx12": "frames=9 input_bytes=1701 output_bytes=1701 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1530\n",
+        "cuda": "frames=9 input_bytes=1701 output_bytes=1701 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=884\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "444",
+      "input_dimensions": [
+        9,
+        7
+      ],
+      "crop": [
+        1,
+        1,
+        5,
+        3
+      ],
+      "horizontal": false,
+      "vertical": false,
+      "signature": {
+        "width": 5,
+        "height": 3,
+        "chroma": "444",
+        "frames": 9,
+        "frame_sha256": [
+          "a235b60e5e2f80b3fb135f9d21776e173fda472eb9b82c35d7a1ac2bd8166302",
+          "a235b60e5e2f80b3fb135f9d21776e173fda472eb9b82c35d7a1ac2bd8166302",
+          "1807bd3a4054b2671b7877a00fc2fb18ed6c20375285bad2d25908860d087e39",
+          "1807bd3a4054b2671b7877a00fc2fb18ed6c20375285bad2d25908860d087e39",
+          "fbeefffebd13cb77d97628c8c79217f9bed3920d5d87330122eb37de2562be88",
+          "fbeefffebd13cb77d97628c8c79217f9bed3920d5d87330122eb37de2562be88",
+          "bc0ddc0de104865b3ec3c343e166473ba03039f29b073974af9c27b32d260662",
+          "bc0ddc0de104865b3ec3c343e166473ba03039f29b073974af9c27b32d260662",
+          "dbd734a7fd5e94909ec8e71957949a39c44c2bb43fa50b7fded86575145577b7"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=1701 output_bytes=405 backend=cpu device=\"CPU\" controlled_memory_bytes=189\n",
+        "dx12": "frames=9 input_bytes=1701 output_bytes=405 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1386\n",
+        "cuda": "frames=9 input_bytes=1701 output_bytes=405 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=596\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "444",
+      "input_dimensions": [
+        9,
+        7
+      ],
+      "crop": [
+        1,
+        1,
+        5,
+        3
+      ],
+      "horizontal": true,
+      "vertical": false,
+      "signature": {
+        "width": 5,
+        "height": 3,
+        "chroma": "444",
+        "frames": 9,
+        "frame_sha256": [
+          "17624e473b4c7b8dee4079749449f71e23290340ae1a2e7cf057d6f52fe1eb4e",
+          "17624e473b4c7b8dee4079749449f71e23290340ae1a2e7cf057d6f52fe1eb4e",
+          "05456acad5efc335ae174399f4490fdaca7d14663ccb43b367cc16ec4ec32a5e",
+          "05456acad5efc335ae174399f4490fdaca7d14663ccb43b367cc16ec4ec32a5e",
+          "882a4b25162e8ddf483296076da19b5587941401cca5b99371512a6bc1289ade",
+          "882a4b25162e8ddf483296076da19b5587941401cca5b99371512a6bc1289ade",
+          "865ed797f67c0894caf5c6a689ac08e9d6e8b3405f3b4bb4c89f898dd367c105",
+          "865ed797f67c0894caf5c6a689ac08e9d6e8b3405f3b4bb4c89f898dd367c105",
+          "2ab41b9e49134bf830dbb092168ae1daec35de7bb53f28d99e28050bff5fe7f7"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=1701 output_bytes=405 backend=cpu device=\"CPU\" controlled_memory_bytes=234\n",
+        "dx12": "frames=9 input_bytes=1701 output_bytes=405 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1386\n",
+        "cuda": "frames=9 input_bytes=1701 output_bytes=405 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=596\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "444",
+      "input_dimensions": [
+        9,
+        7
+      ],
+      "crop": [
+        1,
+        1,
+        5,
+        3
+      ],
+      "horizontal": false,
+      "vertical": true,
+      "signature": {
+        "width": 5,
+        "height": 3,
+        "chroma": "444",
+        "frames": 9,
+        "frame_sha256": [
+          "1071ff69d48137e603a8effa66efa83da291ed65c52fe72e81d14e1729e2c977",
+          "1071ff69d48137e603a8effa66efa83da291ed65c52fe72e81d14e1729e2c977",
+          "2081463cf65c2c4687034506bfa5d78547f0e59bbde4c32c9e8ce58735a7018a",
+          "2081463cf65c2c4687034506bfa5d78547f0e59bbde4c32c9e8ce58735a7018a",
+          "affc5f7745bef868be9e7f8cb28eb55c70a8936892519b3577bd4cc459628c43",
+          "affc5f7745bef868be9e7f8cb28eb55c70a8936892519b3577bd4cc459628c43",
+          "1ef5f50ad0c71524b0cd10a61be9bbef0cc5b3917b12b4b4b26bf47f32442c4c",
+          "1ef5f50ad0c71524b0cd10a61be9bbef0cc5b3917b12b4b4b26bf47f32442c4c",
+          "8675c859ea8f75a651a224b8cb03e7de6939886a6a84787b62b9d7e37b060221"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=1701 output_bytes=405 backend=cpu device=\"CPU\" controlled_memory_bytes=189\n",
+        "dx12": "frames=9 input_bytes=1701 output_bytes=405 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1386\n",
+        "cuda": "frames=9 input_bytes=1701 output_bytes=405 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=596\n",
+        "ffmpeg": ""
+      }
+    },
+    {
+      "chroma": "444",
+      "input_dimensions": [
+        9,
+        7
+      ],
+      "crop": [
+        1,
+        1,
+        5,
+        3
+      ],
+      "horizontal": true,
+      "vertical": true,
+      "signature": {
+        "width": 5,
+        "height": 3,
+        "chroma": "444",
+        "frames": 9,
+        "frame_sha256": [
+          "7bcdc73afb63f94a2b812680c8eed2e87f78a0b73d47f333bc1b457a494a7318",
+          "7bcdc73afb63f94a2b812680c8eed2e87f78a0b73d47f333bc1b457a494a7318",
+          "c95850b80203183456e0dfdcd6e0b870c7e8dea88865521dc02c3b43989c4dd9",
+          "c95850b80203183456e0dfdcd6e0b870c7e8dea88865521dc02c3b43989c4dd9",
+          "2453e2cdd713e8b524ac10ceff403ce055ceb29291ae8db3db507da451d6eda1",
+          "2453e2cdd713e8b524ac10ceff403ce055ceb29291ae8db3db507da451d6eda1",
+          "567a35c82456e7275aa6f3011e56fa78441437a022a36b5e1acb4fa1cb092d7f",
+          "567a35c82456e7275aa6f3011e56fa78441437a022a36b5e1acb4fa1cb092d7f",
+          "c639e0a12efcb1917f639e901798daea21fdf8b52933ec125d6b5d91ca01f998"
+        ]
+      },
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "diagnostics": {
+        "cpu": "frames=9 input_bytes=1701 output_bytes=405 backend=cpu device=\"CPU\" controlled_memory_bytes=234\n",
+        "dx12": "frames=9 input_bytes=1701 output_bytes=405 backend=dx12 device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1386\n",
+        "cuda": "frames=9 input_bytes=1701 output_bytes=405 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=596\n",
+        "ffmpeg": ""
+      }
+    }
+  ],
+  "large_frame_correctness": [
+    {
+      "chroma": "444",
+      "input_dimensions": [
+        65,
+        17
+      ],
+      "crop": null,
+      "horizontal": true,
+      "vertical": true,
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "signature": {
+        "width": 65,
+        "height": 17,
+        "chroma": "444",
+        "frames": 2,
+        "frame_sha256": [
+          "ccc849f1f216ddf1ec61c90cff6a210242ac93cbd21265af1f9317d16f1676e8",
+          "ccc849f1f216ddf1ec61c90cff6a210242ac93cbd21265af1f9317d16f1676e8"
+        ]
+      }
+    },
+    {
+      "chroma": "444",
+      "input_dimensions": [
+        65,
+        17
+      ],
+      "crop": [
+        1,
+        1,
+        63,
+        15
+      ],
+      "horizontal": true,
+      "vertical": true,
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "signature": {
+        "width": 63,
+        "height": 15,
+        "chroma": "444",
+        "frames": 2,
+        "frame_sha256": [
+          "99215d9b79b70a90da77158d3f6d7b06e7b54c476a56db9707a17968f1362184",
+          "99215d9b79b70a90da77158d3f6d7b06e7b54c476a56db9707a17968f1362184"
+        ]
+      }
+    },
+    {
+      "chroma": "444",
+      "input_dimensions": [
+        257,
+        129
+      ],
+      "crop": null,
+      "horizontal": true,
+      "vertical": true,
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "signature": {
+        "width": 257,
+        "height": 129,
+        "chroma": "444",
+        "frames": 2,
+        "frame_sha256": [
+          "19d8cdce9be594fd15ef158ce8845bd03a4549175a12128d884981d9b504588c",
+          "19d8cdce9be594fd15ef158ce8845bd03a4549175a12128d884981d9b504588c"
+        ]
+      }
+    },
+    {
+      "chroma": "444",
+      "input_dimensions": [
+        257,
+        129
+      ],
+      "crop": [
+        1,
+        1,
+        255,
+        127
+      ],
+      "horizontal": true,
+      "vertical": true,
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "signature": {
+        "width": 255,
+        "height": 127,
+        "chroma": "444",
+        "frames": 2,
+        "frame_sha256": [
+          "39025f94f02fa2a347e02825592a3f173ee548788e9ae42ba8a39794de2c3ae3",
+          "39025f94f02fa2a347e02825592a3f173ee548788e9ae42ba8a39794de2c3ae3"
+        ]
+      }
+    },
+    {
+      "chroma": "422",
+      "input_dimensions": [
+        638,
+        479
+      ],
+      "crop": null,
+      "horizontal": true,
+      "vertical": true,
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "signature": {
+        "width": 638,
+        "height": 479,
+        "chroma": "422",
+        "frames": 2,
+        "frame_sha256": [
+          "74ca046a1c0ff2b16515b25c8919dedf8861e15895e4aabd3974866aba0dd407",
+          "74ca046a1c0ff2b16515b25c8919dedf8861e15895e4aabd3974866aba0dd407"
+        ]
+      }
+    },
+    {
+      "chroma": "422",
+      "input_dimensions": [
+        638,
+        479
+      ],
+      "crop": [
+        2,
+        1,
+        634,
+        477
+      ],
+      "horizontal": true,
+      "vertical": true,
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "signature": {
+        "width": 634,
+        "height": 477,
+        "chroma": "422",
+        "frames": 2,
+        "frame_sha256": [
+          "c11aaedb0687ba6ce17f4fb1d6d165fd643bd74f368828d2a1f6498766ae64b3",
+          "c11aaedb0687ba6ce17f4fb1d6d165fd643bd74f368828d2a1f6498766ae64b3"
+        ]
+      }
+    },
+    {
+      "chroma": "420",
+      "input_dimensions": [
+        1280,
+        720
+      ],
+      "crop": null,
+      "horizontal": true,
+      "vertical": true,
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "signature": {
+        "width": 1280,
+        "height": 720,
+        "chroma": "420",
+        "frames": 2,
+        "frame_sha256": [
+          "c0771d60be4ed491a7d3172819227f89f7de7dc686825e339ef21aa2f3f2a213",
+          "c0771d60be4ed491a7d3172819227f89f7de7dc686825e339ef21aa2f3f2a213"
+        ]
+      }
+    },
+    {
+      "chroma": "420",
+      "input_dimensions": [
+        1280,
+        720
+      ],
+      "crop": [
+        160,
+        90,
+        640,
+        360
+      ],
+      "horizontal": true,
+      "vertical": true,
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "signature": {
+        "width": 640,
+        "height": 360,
+        "chroma": "420",
+        "frames": 2,
+        "frame_sha256": [
+          "84002ee084432faca366e1a6746e04d45cca5ae98193dcd3a9055f258ac4a23b",
+          "84002ee084432faca366e1a6746e04d45cca5ae98193dcd3a9055f258ac4a23b"
+        ]
+      }
+    },
+    {
+      "chroma": "420",
+      "input_dimensions": [
+        3840,
+        2160
+      ],
+      "crop": null,
+      "horizontal": true,
+      "vertical": true,
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "signature": {
+        "width": 3840,
+        "height": 2160,
+        "chroma": "420",
+        "frames": 2,
+        "frame_sha256": [
+          "adf7f3900abc218ea694777b51a832d350045eb3e276c5c17f65e59b8c1b7a05",
+          "adf7f3900abc218ea694777b51a832d350045eb3e276c5c17f65e59b8c1b7a05"
+        ]
+      }
+    },
+    {
+      "chroma": "420",
+      "input_dimensions": [
+        3840,
+        2160
+      ],
+      "crop": [
+        480,
+        270,
+        1920,
+        1080
+      ],
+      "horizontal": true,
+      "vertical": true,
+      "verified_engines": [
+        "cpu",
+        "dx12",
+        "cuda",
+        "ffmpeg"
+      ],
+      "signature": {
+        "width": 1920,
+        "height": 1080,
+        "chroma": "420",
+        "frames": 2,
+        "frame_sha256": [
+          "86431176272a675cc3b476e4768b608dff785db01bac9da9c9b8e374da7503f7",
+          "86431176272a675cc3b476e4768b608dff785db01bac9da9c9b8e374da7503f7"
+        ]
+      }
+    }
+  ],
+  "failure_checks": [
+    {
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\probe.y4m",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\must-not-exist.y4m",
+        "--backend",
+        "does-not-exist"
+      ],
+      "exit_code": 1,
+      "stderr": "fvid: unknown backend does-not-exist; choose cpu, auto, metal, vulkan, dx12, gl, cuda\n"
+    },
+    {
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\probe.y4m",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\must-not-exist.y4m",
+        "--backend",
+        "cpu",
+        "--device",
+        "not-a-number"
+      ],
+      "exit_code": 1,
+      "stderr": "fvid: invalid digit found in string\n"
+    },
+    {
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\probe.y4m",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\must-not-exist.y4m",
+        "--backend",
+        "dx12",
+        "--device",
+        "4294967295"
+      ],
+      "exit_code": 1,
+      "stderr": "fvid: GPU: backend dx12 unavailable: hardware device 4294967295 not found\n"
+    },
+    {
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\probe.y4m",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\must-not-exist.y4m",
+        "--backend",
+        "cuda",
+        "--device",
+        "4294967295"
+      ],
+      "exit_code": 1,
+      "stderr": "fvid: GPU: CUDA device ordinal exceeds the driver index range\n"
+    },
+    {
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\probe.y4m",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\must-not-exist.y4m",
+        "--backend",
+        "cpu",
+        "--memory-mib",
+        "0"
+      ],
+      "exit_code": 1,
+      "stderr": "fvid: CPU frame buffers need 90 bytes, exceeding memory limit 0\n"
+    },
+    {
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\probe.y4m",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\must-not-exist.y4m",
+        "--backend",
+        "dx12",
+        "--memory-mib",
+        "0"
+      ],
+      "exit_code": 1,
+      "stderr": "fvid: GPU: GPU frame/staging buffers need 1332 bytes, exceeding memory limit 0\n"
+    },
+    {
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\probe.y4m",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\must-not-exist.y4m",
+        "--backend",
+        "cuda",
+        "--memory-mib",
+        "0"
+      ],
+      "exit_code": 1,
+      "stderr": "fvid: CUDA frame buffers need 488 bytes, exceeding memory limit 0\n"
+    },
+    {
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\truncated.y4m",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\must-not-exist.y4m",
+        "--backend",
+        "cpu"
+      ],
+      "exit_code": 1,
+      "stderr": "fvid: failed to fill whole buffer\n"
+    },
+    {
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\truncated.y4m",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\must-not-exist.y4m",
+        "--backend",
+        "dx12"
+      ],
+      "exit_code": 1,
+      "stderr": "fvid: failed to fill whole buffer\n"
+    },
+    {
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\truncated.y4m",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\must-not-exist.y4m",
+        "--backend",
+        "cuda"
+      ],
+      "exit_code": 1,
+      "stderr": "fvid: failed to fill whole buffer\n"
+    },
+    {
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\memory-bound.y4m",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\must-not-exist.y4m",
+        "--backend",
+        "dx12",
+        "--device",
+        "0",
+        "--memory-mib",
+        "1"
+      ],
+      "exit_code": 1,
+      "stderr": "fvid: GPU: GPU frame/staging buffers need 2359424 bytes, exceeding memory limit 1048576\n"
+    },
+    {
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\memory-bound.y4m",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-gpu-validation-wv0jlhmh\\must-not-exist.y4m",
+        "--backend",
+        "cuda",
+        "--device",
+        "0",
+        "--memory-mib",
+        "1"
+      ],
+      "exit_code": 1,
+      "stderr": "fvid: CUDA frame buffers need 1572992 bytes, exceeding memory limit 1048576\n"
+    }
+  ]
+}

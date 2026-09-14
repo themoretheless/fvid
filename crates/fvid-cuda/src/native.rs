@@ -1,34 +1,34 @@
 use std::sync::Arc;
 
-use cudarc::driver::{
-    CudaContext, CudaFunction, CudaSlice, CudaStream, LaunchConfig, PushKernelArg,
-};
-use cudarc::nvrtc::{CompileOptions, compile_ptx_with_opts};
+use cudarc::driver::{CudaFunction, CudaSlice, CudaStream, LaunchConfig, PushKernelArg};
 
-pub(super) struct Processor {
-    // cudarc buffers retain their stream/context and function retains its module.
+use crate::device_pool::{self, SharedDevice};
+use crate::host_pinned::HostPinned;
+
+struct Slot {
     input: CudaSlice<u8>,
     output: CudaSlice<u8>,
-    params: CudaSlice<u32>,
-    kernel: CudaFunction,
+    host_in: HostPinned,
+    host_out: HostPinned,
     stream: Arc<CudaStream>,
-    name: String,
-    poisoned: bool,
 }
 
-fn require_driver() -> Result<(), String> {
-    // SAFETY: Loads only the CUDA driver's fixed standard library names through
-    // cudarc. This is the same native-code trust boundary as creating its context;
-    // no caller-controlled library paths or pointers are accepted by this crate.
-    if !unsafe { cudarc::driver::sys::is_culib_present() } {
-        return Err("CUDA driver library was not found; install an NVIDIA driver and make libcuda.so.1 (Linux) or nvcuda.dll (Windows) available".into());
-    }
-    Ok(())
+pub(super) struct Processor {
+    _device: Arc<SharedDevice>,
+    slots: [Slot; 2],
+    params: CudaSlice<u32>,
+    kernel: CudaFunction,
+    name: String,
+    poisoned: bool,
+    /// Frames submitted but not yet returned via submit/flush (0..=2).
+    queued: u8,
+    next_slot: u8,
+    oldest_slot: u8,
 }
 
 pub(super) fn devices() -> Result<Vec<(usize, String)>, String> {
-    require_driver()?;
-    let count = CudaContext::device_count()
+    device_pool::require_driver()?;
+    let count = cudarc::driver::CudaContext::device_count()
         .map_err(|err| format!("CUDA driver initialization failed: {err}"))?;
     (0..count)
         .map(|ordinal| {
@@ -41,6 +41,29 @@ pub(super) fn devices() -> Result<Vec<(usize, String)>, String> {
         .collect()
 }
 
+fn make_slot(
+    device: &SharedDevice,
+    input_len: usize,
+    output_len: usize,
+) -> Result<Slot, String> {
+    let stream = device.new_stream()?;
+    let input = stream
+        .alloc_zeros::<u8>(input_len)
+        .map_err(|err| format!("CUDA input allocation ({input_len} bytes) failed: {err}"))?;
+    let output = stream
+        .alloc_zeros::<u8>(output_len)
+        .map_err(|err| format!("CUDA output allocation ({output_len} bytes) failed: {err}"))?;
+    let host_in = HostPinned::alloc(&device.context, input_len)?;
+    let host_out = HostPinned::alloc(&device.context, output_len)?;
+    Ok(Slot {
+        input,
+        output,
+        host_in,
+        host_out,
+        stream,
+    })
+}
+
 impl Processor {
     pub(super) fn new(
         input_len: usize,
@@ -48,70 +71,29 @@ impl Processor {
         params: [u32; 32],
         ordinal: usize,
     ) -> Result<Self, String> {
-        require_driver()?;
-        let count = CudaContext::device_count()
-            .map_err(|err| format!("CUDA driver initialization failed: {err}"))?;
-        if ordinal >= count as usize {
-            return Err(format!(
-                "CUDA device ordinal {ordinal} is unavailable ({count} devices found)"
-            ));
-        }
-        // SAFETY: As above, this probes fixed vendor library names; no FFI pointers
-        // or untrusted kernel sources are accepted. Probe before cudarc's loader,
-        // which otherwise panics when the optional NVRTC library is absent.
-        if !unsafe { cudarc::nvrtc::sys::is_culib_present() } {
-            return Err("CUDA NVRTC compiler was not found; install the CUDA 12 NVRTC runtime and expose libnvrtc.so (Linux) or nvrtc64_120_0.dll (Windows) in the library search path".into());
-        }
-        let context = CudaContext::new(ordinal)
-            .map_err(|err| format!("CUDA device {ordinal} initialization failed: {err}"))?;
-        let name = context
-            .name()
-            .map_err(|err| format!("CUDA device name failed: {err}"))?;
-        let (major, minor) = context
-            .compute_capability()
-            .map_err(|err| format!("CUDA compute capability lookup failed: {err}"))?;
-        let ptx = compile_ptx_with_opts(
-            include_str!("transform.cu"),
-            CompileOptions {
-                options: vec![format!("--gpu-architecture=compute_{major}{minor}")],
-                name: Some("fvid_transform.cu".into()),
-                ..Default::default()
-            },
-        )
-        .map_err(|err| {
-            format!(
-                "CUDA kernel compilation failed; use an NVRTC version supporting this GPU: {err:?}"
-            )
-        })?;
-        let module = context.load_module(ptx).map_err(|err| {
-            format!("CUDA kernel loading failed; check driver and NVRTC compatibility: {err}")
-        })?;
-        let kernel = module
-            .load_function("fvid_transform")
-            .map_err(|err| format!("CUDA transform function loading failed: {err}"))?;
-        let stream = context
-            .new_stream()
-            .map_err(|err| format!("CUDA stream creation failed: {err}"))?;
-        let input = stream
-            .alloc_zeros::<u8>(input_len)
-            .map_err(|err| format!("CUDA input allocation ({input_len} bytes) failed: {err}"))?;
-        let output = stream
-            .alloc_zeros::<u8>(output_len)
-            .map_err(|err| format!("CUDA output allocation ({output_len} bytes) failed: {err}"))?;
-        let params = stream
+        let device = device_pool::shared(ordinal)?;
+        let kernel = device.transform_kernel()?;
+        let slot0 = make_slot(&device, input_len, output_len)?;
+        let slot1 = make_slot(&device, input_len, output_len)?;
+        let params = slot0
+            .stream
             .clone_htod(&params)
             .map_err(|err| format!("CUDA parameter upload failed: {err}"))?;
-        stream
+        slot0
+            .stream
             .synchronize()
             .map_err(|err| format!("CUDA setup synchronization failed: {err}"))?;
+        let name = device.name.clone();
         Ok(Self {
-            input,
-            output,
+            _device: device,
+            slots: [slot0, slot1],
             params,
             kernel,
-            stream,
             name,
             poisoned: false,
+            queued: 0,
+            next_slot: 0,
+            oldest_slot: 0,
         })
     }
 
@@ -119,12 +101,21 @@ impl Processor {
         &self.name
     }
 
+    pub(super) fn input_len(&self) -> usize {
+        self.slots[0].input.len()
+    }
+
+    pub(super) fn output_len(&self) -> usize {
+        self.slots[0].output.len()
+    }
+
     pub(super) fn apply(&mut self, input: &[u8], output: &mut [u8]) -> Result<(), String> {
-        if input.len() != self.input.len() || output.len() != self.output.len() {
+        self.drain_pipeline()?;
+        if input.len() != self.input_len() || output.len() != self.output_len() {
             return Err(format!(
                 "CUDA buffer lengths must be input={} and output={}; received {} and {}",
-                self.input.len(),
-                self.output.len(),
+                self.input_len(),
+                self.output_len(),
                 input.len(),
                 output.len()
             ));
@@ -134,44 +125,134 @@ impl Processor {
                 "CUDA processor failed previously; create a new processor before retrying".into(),
             );
         }
-        let result = self.apply_frame(input, output);
+        let result = self.launch_slot(0, input).and_then(|()| {
+            self.slots[0]
+                .stream
+                .synchronize()
+                .map_err(|err| format!("CUDA frame synchronization failed: {err}"))?;
+            output.copy_from_slice(self.slots[0].host_out.as_slice());
+            Ok(())
+        });
         if result.is_err() {
             self.poisoned = true;
-            // Finish queued work even on a launch/copy error before caller buffers
-            // can be reused. cudarc additionally synchronizes borrowed host slices.
-            let _ = self.stream.synchronize();
+            let _ = self.slots[0].stream.synchronize();
+            let _ = self.slots[1].stream.synchronize();
         }
         result
     }
 
-    fn apply_frame(&mut self, input: &[u8], output: &mut [u8]) -> Result<(), String> {
-        self.stream
-            .memcpy_htod(input, &mut self.input)
+    /// Depth-2 pipeline: queue `input`. If a prior frame finished, write it to `output`
+    /// and return `true`.
+    pub(super) fn submit(&mut self, input: &[u8], output: &mut [u8]) -> Result<bool, String> {
+        if input.len() != self.input_len() || output.len() != self.output_len() {
+            return Err(format!(
+                "CUDA buffer lengths must be input={} and output={}; received {} and {}",
+                self.input_len(),
+                self.output_len(),
+                input.len(),
+                output.len()
+            ));
+        }
+        if self.poisoned {
+            return Err(
+                "CUDA processor failed previously; create a new processor before retrying".into(),
+            );
+        }
+        let result = (|| {
+            let mut produced = false;
+            if self.queued == 2 {
+                self.complete_oldest(output)?;
+                self.queued = 1;
+                produced = true;
+            }
+            let slot = self.next_slot as usize;
+            self.launch_slot(slot, input)?;
+            self.next_slot ^= 1;
+            self.queued += 1;
+            Ok(produced)
+        })();
+        if result.is_err() {
+            self.poisoned = true;
+            let _ = self.slots[0].stream.synchronize();
+            let _ = self.slots[1].stream.synchronize();
+        }
+        result
+    }
+
+    pub(super) fn flush(&mut self, output: &mut [u8]) -> Result<bool, String> {
+        if self.poisoned {
+            return Err(
+                "CUDA processor failed previously; create a new processor before retrying".into(),
+            );
+        }
+        if self.queued == 0 {
+            return Ok(false);
+        }
+        if output.len() != self.output_len() {
+            return Err(format!(
+                "CUDA output length must be {}; received {}",
+                self.output_len(),
+                output.len()
+            ));
+        }
+        let result = self.complete_oldest(output).map(|()| {
+            self.queued -= 1;
+            true
+        });
+        if result.is_err() {
+            self.poisoned = true;
+            let _ = self.slots[0].stream.synchronize();
+            let _ = self.slots[1].stream.synchronize();
+        }
+        result
+    }
+
+    fn drain_pipeline(&mut self) -> Result<(), String> {
+        let mut sink = vec![0u8; self.output_len()];
+        while self.queued > 0 {
+            self.complete_oldest(&mut sink)?;
+            self.queued -= 1;
+        }
+        self.next_slot = 0;
+        self.oldest_slot = 0;
+        Ok(())
+    }
+
+    fn complete_oldest(&mut self, output: &mut [u8]) -> Result<(), String> {
+        let slot = self.oldest_slot as usize;
+        self.slots[slot]
+            .stream
+            .synchronize()
+            .map_err(|err| format!("CUDA frame synchronization failed: {err}"))?;
+        output.copy_from_slice(self.slots[slot].host_out.as_slice());
+        self.oldest_slot ^= 1;
+        Ok(())
+    }
+
+    fn launch_slot(&mut self, slot: usize, input: &[u8]) -> Result<(), String> {
+        let output_len = self.slots[slot].output.len();
+        self.slots[slot].host_in.as_mut_slice().copy_from_slice(input);
+        self.slots[slot]
+            .stream
+            .memcpy_htod(&self.slots[slot].host_in, &mut self.slots[slot].input)
             .map_err(|err| format!("CUDA input upload failed: {err}"))?;
-        let mut arguments = self.stream.launch_builder(&self.kernel);
-        arguments
-            .arg(&self.input)
-            .arg(&mut self.output)
-            .arg(&self.params);
         let config = LaunchConfig {
-            grid_dim: ((output.len() as u32).div_ceil(256), 1, 1),
+            grid_dim: ((output_len as u32).div_ceil(256), 1, 1),
             block_dim: (256, 1, 1),
             shared_mem_bytes: 0,
         };
-        // SAFETY: The fixed kernel accepts (const u8*, u8*, const u32*) in this
-        // exact order. `validate` proves every address, nonzero divisor, packed
-        // output coverage and all u32 arithmetic bounds before allocation. Each
-        // thread owns one output byte. CudaSlice handles keep allocations alive;
-        // one stream orders uploads/kernel/download, and synchronization below
-        // completes GPU work before apply returns. No raw device pointer escapes.
+        let mut arguments = self.slots[slot].stream.launch_builder(&self.kernel);
+        arguments
+            .arg(&self.slots[slot].input)
+            .arg(&mut self.slots[slot].output)
+            .arg(&self.params);
+        // SAFETY: fixed ABI; slot buffers exclusive; host read only after sync.
         unsafe { arguments.launch(config) }
             .map_err(|err| format!("CUDA transform launch failed: {err}"))?;
-        self.stream
-            .memcpy_dtoh(&self.output, output)
+        self.slots[slot]
+            .stream
+            .memcpy_dtoh(&self.slots[slot].output, &mut self.slots[slot].host_out)
             .map_err(|err| format!("CUDA output download failed: {err}"))?;
-        self.stream
-            .synchronize()
-            .map_err(|err| format!("CUDA frame synchronization failed: {err}"))?;
         Ok(())
     }
 }
@@ -279,6 +360,7 @@ mod tests {
     }
 }
 
+
 struct ResidentStage {
     output: CudaSlice<u8>,
     params: CudaSlice<u32>,
@@ -301,15 +383,15 @@ impl Pipeline {
         let p = plans[0];
         let first = Processor::new(p[26] as usize, p[27] as usize, p, ordinal)?;
         let mut stages = Vec::with_capacity(plans.len() - 1);
+        let stream = first.slots[0].stream.clone();
         for p in &plans[1..] {
-            let output = first
-                .stream
+            let output = stream
                 .alloc_zeros::<u8>(p[27] as usize)
                 .map_err(|e| e.to_string())?;
-            let params = first.stream.clone_htod(p).map_err(|e| e.to_string())?;
+            let params = stream.clone_htod(p).map_err(|e| e.to_string())?;
             stages.push(ResidentStage { output, params });
         }
-        first.stream.synchronize().map_err(|e| e.to_string())?;
+        stream.synchronize().map_err(|e| e.to_string())?;
         Ok(Self {
             first,
             stages,
@@ -331,19 +413,21 @@ impl Pipeline {
     fn finish(&mut self, result: Result<(), String>) -> Result<(), String> {
         if result.is_err() {
             self.first.poisoned = true;
-            let _ = self.first.stream.synchronize();
+            let _ = self.first.slots[0].stream.synchronize();
+            let _ = self.first.slots[1].stream.synchronize();
         }
         result
     }
     pub(super) fn upload(&mut self, input: &[u8]) -> Result<(), String> {
         self.check()?;
-        if input.len() != self.first.input.len() {
+        if input.len() != self.first.input_len() {
             return Err("CUDA resident input length mismatch".into());
         }
-        let result = self
-            .first
+        let slot = &mut self.first.slots[0];
+        slot.host_in.as_mut_slice().copy_from_slice(input);
+        let result = slot
             .stream
-            .memcpy_htod(input, &mut self.first.input)
+            .memcpy_htod(&slot.host_in, &mut slot.input)
             .map_err(|e| e.to_string());
         self.finish(result)?;
         self.phase = Phase::Uploaded;
@@ -363,21 +447,23 @@ impl Pipeline {
         Ok(())
     }
     fn process_inner(&mut self) -> Result<(), String> {
-        let first = &mut self.first;
+        let stream = self.first.slots[0].stream.clone();
         launch_resident(
-            &first.stream,
-            &first.kernel,
-            &first.input,
-            &mut first.output,
-            &first.params,
+            &stream,
+            &self.first.kernel,
+            &self.first.slots[0].input,
+            &mut self.first.slots[0].output,
+            &self.first.params,
         )?;
         for i in 0..self.stages.len() {
             let (previous, following) = self.stages.split_at_mut(i);
-            let input = previous.last().map_or(&first.output, |stage| &stage.output);
+            let input = previous
+                .last()
+                .map_or(&self.first.slots[0].output, |stage| &stage.output);
             let stage = &mut following[0];
             launch_resident(
-                &first.stream,
-                &first.kernel,
+                &stream,
+                &self.first.kernel,
                 input,
                 &mut stage.output,
                 &stage.params,
@@ -390,17 +476,55 @@ impl Pipeline {
         if self.phase != Phase::Processed {
             return Err("process a frame before CUDA download".into());
         }
-        let source = self.stages.last().map_or(&self.first.output, |s| &s.output);
-        if output.len() != source.len() {
+        let source_len = self
+            .stages
+            .last()
+            .map_or(self.first.slots[0].output.len(), |s| s.output.len());
+        if output.len() != source_len {
             return Err("CUDA resident output length mismatch".into());
         }
-        let result = self
-            .first
-            .stream
-            .memcpy_dtoh(source, output)
-            .map_err(|e| e.to_string())
-            .and_then(|()| self.first.stream.synchronize().map_err(|e| e.to_string()));
+        let host_out_len = self.first.slots[0].host_out.len();
+        if source_len != host_out_len {
+            let result = {
+                let source = self
+                    .stages
+                    .last()
+                    .map_or(&self.first.slots[0].output, |s| &s.output);
+                self.first.slots[0]
+                    .stream
+                    .memcpy_dtoh(source, output)
+                    .map_err(|e| e.to_string())
+                    .and_then(|()| {
+                        self.first.slots[0]
+                            .stream
+                            .synchronize()
+                            .map_err(|e| e.to_string())
+                    })
+            };
+            self.finish(result)?;
+            self.phase = Phase::Empty;
+            self.transfers.downloads += 1;
+            self.transfers.download_bytes += output.len() as u64;
+            return Ok(());
+        }
+        let result = {
+            let source = self
+                .stages
+                .last()
+                .map_or(&self.first.slots[0].output, |s| &s.output);
+            self.first.slots[0]
+                .stream
+                .memcpy_dtoh(source, &mut self.first.slots[0].host_out)
+                .map_err(|e| e.to_string())
+                .and_then(|()| {
+                    self.first.slots[0]
+                        .stream
+                        .synchronize()
+                        .map_err(|e| e.to_string())
+                })
+        };
         self.finish(result)?;
+        output.copy_from_slice(self.first.slots[0].host_out.as_slice());
         self.phase = Phase::Empty;
         self.transfers.downloads += 1;
         self.transfers.download_bytes += output.len() as u64;
@@ -421,10 +545,7 @@ fn launch_resident(
     };
     let mut args = stream.launch_builder(kernel);
     args.arg(input).arg(output).arg(params);
-    // SAFETY: validate_chain validates every stage's fixed byte-gather ABI and
-    // predecessor length before allocation. Input and output are distinct owned
-    // allocations. One stream orders all stages; no host read occurs here.
-    // CudaSlice retains stream/context and synchronizes lifetime-sensitive drops.
+    // SAFETY: validate_chain validates ABI; distinct buffers; one stream orders stages.
     unsafe { args.launch(config) }.map_err(|e| e.to_string())?;
     Ok(())
 }

@@ -54,7 +54,7 @@ GPU validation/device-lost ошибки сохраняются. После ош�
 Для N этапов заранее учитываются:
 
 - wgpu: N+1 padded frame textures, один upload staging, один readback staging, N×128 bytes uniforms и входной/выходной CPU-буферы на границах.
-- CUDA: N+1 device frame buffers, N×128 bytes parameters и входной/выходной host buffers. CUDA-стек может иметь внутренние driver allocations.
+- CUDA: caller host in/out, depth-2 slots (2× pinned+device for first-stage sizes), extra device outputs for later `--then` stages, N×128 params. CUDA-стек может иметь внутренние driver allocations.
 
 Бюджет проверяется до выделения frame allocations. Он не включает все объекты драйвера/компилятора и не является строгим RSS/VRAM limit. Число allocations не растёт с длительностью ролика. Здесь пока используется фиксированный набор поверхностей для всех этапов, без динамического пула и перекрытия нескольких кадров.
 
@@ -84,6 +84,13 @@ python3 scripts/validate_resident.py --backend metal
 
 ## Оставшаяся граница: аппаратные кодеки
 
-Полный аппаратный decode→GPU filter→encode ещё не реализован. Отдельный [native media adapter](MEDIA.md) уже выполняет CPU decode→crop→FFV1, без GPU interop. Нынешняя RGBA8Uint-упаковка произвольных YUV-байтов не является готовым NV12/P010 codec surface. Для следующего этапа нужны реальные форматы поверхностей, импорт/экспорт handles, синхронизация и проверка ownership на конкретном API.
+Реализован вертикальный срез на NVIDIA (Windows qualified): `cargo build --release --features media-cuda`, затем
 
-Первый целевой путь для имеющегося Apple GPU — VideoToolbox/CVPixelBuffer/IOSurface ↔ Metal. Для NVIDIA — CUDA/NVDEC/NVENC. Это будущие адаптеры, а не автоматически полученные возможности wgpu/cudarc. Только после их исполнения и проверки можно утверждать, что кадр не возвращается в RAM между **декодером и энкодером**.
+```sh
+./target/release/fvid media hw-filter input.mp4 output.mp4 --crop 16:16:320:180 --hflip --vflip
+python scripts/validate_hw_cuda.py
+```
+
+Путь: FFmpeg CUDA hwaccel decode (NV12 device surfaces) → `fvid-cuda` NV12 crop/hflip/vflip (device-to-device) → `h264_nvenc`. Статистика сообщает `host_frame_copies=0` на happy path. Это не полный codec graph и не замена software lossless path.
+
+Первый целевой путь для Apple GPU по-прежнему VideoToolbox/CVPixelBuffer/IOSurface ↔ Metal.

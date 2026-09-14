@@ -1,12 +1,12 @@
 {
-  "created_utc": "2026-09-05T06:27:22.885391+00:00",
+  "created_utc": "2026-09-14T11:41:20.719288+00:00",
   "status": "passed",
   "checks": [
     {
       "name": "probe H264 MP4",
       "status": "passed",
       "info": {
-        "path": "/private/tmp/fvid-media-519dka63/source.mp4",
+        "path": "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-media-m6oe6_jw\\source.mp4",
         "format": "mov,mp4,m4a,3gp,3g2,mj2",
         "duration_us": 2000000,
         "streams": [
@@ -36,7 +36,7 @@
       "status": "passed",
       "stats": {
         "packets": 50,
-        "payload_bytes": 29137,
+        "payload_bytes": 28972,
         "segments": 1,
         "backend": "libavformat (native)",
         "fvid_payload_copies": 0
@@ -47,7 +47,7 @@
       "status": "passed",
       "stats": {
         "packets": 25,
-        "payload_bytes": 14034,
+        "payload_bytes": 14031,
         "segments": 1,
         "backend": "libavformat (native, strict stream copy)",
         "fvid_payload_copies": 0
@@ -58,7 +58,7 @@
       "status": "passed",
       "stats": {
         "packets": 100,
-        "payload_bytes": 58274,
+        "payload_bytes": 57944,
         "segments": 2,
         "backend": "libavformat (native, strict stream copy)",
         "fvid_payload_copies": 0
@@ -870,7 +870,7 @@
       "status": "passed",
       "stats": {
         "packets": 145,
-        "payload_bytes": 44125,
+        "payload_bytes": 43884,
         "segments": 1,
         "backend": "libavformat (native)",
         "fvid_payload_copies": 0
@@ -994,7 +994,7 @@
     {
       "name": "reject unused encoder option",
       "status": "passed",
-      "error": "[libx264 @ 0x81ecfc380] using SAR=1/1\n[libx264 @ 0x81ecfc380] using cpu capabilities: ARMv8 NEON DotProd I8MM\n[libx264 @ 0x81ecfc380] profile High, level 1.0, 4:2:0, 8-bit\n[libx264 @ 0x81ecfc380] 264 - core 165 r3222 b35605a - H.264/MPEG-4 AVC codec - Copyleft 2003-2025 - http://www.videolan.org/x264.html - options: cabac=1 ref=3 deblock=1:0:0 analyse=0x3:0x113 me=hex subme=7 psy=1 psy_rd=1.00:0.00 mixed_ref=1 me_range=16 chroma_me=1 trellis=1 8x8dct=1 cqm=0 deadzone=21,11 fast_pskip=1 chroma_qp_offset=-2 threads=2 lookahead_threads=1 sliced_threads=0 nr=0 decimate=1 interlaced=0 bluray_compat=0 constrained_intra=0 bframes=3 b_pyramid=2 b_adapt=1 b_bias=0 direct=1 weightb=1 open_gop=0 weightp=2 keyint=250 keyint_min=25 scenecut=40 intra_refresh=0 rc_lookahead=40 rc=crf mbtree=1 crf=23.0 qcomp=0.60 qpmin=0 qpmax=69 qpstep=4 ip_ratio=1.40 aq=1:1.00\nfvid: unrecognized or unused encoder option\n"
+      "error": "[libx264 @ 000000c2eeaf73c0] using SAR=1/1\r\n[libx264 @ 000000c2eeaf73c0] using cpu capabilities: MMX2 SSE2Fast SSSE3 SSE4.2 AVX FMA3 BMI2 AVX2\r\n[libx264 @ 000000c2eeaf73c0] profile High, level 1.0, 4:2:0, 8-bit\r\n[libx264 @ 000000c2eeaf73c0] 264 - core 165 - H.264/MPEG-4 AVC codec - Copyleft 2003-2025 - http://www.videolan.org/x264.html - options: cabac=1 ref=3 deblock=1:0:0 analyse=0x3:0x113 me=hex subme=7 psy=1 psy_rd=1.00:0.00 mixed_ref=1 me_range=16 chroma_me=1 trellis=1 8x8dct=1 cqm=0 deadzone=21,11 fast_pskip=1 chroma_qp_offset=-2 threads=2 lookahead_threads=1 sliced_threads=0 nr=0 decimate=1 interlaced=0 bluray_compat=0 constrained_intra=0 bframes=3 b_pyramid=2 b_adapt=1 b_bias=0 direct=1 weightb=1 open_gop=0 weightp=2 keyint=250 keyint_min=25 scenecut=40 intra_refresh=0 rc_lookahead=40 rc=crf mbtree=1 crf=23.0 qcomp=0.60 qpmin=0 qpmax=69 qpstep=4 ip_ratio=1.40 aq=1:1.00\r\nfvid: unrecognized or unused encoder option\n"
     },
     {
       "name": "reject encoder override on lossless command",
@@ -1082,38 +1082,39 @@
     }
   ],
   "capability_counts": {
-    "demuxers": 359,
-    "muxers": 184,
-    "decoders": 527,
-    "encoders": 190,
-    "filters": 481
+    "demuxers": 365,
+    "muxers": 185,
+    "decoders": 548,
+    "encoders": 233,
+    "filters": 569
   },
   "capability_note": "Inventory of linked library; not proof of implemented or tested Fvid workflows.",
-  "library_version": "9.0.1",
-  "binary_sha256": "e406e9c917e47bd495baccb1de19f2231a1de03ee4c0428da5a1e391f1f3a902",
+  "library_version": "n9.0.1-29-gad500d59cb-20260913",
+  "binary_sha256": "91e004c58f182da6095c14afbb0bf9510206fd5399af108415e6a9554a4700bb",
   "source_sha256": {
-    "src/resident.rs": "0c30b1361021143fc63a0a39189b648f3dc00c9bb622c0c76f0a1e739e17d665",
-    "src/backend.rs": "33c21f1ff90aea833ec4268a25bbf5399af7afed92cd02977987f33d6b20ebce",
-    "src/lib.rs": "e139984c15ea39efcf6ef551ab50f9f53a3691cc8daa31d86708be1b3b475fa2",
-    "src/main.rs": "8d1bfc777ed6ff924045257e69147b39a57106e685c02ae3d44a32db8a31f3c4",
-    "src/media_cli.rs": "6b5d82ce9e9680f26347522dd04d92f42dc673c3a090ed35db4394fb05c37158",
-    "src/view.rs": "c1bf9a170eebe80f4aedcfb12a269d9ae4d3b142ecadc95e357063c677105c60",
-    "src/gpu/mod.rs": "adfe67a30a2d46e522886a5fe1451242b38e8506eba4310f1b766cae6264e3d3",
-    "src/resident/pipeline.rs": "650c162279cae996fa62198ede7cdb5964b14447a725eea6ae18c0b8260f3fc3",
-    "src/mcp/tools.rs": "a14a4faf171154feb583c0eb5e01fc64ff53820754aab4d7c52b4cb7cba8e35f",
-    "src/mcp/transport.rs": "91a3d5e168487dcfef6a50c54e612a7dfa4585edd3788cb700e48c2174b3e59b",
-    "src/mcp/mod.rs": "04a58d21a0c4dce289ae5401005df4dca01fa96cd905746d00668764d650225d",
-    "crates/fvid-media/src/edit.rs": "7176935bf00100342e0bbbfe954fa99b078e229a3208682cb140792baa23c575",
-    "crates/fvid-media/src/input_policy.rs": "d765247e08ae025274ee4d45db206b20cda0daba80a727d4fca4019e11fc623d",
-    "crates/fvid-media/src/audio_layout.rs": "6c1d365c37ad3dc5ddfcfec4b63fe80449567a00e0e70366006d4b437cf6d1bd",
-    "crates/fvid-media/src/lib.rs": "001a60436b939d98d2f72c01f43fa43e9b1fce32d1e235efe6bc12e8ba545815",
-    "crates/fvid-media/src/pcm.rs": "de2e6187343079b6324593a6ccc210ddccb30b1df46f72c521eabd4c8ee04025",
-    "crates/fvid-media/src/audio.rs": "7e3fd2e15f488bc55a59a896359d1b2d875cb4335cd3f437a9939957a195e25c",
-    "crates/fvid-media/src/lossless.rs": "cde625fd0aac088a92f5afd94a60c61629df0dced9e96b8bf9562350a5979c45",
-    "crates/fvid-media/build.rs": "ed48261d29447cd7daf0a031670e4efb45bc32d97dbf2b1bb82093a9a1320bc5",
-    "Cargo.toml": "7369d2e21e3490f72bcf13cd39af7d0ee2fc8386d82089665a7ac674f1f427d7",
-    "Cargo.lock": "819ad827fdfab9a8358a563210025d3a9756ef6469ada6dd63ec62772a39525d",
-    "crates/fvid-media/Cargo.toml": "2e3df0d514fcf7566b7c815d3ee5deb0dd92a42947072131095e9ed67f8d9020",
-    "scripts/validate_media.py": "cc97c5c187df1b3807e5b0f90daf5c6ec172cf660e59e420af2d71ce6af4ce5f"
+    "src\\backend.rs": "903d446b36a2c218762d6ff5cc122f638e4a2bea186c7851f43650bb4d90f0f8",
+    "src\\lib.rs": "41671b2d1927c7c6bb3db30a8cd64d0946b5bb53bf7fecbe00f43326f4e298ef",
+    "src\\main.rs": "93fa2cbf2e25c883f9fb072ef66405691234d30d5b0cc2d7b1ee5de43745b116",
+    "src\\media_cli.rs": "52b55e5fbb603855905007e3994d2fc5e4d869614253debe089cd19de40823ca",
+    "src\\publish.rs": "a9640ba3e726754a38ea71307ce97cb30ac17780bf1593af0cf8651c6d0965b7",
+    "src\\resident.rs": "fb922cb57cf8083916574c5c43c82795fb207efd0d7911e42bfe433031bab1f8",
+    "src\\view.rs": "df31ea8d9b6cb98f303d9f7294c00f823108ef4349fffb23d5747872689c4896",
+    "src\\gpu\\mod.rs": "359a3b5500ee040ca4b51d920783b1e11d58ea87e8daf460612893213dfc3574",
+    "src\\mcp\\mod.rs": "8b77d9c3bb820b6177785eea0d30f7c608388b75a8ccf49d3dc7671f076f53c1",
+    "src\\mcp\\tools.rs": "53a29c038f288260f7078750ea246fc17d8033d8d67794dd7b1969619c73b0bc",
+    "src\\mcp\\transport.rs": "73f7d242fe5de6931f7a3ddfecc37832e055fa23a8f9ef28504bfd34238d758b",
+    "src\\resident\\pipeline.rs": "560d54e0045e76f2cfe6943ced68915215d0722a12cc3398c3c4f3ff443fe9fd",
+    "crates\\fvid-media\\src\\audio.rs": "a9de5c10affede2533fce0b2728ee19b629c7f07231da7d09b655bfe4c358968",
+    "crates\\fvid-media\\src\\audio_layout.rs": "92ecc6e5a1483affc4a1db40f91a34f0b42b111ee22d166d9a035c9a1f46057f",
+    "crates\\fvid-media\\src\\edit.rs": "82a92bc4f8cb1ccc2716b3b7fde8aef2044b8f275fc79a706fcb28f7cf75a6cc",
+    "crates\\fvid-media\\src\\input_policy.rs": "d42972f93fd22e9c36c0e743ff2ea74b42c41859387e17469d8bdc7c558ac181",
+    "crates\\fvid-media\\src\\lib.rs": "c603903b6cacc3b1743b55b83c0d1580ef38388eb9470bbfd299b5b973ddc53b",
+    "crates\\fvid-media\\src\\lossless.rs": "c9547d6b2910093554f8c4b7e0ec5647c35b85fe765245470057fdb7f5102db6",
+    "crates\\fvid-media\\src\\pcm.rs": "b70d03ebc14c839d9425ae110739538730d6fd44ce47a97c158bf4966e701911",
+    "crates\\fvid-media\\build.rs": "1767f68f7f9af931f22a2820f384746217db6fb7bd0f91bd18827e65a9e6e18a",
+    "Cargo.toml": "6136f5eb0da952143ddd248e53875303236b0f787c408ddf58bc842479cd0c7c",
+    "Cargo.lock": "3b5caf2ea7941913bb84d9ea7dbf0a41f72116277f97896bcf6d17275c97796b",
+    "crates\\fvid-media\\Cargo.toml": "2a29b6df8ca76c672ff048812710340a70376ae5350003eea139f98f2ece3dae",
+    "scripts\\validate_media.py": "cced5151304a5a81a48face9d3f6f98a6daa3245518d457e0277a67277859b41"
   }
 }

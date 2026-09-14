@@ -10,7 +10,10 @@
 | CPU views без промежуточного кадра | Rust | crop/vflip; hflip CLI пока материализуется |
 | Metal GPU-фильтры | Rust + wgpu | Реальный M4 Max, byte equality, 4K |
 | Цепочки GPU-фильтров без промежуточного RAM | Rust + wgpu | Metal, lifetime/reuse/counters; без codec interop |
-| CUDA / Vulkan / DX12 / GL | CUDA / wgpu adapters | Реализация и cross-compilation; не все устройства исполнены |
+| CUDA / DX12 (Windows) | CUDA / wgpu adapters | RTX 5090: byte equality vs CPU/FFmpeg; resident CUDA chains |
+| CUDA / Vulkan / DX12 / GL (прочее) | CUDA / wgpu adapters | Реализация; Linux/прочие GPU — отдельная квалификация |
+| Цепочки GPU без промежуточного RAM (CUDA) | Rust + CUDA | Windows RTX 5090; lifetime/reuse/counters; без codec interop |
+| NVDEC → CUDA NV12 filter → NVENC | FFmpeg CUDA + fvid-cuda | Windows RTX 5090; `media hw-filter`; host_frame_copies=0 |
 | MCP-модуль | rmcp + Rust handlers | 11 tools, stdio/локальный HTTP, CPU/media/Metal; без публичного deployment |
 | Probe обычного файла | native libavformat adapter | MP4/MKV, streams, codec, dimensions, exact timebase |
 | Remux без encoder/decoder | native libavformat adapter | MP4→MKV, MP4+AAC→MP4, packet equality |
@@ -37,7 +40,7 @@
 | P0 | Audio delay/padding и произвольные швы | Ни потерянных/повторных samples, ни drift; явный выбор режима | FFmpeg, Symphonia |
 | P0 | Полный budget native backend | DPB/lookahead, packet queues, cancellation, long-file RSS | GStreamer, Membrane |
 | P0 | VideoToolbox ↔ Metal surfaces | Реальный decode→filter→encode без host readback, ownership/fences | MetalPetal, Smelter |
-| P1 | NVDEC/CUDA/NVENC | Native NVIDIA execution и pixel/packet validation | cros-codecs, BMF, NVIDIA APIs |
+| P1 | NVDEC/CUDA/NVENC | Вертикальный срез `media hw-filter` (H.264 CUDA decode → NV12 crop/flip → h264_nvenc); расширять профили/аудио | cros-codecs, BMF, NVIDIA APIs |
 | P1 | Прочие decode profiles/форматы | Корпус HEVC/AV1/VP9/ProRes, 10/12-bit, alpha | FFmpeg, rust-av |
 | P1 | Scale/rotate/transpose/pad | Точные геометрия/SAR/chroma/color contracts, CPU/GPU parity | libvips, Halide, FFmpeg |
 | P1 | Audio filters/resample/mix | Format conversion, clipping policy, sample accuracy | Symphonia, Firewheel |

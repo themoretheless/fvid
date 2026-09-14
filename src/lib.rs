@@ -1,9 +1,12 @@
 //! Streaming 8-bit planar YUV processing with CPU and optional GPU backends.
 pub mod backend;
+#[cfg(feature = "airbug")]
+pub mod airbug_runtime;
 #[cfg(feature = "mcp")]
 pub mod mcp;
 #[cfg(feature = "media")]
 pub use fvid_media as media;
+pub mod publish;
 pub mod resident;
 mod view;
 pub use view::{FrameView, PlaneView, RowView};
@@ -311,9 +314,7 @@ impl Plan {
                 let start = p.output_offset + row * p.width;
                 let dst = &mut output[start..start + p.width];
                 if self.horizontal {
-                    for (a, b) in dst.iter_mut().zip(src.iter().rev()) {
-                        *a = *b;
-                    }
+                    fvid_cpu::hflip_row_copy(dst, src, p.width, 1);
                 } else {
                     dst.copy_from_slice(src);
                 }
@@ -413,6 +414,8 @@ pub fn process_with_options<R: BufRead, W: Write>(
         device_name,
         controlled_memory_bytes,
     };
+    #[cfg(feature = "cuda")]
+    let mut marker_queue: std::collections::VecDeque<Vec<u8>> = std::collections::VecDeque::new();
     while line(&mut reader, &mut marker)? {
         if marker != b"FRAME\n" && !marker.starts_with(b"FRAME ") {
             return Err(invalid("expected FRAME marker"));
@@ -425,7 +428,7 @@ pub fn process_with_options<R: BufRead, W: Write>(
                 for p in &plan.planes {
                     for row in p.y..p.y + p.height {
                         let start = p.input_offset + row * p.stride + p.x;
-                        input[start..start + p.width].reverse();
+                        fvid_cpu::hflip_row(&mut input[start..start + p.width], p.width, 1);
                     }
                 }
             }
@@ -436,12 +439,36 @@ pub fn process_with_options<R: BufRead, W: Write>(
                 if !plan.vertical && p.width == p.stride {
                     let start = p.input_offset + p.y * p.stride;
                     writer.write_all(&input[start..start + p.width * p.height])?;
+                } else if plan.vertical && !plan.horizontal && p.width == p.stride {
+                    // Bottom-to-top full-width rows without FrameView overhead.
+                    let base = p.input_offset + p.y * p.stride;
+                    for row in (0..p.height).rev() {
+                        let start = base + row * p.stride;
+                        writer.write_all(&input[start..start + p.width])?;
+                    }
                 } else {
                     let plane = view.plane(index).expect("validated three-plane plan");
                     for row in 0..plane.height() {
                         writer.write_all(plane.row(row).expect("bounded row").storage_bytes())?;
                     }
                 }
+            }
+        } else if backend == Backend::Cuda {
+            #[cfg(feature = "cuda")]
+            {
+                // Depth-2 overlap: keep FRAME markers aligned with completed outputs.
+                marker_queue.push_back(marker.clone());
+                if processor.cuda_submit(&input, &mut output)? {
+                    let done = marker_queue.pop_front().expect("queued marker");
+                    writer.write_all(&done)?;
+                    writer.write_all(&output)?;
+                }
+            }
+            #[cfg(not(feature = "cuda"))]
+            {
+                processor.apply(&plan, &input, &mut output)?;
+                writer.write_all(&marker)?;
+                writer.write_all(&output)?;
             }
         } else {
             processor.apply(&plan, &input, &mut output)?;
@@ -451,6 +478,15 @@ pub fn process_with_options<R: BufRead, W: Write>(
         stats.frames += 1;
         stats.input_bytes += plan.input_len as u64;
         stats.output_bytes += plan.output_len as u64;
+    }
+    #[cfg(feature = "cuda")]
+    if backend == Backend::Cuda {
+        while processor.cuda_flush(&mut output)? {
+            let done = marker_queue.pop_front().expect("queued marker");
+            writer.write_all(&done)?;
+            writer.write_all(&output)?;
+        }
+        debug_assert!(marker_queue.is_empty());
     }
     writer.flush()?;
     Ok(stats)

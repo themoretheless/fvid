@@ -11,7 +11,14 @@ cargo build --release --features media
 
 Нужны FFmpeg development headers/libraries и libclang для генерации bindings. На проверенном Apple Silicon хосте используются `/opt/homebrew/include`, `/opt/homebrew/lib`, FFmpeg 9.0.1 и Command Line Tools libclang. Другой prefix задаётся `FVID_FFMPEG_PREFIX`. `cargo build --release --no-default-features --features media` отключает wgpu/CUDA, сохраняя native media.
 
-Feature `media` не входит в стандартную сборку, чтобы GPU/CPU-ядро не требовало FFmpeg. Для библиотечных пользователей интерфейс доступен как `fvid::media` при включённом feature. Native media проверен на macOS; прежние Windows/Linux-проверки GPU не являются проверками нового адаптера.
+### Windows
+
+1. Установите LLVM (`winget install LLVM.LLVM`) и задайте `LIBCLANG_PATH` на каталог `bin` с `libclang.dll`.
+2. Скачайте shared+dev FFmpeg 9.0: `powershell -File scripts/setup_ffmpeg_windows.ps1` (по умолчанию `C:\ffmpeg-shared` с `include/`, `lib/*.lib`, `bin/*.dll` из BtbN `win64-gpl-shared-9.0`).
+3. В сессии: `$env:FVID_FFMPEG_PREFIX='C:\ffmpeg-shared'`; добавьте `C:\ffmpeg-shared\bin` в `PATH`.
+4. `cargo build --release --features media` (или `--features mcp`). Для NVDEC/NVENC: `--features media-cuda` и `fvid media hw-filter …`.
+
+Qualified: macOS/FFmpeg 9.0.1; Windows/FFmpeg 9.0.1 shared (BtbN n9.0.1-29, `validate_media.py` 84 checks passed 2026-09-14). Feature `media` не входит в стандартную сборку, чтобы GPU/CPU-ядро не требовало FFmpeg.
 
 ## Работающие команды
 

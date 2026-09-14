@@ -356,7 +356,7 @@ fn y4m(input: &std::path::Path, output: &std::path::Path, args: &Args) -> Result
     };
     writer.flush().map_err(|e| e.to_string())?;
     drop(writer);
-    std::fs::hard_link(&path, output).map_err(|e| e.to_string())?;
+    crate::publish::publish_file(&path, output).map_err(|e| e.to_string())?;
     Ok(
         json!({"frames":stats.frames,"input_bytes":stats.input_bytes,"output_bytes":stats.output_bytes,"backend":stats.backend.to_string(),"device":stats.device_name,"controlled_memory_bytes":stats.controlled_memory_bytes,"transfers":transfers}),
     )

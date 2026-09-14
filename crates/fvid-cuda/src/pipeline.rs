@@ -99,15 +99,23 @@ fn validate_chain(plans: &[[u32; 32]], limit: usize) -> Result<usize, String> {
         bytes = bytes.checked_add(n).ok_or("CUDA chain memory overflow")?;
         Ok::<_, String>(())
     };
-    add(plans[0][26] as usize)?; // Host boundary input.
-    add(plans.last().unwrap()[27] as usize)?; // Host boundary output.
-    add(plans[0][26] as usize)?; // Device input.
+    let in0 = plans[0][26] as usize;
+    let out0 = plans[0][27] as usize;
+    let out_last = plans.last().unwrap()[27] as usize;
+    add(in0)?; // caller host input
+    add(out_last)?; // caller host output
+    // Depth-2 processor slots: 2 × (pinned in/out + device in/out) for first-stage sizes.
+    add(in0.checked_mul(4).ok_or("CUDA chain memory overflow")?)?;
+    add(out0.checked_mul(4).ok_or("CUDA chain memory overflow")?)?;
     for (index, p) in plans.iter().enumerate() {
         crate::validate(p[26] as usize, p[27] as usize, p)?;
         if index > 0 && p[26] != plans[index - 1][27] {
             return Err("CUDA chain buffer lengths are discontinuous".into());
         }
-        add(p[27] as usize)?;
+        if index > 0 {
+            // Extra device outputs for stages after the first (first outs are in the slots).
+            add(p[27] as usize)?;
+        }
         add(128)?;
     }
     if bytes > limit {
@@ -129,7 +137,9 @@ mod tests {
         second[16..24].copy_from_slice(&[5, 5, 1, 0, 0, 1, 1, 0]);
         second[26] = 6;
         second[27] = 6;
-        let bytes = 24 + 6 + 24 + 6 + 6 + 256;
+        // host in/out + 2 slots × (pin+dev)×(in+out) + stage1 device out + 2×128
+        // 24+6 + 4*24 + 4*6 + 6 + 256 = 30 + 96 + 24 + 6 + 256 = 412
+        let bytes = 24 + 6 + 4 * 24 + 4 * 6 + 6 + 256;
         assert_eq!(validate_chain(&[first, second], bytes).unwrap(), bytes);
         assert!(validate_chain(&[first, second], bytes - 1).is_err());
         assert!(validate_chain(&[first, first], usize::MAX).is_err());

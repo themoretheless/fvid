@@ -18,10 +18,9 @@ import subprocess
 import tempfile
 import time
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+from common import ROOT, prepend_cuda_bin, release_binary
+
 FORMATS = {"420": (2, 2, "yuv420p"), "422": (2, 1, "yuv422p"), "444": (1, 1, "yuv444p")}
-
-
 def invoke(command, **kwargs):
     return subprocess.run(command, stderr=subprocess.PIPE, timeout=300, **kwargs)
 
@@ -288,7 +287,7 @@ def save(path, report):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--binary", default=str(ROOT / "target/release/fvid"))
+    parser.add_argument("--binary", default=str(release_binary()))
     parser.add_argument("--ffmpeg", default="ffmpeg")
     parser.add_argument("--backends", nargs="+", default=["auto", "metal", "vulkan", "dx12", "gl", "cuda"])
     parser.add_argument("--device", type=int, default=0)
@@ -298,6 +297,7 @@ def main():
     parser.add_argument("--rounds", type=int, default=7)
     parser.add_argument("--report", default=str(ROOT / "benchmarks/gpu-results.json"))
     args = parser.parse_args()
+    prepend_cuda_bin()
     if args.frames < 1 or args.rounds < 1 or args.device < 0:
         parser.error("frames and rounds must be positive; device must be non-negative")
     report = dict(created_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(), platform=platform.platform(), machine=platform.machine(), binary=args.binary, binary_sha256=file_sha256(args.binary), validation_script_sha256_at_execution=file_sha256(__file__), source_sha256={str(source.relative_to(ROOT)): file_sha256(source) for source in source_files()}, ffmpeg=success([args.ffmpeg, "-version"], stdout=subprocess.PIPE).stdout.decode().splitlines()[0], rustc=success(["rustc", "--version"], stdout=subprocess.PIPE).stdout.decode().strip(), method="End-to-end CLI wall time including process startup, GPU device/pipeline initialization, file reads, upload, transform, readback and Y4M serialization to OS null sink. One warmup then seeded randomized rounds. Warm file cache. No codec or steady-state resident-GPU performance claim.", benchmark_rounds=args.rounds, status="running")

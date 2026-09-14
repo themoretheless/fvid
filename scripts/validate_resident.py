@@ -9,6 +9,7 @@ import re
 import subprocess
 import tempfile
 from validate_gpu import ROOT, make_input, signature, ffmpeg_command, file_sha256
+from common import prepend_cuda_bin, release_binary
 
 
 def execute(command, data=None):
@@ -23,7 +24,8 @@ def main():
     parser.add_argument('--backend', default='metal', choices=['metal', 'cuda', 'vulkan', 'dx12', 'gl'])
     parser.add_argument('--report', default=str(ROOT / 'benchmarks/resident-results.json'))
     args = parser.parse_args()
-    binary = str(ROOT / 'target/release/fvid')
+    prepend_cuda_bin()
+    binary = str(release_binary())
     api_test = None
     if args.backend in ('metal', 'cuda'):
         command = ['cargo', 'test', '--offline', '--test', 'resident',

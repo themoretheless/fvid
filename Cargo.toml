@@ -18,6 +18,10 @@ cuda = ["dep:fvid-cuda"]
 gpu = ["dep:wgpu", "dep:pollster"]
 mcp = ["media", "dep:rmcp", "dep:tokio", "dep:axum", "dep:serde"]
 media = ["dep:fvid-media", "dep:serde_json"]
+# Native media + CUDA NVDEC/NVENC vertical slice (pulls fvid-media/cuda-hw).
+media-cuda = ["media", "cuda", "fvid-media/cuda-hw"]
+# Local airbug toolkit from themoretheless/airbug@release (err + OTLP).
+airbug = ["dep:airbug-err", "dep:airbug-otel"]
 # Optional translation layers on Apple platforms (require installed runtimes).
 angle = ["gpu", "wgpu/angle"]
 vulkan-portability = ["gpu", "wgpu/vulkan-portability"]
@@ -28,6 +32,7 @@ pollster = { version = "0.4", optional = true }
 
 fvid-cuda = { path = "crates/fvid-cuda", optional = true }
 fvid-media = { path = "crates/fvid-media", optional = true }
+fvid-cpu = { path = "crates/fvid-cpu" }
 serde_json = { version = "1", optional = true }
 
 rmcp = { version = "=3.1.2", optional = true, default-features = false, features = ["server", "transport-io", "transport-streamable-http-server"] }
@@ -35,5 +40,15 @@ tokio = { version = "1", optional = true, features = ["rt-multi-thread", "net", 
 axum = { version = "0.8", optional = true }
 serde = { version = "1", optional = true, features = ["derive"] }
 
+# themoretheless/airbug release branch (publish=false crates → git).
+airbug-err = { git = "https://github.com/themoretheless/airbug", branch = "release", optional = true }
+airbug-otel = { git = "https://github.com/themoretheless/airbug", branch = "release", optional = true }
+
 [dev-dependencies]
 naga = { version = "=30.0.1", features = ["wgsl-in", "glsl-out", "hlsl-out", "spv-out", "msl-out"] }
+airbug = { git = "https://github.com/themoretheless/airbug", branch = "release" }
+airbug-bench = { git = "https://github.com/themoretheless/airbug", branch = "release", features = ["macros"] }
+
+[[bench]]
+name = "ffmpeg_compare"
+harness = false

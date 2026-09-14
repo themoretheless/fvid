@@ -18,6 +18,10 @@ mod audio;
 mod audio_layout;
 mod lossless;
 mod pcm;
+#[cfg(feature = "cuda-hw")]
+mod hw_cuda;
+#[cfg(feature = "cuda-hw")]
+pub use hw_cuda::{HwFilterOptions, HwFilterStats, hw_filter};
 pub use audio::{AudioDecodeStats, decode_audio};
 use ffi::*;
 pub use lossless::{
@@ -40,6 +44,18 @@ fn cstring(text: &str) -> Result<CString> {
 }
 fn path_string(path: &Path) -> Result<CString> {
     cstring(path.to_str().ok_or("path must be UTF-8")?)
+}
+/// Prefer hard link then unlink temp; fall back to rename when hard links fail.
+fn publish_file(temporary: &Path, destination: &Path) -> Result<()> {
+    match std::fs::hard_link(temporary, destination) {
+        Ok(()) => {
+            let _ = std::fs::remove_file(temporary);
+            Ok(())
+        }
+        Err(hard_link_err) => std::fs::rename(temporary, destination).map_err(|rename_err| {
+            format!("publish output (hard_link: {hard_link_err}; rename: {rename_err})")
+        }),
+    }
 }
 fn check(code: i32, operation: &str) -> Result<()> {
     if code >= 0 {
@@ -307,6 +323,8 @@ struct Output {
     temporary: PathBuf,
     destination: PathBuf,
     strict_timing: bool,
+    /// When false, use `av_write_frame` (single-stream encode; avoids interleave buffer).
+    interleave: bool,
 }
 impl Output {
     fn new(destination: &Path, source: &Input, selected: &[usize]) -> Result<Self> {
@@ -347,6 +365,7 @@ impl Output {
             temporary,
             destination: destination.into(),
             strict_timing: false,
+            interleave: true,
         };
         let target = path_string(destination)?;
         let temp = path_string(&out.temporary)?;
@@ -463,11 +482,17 @@ impl Output {
             (*packet.0).stream_index = index as i32;
             av_packet_rescale_ts(packet.0, time_base, (*stream).time_base);
             (*packet.0).pos = -1;
-            check(
-                av_interleaved_write_frame(self.context, packet.0),
-                "mux packet",
-            )
+            let code = if self.interleave {
+                av_interleaved_write_frame(self.context, packet.0)
+            } else {
+                av_write_frame(self.context, packet.0)
+            };
+            check(code, "mux packet")
         }
+    }
+    fn without_interleave(mut self) -> Self {
+        self.interleave = false;
+        self
     }
     fn finish(self) -> Result<()> {
         // SAFETY: The live output is uniquely owned; close before atomic publication.
@@ -475,9 +500,8 @@ impl Output {
             check(av_write_trailer(self.context), "write trailer")?;
             check(avio_closep(&mut (*self.context).pb), "close output")?;
         }
-        std::fs::hard_link(&self.temporary, &self.destination)
-            .map_err(|e| format!("publish output: {e}"))?;
-        // Drop removes only the temporary hard link and frees the context.
+        publish_file(&self.temporary, &self.destination)?;
+        // Drop removes a leftover temporary name (if any) and frees the context.
         Ok(())
     }
 }

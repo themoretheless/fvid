@@ -14,7 +14,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
 }
 #[cfg(feature = "media")]
 fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
-    let help = "fvid media probe INPUT | capabilities | remux INPUT OUTPUT [--streams 0,1] | decode-audio INPUT OUTPUT.wav [--streams INDEX] | trim-pcm INPUT OUTPUT --from SECONDS --to SECONDS [--streams 0] | trim INPUT OUTPUT --from SECONDS --to SECONDS [--streams 0] | concat OUTPUT INPUT INPUT... [--streams 0] | transcode INPUT OUTPUT --encoder NAME [--encoder-option KEY=VALUE] | transcode-lossless INPUT OUTPUT.mkv [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--from SECONDS --to SECONDS [--seek]] [--streams 0,1] | crop-lossless INPUT OUTPUT.mkv --crop X:Y:WIDTH:HEIGHT [--streams 0,1]";
+    let help = "fvid media probe INPUT | capabilities | remux INPUT OUTPUT [--streams 0,1] | decode-audio INPUT OUTPUT.wav [--streams INDEX] | trim-pcm INPUT OUTPUT --from SECONDS --to SECONDS [--streams 0] | trim INPUT OUTPUT --from SECONDS --to SECONDS [--streams 0] | concat OUTPUT INPUT INPUT... [--streams 0] | transcode INPUT OUTPUT --encoder NAME [--encoder-option KEY=VALUE] | transcode-lossless INPUT OUTPUT.mkv [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--from SECONDS --to SECONDS [--seek]] [--streams 0,1] | crop-lossless INPUT OUTPUT.mkv --crop X:Y:WIDTH:HEIGHT [--streams 0,1] | hw-filter INPUT OUTPUT.mp4 [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--device N]";
     let Some(command) = args.first() else {
         return Err(help.into());
     };
@@ -51,6 +51,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     let mut seek = false;
     let mut encoder = None;
     let mut encoder_options = Vec::new();
+    let mut device = 0usize;
     let mut options = fvid_media::CopyOptions::default();
     let mut i = 1;
     while i < args.len() {
@@ -67,6 +68,10 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                     .split_once('=')
                     .ok_or("encoder option must be KEY=VALUE")?;
                 encoder_options.push((key.to_owned(), value.to_owned()));
+            }
+            "--device" => {
+                i += 1;
+                device = args.get(i).ok_or("missing device")?.parse()?;
             }
             "--seek" => seek = true,
             "--hflip" => horizontal_flip = true,
@@ -116,6 +121,32 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if command != "transcode" && (encoder.is_some() || !encoder_options.is_empty()) {
         return Err("encoder selection requires explicit transcode command".into());
     }
+    if command == "hw-filter" && paths.len() == 2 {
+        #[cfg(feature = "media-cuda")]
+        {
+            let stats = fvid_media::hw_filter(
+                &paths[0],
+                &paths[1],
+                &fvid_media::HwFilterOptions {
+                    crop,
+                    horizontal_flip,
+                    vertical_flip,
+                    device,
+                    host_bounce: false,
+                },
+            )?;
+            println!("{}", serde_json::to_string_pretty(&stats)?);
+            return Ok(());
+        }
+        #[cfg(not(feature = "media-cuda"))]
+        {
+            let _ = device;
+            return Err(
+                "hw-filter requires cargo build --release --features media-cuda (CUDA NVDEC/NVENC)"
+                    .into(),
+            );
+        }
+    }
     if (command == "crop-lossless" || command == "transcode-lossless" || command == "transcode")
         && paths.len() == 2
     {
@@ -154,7 +185,8 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     }
     if crop.is_some() || vertical_flip || horizontal_flip || seek {
         return Err(
-            "--crop/--hflip/--vflip/--seek require crop-lossless or transcode-lossless".into(),
+            "--crop/--hflip/--vflip/--seek require crop-lossless, transcode-lossless, or hw-filter"
+                .into(),
         );
     }
     if command == "decode-audio" && paths.len() == 2 && from.is_none() && to.is_none() {

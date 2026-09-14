@@ -1,0 +1,359 @@
+{
+  "created_utc": "2026-09-14T11:35:05.863899+00:00",
+  "backend": "cuda",
+  "binary_sha256": "cc3623842e95979ea5684f5a2a6caca8bb22d9f2f6361eee8dbe9e3eb665f918",
+  "source_sha256": {
+    "src\\backend.rs": "903d446b36a2c218762d6ff5cc122f638e4a2bea186c7851f43650bb4d90f0f8",
+    "src\\lib.rs": "41671b2d1927c7c6bb3db30a8cd64d0946b5bb53bf7fecbe00f43326f4e298ef",
+    "src\\main.rs": "93fa2cbf2e25c883f9fb072ef66405691234d30d5b0cc2d7b1ee5de43745b116",
+    "src\\media_cli.rs": "52b55e5fbb603855905007e3994d2fc5e4d869614253debe089cd19de40823ca",
+    "src\\publish.rs": "a9640ba3e726754a38ea71307ce97cb30ac17780bf1593af0cf8651c6d0965b7",
+    "src\\resident.rs": "fb922cb57cf8083916574c5c43c82795fb207efd0d7911e42bfe433031bab1f8",
+    "src\\view.rs": "df31ea8d9b6cb98f303d9f7294c00f823108ef4349fffb23d5747872689c4896",
+    "src\\gpu\\mod.rs": "359a3b5500ee040ca4b51d920783b1e11d58ea87e8daf460612893213dfc3574",
+    "src\\mcp\\mod.rs": "8b77d9c3bb820b6177785eea0d30f7c608388b75a8ccf49d3dc7671f076f53c1",
+    "src\\mcp\\tools.rs": "53a29c038f288260f7078750ea246fc17d8033d8d67794dd7b1969619c73b0bc",
+    "src\\mcp\\transport.rs": "73f7d242fe5de6931f7a3ddfecc37832e055fa23a8f9ef28504bfd34238d758b",
+    "src\\resident\\pipeline.rs": "560d54e0045e76f2cfe6943ced68915215d0722a12cc3398c3c4f3ff443fe9fd",
+    "src\\gpu\\transform.wgsl": "abecb46781237cc157216a37d034a5ed89c44729d8a5c4ce61a79134371736c7",
+    "crates\\fvid-cuda\\src\\lib.rs": "5884de6c10a1ed6f1a83cd95db75ab854175f28e629643a06bc26293a8cb6263",
+    "crates\\fvid-cuda\\src\\native.rs": "003a65ab7ab237aa7a575488537e9d5f78a96ba2dba5362ec9fa242c50e4ea40",
+    "crates\\fvid-cuda\\src\\pipeline.rs": "89abd914a65623a76669112dc220b6dac720a94ec9524fbd4564c40363bdf7ed",
+    "crates\\fvid-cuda\\src\\transform.cu": "000c82e45b5b89aa1c5c404b09b8136fe4d41cb5bfdd70be5ac073401e5a1dc3",
+    "Cargo.toml": "6136f5eb0da952143ddd248e53875303236b0f787c408ddf58bc842479cd0c7c",
+    "Cargo.lock": "3b5caf2ea7941913bb84d9ea7dbf0a41f72116277f97896bcf6d17275c97796b",
+    "crates\\fvid-cuda\\Cargo.toml": "dafdcc1a830e871a0cc932584bcf588afaeb417191d0377439543765d6ff8c34",
+    "tests\\resident.rs": "517b1f891cefed44d00fcfbf15e654af7b1366c0963e34df1b4a6e6fc30f1e32",
+    "scripts\\validate_resident.py": "6488b7a02210eddc26d0f465bdb750e603329a484f61c3da3b83f662f3514453"
+  },
+  "qualification": "Actual GPU execution; API transfer counters, not a driver trace. No codec surface interop.",
+  "cases": [
+    {
+      "width": 8,
+      "height": 6,
+      "format": "420",
+      "stages": 3,
+      "input_sha256": "b8ea450427e4f5dbde64b65e671a2f91dcee4d33a335ad6f17f686edd3451104",
+      "output": {
+        "width": 4,
+        "height": 2,
+        "chroma": "420",
+        "frames": 3,
+        "frame_sha256": [
+          "c5dc9c0adbfd8bb854334bfc8210fc7af93f5df049f13e2b6c0cf21f0b64e5b9",
+          "c5dc9c0adbfd8bb854334bfc8210fc7af93f5df049f13e2b6c0cf21f0b64e5b9",
+          "db6ad99ccc3f36366a2b205cf0b391083d977b5aeeac74b5c6e13f696aa5b5ff"
+        ]
+      },
+      "transfers": {
+        "uploads": 3,
+        "downloads": 3,
+        "upload_bytes": 216,
+        "download_bytes": 36,
+        "filter_passes": 9
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=216 download_bytes=36 filter_passes=9\nframes=3 input_bytes=216 output_bytes=36 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=576\n",
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-resident-rq_m65va\\input.y4m",
+        "-",
+        "--backend",
+        "cuda",
+        "--crop",
+        "2:2:4:2",
+        "--then",
+        "--hflip",
+        "--then",
+        "--vflip"
+      ]
+    },
+    {
+      "width": 8,
+      "height": 6,
+      "format": "422",
+      "stages": 3,
+      "input_sha256": "45c4a28f70a135b737ba523c25e21b929a5e362773d83b521479e8c6690d2c49",
+      "output": {
+        "width": 4,
+        "height": 2,
+        "chroma": "422",
+        "frames": 3,
+        "frame_sha256": [
+          "904b93dbd859201d107a131f457cec869e037be48079116a0007e0b95a0a17fc",
+          "904b93dbd859201d107a131f457cec869e037be48079116a0007e0b95a0a17fc",
+          "f84e7ea550beac1e65fbf968b4093ac8dd18c1e1cabcae77efb03cd67eb5e8d7"
+        ]
+      },
+      "transfers": {
+        "uploads": 3,
+        "downloads": 3,
+        "upload_bytes": 288,
+        "download_bytes": 48,
+        "filter_passes": 9
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=288 download_bytes=48 filter_passes=9\nframes=3 input_bytes=288 output_bytes=48 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=640\n",
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-resident-rq_m65va\\input.y4m",
+        "-",
+        "--backend",
+        "cuda",
+        "--crop",
+        "2:2:4:2",
+        "--then",
+        "--hflip",
+        "--then",
+        "--vflip"
+      ]
+    },
+    {
+      "width": 9,
+      "height": 7,
+      "format": "444",
+      "stages": 3,
+      "input_sha256": "35212d0bdd17455d642bb4f4a77226bc5b94c9e542cd12103a15725fcd9ade87",
+      "output": {
+        "width": 5,
+        "height": 3,
+        "chroma": "444",
+        "frames": 3,
+        "frame_sha256": [
+          "d2ae60f05b88b28fe591b80da1e219d165ab21fc959760e74d26b48fd5bf334e",
+          "d2ae60f05b88b28fe591b80da1e219d165ab21fc959760e74d26b48fd5bf334e",
+          "946c676c51f6e1220b1a1049e77d45d8618d287ef8c6169abb914d1a8f921073"
+        ]
+      },
+      "transfers": {
+        "uploads": 3,
+        "downloads": 3,
+        "upload_bytes": 567,
+        "download_bytes": 135,
+        "filter_passes": 9
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=567 download_bytes=135 filter_passes=9\nframes=3 input_bytes=567 output_bytes=135 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=942\n",
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-resident-rq_m65va\\input.y4m",
+        "-",
+        "--backend",
+        "cuda",
+        "--crop",
+        "2:2:5:3",
+        "--then",
+        "--hflip",
+        "--then",
+        "--vflip"
+      ]
+    },
+    {
+      "width": 65,
+      "height": 17,
+      "format": "444",
+      "stages": 3,
+      "input_sha256": "27af3045c5e407fc5dd287608a217c51f04dcbfd0eabe5b50cef963462458441",
+      "output": {
+        "width": 61,
+        "height": 13,
+        "chroma": "444",
+        "frames": 3,
+        "frame_sha256": [
+          "63247f033c804c5f36af0b2d4c3e50621345121aa75f5813db4535d1fd91ba6c",
+          "63247f033c804c5f36af0b2d4c3e50621345121aa75f5813db4535d1fd91ba6c",
+          "db1f5080d603a279a75500992743feb9021c111f2cd81fb77c05195e8a340c80"
+        ]
+      },
+      "transfers": {
+        "uploads": 3,
+        "downloads": 3,
+        "upload_bytes": 9945,
+        "download_bytes": 7137,
+        "filter_passes": 9
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=9945 download_bytes=7137 filter_passes=9\nframes=3 input_bytes=9945 output_bytes=7137 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=16530\n",
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-resident-rq_m65va\\input.y4m",
+        "-",
+        "--backend",
+        "cuda",
+        "--crop",
+        "2:2:61:13",
+        "--then",
+        "--hflip",
+        "--then",
+        "--vflip"
+      ]
+    },
+    {
+      "width": 638,
+      "height": 480,
+      "format": "420",
+      "stages": 3,
+      "input_sha256": "16b0922995bd4735d9a53836123e8dcfbce09c089b33c08f93818ad737ae6c1e",
+      "output": {
+        "width": 634,
+        "height": 476,
+        "chroma": "420",
+        "frames": 3,
+        "frame_sha256": [
+          "90d69caba4fea7c007af53c7ce22970299a53431bf0b907dfa4c216606cf01ba",
+          "90d69caba4fea7c007af53c7ce22970299a53431bf0b907dfa4c216606cf01ba",
+          "40d603c26f168c7358eee81f04bf912cc18ecf275f218d0b5600af7430cddad7"
+        ]
+      },
+      "transfers": {
+        "uploads": 3,
+        "downloads": 3,
+        "upload_bytes": 1378080,
+        "download_bytes": 1358028,
+        "filter_passes": 9
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=1378080 download_bytes=1358028 filter_passes=9\nframes=3 input_bytes=1378080 output_bytes=1358028 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=2729808\n",
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-resident-rq_m65va\\input.y4m",
+        "-",
+        "--backend",
+        "cuda",
+        "--crop",
+        "2:2:634:476",
+        "--then",
+        "--hflip",
+        "--then",
+        "--vflip"
+      ]
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "format": "420",
+      "stages": 3,
+      "input_sha256": "2bc41b9beae42203c3b84183e198182e7cbcf783548b29ef87fa7d8ef2654926",
+      "output": {
+        "width": 1916,
+        "height": 1076,
+        "chroma": "420",
+        "frames": 3,
+        "frame_sha256": [
+          "5cba7bd2ec82ebbbf0e6e674dd43183ad09338bca24a3e44d02ceed6f5efb2ea",
+          "5cba7bd2ec82ebbbf0e6e674dd43183ad09338bca24a3e44d02ceed6f5efb2ea",
+          "b2e59267e7924b146714d4cad6b866cc68a7988238186bf606c7fdd1a7a4b944"
+        ]
+      },
+      "transfers": {
+        "uploads": 3,
+        "downloads": 3,
+        "upload_bytes": 9331200,
+        "download_bytes": 9277272,
+        "filter_passes": 9
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=9331200 download_bytes=9277272 filter_passes=9\nframes=3 input_bytes=9331200 output_bytes=9277272 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=18590880\n",
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-resident-rq_m65va\\input.y4m",
+        "-",
+        "--backend",
+        "cuda",
+        "--crop",
+        "2:2:1916:1076",
+        "--then",
+        "--hflip",
+        "--then",
+        "--vflip"
+      ]
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "format": "420",
+      "stages": 3,
+      "input_sha256": "40a76eb8b7def4c62a72d378560cc805c4cc574c64da15427ced695ca5b4ffdd",
+      "output": {
+        "width": 3836,
+        "height": 2156,
+        "chroma": "420",
+        "frames": 3,
+        "frame_sha256": [
+          "e55c0fd628e3847b4c0e3115410ebdb3eb73ebe79f76cbaa096b641c04473780",
+          "e55c0fd628e3847b4c0e3115410ebdb3eb73ebe79f76cbaa096b641c04473780",
+          "2750c34b3fc1c4122e41c6817e8875866dbc4e396fe26a25c1b0478bc95c2ceb"
+        ]
+      },
+      "transfers": {
+        "uploads": 3,
+        "downloads": 3,
+        "upload_bytes": 37324800,
+        "download_bytes": 37216872,
+        "filter_passes": 9
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=37324800 download_bytes=37216872 filter_passes=9\nframes=3 input_bytes=37324800 output_bytes=37216872 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=74506080\n",
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-resident-rq_m65va\\input.y4m",
+        "-",
+        "--backend",
+        "cuda",
+        "--crop",
+        "2:2:3836:2156",
+        "--then",
+        "--hflip",
+        "--then",
+        "--vflip"
+      ]
+    },
+    {
+      "width": 16,
+      "height": 12,
+      "format": "420",
+      "stages": 3,
+      "order": "hflip,crop,vflip",
+      "input_sha256": "0edd14b2b33a890da3247597df26adb67d29ef08fb3e5feb7537f66ba24aaba1",
+      "output": {
+        "width": 8,
+        "height": 6,
+        "chroma": "420",
+        "frames": 3,
+        "frame_sha256": [
+          "5678b34a408e9c9b77036582760335381c694e0f7b3ae9bf64075082c9510a9d",
+          "5678b34a408e9c9b77036582760335381c694e0f7b3ae9bf64075082c9510a9d",
+          "081e1acb82a139ee48f77d9ed7368ec62ec5517b12adf2342613f5dbac46c602"
+        ]
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=864 download_bytes=216 filter_passes=9\nframes=3 input_bytes=864 output_bytes=216 backend=cuda device=\"NVIDIA GeForce RTX 5090\" controlled_memory_bytes=1464\n",
+      "command": [
+        "D:\\Source\\fvid\\target\\release\\fvid.exe",
+        "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-resident-rq_m65va\\ordered.y4m",
+        "-",
+        "--backend",
+        "cuda",
+        "--hflip",
+        "--then",
+        "--crop",
+        "2:2:8:6",
+        "--then",
+        "--vflip"
+      ]
+    }
+  ],
+  "failure_check": {
+    "exit_code": 1,
+    "diagnostic": "fvid: failed to fill whole buffer\n",
+    "unpublished": true
+  },
+  "resident_api_test": {
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "--test",
+      "resident",
+      "cuda_resident_chain",
+      "--",
+      "--ignored",
+      "--nocapture"
+    ],
+    "stdout": "\nrunning 1 test\ntest cuda_resident_chain ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 2.01s\n\n",
+    "stderr": "   Compiling proc-macro2 v1.0.107\n   Compiling quote v1.0.47\n   Compiling unicode-ident v1.0.24\n   Compiling windows-link v0.2.1\n   Compiling cfg_aliases v0.2.2\n   Compiling log v0.4.34\n   Compiling foldhash v0.2.0\n   Compiling equivalent v1.0.2\n   Compiling autocfg v1.5.1\n   Compiling libm v0.2.16\n   Compiling thiserror v2.0.20\n   Compiling khronos_api v3.1.0\n   Compiling cfg-if v1.0.4\n   Compiling zerocopy v0.8.56\n   Compiling xml-rs v0.8.29\n   Compiling bitflags v2.13.1\n   Compiling rustc-hash v1.1.0\n   Compiling bit-vec v0.9.1\n   Compiling unicode-width v0.2.2\n   Compiling parking_lot_core v0.9.12\n   Compiling libc v0.2.189\n   Compiling ash v0.38.0+1.3.281\n   Compiling allocator-api2 v0.2.21\n   Compiling raw-window-handle v0.6.2\n   Compiling scopeguard v1.2.0\n   Compiling arrayvec v0.7.8\n   Compiling static_assertions v1.1.0\n   Compiling khronos-egl v6.0.0\n   Compiling smallvec v1.16.0\n   Compiling once_cell v1.21.4\n   Compiling presser v0.3.1\n   Compiling glow v0.17.0\n   Compiling windows-strings v0.5.1\n   Compiling windows-result v0.4.1\n   Compiling naga v30.0.1\n   Compiling libloading v0.8.9\n   Compiling hashbrown v0.17.1\n   Compiling windows-threading v0.2.1\n   Compiling spirv v0.4.0+sdk-1.4.341.0\n   Compiling wgpu-hal v30.0.1\n   Compiling lock_api v0.4.14\n   Compiling codespan-reporting v0.13.1\n   Compiling range-alloc v0.1.5\n   Compiling bit-set v0.10.0\n   Compiling profiling v1.0.18\n   Compiling renderdoc-sys v1.1.0\n   Compiling wgpu-core v30.0.1\n   Compiling litrs v1.0.0\n   Compiling cudarc v0.19.9\n   Compiling wgpu v30.0.1\n   Compiling libloading v0.9.0\n   Compiling pollster v0.4.0\n   Compiling hashbrown v0.16.1\n   Compiling num-traits v0.2.19\n   Compiling indexmap v2.14.1\n   Compiling gl_generator v0.14.0\n   Compiling document-features v0.2.12\n   Compiling parking_lot v0.12.5\n   Compiling syn v2.0.119\n   Compiling syn v3.0.4\n   Compiling glutin_wgl_sys v0.6.1\n   Compiling ordered-float v5.5.0\n   Compiling fvid-cuda v0.1.0 (D:\\Source\\fvid\\crates\\fvid-cuda)\n   Compiling thiserror-impl v2.0.20\n   Compiling bytemuck_derive v1.12.0\n   Compiling windows-interface v0.59.3\n   Compiling windows-implement v0.60.2\n   Compiling zerocopy-derive v0.8.56\n   Compiling bytemuck v1.25.2\n   Compiling naga-types v30.0.1\n   Compiling wgpu-types v30.0.1\n   Compiling windows-core v0.62.2\n   Compiling windows-numerics v0.3.1\n   Compiling windows-future v0.3.2\n   Compiling windows-collections v0.3.2\n   Compiling windows v0.62.2\n   Compiling half v2.7.1\n   Compiling gpu-allocator v0.28.0\n   Compiling wgpu-naga-bridge v30.0.1\n   Compiling wgpu-core-deps-windows-linux-android v30.0.1\n   Compiling fvid v0.1.0 (D:\\Source\\fvid)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 29.33s\n     Running tests\\resident.rs (target\\debug\\deps\\resident-f39a5108ac54dd10.exe)\nresident_verified backend=cuda device=\"NVIDIA GeForce RTX 5090\" size=8x6 format=420 uploads=5 downloads=4 filter_passes=15\nresident_verified backend=cuda device=\"NVIDIA GeForce RTX 5090\" size=8x6 format=422 uploads=5 downloads=4 filter_passes=15\nresident_verified backend=cuda device=\"NVIDIA GeForce RTX 5090\" size=9x7 format=444 uploads=5 downloads=4 filter_passes=15\nresident_verified backend=cuda device=\"NVIDIA GeForce RTX 5090\" size=65x17 format=444 uploads=5 downloads=4 filter_passes=15\nresident_verified backend=cuda device=\"NVIDIA GeForce RTX 5090\" size=638x480 format=420 uploads=5 downloads=4 filter_passes=15\nresident_verified backend=cuda device=\"NVIDIA GeForce RTX 5090\" size=1920x1080 format=420 uploads=5 downloads=4 filter_passes=15\nresident_verified backend=cuda device=\"NVIDIA GeForce RTX 5090\" size=3840x2160 format=420 uploads=5 downloads=4 filter_passes=15\n",
+    "exit_code": 0
+  }
+}

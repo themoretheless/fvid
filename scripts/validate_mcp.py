@@ -1,17 +1,31 @@
 #!/usr/bin/env python3
 """Protocol client qualification of Fvid's stdio and Streamable HTTP transports."""
-import argparse, datetime, hashlib, http.client, json, os, pathlib, re, selectors, subprocess, tempfile, time
+import argparse, datetime, hashlib, http.client, json, os, pathlib, re, selectors, subprocess, tempfile, time, threading
 import validate_media as media
-ROOT=pathlib.Path(__file__).resolve().parents[1]
-parser=argparse.ArgumentParser();parser.add_argument('--binary',default=str(ROOT/'target/debug/fvid'));parser.add_argument('--gpu',choices=['metal','cuda','vulkan','dx12','gl']);parser.add_argument('--transport',choices=['stdio','http','both'],default='both');parser.add_argument('--jobs',type=int,choices=[1,2],default=1);args=parser.parse_args();binary=pathlib.Path(args.binary).resolve()
+from common import ROOT, release_binary, prepend_cuda_bin
+parser=argparse.ArgumentParser();parser.add_argument('--binary',default=str(release_binary()));parser.add_argument('--gpu',choices=['metal','cuda','vulkan','dx12','gl']);parser.add_argument('--transport',choices=['stdio','http','both'],default='both');parser.add_argument('--jobs',type=int,choices=[1,2],default=1);args=parser.parse_args();binary=pathlib.Path(args.binary).resolve();prepend_cuda_bin()
 checks=[];sessions=[]
 def record(name):checks.append(name);print(name,flush=True)
 class Stdio:
     def __init__(self,root):
         self.log=tempfile.TemporaryFile();self.p=subprocess.Popen([binary,'mcp','--root',root,'--jobs',str(args.jobs),'--stdio'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=self.log)
-        self.buffer=b'';self.sel=selectors.DefaultSelector();self.sel.register(self.p.stdout,selectors.EVENT_READ)
+        self.buffer=b'';self.sel=None
+        if os.name!='nt':
+            self.sel=selectors.DefaultSelector();self.sel.register(self.p.stdout,selectors.EVENT_READ)
     def send(self,value):self.p.stdin.write(json.dumps(value).encode()+b'\n');self.p.stdin.flush()
     def read(self):
+        if os.name=='nt':
+            # Windows pipes are not selectable; block with a worker timeout.
+            box=[];err=[]
+            def worker():
+                try:box.append(self.p.stdout.readline())
+                except Exception as e:err.append(e)
+            t=threading.Thread(target=worker,daemon=True);t.start();t.join(120)
+            if t.is_alive():raise TimeoutError('MCP response timeout')
+            if err:raise err[0]
+            line=box[0] if box else b''
+            if not line:self.log.seek(0);raise RuntimeError(self.log.read().decode() or 'MCP EOF')
+            return json.loads(line)
         deadline=time.monotonic()+120
         while b'\n' not in self.buffer:
             if not self.sel.select(max(0,deadline-time.monotonic())):raise TimeoutError('MCP response timeout')
@@ -25,7 +39,9 @@ class Stdio:
         self.p.stdin.close()
         try:self.p.wait(timeout=10)
         except subprocess.TimeoutExpired:self.p.kill();self.p.wait()
-        self.p.stdout.close();self.sel.close();self.log.close()
+        self.p.stdout.close()
+        if self.sel:self.sel.close()
+        self.log.close()
 class Http:
     TOKEN='fvid-integration-test-token-only'
     def __init__(self,root):
@@ -66,7 +82,14 @@ with tempfile.TemporaryDirectory(prefix='fvid-mcp-') as directory:
     media.ff('-f','lavfi','-i','sine=sample_rate=48000:frequency=997','-t','2','-c:a','pcm_s16le',audio)
     media.ff('-i',source,'-pix_fmt','yuv420p','-f','yuv4mpegpipe',y4m)
     (root/'playlist.m3u8').write_text('#EXTM3U\n#EXT-X-TARGETDURATION:2\n#EXTINF:2,\n../outside/secret.ts\n#EXT-X-ENDLIST\n')
-    (outside/'secret.wav').write_bytes(audio.read_bytes());(root/'outside-link').symlink_to(outside,target_is_directory=True)
+    (outside/'secret.wav').write_bytes(audio.read_bytes())
+    symlink_ok=True
+    try:
+        (root/'outside-link').symlink_to(outside,target_is_directory=True)
+    except OSError as err:
+        # Windows often requires SeCreateSymbolicLinkPrivilege; path escapes still covered via ../
+        symlink_ok=False
+        print(f'symlink fixture skipped ({err}); continuing without outside-link',flush=True)
     for transport in (['stdio','http'] if args.transport=='both' else [args.transport]):
         client=Stdio(root) if transport=='stdio' else Http(root)
         prefix=transport+'-'
@@ -105,17 +128,22 @@ with tempfile.TemporaryDirectory(prefix='fvid-mcp-') as directory:
                 session['gpu_result']=stats
                 record(prefix+args.gpu+' resident chain through MCP pixel equality')
 
-            for name,arguments in [
+            escape_cases=[
                 ('fvid_probe',{'input':'playlist.m3u8'}),
-                ('fvid_probe',{'input':'../outside/secret.wav'}),('fvid_probe',{'input':'outside-link/secret.wav'}),
-                ('fvid_remux',{'input':'audio.wav','output':'outside-link/escape.wav'}),
+                ('fvid_probe',{'input':'../outside/secret.wav'}),
                 ('fvid_remux',{'input':'audio.wav','output':'../outside/escape.wav'}),
                 ('fvid_remux',{'input':'source.mp4','output':prefix+'remux.mkv'}),
                 ('fvid_probe',{'input':'source.mp4','unexpected':True}),('fvid_probe',{}),
                 ('fvid_transcode',{'input':'source.mp4','output':'bad.mkv','encoder':'libx264','encoder_options':{'stats':'/tmp/escape'}}),
                 ('fvid_process_y4m',{'input':'source.y4m','output':'bad.y4m','memory_mib':0}),
                 ('missing_tool',{}),
-            ]:rejected(client,name,arguments)
+            ]
+            if symlink_ok:
+                escape_cases[1:1]=[
+                    ('fvid_probe',{'input':'outside-link/secret.wav'}),
+                    ('fvid_remux',{'input':'audio.wav','output':'outside-link/escape.wav'}),
+                ]
+            for name,arguments in escape_cases:rejected(client,name,arguments)
             assert not (outside/'escape.wav').exists() and not (root/'bad.mkv').exists() and not (root/'bad.y4m').exists()
             assert not list(root.glob('.fvid-*.tmp'))
             record(prefix+'path escapes, symlinks, no-overwrite, malformed args, encoder option restrictions')

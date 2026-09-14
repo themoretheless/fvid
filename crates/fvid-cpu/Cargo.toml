@@ -1,0 +1,11 @@
+[package]
+name = "fvid-cpu"
+version = "0.1.0"
+edition = "2024"
+description = "CPU SIMD helpers for planar video (hflip)"
+license = "MIT"
+publish = false
+
+[lints.rust]
+# Intrinsics for row reverse; kept out of the root fvid crate (unsafe forbid).
+unsafe_code = "allow"

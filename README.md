@@ -30,7 +30,7 @@ cargo build --release --features media
 ./target/release/fvid media transcode-lossless input.mp4 flipped.mkv --vflip
 ```
 
-Добавлена resident GPU-цепочка: `--backend metal --hflip --then --crop 2:2:1280:720 --then --vflip`. Между этапами кадр остаётся на GPU, загрузка и выгрузка происходят только на границах Y4M. В Rust API выгрузка явная и необязательная. Реализован также CUDA-путь; физически проверен Metal. Codec-surface interop пока отсутствует.
+Добавлена resident GPU-цепочка: `--backend metal --hflip --then --crop 2:2:1280:720 --then --vflip`. Между этапами кадр остаётся на GPU, загрузка и выгрузка происходят только на границах Y4M. В Rust API выгрузка явная и необязательная. Реализован также CUDA-путь; на Windows + NVIDIA RTX 5090 проверены DX12/CUDA Y4M и resident CUDA. Codec-surface interop: вертикальный срез `cargo build --release --features media-cuda` → `fvid media hw-filter` (NVDEC→NV12 filter→NVENC, без host frame copies).
 
 ```sh
 cargo build --release
@@ -43,7 +43,7 @@ cargo clippy --all-targets -- -D warnings
 python3 scripts/benchmark.py
 ```
 
-Crop задаётся `X:Y:WIDTH:HEIGHT` и применяется до отражений. Размеры и смещения должны соответствовать chroma subsampling. `-` обозначает stdin/stdout. Существующий output file никогда не перезаписывается. Для файлов результат сначала пишется во временный файл и публикуется через hard link в том же каталоге; требуется поддержка hard links. Это атомарная видимость, без гарантии crash durability/fsync. При stdout ошибочный ввод может оставить частичный поток.
+Crop задаётся `X:Y:WIDTH:HEIGHT` и применяется до отражений. Размеры и смещения должны соответствовать chroma subsampling. `-` обозначает stdin/stdout. Существующий output file никогда не перезаписывается. Для файлов результат сначала пишется во временный файл и публикуется через hard link в том же каталоге; если hard link недоступен (другой том, FAT и т.п.), используется rename. Это атомарная видимость на поддерживающих FS, без гарантии crash durability/fsync. При stdout ошибочный ввод может оставить частичный поток.
 
 В собственном Y4M-движке явно interlaced-видео отвергается; progressive и unspecified обрабатываются как последовательность кадров. Заголовки ограничены 4096 bytes, plane sizes проверяются до allocation. Его форматы пока ограничены 8-bit planar YUV, без RGB, odd subsampled dimensions и аудио. Для обычных контейнеров/кодеков используется отдельный native media adapter. GPU codec interop и произвольный граф ещё не реализованы. Неизвестные Y4M header/frame tags сохраняются без понимания их семантики. Fvid пока не является полноценной заменой FFmpeg.
 
@@ -58,6 +58,20 @@ Crop задаётся `X:Y:WIDTH:HEIGHT` и применяется до отра
 Лицензия локального кода Fvid: MIT. Файлы research/sources и raw — материалы сторонних проектов со своими лицензиями, они не входят в сборку и не перелицензируются под MIT.
 
 CPU-only сборка без GPU-зависимостей: `cargo build --release --no-default-features`. Default backend — CPU; `--backend auto` явно сообщает выбранный backend или причины fallback. Явный запрос GPU не подменяется CPU.
+
+Опционально `--features airbug` подключает [airbug-err](https://github.com/themoretheless/airbug)/[airbug-otel](https://github.com/themoretheless/airbug) с ветки `release` (panic/error → локальный hub, OTLP). Отключить OTLP: `FVID_AIRBUG_OTEL=0`. Endpoint ошибок: `AIRBUG_ERR_ENDPOINT`.
+
+CLI-бенч fvid vs FFmpeg через [airbug-bench](https://github.com/themoretheless/airbug) (`release`): **Y4M** (cpu / full / ffmpeg) + **media export** (fvid_cpu↔ffmpeg_cpu libx264 veryfast, fvid_gpu↔ffmpeg_gpu NVENC p1).
+
+```sh
+cargo build --release --features media-cuda
+# bench may rebuild default features — pin the media-cuda binary:
+cp target/release/fvid target/release/fvid-media-cuda   # Windows: Copy-Item
+cargo build --release --no-default-features --target-dir target-cpu
+FVID_BENCH_BIN_FULL=$PWD/target/release/fvid-media-cuda cargo bench --bench ffmpeg_compare --features media-cuda
+```
+
+Опционально: `FVID_BENCH_BIN_CPU`; `FVID_BENCH_SKIP_Y4M=1` / `FVID_BENCH_SKIP_MEDIA=1`. Y4M: 720p×180, 1080p×120, 4K×60. Media: 1080p×5s. Ops: copy/crop/hflip/vflip/fused.
 
 ## MCP
 

@@ -188,8 +188,9 @@ impl Processor {
             Backend::Cuda => {
                 #[cfg(feature = "cuda")]
                 {
+                    // Caller host + 2×(pinned+device) slots for depth-2 overlap + params.
                     let bytes = (plan.input_len + plan.output_len)
-                        .checked_mul(2)
+                        .checked_mul(5)
                         .and_then(|n| n.checked_add(128))
                         .ok_or_else(|| Error::Invalid("GPU memory size overflow".into()))?;
                     if bytes > memory_limit {
@@ -234,6 +235,26 @@ impl Processor {
             Self::Gpu(gpu) => gpu.apply(input, output),
             #[cfg(feature = "cuda")]
             Self::Cuda(cuda) => cuda.apply(input, output).map_err(Error::Gpu),
+        }
+    }
+
+    #[cfg(feature = "cuda")]
+    pub fn cuda_submit(&mut self, input: &[u8], output: &mut [u8]) -> Result<bool> {
+        match self {
+            Self::Cuda(cuda) => cuda.submit(input, output).map_err(Error::Gpu),
+            _ => Err(Error::Invalid(
+                "cuda_submit requires the CUDA backend".into(),
+            )),
+        }
+    }
+
+    #[cfg(feature = "cuda")]
+    pub fn cuda_flush(&mut self, output: &mut [u8]) -> Result<bool> {
+        match self {
+            Self::Cuda(cuda) => cuda.flush(output).map_err(Error::Gpu),
+            _ => Err(Error::Invalid(
+                "cuda_flush requires the CUDA backend".into(),
+            )),
         }
     }
 }

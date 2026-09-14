@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Native media end-to-end qualification; FFmpeg CLI is only a test oracle/generator."""
 import argparse,hashlib,json,pathlib,subprocess,tempfile,datetime
-ROOT=pathlib.Path(__file__).resolve().parents[1]
-BINARY=ROOT/'target/debug/fvid'
+from common import ROOT, release_binary
+BINARY=release_binary()
 
 def run(command):
     result=subprocess.run([str(v) for v in command],capture_output=True,timeout=180)

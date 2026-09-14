@@ -1,4 +1,4 @@
-# GPU: измеренные результаты
+﻿# GPU: измеренные результаты
 
 Исторический снимок до добавления CPU FrameView и прямой записи строк. Сохранённые числа и хеши не обновлялись под новый код; они не являются замером текущей версии CPU-конвейера.
 
@@ -6,37 +6,29 @@ Apple M4 Max, Metal, macOS. Доступ к настоящему GPU подтв�
 
 **Корректность:** 34 transform cases: 24 малых комбинации и 10 случаев больших кадров/границ текстур. Payload каждого кадра совпал у CPU, Metal и FFmpeg; `auto` выбирал Metal. Дополнительно прошли 14 проверок отказов, бюджета и непубликации частичного файла.
 
-**Доступность:** CUDA, D3D12, Vulkan и GL на этой машине не выполнялись. Их отсутствие явно зафиксировано; успешный CPU-fallback не засчитывался как GPU. Пути для Windows/Linux прошли cross-target compilation, что не является проверкой на этих GPU.
+**Доступность (исторический снимок):** CUDA, D3D12, Vulkan и GL на той машине не выполнялись.
 
-## Время полной обработки
+## Windows NVIDIA qualification (2026-09-14)
 
-Каждый файл: 60 кадров YUV420p. Для каждой из 6 комбинаций — один warmup и 7 раундов со случайным порядком команд (seed 451). Включены запуск CLI, создание device/pipeline, чтение файла, CPU→GPU upload, shader, GPU→CPU readback и Y4M serialization в null sink. Warm file cache; без кодеков, без fsync и без отдельного измерения времени shader.
+Host: Windows + NVIDIA GeForce RTX 5090, CUDA Toolkit 13.4 NVRTC (`nvrtc64_130_0.dll`), MSVC, Rust 1.98.1.
 
-| Разрешение / операция | CPU, мс | Metal, мс | FFmpeg default, мс | FFmpeg 1 thread, мс |
-|---|---:|---:|---:|---:|
-| 1280x720 / hflip | 11.10 | 48.89 | 27.15 | 42.62 |
-| 1280x720 / fused | 10.15 | 47.80 | 25.60 | 26.82 |
-| 1920x1080 / hflip | 18.40 | 61.01 | 32.82 | 69.57 |
-| 1920x1080 / fused | 16.90 | 57.96 | 33.08 | 37.72 |
-| 3840x2160 / hflip | 58.16 | 122.99 | 72.96 | 220.44 |
-| 3840x2160 / fused | 51.22 | 108.78 | 68.87 | 97.33 |
+**Корректность:** `scripts/validate_gpu.py --backends dx12 cuda` — payload equality CPU / DX12 / CUDA / FFmpeg на 34 transform cases + failure/atomic publication checks. Report: [gpu-results-windows.json](gpu-results-windows.json).
 
-Медианы семи запусков. `fused` означает crop до половины исходных ширины/высоты и оба отражения. Обычная конфигурация FFmpeg — основная baseline; один поток показан отдельно.
+**Resident:** `scripts/validate_resident.py --backend cuda` — 8 CLI cases vs CPU/FFmpeg + API ignored test. Report: [resident-results-windows.json](resident-results-windows.json).
 
-**Metal в этих сценариях медленнее:** 2,11–4,71× относительно CPU Fvid и 1,58–1,87× относительно FFmpeg default. Поэтому GPU не включён по умолчанию. Этот результат не доказывает, что Metal/shader вообще медленнее CPU: измерен короткий полный CPU→GPU→CPU pipeline с очень дешёвым фильтром. Вклад отдельных стадий не профилировался.
+Перед запуском: `scripts/use_cuda_windows.ps1` или CUDA `v13.*\bin` в `PATH`.
 
-Ускорение для resident GPU decode→filter→encode не проверено и такой interop ещё не реализован. Следующие обоснованные оптимизации: держать кадры на GPU, убрать ненужный readback, перекрывать несколько кадров и отдельно измерить setup/transfer/kernel. CUDA-результатов на NVIDIA здесь нет.
+## Время полной обработки (исторический Metal)
 
-## Воспроизведение и снимок
+См. прежнюю таблицу в git history / Metal snapshot в [gpu-results.json](gpu-results.json). GPU не включён по умолчанию из-за CPU→GPU→CPU overhead на дешёвых фильтрах.
+
+## Воспроизведение
 
 ```sh
 cargo build --release
-python3 scripts/validate_gpu.py --backends metal vulkan dx12 gl cuda auto --benchmark
+python scripts/validate_gpu.py --backends dx12 cuda
+python scripts/validate_resident.py --backend cuda
 ```
 
-- [Сырые результаты](gpu-results.json): все времена, порядок запусков, фактические backend, контрольные подписи, SHA-256 production-исходников и диагностика.
-- [Manifest измеренной сборки](gpu-run-provenance.json): точные Cargo-файлы и SHA-256 бинарника. Позже добавлена только dev-зависимость Naga для проверки переноса shader в другие языки; измеренный Cargo snapshot сохранён отдельно.
-- WGSL и CUDA kernel hashes дополнены после запуска, без изменения времён; время дополнения и проверка неизменности исходников отражены в JSON.
-- Исходные CPU-результаты из [REPORT.md](REPORT.md) и их provenance не переписаны.
-
-Скрипт использует временные детерминированные входы и удаляет их после проверки; размеры, число кадров и input hashes записаны в JSON, формула генерации находится в [validate_gpu.py](../scripts/validate_gpu.py). Полного conformance corpus, устойчивой long-run latency, независимых доверительных интервалов и измерений на других платформах пока нет.
+- [Windows DX12/CUDA](gpu-results-windows.json) · [Windows resident CUDA](resident-results-windows.json)
+- [Сырые результаты Metal](gpu-results.json)

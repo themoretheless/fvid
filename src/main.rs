@@ -1,7 +1,7 @@
 use fvid::{Crop, ExecutionOptions, Transform};
 mod media_cli;
 use std::fs::{self, File, OpenOptions};
-use std::io::{self, BufReader, BufWriter, Write};
+use std::io::{self, BufReader, BufWriter, IsTerminal, Write};
 use std::path::{Path, PathBuf};
 
 const HELP: &str = "fvid INPUT.y4m OUTPUT.y4m [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--memory-mib N] [--backend cpu|auto|metal|vulkan|dx12|gl|cuda] [--device N]\nUse - for stdin/stdout. Output files must not exist. Only progressive 8-bit planar YUV 420/422/444 is supported.\nCrop is applied before reflections. Default backend: cpu. Frame/staging-buffer budget: 256 MiB. Use --list-devices to inspect GPU adapters. --then starts the next resident GPU stage (requires an explicit GPU backend); coordinates are relative to the previous stage output.";
@@ -136,11 +136,14 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         Box::new(File::open(&args[0])?)
     };
-    let input = BufReader::with_capacity(64 * 1024, input);
+    // Larger than 64 KiB reduces syscall chatter on 1080p Y4M; keep modest so
+    // the working set stays cache-friendly versus multi-MiB buffers.
+    const IO_BUF: usize = 256 * 1024;
+    let input = BufReader::with_capacity(IO_BUF, input);
     let stats = if args[1] == "-" {
         process_selected(
             input,
-            BufWriter::with_capacity(64 * 1024, io::stdout().lock()),
+            BufWriter::with_capacity(IO_BUF, io::stdout().lock()),
             &transforms,
             memory,
             options,
@@ -167,26 +170,38 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
         let (temp, file) = staged.ok_or("cannot create temporary output")?;
-        let mut writer = BufWriter::with_capacity(64 * 1024, file);
+        let mut writer = BufWriter::with_capacity(IO_BUF, file);
         let stats = process_selected(input, &mut writer, &transforms, memory, options)?;
         writer.flush()?;
-        // No-clobber atomic publication on filesystems supporting hard links.
-        fs::hard_link(&temp.0, output)?;
+        // Prefer hard link; rename when hard links are unavailable (see publish).
+        fvid::publish::publish_file(&temp.0, output)?;
         stats
     };
-    eprintln!(
-        "frames={} input_bytes={} output_bytes={} backend={} device={:?} controlled_memory_bytes={}",
-        stats.frames,
-        stats.input_bytes,
-        stats.output_bytes,
-        stats.backend,
-        stats.device_name,
-        stats.controlled_memory_bytes
-    );
+    if io::stderr().is_terminal() {
+        eprintln!(
+            "frames={} input_bytes={} output_bytes={} backend={} device={:?} controlled_memory_bytes={}",
+            stats.frames,
+            stats.input_bytes,
+            stats.output_bytes,
+            stats.backend,
+            stats.device_name,
+            stats.controlled_memory_bytes
+        );
+    }
     Ok(())
 }
 fn main() {
+    #[cfg(feature = "airbug")]
+    let _airbug = match fvid::airbug_runtime::install() {
+        Ok(runtime) => Some(runtime),
+        Err(e) => {
+            eprintln!("fvid: airbug init failed: {e}");
+            None
+        }
+    };
     if let Err(e) = run() {
+        #[cfg(feature = "airbug")]
+        fvid::airbug_runtime::capture_error(e.as_ref());
         eprintln!("fvid: {e}");
         std::process::exit(1);
     }

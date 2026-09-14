@@ -1,4 +1,6 @@
 /target/
+/target-cpu/
 /crates/*/target/
 /benchmarks/data/
+/benchmarks/show_data/
 __pycache__/

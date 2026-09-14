@@ -9,6 +9,12 @@ description = "Optional native libavformat adapter with checked editing contract
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 libc = "0.2"
+fvid-cuda = { path = "../fvid-cuda", optional = true }
+fvid-cpu = { path = "../fvid-cpu" }
+
+[features]
+default = []
+cuda-hw = ["dep:fvid-cuda"]
 
 [build-dependencies]
 bindgen = "0.72.1"

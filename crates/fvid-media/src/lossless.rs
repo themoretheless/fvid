@@ -91,6 +91,30 @@ fn drain_encoder(
         stats.video_packets += 1;
     }
 }
+
+fn send_encoder_frame(
+    encoder: &mut Codec,
+    output: &mut Output,
+    packet: &mut Packet,
+    index: usize,
+    frame: *mut AVFrame,
+    stats: &mut LosslessStats,
+) -> Result<()> {
+    loop {
+        let code = unsafe { avcodec_send_frame(encoder.0, frame) };
+        if code == AGAIN {
+            let before = stats.video_packets;
+            drain_encoder(encoder, output, packet, index, stats)?;
+            if stats.video_packets == before {
+                return Err("encoder stalled (EAGAIN with no packets)".into());
+            }
+            continue;
+        }
+        check(code, "send frame to encoder")?;
+        return Ok(());
+    }
+}
+
 #[derive(Clone, Copy)]
 struct CropStage {
     index: usize,
@@ -104,6 +128,8 @@ fn drain_decoder(
     encoder: &mut Codec,
     output: &mut Output,
     frame: &mut Frame,
+    compact: &mut [Frame; 8],
+    compact_i: &mut usize,
     packet: &mut Packet,
     stage: CropStage,
     stats: &mut LosslessStats,
@@ -115,6 +141,8 @@ fn drain_decoder(
         horizontal_flip,
         interval,
     } = stage;
+    let full_w = unsafe { (*decoder.0).width };
+    let full_h = unsafe { (*decoder.0).height };
     loop {
         // SAFETY: Decoder/frame are live and exclusively borrowed.
         let code = unsafe { avcodec_receive_frame(decoder.0, frame.0) };
@@ -127,8 +155,8 @@ fn drain_decoder(
         // before av_frame_apply_cropping adjusts views. It does not copy pixel payloads.
         unsafe {
             let f = &mut *frame.0;
-            if f.width != (*decoder.0).width
-                || f.height != (*decoder.0).height
+            if f.width != full_w
+                || f.height != full_h
                 || f.format != (*encoder.0).pix_fmt
                 || (f.width as usize) < crop.x + crop.width
                 || (f.height as usize) < crop.y + crop.height
@@ -150,6 +178,12 @@ fn drain_decoder(
                 }
                 f.pts = f.pts.checked_sub(start).ok_or("frame timestamp overflow")?;
             }
+            // Decoder PTS is in stream time_base; encoder may use 1/fps.
+            let src_tb = (*decoder.0).pkt_timebase;
+            let dst_tb = (*encoder.0).time_base;
+            if src_tb.num != dst_tb.num || src_tb.den != dst_tb.den {
+                f.pts = av_rescale_q(f.pts, src_tb, dst_tb);
+            }
             if f.flags & AV_FRAME_FLAG_INTERLACED as i32 != 0 {
                 return Err("interlaced crop is not qualified".into());
             }
@@ -161,29 +195,72 @@ fn drain_decoder(
                 av_frame_apply_cropping(frame.0, AV_FRAME_CROP_UNALIGNED as i32),
                 "apply exact crop view",
             )?;
-            if horizontal_flip {
-                horizontal_frame(frame.0)?;
-            }
             if vertical_flip {
                 flip_view(frame.0)?;
             }
-            check(avcodec_send_frame(encoder.0, frame.0), "send frame to FFV1")?;
+            // Pack cropped views so libx264 sees tight linesize like `-vf crop`.
+            // Hflip-only stays in-place (make_writable + SIMD) to avoid a second full copy.
+            let cropped = (*frame.0).width != full_w || (*frame.0).height != full_h;
+            let send = if cropped {
+                let i = *compact_i;
+                *compact_i = (i + 1) % compact.len();
+                let slot = &mut compact[i];
+                ensure_compact_frame(slot.0, frame.0)?;
+                if horizontal_flip {
+                    horizontal_frame(slot.0)?;
+                }
+                slot.0
+            } else if horizontal_flip {
+                horizontal_frame(frame.0)?;
+                frame.0
+            } else {
+                frame.0
+            };
+            // Drain only on encoder EAGAIN (inside send) so libx264 keeps depth.
+            send_encoder_frame(encoder, output, packet, index, send, stats)?;
             av_frame_unref(frame.0);
         }
         stats.video_frames += 1;
-        drain_encoder(encoder, output, packet, index, stats)?;
     }
 }
+
+/// Tightly-strided copy of the (possibly cropped) view into `dst`.
+unsafe fn ensure_compact_frame(dst: *mut AVFrame, src: *mut AVFrame) -> Result<()> {
+    unsafe {
+        let s = &*src;
+        let d = &mut *dst;
+        if d.data[0].is_null()
+            || d.width != s.width
+            || d.height != s.height
+            || d.format != s.format
+            || av_frame_is_writable(dst) == 0
+        {
+            av_frame_unref(dst);
+            d.format = s.format;
+            d.width = s.width;
+            d.height = s.height;
+            // Default align (0 → 32) matches FFmpeg filter frames.
+            check(av_frame_get_buffer(dst, 0), "alloc compact encode frame")?;
+        }
+        check(av_frame_copy(dst, src), "compact crop copy")?;
+        check(av_frame_copy_props(dst, src), "compact crop props")?;
+    }
+    Ok(())
+}
+
 /// Reverse pixel groups in writable software planes. Decoder reference frames
 /// are protected by av_frame_make_writable's copy-on-write contract.
 unsafe fn horizontal_frame(frame: *mut AVFrame) -> Result<()> {
     // SAFETY: Caller owns the live decoded frame. Geometry and row extents are
     // validated before pointer arithmetic. Swapped groups never overlap.
     unsafe {
-        check(
-            av_frame_make_writable(frame),
-            "make horizontal-filter frame writable",
-        )?;
+        // Skip COW when the buffer is already exclusively owned.
+        if av_frame_is_writable(frame) == 0 {
+            check(
+                av_frame_make_writable(frame),
+                "make horizontal-filter frame writable",
+            )?;
+        }
         let f = &mut *frame;
         let desc = av_pix_fmt_desc_get(f.format);
         if desc.is_null() || f.width <= 0 || f.height <= 0 {
@@ -218,11 +295,10 @@ unsafe fn horizontal_frame(frame: *mut AVFrame) -> Result<()> {
                 (f.width as usize).div_ceil(1usize << if chroma { d.log2_chroma_w } else { 0 });
             let height =
                 (f.height as usize).div_ceil(1usize << if chroma { d.log2_chroma_h } else { 0 });
+            let stride = f.linesize[plane].unsigned_abs() as usize;
             if step == 0
                 || f.data[plane].is_null()
-                || width
-                    .checked_mul(step)
-                    .is_none_or(|bytes| bytes > f.linesize[plane].unsigned_abs() as usize)
+                || width.checked_mul(step).is_none_or(|bytes| bytes > stride)
             {
                 return Err("invalid horizontal-filter row extent".into());
             }
@@ -231,13 +307,9 @@ unsafe fn horizontal_frame(frame: *mut AVFrame) -> Result<()> {
                     .checked_mul(f.linesize[plane] as isize)
                     .ok_or("row offset overflow")?;
                 let data = f.data[plane].offset(offset);
-                for x in 0..width / 2 {
-                    ptr::swap_nonoverlapping(
-                        data.add(x * step),
-                        data.add((width - 1 - x) * step),
-                        step,
-                    );
-                }
+                let row_bytes = width * step;
+                let slice = std::slice::from_raw_parts_mut(data, row_bytes);
+                fvid_cpu::hflip_row(slice, width, step);
             }
         }
     }
@@ -572,8 +644,18 @@ pub fn transcode(
         (*encoder.0).width = crop.width as i32;
         (*encoder.0).height = crop.height as i32;
         (*encoder.0).pix_fmt = format;
-        (*encoder.0).time_base = s.time_base;
-        (*encoder.0).framerate = s.avg_frame_rate;
+        // ffmpeg CLI uses 1/fps as encode time_base; keep stream tb only as fallback.
+        let fr = s.avg_frame_rate;
+        if fr.num > 0 && fr.den > 0 {
+            (*encoder.0).framerate = fr;
+            (*encoder.0).time_base = AVRational {
+                num: fr.den,
+                den: fr.num,
+            };
+        } else {
+            (*encoder.0).time_base = s.time_base;
+            (*encoder.0).framerate = fr;
+        }
         (*encoder.0).sample_aspect_ratio = p.sample_aspect_ratio;
         (*encoder.0).color_range = p.color_range;
         (*encoder.0).color_primaries = p.color_primaries;
@@ -628,10 +710,22 @@ pub fn transcode(
         &input,
         &selected,
         Some((video, parameters.0, tb)),
-    )?;
+    )?
+    .without_interleave();
     let mut packet = Packet::new()?;
     let mut encoded = Packet::new()?;
     let mut frame = Frame::new()?;
+    let mut compact = [
+        Frame::new()?,
+        Frame::new()?,
+        Frame::new()?,
+        Frame::new()?,
+        Frame::new()?,
+        Frame::new()?,
+        Frame::new()?,
+        Frame::new()?,
+    ];
+    let mut compact_i = 0usize;
     let mut stats = LosslessStats {
         backend: "native libavcodec + Fvid crop view",
         video_frames: 0,
@@ -659,6 +753,8 @@ pub fn transcode(
                 &mut encoder,
                 &mut output,
                 &mut frame,
+                &mut compact,
+                &mut compact_i,
                 &mut encoded,
                 CropStage {
                     index: mapped,
@@ -693,6 +789,8 @@ pub fn transcode(
         &mut encoder,
         &mut output,
         &mut frame,
+        &mut compact,
+        &mut compact_i,
         &mut encoded,
         CropStage {
             index: mapped,
@@ -704,10 +802,22 @@ pub fn transcode(
         &mut stats,
     )?;
     // SAFETY: Decoder has finished; no new frames follow the encoder drain signal.
-    check(
-        unsafe { avcodec_send_frame(encoder.0, ptr::null()) },
-        "drain encoder",
-    )?;
+    loop {
+        let code = unsafe { avcodec_send_frame(encoder.0, ptr::null()) };
+        if code == AGAIN {
+            let before = stats.video_packets;
+            drain_encoder(&mut encoder, &mut output, &mut encoded, mapped, &mut stats)?;
+            if stats.video_packets == before {
+                return Err("encoder flush stalled".into());
+            }
+            continue;
+        }
+        if code == EOF {
+            break;
+        }
+        check(code, "drain encoder")?;
+        break;
+    }
     drain_encoder(&mut encoder, &mut output, &mut encoded, mapped, &mut stats)?;
     if stats.video_frames == 0 {
         return Err("no video frames decoded".into());

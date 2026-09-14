@@ -6,7 +6,8 @@ description = "Optional CUDA compute adapter for Fvid planar byte transforms"
 license = "MIT"
 
 [target.'cfg(any(target_os = "linux", target_os = "windows"))'.dependencies]
-cudarc = { version = "=0.19.9", default-features = false, features = ["std", "driver", "nvrtc", "dynamic-loading", "cuda-12000"] }
+# CUDA 13 bindings load nvrtc64_130_0.dll / libnvrtc.so.13 (required for Blackwell / sm_120).
+cudarc = { version = "=0.19.9", default-features = false, features = ["std", "driver", "nvrtc", "dynamic-loading", "cuda-13000"] }
 
 [lints.rust]
 unsafe_op_in_unsafe_fn = "deny"

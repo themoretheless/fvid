@@ -1,0 +1,48 @@
+name: Windows
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      cuda_smoke:
+        description: "Run CUDA ignored tests (requires self-hosted NVIDIA runner)"
+        type: boolean
+        default: false
+
+jobs:
+  msvc:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.98.1
+          components: clippy
+      - name: Check default features
+        run: cargo check --all-targets
+      - name: Test default features
+        run: cargo test --all-targets
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+      - name: CPU-only
+        run: cargo test --no-default-features
+
+  cuda-smoke:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.cuda_smoke }}
+    runs-on: [self-hosted, windows, nvidia]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.98.1
+      - name: CUDA PATH
+        shell: pwsh
+        run: .\\scripts\\use_cuda_windows.ps1
+      - name: Build release
+        run: cargo build --release
+      - name: CUDA crate hardware tests
+        run: cargo test --manifest-path crates/fvid-cuda/Cargo.toml -- --ignored --nocapture
+      - name: Resident CUDA
+        run: cargo test --test resident cuda_resident_chain -- --ignored --nocapture

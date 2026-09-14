@@ -7,10 +7,10 @@
 | Backend | Реализация | Целевая платформа | Установленный факт |
 |---|---|---|---|
 | `metal` | wgpu → Metal, integer-texture render pipeline | macOS | Выполнение на Apple M4 Max; 34 дифференциальных случая |
-| `dx12` / `directx` / `d3d12` | wgpu → Direct3D 12, тот же shader | Windows | Cross-target compilation; нужен запуск на Windows GPU |
+| `dx12` / `directx` / `d3d12` | wgpu → Direct3D 12, тот же shader | Windows | Выполнение на Windows + NVIDIA (RTX); см. benchmarks |
 | `vulkan` | wgpu → Vulkan, тот же shader | Linux, Windows; Apple через MoltenVK | Cross-target compilation; нужен запуск на Vulkan GPU |
 | `gl` / `opengl` / `gles` | wgpu → OpenGL/GLES, render pipeline без compute/storage buffers | Linux, Windows; Apple через ANGLE | Cross-target compilation; нужен запуск на GL/GLES GPU |
-| `cuda` | cudarc → CUDA Driver + NVRTC, CUDA kernel | Linux, Windows с NVIDIA | Cross-target compilation и проверки ABI; нужен запуск на NVIDIA |
+| `cuda` | cudarc → CUDA Driver + NVRTC 13, CUDA kernel | Linux, Windows с NVIDIA | Выполнение на Windows + NVIDIA (RTX 5090 / sm_120); Linux — компиляция + тот же код |
 | `cpu` | Независимый safe-Rust проход | Проверен на macOS | Контрольный путь и default |
 | `auto` | Выбор доступного backend при подготовке задания | Те же платформы | На M4 Max выбирает Metal; fallback CPU выводится в диагностике |
 
@@ -34,7 +34,7 @@ cargo build --release
 
 На Apple OpenGL-путь wgpu требует **ANGLE/EGL** и feature `angle`; это не обёртка над системным legacy OpenGL. Vulkan на Apple требует **MoltenVK** и feature `vulkan-portability`. Одного Cargo feature недостаточно без доступного runtime. Эти библиотеки автоматически не устанавливаются.
 
-CUDA подключает драйвер и NVRTC динамически; SDK не требуется при сборке. Во время работы нужны NVIDIA GPU, совместимый драйвер и CUDA 12 NVRTC в стандартном пути загрузчика. Ошибки отсутствующего runtime, несовместимой версии compiler/driver и неизвестного device возвращаются пользователю. [Детали CUDA](../crates/fvid-cuda/README.md).
+CUDA подключает драйвер и NVRTC динамически; SDK не требуется при сборке Rust. Во время работы нужны NVIDIA GPU, совместимый драйвер и **CUDA 13 NVRTC** (`nvrtc64_130_0.dll` / `libnvrtc.so.13`) в пути загрузчика. На Windows добавьте `CUDA\v13.*\bin` в `PATH`. Ошибки отсутствующего runtime, несовместимой версии compiler/driver и неизвестного device возвращаются пользователю. [Детали CUDA](../crates/fvid-cuda/README.md).
 
 В Rust API старый `process` сохраняет CPU-семантику. Явный выбор:
 
@@ -57,7 +57,7 @@ Texture width увеличивается при необходимости, чт
 
 Device, queue, pipeline, bindings, input/output textures и upload/readback buffers создаются один раз на поток. В каждом кадре upload mapping → copy to texture → GPU render → copy to readback → CPU read. Map/submit/poll упорядочивают доступ. Буфер не читается до завершения GPU; mapped view уничтожается до unmap. Ошибки validation/OOM/internal и device-lost возвращаются через диагностику; map/poll имеет timeout. Таймаут ожидания не является обещанием принудительно остановить зависший драйвер.
 
-**CUDA:** input/output/parameter buffers также переиспользуются. Один поток CUDA упорядочивает upload → kernel → download; synchronize завершает работу до возврата. Каждый kernel thread пишет свой output byte. Unsafe ограничен небольшим отдельным адаптером с документированными условиями; корневой crate по-прежнему запрещает unsafe. Это не делает весь транзитивный стек memory-safe: wgpu/драйверы и CUDA содержат собственные native/unsafe границы.
+**CUDA:** input/output/parameter device buffers and pinned host staging are reused. A process-wide pool keeps one `CudaContext` and loaded PTX modules per device ordinal (warm for MCP / repeated jobs in-process; one-shot CLI still pays driver/context once). One CUDA stream orders pinned→device upload → kernel → device→pinned download; synchronize completes work before returning. Each kernel thread writes its output byte. Unsafe is limited to the adapter (driver probes, pinned alloc, kernel launch); the root crate still forbids unsafe.
 
 Y4M streaming API возвращает CPU-байты после каждого обработанного кадра. Новый `GpuPipeline` и CLI `--then` удерживают промежуточные кадры между отдельными фильтрами на GPU; в Rust API финальный download явный и необязательный. [Контракт resident-цепочки и проверки](GPU_RESIDENT.md). Аппаратный decode→filter→encode без readback, совместное использование поверхностей с внешним кодеком и перекрытие нескольких кадров ещё не реализованы.
 
@@ -66,14 +66,14 @@ Y4M streaming API возвращает CPU-байты после каждого 
 `--memory-mib` проверяет контролируемые frame/staging allocations **до их создания**:
 
 - CPU после добавления FrameView: `input_len`; при hflip — `input_len + output_len`.
-- CUDA: `2 × (input_len + output_len) + 128`.
+- CUDA: `5 × (input_len + output_len) + 128` (caller host + two pinned/device slots for depth-2 overlap).
 - wgpu: CPU input/output + две padded input-sized allocations (texture/upload) + две padded output-sized allocations (texture/readback) + 128 bytes uniform.
 
 Эти формулы GPU относятся к одному этапу. Для `--then` учитываются также все промежуточные device frames и uniforms, без промежуточных host/staging кадров; полная формула приведена в GPU_RESIDENT.md.
 
 Это payload budget, не гарантированный RSS/VRAM limit: driver allocations, pipeline compilation, internal command buffers и I/O overhead отдельно. Размеры проверяются также против adapter limits. На unified-memory GPU модель намеренно учитывает логические allocations, даже если физические страницы могут иметь особенности размещения.
 
-GPU-ошибка не публикует частичный output file; сохраняется существующее поведение временного файла и no-clobber hard-link публикации. Для stdout частичный поток возможен. Crash durability и произвольное восстановление GPU-контекста не обещаются.
+GPU-ошибка не публикует частичный output file; сохраняется существующее поведение временного файла и no-clobber публикации (hard link, при недоступности — rename). Для stdout частичный поток возможен. Crash durability и произвольное восстановление GPU-контекста не обещаются.
 
 ## Проверки и воспроизведение
 
