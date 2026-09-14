@@ -1,0 +1,553 @@
+{
+  "created_utc": "2026-09-05T06:34:05.935875+00:00",
+  "correctness_cases": 18,
+  "method": "CPU Y4M; warm cached file input to null sink; includes startup and serialization; 1 warmup, 11 seeded interleaved rounds; FFmpeg single-thread; no codec/GPU or disk durability claims.",
+  "ffmpeg": "ffmpeg version 9.0.1 Copyright (c) 2000-2026 the FFmpeg developers",
+  "baseline_sha256": "e406e9c917e47bd495baccb1de19f2231a1de03ee4c0428da5a1e391f1f3a902",
+  "binary_sha256": "7b42844b85acd94f706a270614940d497892218139fba7acb2fcb507931f5183",
+  "source_sha256": {
+    "src/lib.rs": "484d40e44e5b0676163c8c83f50a6f529bf323e31dce7f9d074424b96fe90569",
+    "src/backend.rs": "9bc74dc8a5e47584886c7c7e2c13c2ca14f2d2519235c6af98b642a4ab36639c",
+    "scripts/benchmark_inplace.py": "1d4ca0ca69be501d0322bfa4857cb0b471bfc496510b7533ba473f4d5a1c955b"
+  },
+  "results": [
+    {
+      "resolution": "1920x1080",
+      "frames": 120,
+      "case": "hflip",
+      "input_sha256": "25f54a3e51c51682f665b4fbb3ec88e5d2bc8d767c1a506dac18fc6b51ffee59",
+      "commands": {
+        "before": [
+          "/private/tmp/fvid-before-inplace",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/1920x1080-120-yuv420p.y4m",
+          "-",
+          "--hflip"
+        ],
+        "after": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/1920x1080-120-yuv420p.y4m",
+          "-",
+          "--hflip"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-filter_threads",
+          "1",
+          "-threads",
+          "1",
+          "-i",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/1920x1080-120-yuv420p.y4m",
+          "-vf",
+          "hflip",
+          "-threads",
+          "1",
+          "-c:v",
+          "rawvideo",
+          "-pix_fmt",
+          "yuv420p",
+          "-f",
+          "yuv4mpegpipe",
+          "-"
+        ]
+      },
+      "samples_ms": {
+        "before": [
+          54.137625,
+          53.9575,
+          53.594625,
+          54.200584,
+          53.517125,
+          54.197667,
+          54.214208,
+          54.793167,
+          54.478958,
+          54.159125,
+          54.18725
+        ],
+        "after": [
+          53.691833,
+          53.2945,
+          52.769291,
+          53.475875,
+          53.244375,
+          53.199,
+          54.529625,
+          52.976333,
+          54.489334,
+          52.700584,
+          52.634875
+        ],
+        "ffmpeg_1thread": [
+          117.12275,
+          117.251208,
+          117.926625,
+          117.832958,
+          116.781292,
+          117.896542,
+          117.764,
+          119.821917,
+          134.660333,
+          118.096833,
+          117.116916
+        ]
+      },
+      "median_ms": {
+        "before": 54.18725,
+        "after": 53.244375,
+        "ffmpeg_1thread": 117.832958
+      }
+    },
+    {
+      "resolution": "1920x1080",
+      "frames": 120,
+      "case": "crop_hflip_vflip",
+      "input_sha256": "25f54a3e51c51682f665b4fbb3ec88e5d2bc8d767c1a506dac18fc6b51ffee59",
+      "commands": {
+        "before": [
+          "/private/tmp/fvid-before-inplace",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/1920x1080-120-yuv420p.y4m",
+          "-",
+          "--crop",
+          "240:134:960:540",
+          "--hflip",
+          "--vflip"
+        ],
+        "after": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/1920x1080-120-yuv420p.y4m",
+          "-",
+          "--crop",
+          "240:134:960:540",
+          "--hflip",
+          "--vflip"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-filter_threads",
+          "1",
+          "-threads",
+          "1",
+          "-i",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/1920x1080-120-yuv420p.y4m",
+          "-vf",
+          "crop=960:540:240:134,hflip,vflip",
+          "-threads",
+          "1",
+          "-c:v",
+          "rawvideo",
+          "-pix_fmt",
+          "yuv420p",
+          "-f",
+          "yuv4mpegpipe",
+          "-"
+        ]
+      },
+      "samples_ms": {
+        "before": [
+          41.407125,
+          41.64775,
+          40.900666,
+          42.041375,
+          41.090625,
+          40.879042,
+          40.820459,
+          42.111209,
+          40.954625,
+          41.628833,
+          40.912875
+        ],
+        "after": [
+          41.179708,
+          41.831709,
+          41.371375,
+          41.658917,
+          41.368875,
+          41.252417,
+          40.801458,
+          40.825625,
+          42.496417,
+          40.974375,
+          40.836708
+        ],
+        "ffmpeg_1thread": [
+          50.647875,
+          50.33175,
+          51.134042,
+          50.158459,
+          50.464542,
+          50.038375,
+          50.569208,
+          57.132625,
+          51.014083,
+          50.589,
+          50.005333
+        ]
+      },
+      "median_ms": {
+        "before": 41.090625,
+        "after": 41.252417,
+        "ffmpeg_1thread": 50.569208
+      }
+    },
+    {
+      "resolution": "1920x1080",
+      "frames": 120,
+      "case": "copy",
+      "input_sha256": "25f54a3e51c51682f665b4fbb3ec88e5d2bc8d767c1a506dac18fc6b51ffee59",
+      "commands": {
+        "before": [
+          "/private/tmp/fvid-before-inplace",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/1920x1080-120-yuv420p.y4m",
+          "-"
+        ],
+        "after": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/1920x1080-120-yuv420p.y4m",
+          "-"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-filter_threads",
+          "1",
+          "-threads",
+          "1",
+          "-i",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/1920x1080-120-yuv420p.y4m",
+          "-threads",
+          "1",
+          "-c:v",
+          "rawvideo",
+          "-pix_fmt",
+          "yuv420p",
+          "-f",
+          "yuv4mpegpipe",
+          "-"
+        ]
+      },
+      "samples_ms": {
+        "before": [
+          47.895833,
+          48.018792,
+          47.390333,
+          47.172583,
+          47.340708,
+          47.40525,
+          47.112125,
+          47.399417,
+          47.966292,
+          47.536334,
+          49.201083
+        ],
+        "after": [
+          47.860375,
+          48.309,
+          48.603625,
+          46.918334,
+          46.940042,
+          46.951625,
+          47.4045,
+          47.509416,
+          47.45675,
+          47.425958,
+          47.230541
+        ],
+        "ffmpeg_1thread": [
+          39.571667,
+          39.648958,
+          39.478625,
+          39.536125,
+          39.385375,
+          39.649125,
+          39.288834,
+          39.306,
+          39.45,
+          39.433292,
+          39.811
+        ]
+      },
+      "median_ms": {
+        "before": 47.40525,
+        "after": 47.425958,
+        "ffmpeg_1thread": 39.478625
+      }
+    },
+    {
+      "resolution": "3840x2160",
+      "frames": 60,
+      "case": "hflip",
+      "input_sha256": "66d940f0aa5ffb77310f37e4d46ca8bb3eb66d20759fa42ed84039024758a1dd",
+      "commands": {
+        "before": [
+          "/private/tmp/fvid-before-inplace",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/3840x2160-60-yuv420p.y4m",
+          "-",
+          "--hflip"
+        ],
+        "after": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/3840x2160-60-yuv420p.y4m",
+          "-",
+          "--hflip"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-filter_threads",
+          "1",
+          "-threads",
+          "1",
+          "-i",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/3840x2160-60-yuv420p.y4m",
+          "-vf",
+          "hflip",
+          "-threads",
+          "1",
+          "-c:v",
+          "rawvideo",
+          "-pix_fmt",
+          "yuv420p",
+          "-f",
+          "yuv4mpegpipe",
+          "-"
+        ]
+      },
+      "samples_ms": {
+        "before": [
+          91.757042,
+          91.587167,
+          92.021041,
+          91.774167,
+          91.766541,
+          93.45025,
+          91.720209,
+          92.2835,
+          92.199125,
+          91.789458,
+          91.479125
+        ],
+        "after": [
+          88.762208,
+          88.658834,
+          88.512042,
+          88.739,
+          88.794416,
+          90.198833,
+          90.038625,
+          88.992834,
+          89.409458,
+          89.075667,
+          89.033167
+        ],
+        "ffmpeg_1thread": [
+          219.619459,
+          219.71025,
+          222.473584,
+          220.443625,
+          220.445625,
+          221.883459,
+          226.835792,
+          222.920208,
+          225.098125,
+          220.08025,
+          219.537333
+        ]
+      },
+      "median_ms": {
+        "before": 91.774167,
+        "after": 88.992834,
+        "ffmpeg_1thread": 220.445625
+      }
+    },
+    {
+      "resolution": "3840x2160",
+      "frames": 60,
+      "case": "crop_hflip_vflip",
+      "input_sha256": "66d940f0aa5ffb77310f37e4d46ca8bb3eb66d20759fa42ed84039024758a1dd",
+      "commands": {
+        "before": [
+          "/private/tmp/fvid-before-inplace",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/3840x2160-60-yuv420p.y4m",
+          "-",
+          "--crop",
+          "480:270:1920:1080",
+          "--hflip",
+          "--vflip"
+        ],
+        "after": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/3840x2160-60-yuv420p.y4m",
+          "-",
+          "--crop",
+          "480:270:1920:1080",
+          "--hflip",
+          "--vflip"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-filter_threads",
+          "1",
+          "-threads",
+          "1",
+          "-i",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/3840x2160-60-yuv420p.y4m",
+          "-vf",
+          "crop=1920:1080:480:270,hflip,vflip",
+          "-threads",
+          "1",
+          "-c:v",
+          "rawvideo",
+          "-pix_fmt",
+          "yuv420p",
+          "-f",
+          "yuv4mpegpipe",
+          "-"
+        ]
+      },
+      "samples_ms": {
+        "before": [
+          65.527166,
+          65.640667,
+          69.094417,
+          66.940292,
+          65.946791,
+          65.85925,
+          64.747875,
+          66.243709,
+          66.950875,
+          65.80225,
+          65.950917
+        ],
+        "after": [
+          65.64775,
+          65.6345,
+          65.022667,
+          66.491167,
+          66.485375,
+          65.96725,
+          65.909625,
+          65.78275,
+          65.577792,
+          65.2705,
+          67.676625
+        ],
+        "ffmpeg_1thread": [
+          92.635083,
+          91.4215,
+          93.643042,
+          95.514125,
+          94.029792,
+          93.646625,
+          92.370709,
+          93.266959,
+          93.865791,
+          92.108667,
+          93.307209
+        ]
+      },
+      "median_ms": {
+        "before": 65.946791,
+        "after": 65.78275,
+        "ffmpeg_1thread": 93.307209
+      }
+    },
+    {
+      "resolution": "3840x2160",
+      "frames": 60,
+      "case": "copy",
+      "input_sha256": "66d940f0aa5ffb77310f37e4d46ca8bb3eb66d20759fa42ed84039024758a1dd",
+      "commands": {
+        "before": [
+          "/private/tmp/fvid-before-inplace",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/3840x2160-60-yuv420p.y4m",
+          "-"
+        ],
+        "after": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/3840x2160-60-yuv420p.y4m",
+          "-"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-filter_threads",
+          "1",
+          "-threads",
+          "1",
+          "-i",
+          "/Users/themoretheless/Documents/ChatGPT/fvid/benchmarks/data/3840x2160-60-yuv420p.y4m",
+          "-threads",
+          "1",
+          "-c:v",
+          "rawvideo",
+          "-pix_fmt",
+          "yuv420p",
+          "-f",
+          "yuv4mpegpipe",
+          "-"
+        ]
+      },
+      "samples_ms": {
+        "before": [
+          79.315875,
+          77.917333,
+          77.90775,
+          78.195417,
+          77.823541,
+          77.779917,
+          78.611375,
+          77.91075,
+          77.105625,
+          76.845459,
+          77.115958
+        ],
+        "after": [
+          78.333125,
+          77.53275,
+          77.28075,
+          77.361667,
+          77.51675,
+          77.580709,
+          77.482333,
+          78.250583,
+          78.410917,
+          76.713042,
+          77.350667
+        ],
+        "ffmpeg_1thread": [
+          63.9335,
+          65.21225,
+          64.47725,
+          64.89125,
+          63.108959,
+          64.437584,
+          63.786417,
+          63.788958,
+          63.676458,
+          62.9285,
+          63.173666
+        ]
+      },
+      "median_ms": {
+        "before": 77.90775,
+        "after": 77.51675,
+        "ffmpeg_1thread": 63.788958
+      }
+    }
+  ]
+}

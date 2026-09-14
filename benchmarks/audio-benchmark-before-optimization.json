@@ -1,0 +1,151 @@
+{
+  "created_utc": "2026-09-05T00:28:59.328411+00:00",
+  "scope": "30-second stereo 48kHz audio to WAV, PCM precision matched; whole CLI cached-input/file-output without fsync, 5 randomized runs after exact sample equality warmup.",
+  "results": [
+    {
+      "codec": "aac",
+      "pcm": "pcm_f32le",
+      "sample_equality": true,
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "decode-audio",
+          "/private/tmp/fvid-audio-bench-30s77a7d/source.m4a",
+          "/private/tmp/fvid-audio-bench-30s77a7d/out.wav"
+        ],
+        "ffmpeg": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-audio-bench-30s77a7d/source.m4a",
+          "-c:a",
+          "pcm_f32le",
+          "/private/tmp/fvid-audio-bench-30s77a7d/out.wav"
+        ]
+      },
+      "samples_ms": {
+        "fvid": [
+          37.267333,
+          36.754834,
+          36.415125,
+          36.812458,
+          37.663292
+        ],
+        "ffmpeg": [
+          37.268542,
+          37.131875,
+          38.474625,
+          37.533708,
+          37.084958
+        ]
+      },
+      "median_ms": {
+        "fvid": 36.812458,
+        "ffmpeg": 37.268542
+      }
+    },
+    {
+      "codec": "libmp3lame",
+      "pcm": "pcm_f32le",
+      "sample_equality": true,
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "decode-audio",
+          "/private/tmp/fvid-audio-bench-30s77a7d/source.mp3",
+          "/private/tmp/fvid-audio-bench-30s77a7d/out.wav"
+        ],
+        "ffmpeg": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-audio-bench-30s77a7d/source.mp3",
+          "-c:a",
+          "pcm_f32le",
+          "/private/tmp/fvid-audio-bench-30s77a7d/out.wav"
+        ]
+      },
+      "samples_ms": {
+        "fvid": [
+          41.405167,
+          40.759583,
+          42.01175,
+          40.943167,
+          41.42575
+        ],
+        "ffmpeg": [
+          42.868958,
+          40.513667,
+          41.328875,
+          40.305833,
+          39.872083
+        ]
+      },
+      "median_ms": {
+        "fvid": 41.405167,
+        "ffmpeg": 40.513667
+      }
+    },
+    {
+      "codec": "flac",
+      "pcm": "pcm_s16le",
+      "sample_equality": true,
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "decode-audio",
+          "/private/tmp/fvid-audio-bench-30s77a7d/source.flac",
+          "/private/tmp/fvid-audio-bench-30s77a7d/out.wav"
+        ],
+        "ffmpeg": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-audio-bench-30s77a7d/source.flac",
+          "-c:a",
+          "pcm_s16le",
+          "/private/tmp/fvid-audio-bench-30s77a7d/out.wav"
+        ]
+      },
+      "samples_ms": {
+        "fvid": [
+          33.180583,
+          33.234209,
+          32.35575,
+          32.650416,
+          33.0275
+        ],
+        "ffmpeg": [
+          34.079583,
+          34.151709,
+          34.580458,
+          34.707125,
+          34.764667
+        ]
+      },
+      "median_ms": {
+        "fvid": 33.0275,
+        "ffmpeg": 34.580458
+      }
+    }
+  ],
+  "binary_sha256": "254ec7eeca61387ea96ef9e36a14bc0c40ebd75e551211d893475689e0f9dec5",
+  "source_sha256": {
+    "crates/fvid-media/src/edit.rs": "7176935bf00100342e0bbbfe954fa99b078e229a3208682cb140792baa23c575",
+    "crates/fvid-media/src/lib.rs": "0637183cd09ff2b0352147e91c5474042700719583674c81191255cf66c82f8c",
+    "crates/fvid-media/src/pcm.rs": "de2e6187343079b6324593a6ccc210ddccb30b1df46f72c521eabd4c8ee04025",
+    "crates/fvid-media/src/audio.rs": "fcefc272617bdd8b7b4da2045bac0bb7d2ac30422e3d27bce450b45504c7a7e3",
+    "crates/fvid-media/src/lossless.rs": "cde625fd0aac088a92f5afd94a60c61629df0dced9e96b8bf9562350a5979c45",
+    "src/media_cli.rs": "6b5d82ce9e9680f26347522dd04d92f42dc673c3a090ed35db4394fb05c37158",
+    "scripts/benchmark_audio.py": "a9ba4acbbf08febe58f5a741e103b950819884163dd8648e731efd6a480162b9"
+  }
+}

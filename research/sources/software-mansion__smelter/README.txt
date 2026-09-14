@@ -1,0 +1,40 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="tools/assets/smelter-logo-transparent.svg">
+  <source media="(prefers-color-scheme: light)" srcset="tools/assets/smelter-logo-background.svg">
+  <img width="400" alt="Smelter" src="tools/assets/smelter-logo-background.svg">
+</picture>
+
+<br>
+
+**[Documentation](https://smelter.dev/docs)** | **[Discord](https://discord.gg/Cxj3rzTTag)**
+
+[![Ad](https://revive-adserver.swmansion.com/www/images/zone-gh-smelter-1?n=1)](https://revive-adserver.swmansion.com/www/delivery/ck.php?zoneid=zone-gh-smelter-1&n=1)
+[![Ad](https://revive-adserver.swmansion.com/www/images/zone-gh-smelter-2?n=1)](https://revive-adserver.swmansion.com/www/delivery/ck.php?zoneid=zone-gh-smelter-2&n=1)
+[![Ad](https://revive-adserver.swmansion.com/www/images/zone-gh-smelter-3?n=1)](https://revive-adserver.swmansion.com/www/delivery/ck.php?zoneid=zone-gh-smelter-3&n=1)
+
+Smelter is a toolkit for real-time, low-latency, programmable video and audio composition.
+
+With Smelter, you can:
+- Combine multimedia from different sources into a single video or live stream
+- Enrich your content with text, custom shaders, and embedded websites
+- Do it all effortlessly with ready-to-use React components
+
+<br>
+
+<div align="left">
+  <image width="840" src="https://github.com/user-attachments/assets/892c1de4-57ca-4858-9f7d-a040aaf0e695"></image>
+</div>
+
+## Where to start?
+
+Check out our [Getting Started](https://smelter.dev/docs) section, or jump right into [the set of guides](https://www.smelter.dev/ts-sdk/guides/quick-start/) we've prepared.
+
+## Looking for `gpu-video`?
+
+Our open-source hardware video coding library, `gpu-video` is located in the [`gpu-video`](https://github.com/software-mansion/smelter/tree/master/gpu-video) subfolder of this repository.
+
+## Smelter is created by Software Mansion
+
+<a href="https://swmansion.com"><img width="150" height="80" alt="Software Mansion" src="https://github.com/user-attachments/assets/cacd6185-78b0-4e76-8767-016d6389bb2b" /></a>
+
+Since 2012, [Software Mansion](https://swmansion.com) is a software agency with experience in building web and mobile apps as well as complex multimedia solutions. We are Core React Native Contributors and experts in live streaming and broadcasting technologies. We can help you build your next dream product – [Hire us](https://swmansion.com/contact/projects?utm_source=smelter&utm_medium=readme).

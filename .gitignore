@@ -1,0 +1,4 @@
+/target/
+/crates/*/target/
+/benchmarks/data/
+__pycache__/

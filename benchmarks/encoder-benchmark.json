@@ -1,0 +1,76 @@
+{
+  "created_utc": "2026-09-05T00:23:56.988199+00:00",
+  "scope": "60 720p input frames, crop to 640x360 and hflip, libx264 CRF0 preset fast, MP4 output. Whole CLI cached-input/file-output without fsync, 5 randomized runs after pixel-equality warmup. No claim about lossy quality/performance or all encoders.",
+  "commands": {
+    "fvid": [
+      "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+      "media",
+      "transcode",
+      "/private/tmp/fvid-encoder-bench-4uziv2gt/source.mp4",
+      "/private/tmp/fvid-encoder-bench-4uziv2gt/output.mp4",
+      "--encoder",
+      "libx264",
+      "--encoder-option",
+      "crf=0",
+      "--encoder-option",
+      "preset=fast",
+      "--crop",
+      "2:2:640:360",
+      "--hflip"
+    ],
+    "ffmpeg": [
+      "ffmpeg",
+      "-nostdin",
+      "-v",
+      "error",
+      "-i",
+      "/private/tmp/fvid-encoder-bench-4uziv2gt/source.mp4",
+      "-an",
+      "-vf",
+      "crop=640:360:2:2:exact=1,hflip",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "0",
+      "-preset",
+      "fast",
+      "-pix_fmt",
+      "yuv420p",
+      "/private/tmp/fvid-encoder-bench-4uziv2gt/output.mp4"
+    ]
+  },
+  "decoded_equality": true,
+  "samples_ms": {
+    "fvid": [
+      47.132084,
+      46.090709,
+      46.083667,
+      46.741791,
+      46.620958
+    ],
+    "ffmpeg": [
+      51.753334,
+      50.672666,
+      51.17475,
+      51.825125,
+      51.167667
+    ]
+  },
+  "median_ms": {
+    "fvid": 46.620958,
+    "ffmpeg": 51.17475
+  },
+  "output_bytes": {
+    "fvid": 186389,
+    "ffmpeg": 186378
+  },
+  "binary_sha256": "a7bebeccf27f913c2f2e555adfb2bbd6084cb35be0fea1a747e88e7d1f31f4d5",
+  "source_sha256": {
+    "crates/fvid-media/src/edit.rs": "7176935bf00100342e0bbbfe954fa99b078e229a3208682cb140792baa23c575",
+    "crates/fvid-media/src/lib.rs": "8ed6327857107ae574a964e7c96359b576704e0e19edf9b62756e161fea986c5",
+    "crates/fvid-media/src/pcm.rs": "de2e6187343079b6324593a6ccc210ddccb30b1df46f72c521eabd4c8ee04025",
+    "crates/fvid-media/src/lossless.rs": "ab0a99daa9412131cb345501888ccf209dcb22321b522b3c0338537766cb3211",
+    "src/media_cli.rs": "af5bb54f7cd5138f6dfec2be722e1bea17fcb7b6f3a0e2e25aaa2d0ac262c01a",
+    "scripts/benchmark_encoder.py": "91d812ecc4daec68bde21c3ff1ff626cd4ce54a93843fafb904cb19c592e6575"
+  }
+}

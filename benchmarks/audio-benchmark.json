@@ -1,0 +1,252 @@
+{
+  "created_utc": "2026-09-05T05:56:21.759416+00:00",
+  "scope": "120-second stereo 48kHz audio to WAV, PCM precision matched; whole CLI cached-input/file-output without fsync, 11 randomized runs after exact sample equality warmup.",
+  "baseline_sha256": "254ec7eeca61387ea96ef9e36a14bc0c40ebd75e551211d893475689e0f9dec5",
+  "results": [
+    {
+      "codec": "aac",
+      "pcm": "pcm_f32le",
+      "sample_equality": true,
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "decode-audio",
+          "/private/tmp/fvid-audio-bench-ig5115jv/source.m4a",
+          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+        ],
+        "ffmpeg": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-audio-bench-ig5115jv/source.m4a",
+          "-c:a",
+          "pcm_f32le",
+          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+        ],
+        "fvid_before": [
+          "/private/tmp/fvid-before-audio-optimization",
+          "media",
+          "decode-audio",
+          "/private/tmp/fvid-audio-bench-ig5115jv/source.m4a",
+          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+        ]
+      },
+      "samples_ms": {
+        "fvid": [
+          68.835333,
+          63.962791,
+          62.301291,
+          65.109792,
+          63.158666,
+          62.032,
+          62.799791,
+          61.410417,
+          61.283583,
+          61.058667,
+          62.233542
+        ],
+        "ffmpeg": [
+          82.755292,
+          83.138791,
+          81.922708,
+          81.138583,
+          82.427833,
+          80.961875,
+          81.772375,
+          89.27225,
+          77.933209,
+          78.27975,
+          81.163917
+        ],
+        "fvid_before": [
+          87.039958,
+          85.225,
+          86.022,
+          86.936584,
+          86.744334,
+          85.868333,
+          86.196125,
+          84.033083,
+          83.894,
+          82.45875,
+          89.272042
+        ]
+      },
+      "median_ms": {
+        "fvid": 62.301291,
+        "ffmpeg": 81.772375,
+        "fvid_before": 86.022
+      }
+    },
+    {
+      "codec": "libmp3lame",
+      "pcm": "pcm_f32le",
+      "sample_equality": true,
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "decode-audio",
+          "/private/tmp/fvid-audio-bench-ig5115jv/source.mp3",
+          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+        ],
+        "ffmpeg": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-audio-bench-ig5115jv/source.mp3",
+          "-c:a",
+          "pcm_f32le",
+          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+        ],
+        "fvid_before": [
+          "/private/tmp/fvid-before-audio-optimization",
+          "media",
+          "decode-audio",
+          "/private/tmp/fvid-audio-bench-ig5115jv/source.mp3",
+          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+        ]
+      },
+      "samples_ms": {
+        "fvid": [
+          75.917,
+          76.553083,
+          76.442417,
+          75.939208,
+          76.231292,
+          77.456625,
+          76.624,
+          76.553333,
+          76.245833,
+          78.066292,
+          78.689917
+        ],
+        "ffmpeg": [
+          93.030958,
+          92.932459,
+          92.186916,
+          93.91275,
+          108.624834,
+          92.989666,
+          91.594334,
+          92.137666,
+          94.744167,
+          94.374208,
+          96.773792
+        ],
+        "fvid_before": [
+          100.429125,
+          99.131,
+          101.207958,
+          101.466584,
+          98.335958,
+          101.422875,
+          99.255167,
+          100.236042,
+          99.65025,
+          99.114334,
+          102.084042
+        ]
+      },
+      "median_ms": {
+        "fvid": 76.553083,
+        "ffmpeg": 93.030958,
+        "fvid_before": 100.236042
+      }
+    },
+    {
+      "codec": "flac",
+      "pcm": "pcm_s16le",
+      "sample_equality": true,
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "decode-audio",
+          "/private/tmp/fvid-audio-bench-ig5115jv/source.flac",
+          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+        ],
+        "ffmpeg": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-audio-bench-ig5115jv/source.flac",
+          "-c:a",
+          "pcm_s16le",
+          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+        ],
+        "fvid_before": [
+          "/private/tmp/fvid-before-audio-optimization",
+          "media",
+          "decode-audio",
+          "/private/tmp/fvid-audio-bench-ig5115jv/source.flac",
+          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+        ]
+      },
+      "samples_ms": {
+        "fvid": [
+          74.101375,
+          72.998708,
+          72.602667,
+          74.566542,
+          77.62625,
+          73.220292,
+          75.202625,
+          72.20425,
+          72.591542,
+          72.462875,
+          73.189292
+        ],
+        "ffmpeg": [
+          77.156292,
+          81.871083,
+          77.898,
+          78.998042,
+          75.834083,
+          76.3235,
+          75.938041,
+          75.755042,
+          74.954709,
+          74.965334,
+          78.36175
+        ],
+        "fvid_before": [
+          73.838042,
+          73.496958,
+          73.364709,
+          72.684792,
+          75.075875,
+          73.026125,
+          73.97125,
+          71.455834,
+          76.038333,
+          75.463875,
+          74.46675
+        ]
+      },
+      "median_ms": {
+        "fvid": 73.189292,
+        "ffmpeg": 76.3235,
+        "fvid_before": 73.838042
+      }
+    }
+  ],
+  "binary_sha256": "4b3e7612fd82c803993299d56116a816edf508c74b0c8df0f567992955741425",
+  "source_sha256": {
+    "crates/fvid-media/src/edit.rs": "7176935bf00100342e0bbbfe954fa99b078e229a3208682cb140792baa23c575",
+    "crates/fvid-media/src/audio_layout.rs": "6c1d365c37ad3dc5ddfcfec4b63fe80449567a00e0e70366006d4b437cf6d1bd",
+    "crates/fvid-media/src/lib.rs": "ef9279df9bfe5e3fd325933a6df50a02fcab5b68ab4a78eaedbc8b28601c1cd4",
+    "crates/fvid-media/src/pcm.rs": "de2e6187343079b6324593a6ccc210ddccb30b1df46f72c521eabd4c8ee04025",
+    "crates/fvid-media/src/audio.rs": "7e3fd2e15f488bc55a59a896359d1b2d875cb4335cd3f437a9939957a195e25c",
+    "crates/fvid-media/src/lossless.rs": "cde625fd0aac088a92f5afd94a60c61629df0dced9e96b8bf9562350a5979c45",
+    "src/media_cli.rs": "6b5d82ce9e9680f26347522dd04d92f42dc673c3a090ed35db4394fb05c37158",
+    "scripts/benchmark_audio.py": "3a3b45e7b26c0b2033371c81454e6e963f6fc991f533bdc9079fd7ab91483b8d"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "fvid": {
+      "command": "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+      "args": ["mcp", "--root", "/Users/themoretheless/Documents/ChatGPT/fvid", "--stdio"]
+    }
+  }
+}

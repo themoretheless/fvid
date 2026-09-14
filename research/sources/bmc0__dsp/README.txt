@@ -1,0 +1,915 @@
+### About
+
+dsp is an audio processing program with an interactive mode.
+
+### Building
+
+#### Dependencies
+
+* GNU Make
+* pkg-config
+
+#### Optional dependencies
+
+* fftw3: For `matrix4_mb`, `resample`, `fir`, `fir_p`, and `hilbert` effects.
+* zita-convolver: For the `zita_convolver` effect.
+* libsndfile: For sndfile input/output support (recommended).
+* ffmpeg (libavcodec, libavformat, and libavutil): For ffmpeg input support.
+* alsa-lib: For alsa input/output support.
+* libao: For ao output support.
+* libmad: For mp3 input support (disabled by default).
+* libpulse-simple: For PulseAudio input/ouput support.
+* LADSPA: For the LADSPA frontend and the `ladspa_host` effect.
+
+#### Build
+
+	$ make
+
+Run `./configure [options]` manually if you want to build with non-default
+options. Run `./configure --help` to see all available options.
+
+#### Install
+
+	# make install
+
+### Synopsis
+
+	dsp [options] path ... [effect [args]] ...
+
+### Options
+
+#### Global options
+
+Option      | Description
+----------- | --------------------------------------------------------------------------
+`-h`        | Show help text.
+`-b frames` | Block size (must be given before the first input).
+`-i`        | Force interactive mode.
+`-I`        | Disable interactive mode.
+`-q`        | Disable progress display.
+`-s`        | Silent mode.
+`-v`        | Verbose mode.
+`-d`        | Force dithering.
+`-D`        | Disable dithering.
+`-E`        | Don't drain effects chain before rebuilding.
+`-p`        | Plot effects chain magnitude response instead of processing audio.
+`-P`        | Same as `-p`, but also plot phase response.
+`-g`        | Generate a digraph representation of the effects chain.
+`-V`        | Verbose progress display.
+`-S`        | Use "sequence" input combining mode.
+`-X[n]`     | Run in ABX comparator mode.
+
+#### Input/output options
+
+Option            | Description
+----------------- | -----------------------------
+`-o`              | Output.
+`-t type`         | Type.
+`-e encoding`     | Encoding.
+`-B/L/N`          | Big/little/native endian.
+`-r frequency[k]` | Sample rate.
+`-c channels`     | Number of channels.
+`-R ratio`        | Buffer ratio.
+`-T time_range`   | Set start and end positions (input only).
+`-l[n]`           | Repeat `n` times or indefinitely (input only).
+`-n`              | Equivalent to `-t null null`.
+
+The `time_range` argument has the form `start_timespec[{-,+}end_timespec]`. The
+interpretation of `end_timespec` depends on the joining character: `+` means
+relative to `start_timespec`, while `-` means absolute. Negative timespecs are
+referenced to the end of the associated input. Also see the "Timespec syntax"
+section below.
+
+### Inputs and Outputs
+
+#### Supported input/output types
+
+Type    | Modes | Encodings
+------- | ----- | -------------------------------------------------------------------------------------
+null    | rw    | sample_t
+sgen    | r     | sample_t
+sndfile | r     | autodetected
+wav     | rw    | s16 u8 s24 s32 float double mu-law a-law ima_adpcm ms_adpcm gsm6.10 nms_adpcm_16 nms_adpcm_24 nms_adpcm_32 g721_32 mpeg2.3
+aiff    | rw    | s16 s8 u8 s24 s32 float double mu-law a-law ima_adpcm gsm6.10 dwvw_12 dwvw_16 dwvw_24
+au      | rw    | s16 s8 s24 s32 float double mu-law a-law g721_32 g723_24 g723_40
+raw     | rw    | s16 s8 u8 s24 s32 float double mu-law a-law gsm6.10 vox_adpcm nms_adpcm_16 nms_adpcm_24 nms_adpcm_32 dwvw_12 dwvw_16 dwvw_24
+paf     | rw    | s16 s8 s24
+svx     | rw    | s16 s8
+nist    | rw    | s16 s8 s24 s32 mu-law a-law
+voc     | rw    | s16 u8 mu-law a-law
+ircam   | rw    | s16 s32 float mu-law a-law
+w64     | rw    | s16 u8 s24 s32 float double mu-law a-law ima_adpcm ms_adpcm gsm6.10
+mat4    | rw    | s16 s32 float double
+mat5    | rw    | s16 u8 s32 float double
+pvf     | rw    | s16 s8 s32
+xi      | rw    | dpcm_8 dpcm_16
+htk     | rw    | s16
+sds     | rw    | s16 s8 s24
+avr     | rw    | s16 s8 u8
+wavex   | rw    | s16 u8 s24 s32 float double mu-law a-law
+sd2     | rw    | s16 s8 s24 s32
+flac    | rw    | s16 s8 s24
+caf     | rw    | s16 s8 s24 s32 float double mu-law a-law alac_16 alac_20 alac_24 alac_32
+wve     | rw    | a-law
+ogg     | rw    | vorbis opus
+mpc2k   | rw    | s16
+rf64    | rw    | s16 u8 s24 s32 float double mu-law a-law
+sf/mpeg | rw    | mpeg1.1 mpeg1.2 mpeg2.3
+ffmpeg  | r     | autodetected
+alsa    | rw    | s16 u8 s8 s24 s24_3 s32 float double
+ao      | w     | s16 u8 s32
+mp3     | r     | mad_f
+pcm     | rw    | s16 u8 s8 s24 s24_3 s32 float double
+wavpipe | w     | s16 u8 s24_3 s32 float double
+pulse   | rw    | s16 u8 s24 s24_3 s32 float
+
+#### Input combining modes
+
+In concatenate mode (the default), the inputs are concatenated in the order
+given and sent to the output. All inputs must have the same sample rate and
+number of channels.
+
+In sequence mode, the inputs are sent serially to the output like concatenate
+mode, but the inputs do not need to have the same sample rate or number of
+channels. The effects chain and/or output will be rebuilt/reopened when
+required. Note that if the output is a file, the file will be truncated if it
+is reopened. This mode is most useful when the output is an audio device, but
+can also be used to concatenate inputs with different sample rates and/or
+numbers of channels into a single output file when used with the `resample`
+and/or `remix` effects.
+
+#### Signal generator
+
+The `sgen` input type is a basic (for now, at least) signal generator that can
+generate impulses and exponential sine sweeps. The syntax for the `path`
+argument is as follows:
+
+	[type[@channel_selector][:arg[=value]...]][/type...][+length]
+
+`type` may be `sine` for sine sweeps or tones, or `delta` for a delta function
+(impulse). `length` is a timespec (see "Timespec syntax"). `sine` accepts the
+following arguments:
+
+* `freq=f0[k][-f1[k]]`
+	Frequency. If `len` is set and `f1` is given, an exponential sine sweep
+	is generated.
+
+The arguments for `delta` are:
+
+* `offset=time[s|m|S]`
+	Offset in seconds, miliseconds or samples.
+
+Example:
+
+	$ dsp -t sgen -c 2 sine@0:freq=500-1k/sine@1:freq=300-800+2 gain -10
+
+### Effects
+
+#### Complete effects list
+
+* `lowpass_1 [-r[thresh]] f0[k]`  
+	First-order lowpass filter. See `biquad` for an explanation of the `-r`
+	option.
+* `highpass_1 [-r[thresh]] f0[k]`  
+	First-order highpass filter. See `biquad` for an explanation of the `-r`
+	option.
+* `allpass_1 [-r[thresh]] f0[k]`  
+	First-order allpass filter. See `biquad` for an explanation of the `-r`
+	option.
+* `lowshelf_1 [-r[thresh]] f0[k] gain`  
+	First-order lowshelf filter. See `biquad` for an explanation of the `-r`
+	option.
+* `highshelf_1 [-r[thresh]] f0[k] gain`  
+	First-order highshelf filter. See `biquad` for an explanation of the `-r`
+	option.
+* `lowpass_1p [-r[thresh]] f0[k]`  
+	Single pole lowpass (EWMA) filter. See `biquad` for an explanation of the
+	`-r` option.
+* `lowpass [-r[thresh]] f0[k] width[q|o|h|k]`  
+	Second-order lowpass filter. See `biquad` for an explanation of the `-r`
+	option.
+* `highpass [-r[thresh]] f0[k] width[q|o|h|k]`  
+	Second-order highpass filter. See `biquad` for an explanation of the `-r`
+	option.
+* `bandpass_skirt [-r[thresh]] f0[k] width[q|o|h|k]`  
+	Second-order bandpass filter with constant skirt gain. See `biquad` for an
+	explanation of the `-r` option.
+* `bandpass_peak [-r[thresh]] f0[k] width[q|o|h|k]`  
+	Second-order bandpass filter with constant peak gain. See `biquad` for an
+	explanation of the `-r` option.
+* `notch [-r[thresh]] f0[k] width[q|o|h|k]`  
+	Second-order notch filter. See `biquad` for an explanation of the `-r`
+	option.
+* `allpass [-r[thresh]] f0[k] width[q|o|h|k]`  
+	Second-order allpass filter. See `biquad` for an explanation of the `-r`
+	option.
+* `eq [-r[thresh]] f0[k] width[q|o|h|k] gain`  
+	Second-order peaking filter. See `biquad` for an explanation of the `-r`
+	option.
+* `lowshelf [-r[thresh]] f0[k] width[q|s|d|o|h|k] gain`  
+	Second-order lowshelf filter. See `biquad` for an explanation of the `-r`
+	option.
+* `highshelf [-r[thresh]] f0[k] width[q|s|d|o|h|k] gain`  
+	Second-order highshelf filter. See `biquad` for an explanation of the `-r`
+	option.
+* `lowpass_transform [-r[thresh]] fz[k] width_z[q] fp[k] width_p[q]`  
+	Second-order lowpass transformation filter. Cancels the poles defined by
+	`fz` and `width_z` and replaces them with new poles defined by `fp` and
+	`width_p`. Gain is unity at DC. See `biquad` for an explanation of the `-r`
+	option.
+* `highpass_transform [-r[thresh]] fz[k] width_z[q] fp[k] width_p[q]`  
+	Second-order highpass transformation filter. Also known as a Linkwitz
+	transform (see http://www.linkwitzlab.com/filters.htm#9). Same as
+	`lowpass_transform` except the gain is unity at Fs/2. See `biquad` for an
+	explanation of the `-r` option.
+* `linkwitz_transform [-r[thresh]] fz[k] width_z[q] fp[k] width_p[q]`  
+	Alias for `highpass_transform`. See `biquad` for an explanation of the `-r`
+	option.
+* `deemph [-r[thresh]]`  
+	Compact Disc de-emphasis filter. See `biquad` for an explanation of the `-r`
+	option.
+* `biquad [-r[thresh]] b0 b1 b2 a0 a1 a2`  
+	Biquad filter.
+
+	If the `-r` option is given, the filter is reversed in time using the
+	method described in [1]. The optional `thresh` parameter sets the
+	truncation threshold in negative dB based on the pole with the longest
+	decay time. The default `thresh` is 80. Cascaded time-reversed filters are
+	transformed into a parallel structure for minimum latency.
+
+	[1] M. Vicanek, "A New Reverse IIR Filtering Algorithm," Oct. 2015,
+	rev. Jan. 2022
+
+* `gain gain_dB`  
+	Gain adjustment in decibels.
+* `mult multiplier`  
+	Multiplies each sample by `multiplier`.
+* `add value`  
+	Applies a DC shift.
+* `crossfeed f0[k] separation`  
+	Simple crossfeed for headphones. Very similar to Linkwitz/Meier/CMoy/bs2b
+	crossfeed.
+* `matrix4 [options ...] [surround_level][/surround_level_rear]`  
+	Active matrix upmixer designed primarily for music. Currently supports 2/2
+	(two front and two surround) and 2/4 (two front and four surround) layouts.
+	The intended speaker configuration is in accordance with ITU-R BS.775.
+	Surrounds should be ±100° to ±120° (2/2), or ±60° to ±150° (2/4). Fronts
+	should be at ±30°. The front outputs replace the original input channels
+	and the surround outputs are appended to the end of the channel list.
+
+	For best results, the surround speakers must be calibrated to match the
+	front speakers in both level and spectral balance. `matrix4` is designed to
+	preserve the total power of the original 2-channel input and incorrect
+	calibration will compromise this property. After calibration, surround
+	levels may be adjusted using the `surround_level` and `surround_level_rear`
+	parameters. `surround_level` sets the level for neutral and forward
+	steering. As steering moves from neutral to half rear, `surround_level_rear`
+	gradually takes effect. This allows fine-tuning of the overall front/rear
+	balance while still allowing full level from the surrounds when needed. The
+	default levels are -3dB and 0dB, respectively.
+
+	The surround outputs should be delayed or otherwise decorrelated from the
+	fronts using the `delay` and/or `decorrelate` effects. Delays in the range
+	of 15-25ms tend to work well.
+
+	Options are given as a comma-separated list. Recognized options are:
+
+	* `status[=bars|text|none]`  
+		Show real-time steering information.
+	* `matrix=v1|v4[:adj[:adj_dir]]|v2|v3`  
+		Controls steering behavior for rear-encoded sounds. `v1` does not
+		remove anything from the front outputs. `v4` fully steers sounds
+		encoded full rear (C/S=-45°) and restores lateral separation of sounds
+		encoded along the C/S axis from 0° to -45° in the front outputs and
+		from 0° to -22.5° in the surround outputs. Steering of sounds encoded
+		to the left and right surround positions (L/R=±22.5° C/S=-22.5°) is
+		adjustable via `adj` and `adj_dir`. The default values of 0.5 and 1
+		result in 12dB front/surround separation during normal steering and full
+		separation while direct path redirection is active. `v2` and `v3` are
+		retained for backwards compatability and are equivalent to `v4:0:0`
+		(4.8dB separation) or `v4:1:1`, respectively. The default matrix is `v4`.
+	* `layout=id`  
+		Channel layout. Recognized values are `2/2` (default) and `2/4`.
+	* `shelf=gain[:f0[k]]|none`  
+		Dynamic shelving of frequencies above `f0` in surround outputs. Active
+		when C/S is positive and gradually removed as C/S goes from 0° to
+		-22.5°. The default values are -3dB and 500Hz.
+	* `lowpass=f0[k]|none`  
+		Dynamic high-frequency rolloff (first-order lowpass shape) above `f0`
+		in surround outputs. Active when C/S is positive and gradually removed
+		as C/S goes from 0° to -22.5°. The default is 6kHz.
+	* `contour_pwrcmp=factor`  
+		Dynamic compensation for loss of high-frequency power related to
+		frequency contouring in surround outputs. Attempts to minimize
+		perceived timbral modification of both transient and sustained sounds.
+		The default value is 1.
+	* `phase_flip[=true|false]`  
+		Dynamically flip the relative phase of the right surround output under
+		rear steering so that stongly rear-encoded sounds are in phase. The
+		default is `false`.
+	* `signal[=true|false]`  
+		Toggle the effect on effects chain signal.
+	* `direct_path[=event|static|true|false]`  
+		Redirect strongly surround-encoded sounds to additional outputs. If set
+		to `event` or `true`, surround-encoded events enable redirection until
+		steering moves forward again. If set to `static`, redirection is based
+		only on the current steering angles. The default is `false`. See
+		`examples/matrix4_*direct_path*` for usage examples.
+	* `rear_event_mask=factor`  
+		Sensitivity to rear-encoded sound events. If set to zero, sensitivity
+		is the same for all directions. If set to a high value (e.g. 5), most
+		rear events will be ignored. The default values are 1 for `matrix4`
+		and 0.3 for `matrix4_mb`.
+	* `filter_bank=id` (`matrix4_mb` only)  
+
+		ID           | Notes
+		------------ | ----------------------------------------------
+		`21band`     | 20Hz-20kHz, 1.9ERB/band, 7th order. Default.
+		`13band`     | 63Hz-16.8kHz, 2.9ERB/band, 5th order.
+		`13band_lfx` | 20Hz-16.4kHz, 3ERB/band, 5th order.
+
+	* `filter_type=filter[:stop_dB[:stop_dB]]` (`matrix4_mb` only)  
+		Type of filter used for low pass sections of the filter bank. `filter`
+		may be `butterworth`, `chebyshev1`, `chebyshev2`, or `elliptic`
+		(default).
+
+		The optional `stop_dB` parameter(s) set the stopband attenuation in
+		decibels for the Chebyshev and elliptic filters. Only the first
+		parameter is used for `chebyshev1` and `chebyshev2`. For `elliptic`,
+		the first parameter applies to the lowpass and the second to the
+		highpass. If only one parameter is given, it applies to both stopbands.
+		Default values are 25 for `chebyshev1` and `chebyshev2`, and 35:50 for
+		`elliptic`.
+	* `use_fir_p[=true|false]` (`matrix4_mb` only)  
+		Use the `fir_p` convolution engine. Lower latency, but a bit slower.
+		The default is `false`.
+
+	Applying decorrelation filters to the surround outputs can further improve
+	spatial impression over simple delay. Example:
+
+	```
+	matrix4 -3/0
+	:2,3 delay 5m decorrelate -s1 -m -f0.7k -l35m 5 allpass 80 0.6 :
+	```
+
+	The decorrelation filter has a peak energy time of approximately 10ms, so
+	average total delay applied to the surround outputs is about 15ms at high
+	frequencies. An `allpass` filter is used to equalize group delay at low
+	frequencies.
+
+	See `examples/matrix4_*` for more examples.
+
+* `matrix4_mb [options ...] [surround_level][/surround_level_rear]`  
+	Like the `matrix4` effect, but divides the input into many individually
+	steered bands (21 by default) in order to improve separation of concurrent
+	sound sources. See the `matrix4` effect description for more information.
+* `remix selector|. ...`  
+	Select and mix input channels into output channels. Each selector argument
+	specifies the input channels to be mixed to produce an output channel. `.`
+	selects no input channels. For example, `remix 0,1 2,3` mixes input
+	channels 0 and 1 into output channel 0, and input channels 2 and 3 into
+	output channel 1. `remix -` mixes all input channels into a single output
+	channel. The active channel selector is used as an input channel mask for
+	the selector arguments.
+* `st2ms`
+	Convert stereo to mid/side.
+* `ms2st`
+	Convert mid/side to stereo.
+* `delay [-f[order]] [-m|M depth[s|m|S|%]] [-b bw[k]] [-q quality] delay[s|m|S]`  
+	Delay line. The unit for the delay argument depends on the suffix used:
+	`s` is seconds (the default), `m` is milliseconds, and `S` is samples. If
+	`delay` is negative, a positive delay is applied to all channels which are
+	**not** selected (except when plotting—an actual negative delay is
+	possible in that case).
+
+	By default, the delay is rounded to whole samples. The `-f` option enables
+	fractional delay using Thiran allpass interpolation. The `order` argument
+	sets the allpass filter order and may be any integer from 1 through 50. The
+	default value is 2.
+
+	If `-m` or `-M` are given, the delay is randomly modulated in the range
+	`delay`±`depth` with an approximately Gaussian distribution. Modulation is
+	either uncorrelated (`-m`) or linked (`-M`) across all input channels. The
+	`-b` option sets the modulation bandwidth (default is 1Hz). Interpolation
+	quality may be set via the `-q` option:
+
+	Quality | Interpolation method
+	------- | ----------------------------------------------------
+	0       | Cubic Hermite (fastest).
+	1       | Polyphase FIR (6x) → cubic B-spline (default).
+	2       | Polyphase FIR (16x) → cubic B-spline (best quality).
+
+* `resample [bandwidth] fs[k]|x{mult}|/{div}`  
+	High-quality sinc resampler with >230dB SNR. The default `bandwidth` is
+	0.939.
+
+	**Note:** Changing the sample rate of only a subset of channels within an
+	effects chain is not currently supported. Consequently, `resample` ignores
+	any active channel selector.
+* `fir [-a[offset[s|m|S]]] [input_options] [file:][~/]filter_path|coefs:list[/list...]`  
+	Non-partitioned 64-bit direct or FFT convolution. Latency is zero for
+	filters up to 16 taps. For longer filters, the latency is equal to the
+	`fft_len` reported in verbose mode. Each `list` is a comma-separated list
+	of coefficients for one filter channel. Missing values are filled with
+	zeros.
+
+	If `-a` is given and `offset` is zero or unspecified, channels are aligned
+	to the filter's peak sample. Positive or negative `offset` values specify a
+	fixed offset relative to the start or end of the filter, respectively.
+
+	The `input_options` are useful mostly when loading raw (headerless) input
+	files and are as follows:
+
+	Option            | Description
+	----------------- | -----------------------------
+	`-t type`         | Type.
+	`-e encoding`     | Encoding.
+	`-B/L/N`          | Big/little/native endian.
+	`-r frequency[k]` | Sample rate.
+	`-c channels`     | Number of channels.
+
+	By default, the sample rate of the filter must match that of the effect.
+	Mismatches may be ignored by setting the sample rate to "any".
+
+* `fir_p [-a[offset[s|m|S]]] [input_options] [max_part_len] [file:][~/]filter_path|coefs:list[/list...]`  
+	Zero-latency non-uniform partitioned 64-bit direct/FFT convolution. Usually
+	a bit slower than the `zita_convolver` effect except for very long filters
+	on some hardware. `max_part_len` must be a power of 2 and has a default
+	value of 16384. Each `list` is a comma-separated list of coefficients for
+	one filter channel. Missing values are filled with zeros.
+
+	See the `fir` effect description for an explanation of the `-a` option and
+	the `input_options`.
+* `zita_convolver [-a[offset[s|m|S]]] [input_options] [min_part_len [max_part_len]] [file:][~/]filter_path|coefs:list[/list...]`  
+	Partitioned 32-bit FFT convolution using the zita-convolver library.
+	Latency is equal to `min_part_len` (64 samples by default).
+	`{min,max}_part_len` must be powers of 2 between 64 and 8192. Each `list`
+	is a comma-separated list of coefficients for one filter channel. Missing
+	values are filled with zeros.
+
+	See the `fir` effect description for an explanation of the `-a` option and
+	the `input_options`.
+* `hilbert [-pzc] [-a angle] taps`  
+	Simple FIR approximation of a Hilbert transform. The number of taps must be
+	odd. Bandwidth is controlled by the number of taps. If `-p` is given, the
+	`fir_p` convolution engine is used instead of the default `fir` engine.
+	Similarly, if `-z` is given, `zita_convolver` is used (if available). If
+	`-c` is given, channels are automatically aligned to the middle tap. The
+	`-a` option sets the phase shift in degrees. The default is -90°.
+* `sinc [-hpzc] [-t width] [-w window] f0[k]`  
+	Windowed sinc highpass (`-h`) or lowpass (default) filter. The `-t` option
+	sets the approximate transition band width normalized to `f0`. The default
+	`width` is 0.5. Available window functions are:
+
+	Window          | Notes
+	--------------- | --------------------------------------
+	`rect`          | Rectangular window.
+	`hann`          | Hann window.
+	`hamming`       | Hamming window (a0=0.54).
+	`blackman`      | Blackman window (α=0.16).
+	`nuttall4c1`    | Nuttall 4-term window, continuous first derivative.
+	`albrecht9c3`   | 9-term L=3 window from [1].
+	`kaiser[:beta]` | Kaiser window. The default `beta` is 12.
+
+	The default `window` is `kaiser`. See the `hilbert` effect description for
+	an explanation of the `-p`, `-z`, and `-c` options.
+
+	[1] Hans-Helge Albrecht, "Tailoring of Minimum Sidelobe Cosine-Sum
+	Windows for High-Resolution Measurements," The Open Signal
+	Processing Journal, 2010, Vol. 3.
+
+* `decorrelate [options] [stages]`  
+	Allpass decorrelator as described in "Frequency-Dependent Schroeder
+	Allpass Filters" by Sebastian J. Schlecht (doi:10.3390/app10010187). With
+	the default settings, the average group delay is around 9.5ms at high
+	frequencies. The options are:
+
+	Option                  | Description
+	----------------------- | -----------------------------
+	`-m`                    | Use the same filters for all input channels.
+	`-s seed`               | Random seed value.
+	`-d delay_min[s\|m\|S]` | Minimum filter delay (default: 0.83333ms).
+	`-D delay_max[s\|m\|S]` | Maximum filter delay (default: 3.12503ms).
+	`-f fc[k]`              | Damping filter center frequency (default: 1.1kHz).
+	`-l rt60_lf[s\|m\|S]`   | RT60 at low frequencies (default: 100ms).
+	`-h rt60_hf[s\|m\|S]`   | RT60 at high frequencies (default: 8ms).
+
+	The default number of stages is 5.
+
+* `noise level[b]`  
+	Add TPDF noise. The `level` argument specifies the peak level of the noise
+	in dBFS if no suffix is given, or the effective precision in bits if the
+	`b` suffix is given.
+* `dither [shape] [[quantize_bits] bits]`  
+	Apply dither with optional noise shaping. The `shape` argument determines
+	the type of dither and the noise shaping filter (if any):
+
+	Name       | Description
+	---------- | ----------------------
+	`flat`     | Flat TPDF with no feedback (default).
+	`sloped`   | Flat TPDF with feedback. First-order highpass response.
+	`sloped2`  | Sloped TPDF with feedback. Stronger HF emphasis than `sloped`.
+	`lipshitz` | 5-tap E-weighted curve from [1]. Notches around 4k and 12k.
+	`wan3`     | 3-tap F-weighted curve from [2]. Notch around 4k.
+	`wan9`     | 9-tap F-weighted curve from [2]. Notches around 3.5k and 12k.
+
+	The `bits` argument sets the dither level in bits. The `quantize_bits`
+	argument sets the number of levels to quantize to. The default setting for
+	both is `auto`. If `bits` is not `auto`, dither is applied at the specified
+	bit depth regardless of the output sample format. `bits` may be any number.
+	`quantize_bits` must be an integer between 2 and 32. If `quantize_bits` is
+	not given, it is set to the same value as `bits` (rounded to the nearest
+	integer).
+
+	**Note:** Currently, setting `bits` to `auto` disables dither if the effect
+	is loaded via `watch` or used in `ladspa_dsp`.
+
+	[1] S. P. Lipshitz, J. Vanderkooy, and R. A. Wannamaker,
+	"Minimally Audible Noise Shaping," J. AES, vol. 39, no. 11,
+	November 1991  
+	[2] R. A. Wannamaker, "Psychoacoustically Optimal Noise Shaping,"
+	J. AES, vol. 40, no. 7/8, July 1992
+
+* `ladspa_host [~/]module_path plugin_label [control ...]`  
+	Apply a LADSPA plugin. Supports any number of input/output ports (with
+	the exception of zero output ports). If a plugin has one or zero input
+	ports, it will be instantiated multiple times to handle multi-channel
+	input.
+	
+	Controls which are not explicitly set or are set to `-` will use default
+	values (if available).
+	
+	The `LADSPA_PATH` environment variable can be used to set the search path
+	for plugins.
+* `stats [-i] [-w cols] [ref_level]`  
+	Display the DC offset, minimum, maximum, peak level (dBFS), RMS level
+	(dBFS), crest factor (dB), peak count, peak sample, number of samples, and
+	length (s) for each channel. If `ref_level` is given, peak and RMS levels
+	relative to `ref_level` will be shown as well (dBr). The `-i` option
+	enables interpolation (4x oversampling plus quadratic peak estimation) to
+	better approximate true peak values. The `-w` option sets the display width
+	in characters. Zero means unlimited width. `auto` queries the size of the
+	terminal (if available). The default value is 80.
+* `watch [-e] [~/]path`  
+	Load effects from a file into a sub-chain and reload if the file is
+	modified. Other than the automatic reload, the behavior is similar to
+	sourcing a file using the `@` directive (see "Effects Files"). Some
+	restrictions apply to automatic reload:
+
+	* The new sub-chain must have the same output sample rate and number of
+	  channels as the previous sub-chain.
+	* The new sub-chain must not require larger buffers than the previous
+	  sub-chain.
+
+	If these conditions are not met, the new sub-chain will not be applied and
+	an error message will be printed.
+
+	Currently, this effect polls for file modifications once per second.
+	Support `inotify` events my be added in the future. Ideally, file
+	modifications should be atomic (i.e. by writing to a temporary file, then
+	`rename(3)`-ing it over top of the original file). If this is not possible,
+	the `-e` option may be given, which enforces an end-of-file marker in order
+	to detect partially-written files. This marker, `#EOF#`, must be placed at
+	the beginning of a line and may only be followed by whitespace characters.
+* `levels [-t time_const]`  
+	Show a basic real-time level meter for each channel. Values are in dBFS.
+	The `-t` option sets the averaging time constant as well as the decay rate
+	of the peak indicator.
+
+#### Selector syntax
+
+Example    | Description
+---------- | --------------------------
+`<empty>`  | all
+`-`        | all
+`2-`       | 2 to n
+`-4`       | 0 through 4
+`1,3`      | 1 and 3
+`1-4,7,9-` | 1 through 4, 7, and 9 to n
+
+**Note:** There is no difference between `1,3` and `3,1`. Order is not
+preserved.
+
+#### Timespec syntax
+
+A timespec may be given in one of two forms: `[[hours:]minutes:]seconds` or
+`offset[s|m|S]`. In the latter form, the suffix specifies whether `offset` is
+in seconds (default), milliseconds, or samples, respectively.
+
+#### Filter width
+
+The following suffixes are supported:
+
+Suffix | Description
+------ | ------------------------------
+`q`    | Q-factor (default).
+`s`    | Slope (shelving filters only).
+`d`    | Slope in dB/octave (shelving filters only).
+`o`    | Bandwidth in octaves.
+`h`    | Bandwidth in Hz.
+`k`    | Bandwidth in kHz.
+
+**Note:** The `d` width suffix also changes the definition of `f0` from center
+frequency to corner frequency (like Room EQ Wizard and the Behringer DCX2496).
+
+Additionally, a macro is provided for constructing arbitrary-order Butterworth
+filters from cascaded second-order sections: `bw<order>[.n]`, where `<order>` is
+the filter order and `n` is an index corresponding to a particular pair of
+poles. The Q-factors are always in ascending order. For example,
+
+	lowpass 1k bw6.0 lowpass 1k bw6.1 lowpass 1k bw6.2
+
+creates a 6th-order Butterworth lowpass filter. Odd-order filters require an
+additional first-order section:
+
+	lowpass_1 1k lowpass 1k bw5.0 lowpass 1k bw5.1
+
+#### File paths
+
+On the command line, relative paths are relative to `$PWD`. Within an effects
+file, relative paths are relative to the directory containing said effects
+file. A `~/` prefix will be expanded to the contents of `$HOME`. The following
+substitutions are supported anywhere within a file path:
+
+Sequence | Substitution
+-------- | ------------------
+`%r`     | Sample rate in Hz
+`%k`     | Sample rate in kHz
+`%c`     | Number of channels
+`%%`     | Literal `%`
+
+#### Channel selectors and masks
+
+A colon (`:`) followed by a selector (see "Selector syntax") specifies the
+input channels for effects that follow. For example,
+
+	:0,2 eq 1k 1.0 -6
+
+will apply an `eq` effect to channels 0 and 2. If an effect changes the total
+number of channels, the last channel selector given is parsed again. Additional
+channels are not added unless the selector includes an unbounded range.
+
+Channel numbers refer to the channels in the active channel mask, which is a
+property of the containing block. Blocks may be created using braces
+(`{ ... }`) or by sourcing a file (see "Effects files"). The channel mask is
+derived from the active channel selector at creation. For example,
+
+	:1,3 { :0 gain -6 :1 gain +6 }
+
+creates a block with the mask `1,3`. Within the block, `:0` selects the first
+channel in the mask (channel 1), and `:1` selects the second channel in the
+mask (channel 3). Channel selectors have block scope.
+
+Channels are automatically added or removed from the active channel mask if an
+effect changes the total number of channels. Additional channels are always
+appended to the end of the channel list.
+
+#### Effects files
+
+Files may be sourced using the `@` directive: `@[~/]path/to/file`. See "File
+paths" for more information about how paths are interpreted. Note that sourcing
+a file implicitly creates a block (see "Channel selectors and masks"). Comments
+start with a word beginning with `#` and extend to the next newline. All
+characters within a comment are ignored. Characters enclosed in double quotes
+(`"..."`) are interpreted as literal except for backslash (`\`). A backslash
+causes any character that follows to be intepreted as literal. Example:
+
+	gain -4 lowshelf 90 1s 4
+	# This is a comment
+	eq 3k 1.5 -3  # Another comment
+
+#### Threads
+
+An effects chain may be manually split amongst multiple threads using the
+`new_thread` directive. Each additional thread increases total input–output
+latency by one block.
+
+#### Other directives
+
+An exclamation mark (`!`) allows initialization failure of the effect that
+follows.
+
+#### FFTW wisdom
+
+Effects utilizing FFTW3 can optionally load and save wisdom. For `dsp`, set the
+`DSP_FFTW_WISDOM_PATH` environment variable. `ladspa_dsp` reads
+`LADSPA_DSP_FFTW_WISDOM_PATH` instead. If a path is set, FFTW plans are created
+with the FFTW_MEASURE flag. Accumulated wisdom is written on exit.
+
+### Signals
+
+TSTP is handled gracefully, pausing the active input and output and restoring
+terminal state. USR1 triggers a rebuild of the effects chain. USR2 sends a
+signal to the effects chain.
+
+### Examples
+
+Read `file.flac`, apply a bass boost, and write to alsa device `hw:2`:
+
+	dsp file.flac -ot alsa -e s24_3 hw:2 lowshelf 60 0.5 +4
+
+Plot the magnitude vs frequency response of an effects chain:
+
+	dsp -pn [effect [args]] ... | gnuplot
+
+Show a digraph representation of signal flow through an effects chain:
+
+	dsp -gn [effect [args]] ... | dot -Tx11
+
+Implement an LR4 crossover at 2.2KHz, where output channels 0 and 1 are the
+left and right tweeters, and channels 2 and 3 are the left and right woofers,
+respectively:
+
+	dsp stereo_file.flac -ot alsa -e s32 hw:3 remix 0 1 0 1
+	  :0,1 highpass 2.2k 0.7071 highpass 2.2k 0.7071 :
+	  :2,3 lowpass 2.2k 0.7071 lowpass 2.2k 0.7071 :
+
+Apply effects from a file:
+
+	dsp file.flac @eq.txt
+
+### LADSPA frontend
+
+#### Configuration
+
+`ladspa_dsp` looks for configuration files in the following directories:
+
+* `$XDG_CONFIG_HOME/ladspa_dsp`
+* `$HOME/.config/ladspa_dsp` (if `$XDG_CONFIG_HOME` is not set)
+* `/etc/ladspa_dsp`
+
+To override the default directories, set the `LADSPA_DSP_CONFIG_PATH`
+environment variable to the desired path(s) (colon-separated).
+
+Each file that is named either `config` or `config_<name>` (where `<name>` is
+any string) is loaded as a separate plugin. The plugin label is either
+`ladspa_dsp` (for `config`) or `ladspa_dsp:<name>` (for `config_<name>`).
+
+Configuration files are a simple key-value format. Leading whitespace is
+ignored. The valid keys are:
+
+* `input_channels`  
+	Number of input channels. Default value is `1`. May be left unset unless
+	you want individual control over each channel.
+* `output_channels`  
+	Number of output channels. Default value is `1`. This parameter is not
+	currently set automatically because the number of LADSPA ports must be
+	known before the effects chain is built. Initialization will fail if it
+	does not match the effects chain.
+* `LC_NUMERIC`  
+	Set `LC_NUMERIC` to the given value while building the effects chain.
+	Default value is `C`, which gives consistent number parsing behavior
+	regardless of the system locale and LADSPA host behavior. Setting this to
+	an empty value uses the default system locale. The special value `none`
+	leaves `LC_NUMERIC` up to the LADSPA host (not generally recommended).
+* `effects_chain`  
+	String to build the effects chain. The format is the same as an effects
+	file, but only a single line is interpreted. Alternatively, the special
+	`[effects_chain]` directive causes all subsequent lines to be interpreted
+	as in an effects file.
+
+Example configuration:
+
+	# This is a comment
+	input_channels=1
+	output_channels=1
+	LC_NUMERIC=C
+	[effects_chain]
+	gain -3 lowshelf 100 1s +3
+	@/path/to/eq_file
+
+Relative file paths in the effects chain are relative to the directory in which
+the configuration file resides.
+
+The loglevel can be set to `VERBOSE`, `NORMAL`, or `SILENT` through the
+`LADSPA_DSP_LOGLEVEL` environment variable.
+
+#### Notes
+
+The resample effect cannot be used with the LADSPA frontend.
+
+Some LADSPA hosts cache plugin information and may exhibit unexpected behavior
+if configuration files are added or removed, or if a configuration is edited to
+change the number of input and/or output channels. In these cases, it may be
+necessary to manually delete the cache file(s) or otherwise force the host to
+update its cache.
+
+#### Usage example: Route alsa audio through ladspa_dsp
+
+Put this in `~/.asoundrc`:
+
+	pcm.dsp {
+		type plug
+		slave {
+			format FLOAT
+			rate unchanged
+			channels unchanged
+			pcm {
+				type ladspa
+				path "/usr/lib/ladspa"
+				playback_plugins [{
+					label "ladspa_dsp"
+				}]
+				slave.pcm {
+					type plug
+					slave {
+						pcm "<hw_device>"
+						rate unchanged
+						channels unchanged
+					}
+				}
+			}
+		}
+	}
+
+Replace `<hw_device>` with the preferred output device (`hw:0`, for example).
+
+If you need individual control over each channel, you need to set the number
+of (output) channels:
+
+	pcm.dsp {
+		type plug
+		slave {
+			format FLOAT
+			rate unchanged
+			pcm {
+				type ladspa
+				channels <channels>
+				path "/usr/lib/ladspa"
+				playback_plugins [{
+					label "ladspa_dsp"
+				}]
+				slave.pcm {
+					type plug
+					slave {
+						pcm "<hw_device>"
+						rate unchanged
+						channels unchanged
+					}
+				}
+			}
+		}
+	}
+
+To make `dsp` the default device, append this to `~/.asoundrc`:
+
+	pcm.!default {
+		type copy
+		slave.pcm "dsp"
+	}
+
+#### Usage example: Route pulseaudio audio through ladspa_dsp (tested with Ubuntu 18.04; contributed by shaffenmeister)
+
+1. Prepare .asoundrc as stated above.
+2. Determine pulseaudio master sink using `pacmd list sinks`. Use attribute
+   `name` of the pulseaudio sink you plan to use
+   (e.g. `alsa_output.pci-0000_00_14.2.analog-stereo`).
+3. Execute `analyseplugin <path to LADSPA plugin>/ladspa_dsp.so` to determine
+   plugin name and label.
+4. Run `pacmd load-module module-ladspa-sink sink_name=ladspa_out
+   sink_master=<master_sink> plugin=<plugin name> label=<plugin label>`.
+5. Select new LADSPA sink as system sink (Ubuntu 18.04 Desktop:
+   Settings > Sound > Output > LADSPA_Plugin `<plugin label>` on
+   `<master sink>`).
+
+Example:
+
+	pacmd list sinks
+	analyseplugin /usr/local/lib/ladspa/ladspa_dsp.so
+	pacmd load-module module-ladspa-sink sink_name=ladspa_out sink_master=alsa_output.pci-0000_00_14.2.analog-stereo plugin=ladspa_dsp label=ladspa_dsp
+
+##### Load LADSPA plugin as system default
+
+To load the LADSPA module at system startup for all users include settings in `/etc/pulse/default.pa`:
+
+	.ifexists module-ladspa-sink.so
+	.nofail
+	load-module module-ladspa-sink sink_name=ladspa_out sink_master=<master_sink> plugin=<plugin name> label=<plugin label>
+	.fail
+	.endif
+
+##### Load LADSPA plugin as user default
+
+To load the LADSPA module at user login include settings in
+`~/.config/pulse/default.pa`:
+
+	#!/usr/bin/pulseaudio -nF
+	.include /etc/pulse/default.pa
+	.ifexists module-ladspa-sink.so
+	.nofail
+	load-module module-ladspa-sink sink_name=ladspa_out sink_master=<master_sink> plugin=<plugin name> label=<plugin label>
+	.fail
+	.endif
+
+### Bugs
+
+* No support for metadata.
+* Some effects do not support plotting.
+* When plotting an effects chain containing the `noise` effect, a different
+  random sequence is generated for each output channel regardless of whether the
+  noise should be correlated between outputs. Summing correlated noise works
+  correctly.
+
+### License
+
+This software is released under the ISC license.

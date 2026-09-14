@@ -1,0 +1,354 @@
+{
+  "created_utc": "2026-09-04T23:18:58.758624+00:00",
+  "backend": "metal",
+  "binary_sha256": "1d2aad43101992b13077e6a057b7970382ea8053057a12c4fb5595812e9ee5d3",
+  "source_sha256": {
+    "src/resident.rs": "0c30b1361021143fc63a0a39189b648f3dc00c9bb622c0c76f0a1e739e17d665",
+    "src/backend.rs": "33c21f1ff90aea833ec4268a25bbf5399af7afed92cd02977987f33d6b20ebce",
+    "src/lib.rs": "4f270ad4737e9e46fe15b841a3edc71cc882400426d7947ff2312781c94bc0d6",
+    "src/main.rs": "aa4d17e143c47f30c302c48616b7dfd32ac083c31e5c9f64eeb6c1e3a1f452b3",
+    "src/view.rs": "c1bf9a170eebe80f4aedcfb12a269d9ae4d3b142ecadc95e357063c677105c60",
+    "src/gpu/mod.rs": "adfe67a30a2d46e522886a5fe1451242b38e8506eba4310f1b766cae6264e3d3",
+    "src/resident/pipeline.rs": "650c162279cae996fa62198ede7cdb5964b14447a725eea6ae18c0b8260f3fc3",
+    "src/gpu/transform.wgsl": "2a72b92bcb8d4182715f2d672f68f61ca6b65f28fcc29db42bde42de464e7677",
+    "crates/fvid-cuda/src/native.rs": "0dba25dec6d1c0cef095296a1d1cee85bc5c3664e81427b96b96cedcb79b0bcb",
+    "crates/fvid-cuda/src/lib.rs": "1b3295d35365f78a11494db8209d6b415922c29226a3302279a319505637b2d1",
+    "crates/fvid-cuda/src/pipeline.rs": "4e6a19c49d74d294b5de5988ea9f6a2ce6bcabf348f27846d6eaf5e6be2d1c19",
+    "crates/fvid-cuda/src/transform.cu": "309b51e8d38ff509794fe540041c119cbe5b7efd3e85787864e65bdb103fc5b3",
+    "Cargo.toml": "5830592032b7cad212405c6800c3ebf640bde4ac4e2d0029943c6b4678a4132b",
+    "Cargo.lock": "d4707960d7cac8fb0e4cc6bc9d0cc2278c7c4080cbd7aca6e12e98385ad33798",
+    "crates/fvid-cuda/Cargo.toml": "835b7b4b1af47674c6d984bcfd037a48d19ccb9853eac63b6272e2120f4660eb",
+    "tests/resident.rs": "6c85c7286ef440b4426e1fbb16d0c5e9dc3d7d478507b624e1d874b6b05bc3ee",
+    "scripts/validate_resident.py": "ffc1058a63fe0df19e0970047ff187661f3fb3c71a4510ab1ecea326f9c1088b"
+  },
+  "qualification": "Actual GPU execution; API transfer counters, not a driver trace. No codec surface interop.",
+  "cases": [
+    {
+      "width": 8,
+      "height": 6,
+      "format": "420",
+      "stages": 3,
+      "input_sha256": "b8ea450427e4f5dbde64b65e671a2f91dcee4d33a335ad6f17f686edd3451104",
+      "output": {
+        "width": 4,
+        "height": 2,
+        "chroma": "420",
+        "frames": 3,
+        "frame_sha256": [
+          "c5dc9c0adbfd8bb854334bfc8210fc7af93f5df049f13e2b6c0cf21f0b64e5b9",
+          "c5dc9c0adbfd8bb854334bfc8210fc7af93f5df049f13e2b6c0cf21f0b64e5b9",
+          "db6ad99ccc3f36366a2b205cf0b391083d977b5aeeac74b5c6e13f696aa5b5ff"
+        ]
+      },
+      "transfers": {
+        "uploads": 3,
+        "downloads": 3,
+        "upload_bytes": 216,
+        "download_bytes": 36,
+        "filter_passes": 9
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=216 download_bytes=36 filter_passes=9\nframes=3 input_bytes=216 output_bytes=36 backend=metal device=\"Apple M4 Max\" controlled_memory_bytes=2004\n",
+      "command": [
+        "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+        "/private/tmp/fvid-resident-43y5hnuc/input.y4m",
+        "-",
+        "--backend",
+        "metal",
+        "--crop",
+        "2:2:4:2",
+        "--then",
+        "--hflip",
+        "--then",
+        "--vflip"
+      ]
+    },
+    {
+      "width": 8,
+      "height": 6,
+      "format": "422",
+      "stages": 3,
+      "input_sha256": "45c4a28f70a135b737ba523c25e21b929a5e362773d83b521479e8c6690d2c49",
+      "output": {
+        "width": 4,
+        "height": 2,
+        "chroma": "422",
+        "frames": 3,
+        "frame_sha256": [
+          "904b93dbd859201d107a131f457cec869e037be48079116a0007e0b95a0a17fc",
+          "904b93dbd859201d107a131f457cec869e037be48079116a0007e0b95a0a17fc",
+          "f84e7ea550beac1e65fbf968b4093ac8dd18c1e1cabcae77efb03cd67eb5e8d7"
+        ]
+      },
+      "transfers": {
+        "uploads": 3,
+        "downloads": 3,
+        "upload_bytes": 288,
+        "download_bytes": 48,
+        "filter_passes": 9
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=288 download_bytes=48 filter_passes=9\nframes=3 input_bytes=288 output_bytes=48 backend=metal device=\"Apple M4 Max\" controlled_memory_bytes=2032\n",
+      "command": [
+        "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+        "/private/tmp/fvid-resident-43y5hnuc/input.y4m",
+        "-",
+        "--backend",
+        "metal",
+        "--crop",
+        "2:2:4:2",
+        "--then",
+        "--hflip",
+        "--then",
+        "--vflip"
+      ]
+    },
+    {
+      "width": 9,
+      "height": 7,
+      "format": "444",
+      "stages": 3,
+      "input_sha256": "35212d0bdd17455d642bb4f4a77226bc5b94c9e542cd12103a15725fcd9ade87",
+      "output": {
+        "width": 5,
+        "height": 3,
+        "chroma": "444",
+        "frames": 3,
+        "frame_sha256": [
+          "d2ae60f05b88b28fe591b80da1e219d165ab21fc959760e74d26b48fd5bf334e",
+          "d2ae60f05b88b28fe591b80da1e219d165ab21fc959760e74d26b48fd5bf334e",
+          "946c676c51f6e1220b1a1049e77d45d8618d287ef8c6169abb914d1a8f921073"
+        ]
+      },
+      "transfers": {
+        "uploads": 3,
+        "downloads": 3,
+        "upload_bytes": 567,
+        "download_bytes": 135,
+        "filter_passes": 9
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=567 download_bytes=135 filter_passes=9\nframes=3 input_bytes=567 output_bytes=135 backend=metal device=\"Apple M4 Max\" controlled_memory_bytes=2154\n",
+      "command": [
+        "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+        "/private/tmp/fvid-resident-43y5hnuc/input.y4m",
+        "-",
+        "--backend",
+        "metal",
+        "--crop",
+        "2:2:5:3",
+        "--then",
+        "--hflip",
+        "--then",
+        "--vflip"
+      ]
+    },
+    {
+      "width": 65,
+      "height": 17,
+      "format": "444",
+      "stages": 3,
+      "input_sha256": "27af3045c5e407fc5dd287608a217c51f04dcbfd0eabe5b50cef963462458441",
+      "output": {
+        "width": 61,
+        "height": 13,
+        "chroma": "444",
+        "frames": 3,
+        "frame_sha256": [
+          "63247f033c804c5f36af0b2d4c3e50621345121aa75f5813db4535d1fd91ba6c",
+          "63247f033c804c5f36af0b2d4c3e50621345121aa75f5813db4535d1fd91ba6c",
+          "db1f5080d603a279a75500992743feb9021c111f2cd81fb77c05195e8a340c80"
+        ]
+      },
+      "transfers": {
+        "uploads": 3,
+        "downloads": 3,
+        "upload_bytes": 9945,
+        "download_bytes": 7137,
+        "filter_passes": 9
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=9945 download_bytes=7137 filter_passes=9\nframes=3 input_bytes=9945 output_bytes=7137 backend=metal device=\"Apple M4 Max\" controlled_memory_bytes=22974\n",
+      "command": [
+        "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+        "/private/tmp/fvid-resident-43y5hnuc/input.y4m",
+        "-",
+        "--backend",
+        "metal",
+        "--crop",
+        "2:2:61:13",
+        "--then",
+        "--hflip",
+        "--then",
+        "--vflip"
+      ]
+    },
+    {
+      "width": 638,
+      "height": 480,
+      "format": "420",
+      "stages": 3,
+      "input_sha256": "16b0922995bd4735d9a53836123e8dcfbce09c089b33c08f93818ad737ae6c1e",
+      "output": {
+        "width": 634,
+        "height": 476,
+        "chroma": "420",
+        "frames": 3,
+        "frame_sha256": [
+          "90d69caba4fea7c007af53c7ce22970299a53431bf0b907dfa4c216606cf01ba",
+          "90d69caba4fea7c007af53c7ce22970299a53431bf0b907dfa4c216606cf01ba",
+          "40d603c26f168c7358eee81f04bf912cc18ecf275f218d0b5600af7430cddad7"
+        ]
+      },
+      "transfers": {
+        "uploads": 3,
+        "downloads": 3,
+        "upload_bytes": 1378080,
+        "download_bytes": 1358028,
+        "filter_passes": 9
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=1378080 download_bytes=1358028 filter_passes=9\nframes=3 input_bytes=1378080 output_bytes=1358028 backend=metal device=\"Apple M4 Max\" controlled_memory_bytes=3656740\n",
+      "command": [
+        "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+        "/private/tmp/fvid-resident-43y5hnuc/input.y4m",
+        "-",
+        "--backend",
+        "metal",
+        "--crop",
+        "2:2:634:476",
+        "--then",
+        "--hflip",
+        "--then",
+        "--vflip"
+      ]
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "format": "420",
+      "stages": 3,
+      "input_sha256": "2bc41b9beae42203c3b84183e198182e7cbcf783548b29ef87fa7d8ef2654926",
+      "output": {
+        "width": 1916,
+        "height": 1076,
+        "chroma": "420",
+        "frames": 3,
+        "frame_sha256": [
+          "5cba7bd2ec82ebbbf0e6e674dd43183ad09338bca24a3e44d02ceed6f5efb2ea",
+          "5cba7bd2ec82ebbbf0e6e674dd43183ad09338bca24a3e44d02ceed6f5efb2ea",
+          "b2e59267e7924b146714d4cad6b866cc68a7988238186bf606c7fdd1a7a4b944"
+        ]
+      },
+      "transfers": {
+        "uploads": 3,
+        "downloads": 3,
+        "upload_bytes": 9331200,
+        "download_bytes": 9277272,
+        "filter_passes": 9
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=9331200 download_bytes=9277272 filter_passes=9\nframes=3 input_bytes=9331200 output_bytes=9277272 backend=metal device=\"Apple M4 Max\" controlled_memory_bytes=24799048\n",
+      "command": [
+        "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+        "/private/tmp/fvid-resident-43y5hnuc/input.y4m",
+        "-",
+        "--backend",
+        "metal",
+        "--crop",
+        "2:2:1916:1076",
+        "--then",
+        "--hflip",
+        "--then",
+        "--vflip"
+      ]
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "format": "420",
+      "stages": 3,
+      "input_sha256": "40a76eb8b7def4c62a72d378560cc805c4cc574c64da15427ced695ca5b4ffdd",
+      "output": {
+        "width": 3836,
+        "height": 2156,
+        "chroma": "420",
+        "frames": 3,
+        "frame_sha256": [
+          "e55c0fd628e3847b4c0e3115410ebdb3eb73ebe79f76cbaa096b641c04473780",
+          "e55c0fd628e3847b4c0e3115410ebdb3eb73ebe79f76cbaa096b641c04473780",
+          "2750c34b3fc1c4122e41c6817e8875866dbc4e396fe26a25c1b0478bc95c2ceb"
+        ]
+      },
+      "transfers": {
+        "uploads": 3,
+        "downloads": 3,
+        "upload_bytes": 37324800,
+        "download_bytes": 37216872,
+        "filter_passes": 9
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=37324800 download_bytes=37216872 filter_passes=9\nframes=3 input_bytes=37324800 output_bytes=37216872 backend=metal device=\"Apple M4 Max\" controlled_memory_bytes=99362040\n",
+      "command": [
+        "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+        "/private/tmp/fvid-resident-43y5hnuc/input.y4m",
+        "-",
+        "--backend",
+        "metal",
+        "--crop",
+        "2:2:3836:2156",
+        "--then",
+        "--hflip",
+        "--then",
+        "--vflip"
+      ]
+    },
+    {
+      "width": 16,
+      "height": 12,
+      "format": "420",
+      "stages": 3,
+      "order": "hflip,crop,vflip",
+      "input_sha256": "0edd14b2b33a890da3247597df26adb67d29ef08fb3e5feb7537f66ba24aaba1",
+      "output": {
+        "width": 8,
+        "height": 6,
+        "chroma": "420",
+        "frames": 3,
+        "frame_sha256": [
+          "5678b34a408e9c9b77036582760335381c694e0f7b3ae9bf64075082c9510a9d",
+          "5678b34a408e9c9b77036582760335381c694e0f7b3ae9bf64075082c9510a9d",
+          "081e1acb82a139ee48f77d9ed7368ec62ec5517b12adf2342613f5dbac46c602"
+        ]
+      },
+      "diagnostic": "uploads=3 downloads=3 upload_bytes=864 download_bytes=216 filter_passes=9\nframes=3 input_bytes=864 output_bytes=216 backend=metal device=\"Apple M4 Max\" controlled_memory_bytes=3048\n",
+      "command": [
+        "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+        "/private/tmp/fvid-resident-43y5hnuc/ordered.y4m",
+        "-",
+        "--backend",
+        "metal",
+        "--hflip",
+        "--then",
+        "--crop",
+        "2:2:8:6",
+        "--then",
+        "--vflip"
+      ]
+    }
+  ],
+  "failure_check": {
+    "exit_code": 1,
+    "diagnostic": "fvid: failed to fill whole buffer\n",
+    "unpublished": true
+  },
+  "resident_api_test": {
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "--test",
+      "resident",
+      "metal_resident_chain",
+      "--",
+      "--ignored",
+      "--nocapture"
+    ],
+    "stdout": "\nrunning 1 test\ntest metal_resident_chain ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 1.32s\n\n",
+    "stderr": "   Compiling fvid v0.1.0 (/Users/themoretheless/Documents/ChatGPT/fvid)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.64s\n     Running tests/resident.rs (target/debug/deps/resident-2cffcebf58c9a433)\nresident_verified backend=metal device=\"Apple M4 Max\" size=8x6 format=420 uploads=5 downloads=4 filter_passes=15\nresident_verified backend=metal device=\"Apple M4 Max\" size=8x6 format=422 uploads=5 downloads=4 filter_passes=15\nresident_verified backend=metal device=\"Apple M4 Max\" size=9x7 format=444 uploads=5 downloads=4 filter_passes=15\nresident_verified backend=metal device=\"Apple M4 Max\" size=65x17 format=444 uploads=5 downloads=4 filter_passes=15\nresident_verified backend=metal device=\"Apple M4 Max\" size=638x480 format=420 uploads=5 downloads=4 filter_passes=15\nresident_verified backend=metal device=\"Apple M4 Max\" size=1920x1080 format=420 uploads=5 downloads=4 filter_passes=15\nresident_verified backend=metal device=\"Apple M4 Max\" size=3840x2160 format=420 uploads=5 downloads=4 filter_passes=15\n",
+    "exit_code": 0
+  }
+}

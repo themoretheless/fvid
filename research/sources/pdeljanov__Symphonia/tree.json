@@ -1,0 +1,3020 @@
+{
+  "sha": "ee35874b571a35a9a6e15d3bc9a3aaf8f11fbeee",
+  "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/ee35874b571a35a9a6e15d3bc9a3aaf8f11fbeee",
+  "tree": [
+    {
+      "path": ".github",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "cbb2a268daca7c332181aed19777d4f6f537cc2c",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/cbb2a268daca7c332181aed19777d4f6f537cc2c"
+    },
+    {
+      "path": ".github/workflows",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1f165f19928e9b3ef5257fb7e2bc86c9dea25f0d",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/1f165f19928e9b3ef5257fb7e2bc86c9dea25f0d"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "02a2e93767e5ec83c7e8353b932ddce72bbe1ea7",
+      "size": 2905,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/02a2e93767e5ec83c7e8353b932ddce72bbe1ea7"
+    },
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d4235c7b66130a9f69e9c90f2a9ab6ea3fe1a718",
+      "size": 711,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/d4235c7b66130a9f69e9c90f2a9ab6ea3fe1a718"
+    },
+    {
+      "path": "BENCHMARKS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c385330a3cb74c1bd358776fd500e101cc1b25ad",
+      "size": 7645,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/c385330a3cb74c1bd358776fd500e101cc1b25ad"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b34e939b25e558233d1e301168b6208f7c21b69",
+      "size": 6619,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/8b34e939b25e558233d1e301168b6208f7c21b69"
+    },
+    {
+      "path": "CONTRIBUTORS",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "36409a753b90ac5974d50887af9a30f8f6490300",
+      "size": 1267,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/36409a753b90ac5974d50887af9a30f8f6490300"
+    },
+    {
+      "path": "Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fd30871aa3ffa4b0d7f522d60fdbc51e446e93a4",
+      "size": 1138,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/fd30871aa3ffa4b0d7f522d60fdbc51e446e93a4"
+    },
+    {
+      "path": "GETTING_STARTED.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "45390e814e9ef2c9ed251f398cc4c249f412e7f7",
+      "size": 20430,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/45390e814e9ef2c9ed251f398cc4c249f412e7f7"
+    },
+    {
+      "path": "LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aeda461a13e8d4909e846374324694fcbae05c0d",
+      "size": 12042,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/aeda461a13e8d4909e846374324694fcbae05c0d"
+    },
+    {
+      "path": "benchtest",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "fdda47990f6b0afa6e61771e16c15919d5f89a19",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/fdda47990f6b0afa6e61771e16c15919d5f89a19"
+    },
+    {
+      "path": "benchtest/benchtest.py",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "b38c6b411ceba63493565574eb9a53215c2886df",
+      "size": 2441,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/b38c6b411ceba63493565574eb9a53215c2886df"
+    },
+    {
+      "path": "clippy.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47b77b76f0f5b940207f6301d937c8d1798616ec",
+      "size": 1811,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/47b77b76f0f5b940207f6301d937c8d1798616ec"
+    },
+    {
+      "path": "docs",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "894ed537894560cb5848a2c9c611bf2297d48d28",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/894ed537894560cb5848a2c9c611bf2297d48d28"
+    },
+    {
+      "path": "docs/guides",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8390dba3e3bbb0bcaa9d2944124137079550135d",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/8390dba3e3bbb0bcaa9d2944124137079550135d"
+    },
+    {
+      "path": "docs/guides/migration",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "46dc7d7e4704fc3b8267679e9d41b9481833600e",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/46dc7d7e4704fc3b8267679e9d41b9481833600e"
+    },
+    {
+      "path": "docs/guides/migration/0p6.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "35dace77e11a783419d2c24cede250759a6de2aa",
+      "size": 12424,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/35dace77e11a783419d2c24cede250759a6de2aa"
+    },
+    {
+      "path": "rustfmt.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a1cf3d2bacf583c9afd447d55cbe68318db33d94",
+      "size": 377,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/a1cf3d2bacf583c9afd447d55cbe68318db33d94"
+    },
+    {
+      "path": "symphonia-bundle-flac",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "446e8155750ee7e7bd659df511d99e0f67c10c8a",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/446e8155750ee7e7bd659df511d99e0f67c10c8a"
+    },
+    {
+      "path": "symphonia-bundle-flac/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d5c798a70c2296617ef7af794b6e68d01e26864f",
+      "size": 878,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/d5c798a70c2296617ef7af794b6e68d01e26864f"
+    },
+    {
+      "path": "symphonia-bundle-flac/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-bundle-flac/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2503fcc479f310829941e5898b5490db3100ddeb",
+      "size": 1097,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/2503fcc479f310829941e5898b5490db3100ddeb"
+    },
+    {
+      "path": "symphonia-bundle-flac/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8a2a3444ee4cd7dacd83acfce5283fa375b7472d",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/8a2a3444ee4cd7dacd83acfce5283fa375b7472d"
+    },
+    {
+      "path": "symphonia-bundle-flac/src/decoder.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "086c945f8a092fac6f3f3d580bf660b827e4caa8",
+      "size": 28905,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/086c945f8a092fac6f3f3d580bf660b827e4caa8"
+    },
+    {
+      "path": "symphonia-bundle-flac/src/demuxer.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ff3ea2251a3f830d7f66d1c09eff8db39b821e10",
+      "size": 18607,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/ff3ea2251a3f830d7f66d1c09eff8db39b821e10"
+    },
+    {
+      "path": "symphonia-bundle-flac/src/frame.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "129e042fb732b793f3be2b354cffec6285b383a4",
+      "size": 12286,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/129e042fb732b793f3be2b354cffec6285b383a4"
+    },
+    {
+      "path": "symphonia-bundle-flac/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2b4bf45068b475bc7d10e1d4919035d04b96096a",
+      "size": 714,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/2b4bf45068b475bc7d10e1d4919035d04b96096a"
+    },
+    {
+      "path": "symphonia-bundle-flac/src/parser.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3521afe5eda2b861531c60016f5330363776bbd7",
+      "size": 23966,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/3521afe5eda2b861531c60016f5330363776bbd7"
+    },
+    {
+      "path": "symphonia-bundle-flac/src/validate.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5828e33402b3fb19d7810f1b88c2887637dc3dbc",
+      "size": 4292,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/5828e33402b3fb19d7810f1b88c2887637dc3dbc"
+    },
+    {
+      "path": "symphonia-bundle-mp3",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8222d929cb7f6129c360f705b6ff1ec2bf36e04b",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/8222d929cb7f6129c360f705b6ff1ec2bf36e04b"
+    },
+    {
+      "path": "symphonia-bundle-mp3/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7adf21150fd874864324a0531d19853b3fd4ac4a",
+      "size": 803,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/7adf21150fd874864324a0531d19853b3fd4ac4a"
+    },
+    {
+      "path": "symphonia-bundle-mp3/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-bundle-mp3/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c691916e2e2ed974e24a6279e9cc4cc7b54e5213",
+      "size": 1031,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/c691916e2e2ed974e24a6279e9cc4cc7b54e5213"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9c3086d1623d676bb76635d85dbb7ab5888035d5",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/9c3086d1623d676bb76635d85dbb7ab5888035d5"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/common.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a601883e80be1a70cca3dea01848271c20be5dc",
+      "size": 6213,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/0a601883e80be1a70cca3dea01848271c20be5dc"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/decoder.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f9f4aeda3961290243adcf8963cfa027308d9bd1",
+      "size": 6447,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f9f4aeda3961290243adcf8963cfa027308d9bd1"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/demuxer.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fc0830f16fc314cbc9e026ae2d3de2ef82eb510e",
+      "size": 41066,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/fc0830f16fc314cbc9e026ae2d3de2ef82eb510e"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/header.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "412308127c25cd9c6f97eb7411b0c29c69a5ac9d",
+      "size": 9263,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/412308127c25cd9c6f97eb7411b0c29c69a5ac9d"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/layer1",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "234bd0cbc4ac9f2ffa0224c0733229c1d215bfd0",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/234bd0cbc4ac9f2ffa0224c0733229c1d215bfd0"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/layer1/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cda383c2b699445c5ee66af7e1b870fc2f4a6da3",
+      "size": 6672,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/cda383c2b699445c5ee66af7e1b870fc2f4a6da3"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/layer12.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "83c7b505e5f40e9e8fb8bd98b736445b11794b72",
+      "size": 2011,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/83c7b505e5f40e9e8fb8bd98b736445b11794b72"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/layer2",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f950be003842d4dd7f2ae694c9d2dc6cb7436a65",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/f950be003842d4dd7f2ae694c9d2dc6cb7436a65"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/layer2/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a3de12e07534994979ec2a22b9d5c6fe61e5febe",
+      "size": 14865,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/a3de12e07534994979ec2a22b9d5c6fe61e5febe"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/layer3",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5e2a528e798ad12c63b5d9623699af64a635b3ed",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/5e2a528e798ad12c63b5d9623699af64a635b3ed"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/layer3/bitstream.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cbf3de4bd95460e729e877b84172513c83e0f020",
+      "size": 16790,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/cbf3de4bd95460e729e877b84172513c83e0f020"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/layer3/codebooks.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "462468758a32ace9682be0d595263f6820b59de7",
+      "size": 24494,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/462468758a32ace9682be0d595263f6820b59de7"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/layer3/common.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4a86d993be5ffe4bed7029eeaccbeb1a77fc913e",
+      "size": 7360,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/4a86d993be5ffe4bed7029eeaccbeb1a77fc913e"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/layer3/hybrid_synthesis.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3321bfdd4a101d231534d91890d9b15082b1c107",
+      "size": 30178,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/3321bfdd4a101d231534d91890d9b15082b1c107"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/layer3/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "26952a1b07e621ec8b3f2af835de26480274e44d",
+      "size": 19187,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/26952a1b07e621ec8b3f2af835de26480274e44d"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/layer3/requantize.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8a0aa00688b75fffde4aa93974c60d6b309f5ee1",
+      "size": 14762,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/8a0aa00688b75fffde4aa93974c60d6b309f5ee1"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/layer3/stereo.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "65a747355321e3a29875ae72a88674ad05c93b77",
+      "size": 21175,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/65a747355321e3a29875ae72a88674ad05c93b77"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b2e475d6884b2ffd97bbe83ccf0c415ab4a9c8ee",
+      "size": 1535,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/b2e475d6884b2ffd97bbe83ccf0c415ab4a9c8ee"
+    },
+    {
+      "path": "symphonia-bundle-mp3/src/synthesis.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "20491e9b360bee1346b1776ff2841cc3ff0c499a",
+      "size": 35328,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/20491e9b360bee1346b1776ff2841cc3ff0c499a"
+    },
+    {
+      "path": "symphonia-check",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "897ccaf5508bb5660aba45a95b5a14f6478b590b",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/897ccaf5508bb5660aba45a95b5a14f6478b590b"
+    },
+    {
+      "path": "symphonia-check/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a5768330ecadac5a9c8e24c1ab51485012c3855f",
+      "size": 596,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/a5768330ecadac5a9c8e24c1ab51485012c3855f"
+    },
+    {
+      "path": "symphonia-check/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-check/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "18fd6e9b23244c426366fa4f42958c9fbfe37515",
+      "size": 2431,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/18fd6e9b23244c426366fa4f42958c9fbfe37515"
+    },
+    {
+      "path": "symphonia-check/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c0467a27511641411a8e72a40912845db8e8b59e",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/c0467a27511641411a8e72a40912845db8e8b59e"
+    },
+    {
+      "path": "symphonia-check/src/main.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5c0eaa95c739ce969490914d2b67caab423939b3",
+      "size": 16798,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/5c0eaa95c739ce969490914d2b67caab423939b3"
+    },
+    {
+      "path": "symphonia-codec-aac",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4d67ef8559db22a19f78f4edfa937825b5c9617e",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/4d67ef8559db22a19f78f4edfa937825b5c9617e"
+    },
+    {
+      "path": "symphonia-codec-aac/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d2ea370985e9c5f119f8837c12aa80f069012ea4",
+      "size": 821,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/d2ea370985e9c5f119f8837c12aa80f069012ea4"
+    },
+    {
+      "path": "symphonia-codec-aac/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-codec-aac/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fa50f9a86069ad34d533f40d7362ed89f9c9b638",
+      "size": 1055,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/fa50f9a86069ad34d533f40d7362ed89f9c9b638"
+    },
+    {
+      "path": "symphonia-codec-aac/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "71cb537d1bd62a925866be0bfd618e07acaf0d10",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/71cb537d1bd62a925866be0bfd618e07acaf0d10"
+    },
+    {
+      "path": "symphonia-codec-aac/src/aac",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "caa4d6341e281a1a3267ad986872ba8b69dc9373",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/caa4d6341e281a1a3267ad986872ba8b69dc9373"
+    },
+    {
+      "path": "symphonia-codec-aac/src/aac/codebooks.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0aadf3efa2bcf8c8694da5e0c76112ec68b4c3b7",
+      "size": 26485,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/0aadf3efa2bcf8c8694da5e0c76112ec68b4c3b7"
+    },
+    {
+      "path": "symphonia-codec-aac/src/aac/common.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4b671e30b492b23ad75e1629e74eabb4df6ed6ae",
+      "size": 6412,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/4b671e30b492b23ad75e1629e74eabb4df6ed6ae"
+    },
+    {
+      "path": "symphonia-codec-aac/src/aac/cpe.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "95a44f89ab99620f79a856dc357fc1f13c5f8bda",
+      "size": 6263,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/95a44f89ab99620f79a856dc357fc1f13c5f8bda"
+    },
+    {
+      "path": "symphonia-codec-aac/src/aac/dsp.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7297fa47b8cca27b579856a98991165f3897d88b",
+      "size": 5648,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/7297fa47b8cca27b579856a98991165f3897d88b"
+    },
+    {
+      "path": "symphonia-codec-aac/src/aac/ics",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f56619dcf7bde588401f8ec993df91fdf588b00f",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/f56619dcf7bde588401f8ec993df91fdf588b00f"
+    },
+    {
+      "path": "symphonia-codec-aac/src/aac/ics/gain.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1438af1c96e7a76663232c75d570565f4ff5354f",
+      "size": 1213,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/1438af1c96e7a76663232c75d570565f4ff5354f"
+    },
+    {
+      "path": "symphonia-codec-aac/src/aac/ics/ltp.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f6fbd21dff369fa5f25f968d94796469a1b8212c",
+      "size": 1748,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f6fbd21dff369fa5f25f968d94796469a1b8212c"
+    },
+    {
+      "path": "symphonia-codec-aac/src/aac/ics/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "449dbbe740ddca55de429214c5d699ebe9cb9c36",
+      "size": 20907,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/449dbbe740ddca55de429214c5d699ebe9cb9c36"
+    },
+    {
+      "path": "symphonia-codec-aac/src/aac/ics/pulse.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "97258338f1a954f70c626ebf51ba8c905d7e5921",
+      "size": 2841,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/97258338f1a954f70c626ebf51ba8c905d7e5921"
+    },
+    {
+      "path": "symphonia-codec-aac/src/aac/ics/tns.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b2d9bfd11067d538a1646e6bf74a530bc58cf379",
+      "size": 6053,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/b2d9bfd11067d538a1646e6bf74a530bc58cf379"
+    },
+    {
+      "path": "symphonia-codec-aac/src/aac/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f005179617c8f0f14754005551cc301d672f09e1",
+      "size": 10564,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f005179617c8f0f14754005551cc301d672f09e1"
+    },
+    {
+      "path": "symphonia-codec-aac/src/aac/window.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "697c3fbff8360fa5276f400d039833184a223387",
+      "size": 2063,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/697c3fbff8360fa5276f400d039833184a223387"
+    },
+    {
+      "path": "symphonia-codec-aac/src/adts.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "172fe83f063d6f4a49d3f843dd6ed61ef849df4b",
+      "size": 17257,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/172fe83f063d6f4a49d3f843dd6ed61ef849df4b"
+    },
+    {
+      "path": "symphonia-codec-aac/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b6c10fbd5bb369ba192ce2c16743965d67bc3a84",
+      "size": 744,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/b6c10fbd5bb369ba192ce2c16743965d67bc3a84"
+    },
+    {
+      "path": "symphonia-codec-aac/tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7938f4e89594bb0a935ff0fac2664aa3bebfa182",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/7938f4e89594bb0a935ff0fac2664aa3bebfa182"
+    },
+    {
+      "path": "symphonia-codec-aac/tests/tests.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9cfdac1578307cce164f068da08260cfa498e499",
+      "size": 1207,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/9cfdac1578307cce164f068da08260cfa498e499"
+    },
+    {
+      "path": "symphonia-codec-adpcm",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "477e96bc326ba9cdc905a3162d964c478d84a8a9",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/477e96bc326ba9cdc905a3162d964c478d84a8a9"
+    },
+    {
+      "path": "symphonia-codec-adpcm/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "90efd268c9cabdaa8d4e9aa6d9afd20a674d9c1b",
+      "size": 715,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/90efd268c9cabdaa8d4e9aa6d9afd20a674d9c1b"
+    },
+    {
+      "path": "symphonia-codec-adpcm/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-codec-adpcm/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1b070ec90cd99a43d20cf2e5244c6bba38a3c8dc",
+      "size": 884,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/1b070ec90cd99a43d20cf2e5244c6bba38a3c8dc"
+    },
+    {
+      "path": "symphonia-codec-adpcm/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a6e6c1581e4755a19b6155c83c989907c7f30d0f",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/a6e6c1581e4755a19b6155c83c989907c7f30d0f"
+    },
+    {
+      "path": "symphonia-codec-adpcm/src/codec_ima_qt.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "55bcd9669ace922a90e869a7ec14ed9e59313649",
+      "size": 1495,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/55bcd9669ace922a90e869a7ec14ed9e59313649"
+    },
+    {
+      "path": "symphonia-codec-adpcm/src/codec_ima_wav.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d3e8993087099f4cd93804c729196370be39cb8a",
+      "size": 2429,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/d3e8993087099f4cd93804c729196370be39cb8a"
+    },
+    {
+      "path": "symphonia-codec-adpcm/src/codec_ms.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e05fbb77dd6308a04d897f2925687576c9a85997",
+      "size": 5077,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/e05fbb77dd6308a04d897f2925687576c9a85997"
+    },
+    {
+      "path": "symphonia-codec-adpcm/src/common.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a4774b79a9a9c8ff081d2db8061da8f949ca7d7",
+      "size": 813,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/3a4774b79a9a9c8ff081d2db8061da8f949ca7d7"
+    },
+    {
+      "path": "symphonia-codec-adpcm/src/common_ima.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "90db3c4e242c0de1db14d99b083b15d08a37de8f",
+      "size": 1861,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/90db3c4e242c0de1db14d99b083b15d08a37de8f"
+    },
+    {
+      "path": "symphonia-codec-adpcm/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ef25d83280dc236e33a8e5dc3f7b82570701f84",
+      "size": 7832,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/3ef25d83280dc236e33a8e5dc3f7b82570701f84"
+    },
+    {
+      "path": "symphonia-codec-alac",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "667bb90cb874321727c483572aa9362d8dbac664",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/667bb90cb874321727c483572aa9362d8dbac664"
+    },
+    {
+      "path": "symphonia-codec-alac/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0c67da4e01aca6a4f261d3f45a59730db190368e",
+      "size": 736,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/0c67da4e01aca6a4f261d3f45a59730db190368e"
+    },
+    {
+      "path": "symphonia-codec-alac/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-codec-alac/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b96873daaaa901c185f53042080de3309c7ecff",
+      "size": 736,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/7b96873daaaa901c185f53042080de3309c7ecff"
+    },
+    {
+      "path": "symphonia-codec-alac/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6ef1b6c3a9a934c45071f89731c5b03f91b7a0f3",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/6ef1b6c3a9a934c45071f89731c5b03f91b7a0f3"
+    },
+    {
+      "path": "symphonia-codec-alac/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3213410141cecdfee68d51dd8b60982f09808d0c",
+      "size": 24226,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/3213410141cecdfee68d51dd8b60982f09808d0c"
+    },
+    {
+      "path": "symphonia-codec-opus",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "faa52f5f1eb2d853e080ce1b766a1be96ad2f793",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/faa52f5f1eb2d853e080ce1b766a1be96ad2f793"
+    },
+    {
+      "path": "symphonia-codec-opus/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5433ef3e6ed06c30435f71d10a1cd058ed45d8cc",
+      "size": 660,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/5433ef3e6ed06c30435f71d10a1cd058ed45d8cc"
+    },
+    {
+      "path": "symphonia-codec-opus/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-codec-opus/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78c5858b6f26f6d0d54d21f690c103e9b332adf4",
+      "size": 584,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/78c5858b6f26f6d0d54d21f690c103e9b332adf4"
+    },
+    {
+      "path": "symphonia-codec-opus/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8f9f0c25a8db3da751fb32b09c1fe061ae3109f0",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/8f9f0c25a8db3da751fb32b09c1fe061ae3109f0"
+    },
+    {
+      "path": "symphonia-codec-opus/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc"
+    },
+    {
+      "path": "symphonia-codec-pcm",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "2c8d81cc8b526870352e8932e9851bd0548f21db",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/2c8d81cc8b526870352e8932e9851bd0548f21db"
+    },
+    {
+      "path": "symphonia-codec-pcm/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d790cdc1ed68723676a3c10a9706ca8053e90a2",
+      "size": 668,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/3d790cdc1ed68723676a3c10a9706ca8053e90a2"
+    },
+    {
+      "path": "symphonia-codec-pcm/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-codec-pcm/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b70b3364ac9a493cefa8e0d9ecff06cbff98c57",
+      "size": 1532,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/7b70b3364ac9a493cefa8e0d9ecff06cbff98c57"
+    },
+    {
+      "path": "symphonia-codec-pcm/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a13edea123684e46712f92062f7a7f112799f564",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/a13edea123684e46712f92062f7a7f112799f564"
+    },
+    {
+      "path": "symphonia-codec-pcm/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5076d2b51bea1a1b9d6e22c95f5772635e9ad0e0",
+      "size": 24674,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/5076d2b51bea1a1b9d6e22c95f5772635e9ad0e0"
+    },
+    {
+      "path": "symphonia-codec-vorbis",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "557bc11cd0ddc47c088ead04b3e5b78bbf421782",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/557bc11cd0ddc47c088ead04b3e5b78bbf421782"
+    },
+    {
+      "path": "symphonia-codec-vorbis/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b1be8cd23bb7836e91289a781512b0eee11368c0",
+      "size": 742,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/b1be8cd23bb7836e91289a781512b0eee11368c0"
+    },
+    {
+      "path": "symphonia-codec-vorbis/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-codec-vorbis/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5e8d7e58f128d121172792a1696877f5203545aa",
+      "size": 715,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/5e8d7e58f128d121172792a1696877f5203545aa"
+    },
+    {
+      "path": "symphonia-codec-vorbis/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "710098f2bd4e4cdc390947e29d2af5638e4af55e",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/710098f2bd4e4cdc390947e29d2af5638e4af55e"
+    },
+    {
+      "path": "symphonia-codec-vorbis/src/codebook.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a478182ae3ac97849db15115e5fbe9a8323adac",
+      "size": 18326,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/6a478182ae3ac97849db15115e5fbe9a8323adac"
+    },
+    {
+      "path": "symphonia-codec-vorbis/src/common.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba05d9c0ef26deeff30ba8b9dab68fcaa43305f5",
+      "size": 4234,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/ba05d9c0ef26deeff30ba8b9dab68fcaa43305f5"
+    },
+    {
+      "path": "symphonia-codec-vorbis/src/dsp.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7757fa1f6379f6898dd4c994150bdd08698390ca",
+      "size": 4454,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/7757fa1f6379f6898dd4c994150bdd08698390ca"
+    },
+    {
+      "path": "symphonia-codec-vorbis/src/floor.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3b11b567beb1cc85d1abdade1e93222efcad5a88",
+      "size": 28277,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/3b11b567beb1cc85d1abdade1e93222efcad5a88"
+    },
+    {
+      "path": "symphonia-codec-vorbis/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a47a8ccf7876171ae94ce40f09a3ae5d478e2c88",
+      "size": 25742,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/a47a8ccf7876171ae94ce40f09a3ae5d478e2c88"
+    },
+    {
+      "path": "symphonia-codec-vorbis/src/residue.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e3bc9f3c1cd85f5c0b8095fadee1c16da135c41e",
+      "size": 19589,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/e3bc9f3c1cd85f5c0b8095fadee1c16da135c41e"
+    },
+    {
+      "path": "symphonia-codec-vorbis/src/window.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9e741d9a3bf5ea17d75cf7d213ad7d66a52956f0",
+      "size": 1147,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/9e741d9a3bf5ea17d75cf7d213ad7d66a52956f0"
+    },
+    {
+      "path": "symphonia-codec-wavpack",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "fa256770b0630376eae6082b1d4f5faf92281a40",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/fa256770b0630376eae6082b1d4f5faf92281a40"
+    },
+    {
+      "path": "symphonia-codec-wavpack/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "298b9f6faee6ef85a589d3a8b39d6b5f76dc27dd",
+      "size": 674,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/298b9f6faee6ef85a589d3a8b39d6b5f76dc27dd"
+    },
+    {
+      "path": "symphonia-codec-wavpack/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-codec-wavpack/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19a3f69440b3b7c23b3df06ce7b84bd732f46259",
+      "size": 604,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/19a3f69440b3b7c23b3df06ce7b84bd732f46259"
+    },
+    {
+      "path": "symphonia-codec-wavpack/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8f9f0c25a8db3da751fb32b09c1fe061ae3109f0",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/8f9f0c25a8db3da751fb32b09c1fe061ae3109f0"
+    },
+    {
+      "path": "symphonia-codec-wavpack/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc"
+    },
+    {
+      "path": "symphonia-common",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "68d09dced1d5d83e60bc4851440275e23c6f06a6",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/68d09dced1d5d83e60bc4851440275e23c6f06a6"
+    },
+    {
+      "path": "symphonia-common/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "25c53cd432a8fee27ff67a1ea4be26215c0a0524",
+      "size": 791,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/25c53cd432a8fee27ff67a1ea4be26215c0a0524"
+    },
+    {
+      "path": "symphonia-common/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-common/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f2ee8cada900dae03bac7864c5e1ff816a3b8729",
+      "size": 770,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f2ee8cada900dae03bac7864c5e1ff816a3b8729"
+    },
+    {
+      "path": "symphonia-common/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b3a519f09d78121141619f4bce010a01957f1565",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/b3a519f09d78121141619f4bce010a01957f1565"
+    },
+    {
+      "path": "symphonia-common/src/apple",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "86bb85d226ae9a199dba13b13df4a3356e1afdfe",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/86bb85d226ae9a199dba13b13df4a3356e1afdfe"
+    },
+    {
+      "path": "symphonia-common/src/apple/audio",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8e2c88e946ff6dafbc9f59985ac4a7e7cede7e4d",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/8e2c88e946ff6dafbc9f59985ac4a7e7cede7e4d"
+    },
+    {
+      "path": "symphonia-common/src/apple/audio/alac.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "28838f65abbd352e78cde30970b26da0f6a96b70",
+      "size": 6900,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/28838f65abbd352e78cde30970b26da0f6a96b70"
+    },
+    {
+      "path": "symphonia-common/src/apple/audio/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a110775fcd08f61cf6c922b513ab007d728418d1",
+      "size": 295,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/a110775fcd08f61cf6c922b513ab007d728418d1"
+    },
+    {
+      "path": "symphonia-common/src/apple/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "49a2b4a0c1c974661e638d07f0682990a9691cb4",
+      "size": 296,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/49a2b4a0c1c974661e638d07f0682990a9691cb4"
+    },
+    {
+      "path": "symphonia-common/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "880b7b62d0944f9ce27f402b1cc9158c481035e7",
+      "size": 583,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/880b7b62d0944f9ce27f402b1cc9158c481035e7"
+    },
+    {
+      "path": "symphonia-common/src/mpeg",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0d10f9040c24495621541c3a2aa8fe58c8e22514",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/0d10f9040c24495621541c3a2aa8fe58c8e22514"
+    },
+    {
+      "path": "symphonia-common/src/mpeg/audio",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "818fbfe4062d20e6a792938dca45007088a7daa0",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/818fbfe4062d20e6a792938dca45007088a7daa0"
+    },
+    {
+      "path": "symphonia-common/src/mpeg/audio/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0e6e011dc53b51e4e6850b76e78dfc382349ebba",
+      "size": 16106,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/0e6e011dc53b51e4e6850b76e78dfc382349ebba"
+    },
+    {
+      "path": "symphonia-common/src/mpeg/formats",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e28f2dd96e22f8d1c0fa325b7f1935164e69555d",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/e28f2dd96e22f8d1c0fa325b7f1935164e69555d"
+    },
+    {
+      "path": "symphonia-common/src/mpeg/formats/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9592888ad8e4fc990108065881fc631a6a98219e",
+      "size": 12791,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/9592888ad8e4fc990108065881fc631a6a98219e"
+    },
+    {
+      "path": "symphonia-common/src/mpeg/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "08b0bdc89f193cfdcf8c956af8261540dfdac5f1",
+      "size": 587,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/08b0bdc89f193cfdcf8c956af8261540dfdac5f1"
+    },
+    {
+      "path": "symphonia-common/src/mpeg/video",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8a89e6a8519024debe55cbc79bf888f08af4ebb0",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/8a89e6a8519024debe55cbc79bf888f08af4ebb0"
+    },
+    {
+      "path": "symphonia-common/src/mpeg/video/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "108c0922de6ce2f310624ccc6f0212643dd9b7f9",
+      "size": 3912,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/108c0922de6ce2f310624ccc6f0212643dd9b7f9"
+    },
+    {
+      "path": "symphonia-common/src/xiph",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4213f60b7ece336a8b3503cf192c89c71542d2e2",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/4213f60b7ece336a8b3503cf192c89c71542d2e2"
+    },
+    {
+      "path": "symphonia-common/src/xiph/audio",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5456d13e44d035f9d39e964452f0c4b955997c02",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/5456d13e44d035f9d39e964452f0c4b955997c02"
+    },
+    {
+      "path": "symphonia-common/src/xiph/audio/flac",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "aba505c35ba63a9c44fb2ee3d704a9f3d64aaac5",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/aba505c35ba63a9c44fb2ee3d704a9f3d64aaac5"
+    },
+    {
+      "path": "symphonia-common/src/xiph/audio/flac/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dc1ed95e3d5a932dbd5d3e4efe5718a5fb081bc4",
+      "size": 7706,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/dc1ed95e3d5a932dbd5d3e4efe5718a5fb081bc4"
+    },
+    {
+      "path": "symphonia-common/src/xiph/audio/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4288f35dd2801efb4035aa7767e1be480146b079",
+      "size": 584,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/4288f35dd2801efb4035aa7767e1be480146b079"
+    },
+    {
+      "path": "symphonia-common/src/xiph/audio/opus",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e35e1cd98677d942869cc40e4ed5ae802881daee",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/e35e1cd98677d942869cc40e4ed5ae802881daee"
+    },
+    {
+      "path": "symphonia-common/src/xiph/audio/opus/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e8a5f6ec664871620efb762e1b2c78e14d3f9ef8",
+      "size": 4670,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/e8a5f6ec664871620efb762e1b2c78e14d3f9ef8"
+    },
+    {
+      "path": "symphonia-common/src/xiph/audio/vorbis",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5860a2a0c0aee2b8fa36a4e6f1a6d307be095bb0",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/5860a2a0c0aee2b8fa36a4e6f1a6d307be095bb0"
+    },
+    {
+      "path": "symphonia-common/src/xiph/audio/vorbis/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4b914004a3288e05928e3a07d5676523cd071c5a",
+      "size": 6987,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/4b914004a3288e05928e3a07d5676523cd071c5a"
+    },
+    {
+      "path": "symphonia-common/src/xiph/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d52f6f79254cb1ce7322f567af2b2b3ed05c5ce",
+      "size": 555,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/9d52f6f79254cb1ce7322f567af2b2b3ed05c5ce"
+    },
+    {
+      "path": "symphonia-core",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4b2a6bb7c0e4916cc2ebee21a1886ef20b83b007",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/4b2a6bb7c0e4916cc2ebee21a1886ef20b83b007"
+    },
+    {
+      "path": "symphonia-core/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b8eb4640a66fe0b1e38064bf56fbe935473104c6",
+      "size": 1199,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/b8eb4640a66fe0b1e38064bf56fbe935473104c6"
+    },
+    {
+      "path": "symphonia-core/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-core/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c3c9c16929465bd901e2bb3972c991fc6e64cb44",
+      "size": 760,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/c3c9c16929465bd901e2bb3972c991fc6e64cb44"
+    },
+    {
+      "path": "symphonia-core/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9150fc71e6cfa92b31861477020080ffb04031e7",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/9150fc71e6cfa92b31861477020080ffb04031e7"
+    },
+    {
+      "path": "symphonia-core/src/audio",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d50cdd83e3fedbad29ca3b0c6817d9844682221d",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/d50cdd83e3fedbad29ca3b0c6817d9844682221d"
+    },
+    {
+      "path": "symphonia-core/src/audio/buf.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c160980b8371b2964ff810d1091e33c914d5ff5a",
+      "size": 22795,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/c160980b8371b2964ff810d1091e33c914d5ff5a"
+    },
+    {
+      "path": "symphonia-core/src/audio/channels.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "173c07c27a57bfb25a21d2c336028ebf423c4894",
+      "size": 39153,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/173c07c27a57bfb25a21d2c336028ebf423c4894"
+    },
+    {
+      "path": "symphonia-core/src/audio/conv.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f46c999c832ef73b6bdf995f6b39e5674f4eb514",
+      "size": 41557,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f46c999c832ef73b6bdf995f6b39e5674f4eb514"
+    },
+    {
+      "path": "symphonia-core/src/audio/generic.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9933ad8582c00516a0fe7cf7e20c5535442fc089",
+      "size": 36962,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/9933ad8582c00516a0fe7cf7e20c5535442fc089"
+    },
+    {
+      "path": "symphonia-core/src/audio/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4d77fb53aaa7eb850d03b96be077a56b05fd1b10",
+      "size": 22434,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/4d77fb53aaa7eb850d03b96be077a56b05fd1b10"
+    },
+    {
+      "path": "symphonia-core/src/audio/sample.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6c72214fad0467b921452be9d543c7faa4b82a6f",
+      "size": 18356,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/6c72214fad0467b921452be9d543c7faa4b82a6f"
+    },
+    {
+      "path": "symphonia-core/src/audio/slice.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e6e8346c5d274204766af0f012a1e9a3c425508",
+      "size": 8496,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/2e6e8346c5d274204766af0f012a1e9a3c425508"
+    },
+    {
+      "path": "symphonia-core/src/audio/util.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47d947878d7a5f766ae660a4185f36c1545650fa",
+      "size": 11238,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/47d947878d7a5f766ae660a4185f36c1545650fa"
+    },
+    {
+      "path": "symphonia-core/src/checksum",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c038adf329c56ee7aa51618d1b4d28c577f8f515",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/c038adf329c56ee7aa51618d1b4d28c577f8f515"
+    },
+    {
+      "path": "symphonia-core/src/checksum/crc16.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "09618c8d82a8a91f3a9dfe36775d18ba90c8bf8a",
+      "size": 25341,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/09618c8d82a8a91f3a9dfe36775d18ba90c8bf8a"
+    },
+    {
+      "path": "symphonia-core/src/checksum/crc32.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "df3fdfc535191983e7c75dfdfeae539797fd4614",
+      "size": 31952,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/df3fdfc535191983e7c75dfdfeae539797fd4614"
+    },
+    {
+      "path": "symphonia-core/src/checksum/crc8.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba06d8e4d599abbf65430ef09863a6c38e00616e",
+      "size": 2806,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/ba06d8e4d599abbf65430ef09863a6c38e00616e"
+    },
+    {
+      "path": "symphonia-core/src/checksum/md5.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "14aadf992f5f7fe9d250ab0016ff1982e1dd71fa",
+      "size": 12665,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/14aadf992f5f7fe9d250ab0016ff1982e1dd71fa"
+    },
+    {
+      "path": "symphonia-core/src/checksum/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "024b24efa8664df89fb3a9c545492d7baee28a31",
+      "size": 541,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/024b24efa8664df89fb3a9c545492d7baee28a31"
+    },
+    {
+      "path": "symphonia-core/src/codecs",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "dc34431246b7f4afe5731e99ae2855a0ebb41b76",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/dc34431246b7f4afe5731e99ae2855a0ebb41b76"
+    },
+    {
+      "path": "symphonia-core/src/codecs/audio.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aebb3a0cee93d74f4d9d110a3d8edbeb4cc74d9f",
+      "size": 20855,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/aebb3a0cee93d74f4d9d110a3d8edbeb4cc74d9f"
+    },
+    {
+      "path": "symphonia-core/src/codecs/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2d0aadc472933b203dbfd8f8edb213db16b8927c",
+      "size": 6743,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/2d0aadc472933b203dbfd8f8edb213db16b8927c"
+    },
+    {
+      "path": "symphonia-core/src/codecs/registry.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4e46bfd12fd95f0b05612d34b60bec2ff04dcaf",
+      "size": 16765,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/c4e46bfd12fd95f0b05612d34b60bec2ff04dcaf"
+    },
+    {
+      "path": "symphonia-core/src/codecs/subtitle.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "019c9ae22ff1effe27bb2d48897b37a7843ea561",
+      "size": 6886,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/019c9ae22ff1effe27bb2d48897b37a7843ea561"
+    },
+    {
+      "path": "symphonia-core/src/codecs/video.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f3dc54bcc40283d709c1b28c190bb9f269f45af2",
+      "size": 15560,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f3dc54bcc40283d709c1b28c190bb9f269f45af2"
+    },
+    {
+      "path": "symphonia-core/src/common.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af401b2c6cb5be0c0fc7ff8e00fa551580488ac7",
+      "size": 3147,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/af401b2c6cb5be0c0fc7ff8e00fa551580488ac7"
+    },
+    {
+      "path": "symphonia-core/src/dsp",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "37ab7323432321cb08d3ed3467f57b28e60bed66",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/37ab7323432321cb08d3ed3467f57b28e60bed66"
+    },
+    {
+      "path": "symphonia-core/src/dsp/fft",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d4665e2fc47bcc2c0d647b4aa05f72a532217c77",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/d4665e2fc47bcc2c0d647b4aa05f72a532217c77"
+    },
+    {
+      "path": "symphonia-core/src/dsp/fft/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5bb009875f9ba17a4dc97cacd09c4141c784c46e",
+      "size": 8604,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/5bb009875f9ba17a4dc97cacd09c4141c784c46e"
+    },
+    {
+      "path": "symphonia-core/src/dsp/fft/no_simd.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b1cb3016a00d51c723850dd2384a5457fbda89c",
+      "size": 14123,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/7b1cb3016a00d51c723850dd2384a5457fbda89c"
+    },
+    {
+      "path": "symphonia-core/src/dsp/fft/simd.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aabb573004918a129bdd53fd17d55ac24a3867f0",
+      "size": 3653,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/aabb573004918a129bdd53fd17d55ac24a3867f0"
+    },
+    {
+      "path": "symphonia-core/src/dsp/mdct.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "302464dd3b9924b4e89c524b50dc08d92d0c3805",
+      "size": 7773,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/302464dd3b9924b4e89c524b50dc08d92d0c3805"
+    },
+    {
+      "path": "symphonia-core/src/dsp/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7dcf4ff5b5e83825e3838fb0b5c2a962b606b149",
+      "size": 438,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/7dcf4ff5b5e83825e3838fb0b5c2a962b606b149"
+    },
+    {
+      "path": "symphonia-core/src/errors.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ea5aa53de3868ff0cf97fa701a512939a706b4fb",
+      "size": 4034,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/ea5aa53de3868ff0cf97fa701a512939a706b4fb"
+    },
+    {
+      "path": "symphonia-core/src/formats",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "46be824c319a4773f4c30248bd43237351c6ade0",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/46be824c319a4773f4c30248bd43237351c6ade0"
+    },
+    {
+      "path": "symphonia-core/src/formats/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d8b9629b29ffcd9abbf0ebdbfed4c70e9ec45d37",
+      "size": 29116,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/d8b9629b29ffcd9abbf0ebdbfed4c70e9ec45d37"
+    },
+    {
+      "path": "symphonia-core/src/formats/probe.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "51d2b25cc3a36f0a77570bd85f84346b53705014",
+      "size": 29163,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/51d2b25cc3a36f0a77570bd85f84346b53705014"
+    },
+    {
+      "path": "symphonia-core/src/formats/util.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4e3433c3eb354bb75872533b8b290575ae61738a",
+      "size": 9016,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/4e3433c3eb354bb75872533b8b290575ae61738a"
+    },
+    {
+      "path": "symphonia-core/src/io",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c39e59b34ce803104d478458e747809f0366d4b8",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/c39e59b34ce803104d478458e747809f0366d4b8"
+    },
+    {
+      "path": "symphonia-core/src/io/bit.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1f5a9a5a413ee12802bf07bcb701ef80bb2d17f8",
+      "size": 71558,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/1f5a9a5a413ee12802bf07bcb701ef80bb2d17f8"
+    },
+    {
+      "path": "symphonia-core/src/io/buf_reader.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b4342c4c13b11180edd778821cc46aefb55a0e5e",
+      "size": 8936,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/b4342c4c13b11180edd778821cc46aefb55a0e5e"
+    },
+    {
+      "path": "symphonia-core/src/io/media_source_stream.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "64c0634dc11cef81d42154665db1dfba59f227c4",
+      "size": 24812,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/64c0634dc11cef81d42154665db1dfba59f227c4"
+    },
+    {
+      "path": "symphonia-core/src/io/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b69fbeffb6cfda340e8ba2543f10cd47848863a1",
+      "size": 22413,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/b69fbeffb6cfda340e8ba2543f10cd47848863a1"
+    },
+    {
+      "path": "symphonia-core/src/io/monitor_stream.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cc4dd15c49afa108e7ecf6b661528016a4404b33",
+      "size": 4012,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/cc4dd15c49afa108e7ecf6b661528016a4404b33"
+    },
+    {
+      "path": "symphonia-core/src/io/scoped_stream.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "91aae218ca7118d3b717bdbae02988c74e64b45b",
+      "size": 6169,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/91aae218ca7118d3b717bdbae02988c74e64b45b"
+    },
+    {
+      "path": "symphonia-core/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba2ee615a8b8c2f8387d37157733f8cdb605b814",
+      "size": 778,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/ba2ee615a8b8c2f8387d37157733f8cdb605b814"
+    },
+    {
+      "path": "symphonia-core/src/meta.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c8db5b8da925a8938d98e7f32f203f8e7bb4a6c0",
+      "size": 31783,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/c8db5b8da925a8938d98e7f32f203f8e7bb4a6c0"
+    },
+    {
+      "path": "symphonia-core/src/packet.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5332436bb3475f3b89f478d8813dd4a90a86dc34",
+      "size": 17643,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/5332436bb3475f3b89f478d8813dd4a90a86dc34"
+    },
+    {
+      "path": "symphonia-core/src/subtitle",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3df8462280d95adad78ced34b58c563cb82d2e00",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/3df8462280d95adad78ced34b58c563cb82d2e00"
+    },
+    {
+      "path": "symphonia-core/src/subtitle/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6f3cbb8a4dde12fcf5f73dd934b0a06b7e54edd1",
+      "size": 792,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/6f3cbb8a4dde12fcf5f73dd934b0a06b7e54edd1"
+    },
+    {
+      "path": "symphonia-core/src/units.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "833ee37a3a96d5fcc3b427b34f1e602b7c233243",
+      "size": 54064,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/833ee37a3a96d5fcc3b427b34f1e602b7c233243"
+    },
+    {
+      "path": "symphonia-core/src/util.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f88238adf1146ced1409d63545249bf828c49517",
+      "size": 23683,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f88238adf1146ced1409d63545249bf828c49517"
+    },
+    {
+      "path": "symphonia-core/src/video",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "fe840a769450ed16f73e00727f220e5c931adde1",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/fe840a769450ed16f73e00727f220e5c931adde1"
+    },
+    {
+      "path": "symphonia-core/src/video/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "65305dbbcc982edce9ff9937779bff6201b352cb",
+      "size": 589,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/65305dbbcc982edce9ff9937779bff6201b352cb"
+    },
+    {
+      "path": "symphonia-format-caf",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "dfc371d4274e43b853a89c79d4d976e99da7f4ac",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/dfc371d4274e43b853a89c79d4d976e99da7f4ac"
+    },
+    {
+      "path": "symphonia-format-caf/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80d5699a146040bce93b39714529931bb3039b96",
+      "size": 773,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/80d5699a146040bce93b39714529931bb3039b96"
+    },
+    {
+      "path": "symphonia-format-caf/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-format-caf/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9da61a63efcf4b1d9731c637939a74fcb65a68f8",
+      "size": 721,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/9da61a63efcf4b1d9731c637939a74fcb65a68f8"
+    },
+    {
+      "path": "symphonia-format-caf/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "521d29f2e0009dcc09dcb534c80e8d5bed8b8265",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/521d29f2e0009dcc09dcb534c80e8d5bed8b8265"
+    },
+    {
+      "path": "symphonia-format-caf/src/chunks.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "63ec093ff6828cfa7020c7a544321715f3c61158",
+      "size": 25100,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/63ec093ff6828cfa7020c7a544321715f3c61158"
+    },
+    {
+      "path": "symphonia-format-caf/src/demuxer.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19ceb281327788f8d09f7beca7bab2cb7e269e3c",
+      "size": 22157,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/19ceb281327788f8d09f7beca7bab2cb7e269e3c"
+    },
+    {
+      "path": "symphonia-format-caf/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e3da6e58204f87ee7a9e68417f02259e8e0647ec",
+      "size": 645,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/e3da6e58204f87ee7a9e68417f02259e8e0647ec"
+    },
+    {
+      "path": "symphonia-format-isomp4",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "72e064d01950e32bc4962c9de13f0584feef6904",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/72e064d01950e32bc4962c9de13f0584feef6904"
+    },
+    {
+      "path": "symphonia-format-isomp4/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5c8716903d48df4639e30508f650967d1dbc52a8",
+      "size": 849,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/5c8716903d48df4639e30508f650967d1dbc52a8"
+    },
+    {
+      "path": "symphonia-format-isomp4/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-format-isomp4/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8815d8f848c0d5fbc79b3d29ad5522d3a20fa1ec",
+      "size": 729,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/8815d8f848c0d5fbc79b3d29ad5522d3a20fa1ec"
+    },
+    {
+      "path": "symphonia-format-isomp4/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "725ef16faf052a96636c27b0ed51603fd1ba09dd",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/725ef16faf052a96636c27b0ed51603fd1ba09dd"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "aad39ade11b4c70d59301d93fcc5c75df9ca1cb5",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/aad39ade11b4c70d59301d93fcc5c75df9ca1cb5"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/alac.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "50c8665651259e1f13c231db6fca26b4fc6a572e",
+      "size": 2054,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/50c8665651259e1f13c231db6fca26b4fc6a572e"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/avcc.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cc3377d300973aac1966026cdfdd226da0ab29e3",
+      "size": 2250,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/cc3377d300973aac1966026cdfdd226da0ab29e3"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/co64.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "df26f369c83fa0497f7296124c4899f044dce856",
+      "size": 1105,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/df26f369c83fa0497f7296124c4899f044dce856"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/ctts.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4441fbb568777f89a8bb673d35cdbb3d78409355",
+      "size": 581,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/4441fbb568777f89a8bb673d35cdbb3d78409355"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/dac3.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d52724c29a9e57903c64e308fdeae4eedc5d351",
+      "size": 1398,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/1d52724c29a9e57903c64e308fdeae4eedc5d351"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/dec3.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f3105d236fcff6b8d7d848883e7465296533baaf",
+      "size": 1402,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f3105d236fcff6b8d7d848883e7465296533baaf"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/dovi.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "131aa7fd90fd9e6125c9c6deba3c87a7e9310ac4",
+      "size": 1797,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/131aa7fd90fd9e6125c9c6deba3c87a7e9310ac4"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/edts.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "03d8f8bb37767201d2779c32aa602f29fa4f42a8",
+      "size": 961,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/03d8f8bb37767201d2779c32aa602f29fa4f42a8"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/elst.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "edd5784a3456b4dc4324df58f4a239e7566bd841",
+      "size": 2088,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/edd5784a3456b4dc4324df58f4a239e7566bd841"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/esds.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3befee22df504dcbc5b2e2daa19f7e67b8615be0",
+      "size": 4192,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/3befee22df504dcbc5b2e2daa19f7e67b8615be0"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/flac.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "91a9fd313178f29d8609450e8a014c5bebba590a",
+      "size": 2629,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/91a9fd313178f29d8609450e8a014c5bebba590a"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/ftyp.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ba4818982616de22719a1e0314408daa6610067",
+      "size": 2008,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/3ba4818982616de22719a1e0314408daa6610067"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/hdlr.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8bef3fe4b4ab2d7e9ef58a434eb9d0f8729a1d9c",
+      "size": 2419,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/8bef3fe4b4ab2d7e9ef58a434eb9d0f8729a1d9c"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/hvcc.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9838448c8a268571c4ca23c90a4d06bdf0c660c4",
+      "size": 2190,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/9838448c8a268571c4ca23c90a4d06bdf0c660c4"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/ilst.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "700851205e9b8ffa26ffb01a5db01dd9ad921832",
+      "size": 37162,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/700851205e9b8ffa26ffb01a5db01dd9ad921832"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/mdhd.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6eba7ba12071c6b9b98f915bbe6ebb0094ab7e0f",
+      "size": 2687,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/6eba7ba12071c6b9b98f915bbe6ebb0094ab7e0f"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/mdia.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b6d6f9e2b48838bf9582288982d2a80c5a8fee63",
+      "size": 1684,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/b6d6f9e2b48838bf9582288982d2a80c5a8fee63"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/mehd.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2233ddd4c5d7f051b0b558d8813a140c5dbe86ed",
+      "size": 950,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/2233ddd4c5d7f051b0b558d8813a140c5dbe86ed"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/meta.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dd499f063650c88914ba035e9e88072006379052",
+      "size": 1514,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/dd499f063650c88914ba035e9e88072006379052"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/mfhd.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7412e3194a3f3e1037d1dc0634fcd0a0463f13f4",
+      "size": 788,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/7412e3194a3f3e1037d1dc0634fcd0a0463f13f4"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/minf.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5d3fc2400153170d263cf6ed51e9f85da82411b5",
+      "size": 1345,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/5d3fc2400153170d263cf6ed51e9f85da82411b5"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2d649bc1bff6c0aa9747d1968bf84da8879a003d",
+      "size": 37426,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/2d649bc1bff6c0aa9747d1968bf84da8879a003d"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/moof.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f0ddb43822f7d95aeea454eb6a6fd063f8058e6",
+      "size": 1668,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/9f0ddb43822f7d95aeea454eb6a6fd063f8058e6"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/moov.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8ff35d6a6d7f19cc0ab2d48c00342a0fdea59433",
+      "size": 2767,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/8ff35d6a6d7f19cc0ab2d48c00342a0fdea59433"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/mvex.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d70aa7e2dd57a118490e09c7d72be4b963266e69",
+      "size": 1276,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/d70aa7e2dd57a118490e09c7d72be4b963266e69"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/mvhd.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c03e1526659a20fb0e61bd6a712e196da05631e1",
+      "size": 2712,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/c03e1526659a20fb0e61bd6a712e196da05631e1"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/opus.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "956f1eb3e44553dab741c48000032ba77d60b128",
+      "size": 2998,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/956f1eb3e44553dab741c48000032ba77d60b128"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/sidx.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b5a1e824b31fc7e5a95e85d7cda16d735509c728",
+      "size": 3044,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/b5a1e824b31fc7e5a95e85d7cda16d735509c728"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/smhd.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "432a2969bfb6ba3b9b65a61ee1f03ca4980248ec",
+      "size": 855,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/432a2969bfb6ba3b9b65a61ee1f03ca4980248ec"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/stbl.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54fb04390cb698ca71e52d4804978cc23ce56042",
+      "size": 3045,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/54fb04390cb698ca71e52d4804978cc23ce56042"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/stco.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3f99a392f819af1d22a78a402d15e418c190c8bb",
+      "size": 1105,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/3f99a392f819af1d22a78a402d15e418c190c8bb"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/stsc.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1a2940b27d10a6c591a2c66ff0da48ed709c6b36",
+      "size": 4122,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/1a2940b27d10a6c591a2c66ff0da48ed709c6b36"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/stsd.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "73cb913cfd5aec6f9a04cc15e88d0f04808f5432",
+      "size": 27017,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/73cb913cfd5aec6f9a04cc15e88d0f04808f5432"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/stss.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "538d8ca519b3506c6832c0d8e6f900093541e258",
+      "size": 558,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/538d8ca519b3506c6832c0d8e6f900093541e258"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/stsz.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5695bda1c2647af686e25a2e9f99617c96477a8e",
+      "size": 1569,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/5695bda1c2647af686e25a2e9f99617c96477a8e"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/stts.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "49292dec0e5a58ecb6627158d3b81f868c7e018c",
+      "size": 3755,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/49292dec0e5a58ecb6627158d3b81f868c7e018c"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/tfhd.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "76d1ddff78d01b3761960d514a25e55f3605e709",
+      "size": 2294,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/76d1ddff78d01b3761960d514a25e55f3605e709"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/tkhd.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aa5f01fe361cbe516be3a11605c51510a064f1e0",
+      "size": 2548,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/aa5f01fe361cbe516be3a11605c51510a064f1e0"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/traf.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e5cba85612ce3c099bc3d91f772a91b294c4b51c",
+      "size": 1703,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/e5cba85612ce3c099bc3d91f772a91b294c4b51c"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/trak.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "35e6592d30c7e67155c3017d330e4fc1a340bcdd",
+      "size": 1658,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/35e6592d30c7e67155c3017d330e4fc1a340bcdd"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/trex.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5cb476440ea6fd3e0f8e7e187ab0713a94f01a0f",
+      "size": 1225,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/5cb476440ea6fd3e0f8e7e187ab0713a94f01a0f"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/trun.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8bce4e85c6b6969f17fcd14d08926e06b250b177",
+      "size": 11231,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/8bce4e85c6b6969f17fcd14d08926e06b250b177"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/udta.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "37db4ab0500ff8d1e2490dec2205d64c2bb7704c",
+      "size": 1344,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/37db4ab0500ff8d1e2490dec2205d64c2bb7704c"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/atoms/wave.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf7b428987e76cb8b33f792d1a24875988fd34a1",
+      "size": 1108,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/bf7b428987e76cb8b33f792d1a24875988fd34a1"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/demuxer.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47dd0e7a49d4ef0b36fc148232fcc48d4e2f082e",
+      "size": 30439,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/47dd0e7a49d4ef0b36fc148232fcc48d4e2f082e"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/fp.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4c50192300e7bd4ec0f449cbf1de9926ed2ea20e",
+      "size": 1642,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/4c50192300e7bd4ec0f449cbf1de9926ed2ea20e"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b85ce38467e828136ba1b7d8cc9681126827ad3",
+      "size": 643,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/8b85ce38467e828136ba1b7d8cc9681126827ad3"
+    },
+    {
+      "path": "symphonia-format-isomp4/src/stream.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "69701887bf5bbf4b14d514d5500d975acfacadf3",
+      "size": 17481,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/69701887bf5bbf4b14d514d5500d975acfacadf3"
+    },
+    {
+      "path": "symphonia-format-mkv",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "78e151e35cc4e88a66724b164f770e01cc6ab8cc",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/78e151e35cc4e88a66724b164f770e01cc6ab8cc"
+    },
+    {
+      "path": "symphonia-format-mkv/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "20e97d6c7d9d25293ab7067ee9c236dbd369250d",
+      "size": 832,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/20e97d6c7d9d25293ab7067ee9c236dbd369250d"
+    },
+    {
+      "path": "symphonia-format-mkv/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-format-mkv/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8c307dd3297fd9ac0500ecf8647eb0e6cb2b2905",
+      "size": 717,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/8c307dd3297fd9ac0500ecf8647eb0e6cb2b2905"
+    },
+    {
+      "path": "symphonia-format-mkv/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3ea8aac8cfcecf18d84887af6224a6f4a0acc6e2",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/3ea8aac8cfcecf18d84887af6224a6f4a0acc6e2"
+    },
+    {
+      "path": "symphonia-format-mkv/src/codecs.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a7989528c64c91daf3648143dc37b2897590d145",
+      "size": 15002,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/a7989528c64c91daf3648143dc37b2897590d145"
+    },
+    {
+      "path": "symphonia-format-mkv/src/demuxer.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "14b77803858a70824ab222c6e7639c47566f8905",
+      "size": 27399,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/14b77803858a70824ab222c6e7639c47566f8905"
+    },
+    {
+      "path": "symphonia-format-mkv/src/ebml.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "135cfe7418cf295f9fc3bc0f5b56433843f3824b",
+      "size": 39083,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/135cfe7418cf295f9fc3bc0f5b56433843f3824b"
+    },
+    {
+      "path": "symphonia-format-mkv/src/lacing.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9ef4831296095647c9e1976a73ad45e1e4e02116",
+      "size": 8556,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/9ef4831296095647c9e1976a73ad45e1e4e02116"
+    },
+    {
+      "path": "symphonia-format-mkv/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "153519935e006e578f984f85d81efb5d4755a4d1",
+      "size": 1363,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/153519935e006e578f984f85d81efb5d4755a4d1"
+    },
+    {
+      "path": "symphonia-format-mkv/src/schema.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af5887f32762ce79a83e4cb1c0317f29ec588c90",
+      "size": 33144,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/af5887f32762ce79a83e4cb1c0317f29ec588c90"
+    },
+    {
+      "path": "symphonia-format-mkv/src/segment.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "86aead18e62fb3443259f0be382f6bb47ea248a7",
+      "size": 83979,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/86aead18e62fb3443259f0be382f6bb47ea248a7"
+    },
+    {
+      "path": "symphonia-format-mkv/src/tags.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a2835065ed3a756ebab59fb97dcbfd92db8ccd4",
+      "size": 23098,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/3a2835065ed3a756ebab59fb97dcbfd92db8ccd4"
+    },
+    {
+      "path": "symphonia-format-ogg",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6c0835438c95015aa80fd9d0510ebfddc1601638",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/6c0835438c95015aa80fd9d0510ebfddc1601638"
+    },
+    {
+      "path": "symphonia-format-ogg/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "99a3481ecba944663935035748501abbd76b3383",
+      "size": 865,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/99a3481ecba944663935035748501abbd76b3383"
+    },
+    {
+      "path": "symphonia-format-ogg/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-format-ogg/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11f4d173954441d30937360b262f3d3fa808435a",
+      "size": 707,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/11f4d173954441d30937360b262f3d3fa808435a"
+    },
+    {
+      "path": "symphonia-format-ogg/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f80dbd37aaeced9a6860f5149620e754cfac53ef",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/f80dbd37aaeced9a6860f5149620e754cfac53ef"
+    },
+    {
+      "path": "symphonia-format-ogg/src/common.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31c22a713b0ab6f0ec10420aee2de79876b4dcdd",
+      "size": 495,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/31c22a713b0ab6f0ec10420aee2de79876b4dcdd"
+    },
+    {
+      "path": "symphonia-format-ogg/src/demuxer.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d3febd16853dfd65600c13d736cab94740e95abc",
+      "size": 22357,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/d3febd16853dfd65600c13d736cab94740e95abc"
+    },
+    {
+      "path": "symphonia-format-ogg/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "94838f27718f816be7291e32eb426d288ac60658",
+      "size": 696,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/94838f27718f816be7291e32eb426d288ac60658"
+    },
+    {
+      "path": "symphonia-format-ogg/src/logical.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c115e0c220097f01913a9abea6aadd551e605b4d",
+      "size": 24823,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/c115e0c220097f01913a9abea6aadd551e605b4d"
+    },
+    {
+      "path": "symphonia-format-ogg/src/mappings",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9c941618930882cac49cdc2dd9a14807f4ded778",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/9c941618930882cac49cdc2dd9a14807f4ded778"
+    },
+    {
+      "path": "symphonia-format-ogg/src/mappings/flac.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b842c20fe3c77ec709a3279641c90582d8c4eada",
+      "size": 11524,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/b842c20fe3c77ec709a3279641c90582d8c4eada"
+    },
+    {
+      "path": "symphonia-format-ogg/src/mappings/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b4453cc1df5c71e65a846a18affbfab158f89f8",
+      "size": 3668,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/8b4453cc1df5c71e65a846a18affbfab158f89f8"
+    },
+    {
+      "path": "symphonia-format-ogg/src/mappings/opus.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e98ba22f19b02059418d8f57d14acbda91cfaf07",
+      "size": 6605,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/e98ba22f19b02059418d8f57d14acbda91cfaf07"
+    },
+    {
+      "path": "symphonia-format-ogg/src/mappings/vorbis.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "61596752f6f99a2303ac29ae808f6c57bb7a8273",
+      "size": 23371,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/61596752f6f99a2303ac29ae808f6c57bb7a8273"
+    },
+    {
+      "path": "symphonia-format-ogg/src/page.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80ba274a6231b5ef567b6de5292761eea4b8c555",
+      "size": 10398,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/80ba274a6231b5ef567b6de5292761eea4b8c555"
+    },
+    {
+      "path": "symphonia-format-ogg/src/physical.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "005a291345002fa8c88e5fc2774d4c42d67a73e6",
+      "size": 6979,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/005a291345002fa8c88e5fc2774d4c42d67a73e6"
+    },
+    {
+      "path": "symphonia-format-riff",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "11a3aa76b98c81a46924371d84421195fb3c16c8",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/11a3aa76b98c81a46924371d84421195fb3c16c8"
+    },
+    {
+      "path": "symphonia-format-riff/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0c98986e71dd2acb63d6fd475f08e1a2cc002e8f",
+      "size": 972,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/0c98986e71dd2acb63d6fd475f08e1a2cc002e8f"
+    },
+    {
+      "path": "symphonia-format-riff/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-format-riff/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d04a17c98f5cb4c9568664588b9e2bfbbac1534",
+      "size": 1115,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/1d04a17c98f5cb4c9568664588b9e2bfbbac1534"
+    },
+    {
+      "path": "symphonia-format-riff/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4cb543bd567ca5fb15fed61c5fa51f6b84a8c4de",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/4cb543bd567ca5fb15fed61c5fa51f6b84a8c4de"
+    },
+    {
+      "path": "symphonia-format-riff/src/aiff",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e802883d3baf7c1701aa835ebb40b75681f790c8",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/e802883d3baf7c1701aa835ebb40b75681f790c8"
+    },
+    {
+      "path": "symphonia-format-riff/src/aiff/chunks.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d3330cd492a8ec86b40fa6fe54a40c328e8dd771",
+      "size": 20474,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/d3330cd492a8ec86b40fa6fe54a40c328e8dd771"
+    },
+    {
+      "path": "symphonia-format-riff/src/aiff/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "538592c1a45feedf33b3010c6c25786027ad6739",
+      "size": 17023,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/538592c1a45feedf33b3010c6c25786027ad6739"
+    },
+    {
+      "path": "symphonia-format-riff/src/common.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "98109130c9e60791f2405aa1cee9736f6a75a002",
+      "size": 17031,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/98109130c9e60791f2405aa1cee9736f6a75a002"
+    },
+    {
+      "path": "symphonia-format-riff/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "471733d5048c132f119b1a01306bcc687a979b3a",
+      "size": 774,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/471733d5048c132f119b1a01306bcc687a979b3a"
+    },
+    {
+      "path": "symphonia-format-riff/src/wave",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6097999fa3d2422a84036d7cba38c29406d58ecf",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/6097999fa3d2422a84036d7cba38c29406d58ecf"
+    },
+    {
+      "path": "symphonia-format-riff/src/wave/chunks.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5e40b602964ac8e11f1797ce33799a6d47f7da4d",
+      "size": 31705,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/5e40b602964ac8e11f1797ce33799a6d47f7da4d"
+    },
+    {
+      "path": "symphonia-format-riff/src/wave/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf5b9ff86a75bc6661720a8513790444452086b7",
+      "size": 12014,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/bf5b9ff86a75bc6661720a8513790444452086b7"
+    },
+    {
+      "path": "symphonia-metadata",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "43e532556afb573db5a9da37c0964a11818f5c02",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/43e532556afb573db5a9da37c0964a11818f5c02"
+    },
+    {
+      "path": "symphonia-metadata/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "45b09875034ef93910dea54a6f11feb449713a84",
+      "size": 1108,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/45b09875034ef93910dea54a6f11feb449713a84"
+    },
+    {
+      "path": "symphonia-metadata/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-metadata/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d97b9ce6c02a4ab5ba34d3a7c51c741538ba1025",
+      "size": 739,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/d97b9ce6c02a4ab5ba34d3a7c51c741538ba1025"
+    },
+    {
+      "path": "symphonia-metadata/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "76c999e94c91cb2010d880853f6d065ac09eab68",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/76c999e94c91cb2010d880853f6d065ac09eab68"
+    },
+    {
+      "path": "symphonia-metadata/src/ape.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b0483662772ad77ef2eb08fc05ddf4bc0f3a2cf3",
+      "size": 22769,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/b0483662772ad77ef2eb08fc05ddf4bc0f3a2cf3"
+    },
+    {
+      "path": "symphonia-metadata/src/embedded.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b9e1357e2163405b1021cd2384d9cc43ad02c96b",
+      "size": 520,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/b9e1357e2163405b1021cd2384d9cc43ad02c96b"
+    },
+    {
+      "path": "symphonia-metadata/src/embedded",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4bf60159fbbc69a658e2c85ce6e6633ae2962c76",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/4bf60159fbbc69a658e2c85ce6e6633ae2962c76"
+    },
+    {
+      "path": "symphonia-metadata/src/embedded/flac.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e075197db0e2a697145a9c2b89ababd3297fcc32",
+      "size": 14861,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/e075197db0e2a697145a9c2b89ababd3297fcc32"
+    },
+    {
+      "path": "symphonia-metadata/src/embedded/riff.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0ee15a2907228d86aa1bd7e3cc25044e88ef67a4",
+      "size": 4442,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/0ee15a2907228d86aa1bd7e3cc25044e88ef67a4"
+    },
+    {
+      "path": "symphonia-metadata/src/embedded/vorbis.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c6a98bbb3e7c65a594e0ff888d9ac1afe468e71",
+      "size": 24853,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/1c6a98bbb3e7c65a594e0ff888d9ac1afe468e71"
+    },
+    {
+      "path": "symphonia-metadata/src/id3v1.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "094a913cecef49e094c0379fc2b968e3cdbe64d2",
+      "size": 5004,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/094a913cecef49e094c0379fc2b968e3cdbe64d2"
+    },
+    {
+      "path": "symphonia-metadata/src/id3v2",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "90c836bc5bd0f397a82683b0431c18f825a24597",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/90c836bc5bd0f397a82683b0431c18f825a24597"
+    },
+    {
+      "path": "symphonia-metadata/src/id3v2/frames.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e26d57dd06880b9ab820f56d89275b679ac67006",
+      "size": 35054,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/e26d57dd06880b9ab820f56d89275b679ac67006"
+    },
+    {
+      "path": "symphonia-metadata/src/id3v2/frames",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "eac8dc3b8c9c7529c3601a73f5316f0eff3a4f12",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/eac8dc3b8c9c7529c3601a73f5316f0eff3a4f12"
+    },
+    {
+      "path": "symphonia-metadata/src/id3v2/frames/readers.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3e7dee81a5d5ebb560078419e53d2e883627adf4",
+      "size": 50506,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/3e7dee81a5d5ebb560078419e53d2e883627adf4"
+    },
+    {
+      "path": "symphonia-metadata/src/id3v2/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec015de5d974b44fbf1670f1d758d4482159cdb1",
+      "size": 22129,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/ec015de5d974b44fbf1670f1d758d4482159cdb1"
+    },
+    {
+      "path": "symphonia-metadata/src/id3v2/unsync.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0b976e582c8becfc0a7a5ee732c12f398a275640",
+      "size": 6112,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/0b976e582c8becfc0a7a5ee732c12f398a275640"
+    },
+    {
+      "path": "symphonia-metadata/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b07416c0f3a320bca86b68fd03164398b54aa5f7",
+      "size": 1620,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/b07416c0f3a320bca86b68fd03164398b54aa5f7"
+    },
+    {
+      "path": "symphonia-metadata/src/utils",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9ec4db0c78fe586b2c3097b3b262d12abd2c308d",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/9ec4db0c78fe586b2c3097b3b262d12abd2c308d"
+    },
+    {
+      "path": "symphonia-metadata/src/utils/base64.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8c24db4b4f2ffa01e21c13a22bd51586f1c419ea",
+      "size": 4946,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/8c24db4b4f2ffa01e21c13a22bd51586f1c419ea"
+    },
+    {
+      "path": "symphonia-metadata/src/utils/id3v1.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "40116a2ba2078980c92aabfb34332e090b385101",
+      "size": 3939,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/40116a2ba2078980c92aabfb34332e090b385101"
+    },
+    {
+      "path": "symphonia-metadata/src/utils/id3v2.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f19f60bdb59b9c16eeafd7a89c352ffb696a36eb",
+      "size": 1697,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f19f60bdb59b9c16eeafd7a89c352ffb696a36eb"
+    },
+    {
+      "path": "symphonia-metadata/src/utils/images.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1b27aab5ef6d7f796e3491ce11feaab5caf46148",
+      "size": 10747,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/1b27aab5ef6d7f796e3491ce11feaab5caf46148"
+    },
+    {
+      "path": "symphonia-metadata/src/utils/itunes.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3249281d3df302909dc53e2058c69294b0eeb2f8",
+      "size": 4770,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/3249281d3df302909dc53e2058c69294b0eeb2f8"
+    },
+    {
+      "path": "symphonia-metadata/src/utils/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "437b7caa9d101743fe3b091b5a447585f8bcff4f",
+      "size": 423,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/437b7caa9d101743fe3b091b5a447585f8bcff4f"
+    },
+    {
+      "path": "symphonia-metadata/src/utils/std_tag.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2dfbd3459a6652c36ed68745de562521782be0e3",
+      "size": 20233,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/2dfbd3459a6652c36ed68745de562521782be0e3"
+    },
+    {
+      "path": "symphonia-play",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8ee77958853a1bbcb94530a7616f32ea14c722e2",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/8ee77958853a1bbcb94530a7616f32ea14c722e2"
+    },
+    {
+      "path": "symphonia-play/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7ce18a724487c53ee2945d621b9eb8bd54ddd7a8",
+      "size": 1143,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/7ce18a724487c53ee2945d621b9eb8bd54ddd7a8"
+    },
+    {
+      "path": "symphonia-play/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia-play/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3c95bbcb83548df352789ee1ab26e44b10896f6e",
+      "size": 1453,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/3c95bbcb83548df352789ee1ab26e44b10896f6e"
+    },
+    {
+      "path": "symphonia-play/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b54b9af00f3efa2524efa6a6739f08496c2dde81",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/b54b9af00f3efa2524efa6a6739f08496c2dde81"
+    },
+    {
+      "path": "symphonia-play/src/main.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7de3ae6c0f41dc62b5eaabac043857841b21a5b6",
+      "size": 19619,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/7de3ae6c0f41dc62b5eaabac043857841b21a5b6"
+    },
+    {
+      "path": "symphonia-play/src/output.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "123b8f15c761656dfa2a123bf02eb5d394c34625",
+      "size": 17620,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/123b8f15c761656dfa2a123bf02eb5d394c34625"
+    },
+    {
+      "path": "symphonia-play/src/resampler.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cf664d70e3f0f42aad23b0e89a1886abcfbbc254",
+      "size": 5696,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/cf664d70e3f0f42aad23b0e89a1886abcfbbc254"
+    },
+    {
+      "path": "symphonia-play/src/ui.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2d985edd8279e4a037eb5f27ddae35ca5a6ab71d",
+      "size": 44629,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/2d985edd8279e4a037eb5f27ddae35ca5a6ab71d"
+    },
+    {
+      "path": "symphonia",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "2aea91290f65bc2f2137d071ed218839fa4df0b1",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/2aea91290f65bc2f2137d071ed218839fa4df0b1"
+    },
+    {
+      "path": "symphonia/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "32e3a4dba2302371c103e334bdb655f6ae07e561",
+      "size": 4429,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/32e3a4dba2302371c103e334bdb655f6ae07e561"
+    },
+    {
+      "path": "symphonia/LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a",
+      "size": 16725,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f4bbcd200ad42bbb2fe2faf67e87e8619fafc17a"
+    },
+    {
+      "path": "symphonia/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4ebc7ff6ce0ecb3d27c03837e5c004fe878ac1e",
+      "size": 11526,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/e4ebc7ff6ce0ecb3d27c03837e5c004fe878ac1e"
+    },
+    {
+      "path": "symphonia/examples",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0e4dabd774cced22b06ad16b1f25f25a513f0006",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/0e4dabd774cced22b06ad16b1f25f25a513f0006"
+    },
+    {
+      "path": "symphonia/examples/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6c064814b42f530e0fd2f2a2e0ec2395197d7ac2",
+      "size": 390,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/6c064814b42f530e0fd2f2a2e0ec2395197d7ac2"
+    },
+    {
+      "path": "symphonia/examples/basic-interleaved.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d145273c868cb751983f9a884729ab6c3ed04185",
+      "size": 3528,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/d145273c868cb751983f9a884729ab6c3ed04185"
+    },
+    {
+      "path": "symphonia/examples/getting-started.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c22e461593d29aec4c018e263b64a8df5759b15d",
+      "size": 3854,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/c22e461593d29aec4c018e263b64a8df5759b15d"
+    },
+    {
+      "path": "symphonia/fuzz",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0ebd40d4ddf75e615e97332202b07e94cc39e8bd",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/0ebd40d4ddf75e615e97332202b07e94cc39e8bd"
+    },
+    {
+      "path": "symphonia/fuzz/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "572e03bdf321b6cc3a99488183436905cefd086d",
+      "size": 25,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/572e03bdf321b6cc3a99488183436905cefd086d"
+    },
+    {
+      "path": "symphonia/fuzz/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "79ee87427e721a99d4f85006b19bc9ec12e2a9e6",
+      "size": 1887,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/79ee87427e721a99d4f85006b19bc9ec12e2a9e6"
+    },
+    {
+      "path": "symphonia/fuzz/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5fbb159b0e0f01b4d1b485498529d64f4db8d9ba",
+      "size": 1514,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/5fbb159b0e0f01b4d1b485498529d64f4db8d9ba"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "57ae78290477cf07dc0c9067469108a2446a7a75",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/57ae78290477cf07dc0c9067469108a2446a7a75"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/decode_aac.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0cb1f06a53c925655d32f80be5df1fdc9c1f4c14",
+      "size": 734,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/0cb1f06a53c925655d32f80be5df1fdc9c1f4c14"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/decode_adpcm.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7a892018e7e8848d3875b136be0ffaa956a32fb",
+      "size": 1168,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/d7a892018e7e8848d3875b136be0ffaa956a32fb"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/decode_alac.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6fc655729c1683d7a03bb17cb80cf13b40c2c92a",
+      "size": 1604,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/6fc655729c1683d7a03bb17cb80cf13b40c2c92a"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/decode_any.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef0d39f63c2cc3143a07c2e603b8587952c22bba",
+      "size": 1323,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/ef0d39f63c2cc3143a07c2e603b8587952c22bba"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/decode_flac.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7b05b83d53bedcfac02dfe574a5571880029856",
+      "size": 988,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/d7b05b83d53bedcfac02dfe574a5571880029856"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/decode_mpa.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "608adf29a73328d3a6cb15bed0ab9e115f91cc60",
+      "size": 885,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/608adf29a73328d3a6cb15bed0ab9e115f91cc60"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/decode_pcm.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fd916684af9a08a78b1f54be4fa53dfb9af9211c",
+      "size": 1978,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/fd916684af9a08a78b1f54be4fa53dfb9af9211c"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/decode_vorbis.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "90b9e44ab27300cbcb42dc3e04d768c6f89fda20",
+      "size": 1287,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/90b9e44ab27300cbcb42dc3e04d768c6f89fda20"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/demux_aiff.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19c39a126b6c446cde19752161dcf5596450db08",
+      "size": 293,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/19c39a126b6c446cde19752161dcf5596450db08"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/demux_caf.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e52586db7d9ba8e6c9dfe9dcf59ef19e43815425",
+      "size": 291,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/e52586db7d9ba8e6c9dfe9dcf59ef19e43815425"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/demux_flac.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7c91090656d3bb8a28517311780311e2a742be20",
+      "size": 293,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/7c91090656d3bb8a28517311780311e2a742be20"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/demux_isomp4.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "79dfde916b7ba4dc5fc3b8864ed29344bf5a585d",
+      "size": 297,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/79dfde916b7ba4dc5fc3b8864ed29344bf5a585d"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/demux_mkv.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "02136b92affd793b9d4826b77e9f0d189864a6b8",
+      "size": 291,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/02136b92affd793b9d4826b77e9f0d189864a6b8"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/demux_ogg.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f2f275b2ede4680da3010509970046eaf466f8ec",
+      "size": 291,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/f2f275b2ede4680da3010509970046eaf466f8ec"
+    },
+    {
+      "path": "symphonia/fuzz/fuzz_targets/demux_wav.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cee089b93d5bde934d8c318b6f8e192e74bfd137",
+      "size": 291,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/cee089b93d5bde934d8c318b6f8e192e74bfd137"
+    },
+    {
+      "path": "symphonia/fuzz/run_all.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "a2f11f41f0d0799b3da0006fef0c3961fe7db3f3",
+      "size": 894,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/a2f11f41f0d0799b3da0006fef0c3961fe7db3f3"
+    },
+    {
+      "path": "symphonia/fuzz/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "be6ce156b387ee66730c73738f959fea55e2c987",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/be6ce156b387ee66730c73738f959fea55e2c987"
+    },
+    {
+      "path": "symphonia/fuzz/src/demuxer.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4cdd8088d6c1727a55babca4b4cde92b56f3eb08",
+      "size": 805,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/4cdd8088d6c1727a55babca4b4cde92b56f3eb08"
+    },
+    {
+      "path": "symphonia/fuzz/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d3c2c89f24bc89bcc8ebf98987fc8d07dc6a6e16",
+      "size": 563,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/d3c2c89f24bc89bcc8ebf98987fc8d07dc6a6e16"
+    },
+    {
+      "path": "symphonia/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "287a4b3a8476a66db086f138bb77d2afa48fb069",
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/trees/287a4b3a8476a66db086f138bb77d2afa48fb069"
+    },
+    {
+      "path": "symphonia/src/lib.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c6c7e1ac2daf2f23d67dfa642a771524b380d1d4",
+      "size": 11869,
+      "url": "https://api.github.com/repos/pdeljanov/Symphonia/git/blobs/c6c7e1ac2daf2f23d67dfa642a771524b380d1d4"
+    }
+  ],
+  "truncated": false,
+  "pinned_commit": "ee35874b571a35a9a6e15d3bc9a3aaf8f11fbeee"
+}

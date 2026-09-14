@@ -1,0 +1,83 @@
+{
+  "created_utc": "2026-09-05T00:17:15.035573+00:00",
+  "scope": "60-second stereo 48kHz 24-bit WAV, retain 0.4 seconds. Whole CLI, cached input and file output without fsync. 5 randomized runs after equality warmup. Fvid scans the input; FFmpeg seek and filter baselines.",
+  "commands": {
+    "fvid": [
+      "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+      "media",
+      "trim-pcm",
+      "/private/tmp/fvid-pcm-bench-698i1pja/source.wav",
+      "/private/tmp/fvid-pcm-bench-698i1pja/output.wav",
+      "--from",
+      "40.125",
+      "--to",
+      "40.525"
+    ],
+    "ffmpeg_seek": [
+      "ffmpeg",
+      "-nostdin",
+      "-v",
+      "error",
+      "-ss",
+      "40.125",
+      "-i",
+      "/private/tmp/fvid-pcm-bench-698i1pja/source.wav",
+      "-t",
+      "0.4",
+      "-c:a",
+      "pcm_s24le",
+      "/private/tmp/fvid-pcm-bench-698i1pja/output.wav"
+    ],
+    "ffmpeg_filter": [
+      "ffmpeg",
+      "-nostdin",
+      "-v",
+      "error",
+      "-i",
+      "/private/tmp/fvid-pcm-bench-698i1pja/source.wav",
+      "-af",
+      "atrim=start=40.125:end=40.525,asetpts=PTS-STARTPTS",
+      "-c:a",
+      "pcm_s24le",
+      "/private/tmp/fvid-pcm-bench-698i1pja/output.wav"
+    ]
+  },
+  "sample_equality": true,
+  "samples_ms": {
+    "fvid": [
+      20.148209,
+      19.931875,
+      19.690875,
+      19.407834,
+      19.598542
+    ],
+    "ffmpeg_seek": [
+      20.39275,
+      19.475833,
+      19.337917,
+      19.146042,
+      19.799667
+    ],
+    "ffmpeg_filter": [
+      22.407542,
+      22.575541,
+      24.027416,
+      22.219041,
+      22.642291
+    ]
+  },
+  "median_ms": {
+    "fvid": 19.690875,
+    "ffmpeg_seek": 19.475833,
+    "ffmpeg_filter": 22.575541
+  },
+  "binary_sha256": "7fc8782063343ea6ab3fa4c8e17b73e49a39eb34acd2375e26c5600d25e9b9d1",
+  "source_sha256": {
+    "crates/fvid-media/src/edit.rs": "7176935bf00100342e0bbbfe954fa99b078e229a3208682cb140792baa23c575",
+    "crates/fvid-media/src/lib.rs": "5192cd300748cb89c828c0cc38cab87a5d21723b5651932880c28e7c4faf83eb",
+    "crates/fvid-media/src/pcm.rs": "de2e6187343079b6324593a6ccc210ddccb30b1df46f72c521eabd4c8ee04025",
+    "crates/fvid-media/src/lossless.rs": "f32b6850a689c12f9a7b3c448fcb52ceb28df70e8ec6d29102d6bbfa7dc4da2d",
+    "src/media_cli.rs": "3856b3f03fc4d677e6e1fbd58ccc670159f99765982b4fbd9f0870cfafd66f22",
+    "scripts/benchmark_pcm.py": "bed0f28ccaf729099ae09391cb0db1ce86c72b43ab20a6fa5bb9528c7a3de837"
+  }
+}

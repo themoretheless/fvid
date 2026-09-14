@@ -1,0 +1,113 @@
+{
+  "created_utc": "2026-09-05T00:09:10.187390+00:00",
+  "scope": "720p H264 closed GOP with B-frames, 250 input frames, select 10 frames near end; whole CLI wall time, file output without fsync, warm cache, 5 randomized runs. Fvid seek still decodes the remainder to EOF.",
+  "commands": {
+    "fvid_full_decode": [
+      "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+      "media",
+      "transcode-lossless",
+      "/private/tmp/fvid-seek-bench-qd41v61j/source.mp4",
+      "/private/tmp/fvid-seek-bench-qd41v61j/output.mkv",
+      "--from",
+      "8.12",
+      "--to",
+      "8.52"
+    ],
+    "fvid_seek": [
+      "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+      "media",
+      "transcode-lossless",
+      "/private/tmp/fvid-seek-bench-qd41v61j/source.mp4",
+      "/private/tmp/fvid-seek-bench-qd41v61j/output.mkv",
+      "--from",
+      "8.12",
+      "--to",
+      "8.52",
+      "--seek"
+    ],
+    "ffmpeg_seek": [
+      "ffmpeg",
+      "-nostdin",
+      "-v",
+      "error",
+      "-ss",
+      "8.12",
+      "-i",
+      "/private/tmp/fvid-seek-bench-qd41v61j/source.mp4",
+      "-t",
+      "0.4",
+      "-an",
+      "-c:v",
+      "ffv1",
+      "-level",
+      "3",
+      "-pix_fmt",
+      "yuv420p",
+      "/private/tmp/fvid-seek-bench-qd41v61j/output.mkv"
+    ]
+  },
+  "samples_ms": {
+    "fvid_full_decode": [
+      88.059125,
+      87.753416,
+      94.435791,
+      120.724042,
+      90.895542
+    ],
+    "fvid_seek": [
+      49.374792,
+      47.375417,
+      47.559709,
+      69.504875,
+      48.422917
+    ],
+    "ffmpeg_seek": [
+      49.619667,
+      49.792125,
+      51.033167,
+      46.129833,
+      48.588583
+    ]
+  },
+  "median_ms": {
+    "fvid_full_decode": 90.895542,
+    "fvid_seek": 48.422917,
+    "ffmpeg_seek": 49.619667
+  },
+  "stats": {
+    "fvid_full_decode": {
+      "backend": "native libavcodec + Fvid crop view",
+      "video_frames": 10,
+      "decoded_frames": 250,
+      "seek_used": false,
+      "video_packets": 10,
+      "copied_packets": 0,
+      "pixel_format": "yuv420p",
+      "encoder": "ffv1",
+      "fvid_crop_payload_copies": 0,
+      "vertical_flip": false
+    },
+    "fvid_seek": {
+      "backend": "native libavcodec + Fvid crop view",
+      "video_frames": 10,
+      "decoded_frames": 50,
+      "seek_used": true,
+      "video_packets": 10,
+      "copied_packets": 0,
+      "pixel_format": "yuv420p",
+      "encoder": "ffv1",
+      "fvid_crop_payload_copies": 0,
+      "vertical_flip": false
+    }
+  },
+  "decoded_equality": true,
+  "input_sha256": "4d4e08d9b3cb86341be1903cd5f60f37b8cdd1c03c6bb262daef102958897e11",
+  "binary_sha256": "db8e93918d9aaf96dbee7f568ae28f7d99b2d6e27a4ba41edbb65b1099aeb66d",
+  "source_sha256": {
+    "crates/fvid-media/src/edit.rs": "7176935bf00100342e0bbbfe954fa99b078e229a3208682cb140792baa23c575",
+    "crates/fvid-media/src/lib.rs": "e1737080e53bbba3fbcbe2904af44cc693dc128d83ab836104090777c0b361e2",
+    "crates/fvid-media/src/lossless.rs": "b2a26057ee061338ae3dd91bc383b7951603702718e324f55faaffaa8637481f",
+    "src/media_cli.rs": "8a55de259e44eff300f0acf0a5ee6761e726148d8c568f3446adefef8d8774ff",
+    "scripts/benchmark_seek.py": "f590c41cc711247f3cacbdbac7850b727ca443cb40928c8cc97ed5160100cfcb"
+  }
+}

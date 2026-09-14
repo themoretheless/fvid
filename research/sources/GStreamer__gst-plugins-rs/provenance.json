@@ -1,0 +1,10 @@
+{
+  "repository": "GStreamer/gst-plugins-rs",
+  "retrieved_at_utc": "2026-09-04T22:21:26.364471+00:00",
+  "status": "ok",
+  "blob_sha": "429f852941d4b8140f92bf596672654fdcc48483",
+  "path": "README.md",
+  "url": "https://github.com/GStreamer/gst-plugins-rs/blob/main/README.md",
+  "sha256": "851e68762a6e9b2191813156cf49f419c5eb3cb615e8225dda87db21bdc553c4",
+  "bytes": 30186
+}

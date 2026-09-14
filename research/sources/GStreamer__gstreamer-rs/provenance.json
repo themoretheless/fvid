@@ -1,0 +1,10 @@
+{
+  "repository": "GStreamer/gstreamer-rs",
+  "retrieved_at_utc": "2026-09-04T22:21:26.463176+00:00",
+  "status": "ok",
+  "blob_sha": "371ec463476b97c9bed8fe8ebd93bd142a2dce6d",
+  "path": "README.md",
+  "url": "https://github.com/GStreamer/gstreamer-rs/blob/main/README.md",
+  "sha256": "499c0a970f407a08fa3ef2d22f51a2bf67cf8d9591c6d4371df72adbe718d2e9",
+  "bytes": 10326
+}

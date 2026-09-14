@@ -1,0 +1,332 @@
+[
+  {
+    "repository": "FFmpeg/FFmpeg",
+    "file": "fftools/ffmpeg_sched.h",
+    "commit": "72e5fc4b801f55228a429307eff9dbd0fa633120",
+    "blob_sha": "2cf3034437a5c43f51807bf7cdab1bbb2fb07d3f",
+    "sha256": "44f1ec3688f7a6618fc65d14addb312defc29e9b2fafe2038391a9aa788cec1c",
+    "url": "https://github.com/FFmpeg/FFmpeg/blob/72e5fc4b801f55228a429307eff9dbd0fa633120/fftools/ffmpeg_sched.h",
+    "local": "research/sources/FFmpeg__FFmpeg/code/fftools/ffmpeg_sched.h",
+    "lines": 513
+  },
+  {
+    "repository": "FFmpeg/FFmpeg",
+    "file": "libavfilter/vf_crop.c",
+    "commit": "72e5fc4b801f55228a429307eff9dbd0fa633120",
+    "blob_sha": "fb3f30a758f1b56d0a06a13442ec0dee5773dbc1",
+    "sha256": "d8eaeadd526ba9228ffbd63ddd69e6f6767ba0f27aa98825baad1e2d588598e9",
+    "url": "https://github.com/FFmpeg/FFmpeg/blob/72e5fc4b801f55228a429307eff9dbd0fa633120/libavfilter/vf_crop.c",
+    "local": "research/sources/FFmpeg__FFmpeg/code/libavfilter/vf_crop.c",
+    "lines": 398
+  },
+  {
+    "repository": "FFmpeg/FFmpeg",
+    "file": "libavfilter/vf_vflip.c",
+    "commit": "72e5fc4b801f55228a429307eff9dbd0fa633120",
+    "blob_sha": "4e0411a4575a731192142a70e61de51d14c6770b",
+    "sha256": "189b045af43059b654eef2c8fd5c849ea07a3e72a78334dd654f7abfed0a2b69",
+    "url": "https://github.com/FFmpeg/FFmpeg/blob/72e5fc4b801f55228a429307eff9dbd0fa633120/libavfilter/vf_vflip.c",
+    "local": "research/sources/FFmpeg__FFmpeg/code/libavfilter/vf_vflip.c",
+    "lines": 137
+  },
+  {
+    "repository": "FFmpeg/FFmpeg",
+    "file": "libavutil/frame.h",
+    "commit": "72e5fc4b801f55228a429307eff9dbd0fa633120",
+    "blob_sha": "e8cc765e5dbeef5df9d84a68981f7ac35a02b61a",
+    "sha256": "f13e1847dffbc84fb098e78f56a8a82e471914f556ad997bf0ce733f1a861e47",
+    "url": "https://github.com/FFmpeg/FFmpeg/blob/72e5fc4b801f55228a429307eff9dbd0fa633120/libavutil/frame.h",
+    "local": "research/sources/FFmpeg__FFmpeg/code/libavutil/frame.h",
+    "lines": 1221
+  },
+  {
+    "repository": "GStreamer/gstreamer",
+    "file": "subprojects/gstreamer/gst/gstbufferpool.c",
+    "commit": "f3eda2bee81af74fb7b5417d581637d3c42f184a",
+    "blob_sha": "a1e17217eed24e9326550c4451b3c6ab819183e8",
+    "sha256": "c68a5becd31e53aa02dcea5782bb367e283be541aa7efa2cc1ed941a79b86f5d",
+    "url": "https://github.com/GStreamer/gstreamer/blob/f3eda2bee81af74fb7b5417d581637d3c42f184a/subprojects/gstreamer/gst/gstbufferpool.c",
+    "local": "research/sources/GStreamer__gstreamer/code/subprojects/gstreamer/gst/gstbufferpool.c",
+    "lines": 1423
+  },
+  {
+    "repository": "GStreamer/gstreamer",
+    "file": "subprojects/gstreamer/plugins/elements/gstqueue.c",
+    "commit": "f3eda2bee81af74fb7b5417d581637d3c42f184a",
+    "blob_sha": "8ce17a8220b732af64087e62194fb16e9e722f29",
+    "sha256": "ddae05197940ce040f6c987c08ac26a031a658302edf92f934d04ca8f5d8f5c3",
+    "url": "https://github.com/GStreamer/gstreamer/blob/f3eda2bee81af74fb7b5417d581637d3c42f184a/subprojects/gstreamer/plugins/elements/gstqueue.c",
+    "local": "research/sources/GStreamer__gstreamer/code/subprojects/gstreamer/plugins/elements/gstqueue.c",
+    "lines": 2003
+  },
+  {
+    "repository": "vapoursynth/vapoursynth",
+    "file": "include/VapourSynth4.h",
+    "commit": "2b621093c383b97d639457706e1e06a6b9bced56",
+    "blob_sha": "e660d4799eda505138bee39c775f0b1af4f7072d",
+    "sha256": "d92a3f7b8d2718699dc8082f51d1f0c4ae5280776523ebe17fa793c42777976a",
+    "url": "https://github.com/vapoursynth/vapoursynth/blob/2b621093c383b97d639457706e1e06a6b9bced56/include/VapourSynth4.h",
+    "local": "research/sources/vapoursynth__vapoursynth/code/include/VapourSynth4.h",
+    "lines": 569
+  },
+  {
+    "repository": "pdeljanov/Symphonia",
+    "file": "symphonia-core/src/io/media_source_stream.rs",
+    "commit": "ee35874b571a35a9a6e15d3bc9a3aaf8f11fbeee",
+    "blob_sha": "64c0634dc11cef81d42154665db1dfba59f227c4",
+    "sha256": "0b314be7c3a6709d75529a73191c39911bd4b3f4988bb46545588d402939c027",
+    "url": "https://github.com/pdeljanov/Symphonia/blob/ee35874b571a35a9a6e15d3bc9a3aaf8f11fbeee/symphonia-core/src/io/media_source_stream.rs",
+    "local": "research/sources/pdeljanov__Symphonia/code/symphonia-core/src/io/media_source_stream.rs",
+    "lines": 708
+  },
+  {
+    "repository": "pdeljanov/Symphonia",
+    "file": "symphonia-core/src/units.rs",
+    "commit": "ee35874b571a35a9a6e15d3bc9a3aaf8f11fbeee",
+    "blob_sha": "833ee37a3a96d5fcc3b427b34f1e602b7c233243",
+    "sha256": "84de229767d2f8ee54fea5d8d718b140b3764dfda83e3421a719043564a85c71",
+    "url": "https://github.com/pdeljanov/Symphonia/blob/ee35874b571a35a9a6e15d3bc9a3aaf8f11fbeee/symphonia-core/src/units.rs",
+    "local": "research/sources/pdeljanov__Symphonia/code/symphonia-core/src/units.rs",
+    "lines": 1480
+  },
+  {
+    "repository": "MetalPetal/MetalPetal",
+    "file": "Frameworks/MetalPetal/MTIRenderGraphOptimization.m",
+    "commit": "f9b78897bd4214bb097f352a1bde0a4f4a1e2ddb",
+    "blob_sha": "a6b27854fed2fa013ab651f607b89c0eb62f0df3",
+    "sha256": "8cf009b627033905698566673499f84e50b87f3fc8d67949bc75d091c229d937",
+    "url": "https://github.com/MetalPetal/MetalPetal/blob/f9b78897bd4214bb097f352a1bde0a4f4a1e2ddb/Frameworks/MetalPetal/MTIRenderGraphOptimization.m",
+    "local": "research/sources/MetalPetal__MetalPetal/code/Frameworks/MetalPetal/MTIRenderGraphOptimization.m",
+    "lines": 125
+  },
+  {
+    "repository": "MetalPetal/MetalPetal",
+    "file": "Frameworks/MetalPetal/MTIImagePromise.h",
+    "commit": "f9b78897bd4214bb097f352a1bde0a4f4a1e2ddb",
+    "blob_sha": "76053d48e708c7d5e528e255a28078d99ecd310d",
+    "sha256": "662c9c0f50479305a8462dd29d7fd7d275ec561b654a6f32f51cf873f81058a0",
+    "url": "https://github.com/MetalPetal/MetalPetal/blob/f9b78897bd4214bb097f352a1bde0a4f4a1e2ddb/Frameworks/MetalPetal/MTIImagePromise.h",
+    "local": "research/sources/MetalPetal__MetalPetal/code/Frameworks/MetalPetal/MTIImagePromise.h",
+    "lines": 195
+  },
+  {
+    "repository": "BabitMF/bmf",
+    "file": "bmf/engine/c_engine/include/scheduler_queue.h",
+    "commit": "5c8d302a468085b853613f026876c39d920ee20e",
+    "blob_sha": "b251068608604916d171a769c672a6b75eaca533",
+    "sha256": "a4f7f1e6e832fc93815dfb083d4f9f2f4f6c82d596e7a66a1455372f4b5c66a4",
+    "url": "https://github.com/BabitMF/bmf/blob/5c8d302a468085b853613f026876c39d920ee20e/bmf/engine/c_engine/include/scheduler_queue.h",
+    "local": "research/sources/BabitMF__bmf/code/bmf/engine/c_engine/include/scheduler_queue.h",
+    "lines": 135
+  },
+  {
+    "repository": "BabitMF/bmf",
+    "file": "bmf/sdk/cpp_sdk/include/bmf/sdk/video_frame.h",
+    "commit": "5c8d302a468085b853613f026876c39d920ee20e",
+    "blob_sha": "1faa9631e62fdca01ecd06cf55c42ac7f5b8b653",
+    "sha256": "f6d0b1eebcdac10635d80bf9f1cfbbb49e27805e536d65727870c2be0c2df908",
+    "url": "https://github.com/BabitMF/bmf/blob/5c8d302a468085b853613f026876c39d920ee20e/bmf/sdk/cpp_sdk/include/bmf/sdk/video_frame.h",
+    "local": "research/sources/BabitMF__bmf/code/bmf/sdk/cpp_sdk/include/bmf/sdk/video_frame.h",
+    "lines": 209
+  },
+  {
+    "repository": "software-mansion/smelter",
+    "file": "gpu-video/src/decoders/wgpu_api.rs",
+    "commit": "4afebd308e46e931db03938f798d5217d7d0ffbb",
+    "blob_sha": "ae41f4b22265ce35f71421299f9a5a3316c90829",
+    "sha256": "44d733f625221e2060567bf9c0b47225ac4361b704bf23ebda4d926d204edf15",
+    "url": "https://github.com/software-mansion/smelter/blob/4afebd308e46e931db03938f798d5217d7d0ffbb/gpu-video/src/decoders/wgpu_api.rs",
+    "local": "research/sources/software-mansion__smelter/code/gpu-video/src/decoders/wgpu_api.rs",
+    "lines": 86
+  },
+  {
+    "repository": "software-mansion/smelter",
+    "file": "gpu-video/src/frame_sorter.rs",
+    "commit": "4afebd308e46e931db03938f798d5217d7d0ffbb",
+    "blob_sha": "dd4b7f34b3e08380c2e814b7a9485d454a5d089f",
+    "sha256": "57301f7a58035856b5173eb84e36f6c1f5ee4f6da5149ffdbc6bd33db7e8f688",
+    "url": "https://github.com/software-mansion/smelter/blob/4afebd308e46e931db03938f798d5217d7d0ffbb/gpu-video/src/frame_sorter.rs",
+    "local": "research/sources/software-mansion__smelter/code/gpu-video/src/frame_sorter.rs",
+    "lines": 115
+  },
+  {
+    "repository": "chromeos/cros-codecs",
+    "file": "src/decoder.rs",
+    "commit": "5ff6d693ffae0b36935b8fc13092c733b4c2646f",
+    "blob_sha": "5067c0a64bb51294f4b798c069a697a49d78a6c9",
+    "sha256": "fea8f7d6b76a6b5e9dd15e221dd3e7f7dc38378b5bdb082b4a467fcca2e58af2",
+    "url": "https://github.com/chromeos/cros-codecs/blob/5ff6d693ffae0b36935b8fc13092c733b4c2646f/src/decoder.rs",
+    "local": "research/sources/chromeos__cros-codecs/code/src/decoder.rs",
+    "lines": 266
+  },
+  {
+    "repository": "chromeos/cros-codecs",
+    "file": "src/backend/vaapi/surface_pool.rs",
+    "commit": "5ff6d693ffae0b36935b8fc13092c733b4c2646f",
+    "blob_sha": "a04ae912f605a10d63cccfed8a4cf1bbe7d8c99d",
+    "sha256": "ff60bd308a1b7f02c2b3b991ed8b2bfac0e47394835c68002017a303ff998c2f",
+    "url": "https://github.com/chromeos/cros-codecs/blob/5ff6d693ffae0b36935b8fc13092c733b4c2646f/src/backend/vaapi/surface_pool.rs",
+    "local": "research/sources/chromeos__cros-codecs/code/src/backend/vaapi/surface_pool.rs",
+    "lines": 225
+  },
+  {
+    "repository": "Vanilagy/mediabunny",
+    "file": "src/conversion.ts",
+    "commit": "c67c5e4072cf834743498c45a5a5bdf058947aec",
+    "blob_sha": "b8690bc685c53fe6c9af797c295b49daf7baf3d8",
+    "sha256": "2355adf3a8558a45d639214b0aed0d7c3161c3a9243a5185ba2b37ee238ad601",
+    "url": "https://github.com/Vanilagy/mediabunny/blob/c67c5e4072cf834743498c45a5a5bdf058947aec/src/conversion.ts",
+    "local": "research/sources/Vanilagy__mediabunny/code/src/conversion.ts",
+    "lines": 2042
+  },
+  {
+    "repository": "Vanilagy/mediabunny",
+    "file": "src/media-source.ts",
+    "commit": "c67c5e4072cf834743498c45a5a5bdf058947aec",
+    "blob_sha": "5260e12de2142e121d82c08b39aaa0cc41e11079",
+    "sha256": "4c24a06c1da0b395dedb1bd2e2d9a9b98896ad2c8d1ad89ef05121eb7a06a333",
+    "url": "https://github.com/Vanilagy/mediabunny/blob/c67c5e4072cf834743498c45a5a5bdf058947aec/src/media-source.ts",
+    "local": "research/sources/Vanilagy__mediabunny/code/src/media-source.ts",
+    "lines": 3056
+  },
+  {
+    "repository": "membraneframework/membrane_core",
+    "file": "lib/membrane/core/element/manual_flow_controller.ex",
+    "commit": "3aca29d537ae7f49f2bc792c48fd68d16420ec61",
+    "blob_sha": "2139be3ffc48a446cb9bdbf93306fc405852a18d",
+    "sha256": "5070920b18b6de4f3739d2b41f4848806da65b9df84af69b4dc4e378b23fbd74",
+    "url": "https://github.com/membraneframework/membrane_core/blob/3aca29d537ae7f49f2bc792c48fd68d16420ec61/lib/membrane/core/element/manual_flow_controller.ex",
+    "local": "research/sources/membraneframework__membrane_core/code/lib/membrane/core/element/manual_flow_controller.ex",
+    "lines": 219
+  },
+  {
+    "repository": "membraneframework/membrane_core",
+    "file": "lib/membrane/core/element/manual_flow_controller/input_queue.ex",
+    "commit": "3aca29d537ae7f49f2bc792c48fd68d16420ec61",
+    "blob_sha": "f4fdf3eaef0455f5cb75f664c7f7bde0d5c66e3d",
+    "sha256": "2329216210391a4fe6ad0466be9dcf30dc7481d0167dd8d0d6156cdb40a25750",
+    "url": "https://github.com/membraneframework/membrane_core/blob/3aca29d537ae7f49f2bc792c48fd68d16420ec61/lib/membrane/core/element/manual_flow_controller/input_queue.ex",
+    "local": "research/sources/membraneframework__membrane_core/code/lib/membrane/core/element/manual_flow_controller/input_queue.ex",
+    "lines": 373
+  },
+  {
+    "repository": "BillyDM/Firewheel",
+    "file": "crates/firewheel-graph/src/graph/compiler/schedule.rs",
+    "commit": "5e557f164fd2d5ee942ecc2bdaf2763c07fe6d53",
+    "blob_sha": "2308a992146c2e897bdff7c974778c0aae09690b",
+    "sha256": "df9f6539bf6bd5bb87f0d1cf828f4dd5caa4a415eb40d893b3765b9da806713d",
+    "url": "https://github.com/BillyDM/Firewheel/blob/5e557f164fd2d5ee942ecc2bdaf2763c07fe6d53/crates/firewheel-graph/src/graph/compiler/schedule.rs",
+    "local": "research/sources/BillyDM__Firewheel/code/crates/firewheel-graph/src/graph/compiler/schedule.rs",
+    "lines": 1380
+  },
+  {
+    "repository": "BillyDM/Firewheel",
+    "file": "crates/firewheel-graph/src/processor/process.rs",
+    "commit": "5e557f164fd2d5ee942ecc2bdaf2763c07fe6d53",
+    "blob_sha": "19b369a53550908f398a35a9f549a91bd101ba01",
+    "sha256": "cb1edd65d05066591b89053fa60cb95ad21ab8825e760a0385c8c2eba47624b0",
+    "url": "https://github.com/BillyDM/Firewheel/blob/5e557f164fd2d5ee942ecc2bdaf2763c07fe6d53/crates/firewheel-graph/src/processor/process.rs",
+    "local": "research/sources/BillyDM__Firewheel/code/crates/firewheel-graph/src/processor/process.rs",
+    "lines": 754
+  },
+  {
+    "repository": "rust-av/Av1an",
+    "file": "av1an-core/src/broker.rs",
+    "commit": "805dad69143fa0a81cfe2fb89c0b9e90a828ea72",
+    "blob_sha": "eafef4b24b038e03c642bfb1905699258e236774",
+    "sha256": "4722e6b8564f121b9341577a2bd0d13daf2cba76593926c0d1982d7f11238093",
+    "url": "https://github.com/rust-av/Av1an/blob/805dad69143fa0a81cfe2fb89c0b9e90a828ea72/av1an-core/src/broker.rs",
+    "local": "research/sources/rust-av__Av1an/code/av1an-core/src/broker.rs",
+    "lines": 382
+  },
+  {
+    "repository": "rust-av/Av1an",
+    "file": "av1an-core/src/chunk/mod.rs",
+    "commit": "805dad69143fa0a81cfe2fb89c0b9e90a828ea72",
+    "blob_sha": "37158a4d2fd82cc7b91c97fc6fb64ab140e8ae2b",
+    "sha256": "3720356a79388d6eace8ca62629ac0520ef4ebe19aa8fb38a8135a8cebb228dd",
+    "url": "https://github.com/rust-av/Av1an/blob/805dad69143fa0a81cfe2fb89c0b9e90a828ea72/av1an-core/src/chunk/mod.rs",
+    "local": "research/sources/rust-av__Av1an/code/av1an-core/src/chunk/mod.rs",
+    "lines": 99
+  },
+  {
+    "repository": "cool-japan/oximedia",
+    "file": "docs/codec_status.md",
+    "commit": "5263510374761ec8ef02dace5d26d62fb20e405b",
+    "blob_sha": "e1152847f7d5adab5e65f16f17b0259991673da8",
+    "sha256": "e46504b9f2e9c33187dbbe51fdb57137af5c8a7715b213f63ade5ff18acba449",
+    "url": "https://github.com/cool-japan/oximedia/blob/5263510374761ec8ef02dace5d26d62fb20e405b/docs/codec_status.md",
+    "local": "research/sources/cool-japan__oximedia/code/docs/codec_status.md",
+    "lines": 1102
+  },
+  {
+    "repository": "cool-japan/oximedia",
+    "file": "crates/oximedia-graph/src/filters/video/crop.rs",
+    "commit": "5263510374761ec8ef02dace5d26d62fb20e405b",
+    "blob_sha": "7184f06d676053394bc9e5d862a312ebbe026eda",
+    "sha256": "42ace333afbff5731188146ee2f704ec7fce5d453c64fda1cd0e872b6396067e",
+    "url": "https://github.com/cool-japan/oximedia/blob/5263510374761ec8ef02dace5d26d62fb20e405b/crates/oximedia-graph/src/filters/video/crop.rs",
+    "local": "research/sources/cool-japan__oximedia/code/crates/oximedia-graph/src/filters/video/crop.rs",
+    "lines": 699
+  },
+  {
+    "repository": "rust-av/rust-av",
+    "file": "data/src/frame.rs",
+    "commit": "d44bb083ffc543d80397c8244f2e8c534f609308",
+    "blob_sha": "0cb087efda8df00729098c4bc3a7f4ad7ebeda60",
+    "sha256": "4f701488f722901fda38d7a46a3587d7a2feb46ad30b6dbfd449fbdc5c899ca9",
+    "url": "https://github.com/rust-av/rust-av/blob/d44bb083ffc543d80397c8244f2e8c534f609308/data/src/frame.rs",
+    "local": "research/sources/rust-av__rust-av/code/data/src/frame.rs",
+    "lines": 652
+  },
+  {
+    "repository": "rust-av/rust-av",
+    "file": "codec/src/lib.rs",
+    "commit": "d44bb083ffc543d80397c8244f2e8c534f609308",
+    "blob_sha": "992b9f1581c427ea7dc5307d3fa0438fe8ec0ab2",
+    "sha256": "d7c230d902874dfb2c9b29c596089eed36a53200586ea936136c191e5e9b5f97",
+    "url": "https://github.com/rust-av/rust-av/blob/d44bb083ffc543d80397c8244f2e8c534f609308/codec/src/lib.rs",
+    "local": "research/sources/rust-av__rust-av/code/codec/src/lib.rs",
+    "lines": 12
+  },
+  {
+    "repository": "mozilla/mp4parse-rust",
+    "file": "mp4parse/src/lib.rs",
+    "commit": "215e238e633fa0df42cc25bfcf43a0f902692691",
+    "blob_sha": "7cb41924749c469dc238a3f5b0d9944868e30706",
+    "sha256": "69e8f4d00d535c057338e043f46e7d5145d62397f975520742cf653f6b61c80d",
+    "url": "https://github.com/mozilla/mp4parse-rust/blob/215e238e633fa0df42cc25bfcf43a0f902692691/mp4parse/src/lib.rs",
+    "local": "research/sources/mozilla__mp4parse-rust/code/mp4parse/src/lib.rs",
+    "lines": 6688
+  },
+  {
+    "repository": "halide/Halide",
+    "file": "tutorial/lesson_08_scheduling_2.cpp",
+    "commit": "8cfbcdb0a6e718eff70f6dfd04f37dcc78ede5ca",
+    "blob_sha": "4ab870e4a6ec85ceaf52bf9e5873720a0f84828f",
+    "sha256": "e25e3374a8d96364a4fe4ddc45912fc094ceb8ee078fc09b8c482e6cea5c88e6",
+    "url": "https://github.com/halide/Halide/blob/8cfbcdb0a6e718eff70f6dfd04f37dcc78ede5ca/tutorial/lesson_08_scheduling_2.cpp",
+    "local": "research/sources/halide__Halide/code/tutorial/lesson_08_scheduling_2.cpp",
+    "lines": 709
+  },
+  {
+    "repository": "libvips/libvips",
+    "file": "libvips/iofuncs/generate.c",
+    "commit": "22331a771c76407e2ac4616be86c82c55f3f9f16",
+    "blob_sha": "4f8e15885f28c01112fb4ecef33b4150da8e5063",
+    "sha256": "b3856ab64afde7f266d51bbe6a9f27b32dda739a04db3a9e26eacd6eed43d2b0",
+    "url": "https://github.com/libvips/libvips/blob/22331a771c76407e2ac4616be86c82c55f3f9f16/libvips/iofuncs/generate.c",
+    "local": "research/sources/libvips__libvips/code/libvips/iofuncs/generate.c",
+    "lines": 788
+  },
+  {
+    "repository": "AcademySoftwareFoundation/OpenTimelineIO",
+    "file": "src/opentime/rationalTime.h",
+    "commit": "bc5fe2d78dc3f8b2a8feb7e04483d85a12e80072",
+    "blob_sha": "5551ed3fb02d01a11d330d2cfe960478381ddc41",
+    "sha256": "1ee199836bd25acc56ec8c3fabe0a8dc76920d86e3bd76f3258bfec591e2249d",
+    "url": "https://github.com/AcademySoftwareFoundation/OpenTimelineIO/blob/bc5fe2d78dc3f8b2a8feb7e04483d85a12e80072/src/opentime/rationalTime.h",
+    "local": "research/sources/AcademySoftwareFoundation__OpenTimelineIO/code/src/opentime/rationalTime.h",
+    "lines": 428
+  }
+]

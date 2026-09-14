@@ -1,0 +1,183 @@
+//! Exact packed-PCM packet slicing. Payload ownership stays with AVPacket.buf.
+use super::*;
+
+pub(super) fn validate(parameters: &AVCodecParameters) -> Result<usize> {
+    if parameters.codec_type != AVMediaType_AVMEDIA_TYPE_AUDIO
+        || ![
+            AVCodecID_AV_CODEC_ID_PCM_S16LE,
+            AVCodecID_AV_CODEC_ID_PCM_S16BE,
+            AVCodecID_AV_CODEC_ID_PCM_S24LE,
+            AVCodecID_AV_CODEC_ID_PCM_S24BE,
+            AVCodecID_AV_CODEC_ID_PCM_S32LE,
+            AVCodecID_AV_CODEC_ID_PCM_S32BE,
+            AVCodecID_AV_CODEC_ID_PCM_F32LE,
+            AVCodecID_AV_CODEC_ID_PCM_F32BE,
+            AVCodecID_AV_CODEC_ID_PCM_F64LE,
+            AVCodecID_AV_CODEC_ID_PCM_F64BE,
+            AVCodecID_AV_CODEC_ID_PCM_U8,
+            AVCodecID_AV_CODEC_ID_PCM_S8,
+        ]
+        .contains(&parameters.codec_id)
+        || parameters.sample_rate <= 0
+        || parameters.ch_layout.nb_channels <= 0
+        || parameters.initial_padding != 0
+        || parameters.trailing_padding != 0
+    {
+        return Err("lossless interval audio requires packed PCM without padding; compressed audio trimming is not implemented".into());
+    }
+    // SAFETY: Pure library lookup with a known PCM codec identifier.
+    let bits = unsafe { av_get_bits_per_sample(parameters.codec_id) };
+    let bytes = usize::try_from(bits / 8).map_err(|_| "invalid PCM sample size")?;
+    bytes
+        .checked_mul(parameters.ch_layout.nb_channels as usize)
+        .filter(|&v| v != 0)
+        .ok_or_else(|| "invalid PCM frame size".into())
+}
+fn exact(numerator: i128, denominator: i128) -> Result<i64> {
+    if denominator <= 0 || numerator % denominator != 0 {
+        return Err("PCM time boundary is not exactly representable".into());
+    }
+    i64::try_from(numerator / denominator).map_err(|_| "PCM timestamp overflow".into())
+}
+/// Return retained sample frames (all channels), adjusting only the packet view.
+pub(super) fn trim(
+    packet: &mut Packet,
+    input: &Input,
+    index: usize,
+    from: i64,
+    to: i64,
+) -> Result<u64> {
+    // SAFETY: Packet and selected input stream are live and exclusively owned where
+    // modified. The offset and retained size are checked against the original payload.
+    // AVPacket.buf is untouched, so unref still releases the original allocation.
+    unsafe {
+        let stream = &*input.streams()[index];
+        let parameters = &*stream.codecpar;
+        let frame_bytes = validate(parameters)?;
+        let p = &mut *packet.0;
+        if p.pts == NOPTS
+            || p.dts != p.pts
+            || p.duration <= 0
+            || p.side_data_elems != 0
+            || p.size <= 0
+            || p.data.is_null()
+            || !(p.size as usize).is_multiple_of(frame_bytes)
+        {
+            return Err(
+                "PCM slicing requires timestamped whole sample frames without side data".into(),
+            );
+        }
+        let tb = stream.time_base;
+        if tb.num <= 0 || tb.den <= 0 {
+            return Err("invalid PCM time base".into());
+        }
+        let rate = i128::from(parameters.sample_rate);
+        let position = exact(
+            i128::from(p.pts) * i128::from(tb.num) * rate,
+            i128::from(tb.den),
+        )?;
+        let count = (p.size as usize / frame_bytes) as i64;
+        if exact(
+            i128::from(p.duration) * i128::from(tb.num) * rate,
+            i128::from(tb.den),
+        )? != count
+        {
+            return Err("PCM packet duration disagrees with sample payload".into());
+        }
+        let origin = if (*input.0).start_time == NOPTS {
+            0
+        } else {
+            (*input.0).start_time
+        };
+        let start = exact(
+            i128::from(origin.checked_add(from).ok_or("PCM interval overflow")?) * rate,
+            1_000_000,
+        )?;
+        let end = exact(
+            i128::from(origin.checked_add(to).ok_or("PCM interval overflow")?) * rate,
+            1_000_000,
+        )?;
+        let left = position.max(start);
+        let right = position
+            .checked_add(count)
+            .ok_or("PCM packet range overflow")?
+            .min(end);
+        if left >= right {
+            return Ok(0);
+        }
+        let retained = right - left;
+        let pts = exact(
+            i128::from(left - start) * i128::from(tb.den),
+            rate * i128::from(tb.num),
+        )?;
+        let duration = exact(
+            i128::from(retained) * i128::from(tb.den),
+            rate * i128::from(tb.num),
+        )?;
+        let offset = (left - position) as usize * frame_bytes;
+        p.data = p.data.add(offset);
+        p.size = i32::try_from(retained as usize * frame_bytes)
+            .map_err(|_| "PCM packet size overflow")?;
+        p.pts = pts;
+        p.dts = pts;
+        p.duration = duration;
+        Ok(retained as u64)
+    }
+}
+
+#[derive(Serialize, Debug)]
+pub struct PcmTrimStats {
+    pub packets: u64,
+    pub sample_frames: u64,
+    pub payload_bytes: u64,
+    pub fvid_payload_copies: u64,
+}
+/// Cut selected packed PCM streams without decoding or allocating a new payload.
+pub fn trim_pcm(
+    source: &Path,
+    destination: &Path,
+    from: i64,
+    to: i64,
+    options: &CopyOptions,
+) -> Result<PcmTrimStats> {
+    if from < 0 || to <= from {
+        return Err("PCM interval requires 0 <= from < to".into());
+    }
+    let mut input = Input::open(source)?;
+    let selected = selection(&input, options)?;
+    for &index in &selected {
+        // SAFETY: Stream indices were checked against the live input table.
+        validate(unsafe { &*(*input.streams()[index]).codecpar })?;
+    }
+    lossless::retime_chapters(&mut input, from, to)?;
+    let mut output = Output::new(destination, &input, &selected)?;
+    output.strict_timing = true;
+    let mut packet = Packet::new()?;
+    let mut stats = PcmTrimStats {
+        packets: 0,
+        sample_frames: 0,
+        payload_bytes: 0,
+        fvid_payload_copies: 0,
+    };
+    while packet.read(&mut input)? {
+        let (index, _) = packet_info(&packet, &input, options)?;
+        let Some(mapped) = selected.iter().position(|&i| i == index) else {
+            continue;
+        };
+        let samples = trim(&mut packet, &input, index, from, to)?;
+        if samples == 0 {
+            continue;
+        }
+        // SAFETY: Packet is live and trim checked its retained nonnegative size.
+        stats.payload_bytes += unsafe { (*packet.0).size as u64 };
+        let tb = unsafe { (*input.streams()[index]).time_base };
+        output.write(&mut packet, mapped, tb)?;
+        stats.sample_frames += samples;
+        stats.packets += 1;
+    }
+    if stats.sample_frames == 0 {
+        return Err("no PCM samples in selected interval".into());
+    }
+    output.finish()?;
+    Ok(stats)
+}

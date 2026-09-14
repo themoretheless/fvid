@@ -1,0 +1,10 @@
+{
+  "repository": "libav/libav",
+  "retrieved_at_utc": "2026-09-04T22:22:01.675878+00:00",
+  "status": "ok",
+  "blob_sha": "169f878f8833db571127c0fd6affe841f0bbea85",
+  "path": "README.md",
+  "url": "https://github.com/libav/libav/blob/master/README.md",
+  "sha256": "f9991dc1551aacef9071c1616ac087e28215d3b6737244c70554c2648e911b97",
+  "bytes": 1622
+}

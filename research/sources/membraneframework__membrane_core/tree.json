@@ -1,0 +1,3185 @@
+{
+  "sha": "3aca29d537ae7f49f2bc792c48fd68d16420ec61",
+  "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/3aca29d537ae7f49f2bc792c48fd68d16420ec61",
+  "tree": [
+    {
+      "path": ".claude-plugin",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4aa4664a677f5a7408b60d6f615fcc4294f8c8f4",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/4aa4664a677f5a7408b60d6f615fcc4294f8c8f4"
+    },
+    {
+      "path": ".claude-plugin/marketplace.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bedae52c3aff56dae321c05b0a6dfd9a9610a1ca",
+      "size": 694,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/bedae52c3aff56dae321c05b0a6dfd9a9610a1ca"
+    },
+    {
+      "path": ".claude-plugin/plugin.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7fe76e9ab38e227a115b741e06bf836720f08c28",
+      "size": 470,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/7fe76e9ab38e227a115b741e06bf836720f08c28"
+    },
+    {
+      "path": ".credo.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2b236f120945e698ee37575fd137da951c6e4313",
+      "size": 7439,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/2b236f120945e698ee37575fd137da951c6e4313"
+    },
+    {
+      "path": ".formatter.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9cf8cc2e6bb7a39066d86529b3b47a92ff57aeae",
+      "size": 376,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/9cf8cc2e6bb7a39066d86529b3b47a92ff57aeae"
+    },
+    {
+      "path": ".github",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0ed9e3001f85f59dd768794a0c067b0e937cd3ef",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/0ed9e3001f85f59dd768794a0c067b0e937cd3ef"
+    },
+    {
+      "path": ".github/CODEOWNERS",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4c77ccb46673ad1be09a526e98144c01c13b50d5",
+      "size": 11,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/4c77ccb46673ad1be09a526e98144c01c13b50d5"
+    },
+    {
+      "path": ".github/actions",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "13cf2f0640fe6f7cc30ca63433fa21326218a52f",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/13cf2f0640fe6f7cc30ca63433fa21326218a52f"
+    },
+    {
+      "path": ".github/actions/add_pr_to_smackore_board",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "39e253e5284e1cd12e2aaba5d72611a8cb013628",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/39e253e5284e1cd12e2aaba5d72611a8cb013628"
+    },
+    {
+      "path": ".github/actions/add_pr_to_smackore_board/action.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e83d81b742eade45a6140bf95644a305bda4019b",
+      "size": 1853,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/e83d81b742eade45a6140bf95644a305bda4019b"
+    },
+    {
+      "path": ".github/actions/close_issue",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "dbf6afb4624091e96529df4468f1e595d3e59d34",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/dbf6afb4624091e96529df4468f1e595d3e59d34"
+    },
+    {
+      "path": ".github/actions/close_issue/action.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0367e199b7573f70f5b5a6f4c6233a51c6ff2e1f",
+      "size": 1924,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/0367e199b7573f70f5b5a6f4c6233a51c6ff2e1f"
+    },
+    {
+      "path": ".github/workflows",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "276db1ddcf1757fe4995f569d2d197d2d7921db6",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/276db1ddcf1757fe4995f569d2d197d2d7921db6"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "57e130bc5e851208b3040e8b3e75473d267ea6da",
+      "size": 541,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/57e130bc5e851208b3040e8b3e75473d267ea6da"
+    },
+    {
+      "path": ".github/workflows/enforce-changelog-update.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c5c7ef8283c7944a5871ef6d45d981655e90442d",
+      "size": 1048,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/c5c7ef8283c7944a5871ef6d45d981655e90442d"
+    },
+    {
+      "path": ".github/workflows/on_pr_opened.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "248cabaf4845038d2aa0b7e79c4b762aa79bccb7",
+      "size": 721,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/248cabaf4845038d2aa0b7e79c4b762aa79bccb7"
+    },
+    {
+      "path": ".github/workflows/performance.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d6acd64c2514de9dc3d6a43175cd5a45503ff871",
+      "size": 2157,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/d6acd64c2514de9dc3d6a43175cd5a45503ff871"
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1b14da3f03c87d7dec7a221be6cd7cbc13b9afe3",
+      "size": 889,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/1b14da3f03c87d7dec7a221be6cd7cbc13b9afe3"
+    },
+    {
+      "path": ".github/workflows/update-packages-list.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "94d52f75e0525170676d087f5487e760f6d839ff",
+      "size": 1548,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/94d52f75e0525170676d087f5487e760f6d839ff"
+    },
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca2756db48036825c3d68b3e37e3475c9901a666",
+      "size": 2010,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/ca2756db48036825c3d68b3e37e3475c9901a666"
+    },
+    {
+      "path": ".gitmodules",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4c3a5063ac00652b0742793657e25d5150b742d7",
+      "size": 267,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/4c3a5063ac00652b0742793657e25d5150b742d7"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3419323f8301348401d331093190eaa58add3fe4",
+      "size": 14228,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/3419323f8301348401d331093190eaa58add3fe4"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bd8d4580f28e7c9ad208b729ce82427f37915512",
+      "size": 1113,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/bd8d4580f28e7c9ad208b729ce82427f37915512"
+    },
+    {
+      "path": "LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d87788f4698ac0f55d5434ff599580d0877cabe3",
+      "size": 11346,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/d87788f4698ac0f55d5434ff599580d0877cabe3"
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d9e5451c792ba1959d0400282c86f40935848778",
+      "size": 57770,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/d9e5451c792ba1959d0400282c86f40935848778"
+    },
+    {
+      "path": "assets",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "89abdd7bf50c13f8a84e1ed2646cc541680d5acf",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/89abdd7bf50c13f8a84e1ed2646cc541680d5acf"
+    },
+    {
+      "path": "assets/drawio_schemes",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4857a9624fd6b572b8338195c94c401b577112c4",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/4857a9624fd6b572b8338195c94c401b577112c4"
+    },
+    {
+      "path": "assets/drawio_schemes/spec_with_audio.drawio",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "831ab7674a3876236be251cab23e8db85209588a",
+      "size": 10350,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/831ab7674a3876236be251cab23e8db85209588a"
+    },
+    {
+      "path": "assets/drawio_schemes/spec_without_audio.drawio",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a4c64f4b38675ee6aa4b73c6963afa3241193b87",
+      "size": 8065,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a4c64f4b38675ee6aa4b73c6963afa3241193b87"
+    },
+    {
+      "path": "assets/images",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e09b9d88d9701ff8260c2adb9943947521caab58",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/e09b9d88d9701ff8260c2adb9943947521caab58"
+    },
+    {
+      "path": "assets/images/observer_graph.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "45a11bae9bd2b0bbe795a7c3341a0618fa09a62f",
+      "size": 470570,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/45a11bae9bd2b0bbe795a7c3341a0618fa09a62f"
+    },
+    {
+      "path": "assets/images/spec_with_audio.svg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d13f6a2548166d07ec52482db955e7f85f3c281",
+      "size": 43719,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/9d13f6a2548166d07ec52482db955e7f85f3c281"
+    },
+    {
+      "path": "assets/images/spec_without_audio.svg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "82184489b0642151024f7c75711190434bddc598",
+      "size": 33885,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/82184489b0642151024f7c75711190434bddc598"
+    },
+    {
+      "path": "assets/logo.svg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1a3c2d1428400bf2b5f9d8224e9fe1ea9c866aed",
+      "size": 4451,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/1a3c2d1428400bf2b5f9d8224e9fe1ea9c866aed"
+    },
+    {
+      "path": "benchmark",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "39f889d5292bd36ac574bef1c786344796e3867c",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/39f889d5292bd36ac574bef1c786344796e3867c"
+    },
+    {
+      "path": "benchmark/compare.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a4492a49304a01a79388af440f7743a5cc007bfe",
+      "size": 2147,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a4492a49304a01a79388af440f7743a5cc007bfe"
+    },
+    {
+      "path": "benchmark/metric.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0ff336d3aad3da91ecae91b0076f607fb9459088",
+      "size": 1042,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/0ff336d3aad3da91ecae91b0076f607fb9459088"
+    },
+    {
+      "path": "benchmark/metric",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e85f194eb27833a4efa5729476725b2ad961f561",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/e85f194eb27833a4efa5729476725b2ad961f561"
+    },
+    {
+      "path": "benchmark/metric/in_progress_memory.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fe179c6bcfb6d07b66df34f79a180912ee3377cc",
+      "size": 1428,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/fe179c6bcfb6d07b66df34f79a180912ee3377cc"
+    },
+    {
+      "path": "benchmark/metric/message_queues_length.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "61ad10494a3e7ba1cf14b8220964da0d0222160d",
+      "size": 1733,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/61ad10494a3e7ba1cf14b8220964da0d0222160d"
+    },
+    {
+      "path": "benchmark/metric/time.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "211738f49cf871d63e5c9581c5ee27944ca6eaf7",
+      "size": 718,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/211738f49cf871d63e5c9581c5ee27944ca6eaf7"
+    },
+    {
+      "path": "benchmark/run.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e671fcd74349ed362cae0401524906bcadc85ce8",
+      "size": 11665,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/e671fcd74349ed362cae0401524906bcadc85ce8"
+    },
+    {
+      "path": "benchmark/run",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "cdd479b2c7213d308aa03f63a0799059372919cf",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/cdd479b2c7213d308aa03f63a0799059372919cf"
+    },
+    {
+      "path": "benchmark/run/branched_filter.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7669fe83842fa6c6d0cc52c6702edaedb1eecb5",
+      "size": 2657,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/d7669fe83842fa6c6d0cc52c6702edaedb1eecb5"
+    },
+    {
+      "path": "benchmark/run/linear_filter.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4d47f09be6d49e99bc9f8c3501944d641c18efcb",
+      "size": 1012,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/4d47f09be6d49e99bc9f8c3501944d641c18efcb"
+    },
+    {
+      "path": "benchmark/run/pipeline.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "42a3be3ccaa7075bbc1d4298f4596b2fd802976e",
+      "size": 685,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/42a3be3ccaa7075bbc1d4298f4596b2fd802976e"
+    },
+    {
+      "path": "benchmark/run/reductions.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0b73c272cc5e9adcec1fdd312a811863101c70d8",
+      "size": 706,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/0b73c272cc5e9adcec1fdd312a811863101c70d8"
+    },
+    {
+      "path": "config",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "2c4c6e0df7cf8a7712261b1e973ab4e629862e02",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/2c4c6e0df7cf8a7712261b1e973ab4e629862e02"
+    },
+    {
+      "path": "config/config.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c73f8283abef20bc04fd6fa4838a40b58e914c16",
+      "size": 400,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/c73f8283abef20bc04fd6fa4838a40b58e914c16"
+    },
+    {
+      "path": "example.livemd",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8d0e545742e798824fe0019851f522d07dfa965b",
+      "size": 822,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/8d0e545742e798824fe0019851f522d07dfa965b"
+    },
+    {
+      "path": "guides",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8f5ccab3a8b9f820c878d7756562591cf29d677f",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/8f5ccab3a8b9f820c878d7756562591cf29d677f"
+    },
+    {
+      "path": "guides/llms",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5d5965f3500cd1c97d4a962ed3a90b8eff4fbccd",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/5d5965f3500cd1c97d4a962ed3a90b8eff4fbccd"
+    },
+    {
+      "path": "guides/llms/packages_list.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "99ffec24dcf8da13437739c7fd0a9ccf22b0cfec",
+      "size": 18997,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/99ffec24dcf8da13437739c7fd0a9ccf22b0cfec"
+    },
+    {
+      "path": "guides/membrane_demo",
+      "mode": "160000",
+      "type": "commit",
+      "sha": "b45f479716827a03169a1ec6037fd38b9af950d6"
+    },
+    {
+      "path": "guides/membrane_tutorials",
+      "mode": "160000",
+      "type": "commit",
+      "sha": "b673db5b0c140dbe9a6e5975fc83080d56c5bb76"
+    },
+    {
+      "path": "guides/packages",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d87b1883149794e63f4f78abc5bfd127bedc7389",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/d87b1883149794e63f4f78abc5bfd127bedc7389"
+    },
+    {
+      "path": "guides/packages/00_General.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf1fd037bf0242ed99a61c50e249c4f875901dcc",
+      "size": 2953,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/bf1fd037bf0242ed99a61c50e249c4f875901dcc"
+    },
+    {
+      "path": "guides/packages/02_Plugins_|_General_purpose.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c51884878fcfde646024ff306a1cbf393f806f2a",
+      "size": 5868,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/c51884878fcfde646024ff306a1cbf393f806f2a"
+    },
+    {
+      "path": "guides/packages/03_Plugins_|_AI.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e3a9cdea61f4a012c187247b659f328324fa8023",
+      "size": 1036,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/e3a9cdea61f4a012c187247b659f328324fa8023"
+    },
+    {
+      "path": "guides/packages/04_Plugins_|_Streaming_protocols.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8c982275da5e6f7f8eaa3e7a03a4af6d80ca3ef1",
+      "size": 7684,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/8c982275da5e6f7f8eaa3e7a03a4af6d80ca3ef1"
+    },
+    {
+      "path": "guides/packages/05_Plugins_|_Containers.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b89129b9ab447203137077963de656f9a6f1ef5b",
+      "size": 2323,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/b89129b9ab447203137077963de656f9a6f1ef5b"
+    },
+    {
+      "path": "guides/packages/06_Plugins_|_Audio_codecs.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a26dbb7a9b8347c478de1683135e036ee1282ae",
+      "size": 4104,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/5a26dbb7a9b8347c478de1683135e036ee1282ae"
+    },
+    {
+      "path": "guides/packages/07_Plugins_|_Video_codecs.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "297c08790956c3d738fc1e92b5c71ca7d7441ff7",
+      "size": 3570,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/297c08790956c3d738fc1e92b5c71ca7d7441ff7"
+    },
+    {
+      "path": "guides/packages/08_Plugins_|_Raw_audio.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a9d4b3e88d4fff0af177fe57e19181842082c37e",
+      "size": 3044,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a9d4b3e88d4fff0af177fe57e19181842082c37e"
+    },
+    {
+      "path": "guides/packages/09_Plugins_|_Raw_video.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6deeeec2f67f564f122c7661ac44ebf9230eb521",
+      "size": 5508,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/6deeeec2f67f564f122c7661ac44ebf9230eb521"
+    },
+    {
+      "path": "guides/packages/10_Plugins_|_External_APIs.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "068017bcaee1adaf231800904e9b07461e474223",
+      "size": 2578,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/068017bcaee1adaf231800904e9b07461e474223"
+    },
+    {
+      "path": "guides/packages/11_Formats.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a6286309b44c785e935b76a1563b46b6e5aed418",
+      "size": 7227,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a6286309b44c785e935b76a1563b46b6e5aed418"
+    },
+    {
+      "path": "guides/packages/12_Standalone_media_libs.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1380b8bee6290b0a492b08e437d3a13cdceefb6e",
+      "size": 3749,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/1380b8bee6290b0a492b08e437d3a13cdceefb6e"
+    },
+    {
+      "path": "guides/packages/13_Utils.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "29fa8ca96b048bf395a3ffcaa1a92e78da40f8ea",
+      "size": 4738,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/29fa8ca96b048bf395a3ffcaa1a92e78da40f8ea"
+    },
+    {
+      "path": "guides/upgrading",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "699c0094b82d2051ffdad52b6594453cdf388863",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/699c0094b82d2051ffdad52b6594453cdf388863"
+    },
+    {
+      "path": "guides/upgrading/v0.11.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ed6334187d59571a1de8e21b062d126c3d412408",
+      "size": 12625,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/ed6334187d59571a1de8e21b062d126c3d412408"
+    },
+    {
+      "path": "guides/upgrading/v0.12.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d1bda611f12ae4306bfa191055826aaa3afbde2b",
+      "size": 2090,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/d1bda611f12ae4306bfa191055826aaa3afbde2b"
+    },
+    {
+      "path": "guides/upgrading/v1.0.0-rc0.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "996067a05429ee7dac4b8f21b037dae8a8cf9bcc",
+      "size": 6261,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/996067a05429ee7dac4b8f21b037dae8a8cf9bcc"
+    },
+    {
+      "path": "guides/upgrading/v1.0.0-rc1.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc43deb377021c1afbaab40be6e654e4f5d90dfa",
+      "size": 2141,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/bc43deb377021c1afbaab40be6e654e4f5d90dfa"
+    },
+    {
+      "path": "guides/upgrading/v1.0.0.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e99510ad80d310798a4711309de97062697cd98a",
+      "size": 7259,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/e99510ad80d310798a4711309de97062697cd98a"
+    },
+    {
+      "path": "guides/useful_concepts",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "62f6cfdc853bb0003839657aceba66271c10917a",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/62f6cfdc853bb0003839657aceba66271c10917a"
+    },
+    {
+      "path": "guides/useful_concepts/assets",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "533773e6e25a4ba742ed549a9489c2221f3545aa",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/533773e6e25a4ba742ed549a9489c2221f3545aa"
+    },
+    {
+      "path": "guides/useful_concepts/assets/frame_types.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4276edb5b3b451036be87adbd2eb34344cb7949a",
+      "size": 128466,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/4276edb5b3b451036be87adbd2eb34344cb7949a"
+    },
+    {
+      "path": "guides/useful_concepts/assets/pads1.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b28510fc6aa38579b78b9a43d720d8b9bd1921a2",
+      "size": 22200,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/b28510fc6aa38579b78b9a43d720d8b9bd1921a2"
+    },
+    {
+      "path": "guides/useful_concepts/assets/pads2.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10884e0d80cf72f5b62a10d923515ad0482d76f4",
+      "size": 60852,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/10884e0d80cf72f5b62a10d923515ad0482d76f4"
+    },
+    {
+      "path": "guides/useful_concepts/assets/pads3.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f6d169575cb0816ca17993888ac36041c16cbd39",
+      "size": 47184,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/f6d169575cb0816ca17993888ac36041c16cbd39"
+    },
+    {
+      "path": "guides/useful_concepts/components_lifecycle.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "29c82c08cf142ebfebaa5d1c744f7ca18175ad26",
+      "size": 5499,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/29c82c08cf142ebfebaa5d1c744f7ca18175ad26"
+    },
+    {
+      "path": "guides/useful_concepts/crash_groups.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1516a1e979dc4d2352a3ba9cc0310cddfed8f18d",
+      "size": 6686,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/1516a1e979dc4d2352a3ba9cc0310cddfed8f18d"
+    },
+    {
+      "path": "guides/useful_concepts/manual_demands.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f6a46f02079e2cf5e4ee0d5d41c0284f5a584c3c",
+      "size": 18853,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/f6a46f02079e2cf5e4ee0d5d41c0284f5a584c3c"
+    },
+    {
+      "path": "guides/useful_concepts/pads.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "04ead2afc9473fbb188a9583d69b5bfbc6d6f096",
+      "size": 14710,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/04ead2afc9473fbb188a9583d69b5bfbc6d6f096"
+    },
+    {
+      "path": "guides/useful_concepts/running_membrane_in_elixir_application.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62d27d8c28b04bbcd34c46d20f1322299397ddac",
+      "size": 10169,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/62d27d8c28b04bbcd34c46d20f1322299397ddac"
+    },
+    {
+      "path": "guides/useful_concepts/timer.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a8b6e2596aa3d9b2857525d78be86a7e433e9434",
+      "size": 3553,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a8b6e2596aa3d9b2857525d78be86a7e433e9434"
+    },
+    {
+      "path": "guides/useful_concepts/timestamps.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7516582c7432a7d7cb4d1d5dc29617dfcaffbbb7",
+      "size": 7368,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/7516582c7432a7d7cb4d1d5dc29617dfcaffbbb7"
+    },
+    {
+      "path": "lib",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "28f419840922774733a8ef51999a363096dd2c4e",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/28f419840922774733a8ef51999a363096dd2c4e"
+    },
+    {
+      "path": "lib/membrane",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7a940edf306012bed59d488cbda90fdfa033cd4b",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/7a940edf306012bed59d488cbda90fdfa033cd4b"
+    },
+    {
+      "path": "lib/membrane/bin.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "87c4eebad67ebc4262ab90e2e53c39b5bd0cc87e",
+      "size": 13950,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/87c4eebad67ebc4262ab90e2e53c39b5bd0cc87e"
+    },
+    {
+      "path": "lib/membrane/bin",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "453504995241a0cad148b69d80609a0ba037337c",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/453504995241a0cad148b69d80609a0ba037337c"
+    },
+    {
+      "path": "lib/membrane/bin/action.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "096142885d1055c431d37317d5b1262916e2f7af",
+      "size": 7268,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/096142885d1055c431d37317d5b1262916e2f7af"
+    },
+    {
+      "path": "lib/membrane/bin/callback_context.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ccb8c47dbd4df2aa2fad3cf36c07bfd97cd708aa",
+      "size": 1782,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/ccb8c47dbd4df2aa2fad3cf36c07bfd97cd708aa"
+    },
+    {
+      "path": "lib/membrane/bin/pad_data.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "83635d08c4e2b1d2179d912d0dbe6ea638f03817",
+      "size": 1652,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/83635d08c4e2b1d2179d912d0dbe6ea638f03817"
+    },
+    {
+      "path": "lib/membrane/buffer.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a2954ce45317a82ceb32c2f9be40e561f8942a5",
+      "size": 941,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/0a2954ce45317a82ceb32c2f9be40e561f8942a5"
+    },
+    {
+      "path": "lib/membrane/buffer",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4851ecbb976300442ee85395f0dac933b02e2ff1",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/4851ecbb976300442ee85395f0dac933b02e2ff1"
+    },
+    {
+      "path": "lib/membrane/buffer/metric.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "217579d086becac827fbbad42d832737d8bd733d",
+      "size": 710,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/217579d086becac827fbbad42d832737d8bd733d"
+    },
+    {
+      "path": "lib/membrane/buffer/metric",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "879329342ec172a7572c9ddec44a4535ad9481a1",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/879329342ec172a7572c9ddec44a4535ad9481a1"
+    },
+    {
+      "path": "lib/membrane/buffer/metric/byte_size.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1e25d817aa69636b89ceedd73510dd2a67571fdb",
+      "size": 1743,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/1e25d817aa69636b89ceedd73510dd2a67571fdb"
+    },
+    {
+      "path": "lib/membrane/buffer/metric/count.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d2871209820af9a8b7b2b5c7017ab7f1a00d4fa9",
+      "size": 1108,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/d2871209820af9a8b7b2b5c7017ab7f1a00d4fa9"
+    },
+    {
+      "path": "lib/membrane/child.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "efa15f41821ed0b88d45e2e8c8bed8ccbbf1c47b",
+      "size": 690,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/efa15f41821ed0b88d45e2e8c8bed8ccbbf1c47b"
+    },
+    {
+      "path": "lib/membrane/child_entry.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "489d5390dd6284d2952b0f6c181695ee821bf181",
+      "size": 1054,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/489d5390dd6284d2952b0f6c181695ee821bf181"
+    },
+    {
+      "path": "lib/membrane/children_spec.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a5120180fb417219cdfc1514807364d777e12dcf",
+      "size": 24677,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a5120180fb417219cdfc1514807364d777e12dcf"
+    },
+    {
+      "path": "lib/membrane/clock.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "21d01351debf3721b1b68c6cafa008e0a34cbffd",
+      "size": 8687,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/21d01351debf3721b1b68c6cafa008e0a34cbffd"
+    },
+    {
+      "path": "lib/membrane/component_path.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b507eaf8420312a93d383088bc436748577f8de0",
+      "size": 1074,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/b507eaf8420312a93d383088bc436748577f8de0"
+    },
+    {
+      "path": "lib/membrane/connector.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b53a82f148e3d05bfd5e75a624c02e62ab650f09",
+      "size": 4596,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/b53a82f148e3d05bfd5e75a624c02e62ab650f09"
+    },
+    {
+      "path": "lib/membrane/core",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9bccd44cbf6a1c229006d2d03f59cee85e98edc9",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/9bccd44cbf6a1c229006d2d03f59cee85e98edc9"
+    },
+    {
+      "path": "lib/membrane/core/bin.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fa1868aa5135b34817cfa27b6a0b8ff47c9d4118",
+      "size": 9118,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/fa1868aa5135b34817cfa27b6a0b8ff47c9d4118"
+    },
+    {
+      "path": "lib/membrane/core/bin",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d260fa4244e67f4fb9f4fc24e0fdb451b223df40",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/d260fa4244e67f4fb9f4fc24e0fdb451b223df40"
+    },
+    {
+      "path": "lib/membrane/core/bin/action_handler.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da55739be561b9a5f0ec1ba99e5c52858306d204",
+      "size": 3555,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/da55739be561b9a5f0ec1ba99e5c52858306d204"
+    },
+    {
+      "path": "lib/membrane/core/bin/callback_context.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a131f1e5e4c25dcc798de0f1db1eda02efa9d55b",
+      "size": 1178,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a131f1e5e4c25dcc798de0f1db1eda02efa9d55b"
+    },
+    {
+      "path": "lib/membrane/core/bin/pad_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b16bcadc518e986785c712395c7279c51dd0fe36",
+      "size": 12514,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/b16bcadc518e986785c712395c7279c51dd0fe36"
+    },
+    {
+      "path": "lib/membrane/core/bin/state.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a5ca9fd547719a74199c8efe3a4428b7a34484d8",
+      "size": 2892,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a5ca9fd547719a74199c8efe3a4428b7a34484d8"
+    },
+    {
+      "path": "lib/membrane/core/bin/zombie.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "81918c3fddf72e476e5085755a1c92fd2e4af073",
+      "size": 912,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/81918c3fddf72e476e5085755a1c92fd2e4af073"
+    },
+    {
+      "path": "lib/membrane/core/callback_handler.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a7dd9b365631c58fe68d9f0a48946f8e8fd1087",
+      "size": 5920,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/6a7dd9b365631c58fe68d9f0a48946f8e8fd1087"
+    },
+    {
+      "path": "lib/membrane/core/child.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "93a931c118ab0194e98dab04e8b965e157c8cd4f",
+      "size": 1289,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/93a931c118ab0194e98dab04e8b965e157c8cd4f"
+    },
+    {
+      "path": "lib/membrane/core/child",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9384db0465680e946c2245d256c051f218d2fe09",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/9384db0465680e946c2245d256c051f218d2fe09"
+    },
+    {
+      "path": "lib/membrane/core/child/lifecycle_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c3398f43146c95e9bc662aeeb9626ce8b06cfcda",
+      "size": 575,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/c3398f43146c95e9bc662aeeb9626ce8b06cfcda"
+    },
+    {
+      "path": "lib/membrane/core/child/pad_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "24eae8e8cfb987a23c175c6194986138b00a1054",
+      "size": 2827,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/24eae8e8cfb987a23c175c6194986138b00a1054"
+    },
+    {
+      "path": "lib/membrane/core/child/pad_model.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "674c3489b891c7a91368704ee43977ad6781e0d3",
+      "size": 13114,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/674c3489b891c7a91368704ee43977ad6781e0d3"
+    },
+    {
+      "path": "lib/membrane/core/child/pad_spec_handler.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d5c39bf1d640967059135a3a0b1b8f566d61811",
+      "size": 794,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/9d5c39bf1d640967059135a3a0b1b8f566d61811"
+    },
+    {
+      "path": "lib/membrane/core/child/pads_specs.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0334180ba33c9e16bb0872f37f634c644777bea5",
+      "size": 16618,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/0334180ba33c9e16bb0872f37f634c644777bea5"
+    },
+    {
+      "path": "lib/membrane/core/component.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f73826904f5cc2809bc0e22e2107c2a77803e3b2",
+      "size": 1954,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/f73826904f5cc2809bc0e22e2107c2a77803e3b2"
+    },
+    {
+      "path": "lib/membrane/core/docs_helper.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f1c881b47b42ef9773b111cf4b3ce2b223101047",
+      "size": 2796,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/f1c881b47b42ef9773b111cf4b3ce2b223101047"
+    },
+    {
+      "path": "lib/membrane/core/element.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "452e86770cf697244bbc04372bfb6a4c6c029a20",
+      "size": 9449,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/452e86770cf697244bbc04372bfb6a4c6c029a20"
+    },
+    {
+      "path": "lib/membrane/core/element",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "90bbde62866a9dbae9815863df6b53e41d552de1",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/90bbde62866a9dbae9815863df6b53e41d552de1"
+    },
+    {
+      "path": "lib/membrane/core/element/action_handler.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a513ce3c5426879049ce60d6157cb4d56c02e3d7",
+      "size": 20472,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a513ce3c5426879049ce60d6157cb4d56c02e3d7"
+    },
+    {
+      "path": "lib/membrane/core/element/atomic_demand.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "83baafe5d993143a2bb7f19c2d9c8000fc8a5ccd",
+      "size": 7453,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/83baafe5d993143a2bb7f19c2d9c8000fc8a5ccd"
+    },
+    {
+      "path": "lib/membrane/core/element/atomic_demand",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "48897bd218b7f278ed452d2fbb0a47ff7c2c0d35",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/48897bd218b7f278ed452d2fbb0a47ff7c2c0d35"
+    },
+    {
+      "path": "lib/membrane/core/element/atomic_demand/atomic_flow_status.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4605bec2bc55dd0f399f877f7dcf33ff208a82f",
+      "size": 1169,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/e4605bec2bc55dd0f399f877f7dcf33ff208a82f"
+    },
+    {
+      "path": "lib/membrane/core/element/atomic_demand/distributed_atomic.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3c663f714c400f99c3407fa42ffeb4e36e591e4c",
+      "size": 2708,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/3c663f714c400f99c3407fa42ffeb4e36e591e4c"
+    },
+    {
+      "path": "lib/membrane/core/element/atomic_demand/distributed_atomic",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "dbeff3271585f08e23adb1caace2d4bc79ada741",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/dbeff3271585f08e23adb1caace2d4bc79ada741"
+    },
+    {
+      "path": "lib/membrane/core/element/atomic_demand/distributed_atomic/worker.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "56a9673267cfbd8aa8ba7f19522e77eb45525e7c",
+      "size": 1362,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/56a9673267cfbd8aa8ba7f19522e77eb45525e7c"
+    },
+    {
+      "path": "lib/membrane/core/element/auto_flow_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b6d3302c2e58f9df05055925f88dc927c8d278ec",
+      "size": 11611,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/b6d3302c2e58f9df05055925f88dc927c8d278ec"
+    },
+    {
+      "path": "lib/membrane/core/element/buffer_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "57cdf6844544e8549114397a745e61c7a71a3c0a",
+      "size": 4151,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/57cdf6844544e8549114397a745e61c7a71a3c0a"
+    },
+    {
+      "path": "lib/membrane/core/element/callback_context.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "601677c7048ee57928ad3ae746aa65df48d87874",
+      "size": 835,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/601677c7048ee57928ad3ae746aa65df48d87874"
+    },
+    {
+      "path": "lib/membrane/core/element/demand_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3795b6fc8f70200685315481a352d485a3c5e308",
+      "size": 5125,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/3795b6fc8f70200685315481a352d485a3c5e308"
+    },
+    {
+      "path": "lib/membrane/core/element/diamond_detection_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "efc130d9ac82970bc041b55b3b8d2df07315630a",
+      "size": 11327,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/efc130d9ac82970bc041b55b3b8d2df07315630a"
+    },
+    {
+      "path": "lib/membrane/core/element/diamond_detection_controller",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a7449336b30df55f63c0434a38b63e1ba39acbce",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/a7449336b30df55f63c0434a38b63e1ba39acbce"
+    },
+    {
+      "path": "lib/membrane/core/element/diamond_detection_controller/diamond_detection_state.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da2545177761180385dd2686ad274bf250f32cb9",
+      "size": 482,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/da2545177761180385dd2686ad274bf250f32cb9"
+    },
+    {
+      "path": "lib/membrane/core/element/diamond_detection_controller/diamond_logger.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "14eeaa8c7b867523e058730cf532beff513cf432",
+      "size": 1538,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/14eeaa8c7b867523e058730cf532beff513cf432"
+    },
+    {
+      "path": "lib/membrane/core/element/diamond_detection_controller/path_in_grapth.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a132f09a76f42ff91bcb59f30a99f4b97fe434ad",
+      "size": 462,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a132f09a76f42ff91bcb59f30a99f4b97fe434ad"
+    },
+    {
+      "path": "lib/membrane/core/element/effective_flow_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "875209095623b867aa1d2989f449e07b9c4fbb82",
+      "size": 5470,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/875209095623b867aa1d2989f449e07b9c4fbb82"
+    },
+    {
+      "path": "lib/membrane/core/element/event_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "01df8708819902f1a2d0451c70ab49f7b94a5737",
+      "size": 5021,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/01df8708819902f1a2d0451c70ab49f7b94a5737"
+    },
+    {
+      "path": "lib/membrane/core/element/lifecycle_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "de7cebab433cc0e425d963583d6fd4c6baba7fde",
+      "size": 3371,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/de7cebab433cc0e425d963583d6fd4c6baba7fde"
+    },
+    {
+      "path": "lib/membrane/core/element/manual_flow_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2139be3ffc48a446cb9bdbf93306fc405852a18d",
+      "size": 7563,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/2139be3ffc48a446cb9bdbf93306fc405852a18d"
+    },
+    {
+      "path": "lib/membrane/core/element/manual_flow_controller",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "76132f40844d4c59ee61c5739e77b60f5ee2a4ff",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/76132f40844d4c59ee61c5739e77b60f5ee2a4ff"
+    },
+    {
+      "path": "lib/membrane/core/element/manual_flow_controller/buffer_metric.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c96a7b406a7e769b5853048c555dff5ec32ff215",
+      "size": 7878,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/c96a7b406a7e769b5853048c555dff5ec32ff215"
+    },
+    {
+      "path": "lib/membrane/core/element/manual_flow_controller/input_queue.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4fdf3eaef0455f5cb75f664c7f7bde0d5c66e3d",
+      "size": 11643,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/f4fdf3eaef0455f5cb75f664c7f7bde0d5c66e3d"
+    },
+    {
+      "path": "lib/membrane/core/element/pad_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3c4e716e25584fcec8a89ab09c530ebd122a523e",
+      "size": 15849,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/3c4e716e25584fcec8a89ab09c530ebd122a523e"
+    },
+    {
+      "path": "lib/membrane/core/element/playback_queue.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e796f4ffaae6b9d879f78ad84ced2c29ca2efe35",
+      "size": 625,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/e796f4ffaae6b9d879f78ad84ced2c29ca2efe35"
+    },
+    {
+      "path": "lib/membrane/core/element/state.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "35d1a44b58dd18c326ccb490161d4c547e5f1fd6",
+      "size": 3600,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/35d1a44b58dd18c326ccb490161d4c547e5f1fd6"
+    },
+    {
+      "path": "lib/membrane/core/element/stream_format_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9109043b94afa4303f4dd1c701e7c5fdac20e251",
+      "size": 4315,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/9109043b94afa4303f4dd1c701e7c5fdac20e251"
+    },
+    {
+      "path": "lib/membrane/core/events",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c984118eff772e4a02b586eb125c92adb2d37046",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/c984118eff772e4a02b586eb125c92adb2d37046"
+    },
+    {
+      "path": "lib/membrane/core/events/end_of_stream.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c8f141b10f533da24aa86089b6020bed0dfefc1b",
+      "size": 268,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/c8f141b10f533da24aa86089b6020bed0dfefc1b"
+    },
+    {
+      "path": "lib/membrane/core/events/start_of_stream.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78991572571d4106e9cc03610e3883a8147e9a12",
+      "size": 402,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/78991572571d4106e9cc03610e3883a8147e9a12"
+    },
+    {
+      "path": "lib/membrane/core/filter_aggregator",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3af077ba5de1edc41c74053d2af80bc46f18fa6d",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/3af077ba5de1edc41c74053d2af80bc46f18fa6d"
+    },
+    {
+      "path": "lib/membrane/core/filter_aggregator/action.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "523a79cec7facec328379756b34f80fb735ae4d2",
+      "size": 792,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/523a79cec7facec328379756b34f80fb735ae4d2"
+    },
+    {
+      "path": "lib/membrane/core/filter_aggregator/context.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8f0e96eb30abe9d72fedf6f2ca57b823c84b7970",
+      "size": 5068,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/8f0e96eb30abe9d72fedf6f2ca57b823c84b7970"
+    },
+    {
+      "path": "lib/membrane/core/helper",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6f31e6df3f54adaa1518189c1ff14ca188d23f27",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/6f31e6df3f54adaa1518189c1ff14ca188d23f27"
+    },
+    {
+      "path": "lib/membrane/core/helper/fast_map.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "33f26e22bb4dbdb7bb8f3bed9afc21233379e15a",
+      "size": 6516,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/33f26e22bb4dbdb7bb8f3bed9afc21233379e15a"
+    },
+    {
+      "path": "lib/membrane/core/inspect.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "39c68baf67514a0ac39e5640eb3bfee000859dda",
+      "size": 1187,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/39c68baf67514a0ac39e5640eb3bfee000859dda"
+    },
+    {
+      "path": "lib/membrane/core/legacy_telemetry.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "95af8c224b2c319da714cb86db34d4da13e9c009",
+      "size": 4991,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/95af8c224b2c319da714cb86db34d4da13e9c009"
+    },
+    {
+      "path": "lib/membrane/core/lifecycle_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8c30d39bbe80d68b60ceacd608016db180c953db",
+      "size": 2112,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/8c30d39bbe80d68b60ceacd608016db180c953db"
+    },
+    {
+      "path": "lib/membrane/core/message.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "470fbebb48a88643a96d2c6f218cc5a3af28c86b",
+      "size": 1678,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/470fbebb48a88643a96d2c6f218cc5a3af28c86b"
+    },
+    {
+      "path": "lib/membrane/core/options_specs.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "09f6f2502218f10f63a8c273d3e3e67538c72fb6",
+      "size": 4982,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/09f6f2502218f10f63a8c273d3e3e67538c72fb6"
+    },
+    {
+      "path": "lib/membrane/core/parent.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "350d4fcc7a8e9af756af3f733438de12807bd3af",
+      "size": 662,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/350d4fcc7a8e9af756af3f733438de12807bd3af"
+    },
+    {
+      "path": "lib/membrane/core/parent",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d5c4038369c9d317bdc8d5e267bacdba68b5f923",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/d5c4038369c9d317bdc8d5e267bacdba68b5f923"
+    },
+    {
+      "path": "lib/membrane/core/parent/child_entry_parser.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ef6bc0228cae3f1e0754bde396ae3612bdd6133",
+      "size": 1272,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/3ef6bc0228cae3f1e0754bde396ae3612bdd6133"
+    },
+    {
+      "path": "lib/membrane/core/parent/child_life_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a85d2950febaf0ee33ad7b8c1ef93ed3cba821d4",
+      "size": 27604,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a85d2950febaf0ee33ad7b8c1ef93ed3cba821d4"
+    },
+    {
+      "path": "lib/membrane/core/parent/child_life_controller",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c5b70b83664880828da527b2f542b42008ed8308",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/c5b70b83664880828da527b2f542b42008ed8308"
+    },
+    {
+      "path": "lib/membrane/core/parent/child_life_controller/crash_group_utils.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aaf8d5f31752b8f66d2012e628321d45691aebdc",
+      "size": 4504,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/aaf8d5f31752b8f66d2012e628321d45691aebdc"
+    },
+    {
+      "path": "lib/membrane/core/parent/child_life_controller/link_utils.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fb8bd7a9e61a70bf6addce897b58d327c461864d",
+      "size": 11757,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/fb8bd7a9e61a70bf6addce897b58d327c461864d"
+    },
+    {
+      "path": "lib/membrane/core/parent/child_life_controller/startup_utils.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5cf3140b2b31da2f7f1df509fae68b21270ca385",
+      "size": 7402,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/5cf3140b2b31da2f7f1df509fae68b21270ca385"
+    },
+    {
+      "path": "lib/membrane/core/parent/children_model.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "96a35c31bd6ec93f8a2e1786b4c0b88f7355f956",
+      "size": 1824,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/96a35c31bd6ec93f8a2e1786b4c0b88f7355f956"
+    },
+    {
+      "path": "lib/membrane/core/parent/clock_handler.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ac8a2f36f8166fc31d1f09ffe5568aa97768b04d",
+      "size": 1594,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/ac8a2f36f8166fc31d1f09ffe5568aa97768b04d"
+    },
+    {
+      "path": "lib/membrane/core/parent/crash_group.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62d1631c684458bc86b26a9a8e6d1d7b1174d4cb",
+      "size": 788,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/62d1631c684458bc86b26a9a8e6d1d7b1174d4cb"
+    },
+    {
+      "path": "lib/membrane/core/parent/diamond_detection_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "20b64ee378423248371ac3dea406111f07088315",
+      "size": 546,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/20b64ee378423248371ac3dea406111f07088315"
+    },
+    {
+      "path": "lib/membrane/core/parent/lifecycle_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "959718761df26aa35f296aa9112e58ee9c9ffeb3",
+      "size": 4622,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/959718761df26aa35f296aa9112e58ee9c9ffeb3"
+    },
+    {
+      "path": "lib/membrane/core/parent/link.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e078b5c4b6c4ee2819bca529c3e0e4cede08fa8",
+      "size": 451,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/2e078b5c4b6c4ee2819bca529c3e0e4cede08fa8"
+    },
+    {
+      "path": "lib/membrane/core/parent/link_endpoint.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca5cb1f273ecedfda139e289fbed0d34d2eea826",
+      "size": 524,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/ca5cb1f273ecedfda139e289fbed0d34d2eea826"
+    },
+    {
+      "path": "lib/membrane/core/parent/specification_parser.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ff44f34c24633fbee952fc79a75e186255d7b39a",
+      "size": 2293,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/ff44f34c24633fbee952fc79a75e186255d7b39a"
+    },
+    {
+      "path": "lib/membrane/core/pipeline.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7030e7cec5c6599f997f61a636a434e1093f4c51",
+      "size": 5667,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/7030e7cec5c6599f997f61a636a434e1093f4c51"
+    },
+    {
+      "path": "lib/membrane/core/pipeline",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "edbb0b8300685b7ea4ac71c7691aa9d7a7ace47d",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/edbb0b8300685b7ea4ac71c7691aa9d7a7ace47d"
+    },
+    {
+      "path": "lib/membrane/core/pipeline/action_handler.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a97df0ad89c3db34a5cf38fc470beba7b735b4ec",
+      "size": 3680,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a97df0ad89c3db34a5cf38fc470beba7b735b4ec"
+    },
+    {
+      "path": "lib/membrane/core/pipeline/callback_context.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cb411539febd2f3588ae6cf0510bb7276705fef0",
+      "size": 1118,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/cb411539febd2f3588ae6cf0510bb7276705fef0"
+    },
+    {
+      "path": "lib/membrane/core/pipeline/state.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9c39a703857ea830adb2dcb16553720408475e48",
+      "size": 2281,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/9c39a703857ea830adb2dcb16553720408475e48"
+    },
+    {
+      "path": "lib/membrane/core/pipeline/supervisor.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f6aa33b9e0711f097ecc073683eee4a23af78c8e",
+      "size": 3999,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/f6aa33b9e0711f097ecc073683eee4a23af78c8e"
+    },
+    {
+      "path": "lib/membrane/core/pipeline/zombie.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7c60f117f013549ef8a3fc414e83f6f804837b0",
+      "size": 993,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/d7c60f117f013549ef8a3fc414e83f6f804837b0"
+    },
+    {
+      "path": "lib/membrane/core/process_helper.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "727d35471eff4610c986bf4b6db77b9334b691a9",
+      "size": 1029,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/727d35471eff4610c986bf4b6db77b9334b691a9"
+    },
+    {
+      "path": "lib/membrane/core/stalker.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4bc8e39b2ebe039025e713da0677e0352e7ed510",
+      "size": 17119,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/4bc8e39b2ebe039025e713da0677e0352e7ed510"
+    },
+    {
+      "path": "lib/membrane/core/subprocess_supervisor.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "530e82e6b34b79622c96e638108e4c0860f08657",
+      "size": 8164,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/530e82e6b34b79622c96e638108e4c0860f08657"
+    },
+    {
+      "path": "lib/membrane/core/telemetry.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "531ff2bfcdc956845052c9212bbcfb32d8751b74",
+      "size": 8338,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/531ff2bfcdc956845052c9212bbcfb32d8751b74"
+    },
+    {
+      "path": "lib/membrane/core/timer.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d6a8575a0d042948f91fc9850e483aa77a5b7c7d",
+      "size": 2603,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/d6a8575a0d042948f91fc9850e483aa77a5b7c7d"
+    },
+    {
+      "path": "lib/membrane/core/timer_controller.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c036bb4fc821f0630c106a8b3d83ac4e07baa998",
+      "size": 3073,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/c036bb4fc821f0630c106a8b3d83ac4e07baa998"
+    },
+    {
+      "path": "lib/membrane/core/utils.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54df1b0f4ecef90cad86867898a0ca9650fab306",
+      "size": 832,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/54df1b0f4ecef90cad86867898a0ca9650fab306"
+    },
+    {
+      "path": "lib/membrane/debug",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7a63a062cb2f8dddf6a148d16672e9d56da909bb",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/7a63a062cb2f8dddf6a148d16672e9d56da909bb"
+    },
+    {
+      "path": "lib/membrane/debug/filter.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ab99cca040b3dc49f70df5df7a421083aa6725ea",
+      "size": 3666,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/ab99cca040b3dc49f70df5df7a421083aa6725ea"
+    },
+    {
+      "path": "lib/membrane/debug/sink.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "21f67d11a863f4c0d33644f4872b26c57ba3bb25",
+      "size": 3131,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/21f67d11a863f4c0d33644f4872b26c57ba3bb25"
+    },
+    {
+      "path": "lib/membrane/element.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a1d1b53dd4becc5416d66b9cf86f4b958557620c",
+      "size": 1948,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a1d1b53dd4becc5416d66b9cf86f4b958557620c"
+    },
+    {
+      "path": "lib/membrane/element",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f750bd4c9212b873ffc7fceb1e107fae67ab8a9b",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/f750bd4c9212b873ffc7fceb1e107fae67ab8a9b"
+    },
+    {
+      "path": "lib/membrane/element/action.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9748c43f28826de16571948f3a9ca8f685a24dfd",
+      "size": 13012,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/9748c43f28826de16571948f3a9ca8f685a24dfd"
+    },
+    {
+      "path": "lib/membrane/element/base.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9c084437e62462afb9ffa82cedf7df061946fdf2",
+      "size": 11068,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/9c084437e62462afb9ffa82cedf7df061946fdf2"
+    },
+    {
+      "path": "lib/membrane/element/callback_context.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cfbb92cd672efac05c0144758a4467cc7141f5f7",
+      "size": 1370,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/cfbb92cd672efac05c0144758a4467cc7141f5f7"
+    },
+    {
+      "path": "lib/membrane/element/pad_data.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec4ddf815a669c14813169781bba35818d30cf95",
+      "size": 4427,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/ec4ddf815a669c14813169781bba35818d30cf95"
+    },
+    {
+      "path": "lib/membrane/element/with_input_pads.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fddd78b171b004f4eb2a1e4f376e8b8371c5b2a2",
+      "size": 3823,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/fddd78b171b004f4eb2a1e4f376e8b8371c5b2a2"
+    },
+    {
+      "path": "lib/membrane/element/with_output_pads.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "27b1b0ae8ede9a485e0fc3bd21c4311ddb89876a",
+      "size": 2140,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/27b1b0ae8ede9a485e0fc3bd21c4311ddb89876a"
+    },
+    {
+      "path": "lib/membrane/endpoint.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d1efef5ea8986ea259add2c2af7f6742a10603b0",
+      "size": 3219,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/d1efef5ea8986ea259add2c2af7f6742a10603b0"
+    },
+    {
+      "path": "lib/membrane/event.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a089cffbe505a8c51f569f128300bbfbb6694dda",
+      "size": 910,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a089cffbe505a8c51f569f128300bbfbb6694dda"
+    },
+    {
+      "path": "lib/membrane/event",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "ef3e2dac07829c25d39da8ba701e61e02e7b8cde",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/ef3e2dac07829c25d39da8ba701e61e02e7b8cde"
+    },
+    {
+      "path": "lib/membrane/event/discontinuity.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f846e32e4062ad7a2775ea47dcec1c19ec8699a4",
+      "size": 555,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/f846e32e4062ad7a2775ea47dcec1c19ec8699a4"
+    },
+    {
+      "path": "lib/membrane/event/underrun.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4288f1711a87bd752d2c0196cbd717d6a97200b6",
+      "size": 440,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/4288f1711a87bd752d2c0196cbd717d6a97200b6"
+    },
+    {
+      "path": "lib/membrane/event_protocol.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d100350f80e16ab5f988a665810b3d63da0dc040",
+      "size": 1629,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/d100350f80e16ab5f988a665810b3d63da0dc040"
+    },
+    {
+      "path": "lib/membrane/exceptions.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "282f805c6e4d5471578a41e3fdc390da6441d961",
+      "size": 5296,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/282f805c6e4d5471578a41e3fdc390da6441d961"
+    },
+    {
+      "path": "lib/membrane/fake_sink.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "add0ba38b98a2d161c5527045aac1e8e2831e5ca",
+      "size": 252,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/add0ba38b98a2d161c5527045aac1e8e2831e5ca"
+    },
+    {
+      "path": "lib/membrane/filter.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8ca214de3a08e2a49571a99808e277813e2f1f12",
+      "size": 2572,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/8ca214de3a08e2a49571a99808e277813e2f1f12"
+    },
+    {
+      "path": "lib/membrane/filter_aggregator.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7848d80767cd7c84235f07291e5c9d4559520d5",
+      "size": 10413,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/d7848d80767cd7c84235f07291e5c9d4559520d5"
+    },
+    {
+      "path": "lib/membrane/funnel.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ecb11a3db1d8d21431762edc2ae18e8557e9577d",
+      "size": 1818,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/ecb11a3db1d8d21431762edc2ae18e8557e9577d"
+    },
+    {
+      "path": "lib/membrane/funnel",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7deac4fce25c37777037662e6cbfcfb2cb7a7995",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/7deac4fce25c37777037662e6cbfcfb2cb7a7995"
+    },
+    {
+      "path": "lib/membrane/funnel/new_input_event.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "22f6455e06a5304224fc0adb6f5c439cefda374e",
+      "size": 238,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/22f6455e06a5304224fc0adb6f5c439cefda374e"
+    },
+    {
+      "path": "lib/membrane/keyframe_request_event.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "92cd69a2d7116b40491239a1a950f84577a76a4c",
+      "size": 397,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/92cd69a2d7116b40491239a1a950f84577a76a4c"
+    },
+    {
+      "path": "lib/membrane/logger.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80e0c4584ec014b2f180f7741a72ab7f8b1e338c",
+      "size": 5457,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/80e0c4584ec014b2f180f7741a72ab7f8b1e338c"
+    },
+    {
+      "path": "lib/membrane/notification.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a308ad43df79e486f3e6cc051575bbe81b9e660",
+      "size": 927,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/3a308ad43df79e486f3e6cc051575bbe81b9e660"
+    },
+    {
+      "path": "lib/membrane/pad.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c3ab8b9faf22203971ffdb8a411dd8e1c2313e1e",
+      "size": 9603,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/c3ab8b9faf22203971ffdb8a411dd8e1c2313e1e"
+    },
+    {
+      "path": "lib/membrane/payload.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9cf6238390cd91d1e4b361af2d40454348d29ac7",
+      "size": 3291,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/9cf6238390cd91d1e4b361af2d40454348d29ac7"
+    },
+    {
+      "path": "lib/membrane/pipeline.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "90eb5212c53b77bafcfdc8542948d081a74400ca",
+      "size": 20463,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/90eb5212c53b77bafcfdc8542948d081a74400ca"
+    },
+    {
+      "path": "lib/membrane/pipeline",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0c696ba5d6b1c58b90e92c9c6e58130223719be3",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/0c696ba5d6b1c58b90e92c9c6e58130223719be3"
+    },
+    {
+      "path": "lib/membrane/pipeline/action.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7c8b21a6f0836837d1a04c4545f2365a5dad8bb3",
+      "size": 7728,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/7c8b21a6f0836837d1a04c4545f2365a5dad8bb3"
+    },
+    {
+      "path": "lib/membrane/pipeline/callback_context.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ebb6beaffd74ce64d50cc44fb12be879d9fdf028",
+      "size": 1647,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/ebb6beaffd74ce64d50cc44fb12be879d9fdf028"
+    },
+    {
+      "path": "lib/membrane/playback.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "445311b5cdee2c07bfe07fac605932f034855b68",
+      "size": 785,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/445311b5cdee2c07bfe07fac605932f034855b68"
+    },
+    {
+      "path": "lib/membrane/rc_message.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7d09889d2625cbcf6daaaf515ac0b8eeb4861b26",
+      "size": 2147,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/7d09889d2625cbcf6daaaf515ac0b8eeb4861b26"
+    },
+    {
+      "path": "lib/membrane/rc_pipeline.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "27c2a8fb3a45e6bc66cd38b2ca9869b3da372ad0",
+      "size": 14310,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/27c2a8fb3a45e6bc66cd38b2ca9869b3da372ad0"
+    },
+    {
+      "path": "lib/membrane/remote_stream.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d09c9f2cd8478f77f4bf83c41f7be529d7785999",
+      "size": 779,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/d09c9f2cd8478f77f4bf83c41f7be529d7785999"
+    },
+    {
+      "path": "lib/membrane/resource_guard.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6867be790255862094288c4443c7d0d4cc44ac05",
+      "size": 4928,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/6867be790255862094288c4443c7d0d4cc44ac05"
+    },
+    {
+      "path": "lib/membrane/sink.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c7d2e0256fed0e3fa8792249bd451c746552aba",
+      "size": 1644,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/1c7d2e0256fed0e3fa8792249bd451c746552aba"
+    },
+    {
+      "path": "lib/membrane/source.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b63ea29ce674f3c0660ff0c48c0f08600c8622e3",
+      "size": 1788,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/b63ea29ce674f3c0660ff0c48c0f08600c8622e3"
+    },
+    {
+      "path": "lib/membrane/stream_format.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f63c959063d87ef8df770f47c67426ae5d9ae02",
+      "size": 607,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/9f63c959063d87ef8df770f47c67426ae5d9ae02"
+    },
+    {
+      "path": "lib/membrane/sync.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1577074ed6533b8ad290b0fb8a76efaf223afa54",
+      "size": 6529,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/1577074ed6533b8ad290b0fb8a76efaf223afa54"
+    },
+    {
+      "path": "lib/membrane/tee.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "37d408434c988c945036f8bbc7578f655f3e8438",
+      "size": 2035,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/37d408434c988c945036f8bbc7578f655f3e8438"
+    },
+    {
+      "path": "lib/membrane/telemetry.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "086d2838b32ee6e58ea3f6f4e56a698b66bb9c79",
+      "size": 6668,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/086d2838b32ee6e58ea3f6f4e56a698b66bb9c79"
+    },
+    {
+      "path": "lib/membrane/testing",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a672431ebff4d174a66e86fbc4a6ab1f831a5928",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/a672431ebff4d174a66e86fbc4a6ab1f831a5928"
+    },
+    {
+      "path": "lib/membrane/testing/assertions.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4acd4ec17e06fd58c7ff1b15738b54ee462923d1",
+      "size": 16883,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/4acd4ec17e06fd58c7ff1b15738b54ee462923d1"
+    },
+    {
+      "path": "lib/membrane/testing/dynamic_source.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "536112d1a7bc952acbf71aa3b3fc3c395aab372f",
+      "size": 5092,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/536112d1a7bc952acbf71aa3b3fc3c395aab372f"
+    },
+    {
+      "path": "lib/membrane/testing/endpoint.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8153d5f65508a33104c22840d7f3cc69561ef021",
+      "size": 5314,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/8153d5f65508a33104c22840d7f3cc69561ef021"
+    },
+    {
+      "path": "lib/membrane/testing/event.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4941096d88a1b8e69e63f68d0e859bdd376f4c78",
+      "size": 152,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/4941096d88a1b8e69e63f68d0e859bdd376f4c78"
+    },
+    {
+      "path": "lib/membrane/testing/mock_resource_guard.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0265507188da3413ccebd4e67fd9666829ef3462",
+      "size": 2449,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/0265507188da3413ccebd4e67fd9666829ef3462"
+    },
+    {
+      "path": "lib/membrane/testing/notification.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "61449b7a1b1400199d48252704bc77cb5d8b01c3",
+      "size": 184,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/61449b7a1b1400199d48252704bc77cb5d8b01c3"
+    },
+    {
+      "path": "lib/membrane/testing/pipeline.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c7b4ef4a032ab39d6591d8bf52432c75213a0938",
+      "size": 18141,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/c7b4ef4a032ab39d6591d8bf52432c75213a0938"
+    },
+    {
+      "path": "lib/membrane/testing/sink.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5b036fdda7ed1348d6e101b0a222ae74903f1f39",
+      "size": 2669,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/5b036fdda7ed1348d6e101b0a222ae74903f1f39"
+    },
+    {
+      "path": "lib/membrane/testing/source.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "448ccda6d0eb0f9ce4ea22eb7a588f40ec57d10b",
+      "size": 5007,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/448ccda6d0eb0f9ce4ea22eb7a588f40ec57d10b"
+    },
+    {
+      "path": "lib/membrane/time.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "798247939c203184fa1f6e01f9ce795d96324f94",
+      "size": 9606,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/798247939c203184fa1f6e01f9ce795d96324f94"
+    },
+    {
+      "path": "lib/membrane/utility_supervisor.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b60d556e20fa4ca3b8ca8c0beaddd67887583dcc",
+      "size": 1711,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/b60d556e20fa4ca3b8ca8c0beaddd67887583dcc"
+    },
+    {
+      "path": "lib/mix",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6ce653b0e4991282d5e4fa3631ae277567da72a2",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/6ce653b0e4991282d5e4fa3631ae277567da72a2"
+    },
+    {
+      "path": "lib/mix/tasks",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3af301ba38c49f6fb55a7e07d51dca8107de0727",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/3af301ba38c49f6fb55a7e07d51dca8107de0727"
+    },
+    {
+      "path": "lib/mix/tasks/membrane.demo.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a27a8135649c969581afbdcc41f3a31649b5929",
+      "size": 4283,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/0a27a8135649c969581afbdcc41f3a31649b5929"
+    },
+    {
+      "path": "lib/mix/tasks/membrane.gen.component.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "00bbda0771c93746a3d747ab3ce315747adbe7bb",
+      "size": 2971,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/00bbda0771c93746a3d747ab3ce315747adbe7bb"
+    },
+    {
+      "path": "lib/mix/tasks/membrane.gen.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "767ebba90f7075ed99d2e5f907831a4a7dc84804",
+      "size": 236,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/767ebba90f7075ed99d2e5f907831a4a7dc84804"
+    },
+    {
+      "path": "mix.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1386395867cb3e0eeb064c39d43fce88b081a476",
+      "size": 8950,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/1386395867cb3e0eeb064c39d43fce88b081a476"
+    },
+    {
+      "path": "mix.lock",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b5101b93dffe98b251463587ab08ac2119266d73",
+      "size": 6759,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/b5101b93dffe98b251463587ab08ac2119266d73"
+    },
+    {
+      "path": "scripts",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "cb7ba1255cb64d60b98070f3cdc6ae76d4922666",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/cb7ba1255cb64d60b98070f3cdc6ae76d4922666"
+    },
+    {
+      "path": "scripts/elixir",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "172b2f3a38bf0e84688c000188a11d7ad694016c",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/172b2f3a38bf0e84688c000188a11d7ad694016c"
+    },
+    {
+      "path": "scripts/elixir/hex_packages.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a5bcdb4af3ed86059eb59052e49ab3dbfe983cdf",
+      "size": 3001,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a5bcdb4af3ed86059eb59052e49ab3dbfe983cdf"
+    },
+    {
+      "path": "scripts/elixir/packages.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9304da71aedce348f507839ffcc575acc1017f6c",
+      "size": 3879,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/9304da71aedce348f507839ffcc575acc1017f6c"
+    },
+    {
+      "path": "scripts/elixir/update_packages_list.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf37d34410315c26606f0d1158e9e3ff0f197361",
+      "size": 8280,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/bf37d34410315c26606f0d1158e9e3ff0f197361"
+    },
+    {
+      "path": "scripts/python",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d488fd3712c8c2254b2c46c1b1b21a9812e55458",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/d488fd3712c8c2254b2c46c1b1b21a9812e55458"
+    },
+    {
+      "path": "scripts/python/get_author_origin.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "50b3662cd339465eab00a608a0199b0846dde129",
+      "size": 455,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/50b3662cd339465eab00a608a0199b0846dde129"
+    },
+    {
+      "path": "scripts/python/get_ticket_id.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "55fdca630605e041aa643092862e0e5163796236",
+      "size": 519,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/55fdca630605e041aa643092862e0e5163796236"
+    },
+    {
+      "path": "skills",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c19f46c8f5b3c2aa6007bd3024e1acb96fc881ce",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/c19f46c8f5b3c2aa6007bd3024e1acb96fc881ce"
+    },
+    {
+      "path": "skills/membrane-framework",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "38fc48aae6efb53348b3b385ce0f7f70003f5157",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/38fc48aae6efb53348b3b385ce0f7f70003f5157"
+    },
+    {
+      "path": "skills/membrane-framework/SKILL.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "180496d264d4a982b04176eeeda8097b7305f2b7",
+      "size": 16792,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/180496d264d4a982b04176eeeda8097b7305f2b7"
+    },
+    {
+      "path": "templates",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "2ea692446fbbaf4a7c88d21da5bbdc8f49c0eb43",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/2ea692446fbbaf4a7c88d21da5bbdc8f49c0eb43"
+    },
+    {
+      "path": "templates/bin.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2ce3f27417b8bcd49d93dfbb9a30ed0293c0a8c0",
+      "size": 4781,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/2ce3f27417b8bcd49d93dfbb9a30ed0293c0a8c0"
+    },
+    {
+      "path": "templates/endpoint.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7fab43c7e9b4e6c0c2d2ae8a7b0e106e733bcf87",
+      "size": 4878,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/7fab43c7e9b4e6c0c2d2ae8a7b0e106e733bcf87"
+    },
+    {
+      "path": "templates/filter.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2df5624be15e995335ad2b33e9043fa33f2bed25",
+      "size": 4872,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/2df5624be15e995335ad2b33e9043fa33f2bed25"
+    },
+    {
+      "path": "templates/pipeline.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0f0120180a57785662486c8adaaf50ac518aa30e",
+      "size": 3209,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/0f0120180a57785662486c8adaaf50ac518aa30e"
+    },
+    {
+      "path": "templates/sink.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c477b0457f8fe145876dfef5d9d1907444905aa6",
+      "size": 4209,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/c477b0457f8fe145876dfef5d9d1907444905aa6"
+    },
+    {
+      "path": "templates/source.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5c9fd277835e85ba374671bb5b14a8b8dd18dbb1",
+      "size": 3862,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/5c9fd277835e85ba374671bb5b14a8b8dd18dbb1"
+    },
+    {
+      "path": "test",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "644ee8309fdc70b1c3935bfe29b07eb1400dbd06",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/644ee8309fdc70b1c3935bfe29b07eb1400dbd06"
+    },
+    {
+      "path": "test/membrane",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "fbdd47c039a2c3feede3cf58cb935158bc8e9eab",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/fbdd47c039a2c3feede3cf58cb935158bc8e9eab"
+    },
+    {
+      "path": "test/membrane/buffer_metric",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a58f79b995f442efcc25542e6bf0281f72dee958",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/a58f79b995f442efcc25542e6bf0281f72dee958"
+    },
+    {
+      "path": "test/membrane/buffer_metric/byte_size_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0fddbe1270abefdc558589fa1e033f33e236e135",
+      "size": 2041,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/0fddbe1270abefdc558589fa1e033f33e236e135"
+    },
+    {
+      "path": "test/membrane/buffer_metric/count_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f8d1677069b67ca9f1be59fb6be35aa47c34a034",
+      "size": 888,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/f8d1677069b67ca9f1be59fb6be35aa47c34a034"
+    },
+    {
+      "path": "test/membrane/buffer_metric/timestamp_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e1a421713f7ca58ed8bd9c134a6f3535a2432939",
+      "size": 7416,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/e1a421713f7ca58ed8bd9c134a6f3535a2432939"
+    },
+    {
+      "path": "test/membrane/buffer_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "df8783cb0aa0e6612c7651660a558d2bab06637e",
+      "size": 761,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/df8783cb0aa0e6612c7651660a558d2bab06637e"
+    },
+    {
+      "path": "test/membrane/clock_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "438743a4556f57a60436cffd959ac65865419349",
+      "size": 8415,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/438743a4556f57a60436cffd959ac65865419349"
+    },
+    {
+      "path": "test/membrane/core",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6e709d400a01de6401e3b013a8a4900fe138d25a",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/6e709d400a01de6401e3b013a8a4900fe138d25a"
+    },
+    {
+      "path": "test/membrane/core/element",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "62d2fd33adc41ba735817c2ba13b8b7bce066ea3",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/62d2fd33adc41ba735817c2ba13b8b7bce066ea3"
+    },
+    {
+      "path": "test/membrane/core/element/action_handler_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4505cfc7c60c8d5d37d459f6478d09f4a1dbb15b",
+      "size": 21413,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/4505cfc7c60c8d5d37d459f6478d09f4a1dbb15b"
+    },
+    {
+      "path": "test/membrane/core/element/atomic_demand_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "edf425ecfcbb5c065da390d6b7c060050e0d6e6a",
+      "size": 5689,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/edf425ecfcbb5c065da390d6b7c060050e0d6e6a"
+    },
+    {
+      "path": "test/membrane/core/element/event_controller_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cbe4233532ca38591dc682823bc8a003b5d9eb18",
+      "size": 3301,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/cbe4233532ca38591dc682823bc8a003b5d9eb18"
+    },
+    {
+      "path": "test/membrane/core/element/input_queue_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6149206b270d9e7736b0e7bcf7acde2f796b67ae",
+      "size": 17968,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/6149206b270d9e7736b0e7bcf7acde2f796b67ae"
+    },
+    {
+      "path": "test/membrane/core/element/lifecycle_controller_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c7397f6fed9d4d69e9f1bcb0a6e21c1e9549fd83",
+      "size": 2250,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/c7397f6fed9d4d69e9f1bcb0a6e21c1e9549fd83"
+    },
+    {
+      "path": "test/membrane/core/element/pad_controller_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e36b089232074acb4366689d24d73ac15326205e",
+      "size": 4237,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/e36b089232074acb4366689d24d73ac15326205e"
+    },
+    {
+      "path": "test/membrane/core/element/pad_model_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6c63df6159d8d9c0604d22fb90df83a5266ba640",
+      "size": 3835,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/6c63df6159d8d9c0604d22fb90df83a5266ba640"
+    },
+    {
+      "path": "test/membrane/core/element/stream_format_controller_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6b9955e1dc443b5247a65aa120c0aba352472753",
+      "size": 2722,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/6b9955e1dc443b5247a65aa120c0aba352472753"
+    },
+    {
+      "path": "test/membrane/core/element_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "71f0a28d55dd4d6f18477cbbbcd7f9451c5a0e45",
+      "size": 12385,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/71f0a28d55dd4d6f18477cbbbcd7f9451c5a0e45"
+    },
+    {
+      "path": "test/membrane/core/helper",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1acd11c4f9d0c413b1df34ab049e5e1c0f637125",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/1acd11c4f9d0c413b1df34ab049e5e1c0f637125"
+    },
+    {
+      "path": "test/membrane/core/helper/fast_map_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b1ea9e81f6b986e2cd716cace234b0226616608a",
+      "size": 1726,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/b1ea9e81f6b986e2cd716cace234b0226616608a"
+    },
+    {
+      "path": "test/membrane/core/message_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cff8a1ef2605fcfd35ec7439f6da70a009907bab",
+      "size": 1503,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/cff8a1ef2605fcfd35ec7439f6da70a009907bab"
+    },
+    {
+      "path": "test/membrane/core/parent",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "236fee65a9ffa2a2ea210c793e929a8278378907",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/236fee65a9ffa2a2ea210c793e929a8278378907"
+    },
+    {
+      "path": "test/membrane/core/parent/structure_parser_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7be3449702e564c89bd7f5e7e1cb5aa7a6c10e5f",
+      "size": 6511,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/7be3449702e564c89bd7f5e7e1cb5aa7a6c10e5f"
+    },
+    {
+      "path": "test/membrane/core/pipeline_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e5ec47cf8ccbcbe324196c763dde505751f7f784",
+      "size": 4987,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/e5ec47cf8ccbcbe324196c763dde505751f7f784"
+    },
+    {
+      "path": "test/membrane/diamond_detection_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0395cb47bcbf1524804d72ae4b5a480d8e56cd77",
+      "size": 3930,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/0395cb47bcbf1524804d72ae4b5a480d8e56cd77"
+    },
+    {
+      "path": "test/membrane/element_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "acf6f6c6b93f07047f73e7796dde9893edb416fd",
+      "size": 2917,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/acf6f6c6b93f07047f73e7796dde9893edb416fd"
+    },
+    {
+      "path": "test/membrane/filter_aggregator",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "403739f0dd6d11a34bb6064ca82a967f47d71c2c",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/403739f0dd6d11a34bb6064ca82a967f47d71c2c"
+    },
+    {
+      "path": "test/membrane/filter_aggregator/integration_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "72fcb63b8d095f27dd08f215abcd9cb0c579a533",
+      "size": 2065,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/72fcb63b8d095f27dd08f215abcd9cb0c579a533"
+    },
+    {
+      "path": "test/membrane/filter_aggregator/internal_action_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3cd8c149b837e47163834d69429053088a5644f4",
+      "size": 497,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/3cd8c149b837e47163834d69429053088a5644f4"
+    },
+    {
+      "path": "test/membrane/filter_aggregator/unit_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2db5f9cc1e28a1390cac760f5d4de6ef35f18492",
+      "size": 11954,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/2db5f9cc1e28a1390cac760f5d4de6ef35f18492"
+    },
+    {
+      "path": "test/membrane/integration",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d085d3f8a763052656e75c8f0f2da363b9597a06",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/d085d3f8a763052656e75c8f0f2da363b9597a06"
+    },
+    {
+      "path": "test/membrane/integration/actions_handling_order_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8d9476970754042af3255dbf444ee6d43cffa2d5",
+      "size": 5227,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/8d9476970754042af3255dbf444ee6d43cffa2d5"
+    },
+    {
+      "path": "test/membrane/integration/auto_demands_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "64ab6eb3939dfc17a4241f1b28c540a9c0aefc97",
+      "size": 13643,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/64ab6eb3939dfc17a4241f1b28c540a9c0aefc97"
+    },
+    {
+      "path": "test/membrane/integration/bin_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a6292e69505fc48e39ad4b379927bab0b1e63b21",
+      "size": 9092,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a6292e69505fc48e39ad4b379927bab0b1e63b21"
+    },
+    {
+      "path": "test/membrane/integration/callbacks_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19ccf3e52aed61a50da5f3145eddaf3b039a49d4",
+      "size": 5322,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/19ccf3e52aed61a50da5f3145eddaf3b039a49d4"
+    },
+    {
+      "path": "test/membrane/integration/child_crash_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da423a5cac5da3bed13bceaca4200569f3274f6f",
+      "size": 11463,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/da423a5cac5da3bed13bceaca4200569f3274f6f"
+    },
+    {
+      "path": "test/membrane/integration/child_life_callbacks_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d87ac5dfd5512d523924f02340755b97e1f8786",
+      "size": 3703,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/1d87ac5dfd5512d523924f02340755b97e1f8786"
+    },
+    {
+      "path": "test/membrane/integration/child_pad_removed_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "537e84ba22fd00c9e28cbc3bb57569eebe083038",
+      "size": 5874,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/537e84ba22fd00c9e28cbc3bb57569eebe083038"
+    },
+    {
+      "path": "test/membrane/integration/child_removal_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "99737824b48404f28c3af1184d13e372f21a0b3c",
+      "size": 9019,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/99737824b48404f28c3af1184d13e372f21a0b3c"
+    },
+    {
+      "path": "test/membrane/integration/child_spawn_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "57af973001819cbed4995be2ae055ca06f36e39e",
+      "size": 6829,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/57af973001819cbed4995be2ae055ca06f36e39e"
+    },
+    {
+      "path": "test/membrane/integration/connector_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7bea840b1918c3ffc5112e035fcaa5d0b47baf09",
+      "size": 4702,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/7bea840b1918c3ffc5112e035fcaa5d0b47baf09"
+    },
+    {
+      "path": "test/membrane/integration/debug_elements_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d0704efa31a7ecff17634acbb196d2235af8b74",
+      "size": 1603,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/3d0704efa31a7ecff17634acbb196d2235af8b74"
+    },
+    {
+      "path": "test/membrane/integration/defer_setup_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cc6d1a206aff4e8efee758bc188653f94a4265d1",
+      "size": 4142,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/cc6d1a206aff4e8efee758bc188653f94a4265d1"
+    },
+    {
+      "path": "test/membrane/integration/delayed_demands_loop_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da614c9804cd4ee6ed9552d5851d1ed1e7d6af84",
+      "size": 4918,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/da614c9804cd4ee6ed9552d5851d1ed1e7d6af84"
+    },
+    {
+      "path": "test/membrane/integration/demands_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1281f66740c45664b9f4e0d4f1becd631f9a221d",
+      "size": 12111,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/1281f66740c45664b9f4e0d4f1becd631f9a221d"
+    },
+    {
+      "path": "test/membrane/integration/distributed_pipeline_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c17672a8c6c3b84868fec8b02f7c7b8fe6b30b1a",
+      "size": 1367,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/c17672a8c6c3b84868fec8b02f7c7b8fe6b30b1a"
+    },
+    {
+      "path": "test/membrane/integration/effective_flow_control_resolution_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fe00afb1c75c31123cba0c96c86ea47510402274",
+      "size": 6465,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/fe00afb1c75c31123cba0c96c86ea47510402274"
+    },
+    {
+      "path": "test/membrane/integration/elements_compatibility_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "320a1114c43237b2f54171fd050a920eb1bf81a7",
+      "size": 7306,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/320a1114c43237b2f54171fd050a920eb1bf81a7"
+    },
+    {
+      "path": "test/membrane/integration/end_of_stream_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7bae62b863a007053161b884d4053a876a23e4b0",
+      "size": 1076,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/7bae62b863a007053161b884d4053a876a23e4b0"
+    },
+    {
+      "path": "test/membrane/integration/endpoint_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3178c3b91bb5f72cfc9c63e54773f0c21e5585d8",
+      "size": 1775,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/3178c3b91bb5f72cfc9c63e54773f0c21e5585d8"
+    },
+    {
+      "path": "test/membrane/integration/funnel_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fb9ca57391514c1ca49c258890442fb2572e37f0",
+      "size": 889,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/fb9ca57391514c1ca49c258890442fb2572e37f0"
+    },
+    {
+      "path": "test/membrane/integration/linking_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f241ed24ba4f751d0951e4f0503db44d8f513e42",
+      "size": 18780,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/f241ed24ba4f751d0951e4f0503db44d8f513e42"
+    },
+    {
+      "path": "test/membrane/integration/links_validation_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f69e2f389269314991d28b5edb93f1d836667f0",
+      "size": 3370,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/9f69e2f389269314991d28b5edb93f1d836667f0"
+    },
+    {
+      "path": "test/membrane/integration/no_stream_format_crash_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "759e4262a3f8d00d665f623ae3839d04a46e1f1e",
+      "size": 2062,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/759e4262a3f8d00d665f623ae3839d04a46e1f1e"
+    },
+    {
+      "path": "test/membrane/integration/stalker_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "66e4cab02476df3db18b6df61edd0ce82680dd56",
+      "size": 2990,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/66e4cab02476df3db18b6df61edd0ce82680dd56"
+    },
+    {
+      "path": "test/membrane/integration/stream_format_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0721f5014c28d9223956e7eeb5a39ba9a7aad524",
+      "size": 3448,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/0721f5014c28d9223956e7eeb5a39ba9a7aad524"
+    },
+    {
+      "path": "test/membrane/integration/sync_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cec933df60d9a6259a2a40e7b645a0b5fbd6bd0c",
+      "size": 3666,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/cec933df60d9a6259a2a40e7b645a0b5fbd6bd0c"
+    },
+    {
+      "path": "test/membrane/integration/sync_test",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "35360329c77cd44ad7e60ccdf19ca1f5d1f9974d",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/35360329c77cd44ad7e60ccdf19ca1f5d1f9974d"
+    },
+    {
+      "path": "test/membrane/integration/sync_test/ticking_pace_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a8c66d4334b4d5c8b72d2658c185cf6ad92a3bd4",
+      "size": 1251,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a8c66d4334b4d5c8b72d2658c185cf6ad92a3bd4"
+    },
+    {
+      "path": "test/membrane/integration/synchronous_pipeline_call_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f8da96a4cf2fdae119f109193ca4753871062b4a",
+      "size": 2160,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/f8da96a4cf2fdae119f109193ca4753871062b4a"
+    },
+    {
+      "path": "test/membrane/integration/tee_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c98ea3428052c8125c2a787eba301201b5abf68",
+      "size": 1381,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/1c98ea3428052c8125c2a787eba301201b5abf68"
+    },
+    {
+      "path": "test/membrane/integration/timer_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "84d0a648f1564d6e0fe86228de3953ddd809e23b",
+      "size": 2230,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/84d0a648f1564d6e0fe86228de3953ddd809e23b"
+    },
+    {
+      "path": "test/membrane/integration/toilet_forwarding_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef309ff1c87cadf5259189dfa7f7a31052458da6",
+      "size": 6508,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/ef309ff1c87cadf5259189dfa7f7a31052458da6"
+    },
+    {
+      "path": "test/membrane/log_metadata_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54078d767f829d11ce57619bfb019dffbef8ac4f",
+      "size": 1003,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/54078d767f829d11ce57619bfb019dffbef8ac4f"
+    },
+    {
+      "path": "test/membrane/pad_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "842e0a98c038a1037d19681bb85fc2beb030f327",
+      "size": 487,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/842e0a98c038a1037d19681bb85fc2beb030f327"
+    },
+    {
+      "path": "test/membrane/pipeline_supervisor_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6885069257f8710eb894d04ec0573107116ec5fd",
+      "size": 1839,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/6885069257f8710eb894d04ec0573107116ec5fd"
+    },
+    {
+      "path": "test/membrane/pipeline_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ed061d49a94e5ca0e75eccbb902bfda63c928bd8",
+      "size": 2190,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/ed061d49a94e5ca0e75eccbb902bfda63c928bd8"
+    },
+    {
+      "path": "test/membrane/remote_controlled",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "ae832c137261376e710f72cb64365afb5257e82d",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/ae832c137261376e710f72cb64365afb5257e82d"
+    },
+    {
+      "path": "test/membrane/remote_controlled/pipeline_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8e79aeb33ed5a488e1cf2fc0e870cd79cc5cc2a1",
+      "size": 4896,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/8e79aeb33ed5a488e1cf2fc0e870cd79cc5cc2a1"
+    },
+    {
+      "path": "test/membrane/resource_guard_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "de70f1aae14adc9244588c214388445f16441942",
+      "size": 3373,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/de70f1aae14adc9244588c214388445f16441942"
+    },
+    {
+      "path": "test/membrane/sync_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e57168bdf179e7122f01428e23e086d52651a63c",
+      "size": 5466,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/e57168bdf179e7122f01428e23e086d52651a63c"
+    },
+    {
+      "path": "test/membrane/telemetry_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "03fbd084559b02e416ed002d8a05fe7117669c6e",
+      "size": 8856,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/03fbd084559b02e416ed002d8a05fe7117669c6e"
+    },
+    {
+      "path": "test/membrane/testing",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "fd6db4f41dce72ec3fa0366dbbfe9f2640124d3f",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/fd6db4f41dce72ec3fa0366dbbfe9f2640124d3f"
+    },
+    {
+      "path": "test/membrane/testing/dynamic_source_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "458aad34bd332b9133993780d1eeb875f6950d6a",
+      "size": 2491,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/458aad34bd332b9133993780d1eeb875f6950d6a"
+    },
+    {
+      "path": "test/membrane/testing/endpoint_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6c9e02f868dea7c6381649c4748cd1431a34243a",
+      "size": 2915,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/6c9e02f868dea7c6381649c4748cd1431a34243a"
+    },
+    {
+      "path": "test/membrane/testing/mock_resource_guard_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7721de90fdc4afe20dae92efd57995d03068477b",
+      "size": 133,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/7721de90fdc4afe20dae92efd57995d03068477b"
+    },
+    {
+      "path": "test/membrane/testing/pipeline_assertions_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8c1cac817b88faf5631c0faece07b330fe348322",
+      "size": 6114,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/8c1cac817b88faf5631c0faece07b330fe348322"
+    },
+    {
+      "path": "test/membrane/testing/pipeline_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc61c5a7cbbbe41d02ab0791d990db3557a5e468",
+      "size": 8362,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/bc61c5a7cbbbe41d02ab0791d990db3557a5e468"
+    },
+    {
+      "path": "test/membrane/testing/sink_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d37dc7c7ade24d15ea81db61b7c8872adc1aaaa3",
+      "size": 810,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/d37dc7c7ade24d15ea81db61b7c8872adc1aaaa3"
+    },
+    {
+      "path": "test/membrane/testing/source_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "270bda7afd27a342472e8714862da92c420989b0",
+      "size": 2992,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/270bda7afd27a342472e8714862da92c420989b0"
+    },
+    {
+      "path": "test/membrane/time_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d6b7c14a6e57d32b6752bf15281ca836b0f0abd",
+      "size": 2715,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/9d6b7c14a6e57d32b6752bf15281ca836b0f0abd"
+    },
+    {
+      "path": "test/membrane/utility_supervisor_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ed182b094e4053552503b131a7a06cc32db9cc03",
+      "size": 1082,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/ed182b094e4053552503b131a7a06cc32db9cc03"
+    },
+    {
+      "path": "test/mix",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b458c166007837314474ed591fb1e8bb5a31c276",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/b458c166007837314474ed591fb1e8bb5a31c276"
+    },
+    {
+      "path": "test/mix/tasks",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e415dfc78a2aa70e60f8c26558311eb2338e86fc",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/e415dfc78a2aa70e60f8c26558311eb2338e86fc"
+    },
+    {
+      "path": "test/mix/tasks/membrane.demo_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "508656fd70ec0ce9c68d7c9cea70f57860269788",
+      "size": 1172,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/508656fd70ec0ce9c68d7c9cea70f57860269788"
+    },
+    {
+      "path": "test/mix/tasks/membrane.gen_test.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6938384067892ce433fc4409d3f02873f0d0500a",
+      "size": 1381,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/6938384067892ce433fc4409d3f02873f0d0500a"
+    },
+    {
+      "path": "test/support",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3f20e28d1a306accf380c495de4916a3235a44e1",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/3f20e28d1a306accf380c495de4916a3235a44e1"
+    },
+    {
+      "path": "test/support/accepted_format_test",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1f57a202d69d47c63cf8bfb1d1f672f43feaf9ee",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/1f57a202d69d47c63cf8bfb1d1f672f43feaf9ee"
+    },
+    {
+      "path": "test/support/accepted_format_test/inner_sink_bin.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "95e77c9e6b0355130bf33cdb5257d44cb6c26eb1",
+      "size": 982,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/95e77c9e6b0355130bf33cdb5257d44cb6c26eb1"
+    },
+    {
+      "path": "test/support/accepted_format_test/inner_source_bin.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0bda7681b7347c6be09fb84678f3096a49fa0768",
+      "size": 979,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/0bda7681b7347c6be09fb84678f3096a49fa0768"
+    },
+    {
+      "path": "test/support/accepted_format_test/outer_sink_bin.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fee95ac670895a25d694e713979278568c5af65b",
+      "size": 1005,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/fee95ac670895a25d694e713979278568c5af65b"
+    },
+    {
+      "path": "test/support/accepted_format_test/outer_source_bin.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1b1a713c8ba12f16805cf43735a37cc38aa7d759",
+      "size": 1004,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/1b1a713c8ba12f16805cf43735a37cc38aa7d759"
+    },
+    {
+      "path": "test/support/accepted_format_test/restrictive_sink.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "71ab2a99dd1aa86a9e94fd31e9d898a8b77e865c",
+      "size": 838,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/71ab2a99dd1aa86a9e94fd31e9d898a8b77e865c"
+    },
+    {
+      "path": "test/support/accepted_format_test/restrictive_source.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e1cffb18bb17204d5c158bf682ab6a9736bb2e3",
+      "size": 961,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/2e1cffb18bb17204d5c158bf682ab6a9736bb2e3"
+    },
+    {
+      "path": "test/support/accepted_format_test/sink.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "28d464eb9ceb83f87e5cceca96d1cd5567b6e335",
+      "size": 786,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/28d464eb9ceb83f87e5cceca96d1cd5567b6e335"
+    },
+    {
+      "path": "test/support/accepted_format_test/source.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c070825a6c6d7644d621e15a7ab5b2e525776760",
+      "size": 913,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/c070825a6c6d7644d621e15a7ab5b2e525776760"
+    },
+    {
+      "path": "test/support/accepted_format_test/stream.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78e13b2a535ed14fe0afd8b7fd338cd9097e8e7c",
+      "size": 862,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/78e13b2a535ed14fe0afd8b7fd338cd9097e8e7c"
+    },
+    {
+      "path": "test/support/bin",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4c79234ca4dddecceb3df620023bf8c8e92de249",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/4c79234ca4dddecceb3df620023bf8c8e92de249"
+    },
+    {
+      "path": "test/support/bin/test_bins.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aa2dbd9f4036f73a0e1312c204706302a3a9f785",
+      "size": 7341,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/aa2dbd9f4036f73a0e1312c204706302a3a9f785"
+    },
+    {
+      "path": "test/support/child_crash_test",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1d1810081acb5868fdbd1b65f238b217365e7b5d",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/1d1810081acb5868fdbd1b65f238b217365e7b5d"
+    },
+    {
+      "path": "test/support/child_crash_test/filter.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec2f05d843ce74288d7eba1d32f9b408d86414e8",
+      "size": 1638,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/ec2f05d843ce74288d7eba1d32f9b408d86414e8"
+    },
+    {
+      "path": "test/support/child_crash_test/pipeline.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6761a67c1055a4f1b26dc6128886271056c88d23",
+      "size": 2844,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/6761a67c1055a4f1b26dc6128886271056c88d23"
+    },
+    {
+      "path": "test/support/child_removal_test",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "eb10a517c69f1e984e684814f4bd3794581380a0",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/eb10a517c69f1e984e684814f4bd3794581380a0"
+    },
+    {
+      "path": "test/support/child_removal_test/child_removing_pipeline.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a6eca6fc63ca07f33cbdafaafc4bcd407b4206c",
+      "size": 1157,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/0a6eca6fc63ca07f33cbdafaafc4bcd407b4206c"
+    },
+    {
+      "path": "test/support/child_removal_test/filter.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dcc450f4613a0538576e9a946bf2e7038c03cffb",
+      "size": 2347,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/dcc450f4613a0538576e9a946bf2e7038c03cffb"
+    },
+    {
+      "path": "test/support/child_removal_test/filter_to_be_removed.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "578561235f6210a223a2317669941f0ba6407034",
+      "size": 516,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/578561235f6210a223a2317669941f0ba6407034"
+    },
+    {
+      "path": "test/support/child_removal_test/pipeline.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f9cc11db2ac48c2b76b57043c3655e8be4deb133",
+      "size": 2368,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/f9cc11db2ac48c2b76b57043c3655e8be4deb133"
+    },
+    {
+      "path": "test/support/child_removal_test/source_notyfing_when_pad_removed.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "840c19dd98c8340ba8d6d104a174198b1d8858ab",
+      "size": 783,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/840c19dd98c8340ba8d6d104a174198b1d8858ab"
+    },
+    {
+      "path": "test/support/demands_test",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "88276b8a4b8246e7c8a4da4b0b87419023ce8642",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/88276b8a4b8246e7c8a4da4b0b87419023ce8642"
+    },
+    {
+      "path": "test/support/demands_test/filter.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2becb5debc2f041b60a73976ec5797edcf03da03",
+      "size": 954,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/2becb5debc2f041b60a73976ec5797edcf03da03"
+    },
+    {
+      "path": "test/support/demands_test/pipeline.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3934f55a725efb4c68f1551848c3ae8a71b47b60",
+      "size": 758,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/3934f55a725efb4c68f1551848c3ae8a71b47b60"
+    },
+    {
+      "path": "test/support/distributed.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a6d860f1474a0a2dbc300a226f1b5912e19f7387",
+      "size": 2174,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a6d860f1474a0a2dbc300a226f1b5912e19f7387"
+    },
+    {
+      "path": "test/support/dynamic_filter.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "76726caa379076bbdbab0ea8df7ad42be6a2bb89",
+      "size": 1451,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/76726caa379076bbdbab0ea8df7ad42be6a2bb89"
+    },
+    {
+      "path": "test/support/element",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1b4ace11f7dfad4609453e74040a530f4772acd1",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/1b4ace11f7dfad4609453e74040a530f4772acd1"
+    },
+    {
+      "path": "test/support/element/trivial_filter.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "14203cc1a8a11e239575215e726142f0001a8717",
+      "size": 339,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/14203cc1a8a11e239575215e726142f0001a8717"
+    },
+    {
+      "path": "test/support/element/trivial_sink.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c8ebae0dc5256d7d80504b4cf6bcfdc3f7c427b7",
+      "size": 261,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/c8ebae0dc5256d7d80504b4cf6bcfdc3f7c427b7"
+    },
+    {
+      "path": "test/support/element/trivial_source.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4ccc864e8fa1c172ea707b608939a1bca51e8646",
+      "size": 258,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/4ccc864e8fa1c172ea707b608939a1bca51e8646"
+    },
+    {
+      "path": "test/support/log_metadata_test",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c34ef512ec60bc542774756bb2a25e75e8f7ffbd",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/c34ef512ec60bc542774756bb2a25e75e8f7ffbd"
+    },
+    {
+      "path": "test/support/log_metadata_test/pipeline.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a2e3fa06095ab72a016bf75a7591c0c36cd9ec2",
+      "size": 1087,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/0a2e3fa06095ab72a016bf75a7591c0c36cd9ec2"
+    },
+    {
+      "path": "test/support/stream_format_mock.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3b1090e3d1a5cc476c6b352d69f41856d10d4f6a",
+      "size": 115,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/3b1090e3d1a5cc476c6b352d69f41856d10d4f6a"
+    },
+    {
+      "path": "test/support/sync",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "cc7defa5b21e19fe24c8f67478c882bc8c4f83f8",
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/trees/cc7defa5b21e19fe24c8f67478c882bc8c4f83f8"
+    },
+    {
+      "path": "test/support/sync/helper.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8de098aa3476bd8fa7b4dab8d7406388ce835aa6",
+      "size": 285,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/8de098aa3476bd8fa7b4dab8d7406388ce835aa6"
+    },
+    {
+      "path": "test/support/sync/pipeline.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7a0c825a2c137e8d109add029f34a42f3ffef6e5",
+      "size": 975,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/7a0c825a2c137e8d109add029f34a42f3ffef6e5"
+    },
+    {
+      "path": "test/support/sync/sink.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7adc7b50fa20daf1a94689d9e04b1af04c295d28",
+      "size": 191,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/7adc7b50fa20daf1a94689d9e04b1af04c295d28"
+    },
+    {
+      "path": "test/support/sync/source.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a51ae480d8ee64f551f1a1b00424b3bf533b2fe4",
+      "size": 627,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/a51ae480d8ee64f551f1a1b00424b3bf533b2fe4"
+    },
+    {
+      "path": "test/support/sync/sync_bin.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6ddcaa4b13b1657583dd8f7e47f6767f5c4518f8",
+      "size": 363,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/6ddcaa4b13b1657583dd8f7e47f6767f5c4518f8"
+    },
+    {
+      "path": "test/support/trivial_pipeline.ex",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5768fae6b96a45ca93513cca2177c194375cdb7d",
+      "size": 93,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/5768fae6b96a45ca93513cca2177c194375cdb7d"
+    },
+    {
+      "path": "test/test_helper.exs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10efabeb7e9fb7b5f4da35f1b8e7f8a3a6f140ab",
+      "size": 276,
+      "url": "https://api.github.com/repos/membraneframework/membrane_core/git/blobs/10efabeb7e9fb7b5f4da35f1b8e7f8a3a6f140ab"
+    }
+  ],
+  "truncated": false,
+  "pinned_commit": "3aca29d537ae7f49f2bc792c48fd68d16420ec61"
+}

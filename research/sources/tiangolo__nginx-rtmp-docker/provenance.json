@@ -1,0 +1,10 @@
+{
+  "repository": "tiangolo/nginx-rtmp-docker",
+  "retrieved_at_utc": "2026-09-04T22:22:20.689634+00:00",
+  "status": "ok",
+  "blob_sha": "b1f6ed41fb95b2e566ba206fee9f22347803812d",
+  "path": "README.md",
+  "url": "https://github.com/tiangolo/nginx-rtmp-docker/blob/master/README.md",
+  "sha256": "6a7e06d3fe341aeeef20e1020ca063ffef6dca381eba07c42c1337f09666aca4",
+  "bytes": 7271
+}

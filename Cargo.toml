@@ -1,0 +1,39 @@
+[package]
+name = "fvid"
+version = "0.1.0"
+edition = "2024"
+description = "Bounded, fused planar video processing in safe Rust"
+license = "MIT"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[features]
+default = ["gpu", "cuda"]
+cuda = ["dep:fvid-cuda"]
+gpu = ["dep:wgpu", "dep:pollster"]
+mcp = ["media", "dep:rmcp", "dep:tokio", "dep:axum", "dep:serde"]
+media = ["dep:fvid-media", "dep:serde_json"]
+# Optional translation layers on Apple platforms (require installed runtimes).
+angle = ["gpu", "wgpu/angle"]
+vulkan-portability = ["gpu", "wgpu/vulkan-portability"]
+
+[dependencies]
+wgpu = { version = "=30.0.1", optional = true, default-features = false, features = ["std", "parking_lot", "metal", "vulkan", "dx12", "gles", "wgsl"] }
+pollster = { version = "0.4", optional = true }
+
+fvid-cuda = { path = "crates/fvid-cuda", optional = true }
+fvid-media = { path = "crates/fvid-media", optional = true }
+serde_json = { version = "1", optional = true }
+
+rmcp = { version = "=3.1.2", optional = true, default-features = false, features = ["server", "transport-io", "transport-streamable-http-server"] }
+tokio = { version = "1", optional = true, features = ["rt-multi-thread", "net", "signal", "sync"] }
+axum = { version = "0.8", optional = true }
+serde = { version = "1", optional = true, features = ["derive"] }
+
+[dev-dependencies]
+naga = { version = "=30.0.1", features = ["wgsl-in", "glsl-out", "hlsl-out", "spv-out", "msl-out"] }

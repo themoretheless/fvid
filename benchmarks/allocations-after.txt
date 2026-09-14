@@ -1,0 +1,4 @@
+1000 known MCP lookups: calls=0 requested_bytes=0
+1000 unknown MCP lookups: calls=0 requested_bytes=0
+CPU 1 frames: calls=13 requested_bytes=3480
+CPU 1000 frames: calls=13 requested_bytes=3480

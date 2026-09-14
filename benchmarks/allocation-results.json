@@ -1,0 +1,17 @@
+{
+  "created_utc": "2026-09-05T06:50:02.870624+00:00",
+  "scope": "Rust allocator alloc/alloc_zeroed/realloc calls; warmed synchronous MCP lookup and CPU Y4M to sink. Excludes protocol serialization, native allocations, GPU driver and first catalog initialization. Requested bytes are cumulative, not live or RSS.",
+  "before": "1000 known MCP lookups: calls=1965000 requested_bytes=254507000\n1000 unknown MCP lookups: calls=1965000 requested_bytes=254507000\nCPU 1 frames: calls=13 requested_bytes=3480\nCPU 1000 frames: calls=13 requested_bytes=3480\n",
+  "after": "1000 known MCP lookups: calls=0 requested_bytes=0\n1000 unknown MCP lookups: calls=0 requested_bytes=0\nCPU 1 frames: calls=13 requested_bytes=3480\nCPU 1000 frames: calls=13 requested_bytes=3480\n",
+  "before_probe_sha256": "bca9ff9b62570eb8f2438fed143502dccab31e83a286dd33ffe90198214c05e4",
+  "after_probe_sha256": "48316a5025a796c5843849fd81d53e3cc49fa8d3832dfaaa4388a36dda6d9909",
+  "release_binary_sha256": "10cf07ed53f208d3cff39ec073d863ffc6f44159664b4c543528904236519797",
+  "source_sha256": {
+    "src/mcp/mod.rs": "a57f15381e14be015209344183ae6fc96e288ad336e0060bbe68249fcc1fb53c",
+    "src/mcp/tools.rs": "f72b3460708ef0e65ceafb131ac759670a0c3fca2a042ae34b5fc9f82db7e248",
+    "src/gpu/mod.rs": "9386465d8bda417e1d061c0cf64f7728c6d9310620843d4807e6e03e1666bd3d",
+    "scripts/allocation_probe.rs": "3c3f8ff29b914a6c1f60b0deeae710a18689d701c9e7c07f5e53263829a20b4a",
+    "Cargo.toml": "7369d2e21e3490f72bcf13cd39af7d0ee2fc8386d82089665a7ac674f1f427d7",
+    "Cargo.lock": "819ad827fdfab9a8358a563210025d3a9756ef6469ada6dd63ec62772a39525d"
+  }
+}

@@ -1,0 +1,805 @@
+# Videoflow
+
+![Videoflow](assets/videoflow_logo_small.png)
+
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/videoflow/videoflow/blob/master/LICENSE)
+[![documentation](https://img.shields.io/badge/docs-videoflow.github.io-blue.svg)](https://videoflow.github.io/videoflow/index.html)
+
+📖 **[Documentation](https://videoflow.github.io/videoflow/index.html)**
+
+**Videoflow** is a Python framework for building **distributed** video and stream
+processing pipelines. You describe your pipeline once as a directed acyclic graph
+of producers, processors and consumers, and Videoflow runs it as a set of
+independent workers that communicate over a [NATS JetStream](https://docs.nats.io/nats-concepts/jetstream)
+message broker.
+
+The same graph runs two ways with no code changes:
+
+- **Locally**, as one OS subprocess per node — for fast development and testing.
+- **On Kubernetes**, as one container per node — with per-node scaling, GPU
+  scheduling, health probes and autoscaling for production.
+
+It ships with off-the-shelf components for object detection, tracking, pose
+estimation, segmentation and video I/O, is easy to extend with your own, and can
+run [components written in any language](#language-agnostic-components) shipped as
+container images.
+
+---
+
+## How it works
+
+```
+   ┌──────────┐      ┌───────────┐      ┌───────────┐      ┌──────────┐
+   │ producer │─────▶│ processor │─────▶│ processor │─────▶│ consumer │
+   └──────────┘      └───────────┘      └───────────┘      └──────────┘
+        │                  │                  │                  │
+        └──────────────────┴───── NATS JetStream ───────────────┘
+                        (one stream per node)
+```
+
+- Each **node** is identified by a stable, unique `name` and runs in its own
+  worker (subprocess locally, pod on Kubernetes).
+- Every node publishes its output to its own broker subject; each node subscribes
+  to the subjects of its real parents and reassembles its inputs. This makes
+  arbitrary DAGs — multi-parent joins, multiple independent producers, fan-out —
+  work naturally.
+- A node's constructor arguments must be **JSON-serializable** so a worker can
+  reconstruct just its one node from configuration. Expensive or stateful setup
+  (opening a camera, loading a model) belongs in the node's `open()` method, not
+  its `__init__`.
+
+---
+
+## Installation
+
+Requires **Python 3.12+** and a running NATS JetStream server at runtime.
+
+```bash
+pip install "videoflow[distributed]"   # core + broker client + wire format
+pip install "videoflow[vision]"        # + OpenCV for vision processors
+pip install "videoflow[video]"         # + ffmpeg/OpenCV for video I/O
+pip install "videoflow[deploy]"        # + Kubernetes manifest generation
+pip install "videoflow[all]"           # everything
+```
+
+From a clone with [uv](https://docs.astral.sh/uv/): `uv sync` (creates `.venv`
+with all dependencies). Or with pip: `pip install ".[all]"`.
+
+You do **not** need to start a broker by hand: `videoflow run-local` starts a dev
+NATS + Redis in Docker when none is already running, and stops them when the flow
+ends. To run one yourself instead (it will be detected and reused), either use the
+included `docker-compose.yml` or a local binary:
+
+```bash
+docker compose up -d          # NATS JetStream on :4222, Redis on :6379
+# or, without Docker:
+nats-server -js
+```
+
+---
+
+## Quickstart
+
+A pipeline is defined inside a `build_flow()` factory that returns a `Flow`. The
+same factory is used to run locally and to deploy to Kubernetes.
+
+```python
+from videoflow.core import Flow
+from videoflow.core.constants import BATCH
+from videoflow.producers import IntProducer
+from videoflow.processors import IdentityProcessor, JoinerProcessor
+from videoflow.consumers import CommandlineConsumer
+
+def build_flow():
+    producer  = IntProducer(0, 40, 0.1, name='producer')
+    identity  = IdentityProcessor(name='identity')(producer)
+    identity1 = IdentityProcessor(name='identity1')(identity)
+    joined    = JoinerProcessor(name='joined')(identity, identity1)
+    printer   = CommandlineConsumer(name='printer')(joined)
+    # Producers are discovered automatically from the consumers — list only the leaves.
+    return Flow([printer], flow_type=BATCH)
+
+if __name__ == '__main__':
+    from videoflow.engines.local import LocalProcessEngine
+    flow = build_flow()
+    flow.run(LocalProcessEngine())   # one subprocess per node, talking to NATS
+    flow.join()
+```
+
+Run it:
+
+```bash
+videoflow run-local my_flow.py
+```
+
+That is the local twin of `deploy`: it generates the solution config if the graph
+ships a `config.template.yaml`, runs its `prepare.py` hook, starts a dev broker if
+none is listening, spawns one worker subprocess per node, waits for the flow to
+finish, reports any node that exited non-zero, and stops only the containers it
+started. Overrides: `--nats`, `--config`, `--no-prepare`, `--no-infra`,
+`--keep-infra`, `--blob-redis-url`, `--blob-ttl-seconds`, `--run-id`.
+
+Running the script directly still works when you have a broker up:
+
+```bash
+python my_flow.py
+```
+
+---
+
+## Example solutions
+
+[`solutions/`](solutions) holds three complete, deployable applications built
+from core nodes only — no models, no footage, no extra dependencies. They are
+the fastest way to see the whole path (config, prep hook, image, broker, workers,
+teardown) actually work, and the best code to read after this README.
+
+| Solution | Flow type | What it demonstrates |
+|---|---|---|
+| [toy_calculator](solutions/toy_calculator) | BATCH | A diamond over a stream of integers: fan-out, a trace join, competing replicas, stateful aggregation, a two-parent consumer. The smallest complete solution. |
+| [toy_router](solutions/toy_router) | BATCH | Partitioned parallelism: `partition_by` pinning each key to one replica, an `async def process` node, an idempotent sink. |
+| [toy_fusion](solutions/toy_fusion) | REALTIME | Independent producers fused by event time — tolerance, lateness timeout, quorum, collect windows — with unbounded live sources. |
+
+```bash
+cd solutions/toy_calculator
+videoflow run-local toy_calculator.py     # or: videoflow deploy toy_calculator.py
+```
+
+Each writes a self-checking artifact (`report.json`, `counts.json`,
+`fusion_summary.json`) saying whether the distributed run computed the right
+answer — which is also how they serve as the framework's end-to-end test suite,
+run on every CI build by `tests/integration/local/test_toy_solutions.py`.
+
+---
+
+## Deploying to Kubernetes
+
+On a dev cluster (k3s / kind / minikube / Docker Desktop), deploying is one
+command:
+
+```bash
+videoflow deploy my_flow.py
+```
+
+`deploy` compiles the graph and renders one Deployment (or a Job, for finite
+producers) plus a ConfigMap per node — and by default automates everything
+around that: it builds the node image from the `[gpu.]Dockerfile` next to your
+graph (auto-building `videoflow-base` first when missing) and loads it into the
+detected cluster flavor, provisions a dev NATS (+ Redis for the blob store) in
+the namespace, applies the flow, and — for a BATCH flow — waits for completion
+and tears down the run and the infra it created. Solutions can additionally ship
+a `config.template.yaml` (deploy asks its questions interactively to generate
+`config.yaml`) and a `prepare.py` hook (run inside the solution image before
+compiling); when the graph's ML deps aren't installed on the operator machine,
+deploy compiles the graph inside the image too. Local input files are exposed to
+the pods with repeatable `--mount /abs/path[:ro]` hostPath mounts (solution
+`x-mounts` are added automatically).
+
+Because that image is built locally and loaded straight into the cluster, every
+container is rendered with `imagePullPolicy: IfNotPresent` — there is nothing to
+pull. (Left to Kubernetes' own inference, the `:latest` tag the build produces
+would mean `Always`, and the pod would try to fetch a locally built image from a
+registry that has never seen it.) Pass `--image-pull-policy Always` when every
+image instead comes from a registry the nodes can reach.
+
+Every automatic step has an explicit override — the fully manual path still
+works:
+
+```bash
+# 1. Bring your own broker (use the NATS Helm chart in prod)
+kubectl create namespace videoflow
+kubectl apply -n videoflow -f k8s/nats.yaml
+
+# 2. Build & push your image (your code + deps, FROM videoflow-base)
+./docker/build-images.sh ghcr.io/acme v1     # build videoflow-base
+docker build -t ghcr.io/acme/app:v1 . && docker push ghcr.io/acme/app:v1
+
+# 3. Deploy against that broker and image
+videoflow deploy my_flow.py:build_flow \
+    --nats nats://nats.videoflow.svc:4222 \
+    --namespace videoflow \
+    --image ghcr.io/acme/app:v1 \
+    --autoscaling                             # optional KEDA scalers
+```
+
+Use `--dry-run` to print the manifests to stdout (including the dev-infra
+manifests when `--nats` is omitted) — the prepare hook's output goes to stderr,
+so stdout stays valid YAML — or `--render-only` to write them plus a
+`kustomization.yaml` for `kubectl apply -k`. Other CLI commands:
+`videoflow explain my_flow.py` (human-readable graph/topology summary),
+`videoflow provision my_flow.py --nats ...` (create the broker streams up front),
+`videoflow teardown --flow-id ... --run-id ... --nats ... [--namespace ...] [--infra]`
+(stop a run and delete its streams and workloads — `--infra` also removes
+auto-provisioned NATS/Redis), the
+`videoflow dlq ls|show|replay|purge --flow-id ...` family for
+[dead-lettered messages](#error-handling), `videoflow debug decode`
+(decode wire envelopes from a file), and the
+`videoflow component validate|push|pull|inspect` family for
+[language-agnostic components](#language-agnostic-components).
+
+Every command exits with a code that says what *kind* of thing went wrong, so CI
+can triage without parsing stderr: `2` your flow or config, `3` your cluster or
+broker, `4` the flow ran and nodes failed, `5` the flow stalled, `130`
+interrupted. Errors print as a message and a fix rather than a traceback; set
+`VF_DEBUG=1` when you want the traceback.
+
+### Preparing a cluster with GPU access
+
+A node declared with `device_type='gpu'` compiles to a pod spec with three things
+in it — that's the whole contract the cluster has to satisfy:
+
+```yaml
+resources:
+  limits: { nvidia.com/gpu: 1 }         # one GPU per replica
+nodeSelector:
+  videoflow.io/gpu-pool: "true"         # where GPU pods are allowed to land
+tolerations:
+  - key: nvidia.com/gpu                 # so a tainted GPU pool still accepts them
+    operator: Exists
+    effect: NoSchedule
+```
+
+So a cluster is GPU-ready for Videoflow when some node **advertises allocatable
+`nvidia.com/gpu`** and **carries the `videoflow.io/gpu-pool=true` label**. Deploy
+preflights exactly those two conditions for any flow containing a GPU node and
+prints the fix for whichever is missing (as a warning — it does not block the
+deploy, so the pods will simply sit `Pending`).
+TODO: Why wouldn't it block the deploy? Isn't that whay we would wants, instead of having a node wait forever? (The philosophy behind videoflow is that it takes total control of the Kubernetes cluster.)
+
+**1. Drivers and container runtime on the GPU hosts.** Each GPU node needs the
+NVIDIA driver plus the NVIDIA container toolkit wired into its container runtime,
+so containers can see the device. On managed clusters this is done for you by
+picking a GPU node pool / GPU-enabled AMI; on your own machines:
+
+```bash
+# Ubuntu host
+sudo apt-get install -y nvidia-driver-550 nvidia-container-toolkit
+sudo nvidia-ctk runtime configure --runtime=containerd   # or --runtime=docker
+sudo systemctl restart containerd
+nvidia-smi                                               # driver visible on the host
+```
+
+**2. Expose the GPUs to Kubernetes** with the NVIDIA device plugin, which is what
+turns a physical GPU into the schedulable `nvidia.com/gpu` resource:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.16.2/deployments/static/nvidia-device-plugin.yml
+```
+
+On GKE/EKS/AKS use the provider's path instead (GKE installs the plugin via its
+driver DaemonSet, EKS ships it in the GPU AMI, AKS via the GPU node pool). For a
+bare-metal fleet, the [NVIDIA GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/)
+installs drivers, toolkit, plugin and monitoring in one Helm release and replaces
+both step 1 and step 2:
+
+```bash
+helm repo add nvidia https://helm.ngc.nvidia.com/nvidia && helm repo update
+helm install --wait gpu-operator nvidia/gpu-operator -n gpu-operator --create-namespace
+```
+
+**3. Label the GPU nodes** so Videoflow's nodeSelector matches:
+
+```bash
+kubectl label node <gpu-node> videoflow.io/gpu-pool=true
+# or label a whole managed pool at once:
+kubectl label node -l cloud.google.com/gke-accelerator videoflow.io/gpu-pool=true
+```
+
+Optionally **taint** the pool so CPU-only workloads keep off the expensive
+machines — the generated pods already tolerate exactly this taint:
+
+```bash
+kubectl taint node <gpu-node> nvidia.com/gpu=present:NoSchedule
+```
+
+**4. Verify** before deploying anything:
+
+```bash
+kubectl get nodes -l videoflow.io/gpu-pool=true                                   # non-empty
+kubectl get nodes -o jsonpath='{.items[*].status.allocatable.nvidia\.com/gpu}'    # e.g. "1 4"
+kubectl run gpu-smoke --rm -it --restart=Never --image=nvidia/cuda:12.4.1-base-ubuntu22.04 \
+    --overrides='{"spec":{"nodeSelector":{"videoflow.io/gpu-pool":"true"},"tolerations":[{"key":"nvidia.com/gpu","operator":"Exists","effect":"NoSchedule"}],"containers":[{"name":"gpu-smoke","image":"nvidia/cuda:12.4.1-base-ubuntu22.04","command":["nvidia-smi"],"resources":{"limits":{"nvidia.com/gpu":1}}}]}}'
+```
+
+If `nvidia-smi` prints the device table from inside that pod, the cluster is
+ready — a Videoflow GPU node schedules under identical constraints. (CUDA 12.4
+images are published for Ubuntu 22.04, not 24.04; 24.04 variants start at CUDA
+12.6.)
+
+**The GPU must reach the container, not just the pod.** The device plugin only
+makes `nvidia.com/gpu` *schedulable*; injecting the device into a container is
+the job of the NVIDIA container runtime. That works out of the box only when the
+node's container runtime uses it **by default**. Distributions that instead
+register it as an opt-in `RuntimeClass` — k3s is the notable one, exposing
+handlers named `nvidia` and `nvidia-experimental` — will happily schedule a GPU
+pod that then finds no device. Name the class at deploy time:
+
+```bash
+videoflow deploy my_flow.py --gpu-runtime-class nvidia
+```
+TODO: Why would we need to mention this? why isn't a default that is not needed to be passed explicitly as a paramter?
+
+`--gpu-runtime-class` puts `runtimeClassName` on GPU pods only; CPU nodes are left
+on the node's default runtime. Deploy's preflight warns when an `nvidia`
+RuntimeClass exists and the flag wasn't given, since that combination is the one
+that silently produces device-less GPU pods.
+
+Making the nvidia runtime the node's containerd *default* also works and needs no
+flag, but it routes every pod through the NVIDIA shim — and that has a sharp edge.
+Unless `accept-nvidia-visible-devices-envvar-when-unprivileged = false` is set in
+`/etc/nvidia-container-runtime/config.toml` (it defaults to **true**), any container
+whose image sets `NVIDIA_VISIBLE_DEVICES=all` receives every GPU on the node,
+without requesting `nvidia.com/gpu` and without the device plugin accounting for it.
+Every `nvidia/cuda:*` image sets that variable, `videoflow-base:py3.12-cuda`
+included — so a flow deployed with a single `--image` pointing at a CUDA image would
+hand full GPU access to its `device_type='cpu'` nodes. Prefer the per-deploy flag; if
+you do change the node default, set the hardening option at the same time.
+
+The leak is easy to observe: a pod with `runtimeClassName: nvidia` and **no**
+`nvidia.com/gpu` limit still sees every GPU on the node. What keeps Videoflow's pods
+honest is that the class is attached only to `device_type='gpu'` nodes, which always
+carry a limit — the device plugin's allocation then pins each replica to the GPU it
+was actually granted. Attaching the runtime to pods that request no GPU is precisely
+what you want to avoid, which is why `--gpu-runtime-class` never touches CPU nodes.
+
+The device plugin's own DaemonSet needs the same treatment: if its logs say
+`No devices found. Waiting indefinitely.`, it is running under the default runtime
+and needs `runtimeClassName: nvidia` patched onto its pod spec.
+
+**5. Build the node image on the CUDA base.** GPU scheduling only gets the device
+into the pod; the image still has to contain a CUDA-enabled stack. Videoflow ships
+a CUDA variant of its base image, and `deploy` prefers a `gpu.Dockerfile` next to
+your graph whenever the flow has GPU nodes:
+
+```bash
+./docker/build-images.sh          # builds videoflow-base + videoflow-base:py3.12-cuda
+```
+
+```dockerfile
+# gpu.Dockerfile, next to my_flow.py
+FROM videoflow-base:py3.12-cuda
+RUN pip install torch --index-url https://download.pytorch.org/whl/cu124
+COPY . . && RUN pip install .
+```
+
+Keep the image's CUDA minor version compatible with the host driver — a driver
+too old for the image's CUDA runtime is the most common cause of a pod that
+schedules onto a GPU and then dies with a CUDA initialization error. Deploy
+catches this instead of reporting success: for a REALTIME flow it waits for
+every pod to become Ready and, on a crash-loop or OOM kill, dumps the pod logs
+and exits non-zero (the flow is left running for inspection).
+
+**6. Deploy.** Nothing GPU-specific is needed on the command line; the device
+requests come from the graph:
+
+```bash
+videoflow deploy my_flow.py --namespace videoflow          # dev: builds gpu.Dockerfile, provisions NATS
+kubectl get pods -n videoflow -o wide                      # GPU pods land on the labeled nodes
+```
+
+**7. Optional — time-slicing, to fit more GPU nodes than you have GPUs.** Steps
+1-6 are enough to run GPU flows; this step is what makes a graph with *several*
+GPU nodes schedulable on one card. The device plugin advertises each physical GPU
+as N schedulable units, so N pods co-schedule onto it. Nothing is partitioned:
+every one of those pods gets the same physical device and draws from the same
+VRAM pool — this is scheduler bookkeeping plus driver time-slicing, not isolation.
+
+For more documentation on this, look [here.](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/gpu-sharing.html) Some notes: time-slicing can be applied to specific GPUs. Time-slicing and MIG can be combined in one cluster.
+
+```yaml
+# nvidia-plugin-configs.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: nvidia-plugin-configs, namespace: kube-system}
+data:
+  config.yaml: |
+    version: v1
+    sharing:
+      timeSlicing:
+        renameByDefault: false          # keep the name nvidia.com/gpu
+        failRequestsGreaterThanOne: true
+        resources:
+          - name: nvidia.com/gpu
+            replicas: 4                 # size this from measured VRAM (see below)
+```
+
+```bash
+kubectl apply -f nvidia-plugin-configs.yaml
+# Point the plugin at it with a *strategic* merge patch (the default — do NOT pass
+# --type=merge, which replaces the containers array wholesale and drops the image,
+# the existing env, and runtimeClassName: nvidia from step 4).
+kubectl -n kube-system patch ds nvidia-device-plugin-daemonset -p '{"spec":{"template":{"spec":{
+  "containers":[{"name":"nvidia-device-plugin-ctr","env":[{"name":"CONFIG_FILE","value":"/config/config.yaml"}],
+  "volumeMounts":[{"name":"plugin-config","mountPath":"/config"}]}],
+  "volumes":[{"name":"plugin-config","configMap":{"name":"nvidia-plugin-configs"}}]}}}}'
+kubectl -n kube-system rollout restart ds/nvidia-device-plugin-daemonset
+
+kubectl get node <gpu-node> -o jsonpath='{.status.allocatable.nvidia\.com/gpu}'   # 1 -> 4
+```
+
+`renameByDefault: false` keeps the resource named `nvidia.com/gpu`, so **no
+Videoflow change is needed** — the same manifests just schedule. Time-slicing
+supports `gpu_count = 1` nodes only: the units are shares of one card, so a
+multi-device grant is meaningless against them (`failRequestsGreaterThanOne:
+true` rejects it cluster-side, and deploy's preflight hard-errors first, reading
+the GPU Feature Discovery labels). The same logic applies to MIG: slices are
+hardware-isolated partitions, so a model can never span two of them. A model
+that needs multiple GPUs needs whole exclusive devices (see below).
+
+**Size `replicas` from measured VRAM, not by guessing.** Time-slicing hands out
+scheduling slots, not memory: co-tenants share the whole 24 GB (or whatever the
+card has), and exceeding it is a runtime CUDA OOM inside a pod, not a clean
+`Pending` you can see coming. There is no fault isolation either, and the node now
+advertises more GPUs than it physically has — which will puzzle anyone reading
+`kubectl get node` cold. Measure a single-camera/single-stream run with
+`nvidia-smi --query-gpu=memory.used --format=csv -l 1` and divide.
+
+To revert: `kubectl -n kube-system delete cm nvidia-plugin-configs`, remove the
+`CONFIG_FILE` env and `plugin-config` volume/mount from the DaemonSet, then
+rollout restart. See [`docs/source/distributed/gpu-sharing.rst`](docs/source/distributed/gpu-sharing.rst)
+for MPS (hard per-client memory caps), MIG, and the full comparison.
+
+**Single-node dev clusters.** k3s works well for this: it uses containerd, so
+after step 1 it detects the NVIDIA runtime automatically and registers it as an
+`nvidia` RuntimeClass — but it does *not* make it the default, so deploy with
+`--gpu-runtime-class nvidia` or GPU pods will start without a device. Then
+apply the device plugin and label the single node. minikube needs `minikube start
+--driver=docker --container-runtime=docker --gpus all`. kind has no supported GPU
+passthrough — use k3s or a remote cluster instead.
+
+**When GPU pods stay `Pending`**, `kubectl describe pod <pod> -n videoflow` names
+the reason directly: `didn't match Pod's node affinity/selector` means the label
+from step 3 is missing, `Insufficient nvidia.com/gpu` means the device plugin
+(step 2) isn't running or every GPU is already claimed — a GPU is allocated
+exclusively, so `nb_tasks` above the node's allocatable count (physical GPUs, or
+the advertised units when time-slicing from step 7 is on) leaves the extra
+replicas unschedulable.
+
+**More GPU nodes than GPUs.** Locally each GPU worker gets its own
+`CUDA_VISIBLE_DEVICES` block, wrapping around (with a warning) when there are more
+claims than devices; on Kubernetes each GPU replica claims a whole exclusive device, so a
+graph with N GPU nodes needs N allocatable GPUs — the rest stay `Pending` and the
+flow stalls. Videoflow surfaces this instead of hanging: `videoflow explain`
+prints the flow's GPU demand, deploy's preflight compares it against the cluster
+(exit non-zero with `--strict-preflight`), and the BATCH wait loop aborts with an
+actionable error when a pod is unschedulable. To actually run such a flow on a
+small box: cut demand (run trackers/light stages on CPU), or enable device-plugin
+**time-slicing** (step 7 — advertise each GPU as N units; no videoflow changes
+needed). On MIG-capable hardware, `--gpu-mode mix` shares cards with hard memory
+isolation instead: nodes declare `gpu_memory_gib` and the deploy solves a MIG
+layout for them (see below). `--gpu-resource-name` covers clusters whose whole
+devices are advertised under another name (`amd.com/gpu`); see
+`docs/source/distributed/gpu-sharing.rst` for the full recipes.
+
+**Models larger than one GPU.** A node whose model doesn't fit on one device asks
+for more with `gpu_count`:
+
+```python
+captioner = VlmCaptioner(device_type = GPU, gpu_count = 2, name = 'captioner')(frames)
+```
+
+The pod then requests `nvidia.com/gpu: 2` and Kubernetes grants both whole
+devices to that one worker, on one host. Inside the worker the contract is
+simple: **the visible GPUs are exactly the granted GPUs, `cuda:0..N-1`, with
+`N == gpu_count`** — true on Kubernetes (device plugin) and under `run-local`
+(the engine partitions `CUDA_VISIBLE_DEVICES`). How the model spreads across
+them is the node's own `open()`: `device_map='auto'` for Hugging Face models,
+a `tensor_parallel_size` for engines that take one, or explicit `.to('cuda:1')`
+placement for multi-model nodes. A component can declare its need in its
+`component.yaml` (`spec: {resources: {gpu: {count: 2}}}`) so graph authors don't
+have to pass `gpu_count=` by hand. Two things to know: all `gpu_count` devices
+must fit on **one** cluster node (preflight checks the largest node, not just the
+total — prefer NVLink-connected GPUs for tensor parallelism), and sliced GPUs
+don't qualify (MIG and time-sliced units can't be combined into one model —
+preflight hard-errors on the attempt).
+
+**Sharing GPUs with isolation: `--gpu-mode mix`.** On MIG-capable hardware
+(A30/A100/H100), a flow can mix models that share a card with models that span
+several. Nodes that state their memory demand become **sharers**; nodes that
+don't (or that set `gpu_count > 1`) get whole physical devices:
+
+```python
+detector  = Detector(device_type = GPU, nb_tasks = 4, gpu_memory_gib = 10)(frames)   # 4 x 10 GiB slices
+captioner = VlmCaptioner(device_type = GPU, gpu_count = 2)(frames)                   # 2 whole GPUs
+```
+
+Deploying with `--gpu-mode mix` solves a card layout against the pool's
+inventory (from GPU Feature Discovery labels; only nodes labeled
+`videoflow.io/gpu-pool=true` — the nodes the pods can schedule on): whole cards
+are reserved for the spanners, the sharers are packed into MIG slices of the
+smallest fitting profile (each an *exclusive* slice — the card is shared, the
+slice is not, with hard memory/fault isolation), and the geometry is applied
+through the GPU Operator's MIG manager: videoflow merges its generated
+`nvidia-mig-parted` entries into the operator's current config, points
+ClusterPolicy `migManager.config.name` at the merged copy for the run, and
+restores both the policy and each node's previous `nvidia.com/mig.config` label
+at teardown. The pool is treated as multi-tenant: nodes another flow claimed
+(stamped `videoflow.io/gpu-owner=<flow-id>`), nodes with devices held by
+running pods, and time-sliced or already-MIG'd nodes are excluded from
+planning, capacity checks count only *free* units, concurrent flows split the
+pool at node granularity, and only the last flow out restores the operator
+config (`videoflow teardown --flow-id <id> --gpu-mode mix` reverts just that
+flow's nodes). Without the MIG manager (or its ClusterPolicy), deploy prints
+the exact `nvidia-mig-parted` config to apply by hand. `gpu_memory_gib` and
+`gpu_count > 1` are mutually exclusive on one node — a model can never span MIG
+slices, so a node declares either a fraction of one device or whole devices.
+Under every other mode `gpu_memory_gib` is simply unused (the node gets a whole
+device), so a mix-authored flow still deploys anywhere.
+
+### How graph concepts map onto the broker and Kubernetes
+
+| Concept | Behavior |
+| --- | --- |
+| `flow_type=REALTIME` | broker keeps only the freshest message per edge — stale frames are dropped, producers never block |
+| `flow_type=BATCH` | **at-least-once, loss-free** delivery: interest-retention streams bound the backlog and apply real backpressure (a full stream blocks the publisher instead of dropping) |
+| `ProcessorNode(nb_tasks=N)` | N competing-consumer replicas (Deployment replicas) |
+| `ProcessorNode(nb_tasks=N, partition_by=...)` | N **partitioned** replicas (StatefulSet); each message is owned by one replica by key hash — this is how a multi-parent **join can scale** (`partition_by='trace_id'`) |
+| `device_type=GPU` | pod requests `gpu_count` × `nvidia.com/gpu` (or `--gpu-resource-name`) plus a GPU-pool nodeSelector/toleration — exclusive whole physical devices; under `--gpu-mode mix`, nodes with `gpu_memory_gib` request a solver-chosen exclusive MIG slice instead |
+| finite `ProducerNode` (`is_finite=True`) | Kubernetes **Job**; infinite/streaming producers and all other nodes are **Deployments** |
+| `flow.stop()` | publishes on a control channel every worker subscribes to, then tears the workloads down |
+| observability | each worker exposes `/metrics` (Prometheus) and `/readyz` + `/healthz` + `startupProbe`; `--autoscaling` adds KEDA scalers on broker lag |
+
+### Reliability
+
+Every run is scoped by a **`run_id`**, so re-running or redeploying a flow gets a
+fresh set of streams instead of colliding with the previous run.
+
+Delivery is **at-least-once with ack-after-process**: a worker acknowledges a
+message to the broker only after it has processed it (and published its output), so
+a crash mid-processing causes redelivery, not loss. Content-derived message ids give
+the broker publish-dedup, so the retry after a crash doesn't double-emit.
+
+<a name="error-handling"></a>
+What happens to a *failed* message depends on **why** it failed, not just on the
+flow type:
+
+| The failure means | What videoflow does |
+|---|---|
+| the **message** is bad (`SchemaError`, a decode failure) | dead-letter it on the first attempt — retrying something that failed on its own content cannot help |
+| the **world** blipped (`UpstreamUnavailable`, a timeout) | retry with jittered backoff, then dead-letter |
+| this **worker** is sick (`DeviceError`, out of memory) | hand the message back for a healthy replica, never blame it, and stop the worker |
+
+An exception you do not classify is treated as the middle case, so nothing changes
+until you opt in. Workers also protect themselves: a run of unexplained failures
+trips a circuit breaker, and a node that stops acking while work is pending is
+declared stalled rather than hanging the run forever.
+
+Dead letters land on the flow's DLQ stream (`vf-<flow>-dlq`) with the error code
+attached. It is scoped to the flow, not the run, so tearing a run down does not
+delete the record of what it lost — and `videoflow dlq replay` puts the messages
+back once the bug is fixed.
+
+When a node dies, it says so: an **abort** marker propagates through the graph the
+way end-of-stream does, so a dead producer ends its descendants instead of leaving
+them blocked forever. Crashed workers are restarted — three attempts in Kubernetes
+via the Job `backoffLimit`, and the same three locally, so a crash the cluster
+absorbs is absorbed in development too.
+
+Multi-parent **joins** support timeout + missing-input policies (drop / wait /
+error) so a stalled or dropped branch can't hang the join forever. End-of-stream is
+**replica-safe**: every replica of a node observes it and drains its inputs before
+terminating.
+
+The full model — dispositions, the retry ladder, restarts, the dead-letter queue
+and the exit codes — is in
+[Error handling and recovery](https://videoflow.github.io/videoflow/user-documentation/error-handling-and-recovery.html),
+and `solutions/toy_recovery` is a runnable demonstration of it.
+
+### Time-synchronized joins (fusing independent streams)
+
+By default a join groups inputs by **lineage** — halves that descend from the same
+originating message of one producer (a diamond that fans out and reconverges). To
+fuse streams from *independent* producers — several cameras plus sensors, none
+sharing an upstream — group by **event time** instead:
+
+```python
+from videoflow.core.policies import JoinPolicy
+
+fused = FusionProcessor(name='fuse', join_policy=JoinPolicy(
+    mode='time',            # group by event_ts, not trace lineage
+    tolerance_ms=8,         # messages within 8ms are the same moment (< one 60fps frame)
+    timeout_seconds=0.05,   # lateness bound: how long to wait for stragglers
+    quorum=6,               # emit once ≥6 of N cameras are present (missing ones → None)
+    collect={'imu': 25},    # high-rate parent: deliver every sample within 25ms as a list
+))(cam1, cam2, cam3, cam4, cam5, cam6, cam7, cam8, imu)
+```
+
+Each input carries an **event timestamp** (epoch seconds) that a producer stamps and
+that travels with the message through the whole flow (downstream nodes inherit it
+automatically). Producers stamp it via `ctx.set_event_timestamp(ts)`; the built-in
+`VideostreamReader` does this per frame (`timestamp_source='clock'` for live streams,
+`'position'` for synchronized recordings). A fusion node reads each input's exact
+time from `ctx.input_info` (per-parent `event_ts`/`metadata`) to interpolate between
+samples. Cross-device time accuracy itself is an ops concern — genlocked cameras and
+PTP/NTP-disciplined hosts — the framework aligns on whatever timestamps it's given.
+
+A time-aligned join runs with `nb_tasks=1` (every parent's half must reach the same
+worker to be grouped); scale the per-stream work in the nodes *upstream* of the
+fusion node instead.
+
+**Backward compatibility.** `mode='trace'` is the default and never reads
+`event_ts`, so existing flows — including ones whose producers stamp no time at
+all — behave exactly as before. A producer that never calls
+`ctx.set_event_timestamp` still gets an event time on the wire: its publish
+wall-clock, which is ignored by trace-mode joins and serves as a sensible fallback
+if such a stream is later fed into a `mode='time'` join.
+
+---
+
+## The three node types
+
+| Type | Base class | Implements | Role |
+| --- | --- | --- | --- |
+| Producer | `ProducerNode` | `next()` | Creates data from an external source (camera, file, stream). Set `is_finite=False` for unbounded sources. |
+| Processor | `ProcessorNode` | `process(*inputs)` | Transforms inputs into an output. Supports `nb_tasks` (parallel replicas) and `device_type` (`cpu`/`gpu`). |
+| Consumer | `ConsumerNode` | `consume(item)` | Terminal sink — writes to a file, pushes to a REST API/S3, etc. Produces no output. |
+
+Every node also has `open()`/`close()` lifecycle hooks for acquiring and releasing
+resources.
+
+### Writing a custom node
+
+```python
+from videoflow.core.node import ProcessorNode
+
+class Threshold(ProcessorNode):
+    def __init__(self, cutoff, **kwargs):   # args must be JSON-serializable
+        self._cutoff = cutoff               # store them so get_params() can find them
+        super().__init__(**kwargs)
+
+    def open(self):
+        ...                                 # heavy/stateful setup goes here
+
+    def process(self, value):
+        return value if value >= self._cutoff else 0
+```
+
+Always accept and forward `**kwargs` to `super().__init__()` (that's how `name`,
+`nb_tasks`, `device_type`, etc. are passed through), and store each constructor
+argument on `self` under the same name so it can be captured for reconstruction in
+a worker.
+
+Nodes can also:
+
+- **Be async** — declare `async def process(self, value)` (or `next`/`consume`);
+  the worker awaits it without blocking broker I/O.
+- **Receive a runtime context** — add a final `ctx` parameter to any lifecycle or
+  processing method (`def process(self, value, ctx=None)`) to read `ctx.run_id` /
+  `ctx.node_name` / `ctx.replica_id` or call `ctx.set_partition_key(k)` to route the
+  output of a downstream partitioned node by a business key.
+- **Deduplicate sink effects** — `ConsumerNode(idempotent=True)` plus a Redis URL
+  (`--blob-redis-url`) makes a sink skip re-applying an effect on redelivery.
+- **Pin their own container image** — pass `image='ghcr.io/me/gpu:v1'` when a node
+  intrinsically needs a specific environment; otherwise it uses the deploy's
+  `--image` default. See [Container images](#container-images).
+
+---
+
+## Container images
+
+You bring the image. Videoflow ships one **base** image (framework + broker client +
+the built-in nodes' dependencies — OpenCV, ffmpeg, Redis); you build **your** image on
+top of it with your dependencies and your node package, then point the deploy at it:
+
+```dockerfile
+# Dockerfile (see docker/user-image.example.Dockerfile)
+FROM videoflow-base:latest
+RUN pip install torch my-libs        # your deps
+COPY . . && RUN pip install .        # your package, importable by its module path
+```
+
+```bash
+./docker/build-images.sh                 # build videoflow-base (local)
+./docker/build-images.sh ghcr.io/acme v1 # tagged for a registry
+docker build -t ghcr.io/me/app:v1 .      # your image, FROM videoflow-base
+
+videoflow deploy my_flow.py:build_flow --nats nats://... --image ghcr.io/me/app:v1
+```
+
+`--image` is the default for every node. A node that needs a different environment
+declares its own image in the graph — `MyDetector(name='det', image='ghcr.io/me/gpu:v1')`
+— or is overridden at deploy time with `--image-override det=ghcr.io/me/gpu:v1`
+(override wins over the node's own image, which wins over `--image`). A pure built-in
+flow can just use `--image videoflow-base:latest`.
+
+---
+
+## Language-agnostic components
+
+A node doesn't have to be Python. Videoflow defines a **language-agnostic wire and
+runtime contract** so a component can be written in any language, shipped as its own
+container image, and dropped into a Python-authored graph by reference — the basis
+for a component **marketplace**.
+
+The Python process only ever *builds and compiles* the graph; a remote component's
+`next`/`process`/`consume` run out-of-process in the vendor image, driven by that
+image's own SDK speaking the protocol. You wire one in with the `component()` factory
+instead of importing a class:
+
+```python
+from videoflow.core import Flow, component
+from videoflow.core.constants import BATCH
+
+def build_flow():
+    reader  = component('oci://ghcr.io/acme/camera-reader:1.0.0',
+                        params={'address': 'rtsp://…'}, name='reader')
+    tracker = component('oci://ghcr.io/acme/sort-tracker:1.2.0',
+                        params={'max_age': 30})(reader)      # a Rust/C++/… node
+    sink    = component('./my-consumer')(tracker)            # a local descriptor dir
+    return Flow([sink], flow_type=BATCH)
+```
+
+A remote node behaves like a normal Producer/Processor/Consumer for wiring,
+validation, scaling (`nb_tasks`, `partition_by`), and manifest generation; the
+compiler records a `component_ref` + descriptor instead of a Python class.
+
+### Component descriptors
+
+A component is described by a `component.yaml` (validated against
+[`spec/descriptor/component-schema.json`](spec/descriptor/component-schema.json))
+that declares its params, inputs/outputs, device support, protocol version, and the
+container image(s) to run. A descriptor with a `spec.runtime.pythonClass` names a
+Python node the worker imports directly; without one it's a **native** component that
+runs its own image entrypoint. Validate any descriptor before shipping it:
+
+```bash
+videoflow component validate ./sort-tracker/component.yaml
+```
+
+### Publishing and consuming (OCI)
+
+Descriptors are distributed as **OCI artifacts** (media type
+`application/vnd.videoflow.component.v1+yaml`) alongside the images they reference, so
+a consumer can inspect a component's contract without pulling multi-gigabyte ML
+images. An `oci://` ref in `component()` is pulled and cached under
+`~/.videoflow/components/` automatically.
+
+```bash
+videoflow component push    ./sort-tracker oci://ghcr.io/acme/sort-tracker:1.2.0
+videoflow component inspect oci://ghcr.io/acme/sort-tracker:1.2.0   # params/io, no images
+videoflow component pull    oci://ghcr.io/acme/sort-tracker:1.2.0 --verify   # cosign
+```
+
+See [`spec/DISTRIBUTION.md`](spec/DISTRIBUTION.md) for the reference grammar and
+publishing model.
+
+### The wire protocol and spec
+
+Every flow runs over one language-neutral **protobuf envelope (wire v4)** with
+well-known payload types (`Tensor`, `Frame`, `Detections`, `Tracks`, `BlobRef`,
+`Value`). A `Value` may nest a `Tensor`, so a mixed container such as a
+`(frame_index, frame)` tuple is carried without any Python-specific codec. A payload
+type with no built-in encoding registers one with `register_payload_encoder`;
+arbitrary Python objects are never put on the wire (see
+[`spec/rfcs/0001`](spec/rfcs/0001-v4-only-wire.md)).
+
+The normative contract lives in [`spec/`](spec/):
+[`spec/PROTOCOL.md`](spec/PROTOCOL.md) (protocol v1 — every requirement an SDK must
+implement, with stable IDs), the protobuf IDL under `spec/proto/videoflow/v1/`, and
+golden test vectors in `spec/vectors/` replayed against every SDK to enforce
+lockstep. A vendor can hand-write a conforming component against the spec today; the
+Python worker is the executable reference implementation.
+
+---
+
+## Contributing
+
+A tentative [roadmap](ROADMAP.md) of where we are headed, and the
+[contribution rules](CONTRIBUTING.md).
+
+New processors, producers or consumers that pull in additional third-party
+dependencies belong in the [videoflow-contrib](https://github.com/videoflow/videoflow-contrib)
+project — we keep the core framework lean.
+
+## Citing Videoflow
+
+If you use Videoflow in your research please use the following BibTeX entry.
+
+```
+@misc{deArmas2019videoflow,
+  author =       {Jadiel de Armas},
+  title =        {Videoflow},
+  howpublished = {\url{https://github.com/videoflow/videoflow}},
+  year =         {2019}
+}
+```

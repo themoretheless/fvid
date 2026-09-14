@@ -1,0 +1,95 @@
+{
+  "created_utc": "2026-09-05T07:17:06.971223+00:00",
+  "transport": "http",
+  "jobs": 2,
+  "gpu": "metal",
+  "sessions": [
+    {
+      "transport": "http",
+      "server": {
+        "protocolVersion": "2025-11-25",
+        "capabilities": {
+          "tools": {}
+        },
+        "serverInfo": {
+          "name": "fvid",
+          "version": "0.1.0"
+        },
+        "instructions": "Fvid edits local media within its configured root. Outputs must be new files. Native codecs run on CPU; GPU processing is exposed by fvid_process_y4m. Lossless guarantees apply only to documented operations. Concurrent operations are bounded by the server jobs setting; excess calls return busy. Cancellation does not stop an already running native codec. File paths refer to the server host."
+      },
+      "tools": [
+        "fvid_capabilities",
+        "fvid_devices",
+        "fvid_probe",
+        "fvid_remux",
+        "fvid_trim",
+        "fvid_concat",
+        "fvid_transcode_lossless",
+        "fvid_transcode",
+        "fvid_trim_pcm",
+        "fvid_decode_audio",
+        "fvid_process_y4m"
+      ],
+      "library_version": "9.0.1",
+      "gpu_result": {
+        "output": "/private/tmp/fvid-mcp-tkzrz2mj/root/http-gpu.y4m",
+        "stats": {
+          "backend": "metal",
+          "controlled_memory_bytes": 76032,
+          "device": "Apple M4 Max",
+          "frames": 50,
+          "input_bytes": 691200,
+          "output_bytes": 230400,
+          "transfers": {
+            "download_bytes": 230400,
+            "download_staging_bytes": 409600,
+            "downloads": 50,
+            "filter_passes": 100,
+            "upload_bytes": 691200,
+            "upload_staging_bytes": 819200,
+            "uploads": 50
+          }
+        }
+      }
+    }
+  ],
+  "checks": [
+    "http-initialize, ping, 11 tool schemas",
+    "http-capabilities, devices, probe",
+    "http-remux, strict trim, concat packet equality",
+    "http-lossless and explicit encoder pixel equality",
+    "http-PCM trim and decode sample equality",
+    "http-Rust Y4M pixel equality",
+    "http-metal resident chain through MCP pixel equality",
+    "http-path escapes, symlinks, no-overwrite, malformed args, encoder option restrictions",
+    "http-authentication, Origin, Host and protocol version rejection"
+  ],
+  "status": "passed",
+  "binary_sha256": "724813beca491ccb52713e14a0a5892538bfa6f7ba983d79e1223b6242e03d0d",
+  "source_sha256": {
+    "src/resident.rs": "0c30b1361021143fc63a0a39189b648f3dc00c9bb622c0c76f0a1e739e17d665",
+    "src/backend.rs": "9bc74dc8a5e47584886c7c7e2c13c2ca14f2d2519235c6af98b642a4ab36639c",
+    "src/lib.rs": "484d40e44e5b0676163c8c83f50a6f529bf323e31dce7f9d074424b96fe90569",
+    "src/main.rs": "8d1bfc777ed6ff924045257e69147b39a57106e685c02ae3d44a32db8a31f3c4",
+    "src/media_cli.rs": "6b5d82ce9e9680f26347522dd04d92f42dc673c3a090ed35db4394fb05c37158",
+    "src/view.rs": "c1bf9a170eebe80f4aedcfb12a269d9ae4d3b142ecadc95e357063c677105c60",
+    "src/gpu/mod.rs": "9386465d8bda417e1d061c0cf64f7728c6d9310620843d4807e6e03e1666bd3d",
+    "src/resident/pipeline.rs": "650c162279cae996fa62198ede7cdb5964b14447a725eea6ae18c0b8260f3fc3",
+    "src/mcp/tools.rs": "f72b3460708ef0e65ceafb131ac759670a0c3fca2a042ae34b5fc9f82db7e248",
+    "src/mcp/transport.rs": "707a4737a93afe5f01edd7887a750b67f502f6b95a4f4e13253082b651e85b68",
+    "src/mcp/mod.rs": "16bb666011a3cd495dc1962fef8f9ad3dbab77b5e81f246923c1ae9a924dba25",
+    "crates/fvid-media/src/edit.rs": "7176935bf00100342e0bbbfe954fa99b078e229a3208682cb140792baa23c575",
+    "crates/fvid-media/src/input_policy.rs": "d765247e08ae025274ee4d45db206b20cda0daba80a727d4fca4019e11fc623d",
+    "crates/fvid-media/src/audio_layout.rs": "6c1d365c37ad3dc5ddfcfec4b63fe80449567a00e0e70366006d4b437cf6d1bd",
+    "crates/fvid-media/src/lib.rs": "001a60436b939d98d2f72c01f43fa43e9b1fce32d1e235efe6bc12e8ba545815",
+    "crates/fvid-media/src/pcm.rs": "de2e6187343079b6324593a6ccc210ddccb30b1df46f72c521eabd4c8ee04025",
+    "crates/fvid-media/src/audio.rs": "7e3fd2e15f488bc55a59a896359d1b2d875cb4335cd3f437a9939957a195e25c",
+    "crates/fvid-media/src/lossless.rs": "cde625fd0aac088a92f5afd94a60c61629df0dced9e96b8bf9562350a5979c45",
+    "Cargo.toml": "7369d2e21e3490f72bcf13cd39af7d0ee2fc8386d82089665a7ac674f1f427d7",
+    "Cargo.lock": "819ad827fdfab9a8358a563210025d3a9756ef6469ada6dd63ec62772a39525d",
+    "crates/fvid-media/Cargo.toml": "2e3df0d514fcf7566b7c815d3ee5deb0dd92a42947072131095e9ed67f8d9020",
+    "crates/fvid-media/build.rs": "ed48261d29447cd7daf0a031670e4efb45bc32d97dbf2b1bb82093a9a1320bc5",
+    "scripts/validate_media.py": "cc97c5c187df1b3807e5b0f90daf5c6ec172cf660e59e420af2d71ce6af4ce5f",
+    "scripts/validate_mcp.py": "84b58a10ac7e69b65efca610463f2ce8250605d720ff062f035e688337779b29"
+  }
+}

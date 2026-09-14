@@ -1,0 +1,968 @@
+{
+  "created_utc": "2026-09-05T00:20:23.941129+00:00",
+  "runs": 5,
+  "seed": 20260905,
+  "scope": "Whole CLI wall time, cached input, local file output without fsync, 30 frames; no GPU. Same FFV1 level and pixel format; default and one-thread FFmpeg baselines. No claim of full FFmpeg parity or universal speedup.",
+  "binary_sha256": "723fed574e96257745133bc167e32ea8e2d05d0012de11a50b062a9f04728857",
+  "ffmpeg_version": "ffmpeg version 9.0.1 Copyright (c) 2000-2026 the FFmpeg developers",
+  "source_sha256": {
+    "crates/fvid-media/src/edit.rs": "7176935bf00100342e0bbbfe954fa99b078e229a3208682cb140792baa23c575",
+    "crates/fvid-media/src/lib.rs": "5192cd300748cb89c828c0cc38cab87a5d21723b5651932880c28e7c4faf83eb",
+    "crates/fvid-media/src/pcm.rs": "de2e6187343079b6324593a6ccc210ddccb30b1df46f72c521eabd4c8ee04025",
+    "crates/fvid-media/src/lossless.rs": "2ddc0b112c2e9afb5040646357c2c05d3d761a16af7febb2ac4dcbdbb4b95427",
+    "src/media_cli.rs": "534fdb2ba35d29b8c00edca54c9c5b470e3dde4568b0c9529118c0d1a9660dd4",
+    "scripts/benchmark_media.py": "c9f3a6f68b0c2a7d3020ba70a65ae708d2ef315c711a4bff6393bc3af8edfadd"
+  },
+  "results": [
+    {
+      "width": 1280,
+      "height": 720,
+      "frames": 30,
+      "operation": "remux",
+      "samples_ms": {
+        "fvid": [
+          21.452834,
+          21.721459,
+          22.463541,
+          22.817375,
+          22.055917
+        ],
+        "ffmpeg_default": [
+          21.704208,
+          21.71825,
+          22.600667,
+          22.675542,
+          23.362792
+        ],
+        "ffmpeg_1thread": [
+          22.299375,
+          22.443208,
+          22.3075,
+          23.093792,
+          23.066459
+        ]
+      },
+      "median_ms": {
+        "fvid": 22.055917,
+        "ffmpeg_default": 22.600667,
+        "ffmpeg_1thread": 22.443208
+      },
+      "output_bytes": {
+        "fvid": 379043,
+        "ffmpeg_default": 379043,
+        "ffmpeg_1thread": 379043
+      },
+      "decoded_equality": true,
+      "input_sha256": "3bdaf98eb9a7bfbfe7c9d5ca703696135bc62807e89264c69b94e04344bfc079",
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "remux",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ],
+        "ffmpeg_default": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-c:v",
+          "copy",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-c:v",
+          "copy",
+          "-threads",
+          "1",
+          "-filter_threads",
+          "1",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ]
+      }
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "frames": 30,
+      "operation": "transcode",
+      "samples_ms": {
+        "fvid": [
+          59.108334,
+          60.629542,
+          60.5365,
+          63.502166,
+          63.240834
+        ],
+        "ffmpeg_default": [
+          64.124166,
+          62.525208,
+          61.716333,
+          62.132458,
+          64.233541
+        ],
+        "ffmpeg_1thread": [
+          146.943458,
+          146.694667,
+          147.3235,
+          147.071125,
+          148.479791
+        ]
+      },
+      "median_ms": {
+        "fvid": 60.629542,
+        "ffmpeg_default": 62.525208,
+        "ffmpeg_1thread": 147.071125
+      },
+      "output_bytes": {
+        "fvid": 2249214,
+        "ffmpeg_default": 2249218,
+        "ffmpeg_1thread": 2249218
+      },
+      "decoded_equality": true,
+      "input_sha256": "3bdaf98eb9a7bfbfe7c9d5ca703696135bc62807e89264c69b94e04344bfc079",
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "transcode-lossless",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ],
+        "ffmpeg_default": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "-threads",
+          "1",
+          "-filter_threads",
+          "1",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ]
+      }
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "frames": 30,
+      "operation": "crop-vflip",
+      "samples_ms": {
+        "fvid": [
+          39.259792,
+          39.937125,
+          38.961333,
+          39.0345,
+          38.6475
+        ],
+        "ffmpeg_default": [
+          44.530541,
+          46.718167,
+          44.219834,
+          43.935375,
+          43.727458
+        ],
+        "ffmpeg_1thread": [
+          63.966583,
+          64.440125,
+          63.587208,
+          63.754,
+          63.760125
+        ]
+      },
+      "median_ms": {
+        "fvid": 39.0345,
+        "ffmpeg_default": 44.219834,
+        "ffmpeg_1thread": 63.760125
+      },
+      "output_bytes": {
+        "fvid": 313066,
+        "ffmpeg_default": 313070,
+        "ffmpeg_1thread": 313070
+      },
+      "decoded_equality": true,
+      "input_sha256": "3bdaf98eb9a7bfbfe7c9d5ca703696135bc62807e89264c69b94e04344bfc079",
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "transcode-lossless",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv",
+          "--crop",
+          "2:2:640:360",
+          "--vflip"
+        ],
+        "ffmpeg_default": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-vf",
+          "crop=640:360:2:2:exact=1,vflip",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-vf",
+          "crop=640:360:2:2:exact=1,vflip",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "-threads",
+          "1",
+          "-filter_threads",
+          "1",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ]
+      }
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "frames": 30,
+      "operation": "crop-hflip-vflip",
+      "samples_ms": {
+        "fvid": [
+          42.366875,
+          41.41075,
+          42.02475,
+          41.085125,
+          42.640333
+        ],
+        "ffmpeg_default": [
+          43.753958,
+          43.757959,
+          45.375792,
+          42.853208,
+          43.352792
+        ],
+        "ffmpeg_1thread": [
+          63.768875,
+          64.840625,
+          64.160917,
+          64.190417,
+          63.464959
+        ]
+      },
+      "median_ms": {
+        "fvid": 42.02475,
+        "ffmpeg_default": 43.753958,
+        "ffmpeg_1thread": 64.160917
+      },
+      "output_bytes": {
+        "fvid": 305879,
+        "ffmpeg_default": 305883,
+        "ffmpeg_1thread": 305883
+      },
+      "decoded_equality": true,
+      "input_sha256": "3bdaf98eb9a7bfbfe7c9d5ca703696135bc62807e89264c69b94e04344bfc079",
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "transcode-lossless",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv",
+          "--crop",
+          "2:2:640:360",
+          "--hflip",
+          "--vflip"
+        ],
+        "ffmpeg_default": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-vf",
+          "crop=640:360:2:2:exact=1,hflip,vflip",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-vf",
+          "crop=640:360:2:2:exact=1,hflip,vflip",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "-threads",
+          "1",
+          "-filter_threads",
+          "1",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ]
+      }
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "frames": 30,
+      "operation": "lossless-trim",
+      "samples_ms": {
+        "fvid": [
+          50.351458,
+          62.93075,
+          54.489792,
+          55.183125,
+          51.881875
+        ],
+        "ffmpeg_default": [
+          56.713209,
+          56.980458,
+          55.888875,
+          57.853917,
+          60.966
+        ],
+        "ffmpeg_1thread": [
+          109.186958,
+          109.928625,
+          110.464667,
+          113.619208,
+          109.603959
+        ]
+      },
+      "median_ms": {
+        "fvid": 54.489792,
+        "ffmpeg_default": 56.980458,
+        "ffmpeg_1thread": 109.928625
+      },
+      "output_bytes": {
+        "fvid": 1357949,
+        "ffmpeg_default": 1357953,
+        "ffmpeg_1thread": 1357953
+      },
+      "decoded_equality": true,
+      "input_sha256": "3bdaf98eb9a7bfbfe7c9d5ca703696135bc62807e89264c69b94e04344bfc079",
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "transcode-lossless",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv",
+          "--from",
+          "0.2",
+          "--to",
+          "0.8"
+        ],
+        "ffmpeg_default": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-vf",
+          "trim=start=0.2:end=0.8,setpts=PTS-STARTPTS",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-vf",
+          "trim=start=0.2:end=0.8,setpts=PTS-STARTPTS",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "-threads",
+          "1",
+          "-filter_threads",
+          "1",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ]
+      }
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "frames": 30,
+      "operation": "remux",
+      "samples_ms": {
+        "fvid": [
+          34.891292,
+          30.932792,
+          30.728375,
+          31.090916,
+          35.20875
+        ],
+        "ffmpeg_default": [
+          33.149833,
+          28.742417,
+          27.451667,
+          32.498333,
+          31.385583
+        ],
+        "ffmpeg_1thread": [
+          35.027583,
+          29.565208,
+          30.861792,
+          37.106833,
+          35.085667
+        ]
+      },
+      "median_ms": {
+        "fvid": 31.090916,
+        "ffmpeg_default": 31.385583,
+        "ffmpeg_1thread": 35.027583
+      },
+      "output_bytes": {
+        "fvid": 769756,
+        "ffmpeg_default": 769756,
+        "ffmpeg_1thread": 769756
+      },
+      "decoded_equality": true,
+      "input_sha256": "545658219a0a2091332d7239c367f2c3de43ee3ce48abd281b7ebfb5c4c982a6",
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "remux",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ],
+        "ffmpeg_default": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-c:v",
+          "copy",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-c:v",
+          "copy",
+          "-threads",
+          "1",
+          "-filter_threads",
+          "1",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ]
+      }
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "frames": 30,
+      "operation": "transcode",
+      "samples_ms": {
+        "fvid": [
+          133.72275,
+          131.60625,
+          146.806292,
+          140.404,
+          139.16175
+        ],
+        "ffmpeg_default": [
+          136.217916,
+          135.929875,
+          142.081208,
+          132.848208,
+          149.954833
+        ],
+        "ffmpeg_1thread": [
+          362.388083,
+          333.138958,
+          358.89275,
+          385.292125,
+          429.061083
+        ]
+      },
+      "median_ms": {
+        "fvid": 139.16175,
+        "ffmpeg_default": 136.217916,
+        "ffmpeg_1thread": 362.388083
+      },
+      "output_bytes": {
+        "fvid": 4229970,
+        "ffmpeg_default": 4229974,
+        "ffmpeg_1thread": 4229974
+      },
+      "decoded_equality": true,
+      "input_sha256": "545658219a0a2091332d7239c367f2c3de43ee3ce48abd281b7ebfb5c4c982a6",
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "transcode-lossless",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ],
+        "ffmpeg_default": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "-threads",
+          "1",
+          "-filter_threads",
+          "1",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ]
+      }
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "frames": 30,
+      "operation": "crop-vflip",
+      "samples_ms": {
+        "fvid": [
+          92.9055,
+          104.0335,
+          88.138208,
+          95.360834,
+          55.568875
+        ],
+        "ffmpeg_default": [
+          94.75225,
+          91.226791,
+          91.006625,
+          85.105,
+          64.597666
+        ],
+        "ffmpeg_1thread": [
+          120.685166,
+          126.338041,
+          134.781083,
+          116.43825,
+          113.790459
+        ]
+      },
+      "median_ms": {
+        "fvid": 92.9055,
+        "ffmpeg_default": 91.006625,
+        "ffmpeg_1thread": 120.685166
+      },
+      "output_bytes": {
+        "fvid": 418114,
+        "ffmpeg_default": 418118,
+        "ffmpeg_1thread": 418118
+      },
+      "decoded_equality": true,
+      "input_sha256": "545658219a0a2091332d7239c367f2c3de43ee3ce48abd281b7ebfb5c4c982a6",
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "transcode-lossless",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv",
+          "--crop",
+          "2:2:960:540",
+          "--vflip"
+        ],
+        "ffmpeg_default": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-vf",
+          "crop=960:540:2:2:exact=1,vflip",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-vf",
+          "crop=960:540:2:2:exact=1,vflip",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "-threads",
+          "1",
+          "-filter_threads",
+          "1",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ]
+      }
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "frames": 30,
+      "operation": "crop-hflip-vflip",
+      "samples_ms": {
+        "fvid": [
+          73.407625,
+          66.882583,
+          71.73,
+          70.823375,
+          55.374291
+        ],
+        "ffmpeg_default": [
+          67.8125,
+          74.965667,
+          66.988583,
+          62.602833,
+          71.965458
+        ],
+        "ffmpeg_1thread": [
+          112.567416,
+          121.930792,
+          113.193917,
+          114.834709,
+          111.441667
+        ]
+      },
+      "median_ms": {
+        "fvid": 70.823375,
+        "ffmpeg_default": 67.8125,
+        "ffmpeg_1thread": 113.193917
+      },
+      "output_bytes": {
+        "fvid": 417754,
+        "ffmpeg_default": 417758,
+        "ffmpeg_1thread": 417758
+      },
+      "decoded_equality": true,
+      "input_sha256": "545658219a0a2091332d7239c367f2c3de43ee3ce48abd281b7ebfb5c4c982a6",
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "transcode-lossless",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv",
+          "--crop",
+          "2:2:960:540",
+          "--hflip",
+          "--vflip"
+        ],
+        "ffmpeg_default": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-vf",
+          "crop=960:540:2:2:exact=1,hflip,vflip",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-vf",
+          "crop=960:540:2:2:exact=1,hflip,vflip",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "-threads",
+          "1",
+          "-filter_threads",
+          "1",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ]
+      }
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "frames": 30,
+      "operation": "lossless-trim",
+      "samples_ms": {
+        "fvid": [
+          70.175584,
+          71.109167,
+          69.029459,
+          69.2965,
+          71.527209
+        ],
+        "ffmpeg_default": [
+          78.704666,
+          77.75275,
+          76.845875,
+          83.419625,
+          77.778584
+        ],
+        "ffmpeg_1thread": [
+          203.586792,
+          203.15075,
+          203.988042,
+          204.539333,
+          204.477292
+        ]
+      },
+      "median_ms": {
+        "fvid": 70.175584,
+        "ffmpeg_default": 77.778584,
+        "ffmpeg_1thread": 203.988042
+      },
+      "output_bytes": {
+        "fvid": 2543721,
+        "ffmpeg_default": 2543725,
+        "ffmpeg_1thread": 2543725
+      },
+      "decoded_equality": true,
+      "input_sha256": "545658219a0a2091332d7239c367f2c3de43ee3ce48abd281b7ebfb5c4c982a6",
+      "commands": {
+        "fvid": [
+          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "media",
+          "transcode-lossless",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv",
+          "--from",
+          "0.2",
+          "--to",
+          "0.8"
+        ],
+        "ffmpeg_default": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-vf",
+          "trim=start=0.2:end=0.8,setpts=PTS-STARTPTS",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ],
+        "ffmpeg_1thread": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-i",
+          "/private/tmp/fvid-media-bench-t8vb914q/source.mp4",
+          "-map",
+          "0:v:0",
+          "-an",
+          "-vf",
+          "trim=start=0.2:end=0.8,setpts=PTS-STARTPTS",
+          "-c:v",
+          "ffv1",
+          "-level",
+          "3",
+          "-pix_fmt",
+          "yuv420p",
+          "-threads",
+          "1",
+          "-filter_threads",
+          "1",
+          "/private/tmp/fvid-media-bench-t8vb914q/output.mkv"
+        ]
+      }
+    }
+  ]
+}

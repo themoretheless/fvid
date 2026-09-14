@@ -1,0 +1,57 @@
+{
+  "retrieved_date": "2026-09-04 UTC",
+  "sort": "stars",
+  "order": "desc",
+  "per_page": 100,
+  "page": 1,
+  "queries": [
+    [
+      "ffmpeg",
+      "ffmpeg in:name,description fork:false stars:>50"
+    ],
+    [
+      "gstreamer",
+      "gstreamer in:name,description fork:false stars:>10"
+    ],
+    [
+      "video_codec",
+      "video codec in:name,description fork:false stars:>10"
+    ],
+    [
+      "video_processing",
+      "video processing in:name,description fork:false stars:>50"
+    ],
+    [
+      "media_framework",
+      "media framework in:name,description fork:false stars:>10"
+    ],
+    [
+      "transcoding",
+      "transcoding in:name,description fork:false stars:>20"
+    ],
+    [
+      "video_editor",
+      "video editor in:name,description fork:false stars:>50"
+    ],
+    [
+      "streaming",
+      "rtsp OR rtmp OR webrtc in:description fork:false stars:>100"
+    ],
+    [
+      "audio",
+      "audio codec OR audio processing in:description fork:false stars:>50"
+    ],
+    [
+      "rust_media",
+      "video OR audio OR media language:Rust fork:false stars:>50"
+    ],
+    [
+      "containers",
+      "mp4 OR matroska OR demuxer in:name,description fork:false stars:>30"
+    ],
+    [
+      "filters",
+      "video filter OR image processing in:description fork:false stars:>100"
+    ]
+  ]
+}

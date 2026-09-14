@@ -1,0 +1,15 @@
+[package]
+name = "fvid-cuda"
+version = "0.1.0"
+edition = "2024"
+description = "Optional CUDA compute adapter for Fvid planar byte transforms"
+license = "MIT"
+
+[target.'cfg(any(target_os = "linux", target_os = "windows"))'.dependencies]
+cudarc = { version = "=0.19.9", default-features = false, features = ["std", "driver", "nvrtc", "dynamic-loading", "cuda-12000"] }
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+
+[lints.clippy]
+undocumented_unsafe_blocks = "deny"

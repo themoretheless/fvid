@@ -1,0 +1,24 @@
+{
+  "created_utc": "2026-09-05T06:18:11.111059+00:00",
+  "transport": "http",
+  "checks": [
+    "http-initialize, ping, 11 tool schemas",
+    "http-capabilities, devices, probe",
+    "http-remux, strict trim, concat packet equality",
+    "http-lossless and explicit encoder pixel equality",
+    "http-PCM trim and decode sample equality",
+    "http-Rust Y4M pixel equality",
+    "http-path escapes, symlinks, no-overwrite, malformed args, encoder option restrictions",
+    "http-authentication, Origin, Host and protocol version rejection"
+  ],
+  "status": "passed",
+  "binary_sha256": "c3281a3fa5b8e6cf78c4c38e0546ded2a0fc0d79bc8ef5effebe12699264281e",
+  "source_sha256": {
+    "src/mcp/tools.rs": "9f95ece24339b95f6ebb38f42b3d897d7b02d7ad983acec3cae8adcb760e149e",
+    "src/mcp/transport.rs": "c8b0b4cac823049b692123a536b0f214d9489749aaf00d5b6fd46f7c21d788c7",
+    "src/mcp/mod.rs": "5bb47e7a18b55a72716385b35d8857adf8fb3a78f1898f477796342292007dc2",
+    "Cargo.toml": "7369d2e21e3490f72bcf13cd39af7d0ee2fc8386d82089665a7ac674f1f427d7",
+    "Cargo.lock": "819ad827fdfab9a8358a563210025d3a9756ef6469ada6dd63ec62772a39525d",
+    "scripts/validate_mcp.py": "e12d013a35a851f2f63702f0d62482d726a5432d81fa885fe0a0df03e87a97ec"
+  }
+}

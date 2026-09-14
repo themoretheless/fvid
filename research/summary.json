@@ -1,0 +1,33 @@
+{
+  "created_utc": "2026-09-04T22:27:15.267922+00:00",
+  "broad_queries": 12,
+  "broad_unique_candidates": 1031,
+  "broad_excluded": 444,
+  "broad_included": 587,
+  "final_unique_repositories": 633,
+  "excluding_ffmpeg_baseline": 632,
+  "readmes_collected_for_final_catalog": 630,
+  "readmes_collected_total": 635,
+  "selected_source_projects": 18,
+  "selected_source_files": 33,
+  "categories": {
+    "editor_compositor": 75,
+    "processing_framework": 83,
+    "integration_wrapper": 42,
+    "transcoding_product": 68,
+    "streaming_transport": 107,
+    "container_metadata": 54,
+    "audio_dsp": 86,
+    "targeted_library_framework": 46,
+    "codec_hardware": 57,
+    "playback": 15
+  },
+  "extra_exclusions": {
+    "rust-av/rav1e": "same encoder lineage as xiph/rav1e",
+    "ShiftMediaProject/x265": "build mirror, not a distinct encoder",
+    "FFmpeg/nv-codec-headers": "headers, not an independent engine",
+    "ashellunts/ffmpeg-to-webrtc": "sample integration",
+    "icedland/iced": "CPU instruction toolkit, outside media scope"
+  },
+  "warning": "Repository landscape, not 500 direct substitutes or 500 audited codebases. Signals are automatic keyword hits, not verified implementation or performance claims."
+}
