@@ -246,9 +246,20 @@ unsafe fn alloc_like_frame(dst: *mut AVFrame, src: *const AVFrame) -> Result<()>
 unsafe fn horizontal_copy_frame(dst: *mut AVFrame, src: *mut AVFrame) -> Result<()> {
     unsafe {
         alloc_like_frame(dst, src)?;
-        check(av_frame_copy_props(dst, src), "hflip copy props")?;
+        // Avoid av_frame_copy_props (side-data walk); set encode-critical fields only.
         let s = &*src;
-        let d = &*dst;
+        let d = &mut *dst;
+        d.pts = s.pts;
+        d.duration = s.duration;
+        d.pict_type = 0;
+        d.quality = 0;
+        d.flags = s.flags & !(AV_FRAME_FLAG_KEY as i32);
+        d.sample_aspect_ratio = s.sample_aspect_ratio;
+        d.color_range = s.color_range;
+        d.color_primaries = s.color_primaries;
+        d.color_trc = s.color_trc;
+        d.colorspace = s.colorspace;
+        d.chroma_location = s.chroma_location;
         let desc = av_pix_fmt_desc_get(s.format);
         if desc.is_null() || s.width <= 0 || s.height <= 0 {
             return Err("invalid horizontal-filter geometry".into());
@@ -293,16 +304,15 @@ unsafe fn horizontal_copy_frame(dst: *mut AVFrame, src: *mut AVFrame) -> Result<
                 return Err("invalid horizontal-filter row extent".into());
             }
             let row_bytes = width * step;
+            let src_ls = s.linesize[plane] as isize;
+            let dst_ls = d.linesize[plane] as isize;
+            let sp = s.data[plane];
+            let dp = d.data[plane];
             for row in 0..height {
-                let src_off = (row as isize)
-                    .checked_mul(s.linesize[plane] as isize)
-                    .ok_or("row offset overflow")?;
-                let dst_off = (row as isize)
-                    .checked_mul(d.linesize[plane] as isize)
-                    .ok_or("row offset overflow")?;
-                let src_row = std::slice::from_raw_parts(s.data[plane].offset(src_off), row_bytes);
+                let src_row =
+                    std::slice::from_raw_parts(sp.offset((row as isize) * src_ls), row_bytes);
                 let dst_row =
-                    std::slice::from_raw_parts_mut(d.data[plane].offset(dst_off), row_bytes);
+                    std::slice::from_raw_parts_mut(dp.offset((row as isize) * dst_ls), row_bytes);
                 fvid_cpu::hflip_row_copy(dst_row, src_row, width, step);
             }
         }
@@ -312,7 +322,7 @@ unsafe fn horizontal_copy_frame(dst: *mut AVFrame, src: *mut AVFrame) -> Result<
 
 /// Reverse row traversal while keeping the decoder-owned AVBuffer references.
 /// SAFETY: frame must be a live, writable AVFrame with software video planes.
-unsafe fn flip_view(frame: *mut AVFrame) -> Result<()> {
+pub(super) unsafe fn flip_view(frame: *mut AVFrame) -> Result<()> {
     // SAFETY: Caller owns the decoded frame; validated descriptor/plane bounds below
     // keep offsets within each decoder-provided plane. No buffer ownership changes.
     unsafe {
@@ -711,7 +721,7 @@ pub fn transcode(
     let mut packet = Packet::new()?;
     let mut encoded = Packet::new()?;
     let mut frame = Frame::new()?;
-    let mut compact: Vec<Frame> = (0..32).map(|_| Frame::new()).collect::<Result<Vec<_>>>()?;
+    let mut compact: Vec<Frame> = (0..12).map(|_| Frame::new()).collect::<Result<Vec<_>>>()?;
     let mut compact_i = 0usize;
     let mut stats = LosslessStats {
         backend: "native libavcodec + Fvid crop view",

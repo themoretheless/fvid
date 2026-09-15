@@ -350,6 +350,15 @@ pub fn hw_filter(
         && crop.width == out_w as usize
         && crop.height == out_h as usize
         && !options.host_bounce;
+    // Full-frame vflip only: FFmpeg does hwdownload+vflip(view)+hwupload — match that
+    // (kernel path loses ~2% because software vflip is free after download).
+    let soft_vflip = options.vertical_flip
+        && !options.horizontal_flip
+        && crop.x == 0
+        && crop.y == 0
+        && crop.width == out_w as usize
+        && crop.height == out_h as usize
+        && !options.host_bounce;
 
     // Identity/copy: NVENC on decoder surfaces — no filter, no second frame pool, no PTX.
     // Filtered: separate encoder pool + Nv12Processor (DtoD / kernel on FFmpeg stream).
@@ -397,7 +406,7 @@ pub fn hw_filter(
     )?
     .without_interleave();
 
-    let mut filter = if identity {
+    let mut filter = if identity || soft_vflip {
         None
     } else {
         let mut proc = Nv12Processor::new(options.device)
@@ -429,13 +438,26 @@ pub fn hw_filter(
     };
     let mut out_pool_i = 0usize;
     let mut in_flight: usize = 0;
+    let mut soft_host: Option<Frame> = if soft_vflip {
+        Some(alloc_sw_nv12(out_w, out_h)?)
+    } else {
+        None
+    };
     let device_name = filter
         .as_ref()
         .map(|f| f.device_name().to_owned())
-        .unwrap_or_else(|| "CUDA NVENC passthrough".into());
+        .unwrap_or_else(|| {
+            if soft_vflip {
+                "CUDA NVENC host-vflip".into()
+            } else {
+                "CUDA NVENC passthrough".into()
+            }
+        });
     let mut stats = HwFilterStats {
         backend: if identity {
             "cuda-nvdec-nvenc-passthrough"
+        } else if soft_vflip {
+            "cuda-nvdec-host-vflip-nvenc"
         } else {
             "cuda-nvdec-nvenc"
         },
@@ -446,7 +468,7 @@ pub fn hw_filter(
         host_frame_copies: 0,
         device_filter_passes: 0,
         encoder: "h264_nvenc",
-        host_bounce: options.host_bounce,
+        host_bounce: options.host_bounce || soft_vflip,
     };
 
     let drain_available = |encoder: &Codec,
@@ -505,6 +527,55 @@ pub fn hw_filter(
                 &mut in_flight,
             );
         }
+        if soft_vflip {
+            let host = soft_host.as_mut().expect("soft_vflip host frame");
+            unsafe {
+                av_frame_unref(host.0);
+            }
+            hw_download(host.0, dec)?;
+            stats.host_frame_copies += 1;
+            // Reset geometry after transfer; then view-vflip like FFmpeg vf_vflip.
+            unsafe {
+                (*host.0).width = out_w;
+                (*host.0).height = out_h;
+            }
+            unsafe { crate::lossless::flip_view(host.0)? };
+            let pool = out_pool.as_mut().expect("soft_vflip has out_pool");
+            let enc_ctx = enc_frames_owned.as_ref().map(|h| h.0).unwrap_or(enc_frames_ptr);
+            let mut tries = 0usize;
+            while tries < OUT_POOL {
+                let slot = &mut pool[out_pool_i];
+                out_pool_i = (out_pool_i + 1) % OUT_POOL;
+                unsafe {
+                    if (*slot.0).data[0].is_null() || av_frame_is_writable(slot.0) == 0 {
+                        drain_available(
+                            &encoder,
+                            &mut output,
+                            &mut enc_packet,
+                            &mut stats,
+                            &mut in_flight,
+                        )?;
+                        av_frame_unref(slot.0);
+                        if av_hwframe_get_buffer(enc_ctx, slot.0, 0) < 0 {
+                            tries += 1;
+                            continue;
+                        }
+                    }
+                    (*slot.0).pts = (*dec).pts;
+                }
+                hw_upload(slot.0, host.0)?;
+                stats.host_frame_copies += 1;
+                return send_frame(
+                    &encoder,
+                    slot.0,
+                    &mut output,
+                    &mut enc_packet,
+                    &mut stats,
+                    &mut in_flight,
+                );
+            }
+            return Err("CUDA output frame pool exhausted".into());
+        }
         let src = nv12_view(dec)?;
         if crop.x + crop.width > src.width as usize
             || crop.y + crop.height > src.height as usize
@@ -527,12 +598,10 @@ pub fn hw_filter(
                         &mut stats,
                         &mut in_flight,
                     )?;
-                    if (*slot.0).data[0].is_null() || av_frame_is_writable(slot.0) == 0 {
-                        av_frame_unref(slot.0);
-                        if av_hwframe_get_buffer(enc_ctx, slot.0, 0) < 0 {
-                            tries += 1;
-                            continue;
-                        }
+                    av_frame_unref(slot.0);
+                    if av_hwframe_get_buffer(enc_ctx, slot.0, 0) < 0 {
+                        tries += 1;
+                        continue;
                     }
                 }
                 (*slot.0).pts = (*dec).pts;

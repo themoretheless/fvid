@@ -1,6 +1,7 @@
 /target/
 /target-cpu/
 /target-media/
+/target-media-cuda/
 /crates/*/target/
 /benchmarks/data/
 /benchmarks/show_data/
