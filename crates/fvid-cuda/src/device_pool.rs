@@ -8,7 +8,7 @@ use std::sync::{Arc, Mutex, OnceLock};
 
 use cudarc::driver::{CudaContext, CudaFunction, CudaModule, CudaStream};
 
-use crate::ptx_embed;
+use crate::ptx_embed::{self, Nv12Module};
 
 pub(crate) struct SharedDevice {
     pub context: Arc<CudaContext>,
@@ -17,7 +17,7 @@ pub(crate) struct SharedDevice {
     pub minor: i32,
     /// Loaded on first Y4M/transform use (not at context create).
     transform: OnceLock<Result<Arc<CudaModule>, String>>,
-    nv12: OnceLock<Result<Arc<CudaModule>, String>>,
+    nv12: OnceLock<Result<Arc<Nv12Module>, String>>,
 }
 
 impl SharedDevice {
@@ -28,11 +28,8 @@ impl SharedDevice {
             .map_err(|err| format!("CUDA transform function loading failed: {err}"))
     }
 
-    pub fn nv12_kernel(&self) -> Result<CudaFunction, String> {
-        let module = self.nv12_module()?;
-        module
-            .load_function("fvid_nv12_transform")
-            .map_err(|err| format!("NV12 function loading failed: {err}"))
+    pub fn nv12_module_arc(&self) -> Result<Arc<Nv12Module>, String> {
+        self.nv12_module()
     }
 
     fn transform_module(&self) -> Result<Arc<CudaModule>, String> {
@@ -41,7 +38,7 @@ impl SharedDevice {
             .clone()
     }
 
-    fn nv12_module(&self) -> Result<Arc<CudaModule>, String> {
+    fn nv12_module(&self) -> Result<Arc<Nv12Module>, String> {
         self.nv12
             .get_or_init(|| ptx_embed::load_nv12(&self.context, self.major, self.minor))
             .clone()

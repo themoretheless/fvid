@@ -198,17 +198,15 @@ fn drain_decoder(
             if vertical_flip {
                 flip_view(frame.0)?;
             }
-            // Pack cropped views so libx264 sees tight linesize like `-vf crop`.
-            // Hflip-only stays in-place (make_writable + SIMD) to avoid a second full copy.
+            // Crop/vflip: FFmpeg `-vf crop` is a view (full linesize); libx264 accepts it.
+            // Hflip needs a writable buffer — pack then flip, or full-frame in-place.
             let cropped = (*frame.0).width != full_w || (*frame.0).height != full_h;
-            let send = if cropped {
+            let send = if horizontal_flip && cropped {
                 let i = *compact_i;
                 *compact_i = (i + 1) % compact.len();
                 let slot = &mut compact[i];
                 ensure_compact_frame(slot.0, frame.0)?;
-                if horizontal_flip {
-                    horizontal_frame(slot.0)?;
-                }
+                horizontal_frame(slot.0)?;
                 slot.0
             } else if horizontal_flip {
                 horizontal_frame(frame.0)?;

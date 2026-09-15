@@ -129,15 +129,16 @@ mod native_nv12 {
     use super::*;
     use crate::device_pool::{self, SharedDevice};
     use cudarc::driver::sys::{self as cuda, CUdeviceptr, CUDA_MEMCPY2D_v2, CUmemorytype};
-    use cudarc::driver::{CudaFunction, CudaSlice, CudaStream, LaunchConfig, PushKernelArg};
+    use cudarc::driver::{CudaSlice, CudaStream, DevicePtr};
 
     pub(super) struct Processor {
         device: Arc<SharedDevice>,
-        /// Loaded on first flip; crop-only never pays PTX.
-        kernel: Option<CudaFunction>,
-        /// Allocation / HtoD stream (cudarc-managed).
+        /// Loaded on first flip; crop-only never pays PTX. Keeps module alive.
+        nv12: Option<Arc<crate::ptx_embed::Nv12Module>>,
+        cu_function: Option<cuda::CUfunction>,
+        /// Allocation stream (cudarc-managed).
         stream: Arc<CudaStream>,
-        /// Launch stream for DtoD / kernels. Defaults to `stream`; may be FFmpeg's.
+        /// Last device stream used for work (for order_for_ffmpeg).
         launch: cuda::CUstream,
         /// Orders our launch stream ahead of `follow` (FFmpeg / NVENC stream).
         order_event: Option<cuda::CUevent>,
@@ -145,6 +146,8 @@ mod native_nv12 {
         name: String,
         poisoned: bool,
         params: Option<CudaSlice<u32>>,
+        /// Device pointer for `params` (valid while `params` is live).
+        params_dev: CUdeviceptr,
         /// Last uploaded transform params; skip HtoD when unchanged.
         cached_params: Option<[u32; 10]>,
     }
@@ -193,7 +196,8 @@ mod native_nv12 {
             let name = device.name.clone();
             Ok(Self {
                 device,
-                kernel: None,
+                nv12: None,
+                cu_function: None,
                 stream,
                 launch,
                 order_event: None,
@@ -201,6 +205,7 @@ mod native_nv12 {
                 name,
                 poisoned: false,
                 params: None,
+                params_dev: 0,
                 cached_params: None,
             })
         }
@@ -234,19 +239,26 @@ mod native_nv12 {
         }
 
         fn ensure_flip_kernel(&mut self) -> Result<(), String> {
-            if self.kernel.is_some() {
+            if self.cu_function.is_some() {
                 return Ok(());
             }
-            let kernel = self.device.nv12_kernel()?;
+            let nv12 = self.device.nv12_module_arc()?;
+            let cu_function = nv12.cu_function;
             let params = self
                 .stream
                 .alloc_zeros::<u32>(10)
                 .map_err(|err| format!("NV12 params allocation failed: {err}"))?;
-            // Alloc completes on `stream` before launches on a possibly different stream.
+            let params_dev = {
+                let (ptr, sync) = params.device_ptr(&self.stream);
+                drop(sync);
+                ptr
+            };
             self.stream
                 .synchronize()
                 .map_err(|err| format!("NV12 params sync failed: {err}"))?;
-            self.kernel = Some(kernel);
+            self.cu_function = Some(cu_function);
+            self.nv12 = Some(nv12);
+            self.params_dev = params_dev;
             self.params = Some(params);
             Ok(())
         }
@@ -336,8 +348,8 @@ mod native_nv12 {
             }
 
             self.ensure_flip_kernel()?;
-            let params_slice = self.params.as_mut().expect("params after ensure");
-            let kernel = self.kernel.as_ref().expect("kernel after ensure");
+            let cu_f = self.cu_function.expect("cu_function after ensure");
+            let params_dev = self.params_dev;
 
             let params = [
                 src.pitch_y,
@@ -351,34 +363,45 @@ mod native_nv12 {
                 u32::from(t.hflip),
                 u32::from(t.vflip),
             ];
+            use cudarc::driver::result as cuda_result;
+            use std::ffi::c_void;
             if self.cached_params != Some(params) {
-                self.stream
-                    .memcpy_htod(&params, params_slice)
-                    .map_err(|err| format!("NV12 params upload failed: {err}"))?;
+                let bytes = params.len() * std::mem::size_of::<u32>();
+                let code = unsafe {
+                    cuda::cuMemcpyHtoDAsync_v2(
+                        params_dev,
+                        params.as_ptr() as *const c_void,
+                        bytes,
+                        stream,
+                    )
+                };
+                if code != cuda::CUresult::CUDA_SUCCESS {
+                    return Err(format!("NV12 params upload failed: {code:?}"));
+                }
                 self.cached_params = Some(params);
             }
 
-            // Kernel on cudarc default stream; order_for_ffmpeg waits FFmpeg/NVENC on it.
-            self.launch = self.stream.cu_stream();
-            let src_y = src.y;
-            let src_uv = src.uv;
-            let dst_y = dst.y;
-            let dst_uv = dst.uv;
-            let mut builder = self.stream.launch_builder(kernel);
-            builder
-                .arg(&src_y)
-                .arg(&src_uv)
-                .arg(&dst_y)
-                .arg(&dst_uv)
-                .arg(params_slice);
-            let config = LaunchConfig {
-                grid_dim: (t.out_width.div_ceil(32), t.out_height.div_ceil(16), 1),
-                block_dim: (32, 16, 1),
-                shared_mem_bytes: 0,
-            };
-            // SAFETY: views validated; pointers are live CUDA NV12 planes.
-            unsafe { builder.launch(config) }
-                .map_err(|err| format!("NV12 transform launch failed: {err}"))?;
+            // Same stream as crop memcpy / NVENC — no cross-stream event.
+            self.launch = stream;
+            let mut src_y = src.y;
+            let mut src_uv = src.uv;
+            let mut dst_y = dst.y;
+            let mut dst_uv = dst.uv;
+            let mut params_arg = params_dev;
+            let mut args: [*mut c_void; 5] = [
+                &mut src_y as *mut _ as *mut c_void,
+                &mut src_uv as *mut _ as *mut c_void,
+                &mut dst_y as *mut _ as *mut c_void,
+                &mut dst_uv as *mut _ as *mut c_void,
+                &mut params_arg as *mut _ as *mut c_void,
+            ];
+            let grid = (t.out_width.div_ceil(32), t.out_height.div_ceil(16), 1);
+            let block = (32u32, 16u32, 1u32);
+            // SAFETY: views validated; args match fvid_nv12_transform; stream is live.
+            unsafe {
+                cuda_result::launch_kernel(cu_f, grid, block, 0, stream, &mut args)
+                    .map_err(|err| format!("NV12 transform launch failed: {err}"))?;
+            }
             Ok(())
         }
     }

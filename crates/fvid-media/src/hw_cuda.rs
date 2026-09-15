@@ -9,7 +9,7 @@ use std::path::Path;
 use std::ptr;
 
 const AGAIN: i32 = -libc::EAGAIN;
-/// Filtered-path CUDA output slots (identity/copy skips this pool).
+/// Filtered-path CUDA output slots (identity/copy uses decoder surfaces).
 const OUT_POOL: usize = 8;
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -348,7 +348,7 @@ pub fn hw_filter(
         && !options.host_bounce;
 
     // Identity/copy: NVENC on decoder surfaces — no filter, no second frame pool, no PTX.
-    // Filtered: separate encoder pool + Nv12Processor.
+    // Filtered: separate encoder pool + Nv12Processor (DtoD / kernel on FFmpeg stream).
     let enc_frames_owned: Option<HwDevice>;
     let enc_frames_ptr: *mut AVBufferRef;
     if identity {
