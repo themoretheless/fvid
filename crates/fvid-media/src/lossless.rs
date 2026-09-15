@@ -128,7 +128,7 @@ fn drain_decoder(
     encoder: &mut Codec,
     output: &mut Output,
     frame: &mut Frame,
-    compact: &mut [Frame; 8],
+    compact: &mut [Frame],
     compact_i: &mut usize,
     packet: &mut Packet,
     stage: CropStage,
@@ -178,12 +178,13 @@ fn drain_decoder(
                 }
                 f.pts = f.pts.checked_sub(start).ok_or("frame timestamp overflow")?;
             }
-            // Decoder PTS is in stream time_base; encoder may use 1/fps.
-            let src_tb = (*decoder.0).pkt_timebase;
-            let dst_tb = (*encoder.0).time_base;
-            if src_tb.num != dst_tb.num || src_tb.den != dst_tb.den {
-                f.pts = av_rescale_q(f.pts, src_tb, dst_tb);
-            }
+            // Force CFR PTS 0..N-1 (FFmpeg CLI → libx264) so B-adapt matches.
+            f.pts = stats.video_frames as i64;
+            f.duration = 1;
+            // Decoder pict_type (I/P/B from the source bitstream) must not force
+            // libx264 picture types — FFmpeg filters clear this to NONE.
+            f.pict_type = 0;
+            f.quality = 0;
             if f.flags & AV_FRAME_FLAG_INTERLACED as i32 != 0 {
                 return Err("interlaced crop is not qualified".into());
             }
@@ -198,19 +199,17 @@ fn drain_decoder(
             if vertical_flip {
                 flip_view(frame.0)?;
             }
-            // Crop/vflip: FFmpeg `-vf crop` is a view (full linesize); libx264 accepts it.
-            // Hflip needs a writable buffer — pack then flip, or full-frame in-place.
-            let cropped = (*frame.0).width != full_w || (*frame.0).height != full_h;
-            let send = if horizontal_flip && cropped {
+            // Crop/vflip: view (no pack). Hflip: single-pass copy into pool.
+            let send = if horizontal_flip {
                 let i = *compact_i;
                 *compact_i = (i + 1) % compact.len();
                 let slot = &mut compact[i];
-                ensure_compact_frame(slot.0, frame.0)?;
-                horizontal_frame(slot.0)?;
+                horizontal_copy_frame(slot.0, frame.0)?;
+                (*slot.0).pict_type = 0;
+                (*slot.0).quality = 0;
+                (*slot.0).pts = stats.video_frames as i64;
+                (*slot.0).duration = 1;
                 slot.0
-            } else if horizontal_flip {
-                horizontal_frame(frame.0)?;
-                frame.0
             } else {
                 frame.0
             };
@@ -222,8 +221,7 @@ fn drain_decoder(
     }
 }
 
-/// Tightly-strided copy of the (possibly cropped) view into `dst`.
-unsafe fn ensure_compact_frame(dst: *mut AVFrame, src: *mut AVFrame) -> Result<()> {
+unsafe fn alloc_like_frame(dst: *mut AVFrame, src: *const AVFrame) -> Result<()> {
     unsafe {
         let s = &*src;
         let d = &mut *dst;
@@ -240,37 +238,28 @@ unsafe fn ensure_compact_frame(dst: *mut AVFrame, src: *mut AVFrame) -> Result<(
             // Default align (0 → 32) matches FFmpeg filter frames.
             check(av_frame_get_buffer(dst, 0), "alloc compact encode frame")?;
         }
-        check(av_frame_copy(dst, src), "compact crop copy")?;
-        check(av_frame_copy_props(dst, src), "compact crop props")?;
     }
     Ok(())
 }
 
-/// Reverse pixel groups in writable software planes. Decoder reference frames
-/// are protected by av_frame_make_writable's copy-on-write contract.
-unsafe fn horizontal_frame(frame: *mut AVFrame) -> Result<()> {
-    // SAFETY: Caller owns the live decoded frame. Geometry and row extents are
-    // validated before pointer arithmetic. Swapped groups never overlap.
+/// Single-pass horizontal flip from `src` into a pooled writable `dst`.
+unsafe fn horizontal_copy_frame(dst: *mut AVFrame, src: *mut AVFrame) -> Result<()> {
     unsafe {
-        // Skip COW when the buffer is already exclusively owned.
-        if av_frame_is_writable(frame) == 0 {
-            check(
-                av_frame_make_writable(frame),
-                "make horizontal-filter frame writable",
-            )?;
-        }
-        let f = &mut *frame;
-        let desc = av_pix_fmt_desc_get(f.format);
-        if desc.is_null() || f.width <= 0 || f.height <= 0 {
+        alloc_like_frame(dst, src)?;
+        check(av_frame_copy_props(dst, src), "hflip copy props")?;
+        let s = &*src;
+        let d = &*dst;
+        let desc = av_pix_fmt_desc_get(s.format);
+        if desc.is_null() || s.width <= 0 || s.height <= 0 {
             return Err("invalid horizontal-filter geometry".into());
         }
-        let d = &*desc;
-        let planes = av_pix_fmt_count_planes(f.format);
+        let desc = &*desc;
+        let planes = av_pix_fmt_count_planes(s.format);
         if !(1..=4).contains(&planes)
-            || d.flags
+            || desc.flags
                 & (AV_PIX_FMT_FLAG_HWACCEL | AV_PIX_FMT_FLAG_PAL | AV_PIX_FMT_FLAG_BITSTREAM) as u64
                 != 0
-            || (planes == 1 && d.log2_chroma_w != 0 && d.flags & AV_PIX_FMT_FLAG_RGB as u64 == 0)
+            || (planes == 1 && desc.log2_chroma_w != 0 && desc.flags & AV_PIX_FMT_FLAG_RGB as u64 == 0)
         {
             return Err(
                 "horizontal filter requires software planes with uniform pixel groups".into(),
@@ -278,7 +267,7 @@ unsafe fn horizontal_frame(frame: *mut AVFrame) -> Result<()> {
         }
         for plane in 0..planes as usize {
             let mut step = None;
-            for component in &d.comp[..d.nb_components as usize] {
+            for component in &desc.comp[..desc.nb_components as usize] {
                 if component.plane as usize == plane {
                     if step.is_some_and(|v| v != component.step) {
                         return Err("mixed pixel steps in plane".into());
@@ -288,31 +277,39 @@ unsafe fn horizontal_frame(frame: *mut AVFrame) -> Result<()> {
             }
             let step = usize::try_from(step.ok_or("plane has no components")?)
                 .map_err(|_| "invalid pixel step")?;
-            let chroma = (plane == 1 || plane == 2) && d.flags & AV_PIX_FMT_FLAG_RGB as u64 == 0;
+            let chroma =
+                (plane == 1 || plane == 2) && desc.flags & AV_PIX_FMT_FLAG_RGB as u64 == 0;
             let width =
-                (f.width as usize).div_ceil(1usize << if chroma { d.log2_chroma_w } else { 0 });
+                (s.width as usize).div_ceil(1usize << if chroma { desc.log2_chroma_w } else { 0 });
             let height =
-                (f.height as usize).div_ceil(1usize << if chroma { d.log2_chroma_h } else { 0 });
-            let stride = f.linesize[plane].unsigned_abs() as usize;
+                (s.height as usize).div_ceil(1usize << if chroma { desc.log2_chroma_h } else { 0 });
+            let src_stride = s.linesize[plane].unsigned_abs() as usize;
+            let dst_stride = d.linesize[plane].unsigned_abs() as usize;
             if step == 0
-                || f.data[plane].is_null()
-                || width.checked_mul(step).is_none_or(|bytes| bytes > stride)
+                || s.data[plane].is_null()
+                || d.data[plane].is_null()
+                || width.checked_mul(step).is_none_or(|bytes| bytes > src_stride || bytes > dst_stride)
             {
                 return Err("invalid horizontal-filter row extent".into());
             }
+            let row_bytes = width * step;
             for row in 0..height {
-                let offset = (row as isize)
-                    .checked_mul(f.linesize[plane] as isize)
+                let src_off = (row as isize)
+                    .checked_mul(s.linesize[plane] as isize)
                     .ok_or("row offset overflow")?;
-                let data = f.data[plane].offset(offset);
-                let row_bytes = width * step;
-                let slice = std::slice::from_raw_parts_mut(data, row_bytes);
-                fvid_cpu::hflip_row(slice, width, step);
+                let dst_off = (row as isize)
+                    .checked_mul(d.linesize[plane] as isize)
+                    .ok_or("row offset overflow")?;
+                let src_row = std::slice::from_raw_parts(s.data[plane].offset(src_off), row_bytes);
+                let dst_row =
+                    std::slice::from_raw_parts_mut(d.data[plane].offset(dst_off), row_bytes);
+                fvid_cpu::hflip_row_copy(dst_row, src_row, width, step);
             }
         }
     }
     Ok(())
 }
+
 /// Reverse row traversal while keeping the decoder-owned AVBuffer references.
 /// SAFETY: frame must be a live, writable AVFrame with software video planes.
 unsafe fn flip_view(frame: *mut AVFrame) -> Result<()> {
@@ -683,11 +680,12 @@ pub fn transcode(
             avcodec_parameters_from_context(parameters.0, encoder.0),
             "export FFV1 parameters",
         )?;
+        let enc_tb = (*encoder.0).time_base;
         (
             decoder,
             encoder,
             parameters,
-            s.time_base,
+            enc_tb,
             string(av_get_pix_fmt_name(format)),
         )
     };
@@ -713,16 +711,7 @@ pub fn transcode(
     let mut packet = Packet::new()?;
     let mut encoded = Packet::new()?;
     let mut frame = Frame::new()?;
-    let mut compact = [
-        Frame::new()?,
-        Frame::new()?,
-        Frame::new()?,
-        Frame::new()?,
-        Frame::new()?,
-        Frame::new()?,
-        Frame::new()?,
-        Frame::new()?,
-    ];
+    let mut compact: Vec<Frame> = (0..32).map(|_| Frame::new()).collect::<Result<Vec<_>>>()?;
     let mut compact_i = 0usize;
     let mut stats = LosslessStats {
         backend: "native libavcodec + Fvid crop view",

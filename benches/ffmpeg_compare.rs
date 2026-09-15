@@ -1,13 +1,15 @@
 //! Full CLI wall-clock suite: Y4M filters + media export (CPU↔CPU, GPU↔GPU).
 //!
 //! ```sh
-//! cargo build --release --features media-cuda
+//! cargo build --release --no-default-features --features media-cuda
+//! cargo build --release --no-default-features --features media --target-dir target-media
 //! cargo build --release --no-default-features --target-dir target-cpu
 //! cargo bench --bench ffmpeg_compare
 //! ```
 //!
 //! Env:
 //! - `FVID_BENCH_BIN_FULL` — release binary with media-cuda (default `target/release/fvid`)
+//! - `FVID_BENCH_BIN_MEDIA` — media without CUDA (default `target-media/release/fvid`)
 //! - `FVID_BENCH_BIN_CPU`  — cpu-only Y4M binary (default `target-cpu/release/fvid`)
 //! - `FVID_BENCH_SKIP_MEDIA=1` — Y4M only
 //! - `FVID_BENCH_SKIP_Y4M=1` — media only
@@ -27,22 +29,34 @@ fn exe(root: &Path, rel: &str) -> PathBuf {
     p
 }
 
-fn resolve_bins() -> airbug_bench::Result<(Option<PathBuf>, Option<PathBuf>)> {
+struct Bins {
+    full: Option<PathBuf>,
+    media: Option<PathBuf>,
+    cpu: Option<PathBuf>,
+}
+
+fn resolve_bins() -> airbug_bench::Result<Bins> {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let full = std::env::var_os("FVID_BENCH_BIN_FULL")
         .map(PathBuf::from)
         .unwrap_or_else(|| exe(&root, "target/release/fvid"));
+    let media = std::env::var_os("FVID_BENCH_BIN_MEDIA")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| exe(&root, "target-media/release/fvid"));
     let cpu = std::env::var_os("FVID_BENCH_BIN_CPU")
         .map(PathBuf::from)
         .unwrap_or_else(|| exe(&root, "target-cpu/release/fvid"));
-    let full = full.is_file().then_some(full);
-    let cpu = cpu.is_file().then_some(cpu);
-    if full.is_none() && cpu.is_none() {
+    let bins = Bins {
+        full: full.is_file().then_some(full),
+        media: media.is_file().then_some(media),
+        cpu: cpu.is_file().then_some(cpu),
+    };
+    if bins.full.is_none() && bins.media.is_none() && bins.cpu.is_none() {
         return Err(airbug_bench::error(
-            "no fvid binaries found; build:\n  cargo build --release --features media-cuda\n  cargo build --release --no-default-features --target-dir target-cpu",
+            "no fvid binaries found; build:\n  cargo build --release --no-default-features --features media-cuda\n  cargo build --release --no-default-features --features media --target-dir target-media\n  cargo build --release --no-default-features --target-dir target-cpu",
         ));
     }
-    Ok((full, cpu))
+    Ok(bins)
 }
 
 fn require_ffmpeg() -> airbug_bench::Result<()> {
@@ -312,15 +326,22 @@ fn skip_media() -> bool {
 
 fn main() -> airbug_bench::Result<()> {
     require_ffmpeg()?;
-    let (bin_full, bin_cpu) = resolve_bins()?;
-    if let Some(ref p) = bin_full {
+    let bins = resolve_bins()?;
+    if let Some(ref p) = bins.full {
         eprintln!(
             "bench: fvid/full → {} ({} bytes)",
             p.display(),
             std::fs::metadata(p).map(|m| m.len()).unwrap_or(0)
         );
     }
-    if let Some(ref p) = bin_cpu {
+    if let Some(ref p) = bins.media {
+        eprintln!(
+            "bench: fvid/media → {} ({} bytes)",
+            p.display(),
+            std::fs::metadata(p).map(|m| m.len()).unwrap_or(0)
+        );
+    }
+    if let Some(ref p) = bins.cpu {
         eprintln!(
             "bench: fvid/cpu → {} ({} bytes)",
             p.display(),
@@ -342,6 +363,10 @@ fn main() -> airbug_bench::Result<()> {
         sample_time: std::time::Duration::from_millis(25),
         max_iterations: 16,
     });
+
+    let bin_full = bins.full.clone();
+    let bin_cpu = bins.cpu.clone();
+    let bin_media = bins.media.clone();
 
     // ── Y4M: fvid_cpu / fvid_full / ffmpeg (raw) ───────────────────────────
     if !skip_y4m() {
@@ -417,23 +442,30 @@ fn main() -> airbug_bench::Result<()> {
 
     // ── Media export: CPU↔CPU (x264 veryfast) + GPU↔GPU (NVENC p1) ─────────
     if !skip_media() {
-        let media_bin = bin_full
+        // Prefer media-without-CUDA for CPU pairs (avoids nvcuda/DLL startup tax).
+        let media_cpu = bin_media
             .as_ref()
             .filter(|b| fvid_has_media(b))
             .cloned()
+            .or_else(|| bin_full.as_ref().filter(|b| fvid_has_media(b)).cloned())
             .or_else(|| bin_cpu.as_ref().filter(|b| fvid_has_media(b)).cloned());
+        let media_gpu = bin_full
+            .as_ref()
+            .filter(|b| fvid_has_media(b) && fvid_has_hw_filter(b))
+            .cloned();
 
-        if media_bin.is_none() {
+        if media_cpu.is_none() && media_gpu.is_none() {
             eprintln!(
-                "bench: skip media — binary lacks `media` (build with --features media-cuda)"
+                "bench: skip media — binary lacks `media` (build with --features media / media-cuda)"
             );
         } else {
-            let media_bin = media_bin.unwrap();
             let nvenc = ffmpeg_has_encoder("h264_nvenc");
-            let hw = fvid_has_hw_filter(&media_bin);
+            let hw = media_gpu.is_some();
             eprintln!(
-                "bench: media export — fvid_media=yes hw-filter={} ffmpeg_nvenc={}",
-                hw, nvenc
+                "bench: media export — fvid_media_cpu={} hw-filter={} ffmpeg_nvenc={}",
+                media_cpu.is_some(),
+                hw,
+                nvenc
             );
 
             let (label, w, h, seconds, frames) = ("1080p", 1920u32, 1080u32, 5u32, 150u64);
@@ -441,9 +473,9 @@ fn main() -> airbug_bench::Result<()> {
             let out_dir = dir.clone();
 
             // Warm each path once.
-            {
+            if let Some(ref media_bin) = media_cpu {
                 let out = fresh_out(&out_dir, "warm-cpu");
-                run_checked(media_fvid_cpu(&media_bin, &src, &out, &[]))?;
+                run_checked(media_fvid_cpu(media_bin, &src, &out, &[]))?;
                 remove_quiet(&out);
             }
             {
@@ -451,9 +483,9 @@ fn main() -> airbug_bench::Result<()> {
                 run_checked(media_ffmpeg_cpu(&src, &out, ""))?;
                 remove_quiet(&out);
             }
-            if hw {
+            if let Some(ref media_bin) = media_gpu {
                 let out = fresh_out(&out_dir, "warm-gpu");
-                run_checked(media_fvid_gpu(&media_bin, &src, &out, &[]))?;
+                run_checked(media_fvid_gpu(media_bin, &src, &out, &[]))?;
                 remove_quiet(&out);
             }
             if nvenc {
@@ -463,22 +495,24 @@ fn main() -> airbug_bench::Result<()> {
             }
 
             for (op, flags, vf) in editor_ops(w, h) {
-                let bin = media_bin.clone();
-                let src_c = src.clone();
-                let out_dir_c = out_dir.clone();
-                let flags_c = flags.clone();
-                suite
-                    .bench(&format!("media/fvid_cpu/{label}/{op}"), move || {
-                        let out = fresh_out(&out_dir_c, "fc");
-                        run_checked(media_fvid_cpu(&bin, &src_c, &out, &flags_c))
-                            .expect("fvid_cpu media");
-                        remove_quiet(&out);
-                    })
-                    .tag("media")
-                    .tag("fvid_cpu")
-                    .work_units("frames", frames)
-                    .parameter("resolution", label)
-                    .parameter("op", op);
+                if let Some(ref media_bin) = media_cpu {
+                    let bin = media_bin.clone();
+                    let src_c = src.clone();
+                    let out_dir_c = out_dir.clone();
+                    let flags_c = flags.clone();
+                    suite
+                        .bench(&format!("media/fvid_cpu/{label}/{op}"), move || {
+                            let out = fresh_out(&out_dir_c, "fc");
+                            run_checked(media_fvid_cpu(&bin, &src_c, &out, &flags_c))
+                                .expect("fvid_cpu media");
+                            remove_quiet(&out);
+                        })
+                        .tag("media")
+                        .tag("fvid_cpu")
+                        .work_units("frames", frames)
+                        .parameter("resolution", label)
+                        .parameter("op", op);
+                }
 
                 let src_c = src.clone();
                 let out_dir_c = out_dir.clone();
@@ -495,7 +529,7 @@ fn main() -> airbug_bench::Result<()> {
                     .parameter("resolution", label)
                     .parameter("op", op);
 
-                if hw {
+                if let Some(ref media_bin) = media_gpu {
                     let bin = media_bin.clone();
                     let src_c = src.clone();
                     let out_dir_c = out_dir.clone();

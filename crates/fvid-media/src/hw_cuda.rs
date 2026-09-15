@@ -10,7 +10,9 @@ use std::ptr;
 
 const AGAIN: i32 = -libc::EAGAIN;
 /// Filtered-path CUDA output slots (identity/copy uses decoder surfaces).
-const OUT_POOL: usize = 8;
+const OUT_POOL: usize = 16;
+/// Extra NVDEC surfaces so NVENC refs do not stall decode on passthrough.
+const EXTRA_HW_FRAMES: i32 = 32;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct HwFilterOptions {
@@ -137,6 +139,8 @@ fn open_cuda_decoder(
             return Err("failed to ref CUDA hwdevice for decoder".into());
         }
         (*codec.0).pkt_timebase = (*stream).time_base;
+        // Keep NVDEC ahead of NVENC when surfaces are shared (passthrough).
+        (*codec.0).extra_hw_frames = EXTRA_HW_FRAMES;
     }
     check(
         unsafe { avcodec_open2(codec.0, decoder, ptr::null_mut()) },
@@ -413,20 +417,15 @@ pub fn hw_filter(
     let mut packet = Packet::new()?;
     let mut dec_frame = Frame::new()?;
     let mut enc_packet = Packet::new()?;
-    let mut out_pool: Option<[Frame; OUT_POOL]> = if identity {
+    let mut out_pool: Option<Vec<Frame>> = if identity {
         None
     } else {
         let ctx = enc_frames_owned.as_ref().map(|h| h.0).unwrap_or(enc_frames_ptr);
-        Some([
-            alloc_cuda_frame(ctx)?,
-            alloc_cuda_frame(ctx)?,
-            alloc_cuda_frame(ctx)?,
-            alloc_cuda_frame(ctx)?,
-            alloc_cuda_frame(ctx)?,
-            alloc_cuda_frame(ctx)?,
-            alloc_cuda_frame(ctx)?,
-            alloc_cuda_frame(ctx)?,
-        ])
+        let mut frames = Vec::with_capacity(OUT_POOL);
+        for _ in 0..OUT_POOL {
+            frames.push(alloc_cuda_frame(ctx)?);
+        }
+        Some(frames)
     };
     let mut out_pool_i = 0usize;
     let mut in_flight: usize = 0;
