@@ -152,7 +152,10 @@ pub use play::{
     momentary_lufs_from_peak_milli, format_loudness_osd, spectrum_bar_fills, format_spectrum_osd,
     PlaylistSort, cycle_playlist_sort, playlist_sort_label, sort_playlist_paths,
     format_playlist_sort_osd, format_bookmark_label, RECENT_PLAY_MAX, push_recent_path,
-    format_recent_osd, deinterlace_linear_rgb, deinterlace_mean_rgb,
+    format_recent_osd, deinterlace_linear_rgb, deinterlace_mean_rgb, SeekJump, cycle_seek_jump,
+    format_seek_jump_osd, seek_step_us_ex, VideoPostFx, cycle_video_post_fx, video_post_fx_label,
+    format_video_post_fx_osd, apply_video_post_fx, downmix_surround_to_stereo, format_downmix_osd,
+    format_scaletempo_osd, format_minimal_interface_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

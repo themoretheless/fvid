@@ -1478,11 +1478,236 @@ pub const SEEK_COARSE_US: i64 = 10_000_000;
 /// Fine jump (±3 s), typically Shift+arrows.
 pub const SEEK_FINE_US: i64 = 3_000_000;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct SeekJump {
+    pub coarse_us: i64,
+    pub fine_us: i64,
+}
+
+impl Default for SeekJump {
+    fn default() -> Self {
+        Self {
+            coarse_us: SEEK_COARSE_US,
+            fine_us: SEEK_FINE_US,
+        }
+    }
+}
+
+pub fn cycle_seek_jump(jump: SeekJump) -> SeekJump {
+    match (jump.coarse_us, jump.fine_us) {
+        (SEEK_COARSE_US, SEEK_FINE_US) => SeekJump {
+            coarse_us: 30_000_000,
+            fine_us: 5_000_000,
+        },
+        (30_000_000, _) => SeekJump {
+            coarse_us: 60_000_000,
+            fine_us: 10_000_000,
+        },
+        _ => SeekJump::default(),
+    }
+}
+
+pub fn format_seek_jump_osd(jump: SeekJump) -> String {
+    format!(
+        "Jump ±{}s / ±{}s",
+        jump.coarse_us / 1_000_000,
+        jump.fine_us / 1_000_000
+    )
+}
+
 pub fn seek_step_us(fine: bool) -> i64 {
+    seek_step_us_ex(fine, SeekJump::default())
+}
+
+pub fn seek_step_us_ex(fine: bool, jump: SeekJump) -> i64 {
     if fine {
-        SEEK_FINE_US
+        jump.fine_us.max(1)
     } else {
-        SEEK_COARSE_US
+        jump.coarse_us.max(1)
+    }
+}
+
+/// VLC-like video post filters for the play path.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum VideoPostFx {
+    #[default]
+    Off,
+    Blur,
+    Sharpen,
+    Grain,
+}
+
+pub fn cycle_video_post_fx(fx: VideoPostFx) -> VideoPostFx {
+    match fx {
+        VideoPostFx::Off => VideoPostFx::Blur,
+        VideoPostFx::Blur => VideoPostFx::Sharpen,
+        VideoPostFx::Sharpen => VideoPostFx::Grain,
+        VideoPostFx::Grain => VideoPostFx::Off,
+    }
+}
+
+pub fn video_post_fx_label(fx: VideoPostFx) -> &'static str {
+    match fx {
+        VideoPostFx::Off => "PostFX Off",
+        VideoPostFx::Blur => "Blur",
+        VideoPostFx::Sharpen => "Sharpen",
+        VideoPostFx::Grain => "Grain",
+    }
+}
+
+pub fn format_video_post_fx_osd(fx: VideoPostFx) -> String {
+    format!("Video {}", video_post_fx_label(fx))
+}
+
+fn unpack_rgb(pixel: u32) -> (u8, u8, u8) {
+    (
+        ((pixel >> 16) & 0xff) as u8,
+        ((pixel >> 8) & 0xff) as u8,
+        (pixel & 0xff) as u8,
+    )
+}
+
+fn pack_rgb(red: u8, green: u8, blue: u8) -> u32 {
+    (u32::from(red) << 16) | (u32::from(green) << 8) | u32::from(blue)
+}
+
+pub fn apply_video_post_fx(pixels: &mut [u32], width: u32, height: u32, fx: VideoPostFx) {
+    match fx {
+        VideoPostFx::Off => {}
+        VideoPostFx::Blur => apply_box_blur_rgb(pixels, width, height),
+        VideoPostFx::Sharpen => apply_sharpen_rgb(pixels, width, height),
+        VideoPostFx::Grain => apply_grain_rgb(pixels, width, height),
+    }
+}
+
+fn apply_box_blur_rgb(pixels: &mut [u32], width: u32, height: u32) {
+    let w = width as usize;
+    let h = height as usize;
+    if w == 0 || h == 0 || pixels.len() < w * h {
+        return;
+    }
+    let src = pixels.to_vec();
+    for y in 0..h {
+        for x in 0..w {
+            let mut r = 0u32;
+            let mut g = 0u32;
+            let mut b = 0u32;
+            let mut n = 0u32;
+            for dy in -1i32..=1 {
+                for dx in -1i32..=1 {
+                    let xx = x as i32 + dx;
+                    let yy = y as i32 + dy;
+                    if xx < 0 || yy < 0 || xx as usize >= w || yy as usize >= h {
+                        continue;
+                    }
+                    let (rr, gg, bb) = unpack_rgb(src[yy as usize * w + xx as usize]);
+                    r += u32::from(rr);
+                    g += u32::from(gg);
+                    b += u32::from(bb);
+                    n += 1;
+                }
+            }
+            if n > 0 {
+                pixels[y * w + x] = pack_rgb((r / n) as u8, (g / n) as u8, (b / n) as u8);
+            }
+        }
+    }
+}
+
+fn apply_sharpen_rgb(pixels: &mut [u32], width: u32, height: u32) {
+    let w = width as usize;
+    let h = height as usize;
+    if w < 3 || h < 3 || pixels.len() < w * h {
+        return;
+    }
+    let src = pixels.to_vec();
+    for y in 1..h - 1 {
+        for x in 1..w - 1 {
+            let (cr, cg, cb) = unpack_rgb(src[y * w + x]);
+            let (nr, ng, nb) = unpack_rgb(src[(y - 1) * w + x]);
+            let (sr, sg, sb) = unpack_rgb(src[(y + 1) * w + x]);
+            let (wr, wg, wb) = unpack_rgb(src[y * w + (x - 1)]);
+            let (er, eg, eb) = unpack_rgb(src[y * w + (x + 1)]);
+            let sharpen = |c: u8, n: u8, s: u8, ww: u8, e: u8| -> u8 {
+                let v = i32::from(c) * 5
+                    - i32::from(n)
+                    - i32::from(s)
+                    - i32::from(ww)
+                    - i32::from(e);
+                v.clamp(0, 255) as u8
+            };
+            pixels[y * w + x] = pack_rgb(
+                sharpen(cr, nr, sr, wr, er),
+                sharpen(cg, ng, sg, wg, eg),
+                sharpen(cb, nb, sb, wb, eb),
+            );
+        }
+    }
+}
+
+fn apply_grain_rgb(pixels: &mut [u32], width: u32, height: u32) {
+    let w = width as usize;
+    let h = height as usize;
+    if w == 0 || h == 0 || pixels.len() < w * h {
+        return;
+    }
+    for y in 0..h {
+        for x in 0..w {
+            let mut hash = ((x as u32).wrapping_mul(374761393))
+                ^ ((y as u32).wrapping_mul(668265263));
+            hash = (hash ^ (hash >> 13)).wrapping_mul(1274126177);
+            let noise = ((hash >> 24) as i32) - 128;
+            let delta = noise / 12;
+            let (r, g, b) = unpack_rgb(pixels[y * w + x]);
+            pixels[y * w + x] = pack_rgb(
+                (i32::from(r) + delta).clamp(0, 255) as u8,
+                (i32::from(g) + delta).clamp(0, 255) as u8,
+                (i32::from(b) + delta).clamp(0, 255) as u8,
+            );
+        }
+    }
+}
+
+/// Fold 5.1/7.1 interleaved frames down to stereo (VLC headphone/stereo downmix).
+pub fn downmix_surround_to_stereo(frame: &mut [f32], channels: usize) {
+    if channels < 3 || frame.len() < channels {
+        return;
+    }
+    let left = frame[0];
+    let right = frame[1.min(channels - 1)];
+    let center = if channels >= 3 { frame[2] * 0.707 } else { 0.0 };
+    let lfe = if channels >= 4 { frame[3] * 0.5 } else { 0.0 };
+    let ls = if channels >= 5 { frame[4] * 0.707 } else { 0.0 };
+    let rs = if channels >= 6 { frame[5] * 0.707 } else { 0.0 };
+    let out_l = (left + center + lfe + ls).clamp(-1.0, 1.0);
+    let out_r = (right + center + lfe + rs).clamp(-1.0, 1.0);
+    frame[0] = out_l;
+    if channels > 1 {
+        frame[1] = out_r;
+    }
+}
+
+pub fn format_downmix_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Surround downmix On"
+    } else {
+        "Surround downmix Off"
+    }
+}
+
+pub fn format_scaletempo_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Scaletempo On"
+    } else {
+        "Scaletempo Off"
+    }
+}
+
+pub fn format_minimal_interface_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Minimal interface On"
+    } else {
+        "Minimal interface Off"
     }
 }
 
@@ -1528,6 +1753,8 @@ pub struct PlayRenderOptions {
     pub display_effect: DisplayEffect,
     /// Display peak luminance in nits for HDR output scaling.
     pub hdr_nits: u32,
+    /// Spatial post filter (blur/sharpen/grain).
+    pub post_fx: VideoPostFx,
 }
 
 impl Default for PlayRenderOptions {
@@ -1552,6 +1779,7 @@ impl Default for PlayRenderOptions {
             color_trc: 0,
             display_effect: DisplayEffect::Off,
             hdr_nits: HDR_NITS_DEFAULT,
+            post_fx: VideoPostFx::Off,
         }
     }
 }
@@ -1936,6 +2164,7 @@ pub fn render_play_pixels(
                 (u32::from(red) << 16) | (u32::from(green) << 8) | u32::from(blue);
         }
     }
+    apply_video_post_fx(&mut out, out_w, out_h, opts.post_fx);
     (out_w, out_h, out)
 }
 
@@ -3270,6 +3499,8 @@ struct Shared {
         spatializer_milli: AtomicI32,
         /// ReplayGain linear milli-gain (1000 = unity).
         replaygain_milli: AtomicI32,
+        /// Fold multichannel PCM to stereo before balance/width.
+        surround_downmix: AtomicBool,
         /// VLC-style volume normalizer (peak follower + makeup gain).
         normalizer_on: AtomicBool,
         /// Smoothed peak ×1000 for the normalizer.
@@ -4703,6 +4934,9 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
             mid_milli,
             treble_milli,
         );
+        if shared.surround_downmix.load(Ordering::Relaxed) {
+            downmix_surround_to_stereo(&mut frame_buf, channels);
+        }
         for channel in 0..channels {
             frame_buf[channel] = apply_eq(frame_buf[channel], channel, &mut tone);
             frame_buf[channel] = apply_eq_preamp_sample(frame_buf[channel], eq_preamp_milli);
@@ -5820,6 +6054,11 @@ struct PlayerApp {
     subtitle_color: SubtitleColor,
     playlist_sort: PlaylistSort,
     recent: Vec<PathBuf>,
+    post_fx: VideoPostFx,
+    seek_jump: SeekJump,
+    surround_downmix: bool,
+    scaletempo: bool,
+    minimal_interface: bool,
     volume_normalizer: bool,
     bass_milli: i32,
     mid_milli: i32,
@@ -5956,6 +6195,11 @@ impl PlayerApp {
             subtitle_color: SubtitleColor::White,
             playlist_sort: PlaylistSort::Path,
             recent: Vec::new(),
+            post_fx: VideoPostFx::Off,
+            seek_jump: SeekJump::default(),
+            surround_downmix: false,
+            scaletempo: true,
+            minimal_interface: false,
             volume_normalizer: false,
             bass_milli: TONE_UNITY_MILLI,
             mid_milli: TONE_UNITY_MILLI,
@@ -6091,6 +6335,7 @@ impl PlayerApp {
             eq_preamp_milli: AtomicI32::new(self.eq_preamp_milli),
             spatializer_milli: AtomicI32::new(self.spatializer_milli),
             replaygain_milli: AtomicI32::new(self.replaygain_milli),
+            surround_downmix: AtomicBool::new(self.surround_downmix),
             normalizer_on: AtomicBool::new(self.volume_normalizer),
             normalizer_peak_milli: AtomicU32::new(0),
             vu_peak_milli: AtomicU32::new(0),
@@ -6431,7 +6676,7 @@ impl PlayerApp {
                 } else {
                     self.request_seek(
                         self.shown_media_us()
-                            .saturating_sub(seek_step_us(fine)),
+                            .saturating_sub(seek_step_us_ex(fine, self.seek_jump)),
                     );
                 }
             }
@@ -6452,7 +6697,7 @@ impl PlayerApp {
                 } else {
                     self.request_seek(
                         self.shown_media_us()
-                            .saturating_add(seek_step_us(fine)),
+                            .saturating_add(seek_step_us_ex(fine, self.seek_jump)),
                     );
                 }
             }
@@ -6838,6 +7083,37 @@ impl PlayerApp {
         }
         if !focused
             && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::F))
+        {
+            self.cycle_post_fx_mode();
+        }
+        if !focused
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::J))
+            && !command
+        {
+            self.cycle_seek_jump_size();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::D))
+        {
+            self.toggle_surround_downmix();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::T))
+        {
+            self.toggle_scaletempo();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::M))
+            && !ctx.input(|input| input.modifiers.alt)
+        {
+            self.toggle_minimal_interface();
+        }
+        if !focused
+            && command
             && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::H))
         {
             self.hdr_nits = match self.hdr_nits {
@@ -7009,6 +7285,7 @@ impl PlayerApp {
             frame.color_trc,
             self.display_effect,
             self.hdr_nits,
+            self.post_fx,
             bitmap.as_ref(),
         );
         session.dirty = false;
@@ -8206,6 +8483,38 @@ impl PlayerApp {
         self.notice = Some(format_recent_osd(&self.recent));
     }
 
+    fn cycle_post_fx_mode(&mut self) {
+        self.post_fx = cycle_video_post_fx(self.post_fx);
+        self.adjust_dirty = true;
+        self.notice = Some(format_video_post_fx_osd(self.post_fx));
+    }
+
+    fn cycle_seek_jump_size(&mut self) {
+        self.seek_jump = cycle_seek_jump(self.seek_jump);
+        self.notice = Some(format_seek_jump_osd(self.seek_jump));
+    }
+
+    fn toggle_surround_downmix(&mut self) {
+        self.surround_downmix = !self.surround_downmix;
+        if let Some(session) = &self.session {
+            session
+                .shared
+                .surround_downmix
+                .store(self.surround_downmix, Ordering::Relaxed);
+        }
+        self.notice = Some(format_downmix_osd(self.surround_downmix).into());
+    }
+
+    fn toggle_scaletempo(&mut self) {
+        self.scaletempo = !self.scaletempo;
+        self.notice = Some(format_scaletempo_osd(self.scaletempo).into());
+    }
+
+    fn toggle_minimal_interface(&mut self) {
+        self.minimal_interface = !self.minimal_interface;
+        self.notice = Some(format_minimal_interface_osd(self.minimal_interface).into());
+    }
+
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {
         self.bass_milli = clamp_adjust_milli(bass);
         self.mid_milli = clamp_adjust_milli(mid);
@@ -8480,6 +8789,7 @@ impl PlayerApp {
                 color_trc: frame.color_trc,
                 display_effect: self.display_effect,
                 hdr_nits: self.hdr_nits,
+                post_fx: self.post_fx,
             };
             let (width, height, pixels) =
                 render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap.as_ref());
@@ -9004,6 +9314,7 @@ fn color_image(
     color_trc: u32,
     display_effect: DisplayEffect,
     hdr_nits: u32,
+    post_fx: VideoPostFx,
     bitmap: Option<&BitmapSubtitle>,
 ) -> egui::ColorImage {
     let opts = PlayRenderOptions {
@@ -9026,6 +9337,7 @@ fn color_image(
         color_trc,
         display_effect,
         hdr_nits,
+        post_fx,
     };
     let (out_w, out_h, rgb) =
         render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap);

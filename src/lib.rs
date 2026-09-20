@@ -1553,6 +1553,28 @@ mod play_controls {
             fvid_media::deinterlace_label(fvid_media::DeinterlaceMode::Linear),
             "Linear"
         );
+        assert_eq!(
+            fvid_media::seek_step_us_ex(false, fvid_media::SeekJump::default()),
+            fvid_media::SEEK_COARSE_US
+        );
+        let jump = fvid_media::cycle_seek_jump(fvid_media::SeekJump::default());
+        assert_eq!(jump.coarse_us, 30_000_000);
+        assert_eq!(
+            fvid_media::cycle_video_post_fx(fvid_media::VideoPostFx::Off),
+            fvid_media::VideoPostFx::Blur
+        );
+        let mut sharp = vec![0u32; 9];
+        sharp[4] = 0x00_80_80_80;
+        fvid_media::apply_video_post_fx(&mut sharp, 3, 3, fvid_media::VideoPostFx::Sharpen);
+        let mut blur = vec![0x00_ff_00_00u32, 0, 0, 0];
+        fvid_media::apply_video_post_fx(&mut blur, 2, 2, fvid_media::VideoPostFx::Blur);
+        assert_ne!(blur[0], 0x00_ff_00_00);
+        let mut surround = [1.0f32, -1.0, 0.5, 0.0, 0.25, -0.25];
+        fvid_media::downmix_surround_to_stereo(&mut surround, 6);
+        assert!(surround[0].abs() <= 1.0);
+        assert!(fvid_media::format_downmix_osd(true).contains("On"));
+        assert!(fvid_media::format_scaletempo_osd(false).contains("Off"));
+        assert!(fvid_media::format_minimal_interface_osd(true).contains("Minimal"));
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
         hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;
