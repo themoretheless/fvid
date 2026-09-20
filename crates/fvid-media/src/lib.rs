@@ -243,6 +243,12 @@ pub use play::{
     bt2446_tonemap_channel, apply_bt2446_tonemap_pixel, format_bt2446_osd, SphericalHotspot,
     spherical_hotspot_hit, format_spherical_hotspot_osd, parse_webvtt_region_id,
     thumbnail_cache_key, integrated_lufs_from_short_term, format_integrated_lufs_osd,
+    project_panini_view, project_cylindrical_view, brown_conrady_uv_milli, format_lens_calibration_osd,
+    ictcp_intensity_milli, format_ictcp_osd, prefer_abr_rendition_index, format_abr_osd,
+    storyboard_tile_index, format_storyboard_osd, watch_progress_milli, format_continue_watching_osd,
+    up_next_should_start, format_up_next_osd, format_scrobble_line, gaze_dwell_triggered,
+    format_gaze_dwell_osd, controller_ray_hit, parse_ttml_clock, clamp_dvr_playhead_us,
+    format_dvr_window_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

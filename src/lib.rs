@@ -1977,6 +1977,44 @@ mod play_controls {
             fvid_media::integrated_lufs_from_short_term(&[-230, -220, -210]),
             -220
         );
+        assert_eq!(
+            fvid_media::parse_hdr_tonemap("mobius").unwrap(),
+            fvid_media::HdrTonemap::Mobius
+        );
+        assert_eq!(
+            fvid_media::parse_spherical_projection("panini").unwrap(),
+            fvid_media::SphericalProjection::Panini
+        );
+        let pan = fvid_media::project_panini_view(
+            4,
+            2,
+            &[0x00_10_20_30u32; 8],
+            2,
+            2,
+            0,
+            0,
+            0,
+            90_000,
+            1_000,
+        );
+        assert_eq!(pan.len(), 4);
+        let (cu, cv) = fvid_media::brown_conrady_uv_milli(500, 500, 0, 0);
+        assert_eq!((cu, cv), (500, 500));
+        assert!(fvid_media::ictcp_intensity_milli(200, 200, 200) > 0);
+        assert_eq!(
+            fvid_media::prefer_abr_rendition_index(&[500_000, 1_500_000, 3_000_000], 2_000_000),
+            1
+        );
+        assert_eq!(fvid_media::storyboard_tile_index(25_000_000, 10_000_000, 10), 2);
+        assert_eq!(fvid_media::watch_progress_milli(30, 100), 300);
+        assert!(fvid_media::up_next_should_start(5_000_000, 10_000_000));
+        assert!(fvid_media::format_scrobble_line("A", "T", 180_000_000).contains("180"));
+        assert!(fvid_media::gaze_dwell_triggered(true, 500, 400));
+        assert_eq!(fvid_media::parse_ttml_clock("00:00:01.500"), Some(1_500_000));
+        assert_eq!(
+            fvid_media::clamp_dvr_playhead_us(50, 100, 30),
+            70
+        );
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;

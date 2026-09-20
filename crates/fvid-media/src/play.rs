@@ -2352,6 +2352,10 @@ pub enum SphericalProjection {
     LittlePlanet,
     /// YouTube Equi-Angular Cubemap (EAC).
     Eac,
+    /// Panini projection (architectural / wide FOV 360).
+    Panini,
+    /// Cylindrical panorama.
+    Cylindrical,
 }
 
 pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProjection {
@@ -2360,7 +2364,9 @@ pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProject
         SphericalProjection::DualFisheye => SphericalProjection::Cubemap,
         SphericalProjection::Cubemap => SphericalProjection::LittlePlanet,
         SphericalProjection::LittlePlanet => SphericalProjection::Eac,
-        SphericalProjection::Eac => SphericalProjection::Equirect,
+        SphericalProjection::Eac => SphericalProjection::Panini,
+        SphericalProjection::Panini => SphericalProjection::Cylindrical,
+        SphericalProjection::Cylindrical => SphericalProjection::Equirect,
     }
 }
 
@@ -2371,6 +2377,8 @@ pub fn spherical_projection_label(mode: SphericalProjection) -> &'static str {
         SphericalProjection::Cubemap => "Cubemap",
         SphericalProjection::LittlePlanet => "Little planet",
         SphericalProjection::Eac => "EAC",
+        SphericalProjection::Panini => "Panini",
+        SphericalProjection::Cylindrical => "Cylindrical",
     }
 }
 
@@ -2588,7 +2596,109 @@ pub fn project_spherical_view(
         SphericalProjection::LittlePlanet => {
             project_little_planet(src_w, src_h, src, out_w, out_h, yaw_deg_milli)
         }
+        SphericalProjection::Panini => project_panini_view(
+            src_w,
+            src_h,
+            src,
+            out_w,
+            out_h,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            roll_deg_milli,
+            fov_deg_milli,
+            1_000,
+        ),
+        SphericalProjection::Cylindrical => project_cylindrical_view(
+            src_w,
+            src_h,
+            src,
+            out_w,
+            out_h,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            roll_deg_milli,
+            fov_deg_milli,
+        ),
     }
+}
+
+/// Panini wide-FOV projection from equirect (d_milli = 1000 → classic d=1).
+pub fn project_panini_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    roll_deg_milli: i32,
+    fov_deg_milli: i32,
+    d_milli: i32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+    let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+    let roll = (clamp_roll_milli(roll_deg_milli) as f32 / 1_000.0).to_radians();
+    let fov = (clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0).to_radians();
+    let d = (d_milli.clamp(100, 5_000) as f32) / 1_000.0;
+    let aspect = out_w as f32 / out_h as f32;
+    let tan_half = (fov * 0.5).tan();
+    let (sin_r, cos_r) = roll.sin_cos();
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    for oy in 0..out_h {
+        let ny0 = (1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32) * tan_half;
+        for ox in 0..out_w {
+            let nx0 = (2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0) * tan_half * aspect;
+            let nx = nx0 * cos_r - ny0 * sin_r;
+            let ny = nx0 * sin_r + ny0 * cos_r;
+            let lon_off = (nx / (d + 1.0)).atan();
+            let lat_off = (ny * (d + lon_off.cos()).max(0.05) / (d + 1.0)).atan();
+            let lon = yaw + lon_off;
+            let lat = (pitch + lat_off).clamp(-std::f32::consts::FRAC_PI_2 + 0.01, std::f32::consts::FRAC_PI_2 - 0.01);
+            out[(oy * out_w + ox) as usize] = sample_equirect_pixel(src, src_w, src_h, lon, lat);
+        }
+    }
+    out
+}
+
+/// Cylindrical panorama projection from equirect.
+pub fn project_cylindrical_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    roll_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+    let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+    let roll = (clamp_roll_milli(roll_deg_milli) as f32 / 1_000.0).to_radians();
+    let fov = (clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0).to_radians();
+    let aspect = out_w as f32 / out_h as f32;
+    let tan_half = (fov * 0.5).tan();
+    let (sin_r, cos_r) = roll.sin_cos();
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    for oy in 0..out_h {
+        let ny0 = (1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32) * tan_half;
+        for ox in 0..out_w {
+            let nx0 = (2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0) * tan_half * aspect;
+            let nx = nx0 * cos_r - ny0 * sin_r;
+            let ny = nx0 * sin_r + ny0 * cos_r;
+            let lon = yaw + nx; // linear azimuth
+            let lat = (pitch + ny.atan()).clamp(
+                -std::f32::consts::FRAC_PI_2 + 0.01,
+                std::f32::consts::FRAC_PI_2 - 0.01,
+            );
+            out[(oy * out_w + ox) as usize] = sample_equirect_pixel(src, src_w, src_h, lon, lat);
+        }
+    }
+    out
 }
 
 /// HDR10 static metadata peak luminance (MaxCLL / MaxFALL), nits.
@@ -4968,6 +5078,171 @@ pub fn format_integrated_lufs_osd(lufs_x10: i32) -> String {
     format!("Integrated {:+.1} LUFS", lufs_x10 as f32 / 10.0)
 }
 
+/// Brown–Conrady radial distortion for Cardboard lens calibration (k1/k2 milli).
+pub fn brown_conrady_uv_milli(
+    u_milli: i32,
+    v_milli: i32,
+    k1_milli: i32,
+    k2_milli: i32,
+) -> (i32, i32) {
+    let u = (u_milli.clamp(0, 1_000) as f32 / 1_000.0) * 2.0 - 1.0;
+    let v = (v_milli.clamp(0, 1_000) as f32 / 1_000.0) * 2.0 - 1.0;
+    let k1 = k1_milli.clamp(-2_000, 2_000) as f32 / 1_000.0;
+    let k2 = k2_milli.clamp(-2_000, 2_000) as f32 / 1_000.0;
+    let r2 = u * u + v * v;
+    let scale = 1.0 + k1 * r2 + k2 * r2 * r2;
+    (
+        (((u * scale + 1.0) * 500.0).round() as i32).clamp(0, 1_000),
+        (((v * scale + 1.0) * 500.0).round() as i32).clamp(0, 1_000),
+    )
+}
+
+pub fn format_lens_calibration_osd(k1_milli: i32, k2_milli: i32) -> String {
+    format!(
+        "Lens k1={:.2} k2={:.2}",
+        k1_milli as f32 / 1_000.0,
+        k2_milli as f32 / 1_000.0
+    )
+}
+
+/// Approximate ICtCp intensity from RGB (HDR metering oracle).
+pub fn ictcp_intensity_milli(red: u8, green: u8, blue: u8) -> u32 {
+    let y = (54 * u32::from(red) + 183 * u32::from(green) + 19 * u32::from(blue)) / 256;
+    // Lightly compress highlights toward PQ-ish code value.
+    let t = y as f32 / 255.0;
+    let i = (t.powf(0.45) * 1_000.0).round().clamp(0.0, 1_000.0) as u32;
+    i
+}
+
+pub fn format_ictcp_osd(intensity_milli: u32) -> String {
+    format!("ICtCp I {}%", intensity_milli.min(1_000) / 10)
+}
+
+/// ABR representation pick by available bandwidth (HLS/DASH players).
+pub fn prefer_abr_rendition_index(bandwidths_bps: &[u32], available_bps: u32) -> usize {
+    if bandwidths_bps.is_empty() {
+        return 0;
+    }
+    let mut best: Option<usize> = None;
+    for (i, &bw) in bandwidths_bps.iter().enumerate() {
+        if bw <= available_bps {
+            best = Some(match best {
+                Some(j) if bandwidths_bps[j] >= bw => j,
+                _ => i,
+            });
+        }
+    }
+    if let Some(i) = best {
+        return i;
+    }
+    bandwidths_bps
+        .iter()
+        .enumerate()
+        .min_by_key(|(_, bw)| *bw)
+        .map(|(i, _)| i)
+        .unwrap_or(0)
+}
+
+pub fn format_abr_osd(index: usize, bandwidth_bps: u32) -> String {
+    format!("ABR#{index} {} kbps", bandwidth_bps / 1_000)
+}
+
+/// YouTube/BIF-style storyboard tile index from media time.
+pub fn storyboard_tile_index(media_us: i64, interval_us: i64, tile_count: usize) -> usize {
+    if tile_count == 0 || interval_us <= 0 {
+        return 0;
+    }
+    let idx = (media_us.max(0) / interval_us) as usize;
+    idx.min(tile_count - 1)
+}
+
+pub fn format_storyboard_osd(index: usize, tile_count: usize) -> String {
+    format!("Storyboard {}/{}", index + 1, tile_count.max(1))
+}
+
+/// Continue-watching progress (0..=1000 milli).
+pub fn watch_progress_milli(position_us: i64, duration_us: i64) -> u32 {
+    if duration_us <= 0 {
+        return 0;
+    }
+    ((position_us.max(0) as i128 * 1_000) / duration_us as i128)
+        .clamp(0, 1_000) as u32
+}
+
+pub fn format_continue_watching_osd(progress_milli: u32) -> String {
+    format!("Continue {}%", progress_milli.min(1_000) / 10)
+}
+
+/// Up-next / binge autoplay countdown.
+pub fn up_next_should_start(remaining_us: i64, countdown_us: i64) -> bool {
+    remaining_us <= countdown_us.max(0) && remaining_us >= 0
+}
+
+pub fn format_up_next_osd(title: &str, remaining_us: i64) -> String {
+    format!("Up next: {title} in {}", format_play_clock(remaining_us.max(0)))
+}
+
+/// Scrobble / Last.fm-style payload line.
+pub fn format_scrobble_line(artist: &str, title: &str, duration_us: i64) -> String {
+    format!(
+        "scrobble\t{}\t{}\t{}",
+        artist.trim(),
+        title.trim(),
+        duration_us.max(0) / 1_000_000
+    )
+}
+
+/// Gaze dwell: hotspot activates after dwell_ms at hit.
+pub fn gaze_dwell_triggered(hit: bool, dwell_ms: u64, required_ms: u64) -> bool {
+    hit && dwell_ms >= required_ms.max(1)
+}
+
+pub fn format_gaze_dwell_osd(triggered: bool) -> &'static str {
+    if triggered {
+        "Gaze select"
+    } else {
+        "Gaze idle"
+    }
+}
+
+/// VR controller ray hit test against hotspot angular radius.
+pub fn controller_ray_hit(
+    ray_yaw_milli: i32,
+    ray_pitch_milli: i32,
+    hotspot: &SphericalHotspot,
+) -> bool {
+    spherical_hotspot_hit(hotspot, ray_yaw_milli, ray_pitch_milli)
+}
+
+/// Parse TTML/DFXP clock (`HH:MM:SS.mmm` or `SS.mmm`).
+pub fn parse_ttml_clock(spec: &str) -> Option<i64> {
+    let spec = spec.trim();
+    if let Some(us) = parse_play_clock(spec) {
+        return Some(us);
+    }
+    // TTML frames form HH:MM:SS:FF — treat FF as centiseconds if 2 digits.
+    let parts: Vec<&str> = spec.split(':').collect();
+    if parts.len() == 4 {
+        let h: i64 = parts[0].parse().ok()?;
+        let m: i64 = parts[1].parse().ok()?;
+        let s: i64 = parts[2].parse().ok()?;
+        let f: i64 = parts[3].parse().ok()?;
+        return Some((((h * 60 + m) * 60 + s) * 1_000 + f * 10) * 1_000);
+    }
+    None
+}
+
+/// Live DVR window clamp: playhead must stay within [edge-window, edge].
+pub fn clamp_dvr_playhead_us(playhead_us: i64, live_edge_us: i64, window_us: i64) -> i64 {
+    let edge = live_edge_us.max(0);
+    let start = edge.saturating_sub(window_us.max(0));
+    playhead_us.clamp(start, edge)
+}
+
+pub fn format_dvr_window_osd(window_us: i64) -> String {
+    format!("DVR window {}", format_play_clock(window_us.max(0)))
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -5250,6 +5525,10 @@ pub enum HdrTonemap {
     Clip,
     Reinhard,
     Hable,
+    /// Möbius tonemap (mpv `mobius`).
+    Mobius,
+    /// ACES filmic curve (approximate).
+    Aces,
 }
 
 /// FFmpeg `AVCOL_TRC_SMPTE2084` (PQ).
@@ -5266,7 +5545,9 @@ pub fn cycle_hdr_tonemap(mode: HdrTonemap) -> HdrTonemap {
         HdrTonemap::Off => HdrTonemap::Clip,
         HdrTonemap::Clip => HdrTonemap::Reinhard,
         HdrTonemap::Reinhard => HdrTonemap::Hable,
-        HdrTonemap::Hable => HdrTonemap::Off,
+        HdrTonemap::Hable => HdrTonemap::Mobius,
+        HdrTonemap::Mobius => HdrTonemap::Aces,
+        HdrTonemap::Aces => HdrTonemap::Off,
     }
 }
 
@@ -5276,6 +5557,8 @@ pub fn hdr_tonemap_label(mode: HdrTonemap) -> &'static str {
         HdrTonemap::Clip => "clip",
         HdrTonemap::Reinhard => "reinhard",
         HdrTonemap::Hable => "hable",
+        HdrTonemap::Mobius => "mobius",
+        HdrTonemap::Aces => "aces",
     }
 }
 
@@ -5291,6 +5574,27 @@ fn hable_tonemap(x: f32) -> f32 {
     let e = 0.02;
     let f = 0.30;
     ((x * (a * x + c * b) + d * e) / (x * (a * x + b) + d * f)) - e / f
+}
+
+fn mobius_tonemap(x: f32, j: f32) -> f32 {
+    let j = j.clamp(0.0, 1.0);
+    let x = x.max(0.0);
+    if x <= j {
+        return x;
+    }
+    let a = -j * j * (x - 1.0) / ((j - 1.0) * (j - 1.0)).max(1e-6);
+    let b = (2.0 * j - 1.0) * (j * j - x) / ((j - 1.0) * (j - 1.0)).max(1e-6);
+    ((x + a) / (x + b)).clamp(0.0, 1.0)
+}
+
+fn aces_tonemap(x: f32) -> f32 {
+    let a = 2.51;
+    let b = 0.03;
+    let c = 2.43;
+    let d = 0.59;
+    let e = 0.14;
+    let x = x.max(0.0);
+    ((x * (a * x + b)) / (x * (c * x + d) + e)).clamp(0.0, 1.0)
 }
 
 /// Approximate PQ EOTF (SMPTE ST 2084) from normalized [0,1] code value to relative luminance.
@@ -5343,6 +5647,8 @@ pub fn tonemap_channel(value: f32, mode: HdrTonemap) -> f32 {
             let white = hable_tonemap(11.2).max(1e-6);
             (hable_tonemap(x) / white).clamp(0.0, 1.0)
         }
+        HdrTonemap::Mobius => mobius_tonemap(x, 0.3),
+        HdrTonemap::Aces => aces_tonemap(x),
     }
 }
 
@@ -5792,14 +6098,19 @@ impl Default for PlayOptions {
     }
 }
 
-/// Parse `--hdr-tonemap` values: `off|clip|reinhard|hable`.
+/// Parse `--hdr-tonemap` values: `off|clip|reinhard|hable|mobius|aces`.
 pub fn parse_hdr_tonemap(spec: &str) -> Result<HdrTonemap> {
     match spec.trim().to_ascii_lowercase().as_str() {
         "off" | "none" | "0" => Ok(HdrTonemap::Off),
         "clip" => Ok(HdrTonemap::Clip),
         "reinhard" => Ok(HdrTonemap::Reinhard),
         "hable" => Ok(HdrTonemap::Hable),
-        other => Err(format!("unknown hdr tonemap `{other}` (off|clip|reinhard|hable)").into()),
+        "mobius" => Ok(HdrTonemap::Mobius),
+        "aces" => Ok(HdrTonemap::Aces),
+        other => Err(format!(
+            "unknown hdr tonemap `{other}` (off|clip|reinhard|hable|mobius|aces)"
+        )
+        .into()),
     }
 }
 
@@ -5811,8 +6122,10 @@ pub fn parse_spherical_projection(spec: &str) -> Result<SphericalProjection> {
         "cubemap" | "cube" => Ok(SphericalProjection::Cubemap),
         "little-planet" | "planet" | "stereographic" => Ok(SphericalProjection::LittlePlanet),
         "eac" | "equi-angular" | "equiangular" => Ok(SphericalProjection::Eac),
+        "panini" => Ok(SphericalProjection::Panini),
+        "cylindrical" | "cylinder" => Ok(SphericalProjection::Cylindrical),
         other => Err(format!(
-            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac)"
+            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical)"
         )
         .into()),
     }
