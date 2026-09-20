@@ -191,7 +191,13 @@ pub use play::{
     frame_rate_milli_from_duration_us, format_frame_rate_osd, cycle_angle, format_angle_osd,
     seek_from_wheel, queue_insert, format_queue_osd, format_forced_only_osd,
     clamp_exclusive_latency_ms, format_exclusive_latency_osd, chapter_thumbnail_times,
-    format_chapter_thumbs_osd,
+    format_chapter_thumbs_osd, IPD_DEFAULT_MILLI, IPD_MIN_MILLI, IPD_MAX_MILLI, IPD_STEP_MILLI,
+    clamp_ipd_milli, ipd_step_milli, format_ipd_osd, cardboard_eye_yaw_offset_milli, VrDisplayMode,
+    cycle_vr_display, vr_display_label, format_vr_display_osd, AmbisonicMode, cycle_ambisonic,
+    ambisonic_label, format_ambisonic_osd, parse_webvtt_timestamp, format_webvtt_timestamp,
+    CastProtocol, cycle_cast_protocol, cast_protocol_label, format_cast_osd, media_library_entries,
+    format_media_library_osd, format_chapter_art_osd, SmilClip, parse_smil_clip_line,
+    format_smil_clip_osd, format_named_bookmark_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

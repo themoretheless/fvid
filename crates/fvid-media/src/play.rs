@@ -2832,6 +2832,256 @@ pub fn format_chapter_thumbs_osd(count: usize) -> String {
     format!("Thumbs {count}")
 }
 
+/// VR Cardboard / headset interpupillary distance (mm ×1000).
+pub const IPD_DEFAULT_MILLI: i32 = 63_000;
+pub const IPD_MIN_MILLI: i32 = 50_000;
+pub const IPD_MAX_MILLI: i32 = 80_000;
+pub const IPD_STEP_MILLI: i32 = 1_000;
+
+pub fn clamp_ipd_milli(value: i32) -> i32 {
+    value.clamp(IPD_MIN_MILLI, IPD_MAX_MILLI)
+}
+
+pub fn ipd_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_ipd_milli(current.saturating_add(delta))
+}
+
+pub fn format_ipd_osd(ipd_milli: i32) -> String {
+    format!("IPD {:.1} mm", clamp_ipd_milli(ipd_milli) as f32 / 1_000.0)
+}
+
+/// Stereo eye offset in yaw milli-degrees from IPD (Cardboard-style).
+pub fn cardboard_eye_yaw_offset_milli(ipd_milli: i32, fov_deg_milli: i32) -> i32 {
+    let ipd_mm = clamp_ipd_milli(ipd_milli) as f32 / 1_000.0;
+    let fov_scale = (clamp_fov_milli(fov_deg_milli) as f32 / 90_000.0).clamp(0.5, 2.0);
+    // ~0.05° yaw per mm of IPD at reference FOV, scaled by FOV.
+    ((ipd_mm * 50.0 * fov_scale).round() as i32).max(1)
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum VrDisplayMode {
+    #[default]
+    Off,
+    Cardboard,
+    Mono,
+}
+
+pub fn cycle_vr_display(mode: VrDisplayMode) -> VrDisplayMode {
+    match mode {
+        VrDisplayMode::Off => VrDisplayMode::Cardboard,
+        VrDisplayMode::Cardboard => VrDisplayMode::Mono,
+        VrDisplayMode::Mono => VrDisplayMode::Off,
+    }
+}
+
+pub fn vr_display_label(mode: VrDisplayMode) -> &'static str {
+    match mode {
+        VrDisplayMode::Off => "Off",
+        VrDisplayMode::Cardboard => "Cardboard",
+        VrDisplayMode::Mono => "Mono VR",
+    }
+}
+
+pub fn format_vr_display_osd(mode: VrDisplayMode) -> String {
+    format!("VR {}", vr_display_label(mode))
+}
+
+/// Ambisonic / binaural decode preference (360 audio players).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum AmbisonicMode {
+    #[default]
+    Off,
+    FirstOrder,
+    Binaural,
+}
+
+pub fn cycle_ambisonic(mode: AmbisonicMode) -> AmbisonicMode {
+    match mode {
+        AmbisonicMode::Off => AmbisonicMode::FirstOrder,
+        AmbisonicMode::FirstOrder => AmbisonicMode::Binaural,
+        AmbisonicMode::Binaural => AmbisonicMode::Off,
+    }
+}
+
+pub fn ambisonic_label(mode: AmbisonicMode) -> &'static str {
+    match mode {
+        AmbisonicMode::Off => "Off",
+        AmbisonicMode::FirstOrder => "FOA",
+        AmbisonicMode::Binaural => "Binaural",
+    }
+}
+
+pub fn format_ambisonic_osd(mode: AmbisonicMode) -> String {
+    format!("Ambisonic {}", ambisonic_label(mode))
+}
+
+/// Parse a WebVTT timestamp (`HH:MM:SS.mmm` or `MM:SS.mmm`) into media microseconds.
+pub fn parse_webvtt_timestamp(spec: &str) -> Option<i64> {
+    let spec = spec.trim();
+    let (hms, frac) = spec.split_once('.').unwrap_or((spec, "0"));
+    let parts: Vec<&str> = hms.split(':').collect();
+    let (hours, minutes, seconds) = match parts.as_slice() {
+        [m, s] => (0i64, m.parse::<i64>().ok()?, s.parse::<i64>().ok()?),
+        [h, m, s] => (
+            h.parse::<i64>().ok()?,
+            m.parse::<i64>().ok()?,
+            s.parse::<i64>().ok()?,
+        ),
+        _ => return None,
+    };
+    let mut millis = frac.as_bytes().iter().take(3).fold(0i64, |acc, b| {
+        if b.is_ascii_digit() {
+            acc * 10 + i64::from(*b - b'0')
+        } else {
+            acc
+        }
+    });
+    for _ in frac.len()..3 {
+        millis *= 10;
+    }
+    Some(
+        hours
+            .saturating_mul(3_600_000_000)
+            .saturating_add(minutes.saturating_mul(60_000_000))
+            .saturating_add(seconds.saturating_mul(1_000_000))
+            .saturating_add(millis.saturating_mul(1_000)),
+    )
+}
+
+pub fn format_webvtt_timestamp(us: i64) -> String {
+    let us = us.max(0);
+    let total_ms = us / 1_000;
+    let ms = total_ms % 1_000;
+    let total_s = total_ms / 1_000;
+    let s = total_s % 60;
+    let total_m = total_s / 60;
+    let m = total_m % 60;
+    let h = total_m / 60;
+    if h > 0 {
+        format!("{h:02}:{m:02}:{s:02}.{ms:03}")
+    } else {
+        format!("{m:02}:{s:02}.{ms:03}")
+    }
+}
+
+/// Cast / AirPlay / Chromecast session presence (oracle OSD).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum CastProtocol {
+    #[default]
+    Off,
+    Chromecast,
+    AirPlay,
+    Dlna,
+}
+
+pub fn cycle_cast_protocol(mode: CastProtocol) -> CastProtocol {
+    match mode {
+        CastProtocol::Off => CastProtocol::Chromecast,
+        CastProtocol::Chromecast => CastProtocol::AirPlay,
+        CastProtocol::AirPlay => CastProtocol::Dlna,
+        CastProtocol::Dlna => CastProtocol::Off,
+    }
+}
+
+pub fn cast_protocol_label(mode: CastProtocol) -> &'static str {
+    match mode {
+        CastProtocol::Off => "Off",
+        CastProtocol::Chromecast => "Chromecast",
+        CastProtocol::AirPlay => "AirPlay",
+        CastProtocol::Dlna => "DLNA",
+    }
+}
+
+pub fn format_cast_osd(mode: CastProtocol, device: &str) -> String {
+    let device = device.trim();
+    if matches!(mode, CastProtocol::Off) {
+        "Cast Off".into()
+    } else if device.is_empty() {
+        format!("Cast {}", cast_protocol_label(mode))
+    } else {
+        format!("Cast {} → {device}", cast_protocol_label(mode))
+    }
+}
+
+/// Media library folder scan: collect playable extensions under a root (non-recursive oracle).
+pub fn media_library_entries(root: &Path, names: &[&str]) -> Vec<PathBuf> {
+    let mut out = Vec::new();
+    for name in names {
+        let path = root.join(name);
+        let ext = path
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("")
+            .to_ascii_lowercase();
+        if matches!(
+            ext.as_str(),
+            "mp4" | "mkv" | "webm" | "avi" | "mov" | "m4a" | "mp3" | "flac" | "ogg" | "opus"
+        ) {
+            out.push(path);
+        }
+    }
+    out.sort();
+    out
+}
+
+pub fn format_media_library_osd(count: usize) -> String {
+    format!("Library {count} items")
+}
+
+/// Podcast chapter art / image URL presence.
+pub fn format_chapter_art_osd(url: Option<&str>) -> String {
+    match url.map(str::trim).filter(|u| !u.is_empty()) {
+        Some(url) if url.len() <= 48 => format!("Chapter art {url}"),
+        Some(url) => format!("Chapter art {}…", &url[..48]),
+        None => "Chapter art none".into(),
+    }
+}
+
+/// SMIL / soft playlist entry (src + begin offset).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SmilClip {
+    pub src: String,
+    pub begin_us: i64,
+}
+
+pub fn parse_smil_clip_line(line: &str) -> Option<SmilClip> {
+    let line = line.trim();
+    if line.is_empty() || line.starts_with('#') {
+        return None;
+    }
+    // Minimal: `src=foo.mp4 begin=12.5` or `clip.mp4@12.5`
+    if let Some((src, begin)) = line.split_once('@') {
+        let secs: f64 = begin.trim().parse().ok()?;
+        return Some(SmilClip {
+            src: src.trim().to_string(),
+            begin_us: (secs * 1_000_000.0).round() as i64,
+        });
+    }
+    let mut src = None;
+    let mut begin_us = 0i64;
+    for part in line.split_whitespace() {
+        if let Some(value) = part.strip_prefix("src=") {
+            src = Some(value.trim_matches('"').to_string());
+        } else if let Some(value) = part.strip_prefix("begin=") {
+            let secs: f64 = value.parse().ok()?;
+            begin_us = (secs * 1_000_000.0).round() as i64;
+        }
+    }
+    Some(SmilClip {
+        src: src?,
+        begin_us,
+    })
+}
+
+pub fn format_smil_clip_osd(clip: &SmilClip) -> String {
+    format!("SMIL {} @ {}", clip.src, format_play_clock(clip.begin_us))
+}
+
+/// Named bookmark helper (title + time).
+pub fn format_named_bookmark_osd(title: &str, media_us: i64) -> String {
+    format_bookmark_label(media_us, Some(title))
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -7224,6 +7474,11 @@ struct PlayerApp {
     play_queue: Vec<usize>,
     forced_subs_only: bool,
     exclusive_latency_ms: u32,
+    ipd_milli: i32,
+    vr_display: VrDisplayMode,
+    ambisonic: AmbisonicMode,
+    cast_protocol: CastProtocol,
+    cast_device: String,
     seek_jump: SeekJump,
     surround_downmix: bool,
     scaletempo: bool,
@@ -7408,6 +7663,11 @@ impl PlayerApp {
             play_queue: Vec::new(),
             forced_subs_only: false,
             exclusive_latency_ms: 50,
+            ipd_milli: IPD_DEFAULT_MILLI,
+            vr_display: VrDisplayMode::Off,
+            ambisonic: AmbisonicMode::Off,
+            cast_protocol: CastProtocol::Off,
+            cast_device: String::new(),
             seek_jump: SeekJump::default(),
             surround_downmix: false,
             scaletempo: true,
@@ -8578,6 +8838,35 @@ impl PlayerApp {
             && ctx.input(|input| input.modifiers.alt)
         {
             self.show_frame_rate_osd();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Num0))
+        {
+            let wider = !ctx.input(|input| input.modifiers.shift);
+            self.nudge_ipd(if wider {
+                IPD_STEP_MILLI
+            } else {
+                -IPD_STEP_MILLI
+            });
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::Num4))
+        {
+            self.cycle_vr_mode();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Num8))
+        {
+            self.cycle_ambisonic_mode();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::Num5))
+        {
+            self.cycle_cast_mode();
         }
         if !focused
             && command
@@ -10232,6 +10521,30 @@ impl PlayerApp {
             .map(|f| f.duration_us)
             .unwrap_or(0);
         self.notice = Some(format_frame_rate_osd(dur));
+    }
+
+    fn nudge_ipd(&mut self, delta: i32) {
+        self.ipd_milli = ipd_step_milli(self.ipd_milli, delta);
+        self.notice = Some(format_ipd_osd(self.ipd_milli));
+    }
+
+    fn cycle_vr_mode(&mut self) {
+        self.vr_display = cycle_vr_display(self.vr_display);
+        if !matches!(self.vr_display, VrDisplayMode::Off) {
+            self.spherical = true;
+        }
+        self.adjust_dirty = true;
+        self.notice = Some(format_vr_display_osd(self.vr_display));
+    }
+
+    fn cycle_ambisonic_mode(&mut self) {
+        self.ambisonic = cycle_ambisonic(self.ambisonic);
+        self.notice = Some(format_ambisonic_osd(self.ambisonic));
+    }
+
+    fn cycle_cast_mode(&mut self) {
+        self.cast_protocol = cycle_cast_protocol(self.cast_protocol);
+        self.notice = Some(format_cast_osd(self.cast_protocol, &self.cast_device));
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {

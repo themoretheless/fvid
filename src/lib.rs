@@ -1727,6 +1727,29 @@ mod play_controls {
             fvid_media::parse_spherical_projection("cubemap").unwrap(),
             fvid_media::SphericalProjection::Cubemap
         );
+        assert!(fvid_media::cardboard_eye_yaw_offset_milli(63_000, 90_000) > 0);
+        assert_eq!(
+            fvid_media::cycle_vr_display(fvid_media::VrDisplayMode::Off),
+            fvid_media::VrDisplayMode::Cardboard
+        );
+        assert_eq!(
+            fvid_media::parse_webvtt_timestamp("01:02.500"),
+            Some(62_500_000)
+        );
+        assert_eq!(fvid_media::format_webvtt_timestamp(62_500_000), "01:02.500");
+        assert_eq!(
+            fvid_media::cycle_ambisonic(fvid_media::AmbisonicMode::Off),
+            fvid_media::AmbisonicMode::FirstOrder
+        );
+        assert!(fvid_media::format_cast_osd(fvid_media::CastProtocol::AirPlay, "TV").contains("TV"));
+        let lib = fvid_media::media_library_entries(
+            Path::new("/media"),
+            &["a.mp4", "readme.txt", "b.flac"],
+        );
+        assert_eq!(lib.len(), 2);
+        let clip = fvid_media::parse_smil_clip_line("src=\"ep.mp4\" begin=12.5").unwrap();
+        assert_eq!(clip.begin_us, 12_500_000);
+        assert!(fvid_media::format_named_bookmark_osd("Act 1", 90_000_000).contains("Act 1"));
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
