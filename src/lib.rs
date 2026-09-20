@@ -1188,5 +1188,11 @@ mod play_controls {
         assert!(!fvid_media::sleep_timer_fired(Some(101), 100));
         assert_eq!(fvid_media::format_sleep_osd(30), "Sleep in 30 min");
         assert_eq!(fvid_media::format_sleep_osd(0), "Sleep timer off");
+        let mut phones = [1.0f32, 0.0];
+        fvid_media::apply_crossfeed(&mut phones, 1_000);
+        assert!(phones[0] < 1.0 && phones[1] > 0.0);
+        assert_eq!(fvid_media::crossfeed_step_milli(0, 100), 100);
+        assert_eq!(fvid_media::format_crossfeed_osd(0), "Crossfeed off");
+        assert!(fvid_media::format_crossfeed_osd(500).contains("50%"));
     }
 }

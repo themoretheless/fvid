@@ -595,6 +595,43 @@ pub fn format_compressor_osd(enabled: bool) -> &'static str {
     }
 }
 
+/// Headphone crossfeed strength: `0` off, `1000` full blend toward mono.
+pub const CROSSFEED_MAX_MILLI: i32 = 1_000;
+pub const CROSSFEED_STEP_MILLI: i32 = 100;
+
+pub fn clamp_crossfeed_milli(value: i32) -> i32 {
+    value.clamp(0, CROSSFEED_MAX_MILLI)
+}
+
+pub fn crossfeed_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_crossfeed_milli(current + delta)
+}
+
+/// Blend L↔R for headphone listening. No-op when strength is 0 or mono.
+pub fn apply_crossfeed(frame: &mut [f32], strength_milli: i32) {
+    if frame.len() < 2 {
+        return;
+    }
+    let strength = clamp_crossfeed_milli(strength_milli);
+    if strength == 0 {
+        return;
+    }
+    let mix = strength as f32 / 1_000.0;
+    let left = frame[0];
+    let right = frame[1];
+    frame[0] = left * (1.0 - mix * 0.5) + right * (mix * 0.5);
+    frame[1] = right * (1.0 - mix * 0.5) + left * (mix * 0.5);
+}
+
+pub fn format_crossfeed_osd(strength_milli: i32) -> String {
+    let strength = clamp_crossfeed_milli(strength_milli);
+    if strength == 0 {
+        "Crossfeed off".into()
+    } else {
+        format!("Crossfeed {}%", strength / 10)
+    }
+}
+
 /// Clamp subtitle bottom margin in pixels (`0..=400`). Higher lifts text toward the top.
 pub fn clamp_subtitle_margin(px: i32) -> i32 {
     px.clamp(0, 400)
@@ -2149,6 +2186,8 @@ struct Shared {
         width_milli: AtomicI32,
         /// VLC-style peak compressor before balance/width.
         compressor_on: AtomicBool,
+        /// Headphone crossfeed strength 0..=1000.
+        crossfeed_milli: AtomicI32,
         /// When true, graphic EQ is skipped in the audio path.
         eq_bypass: AtomicBool,
         /// VLC-style volume normalizer (peak follower + makeup gain).
@@ -3002,6 +3041,8 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
         apply_audio_balance(&mut frame_buf, balance_milli);
         let width_milli = shared.width_milli.load(Ordering::Relaxed);
         apply_stereo_width(&mut frame_buf, width_milli);
+        let crossfeed_milli = shared.crossfeed_milli.load(Ordering::Relaxed);
+        apply_crossfeed(&mut frame_buf, crossfeed_milli);
         apply_audio_channel(&mut frame_buf, channel_mode);
         let mut frame_peak = 0.0f32;
         for channel in 0..channels {
@@ -4078,6 +4119,7 @@ struct PlayerApp {
     balance_milli: i32,
     width_milli: i32,
     compressor_on: bool,
+    crossfeed_milli: i32,
     eq_bypass: bool,
     volume_normalizer: bool,
     bass_milli: i32,
@@ -4164,6 +4206,7 @@ impl PlayerApp {
             balance_milli: BALANCE_CENTER_MILLI,
             width_milli: WIDTH_UNITY_MILLI,
             compressor_on: false,
+            crossfeed_milli: 0,
             eq_bypass: false,
             volume_normalizer: false,
             bass_milli: TONE_UNITY_MILLI,
@@ -4183,7 +4226,7 @@ impl PlayerApp {
             app.error = Some(err);
         }
         eprintln!(
-            "fvid play: Space pause, left/right seek, up/down volume, M mute, B audio, V subtitles, L A-B loop, R repeat, G/H subtitle delay, J/K audio delay, A aspect, C crop, Z zoom, Ctrl+B bookmark, Ctrl+R shuffle, T on-top, Shift+T time, Ctrl+N vol normalizer, W stereo width, U compressor, X sleep timer, F fullscreen, [ ] speed, . step, S snapshot, Esc quit"
+            "fvid play: Space pause, left/right seek, up/down volume, M mute, B audio, V subtitles, L A-B loop, R repeat, G/H subtitle delay, J/K audio delay, A aspect, C crop, Z zoom, Ctrl+B bookmark, Ctrl+R shuffle, T on-top, Shift+T time, Ctrl+N vol normalizer, W stereo width, O crossfeed, U compressor, X sleep timer, F fullscreen, [ ] speed, . step, S snapshot, Esc quit"
         );
         app
     }
@@ -4270,6 +4313,7 @@ impl PlayerApp {
             balance_milli: AtomicI32::new(self.balance_milli),
             width_milli: AtomicI32::new(self.width_milli),
             compressor_on: AtomicBool::new(self.compressor_on),
+            crossfeed_milli: AtomicI32::new(self.crossfeed_milli),
             eq_bypass: AtomicBool::new(self.eq_bypass),
             normalizer_on: AtomicBool::new(self.volume_normalizer),
             normalizer_peak_milli: AtomicU32::new(0),
@@ -4797,6 +4841,14 @@ impl PlayerApp {
                 WIDTH_STEP_MILLI
             } else {
                 -WIDTH_STEP_MILLI
+            });
+        }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::O)) {
+            let stronger = !ctx.input(|input| input.modifiers.shift);
+            self.nudge_crossfeed(if stronger {
+                CROSSFEED_STEP_MILLI
+            } else {
+                -CROSSFEED_STEP_MILLI
             });
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::U)) {
@@ -5698,6 +5750,17 @@ impl PlayerApp {
                 .store(self.width_milli, Ordering::Relaxed);
         }
         self.notice = Some(format_width_osd(self.width_milli));
+    }
+
+    fn nudge_crossfeed(&mut self, delta: i32) {
+        self.crossfeed_milli = crossfeed_step_milli(self.crossfeed_milli, delta);
+        if let Some(session) = &self.session {
+            session
+                .shared
+                .crossfeed_milli
+                .store(self.crossfeed_milli, Ordering::Relaxed);
+        }
+        self.notice = Some(format_crossfeed_osd(self.crossfeed_milli));
     }
 
     fn toggle_compressor(&mut self) {
