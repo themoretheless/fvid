@@ -99,6 +99,8 @@ pub use play::{
     format_stop_osd, format_rotate_osd, format_flip_osd, seek_end_us, chapter_index,
     format_chapter_osd, format_pause_osd, clear_bookmarks, format_bookmark_osd,
     format_playlist_osd, format_playlist_m3u, soft_clip_sample, PLAYBACK_PROTOCOLS,
+    SLEEP_TIMER_STEPS_MIN, cycle_sleep_timer_min, sleep_deadline_secs, sleep_timer_fired,
+    format_sleep_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

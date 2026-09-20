@@ -1063,6 +1063,39 @@ pub fn should_stop_playback(now_us: i64, stop_us: Option<i64>) -> bool {
     }
 }
 
+/// Sleep-timer presets in minutes (`0` = off), VLC-style cycle.
+pub const SLEEP_TIMER_STEPS_MIN: &[u32] = &[0, 15, 30, 45, 60, 90, 120];
+
+pub fn cycle_sleep_timer_min(current_min: u32) -> u32 {
+    let idx = SLEEP_TIMER_STEPS_MIN
+        .iter()
+        .position(|&minutes| minutes == current_min)
+        .unwrap_or(0);
+    SLEEP_TIMER_STEPS_MIN[(idx + 1) % SLEEP_TIMER_STEPS_MIN.len()]
+}
+
+pub fn sleep_deadline_secs(minutes: u32, now_secs: u64) -> Option<u64> {
+    if minutes == 0 {
+        None
+    } else {
+        Some(now_secs.saturating_add(u64::from(minutes) * 60))
+    }
+}
+
+pub fn sleep_timer_fired(deadline_secs: Option<u64>, now_secs: u64) -> bool {
+    deadline_secs
+        .map(|deadline| now_secs >= deadline)
+        .unwrap_or(false)
+}
+
+pub fn format_sleep_osd(minutes: u32) -> String {
+    if minutes == 0 {
+        "Sleep timer off".into()
+    } else {
+        format!("Sleep in {minutes} min")
+    }
+}
+
 /// Finer rate step for Ctrl+mouse wheel (±0.05×).
 pub const RATE_WHEEL_STEP_MILLI: i32 = 50;
 
@@ -4056,6 +4089,8 @@ struct PlayerApp {
     eq_gains_milli: [i32; EQ_BAND_COUNT],
     eq_preset: EqPreset,
     position_display: PositionDisplay,
+    sleep_min: u32,
+    sleep_deadline_secs: Option<u64>,
     outcome: Arc<Mutex<Option<std::result::Result<PlayStats, String>>>>,
 }
 
@@ -4140,13 +4175,15 @@ impl PlayerApp {
             eq_gains_milli: eq_unity_gains(),
             eq_preset: EqPreset::Flat,
             position_display: PositionDisplay::Elapsed,
+            sleep_min: 0,
+            sleep_deadline_secs: None,
             outcome,
         };
         if let Err(err) = app.start_session(first) {
             app.error = Some(err);
         }
         eprintln!(
-            "fvid play: Space pause, left/right seek, up/down volume, M mute, B audio, V subtitles, L A-B loop, R repeat, G/H subtitle delay, J/K audio delay, A aspect, C crop, Z zoom, Ctrl+B bookmark, Ctrl+R shuffle, T on-top, Shift+T time, Ctrl+N vol normalizer, W stereo width, U compressor, F fullscreen, [ ] speed, . step, S snapshot, Esc quit"
+            "fvid play: Space pause, left/right seek, up/down volume, M mute, B audio, V subtitles, L A-B loop, R repeat, G/H subtitle delay, J/K audio delay, A aspect, C crop, Z zoom, Ctrl+B bookmark, Ctrl+R shuffle, T on-top, Shift+T time, Ctrl+N vol normalizer, W stereo width, U compressor, X sleep timer, F fullscreen, [ ] speed, . step, S snapshot, Esc quit"
         );
         app
     }
@@ -4393,6 +4430,20 @@ impl PlayerApp {
             drop(session);
             self.set_paused(true);
             self.notice = Some(format_stop_osd().into());
+            return None;
+        }
+        let now_secs = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|duration| duration.as_secs())
+            .unwrap_or(0);
+        if sleep_timer_fired(self.sleep_deadline_secs, now_secs)
+            && !session.shared.paused.load(Ordering::Relaxed)
+        {
+            drop(session);
+            self.sleep_min = 0;
+            self.sleep_deadline_secs = None;
+            self.set_paused(true);
+            self.notice = Some("Sleep timer".into());
             return None;
         }
         loop {
@@ -4750,6 +4801,9 @@ impl PlayerApp {
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::U)) {
             self.toggle_compressor();
+        }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::X)) {
+            self.cycle_sleep_timer();
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::E)) {
             self.toggle_eq_bypass();
@@ -5657,6 +5711,18 @@ impl PlayerApp {
         let notice = format_compressor_osd(self.compressor_on);
         eprintln!("fvid play: {notice}");
         self.notice = Some(notice.into());
+    }
+
+    fn cycle_sleep_timer(&mut self) {
+        self.sleep_min = cycle_sleep_timer_min(self.sleep_min);
+        let now_secs = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|duration| duration.as_secs())
+            .unwrap_or(0);
+        self.sleep_deadline_secs = sleep_deadline_secs(self.sleep_min, now_secs);
+        let notice = format_sleep_osd(self.sleep_min);
+        eprintln!("fvid play: {notice}");
+        self.notice = Some(notice);
     }
 
     fn toggle_eq_bypass(&mut self) {

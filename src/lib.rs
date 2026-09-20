@@ -1180,5 +1180,13 @@ mod play_controls {
         fvid_media::apply_compressor(&mut loud, true, 0.35, 4.0);
         assert!(loud[0].abs() < 0.9);
         assert_eq!(fvid_media::format_compressor_osd(true), "Compressor on");
+        assert_eq!(fvid_media::cycle_sleep_timer_min(0), 15);
+        assert_eq!(fvid_media::cycle_sleep_timer_min(120), 0);
+        assert_eq!(fvid_media::sleep_deadline_secs(0, 100), None);
+        assert_eq!(fvid_media::sleep_deadline_secs(15, 100), Some(1_000));
+        assert!(fvid_media::sleep_timer_fired(Some(100), 100));
+        assert!(!fvid_media::sleep_timer_fired(Some(101), 100));
+        assert_eq!(fvid_media::format_sleep_osd(30), "Sleep in 30 min");
+        assert_eq!(fvid_media::format_sleep_osd(0), "Sleep timer off");
     }
 }
