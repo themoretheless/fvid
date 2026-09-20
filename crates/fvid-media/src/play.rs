@@ -3273,6 +3273,232 @@ pub fn format_image_loop_osd(count: u32, played: u32) -> String {
     }
 }
 
+/// CMX/EDL-style cut list entry for multi-clip play (VLC / NLEs).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct EdlClip {
+    pub src: String,
+    pub in_us: i64,
+    pub out_us: i64,
+}
+
+pub fn parse_edl_line(line: &str) -> Option<EdlClip> {
+    let line = line.trim();
+    if line.is_empty() || line.starts_with('#') || line.starts_with(';') {
+        return None;
+    }
+    // `title.mp4 10.0 25.5` or `title.mp4 in=10 out=25.5`
+    let parts: Vec<&str> = line.split_whitespace().collect();
+    if parts.len() >= 3 && !parts[1].contains('=') {
+        let in_us = (parts[1].parse::<f64>().ok()? * 1_000_000.0).round() as i64;
+        let out_us = (parts[2].parse::<f64>().ok()? * 1_000_000.0).round() as i64;
+        if out_us > in_us {
+            return Some(EdlClip {
+                src: parts[0].to_string(),
+                in_us: in_us.max(0),
+                out_us: out_us.max(0),
+            });
+        }
+        return None;
+    }
+    let mut src = None;
+    let mut in_us = 0i64;
+    let mut out_us = 0i64;
+    for part in parts {
+        if let Some(v) = part.strip_prefix("in=") {
+            in_us = (v.parse::<f64>().ok()? * 1_000_000.0).round() as i64;
+        } else if let Some(v) = part.strip_prefix("out=") {
+            out_us = (v.parse::<f64>().ok()? * 1_000_000.0).round() as i64;
+        } else if !part.contains('=') {
+            src = Some(part.to_string());
+        }
+    }
+    let src = src?;
+    if out_us > in_us {
+        Some(EdlClip {
+            src,
+            in_us: in_us.max(0),
+            out_us: out_us.max(0),
+        })
+    } else {
+        None
+    }
+}
+
+pub fn format_edl_clip_osd(clip: &EdlClip) -> String {
+    format!(
+        "EDL {} {}–{}",
+        clip.src,
+        format_play_clock(clip.in_us),
+        format_play_clock(clip.out_us)
+    )
+}
+
+/// Picture-in-picture overlay rectangle (secondary video players).
+pub fn pip_rect(
+    canvas_w: u32,
+    canvas_h: u32,
+    pip_w: u32,
+    pip_h: u32,
+    margin: u32,
+    bottom_right: bool,
+) -> (u32, u32, u32, u32) {
+    let pip_w = pip_w.min(canvas_w.max(1)).max(1);
+    let pip_h = pip_h.min(canvas_h.max(1)).max(1);
+    let margin = margin.min(canvas_w.min(canvas_h) / 2);
+    let x = if bottom_right {
+        canvas_w.saturating_sub(pip_w).saturating_sub(margin)
+    } else {
+        margin
+    };
+    let y = if bottom_right {
+        canvas_h.saturating_sub(pip_h).saturating_sub(margin)
+    } else {
+        margin
+    };
+    (x, y, pip_w, pip_h)
+}
+
+pub fn format_pip_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "PiP On"
+    } else {
+        "PiP Off"
+    }
+}
+
+/// Thumbnail-strip seek: map hover index to media time.
+pub fn thumbnail_seek_us(index: usize, count: usize, duration_us: i64) -> i64 {
+    if count == 0 || duration_us <= 0 {
+        return 0;
+    }
+    let count = count as i64;
+    let index = (index as i64).clamp(0, count - 1);
+    (duration_us.saturating_mul(index) / count).clamp(0, duration_us)
+}
+
+pub fn format_thumbnail_seek_osd(us: i64) -> String {
+    format!("Thumb {}", format_play_clock(us))
+}
+
+/// Horizontal drag gesture → seek delta (px → microseconds).
+pub fn seek_from_drag_px(dx_px: i32, px_per_second: i32) -> i64 {
+    let pps = px_per_second.max(1) as i64;
+    i64::from(dx_px).saturating_mul(1_000_000) / pps
+}
+
+pub fn format_drag_seek_osd(delta_us: i64) -> String {
+    let sign = if delta_us < 0 { "-" } else { "+" };
+    format!("Drag {sign}{}", format_play_clock(delta_us.abs()))
+}
+
+/// Interactive crop box from drag corners (normalized 0..=1000).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub struct CropBoxMilli {
+    pub x0: i32,
+    pub y0: i32,
+    pub x1: i32,
+    pub y1: i32,
+}
+
+pub fn clamp_crop_box_milli(box_: CropBoxMilli) -> CropBoxMilli {
+    let x0 = box_.x0.clamp(0, 1_000);
+    let y0 = box_.y0.clamp(0, 1_000);
+    let x1 = box_.x1.clamp(0, 1_000).max(x0 + 1).min(1_000);
+    let y1 = box_.y1.clamp(0, 1_000).max(y0 + 1).min(1_000);
+    CropBoxMilli { x0, y0, x1, y1 }
+}
+
+pub fn crop_box_to_pixels(box_: CropBoxMilli, width: u32, height: u32) -> CropPixels {
+    let box_ = clamp_crop_box_milli(box_);
+    let w = width.max(1) as i64;
+    let h = height.max(1) as i64;
+    let left = (w * i64::from(box_.x0) / 1_000) as u32;
+    let top = (h * i64::from(box_.y0) / 1_000) as u32;
+    let right_edge = (w * i64::from(box_.x1) / 1_000) as u32;
+    let bottom_edge = (h * i64::from(box_.y1) / 1_000) as u32;
+    CropPixels {
+        left,
+        top,
+        right: width.saturating_sub(right_edge),
+        bottom: height.saturating_sub(bottom_edge),
+    }
+}
+
+pub fn format_crop_box_osd(box_: CropBoxMilli) -> String {
+    let box_ = clamp_crop_box_milli(box_);
+    format!(
+        "Crop box {:.0}%×{:.0}%",
+        (box_.x1 - box_.x0) as f32 / 10.0,
+        (box_.y1 - box_.y0) as f32 / 10.0
+    )
+}
+
+/// 360° horizon / zenith lock (stabilize pitch while looking around).
+pub fn format_horizon_lock_osd(locked: bool) -> &'static str {
+    if locked {
+        "Horizon lock On"
+    } else {
+        "Horizon lock Off"
+    }
+}
+
+pub fn locked_pitch_milli(current: i32, locked: bool, locked_value: i32) -> i32 {
+    if locked {
+        clamp_pitch_milli(locked_value)
+    } else {
+        clamp_pitch_milli(current)
+    }
+}
+
+/// Estimate frame peak luminance (0..=1000 milli) for HDR auto-nits assist.
+pub fn estimate_frame_peak_milli(pixels: &[u32], sample_stride: usize) -> u32 {
+    if pixels.is_empty() {
+        return 0;
+    }
+    let stride = sample_stride.max(1);
+    let mut peak = 0u32;
+    for pixel in pixels.iter().step_by(stride) {
+        let r = (pixel >> 16) & 0xff;
+        let g = (pixel >> 8) & 0xff;
+        let b = pixel & 0xff;
+        let y = (54 * r + 183 * g + 19 * b) / 256;
+        peak = peak.max(y);
+    }
+    (peak * 1_000 / 255).min(1_000)
+}
+
+pub fn suggest_hdr_nits_from_peak(peak_milli: u32, base_nits: u32) -> u32 {
+    let peak = peak_milli.min(1_000);
+    let base = clamp_hdr_nits(base_nits).max(100);
+    if peak < 200 {
+        base
+    } else if peak < 600 {
+        clamp_hdr_nits(base.saturating_mul(2))
+    } else {
+        clamp_hdr_nits(base.saturating_mul(4))
+    }
+}
+
+pub fn format_hdr_peak_osd(peak_milli: u32, suggested_nits: u32) -> String {
+    format!(
+        "Frame peak {}% → {} nits",
+        peak_milli / 10,
+        suggested_nits
+    )
+}
+
+/// HLS/DASH rendition label from bandwidth + resolution.
+pub fn format_stream_rendition_osd(width: u32, height: u32, bandwidth_bps: u32) -> String {
+    if width == 0 || height == 0 {
+        format!("Rendition {} kbps", bandwidth_bps / 1_000)
+    } else {
+        format!(
+            "Rendition {width}×{height} {} kbps",
+            bandwidth_bps / 1_000
+        )
+    }
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -7678,6 +7904,10 @@ struct PlayerApp {
     cast_device: String,
     lyric_lines: Vec<LyricLine>,
     ab_slots: [(Option<i64>, Option<i64>); 4],
+    pip_enabled: bool,
+    horizon_lock: bool,
+    horizon_pitch_milli: i32,
+    deband_milli: i32,
     seek_jump: SeekJump,
     surround_downmix: bool,
     scaletempo: bool,
@@ -7871,6 +8101,10 @@ impl PlayerApp {
             cast_device: String::new(),
             lyric_lines: Vec::new(),
             ab_slots: [(None, None); 4],
+            pip_enabled: false,
+            horizon_lock: false,
+            horizon_pitch_milli: 0,
+            deband_milli: DEBAND_DEFAULT_MILLI,
             seek_jump: SeekJump::default(),
             surround_downmix: false,
             scaletempo: true,
@@ -9086,6 +9320,26 @@ impl PlayerApp {
             } else {
                 self.store_ab_slot(0);
             }
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Num2))
+        {
+            self.toggle_pip();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Num3))
+        {
+            self.toggle_horizon_lock();
+            self.apply_horizon_lock_pitch();
+            self.adjust_dirty = true;
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Num6))
+        {
+            self.show_hdr_peak_suggestion();
         }
         if !focused
             && command
@@ -10792,6 +11046,37 @@ impl PlayerApp {
         } else {
             self.notice = Some(format_ab_slot_osd(index, None));
         }
+    }
+
+    fn toggle_pip(&mut self) {
+        self.pip_enabled = !self.pip_enabled;
+        self.notice = Some(format_pip_osd(self.pip_enabled).into());
+    }
+
+    fn toggle_horizon_lock(&mut self) {
+        self.horizon_lock = !self.horizon_lock;
+        if self.horizon_lock {
+            self.horizon_pitch_milli = self.pitch_deg_milli;
+        }
+        self.notice = Some(format_horizon_lock_osd(self.horizon_lock).into());
+    }
+
+    fn apply_horizon_lock_pitch(&mut self) {
+        if self.horizon_lock {
+            self.pitch_deg_milli =
+                locked_pitch_milli(self.pitch_deg_milli, true, self.horizon_pitch_milli);
+        }
+    }
+
+    fn show_hdr_peak_suggestion(&mut self) {
+        let peak = self
+            .session
+            .as_ref()
+            .and_then(|s| s.frame.as_ref())
+            .map(|f| estimate_frame_peak_milli(&f.pixels, 16))
+            .unwrap_or(0);
+        let suggested = suggest_hdr_nits_from_peak(peak, self.hdr_nits);
+        self.notice = Some(format_hdr_peak_osd(peak, suggested));
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {

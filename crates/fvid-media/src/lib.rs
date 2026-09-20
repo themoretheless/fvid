@@ -201,7 +201,11 @@ pub use play::{
     format_hdr_gamut_osd, cardboard_eye_rect, cardboard_view_yaw_milli, LyricLine, active_lyric_line,
     format_lyric_osd, ab_slot_store, ab_slot_load, format_ab_slot_osd,     format_play_stats_csv, DEBAND_DEFAULT_MILLI, DEBAND_MAX_MILLI, clamp_deband_milli,
     apply_deband_pixel, format_deband_osd, parse_hdr_maxcll_maxfall, format_dolby_vision_osd,
-    format_snapshot_with_osd, image_loop_remaining, format_image_loop_osd,
+    format_snapshot_with_osd, image_loop_remaining, format_image_loop_osd, EdlClip, parse_edl_line,
+    format_edl_clip_osd, pip_rect, format_pip_osd, thumbnail_seek_us, format_thumbnail_seek_osd,
+    seek_from_drag_px, format_drag_seek_osd, CropBoxMilli, clamp_crop_box_milli, crop_box_to_pixels,
+    format_crop_box_osd, format_horizon_lock_osd, locked_pitch_milli, estimate_frame_peak_milli,
+    suggest_hdr_nits_from_peak, format_hdr_peak_osd, format_stream_rendition_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

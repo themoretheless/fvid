@@ -1786,6 +1786,27 @@ mod play_controls {
         assert!(fvid_media::format_deband_osd(200).contains("Deband"));
         assert!(fvid_media::format_dolby_vision_osd(Some(5)).contains("5"));
         assert_eq!(fvid_media::image_loop_remaining(3, 1), Some(2));
+        let edl = fvid_media::parse_edl_line("clip.mp4 1.5 4.0").unwrap();
+        assert_eq!(edl.in_us, 1_500_000);
+        assert_eq!(
+            fvid_media::pip_rect(1920, 1080, 320, 180, 16, true),
+            (1584, 884, 320, 180)
+        );
+        assert_eq!(fvid_media::thumbnail_seek_us(2, 10, 100_000_000), 20_000_000);
+        assert_eq!(fvid_media::seek_from_drag_px(100, 50), 2_000_000);
+        let box_ = fvid_media::clamp_crop_box_milli(fvid_media::CropBoxMilli {
+            x0: 100,
+            y0: 100,
+            x1: 900,
+            y1: 900,
+        });
+        let crop = fvid_media::crop_box_to_pixels(box_, 1000, 1000);
+        assert_eq!(crop.left, 100);
+        assert!(fvid_media::locked_pitch_milli(40_000, true, 0) == 0);
+        let peak = fvid_media::estimate_frame_peak_milli(&[0x00_ff_ff_ffu32; 4], 1);
+        assert_eq!(peak, 1_000);
+        assert!(fvid_media::suggest_hdr_nits_from_peak(800, 100) >= 100);
+        assert!(fvid_media::format_stream_rendition_osd(1920, 1080, 5_000_000).contains("1920"));
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
