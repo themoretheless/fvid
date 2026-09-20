@@ -81,7 +81,9 @@ pub use play::{
     balance_step_milli, apply_audio_balance, format_balance_osd, clamp_subtitle_scale_milli,
     subtitle_scale_step_milli, subtitle_font_px, SUBTITLE_SCALE_MIN_MILLI, SUBTITLE_SCALE_MAX_MILLI,
     SUBTITLE_SCALE_UNITY_MILLI, SUBTITLE_SCALE_STEP_MILLI, cycle_eq_bypass, format_eq_bypass_osd,
-    reset_av_delays, format_delay_osd, PLAYBACK_PROTOCOLS,
+    reset_av_delays, format_delay_osd, VOLUME_WHEEL_STEP_MILLI, volume_from_wheel, clamp_seek_us,
+    format_ab_osd, format_repeat_osd, format_shuffle_osd, format_subtitle_scale_osd,
+    format_jump_osd, format_window_title, PLAYBACK_PROTOCOLS,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

@@ -941,6 +941,89 @@ pub fn format_delay_osd(label: &str, delay_us: i64) -> String {
     format!("{label} delay {} ms", delay_us / 1_000)
 }
 
+/// Finer volume step for mouse wheel (±2.5%).
+pub const VOLUME_WHEEL_STEP_MILLI: i32 = 25;
+
+pub fn volume_from_wheel(current_milli: u32, scroll_lines: i32) -> u32 {
+    if scroll_lines == 0 {
+        return clamp_volume_milli(current_milli as i32);
+    }
+    volume_step_milli(
+        current_milli,
+        scroll_lines.saturating_mul(VOLUME_WHEEL_STEP_MILLI),
+    )
+}
+
+/// Clamp a seek target into `[0, duration]` when duration is known.
+pub fn clamp_seek_us(target_us: i64, duration_us: i64) -> i64 {
+    let target = target_us.max(0);
+    if duration_us >= 0 {
+        target.min(duration_us)
+    } else {
+        target
+    }
+}
+
+pub fn format_ab_osd(ab: Option<AbLoop>) -> String {
+    match ab {
+        None => "A-B off".into(),
+        Some(loop_) if loop_.b_us < 0 => format!("A-B point A {}", format_clock(loop_.a_us)),
+        Some(loop_) => format!(
+            "A-B {}–{}",
+            format_clock(loop_.a_us),
+            format_clock(loop_.b_us)
+        ),
+    }
+}
+
+pub fn format_repeat_osd(mode: RepeatMode) -> &'static str {
+    match mode {
+        RepeatMode::Off => "repeat off",
+        RepeatMode::All => "repeat all",
+        RepeatMode::One => "repeat one",
+    }
+}
+
+pub fn format_shuffle_osd(on: bool) -> &'static str {
+    if on {
+        "shuffle on"
+    } else {
+        "shuffle off"
+    }
+}
+
+pub fn format_subtitle_scale_osd(scale_milli: i32) -> String {
+    format!("Subtitles {}%", clamp_subtitle_scale_milli(scale_milli) / 10)
+}
+
+pub fn format_jump_osd(target_us: i64) -> String {
+    format!("Jump {}", format_clock(target_us))
+}
+
+pub fn format_window_title(
+    name: &str,
+    media_us: i64,
+    duration_us: i64,
+    paused: bool,
+    rate_milli: u32,
+) -> String {
+    let now = format_clock(media_us);
+    let paused = if paused { "  paused" } else { "" };
+    let speed = if rate_milli != 1_000 {
+        format!("  {}", format_rate(rate_milli))
+    } else {
+        String::new()
+    };
+    if duration_us >= 0 {
+        format!(
+            "{name}  {now} / {}{paused}{speed}",
+            format_clock(duration_us)
+        )
+    } else {
+        format!("{name}  {now}{paused}{speed}")
+    }
+}
+
 /// Media clock used to pick a cue. A positive delay looks at an earlier time.
 pub fn subtitle_clock_us(media_now_us: i64, delay_us: i64) -> i64 {
     media_now_us.saturating_sub(delay_us)
@@ -4048,6 +4131,16 @@ impl PlayerApp {
         {
             self.nudge_subtitle_scale(-SUBTITLE_SCALE_STEP_MILLI);
         }
+        if !focused {
+            let scroll = ctx.input(|input| input.smooth_scroll_delta.y);
+            if scroll.abs() > 0.1 {
+                let lines = if scroll > 0.0 { 1 } else { -1 };
+                let next = volume_from_wheel(self.volume_milli, lines);
+                if next != self.volume_milli {
+                    self.nudge_volume(next as i32 - self.volume_milli as i32);
+                }
+            }
+        }
         let dropped = ctx.input(|input| input.raw.dropped_files.clone());
         if dropped.is_empty() {
             return;
@@ -4483,15 +4576,7 @@ impl PlayerApp {
     fn mark_ab(&mut self) {
         let now = self.shown_media_us().max(0);
         self.ab = ab_mark(self.ab, now);
-        let notice = match self.ab {
-            None => "A-B off".to_string(),
-            Some(loop_) if loop_.b_us < 0 => format!("A-B point A {}", format_clock(loop_.a_us)),
-            Some(loop_) => format!(
-                "A-B {}–{}",
-                format_clock(loop_.a_us),
-                format_clock(loop_.b_us)
-            ),
-        };
+        let notice = format_ab_osd(self.ab);
         eprintln!("fvid play: {notice}");
         self.notice = Some(notice);
     }
@@ -4511,11 +4596,7 @@ impl PlayerApp {
 
     fn cycle_repeat_mode(&mut self) {
         self.repeat = cycle_repeat(self.repeat);
-        let label = match self.repeat {
-            RepeatMode::Off => "repeat off",
-            RepeatMode::All => "repeat all",
-            RepeatMode::One => "repeat one",
-        };
+        let label = format_repeat_osd(self.repeat);
         eprintln!("fvid play: {label}");
         self.notice = Some(label.to_string());
     }
@@ -4523,7 +4604,7 @@ impl PlayerApp {
     fn toggle_shuffle(&mut self) {
         self.shuffle = !self.shuffle;
         self.rebuild_order();
-        let notice = if self.shuffle { "shuffle on" } else { "shuffle off" };
+        let notice = format_shuffle_osd(self.shuffle);
         eprintln!("fvid play: {notice}");
         self.notice = Some(notice.into());
     }
@@ -4686,10 +4767,7 @@ impl PlayerApp {
             return;
         };
         let duration = session.shared.duration_us.load(Ordering::Relaxed);
-        let mut target = media_us.max(0);
-        if duration > 0 {
-            target = target.min(duration);
-        }
+        let target = clamp_seek_us(media_us, duration);
         session.discard_until = Some(target);
         session.shared.seek_us.store(target, Ordering::Release);
         lock(&session.shared.video).clear();
@@ -4786,10 +4864,7 @@ impl PlayerApp {
 
     fn nudge_subtitle_scale(&mut self, delta: i32) {
         self.subtitle_scale_milli = subtitle_scale_step_milli(self.subtitle_scale_milli, delta);
-        self.notice = Some(format!(
-            "Subtitles {}%",
-            self.subtitle_scale_milli / 10
-        ));
+        self.notice = Some(format_subtitle_scale_osd(self.subtitle_scale_milli));
     }
 
     fn cycle_audio(&mut self, delta: i32) {
@@ -5024,14 +5099,9 @@ impl PlayerApp {
             }
             match parse_play_clock(&self.jump_text) {
                 Some(target) => {
-                    let duration = self.duration_us();
-                    let target = if duration >= 0 {
-                        target.min(duration)
-                    } else {
-                        target
-                    };
+                    let target = clamp_seek_us(target, self.duration_us());
                     self.request_seek(target);
-                    self.notice = Some(format!("Jump {}", format_clock(target)));
+                    self.notice = Some(format_jump_osd(target));
                 }
                 None => {
                     self.notice = Some("Jump time must be mm:ss, hh:mm:ss, or seconds".into());
@@ -5530,27 +5600,13 @@ fn paint_drop_hover(ctx: &egui::Context) {
 }
 
 fn window_title(name: &str, shared: &Shared, media_now: i64) -> String {
-    let now = format_clock(media_now);
-    let duration = shared.duration_us.load(Ordering::Relaxed);
-    let paused = if shared.paused.load(Ordering::Relaxed) {
-        "  paused"
-    } else {
-        ""
-    };
-    let rate = shared.rate_milli.load(Ordering::Relaxed);
-    let speed = if rate == 1_000 {
-        String::new()
-    } else {
-        format!("  {}", format_rate(rate))
-    };
-    if duration >= 0 {
-        format!(
-            "{name}  {now} / {}{paused}{speed}",
-            format_clock(duration)
-        )
-    } else {
-        format!("{name}  {now}{paused}{speed}")
-    }
+    format_window_title(
+        name,
+        media_now,
+        shared.duration_us.load(Ordering::Relaxed),
+        shared.paused.load(Ordering::Relaxed),
+        shared.rate_milli.load(Ordering::Relaxed),
+    )
 }
 
 fn format_rate(rate_milli: u32) -> String {

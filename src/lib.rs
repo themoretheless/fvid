@@ -1027,5 +1027,14 @@ mod play_controls {
             fvid_media::format_delay_osd("audio", 100_000),
             "audio delay 100 ms"
         );
+        assert_eq!(fvid_media::volume_from_wheel(1_000, 1), 1_025);
+        assert_eq!(fvid_media::volume_from_wheel(0, -1), 0);
+        assert_eq!(fvid_media::clamp_seek_us(50, 40), 40);
+        assert_eq!(fvid_media::format_ab_osd(None), "A-B off");
+        assert_eq!(fvid_media::format_repeat_osd(fvid_media::RepeatMode::One), "repeat one");
+        assert_eq!(fvid_media::format_shuffle_osd(true), "shuffle on");
+        assert_eq!(fvid_media::format_subtitle_scale_osd(1_500), "Subtitles 150%");
+        assert_eq!(fvid_media::format_jump_osd(90_000_000), "Jump 01:30");
+        assert!(fvid_media::format_window_title("demo", 0, 60_000_000, true, 1_500).contains("1.50x"));
     }
 }
