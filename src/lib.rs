@@ -1895,6 +1895,27 @@ mod play_controls {
         );
         assert_eq!(fvid_media::hdr_sdr_ratio_milli(1_000, 100), 10_000);
         assert_eq!(fvid_media::accelerometer_horizon_pitch_milli(0), 0);
+        let mut soft = fvid_media::PlayRenderOptions::default();
+        soft.hdr_tonemap = fvid_media::HdrTonemap::Hable;
+        soft.color_trc = fvid_media::COLOR_TRC_SMPTE2084;
+        soft.tonemap_strength_milli = 500;
+        soft.hdr_highlight_desat_milli = 400;
+        soft.hdr_black_lift_milli = 50;
+        soft.color_temp_kelvin = 4_000;
+        let gray = vec![0x00_c0_c0_c0u32; 4];
+        let full = fvid_media::render_play_pixels(
+            2,
+            2,
+            &gray,
+            &fvid_media::PlayRenderOptions {
+                hdr_tonemap: fvid_media::HdrTonemap::Hable,
+                color_trc: fvid_media::COLOR_TRC_SMPTE2084,
+                ..fvid_media::PlayRenderOptions::default()
+            },
+            None,
+        );
+        let blended = fvid_media::render_play_pixels(2, 2, &gray, &soft, None);
+        assert_ne!(full.2[0], blended.2[0]);
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;

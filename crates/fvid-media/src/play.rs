@@ -4516,6 +4516,14 @@ pub struct PlayRenderOptions {
     pub hdr_maxfall: u32,
     /// Stream color primaries (BT.709 / BT.2020).
     pub color_primaries: u32,
+    /// Blend HDR tonemap toward identity (0..=1000).
+    pub tonemap_strength_milli: i32,
+    /// Desaturate HDR highlights after tonemap (0..=1000).
+    pub hdr_highlight_desat_milli: i32,
+    /// Lift crushed HDR blacks (0..=1000).
+    pub hdr_black_lift_milli: i32,
+    /// White-balance color temperature (Kelvin).
+    pub color_temp_kelvin: i32,
 }
 
 impl Default for PlayRenderOptions {
@@ -4545,6 +4553,10 @@ impl Default for PlayRenderOptions {
             hdr_maxcll: 0,
             hdr_maxfall: 0,
             color_primaries: 0,
+            tonemap_strength_milli: TONEMAP_STRENGTH_DEFAULT_MILLI,
+            hdr_highlight_desat_milli: 0,
+            hdr_black_lift_milli: 0,
+            color_temp_kelvin: COLOR_TEMP_DAYLIGHT_K,
         }
     }
 }
@@ -4912,8 +4924,16 @@ pub fn render_play_pixels(
                 opts.hue_milli,
             );
             let (red, green, blue) = apply_gamma_pixel(red, green, blue, opts.gamma_milli);
+            let orig_r = red;
+            let orig_g = green;
+            let orig_b = blue;
             let (red, green, blue) =
                 apply_hdr_tonemap_pixel(red, green, blue, opts.hdr_tonemap, opts.color_trc);
+            let (red, green, blue) = (
+                blend_tonemap_channel(red, orig_r, opts.tonemap_strength_milli),
+                blend_tonemap_channel(green, orig_g, opts.tonemap_strength_milli),
+                blend_tonemap_channel(blue, orig_b, opts.tonemap_strength_milli),
+            );
             let (red, green, blue) = if matches!(opts.hdr_tonemap, HdrTonemap::Off) {
                 (red, green, blue)
             } else {
@@ -4923,6 +4943,19 @@ pub fn render_play_pixels(
                     scale_hdr_display_channel(blue, opts.hdr_nits),
                 )
             };
+            let (red, green, blue) = apply_hdr_highlight_desat_pixel(
+                red,
+                green,
+                blue,
+                opts.hdr_highlight_desat_milli,
+            );
+            let (red, green, blue) = (
+                apply_hdr_black_lift_channel(red, opts.hdr_black_lift_milli),
+                apply_hdr_black_lift_channel(green, opts.hdr_black_lift_milli),
+                apply_hdr_black_lift_channel(blue, opts.hdr_black_lift_milli),
+            );
+            let (red, green, blue) =
+                apply_white_balance_pixel(red, green, blue, opts.color_temp_kelvin);
             let (red, green, blue) =
                 apply_display_effect_pixel(red, green, blue, opts.display_effect);
             let (dx, dy) = rotate_pixel(x as u32, y as u32, width, height, opts.rotate);
@@ -10764,6 +10797,10 @@ impl PlayerApp {
             self.hdr_maxcll,
             self.hdr_maxfall,
             self.color_primaries,
+            self.tonemap_strength_milli,
+            self.hdr_highlight_desat_milli,
+            self.hdr_black_lift_milli,
+            self.color_temp_kelvin,
             bitmap.as_ref(),
         );
         session.dirty = false;
@@ -12855,6 +12892,10 @@ impl PlayerApp {
                 hdr_maxcll: self.hdr_maxcll,
                 hdr_maxfall: self.hdr_maxfall,
                 color_primaries: self.color_primaries,
+                tonemap_strength_milli: self.tonemap_strength_milli,
+                hdr_highlight_desat_milli: self.hdr_highlight_desat_milli,
+                hdr_black_lift_milli: self.hdr_black_lift_milli,
+                color_temp_kelvin: self.color_temp_kelvin,
             };
             let (width, height, pixels) =
                 render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap.as_ref());
@@ -13384,6 +13425,10 @@ fn color_image(
     hdr_maxcll: u32,
     hdr_maxfall: u32,
     color_primaries: u32,
+    tonemap_strength_milli: i32,
+    hdr_highlight_desat_milli: i32,
+    hdr_black_lift_milli: i32,
+    color_temp_kelvin: i32,
     bitmap: Option<&BitmapSubtitle>,
 ) -> egui::ColorImage {
     let opts = PlayRenderOptions {
@@ -13411,6 +13456,10 @@ fn color_image(
         hdr_maxcll,
         hdr_maxfall,
         color_primaries,
+        tonemap_strength_milli,
+        hdr_highlight_desat_milli,
+        hdr_black_lift_milli,
+        color_temp_kelvin,
     };
     let (out_w, out_h, rgb) =
         render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap);
