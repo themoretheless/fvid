@@ -265,7 +265,10 @@ pub use play::{
     hlg_system_gamma_default_milli, format_hlg_system_gamma_osd, bt2020_to_bt709_rgb,
     apply_bt2020_to_bt709_pixel, format_gamut_map_osd, DisplayWhitePoint, white_point_xy_milli,
     cycle_display_white_point, format_white_point_osd, parse_edid_max_luminance,
-    format_edid_peak_osd, sample_1d_lut_u8, format_cms_lut_osd,
+    format_edid_peak_osd, sample_1d_lut_u8, format_cms_lut_osd, project_miller_view,
+    project_azimuthal_equidistant_view, hdr_brightness_boost_milli, format_hdr_brightness_osd,
+    format_force_hdr_osd, HdrLightModel, cycle_hdr_light_model, format_hdr_light_model_osd,
+    parse_cube_lut_1d_size, format_cube_lut_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

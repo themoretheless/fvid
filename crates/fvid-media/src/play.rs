@@ -2370,6 +2370,10 @@ pub enum SphericalProjection {
     Gnomonic,
     /// Sinusoidal equal-area projection.
     Sinusoidal,
+    /// Miller cylindrical projection.
+    Miller,
+    /// Azimuthal equidistant projection.
+    AzimuthalEquidistant,
 }
 
 pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProjection {
@@ -2387,7 +2391,9 @@ pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProject
         SphericalProjection::Equisolid => SphericalProjection::Orthographic,
         SphericalProjection::Orthographic => SphericalProjection::Gnomonic,
         SphericalProjection::Gnomonic => SphericalProjection::Sinusoidal,
-        SphericalProjection::Sinusoidal => SphericalProjection::Equirect,
+        SphericalProjection::Sinusoidal => SphericalProjection::Miller,
+        SphericalProjection::Miller => SphericalProjection::AzimuthalEquidistant,
+        SphericalProjection::AzimuthalEquidistant => SphericalProjection::Equirect,
     }
 }
 
@@ -2407,6 +2413,8 @@ pub fn spherical_projection_label(mode: SphericalProjection) -> &'static str {
         SphericalProjection::Orthographic => "Orthographic",
         SphericalProjection::Gnomonic => "Gnomonic",
         SphericalProjection::Sinusoidal => "Sinusoidal",
+        SphericalProjection::Miller => "Miller",
+        SphericalProjection::AzimuthalEquidistant => "Azimuthal EQ",
     }
 }
 
@@ -2723,6 +2731,26 @@ pub fn project_spherical_view(
             yaw_deg_milli,
             pitch_deg_milli,
             fov_deg_milli,
+        ),
+        SphericalProjection::Miller => project_miller_view(
+            src_w,
+            src_h,
+            src,
+            out_w,
+            out_h,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            fov_deg_milli,
+        ),
+        SphericalProjection::AzimuthalEquidistant => project_azimuthal_equidistant_view(
+            src_w,
+            src_h,
+            src,
+            out_w,
+            out_h,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            roll_deg_milli,
         ),
     }
 }
@@ -6058,6 +6086,142 @@ pub fn format_cms_lut_osd(enabled: bool, size: usize) -> String {
     }
 }
 
+/// Miller cylindrical projection from equirect.
+pub fn project_miller_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+    let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+    let fov = (clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0).to_radians();
+    let aspect = out_w as f32 / out_h as f32;
+    let half = fov * 0.5;
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    for oy in 0..out_h {
+        let ny = 1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32;
+        // Inverse Miller: lat = 1.25*atan(sinh(0.8*y))
+        let y = pitch + ny * half;
+        let lat = (1.25 * (0.8 * y).sinh().atan()).clamp(
+            -std::f32::consts::FRAC_PI_2 + 0.01,
+            std::f32::consts::FRAC_PI_2 - 0.01,
+        );
+        for ox in 0..out_w {
+            let nx = 2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0;
+            let lon = yaw + nx * half * aspect;
+            out[(oy * out_w + ox) as usize] = sample_equirect_pixel(src, src_w, src_h, lon, lat);
+        }
+    }
+    out
+}
+
+/// Azimuthal equidistant projection (radar / planetarium style).
+pub fn project_azimuthal_equidistant_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    roll_deg_milli: i32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+    let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+    let roll = (clamp_roll_milli(roll_deg_milli) as f32 / 1_000.0).to_radians();
+    let aspect = out_w as f32 / out_h as f32;
+    let (sin_r, cos_r) = roll.sin_cos();
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    for oy in 0..out_h {
+        let ny0 = 1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32;
+        for ox in 0..out_w {
+            let nx0 = (2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0) * aspect;
+            let nx = nx0 * cos_r - ny0 * sin_r;
+            let ny = nx0 * sin_r + ny0 * cos_r;
+            let rho = (nx * nx + ny * ny).sqrt();
+            if rho > 1.0 {
+                out[(oy * out_w + ox) as usize] = 0;
+                continue;
+            }
+            let c = rho * std::f32::consts::PI; // angular distance
+            let phi = ny.atan2(nx);
+            let lat = (c.cos() * pitch.sin() + c.sin() * pitch.cos() * phi.cos()).asin().clamp(
+                -std::f32::consts::FRAC_PI_2 + 0.01,
+                std::f32::consts::FRAC_PI_2 - 0.01,
+            );
+            let lon = yaw
+                + (phi.sin() * c.sin() * pitch.cos())
+                    .atan2(c.cos() - pitch.sin() * lat.sin());
+            out[(oy * out_w + ox) as usize] = sample_equirect_pixel(src, src_w, src_h, lon, lat);
+        }
+    }
+    out
+}
+
+/// HDR brightness boost relative to paper-white (UI / subtitles).
+pub fn hdr_brightness_boost_milli(paper_white_nits: u32, boost_percent: i32) -> u32 {
+    let pw = clamp_paper_white_nits(paper_white_nits);
+    let boost = boost_percent.clamp(0, 400) as u32;
+    clamp_hdr_nits(pw.saturating_mul(100 + boost) / 100)
+}
+
+pub fn format_hdr_brightness_osd(boost_percent: i32) -> String {
+    format!("HDR brightness +{}%", boost_percent.clamp(0, 400))
+}
+
+/// Force HDR path even when stream is SDR (debug / calibration).
+pub fn format_force_hdr_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Force HDR On"
+    } else {
+        "Force HDR Off"
+    }
+}
+
+/// Scene-referred vs display-referred light model OSD.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum HdrLightModel {
+    #[default]
+    Display,
+    Scene,
+}
+
+pub fn cycle_hdr_light_model(mode: HdrLightModel) -> HdrLightModel {
+    match mode {
+        HdrLightModel::Display => HdrLightModel::Scene,
+        HdrLightModel::Scene => HdrLightModel::Display,
+    }
+}
+
+pub fn format_hdr_light_model_osd(mode: HdrLightModel) -> &'static str {
+    match mode {
+        HdrLightModel::Display => "HDR display-light",
+        HdrLightModel::Scene => "HDR scene-light",
+    }
+}
+
+/// Parse `.cube` 1D LUT SIZE line (`LUT_1D_SIZE 256`).
+pub fn parse_cube_lut_1d_size(line: &str) -> Option<usize> {
+    let rest = line.trim().strip_prefix("LUT_1D_SIZE")?.trim();
+    rest.parse().ok().filter(|&n| n >= 2 && n <= 65_536)
+}
+
+pub fn format_cube_lut_osd(size: Option<usize>) -> String {
+    match size {
+        Some(n) => format!("CUBE 1D {n}"),
+        None => "CUBE Off".into(),
+    }
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -6974,8 +7138,12 @@ pub fn parse_spherical_projection(spec: &str) -> Result<SphericalProjection> {
         "orthographic" | "ortho" => Ok(SphericalProjection::Orthographic),
         "gnomonic" | "rectilinear" => Ok(SphericalProjection::Gnomonic),
         "sinusoidal" | "sanson" => Ok(SphericalProjection::Sinusoidal),
+        "miller" => Ok(SphericalProjection::Miller),
+        "azimuthal" | "azimuthal-equidistant" | "aeqd" => {
+            Ok(SphericalProjection::AzimuthalEquidistant)
+        }
         other => Err(format!(
-            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical|mercator|dual-fisheye-tb|octahedral|equisolid|orthographic|gnomonic|sinusoidal)"
+            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical|mercator|dual-fisheye-tb|octahedral|equisolid|orthographic|gnomonic|sinusoidal|miller|azimuthal)"
         )
         .into()),
     }

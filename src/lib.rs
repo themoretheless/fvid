@@ -2151,6 +2151,29 @@ mod play_controls {
             None,
         );
         assert_ne!(gpix.2[0], 0x00_c8_28_28);
+        assert_eq!(
+            fvid_media::parse_spherical_projection("miller").unwrap(),
+            fvid_media::SphericalProjection::Miller
+        );
+        let mill = fvid_media::project_miller_view(4, 2, &[0x00_77_77_77u32; 8], 2, 2, 0, 0, 90_000);
+        assert_eq!(mill.len(), 4);
+        let aeq = fvid_media::project_azimuthal_equidistant_view(
+            4,
+            2,
+            &[0x00_88_88_88u32; 8],
+            2,
+            2,
+            0,
+            0,
+            0,
+        );
+        assert_eq!(aeq.len(), 4);
+        assert_eq!(fvid_media::hdr_brightness_boost_milli(203, 100), 406);
+        assert_eq!(
+            fvid_media::cycle_hdr_light_model(fvid_media::HdrLightModel::Display),
+            fvid_media::HdrLightModel::Scene
+        );
+        assert_eq!(fvid_media::parse_cube_lut_1d_size("LUT_1D_SIZE 256"), Some(256));
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
