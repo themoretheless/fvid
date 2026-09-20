@@ -1166,13 +1166,19 @@ pub enum DeinterlaceMode {
     Off,
     Blend,
     Bob,
+    /// Average odd/even lines (VLC Linear).
+    Linear,
+    /// Discard one field by doubling the other (VLC Discard/Mean-like).
+    Mean,
 }
 
 pub fn cycle_deinterlace(mode: DeinterlaceMode) -> DeinterlaceMode {
     match mode {
         DeinterlaceMode::Off => DeinterlaceMode::Blend,
         DeinterlaceMode::Blend => DeinterlaceMode::Bob,
-        DeinterlaceMode::Bob => DeinterlaceMode::Off,
+        DeinterlaceMode::Bob => DeinterlaceMode::Linear,
+        DeinterlaceMode::Linear => DeinterlaceMode::Mean,
+        DeinterlaceMode::Mean => DeinterlaceMode::Off,
     }
 }
 
@@ -1181,7 +1187,29 @@ pub fn deinterlace_label(mode: DeinterlaceMode) -> &'static str {
         DeinterlaceMode::Off => "Deint",
         DeinterlaceMode::Blend => "Blend",
         DeinterlaceMode::Bob => "Bob",
+        DeinterlaceMode::Linear => "Linear",
+        DeinterlaceMode::Mean => "Mean",
     }
+}
+
+pub fn deinterlace_linear_rgb(pixels: &mut [u32], width: u32, height: u32) {
+    let w = width as usize;
+    let h = height as usize;
+    if w == 0 || h < 2 || pixels.len() < w * h {
+        return;
+    }
+    for y in (0..h.saturating_sub(1)).step_by(2) {
+        let top = y * w;
+        let bot = (y + 1) * w;
+        for x in 0..w {
+            pixels[bot + x] = average_rgb_pixel(pixels[top + x], pixels[bot + x]);
+        }
+    }
+}
+
+pub fn deinterlace_mean_rgb(pixels: &mut [u32], width: u32, height: u32) {
+    // Mean ≈ keep even lines, copy into odd (field doubling).
+    deinterlace_bob_rgb(pixels, width, height);
 }
 
 pub fn apply_deinterlace_rgb(pixels: &mut [u32], width: u32, height: u32, mode: DeinterlaceMode) {
@@ -1189,6 +1217,8 @@ pub fn apply_deinterlace_rgb(pixels: &mut [u32], width: u32, height: u32, mode: 
         DeinterlaceMode::Off => {}
         DeinterlaceMode::Blend => deinterlace_blend_rgb(pixels, width, height),
         DeinterlaceMode::Bob => deinterlace_bob_rgb(pixels, width, height),
+        DeinterlaceMode::Linear => deinterlace_linear_rgb(pixels, width, height),
+        DeinterlaceMode::Mean => deinterlace_mean_rgb(pixels, width, height),
     }
 }
 
@@ -4242,6 +4272,132 @@ pub fn format_subtitle_color_osd(color: SubtitleColor) -> String {
     format!("Subtitle {}", subtitle_color_label(color))
 }
 
+/// Prefer a forced subtitle track when the demux marks tracks as forced.
+pub fn prefer_forced_subtitle_index(forced: &[bool], current: usize) -> usize {
+    if forced.is_empty() {
+        return current;
+    }
+    if let Some(idx) = forced.iter().position(|flag| *flag) {
+        return idx;
+    }
+    current.min(forced.len() - 1)
+}
+
+pub fn format_forced_subtitle_osd(index: usize) -> String {
+    format!("Forced subtitle #{}", index + 1)
+}
+
+/// Rough momentary loudness from a linear peak (oracle for VLC-style meter).
+pub fn momentary_lufs_from_peak_milli(peak_milli: u32) -> i32 {
+    let peak = (peak_milli as f32 / 1_000.0).max(1e-6);
+    let db = 20.0 * peak.log10();
+    // K-weighting stub: map FS peak dB toward LUFS-ish scale.
+    ((db - 0.691) * 10.0).round() as i32
+}
+
+pub fn format_loudness_osd(peak_milli: u32) -> String {
+    format!(
+        "Loudness {:+.1} LUFS",
+        momentary_lufs_from_peak_milli(peak_milli) as f32 / 10.0
+    )
+}
+
+/// Simple spectrum bar fill levels from interleaved PCM (visualization oracle).
+pub fn spectrum_bar_fills(samples: &[f32], bars: usize) -> Vec<u8> {
+    let bars = bars.max(1).min(64);
+    let mut out = vec![0u8; bars];
+    if samples.is_empty() {
+        return out;
+    }
+    let chunk = (samples.len() / bars).max(1);
+    for (i, slot) in out.iter_mut().enumerate() {
+        let start = i * chunk;
+        let end = (start + chunk).min(samples.len());
+        if start >= samples.len() {
+            break;
+        }
+        let mut peak = 0.0f32;
+        for sample in &samples[start..end] {
+            peak = peak.max(sample.abs());
+        }
+        *slot = ((peak * 255.0).round() as u32).min(255) as u8;
+    }
+    out
+}
+
+pub fn format_spectrum_osd(fills: &[u8]) -> String {
+    let lit = fills.iter().filter(|v| **v > 8).count();
+    format!("Spectrum {lit}/{}", fills.len().max(1))
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum PlaylistSort {
+    #[default]
+    Path,
+    Name,
+    ReverseName,
+}
+
+pub fn cycle_playlist_sort(mode: PlaylistSort) -> PlaylistSort {
+    match mode {
+        PlaylistSort::Path => PlaylistSort::Name,
+        PlaylistSort::Name => PlaylistSort::ReverseName,
+        PlaylistSort::ReverseName => PlaylistSort::Path,
+    }
+}
+
+pub fn playlist_sort_label(mode: PlaylistSort) -> &'static str {
+    match mode {
+        PlaylistSort::Path => "Path",
+        PlaylistSort::Name => "Name",
+        PlaylistSort::ReverseName => "Name↓",
+    }
+}
+
+pub fn sort_playlist_paths(paths: &mut [PathBuf], mode: PlaylistSort) {
+    match mode {
+        PlaylistSort::Path => paths.sort(),
+        PlaylistSort::Name => paths.sort_by(|a, b| {
+            let an = a.file_name().unwrap_or_default();
+            let bn = b.file_name().unwrap_or_default();
+            an.cmp(bn).then_with(|| a.cmp(b))
+        }),
+        PlaylistSort::ReverseName => paths.sort_by(|a, b| {
+            let an = a.file_name().unwrap_or_default();
+            let bn = b.file_name().unwrap_or_default();
+            bn.cmp(an).then_with(|| b.cmp(a))
+        }),
+    }
+}
+
+pub fn format_playlist_sort_osd(mode: PlaylistSort) -> String {
+    format!("Playlist sort {}", playlist_sort_label(mode))
+}
+
+pub fn format_bookmark_label(media_us: i64, title: Option<&str>) -> String {
+    match title.map(str::trim).filter(|t| !t.is_empty()) {
+        Some(title) => format!("{title} ({})", format_play_clock(media_us)),
+        None => format_play_clock(media_us),
+    }
+}
+
+pub const RECENT_PLAY_MAX: usize = 32;
+
+pub fn push_recent_path(recent: &mut Vec<PathBuf>, path: PathBuf) {
+    recent.retain(|entry| entry != &path);
+    recent.insert(0, path);
+    if recent.len() > RECENT_PLAY_MAX {
+        recent.truncate(RECENT_PLAY_MAX);
+    }
+}
+
+pub fn format_recent_osd(recent: &[PathBuf]) -> String {
+    match recent.first().and_then(|p| p.file_name()).and_then(|n| n.to_str()) {
+        Some(name) => format!("Recent {} ({})", name, recent.len()),
+        None => "Recent empty".into(),
+    }
+}
+
 /// Compact on-screen hotkey reminder (VLC Help / F1 style).
 pub fn format_hotkeys_help_osd() -> &'static str {
     "Space pause · ←→ seek · ↑↓ vol · M mute · F full · S snap · Esc quit"
@@ -5662,6 +5818,8 @@ struct PlayerApp {
     gapless: bool,
     crossfade_ms: u32,
     subtitle_color: SubtitleColor,
+    playlist_sort: PlaylistSort,
+    recent: Vec<PathBuf>,
     volume_normalizer: bool,
     bass_milli: i32,
     mid_milli: i32,
@@ -5796,6 +5954,8 @@ impl PlayerApp {
             gapless: false,
             crossfade_ms: CROSSFADE_DEFAULT_MS,
             subtitle_color: SubtitleColor::White,
+            playlist_sort: PlaylistSort::Path,
+            recent: Vec::new(),
             volume_normalizer: false,
             bass_milli: TONE_UNITY_MILLI,
             mid_milli: TONE_UNITY_MILLI,
@@ -5839,6 +5999,7 @@ impl PlayerApp {
     }
 
     fn start_session(&mut self, path: PathBuf) -> Result<()> {
+        push_recent_path(&mut self.recent, path.clone());
         self.stop_session();
         self.logged_sub.clear();
         self.error = None;
@@ -6434,9 +6595,9 @@ impl PlayerApp {
             }
         }
         if keys.17 {
-            if command {
+            if command && !ctx.input(|input| input.modifiers.shift) {
                 self.toggle_shuffle();
-            } else {
+            } else if !command {
                 self.cycle_repeat_mode();
             }
         }
@@ -6655,6 +6816,25 @@ impl PlayerApp {
             && !command
         {
             self.cycle_subtitle_color_mode();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::P))
+        {
+            self.cycle_playlist_sort_mode();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::L))
+        {
+            self.show_loudness_osd();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::R))
+            && !ctx.input(|input| input.modifiers.alt)
+        {
+            self.show_recent_osd();
         }
         if !focused
             && command
@@ -8004,6 +8184,26 @@ impl PlayerApp {
     fn cycle_subtitle_color_mode(&mut self) {
         self.subtitle_color = cycle_subtitle_color(self.subtitle_color);
         self.notice = Some(format_subtitle_color_osd(self.subtitle_color));
+    }
+
+    fn cycle_playlist_sort_mode(&mut self) {
+        self.playlist_sort = cycle_playlist_sort(self.playlist_sort);
+        sort_playlist_paths(&mut self.playlist, self.playlist_sort);
+        self.playlist_index = self.playlist_index.min(self.playlist.len().saturating_sub(1));
+        self.notice = Some(format_playlist_sort_osd(self.playlist_sort));
+    }
+
+    fn show_loudness_osd(&mut self) {
+        let peak = self
+            .session
+            .as_ref()
+            .map(|session| session.shared.vu_peak_milli.load(Ordering::Relaxed))
+            .unwrap_or(0);
+        self.notice = Some(format_loudness_osd(peak));
+    }
+
+    fn show_recent_osd(&mut self) {
+        self.notice = Some(format_recent_osd(&self.recent));
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {

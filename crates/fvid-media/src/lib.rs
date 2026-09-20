@@ -148,7 +148,11 @@ pub use play::{
     replaygain_milli_from_db_milli, apply_replaygain_sample, format_replaygain_osd,
     buffer_health_pct, format_buffer_health_osd, snap_seek_to_keyframe, format_keyframe_seek_osd,
     SubtitleColor, cycle_subtitle_color, subtitle_color_label, subtitle_color_rgba,
-    format_subtitle_color_osd,
+    format_subtitle_color_osd, prefer_forced_subtitle_index, format_forced_subtitle_osd,
+    momentary_lufs_from_peak_milli, format_loudness_osd, spectrum_bar_fills, format_spectrum_osd,
+    PlaylistSort, cycle_playlist_sort, playlist_sort_label, sort_playlist_paths,
+    format_playlist_sort_osd, format_bookmark_label, RECENT_PLAY_MAX, push_recent_path,
+    format_recent_osd, deinterlace_linear_rgb, deinterlace_mean_rgb,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

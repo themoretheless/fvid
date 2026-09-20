@@ -960,6 +960,10 @@ mod play_controls {
         );
         assert_eq!(
             fvid_media::cycle_deinterlace(fvid_media::DeinterlaceMode::Bob),
+            fvid_media::DeinterlaceMode::Linear
+        );
+        assert_eq!(
+            fvid_media::cycle_deinterlace(fvid_media::DeinterlaceMode::Mean),
             fvid_media::DeinterlaceMode::Off
         );
         assert_eq!(fvid_media::deinterlace_label(fvid_media::DeinterlaceMode::Bob), "Bob");
@@ -1525,6 +1529,30 @@ mod play_controls {
         );
         assert!(fvid_media::format_subtitle_color_osd(fvid_media::SubtitleColor::Cyan)
             .contains("Cyan"));
+        assert_eq!(
+            fvid_media::prefer_forced_subtitle_index(&[false, true, false], 0),
+            1
+        );
+        assert!(fvid_media::momentary_lufs_from_peak_milli(1_000) < 0);
+        let spectrum = fvid_media::spectrum_bar_fills(&[0.0, 0.5, -0.25, 0.1], 4);
+        assert_eq!(spectrum.len(), 4);
+        assert!(spectrum.iter().any(|v| *v > 0));
+        let mut paths = vec![
+            PathBuf::from("b/z.mp4"),
+            PathBuf::from("a/y.mp4"),
+        ];
+        fvid_media::sort_playlist_paths(&mut paths, fvid_media::PlaylistSort::Name);
+        assert_eq!(paths[0].file_name().unwrap(), "y.mp4");
+        assert!(fvid_media::format_bookmark_label(90_000_000, Some("Act 1")).contains("Act 1"));
+        let mut recent = Vec::new();
+        fvid_media::push_recent_path(&mut recent, PathBuf::from("one.mp4"));
+        fvid_media::push_recent_path(&mut recent, PathBuf::from("two.mp4"));
+        assert_eq!(recent[0], PathBuf::from("two.mp4"));
+        assert!(fvid_media::format_recent_osd(&recent).contains("two.mp4"));
+        assert_eq!(
+            fvid_media::deinterlace_label(fvid_media::DeinterlaceMode::Linear),
+            "Linear"
+        );
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
         hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;
