@@ -2084,6 +2084,27 @@ mod play_controls {
             fvid_media::COLOR_TRC_SMPTE2084,
         );
         assert!(maxrgb.0 > 0);
+        assert_eq!(
+            fvid_media::parse_spherical_projection("orthographic").unwrap(),
+            fvid_media::SphericalProjection::Orthographic
+        );
+        let ortho = fvid_media::project_orthographic_view(
+            4,
+            2,
+            &[0x00_55_55_55u32; 8],
+            2,
+            2,
+            0,
+            0,
+            0,
+        );
+        assert_eq!(ortho.len(), 4);
+        assert_eq!(fvid_media::clamp_diffuse_white_nits(203), 203);
+        assert_eq!(fvid_media::map_nits_via_paper_white(203, 203, 1_000), 1_000);
+        assert!(fvid_media::checkerboard_eye_is_left(0, 0));
+        assert!(fvid_media::column_interleaved_eye_is_left(0));
+        assert_eq!(fvid_media::wiggle_yaw_offset_milli(0, 5_000), 0);
+        assert!(fvid_media::format_guardian_osd(100).contains("100"));
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;

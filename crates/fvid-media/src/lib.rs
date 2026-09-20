@@ -257,6 +257,10 @@ pub use play::{
     stereo_packing_label, format_stereo_packing_osd, row_interleaved_eye_pixel,
     format_row_interleaved_osd, passthrough_blend_milli, format_passthrough_osd,
     skip_segment_target_us, format_skip_segment_osd, format_binge_mode_osd,
+    project_orthographic_view, clamp_diffuse_white_nits, format_diffuse_white_osd,
+    map_nits_via_paper_white, format_dolby_vision_profile_level_osd, checkerboard_eye_is_left,
+    format_checkerboard_3d_osd, column_interleaved_eye_is_left, wiggle_yaw_offset_milli,
+    format_wiggle_3d_osd, format_guardian_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

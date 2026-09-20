@@ -2364,6 +2364,8 @@ pub enum SphericalProjection {
     Octahedral,
     /// Equisolid fisheye viewport over equirect.
     Equisolid,
+    /// Orthographic globe projection.
+    Orthographic,
 }
 
 pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProjection {
@@ -2378,7 +2380,8 @@ pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProject
         SphericalProjection::Mercator => SphericalProjection::DualFisheyeTb,
         SphericalProjection::DualFisheyeTb => SphericalProjection::Octahedral,
         SphericalProjection::Octahedral => SphericalProjection::Equisolid,
-        SphericalProjection::Equisolid => SphericalProjection::Equirect,
+        SphericalProjection::Equisolid => SphericalProjection::Orthographic,
+        SphericalProjection::Orthographic => SphericalProjection::Equirect,
     }
 }
 
@@ -2395,6 +2398,7 @@ pub fn spherical_projection_label(mode: SphericalProjection) -> &'static str {
         SphericalProjection::DualFisheyeTb => "Dual fisheye TB",
         SphericalProjection::Octahedral => "Octahedral",
         SphericalProjection::Equisolid => "Equisolid",
+        SphericalProjection::Orthographic => "Orthographic",
     }
 }
 
@@ -2680,6 +2684,16 @@ pub fn project_spherical_view(
             pitch_deg_milli,
             roll_deg_milli,
             fov_deg_milli,
+        ),
+        SphericalProjection::Orthographic => project_orthographic_view(
+            src_w,
+            src_h,
+            src,
+            out_w,
+            out_h,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            roll_deg_milli,
         ),
     }
 }
@@ -5698,6 +5712,118 @@ pub fn format_binge_mode_osd(enabled: bool) -> &'static str {
     }
 }
 
+/// Orthographic spherical projection (planetarium / scientific viewers).
+pub fn project_orthographic_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    roll_deg_milli: i32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+    let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+    let roll = (clamp_roll_milli(roll_deg_milli) as f32 / 1_000.0).to_radians();
+    let aspect = out_w as f32 / out_h as f32;
+    let (sin_y, cos_y) = yaw.sin_cos();
+    let (sin_p, cos_p) = pitch.sin_cos();
+    let (sin_r, cos_r) = roll.sin_cos();
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    for oy in 0..out_h {
+        let ny0 = 1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32;
+        for ox in 0..out_w {
+            let nx0 = (2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0) * aspect;
+            let nx = nx0 * cos_r - ny0 * sin_r;
+            let ny = nx0 * sin_r + ny0 * cos_r;
+            let r2 = nx * nx + ny * ny;
+            if r2 > 1.0 {
+                out[(oy * out_w + ox) as usize] = 0;
+                continue;
+            }
+            let nz = (1.0 - r2).sqrt();
+            let y1 = ny * cos_p - nz * sin_p;
+            let z1 = ny * sin_p + nz * cos_p;
+            let x2 = nx * cos_y + z1 * sin_y;
+            let z2 = -nx * sin_y + z1 * cos_y;
+            let lon = z2.atan2(x2);
+            let lat = y1.asin().clamp(
+                -std::f32::consts::FRAC_PI_2 + 0.01,
+                std::f32::consts::FRAC_PI_2 - 0.01,
+            );
+            out[(oy * out_w + ox) as usize] = sample_equirect_pixel(src, src_w, src_h, lon, lat);
+        }
+    }
+    out
+}
+
+/// Diffuse white / graphics white nits for HDR UI (ITU-R BT.2408).
+pub fn clamp_diffuse_white_nits(nits: u32) -> u32 {
+    nits.clamp(100, 300)
+}
+
+pub fn format_diffuse_white_osd(nits: u32) -> String {
+    format!("Diffuse white {} nits", clamp_diffuse_white_nits(nits))
+}
+
+/// Map content luminance to display using paper-white reference.
+pub fn map_nits_via_paper_white(content_nits: u32, paper_white_nits: u32, display_peak_nits: u32) -> u32 {
+    let pw = clamp_paper_white_nits(paper_white_nits).max(1);
+    let peak = clamp_hdr_nits(display_peak_nits).max(1);
+    let scaled = (content_nits as u64 * peak as u64) / pw as u64;
+    scaled.min(u64::from(peak)) as u32
+}
+
+/// Dolby Vision profile/level OSD (oracle; bitstream OOS).
+pub fn format_dolby_vision_profile_level_osd(profile: u32, level: u32) -> String {
+    format!("Dolby Vision {profile}.{level}")
+}
+
+/// Checkerboard 3D sample: choose L/R by (x+y) parity.
+pub fn checkerboard_eye_is_left(x: u32, y: u32) -> bool {
+    (x + y) % 2 == 0
+}
+
+pub fn format_checkerboard_3d_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Checkerboard 3D"
+    } else {
+        "Checkerboard Off"
+    }
+}
+
+/// Column-interleaved 3D eye select.
+pub fn column_interleaved_eye_is_left(x: u32) -> bool {
+    x % 2 == 0
+}
+
+/// Wiggle stereoscopy amplitude (milli-deg yaw oscillation).
+pub fn wiggle_yaw_offset_milli(phase_milli: i32, amplitude_milli: i32) -> i32 {
+    let phase = (phase_milli.rem_euclid(1_000) as f32 / 1_000.0) * std::f32::consts::TAU;
+    let amp = amplitude_milli.clamp(0, 30_000) as f32;
+    (phase.sin() * amp).round() as i32
+}
+
+pub fn format_wiggle_3d_osd(amplitude_milli: i32) -> String {
+    if amplitude_milli <= 0 {
+        "Wiggle 3D Off".into()
+    } else {
+        format!("Wiggle ±{:.1}°", amplitude_milli.clamp(0, 30_000) as f32 / 1_000.0)
+    }
+}
+
+/// Quest / Pico style guardian boundary distance (mm).
+pub fn format_guardian_osd(distance_mm: u32) -> String {
+    if distance_mm == 0 {
+        "Guardian clear".into()
+    } else {
+        format!("Guardian {distance_mm} mm")
+    }
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -6601,8 +6727,9 @@ pub fn parse_spherical_projection(spec: &str) -> Result<SphericalProjection> {
         "dual-fisheye-tb" | "dfisheye-tb" | "fisheye-tb" => Ok(SphericalProjection::DualFisheyeTb),
         "octahedral" | "octa" => Ok(SphericalProjection::Octahedral),
         "equisolid" => Ok(SphericalProjection::Equisolid),
+        "orthographic" | "ortho" => Ok(SphericalProjection::Orthographic),
         other => Err(format!(
-            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical|mercator|dual-fisheye-tb|octahedral|equisolid)"
+            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical|mercator|dual-fisheye-tb|octahedral|equisolid|orthographic)"
         )
         .into()),
     }
