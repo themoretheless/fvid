@@ -260,7 +260,12 @@ pub use play::{
     project_orthographic_view, clamp_diffuse_white_nits, format_diffuse_white_osd,
     map_nits_via_paper_white, format_dolby_vision_profile_level_osd, checkerboard_eye_is_left,
     format_checkerboard_3d_osd, column_interleaved_eye_is_left, wiggle_yaw_offset_milli,
-    format_wiggle_3d_osd, format_guardian_osd,
+    format_wiggle_3d_osd, format_guardian_osd, project_gnomonic_view, project_sinusoidal_view,
+    cubemap_cross_face_rect, format_cubemap_cross_osd, clamp_hlg_system_gamma_milli,
+    hlg_system_gamma_default_milli, format_hlg_system_gamma_osd, bt2020_to_bt709_rgb,
+    apply_bt2020_to_bt709_pixel, format_gamut_map_osd, DisplayWhitePoint, white_point_xy_milli,
+    cycle_display_white_point, format_white_point_osd, parse_edid_max_luminance,
+    format_edid_peak_osd, sample_1d_lut_u8, format_cms_lut_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

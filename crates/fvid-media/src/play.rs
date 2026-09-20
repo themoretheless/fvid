@@ -2366,6 +2366,10 @@ pub enum SphericalProjection {
     Equisolid,
     /// Orthographic globe projection.
     Orthographic,
+    /// Gnomonic (rectilinear tangent) projection.
+    Gnomonic,
+    /// Sinusoidal equal-area projection.
+    Sinusoidal,
 }
 
 pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProjection {
@@ -2381,7 +2385,9 @@ pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProject
         SphericalProjection::DualFisheyeTb => SphericalProjection::Octahedral,
         SphericalProjection::Octahedral => SphericalProjection::Equisolid,
         SphericalProjection::Equisolid => SphericalProjection::Orthographic,
-        SphericalProjection::Orthographic => SphericalProjection::Equirect,
+        SphericalProjection::Orthographic => SphericalProjection::Gnomonic,
+        SphericalProjection::Gnomonic => SphericalProjection::Sinusoidal,
+        SphericalProjection::Sinusoidal => SphericalProjection::Equirect,
     }
 }
 
@@ -2399,6 +2405,8 @@ pub fn spherical_projection_label(mode: SphericalProjection) -> &'static str {
         SphericalProjection::Octahedral => "Octahedral",
         SphericalProjection::Equisolid => "Equisolid",
         SphericalProjection::Orthographic => "Orthographic",
+        SphericalProjection::Gnomonic => "Gnomonic",
+        SphericalProjection::Sinusoidal => "Sinusoidal",
     }
 }
 
@@ -2694,6 +2702,27 @@ pub fn project_spherical_view(
             yaw_deg_milli,
             pitch_deg_milli,
             roll_deg_milli,
+        ),
+        SphericalProjection::Gnomonic => project_gnomonic_view(
+            src_w,
+            src_h,
+            src,
+            out_w,
+            out_h,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            roll_deg_milli,
+            fov_deg_milli,
+        ),
+        SphericalProjection::Sinusoidal => project_sinusoidal_view(
+            src_w,
+            src_h,
+            src,
+            out_w,
+            out_h,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            fov_deg_milli,
         ),
     }
 }
@@ -5824,6 +5853,211 @@ pub fn format_guardian_osd(distance_mm: u32) -> String {
     }
 }
 
+/// Gnomonic (gnomonic/rectilinear) projection from equirect.
+pub fn project_gnomonic_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    roll_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> Vec<u32> {
+    // Same ray math as equirect viewport — gnomonic is the rectilinear camera model.
+    project_equirect_view_ex(
+        src_w,
+        src_h,
+        src,
+        out_w,
+        out_h,
+        yaw_deg_milli,
+        pitch_deg_milli,
+        roll_deg_milli,
+        fov_deg_milli,
+    )
+}
+
+/// Sinusoidal equal-area map projection from equirect.
+pub fn project_sinusoidal_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+    let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+    let fov = (clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0).to_radians();
+    let aspect = out_w as f32 / out_h as f32;
+    let half = fov * 0.5;
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    for oy in 0..out_h {
+        let ny = 1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32;
+        let lat = (pitch + ny * half).clamp(
+            -std::f32::consts::FRAC_PI_2 + 0.01,
+            std::f32::consts::FRAC_PI_2 - 0.01,
+        );
+        let cos_lat = lat.cos().max(1e-3);
+        for ox in 0..out_w {
+            let nx = 2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0;
+            let lon = yaw + (nx * half * aspect) / cos_lat;
+            out[(oy * out_w + ox) as usize] = sample_equirect_pixel(src, src_w, src_h, lon, lat);
+        }
+    }
+    out
+}
+
+/// Vertical cubemap cross layout face UV rect.
+pub fn cubemap_cross_face_rect(canvas_w: u32, canvas_h: u32, face: u8) -> (u32, u32, u32, u32) {
+    //     [+Y]
+    // [-X][+Z][+X][-Z]
+    //     [-Y]
+    let cell = (canvas_w.min(canvas_h) / 4).max(1);
+    let (col, row) = match face % 6 {
+        0 => (2u32, 1), // +X
+        1 => (0, 1),    // -X
+        2 => (1, 0),    // +Y
+        3 => (1, 2),    // -Y
+        4 => (1, 1),    // +Z
+        _ => (3, 1),    // -Z
+    };
+    (col * cell, row * cell, cell, cell)
+}
+
+pub fn format_cubemap_cross_osd(face: u8) -> String {
+    format!("Cube cross face {face}")
+}
+
+/// HLG system gamma (OOTF) for display light (BT.2100).
+pub fn clamp_hlg_system_gamma_milli(value: i32) -> i32 {
+    value.clamp(1_000, 2_000)
+}
+
+pub fn hlg_system_gamma_default_milli(peak_nits: u32) -> i32 {
+    // BT.2100: γ = 1.2 + 0.42*log10(Lw/1000)
+    let lw = clamp_hdr_nits(peak_nits).max(1) as f32;
+    let g = 1.2 + 0.42 * (lw / 1_000.0).log10();
+    clamp_hlg_system_gamma_milli((g * 1_000.0).round() as i32)
+}
+
+pub fn format_hlg_system_gamma_osd(gamma_milli: i32) -> String {
+    format!(
+        "HLG system γ{:.2}",
+        clamp_hlg_system_gamma_milli(gamma_milli) as f32 / 1_000.0
+    )
+}
+
+/// BT.2020 → approximate BT.709 matrix (gamut map oracle).
+pub fn bt2020_to_bt709_rgb(red: f32, green: f32, blue: f32) -> (f32, f32, f32) {
+    // Coarse primary remap; not ICC-accurate.
+    let r = 1.6605 * red - 0.5876 * green - 0.0728 * blue;
+    let g = -0.1246 * red + 1.1329 * green - 0.0083 * blue;
+    let b = -0.0182 * red - 0.1006 * green + 1.1187 * blue;
+    (r.clamp(0.0, 1.0), g.clamp(0.0, 1.0), b.clamp(0.0, 1.0))
+}
+
+pub fn apply_bt2020_to_bt709_pixel(red: u8, green: u8, blue: u8) -> (u8, u8, u8) {
+    let (r, g, b) = bt2020_to_bt709_rgb(
+        f32::from(red) / 255.0,
+        f32::from(green) / 255.0,
+        f32::from(blue) / 255.0,
+    );
+    (
+        (r * 255.0).round() as u8,
+        (g * 255.0).round() as u8,
+        (b * 255.0).round() as u8,
+    )
+}
+
+pub fn format_gamut_map_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Gamut BT.2020→709"
+    } else {
+        "Gamut map Off"
+    }
+}
+
+/// Display white-point presets (CIE xy ×10000).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum DisplayWhitePoint {
+    #[default]
+    D65,
+    Dci,
+    D50,
+}
+
+pub fn white_point_xy_milli(wp: DisplayWhitePoint) -> (u32, u32) {
+    match wp {
+        DisplayWhitePoint::D65 => (3_127, 3_290),
+        DisplayWhitePoint::Dci => (3_140, 3_510),
+        DisplayWhitePoint::D50 => (3_457, 3_586),
+    }
+}
+
+pub fn cycle_display_white_point(wp: DisplayWhitePoint) -> DisplayWhitePoint {
+    match wp {
+        DisplayWhitePoint::D65 => DisplayWhitePoint::Dci,
+        DisplayWhitePoint::Dci => DisplayWhitePoint::D50,
+        DisplayWhitePoint::D50 => DisplayWhitePoint::D65,
+    }
+}
+
+pub fn format_white_point_osd(wp: DisplayWhitePoint) -> String {
+    let (x, y) = white_point_xy_milli(wp);
+    let name = match wp {
+        DisplayWhitePoint::D65 => "D65",
+        DisplayWhitePoint::Dci => "DCI",
+        DisplayWhitePoint::D50 => "D50",
+    };
+    format!("{name} x={:.4} y={:.4}", x as f32 / 10_000.0, y as f32 / 10_000.0)
+}
+
+/// Parse EDID-like peak luminance token (`MaxLuminance=600`).
+pub fn parse_edid_max_luminance(spec: &str) -> Option<u32> {
+    let spec = spec.trim();
+    let value = spec
+        .strip_prefix("MaxLuminance=")
+        .or_else(|| spec.strip_prefix("max_luminance="))
+        .or_else(|| spec.strip_prefix("peak="))?;
+    value.parse().ok().map(clamp_hdr_nits)
+}
+
+pub fn format_edid_peak_osd(nits: u32) -> String {
+    format!("EDID peak {} nits", clamp_hdr_nits(nits))
+}
+
+/// Trilinear-ish 1D LUT sample (CMS / calibration).
+pub fn sample_1d_lut_u8(lut: &[u8], value: u8) -> u8 {
+    if lut.is_empty() {
+        return value;
+    }
+    if lut.len() == 1 {
+        return lut[0];
+    }
+    let pos = (u32::from(value) * (lut.len() as u32 - 1)) / 255;
+    let idx = pos as usize;
+    let next = (idx + 1).min(lut.len() - 1);
+    let frac = (u32::from(value) * (lut.len() as u32 - 1)) % 255;
+    let a = u32::from(lut[idx]);
+    let b = u32::from(lut[next]);
+    ((a * (255 - frac) + b * frac) / 255) as u8
+}
+
+pub fn format_cms_lut_osd(enabled: bool, size: usize) -> String {
+    if !enabled {
+        "CMS LUT Off".into()
+    } else {
+        format!("CMS 1D LUT {size}")
+    }
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -5888,6 +6122,8 @@ pub struct PlayRenderOptions {
     pub hlg_ootf_gamma_milli: i32,
     /// Use BT.2446 HDR→SDR tonemap instead of Hable/Reinhard when set.
     pub bt2446_tonemap: bool,
+    /// Map BT.2020 content toward BT.709 display.
+    pub gamut_map_bt709: bool,
 }
 
 impl Default for PlayRenderOptions {
@@ -5923,6 +6159,7 @@ impl Default for PlayRenderOptions {
             color_temp_kelvin: COLOR_TEMP_DAYLIGHT_K,
             hlg_ootf_gamma_milli: 0,
             bt2446_tonemap: false,
+            gamut_map_bt709: false,
         }
     }
 }
@@ -6382,6 +6619,13 @@ pub fn render_play_pixels(
             } else {
                 (red, green, blue)
             };
+            let (red, green, blue) = if opts.gamut_map_bt709
+                && opts.color_primaries == COLOR_PRIMARIES_BT2020
+            {
+                apply_bt2020_to_bt709_pixel(red, green, blue)
+            } else {
+                (red, green, blue)
+            };
             let (red, green, blue) =
                 apply_display_effect_pixel(red, green, blue, opts.display_effect);
             let (dx, dy) = rotate_pixel(x as u32, y as u32, width, height, opts.rotate);
@@ -6728,8 +6972,10 @@ pub fn parse_spherical_projection(spec: &str) -> Result<SphericalProjection> {
         "octahedral" | "octa" => Ok(SphericalProjection::Octahedral),
         "equisolid" => Ok(SphericalProjection::Equisolid),
         "orthographic" | "ortho" => Ok(SphericalProjection::Orthographic),
+        "gnomonic" | "rectilinear" => Ok(SphericalProjection::Gnomonic),
+        "sinusoidal" | "sanson" => Ok(SphericalProjection::Sinusoidal),
         other => Err(format!(
-            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical|mercator|dual-fisheye-tb|octahedral|equisolid|orthographic)"
+            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical|mercator|dual-fisheye-tb|octahedral|equisolid|orthographic|gnomonic|sinusoidal)"
         )
         .into()),
     }
@@ -10386,6 +10632,7 @@ struct PlayerApp {
     echo_feedback_milli: i32,
     anaglyph_dubois: bool,
     bt2446_tonemap: bool,
+    gamut_map_bt709: bool,
     chorus_milli: i32,
     reverb_milli: i32,
     atempo_milli: i32,
@@ -10620,6 +10867,7 @@ impl PlayerApp {
             echo_feedback_milli: 0,
             anaglyph_dubois: false,
             bt2446_tonemap: false,
+            gamut_map_bt709: false,
             chorus_milli: 0,
             reverb_milli: 0,
             atempo_milli: 1_000,
@@ -12333,6 +12581,7 @@ impl PlayerApp {
             self.color_temp_kelvin,
             self.hlg_ootf_gamma_milli,
             self.bt2446_tonemap,
+            self.gamut_map_bt709,
             bitmap.as_ref(),
         );
         session.dirty = false;
@@ -14194,6 +14443,12 @@ impl PlayerApp {
         self.notice = Some(format_bt2446_osd(self.bt2446_tonemap).into());
     }
 
+    fn toggle_gamut_map(&mut self) {
+        self.gamut_map_bt709 = !self.gamut_map_bt709;
+        self.adjust_dirty = true;
+        self.notice = Some(format_gamut_map_osd(self.gamut_map_bt709).into());
+    }
+
     fn cycle_chorus(&mut self) {
         let next = match self.chorus_milli {
             0 => 300,
@@ -14509,6 +14764,7 @@ impl PlayerApp {
                 color_temp_kelvin: self.color_temp_kelvin,
                 hlg_ootf_gamma_milli: self.hlg_ootf_gamma_milli,
                 bt2446_tonemap: self.bt2446_tonemap,
+                gamut_map_bt709: self.gamut_map_bt709,
             };
             let (width, height, pixels) =
                 render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap.as_ref());
@@ -15044,6 +15300,7 @@ fn color_image(
     color_temp_kelvin: i32,
     hlg_ootf_gamma_milli: i32,
     bt2446_tonemap: bool,
+    gamut_map_bt709: bool,
     bitmap: Option<&BitmapSubtitle>,
 ) -> egui::ColorImage {
     let opts = PlayRenderOptions {
@@ -15077,6 +15334,7 @@ fn color_image(
         color_temp_kelvin,
         hlg_ootf_gamma_milli,
         bt2446_tonemap,
+        gamut_map_bt709,
     };
     let (out_w, out_h, rgb) =
         render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap);

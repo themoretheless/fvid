@@ -2105,6 +2105,52 @@ mod play_controls {
         assert!(fvid_media::column_interleaved_eye_is_left(0));
         assert_eq!(fvid_media::wiggle_yaw_offset_milli(0, 5_000), 0);
         assert!(fvid_media::format_guardian_osd(100).contains("100"));
+        assert_eq!(
+            fvid_media::parse_spherical_projection("gnomonic").unwrap(),
+            fvid_media::SphericalProjection::Gnomonic
+        );
+        assert_eq!(
+            fvid_media::parse_spherical_projection("sinusoidal").unwrap(),
+            fvid_media::SphericalProjection::Sinusoidal
+        );
+        let sin = fvid_media::project_sinusoidal_view(
+            4,
+            2,
+            &[0x00_66_66_66u32; 8],
+            2,
+            2,
+            0,
+            0,
+            90_000,
+        );
+        assert_eq!(sin.len(), 4);
+        assert_eq!(
+            fvid_media::cubemap_cross_face_rect(400, 300, 0),
+            (150, 75, 75, 75)
+        );
+        assert!(fvid_media::hlg_system_gamma_default_milli(1_000) >= 1_000);
+        let mapped = fvid_media::apply_bt2020_to_bt709_pixel(200, 40, 40);
+        assert_ne!(mapped, (200, 40, 40));
+        assert_eq!(
+            fvid_media::white_point_xy_milli(fvid_media::DisplayWhitePoint::D65),
+            (3_127, 3_290)
+        );
+        assert_eq!(
+            fvid_media::parse_edid_max_luminance("MaxLuminance=600"),
+            Some(600)
+        );
+        assert_eq!(fvid_media::sample_1d_lut_u8(&[0, 128, 255], 128), 128);
+        let mut gamut_opts = fvid_media::PlayRenderOptions::default();
+        gamut_opts.gamut_map_bt709 = true;
+        gamut_opts.color_primaries = fvid_media::COLOR_PRIMARIES_BT2020;
+        let gpix = fvid_media::render_play_pixels(
+            1,
+            1,
+            &[0x00_c8_28_28u32],
+            &gamut_opts,
+            None,
+        );
+        assert_ne!(gpix.2[0], 0x00_c8_28_28);
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
