@@ -1933,6 +1933,10 @@ pub struct PlayOptions {
     pub quit_at_end: bool,
     /// Open paused (VLC `--start-paused`).
     pub start_paused: bool,
+    /// Demux/network cache in milliseconds (VLC `--network-caching`).
+    pub network_cache_ms: u32,
+    /// Directory for snapshots (VLC `--snapshot-path`). `None` = beside media.
+    pub snapshot_dir: Option<PathBuf>,
 }
 
 impl Default for PlayOptions {
@@ -1958,6 +1962,8 @@ impl Default for PlayOptions {
             stereo3d: PlayStereo3D::Off,
             quit_at_end: false,
             start_paused: false,
+            network_cache_ms: NETWORK_CACHE_DEFAULT_MS,
+            snapshot_dir: None,
         }
     }
 }
@@ -3006,6 +3012,8 @@ struct Shared {
         normalizer_on: AtomicBool,
         /// Smoothed peak ×1000 for the normalizer.
         normalizer_peak_milli: AtomicU32,
+        /// Instantaneous output peak ×1000 for VU meter OSD.
+        vu_peak_milli: AtomicU32,
     }
 
 struct Finish(Arc<Shared>);
@@ -3671,6 +3679,11 @@ pub fn format_network_cache_osd(ms: u32) -> String {
     format!("Network cache {} ms", clamp_network_cache_ms(ms))
 }
 
+/// Convert network-caching milliseconds to a demux start delay in microseconds.
+pub fn network_cache_delay_us(ms: u32) -> i64 {
+    i64::from(clamp_network_cache_ms(ms)).saturating_mul(1_000)
+}
+
 /// Compact on-screen hotkey reminder (VLC Help / F1 style).
 pub fn format_hotkeys_help_osd() -> &'static str {
     "Space pause · ←→ seek · ↑↓ vol · M mute · F full · S snap · Esc quit"
@@ -3988,6 +4001,10 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
         for channel in 0..channels {
             frame_peak = frame_peak.max(frame_buf[channel].abs());
         }
+        shared.vu_peak_milli.store(
+            ((frame_peak * 1_000.0).round() as u32).min(2_000),
+            Ordering::Relaxed,
+        );
         let mut norm_gain = 1_000u32;
         if shared.normalizer_on.load(Ordering::Relaxed) {
             let prev = shared.normalizer_peak_milli.load(Ordering::Relaxed) as f32 / 1_000.0;
@@ -5035,6 +5052,7 @@ struct PlayerApp {
     snapshots: u32,
     snapshot_format: SnapshotFormat,
     snapshot_dir: Option<PathBuf>,
+    network_cache_ms: u32,
     audio_ordinal: i32,
     subtitle_ordinal: i32,
     logged_sub: String,
@@ -5121,6 +5139,8 @@ impl PlayerApp {
         let hdr_tonemap = options.hdr_tonemap;
         let hdr_auto_applied = !matches!(options.hdr_tonemap, HdrTonemap::Off);
         let stereo3d = options.stereo3d;
+        let snapshot_dir = options.snapshot_dir.clone();
+        let network_cache_ms = clamp_network_cache_ms(options.network_cache_ms);
         let mut app = Self {
             options,
             playlist,
@@ -5149,7 +5169,8 @@ impl PlayerApp {
             step_pending: false,
             snapshots: 0,
             snapshot_format: SnapshotFormat::Bmp,
-            snapshot_dir: None,
+            snapshot_dir,
+            network_cache_ms,
             audio_ordinal,
             subtitle_ordinal,
             logged_sub: String::new(),
@@ -5311,6 +5332,7 @@ impl PlayerApp {
             eq_bypass: AtomicBool::new(self.eq_bypass),
             normalizer_on: AtomicBool::new(self.volume_normalizer),
             normalizer_peak_milli: AtomicU32::new(0),
+            vu_peak_milli: AtomicU32::new(0),
         });
         let stream = if self.options.audio {
             match start_audio(Arc::clone(&shared), self.options.audio_device.as_deref()) {
@@ -6260,6 +6282,30 @@ impl PlayerApp {
                 self.set_rate(clamp_rate_milli(speed));
             }
             ui.label(format_rate(self.rate_milli));
+            let peak = self
+                .session
+                .as_ref()
+                .map(|session| session.shared.vu_peak_milli.load(Ordering::Relaxed))
+                .unwrap_or(0);
+            let fills = vu_bar_fills(peak, 8);
+            ui.label("VU");
+            for fill in fills {
+                let tall = 4.0 + (fill as f32 / 100.0) * 16.0;
+                let (rect, _) =
+                    ui.allocate_exact_size(egui::vec2(4.0, 20.0), egui::Sense::hover());
+                let bar = egui::Rect::from_min_size(
+                    egui::pos2(rect.min.x, rect.max.y - tall),
+                    egui::vec2(4.0, tall),
+                );
+                let color = if fill > 85 {
+                    egui::Color32::from_rgb(255, 80, 80)
+                } else if fill > 60 {
+                    egui::Color32::from_rgb(255, 200, 80)
+                } else {
+                    egui::Color32::from_rgb(80, 200, 120)
+                };
+                ui.painter().rect_filled(bar, 0.0, color);
+            }
         });
         ui.horizontal(|ui| {
             ui.label("Brt");

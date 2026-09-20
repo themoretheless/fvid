@@ -1426,5 +1426,13 @@ mod play_controls {
             ..fvid_media::PlayOptions::default()
         }
         .start_paused);
+        assert_eq!(
+            fvid_media::network_cache_delay_us(1_000),
+            1_000_000
+        );
+        assert_eq!(
+            fvid_media::network_cache_delay_us(120_000),
+            i64::from(fvid_media::NETWORK_CACHE_MAX_MS) * 1_000
+        );
     }
 }
