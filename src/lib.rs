@@ -1053,5 +1053,40 @@ mod play_controls {
         fvid_media::apply_tone_frame(&mut frame, &mut states, 2_000, 1_000, 1_000);
         assert!(frame[0] > 0.25);
         assert!(fvid_media::format_tone_osd(1_000, 1_000, 1_000).contains("Tone"));
+        let opts = fvid_media::PlayRenderOptions::default();
+        let src = vec![0x00_ff_00_00u32, 0x00_00_ff_00, 0x00_00_00_ff, 0x00_ff_ff_00];
+        let (w, h, out) = fvid_media::render_play_pixels(2, 2, &src, &opts, None);
+        assert_eq!((w, h), (2, 2));
+        assert_eq!(out.len(), 4);
+        let mut rotated = opts.clone();
+        rotated.rotate = fvid_media::RotateMode::Deg90;
+        let (rw, rh, _) = fvid_media::render_play_pixels(2, 2, &src, &rotated, None);
+        assert_eq!((rw, rh), (2, 2));
+        assert_eq!(
+            fvid_media::reset_video_adjust(),
+            (1_000, 1_000, 1_000, 1_000)
+        );
+        assert_eq!(fvid_media::adjust_step_milli(1_000, 100), 1_100);
+        assert_eq!(fvid_media::reset_zoom_pan(), (1_000, 0, 0));
+        assert!(fvid_media::format_zoom_osd(2_000).contains("2:1"));
+        assert_eq!(
+            fvid_media::eq_band_step_milli(1_000, 100),
+            fvid_media::clamp_eq_milli(1_100)
+        );
+        assert_eq!(
+            fvid_media::set_eq_gains_from_preset(fvid_media::EqPreset::Flat),
+            fvid_media::eq_unity_gains()
+        );
+        assert!(fvid_media::format_eq_preset_osd(fvid_media::EqPreset::Rock).contains("Rock"));
+        assert_eq!(fvid_media::format_pan_osd(10, -5), "Pan 10,-5");
+        assert_eq!(
+            fvid_media::initial_seek_us("1:30", 200_000_000),
+            Some(90_000_000)
+        );
+        assert_eq!(
+            fvid_media::initial_seek_us("1:30", 60_000_000),
+            Some(60_000_000)
+        );
+        assert_eq!(fvid_media::initial_seek_us("bad", 60_000_000), None);
     }
 }

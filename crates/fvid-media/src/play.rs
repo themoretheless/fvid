@@ -717,6 +717,139 @@ pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String 
         .to_string()
 }
 
+/// Display pipeline options for [`render_play_pixels`].
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct PlayRenderOptions {
+    pub brightness_milli: i32,
+    pub contrast_milli: i32,
+    pub saturation_milli: i32,
+    pub hue_milli: i32,
+    pub rotate: RotateMode,
+    pub deinterlace: DeinterlaceMode,
+}
+
+impl Default for PlayRenderOptions {
+    fn default() -> Self {
+        Self {
+            brightness_milli: 1_000,
+            contrast_milli: 1_000,
+            saturation_milli: 1_000,
+            hue_milli: 1_000,
+            rotate: RotateMode::Deg0,
+            deinterlace: DeinterlaceMode::Off,
+        }
+    }
+}
+
+/// Apply deinterlace, optional bitmap overlay, color adjust, and rotate.
+/// Returns `(width, height, packed 0x00RRGGBB pixels)`.
+pub fn render_play_pixels(
+    width: u32,
+    height: u32,
+    pixels: &[u32],
+    opts: &PlayRenderOptions,
+    bitmap: Option<&BitmapSubtitle>,
+) -> (u32, u32, Vec<u32>) {
+    let w = width as usize;
+    let h = height as usize;
+    let mut source = pixels.to_vec();
+    if source.len() < w.saturating_mul(h) {
+        source.resize(w.saturating_mul(h), 0);
+    }
+    apply_deinterlace_rgb(&mut source, width, height, opts.deinterlace);
+    if let Some(plane) = bitmap {
+        blit_bitmap_subtitle(&mut source, width, height, plane);
+    }
+    let (out_w, out_h) = rotate_size(width, height, opts.rotate);
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    for y in 0..h {
+        for x in 0..w {
+            let pixel = source[y * w + x];
+            let (red, green, blue) = adjust_pixel(
+                ((pixel >> 16) & 0xff) as u8,
+                ((pixel >> 8) & 0xff) as u8,
+                (pixel & 0xff) as u8,
+                opts.brightness_milli,
+                opts.contrast_milli,
+                opts.saturation_milli,
+                opts.hue_milli,
+            );
+            let (dx, dy) = rotate_pixel(x as u32, y as u32, width, height, opts.rotate);
+            out[dy as usize * out_w as usize + dx as usize] =
+                (u32::from(red) << 16) | (u32::from(green) << 8) | u32::from(blue);
+        }
+    }
+    (out_w, out_h, out)
+}
+
+pub fn reset_video_adjust() -> (i32, i32, i32, i32) {
+    (1_000, 1_000, 1_000, 1_000)
+}
+
+pub fn adjust_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_adjust_milli(current + delta)
+}
+
+pub fn reset_zoom_pan() -> (u32, i32, i32) {
+    (1_000, 0, 0)
+}
+
+pub fn format_adjust_osd(
+    brightness_milli: i32,
+    contrast_milli: i32,
+    saturation_milli: i32,
+    hue_milli: i32,
+) -> String {
+    format!(
+        "Adjust B{} C{} S{} H{}",
+        clamp_adjust_milli(brightness_milli) / 10,
+        clamp_adjust_milli(contrast_milli) / 10,
+        clamp_adjust_milli(saturation_milli) / 10,
+        clamp_adjust_milli(hue_milli) / 10
+    )
+}
+
+pub fn format_zoom_osd(zoom_milli: u32) -> String {
+    format!("zoom {}", zoom_label(zoom_milli))
+}
+
+pub fn format_aspect_osd(mode: AspectMode) -> String {
+    format!("aspect {}", aspect_label(mode))
+}
+
+pub fn format_crop_osd(mode: AspectMode) -> String {
+    format!("crop {}", aspect_label(mode))
+}
+
+pub fn format_deinterlace_osd(mode: DeinterlaceMode) -> String {
+    format!("Deinterlace {}", deinterlace_label(mode))
+}
+
+pub fn eq_band_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_eq_milli(current + delta)
+}
+
+pub fn set_eq_gains_from_preset(preset: EqPreset) -> [i32; EQ_BAND_COUNT] {
+    eq_preset_gains(preset)
+}
+
+pub fn format_eq_preset_osd(preset: EqPreset) -> String {
+    format!("EQ {}", eq_preset_label(preset))
+}
+
+/// Arrow-key pan step when zoomed past 1×.
+pub const PAN_STEP_PX: i32 = 40;
+
+pub fn format_pan_osd(pan_x_px: i32, pan_y_px: i32) -> String {
+    format!("Pan {pan_x_px},{pan_y_px}")
+}
+
+/// Parse a jump clock or leave raw microseconds; clamp into duration when known.
+pub fn initial_seek_us(spec: &str, duration_us: i64) -> Option<i64> {
+    let target = parse_play_clock(spec)?;
+    Some(clamp_seek_us(target, duration_us))
+}
+
 #[derive(Clone, Debug)]
 pub struct PlayOptions {
     /// Play the first audio stream on the default output device.
@@ -738,6 +871,8 @@ pub struct PlayOptions {
     pub subtitles: Option<PathBuf>,
     /// Output device name from `audio_output_devices`. `None` is the host default.
     pub audio_device: Option<String>,
+    /// Seek to this media time after open (VLC `--start-time`). Consumed once.
+    pub start_us: Option<i64>,
 }
 
 impl Default for PlayOptions {
@@ -752,6 +887,7 @@ impl Default for PlayOptions {
             subtitle_track: 0,
             subtitles: None,
             audio_device: None,
+            start_us: None,
         }
     }
 }
@@ -3757,6 +3893,9 @@ impl PlayerApp {
             dirty: false,
             discard_until: None,
         });
+        if let Some(start) = self.options.start_us.take() {
+            self.request_seek(start.max(0));
+        }
         Ok(())
     }
 
@@ -4014,10 +4153,14 @@ impl PlayerApp {
                 self.step_bookmark(-1);
             } else {
                 let fine = ctx.input(|input| input.modifiers.shift);
-                self.request_seek(
-                    self.shown_media_us()
-                        .saturating_sub(seek_step_us(fine)),
-                );
+                if fine && self.zoom_milli > 1_000 {
+                    self.nudge_pan(-PAN_STEP_PX, 0, 800, 450);
+                } else {
+                    self.request_seek(
+                        self.shown_media_us()
+                            .saturating_sub(seek_step_us(fine)),
+                    );
+                }
             }
         }
         if keys.3 {
@@ -4025,17 +4168,31 @@ impl PlayerApp {
                 self.step_bookmark(1);
             } else {
                 let fine = ctx.input(|input| input.modifiers.shift);
-                self.request_seek(
-                    self.shown_media_us()
-                        .saturating_add(seek_step_us(fine)),
-                );
+                if fine && self.zoom_milli > 1_000 {
+                    self.nudge_pan(PAN_STEP_PX, 0, 800, 450);
+                } else {
+                    self.request_seek(
+                        self.shown_media_us()
+                            .saturating_add(seek_step_us(fine)),
+                    );
+                }
             }
         }
         if keys.4 {
-            self.nudge_volume(VOLUME_STEP_MILLI);
+            let fine = ctx.input(|input| input.modifiers.shift);
+            if fine && self.zoom_milli > 1_000 {
+                self.nudge_pan(0, -PAN_STEP_PX, 800, 450);
+            } else {
+                self.nudge_volume(VOLUME_STEP_MILLI);
+            }
         }
         if keys.5 {
-            self.nudge_volume(-VOLUME_STEP_MILLI);
+            let fine = ctx.input(|input| input.modifiers.shift);
+            if fine && self.zoom_milli > 1_000 {
+                self.nudge_pan(0, PAN_STEP_PX, 800, 450);
+            } else {
+                self.nudge_volume(-VOLUME_STEP_MILLI);
+            }
         }
         if keys.6 {
             self.nudge_rate(-RATE_STEP_MILLI);
@@ -4158,7 +4315,7 @@ impl PlayerApp {
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::D)) {
             self.deinterlace = cycle_deinterlace(self.deinterlace);
             self.adjust_dirty = true;
-            self.notice = Some(format!("Deinterlace {}", deinterlace_label(self.deinterlace)));
+            self.notice = Some(format_deinterlace_osd(self.deinterlace));
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::I)) {
             self.show_stats = !self.show_stats;
@@ -4432,11 +4589,13 @@ impl PlayerApp {
                 self.adjust_dirty = true;
             }
             if ui.button("Reset").clicked() {
-                self.brightness_milli = 1_000;
-                self.contrast_milli = 1_000;
-                self.saturation_milli = 1_000;
-                self.hue_milli = 1_000;
+                let (b, c, s, h) = reset_video_adjust();
+                self.brightness_milli = b;
+                self.contrast_milli = c;
+                self.saturation_milli = s;
+                self.hue_milli = h;
                 self.adjust_dirty = true;
+                self.notice = Some(format_adjust_osd(b, c, s, h));
             }
             let flip_h = if self.flip_h { "H*" } else { "H" };
             if ui.button(flip_h).clicked() {
@@ -4471,7 +4630,7 @@ impl PlayerApp {
                         .changed()
                     {
                         self.eq_gains_milli[i] =
-                            clamp_eq_milli((gain * 1000.0).round() as i32);
+                            eq_band_step_milli(0, (gain * 1000.0).round() as i32);
                         if let Some(session) = &self.session {
                             session.shared.eq_gains_milli[i]
                                 .store(self.eq_gains_milli[i], Ordering::Relaxed);
@@ -4481,7 +4640,7 @@ impl PlayerApp {
             }
             if ui.button(eq_preset_label(self.eq_preset)).clicked() {
                 self.eq_preset = cycle_eq_preset(self.eq_preset);
-                self.eq_gains_milli = eq_preset_gains(self.eq_preset);
+                self.eq_gains_milli = set_eq_gains_from_preset(self.eq_preset);
                 if let Some(session) = &self.session {
                     for (slot, gain) in session
                         .shared
@@ -4492,6 +4651,7 @@ impl PlayerApp {
                         slot.store(*gain, Ordering::Relaxed);
                     }
                 }
+                self.notice = Some(format_eq_preset_osd(self.eq_preset));
             }
             let eq_label = if self.eq_bypass { "EQ*" } else { "EQ" };
             if ui.button(eq_label).clicked() {
@@ -4801,37 +4961,37 @@ impl PlayerApp {
 
     fn cycle_aspect_mode(&mut self) {
         self.aspect = cycle_aspect(self.aspect);
-        let notice = format!("aspect {}", aspect_label(self.aspect));
+        let notice = format_aspect_osd(self.aspect);
         eprintln!("fvid play: {notice}");
         self.notice = Some(notice);
     }
 
     fn cycle_crop_mode(&mut self) {
         self.crop = cycle_aspect(self.crop);
-        let notice = format!("crop {}", aspect_label(self.crop));
+        let notice = format_crop_osd(self.crop);
         eprintln!("fvid play: {notice}");
         self.notice = Some(notice);
     }
 
     fn nudge_zoom(&mut self, zoom_in: bool) {
         self.zoom_milli = zoom_step(self.zoom_milli, zoom_in);
-        self.pan_x_px = 0;
-        self.pan_y_px = 0;
-        let notice = format!("zoom {}", zoom_label(self.zoom_milli));
+        let (_, pan_x, pan_y) = reset_zoom_pan();
+        self.pan_x_px = pan_x;
+        self.pan_y_px = pan_y;
+        let notice = format_zoom_osd(self.zoom_milli);
         eprintln!("fvid play: {notice}");
         self.notice = Some(notice);
     }
 
     fn nudge_pan(&mut self, dx: i32, dy: i32, viewport_w: u32, viewport_h: u32) {
         let (content_w, content_h) = {
-            // Approximate content from last known zoomed fit using viewport as base.
             let (zw, zh) = zoom_size(viewport_w.max(1), viewport_h.max(1), self.zoom_milli);
             (zw, zh)
         };
         self.pan_x_px = pan_step_px(self.pan_x_px, dx, viewport_w, content_w);
         self.pan_y_px = pan_step_px(self.pan_y_px, dy, viewport_h, content_h);
         if self.zoom_milli > 1_000 {
-            self.notice = Some(format!("Pan {} , {}", self.pan_x_px, self.pan_y_px));
+            self.notice = Some(format_pan_osd(self.pan_x_px, self.pan_y_px));
         }
     }
 
@@ -5177,9 +5337,24 @@ impl PlayerApp {
                 self.notice = Some("No frame to save".into());
                 return;
             };
+            let now = self.shown_media_us();
+            let bitmap = {
+                let mut planes = lock(&session.shared.bitmaps);
+                active_bitmap_subtitle(planes.make_contiguous(), now).cloned()
+            };
+            let opts = PlayRenderOptions {
+                brightness_milli: self.brightness_milli,
+                contrast_milli: self.contrast_milli,
+                saturation_milli: self.saturation_milli,
+                hue_milli: self.hue_milli,
+                rotate: self.rotate,
+                deinterlace: self.deinterlace,
+            };
+            let (width, height, pixels) =
+                render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap.as_ref());
             let bytes = match self.snapshot_format {
-                SnapshotFormat::Bmp => encode_bmp(frame.width, frame.height, &frame.pixels),
-                SnapshotFormat::Png => encode_png(frame.width, frame.height, &frame.pixels),
+                SnapshotFormat::Bmp => encode_bmp(width, height, &pixels),
+                SnapshotFormat::Png => encode_png(width, height, &pixels),
             };
             let bytes = match bytes {
                 Ok(bytes) => bytes,
@@ -5640,32 +5815,26 @@ fn color_image(
     deinterlace: DeinterlaceMode,
     bitmap: Option<&BitmapSubtitle>,
 ) -> egui::ColorImage {
-    let width = frame.width as usize;
-    let height = frame.height as usize;
-    let mut source = frame.pixels.clone();
-    apply_deinterlace_rgb(&mut source, frame.width, frame.height, deinterlace);
-    if let Some(plane) = bitmap {
-        blit_bitmap_subtitle(&mut source, frame.width, frame.height, plane);
-    }
-    let (out_w, out_h) = rotate_size(frame.width, frame.height, rotate);
-    let mut pixels = vec![egui::Color32::BLACK; out_w as usize * out_h as usize];
-    for y in 0..height {
-        for x in 0..width {
-            let pixel = source[y * width + x];
-            let (red, green, blue) = adjust_pixel(
-                (pixel >> 16) as u8,
-                (pixel >> 8) as u8,
-                pixel as u8,
-                brightness_milli,
-                contrast_milli,
-                saturation_milli,
-                hue_milli,
-            );
-            let (dx, dy) = rotate_pixel(x as u32, y as u32, frame.width, frame.height, rotate);
-            pixels[dy as usize * out_w as usize + dx as usize] =
-                egui::Color32::from_rgb(red, green, blue);
-        }
-    }
+    let opts = PlayRenderOptions {
+        brightness_milli,
+        contrast_milli,
+        saturation_milli,
+        hue_milli,
+        rotate,
+        deinterlace,
+    };
+    let (out_w, out_h, rgb) =
+        render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap);
+    let pixels: Vec<egui::Color32> = rgb
+        .into_iter()
+        .map(|pixel| {
+            egui::Color32::from_rgb(
+                ((pixel >> 16) & 0xff) as u8,
+                ((pixel >> 8) & 0xff) as u8,
+                (pixel & 0xff) as u8,
+            )
+        })
+        .collect();
     egui::ColorImage::new([out_w as usize, out_h as usize], pixels)
 }
 

@@ -84,7 +84,11 @@ pub use play::{
     reset_av_delays, format_delay_osd, VOLUME_WHEEL_STEP_MILLI, volume_from_wheel, clamp_seek_us,
     format_ab_osd, format_repeat_osd, format_shuffle_osd, format_subtitle_scale_osd,
     format_jump_osd, format_window_title, TONE_UNITY_MILLI, TONE_STEP_MILLI, tone_gain_step_milli,
-    reset_tone_gains, apply_tone_frame, format_tone_osd, PLAYBACK_PROTOCOLS,
+    reset_tone_gains, apply_tone_frame, format_tone_osd, PlayRenderOptions, render_play_pixels,
+    reset_video_adjust, adjust_step_milli, reset_zoom_pan, format_adjust_osd, format_zoom_osd,
+    format_aspect_osd, format_crop_osd, format_deinterlace_osd, eq_band_step_milli,
+    set_eq_gains_from_preset, format_eq_preset_osd, PAN_STEP_PX, format_pan_osd, initial_seek_us,
+    PLAYBACK_PROTOCOLS,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};
