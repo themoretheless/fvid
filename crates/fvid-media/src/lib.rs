@@ -102,7 +102,12 @@ pub use play::{
     format_bookmarks_export, parse_bookmarks_export,
     format_playlist_osd, format_playlist_m3u, soft_clip_sample, PLAYBACK_PROTOCOLS,
     SLEEP_TIMER_STEPS_MIN, cycle_sleep_timer_min, sleep_deadline_secs, sleep_timer_fired,
-    format_sleep_osd,
+    format_sleep_osd, FOV_MIN_MILLI, FOV_MAX_MILLI, FOV_DEFAULT_MILLI, FOV_STEP_MILLI,
+    YAW_STEP_MILLI, PITCH_STEP_MILLI, PITCH_MIN_MILLI, PITCH_MAX_MILLI, clamp_yaw_milli,
+    clamp_pitch_milli, clamp_fov_milli, yaw_step_milli, pitch_step_milli, fov_step_milli,
+    format_spherical_osd, sample_equirect_pixel, project_equirect_view, HdrTonemap,
+    COLOR_TRC_SMPTE2084, COLOR_TRC_HLG, is_hdr_transfer, cycle_hdr_tonemap, hdr_tonemap_label,
+    format_hdr_tonemap_osd, tonemap_channel, apply_hdr_tonemap_pixel, auto_hdr_tonemap,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

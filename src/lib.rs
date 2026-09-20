@@ -1204,5 +1204,34 @@ mod play_controls {
         assert_eq!(parsed.len(), 2);
         assert_eq!(parsed[0].media_us, 1_500_000);
         assert_eq!(parsed[1].media_us, 3_000_000);
+        assert_eq!(fvid_media::clamp_fov_milli(10_000), fvid_media::FOV_MIN_MILLI);
+        assert_eq!(fvid_media::FOV_DEFAULT_MILLI, 80_000);
+        let flat = vec![0x00_ff_00_00u32; 4 * 2];
+        let view = fvid_media::project_equirect_view(
+            4,
+            2,
+            &flat,
+            2,
+            2,
+            0,
+            0,
+            fvid_media::FOV_DEFAULT_MILLI,
+        );
+        assert_eq!(view.len(), 4);
+        assert!(fvid_media::format_spherical_osd(true, 45_000, 10_000, 80_000).contains("360°"));
+        assert!(fvid_media::is_hdr_transfer(fvid_media::COLOR_TRC_SMPTE2084));
+        assert!(fvid_media::is_hdr_transfer(fvid_media::COLOR_TRC_HLG));
+        assert!(!fvid_media::is_hdr_transfer(1));
+        assert_eq!(
+            fvid_media::cycle_hdr_tonemap(fvid_media::HdrTonemap::Off),
+            fvid_media::HdrTonemap::Clip
+        );
+        assert_eq!(
+            fvid_media::auto_hdr_tonemap(fvid_media::COLOR_TRC_SMPTE2084),
+            fvid_media::HdrTonemap::Hable
+        );
+        let mapped = fvid_media::apply_hdr_tonemap_pixel(200, 200, 200, fvid_media::HdrTonemap::Hable);
+        assert!(mapped.0 <= 255);
+        assert!(fvid_media::format_hdr_tonemap_osd(fvid_media::HdrTonemap::Hable).contains("hable"));
     }
 }

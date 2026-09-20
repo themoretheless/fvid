@@ -957,6 +957,11 @@ pub struct PlayRenderOptions {
     pub flip_v: bool,
     pub rotate: RotateMode,
     pub deinterlace: DeinterlaceMode,
+    pub spherical: bool,
+    pub yaw_deg_milli: i32,
+    pub pitch_deg_milli: i32,
+    pub fov_deg_milli: i32,
+    pub hdr_tonemap: HdrTonemap,
 }
 
 impl Default for PlayRenderOptions {
@@ -971,11 +976,229 @@ impl Default for PlayRenderOptions {
             flip_v: false,
             rotate: RotateMode::Deg0,
             deinterlace: DeinterlaceMode::Off,
+            spherical: false,
+            yaw_deg_milli: 0,
+            pitch_deg_milli: 0,
+            fov_deg_milli: FOV_DEFAULT_MILLI,
+            hdr_tonemap: HdrTonemap::Off,
         }
     }
 }
 
-/// Apply deinterlace, optional bitmap overlay, color adjust, and rotate.
+/// VLC-compatible 360° FOV limits (degrees ×1000).
+pub const FOV_MIN_MILLI: i32 = 20_000;
+pub const FOV_MAX_MILLI: i32 = 150_000;
+pub const FOV_DEFAULT_MILLI: i32 = 80_000;
+pub const FOV_STEP_MILLI: i32 = 5_000;
+pub const YAW_STEP_MILLI: i32 = 5_000;
+pub const PITCH_STEP_MILLI: i32 = 5_000;
+pub const PITCH_MIN_MILLI: i32 = -89_000;
+pub const PITCH_MAX_MILLI: i32 = 89_000;
+
+pub fn clamp_yaw_milli(value: i32) -> i32 {
+    let mut yaw = value % 360_000;
+    if yaw < 0 {
+        yaw += 360_000;
+    }
+    yaw
+}
+
+pub fn clamp_pitch_milli(value: i32) -> i32 {
+    value.clamp(PITCH_MIN_MILLI, PITCH_MAX_MILLI)
+}
+
+pub fn clamp_fov_milli(value: i32) -> i32 {
+    value.clamp(FOV_MIN_MILLI, FOV_MAX_MILLI)
+}
+
+pub fn yaw_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_yaw_milli(current + delta)
+}
+
+pub fn pitch_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_pitch_milli(current + delta)
+}
+
+pub fn fov_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_fov_milli(current + delta)
+}
+
+pub fn format_spherical_osd(
+    enabled: bool,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> String {
+    if !enabled {
+        return "360° off".into();
+    }
+    format!(
+        "360° yaw {:.0}° pitch {:.0}° fov {:.0}°",
+        clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0,
+        clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0,
+        clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0
+    )
+}
+
+/// Sample equirectangular source at normalized lon/lat (radians).
+pub fn sample_equirect_pixel(
+    pixels: &[u32],
+    width: u32,
+    height: u32,
+    lon: f32,
+    lat: f32,
+) -> u32 {
+    let w = width.max(1) as f32;
+    let h = height.max(1) as f32;
+    let u = ((lon / std::f32::consts::PI + 1.0) * 0.5).rem_euclid(1.0);
+    let v = (0.5 - lat / std::f32::consts::PI).clamp(0.0, 1.0);
+    let x = ((u * w).floor() as usize).min(width.saturating_sub(1) as usize);
+    let y = ((v * h).floor() as usize).min(height.saturating_sub(1) as usize);
+    let idx = y.saturating_mul(width as usize).saturating_add(x);
+    pixels.get(idx).copied().unwrap_or(0)
+}
+
+/// Project a rectilinear viewport from an equirectangular 360° frame (VLC-style).
+pub fn project_equirect_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+    let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+    let fov = (clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0).to_radians();
+    let aspect = out_w as f32 / out_h as f32;
+    let tan_half = (fov * 0.5).tan();
+    let (sin_y, cos_y) = yaw.sin_cos();
+    let (sin_p, cos_p) = pitch.sin_cos();
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    for oy in 0..out_h {
+        let ny = (1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32) * tan_half;
+        for ox in 0..out_w {
+            let nx = (2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0) * tan_half * aspect;
+            // Camera looks +Z; rotate pitch then yaw.
+            let x1 = nx;
+            let y1 = ny * cos_p - 1.0 * sin_p;
+            let z1 = ny * sin_p + 1.0 * cos_p;
+            let x2 = x1 * cos_y + z1 * sin_y;
+            let y2 = y1;
+            let z2 = -x1 * sin_y + z1 * cos_y;
+            let len = (x2 * x2 + y2 * y2 + z2 * z2).sqrt().max(1e-6);
+            let dx = x2 / len;
+            let dy = y2 / len;
+            let dz = z2 / len;
+            let lon = dx.atan2(dz);
+            let lat = dy.clamp(-1.0, 1.0).asin();
+            out[oy as usize * out_w as usize + ox as usize] =
+                sample_equirect_pixel(src, src_w, src_h, lon, lat);
+        }
+    }
+    out
+}
+
+/// Display HDR→SDR tonemap operators for play (VLC-style preference names).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum HdrTonemap {
+    #[default]
+    Off,
+    Clip,
+    Reinhard,
+    Hable,
+}
+
+/// FFmpeg `AVCOL_TRC_SMPTE2084` (PQ).
+pub const COLOR_TRC_SMPTE2084: u32 = 16;
+/// FFmpeg `AVCOL_TRC_ARIB_STD_B67` (HLG).
+pub const COLOR_TRC_HLG: u32 = 18;
+
+pub fn is_hdr_transfer(color_trc: u32) -> bool {
+    color_trc == COLOR_TRC_SMPTE2084 || color_trc == COLOR_TRC_HLG
+}
+
+pub fn cycle_hdr_tonemap(mode: HdrTonemap) -> HdrTonemap {
+    match mode {
+        HdrTonemap::Off => HdrTonemap::Clip,
+        HdrTonemap::Clip => HdrTonemap::Reinhard,
+        HdrTonemap::Reinhard => HdrTonemap::Hable,
+        HdrTonemap::Hable => HdrTonemap::Off,
+    }
+}
+
+pub fn hdr_tonemap_label(mode: HdrTonemap) -> &'static str {
+    match mode {
+        HdrTonemap::Off => "off",
+        HdrTonemap::Clip => "clip",
+        HdrTonemap::Reinhard => "reinhard",
+        HdrTonemap::Hable => "hable",
+    }
+}
+
+pub fn format_hdr_tonemap_osd(mode: HdrTonemap) -> String {
+    format!("HDR tonemap {}", hdr_tonemap_label(mode))
+}
+
+fn hable_tonemap(x: f32) -> f32 {
+    let a = 0.15;
+    let b = 0.50;
+    let c = 0.10;
+    let d = 0.20;
+    let e = 0.02;
+    let f = 0.30;
+    ((x * (a * x + c * b) + d * e) / (x * (a * x + b) + d * f)) - e / f
+}
+
+/// Map one linear channel through a display tonemap curve.
+pub fn tonemap_channel(value: f32, mode: HdrTonemap) -> f32 {
+    let x = value.max(0.0);
+    match mode {
+        HdrTonemap::Off => x.clamp(0.0, 1.0),
+        HdrTonemap::Clip => x.clamp(0.0, 1.0),
+        HdrTonemap::Reinhard => (x / (1.0 + x)).clamp(0.0, 1.0),
+        HdrTonemap::Hable => {
+            let white = hable_tonemap(11.2).max(1e-6);
+            (hable_tonemap(x * 2.0) / white).clamp(0.0, 1.0)
+        }
+    }
+}
+
+pub fn apply_hdr_tonemap_pixel(
+    red: u8,
+    green: u8,
+    blue: u8,
+    mode: HdrTonemap,
+) -> (u8, u8, u8) {
+    if matches!(mode, HdrTonemap::Off | HdrTonemap::Clip) {
+        return (red, green, blue);
+    }
+    // Expand 8-bit SDR into a pseudo-HDR range so highlight compression is visible.
+    let boost = 2.5;
+    let r = tonemap_channel((f32::from(red) / 255.0) * boost, mode);
+    let g = tonemap_channel((f32::from(green) / 255.0) * boost, mode);
+    let b = tonemap_channel((f32::from(blue) / 255.0) * boost, mode);
+    (
+        (r * 255.0).round().clamp(0.0, 255.0) as u8,
+        (g * 255.0).round().clamp(0.0, 255.0) as u8,
+        (b * 255.0).round().clamp(0.0, 255.0) as u8,
+    )
+}
+
+/// Default tonemap when stream signals PQ/HLG.
+pub fn auto_hdr_tonemap(color_trc: u32) -> HdrTonemap {
+    if is_hdr_transfer(color_trc) {
+        HdrTonemap::Hable
+    } else {
+        HdrTonemap::Off
+    }
+}
+
+/// Apply deinterlace, optional 360° projection, bitmap overlay, color adjust, HDR tonemap, and rotate.
 /// Returns `(width, height, packed 0x00RRGGBB pixels)`.
 pub fn render_play_pixels(
     width: u32,
@@ -991,6 +1214,18 @@ pub fn render_play_pixels(
         source.resize(w.saturating_mul(h), 0);
     }
     apply_deinterlace_rgb(&mut source, width, height, opts.deinterlace);
+    if opts.spherical {
+        source = project_equirect_view(
+            width,
+            height,
+            &source,
+            width,
+            height,
+            opts.yaw_deg_milli,
+            opts.pitch_deg_milli,
+            opts.fov_deg_milli,
+        );
+    }
     if let Some(plane) = bitmap {
         blit_bitmap_subtitle(&mut source, width, height, plane);
     }
@@ -1011,6 +1246,7 @@ pub fn render_play_pixels(
                 opts.hue_milli,
             );
             let (red, green, blue) = apply_gamma_pixel(red, green, blue, opts.gamma_milli);
+            let (red, green, blue) = apply_hdr_tonemap_pixel(red, green, blue, opts.hdr_tonemap);
             let (dx, dy) = rotate_pixel(x as u32, y as u32, width, height, opts.rotate);
             out[dy as usize * out_w as usize + dx as usize] =
                 (u32::from(red) << 16) | (u32::from(green) << 8) | u32::from(blue);
@@ -2125,6 +2361,7 @@ struct VideoFrame {
     width: u32,
     height: u32,
     pixels: Vec<u32>,
+    color_trc: u32,
 }
 
 struct Shared {
@@ -2171,6 +2408,8 @@ struct Shared {
         chapters: Mutex<Vec<i64>>,
         audio_delay_us: AtomicI64,
         audio_skew_frames: AtomicI64,
+        /// Last seen `AVFrame.color_trc` (PQ/HLG detection for play HDR).
+        color_trc: AtomicU32,
         eq_gains_milli: [AtomicI32; EQ_BAND_COUNT],
         tone: Mutex<Vec<GraphicEqState>>,
         /// Per-channel Bass/Mid/Treble filter state.
@@ -3913,6 +4152,8 @@ fn receive_video(
             .unwrap_or(fallback_us);
         *next_pts = pts_us.saturating_add(duration_us);
         let scaled = scaler.convert(frame.0)?;
+        let color_trc = unsafe { (*frame.0).color_trc as u32 };
+        shared.color_trc.store(color_trc, Ordering::Relaxed);
         if shared.source_width.load(Ordering::Relaxed) == 0 {
             shared
                 .source_width
@@ -3929,6 +4170,7 @@ fn receive_video(
                 width: scaled.width,
                 height: scaled.height,
                 pixels: scaled.pixels,
+                color_trc,
             },
             signaled,
         )?;
@@ -4166,6 +4408,12 @@ struct PlayerApp {
     position_display: PositionDisplay,
     sleep_min: u32,
     sleep_deadline_secs: Option<u64>,
+    spherical: bool,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    fov_deg_milli: i32,
+    hdr_tonemap: HdrTonemap,
+    hdr_auto_applied: bool,
     outcome: Arc<Mutex<Option<std::result::Result<PlayStats, String>>>>,
 }
 
@@ -4253,13 +4501,19 @@ impl PlayerApp {
             position_display: PositionDisplay::Elapsed,
             sleep_min: 0,
             sleep_deadline_secs: None,
+            spherical: false,
+            yaw_deg_milli: 0,
+            pitch_deg_milli: 0,
+            fov_deg_milli: FOV_DEFAULT_MILLI,
+            hdr_tonemap: HdrTonemap::Off,
+            hdr_auto_applied: false,
             outcome,
         };
         if let Err(err) = app.start_session(first) {
             app.error = Some(err);
         }
         eprintln!(
-            "fvid play: Space pause, left/right seek, up/down volume, M mute, B audio, V subtitles, L A-B loop, R repeat, G/H subtitle delay, J/K audio delay, A aspect, C crop, Z zoom, Ctrl+B bookmark, Ctrl+Alt+B save bookmarks, Ctrl+R shuffle, T on-top, Shift+T time, Ctrl+N vol normalizer, W stereo width, O crossfeed, U compressor, X sleep timer, F fullscreen, [ ] speed, . step, S snapshot, Esc quit"
+            "fvid play: Space pause, left/right seek, up/down volume, M mute, B audio, V subtitles, L A-B loop, R repeat, G/H subtitle delay, J/K audio delay, A aspect, C crop, Z zoom, Ctrl+B bookmark, Ctrl+Alt+B save bookmarks, Ctrl+R shuffle, T on-top, Shift+T time, Ctrl+N vol normalizer, W stereo width, O crossfeed, U compressor, X sleep timer, 3 toggle 360, Ctrl+arrows look, Ctrl+PgUp/Dn FOV, Ctrl+H HDR tonemap, F fullscreen, [ ] speed, . step, S snapshot, Esc quit"
         );
         app
     }
@@ -4274,6 +4528,7 @@ impl PlayerApp {
         self.audio_delay_us = 0;
         self.bookmarks.clear();
         self.texture = None;
+        self.hdr_auto_applied = false;
         if path.to_str().is_none() {
             return Err("path must be UTF-8".into());
         }
@@ -4329,6 +4584,7 @@ impl PlayerApp {
             chapters: Mutex::new(Vec::new()),
             audio_delay_us: AtomicI64::new(0),
             audio_skew_frames: AtomicI64::new(0),
+            color_trc: AtomicU32::new(0),
             eq_gains_milli: std::array::from_fn(|i| AtomicI32::new(self.eq_gains_milli[i])),
             tone: Mutex::new(Vec::new()),
             tone_bands: Mutex::new(Vec::new()),
@@ -4662,7 +4918,9 @@ impl PlayerApp {
             self.toggle_pause();
         }
         if keys.2 {
-            if command {
+            if self.spherical {
+                self.nudge_yaw(-YAW_STEP_MILLI);
+            } else if command {
                 self.step_bookmark(-1);
             } else {
                 let fine = ctx.input(|input| input.modifiers.shift);
@@ -4677,7 +4935,9 @@ impl PlayerApp {
             }
         }
         if keys.3 {
-            if command {
+            if self.spherical {
+                self.nudge_yaw(YAW_STEP_MILLI);
+            } else if command {
                 self.step_bookmark(1);
             } else {
                 let fine = ctx.input(|input| input.modifiers.shift);
@@ -4692,19 +4952,27 @@ impl PlayerApp {
             }
         }
         if keys.4 {
-            let fine = ctx.input(|input| input.modifiers.shift);
-            if fine && self.zoom_milli > 1_000 {
-                self.nudge_pan(0, -PAN_STEP_PX, 800, 450);
+            if self.spherical {
+                self.nudge_pitch(PITCH_STEP_MILLI);
             } else {
-                self.nudge_volume(VOLUME_STEP_MILLI);
+                let fine = ctx.input(|input| input.modifiers.shift);
+                if fine && self.zoom_milli > 1_000 {
+                    self.nudge_pan(0, -PAN_STEP_PX, 800, 450);
+                } else {
+                    self.nudge_volume(VOLUME_STEP_MILLI);
+                }
             }
         }
         if keys.5 {
-            let fine = ctx.input(|input| input.modifiers.shift);
-            if fine && self.zoom_milli > 1_000 {
-                self.nudge_pan(0, PAN_STEP_PX, 800, 450);
+            if self.spherical {
+                self.nudge_pitch(-PITCH_STEP_MILLI);
             } else {
-                self.nudge_volume(-VOLUME_STEP_MILLI);
+                let fine = ctx.input(|input| input.modifiers.shift);
+                if fine && self.zoom_milli > 1_000 {
+                    self.nudge_pan(0, PAN_STEP_PX, 800, 450);
+                } else {
+                    self.nudge_volume(-VOLUME_STEP_MILLI);
+                }
             }
         }
         if keys.6 {
@@ -4727,30 +4995,34 @@ impl PlayerApp {
             self.step_frame_back();
         }
         if !focused {
-            let digit = ctx.input(|input| {
-                [
-                    egui::Key::Num0,
-                    egui::Key::Num1,
-                    egui::Key::Num2,
-                    egui::Key::Num3,
-                    egui::Key::Num4,
-                    egui::Key::Num5,
-                    egui::Key::Num6,
-                    egui::Key::Num7,
-                    egui::Key::Num8,
-                    egui::Key::Num9,
-                ]
-                .into_iter()
-                .enumerate()
-                .find_map(|(digit, key)| input.key_pressed(key).then_some(digit as u8))
-            });
-            if let Some(digit) = digit {
-                if let Some(target) = position_us_from_digit(digit, self.duration_us()) {
-                    self.request_seek(target);
-                    self.notice = Some(format!(
-                        "Position {}%",
-                        if digit == 0 { 100 } else { digit * 10 }
-                    ));
+            if command && ctx.input(|input| input.key_pressed(egui::Key::Num3)) {
+                self.toggle_spherical();
+            } else {
+                let digit = ctx.input(|input| {
+                    [
+                        egui::Key::Num0,
+                        egui::Key::Num1,
+                        egui::Key::Num2,
+                        egui::Key::Num3,
+                        egui::Key::Num4,
+                        egui::Key::Num5,
+                        egui::Key::Num6,
+                        egui::Key::Num7,
+                        egui::Key::Num8,
+                        egui::Key::Num9,
+                    ]
+                    .into_iter()
+                    .enumerate()
+                    .find_map(|(digit, key)| input.key_pressed(key).then_some(digit as u8))
+                });
+                if let Some(digit) = digit {
+                    if let Some(target) = position_us_from_digit(digit, self.duration_us()) {
+                        self.request_seek(target);
+                        self.notice = Some(format!(
+                            "Position {}%",
+                            if digit == 0 { 100 } else { digit * 10 }
+                        ));
+                    }
                 }
             }
         }
@@ -4793,10 +5065,18 @@ impl PlayerApp {
             self.mark_ab();
         }
         if keys.15 {
-            self.step_chapter(-1);
+            if self.spherical {
+                self.nudge_fov(-FOV_STEP_MILLI);
+            } else {
+                self.step_chapter(-1);
+            }
         }
         if keys.16 {
-            self.step_chapter(1);
+            if self.spherical {
+                self.nudge_fov(FOV_STEP_MILLI);
+            } else {
+                self.step_chapter(1);
+            }
         }
         if keys.17 {
             if command {
@@ -4809,7 +5089,11 @@ impl PlayerApp {
             self.nudge_subtitle_delay(-1);
         }
         if keys.19 {
-            self.nudge_subtitle_delay(1);
+            if command {
+                self.cycle_hdr_mode();
+            } else {
+                self.nudge_subtitle_delay(1);
+            }
         }
         if keys.20 {
             self.nudge_audio_delay(-1);
@@ -4986,6 +5270,7 @@ impl PlayerApp {
     }
 
     fn take_image(&mut self) -> Option<egui::ColorImage> {
+        self.maybe_auto_hdr();
         let now = self.shown_media_us();
         let session = self.session.as_mut()?;
         if !session.dirty && !self.adjust_dirty {
@@ -5007,6 +5292,11 @@ impl PlayerApp {
             self.flip_v,
             self.rotate,
             self.deinterlace,
+            self.spherical,
+            self.yaw_deg_milli,
+            self.pitch_deg_milli,
+            self.fov_deg_milli,
+            self.hdr_tonemap,
             bitmap.as_ref(),
         );
         session.dirty = false;
@@ -5215,6 +5505,14 @@ impl PlayerApp {
             if ui.button(deint).clicked() {
                 self.deinterlace = cycle_deinterlace(self.deinterlace);
                 self.adjust_dirty = true;
+            }
+            let sph = if self.spherical { "360*" } else { "360" };
+            if ui.button(sph).clicked() {
+                self.toggle_spherical();
+            }
+            let hdr = format!("HDR {}", hdr_tonemap_label(self.hdr_tonemap));
+            if ui.button(hdr).clicked() {
+                self.cycle_hdr_mode();
             }
         });
         ui.horizontal(|ui| {
@@ -5598,6 +5896,81 @@ impl PlayerApp {
         };
         eprintln!("fvid play: {notice}");
         self.notice = Some(notice.into());
+    }
+
+    fn toggle_spherical(&mut self) {
+        self.spherical = !self.spherical;
+        self.adjust_dirty = true;
+        let notice = format_spherical_osd(
+            self.spherical,
+            self.yaw_deg_milli,
+            self.pitch_deg_milli,
+            self.fov_deg_milli,
+        );
+        eprintln!("fvid play: {notice}");
+        self.notice = Some(notice);
+    }
+
+    fn nudge_yaw(&mut self, delta: i32) {
+        self.yaw_deg_milli = yaw_step_milli(self.yaw_deg_milli, delta);
+        self.adjust_dirty = true;
+        self.notice = Some(format_spherical_osd(
+            self.spherical,
+            self.yaw_deg_milli,
+            self.pitch_deg_milli,
+            self.fov_deg_milli,
+        ));
+    }
+
+    fn nudge_pitch(&mut self, delta: i32) {
+        self.pitch_deg_milli = pitch_step_milli(self.pitch_deg_milli, delta);
+        self.adjust_dirty = true;
+        self.notice = Some(format_spherical_osd(
+            self.spherical,
+            self.yaw_deg_milli,
+            self.pitch_deg_milli,
+            self.fov_deg_milli,
+        ));
+    }
+
+    fn nudge_fov(&mut self, delta: i32) {
+        self.fov_deg_milli = fov_step_milli(self.fov_deg_milli, delta);
+        self.adjust_dirty = true;
+        self.notice = Some(format_spherical_osd(
+            self.spherical,
+            self.yaw_deg_milli,
+            self.pitch_deg_milli,
+            self.fov_deg_milli,
+        ));
+    }
+
+    fn cycle_hdr_mode(&mut self) {
+        self.hdr_tonemap = cycle_hdr_tonemap(self.hdr_tonemap);
+        self.hdr_auto_applied = true;
+        self.adjust_dirty = true;
+        let notice = format_hdr_tonemap_osd(self.hdr_tonemap);
+        eprintln!("fvid play: {notice}");
+        self.notice = Some(notice);
+    }
+
+    fn maybe_auto_hdr(&mut self) {
+        if self.hdr_auto_applied {
+            return;
+        }
+        let Some(session) = &self.session else {
+            return;
+        };
+        let trc = session
+            .frame
+            .as_ref()
+            .map(|frame| frame.color_trc)
+            .unwrap_or_else(|| session.shared.color_trc.load(Ordering::Relaxed));
+        if is_hdr_transfer(trc) {
+            self.hdr_tonemap = auto_hdr_tonemap(trc);
+            self.hdr_auto_applied = true;
+            self.adjust_dirty = true;
+            self.notice = Some(format_hdr_tonemap_osd(self.hdr_tonemap));
+        }
     }
 
     fn cycle_position_osd(&mut self) {
@@ -6128,6 +6501,11 @@ impl PlayerApp {
                 flip_v: self.flip_v,
                 rotate: self.rotate,
                 deinterlace: self.deinterlace,
+                spherical: self.spherical,
+                yaw_deg_milli: self.yaw_deg_milli,
+                pitch_deg_milli: self.pitch_deg_milli,
+                fov_deg_milli: self.fov_deg_milli,
+                hdr_tonemap: self.hdr_tonemap,
             };
             let (width, height, pixels) =
                 render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap.as_ref());
@@ -6406,7 +6784,14 @@ impl PlayerApp {
         .fit_to_exact_size(size);
         ui.set_clip_rect(rect);
         let response = ui.allocate_rect(rect, egui::Sense::click_and_drag());
-        if self.zoom_milli > 1_000 && response.dragged() {
+        if self.spherical && response.dragged() {
+            let delta = response.drag_delta();
+            self.yaw_deg_milli =
+                yaw_step_milli(self.yaw_deg_milli, (delta.x * 200.0).round() as i32);
+            self.pitch_deg_milli =
+                pitch_step_milli(self.pitch_deg_milli, (-delta.y * 200.0).round() as i32);
+            self.adjust_dirty = true;
+        } else if self.zoom_milli > 1_000 && response.dragged() {
             let delta = response.drag_delta();
             self.pan_x_px = clamp_pan_px(
                 self.pan_x_px + delta.x.round() as i32,
@@ -6418,6 +6803,16 @@ impl PlayerApp {
                 rect.height().max(0.0) as u32,
                 zoomed_h,
             );
+        }
+        if self.spherical {
+            let scroll = ui.input(|input| input.smooth_scroll_delta.y);
+            if scroll.abs() > 0.1 {
+                self.nudge_fov(if scroll > 0.0 {
+                    -FOV_STEP_MILLI
+                } else {
+                    FOV_STEP_MILLI
+                });
+            }
         }
         let (px, py, pw, ph) = zoom_pan_rect(
             (rect.min.x, rect.min.y, rect.width(), rect.height()),
@@ -6598,6 +6993,11 @@ fn color_image(
     flip_v: bool,
     rotate: RotateMode,
     deinterlace: DeinterlaceMode,
+    spherical: bool,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    fov_deg_milli: i32,
+    hdr_tonemap: HdrTonemap,
     bitmap: Option<&BitmapSubtitle>,
 ) -> egui::ColorImage {
     let opts = PlayRenderOptions {
@@ -6610,6 +7010,11 @@ fn color_image(
         flip_v,
         rotate,
         deinterlace,
+        spherical,
+        yaw_deg_milli,
+        pitch_deg_milli,
+        fov_deg_milli,
+        hdr_tonemap,
     };
     let (out_w, out_h, rgb) =
         render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap);
