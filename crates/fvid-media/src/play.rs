@@ -3855,6 +3855,221 @@ pub fn format_waveform_osd(enabled: bool) -> &'static str {
     }
 }
 
+/// HDR10+ / dynamic metadata presence (oracle; full bitstream remains OOS).
+pub fn format_hdr10_plus_osd(present: bool) -> &'static str {
+    if present {
+        "HDR10+ dynamic"
+    } else {
+        "HDR10+ Off"
+    }
+}
+
+/// HLG OOTF display gamma for SDR preview (BT.2100 simplified).
+pub fn hlg_ootf_channel(scene: f32, gamma: f32) -> f32 {
+    let y = scene.clamp(0.0, 1.0);
+    let g = gamma.clamp(1.0, 2.4);
+    if y <= 0.5 {
+        (3.0 * y * y).powf(g)
+    } else {
+        y.powf(g)
+    }
+    .clamp(0.0, 1.0)
+}
+
+pub fn apply_hlg_ootf_pixel(red: u8, green: u8, blue: u8, gamma_milli: i32) -> (u8, u8, u8) {
+    let gamma = gamma_milli.clamp(1_000, 2_400) as f32 / 1_000.0;
+    let map = |c: u8| -> u8 {
+        let v = hlg_ootf_channel(f32::from(c) / 255.0, gamma);
+        (v * 255.0).round().clamp(0.0, 255.0) as u8
+    };
+    (map(red), map(green), map(blue))
+}
+
+pub fn format_hlg_ootf_osd(gamma_milli: i32) -> String {
+    format!("HLG OOTF γ{:.2}", gamma_milli.clamp(1_000, 2_400) as f32 / 1_000.0)
+}
+
+/// FOV presets for 360 / VR (narrow / cinema / wide / super-wide).
+pub const FOV_PRESET_MILLI: [i32; 4] = [60_000, 90_000, 110_000, 140_000];
+
+pub fn cycle_fov_preset_milli(current: i32) -> i32 {
+    let cur = clamp_fov_milli(current);
+    let mut best = 0usize;
+    let mut best_dist = i32::MAX;
+    for (i, &p) in FOV_PRESET_MILLI.iter().enumerate() {
+        let d = (p - cur).abs();
+        if d < best_dist {
+            best_dist = d;
+            best = i;
+        }
+    }
+    FOV_PRESET_MILLI[(best + 1) % FOV_PRESET_MILLI.len()]
+}
+
+pub fn format_fov_preset_osd(fov_milli: i32) -> String {
+    format!("FOV {:.0}°", clamp_fov_milli(fov_milli) as f32 / 1_000.0)
+}
+
+/// Parse spherical stereo layout CLI token.
+pub fn parse_spherical_stereo(spec: &str) -> Result<SphericalStereoLayout> {
+    match spec.trim().to_ascii_lowercase().as_str() {
+        "mono" | "off" => Ok(SphericalStereoLayout::Mono),
+        "tb" | "top-bottom" | "over-under" => Ok(SphericalStereoLayout::TopBottom),
+        "sbs" | "side-by-side" => Ok(SphericalStereoLayout::SideBySide),
+        other => Err(format!(
+            "spherical stereo expected mono|tb|sbs got `{other}`"
+        )),
+    }
+}
+
+/// Display vs content peak nits comparison for HDR headroom OSD.
+pub fn format_hdr_headroom_osd(content_nits: u32, display_nits: u32) -> String {
+    let content = clamp_hdr_nits(content_nits);
+    let display = clamp_hdr_nits(display_nits);
+    if display == 0 {
+        format!("HDR headroom n/a (content {content})")
+    } else if content <= display {
+        format!("HDR headroom +{} nits", display - content)
+    } else {
+        format!("HDR clip −{} nits", content - display)
+    }
+}
+
+/// SMPTE timecode from media time + fps milli (e.g. 24000 = 24.000 fps).
+pub fn format_timecode_osd(position_us: i64, fps_milli: u32) -> String {
+    let pos = position_us.max(0);
+    let fps = fps_milli.max(1) as i64;
+    let total_frames = (pos * fps) / 1_000_000_000;
+    let fps_i = (fps_milli.max(1) / 1_000).max(1) as i64;
+    let frames = total_frames % fps_i;
+    let total_secs = total_frames / fps_i;
+    let secs = total_secs % 60;
+    let mins = (total_secs / 60) % 60;
+    let hours = total_secs / 3600;
+    format!("{hours:02}:{mins:02}:{secs:02}:{frames:02}")
+}
+
+/// Export chapter times as newline-separated clocks (VLC chapter list style).
+pub fn format_chapter_list_export(chapters_us: &[i64]) -> String {
+    chapters_us
+        .iter()
+        .map(|&t| format_play_clock(t.max(0)))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+/// Prefer sidecar album/cover art next to media (cover.jpg / folder.png).
+pub fn prefer_album_art_path(media: &Path, candidates: &[&str]) -> Option<String> {
+    let parent = media.parent()?;
+    for name in candidates {
+        let path = parent.join(name);
+        if path.is_file() {
+            return Some(path.to_string_lossy().into_owned());
+        }
+    }
+    None
+}
+
+pub fn format_album_art_osd(path: Option<&str>) -> String {
+    match path {
+        Some(p) => format!("Album art {p}"),
+        None => "Album art none".into(),
+    }
+}
+
+/// Simple 3×3 box denoise (VLC / PotPlayer video filter style).
+pub fn apply_box_denoise_pixel(
+    width: u32,
+    height: u32,
+    pixels: &[u32],
+    x: u32,
+    y: u32,
+    strength_milli: i32,
+) -> u32 {
+    let strength = strength_milli.clamp(0, 1_000);
+    if strength == 0 || width == 0 || height == 0 || pixels.len() < (width * height) as usize {
+        let idx = (y * width + x) as usize;
+        return pixels.get(idx).copied().unwrap_or(0);
+    }
+    let mut r_sum = 0u32;
+    let mut g_sum = 0u32;
+    let mut b_sum = 0u32;
+    let mut n = 0u32;
+    for dy in -1i32..=1 {
+        for dx in -1i32..=1 {
+            let xx = (x as i32 + dx).clamp(0, width as i32 - 1) as u32;
+            let yy = (y as i32 + dy).clamp(0, height as i32 - 1) as u32;
+            let p = pixels[(yy * width + xx) as usize];
+            r_sum += (p >> 16) & 0xff;
+            g_sum += (p >> 8) & 0xff;
+            b_sum += p & 0xff;
+            n += 1;
+        }
+    }
+    let avg_r = r_sum / n.max(1);
+    let avg_g = g_sum / n.max(1);
+    let avg_b = b_sum / n.max(1);
+    let src = pixels[(y * width + x) as usize];
+    let sr = (src >> 16) & 0xff;
+    let sg = (src >> 8) & 0xff;
+    let sb = src & 0xff;
+    let blend = |a: u32, b: u32| -> u32 { (a * (1_000 - strength as u32) + b * strength as u32) / 1_000 };
+    let r = blend(sr, avg_r);
+    let g = blend(sg, avg_g);
+    let b = blend(sb, avg_b);
+    (r << 16) | (g << 8) | b
+}
+
+pub fn format_box_denoise_osd(strength_milli: i32) -> String {
+    if strength_milli <= 0 {
+        "Denoise Off".into()
+    } else {
+        format!("Denoise {}%", strength_milli.clamp(0, 1_000) / 10)
+    }
+}
+
+/// Dialogue enhance: mild mid-band boost oracle (speech intelligibility).
+pub fn apply_dialogue_enhance_sample(sample: f32, amount_milli: i32) -> f32 {
+    let amount = amount_milli.clamp(0, 1_000) as f32 / 1_000.0;
+    soft_clip_sample(sample * (1.0 + 0.45 * amount))
+}
+
+pub fn format_dialogue_enhance_osd(amount_milli: i32) -> String {
+    if amount_milli <= 0 {
+        "Dialogue enhance Off".into()
+    } else {
+        format!("Dialogue enhance {}%", amount_milli.clamp(0, 1_000) / 10)
+    }
+}
+
+/// Vectorscope R–B quadrant occupancy counts (simplified color scope).
+pub fn vectorscope_quadrant_counts(pixels: &[u32], sample_stride: usize) -> [u32; 4] {
+    let mut counts = [0u32; 4];
+    let stride = sample_stride.max(1);
+    for p in pixels.iter().step_by(stride) {
+        let r = ((*p >> 16) & 0xff) as i32;
+        let b = (*p & 0xff) as i32;
+        let cr = r - 128;
+        let cb = b - 128;
+        let idx = match (cr >= 0, cb >= 0) {
+            (true, true) => 0,
+            (false, true) => 1,
+            (false, false) => 2,
+            (true, false) => 3,
+        };
+        counts[idx] += 1;
+    }
+    counts
+}
+
+pub fn format_vectorscope_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Vectorscope On"
+    } else {
+        "Vectorscope Off"
+    }
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -4579,6 +4794,12 @@ pub struct PlayOptions {
     pub hdr_maxcll: u32,
     /// HDR10 MaxFALL metadata (nits).
     pub hdr_maxfall: u32,
+    /// Stereo packing inside 360° source (`--spherical-stereo`).
+    pub spherical_stereo: SphericalStereoLayout,
+    /// Mastering display min luminance (milli-nits).
+    pub hdr_mastering_min_milli: u32,
+    /// Mastering display max luminance (nits).
+    pub hdr_mastering_max_nits: u32,
 }
 
 impl Default for PlayOptions {
@@ -4615,6 +4836,9 @@ impl Default for PlayOptions {
             hdr_nits: HDR_NITS_DEFAULT,
             hdr_maxcll: 0,
             hdr_maxfall: 0,
+            spherical_stereo: SphericalStereoLayout::Mono,
+            hdr_mastering_min_milli: 0,
+            hdr_mastering_max_nits: 0,
         }
     }
 }
@@ -8273,6 +8497,14 @@ struct PlayerApp {
     audio_duck_milli: i32,
     waveform_enabled: bool,
     playlist_fade_us: i64,
+    hdr10_plus: bool,
+    hlg_ootf_gamma_milli: i32,
+    denoise_milli: i32,
+    dialogue_enhance_milli: i32,
+    vectorscope_enabled: bool,
+    display_peak_nits: u32,
+    hdr_mastering_min_milli: u32,
+    hdr_mastering_max_nits: u32,
     seek_jump: SeekJump,
     surround_downmix: bool,
     scaletempo: bool,
@@ -8363,6 +8595,9 @@ impl PlayerApp {
         let hdr_nits = clamp_hdr_nits(options.hdr_nits);
         let hdr_maxcll = clamp_hdr_maxcll(options.hdr_maxcll);
         let hdr_maxfall = clamp_hdr_maxcll(options.hdr_maxfall);
+        let spherical_stereo = options.spherical_stereo;
+        let hdr_mastering_min_milli = options.hdr_mastering_min_milli;
+        let hdr_mastering_max_nits = options.hdr_mastering_max_nits;
         let controls_autohide_ms = clamp_controls_autohide_ms(options.controls_autohide_ms);
         let http_reconnect = clamp_http_reconnect(options.http_reconnect);
         let mut app = Self {
@@ -8470,7 +8705,7 @@ impl PlayerApp {
             horizon_lock: false,
             horizon_pitch_milli: 0,
             deband_milli: DEBAND_DEFAULT_MILLI,
-            spherical_stereo: SphericalStereoLayout::Mono,
+            spherical_stereo,
             tonemap_strength_milli: TONEMAP_STRENGTH_DEFAULT_MILLI,
             hdr_highlight_desat_milli: 0,
             color_temp_kelvin: COLOR_TEMP_DAYLIGHT_K,
@@ -8479,6 +8714,14 @@ impl PlayerApp {
             audio_duck_milli: 400,
             waveform_enabled: false,
             playlist_fade_us: 0,
+            hdr10_plus: false,
+            hlg_ootf_gamma_milli: 1_200,
+            denoise_milli: 0,
+            dialogue_enhance_milli: 0,
+            vectorscope_enabled: false,
+            display_peak_nits: HDR_NITS_DEFAULT,
+            hdr_mastering_min_milli,
+            hdr_mastering_max_nits,
             seek_jump: SeekJump::default(),
             surround_downmix: false,
             scaletempo: true,
@@ -9780,6 +10023,70 @@ impl PlayerApp {
             })
         {
             self.detect_and_show_letterbox();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::Num0)
+            })
+        {
+            self.cycle_fov_preset();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::Num8)
+            })
+        {
+            self.toggle_hdr10_plus();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::Num9)
+            })
+        {
+            self.cycle_hlg_ootf();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::H)
+            })
+        {
+            self.show_hdr_headroom();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::C)
+            })
+        {
+            self.show_timecode();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::N)
+            })
+        {
+            self.cycle_denoise();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::E)
+            })
+        {
+            self.cycle_dialogue_enhance();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::S)
+            })
+        {
+            self.toggle_vectorscope();
         }
         if !focused
             && command
@@ -11599,6 +11906,72 @@ impl PlayerApp {
             .map(|f| detect_letterbox_bars(f.width, f.height, &f.pixels, 16))
             .unwrap_or((0, 0, 0, 0));
         self.notice = Some(format_letterbox_osd(bars.0, bars.1, bars.2, bars.3));
+    }
+
+    fn cycle_fov_preset(&mut self) {
+        self.fov_deg_milli = cycle_fov_preset_milli(self.fov_deg_milli);
+        self.adjust_dirty = true;
+        self.notice = Some(format_fov_preset_osd(self.fov_deg_milli));
+    }
+
+    fn toggle_hdr10_plus(&mut self) {
+        self.hdr10_plus = !self.hdr10_plus;
+        self.notice = Some(format_hdr10_plus_osd(self.hdr10_plus).into());
+    }
+
+    fn cycle_hlg_ootf(&mut self) {
+        let next = match self.hlg_ootf_gamma_milli {
+            ..=1_000 => 1_200,
+            1_001..=1_200 => 1_500,
+            _ => 1_000,
+        };
+        self.hlg_ootf_gamma_milli = next;
+        self.notice = Some(format_hlg_ootf_osd(self.hlg_ootf_gamma_milli));
+    }
+
+    fn show_hdr_headroom(&mut self) {
+        let content = if self.hdr_mastering_max_nits > 0 {
+            self.hdr_mastering_max_nits
+        } else if self.hdr_maxcll > 0 {
+            self.hdr_maxcll
+        } else {
+            self.hdr_nits
+        };
+        self.notice = Some(format_hdr_headroom_osd(content, self.display_peak_nits));
+    }
+
+    fn show_timecode(&mut self) {
+        let pos = self
+            .session
+            .as_ref()
+            .map(|s| s.shared.watch_us.load(Ordering::Relaxed))
+            .unwrap_or(0);
+        self.notice = Some(format_timecode_osd(pos, 24_000));
+    }
+
+    fn cycle_denoise(&mut self) {
+        let next = match self.denoise_milli {
+            0 => 350,
+            1..=350 => 700,
+            _ => 0,
+        };
+        self.denoise_milli = next;
+        self.notice = Some(format_box_denoise_osd(self.denoise_milli));
+    }
+
+    fn cycle_dialogue_enhance(&mut self) {
+        let next = match self.dialogue_enhance_milli {
+            0 => 300,
+            1..=300 => 600,
+            _ => 0,
+        };
+        self.dialogue_enhance_milli = next;
+        self.notice = Some(format_dialogue_enhance_osd(self.dialogue_enhance_milli));
+    }
+
+    fn toggle_vectorscope(&mut self) {
+        self.vectorscope_enabled = !self.vectorscope_enabled;
+        self.notice = Some(format_vectorscope_osd(self.vectorscope_enabled).into());
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {

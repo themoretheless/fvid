@@ -1842,6 +1842,23 @@ mod play_controls {
         assert_eq!(fvid_media::audio_duck_gain_milli(true, 400), 400);
         let wave = fvid_media::waveform_column_fills(2, 2, &[0x00_80_80_80u32; 4], 2);
         assert_eq!(wave.len(), 2);
+        assert_eq!(
+            fvid_media::parse_spherical_stereo("sbs").unwrap(),
+            fvid_media::SphericalStereoLayout::SideBySide
+        );
+        assert!(fvid_media::hlg_ootf_channel(0.25, 1.2) > 0.0);
+        assert_eq!(fvid_media::cycle_fov_preset_milli(90_000), 110_000);
+        assert!(fvid_media::format_hdr_headroom_osd(400, 1_000).contains('+'));
+        assert_eq!(fvid_media::format_timecode_osd(1_000_000, 24_000), "00:00:01:00");
+        assert_eq!(
+            fvid_media::format_chapter_list_export(&[0, 1_000_000]),
+            "00:00\n00:01"
+        );
+        let den = fvid_media::apply_box_denoise_pixel(2, 2, &[0x00_10_10_10u32; 4], 0, 0, 500);
+        assert_ne!(den, 0);
+        assert!(fvid_media::apply_dialogue_enhance_sample(0.5, 500).abs() > 0.5);
+        let vs = fvid_media::vectorscope_quadrant_counts(&[0x00_ff_00_ffu32], 1);
+        assert_eq!(vs.iter().sum::<u32>(), 1);
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
