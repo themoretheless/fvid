@@ -2750,6 +2750,88 @@ pub fn format_night_mode_osd(enabled: bool) -> &'static str {
     }
 }
 
+/// Frame-rate OSD from frame duration (VLC stats / Codec info).
+pub fn frame_rate_milli_from_duration_us(frame_duration_us: i64) -> u32 {
+    if frame_duration_us <= 0 {
+        return 0;
+    }
+    ((1_000_000_000i64) / frame_duration_us.max(1)).clamp(0, 240_000) as u32
+}
+
+pub fn format_frame_rate_osd(frame_duration_us: i64) -> String {
+    let milli = frame_rate_milli_from_duration_us(frame_duration_us);
+    format!("FPS {:.3}", milli as f32 / 1_000.0)
+}
+
+/// Multi-angle selection (DVD-style angle index among video streams).
+pub fn cycle_angle(count: u32, current: u32) -> u32 {
+    cycle_video_track(count, current)
+}
+
+pub fn format_angle_osd(index: u32, count: u32) -> String {
+    if count <= 1 {
+        "Angle 1".into()
+    } else {
+        format!("Angle {}/{}", index + 1, count)
+    }
+}
+
+/// Mouse-wheel seek when Ctrl is held (fine scrub).
+pub fn seek_from_wheel(now_us: i64, scroll_lines: i32, step_us: i64) -> i64 {
+    now_us.saturating_add(i64::from(scroll_lines) * step_us).max(0)
+}
+
+/// Playlist queue insert (play next without reshuffling order).
+pub fn queue_insert(queue: &mut Vec<usize>, index: usize, at_front: bool) {
+    queue.retain(|item| *item != index);
+    if at_front {
+        queue.insert(0, index);
+    } else {
+        queue.push(index);
+    }
+}
+
+pub fn format_queue_osd(len: usize) -> String {
+    format!("Queue {len}")
+}
+
+/// Soft subtitle / forced-only display preference.
+pub fn format_forced_only_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Forced subs only"
+    } else {
+        "All subs"
+    }
+}
+
+/// Audio device exclusivity latency hint (ms) for bit-perfect paths.
+pub fn clamp_exclusive_latency_ms(ms: u32) -> u32 {
+    ms.clamp(1, 500)
+}
+
+pub fn format_exclusive_latency_osd(ms: u32) -> String {
+    format!("Exclusive latency {} ms", clamp_exclusive_latency_ms(ms))
+}
+
+/// Chapter thumbnail time grid for scrubber UI.
+pub fn chapter_thumbnail_times(chapters: &[i64], duration_us: i64, max_thumbs: usize) -> Vec<i64> {
+    let max_thumbs = max_thumbs.max(1).min(64);
+    if !chapters.is_empty() {
+        return chapters.iter().copied().take(max_thumbs).collect();
+    }
+    if duration_us <= 0 {
+        return Vec::new();
+    }
+    let step = duration_us / max_thumbs as i64;
+    (0..max_thumbs)
+        .map(|i| (i as i64 * step).clamp(0, duration_us))
+        .collect()
+}
+
+pub fn format_chapter_thumbs_osd(count: usize) -> String {
+    format!("Thumbs {count}")
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -7122,6 +7204,9 @@ struct PlayerApp {
     remote_control_port: u16,
     bitperfect: bool,
     night_mode: bool,
+    play_queue: Vec<usize>,
+    forced_subs_only: bool,
+    exclusive_latency_ms: u32,
     seek_jump: SeekJump,
     surround_downmix: bool,
     scaletempo: bool,
@@ -7302,6 +7387,9 @@ impl PlayerApp {
             remote_control_port: REMOTE_CONTROL_DEFAULT_PORT,
             bitperfect: false,
             night_mode: false,
+            play_queue: Vec::new(),
+            forced_subs_only: false,
+            exclusive_latency_ms: 50,
             seek_jump: SeekJump::default(),
             surround_downmix: false,
             scaletempo: true,
@@ -8410,6 +8498,7 @@ impl PlayerApp {
         if !focused
             && command
             && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::Period))
+            && !ctx.input(|input| input.modifiers.alt)
         {
             self.toggle_silence_skip();
         }
@@ -8450,6 +8539,27 @@ impl PlayerApp {
             && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::N))
         {
             self.toggle_night_mode();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Q))
+            && ctx.input(|input| input.modifiers.shift)
+        {
+            self.queue_current(true);
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::F))
+            && !ctx.input(|input| input.modifiers.shift)
+        {
+            self.toggle_forced_subs_only();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::Period))
+            && ctx.input(|input| input.modifiers.alt)
+        {
+            self.show_frame_rate_osd();
         }
         if !focused
             && command
@@ -10084,6 +10194,26 @@ impl PlayerApp {
     fn toggle_night_mode(&mut self) {
         self.night_mode = !self.night_mode;
         self.notice = Some(format_night_mode_osd(self.night_mode).into());
+    }
+
+    fn queue_current(&mut self, at_front: bool) {
+        queue_insert(&mut self.play_queue, self.playlist_index, at_front);
+        self.notice = Some(format_queue_osd(self.play_queue.len()));
+    }
+
+    fn toggle_forced_subs_only(&mut self) {
+        self.forced_subs_only = !self.forced_subs_only;
+        self.notice = Some(format_forced_only_osd(self.forced_subs_only).into());
+    }
+
+    fn show_frame_rate_osd(&mut self) {
+        let dur = self
+            .session
+            .as_ref()
+            .and_then(|s| s.frame.as_ref())
+            .map(|f| f.duration_us)
+            .unwrap_or(0);
+        self.notice = Some(format_frame_rate_osd(dur));
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {

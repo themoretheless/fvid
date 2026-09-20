@@ -1713,6 +1713,17 @@ mod play_controls {
         assert!(fvid_media::apply_night_mode_sample(0.9, true).abs() < 0.9);
         assert!(fvid_media::format_remote_control_osd(true, 8080).contains("8080"));
         assert!(fvid_media::format_bitperfect_osd(false).contains("Off"));
+        assert_eq!(fvid_media::frame_rate_milli_from_duration_us(16_667), 59_998);
+        assert_eq!(fvid_media::seek_from_wheel(1_000_000, 1, 5_000_000), 6_000_000);
+        let mut queue = vec![2usize];
+        fvid_media::queue_insert(&mut queue, 5, true);
+        assert_eq!(queue[0], 5);
+        assert_eq!(
+            fvid_media::chapter_thumbnail_times(&[], 10_000_000, 5).len(),
+            5
+        );
+        assert!(fvid_media::format_forced_only_osd(true).contains("Forced"));
+        assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
         hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;

@@ -187,6 +187,10 @@ pub use play::{
     toggle_favorite, format_favorite_osd, format_remote_control_osd, REMOTE_CONTROL_DEFAULT_PORT,
     format_bitperfect_osd, should_toggle_fullscreen_on_click, scrub_preview_us,
     format_scrub_preview_osd, apply_night_mode_sample, format_night_mode_osd,
+    frame_rate_milli_from_duration_us, format_frame_rate_osd, cycle_angle, format_angle_osd,
+    seek_from_wheel, queue_insert, format_queue_osd, format_forced_only_osd,
+    clamp_exclusive_latency_ms, format_exclusive_latency_osd, chapter_thumbnail_times,
+    format_chapter_thumbs_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};
