@@ -137,7 +137,18 @@ pub use play::{
     clamp_hdr_nits, format_hdr_nits_osd, scale_hdr_display_channel, CacheDomain,
     cycle_cache_domain, cache_domain_label, default_cache_ms, clamp_cache_ms, format_cache_osd,
     secondary_subtitle_delay_us, format_secondary_subtitle_delay_osd, snapshot_path_with_prefix,
-    format_snapshot_prefix_osd,
+    format_snapshot_prefix_osd, next_snapshot_index, EQ_PREAMP_DEFAULT_MILLI, EQ_PREAMP_MIN_MILLI,
+    EQ_PREAMP_MAX_MILLI, EQ_PREAMP_STEP_MILLI, clamp_eq_preamp_milli, eq_preamp_step_milli,
+    apply_eq_preamp_sample, format_eq_preamp_osd, SPATIALIZER_DEFAULT_MILLI, SPATIALIZER_MIN_MILLI,
+    SPATIALIZER_MAX_MILLI, SPATIALIZER_STEP_MILLI, clamp_spatializer_milli, spatializer_step_milli,
+    apply_spatializer, format_spatializer_osd, GAPLESS_THRESHOLD_DEFAULT_US, gapless_should_prefetch,
+    format_gapless_osd, CROSSFADE_DEFAULT_MS, CROSSFADE_MIN_MS, CROSSFADE_MAX_MS, CROSSFADE_STEP_MS,
+    clamp_crossfade_ms, crossfade_step_ms, crossfade_gain_pair, format_crossfade_osd,
+    REPLAYGAIN_UNITY_MILLI, REPLAYGAIN_MIN_MILLI, REPLAYGAIN_MAX_MILLI, clamp_replaygain_milli,
+    replaygain_milli_from_db_milli, apply_replaygain_sample, format_replaygain_osd,
+    buffer_health_pct, format_buffer_health_osd, snap_seek_to_keyframe, format_keyframe_seek_osd,
+    SubtitleColor, cycle_subtitle_color, subtitle_color_label, subtitle_color_rgba,
+    format_subtitle_color_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

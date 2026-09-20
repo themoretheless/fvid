@@ -426,6 +426,8 @@ pub enum AudioChannelMode {
     Right,
     Mono,
     Reverse,
+    /// Mid-side karaoke: attenuate centered vocals.
+    Karaoke,
 }
 
 pub fn cycle_audio_channel(mode: AudioChannelMode) -> AudioChannelMode {
@@ -434,7 +436,8 @@ pub fn cycle_audio_channel(mode: AudioChannelMode) -> AudioChannelMode {
         AudioChannelMode::Left => AudioChannelMode::Right,
         AudioChannelMode::Right => AudioChannelMode::Mono,
         AudioChannelMode::Mono => AudioChannelMode::Reverse,
-        AudioChannelMode::Reverse => AudioChannelMode::Stereo,
+        AudioChannelMode::Reverse => AudioChannelMode::Karaoke,
+        AudioChannelMode::Karaoke => AudioChannelMode::Stereo,
     }
 }
 
@@ -445,6 +448,7 @@ pub fn audio_channel_label(mode: AudioChannelMode) -> &'static str {
         AudioChannelMode::Right => "Right",
         AudioChannelMode::Mono => "Mono",
         AudioChannelMode::Reverse => "Reverse",
+        AudioChannelMode::Karaoke => "Karaoke",
     }
 }
 
@@ -475,6 +479,11 @@ pub fn apply_audio_channel(frame: &mut [f32], mode: AudioChannelMode) {
         AudioChannelMode::Reverse => {
             frame[0] = right;
             frame[1] = left;
+        }
+        AudioChannelMode::Karaoke => {
+            let mid = (left + right) * 0.5;
+            frame[0] = (left - mid).clamp(-1.0, 1.0);
+            frame[1] = (right - mid).clamp(-1.0, 1.0);
         }
     }
 }
@@ -3225,6 +3234,12 @@ struct Shared {
         crossfeed_milli: AtomicI32,
         /// When true, graphic EQ is skipped in the audio path.
         eq_bypass: AtomicBool,
+        /// EQ preamp milli-gain around unity (0 = 0 dB).
+        eq_preamp_milli: AtomicI32,
+        /// Headphone spatializer strength 0..=2000.
+        spatializer_milli: AtomicI32,
+        /// ReplayGain linear milli-gain (1000 = unity).
+        replaygain_milli: AtomicI32,
         /// VLC-style volume normalizer (peak follower + makeup gain).
         normalizer_on: AtomicBool,
         /// Smoothed peak ×1000 for the normalizer.
@@ -3996,6 +4011,237 @@ pub fn format_snapshot_prefix_osd(prefix: &str) -> String {
     }
 }
 
+pub fn next_snapshot_index(current: u32) -> u32 {
+    current.saturating_add(1)
+}
+
+/// Graphic EQ preamp (VLC equalizer preamp), milli-linear gain around unity.
+pub const EQ_PREAMP_DEFAULT_MILLI: i32 = 0;
+pub const EQ_PREAMP_MIN_MILLI: i32 = -2_000;
+pub const EQ_PREAMP_MAX_MILLI: i32 = 2_000;
+pub const EQ_PREAMP_STEP_MILLI: i32 = 100;
+
+pub fn clamp_eq_preamp_milli(value: i32) -> i32 {
+    value.clamp(EQ_PREAMP_MIN_MILLI, EQ_PREAMP_MAX_MILLI)
+}
+
+pub fn eq_preamp_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_eq_preamp_milli(current.saturating_add(delta))
+}
+
+pub fn apply_eq_preamp_sample(sample: f32, preamp_milli: i32) -> f32 {
+    let gain = 1.0 + (clamp_eq_preamp_milli(preamp_milli) as f32 / 1_000.0);
+    (sample * gain).clamp(-1.0, 1.0)
+}
+
+pub fn format_eq_preamp_osd(preamp_milli: i32) -> String {
+    let db = clamp_eq_preamp_milli(preamp_milli) as f32 / 100.0;
+    format!("EQ preamp {db:+.1} dB")
+}
+
+/// Headphone spatializer strength. 0 off, 1000 mild, 2000 strong.
+pub const SPATIALIZER_DEFAULT_MILLI: i32 = 0;
+pub const SPATIALIZER_MIN_MILLI: i32 = 0;
+pub const SPATIALIZER_MAX_MILLI: i32 = 2_000;
+pub const SPATIALIZER_STEP_MILLI: i32 = 100;
+
+pub fn clamp_spatializer_milli(value: i32) -> i32 {
+    value.clamp(SPATIALIZER_MIN_MILLI, SPATIALIZER_MAX_MILLI)
+}
+
+pub fn spatializer_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_spatializer_milli(current.saturating_add(delta))
+}
+
+pub fn apply_spatializer(frame: &mut [f32], strength_milli: i32) {
+    if frame.len() < 2 || strength_milli <= 0 {
+        return;
+    }
+    let strength = clamp_spatializer_milli(strength_milli) as f32 / 1_000.0;
+    let left = frame[0];
+    let right = frame[1];
+    let mid = (left + right) * 0.5;
+    let side = (left - right) * 0.5;
+    let wide = side * (1.0 + strength);
+    let narrow = mid * (1.0 - 0.25 * strength);
+    frame[0] = (narrow + wide).clamp(-1.0, 1.0);
+    frame[1] = (narrow - wide).clamp(-1.0, 1.0);
+}
+
+pub fn format_spatializer_osd(strength_milli: i32) -> String {
+    if clamp_spatializer_milli(strength_milli) == 0 {
+        "Spatializer Off".into()
+    } else {
+        format!(
+            "Spatializer {}%",
+            clamp_spatializer_milli(strength_milli) / 10
+        )
+    }
+}
+
+/// Playlist gapless handoff when remaining media time is under the threshold.
+pub const GAPLESS_THRESHOLD_DEFAULT_US: i64 = 50_000;
+
+pub fn gapless_should_prefetch(remaining_us: i64, threshold_us: i64) -> bool {
+    remaining_us >= 0 && remaining_us <= threshold_us.max(0)
+}
+
+pub fn format_gapless_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Gapless On"
+    } else {
+        "Gapless Off"
+    }
+}
+
+/// Crossfade between playlist items (VLC `--audio-desync` style fade window).
+pub const CROSSFADE_DEFAULT_MS: u32 = 0;
+pub const CROSSFADE_MIN_MS: u32 = 0;
+pub const CROSSFADE_MAX_MS: u32 = 10_000;
+pub const CROSSFADE_STEP_MS: u32 = 250;
+
+pub fn clamp_crossfade_ms(ms: u32) -> u32 {
+    ms.clamp(CROSSFADE_MIN_MS, CROSSFADE_MAX_MS)
+}
+
+pub fn crossfade_step_ms(current: u32, delta: i32) -> u32 {
+    let next = (current as i64).saturating_add(i64::from(delta));
+    clamp_crossfade_ms(next.clamp(0, i64::from(CROSSFADE_MAX_MS)) as u32)
+}
+
+/// Returns (outgoing, incoming) linear gains for a crossfade window.
+pub fn crossfade_gain_pair(elapsed_ms: u32, duration_ms: u32) -> (f32, f32) {
+    let duration = clamp_crossfade_ms(duration_ms);
+    if duration == 0 {
+        return (0.0, 1.0);
+    }
+    let t = (elapsed_ms.min(duration) as f32) / (duration as f32);
+    (1.0 - t, t)
+}
+
+pub fn format_crossfade_osd(ms: u32) -> String {
+    let ms = clamp_crossfade_ms(ms);
+    if ms == 0 {
+        "Crossfade Off".into()
+    } else {
+        format!("Crossfade {ms} ms")
+    }
+}
+
+/// ReplayGain linear gain in milli-units (1000 = unity).
+pub const REPLAYGAIN_UNITY_MILLI: i32 = 1_000;
+pub const REPLAYGAIN_MIN_MILLI: i32 = 100;
+pub const REPLAYGAIN_MAX_MILLI: i32 = 4_000;
+
+pub fn clamp_replaygain_milli(value: i32) -> i32 {
+    value.clamp(REPLAYGAIN_MIN_MILLI, REPLAYGAIN_MAX_MILLI)
+}
+
+/// Convert tagged ReplayGain dB×1000 into a linear milli-gain.
+pub fn replaygain_milli_from_db_milli(db_milli: i32) -> i32 {
+    let db = (db_milli as f32) / 1_000.0;
+    let linear = 10f32.powf(db / 20.0);
+    clamp_replaygain_milli((linear * 1_000.0).round() as i32)
+}
+
+pub fn apply_replaygain_sample(sample: f32, gain_milli: i32) -> f32 {
+    let gain = clamp_replaygain_milli(gain_milli) as f32 / 1_000.0;
+    (sample * gain).clamp(-1.0, 1.0)
+}
+
+pub fn format_replaygain_osd(gain_milli: i32) -> String {
+    let gain = clamp_replaygain_milli(gain_milli);
+    if gain == REPLAYGAIN_UNITY_MILLI {
+        "ReplayGain Off".into()
+    } else {
+        format!("ReplayGain {}%", gain / 10)
+    }
+}
+
+/// Demux/network buffer fill relative to the configured cache target.
+pub fn buffer_health_pct(queued_ms: u32, target_ms: u32) -> u32 {
+    let target = target_ms.max(1);
+    ((u64::from(queued_ms) * 100) / u64::from(target)).min(200) as u32
+}
+
+pub fn format_buffer_health_osd(queued_ms: u32, target_ms: u32) -> String {
+    format!(
+        "Buffer {}% ({} / {} ms)",
+        buffer_health_pct(queued_ms, target_ms),
+        queued_ms,
+        target_ms.max(1)
+    )
+}
+
+/// Snap a seek target to the nearest earlier keyframe / RAP timestamp.
+pub fn snap_seek_to_keyframe(target_us: i64, keyframes_us: &[i64]) -> i64 {
+    if keyframes_us.is_empty() {
+        return target_us.max(0);
+    }
+    let mut best = keyframes_us[0];
+    for &kf in keyframes_us {
+        if kf <= target_us {
+            best = kf;
+        } else {
+            break;
+        }
+    }
+    if target_us < keyframes_us[0] {
+        keyframes_us[0]
+    } else {
+        best
+    }
+}
+
+pub fn format_keyframe_seek_osd(us: i64) -> String {
+    format!("Keyframe {}", format_play_clock(us))
+}
+
+/// VLC-style forced subtitle text colors.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum SubtitleColor {
+    #[default]
+    White,
+    Yellow,
+    Cyan,
+    Green,
+    Magenta,
+}
+
+pub fn cycle_subtitle_color(color: SubtitleColor) -> SubtitleColor {
+    match color {
+        SubtitleColor::White => SubtitleColor::Yellow,
+        SubtitleColor::Yellow => SubtitleColor::Cyan,
+        SubtitleColor::Cyan => SubtitleColor::Green,
+        SubtitleColor::Green => SubtitleColor::Magenta,
+        SubtitleColor::Magenta => SubtitleColor::White,
+    }
+}
+
+pub fn subtitle_color_label(color: SubtitleColor) -> &'static str {
+    match color {
+        SubtitleColor::White => "White",
+        SubtitleColor::Yellow => "Yellow",
+        SubtitleColor::Cyan => "Cyan",
+        SubtitleColor::Green => "Green",
+        SubtitleColor::Magenta => "Magenta",
+    }
+}
+
+pub fn subtitle_color_rgba(color: SubtitleColor) -> [u8; 4] {
+    match color {
+        SubtitleColor::White => [255, 255, 255, 255],
+        SubtitleColor::Yellow => [255, 255, 0, 255],
+        SubtitleColor::Cyan => [0, 255, 255, 255],
+        SubtitleColor::Green => [0, 255, 0, 255],
+        SubtitleColor::Magenta => [255, 0, 255, 255],
+    }
+}
+
+pub fn format_subtitle_color_osd(color: SubtitleColor) -> String {
+    format!("Subtitle {}", subtitle_color_label(color))
+}
+
 /// Compact on-screen hotkey reminder (VLC Help / F1 style).
 pub fn format_hotkeys_help_osd() -> &'static str {
     "Space pause · ←→ seek · ↑↓ vol · M mute · F full · S snap · Esc quit"
@@ -4248,9 +4494,13 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
         2 => AudioChannelMode::Right,
         3 => AudioChannelMode::Mono,
         4 => AudioChannelMode::Reverse,
+        5 => AudioChannelMode::Karaoke,
         _ => AudioChannelMode::Stereo,
     };
     let balance_milli = shared.balance_milli.load(Ordering::Relaxed);
+    let eq_preamp_milli = shared.eq_preamp_milli.load(Ordering::Relaxed);
+    let spatializer_milli = shared.spatializer_milli.load(Ordering::Relaxed);
+    let replaygain_milli = shared.replaygain_milli.load(Ordering::Relaxed);
     let mut frame_buf = vec![0.0f32; channels];
     for frame_index in 0..frames_out {
         let (need, next_phase) = advance_rate_phase(phase, rate);
@@ -4299,6 +4549,8 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
         );
         for channel in 0..channels {
             frame_buf[channel] = apply_eq(frame_buf[channel], channel, &mut tone);
+            frame_buf[channel] = apply_eq_preamp_sample(frame_buf[channel], eq_preamp_milli);
+            frame_buf[channel] = apply_replaygain_sample(frame_buf[channel], replaygain_milli);
         }
         if shared.compressor_on.load(Ordering::Relaxed) {
             apply_compressor(&mut frame_buf, true, 0.35, 4.0);
@@ -4306,6 +4558,7 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
         apply_audio_balance(&mut frame_buf, balance_milli);
         let width_milli = shared.width_milli.load(Ordering::Relaxed);
         apply_stereo_width(&mut frame_buf, width_milli);
+        apply_spatializer(&mut frame_buf, spatializer_milli);
         let crossfeed_milli = shared.crossfeed_milli.load(Ordering::Relaxed);
         apply_crossfeed(&mut frame_buf, crossfeed_milli);
         apply_audio_channel(&mut frame_buf, channel_mode);
@@ -5403,6 +5656,12 @@ struct PlayerApp {
     compressor_on: bool,
     crossfeed_milli: i32,
     eq_bypass: bool,
+    eq_preamp_milli: i32,
+    spatializer_milli: i32,
+    replaygain_milli: i32,
+    gapless: bool,
+    crossfade_ms: u32,
+    subtitle_color: SubtitleColor,
     volume_normalizer: bool,
     bass_milli: i32,
     mid_milli: i32,
@@ -5531,6 +5790,12 @@ impl PlayerApp {
             compressor_on: false,
             crossfeed_milli: 0,
             eq_bypass: false,
+            eq_preamp_milli: EQ_PREAMP_DEFAULT_MILLI,
+            spatializer_milli: SPATIALIZER_DEFAULT_MILLI,
+            replaygain_milli: REPLAYGAIN_UNITY_MILLI,
+            gapless: false,
+            crossfade_ms: CROSSFADE_DEFAULT_MS,
+            subtitle_color: SubtitleColor::White,
             volume_normalizer: false,
             bass_milli: TONE_UNITY_MILLI,
             mid_milli: TONE_UNITY_MILLI,
@@ -5655,12 +5920,16 @@ impl PlayerApp {
                 AudioChannelMode::Right => 2,
                 AudioChannelMode::Mono => 3,
                 AudioChannelMode::Reverse => 4,
+                AudioChannelMode::Karaoke => 5,
             }),
             balance_milli: AtomicI32::new(self.balance_milli),
             width_milli: AtomicI32::new(self.width_milli),
             compressor_on: AtomicBool::new(self.compressor_on),
             crossfeed_milli: AtomicI32::new(self.crossfeed_milli),
             eq_bypass: AtomicBool::new(self.eq_bypass),
+            eq_preamp_milli: AtomicI32::new(self.eq_preamp_milli),
+            spatializer_milli: AtomicI32::new(self.spatializer_milli),
+            replaygain_milli: AtomicI32::new(self.replaygain_milli),
             normalizer_on: AtomicBool::new(self.volume_normalizer),
             normalizer_peak_milli: AtomicU32::new(0),
             vu_peak_milli: AtomicU32::new(0),
@@ -6337,9 +6606,55 @@ impl PlayerApp {
             ));
         }
         if !focused && command && ctx.input(|input| input.key_pressed(egui::Key::E)) {
-            self.display_effect = cycle_display_effect(self.display_effect);
-            self.adjust_dirty = true;
-            self.notice = Some(format_display_effect_osd(self.display_effect));
+            if ctx.input(|input| input.modifiers.alt) {
+                self.nudge_eq_preamp(EQ_PREAMP_STEP_MILLI);
+            } else if ctx.input(|input| input.modifiers.shift) {
+                self.nudge_eq_preamp(-EQ_PREAMP_STEP_MILLI);
+            } else {
+                self.display_effect = cycle_display_effect(self.display_effect);
+                self.adjust_dirty = true;
+                self.notice = Some(format_display_effect_osd(self.display_effect));
+            }
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::X))
+        {
+            let stronger = !ctx.input(|input| input.modifiers.alt);
+            self.nudge_spatializer(if stronger {
+                SPATIALIZER_STEP_MILLI
+            } else {
+                -SPATIALIZER_STEP_MILLI
+            });
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::G))
+        {
+            self.toggle_gapless();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::C))
+        {
+            let longer = !ctx.input(|input| input.modifiers.alt);
+            self.nudge_crossfade(if longer {
+                CROSSFADE_STEP_MS as i32
+            } else {
+                -(CROSSFADE_STEP_MS as i32)
+            });
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::R))
+        {
+            self.cycle_replaygain_boost();
+        }
+        if !focused
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::C))
+            && !command
+        {
+            self.cycle_subtitle_color_mode();
         }
         if !focused
             && command
@@ -6398,7 +6713,7 @@ impl PlayerApp {
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::U)) {
             self.toggle_compressor();
         }
-        if !focused && ctx.input(|input| input.key_pressed(egui::Key::X)) {
+        if !focused && !command && ctx.input(|input| input.key_pressed(egui::Key::X)) {
             self.cycle_sleep_timer();
         }
         if !focused
@@ -7631,11 +7946,64 @@ impl PlayerApp {
                     AudioChannelMode::Right => 2,
                     AudioChannelMode::Mono => 3,
                     AudioChannelMode::Reverse => 4,
+                    AudioChannelMode::Karaoke => 5,
                 },
                 Ordering::Relaxed,
             );
         }
         self.notice = Some(format_audio_channel_osd(self.audio_channel));
+    }
+
+    fn nudge_eq_preamp(&mut self, delta: i32) {
+        self.eq_preamp_milli = eq_preamp_step_milli(self.eq_preamp_milli, delta);
+        if let Some(session) = &self.session {
+            session
+                .shared
+                .eq_preamp_milli
+                .store(self.eq_preamp_milli, Ordering::Relaxed);
+        }
+        self.notice = Some(format_eq_preamp_osd(self.eq_preamp_milli));
+    }
+
+    fn nudge_spatializer(&mut self, delta: i32) {
+        self.spatializer_milli = spatializer_step_milli(self.spatializer_milli, delta);
+        if let Some(session) = &self.session {
+            session
+                .shared
+                .spatializer_milli
+                .store(self.spatializer_milli, Ordering::Relaxed);
+        }
+        self.notice = Some(format_spatializer_osd(self.spatializer_milli));
+    }
+
+    fn toggle_gapless(&mut self) {
+        self.gapless = !self.gapless;
+        self.notice = Some(format_gapless_osd(self.gapless).into());
+    }
+
+    fn nudge_crossfade(&mut self, delta: i32) {
+        self.crossfade_ms = crossfade_step_ms(self.crossfade_ms, delta);
+        self.notice = Some(format_crossfade_osd(self.crossfade_ms));
+    }
+
+    fn cycle_replaygain_boost(&mut self) {
+        self.replaygain_milli = if self.replaygain_milli == REPLAYGAIN_UNITY_MILLI {
+            replaygain_milli_from_db_milli(-6_000)
+        } else {
+            REPLAYGAIN_UNITY_MILLI
+        };
+        if let Some(session) = &self.session {
+            session
+                .shared
+                .replaygain_milli
+                .store(self.replaygain_milli, Ordering::Relaxed);
+        }
+        self.notice = Some(format_replaygain_osd(self.replaygain_milli));
+    }
+
+    fn cycle_subtitle_color_mode(&mut self) {
+        self.subtitle_color = cycle_subtitle_color(self.subtitle_color);
+        self.notice = Some(format_subtitle_color_osd(self.subtitle_color));
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {
@@ -7937,7 +8305,7 @@ impl PlayerApp {
         };
         match std::fs::write(&encoded.0, &encoded.1) {
             Ok(()) => {
-                self.snapshots += 1;
+                self.snapshots = next_snapshot_index(self.snapshots);
                 self.notice = Some(format!("Saved {}", encoded.0.display()));
             }
             Err(err) => self.notice = Some(err.to_string()),
@@ -8241,6 +8609,7 @@ impl PlayerApp {
             self.subtitle_scale_milli,
             self.subtitle_opacity_milli,
             self.subtitle_position,
+            self.subtitle_color,
         );
         if !self.marquee_text.trim().is_empty() {
             paint_marquee(
@@ -8481,6 +8850,7 @@ fn paint_subtitle(
     scale_milli: i32,
     opacity_milli: i32,
     position: SubtitlePosition,
+    color: SubtitleColor,
 ) {
     let lines: Vec<&str> = text.lines().filter(|line| !line.is_empty()).collect();
     if lines.is_empty() {
@@ -8491,7 +8861,8 @@ fn paint_subtitle(
     let font = egui::FontId::proportional(size);
     let margin = subtitle_margin_px(12, margin_px) as f32;
     let alpha = subtitle_opacity_u8(opacity_milli);
-    let fill = egui::Color32::from_rgba_unmultiplied(255, 255, 255, alpha);
+    let rgba = subtitle_color_rgba(color);
+    let fill = egui::Color32::from_rgba_unmultiplied(rgba[0], rgba[1], rgba[2], alpha);
     let shadow = egui::Color32::from_rgba_unmultiplied(0, 0, 0, alpha);
     let mut y = rect.top()
         + subtitle_block_top_y(rect.height(), lines.len(), line_h, margin, position);

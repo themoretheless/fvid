@@ -878,6 +878,10 @@ mod play_controls {
         assert_eq!(swapped, [-0.5, 0.25]);
         assert_eq!(
             fvid_media::cycle_audio_channel(fvid_media::AudioChannelMode::Reverse),
+            fvid_media::AudioChannelMode::Karaoke
+        );
+        assert_eq!(
+            fvid_media::cycle_audio_channel(fvid_media::AudioChannelMode::Karaoke),
             fvid_media::AudioChannelMode::Stereo
         );
         assert_eq!(fvid_media::clamp_subtitle_margin(500), 400);
@@ -1491,6 +1495,36 @@ mod play_controls {
         );
         assert_eq!(prefixed, PathBuf::from("out/snap-clip-1.png"));
         assert!(fvid_media::format_snapshot_prefix_osd("snap-").contains("snap-"));
+        assert_eq!(fvid_media::next_snapshot_index(3), 4);
+        assert_eq!(
+            fvid_media::apply_eq_preamp_sample(0.5, 1_000),
+            1.0
+        );
+        assert!(fvid_media::format_eq_preamp_osd(100).contains("preamp"));
+        let mut frame = [0.5f32, -0.5];
+        fvid_media::apply_spatializer(&mut frame, 1_000);
+        assert_ne!(frame[0], 0.5);
+        assert!(fvid_media::gapless_should_prefetch(10_000, 50_000));
+        assert!(!fvid_media::gapless_should_prefetch(100_000, 50_000));
+        assert_eq!(fvid_media::crossfade_gain_pair(500, 1_000), (0.5, 0.5));
+        assert!(fvid_media::format_crossfade_osd(500).contains("500"));
+        let rg = fvid_media::replaygain_milli_from_db_milli(0);
+        assert_eq!(rg, fvid_media::REPLAYGAIN_UNITY_MILLI);
+        assert!(fvid_media::buffer_health_pct(500, 1_000) == 50);
+        assert!(fvid_media::format_buffer_health_osd(500, 1_000).contains("50%"));
+        assert_eq!(
+            fvid_media::snap_seek_to_keyframe(1_500_000, &[0, 1_000_000, 2_000_000]),
+            1_000_000
+        );
+        let mut karaoke = [0.8f32, 0.2];
+        fvid_media::apply_audio_channel(&mut karaoke, fvid_media::AudioChannelMode::Karaoke);
+        assert!((karaoke[0] + karaoke[1]).abs() < 0.01);
+        assert_eq!(
+            fvid_media::subtitle_color_rgba(fvid_media::SubtitleColor::Yellow)[1],
+            255
+        );
+        assert!(fvid_media::format_subtitle_color_osd(fvid_media::SubtitleColor::Cyan)
+            .contains("Cyan"));
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
         hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;
