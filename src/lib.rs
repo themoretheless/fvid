@@ -1303,5 +1303,19 @@ mod play_controls {
         let flat = fvid_media::render_play_pixels(2, 2, &gray, &fvid_media::PlayRenderOptions::default(), None);
         let hdr = fvid_media::render_play_pixels(2, 2, &gray, &hdr_opts, None);
         assert_ne!(flat.2[0], hdr.2[0]);
+        assert!(fvid_media::format_media_info_osd(
+            "demo",
+            1920,
+            1080,
+            60_000_000,
+            fvid_media::COLOR_TRC_SMPTE2084,
+            true
+        )
+        .contains("HDR PQ"));
+        assert!(fvid_media::format_media_info_osd("demo", 640, 360, -1, 0, true).contains("360°"));
+        let jump = fvid_media::random_seek_us(100_000_000, 42).unwrap();
+        assert!(jump >= 0 && jump < 100_000_000);
+        assert_eq!(fvid_media::random_seek_us(100_000_000, 42), Some(jump));
+        assert_eq!(fvid_media::random_seek_us(0, 1), None);
     }
 }

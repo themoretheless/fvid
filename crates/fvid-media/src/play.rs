@@ -2554,6 +2554,51 @@ pub fn format_play_stats(stats: &PlayStats, media_us: i64, duration_us: i64) -> 
     )
 }
 
+/// Compact media-info OSD (title, geometry, duration, HDR/360 flags).
+pub fn format_media_info_osd(
+    title: &str,
+    width: u32,
+    height: u32,
+    duration_us: i64,
+    color_trc: u32,
+    spherical: bool,
+) -> String {
+    let name = if title.is_empty() { "media" } else { title };
+    let duration = if duration_us >= 0 {
+        format_clock(duration_us)
+    } else {
+        "--:--".into()
+    };
+    let mut flags = Vec::new();
+    if is_hdr_transfer(color_trc) {
+        flags.push(if color_trc == COLOR_TRC_SMPTE2084 {
+            "HDR PQ"
+        } else {
+            "HDR HLG"
+        });
+    }
+    if spherical {
+        flags.push("360°");
+    }
+    if flags.is_empty() {
+        format!("{name}  {width}x{height}  {duration}")
+    } else {
+        format!("{name}  {width}x{height}  {duration}  {}", flags.join(" "))
+    }
+}
+
+/// VLC/mpv-style random jump within the known duration (exclusive of the end).
+pub fn random_seek_us(duration_us: i64, seed: u64) -> Option<i64> {
+    if duration_us <= 0 {
+        return None;
+    }
+    let mut state = seed | 1;
+    state ^= state << 13;
+    state ^= state >> 7;
+    state ^= state << 17;
+    Some(((state as u128 * duration_us as u128) >> 64) as i64)
+}
+
 struct VideoFrame {
     pts_us: i64,
     duration_us: i64,
@@ -5350,7 +5395,17 @@ impl PlayerApp {
             }
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::I)) {
-            self.show_stats = !self.show_stats;
+            if ctx.input(|input| input.modifiers.shift) {
+                self.show_media_info();
+            } else {
+                self.show_stats = !self.show_stats;
+            }
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::J))
+        {
+            self.jump_random();
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::ArrowUp) && input.modifiers.alt)
         {
@@ -6177,6 +6232,50 @@ impl PlayerApp {
         let notice = format_play_stereo3d_osd(self.stereo3d);
         eprintln!("fvid play: {notice}");
         self.notice = Some(notice);
+    }
+
+    fn show_media_info(&mut self) {
+        let (width, height, color_trc) = self
+            .session
+            .as_ref()
+            .and_then(|session| session.frame.as_ref())
+            .map(|frame| (frame.width, frame.height, frame.color_trc))
+            .unwrap_or((0, 0, 0));
+        let title = self
+            .session
+            .as_ref()
+            .map(|session| {
+                let stored = lock(&session.shared.media_title);
+                if stored.is_empty() {
+                    media_display_title(&session.path, None)
+                } else {
+                    stored.clone()
+                }
+            })
+            .unwrap_or_else(|| "media".into());
+        let notice = format_media_info_osd(
+            &title,
+            width,
+            height,
+            self.duration_us(),
+            color_trc,
+            self.spherical,
+        );
+        eprintln!("fvid play: {notice}");
+        self.notice = Some(notice);
+    }
+
+    fn jump_random(&mut self) {
+        let seed = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|duration| duration.as_nanos() as u64)
+            .unwrap_or(1);
+        let Some(target) = random_seek_us(self.duration_us(), seed) else {
+            self.notice = Some("Random seek unavailable".into());
+            return;
+        };
+        self.request_seek(target);
+        self.notice = Some(format!("Random {}", format_clock(target)));
     }
 
     fn maybe_auto_hdr(&mut self) {
