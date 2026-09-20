@@ -1662,6 +1662,44 @@ mod play_controls {
             fvid_media::prefer_external_subtitle_path(media, &subs),
             Some(PathBuf::from("movie.srt"))
         );
+        assert_eq!(
+            fvid_media::cycle_spherical_projection(fvid_media::SphericalProjection::Equirect),
+            fvid_media::SphericalProjection::DualFisheye
+        );
+        let planet = fvid_media::project_little_planet(8, 4, &vec![0x00_80_80_80u32; 32], 4, 4, 0);
+        assert_eq!(planet.len(), 16);
+        let cube = fvid_media::sample_cubemap_pixel(&[0x00_ff_00_00u32; 96], 24, 4, 1.0, 0.0, 0.0);
+        assert_eq!(cube, 0x00_ff_00_00);
+        assert!(fvid_media::format_hdr_metadata_osd(1_000, 400, fvid_media::COLOR_TRC_SMPTE2084)
+            .contains("MaxCLL"));
+        assert_eq!(
+            fvid_media::color_primaries_label(fvid_media::COLOR_PRIMARIES_BT2020),
+            "BT.2020"
+        );
+        assert_eq!(
+            fvid_media::silence_skip_target_us(1_000_000, 10_000_000, &[(500_000, 2_000_000)], 100_000),
+            Some(2_000_000)
+        );
+        assert_eq!(fvid_media::cycle_video_track(3, 2), 0);
+        assert_eq!(
+            fvid_media::prefer_hearing_impaired_subtitle_index(&[false, true], 0),
+            1
+        );
+        assert_eq!(
+            fvid_media::skip_marker_target_us(10, Some(90), Some(1_000)),
+            Some(90)
+        );
+        let mut hdr_opts = fvid_media::PlayRenderOptions::default();
+        hdr_opts.spherical = true;
+        hdr_opts.spherical_projection = fvid_media::SphericalProjection::LittlePlanet;
+        let projected = fvid_media::render_play_pixels(
+            8,
+            4,
+            &vec![0x00_40_40_40u32; 32],
+            &hdr_opts,
+            None,
+        );
+        assert_eq!(projected.0, 8);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
         hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;

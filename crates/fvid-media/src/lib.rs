@@ -176,7 +176,14 @@ pub use play::{
     clamp_amplifier_milli, apply_amplifier_sample, format_amplifier_osd, format_record_path,
     format_record_osd, format_http_auth_osd, ProxyMode, cycle_proxy_mode, proxy_mode_label,
     format_proxy_osd, prefer_stream_quality_index, format_stream_quality_osd,
-    prefer_external_subtitle_path, format_external_subtitle_osd,
+    prefer_external_subtitle_path, format_external_subtitle_osd, SphericalProjection,
+    cycle_spherical_projection, spherical_projection_label, format_spherical_projection_osd,
+    dual_fisheye_to_equirect, sample_cubemap_pixel, project_little_planet, project_spherical_view,
+    clamp_hdr_maxcll, format_hdr_metadata_osd, COLOR_PRIMARIES_BT709, COLOR_PRIMARIES_BT2020,
+    color_primaries_label, format_color_primaries_osd, silence_skip_target_us,
+    format_silence_skip_osd, cycle_video_track, format_video_track_osd,
+    prefer_hearing_impaired_subtitle_index, format_hearing_impaired_osd, skip_marker_target_us,
+    format_skip_marker_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

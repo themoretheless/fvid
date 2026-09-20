@@ -2342,6 +2342,314 @@ pub fn format_external_subtitle_osd(path: Option<&Path>) -> String {
     }
 }
 
+/// 360° source layout / projection mode beyond plain equirect.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum SphericalProjection {
+    #[default]
+    Equirect,
+    DualFisheye,
+    Cubemap,
+    LittlePlanet,
+}
+
+pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProjection {
+    match mode {
+        SphericalProjection::Equirect => SphericalProjection::DualFisheye,
+        SphericalProjection::DualFisheye => SphericalProjection::Cubemap,
+        SphericalProjection::Cubemap => SphericalProjection::LittlePlanet,
+        SphericalProjection::LittlePlanet => SphericalProjection::Equirect,
+    }
+}
+
+pub fn spherical_projection_label(mode: SphericalProjection) -> &'static str {
+    match mode {
+        SphericalProjection::Equirect => "Equirect",
+        SphericalProjection::DualFisheye => "Dual fisheye",
+        SphericalProjection::Cubemap => "Cubemap",
+        SphericalProjection::LittlePlanet => "Little planet",
+    }
+}
+
+pub fn format_spherical_projection_osd(mode: SphericalProjection) -> String {
+    format!("360° {}", spherical_projection_label(mode))
+}
+
+/// Remap dual-fisheye (side-by-side) into a temporary equirect for viewpoint projection.
+pub fn dual_fisheye_to_equirect(src_w: u32, src_h: u32, src: &[u32], out_w: u32, out_h: u32) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    if src_w < 2 || src_h == 0 || src.is_empty() {
+        return out;
+    }
+    let eye_w = src_w / 2;
+    for y in 0..out_h {
+        let lat = (0.5 - (y as f32 + 0.5) / out_h as f32) * std::f32::consts::PI;
+        for x in 0..out_w {
+            let lon = ((x as f32 + 0.5) / out_w as f32 * 2.0 - 1.0) * std::f32::consts::PI;
+            let use_right = lon >= 0.0;
+            let eye_lon = if use_right { lon } else { lon + std::f32::consts::PI };
+            let r = (0.5 - lat / std::f32::consts::PI).clamp(0.0, 1.0) * 0.5;
+            let angle = eye_lon;
+            let fx = 0.5 + r * angle.cos();
+            let fy = 0.5 + r * angle.sin();
+            let ox = ((fx.clamp(0.0, 1.0) * (eye_w.saturating_sub(1) as f32)).round() as u32)
+                + if use_right { eye_w } else { 0 };
+            let oy = (fy.clamp(0.0, 1.0) * (src_h.saturating_sub(1) as f32)).round() as u32;
+            let idx = (oy as usize) * (src_w as usize) + (ox.min(src_w - 1) as usize);
+            out[(y * out_w + x) as usize] = src.get(idx).copied().unwrap_or(0);
+        }
+    }
+    out
+}
+
+/// Sample a horizontal cubemap strip (6 square faces: +X -X +Y -Y +Z -Z).
+pub fn sample_cubemap_pixel(pixels: &[u32], width: u32, height: u32, dx: f32, dy: f32, dz: f32) -> u32 {
+    let ax = dx.abs();
+    let ay = dy.abs();
+    let az = dz.abs();
+    let (face, u, v) = if ax >= ay && ax >= az {
+        if dx > 0.0 {
+            (0u32, -dz / ax, -dy / ax)
+        } else {
+            (1, dz / ax, -dy / ax)
+        }
+    } else if ay >= ax && ay >= az {
+        if dy > 0.0 {
+            (2, dx / ay, dz / ay)
+        } else {
+            (3, dx / ay, -dz / ay)
+        }
+    } else if dz > 0.0 {
+        (4, dx / az, -dy / az)
+    } else {
+        (5, -dx / az, -dy / az)
+    };
+    let face_w = (width / 6).max(1);
+    let face_h = height.max(1);
+    let uu = ((u * 0.5 + 0.5).clamp(0.0, 1.0) * (face_w.saturating_sub(1) as f32)).round() as u32;
+    let vv = ((v * 0.5 + 0.5).clamp(0.0, 1.0) * (face_h.saturating_sub(1) as f32)).round() as u32;
+    let x = face * face_w + uu.min(face_w - 1);
+    let y = vv.min(face_h - 1);
+    let idx = (y as usize) * (width as usize) + (x.min(width - 1) as usize);
+    pixels.get(idx).copied().unwrap_or(0)
+}
+
+/// Stereographic "little planet" remap from equirectangular source.
+pub fn project_little_planet(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    let cx = out_w as f32 * 0.5;
+    let cy = out_h as f32 * 0.5;
+    let radius = cx.min(cy).max(1.0);
+    for y in 0..out_h {
+        for x in 0..out_w {
+            let dx = (x as f32 + 0.5) - cx;
+            let dy = (y as f32 + 0.5) - cy;
+            let r = (dx * dx + dy * dy).sqrt() / radius;
+            let lon = dx.atan2(-dy) + yaw;
+            let lat = (1.0 - r).clamp(-1.0, 1.0) * std::f32::consts::FRAC_PI_2;
+            out[(y * out_w + x) as usize] = sample_equirect_pixel(src, src_w, src_h, lon, lat);
+        }
+    }
+    out
+}
+
+/// Project a spherical view using the selected source projection.
+pub fn project_spherical_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    projection: SphericalProjection,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    roll_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> Vec<u32> {
+    match projection {
+        SphericalProjection::Equirect => project_equirect_view_ex(
+            src_w,
+            src_h,
+            src,
+            out_w,
+            out_h,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            roll_deg_milli,
+            fov_deg_milli,
+        ),
+        SphericalProjection::DualFisheye => {
+            let equirect = dual_fisheye_to_equirect(src_w, src_h, src, src_w.max(2), src_h.max(1));
+            project_equirect_view_ex(
+                src_w.max(2),
+                src_h.max(1),
+                &equirect,
+                out_w,
+                out_h,
+                yaw_deg_milli,
+                pitch_deg_milli,
+                roll_deg_milli,
+                fov_deg_milli,
+            )
+        }
+        SphericalProjection::Cubemap => {
+            // Reuse equirect camera rays, sampling cubemap faces instead.
+            let out_w = out_w.max(1);
+            let out_h = out_h.max(1);
+            let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+            let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+            let roll = (clamp_roll_milli(roll_deg_milli) as f32 / 1_000.0).to_radians();
+            let fov = (clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0).to_radians();
+            let aspect = out_w as f32 / out_h as f32;
+            let tan_half = (fov * 0.5).tan();
+            let (sin_y, cos_y) = yaw.sin_cos();
+            let (sin_p, cos_p) = pitch.sin_cos();
+            let (sin_r, cos_r) = roll.sin_cos();
+            let mut out = vec![0u32; out_w as usize * out_h as usize];
+            for oy in 0..out_h {
+                let ny0 = (1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32) * tan_half;
+                for ox in 0..out_w {
+                    let nx0 = (2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0) * tan_half * aspect;
+                    let nx = nx0 * cos_r - ny0 * sin_r;
+                    let ny = nx0 * sin_r + ny0 * cos_r;
+                    let x1 = nx;
+                    let y1 = ny * cos_p - 1.0 * sin_p;
+                    let z1 = ny * sin_p + 1.0 * cos_p;
+                    let x2 = x1 * cos_y + z1 * sin_y;
+                    let y2 = y1;
+                    let z2 = -x1 * sin_y + z1 * cos_y;
+                    let len = (x2 * x2 + y2 * y2 + z2 * z2).sqrt().max(1e-6);
+                    out[(oy * out_w + ox) as usize] =
+                        sample_cubemap_pixel(src, src_w, src_h, x2 / len, y2 / len, z2 / len);
+                }
+            }
+            out
+        }
+        SphericalProjection::LittlePlanet => {
+            project_little_planet(src_w, src_h, src, out_w, out_h, yaw_deg_milli)
+        }
+    }
+}
+
+/// HDR10 static metadata peak luminance (MaxCLL / MaxFALL), nits.
+pub fn clamp_hdr_maxcll(nits: u32) -> u32 {
+    nits.min(10_000)
+}
+
+pub fn format_hdr_metadata_osd(maxcll: u32, maxfall: u32, color_trc: u32) -> String {
+    let trc = if color_trc == COLOR_TRC_SMPTE2084 {
+        "PQ"
+    } else if color_trc == COLOR_TRC_HLG {
+        "HLG"
+    } else {
+        "SDR"
+    };
+    format!(
+        "HDR {trc} MaxCLL {} MaxFALL {}",
+        clamp_hdr_maxcll(maxcll),
+        clamp_hdr_maxcll(maxfall)
+    )
+}
+
+pub const COLOR_PRIMARIES_BT709: u32 = 1;
+pub const COLOR_PRIMARIES_BT2020: u32 = 9;
+
+pub fn color_primaries_label(primaries: u32) -> &'static str {
+    match primaries {
+        COLOR_PRIMARIES_BT709 => "BT.709",
+        COLOR_PRIMARIES_BT2020 => "BT.2020",
+        _ => "Unspecified",
+    }
+}
+
+pub fn format_color_primaries_osd(primaries: u32) -> String {
+    format!("Color {}", color_primaries_label(primaries))
+}
+
+/// Skip forward over near-silence (podcast / lecture players).
+pub fn silence_skip_target_us(
+    now_us: i64,
+    duration_us: i64,
+    silence_spans: &[(i64, i64)],
+    min_silence_us: i64,
+) -> Option<i64> {
+    let now_us = now_us.max(0);
+    for &(start, end) in silence_spans {
+        if end <= start || end - start < min_silence_us {
+            continue;
+        }
+        if now_us >= start && now_us < end {
+            return Some(end.min(duration_us.max(0)));
+        }
+    }
+    None
+}
+
+pub fn format_silence_skip_osd(target_us: i64) -> String {
+    format!("Skip silence → {}", format_play_clock(target_us))
+}
+
+/// Cycle among video streams (multi-angle / alternate camera).
+pub fn cycle_video_track(count: u32, current: u32) -> u32 {
+    if count == 0 {
+        return 0;
+    }
+    (current + 1) % count
+}
+
+pub fn format_video_track_osd(index: u32, count: u32) -> String {
+    if count == 0 {
+        "Video none".into()
+    } else {
+        format!("Video {}/{}", index + 1, count)
+    }
+}
+
+/// Prefer hearing-impaired / SDH subtitle disposition.
+pub fn prefer_hearing_impaired_subtitle_index(hi_flags: &[bool], current: usize) -> usize {
+    if hi_flags.is_empty() {
+        return current;
+    }
+    if let Some(idx) = hi_flags.iter().position(|flag| *flag) {
+        return idx;
+    }
+    current.min(hi_flags.len() - 1)
+}
+
+pub fn format_hearing_impaired_osd(index: usize) -> String {
+    format!("SDH subtitle #{}", index + 1)
+}
+
+/// Intro / credits skip markers (Netflix-style chapter helpers).
+pub fn skip_marker_target_us(now_us: i64, intro_end_us: Option<i64>, credits_start_us: Option<i64>) -> Option<i64> {
+    if let Some(end) = intro_end_us {
+        if now_us < end {
+            return Some(end.max(0));
+        }
+    }
+    if let Some(start) = credits_start_us {
+        if now_us < start {
+            return Some(start.max(0));
+        }
+    }
+    None
+}
+
+pub fn format_skip_marker_osd(kind: &str, target_us: i64) -> String {
+    format!("Skip {kind} → {}", format_play_clock(target_us))
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -2386,6 +2694,14 @@ pub struct PlayRenderOptions {
     pub hdr_nits: u32,
     /// Spatial post filter (blur/sharpen/grain).
     pub post_fx: VideoPostFx,
+    /// 360° source projection when `spherical` is enabled.
+    pub spherical_projection: SphericalProjection,
+    /// HDR10 MaxCLL metadata (nits).
+    pub hdr_maxcll: u32,
+    /// HDR10 MaxFALL metadata (nits).
+    pub hdr_maxfall: u32,
+    /// Stream color primaries (BT.709 / BT.2020).
+    pub color_primaries: u32,
 }
 
 impl Default for PlayRenderOptions {
@@ -2411,6 +2727,10 @@ impl Default for PlayRenderOptions {
             display_effect: DisplayEffect::Off,
             hdr_nits: HDR_NITS_DEFAULT,
             post_fx: VideoPostFx::Off,
+            spherical_projection: SphericalProjection::Equirect,
+            hdr_maxcll: 0,
+            hdr_maxfall: 0,
+            color_primaries: 0,
         }
     }
 }
@@ -2743,12 +3063,13 @@ pub fn render_play_pixels(
         source = packed;
     }
     if opts.spherical {
-        source = project_equirect_view_ex(
+        source = project_spherical_view(
             width,
             height,
             &source,
             width,
             height,
+            opts.spherical_projection,
             opts.yaw_deg_milli,
             opts.pitch_deg_milli,
             opts.roll_deg_milli,
@@ -6686,6 +7007,15 @@ struct PlayerApp {
     playlist_sort: PlaylistSort,
     recent: Vec<PathBuf>,
     post_fx: VideoPostFx,
+    spherical_projection: SphericalProjection,
+    hdr_maxcll: u32,
+    hdr_maxfall: u32,
+    color_primaries: u32,
+    video_track: u32,
+    video_track_count: u32,
+    silence_skip: bool,
+    intro_end_us: Option<i64>,
+    credits_start_us: Option<i64>,
     seek_jump: SeekJump,
     surround_downmix: bool,
     scaletempo: bool,
@@ -6851,6 +7181,15 @@ impl PlayerApp {
             playlist_sort: PlaylistSort::Path,
             recent: Vec::new(),
             post_fx: VideoPostFx::Off,
+            spherical_projection: SphericalProjection::Equirect,
+            hdr_maxcll: 0,
+            hdr_maxfall: 0,
+            color_primaries: 0,
+            video_track: 0,
+            video_track_count: 0,
+            silence_skip: false,
+            intro_end_us: None,
+            credits_start_us: None,
             seek_jump: SeekJump::default(),
             surround_downmix: false,
             scaletempo: true,
@@ -7436,7 +7775,11 @@ impl PlayerApp {
         }
         if !focused {
             if command && ctx.input(|input| input.key_pressed(egui::Key::Num3)) {
-                self.toggle_spherical();
+                if ctx.input(|input| input.modifiers.shift) {
+                    self.cycle_spherical_projection_mode();
+                } else {
+                    self.toggle_spherical();
+                }
             } else {
                 let digit = ctx.input(|input| {
                     [
@@ -7940,6 +8283,32 @@ impl PlayerApp {
         }
         if !focused
             && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::I))
+            && !ctx.input(|input| input.modifiers.alt)
+        {
+            // Shift+I is media-info elsewhere; Ctrl+Shift+I shows HDR metadata.
+            self.show_hdr_metadata_osd();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::V))
+        {
+            self.cycle_video_track_mode();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::Period))
+        {
+            self.toggle_silence_skip();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::S))
+        {
+            self.try_skip_marker();
+        }
+        if !focused
+            && command
             && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::H))
         {
             self.hdr_nits = match self.hdr_nits {
@@ -8112,6 +8481,10 @@ impl PlayerApp {
             self.display_effect,
             self.hdr_nits,
             self.post_fx,
+            self.spherical_projection,
+            self.hdr_maxcll,
+            self.hdr_maxfall,
+            self.color_primaries,
             bitmap.as_ref(),
         );
         session.dirty = false;
@@ -9483,6 +9856,56 @@ impl PlayerApp {
         );
     }
 
+    fn cycle_spherical_projection_mode(&mut self) {
+        self.spherical_projection = cycle_spherical_projection(self.spherical_projection);
+        self.spherical = true;
+        self.adjust_dirty = true;
+        self.notice = Some(format_spherical_projection_osd(self.spherical_projection));
+    }
+
+    fn show_hdr_metadata_osd(&mut self) {
+        let trc = self
+            .session
+            .as_ref()
+            .map(|s| s.shared.color_trc.load(Ordering::Relaxed))
+            .unwrap_or(0);
+        self.notice = Some(format_hdr_metadata_osd(
+            self.hdr_maxcll,
+            self.hdr_maxfall,
+            trc,
+        ));
+    }
+
+    fn cycle_video_track_mode(&mut self) {
+        self.video_track = cycle_video_track(self.video_track_count, self.video_track);
+        self.notice = Some(format_video_track_osd(
+            self.video_track,
+            self.video_track_count,
+        ));
+    }
+
+    fn toggle_silence_skip(&mut self) {
+        self.silence_skip = !self.silence_skip;
+        self.notice = Some(if self.silence_skip {
+            "Silence skip On".into()
+        } else {
+            "Silence skip Off".into()
+        });
+    }
+
+    fn try_skip_marker(&mut self) {
+        let now = self.shown_media_us();
+        if let Some(target) = skip_marker_target_us(now, self.intro_end_us, self.credits_start_us) {
+            let kind = if self.intro_end_us.is_some_and(|end| now < end) {
+                "intro"
+            } else {
+                "credits"
+            };
+            self.request_seek(target);
+            self.notice = Some(format_skip_marker_osd(kind, target));
+        }
+    }
+
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {
         self.bass_milli = clamp_adjust_milli(bass);
         self.mid_milli = clamp_adjust_milli(mid);
@@ -9758,6 +10181,10 @@ impl PlayerApp {
                 display_effect: self.display_effect,
                 hdr_nits: self.hdr_nits,
                 post_fx: self.post_fx,
+                spherical_projection: self.spherical_projection,
+                hdr_maxcll: self.hdr_maxcll,
+                hdr_maxfall: self.hdr_maxfall,
+                color_primaries: self.color_primaries,
             };
             let (width, height, pixels) =
                 render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap.as_ref());
@@ -10283,6 +10710,10 @@ fn color_image(
     display_effect: DisplayEffect,
     hdr_nits: u32,
     post_fx: VideoPostFx,
+    spherical_projection: SphericalProjection,
+    hdr_maxcll: u32,
+    hdr_maxfall: u32,
+    color_primaries: u32,
     bitmap: Option<&BitmapSubtitle>,
 ) -> egui::ColorImage {
     let opts = PlayRenderOptions {
@@ -10306,6 +10737,10 @@ fn color_image(
         display_effect,
         hdr_nits,
         post_fx,
+        spherical_projection,
+        hdr_maxcll,
+        hdr_maxfall,
+        color_primaries,
     };
     let (out_w, out_h, rgb) =
         render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap);
