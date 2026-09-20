@@ -229,7 +229,15 @@ pub use play::{
     true_peak_milli, format_true_peak_osd, format_atmos_layout_osd, format_content_rating_osd,
     ass_override_margin_px, format_ass_override_osd, network_bandwidth_bps, format_network_bandwidth_osd,
     multi_room_sync_target_us, format_watch_party_osd, hdr_sdr_ratio_milli, format_hdr_sdr_ratio_osd,
-    accelerometer_horizon_pitch_milli, format_auto_horizon_osd,
+    accelerometer_horizon_pitch_milli, format_auto_horizon_osd, sample_eac_pixel,
+    chromatic_aberration_uv_milli, format_chromatic_aberration_osd, AmbisonicChannelOrder,
+    cycle_ambisonic_order, ambisonic_order_label, format_ambisonic_order_osd,
+    apply_soft_limiter_sample, format_soft_limiter_osd, apply_echo_sample, format_echo_osd,
+    apply_lowpass_1pole, apply_highpass_1pole, format_tone_filter_osd,
+    short_term_lufs_from_peaks, loudness_range_l_milli, format_loudness_range_osd,
+    anaglyph_dubois, format_anaglyph_dubois_osd, apply_delogo_rect, format_delogo_osd,
+    prefer_opensubtitles_path, filter_playlist_by_extension, format_smart_playlist_osd,
+    detect_bpm_from_onset_gaps_ms, format_bpm_osd, haas_delay_samples, format_haas_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

@@ -2350,6 +2350,8 @@ pub enum SphericalProjection {
     DualFisheye,
     Cubemap,
     LittlePlanet,
+    /// YouTube Equi-Angular Cubemap (EAC).
+    Eac,
 }
 
 pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProjection {
@@ -2357,7 +2359,8 @@ pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProject
         SphericalProjection::Equirect => SphericalProjection::DualFisheye,
         SphericalProjection::DualFisheye => SphericalProjection::Cubemap,
         SphericalProjection::Cubemap => SphericalProjection::LittlePlanet,
-        SphericalProjection::LittlePlanet => SphericalProjection::Equirect,
+        SphericalProjection::LittlePlanet => SphericalProjection::Eac,
+        SphericalProjection::Eac => SphericalProjection::Equirect,
     }
 }
 
@@ -2367,6 +2370,7 @@ pub fn spherical_projection_label(mode: SphericalProjection) -> &'static str {
         SphericalProjection::DualFisheye => "Dual fisheye",
         SphericalProjection::Cubemap => "Cubemap",
         SphericalProjection::LittlePlanet => "Little planet",
+        SphericalProjection::Eac => "EAC",
     }
 }
 
@@ -2430,6 +2434,19 @@ pub fn sample_cubemap_pixel(pixels: &[u32], width: u32, height: u32, dx: f32, dy
     let uu = ((u * 0.5 + 0.5).clamp(0.0, 1.0) * (face_w.saturating_sub(1) as f32)).round() as u32;
     let vv = ((v * 0.5 + 0.5).clamp(0.0, 1.0) * (face_h.saturating_sub(1) as f32)).round() as u32;
     let x = face * face_w + uu.min(face_w - 1);
+    let y = vv.min(face_h - 1);
+    let idx = (y as usize) * (width as usize) + (x.min(width - 1) as usize);
+    pixels.get(idx).copied().unwrap_or(0)
+}
+
+/// Sample EAC (equi-angular cubemap) strip using atan face UVs.
+pub fn sample_eac_pixel(pixels: &[u32], width: u32, height: u32, dx: f32, dy: f32, dz: f32) -> u32 {
+    let (face, u, v) = eac_face_uv_from_dir(dx, dy, dz);
+    let face_w = (width / 6).max(1);
+    let face_h = height.max(1);
+    let uu = (u.clamp(0.0, 1.0) * (face_w.saturating_sub(1) as f32)).round() as u32;
+    let vv = (v.clamp(0.0, 1.0) * (face_h.saturating_sub(1) as f32)).round() as u32;
+    let x = u32::from(face) * face_w + uu.min(face_w - 1);
     let y = vv.min(face_h - 1);
     let idx = (y as usize) * (width as usize) + (x.min(width - 1) as usize);
     pixels.get(idx).copied().unwrap_or(0)
@@ -2532,6 +2549,38 @@ pub fn project_spherical_view(
                     let len = (x2 * x2 + y2 * y2 + z2 * z2).sqrt().max(1e-6);
                     out[(oy * out_w + ox) as usize] =
                         sample_cubemap_pixel(src, src_w, src_h, x2 / len, y2 / len, z2 / len);
+                }
+            }
+            out
+        }
+        SphericalProjection::Eac => {
+            let out_w = out_w.max(1);
+            let out_h = out_h.max(1);
+            let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+            let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+            let roll = (clamp_roll_milli(roll_deg_milli) as f32 / 1_000.0).to_radians();
+            let fov = (clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0).to_radians();
+            let aspect = out_w as f32 / out_h as f32;
+            let tan_half = (fov * 0.5).tan();
+            let (sin_y, cos_y) = yaw.sin_cos();
+            let (sin_p, cos_p) = pitch.sin_cos();
+            let (sin_r, cos_r) = roll.sin_cos();
+            let mut out = vec![0u32; out_w as usize * out_h as usize];
+            for oy in 0..out_h {
+                let ny0 = (1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32) * tan_half;
+                for ox in 0..out_w {
+                    let nx0 = (2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0) * tan_half * aspect;
+                    let nx = nx0 * cos_r - ny0 * sin_r;
+                    let ny = nx0 * sin_r + ny0 * cos_r;
+                    let x1 = nx;
+                    let y1 = ny * cos_p - 1.0 * sin_p;
+                    let z1 = ny * sin_p + 1.0 * cos_p;
+                    let x2 = x1 * cos_y + z1 * sin_y;
+                    let y2 = y1;
+                    let z2 = -x1 * sin_y + z1 * cos_y;
+                    let len = (x2 * x2 + y2 * y2 + z2 * z2).sqrt().max(1e-6);
+                    out[(oy * out_w + ox) as usize] =
+                        sample_eac_pixel(src, src_w, src_h, x2 / len, y2 / len, z2 / len);
                 }
             }
             out
@@ -4464,6 +4513,295 @@ pub fn format_auto_horizon_osd(enabled: bool) -> &'static str {
     }
 }
 
+/// Lateral chromatic aberration UV offsets for Cardboard / VR lenses (milli).
+pub fn chromatic_aberration_uv_milli(
+    u_milli: i32,
+    v_milli: i32,
+    amount_milli: i32,
+) -> ((i32, i32), (i32, i32), (i32, i32)) {
+    let amount = amount_milli.clamp(0, 1_000) as f32 / 1_000.0;
+    let u = (u_milli.clamp(0, 1_000) as f32 / 1_000.0) * 2.0 - 1.0;
+    let v = (v_milli.clamp(0, 1_000) as f32 / 1_000.0) * 2.0 - 1.0;
+    let r = (u * u + v * v).sqrt();
+    let shift = amount * r * 12.0; // up to ~12 milli-UV units at edge
+    let to_milli = |x: f32, y: f32| -> (i32, i32) {
+        (
+            (((x + 1.0) * 500.0).round() as i32).clamp(0, 1_000),
+            (((y + 1.0) * 500.0).round() as i32).clamp(0, 1_000),
+        )
+    };
+    let ru = to_milli(u + shift * u.max(1e-3).signum(), v);
+    let gu = to_milli(u, v);
+    let bu = to_milli(u - shift * u.max(1e-3).signum(), v);
+    (ru, gu, bu)
+}
+
+pub fn format_chromatic_aberration_osd(amount_milli: i32) -> String {
+    if amount_milli <= 0 {
+        "Chromatic aberr. Off".into()
+    } else {
+        format!("Chromatic aberr. {}%", amount_milli.clamp(0, 1_000) / 10)
+    }
+}
+
+/// Ambisonic channel ordering / normalization (libambiX / Google Spatial Media).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum AmbisonicChannelOrder {
+    #[default]
+    AcnSn3d,
+    AcnN3d,
+    Fuma,
+}
+
+pub fn cycle_ambisonic_order(order: AmbisonicChannelOrder) -> AmbisonicChannelOrder {
+    match order {
+        AmbisonicChannelOrder::AcnSn3d => AmbisonicChannelOrder::AcnN3d,
+        AmbisonicChannelOrder::AcnN3d => AmbisonicChannelOrder::Fuma,
+        AmbisonicChannelOrder::Fuma => AmbisonicChannelOrder::AcnSn3d,
+    }
+}
+
+pub fn ambisonic_order_label(order: AmbisonicChannelOrder) -> &'static str {
+    match order {
+        AmbisonicChannelOrder::AcnSn3d => "ACN/SN3D",
+        AmbisonicChannelOrder::AcnN3d => "ACN/N3D",
+        AmbisonicChannelOrder::Fuma => "FuMa",
+    }
+}
+
+pub fn format_ambisonic_order_osd(order: AmbisonicChannelOrder) -> String {
+    format!("Ambisonic {}", ambisonic_order_label(order))
+}
+
+/// Soft-knee limiter (playback safety / broadcast players).
+pub fn apply_soft_limiter_sample(sample: f32, threshold_milli: i32) -> f32 {
+    let thr = (threshold_milli.clamp(100, 1_000) as f32) / 1_000.0;
+    let x = sample;
+    let ax = x.abs();
+    if ax <= thr {
+        return x;
+    }
+    let over = ax - thr;
+    let limited = thr + over / (1.0 + over / (1.0 - thr).max(1e-3));
+    soft_clip_sample(limited.copysign(x))
+}
+
+pub fn format_soft_limiter_osd(threshold_milli: i32) -> String {
+    format!(
+        "Limiter −{:.1} dBFS",
+        -20.0 * (threshold_milli.clamp(100, 1_000) as f32 / 1_000.0).log10()
+    )
+}
+
+/// Simple feedforward echo / delay (VLC audio filter style).
+pub fn apply_echo_sample(sample: f32, delayed: f32, feedback_milli: i32) -> f32 {
+    let fb = feedback_milli.clamp(0, 900) as f32 / 1_000.0;
+    soft_clip_sample(sample + delayed * fb)
+}
+
+pub fn format_echo_osd(feedback_milli: i32) -> String {
+    if feedback_milli <= 0 {
+        "Echo Off".into()
+    } else {
+        format!("Echo {}%", feedback_milli.clamp(0, 900) / 10)
+    }
+}
+
+/// One-pole low-pass (karaoke / voice / night-mode companion).
+pub fn apply_lowpass_1pole(sample: f32, state: &mut f32, coeff_milli: i32) -> f32 {
+    let a = (coeff_milli.clamp(1, 999) as f32) / 1_000.0;
+    *state = *state + a * (sample - *state);
+    *state
+}
+
+/// One-pole high-pass via DC blocker style.
+pub fn apply_highpass_1pole(sample: f32, state: &mut f32, prev_in: &mut f32, coeff_milli: i32) -> f32 {
+    let a = (coeff_milli.clamp(1, 999) as f32) / 1_000.0;
+    let y = a * (*state + sample - *prev_in);
+    *prev_in = sample;
+    *state = y;
+    y
+}
+
+pub fn format_tone_filter_osd(kind: &str, coeff_milli: i32) -> String {
+    format!("{kind} {}%", coeff_milli.clamp(0, 1_000) / 10)
+}
+
+/// BS.1770-ish short-term loudness from a window of peak millis (oracle).
+pub fn short_term_lufs_from_peaks(peaks_milli: &[u32]) -> i32 {
+    if peaks_milli.is_empty() {
+        return -700;
+    }
+    let mut sum = 0.0f64;
+    for &p in peaks_milli {
+        let linear = (p.max(1) as f64) / 1_000.0;
+        sum += linear * linear;
+    }
+    let mean = sum / peaks_milli.len() as f64;
+    let lufs = 10.0 * mean.log10() - 0.691; // rough K-weight offset
+    (lufs * 10.0).round().clamp(-700.0, 0.0) as i32
+}
+
+/// Loudness range (LRA) from short-term LUFS samples (×10).
+pub fn loudness_range_l_milli(short_term_lufs_x10: &[i32]) -> u32 {
+    if short_term_lufs_x10.len() < 2 {
+        return 0;
+    }
+    let mut sorted = short_term_lufs_x10.to_vec();
+    sorted.sort_unstable();
+    let lo = sorted[sorted.len() / 10];
+    let hi = sorted[sorted.len().saturating_mul(9) / 10];
+    hi.saturating_sub(lo).max(0) as u32
+}
+
+pub fn format_loudness_range_osd(lra_x10: u32) -> String {
+    format!("LRA {:.1} LU", lra_x10 as f32 / 10.0)
+}
+
+/// Dubois anaglyph matrix (better than simple R/C for 3D players).
+pub fn anaglyph_dubois(left: u32, right: u32) -> u32 {
+    let lr = ((left >> 16) & 0xff) as f32;
+    let lg = ((left >> 8) & 0xff) as f32;
+    let lb = (left & 0xff) as f32;
+    let rr = ((right >> 16) & 0xff) as f32;
+    let rg = ((right >> 8) & 0xff) as f32;
+    let rb = (right & 0xff) as f32;
+    let r = (0.456 * lr + 0.500 * lg + 0.176 * lb - 0.043 * rr - 0.088 * rg - 0.002 * rb)
+        .clamp(0.0, 255.0);
+    let g = (-0.040 * lr - 0.038 * lg - 0.016 * lb + 0.378 * rr + 0.734 * rg - 0.018 * rb)
+        .clamp(0.0, 255.0);
+    let b = (-0.015 * lr - 0.021 * lg - 0.005 * lb - 0.072 * rr - 0.113 * rg + 1.226 * rb)
+        .clamp(0.0, 255.0);
+    ((r as u32) << 16) | ((g as u32) << 8) | (b as u32)
+}
+
+pub fn format_anaglyph_dubois_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Anaglyph Dubois"
+    } else {
+        "Anaglyph RC"
+    }
+}
+
+/// Delogo / watermark cover rectangle fill (mean of border).
+pub fn apply_delogo_rect(
+    width: u32,
+    height: u32,
+    pixels: &mut [u32],
+    x: u32,
+    y: u32,
+    w: u32,
+    h: u32,
+) {
+    if width == 0 || height == 0 || pixels.len() < (width * height) as usize {
+        return;
+    }
+    let x1 = x.min(width.saturating_sub(1));
+    let y1 = y.min(height.saturating_sub(1));
+    let x2 = (x + w.max(1)).min(width);
+    let y2 = (y + h.max(1)).min(height);
+    if x2 <= x1 || y2 <= y1 {
+        return;
+    }
+    // Sample average of outer ring.
+    let mut sum = 0u64;
+    let mut n = 0u64;
+    for yy in y1..y2 {
+        for xx in x1..x2 {
+            if xx == x1 || yy == y1 || xx + 1 == x2 || yy + 1 == y2 {
+                sum += u64::from(pixels[(yy * width + xx) as usize] & 0x00ff_ffff);
+                n += 1;
+            }
+        }
+    }
+    let fill = if n > 0 {
+        (sum / n) as u32
+    } else {
+        0
+    };
+    for yy in y1..y2 {
+        for xx in x1..x2 {
+            pixels[(yy * width + xx) as usize] = fill;
+        }
+    }
+}
+
+pub fn format_delogo_osd(x: u32, y: u32, w: u32, h: u32) -> String {
+    format!("Delogo {w}×{h} @{x},{y}")
+}
+
+/// Prefer OpenSubtitles-style sidecar beside media (`name.en.srt`).
+pub fn prefer_opensubtitles_path(media: &Path, lang: &str) -> Option<String> {
+    let stem = media.file_stem()?.to_str()?;
+    let parent = media.parent()?;
+    let lang = lang.trim();
+    if lang.is_empty() {
+        return None;
+    }
+    let candidate = parent.join(format!("{stem}.{lang}.srt"));
+    if candidate.is_file() {
+        Some(candidate.to_string_lossy().into_owned())
+    } else {
+        None
+    }
+}
+
+/// Smart playlist: keep paths whose extension is in `exts` (lowercase, no dot).
+pub fn filter_playlist_by_extension(paths: &[String], exts: &[&str]) -> Vec<String> {
+    paths
+        .iter()
+        .filter(|p| {
+            Path::new(p)
+                .extension()
+                .and_then(|e| e.to_str())
+                .map(|e| {
+                    let e = e.to_ascii_lowercase();
+                    exts.iter().any(|want| e == *want)
+                })
+                .unwrap_or(false)
+        })
+        .cloned()
+        .collect()
+}
+
+pub fn format_smart_playlist_osd(kept: usize, total: usize) -> String {
+    format!("Smart playlist {kept}/{total}")
+}
+
+/// Onset-based BPM estimate (oracle; uses peak gaps in ms).
+pub fn detect_bpm_from_onset_gaps_ms(gaps_ms: &[u32]) -> u32 {
+    if gaps_ms.is_empty() {
+        return 0;
+    }
+    let mut sum = 0u64;
+    for &g in gaps_ms {
+        sum += u64::from(g.max(1));
+    }
+    let mean = sum / gaps_ms.len() as u64;
+    if mean == 0 {
+        return 0;
+    }
+    ((60_000 / mean) as u32).clamp(40, 240)
+}
+
+pub fn format_bpm_osd(bpm: u32) -> String {
+    if bpm == 0 {
+        "BPM —".into()
+    } else {
+        format!("BPM {bpm}")
+    }
+}
+
+/// Haas / precedence delay for stereo widening (samples).
+pub fn haas_delay_samples(sample_rate: u32, delay_ms_milli: i32) -> usize {
+    let ms = delay_ms_milli.clamp(0, 40_000) as f32 / 1_000.0;
+    ((sample_rate as f32) * ms / 1_000.0).round().max(0.0) as usize
+}
+
+pub fn format_haas_osd(delay_ms_milli: i32) -> String {
+    format!("Haas {:.1} ms", delay_ms_milli.clamp(0, 40_000) as f32 / 1_000.0)
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -4524,6 +4862,8 @@ pub struct PlayRenderOptions {
     pub hdr_black_lift_milli: i32,
     /// White-balance color temperature (Kelvin).
     pub color_temp_kelvin: i32,
+    /// HLG OOTF display gamma ×1000; `0` skips OOTF.
+    pub hlg_ootf_gamma_milli: i32,
 }
 
 impl Default for PlayRenderOptions {
@@ -4557,6 +4897,7 @@ impl Default for PlayRenderOptions {
             hdr_highlight_desat_milli: 0,
             hdr_black_lift_milli: 0,
             color_temp_kelvin: COLOR_TEMP_DAYLIGHT_K,
+            hlg_ootf_gamma_milli: 0,
         }
     }
 }
@@ -4956,6 +5297,13 @@ pub fn render_play_pixels(
             );
             let (red, green, blue) =
                 apply_white_balance_pixel(red, green, blue, opts.color_temp_kelvin);
+            let (red, green, blue) = if opts.hlg_ootf_gamma_milli > 0
+                && opts.color_trc == COLOR_TRC_HLG
+            {
+                apply_hlg_ootf_pixel(red, green, blue, opts.hlg_ootf_gamma_milli)
+            } else {
+                (red, green, blue)
+            };
             let (red, green, blue) =
                 apply_display_effect_pixel(red, green, blue, opts.display_effect);
             let (dx, dy) = rotate_pixel(x as u32, y as u32, width, height, opts.rotate);
@@ -5288,8 +5636,9 @@ pub fn parse_spherical_projection(spec: &str) -> Result<SphericalProjection> {
         "dual-fisheye" | "fisheye" | "dfisheye" => Ok(SphericalProjection::DualFisheye),
         "cubemap" | "cube" => Ok(SphericalProjection::Cubemap),
         "little-planet" | "planet" | "stereographic" => Ok(SphericalProjection::LittlePlanet),
+        "eac" | "equi-angular" | "equiangular" => Ok(SphericalProjection::Eac),
         other => Err(format!(
-            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet)"
+            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac)"
         )
         .into()),
     }
@@ -8940,6 +9289,11 @@ struct PlayerApp {
     watch_party: bool,
     watch_party_offset_us: i64,
     auto_horizon: bool,
+    ambisonic_order: AmbisonicChannelOrder,
+    chromatic_aberration_milli: i32,
+    soft_limiter_milli: i32,
+    echo_feedback_milli: i32,
+    anaglyph_dubois: bool,
     seek_jump: SeekJump,
     surround_downmix: bool,
     scaletempo: bool,
@@ -9165,6 +9519,11 @@ impl PlayerApp {
             watch_party: false,
             watch_party_offset_us: 0,
             auto_horizon: false,
+            ambisonic_order: AmbisonicChannelOrder::AcnSn3d,
+            chromatic_aberration_milli: 0,
+            soft_limiter_milli: 1_000,
+            echo_feedback_milli: 0,
+            anaglyph_dubois: false,
             seek_jump: SeekJump::default(),
             surround_downmix: false,
             scaletempo: true,
@@ -10621,6 +10980,46 @@ impl PlayerApp {
         }
         if !focused
             && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::Num1)
+            })
+        {
+            self.cycle_ambisonic_channel_order();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::Num2)
+            })
+        {
+            self.cycle_chromatic_aberration();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::Num3)
+            })
+        {
+            self.cycle_soft_limiter();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::Num4)
+            })
+        {
+            self.cycle_echo_feedback();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::Num5)
+            })
+        {
+            self.toggle_anaglyph_dubois();
+        }
+        if !focused
+            && command
             && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::H))
         {
             self.hdr_nits = match self.hdr_nits {
@@ -10801,6 +11200,7 @@ impl PlayerApp {
             self.hdr_highlight_desat_milli,
             self.hdr_black_lift_milli,
             self.color_temp_kelvin,
+            self.hlg_ootf_gamma_milli,
             bitmap.as_ref(),
         );
         session.dirty = false;
@@ -12613,6 +13013,46 @@ impl PlayerApp {
         self.notice = Some(format_hdr_sdr_ratio_osd(ratio));
     }
 
+    fn cycle_ambisonic_channel_order(&mut self) {
+        self.ambisonic_order = cycle_ambisonic_order(self.ambisonic_order);
+        self.notice = Some(format_ambisonic_order_osd(self.ambisonic_order));
+    }
+
+    fn cycle_chromatic_aberration(&mut self) {
+        let next = match self.chromatic_aberration_milli {
+            0 => 250,
+            1..=250 => 500,
+            _ => 0,
+        };
+        self.chromatic_aberration_milli = next;
+        self.notice = Some(format_chromatic_aberration_osd(self.chromatic_aberration_milli));
+    }
+
+    fn cycle_soft_limiter(&mut self) {
+        let next = match self.soft_limiter_milli {
+            1_000 => 800,
+            700..=999 => 500,
+            _ => 1_000,
+        };
+        self.soft_limiter_milli = next;
+        self.notice = Some(format_soft_limiter_osd(self.soft_limiter_milli));
+    }
+
+    fn cycle_echo_feedback(&mut self) {
+        let next = match self.echo_feedback_milli {
+            0 => 250,
+            1..=250 => 500,
+            _ => 0,
+        };
+        self.echo_feedback_milli = next;
+        self.notice = Some(format_echo_osd(self.echo_feedback_milli));
+    }
+
+    fn toggle_anaglyph_dubois(&mut self) {
+        self.anaglyph_dubois = !self.anaglyph_dubois;
+        self.notice = Some(format_anaglyph_dubois_osd(self.anaglyph_dubois).into());
+    }
+
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {
         self.bass_milli = clamp_adjust_milli(bass);
         self.mid_milli = clamp_adjust_milli(mid);
@@ -12896,6 +13336,7 @@ impl PlayerApp {
                 hdr_highlight_desat_milli: self.hdr_highlight_desat_milli,
                 hdr_black_lift_milli: self.hdr_black_lift_milli,
                 color_temp_kelvin: self.color_temp_kelvin,
+                hlg_ootf_gamma_milli: self.hlg_ootf_gamma_milli,
             };
             let (width, height, pixels) =
                 render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap.as_ref());
@@ -13429,6 +13870,7 @@ fn color_image(
     hdr_highlight_desat_milli: i32,
     hdr_black_lift_milli: i32,
     color_temp_kelvin: i32,
+    hlg_ootf_gamma_milli: i32,
     bitmap: Option<&BitmapSubtitle>,
 ) -> egui::ColorImage {
     let opts = PlayRenderOptions {
@@ -13460,6 +13902,7 @@ fn color_image(
         hdr_highlight_desat_milli,
         hdr_black_lift_milli,
         color_temp_kelvin,
+        hlg_ootf_gamma_milli,
     };
     let (out_w, out_h, rgb) =
         render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap);

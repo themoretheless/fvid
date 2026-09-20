@@ -1916,6 +1916,42 @@ mod play_controls {
         );
         let blended = fvid_media::render_play_pixels(2, 2, &gray, &soft, None);
         assert_ne!(full.2[0], blended.2[0]);
+        assert_eq!(
+            fvid_media::parse_spherical_projection("eac").unwrap(),
+            fvid_media::SphericalProjection::Eac
+        );
+        let eac_px = fvid_media::sample_eac_pixel(&[0x00_11_22_33u32; 96], 96, 16, 1.0, 0.0, 0.0);
+        assert_ne!(eac_px, 0xFFFF_FFFF);
+        let (r, g, b) = fvid_media::chromatic_aberration_uv_milli(800, 500, 500);
+        assert_ne!(r.0, b.0);
+        assert_eq!(g, (800, 500));
+        assert_eq!(
+            fvid_media::cycle_ambisonic_order(fvid_media::AmbisonicChannelOrder::AcnSn3d),
+            fvid_media::AmbisonicChannelOrder::AcnN3d
+        );
+        assert!(fvid_media::apply_soft_limiter_sample(1.5, 800).abs() <= 1.0);
+        assert!(fvid_media::apply_echo_sample(0.5, 0.25, 400) > 0.5);
+        let mut lp = 0.0f32;
+        assert!(fvid_media::apply_lowpass_1pole(1.0, &mut lp, 200) > 0.0);
+        let st = fvid_media::short_term_lufs_from_peaks(&[500, 600, 400]);
+        assert!(st < 0);
+        assert!(fvid_media::loudness_range_l_milli(&[-200, -150, -100, -50]) > 0);
+        let dub = fvid_media::anaglyph_dubois(0x00_ff_00_00, 0x00_00_00_ff);
+        assert_ne!(dub, 0);
+        let mut logo = vec![0x00_80_80_80u32; 16];
+        fvid_media::apply_delogo_rect(4, 4, &mut logo, 1, 1, 2, 2);
+        assert_eq!(
+            fvid_media::filter_playlist_by_extension(
+                &["a.mp4".into(), "b.txt".into()],
+                &["mp4"]
+            ),
+            vec!["a.mp4".to_string()]
+        );
+        assert_eq!(
+            fvid_media::detect_bpm_from_onset_gaps_ms(&[500, 500, 500]),
+            120
+        );
+        assert_eq!(fvid_media::haas_delay_samples(48_000, 1_000), 48);
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
