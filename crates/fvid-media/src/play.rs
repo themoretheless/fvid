@@ -2232,6 +2232,18 @@ pub fn format_playlist_osd(index: usize, total: usize) -> String {
     format!("{}/{}", index.saturating_add(1), total.max(1))
 }
 
+/// Serialize paths as a simple M3U playlist (one absolute/relative path per line).
+pub fn format_playlist_m3u(paths: &[PathBuf]) -> String {
+    let mut out = String::from("#EXTM3U\n");
+    for path in paths {
+        if let Some(text) = path.to_str() {
+            out.push_str(text);
+            out.push('\n');
+        }
+    }
+    out
+}
+
 /// Next bookmark after `now_us`, or the previous one when `delta` is negative.
 pub fn bookmark_step(marks: &[Bookmark], now_us: i64, delta: i32) -> Option<i64> {
     if marks.is_empty() || delta == 0 {
@@ -4396,11 +4408,15 @@ impl PlayerApp {
         }
         if keys.11 {
             if ctx.input(|input| input.modifiers.shift) {
-                self.snapshot_format = cycle_snapshot_format(self.snapshot_format);
-                self.notice = Some(format!(
-                    "Snapshot {}",
-                    snapshot_format_ext(self.snapshot_format).to_ascii_uppercase()
-                ));
+                if command {
+                    self.save_playlist();
+                } else {
+                    self.snapshot_format = cycle_snapshot_format(self.snapshot_format);
+                    self.notice = Some(format!(
+                        "Snapshot {}",
+                        snapshot_format_ext(self.snapshot_format).to_ascii_uppercase()
+                    ));
+                }
             } else {
                 self.save_snapshot();
             }
@@ -5211,6 +5227,28 @@ impl PlayerApp {
     fn clear_all_bookmarks(&mut self) {
         clear_bookmarks(&mut self.bookmarks);
         self.notice = Some("Bookmarks cleared".into());
+    }
+
+    fn save_playlist(&mut self) {
+        if self.playlist.is_empty() {
+            self.notice = Some("Playlist empty".into());
+            return;
+        }
+        let mut dialog = rfd::FileDialog::new()
+            .set_title("Save playlist")
+            .add_filter("M3U", &["m3u", "m3u8"])
+            .set_file_name("playlist.m3u");
+        if let Some(dir) = self.playlist.first().and_then(|path| path.parent()) {
+            dialog = dialog.set_directory(dir);
+        }
+        let Some(path) = dialog.save_file() else {
+            return;
+        };
+        let body = format_playlist_m3u(&self.playlist);
+        match std::fs::write(&path, body) {
+            Ok(()) => self.notice = Some(format!("Saved {}", path.display())),
+            Err(err) => self.notice = Some(err.to_string()),
+        }
     }
 
     fn step_bookmark(&mut self, delta: i32) {

@@ -1133,5 +1133,12 @@ mod play_controls {
         fvid_media::clear_bookmarks(&mut marks);
         assert!(marks.is_empty());
         assert_eq!(fvid_media::format_playlist_osd(0, 3), "1/3");
+        let m3u = fvid_media::format_playlist_m3u(&[
+            std::path::PathBuf::from("a.mp4"),
+            std::path::PathBuf::from("b.mp4"),
+        ]);
+        assert!(m3u.starts_with("#EXTM3U\n"));
+        assert!(m3u.contains("a.mp4\n"));
+        assert!(m3u.contains("b.mp4\n"));
     }
 }
