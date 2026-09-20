@@ -1317,5 +1317,15 @@ mod play_controls {
         assert!(jump >= 0 && jump < 100_000_000);
         assert_eq!(fvid_media::random_seek_us(100_000_000, 42), Some(jump));
         assert_eq!(fvid_media::random_seek_us(0, 1), None);
+        assert!(fvid_media::detect_equirect_aspect(3840, 1920));
+        assert!(!fvid_media::detect_equirect_aspect(1920, 1080));
+        assert_eq!(fvid_media::cycle_integer_zoom(1_000), 2_000);
+        assert_eq!(fvid_media::cycle_integer_zoom(2_000), 250);
+        assert_eq!(fvid_media::fit_window_to_video(640, 360, 1920, 1080), (640, 360));
+        assert_eq!(fvid_media::fit_window_to_video(3840, 2160, 1920, 1080), (1920, 1080));
+        assert_eq!(fvid_media::subtitle_opacity_u8(1_000), 255);
+        assert_eq!(fvid_media::subtitle_opacity_u8(500), 127);
+        assert!(fvid_media::format_subtitle_opacity_osd(800).contains("80%"));
+        assert!(fvid_media::format_integer_zoom_osd(1_000).contains("1:1"));
     }
 }

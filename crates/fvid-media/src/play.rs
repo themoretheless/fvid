@@ -661,6 +661,32 @@ pub fn subtitle_font_px(base_px: f32, scale_milli: i32) -> f32 {
     base_px * (clamp_subtitle_scale_milli(scale_milli) as f32 / 1_000.0)
 }
 
+/// Subtitle opacity. `1000` is fully opaque, `0` is invisible.
+pub const SUBTITLE_OPACITY_MIN_MILLI: i32 = 100;
+pub const SUBTITLE_OPACITY_MAX_MILLI: i32 = 1_000;
+pub const SUBTITLE_OPACITY_UNITY_MILLI: i32 = 1_000;
+pub const SUBTITLE_OPACITY_STEP_MILLI: i32 = 100;
+
+pub fn clamp_subtitle_opacity_milli(value: i32) -> i32 {
+    value.clamp(SUBTITLE_OPACITY_MIN_MILLI, SUBTITLE_OPACITY_MAX_MILLI)
+}
+
+pub fn subtitle_opacity_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_subtitle_opacity_milli(current + delta)
+}
+
+pub fn format_subtitle_opacity_osd(opacity_milli: i32) -> String {
+    format!(
+        "Subtitles opacity {}%",
+        clamp_subtitle_opacity_milli(opacity_milli) / 10
+    )
+}
+
+/// Map opacity milli to 0..=255 alpha for painted subtitle glyphs.
+pub fn subtitle_opacity_u8(opacity_milli: i32) -> u8 {
+    ((clamp_subtitle_opacity_milli(opacity_milli) as i64 * 255) / 1_000).clamp(0, 255) as u8
+}
+
 pub fn cycle_eq_bypass(bypassed: bool) -> bool {
     !bypassed
 }
@@ -2904,6 +2930,54 @@ pub fn zoom_label(zoom_milli: u32) -> &'static str {
     }
 }
 
+/// Cycle VLC-style integer zoom factors: 1:4 → 1:2 → 1:1 → 2:1 → 1:4.
+pub fn cycle_integer_zoom(current_milli: u32) -> u32 {
+    match current_milli.clamp(ZOOM_MIN_MILLI, ZOOM_MAX_MILLI) {
+        0..=374 => 500,
+        375..=749 => 1_000,
+        750..=1_499 => 2_000,
+        _ => 250,
+    }
+}
+
+pub fn format_integer_zoom_osd(zoom_milli: u32) -> String {
+    format!("Zoom {}", zoom_label(zoom_milli))
+}
+
+/// True when frame aspect is ~2:1 (common equirectangular 360° packaging).
+pub fn detect_equirect_aspect(width: u32, height: u32) -> bool {
+    if width == 0 || height == 0 {
+        return false;
+    }
+    let ratio = width as f32 / height as f32;
+    (ratio - 2.0).abs() <= 0.08
+}
+
+/// Fitted window size for "fit to video" / original-size views.
+pub fn fit_window_to_video(
+    video_w: u32,
+    video_h: u32,
+    max_w: u32,
+    max_h: u32,
+) -> (u32, u32) {
+    let video_w = video_w.max(1);
+    let video_h = video_h.max(1);
+    let max_w = max_w.max(1);
+    let max_h = max_h.max(1);
+    if video_w <= max_w && video_h <= max_h {
+        return (video_w, video_h);
+    }
+    let scale = (max_w as f32 / video_w as f32).min(max_h as f32 / video_h as f32);
+    (
+        ((video_w as f32) * scale).round().max(1.0) as u32,
+        ((video_h as f32) * scale).round().max(1.0) as u32,
+    )
+}
+
+pub fn format_fit_window_osd(width: u32, height: u32) -> String {
+    format!("Window {width}x{height}")
+}
+
 /// Fitted frame scaled by zoom. Values above 1× are clipped by the window.
 pub fn zoom_size(fitted_w: u32, fitted_h: u32, zoom_milli: u32) -> (u32, u32) {
     let zoom = u64::from(zoom_milli.clamp(ZOOM_MIN_MILLI, ZOOM_MAX_MILLI));
@@ -4647,6 +4721,7 @@ struct PlayerApp {
     treble_milli: i32,
     subtitle_margin_px: i32,
     subtitle_scale_milli: i32,
+    subtitle_opacity_milli: i32,
     rotate: RotateMode,
     eq_gains_milli: [i32; EQ_BAND_COUNT],
     eq_preset: EqPreset,
@@ -4747,6 +4822,7 @@ impl PlayerApp {
             treble_milli: TONE_UNITY_MILLI,
             subtitle_margin_px: 0,
             subtitle_scale_milli: SUBTITLE_SCALE_UNITY_MILLI,
+            subtitle_opacity_milli: SUBTITLE_OPACITY_UNITY_MILLI,
             rotate: RotateMode::Deg0,
             eq_gains_milli: eq_unity_gains(),
             eq_preset: EqPreset::Flat,
@@ -5382,8 +5458,52 @@ impl PlayerApp {
             self.reset_av_sync();
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::Z)) {
-            let zoom_in = !ctx.input(|input| input.modifiers.shift);
-            self.nudge_zoom(zoom_in);
+            if command {
+                self.zoom_milli = cycle_integer_zoom(self.zoom_milli);
+                let (_, pan_x, pan_y) = reset_zoom_pan();
+                self.pan_x_px = pan_x;
+                self.pan_y_px = pan_y;
+                self.notice = Some(format_integer_zoom_osd(self.zoom_milli));
+            } else {
+                let zoom_in = !ctx.input(|input| input.modifiers.shift);
+                self.nudge_zoom(zoom_in);
+            }
+        }
+        if !focused
+            && ctx.input(|input| {
+                input.modifiers.alt
+                    && (input.key_pressed(egui::Key::Equals) || input.key_pressed(egui::Key::Plus))
+            })
+        {
+            self.nudge_subtitle_scale(SUBTITLE_SCALE_STEP_MILLI);
+        }
+        if !focused
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Minus))
+        {
+            self.nudge_subtitle_scale(-SUBTITLE_SCALE_STEP_MILLI);
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.key_pressed(egui::Key::Equals) || input.key_pressed(egui::Key::Plus)
+            })
+        {
+            self.nudge_subtitle_opacity(SUBTITLE_OPACITY_STEP_MILLI);
+        }
+        if !focused && command && ctx.input(|input| input.key_pressed(egui::Key::Minus)) {
+            self.nudge_subtitle_opacity(-SUBTITLE_OPACITY_STEP_MILLI);
+        }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::W)) {
+            if command {
+                self.fit_window_video();
+            } else {
+                let wider = !ctx.input(|input| input.modifiers.shift);
+                self.nudge_stereo_width(if wider {
+                    WIDTH_STEP_MILLI
+                } else {
+                    -WIDTH_STEP_MILLI
+                });
+            }
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::D)) {
             if command {
@@ -5426,14 +5546,6 @@ impl PlayerApp {
         {
             self.nudge_balance(BALANCE_STEP_MILLI);
         }
-        if !focused && ctx.input(|input| input.key_pressed(egui::Key::W)) {
-            let wider = !ctx.input(|input| input.modifiers.shift);
-            self.nudge_stereo_width(if wider {
-                WIDTH_STEP_MILLI
-            } else {
-                -WIDTH_STEP_MILLI
-            });
-        }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::O)) {
             let stronger = !ctx.input(|input| input.modifiers.shift);
             self.nudge_crossfeed(if stronger {
@@ -5453,19 +5565,6 @@ impl PlayerApp {
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::Y)) {
             self.cycle_audio_channel_mode();
-        }
-        if !focused
-            && ctx.input(|input| {
-                input.modifiers.alt
-                    && (input.key_pressed(egui::Key::Equals) || input.key_pressed(egui::Key::Plus))
-            })
-        {
-            self.nudge_subtitle_scale(SUBTITLE_SCALE_STEP_MILLI);
-        }
-        if !focused
-            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Minus))
-        {
-            self.nudge_subtitle_scale(-SUBTITLE_SCALE_STEP_MILLI);
         }
         if !focused {
             let (scroll, ctrl) = ctx.input(|input| {
@@ -5539,6 +5638,7 @@ impl PlayerApp {
 
     fn take_image(&mut self) -> Option<egui::ColorImage> {
         self.maybe_auto_hdr();
+        self.maybe_auto_equirect();
         let now = self.shown_media_us();
         let session = self.session.as_mut()?;
         if !session.dirty && !self.adjust_dirty {
@@ -6635,6 +6735,46 @@ impl PlayerApp {
         self.notice = Some(format_subtitle_scale_osd(self.subtitle_scale_milli));
     }
 
+    fn nudge_subtitle_opacity(&mut self, delta: i32) {
+        self.subtitle_opacity_milli =
+            subtitle_opacity_step_milli(self.subtitle_opacity_milli, delta);
+        self.notice = Some(format_subtitle_opacity_osd(self.subtitle_opacity_milli));
+    }
+
+    fn fit_window_video(&mut self) {
+        let (vw, vh) = self
+            .session
+            .as_ref()
+            .and_then(|session| session.frame.as_ref())
+            .map(|frame| (frame.width, frame.height))
+            .unwrap_or((0, 0));
+        let (width, height) = fit_window_to_video(vw, vh, 1920, 1080);
+        if width == 0 || height == 0 {
+            self.notice = Some("Fit unavailable".into());
+            return;
+        }
+        self.notice = Some(format_fit_window_osd(width, height));
+    }
+
+    fn maybe_auto_equirect(&mut self) {
+        if self.spherical || self.options.spherical {
+            return;
+        }
+        let Some(frame) = self.session.as_ref().and_then(|session| session.frame.as_ref()) else {
+            return;
+        };
+        if detect_equirect_aspect(frame.width, frame.height) {
+            self.spherical = true;
+            self.adjust_dirty = true;
+            self.notice = Some(format_spherical_osd(
+                true,
+                self.yaw_deg_milli,
+                self.pitch_deg_milli,
+                self.fov_deg_milli,
+            ));
+        }
+    }
+
     fn cycle_audio(&mut self, delta: i32) {
         let Some(session) = &self.session else {
             return;
@@ -7156,6 +7296,7 @@ impl PlayerApp {
             &self.current_subtitle(),
             self.subtitle_margin_px,
             self.subtitle_scale_milli,
+            self.subtitle_opacity_milli,
         );
         if self.show_stats {
             let stats = PlayStats {
@@ -7362,7 +7503,14 @@ fn color_image(
     egui::ColorImage::new([out_w as usize, out_h as usize], pixels)
 }
 
-fn paint_subtitle(ui: &egui::Ui, rect: egui::Rect, text: &str, margin_px: i32, scale_milli: i32) {
+fn paint_subtitle(
+    ui: &egui::Ui,
+    rect: egui::Rect,
+    text: &str,
+    margin_px: i32,
+    scale_milli: i32,
+    opacity_milli: i32,
+) {
     let lines: Vec<&str> = text.lines().filter(|line| !line.is_empty()).collect();
     if lines.is_empty() {
         return;
@@ -7371,6 +7519,9 @@ fn paint_subtitle(ui: &egui::Ui, rect: egui::Rect, text: &str, margin_px: i32, s
     let line_h = size + 4.0;
     let font = egui::FontId::proportional(size);
     let margin = subtitle_margin_px(12, margin_px) as f32;
+    let alpha = subtitle_opacity_u8(opacity_milli);
+    let fill = egui::Color32::from_rgba_unmultiplied(255, 255, 255, alpha);
+    let shadow = egui::Color32::from_rgba_unmultiplied(0, 0, 0, alpha);
     let mut y = rect.bottom() - margin - lines.len() as f32 * line_h;
     for line in lines {
         let pos = egui::pos2(rect.center().x, y);
@@ -7379,14 +7530,14 @@ fn paint_subtitle(ui: &egui::Ui, rect: egui::Rect, text: &str, margin_px: i32, s
             egui::Align2::CENTER_TOP,
             line,
             font.clone(),
-            egui::Color32::BLACK,
+            shadow,
         );
         ui.painter().text(
             pos,
             egui::Align2::CENTER_TOP,
             line,
             font.clone(),
-            egui::Color32::WHITE,
+            fill,
         );
         y += line_h;
     }
