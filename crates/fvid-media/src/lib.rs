@@ -238,6 +238,11 @@ pub use play::{
     anaglyph_dubois, format_anaglyph_dubois_osd, apply_delogo_rect, format_delogo_osd,
     prefer_opensubtitles_path, filter_playlist_by_extension, format_smart_playlist_osd,
     detect_bpm_from_onset_gaps_ms, format_bpm_osd, haas_delay_samples, format_haas_osd,
+    atempo_duration_us, format_atempo_osd, apply_chorus_sample, format_chorus_osd,
+    apply_reverb_sample, format_reverb_osd, format_ass_force_style, format_ass_force_style_osd,
+    bt2446_tonemap_channel, apply_bt2446_tonemap_pixel, format_bt2446_osd, SphericalHotspot,
+    spherical_hotspot_hit, format_spherical_hotspot_osd, parse_webvtt_region_id,
+    thumbnail_cache_key, integrated_lufs_from_short_term, format_integrated_lufs_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

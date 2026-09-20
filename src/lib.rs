@@ -1952,6 +1952,31 @@ mod play_controls {
             120
         );
         assert_eq!(fvid_media::haas_delay_samples(48_000, 1_000), 48);
+        assert_eq!(fvid_media::atempo_duration_us(2_000_000, 2_000), 1_000_000);
+        assert!(fvid_media::apply_chorus_sample(0.5, 0.2, 500) != 0.5);
+        assert!(fvid_media::apply_reverb_sample(0.4, 0.2, 0.1, 500) != 0.4);
+        assert!(fvid_media::format_ass_force_style("Sans", 24, "").contains("FontSize=24"));
+        let bt = fvid_media::apply_bt2446_tonemap_pixel(200, 200, 200, 1_000);
+        assert!(bt.0 > 0);
+        let hs = fvid_media::SphericalHotspot {
+            yaw_deg_milli: 0,
+            pitch_deg_milli: 0,
+            radius_deg_milli: 5_000,
+            label: "door".into(),
+        };
+        assert!(fvid_media::spherical_hotspot_hit(&hs, 1_000, 0));
+        assert_eq!(
+            fvid_media::parse_webvtt_region_id("REGION id:banner width:50%").as_deref(),
+            Some("banner")
+        );
+        assert_eq!(
+            fvid_media::thumbnail_cache_key("/a.mp4", 5_500_000, 1_000_000),
+            "/a.mp4@5"
+        );
+        assert_eq!(
+            fvid_media::integrated_lufs_from_short_term(&[-230, -220, -210]),
+            -220
+        );
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;

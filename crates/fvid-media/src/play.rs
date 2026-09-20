@@ -4802,6 +4802,172 @@ pub fn format_haas_osd(delay_ms_milli: i32) -> String {
     format!("Haas {:.1} ms", delay_ms_milli.clamp(0, 40_000) as f32 / 1_000.0)
 }
 
+/// Timestretch duration via atempo-style rate (VLC / mpv rubberband companion).
+pub fn atempo_duration_us(src_us: i64, tempo_milli: i32) -> i64 {
+    let tempo = tempo_milli.clamp(250, 4_000) as i64;
+    src_us.saturating_mul(1_000) / tempo
+}
+
+pub fn format_atempo_osd(tempo_milli: i32) -> String {
+    format!("Atempo {:.2}×", tempo_milli.clamp(250, 4_000) as f32 / 1_000.0)
+}
+
+/// Lightweight chorus (modulated delay mix).
+pub fn apply_chorus_sample(sample: f32, delayed: f32, depth_milli: i32) -> f32 {
+    let depth = depth_milli.clamp(0, 1_000) as f32 / 1_000.0;
+    soft_clip_sample(sample * (1.0 - 0.5 * depth) + delayed * 0.5 * depth)
+}
+
+pub fn format_chorus_osd(depth_milli: i32) -> String {
+    if depth_milli <= 0 {
+        "Chorus Off".into()
+    } else {
+        format!("Chorus {}%", depth_milli.clamp(0, 1_000) / 10)
+    }
+}
+
+/// Comb-filter reverb tap mix.
+pub fn apply_reverb_sample(sample: f32, tap1: f32, tap2: f32, wet_milli: i32) -> f32 {
+    let wet = wet_milli.clamp(0, 1_000) as f32 / 1_000.0;
+    let room = 0.5 * tap1 + 0.35 * tap2;
+    soft_clip_sample(sample * (1.0 - wet) + room * wet)
+}
+
+pub fn format_reverb_osd(wet_milli: i32) -> String {
+    if wet_milli <= 0 {
+        "Reverb Off".into()
+    } else {
+        format!("Reverb {}%", wet_milli.clamp(0, 1_000) / 10)
+    }
+}
+
+/// ASS/SSA forced style override string (font + size).
+pub fn format_ass_force_style(font: &str, size_px: u32, primary_color: &str) -> String {
+    let font = font.trim();
+    let font = if font.is_empty() { "Arial" } else { font };
+    let color = primary_color.trim();
+    let color = if color.is_empty() { "&H00FFFFFF" } else { color };
+    format!("FontName={font},FontSize={size_px},PrimaryColour={color}")
+}
+
+pub fn format_ass_force_style_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "ASS force style On"
+    } else {
+        "ASS force style Off"
+    }
+}
+
+/// BT.2446-ish HDR→SDR spline tonemap channel (broadcast).
+pub fn bt2446_tonemap_channel(value: f32, peak: f32) -> f32 {
+    let v = value.clamp(0.0, 1.0);
+    let p = peak.clamp(1.0, 10_000.0);
+    let y = v * p;
+    // Soft shoulder toward SDR 100 nits.
+    let mapped = if y <= 100.0 {
+        y / 100.0
+    } else {
+        let t = ((y - 100.0) / (p - 100.0).max(1.0)).clamp(0.0, 1.0);
+        0.7 + 0.3 * (1.0 - (1.0 - t).powi(2))
+    };
+    mapped.clamp(0.0, 1.0)
+}
+
+pub fn apply_bt2446_tonemap_pixel(red: u8, green: u8, blue: u8, peak_nits: u32) -> (u8, u8, u8) {
+    let peak = clamp_hdr_nits(peak_nits).max(100) as f32;
+    let map = |c: u8| -> u8 {
+        let v = bt2446_tonemap_channel(f32::from(c) / 255.0, peak);
+        (v * 255.0).round().clamp(0.0, 255.0) as u8
+    };
+    (map(red), map(green), map(blue))
+}
+
+pub fn format_bt2446_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "BT.2446 tonemap"
+    } else {
+        "BT.2446 Off"
+    }
+}
+
+/// Interactive 360 hotspot (yaw/pitch milli → hit test radius).
+#[derive(Clone, Debug, PartialEq)]
+pub struct SphericalHotspot {
+    pub yaw_deg_milli: i32,
+    pub pitch_deg_milli: i32,
+    pub radius_deg_milli: i32,
+    pub label: String,
+}
+
+pub fn spherical_hotspot_hit(
+    hotspot: &SphericalHotspot,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+) -> bool {
+    let dyaw = (clamp_yaw_milli(yaw_deg_milli) - clamp_yaw_milli(hotspot.yaw_deg_milli)).abs();
+    let dyaw = dyaw.min(360_000 - dyaw);
+    let dpitch =
+        (clamp_pitch_milli(pitch_deg_milli) - clamp_pitch_milli(hotspot.pitch_deg_milli)).abs();
+    let r = hotspot.radius_deg_milli.max(1);
+    dyaw <= r && dpitch <= r
+}
+
+pub fn format_spherical_hotspot_osd(hotspot: &SphericalHotspot, hit: bool) -> String {
+    if hit {
+        format!("Hotspot {}", hotspot.label)
+    } else {
+        format!("Hotspot miss {}", hotspot.label)
+    }
+}
+
+/// Parse WebVTT REGION settings line (`id:foo width:50%`).
+pub fn parse_webvtt_region_id(line: &str) -> Option<String> {
+    let line = line.trim();
+    let rest = line
+        .strip_prefix("REGION")
+        .or_else(|| line.strip_prefix("Region"))?
+        .trim();
+    for part in rest.split_whitespace() {
+        if let Some(id) = part.strip_prefix("id:") {
+            let id = id.trim();
+            if !id.is_empty() {
+                return Some(id.to_string());
+            }
+        }
+    }
+    None
+}
+
+/// Thumbnail preview cache key (path + media time bucket).
+pub fn thumbnail_cache_key(path: &str, media_us: i64, bucket_us: i64) -> String {
+    let bucket = bucket_us.max(1);
+    let slot = media_us.max(0) / bucket;
+    format!("{path}@{slot}")
+}
+
+/// Integrated loudness estimate from short-term windows (×10 LUFS).
+pub fn integrated_lufs_from_short_term(short_term_x10: &[i32]) -> i32 {
+    if short_term_x10.is_empty() {
+        return -700;
+    }
+    // Absolute gate ≈ −70 LUFS; relative gate ≈ −10 LU below ungated mean.
+    let ungated: Vec<i32> = short_term_x10.iter().copied().filter(|&v| v > -700).collect();
+    if ungated.is_empty() {
+        return -700;
+    }
+    let mean = ungated.iter().map(|&v| v as i64).sum::<i64>() / ungated.len() as i64;
+    let gate = mean - 100;
+    let gated: Vec<i32> = ungated.into_iter().filter(|&v| (v as i64) >= gate).collect();
+    if gated.is_empty() {
+        return mean as i32;
+    }
+    (gated.iter().map(|&v| v as i64).sum::<i64>() / gated.len() as i64) as i32
+}
+
+pub fn format_integrated_lufs_osd(lufs_x10: i32) -> String {
+    format!("Integrated {:+.1} LUFS", lufs_x10 as f32 / 10.0)
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -4864,6 +5030,8 @@ pub struct PlayRenderOptions {
     pub color_temp_kelvin: i32,
     /// HLG OOTF display gamma ×1000; `0` skips OOTF.
     pub hlg_ootf_gamma_milli: i32,
+    /// Use BT.2446 HDR→SDR tonemap instead of Hable/Reinhard when set.
+    pub bt2446_tonemap: bool,
 }
 
 impl Default for PlayRenderOptions {
@@ -4898,6 +5066,7 @@ impl Default for PlayRenderOptions {
             hdr_black_lift_milli: 0,
             color_temp_kelvin: COLOR_TEMP_DAYLIGHT_K,
             hlg_ootf_gamma_milli: 0,
+            bt2446_tonemap: false,
         }
     }
 }
@@ -5268,8 +5437,13 @@ pub fn render_play_pixels(
             let orig_r = red;
             let orig_g = green;
             let orig_b = blue;
-            let (red, green, blue) =
-                apply_hdr_tonemap_pixel(red, green, blue, opts.hdr_tonemap, opts.color_trc);
+            let (red, green, blue) = if opts.bt2446_tonemap
+                && !matches!(opts.hdr_tonemap, HdrTonemap::Off)
+            {
+                apply_bt2446_tonemap_pixel(red, green, blue, opts.hdr_nits)
+            } else {
+                apply_hdr_tonemap_pixel(red, green, blue, opts.hdr_tonemap, opts.color_trc)
+            };
             let (red, green, blue) = (
                 blend_tonemap_channel(red, orig_r, opts.tonemap_strength_milli),
                 blend_tonemap_channel(green, orig_g, opts.tonemap_strength_milli),
@@ -9294,6 +9468,10 @@ struct PlayerApp {
     soft_limiter_milli: i32,
     echo_feedback_milli: i32,
     anaglyph_dubois: bool,
+    bt2446_tonemap: bool,
+    chorus_milli: i32,
+    reverb_milli: i32,
+    atempo_milli: i32,
     seek_jump: SeekJump,
     surround_downmix: bool,
     scaletempo: bool,
@@ -9524,6 +9702,10 @@ impl PlayerApp {
             soft_limiter_milli: 1_000,
             echo_feedback_milli: 0,
             anaglyph_dubois: false,
+            bt2446_tonemap: false,
+            chorus_milli: 0,
+            reverb_milli: 0,
+            atempo_milli: 1_000,
             seek_jump: SeekJump::default(),
             surround_downmix: false,
             scaletempo: true,
@@ -11020,6 +11202,38 @@ impl PlayerApp {
         }
         if !focused
             && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::F)
+            })
+        {
+            self.toggle_bt2446();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::O)
+            })
+        {
+            self.cycle_chorus();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::Z)
+            })
+        {
+            self.cycle_reverb();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::X)
+            })
+        {
+            self.cycle_atempo();
+        }
+        if !focused
+            && command
             && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::H))
         {
             self.hdr_nits = match self.hdr_nits {
@@ -11201,6 +11415,7 @@ impl PlayerApp {
             self.hdr_black_lift_milli,
             self.color_temp_kelvin,
             self.hlg_ootf_gamma_milli,
+            self.bt2446_tonemap,
             bitmap.as_ref(),
         );
         session.dirty = false;
@@ -13053,6 +13268,45 @@ impl PlayerApp {
         self.notice = Some(format_anaglyph_dubois_osd(self.anaglyph_dubois).into());
     }
 
+    fn toggle_bt2446(&mut self) {
+        self.bt2446_tonemap = !self.bt2446_tonemap;
+        if self.bt2446_tonemap && matches!(self.hdr_tonemap, HdrTonemap::Off) {
+            self.hdr_tonemap = HdrTonemap::Hable;
+        }
+        self.adjust_dirty = true;
+        self.notice = Some(format_bt2446_osd(self.bt2446_tonemap).into());
+    }
+
+    fn cycle_chorus(&mut self) {
+        let next = match self.chorus_milli {
+            0 => 300,
+            1..=300 => 600,
+            _ => 0,
+        };
+        self.chorus_milli = next;
+        self.notice = Some(format_chorus_osd(self.chorus_milli));
+    }
+
+    fn cycle_reverb(&mut self) {
+        let next = match self.reverb_milli {
+            0 => 300,
+            1..=300 => 600,
+            _ => 0,
+        };
+        self.reverb_milli = next;
+        self.notice = Some(format_reverb_osd(self.reverb_milli));
+    }
+
+    fn cycle_atempo(&mut self) {
+        let next = match self.atempo_milli {
+            1_000 => 800,
+            700..=999 => 1_250,
+            _ => 1_000,
+        };
+        self.atempo_milli = next;
+        self.notice = Some(format_atempo_osd(self.atempo_milli));
+    }
+
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {
         self.bass_milli = clamp_adjust_milli(bass);
         self.mid_milli = clamp_adjust_milli(mid);
@@ -13337,6 +13591,7 @@ impl PlayerApp {
                 hdr_black_lift_milli: self.hdr_black_lift_milli,
                 color_temp_kelvin: self.color_temp_kelvin,
                 hlg_ootf_gamma_milli: self.hlg_ootf_gamma_milli,
+                bt2446_tonemap: self.bt2446_tonemap,
             };
             let (width, height, pixels) =
                 render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap.as_ref());
@@ -13871,6 +14126,7 @@ fn color_image(
     hdr_black_lift_milli: i32,
     color_temp_kelvin: i32,
     hlg_ootf_gamma_milli: i32,
+    bt2446_tonemap: bool,
     bitmap: Option<&BitmapSubtitle>,
 ) -> egui::ColorImage {
     let opts = PlayRenderOptions {
@@ -13903,6 +14159,7 @@ fn color_image(
         hdr_black_lift_milli,
         color_temp_kelvin,
         hlg_ootf_gamma_milli,
+        bt2446_tonemap,
     };
     let (out_w, out_h, rgb) =
         render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap);
