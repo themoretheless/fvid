@@ -3499,6 +3499,362 @@ pub fn format_stream_rendition_osd(width: u32, height: u32, bandwidth_bps: u32) 
     }
 }
 
+/// Stereo packing inside a 360° sphere (YouTube VR / GoPro VR / Spatial Media).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum SphericalStereoLayout {
+    #[default]
+    Mono,
+    TopBottom,
+    SideBySide,
+}
+
+pub fn cycle_spherical_stereo(layout: SphericalStereoLayout) -> SphericalStereoLayout {
+    match layout {
+        SphericalStereoLayout::Mono => SphericalStereoLayout::TopBottom,
+        SphericalStereoLayout::TopBottom => SphericalStereoLayout::SideBySide,
+        SphericalStereoLayout::SideBySide => SphericalStereoLayout::Mono,
+    }
+}
+
+pub fn spherical_stereo_label(layout: SphericalStereoLayout) -> &'static str {
+    match layout {
+        SphericalStereoLayout::Mono => "Mono 360",
+        SphericalStereoLayout::TopBottom => "TB 360",
+        SphericalStereoLayout::SideBySide => "SBS 360",
+    }
+}
+
+pub fn format_spherical_stereo_osd(layout: SphericalStereoLayout) -> String {
+    format!("Spherical {}", spherical_stereo_label(layout))
+}
+
+/// UV rect (normalized 0..=1000) for left/right eye within a stereo 360 frame.
+pub fn spherical_stereo_uv_rect(
+    layout: SphericalStereoLayout,
+    right_eye: bool,
+) -> (i32, i32, i32, i32) {
+    match layout {
+        SphericalStereoLayout::Mono => (0, 0, 1_000, 1_000),
+        SphericalStereoLayout::TopBottom => {
+            if right_eye {
+                (0, 500, 1_000, 1_000)
+            } else {
+                (0, 0, 1_000, 500)
+            }
+        }
+        SphericalStereoLayout::SideBySide => {
+            if right_eye {
+                (500, 0, 1_000, 1_000)
+            } else {
+                (0, 0, 500, 1_000)
+            }
+        }
+    }
+}
+
+/// Reset look-around to north / level horizon (VLC / YouTube VR recenter).
+pub fn recenter_spherical_view() -> (i32, i32, i32) {
+    (0, 0, 0)
+}
+
+pub fn format_recenter_osd() -> &'static str {
+    "View recentered"
+}
+
+/// Compass heading from yaw (0° = North, clockwise).
+pub fn compass_heading_deg(yaw_deg_milli: i32) -> u32 {
+    let yaw = clamp_yaw_milli(yaw_deg_milli);
+    let deg = ((yaw as i64).rem_euclid(360_000) / 1_000) as u32;
+    deg % 360
+}
+
+pub fn format_compass_osd(yaw_deg_milli: i32) -> String {
+    let deg = compass_heading_deg(yaw_deg_milli);
+    let label = match deg {
+        0..=22 | 338..=359 => "N",
+        23..=67 => "NE",
+        68..=112 => "E",
+        113..=157 => "SE",
+        158..=202 => "S",
+        203..=247 => "SW",
+        248..=292 => "W",
+        _ => "NW",
+    };
+    format!("Compass {label} {deg}°")
+}
+
+/// Cardboard / VR lens barrel distortion: map output UV → sample UV (milli 0..=1000).
+pub fn barrel_distort_uv_milli(u_milli: i32, v_milli: i32, k_milli: i32) -> (i32, i32) {
+    let k = k_milli.clamp(0, 2_000) as f32 / 1_000.0;
+    let u = (u_milli.clamp(0, 1_000) as f32 / 1_000.0) * 2.0 - 1.0;
+    let v = (v_milli.clamp(0, 1_000) as f32 / 1_000.0) * 2.0 - 1.0;
+    let r2 = u * u + v * v;
+    let scale = 1.0 + k * r2;
+    let ou = ((u * scale + 1.0) * 500.0).round() as i32;
+    let ov = ((v * scale + 1.0) * 500.0).round() as i32;
+    (ou.clamp(0, 1_000), ov.clamp(0, 1_000))
+}
+
+pub fn format_barrel_osd(k_milli: i32) -> String {
+    if k_milli <= 0 {
+        "Lens barrel Off".into()
+    } else {
+        format!("Lens barrel {:.2}", k_milli as f32 / 1_000.0)
+    }
+}
+
+/// Blend strength for HDR tonemap toward identity (0 = off/passthrough intent, 1000 = full).
+pub const TONEMAP_STRENGTH_DEFAULT_MILLI: i32 = 1_000;
+
+pub fn clamp_tonemap_strength_milli(value: i32) -> i32 {
+    value.clamp(0, 1_000)
+}
+
+pub fn blend_tonemap_channel(mapped: u8, original: u8, strength_milli: i32) -> u8 {
+    let s = clamp_tonemap_strength_milli(strength_milli);
+    if s >= 1_000 {
+        return mapped;
+    }
+    if s <= 0 {
+        return original;
+    }
+    let m = i32::from(mapped);
+    let o = i32::from(original);
+    ((m * s + o * (1_000 - s)) / 1_000).clamp(0, 255) as u8
+}
+
+pub fn format_tonemap_strength_osd(strength_milli: i32) -> String {
+    format!(
+        "Tonemap strength {}%",
+        clamp_tonemap_strength_milli(strength_milli) / 10
+    )
+}
+
+/// Desaturate highlights after HDR→SDR for display comfort (mpv-style).
+pub fn apply_hdr_highlight_desat_pixel(
+    red: u8,
+    green: u8,
+    blue: u8,
+    amount_milli: i32,
+) -> (u8, u8, u8) {
+    let amount = amount_milli.clamp(0, 1_000);
+    if amount == 0 {
+        return (red, green, blue);
+    }
+    let y = (54 * u32::from(red) + 183 * u32::from(green) + 19 * u32::from(blue)) / 256;
+    let highlight = y.saturating_sub(160).min(95) as i32;
+    if highlight == 0 {
+        return (red, green, blue);
+    }
+    let t = amount * highlight / 95;
+    let lerp = |c: u8| -> u8 {
+        let c = i32::from(c);
+        let y = y as i32;
+        ((c * (1_000 - t) + y * t) / 1_000).clamp(0, 255) as u8
+    };
+    (lerp(red), lerp(green), lerp(blue))
+}
+
+pub fn format_hdr_highlight_desat_osd(amount_milli: i32) -> String {
+    if amount_milli <= 0 {
+        "HDR highlight desat Off".into()
+    } else {
+        format!("HDR highlight desat {}%", amount_milli.clamp(0, 1_000) / 10)
+    }
+}
+
+/// Parse mastering display luminance pair (`0.005,1000` → milli-min, max nits).
+pub fn parse_hdr_mastering_nits(spec: &str) -> Result<(u32, u32)> {
+    let (a, b) = spec
+        .split_once(',')
+        .ok_or_else(|| format!("expected min,max nits got `{spec}`"))?;
+    let min_f: f64 = a
+        .trim()
+        .parse()
+        .map_err(|_| format!("invalid min nits `{a}`"))?;
+    let max_nits: u32 = b
+        .trim()
+        .parse()
+        .map_err(|_| format!("invalid max nits `{b}`"))?;
+    if !(0.0..100.0).contains(&min_f) {
+        return Err(format!("min nits out of range `{a}`"));
+    }
+    let min_milli = (min_f * 1_000.0).round().clamp(0.0, 100_000.0) as u32;
+    Ok((min_milli, clamp_hdr_maxcll(max_nits)))
+}
+
+/// White-balance / color temperature shift in Kelvin (6500 = daylight / identity).
+pub const COLOR_TEMP_DAYLIGHT_K: i32 = 6_500;
+
+pub fn clamp_color_temp_kelvin(value: i32) -> i32 {
+    value.clamp(2_000, 12_000)
+}
+
+pub fn apply_white_balance_pixel(red: u8, green: u8, blue: u8, kelvin: i32) -> (u8, u8, u8) {
+    let k = clamp_color_temp_kelvin(kelvin);
+    // Coarse Planckian tilt: warmer boosts R, cooler boosts B.
+    let delta = (k - COLOR_TEMP_DAYLIGHT_K) as f32 / 4_000.0;
+    let r_mul = (1.0 - delta * 0.35).clamp(0.55, 1.45);
+    let b_mul = (1.0 + delta * 0.35).clamp(0.55, 1.45);
+    (
+        (f32::from(red) * r_mul).round().clamp(0.0, 255.0) as u8,
+        green,
+        (f32::from(blue) * b_mul).round().clamp(0.0, 255.0) as u8,
+    )
+}
+
+pub fn format_color_temp_osd(kelvin: i32) -> String {
+    format!("{} K", clamp_color_temp_kelvin(kelvin))
+}
+
+/// Detect letterbox / pillarbox black bars (mean luma threshold).
+pub fn detect_letterbox_bars(
+    width: u32,
+    height: u32,
+    pixels: &[u32],
+    luma_threshold: u8,
+) -> (u32, u32, u32, u32) {
+    if width == 0 || height == 0 || pixels.len() < (width * height) as usize {
+        return (0, 0, 0, 0);
+    }
+    let thr = u32::from(luma_threshold);
+    let row_dark = |y: u32| -> bool {
+        let mut sum = 0u64;
+        let row = (y * width) as usize;
+        for x in 0..width as usize {
+            let p = pixels[row + x];
+            let r = (p >> 16) & 0xff;
+            let g = (p >> 8) & 0xff;
+            let b = p & 0xff;
+            sum += (54 * r + 183 * g + 19 * b) as u64 / 256;
+        }
+        (sum / u64::from(width.max(1))) <= u64::from(thr)
+    };
+    let col_dark = |x: u32| -> bool {
+        let mut sum = 0u64;
+        for y in 0..height as usize {
+            let p = pixels[y * width as usize + x as usize];
+            let r = (p >> 16) & 0xff;
+            let g = (p >> 8) & 0xff;
+            let b = p & 0xff;
+            sum += (54 * r + 183 * g + 19 * b) as u64 / 256;
+        }
+        (sum / u64::from(height.max(1))) <= u64::from(thr)
+    };
+    let mut top = 0u32;
+    while top < height / 3 && row_dark(top) {
+        top += 1;
+    }
+    let mut bottom = 0u32;
+    while bottom < height / 3 && row_dark(height - 1 - bottom) {
+        bottom += 1;
+    }
+    let mut left = 0u32;
+    while left < width / 3 && col_dark(left) {
+        left += 1;
+    }
+    let mut right = 0u32;
+    while right < width / 3 && col_dark(width - 1 - right) {
+        right += 1;
+    }
+    (left, top, right, bottom)
+}
+
+pub fn format_letterbox_osd(left: u32, top: u32, right: u32, bottom: u32) -> String {
+    if left == 0 && top == 0 && right == 0 && bottom == 0 {
+        "Letterbox none".into()
+    } else {
+        format!("Letterbox L{left} T{top} R{right} B{bottom}")
+    }
+}
+
+/// Playlist edge fade envelope (1_000 = full; fades in/out near item boundaries).
+pub fn playlist_edge_fade_gain_milli(
+    position_us: i64,
+    duration_us: i64,
+    fade_us: i64,
+) -> i32 {
+    if duration_us <= 0 || fade_us <= 0 {
+        return 1_000;
+    }
+    let fade = fade_us.min(duration_us / 2).max(1);
+    let pos = position_us.clamp(0, duration_us);
+    let fade_in = if pos < fade {
+        ((pos * 1_000) / fade) as i32
+    } else {
+        1_000
+    };
+    let remaining = duration_us - pos;
+    let fade_out = if remaining < fade {
+        ((remaining * 1_000) / fade) as i32
+    } else {
+        1_000
+    };
+    fade_in.min(fade_out).clamp(0, 1_000)
+}
+
+pub fn format_playlist_fade_osd(fade_us: i64) -> String {
+    if fade_us <= 0 {
+        "Playlist fade Off".into()
+    } else {
+        format!("Playlist fade {}", format_play_clock(fade_us))
+    }
+}
+
+/// Duck background when dialogue is present (voice-over / podcast players).
+pub fn audio_duck_gain_milli(dialogue_active: bool, duck_milli: i32) -> i32 {
+    if dialogue_active {
+        duck_milli.clamp(50, 1_000)
+    } else {
+        1_000
+    }
+}
+
+pub fn format_audio_duck_osd(enabled: bool, duck_milli: i32) -> String {
+    if !enabled {
+        "Audio duck Off".into()
+    } else {
+        format!("Audio duck {}%", duck_milli.clamp(50, 1_000) / 10)
+    }
+}
+
+/// Luma waveform column fills (0..=1000) for scopes (mpv / Resolve-style).
+pub fn waveform_column_fills(width: u32, height: u32, pixels: &[u32], columns: usize) -> Vec<i32> {
+    let columns = columns.clamp(1, 256);
+    let mut fills = vec![0i32; columns];
+    if width == 0 || height == 0 || pixels.len() < (width * height) as usize {
+        return fills;
+    }
+    let mut counts = vec![0u32; columns];
+    let mut sums = vec![0u64; columns];
+    for y in 0..height as usize {
+        for x in 0..width as usize {
+            let col = x * columns / width as usize;
+            let p = pixels[y * width as usize + x];
+            let r = (p >> 16) & 0xff;
+            let g = (p >> 8) & 0xff;
+            let b = p & 0xff;
+            let yv = (54 * r + 183 * g + 19 * b) / 256;
+            sums[col] += u64::from(yv);
+            counts[col] += 1;
+        }
+    }
+    for i in 0..columns {
+        if counts[i] > 0 {
+            fills[i] = ((sums[i] * 1_000) / (u64::from(counts[i]) * 255)) as i32;
+        }
+    }
+    fills
+}
+
+pub fn format_waveform_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Waveform On"
+    } else {
+        "Waveform Off"
+    }
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -7908,6 +8264,15 @@ struct PlayerApp {
     horizon_lock: bool,
     horizon_pitch_milli: i32,
     deband_milli: i32,
+    spherical_stereo: SphericalStereoLayout,
+    tonemap_strength_milli: i32,
+    hdr_highlight_desat_milli: i32,
+    color_temp_kelvin: i32,
+    barrel_k_milli: i32,
+    audio_duck_enabled: bool,
+    audio_duck_milli: i32,
+    waveform_enabled: bool,
+    playlist_fade_us: i64,
     seek_jump: SeekJump,
     surround_downmix: bool,
     scaletempo: bool,
@@ -8105,6 +8470,15 @@ impl PlayerApp {
             horizon_lock: false,
             horizon_pitch_milli: 0,
             deband_milli: DEBAND_DEFAULT_MILLI,
+            spherical_stereo: SphericalStereoLayout::Mono,
+            tonemap_strength_milli: TONEMAP_STRENGTH_DEFAULT_MILLI,
+            hdr_highlight_desat_milli: 0,
+            color_temp_kelvin: COLOR_TEMP_DAYLIGHT_K,
+            barrel_k_milli: 0,
+            audio_duck_enabled: false,
+            audio_duck_milli: 400,
+            waveform_enabled: false,
+            playlist_fade_us: 0,
             seek_jump: SeekJump::default(),
             surround_downmix: false,
             scaletempo: true,
@@ -9340,6 +9714,72 @@ impl PlayerApp {
             && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Num6))
         {
             self.show_hdr_peak_suggestion();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Num4))
+        {
+            self.cycle_spherical_stereo_layout();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Num5))
+        {
+            if ctx.input(|input| input.modifiers.shift) {
+                self.show_compass();
+            } else {
+                self.recenter_view();
+            }
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Num7))
+        {
+            if ctx.input(|input| input.modifiers.shift) {
+                self.cycle_hdr_highlight_desat();
+            } else {
+                self.cycle_tonemap_strength();
+            }
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::B)
+            })
+        {
+            self.cycle_barrel_distortion();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::T)
+            })
+        {
+            self.cycle_color_temp();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::D)
+            })
+        {
+            self.toggle_audio_duck();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::V)
+            })
+        {
+            self.toggle_waveform();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::L)
+            })
+        {
+            self.detect_and_show_letterbox();
         }
         if !focused
             && command
@@ -11077,6 +11517,88 @@ impl PlayerApp {
             .unwrap_or(0);
         let suggested = suggest_hdr_nits_from_peak(peak, self.hdr_nits);
         self.notice = Some(format_hdr_peak_osd(peak, suggested));
+    }
+
+    fn cycle_spherical_stereo_layout(&mut self) {
+        self.spherical_stereo = cycle_spherical_stereo(self.spherical_stereo);
+        self.notice = Some(format_spherical_stereo_osd(self.spherical_stereo));
+    }
+
+    fn recenter_view(&mut self) {
+        let (y, p, r) = recenter_spherical_view();
+        self.yaw_deg_milli = y;
+        self.pitch_deg_milli = p;
+        self.roll_deg_milli = r;
+        self.horizon_pitch_milli = 0;
+        self.adjust_dirty = true;
+        self.notice = Some(format_recenter_osd().into());
+    }
+
+    fn show_compass(&mut self) {
+        self.notice = Some(format_compass_osd(self.yaw_deg_milli));
+    }
+
+    fn cycle_tonemap_strength(&mut self) {
+        let next = match self.tonemap_strength_milli {
+            0 => 500,
+            1..=500 => 1_000,
+            _ => 0,
+        };
+        self.tonemap_strength_milli = clamp_tonemap_strength_milli(next);
+        self.notice = Some(format_tonemap_strength_osd(self.tonemap_strength_milli));
+    }
+
+    fn cycle_hdr_highlight_desat(&mut self) {
+        let next = match self.hdr_highlight_desat_milli {
+            0 => 350,
+            1..=350 => 700,
+            _ => 0,
+        };
+        self.hdr_highlight_desat_milli = next;
+        self.notice = Some(format_hdr_highlight_desat_osd(self.hdr_highlight_desat_milli));
+    }
+
+    fn cycle_color_temp(&mut self) {
+        let next = match self.color_temp_kelvin {
+            ..=4_000 => COLOR_TEMP_DAYLIGHT_K,
+            4_001..=6_500 => 9_300,
+            _ => 3_200,
+        };
+        self.color_temp_kelvin = clamp_color_temp_kelvin(next);
+        self.notice = Some(format_color_temp_osd(self.color_temp_kelvin));
+    }
+
+    fn cycle_barrel_distortion(&mut self) {
+        let next = match self.barrel_k_milli {
+            0 => 300,
+            1..=300 => 600,
+            _ => 0,
+        };
+        self.barrel_k_milli = next;
+        self.notice = Some(format_barrel_osd(self.barrel_k_milli));
+    }
+
+    fn toggle_audio_duck(&mut self) {
+        self.audio_duck_enabled = !self.audio_duck_enabled;
+        self.notice = Some(format_audio_duck_osd(
+            self.audio_duck_enabled,
+            self.audio_duck_milli,
+        ));
+    }
+
+    fn toggle_waveform(&mut self) {
+        self.waveform_enabled = !self.waveform_enabled;
+        self.notice = Some(format_waveform_osd(self.waveform_enabled).into());
+    }
+
+    fn detect_and_show_letterbox(&mut self) {
+        let bars = self
+            .session
+            .as_ref()
+            .and_then(|s| s.frame.as_ref())
+            .map(|f| detect_letterbox_bars(f.width, f.height, &f.pixels, 16))
+            .unwrap_or((0, 0, 0, 0));
+        self.notice = Some(format_letterbox_osd(bars.0, bars.1, bars.2, bars.3));
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {

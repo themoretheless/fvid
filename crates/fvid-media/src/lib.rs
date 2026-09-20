@@ -206,6 +206,15 @@ pub use play::{
     seek_from_drag_px, format_drag_seek_osd, CropBoxMilli, clamp_crop_box_milli, crop_box_to_pixels,
     format_crop_box_osd, format_horizon_lock_osd, locked_pitch_milli, estimate_frame_peak_milli,
     suggest_hdr_nits_from_peak, format_hdr_peak_osd, format_stream_rendition_osd,
+    SphericalStereoLayout, cycle_spherical_stereo, spherical_stereo_label, format_spherical_stereo_osd,
+    spherical_stereo_uv_rect, recenter_spherical_view, format_recenter_osd, compass_heading_deg,
+    format_compass_osd, barrel_distort_uv_milli, format_barrel_osd, TONEMAP_STRENGTH_DEFAULT_MILLI,
+    clamp_tonemap_strength_milli, blend_tonemap_channel, format_tonemap_strength_osd,
+    apply_hdr_highlight_desat_pixel, format_hdr_highlight_desat_osd, parse_hdr_mastering_nits,
+    COLOR_TEMP_DAYLIGHT_K, clamp_color_temp_kelvin, apply_white_balance_pixel, format_color_temp_osd,
+    detect_letterbox_bars, format_letterbox_osd, playlist_edge_fade_gain_milli,
+    format_playlist_fade_osd, audio_duck_gain_milli, format_audio_duck_osd, waveform_column_fills,
+    format_waveform_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

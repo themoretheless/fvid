@@ -1807,6 +1807,41 @@ mod play_controls {
         assert_eq!(peak, 1_000);
         assert!(fvid_media::suggest_hdr_nits_from_peak(800, 100) >= 100);
         assert!(fvid_media::format_stream_rendition_osd(1920, 1080, 5_000_000).contains("1920"));
+        assert_eq!(
+            fvid_media::cycle_spherical_stereo(fvid_media::SphericalStereoLayout::Mono),
+            fvid_media::SphericalStereoLayout::TopBottom
+        );
+        assert_eq!(
+            fvid_media::spherical_stereo_uv_rect(fvid_media::SphericalStereoLayout::SideBySide, true),
+            (500, 0, 1_000, 1_000)
+        );
+        assert_eq!(fvid_media::recenter_spherical_view(), (0, 0, 0));
+        assert_eq!(fvid_media::compass_heading_deg(90_000), 90);
+        let (bu, bv) = fvid_media::barrel_distort_uv_milli(500, 500, 500);
+        assert_eq!((bu, bv), (500, 500));
+        assert_eq!(fvid_media::blend_tonemap_channel(200, 100, 500), 150);
+        let desat = fvid_media::apply_hdr_highlight_desat_pixel(255, 200, 180, 500);
+        assert!(desat.0 <= 255);
+        let mastering = fvid_media::parse_hdr_mastering_nits("0.005,1000").unwrap();
+        assert_eq!(mastering.0, 5);
+        assert_eq!(mastering.1, 1_000);
+        let wb = fvid_media::apply_white_balance_pixel(128, 128, 128, 3_200);
+        assert_ne!(wb.0, wb.2);
+        let mut letter = vec![0u32; 16];
+        for y in 1..3 {
+            for x in 1..3 {
+                letter[y * 4 + x] = 0x00_ff_ff_ff;
+            }
+        }
+        let bars = fvid_media::detect_letterbox_bars(4, 4, &letter, 16);
+        assert!(bars.1 > 0 || bars.3 > 0 || bars.0 > 0);
+        assert_eq!(
+            fvid_media::playlist_edge_fade_gain_milli(0, 10_000_000, 1_000_000),
+            0
+        );
+        assert_eq!(fvid_media::audio_duck_gain_milli(true, 400), 400);
+        let wave = fvid_media::waveform_column_fills(2, 2, &[0x00_80_80_80u32; 4], 2);
+        assert_eq!(wave.len(), 2);
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
