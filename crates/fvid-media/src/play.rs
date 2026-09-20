@@ -2112,6 +2112,119 @@ pub fn format_media_fingerprint_osd(fingerprint: &str) -> String {
     }
 }
 
+/// Logo overlay opacity / position (VLC logo filter).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum LogoPosition {
+    #[default]
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
+    Center,
+}
+
+pub fn cycle_logo_position(pos: LogoPosition) -> LogoPosition {
+    match pos {
+        LogoPosition::TopLeft => LogoPosition::TopRight,
+        LogoPosition::TopRight => LogoPosition::BottomLeft,
+        LogoPosition::BottomLeft => LogoPosition::BottomRight,
+        LogoPosition::BottomRight => LogoPosition::Center,
+        LogoPosition::Center => LogoPosition::TopLeft,
+    }
+}
+
+pub fn logo_position_label(pos: LogoPosition) -> &'static str {
+    match pos {
+        LogoPosition::TopLeft => "Top-Left",
+        LogoPosition::TopRight => "Top-Right",
+        LogoPosition::BottomLeft => "Bottom-Left",
+        LogoPosition::BottomRight => "Bottom-Right",
+        LogoPosition::Center => "Center",
+    }
+}
+
+pub fn clamp_logo_opacity_milli(value: i32) -> i32 {
+    value.clamp(0, 1_000)
+}
+
+pub fn format_logo_osd(pos: LogoPosition, opacity_milli: i32) -> String {
+    format!(
+        "Logo {} {}%",
+        logo_position_label(pos),
+        clamp_logo_opacity_milli(opacity_milli) / 10
+    )
+}
+
+pub fn logo_anchor_xy(
+    video_w: u32,
+    video_h: u32,
+    logo_w: u32,
+    logo_h: u32,
+    pos: LogoPosition,
+    margin: u32,
+) -> (u32, u32) {
+    let margin = margin.min(video_w.min(video_h) / 2);
+    let max_x = video_w.saturating_sub(logo_w);
+    let max_y = video_h.saturating_sub(logo_h);
+    match pos {
+        LogoPosition::TopLeft => (margin.min(max_x), margin.min(max_y)),
+        LogoPosition::TopRight => (max_x.saturating_sub(margin), margin.min(max_y)),
+        LogoPosition::BottomLeft => (margin.min(max_x), max_y.saturating_sub(margin)),
+        LogoPosition::BottomRight => (max_x.saturating_sub(margin), max_y.saturating_sub(margin)),
+        LogoPosition::Center => (max_x / 2, max_y / 2),
+    }
+}
+
+/// Mosaic tile grid for multi-input preview (VLC mosaic).
+pub fn mosaic_tile_rect(
+    canvas_w: u32,
+    canvas_h: u32,
+    cols: u32,
+    rows: u32,
+    index: u32,
+) -> (u32, u32, u32, u32) {
+    let cols = cols.max(1);
+    let rows = rows.max(1);
+    let tile_w = canvas_w / cols;
+    let tile_h = canvas_h / rows;
+    let index = index % (cols * rows);
+    let col = index % cols;
+    let row = index / cols;
+    (col * tile_w, row * tile_h, tile_w.max(1), tile_h.max(1))
+}
+
+pub fn format_mosaic_osd(cols: u32, rows: u32) -> String {
+    format!("Mosaic {cols}×{rows}")
+}
+
+/// Parametric audio filter gain (VLC param_eq style single-band).
+pub fn clamp_param_eq_milli(value: i32) -> i32 {
+    value.clamp(-2_000, 2_000)
+}
+
+pub fn apply_param_eq_sample(sample: f32, gain_milli: i32) -> f32 {
+    let gain = 1.0 + (clamp_param_eq_milli(gain_milli) as f32 / 1_000.0);
+    (sample * gain).clamp(-1.0, 1.0)
+}
+
+pub fn format_param_eq_osd(gain_milli: i32) -> String {
+    format!("Param EQ {:+} dB", clamp_param_eq_milli(gain_milli) / 100)
+}
+
+/// Audio amplifier (VLC volume amp beyond slider).
+pub fn clamp_amplifier_milli(value: i32) -> i32 {
+    value.clamp(0, 4_000)
+}
+
+pub fn apply_amplifier_sample(sample: f32, amp_milli: i32) -> f32 {
+    let gain = clamp_amplifier_milli(amp_milli) as f32 / 1_000.0;
+    soft_clip_sample(sample * gain)
+}
+
+pub fn format_amplifier_osd(amp_milli: i32) -> String {
+    format!("Amplifier {}%", clamp_amplifier_milli(amp_milli) / 10)
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -6472,6 +6585,12 @@ struct PlayerApp {
     aspect_lock: bool,
     snapshot_sequential: bool,
     hw_decode: bool,
+    logo_position: LogoPosition,
+    logo_opacity_milli: i32,
+    mosaic_cols: u32,
+    mosaic_rows: u32,
+    param_eq_milli: i32,
+    amplifier_milli: i32,
     volume_normalizer: bool,
     bass_milli: i32,
     mid_milli: i32,
@@ -6625,6 +6744,12 @@ impl PlayerApp {
             aspect_lock: false,
             snapshot_sequential: false,
             hw_decode: false,
+            logo_position: LogoPosition::TopLeft,
+            logo_opacity_milli: 1_000,
+            mosaic_cols: 1,
+            mosaic_rows: 1,
+            param_eq_milli: 0,
+            amplifier_milli: 1_000,
             volume_normalizer: false,
             bass_milli: TONE_UNITY_MILLI,
             mid_milli: TONE_UNITY_MILLI,
@@ -7628,6 +7753,38 @@ impl PlayerApp {
             && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::H))
         {
             self.toggle_hw_decode();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::U))
+        {
+            self.cycle_logo_pos();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::O))
+            && !ctx.input(|input| input.modifiers.shift)
+        {
+            self.cycle_mosaic_grid();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Q))
+        {
+            let up = !ctx.input(|input| input.modifiers.shift);
+            self.nudge_param_eq(if up { 100 } else { -100 });
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Equals))
+        {
+            self.nudge_amplifier(100);
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Minus))
+        {
+            self.nudge_amplifier(-100);
         }
         if !focused
             && command
@@ -9105,6 +9262,39 @@ impl PlayerApp {
     fn toggle_hw_decode(&mut self) {
         self.hw_decode = !self.hw_decode;
         self.notice = Some(format_hw_decode_osd(self.hw_decode).into());
+    }
+
+    fn cycle_logo_pos(&mut self) {
+        self.logo_position = cycle_logo_position(self.logo_position);
+        self.notice = Some(format_logo_osd(self.logo_position, self.logo_opacity_milli));
+    }
+
+    fn cycle_mosaic_grid(&mut self) {
+        match (self.mosaic_cols, self.mosaic_rows) {
+            (1, 1) => {
+                self.mosaic_cols = 2;
+                self.mosaic_rows = 2;
+            }
+            (2, 2) => {
+                self.mosaic_cols = 3;
+                self.mosaic_rows = 2;
+            }
+            _ => {
+                self.mosaic_cols = 1;
+                self.mosaic_rows = 1;
+            }
+        }
+        self.notice = Some(format_mosaic_osd(self.mosaic_cols, self.mosaic_rows));
+    }
+
+    fn nudge_param_eq(&mut self, delta: i32) {
+        self.param_eq_milli = clamp_param_eq_milli(self.param_eq_milli.saturating_add(delta));
+        self.notice = Some(format_param_eq_osd(self.param_eq_milli));
+    }
+
+    fn nudge_amplifier(&mut self, delta: i32) {
+        self.amplifier_milli = clamp_amplifier_milli(self.amplifier_milli.saturating_add(delta));
+        self.notice = Some(format_amplifier_osd(self.amplifier_milli));
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {

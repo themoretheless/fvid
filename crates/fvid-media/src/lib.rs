@@ -170,7 +170,10 @@ pub use play::{
     format_subtitle_encoding_osd, TELETEXT_PAGE_DEFAULT, TELETEXT_PAGE_MIN, TELETEXT_PAGE_MAX,
     clamp_teletext_page, teletext_page_step, format_teletext_osd, format_aspect_lock_osd,
     locked_window_size, format_snapshot_sequential_name, format_snapshot_sequential_osd,
-    format_hw_decode_osd, format_media_fingerprint_osd,
+    format_hw_decode_osd, format_media_fingerprint_osd, LogoPosition, cycle_logo_position,
+    logo_position_label, clamp_logo_opacity_milli, format_logo_osd, logo_anchor_xy, mosaic_tile_rect,
+    format_mosaic_osd, clamp_param_eq_milli, apply_param_eq_sample, format_param_eq_osd,
+    clamp_amplifier_milli, apply_amplifier_sample, format_amplifier_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

@@ -1631,6 +1631,16 @@ mod play_controls {
         );
         assert!(fvid_media::format_hw_decode_osd(false).contains("Off"));
         assert!(fvid_media::format_media_fingerprint_osd("abcdef0123456789").contains("…"));
+        assert_eq!(
+            fvid_media::logo_anchor_xy(200, 100, 40, 20, fvid_media::LogoPosition::TopRight, 4),
+            (156, 4)
+        );
+        assert_eq!(
+            fvid_media::mosaic_tile_rect(100, 100, 2, 2, 3),
+            (50, 50, 50, 50)
+        );
+        assert!((fvid_media::apply_param_eq_sample(0.5, 1_000) - 1.0).abs() < 1e-6);
+        assert!(fvid_media::apply_amplifier_sample(0.8, 2_000).abs() <= 1.0);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
         hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;
