@@ -1194,5 +1194,15 @@ mod play_controls {
         assert_eq!(fvid_media::crossfeed_step_milli(0, 100), 100);
         assert_eq!(fvid_media::format_crossfeed_osd(0), "Crossfeed off");
         assert!(fvid_media::format_crossfeed_osd(500).contains("50%"));
+        let mut marks = Vec::new();
+        assert!(fvid_media::insert_bookmark(&mut marks, 1_500_000));
+        assert!(fvid_media::insert_bookmark(&mut marks, 3_000_000));
+        let exported = fvid_media::format_bookmarks_export(&marks);
+        assert!(exported.contains("start-time=1.500"));
+        assert!(exported.contains("start-time=3.000"));
+        let parsed = fvid_media::parse_bookmarks_export(&exported);
+        assert_eq!(parsed.len(), 2);
+        assert_eq!(parsed[0].media_us, 1_500_000);
+        assert_eq!(parsed[1].media_us, 3_000_000);
     }
 }

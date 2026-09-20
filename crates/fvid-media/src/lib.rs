@@ -99,6 +99,7 @@ pub use play::{
     should_stop_playback, RATE_WHEEL_STEP_MILLI, rate_from_wheel, stop_playback_us,
     format_stop_osd, format_rotate_osd, format_flip_osd, seek_end_us, chapter_index,
     format_chapter_osd, format_pause_osd, clear_bookmarks, format_bookmark_osd,
+    format_bookmarks_export, parse_bookmarks_export,
     format_playlist_osd, format_playlist_m3u, soft_clip_sample, PLAYBACK_PROTOCOLS,
     SLEEP_TIMER_STEPS_MIN, cycle_sleep_timer_min, sleep_deadline_secs, sleep_timer_fired,
     format_sleep_osd,

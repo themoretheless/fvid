@@ -2479,6 +2479,39 @@ pub fn clear_bookmarks(marks: &mut Vec<Bookmark>) {
     marks.clear();
 }
 
+/// Serialize bookmarks as `#EXTVLCOPT:start-time=`-style lines (seconds, fractional).
+pub fn format_bookmarks_export(marks: &[Bookmark]) -> String {
+    let mut out = String::from("#EXTM3U\n#EXTINF:-1,bookmarks\n");
+    for mark in marks {
+        let secs = mark.media_us.max(0) as f64 / 1_000_000.0;
+        out.push_str(&format!("#EXTVLCOPT:start-time={secs:.3}\n"));
+    }
+    out
+}
+
+/// Parse `#EXTVLCOPT:start-time=` (seconds) bookmark lines into sorted unique marks.
+pub fn parse_bookmarks_export(text: &str) -> Vec<Bookmark> {
+    let mut marks = Vec::new();
+    for line in text.lines() {
+        let line = line.trim();
+        let Some(rest) = line
+            .strip_prefix("#EXTVLCOPT:start-time=")
+            .or_else(|| line.strip_prefix("#EXTVLCOPT:start-time ="))
+        else {
+            continue;
+        };
+        let Ok(secs) = rest.trim().parse::<f64>() else {
+            continue;
+        };
+        if !secs.is_finite() || secs < 0.0 {
+            continue;
+        }
+        let media_us = (secs * 1_000_000.0).round() as i64;
+        insert_bookmark(&mut marks, media_us);
+    }
+    marks
+}
+
 pub fn format_bookmark_osd(media_us: i64, count: usize, added: bool) -> String {
     if added {
         format!("bookmark {} ({count})", format_clock(media_us))
@@ -4226,7 +4259,7 @@ impl PlayerApp {
             app.error = Some(err);
         }
         eprintln!(
-            "fvid play: Space pause, left/right seek, up/down volume, M mute, B audio, V subtitles, L A-B loop, R repeat, G/H subtitle delay, J/K audio delay, A aspect, C crop, Z zoom, Ctrl+B bookmark, Ctrl+R shuffle, T on-top, Shift+T time, Ctrl+N vol normalizer, W stereo width, O crossfeed, U compressor, X sleep timer, F fullscreen, [ ] speed, . step, S snapshot, Esc quit"
+            "fvid play: Space pause, left/right seek, up/down volume, M mute, B audio, V subtitles, L A-B loop, R repeat, G/H subtitle delay, J/K audio delay, A aspect, C crop, Z zoom, Ctrl+B bookmark, Ctrl+Alt+B save bookmarks, Ctrl+R shuffle, T on-top, Shift+T time, Ctrl+N vol normalizer, W stereo width, O crossfeed, U compressor, X sleep timer, F fullscreen, [ ] speed, . step, S snapshot, Esc quit"
         );
         app
     }
@@ -4738,7 +4771,13 @@ impl PlayerApp {
         }
         if keys.12 {
             if command {
-                if ctx.input(|input| input.modifiers.shift) {
+                if ctx.input(|input| input.modifiers.alt) {
+                    if ctx.input(|input| input.modifiers.shift) {
+                        self.load_bookmarks();
+                    } else {
+                        self.save_bookmarks();
+                    }
+                } else if ctx.input(|input| input.modifiers.shift) {
                     self.clear_all_bookmarks();
                 } else {
                     self.add_bookmark();
@@ -5613,6 +5652,58 @@ impl PlayerApp {
     fn clear_all_bookmarks(&mut self) {
         clear_bookmarks(&mut self.bookmarks);
         self.notice = Some("Bookmarks cleared".into());
+    }
+
+    fn save_bookmarks(&mut self) {
+        if self.bookmarks.is_empty() {
+            self.notice = Some("No bookmarks".into());
+            return;
+        }
+        let mut dialog = rfd::FileDialog::new()
+            .set_title("Save bookmarks")
+            .add_filter("M3U", &["m3u", "m3u8", "txt"])
+            .set_file_name("bookmarks.m3u");
+        if let Some(dir) = self.playlist.first().and_then(|path| path.parent()) {
+            dialog = dialog.set_directory(dir);
+        }
+        let Some(path) = dialog.save_file() else {
+            return;
+        };
+        let body = format_bookmarks_export(&self.bookmarks);
+        match std::fs::write(&path, body) {
+            Ok(()) => {
+                self.notice = Some(format!(
+                    "Saved {} bookmarks → {}",
+                    self.bookmarks.len(),
+                    path.display()
+                ))
+            }
+            Err(err) => self.notice = Some(err.to_string()),
+        }
+    }
+
+    fn load_bookmarks(&mut self) {
+        let mut dialog = rfd::FileDialog::new()
+            .set_title("Load bookmarks")
+            .add_filter("M3U", &["m3u", "m3u8", "txt"]);
+        if let Some(dir) = self.playlist.first().and_then(|path| path.parent()) {
+            dialog = dialog.set_directory(dir);
+        }
+        let Some(path) = dialog.pick_file() else {
+            return;
+        };
+        match std::fs::read_to_string(&path) {
+            Ok(text) => {
+                let marks = parse_bookmarks_export(&text);
+                if marks.is_empty() {
+                    self.notice = Some("No bookmarks in file".into());
+                } else {
+                    self.bookmarks = marks;
+                    self.notice = Some(format!("Loaded {} bookmarks", self.bookmarks.len()));
+                }
+            }
+            Err(err) => self.notice = Some(err.to_string()),
+        }
     }
 
     fn save_playlist(&mut self) {
