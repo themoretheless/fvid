@@ -766,6 +766,147 @@ pub fn format_vu_osd(peak_milli: u32) -> String {
     format!("VU {}%", peak_milli.min(1_000) / 10)
 }
 
+/// Fill levels 0..=100 for an N-bar VU meter from peak milli.
+pub fn vu_bar_fills(peak_milli: u32, bars: usize) -> Vec<u8> {
+    if bars == 0 {
+        return Vec::new();
+    }
+    let peak = peak_milli.min(1_000) as usize;
+    let mut fills = Vec::with_capacity(bars);
+    for i in 0..bars {
+        let threshold = ((i + 1) * 1_000) / bars;
+        if peak >= threshold {
+            fills.push(100);
+        } else {
+            let prev = (i * 1_000) / bars;
+            if peak <= prev {
+                fills.push(0);
+            } else {
+                let span = (threshold - prev).max(1);
+                fills.push((((peak - prev) * 100) / span).min(100) as u8);
+            }
+        }
+    }
+    fills
+}
+
+/// Quick rate presets: 1× → 0.5× → 2× → 1× (VLC-style speed cycle).
+pub fn cycle_rate_preset_milli(current: u32) -> u32 {
+    let rate = clamp_rate_milli(current as f32 / 1_000.0);
+    match rate {
+        750..=1_499 => 500,
+        250..=749 => 2_000,
+        _ => 1_000,
+    }
+}
+
+pub fn format_rate_preset_osd(rate_milli: u32) -> String {
+    format_rate_osd(clamp_rate_milli(rate_milli as f32 / 1_000.0))
+}
+
+/// Vertical marquee / logo text placement (VLC video-title / marquee).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum MarqueePosition {
+    #[default]
+    Top,
+    Center,
+    Bottom,
+}
+
+pub fn cycle_marquee_position(position: MarqueePosition) -> MarqueePosition {
+    match position {
+        MarqueePosition::Top => MarqueePosition::Center,
+        MarqueePosition::Center => MarqueePosition::Bottom,
+        MarqueePosition::Bottom => MarqueePosition::Top,
+    }
+}
+
+pub fn marquee_position_label(position: MarqueePosition) -> &'static str {
+    match position {
+        MarqueePosition::Top => "top",
+        MarqueePosition::Center => "center",
+        MarqueePosition::Bottom => "bottom",
+    }
+}
+
+pub fn format_marquee_osd(text: &str, position: MarqueePosition) -> String {
+    let trimmed = text.trim();
+    if trimmed.is_empty() {
+        format!("Marquee off ({})", marquee_position_label(position))
+    } else {
+        format!(
+            "Marquee {} \"{}\"",
+            marquee_position_label(position),
+            trimmed.chars().take(32).collect::<String>()
+        )
+    }
+}
+
+pub fn marquee_block_top_y(
+    height: f32,
+    line_h: f32,
+    margin: f32,
+    position: MarqueePosition,
+) -> f32 {
+    match position {
+        MarqueePosition::Top => margin.max(0.0),
+        MarqueePosition::Center => ((height - line_h) * 0.5).max(0.0),
+        MarqueePosition::Bottom => (height - margin - line_h).max(0.0),
+    }
+}
+
+pub fn format_title_osd(title: &str) -> String {
+    let trimmed = title.trim();
+    if trimmed.is_empty() {
+        "Title".into()
+    } else {
+        format!("Title {}", trimmed.chars().take(48).collect::<String>())
+    }
+}
+
+/// Late-frame drop policy for play clock catch-up (VLC `--drop-late-frames`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum DropFrameMode {
+    Off,
+    #[default]
+    Late,
+}
+
+pub fn cycle_drop_frame(mode: DropFrameMode) -> DropFrameMode {
+    match mode {
+        DropFrameMode::Off => DropFrameMode::Late,
+        DropFrameMode::Late => DropFrameMode::Off,
+    }
+}
+
+pub fn drop_frame_label(mode: DropFrameMode) -> &'static str {
+    match mode {
+        DropFrameMode::Off => "off",
+        DropFrameMode::Late => "late",
+    }
+}
+
+pub fn format_drop_frame_osd(mode: DropFrameMode) -> String {
+    format!("Drop frames {}", drop_frame_label(mode))
+}
+
+/// Whether a decoded frame should be skipped to catch up when late by `lateness_us`.
+pub fn should_drop_late_frame(mode: DropFrameMode, lateness_us: i64, threshold_us: i64) -> bool {
+    matches!(mode, DropFrameMode::Late) && lateness_us >= threshold_us.max(1)
+}
+
+pub fn cycle_show_osd(show: bool) -> bool {
+    !show
+}
+
+pub fn format_show_osd(show: bool) -> &'static str {
+    if show {
+        "OSD on"
+    } else {
+        "OSD off"
+    }
+}
+
 pub fn cycle_eq_bypass(bypassed: bool) -> bool {
     !bypassed
 }
@@ -1790,6 +1931,8 @@ pub struct PlayOptions {
     pub stereo3d: PlayStereo3D,
     /// Close the player when the playlist finishes (VLC `--play-and-exit`).
     pub quit_at_end: bool,
+    /// Open paused (VLC `--start-paused`).
+    pub start_paused: bool,
 }
 
 impl Default for PlayOptions {
@@ -1814,6 +1957,7 @@ impl Default for PlayOptions {
             hdr_tonemap: HdrTonemap::Off,
             stereo3d: PlayStereo3D::Off,
             quit_at_end: false,
+            start_paused: false,
         }
     }
 }
@@ -4935,6 +5079,10 @@ struct PlayerApp {
     subtitle_scale_milli: i32,
     subtitle_opacity_milli: i32,
     subtitle_position: SubtitlePosition,
+    show_osd: bool,
+    marquee_text: String,
+    marquee_position: MarqueePosition,
+    drop_frame: DropFrameMode,
     rotate: RotateMode,
     eq_gains_milli: [i32; EQ_BAND_COUNT],
     eq_preset: EqPreset,
@@ -5045,6 +5193,10 @@ impl PlayerApp {
             subtitle_scale_milli: SUBTITLE_SCALE_UNITY_MILLI,
             subtitle_opacity_milli: SUBTITLE_OPACITY_UNITY_MILLI,
             subtitle_position: SubtitlePosition::Bottom,
+            show_osd: true,
+            marquee_text: String::new(),
+            marquee_position: MarqueePosition::Top,
+            drop_frame: DropFrameMode::Late,
             rotate: RotateMode::Deg0,
             eq_gains_milli: eq_unity_gains(),
             eq_preset: EqPreset::Flat,
@@ -5194,6 +5346,10 @@ impl PlayerApp {
         });
         if let Some(start) = self.options.start_us.take() {
             self.request_seek(start.max(0));
+        }
+        if self.options.start_paused {
+            self.set_paused(true);
+            self.notice = Some(format_pause_osd(true).into());
         }
         Ok(())
     }
@@ -5361,7 +5517,13 @@ impl PlayerApp {
                     continue;
                 }
                 session.discard_until = None;
-            } else if more_due {
+            } else if more_due
+                && should_drop_late_frame(
+                    self.drop_frame,
+                    media_now.saturating_sub(frame.pts_us),
+                    SLACK_US,
+                )
+            {
                 session.skipped += 1;
                 continue;
             }
@@ -5537,10 +5699,20 @@ impl PlayerApp {
             }
         }
         if keys.6 {
-            self.nudge_rate(-RATE_STEP_MILLI);
+            if command {
+                self.rate_milli = cycle_rate_preset_milli(self.rate_milli);
+                self.set_rate(self.rate_milli);
+            } else {
+                self.nudge_rate(-RATE_STEP_MILLI);
+            }
         }
         if keys.7 {
-            self.nudge_rate(RATE_STEP_MILLI);
+            if command {
+                self.rate_milli = cycle_rate_preset_milli(self.rate_milli);
+                self.set_rate(self.rate_milli);
+            } else {
+                self.nudge_rate(RATE_STEP_MILLI);
+            }
         }
         if keys.8 {
             self.set_muted(!self.muted);
@@ -5671,7 +5843,10 @@ impl PlayerApp {
         if keys.24 {
             self.toggle_on_top();
         }
-        if !focused && ctx.input(|input| input.key_pressed(egui::Key::T) && input.modifiers.shift) {
+        if !focused
+            && !command
+            && ctx.input(|input| input.key_pressed(egui::Key::T) && input.modifiers.shift)
+        {
             self.cycle_position_osd();
         }
         if !focused && command && ctx.input(|input| input.key_pressed(egui::Key::N)) {
@@ -5761,6 +5936,44 @@ impl PlayerApp {
             })
         {
             self.notice = Some(format_hotkeys_help_osd().into());
+        }
+        if !focused && command && ctx.input(|input| input.key_pressed(egui::Key::O)) {
+            if ctx.input(|input| input.modifiers.shift) {
+                self.show_osd = cycle_show_osd(self.show_osd);
+                self.notice = Some(format_show_osd(self.show_osd).into());
+            }
+        }
+        if !focused && command && ctx.input(|input| input.key_pressed(egui::Key::L)) {
+            self.drop_frame = cycle_drop_frame(self.drop_frame);
+            self.notice = Some(format_drop_frame_osd(self.drop_frame));
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::T))
+        {
+            let title = self
+                .session
+                .as_ref()
+                .map(|session| {
+                    let stored = lock(&session.shared.media_title);
+                    if stored.is_empty() {
+                        media_display_title(&session.path, None)
+                    } else {
+                        stored.clone()
+                    }
+                })
+                .unwrap_or_else(|| "Title".into());
+            self.notice = Some(format_title_osd(&title));
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::M))
+        {
+            self.marquee_position = cycle_marquee_position(self.marquee_position);
+            self.notice = Some(format_marquee_osd(
+                &self.marquee_text,
+                self.marquee_position,
+            ));
         }
         if !focused
             && command
@@ -7499,8 +7712,10 @@ impl PlayerApp {
         self.track_row(ui);
         self.url_row(ui);
         self.jump_row(ui);
-        if let Some(notice) = &self.notice {
-            ui.colored_label(egui::Color32::from_rgb(255, 186, 92), notice);
+        if self.show_osd {
+            if let Some(notice) = &self.notice {
+                ui.colored_label(egui::Color32::from_rgb(255, 186, 92), notice);
+            }
         }
         ui.add_space(4.0);
     }
@@ -7607,6 +7822,14 @@ impl PlayerApp {
             self.subtitle_opacity_milli,
             self.subtitle_position,
         );
+        if !self.marquee_text.trim().is_empty() {
+            paint_marquee(
+                ui,
+                image_rect,
+                &self.marquee_text,
+                self.marquee_position,
+            );
+        }
         if self.show_stats {
             let stats = PlayStats {
                 presented_frames: self
@@ -7861,6 +8084,31 @@ fn paint_subtitle(
         );
         y += line_h;
     }
+}
+
+fn paint_marquee(ui: &egui::Ui, rect: egui::Rect, text: &str, position: MarqueePosition) {
+    let trimmed = text.trim();
+    if trimmed.is_empty() {
+        return;
+    }
+    let size = 20.0;
+    let font = egui::FontId::proportional(size);
+    let y = rect.top() + marquee_block_top_y(rect.height(), size + 4.0, 12.0, position);
+    let pos = egui::pos2(rect.center().x, y);
+    ui.painter().text(
+        pos + egui::vec2(1.5, 1.5),
+        egui::Align2::CENTER_TOP,
+        trimmed,
+        font.clone(),
+        egui::Color32::from_rgba_unmultiplied(0, 0, 0, 200),
+    );
+    ui.painter().text(
+        pos,
+        egui::Align2::CENTER_TOP,
+        trimmed,
+        font,
+        egui::Color32::from_rgb(255, 220, 120),
+    );
 }
 
 fn paint_center(ui: &mut egui::Ui, rect: egui::Rect, text: &str, color: egui::Color32) {

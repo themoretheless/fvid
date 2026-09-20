@@ -41,6 +41,7 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     let mut hdr_tonemap = fvid_media::HdrTonemap::Off;
     let mut stereo3d = fvid_media::PlayStereo3D::Off;
     let mut quit_at_end = false;
+    let mut start_paused = false;
     let mut inputs = Vec::new();
     let mut index = 0;
     while index < args.len() {
@@ -156,9 +157,10 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 stereo3d = fvid_media::parse_play_stereo3d(value)?;
             }
             "--play-and-exit" | "--quit-at-end" => quit_at_end = true,
+            "--start-paused" => start_paused = true,
             "--help" | "-h" => {
                 println!(
-                    "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--on-top] [--rate N] [--start-time TIME] [--stop-time TIME] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices] [--spherical] [--yaw DEG] [--pitch DEG] [--roll DEG] [--fov DEG] [--hdr-tonemap off|clip|reinhard|hable] [--play-stereo3d off|sbsl|abl|mono-left|mono-right] [--play-and-exit]\nINPUT is a local file or http/https/rtsp/rtmp/udp URL. --start-time/--stop-time are mm:ss, hh:mm:ss, or seconds. Space pauses. Left/right seek 10s. Up/down volume. M mutes. B cycles audio. V cycles subtitles. L sets A-B loop. T always on top. F fullscreen. [ ] speed. . steps one frame. S saves a bitmap. Esc or Q quits. Drop files, or use Open / Open URL, to replace the playlist. Sub file loads SRT/ASS. The window stays open after the file ends and continues with the next playlist item. Display is capped at 1920x1080. Rate is clamped to 0.25..4. --spherical enables 360° equirect view; Ctrl+3 toggles; Shift+arrows roll. --hdr-tonemap selects display tonemap (auto Hable on PQ/HLG). --play-stereo3d selects packed 3D view. --play-and-exit closes when the playlist stops."
+                    "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--on-top] [--rate N] [--start-time TIME] [--stop-time TIME] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices] [--spherical] [--yaw DEG] [--pitch DEG] [--roll DEG] [--fov DEG] [--hdr-tonemap off|clip|reinhard|hable] [--play-stereo3d off|sbsl|abl|mono-left|mono-right] [--play-and-exit] [--start-paused]\nINPUT is a local file or http/https/rtsp/rtmp/udp URL. --start-time/--stop-time are mm:ss, hh:mm:ss, or seconds. Space pauses. Left/right seek 10s. Up/down volume. M mutes. B cycles audio. V cycles subtitles. L sets A-B loop. T always on top. F fullscreen. [ ] speed. . steps one frame. S saves a bitmap. Esc or Q quits. Drop files, or use Open / Open URL, to replace the playlist. Sub file loads SRT/ASS. The window stays open after the file ends and continues with the next playlist item. Display is capped at 1920x1080. Rate is clamped to 0.25..4. --spherical enables 360° equirect view; Ctrl+3 toggles; Shift+arrows roll. --hdr-tonemap selects display tonemap (auto Hable on PQ/HLG). --play-stereo3d selects packed 3D view. --play-and-exit closes when the playlist stops. --start-paused opens paused."
                 );
                 return Ok(());
             }
@@ -194,6 +196,7 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             hdr_tonemap,
             stereo3d,
             quit_at_end,
+            start_paused,
         },
     )?;
     emit_json(false, serde_json::to_string_pretty(&stats)?);

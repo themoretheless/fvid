@@ -124,6 +124,10 @@ pub use play::{
     format_subtitle_position_osd, subtitle_block_top_y, OSD_TIMEOUT_DEFAULT_MS,
     OSD_TIMEOUT_MIN_MS, OSD_TIMEOUT_MAX_MS, clamp_osd_timeout_ms, osd_should_clear,
     MOUSE_HIDE_DEFAULT_MS, mouse_should_hide, audio_peak_milli, format_vu_osd,
+    vu_bar_fills, cycle_rate_preset_milli, format_rate_preset_osd, MarqueePosition,
+    cycle_marquee_position, marquee_position_label, format_marquee_osd, marquee_block_top_y,
+    format_title_osd, DropFrameMode, cycle_drop_frame, drop_frame_label, format_drop_frame_osd,
+    should_drop_late_frame, cycle_show_osd, format_show_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

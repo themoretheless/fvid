@@ -1386,5 +1386,45 @@ mod play_controls {
         );
         assert!(fvid_media::format_network_cache_osd(1_000).contains("1000"));
         assert!(fvid_media::format_hotkeys_help_osd().contains("Space"));
+        assert_eq!(fvid_media::vu_bar_fills(0, 4), vec![0, 0, 0, 0]);
+        assert_eq!(fvid_media::vu_bar_fills(1_000, 4), vec![100, 100, 100, 100]);
+        let mid = fvid_media::vu_bar_fills(500, 4);
+        assert_eq!(mid.len(), 4);
+        assert!(mid[0] > 0 && mid[3] < 100);
+        assert_eq!(fvid_media::cycle_rate_preset_milli(1_000), 500);
+        assert_eq!(fvid_media::cycle_rate_preset_milli(500), 2_000);
+        assert_eq!(fvid_media::cycle_rate_preset_milli(2_000), 1_000);
+        assert_eq!(
+            fvid_media::cycle_marquee_position(fvid_media::MarqueePosition::Top),
+            fvid_media::MarqueePosition::Center
+        );
+        assert!(fvid_media::format_marquee_osd("Hello", fvid_media::MarqueePosition::Bottom)
+            .contains("bottom"));
+        assert_eq!(
+            fvid_media::marquee_block_top_y(100.0, 20.0, 8.0, fvid_media::MarqueePosition::Top),
+            8.0
+        );
+        assert!(fvid_media::format_title_osd("Demo Clip").contains("Demo"));
+        assert!(fvid_media::should_drop_late_frame(
+            fvid_media::DropFrameMode::Late,
+            50_000,
+            40_000
+        ));
+        assert!(!fvid_media::should_drop_late_frame(
+            fvid_media::DropFrameMode::Off,
+            50_000,
+            40_000
+        ));
+        assert_eq!(
+            fvid_media::cycle_drop_frame(fvid_media::DropFrameMode::Late),
+            fvid_media::DropFrameMode::Off
+        );
+        assert_eq!(fvid_media::format_show_osd(true), "OSD on");
+        assert!(!fvid_media::cycle_show_osd(true));
+        assert!(fvid_media::PlayOptions {
+            start_paused: true,
+            ..fvid_media::PlayOptions::default()
+        }
+        .start_paused);
     }
 }
