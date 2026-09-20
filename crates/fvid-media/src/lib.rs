@@ -155,7 +155,14 @@ pub use play::{
     format_recent_osd, deinterlace_linear_rgb, deinterlace_mean_rgb, SeekJump, cycle_seek_jump,
     format_seek_jump_osd, seek_step_us_ex, VideoPostFx, cycle_video_post_fx, video_post_fx_label,
     format_video_post_fx_osd, apply_video_post_fx, downmix_surround_to_stereo, format_downmix_osd,
-    format_scaletempo_osd, format_minimal_interface_osd,
+    format_scaletempo_osd, format_minimal_interface_osd, AUDIO_PITCH_UNITY_MILLI,
+    AUDIO_PITCH_MIN_MILLI, AUDIO_PITCH_MAX_MILLI, AUDIO_PITCH_STEP_MILLI, clamp_audio_pitch_milli,
+    audio_pitch_step_milli, apply_audio_pitch_sample_index, format_audio_pitch_osd,
+    VisualizationMode, cycle_visualization, visualization_label,
+    format_visualization_osd, scope_samples_u8, audio_bargraph_fills, format_bargraph_osd,
+    apply_motion_blur_rgb, format_motion_blur_osd, apply_video_post_fx_with_prev,
+    IMAGE_DURATION_DEFAULT_SECS, IMAGE_DURATION_MIN_SECS, IMAGE_DURATION_MAX_SECS,
+    clamp_image_duration_secs, image_duration_us, format_image_duration_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

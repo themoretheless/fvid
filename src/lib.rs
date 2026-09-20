@@ -1575,6 +1575,28 @@ mod play_controls {
         assert!(fvid_media::format_downmix_osd(true).contains("On"));
         assert!(fvid_media::format_scaletempo_osd(false).contains("Off"));
         assert!(fvid_media::format_minimal_interface_osd(true).contains("Minimal"));
+        assert_eq!(
+            fvid_media::apply_audio_pitch_sample_index(1_000, 2_000),
+            500
+        );
+        assert!(fvid_media::format_audio_pitch_osd(1_000).contains("1.00"));
+        assert_eq!(
+            fvid_media::cycle_visualization(fvid_media::VisualizationMode::Off),
+            fvid_media::VisualizationMode::Spectrum
+        );
+        let scope = fvid_media::scope_samples_u8(&[0.0, 0.5, -0.5, 0.25], 4);
+        assert_eq!(scope.len(), 4);
+        let bars = fvid_media::audio_bargraph_fills(&[500, 1_000, 1_500], 3);
+        assert_eq!(bars.len(), 3);
+        let mut cur = vec![0x00_ff_00_00u32; 4];
+        let prev = vec![0x00_00_00_ffu32; 4];
+        fvid_media::apply_motion_blur_rgb(&mut cur, 2, 2, &prev);
+        assert_ne!(cur[0], 0x00_ff_00_00);
+        assert_eq!(fvid_media::image_duration_us(10), 10_000_000);
+        assert_eq!(
+            fvid_media::cycle_video_post_fx(fvid_media::VideoPostFx::Grain),
+            fvid_media::VideoPostFx::MotionBlur
+        );
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
         hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;

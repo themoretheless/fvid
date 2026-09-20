@@ -1535,6 +1535,7 @@ pub enum VideoPostFx {
     Blur,
     Sharpen,
     Grain,
+    MotionBlur,
 }
 
 pub fn cycle_video_post_fx(fx: VideoPostFx) -> VideoPostFx {
@@ -1542,7 +1543,8 @@ pub fn cycle_video_post_fx(fx: VideoPostFx) -> VideoPostFx {
         VideoPostFx::Off => VideoPostFx::Blur,
         VideoPostFx::Blur => VideoPostFx::Sharpen,
         VideoPostFx::Sharpen => VideoPostFx::Grain,
-        VideoPostFx::Grain => VideoPostFx::Off,
+        VideoPostFx::Grain => VideoPostFx::MotionBlur,
+        VideoPostFx::MotionBlur => VideoPostFx::Off,
     }
 }
 
@@ -1552,6 +1554,7 @@ pub fn video_post_fx_label(fx: VideoPostFx) -> &'static str {
         VideoPostFx::Blur => "Blur",
         VideoPostFx::Sharpen => "Sharpen",
         VideoPostFx::Grain => "Grain",
+        VideoPostFx::MotionBlur => "Motion blur",
     }
 }
 
@@ -1577,6 +1580,25 @@ pub fn apply_video_post_fx(pixels: &mut [u32], width: u32, height: u32, fx: Vide
         VideoPostFx::Blur => apply_box_blur_rgb(pixels, width, height),
         VideoPostFx::Sharpen => apply_sharpen_rgb(pixels, width, height),
         VideoPostFx::Grain => apply_grain_rgb(pixels, width, height),
+        VideoPostFx::MotionBlur => {}
+    }
+}
+
+/// Apply motion blur against a previous frame when `VideoPostFx::MotionBlur` is selected.
+pub fn apply_video_post_fx_with_prev(
+    pixels: &mut [u32],
+    width: u32,
+    height: u32,
+    fx: VideoPostFx,
+    previous: Option<&[u32]>,
+) {
+    match fx {
+        VideoPostFx::MotionBlur => {
+            if let Some(prev) = previous {
+                apply_motion_blur_rgb(pixels, width, height, prev);
+            }
+        }
+        other => apply_video_post_fx(pixels, width, height, other),
     }
 }
 
@@ -1709,6 +1731,143 @@ pub fn format_minimal_interface_osd(enabled: bool) -> &'static str {
     } else {
         "Minimal interface Off"
     }
+}
+
+/// Independent audio pitch ratio (VLC Advanced pitch), milli-units around unity.
+pub const AUDIO_PITCH_UNITY_MILLI: i32 = 1_000;
+pub const AUDIO_PITCH_MIN_MILLI: i32 = 500;
+pub const AUDIO_PITCH_MAX_MILLI: i32 = 2_000;
+pub const AUDIO_PITCH_STEP_MILLI: i32 = 50;
+
+pub fn clamp_audio_pitch_milli(value: i32) -> i32 {
+    value.clamp(AUDIO_PITCH_MIN_MILLI, AUDIO_PITCH_MAX_MILLI)
+}
+
+pub fn audio_pitch_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_audio_pitch_milli(current.saturating_add(delta))
+}
+
+pub fn apply_audio_pitch_sample_index(index: u64, pitch_milli: i32) -> u64 {
+    let pitch = clamp_audio_pitch_milli(pitch_milli) as u64;
+    index.saturating_mul(AUDIO_PITCH_UNITY_MILLI as u64) / pitch.max(1)
+}
+
+pub fn format_audio_pitch_osd(pitch_milli: i32) -> String {
+    format!(
+        "Audio pitch {:.2}×",
+        clamp_audio_pitch_milli(pitch_milli) as f32 / 1_000.0
+    )
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum VisualizationMode {
+    #[default]
+    Off,
+    Spectrum,
+    Scope,
+    VUMeter,
+}
+
+pub fn cycle_visualization(mode: VisualizationMode) -> VisualizationMode {
+    match mode {
+        VisualizationMode::Off => VisualizationMode::Spectrum,
+        VisualizationMode::Spectrum => VisualizationMode::Scope,
+        VisualizationMode::Scope => VisualizationMode::VUMeter,
+        VisualizationMode::VUMeter => VisualizationMode::Off,
+    }
+}
+
+pub fn visualization_label(mode: VisualizationMode) -> &'static str {
+    match mode {
+        VisualizationMode::Off => "Off",
+        VisualizationMode::Spectrum => "Spectrum",
+        VisualizationMode::Scope => "Scope",
+        VisualizationMode::VUMeter => "VU meter",
+    }
+}
+
+pub fn format_visualization_osd(mode: VisualizationMode) -> String {
+    format!("Visualization {}", visualization_label(mode))
+}
+
+/// Scope polyline samples normalized to 0..=255 for overlay drawing.
+pub fn scope_samples_u8(samples: &[f32], points: usize) -> Vec<u8> {
+    let points = points.max(1).min(512);
+    let mut out = vec![128u8; points];
+    if samples.is_empty() {
+        return out;
+    }
+    let chunk = (samples.len() / points).max(1);
+    for (i, slot) in out.iter_mut().enumerate() {
+        let start = i * chunk;
+        let end = (start + chunk).min(samples.len());
+        if start >= samples.len() {
+            break;
+        }
+        let mut acc = 0.0f32;
+        let mut n = 0u32;
+        for sample in &samples[start..end] {
+            acc += *sample;
+            n += 1;
+        }
+        let mean = if n == 0 { 0.0 } else { acc / n as f32 };
+        *slot = ((mean * 0.5 + 0.5) * 255.0).round().clamp(0.0, 255.0) as u8;
+    }
+    out
+}
+
+/// Audio bargraph overlay levels (VLC audiobargraph).
+pub fn audio_bargraph_fills(peaks_milli: &[u32], bars: usize) -> Vec<u8> {
+    let bars = bars.max(1).min(32);
+    let mut out = vec![0u8; bars];
+    if peaks_milli.is_empty() {
+        return out;
+    }
+    for (i, slot) in out.iter_mut().enumerate() {
+        let peak = peaks_milli[i % peaks_milli.len()].min(2_000);
+        *slot = ((peak * 255) / 2_000) as u8;
+    }
+    out
+}
+
+pub fn format_bargraph_osd(fills: &[u8]) -> String {
+    let lit = fills.iter().filter(|v| **v > 8).count();
+    format!("Bargraph {lit}/{}", fills.len().max(1))
+}
+
+pub fn apply_motion_blur_rgb(pixels: &mut [u32], width: u32, height: u32, previous: &[u32]) {
+    let n = (width as usize).saturating_mul(height as usize);
+    if n == 0 || pixels.len() < n || previous.len() < n {
+        return;
+    }
+    for i in 0..n {
+        pixels[i] = average_rgb_pixel(pixels[i], previous[i]);
+    }
+}
+
+pub fn format_motion_blur_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Motion blur On"
+    } else {
+        "Motion blur Off"
+    }
+}
+
+/// Still-image playlist dwell (VLC `--image-duration`), seconds.
+pub const IMAGE_DURATION_DEFAULT_SECS: u32 = 10;
+pub const IMAGE_DURATION_MIN_SECS: u32 = 1;
+pub const IMAGE_DURATION_MAX_SECS: u32 = 3_600;
+
+pub fn clamp_image_duration_secs(secs: u32) -> u32 {
+    secs.clamp(IMAGE_DURATION_MIN_SECS, IMAGE_DURATION_MAX_SECS)
+}
+
+pub fn image_duration_us(secs: u32) -> i64 {
+    i64::from(clamp_image_duration_secs(secs)).saturating_mul(1_000_000)
+}
+
+pub fn format_image_duration_osd(secs: u32) -> String {
+    format!("Image duration {} s", clamp_image_duration_secs(secs))
 }
 
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
@@ -6059,6 +6218,9 @@ struct PlayerApp {
     surround_downmix: bool,
     scaletempo: bool,
     minimal_interface: bool,
+    pitch_milli: i32,
+    visualization: VisualizationMode,
+    image_duration_secs: u32,
     volume_normalizer: bool,
     bass_milli: i32,
     mid_milli: i32,
@@ -6200,6 +6362,9 @@ impl PlayerApp {
             surround_downmix: false,
             scaletempo: true,
             minimal_interface: false,
+            pitch_milli: AUDIO_PITCH_UNITY_MILLI,
+            visualization: VisualizationMode::Off,
+            image_duration_secs: IMAGE_DURATION_DEFAULT_SECS,
             volume_normalizer: false,
             bass_milli: TONE_UNITY_MILLI,
             mid_milli: TONE_UNITY_MILLI,
@@ -7111,6 +7276,30 @@ impl PlayerApp {
             && !ctx.input(|input| input.modifiers.alt)
         {
             self.toggle_minimal_interface();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::P))
+        {
+            let up = !ctx.input(|input| input.modifiers.shift);
+            self.nudge_audio_pitch(if up {
+                AUDIO_PITCH_STEP_MILLI
+            } else {
+                -AUDIO_PITCH_STEP_MILLI
+            });
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::V))
+        {
+            self.cycle_visualization_mode();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::I))
+        {
+            let longer = !ctx.input(|input| input.modifiers.shift);
+            self.nudge_image_duration(if longer { 5 } else { -5 });
         }
         if !focused
             && command
@@ -8513,6 +8702,23 @@ impl PlayerApp {
     fn toggle_minimal_interface(&mut self) {
         self.minimal_interface = !self.minimal_interface;
         self.notice = Some(format_minimal_interface_osd(self.minimal_interface).into());
+    }
+
+    fn nudge_audio_pitch(&mut self, delta: i32) {
+        self.pitch_milli = audio_pitch_step_milli(self.pitch_milli, delta);
+        self.notice = Some(format_audio_pitch_osd(self.pitch_milli));
+    }
+
+    fn cycle_visualization_mode(&mut self) {
+        self.visualization = cycle_visualization(self.visualization);
+        self.notice = Some(format_visualization_osd(self.visualization));
+    }
+
+    fn nudge_image_duration(&mut self, delta: i32) {
+        let next = (self.image_duration_secs as i64).saturating_add(i64::from(delta));
+        self.image_duration_secs =
+            clamp_image_duration_secs(next.clamp(1, i64::from(IMAGE_DURATION_MAX_SECS)) as u32);
+        self.notice = Some(format_image_duration_osd(self.image_duration_secs));
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {
