@@ -962,6 +962,8 @@ pub struct PlayRenderOptions {
     pub pitch_deg_milli: i32,
     pub fov_deg_milli: i32,
     pub hdr_tonemap: HdrTonemap,
+    /// Stream `color_trc` used when expanding PQ/HLG before display tonemap.
+    pub color_trc: u32,
 }
 
 impl Default for PlayRenderOptions {
@@ -981,6 +983,7 @@ impl Default for PlayRenderOptions {
             pitch_deg_milli: 0,
             fov_deg_milli: FOV_DEFAULT_MILLI,
             hdr_tonemap: HdrTonemap::Off,
+            color_trc: 0,
         }
     }
 }
@@ -1154,6 +1157,45 @@ fn hable_tonemap(x: f32) -> f32 {
     ((x * (a * x + c * b) + d * e) / (x * (a * x + b) + d * f)) - e / f
 }
 
+/// Approximate PQ EOTF (SMPTE ST 2084) from normalized [0,1] code value to relative luminance.
+pub fn pq_eotf(value: f32) -> f32 {
+    let v = value.clamp(0.0, 1.0);
+    let m1 = 0.1593017578125;
+    let m2 = 78.84375;
+    let c1 = 0.8359375;
+    let c2 = 18.8515625;
+    let c3 = 18.6875;
+    let vm = v.powf(1.0 / m2);
+    let num = (vm - c1).max(0.0);
+    let den = (c2 - c3 * vm).max(1e-6);
+    (num / den).powf(1.0 / m1) * 100.0 // scale toward displayable range
+}
+
+/// Approximate HLG inverse OETF to relative scene-light.
+pub fn hlg_eotf(value: f32) -> f32 {
+    let v = value.clamp(0.0, 1.0);
+    let a = 0.17883277;
+    let b = 0.28466892;
+    let c = 0.55991073;
+    if v <= 0.5 {
+        (v * v) / 3.0 * 12.0
+    } else {
+        ((v - c) / a).exp().mul_add(1.0, b) / 12.0 * 12.0
+    }
+}
+
+/// Expand an 8-bit channel using stream transfer before display tonemap.
+pub fn expand_hdr_channel(value: f32, color_trc: u32) -> f32 {
+    let v = value.clamp(0.0, 1.0);
+    if color_trc == COLOR_TRC_SMPTE2084 {
+        pq_eotf(v)
+    } else if color_trc == COLOR_TRC_HLG {
+        hlg_eotf(v)
+    } else {
+        v * 2.5
+    }
+}
+
 /// Map one linear channel through a display tonemap curve.
 pub fn tonemap_channel(value: f32, mode: HdrTonemap) -> f32 {
     let x = value.max(0.0);
@@ -1163,7 +1205,7 @@ pub fn tonemap_channel(value: f32, mode: HdrTonemap) -> f32 {
         HdrTonemap::Reinhard => (x / (1.0 + x)).clamp(0.0, 1.0),
         HdrTonemap::Hable => {
             let white = hable_tonemap(11.2).max(1e-6);
-            (hable_tonemap(x * 2.0) / white).clamp(0.0, 1.0)
+            (hable_tonemap(x) / white).clamp(0.0, 1.0)
         }
     }
 }
@@ -1173,15 +1215,14 @@ pub fn apply_hdr_tonemap_pixel(
     green: u8,
     blue: u8,
     mode: HdrTonemap,
+    color_trc: u32,
 ) -> (u8, u8, u8) {
     if matches!(mode, HdrTonemap::Off | HdrTonemap::Clip) {
         return (red, green, blue);
     }
-    // Expand 8-bit SDR into a pseudo-HDR range so highlight compression is visible.
-    let boost = 2.5;
-    let r = tonemap_channel((f32::from(red) / 255.0) * boost, mode);
-    let g = tonemap_channel((f32::from(green) / 255.0) * boost, mode);
-    let b = tonemap_channel((f32::from(blue) / 255.0) * boost, mode);
+    let r = tonemap_channel(expand_hdr_channel(f32::from(red) / 255.0, color_trc), mode);
+    let g = tonemap_channel(expand_hdr_channel(f32::from(green) / 255.0, color_trc), mode);
+    let b = tonemap_channel(expand_hdr_channel(f32::from(blue) / 255.0, color_trc), mode);
     (
         (r * 255.0).round().clamp(0.0, 255.0) as u8,
         (g * 255.0).round().clamp(0.0, 255.0) as u8,
@@ -1246,7 +1287,8 @@ pub fn render_play_pixels(
                 opts.hue_milli,
             );
             let (red, green, blue) = apply_gamma_pixel(red, green, blue, opts.gamma_milli);
-            let (red, green, blue) = apply_hdr_tonemap_pixel(red, green, blue, opts.hdr_tonemap);
+            let (red, green, blue) =
+                apply_hdr_tonemap_pixel(red, green, blue, opts.hdr_tonemap, opts.color_trc);
             let (dx, dy) = rotate_pixel(x as u32, y as u32, width, height, opts.rotate);
             out[dy as usize * out_w as usize + dx as usize] =
                 (u32::from(red) << 16) | (u32::from(green) << 8) | u32::from(blue);
@@ -5297,6 +5339,7 @@ impl PlayerApp {
             self.pitch_deg_milli,
             self.fov_deg_milli,
             self.hdr_tonemap,
+            frame.color_trc,
             bitmap.as_ref(),
         );
         session.dirty = false;
@@ -6506,6 +6549,7 @@ impl PlayerApp {
                 pitch_deg_milli: self.pitch_deg_milli,
                 fov_deg_milli: self.fov_deg_milli,
                 hdr_tonemap: self.hdr_tonemap,
+                color_trc: frame.color_trc,
             };
             let (width, height, pixels) =
                 render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap.as_ref());
@@ -6998,6 +7042,7 @@ fn color_image(
     pitch_deg_milli: i32,
     fov_deg_milli: i32,
     hdr_tonemap: HdrTonemap,
+    color_trc: u32,
     bitmap: Option<&BitmapSubtitle>,
 ) -> egui::ColorImage {
     let opts = PlayRenderOptions {
@@ -7015,6 +7060,7 @@ fn color_image(
         pitch_deg_milli,
         fov_deg_milli,
         hdr_tonemap,
+        color_trc,
     };
     let (out_w, out_h, rgb) =
         render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap);

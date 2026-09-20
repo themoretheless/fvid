@@ -1230,8 +1230,20 @@ mod play_controls {
             fvid_media::auto_hdr_tonemap(fvid_media::COLOR_TRC_SMPTE2084),
             fvid_media::HdrTonemap::Hable
         );
-        let mapped = fvid_media::apply_hdr_tonemap_pixel(200, 200, 200, fvid_media::HdrTonemap::Hable);
+        let mapped = fvid_media::apply_hdr_tonemap_pixel(
+            200,
+            200,
+            200,
+            fvid_media::HdrTonemap::Hable,
+            fvid_media::COLOR_TRC_SMPTE2084,
+        );
         assert!(mapped.0 <= 255);
+        assert!(fvid_media::pq_eotf(0.5) > 0.0);
+        assert!(fvid_media::hlg_eotf(0.5) > 0.0);
+        assert!(fvid_media::pq_eotf(0.8) > fvid_media::pq_eotf(0.2));
+        assert!(
+            (fvid_media::expand_hdr_channel(0.5, 1) - 1.25).abs() < 0.01
+        );
         assert!(fvid_media::format_hdr_tonemap_osd(fvid_media::HdrTonemap::Hable).contains("hable"));
     }
 }
