@@ -1104,5 +1104,17 @@ mod play_controls {
         let expanded = fvid_media::expand_play_inputs(&[list]).unwrap();
         assert_eq!(expanded.len(), 1);
         assert!(expanded[0].ends_with("a.mp4"));
+        assert_eq!(
+            fvid_media::initial_stop_us("1:30", 200_000_000),
+            Some(90_000_000)
+        );
+        assert!(fvid_media::should_stop_playback(90_000_001, Some(90_000_000)));
+        assert!(!fvid_media::should_stop_playback(10, Some(90_000_000)));
+        assert_eq!(fvid_media::rate_from_wheel(1_000, 1), 1_050);
+        assert_eq!(fvid_media::rate_from_wheel(250, -1), 250);
+        assert_eq!(fvid_media::stop_playback_us(), 0);
+        assert_eq!(fvid_media::format_stop_osd(), "Stopped");
+        assert!(fvid_media::format_rotate_osd(fvid_media::RotateMode::Deg90).contains("90"));
+        assert_eq!(fvid_media::format_flip_osd(true, true), "Flip HV");
     }
 }

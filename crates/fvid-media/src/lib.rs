@@ -88,7 +88,9 @@ pub use play::{
     reset_video_adjust, adjust_step_milli, reset_zoom_pan, format_adjust_osd, format_zoom_osd,
     format_aspect_osd, format_crop_osd, format_deinterlace_osd, eq_band_step_milli,
     set_eq_gains_from_preset, format_eq_preset_osd, PAN_STEP_PX, format_pan_osd, initial_seek_us,
-    gamma_channel, apply_gamma_pixel, format_audio_channel_osd, PLAYBACK_PROTOCOLS,
+    gamma_channel, apply_gamma_pixel, format_audio_channel_osd, initial_stop_us,
+    should_stop_playback, RATE_WHEEL_STEP_MILLI, rate_from_wheel, stop_playback_us,
+    format_stop_osd, format_rotate_osd, format_flip_osd, PLAYBACK_PROTOCOLS,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

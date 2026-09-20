@@ -32,6 +32,7 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     let mut subtitles: Option<PathBuf> = None;
     let mut audio_device: Option<String> = None;
     let mut start_us: Option<i64> = None;
+    let mut stop_us: Option<i64> = None;
     let mut inputs = Vec::new();
     let mut index = 0;
     while index < args.len() {
@@ -57,6 +58,16 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 start_us = fvid_media::initial_seek_us(value, -1)
                     .or_else(|| value.parse::<i64>().ok().map(|s| s.saturating_mul(1_000_000)))
                     .ok_or_else(|| format!("invalid start time {value}"))
+                    .map(Some)?;
+            }
+            "--stop-time" => {
+                index += 1;
+                let value = args
+                    .get(index)
+                    .ok_or("play --stop-time requires mm:ss or seconds")?;
+                stop_us = fvid_media::initial_stop_us(value, -1)
+                    .or_else(|| value.parse::<i64>().ok().map(|s| s.saturating_mul(1_000_000)))
+                    .ok_or_else(|| format!("invalid stop time {value}"))
                     .map(Some)?;
             }
             "--audio-track" => {
@@ -103,7 +114,7 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             }
             "--help" | "-h" => {
                 println!(
-                    "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--on-top] [--rate N] [--start-time TIME] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices]\nINPUT is a local file or http/https/rtsp/rtmp/udp URL. --start-time is mm:ss, hh:mm:ss, or seconds. Space pauses. Left/right seek 10s. Up/down volume. M mutes. B cycles audio. V cycles subtitles. L sets A-B loop. T always on top. F fullscreen. [ ] speed. . steps one frame. S saves a bitmap. Esc or Q quits. Drop files, or use Open / Open URL, to replace the playlist. Sub file loads SRT/ASS. The window stays open after the file ends and continues with the next playlist item. Display is capped at 1920x1080. Rate is clamped to 0.25..4."
+                    "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--on-top] [--rate N] [--start-time TIME] [--stop-time TIME] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices]\nINPUT is a local file or http/https/rtsp/rtmp/udp URL. --start-time/--stop-time are mm:ss, hh:mm:ss, or seconds. Space pauses. Left/right seek 10s. Up/down volume. M mutes. B cycles audio. V cycles subtitles. L sets A-B loop. T always on top. F fullscreen. [ ] speed. . steps one frame. S saves a bitmap. Esc or Q quits. Drop files, or use Open / Open URL, to replace the playlist. Sub file loads SRT/ASS. The window stays open after the file ends and continues with the next playlist item. Display is capped at 1920x1080. Rate is clamped to 0.25..4."
                 );
                 return Ok(());
             }
@@ -130,6 +141,7 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             subtitles,
             audio_device,
             start_us,
+            stop_us,
         },
     )?;
     emit_json(false, serde_json::to_string_pretty(&stats)?);

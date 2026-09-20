@@ -748,6 +748,8 @@ pub struct PlayRenderOptions {
     pub saturation_milli: i32,
     pub hue_milli: i32,
     pub gamma_milli: i32,
+    pub flip_h: bool,
+    pub flip_v: bool,
     pub rotate: RotateMode,
     pub deinterlace: DeinterlaceMode,
 }
@@ -760,6 +762,8 @@ impl Default for PlayRenderOptions {
             saturation_milli: 1_000,
             hue_milli: 1_000,
             gamma_milli: 1_000,
+            flip_h: false,
+            flip_v: false,
             rotate: RotateMode::Deg0,
             deinterlace: DeinterlaceMode::Off,
         }
@@ -789,7 +793,9 @@ pub fn render_play_pixels(
     let mut out = vec![0u32; out_w as usize * out_h as usize];
     for y in 0..h {
         for x in 0..w {
-            let pixel = source[y * w + x];
+            let src_x = if opts.flip_h { w - 1 - x } else { x };
+            let src_y = if opts.flip_v { h - 1 - y } else { y };
+            let pixel = source[src_y * w + src_x];
             let (red, green, blue) = adjust_pixel(
                 ((pixel >> 16) & 0xff) as u8,
                 ((pixel >> 8) & 0xff) as u8,
@@ -878,6 +884,51 @@ pub fn initial_seek_us(spec: &str, duration_us: i64) -> Option<i64> {
     Some(clamp_seek_us(target, duration_us))
 }
 
+pub fn initial_stop_us(spec: &str, duration_us: i64) -> Option<i64> {
+    initial_seek_us(spec, duration_us)
+}
+
+pub fn should_stop_playback(now_us: i64, stop_us: Option<i64>) -> bool {
+    match stop_us {
+        Some(stop) if stop >= 0 => now_us >= stop,
+        _ => false,
+    }
+}
+
+/// Finer rate step for Ctrl+mouse wheel (±0.05×).
+pub const RATE_WHEEL_STEP_MILLI: i32 = 50;
+
+pub fn rate_from_wheel(current_milli: u32, scroll_lines: i32) -> u32 {
+    if scroll_lines == 0 {
+        return rate_step_milli(current_milli, 0);
+    }
+    rate_step_milli(
+        current_milli,
+        scroll_lines.saturating_mul(RATE_WHEEL_STEP_MILLI),
+    )
+}
+
+pub fn stop_playback_us() -> i64 {
+    0
+}
+
+pub fn format_stop_osd() -> &'static str {
+    "Stopped"
+}
+
+pub fn format_rotate_osd(mode: RotateMode) -> String {
+    format!("Rotate {}", rotate_label(mode))
+}
+
+pub fn format_flip_osd(flip_h: bool, flip_v: bool) -> String {
+    match (flip_h, flip_v) {
+        (false, false) => "Flip off".into(),
+        (true, false) => "Flip H".into(),
+        (false, true) => "Flip V".into(),
+        (true, true) => "Flip HV".into(),
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct PlayOptions {
     /// Play the first audio stream on the default output device.
@@ -901,6 +952,8 @@ pub struct PlayOptions {
     pub audio_device: Option<String>,
     /// Seek to this media time after open (VLC `--start-time`). Consumed once.
     pub start_us: Option<i64>,
+    /// Stop (pause at end) when media time reaches this (VLC `--stop-time`).
+    pub stop_us: Option<i64>,
 }
 
 impl Default for PlayOptions {
@@ -916,6 +969,7 @@ impl Default for PlayOptions {
             subtitles: None,
             audio_device: None,
             start_us: None,
+            stop_us: None,
         }
     }
 }
@@ -3687,6 +3741,7 @@ struct PlayerApp {
     url_text: String,
     jump_text: String,
     ab: Option<AbLoop>,
+    stop_us: Option<i64>,
     repeat: RepeatMode,
     subtitle_delay_us: i64,
     audio_delay_us: i64,
@@ -3736,6 +3791,7 @@ impl PlayerApp {
         let audio_ordinal = options.audio_track as i32;
         let subtitle_ordinal = options.subtitle_track;
         let first = playlist.first().cloned().unwrap_or_default();
+        let stop_us = options.stop_us;
         let mut app = Self {
             options,
             playlist,
@@ -3765,6 +3821,7 @@ impl PlayerApp {
             url_text: String::new(),
             jump_text: String::new(),
             ab: None,
+            stop_us,
             repeat: RepeatMode::Off,
             subtitle_delay_us: 0,
             audio_delay_us: 0,
@@ -4042,6 +4099,13 @@ impl PlayerApp {
         );
         session.media_now = media_now;
         session.shared.watch_us.store(media_now, Ordering::Relaxed);
+        let hit_stop = should_stop_playback(media_now, self.stop_us);
+        if hit_stop && !session.shared.paused.load(Ordering::Relaxed) {
+            drop(session);
+            self.set_paused(true);
+            self.notice = Some(format_stop_osd().into());
+            return None;
+        }
         loop {
             let next_pts = lock(&session.shared.video)
                 .front()
@@ -4389,14 +4453,33 @@ impl PlayerApp {
             self.nudge_subtitle_scale(-SUBTITLE_SCALE_STEP_MILLI);
         }
         if !focused {
-            let scroll = ctx.input(|input| input.smooth_scroll_delta.y);
+            let (scroll, ctrl) = ctx.input(|input| {
+                (input.smooth_scroll_delta.y, input.modifiers.command)
+            });
             if scroll.abs() > 0.1 {
                 let lines = if scroll > 0.0 { 1 } else { -1 };
-                let next = volume_from_wheel(self.volume_milli, lines);
-                if next != self.volume_milli {
-                    self.nudge_volume(next as i32 - self.volume_milli as i32);
+                if ctrl {
+                    let next = rate_from_wheel(self.rate_milli, lines);
+                    if next != self.rate_milli {
+                        self.set_rate(next);
+                    }
+                } else {
+                    let next = volume_from_wheel(self.volume_milli, lines);
+                    if next != self.volume_milli {
+                        self.nudge_volume(next as i32 - self.volume_milli as i32);
+                    }
                 }
             }
+        }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::Backspace)) {
+            self.stop_playback();
+        }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::Home)) {
+            let (zoom, pan_x, pan_y) = reset_zoom_pan();
+            self.zoom_milli = zoom;
+            self.pan_x_px = pan_x;
+            self.pan_y_px = pan_y;
+            self.notice = Some(format_zoom_osd(zoom));
         }
         let dropped = ctx.input(|input| input.raw.dropped_files.clone());
         if dropped.is_empty() {
@@ -4452,6 +4535,8 @@ impl PlayerApp {
             self.saturation_milli,
             self.hue_milli,
             self.gamma_milli,
+            self.flip_h,
+            self.flip_v,
             self.rotate,
             self.deinterlace,
             bitmap.as_ref(),
@@ -4644,14 +4729,19 @@ impl PlayerApp {
             let flip_h = if self.flip_h { "H*" } else { "H" };
             if ui.button(flip_h).clicked() {
                 self.flip_h = !self.flip_h;
+                self.adjust_dirty = true;
+                self.notice = Some(format_flip_osd(self.flip_h, self.flip_v));
             }
             let flip_v = if self.flip_v { "V*" } else { "V" };
             if ui.button(flip_v).clicked() {
                 self.flip_v = !self.flip_v;
+                self.adjust_dirty = true;
+                self.notice = Some(format_flip_osd(self.flip_h, self.flip_v));
             }
             if ui.button(rotate_label(self.rotate)).clicked() {
                 self.rotate = cycle_rotate(self.rotate);
                 self.adjust_dirty = true;
+                self.notice = Some(format_rotate_osd(self.rotate));
             }
             let deint = deinterlace_label(self.deinterlace);
             if ui.button(deint).clicked() {
@@ -5109,13 +5199,13 @@ impl PlayerApp {
     fn set_rate(&mut self, rate_milli: u32) {
         let rate_milli = rate_milli.clamp(RATE_MIN_MILLI, RATE_MAX_MILLI);
         self.rate_milli = rate_milli;
-        let Some(session) = &mut self.session else {
-            return;
-        };
-        session.clock.set_rate(rate_milli);
-        session.shared.rate_milli.store(rate_milli, Ordering::Relaxed);
-        session.last_clock = session.clock.now();
-        session.media_now = session.last_clock;
+        if let Some(session) = &mut self.session {
+            session.clock.set_rate(rate_milli);
+            session.shared.rate_milli.store(rate_milli, Ordering::Relaxed);
+            session.last_clock = session.clock.now();
+            session.media_now = session.last_clock;
+        }
+        self.notice = Some(format_rate_osd(rate_milli));
     }
 
     fn set_muted(&mut self, muted: bool) {
@@ -5128,6 +5218,13 @@ impl PlayerApp {
 
     fn nudge_rate(&mut self, delta_milli: i32) {
         self.set_rate(rate_step_milli(self.rate_milli, delta_milli));
+    }
+
+    fn stop_playback(&mut self) {
+        self.scrub = None;
+        self.request_seek(stop_playback_us());
+        self.set_paused(true);
+        self.notice = Some(format_stop_osd().into());
     }
 
     fn nudge_volume(&mut self, delta_milli: i32) {
@@ -5397,6 +5494,8 @@ impl PlayerApp {
                 saturation_milli: self.saturation_milli,
                 hue_milli: self.hue_milli,
                 gamma_milli: self.gamma_milli,
+                flip_h: self.flip_h,
+                flip_v: self.flip_v,
                 rotate: self.rotate,
                 deinterlace: self.deinterlace,
             };
@@ -5510,6 +5609,9 @@ impl PlayerApp {
                 .clicked()
             {
                 self.toggle_pause();
+            }
+            if ui.add_sized([72.0, 28.0], egui::Button::new("Stop")).clicked() {
+                self.stop_playback();
             }
             let can_prev = if self.shuffle {
                 order_step(&self.order, self.order_cursor, -1, self.repeat == RepeatMode::All).is_some()
@@ -5862,6 +5964,8 @@ fn color_image(
     saturation_milli: i32,
     hue_milli: i32,
     gamma_milli: i32,
+    flip_h: bool,
+    flip_v: bool,
     rotate: RotateMode,
     deinterlace: DeinterlaceMode,
     bitmap: Option<&BitmapSubtitle>,
@@ -5872,6 +5976,8 @@ fn color_image(
         saturation_milli,
         hue_milli,
         gamma_milli,
+        flip_h,
+        flip_v,
         rotate,
         deinterlace,
     };
