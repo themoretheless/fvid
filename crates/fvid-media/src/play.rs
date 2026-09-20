@@ -2650,6 +2650,106 @@ pub fn format_skip_marker_osd(kind: &str, target_us: i64) -> String {
     format!("Skip {kind} → {}", format_play_clock(target_us))
 }
 
+/// Case-insensitive playlist path filter (library / finder players).
+pub fn filter_playlist_paths(paths: &[PathBuf], query: &str) -> Vec<PathBuf> {
+    let query = query.trim().to_ascii_lowercase();
+    if query.is_empty() {
+        return paths.to_vec();
+    }
+    paths
+        .iter()
+        .filter(|path| {
+            path.to_string_lossy()
+                .to_ascii_lowercase()
+                .contains(&query)
+        })
+        .cloned()
+        .collect()
+}
+
+pub fn format_playlist_filter_osd(query: &str, matched: usize, total: usize) -> String {
+    let query = query.trim();
+    if query.is_empty() {
+        format!("Filter off ({total})")
+    } else {
+        format!("Filter \"{query}\" {matched}/{total}")
+    }
+}
+
+/// Favorites / starred media paths (capped).
+pub const FAVORITES_MAX: usize = 256;
+
+pub fn toggle_favorite(favorites: &mut Vec<PathBuf>, path: PathBuf) -> bool {
+    if let Some(idx) = favorites.iter().position(|entry| entry == &path) {
+        favorites.remove(idx);
+        false
+    } else {
+        favorites.insert(0, path);
+        if favorites.len() > FAVORITES_MAX {
+            favorites.truncate(FAVORITES_MAX);
+        }
+        true
+    }
+}
+
+pub fn format_favorite_osd(starred: bool) -> &'static str {
+    if starred {
+        "Favorite On"
+    } else {
+        "Favorite Off"
+    }
+}
+
+/// Remote-control / HTTP interface enable flag (VLC `--extraintf=http` style).
+pub fn format_remote_control_osd(enabled: bool, port: u16) -> String {
+    if enabled {
+        format!("RC http :{port}")
+    } else {
+        "RC Off".into()
+    }
+}
+
+pub const REMOTE_CONTROL_DEFAULT_PORT: u16 = 8080;
+
+/// Bit-perfect / exclusive output preference (WASAPI exclusive style).
+pub fn format_bitperfect_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Bit-perfect On"
+    } else {
+        "Bit-perfect Off"
+    }
+}
+
+/// Double-click fullscreen toggle helper.
+pub fn should_toggle_fullscreen_on_click(click_count: u32, on_video: bool) -> bool {
+    on_video && click_count >= 2
+}
+
+/// Scrub-preview media time from a normalized slider fraction.
+pub fn scrub_preview_us(fraction: f32, duration_us: i64) -> i64 {
+    media_us_from_fraction(fraction.clamp(0.0, 1.0), duration_us)
+}
+
+pub fn format_scrub_preview_osd(us: i64) -> String {
+    format!("Preview {}", format_play_clock(us))
+}
+
+/// Night-mode / soft volume curve (compress loud peaks for late listening).
+pub fn apply_night_mode_sample(sample: f32, enabled: bool) -> f32 {
+    if !enabled {
+        return sample.clamp(-1.0, 1.0);
+    }
+    compress_sample(sample, 0.25, 3.0)
+}
+
+pub fn format_night_mode_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Night mode On"
+    } else {
+        "Night mode Off"
+    }
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -7016,6 +7116,12 @@ struct PlayerApp {
     silence_skip: bool,
     intro_end_us: Option<i64>,
     credits_start_us: Option<i64>,
+    playlist_filter: String,
+    favorites: Vec<PathBuf>,
+    remote_control: bool,
+    remote_control_port: u16,
+    bitperfect: bool,
+    night_mode: bool,
     seek_jump: SeekJump,
     surround_downmix: bool,
     scaletempo: bool,
@@ -7190,6 +7296,12 @@ impl PlayerApp {
             silence_skip: false,
             intro_end_us: None,
             credits_start_us: None,
+            playlist_filter: String::new(),
+            favorites: Vec::new(),
+            remote_control: false,
+            remote_control_port: REMOTE_CONTROL_DEFAULT_PORT,
+            bitperfect: false,
+            night_mode: false,
             seek_jump: SeekJump::default(),
             surround_downmix: false,
             scaletempo: true,
@@ -8306,6 +8418,38 @@ impl PlayerApp {
             && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::S))
         {
             self.try_skip_marker();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::F))
+            && ctx.input(|input| input.modifiers.alt)
+        {
+            self.toggle_current_favorite();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Slash))
+        {
+            self.set_playlist_filter(String::new());
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::H))
+            && ctx.input(|input| input.modifiers.alt)
+        {
+            self.toggle_remote_control();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Period))
+        {
+            self.toggle_bitperfect();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::N))
+        {
+            self.toggle_night_mode();
         }
         if !focused
             && command
@@ -9904,6 +10048,42 @@ impl PlayerApp {
             self.request_seek(target);
             self.notice = Some(format_skip_marker_osd(kind, target));
         }
+    }
+
+    fn set_playlist_filter(&mut self, query: String) {
+        self.playlist_filter = query;
+        let matched = filter_playlist_paths(&self.playlist, &self.playlist_filter).len();
+        self.notice = Some(format_playlist_filter_osd(
+            &self.playlist_filter,
+            matched,
+            self.playlist.len(),
+        ));
+    }
+
+    fn toggle_current_favorite(&mut self) {
+        let Some(path) = self.playlist.get(self.playlist_index).cloned() else {
+            return;
+        };
+        let starred = toggle_favorite(&mut self.favorites, path);
+        self.notice = Some(format_favorite_osd(starred).into());
+    }
+
+    fn toggle_remote_control(&mut self) {
+        self.remote_control = !self.remote_control;
+        self.notice = Some(format_remote_control_osd(
+            self.remote_control,
+            self.remote_control_port,
+        ));
+    }
+
+    fn toggle_bitperfect(&mut self) {
+        self.bitperfect = !self.bitperfect;
+        self.notice = Some(format_bitperfect_osd(self.bitperfect).into());
+    }
+
+    fn toggle_night_mode(&mut self) {
+        self.night_mode = !self.night_mode;
+        self.notice = Some(format_night_mode_osd(self.night_mode).into());
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {

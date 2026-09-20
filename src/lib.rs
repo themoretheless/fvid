@@ -1700,6 +1700,19 @@ mod play_controls {
             None,
         );
         assert_eq!(projected.0, 8);
+        let filtered = fvid_media::filter_playlist_paths(
+            &[PathBuf::from("a/foo.mp4"), PathBuf::from("b/bar.mkv")],
+            "foo",
+        );
+        assert_eq!(filtered.len(), 1);
+        let mut favs = Vec::new();
+        assert!(fvid_media::toggle_favorite(&mut favs, PathBuf::from("a.mp4")));
+        assert!(!fvid_media::toggle_favorite(&mut favs, PathBuf::from("a.mp4")));
+        assert!(fvid_media::should_toggle_fullscreen_on_click(2, true));
+        assert_eq!(fvid_media::scrub_preview_us(0.5, 100_000_000), 50_000_000);
+        assert!(fvid_media::apply_night_mode_sample(0.9, true).abs() < 0.9);
+        assert!(fvid_media::format_remote_control_osd(true, 8080).contains("8080"));
+        assert!(fvid_media::format_bitperfect_osd(false).contains("Off"));
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
         hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;

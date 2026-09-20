@@ -183,7 +183,10 @@ pub use play::{
     color_primaries_label, format_color_primaries_osd, silence_skip_target_us,
     format_silence_skip_osd, cycle_video_track, format_video_track_osd,
     prefer_hearing_impaired_subtitle_index, format_hearing_impaired_osd, skip_marker_target_us,
-    format_skip_marker_osd,
+    format_skip_marker_osd, filter_playlist_paths, format_playlist_filter_osd, FAVORITES_MAX,
+    toggle_favorite, format_favorite_osd, format_remote_control_osd, REMOTE_CONTROL_DEFAULT_PORT,
+    format_bitperfect_osd, should_toggle_fullscreen_on_click, scrub_preview_us,
+    format_scrub_preview_osd, apply_night_mode_sample, format_night_mode_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};
