@@ -167,7 +167,10 @@ pub use play::{
     CropPixels, clamp_crop_pixels, crop_output_size, format_crop_pixels_osd, audio_desync_us,
     audio_desync_ms_from_us, format_audio_desync_osd, format_wallpaper_osd, prefer_program_index,
     format_program_osd, SubtitleEncoding, cycle_subtitle_encoding, subtitle_encoding_label,
-    format_subtitle_encoding_osd,
+    format_subtitle_encoding_osd, TELETEXT_PAGE_DEFAULT, TELETEXT_PAGE_MIN, TELETEXT_PAGE_MAX,
+    clamp_teletext_page, teletext_page_step, format_teletext_osd, format_aspect_lock_osd,
+    locked_window_size, format_snapshot_sequential_name, format_snapshot_sequential_osd,
+    format_hw_decode_osd, format_media_fingerprint_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

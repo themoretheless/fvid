@@ -2016,6 +2016,102 @@ pub fn format_subtitle_encoding_osd(enc: SubtitleEncoding) -> String {
     format!("Subs encoding {}", subtitle_encoding_label(enc))
 }
 
+/// Teletext page selection (VLC Teletext).
+pub const TELETEXT_PAGE_DEFAULT: u32 = 100;
+pub const TELETEXT_PAGE_MIN: u32 = 100;
+pub const TELETEXT_PAGE_MAX: u32 = 899;
+
+pub fn clamp_teletext_page(page: u32) -> u32 {
+    page.clamp(TELETEXT_PAGE_MIN, TELETEXT_PAGE_MAX)
+}
+
+pub fn teletext_page_step(current: u32, delta: i32) -> u32 {
+    let next = (clamp_teletext_page(current) as i64).saturating_add(i64::from(delta));
+    clamp_teletext_page(next.clamp(i64::from(TELETEXT_PAGE_MIN), i64::from(TELETEXT_PAGE_MAX)) as u32)
+}
+
+pub fn format_teletext_osd(page: u32, enabled: bool) -> String {
+    if enabled {
+        format!("Teletext {}", clamp_teletext_page(page))
+    } else {
+        "Teletext Off".into()
+    }
+}
+
+/// Keep video aspect locked when window is resized (VLC "Keep original AR").
+pub fn format_aspect_lock_osd(locked: bool) -> &'static str {
+    if locked {
+        "Aspect lock On"
+    } else {
+        "Aspect lock Off"
+    }
+}
+
+/// Fit window size to content while respecting a locked aspect.
+pub fn locked_window_size(
+    video_w: u32,
+    video_h: u32,
+    max_w: u32,
+    max_h: u32,
+    locked: bool,
+) -> (u32, u32) {
+    let vw = video_w.max(1);
+    let vh = video_h.max(1);
+    if !locked {
+        return (vw.min(max_w.max(1)), vh.min(max_h.max(1)));
+    }
+    let max_w = max_w.max(1);
+    let max_h = max_h.max(1);
+    let scale_w = max_w as f64 / vw as f64;
+    let scale_h = max_h as f64 / vh as f64;
+    let scale = scale_w.min(scale_h);
+    (
+        ((vw as f64) * scale).round().max(1.0) as u32,
+        ((vh as f64) * scale).round().max(1.0) as u32,
+    )
+}
+
+/// Sequential snapshot counter with width padding (VLC snapshot-sequential).
+pub fn format_snapshot_sequential_name(prefix: &str, index: u32, width: u32, ext: &str) -> String {
+    let prefix = prefix.trim();
+    let width = width.clamp(1, 8) as usize;
+    let num = format!("{index:0width$}");
+    if prefix.is_empty() {
+        format!("vlcsnap-{num}.{ext}")
+    } else {
+        format!("{prefix}{num}.{ext}")
+    }
+}
+
+pub fn format_snapshot_sequential_osd(enabled: bool, index: u32) -> String {
+    if enabled {
+        format!("Snapshot sequential #{index}")
+    } else {
+        "Snapshot sequential Off".into()
+    }
+}
+
+/// Hardware decode preference flag (oracle; software path remains the default).
+pub fn format_hw_decode_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "HW decode preferred"
+    } else {
+        "HW decode Off"
+    }
+}
+
+/// Fingerprinting / Next / AcoustID style media id stub for play library hooks.
+pub fn format_media_fingerprint_osd(fingerprint: &str) -> String {
+    let trimmed = fingerprint.trim();
+    if trimmed.is_empty() {
+        "Fingerprint none".into()
+    } else if trimmed.len() <= 12 {
+        format!("Fingerprint {trimmed}")
+    } else {
+        format!("Fingerprint {}…", &trimmed[..12])
+    }
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -6371,6 +6467,11 @@ struct PlayerApp {
     crop_pixels: CropPixels,
     wallpaper_mode: bool,
     subtitle_encoding: SubtitleEncoding,
+    teletext_enabled: bool,
+    teletext_page: u32,
+    aspect_lock: bool,
+    snapshot_sequential: bool,
+    hw_decode: bool,
     volume_normalizer: bool,
     bass_milli: i32,
     mid_milli: i32,
@@ -6519,6 +6620,11 @@ impl PlayerApp {
             crop_pixels: CropPixels::default(),
             wallpaper_mode: false,
             subtitle_encoding: SubtitleEncoding::Utf8,
+            teletext_enabled: false,
+            teletext_page: TELETEXT_PAGE_DEFAULT,
+            aspect_lock: false,
+            snapshot_sequential: false,
+            hw_decode: false,
             volume_normalizer: false,
             bass_milli: TONE_UNITY_MILLI,
             mid_milli: TONE_UNITY_MILLI,
@@ -7484,6 +7590,44 @@ impl PlayerApp {
             && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::CloseBracket))
         {
             self.nudge_crop_pixels(0, 0, 8, 0);
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::Y))
+        {
+            self.toggle_teletext();
+        }
+        if !focused
+            && self.teletext_enabled
+            && !command
+            && ctx.input(|input| input.key_pressed(egui::Key::PageUp) && input.modifiers.alt)
+        {
+            self.nudge_teletext_page(1);
+        }
+        if !focused
+            && self.teletext_enabled
+            && !command
+            && ctx.input(|input| input.key_pressed(egui::Key::PageDown) && input.modifiers.alt)
+        {
+            self.nudge_teletext_page(-1);
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::A))
+        {
+            self.toggle_aspect_lock();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::N))
+        {
+            self.toggle_snapshot_sequential();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::H))
+        {
+            self.toggle_hw_decode();
         }
         if !focused
             && command
@@ -8932,6 +9076,35 @@ impl PlayerApp {
         };
         self.adjust_dirty = true;
         self.notice = Some(format_crop_pixels_osd(self.crop_pixels));
+    }
+
+    fn toggle_teletext(&mut self) {
+        self.teletext_enabled = !self.teletext_enabled;
+        self.notice = Some(format_teletext_osd(self.teletext_page, self.teletext_enabled));
+    }
+
+    fn nudge_teletext_page(&mut self, delta: i32) {
+        self.teletext_page = teletext_page_step(self.teletext_page, delta);
+        self.teletext_enabled = true;
+        self.notice = Some(format_teletext_osd(self.teletext_page, self.teletext_enabled));
+    }
+
+    fn toggle_aspect_lock(&mut self) {
+        self.aspect_lock = !self.aspect_lock;
+        self.notice = Some(format_aspect_lock_osd(self.aspect_lock).into());
+    }
+
+    fn toggle_snapshot_sequential(&mut self) {
+        self.snapshot_sequential = !self.snapshot_sequential;
+        self.notice = Some(format_snapshot_sequential_osd(
+            self.snapshot_sequential,
+            self.snapshots,
+        ));
+    }
+
+    fn toggle_hw_decode(&mut self) {
+        self.hw_decode = !self.hw_decode;
+        self.notice = Some(format_hw_decode_osd(self.hw_decode).into());
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {

@@ -1619,6 +1619,18 @@ mod play_controls {
             fvid_media::SubtitleEncoding::Cp1251
         );
         assert!(fvid_media::format_wallpaper_osd(true).contains("On"));
+        assert_eq!(fvid_media::teletext_page_step(100, 1), 101);
+        assert!(fvid_media::format_teletext_osd(888, true).contains("888"));
+        assert_eq!(
+            fvid_media::locked_window_size(1920, 1080, 800, 800, true),
+            (800, 450)
+        );
+        assert_eq!(
+            fvid_media::format_snapshot_sequential_name("shot-", 7, 3, "png"),
+            "shot-007.png"
+        );
+        assert!(fvid_media::format_hw_decode_osd(false).contains("Off"));
+        assert!(fvid_media::format_media_fingerprint_osd("abcdef0123456789").contains("…"));
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
         hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;
