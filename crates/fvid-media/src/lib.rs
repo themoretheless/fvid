@@ -197,7 +197,9 @@ pub use play::{
     ambisonic_label, format_ambisonic_osd, parse_webvtt_timestamp, format_webvtt_timestamp,
     CastProtocol, cycle_cast_protocol, cast_protocol_label, format_cast_osd, media_library_entries,
     format_media_library_osd, format_chapter_art_osd, SmilClip, parse_smil_clip_line,
-    format_smil_clip_osd, format_named_bookmark_osd,
+    format_smil_clip_osd, format_named_bookmark_osd, format_hdr_mastering_osd, hdr_gamut_warning,
+    format_hdr_gamut_osd, cardboard_eye_rect, cardboard_view_yaw_milli, LyricLine, active_lyric_line,
+    format_lyric_osd, ab_slot_store, ab_slot_load, format_ab_slot_osd, format_play_stats_csv,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

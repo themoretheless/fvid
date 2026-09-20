@@ -1750,6 +1750,34 @@ mod play_controls {
         let clip = fvid_media::parse_smil_clip_line("src=\"ep.mp4\" begin=12.5").unwrap();
         assert_eq!(clip.begin_us, 12_500_000);
         assert!(fvid_media::format_named_bookmark_osd("Act 1", 90_000_000).contains("Act 1"));
+        assert!(fvid_media::format_hdr_mastering_osd(50, 1_000).contains("nits"));
+        assert!(fvid_media::hdr_gamut_warning(
+            fvid_media::COLOR_PRIMARIES_BT2020,
+            true
+        ));
+        assert_eq!(fvid_media::cardboard_eye_rect(1920, 1080, 1), (960, 0, 960, 1080));
+        let left = fvid_media::cardboard_view_yaw_milli(0, 63_000, 90_000, true);
+        let right = fvid_media::cardboard_view_yaw_milli(0, 63_000, 90_000, false);
+        assert!(left != right);
+        let lyrics = [
+            fvid_media::LyricLine {
+                start_us: 0,
+                text: "one".into(),
+            },
+            fvid_media::LyricLine {
+                start_us: 1_000_000,
+                text: "two".into(),
+            },
+        ];
+        assert_eq!(
+            fvid_media::active_lyric_line(&lyrics, 1_500_000)
+                .map(|l| l.text.as_str()),
+            Some("two")
+        );
+        let mut slots = [(None, None); 2];
+        assert!(fvid_media::ab_slot_store(&mut slots, 0, 1_000, 2_000));
+        assert_eq!(fvid_media::ab_slot_load(&slots, 0), Some((1_000, 2_000)));
+        assert!(fvid_media::format_play_stats_csv(10, 1, 5_000_000, 1_000).contains("presented=10"));
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;

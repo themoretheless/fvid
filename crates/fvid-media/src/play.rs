@@ -3082,6 +3082,112 @@ pub fn format_named_bookmark_osd(title: &str, media_us: i64) -> String {
     format_bookmark_label(media_us, Some(title))
 }
 
+/// HDR mastering display luminance range (cd/m²), oracle for HDR10 metadata panels.
+pub fn format_hdr_mastering_osd(min_nits_milli: u32, max_nits: u32) -> String {
+    format!(
+        "Mastering {:.4}–{} nits",
+        min_nits_milli as f32 / 1_000.0,
+        clamp_hdr_maxcll(max_nits)
+    )
+}
+
+/// BT.2020 vs BT.709 gamut clip warning for SDR displays.
+pub fn hdr_gamut_warning(color_primaries: u32, display_is_bt709: bool) -> bool {
+    display_is_bt709 && color_primaries == COLOR_PRIMARIES_BT2020
+}
+
+pub fn format_hdr_gamut_osd(warn: bool) -> &'static str {
+    if warn {
+        "Gamut BT.2020→709"
+    } else {
+        "Gamut OK"
+    }
+}
+
+/// 360° stereo SBS cardboard layout size for dual-eye render.
+pub fn cardboard_eye_rect(
+    canvas_w: u32,
+    canvas_h: u32,
+    eye: u32,
+) -> (u32, u32, u32, u32) {
+    let half = (canvas_w / 2).max(1);
+    let x = if eye == 0 { 0 } else { half };
+    (x, 0, half, canvas_h.max(1))
+}
+
+/// Apply Cardboard eye yaw offset to a base yaw.
+pub fn cardboard_view_yaw_milli(base_yaw_milli: i32, ipd_milli: i32, fov_deg_milli: i32, left_eye: bool) -> i32 {
+    let offset = cardboard_eye_yaw_offset_milli(ipd_milli, fov_deg_milli);
+    if left_eye {
+        clamp_yaw_milli(base_yaw_milli.saturating_sub(offset))
+    } else {
+        clamp_yaw_milli(base_yaw_milli.saturating_add(offset))
+    }
+}
+
+/// Lyrics / timed text line for karaoke / music video players.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LyricLine {
+    pub start_us: i64,
+    pub text: String,
+}
+
+pub fn active_lyric_line<'a>(lines: &'a [LyricLine], now_us: i64) -> Option<&'a LyricLine> {
+    let mut best = None;
+    for line in lines {
+        if line.start_us <= now_us {
+            best = Some(line);
+        } else {
+            break;
+        }
+    }
+    best
+}
+
+pub fn format_lyric_osd(line: Option<&LyricLine>) -> String {
+    match line {
+        Some(line) if !line.text.trim().is_empty() => format!("♪ {}", line.text.trim()),
+        _ => "♪".into(),
+    }
+}
+
+/// A-B loop memory slots (multi-marker players).
+pub fn ab_slot_store(slots: &mut [(Option<i64>, Option<i64>)], index: usize, a: i64, b: i64) -> bool {
+    if index >= slots.len() || b <= a {
+        return false;
+    }
+    slots[index] = (Some(a.max(0)), Some(b.max(0)));
+    true
+}
+
+pub fn ab_slot_load(slots: &[(Option<i64>, Option<i64>)], index: usize) -> Option<(i64, i64)> {
+    slots.get(index).and_then(|(a, b)| Some(((*a)?, (*b)?)))
+}
+
+pub fn format_ab_slot_osd(index: usize, pair: Option<(i64, i64)>) -> String {
+    match pair {
+        Some((a, b)) => format!(
+            "A-B slot {} {}–{}",
+            index + 1,
+            format_play_clock(a),
+            format_play_clock(b)
+        ),
+        None => format!("A-B slot {} empty", index + 1),
+    }
+}
+
+/// Playback statistics export line (CSV-ish) for analytics players.
+pub fn format_play_stats_csv(
+    presented: u64,
+    skipped: u64,
+    duration_us: i64,
+    rate_milli: u32,
+) -> String {
+    format!(
+        "presented={presented},skipped={skipped},duration_us={duration_us},rate_milli={rate_milli}"
+    )
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -7479,6 +7585,8 @@ struct PlayerApp {
     ambisonic: AmbisonicMode,
     cast_protocol: CastProtocol,
     cast_device: String,
+    lyric_lines: Vec<LyricLine>,
+    ab_slots: [(Option<i64>, Option<i64>); 4],
     seek_jump: SeekJump,
     surround_downmix: bool,
     scaletempo: bool,
@@ -7668,6 +7776,8 @@ impl PlayerApp {
             ambisonic: AmbisonicMode::Off,
             cast_protocol: CastProtocol::Off,
             cast_device: String::new(),
+            lyric_lines: Vec::new(),
+            ab_slots: [(None, None); 4],
             seek_jump: SeekJump::default(),
             surround_downmix: false,
             scaletempo: true,
@@ -8867,6 +8977,22 @@ impl PlayerApp {
             && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::Num5))
         {
             self.cycle_cast_mode();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Num9))
+        {
+            self.show_active_lyric();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Num1))
+        {
+            if ctx.input(|input| input.modifiers.shift) {
+                self.load_ab_slot(0);
+            } else {
+                self.store_ab_slot(0);
+            }
         }
         if !focused
             && command
@@ -10545,6 +10671,34 @@ impl PlayerApp {
     fn cycle_cast_mode(&mut self) {
         self.cast_protocol = cycle_cast_protocol(self.cast_protocol);
         self.notice = Some(format_cast_osd(self.cast_protocol, &self.cast_device));
+    }
+
+    fn show_active_lyric(&mut self) {
+        let now = self.shown_media_us();
+        self.notice = Some(format_lyric_osd(active_lyric_line(&self.lyric_lines, now)));
+    }
+
+    fn store_ab_slot(&mut self, index: usize) {
+        let pair = self.ab.and_then(|loop_| {
+            if loop_.b_us > loop_.a_us {
+                Some((loop_.a_us, loop_.b_us))
+            } else {
+                None
+            }
+        });
+        if let Some((a, b)) = pair {
+            ab_slot_store(&mut self.ab_slots, index, a, b);
+        }
+        self.notice = Some(format_ab_slot_osd(index, ab_slot_load(&self.ab_slots, index)));
+    }
+
+    fn load_ab_slot(&mut self, index: usize) {
+        if let Some((a, b)) = ab_slot_load(&self.ab_slots, index) {
+            self.ab = Some(AbLoop { a_us: a, b_us: b });
+            self.notice = Some(format_ab_slot_osd(index, Some((a, b))));
+        } else {
+            self.notice = Some(format_ab_slot_osd(index, None));
+        }
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {
