@@ -128,6 +128,13 @@ pub use play::{
     cycle_marquee_position, marquee_position_label, format_marquee_osd, marquee_block_top_y,
     format_title_osd, DropFrameMode, cycle_drop_frame, drop_frame_label, format_drop_frame_osd,
     should_drop_late_frame, cycle_show_osd, format_show_osd, network_cache_delay_us,
+    DisplayEffect, cycle_display_effect, display_effect_label, format_display_effect_osd,
+    apply_display_effect_pixel, prefer_track_index, CONTROLS_AUTOHIDE_DEFAULT_MS,
+    CONTROLS_AUTOHIDE_MIN_MS, CONTROLS_AUTOHIDE_MAX_MS, clamp_controls_autohide_ms,
+    controls_should_hide, format_resume_positions, parse_resume_positions, resume_seek_us,
+    HTTP_RECONNECT_DEFAULT, HTTP_RECONNECT_MAX, clamp_http_reconnect, format_http_reconnect_osd,
+    http_should_reconnect, scaletempo_duration_us, HDR_NITS_DEFAULT, HDR_NITS_MIN, HDR_NITS_MAX,
+    clamp_hdr_nits, format_hdr_nits_osd, scale_hdr_display_channel,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

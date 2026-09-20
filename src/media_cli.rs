@@ -217,6 +217,7 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             start_paused,
             network_cache_ms,
             snapshot_dir,
+            ..Default::default()
         },
     )?;
     emit_json(false, serde_json::to_string_pretty(&stats)?);

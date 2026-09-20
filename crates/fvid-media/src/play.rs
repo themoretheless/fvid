@@ -907,6 +907,188 @@ pub fn format_show_osd(show: bool) -> &'static str {
     }
 }
 
+/// VLC-style video color effects for play display.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum DisplayEffect {
+    #[default]
+    Off,
+    Invert,
+    Sepia,
+    Grayscale,
+}
+
+pub fn cycle_display_effect(effect: DisplayEffect) -> DisplayEffect {
+    match effect {
+        DisplayEffect::Off => DisplayEffect::Invert,
+        DisplayEffect::Invert => DisplayEffect::Sepia,
+        DisplayEffect::Sepia => DisplayEffect::Grayscale,
+        DisplayEffect::Grayscale => DisplayEffect::Off,
+    }
+}
+
+pub fn display_effect_label(effect: DisplayEffect) -> &'static str {
+    match effect {
+        DisplayEffect::Off => "off",
+        DisplayEffect::Invert => "invert",
+        DisplayEffect::Sepia => "sepia",
+        DisplayEffect::Grayscale => "grayscale",
+    }
+}
+
+pub fn format_display_effect_osd(effect: DisplayEffect) -> String {
+    format!("Effect {}", display_effect_label(effect))
+}
+
+pub fn apply_display_effect_pixel(red: u8, green: u8, blue: u8, effect: DisplayEffect) -> (u8, u8, u8) {
+    match effect {
+        DisplayEffect::Off => (red, green, blue),
+        DisplayEffect::Invert => (255 - red, 255 - green, 255 - blue),
+        DisplayEffect::Grayscale => {
+            let y = ((u16::from(red) * 77 + u16::from(green) * 150 + u16::from(blue) * 29) / 256) as u8;
+            (y, y, y)
+        }
+        DisplayEffect::Sepia => {
+            let r = ((u32::from(red) * 393 + u32::from(green) * 769 + u32::from(blue) * 189) / 1000)
+                .min(255) as u8;
+            let g = ((u32::from(red) * 349 + u32::from(green) * 686 + u32::from(blue) * 168) / 1000)
+                .min(255) as u8;
+            let b = ((u32::from(red) * 272 + u32::from(green) * 534 + u32::from(blue) * 131) / 1000)
+                .min(255) as u8;
+            (r, g, b)
+        }
+    }
+}
+
+/// Pick the first track whose language tag matches `prefer` (case-insensitive prefix).
+pub fn prefer_track_index(languages: &[&str], prefer: &str, current: usize) -> usize {
+    let prefer = prefer.trim();
+    if prefer.is_empty() || languages.is_empty() {
+        return current.min(languages.len().saturating_sub(1));
+    }
+    let needle = prefer.to_ascii_lowercase();
+    languages
+        .iter()
+        .enumerate()
+        .find(|(_, lang)| {
+            let lang = lang.trim().to_ascii_lowercase();
+            !lang.is_empty() && (lang.starts_with(&needle) || needle.starts_with(&lang))
+        })
+        .map(|(i, _)| i)
+        .unwrap_or_else(|| current.min(languages.len().saturating_sub(1)))
+}
+
+/// Autohide playback controls after idle (VLC qt-fs-controller-autohide).
+pub const CONTROLS_AUTOHIDE_DEFAULT_MS: u64 = 3_000;
+pub const CONTROLS_AUTOHIDE_MIN_MS: u64 = 500;
+pub const CONTROLS_AUTOHIDE_MAX_MS: u64 = 60_000;
+
+pub fn clamp_controls_autohide_ms(ms: u64) -> u64 {
+    ms.clamp(CONTROLS_AUTOHIDE_MIN_MS, CONTROLS_AUTOHIDE_MAX_MS)
+}
+
+pub fn controls_should_hide(idle_ms: u64, timeout_ms: u64, fullscreen: bool) -> bool {
+    fullscreen && idle_ms >= clamp_controls_autohide_ms(timeout_ms)
+}
+
+/// Persist resume positions as `path=media_us` lines (VLC media-library style).
+pub fn format_resume_positions(entries: &[(String, i64)]) -> String {
+    let mut out = String::from("#EXTFVID-RESUME\n");
+    for (path, us) in entries {
+        if path.trim().is_empty() || *us < 0 {
+            continue;
+        }
+        out.push_str(path.trim());
+        out.push('=');
+        out.push_str(&us.to_string());
+        out.push('\n');
+    }
+    out
+}
+
+pub fn parse_resume_positions(text: &str) -> Vec<(String, i64)> {
+    let mut out = Vec::new();
+    for line in text.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        let Some((path, us)) = line.rsplit_once('=') else {
+            continue;
+        };
+        let Ok(us) = us.trim().parse::<i64>() else {
+            continue;
+        };
+        if us < 0 || path.trim().is_empty() {
+            continue;
+        }
+        out.push((path.trim().to_string(), us));
+    }
+    out
+}
+
+pub fn resume_seek_us(entries: &[(String, i64)], path: &str) -> Option<i64> {
+    let path = path.trim();
+    entries
+        .iter()
+        .rev()
+        .find(|(p, _)| p == path)
+        .map(|(_, us)| *us)
+}
+
+/// HTTP/network reconnect attempts (VLC `--http-reconnect` style budget).
+pub const HTTP_RECONNECT_DEFAULT: u32 = 3;
+pub const HTTP_RECONNECT_MAX: u32 = 100;
+
+pub fn clamp_http_reconnect(attempts: u32) -> u32 {
+    attempts.min(HTTP_RECONNECT_MAX)
+}
+
+pub fn format_http_reconnect_osd(attempts: u32) -> String {
+    let n = clamp_http_reconnect(attempts);
+    if n == 0 {
+        "HTTP reconnect off".into()
+    } else {
+        format!("HTTP reconnect {n}")
+    }
+}
+
+/// Whether another reconnect is allowed after `failures` failures.
+pub fn http_should_reconnect(failures: u32, max_attempts: u32) -> bool {
+    let max = clamp_http_reconnect(max_attempts);
+    max > 0 && failures < max
+}
+
+/// Scaletempo-style tempo without pitch change: output duration scale for rate.
+pub fn scaletempo_duration_us(input_us: i64, rate_milli: u32) -> i64 {
+    let rate = clamp_rate_milli(rate_milli as f32 / 1_000.0).max(1);
+    input_us
+        .saturating_mul(1_000)
+        .saturating_div(i64::from(rate))
+}
+
+/// Display peak luminance for HDR tonemap (nits). Used to scale Hable/Reinhard output.
+pub const HDR_NITS_DEFAULT: u32 = 100;
+pub const HDR_NITS_MIN: u32 = 50;
+pub const HDR_NITS_MAX: u32 = 10_000;
+
+pub fn clamp_hdr_nits(nits: u32) -> u32 {
+    nits.clamp(HDR_NITS_MIN, HDR_NITS_MAX)
+}
+
+pub fn format_hdr_nits_osd(nits: u32) -> String {
+    format!("HDR peak {} nits", clamp_hdr_nits(nits))
+}
+
+/// Scale an SDR channel after tonemap toward a brighter display peak (>100 nits).
+pub fn scale_hdr_display_channel(value: u8, nits: u32) -> u8 {
+    let nits = clamp_hdr_nits(nits);
+    if nits <= HDR_NITS_DEFAULT {
+        return value;
+    }
+    let gain = (nits as f32 / HDR_NITS_DEFAULT as f32).min(4.0);
+    ((f32::from(value) * gain).round() as u32).min(255) as u8
+}
+
 pub fn cycle_eq_bypass(bypassed: bool) -> bool {
     !bypassed
 }
@@ -1303,6 +1485,10 @@ pub struct PlayRenderOptions {
     pub hdr_tonemap: HdrTonemap,
     /// Stream `color_trc` used when expanding PQ/HLG before display tonemap.
     pub color_trc: u32,
+    /// Post-process color effect (invert/sepia/grayscale).
+    pub display_effect: DisplayEffect,
+    /// Display peak luminance in nits for HDR output scaling.
+    pub hdr_nits: u32,
 }
 
 impl Default for PlayRenderOptions {
@@ -1325,6 +1511,8 @@ impl Default for PlayRenderOptions {
             fov_deg_milli: FOV_DEFAULT_MILLI,
             hdr_tonemap: HdrTonemap::Off,
             color_trc: 0,
+            display_effect: DisplayEffect::Off,
+            hdr_nits: HDR_NITS_DEFAULT,
         }
     }
 }
@@ -1693,6 +1881,17 @@ pub fn render_play_pixels(
             let (red, green, blue) = apply_gamma_pixel(red, green, blue, opts.gamma_milli);
             let (red, green, blue) =
                 apply_hdr_tonemap_pixel(red, green, blue, opts.hdr_tonemap, opts.color_trc);
+            let (red, green, blue) = if matches!(opts.hdr_tonemap, HdrTonemap::Off) {
+                (red, green, blue)
+            } else {
+                (
+                    scale_hdr_display_channel(red, opts.hdr_nits),
+                    scale_hdr_display_channel(green, opts.hdr_nits),
+                    scale_hdr_display_channel(blue, opts.hdr_nits),
+                )
+            };
+            let (red, green, blue) =
+                apply_display_effect_pixel(red, green, blue, opts.display_effect);
             let (dx, dy) = rotate_pixel(x as u32, y as u32, width, height, opts.rotate);
             out[dy as usize * out_w as usize + dx as usize] =
                 (u32::from(red) << 16) | (u32::from(green) << 8) | u32::from(blue);
@@ -1937,6 +2136,18 @@ pub struct PlayOptions {
     pub network_cache_ms: u32,
     /// Directory for snapshots (VLC `--snapshot-path`). `None` = beside media.
     pub snapshot_dir: Option<PathBuf>,
+    /// HTTP reconnect attempt budget.
+    pub http_reconnect: u32,
+    /// Preferred audio language tag (e.g. `en`, `ru`).
+    pub prefer_audio_lang: Option<String>,
+    /// Preferred subtitle language tag.
+    pub prefer_sub_lang: Option<String>,
+    /// Fullscreen controls autohide timeout in ms.
+    pub controls_autohide_ms: u64,
+    /// Initial display color effect.
+    pub display_effect: DisplayEffect,
+    /// HDR display peak nits for tonemap output scaling.
+    pub hdr_nits: u32,
 }
 
 impl Default for PlayOptions {
@@ -1964,6 +2175,12 @@ impl Default for PlayOptions {
             start_paused: false,
             network_cache_ms: NETWORK_CACHE_DEFAULT_MS,
             snapshot_dir: None,
+            http_reconnect: HTTP_RECONNECT_DEFAULT,
+            prefer_audio_lang: None,
+            prefer_sub_lang: None,
+            controls_autohide_ms: CONTROLS_AUTOHIDE_DEFAULT_MS,
+            display_effect: DisplayEffect::Off,
+            hdr_nits: HDR_NITS_DEFAULT,
         }
     }
 }
@@ -5101,6 +5318,11 @@ struct PlayerApp {
     marquee_text: String,
     marquee_position: MarqueePosition,
     drop_frame: DropFrameMode,
+    display_effect: DisplayEffect,
+    hdr_nits: u32,
+    controls_autohide_ms: u64,
+    http_reconnect: u32,
+    http_failures: u32,
     rotate: RotateMode,
     eq_gains_milli: [i32; EQ_BAND_COUNT],
     eq_preset: EqPreset,
@@ -5141,6 +5363,10 @@ impl PlayerApp {
         let stereo3d = options.stereo3d;
         let snapshot_dir = options.snapshot_dir.clone();
         let network_cache_ms = clamp_network_cache_ms(options.network_cache_ms);
+        let display_effect = options.display_effect;
+        let hdr_nits = clamp_hdr_nits(options.hdr_nits);
+        let controls_autohide_ms = clamp_controls_autohide_ms(options.controls_autohide_ms);
+        let http_reconnect = clamp_http_reconnect(options.http_reconnect);
         let mut app = Self {
             options,
             playlist,
@@ -5218,6 +5444,11 @@ impl PlayerApp {
             marquee_text: String::new(),
             marquee_position: MarqueePosition::Top,
             drop_frame: DropFrameMode::Late,
+            display_effect,
+            hdr_nits,
+            controls_autohide_ms,
+            http_reconnect,
+            http_failures: 0,
             rotate: RotateMode::Deg0,
             eq_gains_milli: eq_unity_gains(),
             eq_preset: EqPreset::Flat,
@@ -5845,7 +6076,9 @@ impl PlayerApp {
         }
         if keys.19 {
             if command {
-                self.cycle_hdr_mode();
+                if !ctx.input(|input| input.modifiers.shift) {
+                    self.cycle_hdr_mode();
+                }
             } else {
                 self.nudge_subtitle_delay(1);
             }
@@ -5997,6 +6230,24 @@ impl PlayerApp {
                 self.marquee_position,
             ));
         }
+        if !focused && command && ctx.input(|input| input.key_pressed(egui::Key::E)) {
+            self.display_effect = cycle_display_effect(self.display_effect);
+            self.adjust_dirty = true;
+            self.notice = Some(format_display_effect_osd(self.display_effect));
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::H))
+        {
+            self.hdr_nits = match self.hdr_nits {
+                0..=99 => 100,
+                100..=199 => 400,
+                200..=999 => 1_000,
+                _ => 100,
+            };
+            self.adjust_dirty = true;
+            self.notice = Some(format_hdr_nits_osd(self.hdr_nits));
+        }
         if !focused
             && command
             && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::J))
@@ -6044,7 +6295,10 @@ impl PlayerApp {
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::X)) {
             self.cycle_sleep_timer();
         }
-        if !focused && ctx.input(|input| input.key_pressed(egui::Key::E)) {
+        if !focused
+            && !command
+            && ctx.input(|input| input.key_pressed(egui::Key::E))
+        {
             self.toggle_eq_bypass();
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::Y)) {
@@ -6152,6 +6406,8 @@ impl PlayerApp {
             self.fov_deg_milli,
             self.hdr_tonemap,
             frame.color_trc,
+            self.display_effect,
+            self.hdr_nits,
             bitmap.as_ref(),
         );
         session.dirty = false;
@@ -7539,6 +7795,8 @@ impl PlayerApp {
                 fov_deg_milli: self.fov_deg_milli,
                 hdr_tonemap: self.hdr_tonemap,
                 color_trc: frame.color_trc,
+                display_effect: self.display_effect,
+                hdr_nits: self.hdr_nits,
             };
             let (width, height, pixels) =
                 render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap.as_ref());
@@ -8027,7 +8285,12 @@ impl eframe::App for PlayerApp {
 
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         let ctx = ui.ctx().clone();
-        egui::Panel::bottom("controls").show(ui, |ui| self.controls(ui));
+        let idle = self.mouse_moved_at.elapsed().as_millis() as u64;
+        let hide_controls =
+            controls_should_hide(idle, self.controls_autohide_ms, self.fullscreen);
+        if !hide_controls {
+            egui::Panel::bottom("controls").show(ui, |ui| self.controls(ui));
+        }
         egui::CentralPanel::default()
             .frame(egui::Frame::NONE)
             .show(ui, |ui| self.show_video(ui));
@@ -8054,6 +8317,8 @@ fn color_image(
     fov_deg_milli: i32,
     hdr_tonemap: HdrTonemap,
     color_trc: u32,
+    display_effect: DisplayEffect,
+    hdr_nits: u32,
     bitmap: Option<&BitmapSubtitle>,
 ) -> egui::ColorImage {
     let opts = PlayRenderOptions {
@@ -8074,6 +8339,8 @@ fn color_image(
         fov_deg_milli,
         hdr_tonemap,
         color_trc,
+        display_effect,
+        hdr_nits,
     };
     let (out_w, out_h, rgb) =
         render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap);

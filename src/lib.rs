@@ -1434,5 +1434,58 @@ mod play_controls {
             fvid_media::network_cache_delay_us(120_000),
             i64::from(fvid_media::NETWORK_CACHE_MAX_MS) * 1_000
         );
+        assert_eq!(
+            fvid_media::apply_display_effect_pixel(10, 20, 30, fvid_media::DisplayEffect::Invert),
+            (245, 235, 225)
+        );
+        let (sr, sg, sb) =
+            fvid_media::apply_display_effect_pixel(200, 100, 50, fvid_media::DisplayEffect::Sepia);
+        assert!(sr >= sg && sg >= sb);
+        assert_eq!(
+            fvid_media::apply_display_effect_pixel(10, 20, 30, fvid_media::DisplayEffect::Grayscale)
+                .0,
+            fvid_media::apply_display_effect_pixel(10, 20, 30, fvid_media::DisplayEffect::Grayscale)
+                .1
+        );
+        assert_eq!(
+            fvid_media::prefer_track_index(&["eng", "rus", "jpn"], "ru", 0),
+            1
+        );
+        assert_eq!(
+            fvid_media::prefer_track_index(&["eng", "rus"], "de", 0),
+            0
+        );
+        assert!(fvid_media::controls_should_hide(
+            4_000,
+            fvid_media::CONTROLS_AUTOHIDE_DEFAULT_MS,
+            true
+        ));
+        assert!(!fvid_media::controls_should_hide(4_000, 3_000, false));
+        let resume = fvid_media::format_resume_positions(&[
+            ("a.mp4".into(), 1_500_000),
+            ("b.mkv".into(), 2_000_000),
+        ]);
+        let parsed = fvid_media::parse_resume_positions(&resume);
+        assert_eq!(parsed.len(), 2);
+        assert_eq!(fvid_media::resume_seek_us(&parsed, "a.mp4"), Some(1_500_000));
+        assert!(fvid_media::http_should_reconnect(0, 3));
+        assert!(!fvid_media::http_should_reconnect(3, 3));
+        assert_eq!(fvid_media::scaletempo_duration_us(1_000_000, 2_000), 500_000);
+        assert_eq!(fvid_media::scale_hdr_display_channel(100, 100), 100);
+        assert!(fvid_media::scale_hdr_display_channel(100, 400) > 100);
+        let mut hdr_opts = fvid_media::PlayRenderOptions::default();
+        hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
+        hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;
+        hdr_opts.hdr_nits = 400;
+        hdr_opts.display_effect = fvid_media::DisplayEffect::Off;
+        let gray = vec![0x00_80_80_80u32; 4];
+        let base = fvid_media::render_play_pixels(2, 2, &gray, &fvid_media::PlayRenderOptions {
+            hdr_tonemap: fvid_media::HdrTonemap::Hable,
+            color_trc: fvid_media::COLOR_TRC_SMPTE2084,
+            hdr_nits: 100,
+            ..fvid_media::PlayRenderOptions::default()
+        }, None);
+        let bright = fvid_media::render_play_pixels(2, 2, &gray, &hdr_opts, None);
+        assert_ne!(base.2[0], bright.2[0]);
     }
 }
