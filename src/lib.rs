@@ -1174,5 +1174,11 @@ mod play_controls {
         assert!((mono[0] - mono[1]).abs() < 0.01);
         assert_eq!(fvid_media::width_step_milli(1_000, 100), 1_100);
         assert!(fvid_media::format_width_osd(1_500).contains("1.50"));
+        assert!((fvid_media::compress_sample(0.2, 0.35, 4.0) - 0.2).abs() < 0.001);
+        assert!(fvid_media::compress_sample(0.9, 0.35, 4.0).abs() < 0.9);
+        let mut loud = [0.9f32, -0.9];
+        fvid_media::apply_compressor(&mut loud, true, 0.35, 4.0);
+        assert!(loud[0].abs() < 0.9);
+        assert_eq!(fvid_media::format_compressor_osd(true), "Compressor on");
     }
 }

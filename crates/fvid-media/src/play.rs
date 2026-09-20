@@ -563,6 +563,38 @@ pub fn format_width_osd(width_milli: i32) -> String {
     }
 }
 
+/// Simple peak compressor: threshold 0..=1, ratio ≥1 (1 = bypass).
+pub fn compress_sample(sample: f32, threshold: f32, ratio: f32) -> f32 {
+    let threshold = threshold.clamp(0.05, 1.0);
+    let ratio = ratio.max(1.0);
+    if ratio <= 1.0 {
+        return sample;
+    }
+    let abs = sample.abs();
+    if abs <= threshold {
+        return sample;
+    }
+    let compressed = threshold + (abs - threshold) / ratio;
+    sample.signum() * compressed
+}
+
+pub fn apply_compressor(frame: &mut [f32], enabled: bool, threshold: f32, ratio: f32) {
+    if !enabled {
+        return;
+    }
+    for sample in frame.iter_mut() {
+        *sample = compress_sample(*sample, threshold, ratio);
+    }
+}
+
+pub fn format_compressor_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Compressor on"
+    } else {
+        "Compressor off"
+    }
+}
+
 /// Clamp subtitle bottom margin in pixels (`0..=400`). Higher lifts text toward the top.
 pub fn clamp_subtitle_margin(px: i32) -> i32 {
     px.clamp(0, 400)
@@ -2082,6 +2114,8 @@ struct Shared {
         balance_milli: AtomicI32,
         /// Stereo width. 1000 is normal, 0 mono, 2000 double-wide.
         width_milli: AtomicI32,
+        /// VLC-style peak compressor before balance/width.
+        compressor_on: AtomicBool,
         /// When true, graphic EQ is skipped in the audio path.
         eq_bypass: AtomicBool,
         /// VLC-style volume normalizer (peak follower + makeup gain).
@@ -2928,6 +2962,9 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
         );
         for channel in 0..channels {
             frame_buf[channel] = apply_eq(frame_buf[channel], channel, &mut tone);
+        }
+        if shared.compressor_on.load(Ordering::Relaxed) {
+            apply_compressor(&mut frame_buf, true, 0.35, 4.0);
         }
         apply_audio_balance(&mut frame_buf, balance_milli);
         let width_milli = shared.width_milli.load(Ordering::Relaxed);
@@ -4007,6 +4044,7 @@ struct PlayerApp {
     audio_channel: AudioChannelMode,
     balance_milli: i32,
     width_milli: i32,
+    compressor_on: bool,
     eq_bypass: bool,
     volume_normalizer: bool,
     bass_milli: i32,
@@ -4090,6 +4128,7 @@ impl PlayerApp {
             audio_channel: AudioChannelMode::Stereo,
             balance_milli: BALANCE_CENTER_MILLI,
             width_milli: WIDTH_UNITY_MILLI,
+            compressor_on: false,
             eq_bypass: false,
             volume_normalizer: false,
             bass_milli: TONE_UNITY_MILLI,
@@ -4107,7 +4146,7 @@ impl PlayerApp {
             app.error = Some(err);
         }
         eprintln!(
-            "fvid play: Space pause, left/right seek, up/down volume, M mute, B audio, V subtitles, L A-B loop, R repeat, G/H subtitle delay, J/K audio delay, A aspect, C crop, Z zoom, Ctrl+B bookmark, Ctrl+R shuffle, T on-top, Shift+T time, Ctrl+N vol normalizer, W stereo width, F fullscreen, [ ] speed, . step, S snapshot, Esc quit"
+            "fvid play: Space pause, left/right seek, up/down volume, M mute, B audio, V subtitles, L A-B loop, R repeat, G/H subtitle delay, J/K audio delay, A aspect, C crop, Z zoom, Ctrl+B bookmark, Ctrl+R shuffle, T on-top, Shift+T time, Ctrl+N vol normalizer, W stereo width, U compressor, F fullscreen, [ ] speed, . step, S snapshot, Esc quit"
         );
         app
     }
@@ -4193,6 +4232,7 @@ impl PlayerApp {
             }),
             balance_milli: AtomicI32::new(self.balance_milli),
             width_milli: AtomicI32::new(self.width_milli),
+            compressor_on: AtomicBool::new(self.compressor_on),
             eq_bypass: AtomicBool::new(self.eq_bypass),
             normalizer_on: AtomicBool::new(self.volume_normalizer),
             normalizer_peak_milli: AtomicU32::new(0),
@@ -4707,6 +4747,9 @@ impl PlayerApp {
             } else {
                 -WIDTH_STEP_MILLI
             });
+        }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::U)) {
+            self.toggle_compressor();
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::E)) {
             self.toggle_eq_bypass();
@@ -5601,6 +5644,19 @@ impl PlayerApp {
                 .store(self.width_milli, Ordering::Relaxed);
         }
         self.notice = Some(format_width_osd(self.width_milli));
+    }
+
+    fn toggle_compressor(&mut self) {
+        self.compressor_on = !self.compressor_on;
+        if let Some(session) = &self.session {
+            session
+                .shared
+                .compressor_on
+                .store(self.compressor_on, Ordering::Relaxed);
+        }
+        let notice = format_compressor_osd(self.compressor_on);
+        eprintln!("fvid play: {notice}");
+        self.notice = Some(notice.into());
     }
 
     fn toggle_eq_bypass(&mut self) {
