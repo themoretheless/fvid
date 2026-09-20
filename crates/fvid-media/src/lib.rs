@@ -224,7 +224,12 @@ pub use play::{
     eac_face_uv_from_dir, format_eac_face_osd, apply_hdr_black_lift_channel, format_hdr_black_lift_osd,
     apply_unsharp_pixel, format_unsharp_osd, format_icecast_metadata_osd, MediaKeyAction,
     media_key_label, format_media_key_osd, parse_m3u_extinf_title, thumbnail_grid_rect,
-    format_thumbnail_grid_osd, format_clipboard_snapshot_osd,
+    format_thumbnail_grid_osd, format_clipboard_snapshot_osd, timeshift_lag_us, format_live_edge_osd,
+    instant_replay_us, format_instant_replay_osd, phase_correlation_milli, format_phase_correlation_osd,
+    true_peak_milli, format_true_peak_osd, format_atmos_layout_osd, format_content_rating_osd,
+    ass_override_margin_px, format_ass_override_osd, network_bandwidth_bps, format_network_bandwidth_osd,
+    multi_room_sync_target_us, format_watch_party_osd, hdr_sdr_ratio_milli, format_hdr_sdr_ratio_osd,
+    accelerometer_horizon_pitch_milli, format_auto_horizon_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

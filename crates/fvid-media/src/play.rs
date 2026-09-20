@@ -4307,6 +4307,163 @@ pub fn format_clipboard_snapshot_osd(enabled: bool) -> &'static str {
     }
 }
 
+/// Live-edge lag / timeshift delay for DVR and HLS live windows.
+pub fn timeshift_lag_us(live_edge_us: i64, playhead_us: i64) -> i64 {
+    live_edge_us.saturating_sub(playhead_us).max(0)
+}
+
+pub fn format_live_edge_osd(lag_us: i64) -> String {
+    if lag_us <= 0 {
+        "Live".into()
+    } else {
+        format!("Timeshift −{}", format_play_clock(lag_us))
+    }
+}
+
+/// Instant replay seek target (jump back by window, clamped to 0).
+pub fn instant_replay_us(playhead_us: i64, window_us: i64) -> i64 {
+    playhead_us.saturating_sub(window_us.max(0)).max(0)
+}
+
+pub fn format_instant_replay_osd(window_us: i64) -> String {
+    format!("Replay −{}", format_play_clock(window_us.max(0)))
+}
+
+/// Stereo phase correlation (−1000..+1000; +1000 = identical L/R).
+pub fn phase_correlation_milli(left: &[f32], right: &[f32]) -> i32 {
+    let n = left.len().min(right.len());
+    if n == 0 {
+        return 0;
+    }
+    let mut dot = 0.0f64;
+    let mut el = 0.0f64;
+    let mut er = 0.0f64;
+    for i in 0..n {
+        let l = f64::from(left[i]);
+        let r = f64::from(right[i]);
+        dot += l * r;
+        el += l * l;
+        er += r * r;
+    }
+    let denom = (el * er).sqrt();
+    if denom < 1e-12 {
+        return 0;
+    }
+    ((dot / denom) * 1_000.0).round().clamp(-1_000.0, 1_000.0) as i32
+}
+
+pub fn format_phase_correlation_osd(corr_milli: i32) -> String {
+    format!("Phase {:.2}", corr_milli.clamp(-1_000, 1_000) as f32 / 1_000.0)
+}
+
+/// True-peak estimate from interleaved PCM (milli, 1000 = 0 dBFS).
+pub fn true_peak_milli(samples: &[f32]) -> u32 {
+    let mut peak = 0.0f32;
+    for &s in samples {
+        peak = peak.max(s.abs());
+    }
+    (peak * 1_000.0).round().clamp(0.0, 4_000.0) as u32
+}
+
+pub fn format_true_peak_osd(peak_milli: u32) -> String {
+    if peak_milli == 0 {
+        "True peak −∞".into()
+    } else {
+        let db = 20.0 * (peak_milli as f32 / 1_000.0).log10();
+        format!("True peak {db:.1} dBTP")
+    }
+}
+
+/// Dolby Atmos bed/object presence OSD (oracle; full Atmos decode OOS).
+pub fn format_atmos_layout_osd(bed_channels: u32, objects: u32) -> String {
+    if bed_channels == 0 && objects == 0 {
+        "Atmos Off".into()
+    } else {
+        format!("Atmos bed {bed_channels} + {objects} objects")
+    }
+}
+
+/// Content / parental rating label.
+pub fn format_content_rating_osd(rating: Option<&str>) -> String {
+    match rating.map(str::trim).filter(|s| !s.is_empty()) {
+        Some(r) => format!("Rating {r}"),
+        None => "Rating none".into(),
+    }
+}
+
+/// ASS/SSA forced margin override (VLC freetype).
+pub fn ass_override_margin_px(base_px: i32, override_px: Option<i32>) -> i32 {
+    override_px.unwrap_or(base_px).clamp(0, 4_000)
+}
+
+pub fn format_ass_override_osd(override_px: Option<i32>) -> String {
+    match override_px {
+        Some(px) => format!("ASS margin {px}px"),
+        None => "ASS margin default".into(),
+    }
+}
+
+/// Estimate stream bitrate from bytes over a window.
+pub fn network_bandwidth_bps(bytes: u64, window_ms: u64) -> u64 {
+    if window_ms == 0 {
+        return 0;
+    }
+    bytes.saturating_mul(8_000) / window_ms
+}
+
+pub fn format_network_bandwidth_osd(bps: u64) -> String {
+    if bps >= 1_000_000 {
+        format!("Net {:.1} Mbps", bps as f64 / 1_000_000.0)
+    } else {
+        format!("Net {} kbps", bps / 1_000)
+    }
+}
+
+/// Multi-room / watch-party clock offset compensation.
+pub fn multi_room_sync_target_us(local_us: i64, peer_us: i64, offset_us: i64) -> i64 {
+    let peer = peer_us.saturating_add(offset_us);
+    // Nudge local halfway toward peer for gentle lock.
+    local_us + (peer - local_us) / 2
+}
+
+pub fn format_watch_party_osd(enabled: bool, offset_us: i64) -> String {
+    if !enabled {
+        "Watch party Off".into()
+    } else {
+        let sign = if offset_us < 0 { "-" } else { "+" };
+        format!(
+            "Watch party sync {sign}{}",
+            format_play_clock(offset_us.abs())
+        )
+    }
+}
+
+/// HDR vs SDR display ratio hint (content peak / display peak).
+pub fn hdr_sdr_ratio_milli(content_nits: u32, display_nits: u32) -> u32 {
+    let c = clamp_hdr_nits(content_nits).max(1);
+    let d = clamp_hdr_nits(display_nits).max(1);
+    ((c as u64 * 1_000) / d as u64).min(100_000) as u32
+}
+
+pub fn format_hdr_sdr_ratio_osd(ratio_milli: u32) -> String {
+    format!("HDR/SDR ×{:.2}", ratio_milli as f32 / 1_000.0)
+}
+
+/// Auto-horizon from accelerometer pitch (milli-g on device Y).
+pub fn accelerometer_horizon_pitch_milli(accel_y_milli_g: i32) -> i32 {
+    let y = (accel_y_milli_g.clamp(-1_000, 1_000) as f32) / 1_000.0;
+    let pitch_deg = y.clamp(-1.0, 1.0).asin().to_degrees();
+    clamp_pitch_milli((pitch_deg * 1_000.0).round() as i32)
+}
+
+pub fn format_auto_horizon_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Auto horizon On"
+    } else {
+        "Auto horizon Off"
+    }
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -8747,6 +8904,9 @@ struct PlayerApp {
     hdr_black_lift_milli: i32,
     unsharp_milli: i32,
     clipboard_snapshot: bool,
+    watch_party: bool,
+    watch_party_offset_us: i64,
+    auto_horizon: bool,
     seek_jump: SeekJump,
     surround_downmix: bool,
     scaletempo: bool,
@@ -8969,6 +9129,9 @@ impl PlayerApp {
             hdr_black_lift_milli: 0,
             unsharp_milli: 0,
             clipboard_snapshot: false,
+            watch_party: false,
+            watch_party_offset_us: 0,
+            auto_horizon: false,
             seek_jump: SeekJump::default(),
             surround_downmix: false,
             scaletempo: true,
@@ -10382,6 +10545,46 @@ impl PlayerApp {
             })
         {
             self.show_eac_face();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::W)
+            })
+        {
+            self.toggle_watch_party();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::Y)
+            })
+        {
+            self.toggle_auto_horizon();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::I)
+            })
+        {
+            self.show_live_edge();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::R)
+            })
+        {
+            self.do_instant_replay();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::Num7)
+            })
+        {
+            self.show_hdr_sdr_ratio();
         }
         if !focused
             && command
@@ -12317,6 +12520,60 @@ impl PlayerApp {
         let z = yaw.sin() * pitch.cos();
         let (face, _, _) = eac_face_uv_from_dir(x, y, z);
         self.notice = Some(format_eac_face_osd(face));
+    }
+
+    fn toggle_watch_party(&mut self) {
+        self.watch_party = !self.watch_party;
+        self.notice = Some(format_watch_party_osd(
+            self.watch_party,
+            self.watch_party_offset_us,
+        ));
+    }
+
+    fn toggle_auto_horizon(&mut self) {
+        self.auto_horizon = !self.auto_horizon;
+        self.notice = Some(format_auto_horizon_osd(self.auto_horizon).into());
+    }
+
+    fn show_live_edge(&mut self) {
+        let playhead = self
+            .session
+            .as_ref()
+            .map(|s| s.shared.watch_us.load(Ordering::Relaxed))
+            .unwrap_or(0);
+        let duration = self
+            .session
+            .as_ref()
+            .map(|s| s.shared.duration_us.load(Ordering::Relaxed))
+            .unwrap_or(0);
+        let lag = timeshift_lag_us(duration, playhead);
+        self.notice = Some(format_live_edge_osd(lag));
+    }
+
+    fn do_instant_replay(&mut self) {
+        let window = 10_000_000i64;
+        let playhead = self
+            .session
+            .as_ref()
+            .map(|s| s.shared.watch_us.load(Ordering::Relaxed))
+            .unwrap_or(0);
+        let target = instant_replay_us(playhead, window);
+        if let Some(session) = &self.session {
+            session.shared.seek_us.store(target, Ordering::Release);
+        }
+        self.notice = Some(format_instant_replay_osd(window));
+    }
+
+    fn show_hdr_sdr_ratio(&mut self) {
+        let content = if self.hdr_mastering_max_nits > 0 {
+            self.hdr_mastering_max_nits
+        } else if self.hdr_maxcll > 0 {
+            self.hdr_maxcll
+        } else {
+            self.hdr_nits
+        };
+        let ratio = hdr_sdr_ratio_milli(content, self.display_peak_nits);
+        self.notice = Some(format_hdr_sdr_ratio_osd(ratio));
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {

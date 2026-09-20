@@ -1879,6 +1879,22 @@ mod play_controls {
             "Next"
         );
         assert!(fvid_media::format_icecast_metadata_osd(Some("A"), Some("T")).contains('—'));
+        assert_eq!(fvid_media::timeshift_lag_us(100, 40), 60);
+        assert_eq!(fvid_media::instant_replay_us(50_000_000, 10_000_000), 40_000_000);
+        assert_eq!(
+            fvid_media::phase_correlation_milli(&[1.0, 0.5], &[1.0, 0.5]),
+            1_000
+        );
+        assert_eq!(fvid_media::true_peak_milli(&[0.5, -0.25]), 500);
+        assert!(fvid_media::format_atmos_layout_osd(7, 16).contains("objects"));
+        assert_eq!(fvid_media::ass_override_margin_px(40, Some(80)), 80);
+        assert_eq!(fvid_media::network_bandwidth_bps(1_250_000, 1_000), 10_000_000);
+        assert_eq!(
+            fvid_media::multi_room_sync_target_us(100, 200, 0),
+            150
+        );
+        assert_eq!(fvid_media::hdr_sdr_ratio_milli(1_000, 100), 10_000);
+        assert_eq!(fvid_media::accelerometer_horizon_pitch_milli(0), 0);
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
