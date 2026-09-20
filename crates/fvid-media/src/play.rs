@@ -2360,6 +2360,10 @@ pub enum SphericalProjection {
     Mercator,
     /// Dual fisheye top-bottom layout.
     DualFisheyeTb,
+    /// Octahedral environment map.
+    Octahedral,
+    /// Equisolid fisheye viewport over equirect.
+    Equisolid,
 }
 
 pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProjection {
@@ -2372,7 +2376,9 @@ pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProject
         SphericalProjection::Panini => SphericalProjection::Cylindrical,
         SphericalProjection::Cylindrical => SphericalProjection::Mercator,
         SphericalProjection::Mercator => SphericalProjection::DualFisheyeTb,
-        SphericalProjection::DualFisheyeTb => SphericalProjection::Equirect,
+        SphericalProjection::DualFisheyeTb => SphericalProjection::Octahedral,
+        SphericalProjection::Octahedral => SphericalProjection::Equisolid,
+        SphericalProjection::Equisolid => SphericalProjection::Equirect,
     }
 }
 
@@ -2387,6 +2393,8 @@ pub fn spherical_projection_label(mode: SphericalProjection) -> &'static str {
         SphericalProjection::Cylindrical => "Cylindrical",
         SphericalProjection::Mercator => "Mercator",
         SphericalProjection::DualFisheyeTb => "Dual fisheye TB",
+        SphericalProjection::Octahedral => "Octahedral",
+        SphericalProjection::Equisolid => "Equisolid",
     }
 }
 
@@ -2650,8 +2658,158 @@ pub fn project_spherical_view(
                 roll_deg_milli,
                 fov_deg_milli,
             )
-        },
+        }
+        SphericalProjection::Octahedral => project_octahedral_view(
+            src_w,
+            src_h,
+            src,
+            out_w,
+            out_h,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            roll_deg_milli,
+            fov_deg_milli,
+        ),
+        SphericalProjection::Equisolid => project_equisolid_view(
+            src_w,
+            src_h,
+            src,
+            out_w,
+            out_h,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            roll_deg_milli,
+            fov_deg_milli,
+        ),
     }
+}
+
+/// Sample octahedral environment map.
+pub fn sample_octahedral_pixel(
+    pixels: &[u32],
+    width: u32,
+    height: u32,
+    dx: f32,
+    dy: f32,
+    dz: f32,
+) -> u32 {
+    let len = (dx.abs() + dy.abs() + dz.abs()).max(1e-6);
+    let mut x = dx / len;
+    let mut y = dy / len;
+    let z = dz / len;
+    if z < 0.0 {
+        let ox = x;
+        x = (1.0 - y.abs()) * if ox >= 0.0 { 1.0 } else { -1.0 };
+        y = (1.0 - ox.abs()) * if y >= 0.0 { 1.0 } else { -1.0 };
+    }
+    let u = x * 0.5 + 0.5;
+    let v = y * 0.5 + 0.5;
+    let px = ((u.clamp(0.0, 1.0) * (width.saturating_sub(1) as f32)).round() as u32)
+        .min(width.saturating_sub(1));
+    let py = ((v.clamp(0.0, 1.0) * (height.saturating_sub(1) as f32)).round() as u32)
+        .min(height.saturating_sub(1));
+    let idx = (py as usize) * (width as usize) + (px as usize);
+    pixels.get(idx).copied().unwrap_or(0)
+}
+
+pub fn project_octahedral_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    roll_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+    let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+    let roll = (clamp_roll_milli(roll_deg_milli) as f32 / 1_000.0).to_radians();
+    let fov = (clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0).to_radians();
+    let aspect = out_w as f32 / out_h as f32;
+    let tan_half = (fov * 0.5).tan();
+    let (sin_y, cos_y) = yaw.sin_cos();
+    let (sin_p, cos_p) = pitch.sin_cos();
+    let (sin_r, cos_r) = roll.sin_cos();
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    for oy in 0..out_h {
+        let ny0 = (1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32) * tan_half;
+        for ox in 0..out_w {
+            let nx0 = (2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0) * tan_half * aspect;
+            let nx = nx0 * cos_r - ny0 * sin_r;
+            let ny = nx0 * sin_r + ny0 * cos_r;
+            let x1 = nx;
+            let y1 = ny * cos_p - sin_p;
+            let z1 = ny * sin_p + cos_p;
+            let x2 = x1 * cos_y + z1 * sin_y;
+            let y2 = y1;
+            let z2 = -x1 * sin_y + z1 * cos_y;
+            let len = (x2 * x2 + y2 * y2 + z2 * z2).sqrt().max(1e-6);
+            out[(oy * out_w + ox) as usize] =
+                sample_octahedral_pixel(src, src_w, src_h, x2 / len, y2 / len, z2 / len);
+        }
+    }
+    out
+}
+
+/// Equisolid fisheye viewport sampling equirect.
+pub fn project_equisolid_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    roll_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+    let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+    let roll = (clamp_roll_milli(roll_deg_milli) as f32 / 1_000.0).to_radians();
+    let fov = (clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0).to_radians();
+    let aspect = out_w as f32 / out_h as f32;
+    let r_max = 2.0 * (fov * 0.5).sin().max(1e-6);
+    let (sin_r, cos_r) = roll.sin_cos();
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    for oy in 0..out_h {
+        let ny0 = 1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32;
+        for ox in 0..out_w {
+            let nx0 = (2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0) * aspect;
+            let nx = nx0 * cos_r - ny0 * sin_r;
+            let ny = nx0 * sin_r + ny0 * cos_r;
+            let r = (nx * nx + ny * ny).sqrt();
+            if r > 1.0 {
+                out[(oy * out_w + ox) as usize] = 0;
+                continue;
+            }
+            let theta = 2.0 * ((r * r_max * 0.5).clamp(0.0, 1.0)).asin();
+            let phi = ny.atan2(nx);
+            let x_cam = theta.sin() * phi.cos();
+            let y_cam = theta.sin() * phi.sin();
+            let z_cam = theta.cos();
+            // Apply yaw/pitch to camera forward
+            let (sin_p, cos_p) = pitch.sin_cos();
+            let (sin_y, cos_y) = yaw.sin_cos();
+            let y1 = y_cam * cos_p - z_cam * sin_p;
+            let z1 = y_cam * sin_p + z_cam * cos_p;
+            let x2 = x_cam * cos_y + z1 * sin_y;
+            let z2 = -x_cam * sin_y + z1 * cos_y;
+            let len = (x2 * x2 + y1 * y1 + z2 * z2).sqrt().max(1e-6);
+            let lon = (z2 / len).atan2(x2 / len);
+            let lat = (y1 / len).asin().clamp(
+                -std::f32::consts::FRAC_PI_2 + 0.01,
+                std::f32::consts::FRAC_PI_2 - 0.01,
+            );
+            out[(oy * out_w + ox) as usize] = sample_equirect_pixel(src, src_w, src_h, lon, lat);
+        }
+    }
+    out
 }
 
 /// Panini wide-FOV projection from equirect (d_milli = 1000 → classic d=1).
@@ -5430,6 +5588,116 @@ pub fn format_cea708_service_osd(service: u32) -> String {
     }
 }
 
+/// Display paper-white / reference white nits (HDR UI / subtitles).
+pub const PAPER_WHITE_DEFAULT_NITS: u32 = 203;
+
+pub fn clamp_paper_white_nits(nits: u32) -> u32 {
+    nits.clamp(80, 400)
+}
+
+pub fn format_paper_white_osd(nits: u32) -> String {
+    format!("Paper white {} nits", clamp_paper_white_nits(nits))
+}
+
+/// Scale SDR UI overlay toward HDR paper-white.
+pub fn scale_sdr_overlay_to_paper_white(value: u8, paper_white_nits: u32) -> u8 {
+    let pw = clamp_paper_white_nits(paper_white_nits) as f32;
+    let scale = (pw / 100.0).clamp(0.5, 4.0);
+    (f32::from(value) * scale).round().clamp(0.0, 255.0) as u8
+}
+
+/// ST.2094 / HDR10+ L1 frame peak & average (oracle metadata).
+pub fn format_st2094_l1_osd(peak_nits: u32, avg_nits: u32) -> String {
+    format!(
+        "ST.2094 L1 peak {} avg {}",
+        clamp_hdr_maxcll(peak_nits),
+        clamp_hdr_maxcll(avg_nits)
+    )
+}
+
+/// Half vs full side-by-side packing for 3D/360 stereo.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum StereoPacking {
+    #[default]
+    HalfSbs,
+    FullSbs,
+    HalfOu,
+    FullOu,
+}
+
+pub fn cycle_stereo_packing(mode: StereoPacking) -> StereoPacking {
+    match mode {
+        StereoPacking::HalfSbs => StereoPacking::FullSbs,
+        StereoPacking::FullSbs => StereoPacking::HalfOu,
+        StereoPacking::HalfOu => StereoPacking::FullOu,
+        StereoPacking::FullOu => StereoPacking::HalfSbs,
+    }
+}
+
+pub fn stereo_packing_label(mode: StereoPacking) -> &'static str {
+    match mode {
+        StereoPacking::HalfSbs => "Half-SBS",
+        StereoPacking::FullSbs => "Full-SBS",
+        StereoPacking::HalfOu => "Half-OU",
+        StereoPacking::FullOu => "Full-OU",
+    }
+}
+
+pub fn format_stereo_packing_osd(mode: StereoPacking) -> String {
+    format!("Stereo {}", stereo_packing_label(mode))
+}
+
+/// Row-interleaved 3D field select (even/odd rows).
+pub fn row_interleaved_eye_pixel(y: u32, left_eye: bool) -> bool {
+    if left_eye {
+        y % 2 == 0
+    } else {
+        y % 2 == 1
+    }
+}
+
+pub fn format_row_interleaved_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Row-interleaved 3D"
+    } else {
+        "Row-interleaved Off"
+    }
+}
+
+/// AR / passthrough compositor opacity (0 = full VR, 1000 = full camera).
+pub fn passthrough_blend_milli(vr_opacity_milli: i32) -> i32 {
+    (1_000 - vr_opacity_milli.clamp(0, 1_000)).clamp(0, 1_000)
+}
+
+pub fn format_passthrough_osd(blend_milli: i32) -> String {
+    format!("Passthrough {}%", blend_milli.clamp(0, 1_000) / 10)
+}
+
+/// Skip-recap / skip-intro marker pair.
+pub fn skip_segment_target_us(position_us: i64, start_us: i64, end_us: i64) -> Option<i64> {
+    if end_us <= start_us {
+        return None;
+    }
+    if position_us >= start_us && position_us < end_us {
+        Some(end_us)
+    } else {
+        None
+    }
+}
+
+pub fn format_skip_segment_osd(kind: &str) -> String {
+    format!("Skip {kind}")
+}
+
+/// Binge / autoplay-next mode OSD.
+pub fn format_binge_mode_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Binge mode On"
+    } else {
+        "Binge mode Off"
+    }
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -5716,6 +5984,8 @@ pub enum HdrTonemap {
     Mobius,
     /// ACES filmic curve (approximate).
     Aces,
+    /// MaxRGB channel-relative tonemap.
+    MaxRgb,
 }
 
 /// FFmpeg `AVCOL_TRC_SMPTE2084` (PQ).
@@ -5734,7 +6004,8 @@ pub fn cycle_hdr_tonemap(mode: HdrTonemap) -> HdrTonemap {
         HdrTonemap::Reinhard => HdrTonemap::Hable,
         HdrTonemap::Hable => HdrTonemap::Mobius,
         HdrTonemap::Mobius => HdrTonemap::Aces,
-        HdrTonemap::Aces => HdrTonemap::Off,
+        HdrTonemap::Aces => HdrTonemap::MaxRgb,
+        HdrTonemap::MaxRgb => HdrTonemap::Off,
     }
 }
 
@@ -5746,6 +6017,7 @@ pub fn hdr_tonemap_label(mode: HdrTonemap) -> &'static str {
         HdrTonemap::Hable => "hable",
         HdrTonemap::Mobius => "mobius",
         HdrTonemap::Aces => "aces",
+        HdrTonemap::MaxRgb => "maxrgb",
     }
 }
 
@@ -5836,6 +6108,7 @@ pub fn tonemap_channel(value: f32, mode: HdrTonemap) -> f32 {
         }
         HdrTonemap::Mobius => mobius_tonemap(x, 0.3),
         HdrTonemap::Aces => aces_tonemap(x),
+        HdrTonemap::MaxRgb => (x / (1.0 + x)).clamp(0.0, 1.0),
     }
 }
 
@@ -5848,6 +6121,18 @@ pub fn apply_hdr_tonemap_pixel(
 ) -> (u8, u8, u8) {
     if matches!(mode, HdrTonemap::Off | HdrTonemap::Clip) {
         return (red, green, blue);
+    }
+    if matches!(mode, HdrTonemap::MaxRgb) {
+        let r = expand_hdr_channel(f32::from(red) / 255.0, color_trc);
+        let g = expand_hdr_channel(f32::from(green) / 255.0, color_trc);
+        let b = expand_hdr_channel(f32::from(blue) / 255.0, color_trc);
+        let m = r.max(g).max(b).max(1e-6);
+        let scale = 1.0 / (1.0 + m);
+        return (
+            (r * scale * 255.0).round().clamp(0.0, 255.0) as u8,
+            (g * scale * 255.0).round().clamp(0.0, 255.0) as u8,
+            (b * scale * 255.0).round().clamp(0.0, 255.0) as u8,
+        );
     }
     let r = tonemap_channel(expand_hdr_channel(f32::from(red) / 255.0, color_trc), mode);
     let g = tonemap_channel(expand_hdr_channel(f32::from(green) / 255.0, color_trc), mode);
@@ -6294,8 +6579,9 @@ pub fn parse_hdr_tonemap(spec: &str) -> Result<HdrTonemap> {
         "hable" => Ok(HdrTonemap::Hable),
         "mobius" => Ok(HdrTonemap::Mobius),
         "aces" => Ok(HdrTonemap::Aces),
+        "maxrgb" | "max-rgb" => Ok(HdrTonemap::MaxRgb),
         other => Err(format!(
-            "unknown hdr tonemap `{other}` (off|clip|reinhard|hable|mobius|aces)"
+            "unknown hdr tonemap `{other}` (off|clip|reinhard|hable|mobius|aces|maxrgb)"
         )
         .into()),
     }
@@ -6313,8 +6599,10 @@ pub fn parse_spherical_projection(spec: &str) -> Result<SphericalProjection> {
         "cylindrical" | "cylinder" => Ok(SphericalProjection::Cylindrical),
         "mercator" => Ok(SphericalProjection::Mercator),
         "dual-fisheye-tb" | "dfisheye-tb" | "fisheye-tb" => Ok(SphericalProjection::DualFisheyeTb),
+        "octahedral" | "octa" => Ok(SphericalProjection::Octahedral),
+        "equisolid" => Ok(SphericalProjection::Equisolid),
         other => Err(format!(
-            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical|mercator|dual-fisheye-tb)"
+            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical|mercator|dual-fisheye-tb|octahedral|equisolid)"
         )
         .into()),
     }

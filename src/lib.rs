@@ -2031,6 +2031,59 @@ mod play_controls {
         assert_eq!(fvid_media::buffer_health_ratio_milli(5_000_000, 10_000_000), 500);
         assert!(fvid_media::format_epg_program_osd("News", 0, 3_600_000_000).contains("News"));
         assert!(fvid_media::format_cea708_service_osd(1).contains('1'));
+        assert_eq!(
+            fvid_media::parse_spherical_projection("octahedral").unwrap(),
+            fvid_media::SphericalProjection::Octahedral
+        );
+        assert_eq!(
+            fvid_media::parse_hdr_tonemap("maxrgb").unwrap(),
+            fvid_media::HdrTonemap::MaxRgb
+        );
+        let oct = fvid_media::project_octahedral_view(
+            4,
+            4,
+            &[0x00_30_30_30u32; 16],
+            2,
+            2,
+            0,
+            0,
+            0,
+            90_000,
+        );
+        assert_eq!(oct.len(), 4);
+        let eq = fvid_media::project_equisolid_view(
+            4,
+            2,
+            &[0x00_40_40_40u32; 8],
+            2,
+            2,
+            0,
+            0,
+            0,
+            120_000,
+        );
+        assert_eq!(eq.len(), 4);
+        assert_eq!(fvid_media::clamp_paper_white_nits(203), 203);
+        assert!(fvid_media::scale_sdr_overlay_to_paper_white(100, 203) > 100);
+        assert!(fvid_media::format_st2094_l1_osd(1_000, 200).contains("L1"));
+        assert_eq!(
+            fvid_media::cycle_stereo_packing(fvid_media::StereoPacking::HalfSbs),
+            fvid_media::StereoPacking::FullSbs
+        );
+        assert!(fvid_media::row_interleaved_eye_pixel(0, true));
+        assert_eq!(fvid_media::passthrough_blend_milli(250), 750);
+        assert_eq!(
+            fvid_media::skip_segment_target_us(5_000_000, 0, 10_000_000),
+            Some(10_000_000)
+        );
+        let maxrgb = fvid_media::apply_hdr_tonemap_pixel(
+            200,
+            100,
+            50,
+            fvid_media::HdrTonemap::MaxRgb,
+            fvid_media::COLOR_TRC_SMPTE2084,
+        );
+        assert!(maxrgb.0 > 0);
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;

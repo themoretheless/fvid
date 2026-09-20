@@ -251,6 +251,12 @@ pub use play::{
     format_dvr_window_osd, pq_oetf, hlg_oetf, maxrgb_tonemap_pixel, format_maxrgb_osd,
     project_mercator_view, dual_fisheye_tb_to_equirect, clamp_live_latency_ms, format_live_latency_osd,
     buffer_health_ratio_milli, format_epg_program_osd, format_cea708_service_osd,
+    sample_octahedral_pixel, project_octahedral_view, project_equisolid_view,
+    PAPER_WHITE_DEFAULT_NITS, clamp_paper_white_nits, format_paper_white_osd,
+    scale_sdr_overlay_to_paper_white, format_st2094_l1_osd, StereoPacking, cycle_stereo_packing,
+    stereo_packing_label, format_stereo_packing_osd, row_interleaved_eye_pixel,
+    format_row_interleaved_osd, passthrough_blend_milli, format_passthrough_osd,
+    skip_segment_target_us, format_skip_segment_osd, format_binge_mode_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};
