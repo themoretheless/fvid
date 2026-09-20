@@ -1116,5 +1116,13 @@ mod play_controls {
         assert_eq!(fvid_media::format_stop_osd(), "Stopped");
         assert!(fvid_media::format_rotate_osd(fvid_media::RotateMode::Deg90).contains("90"));
         assert_eq!(fvid_media::format_flip_osd(true, true), "Flip HV");
+        assert_eq!(fvid_media::seek_end_us(100_000_000, Some(50_000_000)), 50_000_000);
+        assert_eq!(fvid_media::seek_end_us(100_000_000, None), 100_000_000);
+        assert_eq!(
+            fvid_media::chapter_index(&[0, 10_000_000, 20_000_000], 15_000_000),
+            Some(1)
+        );
+        assert!(fvid_media::format_chapter_osd(1, 3, 10_000_000).contains("2/3"));
+        assert_eq!(fvid_media::format_pause_osd(true), "Paused");
     }
 }

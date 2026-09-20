@@ -90,7 +90,8 @@ pub use play::{
     set_eq_gains_from_preset, format_eq_preset_osd, PAN_STEP_PX, format_pan_osd, initial_seek_us,
     gamma_channel, apply_gamma_pixel, format_audio_channel_osd, initial_stop_us,
     should_stop_playback, RATE_WHEEL_STEP_MILLI, rate_from_wheel, stop_playback_us,
-    format_stop_osd, format_rotate_osd, format_flip_osd, PLAYBACK_PROTOCOLS,
+    format_stop_osd, format_rotate_osd, format_flip_osd, seek_end_us, chapter_index,
+    format_chapter_osd, format_pause_osd, PLAYBACK_PROTOCOLS,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

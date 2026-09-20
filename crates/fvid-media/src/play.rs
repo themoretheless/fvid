@@ -929,6 +929,47 @@ pub fn format_flip_osd(flip_h: bool, flip_v: bool) -> String {
     }
 }
 
+/// Seek target for End: stop-time if set, otherwise media duration.
+pub fn seek_end_us(duration_us: i64, stop_us: Option<i64>) -> i64 {
+    match stop_us {
+        Some(stop) if stop >= 0 => clamp_seek_us(stop, duration_us),
+        _ => duration_us.max(0),
+    }
+}
+
+/// Index of the chapter containing `now_us`, if any.
+pub fn chapter_index(chapters: &[i64], now_us: i64) -> Option<usize> {
+    if chapters.is_empty() {
+        return None;
+    }
+    let mut index = 0usize;
+    for (i, &start) in chapters.iter().enumerate() {
+        if now_us >= start {
+            index = i;
+        } else {
+            break;
+        }
+    }
+    Some(index)
+}
+
+pub fn format_chapter_osd(index: usize, total: usize, start_us: i64) -> String {
+    format!(
+        "Chapter {}/{} {}",
+        index.saturating_add(1),
+        total.max(1),
+        format_clock(start_us)
+    )
+}
+
+pub fn format_pause_osd(paused: bool) -> &'static str {
+    if paused {
+        "Paused"
+    } else {
+        "Playing"
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct PlayOptions {
     /// Play the first audio stream on the default output device.
@@ -4172,6 +4213,7 @@ impl PlayerApp {
         if self.ended() {
             self.request_seek(0);
             self.set_paused(false);
+            self.notice = Some(format_pause_osd(false).into());
             return;
         }
         let Some(session) = &mut self.session else {
@@ -4184,6 +4226,7 @@ impl PlayerApp {
         } else {
             session.clock.resume();
         }
+        self.notice = Some(format_pause_osd(paused).into());
     }
 
     fn pick_file(&mut self) {
@@ -4480,6 +4523,11 @@ impl PlayerApp {
             self.pan_x_px = pan_x;
             self.pan_y_px = pan_y;
             self.notice = Some(format_zoom_osd(zoom));
+        }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::End)) {
+            let target = seek_end_us(self.duration_us(), self.stop_us);
+            self.request_seek(target);
+            self.notice = Some(format_jump_osd(target));
         }
         let dropped = ctx.input(|input| input.raw.dropped_files.clone());
         if dropped.is_empty() {
@@ -4981,7 +5029,10 @@ impl PlayerApp {
         let Some(target) = chapter_step(&starts, self.shown_media_us(), delta) else {
             return;
         };
-        eprintln!("fvid play: chapter {}", format_clock(target));
+        let index = chapter_index(&starts, target).unwrap_or(0);
+        let notice = format_chapter_osd(index, starts.len(), target);
+        eprintln!("fvid play: {notice}");
+        self.notice = Some(notice);
         self.request_seek(target);
     }
 
