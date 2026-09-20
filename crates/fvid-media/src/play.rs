@@ -30,6 +30,15 @@ pub fn clamp_volume_milli(value: i32) -> u32 {
     value.clamp(0, VOLUME_MAX_MILLI as i32) as u32
 }
 
+/// Soft-clip a sample after boost so peaks above unity stay bounded (VLC-style).
+pub fn soft_clip_sample(sample: f32) -> f32 {
+    if sample.abs() <= 1.0 {
+        sample.clamp(-1.0, 1.0)
+    } else {
+        sample.tanh()
+    }
+}
+
 /// Video adjustment. `1000` is neutral. Range is `0..=2000`.
 pub fn clamp_adjust_milli(value: i32) -> i32 {
     value.clamp(0, 2_000)
@@ -2779,10 +2788,12 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
         apply_audio_balance(&mut frame_buf, balance_milli);
         apply_audio_channel(&mut frame_buf, channel_mode);
         for channel in 0..channels {
-            write(
-                frame_buf[channel],
-                &mut data[frame_index * channels + channel],
-            );
+            let sample = if gain > 1.0 {
+                soft_clip_sample(frame_buf[channel])
+            } else {
+                frame_buf[channel].clamp(-1.0, 1.0)
+            };
+            write(sample, &mut data[frame_index * channels + channel]);
         }
         written = frame_index + 1;
     }

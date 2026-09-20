@@ -1140,5 +1140,8 @@ mod play_controls {
         assert!(m3u.starts_with("#EXTM3U\n"));
         assert!(m3u.contains("a.mp4\n"));
         assert!(m3u.contains("b.mp4\n"));
+        assert_eq!(fvid_media::soft_clip_sample(0.5), 0.5);
+        assert!(fvid_media::soft_clip_sample(2.0) < 1.0);
+        assert!(fvid_media::soft_clip_sample(-2.0) > -1.0);
     }
 }
