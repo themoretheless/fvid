@@ -219,6 +219,119 @@ pub fn eq_unity_gains() -> [i32; EQ_BAND_COUNT] {
     [1_000; EQ_BAND_COUNT]
 }
 
+/// EQ band gain range. `1000` is 0 dB; spans roughly −26 dB..=+12 dB.
+pub fn clamp_eq_milli(value: i32) -> i32 {
+    value.clamp(50, 4_000)
+}
+
+/// Convert a VLC-style band gain in dB to linear milli (`1000` = unity).
+pub fn eq_db_to_milli(db: f32) -> i32 {
+    let linear = 10f32.powf(db / 20.0);
+    clamp_eq_milli((linear * 1_000.0).round() as i32)
+}
+
+/// Classic VLC 10-band equalizer presets (`equalizer_presets.h`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum EqPreset {
+    #[default]
+    Flat,
+    Classical,
+    Club,
+    Dance,
+    FullBass,
+    FullBassTreble,
+    FullTreble,
+    Headphones,
+    LargeHall,
+    Live,
+    Party,
+    Pop,
+    Reggae,
+    Rock,
+    Ska,
+    Soft,
+    SoftRock,
+    Techno,
+}
+
+pub const EQ_PRESET_COUNT: usize = 18;
+
+pub fn eq_preset_label(preset: EqPreset) -> &'static str {
+    match preset {
+        EqPreset::Flat => "Flat",
+        EqPreset::Classical => "Classical",
+        EqPreset::Club => "Club",
+        EqPreset::Dance => "Dance",
+        EqPreset::FullBass => "Full bass",
+        EqPreset::FullBassTreble => "Full bass+treble",
+        EqPreset::FullTreble => "Full treble",
+        EqPreset::Headphones => "Headphones",
+        EqPreset::LargeHall => "Large hall",
+        EqPreset::Live => "Live",
+        EqPreset::Party => "Party",
+        EqPreset::Pop => "Pop",
+        EqPreset::Reggae => "Reggae",
+        EqPreset::Rock => "Rock",
+        EqPreset::Ska => "Ska",
+        EqPreset::Soft => "Soft",
+        EqPreset::SoftRock => "Soft rock",
+        EqPreset::Techno => "Techno",
+    }
+}
+
+pub fn cycle_eq_preset(preset: EqPreset) -> EqPreset {
+    match preset {
+        EqPreset::Flat => EqPreset::Classical,
+        EqPreset::Classical => EqPreset::Club,
+        EqPreset::Club => EqPreset::Dance,
+        EqPreset::Dance => EqPreset::FullBass,
+        EqPreset::FullBass => EqPreset::FullBassTreble,
+        EqPreset::FullBassTreble => EqPreset::FullTreble,
+        EqPreset::FullTreble => EqPreset::Headphones,
+        EqPreset::Headphones => EqPreset::LargeHall,
+        EqPreset::LargeHall => EqPreset::Live,
+        EqPreset::Live => EqPreset::Party,
+        EqPreset::Party => EqPreset::Pop,
+        EqPreset::Pop => EqPreset::Reggae,
+        EqPreset::Reggae => EqPreset::Rock,
+        EqPreset::Rock => EqPreset::Ska,
+        EqPreset::Ska => EqPreset::Soft,
+        EqPreset::Soft => EqPreset::SoftRock,
+        EqPreset::SoftRock => EqPreset::Techno,
+        EqPreset::Techno => EqPreset::Flat,
+    }
+}
+
+/// Band gains in dB from VLC `eqz_preset_10b` (near-zero epsilon treated as 0).
+pub fn eq_preset_db(preset: EqPreset) -> [f32; EQ_BAND_COUNT] {
+    match preset {
+        EqPreset::Flat => [0.0; EQ_BAND_COUNT],
+        EqPreset::Classical => [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -7.2, -7.2, -7.2, -9.6],
+        EqPreset::Club => [0.0, 0.0, 8.0, 5.6, 5.6, 5.6, 3.2, 0.0, 0.0, 0.0],
+        EqPreset::Dance => [9.6, 7.2, 2.4, 0.0, 0.0, -5.6, -7.2, -7.2, 0.0, 0.0],
+        EqPreset::FullBass => [-8.0, 9.6, 9.6, 5.6, 1.6, -4.0, -8.0, -10.4, -11.2, -11.2],
+        EqPreset::FullBassTreble => [7.2, 5.6, 0.0, -7.2, -4.8, 1.6, 8.0, 11.2, 12.0, 12.0],
+        EqPreset::FullTreble => [-9.6, -9.6, -9.6, -4.0, 2.4, 11.2, 16.0, 16.0, 16.0, 16.8],
+        EqPreset::Headphones => [4.8, 11.2, 5.6, -3.2, -2.4, 1.6, 4.8, 9.6, 12.8, 14.4],
+        EqPreset::LargeHall => [10.4, 10.4, 5.6, 5.6, 0.0, -4.8, -4.8, -4.8, 0.0, 0.0],
+        EqPreset::Live => [-4.8, 0.0, 4.0, 5.6, 5.6, 5.6, 4.0, 2.4, 2.4, 2.4],
+        EqPreset::Party => [7.2, 7.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.2, 7.2],
+        EqPreset::Pop => [-1.6, 4.8, 7.2, 8.0, 5.6, 0.0, -2.4, -2.4, -1.6, -1.6],
+        EqPreset::Reggae => [0.0, 0.0, 0.0, -5.6, 0.0, 6.4, 6.4, 0.0, 0.0, 0.0],
+        EqPreset::Rock => [8.0, 4.8, -5.6, -8.0, -3.2, 4.0, 8.8, 11.2, 11.2, 11.2],
+        EqPreset::Ska => [-2.4, -4.8, -4.0, 0.0, 4.0, 5.6, 8.8, 9.6, 11.2, 9.6],
+        EqPreset::Soft => [4.8, 1.6, 0.0, -2.4, 0.0, 4.0, 8.0, 9.6, 11.2, 12.0],
+        EqPreset::SoftRock => [4.0, 4.0, 2.4, 0.0, -4.0, -5.6, -3.2, 0.0, 2.4, 8.8],
+        EqPreset::Techno => [8.0, 5.6, 0.0, -5.6, -4.8, 0.0, 8.0, 9.6, 9.6, 8.8],
+    }
+}
+
+/// Linear milli gains for a VLC preset.
+pub fn eq_preset_gains(preset: EqPreset) -> [i32; EQ_BAND_COUNT] {
+    let db = eq_preset_db(preset);
+    std::array::from_fn(|i| eq_db_to_milli(db[i]))
+}
+
 /// Split `sample` into 10 complementary bands, apply per-band gains (`1000` = unity), and sum.
 pub fn graphic_eq_step(
     sample: f32,
@@ -233,11 +346,11 @@ pub fn graphic_eq_step(
     for i in 0..EQ_BAND_COUNT - 1 {
         let band = state.lp[i] - lower;
         lower = state.lp[i];
-        let gain = clamp_adjust_milli(gains_milli[i]) as f32 / 1_000.0;
+        let gain = clamp_eq_milli(gains_milli[i]) as f32 / 1_000.0;
         out += band * gain;
     }
     let top = sample - lower;
-    let top_gain = clamp_adjust_milli(gains_milli[EQ_BAND_COUNT - 1]) as f32 / 1_000.0;
+    let top_gain = clamp_eq_milli(gains_milli[EQ_BAND_COUNT - 1]) as f32 / 1_000.0;
     (out + top * top_gain).clamp(-1.0, 1.0)
 }
 
@@ -299,6 +412,51 @@ pub fn apply_audio_channel(frame: &mut [f32], mode: AudioChannelMode) {
     }
 }
 
+/// Stereo balance: `1000` is center, `0` full left, `2000` full right.
+pub const BALANCE_CENTER_MILLI: i32 = 1_000;
+pub const BALANCE_MIN_MILLI: i32 = 0;
+pub const BALANCE_MAX_MILLI: i32 = 2_000;
+pub const BALANCE_STEP_MILLI: i32 = 100;
+
+pub fn clamp_balance_milli(value: i32) -> i32 {
+    value.clamp(BALANCE_MIN_MILLI, BALANCE_MAX_MILLI)
+}
+
+pub fn balance_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_balance_milli(current + delta)
+}
+
+/// Scale L/R gains for stereo balance. No-op when `frame.len() < 2`.
+pub fn apply_audio_balance(frame: &mut [f32], balance_milli: i32) {
+    if frame.len() < 2 {
+        return;
+    }
+    let balance = clamp_balance_milli(balance_milli);
+    let left_gain = if balance <= BALANCE_CENTER_MILLI {
+        1.0
+    } else {
+        (BALANCE_MAX_MILLI - balance) as f32 / 1_000.0
+    };
+    let right_gain = if balance >= BALANCE_CENTER_MILLI {
+        1.0
+    } else {
+        balance as f32 / 1_000.0
+    };
+    frame[0] *= left_gain;
+    frame[1] *= right_gain;
+}
+
+pub fn format_balance_osd(balance_milli: i32) -> String {
+    let balance = clamp_balance_milli(balance_milli);
+    if balance == BALANCE_CENTER_MILLI {
+        "Balance center".into()
+    } else if balance < BALANCE_CENTER_MILLI {
+        format!("Balance L{}", BALANCE_CENTER_MILLI - balance)
+    } else {
+        format!("Balance R{}", balance - BALANCE_CENTER_MILLI)
+    }
+}
+
 /// Clamp subtitle bottom margin in pixels (`0..=400`). Higher lifts text toward the top.
 pub fn clamp_subtitle_margin(px: i32) -> i32 {
     px.clamp(0, 400)
@@ -307,6 +465,37 @@ pub fn clamp_subtitle_margin(px: i32) -> i32 {
 /// Bottom margin for painted subtitles given a base inset and user offset.
 pub fn subtitle_margin_px(base: i32, offset: i32) -> i32 {
     clamp_subtitle_margin(base.saturating_add(offset))
+}
+
+/// Subtitle text scale. `1000` is default size.
+pub const SUBTITLE_SCALE_MIN_MILLI: i32 = 500;
+pub const SUBTITLE_SCALE_MAX_MILLI: i32 = 2_000;
+pub const SUBTITLE_SCALE_UNITY_MILLI: i32 = 1_000;
+pub const SUBTITLE_SCALE_STEP_MILLI: i32 = 100;
+
+pub fn clamp_subtitle_scale_milli(value: i32) -> i32 {
+    value.clamp(SUBTITLE_SCALE_MIN_MILLI, SUBTITLE_SCALE_MAX_MILLI)
+}
+
+pub fn subtitle_scale_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_subtitle_scale_milli(current + delta)
+}
+
+/// Scaled font size in pixels for on-screen subtitles.
+pub fn subtitle_font_px(base_px: f32, scale_milli: i32) -> f32 {
+    base_px * (clamp_subtitle_scale_milli(scale_milli) as f32 / 1_000.0)
+}
+
+pub fn cycle_eq_bypass(bypassed: bool) -> bool {
+    !bypassed
+}
+
+pub fn format_eq_bypass_osd(bypassed: bool) -> &'static str {
+    if bypassed {
+        "EQ off"
+    } else {
+        "EQ on"
+    }
 }
 
 /// Average two packed `0x00RRGGBB` pixels channel-wise.
@@ -340,7 +529,158 @@ pub fn deinterlace_blend_rgb(pixels: &mut [u32], width: u32, height: u32) {
         }
     }
 }
-const SEEK_STEP_US: i64 = 10_000_000;
+
+/// Bob deinterlace: copy even rows onto the following odd rows (VLC "Bob" style).
+pub fn deinterlace_bob_rgb(pixels: &mut [u32], width: u32, height: u32) {
+    if width == 0 || height < 2 {
+        return;
+    }
+    let w = width as usize;
+    let h = height as usize;
+    if pixels.len() < w * h {
+        return;
+    }
+    for y in (0..h.saturating_sub(1)).step_by(2) {
+        let top = y * w;
+        let bot = (y + 1) * w;
+        pixels.copy_within(top..top + w, bot);
+    }
+}
+
+/// Playback deinterlace modes matching common VLC options.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum DeinterlaceMode {
+    #[default]
+    Off,
+    Blend,
+    Bob,
+}
+
+pub fn cycle_deinterlace(mode: DeinterlaceMode) -> DeinterlaceMode {
+    match mode {
+        DeinterlaceMode::Off => DeinterlaceMode::Blend,
+        DeinterlaceMode::Blend => DeinterlaceMode::Bob,
+        DeinterlaceMode::Bob => DeinterlaceMode::Off,
+    }
+}
+
+pub fn deinterlace_label(mode: DeinterlaceMode) -> &'static str {
+    match mode {
+        DeinterlaceMode::Off => "Deint",
+        DeinterlaceMode::Blend => "Blend",
+        DeinterlaceMode::Bob => "Bob",
+    }
+}
+
+pub fn apply_deinterlace_rgb(pixels: &mut [u32], width: u32, height: u32, mode: DeinterlaceMode) {
+    match mode {
+        DeinterlaceMode::Off => {}
+        DeinterlaceMode::Blend => deinterlace_blend_rgb(pixels, width, height),
+        DeinterlaceMode::Bob => deinterlace_bob_rgb(pixels, width, height),
+    }
+}
+
+/// Short OSD line for volume changes (VLC-style feedback).
+pub fn format_volume_osd(volume_milli: u32, muted: bool) -> String {
+    if muted {
+        "Volume muted".into()
+    } else {
+        format!("Volume {}%", volume_milli / 10)
+    }
+}
+
+/// Default volume nudge (±5%).
+pub const VOLUME_STEP_MILLI: i32 = 50;
+/// Default rate nudge (±0.1×).
+pub const RATE_STEP_MILLI: i32 = 100;
+
+pub fn volume_step_milli(current: u32, delta: i32) -> u32 {
+    clamp_volume_milli(current as i32 + delta)
+}
+
+pub fn rate_step_milli(current: u32, delta: i32) -> u32 {
+    let next = current as i32 + delta;
+    next.clamp(RATE_MIN_MILLI as i32, RATE_MAX_MILLI as i32) as u32
+}
+
+/// Human clock for OSD (`mm:ss` or `h:mm:ss`).
+pub fn format_play_clock(us: i64) -> String {
+    format_clock(us)
+}
+
+/// Rate line for OSD (`1.50x`).
+pub fn format_rate_osd(rate_milli: u32) -> String {
+    format_rate(rate_milli)
+}
+
+/// VLC digit jump: `1`→10% … `9`→90%, `0`→100% of duration.
+pub fn position_us_from_digit(digit: u8, duration_us: i64) -> Option<i64> {
+    if duration_us <= 0 || digit > 9 {
+        return None;
+    }
+    let percent = if digit == 0 { 100i64 } else { i64::from(digit) * 10 };
+    Some(duration_us.saturating_mul(percent) / 100)
+}
+
+pub fn media_fraction(now_us: i64, duration_us: i64) -> f32 {
+    if duration_us <= 0 {
+        0.0
+    } else {
+        ((now_us.max(0) as f64) / (duration_us as f64)).clamp(0.0, 1.0) as f32
+    }
+}
+
+pub fn media_us_from_fraction(fraction: f32, duration_us: i64) -> i64 {
+    if duration_us <= 0 {
+        return 0;
+    }
+    let fraction = fraction.clamp(0.0, 1.0) as f64;
+    (duration_us as f64 * fraction).round() as i64
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FrameStep {
+    Forward,
+    Backward,
+}
+
+pub fn frame_step_target_us(now_us: i64, frame_duration_us: i64, step: FrameStep) -> i64 {
+    let duration = frame_duration_us.max(1);
+    match step {
+        FrameStep::Forward => now_us.saturating_add(duration),
+        FrameStep::Backward => now_us.saturating_sub(duration).max(0),
+    }
+}
+
+/// VLC-style coarse jump (±10 s).
+pub const SEEK_COARSE_US: i64 = 10_000_000;
+/// Fine jump (±3 s), typically Shift+arrows.
+pub const SEEK_FINE_US: i64 = 3_000_000;
+
+pub fn seek_step_us(fine: bool) -> i64 {
+    if fine {
+        SEEK_FINE_US
+    } else {
+        SEEK_COARSE_US
+    }
+}
+
+/// Prefer container metadata title; otherwise the file stem / URL leaf.
+pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
+    if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
+        return title.to_string();
+    }
+    if let Some(name) = path.file_stem().and_then(|name| name.to_str()) {
+        if !name.is_empty() {
+            return name.to_string();
+        }
+    }
+    path.file_name()
+        .and_then(|name| name.to_str())
+        .filter(|name| !name.is_empty())
+        .unwrap_or("video")
+        .to_string()
+}
 
 #[derive(Clone, Debug)]
 pub struct PlayOptions {
@@ -590,6 +930,15 @@ pub fn expand_play_inputs(paths: &[PathBuf]) -> Result<Vec<PathBuf>> {
 /// Step subtitle delay. Positive delay shows cues later. Each step is 50 ms.
 pub fn subtitle_delay_us(current_us: i64, steps: i32) -> i64 {
     current_us.saturating_add(i64::from(steps).saturating_mul(50_000))
+}
+
+/// Clear subtitle and audio delay offsets (VLC “Reset Audio/Subtitle Synchronization”).
+pub fn reset_av_delays() -> (i64, i64) {
+    (0, 0)
+}
+
+pub fn format_delay_osd(label: &str, delay_us: i64) -> String {
+    format!("{label} delay {} ms", delay_us / 1_000)
 }
 
 /// Media clock used to pick a cue. A positive delay looks at an earlier time.
@@ -1192,6 +1541,7 @@ struct Shared {
         external_cues: Mutex<Vec<SubtitleCue>>,
         external_sub: AtomicBool,
         device_name: Mutex<String>,
+        media_title: Mutex<String>,
         chapters: Mutex<Vec<i64>>,
         audio_delay_us: AtomicI64,
         audio_skew_frames: AtomicI64,
@@ -1199,6 +1549,10 @@ struct Shared {
         tone: Mutex<Vec<GraphicEqState>>,
         audio_reset: AtomicBool,
         audio_channel: AtomicU32,
+        /// Stereo balance. 1000 is center, 0 full left, 2000 full right.
+        balance_milli: AtomicI32,
+        /// When true, graphic EQ is skipped in the audio path.
+        eq_bypass: AtomicBool,
     }
 
 struct Finish(Arc<Shared>);
@@ -1432,6 +1786,35 @@ pub fn zoom_size(fitted_w: u32, fitted_h: u32, zoom_milli: u32) -> (u32, u32) {
     let width = (u64::from(fitted_w.max(1)).saturating_mul(zoom) / 1000).max(1);
     let height = (u64::from(fitted_h.max(1)).saturating_mul(zoom) / 1000).max(1);
     (width as u32, height as u32)
+}
+
+/// Max absolute pan so content stays fillable in the viewport. Zero when not zoomed past 1× fit.
+pub fn clamp_pan_px(value: i32, viewport: u32, content: u32) -> i32 {
+    if content <= viewport {
+        return 0;
+    }
+    let max = ((content - viewport) / 2) as i32;
+    value.clamp(-max, max)
+}
+
+pub fn pan_step_px(current: i32, delta: i32, viewport: u32, content: u32) -> i32 {
+    clamp_pan_px(current + delta, viewport, content)
+}
+
+/// Apply pan offsets to a centered image rect inside the viewport.
+pub fn zoom_pan_rect(
+    viewport: (f32, f32, f32, f32),
+    content_w: f32,
+    content_h: f32,
+    pan_x_px: i32,
+    pan_y_px: i32,
+) -> (f32, f32, f32, f32) {
+    let (vx, vy, vw, vh) = viewport;
+    let pan_x = clamp_pan_px(pan_x_px, vw.max(0.0) as u32, content_w.max(0.0) as u32) as f32;
+    let pan_y = clamp_pan_px(pan_y_px, vh.max(0.0) as u32, content_h.max(0.0) as u32) as f32;
+    let x = vx + (vw - content_w) * 0.5 + pan_x;
+    let y = vy + (vh - content_h) * 0.5 + pan_y;
+    (x, y, content_w, content_h)
 }
 
 /// A playback bookmark. Times are media microseconds and stay sorted.
@@ -1907,12 +2290,17 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
     for (slot, gain) in shared.eq_gains_milli.iter().zip(gains.iter_mut()) {
         *gain = slot.load(Ordering::Relaxed);
     }
+    let eq_bypass = shared.eq_bypass.load(Ordering::Relaxed);
     let mut tone = lock(&shared.tone);
     if tone.len() != channels {
         tone.resize(channels, GraphicEqState::default());
     }
     let apply = |sample: f32, channel: usize, tone: &mut [GraphicEqState]| {
-        graphic_eq_step(sample, &mut tone[channel], &gains) * gain
+        if eq_bypass {
+            sample * gain
+        } else {
+            graphic_eq_step(sample, &mut tone[channel], &gains) * gain
+        }
     };
     let channel_mode = match shared.audio_channel.load(Ordering::Relaxed) {
         1 => AudioChannelMode::Left,
@@ -1921,6 +2309,7 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
         4 => AudioChannelMode::Reverse,
         _ => AudioChannelMode::Stereo,
     };
+    let balance_milli = shared.balance_milli.load(Ordering::Relaxed);
     let mut frame_buf = vec![0.0f32; channels];
     for frame_index in 0..frames_out {
         let (need, next_phase) = advance_rate_phase(phase, rate);
@@ -1961,6 +2350,7 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
             have_held = true;
             consumed += u64::from(need);
         }
+        apply_audio_balance(&mut frame_buf, balance_milli);
         apply_audio_channel(&mut frame_buf, channel_mode);
         for channel in 0..channels {
             write(
@@ -2016,8 +2406,34 @@ fn worker(shared: Arc<Shared>, path: std::path::PathBuf) -> Result<()> {
     result
 }
 
+unsafe fn container_metadata_title(ctx: *mut AVFormatContext) -> Option<String> {
+    if ctx.is_null() {
+        return None;
+    }
+    unsafe {
+        let metadata = (*ctx).metadata;
+        if metadata.is_null() {
+            return None;
+        }
+        for key in [c"title", c"TITLE", c"Title"] {
+            let entry = av_dict_get(metadata, key.as_ptr(), ptr::null(), 0);
+            if entry.is_null() {
+                continue;
+            }
+            let value = CStr::from_ptr((*entry).value).to_string_lossy();
+            let trimmed = value.trim();
+            if !trimmed.is_empty() {
+                return Some(trimmed.to_string());
+            }
+        }
+    }
+    None
+}
+
 fn decode_file(shared: &Shared, path: &Path) -> Result<()> {
     let mut input = Input::open_playback(path.to_str().ok_or("path must be UTF-8")?)?;
+    let meta_title = unsafe { container_metadata_title(input.0) };
+    *lock(&shared.media_title) = media_display_title(path, meta_title.as_deref());
     let duration = unsafe { (*input.0).duration };
     if duration >= 0 {
         shared.duration_us.store(duration, Ordering::Relaxed);
@@ -2973,6 +3389,8 @@ struct PlayerApp {
     aspect: AspectMode,
     crop: AspectMode,
     zoom_milli: u32,
+    pan_x_px: i32,
+    pan_y_px: i32,
     bookmarks: Vec<Bookmark>,
     shuffle: bool,
     order: Vec<usize>,
@@ -2984,12 +3402,16 @@ struct PlayerApp {
     adjust_dirty: bool,
     flip_h: bool,
     flip_v: bool,
-    deinterlace: bool,
+    deinterlace: DeinterlaceMode,
     show_stats: bool,
     audio_channel: AudioChannelMode,
+    balance_milli: i32,
+    eq_bypass: bool,
     subtitle_margin_px: i32,
+    subtitle_scale_milli: i32,
     rotate: RotateMode,
     eq_gains_milli: [i32; EQ_BAND_COUNT],
+    eq_preset: EqPreset,
     outcome: Arc<Mutex<Option<std::result::Result<PlayStats, String>>>>,
 }
 
@@ -3041,6 +3463,8 @@ impl PlayerApp {
             aspect: AspectMode::Source,
             crop: AspectMode::Source,
             zoom_milli: 1_000,
+            pan_x_px: 0,
+            pan_y_px: 0,
             bookmarks: Vec::new(),
             shuffle: false,
             order: Vec::new(),
@@ -3052,12 +3476,16 @@ impl PlayerApp {
             adjust_dirty: false,
             flip_h: false,
             flip_v: false,
-            deinterlace: false,
+            deinterlace: DeinterlaceMode::Off,
             show_stats: false,
             audio_channel: AudioChannelMode::Stereo,
+            balance_milli: BALANCE_CENTER_MILLI,
+            eq_bypass: false,
             subtitle_margin_px: 0,
+            subtitle_scale_milli: SUBTITLE_SCALE_UNITY_MILLI,
             rotate: RotateMode::Deg0,
             eq_gains_milli: eq_unity_gains(),
+            eq_preset: EqPreset::Flat,
             outcome,
         };
         if let Err(err) = app.start_session(first) {
@@ -3130,6 +3558,7 @@ impl PlayerApp {
             external_cues: Mutex::new(external),
             external_sub: AtomicBool::new(has_external),
             device_name: Mutex::new(String::new()),
+            media_title: Mutex::new(String::new()),
             chapters: Mutex::new(Vec::new()),
             audio_delay_us: AtomicI64::new(0),
             audio_skew_frames: AtomicI64::new(0),
@@ -3143,6 +3572,8 @@ impl PlayerApp {
                 AudioChannelMode::Mono => 3,
                 AudioChannelMode::Reverse => 4,
             }),
+            balance_milli: AtomicI32::new(self.balance_milli),
+            eq_bypass: AtomicBool::new(self.eq_bypass),
         });
         let stream = if self.options.audio {
             match start_audio(Arc::clone(&shared), self.options.audio_device.as_deref()) {
@@ -3432,27 +3863,35 @@ impl PlayerApp {
             if command {
                 self.step_bookmark(-1);
             } else {
-                self.request_seek(self.shown_media_us().saturating_sub(SEEK_STEP_US));
+                let fine = ctx.input(|input| input.modifiers.shift);
+                self.request_seek(
+                    self.shown_media_us()
+                        .saturating_sub(seek_step_us(fine)),
+                );
             }
         }
         if keys.3 {
             if command {
                 self.step_bookmark(1);
             } else {
-                self.request_seek(self.shown_media_us().saturating_add(SEEK_STEP_US));
+                let fine = ctx.input(|input| input.modifiers.shift);
+                self.request_seek(
+                    self.shown_media_us()
+                        .saturating_add(seek_step_us(fine)),
+                );
             }
         }
         if keys.4 {
-            self.nudge_volume(50);
+            self.nudge_volume(VOLUME_STEP_MILLI);
         }
         if keys.5 {
-            self.nudge_volume(-50);
+            self.nudge_volume(-VOLUME_STEP_MILLI);
         }
         if keys.6 {
-            self.nudge_rate(-100);
+            self.nudge_rate(-RATE_STEP_MILLI);
         }
         if keys.7 {
-            self.nudge_rate(100);
+            self.nudge_rate(RATE_STEP_MILLI);
         }
         if keys.8 {
             self.set_muted(!self.muted);
@@ -3463,6 +3902,37 @@ impl PlayerApp {
         }
         if keys.10 {
             self.step_pending = true;
+        }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::Comma)) {
+            self.step_frame_back();
+        }
+        if !focused {
+            let digit = ctx.input(|input| {
+                [
+                    egui::Key::Num0,
+                    egui::Key::Num1,
+                    egui::Key::Num2,
+                    egui::Key::Num3,
+                    egui::Key::Num4,
+                    egui::Key::Num5,
+                    egui::Key::Num6,
+                    egui::Key::Num7,
+                    egui::Key::Num8,
+                    egui::Key::Num9,
+                ]
+                .into_iter()
+                .enumerate()
+                .find_map(|(digit, key)| input.key_pressed(key).then_some(digit as u8))
+            });
+            if let Some(digit) = digit {
+                if let Some(target) = position_us_from_digit(digit, self.duration_us()) {
+                    self.request_seek(target);
+                    self.notice = Some(format!(
+                        "Position {}%",
+                        if digit == 0 { 100 } else { digit * 10 }
+                    ));
+                }
+            }
         }
         if keys.11 {
             if ctx.input(|input| input.modifiers.shift) {
@@ -3522,13 +3992,23 @@ impl PlayerApp {
         if keys.24 {
             self.toggle_on_top();
         }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::N)) {
+            self.step_playlist(1);
+        }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::P)) {
+            self.step_playlist(-1);
+        }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::Slash)) {
+            self.reset_av_sync();
+        }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::Z)) {
             let zoom_in = !ctx.input(|input| input.modifiers.shift);
             self.nudge_zoom(zoom_in);
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::D)) {
-            self.deinterlace = !self.deinterlace;
+            self.deinterlace = cycle_deinterlace(self.deinterlace);
             self.adjust_dirty = true;
+            self.notice = Some(format!("Deinterlace {}", deinterlace_label(self.deinterlace)));
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::I)) {
             self.show_stats = !self.show_stats;
@@ -3541,6 +4021,32 @@ impl PlayerApp {
             && ctx.input(|input| input.key_pressed(egui::Key::ArrowDown) && input.modifiers.alt)
         {
             self.subtitle_margin_px = clamp_subtitle_margin(self.subtitle_margin_px - 10);
+        }
+        if !focused
+            && ctx.input(|input| input.key_pressed(egui::Key::ArrowLeft) && input.modifiers.alt)
+        {
+            self.nudge_balance(-BALANCE_STEP_MILLI);
+        }
+        if !focused
+            && ctx.input(|input| input.key_pressed(egui::Key::ArrowRight) && input.modifiers.alt)
+        {
+            self.nudge_balance(BALANCE_STEP_MILLI);
+        }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::E)) {
+            self.toggle_eq_bypass();
+        }
+        if !focused
+            && ctx.input(|input| {
+                input.modifiers.alt
+                    && (input.key_pressed(egui::Key::Equals) || input.key_pressed(egui::Key::Plus))
+            })
+        {
+            self.nudge_subtitle_scale(SUBTITLE_SCALE_STEP_MILLI);
+        }
+        if !focused
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Minus))
+        {
+            self.nudge_subtitle_scale(-SUBTITLE_SCALE_STEP_MILLI);
         }
         let dropped = ctx.input(|input| input.raw.dropped_files.clone());
         if dropped.is_empty() {
@@ -3608,12 +4114,15 @@ impl PlayerApp {
         let Some(session) = &self.session else {
             return;
         };
-        let name = session
-            .path
-            .file_name()
-            .and_then(|name| name.to_str())
-            .unwrap_or("video");
-        let title = window_title(name, &session.shared, session.media_now);
+        let name = {
+            let stored = lock(&session.shared.media_title);
+            if stored.is_empty() {
+                media_display_title(&session.path, None)
+            } else {
+                stored.clone()
+            }
+        };
+        let title = window_title(&name, &session.shared, session.media_now);
         if title != self.title {
             self.title.clone_from(&title);
             ctx.send_viewport_cmd(egui::ViewportCommand::Title(title));
@@ -3781,9 +4290,9 @@ impl PlayerApp {
                 self.rotate = cycle_rotate(self.rotate);
                 self.adjust_dirty = true;
             }
-            let deint = if self.deinterlace { "Deint*" } else { "Deint" };
+            let deint = deinterlace_label(self.deinterlace);
             if ui.button(deint).clicked() {
-                self.deinterlace = !self.deinterlace;
+                self.deinterlace = cycle_deinterlace(self.deinterlace);
                 self.adjust_dirty = true;
             }
         });
@@ -3795,14 +4304,14 @@ impl PlayerApp {
                     let mut gain = self.eq_gains_milli[i] as f32 / 1000.0;
                     if ui
                         .add(
-                            egui::Slider::new(&mut gain, 0.0..=2.0)
+                            egui::Slider::new(&mut gain, 0.05..=4.0)
                                 .vertical()
                                 .show_value(false),
                         )
                         .changed()
                     {
                         self.eq_gains_milli[i] =
-                            clamp_adjust_milli((gain * 1000.0).round() as i32);
+                            clamp_eq_milli((gain * 1000.0).round() as i32);
                         if let Some(session) = &self.session {
                             session.shared.eq_gains_milli[i]
                                 .store(self.eq_gains_milli[i], Ordering::Relaxed);
@@ -3810,8 +4319,9 @@ impl PlayerApp {
                     }
                 });
             }
-            if ui.button("Flat").clicked() {
-                self.eq_gains_milli = eq_unity_gains();
+            if ui.button(eq_preset_label(self.eq_preset)).clicked() {
+                self.eq_preset = cycle_eq_preset(self.eq_preset);
+                self.eq_gains_milli = eq_preset_gains(self.eq_preset);
                 if let Some(session) = &self.session {
                     for (slot, gain) in session
                         .shared
@@ -3822,6 +4332,10 @@ impl PlayerApp {
                         slot.store(*gain, Ordering::Relaxed);
                     }
                 }
+            }
+            let eq_label = if self.eq_bypass { "EQ*" } else { "EQ" };
+            if ui.button(eq_label).clicked() {
+                self.toggle_eq_bypass();
             }
         });
     }
@@ -3898,6 +4412,12 @@ impl PlayerApp {
                         Ordering::Relaxed,
                     );
                 }
+            }
+            if ui.button("Bal-").clicked() {
+                self.nudge_balance(-BALANCE_STEP_MILLI);
+            }
+            if ui.button("Bal+").clicked() {
+                self.nudge_balance(BALANCE_STEP_MILLI);
             }
         });
     }
@@ -4042,8 +4562,7 @@ impl PlayerApp {
 
     fn nudge_subtitle_delay(&mut self, steps: i32) {
         self.subtitle_delay_us = subtitle_delay_us(self.subtitle_delay_us, steps);
-        let millis = self.subtitle_delay_us / 1000;
-        let notice = format!("subtitle delay {millis} ms");
+        let notice = format_delay_osd("subtitle", self.subtitle_delay_us);
         eprintln!("fvid play: {notice}");
         self.notice = Some(notice);
     }
@@ -4065,10 +4584,29 @@ impl PlayerApp {
             .shared
             .audio_skew_frames
             .fetch_add(delta, Ordering::Relaxed);
-        let millis = next / 1000;
-        let notice = format!("audio delay {millis} ms");
+        let notice = format_delay_osd("audio", next);
         eprintln!("fvid play: {notice}");
         self.notice = Some(notice);
+    }
+
+    fn reset_av_sync(&mut self) {
+        let (sub, audio) = reset_av_delays();
+        let prev_audio = self.audio_delay_us;
+        self.subtitle_delay_us = sub;
+        self.audio_delay_us = audio;
+        if let Some(session) = &self.session {
+            let rate = session.shared.sample_rate.load(Ordering::Relaxed);
+            let delta = audio_delay_frames(audio, rate) - audio_delay_frames(prev_audio, rate);
+            session
+                .shared
+                .audio_delay_us
+                .store(audio, Ordering::Relaxed);
+            session
+                .shared
+                .audio_skew_frames
+                .fetch_add(delta, Ordering::Relaxed);
+        }
+        self.notice = Some("A/V sync reset".into());
     }
 
     fn cycle_aspect_mode(&mut self) {
@@ -4087,9 +4625,24 @@ impl PlayerApp {
 
     fn nudge_zoom(&mut self, zoom_in: bool) {
         self.zoom_milli = zoom_step(self.zoom_milli, zoom_in);
+        self.pan_x_px = 0;
+        self.pan_y_px = 0;
         let notice = format!("zoom {}", zoom_label(self.zoom_milli));
         eprintln!("fvid play: {notice}");
         self.notice = Some(notice);
+    }
+
+    fn nudge_pan(&mut self, dx: i32, dy: i32, viewport_w: u32, viewport_h: u32) {
+        let (content_w, content_h) = {
+            // Approximate content from last known zoomed fit using viewport as base.
+            let (zw, zh) = zoom_size(viewport_w.max(1), viewport_h.max(1), self.zoom_milli);
+            (zw, zh)
+        };
+        self.pan_x_px = pan_step_px(self.pan_x_px, dx, viewport_w, content_w);
+        self.pan_y_px = pan_step_px(self.pan_y_px, dy, viewport_h, content_h);
+        if self.zoom_milli > 1_000 {
+            self.notice = Some(format!("Pan {} , {}", self.pan_x_px, self.pan_y_px));
+        }
     }
 
     fn toggle_on_top(&mut self) {
@@ -4191,22 +4744,52 @@ impl PlayerApp {
         if let Some(session) = &self.session {
             session.shared.muted.store(muted, Ordering::Relaxed);
         }
+        self.notice = Some(format_volume_osd(self.volume_milli, self.muted));
     }
 
     fn nudge_rate(&mut self, delta_milli: i32) {
-        let next = self.rate_milli as i32 + delta_milli;
-        self.set_rate(next.clamp(RATE_MIN_MILLI as i32, RATE_MAX_MILLI as i32) as u32);
+        self.set_rate(rate_step_milli(self.rate_milli, delta_milli));
     }
 
     fn nudge_volume(&mut self, delta_milli: i32) {
-        let next = self.volume_milli as i32 + delta_milli;
-        self.volume_milli = clamp_volume_milli(next);
+        self.volume_milli = volume_step_milli(self.volume_milli, delta_milli);
         if let Some(session) = &self.session {
             session
                 .shared
                 .volume_milli
                 .store(self.volume_milli, Ordering::Relaxed);
         }
+        self.notice = Some(format_volume_osd(self.volume_milli, self.muted));
+    }
+
+    fn nudge_balance(&mut self, delta: i32) {
+        self.balance_milli = balance_step_milli(self.balance_milli, delta);
+        if let Some(session) = &self.session {
+            session
+                .shared
+                .balance_milli
+                .store(self.balance_milli, Ordering::Relaxed);
+        }
+        self.notice = Some(format_balance_osd(self.balance_milli));
+    }
+
+    fn toggle_eq_bypass(&mut self) {
+        self.eq_bypass = cycle_eq_bypass(self.eq_bypass);
+        if let Some(session) = &self.session {
+            session
+                .shared
+                .eq_bypass
+                .store(self.eq_bypass, Ordering::Relaxed);
+        }
+        self.notice = Some(format_eq_bypass_osd(self.eq_bypass).into());
+    }
+
+    fn nudge_subtitle_scale(&mut self, delta: i32) {
+        self.subtitle_scale_milli = subtitle_scale_step_milli(self.subtitle_scale_milli, delta);
+        self.notice = Some(format!(
+            "Subtitles {}%",
+            self.subtitle_scale_milli / 10
+        ));
     }
 
     fn cycle_audio(&mut self, delta: i32) {
@@ -4341,7 +4924,7 @@ impl PlayerApp {
                 .map(|frame| frame.duration_us.max(1))
                 .unwrap_or(40_000);
             drop(session);
-            self.request_seek(now.saturating_add(step));
+            self.request_seek(frame_step_target_us(now, step, FrameStep::Forward));
             self.set_paused(true);
             return;
         };
@@ -4358,6 +4941,22 @@ impl PlayerApp {
         reset_audio_rate(&session.shared);
         rearm_audio_skew(&session.shared);
         lock(&session.shared.audio).clear();
+    }
+
+    fn step_frame_back(&mut self) {
+        let Some(session) = &self.session else {
+            return;
+        };
+        let now = session.media_now;
+        let step = session
+            .frame
+            .as_ref()
+            .map(|frame| frame.duration_us.max(1))
+            .unwrap_or(40_000);
+        let target = frame_step_target_us(now, step, FrameStep::Backward);
+        drop(session);
+        self.request_seek(target);
+        self.set_paused(true);
     }
 
     fn save_snapshot(&mut self) {
@@ -4399,12 +4998,13 @@ impl PlayerApp {
     fn file_name(&self) -> String {
         self.session
             .as_ref()
-            .and_then(|session| {
-                session
-                    .path
-                    .file_name()
-                    .and_then(|name| name.to_str())
-                    .map(str::to_string)
+            .map(|session| {
+                let stored = lock(&session.shared.media_title);
+                if stored.is_empty() {
+                    media_display_title(&session.path, None)
+                } else {
+                    stored.clone()
+                }
             })
             .unwrap_or_default()
     }
@@ -4591,7 +5191,7 @@ impl PlayerApp {
         ui.add_space(4.0);
     }
 
-    fn show_video(&self, ui: &mut egui::Ui) {
+    fn show_video(&mut self, ui: &mut egui::Ui) {
         let rect = ui.available_rect_before_wrap();
         ui.painter()
             .rect_filled(rect, 0.0, egui::Color32::from_rgb(8, 8, 8));
@@ -4608,9 +5208,12 @@ impl PlayerApp {
             );
             return;
         };
-        let source = texture.size_vec2();
-        let source_w = source.x.round().max(1.0) as u32;
-        let source_h = source.y.round().max(1.0) as u32;
+        let tex_id = texture.id();
+        let tex_size = texture.size_vec2();
+        let tex_w = texture.size()[0] as u32;
+        let tex_h = texture.size()[1] as u32;
+        let source_w = tex_size.x.round().max(1.0) as u32;
+        let source_h = tex_size.y.round().max(1.0) as u32;
         let (ratio_w, ratio_h) = display_ratio(source_w, source_h, self.aspect, self.crop);
         let (width, height) = fit_aspect(
             rect.width().max(0.0) as u32,
@@ -4637,16 +5240,40 @@ impl PlayerApp {
             self.flip_v,
         );
         let uv = egui::Rect::from_min_max(egui::pos2(u0, v0), egui::pos2(u1, v1));
-        let image = egui::Image::from_texture(egui::load::SizedTexture::new(
-            texture.id(),
-            texture.size_vec2(),
-        ))
+        let image = egui::Image::from_texture(egui::load::SizedTexture::new(tex_id, tex_size))
         .uv(uv)
         .fit_to_exact_size(size);
         ui.set_clip_rect(rect);
-        let image_rect = egui::Align2::CENTER_CENTER.align_size_within_rect(size, rect);
+        let response = ui.allocate_rect(rect, egui::Sense::click_and_drag());
+        if self.zoom_milli > 1_000 && response.dragged() {
+            let delta = response.drag_delta();
+            self.pan_x_px = clamp_pan_px(
+                self.pan_x_px + delta.x.round() as i32,
+                rect.width().max(0.0) as u32,
+                zoomed_w,
+            );
+            self.pan_y_px = clamp_pan_px(
+                self.pan_y_px + delta.y.round() as i32,
+                rect.height().max(0.0) as u32,
+                zoomed_h,
+            );
+        }
+        let (px, py, pw, ph) = zoom_pan_rect(
+            (rect.min.x, rect.min.y, rect.width(), rect.height()),
+            size.x,
+            size.y,
+            self.pan_x_px,
+            self.pan_y_px,
+        );
+        let image_rect = egui::Rect::from_min_size(egui::pos2(px, py), egui::vec2(pw, ph));
         image.paint_at(ui, image_rect);
-        paint_subtitle(ui, image_rect, &self.current_subtitle(), self.subtitle_margin_px);
+        paint_subtitle(
+            ui,
+            image_rect,
+            &self.current_subtitle(),
+            self.subtitle_margin_px,
+            self.subtitle_scale_milli,
+        );
         if self.show_stats {
             let stats = PlayStats {
                 presented_frames: self
@@ -4659,8 +5286,8 @@ impl PlayerApp {
                     .as_ref()
                     .map(|session| session.skipped)
                     .unwrap_or(0),
-                width: texture.size()[0] as u32,
-                height: texture.size()[1] as u32,
+                width: tex_w,
+                height: tex_h,
                 source_width: self
                     .session
                     .as_ref()
@@ -4806,15 +5433,13 @@ fn color_image(
     saturation_milli: i32,
     hue_milli: i32,
     rotate: RotateMode,
-    deinterlace: bool,
+    deinterlace: DeinterlaceMode,
     bitmap: Option<&BitmapSubtitle>,
 ) -> egui::ColorImage {
     let width = frame.width as usize;
     let height = frame.height as usize;
     let mut source = frame.pixels.clone();
-    if deinterlace {
-        deinterlace_blend_rgb(&mut source, frame.width, frame.height);
-    }
+    apply_deinterlace_rgb(&mut source, frame.width, frame.height, deinterlace);
     if let Some(plane) = bitmap {
         blit_bitmap_subtitle(&mut source, frame.width, frame.height, plane);
     }
@@ -4840,14 +5465,16 @@ fn color_image(
     egui::ColorImage::new([out_w as usize, out_h as usize], pixels)
 }
 
-fn paint_subtitle(ui: &egui::Ui, rect: egui::Rect, text: &str, margin_px: i32) {
+fn paint_subtitle(ui: &egui::Ui, rect: egui::Rect, text: &str, margin_px: i32, scale_milli: i32) {
     let lines: Vec<&str> = text.lines().filter(|line| !line.is_empty()).collect();
     if lines.is_empty() {
         return;
     }
-    let font = egui::FontId::proportional(22.0);
+    let size = subtitle_font_px(22.0, scale_milli);
+    let line_h = size + 4.0;
+    let font = egui::FontId::proportional(size);
     let margin = subtitle_margin_px(12, margin_px) as f32;
-    let mut y = rect.bottom() - margin - lines.len() as f32 * 26.0;
+    let mut y = rect.bottom() - margin - lines.len() as f32 * line_h;
     for line in lines {
         let pos = egui::pos2(rect.center().x, y);
         ui.painter().text(
@@ -4864,7 +5491,7 @@ fn paint_subtitle(ui: &egui::Ui, rect: egui::Rect, text: &str, margin_px: i32) {
             font.clone(),
             egui::Color32::WHITE,
         );
-        y += 26.0;
+        y += line_h;
     }
 }
 

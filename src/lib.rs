@@ -922,5 +922,110 @@ mod play_controls {
         assert_eq!(fvid_media::parse_play_clock("90"), Some(90_000_000));
         assert_eq!(fvid_media::parse_play_clock("1:30.0"), Some(90_000_000));
         assert_eq!(fvid_media::parse_play_clock("bad"), None);
+        assert_eq!(fvid_media::EQ_PRESET_COUNT, 18);
+        assert_eq!(
+            fvid_media::eq_preset_gains(fvid_media::EqPreset::Flat),
+            fvid_media::eq_unity_gains()
+        );
+        let rock = fvid_media::eq_preset_db(fvid_media::EqPreset::Rock);
+        assert!((rock[0] - 8.0).abs() < 0.01);
+        assert!(fvid_media::eq_db_to_milli(0.0) == 1_000);
+        assert!(fvid_media::eq_db_to_milli(-6.0) < 1_000);
+        assert!(fvid_media::eq_db_to_milli(6.0) > 1_000);
+        assert_eq!(
+            fvid_media::cycle_eq_preset(fvid_media::EqPreset::Techno),
+            fvid_media::EqPreset::Flat
+        );
+        assert_eq!(fvid_media::seek_step_us(false), fvid_media::SEEK_COARSE_US);
+        assert_eq!(fvid_media::seek_step_us(true), fvid_media::SEEK_FINE_US);
+        assert_eq!(
+            fvid_media::media_display_title(std::path::Path::new("clips/demo.mp4"), Some(" My Title ")),
+            "My Title"
+        );
+        assert_eq!(
+            fvid_media::media_display_title(std::path::Path::new("clips/demo.mp4"), None),
+            "demo"
+        );
+        assert_eq!(
+            fvid_media::cycle_deinterlace(fvid_media::DeinterlaceMode::Off),
+            fvid_media::DeinterlaceMode::Blend
+        );
+        assert_eq!(
+            fvid_media::cycle_deinterlace(fvid_media::DeinterlaceMode::Blend),
+            fvid_media::DeinterlaceMode::Bob
+        );
+        assert_eq!(
+            fvid_media::cycle_deinterlace(fvid_media::DeinterlaceMode::Bob),
+            fvid_media::DeinterlaceMode::Off
+        );
+        assert_eq!(fvid_media::deinterlace_label(fvid_media::DeinterlaceMode::Bob), "Bob");
+        let mut bob = vec![0x00_ff_00_00u32, 0x00_00_00_ff, 0x00_00_ff_00, 0x00_ff_ff_00];
+        fvid_media::apply_deinterlace_rgb(&mut bob, 2, 2, fvid_media::DeinterlaceMode::Bob);
+        assert_eq!(bob[0], bob[2]);
+        assert_eq!(bob[1], bob[3]);
+        let mut unchanged = vec![1u32, 2, 3, 4];
+        fvid_media::apply_deinterlace_rgb(&mut unchanged, 2, 2, fvid_media::DeinterlaceMode::Off);
+        assert_eq!(unchanged, vec![1, 2, 3, 4]);
+        assert_eq!(fvid_media::format_volume_osd(1_000, false), "Volume 100%");
+        assert_eq!(fvid_media::format_volume_osd(1_500, false), "Volume 150%");
+        assert_eq!(fvid_media::format_volume_osd(500, true), "Volume muted");
+        assert_eq!(fvid_media::position_us_from_digit(5, 100_000_000), Some(50_000_000));
+        assert_eq!(fvid_media::position_us_from_digit(0, 100_000_000), Some(100_000_000));
+        assert_eq!(fvid_media::position_us_from_digit(3, -1), None);
+        assert_eq!(fvid_media::media_us_from_fraction(0.25, 80_000_000), 20_000_000);
+        assert!((fvid_media::media_fraction(25_000_000, 100_000_000) - 0.25).abs() < f32::EPSILON);
+        assert_eq!(fvid_media::volume_step_milli(1_000, fvid_media::VOLUME_STEP_MILLI), 1_050);
+        assert_eq!(fvid_media::volume_step_milli(1_990, 50), fvid_media::VOLUME_MAX_MILLI);
+        assert_eq!(fvid_media::rate_step_milli(1_000, fvid_media::RATE_STEP_MILLI), 1_100);
+        assert_eq!(fvid_media::rate_step_milli(250, -100), 250);
+        assert_eq!(fvid_media::format_play_clock(90_000_000), "01:30");
+        assert_eq!(fvid_media::format_rate_osd(1_500), "1.50x");
+        assert_eq!(
+            fvid_media::frame_step_target_us(1_000_000, 40_000, fvid_media::FrameStep::Forward),
+            1_040_000
+        );
+        assert_eq!(
+            fvid_media::frame_step_target_us(30_000, 40_000, fvid_media::FrameStep::Backward),
+            0
+        );
+        assert_eq!(
+            fvid_media::clamp_balance_milli(3_000),
+            fvid_media::BALANCE_MAX_MILLI
+        );
+        assert_eq!(
+            fvid_media::balance_step_milli(fvid_media::BALANCE_CENTER_MILLI, -fvid_media::BALANCE_STEP_MILLI),
+            900
+        );
+        let mut stereo = [0.5f32, 0.5];
+        fvid_media::apply_audio_balance(&mut stereo, fvid_media::BALANCE_CENTER_MILLI);
+        assert!((stereo[0] - 0.5).abs() < f32::EPSILON && (stereo[1] - 0.5).abs() < f32::EPSILON);
+        let mut left = [0.5f32, 0.5];
+        fvid_media::apply_audio_balance(&mut left, fvid_media::BALANCE_MIN_MILLI);
+        assert!((left[0] - 0.5).abs() < f32::EPSILON && left[1].abs() < f32::EPSILON);
+        let mut mono = [0.5f32];
+        fvid_media::apply_audio_balance(&mut mono, 0);
+        assert!((mono[0] - 0.5).abs() < f32::EPSILON);
+        assert_eq!(
+            fvid_media::format_balance_osd(fvid_media::BALANCE_CENTER_MILLI),
+            "Balance center"
+        );
+        assert_eq!(fvid_media::clamp_pan_px(0, 100, 100), 0);
+        assert_eq!(fvid_media::clamp_pan_px(80, 100, 200), 50);
+        assert_eq!(fvid_media::pan_step_px(0, 10, 100, 200), 10);
+        let (x, y, w, h) = fvid_media::zoom_pan_rect((0.0, 0.0, 100.0, 100.0), 200.0, 200.0, 0, 0);
+        assert!((w - 200.0).abs() < f32::EPSILON && (h - 200.0).abs() < f32::EPSILON);
+        assert!((x - (-50.0)).abs() < f32::EPSILON && (y - (-50.0)).abs() < f32::EPSILON);
+        assert_eq!(
+            fvid_media::clamp_subtitle_scale_milli(3_000),
+            fvid_media::SUBTITLE_SCALE_MAX_MILLI
+        );
+        assert!((fvid_media::subtitle_font_px(22.0, 2_000) - 44.0).abs() < f32::EPSILON);
+        assert!(!fvid_media::cycle_eq_bypass(true));
+        assert_eq!(fvid_media::format_eq_bypass_osd(false), "EQ on");
+        assert_eq!(fvid_media::reset_av_delays(), (0, 0));
+        assert_eq!(
+            fvid_media::format_delay_osd("audio", 100_000),
+            "audio delay 100 ms"
+        );
     }
 }

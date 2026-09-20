@@ -61,7 +61,7 @@ pub use play::{
     subtitle_clock_us, subtitle_delay_us, audio_delay_frames, step_audio_skew,
     PlaybackContinue, RepeatMode, AspectMode, cycle_aspect, aspect_label, frame_aspect,
     fit_aspect, center_crop, display_ratio,     zoom_step, zoom_label, zoom_size, ZOOM_MIN_MILLI,
-    ZOOM_MAX_MILLI, Bookmark, insert_bookmark, bookmark_step, shuffled_indices, order_step,
+    ZOOM_MAX_MILLI, clamp_pan_px, pan_step_px, zoom_pan_rect, Bookmark, insert_bookmark, bookmark_step, shuffled_indices, order_step,
     is_hls_playlist, parse_playlist_text, expand_play_inputs, clamp_volume_milli,
     clamp_adjust_milli, adjust_pixel, flip_uv, RotateMode, cycle_rotate, rotate_label,
     rotate_pixel, rotate_size, ToneState, tone_step, EQ_BAND_COUNT, EQ_BAND_HZ, GraphicEqState,
@@ -70,7 +70,18 @@ pub use play::{
     apply_audio_channel, clamp_subtitle_margin, subtitle_margin_px, SnapshotFormat,
     cycle_snapshot_format, snapshot_format_ext, encode_png, snapshot_path_with_ext,
     BitmapSubtitle, palette_rgba_pixel, pal8_to_rgba, blend_rgba_over_rgb, blit_bitmap_subtitle,
-    active_bitmap_subtitle, parse_play_clock, VOLUME_MAX_MILLI, PLAYBACK_PROTOCOLS,
+    active_bitmap_subtitle, parse_play_clock, EqPreset, EQ_PRESET_COUNT, eq_preset_label,
+    cycle_eq_preset, eq_preset_db, eq_preset_gains, eq_db_to_milli, clamp_eq_milli,
+    seek_step_us, SEEK_COARSE_US, SEEK_FINE_US, media_display_title, DeinterlaceMode,
+    cycle_deinterlace, deinterlace_label, deinterlace_bob_rgb, apply_deinterlace_rgb,
+    format_volume_osd, VOLUME_MAX_MILLI, VOLUME_STEP_MILLI, RATE_STEP_MILLI, volume_step_milli,
+    rate_step_milli, format_play_clock, format_rate_osd, position_us_from_digit, media_fraction,
+    media_us_from_fraction, FrameStep, frame_step_target_us, BALANCE_CENTER_MILLI,
+    BALANCE_MIN_MILLI, BALANCE_MAX_MILLI, BALANCE_STEP_MILLI, clamp_balance_milli,
+    balance_step_milli, apply_audio_balance, format_balance_osd, clamp_subtitle_scale_milli,
+    subtitle_scale_step_milli, subtitle_font_px, SUBTITLE_SCALE_MIN_MILLI, SUBTITLE_SCALE_MAX_MILLI,
+    SUBTITLE_SCALE_UNITY_MILLI, SUBTITLE_SCALE_STEP_MILLI, cycle_eq_bypass, format_eq_bypass_osd,
+    reset_av_delays, format_delay_osd, PLAYBACK_PROTOCOLS,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};
