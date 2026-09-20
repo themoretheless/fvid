@@ -1372,5 +1372,19 @@ mod play_controls {
         assert!(!fvid_media::mouse_should_hide(10, fvid_media::MOUSE_HIDE_DEFAULT_MS));
         assert_eq!(fvid_media::audio_peak_milli(&[0.0, 0.5, -0.25]), 500);
         assert_eq!(fvid_media::format_vu_osd(500), "VU 50%");
+        let snap = fvid_media::snapshot_path_in_dir(
+            Some(Path::new("shots")),
+            Path::new("clips/demo.mp4"),
+            3,
+            "png",
+        );
+        assert_eq!(snap, PathBuf::from("shots/demo-fvid-3.png"));
+        assert!(fvid_media::format_snapshot_dir_osd(Some(Path::new("shots"))).contains("shots"));
+        assert_eq!(
+            fvid_media::clamp_network_cache_ms(120_000),
+            fvid_media::NETWORK_CACHE_MAX_MS
+        );
+        assert!(fvid_media::format_network_cache_osd(1_000).contains("1000"));
+        assert!(fvid_media::format_hotkeys_help_osd().contains("Space"));
     }
 }

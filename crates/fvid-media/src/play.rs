@@ -3485,6 +3485,53 @@ pub fn snapshot_path_with_ext(video: &Path, index: u32, ext: &str) -> PathBuf {
     }
 }
 
+/// Resolve snapshot output under an optional directory (VLC `--snapshot-path`).
+pub fn snapshot_path_in_dir(
+    dir: Option<&Path>,
+    video: &Path,
+    index: u32,
+    ext: &str,
+) -> PathBuf {
+    let default = snapshot_path_with_ext(video, index, ext);
+    match dir {
+        Some(folder) if !folder.as_os_str().is_empty() => {
+            let name = default
+                .file_name()
+                .map(PathBuf::from)
+                .unwrap_or_else(|| PathBuf::from(format!("frame-fvid-{index}.{ext}")));
+            folder.join(name)
+        }
+        _ => default,
+    }
+}
+
+pub fn format_snapshot_dir_osd(dir: Option<&Path>) -> String {
+    match dir {
+        Some(path) if !path.as_os_str().is_empty() => {
+            format!("Snapshots {}", path.display())
+        }
+        _ => "Snapshots beside media".into(),
+    }
+}
+
+/// Network/stream demux cache in milliseconds (VLC `--network-caching`).
+pub const NETWORK_CACHE_DEFAULT_MS: u32 = 1_000;
+pub const NETWORK_CACHE_MIN_MS: u32 = 0;
+pub const NETWORK_CACHE_MAX_MS: u32 = 60_000;
+
+pub fn clamp_network_cache_ms(ms: u32) -> u32 {
+    ms.clamp(NETWORK_CACHE_MIN_MS, NETWORK_CACHE_MAX_MS)
+}
+
+pub fn format_network_cache_osd(ms: u32) -> String {
+    format!("Network cache {} ms", clamp_network_cache_ms(ms))
+}
+
+/// Compact on-screen hotkey reminder (VLC Help / F1 style).
+pub fn format_hotkeys_help_osd() -> &'static str {
+    "Space pause · ←→ seek · ↑↓ vol · M mute · F full · S snap · Esc quit"
+}
+
 /// Align one resampled chunk to the video origin. Later chunks pass through unchanged.
 pub(crate) fn take_aligned(
     aligned: &mut bool,
@@ -4843,6 +4890,7 @@ struct PlayerApp {
     step_pending: bool,
     snapshots: u32,
     snapshot_format: SnapshotFormat,
+    snapshot_dir: Option<PathBuf>,
     audio_ordinal: i32,
     subtitle_ordinal: i32,
     logged_sub: String,
@@ -4953,6 +5001,7 @@ impl PlayerApp {
             step_pending: false,
             snapshots: 0,
             snapshot_format: SnapshotFormat::Bmp,
+            snapshot_dir: None,
             audio_ordinal,
             subtitle_ordinal,
             logged_sub: String::new(),
@@ -5636,7 +5685,9 @@ impl PlayerApp {
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::P)) {
             self.step_playlist(-1);
         }
-        if !focused && ctx.input(|input| input.key_pressed(egui::Key::Slash)) {
+        if !focused
+            && ctx.input(|input| input.key_pressed(egui::Key::Slash) && !input.modifiers.shift)
+        {
             self.reset_av_sync();
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::Z)) {
@@ -5702,6 +5753,14 @@ impl PlayerApp {
             } else {
                 self.show_stats = !self.show_stats;
             }
+        }
+        if !focused
+            && ctx.input(|input| {
+                input.key_pressed(egui::Key::F1)
+                    || (input.key_pressed(egui::Key::Slash) && input.modifiers.shift)
+            })
+        {
+            self.notice = Some(format_hotkeys_help_osd().into());
         }
         if !focused
             && command
@@ -7235,7 +7294,8 @@ impl PlayerApp {
                     return;
                 }
             };
-            let path = snapshot_path_with_ext(
+            let path = snapshot_path_in_dir(
+                self.snapshot_dir.as_deref(),
                 &session.path,
                 self.snapshots + 1,
                 snapshot_format_ext(self.snapshot_format),
