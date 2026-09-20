@@ -1723,6 +1723,10 @@ mod play_controls {
             5
         );
         assert!(fvid_media::format_forced_only_osd(true).contains("Forced"));
+        assert_eq!(
+            fvid_media::parse_spherical_projection("cubemap").unwrap(),
+            fvid_media::SphericalProjection::Cubemap
+        );
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;

@@ -179,6 +179,7 @@ pub use play::{
     prefer_external_subtitle_path, format_external_subtitle_osd, SphericalProjection,
     cycle_spherical_projection, spherical_projection_label, format_spherical_projection_osd,
     dual_fisheye_to_equirect, sample_cubemap_pixel, project_little_planet, project_spherical_view,
+    parse_spherical_projection,
     clamp_hdr_maxcll, format_hdr_metadata_osd, COLOR_PRIMARIES_BT709, COLOR_PRIMARIES_BT2020,
     color_primaries_label, format_color_primaries_osd, silence_skip_target_us,
     format_silence_skip_osd, cycle_video_track, format_video_track_osd,

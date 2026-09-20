@@ -3518,6 +3518,8 @@ pub struct PlayOptions {
     pub stop_us: Option<i64>,
     /// Enable equirectangular 360° view on open (`--spherical`).
     pub spherical: bool,
+    /// 360° source projection (`--spherical-projection`).
+    pub spherical_projection: SphericalProjection,
     /// Initial yaw in degrees ×1000 for 360° view.
     pub yaw_deg_milli: i32,
     /// Initial pitch in degrees ×1000 for 360° view.
@@ -3567,6 +3569,7 @@ impl Default for PlayOptions {
             start_us: None,
             stop_us: None,
             spherical: false,
+            spherical_projection: SphericalProjection::Equirect,
             yaw_deg_milli: 0,
             pitch_deg_milli: 0,
             roll_deg_milli: 0,
@@ -3595,6 +3598,20 @@ pub fn parse_hdr_tonemap(spec: &str) -> Result<HdrTonemap> {
         "reinhard" => Ok(HdrTonemap::Reinhard),
         "hable" => Ok(HdrTonemap::Hable),
         other => Err(format!("unknown hdr tonemap `{other}` (off|clip|reinhard|hable)").into()),
+    }
+}
+
+/// Parse `--spherical-projection` values.
+pub fn parse_spherical_projection(spec: &str) -> Result<SphericalProjection> {
+    match spec.trim().to_ascii_lowercase().as_str() {
+        "equirect" | "equirectangular" | "360" => Ok(SphericalProjection::Equirect),
+        "dual-fisheye" | "fisheye" | "dfisheye" => Ok(SphericalProjection::DualFisheye),
+        "cubemap" | "cube" => Ok(SphericalProjection::Cubemap),
+        "little-planet" | "planet" | "stereographic" => Ok(SphericalProjection::LittlePlanet),
+        other => Err(format!(
+            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet)"
+        )
+        .into()),
     }
 }
 
@@ -7283,6 +7300,7 @@ impl PlayerApp {
         let first = playlist.first().cloned().unwrap_or_default();
         let stop_us = options.stop_us;
         let spherical = options.spherical;
+        let spherical_projection = options.spherical_projection;
         let yaw_deg_milli = clamp_yaw_milli(options.yaw_deg_milli);
         let pitch_deg_milli = clamp_pitch_milli(options.pitch_deg_milli);
         let roll_deg_milli = clamp_roll_milli(options.roll_deg_milli);
@@ -7372,7 +7390,7 @@ impl PlayerApp {
             playlist_sort: PlaylistSort::Path,
             recent: Vec::new(),
             post_fx: VideoPostFx::Off,
-            spherical_projection: SphericalProjection::Equirect,
+            spherical_projection,
             hdr_maxcll: 0,
             hdr_maxfall: 0,
             color_primaries: 0,
