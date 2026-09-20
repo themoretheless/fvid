@@ -189,6 +189,41 @@ pub fn tone_step(
     (low * bass + mid * mid_gain + high * treble).clamp(-1.0, 1.0)
 }
 
+/// Neutral Bass/Mid/Treble gain (`1000` = unity).
+pub const TONE_UNITY_MILLI: i32 = 1_000;
+pub const TONE_STEP_MILLI: i32 = 100;
+
+pub fn tone_gain_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_adjust_milli(current + delta)
+}
+
+pub fn reset_tone_gains() -> (i32, i32, i32) {
+    (TONE_UNITY_MILLI, TONE_UNITY_MILLI, TONE_UNITY_MILLI)
+}
+
+/// Apply Bass/Mid/Treble to one interleaved frame. `states.len()` should match channel count.
+pub fn apply_tone_frame(
+    frame: &mut [f32],
+    states: &mut [ToneState],
+    bass_milli: i32,
+    mid_milli: i32,
+    treble_milli: i32,
+) {
+    let n = frame.len().min(states.len());
+    for i in 0..n {
+        frame[i] = tone_step(frame[i], &mut states[i], bass_milli, mid_milli, treble_milli);
+    }
+}
+
+pub fn format_tone_osd(bass_milli: i32, mid_milli: i32, treble_milli: i32) -> String {
+    format!(
+        "Tone B{} M{} T{}",
+        clamp_adjust_milli(bass_milli) / 10,
+        clamp_adjust_milli(mid_milli) / 10,
+        clamp_adjust_milli(treble_milli) / 10
+    )
+}
+
 /// VLC-style 10-band graphic equalizer.
 pub const EQ_BAND_COUNT: usize = 10;
 
@@ -1630,6 +1665,11 @@ struct Shared {
         audio_skew_frames: AtomicI64,
         eq_gains_milli: [AtomicI32; EQ_BAND_COUNT],
         tone: Mutex<Vec<GraphicEqState>>,
+        /// Per-channel Bass/Mid/Treble filter state.
+        tone_bands: Mutex<Vec<ToneState>>,
+        bass_milli: AtomicI32,
+        mid_milli: AtomicI32,
+        treble_milli: AtomicI32,
         audio_reset: AtomicBool,
         audio_channel: AtomicU32,
         /// Stereo balance. 1000 is center, 0 full left, 2000 full right.
@@ -2374,11 +2414,18 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
         *gain = slot.load(Ordering::Relaxed);
     }
     let eq_bypass = shared.eq_bypass.load(Ordering::Relaxed);
+    let bass_milli = shared.bass_milli.load(Ordering::Relaxed);
+    let mid_milli = shared.mid_milli.load(Ordering::Relaxed);
+    let treble_milli = shared.treble_milli.load(Ordering::Relaxed);
     let mut tone = lock(&shared.tone);
     if tone.len() != channels {
         tone.resize(channels, GraphicEqState::default());
     }
-    let apply = |sample: f32, channel: usize, tone: &mut [GraphicEqState]| {
+    let mut tone_bands = lock(&shared.tone_bands);
+    if tone_bands.len() != channels {
+        tone_bands.resize(channels, ToneState::default());
+    }
+    let apply_eq = |sample: f32, channel: usize, tone: &mut [GraphicEqState]| {
         if eq_bypass {
             sample * gain
         } else {
@@ -2419,8 +2466,7 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
         phase = next_phase;
         if need == 0 {
             for channel in 0..channels {
-                let sample = if have_held { held[channel] } else { 0.0 };
-                frame_buf[channel] = apply(sample, channel, &mut tone);
+                frame_buf[channel] = if have_held { held[channel] } else { 0.0 };
             }
         } else {
             let drop = (need as usize - 1) * channels;
@@ -2428,10 +2474,20 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
             for channel in 0..channels {
                 let sample = queue.pop_front().unwrap_or(0.0);
                 held[channel] = sample;
-                frame_buf[channel] = apply(sample, channel, &mut tone);
+                frame_buf[channel] = sample;
             }
             have_held = true;
             consumed += u64::from(need);
+        }
+        apply_tone_frame(
+            &mut frame_buf,
+            &mut tone_bands,
+            bass_milli,
+            mid_milli,
+            treble_milli,
+        );
+        for channel in 0..channels {
+            frame_buf[channel] = apply_eq(frame_buf[channel], channel, &mut tone);
         }
         apply_audio_balance(&mut frame_buf, balance_milli);
         apply_audio_channel(&mut frame_buf, channel_mode);
@@ -2446,6 +2502,7 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
     drop(queue);
     drop(held);
     drop(tone);
+    drop(tone_bands);
     shared.rate_phase.store(phase, Ordering::Relaxed);
     shared.rate_held.store(have_held, Ordering::Relaxed);
     shared.audio_skew_frames.store(skew, Ordering::Relaxed);
@@ -3490,6 +3547,9 @@ struct PlayerApp {
     audio_channel: AudioChannelMode,
     balance_milli: i32,
     eq_bypass: bool,
+    bass_milli: i32,
+    mid_milli: i32,
+    treble_milli: i32,
     subtitle_margin_px: i32,
     subtitle_scale_milli: i32,
     rotate: RotateMode,
@@ -3564,6 +3624,9 @@ impl PlayerApp {
             audio_channel: AudioChannelMode::Stereo,
             balance_milli: BALANCE_CENTER_MILLI,
             eq_bypass: false,
+            bass_milli: TONE_UNITY_MILLI,
+            mid_milli: TONE_UNITY_MILLI,
+            treble_milli: TONE_UNITY_MILLI,
             subtitle_margin_px: 0,
             subtitle_scale_milli: SUBTITLE_SCALE_UNITY_MILLI,
             rotate: RotateMode::Deg0,
@@ -3647,6 +3710,10 @@ impl PlayerApp {
             audio_skew_frames: AtomicI64::new(0),
             eq_gains_milli: std::array::from_fn(|i| AtomicI32::new(self.eq_gains_milli[i])),
             tone: Mutex::new(Vec::new()),
+            tone_bands: Mutex::new(Vec::new()),
+            bass_milli: AtomicI32::new(self.bass_milli),
+            mid_milli: AtomicI32::new(self.mid_milli),
+            treble_milli: AtomicI32::new(self.treble_milli),
             audio_reset: AtomicBool::new(false),
             audio_channel: AtomicU32::new(match self.audio_channel {
                 AudioChannelMode::Stereo => 0,
@@ -4431,6 +4498,48 @@ impl PlayerApp {
                 self.toggle_eq_bypass();
             }
         });
+        ui.horizontal(|ui| {
+            ui.label("Bass");
+            let mut bass = self.bass_milli as f32 / 1000.0;
+            if ui
+                .add(egui::Slider::new(&mut bass, 0.0..=2.0).show_value(false))
+                .changed()
+            {
+                self.set_tone_gains(
+                    clamp_adjust_milli((bass * 1000.0).round() as i32),
+                    self.mid_milli,
+                    self.treble_milli,
+                );
+            }
+            ui.label("Mid");
+            let mut mid = self.mid_milli as f32 / 1000.0;
+            if ui
+                .add(egui::Slider::new(&mut mid, 0.0..=2.0).show_value(false))
+                .changed()
+            {
+                self.set_tone_gains(
+                    self.bass_milli,
+                    clamp_adjust_milli((mid * 1000.0).round() as i32),
+                    self.treble_milli,
+                );
+            }
+            ui.label("Treble");
+            let mut treble = self.treble_milli as f32 / 1000.0;
+            if ui
+                .add(egui::Slider::new(&mut treble, 0.0..=2.0).show_value(false))
+                .changed()
+            {
+                self.set_tone_gains(
+                    self.bass_milli,
+                    self.mid_milli,
+                    clamp_adjust_milli((treble * 1000.0).round() as i32),
+                );
+            }
+            if ui.button("Tone").clicked() {
+                let (b, m, t) = reset_tone_gains();
+                self.set_tone_gains(b, m, t);
+            }
+        });
     }
 
     fn track_row(&mut self, ui: &mut egui::Ui) {
@@ -4860,6 +4969,31 @@ impl PlayerApp {
                 .store(self.eq_bypass, Ordering::Relaxed);
         }
         self.notice = Some(format_eq_bypass_osd(self.eq_bypass).into());
+    }
+
+    fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {
+        self.bass_milli = clamp_adjust_milli(bass);
+        self.mid_milli = clamp_adjust_milli(mid);
+        self.treble_milli = clamp_adjust_milli(treble);
+        if let Some(session) = &self.session {
+            session
+                .shared
+                .bass_milli
+                .store(self.bass_milli, Ordering::Relaxed);
+            session
+                .shared
+                .mid_milli
+                .store(self.mid_milli, Ordering::Relaxed);
+            session
+                .shared
+                .treble_milli
+                .store(self.treble_milli, Ordering::Relaxed);
+        }
+        self.notice = Some(format_tone_osd(
+            self.bass_milli,
+            self.mid_milli,
+            self.treble_milli,
+        ));
     }
 
     fn nudge_subtitle_scale(&mut self, delta: i32) {

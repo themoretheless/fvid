@@ -1036,5 +1036,22 @@ mod play_controls {
         assert_eq!(fvid_media::format_subtitle_scale_osd(1_500), "Subtitles 150%");
         assert_eq!(fvid_media::format_jump_osd(90_000_000), "Jump 01:30");
         assert!(fvid_media::format_window_title("demo", 0, 60_000_000, true, 1_500).contains("1.50x"));
+        assert_eq!(
+            fvid_media::reset_tone_gains(),
+            (
+                fvid_media::TONE_UNITY_MILLI,
+                fvid_media::TONE_UNITY_MILLI,
+                fvid_media::TONE_UNITY_MILLI
+            )
+        );
+        assert_eq!(
+            fvid_media::tone_gain_step_milli(1_000, fvid_media::TONE_STEP_MILLI),
+            1_100
+        );
+        let mut states = [fvid_media::ToneState::default()];
+        let mut frame = [0.25f32];
+        fvid_media::apply_tone_frame(&mut frame, &mut states, 2_000, 1_000, 1_000);
+        assert!(frame[0] > 0.25);
+        assert!(fvid_media::format_tone_osd(1_000, 1_000, 1_000).contains("Tone"));
     }
 }
