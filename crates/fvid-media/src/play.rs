@@ -3188,6 +3188,91 @@ pub fn format_play_stats_csv(
     )
 }
 
+/// Film-grain / deband strength for HDR delivery (VLC video filter style).
+pub const DEBAND_DEFAULT_MILLI: i32 = 0;
+pub const DEBAND_MAX_MILLI: i32 = 1_000;
+
+pub fn clamp_deband_milli(value: i32) -> i32 {
+    value.clamp(0, DEBAND_MAX_MILLI)
+}
+
+pub fn apply_deband_pixel(red: u8, green: u8, blue: u8, strength_milli: i32, x: u32, y: u32) -> (u8, u8, u8) {
+    let strength = clamp_deband_milli(strength_milli);
+    if strength == 0 {
+        return (red, green, blue);
+    }
+    let mut hash = x.wrapping_mul(374761393) ^ y.wrapping_mul(668265263);
+    hash = (hash ^ (hash >> 13)).wrapping_mul(1274126177);
+    let noise = ((hash >> 24) as i32) - 128;
+    let delta = noise * strength / 8_000;
+    (
+        (i32::from(red) + delta).clamp(0, 255) as u8,
+        (i32::from(green) + delta).clamp(0, 255) as u8,
+        (i32::from(blue) + delta).clamp(0, 255) as u8,
+    )
+}
+
+pub fn format_deband_osd(strength_milli: i32) -> String {
+    if clamp_deband_milli(strength_milli) == 0 {
+        "Deband Off".into()
+    } else {
+        format!("Deband {}%", clamp_deband_milli(strength_milli) / 10)
+    }
+}
+
+/// Parse HDR MaxCLL/MaxFALL pair from CLI (`1000,400`).
+pub fn parse_hdr_maxcll_maxfall(spec: &str) -> Result<(u32, u32)> {
+    let (a, b) = spec
+        .split_once(',')
+        .ok_or_else(|| format!("expected MaxCLL,MaxFALL got `{spec}`"))?;
+    let maxcll: u32 = a
+        .trim()
+        .parse()
+        .map_err(|_| format!("invalid MaxCLL `{a}`"))?;
+    let maxfall: u32 = b
+        .trim()
+        .parse()
+        .map_err(|_| format!("invalid MaxFALL `{b}`"))?;
+    Ok((clamp_hdr_maxcll(maxcll), clamp_hdr_maxcll(maxfall)))
+}
+
+/// Dolby Vision profile tag presence (oracle; full DV bitstream remains OOS).
+pub fn format_dolby_vision_osd(profile: Option<u32>) -> String {
+    match profile {
+        Some(p) => format!("Dolby Vision profile {p}"),
+        None => "Dolby Vision Off".into(),
+    }
+}
+
+/// Snapshot WYSIWYG includes OSD overlay flag.
+pub fn format_snapshot_with_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Snapshot with OSD"
+    } else {
+        "Snapshot video only"
+    }
+}
+
+/// Loop filter for still-image / GIF-style playlists (count + delay).
+pub fn image_loop_remaining(count: u32, played: u32) -> Option<u32> {
+    if count == 0 {
+        return None; // infinite
+    }
+    if played >= count {
+        Some(0)
+    } else {
+        Some(count - played)
+    }
+}
+
+pub fn format_image_loop_osd(count: u32, played: u32) -> String {
+    match image_loop_remaining(count, played) {
+        None => format!("Image loop ∞ ({played})"),
+        Some(0) => "Image loop done".into(),
+        Some(left) => format!("Image loop {left} left"),
+    }
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -3908,6 +3993,10 @@ pub struct PlayOptions {
     pub display_effect: DisplayEffect,
     /// HDR display peak nits for tonemap output scaling.
     pub hdr_nits: u32,
+    /// HDR10 MaxCLL metadata (nits).
+    pub hdr_maxcll: u32,
+    /// HDR10 MaxFALL metadata (nits).
+    pub hdr_maxfall: u32,
 }
 
 impl Default for PlayOptions {
@@ -3942,6 +4031,8 @@ impl Default for PlayOptions {
             controls_autohide_ms: CONTROLS_AUTOHIDE_DEFAULT_MS,
             display_effect: DisplayEffect::Off,
             hdr_nits: HDR_NITS_DEFAULT,
+            hdr_maxcll: 0,
+            hdr_maxfall: 0,
         }
     }
 }
@@ -7675,6 +7766,8 @@ impl PlayerApp {
         let network_cache_ms = clamp_network_cache_ms(options.network_cache_ms);
         let display_effect = options.display_effect;
         let hdr_nits = clamp_hdr_nits(options.hdr_nits);
+        let hdr_maxcll = clamp_hdr_maxcll(options.hdr_maxcll);
+        let hdr_maxfall = clamp_hdr_maxcll(options.hdr_maxfall);
         let controls_autohide_ms = clamp_controls_autohide_ms(options.controls_autohide_ms);
         let http_reconnect = clamp_http_reconnect(options.http_reconnect);
         let mut app = Self {
@@ -7754,8 +7847,8 @@ impl PlayerApp {
             recent: Vec::new(),
             post_fx: VideoPostFx::Off,
             spherical_projection,
-            hdr_maxcll: 0,
-            hdr_maxfall: 0,
+            hdr_maxcll,
+            hdr_maxfall,
             color_primaries: 0,
             video_track: 0,
             video_track_count: 0,

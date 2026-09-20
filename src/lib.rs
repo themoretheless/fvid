@@ -1778,6 +1778,14 @@ mod play_controls {
         assert!(fvid_media::ab_slot_store(&mut slots, 0, 1_000, 2_000));
         assert_eq!(fvid_media::ab_slot_load(&slots, 0), Some((1_000, 2_000)));
         assert!(fvid_media::format_play_stats_csv(10, 1, 5_000_000, 1_000).contains("presented=10"));
+        assert_eq!(
+            fvid_media::parse_hdr_maxcll_maxfall("1000,400").unwrap(),
+            (1_000, 400)
+        );
+        let _ = fvid_media::apply_deband_pixel(128, 128, 128, 500, 3, 5);
+        assert!(fvid_media::format_deband_osd(200).contains("Deband"));
+        assert!(fvid_media::format_dolby_vision_osd(Some(5)).contains("5"));
+        assert_eq!(fvid_media::image_loop_remaining(3, 1), Some(2));
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;

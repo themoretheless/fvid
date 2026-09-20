@@ -41,6 +41,8 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     let mut fov_deg_milli = fvid_media::FOV_DEFAULT_MILLI;
     let mut hdr_tonemap = fvid_media::HdrTonemap::Off;
     let mut hdr_nits = fvid_media::HDR_NITS_DEFAULT;
+    let mut hdr_maxcll = 0u32;
+    let mut hdr_maxfall = 0u32;
     let mut stereo3d = fvid_media::PlayStereo3D::Off;
     let mut quit_at_end = false;
     let mut start_paused = false;
@@ -168,6 +170,15 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                     .parse()
                     .map_err(|_| format!("invalid hdr nits {value}"))?;
             }
+            "--hdr-maxcll" => {
+                index += 1;
+                let value = args
+                    .get(index)
+                    .ok_or("play --hdr-maxcll requires MaxCLL,MaxFALL")?;
+                let (cll, fall) = fvid_media::parse_hdr_maxcll_maxfall(value)?;
+                hdr_maxcll = cll;
+                hdr_maxfall = fall;
+            }
             "--play-stereo3d" => {
                 index += 1;
                 let value = args
@@ -195,7 +206,7 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             }
             "--help" | "-h" => {
                 println!(
-                    "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--on-top] [--rate N] [--start-time TIME] [--stop-time TIME] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices] [--spherical] [--spherical-projection equirect|dual-fisheye|cubemap|little-planet] [--yaw DEG] [--pitch DEG] [--roll DEG] [--fov DEG] [--hdr-tonemap off|clip|reinhard|hable] [--hdr-nits N] [--play-stereo3d off|sbsl|abl|mono-left|mono-right] [--play-and-exit] [--start-paused] [--network-caching MS] [--snapshot-path DIR]\nINPUT is a local file or http/https/rtsp/rtmp/udp URL. --start-time/--stop-time are mm:ss, hh:mm:ss, or seconds. Space pauses. Left/right seek 10s. Up/down volume. M mutes. B cycles audio. V cycles subtitles. L sets A-B loop. T always on top. F fullscreen. [ ] speed. . steps one frame. S saves a bitmap. Esc or Q quits. Drop files, or use Open / Open URL, to replace the playlist. Sub file loads SRT/ASS. The window stays open after the file ends and continues with the next playlist item. Display is capped at 1920x1080. Rate is clamped to 0.25..4. --spherical enables 360° view; --spherical-projection selects equirect/dual-fisheye/cubemap/little-planet; Ctrl+3 toggles; Ctrl+Shift+3 cycles projection; Shift+arrows roll. --hdr-tonemap selects display tonemap (auto Hable on PQ/HLG); --hdr-nits sets display peak. --play-stereo3d selects packed 3D view. --play-and-exit closes when the playlist stops. --start-paused opens paused. --network-caching sets demux cache ms. --snapshot-path sets snapshot directory."
+                    "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--on-top] [--rate N] [--start-time TIME] [--stop-time TIME] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices] [--spherical] [--spherical-projection equirect|dual-fisheye|cubemap|little-planet] [--yaw DEG] [--pitch DEG] [--roll DEG] [--fov DEG] [--hdr-tonemap off|clip|reinhard|hable] [--hdr-nits N] [--hdr-maxcll MaxCLL,MaxFALL] [--play-stereo3d off|sbsl|abl|mono-left|mono-right] [--play-and-exit] [--start-paused] [--network-caching MS] [--snapshot-path DIR]\nINPUT is a local file or http/https/rtsp/rtmp/udp URL. --start-time/--stop-time are mm:ss, hh:mm:ss, or seconds. Space pauses. Left/right seek 10s. Up/down volume. M mutes. B cycles audio. V cycles subtitles. L sets A-B loop. T always on top. F fullscreen. [ ] speed. . steps one frame. S saves a bitmap. Esc or Q quits. Drop files, or use Open / Open URL, to replace the playlist. Sub file loads SRT/ASS. The window stays open after the file ends and continues with the next playlist item. Display is capped at 1920x1080. Rate is clamped to 0.25..4. --spherical enables 360° view; --spherical-projection selects equirect/dual-fisheye/cubemap/little-planet; Ctrl+3 toggles; Ctrl+Shift+3 cycles projection; Shift+arrows roll. --hdr-tonemap selects display tonemap (auto Hable on PQ/HLG); --hdr-nits sets display peak; --hdr-maxcll sets MaxCLL,MaxFALL. --play-stereo3d selects packed 3D view. --play-and-exit closes when the playlist stops. --start-paused opens paused. --network-caching sets demux cache ms. --snapshot-path sets snapshot directory."
                 );
                 return Ok(());
             }
@@ -231,6 +242,8 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             fov_deg_milli,
             hdr_tonemap,
             hdr_nits,
+            hdr_maxcll,
+            hdr_maxfall,
             stereo3d,
             quit_at_end,
             start_paused,
