@@ -524,6 +524,45 @@ pub fn format_balance_osd(balance_milli: i32) -> String {
     }
 }
 
+/// Stereo width (mid/side): `1000` = normal, `0` = mono, `2000` = 2× wide.
+pub const WIDTH_UNITY_MILLI: i32 = 1_000;
+pub const WIDTH_MIN_MILLI: i32 = 0;
+pub const WIDTH_MAX_MILLI: i32 = 2_000;
+pub const WIDTH_STEP_MILLI: i32 = 100;
+
+pub fn clamp_width_milli(value: i32) -> i32 {
+    value.clamp(WIDTH_MIN_MILLI, WIDTH_MAX_MILLI)
+}
+
+pub fn width_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_width_milli(current + delta)
+}
+
+/// Mid/side stereo width. No-op when `frame.len() < 2` or width is unity.
+pub fn apply_stereo_width(frame: &mut [f32], width_milli: i32) {
+    if frame.len() < 2 {
+        return;
+    }
+    let width = clamp_width_milli(width_milli);
+    if width == WIDTH_UNITY_MILLI {
+        return;
+    }
+    let scale = width as f32 / 1_000.0;
+    let mid = (frame[0] + frame[1]) * 0.5;
+    let side = (frame[0] - frame[1]) * 0.5 * scale;
+    frame[0] = mid + side;
+    frame[1] = mid - side;
+}
+
+pub fn format_width_osd(width_milli: i32) -> String {
+    let width = clamp_width_milli(width_milli);
+    if width == WIDTH_UNITY_MILLI {
+        "Stereo width 1.00x".into()
+    } else {
+        format!("Stereo width {:.2}x", width as f32 / 1_000.0)
+    }
+}
+
 /// Clamp subtitle bottom margin in pixels (`0..=400`). Higher lifts text toward the top.
 pub fn clamp_subtitle_margin(px: i32) -> i32 {
     px.clamp(0, 400)
@@ -2041,6 +2080,8 @@ struct Shared {
         audio_channel: AtomicU32,
         /// Stereo balance. 1000 is center, 0 full left, 2000 full right.
         balance_milli: AtomicI32,
+        /// Stereo width. 1000 is normal, 0 mono, 2000 double-wide.
+        width_milli: AtomicI32,
         /// When true, graphic EQ is skipped in the audio path.
         eq_bypass: AtomicBool,
         /// VLC-style volume normalizer (peak follower + makeup gain).
@@ -2889,6 +2930,8 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
             frame_buf[channel] = apply_eq(frame_buf[channel], channel, &mut tone);
         }
         apply_audio_balance(&mut frame_buf, balance_milli);
+        let width_milli = shared.width_milli.load(Ordering::Relaxed);
+        apply_stereo_width(&mut frame_buf, width_milli);
         apply_audio_channel(&mut frame_buf, channel_mode);
         let mut frame_peak = 0.0f32;
         for channel in 0..channels {
@@ -3963,6 +4006,7 @@ struct PlayerApp {
     show_stats: bool,
     audio_channel: AudioChannelMode,
     balance_milli: i32,
+    width_milli: i32,
     eq_bypass: bool,
     volume_normalizer: bool,
     bass_milli: i32,
@@ -4045,6 +4089,7 @@ impl PlayerApp {
             show_stats: false,
             audio_channel: AudioChannelMode::Stereo,
             balance_milli: BALANCE_CENTER_MILLI,
+            width_milli: WIDTH_UNITY_MILLI,
             eq_bypass: false,
             volume_normalizer: false,
             bass_milli: TONE_UNITY_MILLI,
@@ -4062,7 +4107,7 @@ impl PlayerApp {
             app.error = Some(err);
         }
         eprintln!(
-            "fvid play: Space pause, left/right seek, up/down volume, M mute, B audio, V subtitles, L A-B loop, R repeat, G/H subtitle delay, J/K audio delay, A aspect, C crop, Z zoom, Ctrl+B bookmark, Ctrl+R shuffle, T on-top, Shift+T time, Ctrl+N vol normalizer, F fullscreen, [ ] speed, . step, S snapshot, Esc quit"
+            "fvid play: Space pause, left/right seek, up/down volume, M mute, B audio, V subtitles, L A-B loop, R repeat, G/H subtitle delay, J/K audio delay, A aspect, C crop, Z zoom, Ctrl+B bookmark, Ctrl+R shuffle, T on-top, Shift+T time, Ctrl+N vol normalizer, W stereo width, F fullscreen, [ ] speed, . step, S snapshot, Esc quit"
         );
         app
     }
@@ -4147,6 +4192,7 @@ impl PlayerApp {
                 AudioChannelMode::Reverse => 4,
             }),
             balance_milli: AtomicI32::new(self.balance_milli),
+            width_milli: AtomicI32::new(self.width_milli),
             eq_bypass: AtomicBool::new(self.eq_bypass),
             normalizer_on: AtomicBool::new(self.volume_normalizer),
             normalizer_peak_milli: AtomicU32::new(0),
@@ -4653,6 +4699,14 @@ impl PlayerApp {
             && ctx.input(|input| input.key_pressed(egui::Key::ArrowRight) && input.modifiers.alt)
         {
             self.nudge_balance(BALANCE_STEP_MILLI);
+        }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::W)) {
+            let wider = !ctx.input(|input| input.modifiers.shift);
+            self.nudge_stereo_width(if wider {
+                WIDTH_STEP_MILLI
+            } else {
+                -WIDTH_STEP_MILLI
+            });
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::E)) {
             self.toggle_eq_bypass();
@@ -5536,6 +5590,17 @@ impl PlayerApp {
                 .store(self.balance_milli, Ordering::Relaxed);
         }
         self.notice = Some(format_balance_osd(self.balance_milli));
+    }
+
+    fn nudge_stereo_width(&mut self, delta: i32) {
+        self.width_milli = width_step_milli(self.width_milli, delta);
+        if let Some(session) = &self.session {
+            session
+                .shared
+                .width_milli
+                .store(self.width_milli, Ordering::Relaxed);
+        }
+        self.notice = Some(format_width_osd(self.width_milli));
     }
 
     fn toggle_eq_bypass(&mut self) {

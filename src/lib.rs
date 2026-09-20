@@ -1165,5 +1165,14 @@ mod play_controls {
         assert!(fvid_media::normalizer_gain_milli(0.5, 0.95) > 1_000);
         assert!(fvid_media::apply_normalizer_sample(0.5, 2_000).abs() <= 1.0);
         assert!(fvid_media::format_normalizer_osd(true, 1_500).contains("1.50"));
+        let mut wide = [0.5f32, -0.5];
+        fvid_media::apply_stereo_width(&mut wide, 2_000);
+        assert!((wide[0] - 1.0).abs() < 0.01);
+        assert!((wide[1] + 1.0).abs() < 0.01);
+        let mut mono = [0.5f32, -0.5];
+        fvid_media::apply_stereo_width(&mut mono, 0);
+        assert!((mono[0] - mono[1]).abs() < 0.01);
+        assert_eq!(fvid_media::width_step_milli(1_000, 100), 1_100);
+        assert!(fvid_media::format_width_osd(1_500).contains("1.50"));
     }
 }
