@@ -1859,6 +1859,26 @@ mod play_controls {
         assert!(fvid_media::apply_dialogue_enhance_sample(0.5, 500).abs() > 0.5);
         let vs = fvid_media::vectorscope_quadrant_counts(&[0x00_ff_00_ffu32], 1);
         assert_eq!(vs.iter().sum::<u32>(), 1);
+        assert_eq!(fvid_media::yaw_from_swipe_px(90, 1), 90_000);
+        let (gy, _) = fvid_media::gyro_look_delta_milli(1_000, 0, 500);
+        assert_eq!(gy, 500);
+        assert!(fvid_media::vr_vignette_gain_milli(0, 0, 1_000) < 1_000);
+        let (face, _, _) = fvid_media::eac_face_uv_from_dir(1.0, 0.0, 0.0);
+        assert_eq!(face, 0);
+        assert_eq!(fvid_media::apply_hdr_black_lift_channel(10, 100), 25);
+        assert_eq!(
+            fvid_media::parse_m3u_extinf_title("#EXTINF:123,Track Title").as_deref(),
+            Some("Track Title")
+        );
+        assert_eq!(
+            fvid_media::thumbnail_grid_rect(2, 2, 3, 100, 100),
+            (50, 50, 50, 50)
+        );
+        assert_eq!(
+            fvid_media::media_key_label(fvid_media::MediaKeyAction::Next),
+            "Next"
+        );
+        assert!(fvid_media::format_icecast_metadata_osd(Some("A"), Some("T")).contains('—'));
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;

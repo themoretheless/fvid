@@ -4070,6 +4070,243 @@ pub fn format_vectorscope_osd(enabled: bool) -> &'static str {
     }
 }
 
+/// Touch / trackpad swipe → yaw delta for 360 look-around.
+pub fn yaw_from_swipe_px(dx_px: i32, px_per_degree: i32) -> i32 {
+    let ppd = px_per_degree.max(1);
+    clamp_yaw_milli((dx_px.saturating_mul(1_000)) / ppd)
+}
+
+pub fn pitch_from_swipe_px(dy_px: i32, px_per_degree: i32) -> i32 {
+    let ppd = px_per_degree.max(1);
+    clamp_pitch_milli((-dy_px.saturating_mul(1_000)) / ppd)
+}
+
+/// Integrate device gyro rates (milli-deg/s) over dt_ms into look deltas.
+pub fn gyro_look_delta_milli(
+    yaw_rate_milli: i32,
+    pitch_rate_milli: i32,
+    dt_ms: i32,
+) -> (i32, i32) {
+    let dt = dt_ms.max(0);
+    let yaw = (i64::from(yaw_rate_milli) * i64::from(dt) / 1_000) as i32;
+    let pitch = (i64::from(pitch_rate_milli) * i64::from(dt) / 1_000) as i32;
+    (yaw, pitch)
+}
+
+pub fn format_gyro_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Gyro look On"
+    } else {
+        "Gyro look Off"
+    }
+}
+
+/// VR comfort vignette strength by eccentricity (0 at center → strength at edges).
+pub fn vr_vignette_gain_milli(u_milli: i32, v_milli: i32, strength_milli: i32) -> i32 {
+    let strength = strength_milli.clamp(0, 1_000);
+    if strength == 0 {
+        return 1_000;
+    }
+    let u = (u_milli.clamp(0, 1_000) - 500) as f32 / 500.0;
+    let v = (v_milli.clamp(0, 1_000) - 500) as f32 / 500.0;
+    let r = (u * u + v * v).sqrt().min(1.0);
+    let darken = (r * strength as f32 / 1_000.0).clamp(0.0, 1.0);
+    ((1.0 - darken) * 1_000.0).round() as i32
+}
+
+pub fn apply_vr_vignette_pixel(red: u8, green: u8, blue: u8, gain_milli: i32) -> (u8, u8, u8) {
+    let g = gain_milli.clamp(0, 1_000) as u32;
+    (
+        (u32::from(red) * g / 1_000) as u8,
+        (u32::from(green) * g / 1_000) as u8,
+        (u32::from(blue) * g / 1_000) as u8,
+    )
+}
+
+pub fn format_vr_vignette_osd(strength_milli: i32) -> String {
+    if strength_milli <= 0 {
+        "VR vignette Off".into()
+    } else {
+        format!("VR vignette {}%", strength_milli.clamp(0, 1_000) / 10)
+    }
+}
+
+/// Equi-Angular Cubemap face index + local UV from direction (YouTube EAC).
+pub fn eac_face_uv_from_dir(x: f32, y: f32, z: f32) -> (u8, f32, f32) {
+    let ax = x.abs();
+    let ay = y.abs();
+    let az = z.abs();
+    let (face, uc, vc, maxc) = if ax >= ay && ax >= az {
+        if x > 0.0 {
+            (0u8, -z, y, ax)
+        } else {
+            (1, z, y, ax)
+        }
+    } else if ay >= ax && ay >= az {
+        if y > 0.0 {
+            (2, x, -z, ay)
+        } else {
+            (3, x, z, ay)
+        }
+    } else if z > 0.0 {
+        (4, x, y, az)
+    } else {
+        (5, -x, y, az)
+    };
+    let maxc = maxc.max(1e-6);
+    // Equi-angular: atan mapping vs perspective
+    let u = (uc.atan2(maxc) / std::f32::consts::FRAC_PI_4 + 1.0) * 0.5;
+    let v = (vc.atan2(maxc) / std::f32::consts::FRAC_PI_4 + 1.0) * 0.5;
+    (face, u.clamp(0.0, 1.0), v.clamp(0.0, 1.0))
+}
+
+pub fn format_eac_face_osd(face: u8) -> String {
+    let name = match face {
+        0 => "+X",
+        1 => "-X",
+        2 => "+Y",
+        3 => "-Y",
+        4 => "+Z",
+        _ => "-Z",
+    };
+    format!("EAC face {name}")
+}
+
+/// Lift HDR black level (pedestal) in milli (0 = crush blacks, 1000 = +full lift).
+pub fn apply_hdr_black_lift_channel(value: u8, lift_milli: i32) -> u8 {
+    let lift = lift_milli.clamp(0, 1_000);
+    if lift == 0 {
+        return value;
+    }
+    let floor = (255 * lift / 1_000) as u8;
+    value.max(floor)
+}
+
+pub fn format_hdr_black_lift_osd(lift_milli: i32) -> String {
+    if lift_milli <= 0 {
+        "HDR black lift Off".into()
+    } else {
+        format!("HDR black lift {}%", lift_milli.clamp(0, 1_000) / 10)
+    }
+}
+
+/// Unsharp / sharpen kernel weight (center vs neighbors).
+pub fn apply_unsharp_pixel(
+    width: u32,
+    height: u32,
+    pixels: &[u32],
+    x: u32,
+    y: u32,
+    amount_milli: i32,
+) -> u32 {
+    let amount = amount_milli.clamp(-1_000, 1_000);
+    if amount == 0 || width == 0 || height == 0 || pixels.len() < (width * height) as usize {
+        return pixels.get((y * width + x) as usize).copied().unwrap_or(0);
+    }
+    let src = pixels[(y * width + x) as usize];
+    let blur = apply_box_denoise_pixel(width, height, pixels, x, y, 1_000);
+    let sharpen = |s: u32, b: u32| -> u32 {
+        let s = s as i32;
+        let b = b as i32;
+        let d = s - b;
+        (s + d * amount / 1_000).clamp(0, 255) as u32
+    };
+    let sr = (src >> 16) & 0xff;
+    let sg = (src >> 8) & 0xff;
+    let sb = src & 0xff;
+    let br = (blur >> 16) & 0xff;
+    let bg = (blur >> 8) & 0xff;
+    let bb = blur & 0xff;
+    (sharpen(sr, br) << 16) | (sharpen(sg, bg) << 8) | sharpen(sb, bb)
+}
+
+pub fn format_unsharp_osd(amount_milli: i32) -> String {
+    if amount_milli == 0 {
+        "Unsharp Off".into()
+    } else {
+        format!("Unsharp {}%", amount_milli.clamp(-1_000, 1_000) / 10)
+    }
+}
+
+/// Icecast / Shoutcast stream title OSD.
+pub fn format_icecast_metadata_osd(artist: Option<&str>, title: Option<&str>) -> String {
+    match (artist.map(str::trim).filter(|s| !s.is_empty()), title.map(str::trim).filter(|s| !s.is_empty())) {
+        (Some(a), Some(t)) => format!("{a} — {t}"),
+        (None, Some(t)) => t.to_string(),
+        (Some(a), None) => a.to_string(),
+        (None, None) => "Stream metadata none".into(),
+    }
+}
+
+/// Media-key action labels (MPRIS / Windows media keys parity).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MediaKeyAction {
+    PlayPause,
+    Next,
+    Previous,
+    Stop,
+    SeekForward,
+    SeekBack,
+}
+
+pub fn media_key_label(action: MediaKeyAction) -> &'static str {
+    match action {
+        MediaKeyAction::PlayPause => "Play/Pause",
+        MediaKeyAction::Next => "Next",
+        MediaKeyAction::Previous => "Previous",
+        MediaKeyAction::Stop => "Stop",
+        MediaKeyAction::SeekForward => "Seek +",
+        MediaKeyAction::SeekBack => "Seek −",
+    }
+}
+
+pub fn format_media_key_osd(action: MediaKeyAction) -> String {
+    format!("Media key {}", media_key_label(action))
+}
+
+/// `#EXTINF` title from M3U line (podcast / radio playlists).
+pub fn parse_m3u_extinf_title(line: &str) -> Option<String> {
+    let line = line.trim();
+    let rest = line.strip_prefix("#EXTINF:")?;
+    let title = rest.split_once(',')?.1.trim();
+    if title.is_empty() {
+        None
+    } else {
+        Some(title.to_string())
+    }
+}
+
+/// Thumbnailer contact-sheet cell rect.
+pub fn thumbnail_grid_rect(
+    cols: u32,
+    rows: u32,
+    index: usize,
+    canvas_w: u32,
+    canvas_h: u32,
+) -> (u32, u32, u32, u32) {
+    let cols = cols.max(1);
+    let rows = rows.max(1);
+    let cell_w = canvas_w / cols;
+    let cell_h = canvas_h / rows;
+    let i = index as u32;
+    let col = i % cols;
+    let row = (i / cols) % rows;
+    (col * cell_w, row * cell_h, cell_w.max(1), cell_h.max(1))
+}
+
+pub fn format_thumbnail_grid_osd(cols: u32, rows: u32) -> String {
+    format!("Thumbs {cols}×{rows}")
+}
+
+/// Clipboard snapshot mode OSD (copy frame without writing a file).
+pub fn format_clipboard_snapshot_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Snapshot → clipboard"
+    } else {
+        "Snapshot → file"
+    }
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -8505,6 +8742,11 @@ struct PlayerApp {
     display_peak_nits: u32,
     hdr_mastering_min_milli: u32,
     hdr_mastering_max_nits: u32,
+    gyro_look: bool,
+    vr_vignette_milli: i32,
+    hdr_black_lift_milli: i32,
+    unsharp_milli: i32,
+    clipboard_snapshot: bool,
     seek_jump: SeekJump,
     surround_downmix: bool,
     scaletempo: bool,
@@ -8722,6 +8964,11 @@ impl PlayerApp {
             display_peak_nits: HDR_NITS_DEFAULT,
             hdr_mastering_min_milli,
             hdr_mastering_max_nits,
+            gyro_look: false,
+            vr_vignette_milli: 0,
+            hdr_black_lift_milli: 0,
+            unsharp_milli: 0,
+            clipboard_snapshot: false,
             seek_jump: SeekJump::default(),
             surround_downmix: false,
             scaletempo: true,
@@ -10087,6 +10334,54 @@ impl PlayerApp {
             })
         {
             self.toggle_vectorscope();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::G)
+            })
+        {
+            self.toggle_gyro_look();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::U)
+            })
+        {
+            self.cycle_vr_vignette();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::K)
+            })
+        {
+            self.cycle_hdr_black_lift();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::P)
+            })
+        {
+            self.cycle_unsharp();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::M)
+            })
+        {
+            self.toggle_clipboard_snapshot();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::Num6)
+            })
+        {
+            self.show_eac_face();
         }
         if !focused
             && command
@@ -11972,6 +12267,56 @@ impl PlayerApp {
     fn toggle_vectorscope(&mut self) {
         self.vectorscope_enabled = !self.vectorscope_enabled;
         self.notice = Some(format_vectorscope_osd(self.vectorscope_enabled).into());
+    }
+
+    fn toggle_gyro_look(&mut self) {
+        self.gyro_look = !self.gyro_look;
+        self.notice = Some(format_gyro_osd(self.gyro_look).into());
+    }
+
+    fn cycle_vr_vignette(&mut self) {
+        let next = match self.vr_vignette_milli {
+            0 => 350,
+            1..=350 => 700,
+            _ => 0,
+        };
+        self.vr_vignette_milli = next;
+        self.notice = Some(format_vr_vignette_osd(self.vr_vignette_milli));
+    }
+
+    fn cycle_hdr_black_lift(&mut self) {
+        let next = match self.hdr_black_lift_milli {
+            0 => 80,
+            1..=80 => 160,
+            _ => 0,
+        };
+        self.hdr_black_lift_milli = next;
+        self.notice = Some(format_hdr_black_lift_osd(self.hdr_black_lift_milli));
+    }
+
+    fn cycle_unsharp(&mut self) {
+        let next = match self.unsharp_milli {
+            0 => 400,
+            1..=400 => 800,
+            _ => 0,
+        };
+        self.unsharp_milli = next;
+        self.notice = Some(format_unsharp_osd(self.unsharp_milli));
+    }
+
+    fn toggle_clipboard_snapshot(&mut self) {
+        self.clipboard_snapshot = !self.clipboard_snapshot;
+        self.notice = Some(format_clipboard_snapshot_osd(self.clipboard_snapshot).into());
+    }
+
+    fn show_eac_face(&mut self) {
+        let yaw = (clamp_yaw_milli(self.yaw_deg_milli) as f32 / 1_000.0).to_radians();
+        let pitch = (clamp_pitch_milli(self.pitch_deg_milli) as f32 / 1_000.0).to_radians();
+        let x = yaw.cos() * pitch.cos();
+        let y = pitch.sin();
+        let z = yaw.sin() * pitch.cos();
+        let (face, _, _) = eac_face_uv_from_dir(x, y, z);
+        self.notice = Some(format_eac_face_osd(face));
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {
