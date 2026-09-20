@@ -1,0 +1,46 @@
+[
+  {
+    "label": "Debug fvid play (current file)",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": {
+      "command": "cargo",
+      "args": ["build", "--features", "media", "--bin", "fvid"],
+      "cwd": "$ZED_WORKTREE_ROOT",
+      "env": {
+        "FVID_FFMPEG_PREFIX": "C:\\ffmpeg-shared",
+        "LIBCLANG_PATH": "C:\\Program Files\\LLVM\\bin",
+        "PATH": "C:\\ffmpeg-shared\\bin;${PATH}"
+      }
+    },
+    "program": "$ZED_WORKTREE_ROOT/target/debug/fvid",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "args": ["play", "$ZED_FILE"],
+    "env": {
+      "PATH": "C:\\ffmpeg-shared\\bin;${PATH}"
+    },
+    "sourceLanguages": ["rust"]
+  },
+  {
+    "label": "Debug fvid play (selection / URL)",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "build": {
+      "command": "cargo",
+      "args": ["build", "--features", "media", "--bin", "fvid"],
+      "cwd": "$ZED_WORKTREE_ROOT",
+      "env": {
+        "FVID_FFMPEG_PREFIX": "C:\\ffmpeg-shared",
+        "LIBCLANG_PATH": "C:\\Program Files\\LLVM\\bin",
+        "PATH": "C:\\ffmpeg-shared\\bin;${PATH}"
+      }
+    },
+    "program": "$ZED_WORKTREE_ROOT/target/debug/fvid",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "args": ["play", "$ZED_SELECTED_TEXT"],
+    "env": {
+      "PATH": "C:\\ffmpeg-shared\\bin;${PATH}"
+    },
+    "sourceLanguages": ["rust"]
+  }
+]
