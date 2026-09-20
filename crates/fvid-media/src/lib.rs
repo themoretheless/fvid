@@ -173,7 +173,10 @@ pub use play::{
     format_hw_decode_osd, format_media_fingerprint_osd, LogoPosition, cycle_logo_position,
     logo_position_label, clamp_logo_opacity_milli, format_logo_osd, logo_anchor_xy, mosaic_tile_rect,
     format_mosaic_osd, clamp_param_eq_milli, apply_param_eq_sample, format_param_eq_osd,
-    clamp_amplifier_milli, apply_amplifier_sample, format_amplifier_osd,
+    clamp_amplifier_milli, apply_amplifier_sample, format_amplifier_osd, format_record_path,
+    format_record_osd, format_http_auth_osd, ProxyMode, cycle_proxy_mode, proxy_mode_label,
+    format_proxy_osd, prefer_stream_quality_index, format_stream_quality_osd,
+    prefer_external_subtitle_path, format_external_subtitle_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

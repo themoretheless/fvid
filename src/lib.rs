@@ -1641,6 +1641,27 @@ mod play_controls {
         );
         assert!((fvid_media::apply_param_eq_sample(0.5, 1_000) - 1.0).abs() < 1e-6);
         assert!(fvid_media::apply_amplifier_sample(0.8, 2_000).abs() <= 1.0);
+        let rec = fvid_media::format_record_path(Some(Path::new("out")), "cap", 2, "mkv");
+        assert_eq!(rec, PathBuf::from("out/cap-rec-2.mkv"));
+        assert!(fvid_media::format_record_osd(true, Some(Path::new("a.mkv"))).contains("a.mkv"));
+        assert_eq!(
+            fvid_media::cycle_proxy_mode(fvid_media::ProxyMode::Off),
+            fvid_media::ProxyMode::Http
+        );
+        assert_eq!(
+            fvid_media::prefer_stream_quality_index(&[400, 800, 1600], 900),
+            1
+        );
+        let media = Path::new("movie.mp4");
+        let subs = [
+            Path::new("other.srt"),
+            Path::new("movie.en.srt"),
+            Path::new("movie.srt"),
+        ];
+        assert_eq!(
+            fvid_media::prefer_external_subtitle_path(media, &subs),
+            Some(PathBuf::from("movie.srt"))
+        );
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
         hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;

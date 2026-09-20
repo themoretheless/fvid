@@ -2225,6 +2225,123 @@ pub fn format_amplifier_osd(amp_milli: i32) -> String {
     format!("Amplifier {}%", clamp_amplifier_milli(amp_milli) / 10)
 }
 
+/// Record-while-playing destination naming (VLC record).
+pub fn format_record_path(dir: Option<&Path>, stem: &str, index: u32, ext: &str) -> PathBuf {
+    let name = format!("{stem}-rec-{index}.{ext}");
+    match dir {
+        Some(folder) if !folder.as_os_str().is_empty() => folder.join(name),
+        _ => PathBuf::from(name),
+    }
+}
+
+pub fn format_record_osd(recording: bool, path: Option<&Path>) -> String {
+    if !recording {
+        return "Record Off".into();
+    }
+    match path.and_then(|p| p.file_name()).and_then(|n| n.to_str()) {
+        Some(name) => format!("Recording {name}"),
+        None => "Recording".into(),
+    }
+}
+
+/// HTTP basic-auth credential presence (oracle; secrets stay out of logs).
+pub fn format_http_auth_osd(has_user: bool, has_password: bool) -> &'static str {
+    match (has_user, has_password) {
+        (false, false) => "HTTP auth Off",
+        (true, false) => "HTTP auth user",
+        (true, true) => "HTTP auth user+pass",
+        (false, true) => "HTTP auth pass-only",
+    }
+}
+
+/// Network proxy mode for play inputs (VLC `--http-proxy`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum ProxyMode {
+    #[default]
+    Off,
+    Http,
+    Socks,
+}
+
+pub fn cycle_proxy_mode(mode: ProxyMode) -> ProxyMode {
+    match mode {
+        ProxyMode::Off => ProxyMode::Http,
+        ProxyMode::Http => ProxyMode::Socks,
+        ProxyMode::Socks => ProxyMode::Off,
+    }
+}
+
+pub fn proxy_mode_label(mode: ProxyMode) -> &'static str {
+    match mode {
+        ProxyMode::Off => "Off",
+        ProxyMode::Http => "HTTP",
+        ProxyMode::Socks => "SOCKS",
+    }
+}
+
+pub fn format_proxy_osd(mode: ProxyMode, host: &str) -> String {
+    let host = host.trim();
+    if matches!(mode, ProxyMode::Off) || host.is_empty() {
+        format!("Proxy {}", proxy_mode_label(mode))
+    } else {
+        format!("Proxy {} {host}", proxy_mode_label(mode))
+    }
+}
+
+/// Adaptive streaming quality ladder pick (HLS/DASH style).
+pub fn prefer_stream_quality_index(bitrates_kbps: &[u32], prefer_kbps: u32) -> usize {
+    if bitrates_kbps.is_empty() {
+        return 0;
+    }
+    let mut best = 0usize;
+    let mut best_delta = u32::MAX;
+    for (i, &rate) in bitrates_kbps.iter().enumerate() {
+        let delta = rate.abs_diff(prefer_kbps);
+        if delta < best_delta || (delta == best_delta && rate > bitrates_kbps[best]) {
+            best = i;
+            best_delta = delta;
+        }
+    }
+    best
+}
+
+pub fn format_stream_quality_osd(bitrate_kbps: u32) -> String {
+    format!("Quality {bitrate_kbps} kbps")
+}
+
+/// Subtitle autodetect fuzzy match for external files beside the media.
+pub fn prefer_external_subtitle_path(media: &Path, candidates: &[&Path]) -> Option<PathBuf> {
+    let stem = media.file_stem()?.to_str()?.to_ascii_lowercase();
+    let mut best: Option<(usize, PathBuf)> = None;
+    for candidate in candidates {
+        let name = candidate
+            .file_stem()
+            .and_then(|n| n.to_str())
+            .map(|n| n.to_ascii_lowercase())?;
+        let score = if name == stem {
+            0
+        } else if name.starts_with(&stem) {
+            1
+        } else if name.contains(&stem) {
+            2
+        } else {
+            continue;
+        };
+        match &best {
+            Some((prev, _)) if *prev <= score => {}
+            _ => best = Some((score, candidate.to_path_buf())),
+        }
+    }
+    best.map(|(_, path)| path)
+}
+
+pub fn format_external_subtitle_osd(path: Option<&Path>) -> String {
+    match path.and_then(|p| p.file_name()).and_then(|n| n.to_str()) {
+        Some(name) => format!("Ext sub {name}"),
+        None => "Ext sub none".into(),
+    }
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -6591,6 +6708,12 @@ struct PlayerApp {
     mosaic_rows: u32,
     param_eq_milli: i32,
     amplifier_milli: i32,
+    recording: bool,
+    record_dir: Option<PathBuf>,
+    proxy_mode: ProxyMode,
+    proxy_host: String,
+    http_auth_user: bool,
+    http_auth_password: bool,
     volume_normalizer: bool,
     bass_milli: i32,
     mid_milli: i32,
@@ -6750,6 +6873,12 @@ impl PlayerApp {
             mosaic_rows: 1,
             param_eq_milli: 0,
             amplifier_milli: 1_000,
+            recording: false,
+            record_dir: None,
+            proxy_mode: ProxyMode::Off,
+            proxy_host: String::new(),
+            http_auth_user: false,
+            http_auth_password: false,
             volume_normalizer: false,
             bass_milli: TONE_UNITY_MILLI,
             mid_milli: TONE_UNITY_MILLI,
@@ -7785,6 +7914,29 @@ impl PlayerApp {
             && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Minus))
         {
             self.nudge_amplifier(-100);
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::R))
+            && ctx.input(|input| input.modifiers.alt)
+        {
+            self.toggle_recording();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::X))
+        {
+            self.cycle_proxy();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| {
+                input.modifiers.alt
+                    && input.modifiers.shift
+                    && input.key_pressed(egui::Key::A)
+            })
+        {
+            self.toggle_http_auth_flags();
         }
         if !focused
             && command
@@ -9295,6 +9447,40 @@ impl PlayerApp {
     fn nudge_amplifier(&mut self, delta: i32) {
         self.amplifier_milli = clamp_amplifier_milli(self.amplifier_milli.saturating_add(delta));
         self.notice = Some(format_amplifier_osd(self.amplifier_milli));
+    }
+
+    fn toggle_recording(&mut self) {
+        self.recording = !self.recording;
+        let path = if self.recording {
+            Some(format_record_path(
+                self.record_dir.as_deref(),
+                "capture",
+                self.snapshots,
+                "mkv",
+            ))
+        } else {
+            None
+        };
+        self.notice = Some(format_record_osd(self.recording, path.as_deref()));
+    }
+
+    fn cycle_proxy(&mut self) {
+        self.proxy_mode = cycle_proxy_mode(self.proxy_mode);
+        self.notice = Some(format_proxy_osd(self.proxy_mode, &self.proxy_host));
+    }
+
+    fn toggle_http_auth_flags(&mut self) {
+        match (self.http_auth_user, self.http_auth_password) {
+            (false, false) => self.http_auth_user = true,
+            (true, false) => self.http_auth_password = true,
+            _ => {
+                self.http_auth_user = false;
+                self.http_auth_password = false;
+            }
+        }
+        self.notice = Some(
+            format_http_auth_osd(self.http_auth_user, self.http_auth_password).into(),
+        );
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {
