@@ -675,6 +675,94 @@ pub fn format_play_clock(us: i64) -> String {
     format_clock(us)
 }
 
+/// VLC-style position OSD: elapsed, remaining, or both.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum PositionDisplay {
+    #[default]
+    Elapsed,
+    Remaining,
+    Both,
+}
+
+pub fn cycle_position_display(mode: PositionDisplay) -> PositionDisplay {
+    match mode {
+        PositionDisplay::Elapsed => PositionDisplay::Remaining,
+        PositionDisplay::Remaining => PositionDisplay::Both,
+        PositionDisplay::Both => PositionDisplay::Elapsed,
+    }
+}
+
+/// Remaining media time; `0` when duration is unknown or already past the end.
+pub fn remaining_media_us(now_us: i64, duration_us: i64) -> i64 {
+    if duration_us < 0 {
+        return 0;
+    }
+    duration_us.saturating_sub(now_us.max(0)).max(0)
+}
+
+/// Position line for OSD / title (`01:00 / 02:00`, `-01:00`, or both).
+pub fn format_position_osd(now_us: i64, duration_us: i64, mode: PositionDisplay) -> String {
+    let now = format_clock(now_us.max(0));
+    match mode {
+        PositionDisplay::Elapsed => {
+            if duration_us >= 0 {
+                format!("{now} / {}", format_clock(duration_us))
+            } else {
+                now
+            }
+        }
+        PositionDisplay::Remaining => {
+            if duration_us >= 0 {
+                format!("-{}", format_clock(remaining_media_us(now_us, duration_us)))
+            } else {
+                now
+            }
+        }
+        PositionDisplay::Both => {
+            if duration_us >= 0 {
+                format!(
+                    "{now} / {} (-{})",
+                    format_clock(duration_us),
+                    format_clock(remaining_media_us(now_us, duration_us))
+                )
+            } else {
+                now
+            }
+        }
+    }
+}
+
+/// Peak-follower for VLC-style volume normalizer (`attack`/`release` in 0..=1).
+pub fn normalizer_peak_step(prev_peak: f32, sample_peak: f32, attack: f32, release: f32) -> f32 {
+    let sample_peak = sample_peak.abs().max(0.0);
+    let prev_peak = prev_peak.max(0.0);
+    if sample_peak > prev_peak {
+        prev_peak + (sample_peak - prev_peak) * attack.clamp(0.0, 1.0)
+    } else {
+        prev_peak + (sample_peak - prev_peak) * release.clamp(0.0, 1.0)
+    }
+}
+
+/// Makeup gain so `peak` reaches `target` (capped at 4×).
+pub fn normalizer_gain_milli(peak: f32, target: f32) -> u32 {
+    let peak = peak.abs().max(1e-6);
+    let target = target.clamp(0.1, 1.0);
+    let gain = (target / peak).clamp(0.0, 4.0);
+    (gain * 1_000.0).round() as u32
+}
+
+pub fn apply_normalizer_sample(sample: f32, gain_milli: u32) -> f32 {
+    soft_clip_sample(sample * (gain_milli as f32 / 1_000.0))
+}
+
+pub fn format_normalizer_osd(enabled: bool, gain_milli: u32) -> String {
+    if enabled {
+        format!("Vol normalizer {:.2}x", gain_milli as f32 / 1_000.0)
+    } else {
+        "Vol normalizer off".into()
+    }
+}
+
 /// Rate line for OSD (`1.50x`).
 pub fn format_rate_osd(rate_milli: u32) -> String {
     format_rate(rate_milli)
@@ -1310,21 +1398,32 @@ pub fn format_window_title(
     paused: bool,
     rate_milli: u32,
 ) -> String {
-    let now = format_clock(media_us);
+    format_window_title_with_position(
+        name,
+        media_us,
+        duration_us,
+        paused,
+        rate_milli,
+        PositionDisplay::Elapsed,
+    )
+}
+
+pub fn format_window_title_with_position(
+    name: &str,
+    media_us: i64,
+    duration_us: i64,
+    paused: bool,
+    rate_milli: u32,
+    position: PositionDisplay,
+) -> String {
+    let position = format_position_osd(media_us, duration_us, position);
     let paused = if paused { "  paused" } else { "" };
     let speed = if rate_milli != 1_000 {
         format!("  {}", format_rate(rate_milli))
     } else {
         String::new()
     };
-    if duration_us >= 0 {
-        format!(
-            "{name}  {now} / {}{paused}{speed}",
-            format_clock(duration_us)
-        )
-    } else {
-        format!("{name}  {now}{paused}{speed}")
-    }
+    format!("{name}  {position}{paused}{speed}")
 }
 
 /// Media clock used to pick a cue. A positive delay looks at an earlier time.
@@ -1944,6 +2043,10 @@ struct Shared {
         balance_milli: AtomicI32,
         /// When true, graphic EQ is skipped in the audio path.
         eq_bypass: AtomicBool,
+        /// VLC-style volume normalizer (peak follower + makeup gain).
+        normalizer_on: AtomicBool,
+        /// Smoothed peak ×1000 for the normalizer.
+        normalizer_peak_milli: AtomicU32,
     }
 
 struct Finish(Arc<Shared>);
@@ -2787,11 +2890,25 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
         }
         apply_audio_balance(&mut frame_buf, balance_milli);
         apply_audio_channel(&mut frame_buf, channel_mode);
+        let mut frame_peak = 0.0f32;
         for channel in 0..channels {
-            let sample = if gain > 1.0 {
-                soft_clip_sample(frame_buf[channel])
+            frame_peak = frame_peak.max(frame_buf[channel].abs());
+        }
+        let mut norm_gain = 1_000u32;
+        if shared.normalizer_on.load(Ordering::Relaxed) {
+            let prev = shared.normalizer_peak_milli.load(Ordering::Relaxed) as f32 / 1_000.0;
+            let next = normalizer_peak_step(prev, frame_peak, 0.35, 0.015);
+            shared
+                .normalizer_peak_milli
+                .store((next * 1_000.0).round() as u32, Ordering::Relaxed);
+            norm_gain = normalizer_gain_milli(next.max(frame_peak).max(1e-6), 0.95);
+        }
+        for channel in 0..channels {
+            let boosted = frame_buf[channel] * (norm_gain as f32 / 1_000.0);
+            let sample = if gain > 1.0 || norm_gain > 1_000 || boosted.abs() > 1.0 {
+                soft_clip_sample(boosted)
             } else {
-                frame_buf[channel].clamp(-1.0, 1.0)
+                boosted.clamp(-1.0, 1.0)
             };
             write(sample, &mut data[frame_index * channels + channel]);
         }
@@ -3847,6 +3964,7 @@ struct PlayerApp {
     audio_channel: AudioChannelMode,
     balance_milli: i32,
     eq_bypass: bool,
+    volume_normalizer: bool,
     bass_milli: i32,
     mid_milli: i32,
     treble_milli: i32,
@@ -3855,6 +3973,7 @@ struct PlayerApp {
     rotate: RotateMode,
     eq_gains_milli: [i32; EQ_BAND_COUNT],
     eq_preset: EqPreset,
+    position_display: PositionDisplay,
     outcome: Arc<Mutex<Option<std::result::Result<PlayStats, String>>>>,
 }
 
@@ -3927,6 +4046,7 @@ impl PlayerApp {
             audio_channel: AudioChannelMode::Stereo,
             balance_milli: BALANCE_CENTER_MILLI,
             eq_bypass: false,
+            volume_normalizer: false,
             bass_milli: TONE_UNITY_MILLI,
             mid_milli: TONE_UNITY_MILLI,
             treble_milli: TONE_UNITY_MILLI,
@@ -3935,13 +4055,14 @@ impl PlayerApp {
             rotate: RotateMode::Deg0,
             eq_gains_milli: eq_unity_gains(),
             eq_preset: EqPreset::Flat,
+            position_display: PositionDisplay::Elapsed,
             outcome,
         };
         if let Err(err) = app.start_session(first) {
             app.error = Some(err);
         }
         eprintln!(
-            "fvid play: Space pause, left/right seek, up/down volume, M mute, B audio, V subtitles, L A-B loop, R repeat, G/H subtitle delay, J/K audio delay, A aspect, C crop, Z zoom, Ctrl+B bookmark, Ctrl+R shuffle, T on-top, F fullscreen, [ ] speed, . step, S snapshot, Esc quit"
+            "fvid play: Space pause, left/right seek, up/down volume, M mute, B audio, V subtitles, L A-B loop, R repeat, G/H subtitle delay, J/K audio delay, A aspect, C crop, Z zoom, Ctrl+B bookmark, Ctrl+R shuffle, T on-top, Shift+T time, Ctrl+N vol normalizer, F fullscreen, [ ] speed, . step, S snapshot, Esc quit"
         );
         app
     }
@@ -4027,6 +4148,8 @@ impl PlayerApp {
             }),
             balance_milli: AtomicI32::new(self.balance_milli),
             eq_bypass: AtomicBool::new(self.eq_bypass),
+            normalizer_on: AtomicBool::new(self.volume_normalizer),
+            normalizer_peak_milli: AtomicU32::new(0),
         });
         let stream = if self.options.audio {
             match start_audio(Arc::clone(&shared), self.options.audio_device.as_deref()) {
@@ -4315,7 +4438,7 @@ impl PlayerApp {
                 !focused && pressed(egui::Key::K),
                 !focused && pressed(egui::Key::A),
                 !focused && pressed(egui::Key::C),
-                !focused && pressed(egui::Key::T),
+                !focused && pressed(egui::Key::T) && !input.modifiers.shift,
             )
         });
         if keys.0 {
@@ -4483,8 +4606,16 @@ impl PlayerApp {
         if keys.24 {
             self.toggle_on_top();
         }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::T) && input.modifiers.shift) {
+            self.cycle_position_osd();
+        }
+        if !focused && command && ctx.input(|input| input.key_pressed(egui::Key::N)) {
+            self.toggle_volume_normalizer();
+        }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::N)) {
-            self.step_playlist(1);
+            if !command {
+                self.step_playlist(1);
+            }
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::P)) {
             self.step_playlist(-1);
@@ -4653,7 +4784,7 @@ impl PlayerApp {
                 stored.clone()
             }
         };
-        let title = window_title(&name, &session.shared, session.media_now);
+        let title = window_title(&name, &session.shared, session.media_now, self.position_display);
         if title != self.title {
             self.title.clone_from(&title);
             ctx.send_viewport_cmd(egui::ViewportCommand::Title(title));
@@ -5225,6 +5356,47 @@ impl PlayerApp {
         };
         eprintln!("fvid play: {notice}");
         self.notice = Some(notice.into());
+    }
+
+    fn cycle_position_osd(&mut self) {
+        self.position_display = cycle_position_display(self.position_display);
+        let duration = self.duration_us();
+        let now = self
+            .session
+            .as_ref()
+            .map(|session| session.media_now)
+            .unwrap_or(0);
+        let notice = format_position_osd(now, duration, self.position_display);
+        eprintln!("fvid play: {notice}");
+        self.notice = Some(notice);
+        self.title.clear();
+    }
+
+    fn toggle_volume_normalizer(&mut self) {
+        self.volume_normalizer = !self.volume_normalizer;
+        let gain = if let Some(session) = self.session.as_ref() {
+            session
+                .shared
+                .normalizer_on
+                .store(self.volume_normalizer, Ordering::Relaxed);
+            if !self.volume_normalizer {
+                session
+                    .shared
+                    .normalizer_peak_milli
+                    .store(0, Ordering::Relaxed);
+            }
+            session.shared.normalizer_peak_milli.load(Ordering::Relaxed)
+        } else {
+            0
+        };
+        let gain = if gain == 0 {
+            1_000
+        } else {
+            normalizer_gain_milli(gain as f32 / 1_000.0, 0.95)
+        };
+        let notice = format_normalizer_osd(self.volume_normalizer, gain);
+        eprintln!("fvid play: {notice}");
+        self.notice = Some(notice);
     }
 
     fn add_bookmark(&mut self) {
@@ -6177,13 +6349,14 @@ fn paint_drop_hover(ctx: &egui::Context) {
     );
 }
 
-fn window_title(name: &str, shared: &Shared, media_now: i64) -> String {
-    format_window_title(
+fn window_title(name: &str, shared: &Shared, media_now: i64, position: PositionDisplay) -> String {
+    format_window_title_with_position(
         name,
         media_now,
         shared.duration_us.load(Ordering::Relaxed),
         shared.paused.load(Ordering::Relaxed),
         shared.rate_milli.load(Ordering::Relaxed),
+        position,
     )
 }
 

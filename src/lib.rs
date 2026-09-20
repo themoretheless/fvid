@@ -1143,5 +1143,27 @@ mod play_controls {
         assert_eq!(fvid_media::soft_clip_sample(0.5), 0.5);
         assert!(fvid_media::soft_clip_sample(2.0) < 1.0);
         assert!(fvid_media::soft_clip_sample(-2.0) > -1.0);
+        assert_eq!(fvid_media::remaining_media_us(30_000_000, 90_000_000), 60_000_000);
+        assert_eq!(
+            fvid_media::cycle_position_display(fvid_media::PositionDisplay::Elapsed),
+            fvid_media::PositionDisplay::Remaining
+        );
+        assert!(fvid_media::format_position_osd(
+            30_000_000,
+            90_000_000,
+            fvid_media::PositionDisplay::Remaining
+        )
+        .starts_with('-'));
+        assert!(fvid_media::format_position_osd(
+            30_000_000,
+            90_000_000,
+            fvid_media::PositionDisplay::Both
+        )
+        .contains("(-"));
+        let peak = fvid_media::normalizer_peak_step(0.1, 0.8, 1.0, 0.0);
+        assert!((peak - 0.8).abs() < 0.01);
+        assert!(fvid_media::normalizer_gain_milli(0.5, 0.95) > 1_000);
+        assert!(fvid_media::apply_normalizer_sample(0.5, 2_000).abs() <= 1.0);
+        assert!(fvid_media::format_normalizer_osd(true, 1_500).contains("1.50"));
     }
 }
