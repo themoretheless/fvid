@@ -114,7 +114,7 @@ pub use play::{
     format_integer_zoom_osd, detect_equirect_aspect, fit_window_to_video, format_fit_window_osd,
     SUBTITLE_OPACITY_MIN_MILLI, SUBTITLE_OPACITY_MAX_MILLI, SUBTITLE_OPACITY_UNITY_MILLI,
     SUBTITLE_OPACITY_STEP_MILLI, clamp_subtitle_opacity_milli, subtitle_opacity_step_milli,
-    format_subtitle_opacity_osd, subtitle_opacity_u8,
+    format_subtitle_opacity_osd, subtitle_opacity_u8, format_track_osd, should_quit_at_end,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

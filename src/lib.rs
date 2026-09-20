@@ -1327,5 +1327,15 @@ mod play_controls {
         assert_eq!(fvid_media::subtitle_opacity_u8(500), 127);
         assert!(fvid_media::format_subtitle_opacity_osd(800).contains("80%"));
         assert!(fvid_media::format_integer_zoom_osd(1_000).contains("1:1"));
+        assert_eq!(fvid_media::format_track_osd("Audio", 1, 3), "Audio 2/3");
+        assert_eq!(fvid_media::format_track_osd("Subtitles", -1, 2), "Subtitles off");
+        assert!(fvid_media::should_quit_at_end(
+            true,
+            fvid_media::PlaybackContinue::Stop
+        ));
+        assert!(!fvid_media::should_quit_at_end(
+            true,
+            fvid_media::PlaybackContinue::Next(1)
+        ));
     }
 }

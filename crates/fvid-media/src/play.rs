@@ -1651,6 +1651,8 @@ pub struct PlayOptions {
     pub hdr_tonemap: HdrTonemap,
     /// Packed stereo3d display mode (`--play-stereo3d`).
     pub stereo3d: PlayStereo3D,
+    /// Close the player when the playlist finishes (VLC `--play-and-exit`).
+    pub quit_at_end: bool,
 }
 
 impl Default for PlayOptions {
@@ -1673,6 +1675,7 @@ impl Default for PlayOptions {
             fov_deg_milli: FOV_DEFAULT_MILLI,
             hdr_tonemap: HdrTonemap::Off,
             stereo3d: PlayStereo3D::Off,
+            quit_at_end: false,
         }
     }
 }
@@ -2078,6 +2081,24 @@ pub fn cycle_track(len: usize, current: i32, delta: i32, include_off: bool) -> i
     };
     let next = (base + delta).rem_euclid(span);
     if include_off { next - 1 } else { next }
+}
+
+/// OSD for audio/subtitle track selection (`Audio 2/3`, `Subtitles off`).
+pub fn format_track_osd(kind: &str, ordinal: i32, total: usize) -> String {
+    if ordinal < 0 || total == 0 {
+        format!("{kind} off")
+    } else {
+        format!(
+            "{kind} {}/{}",
+            (ordinal as usize).saturating_add(1),
+            total.max(1)
+        )
+    }
+}
+
+/// Whether play should close after the playlist stops (VLC `--play-and-exit`).
+pub fn should_quit_at_end(quit_at_end: bool, cont: PlaybackContinue) -> bool {
+    quit_at_end && matches!(cont, PlaybackContinue::Stop)
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -6787,6 +6808,7 @@ impl PlayerApp {
         lock(&session.shared.cues).clear();
         session.shared.video_cv.notify_all();
         session.shared.audio_cv.notify_all();
+        self.notice = Some(format_track_osd("Audio", next, count));
     }
 
     fn cycle_subtitle(&mut self, delta: i32) {
@@ -6802,6 +6824,7 @@ impl PlayerApp {
         self.logged_sub.clear();
         session.shared.video_cv.notify_all();
         session.shared.audio_cv.notify_all();
+        self.notice = Some(format_track_osd("Subtitles", next, count));
     }
 
     fn current_subtitle(&self) -> String {
@@ -7387,6 +7410,8 @@ impl eframe::App for PlayerApp {
                     {
                         self.order_cursor = cursor;
                         self.goto_playlist(index);
+                    } else if self.options.quit_at_end {
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                     }
                 } else {
                     match playback_continue(self.playlist.len(), self.playlist_index, self.repeat)
@@ -7397,7 +7422,11 @@ impl eframe::App for PlayerApp {
                             self.request_seek(0);
                             self.set_paused(false);
                         }
-                        PlaybackContinue::Stop => {}
+                        PlaybackContinue::Stop => {
+                            if self.options.quit_at_end {
+                                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                            }
+                        }
                     }
                 }
             }
