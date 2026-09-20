@@ -36,6 +36,7 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     let mut spherical = false;
     let mut yaw_deg_milli = 0i32;
     let mut pitch_deg_milli = 0i32;
+    let mut roll_deg_milli = 0i32;
     let mut fov_deg_milli = fvid_media::FOV_DEFAULT_MILLI;
     let mut hdr_tonemap = fvid_media::HdrTonemap::Off;
     let mut stereo3d = fvid_media::PlayStereo3D::Off;
@@ -130,6 +131,11 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 let value = args.get(index).ok_or("play --pitch requires degrees")?;
                 pitch_deg_milli = fvid_media::parse_degrees_milli(value)?;
             }
+            "--roll" => {
+                index += 1;
+                let value = args.get(index).ok_or("play --roll requires degrees")?;
+                roll_deg_milli = fvid_media::parse_degrees_milli(value)?;
+            }
             "--fov" => {
                 index += 1;
                 let value = args.get(index).ok_or("play --fov requires degrees")?;
@@ -152,7 +158,7 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             "--play-and-exit" | "--quit-at-end" => quit_at_end = true,
             "--help" | "-h" => {
                 println!(
-                    "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--on-top] [--rate N] [--start-time TIME] [--stop-time TIME] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices] [--spherical] [--yaw DEG] [--pitch DEG] [--fov DEG] [--hdr-tonemap off|clip|reinhard|hable] [--play-stereo3d off|sbsl|abl|mono-left|mono-right] [--play-and-exit]\nINPUT is a local file or http/https/rtsp/rtmp/udp URL. --start-time/--stop-time are mm:ss, hh:mm:ss, or seconds. Space pauses. Left/right seek 10s. Up/down volume. M mutes. B cycles audio. V cycles subtitles. L sets A-B loop. T always on top. F fullscreen. [ ] speed. . steps one frame. S saves a bitmap. Esc or Q quits. Drop files, or use Open / Open URL, to replace the playlist. Sub file loads SRT/ASS. The window stays open after the file ends and continues with the next playlist item. Display is capped at 1920x1080. Rate is clamped to 0.25..4. --spherical enables 360° equirect view; Ctrl+3 toggles. --hdr-tonemap selects display tonemap (auto Hable on PQ/HLG). --play-stereo3d selects packed 3D view. --play-and-exit closes when the playlist stops."
+                    "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--on-top] [--rate N] [--start-time TIME] [--stop-time TIME] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices] [--spherical] [--yaw DEG] [--pitch DEG] [--roll DEG] [--fov DEG] [--hdr-tonemap off|clip|reinhard|hable] [--play-stereo3d off|sbsl|abl|mono-left|mono-right] [--play-and-exit]\nINPUT is a local file or http/https/rtsp/rtmp/udp URL. --start-time/--stop-time are mm:ss, hh:mm:ss, or seconds. Space pauses. Left/right seek 10s. Up/down volume. M mutes. B cycles audio. V cycles subtitles. L sets A-B loop. T always on top. F fullscreen. [ ] speed. . steps one frame. S saves a bitmap. Esc or Q quits. Drop files, or use Open / Open URL, to replace the playlist. Sub file loads SRT/ASS. The window stays open after the file ends and continues with the next playlist item. Display is capped at 1920x1080. Rate is clamped to 0.25..4. --spherical enables 360° equirect view; Ctrl+3 toggles; Shift+arrows roll. --hdr-tonemap selects display tonemap (auto Hable on PQ/HLG). --play-stereo3d selects packed 3D view. --play-and-exit closes when the playlist stops."
                 );
                 return Ok(());
             }
@@ -183,6 +189,7 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             spherical,
             yaw_deg_milli,
             pitch_deg_milli,
+            roll_deg_milli,
             fov_deg_milli,
             hdr_tonemap,
             stereo3d,
@@ -1233,8 +1240,6 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             r#loop: vloop.clone(),
             thumbnail: thumbnail.clone(),
             freezedetect: freezedetect.clone(),
-            setpts: setpts.clone(),
-            select: select.clone(),
             pseudocolor: pseudocolor.clone(),
             minterpolate: minterpolate.clone(),
             fps: fps.clone(),
@@ -1354,8 +1359,8 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             || transform.r#loop.is_some()
             || transform.thumbnail.is_some()
             || transform.freezedetect.is_some()
-            || transform.setpts.is_some()
-            || transform.select.is_some()
+            || setpts.is_some()
+            || select.is_some()
             || transform.pseudocolor.is_some()
             || transform.minterpolate.is_some()
             || transform.fps.is_some()
@@ -1723,8 +1728,6 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                     r#loop: vloop.clone(),
                     thumbnail: thumbnail.clone(),
                     freezedetect: freezedetect.clone(),
-                    setpts: setpts.clone(),
-                    select: select.clone(),
                     pseudocolor: pseudocolor.clone(),
                     minterpolate: minterpolate.clone(),
                     fps: fps.clone(),
@@ -2215,8 +2218,6 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             r#loop: vloop,
             thumbnail,
             freezedetect,
-            setpts,
-            select,
             pseudocolor,
             minterpolate,
             fps,

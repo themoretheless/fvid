@@ -1337,5 +1337,40 @@ mod play_controls {
             true,
             fvid_media::PlaybackContinue::Next(1)
         ));
+        assert_eq!(fvid_media::clamp_roll_milli(-5_000), 355_000);
+        assert_eq!(fvid_media::roll_step_milli(0, fvid_media::ROLL_STEP_MILLI), 5_000);
+        assert!(fvid_media::format_spherical_osd_ex(true, 0, 0, 90_000, 80_000).contains("roll"));
+        let level = fvid_media::project_equirect_view(64, 32, &dual, 8, 8, 0, 0, 60_000);
+        let rolled = fvid_media::project_equirect_view_ex(64, 32, &dual, 8, 8, 0, 0, 90_000, 60_000);
+        assert!(level.iter().zip(rolled.iter()).any(|(a, b)| a != b));
+        assert_eq!(
+            fvid_media::cycle_subtitle_position(fvid_media::SubtitlePosition::Bottom),
+            fvid_media::SubtitlePosition::Center
+        );
+        assert_eq!(
+            fvid_media::subtitle_block_top_y(100.0, 2, 10.0, 8.0, fvid_media::SubtitlePosition::Top),
+            8.0
+        );
+        assert!(
+            fvid_media::subtitle_block_top_y(
+                100.0,
+                2,
+                10.0,
+                8.0,
+                fvid_media::SubtitlePosition::Bottom
+            ) > 50.0
+        );
+        assert!(fvid_media::format_subtitle_position_osd(fvid_media::SubtitlePosition::Center)
+            .contains("center"));
+        assert!(!fvid_media::osd_should_clear(100, fvid_media::OSD_TIMEOUT_DEFAULT_MS));
+        assert!(fvid_media::osd_should_clear(3_000, fvid_media::OSD_TIMEOUT_DEFAULT_MS));
+        assert_eq!(
+            fvid_media::clamp_osd_timeout_ms(10),
+            fvid_media::OSD_TIMEOUT_MIN_MS
+        );
+        assert!(fvid_media::mouse_should_hide(1_000, fvid_media::MOUSE_HIDE_DEFAULT_MS));
+        assert!(!fvid_media::mouse_should_hide(10, fvid_media::MOUSE_HIDE_DEFAULT_MS));
+        assert_eq!(fvid_media::audio_peak_milli(&[0.0, 0.5, -0.25]), 500);
+        assert_eq!(fvid_media::format_vu_osd(500), "VU 50%");
     }
 }

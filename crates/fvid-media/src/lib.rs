@@ -105,7 +105,9 @@ pub use play::{
     format_sleep_osd, FOV_MIN_MILLI, FOV_MAX_MILLI, FOV_DEFAULT_MILLI, FOV_STEP_MILLI,
     YAW_STEP_MILLI, PITCH_STEP_MILLI, PITCH_MIN_MILLI, PITCH_MAX_MILLI, clamp_yaw_milli,
     clamp_pitch_milli, clamp_fov_milli, yaw_step_milli, pitch_step_milli, fov_step_milli,
-    format_spherical_osd, sample_equirect_pixel, project_equirect_view, HdrTonemap,
+    ROLL_STEP_MILLI, clamp_roll_milli, roll_step_milli, format_spherical_osd,
+    format_spherical_osd_ex, sample_equirect_pixel, project_equirect_view,
+    project_equirect_view_ex, HdrTonemap,
     COLOR_TRC_SMPTE2084, COLOR_TRC_HLG, is_hdr_transfer, cycle_hdr_tonemap, hdr_tonemap_label,
     format_hdr_tonemap_osd, tonemap_channel, apply_hdr_tonemap_pixel, auto_hdr_tonemap,
     pq_eotf, hlg_eotf, expand_hdr_channel, PlayStereo3D, cycle_play_stereo3d, play_stereo3d_label,
@@ -115,6 +117,10 @@ pub use play::{
     SUBTITLE_OPACITY_MIN_MILLI, SUBTITLE_OPACITY_MAX_MILLI, SUBTITLE_OPACITY_UNITY_MILLI,
     SUBTITLE_OPACITY_STEP_MILLI, clamp_subtitle_opacity_milli, subtitle_opacity_step_milli,
     format_subtitle_opacity_osd, subtitle_opacity_u8, format_track_osd, should_quit_at_end,
+    SubtitlePosition, cycle_subtitle_position, subtitle_position_label,
+    format_subtitle_position_osd, subtitle_block_top_y, OSD_TIMEOUT_DEFAULT_MS,
+    OSD_TIMEOUT_MIN_MS, OSD_TIMEOUT_MAX_MS, clamp_osd_timeout_ms, osd_should_clear,
+    MOUSE_HIDE_DEFAULT_MS, mouse_should_hide, audio_peak_milli, format_vu_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

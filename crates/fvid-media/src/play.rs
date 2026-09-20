@@ -687,6 +687,85 @@ pub fn subtitle_opacity_u8(opacity_milli: i32) -> u8 {
     ((clamp_subtitle_opacity_milli(opacity_milli) as i64 * 255) / 1_000).clamp(0, 255) as u8
 }
 
+/// Vertical placement for painted subtitle text (VLC-style).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum SubtitlePosition {
+    #[default]
+    Bottom,
+    Center,
+    Top,
+}
+
+pub fn cycle_subtitle_position(position: SubtitlePosition) -> SubtitlePosition {
+    match position {
+        SubtitlePosition::Bottom => SubtitlePosition::Center,
+        SubtitlePosition::Center => SubtitlePosition::Top,
+        SubtitlePosition::Top => SubtitlePosition::Bottom,
+    }
+}
+
+pub fn subtitle_position_label(position: SubtitlePosition) -> &'static str {
+    match position {
+        SubtitlePosition::Bottom => "bottom",
+        SubtitlePosition::Center => "center",
+        SubtitlePosition::Top => "top",
+    }
+}
+
+pub fn format_subtitle_position_osd(position: SubtitlePosition) -> String {
+    format!("Subtitles {}", subtitle_position_label(position))
+}
+
+/// Y of the top of a subtitle block inside a viewport of `height`.
+pub fn subtitle_block_top_y(
+    height: f32,
+    line_count: usize,
+    line_h: f32,
+    margin: f32,
+    position: SubtitlePosition,
+) -> f32 {
+    let block_h = line_count as f32 * line_h;
+    match position {
+        SubtitlePosition::Bottom => (height - margin - block_h).max(0.0),
+        SubtitlePosition::Center => ((height - block_h) * 0.5).max(0.0),
+        SubtitlePosition::Top => margin.max(0.0),
+    }
+}
+
+/// Default OSD auto-clear timeout (VLC-style).
+pub const OSD_TIMEOUT_DEFAULT_MS: u64 = 3_000;
+pub const OSD_TIMEOUT_MIN_MS: u64 = 500;
+pub const OSD_TIMEOUT_MAX_MS: u64 = 30_000;
+
+pub fn clamp_osd_timeout_ms(ms: u64) -> u64 {
+    ms.clamp(OSD_TIMEOUT_MIN_MS, OSD_TIMEOUT_MAX_MS)
+}
+
+/// Whether an OSD notice shown `elapsed_ms` ago should clear.
+pub fn osd_should_clear(elapsed_ms: u64, timeout_ms: u64) -> bool {
+    elapsed_ms >= clamp_osd_timeout_ms(timeout_ms)
+}
+
+/// Hide the mouse cursor after idle (VLC `--mouse-hide-timeout`).
+pub const MOUSE_HIDE_DEFAULT_MS: u64 = 1_000;
+
+pub fn mouse_should_hide(idle_ms: u64, timeout_ms: u64) -> bool {
+    idle_ms >= timeout_ms.max(1)
+}
+
+/// Peak absolute sample amplitude as milli (1000 = 0 dBFS).
+pub fn audio_peak_milli(samples: &[f32]) -> u32 {
+    let peak = samples
+        .iter()
+        .map(|sample| sample.abs())
+        .fold(0.0f32, f32::max);
+    ((peak * 1_000.0).round() as u32).min(2_000)
+}
+
+pub fn format_vu_osd(peak_milli: u32) -> String {
+    format!("VU {}%", peak_milli.min(1_000) / 10)
+}
+
 pub fn cycle_eq_bypass(bypassed: bool) -> bool {
     !bypassed
 }
@@ -1078,6 +1157,7 @@ pub struct PlayRenderOptions {
     pub spherical: bool,
     pub yaw_deg_milli: i32,
     pub pitch_deg_milli: i32,
+    pub roll_deg_milli: i32,
     pub fov_deg_milli: i32,
     pub hdr_tonemap: HdrTonemap,
     /// Stream `color_trc` used when expanding PQ/HLG before display tonemap.
@@ -1100,6 +1180,7 @@ impl Default for PlayRenderOptions {
             spherical: false,
             yaw_deg_milli: 0,
             pitch_deg_milli: 0,
+            roll_deg_milli: 0,
             fov_deg_milli: FOV_DEFAULT_MILLI,
             hdr_tonemap: HdrTonemap::Off,
             color_trc: 0,
@@ -1116,6 +1197,7 @@ pub const YAW_STEP_MILLI: i32 = 5_000;
 pub const PITCH_STEP_MILLI: i32 = 5_000;
 pub const PITCH_MIN_MILLI: i32 = -89_000;
 pub const PITCH_MAX_MILLI: i32 = 89_000;
+pub const ROLL_STEP_MILLI: i32 = 5_000;
 
 pub fn clamp_yaw_milli(value: i32) -> i32 {
     let mut yaw = value % 360_000;
@@ -1133,6 +1215,14 @@ pub fn clamp_fov_milli(value: i32) -> i32 {
     value.clamp(FOV_MIN_MILLI, FOV_MAX_MILLI)
 }
 
+pub fn clamp_roll_milli(value: i32) -> i32 {
+    let mut roll = value % 360_000;
+    if roll < 0 {
+        roll += 360_000;
+    }
+    roll
+}
+
 pub fn yaw_step_milli(current: i32, delta: i32) -> i32 {
     clamp_yaw_milli(current + delta)
 }
@@ -1145,19 +1235,34 @@ pub fn fov_step_milli(current: i32, delta: i32) -> i32 {
     clamp_fov_milli(current + delta)
 }
 
+pub fn roll_step_milli(current: i32, delta: i32) -> i32 {
+    clamp_roll_milli(current + delta)
+}
+
 pub fn format_spherical_osd(
     enabled: bool,
     yaw_deg_milli: i32,
     pitch_deg_milli: i32,
     fov_deg_milli: i32,
 ) -> String {
+    format_spherical_osd_ex(enabled, yaw_deg_milli, pitch_deg_milli, 0, fov_deg_milli)
+}
+
+pub fn format_spherical_osd_ex(
+    enabled: bool,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    roll_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> String {
     if !enabled {
         return "360° off".into();
     }
     format!(
-        "360° yaw {:.0}° pitch {:.0}° fov {:.0}°",
+        "360° yaw {:.0}° pitch {:.0}° roll {:.0}° fov {:.0}°",
         clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0,
         clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0,
+        clamp_roll_milli(roll_deg_milli) as f32 / 1_000.0,
         clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0
     )
 }
@@ -1191,20 +1296,49 @@ pub fn project_equirect_view(
     pitch_deg_milli: i32,
     fov_deg_milli: i32,
 ) -> Vec<u32> {
+    project_equirect_view_ex(
+        src_w,
+        src_h,
+        src,
+        out_w,
+        out_h,
+        yaw_deg_milli,
+        pitch_deg_milli,
+        0,
+        fov_deg_milli,
+    )
+}
+
+/// Like [`project_equirect_view`] with viewpoint roll (degrees ×1000).
+pub fn project_equirect_view_ex(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    roll_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> Vec<u32> {
     let out_w = out_w.max(1);
     let out_h = out_h.max(1);
     let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
     let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+    let roll = (clamp_roll_milli(roll_deg_milli) as f32 / 1_000.0).to_radians();
     let fov = (clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0).to_radians();
     let aspect = out_w as f32 / out_h as f32;
     let tan_half = (fov * 0.5).tan();
     let (sin_y, cos_y) = yaw.sin_cos();
     let (sin_p, cos_p) = pitch.sin_cos();
+    let (sin_r, cos_r) = roll.sin_cos();
     let mut out = vec![0u32; out_w as usize * out_h as usize];
     for oy in 0..out_h {
-        let ny = (1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32) * tan_half;
+        let ny0 = (1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32) * tan_half;
         for ox in 0..out_w {
-            let nx = (2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0) * tan_half * aspect;
+            let nx0 = (2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0) * tan_half * aspect;
+            let nx = nx0 * cos_r - ny0 * sin_r;
+            let ny = nx0 * sin_r + ny0 * cos_r;
             // Camera looks +Z; rotate pitch then yaw.
             let x1 = nx;
             let y1 = ny * cos_p - 1.0 * sin_p;
@@ -1382,7 +1516,7 @@ pub fn render_play_pixels(
         source = packed;
     }
     if opts.spherical {
-        source = project_equirect_view(
+        source = project_equirect_view_ex(
             width,
             height,
             &source,
@@ -1390,6 +1524,7 @@ pub fn render_play_pixels(
             height,
             opts.yaw_deg_milli,
             opts.pitch_deg_milli,
+            opts.roll_deg_milli,
             opts.fov_deg_milli,
         );
     }
@@ -1645,6 +1780,8 @@ pub struct PlayOptions {
     pub yaw_deg_milli: i32,
     /// Initial pitch in degrees ×1000 for 360° view.
     pub pitch_deg_milli: i32,
+    /// Initial roll in degrees ×1000 for 360° view.
+    pub roll_deg_milli: i32,
     /// Initial FOV in degrees ×1000 for 360° view.
     pub fov_deg_milli: i32,
     /// Display HDR tonemap mode (`--hdr-tonemap`).
@@ -1672,6 +1809,7 @@ impl Default for PlayOptions {
             spherical: false,
             yaw_deg_milli: 0,
             pitch_deg_milli: 0,
+            roll_deg_milli: 0,
             fov_deg_milli: FOV_DEFAULT_MILLI,
             hdr_tonemap: HdrTonemap::Off,
             stereo3d: PlayStereo3D::Off,
@@ -4687,6 +4825,11 @@ struct PlayerApp {
     fitted: bool,
     error: Option<String>,
     notice: Option<String>,
+    notice_at: Option<Instant>,
+    notice_text: Option<String>,
+    osd_timeout_ms: u64,
+    mouse_moved_at: Instant,
+    mouse_hide_ms: u64,
     pending: Option<PathBuf>,
     title: String,
     scrub: Option<f32>,
@@ -4743,6 +4886,7 @@ struct PlayerApp {
     subtitle_margin_px: i32,
     subtitle_scale_milli: i32,
     subtitle_opacity_milli: i32,
+    subtitle_position: SubtitlePosition,
     rotate: RotateMode,
     eq_gains_milli: [i32; EQ_BAND_COUNT],
     eq_preset: EqPreset,
@@ -4752,6 +4896,7 @@ struct PlayerApp {
     spherical: bool,
     yaw_deg_milli: i32,
     pitch_deg_milli: i32,
+    roll_deg_milli: i32,
     fov_deg_milli: i32,
     hdr_tonemap: HdrTonemap,
     hdr_auto_applied: bool,
@@ -4775,6 +4920,7 @@ impl PlayerApp {
         let spherical = options.spherical;
         let yaw_deg_milli = clamp_yaw_milli(options.yaw_deg_milli);
         let pitch_deg_milli = clamp_pitch_milli(options.pitch_deg_milli);
+        let roll_deg_milli = clamp_roll_milli(options.roll_deg_milli);
         let fov_deg_milli = clamp_fov_milli(options.fov_deg_milli);
         let hdr_tonemap = options.hdr_tonemap;
         let hdr_auto_applied = !matches!(options.hdr_tonemap, HdrTonemap::Off);
@@ -4789,6 +4935,11 @@ impl PlayerApp {
             fitted: false,
             error: None,
             notice: None,
+            notice_at: None,
+            notice_text: None,
+            osd_timeout_ms: OSD_TIMEOUT_DEFAULT_MS,
+            mouse_moved_at: Instant::now(),
+            mouse_hide_ms: MOUSE_HIDE_DEFAULT_MS,
             pending: None,
             title: String::new(),
             scrub: None,
@@ -4844,6 +4995,7 @@ impl PlayerApp {
             subtitle_margin_px: 0,
             subtitle_scale_milli: SUBTITLE_SCALE_UNITY_MILLI,
             subtitle_opacity_milli: SUBTITLE_OPACITY_UNITY_MILLI,
+            subtitle_position: SubtitlePosition::Bottom,
             rotate: RotateMode::Deg0,
             eq_gains_milli: eq_unity_gains(),
             eq_preset: EqPreset::Flat,
@@ -4853,6 +5005,7 @@ impl PlayerApp {
             spherical,
             yaw_deg_milli,
             pitch_deg_milli,
+            roll_deg_milli,
             fov_deg_milli,
             hdr_tonemap,
             hdr_auto_applied,
@@ -5270,7 +5423,11 @@ impl PlayerApp {
         }
         if keys.2 {
             if self.spherical {
-                self.nudge_yaw(-YAW_STEP_MILLI);
+                if ctx.input(|input| input.modifiers.shift) {
+                    self.nudge_roll(-ROLL_STEP_MILLI);
+                } else {
+                    self.nudge_yaw(-YAW_STEP_MILLI);
+                }
             } else if command {
                 self.step_bookmark(-1);
             } else {
@@ -5287,7 +5444,11 @@ impl PlayerApp {
         }
         if keys.3 {
             if self.spherical {
-                self.nudge_yaw(YAW_STEP_MILLI);
+                if ctx.input(|input| input.modifiers.shift) {
+                    self.nudge_roll(ROLL_STEP_MILLI);
+                } else {
+                    self.nudge_yaw(YAW_STEP_MILLI);
+                }
             } else if command {
                 self.step_bookmark(1);
             } else {
@@ -5550,12 +5711,20 @@ impl PlayerApp {
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::ArrowUp) && input.modifiers.alt)
         {
-            self.subtitle_margin_px = clamp_subtitle_margin(self.subtitle_margin_px + 10);
+            if command {
+                self.cycle_subtitle_pos();
+            } else {
+                self.subtitle_margin_px = clamp_subtitle_margin(self.subtitle_margin_px + 10);
+            }
         }
         if !focused
             && ctx.input(|input| input.key_pressed(egui::Key::ArrowDown) && input.modifiers.alt)
         {
-            self.subtitle_margin_px = clamp_subtitle_margin(self.subtitle_margin_px - 10);
+            if command {
+                self.cycle_subtitle_pos();
+            } else {
+                self.subtitle_margin_px = clamp_subtitle_margin(self.subtitle_margin_px - 10);
+            }
         }
         if !focused
             && ctx.input(|input| input.key_pressed(egui::Key::ArrowLeft) && input.modifiers.alt)
@@ -5685,6 +5854,7 @@ impl PlayerApp {
             self.spherical,
             self.yaw_deg_milli,
             self.pitch_deg_milli,
+            self.roll_deg_milli,
             self.fov_deg_milli,
             self.hdr_tonemap,
             frame.color_trc,
@@ -6295,10 +6465,11 @@ impl PlayerApp {
     fn toggle_spherical(&mut self) {
         self.spherical = !self.spherical;
         self.adjust_dirty = true;
-        let notice = format_spherical_osd(
+        let notice = format_spherical_osd_ex(
             self.spherical,
             self.yaw_deg_milli,
             self.pitch_deg_milli,
+            self.roll_deg_milli,
             self.fov_deg_milli,
         );
         eprintln!("fvid play: {notice}");
@@ -6308,10 +6479,11 @@ impl PlayerApp {
     fn nudge_yaw(&mut self, delta: i32) {
         self.yaw_deg_milli = yaw_step_milli(self.yaw_deg_milli, delta);
         self.adjust_dirty = true;
-        self.notice = Some(format_spherical_osd(
+        self.notice = Some(format_spherical_osd_ex(
             self.spherical,
             self.yaw_deg_milli,
             self.pitch_deg_milli,
+            self.roll_deg_milli,
             self.fov_deg_milli,
         ));
     }
@@ -6319,10 +6491,23 @@ impl PlayerApp {
     fn nudge_pitch(&mut self, delta: i32) {
         self.pitch_deg_milli = pitch_step_milli(self.pitch_deg_milli, delta);
         self.adjust_dirty = true;
-        self.notice = Some(format_spherical_osd(
+        self.notice = Some(format_spherical_osd_ex(
             self.spherical,
             self.yaw_deg_milli,
             self.pitch_deg_milli,
+            self.roll_deg_milli,
+            self.fov_deg_milli,
+        ));
+    }
+
+    fn nudge_roll(&mut self, delta: i32) {
+        self.roll_deg_milli = roll_step_milli(self.roll_deg_milli, delta);
+        self.adjust_dirty = true;
+        self.notice = Some(format_spherical_osd_ex(
+            self.spherical,
+            self.yaw_deg_milli,
+            self.pitch_deg_milli,
+            self.roll_deg_milli,
             self.fov_deg_milli,
         ));
     }
@@ -6330,12 +6515,50 @@ impl PlayerApp {
     fn nudge_fov(&mut self, delta: i32) {
         self.fov_deg_milli = fov_step_milli(self.fov_deg_milli, delta);
         self.adjust_dirty = true;
-        self.notice = Some(format_spherical_osd(
+        self.notice = Some(format_spherical_osd_ex(
             self.spherical,
             self.yaw_deg_milli,
             self.pitch_deg_milli,
+            self.roll_deg_milli,
             self.fov_deg_milli,
         ));
+    }
+
+    fn cycle_subtitle_pos(&mut self) {
+        self.subtitle_position = cycle_subtitle_position(self.subtitle_position);
+        self.notice = Some(format_subtitle_position_osd(self.subtitle_position));
+    }
+
+    fn tick_osd_and_mouse(&mut self, ctx: &egui::Context) {
+        match &self.notice {
+            Some(text) => {
+                if self.notice_text.as_deref() != Some(text.as_str()) {
+                    self.notice_text = Some(text.clone());
+                    self.notice_at = Some(Instant::now());
+                }
+            }
+            None => {
+                self.notice_text = None;
+                self.notice_at = None;
+            }
+        }
+        if let Some(at) = self.notice_at
+            && osd_should_clear(at.elapsed().as_millis() as u64, self.osd_timeout_ms)
+        {
+            self.notice = None;
+            self.notice_text = None;
+            self.notice_at = None;
+        }
+        if ctx.input(|input| input.pointer.delta().length_sq() > 0.0 || !input.events.is_empty()) {
+            // Only count pointer motion for hide timer.
+            if ctx.input(|input| input.pointer.delta().length_sq() > 0.0) {
+                self.mouse_moved_at = Instant::now();
+            }
+        }
+        let idle = self.mouse_moved_at.elapsed().as_millis() as u64;
+        if mouse_should_hide(idle, self.mouse_hide_ms) {
+            ctx.set_cursor_icon(egui::CursorIcon::None);
+        }
     }
 
     fn cycle_hdr_mode(&mut self) {
@@ -6787,10 +7010,11 @@ impl PlayerApp {
         if detect_equirect_aspect(frame.width, frame.height) {
             self.spherical = true;
             self.adjust_dirty = true;
-            self.notice = Some(format_spherical_osd(
+            self.notice = Some(format_spherical_osd_ex(
                 true,
                 self.yaw_deg_milli,
                 self.pitch_deg_milli,
+                self.roll_deg_milli,
                 self.fov_deg_milli,
             ));
         }
@@ -6993,6 +7217,7 @@ impl PlayerApp {
                 spherical: self.spherical,
                 yaw_deg_milli: self.yaw_deg_milli,
                 pitch_deg_milli: self.pitch_deg_milli,
+                roll_deg_milli: self.roll_deg_milli,
                 fov_deg_milli: self.fov_deg_milli,
                 hdr_tonemap: self.hdr_tonemap,
                 color_trc: frame.color_trc,
@@ -7320,6 +7545,7 @@ impl PlayerApp {
             self.subtitle_margin_px,
             self.subtitle_scale_milli,
             self.subtitle_opacity_milli,
+            self.subtitle_position,
         );
         if self.show_stats {
             let stats = PlayStats {
@@ -7387,6 +7613,7 @@ impl eframe::App for PlayerApp {
     }
 
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.tick_osd_and_mouse(ctx);
         self.read_input(ctx);
         if self.fullscreen_dirty {
             self.fullscreen_dirty = false;
@@ -7494,6 +7721,7 @@ fn color_image(
     spherical: bool,
     yaw_deg_milli: i32,
     pitch_deg_milli: i32,
+    roll_deg_milli: i32,
     fov_deg_milli: i32,
     hdr_tonemap: HdrTonemap,
     color_trc: u32,
@@ -7513,6 +7741,7 @@ fn color_image(
         spherical,
         yaw_deg_milli,
         pitch_deg_milli,
+        roll_deg_milli,
         fov_deg_milli,
         hdr_tonemap,
         color_trc,
@@ -7539,6 +7768,7 @@ fn paint_subtitle(
     margin_px: i32,
     scale_milli: i32,
     opacity_milli: i32,
+    position: SubtitlePosition,
 ) {
     let lines: Vec<&str> = text.lines().filter(|line| !line.is_empty()).collect();
     if lines.is_empty() {
@@ -7551,7 +7781,8 @@ fn paint_subtitle(
     let alpha = subtitle_opacity_u8(opacity_milli);
     let fill = egui::Color32::from_rgba_unmultiplied(255, 255, 255, alpha);
     let shadow = egui::Color32::from_rgba_unmultiplied(0, 0, 0, alpha);
-    let mut y = rect.bottom() - margin - lines.len() as f32 * line_h;
+    let mut y = rect.top()
+        + subtitle_block_top_y(rect.height(), lines.len(), line_h, margin, position);
     for line in lines {
         let pos = egui::pos2(rect.center().x, y);
         ui.painter().text(
