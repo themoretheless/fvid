@@ -41,11 +41,7 @@ pub(super) fn devices() -> Result<Vec<(usize, String)>, String> {
         .collect()
 }
 
-fn make_slot(
-    device: &SharedDevice,
-    input_len: usize,
-    output_len: usize,
-) -> Result<Slot, String> {
+fn make_slot(device: &SharedDevice, input_len: usize, output_len: usize) -> Result<Slot, String> {
     let stream = device.new_stream()?;
     let input = stream
         .alloc_zeros::<u8>(input_len)
@@ -231,7 +227,10 @@ impl Processor {
 
     fn launch_slot(&mut self, slot: usize, input: &[u8]) -> Result<(), String> {
         let output_len = self.slots[slot].output.len();
-        self.slots[slot].host_in.as_mut_slice().copy_from_slice(input);
+        self.slots[slot]
+            .host_in
+            .as_mut_slice()
+            .copy_from_slice(input);
         self.slots[slot]
             .stream
             .memcpy_htod(&self.slots[slot].host_in, &mut self.slots[slot].input)
@@ -359,7 +358,6 @@ mod tests {
         }
     }
 }
-
 
 struct ResidentStage {
     output: CudaSlice<u8>,

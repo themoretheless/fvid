@@ -1,0 +1,14 @@
+{
+  "created_utc": "2026-09-17T15:11:06.830076+00:00",
+  "binary_sha256": "8454559b8dbcf4e627b1b39e9706503307d84c7bb1dd12ed62baabde7e52fe31",
+  "checks": [
+    "crop decoded frames match FFmpeg",
+    "copy decoded frames match FFmpeg",
+    "hflip decoded frames match FFmpeg",
+    "vflip decoded frames match FFmpeg",
+    "fused decoded frames match FFmpeg",
+    "cut interval timeline and decoded frames match FFmpeg",
+    "decode-only frame count matches FFmpeg"
+  ],
+  "status": "passed"
+}

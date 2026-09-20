@@ -90,6 +90,31 @@ impl Nv12Processor {
     }
 }
 
+/// Submit a crop-only NV12 device copy directly on an externally owned CUDA
+/// stream. This avoids creating a second CUDA wrapper/context when FFmpeg
+/// already owns the current primary context.
+pub fn copy_crop_on_stream(
+    src: Nv12View,
+    dst: Nv12View,
+    transform: Nv12Transform,
+    context: u64,
+    stream: u64,
+) -> Result<(), String> {
+    validate_views(src, dst, transform)?;
+    if transform.hflip || transform.vflip {
+        return Err("direct NV12 copy accepts crop-only transforms".into());
+    }
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    {
+        native_nv12::copy_crop_on_stream(src, dst, transform, context, stream)
+    }
+    #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+    {
+        let _ = (src, dst, transform, context, stream);
+        Err(crate::unsupported())
+    }
+}
+
 fn validate_views(src: Nv12View, dst: Nv12View, t: Nv12Transform) -> Result<(), String> {
     if t.out_width == 0 || t.out_height == 0 {
         return Err("NV12 output size must be non-zero".into());
@@ -97,14 +122,12 @@ fn validate_views(src: Nv12View, dst: Nv12View, t: Nv12Transform) -> Result<(), 
     if t.out_width != dst.width || t.out_height != dst.height {
         return Err("NV12 destination size must match transform output".into());
     }
-    if t.crop_x % 2 != 0
-        || t.crop_y % 2 != 0
-        || t.out_width % 2 != 0
-        || t.out_height % 2 != 0
-    {
+    if t.crop_x % 2 != 0 || t.crop_y % 2 != 0 || t.out_width % 2 != 0 || t.out_height % 2 != 0 {
         return Err("NV12 crop and size must be even for 4:2:0".into());
     }
-    if t.crop_x.checked_add(t.out_width).is_none_or(|x| x > src.width)
+    if t.crop_x
+        .checked_add(t.out_width)
+        .is_none_or(|x| x > src.width)
         || t.crop_y
             .checked_add(t.out_height)
             .is_none_or(|y| y > src.height)
@@ -128,7 +151,7 @@ fn validate_views(src: Nv12View, dst: Nv12View, t: Nv12Transform) -> Result<(), 
 mod native_nv12 {
     use super::*;
     use crate::device_pool::{self, SharedDevice};
-    use cudarc::driver::sys::{self as cuda, CUdeviceptr, CUDA_MEMCPY2D_v2, CUmemorytype};
+    use cudarc::driver::sys::{self as cuda, CUDA_MEMCPY2D_v2, CUdeviceptr, CUmemorytype};
     use cudarc::driver::{CudaSlice, CudaStream, DevicePtr};
 
     pub(super) struct Processor {
@@ -186,6 +209,55 @@ mod native_nv12 {
             return Err(format!("CUDA 2D copy failed: {code:?}"));
         }
         Ok(())
+    }
+
+    pub(super) fn copy_crop_on_stream(
+        src: Nv12View,
+        dst: Nv12View,
+        t: Nv12Transform,
+        context: u64,
+        stream: u64,
+    ) -> Result<(), String> {
+        let push = unsafe { cuda::cuCtxPushCurrent_v2(context as cuda::CUcontext) };
+        if push != cuda::CUresult::CUDA_SUCCESS {
+            return Err(format!("CUDA context push failed: {push:?}"));
+        }
+        let stream = stream as cuda::CUstream;
+        let src_y = (src.y as CUdeviceptr)
+            .wrapping_add((t.crop_y as usize * src.pitch_y as usize + t.crop_x as usize) as u64);
+        let src_uv = (src.uv as CUdeviceptr).wrapping_add(
+            ((t.crop_y as usize / 2) * src.pitch_uv as usize + t.crop_x as usize) as u64,
+        );
+        let result = (|| {
+            memcpy2d(
+                CUmemorytype::CU_MEMORYTYPE_DEVICE,
+                CUmemorytype::CU_MEMORYTYPE_DEVICE,
+                src_y,
+                src.pitch_y as usize,
+                dst.y as CUdeviceptr,
+                dst.pitch_y as usize,
+                t.out_width as usize,
+                t.out_height as usize,
+                stream,
+            )?;
+            memcpy2d(
+                CUmemorytype::CU_MEMORYTYPE_DEVICE,
+                CUmemorytype::CU_MEMORYTYPE_DEVICE,
+                src_uv,
+                src.pitch_uv as usize,
+                dst.uv as CUdeviceptr,
+                dst.pitch_uv as usize,
+                t.out_width as usize,
+                (t.out_height / 2) as usize,
+                stream,
+            )
+        })();
+        let mut popped = std::ptr::null_mut();
+        let pop = unsafe { cuda::cuCtxPopCurrent_v2(&mut popped) };
+        if pop != cuda::CUresult::CUDA_SUCCESS {
+            return Err(format!("CUDA context pop failed: {pop:?}"));
+        }
+        result
     }
 
     impl Processor {
@@ -253,9 +325,7 @@ mod native_nv12 {
                 drop(sync);
                 ptr
             };
-            self.stream
-                .synchronize()
-                .map_err(|err| format!("NV12 params sync failed: {err}"))?;
+            // Params live on the launch stream; no device-wide sync needed.
             self.cu_function = Some(cu_function);
             self.nv12 = Some(nv12);
             self.params_dev = params_dev;
@@ -296,7 +366,9 @@ mod native_nv12 {
                         .into(),
                 );
             }
-            let result = self.apply_inner(src, dst, t).and_then(|_| self.order_for_ffmpeg());
+            let result = self
+                .apply_inner(src, dst, t)
+                .and_then(|_| self.order_for_ffmpeg());
             if result.is_err() {
                 self.poisoned = true;
                 let _ = self.stream.synchronize();
@@ -317,8 +389,9 @@ mod native_nv12 {
 
             // Crop-only (no flips): single DtoD per plane — no kernel / no PTX.
             if !t.hflip && !t.vflip {
-                let src_y = (src.y as CUdeviceptr)
-                    .wrapping_add((t.crop_y as usize * src.pitch_y as usize + t.crop_x as usize) as u64);
+                let src_y = (src.y as CUdeviceptr).wrapping_add(
+                    (t.crop_y as usize * src.pitch_y as usize + t.crop_x as usize) as u64,
+                );
                 let src_uv = (src.uv as CUdeviceptr).wrapping_add(
                     ((t.crop_y as usize / 2) * src.pitch_uv as usize + t.crop_x as usize) as u64,
                 );
@@ -381,7 +454,6 @@ mod native_nv12 {
                 self.cached_params = Some(params);
             }
 
-            // Same stream as crop memcpy / NVENC — no cross-stream event.
             self.launch = stream;
             let mut src_y = src.y;
             let mut src_uv = src.uv;
@@ -395,6 +467,8 @@ mod native_nv12 {
                 &mut dst_uv as *mut _ as *mut c_void,
                 &mut params_arg as *mut _ as *mut c_void,
             ];
+            // Reverse lane order still reads adjacent addresses within each warp,
+            // so direct 2D loads remain coalesced without row-sized shared memory.
             let grid = (t.out_width.div_ceil(32), t.out_height.div_ceil(16), 1);
             let block = (32u32, 16u32, 1u32);
             // SAFETY: views validated; args match fvid_nv12_transform; stream is live.
@@ -452,4 +526,3 @@ mod tests {
         assert!(validate_views(src, dst, t).is_ok());
     }
 }
-

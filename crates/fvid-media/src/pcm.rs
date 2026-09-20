@@ -1,23 +1,62 @@
 //! Exact packed-PCM packet slicing. Payload ownership stays with AVPacket.buf.
 use super::*;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum IntervalAudio {
+    /// Packet-trim path for packed PCM without padding.
+    Pcm,
+    /// Decode to PCM for AAC/MP3/FLAC during lossless intervals.
+    Decode,
+}
+
+pub(super) fn classify_interval_audio(parameters: &AVCodecParameters) -> Result<IntervalAudio> {
+    if parameters.codec_type != AVMediaType_AVMEDIA_TYPE_AUDIO {
+        return Err("lossless interval non-video stream must be audio".into());
+    }
+    if is_packed_pcm(parameters) {
+        if parameters.initial_padding != 0 || parameters.trailing_padding != 0 {
+            return Err(
+                "lossless interval audio requires packed PCM without padding; compressed audio trimming is not implemented"
+                    .into(),
+            );
+        }
+        return Ok(IntervalAudio::Pcm);
+    }
+    if [
+        AVCodecID_AV_CODEC_ID_AAC,
+        AVCodecID_AV_CODEC_ID_MP3,
+        AVCodecID_AV_CODEC_ID_FLAC,
+    ]
+    .contains(&parameters.codec_id)
+    {
+        return Ok(IntervalAudio::Decode);
+    }
+    Err(
+        "lossless interval audio requires packed PCM or AAC/MP3/FLAC; other codecs are not implemented"
+            .into(),
+    )
+}
+
+fn is_packed_pcm(parameters: &AVCodecParameters) -> bool {
+    [
+        AVCodecID_AV_CODEC_ID_PCM_S16LE,
+        AVCodecID_AV_CODEC_ID_PCM_S16BE,
+        AVCodecID_AV_CODEC_ID_PCM_S24LE,
+        AVCodecID_AV_CODEC_ID_PCM_S24BE,
+        AVCodecID_AV_CODEC_ID_PCM_S32LE,
+        AVCodecID_AV_CODEC_ID_PCM_S32BE,
+        AVCodecID_AV_CODEC_ID_PCM_F32LE,
+        AVCodecID_AV_CODEC_ID_PCM_F32BE,
+        AVCodecID_AV_CODEC_ID_PCM_F64LE,
+        AVCodecID_AV_CODEC_ID_PCM_F64BE,
+        AVCodecID_AV_CODEC_ID_PCM_U8,
+        AVCodecID_AV_CODEC_ID_PCM_S8,
+    ]
+    .contains(&parameters.codec_id)
+}
+
 pub(super) fn validate(parameters: &AVCodecParameters) -> Result<usize> {
-    if parameters.codec_type != AVMediaType_AVMEDIA_TYPE_AUDIO
-        || ![
-            AVCodecID_AV_CODEC_ID_PCM_S16LE,
-            AVCodecID_AV_CODEC_ID_PCM_S16BE,
-            AVCodecID_AV_CODEC_ID_PCM_S24LE,
-            AVCodecID_AV_CODEC_ID_PCM_S24BE,
-            AVCodecID_AV_CODEC_ID_PCM_S32LE,
-            AVCodecID_AV_CODEC_ID_PCM_S32BE,
-            AVCodecID_AV_CODEC_ID_PCM_F32LE,
-            AVCodecID_AV_CODEC_ID_PCM_F32BE,
-            AVCodecID_AV_CODEC_ID_PCM_F64LE,
-            AVCodecID_AV_CODEC_ID_PCM_F64BE,
-            AVCodecID_AV_CODEC_ID_PCM_U8,
-            AVCodecID_AV_CODEC_ID_PCM_S8,
-        ]
-        .contains(&parameters.codec_id)
+    if !is_packed_pcm(parameters)
         || parameters.sample_rate <= 0
         || parameters.ch_layout.nb_channels <= 0
         || parameters.initial_padding != 0

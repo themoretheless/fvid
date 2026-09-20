@@ -11,8 +11,225 @@ pub struct AudioDecodeStats {
     pub sample_format: String,
     pub planar_interleave_bytes: u64,
 }
+
+#[derive(Clone, Copy, Debug, Default)]
+pub struct AudioDecodeTransform {
+    /// Half-open presentation interval in microseconds from the first decoded sample.
+    pub interval: Option<(i64, i64)>,
+    /// Target sample rate; `None` keeps the decoded rate. Fair-pairs FFmpeg `-ar RATE`.
+    pub sample_rate: Option<i32>,
+    /// Target channel count; `None` keeps the decoded layout. Fair-pairs FFmpeg `-ac N`
+    /// (default layout for N via libswresample rematrix).
+    pub channels: Option<i32>,
+    /// Linear gain applied after decode/resample. Fair-pairs FFmpeg `-af volume=GAIN`
+    /// on float PCM (flt/fltp/dbl/dblp).
+    pub volume: Option<f64>,
+}
+
+fn validate_sample_rate(rate: i32) -> Result<()> {
+    if !(8_000..=384_000).contains(&rate) {
+        return Err("sample rate must be within 8000..=384000".into());
+    }
+    Ok(())
+}
+
+fn validate_channels(channels: i32) -> Result<()> {
+    if !(1..=64).contains(&channels) {
+        return Err("channels must be within 1..=64".into());
+    }
+    Ok(())
+}
+
+fn validate_volume(gain: f64) -> Result<()> {
+    if !gain.is_finite() || !(0.0..=64.0).contains(&gain) {
+        return Err("volume must be a finite linear gain within 0..=64".into());
+    }
+    Ok(())
+}
+
+/// Apply linear gain in-place. Matches FFmpeg `volume=` on floating-point samples.
+pub(crate) unsafe fn apply_volume(frame: *mut AVFrame, gain: f64) -> Result<()> {
+    unsafe {
+        if (gain - 1.0).abs() < 1e-15 {
+            return Ok(());
+        }
+        check(av_frame_make_writable(frame), "make audio writable for volume")?;
+        let f = &*frame;
+        let channels = f.ch_layout.nb_channels as usize;
+        let samples = f.nb_samples as usize;
+        if channels == 0 || samples == 0 || f.extended_data.is_null() {
+            return Err("invalid audio frame for volume".into());
+        }
+        let planar = av_sample_fmt_is_planar(f.format) != 0;
+        let fmt = f.format;
+        if fmt == AVSampleFormat_AV_SAMPLE_FMT_FLT || fmt == AVSampleFormat_AV_SAMPLE_FMT_FLTP {
+            let gain = gain as f32;
+            if planar {
+                for ch in 0..channels {
+                    let plane = *f.extended_data.add(ch) as *mut f32;
+                    if plane.is_null() {
+                        return Err("missing audio plane for volume".into());
+                    }
+                    for i in 0..samples {
+                        *plane.add(i) *= gain;
+                    }
+                }
+            } else {
+                let data = *f.extended_data as *mut f32;
+                if data.is_null() {
+                    return Err("missing audio data for volume".into());
+                }
+                for i in 0..(samples * channels) {
+                    *data.add(i) *= gain;
+                }
+            }
+        } else if fmt == AVSampleFormat_AV_SAMPLE_FMT_DBL || fmt == AVSampleFormat_AV_SAMPLE_FMT_DBLP
+        {
+            if planar {
+                for ch in 0..channels {
+                    let plane = *f.extended_data.add(ch) as *mut f64;
+                    if plane.is_null() {
+                        return Err("missing audio plane for volume".into());
+                    }
+                    for i in 0..samples {
+                        *plane.add(i) *= gain;
+                    }
+                }
+            } else {
+                let data = *f.extended_data as *mut f64;
+                if data.is_null() {
+                    return Err("missing audio data for volume".into());
+                }
+                for i in 0..(samples * channels) {
+                    *data.add(i) *= gain;
+                }
+            }
+        } else {
+            return Err(
+                "volume requires floating-point PCM (flt/fltp/dbl/dblp); integer formats are not qualified"
+                    .into(),
+            );
+        }
+        Ok(())
+    }
+}
+
+struct Resampler {
+    swr: *mut SwrContext,
+    out_rate: i32,
+    out_format: AVSampleFormat,
+    ch_layout: AVChannelLayout,
+}
+
+impl Drop for Resampler {
+    fn drop(&mut self) {
+        unsafe {
+            av_channel_layout_uninit(&mut self.ch_layout);
+            if !self.swr.is_null() {
+                swr_free(&mut self.swr);
+            }
+        }
+    }
+}
+
+impl Resampler {
+    /// Open libswresample for rate and/or channel rematrix. `out_channels == source`
+    /// keeps the decoded layout; otherwise uses FFmpeg's default layout for N (`-ac N`).
+    unsafe fn open(frame: *const AVFrame, out_rate: i32, out_channels: i32) -> Result<Self> {
+        unsafe {
+            let f = &*frame;
+            let out_format = av_get_packed_sample_fmt(f.format);
+            if out_format < 0 {
+                return Err("unsupported decoded audio format for resample".into());
+            }
+            let mut ch_layout = AVChannelLayout {
+                order: 0,
+                nb_channels: 0,
+                u: std::mem::zeroed(),
+                opaque: ptr::null_mut(),
+            };
+            if out_channels == f.ch_layout.nb_channels {
+                check(
+                    av_channel_layout_copy(&mut ch_layout, &f.ch_layout),
+                    "copy resampler channel layout",
+                )?;
+            } else {
+                av_channel_layout_default(&mut ch_layout, out_channels);
+                if ch_layout.nb_channels != out_channels {
+                    return Err("failed to build default channel layout".into());
+                }
+            }
+            let mut swr = ptr::null_mut();
+            let mut built = Self {
+                swr: ptr::null_mut(),
+                out_rate,
+                out_format,
+                ch_layout,
+            };
+            check(
+                swr_alloc_set_opts2(
+                    &mut swr,
+                    &built.ch_layout,
+                    out_format,
+                    out_rate,
+                    &f.ch_layout,
+                    f.format,
+                    f.sample_rate,
+                    0,
+                    ptr::null_mut(),
+                ),
+                "allocate audio resampler",
+            )?;
+            built.swr = swr;
+            check(swr_init(built.swr), "initialize audio resampler")?;
+            Ok(built)
+        }
+    }
+
+    /// Convert one input frame (or flush with null). Returns output sample count.
+    unsafe fn convert(&mut self, dst: *mut AVFrame, src: *const AVFrame) -> Result<i32> {
+        unsafe {
+            av_frame_unref(dst);
+            let out_samples = if src.is_null() {
+                let delay = swr_get_delay(self.swr, i64::from(self.out_rate));
+                if delay <= 0 {
+                    return Ok(0);
+                }
+                delay
+            } else {
+                let s = &*src;
+                let delay = swr_get_delay(self.swr, i64::from(self.out_rate));
+                av_rescale_rnd(
+                    delay + i64::from(s.nb_samples),
+                    i64::from(self.out_rate),
+                    i64::from(s.sample_rate),
+                    AVRounding_AV_ROUND_UP,
+                )
+            };
+            if out_samples < 0 || out_samples > i64::from(i32::MAX) {
+                return Err("resampled audio size overflow".into());
+            }
+            (*dst).format = self.out_format;
+            (*dst).sample_rate = self.out_rate;
+            (*dst).nb_samples = out_samples as i32;
+            check(
+                av_channel_layout_copy(&mut (*dst).ch_layout, &self.ch_layout),
+                "copy resample layout",
+            )?;
+            check(
+                av_frame_get_buffer(dst, 0),
+                "allocate resampled audio buffer",
+            )?;
+            let code = swr_convert_frame(self.swr, dst, src);
+            if code < 0 {
+                return Err(check(code, "resample audio frame").unwrap_err());
+            }
+            Ok((*dst).nb_samples)
+        }
+    }
+}
 #[derive(Default)]
-struct PacketPool {
+pub(super) struct PacketPool {
     raw: *mut AVBufferPool,
     capacity: usize,
 }
@@ -25,7 +242,7 @@ impl Drop for PacketPool {
     }
 }
 impl PacketPool {
-    fn get(&mut self, size: usize) -> Result<*mut AVBufferRef> {
+    pub(super) fn get(&mut self, size: usize) -> Result<*mut AVBufferRef> {
         let needed = size
             .checked_add(AV_INPUT_BUFFER_PADDING_SIZE as usize)
             .ok_or("audio buffer size overflow")?;
@@ -54,7 +271,9 @@ impl PacketPool {
     }
 }
 struct AudioSink {
-    output: Output,
+    output: Option<Output>,
+    wav_pcm: Option<Vec<u8>>,
+    destination: PathBuf,
     format: AVSampleFormat,
     parameters: Parameters,
     pool: PacketPool,
@@ -100,6 +319,27 @@ impl AudioSink {
                 av_channel_layout_copy(&mut p.ch_layout, &f.ch_layout),
                 "copy audio layout",
             )?;
+            let stats = AudioDecodeStats {
+                sample_frames: 0,
+                decoded_frames: 0,
+                sample_rate: f.sample_rate,
+                channels: f.ch_layout.nb_channels,
+                sample_format: string(av_get_sample_fmt_name(format)),
+                planar_interleave_bytes: 0,
+            };
+            let direct_float_wav = destination.extension().and_then(|v| v.to_str()) == Some("wav")
+                && format == AVSampleFormat_AV_SAMPLE_FMT_FLT;
+            if direct_float_wav {
+                return Ok(Self {
+                    output: None,
+                    wav_pcm: Some(Vec::new()),
+                    destination: destination.to_path_buf(),
+                    format,
+                    parameters,
+                    pool: PacketPool::default(),
+                    stats,
+                });
+            }
             let tb = AVRational {
                 num: 1,
                 den: f.sample_rate,
@@ -111,22 +351,24 @@ impl AudioSink {
                 Some((index, parameters.0, tb)),
             )?;
             Ok(Self {
-                output,
+                output: Some(output),
+                wav_pcm: None,
+                destination: destination.to_path_buf(),
                 format,
                 parameters,
                 pool: PacketPool::default(),
-                stats: AudioDecodeStats {
-                    sample_frames: 0,
-                    decoded_frames: 0,
-                    sample_rate: f.sample_rate,
-                    channels: f.ch_layout.nb_channels,
-                    sample_format: string(av_get_sample_fmt_name(format)),
-                    planar_interleave_bytes: 0,
-                },
+                stats,
             })
         }
     }
-    fn write(&mut self, frame: &Frame, packet: &mut Packet, limit: usize) -> Result<()> {
+    fn write(
+        &mut self,
+        frame: &Frame,
+        packet: &mut Packet,
+        limit: usize,
+        offset: usize,
+        count: usize,
+    ) -> Result<()> {
         // SAFETY: Frame is decoder-owned and live. Packed payloads retain AVBuffer
         // ownership; planar interleave writes only the checked newly allocated packet.
         unsafe {
@@ -140,7 +382,14 @@ impl AudioSink {
                 return Err("dynamic audio format/rate/layout is not supported".into());
             }
             let bytes = av_get_bytes_per_sample(self.format) as usize;
-            let count = f.nb_samples as usize;
+            let frame_count = f.nb_samples as usize;
+            if count == 0
+                || offset
+                    .checked_add(count)
+                    .is_none_or(|end| end > frame_count)
+            {
+                return Err("invalid decoded audio sample range".into());
+            }
             let size = count
                 .checked_mul(channels)
                 .and_then(|n| n.checked_mul(bytes))
@@ -149,17 +398,55 @@ impl AudioSink {
             if f.extended_data.is_null() {
                 return Err("missing audio data".into());
             }
+            if let Some(pcm) = self.wav_pcm.as_mut() {
+                let start = pcm.len();
+                pcm.resize(start + size, 0);
+                if av_sample_fmt_is_planar(f.format) != 0 && channels > 1 {
+                    if (f.linesize[0].max(0) as usize) < frame_count * bytes {
+                        return Err("short planar audio buffer".into());
+                    }
+                    let mut planes = [ptr::null(); 64];
+                    for (channel, plane) in planes[..channels].iter_mut().enumerate() {
+                        let base = *f.extended_data.add(channel);
+                        if base.is_null() {
+                            return Err("missing audio plane".into());
+                        }
+                        *plane = base.add(offset * bytes);
+                    }
+                    super::audio_layout::interleave(
+                        &planes[..channels],
+                        pcm[start..].as_mut_ptr(),
+                        count,
+                        bytes,
+                    );
+                    self.stats.planar_interleave_bytes += size as u64;
+                } else {
+                    let data = *f.extended_data;
+                    if data.is_null() {
+                        return Err("missing audio data".into());
+                    }
+                    ptr::copy_nonoverlapping(
+                        data.add(offset * channels * bytes),
+                        pcm[start..].as_mut_ptr(),
+                        size,
+                    );
+                }
+                self.stats.sample_frames += count as u64;
+                self.stats.decoded_frames += 1;
+                return Ok(());
+            }
             av_packet_unref(packet.0);
             if av_sample_fmt_is_planar(f.format) != 0 && channels > 1 {
-                if (f.linesize[0].max(0) as usize) < count * bytes {
+                if (f.linesize[0].max(0) as usize) < frame_count * bytes {
                     return Err("short planar audio buffer".into());
                 }
                 let mut planes = [ptr::null(); 64];
                 for (channel, plane) in planes[..channels].iter_mut().enumerate() {
-                    *plane = *f.extended_data.add(channel);
-                    if plane.is_null() {
+                    let base = *f.extended_data.add(channel);
+                    if base.is_null() {
                         return Err("missing audio plane".into());
                     }
+                    *plane = base.add(offset * bytes);
                 }
                 (*packet.0).buf = self.pool.get(size)?;
                 (*packet.0).data = (*(*packet.0).buf).data;
@@ -174,7 +461,11 @@ impl AudioSink {
             } else {
                 if (*f.extended_data).is_null()
                     || f.buf[0].is_null()
-                    || (f.linesize[0].max(0) as usize) < size
+                    || (f.linesize[0].max(0) as usize)
+                        < frame_count
+                            .checked_mul(channels)
+                            .and_then(|n| n.checked_mul(bytes))
+                            .ok_or("decoded audio frame size overflow")?
                 {
                     return Err("invalid packed audio buffer".into());
                 }
@@ -182,14 +473,14 @@ impl AudioSink {
                 if (*packet.0).buf.is_null() {
                     return Err("audio buffer reference failed".into());
                 }
-                (*packet.0).data = *f.extended_data;
+                (*packet.0).data = (*f.extended_data).add(offset * channels * bytes);
                 (*packet.0).size = size as i32;
             }
             (*packet.0).pts =
                 i64::try_from(self.stats.sample_frames).map_err(|_| "audio timeline overflow")?;
             (*packet.0).dts = (*packet.0).pts;
-            (*packet.0).duration = f.nb_samples as i64;
-            self.output.write(
+            (*packet.0).duration = i64::try_from(count).map_err(|_| "audio duration overflow")?;
+            self.output.as_mut().unwrap().write(
                 packet,
                 0,
                 AVRational {
@@ -202,7 +493,93 @@ impl AudioSink {
         }
         Ok(())
     }
+    fn finish(mut self) -> Result<AudioDecodeStats> {
+        if let Some(pcm) = self.wav_pcm.take() {
+            let samples = unsafe {
+                slice::from_raw_parts(pcm.as_ptr() as *const f32, pcm.len() / 4)
+            };
+            super::wav::write_wav_f32le(
+                &self.destination,
+                self.stats.sample_rate,
+                self.stats.channels,
+                samples,
+            )?;
+            return Ok(self.stats);
+        }
+        self.output.take().unwrap().finish()?;
+        Ok(self.stats)
+    }
 }
+fn emit_decoded_audio(
+    destination: &Path,
+    input: &Input,
+    index: usize,
+    frame: &Frame,
+    sink: &mut Option<AudioSink>,
+    pcm: &mut Packet,
+    sample_bounds: &mut Option<(u64, u64)>,
+    output_sample_frames: &mut u64,
+    interval: Option<(i64, i64)>,
+    volume: Option<f64>,
+    max_packet_bytes: usize,
+    decoded_bump: bool,
+) -> Result<bool> {
+    if let Some(gain) = volume {
+        unsafe {
+            apply_volume(frame.0, gain)?;
+        }
+    }
+    let (frame_count, sample_rate) = unsafe {
+        let f = &*frame.0;
+        if f.nb_samples <= 0 || f.sample_rate <= 0 {
+            return Err("invalid decoded audio frame geometry".into());
+        }
+        (f.nb_samples as u64, f.sample_rate)
+    };
+    if sample_bounds.is_none() {
+        let sample_at = |time_us: i64| -> Result<u64> {
+            let scaled = i128::from(time_us) * i128::from(sample_rate);
+            let samples = (scaled + 999_999) / 1_000_000;
+            u64::try_from(samples).map_err(|_| "audio interval overflow".into())
+        };
+        *sample_bounds = Some(match interval {
+            Some((from, to)) => (sample_at(from)?, sample_at(to)?),
+            None => (0, u64::MAX),
+        });
+    }
+    let (wanted_start, wanted_end) = sample_bounds.expect("sample bounds initialized");
+    let frame_start = *output_sample_frames;
+    let frame_end = frame_start
+        .checked_add(frame_count)
+        .ok_or("decoded audio timeline overflow")?;
+    let overlap_start = frame_start.max(wanted_start);
+    let overlap_end = frame_end.min(wanted_end);
+    if overlap_start < overlap_end {
+        if sink.is_none() {
+            *sink = Some(AudioSink::new(destination, input, index, frame)?);
+        }
+        let active = sink.as_mut().unwrap();
+        if decoded_bump {
+            active.stats.decoded_frames += 1;
+        }
+        active.write(
+            frame,
+            pcm,
+            max_packet_bytes,
+            usize::try_from(overlap_start - frame_start)
+                .map_err(|_| "audio sample offset overflow")?,
+            usize::try_from(overlap_end - overlap_start)
+                .map_err(|_| "audio sample count overflow")?,
+        )?;
+    } else if decoded_bump {
+        if let Some(active) = sink.as_mut() {
+            active.stats.decoded_frames += 1;
+        }
+    }
+    *output_sample_frames = frame_end;
+    Ok(*output_sample_frames >= wanted_end)
+}
+
 /// Export the contiguous decoded sample sequence, preserving decoded precision.
 /// Source timestamp gaps are not synthesized into silence in this extraction API.
 pub fn decode_audio(
@@ -210,10 +587,57 @@ pub fn decode_audio(
     destination: &Path,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
+    decode_audio_transformed(source, destination, AudioDecodeTransform::default(), options)
+}
+
+/// Export a half-open interval from the contiguous decoded sample sequence.
+/// Boundaries are microseconds from the first decoded sample and round up to
+/// the first sample whose presentation time is not before the boundary.
+pub fn decode_audio_interval(
+    source: &Path,
+    destination: &Path,
+    interval: Option<(i64, i64)>,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
+    decode_audio_transformed(
+        source,
+        destination,
+        AudioDecodeTransform {
+            interval,
+            sample_rate: None,
+            channels: None,
+            volume: None,
+        },
+        options,
+    )
+}
+
+/// Decode audio with optional interval, sample-rate, and channel rematrix (`libswresample`).
+pub fn decode_audio_transformed(
+    source: &Path,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
     if !cfg!(target_endian = "little") {
         return Err("PCM export requires little-endian host".into());
     }
-    let mut input = Input::open(source)?;
+    if transform
+        .interval
+        .is_some_and(|(from, to)| from < 0 || to <= from)
+    {
+        return Err("decode-audio interval requires 0 <= from < to".into());
+    }
+    if let Some(rate) = transform.sample_rate {
+        validate_sample_rate(rate)?;
+    }
+    if let Some(channels) = transform.channels {
+        validate_channels(channels)?;
+    }
+    if let Some(gain) = transform.volume {
+        validate_volume(gain)?;
+    }
+    let mut input = Input::open_fast(source)?;
     // SAFETY: Input owns a live format context. A contiguous sample extraction
     // cannot carry arbitrary source chapter times without a separate clock mapping.
     if unsafe { (*input.0).nb_chapters } != 0 {
@@ -254,8 +678,14 @@ pub fn decode_audio(
     let mut packet = Packet::new()?;
     let mut pcm = Packet::new()?;
     let frame = Frame::new()?;
+    let resampled = Frame::new()?;
+    let mut resampler: Option<Resampler> = None;
     let mut sink = None;
-    loop {
+    let mut sample_bounds = None;
+    let mut output_sample_frames = 0u64;
+    let mut finished = false;
+
+    'packets: loop {
         let available = packet.read(&mut input)?;
         if available {
             let (stream, _) = packet_info(&packet, &input, options)?;
@@ -277,24 +707,386 @@ pub fn decode_audio(
                 break;
             }
             check(code, "receive audio frame")?;
-            if sink.is_none() {
-                sink = Some(AudioSink::new(destination, &input, index, &frame)?);
+            let needs_swr = unsafe {
+                let f = &*frame.0;
+                transform
+                    .sample_rate
+                    .is_some_and(|rate| rate != f.sample_rate)
+                    || transform
+                        .channels
+                        .is_some_and(|channels| channels != f.ch_layout.nb_channels)
+            };
+            if needs_swr {
+                unsafe {
+                    if resampler.is_none() {
+                        let f = &*frame.0;
+                        let out_rate = transform.sample_rate.unwrap_or(f.sample_rate);
+                        let out_channels =
+                            transform.channels.unwrap_or(f.ch_layout.nb_channels);
+                        resampler = Some(Resampler::open(frame.0, out_rate, out_channels)?);
+                    }
+                    let swr = resampler.as_mut().unwrap();
+                    let produced = swr.convert(resampled.0, frame.0)?;
+                    if produced > 0 {
+                        if emit_decoded_audio(
+                            destination,
+                            &input,
+                            index,
+                            &resampled,
+                            &mut sink,
+                            &mut pcm,
+                            &mut sample_bounds,
+                            &mut output_sample_frames,
+                            transform.interval,
+                            transform.volume,
+                            options.max_packet_bytes,
+                            true,
+                        )? {
+                            finished = true;
+                        }
+                    } else if let Some(active) = sink.as_mut() {
+                        active.stats.decoded_frames += 1;
+                    }
+                    av_frame_unref(frame.0);
+                }
+            } else if emit_decoded_audio(
+                destination,
+                &input,
+                index,
+                &frame,
+                &mut sink,
+                &mut pcm,
+                &mut sample_bounds,
+                &mut output_sample_frames,
+                transform.interval,
+                transform.volume,
+                options.max_packet_bytes,
+                true,
+            )? {
+                finished = true;
+                unsafe {
+                    av_frame_unref(frame.0);
+                }
+                break;
+            } else {
+                unsafe {
+                    av_frame_unref(frame.0);
+                }
             }
-            sink.as_mut()
-                .unwrap()
-                .write(&frame, &mut pcm, options.max_packet_bytes)?;
-            // SAFETY: PCM packet retained its own ref or copied planar samples.
+            if finished {
+                break;
+            }
+        }
+        if finished {
+            break 'packets;
+        }
+        if !available {
+            break;
+        }
+    }
+    if let Some(swr) = resampler.as_mut() {
+        loop {
+            let produced = unsafe { swr.convert(resampled.0, ptr::null())? };
+            if produced <= 0 {
+                break;
+            }
+            if emit_decoded_audio(
+                destination,
+                &input,
+                index,
+                &resampled,
+                &mut sink,
+                &mut pcm,
+                &mut sample_bounds,
+                &mut output_sample_frames,
+                transform.interval,
+                transform.volume,
+                options.max_packet_bytes,
+                false,
+            )? {
+                break;
+            }
+        }
+    }
+    let sink = sink.ok_or("no decoded audio samples")?;
+    sink.finish()
+}
+
+/// PCM codec parameters for muxing decoded AAC/MP3/FLAC during lossless intervals.
+pub(super) fn pcm_parameters_for_interval_decode(
+    codecpar: &AVCodecParameters,
+) -> Result<(Parameters, AVRational, AVSampleFormat)> {
+    unsafe {
+        let format = match codecpar.codec_id {
+            AVCodecID_AV_CODEC_ID_AAC | AVCodecID_AV_CODEC_ID_MP3 => {
+                AVSampleFormat_AV_SAMPLE_FMT_FLT
+            }
+            AVCodecID_AV_CODEC_ID_FLAC => AVSampleFormat_AV_SAMPLE_FMT_S16,
+            _ => {
+                return Err(
+                    "lossless interval decode supports AAC, MP3, and FLAC only".into(),
+                )
+            }
+        };
+        if codecpar.sample_rate <= 0 || !(1..=64).contains(&codecpar.ch_layout.nb_channels) {
+            return Err("invalid compressed audio rate/channel count".into());
+        }
+        let codec = match format {
+            AVSampleFormat_AV_SAMPLE_FMT_FLT => AVCodecID_AV_CODEC_ID_PCM_F32LE,
+            AVSampleFormat_AV_SAMPLE_FMT_S16 => AVCodecID_AV_CODEC_ID_PCM_S16LE,
+            _ => return Err("unsupported interval PCM format".into()),
+        };
+        let parameters = Parameters(avcodec_parameters_alloc());
+        if parameters.0.is_null() {
+            return Err("audio parameter allocation failed".into());
+        }
+        let p = &mut *parameters.0;
+        p.codec_type = AVMediaType_AVMEDIA_TYPE_AUDIO;
+        p.codec_id = codec;
+        p.format = format;
+        p.sample_rate = codecpar.sample_rate;
+        p.bits_per_coded_sample = av_get_bytes_per_sample(format) * 8;
+        p.bits_per_raw_sample = p.bits_per_coded_sample;
+        p.block_align = p.bits_per_coded_sample / 8 * codecpar.ch_layout.nb_channels;
+        p.bit_rate = i64::from(p.sample_rate) * i64::from(p.block_align) * 8;
+        check(
+            av_channel_layout_copy(&mut p.ch_layout, &codecpar.ch_layout),
+            "copy audio layout",
+        )?;
+        let tb = AVRational {
+            num: 1,
+            den: codecpar.sample_rate,
+        };
+        Ok((parameters, tb, format))
+    }
+}
+
+/// Write a decoded audio frame slice into an existing muxer as packed PCM.
+/// Returns true once the contiguous decoded timeline reaches the interval end.
+pub(super) fn write_interval_pcm_frame(
+    output: &mut Output,
+    mapped: usize,
+    frame: &Frame,
+    packet: &mut Packet,
+    pool: &mut PacketPool,
+    expected_format: AVSampleFormat,
+    decoded_sample_frames: &mut u64,
+    written_sample_frames: &mut u64,
+    sample_bounds: &mut Option<(u64, u64)>,
+    interval_us: (i64, i64),
+    max_packet_bytes: usize,
+) -> Result<bool> {
+    let (frame_count, sample_rate, channels, packed) = unsafe {
+        let f = &*frame.0;
+        if f.nb_samples <= 0 || f.sample_rate <= 0 {
+            return Err("invalid decoded audio frame geometry".into());
+        }
+        let packed = av_get_packed_sample_fmt(f.format);
+        if packed != expected_format {
+            return Err("decoded audio format does not match interval PCM override".into());
+        }
+        (
+            f.nb_samples as u64,
+            f.sample_rate,
+            f.ch_layout.nb_channels as usize,
+            packed,
+        )
+    };
+    if sample_bounds.is_none() {
+        let sample_at = |time_us: i64| -> Result<u64> {
+            let scaled = i128::from(time_us) * i128::from(sample_rate);
+            let samples = (scaled + 999_999) / 1_000_000;
+            u64::try_from(samples).map_err(|_| "audio interval overflow".into())
+        };
+        *sample_bounds = Some((sample_at(interval_us.0)?, sample_at(interval_us.1)?));
+    }
+    let (wanted_start, wanted_end) = sample_bounds.expect("sample bounds initialized");
+    let frame_start = *decoded_sample_frames;
+    let frame_end = frame_start
+        .checked_add(frame_count)
+        .ok_or("decoded audio timeline overflow")?;
+    let overlap_start = frame_start.max(wanted_start);
+    let overlap_end = frame_end.min(wanted_end);
+    if overlap_start < overlap_end {
+        let offset = usize::try_from(overlap_start - frame_start)
+            .map_err(|_| "audio sample offset overflow")?;
+        let count = usize::try_from(overlap_end - overlap_start)
+            .map_err(|_| "audio sample count overflow")?;
+        unsafe {
+            let f = &*frame.0;
+            let bytes = av_get_bytes_per_sample(packed) as usize;
+            let size = count
+                .checked_mul(channels)
+                .and_then(|n| n.checked_mul(bytes))
+                .filter(|&n| n <= max_packet_bytes && n <= i32::MAX as usize)
+                .ok_or("decoded audio block exceeds packet budget")?;
+            av_packet_unref(packet.0);
+            if av_sample_fmt_is_planar(f.format) != 0 && channels > 1 {
+                if (f.linesize[0].max(0) as usize) < frame_count as usize * bytes {
+                    return Err("short planar audio buffer".into());
+                }
+                let mut planes = [ptr::null(); 64];
+                for (channel, plane) in planes[..channels].iter_mut().enumerate() {
+                    let base = *f.extended_data.add(channel);
+                    if base.is_null() {
+                        return Err("missing audio plane".into());
+                    }
+                    *plane = base.add(offset * bytes);
+                }
+                (*packet.0).buf = pool.get(size)?;
+                (*packet.0).data = (*(*packet.0).buf).data;
+                (*packet.0).size = size as i32;
+                super::audio_layout::interleave(
+                    &planes[..channels],
+                    (*packet.0).data,
+                    count,
+                    bytes,
+                );
+            } else {
+                if (*f.extended_data).is_null()
+                    || f.buf[0].is_null()
+                    || (f.linesize[0].max(0) as usize)
+                        < (frame_count as usize)
+                            .checked_mul(channels)
+                            .and_then(|n| n.checked_mul(bytes))
+                            .ok_or("decoded audio frame size overflow")?
+                {
+                    return Err("invalid packed audio buffer".into());
+                }
+                (*packet.0).buf = av_buffer_ref(f.buf[0]);
+                if (*packet.0).buf.is_null() {
+                    return Err("audio buffer reference failed".into());
+                }
+                (*packet.0).data = (*f.extended_data).add(offset * channels * bytes);
+                (*packet.0).size = size as i32;
+            }
+            (*packet.0).pts =
+                i64::try_from(*written_sample_frames).map_err(|_| "audio timeline overflow")?;
+            (*packet.0).dts = (*packet.0).pts;
+            (*packet.0).duration = i64::try_from(count).map_err(|_| "audio duration overflow")?;
+            output.write(
+                packet,
+                mapped,
+                AVRational {
+                    num: 1,
+                    den: sample_rate,
+                },
+            )?;
+            *written_sample_frames = written_sample_frames
+                .checked_add(count as u64)
+                .ok_or("audio timeline overflow")?;
+        }
+    }
+    *decoded_sample_frames = frame_end;
+    Ok(*decoded_sample_frames >= wanted_end)
+}
+
+/// Decode one compressed audio stream from a fresh demuxer (no seek) into `output`.
+/// Used when the video path seeks: mid-stream AAC/MP3 state is not sample-identical to a
+/// from-start decode, so audio keeps the contiguous sample-window path on its own Input.
+pub(super) fn mux_interval_pcm_from_path(
+    source: &Path,
+    output: &mut Output,
+    stream_index: usize,
+    mapped: usize,
+    interval_us: (i64, i64),
+    max_packet_bytes: usize,
+) -> Result<u64> {
+    let mut input = Input::open_fast(source)?;
+    if stream_index >= input.streams().len() {
+        return Err("audio stream index out of range".into());
+    }
+    // SAFETY: Index checked; codecpar owned by Input.
+    let codecpar = unsafe { &*(*input.streams()[stream_index]).codecpar };
+    let (pcm_params, _tb, format) = pcm_parameters_for_interval_decode(codecpar)?;
+    drop(pcm_params);
+    let decoder = unsafe {
+        let codec = avcodec_find_decoder(codecpar.codec_id);
+        if codec.is_null() {
+            return Err("audio decoder unavailable".into());
+        }
+        let decoder = Codec(avcodec_alloc_context3(codec));
+        if decoder.0.is_null() {
+            return Err("audio decoder allocation failed".into());
+        }
+        check(
+            avcodec_parameters_to_context(decoder.0, codecpar),
+            "configure audio decoder",
+        )?;
+        (*decoder.0).pkt_timebase = (*input.streams()[stream_index]).time_base;
+        check(
+            avcodec_open2(decoder.0, codec, ptr::null_mut()),
+            "open audio decoder",
+        )?;
+        decoder
+    };
+    let mut packet = Packet::new()?;
+    let mut encoded = Packet::new()?;
+    let frame = Frame::new()?;
+    let mut pool = PacketPool::default();
+    let mut decoded_sample_frames = 0u64;
+    let mut written_sample_frames = 0u64;
+    let mut sample_bounds = None;
+    let options = CopyOptions {
+        max_packet_bytes,
+        ..CopyOptions::default()
+    };
+    let mut done = false;
+    loop {
+        let available = packet.read(&mut input)?;
+        if available {
+            let (index, _) = packet_info(&packet, &input, &options)?;
+            if index != stream_index {
+                continue;
+            }
+        }
+        check(
+            unsafe {
+                avcodec_send_packet(
+                    decoder.0,
+                    if available {
+                        packet.0
+                    } else {
+                        ptr::null()
+                    },
+                )
+            },
+            "send compressed audio packet",
+        )?;
+        loop {
+            let code = unsafe { avcodec_receive_frame(decoder.0, frame.0) };
+            if code == -libc::EAGAIN || code == EOF {
+                break;
+            }
+            check(code, "receive decoded audio frame")?;
+            done = write_interval_pcm_frame(
+                output,
+                mapped,
+                &frame,
+                &mut encoded,
+                &mut pool,
+                format,
+                &mut decoded_sample_frames,
+                &mut written_sample_frames,
+                &mut sample_bounds,
+                interval_us,
+                max_packet_bytes,
+            )?;
             unsafe {
                 av_frame_unref(frame.0);
+            }
+            if done {
+                return Ok(written_sample_frames);
             }
         }
         if !available {
             break;
         }
     }
-    let sink = sink.ok_or("no decoded audio samples")?;
-    sink.output.finish()?;
-    Ok(sink.stats)
+    if !done {
+        return Err("compressed audio interval ended before sample window completed".into());
+    }
+    Ok(written_sample_frames)
 }
 
 #[cfg(test)]

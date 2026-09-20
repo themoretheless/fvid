@@ -12,11 +12,11 @@ mod device_pool;
 mod host_pinned;
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 mod native;
-#[cfg(any(target_os = "linux", target_os = "windows"))]
-mod ptx_embed;
 mod nv12;
 mod pipeline;
-pub use nv12::{Nv12Processor, Nv12Transform, Nv12View};
+#[cfg(any(target_os = "linux", target_os = "windows"))]
+mod ptx_embed;
+pub use nv12::{Nv12Processor, Nv12Transform, Nv12View, copy_crop_on_stream};
 pub use pipeline::{CudaPipeline, TransferStats};
 
 /// A validated transform with buffers reused across frames of the same size.

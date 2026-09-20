@@ -47,9 +47,9 @@
 	or.pred  	%p3, %p1, %p2;
 	@%p3 bra 	$L__BB0_3;
 
-	cvta.to.global.u64 	%rd7, %rd2;
 	ld.global.u32 	%r5, [%rd1+4];
 	ld.global.u32 	%r6, [%rd1+12];
+	cvta.to.global.u64 	%rd7, %rd2;
 	ld.global.u32 	%r15, [%rd1+32];
 	setp.eq.s32 	%p4, %r15, 0;
 	not.b32 	%r16, %r1;
@@ -65,7 +65,7 @@
 	ld.global.u32 	%r24, [%rd1+20];
 	add.s32 	%r8, %r22, %r24;
 	ld.global.u32 	%r25, [%rd1];
-	mad.lo.s32 	%r26, %r8, %r25, %r7;
+	mad.lo.s32 	%r26, %r25, %r8, %r7;
 	cvt.u64.u32 	%rd8, %r26;
 	add.s64 	%rd9, %rd7, %rd8;
 	ld.global.u8 	%rs1, [%rd9];

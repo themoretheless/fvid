@@ -1,7 +1,7 @@
 //! Streaming 8-bit planar YUV processing with CPU and optional GPU backends.
-pub mod backend;
 #[cfg(feature = "airbug")]
 pub mod airbug_runtime;
+pub mod backend;
 #[cfg(feature = "mcp")]
 pub mod mcp;
 #[cfg(feature = "media")]
@@ -534,4 +534,393 @@ pub fn process_gpu_chain<R: BufRead, W: Write>(
     }
     writer.flush()?;
     Ok((stats, pipeline.transfers()))
+}
+
+#[cfg(all(test, feature = "media"))]
+mod play_controls {
+    use std::path::{Path, PathBuf};
+
+    #[test]
+    fn rate_scales_time_and_audio_phase() {
+        let media = fvid_media::clamp_rate_milli;
+        assert_eq!(media(1.0), 1_000);
+        assert_eq!(media(0.1), 250);
+        assert_eq!(media(8.0), 4_000);
+        assert_eq!(media(f32::NAN), 1_000);
+        assert_eq!(fvid_media::scale_elapsed_us(1_000_000, 1_000), 1_000_000);
+        assert_eq!(fvid_media::scale_elapsed_us(1_000_000, 2_000), 2_000_000);
+        assert_eq!(fvid_media::scale_elapsed_us(1_000_000, 250), 250_000);
+        assert_eq!(fvid_media::advance_rate_phase(0, 1_000), (1, 0));
+        assert_eq!(fvid_media::advance_rate_phase(0, 2_000), (2, 0));
+        let mut phase = 0;
+        let mut consumed = 0u32;
+        for _ in 0..4 {
+            let (need, next) = fvid_media::advance_rate_phase(phase, 250);
+            consumed += need;
+            phase = next;
+        }
+        assert_eq!(consumed, 1);
+        assert_eq!(phase, 0);
+    }
+
+    #[test]
+    fn playlist_step_stays_inside_the_list() {
+        assert_eq!(fvid_media::playlist_step(3, 0, -1), None);
+        assert_eq!(fvid_media::playlist_step(3, 0, 1), Some(1));
+        assert_eq!(fvid_media::playlist_step(3, 2, 1), None);
+        assert_eq!(fvid_media::playlist_step(0, 0, 1), None);
+    }
+
+    #[test]
+    fn snapshot_bmp_is_bottom_up_bgr() {
+        let bytes = fvid_media::encode_bmp(1, 1, &[0x00FF_0000]).unwrap();
+        assert_eq!(&bytes[0..2], b"BM");
+        assert_eq!(bytes[54], 0);
+        assert_eq!(bytes[55], 0);
+        assert_eq!(bytes[56], 255);
+        let path = fvid_media::snapshot_path(Path::new("clips/demo.mp4"), 2);
+        assert_eq!(path, PathBuf::from("clips/demo-fvid-2.bmp"));
+    }
+
+    #[test]
+    fn subtitle_text_and_track_cycle() {
+        assert_eq!(fvid_media::plain_subtitle("Hello"), "Hello");
+        assert_eq!(
+            fvid_media::plain_subtitle(r"0,0,Default,,0,0,0,,{\i1}Hello{\i0}\Nthere"),
+            "Hello\nthere"
+        );
+        let (start, end) = fvid_media::subtitle_window(1_000_000, 200, 1200);
+        assert_eq!((start, end), (1_200_000, 2_200_000));
+        let cues = [fvid_media::SubtitleCue {
+            start_us: start,
+            end_us: end,
+            text: "Hello".into(),
+        }];
+        assert_eq!(fvid_media::active_subtitle(&cues, 1_200_000), Some("Hello"));
+        assert_eq!(fvid_media::active_subtitle(&cues, 2_200_000), None);
+        assert_eq!(fvid_media::cycle_track(2, 0, 1, false), 1);
+        assert_eq!(fvid_media::cycle_track(2, 1, 1, false), 0);
+        assert_eq!(fvid_media::cycle_track(2, 0, 1, true), 1);
+        assert_eq!(fvid_media::cycle_track(2, 1, 1, true), -1);
+        assert_eq!(fvid_media::cycle_track(2, -1, 1, true), 0);
+    }
+
+    #[test]
+    fn external_subtitles_and_device_name() {
+        let cues = fvid_media::parse_srt(
+            "1\n00:00:01,200 --> 00:00:02,000\nHello from file\n\n2\n00:00:02,000 --> 00:00:03,000\nNext\n",
+        );
+        assert_eq!(cues.len(), 2);
+        assert_eq!(cues[0].start_us, 1_200_000);
+        assert_eq!(cues[0].text, "Hello from file");
+        assert_eq!(
+            fvid_media::parse_subtitle_clock("0:00:01.20"),
+            Some(1_200_000)
+        );
+        let ass = fvid_media::parse_subtitle_text(
+            "[Events]\nDialogue: 0,0:00:01.20,0:00:02.00,Default,,0,0,0,,Hello\n",
+        )
+        .unwrap();
+        assert_eq!(ass[0].text, "Hello");
+        let names = vec!["Speakers".into(), "HDMI".into()];
+        assert_eq!(fvid_media::find_audio_device(&names, "hdmi"), Some("HDMI"));
+        assert_eq!(fvid_media::find_audio_device(&names, " missing "), None);
+        assert!(fvid_media::is_playback_url("https://example.test/a.mp4"));
+        assert!(fvid_media::is_playback_url("rtsp://cam.example/stream"));
+        assert!(fvid_media::is_playback_url("udp://239.1.1.1:5000"));
+        assert!(!fvid_media::is_playback_url("file-not-a-url"));
+        assert!(!fvid_media::is_playback_url("javascript://alert"));
+        let a = fvid_media::ab_mark(None, 1_500_000).unwrap();
+        assert_eq!(a.a_us, 1_500_000);
+        assert!(a.b_us < 0);
+        assert_eq!(fvid_media::ab_restart_us(a, 9_000_000), None);
+        let both = fvid_media::ab_mark(Some(a), 4_000_000).unwrap();
+        assert_eq!(both.a_us, 1_500_000);
+        assert_eq!(both.b_us, 4_000_000);
+        assert_eq!(fvid_media::ab_restart_us(both, 3_999_999), None);
+        assert_eq!(fvid_media::ab_restart_us(both, 4_000_000), Some(1_500_000));
+        let swapped = fvid_media::ab_mark(Some(a), 200_000).unwrap();
+        assert_eq!((swapped.a_us, swapped.b_us), (200_000, 1_500_000));
+        assert_eq!(fvid_media::ab_mark(Some(both), 0), None);
+        let chapters = [0, 10_000_000, 20_000_000];
+        assert_eq!(fvid_media::chapter_step(&chapters, 12_000_000, 1), Some(20_000_000));
+        assert_eq!(fvid_media::chapter_step(&chapters, 15_000_000, -1), Some(10_000_000));
+        assert_eq!(fvid_media::chapter_step(&chapters, 11_000_000, -1), Some(0));
+        assert_eq!(fvid_media::chapter_step(&chapters, 25_000_000, 1), None);
+        assert_eq!(
+            fvid_media::cycle_repeat(fvid_media::RepeatMode::Off),
+            fvid_media::RepeatMode::All
+        );
+        assert_eq!(
+            fvid_media::playback_continue(3, 2, fvid_media::RepeatMode::Off),
+            fvid_media::PlaybackContinue::Stop
+        );
+        assert_eq!(
+            fvid_media::playback_continue(3, 2, fvid_media::RepeatMode::All),
+            fvid_media::PlaybackContinue::Next(0)
+        );
+        assert_eq!(
+            fvid_media::playback_continue(3, 1, fvid_media::RepeatMode::One),
+            fvid_media::PlaybackContinue::Restart
+        );
+        assert_eq!(fvid_media::subtitle_delay_us(0, 2), 100_000);
+        assert_eq!(fvid_media::subtitle_clock_us(1_000_000, 100_000), 900_000);
+        assert_eq!(fvid_media::audio_delay_frames(50_000, 48_000), 2_400);
+        assert_eq!(fvid_media::audio_delay_frames(-50_000, 48_000), -2_400);
+        assert_eq!(fvid_media::audio_delay_frames(50_000, 0), 0);
+        assert_eq!(fvid_media::step_audio_skew(3, 1, 10), (2, true, 0));
+        assert_eq!(fvid_media::step_audio_skew(-3, 1, 10), (-2, false, 1));
+        assert_eq!(fvid_media::step_audio_skew(-3, 1, 0), (-3, false, 0));
+        assert_eq!(
+            fvid_media::cycle_aspect(fvid_media::AspectMode::Source),
+            fvid_media::AspectMode::Square
+        );
+        assert_eq!(fvid_media::cycle_aspect(fvid_media::AspectMode::FiveFour), fvid_media::AspectMode::Source);
+        assert_eq!(
+            fvid_media::frame_aspect(320, 240, fvid_media::AspectMode::Source),
+            (320, 240)
+        );
+        assert_eq!(
+            fvid_media::frame_aspect(320, 240, fvid_media::AspectMode::SixteenNine),
+            (16, 9)
+        );
+        assert_eq!(fvid_media::fit_aspect(1000, 1000, 16, 9), (1000, 562));
+        assert_eq!(fvid_media::fit_aspect(1920, 1080, 16, 9), (1920, 1080));
+        assert_eq!(fvid_media::clamp_volume_milli(2_500), 2_000);
+        assert_eq!(fvid_media::clamp_volume_milli(-5), 0);
+        assert_eq!(fvid_media::clamp_volume_milli(1_500), 1_500);
+        assert_eq!(fvid_media::center_crop(1920, 1080, 4, 3), (240, 0, 1440, 1080));
+        assert_eq!(fvid_media::center_crop(320, 240, 16, 9), (0, 30, 320, 180));
+        assert_eq!(
+            fvid_media::display_ratio(320, 240, fvid_media::AspectMode::Source, fvid_media::AspectMode::SixteenNine),
+            (16, 9)
+        );
+        assert_eq!(
+            fvid_media::display_ratio(320, 240, fvid_media::AspectMode::Square, fvid_media::AspectMode::SixteenNine),
+            (1, 1)
+        );
+        assert_eq!(fvid_media::zoom_step(1_000, true), 2_000);
+        assert_eq!(fvid_media::zoom_step(1_000, false), 500);
+        assert_eq!(fvid_media::zoom_step(250, false), 250);
+        assert_eq!(fvid_media::zoom_step(2_000, true), 2_000);
+        assert_eq!(fvid_media::zoom_size(1920, 1080, 1_000), (1920, 1080));
+        assert_eq!(fvid_media::zoom_size(1920, 1080, 2_000), (3840, 2160));
+        assert_eq!(fvid_media::zoom_label(500), "1:2");
+        let mut marks = Vec::new();
+        assert!(fvid_media::insert_bookmark(&mut marks, 2_000_000));
+        assert!(fvid_media::insert_bookmark(&mut marks, 500_000));
+        assert!(!fvid_media::insert_bookmark(&mut marks, 2_000_000));
+        assert_eq!(marks[0].media_us, 500_000);
+        assert_eq!(fvid_media::bookmark_step(&marks, 0, 1), Some(500_000));
+        assert_eq!(fvid_media::bookmark_step(&marks, 500_000, 1), Some(2_000_000));
+        assert_eq!(fvid_media::bookmark_step(&marks, 2_000_000, 1), None);
+        assert_eq!(fvid_media::bookmark_step(&marks, 2_000_000, -1), Some(500_000));
+        let order = fvid_media::shuffled_indices(5, 42);
+        let mut sorted = order.clone();
+        sorted.sort_unstable();
+        assert_eq!(sorted, vec![0, 1, 2, 3, 4]);
+        assert_eq!(fvid_media::shuffled_indices(5, 42), order);
+        assert_eq!(fvid_media::order_step(&order, 0, 1, false), Some((order[1], 1)));
+        assert_eq!(fvid_media::order_step(&[2, 0, 1], 2, 1, false), None);
+        assert_eq!(fvid_media::order_step(&[2, 0, 1], 2, 1, true), Some((2, 0)));
+        let base = std::path::Path::new(r"D:\lists");
+        let items = fvid_media::parse_playlist_text(
+            "#EXTM3U\n#EXTINF:1,A\na.mp4\nhttp://example.test/b.mp4\n",
+            base,
+        );
+        assert_eq!(items.len(), 2);
+        assert!(items[0].ends_with("a.mp4"));
+        assert!(fvid_media::is_playback_url(items[1].to_str().unwrap()));
+        let pls = fvid_media::parse_playlist_text(
+            "[playlist]\nFile1=c.mp3\nTitle1=C\nNumberOfEntries=1\n",
+            base,
+        );
+        assert!(pls[0].ends_with("c.mp3"));
+        assert!(fvid_media::is_hls_playlist("#EXTM3U\n#EXT-X-TARGETDURATION:1\nseg.ts\n"));
+        assert!(fvid_media::parse_playlist_text("#EXTM3U\n#EXT-X-TARGETDURATION:1\nseg.ts\n", base).is_empty());
+        let cues = [fvid_media::SubtitleCue {
+            start_us: 0,
+            end_us: 500_000,
+            text: "Hi".into(),
+        }];
+        assert_eq!(
+            fvid_media::active_subtitle(&cues, fvid_media::subtitle_clock_us(600_000, 200_000)),
+            Some("Hi")
+        );
+        let corpus = std::fs::read_to_string("docs/PLAYER_CORPUS.md").expect("player corpus");
+        let names: Vec<_> = corpus
+            .lines()
+            .filter_map(|line| {
+                let line = line.trim();
+                let rest = line.strip_prefix("| ")?;
+                let (index, rest) = rest.split_once(" | ")?;
+                let name = rest.strip_suffix(" |")?;
+                index.parse::<usize>().ok()?;
+                Some(name.trim())
+            })
+            .filter(|name| !name.is_empty() && *name != "Name" && *name != "---")
+            .collect();
+        assert!(
+            names.len() >= 500,
+            "player corpus has {} entries; need at least 500 real products",
+            names.len()
+        );
+        assert!(names.iter().any(|name| name.eq_ignore_ascii_case("VLC")));
+        assert!(names.iter().any(|name| name.eq_ignore_ascii_case("mpv")));
+        assert!(names.iter().any(|name| name.eq_ignore_ascii_case("PotPlayer")));
+        assert_eq!(fvid_media::clamp_adjust_milli(3_000), 2_000);
+        assert_eq!(
+            fvid_media::adjust_pixel(40, 80, 120, 1_000, 1_000, 1_000, 1_000),
+            (40, 80, 120)
+        );
+        let bright = fvid_media::adjust_pixel(40, 80, 120, 1_500, 1_000, 1_000, 1_000);
+        assert!(bright.0 > 40 && bright.1 > 80 && bright.2 > 120);
+        let gray = fvid_media::adjust_pixel(200, 40, 40, 1_000, 1_000, 0, 1_000);
+        assert!((gray.0 as i32 - gray.1 as i32).abs() < 8);
+        assert!((gray.1 as i32 - gray.2 as i32).abs() < 8);
+        let hue = fvid_media::adjust_pixel(200, 40, 40, 1_000, 1_000, 1_000, 1_500);
+        assert_ne!(hue, (200, 40, 40));
+        assert_eq!(fvid_media::flip_uv((0.1, 0.2, 0.9, 0.8), true, false), (0.9, 0.2, 0.1, 0.8));
+        assert_eq!(fvid_media::flip_uv((0.1, 0.2, 0.9, 0.8), false, true), (0.1, 0.8, 0.9, 0.2));
+        assert_eq!(fvid_media::flip_uv((0.1, 0.2, 0.9, 0.8), true, true), (0.9, 0.8, 0.1, 0.2));
+        assert_eq!(
+            fvid_media::cycle_rotate(fvid_media::RotateMode::Deg0),
+            fvid_media::RotateMode::Deg90
+        );
+        assert_eq!(fvid_media::rotate_size(320, 240, fvid_media::RotateMode::Deg90), (240, 320));
+        assert_eq!(
+            fvid_media::rotate_pixel(0, 0, 320, 240, fvid_media::RotateMode::Deg90),
+            (0, 319)
+        );
+        assert_eq!(
+            fvid_media::rotate_pixel(319, 0, 320, 240, fvid_media::RotateMode::Deg90),
+            (0, 0)
+        );
+        assert_eq!(
+            fvid_media::rotate_pixel(0, 0, 320, 240, fvid_media::RotateMode::Deg180),
+            (319, 239)
+        );
+        let mut tone = fvid_media::ToneState::default();
+        let mut flat = 0.0;
+        for _ in 0..64 {
+            flat = fvid_media::tone_step(0.25, &mut tone, 1_000, 1_000, 1_000);
+        }
+        assert!((flat - 0.25).abs() < 0.05);
+        let mut boosted = fvid_media::ToneState::default();
+        let mut loud = 0.0;
+        for _ in 0..64 {
+            loud = fvid_media::tone_step(0.25, &mut boosted, 2_000, 1_000, 1_000);
+        }
+        assert!(loud > flat);
+        assert_eq!(fvid_media::EQ_BAND_COUNT, 10);
+        assert_eq!(fvid_media::EQ_BAND_HZ[0], 60);
+        assert_eq!(fvid_media::EQ_BAND_HZ[9], 16_000);
+        let mut geq = fvid_media::GraphicEqState::default();
+        let unity = fvid_media::eq_unity_gains();
+        let mut flat_eq = 0.0;
+        for _ in 0..128 {
+            flat_eq = fvid_media::graphic_eq_step(0.25, &mut geq, &unity);
+        }
+        assert!((flat_eq - 0.25).abs() < 0.05);
+        let mut bass_boost = fvid_media::eq_unity_gains();
+        bass_boost[0] = 2_000;
+        let mut geq_boost = fvid_media::GraphicEqState::default();
+        let mut loud_eq = 0.0;
+        for _ in 0..128 {
+            loud_eq = fvid_media::graphic_eq_step(0.25, &mut geq_boost, &bass_boost);
+        }
+        assert!(loud_eq > flat_eq);
+        assert_eq!(
+            fvid_media::average_rgb_pixel(0x00_ff_00_00, 0x00_00_00_00),
+            0x00_7f_00_00
+        );
+        let mut field = vec![0x00_ff_00_00u32, 0x00_00_00_ff, 0x00_00_ff_00, 0x00_ff_ff_00];
+        fvid_media::deinterlace_blend_rgb(&mut field, 2, 2);
+        assert_eq!(field[0], field[2]);
+        assert_eq!(field[1], field[3]);
+        assert_eq!(field[0], fvid_media::average_rgb_pixel(0x00_ff_00_00, 0x00_00_ff_00));
+        let devices = vec!["Speakers".into(), "HDMI".into(), "USB DAC".into()];
+        assert_eq!(
+            fvid_media::cycle_output_device(&devices, "HDMI", 1),
+            Some("USB DAC")
+        );
+        assert_eq!(
+            fvid_media::cycle_output_device(&devices, "USB DAC", 1),
+            Some("Speakers")
+        );
+        assert_eq!(
+            fvid_media::cycle_output_device(&devices, "missing", -1),
+            Some("USB DAC")
+        );
+        assert_eq!(fvid_media::cycle_output_device(&[], "x", 1), None);
+        let stats = fvid_media::PlayStats {
+            presented_frames: 12,
+            skipped_frames: 3,
+            width: 640,
+            height: 360,
+            source_width: 1920,
+            source_height: 1080,
+            audio: true,
+            sample_rate: 48_000,
+            channels: 2,
+        };
+        let line = fvid_media::format_play_stats(&stats, 65_000_000, 120_000_000);
+        assert!(line.contains("shown 12"));
+        assert!(line.contains("drop 3"));
+        assert!(line.contains("1920x1080→640x360"));
+        assert!(line.contains("48000 Hz 2ch"));
+        let mut frame = [0.25f32, -0.5];
+        fvid_media::apply_audio_channel(&mut frame, fvid_media::AudioChannelMode::Mono);
+        assert!((frame[0] - (-0.125)).abs() < 1e-6);
+        assert_eq!(frame[0], frame[1]);
+        let mut swapped = [0.25f32, -0.5];
+        fvid_media::apply_audio_channel(&mut swapped, fvid_media::AudioChannelMode::Reverse);
+        assert_eq!(swapped, [-0.5, 0.25]);
+        assert_eq!(
+            fvid_media::cycle_audio_channel(fvid_media::AudioChannelMode::Reverse),
+            fvid_media::AudioChannelMode::Stereo
+        );
+        assert_eq!(fvid_media::clamp_subtitle_margin(500), 400);
+        assert_eq!(fvid_media::subtitle_margin_px(12, 40), 52);
+        assert_eq!(fvid_media::subtitle_margin_px(12, -20), 0);
+        let png = fvid_media::encode_png(1, 1, &[0x00_ff_00_00]).unwrap();
+        assert_eq!(&png[0..8], &[0x89, b'P', b'N', b'G', 0x0d, 0x0a, 0x1a, 0x0a]);
+        assert_eq!(
+            fvid_media::cycle_snapshot_format(fvid_media::SnapshotFormat::Bmp),
+            fvid_media::SnapshotFormat::Png
+        );
+        assert_eq!(
+            fvid_media::snapshot_path_with_ext(std::path::Path::new("a.mp4"), 1, "png")
+                .file_name()
+                .and_then(|n| n.to_str()),
+            Some("a-fvid-1.png")
+        );
+        let mut palette = vec![0u8; 1024];
+        palette[4..8].copy_from_slice(&[255, 0, 0, 255]);
+        assert_eq!(fvid_media::palette_rgba_pixel(1, &palette), 0xff_ff_00_00);
+        let pixels = fvid_media::pal8_to_rgba(2, 1, &[1, 0], 2, &palette).unwrap();
+        assert_eq!(pixels[0], 0xff_ff_00_00);
+        assert_eq!(pixels[1], 0);
+        assert_eq!(
+            fvid_media::blend_rgba_over_rgb(0x00_00_ff_00, 0x80_ff_00_00),
+            0x00_80_7f_00
+        );
+        let mut frame = vec![0u32; 4];
+        let plane = fvid_media::BitmapSubtitle {
+            start_us: 0,
+            end_us: 1_000_000,
+            x: 1,
+            y: 0,
+            width: 1,
+            height: 1,
+            pixels: vec![0xff_00_00_ff],
+        };
+        fvid_media::blit_bitmap_subtitle(&mut frame, 2, 2, &plane);
+        assert_eq!(frame[1], 0x00_00_00_ff);
+        assert!(fvid_media::active_bitmap_subtitle(std::slice::from_ref(&plane), 10).is_some());
+        assert!(fvid_media::active_bitmap_subtitle(std::slice::from_ref(&plane), 2_000_000).is_none());
+        assert_eq!(fvid_media::parse_play_clock("90"), Some(90_000_000));
+        assert_eq!(fvid_media::parse_play_clock("1:30.0"), Some(90_000_000));
+        assert_eq!(fvid_media::parse_play_clock("bad"), None);
+    }
 }

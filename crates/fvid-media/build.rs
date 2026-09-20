@@ -30,7 +30,7 @@ fn main() {
         );
     }
     println!("cargo:rustc-link-search=native={}", lib.display());
-    for library in ["avformat", "avcodec", "avutil", "avfilter"] {
+    for library in ["avformat", "avcodec", "avutil", "avfilter", "swscale", "swresample"] {
         // MSVC import libs are avformat.lib; MinGW uses libavformat.dll.a — rustc -l avformat
         // resolves both when the search path is correct.
         println!("cargo:rustc-link-lib={library}");
@@ -39,24 +39,27 @@ fn main() {
     if target_os == "windows" && bin.is_dir() {
         // Help runtime discovery when running tests from the build tree.
         println!("cargo:rustc-env=FVID_FFMPEG_BIN={}", bin.display());
-        println!("cargo:warning=Add {} to PATH so FFmpeg DLLs load at runtime", bin.display());
+        println!(
+            "cargo:warning=Add {} to PATH so FFmpeg DLLs load at runtime",
+            bin.display()
+        );
     }
     let builder = bindgen::Builder::default()
         .header_contents(
             "fvid_av.h",
-            "#include <libavformat/avformat.h>\n#include <libavcodec/avcodec.h>\n#include <libavcodec/codec_desc.h>\n#include <libavutil/pixdesc.h>\n#include <libavutil/hwcontext.h>\n#include <libavfilter/avfilter.h>\n#include <libavfilter/buffersrc.h>\n#include <libavfilter/buffersink.h>\n",
+            "#include <libavformat/avformat.h>\n#include <libavcodec/avcodec.h>\n#include <libavcodec/codec_desc.h>\n#include <libavutil/pixdesc.h>\n#include <libavutil/imgutils.h>\n#include <libavutil/hwcontext.h>\n#include <libavutil/opt.h>\n#include <libavfilter/avfilter.h>\n#include <libavfilter/buffersrc.h>\n#include <libavfilter/buffersink.h>\n#include <libswscale/swscale.h>\n#include <libswresample/swresample.h>\n",
         )
         .clang_arg(format!("-I{}", include.display()))
-        .allowlist_function("av.*")
-        .allowlist_type("AV.*")
-        .allowlist_var("AV.*|LIBAV.*")
+        .allowlist_function("av.*|sws_.*|swr_.*")
+        .allowlist_type("AV.*|SwsContext|SwrContext")
+        .allowlist_var("AV.*|LIBAV.*|SWS_.*|SWR_.*")
         .derive_debug(false)
         .layout_tests(false)
         .generate_comments(false)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()));
-    let bindings = builder
-        .generate()
-        .expect("FFmpeg headers must be readable by libclang; set LIBCLANG_PATH on Windows to LLVM bin");
+    let bindings = builder.generate().expect(
+        "FFmpeg headers must be readable by libclang; set LIBCLANG_PATH on Windows to LLVM bin",
+    );
     bindings
         .write_to_file(PathBuf::from(env::var_os("OUT_DIR").unwrap()).join("av.rs"))
         .unwrap();

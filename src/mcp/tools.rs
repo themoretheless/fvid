@@ -23,6 +23,17 @@ struct Args {
     from: Option<String>,
     to: Option<String>,
     crop: Option<[usize; 4]>,
+    scale: Option<[u32; 2]>,
+    transpose: Option<String>,
+    rotate: Option<f64>,
+    pad: Option<[u32; 4]>,
+    rate: Option<i32>,
+    channels: Option<i32>,
+    volume: Option<f64>,
+    #[serde(default)]
+    normalize: Option<bool>,
+    #[serde(default)]
+    weights: Vec<f32>,
     #[serde(default)]
     hflip: bool,
     #[serde(default)]
@@ -74,7 +85,7 @@ const DEFINITIONS: &[(&str, &str, &str, &str)] = &[
     ),
     (
         "fvid_trim",
-        "Strict packet-copy trim [from,to). Rejects B-frames and unsafe boundaries; use transcode_lossless for frame selection inside GOP.",
+        "Strict packet-copy trim [from,to). Closed-GOP mid-GOP pre/post-roll and open-GOP end/start from preceding IDR/IRAP; rejects unsafe boundaries. Use transcode_lossless when stream-copy cannot qualify.",
         "input output streams from to",
         "input output from to",
     ),
@@ -86,14 +97,14 @@ const DEFINITIONS: &[(&str, &str, &str, &str)] = &[
     ),
     (
         "fvid_transcode_lossless",
-        "FFV1/Matroska export of decoded samples, optional crop [x,y,width,height], hflip/vflip and interval. Interval supports PCM audio; seek is video-only.",
-        "input output streams crop hflip vflip from to seek",
+        "FFV1/Matroska export of decoded samples, optional crop [x,y,width,height], scale [width,height] (neighbor), transpose, rotate degrees, pad [width,height,x,y] (black), hflip/vflip and interval. Interval supports PCM audio; seek is video-only.",
+        "input output streams crop scale transpose rotate pad hflip vflip from to seek",
         "input output",
     ),
     (
         "fvid_transcode",
-        "Encode video with explicit encoder/quality. May be lossy. Other streams copied except PCM interval slicing. No automatic pixel conversion.",
-        "input output streams crop hflip vflip from to seek encoder encoder_options",
+        "Encode video with explicit encoder/quality. May be lossy. Other streams copied except PCM interval slicing. No automatic pixel-format conversion; optional neighbor scale, transpose, rotate and pad.",
+        "input output streams crop scale transpose rotate pad hflip vflip from to seek encoder encoder_options",
         "input output encoder",
     ),
     (
@@ -104,9 +115,21 @@ const DEFINITIONS: &[(&str, &str, &str, &str)] = &[
     ),
     (
         "fvid_decode_audio",
-        "Decode one selected audio stream to PCM retaining sample precision; contiguous decoded samples, no synthesized timestamp gaps.",
-        "input output streams",
+        "Decode one selected audio stream to PCM retaining sample precision; optional rate/channels (libswresample) and volume (linear gain on float PCM). Contiguous decoded samples, no synthesized timestamp gaps.",
+        "input output streams rate channels volume from to",
         "input output",
+    ),
+    (
+        "fvid_mix_audio",
+        "Mix 2..=16 float audio inputs to PCM WAV with FFmpeg amix=duration=shortest semantics; optional weights; normalize defaults true.",
+        "inputs output normalize weights",
+        "inputs output",
+    ),
+    (
+        "fvid_merge_audio",
+        "Channel-merge exactly two float audio inputs to PCM WAV (FFmpeg amerge=inputs=2); output channels are the sum; duration is shortest.",
+        "inputs output",
+        "inputs output",
     ),
     (
         "fvid_process_y4m",
@@ -117,6 +140,10 @@ const DEFINITIONS: &[(&str, &str, &str, &str)] = &[
 ];
 fn properties() -> Map<String, Value> {
     let crop = json!({"type":"array","items":{"type":"integer","minimum":0},"minItems":4,"maxItems":4,"description":"[x,y,width,height]"});
+    let scale = json!({"type":"array","items":{"type":"integer","minimum":1},"minItems":2,"maxItems":2,"description":"[width,height] neighbor scale after crop/flips/transpose/pad"});
+    let transpose = json!({"type":"string","enum":["clock","cclock","clock_flip","cclock_flip"],"description":"FFmpeg transpose= mode after crop/flips and before rotate/pad/scale"});
+    let rotate = json!({"type":"number","minimum":-3600,"maximum":3600,"description":"rotation degrees; FFmpeg rotate=a=DEG*PI/180:ow=rotw(a):oh=roth(a):c=black"});
+    let pad = json!({"type":"array","items":{"type":"integer","minimum":0},"minItems":4,"maxItems":4,"description":"[width,height,x,y] black pad after rotate and before scale"});
     let stage = json!({"type":"object","additionalProperties":false,"properties":{"crop":crop,"hflip":{"type":"boolean"},"vflip":{"type":"boolean"}}});
     json!({
         "input":{"type":"string","minLength":1,"maxLength":4096},"output":{"type":"string","minLength":1,"maxLength":4096},
@@ -124,12 +151,18 @@ fn properties() -> Map<String, Value> {
         "streams":{"type":"array","items":{"type":"integer","minimum":0},"maxItems":64},
         "from":{"type":"string","pattern":"^[0-9]+(\\.[0-9]{1,6})?$","maxLength":32},
         "to":{"type":"string","pattern":"^[0-9]+(\\.[0-9]{1,6})?$","maxLength":32},
-        "crop":crop,"hflip":{"type":"boolean"},"vflip":{"type":"boolean"},"seek":{"type":"boolean"},
+        "crop":crop,"scale":scale,"transpose":transpose,"rotate":rotate,"pad":pad,"hflip":{"type":"boolean"},"vflip":{"type":"boolean"},"seek":{"type":"boolean"},
+        "rate":{"type":"integer","minimum":8000,"maximum":384000,"description":"target sample rate for decode-audio (libswresample)"},
+        "channels":{"type":"integer","minimum":1,"maximum":64,"description":"target channel count for decode-audio (FFmpeg -ac via libswresample)"},
+        "volume":{"type":"number","minimum":0,"maximum":64,"description":"linear gain for decode-audio float PCM (FFmpeg volume=)"},
+        "normalize":{"type":"boolean","description":"amix normalize (default true) for mix-audio"},
+        "weights":{"type":"array","items":{"type":"number"},"minItems":1,"maxItems":16,"description":"amix per-input weights; shorter lists repeat the last weight"},
         "encoder":{"type":"string","minLength":1,"maxLength":128},
         "encoder_options":{"type":"object","additionalProperties":false,"properties":{
             "crf":{"type":"string","maxLength":32},"preset":{"type":"string","maxLength":128},"tune":{"type":"string","maxLength":128},
             "lossless":{"type":"string","maxLength":16},"deadline":{"type":"string","maxLength":32},"cpu-used":{"type":"string","maxLength":16},
-            "threads":{"type":"string","maxLength":16},"bf":{"type":"string","maxLength":16},"g":{"type":"string","maxLength":16},"level":{"type":"string","maxLength":16}}},
+            "threads":{"type":"string","maxLength":16},"bf":{"type":"string","maxLength":16},"g":{"type":"string","maxLength":16},"level":{"type":"string","maxLength":16},
+            "x265-params":{"type":"string","maxLength":512},"svtav1-params":{"type":"string","maxLength":512}},
         "backend":{"type":"string","enum":["cpu","auto","metal","vulkan","dx12","gl","cuda"]},
         "device":{"type":"integer","minimum":0},"memory_mib":{"type":"integer","minimum":1,"maximum":4096},
         "stages":{"type":"array","items":stage,"maxItems":255}
@@ -230,6 +263,32 @@ pub(super) fn execute(
             .map(|p| server.input(p))
             .collect::<Result<Vec<_>, _>>()?;
         encode(media::concat(&sources, &output, &options)?)?
+    } else if name == "fvid_mix_audio" || name == "fvid_merge_audio" {
+        if name == "fvid_mix_audio" {
+            if !(2..=16).contains(&a.inputs.len()) {
+                return Err("mix-audio requires 2..=16 inputs".into());
+            }
+        } else if a.inputs.len() != 2 {
+            return Err("merge-audio requires exactly two inputs".into());
+        }
+        let sources = a
+            .inputs
+            .iter()
+            .map(|p| server.input(p))
+            .collect::<Result<Vec<_>, _>>()?;
+        if name == "fvid_mix_audio" {
+            encode(media::mix_audio(
+                &sources,
+                &output,
+                &media::MixAudioOptions {
+                    duration: media::MixDuration::Shortest,
+                    normalize: a.normalize.unwrap_or(true),
+                    weights: a.weights.clone(),
+                },
+            )?)?
+        } else {
+            encode(media::merge_audio(&sources, &output)?)?
+        }
     } else {
         let input = server.input(required(&a.input, "input")?)?;
         match name {
@@ -242,7 +301,17 @@ pub(super) fn execute(
                     encode(media::trim_pcm(&input, &output, from, to, &options)?)?
                 }
             }
-            "fvid_decode_audio" => encode(media::decode_audio(&input, &output, &options)?)?,
+            "fvid_decode_audio" => {
+                let transform = media::AudioDecodeTransform {
+                    interval: interval(&a)?,
+                    sample_rate: a.rate,
+                    channels: a.channels,
+                    volume: a.volume,
+                };
+                encode(media::decode_audio_transformed(
+                    &input, &output, transform, &options,
+                )?)?
+            }
             "fvid_transcode" | "fvid_transcode_lossless" => {
                 let transform = media::LosslessTransform {
                     crop: a.crop.map(|[x, y, width, height]| media::CropRect {
@@ -253,6 +322,127 @@ pub(super) fn execute(
                     }),
                     horizontal_flip: a.hflip,
                     vertical_flip: a.vflip,
+                    scale: a.scale.map(|[width, height]| media::ScaleSize { width, height }),
+                    transpose: a
+                        .transpose
+                        .as_deref()
+                        .map(media::TransposeMode::parse)
+                        .transpose()?,
+                    rotate: match a.rotate {
+                        Some(degrees) => Some(media::RotateAngle::parse(&degrees.to_string())?),
+                        None => None,
+                    },
+                    pad: a.pad.map(|[width, height, x, y]| media::PadRect {
+                        width,
+                        height,
+                        x,
+                        y,
+                    }),
+                    burn_subs: None,
+                    overlay: None,
+                    colorspace: None,
+                    zscale: None,
+                    tonemap: None,
+                    xfade: None,
+                    yadif: None,
+                    bwdif: None,
+                    w3fdif: None,
+                    tblend: None,
+                    tmix: None,
+                    hqdn3d: None,
+                    gblur: None,
+                    eq: None,
+                    unsharp: None,
+                    hue: None,
+                    avgblur: None,
+                    boxblur: None,
+                    negate: None,
+                    edgedetect: None,
+                    sobel: None,
+                    prewitt: None,
+                    roberts: None,
+                    kirsch: None,
+                    scharr: None,
+                    atadenoise: None,
+                    owdenoise: None,
+                    vaguedenoiser: None,
+                    nlmeans: None,
+                    bm3d: None,
+                    dctdnoiz: None,
+                    fftdnoiz: None,
+                    smartblur: None,
+                    sab: None,
+                    bilateral: None,
+                    cas: None,
+                    epx: None,
+                    vignette: None,
+                    curves: None,
+                    colorbalance: None,
+                    colorlevels: None,
+                    colorchannelmixer: None,
+                    deflicker: None,
+                    photosensitivity: None,
+                    monochrome: None,
+                    grayworld: None,
+                    drawbox: None,
+                    drawgrid: None,
+                    lagfun: None,
+                    amplify: None,
+                    bitplanenoise: None,
+                    deband: None,
+                    gradfun: None,
+                    lenscorrection: None,
+                    pixelize: None,
+                    removegrain: None,
+                    yaepblur: None,
+                    vibrance: None,
+                    dilation: None,
+                    erosion: None,
+                    colorize: None,
+                    exposure: None,
+                    chromashift: None,
+                    colorcontrast: None,
+                    colorcorrect: None,
+                    histeq: None,
+                    shuffleplanes: None,
+                    lutyuv: None,
+                    colorhold: None,
+                    fade: None,
+                    perspective: None,
+                    lumakey: None,
+                    chromakey: None,
+                    colorkey: None,
+                    despill: None,
+                    selectivecolor: None,
+                    stereo3d: None,
+                    field: None,
+                    hqx: None,
+                    xbr: None,
+                    il: None,
+                    super2xsai: None,
+                    kerndeint: None,
+                    phase: None,
+                    estdif: None,
+                    tinterlace: None,
+                    separatefields: None,
+                    weave: None,
+                    doubleweave: None,
+                    framepack: None,
+                    telecine: None,
+                    pullup: None,
+                    decimate: None,
+                    mpdecimate: None,
+                    framestep: None,
+                    tile: None,
+                    untile: None,
+                    shuffleframes: None,
+                    reverse: None,
+                    r#loop: None,
+                    thumbnail: None,
+                    pseudocolor: None,
+                    minterpolate: None,
+                    fps: None,
+                    pix_fmt: None,
                     interval: interval(&a)?,
                     seek: a.seek,
                 };

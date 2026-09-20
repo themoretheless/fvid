@@ -32,7 +32,11 @@ fn main() {
             .unwrap_or_else(|e| panic!("NVRTC {name} compute_{arch}: {e:?}"));
             let path = out.join(format!("{name}_sm{arch}.ptx"));
             fs::write(&path, ptx.to_src().as_bytes()).unwrap_or_else(|e| panic!("{path:?}: {e}"));
-            println!("wrote {} ({} bytes)", path.display(), fs::metadata(&path).unwrap().len());
+            println!(
+                "wrote {} ({} bytes)",
+                path.display(),
+                fs::metadata(&path).unwrap().len()
+            );
         }
     }
 }

@@ -23,11 +23,13 @@ impl HostPinned {
             .bind_to_thread()
             .map_err(|err| format!("CUDA bind_to_thread failed: {err}"))?;
         // SAFETY: flags 0 = portable page-locked host memory; unset contents.
-        let ptr = unsafe { result::malloc_host(len, 0) }
-            .map_err(|err: DriverError| format!("CUDA pinned host allocation ({len} bytes) failed: {err}"))?
-            as *mut u8;
+        let ptr = unsafe { result::malloc_host(len, 0) }.map_err(|err: DriverError| {
+            format!("CUDA pinned host allocation ({len} bytes) failed: {err}")
+        })? as *mut u8;
         if ptr.is_null() {
-            return Err(format!("CUDA pinned host allocation ({len} bytes) returned null"));
+            return Err(format!(
+                "CUDA pinned host allocation ({len} bytes) returned null"
+            ));
         }
         Ok(Self {
             ptr,

@@ -66,9 +66,7 @@ fn compile_source(source: &str, name: &str, major: i32, minor: i32) -> Result<Pt
         },
     )
     .map_err(|err| {
-        format!(
-            "CUDA kernel compilation failed; use an NVRTC version supporting this GPU: {err:?}"
-        )
+        format!("CUDA kernel compilation failed; use an NVRTC version supporting this GPU: {err:?}")
     })
 }
 

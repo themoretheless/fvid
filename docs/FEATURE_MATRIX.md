@@ -1,6 +1,20 @@
 # Матрица функциональности Fvid
 
-Цель — расширение медиадвижка по проверяемым вертикальным сценариям. «Весь FFmpeg и все 632 проекта» не является достигнутым или конечным фиксированным набором функций: многие найденные проекты — кодеки, редакторы, streaming servers или компоненты. Ни metadata-инвентарь, ни наличие функции в подключённой библиотеке не считаются готовой функцией Fvid.
+Цель — покрыть и обогнать FFmpeg в фактической продуктовой области Fvid по проверяемым вертикальным сценариям. Ни metadata-инвентарь, ни наличие функции в подключённой библиотеке не считаются готовой функцией Fvid.
+
+## Зафиксированная граница продукта
+
+Граница выведена из публичных CLI/Rust API и существующей архитектуры, а не из уже пройденных тестов:
+
+- Локальные конечные media files: анализ, stream mapping, remux/mux/demux, точный edit, decode и transcode. Вход не может быть URL или произвольным AVIO callback.
+- Y4M stdin/file/stdout: bounded CPU, wgpu и CUDA crop/hflip/vflip pipelines, включая resident chains.
+- Видео: spatial transforms, интервалы, сохранение timeline, software и NVDEC/CUDA/NVENC backends. Новые spatial/conversion filters входят в область; произвольный пользовательский filtergraph пока не является публичным контрактом.
+- Аудио: stream copy, точный PCM edit и decode compressed audio в PCM. Совместный compressed-audio/video interval в `transcode-lossless` (AAC/MP3/FLAC→PCM, с optional `--seek`) квалифицирован.
+- Container semantics: порядок/выбор потоков, time bases, metadata, disposition, chapters и subtitle passthrough. Subtitle burn-in пока является gap внутри области.
+- Codec scope определяется codec families, для которых существует end-to-end workflow и corpus, а не полным списком `capabilities`. Расширение на HEVC/AV1/VP9/ProRes и hardware profiles остаётся частью цели.
+- Не входят в фактическую границу текущего продукта: capture devices, streaming server, HLS/DASH packaging и distributed batch service. Окно проигрывания входит отдельно: `fvid play` / `fvid media play` принимает локальный файл или URL (`http`, `https`, `rtsp`, `rtmp`, `udp` и остальные схемы `PLAYBACK_PROTOCOLS`). Обработка (remux/decode/edit) по-прежнему только локальные файлы. Наличие capture/packaging в FFmpeg не считается gap данного аудита, пока публичная архитектура Fvid не добавит такой продуктовый сценарий.
+
+Каждый элемент считается покрытым только при наличии публичного CLI/API, correctness/interoperability oracle и эквивалентного fair-pair benchmark. Для performance-покрытия требуется медиана Fvid строго быстрее FFmpeg более чем на 15%; единичный удачный запуск или benchmark другой операции доказательством не является.
 
 ## Реализовано и проверено
 
@@ -15,20 +29,21 @@
 | Цепочки GPU без промежуточного RAM (CUDA) | Rust + CUDA | Windows RTX 5090; lifetime/reuse/counters; без codec interop |
 | NVDEC → CUDA NV12 filter → NVENC | FFmpeg CUDA + fvid-cuda | Windows RTX 5090; `media hw-filter`; host_frame_copies=0 |
 | MCP-модуль | rmcp + Rust handlers | 11 tools, stdio/локальный HTTP, CPU/media/Metal; без публичного deployment |
-| Probe обычного файла | native libavformat adapter | MP4/MKV, streams, codec, dimensions, exact timebase |
-| Remux без encoder/decoder | native libavformat adapter | MP4→MKV, MP4+AAC→MP4, packet equality |
+| Probe обычного файла | native libavformat adapter | MP4/MKV, streams, codec/profile/level, bitrate/rate, metadata, disposition, chapters, exact timebase |
+| Remux без encoder/decoder | native libavformat adapter | MP4→MKV, MP4+AAC→MP4, SRT→MKV, mapped SubRip in MKV, packet equality |
 | Выбор/удаление дорожек | native adapter | `--streams`; PCM audio extraction to WAV |
 | Lossless-обрезка внутри GOP | decode → выбор PTS → FFV1 | H.264 B-frames, crop/vflip, retiming глав, packed PCM packet slicing; opt-in seek только video-only |
-| Обрезка по времени | native adapter + строгий Rust-контракт | H.264 IDR без B-frames; FFV1 keyframe; aligned PCM |
+| Обрезка по времени | native adapter + строгий Rust-контракт | H.264 IDR без B-frames; closed-GOP H.264/HEVC RAP→RAP и mid-GOP pre/post-roll (точный packet `from`/`to`, end-RAP decode span); FFV1 keyframe; aligned PCM |
 | Склейка | native adapter + строгий Rust-контракт | Совместимые H.264 / FFV1+PCM, точные seams |
 | Декодирование H.264 / FFV1 | native libavcodec adapter | Для crop-lossless; включая B-frame drain |
-| Явный видеокодек и параметры | native libavcodec | transcode: libx264 CRF0/28, VP9 lossless; прочие энкодеры ещё не квалифицированы |
-| Lossless-экспорт | native libavcodec + Fvid plane views | FFV1/Matroska, полный кадр или crop+hflip+vflip; 8/10/16-bit samples и alpha |
+| Проигрывание | software decode + окно | `fvid play` / `fvid media play` INPUT... `[--no-audio] [--mute] [--fullscreen] [--rate N] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices]`; INPUT — локальный файл или URL (`http`/`https`/`rtsp`/`rtmp`/`udp`, поле Open URL); BGRA до 1920×1080; seek, скорость 0.25×–4×, прыжок ко времени (`parse_play_clock`, поле Go/Jump), громкость/mute, плейлист, fullscreen, покадровый шаг, BMP-снимок (`encode_bmp` / `encode_png`, Shift+S переключает формат)., выбор аудиодорожки и устройства вывода, встроенные и внешние текстовые субтитры (SRT/ASS) и bitmap/PGS/VobSub overlay (`pal8_to_rgba`, `blit_bitmap_subtitle`). На `127.0.0.1` проверены HTTP range MP4 и HLS VOD (`index.m3u8` + `seg0.ts`): окно доходит до `00:01 / 00:01` на 4×. Клавиша L и кнопка A-B задают цикл A–B (`ab_mark` / `ab_restart_us`). PageUp/PageDown и Ch-/Ch+ переключают главы (`chapter_step`); на MP4 с двумя главами плеер пишет `fvid play: chapters: 2`. `R` переключает повтор Off/All/One (`playback_continue`). `G`/`H` сдвигают субтитры на 50 мс (`subtitle_delay_us`). `J`/`K` сдвигают звук на 50 мс: положительный skew даёт тишину и двигает часы, отрицательный выбрасывает кадры звука без сдвига часов (`audio_delay_frames`, `step_audio_skew`). `A` переключает пропорции меню VLC (`AspectMode`, `fit_aspect`). `C` кадрирует по тем же пропорциям (`center_crop`). `Z` увеличивает, Shift+Z уменьшает (1:4, 1:2, 1:1, 2:1, `zoom_size`). Ctrl+B ставит закладку, Ctrl+стрелки прыгают к соседней (`insert_bookmark`, `bookmark_step`). Ctrl+R включает случайный порядок (`shuffled_indices`, `order_step`). Локальный M3U/PLS раскрывается в список файлов, HLS (`#EXT-X-`) остаётся одним входом (`parse_playlist_text`). `T` / `--on-top` держат окно поверх остальных. Корпус ≥500 реальных плееров: `docs/PLAYER_CORPUS.md`. Яркость/контраст/насыщенность/оттенок (`adjust_pixel`), отражение H/V (`flip_uv`), поворот 0/90/180/270 (`rotate_pixel`). Деинтерлейс blend (`deinterlace_blend_rgb`, `D` / Deint). Десятиполосный графический EQ 60–16000 Hz (`graphic_eq_step`, `EQ_BAND_HZ`; UI Flat). Трёхполосный тон Bass/Mid/Treble (`tone_step`) сохранён как API. Горячая смена аудиовыхода без перезапуска сессии (`cycle_output_device`, кнопка Out). Оверлей статистики (`format_play_stats`, `I`). Режимы каналов Stereo/Left/Right/Mono/Reverse (`apply_audio_channel`). Позиция субтитров Alt+↑/↓ (`subtitle_margin_px`). Громкость до 200% (`clamp_volume_milli`) |
+| Явный видеокодек и параметры | native libavcodec | transcode: libx264 CRF0/28, libx265 lossless, VP9 lossless; HEVC/AV1/ProRes decode→FFV1 crop corpus |
+| Lossless-экспорт | native libavcodec + Fvid plane views | FFV1/Matroska, полный кадр или crop+hflip+vflip+transpose+rotate+pad+neighbor scale+`format=` (`--pix-fmt`); 8/10/12/16-bit samples и alpha |
 | Декодирование аудио в PCM | native decoder + PCM packet adapter | AAC/MP3 float32, FLAC s16; codec delay, sample equality; без глав и синтеза gaps |
 | Отдельная PCM-обрезка и извлечение | Native demux/mux + Rust packet view | trim-pcm WAV→WAV, MKV→WAV, строгий timestamp rescale |
 | Обрезка PCM внутри пакета | Rust packet view | Mono s16le, stereo s24le/s32le/f32le, exact samples; без seek |
 | Сохранение аудио при crop | packet remux | PCM samples и AAC payload/decoded audio |
-| Главы и базовая metadata | native adapter | Remux и full-duration crop; lossless trim clip/rebase; stream-copy trim/concat глав пока reject |
+| Главы, metadata и subtitle passthrough | native adapter | Rich probe; remux/full-duration crop; lossless trim clip/rebase; SubRip packets/language/disposition; remux metadata set/delete; `convert-subtitles` SRT→ASS; burn-in отсутствует |
 | Отказ без частичного output | Rust + native adapter | Temporary file → no-clobber publication |
 | Воспроизводимые бенчмарки | scripts + fixtures | Y4M CPU/Metal против FFmpeg; native remux/FFV1/crop+vflip отдельно в media-benchmark.json |
 
@@ -36,29 +51,44 @@
 
 | Приоритет | Блок | Что требуется доказать | Источники подхода |
 |---|---|---|---|
-| P0 | Точные резы H.264/HEVC с B-frames | Decode dependencies, pre-roll, display order, независимые границы; no silent lossy | FFmpeg, Smelter, Vireo |
-| P0 | Audio delay/padding и произвольные швы | Ни потерянных/повторных samples, ни drift; явный выбор режима | FFmpeg, Symphonia |
-| P0 | Полный budget native backend | DPB/lookahead, packet queues, cancellation, long-file RSS | GStreamer, Membrane |
+| P0 | Точные резы H.264/HEVC с B-frames | Closed-GOP RAP/mid-GOP и open-GOP end/start (stream-copy с preceding closed IDR pre-roll) квалифицированы | FFmpeg, Smelter, Vireo |
+| P0 | Audio delay/padding и произвольные швы | AAC `initial_padding` trim-from-0/mid-stream packet-aligned/concat, PCM `--seek`, и non-aligned AAC/MP3/FLAC seams (`trim` → PCM, в т.ч. рядом с video stream-copy) квалифицированы | FFmpeg, Symphonia |
+| P0 | Полный budget native backend | Packet payload limit + cooperative `--max-packets` / `CancelFlag` + estimated decode DPB/`--max-memory-mib` admission + optional process `--max-rss-mib` probes on remux/trim/concat/lossless квалифицированы; strict OS RSS from libav queues and encoder lookahead internals остаются | GStreamer, Membrane |
 | P0 | VideoToolbox ↔ Metal surfaces | Реальный decode→filter→encode без host readback, ownership/fences | MetalPetal, Smelter |
-| P1 | NVDEC/CUDA/NVENC | Вертикальный срез `media hw-filter` (H.264 CUDA decode → NV12 crop/flip → h264_nvenc); расширять профили/аудио | cros-codecs, BMF, NVIDIA APIs |
-| P1 | Прочие decode profiles/форматы | Корпус HEVC/AV1/VP9/ProRes, 10/12-bit, alpha | FFmpeg, rust-av |
-| P1 | Scale/rotate/transpose/pad | Точные геометрия/SAR/chroma/color contracts, CPU/GPU parity | libvips, Halide, FFmpeg |
-| P1 | Audio filters/resample/mix | Format conversion, clipping policy, sample accuracy | Symphonia, Firewheel |
-| P1 | Streaming encode и presets | Несколько encode backends; явные lossless/lossy quality gates | FFmpeg, Mediabunny |
-| P1 | План задания и explain | Показ copy/reencode/transfer/materialization до исполнения | GStreamer, MetalPetal |
-| P1 | Seek/cancel/progress | Неперепутанные поколения кадров, bounded cancellation | VapourSynth, Membrane |
-| P2 | Temporal filters, denoise, interpolation | Lookahead, frame dependencies и bounded caches | VapourSynth, Halide |
-| P2 | Overlay/compositing/transitions | Alpha/color space correctness, graph scheduling | MetalPetal, MLT |
-| P2 | Subtitles: render/convert/timing | Fonts, shaping, timestamps, mixed encodings | FFmpeg, MLT |
-| P2 | HDR/tone mapping/Dolby metadata | Color/metadata conformance corpus | FFmpeg, OpenColorIO |
+| P1 | NVDEC/CUDA/NVENC expansion | Базовый H.264/NV12 vertical slice реализован; требуются остальные profiles/formats, audio mapping и стабильные >15% gates всех GPU fair pairs | cros-codecs, BMF, NVIDIA APIs |
+| P1 | Прочие decode profiles/форматы | HEVC/AV1/ProRes decode→FFV1, libx265 lossless и 12-bit `yuv420p12le` crop квалифицированы; hardware decode profiles остаются | FFmpeg, rust-av |
+| P1 | Scale/rotate/transpose/pad/format | Neighbor scale, transpose, pad, arbitrary rotate и `--pix-fmt` (`format=` via libswscale) на CPU decode/lossless квалифицированы; GPU scale остаётся | libvips, Halide, FFmpeg |
+| P1 | Audio filters/resample/mix | Sample-rate (`--rate`), channel rematrix (`--channels` / `-ac`), linear volume (`--volume`), `mix-audio` N≤16 with weights (`amix`) и two-input `merge-audio` (`amerge`) квалифицированы | Symphonia, Firewheel |
+| P1 | Streaming encode и presets | Несколько encode backends (FFV1/libx264/libx265/VP9); lossless pixel gates и lossy H.264 CRF/preset deterministic interop (`threads=1`, decoded-pixel equality vs FFmpeg) квалифицированы; lossy encode speed pair остаётся buried under shared libx264 work | FFmpeg, Mediabunny |
+| P1 | План задания и explain | `fvid media plan` покрывает remux/transcode-lossless (steps+`-vf` graph), explicit `plan trim`/`plan trim-pcm`/`plan concat` stream-copy, и `plan overlay`/`plan xfade`/`plan burn-subtitles`/`plan loudness`/`plan loudnorm`/`plan mix-audio`/`plan merge-audio`/`plan decode-audio` (`-af` chain); полный graph для остальных команд остаётся | GStreamer, MetalPetal |
+| P1 | Seek/cancel/progress | Seek (включая multi-video via dedicated demuxers), `CancelFlag` / `--max-packets`, и cooperative `--progress` NDJSON (каждые 256 пакетов + `done`) квалифицированы | VapourSynth, Membrane |
+| P2 | Temporal filters, denoise, interpolation | `yadif=` (`--yadif`), `bwdif=` (`--bwdif`), `tblend=` (`--tblend`), `hqdn3d=` (`--hqdn3d`), `fps=` (`--fps`), `minterpolate=` (`--minterpolate`), `gblur=` (`--gblur`), `eq=` (`--eq`), `unsharp=` (`--unsharp`), `hue=` (`--hue`), `boxblur=` (`--boxblur`), `negate` (`--negate`), `edgedetect=` (`--edgedetect`), `atadenoise=` (`--atadenoise`), `nlmeans=` (`--nlmeans`), `smartblur=` (`--smartblur`), `cas=` (`--cas`), `vignette=` (`--vignette`), `curves=` (`--curves`), `colorbalance=` (`--colorbalance`), `colorlevels=` (`--colorlevels`), `colorchannelmixer=` (`--colorchannelmixer`), `deflicker=` (`--deflicker`), `photosensitivity=` (`--photosensitivity`) квалифицированы vs FFmpeg (validate); lookahead remain | VapourSynth, Halide |
+| P2 | Overlay/compositing/transitions | Opaque and alpha `overlay=` via `movie=`+`overlay` (CLI `overlay` / `--overlay`) и dual-input `xfade` (CLI `xfade`, fair-pair `-filter_complex [0:v][1:v]xfade=...,format=`) квалифицированы vs FFmpeg; richer transition corpus / audio-aware edits remain | MetalPetal, MLT |
+| P2 | Subtitles: render/convert/timing | SRT→ASS convert и external SRT burn-in (`burn-subtitles --subs`) квалифицированы; fonts/shaping corpus и mixed encodings остаются | FFmpeg, MLT |
+| P2 | HDR/tone mapping/Dolby metadata | SDR `colorspace=` и HDR→SDR `tonemap=`+`format=` (`--tonemap`+`--pix-fmt`, parse-chain fair-pair) квалифицированы vs FFmpeg (validate); Dolby metadata/`zscale` corpus остаются | FFmpeg, OpenColorIO |
 | P2 | Timeline interchange / OTIO | Rational time roundtrip и media linking | OpenTimelineIO |
-| P2 | Loudness/quality analysis | Эталонные измерения, воспроизводимость | FFmpeg, audio projects |
+| P2 | Loudness/quality analysis | `fvid media loudness` via libavfilter `ebur128` (integrated/LRA/true-peak) и `fvid media loudnorm` apply (`loudnorm=` → float WAV) плюс `--dual-pass` (measure `print_format=json` → `measured_*`+`linear=true`) квалифицированы vs FFmpeg (validate); measure speed pair buried (~+9%) | FFmpeg, audio projects |
 | P3 | HLS/DASH/CMAF, RTP/RTSP/SRT/WebRTC | Clock, reconnect, discontinuity, live drop policies | GStreamer, Pion, OvenMediaEngine |
 | P3 | Capture/devices/hardware ingest | Платформенные устройства и clocks | GStreamer, FFmpeg |
 | P3 | Thumbnail/preview/editor API | Demand-driven frames и UI cache policies | VapourSynth, Mediabunny |
 | P3 | Distribution/services/batch DAG | Scheduling, persistence, retries, multi-job resource budget | Av1an, BMF |
 
 P0 сохраняет текущий приоритет пользователя: обрезка/кроп/склейка без потерь и лишних копий в памяти. Таблица — roadmap, не созданные фоновые задания и не гарантия сроков.
+
+## Текущий доказательный gap-аудит
+
+Снимок 2026-09-17; статус относится только к текущему working tree и зафиксированным артефактам:
+
+- Formats/mux/demux: MP4, Matroska, MOV, MPEG-TS, WAV и standalone SRT имеют квалифицированные remux/probe slices. AAC/MP3/FLAC квалифицированы как audio decode inputs. WebM проверен через VP9 transcode. Остальные форматы из whitelist и `capabilities` доступны библиотеке, но не считаются покрытыми без corpus.
+- Codecs: H.264 decode/transcode, FFV1, libx264, libx265 lossless, lossless VP9, HEVC/AV1/ProRes decode→FFV1 crop, AAC/MP3/FLAC decode и packed PCM имеют end-to-end evidence. HEVC decode имеет fair-pair >15%; plain AV1 decode пока только correctness (dav1d уже слишком быстр для wrapper-delta). 12-bit `yuv420p12le` crop квалифицирован; hardware decode profiles и произвольные encoder combinations не квалифицированы.
+- Edit/transcode: remux, stream selection, strict trim/concat (включая open-GOP start stream-copy), lossless and explicit-encoder transcode with secondary-video remux (full-duration; interval для non-reordered и closed-GOP H.264/HEVC secondary с RAP/mid-GOP, включая `--seek` через dedicated demuxers), exact video/PCM intervals, compressed AAC/MP3/FLAC decode during lossless video intervals (включая `--seek`) и VFR preservation реализованы.
+- Video filters: crop/hflip/vflip/neighbor scale/epx=/transpose/rotate/pad/`format=` (`--pix-fmt`)/opaque+alpha `overlay=`/dual-input `xfade=`+`format=`/`yadif=`/`bwdif=`/`tblend=`/`hqdn3d=`/`gblur=`/`eq=`/`unsharp=`/`hue=`/`boxblur=`/`negate`/`edgedetect=`/`atadenoise=`/`nlmeans=`/`smartblur=`/`cas=`/`vignette=`/`curves=`/`colorbalance=`/`colorlevels=`/`colorchannelmixer=`/`deflicker=`/`photosensitivity=`/`minterpolate=`/`fps=`/`colorspace=` (SDR matrix convert)/`tonemap=`+`format=` (HDR→SDR, requires `--pix-fmt`) и fused crop+flip combinations реализованы на CPU; NV12 crop/flip subset реализован на CUDA codec surfaces. Dolby metadata и GPU scale отсутствуют.
+- Audio filters: sample-exact extraction/interval, PCM packet slicing, sample-rate conversion (`--rate`), channel rematrix (`--channels` / `-ac`), linear volume (`--volume` на float PCM), `mix-audio` с N≤16 inputs и `--weights` (`amix`), two-input `merge-audio` (`amerge`), `loudness` (`ebur128` measure) и `loudnorm` apply → float WAV (включая `--dual-pass` measured linear) реализованы. Gap synthesis отсутствует.
+- Metadata/subtitles: probe, preservation, chapter clipping, SubRip passthrough, remux metadata set/delete, SRT→ASS `convert-subtitles` и external SRT `burn-subtitles` (libass/`subtitles=`) реализованы. Attachment mapping corpus и advanced styling остаются.
+- Performance: [randomized/interleaved native CPU gate](../benchmarks/cpu-media-gate.json) проверяет пары по 21 раунду (paired within-round deltas), включая VFR identity, neighbor scale, transpose, rotate, pad, audio resample/channels/volume/amix/amix3/amerge, metadata remux, HEVC decode, SRT→ASS convert и subtitle burn-in; все проходят строго >15%. Compressed-audio intervals также имеют проходящие gates. [CUDA gate](../benchmarks/gpu-media-gate.json) проверяет семь пар по перемешанным внутрипарным раундам и принимает только hash-связанный correctness report: все семь проходят строго >15% (multi-session NVENC для encode-heavy identity/crop/hflip/cut; soft vflip и fused — single-session). Полный CPU+GPU performance gate доказан на текущем корпусе.
+- Профиль RTX 5090 на single-session H.264 упирался в один NVENC engine; multi-session timeline split + concat использует несколько engines без SFE (SFE не поддерживает H.264). Gate из-за этого не ослаблялся.
+
+Следующий обязательный порядок: codec/hardware corpus; затем повторный coverage-аудит. Validate≥314; CPU/GPU gates green. Goal completion not defensible while remaining P0/P1 product slices are open.
 
 ## Как читать capabilities
 

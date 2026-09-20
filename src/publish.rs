@@ -20,9 +20,7 @@ pub fn publish_file(temporary: &Path, destination: &Path) -> io::Result<()> {
         Err(hard_link_err) => fs::rename(temporary, destination).map_err(|rename_err| {
             io::Error::new(
                 rename_err.kind(),
-                format!(
-                    "publish failed (hard_link: {hard_link_err}; rename: {rename_err})"
-                ),
+                format!("publish failed (hard_link: {hard_link_err}; rename: {rename_err})"),
             )
         }),
     }

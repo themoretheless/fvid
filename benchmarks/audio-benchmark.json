@@ -1,19 +1,20 @@
 {
-  "created_utc": "2026-09-05T05:56:21.759416+00:00",
-  "scope": "120-second stereo 48kHz audio to WAV, PCM precision matched; whole CLI cached-input/file-output without fsync, 11 randomized runs after exact sample equality warmup.",
-  "baseline_sha256": "254ec7eeca61387ea96ef9e36a14bc0c40ebd75e551211d893475689e0f9dec5",
+  "created_utc": "2026-09-16T22:29:52.121009+00:00",
+  "scope": "30-second stereo 48kHz audio to WAV, full decode plus a 5-second middle interval, PCM precision matched; whole CLI cached-input/file-output without fsync, 21 randomized runs after exact sample equality warmup.",
+  "baseline_sha256": null,
   "results": [
     {
       "codec": "aac",
+      "mode": "full",
       "pcm": "pcm_f32le",
       "sample_equality": true,
       "commands": {
         "fvid": [
-          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "D:\\Source\\fvid\\target-media\\release\\fvid.exe",
           "media",
           "decode-audio",
-          "/private/tmp/fvid-audio-bench-ig5115jv/source.m4a",
-          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\source.m4a",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\out.wav"
         ],
         "ffmpeg": [
           "ffmpeg",
@@ -21,77 +22,163 @@
           "-v",
           "error",
           "-i",
-          "/private/tmp/fvid-audio-bench-ig5115jv/source.m4a",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\source.m4a",
           "-c:a",
           "pcm_f32le",
-          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
-        ],
-        "fvid_before": [
-          "/private/tmp/fvid-before-audio-optimization",
-          "media",
-          "decode-audio",
-          "/private/tmp/fvid-audio-bench-ig5115jv/source.m4a",
-          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\out.wav"
         ]
       },
       "samples_ms": {
         "fvid": [
-          68.835333,
-          63.962791,
-          62.301291,
-          65.109792,
-          63.158666,
-          62.032,
-          62.799791,
-          61.410417,
-          61.283583,
-          61.058667,
-          62.233542
+          44.4421,
+          39.6927,
+          42.035,
+          38.726,
+          42.395,
+          42.1531,
+          39.2607,
+          39.495,
+          39.0064,
+          41.4507,
+          42.9951,
+          38.8027,
+          40.3716,
+          38.7981,
+          42.783,
+          38.4211,
+          41.3961,
+          38.2861,
+          38.8701,
+          41.2331,
+          42.6519
         ],
         "ffmpeg": [
-          82.755292,
-          83.138791,
-          81.922708,
-          81.138583,
-          82.427833,
-          80.961875,
-          81.772375,
-          89.27225,
-          77.933209,
-          78.27975,
-          81.163917
-        ],
-        "fvid_before": [
-          87.039958,
-          85.225,
-          86.022,
-          86.936584,
-          86.744334,
-          85.868333,
-          86.196125,
-          84.033083,
-          83.894,
-          82.45875,
-          89.272042
+          48.8539,
+          51.9863,
+          47.4828,
+          50.264,
+          54.4472,
+          50.9035,
+          51.1572,
+          47.4402,
+          47.2908,
+          47.9852,
+          51.0877,
+          51.2796,
+          47.7752,
+          47.5585,
+          48.6445,
+          49.8332,
+          48.1505,
+          50.3443,
+          47.1946,
+          47.174,
+          47.626
         ]
       },
       "median_ms": {
-        "fvid": 62.301291,
-        "ffmpeg": 81.772375,
-        "fvid_before": 86.022
-      }
+        "fvid": 40.3716,
+        "ffmpeg": 48.6445
+      },
+      "delta_vs_ffmpeg": 0.17006855862430492
+    },
+    {
+      "codec": "aac",
+      "mode": "interval",
+      "pcm": "pcm_f32le",
+      "sample_equality": true,
+      "commands": {
+        "fvid": [
+          "D:\\Source\\fvid\\target-media\\release\\fvid.exe",
+          "media",
+          "decode-audio",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\source.m4a",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\out.wav",
+          "--from",
+          "10",
+          "--to",
+          "15"
+        ],
+        "ffmpeg": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\source.m4a",
+          "-af",
+          "atrim=start=10:end=15,asetpts=PTS-STARTPTS",
+          "-c:a",
+          "pcm_f32le",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\out.wav"
+        ]
+      },
+      "samples_ms": {
+        "fvid": [
+          34.224,
+          36.6623,
+          35.5686,
+          35.7005,
+          31.7203,
+          33.142,
+          32.339,
+          32.0607,
+          35.2188,
+          32.7051,
+          32.5283,
+          31.8401,
+          32.2945,
+          31.5586,
+          37.115,
+          32.0297,
+          32.3331,
+          35.5087,
+          35.3708,
+          32.0883,
+          31.9268
+        ],
+        "ffmpeg": [
+          44.4698,
+          45.3237,
+          41.425,
+          42.0499,
+          40.9458,
+          41.0771,
+          41.4796,
+          40.7966,
+          40.7435,
+          44.1022,
+          41.9279,
+          40.8125,
+          42.6785,
+          40.8636,
+          43.7308,
+          41.4397,
+          41.3428,
+          39.9075,
+          43.4419,
+          43.6401,
+          41.8038
+        ]
+      },
+      "median_ms": {
+        "fvid": 32.5283,
+        "ffmpeg": 41.4796
+      },
+      "delta_vs_ffmpeg": 0.21580005593110818
     },
     {
       "codec": "libmp3lame",
+      "mode": "full",
       "pcm": "pcm_f32le",
       "sample_equality": true,
       "commands": {
         "fvid": [
-          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "D:\\Source\\fvid\\target-media\\release\\fvid.exe",
           "media",
           "decode-audio",
-          "/private/tmp/fvid-audio-bench-ig5115jv/source.mp3",
-          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\source.mp3",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\out.wav"
         ],
         "ffmpeg": [
           "ffmpeg",
@@ -99,77 +186,163 @@
           "-v",
           "error",
           "-i",
-          "/private/tmp/fvid-audio-bench-ig5115jv/source.mp3",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\source.mp3",
           "-c:a",
           "pcm_f32le",
-          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
-        ],
-        "fvid_before": [
-          "/private/tmp/fvid-before-audio-optimization",
-          "media",
-          "decode-audio",
-          "/private/tmp/fvid-audio-bench-ig5115jv/source.mp3",
-          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\out.wav"
         ]
       },
       "samples_ms": {
         "fvid": [
-          75.917,
-          76.553083,
-          76.442417,
-          75.939208,
-          76.231292,
-          77.456625,
-          76.624,
-          76.553333,
-          76.245833,
-          78.066292,
-          78.689917
+          44.8497,
+          43.6429,
+          45.199,
+          45.8644,
+          42.5214,
+          45.3628,
+          44.6137,
+          45.6416,
+          45.9387,
+          45.6662,
+          42.9272,
+          42.1017,
+          44.9606,
+          49.3974,
+          47.1194,
+          42.4341,
+          42.4867,
+          45.5063,
+          45.3133,
+          46.0842,
+          42.5467
         ],
         "ffmpeg": [
-          93.030958,
-          92.932459,
-          92.186916,
-          93.91275,
-          108.624834,
-          92.989666,
-          91.594334,
-          92.137666,
-          94.744167,
-          94.374208,
-          96.773792
-        ],
-        "fvid_before": [
-          100.429125,
-          99.131,
-          101.207958,
-          101.466584,
-          98.335958,
-          101.422875,
-          99.255167,
-          100.236042,
-          99.65025,
-          99.114334,
-          102.084042
+          50.8803,
+          50.9618,
+          51.3635,
+          56.3599,
+          52.7655,
+          53.3511,
+          49.2241,
+          53.6567,
+          54.0548,
+          50.1598,
+          54.4747,
+          54.6712,
+          51.3022,
+          56.937,
+          56.4475,
+          51.0543,
+          50.3368,
+          50.4937,
+          51.0238,
+          57.3444,
+          51.0744
         ]
       },
       "median_ms": {
-        "fvid": 76.553083,
-        "ffmpeg": 93.030958,
-        "fvid_before": 100.236042
-      }
+        "fvid": 45.199,
+        "ffmpeg": 51.3635
+      },
+      "delta_vs_ffmpeg": 0.12001713278884818
+    },
+    {
+      "codec": "libmp3lame",
+      "mode": "interval",
+      "pcm": "pcm_f32le",
+      "sample_equality": true,
+      "commands": {
+        "fvid": [
+          "D:\\Source\\fvid\\target-media\\release\\fvid.exe",
+          "media",
+          "decode-audio",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\source.mp3",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\out.wav",
+          "--from",
+          "10",
+          "--to",
+          "15"
+        ],
+        "ffmpeg": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\source.mp3",
+          "-af",
+          "atrim=start=10:end=15,asetpts=PTS-STARTPTS",
+          "-c:a",
+          "pcm_f32le",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\out.wav"
+        ]
+      },
+      "samples_ms": {
+        "fvid": [
+          35.6528,
+          34.4737,
+          33.7762,
+          37.2024,
+          37.1011,
+          36.8988,
+          33.6969,
+          34.7366,
+          37.6296,
+          34.8166,
+          33.7104,
+          34.9325,
+          34.2127,
+          34.0062,
+          37.4598,
+          34.062,
+          34.8887,
+          34.9647,
+          34.3107,
+          37.827,
+          37.7353
+        ],
+        "ffmpeg": [
+          42.7646,
+          43.7371,
+          46.0577,
+          42.3367,
+          42.2438,
+          42.3033,
+          43.3,
+          42.8649,
+          45.9717,
+          47.0278,
+          42.2802,
+          41.902,
+          43.1874,
+          42.9223,
+          43.6726,
+          46.2551,
+          43.3327,
+          43.261,
+          43.4636,
+          43.5638,
+          42.9378
+        ]
+      },
+      "median_ms": {
+        "fvid": 34.8887,
+        "ffmpeg": 43.261
+      },
+      "delta_vs_ffmpeg": 0.1935299692563741
     },
     {
       "codec": "flac",
+      "mode": "full",
       "pcm": "pcm_s16le",
       "sample_equality": true,
       "commands": {
         "fvid": [
-          "/Users/themoretheless/Documents/ChatGPT/fvid/target/release/fvid",
+          "D:\\Source\\fvid\\target-media\\release\\fvid.exe",
           "media",
           "decode-audio",
-          "/private/tmp/fvid-audio-bench-ig5115jv/source.flac",
-          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\source.flac",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\out.wav"
         ],
         "ffmpeg": [
           "ffmpeg",
@@ -177,76 +350,164 @@
           "-v",
           "error",
           "-i",
-          "/private/tmp/fvid-audio-bench-ig5115jv/source.flac",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\source.flac",
           "-c:a",
           "pcm_s16le",
-          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
-        ],
-        "fvid_before": [
-          "/private/tmp/fvid-before-audio-optimization",
-          "media",
-          "decode-audio",
-          "/private/tmp/fvid-audio-bench-ig5115jv/source.flac",
-          "/private/tmp/fvid-audio-bench-ig5115jv/out.wav"
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\out.wav"
         ]
       },
       "samples_ms": {
         "fvid": [
-          74.101375,
-          72.998708,
-          72.602667,
-          74.566542,
-          77.62625,
-          73.220292,
-          75.202625,
-          72.20425,
-          72.591542,
-          72.462875,
-          73.189292
+          40.8146,
+          43.3392,
+          39.488,
+          40.4125,
+          40.0887,
+          39.6891,
+          43.8161,
+          46.2839,
+          46.3371,
+          41.0742,
+          42.4612,
+          40.3081,
+          43.5146,
+          40.3462,
+          43.3163,
+          43.8889,
+          40.4336,
+          39.5126,
+          42.9946,
+          43.9505,
+          39.488
         ],
         "ffmpeg": [
-          77.156292,
-          81.871083,
-          77.898,
-          78.998042,
-          75.834083,
-          76.3235,
-          75.938041,
-          75.755042,
-          74.954709,
-          74.965334,
-          78.36175
-        ],
-        "fvid_before": [
-          73.838042,
-          73.496958,
-          73.364709,
-          72.684792,
-          75.075875,
-          73.026125,
-          73.97125,
-          71.455834,
-          76.038333,
-          75.463875,
-          74.46675
+          44.1741,
+          44.2106,
+          44.7185,
+          46.96,
+          43.4111,
+          45.5936,
+          47.7129,
+          46.4708,
+          43.7493,
+          43.6787,
+          44.1296,
+          44.6487,
+          44.3911,
+          47.6361,
+          45.1067,
+          48.1592,
+          46.8035,
+          47.0292,
+          44.1363,
+          44.5729,
+          47.2447
         ]
       },
       "median_ms": {
-        "fvid": 73.189292,
-        "ffmpeg": 76.3235,
-        "fvid_before": 73.838042
-      }
+        "fvid": 41.0742,
+        "ffmpeg": 44.7185
+      },
+      "delta_vs_ffmpeg": 0.08149423616623996
+    },
+    {
+      "codec": "flac",
+      "mode": "interval",
+      "pcm": "pcm_s16le",
+      "sample_equality": true,
+      "commands": {
+        "fvid": [
+          "D:\\Source\\fvid\\target-media\\release\\fvid.exe",
+          "media",
+          "decode-audio",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\source.flac",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\out.wav",
+          "--from",
+          "10",
+          "--to",
+          "15"
+        ],
+        "ffmpeg": [
+          "ffmpeg",
+          "-nostdin",
+          "-v",
+          "error",
+          "-i",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\source.flac",
+          "-af",
+          "atrim=start=10:end=15,asetpts=PTS-STARTPTS",
+          "-c:a",
+          "pcm_s16le",
+          "C:\\Users\\domez\\AppData\\Local\\Temp\\fvid-audio-bench-m07i2lub\\out.wav"
+        ]
+      },
+      "samples_ms": {
+        "fvid": [
+          35.9437,
+          33.3634,
+          35.5517,
+          36.8404,
+          33.6434,
+          33.7189,
+          38.1686,
+          36.8899,
+          39.3434,
+          32.7455,
+          33.3792,
+          35.8822,
+          32.2856,
+          36.3612,
+          33.2073,
+          35.8569,
+          32.608,
+          36.0995,
+          32.3947,
+          38.5286,
+          33.6952
+        ],
+        "ffmpeg": [
+          40.1615,
+          39.2062,
+          43.489,
+          43.2756,
+          43.0044,
+          39.6742,
+          39.4724,
+          45.4602,
+          43.9817,
+          43.5224,
+          39.2563,
+          42.6049,
+          41.453,
+          42.1939,
+          40.5354,
+          42.7178,
+          39.9357,
+          42.6754,
+          39.8518,
+          40.8144,
+          42.5837
+        ]
+      },
+      "median_ms": {
+        "fvid": 35.5517,
+        "ffmpeg": 42.1939
+      },
+      "delta_vs_ffmpeg": 0.15742085941332762
     }
   ],
-  "binary_sha256": "4b3e7612fd82c803993299d56116a816edf508c74b0c8df0f567992955741425",
+  "binary_sha256": "8e1be596e72197eea57f0f3e09a460b58a5fc864ae8f88e9784849fe538eaeb1",
   "source_sha256": {
-    "crates/fvid-media/src/edit.rs": "7176935bf00100342e0bbbfe954fa99b078e229a3208682cb140792baa23c575",
-    "crates/fvid-media/src/audio_layout.rs": "6c1d365c37ad3dc5ddfcfec4b63fe80449567a00e0e70366006d4b437cf6d1bd",
-    "crates/fvid-media/src/lib.rs": "ef9279df9bfe5e3fd325933a6df50a02fcab5b68ab4a78eaedbc8b28601c1cd4",
-    "crates/fvid-media/src/pcm.rs": "de2e6187343079b6324593a6ccc210ddccb30b1df46f72c521eabd4c8ee04025",
-    "crates/fvid-media/src/audio.rs": "7e3fd2e15f488bc55a59a896359d1b2d875cb4335cd3f437a9939957a195e25c",
-    "crates/fvid-media/src/lossless.rs": "cde625fd0aac088a92f5afd94a60c61629df0dced9e96b8bf9562350a5979c45",
-    "src/media_cli.rs": "6b5d82ce9e9680f26347522dd04d92f42dc673c3a090ed35db4394fb05c37158",
-    "scripts/benchmark_audio.py": "3a3b45e7b26c0b2033371c81454e6e963f6fc991f533bdc9079fd7ab91483b8d"
+    "crates\\fvid-media\\src\\audio.rs": "5b6783852fd984ee7fc4d587a887dcd25f53966b13acf1d5c1a50fe3f5f9303b",
+    "crates\\fvid-media\\src\\audio_layout.rs": "92ecc6e5a1483affc4a1db40f91a34f0b42b111ee22d166d9a035c9a1f46057f",
+    "crates\\fvid-media\\src\\decode.rs": "9d9128dd199e6f370c66e245878c81b896e4f2c1469f6699711a5e1d97a7b8b1",
+    "crates\\fvid-media\\src\\edit.rs": "b8905fbb2c6e8f378e57230e5544100ad853be493f152ee4990a8dc3f7b9973b",
+    "crates\\fvid-media\\src\\hw_cuda.rs": "c0f29f0673331d63710b47b5343a9ee49f9a9886fe500422ab271fee94fb8cb7",
+    "crates\\fvid-media\\src\\input_policy.rs": "d42972f93fd22e9c36c0e743ff2ea74b42c41859387e17469d8bdc7c558ac181",
+    "crates\\fvid-media\\src\\lib.rs": "83ab12ac54da74a0714db071c43b0bea24bc80c8b0689e201af93b8d1cf8c27d",
+    "crates\\fvid-media\\src\\lossless.rs": "819da8204863789968d43c6318763606a32317803e6864a350bd63ed08310f9d",
+    "crates\\fvid-media\\src\\pcm.rs": "b70d03ebc14c839d9425ae110739538730d6fd44ce47a97c158bf4966e701911",
+    "src\\media_cli.rs": "8c0f4d2752c92675cff0b53317ef45206ba0cbe249b726eb18903e420db4e4c9",
+    "scripts\\benchmark_audio.py": "7e1f9a077278457c087953e64b6fac8ec1270716d4750d0e363138df0c2d6467"
   }
 }
