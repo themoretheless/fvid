@@ -1245,5 +1245,20 @@ mod play_controls {
             (fvid_media::expand_hdr_channel(0.5, 1) - 1.25).abs() < 0.01
         );
         assert!(fvid_media::format_hdr_tonemap_osd(fvid_media::HdrTonemap::Hable).contains("hable"));
+        let sbs = vec![0x00_ff_00_00u32, 0x00_00_ff_00, 0x00_ff_00_00, 0x00_00_ff_00];
+        let (aw, ah, anag) = fvid_media::apply_play_stereo3d(
+            2,
+            2,
+            &sbs,
+            fvid_media::PlayStereo3D::SbslAnaglyph,
+        );
+        assert_eq!((aw, ah), (1, 2));
+        assert_eq!(anag.len(), 2);
+        assert_eq!(
+            fvid_media::cycle_play_stereo3d(fvid_media::PlayStereo3D::Off),
+            fvid_media::PlayStereo3D::SbslAnaglyph
+        );
+        assert!(fvid_media::format_play_stereo3d_osd(fvid_media::PlayStereo3D::MonoLeft)
+            .contains("mono-left"));
     }
 }

@@ -755,6 +755,97 @@ pub fn apply_deinterlace_rgb(pixels: &mut [u32], width: u32, height: u32, mode: 
     }
 }
 
+/// Packed 3D layout → display view for `fvid play` (VLC-style stereo3d subset).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum PlayStereo3D {
+    #[default]
+    Off,
+    /// Side-by-side left|right → red/cyan anaglyph.
+    SbslAnaglyph,
+    /// Above-below left/right → red/cyan anaglyph.
+    AblAnaglyph,
+    /// Show left eye only (SBS half).
+    MonoLeft,
+    /// Show right eye only (SBS half).
+    MonoRight,
+}
+
+pub fn cycle_play_stereo3d(mode: PlayStereo3D) -> PlayStereo3D {
+    match mode {
+        PlayStereo3D::Off => PlayStereo3D::SbslAnaglyph,
+        PlayStereo3D::SbslAnaglyph => PlayStereo3D::AblAnaglyph,
+        PlayStereo3D::AblAnaglyph => PlayStereo3D::MonoLeft,
+        PlayStereo3D::MonoLeft => PlayStereo3D::MonoRight,
+        PlayStereo3D::MonoRight => PlayStereo3D::Off,
+    }
+}
+
+pub fn play_stereo3d_label(mode: PlayStereo3D) -> &'static str {
+    match mode {
+        PlayStereo3D::Off => "off",
+        PlayStereo3D::SbslAnaglyph => "sbsl→anaglyph",
+        PlayStereo3D::AblAnaglyph => "abl→anaglyph",
+        PlayStereo3D::MonoLeft => "mono-left",
+        PlayStereo3D::MonoRight => "mono-right",
+    }
+}
+
+pub fn format_play_stereo3d_osd(mode: PlayStereo3D) -> String {
+    format!("3D {}", play_stereo3d_label(mode))
+}
+
+fn anaglyph_rc(left: u32, right: u32) -> u32 {
+    let lr = (left >> 16) & 0xff;
+    let rg = (right >> 8) & 0xff;
+    let rb = right & 0xff;
+    (lr << 16) | (rg << 8) | rb
+}
+
+/// Convert packed stereo layout into a single-view RGB frame.
+pub fn apply_play_stereo3d(
+    width: u32,
+    height: u32,
+    pixels: &[u32],
+    mode: PlayStereo3D,
+) -> (u32, u32, Vec<u32>) {
+    let w = width as usize;
+    let h = height as usize;
+    if matches!(mode, PlayStereo3D::Off) || w == 0 || h == 0 || pixels.len() < w * h {
+        return (width, height, pixels.to_vec());
+    }
+    match mode {
+        PlayStereo3D::SbslAnaglyph | PlayStereo3D::MonoLeft | PlayStereo3D::MonoRight if w >= 2 => {
+            let out_w = w / 2;
+            let mut out = vec![0u32; out_w * h];
+            for y in 0..h {
+                for x in 0..out_w {
+                    let left = pixels[y * w + x];
+                    let right = pixels[y * w + out_w + x];
+                    out[y * out_w + x] = match mode {
+                        PlayStereo3D::MonoLeft => left,
+                        PlayStereo3D::MonoRight => right,
+                        _ => anaglyph_rc(left, right),
+                    };
+                }
+            }
+            (out_w as u32, height, out)
+        }
+        PlayStereo3D::AblAnaglyph if h >= 2 => {
+            let out_h = h / 2;
+            let mut out = vec![0u32; w * out_h];
+            for y in 0..out_h {
+                for x in 0..w {
+                    let left = pixels[y * w + x];
+                    let right = pixels[(y + out_h) * w + x];
+                    out[y * w + x] = anaglyph_rc(left, right);
+                }
+            }
+            (width, out_h as u32, out)
+        }
+        _ => (width, height, pixels.to_vec()),
+    }
+}
+
 /// Short OSD line for volume changes (VLC-style feedback).
 pub fn format_volume_osd(volume_milli: u32, muted: bool) -> String {
     if muted {
@@ -957,6 +1048,7 @@ pub struct PlayRenderOptions {
     pub flip_v: bool,
     pub rotate: RotateMode,
     pub deinterlace: DeinterlaceMode,
+    pub stereo3d: PlayStereo3D,
     pub spherical: bool,
     pub yaw_deg_milli: i32,
     pub pitch_deg_milli: i32,
@@ -978,6 +1070,7 @@ impl Default for PlayRenderOptions {
             flip_v: false,
             rotate: RotateMode::Deg0,
             deinterlace: DeinterlaceMode::Off,
+            stereo3d: PlayStereo3D::Off,
             spherical: false,
             yaw_deg_milli: 0,
             pitch_deg_milli: 0,
@@ -1248,13 +1341,20 @@ pub fn render_play_pixels(
     opts: &PlayRenderOptions,
     bitmap: Option<&BitmapSubtitle>,
 ) -> (u32, u32, Vec<u32>) {
-    let w = width as usize;
-    let h = height as usize;
+    let mut width = width;
+    let mut height = height;
     let mut source = pixels.to_vec();
-    if source.len() < w.saturating_mul(h) {
-        source.resize(w.saturating_mul(h), 0);
+    let needed = (width as usize).saturating_mul(height as usize);
+    if source.len() < needed {
+        source.resize(needed, 0);
     }
     apply_deinterlace_rgb(&mut source, width, height, opts.deinterlace);
+    if !matches!(opts.stereo3d, PlayStereo3D::Off) {
+        let (sw, sh, packed) = apply_play_stereo3d(width, height, &source, opts.stereo3d);
+        width = sw;
+        height = sh;
+        source = packed;
+    }
     if opts.spherical {
         source = project_equirect_view(
             width,
@@ -1270,6 +1370,8 @@ pub fn render_play_pixels(
     if let Some(plane) = bitmap {
         blit_bitmap_subtitle(&mut source, width, height, plane);
     }
+    let w = width as usize;
+    let h = height as usize;
     let (out_w, out_h) = rotate_size(width, height, opts.rotate);
     let mut out = vec![0u32; out_w as usize * out_h as usize];
     for y in 0..h {
@@ -4431,6 +4533,7 @@ struct PlayerApp {
     flip_h: bool,
     flip_v: bool,
     deinterlace: DeinterlaceMode,
+    stereo3d: PlayStereo3D,
     show_stats: bool,
     audio_channel: AudioChannelMode,
     balance_milli: i32,
@@ -4524,6 +4627,7 @@ impl PlayerApp {
             flip_h: false,
             flip_v: false,
             deinterlace: DeinterlaceMode::Off,
+            stereo3d: PlayStereo3D::Off,
             show_stats: false,
             audio_channel: AudioChannelMode::Stereo,
             balance_milli: BALANCE_CENTER_MILLI,
@@ -5174,9 +5278,13 @@ impl PlayerApp {
             self.nudge_zoom(zoom_in);
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::D)) {
-            self.deinterlace = cycle_deinterlace(self.deinterlace);
-            self.adjust_dirty = true;
-            self.notice = Some(format_deinterlace_osd(self.deinterlace));
+            if command {
+                self.cycle_stereo3d_mode();
+            } else {
+                self.deinterlace = cycle_deinterlace(self.deinterlace);
+                self.adjust_dirty = true;
+                self.notice = Some(format_deinterlace_osd(self.deinterlace));
+            }
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::I)) {
             self.show_stats = !self.show_stats;
@@ -5334,6 +5442,7 @@ impl PlayerApp {
             self.flip_v,
             self.rotate,
             self.deinterlace,
+            self.stereo3d,
             self.spherical,
             self.yaw_deg_milli,
             self.pitch_deg_milli,
@@ -5552,6 +5661,9 @@ impl PlayerApp {
             let sph = if self.spherical { "360*" } else { "360" };
             if ui.button(sph).clicked() {
                 self.toggle_spherical();
+            }
+            if ui.button(format_play_stereo3d_osd(self.stereo3d)).clicked() {
+                self.cycle_stereo3d_mode();
             }
             let hdr = format!("HDR {}", hdr_tonemap_label(self.hdr_tonemap));
             if ui.button(hdr).clicked() {
@@ -5992,6 +6104,14 @@ impl PlayerApp {
         self.hdr_auto_applied = true;
         self.adjust_dirty = true;
         let notice = format_hdr_tonemap_osd(self.hdr_tonemap);
+        eprintln!("fvid play: {notice}");
+        self.notice = Some(notice);
+    }
+
+    fn cycle_stereo3d_mode(&mut self) {
+        self.stereo3d = cycle_play_stereo3d(self.stereo3d);
+        self.adjust_dirty = true;
+        let notice = format_play_stereo3d_osd(self.stereo3d);
         eprintln!("fvid play: {notice}");
         self.notice = Some(notice);
     }
@@ -6544,6 +6664,7 @@ impl PlayerApp {
                 flip_v: self.flip_v,
                 rotate: self.rotate,
                 deinterlace: self.deinterlace,
+                stereo3d: self.stereo3d,
                 spherical: self.spherical,
                 yaw_deg_milli: self.yaw_deg_milli,
                 pitch_deg_milli: self.pitch_deg_milli,
@@ -7037,6 +7158,7 @@ fn color_image(
     flip_v: bool,
     rotate: RotateMode,
     deinterlace: DeinterlaceMode,
+    stereo3d: PlayStereo3D,
     spherical: bool,
     yaw_deg_milli: i32,
     pitch_deg_milli: i32,
@@ -7055,6 +7177,7 @@ fn color_image(
         flip_v,
         rotate,
         deinterlace,
+        stereo3d,
         spherical,
         yaw_deg_milli,
         pitch_deg_milli,
