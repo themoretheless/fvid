@@ -95,6 +95,25 @@ pub fn adjust_pixel(
     )
 }
 
+/// Apply display gamma. `1000` is identity; range matches [`clamp_adjust_milli`].
+pub fn gamma_channel(value: u8, gamma_milli: i32) -> u8 {
+    let gamma = clamp_adjust_milli(gamma_milli) as f32 / 1_000.0;
+    if (gamma - 1.0).abs() < f32::EPSILON {
+        return value;
+    }
+    let sample = value as f32 / 255.0;
+    let out = sample.powf(1.0 / gamma.max(0.01));
+    (out * 255.0).round().clamp(0.0, 255.0) as u8
+}
+
+pub fn apply_gamma_pixel(red: u8, green: u8, blue: u8, gamma_milli: i32) -> (u8, u8, u8) {
+    (
+        gamma_channel(red, gamma_milli),
+        gamma_channel(green, gamma_milli),
+        gamma_channel(blue, gamma_milli),
+    )
+}
+
 /// Flip UV corners. `uv` is `(u0, v0, u1, v1)`.
 pub fn flip_uv(uv: (f32, f32, f32, f32), flip_h: bool, flip_v: bool) -> (f32, f32, f32, f32) {
     let (mut u0, mut v0, mut u1, mut v1) = uv;
@@ -420,6 +439,10 @@ pub fn audio_channel_label(mode: AudioChannelMode) -> &'static str {
     }
 }
 
+pub fn format_audio_channel_osd(mode: AudioChannelMode) -> String {
+    format!("Audio {}", audio_channel_label(mode))
+}
+
 /// Remap one interleaved frame in-place. No-op when `channels < 2`.
 pub fn apply_audio_channel(frame: &mut [f32], mode: AudioChannelMode) {
     if frame.len() < 2 {
@@ -724,6 +747,7 @@ pub struct PlayRenderOptions {
     pub contrast_milli: i32,
     pub saturation_milli: i32,
     pub hue_milli: i32,
+    pub gamma_milli: i32,
     pub rotate: RotateMode,
     pub deinterlace: DeinterlaceMode,
 }
@@ -735,6 +759,7 @@ impl Default for PlayRenderOptions {
             contrast_milli: 1_000,
             saturation_milli: 1_000,
             hue_milli: 1_000,
+            gamma_milli: 1_000,
             rotate: RotateMode::Deg0,
             deinterlace: DeinterlaceMode::Off,
         }
@@ -774,6 +799,7 @@ pub fn render_play_pixels(
                 opts.saturation_milli,
                 opts.hue_milli,
             );
+            let (red, green, blue) = apply_gamma_pixel(red, green, blue, opts.gamma_milli);
             let (dx, dy) = rotate_pixel(x as u32, y as u32, width, height, opts.rotate);
             out[dy as usize * out_w as usize + dx as usize] =
                 (u32::from(red) << 16) | (u32::from(green) << 8) | u32::from(blue);
@@ -782,8 +808,8 @@ pub fn render_play_pixels(
     (out_w, out_h, out)
 }
 
-pub fn reset_video_adjust() -> (i32, i32, i32, i32) {
-    (1_000, 1_000, 1_000, 1_000)
+pub fn reset_video_adjust() -> (i32, i32, i32, i32, i32) {
+    (1_000, 1_000, 1_000, 1_000, 1_000)
 }
 
 pub fn adjust_step_milli(current: i32, delta: i32) -> i32 {
@@ -799,13 +825,15 @@ pub fn format_adjust_osd(
     contrast_milli: i32,
     saturation_milli: i32,
     hue_milli: i32,
+    gamma_milli: i32,
 ) -> String {
     format!(
-        "Adjust B{} C{} S{} H{}",
+        "Adjust B{} C{} S{} H{} G{}",
         clamp_adjust_milli(brightness_milli) / 10,
         clamp_adjust_milli(contrast_milli) / 10,
         clamp_adjust_milli(saturation_milli) / 10,
-        clamp_adjust_milli(hue_milli) / 10
+        clamp_adjust_milli(hue_milli) / 10,
+        clamp_adjust_milli(gamma_milli) / 10
     )
 }
 
@@ -3675,6 +3703,7 @@ struct PlayerApp {
     contrast_milli: i32,
     saturation_milli: i32,
     hue_milli: i32,
+    gamma_milli: i32,
     adjust_dirty: bool,
     flip_h: bool,
     flip_v: bool,
@@ -3752,6 +3781,7 @@ impl PlayerApp {
             contrast_milli: 1_000,
             saturation_milli: 1_000,
             hue_milli: 1_000,
+            gamma_milli: 1_000,
             adjust_dirty: false,
             flip_h: false,
             flip_v: false,
@@ -4342,6 +4372,9 @@ impl PlayerApp {
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::E)) {
             self.toggle_eq_bypass();
         }
+        if !focused && ctx.input(|input| input.key_pressed(egui::Key::Y)) {
+            self.cycle_audio_channel_mode();
+        }
         if !focused
             && ctx.input(|input| {
                 input.modifiers.alt
@@ -4418,6 +4451,7 @@ impl PlayerApp {
             self.contrast_milli,
             self.saturation_milli,
             self.hue_milli,
+            self.gamma_milli,
             self.rotate,
             self.deinterlace,
             bitmap.as_ref(),
@@ -4588,14 +4622,24 @@ impl PlayerApp {
                 self.hue_milli = clamp_adjust_milli((hue * 1000.0).round() as i32);
                 self.adjust_dirty = true;
             }
+            ui.label("Gam");
+            let mut gamma = self.gamma_milli as f32 / 1000.0;
+            if ui
+                .add(egui::Slider::new(&mut gamma, 0.25..=4.0).show_value(false))
+                .changed()
+            {
+                self.gamma_milli = clamp_adjust_milli((gamma * 1000.0).round() as i32);
+                self.adjust_dirty = true;
+            }
             if ui.button("Reset").clicked() {
-                let (b, c, s, h) = reset_video_adjust();
+                let (b, c, s, h, g) = reset_video_adjust();
                 self.brightness_milli = b;
                 self.contrast_milli = c;
                 self.saturation_milli = s;
                 self.hue_milli = h;
+                self.gamma_milli = g;
                 self.adjust_dirty = true;
-                self.notice = Some(format_adjust_osd(b, c, s, h));
+                self.notice = Some(format_adjust_osd(b, c, s, h, g));
             }
             let flip_h = if self.flip_h { "H*" } else { "H" };
             if ui.button(flip_h).clicked() {
@@ -4761,19 +4805,7 @@ impl PlayerApp {
                 .button(audio_channel_label(self.audio_channel))
                 .clicked()
             {
-                self.audio_channel = cycle_audio_channel(self.audio_channel);
-                if let Some(session) = &self.session {
-                    session.shared.audio_channel.store(
-                        match self.audio_channel {
-                            AudioChannelMode::Stereo => 0,
-                            AudioChannelMode::Left => 1,
-                            AudioChannelMode::Right => 2,
-                            AudioChannelMode::Mono => 3,
-                            AudioChannelMode::Reverse => 4,
-                        },
-                        Ordering::Relaxed,
-                    );
-                }
+                self.cycle_audio_channel_mode();
             }
             if ui.button("Bal-").clicked() {
                 self.nudge_balance(-BALANCE_STEP_MILLI);
@@ -5131,6 +5163,23 @@ impl PlayerApp {
         self.notice = Some(format_eq_bypass_osd(self.eq_bypass).into());
     }
 
+    fn cycle_audio_channel_mode(&mut self) {
+        self.audio_channel = cycle_audio_channel(self.audio_channel);
+        if let Some(session) = &self.session {
+            session.shared.audio_channel.store(
+                match self.audio_channel {
+                    AudioChannelMode::Stereo => 0,
+                    AudioChannelMode::Left => 1,
+                    AudioChannelMode::Right => 2,
+                    AudioChannelMode::Mono => 3,
+                    AudioChannelMode::Reverse => 4,
+                },
+                Ordering::Relaxed,
+            );
+        }
+        self.notice = Some(format_audio_channel_osd(self.audio_channel));
+    }
+
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {
         self.bass_milli = clamp_adjust_milli(bass);
         self.mid_milli = clamp_adjust_milli(mid);
@@ -5347,6 +5396,7 @@ impl PlayerApp {
                 contrast_milli: self.contrast_milli,
                 saturation_milli: self.saturation_milli,
                 hue_milli: self.hue_milli,
+                gamma_milli: self.gamma_milli,
                 rotate: self.rotate,
                 deinterlace: self.deinterlace,
             };
@@ -5811,6 +5861,7 @@ fn color_image(
     contrast_milli: i32,
     saturation_milli: i32,
     hue_milli: i32,
+    gamma_milli: i32,
     rotate: RotateMode,
     deinterlace: DeinterlaceMode,
     bitmap: Option<&BitmapSubtitle>,
@@ -5820,6 +5871,7 @@ fn color_image(
         contrast_milli,
         saturation_milli,
         hue_milli,
+        gamma_milli,
         rotate,
         deinterlace,
     };

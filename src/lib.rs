@@ -1064,7 +1064,7 @@ mod play_controls {
         assert_eq!((rw, rh), (2, 2));
         assert_eq!(
             fvid_media::reset_video_adjust(),
-            (1_000, 1_000, 1_000, 1_000)
+            (1_000, 1_000, 1_000, 1_000, 1_000)
         );
         assert_eq!(fvid_media::adjust_step_milli(1_000, 100), 1_100);
         assert_eq!(fvid_media::reset_zoom_pan(), (1_000, 0, 0));
@@ -1088,5 +1088,21 @@ mod play_controls {
             Some(60_000_000)
         );
         assert_eq!(fvid_media::initial_seek_us("bad", 60_000_000), None);
+        assert_eq!(fvid_media::gamma_channel(128, 1_000), 128);
+        assert!(fvid_media::gamma_channel(128, 2_000) > 128);
+        assert_eq!(
+            fvid_media::format_audio_channel_osd(fvid_media::AudioChannelMode::Mono),
+            "Audio Mono"
+        );
+        let tmp = std::env::temp_dir().join("fvid-play-controls-playlist");
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(&tmp).unwrap();
+        let a = tmp.join("a.mp4");
+        std::fs::write(&a, b"x").unwrap();
+        let list = tmp.join("list.m3u");
+        std::fs::write(&list, format!("#EXTM3U\n{}\n", a.display())).unwrap();
+        let expanded = fvid_media::expand_play_inputs(&[list]).unwrap();
+        assert_eq!(expanded.len(), 1);
+        assert!(expanded[0].ends_with("a.mp4"));
     }
 }
