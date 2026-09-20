@@ -2356,6 +2356,10 @@ pub enum SphericalProjection {
     Panini,
     /// Cylindrical panorama.
     Cylindrical,
+    /// Mercator map projection.
+    Mercator,
+    /// Dual fisheye top-bottom layout.
+    DualFisheyeTb,
 }
 
 pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProjection {
@@ -2366,7 +2370,9 @@ pub fn cycle_spherical_projection(mode: SphericalProjection) -> SphericalProject
         SphericalProjection::LittlePlanet => SphericalProjection::Eac,
         SphericalProjection::Eac => SphericalProjection::Panini,
         SphericalProjection::Panini => SphericalProjection::Cylindrical,
-        SphericalProjection::Cylindrical => SphericalProjection::Equirect,
+        SphericalProjection::Cylindrical => SphericalProjection::Mercator,
+        SphericalProjection::Mercator => SphericalProjection::DualFisheyeTb,
+        SphericalProjection::DualFisheyeTb => SphericalProjection::Equirect,
     }
 }
 
@@ -2379,6 +2385,8 @@ pub fn spherical_projection_label(mode: SphericalProjection) -> &'static str {
         SphericalProjection::Eac => "EAC",
         SphericalProjection::Panini => "Panini",
         SphericalProjection::Cylindrical => "Cylindrical",
+        SphericalProjection::Mercator => "Mercator",
+        SphericalProjection::DualFisheyeTb => "Dual fisheye TB",
     }
 }
 
@@ -2619,6 +2627,30 @@ pub fn project_spherical_view(
             roll_deg_milli,
             fov_deg_milli,
         ),
+        SphericalProjection::Mercator => project_mercator_view(
+            src_w,
+            src_h,
+            src,
+            out_w,
+            out_h,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            fov_deg_milli,
+        ),
+        SphericalProjection::DualFisheyeTb => {
+            let equirect = dual_fisheye_tb_to_equirect(src_w, src_h, src, src_w.max(2), src_h.max(1));
+            project_equirect_view_ex(
+                src_w.max(2),
+                src_h.max(1),
+                &equirect,
+                out_w,
+                out_h,
+                yaw_deg_milli,
+                pitch_deg_milli,
+                roll_deg_milli,
+                fov_deg_milli,
+            )
+        },
     }
 }
 
@@ -5243,6 +5275,161 @@ pub fn format_dvr_window_osd(window_us: i64) -> String {
     format!("DVR window {}", format_play_clock(window_us.max(0)))
 }
 
+/// PQ OETF (inverse EOTF) for encoding display-linear → PQ code value.
+pub fn pq_oetf(luminance: f32) -> f32 {
+    let y = (luminance.max(0.0) / 100.0).clamp(0.0, 1.0);
+    let m1 = 0.1593017578125;
+    let m2 = 78.84375;
+    let c1 = 0.8359375;
+    let c2 = 18.8515625;
+    let c3 = 18.6875;
+    let ym = y.powf(m1);
+    ((c1 + c2 * ym) / (1.0 + c3 * ym)).powf(m2).clamp(0.0, 1.0)
+}
+
+/// HLG OETF (scene-light → HLG signal).
+pub fn hlg_oetf(scene: f32) -> f32 {
+    let e = scene.clamp(0.0, 1.0);
+    let a = 0.17883277;
+    let b = 0.28466892;
+    let c = 0.55991073;
+    if e <= 1.0 / 12.0 {
+        (3.0 * e).sqrt().clamp(0.0, 1.0)
+    } else {
+        (a * (12.0 * e - b).ln() + c).clamp(0.0, 1.0)
+    }
+}
+
+/// MaxRGB tonemap: scale by max channel (HDR games / mpv alternative).
+pub fn maxrgb_tonemap_pixel(red: u8, green: u8, blue: u8) -> (u8, u8, u8) {
+    let r = f32::from(red) / 255.0;
+    let g = f32::from(green) / 255.0;
+    let b = f32::from(blue) / 255.0;
+    let m = r.max(g).max(b).max(1e-6);
+    let scale = (1.0 / (1.0 + m)).clamp(0.0, 1.0);
+    (
+        (r * scale * 255.0).round().clamp(0.0, 255.0) as u8,
+        (g * scale * 255.0).round().clamp(0.0, 255.0) as u8,
+        (b * scale * 255.0).round().clamp(0.0, 255.0) as u8,
+    )
+}
+
+pub fn format_maxrgb_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "MaxRGB tonemap"
+    } else {
+        "MaxRGB Off"
+    }
+}
+
+/// Mercator projection from equirect (cartographic / planet viewers).
+pub fn project_mercator_view(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+    yaw_deg_milli: i32,
+    pitch_deg_milli: i32,
+    fov_deg_milli: i32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let yaw = (clamp_yaw_milli(yaw_deg_milli) as f32 / 1_000.0).to_radians();
+    let pitch = (clamp_pitch_milli(pitch_deg_milli) as f32 / 1_000.0).to_radians();
+    let fov = (clamp_fov_milli(fov_deg_milli) as f32 / 1_000.0).to_radians();
+    let aspect = out_w as f32 / out_h as f32;
+    let half = fov * 0.5;
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    for oy in 0..out_h {
+        let ny = 1.0 - 2.0 * (oy as f32 + 0.5) / out_h as f32;
+        for ox in 0..out_w {
+            let nx = 2.0 * (ox as f32 + 0.5) / out_w as f32 - 1.0;
+            let lon = yaw + nx * half * aspect;
+            let lat = (pitch + (ny * half).sinh().atan()).clamp(
+                -std::f32::consts::FRAC_PI_2 + 0.01,
+                std::f32::consts::FRAC_PI_2 - 0.01,
+            );
+            out[(oy * out_w + ox) as usize] = sample_equirect_pixel(src, src_w, src_h, lon, lat);
+        }
+    }
+    out
+}
+
+/// Dual fisheye top-bottom → equirect (Insta360 / GoPro TB layout).
+pub fn dual_fisheye_tb_to_equirect(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+) -> Vec<u32> {
+    let out_w = out_w.max(1);
+    let out_h = out_h.max(1);
+    let mut out = vec![0u32; out_w as usize * out_h as usize];
+    if src_w == 0 || src_h < 2 || src.is_empty() {
+        return out;
+    }
+    let eye_h = src_h / 2;
+    for y in 0..out_h {
+        let lat = (0.5 - (y as f32 + 0.5) / out_h as f32) * std::f32::consts::PI;
+        for x in 0..out_w {
+            let lon = ((x as f32 + 0.5) / out_w as f32 * 2.0 - 1.0) * std::f32::consts::PI;
+            let use_bottom = lon >= 0.0;
+            let eye_lon = if use_bottom {
+                lon
+            } else {
+                lon + std::f32::consts::PI
+            };
+            let r = (0.5 - lat / std::f32::consts::PI).clamp(0.0, 1.0) * 0.5;
+            let fx = 0.5 + r * eye_lon.cos();
+            let fy = 0.5 + r * eye_lon.sin();
+            let ox = (fx.clamp(0.0, 1.0) * (src_w.saturating_sub(1) as f32)).round() as u32;
+            let oy = ((fy.clamp(0.0, 1.0) * (eye_h.saturating_sub(1) as f32)).round() as u32)
+                + if use_bottom { eye_h } else { 0 };
+            let idx = (oy.min(src_h - 1) as usize) * (src_w as usize) + (ox.min(src_w - 1) as usize);
+            out[(y * out_w + x) as usize] = src.get(idx).copied().unwrap_or(0);
+        }
+    }
+    out
+}
+
+/// Target live latency for low-latency HLS/DASH (ms).
+pub fn clamp_live_latency_ms(ms: u32) -> u32 {
+    ms.clamp(100, 60_000)
+}
+
+pub fn format_live_latency_osd(ms: u32) -> String {
+    format!("Live latency {} ms", clamp_live_latency_ms(ms))
+}
+
+/// Buffer target fill ratio (0..=1000) for ABR decisions.
+pub fn buffer_health_ratio_milli(buffered_us: i64, target_us: i64) -> u32 {
+    if target_us <= 0 {
+        return 1_000;
+    }
+    ((buffered_us.max(0) as i128 * 1_000) / target_us as i128).clamp(0, 2_000) as u32
+}
+
+/// EPG / program-guide row.
+pub fn format_epg_program_osd(title: &str, start_us: i64, end_us: i64) -> String {
+    format!(
+        "EPG {} {}–{}",
+        title.trim(),
+        format_play_clock(start_us.max(0)),
+        format_play_clock(end_us.max(0))
+    )
+}
+
+/// CEA-708 service channel label.
+pub fn format_cea708_service_osd(service: u32) -> String {
+    if service == 0 {
+        "CEA-708 Off".into()
+    } else {
+        format!("CEA-708 service {service}")
+    }
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -6124,8 +6311,10 @@ pub fn parse_spherical_projection(spec: &str) -> Result<SphericalProjection> {
         "eac" | "equi-angular" | "equiangular" => Ok(SphericalProjection::Eac),
         "panini" => Ok(SphericalProjection::Panini),
         "cylindrical" | "cylinder" => Ok(SphericalProjection::Cylindrical),
+        "mercator" => Ok(SphericalProjection::Mercator),
+        "dual-fisheye-tb" | "dfisheye-tb" | "fisheye-tb" => Ok(SphericalProjection::DualFisheyeTb),
         other => Err(format!(
-            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical)"
+            "unknown spherical projection `{other}` (equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical|mercator|dual-fisheye-tb)"
         )
         .into()),
     }

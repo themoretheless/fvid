@@ -248,7 +248,9 @@ pub use play::{
     storyboard_tile_index, format_storyboard_osd, watch_progress_milli, format_continue_watching_osd,
     up_next_should_start, format_up_next_osd, format_scrobble_line, gaze_dwell_triggered,
     format_gaze_dwell_osd, controller_ray_hit, parse_ttml_clock, clamp_dvr_playhead_us,
-    format_dvr_window_osd,
+    format_dvr_window_osd, pq_oetf, hlg_oetf, maxrgb_tonemap_pixel, format_maxrgb_osd,
+    project_mercator_view, dual_fisheye_tb_to_equirect, clamp_live_latency_ms, format_live_latency_osd,
+    buffer_health_ratio_milli, format_epg_program_osd, format_cea708_service_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

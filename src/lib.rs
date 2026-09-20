@@ -2015,6 +2015,22 @@ mod play_controls {
             fvid_media::clamp_dvr_playhead_us(50, 100, 30),
             70
         );
+        let pq = fvid_media::pq_oetf(fvid_media::pq_eotf(0.5));
+        assert!((pq - 0.5).abs() < 0.15);
+        let mx = fvid_media::maxrgb_tonemap_pixel(255, 128, 64);
+        assert!(mx.0 < 255);
+        let merc = fvid_media::project_mercator_view(4, 2, &[0x00_20_20_20u32; 8], 2, 2, 0, 0, 90_000);
+        assert_eq!(merc.len(), 4);
+        assert_eq!(
+            fvid_media::parse_spherical_projection("mercator").unwrap(),
+            fvid_media::SphericalProjection::Mercator
+        );
+        let tb = fvid_media::dual_fisheye_tb_to_equirect(4, 4, &[0x00_11_11_11u32; 16], 4, 4);
+        assert_eq!(tb.len(), 16);
+        assert_eq!(fvid_media::clamp_live_latency_ms(50), 100);
+        assert_eq!(fvid_media::buffer_health_ratio_milli(5_000_000, 10_000_000), 500);
+        assert!(fvid_media::format_epg_program_osd("News", 0, 3_600_000_000).contains("News"));
+        assert!(fvid_media::format_cea708_service_osd(1).contains('1'));
         assert_eq!(fvid_media::clamp_exclusive_latency_ms(0), 1);
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
