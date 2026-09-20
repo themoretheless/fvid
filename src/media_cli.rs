@@ -33,6 +33,12 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     let mut audio_device: Option<String> = None;
     let mut start_us: Option<i64> = None;
     let mut stop_us: Option<i64> = None;
+    let mut spherical = false;
+    let mut yaw_deg_milli = 0i32;
+    let mut pitch_deg_milli = 0i32;
+    let mut fov_deg_milli = fvid_media::FOV_DEFAULT_MILLI;
+    let mut hdr_tonemap = fvid_media::HdrTonemap::Off;
+    let mut stereo3d = fvid_media::PlayStereo3D::Off;
     let mut inputs = Vec::new();
     let mut index = 0;
     while index < args.len() {
@@ -112,9 +118,39 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 }
                 return Ok(());
             }
+            "--spherical" | "--360" => spherical = true,
+            "--yaw" => {
+                index += 1;
+                let value = args.get(index).ok_or("play --yaw requires degrees")?;
+                yaw_deg_milli = fvid_media::parse_degrees_milli(value)?;
+            }
+            "--pitch" => {
+                index += 1;
+                let value = args.get(index).ok_or("play --pitch requires degrees")?;
+                pitch_deg_milli = fvid_media::parse_degrees_milli(value)?;
+            }
+            "--fov" => {
+                index += 1;
+                let value = args.get(index).ok_or("play --fov requires degrees")?;
+                fov_deg_milli = fvid_media::parse_degrees_milli(value)?;
+            }
+            "--hdr-tonemap" => {
+                index += 1;
+                let value = args
+                    .get(index)
+                    .ok_or("play --hdr-tonemap requires off|clip|reinhard|hable")?;
+                hdr_tonemap = fvid_media::parse_hdr_tonemap(value)?;
+            }
+            "--play-stereo3d" => {
+                index += 1;
+                let value = args
+                    .get(index)
+                    .ok_or("play --play-stereo3d requires off|sbsl|abl|mono-left|mono-right")?;
+                stereo3d = fvid_media::parse_play_stereo3d(value)?;
+            }
             "--help" | "-h" => {
                 println!(
-                    "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--on-top] [--rate N] [--start-time TIME] [--stop-time TIME] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices]\nINPUT is a local file or http/https/rtsp/rtmp/udp URL. --start-time/--stop-time are mm:ss, hh:mm:ss, or seconds. Space pauses. Left/right seek 10s. Up/down volume. M mutes. B cycles audio. V cycles subtitles. L sets A-B loop. T always on top. F fullscreen. [ ] speed. . steps one frame. S saves a bitmap. Esc or Q quits. Drop files, or use Open / Open URL, to replace the playlist. Sub file loads SRT/ASS. The window stays open after the file ends and continues with the next playlist item. Display is capped at 1920x1080. Rate is clamped to 0.25..4."
+                    "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--on-top] [--rate N] [--start-time TIME] [--stop-time TIME] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices] [--spherical] [--yaw DEG] [--pitch DEG] [--fov DEG] [--hdr-tonemap off|clip|reinhard|hable] [--play-stereo3d off|sbsl|abl|mono-left|mono-right]\nINPUT is a local file or http/https/rtsp/rtmp/udp URL. --start-time/--stop-time are mm:ss, hh:mm:ss, or seconds. Space pauses. Left/right seek 10s. Up/down volume. M mutes. B cycles audio. V cycles subtitles. L sets A-B loop. T always on top. F fullscreen. [ ] speed. . steps one frame. S saves a bitmap. Esc or Q quits. Drop files, or use Open / Open URL, to replace the playlist. Sub file loads SRT/ASS. The window stays open after the file ends and continues with the next playlist item. Display is capped at 1920x1080. Rate is clamped to 0.25..4. --spherical enables 360° equirect view; Ctrl+3 toggles. --hdr-tonemap selects display tonemap (auto Hable on PQ/HLG). --play-stereo3d selects packed 3D view."
                 );
                 return Ok(());
             }
@@ -142,6 +178,12 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             audio_device,
             start_us,
             stop_us,
+            spherical,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            fov_deg_milli,
+            hdr_tonemap,
+            stereo3d,
         },
     )?;
     emit_json(false, serde_json::to_string_pretty(&stats)?);

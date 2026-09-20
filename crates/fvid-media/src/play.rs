@@ -1613,6 +1613,18 @@ pub struct PlayOptions {
     pub start_us: Option<i64>,
     /// Stop (pause at end) when media time reaches this (VLC `--stop-time`).
     pub stop_us: Option<i64>,
+    /// Enable equirectangular 360° view on open (`--spherical`).
+    pub spherical: bool,
+    /// Initial yaw in degrees ×1000 for 360° view.
+    pub yaw_deg_milli: i32,
+    /// Initial pitch in degrees ×1000 for 360° view.
+    pub pitch_deg_milli: i32,
+    /// Initial FOV in degrees ×1000 for 360° view.
+    pub fov_deg_milli: i32,
+    /// Display HDR tonemap mode (`--hdr-tonemap`).
+    pub hdr_tonemap: HdrTonemap,
+    /// Packed stereo3d display mode (`--play-stereo3d`).
+    pub stereo3d: PlayStereo3D,
 }
 
 impl Default for PlayOptions {
@@ -1629,8 +1641,51 @@ impl Default for PlayOptions {
             audio_device: None,
             start_us: None,
             stop_us: None,
+            spherical: false,
+            yaw_deg_milli: 0,
+            pitch_deg_milli: 0,
+            fov_deg_milli: FOV_DEFAULT_MILLI,
+            hdr_tonemap: HdrTonemap::Off,
+            stereo3d: PlayStereo3D::Off,
         }
     }
+}
+
+/// Parse `--hdr-tonemap` values: `off|clip|reinhard|hable`.
+pub fn parse_hdr_tonemap(spec: &str) -> Result<HdrTonemap> {
+    match spec.trim().to_ascii_lowercase().as_str() {
+        "off" | "none" | "0" => Ok(HdrTonemap::Off),
+        "clip" => Ok(HdrTonemap::Clip),
+        "reinhard" => Ok(HdrTonemap::Reinhard),
+        "hable" => Ok(HdrTonemap::Hable),
+        other => Err(format!("unknown hdr tonemap `{other}` (off|clip|reinhard|hable)").into()),
+    }
+}
+
+/// Parse `--play-stereo3d` values: `off|sbsl|abl|mono-left|mono-right`.
+pub fn parse_play_stereo3d(spec: &str) -> Result<PlayStereo3D> {
+    match spec.trim().to_ascii_lowercase().as_str() {
+        "off" | "none" | "0" => Ok(PlayStereo3D::Off),
+        "sbsl" | "sbs" | "anaglyph" => Ok(PlayStereo3D::SbslAnaglyph),
+        "abl" | "tab" => Ok(PlayStereo3D::AblAnaglyph),
+        "mono-left" | "ml" | "left" => Ok(PlayStereo3D::MonoLeft),
+        "mono-right" | "mr" | "right" => Ok(PlayStereo3D::MonoRight),
+        other => Err(format!(
+            "unknown play stereo3d `{other}` (off|sbsl|abl|mono-left|mono-right)"
+        )
+        .into()),
+    }
+}
+
+/// Parse degrees for viewpoint CLI (`45`, `45.5`) into milli-degrees.
+pub fn parse_degrees_milli(spec: &str) -> Result<i32> {
+    let value: f32 = spec
+        .parse()
+        .map_err(|_| format!("invalid degrees `{spec}`"))?;
+    if !value.is_finite() {
+        return Err(format!("invalid degrees `{spec}`").into());
+    }
+    Ok((value * 1_000.0).round() as i32)
 }
 
 /// Clamp a playback rate into the VLC slider range, 0.25×..=4×, as thousandths.
@@ -4576,6 +4631,13 @@ impl PlayerApp {
         let subtitle_ordinal = options.subtitle_track;
         let first = playlist.first().cloned().unwrap_or_default();
         let stop_us = options.stop_us;
+        let spherical = options.spherical;
+        let yaw_deg_milli = clamp_yaw_milli(options.yaw_deg_milli);
+        let pitch_deg_milli = clamp_pitch_milli(options.pitch_deg_milli);
+        let fov_deg_milli = clamp_fov_milli(options.fov_deg_milli);
+        let hdr_tonemap = options.hdr_tonemap;
+        let hdr_auto_applied = !matches!(options.hdr_tonemap, HdrTonemap::Off);
+        let stereo3d = options.stereo3d;
         let mut app = Self {
             options,
             playlist,
@@ -4627,7 +4689,6 @@ impl PlayerApp {
             flip_h: false,
             flip_v: false,
             deinterlace: DeinterlaceMode::Off,
-            stereo3d: PlayStereo3D::Off,
             show_stats: false,
             audio_channel: AudioChannelMode::Stereo,
             balance_milli: BALANCE_CENTER_MILLI,
@@ -4647,12 +4708,13 @@ impl PlayerApp {
             position_display: PositionDisplay::Elapsed,
             sleep_min: 0,
             sleep_deadline_secs: None,
-            spherical: false,
-            yaw_deg_milli: 0,
-            pitch_deg_milli: 0,
-            fov_deg_milli: FOV_DEFAULT_MILLI,
-            hdr_tonemap: HdrTonemap::Off,
-            hdr_auto_applied: false,
+            spherical,
+            yaw_deg_milli,
+            pitch_deg_milli,
+            fov_deg_milli,
+            hdr_tonemap,
+            hdr_auto_applied,
+            stereo3d,
             outcome,
         };
         if let Err(err) = app.start_session(first) {
@@ -4674,7 +4736,8 @@ impl PlayerApp {
         self.audio_delay_us = 0;
         self.bookmarks.clear();
         self.texture = None;
-        self.hdr_auto_applied = false;
+        self.hdr_tonemap = self.options.hdr_tonemap;
+        self.hdr_auto_applied = !matches!(self.options.hdr_tonemap, HdrTonemap::Off);
         if path.to_str().is_none() {
             return Err("path must be UTF-8".into());
         }

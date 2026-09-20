@@ -1260,5 +1260,48 @@ mod play_controls {
         );
         assert!(fvid_media::format_play_stereo3d_osd(fvid_media::PlayStereo3D::MonoLeft)
             .contains("mono-left"));
+        assert_eq!(
+            fvid_media::parse_hdr_tonemap("hable").unwrap(),
+            fvid_media::HdrTonemap::Hable
+        );
+        assert_eq!(
+            fvid_media::parse_play_stereo3d("sbsl").unwrap(),
+            fvid_media::PlayStereo3D::SbslAnaglyph
+        );
+        assert_eq!(fvid_media::parse_degrees_milli("45.5").unwrap(), 45_500);
+        let mut dual = vec![0u32; 64 * 32];
+        for y in 0..32 {
+            for x in 0..64 {
+                dual[y * 64 + x] = if x < 32 { 0x00_ff_00_00 } else { 0x00_00_00_ff };
+            }
+        }
+        let front = fvid_media::project_equirect_view(
+            64,
+            32,
+            &dual,
+            8,
+            8,
+            0,
+            0,
+            60_000,
+        );
+        let back = fvid_media::project_equirect_view(
+            64,
+            32,
+            &dual,
+            8,
+            8,
+            180_000,
+            0,
+            60_000,
+        );
+        assert_ne!(front[0], back[0]);
+        let gray = vec![0x00_80_80_80u32; 4];
+        let mut hdr_opts = fvid_media::PlayRenderOptions::default();
+        hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
+        hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;
+        let flat = fvid_media::render_play_pixels(2, 2, &gray, &fvid_media::PlayRenderOptions::default(), None);
+        let hdr = fvid_media::render_play_pixels(2, 2, &gray, &hdr_opts, None);
+        assert_ne!(flat.2[0], hdr.2[0]);
     }
 }

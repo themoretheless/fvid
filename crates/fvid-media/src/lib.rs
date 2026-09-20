@@ -109,7 +109,8 @@ pub use play::{
     COLOR_TRC_SMPTE2084, COLOR_TRC_HLG, is_hdr_transfer, cycle_hdr_tonemap, hdr_tonemap_label,
     format_hdr_tonemap_osd, tonemap_channel, apply_hdr_tonemap_pixel, auto_hdr_tonemap,
     pq_eotf, hlg_eotf, expand_hdr_channel, PlayStereo3D, cycle_play_stereo3d, play_stereo3d_label,
-    format_play_stereo3d_osd, apply_play_stereo3d,
+    format_play_stereo3d_osd, apply_play_stereo3d, parse_hdr_tonemap, parse_play_stereo3d,
+    parse_degrees_milli,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};
