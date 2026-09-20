@@ -3901,6 +3901,101 @@ pub fn network_cache_delay_us(ms: u32) -> i64 {
     i64::from(clamp_network_cache_ms(ms)).saturating_mul(1_000)
 }
 
+/// VLC-style caching domains.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum CacheDomain {
+    #[default]
+    Network,
+    File,
+    Live,
+    Disc,
+}
+
+pub fn cycle_cache_domain(domain: CacheDomain) -> CacheDomain {
+    match domain {
+        CacheDomain::Network => CacheDomain::File,
+        CacheDomain::File => CacheDomain::Live,
+        CacheDomain::Live => CacheDomain::Disc,
+        CacheDomain::Disc => CacheDomain::Network,
+    }
+}
+
+pub fn cache_domain_label(domain: CacheDomain) -> &'static str {
+    match domain {
+        CacheDomain::Network => "network",
+        CacheDomain::File => "file",
+        CacheDomain::Live => "live",
+        CacheDomain::Disc => "disc",
+    }
+}
+
+pub fn default_cache_ms(domain: CacheDomain) -> u32 {
+    match domain {
+        CacheDomain::Network => 1_000,
+        CacheDomain::File => 300,
+        CacheDomain::Live => 300,
+        CacheDomain::Disc => 300,
+    }
+}
+
+pub fn clamp_cache_ms(domain: CacheDomain, ms: u32) -> u32 {
+    let _ = domain;
+    clamp_network_cache_ms(ms)
+}
+
+pub fn format_cache_osd(domain: CacheDomain, ms: u32) -> String {
+    format!(
+        "{} cache {} ms",
+        cache_domain_label(domain),
+        clamp_cache_ms(domain, ms)
+    )
+}
+
+/// Secondary (dual) subtitle delay — same step semantics as primary.
+pub fn secondary_subtitle_delay_us(current_us: i64, steps: i32) -> i64 {
+    subtitle_delay_us(current_us, steps)
+}
+
+pub fn format_secondary_subtitle_delay_osd(delay_us: i64) -> String {
+    format_delay_osd("secondary subtitle", delay_us)
+}
+
+/// Snapshot filename with an optional prefix (VLC `--snapshot-prefix`).
+pub fn snapshot_path_with_prefix(
+    dir: Option<&Path>,
+    video: &Path,
+    prefix: &str,
+    index: u32,
+    ext: &str,
+) -> PathBuf {
+    let stem = video
+        .file_stem()
+        .and_then(|name| name.to_str())
+        .unwrap_or("frame");
+    let prefix = prefix.trim();
+    let name = if prefix.is_empty() {
+        format!("{stem}-fvid-{index}.{ext}")
+    } else {
+        format!("{prefix}{stem}-{index}.{ext}")
+    };
+    match dir {
+        Some(folder) if !folder.as_os_str().is_empty() => folder.join(name),
+        _ => match video.parent() {
+            Some(parent) if !parent.as_os_str().is_empty() => parent.join(name),
+            _ => PathBuf::from(name),
+        },
+    }
+}
+
+pub fn format_snapshot_prefix_osd(prefix: &str) -> String {
+    let prefix = prefix.trim();
+    if prefix.is_empty() {
+        "Snapshot prefix default".into()
+    } else {
+        format!("Snapshot prefix {prefix}")
+    }
+}
+
 /// Compact on-screen hotkey reminder (VLC Help / F1 style).
 pub fn format_hotkeys_help_osd() -> &'static str {
     "Space pause · ←→ seek · ↑↓ vol · M mute · F full · S snap · Esc quit"
@@ -5269,6 +5364,7 @@ struct PlayerApp {
     snapshots: u32,
     snapshot_format: SnapshotFormat,
     snapshot_dir: Option<PathBuf>,
+    snapshot_prefix: String,
     network_cache_ms: u32,
     audio_ordinal: i32,
     subtitle_ordinal: i32,
@@ -5279,6 +5375,7 @@ struct PlayerApp {
     stop_us: Option<i64>,
     repeat: RepeatMode,
     subtitle_delay_us: i64,
+    secondary_subtitle_delay_us: i64,
     audio_delay_us: i64,
     aspect: AspectMode,
     crop: AspectMode,
@@ -5396,6 +5493,7 @@ impl PlayerApp {
             snapshots: 0,
             snapshot_format: SnapshotFormat::Bmp,
             snapshot_dir,
+            snapshot_prefix: String::new(),
             network_cache_ms,
             audio_ordinal,
             subtitle_ordinal,
@@ -5406,6 +5504,7 @@ impl PlayerApp {
             stop_us,
             repeat: RepeatMode::Off,
             subtitle_delay_us: 0,
+            secondary_subtitle_delay_us: 0,
             audio_delay_us: 0,
             aspect: AspectMode::Source,
             crop: AspectMode::Source,
@@ -5481,6 +5580,7 @@ impl PlayerApp {
         self.notice = None;
         self.ab = None;
         self.subtitle_delay_us = 0;
+        self.secondary_subtitle_delay_us = 0;
         self.audio_delay_us = 0;
         self.bookmarks.clear();
         self.texture = None;
@@ -6072,13 +6172,19 @@ impl PlayerApp {
             }
         }
         if keys.18 {
-            self.nudge_subtitle_delay(-1);
+            if ctx.input(|input| input.modifiers.alt) {
+                self.nudge_secondary_subtitle_delay(-1);
+            } else {
+                self.nudge_subtitle_delay(-1);
+            }
         }
         if keys.19 {
             if command {
                 if !ctx.input(|input| input.modifiers.shift) {
                     self.cycle_hdr_mode();
                 }
+            } else if ctx.input(|input| input.modifiers.alt) {
+                self.nudge_secondary_subtitle_delay(1);
             } else {
                 self.nudge_subtitle_delay(1);
             }
@@ -6946,6 +7052,14 @@ impl PlayerApp {
         self.notice = Some(notice);
     }
 
+    fn nudge_secondary_subtitle_delay(&mut self, steps: i32) {
+        self.secondary_subtitle_delay_us =
+            secondary_subtitle_delay_us(self.secondary_subtitle_delay_us, steps);
+        let notice = format_secondary_subtitle_delay_osd(self.secondary_subtitle_delay_us);
+        eprintln!("fvid play: {notice}");
+        self.notice = Some(notice);
+    }
+
     fn nudge_audio_delay(&mut self, steps: i32) {
         let next = subtitle_delay_us(self.audio_delay_us, steps);
         let Some(session) = &self.session else {
@@ -6972,6 +7086,7 @@ impl PlayerApp {
         let (sub, audio) = reset_av_delays();
         let prev_audio = self.audio_delay_us;
         self.subtitle_delay_us = sub;
+        self.secondary_subtitle_delay_us = 0;
         self.audio_delay_us = audio;
         if let Some(session) = &self.session {
             let rate = session.shared.sample_rate.load(Ordering::Relaxed);
@@ -7811,9 +7926,10 @@ impl PlayerApp {
                     return;
                 }
             };
-            let path = snapshot_path_in_dir(
+            let path = snapshot_path_with_prefix(
                 self.snapshot_dir.as_deref(),
                 &session.path,
+                &self.snapshot_prefix,
                 self.snapshots + 1,
                 snapshot_format_ext(self.snapshot_format),
             );

@@ -134,7 +134,10 @@ pub use play::{
     controls_should_hide, format_resume_positions, parse_resume_positions, resume_seek_us,
     HTTP_RECONNECT_DEFAULT, HTTP_RECONNECT_MAX, clamp_http_reconnect, format_http_reconnect_osd,
     http_should_reconnect, scaletempo_duration_us, HDR_NITS_DEFAULT, HDR_NITS_MIN, HDR_NITS_MAX,
-    clamp_hdr_nits, format_hdr_nits_osd, scale_hdr_display_channel,
+    clamp_hdr_nits, format_hdr_nits_osd, scale_hdr_display_channel, CacheDomain,
+    cycle_cache_domain, cache_domain_label, default_cache_ms, clamp_cache_ms, format_cache_osd,
+    secondary_subtitle_delay_us, format_secondary_subtitle_delay_osd, snapshot_path_with_prefix,
+    format_snapshot_prefix_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

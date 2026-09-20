@@ -1473,18 +1473,41 @@ mod play_controls {
         assert_eq!(fvid_media::scaletempo_duration_us(1_000_000, 2_000), 500_000);
         assert_eq!(fvid_media::scale_hdr_display_channel(100, 100), 100);
         assert!(fvid_media::scale_hdr_display_channel(100, 400) > 100);
+        assert_eq!(
+            fvid_media::default_cache_ms(fvid_media::CacheDomain::File),
+            300
+        );
+        assert!(fvid_media::format_cache_osd(fvid_media::CacheDomain::Live, 500).contains("live"));
+        assert_eq!(
+            fvid_media::secondary_subtitle_delay_us(0, 1),
+            fvid_media::subtitle_delay_us(0, 1)
+        );
+        let prefixed = fvid_media::snapshot_path_with_prefix(
+            Some(Path::new("out")),
+            Path::new("clip.mp4"),
+            "snap-",
+            1,
+            "png",
+        );
+        assert_eq!(prefixed, PathBuf::from("out/snap-clip-1.png"));
+        assert!(fvid_media::format_snapshot_prefix_osd("snap-").contains("snap-"));
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
         hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;
         hdr_opts.hdr_nits = 400;
-        hdr_opts.display_effect = fvid_media::DisplayEffect::Off;
         let gray = vec![0x00_80_80_80u32; 4];
-        let base = fvid_media::render_play_pixels(2, 2, &gray, &fvid_media::PlayRenderOptions {
-            hdr_tonemap: fvid_media::HdrTonemap::Hable,
-            color_trc: fvid_media::COLOR_TRC_SMPTE2084,
-            hdr_nits: 100,
-            ..fvid_media::PlayRenderOptions::default()
-        }, None);
+        let base = fvid_media::render_play_pixels(
+            2,
+            2,
+            &gray,
+            &fvid_media::PlayRenderOptions {
+                hdr_tonemap: fvid_media::HdrTonemap::Hable,
+                color_trc: fvid_media::COLOR_TRC_SMPTE2084,
+                hdr_nits: 100,
+                ..fvid_media::PlayRenderOptions::default()
+            },
+            None,
+        );
         let bright = fvid_media::render_play_pixels(2, 2, &gray, &hdr_opts, None);
         assert_ne!(base.2[0], bright.2[0]);
     }
