@@ -2216,6 +2216,22 @@ pub fn insert_bookmark(marks: &mut Vec<Bookmark>, media_us: i64) -> bool {
     true
 }
 
+pub fn clear_bookmarks(marks: &mut Vec<Bookmark>) {
+    marks.clear();
+}
+
+pub fn format_bookmark_osd(media_us: i64, count: usize, added: bool) -> String {
+    if added {
+        format!("bookmark {} ({count})", format_clock(media_us))
+    } else {
+        format!("bookmark {} already set", format_clock(media_us))
+    }
+}
+
+pub fn format_playlist_osd(index: usize, total: usize) -> String {
+    format!("{}/{}", index.saturating_add(1), total.max(1))
+}
+
 /// Next bookmark after `now_us`, or the previous one when `delta` is negative.
 pub fn bookmark_step(marks: &[Bookmark], now_us: i64, delta: i32) -> Option<i64> {
     if marks.is_empty() || delta == 0 {
@@ -4391,7 +4407,11 @@ impl PlayerApp {
         }
         if keys.12 {
             if command {
-                self.add_bookmark();
+                if ctx.input(|input| input.modifiers.shift) {
+                    self.clear_all_bookmarks();
+                } else {
+                    self.add_bookmark();
+                }
             } else {
                 self.cycle_audio(1);
             }
@@ -5183,17 +5203,14 @@ impl PlayerApp {
     fn add_bookmark(&mut self) {
         let now = self.shown_media_us().max(0);
         let added = insert_bookmark(&mut self.bookmarks, now);
-        let notice = if added {
-            format!(
-                "bookmark {} ({})",
-                format_clock(now),
-                self.bookmarks.len()
-            )
-        } else {
-            format!("bookmark {} already set", format_clock(now))
-        };
+        let notice = format_bookmark_osd(now, self.bookmarks.len(), added);
         eprintln!("fvid play: {notice}");
         self.notice = Some(notice);
+    }
+
+    fn clear_all_bookmarks(&mut self) {
+        clear_bookmarks(&mut self.bookmarks);
+        self.notice = Some("Bookmarks cleared".into());
     }
 
     fn step_bookmark(&mut self, delta: i32) {

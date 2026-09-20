@@ -1124,5 +1124,14 @@ mod play_controls {
         );
         assert!(fvid_media::format_chapter_osd(1, 3, 10_000_000).contains("2/3"));
         assert_eq!(fvid_media::format_pause_osd(true), "Paused");
+        let mut marks = Vec::new();
+        assert!(fvid_media::insert_bookmark(&mut marks, 1_000_000));
+        assert_eq!(
+            fvid_media::format_bookmark_osd(1_000_000, marks.len(), true),
+            "bookmark 00:01 (1)"
+        );
+        fvid_media::clear_bookmarks(&mut marks);
+        assert!(marks.is_empty());
+        assert_eq!(fvid_media::format_playlist_osd(0, 3), "1/3");
     }
 }
