@@ -1597,6 +1597,28 @@ mod play_controls {
             fvid_media::cycle_video_post_fx(fvid_media::VideoPostFx::Grain),
             fvid_media::VideoPostFx::MotionBlur
         );
+        assert_eq!(
+            fvid_media::cycle_closed_caption(fvid_media::ClosedCaptionChannel::Off),
+            fvid_media::ClosedCaptionChannel::Cc1
+        );
+        let crop = fvid_media::clamp_crop_pixels(
+            fvid_media::CropPixels {
+                left: 10,
+                top: 20,
+                right: 10,
+                bottom: 20,
+            },
+            100,
+            100,
+        );
+        assert_eq!(fvid_media::crop_output_size(100, 100, crop), (80, 60));
+        assert_eq!(fvid_media::audio_desync_us(50), 50_000);
+        assert_eq!(fvid_media::prefer_program_index(&[1, 2, 100], 100, 0), 2);
+        assert_eq!(
+            fvid_media::cycle_subtitle_encoding(fvid_media::SubtitleEncoding::Utf8),
+            fvid_media::SubtitleEncoding::Cp1251
+        );
+        assert!(fvid_media::format_wallpaper_osd(true).contains("On"));
         let mut hdr_opts = fvid_media::PlayRenderOptions::default();
         hdr_opts.hdr_tonemap = fvid_media::HdrTonemap::Hable;
         hdr_opts.color_trc = fvid_media::COLOR_TRC_SMPTE2084;

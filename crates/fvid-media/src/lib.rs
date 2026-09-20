@@ -163,6 +163,11 @@ pub use play::{
     apply_motion_blur_rgb, format_motion_blur_osd, apply_video_post_fx_with_prev,
     IMAGE_DURATION_DEFAULT_SECS, IMAGE_DURATION_MIN_SECS, IMAGE_DURATION_MAX_SECS,
     clamp_image_duration_secs, image_duration_us, format_image_duration_osd,
+    ClosedCaptionChannel, cycle_closed_caption, closed_caption_label, format_closed_caption_osd,
+    CropPixels, clamp_crop_pixels, crop_output_size, format_crop_pixels_osd, audio_desync_us,
+    audio_desync_ms_from_us, format_audio_desync_osd, format_wallpaper_osd, prefer_program_index,
+    format_program_osd, SubtitleEncoding, cycle_subtitle_encoding, subtitle_encoding_label,
+    format_subtitle_encoding_osd,
 };
 pub use filter::{PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf};
 pub use xfade::{xfade_filter_complex, xfade_video};

@@ -1870,6 +1870,152 @@ pub fn format_image_duration_osd(secs: u32) -> String {
     format!("Image duration {} s", clamp_image_duration_secs(secs))
 }
 
+/// CEA-608 / closed-caption channels (VLC CC1–CC4).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum ClosedCaptionChannel {
+    #[default]
+    Off,
+    Cc1,
+    Cc2,
+    Cc3,
+    Cc4,
+}
+
+pub fn cycle_closed_caption(channel: ClosedCaptionChannel) -> ClosedCaptionChannel {
+    match channel {
+        ClosedCaptionChannel::Off => ClosedCaptionChannel::Cc1,
+        ClosedCaptionChannel::Cc1 => ClosedCaptionChannel::Cc2,
+        ClosedCaptionChannel::Cc2 => ClosedCaptionChannel::Cc3,
+        ClosedCaptionChannel::Cc3 => ClosedCaptionChannel::Cc4,
+        ClosedCaptionChannel::Cc4 => ClosedCaptionChannel::Off,
+    }
+}
+
+pub fn closed_caption_label(channel: ClosedCaptionChannel) -> &'static str {
+    match channel {
+        ClosedCaptionChannel::Off => "CC Off",
+        ClosedCaptionChannel::Cc1 => "CC1",
+        ClosedCaptionChannel::Cc2 => "CC2",
+        ClosedCaptionChannel::Cc3 => "CC3",
+        ClosedCaptionChannel::Cc4 => "CC4",
+    }
+}
+
+pub fn format_closed_caption_osd(channel: ClosedCaptionChannel) -> String {
+    format!("Captions {}", closed_caption_label(channel))
+}
+
+/// Custom crop rectangle in source pixels (VLC Video Crop).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub struct CropPixels {
+    pub left: u32,
+    pub top: u32,
+    pub right: u32,
+    pub bottom: u32,
+}
+
+pub fn clamp_crop_pixels(crop: CropPixels, width: u32, height: u32) -> CropPixels {
+    let max_x = width.saturating_sub(1);
+    let max_y = height.saturating_sub(1);
+    let left = crop.left.min(max_x);
+    let right = crop.right.min(width.saturating_sub(left).saturating_sub(1));
+    let top = crop.top.min(max_y);
+    let bottom = crop.bottom.min(height.saturating_sub(top).saturating_sub(1));
+    CropPixels {
+        left,
+        top,
+        right,
+        bottom,
+    }
+}
+
+pub fn crop_output_size(width: u32, height: u32, crop: CropPixels) -> (u32, u32) {
+    let crop = clamp_crop_pixels(crop, width, height);
+    (
+        width.saturating_sub(crop.left + crop.right).max(1),
+        height.saturating_sub(crop.top + crop.bottom).max(1),
+    )
+}
+
+pub fn format_crop_pixels_osd(crop: CropPixels) -> String {
+    format!(
+        "Crop L{} T{} R{} B{}",
+        crop.left, crop.top, crop.right, crop.bottom
+    )
+}
+
+/// Audio/video desync in milliseconds (VLC `--audio-desync`).
+pub fn audio_desync_us(ms: i32) -> i64 {
+    i64::from(ms).saturating_mul(1_000)
+}
+
+pub fn audio_desync_ms_from_us(us: i64) -> i32 {
+    (us / 1_000).clamp(i64::from(i32::MIN), i64::from(i32::MAX)) as i32
+}
+
+pub fn format_audio_desync_osd(ms: i32) -> String {
+    format!("Audio desync {ms} ms")
+}
+
+/// Desktop wallpaper / video desktop mode (VLC Video wallpaper).
+pub fn format_wallpaper_osd(enabled: bool) -> &'static str {
+    if enabled {
+        "Wallpaper mode On"
+    } else {
+        "Wallpaper mode Off"
+    }
+}
+
+/// MPEG-TS program / service id selection.
+pub fn prefer_program_index(program_ids: &[u32], prefer: u32, current: usize) -> usize {
+    if program_ids.is_empty() {
+        return current;
+    }
+    if let Some(idx) = program_ids.iter().position(|id| *id == prefer) {
+        return idx;
+    }
+    current.min(program_ids.len() - 1)
+}
+
+pub fn format_program_osd(program_id: u32) -> String {
+    format!("Program {program_id}")
+}
+
+/// Subtitle text encoding / codepage label (VLC `--subsdec-encoding`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum SubtitleEncoding {
+    #[default]
+    Utf8,
+    Cp1251,
+    Cp1252,
+    Latin1,
+    ShiftJis,
+}
+
+pub fn cycle_subtitle_encoding(enc: SubtitleEncoding) -> SubtitleEncoding {
+    match enc {
+        SubtitleEncoding::Utf8 => SubtitleEncoding::Cp1251,
+        SubtitleEncoding::Cp1251 => SubtitleEncoding::Cp1252,
+        SubtitleEncoding::Cp1252 => SubtitleEncoding::Latin1,
+        SubtitleEncoding::Latin1 => SubtitleEncoding::ShiftJis,
+        SubtitleEncoding::ShiftJis => SubtitleEncoding::Utf8,
+    }
+}
+
+pub fn subtitle_encoding_label(enc: SubtitleEncoding) -> &'static str {
+    match enc {
+        SubtitleEncoding::Utf8 => "UTF-8",
+        SubtitleEncoding::Cp1251 => "CP1251",
+        SubtitleEncoding::Cp1252 => "CP1252",
+        SubtitleEncoding::Latin1 => "Latin-1",
+        SubtitleEncoding::ShiftJis => "Shift-JIS",
+    }
+}
+
+pub fn format_subtitle_encoding_osd(enc: SubtitleEncoding) -> String {
+    format!("Subs encoding {}", subtitle_encoding_label(enc))
+}
+
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
     if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
@@ -6221,6 +6367,10 @@ struct PlayerApp {
     pitch_milli: i32,
     visualization: VisualizationMode,
     image_duration_secs: u32,
+    closed_captions: ClosedCaptionChannel,
+    crop_pixels: CropPixels,
+    wallpaper_mode: bool,
+    subtitle_encoding: SubtitleEncoding,
     volume_normalizer: bool,
     bass_milli: i32,
     mid_milli: i32,
@@ -6365,6 +6515,10 @@ impl PlayerApp {
             pitch_milli: AUDIO_PITCH_UNITY_MILLI,
             visualization: VisualizationMode::Off,
             image_duration_secs: IMAGE_DURATION_DEFAULT_SECS,
+            closed_captions: ClosedCaptionChannel::Off,
+            crop_pixels: CropPixels::default(),
+            wallpaper_mode: false,
+            subtitle_encoding: SubtitleEncoding::Utf8,
             volume_normalizer: false,
             bass_milli: TONE_UNITY_MILLI,
             mid_milli: TONE_UNITY_MILLI,
@@ -7300,6 +7454,36 @@ impl PlayerApp {
         {
             let longer = !ctx.input(|input| input.modifiers.shift);
             self.nudge_image_duration(if longer { 5 } else { -5 });
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::K))
+        {
+            self.cycle_closed_captions();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.shift && input.key_pressed(egui::Key::W))
+        {
+            self.toggle_wallpaper_mode();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::U))
+        {
+            self.cycle_subtitle_encoding_mode();
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::OpenBracket))
+        {
+            self.nudge_crop_pixels(8, 0, 0, 0);
+        }
+        if !focused
+            && command
+            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::CloseBracket))
+        {
+            self.nudge_crop_pixels(0, 0, 8, 0);
         }
         if !focused
             && command
@@ -8719,6 +8903,35 @@ impl PlayerApp {
         self.image_duration_secs =
             clamp_image_duration_secs(next.clamp(1, i64::from(IMAGE_DURATION_MAX_SECS)) as u32);
         self.notice = Some(format_image_duration_osd(self.image_duration_secs));
+    }
+
+    fn cycle_closed_captions(&mut self) {
+        self.closed_captions = cycle_closed_caption(self.closed_captions);
+        self.notice = Some(format_closed_caption_osd(self.closed_captions));
+    }
+
+    fn toggle_wallpaper_mode(&mut self) {
+        self.wallpaper_mode = !self.wallpaper_mode;
+        self.notice = Some(format_wallpaper_osd(self.wallpaper_mode).into());
+    }
+
+    fn cycle_subtitle_encoding_mode(&mut self) {
+        self.subtitle_encoding = cycle_subtitle_encoding(self.subtitle_encoding);
+        self.notice = Some(format_subtitle_encoding_osd(self.subtitle_encoding));
+    }
+
+    fn nudge_crop_pixels(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+        let add = |base: u32, delta: i32| -> u32 {
+            (base as i64 + i64::from(delta)).clamp(0, 4_000) as u32
+        };
+        self.crop_pixels = CropPixels {
+            left: add(self.crop_pixels.left, left),
+            top: add(self.crop_pixels.top, top),
+            right: add(self.crop_pixels.right, right),
+            bottom: add(self.crop_pixels.bottom, bottom),
+        };
+        self.adjust_dirty = true;
+        self.notice = Some(format_crop_pixels_osd(self.crop_pixels));
     }
 
     fn set_tone_gains(&mut self, bass: i32, mid: i32, treble: i32) {
