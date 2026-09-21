@@ -5,25 +5,38 @@
 //! small bounded queue; control messages (pause, rewind, seek) go the other
 //! way. Every frame carries the generation of the last rewind or seek so
 //! stale queued frames can be dropped.
-use crate::playback_native::{NativeReader, RawFrame};
+use crate::playback_native::{NativeReader, Planar8, RawFrame, avc_to_planar8};
 use std::{
     io::{BufRead, Seek},
-    sync::mpsc::{Receiver, RecvTimeoutError, SyncSender, TryRecvError, TrySendError, sync_channel},
+    sync::{
+        Arc,
+        mpsc::{Receiver, RecvTimeoutError, SyncSender, TryRecvError, TrySendError, sync_channel},
+    },
     thread,
     time::Duration,
 };
 
 /// How many converted frames may wait for the window. Two keeps the decoder
-/// one frame ahead without holding many large RGB buffers.
+/// one frame ahead without holding many large buffers.
 const QUEUE: usize = 2;
 
+/// Picture data as the window draws it: packed RGB through an egui texture,
+/// or 8-bit planes converted to RGB by the GPU shader.
+pub enum Pixels {
+    Rgb(Vec<u8>),
+    Planar(Arc<Planar8>),
+}
+
 pub struct Frame {
-    pub rgb: Vec<u8>,
+    pub pixels: Pixels,
     pub dimensions: [usize; 2],
     pub period: Duration,
     /// `NativeReader::frame_interval` of this frame.
     pub interval: Option<(u128, u128, u32)>,
     pub generation: u64,
+    /// Increases with every frame handed to the window; the GPU uploads a
+    /// frame once and skips repaints that show the same one.
+    pub serial: u64,
 }
 
 pub enum Event {
@@ -76,6 +89,7 @@ impl Playback {
         let converter = thread::Builder::new()
             .name("fvid-convert".into())
             .spawn(move || {
+                let mut serial = 0;
                 for stage in stage_rx {
                     let event = match stage {
                         Stage::Raw {
@@ -84,16 +98,23 @@ impl Playback {
                             period,
                             interval,
                             generation,
-                        } => match raw.into_rgb(usize::MAX) {
-                            Ok(rgb) => Event::Frame(Frame {
-                                rgb,
+                        } => {
+                            let pixels = match raw {
+                                RawFrame::Rgb(rgb) => Pixels::Rgb(rgb),
+                                RawFrame::Avc { picture, colour } => {
+                                    Pixels::Planar(Arc::new(avc_to_planar8(&picture, colour)))
+                                }
+                            };
+                            serial += 1;
+                            Event::Frame(Frame {
+                                pixels,
                                 dimensions,
                                 period,
                                 interval,
                                 generation,
-                            }),
-                            Err(error) => Event::Error(error.to_string()),
-                        },
+                                serial,
+                            })
+                        }
                         Stage::Event(event) => event,
                     };
                     if event_tx.send(event).is_err() {

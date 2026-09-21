@@ -11,6 +11,8 @@ pub mod playback_thread;
 pub mod playback_webm;
 #[cfg(feature = "player")]
 pub mod player;
+#[cfg(feature = "player")]
+pub mod player_gpu;
 #[cfg(feature = "mcp")]
 pub mod mcp;
 #[cfg(feature = "media")]

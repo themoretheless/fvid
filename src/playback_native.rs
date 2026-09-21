@@ -364,6 +364,43 @@ pub struct AvcColour {
     pub kb: f64,
     pub full: bool,
 }
+/// The visible picture as packed 8-bit 4:2:0 planes, ready for GPU upload.
+pub struct Planar8 {
+    pub width: usize,
+    pub height: usize,
+    pub chroma_width: usize,
+    pub chroma_height: usize,
+    pub y: Vec<u8>,
+    pub cb: Vec<u8>,
+    pub cr: Vec<u8>,
+    pub colour: AvcColour,
+}
+/// Crop the picture and narrow its samples to 8 bits without colour conversion.
+pub fn avc_to_planar8(p: &IntraPicture, colour: AvcColour) -> Planar8 {
+    let (w, h) = p.dimensions();
+    let shift = p.bit_depth.saturating_sub(8);
+    let (x0, y0) = (p.crop[0], p.crop[2]);
+    let (cx0, cy0) = (x0 / 2, y0 / 2);
+    let chroma_width = (x0 + w).div_ceil(2) - cx0;
+    let chroma_height = (y0 + h).div_ceil(2) - cy0;
+    let narrow = |plane: &[u16], stride: usize, x: usize, y: usize, width: usize, height: usize| {
+        let mut out = Vec::with_capacity(width * height);
+        for row in 0..height {
+            out.extend(plane[(y + row) * stride + x..][..width].iter().map(|&v| (v >> shift) as u8));
+        }
+        out
+    };
+    Planar8 {
+        width: w,
+        height: h,
+        chroma_width,
+        chroma_height,
+        y: narrow(&p.y, p.coded_width, x0, y0, w, h),
+        cb: narrow(&p.cb, p.coded_width / 2, cx0, cy0, chroma_width, chroma_height),
+        cr: narrow(&p.cr, p.coded_width / 2, cx0, cy0, chroma_width, chroma_height),
+        colour,
+    }
+}
 /// A decoded frame before RGB conversion.
 pub enum RawFrame {
     Rgb(Vec<u8>),

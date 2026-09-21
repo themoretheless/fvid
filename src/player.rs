@@ -6,9 +6,12 @@
 //! controls along the bottom. Controls fade out while the video plays and
 //! the pointer rests; any movement brings them back.
 use crate::{
-    playback_native::NativeReader,
-    playback_thread::{Event, Frame, Playback},
+    playback_native::{NativeReader, Planar8},
+    playback_thread::{Event, Frame, Pixels, Playback},
+    player_gpu::VideoCallback,
 };
+use eframe::egui_wgpu;
+use std::sync::Arc;
 use eframe::egui::{self, Align2, Color32, CornerRadius, FontId, Pos2, Rect, Sense, Stroke, Vec2};
 use std::{
     fs::File,
@@ -40,8 +43,17 @@ pub fn run(path: Option<PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
         persist_window: false,
         ..Default::default()
     };
-    eframe::run_native("FVid", options, Box::new(move |_| Ok(Box::new(app))))
-        .map_err(|error| error.to_string())?;
+    eframe::run_native(
+        "FVid",
+        options,
+        Box::new(move |cc| {
+            if let Some(state) = cc.wgpu_render_state.as_ref() {
+                crate::player_gpu::install(state);
+            }
+            Ok(Box::new(app))
+        }),
+    )
+    .map_err(|error| error.to_string())?;
     Ok(())
 }
 
@@ -73,6 +85,9 @@ struct Player {
     interval: Option<(u128, u128, u32)>,
     /// The next decoded frame, waiting for its presentation deadline.
     queued: Option<Frame>,
+    /// Frame on screen when it is drawn by the GPU shader (planar).
+    video: Option<(Arc<Planar8>, u64)>,
+    /// Frame on screen when it arrived as packed RGB (Y4M, WebM).
     texture: Option<egui::TextureHandle>,
     name: String,
     error: Option<String>,
@@ -98,6 +113,7 @@ impl Default for Player {
             period: Duration::ZERO,
             interval: None,
             queued: None,
+            video: None,
             texture: None,
             name: String::new(),
             error: None,
@@ -236,12 +252,24 @@ impl Player {
         if self.queued.is_some() {
             if now >= self.deadline {
                 let frame = self.queued.take().unwrap();
-                let image = egui::ColorImage::from_rgb(frame.dimensions, &frame.rgb);
-                if let Some(texture) = &mut self.texture {
-                    texture.set(image, egui::TextureOptions::LINEAR);
-                } else {
-                    self.texture =
-                        Some(ctx.load_texture("video", image, egui::TextureOptions::LINEAR));
+                match &frame.pixels {
+                    Pixels::Planar(planes) => {
+                        self.video = Some((planes.clone(), frame.serial));
+                        self.texture = None;
+                    }
+                    Pixels::Rgb(rgb) => {
+                        let image = egui::ColorImage::from_rgb(frame.dimensions, rgb);
+                        if let Some(texture) = &mut self.texture {
+                            texture.set(image, egui::TextureOptions::LINEAR);
+                        } else {
+                            self.texture = Some(ctx.load_texture(
+                                "video",
+                                image,
+                                egui::TextureOptions::LINEAR,
+                            ));
+                        }
+                        self.video = None;
+                    }
                 }
                 self.dimensions = frame.dimensions;
                 self.period = frame.period;
@@ -458,8 +486,22 @@ impl eframe::App for Player {
             let painter = ui.painter().with_clip_rect(frame);
             painter.rect_filled(frame, CornerRadius::ZERO, FRAME);
 
-            // The picture, aspect-fitted inside the frame.
-            if let Some(texture) = &self.texture {
+            // The picture, aspect-fitted inside the frame. Planar frames are
+            // converted to RGB by the GPU shader while drawing.
+            if let Some((planes, serial)) = &self.video {
+                let size = Vec2::new(planes.width as f32, planes.height as f32);
+                let scale = (frame.width() / size.x)
+                    .min(frame.height() / size.y)
+                    .max(0.0);
+                let rect = Rect::from_center_size(frame.center(), size * scale);
+                ui.painter().add(egui_wgpu::Callback::new_paint_callback(
+                    rect,
+                    VideoCallback {
+                        frame: planes.clone(),
+                        serial: *serial,
+                    },
+                ));
+            } else if let Some(texture) = &self.texture {
                 let size = texture.size_vec2();
                 let scale = (frame.width() / size.x)
                     .min(frame.height() / size.y)
