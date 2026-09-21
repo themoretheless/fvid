@@ -123,6 +123,32 @@ impl<R: BufRead + Seek> NativeReader<R> {
             }
         }
     }
+    /// Total playable length when the container declares one (MP4 track
+    /// duration, clipped by its edit window). Y4M and WebM streams carry no
+    /// up-front length, so they report `None`.
+    pub fn duration(&self) -> Option<Duration> {
+        match self {
+            Self::Y4m(_) | Self::Webm(_) => None,
+            Self::Avc {
+                source,
+                media_start,
+                media_end,
+                ..
+            } => {
+                let track = source.track();
+                if track.timescale == 0 {
+                    return None;
+                }
+                let end = media_end.map_or(i128::from(track.duration), |end| i128::from(end));
+                let ticks = end - i128::from(*media_start);
+                if ticks <= 0 {
+                    return None;
+                }
+                let nanos = ticks * 1_000_000_000 / i128::from(track.timescale);
+                u64::try_from(nanos).ok().map(Duration::from_nanos)
+            }
+        }
+    }
     pub fn rewind(&mut self) -> Result<()> {
         match self {
             Self::Y4m(r) => r.rewind(),
