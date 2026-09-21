@@ -125,7 +125,7 @@ pub fn decode_inter_picture_with_motion(
             if r.coded_width != w || r.coded_height != h || r.bit_depth != sps.bit_depth_luma {
                 return Err(invalid("inter-picture reference format mismatch"));
             }
-            planes[list].push(Reference420::new(
+            planes[list].push(Reference420::from_decoded(
                 [&r.y, &r.cb, &r.cr],
                 w,
                 h,

@@ -257,14 +257,14 @@ pub fn inter_plane(
     {
         return Err(crate::invalid("invalid AVC deblocking plane geometry"));
     }
-    let max = (1u16 << depth) - 1;
-    if plane.iter().any(|&p| p > max)
-        || blocks.iter().any(|b| {
-            b.strengths.iter().flatten().flatten().any(|&s| s > 4)
-                || b.qp.iter().flatten().any(|q| !(-36..=51).contains(q))
-                || b.offsets.iter().any(|o| !(-12..=12).contains(o))
-        })
-    {
+    // Reconstruction clips every sample to the bit depth; scanning the whole
+    // plane again here cost a visible share of decode time.
+    debug_assert!(plane.iter().all(|&p| p <= (1u16 << depth) - 1));
+    if blocks.iter().any(|b| {
+        b.strengths.iter().flatten().flatten().any(|&s| s > 4)
+            || b.qp.iter().flatten().any(|q| !(-36..=51).contains(q))
+            || b.offsets.iter().any(|o| !(-12..=12).contains(o))
+    }) {
         return Err(crate::invalid("invalid AVC deblocking samples or metadata"));
     }
     let mb_width = width / size;

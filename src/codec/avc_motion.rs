@@ -52,6 +52,41 @@ impl<'a> ReferencePlane<'a> {
             depth,
         })
     }
+    /// `new` for a plane this decoder reconstructed itself: every sample was
+    /// clipped to the bit depth on the way out, so only geometry is checked
+    /// instead of scanning the whole picture again per reference.
+    pub fn from_decoded(
+        samples: &'a [u16],
+        width: usize,
+        height: usize,
+        stride: usize,
+        depth: u8,
+    ) -> Result<Self> {
+        let max = maximum(depth)?;
+        if width == 0
+            || height == 0
+            || stride < width
+            || width > i32::MAX as usize
+            || height > i32::MAX as usize
+        {
+            return Err(invalid("invalid reference plane geometry"));
+        }
+        let needed = (height - 1)
+            .checked_mul(stride)
+            .and_then(|n| n.checked_add(width))
+            .ok_or_else(|| invalid("reference plane size overflow"))?;
+        if samples.len() < needed {
+            return Err(invalid("truncated reference plane"));
+        }
+        debug_assert!(samples.iter().all(|&p| i64::from(p) <= max));
+        Ok(Self {
+            samples,
+            width,
+            height,
+            stride,
+            depth,
+        })
+    }
     fn at(&self, x: i64, y: i64) -> i32 {
         let x = x.clamp(0, self.width as i64 - 1) as usize;
         let y = y.clamp(0, self.height as i64 - 1) as usize;
@@ -109,63 +144,35 @@ impl<'a> ReferencePlane<'a> {
         // Two samples of margin before and three after each axis cover every tap.
         let cols = width + 5;
         let rows = height + 5;
-        let win = &mut scratch[..cols * rows];
-        self.window(x - 2, y - 2, cols, rows, win);
-        let win = &*win;
         let max = (1i32 << self.depth) - 1;
-        let clip = |v: i32| v.clamp(0, max) as u16;
-        let avg = |a: u16, b: u16| ((u32::from(a) + u32::from(b) + 1) >> 1) as u16;
-        let at = |px: usize, py: usize| win[py * cols + px];
-        let horizontal = |px: usize, py: usize| -> i32 {
-            let base = py * cols + px - 2;
-            let s = &win[base..base + 6];
-            s[0] - 5 * s[1] + 20 * s[2] + 20 * s[3] - 5 * s[4] + s[5]
-        };
-        let vertical = |px: usize, py: usize| -> i32 {
-            let base = (py - 2) * cols + px;
-            win[base] - 5 * win[base + cols] + 20 * win[base + 2 * cols] + 20 * win[base + 3 * cols]
-                - 5 * win[base + 4 * cols]
-                + win[base + 5 * cols]
-        };
-        let (fx, fy) = (motion[0] & 3, motion[1] & 3);
-        for row in 0..height {
-            for col in 0..width {
-                let (px, py) = (col + 2, row + 2);
-                let b = || clip((horizontal(px, py) + 16) >> 5);
-                let h = || clip((vertical(px, py) + 16) >> 5);
-                let m = || clip((vertical(px + 1, py) + 16) >> 5);
-                let s = || clip((horizontal(px, py + 1) + 16) >> 5);
-                let j = || {
-                    // Do not clip or round the horizontal intermediate values here.
-                    let sum = horizontal(px, py - 2) - 5 * horizontal(px, py - 1)
-                        + 20 * horizontal(px, py)
-                        + 20 * horizontal(px, py + 1)
-                        - 5 * horizontal(px, py + 2)
-                        + horizontal(px, py + 3);
-                    clip((sum + 512) >> 10)
-                };
-                output[row * width + col] = match (fx, fy) {
-                    (0, 0) => at(px, py) as u16,
-                    (0, 1) => avg(at(px, py) as u16, h()),
-                    (0, 2) => h(),
-                    (0, 3) => avg(h(), at(px, py + 1) as u16),
-                    (1, 0) => avg(at(px, py) as u16, b()),
-                    (2, 0) => b(),
-                    (3, 0) => avg(b(), at(px + 1, py) as u16),
-                    (1, 1) => avg(b(), h()),
-                    (2, 1) => avg(b(), j()),
-                    (3, 1) => avg(b(), m()),
-                    (1, 2) => avg(h(), j()),
-                    (2, 2) => j(),
-                    (3, 2) => avg(j(), m()),
-                    (1, 3) => avg(h(), s()),
-                    (2, 3) => avg(j(), s()),
-                    (3, 3) => avg(m(), s()),
-                    _ => unreachable!(),
-                };
-            }
+        let fraction = [motion[0] & 3, motion[1] & 3];
+        let (wx, wy) = (x - 2, y - 2);
+        if self.inside(wx, wy, cols, rows) {
+            // Read the reference directly; no window copy is needed.
+            let base = wy as usize * self.stride + wx as usize;
+            let samples = &self.samples[base..];
+            let stride = self.stride;
+            luma_core(
+                |px, py| i32::from(samples[py * stride + px]),
+                width,
+                height,
+                fraction,
+                max,
+                output,
+            );
+        } else {
+            let win = &mut scratch[..cols * rows];
+            self.window(wx, wy, cols, rows, win);
+            let win = &*win;
+            luma_core(|px, py| win[py * cols + px], width, height, fraction, max, output);
         }
         Ok(())
+    }
+    fn inside(&self, x: i64, y: i64, cols: usize, rows: usize) -> bool {
+        x >= 0
+            && y >= 0
+            && x + cols as i64 <= self.width as i64
+            && y + rows as i64 <= self.height as i64
     }
     /// Origin is in integer chroma samples; motion is in signed eighth-sample units.
     /// For progressive 4:2:0, pass the same numeric vector as luma.
@@ -196,26 +203,112 @@ impl<'a> ReferencePlane<'a> {
         let fy = motion[1] & 7;
         let cols = width + 1;
         let rows = height + 1;
-        let win = &mut scratch[..cols * rows];
-        self.window(x, y, cols, rows, win);
-        let win = &*win;
         let w = [
             (8 - fx) * (8 - fy),
             fx * (8 - fy),
             (8 - fx) * fy,
             fx * fy,
         ];
-        for row in 0..height {
-            for col in 0..width {
-                let base = row * cols + col;
-                let value = w[0] * win[base]
-                    + w[1] * win[base + 1]
-                    + w[2] * win[base + cols]
-                    + w[3] * win[base + cols + 1];
-                output[row * width + col] = ((value + 32) >> 6) as u16;
-            }
+        if self.inside(x, y, cols, rows) {
+            let base = y as usize * self.stride + x as usize;
+            let samples = &self.samples[base..];
+            let stride = self.stride;
+            chroma_core(
+                |px, py| i32::from(samples[py * stride + px]),
+                width,
+                height,
+                w,
+                output,
+            );
+        } else {
+            let win = &mut scratch[..cols * rows];
+            self.window(x, y, cols, rows, win);
+            let win = &*win;
+            chroma_core(|px, py| win[py * cols + px], width, height, w, output);
         }
         Ok(())
+    }
+}
+/// Quarter-sample luma interpolation over `get(px, py)`, whose origin is two
+/// samples above and left of the partition so every 6-tap reach is in range.
+#[inline(always)]
+fn luma_core<F: Fn(usize, usize) -> i32>(
+    get: F,
+    width: usize,
+    height: usize,
+    fraction: [i32; 2],
+    max: i32,
+    output: &mut [u16],
+) {
+    let clip = |v: i32| v.clamp(0, max) as u16;
+    let avg = |a: u16, b: u16| ((u32::from(a) + u32::from(b) + 1) >> 1) as u16;
+    let horizontal = |px: usize, py: usize| -> i32 {
+        get(px - 2, py) - 5 * get(px - 1, py) + 20 * get(px, py) + 20 * get(px + 1, py)
+            - 5 * get(px + 2, py)
+            + get(px + 3, py)
+    };
+    let vertical = |px: usize, py: usize| -> i32 {
+        get(px, py - 2) - 5 * get(px, py - 1) + 20 * get(px, py) + 20 * get(px, py + 1)
+            - 5 * get(px, py + 2)
+            + get(px, py + 3)
+    };
+    let [fx, fy] = fraction;
+    for row in 0..height {
+        for col in 0..width {
+            let (px, py) = (col + 2, row + 2);
+            let b = || clip((horizontal(px, py) + 16) >> 5);
+            let h = || clip((vertical(px, py) + 16) >> 5);
+            let m = || clip((vertical(px + 1, py) + 16) >> 5);
+            let s = || clip((horizontal(px, py + 1) + 16) >> 5);
+            let j = || {
+                // Do not clip or round the horizontal intermediate values here.
+                let sum = horizontal(px, py - 2) - 5 * horizontal(px, py - 1)
+                    + 20 * horizontal(px, py)
+                    + 20 * horizontal(px, py + 1)
+                    - 5 * horizontal(px, py + 2)
+                    + horizontal(px, py + 3);
+                clip((sum + 512) >> 10)
+            };
+            output[row * width + col] = match (fx, fy) {
+                (0, 0) => get(px, py) as u16,
+                (0, 1) => avg(get(px, py) as u16, h()),
+                (0, 2) => h(),
+                (0, 3) => avg(h(), get(px, py + 1) as u16),
+                (1, 0) => avg(get(px, py) as u16, b()),
+                (2, 0) => b(),
+                (3, 0) => avg(b(), get(px + 1, py) as u16),
+                (1, 1) => avg(b(), h()),
+                (2, 1) => avg(b(), j()),
+                (3, 1) => avg(b(), m()),
+                (1, 2) => avg(h(), j()),
+                (2, 2) => j(),
+                (3, 2) => avg(j(), m()),
+                (1, 3) => avg(h(), s()),
+                (2, 3) => avg(j(), s()),
+                (3, 3) => avg(m(), s()),
+                _ => unreachable!(),
+            };
+        }
+    }
+}
+/// Eighth-sample bilinear chroma interpolation over `get(px, py)` with the
+/// partition's own origin; `w` holds the four corner weights.
+#[inline(always)]
+fn chroma_core<F: Fn(usize, usize) -> i32>(
+    get: F,
+    width: usize,
+    height: usize,
+    w: [i32; 4],
+    output: &mut [u16],
+) {
+    for row in 0..height {
+        for col in 0..width {
+            let value = w[0] * get(col, row)
+                + w[1] * get(col + 1, row)
+                + w[2] * get(col, row + 1)
+                + w[3] * get(col + 1, row + 1);
+            output[row * width + col] = ((value + 32) >> 6) as u16;
+        }
     }
 }
 fn partition(width: usize, height: usize, length: usize) -> Result<()> {
@@ -268,9 +361,8 @@ pub fn weight_block(
 ) -> Result<()> {
     let max = maximum(depth)?;
     validate_weight(weight, offset, denominator)?;
-    if samples.iter().any(|&s| i64::from(s) > max) {
-        return Err(invalid("prediction sample exceeds bit depth"));
-    }
+    // Interpolation clips every sample to the bit depth, so the range holds.
+    debug_assert!(samples.iter().all(|&s| i64::from(s) <= max));
     // Samples are at most 14 bits and weights 8 bits, so i32 cannot overflow.
     let rounding = if denominator == 0 {
         0
@@ -301,9 +393,7 @@ pub fn bipred_block(
     if a.len() != b.len() {
         return Err(invalid("bipred partition sizes differ"));
     }
-    if a.iter().chain(b).any(|&s| i64::from(s) > max) {
-        return Err(invalid("prediction sample exceeds bit depth"));
-    }
+    debug_assert!(a.iter().chain(b).all(|&s| i64::from(s) <= max));
     // Two 14-bit samples times 8-bit weights stay far inside i32.
     let w = weights.map(i32::from);
     let rounding = 1i32 << denominator;

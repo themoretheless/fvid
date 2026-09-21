@@ -53,6 +53,27 @@ impl<'a> Reference420<'a> {
             depth,
         })
     }
+    /// `new` for planes this decoder reconstructed: skips the full-picture
+    /// sample scan (see `ReferencePlane::from_decoded`).
+    pub fn from_decoded(
+        planes: [&'a [u16]; 3],
+        width: usize,
+        height: usize,
+        strides: [usize; 3],
+        depth: u8,
+    ) -> Result<Self> {
+        if width % 2 != 0 || height % 2 != 0 {
+            return Err(invalid("AVC 4:2:0 reference dimensions must be even"));
+        }
+        Ok(Self {
+            planes: [
+                ReferencePlane::from_decoded(planes[0], width, height, strides[0], depth)?,
+                ReferencePlane::from_decoded(planes[1], width / 2, height / 2, strides[1], depth)?,
+                ReferencePlane::from_decoded(planes[2], width / 2, height / 2, strides[2], depth)?,
+            ],
+            depth,
+        })
+    }
     /// Origin and size are in luma samples, vector in quarter-luma units.
     pub fn predict(
         &self,
@@ -307,26 +328,34 @@ impl MacroblockPrediction {
         if self.covered & mask != 0 {
             return Err(invalid("overlapping AVC prediction partitions"));
         }
-        let max = (1u16 << self.picture.depth) - 1;
-        if partition.y[..w * h]
-            .iter()
-            .chain(&partition.cb[..w * h / 4])
-            .chain(&partition.cr[..w * h / 4])
-            .any(|&v| v > max)
-        {
-            return Err(invalid("AVC prediction sample exceeds bit depth"));
-        }
+        // Predictions are clipped to the bit depth when interpolated and weighted.
+        debug_assert!({
+            let max = (1u16 << self.picture.depth) - 1;
+            partition.y[..w * h]
+                .iter()
+                .chain(&partition.cb[..w * h / 4])
+                .chain(&partition.cr[..w * h / 4])
+                .all(|&v| v <= max)
+        });
+        // Rows are 4 to 16 samples; plain loops beat a memmove call per row.
         for row in 0..h {
-            self.picture.y[(y + row) * 16 + x..(y + row) * 16 + x + w]
-                .copy_from_slice(&partition.y[row * w..(row + 1) * w]);
+            let dst = &mut self.picture.y[(y + row) * 16 + x..][..w];
+            let src = &partition.y[row * w..][..w];
+            for (d, s) in dst.iter_mut().zip(src) {
+                *d = *s;
+            }
         }
+        let (cw, ch) = (w / 2, h / 2);
         for (dst, src) in [
             (&mut self.picture.cb, &partition.cb),
             (&mut self.picture.cr, &partition.cr),
         ] {
-            for row in 0..h / 2 {
-                dst[(y / 2 + row) * 8 + x / 2..(y / 2 + row) * 8 + (x + w) / 2]
-                    .copy_from_slice(&src[row * w / 2..(row + 1) * w / 2]);
+            for row in 0..ch {
+                let dst = &mut dst[(y / 2 + row) * 8 + x / 2..][..cw];
+                let src = &src[row * cw..][..cw];
+                for (d, s) in dst.iter_mut().zip(src) {
+                    *d = *s;
+                }
             }
         }
         self.covered |= mask;
