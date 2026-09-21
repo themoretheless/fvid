@@ -5,7 +5,10 @@
 //! button in the middle while paused, and a thin progress line with round
 //! controls along the bottom. Controls fade out while the video plays and
 //! the pointer rests; any movement brings them back.
-use crate::playback_native::NativeReader;
+use crate::{
+    playback_native::NativeReader,
+    playback_thread::{Event, Frame, Playback},
+};
 use eframe::egui::{self, Align2, Color32, CornerRadius, FontId, Pos2, Rect, Sense, Stroke, Vec2};
 use std::{
     fs::File,
@@ -59,13 +62,21 @@ const BUTTON: f32 = 44.0;
 const HIDE_AFTER: Duration = Duration::from_millis(2500);
 
 struct Player {
-    reader: Option<NativeReader<BufReader<File>>>,
+    /// The decoding thread for the open file.
+    playback: Option<Playback>,
+    duration: Option<Duration>,
+    seekable: bool,
+    /// Geometry, period and timeline interval of the frame on screen.
+    dimensions: [usize; 2],
+    period: Duration,
+    interval: Option<(u128, u128, u32)>,
+    /// The next decoded frame, waiting for its presentation deadline.
+    queued: Option<Frame>,
     texture: Option<egui::TextureHandle>,
     name: String,
     error: Option<String>,
     paused: bool,
     ended: bool,
-    dirty: bool,
     deadline: Instant,
     /// Last pointer movement or click; drives the controls fade-out.
     activity: Instant,
@@ -78,13 +89,18 @@ struct Player {
 impl Default for Player {
     fn default() -> Self {
         Self {
-            reader: None,
+            playback: None,
+            duration: None,
+            seekable: false,
+            dimensions: [0; 2],
+            period: Duration::ZERO,
+            interval: None,
+            queued: None,
             texture: None,
             name: String::new(),
             error: None,
             paused: false,
             ended: false,
-            dirty: false,
             deadline: Instant::now(),
             activity: Instant::now(),
             dialog: None,
@@ -99,8 +115,16 @@ impl Player {
         if !reader.read_frame()? {
             return Err(crate::invalid("video has no frames"));
         }
-        self.deadline = Instant::now() + reader.frame_period();
-        self.reader = Some(reader);
+        self.duration = reader.duration();
+        self.seekable = reader.seekable();
+        self.dimensions = reader.dimensions();
+        self.period = reader.frame_period();
+        self.interval = None;
+        // Drop the old thread before starting the new one.
+        self.playback = None;
+        self.queued = None;
+        self.playback = Some(Playback::start(reader));
+        self.deadline = Instant::now();
         self.name = path
             .file_name()
             .unwrap_or_default()
@@ -109,7 +133,6 @@ impl Player {
         self.error = None;
         self.paused = false;
         self.ended = false;
-        self.dirty = true;
         Ok(())
     }
 
@@ -145,73 +168,119 @@ impl Player {
     }
 
     fn toggle_pause(&mut self) {
-        if self.reader.is_none() {
+        let Some(playback) = &self.playback else {
             return;
-        }
+        };
         if self.ended {
             self.restart();
             return;
         }
         self.paused = !self.paused;
-        if let Some(reader) = &self.reader {
-            self.deadline = Instant::now() + reader.frame_period();
+        if self.paused {
+            playback.pause();
+        } else {
+            playback.play();
+            self.deadline = Instant::now();
         }
     }
 
     fn restart(&mut self) {
-        if let Some(reader) = &mut self.reader {
-            match reader.rewind() {
-                Ok(()) => {
-                    self.ended = false;
-                    self.paused = false;
-                    self.deadline = Instant::now();
-                }
-                Err(error) => self.error = Some(error.to_string()),
-            }
+        if let Some(playback) = &mut self.playback {
+            playback.rewind();
+            self.queued = None;
+            self.ended = false;
+            self.paused = false;
+            self.error = None;
+            self.deadline = Instant::now();
         }
     }
 
     /// Jump to `fraction` of the known duration; playback state is kept.
     fn seek_fraction(&mut self, fraction: f32) {
-        let Some(reader) = &mut self.reader else {
+        let (Some(playback), Some(total)) = (&mut self.playback, self.duration) else {
             return;
         };
-        let Some(total) = reader.duration() else {
+        playback.seek(total.mul_f32(fraction.clamp(0.0, 1.0)));
+        self.queued = None;
+        self.ended = false;
+        self.error = None;
+        self.deadline = Instant::now();
+    }
+
+    /// Take decoded frames from the thread and show the one whose time has come.
+    fn present(&mut self, ctx: &egui::Context) {
+        let Some(playback) = &self.playback else {
             return;
         };
-        let target = total.mul_f32(fraction.clamp(0.0, 1.0));
-        match reader.seek(target) {
-            Ok(()) => {
-                self.ended = false;
-                self.error = None;
+        let generation = playback.generation();
+        while self.queued.is_none() {
+            match playback.poll() {
+                Some(Event::Frame(frame)) if frame.generation < generation => continue,
+                Some(Event::Frame(frame)) => self.queued = Some(frame),
+                Some(Event::Ended(at)) => {
+                    if at >= generation {
+                        self.ended = true;
+                    }
+                }
+                Some(Event::Error(error)) => {
+                    self.error = Some(error);
+                    self.ended = true;
+                }
+                None => break,
             }
-            Err(error) => self.error = Some(error.to_string()),
         }
-        self.dirty = true;
-        self.deadline = Instant::now() + reader.frame_period();
+        let now = Instant::now();
+        if self.queued.is_some() {
+            if now >= self.deadline {
+                let frame = self.queued.take().unwrap();
+                let image = egui::ColorImage::from_rgb(frame.dimensions, &frame.rgb);
+                if let Some(texture) = &mut self.texture {
+                    texture.set(image, egui::TextureOptions::LINEAR);
+                } else {
+                    self.texture =
+                        Some(ctx.load_texture("video", image, egui::TextureOptions::LINEAR));
+                }
+                self.dimensions = frame.dimensions;
+                self.period = frame.period;
+                self.interval = frame.interval;
+                // Keep the cadence while the decoder keeps up; when it falls
+                // behind, show frames as they arrive instead of piling up debt.
+                self.deadline = if self.deadline + frame.period < now {
+                    now
+                } else {
+                    self.deadline + frame.period
+                };
+                ctx.request_repaint_after(self.deadline.saturating_duration_since(Instant::now()));
+            } else {
+                ctx.request_repaint_after(self.deadline.saturating_duration_since(now));
+            }
+        } else if !self.paused && !self.ended {
+            // Waiting on the decoder: check again soon.
+            ctx.request_repaint_after(Duration::from_millis(8));
+        }
     }
 
     /// Elapsed time at the end of the frame on screen, and the total when known.
     fn timeline(&self) -> (Option<Duration>, Option<Duration>) {
-        let Some(reader) = &self.reader else {
+        if self.playback.is_none() {
             return (None, None);
-        };
-        let elapsed = reader
-            .frame_interval()
+        }
+        let elapsed = self
+            .interval
             .filter(|(_, _, scale)| *scale > 0)
             .map(|(_, end, scale)| {
                 let nanos = end * 1_000_000_000 / u128::from(scale);
                 Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX))
             });
-        (elapsed, reader.duration())
+        (elapsed, self.duration)
     }
 
     fn subtitle(&self) -> String {
-        let Some(reader) = &self.reader else {
+        if self.playback.is_none() {
             return String::new();
-        };
-        let [w, h] = reader.dimensions();
-        let period = reader.frame_period().as_secs_f64();
+        }
+        let [w, h] = self.dimensions;
+        let period = self.period.as_secs_f64();
         let fps = if period > 0.0 { 1.0 / period } else { 0.0 };
         let fps = if (fps - fps.round()).abs() < 0.05 {
             format!("{}", fps.round() as u32)
@@ -222,7 +291,7 @@ impl Player {
     }
 
     fn controls_visible(&self) -> bool {
-        self.reader.is_none()
+        self.playback.is_none()
             || self.paused
             || self.ended
             || self.error.is_some()
@@ -369,37 +438,7 @@ impl eframe::App for Player {
                 ctx.request_repaint_after(Duration::from_millis(100));
             }
         }
-        if let Some(reader) = &mut self.reader {
-            if !self.paused && !self.ended {
-                let now = Instant::now();
-                if now >= self.deadline {
-                    match reader.read_frame() {
-                        Ok(true) => self.dirty = true,
-                        Ok(false) => self.ended = true,
-                        Err(error) => {
-                            self.error = Some(error.to_string());
-                            self.ended = true;
-                        }
-                    }
-                    self.deadline += reader.frame_period();
-                    // Bound catch-up after a stalled UI instead of decoding an unbounded backlog.
-                    if self.deadline < now {
-                        self.deadline = now + reader.frame_period();
-                    }
-                }
-                ctx.request_repaint_after(self.deadline.saturating_duration_since(Instant::now()));
-            }
-            if self.dirty {
-                let image = egui::ColorImage::from_rgb(reader.dimensions(), reader.rgb());
-                if let Some(texture) = &mut self.texture {
-                    texture.set(image, egui::TextureOptions::LINEAR);
-                } else {
-                    self.texture =
-                        Some(ctx.load_texture("video", image, egui::TextureOptions::LINEAR));
-                }
-                self.dirty = false;
-            }
-        }
+        self.present(ctx);
         // Wake up once to let the controls fade after the pointer rests.
         if self.controls_visible() && !self.paused {
             ctx.request_repaint_after(HIDE_AFTER.saturating_sub(self.activity.elapsed()));
@@ -436,7 +475,7 @@ impl eframe::App for Player {
             if surface.double_clicked() {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(!fullscreen));
             } else if surface.clicked() {
-                if self.reader.is_some() {
+                if self.playback.is_some() {
                     self.toggle_pause();
                 } else {
                     self.pick_file();
@@ -451,20 +490,20 @@ impl eframe::App for Player {
             }
 
             // Centre: one large play button while idle.
-            if self.reader.is_none() || self.paused || self.ended {
+            if self.playback.is_none() || self.paused || self.ended {
                 let center = frame.center();
                 let size = 88.0_f32.min(frame.height() * 0.4);
                 let clicked = round_button(ui, "big-play", center, size, CHIP, |p, c, color| {
                     icon_play(p, Pos2::new(c.x + size * 0.04, c.y), size * 0.34, color);
                 });
                 if clicked {
-                    if self.reader.is_some() {
+                    if self.playback.is_some() {
                         self.toggle_pause();
                     } else {
                         self.pick_file();
                     }
                 }
-                if self.reader.is_none() {
+                if self.playback.is_none() {
                     painter.text(
                         Pos2::new(center.x, center.y + size / 2.0 + 24.0),
                         Align2::CENTER_TOP,
@@ -485,7 +524,7 @@ impl eframe::App for Player {
             // Keep the title block clear of the macOS traffic lights over the hidden title bar.
             let title_left = if fullscreen { pad } else { pad.max(96.0) };
             let top = Pos2::new(frame.left() + title_left, frame.top() + 24.0);
-            if self.reader.is_some() {
+            if self.playback.is_some() {
                 painter.text(top, Align2::LEFT_TOP, &self.name, FontId::proportional(17.0), TEXT);
                 painter.text(
                     Pos2::new(top.x, top.y + 24.0),
@@ -534,7 +573,7 @@ impl eframe::App for Player {
             };
             // The line takes clicks and drags on a taller hit area; the seek
             // itself happens on release so a drag decodes only once.
-            if fraction.is_some() && self.reader.as_ref().is_some_and(|r| r.seekable()) {
+            if fraction.is_some() && self.seekable {
                 let hit = Rect::from_min_max(
                     Pos2::new(bar.left(), bar_y - 12.0),
                     Pos2::new(bar.right(), bar_y + 12.0),
@@ -573,7 +612,7 @@ impl eframe::App for Player {
 
             // Left group: play/pause, restart, time.
             let mut x = frame.left() + pad + BUTTON / 2.0;
-            let playing = self.reader.is_some() && !self.paused && !self.ended;
+            let playing = self.playback.is_some() && !self.paused && !self.ended;
             let clicked = round_button(ui, "play", Pos2::new(x, row_y), BUTTON, Color32::TRANSPARENT, |p, c, color| {
                 if playing {
                     icon_pause(p, c, 16.0, color);
@@ -582,7 +621,7 @@ impl eframe::App for Player {
                 }
             });
             if clicked {
-                if self.reader.is_some() {
+                if self.playback.is_some() {
                     self.toggle_pause();
                 } else {
                     self.pick_file();
