@@ -92,6 +92,11 @@ fn u64be(b: &[u8], at: usize) -> Result<u64> {
 fn atoms(mut data: &[u8]) -> Result<Vec<Atom<'_>>> {
     let mut out = Vec::new();
     while !data.is_empty() {
+        // QuickTime writers end a sample entry's extension list with a four-byte
+        // zero terminator; a short all-zero tail carries no box and is ignored.
+        if data.len() < 8 && data.iter().all(|b| *b == 0) {
+            break;
+        }
         let size = u32be(data, 0)?;
         let kind = data
             .get(4..8)
@@ -303,9 +308,11 @@ fn parse_track(data: &[u8], mdats: &[Range<u64>], limit: usize) -> Result<Track>
         dref.get(8..)
             .ok_or_else(|| invalid("truncated data references"))?,
     )?;
+    // ISO files use `url `, QuickTime (macOS screen recordings) `alis`; either is
+    // acceptable only with the self-contained flag and no external location.
     if u32be(dref, 4)? != 1
         || references.len() != 1
-        || references[0].kind != *b"url "
+        || !(references[0].kind == *b"url " || references[0].kind == *b"alis")
         || references[0].data != [0, 0, 0, 1]
     {
         return Err(invalid(

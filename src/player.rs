@@ -9,10 +9,15 @@ use crate::playback_native::NativeReader;
 use eframe::egui::{self, Align2, Color32, CornerRadius, FontId, Pos2, Rect, Sense, Stroke, Vec2};
 use std::{
     fs::File,
+    future::Future,
     io::BufReader,
     path::PathBuf,
+    pin::Pin,
+    task::{Context, Poll, Waker},
     time::{Duration, Instant},
 };
+
+type Dialog = Pin<Box<dyn Future<Output = Option<rfd::FileHandle>>>>;
 
 /// Open an empty player or a supported local Y4M, MP4/AVC or WebM/VP9/AV1 file.
 pub fn run(path: Option<PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
@@ -37,17 +42,18 @@ pub fn run(path: Option<PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-// Palette from the design canvas.
+// Palette from the design canvas. Every overlay element sits at 50% opacity
+// over the picture; only the window and frame backgrounds are opaque.
 const WINDOW: Color32 = Color32::from_rgb(0x0e, 0x0e, 0x10);
 const FRAME: Color32 = Color32::from_rgb(0x1a, 0x1a, 0x1d);
-const TEXT: Color32 = Color32::from_rgb(0xf4, 0xf4, 0xf2);
-const MUTED: Color32 = Color32::from_rgb(0xa2, 0xa2, 0xa6);
-const DIM: Color32 = Color32::from_rgb(0x7d, 0x7d, 0x82);
-const ACCENT: Color32 = Color32::from_rgb(0xe8, 0xe3, 0xd6);
-const ERROR: Color32 = Color32::from_rgb(0xe0, 0x8a, 0x7a);
-const TRACK: Color32 = Color32::from_rgba_premultiplied(46, 46, 46, 46);
-const CHIP: Color32 = Color32::from_rgba_premultiplied(15, 15, 15, 15);
-const CHIP_STRONG: Color32 = Color32::from_rgba_premultiplied(26, 26, 26, 26);
+const TEXT: Color32 = Color32::from_rgba_premultiplied(0x7a, 0x7a, 0x79, 128);
+const MUTED: Color32 = Color32::from_rgba_premultiplied(0x51, 0x51, 0x53, 128);
+const DIM: Color32 = Color32::from_rgba_premultiplied(0x3e, 0x3e, 0x41, 128);
+const ACCENT: Color32 = Color32::from_rgba_premultiplied(0x74, 0x71, 0x6b, 128);
+const ERROR: Color32 = Color32::from_rgba_premultiplied(0x70, 0x45, 0x3d, 128);
+const TRACK: Color32 = Color32::from_rgba_premultiplied(23, 23, 23, 23);
+const CHIP: Color32 = Color32::from_rgba_premultiplied(8, 8, 8, 8);
+const CHIP_STRONG: Color32 = Color32::from_rgba_premultiplied(13, 13, 13, 13);
 
 const BUTTON: f32 = 44.0;
 const HIDE_AFTER: Duration = Duration::from_millis(2500);
@@ -63,6 +69,8 @@ struct Player {
     deadline: Instant,
     /// Last pointer movement or click; drives the controls fade-out.
     activity: Instant,
+    /// An open file picker, polled once per frame so the event loop never nests.
+    dialog: Option<Dialog>,
 }
 
 impl Default for Player {
@@ -77,6 +85,7 @@ impl Default for Player {
             dirty: false,
             deadline: Instant::now(),
             activity: Instant::now(),
+            dialog: None,
         }
     }
 }
@@ -110,11 +119,25 @@ impl Player {
     }
 
     fn pick_file(&mut self) {
-        if let Some(path) = rfd::FileDialog::new()
+        if self.dialog.is_some() {
+            return;
+        }
+        let dialog = rfd::AsyncFileDialog::new()
             .add_filter("Video", &["y4m", "mp4", "mov", "webm", "mkv"])
-            .pick_file()
-        {
-            self.try_open(path);
+            .pick_file();
+        self.dialog = Some(Box::pin(dialog));
+    }
+
+    fn poll_dialog(&mut self) {
+        let Some(dialog) = &mut self.dialog else {
+            return;
+        };
+        let mut cx = Context::from_waker(Waker::noop());
+        if let Poll::Ready(handle) = dialog.as_mut().poll(&mut cx) {
+            self.dialog = None;
+            if let Some(handle) = handle {
+                self.try_open(handle.path().to_path_buf());
+            }
         }
     }
 
@@ -316,6 +339,12 @@ impl eframe::App for Player {
             ctx.input(|i| i.raw.dropped_files.first().map(|f| f.path().to_path_buf()))
         {
             self.try_open(path);
+        }
+        if self.dialog.is_some() {
+            self.poll_dialog();
+            if self.dialog.is_some() {
+                ctx.request_repaint_after(Duration::from_millis(100));
+            }
         }
         if let Some(reader) = &mut self.reader {
             if !self.paused && !self.ended {
