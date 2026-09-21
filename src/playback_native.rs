@@ -329,6 +329,8 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 let g_cb = (kb * 2.0 * (1.0 - kb) / (1.0 - kr - kb) * c_gain) as f32;
                 let (y_offset, c_offset) = (y_offset as f32, (128.0 * scale) as f32);
                 let chroma_stride = p.coded_width / 2;
+                // Single-threaded on purpose: spreading this over threads measured
+                // slower than the plain loop on a 3-megapixel frame.
                 for (row, line) in rgb.chunks_exact_mut(w * 3).enumerate() {
                     let y = row + p.crop[2];
                     let luma_row = &p.y[y * p.coded_width + p.crop[0]..][..w];

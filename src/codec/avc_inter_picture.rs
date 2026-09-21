@@ -2,17 +2,87 @@
 use super::{
     avc::{Pps, SliceGroups, Sps},
     avc_boundary::{BlockEdge, DecodedBlockEdges, MotionReference},
-    avc_compensation::{InterLumaResidual, Reference420},
+    avc_compensation::{ComponentWeight, InterLumaResidual, Reference420},
     avc_deblock::inter_plane,
     avc_inter::{Partition, Prediction},
+    avc_inter_coefficients::InterCoefficients,
     avc_inter_prediction::predict_macroblock,
     avc_inter_slice::{InterCavlcSlice, InterMacroblock},
+    avc_macroblock::IntraMacroblock,
     avc_motion_field::MotionField,
     avc_mv::Neighbour,
     avc_picture::{IntraPicture, chroma_qp},
     avc_slice::{SliceHeader, SliceType},
 };
 use crate::{Result, invalid};
+use std::sync::{
+    Mutex,
+    atomic::{AtomicUsize, Ordering},
+};
+
+/// Everything an inter macroblock needs to be predicted and reconstructed
+/// once entropy decoding and motion derivation (both serial) are done.
+struct InterJob {
+    origin: [usize; 2],
+    parts: Vec<Partition>,
+    vectors: Vec<[Neighbour; 2]>,
+    weights: Option<Vec<[[ComponentWeight; 3]; 2]>>,
+    coefficients: Option<Box<InterCoefficients>>,
+    eight: bool,
+    qps: [u8; 3],
+}
+enum Pending {
+    Inter(InterJob),
+    Intra(Box<IntraMacroblock>),
+}
+
+/// Predict and reconstruct one inter macroblock into its row band
+/// (`y` is 16 rows, `cb`/`cr` 8 rows, all starting at the band's top).
+fn reconstruct_inter_job(
+    job: InterJob,
+    depth: u8,
+    refs: &[Vec<&Reference420<'_>>; 2],
+    w: usize,
+    y: &mut [u16],
+    cb: &mut [u16],
+    cr: &mut [u16],
+) -> Result<()> {
+    let prediction = predict_macroblock(
+        job.origin.map(|n| n as i32),
+        depth,
+        &job.parts,
+        &job.vectors,
+        [&refs[0], &refs[1]],
+        job.weights.as_deref(),
+    )?;
+    let prediction = if let Some(c) = &job.coefficients {
+        prediction.reconstruct_inter(
+            if job.eight {
+                InterLumaResidual::Blocks8(&c.luma8)
+            } else {
+                InterLumaResidual::Blocks4(&c.luma4)
+            },
+            &c.chroma_dc,
+            &c.chroma_ac,
+            job.qps,
+            &[[16; 16]; 3],
+            &[16; 64],
+        )?
+    } else {
+        prediction
+    };
+    let x = job.origin[0];
+    for (plane, src, stride, size, px) in [
+        (y, prediction.y.as_slice(), w, 16, x),
+        (cb, prediction.cb.as_slice(), w / 2, 8, x / 2),
+        (cr, prediction.cr.as_slice(), w / 2, 8, x / 2),
+    ] {
+        for row in 0..size {
+            plane[row * stride + px..][..size].copy_from_slice(&src[row * size..][..size]);
+        }
+    }
+    Ok(())
+}
 /// Reference order is the already modified L0 list. Picture identities must be
 /// stable; aliases of one reference must point to the same picture object.
 pub fn decode_p_picture(
@@ -167,6 +237,7 @@ pub fn decode_inter_picture_with_motion(
         cr: vec![0; pixels / 4],
     };
     let mut edges = Vec::with_capacity(count);
+    let mut pending = Vec::with_capacity(count);
     let mut seen = 0;
     while let Some(mb) = match (&mut cabac, &mut cavlc) {
         (Some(reader), _) => reader.read_macroblock()?,
@@ -175,7 +246,6 @@ pub fn decode_inter_picture_with_motion(
     } {
         if let InterMacroblock::Intra(block) = mb {
             let address = block.address as usize;
-            super::avc_picture::reconstruct_macroblock(&mut out, &block, sps, pps, &mut ready)?;
             motion.store(
                 [address % (w / 16) * 16, address / (w / 16) * 16],
                 [16, 16],
@@ -209,6 +279,7 @@ pub fn decode_inter_picture_with_motion(
                 offsets: [header.alpha_offset, header.beta_offset],
                 transform8: matches!(block.luma, super::avc_macroblock::IntraLuma::Blocks8 { .. }),
             });
+            pending.push(Pending::Intra(block));
             seen += 1;
             continue;
         }
@@ -266,7 +337,6 @@ pub fn decode_inter_picture_with_motion(
             motion.decode_macroblock_with_direct(origin, 0, &parts, direct)?
         };
         let weights = if explicit_weights || (is_b && pps.weighted_bipred == 2) {
-            use super::avc_compensation::ComponentWeight;
             let mut weights = Vec::with_capacity(parts.len());
             for vector in &vectors {
                 let mut weight = [[ComponentWeight::default(); 3]; 2];
@@ -330,36 +400,12 @@ pub fn decode_inter_picture_with_motion(
         } else {
             None
         };
-        let prediction = predict_macroblock(
-            origin.map(|n| n as i32),
-            sps.bit_depth_luma,
-            &parts,
-            &vectors,
-            [&refs[0], &refs[1]],
-            weights.as_deref(),
-        )?;
         let bd = 6 * (i32::from(sps.bit_depth_luma) - 8);
         let qps = [
             (qp + bd) as u8,
             chroma_qp(qp, pps.chroma_qp_offset, sps.bit_depth_chroma),
             chroma_qp(qp, pps.second_chroma_qp_offset, sps.bit_depth_chroma),
         ];
-        let prediction = if let Some(c) = &coefficients {
-            prediction.reconstruct_inter(
-                if eight {
-                    InterLumaResidual::Blocks8(&c.luma8)
-                } else {
-                    InterLumaResidual::Blocks4(&c.luma4)
-                },
-                &c.chroma_dc,
-                &c.chroma_ac,
-                qps,
-                &[[16; 16]; 3],
-                &[16; 64],
-            )?
-        } else {
-            prediction
-        };
         let empty = BlockEdge {
             intra: false,
             switching_slice: false,
@@ -408,44 +454,132 @@ pub fn decode_inter_picture_with_motion(
             offsets: [header.alpha_offset, header.beta_offset],
             transform8: eight,
         });
-        for (plane, src, stride, size) in [
-            (&mut out.y, prediction.y.as_slice(), w, 16),
-            (&mut out.cb, prediction.cb.as_slice(), w / 2, 8),
-            (&mut out.cr, prediction.cr.as_slice(), w / 2, 8),
-        ] {
-            let (x, y) = (origin[0] * size / 16, origin[1] * size / 16);
-            for row in 0..size {
-                plane[(y + row) * stride + x..(y + row) * stride + x + size]
-                    .copy_from_slice(&src[row * size..row * size + size]);
-            }
-        }
-        for y in 0..4 {
-            for x in 0..4 {
-                ready[(origin[1] / 4 + y) * (w / 4) + origin[0] / 4 + x] =
-                    u8::from(!pps.constrained_intra_pred);
-            }
-        }
+        pending.push(Pending::Inter(InterJob {
+            origin,
+            parts,
+            vectors,
+            weights,
+            coefficients,
+            eight,
+            qps,
+        }));
         seen += 1;
     }
     if seen != count {
         return Err(invalid("incomplete single-slice inter-picture"));
     }
-    let grids = super::avc_boundary::picture_edges_components(&edges, w / 16)?;
-    for (component, (plane, grid)) in [&mut out.y, &mut out.cb, &mut out.cr]
-        .into_iter()
-        .zip(&grids)
-        .enumerate()
-    {
-        let scale = if component == 0 { 1 } else { 2 };
-        inter_plane(
-            plane,
-            w / scale,
-            h / scale,
-            sps.bit_depth_luma,
-            component != 0,
-            grid,
-        )?;
+    // Pass A: inter macroblocks depend only on the reference pictures, so
+    // each macroblock row band is reconstructed on whichever thread takes it.
+    // Pass B replays decode order: inter macroblocks mark their availability,
+    // intra macroblocks predict from neighbours decoded before them, so a
+    // later inter macroblock (e.g. the top-right of a right-column 4x4 block)
+    // is still unavailable exactly as in single-pass decoding.
+    enum Order {
+        Inter([usize; 2]),
+        Intra(Box<IntraMacroblock>),
     }
+    let mut rows: Vec<Vec<InterJob>> = (0..h / 16).map(|_| Vec::new()).collect();
+    let mut order = Vec::with_capacity(count);
+    for job in pending {
+        match job {
+            Pending::Inter(job) => {
+                order.push(Order::Inter(job.origin));
+                rows[job.origin[1] / 16].push(job);
+            }
+            Pending::Intra(block) => order.push(Order::Intra(block)),
+        }
+    }
+    {
+        let bands: Vec<Mutex<(&mut [u16], &mut [u16], &mut [u16], Vec<InterJob>)>> = out
+            .y
+            .chunks_mut(16 * w)
+            .zip(out.cb.chunks_mut(8 * (w / 2)))
+            .zip(out.cr.chunks_mut(8 * (w / 2)))
+            .zip(rows)
+            .map(|(((y, cb), cr), jobs)| Mutex::new((y, cb, cr, jobs)))
+            .collect();
+        let next = AtomicUsize::new(0);
+        let threads = std::thread::available_parallelism()
+            .map_or(1, |n| n.get())
+            .min(bands.len())
+            .max(1);
+        let depth = sps.bit_depth_luma;
+        let refs = &refs;
+        let results: Vec<Result<()>> = std::thread::scope(|scope| {
+            let handles: Vec<_> = (0..threads)
+                .map(|_| {
+                    let (bands, next) = (&bands, &next);
+                    scope.spawn(move || -> Result<()> {
+                        loop {
+                            let index = next.fetch_add(1, Ordering::Relaxed);
+                            let Some(band) = bands.get(index) else {
+                                return Ok(());
+                            };
+                            let mut guard = band.lock().unwrap_or_else(|e| e.into_inner());
+                            let (y, cb, cr, jobs) = &mut *guard;
+                            for job in jobs.drain(..) {
+                                reconstruct_inter_job(job, depth, refs, w, y, cb, cr)?;
+                            }
+                        }
+                    })
+                })
+                .collect();
+            handles
+                .into_iter()
+                .map(|h| {
+                    h.join()
+                        .unwrap_or_else(|_| Err(invalid("AVC reconstruction thread panicked")))
+                })
+                .collect()
+        });
+        for result in results {
+            result?;
+        }
+    }
+    for step in order {
+        match step {
+            Order::Inter(origin) => {
+                for y in 0..4 {
+                    for x in 0..4 {
+                        ready[(origin[1] / 4 + y) * (w / 4) + origin[0] / 4 + x] =
+                            u8::from(!pps.constrained_intra_pred);
+                    }
+                }
+            }
+            Order::Intra(block) => {
+                super::avc_picture::reconstruct_macroblock(&mut out, &block, sps, pps, &mut ready)?;
+            }
+        }
+    }
+    let grids = super::avc_boundary::picture_edges_components(&edges, w / 16)?;
+    // The three planes deblock independently; run them on their own threads.
+    let depth = sps.bit_depth_luma;
+    let [y, cb, cr] = std::thread::scope(|scope| {
+        let planes = [&mut out.y, &mut out.cb, &mut out.cr];
+        let handles: Vec<_> = planes
+            .into_iter()
+            .zip(&grids)
+            .enumerate()
+            .map(|(component, (plane, grid))| {
+                let scale = if component == 0 { 1 } else { 2 };
+                scope.spawn(move || {
+                    inter_plane(plane, w / scale, h / scale, depth, component != 0, grid)
+                })
+            })
+            .collect();
+        let mut results = handles.into_iter().map(|h| {
+            h.join()
+                .unwrap_or_else(|_| Err(invalid("AVC deblocking thread panicked")))
+        });
+        [
+            results.next().unwrap(),
+            results.next().unwrap(),
+            results.next().unwrap(),
+        ]
+    });
+    y?;
+    cb?;
+    cr?;
     Ok((out, motion))
 }
 
