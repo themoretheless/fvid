@@ -1,7 +1,10 @@
 //! H.264 fractional-sample motion compensation and weighted prediction (8.4.2.2–3).
 //! Reference planes contain reconstructed, deblocked samples before display cropping.
 use crate::{Result, invalid};
-const TAPS: [i64; 6] = [1, -5, 20, 20, -5, 1];
+
+/// Samples in the largest interpolation window: a 16x16 luma partition plus
+/// the 6-tap filter margin (21 x 21).
+pub const SCRATCH: usize = 21 * 21;
 
 pub struct ReferencePlane<'a> {
     samples: &'a [u16],
@@ -49,59 +52,33 @@ impl<'a> ReferencePlane<'a> {
             depth,
         })
     }
-    fn at(&self, x: i64, y: i64) -> i64 {
+    fn at(&self, x: i64, y: i64) -> i32 {
         let x = x.clamp(0, self.width as i64 - 1) as usize;
         let y = y.clamp(0, self.height as i64 - 1) as usize;
-        i64::from(self.samples[y * self.stride + x])
+        i32::from(self.samples[y * self.stride + x])
     }
-    fn clip(&self, v: i64) -> u16 {
-        v.clamp(0, (1i64 << self.depth) - 1) as u16
-    }
-    fn horizontal(&self, x: i64, y: i64) -> i64 {
-        TAPS.iter()
-            .enumerate()
-            .map(|(i, &tap)| tap * self.at(x + i as i64 - 2, y))
-            .sum()
-    }
-    fn vertical(&self, x: i64, y: i64) -> i64 {
-        TAPS.iter()
-            .enumerate()
-            .map(|(i, &tap)| tap * self.at(x, y + i as i64 - 2))
-            .sum()
-    }
-    fn quarter(&self, x: i64, y: i64, fx: i32, fy: i32) -> u16 {
-        let b = || self.clip((self.horizontal(x, y) + 16) >> 5);
-        let h = || self.clip((self.vertical(x, y) + 16) >> 5);
-        let m = || self.clip((self.vertical(x + 1, y) + 16) >> 5);
-        let s = || self.clip((self.horizontal(x, y + 1) + 16) >> 5);
-        let j = || {
-            // Do not clip or round the horizontal intermediate values here.
-            let sum: i64 = TAPS
-                .iter()
-                .enumerate()
-                .map(|(i, &tap)| tap * self.horizontal(x, y + i as i64 - 2))
-                .sum();
-            self.clip((sum + 512) >> 10)
-        };
-        let avg = |a: u16, b: u16| ((u32::from(a) + u32::from(b) + 1) >> 1) as u16;
-        match (fx, fy) {
-            (0, 0) => self.at(x, y) as u16,
-            (0, 1) => avg(self.at(x, y) as u16, h()),
-            (0, 2) => h(),
-            (0, 3) => avg(h(), self.at(x, y + 1) as u16),
-            (1, 0) => avg(self.at(x, y) as u16, b()),
-            (2, 0) => b(),
-            (3, 0) => avg(b(), self.at(x + 1, y) as u16),
-            (1, 1) => avg(b(), h()),
-            (2, 1) => avg(b(), j()),
-            (3, 1) => avg(b(), m()),
-            (1, 2) => avg(h(), j()),
-            (2, 2) => j(),
-            (3, 2) => avg(j(), m()),
-            (1, 3) => avg(h(), s()),
-            (2, 3) => avg(j(), s()),
-            (3, 3) => avg(m(), s()),
-            _ => unreachable!(),
+    /// Copy a `cols` x `rows` window whose top-left is (`x`, `y`) into `out`,
+    /// replicating edge samples (8.4.2.2.1 clipping of reference coordinates).
+    /// Every later filter tap then indexes the window without bounds clamps.
+    fn window(&self, x: i64, y: i64, cols: usize, rows: usize, out: &mut [i32]) {
+        let inside = x >= 0
+            && y >= 0
+            && x + cols as i64 <= self.width as i64
+            && y + rows as i64 <= self.height as i64;
+        if inside {
+            let (x, y) = (x as usize, y as usize);
+            for row in 0..rows {
+                let source = &self.samples[(y + row) * self.stride + x..][..cols];
+                for (dst, src) in out[row * cols..(row + 1) * cols].iter_mut().zip(source) {
+                    *dst = i32::from(*src);
+                }
+            }
+        } else {
+            for row in 0..rows {
+                for col in 0..cols {
+                    out[row * cols + col] = self.at(x + col as i64, y + row as i64);
+                }
+            }
         }
     }
     /// Origin is in integer luma samples; motion is in signed quarter-sample units.
@@ -114,13 +91,78 @@ impl<'a> ReferencePlane<'a> {
         height: usize,
         output: &mut [u16],
     ) -> Result<()> {
+        self.luma_with(origin, motion, width, height, output, &mut [0; SCRATCH])
+    }
+    /// `luma` with a caller-provided scratch window, so hot loops skip zeroing it.
+    pub fn luma_with(
+        &self,
+        origin: [i32; 2],
+        motion: [i32; 2],
+        width: usize,
+        height: usize,
+        output: &mut [u16],
+        scratch: &mut [i32; SCRATCH],
+    ) -> Result<()> {
         partition(width, height, output.len())?;
         let x = i64::from(origin[0]) + i64::from(motion[0] >> 2);
         let y = i64::from(origin[1]) + i64::from(motion[1] >> 2);
+        // Two samples of margin before and three after each axis cover every tap.
+        let cols = width + 5;
+        let rows = height + 5;
+        let win = &mut scratch[..cols * rows];
+        self.window(x - 2, y - 2, cols, rows, win);
+        let win = &*win;
+        let max = (1i32 << self.depth) - 1;
+        let clip = |v: i32| v.clamp(0, max) as u16;
+        let avg = |a: u16, b: u16| ((u32::from(a) + u32::from(b) + 1) >> 1) as u16;
+        let at = |px: usize, py: usize| win[py * cols + px];
+        let horizontal = |px: usize, py: usize| -> i32 {
+            let base = py * cols + px - 2;
+            let s = &win[base..base + 6];
+            s[0] - 5 * s[1] + 20 * s[2] + 20 * s[3] - 5 * s[4] + s[5]
+        };
+        let vertical = |px: usize, py: usize| -> i32 {
+            let base = (py - 2) * cols + px;
+            win[base] - 5 * win[base + cols] + 20 * win[base + 2 * cols] + 20 * win[base + 3 * cols]
+                - 5 * win[base + 4 * cols]
+                + win[base + 5 * cols]
+        };
+        let (fx, fy) = (motion[0] & 3, motion[1] & 3);
         for row in 0..height {
             for col in 0..width {
-                output[row * width + col] =
-                    self.quarter(x + col as i64, y + row as i64, motion[0] & 3, motion[1] & 3);
+                let (px, py) = (col + 2, row + 2);
+                let b = || clip((horizontal(px, py) + 16) >> 5);
+                let h = || clip((vertical(px, py) + 16) >> 5);
+                let m = || clip((vertical(px + 1, py) + 16) >> 5);
+                let s = || clip((horizontal(px, py + 1) + 16) >> 5);
+                let j = || {
+                    // Do not clip or round the horizontal intermediate values here.
+                    let sum = horizontal(px, py - 2) - 5 * horizontal(px, py - 1)
+                        + 20 * horizontal(px, py)
+                        + 20 * horizontal(px, py + 1)
+                        - 5 * horizontal(px, py + 2)
+                        + horizontal(px, py + 3);
+                    clip((sum + 512) >> 10)
+                };
+                output[row * width + col] = match (fx, fy) {
+                    (0, 0) => at(px, py) as u16,
+                    (0, 1) => avg(at(px, py) as u16, h()),
+                    (0, 2) => h(),
+                    (0, 3) => avg(h(), at(px, py + 1) as u16),
+                    (1, 0) => avg(at(px, py) as u16, b()),
+                    (2, 0) => b(),
+                    (3, 0) => avg(b(), at(px + 1, py) as u16),
+                    (1, 1) => avg(b(), h()),
+                    (2, 1) => avg(b(), j()),
+                    (3, 1) => avg(b(), m()),
+                    (1, 2) => avg(h(), j()),
+                    (2, 2) => j(),
+                    (3, 2) => avg(j(), m()),
+                    (1, 3) => avg(h(), s()),
+                    (2, 3) => avg(j(), s()),
+                    (3, 3) => avg(m(), s()),
+                    _ => unreachable!(),
+                };
             }
         }
         Ok(())
@@ -135,18 +177,41 @@ impl<'a> ReferencePlane<'a> {
         height: usize,
         output: &mut [u16],
     ) -> Result<()> {
+        self.chroma_with(origin, motion, width, height, output, &mut [0; SCRATCH])
+    }
+    /// `chroma` with a caller-provided scratch window.
+    pub fn chroma_with(
+        &self,
+        origin: [i32; 2],
+        motion: [i32; 2],
+        width: usize,
+        height: usize,
+        output: &mut [u16],
+        scratch: &mut [i32; SCRATCH],
+    ) -> Result<()> {
         partition(width, height, output.len())?;
         let x = i64::from(origin[0]) + i64::from(motion[0] >> 3);
         let y = i64::from(origin[1]) + i64::from(motion[1] >> 3);
-        let fx = i64::from(motion[0] & 7);
-        let fy = i64::from(motion[1] & 7);
+        let fx = motion[0] & 7;
+        let fy = motion[1] & 7;
+        let cols = width + 1;
+        let rows = height + 1;
+        let win = &mut scratch[..cols * rows];
+        self.window(x, y, cols, rows, win);
+        let win = &*win;
+        let w = [
+            (8 - fx) * (8 - fy),
+            fx * (8 - fy),
+            (8 - fx) * fy,
+            fx * fy,
+        ];
         for row in 0..height {
             for col in 0..width {
-                let (x, y) = (x + col as i64, y + row as i64);
-                let value = (8 - fx) * (8 - fy) * self.at(x, y)
-                    + fx * (8 - fy) * self.at(x + 1, y)
-                    + (8 - fx) * fy * self.at(x, y + 1)
-                    + fx * fy * self.at(x + 1, y + 1);
+                let base = row * cols + col;
+                let value = w[0] * win[base]
+                    + w[1] * win[base + 1]
+                    + w[2] * win[base + cols]
+                    + w[3] * win[base + cols + 1];
                 output[row * width + col] = ((value + 32) >> 6) as u16;
             }
         }
@@ -191,6 +256,65 @@ pub fn weighted(sample: u16, weight: i16, offset: i16, denominator: u8, depth: u
             + (i64::from(offset) << (depth - 8)))
             .clamp(0, max) as u16,
     )
+}
+/// `weighted` over a whole partition: parameters are validated once, each
+/// sample is still range-checked, and the arithmetic is identical.
+pub fn weight_block(
+    samples: &mut [u16],
+    weight: i16,
+    offset: i16,
+    denominator: u8,
+    depth: u8,
+) -> Result<()> {
+    let max = maximum(depth)?;
+    validate_weight(weight, offset, denominator)?;
+    if samples.iter().any(|&s| i64::from(s) > max) {
+        return Err(invalid("prediction sample exceeds bit depth"));
+    }
+    // Samples are at most 14 bits and weights 8 bits, so i32 cannot overflow.
+    let rounding = if denominator == 0 {
+        0
+    } else {
+        1i32 << (denominator - 1)
+    };
+    let (weight, offset) = (i32::from(weight), i32::from(offset) << (depth - 8));
+    let max = max as i32;
+    for sample in samples {
+        *sample = (((i32::from(*sample) * weight + rounding) >> denominator) + offset)
+            .clamp(0, max) as u16;
+    }
+    Ok(())
+}
+/// `bipred` over a whole partition, blending `b` into `a` in place.
+pub fn bipred_block(
+    a: &mut [u16],
+    b: &[u16],
+    weights: [i16; 2],
+    offsets: [i16; 2],
+    denominator: u8,
+    depth: u8,
+) -> Result<()> {
+    let max = maximum(depth)?;
+    for i in 0..2 {
+        validate_weight(weights[i], offsets[i], denominator)?;
+    }
+    if a.len() != b.len() {
+        return Err(invalid("bipred partition sizes differ"));
+    }
+    if a.iter().chain(b).any(|&s| i64::from(s) > max) {
+        return Err(invalid("prediction sample exceeds bit depth"));
+    }
+    // Two 14-bit samples times 8-bit weights stay far inside i32.
+    let w = weights.map(i32::from);
+    let rounding = 1i32 << denominator;
+    let shift = denominator + 1;
+    let offset = ((i32::from(offsets[0]) + i32::from(offsets[1])) * (1i32 << (depth - 8)) + 1) >> 1;
+    let max = max as i32;
+    for (a, b) in a.iter_mut().zip(b) {
+        let value = (i32::from(*a) * w[0] + i32::from(*b) * w[1] + rounding) >> shift;
+        *a = (value + offset).clamp(0, max) as u16;
+    }
+    Ok(())
 }
 /// Default bi-prediction is weights=[1,1], offsets=[0,0], denominator=0.
 /// Implicit weighting supplies derived weights, zero offsets and denominator=5.

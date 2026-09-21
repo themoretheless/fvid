@@ -257,18 +257,33 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 } else {
                     (16.0 * scale, 219.0 * scale, 224.0 * scale)
                 };
-                for (i, pixel) in rgb.chunks_exact_mut(3).enumerate() {
-                    let x = i % w + p.crop[0];
-                    let y = i / w + p.crop[2];
-                    let at = (y / 2) * (p.coded_width / 2) + x / 2;
-                    let luma = (f64::from(p.y[y * p.coded_width + x]) - y_offset) / y_range;
-                    let cb = (f64::from(p.cb[at]) - 128.0 * scale) / c_range;
-                    let cr = (f64::from(p.cr[at]) - 128.0 * scale) / c_range;
-                    let red = luma + 2.0 * (1.0 - kr) * cr;
-                    let blue = luma + 2.0 * (1.0 - kb) * cb;
-                    let green = (luma - kr * red - kb * blue) / (1.0 - kr - kb);
-                    for (out, value) in pixel.iter_mut().zip([red, green, blue]) {
-                        *out = (value * 255.0).round().clamp(0.0, 255.0) as u8;
+                // Fold the range normalisation and the 255 output scale into
+                // per-component gains so each pixel is three multiply-adds.
+                // G = Y - kr*(2-2kr)/(1-kr-kb) * Cr - kb*(2-2kb)/(1-kr-kb) * Cb.
+                let y_gain = (255.0 / y_range) as f32;
+                let c_gain = 255.0 / c_range;
+                let r_cr = (2.0 * (1.0 - kr) * c_gain) as f32;
+                let b_cb = (2.0 * (1.0 - kb) * c_gain) as f32;
+                let g_cr = (kr * 2.0 * (1.0 - kr) / (1.0 - kr - kb) * c_gain) as f32;
+                let g_cb = (kb * 2.0 * (1.0 - kb) / (1.0 - kr - kb) * c_gain) as f32;
+                let (y_offset, c_offset) = (y_offset as f32, (128.0 * scale) as f32);
+                let chroma_stride = p.coded_width / 2;
+                for (row, line) in rgb.chunks_exact_mut(w * 3).enumerate() {
+                    let y = row + p.crop[2];
+                    let luma_row = &p.y[y * p.coded_width + p.crop[0]..][..w];
+                    let chroma_row = (y / 2) * chroma_stride;
+                    for (col, (pixel, &luma)) in line.chunks_exact_mut(3).zip(luma_row).enumerate()
+                    {
+                        let at = chroma_row + (col + p.crop[0]) / 2;
+                        let luma = (f32::from(luma) - y_offset) * y_gain;
+                        let cb = f32::from(p.cb[at]) - c_offset;
+                        let cr = f32::from(p.cr[at]) - c_offset;
+                        let red = luma + r_cr * cr;
+                        let blue = luma + b_cb * cb;
+                        let green = luma - g_cr * cr - g_cb * cb;
+                        pixel[0] = red.round().clamp(0.0, 255.0) as u8;
+                        pixel[1] = green.round().clamp(0.0, 255.0) as u8;
+                        pixel[2] = blue.round().clamp(0.0, 255.0) as u8;
                     }
                 }
                 *dimensions = [w, h];

@@ -27,6 +27,10 @@ pub fn predict_macroblock(
         return Err(invalid("invalid AVC macroblock prediction inputs"));
     }
     let mut assembled = MacroblockPrediction::new(depth)?;
+    // One buffer per list, reused across partitions, so predictions are never
+    // moved by value through the blend and weight steps.
+    let mut buffers = [Prediction420::empty(depth), Prediction420::empty(depth)];
+    let mut scratch = [0i32; super::avc_motion::SCRATCH];
     for (index, (partition, vectors)) in partitions.iter().zip(motion).enumerate() {
         let actual = vectors.map(|v| matches!(v, Neighbour::Inter { .. }));
         let valid = match partition.prediction {
@@ -46,7 +50,7 @@ pub fn predict_macroblock(
             return Err(invalid("AVC prediction coordinate overflow"));
         };
         let w = weights.map_or([[ComponentWeight::default(); 3]; 2], |w| w[index]);
-        let mut predicted: [Option<Prediction420>; 2] = [None, None];
+        let mut predicted = [false; 2];
         for list in 0..2 {
             if let Neighbour::Inter { reference, vector } = vectors[list] {
                 if partition.prediction != Prediction::Direct
@@ -57,20 +61,33 @@ pub fn predict_macroblock(
                 let picture = references[list]
                     .get(usize::from(reference))
                     .ok_or_else(|| invalid("AVC prediction reference is missing"))?;
-                predicted[list] = Some(picture.predict(
+                picture.predict_into(
                     [x, y],
                     vector.map(i32::from),
                     partition.size.map(usize::from),
-                )?);
+                    &mut buffers[list],
+                    &mut scratch,
+                )?;
+                predicted[list] = true;
             }
         }
         let prediction = match predicted {
-            [Some(a), Some(b)] => a.blend(b, w)?,
-            [Some(a), None] => a.weight(w[0])?,
-            [None, Some(b)] => b.weight(w[1])?,
+            [true, true] => {
+                let (a, b) = buffers.split_at_mut(1);
+                a[0].blend_in_place(&b[0], w)?;
+                &buffers[0]
+            }
+            [true, false] => {
+                buffers[0].weight_in_place(w[0])?;
+                &buffers[0]
+            }
+            [false, true] => {
+                buffers[1].weight_in_place(w[1])?;
+                &buffers[1]
+            }
             _ => return Err(invalid("AVC partition has no predictor")),
         };
-        assembled.insert(partition.origin.map(usize::from), &prediction)?;
+        assembled.insert(partition.origin.map(usize::from), prediction)?;
     }
     assembled.finish()
 }

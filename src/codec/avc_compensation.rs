@@ -1,5 +1,5 @@
 //! Progressive 4:2:0 partition prediction from deblocked reference pictures.
-use super::avc_motion::{ReferencePlane, bipred, weighted};
+use super::avc_motion::{ReferencePlane, SCRATCH, bipred_block, weight_block};
 use crate::{Result, invalid};
 
 pub struct Reference420<'a> {
@@ -60,6 +60,19 @@ impl<'a> Reference420<'a> {
         motion: [i32; 2],
         size: [usize; 2],
     ) -> Result<Prediction420> {
+        let mut out = Prediction420::empty(self.depth);
+        self.predict_into(origin, motion, size, &mut out, &mut [0; SCRATCH])?;
+        Ok(out)
+    }
+    /// `predict` into a caller-owned buffer; only the packed region is written.
+    pub fn predict_into(
+        &self,
+        origin: [i32; 2],
+        motion: [i32; 2],
+        size: [usize; 2],
+        out: &mut Prediction420,
+        scratch: &mut [i32; SCRATCH],
+    ) -> Result<()> {
         let [width, height] = size;
         if ![4, 8, 16].contains(&width)
             || ![4, 8, 16].contains(&height)
@@ -67,40 +80,52 @@ impl<'a> Reference420<'a> {
         {
             return Err(invalid("invalid AVC 4:2:0 partition geometry"));
         }
-        let mut out = Prediction420 {
-            width,
-            height,
-            y: [0; 256],
-            cb: [0; 64],
-            cr: [0; 64],
-            depth: self.depth,
-        };
+        out.width = width;
+        out.height = height;
+        out.depth = self.depth;
         let count = width * height;
-        self.planes[0].luma(origin, motion, width, height, &mut out.y[..count])?;
+        self.planes[0].luma_with(origin, motion, width, height, &mut out.y[..count], scratch)?;
         let chroma_origin = [origin[0] / 2, origin[1] / 2];
-        self.planes[1].chroma(
+        self.planes[1].chroma_with(
             chroma_origin,
             motion,
             width / 2,
             height / 2,
             &mut out.cb[..count / 4],
+            scratch,
         )?;
-        self.planes[2].chroma(
+        self.planes[2].chroma_with(
             chroma_origin,
             motion,
             width / 2,
             height / 2,
             &mut out.cr[..count / 4],
+            scratch,
         )?;
-        Ok(out)
+        Ok(())
     }
 }
 impl Prediction420 {
+    /// A zero 16x16 buffer for `predict_into`.
+    pub fn empty(depth: u8) -> Self {
+        Self {
+            width: 16,
+            height: 16,
+            y: [0; 256],
+            cb: [0; 64],
+            cr: [0; 64],
+            depth,
+        }
+    }
     pub fn dimensions(&self) -> (usize, usize) {
         (self.width, self.height)
     }
     /// Apply explicit uni-prediction weights in Y/Cb/Cr order.
     pub fn weight(mut self, weights: [ComponentWeight; 3]) -> Result<Self> {
+        self.weight_in_place(weights)?;
+        Ok(self)
+    }
+    pub fn weight_in_place(&mut self, weights: [ComponentWeight; 3]) -> Result<()> {
         let count = self.width * self.height;
         for (component, samples) in [
             &mut self.y[..count],
@@ -111,15 +136,21 @@ impl Prediction420 {
         .enumerate()
         {
             let w = weights[component];
-            for sample in samples {
-                *sample = weighted(*sample, w.weight, w.offset, w.denominator, self.depth)?;
-            }
+            weight_block(samples, w.weight, w.offset, w.denominator, self.depth)?;
         }
-        Ok(self)
+        Ok(())
     }
     /// Blend raw L0/L1 predictions. Explicit component denominators must match.
     /// Defaults use weight 1, offset 0, denominator 0; implicit weights use 5.
     pub fn blend(mut self, other: Self, weights: [[ComponentWeight; 3]; 2]) -> Result<Self> {
+        self.blend_in_place(&other, weights)?;
+        Ok(self)
+    }
+    pub fn blend_in_place(
+        &mut self,
+        other: &Self,
+        weights: [[ComponentWeight; 3]; 2],
+    ) -> Result<()> {
         if self.width != other.width || self.height != other.height || self.depth != other.depth {
             return Err(invalid("AVC prediction geometry or bit depth mismatch"));
         }
@@ -139,17 +170,16 @@ impl Prediction420 {
             if w[0].denominator != w[1].denominator {
                 return Err(invalid("AVC bipred denominators differ"));
             }
-            for (a, b) in a.iter_mut().zip(b) {
-                *a = bipred(
-                    [*a, *b],
-                    [w[0].weight, w[1].weight],
-                    [w[0].offset, w[1].offset],
-                    w[0].denominator,
-                    self.depth,
-                )?;
-            }
+            bipred_block(
+                a,
+                b,
+                [w[0].weight, w[1].weight],
+                [w[0].offset, w[1].offset],
+                w[0].denominator,
+                self.depth,
+            )?;
         }
-        Ok(self)
+        Ok(())
     }
 }
 
