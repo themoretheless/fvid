@@ -104,3 +104,39 @@ pub mod hevc_qp;
 pub mod hevc_plane;
 pub mod hevc_picture;
 pub mod hevc_deblock;
+pub mod vp9;
+pub mod vp9_bool;
+pub mod vp9_probs;
+pub mod vp9_intra;
+pub mod vp9_transform;
+pub mod vp9_residual;
+pub mod vp9_picture;
+pub mod vp9_filter;
+pub mod vp9_motion;
+pub mod vp9_decoder;
+mod vp9_tables;
+
+pub mod av1;
+
+pub mod av1_sequence;
+
+pub mod av1_symbol;
+
+pub mod av1_tiles;
+
+pub mod av1_frame;
+
+mod av1_cdfs;
+
+pub mod av1_picture;
+
+pub mod av1_decoder;
+
+pub mod av1_transform;
+mod av1_warp;
+
+mod av1_tables;
+
+pub mod av1_intra;
+
+mod av1_filter;

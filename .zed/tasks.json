@@ -4,6 +4,7 @@
     "command": "cargo",
     "args": [
       "run",
+      "--release",
       "--no-default-features",
       "--features",
       "player",
@@ -17,10 +18,11 @@
     "hide": "never"
   },
   {
-    "label": "fvid player (current Y4M file)",
+    "label": "fvid player (current video file)",
     "command": "cargo",
     "args": [
       "run",
+      "--release",
       "--no-default-features",
       "--features",
       "player",

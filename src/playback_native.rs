@@ -1,4 +1,4 @@
-//! RGB playback adapter for FVid's own Y4M and MP4/AVC readers.
+//! RGB playback adapter for FVid's own Y4M, MP4/AVC and WebM/VP9/AV1 readers.
 use crate::{
     Result, container::mp4::Limits, invalid, playback::Y4mReader, playback_mp4::Mp4AvcReader,
 };
@@ -8,6 +8,7 @@ use std::{
 };
 
 pub enum NativeReader<R> {
+    Webm(crate::playback_webm::WebmVideoReader<R>),
     Y4m(Y4mReader<R>),
     Avc {
         source: Mp4AvcReader<R>,
@@ -23,6 +24,12 @@ pub enum NativeReader<R> {
     },
 }
 impl<R: BufRead + Seek> NativeReader<R> {
+    /// Playback without an application-imposed memory cap. Format bounds and
+    /// checked size arithmetic still apply; storage is allocated as needed.
+    pub fn without_memory_limit(reader: R) -> Result<Self> {
+        Self::new(reader, usize::MAX)
+    }
+
     pub fn new(mut reader: R, budget: usize) -> Result<Self> {
         let start = reader.stream_position()?;
         let mut prefix = [0u8; 9];
@@ -37,6 +44,11 @@ impl<R: BufRead + Seek> NativeReader<R> {
         reader.seek(SeekFrom::Start(start))?;
         if &prefix == b"YUV4MPEG2" {
             return Ok(Self::Y4m(Y4mReader::new(reader, budget)?));
+        }
+        if length >= 4 && prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
+            return Ok(Self::Webm(crate::playback_webm::WebmVideoReader::open(
+                reader, budget,
+            )?));
         }
         let rgb_budget = budget / 4;
         let source = Mp4AvcReader::open(reader, Limits::default(), budget - rgb_budget)?;
@@ -58,18 +70,21 @@ impl<R: BufRead + Seek> NativeReader<R> {
     pub fn dimensions(&self) -> [usize; 2] {
         match self {
             Self::Y4m(r) => r.dimensions(),
+            Self::Webm(r) => r.dimensions(),
             Self::Avc { dimensions, .. } => *dimensions,
         }
     }
     pub fn rgb(&self) -> &[u8] {
         match self {
             Self::Y4m(r) => r.rgb(),
+            Self::Webm(r) => r.rgb(),
             Self::Avc { rgb, .. } => rgb,
         }
     }
     pub fn frame_period(&self) -> Duration {
         match self {
             Self::Y4m(r) => r.frame_period(),
+            Self::Webm(r) => r.frame_period(),
             Self::Avc { period, .. } => *period,
         }
     }
@@ -77,6 +92,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
     /// No accumulated floating-point or nanosecond rounding is involved.
     pub fn frame_interval(&self) -> Option<(u128, u128, u32)> {
         match self {
+            Self::Webm(r) => r.frame_interval(),
             Self::Y4m(reader) => {
                 let count = reader.frames_read();
                 if count == 0 {
@@ -110,6 +126,10 @@ impl<R: BufRead + Seek> NativeReader<R> {
     pub fn rewind(&mut self) -> Result<()> {
         match self {
             Self::Y4m(r) => r.rewind(),
+            Self::Webm(r) => {
+                r.rewind();
+                Ok(())
+            }
             Self::Avc {
                 source,
                 next_pts,
@@ -128,6 +148,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
     pub fn read_frame(&mut self) -> Result<bool> {
         match self {
             Self::Y4m(r) => r.read_frame(),
+            Self::Webm(r) => r.read_frame(),
             Self::Avc {
                 source,
                 rgb,
@@ -276,6 +297,16 @@ fn playback_window(
 mod tests {
     use super::*;
     use std::io::{BufReader, Cursor};
+    #[test]
+    fn webm_signature_never_enters_mp4_parser() {
+        let bytes = [0x1a, 0x45, 0xdf, 0xa3, 0x9f, 0x42, 0x86, 0x81, 0x01];
+        let error = match NativeReader::new(Cursor::new(bytes), 1 << 20) {
+            Ok(_) => panic!("truncated WebM accepted"),
+            Err(error) => error.to_string(),
+        };
+        assert!(error.contains("EBML"));
+        assert!(!error.contains("box"));
+    }
     #[test]
     fn edit_window_preserves_track_units_and_rejects_unrepresentable_endpoints() {
         use crate::container::mp4::{Edit, Track};

@@ -1073,3 +1073,104 @@ both endpoint lines to pass; weak filtering independently selects second-sample
 updates on p/q sides. Tests cover threshold equality, one-endpoint rejection,
 independent second-sample decisions and 10-bit scaling. Picture boundary strength
 metadata and vertical/horizontal traversal remain to be connected.
+
+### WebM indexing and VP9 header decoding
+
+Added an FVid-owned seekable EBML/WebM reader: track metadata, timestamp scale,
+known/unknown Segment and Cluster sizes, SimpleBlock/BlockGroup packet indexing,
+signed relative timestamps, and bounded payload reads. Lacing and track content
+encoding/encryption are rejected. This is an initial video indexing subset, not
+complete Matroska support (track timing transformations and audio remain pending).
+
+Added VP9 superframe framing, stateful uncompressed headers, reference dimensions,
+profile/color configuration, loop-filter deltas, quantizers, segmentation, tile
+geometry and bounded tile splitting. Malformed header parsing preserves prior
+state. The own Boolean arithmetic decoder and compressed-header parser apply
+normative probability updates; default probability tables are reproducibly
+extracted from the VP9 v0.7 specification by `scripts/generate_vp9_tables.py`.
+Probability adaptation from decoded symbols is not implemented. The diagnostic
+example supports frame-parallel context refresh and explicitly rejects streams
+requiring symbol adaptation.
+
+Local validation on the user-provided WebM: 1280×720 VP9 profile 0, 8-bit 4:2:0,
+BT.709 limited range; 14,185 packets/headers, 141 keyframes, 56,740 tile markers.
+Every payload, uncompressed header, compressed header and tile boundary passed.
+An independent ffprobe packet count agrees. The private media is not a repository
+fixture. A separate three-frame synthetic IVF fixture supplies regression checks;
+its quantizers, filter levels and header lengths agree with FFmpeg trace_headers.
+
+**WebM playback remains unavailable:** VP9 block syntax, coefficient decoding,
+prediction, inverse transforms, pixel filtering and the playback adapter still
+need implementation. The player detects EBML instead of incorrectly interpreting
+it as MP4, reports the unsupported format and includes the opened path in errors.
+No FFmpeg or external-codec fallback was added.
+
+### Native VP9 picture reconstruction and WebM playback
+
+Implemented all ten intra prediction modes, DCT/ADST 4–32 transforms, lossless
+WHT, coefficient scans/Pareto token probabilities, dequantization and loop
+filtering. The 448-block independent libvpx transform corpus matches exactly.
+Added single-reference inter block syntax, neighboring/previous-frame motion
+candidates, sub-8x8 motion, high-precision MV syntax and four subpixel filters.
+Reference slots and frame-parallel probability contexts are managed in the native
+VP9 decoder. Decode errors poison the decoder until reset.
+
+NativeReader now selects WebM/Matroska VP9 from EBML input. The adapter supplies
+RGB, source-clock intervals, bounded lookahead, EOF and rewind to the player and
+NativeCameraSource. The player file picker accepts webm/mkv; Zed run tasks now
+use release mode. No runtime FFmpeg/libvpx dependency was introduced.
+
+Initial local oracle validation: the user's first 100 1280x720 frames match every
+YUV byte. Synthetic 10-frame motion/reference-refresh, 10-bit 70x50 and 12-bit
+lossless sequences also match independent raw-pixel oracles. The complete private
+recording is validated separately; no private media is stored in fixtures.
+
+Limitations: segmentation, compound references, scaled references, decoded-symbol
+probability adaptation, 4:2:2/4:4:4, VP8 and audio are not implemented. The
+native player reports unsupported tools rather than substituting another decoder.
+
+Full private-recording verification completed: all 14,185 displayed frames,
+19,609,344,000 raw yuv420p bytes, match the independent FFmpeg oracle SHA-256:
+`5563489ccf22278ec76316bb0970244dd6cf5bdd6fd0a46209987afb08d8faa0`.
+Both pipelines exited successfully; raw frames were streamed into SHA-256 without
+storing the complete decoded recording. Packet PTS are strictly increasing.
+The diagnostic run (including output and SHA-256) took about 607 seconds for
+479 seconds of media, so real-time 720p30 is not claimed for this implementation.
+The native suite passes 246 tests (213 unit + 33 integration), including the
+additional malformed compressed-frame corpus. Player release and camera FFI
+checks pass without warnings. `otool -L` on the release player lists only system
+frameworks/libraries, with no FFmpeg/libvpx linkage.
+
+## AV1: native picture decoding and WebM playback (2026-09-21)
+
+FVid now reconstructs a tested AV1 subset in safe Rust with no external runtime
+codec. The native WebM reader selects `V_AV1`, preserves source timestamps,
+converts decoded planes to RGB and resets the decoder on Restart.
+
+Implemented: bounded OBU/frame/tile parsing, normative adaptive CDFs, residual
+coefficients and quantization, all AV1 transform sizes and types, intra modes,
+CFL/filter-intra, single and average/distance compound prediction, spatial MV
+stacks, variable transform trees, local affine warp, reference/CDF refresh,
+hidden/show-existing frames, deblocking and CDEF. Reconstruction supports
+4:2:0 8/10/12-bit, lossy and lossless; no FFmpeg/libaom/dav1d fallback exists.
+
+Pixel oracles cover all-keyframe sequences, I/P lossless, eight tiled 10-bit
+I/P frames, odd frame dimensions, 12-bit lossless, and a default SVT-AV1
+24-frame 192x128 random-access sequence including compound/local warp.
+Every displayed YUV sample agrees with the independent decoder. Separate
+oracles cover inverse transforms and 30,720 adaptive/nonadaptive symbols.
+Fixtures and regeneration instructions are in `tests/fixtures/av1/README.md`.
+
+This is **not full AV1 conformance**. Temporal motion fields, global motion,
+OBMC, masked compound/inter-intra, palette/intrabc, segmentation, quantization
+matrices, restoration, superres/reference scaling, film grain, 4:2:2/4:4:4,
+short reference signaling/inter frame IDs, separate FrameHeader/TileGroup OBUs,
+and layered operating points still return explicit errors. MP4 AV1 dispatch
+and audio remain unimplemented. See `NATIVE_PLAYBACK.md` for playback limits.
+
+Validation: `cargo test --locked --offline --no-default-features` passes all
+262 unit/integration tests. The release player build and `fvid-camera-ffi`
+check complete without warnings. `otool -L target/release/fvid` lists only
+macOS system libraries/frameworks. The release player was launched with the
+24-frame AV1 WebM fixture. No full-spec conformance or general real-time claim
+is inferred from these tests.

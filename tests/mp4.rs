@@ -207,3 +207,16 @@ fn mutated_metadata_never_panics() {
         }
     }
 }
+
+#[test]
+fn invalid_box_reports_offset_size_and_remaining_bytes() {
+    let bytes = [0, 0, 0, 100, b'm', b'd', b'a', b't'];
+    let error = match Mp4Reader::open(Cursor::new(bytes), Limits::default()) {
+        Ok(_) => panic!("oversized box accepted"),
+        Err(error) => error.to_string(),
+    };
+    assert!(error.contains("mdat"));
+    assert!(error.contains("byte 0"));
+    assert!(error.contains("declared size 100"));
+    assert!(error.contains("remaining file bytes 8"));
+}

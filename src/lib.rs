@@ -7,6 +7,7 @@ pub mod container;
 pub mod playback;
 pub mod playback_mp4;
 pub mod playback_native;
+pub mod playback_webm;
 #[cfg(feature = "player")]
 pub mod player;
 #[cfg(feature = "mcp")]

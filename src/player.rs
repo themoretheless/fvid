@@ -3,9 +3,7 @@ use crate::playback_native::NativeReader;
 use eframe::egui;
 use std::{fs::File, io::BufReader, path::PathBuf, time::Instant};
 
-const BUFFER_BUDGET: usize = 256 * 1024 * 1024;
-
-/// Open an empty player or a local Y4M / supported MP4 AVC file.
+/// Open an empty player or a supported local Y4M, MP4/AVC or WebM/VP9/AV1 file.
 pub fn run(path: Option<PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
     let mut app = Player::default();
     if let Some(path) = path {
@@ -51,7 +49,7 @@ impl Default for Player {
 
 impl Player {
     fn open(&mut self, path: PathBuf) -> crate::Result<()> {
-        let mut reader = NativeReader::new(BufReader::new(File::open(&path)?), BUFFER_BUDGET)?;
+        let mut reader = NativeReader::without_memory_limit(BufReader::new(File::open(&path)?))?;
         if !reader.read_frame()? {
             return Err(crate::invalid("video has no frames"));
         }
@@ -70,8 +68,10 @@ impl Player {
     }
 
     fn try_open(&mut self, path: PathBuf) {
-        if let Err(error) = self.open(path) {
-            self.error = Some(error.to_string());
+        if let Err(error) = self.open(path.clone()) {
+            let message = format!("{}: {error}", path.display());
+            eprintln!("{message}");
+            self.error = Some(message);
         }
     }
 
@@ -134,7 +134,7 @@ impl eframe::App for Player {
             ui.horizontal(|ui| {
                 if ui.button("Open…").clicked() {
                     if let Some(path) = rfd::FileDialog::new()
-                        .add_filter("Video", &["y4m", "mp4", "mov"])
+                        .add_filter("Video", &["y4m", "mp4", "mov", "webm", "mkv"])
                         .pick_file()
                     {
                         self.try_open(path);

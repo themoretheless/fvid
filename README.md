@@ -3,14 +3,15 @@
 ## Собственный плеер без FFmpeg
 
 ```sh
-cargo run --no-default-features --features player -- play
-cargo run --no-default-features --features player -- play input.y4m
+cargo run --release --no-default-features --features player -- play
+cargo run --release --no-default-features --features player -- play input.y4m
 ```
 
 Открытие файла, drag-and-drop, Space для паузы, Restart и Esc для выхода.
-Чтение Y4M, кадровые буферы и преобразование YUV → RGB реализованы в библиотеке
-FVid (`fvid::playback`); `eframe` отвечает за окно и вывод изображения.
-Ограничения: 8-bit Y4M, BT.601 limited range, без звука и сжатых кодеков.
+FVid самостоятельно читает Y4M, MP4/H.264 и WebM/Matroska с VP9/AV1, декодирует
+поддерживаемые профили и преобразует YUV → RGB. `eframe` отвечает за окно.
+Для сжатого видео используйте `--release`; звук пока не реализован.
+[Поддерживаемые режимы и ограничения](docs/NATIVE_PLAYBACK.md).
 В Zed задача `fvid player` открывает пустое окно без подготовленного видео.
 
 Цель — собственные контейнеры и кодеки, FFmpeg только для бенчмарков.

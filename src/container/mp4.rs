@@ -194,7 +194,11 @@ impl<R: Read + Seek> Mp4Reader<R> {
                 (u64::from(size), 8)
             };
             if size < header || size > end - at {
-                return Err(invalid("MP4 box exceeds file"));
+                return Err(invalid(&format!(
+                    "Invalid MP4 box {:?} at byte {at}: declared size {size}, header {header}, remaining file bytes {}",
+                    String::from_utf8_lossy(&h[4..]),
+                    end - at
+                )));
             }
             match &h[4..] {
                 b"moov" => {
