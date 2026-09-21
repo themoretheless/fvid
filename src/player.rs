@@ -356,12 +356,9 @@ impl eframe::App for Player {
         let fullscreen = ctx.input(|i| i.viewport().fullscreen.unwrap_or(false));
         let panel = egui::CentralPanel::default().frame(egui::Frame::NONE.fill(WINDOW));
         panel.show(ui, |ui| {
-            let full = ui.max_rect();
-            let margin = if fullscreen { 0.0 } else { 24.0 };
-            let frame = full.shrink(margin);
-            let radius = if fullscreen { 0 } else { 16 };
+            let frame = ui.max_rect();
             let painter = ui.painter().with_clip_rect(frame);
-            painter.rect_filled(frame, CornerRadius::same(radius), FRAME);
+            painter.rect_filled(frame, CornerRadius::ZERO, FRAME);
 
             // The picture, aspect-fitted inside the frame.
             if let Some(texture) = &self.texture {
