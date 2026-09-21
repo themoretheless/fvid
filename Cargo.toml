@@ -14,6 +14,7 @@ unsafe_code = "forbid"
 
 [features]
 default = ["gpu", "cuda"]
+player = ["dep:eframe", "dep:rfd"]
 cuda = ["dep:fvid-cuda"]
 gpu = ["dep:wgpu", "dep:pollster"]
 mcp = ["media", "dep:rmcp", "dep:tokio", "dep:axum", "dep:serde"]
@@ -27,6 +28,8 @@ angle = ["gpu", "wgpu/angle"]
 vulkan-portability = ["gpu", "wgpu/vulkan-portability"]
 
 [dependencies]
+eframe = { version = "0.36", optional = true }
+rfd = { version = "0.17.2", optional = true }
 wgpu = { version = "=30.0.1", optional = true, default-features = false, features = ["std", "parking_lot", "metal", "vulkan", "dx12", "gles", "wgsl"] }
 pollster = { version = "0.4", optional = true }
 

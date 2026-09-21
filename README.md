@@ -1,5 +1,24 @@
 # Fvid
 
+## Собственный плеер без FFmpeg
+
+```sh
+cargo run --no-default-features --features player -- play
+cargo run --no-default-features --features player -- play input.y4m
+```
+
+Открытие файла, drag-and-drop, Space для паузы, Restart и Esc для выхода.
+Чтение Y4M, кадровые буферы и преобразование YUV → RGB реализованы в библиотеке
+FVid (`fvid::playback`); `eframe` отвечает за окно и вывод изображения.
+Ограничения: 8-bit Y4M, BT.601 limited range, без звука и сжатых кодеков.
+В Zed задача `fvid player` открывает пустое окно без подготовленного видео.
+
+Цель — собственные контейнеры и кодеки, FFmpeg только для бенчмарков.
+**Переход не завершён:** старые команды `fvid media …` всё ещё используют
+FFmpeg через необязательный `media`; они не входят в сборку плеера выше.
+[Состояние перехода](docs/NATIVE_PLAYBACK.md).
+
+
 Исследовательский медиадвижок на Rust и архитектурный проект на основе обзора 633 медиарепозиториев.
 
 - [Архитектура и решения](docs/ARCHITECTURE.md)
@@ -20,7 +39,7 @@
 
 После первого GPU-снимка добавлен `FrameView`: CPU identity/crop/vflip записывают строки прямо из входного кадра без второго кадрового buffer. CPU hflip без сужения кадра разворачивает строки во входном буфере без второго кадра. Для hflip с сужением кропа сохранён более быстрый путь с выходным буфером; GPU также материализует выход. Адреса исходных строк и бюджет одного кадра проверяются тестами. Все бенчмарки относятся к явно зафиксированным версиям кода.
 
-Необязательный `--features media` добавляет Rust-адаптер к native-библиотекам FFmpeg: probe, remux, выбор дорожек, строгую обрезку/склейку сжатых потоков и FFV1 lossless-экспорт полного кадра или crop+vflip с сохранением аудио. `fvid play` (то же, что `fvid media play`) открывает окно и проигрывает локальный файл: software decode, звук устройства вывода, пауза по Space, выход по Esc. Production-код не запускает FFmpeg CLI; кодеки здесь предоставлены библиотекой, а не переписаны на Rust. Проверены MP4/MKV, H.264/FFV1, PCM/AAC, 8/10/16-bit samples и alpha planes. Подробные ограничения находятся в docs/MEDIA.md.
+Необязательный `--features media` добавляет Rust-адаптер к native-библиотекам FFmpeg: probe, remux, выбор дорожек, строгую обрезку/склейку сжатых потоков и FFV1 lossless-экспорт полного кадра или crop+vflip с сохранением аудио. Legacy-команда `fvid media play` открывает окно и проигрывает локальный файл: software decode, звук устройства вывода, пауза по Space, выход по Esc. Production-код не запускает FFmpeg CLI; кодеки здесь предоставлены библиотекой, а не переписаны на Rust. Проверены MP4/MKV, H.264/FFV1, PCM/AAC, 8/10/16-bit samples и alpha planes. Подробные ограничения находятся в docs/MEDIA.md.
 
 ```sh
 cargo build --release --features media
@@ -28,7 +47,7 @@ cargo build --release --features media
 ./target/release/fvid media concat joined.mp4 first.mp4 second.mp4 --streams 0
 ./target/release/fvid media crop-lossless input.mp4 cropped.mkv --crop 2:2:640:360
 ./target/release/fvid media transcode-lossless input.mp4 flipped.mkv --vflip
-./target/release/fvid play input.mp4
+./target/release/fvid media play input.mp4
 ```
 
 Добавлена resident GPU-цепочка: `--backend metal --hflip --then --crop 2:2:1280:720 --then --vflip`. Между этапами кадр остаётся на GPU, загрузка и выгрузка происходят только на границах Y4M. В Rust API выгрузка явная и необязательная. Реализован также CUDA-путь; на Windows + NVIDIA RTX 5090 проверены DX12/CUDA Y4M и resident CUDA. Codec-surface interop: вертикальный срез `cargo build --release --features media-cuda` → `fvid media hw-filter` (NVDEC→NV12 filter→NVENC, без host frame copies).

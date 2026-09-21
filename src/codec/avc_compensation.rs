@@ -1,0 +1,446 @@
+//! Progressive 4:2:0 partition prediction from deblocked reference pictures.
+use super::avc_motion::{ReferencePlane, bipred, weighted};
+use crate::{Result, invalid};
+
+pub struct Reference420<'a> {
+    planes: [ReferencePlane<'a>; 3],
+    depth: u8,
+}
+#[derive(Clone, Copy, Debug)]
+pub struct ComponentWeight {
+    pub weight: i16,
+    pub offset: i16,
+    pub denominator: u8,
+}
+impl Default for ComponentWeight {
+    fn default() -> Self {
+        Self {
+            weight: 1,
+            offset: 0,
+            denominator: 0,
+        }
+    }
+}
+/// Packed samples occupy width*height (luma) and width*height/4 (chroma).
+/// Remaining array entries are zero. No per-partition heap allocation is needed.
+pub struct Prediction420 {
+    width: usize,
+    height: usize,
+    pub y: [u16; 256],
+    pub cb: [u16; 64],
+    pub cr: [u16; 64],
+    depth: u8,
+}
+impl<'a> Reference420<'a> {
+    /// Plane strides are in samples. Construct once per reference frame, since
+    /// validation inspects the sample values in all three planes.
+    pub fn new(
+        planes: [&'a [u16]; 3],
+        width: usize,
+        height: usize,
+        strides: [usize; 3],
+        depth: u8,
+    ) -> Result<Self> {
+        if width % 2 != 0 || height % 2 != 0 {
+            return Err(invalid("AVC 4:2:0 reference dimensions must be even"));
+        }
+        Ok(Self {
+            planes: [
+                ReferencePlane::new(planes[0], width, height, strides[0], depth)?,
+                ReferencePlane::new(planes[1], width / 2, height / 2, strides[1], depth)?,
+                ReferencePlane::new(planes[2], width / 2, height / 2, strides[2], depth)?,
+            ],
+            depth,
+        })
+    }
+    /// Origin and size are in luma samples, vector in quarter-luma units.
+    pub fn predict(
+        &self,
+        origin: [i32; 2],
+        motion: [i32; 2],
+        size: [usize; 2],
+    ) -> Result<Prediction420> {
+        let [width, height] = size;
+        if ![4, 8, 16].contains(&width)
+            || ![4, 8, 16].contains(&height)
+            || origin.iter().any(|v| v % 2 != 0)
+        {
+            return Err(invalid("invalid AVC 4:2:0 partition geometry"));
+        }
+        let mut out = Prediction420 {
+            width,
+            height,
+            y: [0; 256],
+            cb: [0; 64],
+            cr: [0; 64],
+            depth: self.depth,
+        };
+        let count = width * height;
+        self.planes[0].luma(origin, motion, width, height, &mut out.y[..count])?;
+        let chroma_origin = [origin[0] / 2, origin[1] / 2];
+        self.planes[1].chroma(
+            chroma_origin,
+            motion,
+            width / 2,
+            height / 2,
+            &mut out.cb[..count / 4],
+        )?;
+        self.planes[2].chroma(
+            chroma_origin,
+            motion,
+            width / 2,
+            height / 2,
+            &mut out.cr[..count / 4],
+        )?;
+        Ok(out)
+    }
+}
+impl Prediction420 {
+    pub fn dimensions(&self) -> (usize, usize) {
+        (self.width, self.height)
+    }
+    /// Apply explicit uni-prediction weights in Y/Cb/Cr order.
+    pub fn weight(mut self, weights: [ComponentWeight; 3]) -> Result<Self> {
+        let count = self.width * self.height;
+        for (component, samples) in [
+            &mut self.y[..count],
+            &mut self.cb[..count / 4],
+            &mut self.cr[..count / 4],
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let w = weights[component];
+            for sample in samples {
+                *sample = weighted(*sample, w.weight, w.offset, w.denominator, self.depth)?;
+            }
+        }
+        Ok(self)
+    }
+    /// Blend raw L0/L1 predictions. Explicit component denominators must match.
+    /// Defaults use weight 1, offset 0, denominator 0; implicit weights use 5.
+    pub fn blend(mut self, other: Self, weights: [[ComponentWeight; 3]; 2]) -> Result<Self> {
+        if self.width != other.width || self.height != other.height || self.depth != other.depth {
+            return Err(invalid("AVC prediction geometry or bit depth mismatch"));
+        }
+        let count = self.width * self.height;
+        let a = [
+            &mut self.y[..count],
+            &mut self.cb[..count / 4],
+            &mut self.cr[..count / 4],
+        ];
+        let b = [
+            &other.y[..count],
+            &other.cb[..count / 4],
+            &other.cr[..count / 4],
+        ];
+        for (component, (a, b)) in a.into_iter().zip(b).enumerate() {
+            let w = [weights[0][component], weights[1][component]];
+            if w[0].denominator != w[1].denominator {
+                return Err(invalid("AVC bipred denominators differ"));
+            }
+            for (a, b) in a.iter_mut().zip(b) {
+                *a = bipred(
+                    [*a, *b],
+                    [w[0].weight, w[1].weight],
+                    [w[0].offset, w[1].offset],
+                    w[0].denominator,
+                    self.depth,
+                )?;
+            }
+        }
+        Ok(self)
+    }
+}
+
+/// Coefficients are raster ordered within blocks and blocks are raster ordered
+/// within the macroblock. Chroma AC slot zero is replaced by transformed DC.
+pub enum InterLumaResidual<'a> {
+    Blocks4(&'a [[i32; 16]; 16]),
+    Blocks8(&'a [[i32; 64]; 4]),
+}
+impl Prediction420 {
+    /// Reconstruct a complete inter macroblock before deblocking. QPs include
+    /// the bit-depth offset; the caller derives component QPs from slice QP.
+    /// Scaling lists must already have SPS/PPS fallback rules applied.
+    pub fn reconstruct_inter(
+        mut self,
+        luma: InterLumaResidual<'_>,
+        chroma_dc: &[[i32; 4]; 2],
+        chroma_ac: &[[[i32; 16]; 4]; 2],
+        qp: [u8; 3],
+        weights4: &[[u8; 16]; 3],
+        weights8: &[u8; 64],
+    ) -> Result<Self> {
+        use super::avc_transform::{chroma_dc_2x2, reconstruct_4x4, residual_4x4};
+        use super::avc_transform8::{reconstruct_8x8, residual_8x8};
+        if self.dimensions() != (16, 16) {
+            return Err(invalid(
+                "inter residual reconstruction requires a full macroblock",
+            ));
+        }
+        match luma {
+            InterLumaResidual::Blocks4(blocks) => {
+                for (index, levels) in blocks.iter().enumerate() {
+                    let (x, y) = (index % 4 * 4, index / 4 * 4);
+                    let pred = std::array::from_fn(|i| self.y[(y + i / 4) * 16 + x + i % 4]);
+                    let residual = residual_4x4(levels, qp[0], self.depth, &weights4[0], None)?;
+                    let block = reconstruct_4x4(&pred, &residual, self.depth)?;
+                    for row in 0..4 {
+                        self.y[(y + row) * 16 + x..(y + row) * 16 + x + 4]
+                            .copy_from_slice(&block[row * 4..row * 4 + 4]);
+                    }
+                }
+            }
+            InterLumaResidual::Blocks8(blocks) => {
+                for (index, levels) in blocks.iter().enumerate() {
+                    let (x, y) = (index % 2 * 8, index / 2 * 8);
+                    let pred = std::array::from_fn(|i| self.y[(y + i / 8) * 16 + x + i % 8]);
+                    let residual = residual_8x8(levels, qp[0], self.depth, weights8)?;
+                    let block = reconstruct_8x8(&pred, &residual, self.depth)?;
+                    for row in 0..8 {
+                        self.y[(y + row) * 16 + x..(y + row) * 16 + x + 8]
+                            .copy_from_slice(&block[row * 8..row * 8 + 8]);
+                    }
+                }
+            }
+        }
+        for (component, plane) in [&mut self.cb, &mut self.cr].into_iter().enumerate() {
+            let dc = chroma_dc_2x2(
+                &chroma_dc[component],
+                qp[component + 1],
+                self.depth,
+                weights4[component + 1][0],
+            )?;
+            for index in 0..4 {
+                let (x, y) = (index % 2 * 4, index / 2 * 4);
+                let pred = std::array::from_fn(|i| plane[(y + i / 4) * 8 + x + i % 4]);
+                let residual = residual_4x4(
+                    &chroma_ac[component][index],
+                    qp[component + 1],
+                    self.depth,
+                    &weights4[component + 1],
+                    Some(dc[index]),
+                )?;
+                let block = reconstruct_4x4(&pred, &residual, self.depth)?;
+                for row in 0..4 {
+                    plane[(y + row) * 8 + x..(y + row) * 8 + x + 4]
+                        .copy_from_slice(&block[row * 4..row * 4 + 4]);
+                }
+            }
+        }
+        Ok(self)
+    }
+}
+
+/// Assemble non-overlapping motion-compensated partitions into one macroblock.
+/// Coverage is tracked at 4x4 luma granularity; chroma follows the same regions.
+pub struct MacroblockPrediction {
+    picture: Prediction420,
+    covered: u16,
+}
+impl MacroblockPrediction {
+    pub fn new(depth: u8) -> Result<Self> {
+        if !(8..=14).contains(&depth) {
+            return Err(invalid("AVC prediction bit depth out of range"));
+        }
+        Ok(Self {
+            picture: Prediction420 {
+                width: 16,
+                height: 16,
+                y: [0; 256],
+                cb: [0; 64],
+                cr: [0; 64],
+                depth,
+            },
+            covered: 0,
+        })
+    }
+    /// Origin is relative to this macroblock. Invalid input leaves it unchanged.
+    pub fn insert(&mut self, origin: [usize; 2], partition: &Prediction420) -> Result<()> {
+        let [x, y] = origin;
+        let (w, h) = partition.dimensions();
+        if partition.depth != self.picture.depth
+            || x > 16 - w
+            || y > 16 - h
+            || x % 4 != 0
+            || y % 4 != 0
+        {
+            return Err(invalid("AVC partition does not fit macroblock"));
+        }
+        let mut mask = 0u16;
+        for row in y / 4..(y + h) / 4 {
+            for col in x / 4..(x + w) / 4 {
+                mask |= 1 << (row * 4 + col);
+            }
+        }
+        if self.covered & mask != 0 {
+            return Err(invalid("overlapping AVC prediction partitions"));
+        }
+        let max = (1u16 << self.picture.depth) - 1;
+        if partition.y[..w * h]
+            .iter()
+            .chain(&partition.cb[..w * h / 4])
+            .chain(&partition.cr[..w * h / 4])
+            .any(|&v| v > max)
+        {
+            return Err(invalid("AVC prediction sample exceeds bit depth"));
+        }
+        for row in 0..h {
+            self.picture.y[(y + row) * 16 + x..(y + row) * 16 + x + w]
+                .copy_from_slice(&partition.y[row * w..(row + 1) * w]);
+        }
+        for (dst, src) in [
+            (&mut self.picture.cb, &partition.cb),
+            (&mut self.picture.cr, &partition.cr),
+        ] {
+            for row in 0..h / 2 {
+                dst[(y / 2 + row) * 8 + x / 2..(y / 2 + row) * 8 + (x + w) / 2]
+                    .copy_from_slice(&src[row * w / 2..(row + 1) * w / 2]);
+            }
+        }
+        self.covered |= mask;
+        Ok(())
+    }
+    pub fn finish(self) -> Result<Prediction420> {
+        if self.covered != u16::MAX {
+            return Err(invalid("incomplete AVC macroblock prediction"));
+        }
+        Ok(self.picture)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn fractional_luma_chroma_and_bipred() {
+        let y: Vec<_> = (0..16)
+            .flat_map(|y| (0..16).map(move |x| 100 + 8 * x + 16 * y))
+            .collect();
+        let cb: Vec<_> = (0..8)
+            .flat_map(|y| (0..8).map(move |x| 100 + 16 * x + 32 * y))
+            .collect();
+        let cr = vec![400; 64];
+        let r = Reference420::new([&y, &cb, &cr], 16, 16, [16, 8, 8], 10).unwrap();
+        let a = r.predict([4, 4], [1, 2], [4, 4]).unwrap();
+        assert_eq!(a.y[0], 206);
+        assert_eq!(a.cb[0], 206);
+        assert_eq!(a.cr[0], 400);
+        let b = r.predict([4, 4], [-1, -2], [4, 4]).unwrap();
+        let mixed = a.blend(b, [[ComponentWeight::default(); 3]; 2]).unwrap();
+        assert_eq!(mixed.y[0], 196);
+        assert_eq!(mixed.cb[0], 196);
+        let scaled = mixed
+            .weight(
+                [ComponentWeight {
+                    weight: 1,
+                    offset: -10,
+                    denominator: 0,
+                }; 3],
+            )
+            .unwrap();
+        assert_eq!(scaled.y[0], 156);
+        assert_eq!(scaled.cr[0], 360);
+        assert_eq!(scaled.y[16], 0);
+        assert_eq!(scaled.cb[4], 0);
+    }
+    #[test]
+    fn border_extension_and_invalid_geometry() {
+        let y = [10; 256];
+        let c = [20; 64];
+        let r = Reference420::new([&y, &c, &c], 16, 16, [16, 8, 8], 8).unwrap();
+        let p = r.predict([0, 0], [i32::MIN, i32::MAX], [16, 16]).unwrap();
+        assert_eq!(p.y, [10; 256]);
+        assert_eq!(p.cb, [20; 64]);
+        assert!(r.predict([1, 0], [0, 0], [4, 4]).is_err());
+        assert!(r.predict([0, 0], [0, 0], [32, 16]).is_err());
+        assert!(Reference420::new([&y, &c[..63], &c], 16, 16, [16, 8, 8], 8).is_err());
+    }
+}
+
+#[cfg(test)]
+mod assembly_tests {
+    use super::*;
+    #[test]
+    fn mixed_partitions_preserve_luma_and_chroma_positions() {
+        let y = [37; 256];
+        let cb = [81; 64];
+        let cr = [123; 64];
+        let r = Reference420::new([&y, &cb, &cr], 16, 16, [16, 8, 8], 8).unwrap();
+        let mut mb = MacroblockPrediction::new(8).unwrap();
+        let top = r.predict([0, 0], [0, 0], [16, 8]).unwrap();
+        mb.insert([0, 0], &top).unwrap();
+        assert!(mb.insert([0, 0], &top).is_err());
+        assert!(mb.insert([usize::MAX, 0], &top).is_err());
+        for x in [0, 8] {
+            let p = r
+                .predict([x as i32, 8], [0, 0], [8, 8])
+                .unwrap()
+                .weight(
+                    [ComponentWeight {
+                        weight: 1,
+                        offset: x as i16 + 1,
+                        denominator: 0,
+                    }; 3],
+                )
+                .unwrap();
+            mb.insert([x, 8], &p).unwrap();
+        }
+        let out = mb.finish().unwrap();
+        assert_eq!(out.y[0], 37);
+        assert_eq!(out.y[128], 38);
+        assert_eq!(out.y[136], 46);
+        assert_eq!(out.cb[32], 82);
+        assert_eq!(out.cb[36], 90);
+        assert_eq!(out.cr[36], 132);
+        assert!(MacroblockPrediction::new(8).unwrap().finish().is_err());
+    }
+}
+
+#[cfg(test)]
+mod residual_tests {
+    use super::*;
+    #[test]
+    fn inter_residual_dc_placement_clipping_and_zero_identity() {
+        let y = [250; 256];
+        let cb = [2; 64];
+        let cr = [100; 64];
+        let reference = Reference420::new([&y, &cb, &cr], 16, 16, [16, 8, 8], 8).unwrap();
+        let mut levels = [[0; 16]; 16];
+        levels[0][0] = 64;
+        levels[15][0] = -64;
+        let result = reference
+            .predict([0, 0], [0, 0], [16, 16])
+            .unwrap()
+            .reconstruct_inter(
+                InterLumaResidual::Blocks4(&levels),
+                &[[-64, 0, 0, 0], [0; 4]],
+                &[[[0; 16]; 4]; 2],
+                [0; 3],
+                &[[16; 16]; 3],
+                &[16; 64],
+            )
+            .unwrap();
+        assert_eq!(result.y[0], 255);
+        assert_eq!(result.y[12 * 16 + 12], 240);
+        assert_eq!(result.y[4], 250);
+        assert_eq!(result.cb, [0; 64]);
+        assert_eq!(result.cr, [100; 64]);
+        let result = reference
+            .predict([0, 0], [0, 0], [16, 16])
+            .unwrap()
+            .reconstruct_inter(
+                InterLumaResidual::Blocks8(&[[0; 64]; 4]),
+                &[[0; 4]; 2],
+                &[[[0; 16]; 4]; 2],
+                [51; 3],
+                &[[16; 16]; 3],
+                &[16; 64],
+            )
+            .unwrap();
+        assert_eq!(result.y, y);
+        assert_eq!(result.cb, cb);
+        assert_eq!(result.cr, cr);
+    }
+}

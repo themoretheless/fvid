@@ -30,7 +30,14 @@ fn main() {
         );
     }
     println!("cargo:rustc-link-search=native={}", lib.display());
-    for library in ["avformat", "avcodec", "avutil", "avfilter", "swscale", "swresample"] {
+    for library in [
+        "avformat",
+        "avcodec",
+        "avutil",
+        "avfilter",
+        "swscale",
+        "swresample",
+    ] {
         // MSVC import libs are avformat.lib; MinGW uses libavformat.dll.a — rustc -l avformat
         // resolves both when the search path is correct.
         println!("cargo:rustc-link-lib={library}");

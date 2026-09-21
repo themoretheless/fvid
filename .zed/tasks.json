@@ -1,68 +1,70 @@
 [
   {
-    "label": "fvid play (current file)",
-    "command": "cargo",
-    "args": ["run", "--features", "media", "--", "play", "$ZED_FILE"],
-    "cwd": "$ZED_WORKTREE_ROOT",
-    "env": {
-      "FVID_FFMPEG_PREFIX": "C:\\ffmpeg-shared",
-      "LIBCLANG_PATH": "C:\\Program Files\\LLVM\\bin",
-      "PATH": "C:\\ffmpeg-shared\\bin;${PATH}"
-    },
-    "use_new_terminal": true,
-    "allow_concurrent_runs": false,
-    "reveal": "always",
-    "hide": "never"
-  },
-  {
-    "label": "fvid play (selection / URL)",
-    "command": "cargo",
-    "args": ["run", "--features", "media", "--", "play", "$ZED_SELECTED_TEXT"],
-    "cwd": "$ZED_WORKTREE_ROOT",
-    "env": {
-      "FVID_FFMPEG_PREFIX": "C:\\ffmpeg-shared",
-      "LIBCLANG_PATH": "C:\\Program Files\\LLVM\\bin",
-      "PATH": "C:\\ffmpeg-shared\\bin;${PATH}"
-    },
-    "use_new_terminal": true,
-    "allow_concurrent_runs": false,
-    "reveal": "always",
-    "hide": "never"
-  },
-  {
-    "label": "fvid play release (current file)",
+    "label": "fvid player",
     "command": "cargo",
     "args": [
       "run",
-      "--release",
+      "--no-default-features",
       "--features",
-      "media",
+      "player",
+      "--",
+      "play"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "hide": "never"
+  },
+  {
+    "label": "fvid player (current Y4M file)",
+    "command": "cargo",
+    "args": [
+      "run",
+      "--no-default-features",
+      "--features",
+      "player",
       "--",
       "play",
       "$ZED_FILE"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "env": {
-      "FVID_FFMPEG_PREFIX": "C:\\ffmpeg-shared",
-      "LIBCLANG_PATH": "C:\\Program Files\\LLVM\\bin",
-      "PATH": "C:\\ffmpeg-shared\\bin;${PATH}"
-    },
     "use_new_terminal": true,
     "allow_concurrent_runs": false,
     "reveal": "always",
     "hide": "never"
   },
   {
-    "label": "build fvid media",
+    "label": "fvid player release",
     "command": "cargo",
-    "args": ["build", "--features", "media"],
+    "args": [
+      "run",
+      "--release",
+      "--no-default-features",
+      "--features",
+      "player",
+      "--",
+      "play"
+    ],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "env": {
-      "FVID_FFMPEG_PREFIX": "C:\\ffmpeg-shared",
-      "LIBCLANG_PATH": "C:\\Program Files\\LLVM\\bin",
-      "PATH": "C:\\ffmpeg-shared\\bin;${PATH}"
-    },
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false,
     "reveal": "always",
-    "hide": "on_success"
+    "hide": "never"
+  },
+  {
+    "label": "build fvid player",
+    "command": "cargo",
+    "args": [
+      "build",
+      "--no-default-features",
+      "--features",
+      "player"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "hide": "never"
   }
 ]

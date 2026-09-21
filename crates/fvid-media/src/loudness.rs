@@ -87,9 +87,7 @@ impl Drop for EburGraph {
 fn describe_layout(layout: &AVChannelLayout) -> Result<String> {
     let mut buf = [0i8; 64];
     // SAFETY: layout is a valid AVChannelLayout; buffer is writable.
-    let written = unsafe {
-        av_channel_layout_describe(layout, buf.as_mut_ptr(), buf.len())
-    };
+    let written = unsafe { av_channel_layout_describe(layout, buf.as_mut_ptr(), buf.len()) };
     if written < 0 {
         return Err("channel layout describe failed".into());
     }
@@ -351,9 +349,7 @@ fn select_audio_index(input: &Input, options: &CopyOptions, command: &str) -> Re
         input
             .streams()
             .iter()
-            .position(|&s| unsafe {
-                (*(*s).codecpar).codec_type == AVMediaType_AVMEDIA_TYPE_AUDIO
-            })
+            .position(|&s| unsafe { (*(*s).codecpar).codec_type == AVMediaType_AVMEDIA_TYPE_AUDIO })
             .ok_or_else(|| format!("{command} requires an audio stream"))
     } else if selected.len() == 1 {
         let index = selected[0];
@@ -545,7 +541,9 @@ pub fn apply_loudnorm(
                 channels = f.ch_layout.nb_channels;
                 graph = Some(LoudnormGraph::open(f, &loudnorm_args)?);
             } else if sample_rate != f.sample_rate || channels != f.ch_layout.nb_channels {
-                return Err("dynamic audio format/rate/layout is not supported for loudnorm".into());
+                return Err(
+                    "dynamic audio format/rate/layout is not supported for loudnorm".into(),
+                );
             }
             let active = graph.as_mut().ok_or("loudnorm graph missing")?;
             check(

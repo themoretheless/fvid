@@ -1,0 +1,1075 @@
+# Собственные контейнеры и кодеки: состояние реализации
+
+Цель: собственные H.264, H.265 и AAC в FVid; production-модуль `media`
+не зависит от FFmpeg. Цель пока **не достигнута**.
+
+## Выполнено
+
+- `src/container/mp4.rs`: собственный индексируемый MP4-demux для
+  нефрагментированных self-contained файлов. Поддержаны 32/64-bit box sizes,
+  `stsz`, `stts`, `ctts` v0/v1, `stsc`, `stco/co64`, `stss`, track IDs,
+  track/movie timescale, edit lists v0/v1 с единичной скоростью.
+- Извлекаются sample entries `avc1/avc3`, `hvc1/hev1`, `mp4a` и сырые
+  конфигурации `avcC/hvcC/esds`. Это не декодирование видео или аудио.
+- API возвращает track-media DTS/PTS и отдельный edit list; edit list пока
+  не применяется. Нельзя использовать эти PTS как movie presentation time
+  без обработки edit list, особенно для AAC priming и начала B-frame видео.
+- Пакеты читаются по индексу в переиспользуемый буфер. Проверяются границы
+  файла, родительского box, `mdat`, согласованность таблиц и лимиты.
+  Поиск содержащего `mdat` двоичный, без полного прохода на каждый chunk.
+- Ограничения по умолчанию: moov 32 MiB, суммарно 1 млн samples,
+  64 tracks, пакет 32 MiB. Это лимиты отдельных структур, не RSS.
+- `src/codec/bits.rs`: собственный MSB bit reader, unsigned/signed
+  exponential-Golomb, RBSP unescape и проверка trailing bits.
+- `src/codec/config.rs`: собственные avcC/hvcC parsers с проверкой
+  длины, reserved bits и типов parameter-set NAL; borrowed iterator
+  length-prefixed NAL units; esds descriptor reader и AAC-LC
+  AudioSpecificConfig (частота, каналы, frame length, core-coder delay).
+  HEVC VPS/SPS/PPS пока возвращаются как NAL bytes;
+  их внутренняя syntax ещё не разбирается. AAC PCE, HE-AAC/SBR и ER
+  tools отклоняются. Конфигурационный parser не является декодером.
+
+- `src/codec/avc.rs`: собственные SPS/PPS H.264, включая chroma/bit depth,
+  cropping, POC types 0/1/2, scaling-list syntax, VUI/HRD, параметры
+  квантования, CABAC/CAVLC flags и slice-group mapping syntax. Проверяются
+  RBSP trailing bits, ссылки PPS→SPS, диапазоны параметров и геометрия.
+  Это разбор syntax, не полная проверка profile/level conformance.
+  Scaling lists пока сохраняются в scan order; fallback A/B и применение
+  матриц будут частью декодера. Извлечение slice-group параметров не
+  означает, что восстановление FMO-карт и декодирование slices уже работают.
+
+- `src/codec/avc_transform.rs`: inverse scan 4×4 для frame/field,
+  обратное квантование с масштабными весами и QP, integer inverse transform,
+  DC Hadamard для Intra16 luma и 4:2:0 chroma, сложение residual/prediction
+  с clipping. Промежуточные вычисления i64; недопустимый диапазон residual
+  отклоняется. Поддерживается bit depth 8–14; 8×8 transform реализован отдельно ниже; bypass ещё нет.
+- `src/codec/avc_prediction.rs`: все четыре Intra16 режима и реконструкция
+  luma-макроблока из отдельного DC и 16 AC-блоков. API принимает уже
+  декодированные коэффициенты. Подключён к CAVLC picture decoder ниже.
+  Intra deblocking подключён на уровне полного кадра ниже.
+- Проверки вычислений: независимая матричная формулировка transform на
+  базисных векторах, все QP 0–87 на DC, clipping, affine plane prediction,
+  отсутствие соседей и размещение residual-блоков в макроблоке. Это не
+  заменяет побайтовое сравнение декодированных видеокадров с эталоном.
+
+- `src/codec/avc_slice.rs`: разбор обычных slice NAL 1/5, выбор PPS,
+  I/P/B/SP/SI header syntax, frame/field/POC fields, reference-list modifications,
+  weighted prediction tables, MMCO syntax, QP/QS, deblocking offsets,
+  changing slice-group cycle и CABAC alignment. Возвращает RBSP и точное
+  bit offset начала entropy payload. Проверяет ограничения списков и полей.
+  Data partitioning NAL 2/3/4 и расширения SVC/MVC не поддержаны.
+  MMCO пока только разобраны, не применены к decoded picture buffer.
+- Дифференциальная проверка 24 slice headers (High 10 и AVC I/P/B)
+  сравнивает first_mb, frame_num, slice_type, PPS ID, QP delta и точное
+  положение начала entropy payload с FFmpeg `trace_headers`.
+  Дополнительно разобраны 3600 Baseline slices локального тестового файла.
+  Unit-тесты включают сохранённый Baseline IDR header и побайтовые мутации.
+
+- `src/codec/cavlc.rs`: собственное residual CAVLC decoding, включая все
+  coeff_token contexts, trailing-one signs, level prefix/suffix escapes,
+  total_zeros и run_before для 4×4/AC15 и chroma DC 2×2/2×4. Выход —
+  коэффициенты в scan order и TotalCoeff для соседних блоков. Лимит
+  level_prefix=31 защищает числовой диапазон; profile-specific ограничения
+  должен применить будущий slice decoder.
+- `src/codec/cavlc_tables.rs`: числовые таблицы 9-5, 9-7…9-10 из
+  ITU-T H.264 (02/2016). `scripts/generate_cavlc_tables.py` воспроизводит
+  их из официального PDF с проверкой SHA-256; зависимость pdfplumber
+  нужна только для генератора. Повторная генерация побайтово совпала.
+- Проверены все VLC-коды и их prefix-free свойство, фиксированные
+  bitstream vectors и 2400 roundtrip блоков с разными contexts/levels.
+  Интеграционный тест восстанавливает известный блок пикселей из CAVLC
+  битов через inverse scan/scaling/transform. CAVLC подключён к intra
+  macroblock reader и сборке полного intra picture ниже; CABAC syntax ещё отсутствует.
+
+- `src/codec/avc_intra.rs`: все девять Intra4×4 и четыре 4:2:0 chroma
+  prediction modes, вывод prev/rem режима, top-right substitution и
+  проверка доступности соседей. Фиксированные векторы проверяют каждый
+  режим; affine/constant vectors проверяют plane и разрядности 8–14.
+- `src/codec/avc_macroblock.rs`: последовательный reader progressive
+  4:2:0 CAVLC I-slices. Читает Intra4/Intra16/PCM syntax, QP, CBP,
+  DC/AC коэффициенты; поддерживает контексты соседних блоков. Возвращает
+  блоки и коэффициенты, не изображение. Intra8×8 подключён; FMO, interlace,
+  CABAC и P/B macroblocks явно не реализованы. Context budget ограничен.
+- Проверка нового Baseline fixture: все 72 макроблока трёх I-slices
+  разобраны до RBSP trailing bits; дополнительно разобраны 15 I-slices
+  длинного 960×540 ролика (30600 макроблоков). Это проверка syntax/coverage,
+  а не доказательство совпадения всех коэффициентов или целых кадров
+  с эталоном. Побайтовое сравнение reconstructed frames описано ниже.
+
+- `src/codec/avc_picture.rs`: сборка целого single-slice progressive 4:2:0
+  CAVLC/CABAC I-кадра с Intra4/Intra8/Intra16/PCM, chroma QP mapping, cropping и
+  planar YUV export. Поддерживаются 8–14-bit вычисления; с реальным
+  эталонным потоком проверены 8 и 10 бит. Требуются стандартные плоские
+  scaling weights; custom matrices и bypass
+  явно отклоняются. Проверяются полнота кадра и бюджет planes/context grids.
+- `src/codec/avc_deblock.rs`: собственный progressive intra deblocking,
+  bS=4 на границах макроблоков и bS=3 внутри, с учётом 8×8 transforms,
+  отдельные luma/chroma QP,
+  alpha/beta offsets, 8–14-bit thresholds. Фильтрация после reconstruction
+  сохраняет неотфильтрованных соседей для intra prediction. Inter bS=0–2
+  и границы между slices пока не реализованы.
+- `examples/decode_avc_intra.rs` соединяет собственные MP4, SPS/PPS,
+  slice/CAVLC, prediction и inverse transforms без FFmpeg. Это пример
+  ограниченного декодера, ещё не общий backend плеера.
+- `benchmarks/validate_native_avc_intra.py`: все YUV bytes совпали с
+  независимым FFmpeg decoder на 42 кадрах: pattern 96×64 (27648 bytes),
+  cropped 66×50 (14850), flat 64×48 (13824), High 10 96×64 (55296).
+  Дополнительно проверены deblocking 8-bit (27648 bytes), 10-bit (55296)
+  и offsets +3/−2 на cropped 66×50 (14850). CABAC Main (27648),
+  CABAC High 10 (55296) и CABAC High cropped (14850) также совпали.
+  Четыре fixtures 128×96 проверяют 8×8: CABAC 8-bit (55296), CABAC
+  10-bit (110592), CABAC mixed Intra4/8 (55296), CAVLC (55296).
+  Encoder statistics подтверждают ненулевое использование 8×8 transforms.
+  FFmpeg используется только в benchmark как encoder/oracle.
+  Unit-тесты отдельно проверяют видимый crop, нейтральные пиксели,
+  недостаточный budget, неполный кадр и усечённый payload.
+
+- `src/codec/cabac.rs`: собственное арифметическое ядро CABAC — decision,
+  bypass, terminate, renormalization и H.264 context initialization из m/n/QP.
+  Проверяются начальный offset, alignment, усечение и обращения после
+  termination; неудачное чтение сохраняет прежнее состояние контекста/ядра.
+  Таблицы range/state transitions воспроизводятся из официального PDF
+  скриптом `scripts/generate_cabac_tables.py` с проверкой SHA-256.
+- CABAC core проверен фиксированной арифметической трассой и 1024
+  смешанными последовательностями всех 64 состояний. Независимый тестовый
+  encoder хранит целый интервал в u128; совпадают bins, итоговые contexts
+  и точная позиция потока. Это проверка арифметики, не CABAC video decoding:
+  I-macroblock syntax подключена ниже; P/B syntax ещё предстоит реализовать.
+
+- `src/codec/avc_cabac_init.rs`: таблицы m/n для contexts 0–459,
+  I/SI и всех трёх cabac_init_idc, извлечённые из таблиц 9-12…9-24
+  официального PDF. Неиспользуемые contexts представлены как None и
+  отклоняются при обращении. Генератор проверяет заполненность и диапазоны.
+- `src/codec/avc_cabac.rs`: банк контекстов и residual_block_cabac для
+  luma DC/AC/4×4 и chroma DC/AC (4:2:0 и 4:2:2), frame/field significance,
+  implicit last coefficient, reverse level order, UEG0 escapes и sign bins.
+  Соседний coded-block context передаётся вызывающим macroblock reader.
+  Проверки syntax traces подтверждают context indices и коэффициенты;
+  реальное CABAC intra-видео проверено через reader ниже. 8×8 residual syntax
+  подключена к picture reader ниже.
+  Расширенные contexts 460–1023 ещё не подключены.
+
+- `src/codec/avc_cabac_macroblock.rs`: progressive 4:2:0 CABAC I-slice
+  reader для Intra4/Intra8/Intra16/PCM, mb_type/CBP/QP/mode binarization,
+  контекстов соседних макроблоков и coded-block flags. PCM перезапускает
+  arithmetic engine с сохранением context bank. Reader выдаёт тот же
+  IntraMacroblock, что CAVLC, и подключён к picture reconstruction/deblocking.
+  I_PCM путь реализован, но пока не покрыт реальным PCM fixture.
+- CABAC termination проверяется после каждого макроблока; extra zero words
+  проверяются отдельно. Неиспользуемые биты последнего арифметического
+  байта допускаются для совместимости с x264 flush padding. Это не строгая
+  проверка всех RBSP alignment bits. Сохранённый 16×16 Main IDR проверяет
+  известные пиксели без FFmpeg, каждое побайтовое усечение и мутации payload.
+
+- `src/codec/avc_transform8.rs`: inverse scan frame/field, scaling с шестью
+  normalization classes и QP, integer inverse transform 8×8 и reconstruction
+  с clipping. Все 64 basis coefficients обоих знаков проверены независимым
+  матричным вычислением; DC проверен на QP 0–87. Wide intermediates
+  предотвращают overflow, выход за i32 явно отклоняется.
+- `src/codec/avc_8x8_tables.rs`: scan и CABAC significance maps из таблиц
+  8-14 и 9-43 официального PDF; воспроизводятся генератором CABAC tables.
+  `AvcCabac::residual8` реализует 64 coefficients с inferred coded-block flag
+  для 4:2:0/4:2:2 luma. Frame/field syntax traces проверяют context selection.
+  Intra8 prediction и подключение к macroblock/picture завершены для
+  текущего progressive 4:2:0 intra subset; сравнение кадров описано выше.
+- `intra8` в `src/codec/avc_intra.rs`: фильтрация reference samples,
+  девять режимов prediction, top-right replication и mode derivation через
+  общую сетку Intra4/8 modes. CAVLC deinterleaves четыре residual streams
+  в 64 coefficients; CABAC использует отдельные 8×8 contexts. Deblocking
+  пропускает внутренние luma edges на 4 и 12 при transform_size_8x8_flag.
+  Проверены filtered edges, отрицательные directional branches и отсутствие
+  соседей. Общие Intra4/8 формулы сохраняют прежние Intra4 проверки.
+
+- `src/codec/avc_motion.rs`: собственная progressive motion compensation:
+  quarter-pel luma с 6-tap фильтром и без промежуточного clipping при
+  diagonal half-pel, eighth-pel bilinear chroma, signed vectors и edge extension.
+  ReferencePlane проверяет geometry/stride/bit depth; prediction пишет в
+  предоставленный буфер partition до 16×16 без allocations.
+- Реализованы explicit weighted prediction, default bi-prediction и применение
+  переданных implicit weights. Offsets масштабируются по bit depth.
+  Derivation implicit weights из POC реализована отдельно ниже. Проверены все 16
+  luma fractions на impulse, luma/chroma на affine field со signed vectors,
+  extreme motion vectors, padding stride, diagonal negative filter taps,
+  rounding и clipping. Это primitive tests, не доказательство P/B decoding:
+  macroblock syntax, motion-vector prediction и reference-picture management
+  ещё предстоит соединить с этими примитивами.
+
+- `src/codec/avc_mv.rs`: progressive motion-vector predictors — median,
+  единственная matching reference, directional 16×8/8×16, C→D fallback,
+  P-skip, проверяемое сложение predictor+difference. Недоступный сосед
+  отличается от доступного intra/другого списка без prediction.
+- Temporal direct vector scaling и implicit B weights вычисляются из POC
+  с clipping distances, long-term/zero-distance fallback и защитой от
+  переполнения. Векторы вне signed 16-bit отклоняются. Проверены partition
+  preferences, neighbour availability, reference matching, P-skip,
+  forward/reverse temporal distances, long-term и числовые границы.
+  Это ещё не DPB и не inter macroblock reader: выбор и хранение reference
+  pictures и извлечение соседей остаются вызывающему слою; POC описан ниже.
+
+- `src/codec/avc_poc.rs`: stateful POC types 0/1/2 с LSB/frame_num
+  wraparound, cycle offsets, non-reference history, field POC и MMCO 5 reset.
+  Возвращает значения до и после reference marking, не смешивая текущую
+  temporal prediction с последующим хранением reference picture. Ошибка
+  не изменяет state; проверяются IDR origin и signed 32-bit range.
+- POC unit vectors покрывают B-order, обе границы half-range wrap, cycle,
+  frame_num wrap, MMCO 5 и bottom field. MP4 verifier сравнивает 27 POC
+  с presentation timestamps x264 fixtures (включая B-кадры) внутри каждого
+  IDR sequence. Это ещё не output reorder queue или DPB. Вызывать API
+  нужно один раз на picture; gap-inferred pictures должен передать DPB слой.
+  Начало без IDR и смена POC configuration без IDR пока отклоняются.
+
+## Проверки
+
+```sh
+cargo test --locked --offline --no-default-features --lib --test mp4
+cargo run --locked --offline --no-default-features --example mp4_packets -- input.mp4
+python3 benchmarks/validate_native_mp4.py
+python3 benchmarks/validate_native_avc_intra.py
+```
+
+MP4-тесты проверяют содержимое пакетов, знаковые composition offsets,
+разные sample-to-chunk runs, edit list, co64, extended size, усечения по
+каждому байту, испорченные таблицы, внешние references и бюджет.
+Побайтовые мутации небольшого контейнера проверяют отсутствие panic.
+Это не заменяет полноценный fuzzing на большом корпусе.
+
+Дифференциальный скрипт в `benchmarks` создаёт AVC+B/AAC и HEVC fixtures
+и сравнивает все packet offsets, sizes, DTS, PTS, durations и sync flags
+с ffprobe (`-ignore_editlist 1`, то есть тот же media timeline).
+Пример также разбирает codec configuration каждой дорожки и проверяет
+NAL framing всех AVC/HEVC пакетов, SPS/PPS H.264 и совпадение видимых
+размеров с ffprobe. Дополнительно генерируется High 10 файл 66×50
+с cropping и SAR 4:3 (12 пакетов); Baseline SPS 960×540 проверяется
+на сохранённом NAL fixture, включая coded size 960×544 и timing.
+На локальном запуске совпали 60 AVC/AAC и 12 HEVC пакетов; дополнительно
+проверены 3600 пакетов длинного AVC fixture. FFmpeg/ffprobe вызываются
+только эталонным скриптом, не новым production-reader.
+
+## Ограничения MP4
+
+Пока нет fragmented MP4, compact sample-size `stz2`, multiple sample
+entries, encrypted/external tracks, QuickTime audio entry v1/v2.
+Такие входы явно отклоняются. Произвольный codec sample entry тоже
+отклоняется. Codec configuration ещё должна быть валидирована декодером.
+
+## Следующие обязательные шаги
+
+1. Разбор внутренней syntax HEVC parameter sets; AAC program config
+   elements и дополнительные профили поверх реализованного AAC-LC config.
+2. H.264 reconstruction: multi-slice pictures, P/B macroblock syntax,
+   CABAC P/B macroblocks, motion-vector prediction и подключение
+   motion compensation, scaling-list fallback,
+   reference-picture management, inter deblocking, display reordering.
+3. H.265 reconstruction с собственными CABAC, prediction, transforms,
+   reference management, deblocking и SAO.
+4. AAC decoding: syntax, Huffman, inverse quantization, stereo tools,
+   filterbank/overlap, priming. Затем синхронизация и звук плеера.
+5. Подключить эти декодеры к контейнеру и плееру; переносить `media` и MCP
+   с сохранением нужных операций. Убрать libav из production build graph.
+6. Проверять декодированные пиксели/PCM, timestamps, seek, повреждённые
+   данные и расход памяти на независимом корпусе. Сравнение packet index
+   не является доказательством работы декодеров.
+
+Legacy `fvid-media` пока остаётся зависимым от FFmpeg. Его наличие не
+маскируется переименованием или фиктивными заглушками.
+
+## Форматы и справочные материалы
+
+- [MP4RA: зарегистрированные box types](https://mp4ra.org/registered-types/boxes).
+- [W3C ISO BMFF byte stream format](https://www.w3.org/TR/mse-byte-stream-format-isobmff/).
+  Описание fragmented media не означает, что reader уже его поддерживает.
+
+- [W3C AAC registration](https://www.w3.org/TR/webcodecs-aac-codec-registration/):
+  связь raw AAC с AudioSpecificConfig.
+- [W3C HEVC registration](https://www.w3.org/TR/webcodecs-hevc-codec-registration/):
+  связь length-prefixed потока с HEVCDecoderConfigurationRecord.
+
+- [ITU-T H.264](https://www.itu.int/rec/t-rec-h.264): SPS/PPS syntax,
+  scaling lists и VUI/HRD (разделы 7.3/7.4 и приложение E).
+
+### Списки опорных кадров AVC
+
+`codec::avc_references` строит списки прогрессивных P/SP/B-кадров:
+FrameNumWrap, сортировка по POC, перестановка одинаковых B-списков,
+short-term/long-term modifications с сохранением повторов в изменённом
+префиксе. Проверяются отсутствующие и повторные записи, границы operands.
+`avc_dpb::ReferenceBuffer<T>` хранит опорные кадры через `Arc<T>`,
+применяет IDR reset, sliding window и MMCO 1–6 атомарно при ошибках.
+Списки связаны с буфером; MP4 inspector прогоняет его на метаданных
+реальных потоков, пока без межкадровой реконструкции пикселей.
+Non-existing pictures, frame-number gaps, field lists и очередь показа
+ещё не реализованы.
+Проверка: `cargo test --locked --offline --no-default-features` — 98 тестов.
+
+### Inter prediction syntax AVC
+
+`avc_inter` implements P/SP/B mb_type and sub_mb_type partition tables,
+including mixed L0/L1/Bi prediction, direct partitions and I-type offsets.
+The progressive CAVLC prediction reader handles truncated-Golomb reference
+indices, P_8x8ref0 inference and signed motion differences in syntax order;
+reader state is restored on error. Two tests cover geometry for every table
+entry and fixed bitstreams for reference/MVD order and truncation.
+All 100 no-default-features tests pass. This is not yet a full P/B macroblock
+reader: residuals, motion-neighbour state, direct derivation and inter
+reconstruction still need integration; CABAC inter syntax remains pending.
+
+`avc_compensation::Reference420` validates deblocked Y/Cb/Cr planes once and
+produces packed partition predictions without heap allocations. It connects
+quarter-luma and eighth-chroma interpolation for progressive 4:2:0, including
+edge extension, uni weights and bi weights at 8–14-bit sample depth. Fixed
+buffers carry the prediction into future residual reconstruction. Tests cover
+fractional affine samples, chroma coordinates, blend/offset depth scaling,
+extreme vectors and malformed geometry. Full suite: 102 tests pass; this does
+not yet prove complete P/B picture reconstruction.
+
+`MacroblockPrediction` assembles partition predictors into 16x16 luma and
+8x8 chroma buffers, validates sample depth and rejects overlap, out-of-range
+origins and incomplete coverage. A mixed 16x8/8x8 test checks chroma/luma
+placement and failed-insert atomicity. Full no-default-features suite: 103 tests.
+
+Inter macroblock predictors now accept raster luma residuals (4x4 or 8x8)
+and chroma DC/AC coefficients, apply component quantization/scaling lists,
+and reconstruct clipped pixels before deblocking. Component QP derivation and
+scaling-list fallback remain caller responsibilities. Tests cover signed DC,
+block placement, saturation, chroma DC and zero-residual identity. All 104
+no-default-features tests pass. Entropy/motion-field integration and inter
+boundary-strength derivation are still required for complete P/B decoding.
+
+## Дополнение цели: веб-камера
+
+Пользователь подтвердил направление: видеофайл из FVid передаётся другим
+приложениям как виртуальная камера. Захват физической камеры не входит
+в это дополнение. Сейчас соответствующих backend/API в FVid нет. Эта часть входит в общую цель и ещё не выполнена;
+успешные тесты кодековых примитивов её не подтверждают.
+
+`avc_boundary::strength` derives progressive bS=0..4 from intra/switching
+mode, nonzero luma coefficients and motion/reference identity. It handles
+swapped B lists and the ambiguous same-picture bipred pairing, with widened
+arithmetic for extreme vectors. Tests verify priority and the quarter-sample
+threshold; the full suite passes 110 tests. Integration with inter edge
+filtering and picture motion metadata remains pending.
+
+The deblocking pixel kernel now handles bS=0/1/2 as well as intra bS=3/4,
+using the normative clipping tables for each weak strength. Public
+`avc_deblock::filter_samples` validates parameters and sample depth. All 111
+Rust tests pass; the 42-frame intra oracle corpus still matches FFmpeg YUV
+byte-for-byte. Inter picture edge traversal is not yet connected.
+
+`avc_deblock::inter_plane` now traverses progressive luma/4:2:0 chroma
+macroblocks with per-segment strengths, averaged component QPs and slice
+offsets. It skips absent outer edges and internal 4x4 luma edges for 8x8
+transforms. Invalid metadata is rejected before mutation. A luma/chroma test
+checks distinct segment strengths and error atomicity. All 112 tests pass.
+Producing these edge grids from decoded P/B macroblock state is still pending.
+
+`avc_boundary::picture_edges` connects decoded 4x4 motion/coefficient metadata
+to the filter edge grids, including neighbour coordinates, component QP
+averaging, 8x8 edge suppression and disable_deblocking_filter_idc 1/2 slice
+rules. Tests cover mixed slice IDs, coefficient/intra strengths and chroma QP.
+The complete Rust suite passes 113 tests. The full inter entropy decoder still
+needs to populate this metadata; P/B bitstream decoding is not yet complete.
+
+Intra reconstruction now uses the same metadata-driven edge traversal as inter
+deblocking, removing the duplicate pixel traversal. The temporary edge-grid
+allocation is included in the picture memory budget. All 113 tests pass, and
+42 intra frames remain byte-identical to the FFmpeg oracle, exercising the
+shared path on CAVLC/CABAC, cropped, 8/10-bit and 8x8-transform inputs.
+
+`avc_motion_field::MotionField` provides budgeted 4x4 progressive motion storage,
+slice-aware neighbour lookup and prediction-plus-MVD reconstruction for both
+lists. It rejects overlap and invalid partitions; failed vector derivation
+does not publish partial state. P-skip/B-direct supply their derived vectors
+through the same store API. All 114 Rust tests pass. The field is not yet
+connected to the complete P/B entropy loop.
+
+MotionField now accepts parsed non-direct macroblock partitions as a unit,
+derives directional 16x8/8x16 predictors in decode order, checks full coverage
+and restores all cells if any partition fails. P-skip derives and stores its
+inferred vector. An integration test feeds real CAVLC prediction bits through
+partition parsing into the field, exercises late-partition failure rollback,
+and decodes the following P-skip. All 115 tests pass. B-direct integration and
+the surrounding residual/macroblock entropy loop remain pending.
+
+`avc_inter_prediction::predict_macroblock` connects parsed partitions and final
+motion vectors to reference planes, interpolation, per-component weighting and
+macroblock assembly. It validates prediction/list agreement and missing
+references. A CAVLC B_Bi bitstream test now runs through motion derivation to
+expected Y/Cb/Cr pixels. All 116 Rust tests pass. This joins prediction stages;
+complete slice decoding and residual syntax integration remain unfinished.
+
+CAVLC residual control now includes inter coded_block_pattern mapping,
+conditional transform_size_8x8_flag and mb_qp_delta. Table 9-4 and QP wrapping
+are shared with the active intra reader. Invalid control syntax restores the
+bit cursor. All 118 tests pass; all 42 intra oracle frames still match. The
+inter coefficient reader and full slice loop remain to be connected.
+
+`read_inter_header` now joins mb_type, subpartition prediction syntax, CBP,
+conditional transform8 and QP delta with transactional cursor handling.
+Transform8 eligibility follows partition sizes and direct_8x8_inference_flag.
+Tests cover every P/B subpartition type and a complete fixed inter header;
+all 120 Rust tests pass. Coefficient parsing and slice iteration remain pending.
+
+`avc_inter_coefficients` reads progressive 4:2:0 CAVLC inter residuals with
+local nC propagation and externally supplied neighbour counts. It reconstructs
+raster 4x4/8x8 luma levels and chroma DC/AC, returning counts for subsequent
+macroblocks. Fixed vectors cover zero and nonzero coefficients plus cursor
+rollback on truncation. All 122 tests pass. Full-slice state integration and
+independent inter-frame pixel validation are still required.
+
+`CoefficientField` stores CAVLC counts with slice identity and a memory budget.
+Its `read_inter` combines the header and coefficient parser, committing cursor
+and neighbour counts only after successful decoding. Skip/intra/PCM counts
+can be published through the same field. Tests cover complete inter syntax,
+top/left propagation, slice isolation and failure rollback. All 123 tests pass.
+Full-slice dispatch and inter-frame oracle validation remain pending.
+
+`InterCavlcSlice` iterates progressive 4:2:0 inter macroblocks, expands bounded
+mb_skip_run, propagates QP/counts and validates RBSP trailing bits. Fatal parse
+errors poison the reader. Tests cover skip/coded/skip sequences and excessive
+runs; all 125 tests pass. Intra macroblocks within P/B slices remain explicitly
+unsupported, and picture assembly must enforce complete coverage. This reader
+is an integration stage, not a completed P/B decoder.
+
+`avc_inter_picture::decode_p_picture` now connects single-slice CAVLC P parsing,
+motion fields, reference interpolation, residual reconstruction and deblocking
+into coded Y/Cb/Cr planes. Current supported path is progressive 4:2:0, flat
+scaling, unweighted prediction; intra-in-P is still rejected. The memory budget
+uses a conservative per-macroblock bound. Full skip and zero-residual picture
+tests reproduce a patterned reference exactly. All 126 tests passed before the
+final reference-identity validation adjustment; the targeted picture test also
+passes after it. Real inter-bitstream oracle coverage is still pending.
+
+`examples/decode_avc_ip.rs` integrates MP4 packet reading, POC, reference lists,
+reference-frame storage and native I/P picture decoding. It rejects display
+reordering rather than writing misordered output. `validate_native_avc_ip.py`
+checks three real static-color streams, each one I and four P frames: all 15
+frames match FFmpeg bytes. This corpus principally exercises reference/skip
+integration, not general inter residual/motion coverage. A changing-luma
+fixture currently fails at intra-in-P macroblock dispatch, establishing the
+next required integration. The Rust suite passes 126 tests.
+
+IntraCavlcReader now exposes shared-context construction and embedded intra
+macroblock parsing after a P/B dispatcher maps mb_type to the I table. Inter
+counts can be imported and completed intra counts exported, avoiding a second
+intra entropy implementation. Existing I-slice decoding uses the same body.
+All 126 tests pass; 42 intra oracle frames remain byte-identical. Mixed-slice
+dispatch and shared pixel reconstruction are not yet wired into decode_p_picture.
+
+Mixed CAVLC slice dispatch now parses embedded intra macroblocks and exchanges
+counts with the inter context; PCM preserves the preceding slice QP. The MP4
+inspector uses this path. The changing-luma fixture that previously stopped
+now parses all seven P slices: each contains one inter and three intra blocks.
+All 126 tests pass. Pixel reconstruction for embedded intra blocks remains
+unconnected in decode_p_picture, so this is entropy proof, not pixel proof.
+
+Embedded intra reconstruction is now connected to decode_p_picture through
+shared reconstruction code used by the I decoder. Intra blocks update motion
+availability, coefficient contexts, QPs and deblocking metadata. The changing
+luma MP4 now decodes all eight frames byte-identically to FFmpeg and is retained
+in the I/P oracle script. All 126 Rust tests pass, as do 23 I/P and 42 intra
+oracle frames. Constrained intra prediction, weighted P, CABAC P and B-picture
+assembly remain unsupported in this path.
+
+P reconstruction now applies explicit per-reference luma/chroma weights,
+including skip predictions. An eight-frame weighted ramp with confirmed
+luma_weight_l0_flag=1 matches FFmpeg; a 12-frame moving CRF fixture also matches.
+The expanded persistent oracle adds motion at fixed QP=20 and currently FAILS
+its pixel comparison. This unresolved regression must not be treated as broad
+P-decoder conformance. The Rust suite still passes 126 tests; those tests do
+not cover the newly found moving-frame discrepancy.
+
+The fixed-QP moving-frame regression is resolved: an available inter neighbour
+contributes DC to intra mode derivation, rather than making the neighbour
+unavailable (unless constrained_intra_pred excludes it). The incorrect mode
+first affected an intra block inside P frame 10 and propagated through its
+reference. The persistent I/P oracle now passes all 43 frames byte-for-byte,
+including fixed-QP motion and explicit weights. A focused regression covers
+both constrained and unconstrained neighbour mode derivation.
+
+Constrained intra prediction is now connected in progressive CAVLC P pictures.
+The shared intra reconstruction masks unavailable neighbours for Intra4,
+Intra8, Intra16 and chroma; inter pixels enter the availability grid only when
+constrained_intra_pred is false. A focused pixel regression checks all three
+luma block sizes and both chroma planes with available and excluded neighbours.
+The I/P oracle now passes 55 frames (including 12 constrained motion frames
+with the PPS flag verified); all 42 intra oracle frames still match. The full
+127-test suite and the newly added pixel regression pass. This does not add
+CABAC P, B reconstruction, HEVC or AAC decoding.
+
+The I/P access-unit integration now lives in the library as
+codec::avc_decoder::AvcDecoder, rather than being implemented by the example.
+It owns parameter sets, POC and decoded references; enforces a combined
+reference/reconstruction budget; rejects multiple slices, unsupported in-band
+NALs, frame-number gaps and output reordering explicitly; and requires reset
+after an error. Returned pictures are shared Arcs; additional output storage
+retained by callers is outside the decoder budget. The MP4 I/P example now
+uses this API and all 55 oracle frames match. The Rust suite passes 130 tests.
+GUI playback and the camera source still need this API connected; they remain
+Y4M-only. This integration does not imply complete H.264 support.
+
+playback_mp4::Mp4AvcReader now joins the own MP4 demuxer and AvcDecoder as a
+library frame source. It selects or explicitly accepts an AVC video track,
+returns shared decoded pictures with exact track PTS/duration/sample index,
+reuses packet storage, and resets decoder/reference state on rewind. Errors
+require rewind before retry. Track edit lists and movie timescale are exposed;
+this layer returns media timestamps and does not yet apply presentation edits.
+The I/P example uses this source and verifies first-frame pixels and timestamps
+after rewind. All 55 oracle frames match. RGB conversion, presentation scheduling,
+audio and GUI/camera integration are still outstanding.
+
+The GUI player now uses playback_native::NativeReader for both Y4M and the
+supported MP4/AVC subset. AVC pixels are cropped and converted to RGB using
+VUI limited/full range and BT.601/709 matrices (unspecified defaults to 601),
+including 10-bit input. Chroma upsampling is nearest neighbour. Per-sample
+durations drive the player timer; non-contiguous timestamps, non-identity
+edit lists and other colour matrices currently fail explicitly. File opening,
+drag/drop, pause and restart share the native source. This is video-only.
+The headless GUI-source example decodes a 12-frame moving MP4 and verifies
+rewind. The persistent playback oracle covers 48 flat-colour frames, range,
+matrix and depth variants; maximum RGB difference is 3/255 versus FFmpeg.
+All 132 no-default-feature tests pass. The player dependency graph contains
+neither fvid-media nor FFmpeg. The separate media feature remains legacy.
+
+NativeCameraSource now connects the shared Y4M/MP4 RGB reader to the bounded
+BGRA camera buffer. Frame selection uses exact rational source intervals;
+backward seek, EOF hold and fractional boundaries are verified. The moving
+MP4 camera regression selects frames 0,1,10,0 at 0/40/400/0 ms with exact BGRA
+and timestamp checks. All 133 Rust tests pass. OS extension transport and
+installation remain unconnected, as do the remaining codec and media work.
+
+The persistent AVC I/P oracle now also covers 24 moving High Profile frames.
+The own MP4/entropy inspector confirms 58 inter macroblocks actually use 8x8
+transforms, so the fixture cannot silently become a 4x4-only test. All 79 I/P
+frames match the FFmpeg planar oracle byte-for-byte. This strengthens evidence
+for the existing CAVLC path; CABAC P and B picture reconstruction remain absent.
+
+CABAC inter syntax now has own P/B mb_type/sub_mb_type binarizations, embedded
+intra suffixes, mb_skip_flag, bounded unary reference indices and signed UEG3
+motion differences. Context indices and neighbour conditions follow H.264
+9.3.2/9.3.3, tables 9-37..9-41 in the pinned 2016 standard. The routines operate
+on the existing AvcCabac engine; spatial neighbour inputs remain the caller's
+responsibility. Four tests pass: explicit bin/context traces for P/B/intra,
+reference and UEG3 boundary checks, and a saved real 32x32 CABAC P slice whose
+four skip blocks reach exact arithmetic/RBSP termination. No external codec
+is required by these Rust tests. Inter context grids, residual integration and
+complete CABAC P/B picture dispatch remain unfinished; the public decoder
+still rejects those pictures.
+
+CABAC inter prediction now has a bounded spatial context grid. It reads P/B
+subtypes, both lists' reference indices, then both lists' MVDs in normative
+syntax order, updating every covered 4x4 cell. Left/top derivation observes
+slice IDs; intra, skip and direct neighbours contribute zero. It reuses the
+existing partition tables and supplies Partition values for reconstruction.
+Malformed entropy poisons the context grid; geometry, duplicate macroblocks
+and memory limits are checked. Three new trace tests cover intra-macroblock
+updates, left/top cross-macroblock contexts, slice boundaries, B bi-prediction,
+direct/skip context suppression and failure handling. All 141 Rust tests pass.
+The grid is not yet wired into complete CABAC mixed-slice/residual decoding.
+
+The existing IntraCabacReader now supports shared I/P/B arithmetic/context
+construction, embedded intra-body decoding after external mb_type dispatch,
+and publication of inter/skip neighbour entropy state with end-of-slice handling.
+This reuses the tested intra prediction/residual path instead of copying it.
+A saved real P slice containing an embedded intra macroblock reconstructs
+Y=235/Cb=Cr=128 exactly and terminates correctly; another real P slice verifies
+four skip-context updates. All 143 Rust tests pass and the 42-frame intra oracle
+is unchanged. Complete mixed CABAC dispatch and inter residual parsing are
+still required before enabling CABAC P/B in the public picture decoder.
+
+CABAC P reconstruction is now connected end-to-end. Inter residual decoding
+shares CBP/QP/coefficient machinery with intra, with unavailable-neighbour
+coded-block defaults selected for the current prediction mode. InterCabacSlice
+joins skip, P/B type syntax, motion contexts, embedded intra and inter residuals,
+poisons on errors, and consumes slice termination. decode_p_picture dispatches
+CAVLC or CABAC from PPS without a third-party decoder. A saved real P residual
+fixture reconstructs flat luma 64 -> 66 exactly. The persistent oracle adds
+24 Main-profile motion frames, 24 High/8x8 motion frames and 12 High10 motion
+frames: all 139 I/P frames match FFmpeg planar output byte-for-byte. All 144 Rust
+tests pass and all 42 intra oracle frames remain exact. B syntax can be iterated
+but B picture reconstruction/output reordering remain unsupported; this is not
+full AVC conformance. HEVC/AAC decoding and legacy media replacement remain open.
+
+ReferenceMotionField now stores a complete picture's per-4x4 motion with stable
+reference-picture IDs, original list indices and vectors. MotionField.snapshot
+resolves indices, rejects incomplete/mixed-slice mappings and enforces storage
+limits. Co-located lookup prefers L0 then L1; temporal-direct reference mapping
+uses identity and handles reordered/duplicate list entries. P reconstruction
+can now return its completed motion field through decode_p_picture_with_motion;
+the existing image-only API delegates to the same implementation. Two tests
+cover identity remapping, L1 fallback, intra cells, missing references, mixed
+slices and budget rejection. All 146 Rust tests pass and all 139 I/P oracle
+frames still match. Retention alongside DPB references and B direct/picture
+assembly remain to be connected.
+
+AvcDecoder's DPB now owns DecodedReferencePicture entries containing both the
+image and optional persistent motion. Reference P pictures snapshot resolved
+list identities before marking; intra-only entries need no motion allocation.
+The decoder budget reserves the worst-case image+motion storage per reference
+and the transient snapshot allocation. DPB marking/eviction drops both parts
+together. A saved real IDR/P/P stream verifies exact luma 64/66/68, motion IDs
+0->1 across list reuse, release of evicted payloads, IDR clearing and reset.
+All 147 Rust tests pass; the 139-frame I/P oracle remains byte-identical.
+B direct derivation, B image assembly and display reordering remain unfinished.
+
+### Spatial direct motion derivation
+
+Added progressive H.264 spatial direct derivation (8.4.1.2.2) using shared
+macroblock-neighbour prediction. It selects the smallest nonnegative reference
+per list, handles C-to-D substitution and absent lists, and applies co-located
+zeroing only for short-term list1[0], co-located reference index zero, and vectors
+in [-1, 1]. Intra co-located blocks do not trigger that zeroing. Tests cover these
+boundaries, long-term references, both-lists-absent fallback and invalid indices.
+This primitive is not yet connected to B-picture reconstruction.
+
+### Direct motion connected to the working field
+
+`DirectPrediction` now derives spatial or temporal direct vectors from the
+retained motion of list1[0], mapping temporal references by stable picture ID.
+Progressive direct-8x8 inference selects luma block indices 0/5/10/15 as required
+by 8.4.1.2.1. The motion-field decoder accepts mixed explicit/direct partitions,
+uses macroblock-level neighbours for direct prediction, and rolls back every
+cell on a late error. Integration tests cover inference on/off, reordered
+references, intra co-located fallback and late-error recovery. Native no-default-
+features tests pass. B-picture pixel reconstruction/output reordering remain
+unconnected; this is not yet end-to-end B-frame support.
+
+### Progressive B-picture pixel reconstruction
+
+Generalized the single-slice inter-picture reconstruction entry point to accept
+both reference lists and DirectPrediction metadata. It now connects direct
+motion to pixel prediction, handles B-skip, explicit weights on either list,
+implicit bidirectional weights, residual reconstruction and cross-list reference
+identity for deblocking. Tests reconstruct B-skip pixels for spatial/temporal
+modes with unweighted and implicit weighted predictions and verify retained
+motion identities. The existing 139-frame I/P oracle remains byte-exact; the
+full native test suite passes. This entry point is not yet wired into AvcDecoder
+or MP4 display-order output; real encoded B-picture oracle coverage remains due.
+
+### Stateful B-picture decoding and real-stream oracle
+
+AvcDecoder now offers decode_order for access-unit-order I/P/B decoding. Both
+reference lists and co-located motion are sourced from the DPB, including retained
+reference B pictures. The existing decode entry point retains its monotonic-POC
+check, so playback cannot silently display reordered pictures incorrectly.
+
+Added a bounded short-clip oracle example that sorts decoded outputs by MP4 PTS,
+and validate_native_avc_b.py. All four 24-frame streams match FFmpeg byte-for-byte:
+CABAC spatial direct, CABAC temporal direct with implicit weights, CAVLC temporal
+direct with implicit weights, and a reference-B pyramid. Each includes 15 B
+pictures (96 total frames). Production MP4 output reordering is still pending;
+this oracle's whole-clip buffering is explicitly not the playback implementation.
+
+### MP4 streaming presentation order
+
+Mp4AvcReader now uses decode-order AVC output and a PTS reorder queue. A bounded
+suffix-minimum index over the demuxed samples proves when a queued frame can be
+emitted; only required future access units are decoded. Half the supplied memory
+budget is reserved for decoding, half for the index and retained output frames;
+over-budget queues fail explicitly. Rewind clears both DPB and queued pictures.
+The B oracle now additionally exercises this production reader and rewind: all
+96 frames in four B-stream configurations remain byte-exact. NativeReader still
+requires its supported edit/timeline shape; common nonzero media-start edits in
+B-frame MP4 files need timeline integration before general GUI playback.
+
+### Native playback of B-frame MP4 timeline offsets
+
+NativeReader now maps a single positive, rate-one MP4 edit to playback time zero,
+decodes/discards preroll pictures, and clips frame intervals at edit boundaries.
+Edits with fractional media-tick endpoints, empty edits and multiple ranges are
+still explicitly unsupported. The RGB playback regression passes all 48 color
+frames. Both I/P and reference-B motion clips pass native virtual-camera selection
+at 0/40/400/0 ms with exact BGRA comparison and rewind. This verifies the native
+source/buffer path, not installed macOS cross-process camera consumption.
+
+### VFR presentation duration after B reordering
+
+Reproduced a NativeReader failure on a real 12-frame B-pyramid clip changing
+from 25 fps to 12.5 fps: decode-order sample durations caused false discontinuity
+errors after display reordering. Mp4AvcReader now derives each non-final output
+interval from the next composition timestamp across queued and future samples;
+the final frame retains its declared sample duration. Equal/non-increasing PTS
+and duration overflow fail explicitly. The VFR clip now decodes all 12 frames,
+and camera selection at 400 ms correctly returns presentation frame 8 rather
+than frame 10. Extended playback regression covers exact BGRA at 0/40/400/0 ms
+for I/P, B and VFR-B clips; the four 24-frame B oracle streams still match exactly.
+
+### HEVC NAL input foundation
+
+Added independent H.265 NAL-header parsing and budgeted RBSP extraction. hvcC
+configuration validation now uses the same header parser. Layer ID and temporal
+ID are retained explicitly; unsupported multilayer decoding has a separate guard.
+All 65,536 two-byte header patterns are tested, including forbidden bits and zero
+TemporalIdPlus1, together with payload escaping, truncation and allocation limits.
+No HEVC pixel decoder is claimed by this step. Syntax references: ITU-T H.265
+7.3.1 and RFC 7798 section 1.1.4. The official PDF URL currently downloads an HTML login page; the local
+/tmp/fvid-h265-standard.pdf is not a usable standard document. Parameter-set
+work must obtain the actual specification before relying on that path.
+
+### HEVC profile/tier/level
+
+Added profile_tier_level parsing per H.265 7.3.3: profile space, tier, profile ID,
+compatibility flags, all 48 constraint bits, general level, optional sublayer
+profiles/levels and reserved-bit validation for the specified profile branches.
+Tests parse VPS/SPS from a real x265 64x64 stream, verify identical Main-profile
+metadata and exact bit alignment before SPS ID/chroma/geometry fields. Truncated
+profiles, reserved bits and invalid sublayer counts are rejected.
+
+A usable 716-page H.265 August 2021 PDF is now at /tmp/fvid-h265-2021.pdf,
+downloaded from the Texas Instruments-hosted copy of the ITU document. The earlier
+/tmp/fvid-h265-standard.pdf remains an HTML error page and must not be used.
+
+### HEVC base-layer VPS
+
+Added VPS parsing with NAL/layer/temporal validation, profile/tier/level,
+sublayer ordering limits, optional timing clock and POC tick ratio, and exact
+RBSP termination. Shared ordering parsing infers omitted lower-sublayer values
+and validates DPB/reorder bounds and monotonicity. The reserved VPS 16-bit value
+is ignored as explicitly required by 7.4.3.1. Tests verify real x265 VPS values,
+every truncation, trailing data, memory limits, sublayer inference and invalid
+ordering. Multilayer/external base layers, HRD and VPS extensions remain explicit
+unsupported cases and must be implemented before claiming complete VPS support.
+
+### HEVC HRD syntax and VPS integration
+
+Added Annex E HRD parsing with common-parameter inheritance, NAL/VCL CPB lists,
+sub-picture parameters, delay bit widths, rate/size scale factors and per-sublayer
+fixed-rate/low-delay inference. Counts are bounded to seven sublayers and 32 CPBs;
+integer syntax bounds are checked. Base-layer VPS now accepts its optional HRD
+entry instead of rejecting every nonzero HRD count. Tests cover omitted common
+syntax, inferred fields, simultaneous NAL/VCL sub-picture CPBs and truncation.
+This parses HRD metadata; it does not simulate conformance buffer fullness.
+
+### HEVC VUI metadata
+
+Added Annex E.2.1 VUI parsing: aspect ratio/extended SAR, overscan, video range
+and colour description, chroma location, field flags, display-window offsets,
+timing/POC ratio, optional HRD and bitstream restrictions. Values remain typed
+and available to future playback integration. Tests parse VUI inside the saved
+real x265 SPS at the independently traced bit offset and reach exact SPS trailing
+bits; another fixture covers all non-HRD optional fields, legal upper bounds and
+truncations. This supplies the VUI component for the pending full SPS parser.
+
+### HEVC SPS base syntax
+
+Added SPS parsing for base-layer geometry, chroma format/separate planes,
+conformance cropping, bit depths, POC width, temporal ordering limits,
+coding/transform block sizes, hierarchy depths, default scaling-list enablement,
+AMP/SAO/PCM flags, explicit short-term sets, long-term references, temporal MVP,
+strong intra smoothing and VUI. Exact RBSP termination is checked. Real x265
+fixtures cover 8-bit 64x64 and Main10 coded 72x56 cropped to 66x50, including
+clock metadata and every truncation of the first fixture. Explicit scaling-list
+data, predicted short-term sets and SPS extensions remain unsupported; cross-VPS
+and level/geometry-dependent conformance validation is still required.
+
+### HEVC predicted short-term reference sets
+
+Extracted short-term RPS parsing into a shared SPS/slice reader. It now handles
+inter-set prediction, slice-local predictor distance, signed POC shifts, inferred
+use_delta flags, zero-POC exclusion and normative negative/positive ordering.
+SPS parsing uses the shared reader and no longer rejects predicted sets. Tests
+cover explicit syntax, POC sign crossing, retained-but-unused references,
+non-adjacent slice predictors, DPB capacity, malformed predictor ordering,
+truncation and arithmetic overflow. Existing real Main/Main10 SPS tests pass.
+
+### HEVC scaling lists
+
+Added scaling-list decoding and connected it to SPS: disabled lists become flat
+16, enabled unsignalled lists use normative intra/inter defaults, signalled lists
+support prior-matrix prediction, signed deltas/modulo wrap and separate DC terms.
+The factor accessor expands diagonal-scan coefficients to 4/8/16/32-square
+matrices, including 4:4:4 32-square chroma inference from the 16-square lists.
+Tests cover default tables, explicit ramps, matrix copying, DC replacement,
+wraparound, chroma inheritance, invalid indices and truncated syntax. Pixel
+inverse quantization is not connected to these matrices yet.
+
+### HEVC PPS base syntax
+
+Added PPS parsing bound to its referenced SPS: dependent slice/output flags,
+CABAC/sign hiding, default references, QP/chroma offsets, transform skip and
+transquant bypass, tiles/WPP, deblocking controls, optional scaling-list override,
+list modification, merge level and slice-header extensions. Uniform and explicit
+tile dimensions are resolved to CTU widths/heights with bounds and coverage
+checks. Real x265 PPS and all truncations pass the focused regression; tile tests
+cover non-divisible uniform geometry, explicit sizes and overflow of the extent.
+PPS range/multilayer/3D/SCC extensions are still unsupported. Parsing WPP/tiles
+metadata does not yet implement their entropy synchronization or reconstruction.
+
+### HEVC IDR slice headers
+
+Added IDR slice-header parsing connected to SPS/PPS: parameter-set selection,
+first/non-first independent CTU addressing, picture output, colour plane, SAO,
+QP/chroma offsets, deblocking overrides, cross-slice filtering, entry-point
+length syntax and header extension bytes. Byte alignment is validated and the
+RBSP/CABAC boundary retained. A real x265 IDR matches trace_headers (QP 33,
+SAO luma/chroma true, CABAC at RBSP byte 3). Truncation and malformed alignment
+are rejected. Entry-point lengths remain in escaped-NAL units pending substream
+translation. Dependent segments and non-IDR/P/B headers remain unsupported;
+CABAC pixel decoding is not implemented yet.
+
+### HEVC CABAC initialization and initial context banks
+
+The shared FVid binary arithmetic engine now exposes HEVC context initialization
+from initValue (H.265 9.3.2.2). Added HEVC-specific banks for SAO, coding-tree
+split, transquant bypass, skip, prediction/partition mode and intra prediction,
+with I/P/B table selection and cabac_init swapping. Invalid context selection or
+arithmetic error poisons the HEVC wrapper; no external entropy decoder is used.
+Tests exhaust all 256 initValue entries across clipped/unclipped QPs and verify
+P/B table swapping and unsupported-context rejection. Full native tests pass.
+Residual context tables, binarization and coding-tree reconstruction remain due.
+
+### HEVC transform/residual CABAC context banks
+
+Added context banks for transform splitting, luma/chroma CBF, QP delta, transform
+skip, independent last-X/last-Y positions, coded coefficient groups, significant
+coefficients, greater1/greater2 levels and inter root CBF. Generated normative
+initialization values from H.265 (08/2021) tables with exact count checks using
+scripts/generate_hevc_cabac_tables.py. Noncontiguous chroma-CBF and significant-
+coefficient extension contexts are mapped explicitly into local bank indices.
+Tests check I/P/B bank layouts, special indices and independent X/Y adaptation.
+Residual binarization/context-increment derivation still needs implementation.
+
+### HEVC last-significant coefficient position
+
+Added residual-bin interface connected to HevcCabac and last-position decoding:
+both truncated-unary context prefixes are read before bypass suffixes, context
+increments depend on transform size/component, and vertical scanning swaps the
+coordinates. Exhaustive scripted tests cover every coordinate of 4/8/16/32-square
+blocks, luma/chroma and diagonal/horizontal/vertical scans, validating bin order
+against independent normative context-index arrays. All HEVC tests pass. This is
+a primitive for the forthcoming full residual block reader, not yet a coefficient
+or picture decoder.
+
+### HEVC coefficient significance context selection
+
+Added coded-sub-block and significant-coefficient CABAC context derivation from
+the right/bottom group flags, transform size, colour component and scan order.
+The 4x4 map, DC position, larger-block offsets and range-extension skip-context
+banks are handled explicitly. Out-of-bounds groups and invalid map shapes fail;
+outside-picture neighbours contribute zero. Tests cover neighbour combinations,
+edge groups, luma/chroma banks, directional scan offsets and inferred 4x4 corner
+significance. Full coefficient flag/level traversal is still pending.
+
+### HEVC coefficient remainder and Rice adaptation
+
+Added Main/Main10 coeff_abs_level_remaining decoding: truncated Rice prefix,
+EGk escape, bounded bypass reads and checked unsigned result. Non-persistent
+RiceState adapts from the preceding absolute level, caps the parameter at four,
+resets per coefficient group and commits state only after successful decoding.
+Tests round-trip all remainders 0..4095 at each Rice parameter plus large boundary
+values, validate adaptation/capping and reject overlong codes/absolute overflow.
+Persistent Rice adaptation and extended-precision limited EGk remain separate
+range-extension work; full coefficient traversal is still pending.
+
+### HEVC complete residual block traversal
+
+Added Main/Main10 residual block reading into raster-order signed coefficients:
+reverse group/scan traversal, implicit last/DC significance, context-coded levels,
+bypass signs, sign hiding and Rice remainders. Level contexts carry across skipped
+groups, while Rice state resets per group. Scripted tests verify exact syntax/bin
+order for a DC remainder, hidden-sign parity and an 8x8 block with three coded
+groups plus a skipped group, including inferred DC and cross-group context state.
+The caller supplies scan/sign-hiding eligibility and reads transform-skip syntax;
+range-extension RDPCM and persistent Rice are outside this reader's scope.
+This is coefficient syntax support, not yet HEVC picture decoding; real-bitstream
+pixel comparison still requires coding-tree traversal and reconstruction.
+
+### HEVC inverse scaling and residual reconstruction
+
+Added Main/Main10 inverse quantization with SPS/PPS scaling lists, 4/8/16/32 DCT,
+intra-luma 4x4 DST, 4x4 transform skip and transquant bypass. Reconstruction uses
+wide integer intermediates, normative signed rounding and intermediate clipping;
+invalid geometry, coefficient range, matrix index and derived QP fail explicitly.
+The caller supplies the derived component QP and selected transform type.
+DCT constants are extracted from H.265 (08/2021) equations 8-319/8-321 by
+scripts/generate_hevc_transform_tables.py, with dimensions and symmetry checked.
+Tests cover all sizes and 8/10-bit DC normalization, DST impulse values, distinct
+skip/bypass behavior, nonflat matrices, saturation, and dense 4x4 blocks against
+an independent factored transform across the entire supported QP range. All 35
+HEVC tests pass. Prediction, coding-tree traversal and loop filters are still
+needed before a HEVC picture can be decoded and compared with an oracle.
+
+### HEVC intra prediction and mode derivation
+
+Added all 35 Main/Main10 4:2:0 intra sample modes for 4/8/16/32 blocks, reference
+substitution in normative bottom-left-to-top-right order, mode-dependent weak
+smoothing, conditional 32x32 strong smoothing, DC/axis boundary correction and
+fractional angular interpolation with negative-angle reference extension.
+The caller supplies availability after z-scan, slice/tile and constrained-intra
+checks; this module does not infer those conditions from picture coordinates.
+Luma MPM candidates/remainder mapping and 4:2:0 chroma mode derivation are also
+implemented, with separate caller obligations for neighbouring mode availability.
+Tests cover exact planar/DC/angular vectors, fractional angles, clipping,
+substitution gaps, strict strong-smoothing thresholds, every mode/size/component
+on absent references, transposed angular predictions, and all 1,225 neighbouring
+mode pairs with exact candidate/remainder complement coverage. Coding-tree
+integration and real-picture oracle validation remain pending.
+
+### HEVC intra CABAC mode syntax
+
+Added single/four-part intra luma syntax reading through the existing HEVC CABAC
+bin interface. All previous-mode flags precede any MPM indices/remainders, as
+required for NxN coding units. MPM indices use truncated unary bypass bins and
+remaining modes use five bypass bits. Chroma mode uses one context bin followed
+by two bypass bins only for explicit modes. Luma codes resolve through the
+existing neighbour-dependent mode derivation after syntax reading. Tests check
+mixed NxN bin ordering, every remainder/chroma value and truncated inputs.
+This still requires coding-unit traversal before real slice reconstruction.
+
+### HEVC CTU SAO syntax
+
+Added Main/Main10 SAO parameter reading before coding-tree syntax: conditional
+left/up merging, shared chroma type and edge class, independent Cb/Cr offsets,
+truncated unary magnitudes, inferred edge signs, explicit nonzero band signs,
+and band positions. Disabled slices consume no bins. The caller supplies only
+merge neighbours permitted by slice-segment/tile boundaries. Tests verify exact
+bin consumption for merges, shared chroma edge metadata, maximum 8/10-bit offset
+values and zero-sign omission. These are parsed parameters; applying the SAO
+pixel filter and whole-picture decoding remain pending.
+
+### HEVC SAO sample filtering
+
+Added SAO sample application and edge-neighbour direction selection. Band lookup
+wraps modulo 32, edge classification handles all five sign-sum categories, missing
+edge neighbours suppress filtering, and results clip to 8/10-bit sample range.
+Parameters and samples are checked before arithmetic. Tests cover categories,
+directions, equal neighbours, missing neighbours, band wrap and saturation.
+The picture caller must supply deblocked (not already SAO-filtered) neighbours
+and enforce tile/slice/PCM/transquant exclusions. Whole-picture filter traversal
+and real HEVC decode validation remain pending.
+
+### HEVC coding-quadtree traversal
+
+Added bounded CTU traversal with z-order child visitation, CABAC split context
+selection from available left/top CU depths, inferred picture-edge splitting and
+implicit minimum-size leaves. The visitor receives each node after its split
+decision for quantization-group state reset, and each leaf with the same entropy
+stream for CU decoding. Geometry validation and widened coordinates prevent
+invalid shifts/overflow. Tests verify context changes from completed siblings,
+exact leaf order, fully inferred edge traversal and truncated split input.
+The picture-level visitor and transform-tree/CU decoding are still pending.
+
+### HEVC intra transform-tree syntax
+
+Added intra 4:2:0 transform-tree traversal with inferred/explicit splitting,
+parent-conditioned chroma CBF reading, depth-specific luma/chroma contexts and
+synchronous transform-unit callbacks on the shared CABAC stream. Four 4x4 luma
+children retain the parent chroma flags for QP-state decisions, but only the last
+child owns/consumes the shared 4x4 chroma residuals. Geometry/configuration checks
+bound traversal. Tests cover unsplit context selection, forced NxN splitting,
+chroma ownership/origins, exact bin consumption and truncated input. Integration
+with CU metadata, residual decoding and picture reconstruction remains pending.
+
+### HEVC residual block decoding pipeline
+
+Connected transform-skip syntax, intra-dependent scan selection, coefficient
+reading and inverse reconstruction in hevc_block. The adapter chooses DCT/DST,
+skip/bypass, intra/inter scaling-list index and sign-hiding eligibility from block
+configuration, validating geometry/depth/QP before consuming bins. Tests follow
+scripted syntax through signed pixel residuals and cover scan selection for all
+modes, sizes and 4:2:0 components. Whole-picture CU integration remains pending.
+
+### HEVC quantization parameter derivation
+
+Added CABAC delta-QP prefix/EG0 suffix/sign decoding with asymmetric conformance
+bounds, neighbour/previous-QP prediction with signed modulo wrapping, and the
+4:2:0 chroma QP mapping plus bit-depth offsets. Tests cover every legal 8/10-bit
+delta, invalid adjacent values, negative prediction rounding, range wrapping and
+chroma mapping plateaus. Picture integration still needs quantization-group
+ownership and slice/tile/WPP reset handling before real-frame validation.
+
+### Real HEVC IDR entropy integration
+
+Added an embedded libx265 64x64 gray IDR integration fixture joining SPS/PPS/slice
+parsing, CABAC initialization, SAO, coding-quadtree traversal, intra mode syntax,
+transform-tree CBFs, QP delta and residual reconstruction. It reaches the real
+end-of-slice termination bin and verifies four 32x32 CUs, disabled SAO, and one
+32x32 residual block containing -2 throughout. The fixture harness assumes full
+intra partitions and simple QP/mode neighbours; it is deliberately a test, not a
+general picture decoder. Picture reconstruction and pixel-oracle comparison are
+still required before claiming native HEVC playback.
+
+### First real HEVC intra picture reconstruction
+
+Added a budgeted plane builder that tracks decoded samples, gathers available
+intra references, applies prediction plus residual with wide signed arithmetic,
+clips by bit depth, and rejects overlapping/out-of-bounds block writes. Additional
+slice/tile/constrained-intra availability is supplied by the picture caller.
+Extended the gray IDR fixture through neighbour mode derivation and reconstruction
+of all Y/Cb/Cr samples. The test verifies Y=126 for all 4,096 samples and Cb=Cr=128
+for all 2,048 chroma samples. A local FFmpeg oracle independently confirmed exactly
+those 6,144 values. SAO is off in this fixture and its uniform edges need no
+deblocking changes. General CU/QP state, PCM/NxN paths, loop filters and varied
+picture oracles remain required; this fixture is not a production HEVC decoder.
+
+### Detailed HEVC IDR pixel oracle and NxN integration
+
+Extended the fixture decoder to publish per-prediction-block intra modes, derive
+NxN sibling MPMs in order, select modes for individual transform blocks and add
+the NxN transform-depth increment. Fixed transform-tree validation to allow an
+SPS hierarchy-depth limit greater than a particular CU's available depth; minimum
+transform size still terminates traversal. Added a generated 32x32 testsrc2 IDR
+with loop filters/AQ disabled: 10 CUs, 31 prediction blocks and 47 residual blocks.
+All 1,536 reconstructed Y/Cb/Cr samples match the embedded FFmpeg oracle exactly.
+Both gray and detailed integration tests pass. Production picture API, general
+QP-group state and loop filters still require integration and validation.
+
+### HEVC Main10 detailed picture oracle
+
+Added a 10-bit version of the detailed IDR fixture and generalized the integration
+harness to compare u16 samples without downconversion. All 1,536 Main10 Y/Cb/Cr
+values match the embedded independent decoder output, including NxN prediction,
+coefficient decoding and inverse reconstruction. The 8-bit detailed and gray
+fixtures also still pass. Loop filters remain disabled for the detailed fixtures;
+these tests do not establish general HEVC stream or playback support.
+
+### Native HEVC IDR picture API
+
+Promoted the verified intra reconstruction path into hevc_picture::decode_idr.
+It returns coded Y/Cb/Cr planes with crop/depth metadata, traverses raster CTUs,
+shares CABAC state and checks termination against picture extent. Decode memory
+is bounded before allocation, parameter fields are validated, and incomplete
+pictures fail without publishing output. Current supported scope is a single
+4:2:0 Main/Main10 IDR slice with fixed QP, no PCM/tiles/WPP and disabled loop
+filters; unsupported tools are rejected explicitly. The 8/10-bit detailed
+oracles now exercise the library API, including budget/truncation/tool rejection.
+A new four-CTU 64x64 fixture matches all 6,144 oracle values across CTU rows.
+General QP groups, loop filters, inter pictures and playback wiring remain due.
+
+### HEVC picture-level SAO integration
+
+The IDR API now reads SAO before every CTU, resolves left/up merges and applies
+the filter after all prediction/reconstruction is complete. Planes use unchanged
+input neighbours and publish filtered output only on success; picture budget
+includes the extra sample buffer. Resolved SAO parameters are retained in raster
+CTU order. A four-CTU fixture with nonzero SAO offsets matches all 6,144 oracle
+samples; previous 8/10-bit fixtures still pass. SAO with transquant bypass is
+rejected until per-CU filter exclusions are integrated. Deblocking, adaptive QP,
+other previously unsupported tools and inter pictures remain pending.
+
+### HEVC chroma deblocking primitives
+
+Added normative tC table, 4:2:0 chroma threshold derivation from adjacent luma QPs
+and PPS-only chroma offset, bit-depth scaling, and chroma sample-pair filtering.
+Per-side PCM/bypass exclusions preserve original inputs for delta derivation;
+signed deltas and output samples are clipped independently. Tests cover QP mapping
+plateaus, offset limits, 8/10-bit thresholds, signed rounding, clipping and side
+exclusions. Luma deblocking and picture-edge traversal remain unimplemented, so
+the picture API still rejects streams with enabled deblocking.
+
+### HEVC luma sample deblocking
+
+Added strong three-sample and weak one/two-sample luma filters, strict raw-delta
+gating, per-sample change limits, bit-depth clipping and independent side
+exclusions. All outputs derive from original p/q values. Tests cover exact strong
+and weak outputs, bounded strong updates, disabled sides and threshold equality.
+Edge-level beta/tC decisions and picture traversal remain pending; the native
+picture decoder continues to reject enabled deblocking until those are connected.
+
+### HEVC luma edge filter decision
+
+Added boundary-strength/QP/offset-derived beta and tC, bit-depth scaling, and the
+four-sample segment decision from endpoint curvature. Strong filtering requires
+both endpoint lines to pass; weak filtering independently selects second-sample
+updates on p/q sides. Tests cover threshold equality, one-endpoint rejection,
+independent second-sample decisions and 10-bit scaling. Picture boundary strength
+metadata and vertical/horizontal traversal remain to be connected.

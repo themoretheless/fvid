@@ -19,9 +19,7 @@ pub(crate) fn write_wav_f32le(
     let data_bytes = (samples.len() as u64)
         .checked_mul(4)
         .ok_or("wav data size overflow")?;
-    let riff_size = data_bytes
-        .checked_add(36)
-        .ok_or("wav riff size overflow")?;
+    let riff_size = data_bytes.checked_add(36).ok_or("wav riff size overflow")?;
     if riff_size > u32::MAX as u64 || data_bytes > u32::MAX as u64 {
         return Err("wav payload exceeds 4 GiB".into());
     }

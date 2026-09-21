@@ -239,7 +239,13 @@ pub fn apply_tone_frame(
 ) {
     let n = frame.len().min(states.len());
     for i in 0..n {
-        frame[i] = tone_step(frame[i], &mut states[i], bass_milli, mid_milli, treble_milli);
+        frame[i] = tone_step(
+            frame[i],
+            &mut states[i],
+            bass_milli,
+            mid_milli,
+            treble_milli,
+        );
     }
 }
 
@@ -256,8 +262,9 @@ pub fn format_tone_osd(bass_milli: i32, mid_milli: i32, treble_milli: i32) -> St
 pub const EQ_BAND_COUNT: usize = 10;
 
 /// Center frequencies (Hz) matching the classic VLC 10-band preset labels.
-pub const EQ_BAND_HZ: [u32; EQ_BAND_COUNT] =
-    [60, 170, 310, 600, 1_000, 3_000, 6_000, 12_000, 14_000, 16_000];
+pub const EQ_BAND_HZ: [u32; EQ_BAND_COUNT] = [
+    60, 170, 310, 600, 1_000, 3_000, 6_000, 12_000, 14_000, 16_000,
+];
 
 /// Cascaded one-pole low-pass state for [`graphic_eq_step`].
 #[derive(Clone, Copy, Debug)]
@@ -909,11 +916,7 @@ pub fn cycle_show_osd(show: bool) -> bool {
 }
 
 pub fn format_show_osd(show: bool) -> &'static str {
-    if show {
-        "OSD on"
-    } else {
-        "OSD off"
-    }
+    if show { "OSD on" } else { "OSD off" }
 }
 
 /// VLC-style video color effects for play display.
@@ -948,12 +951,18 @@ pub fn format_display_effect_osd(effect: DisplayEffect) -> String {
     format!("Effect {}", display_effect_label(effect))
 }
 
-pub fn apply_display_effect_pixel(red: u8, green: u8, blue: u8, effect: DisplayEffect) -> (u8, u8, u8) {
+pub fn apply_display_effect_pixel(
+    red: u8,
+    green: u8,
+    blue: u8,
+    effect: DisplayEffect,
+) -> (u8, u8, u8) {
     match effect {
         DisplayEffect::Off => (red, green, blue),
         DisplayEffect::Invert => (255 - red, 255 - green, 255 - blue),
         DisplayEffect::Grayscale => {
-            let y = ((u16::from(red) * 77 + u16::from(green) * 150 + u16::from(blue) * 29) / 256) as u8;
+            let y =
+                ((u16::from(red) * 77 + u16::from(green) * 150 + u16::from(blue) * 29) / 256) as u8;
             (y, y, y)
         }
         DisplayEffect::Sepia => {
@@ -1103,11 +1112,7 @@ pub fn cycle_eq_bypass(bypassed: bool) -> bool {
 }
 
 pub fn format_eq_bypass_osd(bypassed: bool) -> &'static str {
-    if bypassed {
-        "EQ off"
-    } else {
-        "EQ on"
-    }
+    if bypassed { "EQ off" } else { "EQ on" }
 }
 
 /// Average two packed `0x00RRGGBB` pixels channel-wise.
@@ -1439,7 +1444,11 @@ pub fn position_us_from_digit(digit: u8, duration_us: i64) -> Option<i64> {
     if duration_us <= 0 || digit > 9 {
         return None;
     }
-    let percent = if digit == 0 { 100i64 } else { i64::from(digit) * 10 };
+    let percent = if digit == 0 {
+        100i64
+    } else {
+        i64::from(digit) * 10
+    };
     Some(duration_us.saturating_mul(percent) / 100)
 }
 
@@ -1651,11 +1660,8 @@ fn apply_sharpen_rgb(pixels: &mut [u32], width: u32, height: u32) {
             let (wr, wg, wb) = unpack_rgb(src[y * w + (x - 1)]);
             let (er, eg, eb) = unpack_rgb(src[y * w + (x + 1)]);
             let sharpen = |c: u8, n: u8, s: u8, ww: u8, e: u8| -> u8 {
-                let v = i32::from(c) * 5
-                    - i32::from(n)
-                    - i32::from(s)
-                    - i32::from(ww)
-                    - i32::from(e);
+                let v =
+                    i32::from(c) * 5 - i32::from(n) - i32::from(s) - i32::from(ww) - i32::from(e);
                 v.clamp(0, 255) as u8
             };
             pixels[y * w + x] = pack_rgb(
@@ -1675,8 +1681,8 @@ fn apply_grain_rgb(pixels: &mut [u32], width: u32, height: u32) {
     }
     for y in 0..h {
         for x in 0..w {
-            let mut hash = ((x as u32).wrapping_mul(374761393))
-                ^ ((y as u32).wrapping_mul(668265263));
+            let mut hash =
+                ((x as u32).wrapping_mul(374761393)) ^ ((y as u32).wrapping_mul(668265263));
             hash = (hash ^ (hash >> 13)).wrapping_mul(1274126177);
             let noise = ((hash >> 24) as i32) - 128;
             let delta = noise / 12;
@@ -1920,7 +1926,9 @@ pub fn clamp_crop_pixels(crop: CropPixels, width: u32, height: u32) -> CropPixel
     let left = crop.left.min(max_x);
     let right = crop.right.min(width.saturating_sub(left).saturating_sub(1));
     let top = crop.top.min(max_y);
-    let bottom = crop.bottom.min(height.saturating_sub(top).saturating_sub(1));
+    let bottom = crop
+        .bottom
+        .min(height.saturating_sub(top).saturating_sub(1));
     CropPixels {
         left,
         top,
@@ -2027,7 +2035,9 @@ pub fn clamp_teletext_page(page: u32) -> u32 {
 
 pub fn teletext_page_step(current: u32, delta: i32) -> u32 {
     let next = (clamp_teletext_page(current) as i64).saturating_add(i64::from(delta));
-    clamp_teletext_page(next.clamp(i64::from(TELETEXT_PAGE_MIN), i64::from(TELETEXT_PAGE_MAX)) as u32)
+    clamp_teletext_page(
+        next.clamp(i64::from(TELETEXT_PAGE_MIN), i64::from(TELETEXT_PAGE_MAX)) as u32,
+    )
 }
 
 pub fn format_teletext_osd(page: u32, enabled: bool) -> String {
@@ -2423,7 +2433,13 @@ pub fn format_spherical_projection_osd(mode: SphericalProjection) -> String {
 }
 
 /// Remap dual-fisheye (side-by-side) into a temporary equirect for viewpoint projection.
-pub fn dual_fisheye_to_equirect(src_w: u32, src_h: u32, src: &[u32], out_w: u32, out_h: u32) -> Vec<u32> {
+pub fn dual_fisheye_to_equirect(
+    src_w: u32,
+    src_h: u32,
+    src: &[u32],
+    out_w: u32,
+    out_h: u32,
+) -> Vec<u32> {
     let out_w = out_w.max(1);
     let out_h = out_h.max(1);
     let mut out = vec![0u32; out_w as usize * out_h as usize];
@@ -2436,7 +2452,11 @@ pub fn dual_fisheye_to_equirect(src_w: u32, src_h: u32, src: &[u32], out_w: u32,
         for x in 0..out_w {
             let lon = ((x as f32 + 0.5) / out_w as f32 * 2.0 - 1.0) * std::f32::consts::PI;
             let use_right = lon >= 0.0;
-            let eye_lon = if use_right { lon } else { lon + std::f32::consts::PI };
+            let eye_lon = if use_right {
+                lon
+            } else {
+                lon + std::f32::consts::PI
+            };
             let r = (0.5 - lat / std::f32::consts::PI).clamp(0.0, 1.0) * 0.5;
             let angle = eye_lon;
             let fx = 0.5 + r * angle.cos();
@@ -2452,7 +2472,14 @@ pub fn dual_fisheye_to_equirect(src_w: u32, src_h: u32, src: &[u32], out_w: u32,
 }
 
 /// Sample a horizontal cubemap strip (6 square faces: +X -X +Y -Y +Z -Z).
-pub fn sample_cubemap_pixel(pixels: &[u32], width: u32, height: u32, dx: f32, dy: f32, dz: f32) -> u32 {
+pub fn sample_cubemap_pixel(
+    pixels: &[u32],
+    width: u32,
+    height: u32,
+    dx: f32,
+    dy: f32,
+    dz: f32,
+) -> u32 {
     let ax = dx.abs();
     let ay = dy.abs();
     let az = dz.abs();
@@ -2666,7 +2693,8 @@ pub fn project_spherical_view(
             fov_deg_milli,
         ),
         SphericalProjection::DualFisheyeTb => {
-            let equirect = dual_fisheye_tb_to_equirect(src_w, src_h, src, src_w.max(2), src_h.max(1));
+            let equirect =
+                dual_fisheye_tb_to_equirect(src_w, src_h, src, src_w.max(2), src_h.max(1));
             project_equirect_view_ex(
                 src_w.max(2),
                 src_h.max(1),
@@ -2916,7 +2944,10 @@ pub fn project_panini_view(
             let lon_off = (nx / (d + 1.0)).atan();
             let lat_off = (ny * (d + lon_off.cos()).max(0.05) / (d + 1.0)).atan();
             let lon = yaw + lon_off;
-            let lat = (pitch + lat_off).clamp(-std::f32::consts::FRAC_PI_2 + 0.01, std::f32::consts::FRAC_PI_2 - 0.01);
+            let lat = (pitch + lat_off).clamp(
+                -std::f32::consts::FRAC_PI_2 + 0.01,
+                std::f32::consts::FRAC_PI_2 - 0.01,
+            );
             out[(oy * out_w + ox) as usize] = sample_equirect_pixel(src, src_w, src_h, lon, lat);
         }
     }
@@ -3052,7 +3083,11 @@ pub fn format_hearing_impaired_osd(index: usize) -> String {
 }
 
 /// Intro / credits skip markers (Netflix-style chapter helpers).
-pub fn skip_marker_target_us(now_us: i64, intro_end_us: Option<i64>, credits_start_us: Option<i64>) -> Option<i64> {
+pub fn skip_marker_target_us(
+    now_us: i64,
+    intro_end_us: Option<i64>,
+    credits_start_us: Option<i64>,
+) -> Option<i64> {
     if let Some(end) = intro_end_us {
         if now_us < end {
             return Some(end.max(0));
@@ -3078,11 +3113,7 @@ pub fn filter_playlist_paths(paths: &[PathBuf], query: &str) -> Vec<PathBuf> {
     }
     paths
         .iter()
-        .filter(|path| {
-            path.to_string_lossy()
-                .to_ascii_lowercase()
-                .contains(&query)
-        })
+        .filter(|path| path.to_string_lossy().to_ascii_lowercase().contains(&query))
         .cloned()
         .collect()
 }
@@ -3198,7 +3229,9 @@ pub fn format_angle_osd(index: u32, count: u32) -> String {
 
 /// Mouse-wheel seek when Ctrl is held (fine scrub).
 pub fn seek_from_wheel(now_us: i64, scroll_lines: i32, step_us: i64) -> i64 {
-    now_us.saturating_add(i64::from(scroll_lines) * step_us).max(0)
+    now_us
+        .saturating_add(i64::from(scroll_lines) * step_us)
+        .max(0)
 }
 
 /// Playlist queue insert (play next without reshuffling order).
@@ -3525,18 +3558,19 @@ pub fn format_hdr_gamut_osd(warn: bool) -> &'static str {
 }
 
 /// 360° stereo SBS cardboard layout size for dual-eye render.
-pub fn cardboard_eye_rect(
-    canvas_w: u32,
-    canvas_h: u32,
-    eye: u32,
-) -> (u32, u32, u32, u32) {
+pub fn cardboard_eye_rect(canvas_w: u32, canvas_h: u32, eye: u32) -> (u32, u32, u32, u32) {
     let half = (canvas_w / 2).max(1);
     let x = if eye == 0 { 0 } else { half };
     (x, 0, half, canvas_h.max(1))
 }
 
 /// Apply Cardboard eye yaw offset to a base yaw.
-pub fn cardboard_view_yaw_milli(base_yaw_milli: i32, ipd_milli: i32, fov_deg_milli: i32, left_eye: bool) -> i32 {
+pub fn cardboard_view_yaw_milli(
+    base_yaw_milli: i32,
+    ipd_milli: i32,
+    fov_deg_milli: i32,
+    left_eye: bool,
+) -> i32 {
     let offset = cardboard_eye_yaw_offset_milli(ipd_milli, fov_deg_milli);
     if left_eye {
         clamp_yaw_milli(base_yaw_milli.saturating_sub(offset))
@@ -3572,7 +3606,12 @@ pub fn format_lyric_osd(line: Option<&LyricLine>) -> String {
 }
 
 /// A-B loop memory slots (multi-marker players).
-pub fn ab_slot_store(slots: &mut [(Option<i64>, Option<i64>)], index: usize, a: i64, b: i64) -> bool {
+pub fn ab_slot_store(
+    slots: &mut [(Option<i64>, Option<i64>)],
+    index: usize,
+    a: i64,
+    b: i64,
+) -> bool {
     if index >= slots.len() || b <= a {
         return false;
     }
@@ -3616,7 +3655,14 @@ pub fn clamp_deband_milli(value: i32) -> i32 {
     value.clamp(0, DEBAND_MAX_MILLI)
 }
 
-pub fn apply_deband_pixel(red: u8, green: u8, blue: u8, strength_milli: i32, x: u32, y: u32) -> (u8, u8, u8) {
+pub fn apply_deband_pixel(
+    red: u8,
+    green: u8,
+    blue: u8,
+    strength_milli: i32,
+    x: u32,
+    y: u32,
+) -> (u8, u8, u8) {
     let strength = clamp_deband_milli(strength_milli);
     if strength == 0 {
         return (red, green, blue);
@@ -3779,11 +3825,7 @@ pub fn pip_rect(
 }
 
 pub fn format_pip_osd(enabled: bool) -> &'static str {
-    if enabled {
-        "PiP On"
-    } else {
-        "PiP Off"
-    }
+    if enabled { "PiP On" } else { "PiP Off" }
 }
 
 /// Thumbnail-strip seek: map hover index to media time.
@@ -3900,11 +3942,7 @@ pub fn suggest_hdr_nits_from_peak(peak_milli: u32, base_nits: u32) -> u32 {
 }
 
 pub fn format_hdr_peak_osd(peak_milli: u32, suggested_nits: u32) -> String {
-    format!(
-        "Frame peak {}% → {} nits",
-        peak_milli / 10,
-        suggested_nits
-    )
+    format!("Frame peak {}% → {} nits", peak_milli / 10, suggested_nits)
 }
 
 /// HLS/DASH rendition label from bandwidth + resolution.
@@ -3912,10 +3950,7 @@ pub fn format_stream_rendition_osd(width: u32, height: u32, bandwidth_bps: u32) 
     if width == 0 || height == 0 {
         format!("Rendition {} kbps", bandwidth_bps / 1_000)
     } else {
-        format!(
-            "Rendition {width}×{height} {} kbps",
-            bandwidth_bps / 1_000
-        )
+        format!("Rendition {width}×{height} {} kbps", bandwidth_bps / 1_000)
     }
 }
 
@@ -4189,11 +4224,7 @@ pub fn format_letterbox_osd(left: u32, top: u32, right: u32, bottom: u32) -> Str
 }
 
 /// Playlist edge fade envelope (1_000 = full; fades in/out near item boundaries).
-pub fn playlist_edge_fade_gain_milli(
-    position_us: i64,
-    duration_us: i64,
-    fade_us: i64,
-) -> i32 {
+pub fn playlist_edge_fade_gain_milli(position_us: i64, duration_us: i64, fade_us: i64) -> i32 {
     if duration_us <= 0 || fade_us <= 0 {
         return 1_000;
     }
@@ -4306,7 +4337,10 @@ pub fn apply_hlg_ootf_pixel(red: u8, green: u8, blue: u8, gamma_milli: i32) -> (
 }
 
 pub fn format_hlg_ootf_osd(gamma_milli: i32) -> String {
-    format!("HLG OOTF γ{:.2}", gamma_milli.clamp(1_000, 2_400) as f32 / 1_000.0)
+    format!(
+        "HLG OOTF γ{:.2}",
+        gamma_milli.clamp(1_000, 2_400) as f32 / 1_000.0
+    )
 }
 
 /// FOV presets for 360 / VR (narrow / cinema / wide / super-wide).
@@ -4433,7 +4467,8 @@ pub fn apply_box_denoise_pixel(
     let sr = (src >> 16) & 0xff;
     let sg = (src >> 8) & 0xff;
     let sb = src & 0xff;
-    let blend = |a: u32, b: u32| -> u32 { (a * (1_000 - strength as u32) + b * strength as u32) / 1_000 };
+    let blend =
+        |a: u32, b: u32| -> u32 { (a * (1_000 - strength as u32) + b * strength as u32) / 1_000 };
     let r = blend(sr, avg_r);
     let g = blend(sg, avg_g);
     let b = blend(sb, avg_b);
@@ -4502,11 +4537,7 @@ pub fn pitch_from_swipe_px(dy_px: i32, px_per_degree: i32) -> i32 {
 }
 
 /// Integrate device gyro rates (milli-deg/s) over dt_ms into look deltas.
-pub fn gyro_look_delta_milli(
-    yaw_rate_milli: i32,
-    pitch_rate_milli: i32,
-    dt_ms: i32,
-) -> (i32, i32) {
+pub fn gyro_look_delta_milli(yaw_rate_milli: i32, pitch_rate_milli: i32, dt_ms: i32) -> (i32, i32) {
     let dt = dt_ms.max(0);
     let yaw = (i64::from(yaw_rate_milli) * i64::from(dt) / 1_000) as i32;
     let pitch = (i64::from(pitch_rate_milli) * i64::from(dt) / 1_000) as i32;
@@ -4650,7 +4681,10 @@ pub fn format_unsharp_osd(amount_milli: i32) -> String {
 
 /// Icecast / Shoutcast stream title OSD.
 pub fn format_icecast_metadata_osd(artist: Option<&str>, title: Option<&str>) -> String {
-    match (artist.map(str::trim).filter(|s| !s.is_empty()), title.map(str::trim).filter(|s| !s.is_empty())) {
+    match (
+        artist.map(str::trim).filter(|s| !s.is_empty()),
+        title.map(str::trim).filter(|s| !s.is_empty()),
+    ) {
         (Some(a), Some(t)) => format!("{a} — {t}"),
         (None, Some(t)) => t.to_string(),
         (Some(a), None) => a.to_string(),
@@ -4773,7 +4807,10 @@ pub fn phase_correlation_milli(left: &[f32], right: &[f32]) -> i32 {
 }
 
 pub fn format_phase_correlation_osd(corr_milli: i32) -> String {
-    format!("Phase {:.2}", corr_milli.clamp(-1_000, 1_000) as f32 / 1_000.0)
+    format!(
+        "Phase {:.2}",
+        corr_milli.clamp(-1_000, 1_000) as f32 / 1_000.0
+    )
 }
 
 /// True-peak estimate from interleaved PCM (milli, 1000 = 0 dBFS).
@@ -4986,7 +5023,12 @@ pub fn apply_lowpass_1pole(sample: f32, state: &mut f32, coeff_milli: i32) -> f3
 }
 
 /// One-pole high-pass via DC blocker style.
-pub fn apply_highpass_1pole(sample: f32, state: &mut f32, prev_in: &mut f32, coeff_milli: i32) -> f32 {
+pub fn apply_highpass_1pole(
+    sample: f32,
+    state: &mut f32,
+    prev_in: &mut f32,
+    coeff_milli: i32,
+) -> f32 {
     let a = (coeff_milli.clamp(1, 999) as f32) / 1_000.0;
     let y = a * (*state + sample - *prev_in);
     *prev_in = sample;
@@ -5085,11 +5127,7 @@ pub fn apply_delogo_rect(
             }
         }
     }
-    let fill = if n > 0 {
-        (sum / n) as u32
-    } else {
-        0
-    };
+    let fill = if n > 0 { (sum / n) as u32 } else { 0 };
     for yy in y1..y2 {
         for xx in x1..x2 {
             pixels[(yy * width + xx) as usize] = fill;
@@ -5170,7 +5208,10 @@ pub fn haas_delay_samples(sample_rate: u32, delay_ms_milli: i32) -> usize {
 }
 
 pub fn format_haas_osd(delay_ms_milli: i32) -> String {
-    format!("Haas {:.1} ms", delay_ms_milli.clamp(0, 40_000) as f32 / 1_000.0)
+    format!(
+        "Haas {:.1} ms",
+        delay_ms_milli.clamp(0, 40_000) as f32 / 1_000.0
+    )
 }
 
 /// Timestretch duration via atempo-style rate (VLC / mpv rubberband companion).
@@ -5180,7 +5221,10 @@ pub fn atempo_duration_us(src_us: i64, tempo_milli: i32) -> i64 {
 }
 
 pub fn format_atempo_osd(tempo_milli: i32) -> String {
-    format!("Atempo {:.2}×", tempo_milli.clamp(250, 4_000) as f32 / 1_000.0)
+    format!(
+        "Atempo {:.2}×",
+        tempo_milli.clamp(250, 4_000) as f32 / 1_000.0
+    )
 }
 
 /// Lightweight chorus (modulated delay mix).
@@ -5217,7 +5261,11 @@ pub fn format_ass_force_style(font: &str, size_px: u32, primary_color: &str) -> 
     let font = font.trim();
     let font = if font.is_empty() { "Arial" } else { font };
     let color = primary_color.trim();
-    let color = if color.is_empty() { "&H00FFFFFF" } else { color };
+    let color = if color.is_empty() {
+        "&H00FFFFFF"
+    } else {
+        color
+    };
     format!("FontName={font},FontSize={size_px},PrimaryColour={color}")
 }
 
@@ -5322,13 +5370,20 @@ pub fn integrated_lufs_from_short_term(short_term_x10: &[i32]) -> i32 {
         return -700;
     }
     // Absolute gate ≈ −70 LUFS; relative gate ≈ −10 LU below ungated mean.
-    let ungated: Vec<i32> = short_term_x10.iter().copied().filter(|&v| v > -700).collect();
+    let ungated: Vec<i32> = short_term_x10
+        .iter()
+        .copied()
+        .filter(|&v| v > -700)
+        .collect();
     if ungated.is_empty() {
         return -700;
     }
     let mean = ungated.iter().map(|&v| v as i64).sum::<i64>() / ungated.len() as i64;
     let gate = mean - 100;
-    let gated: Vec<i32> = ungated.into_iter().filter(|&v| (v as i64) >= gate).collect();
+    let gated: Vec<i32> = ungated
+        .into_iter()
+        .filter(|&v| (v as i64) >= gate)
+        .collect();
     if gated.is_empty() {
         return mean as i32;
     }
@@ -5426,8 +5481,7 @@ pub fn watch_progress_milli(position_us: i64, duration_us: i64) -> u32 {
     if duration_us <= 0 {
         return 0;
     }
-    ((position_us.max(0) as i128 * 1_000) / duration_us as i128)
-        .clamp(0, 1_000) as u32
+    ((position_us.max(0) as i128 * 1_000) / duration_us as i128).clamp(0, 1_000) as u32
 }
 
 pub fn format_continue_watching_osd(progress_milli: u32) -> String {
@@ -5440,7 +5494,10 @@ pub fn up_next_should_start(remaining_us: i64, countdown_us: i64) -> bool {
 }
 
 pub fn format_up_next_osd(title: &str, remaining_us: i64) -> String {
-    format!("Up next: {title} in {}", format_play_clock(remaining_us.max(0)))
+    format!(
+        "Up next: {title} in {}",
+        format_play_clock(remaining_us.max(0))
+    )
 }
 
 /// Scrobble / Last.fm-style payload line.
@@ -5616,7 +5673,8 @@ pub fn dual_fisheye_tb_to_equirect(
             let ox = (fx.clamp(0.0, 1.0) * (src_w.saturating_sub(1) as f32)).round() as u32;
             let oy = ((fy.clamp(0.0, 1.0) * (eye_h.saturating_sub(1) as f32)).round() as u32)
                 + if use_bottom { eye_h } else { 0 };
-            let idx = (oy.min(src_h - 1) as usize) * (src_w as usize) + (ox.min(src_w - 1) as usize);
+            let idx =
+                (oy.min(src_h - 1) as usize) * (src_w as usize) + (ox.min(src_w - 1) as usize);
             out[(y * out_w + x) as usize] = src.get(idx).copied().unwrap_or(0);
         }
     }
@@ -5720,11 +5778,7 @@ pub fn format_stereo_packing_osd(mode: StereoPacking) -> String {
 
 /// Row-interleaved 3D field select (even/odd rows).
 pub fn row_interleaved_eye_pixel(y: u32, left_eye: bool) -> bool {
-    if left_eye {
-        y % 2 == 0
-    } else {
-        y % 2 == 1
-    }
+    if left_eye { y % 2 == 0 } else { y % 2 == 1 }
 }
 
 pub fn format_row_interleaved_osd(enabled: bool) -> &'static str {
@@ -5827,7 +5881,11 @@ pub fn format_diffuse_white_osd(nits: u32) -> String {
 }
 
 /// Map content luminance to display using paper-white reference.
-pub fn map_nits_via_paper_white(content_nits: u32, paper_white_nits: u32, display_peak_nits: u32) -> u32 {
+pub fn map_nits_via_paper_white(
+    content_nits: u32,
+    paper_white_nits: u32,
+    display_peak_nits: u32,
+) -> u32 {
     let pw = clamp_paper_white_nits(paper_white_nits).max(1);
     let peak = clamp_hdr_nits(display_peak_nits).max(1);
     let scaled = (content_nits as u64 * peak as u64) / pw as u64;
@@ -5868,7 +5926,10 @@ pub fn format_wiggle_3d_osd(amplitude_milli: i32) -> String {
     if amplitude_milli <= 0 {
         "Wiggle 3D Off".into()
     } else {
-        format!("Wiggle ±{:.1}°", amplitude_milli.clamp(0, 30_000) as f32 / 1_000.0)
+        format!(
+            "Wiggle ±{:.1}°",
+            amplitude_milli.clamp(0, 30_000) as f32 / 1_000.0
+        )
     }
 }
 
@@ -6044,7 +6105,11 @@ pub fn format_white_point_osd(wp: DisplayWhitePoint) -> String {
         DisplayWhitePoint::Dci => "DCI",
         DisplayWhitePoint::D50 => "D50",
     };
-    format!("{name} x={:.4} y={:.4}", x as f32 / 10_000.0, y as f32 / 10_000.0)
+    format!(
+        "{name} x={:.4} y={:.4}",
+        x as f32 / 10_000.0,
+        y as f32 / 10_000.0
+    )
 }
 
 /// Parse EDID-like peak luminance token (`MaxLuminance=600`).
@@ -6154,13 +6219,14 @@ pub fn project_azimuthal_equidistant_view(
             }
             let c = rho * std::f32::consts::PI; // angular distance
             let phi = ny.atan2(nx);
-            let lat = (c.cos() * pitch.sin() + c.sin() * pitch.cos() * phi.cos()).asin().clamp(
-                -std::f32::consts::FRAC_PI_2 + 0.01,
-                std::f32::consts::FRAC_PI_2 - 0.01,
-            );
-            let lon = yaw
-                + (phi.sin() * c.sin() * pitch.cos())
-                    .atan2(c.cos() - pitch.sin() * lat.sin());
+            let lat = (c.cos() * pitch.sin() + c.sin() * pitch.cos() * phi.cos())
+                .asin()
+                .clamp(
+                    -std::f32::consts::FRAC_PI_2 + 0.01,
+                    std::f32::consts::FRAC_PI_2 - 0.01,
+                );
+            let lon =
+                yaw + (phi.sin() * c.sin() * pitch.cos()).atan2(c.cos() - pitch.sin() * lat.sin());
             out[(oy * out_w + ox) as usize] = sample_equirect_pixel(src, src_w, src_h, lon, lat);
         }
     }
@@ -6224,7 +6290,10 @@ pub fn format_cube_lut_osd(size: Option<usize>) -> String {
 
 /// Prefer container metadata title; otherwise the file stem / URL leaf.
 pub fn media_display_title(path: &Path, metadata_title: Option<&str>) -> String {
-    if let Some(title) = metadata_title.map(str::trim).filter(|title| !title.is_empty()) {
+    if let Some(title) = metadata_title
+        .map(str::trim)
+        .filter(|title| !title.is_empty())
+    {
         return title.to_string();
     }
     if let Some(name) = path.file_stem().and_then(|name| name.to_str()) {
@@ -6408,13 +6477,7 @@ pub fn format_spherical_osd_ex(
 }
 
 /// Sample equirectangular source at normalized lon/lat (radians).
-pub fn sample_equirect_pixel(
-    pixels: &[u32],
-    width: u32,
-    height: u32,
-    lon: f32,
-    lat: f32,
-) -> u32 {
+pub fn sample_equirect_pixel(pixels: &[u32], width: u32, height: u32, lon: f32, lat: f32) -> u32 {
     let w = width.max(1) as f32;
     let h = height.max(1) as f32;
     let u = ((lon / std::f32::consts::PI + 1.0) * 0.5).rem_euclid(1.0);
@@ -6662,7 +6725,10 @@ pub fn apply_hdr_tonemap_pixel(
         );
     }
     let r = tonemap_channel(expand_hdr_channel(f32::from(red) / 255.0, color_trc), mode);
-    let g = tonemap_channel(expand_hdr_channel(f32::from(green) / 255.0, color_trc), mode);
+    let g = tonemap_channel(
+        expand_hdr_channel(f32::from(green) / 255.0, color_trc),
+        mode,
+    );
     let b = tonemap_channel(expand_hdr_channel(f32::from(blue) / 255.0, color_trc), mode);
     (
         (r * 255.0).round().clamp(0.0, 255.0) as u8,
@@ -6742,13 +6808,12 @@ pub fn render_play_pixels(
             let orig_r = red;
             let orig_g = green;
             let orig_b = blue;
-            let (red, green, blue) = if opts.bt2446_tonemap
-                && !matches!(opts.hdr_tonemap, HdrTonemap::Off)
-            {
-                apply_bt2446_tonemap_pixel(red, green, blue, opts.hdr_nits)
-            } else {
-                apply_hdr_tonemap_pixel(red, green, blue, opts.hdr_tonemap, opts.color_trc)
-            };
+            let (red, green, blue) =
+                if opts.bt2446_tonemap && !matches!(opts.hdr_tonemap, HdrTonemap::Off) {
+                    apply_bt2446_tonemap_pixel(red, green, blue, opts.hdr_nits)
+                } else {
+                    apply_hdr_tonemap_pixel(red, green, blue, opts.hdr_tonemap, opts.color_trc)
+                };
             let (red, green, blue) = (
                 blend_tonemap_channel(red, orig_r, opts.tonemap_strength_milli),
                 blend_tonemap_channel(green, orig_g, opts.tonemap_strength_milli),
@@ -6763,12 +6828,8 @@ pub fn render_play_pixels(
                     scale_hdr_display_channel(blue, opts.hdr_nits),
                 )
             };
-            let (red, green, blue) = apply_hdr_highlight_desat_pixel(
-                red,
-                green,
-                blue,
-                opts.hdr_highlight_desat_milli,
-            );
+            let (red, green, blue) =
+                apply_hdr_highlight_desat_pixel(red, green, blue, opts.hdr_highlight_desat_milli);
             let (red, green, blue) = (
                 apply_hdr_black_lift_channel(red, opts.hdr_black_lift_milli),
                 apply_hdr_black_lift_channel(green, opts.hdr_black_lift_milli),
@@ -6776,20 +6837,18 @@ pub fn render_play_pixels(
             );
             let (red, green, blue) =
                 apply_white_balance_pixel(red, green, blue, opts.color_temp_kelvin);
-            let (red, green, blue) = if opts.hlg_ootf_gamma_milli > 0
-                && opts.color_trc == COLOR_TRC_HLG
-            {
-                apply_hlg_ootf_pixel(red, green, blue, opts.hlg_ootf_gamma_milli)
-            } else {
-                (red, green, blue)
-            };
-            let (red, green, blue) = if opts.gamut_map_bt709
-                && opts.color_primaries == COLOR_PRIMARIES_BT2020
-            {
-                apply_bt2020_to_bt709_pixel(red, green, blue)
-            } else {
-                (red, green, blue)
-            };
+            let (red, green, blue) =
+                if opts.hlg_ootf_gamma_milli > 0 && opts.color_trc == COLOR_TRC_HLG {
+                    apply_hlg_ootf_pixel(red, green, blue, opts.hlg_ootf_gamma_milli)
+                } else {
+                    (red, green, blue)
+                };
+            let (red, green, blue) =
+                if opts.gamut_map_bt709 && opts.color_primaries == COLOR_PRIMARIES_BT2020 {
+                    apply_bt2020_to_bt709_pixel(red, green, blue)
+                } else {
+                    (red, green, blue)
+                };
             let (red, green, blue) =
                 apply_display_effect_pixel(red, green, blue, opts.display_effect);
             let (dx, dy) = rotate_pixel(x as u32, y as u32, width, height, opts.rotate);
@@ -6983,11 +7042,7 @@ pub fn format_chapter_osd(index: usize, total: usize, start_us: i64) -> String {
 }
 
 pub fn format_pause_osd(paused: bool) -> &'static str {
-    if paused {
-        "Paused"
-    } else {
-        "Playing"
-    }
+    if paused { "Paused" } else { "Playing" }
 }
 
 #[derive(Clone, Debug)]
@@ -7323,7 +7378,10 @@ pub fn parse_playlist_text(text: &str, base: &Path) -> Vec<PathBuf> {
     let mut entries = Vec::new();
     for raw in text.lines() {
         let line = raw.trim();
-        if line.is_empty() || line.starts_with('#') || (line.starts_with('[') && line.ends_with(']')) {
+        if line.is_empty()
+            || line.starts_with('#')
+            || (line.starts_with('[') && line.ends_with(']'))
+        {
             continue;
         }
         let target = if let Some(rest) = line.strip_prefix("File") {
@@ -7334,10 +7392,7 @@ pub fn parse_playlist_text(text: &str, base: &Path) -> Vec<PathBuf> {
                 continue;
             };
             value.trim()
-        } else if line.contains('=')
-            && !is_playback_url(line)
-            && !line.contains(['/', '\\'])
-        {
+        } else if line.contains('=') && !is_playback_url(line) && !line.contains(['/', '\\']) {
             continue;
         } else {
             line
@@ -7368,10 +7423,7 @@ pub fn expand_play_inputs(paths: &[PathBuf]) -> Result<Vec<PathBuf>> {
         let base = path.parent().unwrap_or_else(|| Path::new("."));
         let entries = parse_playlist_text(&body, base);
         if entries.is_empty() {
-            return Err(format!(
-                "playlist has no entries: {}",
-                path.display()
-            ));
+            return Err(format!("playlist has no entries: {}", path.display()));
         }
         expanded.extend(entries);
     }
@@ -7439,15 +7491,14 @@ pub fn format_repeat_osd(mode: RepeatMode) -> &'static str {
 }
 
 pub fn format_shuffle_osd(on: bool) -> &'static str {
-    if on {
-        "shuffle on"
-    } else {
-        "shuffle off"
-    }
+    if on { "shuffle on" } else { "shuffle off" }
 }
 
 pub fn format_subtitle_scale_osd(scale_milli: i32) -> String {
-    format!("Subtitles {}%", clamp_subtitle_scale_milli(scale_milli) / 10)
+    format!(
+        "Subtitles {}%",
+        clamp_subtitle_scale_milli(scale_milli) / 10
+    )
 }
 
 pub fn format_jump_osd(target_us: i64) -> String {
@@ -7505,7 +7556,11 @@ pub fn audio_delay_frames(delay_us: i64, sample_rate: u32) -> i64 {
 
 /// One block of output. `media_frames` is how many source frames this block represents.
 /// Silence advances the media clock. Dropped frames do not.
-pub fn step_audio_skew(skew_frames: i64, media_frames: u32, queued_frames: u64) -> (i64, bool, u64) {
+pub fn step_audio_skew(
+    skew_frames: i64,
+    media_frames: u32,
+    queued_frames: u64,
+) -> (i64, bool, u64) {
     if media_frames == 0 || skew_frames == 0 {
         return (skew_frames, false, 0);
     }
@@ -8129,70 +8184,70 @@ struct Shared {
     sample_rate: AtomicU32,
     channels: AtomicU32,
     played_samples: AtomicU64,
-        source_width: AtomicU32,
-        source_height: AtomicU32,
-        duration_us: AtomicI64,
-        /// Media time to seek to, or -1 when idle. AV timestamps are derived from this.
-        seek_us: AtomicI64,
-        /// Linear output gain. 1000 is unity.
-        volume_milli: AtomicU32,
-        /// Playback rate in thousandths. 1000 is 1×.
-        rate_milli: AtomicU32,
-        rate_phase: AtomicU32,
-        rate_held: AtomicBool,
-        muted: AtomicBool,
-        held_audio: Mutex<Vec<f32>>,
-        cues: Mutex<VecDeque<SubtitleCue>>,
-        bitmaps: Mutex<VecDeque<BitmapSubtitle>>,
-        audio_count: AtomicU32,
-        subtitle_count: AtomicU32,
-        audio_ordinal: AtomicI32,
-        subtitle_ordinal: AtomicI32,
-        track_gen: AtomicU32,
-        watch_us: AtomicI64,
-        external_cues: Mutex<Vec<SubtitleCue>>,
-        external_sub: AtomicBool,
-        device_name: Mutex<String>,
-        media_title: Mutex<String>,
-        chapters: Mutex<Vec<i64>>,
-        audio_delay_us: AtomicI64,
-        audio_skew_frames: AtomicI64,
-        /// Last seen `AVFrame.color_trc` (PQ/HLG detection for play HDR).
-        color_trc: AtomicU32,
-        eq_gains_milli: [AtomicI32; EQ_BAND_COUNT],
-        tone: Mutex<Vec<GraphicEqState>>,
-        /// Per-channel Bass/Mid/Treble filter state.
-        tone_bands: Mutex<Vec<ToneState>>,
-        bass_milli: AtomicI32,
-        mid_milli: AtomicI32,
-        treble_milli: AtomicI32,
-        audio_reset: AtomicBool,
-        audio_channel: AtomicU32,
-        /// Stereo balance. 1000 is center, 0 full left, 2000 full right.
-        balance_milli: AtomicI32,
-        /// Stereo width. 1000 is normal, 0 mono, 2000 double-wide.
-        width_milli: AtomicI32,
-        /// VLC-style peak compressor before balance/width.
-        compressor_on: AtomicBool,
-        /// Headphone crossfeed strength 0..=1000.
-        crossfeed_milli: AtomicI32,
-        /// When true, graphic EQ is skipped in the audio path.
-        eq_bypass: AtomicBool,
-        /// EQ preamp milli-gain around unity (0 = 0 dB).
-        eq_preamp_milli: AtomicI32,
-        /// Headphone spatializer strength 0..=2000.
-        spatializer_milli: AtomicI32,
-        /// ReplayGain linear milli-gain (1000 = unity).
-        replaygain_milli: AtomicI32,
-        /// Fold multichannel PCM to stereo before balance/width.
-        surround_downmix: AtomicBool,
-        /// VLC-style volume normalizer (peak follower + makeup gain).
-        normalizer_on: AtomicBool,
-        /// Smoothed peak ×1000 for the normalizer.
-        normalizer_peak_milli: AtomicU32,
-        /// Instantaneous output peak ×1000 for VU meter OSD.
-        vu_peak_milli: AtomicU32,
-    }
+    source_width: AtomicU32,
+    source_height: AtomicU32,
+    duration_us: AtomicI64,
+    /// Media time to seek to, or -1 when idle. AV timestamps are derived from this.
+    seek_us: AtomicI64,
+    /// Linear output gain. 1000 is unity.
+    volume_milli: AtomicU32,
+    /// Playback rate in thousandths. 1000 is 1×.
+    rate_milli: AtomicU32,
+    rate_phase: AtomicU32,
+    rate_held: AtomicBool,
+    muted: AtomicBool,
+    held_audio: Mutex<Vec<f32>>,
+    cues: Mutex<VecDeque<SubtitleCue>>,
+    bitmaps: Mutex<VecDeque<BitmapSubtitle>>,
+    audio_count: AtomicU32,
+    subtitle_count: AtomicU32,
+    audio_ordinal: AtomicI32,
+    subtitle_ordinal: AtomicI32,
+    track_gen: AtomicU32,
+    watch_us: AtomicI64,
+    external_cues: Mutex<Vec<SubtitleCue>>,
+    external_sub: AtomicBool,
+    device_name: Mutex<String>,
+    media_title: Mutex<String>,
+    chapters: Mutex<Vec<i64>>,
+    audio_delay_us: AtomicI64,
+    audio_skew_frames: AtomicI64,
+    /// Last seen `AVFrame.color_trc` (PQ/HLG detection for play HDR).
+    color_trc: AtomicU32,
+    eq_gains_milli: [AtomicI32; EQ_BAND_COUNT],
+    tone: Mutex<Vec<GraphicEqState>>,
+    /// Per-channel Bass/Mid/Treble filter state.
+    tone_bands: Mutex<Vec<ToneState>>,
+    bass_milli: AtomicI32,
+    mid_milli: AtomicI32,
+    treble_milli: AtomicI32,
+    audio_reset: AtomicBool,
+    audio_channel: AtomicU32,
+    /// Stereo balance. 1000 is center, 0 full left, 2000 full right.
+    balance_milli: AtomicI32,
+    /// Stereo width. 1000 is normal, 0 mono, 2000 double-wide.
+    width_milli: AtomicI32,
+    /// VLC-style peak compressor before balance/width.
+    compressor_on: AtomicBool,
+    /// Headphone crossfeed strength 0..=1000.
+    crossfeed_milli: AtomicI32,
+    /// When true, graphic EQ is skipped in the audio path.
+    eq_bypass: AtomicBool,
+    /// EQ preamp milli-gain around unity (0 = 0 dB).
+    eq_preamp_milli: AtomicI32,
+    /// Headphone spatializer strength 0..=2000.
+    spatializer_milli: AtomicI32,
+    /// ReplayGain linear milli-gain (1000 = unity).
+    replaygain_milli: AtomicI32,
+    /// Fold multichannel PCM to stereo before balance/width.
+    surround_downmix: AtomicBool,
+    /// VLC-style volume normalizer (peak follower + makeup gain).
+    normalizer_on: AtomicBool,
+    /// Smoothed peak ×1000 for the normalizer.
+    normalizer_peak_milli: AtomicU32,
+    /// Instantaneous output peak ×1000 for VU meter OSD.
+    vu_peak_milli: AtomicU32,
+}
 
 struct Finish(Arc<Shared>);
 
@@ -8366,7 +8421,12 @@ pub fn fit_aspect(bounds_w: u32, bounds_h: u32, ratio_w: u32, ratio_h: u32) -> (
 
 /// Centered crop to `ratio_w:ratio_h`. Returns `(x, y, width, height)` in source pixels.
 /// `Source` callers pass the frame size and get the full frame back.
-pub fn center_crop(source_w: u32, source_h: u32, ratio_w: u32, ratio_h: u32) -> (u32, u32, u32, u32) {
+pub fn center_crop(
+    source_w: u32,
+    source_h: u32,
+    ratio_w: u32,
+    ratio_h: u32,
+) -> (u32, u32, u32, u32) {
     if source_w == 0 || source_h == 0 || ratio_w == 0 || ratio_h == 0 {
         return (0, 0, source_w, source_h);
     }
@@ -8443,12 +8503,7 @@ pub fn detect_equirect_aspect(width: u32, height: u32) -> bool {
 }
 
 /// Fitted window size for "fit to video" / original-size views.
-pub fn fit_window_to_video(
-    video_w: u32,
-    video_h: u32,
-    max_w: u32,
-    max_h: u32,
-) -> (u32, u32) {
+pub fn fit_window_to_video(video_w: u32, video_h: u32, max_w: u32, max_h: u32) -> (u32, u32) {
     let video_w = video_w.max(1);
     let video_h = video_h.max(1);
     let max_w = max_w.max(1);
@@ -8816,12 +8871,7 @@ pub fn snapshot_path_with_ext(video: &Path, index: u32, ext: &str) -> PathBuf {
 }
 
 /// Resolve snapshot output under an optional directory (VLC `--snapshot-path`).
-pub fn snapshot_path_in_dir(
-    dir: Option<&Path>,
-    video: &Path,
-    index: u32,
-    ext: &str,
-) -> PathBuf {
+pub fn snapshot_path_in_dir(dir: Option<&Path>, video: &Path, index: u32, ext: &str) -> PathBuf {
     let default = snapshot_path_with_ext(video, index, ext);
     match dir {
         Some(folder) if !folder.as_os_str().is_empty() => {
@@ -9033,11 +9083,7 @@ pub fn gapless_should_prefetch(remaining_us: i64, threshold_us: i64) -> bool {
 }
 
 pub fn format_gapless_osd(enabled: bool) -> &'static str {
-    if enabled {
-        "Gapless On"
-    } else {
-        "Gapless Off"
-    }
+    if enabled { "Gapless On" } else { "Gapless Off" }
 }
 
 /// Crossfade between playlist items (VLC `--audio-desync` style fade window).
@@ -9308,7 +9354,11 @@ pub fn push_recent_path(recent: &mut Vec<PathBuf>, path: PathBuf) {
 }
 
 pub fn format_recent_osd(recent: &[PathBuf]) -> String {
-    match recent.first().and_then(|p| p.file_name()).and_then(|n| n.to_str()) {
+    match recent
+        .first()
+        .and_then(|p| p.file_name())
+        .and_then(|n| n.to_str())
+    {
         Some(name) => format!("Recent {} ({})", name, recent.len()),
         None => "Recent empty".into(),
     }
@@ -9448,9 +9498,7 @@ fn start_audio(
         host.default_output_device()
             .ok_or("no default audio output device")?
     };
-    let chosen = device
-        .name()
-        .unwrap_or_else(|_| "default".into());
+    let chosen = device.name().unwrap_or_else(|_| "default".into());
     *lock(&shared.device_name) = chosen.clone();
     eprintln!("fvid play: audio device: {chosen}");
     let supported = device
@@ -9676,9 +9724,7 @@ fn fill_audio<T>(shared: &Shared, data: &mut [T], mut write: impl FnMut(f32, &mu
         write(0.0, sample);
     }
     if consumed > 0 {
-        shared
-            .played_samples
-            .fetch_add(consumed, Ordering::Relaxed);
+        shared.played_samples.fetch_add(consumed, Ordering::Relaxed);
         shared.audio_cv.notify_all();
     }
 }
@@ -9786,10 +9832,16 @@ fn decode_file(shared: &Shared, path: &Path) -> Result<()> {
     shared
         .audio_count
         .store(audio_streams.len() as u32, Ordering::Relaxed);
-    shared
-        .subtitle_count
-        .store(subtitle_streams.len() as u32 + subtitle_extra(shared), Ordering::Relaxed);
-    let mut audio_ordinal = bind_ordinal(&audio_streams, shared.audio_ordinal.load(Ordering::Acquire), false, 0);
+    shared.subtitle_count.store(
+        subtitle_streams.len() as u32 + subtitle_extra(shared),
+        Ordering::Relaxed,
+    );
+    let mut audio_ordinal = bind_ordinal(
+        &audio_streams,
+        shared.audio_ordinal.load(Ordering::Acquire),
+        false,
+        0,
+    );
     let mut subtitle_ordinal = bind_ordinal(
         &subtitle_streams,
         shared.subtitle_ordinal.load(Ordering::Acquire),
@@ -9892,9 +9944,7 @@ fn decode_file(shared: &Shared, path: &Path) -> Result<()> {
                 return Err("input produced no video frames".into());
             }
             if shared.duration_us.load(Ordering::Relaxed) < 0 && next_video_pts > 0 {
-                shared
-                    .duration_us
-                    .store(next_video_pts, Ordering::Relaxed);
+                shared.duration_us.store(next_video_pts, Ordering::Relaxed);
             }
             loop {
                 if shared.quit.load(Ordering::Acquire) {
@@ -9936,14 +9986,14 @@ fn decode_file(shared: &Shared, path: &Path) -> Result<()> {
                         &mut video_origin,
                         &mut audio_aligned,
                         &mut pending_audio,
-                    &mut next_video_pts,
-                )?;
-                if let Some(decoder) = subtitle_decoder.as_ref() {
-                    unsafe { avcodec_flush_buffers(decoder.0) };
+                        &mut next_video_pts,
+                    )?;
+                    if let Some(decoder) = subtitle_decoder.as_ref() {
+                        unsafe { avcodec_flush_buffers(decoder.0) };
+                    }
+                    break;
                 }
-                break;
-            }
-            let guard = lock(&shared.video);
+                let guard = lock(&shared.video);
                 let _guard = wait_timeout(&shared.video_cv, guard);
             }
             continue;
@@ -10085,9 +10135,18 @@ fn sync_tracks(
     }
     *seen_gen = generation;
     *audio_ordinal = bind_ordinal(audio_streams, want_audio, false, 0);
-    *subtitle_ordinal = bind_ordinal(subtitle_streams, want_sub, true, subtitle_extra(shared) as i32);
-    shared.audio_ordinal.store(*audio_ordinal, Ordering::Relaxed);
-    shared.subtitle_ordinal.store(*subtitle_ordinal, Ordering::Relaxed);
+    *subtitle_ordinal = bind_ordinal(
+        subtitle_streams,
+        want_sub,
+        true,
+        subtitle_extra(shared) as i32,
+    );
+    shared
+        .audio_ordinal
+        .store(*audio_ordinal, Ordering::Relaxed);
+    shared
+        .subtitle_ordinal
+        .store(*subtitle_ordinal, Ordering::Relaxed);
     shared.subtitle_count.store(
         subtitle_streams.len() as u32 + subtitle_extra(shared),
         Ordering::Relaxed,
@@ -10303,9 +10362,7 @@ fn apply_playback_seek(
     reset_audio_rate(shared);
     shared.played_samples.store(0, Ordering::Relaxed);
     rearm_audio_skew(shared);
-    shared
-        .audio_eof
-        .store(audio.is_none(), Ordering::Release);
+    shared.audio_eof.store(audio.is_none(), Ordering::Release);
     shared.finished.store(false, Ordering::Release);
     shared.origin_us.store(target_us, Ordering::Release);
     *video_origin = Some(target_us);
@@ -10453,7 +10510,7 @@ fn receive_video(
         let cropped = unsafe { av_frame_apply_cropping(frame.0, 0) };
         if cropped < 0 {
             check(
-                unsafe { av_frame_apply_cropping(frame.0, AV_FRAME_CROP_UNALIGNED) },
+                unsafe { av_frame_apply_cropping(frame.0, AV_FRAME_CROP_UNALIGNED as i32) },
                 "apply frame crop",
             )?;
         }
@@ -11266,7 +11323,11 @@ impl PlayerApp {
 
     fn report(&self) -> std::result::Result<PlayStats, String> {
         if let Some(err) = &self.error {
-            let presented = self.session.as_ref().map(|session| session.presented).unwrap_or(0);
+            let presented = self
+                .session
+                .as_ref()
+                .map(|session| session.presented)
+                .unwrap_or(0);
             if presented == 0 {
                 return Err(err.clone());
             }
@@ -11333,9 +11394,7 @@ impl PlayerApp {
             let source_w = session.shared.source_width.load(Ordering::Relaxed);
             let source_h = session.shared.source_height.load(Ordering::Relaxed);
             if source_w != frame.width || source_h != frame.height {
-                eprintln!(
-                    "fvid play: display {width}x{height} (source {source_w}x{source_h})"
-                );
+                eprintln!("fvid play: display {width}x{height} (source {source_w}x{source_h})");
             }
             session.clock = Clock::new(frame.pts_us, session.clock.rate_milli);
             session.last_clock = session.clock.now();
@@ -11347,7 +11406,10 @@ impl PlayerApp {
                 if let Some(stream) = session.stream.as_mut() {
                     if let Err(err) = stream.play() {
                         eprintln!("fvid play: audio disabled ({err})");
-                        session.shared.use_audio_clock.store(false, Ordering::Release);
+                        session
+                            .shared
+                            .use_audio_clock
+                            .store(false, Ordering::Release);
                     }
                 }
             } else if let Some(stream) = session.stream.as_mut() {
@@ -11792,8 +11854,7 @@ impl PlayerApp {
         {
             self.nudge_subtitle_scale(SUBTITLE_SCALE_STEP_MILLI);
         }
-        if !focused
-            && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Minus))
+        if !focused && ctx.input(|input| input.modifiers.alt && input.key_pressed(egui::Key::Minus))
         {
             self.nudge_subtitle_scale(-SUBTITLE_SCALE_STEP_MILLI);
         }
@@ -12123,9 +12184,7 @@ impl PlayerApp {
         if !focused
             && command
             && ctx.input(|input| {
-                input.modifiers.alt
-                    && input.modifiers.shift
-                    && input.key_pressed(egui::Key::A)
+                input.modifiers.alt && input.modifiers.shift && input.key_pressed(egui::Key::A)
             })
         {
             self.toggle_http_auth_flags();
@@ -12584,7 +12643,8 @@ impl PlayerApp {
         {
             self.jump_random();
         }
-        if !focused && ctx.input(|input| input.key_pressed(egui::Key::ArrowUp) && input.modifiers.alt)
+        if !focused
+            && ctx.input(|input| input.key_pressed(egui::Key::ArrowUp) && input.modifiers.alt)
         {
             if command {
                 self.cycle_subtitle_pos();
@@ -12625,19 +12685,15 @@ impl PlayerApp {
         if !focused && !command && ctx.input(|input| input.key_pressed(egui::Key::X)) {
             self.cycle_sleep_timer();
         }
-        if !focused
-            && !command
-            && ctx.input(|input| input.key_pressed(egui::Key::E))
-        {
+        if !focused && !command && ctx.input(|input| input.key_pressed(egui::Key::E)) {
             self.toggle_eq_bypass();
         }
         if !focused && ctx.input(|input| input.key_pressed(egui::Key::Y)) {
             self.cycle_audio_channel_mode();
         }
         if !focused {
-            let (scroll, ctrl) = ctx.input(|input| {
-                (input.smooth_scroll_delta.y, input.modifiers.command)
-            });
+            let (scroll, ctrl) =
+                ctx.input(|input| (input.smooth_scroll_delta.y, input.modifiers.command));
             if scroll.abs() > 0.1 {
                 let lines = if scroll > 0.0 { 1 } else { -1 };
                 if ctrl {
@@ -12769,7 +12825,12 @@ impl PlayerApp {
                 stored.clone()
             }
         };
-        let title = window_title(&name, &session.shared, session.media_now, self.position_display);
+        let title = window_title(
+            &name,
+            &session.shared,
+            session.media_now,
+            self.position_display,
+        );
         if title != self.title {
             self.title.clone_from(&title);
             ctx.send_viewport_cmd(egui::ViewportCommand::Title(title));
@@ -12889,8 +12950,7 @@ impl PlayerApp {
             ui.label("VU");
             for fill in fills {
                 let tall = 4.0 + (fill as f32 / 100.0) * 16.0;
-                let (rect, _) =
-                    ui.allocate_exact_size(egui::vec2(4.0, 20.0), egui::Sense::hover());
+                let (rect, _) = ui.allocate_exact_size(egui::vec2(4.0, 20.0), egui::Sense::hover());
                 let bar = egui::Rect::from_min_size(
                     egui::pos2(rect.min.x, rect.max.y - tall),
                     egui::vec2(4.0, tall),
@@ -13097,7 +13157,10 @@ impl PlayerApp {
             let audio_label = if audio_count == 0 {
                 "Audio —".to_string()
             } else {
-                format!("Audio {}/{audio_count}", self.audio_ordinal.saturating_add(1))
+                format!(
+                    "Audio {}/{audio_count}",
+                    self.audio_ordinal.saturating_add(1)
+                )
             };
             if ui
                 .add_enabled(audio_count > 1, egui::Button::new(audio_label))
@@ -13137,10 +13200,7 @@ impl PlayerApp {
                 };
                 self.cycle_output_device(delta);
             }
-            if ui
-                .button(audio_channel_label(self.audio_channel))
-                .clicked()
-            {
+            if ui.button(audio_channel_label(self.audio_channel)).clicked() {
                 self.cycle_audio_channel_mode();
             }
             if ui.button("Bal-").clicked() {
@@ -13305,10 +13365,7 @@ impl PlayerApp {
         let rate = session.shared.sample_rate.load(Ordering::Relaxed);
         let delta = audio_delay_frames(next, rate) - audio_delay_frames(self.audio_delay_us, rate);
         self.audio_delay_us = next;
-        session
-            .shared
-            .audio_delay_us
-            .store(next, Ordering::Relaxed);
+        session.shared.audio_delay_us.store(next, Ordering::Relaxed);
         session
             .shared
             .audio_skew_frames
@@ -13717,10 +13774,7 @@ impl PlayerApp {
         session.shared.played_samples.store(0, Ordering::Relaxed);
         reset_audio_rate(&session.shared);
         rearm_audio_skew(&session.shared);
-        session
-            .shared
-            .audio_eof
-            .store(false, Ordering::Release);
+        session.shared.audio_eof.store(false, Ordering::Release);
         session.shared.finished.store(false, Ordering::Release);
         session.shared.origin_us.store(target, Ordering::Release);
         session.clock.jump(target);
@@ -13751,7 +13805,10 @@ impl PlayerApp {
         self.rate_milli = rate_milli;
         if let Some(session) = &mut self.session {
             session.clock.set_rate(rate_milli);
-            session.shared.rate_milli.store(rate_milli, Ordering::Relaxed);
+            session
+                .shared
+                .rate_milli
+                .store(rate_milli, Ordering::Relaxed);
             session.last_clock = session.clock.now();
             session.media_now = session.last_clock;
         }
@@ -13930,7 +13987,9 @@ impl PlayerApp {
     fn cycle_playlist_sort_mode(&mut self) {
         self.playlist_sort = cycle_playlist_sort(self.playlist_sort);
         sort_playlist_paths(&mut self.playlist, self.playlist_sort);
-        self.playlist_index = self.playlist_index.min(self.playlist.len().saturating_sub(1));
+        self.playlist_index = self
+            .playlist_index
+            .min(self.playlist.len().saturating_sub(1));
         self.notice = Some(format_playlist_sort_osd(self.playlist_sort));
     }
 
@@ -14027,13 +14086,19 @@ impl PlayerApp {
 
     fn toggle_teletext(&mut self) {
         self.teletext_enabled = !self.teletext_enabled;
-        self.notice = Some(format_teletext_osd(self.teletext_page, self.teletext_enabled));
+        self.notice = Some(format_teletext_osd(
+            self.teletext_page,
+            self.teletext_enabled,
+        ));
     }
 
     fn nudge_teletext_page(&mut self, delta: i32) {
         self.teletext_page = teletext_page_step(self.teletext_page, delta);
         self.teletext_enabled = true;
-        self.notice = Some(format_teletext_osd(self.teletext_page, self.teletext_enabled));
+        self.notice = Some(format_teletext_osd(
+            self.teletext_page,
+            self.teletext_enabled,
+        ));
     }
 
     fn toggle_aspect_lock(&mut self) {
@@ -14116,9 +14181,8 @@ impl PlayerApp {
                 self.http_auth_password = false;
             }
         }
-        self.notice = Some(
-            format_http_auth_osd(self.http_auth_user, self.http_auth_password).into(),
-        );
+        self.notice =
+            Some(format_http_auth_osd(self.http_auth_user, self.http_auth_password).into());
     }
 
     fn cycle_spherical_projection_mode(&mut self) {
@@ -14267,7 +14331,10 @@ impl PlayerApp {
         if let Some((a, b)) = pair {
             ab_slot_store(&mut self.ab_slots, index, a, b);
         }
-        self.notice = Some(format_ab_slot_osd(index, ab_slot_load(&self.ab_slots, index)));
+        self.notice = Some(format_ab_slot_osd(
+            index,
+            ab_slot_load(&self.ab_slots, index),
+        ));
     }
 
     fn load_ab_slot(&mut self, index: usize) {
@@ -14346,7 +14413,9 @@ impl PlayerApp {
             _ => 0,
         };
         self.hdr_highlight_desat_milli = next;
-        self.notice = Some(format_hdr_highlight_desat_osd(self.hdr_highlight_desat_milli));
+        self.notice = Some(format_hdr_highlight_desat_osd(
+            self.hdr_highlight_desat_milli,
+        ));
     }
 
     fn cycle_color_temp(&mut self) {
@@ -14574,7 +14643,9 @@ impl PlayerApp {
             _ => 0,
         };
         self.chromatic_aberration_milli = next;
-        self.notice = Some(format_chromatic_aberration_osd(self.chromatic_aberration_milli));
+        self.notice = Some(format_chromatic_aberration_osd(
+            self.chromatic_aberration_milli,
+        ));
     }
 
     fn cycle_soft_limiter(&mut self) {
@@ -14702,7 +14773,11 @@ impl PlayerApp {
         if self.spherical || self.options.spherical {
             return;
         }
-        let Some(frame) = self.session.as_ref().and_then(|session| session.frame.as_ref()) else {
+        let Some(frame) = self
+            .session
+            .as_ref()
+            .and_then(|session| session.frame.as_ref())
+        else {
             return;
         };
         if detect_equirect_aspect(frame.width, frame.height) {
@@ -14740,7 +14815,10 @@ impl PlayerApp {
         let count = session.shared.subtitle_count.load(Ordering::Relaxed) as usize;
         let next = cycle_track(count, self.subtitle_ordinal, delta, true);
         self.subtitle_ordinal = next;
-        session.shared.subtitle_ordinal.store(next, Ordering::Release);
+        session
+            .shared
+            .subtitle_ordinal
+            .store(next, Ordering::Release);
         session.shared.track_gen.fetch_add(1, Ordering::Release);
         lock(&session.shared.cues).clear();
         self.logged_sub.clear();
@@ -14774,10 +14852,7 @@ impl PlayerApp {
                     let was_external = session.shared.external_sub.swap(true, Ordering::AcqRel);
                     *lock(&session.shared.external_cues) = cues;
                     if !was_external {
-                        session
-                            .shared
-                            .subtitle_count
-                            .fetch_add(1, Ordering::AcqRel);
+                        session.shared.subtitle_count.fetch_add(1, Ordering::AcqRel);
                     }
                     let count = session.shared.subtitle_count.load(Ordering::Acquire) as i32;
                     let ordinal = (count - 1).max(0);
@@ -14934,8 +15009,13 @@ impl PlayerApp {
                 bt2446_tonemap: self.bt2446_tonemap,
                 gamut_map_bt709: self.gamut_map_bt709,
             };
-            let (width, height, pixels) =
-                render_play_pixels(frame.width, frame.height, &frame.pixels, &opts, bitmap.as_ref());
+            let (width, height, pixels) = render_play_pixels(
+                frame.width,
+                frame.height,
+                &frame.pixels,
+                &opts,
+                bitmap.as_ref(),
+            );
             let bytes = match self.snapshot_format {
                 SnapshotFormat::Bmp => encode_bmp(width, height, &pixels),
                 SnapshotFormat::Png => encode_png(width, height, &pixels),
@@ -15047,11 +15127,20 @@ impl PlayerApp {
             {
                 self.toggle_pause();
             }
-            if ui.add_sized([72.0, 28.0], egui::Button::new("Stop")).clicked() {
+            if ui
+                .add_sized([72.0, 28.0], egui::Button::new("Stop"))
+                .clicked()
+            {
                 self.stop_playback();
             }
             let can_prev = if self.shuffle {
-                order_step(&self.order, self.order_cursor, -1, self.repeat == RepeatMode::All).is_some()
+                order_step(
+                    &self.order,
+                    self.order_cursor,
+                    -1,
+                    self.repeat == RepeatMode::All,
+                )
+                .is_some()
             } else {
                 playlist_step(self.playlist.len(), self.playlist_index, -1).is_some()
             };
@@ -15062,7 +15151,13 @@ impl PlayerApp {
                 self.step_playlist(-1);
             }
             let can_next = if self.shuffle {
-                order_step(&self.order, self.order_cursor, 1, self.repeat == RepeatMode::All).is_some()
+                order_step(
+                    &self.order,
+                    self.order_cursor,
+                    1,
+                    self.repeat == RepeatMode::All,
+                )
+                .is_some()
             } else {
                 playlist_step(self.playlist.len(), self.playlist_index, 1).is_some()
             };
@@ -15211,8 +15306,8 @@ impl PlayerApp {
         );
         let uv = egui::Rect::from_min_max(egui::pos2(u0, v0), egui::pos2(u1, v1));
         let image = egui::Image::from_texture(egui::load::SizedTexture::new(tex_id, tex_size))
-        .uv(uv)
-        .fit_to_exact_size(size);
+            .uv(uv)
+            .fit_to_exact_size(size);
         ui.set_clip_rect(rect);
         let response = ui.allocate_rect(rect, egui::Sense::click_and_drag());
         if self.spherical && response.dragged() {
@@ -15265,12 +15360,7 @@ impl PlayerApp {
             self.subtitle_color,
         );
         if !self.marquee_text.trim().is_empty() {
-            paint_marquee(
-                ui,
-                image_rect,
-                &self.marquee_text,
-                self.marquee_position,
-            );
+            paint_marquee(ui, image_rect, &self.marquee_text, self.marquee_position);
         }
         if self.show_stats {
             let stats = PlayStats {
@@ -15366,8 +15456,7 @@ impl eframe::App for PlayerApp {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                     }
                 } else {
-                    match playback_continue(self.playlist.len(), self.playlist_index, self.repeat)
-                    {
+                    match playback_continue(self.playlist.len(), self.playlist_index, self.repeat) {
                         PlaybackContinue::Next(index) => self.goto_playlist(index),
                         PlaybackContinue::Restart => {
                             self.advance_guard = true;
@@ -15424,8 +15513,7 @@ impl eframe::App for PlayerApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         let ctx = ui.ctx().clone();
         let idle = self.mouse_moved_at.elapsed().as_millis() as u64;
-        let hide_controls =
-            controls_should_hide(idle, self.controls_autohide_ms, self.fullscreen);
+        let hide_controls = controls_should_hide(idle, self.controls_autohide_ms, self.fullscreen);
         if !hide_controls {
             egui::Panel::bottom("controls").show(ui, |ui| self.controls(ui));
         }
@@ -15541,8 +15629,8 @@ fn paint_subtitle(
     let rgba = subtitle_color_rgba(color);
     let fill = egui::Color32::from_rgba_unmultiplied(rgba[0], rgba[1], rgba[2], alpha);
     let shadow = egui::Color32::from_rgba_unmultiplied(0, 0, 0, alpha);
-    let mut y = rect.top()
-        + subtitle_block_top_y(rect.height(), lines.len(), line_h, margin, position);
+    let mut y =
+        rect.top() + subtitle_block_top_y(rect.height(), lines.len(), line_h, margin, position);
     for line in lines {
         let pos = egui::pos2(rect.center().x, y);
         ui.painter().text(
@@ -15552,13 +15640,8 @@ fn paint_subtitle(
             font.clone(),
             shadow,
         );
-        ui.painter().text(
-            pos,
-            egui::Align2::CENTER_TOP,
-            line,
-            font.clone(),
-            fill,
-        );
+        ui.painter()
+            .text(pos, egui::Align2::CENTER_TOP, line, font.clone(), fill);
         y += line_h;
     }
 }

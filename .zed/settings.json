@@ -3,7 +3,10 @@
     "rust-analyzer": {
       "initialization_options": {
         "cargo": {
-          "features": ["media"]
+          "features": [
+            "player"
+          ],
+          "noDefaultFeatures": true
         }
       }
     }

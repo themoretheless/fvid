@@ -2,6 +2,13 @@
 #[cfg(feature = "airbug")]
 pub mod airbug_runtime;
 pub mod backend;
+pub mod codec;
+pub mod container;
+pub mod playback;
+pub mod playback_mp4;
+pub mod playback_native;
+#[cfg(feature = "player")]
+pub mod player;
 #[cfg(feature = "mcp")]
 pub mod mcp;
 #[cfg(feature = "media")]
@@ -2196,3 +2203,5 @@ mod play_controls {
         assert_ne!(base.2[0], bright.2[0]);
     }
 }
+
+pub mod virtual_camera;

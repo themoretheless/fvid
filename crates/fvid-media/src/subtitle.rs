@@ -176,9 +176,7 @@ pub fn convert_subtitles(
         let mut got = 0i32;
         // SAFETY: Decoder, subtitle, and packet are live for the call.
         check(
-            unsafe {
-                avcodec_decode_subtitle2(decoder.0, &mut subtitle.0, &mut got, packet.0)
-            },
+            unsafe { avcodec_decode_subtitle2(decoder.0, &mut subtitle.0, &mut got, packet.0) },
             "decode subtitle cue",
         )?;
         if got == 0 {
@@ -241,14 +239,7 @@ pub fn convert_subtitles(
                 let start = i64::from(subtitle.0.start_display_time);
                 let end = i64::from(subtitle.0.end_display_time);
                 if end > start {
-                    av_rescale_q(
-                        end - start,
-                        AVRational {
-                            num: 1,
-                            den: 1000,
-                        },
-                        src_tb,
-                    )
+                    av_rescale_q(end - start, AVRational { num: 1, den: 1000 }, src_tb)
                 } else {
                     0
                 }
@@ -355,5 +346,3 @@ pub fn overlay_video(
         &selected,
     )
 }
-
-

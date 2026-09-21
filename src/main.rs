@@ -4,7 +4,7 @@ use std::fs::{self, File, OpenOptions};
 use std::io::{self, BufReader, BufWriter, IsTerminal, Write};
 use std::path::{Path, PathBuf};
 
-const HELP: &str = "fvid INPUT.y4m OUTPUT.y4m [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--memory-mib N] [--backend cpu|auto|metal|vulkan|dx12|gl|cuda] [--device N]\nUse - for stdin/stdout. Output files must not exist. Only progressive 8-bit planar YUV 420/422/444 is supported.\nCrop is applied before reflections. Default backend: cpu. Frame/staging-buffer budget: 256 MiB. Use --list-devices to inspect GPU adapters. --then starts the next resident GPU stage (requires an explicit GPU backend); coordinates are relative to the previous stage output.\nPlay a file or URL in a window: fvid play INPUT... [--no-audio] [--mute] [--fullscreen] [--rate N] [--audio-track N] [--subtitle-track N] [--no-subtitles] (requires --features media). INPUT is a local file or http/https/rtsp/rtmp/udp URL. Space pauses, left/right seek, B audio, V subtitles, L A-B loop, F fullscreen, Esc quits. Drop files on the window, or use Open / Open URL, to replace the playlist.";
+const HELP: &str = "fvid INPUT.y4m OUTPUT.y4m [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--memory-mib N] [--backend cpu|auto|metal|vulkan|dx12|gl|cuda] [--device N]\nUse - for stdin/stdout. Output files must not exist. Only progressive 8-bit planar YUV 420/422/444 is supported.\nCrop is applied before reflections. Default backend: cpu. Frame/staging-buffer budget: 256 MiB. Use --list-devices to inspect GPU adapters. --then starts the next resident GPU stage (requires an explicit GPU backend); coordinates are relative to the previous stage output.\nOpen the FVid player: fvid play [INPUT.y4m|INPUT.mp4] (requires --features player). Space pauses, Esc quits. Open / drop Y4M or supported MP4/AVC I/P video. Native codecs; audio and general AVC tools are still in development.";
 struct Temporary(PathBuf);
 fn process_selected<R: io::BufRead, W: Write>(
     reader: R,
@@ -52,7 +52,17 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         return media_cli::run(&args[1..]);
     }
     if args.first().is_some_and(|a| a == "play") {
-        return media_cli::run(&args);
+        #[cfg(feature = "player")]
+        {
+            if args.len() > 2 {
+                return Err("usage: fvid play [INPUT.y4m|INPUT.mp4]".into());
+            }
+            return fvid::player::run(args.get(1).map(PathBuf::from));
+        }
+        #[cfg(not(feature = "player"))]
+        return Err(
+            "player requires cargo build --features player; native playback supports Y4M and an MP4/AVC subset".into(),
+        );
     }
     if args.first().is_some_and(|a| a == "--help" || a == "-h") {
         println!("{HELP}");

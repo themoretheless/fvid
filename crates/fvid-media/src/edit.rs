@@ -428,9 +428,7 @@ fn edit(
             let codec = unsafe { &*(*input.streams()[selected[i]]).codecpar };
             if codec.codec_type != AVMediaType_AVMEDIA_TYPE_VIDEO {
                 c.reorder = false;
-            } else if codec.video_delay == 0
-                && codec.codec_id != AVCodecID_AV_CODEC_ID_HEVC
-            {
+            } else if codec.video_delay == 0 && codec.codec_id != AVCodecID_AV_CODEC_ID_HEVC {
                 // Keep H.264 no-B as the contiguous-PTS path. HEVC often leaves
                 // video_delay unset in MP4 even when B-frames are present, so keep
                 // the closed-GOP IRAP reorder path for HEVC.
@@ -499,20 +497,12 @@ fn edit(
                     }
                 }
             }
-            let origin_pts = last_rap.ok_or(
-                "requested start has no preceding closed-GOP RAP boundary",
-            )?;
+            let origin_pts =
+                last_rap.ok_or("requested start has no preceding closed-GOP RAP boundary")?;
             coverage[selected_pos].required_rap = Some(origin_pts);
             check(
                 unsafe {
-                    avformat_seek_file(
-                        input.0,
-                        stream_index as i32,
-                        i64::MIN,
-                        origin_pts,
-                        start,
-                        0,
-                    )
+                    avformat_seek_file(input.0, stream_index as i32, i64::MIN, origin_pts, start, 0)
                 },
                 "seek to closed-GOP RAP before trim",
             )?;
@@ -604,7 +594,7 @@ fn edit(
                         }
                         if packet_end > end {
                             return Err(
-                                "end cuts through a packet; exact stream copy impossible".into(),
+                                "end cuts through a packet; exact stream copy impossible".into()
                             );
                         }
                     }
@@ -663,10 +653,15 @@ fn edit(
                     {
                         return Err("packet gap/overlap rejected by strict editing".into());
                     }
-                    c.dts_end =
-                        Some(p.dts.checked_add(p.duration).ok_or("packet DTS end overflow")?);
-                    let presentation_end =
-                        p.pts.checked_add(p.duration).ok_or("packet PTS end overflow")?;
+                    c.dts_end = Some(
+                        p.dts
+                            .checked_add(p.duration)
+                            .ok_or("packet DTS end overflow")?,
+                    );
+                    let presentation_end = p
+                        .pts
+                        .checked_add(p.duration)
+                        .ok_or("packet PTS end overflow")?;
                     c.pts_end = Some(match c.pts_end {
                         Some(prev) => prev.max(presentation_end),
                         None => presentation_end,
@@ -717,10 +712,7 @@ fn edit(
                 coverage[mapped].present_origin = Some(start);
                 coverage[mapped].origin = Some(start);
                 coverage[mapped].end = Some(end);
-                coverage[mapped].tb = AVRational {
-                    num: 1,
-                    den: rate,
-                };
+                coverage[mapped].tb = AVRational { num: 1, den: rate };
                 coverage[mapped].saw_present_start = true;
                 coverage[mapped].saw_present_end = true;
                 stats.packets = stats.packets.saturating_add(1);
@@ -735,8 +727,12 @@ fn edit(
                 let end = c.end.ok_or("selected stream is empty")?;
                 durations.push(end.checked_sub(first).ok_or("duration overflow")?);
                 if i > 0
-                    && (!same_time(first, c.tb, coverage[0].present_origin.unwrap(), coverage[0].tb)
-                        || !same_time(durations[i], c.tb, durations[0], coverage[0].tb))
+                    && (!same_time(
+                        first,
+                        c.tb,
+                        coverage[0].present_origin.unwrap(),
+                        coverage[0].tb,
+                    ) || !same_time(durations[i], c.tb, durations[0], coverage[0].tb))
                 {
                     return Err("audio/video starts or ends differ; strict concat/trim would create a gap or sync shift".into());
                 }
@@ -776,8 +772,12 @@ fn edit(
             }
             durations.push(end.checked_sub(first).ok_or("duration overflow")?);
             if i > 0
-                && (!same_time(first, c.tb, coverage[0].present_origin.unwrap(), coverage[0].tb)
-                    || !same_time(durations[i], c.tb, durations[0], coverage[0].tb))
+                && (!same_time(
+                    first,
+                    c.tb,
+                    coverage[0].present_origin.unwrap(),
+                    coverage[0].tb,
+                ) || !same_time(durations[i], c.tb, durations[0], coverage[0].tb))
             {
                 return Err("audio/video starts or ends differ; strict concat/trim would create a gap or sync shift".into());
             }
@@ -851,16 +851,7 @@ pub(crate) fn mux_reordered_video_interval(
     };
     let target = start.saturating_sub(preroll.max(1));
     check(
-        unsafe {
-            avformat_seek_file(
-                input.0,
-                stream_index as i32,
-                i64::MIN,
-                target,
-                start,
-                0,
-            )
-        },
+        unsafe { avformat_seek_file(input.0, stream_index as i32, i64::MIN, target, start, 0) },
         "seek before secondary RAP scan",
     )?;
     let mut last_rap = None;
@@ -885,9 +876,8 @@ pub(crate) fn mux_reordered_video_interval(
             }
         }
     }
-    let required_rap = last_rap.ok_or(
-        "secondary interval has no preceding closed-GOP RAP boundary",
-    )?;
+    let required_rap =
+        last_rap.ok_or("secondary interval has no preceding closed-GOP RAP boundary")?;
     check(
         unsafe {
             avformat_seek_file(
@@ -921,7 +911,9 @@ pub(crate) fn mux_reordered_video_interval(
             let p = &mut *packet.0;
             let codec = &*(*input.streams()[index]).codecpar;
             if p.pts == NOPTS || p.dts == NOPTS || p.duration <= 0 {
-                return Err("secondary reordered interval requires PTS, DTS and positive duration".into());
+                return Err(
+                    "secondary reordered interval requires PTS, DTS and positive duration".into(),
+                );
             }
             if origin.is_none() {
                 if p.pts > start {

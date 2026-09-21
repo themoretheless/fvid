@@ -121,13 +121,7 @@ pub fn mix_audio(
     let samples = frames * channels;
     let scales: Vec<f32> = weights
         .iter()
-        .map(|&w| {
-            if options.normalize {
-                w / weight_sum
-            } else {
-                w
-            }
-        })
+        .map(|&w| if options.normalize { w / weight_sum } else { w })
         .collect();
     let mut out = vec![0f32; samples];
     // Match FFmpeg amix fmac into an f32 buffer: each input is scaled in f64-wide
@@ -365,10 +359,7 @@ fn decode_to_packed_f32(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
                         av_frame_unref(frame.0);
                         return Err("missing audio data".into());
                     }
-                    pcm.extend_from_slice(slice::from_raw_parts(
-                        data,
-                        samples * channels * bytes,
-                    ));
+                    pcm.extend_from_slice(slice::from_raw_parts(data, samples * channels * bytes));
                 }
                 active.sample_frames += samples as u64;
                 active.decoded_frames += 1;

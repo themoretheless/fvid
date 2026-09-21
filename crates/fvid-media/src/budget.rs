@@ -118,8 +118,7 @@ pub(crate) fn admit_input_controlled_budget(
     if options.max_controlled_bytes.is_none() {
         return Ok(());
     }
-    let estimated =
-        estimate_input_decode_controlled_bytes(input, options, scratch_frames, decode)?;
+    let estimated = estimate_input_decode_controlled_bytes(input, options, scratch_frames, decode)?;
     admit_controlled_budget(options, estimated)
 }
 
@@ -209,7 +208,11 @@ pub(crate) fn check_budget_with_bytes(
     packets: u64,
     payload_bytes: u64,
 ) -> Result<()> {
-    if options.cancel.as_ref().is_some_and(crate::CancelFlag::is_cancelled) {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(crate::CancelFlag::is_cancelled)
+    {
         return Err("operation cancelled".into());
     }
     if let Some(max) = options.max_packets

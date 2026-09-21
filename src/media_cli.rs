@@ -61,9 +61,7 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             "--on-top" => on_top = true,
             "--rate" => {
                 index += 1;
-                let value = args
-                    .get(index)
-                    .ok_or("play --rate requires a number")?;
+                let value = args.get(index).ok_or("play --rate requires a number")?;
                 rate = value
                     .parse()
                     .map_err(|_| format!("invalid playback rate {value}"))?;
@@ -74,7 +72,12 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                     .get(index)
                     .ok_or("play --start-time requires mm:ss or seconds")?;
                 start_us = fvid_media::initial_seek_us(value, -1)
-                    .or_else(|| value.parse::<i64>().ok().map(|s| s.saturating_mul(1_000_000)))
+                    .or_else(|| {
+                        value
+                            .parse::<i64>()
+                            .ok()
+                            .map(|s| s.saturating_mul(1_000_000))
+                    })
                     .ok_or_else(|| format!("invalid start time {value}"))
                     .map(Some)?;
             }
@@ -84,13 +87,20 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                     .get(index)
                     .ok_or("play --stop-time requires mm:ss or seconds")?;
                 stop_us = fvid_media::initial_stop_us(value, -1)
-                    .or_else(|| value.parse::<i64>().ok().map(|s| s.saturating_mul(1_000_000)))
+                    .or_else(|| {
+                        value
+                            .parse::<i64>()
+                            .ok()
+                            .map(|s| s.saturating_mul(1_000_000))
+                    })
                     .ok_or_else(|| format!("invalid stop time {value}"))
                     .map(Some)?;
             }
             "--audio-track" => {
                 index += 1;
-                let value = args.get(index).ok_or("play --audio-track requires an index")?;
+                let value = args
+                    .get(index)
+                    .ok_or("play --audio-track requires an index")?;
                 audio_track = value
                     .parse()
                     .map_err(|_| format!("invalid audio track {value}"))?;
@@ -169,9 +179,9 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             }
             "--hdr-tonemap" => {
                 index += 1;
-                let value = args
-                    .get(index)
-                    .ok_or("play --hdr-tonemap requires off|clip|reinhard|hable|mobius|aces|maxrgb")?;
+                let value = args.get(index).ok_or(
+                    "play --hdr-tonemap requires off|clip|reinhard|hable|mobius|aces|maxrgb",
+                )?;
                 hdr_tonemap = fvid_media::parse_hdr_tonemap(value)?;
             }
             "--hdr-nits" => {
@@ -226,7 +236,7 @@ fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             }
             "--help" | "-h" => {
                 println!(
-                    "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--on-top] [--rate N] [--start-time TIME] [--stop-time TIME] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices] [--spherical] [--spherical-projection equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical|mercator|dual-fisheye-tb|octahedral|equisolid|orthographic|gnomonic|sinusoidal|miller|azimuthal] [--spherical-stereo mono|tb|sbs] [--yaw DEG] [--pitch DEG] [--roll DEG] [--fov DEG] [--hdr-tonemap off|clip|reinhard|hable|mobius|aces|maxrgb] [--hdr-nits N] [--hdr-maxcll MaxCLL,MaxFALL] [--hdr-mastering min,max] [--play-stereo3d off|sbsl|abl|mono-left|mono-right] [--play-and-exit] [--start-paused] [--network-caching MS] [--snapshot-path DIR]\nINPUT is a local file or http/https/rtsp/rtmp/udp URL. --start-time/--stop-time are mm:ss, hh:mm:ss, or seconds. Space pauses. Left/right seek 10s. Up/down volume. M mutes. B cycles audio. V cycles subtitles. L sets A-B loop. T always on top. F fullscreen. [ ] speed. . steps one frame. S saves a bitmap. Esc or Q quits. Drop files, or use Open / Open URL, to replace the playlist. Su"b file loads SRT/ASS. The window stays open after the file ends and continues with the next playlist item. Display is capped at 1920x1080. Rate is clamped to 0.25..4. --spherical enables 360° view; --spherical-projection selects equirect/dual-fisheye/cubemap/little-planet; Ctrl+3 toggles; Ctrl+Shift+3 cycles projection; Shift+arrows roll. --hdr-tonemap selects display tonemap (auto Hable on PQ/HLG); --hdr-nits sets display peak; --hdr-maxcll sets MaxCLL,MaxFALL. --play-stereo3d selects packed 3D view. --play-and-exit closes when the playlist stops. --start-paused opens paused. --network-caching sets demux cache ms. --snapshot-path sets snapshot directory."
+                    "fvid media play INPUT... [--no-audio] [--mute] [--fullscreen] [--on-top] [--rate N] [--start-time TIME] [--stop-time TIME] [--audio-track N] [--subtitle-track N] [--no-subtitles] [--subtitles FILE] [--audio-device NAME] [--list-audio-devices] [--spherical] [--spherical-projection equirect|dual-fisheye|cubemap|little-planet|eac|panini|cylindrical|mercator|dual-fisheye-tb|octahedral|equisolid|orthographic|gnomonic|sinusoidal|miller|azimuthal] [--spherical-stereo mono|tb|sbs] [--yaw DEG] [--pitch DEG] [--roll DEG] [--fov DEG] [--hdr-tonemap off|clip|reinhard|hable|mobius|aces|maxrgb] [--hdr-nits N] [--hdr-maxcll MaxCLL,MaxFALL] [--hdr-mastering min,max] [--play-stereo3d off|sbsl|abl|mono-left|mono-right] [--play-and-exit] [--start-paused] [--network-caching MS] [--snapshot-path DIR]\nINPUT is a local file or http/https/rtsp/rtmp/udp URL. --start-time/--stop-time are mm:ss, hh:mm:ss, or seconds. Space pauses. Left/right seek 10s. Up/down volume. M mutes. B cycles audio. V cycles subtitles. L sets A-B loop. T always on top. F fullscreen. [ ] speed. . steps one frame. S saves a bitmap. Esc or Q quits. Drop files, or use Open / Open URL, to replace the playlist. Sub file loads SRT/ASS. The window stays open after the file ends and continues with the next playlist item. Display is capped at 1920x1080. Rate is clamped to 0.25..4. --spherical enables 360° view; --spherical-projection selects equirect/dual-fisheye/cubemap/little-planet; Ctrl+3 toggles; Ctrl+Shift+3 cycles projection; Shift+arrows roll. --hdr-tonemap selects display tonemap (auto Hable on PQ/HLG); --hdr-nits sets display peak; --hdr-maxcll sets MaxCLL,MaxFALL. --play-stereo3d selects packed 3D view. --play-and-exit closes when the playlist stops. --start-paused opens paused. --network-caching sets demux cache ms. --snapshot-path sets snapshot directory."
                 );
                 return Ok(());
             }
@@ -2115,7 +2125,9 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             return Err("crop-lossless does not take --tinterlace; use transcode-lossless".into());
         }
         if command == "crop-lossless" && separatefields.is_some() {
-            return Err("crop-lossless does not take --separatefields; use transcode-lossless".into());
+            return Err(
+                "crop-lossless does not take --separatefields; use transcode-lossless".into(),
+            );
         }
         if command == "crop-lossless" && weave.is_some() {
             return Err("crop-lossless does not take --weave; use transcode-lossless".into());
@@ -2148,7 +2160,9 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             return Err("crop-lossless does not take --untile; use transcode-lossless".into());
         }
         if command == "crop-lossless" && shuffleframes.is_some() {
-            return Err("crop-lossless does not take --shuffleframes; use transcode-lossless".into());
+            return Err(
+                "crop-lossless does not take --shuffleframes; use transcode-lossless".into(),
+            );
         }
         if command == "crop-lossless" && reverse.is_some() {
             return Err("crop-lossless does not take --reverse; use transcode-lossless".into());
@@ -2160,7 +2174,9 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             return Err("crop-lossless does not take --thumbnail; use transcode-lossless".into());
         }
         if command == "crop-lossless" && freezedetect.is_some() {
-            return Err("crop-lossless does not take --freezedetect; use transcode-lossless".into());
+            return Err(
+                "crop-lossless does not take --freezedetect; use transcode-lossless".into(),
+            );
         }
         if command == "crop-lossless" && setpts.is_some() {
             return Err("crop-lossless does not take --setpts; use transcode-lossless".into());

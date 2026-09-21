@@ -162,7 +162,7 @@ fn properties() -> Map<String, Value> {
             "crf":{"type":"string","maxLength":32},"preset":{"type":"string","maxLength":128},"tune":{"type":"string","maxLength":128},
             "lossless":{"type":"string","maxLength":16},"deadline":{"type":"string","maxLength":32},"cpu-used":{"type":"string","maxLength":16},
             "threads":{"type":"string","maxLength":16},"bf":{"type":"string","maxLength":16},"g":{"type":"string","maxLength":16},"level":{"type":"string","maxLength":16},
-            "x265-params":{"type":"string","maxLength":512},"svtav1-params":{"type":"string","maxLength":512}},
+            "x265-params":{"type":"string","maxLength":512},"svtav1-params":{"type":"string","maxLength":512}}},
         "backend":{"type":"string","enum":["cpu","auto","metal","vulkan","dx12","gl","cuda"]},
         "device":{"type":"integer","minimum":0},"memory_mib":{"type":"integer","minimum":1,"maximum":4096},
         "stages":{"type":"array","items":stage,"maxItems":255}

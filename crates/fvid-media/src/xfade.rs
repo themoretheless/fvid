@@ -34,7 +34,7 @@ impl DualXfade {
         stream_tb: AVRational,
         fps_num: i32,
         fps_den: i32,
-        color_range: i32,
+        color_range: AVColorRange,
         transition: &str,
         duration: &str,
         offset: &str,
@@ -55,10 +55,7 @@ impl DualXfade {
             let xfade = avfilter_get_by_name(c"xfade".as_ptr());
             let format_f = avfilter_get_by_name(c"format".as_ptr());
             let buffersink = avfilter_get_by_name(c"buffersink".as_ptr());
-            if buffersrc.is_null()
-                || xfade.is_null()
-                || format_f.is_null()
-                || buffersink.is_null()
+            if buffersrc.is_null() || xfade.is_null() || format_f.is_null() || buffersink.is_null()
             {
                 return Err("xfade filters unavailable in linked libavfilter".into());
             }
@@ -117,8 +114,7 @@ impl DualXfade {
                 "create xfade other buffer",
             )?;
             let mut xfade_ctx = ptr::null_mut();
-            let xfade_args =
-                format!("transition={transition}:duration={duration}:offset={offset}");
+            let xfade_args = format!("transition={transition}:duration={duration}:offset={offset}");
             let xfade_args = cstring(&xfade_args)?;
             check(
                 avfilter_graph_create_filter(
@@ -160,8 +156,14 @@ impl DualXfade {
                 ),
                 "create xfade sink",
             )?;
-            check(avfilter_link(built.main, 0, xfade_ctx, 0), "link main to xfade")?;
-            check(avfilter_link(built.other, 0, xfade_ctx, 1), "link other to xfade")?;
+            check(
+                avfilter_link(built.main, 0, xfade_ctx, 0),
+                "link main to xfade",
+            )?;
+            check(
+                avfilter_link(built.other, 0, xfade_ctx, 1),
+                "link other to xfade",
+            )?;
             check(
                 avfilter_link(xfade_ctx, 0, format_ctx, 0),
                 "link xfade to format",
@@ -198,9 +200,7 @@ impl VideoPump {
         let index = input
             .streams()
             .iter()
-            .position(|&s| unsafe {
-                (*(*s).codecpar).codec_type == AVMediaType_AVMEDIA_TYPE_VIDEO
-            })
+            .position(|&s| unsafe { (*(*s).codecpar).codec_type == AVMediaType_AVMEDIA_TYPE_VIDEO })
             .ok_or("xfade requires a video stream")?;
         unsafe {
             let stream = &*input.streams()[index];
@@ -237,7 +237,17 @@ impl VideoPump {
         }
     }
 
-    fn geometry(&self) -> (i32, i32, i32, AVRational, AVRational, AVRational, i32) {
+    fn geometry(
+        &self,
+    ) -> (
+        i32,
+        i32,
+        i32,
+        AVRational,
+        AVRational,
+        AVRational,
+        AVColorRange,
+    ) {
         unsafe {
             let d = &*self.decoder.0;
             let stream = &*self.input.streams()[self.index];
@@ -333,7 +343,10 @@ impl VideoPump {
                 f.pts = av_rescale_q(f.pts, src_tb, filter_tb);
             }
             f.time_base = filter_tb;
-            check(av_buffersrc_write_frame(src, self.frame.0), "feed xfade buffer")?;
+            check(
+                av_buffersrc_write_frame(src, self.frame.0),
+                "feed xfade buffer",
+            )?;
             av_frame_unref(self.frame.0);
         }
         self.pending = false;
@@ -498,11 +511,7 @@ pub fn xfade_video(
             avcodec_parameters_from_context(parameters.0, encoder.0),
             "export FFV1 parameters",
         )?;
-        (
-            encoder,
-            parameters,
-            string(av_get_pix_fmt_name(pix_fmt)),
-        )
+        (encoder, parameters, string(av_get_pix_fmt_name(pix_fmt)))
     };
 
     let main_idx = main.index;
@@ -510,11 +519,9 @@ pub fn xfade_video(
         destination,
         &main.input,
         &[main_idx],
-        Some((
-            main_idx,
-            parameters.0 as *const _,
-            unsafe { (*encoder.0).time_base },
-        )),
+        Some((main_idx, parameters.0 as *const _, unsafe {
+            (*encoder.0).time_base
+        })),
     )?
     .without_interleave();
 
@@ -625,7 +632,10 @@ pub fn xfade_filter_complex(
     pix_fmt: &str,
 ) -> Result<String> {
     validate_xfade_transition(transition)?;
-    if pix_fmt.is_empty() || pix_fmt.len() > 32 || !pix_fmt.chars().all(|c| c.is_ascii_alphanumeric()) {
+    if pix_fmt.is_empty()
+        || pix_fmt.len() > 32
+        || !pix_fmt.chars().all(|c| c.is_ascii_alphanumeric())
+    {
         return Err("xfade pix_fmt for fair-pair must be alphanumeric".into());
     }
     let duration = us_to_filter_secs(duration_us)?;

@@ -945,7 +945,105 @@ fn drain_decoder(
             // FFmpeg merges `scale=flags=neighbor,format=` into one neighbor
             // swscale pass when no later materialize (burn/overlay) intervenes.
             let (send, format_done) = if let (Some(size), Some(fmt)) = (scale, pix_fmt) {
-                if burn_subs.is_none() && overlay.is_none() && xfade.is_none() && epx.is_none() && yadif.is_none() && bwdif.is_none() && w3fdif.is_none() && tblend.is_none() && tmix.is_none() && hqdn3d.is_none() && gblur.is_none() && eq.is_none() && unsharp.is_none() && hue.is_none() && avgblur.is_none() && boxblur.is_none() && negate.is_none() && edgedetect.is_none() && sobel.is_none() && prewitt.is_none() && roberts.is_none() && kirsch.is_none() && scharr.is_none() && atadenoise.is_none() && owdenoise.is_none() && vaguedenoiser.is_none() && nlmeans.is_none() && bm3d.is_none() && dctdnoiz.is_none() && fftdnoiz.is_none() && smartblur.is_none() && sab.is_none() && bilateral.is_none() && cas.is_none() && vignette.is_none() && curves.is_none() && colorbalance.is_none() && colorlevels.is_none() && colorchannelmixer.is_none() && deflicker.is_none() && photosensitivity.is_none() && monochrome.is_none() && grayworld.is_none() && drawbox.is_none() && drawgrid.is_none() && lagfun.is_none() && amplify.is_none() && bitplanenoise.is_none() && deband.is_none() && gradfun.is_none() && lenscorrection.is_none() && pixelize.is_none() && removegrain.is_none() && yaepblur.is_none() && vibrance.is_none() && dilation.is_none() && erosion.is_none() && colorize.is_none() && exposure.is_none() && chromashift.is_none() && colorcontrast.is_none() && colorcorrect.is_none() && histeq.is_none() && shuffleplanes.is_none() && lutyuv.is_none() && colorhold.is_none() && fade.is_none() && perspective.is_none() && lumakey.is_none() && chromakey.is_none() && colorkey.is_none() && despill.is_none() && selectivecolor.is_none() && stereo3d.is_none() && field.is_none() && hqx.is_none() && xbr.is_none() && il.is_none() && super2xsai.is_none() && kerndeint.is_none() && phase.is_none() && estdif.is_none() && tinterlace.is_none() && separatefields.is_none() && weave.is_none() && doubleweave.is_none() && framepack.is_none() && telecine.is_none() && pullup.is_none() && decimate.is_none() && mpdecimate.is_none() && framestep.is_none() && pseudocolor.is_none() && minterpolate.is_none() && fps.is_none() && colorspace.is_none() && zscale.is_none() && tonemap.is_none() {
+                if burn_subs.is_none()
+                    && overlay.is_none()
+                    && xfade.is_none()
+                    && epx.is_none()
+                    && yadif.is_none()
+                    && bwdif.is_none()
+                    && w3fdif.is_none()
+                    && tblend.is_none()
+                    && tmix.is_none()
+                    && hqdn3d.is_none()
+                    && gblur.is_none()
+                    && eq.is_none()
+                    && unsharp.is_none()
+                    && hue.is_none()
+                    && avgblur.is_none()
+                    && boxblur.is_none()
+                    && negate.is_none()
+                    && edgedetect.is_none()
+                    && sobel.is_none()
+                    && prewitt.is_none()
+                    && roberts.is_none()
+                    && kirsch.is_none()
+                    && scharr.is_none()
+                    && atadenoise.is_none()
+                    && owdenoise.is_none()
+                    && vaguedenoiser.is_none()
+                    && nlmeans.is_none()
+                    && bm3d.is_none()
+                    && dctdnoiz.is_none()
+                    && fftdnoiz.is_none()
+                    && smartblur.is_none()
+                    && sab.is_none()
+                    && bilateral.is_none()
+                    && cas.is_none()
+                    && vignette.is_none()
+                    && curves.is_none()
+                    && colorbalance.is_none()
+                    && colorlevels.is_none()
+                    && colorchannelmixer.is_none()
+                    && deflicker.is_none()
+                    && photosensitivity.is_none()
+                    && monochrome.is_none()
+                    && grayworld.is_none()
+                    && drawbox.is_none()
+                    && drawgrid.is_none()
+                    && lagfun.is_none()
+                    && amplify.is_none()
+                    && bitplanenoise.is_none()
+                    && deband.is_none()
+                    && gradfun.is_none()
+                    && lenscorrection.is_none()
+                    && pixelize.is_none()
+                    && removegrain.is_none()
+                    && yaepblur.is_none()
+                    && vibrance.is_none()
+                    && dilation.is_none()
+                    && erosion.is_none()
+                    && colorize.is_none()
+                    && exposure.is_none()
+                    && chromashift.is_none()
+                    && colorcontrast.is_none()
+                    && colorcorrect.is_none()
+                    && histeq.is_none()
+                    && shuffleplanes.is_none()
+                    && lutyuv.is_none()
+                    && colorhold.is_none()
+                    && fade.is_none()
+                    && perspective.is_none()
+                    && lumakey.is_none()
+                    && chromakey.is_none()
+                    && colorkey.is_none()
+                    && despill.is_none()
+                    && selectivecolor.is_none()
+                    && stereo3d.is_none()
+                    && field.is_none()
+                    && hqx.is_none()
+                    && xbr.is_none()
+                    && il.is_none()
+                    && super2xsai.is_none()
+                    && kerndeint.is_none()
+                    && phase.is_none()
+                    && estdif.is_none()
+                    && tinterlace.is_none()
+                    && separatefields.is_none()
+                    && weave.is_none()
+                    && doubleweave.is_none()
+                    && framepack.is_none()
+                    && telecine.is_none()
+                    && pullup.is_none()
+                    && decimate.is_none()
+                    && mpdecimate.is_none()
+                    && framestep.is_none()
+                    && pseudocolor.is_none()
+                    && minterpolate.is_none()
+                    && fps.is_none()
+                    && colorspace.is_none()
+                    && zscale.is_none()
+                    && tonemap.is_none()
+                {
                     scale_convert_frame(
                         sws,
                         scaled.0,
@@ -956,23 +1054,11 @@ fn drain_decoder(
                     )?;
                     (scaled.0, true)
                 } else {
-                    scale_frame(
-                        sws,
-                        scaled.0,
-                        send,
-                        size.width as i32,
-                        size.height as i32,
-                    )?;
+                    scale_frame(sws, scaled.0, send, size.width as i32, size.height as i32)?;
                     (scaled.0, false)
                 }
             } else if let Some(size) = scale {
-                scale_frame(
-                    sws,
-                    scaled.0,
-                    send,
-                    size.width as i32,
-                    size.height as i32,
-                )?;
+                scale_frame(sws, scaled.0, send, size.width as i32, size.height as i32)?;
                 (scaled.0, false)
             } else {
                 (send, false)
@@ -1016,8 +1102,7 @@ fn drain_decoder(
                 send
             };
             let send = if let Some(args) = yadif {
-                let produced =
-                    filter::yadif_push_frame(yadif_graph, deinterlaced.0, send, args)?;
+                let produced = filter::yadif_push_frame(yadif_graph, deinterlaced.0, send, args)?;
                 if !produced {
                     av_frame_unref(frame.0);
                     continue;
@@ -1027,8 +1112,7 @@ fn drain_decoder(
                 send
             };
             let send = if let Some(args) = bwdif {
-                let produced =
-                    filter::bwdif_push_frame(bwdif_graph, bwdif_out.0, send, args)?;
+                let produced = filter::bwdif_push_frame(bwdif_graph, bwdif_out.0, send, args)?;
                 if !produced {
                     av_frame_unref(frame.0);
                     continue;
@@ -1038,8 +1122,7 @@ fn drain_decoder(
                 send
             };
             let send = if let Some(args) = w3fdif {
-                let produced =
-                    filter::w3fdif_push_frame(w3fdif_graph, w3fdif_out.0, send, args)?;
+                let produced = filter::w3fdif_push_frame(w3fdif_graph, w3fdif_out.0, send, args)?;
                 if !produced {
                     av_frame_unref(frame.0);
                     continue;
@@ -1288,7 +1371,12 @@ fn drain_decoder(
             };
             let send = if let Some(args) = colorchannelmixer {
                 let src_fmt = (*send).format;
-                filter::colorchannelmixer_frame(colorchannelmixer_graph, colorchannelmixed.0, send, args)?;
+                filter::colorchannelmixer_frame(
+                    colorchannelmixer_graph,
+                    colorchannelmixed.0,
+                    send,
+                    args,
+                )?;
                 let out = colorchannelmixed.0;
                 // colorchannelmixer materializes bgr0; fair-pair reverts via libswscale like `--pix-fmt`.
                 if (*out).format != src_fmt {
@@ -1313,7 +1401,12 @@ fn drain_decoder(
             };
             let send = if let Some(args) = photosensitivity {
                 let src_fmt = (*send).format;
-                filter::photosensitivity_frame(photosensitivity_graph, photosensitized.0, send, args)?;
+                filter::photosensitivity_frame(
+                    photosensitivity_graph,
+                    photosensitized.0,
+                    send,
+                    args,
+                )?;
                 let out = photosensitized.0;
                 // photosensitivity materializes rgb24; fair-pair reverts via libswscale like colorbalance.
                 if (*out).format != src_fmt {
@@ -1357,8 +1450,7 @@ fn drain_decoder(
                 send
             };
             let send = if let Some(args) = lagfun {
-                let produced =
-                    filter::lagfun_push_frame(lagfun_graph, lagfuned.0, send, args)?;
+                let produced = filter::lagfun_push_frame(lagfun_graph, lagfuned.0, send, args)?;
                 if !produced {
                     av_frame_unref(frame.0);
                     continue;
@@ -1368,8 +1460,7 @@ fn drain_decoder(
                 send
             };
             let send = if let Some(args) = amplify {
-                let produced =
-                    filter::amplify_push_frame(amplify_graph, amplified.0, send, args)?;
+                let produced = filter::amplify_push_frame(amplify_graph, amplified.0, send, args)?;
                 if !produced {
                     av_frame_unref(frame.0);
                     continue;
@@ -1759,13 +1850,8 @@ fn drain_decoder(
             };
             let send = if let Some(args) = phase {
                 let src_fmt = (*send).format;
-                let produced = filter::phase_apply_frame(
-                    phase_graph,
-                    phased.0,
-                    send,
-                    args,
-                    phase_push_mode,
-                )?;
+                let produced =
+                    filter::phase_apply_frame(phase_graph, phased.0, send, args, phase_push_mode)?;
                 if !produced {
                     av_frame_unref(frame.0);
                     continue;
@@ -1830,102 +1916,117 @@ fn drain_decoder(
                             out = converted.0;
                         }
                         let mut doubleweave_field = |mut out: *mut AVFrame| -> Result<()> {
-                        let out = if let Some(args) = freezedetect {
-                            let src_fmt = (*out).format;
-                            filter::freezedetect_frame(
-                                freezedetect_graph,
-                                freezedetectd.0,
-                                out,
-                                args,
-                            )?;
-                            let o = freezedetectd.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = pseudocolor {
-                            let src_fmt = (*out).format;
-                            filter::pseudocolor_frame(
-                                pseudocolor_graph,
-                                pseudocolored.0,
-                                out,
-                                args,
-                            )?;
-                            let o = pseudocolored.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = colorspace {
-                            filter::colorspace_frame(colorspace_graph, colorspaced.0, out, args)?;
-                            colorspaced.0
-                        } else {
-                            out
-                        };
-                        let (out, mut format_done) = if let Some(args) = zscale {
-                            let fmt =
-                                pix_fmt.ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            filter::zscale_frame(zscale_graph, zscaled.0, out, args, &name)?;
-                            (zscaled.0, true)
-                        } else {
-                            (out, format_done)
-                        };
-                        let (out, format_done) = if let Some(args) = tonemap {
-                            let fmt = pix_fmt
-                                .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            filter::tonemap_frame(tonemap_graph, tonemapped.0, out, args, &name)?;
-                            (tonemapped.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, out, fmt)?;
-                                converted.0
+                            let out = if let Some(args) = freezedetect {
+                                let src_fmt = (*out).format;
+                                filter::freezedetect_frame(
+                                    freezedetect_graph,
+                                    freezedetectd.0,
+                                    out,
+                                    args,
+                                )?;
+                                let o = freezedetectd.0;
+                                if (*o).format != src_fmt {
+                                    convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
+                                    converted.0
+                                } else {
+                                    o
+                                }
                             } else {
                                 out
+                            };
+                            let out = if let Some(args) = pseudocolor {
+                                let src_fmt = (*out).format;
+                                filter::pseudocolor_frame(
+                                    pseudocolor_graph,
+                                    pseudocolored.0,
+                                    out,
+                                    args,
+                                )?;
+                                let o = pseudocolored.0;
+                                if (*o).format != src_fmt {
+                                    convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
+                                    converted.0
+                                } else {
+                                    o
+                                }
+                            } else {
+                                out
+                            };
+                            let out = if let Some(args) = colorspace {
+                                filter::colorspace_frame(
+                                    colorspace_graph,
+                                    colorspaced.0,
+                                    out,
+                                    args,
+                                )?;
+                                colorspaced.0
+                            } else {
+                                out
+                            };
+                            let (out, mut format_done) = if let Some(args) = zscale {
+                                let fmt = pix_fmt.ok_or(
+                                    "--zscale requires --pix-fmt for format= after zscale",
+                                )?;
+                                let name = string(av_get_pix_fmt_name(fmt));
+                                if name.is_empty() {
+                                    return Err("unknown zscale output pixel format".into());
+                                }
+                                filter::zscale_frame(zscale_graph, zscaled.0, out, args, &name)?;
+                                (zscaled.0, true)
+                            } else {
+                                (out, format_done)
+                            };
+                            let (out, format_done) = if let Some(args) = tonemap {
+                                let fmt = pix_fmt.ok_or(
+                                    "--tonemap requires --pix-fmt for format= after tonemap",
+                                )?;
+                                let name = string(av_get_pix_fmt_name(fmt));
+                                if name.is_empty() {
+                                    return Err("unknown tonemap output pixel format".into());
+                                }
+                                filter::tonemap_frame(
+                                    tonemap_graph,
+                                    tonemapped.0,
+                                    out,
+                                    args,
+                                    &name,
+                                )?;
+                                (tonemapped.0, format_done)
+                            } else {
+                                (out, format_done)
+                            };
+                            let out = if let Some(fmt) = pix_fmt {
+                                if !format_done && (*out).format != fmt {
+                                    convert_pix_fmt_frame(fmt_sws, converted.0, out, fmt)?;
+                                    converted.0
+                                } else {
+                                    out
+                                }
+                            } else {
+                                out
+                            };
+                            if minterpolate.is_some() || fps.is_some() {
+                                filter::temporal_push_frame(
+                                    minterpolate_graph,
+                                    minterpolate_dst.0,
+                                    minterpolate,
+                                    fps_graph,
+                                    fps_dst.0,
+                                    fps,
+                                    out,
+                                    |o| {
+                                        send_encoder_frame(
+                                            encoder, output, packet, index, o, stats,
+                                        )?;
+                                        emitted += 1;
+                                        Ok(())
+                                    },
+                                )?;
+                            } else {
+                                send_encoder_frame(encoder, output, packet, index, out, stats)?;
+                                emitted += 1;
                             }
-                        } else {
-                            out
-                        };
-                        if minterpolate.is_some() || fps.is_some() {
-                            filter::temporal_push_frame(
-                                minterpolate_graph,
-                                minterpolate_dst.0,
-                                minterpolate,
-                                fps_graph,
-                                fps_dst.0,
-                                fps,
-                                out,
-                                |o| {
-                                    send_encoder_frame(encoder, output, packet, index, o, stats)?;
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            send_encoder_frame(encoder, output, packet, index, out, stats)?;
-                            emitted += 1;
-                        }
-                        Ok(())
+                            Ok(())
                         };
                         let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
                             if shuffleframes.is_some() {
@@ -1966,7 +2067,7 @@ fn drain_decoder(
                                 apply_untile(out)
                             }
                         };
-                        
+
                         let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
                             if framestep.is_some() {
                                 filter::push_framestep_or_emit(
@@ -2084,18 +2185,13 @@ fn drain_decoder(
             if let Some(args) = weave {
                 let src_fmt = (*send).format;
                 let mut emitted = 0u64;
-                filter::weave_push_frame(
-                    weave_graph,
-                    weaved.0,
-                    send,
-                    args,
-                    |woven| {
-                        let mut out = woven;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        let mut finish = |mut out: *mut AVFrame| -> Result<()> {
+                filter::weave_push_frame(weave_graph, weaved.0, send, args, |woven| {
+                    let mut out = woven;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
+                        out = converted.0;
+                    }
+                    let mut finish = |mut out: *mut AVFrame| -> Result<()> {
                         let out = if let Some(args) = freezedetect {
                             let src_fmt = (*out).format;
                             filter::freezedetect_frame(
@@ -2139,8 +2235,8 @@ fn drain_decoder(
                             out
                         };
                         let (out, mut format_done) = if let Some(args) = zscale {
-                            let fmt =
-                                pix_fmt.ok_or("--zscale requires --pix-fmt for format= after zscale")?;
+                            let fmt = pix_fmt
+                                .ok_or("--zscale requires --pix-fmt for format= after zscale")?;
                             let name = string(av_get_pix_fmt_name(fmt));
                             if name.is_empty() {
                                 return Err("unknown zscale output pixel format".into());
@@ -2192,143 +2288,142 @@ fn drain_decoder(
                             emitted += 1;
                         }
                         Ok(())
-                        };
-                        let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
-                            if shuffleframes.is_some() {
-                                filter::push_shuffleframes_or_emit(
-                                    shuffleframes_graph,
-                                    shuffled.0,
-                                    out,
-                                    shuffleframes.as_deref(),
-                                    |f| finish(f),
-                                )
-                            } else {
-                                finish(out)
-                            }
-                        };
-                        let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
-                            if untile.is_some() {
-                                filter::push_untile_or_emit(
-                                    untile_graph,
-                                    untiled.0,
-                                    out,
-                                    untile.as_deref(),
-                                    |f| apply_shuffleframes(f),
-                                )
-                            } else {
-                                apply_shuffleframes(out)
-                            }
-                        };
-                        let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
-                            if tile.is_some() {
-                                filter::push_tile_or_emit(
-                                    tile_graph,
-                                    tiled.0,
-                                    out,
-                                    tile.as_deref(),
-                                    |f| apply_untile(f),
-                                )
-                            } else {
-                                apply_untile(out)
-                            }
-                        };
-                        
-                        let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
-                            if framestep.is_some() {
-                                filter::push_framestep_or_emit(
-                                    framestep_graph,
-                                    framestepped.0,
-                                    out,
-                                    framestep,
-                                    |f| apply_tile(f),
-                                )
-                            } else {
-                                apply_tile(out)
-                            }
-                        };
-                        let mut apply_mpdecimate = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(mpd_args) = mpdecimate {
-                                filter::mpdecimate_push_frame(
-                                    mpdecimate_graph,
-                                    mpdecimated.0,
-                                    out,
-                                    mpd_args,
-                                    |mpd| apply_framestep(mpd),
-                                )
-                            } else {
-                                apply_framestep(out)
-                            }
-                        };
-                        let mut apply_decimate = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(dc_args) = decimate {
-                                filter::decimate_push_frame(
-                                    decimate_graph,
-                                    decimated.0,
-                                    out,
-                                    dc_args,
-                                    |dc| apply_mpdecimate(dc),
-                                )?;
-                            } else {
-                                apply_mpdecimate(out)?;
-                            }
-                            Ok(())
-                        };
-                        let mut apply_pullup = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(pu_args) = pullup {
-                                filter::pullup_push_frame(
-                                    pullup_graph,
-                                    pulledup.0,
-                                    out,
-                                    pu_args,
-                                    |pu| apply_decimate(pu),
-                                )?;
-                            } else {
-                                apply_decimate(out)?;
-                            }
-                            Ok(())
-                        };
-                        let mut apply_telecine = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(tc_args) = telecine {
-                                filter::telecine_push_frame(
-                                    telecine_graph,
-                                    telecined.0,
-                                    out,
-                                    tc_args,
-                                    |tc| apply_pullup(tc),
-                                )?;
-                            } else {
-                                apply_pullup(out)?;
-                            }
-                            Ok(())
-                        };
-                        let mut apply_framepack = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(fp_args) = framepack {
-                                filter::framepack_push_frame(
-                                    framepack_graph,
-                                    framepacked.0,
-                                    out,
-                                    fp_args,
-                                    |packed| apply_telecine(packed),
-                                )?;
-                            } else {
-                                apply_telecine(out)?;
-                            }
-                            Ok(())
-                        };
-                        if let Some(dw_args) = doubleweave {
-                            filter::doubleweave_push_frame(
-                                doubleweave_graph,
-                                doubleweaved.0,
+                    };
+                    let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
+                        if shuffleframes.is_some() {
+                            filter::push_shuffleframes_or_emit(
+                                shuffleframes_graph,
+                                shuffled.0,
                                 out,
-                                dw_args,
-                                |doubled| apply_framepack(doubled),
+                                shuffleframes.as_deref(),
+                                |f| finish(f),
+                            )
+                        } else {
+                            finish(out)
+                        }
+                    };
+                    let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
+                        if untile.is_some() {
+                            filter::push_untile_or_emit(
+                                untile_graph,
+                                untiled.0,
+                                out,
+                                untile.as_deref(),
+                                |f| apply_shuffleframes(f),
+                            )
+                        } else {
+                            apply_shuffleframes(out)
+                        }
+                    };
+                    let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
+                        if tile.is_some() {
+                            filter::push_tile_or_emit(
+                                tile_graph,
+                                tiled.0,
+                                out,
+                                tile.as_deref(),
+                                |f| apply_untile(f),
+                            )
+                        } else {
+                            apply_untile(out)
+                        }
+                    };
+
+                    let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
+                        if framestep.is_some() {
+                            filter::push_framestep_or_emit(
+                                framestep_graph,
+                                framestepped.0,
+                                out,
+                                framestep,
+                                |f| apply_tile(f),
+                            )
+                        } else {
+                            apply_tile(out)
+                        }
+                    };
+                    let mut apply_mpdecimate = |out: *mut AVFrame| -> Result<()> {
+                        if let Some(mpd_args) = mpdecimate {
+                            filter::mpdecimate_push_frame(
+                                mpdecimate_graph,
+                                mpdecimated.0,
+                                out,
+                                mpd_args,
+                                |mpd| apply_framestep(mpd),
+                            )
+                        } else {
+                            apply_framestep(out)
+                        }
+                    };
+                    let mut apply_decimate = |out: *mut AVFrame| -> Result<()> {
+                        if let Some(dc_args) = decimate {
+                            filter::decimate_push_frame(
+                                decimate_graph,
+                                decimated.0,
+                                out,
+                                dc_args,
+                                |dc| apply_mpdecimate(dc),
                             )?;
                         } else {
-                            apply_framepack(out)?;
+                            apply_mpdecimate(out)?;
                         }
                         Ok(())
-                    },
-                )?;
+                    };
+                    let mut apply_pullup = |out: *mut AVFrame| -> Result<()> {
+                        if let Some(pu_args) = pullup {
+                            filter::pullup_push_frame(
+                                pullup_graph,
+                                pulledup.0,
+                                out,
+                                pu_args,
+                                |pu| apply_decimate(pu),
+                            )?;
+                        } else {
+                            apply_decimate(out)?;
+                        }
+                        Ok(())
+                    };
+                    let mut apply_telecine = |out: *mut AVFrame| -> Result<()> {
+                        if let Some(tc_args) = telecine {
+                            filter::telecine_push_frame(
+                                telecine_graph,
+                                telecined.0,
+                                out,
+                                tc_args,
+                                |tc| apply_pullup(tc),
+                            )?;
+                        } else {
+                            apply_pullup(out)?;
+                        }
+                        Ok(())
+                    };
+                    let mut apply_framepack = |out: *mut AVFrame| -> Result<()> {
+                        if let Some(fp_args) = framepack {
+                            filter::framepack_push_frame(
+                                framepack_graph,
+                                framepacked.0,
+                                out,
+                                fp_args,
+                                |packed| apply_telecine(packed),
+                            )?;
+                        } else {
+                            apply_telecine(out)?;
+                        }
+                        Ok(())
+                    };
+                    if let Some(dw_args) = doubleweave {
+                        filter::doubleweave_push_frame(
+                            doubleweave_graph,
+                            doubleweaved.0,
+                            out,
+                            dw_args,
+                            |doubled| apply_framepack(doubled),
+                        )?;
+                    } else {
+                        apply_framepack(out)?;
+                    }
+                    Ok(())
+                })?;
                 stats.video_frames += emitted;
                 av_frame_unref(frame.0);
                 continue;
@@ -2348,102 +2443,117 @@ fn drain_decoder(
                             out = converted.0;
                         }
                         let mut finish = |mut out: *mut AVFrame| -> Result<()> {
-                        let out = if let Some(args) = freezedetect {
-                            let src_fmt = (*out).format;
-                            filter::freezedetect_frame(
-                                freezedetect_graph,
-                                freezedetectd.0,
-                                out,
-                                args,
-                            )?;
-                            let o = freezedetectd.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = pseudocolor {
-                            let src_fmt = (*out).format;
-                            filter::pseudocolor_frame(
-                                pseudocolor_graph,
-                                pseudocolored.0,
-                                out,
-                                args,
-                            )?;
-                            let o = pseudocolored.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = colorspace {
-                            filter::colorspace_frame(colorspace_graph, colorspaced.0, out, args)?;
-                            colorspaced.0
-                        } else {
-                            out
-                        };
-                        let (out, mut format_done) = if let Some(args) = zscale {
-                            let fmt =
-                                pix_fmt.ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            filter::zscale_frame(zscale_graph, zscaled.0, out, args, &name)?;
-                            (zscaled.0, true)
-                        } else {
-                            (out, format_done)
-                        };
-                        let (out, format_done) = if let Some(args) = tonemap {
-                            let fmt = pix_fmt
-                                .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            filter::tonemap_frame(tonemap_graph, tonemapped.0, out, args, &name)?;
-                            (tonemapped.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, out, fmt)?;
-                                converted.0
+                            let out = if let Some(args) = freezedetect {
+                                let src_fmt = (*out).format;
+                                filter::freezedetect_frame(
+                                    freezedetect_graph,
+                                    freezedetectd.0,
+                                    out,
+                                    args,
+                                )?;
+                                let o = freezedetectd.0;
+                                if (*o).format != src_fmt {
+                                    convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
+                                    converted.0
+                                } else {
+                                    o
+                                }
                             } else {
                                 out
+                            };
+                            let out = if let Some(args) = pseudocolor {
+                                let src_fmt = (*out).format;
+                                filter::pseudocolor_frame(
+                                    pseudocolor_graph,
+                                    pseudocolored.0,
+                                    out,
+                                    args,
+                                )?;
+                                let o = pseudocolored.0;
+                                if (*o).format != src_fmt {
+                                    convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
+                                    converted.0
+                                } else {
+                                    o
+                                }
+                            } else {
+                                out
+                            };
+                            let out = if let Some(args) = colorspace {
+                                filter::colorspace_frame(
+                                    colorspace_graph,
+                                    colorspaced.0,
+                                    out,
+                                    args,
+                                )?;
+                                colorspaced.0
+                            } else {
+                                out
+                            };
+                            let (out, mut format_done) = if let Some(args) = zscale {
+                                let fmt = pix_fmt.ok_or(
+                                    "--zscale requires --pix-fmt for format= after zscale",
+                                )?;
+                                let name = string(av_get_pix_fmt_name(fmt));
+                                if name.is_empty() {
+                                    return Err("unknown zscale output pixel format".into());
+                                }
+                                filter::zscale_frame(zscale_graph, zscaled.0, out, args, &name)?;
+                                (zscaled.0, true)
+                            } else {
+                                (out, format_done)
+                            };
+                            let (out, format_done) = if let Some(args) = tonemap {
+                                let fmt = pix_fmt.ok_or(
+                                    "--tonemap requires --pix-fmt for format= after tonemap",
+                                )?;
+                                let name = string(av_get_pix_fmt_name(fmt));
+                                if name.is_empty() {
+                                    return Err("unknown tonemap output pixel format".into());
+                                }
+                                filter::tonemap_frame(
+                                    tonemap_graph,
+                                    tonemapped.0,
+                                    out,
+                                    args,
+                                    &name,
+                                )?;
+                                (tonemapped.0, format_done)
+                            } else {
+                                (out, format_done)
+                            };
+                            let out = if let Some(fmt) = pix_fmt {
+                                if !format_done && (*out).format != fmt {
+                                    convert_pix_fmt_frame(fmt_sws, converted.0, out, fmt)?;
+                                    converted.0
+                                } else {
+                                    out
+                                }
+                            } else {
+                                out
+                            };
+                            if minterpolate.is_some() || fps.is_some() {
+                                filter::temporal_push_frame(
+                                    minterpolate_graph,
+                                    minterpolate_dst.0,
+                                    minterpolate,
+                                    fps_graph,
+                                    fps_dst.0,
+                                    fps,
+                                    out,
+                                    |o| {
+                                        send_encoder_frame(
+                                            encoder, output, packet, index, o, stats,
+                                        )?;
+                                        emitted += 1;
+                                        Ok(())
+                                    },
+                                )?;
+                            } else {
+                                send_encoder_frame(encoder, output, packet, index, out, stats)?;
+                                emitted += 1;
                             }
-                        } else {
-                            out
-                        };
-                        if minterpolate.is_some() || fps.is_some() {
-                            filter::temporal_push_frame(
-                                minterpolate_graph,
-                                minterpolate_dst.0,
-                                minterpolate,
-                                fps_graph,
-                                fps_dst.0,
-                                fps,
-                                out,
-                                |o| {
-                                    send_encoder_frame(encoder, output, packet, index, o, stats)?;
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            send_encoder_frame(encoder, output, packet, index, out, stats)?;
-                            emitted += 1;
-                        }
-                        Ok(())
+                            Ok(())
                         };
                         let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
                             if shuffleframes.is_some() {
@@ -2484,7 +2594,7 @@ fn drain_decoder(
                                 apply_untile(out)
                             }
                         };
-                        
+
                         let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
                             if framestep.is_some() {
                                 filter::push_framestep_or_emit(
@@ -2575,143 +2685,129 @@ fn drain_decoder(
                 let src_fmt = (*send).format;
                 let mut emitted = 0u64;
                 let mut finish = |mut out: *mut AVFrame| -> Result<()> {
-                        let out = if let Some(args) = freezedetect {
-                            let src_fmt = (*out).format;
-                            filter::freezedetect_frame(
-                                freezedetect_graph,
-                                freezedetectd.0,
-                                out,
-                                args,
-                            )?;
-                            let o = freezedetectd.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
+                    let out = if let Some(args) = freezedetect {
+                        let src_fmt = (*out).format;
+                        filter::freezedetect_frame(freezedetect_graph, freezedetectd.0, out, args)?;
+                        let o = freezedetectd.0;
+                        if (*o).format != src_fmt {
+                            convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
+                            converted.0
                         } else {
-                            out
-                        };
-                        let out = if let Some(args) = pseudocolor {
-                            let src_fmt = (*out).format;
-                            filter::pseudocolor_frame(
-                                pseudocolor_graph,
-                                pseudocolored.0,
-                                out,
-                                args,
-                            )?;
-                            let o = pseudocolored.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = colorspace {
-                            filter::colorspace_frame(colorspace_graph, colorspaced.0, out, args)?;
-                            colorspaced.0
-                        } else {
-                            out
-                        };
-                        let (out, mut format_done) = if let Some(args) = zscale {
-                            let fmt =
-                                pix_fmt.ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            filter::zscale_frame(zscale_graph, zscaled.0, out, args, &name)?;
-                            (zscaled.0, true)
-                        } else {
-                            (out, format_done)
-                        };
-                        let (out, format_done) = if let Some(args) = tonemap {
-                            let fmt = pix_fmt
-                                .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            filter::tonemap_frame(tonemap_graph, tonemapped.0, out, args, &name)?;
-                            (tonemapped.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, out, fmt)?;
-                                converted.0
-                            } else {
-                                out
-                            }
-                        } else {
-                            out
-                        };
-                        if minterpolate.is_some() || fps.is_some() {
-                            filter::temporal_push_frame(
-                                minterpolate_graph,
-                                minterpolate_dst.0,
-                                minterpolate,
-                                fps_graph,
-                                fps_dst.0,
-                                fps,
-                                out,
-                                |o| {
-                                    send_encoder_frame(encoder, output, packet, index, o, stats)?;
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            send_encoder_frame(encoder, output, packet, index, out, stats)?;
-                            emitted += 1;
+                            o
                         }
-                        Ok(())
+                    } else {
+                        out
+                    };
+                    let out = if let Some(args) = pseudocolor {
+                        let src_fmt = (*out).format;
+                        filter::pseudocolor_frame(pseudocolor_graph, pseudocolored.0, out, args)?;
+                        let o = pseudocolored.0;
+                        if (*o).format != src_fmt {
+                            convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
+                            converted.0
+                        } else {
+                            o
+                        }
+                    } else {
+                        out
+                    };
+                    let out = if let Some(args) = colorspace {
+                        filter::colorspace_frame(colorspace_graph, colorspaced.0, out, args)?;
+                        colorspaced.0
+                    } else {
+                        out
+                    };
+                    let (out, mut format_done) = if let Some(args) = zscale {
+                        let fmt = pix_fmt
+                            .ok_or("--zscale requires --pix-fmt for format= after zscale")?;
+                        let name = string(av_get_pix_fmt_name(fmt));
+                        if name.is_empty() {
+                            return Err("unknown zscale output pixel format".into());
+                        }
+                        filter::zscale_frame(zscale_graph, zscaled.0, out, args, &name)?;
+                        (zscaled.0, true)
+                    } else {
+                        (out, format_done)
+                    };
+                    let (out, format_done) = if let Some(args) = tonemap {
+                        let fmt = pix_fmt
+                            .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
+                        let name = string(av_get_pix_fmt_name(fmt));
+                        if name.is_empty() {
+                            return Err("unknown tonemap output pixel format".into());
+                        }
+                        filter::tonemap_frame(tonemap_graph, tonemapped.0, out, args, &name)?;
+                        (tonemapped.0, format_done)
+                    } else {
+                        (out, format_done)
+                    };
+                    let out = if let Some(fmt) = pix_fmt {
+                        if !format_done && (*out).format != fmt {
+                            convert_pix_fmt_frame(fmt_sws, converted.0, out, fmt)?;
+                            converted.0
+                        } else {
+                            out
+                        }
+                    } else {
+                        out
+                    };
+                    if minterpolate.is_some() || fps.is_some() {
+                        filter::temporal_push_frame(
+                            minterpolate_graph,
+                            minterpolate_dst.0,
+                            minterpolate,
+                            fps_graph,
+                            fps_dst.0,
+                            fps,
+                            out,
+                            |o| {
+                                send_encoder_frame(encoder, output, packet, index, o, stats)?;
+                                emitted += 1;
+                                Ok(())
+                            },
+                        )?;
+                    } else {
+                        send_encoder_frame(encoder, output, packet, index, out, stats)?;
+                        emitted += 1;
+                    }
+                    Ok(())
                 };
-                        let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
-                            if shuffleframes.is_some() {
-                                filter::push_shuffleframes_or_emit(
-                                    shuffleframes_graph,
-                                    shuffled.0,
-                                    out,
-                                    shuffleframes.as_deref(),
-                                    |f| finish(f),
-                                )
-                            } else {
-                                finish(out)
-                            }
-                        };
-                        let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
-                            if untile.is_some() {
-                                filter::push_untile_or_emit(
-                                    untile_graph,
-                                    untiled.0,
-                                    out,
-                                    untile.as_deref(),
-                                    |f| apply_shuffleframes(f),
-                                )
-                            } else {
-                                apply_shuffleframes(out)
-                            }
-                        };
-                        let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
-                            if tile.is_some() {
-                                filter::push_tile_or_emit(
-                                    tile_graph,
-                                    tiled.0,
-                                    out,
-                                    tile.as_deref(),
-                                    |f| apply_untile(f),
-                                )
-                            } else {
-                                apply_untile(out)
-                            }
-                        };
-                        
+                let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
+                    if shuffleframes.is_some() {
+                        filter::push_shuffleframes_or_emit(
+                            shuffleframes_graph,
+                            shuffled.0,
+                            out,
+                            shuffleframes.as_deref(),
+                            |f| finish(f),
+                        )
+                    } else {
+                        finish(out)
+                    }
+                };
+                let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
+                    if untile.is_some() {
+                        filter::push_untile_or_emit(
+                            untile_graph,
+                            untiled.0,
+                            out,
+                            untile.as_deref(),
+                            |f| apply_shuffleframes(f),
+                        )
+                    } else {
+                        apply_shuffleframes(out)
+                    }
+                };
+                let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
+                    if tile.is_some() {
+                        filter::push_tile_or_emit(tile_graph, tiled.0, out, tile.as_deref(), |f| {
+                            apply_untile(f)
+                        })
+                    } else {
+                        apply_untile(out)
+                    }
+                };
+
                 let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
                     if framestep.is_some() {
                         filter::push_framestep_or_emit(
@@ -2754,13 +2850,9 @@ fn drain_decoder(
                 };
                 let mut apply_pullup = |out: *mut AVFrame| -> Result<()> {
                     if let Some(pu_args) = pullup {
-                        filter::pullup_push_frame(
-                            pullup_graph,
-                            pulledup.0,
-                            out,
-                            pu_args,
-                            |pu| apply_decimate(pu),
-                        )?;
+                        filter::pullup_push_frame(pullup_graph, pulledup.0, out, pu_args, |pu| {
+                            apply_decimate(pu)
+                        })?;
                     } else {
                         apply_decimate(out)?;
                     }
@@ -2794,13 +2886,8 @@ fn drain_decoder(
             if let Some(args) = telecine {
                 let src_fmt = (*send).format;
                 let mut emitted = 0u64;
-                filter::telecine_push_frame(
-                    telecine_graph,
-                    telecined.0,
-                    send,
-                    args,
-                    |tc| {
-                        let mut after_decimate = |mut out: *mut AVFrame| -> Result<()> {
+                filter::telecine_push_frame(telecine_graph, telecined.0, send, args, |tc| {
+                    let mut after_decimate = |mut out: *mut AVFrame| -> Result<()> {
                         if (*out).format != src_fmt {
                             convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
                             out = converted.0;
@@ -2848,8 +2935,8 @@ fn drain_decoder(
                             out
                         };
                         let (out, mut format_done) = if let Some(args) = zscale {
-                            let fmt =
-                                pix_fmt.ok_or("--zscale requires --pix-fmt for format= after zscale")?;
+                            let fmt = pix_fmt
+                                .ok_or("--zscale requires --pix-fmt for format= after zscale")?;
                             let name = string(av_get_pix_fmt_name(fmt));
                             if name.is_empty() {
                                 return Err("unknown zscale output pixel format".into());
@@ -2901,99 +2988,94 @@ fn drain_decoder(
                             emitted += 1;
                         }
                         Ok(())
-                        };
-                        let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
-                            if shuffleframes.is_some() {
-                                filter::push_shuffleframes_or_emit(
-                                    shuffleframes_graph,
-                                    shuffled.0,
-                                    out,
-                                    shuffleframes.as_deref(),
-                                    |f| after_decimate(f),
-                                )
-                            } else {
-                                after_decimate(out)
-                            }
-                        };
-                        let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
-                            if untile.is_some() {
-                                filter::push_untile_or_emit(
-                                    untile_graph,
-                                    untiled.0,
-                                    out,
-                                    untile.as_deref(),
-                                    |f| apply_shuffleframes(f),
-                                )
-                            } else {
-                                apply_shuffleframes(out)
-                            }
-                        };
-                        let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
-                            if tile.is_some() {
-                                filter::push_tile_or_emit(
-                                    tile_graph,
-                                    tiled.0,
-                                    out,
-                                    tile.as_deref(),
-                                    |f| apply_untile(f),
-                                )
-                            } else {
-                                apply_untile(out)
-                            }
-                        };
-                        
-                        let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
-                            if framestep.is_some() {
-                                filter::push_framestep_or_emit(
-                                    framestep_graph,
-                                    framestepped.0,
-                                    out,
-                                    framestep,
-                                    |f| apply_tile(f),
-                                )
-                            } else {
-                                apply_tile(out)
-                            }
-                        };
-                        let mut apply_mpdecimate = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(mpd_args) = mpdecimate {
-                                filter::mpdecimate_push_frame(
-                                    mpdecimate_graph,
-                                    mpdecimated.0,
-                                    out,
-                                    mpd_args,
-                                    |mpd| apply_framestep(mpd),
-                                )
-                            } else {
-                                apply_framestep(out)
-                            }
-                        };
-                        let mut apply_decimate = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(dc_args) = decimate {
-                                filter::decimate_push_frame(
-                                    decimate_graph,
-                                    decimated.0,
-                                    out,
-                                    dc_args,
-                                    |dc| apply_mpdecimate(dc),
-                                )
-                            } else {
-                                apply_mpdecimate(out)
-                            }
-                        };
-                        if let Some(pu_args) = pullup {
-                            filter::pullup_push_frame(
-                                pullup_graph,
-                                pulledup.0,
-                                tc,
-                                pu_args,
-                                |pu| apply_decimate(pu),
+                    };
+                    let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
+                        if shuffleframes.is_some() {
+                            filter::push_shuffleframes_or_emit(
+                                shuffleframes_graph,
+                                shuffled.0,
+                                out,
+                                shuffleframes.as_deref(),
+                                |f| after_decimate(f),
                             )
                         } else {
-                            apply_decimate(tc)
+                            after_decimate(out)
                         }
-                    },
-                )?;
+                    };
+                    let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
+                        if untile.is_some() {
+                            filter::push_untile_or_emit(
+                                untile_graph,
+                                untiled.0,
+                                out,
+                                untile.as_deref(),
+                                |f| apply_shuffleframes(f),
+                            )
+                        } else {
+                            apply_shuffleframes(out)
+                        }
+                    };
+                    let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
+                        if tile.is_some() {
+                            filter::push_tile_or_emit(
+                                tile_graph,
+                                tiled.0,
+                                out,
+                                tile.as_deref(),
+                                |f| apply_untile(f),
+                            )
+                        } else {
+                            apply_untile(out)
+                        }
+                    };
+
+                    let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
+                        if framestep.is_some() {
+                            filter::push_framestep_or_emit(
+                                framestep_graph,
+                                framestepped.0,
+                                out,
+                                framestep,
+                                |f| apply_tile(f),
+                            )
+                        } else {
+                            apply_tile(out)
+                        }
+                    };
+                    let mut apply_mpdecimate = |out: *mut AVFrame| -> Result<()> {
+                        if let Some(mpd_args) = mpdecimate {
+                            filter::mpdecimate_push_frame(
+                                mpdecimate_graph,
+                                mpdecimated.0,
+                                out,
+                                mpd_args,
+                                |mpd| apply_framestep(mpd),
+                            )
+                        } else {
+                            apply_framestep(out)
+                        }
+                    };
+                    let mut apply_decimate = |out: *mut AVFrame| -> Result<()> {
+                        if let Some(dc_args) = decimate {
+                            filter::decimate_push_frame(
+                                decimate_graph,
+                                decimated.0,
+                                out,
+                                dc_args,
+                                |dc| apply_mpdecimate(dc),
+                            )
+                        } else {
+                            apply_mpdecimate(out)
+                        }
+                    };
+                    if let Some(pu_args) = pullup {
+                        filter::pullup_push_frame(pullup_graph, pulledup.0, tc, pu_args, |pu| {
+                            apply_decimate(pu)
+                        })
+                    } else {
+                        apply_decimate(tc)
+                    }
+                })?;
                 stats.video_frames += emitted;
                 av_frame_unref(frame.0);
                 continue;
@@ -3002,148 +3084,134 @@ fn drain_decoder(
                 let src_fmt = (*send).format;
                 let mut emitted = 0u64;
                 let mut after_decimate = |mut out: *mut AVFrame| -> Result<()> {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
+                    let mut out = out;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
+                        out = converted.0;
+                    }
+                    let out = if let Some(args) = freezedetect {
+                        let src_fmt = (*out).format;
+                        filter::freezedetect_frame(freezedetect_graph, freezedetectd.0, out, args)?;
+                        let o = freezedetectd.0;
+                        if (*o).format != src_fmt {
+                            convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
+                            converted.0
+                        } else {
+                            o
                         }
-                        let out = if let Some(args) = freezedetect {
-                            let src_fmt = (*out).format;
-                            filter::freezedetect_frame(
-                                freezedetect_graph,
-                                freezedetectd.0,
-                                out,
-                                args,
-                            )?;
-                            let o = freezedetectd.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
+                    } else {
+                        out
+                    };
+                    let out = if let Some(args) = pseudocolor {
+                        let src_fmt = (*out).format;
+                        filter::pseudocolor_frame(pseudocolor_graph, pseudocolored.0, out, args)?;
+                        let o = pseudocolored.0;
+                        if (*o).format != src_fmt {
+                            convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
+                            converted.0
                         } else {
-                            out
-                        };
-                        let out = if let Some(args) = pseudocolor {
-                            let src_fmt = (*out).format;
-                            filter::pseudocolor_frame(
-                                pseudocolor_graph,
-                                pseudocolored.0,
-                                out,
-                                args,
-                            )?;
-                            let o = pseudocolored.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = colorspace {
-                            filter::colorspace_frame(colorspace_graph, colorspaced.0, out, args)?;
-                            colorspaced.0
-                        } else {
-                            out
-                        };
-                        let (out, mut format_done) = if let Some(args) = zscale {
-                            let fmt =
-                                pix_fmt.ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            filter::zscale_frame(zscale_graph, zscaled.0, out, args, &name)?;
-                            (zscaled.0, true)
-                        } else {
-                            (out, format_done)
-                        };
-                        let (out, format_done) = if let Some(args) = tonemap {
-                            let fmt = pix_fmt
-                                .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            filter::tonemap_frame(tonemap_graph, tonemapped.0, out, args, &name)?;
-                            (tonemapped.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, out, fmt)?;
-                                converted.0
-                            } else {
-                                out
-                            }
-                        } else {
-                            out
-                        };
-                        if minterpolate.is_some() || fps.is_some() {
-                            filter::temporal_push_frame(
-                                minterpolate_graph,
-                                minterpolate_dst.0,
-                                minterpolate,
-                                fps_graph,
-                                fps_dst.0,
-                                fps,
-                                out,
-                                |o| {
-                                    send_encoder_frame(encoder, output, packet, index, o, stats)?;
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            send_encoder_frame(encoder, output, packet, index, out, stats)?;
-                            emitted += 1;
+                            o
                         }
-                        Ok(())
+                    } else {
+                        out
+                    };
+                    let out = if let Some(args) = colorspace {
+                        filter::colorspace_frame(colorspace_graph, colorspaced.0, out, args)?;
+                        colorspaced.0
+                    } else {
+                        out
+                    };
+                    let (out, mut format_done) = if let Some(args) = zscale {
+                        let fmt = pix_fmt
+                            .ok_or("--zscale requires --pix-fmt for format= after zscale")?;
+                        let name = string(av_get_pix_fmt_name(fmt));
+                        if name.is_empty() {
+                            return Err("unknown zscale output pixel format".into());
+                        }
+                        filter::zscale_frame(zscale_graph, zscaled.0, out, args, &name)?;
+                        (zscaled.0, true)
+                    } else {
+                        (out, format_done)
+                    };
+                    let (out, format_done) = if let Some(args) = tonemap {
+                        let fmt = pix_fmt
+                            .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
+                        let name = string(av_get_pix_fmt_name(fmt));
+                        if name.is_empty() {
+                            return Err("unknown tonemap output pixel format".into());
+                        }
+                        filter::tonemap_frame(tonemap_graph, tonemapped.0, out, args, &name)?;
+                        (tonemapped.0, format_done)
+                    } else {
+                        (out, format_done)
+                    };
+                    let out = if let Some(fmt) = pix_fmt {
+                        if !format_done && (*out).format != fmt {
+                            convert_pix_fmt_frame(fmt_sws, converted.0, out, fmt)?;
+                            converted.0
+                        } else {
+                            out
+                        }
+                    } else {
+                        out
+                    };
+                    if minterpolate.is_some() || fps.is_some() {
+                        filter::temporal_push_frame(
+                            minterpolate_graph,
+                            minterpolate_dst.0,
+                            minterpolate,
+                            fps_graph,
+                            fps_dst.0,
+                            fps,
+                            out,
+                            |o| {
+                                send_encoder_frame(encoder, output, packet, index, o, stats)?;
+                                emitted += 1;
+                                Ok(())
+                            },
+                        )?;
+                    } else {
+                        send_encoder_frame(encoder, output, packet, index, out, stats)?;
+                        emitted += 1;
+                    }
+                    Ok(())
                 };
-                        let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
-                            if shuffleframes.is_some() {
-                                filter::push_shuffleframes_or_emit(
-                                    shuffleframes_graph,
-                                    shuffled.0,
-                                    out,
-                                    shuffleframes.as_deref(),
-                                    |f| after_decimate(f),
-                                )
-                            } else {
-                                after_decimate(out)
-                            }
-                        };
-                        let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
-                            if untile.is_some() {
-                                filter::push_untile_or_emit(
-                                    untile_graph,
-                                    untiled.0,
-                                    out,
-                                    untile.as_deref(),
-                                    |f| apply_shuffleframes(f),
-                                )
-                            } else {
-                                apply_shuffleframes(out)
-                            }
-                        };
-                        let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
-                            if tile.is_some() {
-                                filter::push_tile_or_emit(
-                                    tile_graph,
-                                    tiled.0,
-                                    out,
-                                    tile.as_deref(),
-                                    |f| apply_untile(f),
-                                )
-                            } else {
-                                apply_untile(out)
-                            }
-                        };
-                        
+                let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
+                    if shuffleframes.is_some() {
+                        filter::push_shuffleframes_or_emit(
+                            shuffleframes_graph,
+                            shuffled.0,
+                            out,
+                            shuffleframes.as_deref(),
+                            |f| after_decimate(f),
+                        )
+                    } else {
+                        after_decimate(out)
+                    }
+                };
+                let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
+                    if untile.is_some() {
+                        filter::push_untile_or_emit(
+                            untile_graph,
+                            untiled.0,
+                            out,
+                            untile.as_deref(),
+                            |f| apply_shuffleframes(f),
+                        )
+                    } else {
+                        apply_shuffleframes(out)
+                    }
+                };
+                let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
+                    if tile.is_some() {
+                        filter::push_tile_or_emit(tile_graph, tiled.0, out, tile.as_deref(), |f| {
+                            apply_untile(f)
+                        })
+                    } else {
+                        apply_untile(out)
+                    }
+                };
+
                 let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
                     if framestep.is_some() {
                         filter::push_framestep_or_emit(
@@ -3183,13 +3251,9 @@ fn drain_decoder(
                         apply_mpdecimate(out)
                     }
                 };
-                filter::pullup_push_frame(
-                    pullup_graph,
-                    pulledup.0,
-                    send,
-                    args,
-                    |pu| apply_decimate(pu),
-                )?;
+                filter::pullup_push_frame(pullup_graph, pulledup.0, send, args, |pu| {
+                    apply_decimate(pu)
+                })?;
                 stats.video_frames += emitted;
                 av_frame_unref(frame.0);
                 continue;
@@ -3198,107 +3262,97 @@ fn drain_decoder(
                 let src_fmt = (*send).format;
                 let mut emitted = 0u64;
                 let mut after_tile = |mut out: *mut AVFrame| -> Result<()> {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
+                    let mut out = out;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
+                        out = converted.0;
+                    }
+                    let out = if let Some(args) = freezedetect {
+                        let src_fmt = (*out).format;
+                        filter::freezedetect_frame(freezedetect_graph, freezedetectd.0, out, args)?;
+                        let o = freezedetectd.0;
+                        if (*o).format != src_fmt {
+                            convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
+                            converted.0
+                        } else {
+                            o
                         }
-                        let out = if let Some(args) = freezedetect {
-                            let src_fmt = (*out).format;
-                            filter::freezedetect_frame(
-                                freezedetect_graph,
-                                freezedetectd.0,
-                                out,
-                                args,
-                            )?;
-                            let o = freezedetectd.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
+                    } else {
+                        out
+                    };
+                    let out = if let Some(args) = pseudocolor {
+                        let src_fmt = (*out).format;
+                        filter::pseudocolor_frame(pseudocolor_graph, pseudocolored.0, out, args)?;
+                        let o = pseudocolored.0;
+                        if (*o).format != src_fmt {
+                            convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
+                            converted.0
                         } else {
-                            out
-                        };
-                        let out = if let Some(args) = pseudocolor {
-                            let src_fmt = (*out).format;
-                            filter::pseudocolor_frame(
-                                pseudocolor_graph,
-                                pseudocolored.0,
-                                out,
-                                args,
-                            )?;
-                            let o = pseudocolored.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = colorspace {
-                            filter::colorspace_frame(colorspace_graph, colorspaced.0, out, args)?;
-                            colorspaced.0
-                        } else {
-                            out
-                        };
-                        let (out, mut format_done) = if let Some(args) = zscale {
-                            let fmt =
-                                pix_fmt.ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            filter::zscale_frame(zscale_graph, zscaled.0, out, args, &name)?;
-                            (zscaled.0, true)
-                        } else {
-                            (out, format_done)
-                        };
-                        let (out, format_done) = if let Some(args) = tonemap {
-                            let fmt = pix_fmt
-                                .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            filter::tonemap_frame(tonemap_graph, tonemapped.0, out, args, &name)?;
-                            (tonemapped.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, out, fmt)?;
-                                converted.0
-                            } else {
-                                out
-                            }
-                        } else {
-                            out
-                        };
-                        if minterpolate.is_some() || fps.is_some() {
-                            filter::temporal_push_frame(
-                                minterpolate_graph,
-                                minterpolate_dst.0,
-                                minterpolate,
-                                fps_graph,
-                                fps_dst.0,
-                                fps,
-                                out,
-                                |o| {
-                                    send_encoder_frame(encoder, output, packet, index, o, stats)?;
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            send_encoder_frame(encoder, output, packet, index, out, stats)?;
-                            emitted += 1;
+                            o
                         }
-                        Ok(())
+                    } else {
+                        out
+                    };
+                    let out = if let Some(args) = colorspace {
+                        filter::colorspace_frame(colorspace_graph, colorspaced.0, out, args)?;
+                        colorspaced.0
+                    } else {
+                        out
+                    };
+                    let (out, mut format_done) = if let Some(args) = zscale {
+                        let fmt = pix_fmt
+                            .ok_or("--zscale requires --pix-fmt for format= after zscale")?;
+                        let name = string(av_get_pix_fmt_name(fmt));
+                        if name.is_empty() {
+                            return Err("unknown zscale output pixel format".into());
+                        }
+                        filter::zscale_frame(zscale_graph, zscaled.0, out, args, &name)?;
+                        (zscaled.0, true)
+                    } else {
+                        (out, format_done)
+                    };
+                    let (out, format_done) = if let Some(args) = tonemap {
+                        let fmt = pix_fmt
+                            .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
+                        let name = string(av_get_pix_fmt_name(fmt));
+                        if name.is_empty() {
+                            return Err("unknown tonemap output pixel format".into());
+                        }
+                        filter::tonemap_frame(tonemap_graph, tonemapped.0, out, args, &name)?;
+                        (tonemapped.0, format_done)
+                    } else {
+                        (out, format_done)
+                    };
+                    let out = if let Some(fmt) = pix_fmt {
+                        if !format_done && (*out).format != fmt {
+                            convert_pix_fmt_frame(fmt_sws, converted.0, out, fmt)?;
+                            converted.0
+                        } else {
+                            out
+                        }
+                    } else {
+                        out
+                    };
+                    if minterpolate.is_some() || fps.is_some() {
+                        filter::temporal_push_frame(
+                            minterpolate_graph,
+                            minterpolate_dst.0,
+                            minterpolate,
+                            fps_graph,
+                            fps_dst.0,
+                            fps,
+                            out,
+                            |o| {
+                                send_encoder_frame(encoder, output, packet, index, o, stats)?;
+                                emitted += 1;
+                                Ok(())
+                            },
+                        )?;
+                    } else {
+                        send_encoder_frame(encoder, output, packet, index, out, stats)?;
+                        emitted += 1;
+                    }
+                    Ok(())
                 };
                 let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
                     if shuffleframes.is_some() {
@@ -3352,13 +3406,9 @@ fn drain_decoder(
                         apply_framestep(out)
                     }
                 };
-                filter::decimate_push_frame(
-                    decimate_graph,
-                    decimated.0,
-                    send,
-                    args,
-                    |dc| apply_mpdecimate(dc),
-                )?;
+                filter::decimate_push_frame(decimate_graph, decimated.0, send, args, |dc| {
+                    apply_mpdecimate(dc)
+                })?;
                 stats.video_frames += emitted;
                 av_frame_unref(frame.0);
                 continue;
@@ -3367,107 +3417,97 @@ fn drain_decoder(
                 let src_fmt = (*send).format;
                 let mut emitted = 0u64;
                 let mut after_tile = |mut out: *mut AVFrame| -> Result<()> {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
+                    let mut out = out;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
+                        out = converted.0;
+                    }
+                    let out = if let Some(args) = freezedetect {
+                        let src_fmt = (*out).format;
+                        filter::freezedetect_frame(freezedetect_graph, freezedetectd.0, out, args)?;
+                        let o = freezedetectd.0;
+                        if (*o).format != src_fmt {
+                            convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
+                            converted.0
+                        } else {
+                            o
                         }
-                        let out = if let Some(args) = freezedetect {
-                            let src_fmt = (*out).format;
-                            filter::freezedetect_frame(
-                                freezedetect_graph,
-                                freezedetectd.0,
-                                out,
-                                args,
-                            )?;
-                            let o = freezedetectd.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
+                    } else {
+                        out
+                    };
+                    let out = if let Some(args) = pseudocolor {
+                        let src_fmt = (*out).format;
+                        filter::pseudocolor_frame(pseudocolor_graph, pseudocolored.0, out, args)?;
+                        let o = pseudocolored.0;
+                        if (*o).format != src_fmt {
+                            convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
+                            converted.0
                         } else {
-                            out
-                        };
-                        let out = if let Some(args) = pseudocolor {
-                            let src_fmt = (*out).format;
-                            filter::pseudocolor_frame(
-                                pseudocolor_graph,
-                                pseudocolored.0,
-                                out,
-                                args,
-                            )?;
-                            let o = pseudocolored.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = colorspace {
-                            filter::colorspace_frame(colorspace_graph, colorspaced.0, out, args)?;
-                            colorspaced.0
-                        } else {
-                            out
-                        };
-                        let (out, mut format_done) = if let Some(args) = zscale {
-                            let fmt =
-                                pix_fmt.ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            filter::zscale_frame(zscale_graph, zscaled.0, out, args, &name)?;
-                            (zscaled.0, true)
-                        } else {
-                            (out, format_done)
-                        };
-                        let (out, format_done) = if let Some(args) = tonemap {
-                            let fmt = pix_fmt
-                                .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            filter::tonemap_frame(tonemap_graph, tonemapped.0, out, args, &name)?;
-                            (tonemapped.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, out, fmt)?;
-                                converted.0
-                            } else {
-                                out
-                            }
-                        } else {
-                            out
-                        };
-                        if minterpolate.is_some() || fps.is_some() {
-                            filter::temporal_push_frame(
-                                minterpolate_graph,
-                                minterpolate_dst.0,
-                                minterpolate,
-                                fps_graph,
-                                fps_dst.0,
-                                fps,
-                                out,
-                                |o| {
-                                    send_encoder_frame(encoder, output, packet, index, o, stats)?;
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            send_encoder_frame(encoder, output, packet, index, out, stats)?;
-                            emitted += 1;
+                            o
                         }
-                        Ok(())
+                    } else {
+                        out
+                    };
+                    let out = if let Some(args) = colorspace {
+                        filter::colorspace_frame(colorspace_graph, colorspaced.0, out, args)?;
+                        colorspaced.0
+                    } else {
+                        out
+                    };
+                    let (out, mut format_done) = if let Some(args) = zscale {
+                        let fmt = pix_fmt
+                            .ok_or("--zscale requires --pix-fmt for format= after zscale")?;
+                        let name = string(av_get_pix_fmt_name(fmt));
+                        if name.is_empty() {
+                            return Err("unknown zscale output pixel format".into());
+                        }
+                        filter::zscale_frame(zscale_graph, zscaled.0, out, args, &name)?;
+                        (zscaled.0, true)
+                    } else {
+                        (out, format_done)
+                    };
+                    let (out, format_done) = if let Some(args) = tonemap {
+                        let fmt = pix_fmt
+                            .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
+                        let name = string(av_get_pix_fmt_name(fmt));
+                        if name.is_empty() {
+                            return Err("unknown tonemap output pixel format".into());
+                        }
+                        filter::tonemap_frame(tonemap_graph, tonemapped.0, out, args, &name)?;
+                        (tonemapped.0, format_done)
+                    } else {
+                        (out, format_done)
+                    };
+                    let out = if let Some(fmt) = pix_fmt {
+                        if !format_done && (*out).format != fmt {
+                            convert_pix_fmt_frame(fmt_sws, converted.0, out, fmt)?;
+                            converted.0
+                        } else {
+                            out
+                        }
+                    } else {
+                        out
+                    };
+                    if minterpolate.is_some() || fps.is_some() {
+                        filter::temporal_push_frame(
+                            minterpolate_graph,
+                            minterpolate_dst.0,
+                            minterpolate,
+                            fps_graph,
+                            fps_dst.0,
+                            fps,
+                            out,
+                            |o| {
+                                send_encoder_frame(encoder, output, packet, index, o, stats)?;
+                                emitted += 1;
+                                Ok(())
+                            },
+                        )?;
+                    } else {
+                        send_encoder_frame(encoder, output, packet, index, out, stats)?;
+                        emitted += 1;
+                    }
+                    Ok(())
                 };
                 let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
                     if shuffleframes.is_some() {
@@ -3521,152 +3561,160 @@ fn drain_decoder(
             }
             if let Some(args) = reverse {
                 if shuffleframes.is_none() {
-                let src_fmt = (*send).format;
-                let mut emitted = 0u64;
-                filter::reverse_push_frame(
-                    reverse_graph,
-                    reversed.0,
-                    send,
-                    args,
-                    |out| unsafe {
-                        filter::push_loop_or_emit(
-                            loop_graph,
-                            looped.0,
-                            out,
-                            r#loop.as_deref(),
-                            |out| unsafe {
-                                filter::push_thumbnail_or_emit(
-                                    thumbnail_graph,
-                                    thumbnailed.0,
-                                    out,
-                                    thumbnail.as_deref(),
-                                    |mut out| {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        if minterpolate.is_some() || fps.is_some() {
-                            filter::temporal_push_frame(
-                                minterpolate_graph,
-                                minterpolate_dst.0,
-                                minterpolate,
-                                fps_graph,
-                                fps_dst.0,
-                                fps,
+                    let src_fmt = (*send).format;
+                    let mut emitted = 0u64;
+                    filter::reverse_push_frame(
+                        reverse_graph,
+                        reversed.0,
+                        send,
+                        args,
+                        |out| unsafe {
+                            filter::push_loop_or_emit(
+                                loop_graph,
+                                looped.0,
                                 out,
-                                |o| {
-                                    send_encoder_frame(encoder, output, packet, index, o, stats)?;
-                                    emitted += 1;
-                                    Ok(())
+                                r#loop.as_deref(),
+                                |out| unsafe {
+                                    filter::push_thumbnail_or_emit(
+                                        thumbnail_graph,
+                                        thumbnailed.0,
+                                        out,
+                                        thumbnail.as_deref(),
+                                        |mut out| {
+                                            let mut out = out;
+                                            if (*out).format != src_fmt {
+                                                convert_pix_fmt_frame(
+                                                    fmt_sws,
+                                                    converted.0,
+                                                    out,
+                                                    src_fmt,
+                                                )?;
+                                                out = converted.0;
+                                            }
+                                            if minterpolate.is_some() || fps.is_some() {
+                                                filter::temporal_push_frame(
+                                                    minterpolate_graph,
+                                                    minterpolate_dst.0,
+                                                    minterpolate,
+                                                    fps_graph,
+                                                    fps_dst.0,
+                                                    fps,
+                                                    out,
+                                                    |o| {
+                                                        send_encoder_frame(
+                                                            encoder, output, packet, index, o,
+                                                            stats,
+                                                        )?;
+                                                        emitted += 1;
+                                                        Ok(())
+                                                    },
+                                                )?;
+                                            } else {
+                                                send_encoder_frame(
+                                                    encoder, output, packet, index, out, stats,
+                                                )?;
+                                                emitted += 1;
+                                            }
+                                            Ok(())
+                                        },
+                                    )
                                 },
-                            )?;
-                        } else {
-                            send_encoder_frame(encoder, output, packet, index, out, stats)?;
-                            emitted += 1;
-                        }
-                        Ok(())
-                            },
-                        )
-                            },
-                        )
-                    },
-                )?;
-                stats.video_frames += emitted;
-                av_frame_unref(frame.0);
-                continue;
+                            )
+                        },
+                    )?;
+                    stats.video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    continue;
                 }
             }
             if let Some(args) = r#loop {
                 if shuffleframes.is_none() && reverse.is_none() {
-                let src_fmt = (*send).format;
-                let mut emitted = 0u64;
-                filter::loop_push_frame(
-                    loop_graph,
-                    looped.0,
-                    send,
-                    args,
-                    |out| unsafe {
+                    let src_fmt = (*send).format;
+                    let mut emitted = 0u64;
+                    filter::loop_push_frame(loop_graph, looped.0, send, args, |out| unsafe {
                         filter::push_thumbnail_or_emit(
                             thumbnail_graph,
                             thumbnailed.0,
                             out,
                             thumbnail.as_deref(),
                             |mut out| {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        if minterpolate.is_some() || fps.is_some() {
-                            filter::temporal_push_frame(
-                                minterpolate_graph,
-                                minterpolate_dst.0,
-                                minterpolate,
-                                fps_graph,
-                                fps_dst.0,
-                                fps,
-                                out,
-                                |o| {
-                                    send_encoder_frame(encoder, output, packet, index, o, stats)?;
+                                let mut out = out;
+                                if (*out).format != src_fmt {
+                                    convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
+                                    out = converted.0;
+                                }
+                                if minterpolate.is_some() || fps.is_some() {
+                                    filter::temporal_push_frame(
+                                        minterpolate_graph,
+                                        minterpolate_dst.0,
+                                        minterpolate,
+                                        fps_graph,
+                                        fps_dst.0,
+                                        fps,
+                                        out,
+                                        |o| {
+                                            send_encoder_frame(
+                                                encoder, output, packet, index, o, stats,
+                                            )?;
+                                            emitted += 1;
+                                            Ok(())
+                                        },
+                                    )?;
+                                } else {
+                                    send_encoder_frame(encoder, output, packet, index, out, stats)?;
                                     emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            send_encoder_frame(encoder, output, packet, index, out, stats)?;
-                            emitted += 1;
-                        }
-                        Ok(())
+                                }
+                                Ok(())
                             },
                         )
-                    },
-                )?;
-                stats.video_frames += emitted;
-                av_frame_unref(frame.0);
-                continue;
+                    })?;
+                    stats.video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    continue;
                 }
             }
             if let Some(args) = thumbnail {
                 if shuffleframes.is_none() && reverse.is_none() && r#loop.is_none() {
-                let src_fmt = (*send).format;
-                let mut emitted = 0u64;
-                filter::thumbnail_push_frame(
-                    thumbnail_graph,
-                    thumbnailed.0,
-                    send,
-                    args,
-                    |mut out| {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        if minterpolate.is_some() || fps.is_some() {
-                            filter::temporal_push_frame(
-                                minterpolate_graph,
-                                minterpolate_dst.0,
-                                minterpolate,
-                                fps_graph,
-                                fps_dst.0,
-                                fps,
-                                out,
-                                |o| {
-                                    send_encoder_frame(encoder, output, packet, index, o, stats)?;
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            send_encoder_frame(encoder, output, packet, index, out, stats)?;
-                            emitted += 1;
-                        }
-                        Ok(())
-                    },
-                )?;
-                stats.video_frames += emitted;
-                av_frame_unref(frame.0);
-                continue;
+                    let src_fmt = (*send).format;
+                    let mut emitted = 0u64;
+                    filter::thumbnail_push_frame(
+                        thumbnail_graph,
+                        thumbnailed.0,
+                        send,
+                        args,
+                        |mut out| {
+                            let mut out = out;
+                            if (*out).format != src_fmt {
+                                convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
+                                out = converted.0;
+                            }
+                            if minterpolate.is_some() || fps.is_some() {
+                                filter::temporal_push_frame(
+                                    minterpolate_graph,
+                                    minterpolate_dst.0,
+                                    minterpolate,
+                                    fps_graph,
+                                    fps_dst.0,
+                                    fps,
+                                    out,
+                                    |o| {
+                                        send_encoder_frame(
+                                            encoder, output, packet, index, o, stats,
+                                        )?;
+                                        emitted += 1;
+                                        Ok(())
+                                    },
+                                )?;
+                            } else {
+                                send_encoder_frame(encoder, output, packet, index, out, stats)?;
+                                emitted += 1;
+                            }
+                            Ok(())
+                        },
+                    )?;
+                    stats.video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    continue;
                 }
             }
             if let Some(args) = shuffleframes {
@@ -3696,39 +3744,49 @@ fn drain_decoder(
                                             out,
                                             thumbnail.as_deref(),
                                             |mut out| {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        if minterpolate.is_some() || fps.is_some() {
-                            filter::temporal_push_frame(
-                                minterpolate_graph,
-                                minterpolate_dst.0,
-                                minterpolate,
-                                fps_graph,
-                                fps_dst.0,
-                                fps,
-                                out,
-                                |o| {
-                                    send_encoder_frame(encoder, output, packet, index, o, stats)?;
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            send_encoder_frame(encoder, output, packet, index, out, stats)?;
-                            emitted += 1;
-                        }
-                        Ok(())
+                                                let mut out = out;
+                                                if (*out).format != src_fmt {
+                                                    convert_pix_fmt_frame(
+                                                        fmt_sws,
+                                                        converted.0,
+                                                        out,
+                                                        src_fmt,
+                                                    )?;
+                                                    out = converted.0;
+                                                }
+                                                if minterpolate.is_some() || fps.is_some() {
+                                                    filter::temporal_push_frame(
+                                                        minterpolate_graph,
+                                                        minterpolate_dst.0,
+                                                        minterpolate,
+                                                        fps_graph,
+                                                        fps_dst.0,
+                                                        fps,
+                                                        out,
+                                                        |o| {
+                                                            send_encoder_frame(
+                                                                encoder, output, packet, index, o,
+                                                                stats,
+                                                            )?;
+                                                            emitted += 1;
+                                                            Ok(())
+                                                        },
+                                                    )?;
+                                                } else {
+                                                    send_encoder_frame(
+                                                        encoder, output, packet, index, out, stats,
+                                                    )?;
+                                                    emitted += 1;
+                                                }
+                                                Ok(())
+                                            },
+                                        )
                                     },
                                 )
                             },
                         )
                     },
-                )
-            },
-        )?;
+                )?;
                 stats.video_frames += emitted;
                 av_frame_unref(frame.0);
                 continue;
@@ -3736,155 +3794,208 @@ fn drain_decoder(
             if let Some(args) = tile {
                 let src_fmt = (*send).format;
                 let mut emitted = 0u64;
-                filter::tile_push_frame(
-                    tile_graph,
-                    tiled.0,
-                    send,
-                    args,
-                    |out| {
-                        filter::push_untile_or_emit(
-                            untile_graph,
-                            untiled.0,
-                            out,
-                            untile.as_deref(),
-                            |out| {
-                                filter::push_shuffleframes_or_emit(
-                                    shuffleframes_graph,
-                                    shuffled.0,
-                                    out,
-                                    shuffleframes.as_deref(),
-                                    |out| {
-                                        filter::push_reverse_or_emit(
-                                            reverse_graph,
-                                            reversed.0,
-                                            out,
-                                            reverse.as_deref(),
-                                            |out| unsafe {
-                                                filter::push_loop_or_emit(
-                                                    loop_graph,
-                                                    looped.0,
-                                                    out,
-                                                    r#loop.as_deref(),
-                                                    |out| unsafe {
-                                                        filter::push_thumbnail_or_emit(
-                                                            thumbnail_graph,
-                                                            thumbnailed.0,
-                                                            out,
-                                                            thumbnail.as_deref(),
-                                                            |mut out| {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        let out = if let Some(args) = freezedetect {
-                            let src_fmt = (*out).format;
-                            filter::freezedetect_frame(
-                                freezedetect_graph,
-                                freezedetectd.0,
+                filter::tile_push_frame(tile_graph, tiled.0, send, args, |out| {
+                    filter::push_untile_or_emit(
+                        untile_graph,
+                        untiled.0,
+                        out,
+                        untile.as_deref(),
+                        |out| {
+                            filter::push_shuffleframes_or_emit(
+                                shuffleframes_graph,
+                                shuffled.0,
                                 out,
-                                args,
-                            )?;
-                            let o = freezedetectd.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = pseudocolor {
-                            let src_fmt = (*out).format;
-                            filter::pseudocolor_frame(
-                                pseudocolor_graph,
-                                pseudocolored.0,
-                                out,
-                                args,
-                            )?;
-                            let o = pseudocolored.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = colorspace {
-                            filter::colorspace_frame(colorspace_graph, colorspaced.0, out, args)?;
-                            colorspaced.0
-                        } else {
-                            out
-                        };
-                        let (out, mut format_done) = if let Some(args) = zscale {
-                            let fmt =
+                                shuffleframes.as_deref(),
+                                |out| {
+                                    filter::push_reverse_or_emit(
+                                        reverse_graph,
+                                        reversed.0,
+                                        out,
+                                        reverse.as_deref(),
+                                        |out| unsafe {
+                                            filter::push_loop_or_emit(
+                                                loop_graph,
+                                                looped.0,
+                                                out,
+                                                r#loop.as_deref(),
+                                                |out| unsafe {
+                                                    filter::push_thumbnail_or_emit(
+                                                        thumbnail_graph,
+                                                        thumbnailed.0,
+                                                        out,
+                                                        thumbnail.as_deref(),
+                                                        |mut out| {
+                                                            let mut out = out;
+                                                            if (*out).format != src_fmt {
+                                                                convert_pix_fmt_frame(
+                                                                    fmt_sws,
+                                                                    converted.0,
+                                                                    out,
+                                                                    src_fmt,
+                                                                )?;
+                                                                out = converted.0;
+                                                            }
+                                                            let out =
+                                                                if let Some(args) = freezedetect {
+                                                                    let src_fmt = (*out).format;
+                                                                    filter::freezedetect_frame(
+                                                                        freezedetect_graph,
+                                                                        freezedetectd.0,
+                                                                        out,
+                                                                        args,
+                                                                    )?;
+                                                                    let o = freezedetectd.0;
+                                                                    if (*o).format != src_fmt {
+                                                                        convert_pix_fmt_frame(
+                                                                            fmt_sws,
+                                                                            converted.0,
+                                                                            o,
+                                                                            src_fmt,
+                                                                        )?;
+                                                                        converted.0
+                                                                    } else {
+                                                                        o
+                                                                    }
+                                                                } else {
+                                                                    out
+                                                                };
+                                                            let out =
+                                                                if let Some(args) = pseudocolor {
+                                                                    let src_fmt = (*out).format;
+                                                                    filter::pseudocolor_frame(
+                                                                        pseudocolor_graph,
+                                                                        pseudocolored.0,
+                                                                        out,
+                                                                        args,
+                                                                    )?;
+                                                                    let o = pseudocolored.0;
+                                                                    if (*o).format != src_fmt {
+                                                                        convert_pix_fmt_frame(
+                                                                            fmt_sws,
+                                                                            converted.0,
+                                                                            o,
+                                                                            src_fmt,
+                                                                        )?;
+                                                                        converted.0
+                                                                    } else {
+                                                                        o
+                                                                    }
+                                                                } else {
+                                                                    out
+                                                                };
+                                                            let out = if let Some(args) = colorspace
+                                                            {
+                                                                filter::colorspace_frame(
+                                                                    colorspace_graph,
+                                                                    colorspaced.0,
+                                                                    out,
+                                                                    args,
+                                                                )?;
+                                                                colorspaced.0
+                                                            } else {
+                                                                out
+                                                            };
+                                                            let (out, mut format_done) =
+                                                                if let Some(args) = zscale {
+                                                                    let fmt =
                                 pix_fmt.ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            filter::zscale_frame(zscale_graph, zscaled.0, out, args, &name)?;
-                            (zscaled.0, true)
-                        } else {
-                            (out, format_done)
-                        };
-                        let (out, format_done) = if let Some(args) = tonemap {
-                            let fmt = pix_fmt
+                                                                    let name = string(
+                                                                        av_get_pix_fmt_name(fmt),
+                                                                    );
+                                                                    if name.is_empty() {
+                                                                        return Err("unknown zscale output pixel format".into());
+                                                                    }
+                                                                    filter::zscale_frame(
+                                                                        zscale_graph,
+                                                                        zscaled.0,
+                                                                        out,
+                                                                        args,
+                                                                        &name,
+                                                                    )?;
+                                                                    (zscaled.0, true)
+                                                                } else {
+                                                                    (out, format_done)
+                                                                };
+                                                            let (out, format_done) = if let Some(
+                                                                args,
+                                                            ) = tonemap
+                                                            {
+                                                                let fmt = pix_fmt
                                 .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            filter::tonemap_frame(tonemap_graph, tonemapped.0, out, args, &name)?;
-                            (tonemapped.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, out, fmt)?;
-                                converted.0
-                            } else {
-                                out
-                            }
-                        } else {
-                            out
-                        };
-                        if minterpolate.is_some() || fps.is_some() {
-                            filter::temporal_push_frame(
-                                minterpolate_graph,
-                                minterpolate_dst.0,
-                                minterpolate,
-                                fps_graph,
-                                fps_dst.0,
-                                fps,
-                                out,
-                                |o| {
-                                    send_encoder_frame(encoder, output, packet, index, o, stats)?;
-                                    emitted += 1;
-                                    Ok(())
+                                                                let name = string(
+                                                                    av_get_pix_fmt_name(fmt),
+                                                                );
+                                                                if name.is_empty() {
+                                                                    return Err("unknown tonemap output pixel format".into());
+                                                                }
+                                                                filter::tonemap_frame(
+                                                                    tonemap_graph,
+                                                                    tonemapped.0,
+                                                                    out,
+                                                                    args,
+                                                                    &name,
+                                                                )?;
+                                                                (tonemapped.0, format_done)
+                                                            } else {
+                                                                (out, format_done)
+                                                            };
+                                                            let out = if let Some(fmt) = pix_fmt {
+                                                                if !format_done
+                                                                    && (*out).format != fmt
+                                                                {
+                                                                    convert_pix_fmt_frame(
+                                                                        fmt_sws,
+                                                                        converted.0,
+                                                                        out,
+                                                                        fmt,
+                                                                    )?;
+                                                                    converted.0
+                                                                } else {
+                                                                    out
+                                                                }
+                                                            } else {
+                                                                out
+                                                            };
+                                                            if minterpolate.is_some()
+                                                                || fps.is_some()
+                                                            {
+                                                                filter::temporal_push_frame(
+                                                                    minterpolate_graph,
+                                                                    minterpolate_dst.0,
+                                                                    minterpolate,
+                                                                    fps_graph,
+                                                                    fps_dst.0,
+                                                                    fps,
+                                                                    out,
+                                                                    |o| {
+                                                                        send_encoder_frame(
+                                                                            encoder, output,
+                                                                            packet, index, o,
+                                                                            stats,
+                                                                        )?;
+                                                                        emitted += 1;
+                                                                        Ok(())
+                                                                    },
+                                                                )?;
+                                                            } else {
+                                                                send_encoder_frame(
+                                                                    encoder, output, packet, index,
+                                                                    out, stats,
+                                                                )?;
+                                                                emitted += 1;
+                                                            }
+                                                            Ok(())
+                                                        },
+                                                    )
+                                                },
+                                            )
+                                        },
+                                    )
                                 },
-                            )?;
-                        } else {
-                            send_encoder_frame(encoder, output, packet, index, out, stats)?;
-                            emitted += 1;
-                        }
-                        Ok(())
-                                                    },
-                                                )
-                                            },
-                                        )
-                                    },
-                                )
-                            },
-                        )
-                    },
-                )
-            },
-        )?;
+                            )
+                        },
+                    )
+                })?;
                 stats.video_frames += emitted;
                 av_frame_unref(frame.0);
                 continue;
@@ -3892,147 +4003,188 @@ fn drain_decoder(
             if let Some(args) = untile {
                 let src_fmt = (*send).format;
                 let mut emitted = 0u64;
-                filter::untile_push_frame(
-                    untile_graph,
-                    untiled.0,
-                    send,
-                    args,
-                    |out| unsafe {
-                        filter::push_shuffleframes_or_emit(
-                            shuffleframes_graph,
-                            shuffled.0,
-                            out,
-                            shuffleframes.as_deref(),
-                            |out| {
-                                filter::push_reverse_or_emit(
-                                    reverse_graph,
-                                    reversed.0,
-                                    out,
-                                    reverse.as_deref(),
-                                    |out| unsafe {
-                                        filter::push_loop_or_emit(
-                                            loop_graph,
-                                            looped.0,
-                                            out,
-                                            r#loop.as_deref(),
-                                            |out| unsafe {
-                                                filter::push_thumbnail_or_emit(
-                                                    thumbnail_graph,
-                                                    thumbnailed.0,
-                                                    out,
-                                                    thumbnail.as_deref(),
-                                                    |mut out| {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        let out = if let Some(args) = freezedetect {
-                            let src_fmt = (*out).format;
-                            filter::freezedetect_frame(
-                                freezedetect_graph,
-                                freezedetectd.0,
+                filter::untile_push_frame(untile_graph, untiled.0, send, args, |out| unsafe {
+                    filter::push_shuffleframes_or_emit(
+                        shuffleframes_graph,
+                        shuffled.0,
+                        out,
+                        shuffleframes.as_deref(),
+                        |out| {
+                            filter::push_reverse_or_emit(
+                                reverse_graph,
+                                reversed.0,
                                 out,
-                                args,
-                            )?;
-                            let o = freezedetectd.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = pseudocolor {
-                            let src_fmt = (*out).format;
-                            filter::pseudocolor_frame(
-                                pseudocolor_graph,
-                                pseudocolored.0,
-                                out,
-                                args,
-                            )?;
-                            let o = pseudocolored.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = colorspace {
-                            filter::colorspace_frame(colorspace_graph, colorspaced.0, out, args)?;
-                            colorspaced.0
-                        } else {
-                            out
-                        };
-                        let (out, mut format_done) = if let Some(args) = zscale {
-                            let fmt =
+                                reverse.as_deref(),
+                                |out| unsafe {
+                                    filter::push_loop_or_emit(
+                                        loop_graph,
+                                        looped.0,
+                                        out,
+                                        r#loop.as_deref(),
+                                        |out| unsafe {
+                                            filter::push_thumbnail_or_emit(
+                                                thumbnail_graph,
+                                                thumbnailed.0,
+                                                out,
+                                                thumbnail.as_deref(),
+                                                |mut out| {
+                                                    let mut out = out;
+                                                    if (*out).format != src_fmt {
+                                                        convert_pix_fmt_frame(
+                                                            fmt_sws,
+                                                            converted.0,
+                                                            out,
+                                                            src_fmt,
+                                                        )?;
+                                                        out = converted.0;
+                                                    }
+                                                    let out = if let Some(args) = freezedetect {
+                                                        let src_fmt = (*out).format;
+                                                        filter::freezedetect_frame(
+                                                            freezedetect_graph,
+                                                            freezedetectd.0,
+                                                            out,
+                                                            args,
+                                                        )?;
+                                                        let o = freezedetectd.0;
+                                                        if (*o).format != src_fmt {
+                                                            convert_pix_fmt_frame(
+                                                                fmt_sws,
+                                                                converted.0,
+                                                                o,
+                                                                src_fmt,
+                                                            )?;
+                                                            converted.0
+                                                        } else {
+                                                            o
+                                                        }
+                                                    } else {
+                                                        out
+                                                    };
+                                                    let out = if let Some(args) = pseudocolor {
+                                                        let src_fmt = (*out).format;
+                                                        filter::pseudocolor_frame(
+                                                            pseudocolor_graph,
+                                                            pseudocolored.0,
+                                                            out,
+                                                            args,
+                                                        )?;
+                                                        let o = pseudocolored.0;
+                                                        if (*o).format != src_fmt {
+                                                            convert_pix_fmt_frame(
+                                                                fmt_sws,
+                                                                converted.0,
+                                                                o,
+                                                                src_fmt,
+                                                            )?;
+                                                            converted.0
+                                                        } else {
+                                                            o
+                                                        }
+                                                    } else {
+                                                        out
+                                                    };
+                                                    let out = if let Some(args) = colorspace {
+                                                        filter::colorspace_frame(
+                                                            colorspace_graph,
+                                                            colorspaced.0,
+                                                            out,
+                                                            args,
+                                                        )?;
+                                                        colorspaced.0
+                                                    } else {
+                                                        out
+                                                    };
+                                                    let (out, mut format_done) = if let Some(args) =
+                                                        zscale
+                                                    {
+                                                        let fmt =
                                 pix_fmt.ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            filter::zscale_frame(zscale_graph, zscaled.0, out, args, &name)?;
-                            (zscaled.0, true)
-                        } else {
-                            (out, format_done)
-                        };
-                        let (out, format_done) = if let Some(args) = tonemap {
-                            let fmt = pix_fmt
+                                                        let name = string(av_get_pix_fmt_name(fmt));
+                                                        if name.is_empty() {
+                                                            return Err("unknown zscale output pixel format".into());
+                                                        }
+                                                        filter::zscale_frame(
+                                                            zscale_graph,
+                                                            zscaled.0,
+                                                            out,
+                                                            args,
+                                                            &name,
+                                                        )?;
+                                                        (zscaled.0, true)
+                                                    } else {
+                                                        (out, format_done)
+                                                    };
+                                                    let (out, format_done) = if let Some(args) =
+                                                        tonemap
+                                                    {
+                                                        let fmt = pix_fmt
                                 .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            filter::tonemap_frame(tonemap_graph, tonemapped.0, out, args, &name)?;
-                            (tonemapped.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(fmt_sws, converted.0, out, fmt)?;
-                                converted.0
-                            } else {
-                                out
-                            }
-                        } else {
-                            out
-                        };
-                        if minterpolate.is_some() || fps.is_some() {
-                            filter::temporal_push_frame(
-                                minterpolate_graph,
-                                minterpolate_dst.0,
-                                minterpolate,
-                                fps_graph,
-                                fps_dst.0,
-                                fps,
-                                out,
-                                |o| {
-                                    send_encoder_frame(encoder, output, packet, index, o, stats)?;
-                                    emitted += 1;
-                                    Ok(())
+                                                        let name = string(av_get_pix_fmt_name(fmt));
+                                                        if name.is_empty() {
+                                                            return Err("unknown tonemap output pixel format".into());
+                                                        }
+                                                        filter::tonemap_frame(
+                                                            tonemap_graph,
+                                                            tonemapped.0,
+                                                            out,
+                                                            args,
+                                                            &name,
+                                                        )?;
+                                                        (tonemapped.0, format_done)
+                                                    } else {
+                                                        (out, format_done)
+                                                    };
+                                                    let out = if let Some(fmt) = pix_fmt {
+                                                        if !format_done && (*out).format != fmt {
+                                                            convert_pix_fmt_frame(
+                                                                fmt_sws,
+                                                                converted.0,
+                                                                out,
+                                                                fmt,
+                                                            )?;
+                                                            converted.0
+                                                        } else {
+                                                            out
+                                                        }
+                                                    } else {
+                                                        out
+                                                    };
+                                                    if minterpolate.is_some() || fps.is_some() {
+                                                        filter::temporal_push_frame(
+                                                            minterpolate_graph,
+                                                            minterpolate_dst.0,
+                                                            minterpolate,
+                                                            fps_graph,
+                                                            fps_dst.0,
+                                                            fps,
+                                                            out,
+                                                            |o| {
+                                                                send_encoder_frame(
+                                                                    encoder, output, packet, index,
+                                                                    o, stats,
+                                                                )?;
+                                                                emitted += 1;
+                                                                Ok(())
+                                                            },
+                                                        )?;
+                                                    } else {
+                                                        send_encoder_frame(
+                                                            encoder, output, packet, index, out,
+                                                            stats,
+                                                        )?;
+                                                        emitted += 1;
+                                                    }
+                                                    Ok(())
+                                                },
+                                            )
+                                        },
+                                    )
                                 },
-                            )?;
-                        } else {
-                            send_encoder_frame(encoder, output, packet, index, out, stats)?;
-                            emitted += 1;
-                        }
-                        Ok(())
-                                            },
-                                        )
-                                    },
-                                )
-                            },
-                        )
-                    },
-                )
-            },
-        )?;
+                            )
+                        },
+                    )
+                })?;
                 stats.video_frames += emitted;
                 av_frame_unref(frame.0);
                 continue;
@@ -4094,8 +4246,8 @@ fn drain_decoder(
                             out
                         };
                         let (out, mut format_done) = if let Some(args) = zscale {
-                            let fmt =
-                                pix_fmt.ok_or("--zscale requires --pix-fmt for format= after zscale")?;
+                            let fmt = pix_fmt
+                                .ok_or("--zscale requires --pix-fmt for format= after zscale")?;
                             let name = string(av_get_pix_fmt_name(fmt));
                             if name.is_empty() {
                                 return Err("unknown zscale output pixel format".into());
@@ -4197,7 +4349,8 @@ fn drain_decoder(
                 (send, format_done)
             };
             let (send, format_done) = if let Some(args) = tonemap {
-                let fmt = pix_fmt.ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
+                let fmt =
+                    pix_fmt.ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
                 let name = string(av_get_pix_fmt_name(fmt));
                 if name.is_empty() {
                     return Err("unknown tonemap output pixel format".into());
@@ -4522,7 +4675,10 @@ unsafe fn scale_or_convert_frame(
             d.format = out_fmt;
             d.width = out_w;
             d.height = out_h;
-            check(av_frame_get_buffer(dst, 32), "allocate converted frame buffer")?;
+            check(
+                av_frame_get_buffer(dst, 32),
+                "allocate converted frame buffer",
+            )?;
         }
         d.pts = s.pts;
         d.duration = s.duration;
@@ -4746,16 +4902,7 @@ fn mux_exact_video_interval_from_path(
     };
     let start = ticks(from_us)?;
     check(
-        unsafe {
-            avformat_seek_file(
-                input.0,
-                stream_index as i32,
-                i64::MIN,
-                start,
-                start,
-                0,
-            )
-        },
+        unsafe { avformat_seek_file(input.0, stream_index as i32, i64::MIN, start, start, 0) },
         "seek before exact secondary video interval",
     )?;
     let mut packet = Packet::new()?;
@@ -4836,9 +4983,7 @@ fn copy_secondary_video_interval(
             );
         }
         if p.pts == start && p.flags & AV_PKT_FLAG_KEY as i32 == 0 {
-            return Err(
-                "secondary video interval must begin on a keyframe".into(),
-            );
+            return Err("secondary video interval must begin on a keyframe".into());
         }
         p.pts = p.pts.checked_sub(start).ok_or("PTS overflow")?;
         p.dts = p.dts.checked_sub(start).ok_or("DTS overflow")?;
@@ -5513,15 +5658,9 @@ pub fn transcode(
             });
         }
     }
-    let mut output = Output::with_overrides(
-        destination,
-        &input,
-        &selected,
-        &overrides,
-        true,
-        None,
-    )?
-    .without_interleave();
+    let mut output =
+        Output::with_overrides(destination, &input, &selected, &overrides, true, None)?
+            .without_interleave();
     drop(audio_param_holders);
     let mut stats = LosslessStats {
         backend: "native libavcodec + Fvid crop view",
@@ -6439,46 +6578,46 @@ pub fn transcode(
                     chromashift: transform.chromashift.as_deref(),
                     colorcontrast: transform.colorcontrast.as_deref(),
                     colorcorrect: transform.colorcorrect.as_deref(),
-            histeq: transform.histeq.as_deref(),
-            shuffleplanes: transform.shuffleplanes.as_deref(),
-            lutyuv: transform.lutyuv.as_deref(),
-            colorhold: transform.colorhold.as_deref(),
-            fade: transform.fade.as_deref(),
-            perspective: transform.perspective.as_deref(),
-            lumakey: transform.lumakey.as_deref(),
-            chromakey: transform.chromakey.as_deref(),
-            colorkey: transform.colorkey.as_deref(),
-            despill: transform.despill.as_deref(),
-            selectivecolor: transform.selectivecolor.as_deref(),
-            stereo3d: transform.stereo3d.as_deref(),
-            field: transform.field.as_deref(),
-            hqx: transform.hqx.as_deref(),
-            xbr: transform.xbr.as_deref(),
-            il: transform.il.as_deref(),
-            super2xsai: transform.super2xsai.as_deref(),
-            kerndeint: transform.kerndeint.as_deref(),
-            phase: transform.phase.as_deref(),
-            estdif: transform.estdif.as_deref(),
-            tinterlace: transform.tinterlace.as_deref(),
-            separatefields: transform.separatefields.as_deref(),
-            weave: transform.weave.as_deref(),
-            doubleweave: transform.doubleweave.as_deref(),
-            framepack: transform.framepack.as_deref(),
-            telecine: transform.telecine.as_deref(),
-            pullup: transform.pullup.as_deref(),
-            decimate: transform.decimate.as_deref(),
-            mpdecimate: transform.mpdecimate.as_deref(),
-            framestep: transform.framestep.as_deref(),
-            tile: transform.tile.as_deref(),
-            untile: transform.untile.as_deref(),
-            shuffleframes: transform.shuffleframes.as_deref(),
-            reverse: transform.reverse.as_deref(),
-            r#loop: transform.r#loop.as_deref(),
-            thumbnail: transform.thumbnail.as_deref(),
-            freezedetect: transform.freezedetect.as_deref(),
-            pseudocolor: transform.pseudocolor.as_deref(),
-            minterpolate: transform.minterpolate.as_deref(),
-            fps: transform.fps.as_deref(),
+                    histeq: transform.histeq.as_deref(),
+                    shuffleplanes: transform.shuffleplanes.as_deref(),
+                    lutyuv: transform.lutyuv.as_deref(),
+                    colorhold: transform.colorhold.as_deref(),
+                    fade: transform.fade.as_deref(),
+                    perspective: transform.perspective.as_deref(),
+                    lumakey: transform.lumakey.as_deref(),
+                    chromakey: transform.chromakey.as_deref(),
+                    colorkey: transform.colorkey.as_deref(),
+                    despill: transform.despill.as_deref(),
+                    selectivecolor: transform.selectivecolor.as_deref(),
+                    stereo3d: transform.stereo3d.as_deref(),
+                    field: transform.field.as_deref(),
+                    hqx: transform.hqx.as_deref(),
+                    xbr: transform.xbr.as_deref(),
+                    il: transform.il.as_deref(),
+                    super2xsai: transform.super2xsai.as_deref(),
+                    kerndeint: transform.kerndeint.as_deref(),
+                    phase: transform.phase.as_deref(),
+                    estdif: transform.estdif.as_deref(),
+                    tinterlace: transform.tinterlace.as_deref(),
+                    separatefields: transform.separatefields.as_deref(),
+                    weave: transform.weave.as_deref(),
+                    doubleweave: transform.doubleweave.as_deref(),
+                    framepack: transform.framepack.as_deref(),
+                    telecine: transform.telecine.as_deref(),
+                    pullup: transform.pullup.as_deref(),
+                    decimate: transform.decimate.as_deref(),
+                    mpdecimate: transform.mpdecimate.as_deref(),
+                    framestep: transform.framestep.as_deref(),
+                    tile: transform.tile.as_deref(),
+                    untile: transform.untile.as_deref(),
+                    shuffleframes: transform.shuffleframes.as_deref(),
+                    reverse: transform.reverse.as_deref(),
+                    r#loop: transform.r#loop.as_deref(),
+                    thumbnail: transform.thumbnail.as_deref(),
+                    freezedetect: transform.freezedetect.as_deref(),
+                    pseudocolor: transform.pseudocolor.as_deref(),
+                    minterpolate: transform.minterpolate.as_deref(),
+                    fps: transform.fps.as_deref(),
                     colorspace: transform.colorspace.as_deref(),
                     zscale: transform.zscale.as_deref(),
                     tonemap: transform.tonemap.as_deref(),
@@ -6529,7 +6668,9 @@ pub fn transcode(
         } else if seek_audio.iter().any(|&(stream, _)| stream == index) {
             // Already written via secondary from-start demux for seek+compressed.
             continue;
-        } else if reordered_secondary.iter().any(|&(stream, _)| stream == index)
+        } else if reordered_secondary
+            .iter()
+            .any(|&(stream, _)| stream == index)
             || exact_secondary.iter().any(|&(stream, _)| stream == index)
         {
             // Secondary video written from a dedicated demuxer (seek-safe).
@@ -6765,20 +6906,20 @@ pub fn transcode(
         &mut mpdecimate_graph,
         &mut framestepped,
         &mut framestep_graph,
-                &mut tiled,
-                &mut tile_graph,
-                &mut untiled,
-                &mut untile_graph,
-                &mut shuffled,
-                &mut shuffleframes_graph,
-                &mut reversed,
-                &mut reverse_graph,
-                &mut looped,
-                &mut loop_graph,
-                &mut thumbnailed,
-                &mut thumbnail_graph,
-                &mut freezedetectd,
-                &mut freezedetect_graph,
+        &mut tiled,
+        &mut tile_graph,
+        &mut untiled,
+        &mut untile_graph,
+        &mut shuffled,
+        &mut shuffleframes_graph,
+        &mut reversed,
+        &mut reverse_graph,
+        &mut looped,
+        &mut loop_graph,
+        &mut thumbnailed,
+        &mut thumbnail_graph,
+        &mut freezedetectd,
+        &mut freezedetect_graph,
         &mut pseudocolored,
         &mut pseudocolor_graph,
         &mut minterpolate_dst,
@@ -6918,12 +7059,7 @@ pub fn transcode(
             filter::fade_flush(&mut fade_graph, faded.0, |mut send| {
                 if let Some(ref args) = transform.perspective {
                     let src_fmt = (*send).format;
-                    filter::perspective_frame(
-                        &mut perspective_graph,
-                        perspectived.0,
-                        send,
-                        args,
-                    )?;
+                    filter::perspective_frame(&mut perspective_graph, perspectived.0, send, args)?;
                     let out = perspectived.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -6973,12 +7109,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.stereo3d {
                     let src_fmt = (*send).format;
-                    filter::stereo3d_frame(
-                        &mut stereo3d_graph,
-                        stereo3ded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::stereo3d_frame(&mut stereo3d_graph, stereo3ded.0, send, args)?;
                     let out = stereo3ded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -6989,12 +7120,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.field {
                     let src_fmt = (*send).format;
-                    filter::field_frame(
-                        &mut field_graph,
-                        fielded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::field_frame(&mut field_graph, fielded.0, send, args)?;
                     let out = fielded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -7109,12 +7235,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -7248,12 +7369,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -7372,12 +7488,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -7477,12 +7588,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -7563,322 +7669,337 @@ pub fn transcode(
     }
     if transform.separatefields.is_some() {
         unsafe {
-            filter::separatefields_flush(&mut separatefields_graph, separatefieldsd.0, |mut send| {
-                let mut finish = |mut send: *mut AVFrame| -> Result<()> {
-                if let Some(ref args) = transform.freezedetect {
-                    let src_fmt = (*send).format;
-                    filter::freezedetect_frame(
-                        &mut freezedetect_graph,
-                        freezedetectd.0,
-                        send,
-                        args,
-                    )?;
-                    let out = freezedetectd.0;
-                    if (*out).format != src_fmt {
-                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                        send = converted.0;
-                    } else {
-                        send = out;
-                    }
-                }
-                if let Some(ref args) = transform.pseudocolor {
-                    let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
-                    let out = pseudocolored.0;
-                    if (*out).format != src_fmt {
-                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                        send = converted.0;
-                    } else {
-                        send = out;
-                    }
-                }
-                if let Some(ref args) = transform.colorspace {
-                    filter::colorspace_frame(&mut colorspace_graph, colorspaced.0, send, args)?;
-                    send = colorspaced.0;
-                }
-                let mut format_done = false;
-                if let Some(ref args) = transform.zscale {
-                    let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
-                    if name.is_empty() {
-                        return Err("unknown zscale output pixel format".into());
-                    }
-                    filter::zscale_frame(&mut zscale_graph, zscaled.0, send, args, &name)?;
-                    send = zscaled.0;
-                    format_done = true;
-                }
-                if let Some(ref args) = transform.tonemap {
-                    let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
-                    if name.is_empty() {
-                        return Err("unknown tonemap output pixel format".into());
-                    }
-                    filter::tonemap_frame(&mut tonemap_graph, tonemapped.0, send, args, &name)?;
-                    send = tonemapped.0;
-                    format_done = true;
-                }
-                if let Some(fmt) = target_pix_fmt {
-                    if !format_done && (*send).format != fmt {
-                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, send, fmt)?;
-                        send = converted.0;
-                    }
-                }
-                if transform.minterpolate.is_some() || transform.fps.is_some() {
-                    let mut emitted = 0u64;
-                    filter::temporal_push_frame(
-                        &mut minterpolate_graph,
-                        minterpolate_dst.0,
-                        transform.minterpolate.as_deref(),
-                        &mut fps_graph,
-                        fps_dst.0,
-                        transform.fps.as_deref(),
-                        send,
-                        |out| {
+            filter::separatefields_flush(
+                &mut separatefields_graph,
+                separatefieldsd.0,
+                |mut send| {
+                    let mut finish = |mut send: *mut AVFrame| -> Result<()> {
+                        if let Some(ref args) = transform.freezedetect {
+                            let src_fmt = (*send).format;
+                            filter::freezedetect_frame(
+                                &mut freezedetect_graph,
+                                freezedetectd.0,
+                                send,
+                                args,
+                            )?;
+                            let out = freezedetectd.0;
+                            if (*out).format != src_fmt {
+                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                                send = converted.0;
+                            } else {
+                                send = out;
+                            }
+                        }
+                        if let Some(ref args) = transform.pseudocolor {
+                            let src_fmt = (*send).format;
+                            filter::pseudocolor_frame(
+                                &mut pseudocolor_graph,
+                                pseudocolored.0,
+                                send,
+                                args,
+                            )?;
+                            let out = pseudocolored.0;
+                            if (*out).format != src_fmt {
+                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                                send = converted.0;
+                            } else {
+                                send = out;
+                            }
+                        }
+                        if let Some(ref args) = transform.colorspace {
+                            filter::colorspace_frame(
+                                &mut colorspace_graph,
+                                colorspaced.0,
+                                send,
+                                args,
+                            )?;
+                            send = colorspaced.0;
+                        }
+                        let mut format_done = false;
+                        if let Some(ref args) = transform.zscale {
+                            let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
+                            let name = string(av_get_pix_fmt_name(fmt));
+                            if name.is_empty() {
+                                return Err("unknown zscale output pixel format".into());
+                            }
+                            filter::zscale_frame(&mut zscale_graph, zscaled.0, send, args, &name)?;
+                            send = zscaled.0;
+                            format_done = true;
+                        }
+                        if let Some(ref args) = transform.tonemap {
+                            let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
+                            let name = string(av_get_pix_fmt_name(fmt));
+                            if name.is_empty() {
+                                return Err("unknown tonemap output pixel format".into());
+                            }
+                            filter::tonemap_frame(
+                                &mut tonemap_graph,
+                                tonemapped.0,
+                                send,
+                                args,
+                                &name,
+                            )?;
+                            send = tonemapped.0;
+                            format_done = true;
+                        }
+                        if let Some(fmt) = target_pix_fmt {
+                            if !format_done && (*send).format != fmt {
+                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, send, fmt)?;
+                                send = converted.0;
+                            }
+                        }
+                        if transform.minterpolate.is_some() || transform.fps.is_some() {
+                            let mut emitted = 0u64;
+                            filter::temporal_push_frame(
+                                &mut minterpolate_graph,
+                                minterpolate_dst.0,
+                                transform.minterpolate.as_deref(),
+                                &mut fps_graph,
+                                fps_dst.0,
+                                transform.fps.as_deref(),
+                                send,
+                                |out| {
+                                    send_encoder_frame(
+                                        &mut encoder,
+                                        &mut output,
+                                        &mut encoded,
+                                        mapped,
+                                        out,
+                                        &mut stats,
+                                    )?;
+                                    emitted += 1;
+                                    Ok(())
+                                },
+                            )?;
+                            stats.video_frames += emitted;
+                        } else {
                             send_encoder_frame(
                                 &mut encoder,
                                 &mut output,
                                 &mut encoded,
                                 mapped,
-                                out,
+                                send,
                                 &mut stats,
                             )?;
-                            emitted += 1;
-                            Ok(())
-                        },
-                    )?;
-                    stats.video_frames += emitted;
-                } else {
-                    send_encoder_frame(
-                        &mut encoder,
-                        &mut output,
-                        &mut encoded,
-                        mapped,
-                        send,
-                        &mut stats,
-                    )?;
-                    stats.video_frames += 1;
-                }
-                Ok(())
-                };
-                let mut apply_framestep = |send: *mut AVFrame| -> Result<()> {
-                    if transform.framestep.is_some() {
-                        filter::push_framestep_or_emit(
-                            &mut framestep_graph,
-                            framestepped.0,
-                            send,
-                            transform.framestep.as_deref(),
-                            |f| finish(f),
-                        )
-                    } else {
-                        finish(send)
-                    }
-                };
-                let mut apply_mpdecimate = |send: *mut AVFrame| -> Result<()> {
-                    if let Some(ref args) = transform.mpdecimate {
-                        filter::mpdecimate_push_frame(
-                            &mut mpdecimate_graph,
-                            mpdecimated.0,
+                            stats.video_frames += 1;
+                        }
+                        Ok(())
+                    };
+                    let mut apply_framestep = |send: *mut AVFrame| -> Result<()> {
+                        if transform.framestep.is_some() {
+                            filter::push_framestep_or_emit(
+                                &mut framestep_graph,
+                                framestepped.0,
+                                send,
+                                transform.framestep.as_deref(),
+                                |f| finish(f),
+                            )
+                        } else {
+                            finish(send)
+                        }
+                    };
+                    let mut apply_mpdecimate = |send: *mut AVFrame| -> Result<()> {
+                        if let Some(ref args) = transform.mpdecimate {
+                            filter::mpdecimate_push_frame(
+                                &mut mpdecimate_graph,
+                                mpdecimated.0,
+                                send,
+                                args,
+                                |mpd| apply_framestep(mpd),
+                            )
+                        } else {
+                            apply_framestep(send)
+                        }
+                    };
+                    let mut apply_decimate = |send: *mut AVFrame| -> Result<()> {
+                        if let Some(ref args) = transform.decimate {
+                            filter::decimate_push_frame(
+                                &mut decimate_graph,
+                                decimated.0,
+                                send,
+                                args,
+                                |dc| apply_mpdecimate(dc),
+                            )?;
+                        } else {
+                            apply_mpdecimate(send)?;
+                        }
+                        Ok(())
+                    };
+                    let mut apply_pullup = |send: *mut AVFrame| -> Result<()> {
+                        if let Some(ref args) = transform.pullup {
+                            filter::pullup_push_frame(
+                                &mut pullup_graph,
+                                pulledup.0,
+                                send,
+                                args,
+                                |pu| apply_decimate(pu),
+                            )?;
+                        } else {
+                            apply_decimate(send)?;
+                        }
+                        Ok(())
+                    };
+                    let mut apply_telecine = |send: *mut AVFrame| -> Result<()> {
+                        if let Some(ref args) = transform.telecine {
+                            filter::telecine_push_frame(
+                                &mut telecine_graph,
+                                telecined.0,
+                                send,
+                                args,
+                                |tc| apply_pullup(tc),
+                            )?;
+                        } else {
+                            apply_pullup(send)?;
+                        }
+                        Ok(())
+                    };
+                    let mut apply_framepack = |send: *mut AVFrame| -> Result<()> {
+                        if let Some(ref args) = transform.framepack {
+                            filter::framepack_push_frame(
+                                &mut framepack_graph,
+                                framepacked.0,
+                                send,
+                                args,
+                                |packed| apply_telecine(packed),
+                            )?;
+                        } else {
+                            apply_telecine(send)?;
+                        }
+                        Ok(())
+                    };
+                    let mut apply_doubleweave = |send: *mut AVFrame| -> Result<()> {
+                        if let Some(ref args) = transform.doubleweave {
+                            filter::doubleweave_push_frame(
+                                &mut doubleweave_graph,
+                                doubleweaved.0,
+                                send,
+                                args,
+                                |doubled| apply_framepack(doubled),
+                            )?;
+                        } else {
+                            apply_framepack(send)?;
+                        }
+                        Ok(())
+                    };
+                    if let Some(ref args) = transform.weave {
+                        filter::weave_push_frame(
+                            &mut weave_graph,
+                            weaved.0,
                             send,
                             args,
-                            |mpd| apply_framestep(mpd),
-                        )
-                    } else {
-                        apply_framestep(send)
-                    }
-                };
-                let mut apply_decimate = |send: *mut AVFrame| -> Result<()> {
-                    if let Some(ref args) = transform.decimate {
-                        filter::decimate_push_frame(
-                            &mut decimate_graph,
-                            decimated.0,
-                            send,
-                            args,
-                            |dc| apply_mpdecimate(dc),
+                            |woven| apply_doubleweave(woven),
                         )?;
                     } else {
-                        apply_mpdecimate(send)?;
+                        apply_doubleweave(send)?;
                     }
                     Ok(())
-                };
-                let mut apply_pullup = |send: *mut AVFrame| -> Result<()> {
-                    if let Some(ref args) = transform.pullup {
-                        filter::pullup_push_frame(
-                            &mut pullup_graph,
-                            pulledup.0,
-                            send,
-                            args,
-                            |pu| apply_decimate(pu),
-                        )?;
-                    } else {
-                        apply_decimate(send)?;
-                    }
-                    Ok(())
-                };
-                let mut apply_telecine = |send: *mut AVFrame| -> Result<()> {
-                    if let Some(ref args) = transform.telecine {
-                        filter::telecine_push_frame(
-                            &mut telecine_graph,
-                            telecined.0,
-                            send,
-                            args,
-                            |tc| apply_pullup(tc),
-                        )?;
-                    } else {
-                        apply_pullup(send)?;
-                    }
-                    Ok(())
-                };
-                let mut apply_framepack = |send: *mut AVFrame| -> Result<()> {
-                    if let Some(ref args) = transform.framepack {
-                        filter::framepack_push_frame(
-                            &mut framepack_graph,
-                            framepacked.0,
-                            send,
-                            args,
-                            |packed| apply_telecine(packed),
-                        )?;
-                    } else {
-                        apply_telecine(send)?;
-                    }
-                    Ok(())
-                };
-                let mut apply_doubleweave = |send: *mut AVFrame| -> Result<()> {
-                    if let Some(ref args) = transform.doubleweave {
-                        filter::doubleweave_push_frame(
-                            &mut doubleweave_graph,
-                            doubleweaved.0,
-                            send,
-                            args,
-                            |doubled| apply_framepack(doubled),
-                        )?;
-                    } else {
-                        apply_framepack(send)?;
-                    }
-                    Ok(())
-                };
-                if let Some(ref args) = transform.weave {
-                    filter::weave_push_frame(
-                        &mut weave_graph,
-                        weaved.0,
-                        send,
-                        args,
-                        |woven| apply_doubleweave(woven),
-                    )?;
-                } else {
-                    apply_doubleweave(send)?;
-                }
-                Ok(())
-            })?;
+                },
+            )?;
         }
     }
     if transform.weave.is_some() {
         unsafe {
             filter::weave_flush(&mut weave_graph, weaved.0, |mut send| {
                 let mut finish = |mut send: *mut AVFrame| -> Result<()> {
-                if let Some(ref args) = transform.freezedetect {
-                    let src_fmt = (*send).format;
-                    filter::freezedetect_frame(
-                        &mut freezedetect_graph,
-                        freezedetectd.0,
-                        send,
-                        args,
-                    )?;
-                    let out = freezedetectd.0;
-                    if (*out).format != src_fmt {
-                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                        send = converted.0;
+                    if let Some(ref args) = transform.freezedetect {
+                        let src_fmt = (*send).format;
+                        filter::freezedetect_frame(
+                            &mut freezedetect_graph,
+                            freezedetectd.0,
+                            send,
+                            args,
+                        )?;
+                        let out = freezedetectd.0;
+                        if (*out).format != src_fmt {
+                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                            send = converted.0;
+                        } else {
+                            send = out;
+                        }
+                    }
+                    if let Some(ref args) = transform.pseudocolor {
+                        let src_fmt = (*send).format;
+                        filter::pseudocolor_frame(
+                            &mut pseudocolor_graph,
+                            pseudocolored.0,
+                            send,
+                            args,
+                        )?;
+                        let out = pseudocolored.0;
+                        if (*out).format != src_fmt {
+                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                            send = converted.0;
+                        } else {
+                            send = out;
+                        }
+                    }
+                    if let Some(ref args) = transform.colorspace {
+                        filter::colorspace_frame(&mut colorspace_graph, colorspaced.0, send, args)?;
+                        send = colorspaced.0;
+                    }
+                    let mut format_done = false;
+                    if let Some(ref args) = transform.zscale {
+                        let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
+                        let name = string(av_get_pix_fmt_name(fmt));
+                        if name.is_empty() {
+                            return Err("unknown zscale output pixel format".into());
+                        }
+                        filter::zscale_frame(&mut zscale_graph, zscaled.0, send, args, &name)?;
+                        send = zscaled.0;
+                        format_done = true;
+                    }
+                    if let Some(ref args) = transform.tonemap {
+                        let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
+                        let name = string(av_get_pix_fmt_name(fmt));
+                        if name.is_empty() {
+                            return Err("unknown tonemap output pixel format".into());
+                        }
+                        filter::tonemap_frame(&mut tonemap_graph, tonemapped.0, send, args, &name)?;
+                        send = tonemapped.0;
+                        format_done = true;
+                    }
+                    if let Some(fmt) = target_pix_fmt {
+                        if !format_done && (*send).format != fmt {
+                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, send, fmt)?;
+                            send = converted.0;
+                        }
+                    }
+                    if transform.minterpolate.is_some() || transform.fps.is_some() {
+                        let mut emitted = 0u64;
+                        filter::temporal_push_frame(
+                            &mut minterpolate_graph,
+                            minterpolate_dst.0,
+                            transform.minterpolate.as_deref(),
+                            &mut fps_graph,
+                            fps_dst.0,
+                            transform.fps.as_deref(),
+                            send,
+                            |out| {
+                                send_encoder_frame(
+                                    &mut encoder,
+                                    &mut output,
+                                    &mut encoded,
+                                    mapped,
+                                    out,
+                                    &mut stats,
+                                )?;
+                                emitted += 1;
+                                Ok(())
+                            },
+                        )?;
+                        stats.video_frames += emitted;
                     } else {
-                        send = out;
+                        send_encoder_frame(
+                            &mut encoder,
+                            &mut output,
+                            &mut encoded,
+                            mapped,
+                            send,
+                            &mut stats,
+                        )?;
+                        stats.video_frames += 1;
                     }
-                }
-                if let Some(ref args) = transform.pseudocolor {
-                    let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
-                    let out = pseudocolored.0;
-                    if (*out).format != src_fmt {
-                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                        send = converted.0;
-                    } else {
-                        send = out;
-                    }
-                }
-                if let Some(ref args) = transform.colorspace {
-                    filter::colorspace_frame(&mut colorspace_graph, colorspaced.0, send, args)?;
-                    send = colorspaced.0;
-                }
-                let mut format_done = false;
-                if let Some(ref args) = transform.zscale {
-                    let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
-                    if name.is_empty() {
-                        return Err("unknown zscale output pixel format".into());
-                    }
-                    filter::zscale_frame(&mut zscale_graph, zscaled.0, send, args, &name)?;
-                    send = zscaled.0;
-                    format_done = true;
-                }
-                if let Some(ref args) = transform.tonemap {
-                    let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
-                    if name.is_empty() {
-                        return Err("unknown tonemap output pixel format".into());
-                    }
-                    filter::tonemap_frame(&mut tonemap_graph, tonemapped.0, send, args, &name)?;
-                    send = tonemapped.0;
-                    format_done = true;
-                }
-                if let Some(fmt) = target_pix_fmt {
-                    if !format_done && (*send).format != fmt {
-                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, send, fmt)?;
-                        send = converted.0;
-                    }
-                }
-                if transform.minterpolate.is_some() || transform.fps.is_some() {
-                    let mut emitted = 0u64;
-                    filter::temporal_push_frame(
-                        &mut minterpolate_graph,
-                        minterpolate_dst.0,
-                        transform.minterpolate.as_deref(),
-                        &mut fps_graph,
-                        fps_dst.0,
-                        transform.fps.as_deref(),
-                        send,
-                        |out| {
-                            send_encoder_frame(
-                                &mut encoder,
-                                &mut output,
-                                &mut encoded,
-                                mapped,
-                                out,
-                                &mut stats,
-                            )?;
-                            emitted += 1;
-                            Ok(())
-                        },
-                    )?;
-                    stats.video_frames += emitted;
-                } else {
-                    send_encoder_frame(
-                        &mut encoder,
-                        &mut output,
-                        &mut encoded,
-                        mapped,
-                        send,
-                        &mut stats,
-                    )?;
-                    stats.video_frames += 1;
-                }
-                Ok(())
+                    Ok(())
                 };
                 let mut apply_framestep = |send: *mut AVFrame| -> Result<()> {
                     if transform.framestep.is_some() {
@@ -7998,12 +8119,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -8103,12 +8219,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -8191,105 +8302,105 @@ pub fn transcode(
         unsafe {
             filter::telecine_flush(&mut telecine_graph, telecined.0, |mut send| {
                 let mut after_decimate = |mut send: *mut AVFrame| -> Result<()> {
-                if let Some(ref args) = transform.freezedetect {
-                    let src_fmt = (*send).format;
-                    filter::freezedetect_frame(
-                        &mut freezedetect_graph,
-                        freezedetectd.0,
-                        send,
-                        args,
-                    )?;
-                    let out = freezedetectd.0;
-                    if (*out).format != src_fmt {
-                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                        send = converted.0;
+                    if let Some(ref args) = transform.freezedetect {
+                        let src_fmt = (*send).format;
+                        filter::freezedetect_frame(
+                            &mut freezedetect_graph,
+                            freezedetectd.0,
+                            send,
+                            args,
+                        )?;
+                        let out = freezedetectd.0;
+                        if (*out).format != src_fmt {
+                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                            send = converted.0;
+                        } else {
+                            send = out;
+                        }
+                    }
+                    if let Some(ref args) = transform.pseudocolor {
+                        let src_fmt = (*send).format;
+                        filter::pseudocolor_frame(
+                            &mut pseudocolor_graph,
+                            pseudocolored.0,
+                            send,
+                            args,
+                        )?;
+                        let out = pseudocolored.0;
+                        if (*out).format != src_fmt {
+                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                            send = converted.0;
+                        } else {
+                            send = out;
+                        }
+                    }
+                    if let Some(ref args) = transform.colorspace {
+                        filter::colorspace_frame(&mut colorspace_graph, colorspaced.0, send, args)?;
+                        send = colorspaced.0;
+                    }
+                    let mut format_done = false;
+                    if let Some(ref args) = transform.zscale {
+                        let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
+                        let name = string(av_get_pix_fmt_name(fmt));
+                        if name.is_empty() {
+                            return Err("unknown zscale output pixel format".into());
+                        }
+                        filter::zscale_frame(&mut zscale_graph, zscaled.0, send, args, &name)?;
+                        send = zscaled.0;
+                        format_done = true;
+                    }
+                    if let Some(ref args) = transform.tonemap {
+                        let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
+                        let name = string(av_get_pix_fmt_name(fmt));
+                        if name.is_empty() {
+                            return Err("unknown tonemap output pixel format".into());
+                        }
+                        filter::tonemap_frame(&mut tonemap_graph, tonemapped.0, send, args, &name)?;
+                        send = tonemapped.0;
+                        format_done = true;
+                    }
+                    if let Some(fmt) = target_pix_fmt {
+                        if !format_done && (*send).format != fmt {
+                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, send, fmt)?;
+                            send = converted.0;
+                        }
+                    }
+                    if transform.minterpolate.is_some() || transform.fps.is_some() {
+                        let mut emitted = 0u64;
+                        filter::temporal_push_frame(
+                            &mut minterpolate_graph,
+                            minterpolate_dst.0,
+                            transform.minterpolate.as_deref(),
+                            &mut fps_graph,
+                            fps_dst.0,
+                            transform.fps.as_deref(),
+                            send,
+                            |out| {
+                                send_encoder_frame(
+                                    &mut encoder,
+                                    &mut output,
+                                    &mut encoded,
+                                    mapped,
+                                    out,
+                                    &mut stats,
+                                )?;
+                                emitted += 1;
+                                Ok(())
+                            },
+                        )?;
+                        stats.video_frames += emitted;
                     } else {
-                        send = out;
+                        send_encoder_frame(
+                            &mut encoder,
+                            &mut output,
+                            &mut encoded,
+                            mapped,
+                            send,
+                            &mut stats,
+                        )?;
+                        stats.video_frames += 1;
                     }
-                }
-                if let Some(ref args) = transform.pseudocolor {
-                    let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
-                    let out = pseudocolored.0;
-                    if (*out).format != src_fmt {
-                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                        send = converted.0;
-                    } else {
-                        send = out;
-                    }
-                }
-                if let Some(ref args) = transform.colorspace {
-                    filter::colorspace_frame(&mut colorspace_graph, colorspaced.0, send, args)?;
-                    send = colorspaced.0;
-                }
-                let mut format_done = false;
-                if let Some(ref args) = transform.zscale {
-                    let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
-                    if name.is_empty() {
-                        return Err("unknown zscale output pixel format".into());
-                    }
-                    filter::zscale_frame(&mut zscale_graph, zscaled.0, send, args, &name)?;
-                    send = zscaled.0;
-                    format_done = true;
-                }
-                if let Some(ref args) = transform.tonemap {
-                    let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
-                    if name.is_empty() {
-                        return Err("unknown tonemap output pixel format".into());
-                    }
-                    filter::tonemap_frame(&mut tonemap_graph, tonemapped.0, send, args, &name)?;
-                    send = tonemapped.0;
-                    format_done = true;
-                }
-                if let Some(fmt) = target_pix_fmt {
-                    if !format_done && (*send).format != fmt {
-                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, send, fmt)?;
-                        send = converted.0;
-                    }
-                }
-                if transform.minterpolate.is_some() || transform.fps.is_some() {
-                    let mut emitted = 0u64;
-                    filter::temporal_push_frame(
-                        &mut minterpolate_graph,
-                        minterpolate_dst.0,
-                        transform.minterpolate.as_deref(),
-                        &mut fps_graph,
-                        fps_dst.0,
-                        transform.fps.as_deref(),
-                        send,
-                        |out| {
-                            send_encoder_frame(
-                                &mut encoder,
-                                &mut output,
-                                &mut encoded,
-                                mapped,
-                                out,
-                                &mut stats,
-                            )?;
-                            emitted += 1;
-                            Ok(())
-                        },
-                    )?;
-                    stats.video_frames += emitted;
-                } else {
-                    send_encoder_frame(
-                        &mut encoder,
-                        &mut output,
-                        &mut encoded,
-                        mapped,
-                        send,
-                        &mut stats,
-                    )?;
-                    stats.video_frames += 1;
-                }
-                Ok(())
+                    Ok(())
                 };
                 let mut apply_framestep = |send: *mut AVFrame| -> Result<()> {
                     if transform.framestep.is_some() {
@@ -8331,13 +8442,9 @@ pub fn transcode(
                     }
                 };
                 if let Some(ref args) = transform.pullup {
-                    filter::pullup_push_frame(
-                        &mut pullup_graph,
-                        pulledup.0,
-                        send,
-                        args,
-                        |pu| apply_decimate(pu),
-                    )
+                    filter::pullup_push_frame(&mut pullup_graph, pulledup.0, send, args, |pu| {
+                        apply_decimate(pu)
+                    })
                 } else {
                     apply_decimate(send)
                 }
@@ -8348,105 +8455,105 @@ pub fn transcode(
         unsafe {
             filter::pullup_flush(&mut pullup_graph, pulledup.0, |send| {
                 let mut after_decimate = |mut send: *mut AVFrame| -> Result<()> {
-                if let Some(ref args) = transform.freezedetect {
-                    let src_fmt = (*send).format;
-                    filter::freezedetect_frame(
-                        &mut freezedetect_graph,
-                        freezedetectd.0,
-                        send,
-                        args,
-                    )?;
-                    let out = freezedetectd.0;
-                    if (*out).format != src_fmt {
-                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                        send = converted.0;
+                    if let Some(ref args) = transform.freezedetect {
+                        let src_fmt = (*send).format;
+                        filter::freezedetect_frame(
+                            &mut freezedetect_graph,
+                            freezedetectd.0,
+                            send,
+                            args,
+                        )?;
+                        let out = freezedetectd.0;
+                        if (*out).format != src_fmt {
+                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                            send = converted.0;
+                        } else {
+                            send = out;
+                        }
+                    }
+                    if let Some(ref args) = transform.pseudocolor {
+                        let src_fmt = (*send).format;
+                        filter::pseudocolor_frame(
+                            &mut pseudocolor_graph,
+                            pseudocolored.0,
+                            send,
+                            args,
+                        )?;
+                        let out = pseudocolored.0;
+                        if (*out).format != src_fmt {
+                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                            send = converted.0;
+                        } else {
+                            send = out;
+                        }
+                    }
+                    if let Some(ref args) = transform.colorspace {
+                        filter::colorspace_frame(&mut colorspace_graph, colorspaced.0, send, args)?;
+                        send = colorspaced.0;
+                    }
+                    let mut format_done = false;
+                    if let Some(ref args) = transform.zscale {
+                        let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
+                        let name = string(av_get_pix_fmt_name(fmt));
+                        if name.is_empty() {
+                            return Err("unknown zscale output pixel format".into());
+                        }
+                        filter::zscale_frame(&mut zscale_graph, zscaled.0, send, args, &name)?;
+                        send = zscaled.0;
+                        format_done = true;
+                    }
+                    if let Some(ref args) = transform.tonemap {
+                        let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
+                        let name = string(av_get_pix_fmt_name(fmt));
+                        if name.is_empty() {
+                            return Err("unknown tonemap output pixel format".into());
+                        }
+                        filter::tonemap_frame(&mut tonemap_graph, tonemapped.0, send, args, &name)?;
+                        send = tonemapped.0;
+                        format_done = true;
+                    }
+                    if let Some(fmt) = target_pix_fmt {
+                        if !format_done && (*send).format != fmt {
+                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, send, fmt)?;
+                            send = converted.0;
+                        }
+                    }
+                    if transform.minterpolate.is_some() || transform.fps.is_some() {
+                        let mut emitted = 0u64;
+                        filter::temporal_push_frame(
+                            &mut minterpolate_graph,
+                            minterpolate_dst.0,
+                            transform.minterpolate.as_deref(),
+                            &mut fps_graph,
+                            fps_dst.0,
+                            transform.fps.as_deref(),
+                            send,
+                            |out| {
+                                send_encoder_frame(
+                                    &mut encoder,
+                                    &mut output,
+                                    &mut encoded,
+                                    mapped,
+                                    out,
+                                    &mut stats,
+                                )?;
+                                emitted += 1;
+                                Ok(())
+                            },
+                        )?;
+                        stats.video_frames += emitted;
                     } else {
-                        send = out;
+                        send_encoder_frame(
+                            &mut encoder,
+                            &mut output,
+                            &mut encoded,
+                            mapped,
+                            send,
+                            &mut stats,
+                        )?;
+                        stats.video_frames += 1;
                     }
-                }
-                if let Some(ref args) = transform.pseudocolor {
-                    let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
-                    let out = pseudocolored.0;
-                    if (*out).format != src_fmt {
-                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                        send = converted.0;
-                    } else {
-                        send = out;
-                    }
-                }
-                if let Some(ref args) = transform.colorspace {
-                    filter::colorspace_frame(&mut colorspace_graph, colorspaced.0, send, args)?;
-                    send = colorspaced.0;
-                }
-                let mut format_done = false;
-                if let Some(ref args) = transform.zscale {
-                    let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
-                    if name.is_empty() {
-                        return Err("unknown zscale output pixel format".into());
-                    }
-                    filter::zscale_frame(&mut zscale_graph, zscaled.0, send, args, &name)?;
-                    send = zscaled.0;
-                    format_done = true;
-                }
-                if let Some(ref args) = transform.tonemap {
-                    let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
-                    if name.is_empty() {
-                        return Err("unknown tonemap output pixel format".into());
-                    }
-                    filter::tonemap_frame(&mut tonemap_graph, tonemapped.0, send, args, &name)?;
-                    send = tonemapped.0;
-                    format_done = true;
-                }
-                if let Some(fmt) = target_pix_fmt {
-                    if !format_done && (*send).format != fmt {
-                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, send, fmt)?;
-                        send = converted.0;
-                    }
-                }
-                if transform.minterpolate.is_some() || transform.fps.is_some() {
-                    let mut emitted = 0u64;
-                    filter::temporal_push_frame(
-                        &mut minterpolate_graph,
-                        minterpolate_dst.0,
-                        transform.minterpolate.as_deref(),
-                        &mut fps_graph,
-                        fps_dst.0,
-                        transform.fps.as_deref(),
-                        send,
-                        |out| {
-                            send_encoder_frame(
-                                &mut encoder,
-                                &mut output,
-                                &mut encoded,
-                                mapped,
-                                out,
-                                &mut stats,
-                            )?;
-                            emitted += 1;
-                            Ok(())
-                        },
-                    )?;
-                    stats.video_frames += emitted;
-                } else {
-                    send_encoder_frame(
-                        &mut encoder,
-                        &mut output,
-                        &mut encoded,
-                        mapped,
-                        send,
-                        &mut stats,
-                    )?;
-                    stats.video_frames += 1;
-                }
-                Ok(())
+                    Ok(())
                 };
                 let mut apply_framestep = |send: *mut AVFrame| -> Result<()> {
                     if transform.framestep.is_some() {
@@ -8513,12 +8620,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -8695,12 +8797,7 @@ pub fn transcode(
         unsafe {
             if let Some(ref args) = transform.freezedetect {
                 let src_fmt = (*send).format;
-                filter::freezedetect_frame(
-                    &mut freezedetect_graph,
-                    freezedetectd.0,
-                    send,
-                    args,
-                )?;
+                filter::freezedetect_frame(&mut freezedetect_graph, freezedetectd.0, send, args)?;
                 let out = freezedetectd.0;
                 if (*out).format != src_fmt {
                     convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -8711,12 +8808,7 @@ pub fn transcode(
             }
             if let Some(ref args) = transform.pseudocolor {
                 let src_fmt = (*send).format;
-                filter::pseudocolor_frame(
-                    &mut pseudocolor_graph,
-                    pseudocolored.0,
-                    send,
-                    args,
-                )?;
+                filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                 let out = pseudocolored.0;
                 if (*out).format != src_fmt {
                     convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -8827,34 +8919,35 @@ pub fn transcode(
                                                 send,
                                                 transform.shuffleframes.as_deref(),
                                                 |send| {
-                                        filter::push_reverse_or_emit(
-                                            &mut reverse_graph,
-                                            reversed.0,
-                                            send,
-                                            transform.reverse.as_deref(),
-                                            |send| unsafe {
-                                                filter::push_loop_or_emit(
-                                                    &mut loop_graph,
-                                                    looped.0,
-                                                    send,
-                                                    transform.r#loop.as_deref(),
-                                                    |send| {
-                                                        if transform.thumbnail.is_some() {
-                                                            filter::push_thumbnail_or_emit(
+                                                    filter::push_reverse_or_emit(
+                                                        &mut reverse_graph,
+                                                        reversed.0,
+                                                        send,
+                                                        transform.reverse.as_deref(),
+                                                        |send| unsafe {
+                                                            filter::push_loop_or_emit(
+                                                                &mut loop_graph,
+                                                                looped.0,
+                                                                send,
+                                                                transform.r#loop.as_deref(),
+                                                                |send| {
+                                                                    if transform.thumbnail.is_some()
+                                                                    {
+                                                                        filter::push_thumbnail_or_emit(
                                                                 &mut thumbnail_graph,
                                                                 thumbnailed.0,
                                                                 send,
                                                                 transform.thumbnail.as_deref(),
                                                                 |f| flush_after_tile(f),
                                                             )
-                                                        } else {
-                                                            flush_after_tile(send)
-                                                        }
-                                                    },
-                                                )
-                                            },
-                                        )
-                                    },
+                                                                    } else {
+                                                                        flush_after_tile(send)
+                                                                    }
+                                                                },
+                                                            )
+                                                        },
+                                                    )
+                                                },
                                             )
                                         },
                                     )
@@ -8881,34 +8974,34 @@ pub fn transcode(
                                         send,
                                         transform.shuffleframes.as_deref(),
                                         |send| {
-                                        filter::push_reverse_or_emit(
-                                            &mut reverse_graph,
-                                            reversed.0,
-                                            send,
-                                            transform.reverse.as_deref(),
-                                            |send| unsafe {
-                                                filter::push_loop_or_emit(
-                                                    &mut loop_graph,
-                                                    looped.0,
-                                                    send,
-                                                    transform.r#loop.as_deref(),
-                                                    |send| {
-                                                        if transform.thumbnail.is_some() {
-                                                            filter::push_thumbnail_or_emit(
-                                                                &mut thumbnail_graph,
-                                                                thumbnailed.0,
-                                                                send,
-                                                                transform.thumbnail.as_deref(),
-                                                                |f| flush_after_tile(f),
-                                                            )
-                                                        } else {
-                                                            flush_after_tile(send)
-                                                        }
-                                                    },
-                                                )
-                                            },
-                                        )
-                                    },
+                                            filter::push_reverse_or_emit(
+                                                &mut reverse_graph,
+                                                reversed.0,
+                                                send,
+                                                transform.reverse.as_deref(),
+                                                |send| unsafe {
+                                                    filter::push_loop_or_emit(
+                                                        &mut loop_graph,
+                                                        looped.0,
+                                                        send,
+                                                        transform.r#loop.as_deref(),
+                                                        |send| {
+                                                            if transform.thumbnail.is_some() {
+                                                                filter::push_thumbnail_or_emit(
+                                                                    &mut thumbnail_graph,
+                                                                    thumbnailed.0,
+                                                                    send,
+                                                                    transform.thumbnail.as_deref(),
+                                                                    |f| flush_after_tile(f),
+                                                                )
+                                                            } else {
+                                                                flush_after_tile(send)
+                                                            }
+                                                        },
+                                                    )
+                                                },
+                                            )
+                                        },
                                     )
                                 },
                             )
@@ -9003,34 +9096,34 @@ pub fn transcode(
                             send,
                             transform.shuffleframes.as_deref(),
                             |send| {
-                                        filter::push_reverse_or_emit(
-                                            &mut reverse_graph,
-                                            reversed.0,
+                                filter::push_reverse_or_emit(
+                                    &mut reverse_graph,
+                                    reversed.0,
+                                    send,
+                                    transform.reverse.as_deref(),
+                                    |send| unsafe {
+                                        filter::push_loop_or_emit(
+                                            &mut loop_graph,
+                                            looped.0,
                                             send,
-                                            transform.reverse.as_deref(),
-                                            |send| unsafe {
-                                                filter::push_loop_or_emit(
-                                                    &mut loop_graph,
-                                                    looped.0,
-                                                    send,
-                                                    transform.r#loop.as_deref(),
-                                                    |send| {
-                                                        if transform.thumbnail.is_some() {
-                                                            filter::push_thumbnail_or_emit(
-                                                                &mut thumbnail_graph,
-                                                                thumbnailed.0,
-                                                                send,
-                                                                transform.thumbnail.as_deref(),
-                                                                |f| flush_after_tile(f),
-                                                            )
-                                                        } else {
-                                                            flush_after_tile(send)
-                                                        }
-                                                    },
-                                                )
+                                            transform.r#loop.as_deref(),
+                                            |send| {
+                                                if transform.thumbnail.is_some() {
+                                                    filter::push_thumbnail_or_emit(
+                                                        &mut thumbnail_graph,
+                                                        thumbnailed.0,
+                                                        send,
+                                                        transform.thumbnail.as_deref(),
+                                                        |f| flush_after_tile(f),
+                                                    )
+                                                } else {
+                                                    flush_after_tile(send)
+                                                }
                                             },
                                         )
                                     },
+                                )
+                            },
                         )
                     },
                 )
@@ -9054,34 +9147,34 @@ pub fn transcode(
                     send,
                     transform.shuffleframes.as_deref(),
                     |send| {
-                                        filter::push_reverse_or_emit(
-                                            &mut reverse_graph,
-                                            reversed.0,
-                                            send,
-                                            transform.reverse.as_deref(),
-                                            |send| unsafe {
-                                                filter::push_loop_or_emit(
-                                                    &mut loop_graph,
-                                                    looped.0,
-                                                    send,
-                                                    transform.r#loop.as_deref(),
-                                                    |send| {
-                                                        if transform.thumbnail.is_some() {
-                                                            filter::push_thumbnail_or_emit(
-                                                                &mut thumbnail_graph,
-                                                                thumbnailed.0,
-                                                                send,
-                                                                transform.thumbnail.as_deref(),
-                                                                |f| flush_after_tile(f),
-                                                            )
-                                                        } else {
-                                                            flush_after_tile(send)
-                                                        }
-                                                    },
-                                                )
-                                            },
-                                        )
+                        filter::push_reverse_or_emit(
+                            &mut reverse_graph,
+                            reversed.0,
+                            send,
+                            transform.reverse.as_deref(),
+                            |send| unsafe {
+                                filter::push_loop_or_emit(
+                                    &mut loop_graph,
+                                    looped.0,
+                                    send,
+                                    transform.r#loop.as_deref(),
+                                    |send| {
+                                        if transform.thumbnail.is_some() {
+                                            filter::push_thumbnail_or_emit(
+                                                &mut thumbnail_graph,
+                                                thumbnailed.0,
+                                                send,
+                                                transform.thumbnail.as_deref(),
+                                                |f| flush_after_tile(f),
+                                            )
+                                        } else {
+                                            flush_after_tile(send)
+                                        }
                                     },
+                                )
+                            },
+                        )
+                    },
                 )
             })?;
         }
@@ -9110,18 +9203,18 @@ pub fn transcode(
                             send,
                             transform.r#loop.as_deref(),
                             |send| {
-                                                        if transform.thumbnail.is_some() {
-                                                            filter::push_thumbnail_or_emit(
-                                                                &mut thumbnail_graph,
-                                                                thumbnailed.0,
-                                                                send,
-                                                                transform.thumbnail.as_deref(),
-                                                                |f| flush_after_tile(f),
-                                                            )
-                                                        } else {
-                                                            flush_after_tile(send)
-                                                        }
-                                                    },
+                                if transform.thumbnail.is_some() {
+                                    filter::push_thumbnail_or_emit(
+                                        &mut thumbnail_graph,
+                                        thumbnailed.0,
+                                        send,
+                                        transform.thumbnail.as_deref(),
+                                        |f| flush_after_tile(f),
+                                    )
+                                } else {
+                                    flush_after_tile(send)
+                                }
+                            },
                         )
                     },
                 )
@@ -9147,18 +9240,18 @@ pub fn transcode(
                     send,
                     transform.r#loop.as_deref(),
                     |send| {
-                                                        if transform.thumbnail.is_some() {
-                                                            filter::push_thumbnail_or_emit(
-                                                                &mut thumbnail_graph,
-                                                                thumbnailed.0,
-                                                                send,
-                                                                transform.thumbnail.as_deref(),
-                                                                |f| flush_after_tile(f),
-                                                            )
-                                                        } else {
-                                                            flush_after_tile(send)
-                                                        }
-                                                    },
+                        if transform.thumbnail.is_some() {
+                            filter::push_thumbnail_or_emit(
+                                &mut thumbnail_graph,
+                                thumbnailed.0,
+                                send,
+                                transform.thumbnail.as_deref(),
+                                |f| flush_after_tile(f),
+                            )
+                        } else {
+                            flush_after_tile(send)
+                        }
+                    },
                 )
             })?;
         }
@@ -9230,16 +9323,14 @@ pub fn transcode(
                     send = w3fdif_out.0;
                 }
                 if let Some(ref args) = transform.tblend {
-                    let produced =
-                        filter::tblend_frame(&mut tblend_graph, tblended.0, send, args)?;
+                    let produced = filter::tblend_frame(&mut tblend_graph, tblended.0, send, args)?;
                     if !produced {
                         return Ok(());
                     }
                     send = tblended.0;
                 }
                 if let Some(ref args) = transform.tmix {
-                    let produced =
-                        filter::tmix_push_frame(&mut tmix_graph, tmixed.0, send, args)?;
+                    let produced = filter::tmix_push_frame(&mut tmix_graph, tmixed.0, send, args)?;
                     if !produced {
                         return Ok(());
                     }
@@ -9404,12 +9495,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorlevels {
                     let src_fmt = (*send).format;
-                    filter::colorlevels_frame(
-                        &mut colorlevels_graph,
-                        colorleveled.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorlevels_frame(&mut colorlevels_graph, colorleveled.0, send, args)?;
                     let out = colorleveled.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9463,22 +9549,12 @@ pub fn transcode(
                     }
                 }
                 if let Some(ref args) = transform.monochrome {
-                    filter::monochrome_frame(
-                        &mut monochrome_graph,
-                        monochromed.0,
-                        send,
-                        args,
-                    )?;
+                    filter::monochrome_frame(&mut monochrome_graph, monochromed.0, send, args)?;
                     send = monochromed.0;
                 }
                 if let Some(ref args) = transform.grayworld {
                     let src_fmt = (*send).format;
-                    filter::grayworld_frame(
-                        &mut grayworld_graph,
-                        grayworlded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::grayworld_frame(&mut grayworld_graph, grayworlded.0, send, args)?;
                     let out = grayworlded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9553,12 +9629,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pixelize {
                     let src_fmt = (*send).format;
-                    filter::pixelize_frame(
-                        &mut pixelize_graph,
-                        pixelized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pixelize_frame(&mut pixelize_graph, pixelized.0, send, args)?;
                     let out = pixelized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9569,12 +9640,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.removegrain {
                     let src_fmt = (*send).format;
-                    filter::removegrain_frame(
-                        &mut removegrain_graph,
-                        removegrained.0,
-                        send,
-                        args,
-                    )?;
+                    filter::removegrain_frame(&mut removegrain_graph, removegrained.0, send, args)?;
                     let out = removegrained.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9585,12 +9651,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.yaepblur {
                     let src_fmt = (*send).format;
-                    filter::yaepblur_frame(
-                        &mut yaepblur_graph,
-                        yaepblurred.0,
-                        send,
-                        args,
-                    )?;
+                    filter::yaepblur_frame(&mut yaepblur_graph, yaepblurred.0, send, args)?;
                     let out = yaepblurred.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9601,12 +9662,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.vibrance {
                     let src_fmt = (*send).format;
-                    filter::vibrance_frame(
-                        &mut vibrance_graph,
-                        vibranced.0,
-                        send,
-                        args,
-                    )?;
+                    filter::vibrance_frame(&mut vibrance_graph, vibranced.0, send, args)?;
                     let out = vibranced.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9617,12 +9673,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.dilation {
                     let src_fmt = (*send).format;
-                    filter::dilation_frame(
-                        &mut dilation_graph,
-                        dilated.0,
-                        send,
-                        args,
-                    )?;
+                    filter::dilation_frame(&mut dilation_graph, dilated.0, send, args)?;
                     let out = dilated.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9633,12 +9684,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.erosion {
                     let src_fmt = (*send).format;
-                    filter::erosion_frame(
-                        &mut erosion_graph,
-                        eroded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::erosion_frame(&mut erosion_graph, eroded.0, send, args)?;
                     let out = eroded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9649,12 +9695,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorize {
                     let src_fmt = (*send).format;
-                    filter::colorize_frame(
-                        &mut colorize_graph,
-                        colorized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorize_frame(&mut colorize_graph, colorized.0, send, args)?;
                     let out = colorized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9665,12 +9706,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.exposure {
                     let src_fmt = (*send).format;
-                    filter::exposure_frame(
-                        &mut exposure_graph,
-                        exposured.0,
-                        send,
-                        args,
-                    )?;
+                    filter::exposure_frame(&mut exposure_graph, exposured.0, send, args)?;
                     let out = exposured.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9681,12 +9717,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.chromashift {
                     let src_fmt = (*send).format;
-                    filter::chromashift_frame(
-                        &mut chromashift_graph,
-                        chromashifted.0,
-                        send,
-                        args,
-                    )?;
+                    filter::chromashift_frame(&mut chromashift_graph, chromashifted.0, send, args)?;
                     let out = chromashifted.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9729,12 +9760,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.histeq {
                     let src_fmt = (*send).format;
-                    filter::histeq_frame(
-                        &mut histeq_graph,
-                        histeqed.0,
-                        send,
-                        args,
-                    )?;
+                    filter::histeq_frame(&mut histeq_graph, histeqed.0, send, args)?;
                     let out = histeqed.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9761,12 +9787,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.lutyuv {
                     let src_fmt = (*send).format;
-                    filter::lutyuv_frame(
-                        &mut lutyuv_graph,
-                        lutyuved.0,
-                        send,
-                        args,
-                    )?;
+                    filter::lutyuv_frame(&mut lutyuv_graph, lutyuved.0, send, args)?;
                     let out = lutyuved.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9777,12 +9798,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorhold {
                     let src_fmt = (*send).format;
-                    filter::colorhold_frame(
-                        &mut colorhold_graph,
-                        colorholded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorhold_frame(&mut colorhold_graph, colorholded.0, send, args)?;
                     let out = colorholded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9813,12 +9829,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.perspective {
                     let src_fmt = (*send).format;
-                    filter::perspective_frame(
-                        &mut perspective_graph,
-                        perspectived.0,
-                        send,
-                        args,
-                    )?;
+                    filter::perspective_frame(&mut perspective_graph, perspectived.0, send, args)?;
                     let out = perspectived.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9868,12 +9879,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.stereo3d {
                     let src_fmt = (*send).format;
-                    filter::stereo3d_frame(
-                        &mut stereo3d_graph,
-                        stereo3ded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::stereo3d_frame(&mut stereo3d_graph, stereo3ded.0, send, args)?;
                     let out = stereo3ded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -9884,12 +9890,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.field {
                     let src_fmt = (*send).format;
-                    filter::field_frame(
-                        &mut field_graph,
-                        fielded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::field_frame(&mut field_graph, fielded.0, send, args)?;
                     let out = fielded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10004,12 +10005,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10100,16 +10096,14 @@ pub fn transcode(
                     send = w3fdif_out.0;
                 }
                 if let Some(ref args) = transform.tblend {
-                    let produced =
-                        filter::tblend_frame(&mut tblend_graph, tblended.0, send, args)?;
+                    let produced = filter::tblend_frame(&mut tblend_graph, tblended.0, send, args)?;
                     if !produced {
                         return Ok(());
                     }
                     send = tblended.0;
                 }
                 if let Some(ref args) = transform.tmix {
-                    let produced =
-                        filter::tmix_push_frame(&mut tmix_graph, tmixed.0, send, args)?;
+                    let produced = filter::tmix_push_frame(&mut tmix_graph, tmixed.0, send, args)?;
                     if !produced {
                         return Ok(());
                     }
@@ -10274,12 +10268,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorlevels {
                     let src_fmt = (*send).format;
-                    filter::colorlevels_frame(
-                        &mut colorlevels_graph,
-                        colorleveled.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorlevels_frame(&mut colorlevels_graph, colorleveled.0, send, args)?;
                     let out = colorleveled.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10333,22 +10322,12 @@ pub fn transcode(
                     }
                 }
                 if let Some(ref args) = transform.monochrome {
-                    filter::monochrome_frame(
-                        &mut monochrome_graph,
-                        monochromed.0,
-                        send,
-                        args,
-                    )?;
+                    filter::monochrome_frame(&mut monochrome_graph, monochromed.0, send, args)?;
                     send = monochromed.0;
                 }
                 if let Some(ref args) = transform.grayworld {
                     let src_fmt = (*send).format;
-                    filter::grayworld_frame(
-                        &mut grayworld_graph,
-                        grayworlded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::grayworld_frame(&mut grayworld_graph, grayworlded.0, send, args)?;
                     let out = grayworlded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10423,12 +10402,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pixelize {
                     let src_fmt = (*send).format;
-                    filter::pixelize_frame(
-                        &mut pixelize_graph,
-                        pixelized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pixelize_frame(&mut pixelize_graph, pixelized.0, send, args)?;
                     let out = pixelized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10439,12 +10413,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.removegrain {
                     let src_fmt = (*send).format;
-                    filter::removegrain_frame(
-                        &mut removegrain_graph,
-                        removegrained.0,
-                        send,
-                        args,
-                    )?;
+                    filter::removegrain_frame(&mut removegrain_graph, removegrained.0, send, args)?;
                     let out = removegrained.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10455,12 +10424,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.yaepblur {
                     let src_fmt = (*send).format;
-                    filter::yaepblur_frame(
-                        &mut yaepblur_graph,
-                        yaepblurred.0,
-                        send,
-                        args,
-                    )?;
+                    filter::yaepblur_frame(&mut yaepblur_graph, yaepblurred.0, send, args)?;
                     let out = yaepblurred.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10471,12 +10435,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.vibrance {
                     let src_fmt = (*send).format;
-                    filter::vibrance_frame(
-                        &mut vibrance_graph,
-                        vibranced.0,
-                        send,
-                        args,
-                    )?;
+                    filter::vibrance_frame(&mut vibrance_graph, vibranced.0, send, args)?;
                     let out = vibranced.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10487,12 +10446,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.dilation {
                     let src_fmt = (*send).format;
-                    filter::dilation_frame(
-                        &mut dilation_graph,
-                        dilated.0,
-                        send,
-                        args,
-                    )?;
+                    filter::dilation_frame(&mut dilation_graph, dilated.0, send, args)?;
                     let out = dilated.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10503,12 +10457,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.erosion {
                     let src_fmt = (*send).format;
-                    filter::erosion_frame(
-                        &mut erosion_graph,
-                        eroded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::erosion_frame(&mut erosion_graph, eroded.0, send, args)?;
                     let out = eroded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10519,12 +10468,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorize {
                     let src_fmt = (*send).format;
-                    filter::colorize_frame(
-                        &mut colorize_graph,
-                        colorized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorize_frame(&mut colorize_graph, colorized.0, send, args)?;
                     let out = colorized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10535,12 +10479,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.exposure {
                     let src_fmt = (*send).format;
-                    filter::exposure_frame(
-                        &mut exposure_graph,
-                        exposured.0,
-                        send,
-                        args,
-                    )?;
+                    filter::exposure_frame(&mut exposure_graph, exposured.0, send, args)?;
                     let out = exposured.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10551,12 +10490,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.chromashift {
                     let src_fmt = (*send).format;
-                    filter::chromashift_frame(
-                        &mut chromashift_graph,
-                        chromashifted.0,
-                        send,
-                        args,
-                    )?;
+                    filter::chromashift_frame(&mut chromashift_graph, chromashifted.0, send, args)?;
                     let out = chromashifted.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10599,12 +10533,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.histeq {
                     let src_fmt = (*send).format;
-                    filter::histeq_frame(
-                        &mut histeq_graph,
-                        histeqed.0,
-                        send,
-                        args,
-                    )?;
+                    filter::histeq_frame(&mut histeq_graph, histeqed.0, send, args)?;
                     let out = histeqed.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10631,12 +10560,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.lutyuv {
                     let src_fmt = (*send).format;
-                    filter::lutyuv_frame(
-                        &mut lutyuv_graph,
-                        lutyuved.0,
-                        send,
-                        args,
-                    )?;
+                    filter::lutyuv_frame(&mut lutyuv_graph, lutyuved.0, send, args)?;
                     let out = lutyuved.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10647,12 +10571,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorhold {
                     let src_fmt = (*send).format;
-                    filter::colorhold_frame(
-                        &mut colorhold_graph,
-                        colorholded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorhold_frame(&mut colorhold_graph, colorholded.0, send, args)?;
                     let out = colorholded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10683,12 +10602,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.perspective {
                     let src_fmt = (*send).format;
-                    filter::perspective_frame(
-                        &mut perspective_graph,
-                        perspectived.0,
-                        send,
-                        args,
-                    )?;
+                    filter::perspective_frame(&mut perspective_graph, perspectived.0, send, args)?;
                     let out = perspectived.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10738,12 +10652,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.stereo3d {
                     let src_fmt = (*send).format;
-                    filter::stereo3d_frame(
-                        &mut stereo3d_graph,
-                        stereo3ded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::stereo3d_frame(&mut stereo3d_graph, stereo3ded.0, send, args)?;
                     let out = stereo3ded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10754,12 +10663,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.field {
                     let src_fmt = (*send).format;
-                    filter::field_frame(
-                        &mut field_graph,
-                        fielded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::field_frame(&mut field_graph, fielded.0, send, args)?;
                     let out = fielded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10874,12 +10778,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -10962,16 +10861,14 @@ pub fn transcode(
         unsafe {
             filter::w3fdif_flush(&mut w3fdif_graph, w3fdif_out.0, |mut send| {
                 if let Some(ref args) = transform.tblend {
-                    let produced =
-                        filter::tblend_frame(&mut tblend_graph, tblended.0, send, args)?;
+                    let produced = filter::tblend_frame(&mut tblend_graph, tblended.0, send, args)?;
                     if !produced {
                         return Ok(());
                     }
                     send = tblended.0;
                 }
                 if let Some(ref args) = transform.tmix {
-                    let produced =
-                        filter::tmix_push_frame(&mut tmix_graph, tmixed.0, send, args)?;
+                    let produced = filter::tmix_push_frame(&mut tmix_graph, tmixed.0, send, args)?;
                     if !produced {
                         return Ok(());
                     }
@@ -11136,12 +11033,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorlevels {
                     let src_fmt = (*send).format;
-                    filter::colorlevels_frame(
-                        &mut colorlevels_graph,
-                        colorleveled.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorlevels_frame(&mut colorlevels_graph, colorleveled.0, send, args)?;
                     let out = colorleveled.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11195,22 +11087,12 @@ pub fn transcode(
                     }
                 }
                 if let Some(ref args) = transform.monochrome {
-                    filter::monochrome_frame(
-                        &mut monochrome_graph,
-                        monochromed.0,
-                        send,
-                        args,
-                    )?;
+                    filter::monochrome_frame(&mut monochrome_graph, monochromed.0, send, args)?;
                     send = monochromed.0;
                 }
                 if let Some(ref args) = transform.grayworld {
                     let src_fmt = (*send).format;
-                    filter::grayworld_frame(
-                        &mut grayworld_graph,
-                        grayworlded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::grayworld_frame(&mut grayworld_graph, grayworlded.0, send, args)?;
                     let out = grayworlded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11285,12 +11167,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pixelize {
                     let src_fmt = (*send).format;
-                    filter::pixelize_frame(
-                        &mut pixelize_graph,
-                        pixelized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pixelize_frame(&mut pixelize_graph, pixelized.0, send, args)?;
                     let out = pixelized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11301,12 +11178,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.removegrain {
                     let src_fmt = (*send).format;
-                    filter::removegrain_frame(
-                        &mut removegrain_graph,
-                        removegrained.0,
-                        send,
-                        args,
-                    )?;
+                    filter::removegrain_frame(&mut removegrain_graph, removegrained.0, send, args)?;
                     let out = removegrained.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11317,12 +11189,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.yaepblur {
                     let src_fmt = (*send).format;
-                    filter::yaepblur_frame(
-                        &mut yaepblur_graph,
-                        yaepblurred.0,
-                        send,
-                        args,
-                    )?;
+                    filter::yaepblur_frame(&mut yaepblur_graph, yaepblurred.0, send, args)?;
                     let out = yaepblurred.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11333,12 +11200,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.vibrance {
                     let src_fmt = (*send).format;
-                    filter::vibrance_frame(
-                        &mut vibrance_graph,
-                        vibranced.0,
-                        send,
-                        args,
-                    )?;
+                    filter::vibrance_frame(&mut vibrance_graph, vibranced.0, send, args)?;
                     let out = vibranced.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11349,12 +11211,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.dilation {
                     let src_fmt = (*send).format;
-                    filter::dilation_frame(
-                        &mut dilation_graph,
-                        dilated.0,
-                        send,
-                        args,
-                    )?;
+                    filter::dilation_frame(&mut dilation_graph, dilated.0, send, args)?;
                     let out = dilated.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11365,12 +11222,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.erosion {
                     let src_fmt = (*send).format;
-                    filter::erosion_frame(
-                        &mut erosion_graph,
-                        eroded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::erosion_frame(&mut erosion_graph, eroded.0, send, args)?;
                     let out = eroded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11381,12 +11233,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorize {
                     let src_fmt = (*send).format;
-                    filter::colorize_frame(
-                        &mut colorize_graph,
-                        colorized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorize_frame(&mut colorize_graph, colorized.0, send, args)?;
                     let out = colorized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11397,12 +11244,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.exposure {
                     let src_fmt = (*send).format;
-                    filter::exposure_frame(
-                        &mut exposure_graph,
-                        exposured.0,
-                        send,
-                        args,
-                    )?;
+                    filter::exposure_frame(&mut exposure_graph, exposured.0, send, args)?;
                     let out = exposured.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11413,12 +11255,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.chromashift {
                     let src_fmt = (*send).format;
-                    filter::chromashift_frame(
-                        &mut chromashift_graph,
-                        chromashifted.0,
-                        send,
-                        args,
-                    )?;
+                    filter::chromashift_frame(&mut chromashift_graph, chromashifted.0, send, args)?;
                     let out = chromashifted.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11461,12 +11298,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.histeq {
                     let src_fmt = (*send).format;
-                    filter::histeq_frame(
-                        &mut histeq_graph,
-                        histeqed.0,
-                        send,
-                        args,
-                    )?;
+                    filter::histeq_frame(&mut histeq_graph, histeqed.0, send, args)?;
                     let out = histeqed.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11493,12 +11325,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.lutyuv {
                     let src_fmt = (*send).format;
-                    filter::lutyuv_frame(
-                        &mut lutyuv_graph,
-                        lutyuved.0,
-                        send,
-                        args,
-                    )?;
+                    filter::lutyuv_frame(&mut lutyuv_graph, lutyuved.0, send, args)?;
                     let out = lutyuved.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11509,12 +11336,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorhold {
                     let src_fmt = (*send).format;
-                    filter::colorhold_frame(
-                        &mut colorhold_graph,
-                        colorholded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorhold_frame(&mut colorhold_graph, colorholded.0, send, args)?;
                     let out = colorholded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11545,12 +11367,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.perspective {
                     let src_fmt = (*send).format;
-                    filter::perspective_frame(
-                        &mut perspective_graph,
-                        perspectived.0,
-                        send,
-                        args,
-                    )?;
+                    filter::perspective_frame(&mut perspective_graph, perspectived.0, send, args)?;
                     let out = perspectived.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11600,12 +11417,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.stereo3d {
                     let src_fmt = (*send).format;
-                    filter::stereo3d_frame(
-                        &mut stereo3d_graph,
-                        stereo3ded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::stereo3d_frame(&mut stereo3d_graph, stereo3ded.0, send, args)?;
                     let out = stereo3ded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11616,12 +11428,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.field {
                     let src_fmt = (*send).format;
-                    filter::field_frame(
-                        &mut field_graph,
-                        fielded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::field_frame(&mut field_graph, fielded.0, send, args)?;
                     let out = fielded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11736,12 +11543,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -11982,12 +11784,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorlevels {
                     let src_fmt = (*send).format;
-                    filter::colorlevels_frame(
-                        &mut colorlevels_graph,
-                        colorleveled.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorlevels_frame(&mut colorlevels_graph, colorleveled.0, send, args)?;
                     let out = colorleveled.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12041,22 +11838,12 @@ pub fn transcode(
                     }
                 }
                 if let Some(ref args) = transform.monochrome {
-                    filter::monochrome_frame(
-                        &mut monochrome_graph,
-                        monochromed.0,
-                        send,
-                        args,
-                    )?;
+                    filter::monochrome_frame(&mut monochrome_graph, monochromed.0, send, args)?;
                     send = monochromed.0;
                 }
                 if let Some(ref args) = transform.grayworld {
                     let src_fmt = (*send).format;
-                    filter::grayworld_frame(
-                        &mut grayworld_graph,
-                        grayworlded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::grayworld_frame(&mut grayworld_graph, grayworlded.0, send, args)?;
                     let out = grayworlded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12131,12 +11918,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pixelize {
                     let src_fmt = (*send).format;
-                    filter::pixelize_frame(
-                        &mut pixelize_graph,
-                        pixelized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pixelize_frame(&mut pixelize_graph, pixelized.0, send, args)?;
                     let out = pixelized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12147,12 +11929,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.removegrain {
                     let src_fmt = (*send).format;
-                    filter::removegrain_frame(
-                        &mut removegrain_graph,
-                        removegrained.0,
-                        send,
-                        args,
-                    )?;
+                    filter::removegrain_frame(&mut removegrain_graph, removegrained.0, send, args)?;
                     let out = removegrained.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12163,12 +11940,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.yaepblur {
                     let src_fmt = (*send).format;
-                    filter::yaepblur_frame(
-                        &mut yaepblur_graph,
-                        yaepblurred.0,
-                        send,
-                        args,
-                    )?;
+                    filter::yaepblur_frame(&mut yaepblur_graph, yaepblurred.0, send, args)?;
                     let out = yaepblurred.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12179,12 +11951,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.vibrance {
                     let src_fmt = (*send).format;
-                    filter::vibrance_frame(
-                        &mut vibrance_graph,
-                        vibranced.0,
-                        send,
-                        args,
-                    )?;
+                    filter::vibrance_frame(&mut vibrance_graph, vibranced.0, send, args)?;
                     let out = vibranced.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12195,12 +11962,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.dilation {
                     let src_fmt = (*send).format;
-                    filter::dilation_frame(
-                        &mut dilation_graph,
-                        dilated.0,
-                        send,
-                        args,
-                    )?;
+                    filter::dilation_frame(&mut dilation_graph, dilated.0, send, args)?;
                     let out = dilated.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12211,12 +11973,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.erosion {
                     let src_fmt = (*send).format;
-                    filter::erosion_frame(
-                        &mut erosion_graph,
-                        eroded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::erosion_frame(&mut erosion_graph, eroded.0, send, args)?;
                     let out = eroded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12227,12 +11984,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorize {
                     let src_fmt = (*send).format;
-                    filter::colorize_frame(
-                        &mut colorize_graph,
-                        colorized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorize_frame(&mut colorize_graph, colorized.0, send, args)?;
                     let out = colorized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12243,12 +11995,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.exposure {
                     let src_fmt = (*send).format;
-                    filter::exposure_frame(
-                        &mut exposure_graph,
-                        exposured.0,
-                        send,
-                        args,
-                    )?;
+                    filter::exposure_frame(&mut exposure_graph, exposured.0, send, args)?;
                     let out = exposured.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12259,12 +12006,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.chromashift {
                     let src_fmt = (*send).format;
-                    filter::chromashift_frame(
-                        &mut chromashift_graph,
-                        chromashifted.0,
-                        send,
-                        args,
-                    )?;
+                    filter::chromashift_frame(&mut chromashift_graph, chromashifted.0, send, args)?;
                     let out = chromashifted.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12307,12 +12049,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.histeq {
                     let src_fmt = (*send).format;
-                    filter::histeq_frame(
-                        &mut histeq_graph,
-                        histeqed.0,
-                        send,
-                        args,
-                    )?;
+                    filter::histeq_frame(&mut histeq_graph, histeqed.0, send, args)?;
                     let out = histeqed.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12339,12 +12076,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.lutyuv {
                     let src_fmt = (*send).format;
-                    filter::lutyuv_frame(
-                        &mut lutyuv_graph,
-                        lutyuved.0,
-                        send,
-                        args,
-                    )?;
+                    filter::lutyuv_frame(&mut lutyuv_graph, lutyuved.0, send, args)?;
                     let out = lutyuved.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12355,12 +12087,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorhold {
                     let src_fmt = (*send).format;
-                    filter::colorhold_frame(
-                        &mut colorhold_graph,
-                        colorholded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorhold_frame(&mut colorhold_graph, colorholded.0, send, args)?;
                     let out = colorholded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12391,12 +12118,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.perspective {
                     let src_fmt = (*send).format;
-                    filter::perspective_frame(
-                        &mut perspective_graph,
-                        perspectived.0,
-                        send,
-                        args,
-                    )?;
+                    filter::perspective_frame(&mut perspective_graph, perspectived.0, send, args)?;
                     let out = perspectived.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12446,12 +12168,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.stereo3d {
                     let src_fmt = (*send).format;
-                    filter::stereo3d_frame(
-                        &mut stereo3d_graph,
-                        stereo3ded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::stereo3d_frame(&mut stereo3d_graph, stereo3ded.0, send, args)?;
                     let out = stereo3ded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12462,12 +12179,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.field {
                     let src_fmt = (*send).format;
-                    filter::field_frame(
-                        &mut field_graph,
-                        fielded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::field_frame(&mut field_graph, fielded.0, send, args)?;
                     let out = fielded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12582,12 +12294,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12754,12 +12461,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorlevels {
                     let src_fmt = (*send).format;
-                    filter::colorlevels_frame(
-                        &mut colorlevels_graph,
-                        colorleveled.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorlevels_frame(&mut colorlevels_graph, colorleveled.0, send, args)?;
                     let out = colorleveled.0;
                     // colorlevels materializes bgr0; fair-pair reverts via libswscale like `--pix-fmt`.
                     if (*out).format != src_fmt {
@@ -12815,22 +12517,12 @@ pub fn transcode(
                     }
                 }
                 if let Some(ref args) = transform.monochrome {
-                    filter::monochrome_frame(
-                        &mut monochrome_graph,
-                        monochromed.0,
-                        send,
-                        args,
-                    )?;
+                    filter::monochrome_frame(&mut monochrome_graph, monochromed.0, send, args)?;
                     send = monochromed.0;
                 }
                 if let Some(ref args) = transform.grayworld {
                     let src_fmt = (*send).format;
-                    filter::grayworld_frame(
-                        &mut grayworld_graph,
-                        grayworlded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::grayworld_frame(&mut grayworld_graph, grayworlded.0, send, args)?;
                     let out = grayworlded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12905,12 +12597,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pixelize {
                     let src_fmt = (*send).format;
-                    filter::pixelize_frame(
-                        &mut pixelize_graph,
-                        pixelized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pixelize_frame(&mut pixelize_graph, pixelized.0, send, args)?;
                     let out = pixelized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12921,12 +12608,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.removegrain {
                     let src_fmt = (*send).format;
-                    filter::removegrain_frame(
-                        &mut removegrain_graph,
-                        removegrained.0,
-                        send,
-                        args,
-                    )?;
+                    filter::removegrain_frame(&mut removegrain_graph, removegrained.0, send, args)?;
                     let out = removegrained.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12937,12 +12619,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.yaepblur {
                     let src_fmt = (*send).format;
-                    filter::yaepblur_frame(
-                        &mut yaepblur_graph,
-                        yaepblurred.0,
-                        send,
-                        args,
-                    )?;
+                    filter::yaepblur_frame(&mut yaepblur_graph, yaepblurred.0, send, args)?;
                     let out = yaepblurred.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12953,12 +12630,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.vibrance {
                     let src_fmt = (*send).format;
-                    filter::vibrance_frame(
-                        &mut vibrance_graph,
-                        vibranced.0,
-                        send,
-                        args,
-                    )?;
+                    filter::vibrance_frame(&mut vibrance_graph, vibranced.0, send, args)?;
                     let out = vibranced.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12969,12 +12641,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.dilation {
                     let src_fmt = (*send).format;
-                    filter::dilation_frame(
-                        &mut dilation_graph,
-                        dilated.0,
-                        send,
-                        args,
-                    )?;
+                    filter::dilation_frame(&mut dilation_graph, dilated.0, send, args)?;
                     let out = dilated.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -12985,12 +12652,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.erosion {
                     let src_fmt = (*send).format;
-                    filter::erosion_frame(
-                        &mut erosion_graph,
-                        eroded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::erosion_frame(&mut erosion_graph, eroded.0, send, args)?;
                     let out = eroded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13001,12 +12663,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorize {
                     let src_fmt = (*send).format;
-                    filter::colorize_frame(
-                        &mut colorize_graph,
-                        colorized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorize_frame(&mut colorize_graph, colorized.0, send, args)?;
                     let out = colorized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13017,12 +12674,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.exposure {
                     let src_fmt = (*send).format;
-                    filter::exposure_frame(
-                        &mut exposure_graph,
-                        exposured.0,
-                        send,
-                        args,
-                    )?;
+                    filter::exposure_frame(&mut exposure_graph, exposured.0, send, args)?;
                     let out = exposured.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13033,12 +12685,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.chromashift {
                     let src_fmt = (*send).format;
-                    filter::chromashift_frame(
-                        &mut chromashift_graph,
-                        chromashifted.0,
-                        send,
-                        args,
-                    )?;
+                    filter::chromashift_frame(&mut chromashift_graph, chromashifted.0, send, args)?;
                     let out = chromashifted.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13081,12 +12728,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.histeq {
                     let src_fmt = (*send).format;
-                    filter::histeq_frame(
-                        &mut histeq_graph,
-                        histeqed.0,
-                        send,
-                        args,
-                    )?;
+                    filter::histeq_frame(&mut histeq_graph, histeqed.0, send, args)?;
                     let out = histeqed.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13113,12 +12755,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.lutyuv {
                     let src_fmt = (*send).format;
-                    filter::lutyuv_frame(
-                        &mut lutyuv_graph,
-                        lutyuved.0,
-                        send,
-                        args,
-                    )?;
+                    filter::lutyuv_frame(&mut lutyuv_graph, lutyuved.0, send, args)?;
                     let out = lutyuved.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13129,12 +12766,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorhold {
                     let src_fmt = (*send).format;
-                    filter::colorhold_frame(
-                        &mut colorhold_graph,
-                        colorholded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorhold_frame(&mut colorhold_graph, colorholded.0, send, args)?;
                     let out = colorholded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13165,12 +12797,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.perspective {
                     let src_fmt = (*send).format;
-                    filter::perspective_frame(
-                        &mut perspective_graph,
-                        perspectived.0,
-                        send,
-                        args,
-                    )?;
+                    filter::perspective_frame(&mut perspective_graph, perspectived.0, send, args)?;
                     let out = perspectived.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13220,12 +12847,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.stereo3d {
                     let src_fmt = (*send).format;
-                    filter::stereo3d_frame(
-                        &mut stereo3d_graph,
-                        stereo3ded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::stereo3d_frame(&mut stereo3d_graph, stereo3ded.0, send, args)?;
                     let out = stereo3ded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13236,12 +12858,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.field {
                     let src_fmt = (*send).format;
-                    filter::field_frame(
-                        &mut field_graph,
-                        fielded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::field_frame(&mut field_graph, fielded.0, send, args)?;
                     let out = fielded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13356,12 +12973,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13460,22 +13072,12 @@ pub fn transcode(
                     }
                 }
                 if let Some(ref args) = transform.monochrome {
-                    filter::monochrome_frame(
-                        &mut monochrome_graph,
-                        monochromed.0,
-                        send,
-                        args,
-                    )?;
+                    filter::monochrome_frame(&mut monochrome_graph, monochromed.0, send, args)?;
                     send = monochromed.0;
                 }
                 if let Some(ref args) = transform.grayworld {
                     let src_fmt = (*send).format;
-                    filter::grayworld_frame(
-                        &mut grayworld_graph,
-                        grayworlded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::grayworld_frame(&mut grayworld_graph, grayworlded.0, send, args)?;
                     let out = grayworlded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13550,12 +13152,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pixelize {
                     let src_fmt = (*send).format;
-                    filter::pixelize_frame(
-                        &mut pixelize_graph,
-                        pixelized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pixelize_frame(&mut pixelize_graph, pixelized.0, send, args)?;
                     let out = pixelized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13566,12 +13163,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.removegrain {
                     let src_fmt = (*send).format;
-                    filter::removegrain_frame(
-                        &mut removegrain_graph,
-                        removegrained.0,
-                        send,
-                        args,
-                    )?;
+                    filter::removegrain_frame(&mut removegrain_graph, removegrained.0, send, args)?;
                     let out = removegrained.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13582,12 +13174,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.yaepblur {
                     let src_fmt = (*send).format;
-                    filter::yaepblur_frame(
-                        &mut yaepblur_graph,
-                        yaepblurred.0,
-                        send,
-                        args,
-                    )?;
+                    filter::yaepblur_frame(&mut yaepblur_graph, yaepblurred.0, send, args)?;
                     let out = yaepblurred.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13598,12 +13185,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.vibrance {
                     let src_fmt = (*send).format;
-                    filter::vibrance_frame(
-                        &mut vibrance_graph,
-                        vibranced.0,
-                        send,
-                        args,
-                    )?;
+                    filter::vibrance_frame(&mut vibrance_graph, vibranced.0, send, args)?;
                     let out = vibranced.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13614,12 +13196,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.dilation {
                     let src_fmt = (*send).format;
-                    filter::dilation_frame(
-                        &mut dilation_graph,
-                        dilated.0,
-                        send,
-                        args,
-                    )?;
+                    filter::dilation_frame(&mut dilation_graph, dilated.0, send, args)?;
                     let out = dilated.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13630,12 +13207,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.erosion {
                     let src_fmt = (*send).format;
-                    filter::erosion_frame(
-                        &mut erosion_graph,
-                        eroded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::erosion_frame(&mut erosion_graph, eroded.0, send, args)?;
                     let out = eroded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13646,12 +13218,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorize {
                     let src_fmt = (*send).format;
-                    filter::colorize_frame(
-                        &mut colorize_graph,
-                        colorized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorize_frame(&mut colorize_graph, colorized.0, send, args)?;
                     let out = colorized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13662,12 +13229,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.exposure {
                     let src_fmt = (*send).format;
-                    filter::exposure_frame(
-                        &mut exposure_graph,
-                        exposured.0,
-                        send,
-                        args,
-                    )?;
+                    filter::exposure_frame(&mut exposure_graph, exposured.0, send, args)?;
                     let out = exposured.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13678,12 +13240,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.chromashift {
                     let src_fmt = (*send).format;
-                    filter::chromashift_frame(
-                        &mut chromashift_graph,
-                        chromashifted.0,
-                        send,
-                        args,
-                    )?;
+                    filter::chromashift_frame(&mut chromashift_graph, chromashifted.0, send, args)?;
                     let out = chromashifted.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13726,12 +13283,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.histeq {
                     let src_fmt = (*send).format;
-                    filter::histeq_frame(
-                        &mut histeq_graph,
-                        histeqed.0,
-                        send,
-                        args,
-                    )?;
+                    filter::histeq_frame(&mut histeq_graph, histeqed.0, send, args)?;
                     let out = histeqed.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13758,12 +13310,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.lutyuv {
                     let src_fmt = (*send).format;
-                    filter::lutyuv_frame(
-                        &mut lutyuv_graph,
-                        lutyuved.0,
-                        send,
-                        args,
-                    )?;
+                    filter::lutyuv_frame(&mut lutyuv_graph, lutyuved.0, send, args)?;
                     let out = lutyuved.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13774,12 +13321,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorhold {
                     let src_fmt = (*send).format;
-                    filter::colorhold_frame(
-                        &mut colorhold_graph,
-                        colorholded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorhold_frame(&mut colorhold_graph, colorholded.0, send, args)?;
                     let out = colorholded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13810,12 +13352,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.perspective {
                     let src_fmt = (*send).format;
-                    filter::perspective_frame(
-                        &mut perspective_graph,
-                        perspectived.0,
-                        send,
-                        args,
-                    )?;
+                    filter::perspective_frame(&mut perspective_graph, perspectived.0, send, args)?;
                     let out = perspectived.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13865,12 +13402,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.stereo3d {
                     let src_fmt = (*send).format;
-                    filter::stereo3d_frame(
-                        &mut stereo3d_graph,
-                        stereo3ded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::stereo3d_frame(&mut stereo3d_graph, stereo3ded.0, send, args)?;
                     let out = stereo3ded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -13881,12 +13413,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.field {
                     let src_fmt = (*send).format;
-                    filter::field_frame(
-                        &mut field_graph,
-                        fielded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::field_frame(&mut field_graph, fielded.0, send, args)?;
                     let out = fielded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14001,12 +13528,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14138,12 +13660,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pixelize {
                     let src_fmt = (*send).format;
-                    filter::pixelize_frame(
-                        &mut pixelize_graph,
-                        pixelized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pixelize_frame(&mut pixelize_graph, pixelized.0, send, args)?;
                     let out = pixelized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14154,12 +13671,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.removegrain {
                     let src_fmt = (*send).format;
-                    filter::removegrain_frame(
-                        &mut removegrain_graph,
-                        removegrained.0,
-                        send,
-                        args,
-                    )?;
+                    filter::removegrain_frame(&mut removegrain_graph, removegrained.0, send, args)?;
                     let out = removegrained.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14170,12 +13682,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.yaepblur {
                     let src_fmt = (*send).format;
-                    filter::yaepblur_frame(
-                        &mut yaepblur_graph,
-                        yaepblurred.0,
-                        send,
-                        args,
-                    )?;
+                    filter::yaepblur_frame(&mut yaepblur_graph, yaepblurred.0, send, args)?;
                     let out = yaepblurred.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14186,12 +13693,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.vibrance {
                     let src_fmt = (*send).format;
-                    filter::vibrance_frame(
-                        &mut vibrance_graph,
-                        vibranced.0,
-                        send,
-                        args,
-                    )?;
+                    filter::vibrance_frame(&mut vibrance_graph, vibranced.0, send, args)?;
                     let out = vibranced.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14202,12 +13704,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.dilation {
                     let src_fmt = (*send).format;
-                    filter::dilation_frame(
-                        &mut dilation_graph,
-                        dilated.0,
-                        send,
-                        args,
-                    )?;
+                    filter::dilation_frame(&mut dilation_graph, dilated.0, send, args)?;
                     let out = dilated.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14218,12 +13715,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.erosion {
                     let src_fmt = (*send).format;
-                    filter::erosion_frame(
-                        &mut erosion_graph,
-                        eroded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::erosion_frame(&mut erosion_graph, eroded.0, send, args)?;
                     let out = eroded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14234,12 +13726,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorize {
                     let src_fmt = (*send).format;
-                    filter::colorize_frame(
-                        &mut colorize_graph,
-                        colorized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorize_frame(&mut colorize_graph, colorized.0, send, args)?;
                     let out = colorized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14250,12 +13737,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.exposure {
                     let src_fmt = (*send).format;
-                    filter::exposure_frame(
-                        &mut exposure_graph,
-                        exposured.0,
-                        send,
-                        args,
-                    )?;
+                    filter::exposure_frame(&mut exposure_graph, exposured.0, send, args)?;
                     let out = exposured.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14266,12 +13748,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.chromashift {
                     let src_fmt = (*send).format;
-                    filter::chromashift_frame(
-                        &mut chromashift_graph,
-                        chromashifted.0,
-                        send,
-                        args,
-                    )?;
+                    filter::chromashift_frame(&mut chromashift_graph, chromashifted.0, send, args)?;
                     let out = chromashifted.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14314,12 +13791,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.histeq {
                     let src_fmt = (*send).format;
-                    filter::histeq_frame(
-                        &mut histeq_graph,
-                        histeqed.0,
-                        send,
-                        args,
-                    )?;
+                    filter::histeq_frame(&mut histeq_graph, histeqed.0, send, args)?;
                     let out = histeqed.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14346,12 +13818,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.lutyuv {
                     let src_fmt = (*send).format;
-                    filter::lutyuv_frame(
-                        &mut lutyuv_graph,
-                        lutyuved.0,
-                        send,
-                        args,
-                    )?;
+                    filter::lutyuv_frame(&mut lutyuv_graph, lutyuved.0, send, args)?;
                     let out = lutyuved.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14362,12 +13829,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorhold {
                     let src_fmt = (*send).format;
-                    filter::colorhold_frame(
-                        &mut colorhold_graph,
-                        colorholded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorhold_frame(&mut colorhold_graph, colorholded.0, send, args)?;
                     let out = colorholded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14398,12 +13860,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.perspective {
                     let src_fmt = (*send).format;
-                    filter::perspective_frame(
-                        &mut perspective_graph,
-                        perspectived.0,
-                        send,
-                        args,
-                    )?;
+                    filter::perspective_frame(&mut perspective_graph, perspectived.0, send, args)?;
                     let out = perspectived.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14453,12 +13910,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.stereo3d {
                     let src_fmt = (*send).format;
-                    filter::stereo3d_frame(
-                        &mut stereo3d_graph,
-                        stereo3ded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::stereo3d_frame(&mut stereo3d_graph, stereo3ded.0, send, args)?;
                     let out = stereo3ded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14469,12 +13921,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.field {
                     let src_fmt = (*send).format;
-                    filter::field_frame(
-                        &mut field_graph,
-                        fielded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::field_frame(&mut field_graph, fielded.0, send, args)?;
                     let out = fielded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14589,12 +14036,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14718,12 +14160,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pixelize {
                     let src_fmt = (*send).format;
-                    filter::pixelize_frame(
-                        &mut pixelize_graph,
-                        pixelized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pixelize_frame(&mut pixelize_graph, pixelized.0, send, args)?;
                     let out = pixelized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14734,12 +14171,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.removegrain {
                     let src_fmt = (*send).format;
-                    filter::removegrain_frame(
-                        &mut removegrain_graph,
-                        removegrained.0,
-                        send,
-                        args,
-                    )?;
+                    filter::removegrain_frame(&mut removegrain_graph, removegrained.0, send, args)?;
                     let out = removegrained.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14750,12 +14182,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.yaepblur {
                     let src_fmt = (*send).format;
-                    filter::yaepblur_frame(
-                        &mut yaepblur_graph,
-                        yaepblurred.0,
-                        send,
-                        args,
-                    )?;
+                    filter::yaepblur_frame(&mut yaepblur_graph, yaepblurred.0, send, args)?;
                     let out = yaepblurred.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14766,12 +14193,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.vibrance {
                     let src_fmt = (*send).format;
-                    filter::vibrance_frame(
-                        &mut vibrance_graph,
-                        vibranced.0,
-                        send,
-                        args,
-                    )?;
+                    filter::vibrance_frame(&mut vibrance_graph, vibranced.0, send, args)?;
                     let out = vibranced.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14782,12 +14204,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.dilation {
                     let src_fmt = (*send).format;
-                    filter::dilation_frame(
-                        &mut dilation_graph,
-                        dilated.0,
-                        send,
-                        args,
-                    )?;
+                    filter::dilation_frame(&mut dilation_graph, dilated.0, send, args)?;
                     let out = dilated.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14798,12 +14215,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.erosion {
                     let src_fmt = (*send).format;
-                    filter::erosion_frame(
-                        &mut erosion_graph,
-                        eroded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::erosion_frame(&mut erosion_graph, eroded.0, send, args)?;
                     let out = eroded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14814,12 +14226,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorize {
                     let src_fmt = (*send).format;
-                    filter::colorize_frame(
-                        &mut colorize_graph,
-                        colorized.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorize_frame(&mut colorize_graph, colorized.0, send, args)?;
                     let out = colorized.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14830,12 +14237,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.exposure {
                     let src_fmt = (*send).format;
-                    filter::exposure_frame(
-                        &mut exposure_graph,
-                        exposured.0,
-                        send,
-                        args,
-                    )?;
+                    filter::exposure_frame(&mut exposure_graph, exposured.0, send, args)?;
                     let out = exposured.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14846,12 +14248,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.chromashift {
                     let src_fmt = (*send).format;
-                    filter::chromashift_frame(
-                        &mut chromashift_graph,
-                        chromashifted.0,
-                        send,
-                        args,
-                    )?;
+                    filter::chromashift_frame(&mut chromashift_graph, chromashifted.0, send, args)?;
                     let out = chromashifted.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14894,12 +14291,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.histeq {
                     let src_fmt = (*send).format;
-                    filter::histeq_frame(
-                        &mut histeq_graph,
-                        histeqed.0,
-                        send,
-                        args,
-                    )?;
+                    filter::histeq_frame(&mut histeq_graph, histeqed.0, send, args)?;
                     let out = histeqed.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14926,12 +14318,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.lutyuv {
                     let src_fmt = (*send).format;
-                    filter::lutyuv_frame(
-                        &mut lutyuv_graph,
-                        lutyuved.0,
-                        send,
-                        args,
-                    )?;
+                    filter::lutyuv_frame(&mut lutyuv_graph, lutyuved.0, send, args)?;
                     let out = lutyuved.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14942,12 +14329,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.colorhold {
                     let src_fmt = (*send).format;
-                    filter::colorhold_frame(
-                        &mut colorhold_graph,
-                        colorholded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::colorhold_frame(&mut colorhold_graph, colorholded.0, send, args)?;
                     let out = colorholded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -14978,12 +14360,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.perspective {
                     let src_fmt = (*send).format;
-                    filter::perspective_frame(
-                        &mut perspective_graph,
-                        perspectived.0,
-                        send,
-                        args,
-                    )?;
+                    filter::perspective_frame(&mut perspective_graph, perspectived.0, send, args)?;
                     let out = perspectived.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -15033,12 +14410,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.stereo3d {
                     let src_fmt = (*send).format;
-                    filter::stereo3d_frame(
-                        &mut stereo3d_graph,
-                        stereo3ded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::stereo3d_frame(&mut stereo3d_graph, stereo3ded.0, send, args)?;
                     let out = stereo3ded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -15049,12 +14421,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.field {
                     let src_fmt = (*send).format;
-                    filter::field_frame(
-                        &mut field_graph,
-                        fielded.0,
-                        send,
-                        args,
-                    )?;
+                    filter::field_frame(&mut field_graph, fielded.0, send, args)?;
                     let out = fielded.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -15169,12 +14536,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.pseudocolor {
                     let src_fmt = (*send).format;
-                    filter::pseudocolor_frame(
-                        &mut pseudocolor_graph,
-                        pseudocolored.0,
-                        send,
-                        args,
-                    )?;
+                    filter::pseudocolor_frame(&mut pseudocolor_graph, pseudocolored.0, send, args)?;
                     let out = pseudocolored.0;
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;

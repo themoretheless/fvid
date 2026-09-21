@@ -19,9 +19,7 @@ impl TransposeMode {
             "cclock" => Ok(Self::CClock),
             "clock_flip" => Ok(Self::ClockFlip),
             "cclock_flip" => Ok(Self::CClockFlip),
-            _ => Err(
-                "transpose must be clock, cclock, clock_flip, or cclock_flip".into(),
-            ),
+            _ => Err("transpose must be clock, cclock, clock_flip, or cclock_flip".into()),
         }
     }
 
@@ -59,7 +57,9 @@ impl PadRect {
             || self.width < input_w
             || self.height < input_h
         {
-            return Err("pad size must contain the input and stay within 1..=8192 x 1..=4320".into());
+            return Err(
+                "pad size must contain the input and stay within 1..=8192 x 1..=4320".into(),
+            );
         }
         if self.width % 2 != 0 || self.height % 2 != 0 || self.x % 2 != 0 || self.y % 2 != 0 {
             return Err("pad size and origin must be even for 4:2:0 chroma".into());
@@ -228,8 +228,7 @@ impl OverlayGraph {
                 ),
                 "create overlay main buffer",
             )?;
-            let movie_ctx =
-                avfilter_graph_alloc_filter(built.graph, movie, c"movie".as_ptr());
+            let movie_ctx = avfilter_graph_alloc_filter(built.graph, movie, c"movie".as_ptr());
             if movie_ctx.is_null() {
                 return Err("allocate movie filter failed".into());
             }
@@ -427,8 +426,7 @@ impl XfadeGraph {
                 "create fps after movie for xfade",
             )?;
             let mut xfade_ctx = ptr::null_mut();
-            let xfade_args =
-                format!("transition={transition}:duration={duration}:offset={offset}");
+            let xfade_args = format!("transition={transition}:duration={duration}:offset={offset}");
             let xfade_args = cstring(&xfade_args)?;
             check(
                 avfilter_graph_create_filter(
@@ -512,7 +510,9 @@ impl FilterGraph {
             let filter = avfilter_get_by_name(cstring(filter_name)?.as_ptr());
             let buffersink = avfilter_get_by_name(c"buffersink".as_ptr());
             if buffersrc.is_null() || filter.is_null() || buffersink.is_null() {
-                return Err(format!("{filter_name} filter unavailable in linked libavfilter"));
+                return Err(format!(
+                    "{filter_name} filter unavailable in linked libavfilter"
+                ));
             }
             let graph = avfilter_graph_alloc();
             if graph.is_null() {
@@ -952,8 +952,14 @@ impl FilterGraph {
                 ),
                 "create buffer sink",
             )?;
-            check(avfilter_link(built.src, 0, mid, 0), "link buffer to subtitles")?;
-            check(avfilter_link(mid, 0, built.sink, 0), "link subtitles to sink")?;
+            check(
+                avfilter_link(built.src, 0, mid, 0),
+                "link buffer to subtitles",
+            )?;
+            check(
+                avfilter_link(mid, 0, built.sink, 0),
+                "link subtitles to sink",
+            )?;
             check(
                 avfilter_graph_config(built.graph, ptr::null_mut()),
                 "configure subtitles graph",
@@ -1227,9 +1233,18 @@ impl FramepackGraph {
                 ),
                 "create framepack sink",
             )?;
-            check(avfilter_link(built.src_left, 0, mid, 0), "link left to framepack")?;
-            check(avfilter_link(built.src_right, 0, mid, 1), "link right to framepack")?;
-            check(avfilter_link(mid, 0, built.sink, 0), "link framepack to sink")?;
+            check(
+                avfilter_link(built.src_left, 0, mid, 0),
+                "link left to framepack",
+            )?;
+            check(
+                avfilter_link(built.src_right, 0, mid, 1),
+                "link right to framepack",
+            )?;
+            check(
+                avfilter_link(mid, 0, built.sink, 0),
+                "link framepack to sink",
+            )?;
             check(
                 avfilter_graph_config(built.graph, ptr::null_mut()),
                 "configure framepack graph",
@@ -1367,9 +1382,14 @@ pub(crate) unsafe fn apply_video_filter(
             AVRational { num: 1, den: 1 }
         };
         let needs_new = match graph.as_ref() {
-            Some(existing) => {
-                !existing.matches(filter_name, filter_args, s.width, s.height, s.format, time_base)
-            }
+            Some(existing) => !existing.matches(
+                filter_name,
+                filter_args,
+                s.width,
+                s.height,
+                s.format,
+                time_base,
+            ),
             None => true,
         };
         if needs_new {
@@ -1381,7 +1401,9 @@ pub(crate) unsafe fn apply_video_filter(
                 sar,
             )?);
         }
-        let active = graph.as_mut().ok_or_else(|| format!("{filter_name} graph missing"))?;
+        let active = graph
+            .as_mut()
+            .ok_or_else(|| format!("{filter_name} graph missing"))?;
         check(
             av_buffersrc_write_frame(active.src, src),
             &format!("feed {filter_name} source"),
@@ -1461,9 +1483,7 @@ pub(crate) fn validate_zscale_args(args: &str) -> Result<()> {
         .bytes()
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_'))
     {
-        return Err(
-            "zscale args may only contain [A-Za-z0-9=_:-] (FFmpeg zscale= options)".into(),
-        );
+        return Err("zscale args may only contain [A-Za-z0-9=_:-] (FFmpeg zscale= options)".into());
     }
     Ok(())
 }
@@ -1520,10 +1540,16 @@ pub(crate) unsafe fn apply_parsed_video_filter(
         };
         if needs_new {
             *graph = Some(FilterGraph::open_parsed_chain(
-                filter_name, chain, s, time_base, sar,
+                filter_name,
+                chain,
+                s,
+                time_base,
+                sar,
             )?);
         }
-        let active = graph.as_mut().ok_or_else(|| format!("{filter_name} graph missing"))?;
+        let active = graph
+            .as_mut()
+            .ok_or_else(|| format!("{filter_name} graph missing"))?;
         check(
             av_buffersrc_write_frame(active.src, src),
             &format!("feed {filter_name} source"),
@@ -1545,7 +1571,6 @@ pub(crate) unsafe fn apply_parsed_video_filter(
         Ok(())
     }
 }
-
 
 pub(crate) fn validate_tonemap_args(args: &str) -> Result<()> {
     if args.is_empty() || args.len() > 128 || args.contains('\0') {
@@ -1593,11 +1618,7 @@ pub(crate) unsafe fn tblend_frame(
         };
         if needs_new {
             *graph = Some(FilterGraph::open_from_frame(
-                "tblend",
-                args,
-                s,
-                time_base,
-                sar,
+                "tblend", args, s, time_base, sar,
             )?);
         }
         let active = graph.as_mut().ok_or("tblend graph missing")?;
@@ -1632,9 +1653,7 @@ pub(crate) fn validate_tblend_args(args: &str) -> Result<()> {
         .bytes()
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_'))
     {
-        return Err(
-            "tblend args may only contain [A-Za-z0-9=_:-] (FFmpeg tblend= options)".into(),
-        );
+        return Err("tblend args may only contain [A-Za-z0-9=_:-] (FFmpeg tblend= options)".into());
     }
     Ok(())
 }
@@ -1669,11 +1688,7 @@ pub(crate) unsafe fn tmix_push_frame(
         };
         if needs_new {
             *graph = Some(FilterGraph::open_from_frame(
-                "tmix",
-                args,
-                s,
-                time_base,
-                sar,
+                "tmix", args, s, time_base, sar,
             )?);
         }
         let active = graph.as_mut().ok_or("tmix graph missing")?;
@@ -1733,12 +1748,11 @@ pub(crate) fn validate_tmix_args(args: &str) -> Result<()> {
     if args.is_empty() || args.len() > 128 || args.contains('\0') {
         return Err("tmix args must be 1..=128 bytes without NUL".into());
     }
-    if !args.bytes().all(|b| {
-        b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.' | b' ')
-    }) {
-        return Err(
-            "tmix args may only contain [A-Za-z0-9=.:_ -] (FFmpeg tmix= options)".into(),
-        );
+    if !args
+        .bytes()
+        .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.' | b' '))
+    {
+        return Err("tmix args may only contain [A-Za-z0-9=.:_ -] (FFmpeg tmix= options)".into());
     }
     Ok(())
 }
@@ -1789,7 +1803,10 @@ pub(crate) unsafe fn yadif_push_frame(
             )?);
         }
         let active = graph.as_mut().ok_or("yadif graph missing")?;
-        check(av_buffersrc_write_frame(active.src, src), "feed yadif source")?;
+        check(
+            av_buffersrc_write_frame(active.src, src),
+            "feed yadif source",
+        )?;
         av_frame_unref(dst);
         let code = av_buffersink_get_frame(active.sink, dst);
         if code == -libc::EAGAIN || code == EOF {
@@ -1846,9 +1863,7 @@ pub(crate) fn validate_yadif_args(args: &str) -> Result<()> {
         .bytes()
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
     {
-        return Err(
-            "yadif args may only contain [A-Za-z0-9=.:_-] (FFmpeg yadif= options)".into(),
-        );
+        return Err("yadif args may only contain [A-Za-z0-9=.:_-] (FFmpeg yadif= options)".into());
     }
     Ok(())
 }
@@ -1887,7 +1902,10 @@ pub(crate) unsafe fn bwdif_push_frame(
             )?);
         }
         let active = graph.as_mut().ok_or("bwdif graph missing")?;
-        check(av_buffersrc_write_frame(active.src, src), "feed bwdif source")?;
+        check(
+            av_buffersrc_write_frame(active.src, src),
+            "feed bwdif source",
+        )?;
         av_frame_unref(dst);
         let code = av_buffersink_get_frame(active.sink, dst);
         if code == -libc::EAGAIN || code == EOF {
@@ -1944,9 +1962,7 @@ pub(crate) fn validate_bwdif_args(args: &str) -> Result<()> {
         .bytes()
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
     {
-        return Err(
-            "bwdif args may only contain [A-Za-z0-9=.:_-] (FFmpeg bwdif= options)".into(),
-        );
+        return Err("bwdif args may only contain [A-Za-z0-9=.:_-] (FFmpeg bwdif= options)".into());
     }
     Ok(())
 }
@@ -1985,7 +2001,10 @@ pub(crate) unsafe fn w3fdif_push_frame(
             )?);
         }
         let active = graph.as_mut().ok_or("w3fdif graph missing")?;
-        check(av_buffersrc_write_frame(active.src, src), "feed w3fdif source")?;
+        check(
+            av_buffersrc_write_frame(active.src, src),
+            "feed w3fdif source",
+        )?;
         av_frame_unref(dst);
         let code = av_buffersink_get_frame(active.sink, dst);
         if code == -libc::EAGAIN || code == EOF {
@@ -2084,9 +2103,7 @@ pub(crate) fn validate_gblur_args(args: &str) -> Result<()> {
         .bytes()
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
     {
-        return Err(
-            "gblur args may only contain [A-Za-z0-9=.:_-] (FFmpeg gblur= options)".into(),
-        );
+        return Err("gblur args may only contain [A-Za-z0-9=.:_-] (FFmpeg gblur= options)".into());
     }
     Ok(())
 }
@@ -2269,9 +2286,7 @@ pub(crate) fn validate_sab_args(args: &str) -> Result<()> {
         .bytes()
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
     {
-        return Err(
-            "sab args may only contain [A-Za-z0-9=.:_-] (FFmpeg sab= options)".into(),
-        );
+        return Err("sab args may only contain [A-Za-z0-9=.:_-] (FFmpeg sab= options)".into());
     }
     Ok(())
 }
@@ -2575,9 +2590,7 @@ pub(crate) fn validate_il_args(args: &str) -> Result<()> {
         .bytes()
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
     {
-        return Err(
-            "il args may only contain [A-Za-z0-9=.:_-] (FFmpeg il= options)".into(),
-        );
+        return Err("il args may only contain [A-Za-z0-9=.:_-] (FFmpeg il= options)".into());
     }
     Ok(())
 }
@@ -2643,7 +2656,10 @@ pub(crate) unsafe fn estdif_push_frame(
             )?);
         }
         let active = graph.as_mut().ok_or("estdif graph missing")?;
-        check(av_buffersrc_write_frame(active.src, src), "feed estdif source")?;
+        check(
+            av_buffersrc_write_frame(active.src, src),
+            "feed estdif source",
+        )?;
         av_frame_unref(dst);
         let code = av_buffersink_get_frame(active.sink, dst);
         if code == -libc::EAGAIN || code == EOF {
@@ -2737,11 +2753,18 @@ pub(crate) unsafe fn tinterlace_push_frame(
         };
         if needs_new {
             *graph = Some(FilterGraph::open_from_frame(
-                "tinterlace", args, s, time_base, sar,
+                "tinterlace",
+                args,
+                s,
+                time_base,
+                sar,
             )?);
         }
         let active = graph.as_mut().ok_or("tinterlace graph missing")?;
-        check(av_buffersrc_write_frame(active.src, src), "feed tinterlace source")?;
+        check(
+            av_buffersrc_write_frame(active.src, src),
+            "feed tinterlace source",
+        )?;
         av_frame_unref(dst);
         let code = av_buffersink_get_frame(active.sink, dst);
         if code == -libc::EAGAIN || code == EOF {
@@ -2908,7 +2931,11 @@ pub(crate) fn validate_separatefields_args(args: &str) -> Result<()> {
 }
 
 /// Output size after `separatefields` (height halved; width unchanged).
-pub(crate) fn separatefields_output_size(width: u32, height: u32, args: &str) -> Result<(u32, u32)> {
+pub(crate) fn separatefields_output_size(
+    width: u32,
+    height: u32,
+    args: &str,
+) -> Result<(u32, u32)> {
     validate_separatefields_args(args)?;
     let out_h = height / 2;
     if out_h == 0 {
@@ -2941,23 +2968,14 @@ pub(crate) unsafe fn weave_push_frame(
             AVRational { num: 1, den: 1 }
         };
         let needs_new = match graph.as_ref() {
-            Some(existing) => !existing.matches(
-                "weave",
-                args,
-                s.width,
-                s.height,
-                s.format,
-                time_base,
-            ),
+            Some(existing) => {
+                !existing.matches("weave", args, s.width, s.height, s.format, time_base)
+            }
             None => true,
         };
         if needs_new {
             *graph = Some(FilterGraph::open_from_frame(
-                "weave",
-                args,
-                s,
-                time_base,
-                sar,
+                "weave", args, s, time_base, sar,
             )?);
         }
         let active = graph.as_mut().ok_or("weave graph missing")?;
@@ -3017,9 +3035,7 @@ pub(crate) fn validate_weave_args(args: &str) -> Result<()> {
         .bytes()
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
     {
-        return Err(
-            "weave args may only contain [A-Za-z0-9=.:_-] (FFmpeg weave= options)".into(),
-        );
+        return Err("weave args may only contain [A-Za-z0-9=.:_-] (FFmpeg weave= options)".into());
     }
     Ok(())
 }
@@ -3057,14 +3073,9 @@ pub(crate) unsafe fn doubleweave_push_frame(
             AVRational { num: 1, den: 1 }
         };
         let needs_new = match graph.as_ref() {
-            Some(existing) => !existing.matches(
-                "doubleweave",
-                args,
-                s.width,
-                s.height,
-                s.format,
-                time_base,
-            ),
+            Some(existing) => {
+                !existing.matches("doubleweave", args, s.width, s.height, s.format, time_base)
+            }
             None => true,
         };
         if needs_new {
@@ -3174,18 +3185,11 @@ pub(crate) unsafe fn framepack_push_frame(
             AVRational { num: 1, den: 1 }
         };
         let needs_new = match graph.as_ref() {
-            Some(existing) => {
-                !existing.matches(args, s.width, s.height, s.format, time_base)
-            }
+            Some(existing) => !existing.matches(args, s.width, s.height, s.format, time_base),
             None => true,
         };
         if needs_new {
-            *graph = Some(FramepackGraph::open_from_frame(
-                args,
-                s,
-                time_base,
-                sar,
-            )?);
+            *graph = Some(FramepackGraph::open_from_frame(args, s, time_base, sar)?);
         }
         let active = graph.as_mut().ok_or("framepack graph missing")?;
         active.write_and_drain(dst, src, |packed| emit(packed))?;
@@ -3227,11 +3231,15 @@ pub(crate) fn framepack_output_size(width: u32, height: u32, args: &str) -> Resu
     let mode = parse_framepack_format(args)?;
     match mode {
         FramepackFormat::Sbs | FramepackFormat::Columns => {
-            let out_w = width.checked_mul(2).ok_or("framepack output width overflow")?;
+            let out_w = width
+                .checked_mul(2)
+                .ok_or("framepack output width overflow")?;
             Ok((out_w, height))
         }
         FramepackFormat::Tab | FramepackFormat::Lines => {
-            let out_h = height.checked_mul(2).ok_or("framepack output height overflow")?;
+            let out_h = height
+                .checked_mul(2)
+                .ok_or("framepack output height overflow")?;
             Ok((width, out_h))
         }
         FramepackFormat::Frameseq => Ok((width, height)),
@@ -3262,23 +3270,14 @@ pub(crate) unsafe fn telecine_push_frame(
             AVRational { num: 1, den: 1 }
         };
         let needs_new = match graph.as_ref() {
-            Some(existing) => !existing.matches(
-                "telecine",
-                args,
-                s.width,
-                s.height,
-                s.format,
-                time_base,
-            ),
+            Some(existing) => {
+                !existing.matches("telecine", args, s.width, s.height, s.format, time_base)
+            }
             None => true,
         };
         if needs_new {
             *graph = Some(FilterGraph::open_cfr_from_frame(
-                "telecine",
-                args,
-                s,
-                time_base,
-                sar,
+                "telecine", args, s, time_base, sar,
             )?);
         }
         let active = graph.as_mut().ok_or("telecine graph missing")?;
@@ -3372,23 +3371,14 @@ pub(crate) unsafe fn pullup_push_frame(
             AVRational { num: 1, den: 1 }
         };
         let needs_new = match graph.as_ref() {
-            Some(existing) => !existing.matches(
-                "pullup",
-                args,
-                s.width,
-                s.height,
-                s.format,
-                time_base,
-            ),
+            Some(existing) => {
+                !existing.matches("pullup", args, s.width, s.height, s.format, time_base)
+            }
             None => true,
         };
         if needs_new {
             *graph = Some(FilterGraph::open_cfr_from_frame(
-                "pullup",
-                args,
-                s,
-                time_base,
-                sar,
+                "pullup", args, s, time_base, sar,
             )?);
         }
         let active = graph.as_mut().ok_or("pullup graph missing")?;
@@ -3482,23 +3472,14 @@ pub(crate) unsafe fn decimate_push_frame(
             AVRational { num: 1, den: 1 }
         };
         let needs_new = match graph.as_ref() {
-            Some(existing) => !existing.matches(
-                "decimate",
-                args,
-                s.width,
-                s.height,
-                s.format,
-                time_base,
-            ),
+            Some(existing) => {
+                !existing.matches("decimate", args, s.width, s.height, s.format, time_base)
+            }
             None => true,
         };
         if needs_new {
             *graph = Some(FilterGraph::open_cfr_from_frame(
-                "decimate",
-                args,
-                s,
-                time_base,
-                sar,
+                "decimate", args, s, time_base, sar,
             )?);
         }
         let active = graph.as_mut().ok_or("decimate graph missing")?;
@@ -3592,14 +3573,9 @@ pub(crate) unsafe fn mpdecimate_push_frame(
             AVRational { num: 1, den: 1 }
         };
         let needs_new = match graph.as_ref() {
-            Some(existing) => !existing.matches(
-                "mpdecimate",
-                args,
-                s.width,
-                s.height,
-                s.format,
-                time_base,
-            ),
+            Some(existing) => {
+                !existing.matches("mpdecimate", args, s.width, s.height, s.format, time_base)
+            }
             None => true,
         };
         if needs_new {
@@ -3702,14 +3678,9 @@ pub(crate) unsafe fn framestep_push_frame(
             AVRational { num: 1, den: 1 }
         };
         let needs_new = match graph.as_ref() {
-            Some(existing) => !existing.matches(
-                "framestep",
-                args,
-                s.width,
-                s.height,
-                s.format,
-                time_base,
-            ),
+            Some(existing) => {
+                !existing.matches("framestep", args, s.width, s.height, s.format, time_base)
+            }
             None => true,
         };
         if needs_new {
@@ -3842,9 +3813,7 @@ pub(crate) fn validate_tile_args(args: &str) -> Result<()> {
         .bytes()
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
     {
-        return Err(
-            "tile args may only contain [A-Za-z0-9=.:_-] (FFmpeg tile= options)".into(),
-        );
+        return Err("tile args may only contain [A-Za-z0-9=.:_-] (FFmpeg tile= options)".into());
     }
     let _ = parse_tile_layout(args)?;
     Ok(())
@@ -3887,7 +3856,9 @@ pub(crate) unsafe fn tile_push_frame(
             AVRational { num: 1, den: 1 }
         };
         let needs_new = match graph.as_ref() {
-            Some(existing) => !existing.matches("tile", args, s.width, s.height, s.format, time_base),
+            Some(existing) => {
+                !existing.matches("tile", args, s.width, s.height, s.format, time_base)
+            }
             None => true,
         };
         if needs_new {
@@ -4128,8 +4099,7 @@ pub(crate) fn validate_shuffleframes_args(args: &str) -> Result<()> {
         return Err("shuffleframes args must be 0..=128 bytes without NUL".into());
     }
     if !args.bytes().all(|b| {
-        b.is_ascii_alphanumeric()
-            || matches!(b, b'=' | b':' | b'-' | b'_' | b'.' | b' ' | b'|')
+        b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.' | b' ' | b'|')
     }) || args
         .bytes()
         .any(|b| matches!(b, b';' | b'\'' | b'"' | b'`' | b'&' | b'$'))
@@ -4293,11 +4263,7 @@ pub(crate) unsafe fn reverse_push_frame(
         };
         if needs_new {
             *graph = Some(FilterGraph::open_cfr_from_frame(
-                "reverse",
-                args,
-                s,
-                time_base,
-                sar,
+                "reverse", args, s, time_base, sar,
             )?);
         }
         let active = graph.as_mut().ok_or("reverse graph missing")?;
@@ -4411,11 +4377,7 @@ pub(crate) unsafe fn loop_push_frame(
         };
         if needs_new {
             *graph = Some(FilterGraph::open_cfr_from_frame(
-                "loop",
-                args,
-                s,
-                time_base,
-                sar,
+                "loop", args, s, time_base, sar,
             )?);
         }
         let active = graph.as_mut().ok_or("loop graph missing")?;
@@ -4653,9 +4615,7 @@ pub(crate) fn validate_phase_args(args: &str) -> Result<()> {
         .bytes()
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
     {
-        return Err(
-            "phase args may only contain [A-Za-z0-9=.:_-] (FFmpeg phase= options)".into(),
-        );
+        return Err("phase args may only contain [A-Za-z0-9=.:_-] (FFmpeg phase= options)".into());
     }
     Ok(())
 }
@@ -4694,7 +4654,10 @@ pub(crate) unsafe fn phase_push_frame(
             )?);
         }
         let active = graph.as_mut().ok_or("phase graph missing")?;
-        check(av_buffersrc_write_frame(active.src, src), "feed phase source")?;
+        check(
+            av_buffersrc_write_frame(active.src, src),
+            "feed phase source",
+        )?;
         av_frame_unref(dst);
         let code = av_buffersink_get_frame(active.sink, dst);
         if code == -libc::EAGAIN || code == EOF {
@@ -4781,7 +4744,10 @@ pub(crate) unsafe fn phase_apply_frame(
             )?);
         }
         let active = graph.as_mut().ok_or("phase graph missing")?;
-        check(av_buffersrc_write_frame(active.src, src), "feed phase source")?;
+        check(
+            av_buffersrc_write_frame(active.src, src),
+            "feed phase source",
+        )?;
         av_frame_unref(dst);
         let code = av_buffersink_get_frame(active.sink, dst);
         if code == -libc::EAGAIN || code == EOF {
@@ -4818,9 +4784,10 @@ pub(crate) fn validate_vignette_args(args: &str) -> Result<()> {
     if args.len() > 128 || args.contains('\0') {
         return Err("vignette args must be 0..=128 bytes without NUL".into());
     }
-    if !args.bytes().all(|b| {
-        b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.' | b'/')
-    }) {
+    if !args
+        .bytes()
+        .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.' | b'/'))
+    {
         return Err(
             "vignette args may only contain [A-Za-z0-9=.:_/-] (FFmpeg vignette= options)".into(),
         );
@@ -5013,9 +4980,7 @@ pub(crate) fn validate_sobel_args(args: &str) -> Result<()> {
         .bytes()
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
     {
-        return Err(
-            "sobel args may only contain [A-Za-z0-9=.:_-] (FFmpeg sobel= options)".into(),
-        );
+        return Err("sobel args may only contain [A-Za-z0-9=.:_-] (FFmpeg sobel= options)".into());
     }
     Ok(())
 }
@@ -5439,9 +5404,10 @@ pub(crate) fn validate_monochrome_args(args: &str) -> Result<()> {
     if args.len() > 128 || args.contains('\0') {
         return Err("monochrome args must be 0..=128 bytes without NUL".into());
     }
-    if !args.bytes().all(|b| {
-        b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.')
-    }) {
+    if !args
+        .bytes()
+        .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
+    {
         return Err(
             "monochrome args may only contain [A-Za-z0-9=.:_-] (FFmpeg monochrome= options)".into(),
         );
@@ -5474,11 +5440,25 @@ pub(crate) fn validate_grayworld_args(args: &str) -> Result<()> {
         || args == "0"
         || args.bytes().all(|b| {
             b.is_ascii_alphanumeric()
-                || matches!(b, b'=' | b':' | b'-' | b'_' | b'.' | b'\'' | b'(' | b')' | b'+' | b',' | b'/' | b' ')
+                || matches!(
+                    b,
+                    b'=' | b':'
+                        | b'-'
+                        | b'_'
+                        | b'.'
+                        | b'\''
+                        | b'('
+                        | b')'
+                        | b'+'
+                        | b','
+                        | b'/'
+                        | b' '
+                )
         }))
     {
         return Err(
-            "grayworld args may only contain [A-Za-z0-9=.:_'()+-,/ ] (FFmpeg grayworld= options)".into(),
+            "grayworld args may only contain [A-Za-z0-9=.:_'()+-,/ ] (FFmpeg grayworld= options)"
+                .into(),
         );
     }
     Ok(())
@@ -5580,11 +5560,7 @@ pub(crate) unsafe fn lagfun_push_frame(
         };
         if needs_new {
             *graph = Some(FilterGraph::open_from_frame(
-                "lagfun",
-                args,
-                s,
-                time_base,
-                sar,
+                "lagfun", args, s, time_base, sar,
             )?);
         }
         let active = graph.as_mut().ok_or("lagfun graph missing")?;
@@ -5697,11 +5673,7 @@ pub(crate) unsafe fn amplify_push_frame(
         };
         if needs_new {
             *graph = Some(FilterGraph::open_from_frame(
-                "amplify",
-                args,
-                s,
-                time_base,
-                sar,
+                "amplify", args, s, time_base, sar,
             )?);
         }
         let active = graph.as_mut().ok_or("amplify graph missing")?;
@@ -5929,7 +5901,8 @@ pub(crate) fn validate_removegrain_args(args: &str) -> Result<()> {
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
     {
         return Err(
-            "removegrain args may only contain [A-Za-z0-9=.:_-] (FFmpeg removegrain= options)".into(),
+            "removegrain args may only contain [A-Za-z0-9=.:_-] (FFmpeg removegrain= options)"
+                .into(),
         );
     }
     Ok(())
@@ -6254,7 +6227,10 @@ pub(crate) fn validate_lutyuv_args(args: &str) -> Result<()> {
     }
     if !args.bytes().all(|b| {
         b.is_ascii_alphanumeric()
-            || matches!(b, b'=' | b':' | b'-' | b'_' | b'.' | b'*' | b'+' | b'(' | b')' | b'/')
+            || matches!(
+                b,
+                b'=' | b':' | b'-' | b'_' | b'.' | b'*' | b'+' | b'(' | b')' | b'/'
+            )
     }) {
         return Err(
             "lutyuv args may only contain [A-Za-z0-9=.:_*+()/-] (FFmpeg lutyuv= options)".into(),
@@ -6310,9 +6286,7 @@ pub(crate) fn validate_fade_args(args: &str) -> Result<()> {
         .bytes()
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
     {
-        return Err(
-            "fade args may only contain [A-Za-z0-9=.:_-] (FFmpeg fade= options)".into(),
-        );
+        return Err("fade args may only contain [A-Za-z0-9=.:_-] (FFmpeg fade= options)".into());
     }
     Ok(())
 }
@@ -6338,7 +6312,8 @@ pub(crate) fn validate_perspective_args(args: &str) -> Result<()> {
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
     {
         return Err(
-            "perspective args may only contain [A-Za-z0-9=.:_-] (FFmpeg perspective= options)".into(),
+            "perspective args may only contain [A-Za-z0-9=.:_-] (FFmpeg perspective= options)"
+                .into(),
         );
     }
     Ok(())
@@ -6474,12 +6449,13 @@ pub(crate) fn validate_selectivecolor_args(args: &str) -> Result<()> {
     if args.len() > 128 || args.contains('\0') {
         return Err("selectivecolor args must be 0..=128 bytes without NUL".into());
     }
-    if !args.bytes().all(|b| {
-        b.is_ascii_alphanumeric()
-            || matches!(b, b'=' | b':' | b'-' | b'_' | b'.' | b' ')
-    }) || args.bytes().any(|b| {
-        matches!(b, b';' | b'\'' | b'"' | b'`' | b'|' | b'&' | b'$')
-    }) {
+    if !args
+        .bytes()
+        .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.' | b' '))
+        || args
+            .bytes()
+            .any(|b| matches!(b, b';' | b'\'' | b'"' | b'`' | b'|' | b'&' | b'$'))
+    {
         return Err(
             "selectivecolor args may only contain [A-Za-z0-9=.:_ -] (FFmpeg selectivecolor= options)"
                 .into(),
@@ -6624,8 +6600,10 @@ pub(crate) fn stereo3d_output_size(width: u32, height: u32, args: &str) -> Resul
             eye_w = width / 2;
         }
         Stereo3DFormat::InterleaveRowsLr | Stereo3DFormat::InterleaveRowsRl => {
-            if !matches!(out_fmt, Stereo3DFormat::CheckerboardLr | Stereo3DFormat::CheckerboardRl)
-            {
+            if !matches!(
+                out_fmt,
+                Stereo3DFormat::CheckerboardLr | Stereo3DFormat::CheckerboardRl
+            ) {
                 eye_h = height / 2;
             }
         }
@@ -6650,8 +6628,10 @@ pub(crate) fn stereo3d_output_size(width: u32, height: u32, args: &str) -> Resul
         Stereo3DFormat::InterleaveRowsLr | Stereo3DFormat::InterleaveRowsRl => {
             out_h = eye_h * 2;
         }
-        Stereo3DFormat::CheckerboardLr | Stereo3DFormat::CheckerboardRl
-        | Stereo3DFormat::InterleaveColsLr | Stereo3DFormat::InterleaveColsRl => {
+        Stereo3DFormat::CheckerboardLr
+        | Stereo3DFormat::CheckerboardRl
+        | Stereo3DFormat::InterleaveColsLr
+        | Stereo3DFormat::InterleaveColsRl => {
             out_w = eye_w * 2;
         }
         Stereo3DFormat::Hdmi => {
@@ -6687,9 +6667,7 @@ pub(crate) fn validate_field_args(args: &str) -> Result<()> {
         .bytes()
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
     {
-        return Err(
-            "field args may only contain [A-Za-z0-9=.:_-] (FFmpeg field= options)".into(),
-        );
+        return Err("field args may only contain [A-Za-z0-9=.:_-] (FFmpeg field= options)".into());
     }
     if !args.is_empty()
         && args != "top"
@@ -6748,7 +6726,10 @@ pub(crate) unsafe fn fade_push_frame(
             )?);
         }
         let active = graph.as_mut().ok_or("fade graph missing")?;
-        check(av_buffersrc_write_frame(active.src, src), "feed fade source")?;
+        check(
+            av_buffersrc_write_frame(active.src, src),
+            "feed fade source",
+        )?;
         av_frame_unref(dst);
         let code = av_buffersink_get_frame(active.sink, dst);
         if code == -libc::EAGAIN || code == EOF {
@@ -6835,7 +6816,10 @@ pub(crate) unsafe fn fade_apply_frame(
             )?);
         }
         let active = graph.as_mut().ok_or("fade graph missing")?;
-        check(av_buffersrc_write_frame(active.src, src), "feed fade source")?;
+        check(
+            av_buffersrc_write_frame(active.src, src),
+            "feed fade source",
+        )?;
         av_frame_unref(dst);
         let code = av_buffersink_get_frame(active.sink, dst);
         if code == -libc::EAGAIN || code == EOF {
@@ -6931,9 +6915,7 @@ pub(crate) fn validate_bm3d_args(args: &str) -> Result<()> {
         .bytes()
         .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
     {
-        return Err(
-            "bm3d args may only contain [A-Za-z0-9=.:_-] (FFmpeg bm3d= options)".into(),
-        );
+        return Err("bm3d args may only contain [A-Za-z0-9=.:_-] (FFmpeg bm3d= options)".into());
     }
     Ok(())
 }
@@ -7007,11 +6989,7 @@ pub(crate) fn validate_fps_args(args: &str) -> Result<()> {
     Ok(())
 }
 
-fn open_fps_graph(
-    graph: &mut Option<FilterGraph>,
-    src: *mut AVFrame,
-    args: &str,
-) -> Result<()> {
+fn open_fps_graph(graph: &mut Option<FilterGraph>, src: *mut AVFrame, args: &str) -> Result<()> {
     validate_fps_args(args)?;
     unsafe {
         let s = &*src;
@@ -7104,9 +7082,9 @@ pub(crate) fn validate_minterpolate_args(args: &str) -> Result<()> {
         return Err("minterpolate args must be 0..=128 bytes without NUL".into());
     }
     if !args.is_empty()
-        && !args.bytes().all(|b| {
-            b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'.' | b'_' | b'-')
-        })
+        && !args
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'.' | b'_' | b'-'))
     {
         return Err(
             "minterpolate args may only contain [A-Za-z0-9=.:_-] (FFmpeg minterpolate= options)"
@@ -7137,14 +7115,9 @@ fn open_minterpolate_graph(
             AVRational { num: 1, den: 1 }
         };
         let needs_new = match graph.as_ref() {
-            Some(existing) => !existing.matches(
-                "minterpolate",
-                args,
-                s.width,
-                s.height,
-                s.format,
-                time_base,
-            ),
+            Some(existing) => {
+                !existing.matches("minterpolate", args, s.width, s.height, s.format, time_base)
+            }
             None => true,
         };
         if needs_new {
@@ -7397,14 +7370,7 @@ pub(crate) unsafe fn overlay_frame(
         };
         if needs_new {
             *graph = Some(OverlayGraph::open(
-                &filename,
-                x,
-                y,
-                s.width,
-                s.height,
-                s.format,
-                time_base,
-                sar,
+                &filename, x, y, s.width, s.height, s.format, time_base, sar,
             )?);
         }
         let active = graph.as_mut().ok_or("overlay graph missing")?;
@@ -7463,7 +7429,9 @@ pub(crate) fn us_to_filter_secs(us: i64) -> Result<String> {
     if frac == 0 {
         Ok(whole.to_string())
     } else {
-        Ok(format!("{whole}.{frac:06}").trim_end_matches('0').to_string())
+        Ok(format!("{whole}.{frac:06}")
+            .trim_end_matches('0')
+            .to_string())
     }
 }
 
@@ -7518,29 +7486,14 @@ pub(crate) unsafe fn xfade_frame(
         };
         let needs_new = match graph.as_ref() {
             Some(existing) => !existing.matches(
-                &filename,
-                transition,
-                &duration,
-                &offset,
-                s.width,
-                s.height,
-                s.format,
-                filter_tb,
+                &filename, transition, &duration, &offset, s.width, s.height, s.format, filter_tb,
             ),
             None => true,
         };
         if needs_new {
             *graph = Some(XfadeGraph::open(
-                &filename,
-                transition,
-                &duration,
-                &offset,
-                s.width,
-                s.height,
-                s.format,
-                sar,
-                fps_num,
-                fps_den,
+                &filename, transition, &duration, &offset, s.width, s.height, s.format, sar,
+                fps_num, fps_den,
             )?);
         }
         let active = graph.as_mut().ok_or("xfade graph missing")?;
@@ -7601,19 +7554,19 @@ pub(crate) unsafe fn subtitles_frame(
         };
         let filename = subtitles_filename(path)?;
         let needs_new = match graph.as_ref() {
-            Some(existing) => {
-                !existing.matches("subtitles", &filename, s.width, s.height, s.format, time_base)
-            }
-            None => true,
-        };
-        if needs_new {
-            *graph = Some(FilterGraph::open_subtitles(
+            Some(existing) => !existing.matches(
+                "subtitles",
                 &filename,
                 s.width,
                 s.height,
                 s.format,
                 time_base,
-                sar,
+            ),
+            None => true,
+        };
+        if needs_new {
+            *graph = Some(FilterGraph::open_subtitles(
+                &filename, s.width, s.height, s.format, time_base, sar,
             )?);
         }
         let active = graph.as_mut().ok_or("subtitles graph missing")?;

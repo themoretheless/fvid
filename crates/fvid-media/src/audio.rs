@@ -53,7 +53,10 @@ pub(crate) unsafe fn apply_volume(frame: *mut AVFrame, gain: f64) -> Result<()> 
         if (gain - 1.0).abs() < 1e-15 {
             return Ok(());
         }
-        check(av_frame_make_writable(frame), "make audio writable for volume")?;
+        check(
+            av_frame_make_writable(frame),
+            "make audio writable for volume",
+        )?;
         let f = &*frame;
         let channels = f.ch_layout.nb_channels as usize;
         let samples = f.nb_samples as usize;
@@ -83,7 +86,8 @@ pub(crate) unsafe fn apply_volume(frame: *mut AVFrame, gain: f64) -> Result<()> 
                     *data.add(i) *= gain;
                 }
             }
-        } else if fmt == AVSampleFormat_AV_SAMPLE_FMT_DBL || fmt == AVSampleFormat_AV_SAMPLE_FMT_DBLP
+        } else if fmt == AVSampleFormat_AV_SAMPLE_FMT_DBL
+            || fmt == AVSampleFormat_AV_SAMPLE_FMT_DBLP
         {
             if planar {
                 for ch in 0..channels {
@@ -495,9 +499,8 @@ impl AudioSink {
     }
     fn finish(mut self) -> Result<AudioDecodeStats> {
         if let Some(pcm) = self.wav_pcm.take() {
-            let samples = unsafe {
-                slice::from_raw_parts(pcm.as_ptr() as *const f32, pcm.len() / 4)
-            };
+            let samples =
+                unsafe { slice::from_raw_parts(pcm.as_ptr() as *const f32, pcm.len() / 4) };
             super::wav::write_wav_f32le(
                 &self.destination,
                 self.stats.sample_rate,
@@ -587,7 +590,12 @@ pub fn decode_audio(
     destination: &Path,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    decode_audio_transformed(source, destination, AudioDecodeTransform::default(), options)
+    decode_audio_transformed(
+        source,
+        destination,
+        AudioDecodeTransform::default(),
+        options,
+    )
 }
 
 /// Export a half-open interval from the contiguous decoded sample sequence.
@@ -721,8 +729,7 @@ pub fn decode_audio_transformed(
                     if resampler.is_none() {
                         let f = &*frame.0;
                         let out_rate = transform.sample_rate.unwrap_or(f.sample_rate);
-                        let out_channels =
-                            transform.channels.unwrap_or(f.ch_layout.nb_channels);
+                        let out_channels = transform.channels.unwrap_or(f.ch_layout.nb_channels);
                         resampler = Some(Resampler::open(frame.0, out_rate, out_channels)?);
                     }
                     let swr = resampler.as_mut().unwrap();
@@ -822,11 +829,7 @@ pub(super) fn pcm_parameters_for_interval_decode(
                 AVSampleFormat_AV_SAMPLE_FMT_FLT
             }
             AVCodecID_AV_CODEC_ID_FLAC => AVSampleFormat_AV_SAMPLE_FMT_S16,
-            _ => {
-                return Err(
-                    "lossless interval decode supports AAC, MP3, and FLAC only".into(),
-                )
-            }
+            _ => return Err("lossless interval decode supports AAC, MP3, and FLAC only".into()),
         };
         if codecpar.sample_rate <= 0 || !(1..=64).contains(&codecpar.ch_layout.nb_channels) {
             return Err("invalid compressed audio rate/channel count".into());
@@ -1042,14 +1045,7 @@ pub(super) fn mux_interval_pcm_from_path(
         }
         check(
             unsafe {
-                avcodec_send_packet(
-                    decoder.0,
-                    if available {
-                        packet.0
-                    } else {
-                        ptr::null()
-                    },
-                )
+                avcodec_send_packet(decoder.0, if available { packet.0 } else { ptr::null() })
             },
             "send compressed audio packet",
         )?;

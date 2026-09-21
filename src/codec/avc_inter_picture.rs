@@ -1,0 +1,575 @@
+//! Single-slice progressive CAVLC/CABAC P/B-picture reconstruction, flat scaling lists.
+use super::{
+    avc::{Pps, SliceGroups, Sps},
+    avc_boundary::{BlockEdge, DecodedBlockEdges, MotionReference, picture_edges},
+    avc_compensation::{InterLumaResidual, Reference420},
+    avc_deblock::inter_plane,
+    avc_inter::{Partition, Prediction},
+    avc_inter_prediction::predict_macroblock,
+    avc_inter_slice::{InterCavlcSlice, InterMacroblock},
+    avc_motion_field::MotionField,
+    avc_mv::Neighbour,
+    avc_picture::{IntraPicture, chroma_qp},
+    avc_slice::{SliceHeader, SliceType},
+};
+use crate::{Result, invalid};
+/// Reference order is the already modified L0 list. Picture identities must be
+/// stable; aliases of one reference must point to the same picture object.
+pub fn decode_p_picture(
+    header: &SliceHeader,
+    sps: &Sps,
+    pps: &Pps,
+    references: &[&IntraPicture],
+    budget: usize,
+) -> Result<IntraPicture> {
+    decode_p_picture_with_motion(header, sps, pps, references, budget).map(|(picture, _)| picture)
+}
+/// Retains the decoded working motion field for reference-picture snapshots.
+/// The returned field is already included in the reconstruction memory budget.
+pub fn decode_p_picture_with_motion(
+    header: &SliceHeader,
+    sps: &Sps,
+    pps: &Pps,
+    references: &[&IntraPicture],
+    budget: usize,
+) -> Result<(IntraPicture, MotionField)> {
+    decode_inter_picture_with_motion(header, sps, pps, [references, &[]], None, budget)
+}
+/// Reconstruct a progressive P/B slice. B pictures require reference metadata
+/// and retained co-located motion matching the supplied picture lists.
+pub fn decode_inter_picture_with_motion(
+    header: &SliceHeader,
+    sps: &Sps,
+    pps: &Pps,
+    references: [&[&IntraPicture]; 2],
+    direct: Option<&super::avc_direct::DirectPrediction<'_>>,
+    budget: usize,
+) -> Result<(IntraPicture, MotionField)> {
+    let is_b = header.slice_type == SliceType::B;
+    if !matches!(header.slice_type, SliceType::P | SliceType::B)
+        || header.first_mb != 0
+        || header.disable_deblocking_filter_idc > 2
+        || header.field_pic
+        || !sps.frame_mbs_only
+        || sps.chroma_format != 1
+        || sps.separate_colour_plane
+        || sps.bit_depth_luma != sps.bit_depth_chroma
+        || sps.transform_bypass
+        || sps.scaling_lists.is_some()
+        || pps.scaling_lists.is_some()
+        || !matches!(pps.slice_groups, SliceGroups::Single)
+        || header.redundant_pic_cnt != 0
+    {
+        return Err(invalid("unsupported inter-picture reconstruction tools"));
+    }
+    let explicit_weights = if is_b {
+        pps.weighted_bipred == 1
+    } else {
+        pps.weighted_pred
+    };
+    if is_b && direct.is_none() {
+        return Err(invalid("B-picture direct metadata is missing"));
+    }
+    if explicit_weights
+        && header.weights.as_ref().is_none_or(|w| {
+            w.l0.len() != header.refs_l0 as usize || (is_b && w.l1.len() != header.refs_l1 as usize)
+        })
+    {
+        return Err(invalid(
+            "inter-picture weight table is missing or incomplete",
+        ));
+    }
+    let (width, height) = sps.coded_dimensions();
+    let (w, h) = (width as usize, height as usize);
+    let pixels = w
+        .checked_mul(h)
+        .ok_or_else(|| invalid("inter-picture size overflow"))?;
+    let count = pixels / 256;
+    // Conservative upper bound for motion/count fields, edge state and transient
+    // grids, including scratch coefficients. Reference pictures are caller owned.
+    let required = pixels
+        .checked_mul(3)
+        .and_then(|n| count.checked_mul(4096).and_then(|m| n.checked_add(m)))
+        .and_then(|n| n.checked_add(16384))
+        .ok_or_else(|| invalid("inter-picture budget overflow"))?;
+    if w == 0 || h == 0 || count > 65536 || required > budget {
+        return Err(invalid("inter-picture exceeds memory budget"));
+    }
+    let lengths = [
+        header.refs_l0 as usize,
+        if is_b { header.refs_l1 as usize } else { 0 },
+    ];
+    for list in 0..2 {
+        if references[list].len() != lengths[list]
+            || lengths[list] > 32
+            || (list == 0 || is_b) && lengths[list] == 0
+        {
+            return Err(invalid("inter-picture reference count mismatch"));
+        }
+    }
+    if let Some(context) = direct {
+        if context.list0.len() != lengths[0]
+            || context.list1.len() != lengths[1]
+            || context.spatial != header.direct_spatial_mv_pred
+            || context.inference8 != sps.direct_8x8_inference
+            || context
+                .colocated
+                .is_some_and(|field| field.dimensions() != [w, h])
+        {
+            return Err(invalid("direct metadata reference count mismatch"));
+        }
+    }
+    let mut planes = [Vec::new(), Vec::new()];
+    for list in 0..2 {
+        for r in references[list] {
+            if r.coded_width != w || r.coded_height != h || r.bit_depth != sps.bit_depth_luma {
+                return Err(invalid("inter-picture reference format mismatch"));
+            }
+            planes[list].push(Reference420::new(
+                [&r.y, &r.cb, &r.cr],
+                w,
+                h,
+                [w, w / 2, w / 2],
+                r.bit_depth,
+            )?);
+        }
+    }
+    let refs = [
+        planes[0].iter().collect::<Vec<_>>(),
+        planes[1].iter().collect::<Vec<_>>(),
+    ];
+    let all_references: Vec<_> = references.into_iter().flatten().copied().collect();
+    let mut cavlc = if pps.cabac {
+        None
+    } else {
+        Some(InterCavlcSlice::new_mixed(header, sps, pps, count * 4096)?)
+    };
+    let mut cabac = if pps.cabac {
+        Some(super::avc_cabac_slice::InterCabacSlice::new(
+            header,
+            sps,
+            pps,
+            count * 4096,
+        )?)
+    } else {
+        None
+    };
+
+    let mut ready = vec![0u8; count * 16];
+    let mut motion = MotionField::new(w, h, count * 4096)?;
+    let mut out = IntraPicture {
+        coded_width: w,
+        coded_height: h,
+        crop: sps.crop.map(|v| v as usize),
+        bit_depth: sps.bit_depth_luma,
+        y: vec![0; pixels],
+        cb: vec![0; pixels / 4],
+        cr: vec![0; pixels / 4],
+    };
+    let mut edges = Vec::with_capacity(count);
+    let mut seen = 0;
+    while let Some(mb) = match (&mut cabac, &mut cavlc) {
+        (Some(reader), _) => reader.read_macroblock()?,
+        (_, Some(reader)) => reader.read_macroblock()?,
+        _ => return Err(invalid("missing AVC entropy reader")),
+    } {
+        if let InterMacroblock::Intra(block) = mb {
+            let address = block.address as usize;
+            super::avc_picture::reconstruct_macroblock(&mut out, &block, sps, pps, &mut ready)?;
+            motion.store(
+                [address % (w / 16) * 16, address / (w / 16) * 16],
+                [16, 16],
+                0,
+                [Neighbour::NoPrediction; 2],
+            )?;
+            let bd = 6 * (i32::from(sps.bit_depth_luma) - 8);
+            let qps = [
+                block.qp,
+                i32::from(chroma_qp(
+                    block.qp,
+                    pps.chroma_qp_offset,
+                    sps.bit_depth_chroma,
+                )) - bd,
+                i32::from(chroma_qp(
+                    block.qp,
+                    pps.second_chroma_qp_offset,
+                    sps.bit_depth_chroma,
+                )) - bd,
+            ];
+            edges.push(DecodedBlockEdges {
+                blocks: [BlockEdge {
+                    intra: true,
+                    switching_slice: false,
+                    nonzero_luma: false,
+                    motion: [None; 2],
+                }; 16],
+                qp: qps,
+                slice_id: 0,
+                disable_filter: header.disable_deblocking_filter_idc as u8,
+                offsets: [header.alpha_offset, header.beta_offset],
+                transform8: matches!(block.luma, super::avc_macroblock::IntraLuma::Blocks8 { .. }),
+            });
+            seen += 1;
+            continue;
+        }
+
+        let (address, qp, parts, coefficients, eight) = match mb {
+            InterMacroblock::Intra(_) => {
+                return Err(invalid(
+                    "mixed intra picture reconstruction is not connected",
+                ));
+            }
+            InterMacroblock::Skip { address, qp } if is_b => {
+                let super::avc_inter::MacroblockType::Inter { partitions, .. } =
+                    super::avc_inter::macroblock_type(SliceType::B, 0)?
+                else {
+                    return Err(invalid("invalid B-skip partition layout"));
+                };
+                (address, qp, partitions, None, false)
+            }
+            InterMacroblock::Skip { address, qp } => (
+                address,
+                qp,
+                vec![Partition {
+                    origin: [0, 0],
+                    size: [16, 16],
+                    prediction: Prediction::L0,
+                    group: 0,
+                    references: [Some(0), None],
+                    differences: [[0; 2]; 2],
+                }],
+                None,
+                false,
+            ),
+            InterMacroblock::Coded {
+                address,
+                header,
+                coefficients,
+            } => (
+                address,
+                header.residual.qp,
+                header.partitions,
+                Some(coefficients),
+                header.residual.transform8,
+            ),
+        };
+        let origin = [address % (w / 16) * 16, address / (w / 16) * 16];
+        let vectors = if coefficients.is_none() && !is_b {
+            vec![[
+                Neighbour::Inter {
+                    reference: 0,
+                    vector: motion.decode_p_skip(origin, 0)?,
+                },
+                Neighbour::NoPrediction,
+            ]]
+        } else {
+            motion.decode_macroblock_with_direct(origin, 0, &parts, direct)?
+        };
+        let weights = if explicit_weights || (is_b && pps.weighted_bipred == 2) {
+            use super::avc_compensation::ComponentWeight;
+            let mut weights = Vec::with_capacity(parts.len());
+            for vector in &vectors {
+                let mut weight = [[ComponentWeight::default(); 3]; 2];
+                if explicit_weights {
+                    let table = header.weights.as_ref().unwrap();
+                    for list in 0..2 {
+                        if let Neighbour::Inter { reference, .. } = vector[list] {
+                            let entry = [&table.l0, &table.l1][list]
+                                .get(reference as usize)
+                                .ok_or_else(|| invalid("missing explicit reference weight"))?;
+                            weight[list] = [
+                                ComponentWeight {
+                                    weight: entry.luma.0,
+                                    offset: entry.luma.1,
+                                    denominator: table.luma_denom,
+                                },
+                                ComponentWeight {
+                                    weight: entry.chroma[0].0,
+                                    offset: entry.chroma[0].1,
+                                    denominator: table.chroma_denom,
+                                },
+                                ComponentWeight {
+                                    weight: entry.chroma[1].0,
+                                    offset: entry.chroma[1].1,
+                                    denominator: table.chroma_denom,
+                                },
+                            ];
+                        }
+                    }
+                } else if let [
+                    Neighbour::Inter { reference: a, .. },
+                    Neighbour::Inter { reference: b, .. },
+                ] = *vector
+                {
+                    let context = direct.unwrap();
+                    let a = context
+                        .list0
+                        .get(a as usize)
+                        .ok_or_else(|| invalid("implicit L0 reference missing"))?;
+                    let b = context
+                        .list1
+                        .get(b as usize)
+                        .ok_or_else(|| invalid("implicit L1 reference missing"))?;
+                    let values = super::avc_mv::implicit_weights(
+                        context.current_poc.into(),
+                        a.poc.into(),
+                        b.poc.into(),
+                        a.long_term_index.is_some() || b.long_term_index.is_some(),
+                    );
+                    for list in 0..2 {
+                        weight[list] = [ComponentWeight {
+                            weight: values[list],
+                            offset: 0,
+                            denominator: 5,
+                        }; 3];
+                    }
+                }
+                weights.push(weight);
+            }
+            Some(weights)
+        } else {
+            None
+        };
+        let prediction = predict_macroblock(
+            origin.map(|n| n as i32),
+            sps.bit_depth_luma,
+            &parts,
+            &vectors,
+            [&refs[0], &refs[1]],
+            weights.as_deref(),
+        )?;
+        let bd = 6 * (i32::from(sps.bit_depth_luma) - 8);
+        let qps = [
+            (qp + bd) as u8,
+            chroma_qp(qp, pps.chroma_qp_offset, sps.bit_depth_chroma),
+            chroma_qp(qp, pps.second_chroma_qp_offset, sps.bit_depth_chroma),
+        ];
+        let prediction = if let Some(c) = &coefficients {
+            prediction.reconstruct_inter(
+                if eight {
+                    InterLumaResidual::Blocks8(&c.luma8)
+                } else {
+                    InterLumaResidual::Blocks4(&c.luma4)
+                },
+                &c.chroma_dc,
+                &c.chroma_ac,
+                qps,
+                &[[16; 16]; 3],
+                &[16; 64],
+            )?
+        } else {
+            prediction
+        };
+        let empty = BlockEdge {
+            intra: false,
+            switching_slice: false,
+            nonzero_luma: false,
+            motion: [None; 2],
+        };
+        let mut blocks = [empty; 16];
+        for (p, v) in parts.iter().zip(&vectors) {
+            for y in usize::from(p.origin[1]) / 4..usize::from(p.origin[1] + p.size[1]) / 4 {
+                for x in usize::from(p.origin[0]) / 4..usize::from(p.origin[0] + p.size[0]) / 4 {
+                    blocks[y * 4 + x].motion = std::array::from_fn(|list| {
+                        let n = v[list];
+                        if let Neighbour::Inter { reference, vector } = n {
+                            Some(MotionReference {
+                                picture: all_references
+                                    .iter()
+                                    .position(|r| {
+                                        std::ptr::eq(*r, references[list][usize::from(reference)])
+                                    })
+                                    .unwrap() as u64,
+                                vector,
+                            })
+                        } else {
+                            None
+                        }
+                    });
+                }
+            }
+        }
+        if let Some(c) = &coefficients {
+            for i in 0..16 {
+                blocks[i].nonzero_luma = if eight {
+                    c.luma8[(i / 4 / 2) * 2 + (i % 4 / 2)]
+                        .iter()
+                        .any(|&v| v != 0)
+                } else {
+                    c.luma_counts[i] != 0
+                };
+            }
+        }
+        edges.push(DecodedBlockEdges {
+            blocks,
+            qp: qps.map(|q| i32::from(q) - bd),
+            slice_id: 0,
+            disable_filter: header.disable_deblocking_filter_idc as u8,
+            offsets: [header.alpha_offset, header.beta_offset],
+            transform8: eight,
+        });
+        for (plane, src, stride, size) in [
+            (&mut out.y, prediction.y.as_slice(), w, 16),
+            (&mut out.cb, prediction.cb.as_slice(), w / 2, 8),
+            (&mut out.cr, prediction.cr.as_slice(), w / 2, 8),
+        ] {
+            let (x, y) = (origin[0] * size / 16, origin[1] * size / 16);
+            for row in 0..size {
+                plane[(y + row) * stride + x..(y + row) * stride + x + size]
+                    .copy_from_slice(&src[row * size..row * size + size]);
+            }
+        }
+        for y in 0..4 {
+            for x in 0..4 {
+                ready[(origin[1] / 4 + y) * (w / 4) + origin[0] / 4 + x] =
+                    u8::from(!pps.constrained_intra_pred);
+            }
+        }
+        seen += 1;
+    }
+    if seen != count {
+        return Err(invalid("incomplete single-slice inter-picture"));
+    }
+    for (component, plane) in [&mut out.y, &mut out.cb, &mut out.cr]
+        .into_iter()
+        .enumerate()
+    {
+        let grid = picture_edges(&edges, w / 16, component)?;
+        let scale = if component == 0 { 1 } else { 2 };
+        inter_plane(
+            plane,
+            w / scale,
+            h / scale,
+            sps.bit_depth_luma,
+            component != 0,
+            &grid,
+        )?;
+    }
+    Ok((out, motion))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn b_skip_reconstructs_spatial_temporal_and_implicit_weighted_pixels() {
+        use super::super::{avc_direct::DirectPrediction, avc_references::FrameReference};
+        let hex = "6742c01fda03c045fbc044000003000400000300f03c60ca80";
+        let bytes: Vec<_> = (0..hex.len())
+            .step_by(2)
+            .map(|i| u8::from_str_radix(&hex[i..i + 2], 16).unwrap())
+            .collect();
+        let mut s = Sps::parse(&bytes).unwrap();
+        s.width_mbs = 1;
+        s.height_map_units = 1;
+        s.crop = [0; 4];
+        let mut p = Pps::parse(&[0x68, 0xce, 0x09, 0xc8], &s).unwrap();
+        let mut header = SliceHeader::parse(&[0x65, 0x88, 0x84, 0x3a, 0x27, 0x80], &s, &p).unwrap();
+        header.slice_type = SliceType::B;
+        header.idr = false;
+        header.refs_l0 = 1;
+        header.refs_l1 = 1;
+        header.header_bits = 0;
+        header.entropy_bit_offset = 0;
+        header.disable_deblocking_filter_idc = 0;
+        header.rbsp = vec![0x50]; // mb_skip_run=1, rbsp_stop_one_bit.
+        let a = IntraPicture {
+            coded_width: 16,
+            coded_height: 16,
+            crop: [0; 4],
+            bit_depth: 8,
+            y: vec![20; 256],
+            cb: vec![60; 64],
+            cr: vec![180; 64],
+        };
+        let b = IntraPicture {
+            coded_width: 16,
+            coded_height: 16,
+            crop: [0; 4],
+            bit_depth: 8,
+            y: vec![100; 256],
+            cb: vec![180; 64],
+            cr: vec![60; 64],
+        };
+        let l0 = [FrameReference {
+            id: 10,
+            frame_num: 0,
+            poc: 0,
+            long_term_index: None,
+        }];
+        let l1 = [FrameReference {
+            id: 20,
+            frame_num: 1,
+            poc: 8,
+            long_term_index: None,
+        }];
+        for spatial in [false, true] {
+            header.direct_spatial_mv_pred = spatial;
+            let context = DirectPrediction {
+                spatial,
+                inference8: s.direct_8x8_inference,
+                current_poc: 2,
+                list0: &l0,
+                list1: &l1,
+                colocated: None,
+            };
+            for implicit in [false, true] {
+                p.weighted_bipred = if implicit { 2 } else { 0 };
+                let (picture, motion) = decode_inter_picture_with_motion(
+                    &header,
+                    &s,
+                    &p,
+                    [&[&a], &[&b]],
+                    Some(&context),
+                    1 << 20,
+                )
+                .unwrap();
+                assert_eq!(picture.y, vec![if implicit { 40 } else { 60 }; 256]);
+                assert_eq!(picture.cb, vec![if implicit { 90 } else { 120 }; 64]);
+                assert_eq!(picture.cr, vec![if implicit { 150 } else { 120 }; 64]);
+                let retained = motion.snapshot([&[10], &[20]], 65536).unwrap();
+                let cell = retained.at([15, 15]).unwrap();
+                assert_eq!(cell[0].unwrap().picture_id, 10);
+                assert_eq!(cell[1].unwrap().picture_id, 20);
+            }
+        }
+    }
+    #[test]
+    fn full_skip_and_zero_residual_pictures_copy_reference() {
+        let hex = "6742c01fda03c045fbc044000003000400000300f03c60ca80";
+        let bytes: Vec<_> = (0..hex.len())
+            .step_by(2)
+            .map(|i| u8::from_str_radix(&hex[i..i + 2], 16).unwrap())
+            .collect();
+        let mut s = Sps::parse(&bytes).unwrap();
+        s.width_mbs = 1;
+        s.height_map_units = 1;
+        s.crop = [0; 4];
+        let p = Pps::parse(&[0x68, 0xce, 0x09, 0xc8], &s).unwrap();
+        let mut header = SliceHeader::parse(&[0x65, 0x88, 0x84, 0x3a, 0x27, 0x80], &s, &p).unwrap();
+        header.slice_type = SliceType::P;
+        header.idr = false;
+        header.refs_l0 = 1;
+        header.header_bits = 0;
+        header.entropy_bit_offset = 0;
+        header.disable_deblocking_filter_idc = 0;
+        let reference = IntraPicture {
+            coded_width: 16,
+            coded_height: 16,
+            crop: [0; 4],
+            bit_depth: 8,
+            y: (0..256).map(|i| i as u16).collect(),
+            cb: vec![90; 64],
+            cr: vec![180; 64],
+        };
+        // skip_run=1 then stop; or skip_run=0 + zero-residual inter MB then stop.
+        for payload in [0x50, 0xfc] {
+            header.rbsp = vec![payload];
+            let result = decode_p_picture(&header, &s, &p, &[&reference], 1 << 20).unwrap();
+            assert_eq!(result.y, reference.y);
+            assert_eq!(result.cb, reference.cb);
+            assert_eq!(result.cr, reference.cr);
+        }
+        assert!(decode_p_picture(&header, &s, &p, &[&reference], 1).is_err());
+    }
+}

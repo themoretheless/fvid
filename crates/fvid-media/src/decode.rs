@@ -1,18 +1,63 @@
 //! Decode video and discard frames (throughput probe; no encode/mux).
 use super::*;
 use filter::{
-    FilterGraph, FramepackGraph, OverlayGraph, colorspace_frame, overlay_frame, pad_frame, rotate_frame,
-    subtitles_frame, tblend_frame, tmix_push_frame, tmix_flush, tonemap_frame, transpose_frame,
-    validate_colorspace_args, validate_hqdn3d_args, validate_tblend_args, validate_tmix_args,
-    validate_tonemap_args, validate_zscale_args,
-    validate_fps_args, zscale_frame,
-    validate_minterpolate_args,
-    validate_gblur_args, validate_eq_args, validate_unsharp_args, validate_hue_args, validate_avgblur_args, validate_boxblur_args, validate_smartblur_args, validate_sab_args, validate_bilateral_args, validate_cas_args, validate_epx_args, validate_hqx_args, validate_xbr_args, validate_il_args, validate_super2xsai_args, validate_kerndeint_args, validate_phase_args, validate_estdif_args, validate_tinterlace_args, validate_separatefields_args, validate_weave_args, validate_doubleweave_args, validate_framepack_args, validate_telecine_args, validate_pullup_args, validate_decimate_args, validate_mpdecimate_args, validate_framestep_args, validate_tile_args, validate_untile_args, validate_shuffleframes_args, validate_reverse_args, validate_loop_args, validate_thumbnail_args, validate_freezedetect_args, validate_vignette_args, validate_curves_args, validate_colorbalance_args, validate_colorlevels_args, validate_colorchannelmixer_args, validate_deflicker_args, validate_photosensitivity_args, validate_monochrome_args, validate_grayworld_args, validate_drawbox_args, validate_drawgrid_args, validate_lagfun_args, validate_amplify_args, validate_bitplanenoise_args, validate_deband_args, validate_gradfun_args, validate_lenscorrection_args, validate_pixelize_args, validate_removegrain_args, validate_yaepblur_args, validate_vibrance_args, validate_dilation_args, validate_erosion_args, validate_colorize_args, validate_exposure_args, validate_chromashift_args, validate_colorcontrast_args, validate_colorcorrect_args, validate_histeq_args, validate_shuffleplanes_args, validate_lutyuv_args, validate_colorhold_args, validate_fade_args, validate_perspective_args, validate_lumakey_args, validate_chromakey_args, validate_colorkey_args, validate_despill_args, validate_selectivecolor_args, validate_stereo3d_args, validate_field_args, validate_pseudocolor_args, validate_negate_args, validate_edgedetect_args, validate_sobel_args, validate_prewitt_args, validate_roberts_args, validate_kirsch_args, validate_scharr_args, validate_atadenoise_args, validate_owdenoise_args, validate_vaguedenoiser_args, validate_nlmeans_args, validate_bm3d_args, validate_dctdnoiz_args, validate_fftdnoiz_args, validate_yadif_args, validate_bwdif_args, validate_w3fdif_args,
-    hqdn3d_frame, yadif_push_frame, yadif_flush, bwdif_push_frame, bwdif_flush, w3fdif_push_frame, w3fdif_flush, gblur_frame, eq_frame, unsharp_frame, hue_frame, avgblur_frame, boxblur_frame,
-    smartblur_frame, sab_frame, bilateral_frame, cas_frame, epx_frame, hqx_frame, xbr_frame, il_frame, super2xsai_frame, kerndeint_frame, phase_apply_frame, phase_flush, estdif_push_frame, estdif_flush, tinterlace_push_frame, tinterlace_flush, separatefields_push_frame, separatefields_flush, weave_push_frame, weave_flush, doubleweave_push_frame, doubleweave_flush, framepack_push_frame, framepack_flush, telecine_push_frame, telecine_flush, pullup_push_frame, pullup_flush, decimate_push_frame, decimate_flush, mpdecimate_push_frame, mpdecimate_flush, framestep_push_frame, framestep_flush, push_framestep_or_emit, tile_push_frame, tile_flush, push_tile_or_emit, untile_push_frame, untile_flush, push_untile_or_emit, shuffleframes_push_frame, shuffleframes_flush, push_shuffleframes_or_emit, reverse_push_frame, reverse_flush, push_reverse_or_emit, loop_push_frame, loop_flush, push_loop_or_emit, thumbnail_push_frame, thumbnail_flush, push_thumbnail_or_emit, freezedetect_frame, vignette_frame, curves_frame, colorbalance_frame,
-    colorlevels_frame, colorchannelmixer_frame, negate_frame, edgedetect_frame, sobel_frame, prewitt_frame, roberts_frame, kirsch_frame, scharr_frame,
-    atadenoise_push_frame, atadenoise_flush, owdenoise_frame, vaguedenoiser_frame, deflicker_push_frame, deflicker_flush, lagfun_push_frame, lagfun_flush, amplify_push_frame, amplify_flush, photosensitivity_frame, monochrome_frame, grayworld_frame, drawbox_frame, drawgrid_frame, bitplanenoise_frame, deband_frame, gradfun_frame, lenscorrection_frame, pixelize_frame, removegrain_frame, yaepblur_frame, vibrance_frame, dilation_frame, erosion_frame, colorize_frame, exposure_frame, chromashift_frame, colorcontrast_frame, colorcorrect_frame, histeq_frame, shuffleplanes_frame, lutyuv_frame, colorhold_frame, fade_apply_frame, fade_flush, perspective_frame, lumakey_frame, chromakey_frame, colorkey_frame, despill_frame, selectivecolor_frame, stereo3d_frame, field_frame, pseudocolor_frame, nlmeans_frame, bm3d_frame, dctdnoiz_frame, fftdnoiz_frame,
-    temporal_push_frame, temporal_flush_frames,
+    FilterGraph, FramepackGraph, OverlayGraph, amplify_flush, amplify_push_frame, atadenoise_flush,
+    atadenoise_push_frame, avgblur_frame, bilateral_frame, bitplanenoise_frame, bm3d_frame,
+    boxblur_frame, bwdif_flush, bwdif_push_frame, cas_frame, chromakey_frame, chromashift_frame,
+    colorbalance_frame, colorchannelmixer_frame, colorcontrast_frame, colorcorrect_frame,
+    colorhold_frame, colorize_frame, colorkey_frame, colorlevels_frame, colorspace_frame,
+    curves_frame, dctdnoiz_frame, deband_frame, decimate_flush, decimate_push_frame,
+    deflicker_flush, deflicker_push_frame, despill_frame, dilation_frame, doubleweave_flush,
+    doubleweave_push_frame, drawbox_frame, drawgrid_frame, edgedetect_frame, epx_frame, eq_frame,
+    erosion_frame, estdif_flush, estdif_push_frame, exposure_frame, fade_apply_frame, fade_flush,
+    fftdnoiz_frame, field_frame, framepack_flush, framepack_push_frame, framestep_flush,
+    framestep_push_frame, freezedetect_frame, gblur_frame, gradfun_frame, grayworld_frame,
+    histeq_frame, hqdn3d_frame, hqx_frame, hue_frame, il_frame, kerndeint_frame, kirsch_frame,
+    lagfun_flush, lagfun_push_frame, lenscorrection_frame, loop_flush, loop_push_frame,
+    lumakey_frame, lutyuv_frame, monochrome_frame, mpdecimate_flush, mpdecimate_push_frame,
+    negate_frame, nlmeans_frame, overlay_frame, owdenoise_frame, pad_frame, perspective_frame,
+    phase_apply_frame, phase_flush, photosensitivity_frame, pixelize_frame, prewitt_frame,
+    pseudocolor_frame, pullup_flush, pullup_push_frame, push_framestep_or_emit, push_loop_or_emit,
+    push_reverse_or_emit, push_shuffleframes_or_emit, push_thumbnail_or_emit, push_tile_or_emit,
+    push_untile_or_emit, removegrain_frame, reverse_flush, reverse_push_frame, roberts_frame,
+    rotate_frame, sab_frame, scharr_frame, selectivecolor_frame, separatefields_flush,
+    separatefields_push_frame, shuffleframes_flush, shuffleframes_push_frame, shuffleplanes_frame,
+    smartblur_frame, sobel_frame, stereo3d_frame, subtitles_frame, super2xsai_frame, tblend_frame,
+    telecine_flush, telecine_push_frame, temporal_flush_frames, temporal_push_frame,
+    thumbnail_flush, thumbnail_push_frame, tile_flush, tile_push_frame, tinterlace_flush,
+    tinterlace_push_frame, tmix_flush, tmix_push_frame, tonemap_frame, transpose_frame,
+    unsharp_frame, untile_flush, untile_push_frame, vaguedenoiser_frame, validate_amplify_args,
+    validate_atadenoise_args, validate_avgblur_args, validate_bilateral_args,
+    validate_bitplanenoise_args, validate_bm3d_args, validate_boxblur_args, validate_bwdif_args,
+    validate_cas_args, validate_chromakey_args, validate_chromashift_args,
+    validate_colorbalance_args, validate_colorchannelmixer_args, validate_colorcontrast_args,
+    validate_colorcorrect_args, validate_colorhold_args, validate_colorize_args,
+    validate_colorkey_args, validate_colorlevels_args, validate_colorspace_args,
+    validate_curves_args, validate_dctdnoiz_args, validate_deband_args, validate_decimate_args,
+    validate_deflicker_args, validate_despill_args, validate_dilation_args,
+    validate_doubleweave_args, validate_drawbox_args, validate_drawgrid_args,
+    validate_edgedetect_args, validate_epx_args, validate_eq_args, validate_erosion_args,
+    validate_estdif_args, validate_exposure_args, validate_fade_args, validate_fftdnoiz_args,
+    validate_field_args, validate_fps_args, validate_framepack_args, validate_framestep_args,
+    validate_freezedetect_args, validate_gblur_args, validate_gradfun_args,
+    validate_grayworld_args, validate_histeq_args, validate_hqdn3d_args, validate_hqx_args,
+    validate_hue_args, validate_il_args, validate_kerndeint_args, validate_kirsch_args,
+    validate_lagfun_args, validate_lenscorrection_args, validate_loop_args, validate_lumakey_args,
+    validate_lutyuv_args, validate_minterpolate_args, validate_monochrome_args,
+    validate_mpdecimate_args, validate_negate_args, validate_nlmeans_args, validate_owdenoise_args,
+    validate_perspective_args, validate_phase_args, validate_photosensitivity_args,
+    validate_pixelize_args, validate_prewitt_args, validate_pseudocolor_args, validate_pullup_args,
+    validate_removegrain_args, validate_reverse_args, validate_roberts_args, validate_sab_args,
+    validate_scharr_args, validate_selectivecolor_args, validate_separatefields_args,
+    validate_shuffleframes_args, validate_shuffleplanes_args, validate_smartblur_args,
+    validate_sobel_args, validate_stereo3d_args, validate_super2xsai_args, validate_tblend_args,
+    validate_telecine_args, validate_thumbnail_args, validate_tile_args, validate_tinterlace_args,
+    validate_tmix_args, validate_tonemap_args, validate_unsharp_args, validate_untile_args,
+    validate_vaguedenoiser_args, validate_vibrance_args, validate_vignette_args,
+    validate_w3fdif_args, validate_weave_args, validate_xbr_args, validate_yadif_args,
+    validate_yaepblur_args, validate_zscale_args, vibrance_frame, vignette_frame, w3fdif_flush,
+    w3fdif_push_frame, weave_flush, weave_push_frame, xbr_frame, yadif_flush, yadif_push_frame,
+    yaepblur_frame, zscale_frame,
 };
 use lossless::{
     Codec, CropRect, Frame, ScaleSize, Sws, convert_pix_fmt_frame, flip_view,
@@ -1416,374 +1461,464 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
     let mut video_frames = 0u64;
     let mut finished = false;
     {
-    let mut handle = |frame: &mut Frame| -> Result<bool> {
-        unsafe {
-            let f = &mut *frame.0;
-            if !format_validated {
-                let descriptor = av_pix_fmt_desc_get(f.format);
-                if descriptor.is_null() {
-                    return Err("unknown decoded pixel format".into());
-                }
-                let sx = 1usize << (*descriptor).log2_chroma_w;
-                let sy = 1usize << (*descriptor).log2_chroma_h;
-                if !crop.x.is_multiple_of(sx) || !crop.y.is_multiple_of(sy) {
-                    return Err("crop origin must be chroma-aligned".into());
-                }
-                pixel_format = string(av_get_pix_fmt_name(f.format));
-                format_validated = true;
-            }
-            if f.width <= 0
-                || f.height <= 0
-                || crop
-                    .x
-                    .checked_add(crop.width)
-                    .is_none_or(|right| right > f.width as usize)
-                || crop
-                    .y
-                    .checked_add(crop.height)
-                    .is_none_or(|bottom| bottom > f.height as usize)
-            {
-                return Err("dynamic frame geometry is not compatible with crop".into());
-            }
-            if f.pts == NOPTS {
-                f.pts = f.best_effort_timestamp;
-            }
-            if f.time_base.num <= 0 || f.time_base.den <= 0 {
-                f.time_base = (*decoder.0).pkt_timebase;
-            }
-            if let Some((start, end)) = interval {
-                let pts = f.pts;
-                if pts != NOPTS && pts >= end {
-                    av_frame_unref(frame.0);
-                    return Ok(true);
-                }
-                if pts == NOPTS || pts < start {
-                    av_frame_unref(frame.0);
-                    return Ok(false);
-                }
-            }
-            let full_frame = crop.x == 0
-                && crop.y == 0
-                && crop.width == f.width as usize
-                && crop.height == f.height as usize;
-            if !full_frame {
-                f.crop_left = crop.x;
-                f.crop_top = crop.y;
-                f.crop_right = f.width as usize - crop.x - crop.width;
-                f.crop_bottom = f.height as usize - crop.y - crop.height;
-                check(
-                    av_frame_apply_cropping(frame.0, AV_FRAME_CROP_UNALIGNED as i32),
-                    "apply exact decode crop view",
-                )?;
-            }
-            let output = if transform.horizontal_flip {
-                horizontal_copy_frame(transformed.0, frame.0)?;
-                transformed.0
-            } else {
-                frame.0
-            };
-            if transform.vertical_flip {
-                flip_view(output)?;
-                // Keep the reusable hflip destination in positive-stride form.
-                if output == transformed.0 {
-                    flip_view(output)?;
-                }
-            }
-            // Match FFmpeg vf order: crop → hflip → vflip → transpose → rotate → pad → scale → subtitles → overlay → colorspace → zscale → tonemap → format.
-            let output = if let Some(mode) = transform.transpose {
-                transpose_frame(&mut transpose, transposed.0, output, mode)?;
-                transposed.0
-            } else {
-                output
-            };
-            let output = if let Some(angle) = transform.rotate {
-                rotate_frame(&mut rotate_graph, rotated.0, output, angle)?;
-                rotated.0
-            } else {
-                output
-            };
-            let output = if let Some(pad) = transform.pad {
-                pad_frame(&mut pad_graph, padded.0, output, pad)?;
-                padded.0
-            } else {
-                output
-            };
-            let (output, format_done) =
-                if let (true, Some(fmt)) = (transform.scale.is_some(), target_pix_fmt) {
-                    if transform.burn_subs.is_none()
-                        && transform.overlay.is_none()
-                        && transform.yadif.is_none()
-                        && transform.bwdif.is_none()
-                        && transform.w3fdif.is_none()
-                        && transform.tblend.is_none()
-                        && transform.tmix.is_none()
-                        && transform.hqdn3d.is_none()
-                        && transform.gblur.is_none()
-                        && transform.eq.is_none()
-                        && transform.unsharp.is_none()
-                        && transform.hue.is_none()
-                        && transform.avgblur.is_none()
-                        && transform.boxblur.is_none()
-                        && transform.negate.is_none()
-                        && transform.edgedetect.is_none()
-                        && transform.sobel.is_none()
-                        && transform.prewitt.is_none()
-                        && transform.roberts.is_none()
-                        && transform.kirsch.is_none()
-                        && transform.scharr.is_none()
-                        && transform.atadenoise.is_none()
-                        && transform.owdenoise.is_none()
-                        && transform.vaguedenoiser.is_none()
-                        && transform.nlmeans.is_none()
-                        && transform.bm3d.is_none()
-                        && transform.dctdnoiz.is_none()
-                        && transform.fftdnoiz.is_none()
-                        && transform.smartblur.is_none()
-                        && transform.sab.is_none()
-                        && transform.bilateral.is_none()
-                        && transform.cas.is_none()
-                        && transform.epx.is_none()
-                        && transform.vignette.is_none()
-                        && transform.curves.is_none()
-                        && transform.colorbalance.is_none()
-                        && transform.colorlevels.is_none()
-                        && transform.colorchannelmixer.is_none()
-                        && transform.deflicker.is_none()
-                        && transform.photosensitivity.is_none()
-                        && transform.monochrome.is_none()
-                        && transform.grayworld.is_none()
-                        && transform.drawbox.is_none()
-                        && transform.drawgrid.is_none()
-                        && transform.lagfun.is_none()
-                        && transform.amplify.is_none()
-                        && transform.bitplanenoise.is_none()
-                        && transform.deband.is_none()
-                        && transform.gradfun.is_none()
-                        && transform.lenscorrection.is_none()
-                        && transform.pixelize.is_none()
-                        && transform.removegrain.is_none()
-                        && transform.yaepblur.is_none()
-                        && transform.vibrance.is_none()
-                        && transform.dilation.is_none()
-                        && transform.erosion.is_none()
-                        && transform.colorize.is_none()
-                        && transform.exposure.is_none()
-                        && transform.chromashift.is_none()
-                        && transform.colorcontrast.is_none()
-                        && transform.colorcorrect.is_none()
-                        && transform.histeq.is_none()
-                        && transform.shuffleplanes.is_none()
-                        && transform.lutyuv.is_none()
-                        && transform.colorhold.is_none()
-                        && transform.fade.is_none()
-                        && transform.perspective.is_none()
-                        && transform.lumakey.is_none()
-                        && transform.chromakey.is_none()
-                        && transform.colorkey.is_none()
-                        && transform.despill.is_none()
-                        && transform.selectivecolor.is_none()
-                        && transform.stereo3d.is_none()
-                        && transform.field.is_none()
-                        && transform.hqx.is_none()
-                        && transform.xbr.is_none()
-                        && transform.il.is_none()
-                        && transform.super2xsai.is_none()
-                        && transform.kerndeint.is_none()
-                        && transform.phase.is_none()
-                        && transform.estdif.is_none()
-                        && transform.tinterlace.is_none()
-                        && transform.separatefields.is_none()
-                        && transform.weave.is_none()
-                        && transform.doubleweave.is_none()
-                        && transform.framepack.is_none()
-                        && transform.telecine.is_none()
-                        && transform.pullup.is_none()
-                        && transform.decimate.is_none()
-                        && transform.mpdecimate.is_none()
-                        && transform.framestep.is_none()
-                        && transform.tile.is_none()
-                        && transform.untile.is_none()
-                        && transform.shuffleframes.is_none()
-                        && transform.reverse.is_none()
-                        && transform.r#loop.is_none()
-                        && transform.thumbnail.is_none()
-                        && transform.freezedetect.is_none()
-                        && transform.pseudocolor.is_none()
-                        && transform.minterpolate.is_none()
-                        && transform.fps.is_none()
-                        && transform.colorspace.is_none()
-                        && transform.zscale.is_none()
-                        && transform.tonemap.is_none()
-                    {
-                        scale_convert_frame(
-                            &mut sws,
-                            scaled.0,
-                            output,
-                            out_w as i32,
-                            out_h as i32,
-                            fmt,
-                        )?;
-                        (scaled.0, true)
-                    } else {
-                        scale_frame(
-                            &mut sws,
-                            scaled.0,
-                            output,
-                            out_w as i32,
-                            out_h as i32,
-                        )?;
-                        (scaled.0, false)
+        let mut handle = |frame: &mut Frame| -> Result<bool> {
+            unsafe {
+                let f = &mut *frame.0;
+                if !format_validated {
+                    let descriptor = av_pix_fmt_desc_get(f.format);
+                    if descriptor.is_null() {
+                        return Err("unknown decoded pixel format".into());
                     }
-                } else if transform.scale.is_some() {
-                    scale_frame(
-                        &mut sws,
-                        scaled.0,
-                        output,
-                        out_w as i32,
-                        out_h as i32,
+                    let sx = 1usize << (*descriptor).log2_chroma_w;
+                    let sy = 1usize << (*descriptor).log2_chroma_h;
+                    if !crop.x.is_multiple_of(sx) || !crop.y.is_multiple_of(sy) {
+                        return Err("crop origin must be chroma-aligned".into());
+                    }
+                    pixel_format = string(av_get_pix_fmt_name(f.format));
+                    format_validated = true;
+                }
+                if f.width <= 0
+                    || f.height <= 0
+                    || crop
+                        .x
+                        .checked_add(crop.width)
+                        .is_none_or(|right| right > f.width as usize)
+                    || crop
+                        .y
+                        .checked_add(crop.height)
+                        .is_none_or(|bottom| bottom > f.height as usize)
+                {
+                    return Err("dynamic frame geometry is not compatible with crop".into());
+                }
+                if f.pts == NOPTS {
+                    f.pts = f.best_effort_timestamp;
+                }
+                if f.time_base.num <= 0 || f.time_base.den <= 0 {
+                    f.time_base = (*decoder.0).pkt_timebase;
+                }
+                if let Some((start, end)) = interval {
+                    let pts = f.pts;
+                    if pts != NOPTS && pts >= end {
+                        av_frame_unref(frame.0);
+                        return Ok(true);
+                    }
+                    if pts == NOPTS || pts < start {
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                }
+                let full_frame = crop.x == 0
+                    && crop.y == 0
+                    && crop.width == f.width as usize
+                    && crop.height == f.height as usize;
+                if !full_frame {
+                    f.crop_left = crop.x;
+                    f.crop_top = crop.y;
+                    f.crop_right = f.width as usize - crop.x - crop.width;
+                    f.crop_bottom = f.height as usize - crop.y - crop.height;
+                    check(
+                        av_frame_apply_cropping(frame.0, AV_FRAME_CROP_UNALIGNED as i32),
+                        "apply exact decode crop view",
                     )?;
-                    (scaled.0, false)
+                }
+                let output = if transform.horizontal_flip {
+                    horizontal_copy_frame(transformed.0, frame.0)?;
+                    transformed.0
                 } else {
-                    (output, false)
+                    frame.0
                 };
-            let output = if let Some(args) = transform.epx.as_deref() {
-                let dst = epxed.as_mut().ok_or("epx frame missing")?;
-                epx_frame(&mut epx_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(path) = transform.burn_subs.as_deref() {
-                let dst = burned.as_mut().ok_or("burn frame missing")?;
-                subtitles_frame(&mut burn_graph, dst.0, output, path)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(spec) = transform.overlay.as_ref() {
-                let dst = overlaid.as_mut().ok_or("overlay frame missing")?;
-                overlay_frame(&mut overlay_graph, dst.0, output, &spec.path, spec.x, spec.y)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.yadif.as_deref() {
-                let dst = deinterlaced.as_mut().ok_or("yadif frame missing")?;
-                let produced = yadif_push_frame(&mut yadif_graph, dst.0, output, args)?;
-                if !produced {
-                    av_frame_unref(frame.0);
-                    return Ok(false);
+                if transform.vertical_flip {
+                    flip_view(output)?;
+                    // Keep the reusable hflip destination in positive-stride form.
+                    if output == transformed.0 {
+                        flip_view(output)?;
+                    }
                 }
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.bwdif.as_deref() {
-                let dst = bwdif_out.as_mut().ok_or("bwdif frame missing")?;
-                let produced = bwdif_push_frame(&mut bwdif_graph, dst.0, output, args)?;
-                if !produced {
-                    av_frame_unref(frame.0);
-                    return Ok(false);
-                }
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.w3fdif.as_deref() {
-                let dst = w3fdif_out.as_mut().ok_or("w3fdif frame missing")?;
-                let produced = w3fdif_push_frame(&mut w3fdif_graph, dst.0, output, args)?;
-                if !produced {
-                    av_frame_unref(frame.0);
-                    return Ok(false);
-                }
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.tblend.as_deref() {
-                let dst = tblended.as_mut().ok_or("tblend frame missing")?;
-                let produced = tblend_frame(&mut tblend_graph, dst.0, output, args)?;
-                if !produced {
-                    av_frame_unref(frame.0);
-                    return Ok(false);
-                }
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.tmix.as_deref() {
-                let dst = tmixed.as_mut().ok_or("tmix frame missing")?;
-                let produced = tmix_push_frame(&mut tmix_graph, dst.0, output, args)?;
-                if !produced {
-                    av_frame_unref(frame.0);
-                    return Ok(false);
-                }
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.hqdn3d.as_deref() {
-                let dst = denoised.as_mut().ok_or("hqdn3d frame missing")?;
-                hqdn3d_frame(&mut hqdn3d_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.gblur.as_deref() {
-                let dst = blurred.as_mut().ok_or("gblur frame missing")?;
-                gblur_frame(&mut gblur_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.eq.as_deref() {
-                let dst = equalized.as_mut().ok_or("eq frame missing")?;
-                eq_frame(&mut eq_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.unsharp.as_deref() {
-                let dst = sharpened.as_mut().ok_or("unsharp frame missing")?;
-                unsharp_frame(&mut unsharp_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.hue.as_deref() {
-                let dst = hued.as_mut().ok_or("hue frame missing")?;
-                hue_frame(&mut hue_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.avgblur.as_deref() {
-                let dst = avgblurred.as_mut().ok_or("avgblur frame missing")?;
-                avgblur_frame(&mut avgblur_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.boxblur.as_deref() {
-                let dst = boxblurred.as_mut().ok_or("boxblur frame missing")?;
-                boxblur_frame(&mut boxblur_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.negate.as_deref() {
-                let dst = negated.as_mut().ok_or("negate frame missing")?;
-                negate_frame(&mut negate_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.edgedetect.as_deref() {
-                let dst = edged.as_mut().ok_or("edgedetect frame missing")?;
-                edgedetect_frame(&mut edgedetect_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if args.contains("mode=colormix") {
+                // Match FFmpeg vf order: crop → hflip → vflip → transpose → rotate → pad → scale → subtitles → overlay → colorspace → zscale → tonemap → format.
+                let output = if let Some(mode) = transform.transpose {
+                    transpose_frame(&mut transpose, transposed.0, output, mode)?;
+                    transposed.0
+                } else {
+                    output
+                };
+                let output = if let Some(angle) = transform.rotate {
+                    rotate_frame(&mut rotate_graph, rotated.0, output, angle)?;
+                    rotated.0
+                } else {
+                    output
+                };
+                let output = if let Some(pad) = transform.pad {
+                    pad_frame(&mut pad_graph, padded.0, output, pad)?;
+                    padded.0
+                } else {
+                    output
+                };
+                let (output, format_done) =
+                    if let (true, Some(fmt)) = (transform.scale.is_some(), target_pix_fmt) {
+                        if transform.burn_subs.is_none()
+                            && transform.overlay.is_none()
+                            && transform.yadif.is_none()
+                            && transform.bwdif.is_none()
+                            && transform.w3fdif.is_none()
+                            && transform.tblend.is_none()
+                            && transform.tmix.is_none()
+                            && transform.hqdn3d.is_none()
+                            && transform.gblur.is_none()
+                            && transform.eq.is_none()
+                            && transform.unsharp.is_none()
+                            && transform.hue.is_none()
+                            && transform.avgblur.is_none()
+                            && transform.boxblur.is_none()
+                            && transform.negate.is_none()
+                            && transform.edgedetect.is_none()
+                            && transform.sobel.is_none()
+                            && transform.prewitt.is_none()
+                            && transform.roberts.is_none()
+                            && transform.kirsch.is_none()
+                            && transform.scharr.is_none()
+                            && transform.atadenoise.is_none()
+                            && transform.owdenoise.is_none()
+                            && transform.vaguedenoiser.is_none()
+                            && transform.nlmeans.is_none()
+                            && transform.bm3d.is_none()
+                            && transform.dctdnoiz.is_none()
+                            && transform.fftdnoiz.is_none()
+                            && transform.smartblur.is_none()
+                            && transform.sab.is_none()
+                            && transform.bilateral.is_none()
+                            && transform.cas.is_none()
+                            && transform.epx.is_none()
+                            && transform.vignette.is_none()
+                            && transform.curves.is_none()
+                            && transform.colorbalance.is_none()
+                            && transform.colorlevels.is_none()
+                            && transform.colorchannelmixer.is_none()
+                            && transform.deflicker.is_none()
+                            && transform.photosensitivity.is_none()
+                            && transform.monochrome.is_none()
+                            && transform.grayworld.is_none()
+                            && transform.drawbox.is_none()
+                            && transform.drawgrid.is_none()
+                            && transform.lagfun.is_none()
+                            && transform.amplify.is_none()
+                            && transform.bitplanenoise.is_none()
+                            && transform.deband.is_none()
+                            && transform.gradfun.is_none()
+                            && transform.lenscorrection.is_none()
+                            && transform.pixelize.is_none()
+                            && transform.removegrain.is_none()
+                            && transform.yaepblur.is_none()
+                            && transform.vibrance.is_none()
+                            && transform.dilation.is_none()
+                            && transform.erosion.is_none()
+                            && transform.colorize.is_none()
+                            && transform.exposure.is_none()
+                            && transform.chromashift.is_none()
+                            && transform.colorcontrast.is_none()
+                            && transform.colorcorrect.is_none()
+                            && transform.histeq.is_none()
+                            && transform.shuffleplanes.is_none()
+                            && transform.lutyuv.is_none()
+                            && transform.colorhold.is_none()
+                            && transform.fade.is_none()
+                            && transform.perspective.is_none()
+                            && transform.lumakey.is_none()
+                            && transform.chromakey.is_none()
+                            && transform.colorkey.is_none()
+                            && transform.despill.is_none()
+                            && transform.selectivecolor.is_none()
+                            && transform.stereo3d.is_none()
+                            && transform.field.is_none()
+                            && transform.hqx.is_none()
+                            && transform.xbr.is_none()
+                            && transform.il.is_none()
+                            && transform.super2xsai.is_none()
+                            && transform.kerndeint.is_none()
+                            && transform.phase.is_none()
+                            && transform.estdif.is_none()
+                            && transform.tinterlace.is_none()
+                            && transform.separatefields.is_none()
+                            && transform.weave.is_none()
+                            && transform.doubleweave.is_none()
+                            && transform.framepack.is_none()
+                            && transform.telecine.is_none()
+                            && transform.pullup.is_none()
+                            && transform.decimate.is_none()
+                            && transform.mpdecimate.is_none()
+                            && transform.framestep.is_none()
+                            && transform.tile.is_none()
+                            && transform.untile.is_none()
+                            && transform.shuffleframes.is_none()
+                            && transform.reverse.is_none()
+                            && transform.r#loop.is_none()
+                            && transform.thumbnail.is_none()
+                            && transform.freezedetect.is_none()
+                            && transform.pseudocolor.is_none()
+                            && transform.minterpolate.is_none()
+                            && transform.fps.is_none()
+                            && transform.colorspace.is_none()
+                            && transform.zscale.is_none()
+                            && transform.tonemap.is_none()
+                        {
+                            scale_convert_frame(
+                                &mut sws,
+                                scaled.0,
+                                output,
+                                out_w as i32,
+                                out_h as i32,
+                                fmt,
+                            )?;
+                            (scaled.0, true)
+                        } else {
+                            scale_frame(&mut sws, scaled.0, output, out_w as i32, out_h as i32)?;
+                            (scaled.0, false)
+                        }
+                    } else if transform.scale.is_some() {
+                        scale_frame(&mut sws, scaled.0, output, out_w as i32, out_h as i32)?;
+                        (scaled.0, false)
+                    } else {
+                        (output, false)
+                    };
+                let output = if let Some(args) = transform.epx.as_deref() {
+                    let dst = epxed.as_mut().ok_or("epx frame missing")?;
+                    epx_frame(&mut epx_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(path) = transform.burn_subs.as_deref() {
+                    let dst = burned.as_mut().ok_or("burn frame missing")?;
+                    subtitles_frame(&mut burn_graph, dst.0, output, path)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(spec) = transform.overlay.as_ref() {
+                    let dst = overlaid.as_mut().ok_or("overlay frame missing")?;
+                    overlay_frame(
+                        &mut overlay_graph,
+                        dst.0,
+                        output,
+                        &spec.path,
+                        spec.x,
+                        spec.y,
+                    )?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.yadif.as_deref() {
+                    let dst = deinterlaced.as_mut().ok_or("yadif frame missing")?;
+                    let produced = yadif_push_frame(&mut yadif_graph, dst.0, output, args)?;
+                    if !produced {
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.bwdif.as_deref() {
+                    let dst = bwdif_out.as_mut().ok_or("bwdif frame missing")?;
+                    let produced = bwdif_push_frame(&mut bwdif_graph, dst.0, output, args)?;
+                    if !produced {
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.w3fdif.as_deref() {
+                    let dst = w3fdif_out.as_mut().ok_or("w3fdif frame missing")?;
+                    let produced = w3fdif_push_frame(&mut w3fdif_graph, dst.0, output, args)?;
+                    if !produced {
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.tblend.as_deref() {
+                    let dst = tblended.as_mut().ok_or("tblend frame missing")?;
+                    let produced = tblend_frame(&mut tblend_graph, dst.0, output, args)?;
+                    if !produced {
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.tmix.as_deref() {
+                    let dst = tmixed.as_mut().ok_or("tmix frame missing")?;
+                    let produced = tmix_push_frame(&mut tmix_graph, dst.0, output, args)?;
+                    if !produced {
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.hqdn3d.as_deref() {
+                    let dst = denoised.as_mut().ok_or("hqdn3d frame missing")?;
+                    hqdn3d_frame(&mut hqdn3d_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.gblur.as_deref() {
+                    let dst = blurred.as_mut().ok_or("gblur frame missing")?;
+                    gblur_frame(&mut gblur_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.eq.as_deref() {
+                    let dst = equalized.as_mut().ok_or("eq frame missing")?;
+                    eq_frame(&mut eq_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.unsharp.as_deref() {
+                    let dst = sharpened.as_mut().ok_or("unsharp frame missing")?;
+                    unsharp_frame(&mut unsharp_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.hue.as_deref() {
+                    let dst = hued.as_mut().ok_or("hue frame missing")?;
+                    hue_frame(&mut hue_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.avgblur.as_deref() {
+                    let dst = avgblurred.as_mut().ok_or("avgblur frame missing")?;
+                    avgblur_frame(&mut avgblur_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.boxblur.as_deref() {
+                    let dst = boxblurred.as_mut().ok_or("boxblur frame missing")?;
+                    boxblur_frame(&mut boxblur_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.negate.as_deref() {
+                    let dst = negated.as_mut().ok_or("negate frame missing")?;
+                    negate_frame(&mut negate_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.edgedetect.as_deref() {
+                    let dst = edged.as_mut().ok_or("edgedetect frame missing")?;
+                    edgedetect_frame(&mut edgedetect_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if args.contains("mode=colormix") {
+                        let src_fmt = (*output).format;
+                        if (*out).format != src_fmt {
+                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                            converted.0
+                        } else {
+                            out
+                        }
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.sobel.as_deref() {
+                    let dst = sobeled.as_mut().ok_or("sobel frame missing")?;
+                    sobel_frame(&mut sobel_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.prewitt.as_deref() {
+                    let dst = prewitted.as_mut().ok_or("prewitt frame missing")?;
+                    prewitt_frame(&mut prewitt_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.roberts.as_deref() {
+                    let dst = robertsed.as_mut().ok_or("roberts frame missing")?;
+                    roberts_frame(&mut roberts_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.kirsch.as_deref() {
+                    let dst = kirsched.as_mut().ok_or("kirsch frame missing")?;
+                    kirsch_frame(&mut kirsch_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.scharr.as_deref() {
+                    let dst = scharred.as_mut().ok_or("scharr frame missing")?;
+                    scharr_frame(&mut scharr_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.atadenoise.as_deref() {
+                    let dst = atdenoised.as_mut().ok_or("atadenoise frame missing")?;
+                    let produced =
+                        atadenoise_push_frame(&mut atadenoise_graph, dst.0, output, args)?;
+                    if !produced {
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.owdenoise.as_deref() {
+                    let dst = owdenoised.as_mut().ok_or("owdenoise frame missing")?;
+                    owdenoise_frame(&mut owdenoise_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.vaguedenoiser.as_deref() {
+                    let dst = vaguedenoised
+                        .as_mut()
+                        .ok_or("vaguedenoiser frame missing")?;
+                    vaguedenoiser_frame(&mut vaguedenoiser_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.nlmeans.as_deref() {
+                    let dst = nldenoised.as_mut().ok_or("nlmeans frame missing")?;
+                    nlmeans_frame(&mut nlmeans_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.bm3d.as_deref() {
+                    let dst = bm3ded.as_mut().ok_or("bm3d frame missing")?;
+                    bm3d_frame(&mut bm3d_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.dctdnoiz.as_deref() {
                     let src_fmt = (*output).format;
+                    let dst = dctdnoized.as_mut().ok_or("dctdnoiz frame missing")?;
+                    dctdnoiz_frame(&mut dctdnoiz_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    // dctdnoiz materializes rgb24; fair-pair reverts via libswscale like photosensitivity.
                     if (*out).format != src_fmt {
                         convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
                         converted.0
@@ -1791,1189 +1926,1144 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         out
                     }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.sobel.as_deref() {
-                let dst = sobeled.as_mut().ok_or("sobel frame missing")?;
-                sobel_frame(&mut sobel_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.prewitt.as_deref() {
-                let dst = prewitted.as_mut().ok_or("prewitt frame missing")?;
-                prewitt_frame(&mut prewitt_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.roberts.as_deref() {
-                let dst = robertsed.as_mut().ok_or("roberts frame missing")?;
-                roberts_frame(&mut roberts_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.kirsch.as_deref() {
-                let dst = kirsched.as_mut().ok_or("kirsch frame missing")?;
-                kirsch_frame(&mut kirsch_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.scharr.as_deref() {
-                let dst = scharred.as_mut().ok_or("scharr frame missing")?;
-                scharr_frame(&mut scharr_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.atadenoise.as_deref() {
-                let dst = atdenoised.as_mut().ok_or("atadenoise frame missing")?;
-                let produced =
-                    atadenoise_push_frame(&mut atadenoise_graph, dst.0, output, args)?;
-                if !produced {
-                    av_frame_unref(frame.0);
-                    return Ok(false);
-                }
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.owdenoise.as_deref() {
-                let dst = owdenoised.as_mut().ok_or("owdenoise frame missing")?;
-                owdenoise_frame(&mut owdenoise_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.vaguedenoiser.as_deref() {
-                let dst = vaguedenoised.as_mut().ok_or("vaguedenoiser frame missing")?;
-                vaguedenoiser_frame(&mut vaguedenoiser_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.nlmeans.as_deref() {
-                let dst = nldenoised.as_mut().ok_or("nlmeans frame missing")?;
-                nlmeans_frame(&mut nlmeans_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.bm3d.as_deref() {
-                let dst = bm3ded.as_mut().ok_or("bm3d frame missing")?;
-                bm3d_frame(&mut bm3d_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.dctdnoiz.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = dctdnoized.as_mut().ok_or("dctdnoiz frame missing")?;
-                dctdnoiz_frame(&mut dctdnoiz_graph, dst.0, output, args)?;
-                let out = dst.0;
-                // dctdnoiz materializes rgb24; fair-pair reverts via libswscale like photosensitivity.
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.fftdnoiz.as_deref() {
+                    let dst = fftdnoized.as_mut().ok_or("fftdnoiz frame missing")?;
+                    fftdnoiz_frame(&mut fftdnoiz_graph, dst.0, output, args)?;
+                    dst.0
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.fftdnoiz.as_deref() {
-                let dst = fftdnoized.as_mut().ok_or("fftdnoiz frame missing")?;
-                fftdnoiz_frame(&mut fftdnoiz_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.smartblur.as_deref() {
-                let dst = smartblurred.as_mut().ok_or("smartblur frame missing")?;
-                smartblur_frame(&mut smartblur_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.sab.as_deref() {
-                let dst = sabbed.as_mut().ok_or("sab frame missing")?;
-                sab_frame(&mut sab_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.bilateral.as_deref() {
-                let dst = bilateraled.as_mut().ok_or("bilateral frame missing")?;
-                bilateral_frame(&mut bilateral_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.cas.as_deref() {
-                let dst = cased.as_mut().ok_or("cas frame missing")?;
-                cas_frame(&mut cas_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.vignette.as_deref() {
-                let dst = vignetted.as_mut().ok_or("vignette frame missing")?;
-                vignette_frame(&mut vignette_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.curves.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = curved.as_mut().ok_or("curves frame missing")?;
-                curves_frame(&mut curves_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.smartblur.as_deref() {
+                    let dst = smartblurred.as_mut().ok_or("smartblur frame missing")?;
+                    smartblur_frame(&mut smartblur_graph, dst.0, output, args)?;
+                    dst.0
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.colorbalance.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = balanced.as_mut().ok_or("colorbalance frame missing")?;
-                colorbalance_frame(&mut colorbalance_graph, dst.0, output, args)?;
-                let out = dst.0;
-                // colorbalance materializes bgr0; fair-pair reverts via libswscale like `--pix-fmt`.
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.sab.as_deref() {
+                    let dst = sabbed.as_mut().ok_or("sab frame missing")?;
+                    sab_frame(&mut sab_graph, dst.0, output, args)?;
+                    dst.0
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.colorlevels.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = leveled.as_mut().ok_or("colorlevels frame missing")?;
-                colorlevels_frame(&mut colorlevels_graph, dst.0, output, args)?;
-                let out = dst.0;
-                // colorlevels materializes bgr0; fair-pair reverts via libswscale like `--pix-fmt`.
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.bilateral.as_deref() {
+                    let dst = bilateraled.as_mut().ok_or("bilateral frame missing")?;
+                    bilateral_frame(&mut bilateral_graph, dst.0, output, args)?;
+                    dst.0
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.colorchannelmixer.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = channelmixed.as_mut().ok_or("colorchannelmixer frame missing")?;
-                colorchannelmixer_frame(&mut colorchannelmixer_graph, dst.0, output, args)?;
-                let out = dst.0;
-                // colorchannelmixer materializes bgr0; fair-pair reverts via libswscale like `--pix-fmt`.
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.cas.as_deref() {
+                    let dst = cased.as_mut().ok_or("cas frame missing")?;
+                    cas_frame(&mut cas_graph, dst.0, output, args)?;
+                    dst.0
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.deflicker.as_deref() {
-                let dst = deflickered.as_mut().ok_or("deflicker frame missing")?;
-                let produced =
-                    deflicker_push_frame(&mut deflicker_graph, dst.0, output, args)?;
-                if !produced {
-                    av_frame_unref(frame.0);
-                    return Ok(false);
-                }
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.photosensitivity.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = photosensitized.as_mut().ok_or("photosensitivity frame missing")?;
-                photosensitivity_frame(&mut photosensitivity_graph, dst.0, output, args)?;
-                let out = dst.0;
-                // photosensitivity materializes rgb24; fair-pair reverts via libswscale like colorbalance.
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.vignette.as_deref() {
+                    let dst = vignetted.as_mut().ok_or("vignette frame missing")?;
+                    vignette_frame(&mut vignette_graph, dst.0, output, args)?;
+                    dst.0
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.monochrome.as_deref() {
-                let dst = monochromed.as_mut().ok_or("monochrome frame missing")?;
-                monochrome_frame(&mut monochrome_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.grayworld.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = grayworlded.as_mut().ok_or("grayworld frame missing")?;
-                grayworld_frame(&mut grayworld_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.curves.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = curved.as_mut().ok_or("curves frame missing")?;
+                    curves_frame(&mut curves_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.drawbox.as_deref() {
-                let dst = drawboxed.as_mut().ok_or("drawbox frame missing")?;
-                drawbox_frame(&mut drawbox_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.drawgrid.as_deref() {
-                let dst = drawgridd.as_mut().ok_or("drawgrid frame missing")?;
-                drawgrid_frame(&mut drawgrid_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.lagfun.as_deref() {
-                let dst = lagfuned.as_mut().ok_or("lagfun frame missing")?;
-                let produced =
-                    lagfun_push_frame(&mut lagfun_graph, dst.0, output, args)?;
-                if !produced {
-                    av_frame_unref(frame.0);
-                    return Ok(false);
-                }
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.amplify.as_deref() {
-                let dst = amplified.as_mut().ok_or("amplify frame missing")?;
-                let produced =
-                    amplify_push_frame(&mut amplify_graph, dst.0, output, args)?;
-                if !produced {
-                    av_frame_unref(frame.0);
-                    return Ok(false);
-                }
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.bitplanenoise.as_deref() {
-                let dst = bitplanenoised.as_mut().ok_or("bitplanenoise frame missing")?;
-                bitplanenoise_frame(&mut bitplanenoise_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.deband.as_deref() {
-                let dst = debanded.as_mut().ok_or("deband frame missing")?;
-                deband_frame(&mut deband_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.gradfun.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = gradfuned.as_mut().ok_or("gradfun frame missing")?;
-                gradfun_frame(&mut gradfun_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.colorbalance.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = balanced.as_mut().ok_or("colorbalance frame missing")?;
+                    colorbalance_frame(&mut colorbalance_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    // colorbalance materializes bgr0; fair-pair reverts via libswscale like `--pix-fmt`.
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.lenscorrection.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = lenscorrected.as_mut().ok_or("lenscorrection frame missing")?;
-                lenscorrection_frame(&mut lenscorrection_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.colorlevels.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = leveled.as_mut().ok_or("colorlevels frame missing")?;
+                    colorlevels_frame(&mut colorlevels_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    // colorlevels materializes bgr0; fair-pair reverts via libswscale like `--pix-fmt`.
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.pixelize.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = pixelized.as_mut().ok_or("pixelize frame missing")?;
-                pixelize_frame(&mut pixelize_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.colorchannelmixer.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = channelmixed
+                        .as_mut()
+                        .ok_or("colorchannelmixer frame missing")?;
+                    colorchannelmixer_frame(&mut colorchannelmixer_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    // colorchannelmixer materializes bgr0; fair-pair reverts via libswscale like `--pix-fmt`.
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.removegrain.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = removegrained.as_mut().ok_or("removegrain frame missing")?;
-                removegrain_frame(&mut removegrain_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.deflicker.as_deref() {
+                    let dst = deflickered.as_mut().ok_or("deflicker frame missing")?;
+                    let produced = deflicker_push_frame(&mut deflicker_graph, dst.0, output, args)?;
+                    if !produced {
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                    dst.0
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.yaepblur.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = yaepblurred.as_mut().ok_or("yaepblur frame missing")?;
-                yaepblur_frame(&mut yaepblur_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.photosensitivity.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = photosensitized
+                        .as_mut()
+                        .ok_or("photosensitivity frame missing")?;
+                    photosensitivity_frame(&mut photosensitivity_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    // photosensitivity materializes rgb24; fair-pair reverts via libswscale like colorbalance.
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.vibrance.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = vibranced.as_mut().ok_or("vibrance frame missing")?;
-                vibrance_frame(&mut vibrance_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.monochrome.as_deref() {
+                    let dst = monochromed.as_mut().ok_or("monochrome frame missing")?;
+                    monochrome_frame(&mut monochrome_graph, dst.0, output, args)?;
+                    dst.0
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.dilation.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = dilated.as_mut().ok_or("dilation frame missing")?;
-                dilation_frame(&mut dilation_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.grayworld.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = grayworlded.as_mut().ok_or("grayworld frame missing")?;
+                    grayworld_frame(&mut grayworld_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.erosion.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = eroded.as_mut().ok_or("erosion frame missing")?;
-                erosion_frame(&mut erosion_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.drawbox.as_deref() {
+                    let dst = drawboxed.as_mut().ok_or("drawbox frame missing")?;
+                    drawbox_frame(&mut drawbox_graph, dst.0, output, args)?;
+                    dst.0
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.colorize.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = colorized.as_mut().ok_or("colorize frame missing")?;
-                colorize_frame(&mut colorize_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.drawgrid.as_deref() {
+                    let dst = drawgridd.as_mut().ok_or("drawgrid frame missing")?;
+                    drawgrid_frame(&mut drawgrid_graph, dst.0, output, args)?;
+                    dst.0
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.exposure.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = exposured.as_mut().ok_or("exposure frame missing")?;
-                exposure_frame(&mut exposure_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.lagfun.as_deref() {
+                    let dst = lagfuned.as_mut().ok_or("lagfun frame missing")?;
+                    let produced = lagfun_push_frame(&mut lagfun_graph, dst.0, output, args)?;
+                    if !produced {
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                    dst.0
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.chromashift.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = chromashifted.as_mut().ok_or("chromashift frame missing")?;
-                chromashift_frame(&mut chromashift_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.amplify.as_deref() {
+                    let dst = amplified.as_mut().ok_or("amplify frame missing")?;
+                    let produced = amplify_push_frame(&mut amplify_graph, dst.0, output, args)?;
+                    if !produced {
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                    dst.0
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.colorcontrast.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = colorcontrasted.as_mut().ok_or("colorcontrast frame missing")?;
-                colorcontrast_frame(&mut colorcontrast_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.bitplanenoise.as_deref() {
+                    let dst = bitplanenoised
+                        .as_mut()
+                        .ok_or("bitplanenoise frame missing")?;
+                    bitplanenoise_frame(&mut bitplanenoise_graph, dst.0, output, args)?;
+                    dst.0
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.colorcorrect.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = colorcorrected.as_mut().ok_or("colorcorrect frame missing")?;
-                colorcorrect_frame(&mut colorcorrect_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.deband.as_deref() {
+                    let dst = debanded.as_mut().ok_or("deband frame missing")?;
+                    deband_frame(&mut deband_graph, dst.0, output, args)?;
+                    dst.0
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.histeq.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = histeqed.as_mut().ok_or("histeq frame missing")?;
-                histeq_frame(&mut histeq_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.gradfun.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = gradfuned.as_mut().ok_or("gradfun frame missing")?;
+                    gradfun_frame(&mut gradfun_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.shuffleplanes.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = shuffleplaned.as_mut().ok_or("shuffleplanes frame missing")?;
-                shuffleplanes_frame(&mut shuffleplanes_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.lenscorrection.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = lenscorrected
+                        .as_mut()
+                        .ok_or("lenscorrection frame missing")?;
+                    lenscorrection_frame(&mut lenscorrection_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.lutyuv.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = lutyuved.as_mut().ok_or("lutyuv frame missing")?;
-                lutyuv_frame(&mut lutyuv_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.pixelize.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = pixelized.as_mut().ok_or("pixelize frame missing")?;
+                    pixelize_frame(&mut pixelize_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.colorhold.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = colorholded.as_mut().ok_or("colorhold frame missing")?;
-                colorhold_frame(&mut colorhold_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.removegrain.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = removegrained.as_mut().ok_or("removegrain frame missing")?;
+                    removegrain_frame(&mut removegrain_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.fade.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = faded.as_mut().ok_or("fade frame missing")?;
-                let produced =
-                    fade_apply_frame(&mut fade_graph, dst.0, output, args, &mut fade_push_mode)?;
-                if !produced {
-                    av_frame_unref(frame.0);
-                    return Ok(false);
-                }
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.yaepblur.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = yaepblurred.as_mut().ok_or("yaepblur frame missing")?;
+                    yaepblur_frame(&mut yaepblur_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.perspective.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = perspectived.as_mut().ok_or("perspective frame missing")?;
-                perspective_frame(&mut perspective_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.vibrance.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = vibranced.as_mut().ok_or("vibrance frame missing")?;
+                    vibrance_frame(&mut vibrance_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.lumakey.as_deref() {
-                let dst = lumakeyed.as_mut().ok_or("lumakey frame missing")?;
-                lumakey_frame(&mut lumakey_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.chromakey.as_deref() {
-                let dst = chromakeyed.as_mut().ok_or("chromakey frame missing")?;
-                chromakey_frame(&mut chromakey_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.colorkey.as_deref() {
-                let dst = colorkeyed.as_mut().ok_or("colorkey frame missing")?;
-                colorkey_frame(&mut colorkey_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.despill.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = despilled.as_mut().ok_or("despill frame missing")?;
-                despill_frame(&mut despill_graph, dst.0, output, args)?;
-                let out = dst.0;
-                // despill materializes gbrp/rgb; fair-pair reverts via libswscale like colorbalance.
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.dilation.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = dilated.as_mut().ok_or("dilation frame missing")?;
+                    dilation_frame(&mut dilation_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.selectivecolor.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = selectivecolored.as_mut().ok_or("selectivecolor frame missing")?;
-                selectivecolor_frame(&mut selectivecolor_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.erosion.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = eroded.as_mut().ok_or("erosion frame missing")?;
+                    erosion_frame(&mut erosion_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.stereo3d.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = stereo3ded.as_mut().ok_or("stereo3d frame missing")?;
-                stereo3d_frame(&mut stereo3d_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.colorize.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = colorized.as_mut().ok_or("colorize frame missing")?;
+                    colorize_frame(&mut colorize_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.field.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = fielded.as_mut().ok_or("field frame missing")?;
-                field_frame(&mut field_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.exposure.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = exposured.as_mut().ok_or("exposure frame missing")?;
+                    exposure_frame(&mut exposure_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.hqx.as_deref() {
-                let dst = hqxd.as_mut().ok_or("hqx frame missing")?;
-                hqx_frame(&mut hqx_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.xbr.as_deref() {
-                let dst = xbrd.as_mut().ok_or("xbr frame missing")?;
-                xbr_frame(&mut xbr_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.il.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = ild.as_mut().ok_or("il frame missing")?;
-                il_frame(&mut il_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.chromashift.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = chromashifted.as_mut().ok_or("chromashift frame missing")?;
+                    chromashift_frame(&mut chromashift_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.super2xsai.as_deref() {
-                let dst = super2xsaid.as_mut().ok_or("super2xsai frame missing")?;
-                super2xsai_frame(&mut super2xsai_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.kerndeint.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = kerndeintd.as_mut().ok_or("kerndeint frame missing")?;
-                kerndeint_frame(&mut kerndeint_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.colorcontrast.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = colorcontrasted
+                        .as_mut()
+                        .ok_or("colorcontrast frame missing")?;
+                    colorcontrast_frame(&mut colorcontrast_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.phase.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = phased.as_mut().ok_or("phase frame missing")?;
-                let produced =
-                    phase_apply_frame(&mut phase_graph, dst.0, output, args, &mut phase_push_mode)?;
-                if !produced {
-                    av_frame_unref(frame.0);
-                    return Ok(false);
-                }
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.colorcorrect.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = colorcorrected
+                        .as_mut()
+                        .ok_or("colorcorrect frame missing")?;
+                    colorcorrect_frame(&mut colorcorrect_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.estdif.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = estdifd.as_mut().ok_or("estdif frame missing")?;
-                let produced = estdif_push_frame(&mut estdif_graph, dst.0, output, args)?;
-                if !produced {
-                    av_frame_unref(frame.0);
-                    return Ok(false);
-                }
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.histeq.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = histeqed.as_mut().ok_or("histeq frame missing")?;
+                    histeq_frame(&mut histeq_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.tinterlace.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = tinterlaced.as_mut().ok_or("tinterlace frame missing")?;
-                let produced = tinterlace_push_frame(&mut tinterlace_graph, dst.0, output, args)?;
-                if !produced {
-                    av_frame_unref(frame.0);
-                    return Ok(false);
-                }
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
+                    output
+                };
+                let output = if let Some(args) = transform.shuffleplanes.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = shuffleplaned
+                        .as_mut()
+                        .ok_or("shuffleplanes frame missing")?;
+                    shuffleplanes_frame(&mut shuffleplanes_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
-                    out
-                }
-            } else {
-                output
-            };
-            if let Some(args) = transform.separatefields.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = separatefieldsd.as_mut().ok_or("separatefields frame missing")?;
-                let mut emitted = 0u64;
-                separatefields_push_frame(
-                    &mut separatefields_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |field| {
-                        let mut out = field;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        let mut doubleweave_field = |mut out: *mut AVFrame| -> Result<()> {
-                        let out = if let Some(args) = transform.freezedetect.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
-                            freezedetect_frame(&mut freezedetect_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
+                    output
+                };
+                let output = if let Some(args) = transform.lutyuv.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = lutyuved.as_mut().ok_or("lutyuv frame missing")?;
+                    lutyuv_frame(&mut lutyuv_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.colorhold.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = colorholded.as_mut().ok_or("colorhold frame missing")?;
+                    colorhold_frame(&mut colorhold_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.fade.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = faded.as_mut().ok_or("fade frame missing")?;
+                    let produced = fade_apply_frame(
+                        &mut fade_graph,
+                        dst.0,
+                        output,
+                        args,
+                        &mut fade_push_mode,
+                    )?;
+                    if !produced {
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.perspective.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = perspectived.as_mut().ok_or("perspective frame missing")?;
+                    perspective_frame(&mut perspective_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.lumakey.as_deref() {
+                    let dst = lumakeyed.as_mut().ok_or("lumakey frame missing")?;
+                    lumakey_frame(&mut lumakey_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.chromakey.as_deref() {
+                    let dst = chromakeyed.as_mut().ok_or("chromakey frame missing")?;
+                    chromakey_frame(&mut chromakey_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.colorkey.as_deref() {
+                    let dst = colorkeyed.as_mut().ok_or("colorkey frame missing")?;
+                    colorkey_frame(&mut colorkey_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.despill.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = despilled.as_mut().ok_or("despill frame missing")?;
+                    despill_frame(&mut despill_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    // despill materializes gbrp/rgb; fair-pair reverts via libswscale like colorbalance.
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.selectivecolor.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = selectivecolored
+                        .as_mut()
+                        .ok_or("selectivecolor frame missing")?;
+                    selectivecolor_frame(&mut selectivecolor_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.stereo3d.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = stereo3ded.as_mut().ok_or("stereo3d frame missing")?;
+                    stereo3d_frame(&mut stereo3d_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.field.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = fielded.as_mut().ok_or("field frame missing")?;
+                    field_frame(&mut field_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.hqx.as_deref() {
+                    let dst = hqxd.as_mut().ok_or("hqx frame missing")?;
+                    hqx_frame(&mut hqx_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.xbr.as_deref() {
+                    let dst = xbrd.as_mut().ok_or("xbr frame missing")?;
+                    xbr_frame(&mut xbr_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.il.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = ild.as_mut().ok_or("il frame missing")?;
+                    il_frame(&mut il_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.super2xsai.as_deref() {
+                    let dst = super2xsaid.as_mut().ok_or("super2xsai frame missing")?;
+                    super2xsai_frame(&mut super2xsai_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.kerndeint.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = kerndeintd.as_mut().ok_or("kerndeint frame missing")?;
+                    kerndeint_frame(&mut kerndeint_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.phase.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = phased.as_mut().ok_or("phase frame missing")?;
+                    let produced = phase_apply_frame(
+                        &mut phase_graph,
+                        dst.0,
+                        output,
+                        args,
+                        &mut phase_push_mode,
+                    )?;
+                    if !produced {
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.estdif.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = estdifd.as_mut().ok_or("estdif frame missing")?;
+                    let produced = estdif_push_frame(&mut estdif_graph, dst.0, output, args)?;
+                    if !produced {
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.tinterlace.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = tinterlaced.as_mut().ok_or("tinterlace frame missing")?;
+                    let produced =
+                        tinterlace_push_frame(&mut tinterlace_graph, dst.0, output, args)?;
+                    if !produced {
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                if let Some(args) = transform.separatefields.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = separatefieldsd
+                        .as_mut()
+                        .ok_or("separatefields frame missing")?;
+                    let mut emitted = 0u64;
+                    separatefields_push_frame(
+                        &mut separatefields_graph,
+                        dst.0,
+                        output,
+                        args,
+                        |field| {
+                            let mut out = field;
+                            if (*out).format != src_fmt {
+                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                                out = converted.0;
                             }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.pseudocolor.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
-                            pseudocolor_frame(&mut pseudocolor_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.colorspace.as_deref() {
-                            let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
-                            colorspace_frame(&mut colorspace_graph, dst.0, out, args)?;
-                            dst.0
-                        } else {
-                            out
-                        };
-                        let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
-                            zscale_frame(&mut zscale_graph, dst.0, out, args, &name)?;
-                            (dst.0, true)
-                        } else {
-                            (out, false)
-                        };
-                        let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
-                            tonemap_frame(&mut tonemap_graph, dst.0, out, args, &name)?;
-                            (dst.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = target_pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, fmt)?;
-                                converted.0
-                            } else {
-                                out
-                            }
-                        } else {
-                            out
-                        };
-                        if transform.minterpolate.is_some() || transform.fps.is_some() {
-                            let scratch =
-                                temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                            let fps_dst = fps_out
-                                .as_mut()
-                                .map(|f| f.0)
-                                .unwrap_or(scratch.0);
-                            temporal_push_frame(
-                                &mut minterpolate_graph,
-                                scratch.0,
-                                transform.minterpolate.as_deref(),
-                                &mut fps_graph,
-                                fps_dst,
-                                transform.fps.as_deref(),
-                                out,
-                                |_| {
+                            let mut doubleweave_field = |mut out: *mut AVFrame| -> Result<()> {
+                                let out = if let Some(args) = transform.freezedetect.as_deref() {
+                                    let src_fmt = (*out).format;
+                                    let dst = freezedetectd
+                                        .as_mut()
+                                        .ok_or("freezedetect frame missing")?;
+                                    freezedetect_frame(&mut freezedetect_graph, dst.0, out, args)?;
+                                    let o = dst.0;
+                                    if (*o).format != src_fmt {
+                                        convert_pix_fmt_frame(
+                                            &mut fmt_sws,
+                                            converted.0,
+                                            o,
+                                            src_fmt,
+                                        )?;
+                                        converted.0
+                                    } else {
+                                        o
+                                    }
+                                } else {
+                                    out
+                                };
+                                let out = if let Some(args) = transform.pseudocolor.as_deref() {
+                                    let src_fmt = (*out).format;
+                                    let dst = pseudocolored
+                                        .as_mut()
+                                        .ok_or("pseudocolor frame missing")?;
+                                    pseudocolor_frame(&mut pseudocolor_graph, dst.0, out, args)?;
+                                    let o = dst.0;
+                                    if (*o).format != src_fmt {
+                                        convert_pix_fmt_frame(
+                                            &mut fmt_sws,
+                                            converted.0,
+                                            o,
+                                            src_fmt,
+                                        )?;
+                                        converted.0
+                                    } else {
+                                        o
+                                    }
+                                } else {
+                                    out
+                                };
+                                let out = if let Some(args) = transform.colorspace.as_deref() {
+                                    let dst =
+                                        colorspaced.as_mut().ok_or("colorspace frame missing")?;
+                                    colorspace_frame(&mut colorspace_graph, dst.0, out, args)?;
+                                    dst.0
+                                } else {
+                                    out
+                                };
+                                let (out, format_done) =
+                                    if let Some(args) = transform.zscale.as_deref() {
+                                        let fmt =
+                                            target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
+                                        let name = string(av_get_pix_fmt_name(fmt));
+                                        if name.is_empty() {
+                                            return Err("unknown zscale output pixel format".into());
+                                        }
+                                        let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
+                                        zscale_frame(&mut zscale_graph, dst.0, out, args, &name)?;
+                                        (dst.0, true)
+                                    } else {
+                                        (out, false)
+                                    };
+                                let (out, format_done) = if let Some(args) =
+                                    transform.tonemap.as_deref()
+                                {
+                                    let fmt =
+                                        target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
+                                    let name = string(av_get_pix_fmt_name(fmt));
+                                    if name.is_empty() {
+                                        return Err("unknown tonemap output pixel format".into());
+                                    }
+                                    let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
+                                    tonemap_frame(&mut tonemap_graph, dst.0, out, args, &name)?;
+                                    (dst.0, format_done)
+                                } else {
+                                    (out, format_done)
+                                };
+                                let out = if let Some(fmt) = target_pix_fmt {
+                                    if !format_done && (*out).format != fmt {
+                                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, fmt)?;
+                                        converted.0
+                                    } else {
+                                        out
+                                    }
+                                } else {
+                                    out
+                                };
+                                if transform.minterpolate.is_some() || transform.fps.is_some() {
+                                    let scratch = temporal_scratch
+                                        .as_mut()
+                                        .ok_or("temporal frame missing")?;
+                                    let fps_dst =
+                                        fps_out.as_mut().map(|f| f.0).unwrap_or(scratch.0);
+                                    temporal_push_frame(
+                                        &mut minterpolate_graph,
+                                        scratch.0,
+                                        transform.minterpolate.as_deref(),
+                                        &mut fps_graph,
+                                        fps_dst,
+                                        transform.fps.as_deref(),
+                                        out,
+                                        |_| {
+                                            emitted += 1;
+                                            Ok(())
+                                        },
+                                    )?;
+                                } else {
                                     emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            emitted += 1;
-                        }
-                        Ok(())
-                        };                        let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
-                            if transform.thumbnail.is_some() {
-                                let thumb_dst = thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
-                                push_thumbnail_or_emit(
-                                    &mut thumbnail_graph,
-                                    thumb_dst.0,
+                                }
+                                Ok(())
+                            };
+                            let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
+                                if transform.thumbnail.is_some() {
+                                    let thumb_dst =
+                                        thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
+                                    push_thumbnail_or_emit(
+                                        &mut thumbnail_graph,
+                                        thumb_dst.0,
+                                        out,
+                                        transform.thumbnail.as_deref(),
+                                        |f| doubleweave_field(f),
+                                    )
+                                } else {
+                                    doubleweave_field(out)
+                                }
+                            };
+                            let mut apply_loop = |out: *mut AVFrame| -> Result<()> {
+                                if transform.r#loop.is_some() {
+                                    let loop_dst = looped.as_mut().ok_or("loop frame missing")?;
+                                    push_loop_or_emit(
+                                        &mut loop_graph,
+                                        loop_dst.0,
+                                        out,
+                                        transform.r#loop.as_deref(),
+                                        |f| apply_thumbnail(f),
+                                    )
+                                } else {
+                                    apply_thumbnail(out)
+                                }
+                            };
+                            let mut apply_reverse = |out: *mut AVFrame| -> Result<()> {
+                                if transform.reverse.is_some() {
+                                    let rev_dst =
+                                        reversed.as_mut().ok_or("reverse frame missing")?;
+                                    push_reverse_or_emit(
+                                        &mut reverse_graph,
+                                        rev_dst.0,
+                                        out,
+                                        transform.reverse.as_deref(),
+                                        |f| apply_loop(f),
+                                    )
+                                } else {
+                                    apply_loop(out)
+                                }
+                            };
+                            let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
+                                if transform.shuffleframes.is_some() {
+                                    let sf_dst =
+                                        shuffled.as_mut().ok_or("shuffleframes frame missing")?;
+                                    push_shuffleframes_or_emit(
+                                        &mut shuffleframes_graph,
+                                        sf_dst.0,
+                                        out,
+                                        transform.shuffleframes.as_deref(),
+                                        |f| apply_reverse(f),
+                                    )
+                                } else {
+                                    apply_reverse(out)
+                                }
+                            };
+                            let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
+                                if transform.untile.is_some() {
+                                    let u_dst = untiled.as_mut().ok_or("untile frame missing")?;
+                                    push_untile_or_emit(
+                                        &mut untile_graph,
+                                        u_dst.0,
+                                        out,
+                                        transform.untile.as_deref(),
+                                        |f| apply_shuffleframes(f),
+                                    )
+                                } else {
+                                    apply_shuffleframes(out)
+                                }
+                            };
+                            let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
+                                if transform.tile.is_some() {
+                                    let t_dst = tiled.as_mut().ok_or("tile frame missing")?;
+                                    push_tile_or_emit(
+                                        &mut tile_graph,
+                                        t_dst.0,
+                                        out,
+                                        transform.tile.as_deref(),
+                                        |f| apply_untile(f),
+                                    )
+                                } else {
+                                    apply_untile(out)
+                                }
+                            };
+
+                            let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
+                                if transform.framestep.is_some() {
+                                    let fs_dst =
+                                        framestepped.as_mut().ok_or("framestep frame missing")?;
+                                    push_framestep_or_emit(
+                                        &mut framestep_graph,
+                                        fs_dst.0,
+                                        out,
+                                        transform.framestep.as_deref(),
+                                        |f| apply_tile(f),
+                                    )
+                                } else {
+                                    apply_tile(out)
+                                }
+                            };
+                            let mut apply_mpdecimate = |out: *mut AVFrame| -> Result<()> {
+                                if let Some(mpd_args) = transform.mpdecimate.as_deref() {
+                                    let mpd_dst =
+                                        mpdecimated.as_mut().ok_or("mpdecimate frame missing")?;
+                                    mpdecimate_push_frame(
+                                        &mut mpdecimate_graph,
+                                        mpd_dst.0,
+                                        out,
+                                        mpd_args,
+                                        |mpd| apply_framestep(mpd),
+                                    )
+                                } else {
+                                    apply_framestep(out)
+                                }
+                            };
+                            let mut apply_decimate = |out: *mut AVFrame| -> Result<()> {
+                                if let Some(dc_args) = transform.decimate.as_deref() {
+                                    let dc_dst =
+                                        decimated.as_mut().ok_or("decimate frame missing")?;
+                                    decimate_push_frame(
+                                        &mut decimate_graph,
+                                        dc_dst.0,
+                                        out,
+                                        dc_args,
+                                        |dc| apply_mpdecimate(dc),
+                                    )?;
+                                } else {
+                                    apply_mpdecimate(out)?;
+                                }
+                                Ok(())
+                            };
+                            let mut apply_pullup = |out: *mut AVFrame| -> Result<()> {
+                                if let Some(pu_args) = transform.pullup.as_deref() {
+                                    let pu_dst = pulledup.as_mut().ok_or("pullup frame missing")?;
+                                    pullup_push_frame(
+                                        &mut pullup_graph,
+                                        pu_dst.0,
+                                        out,
+                                        pu_args,
+                                        |pu| apply_decimate(pu),
+                                    )?;
+                                } else {
+                                    apply_decimate(out)?;
+                                }
+                                Ok(())
+                            };
+                            let mut apply_telecine = |out: *mut AVFrame| -> Result<()> {
+                                if let Some(tc_args) = transform.telecine.as_deref() {
+                                    let tc_dst =
+                                        telecined.as_mut().ok_or("telecine frame missing")?;
+                                    telecine_push_frame(
+                                        &mut telecine_graph,
+                                        tc_dst.0,
+                                        out,
+                                        tc_args,
+                                        |tc| apply_pullup(tc),
+                                    )?;
+                                } else {
+                                    apply_pullup(out)?;
+                                }
+                                Ok(())
+                            };
+                            let mut apply_framepack = |out: *mut AVFrame| -> Result<()> {
+                                if let Some(fp_args) = transform.framepack.as_deref() {
+                                    let fp_dst =
+                                        framepacked.as_mut().ok_or("framepack frame missing")?;
+                                    framepack_push_frame(
+                                        &mut framepack_graph,
+                                        fp_dst.0,
+                                        out,
+                                        fp_args,
+                                        |packed| apply_telecine(packed),
+                                    )?;
+                                } else {
+                                    apply_telecine(out)?;
+                                }
+                                Ok(())
+                            };
+                            let mut apply_doubleweave = |out: *mut AVFrame| -> Result<()> {
+                                if let Some(dw_args) = transform.doubleweave.as_deref() {
+                                    let dw_dst =
+                                        doubleweaved.as_mut().ok_or("doubleweave frame missing")?;
+                                    doubleweave_push_frame(
+                                        &mut doubleweave_graph,
+                                        dw_dst.0,
+                                        out,
+                                        dw_args,
+                                        |doubled| apply_framepack(doubled),
+                                    )?;
+                                } else {
+                                    apply_framepack(out)?;
+                                }
+                                Ok(())
+                            };
+                            if let Some(weave_args) = transform.weave.as_deref() {
+                                let weave_dst = weaved.as_mut().ok_or("weave frame missing")?;
+                                weave_push_frame(
+                                    &mut weave_graph,
+                                    weave_dst.0,
                                     out,
-                                    transform.thumbnail.as_deref(),
-                                    |f| doubleweave_field(f),
-                                )
-                            } else {
-                                doubleweave_field(out)
-                            }
-                        };
-                        let mut apply_loop = |out: *mut AVFrame| -> Result<()> {
-                            if transform.r#loop.is_some() {
-                                let loop_dst = looped.as_mut().ok_or("loop frame missing")?;
-                                push_loop_or_emit(
-                                    &mut loop_graph,
-                                    loop_dst.0,
-                                    out,
-                                    transform.r#loop.as_deref(),
-                                    |f| apply_thumbnail(f),
-                                )
-                            } else {
-                                apply_thumbnail(out)
-                            }
-                        };
-                        let mut apply_reverse = |out: *mut AVFrame| -> Result<()> {
-                            if transform.reverse.is_some() {
-                                let rev_dst = reversed.as_mut().ok_or("reverse frame missing")?;
-                                push_reverse_or_emit(
-                                    &mut reverse_graph,
-                                    rev_dst.0,
-                                    out,
-                                    transform.reverse.as_deref(),
-                                    |f| apply_loop(f),
-                                )
-                            } else {
-                                apply_loop(out)
-                            }
-                        };
-                        let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
-                            if transform.shuffleframes.is_some() {
-                                let sf_dst = shuffled.as_mut().ok_or("shuffleframes frame missing")?;
-                                push_shuffleframes_or_emit(
-                                    &mut shuffleframes_graph,
-                                    sf_dst.0,
-                                    out,
-                                    transform.shuffleframes.as_deref(),
-                                    |f| apply_reverse(f),
-                                )
-                            } else {
-                                apply_reverse(out)
-                            }
-                        };
-                        let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
-                            if transform.untile.is_some() {
-                                let u_dst = untiled.as_mut().ok_or("untile frame missing")?;
-                                push_untile_or_emit(
-                                    &mut untile_graph,
-                                    u_dst.0,
-                                    out,
-                                    transform.untile.as_deref(),
-                                    |f| apply_shuffleframes(f),
-                                )
-                            } else {
-                                apply_shuffleframes(out)
-                            }
-                        };
-                        let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
-                            if transform.tile.is_some() {
-                                let t_dst = tiled.as_mut().ok_or("tile frame missing")?;
-                                push_tile_or_emit(
-                                    &mut tile_graph,
-                                    t_dst.0,
-                                    out,
-                                    transform.tile.as_deref(),
-                                    |f| apply_untile(f),
-                                )
-                            } else {
-                                apply_untile(out)
-                            }
-                        };
-                        
-                        let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
-                            if transform.framestep.is_some() {
-                                let fs_dst = framestepped.as_mut().ok_or("framestep frame missing")?;
-                                push_framestep_or_emit(
-                                    &mut framestep_graph,
-                                    fs_dst.0,
-                                    out,
-                                    transform.framestep.as_deref(),
-                                    |f| apply_tile(f),
-                                )
-                            } else {
-                                apply_tile(out)
-                            }
-                        };
-                        let mut apply_mpdecimate = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(mpd_args) = transform.mpdecimate.as_deref() {
-                                let mpd_dst =
-                                    mpdecimated.as_mut().ok_or("mpdecimate frame missing")?;
-                                mpdecimate_push_frame(
-                                    &mut mpdecimate_graph,
-                                    mpd_dst.0,
-                                    out,
-                                    mpd_args,
-                                    |mpd| apply_framestep(mpd),
-                                )
-                            } else {
-                                apply_framestep(out)
-                            }
-                        };
-                        let mut apply_decimate = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(dc_args) = transform.decimate.as_deref() {
-                                let dc_dst =
-                                    decimated.as_mut().ok_or("decimate frame missing")?;
-                                decimate_push_frame(
-                                    &mut decimate_graph,
-                                    dc_dst.0,
-                                    out,
-                                    dc_args,
-                                    |dc| apply_mpdecimate(dc),
+                                    weave_args,
+                                    |woven| apply_doubleweave(woven),
                                 )?;
                             } else {
-                                apply_mpdecimate(out)?;
+                                apply_doubleweave(out)?;
                             }
                             Ok(())
-                        };
-                        let mut apply_pullup = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(pu_args) = transform.pullup.as_deref() {
-                                let pu_dst =
-                                    pulledup.as_mut().ok_or("pullup frame missing")?;
-                                pullup_push_frame(
-                                    &mut pullup_graph,
-                                    pu_dst.0,
-                                    out,
-                                    pu_args,
-                                    |pu| apply_decimate(pu),
-                                )?;
-                            } else {
-                                apply_decimate(out)?;
-                            }
-                            Ok(())
-                        };
-                        let mut apply_telecine = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(tc_args) = transform.telecine.as_deref() {
-                                let tc_dst =
-                                    telecined.as_mut().ok_or("telecine frame missing")?;
-                                telecine_push_frame(
-                                    &mut telecine_graph,
-                                    tc_dst.0,
-                                    out,
-                                    tc_args,
-                                    |tc| apply_pullup(tc),
-                                )?;
-                            } else {
-                                apply_pullup(out)?;
-                            }
-                            Ok(())
-                        };
-                        let mut apply_framepack = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(fp_args) = transform.framepack.as_deref() {
-                                let fp_dst =
-                                    framepacked.as_mut().ok_or("framepack frame missing")?;
-                                framepack_push_frame(
-                                    &mut framepack_graph,
-                                    fp_dst.0,
-                                    out,
-                                    fp_args,
-                                    |packed| apply_telecine(packed),
-                                )?;
-                            } else {
-                                apply_telecine(out)?;
-                            }
-                            Ok(())
-                        };
-                        let mut apply_doubleweave = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(dw_args) = transform.doubleweave.as_deref() {
-                                let dw_dst =
-                                    doubleweaved.as_mut().ok_or("doubleweave frame missing")?;
-                                doubleweave_push_frame(
-                                    &mut doubleweave_graph,
-                                    dw_dst.0,
-                                    out,
-                                    dw_args,
-                                    |doubled| apply_framepack(doubled),
-                                )?;
-                            } else {
-                                apply_framepack(out)?;
-                            }
-                            Ok(())
-                        };
-                        if let Some(weave_args) = transform.weave.as_deref() {
-                            let weave_dst = weaved.as_mut().ok_or("weave frame missing")?;
-                            weave_push_frame(
-                                &mut weave_graph,
-                                weave_dst.0,
-                                out,
-                                weave_args,
-                                |woven| apply_doubleweave(woven),
-                            )?;
-                        } else {
-                            apply_doubleweave(out)?;
-                        }
-                        Ok(())
-                    },
-                )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
-            }
-            if let Some(args) = transform.weave.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = weaved.as_mut().ok_or("weave frame missing")?;
-                let mut emitted = 0u64;
-                weave_push_frame(
-                    &mut weave_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |woven| {
+                        },
+                    )?;
+                    video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    return Ok(false);
+                }
+                if let Some(args) = transform.weave.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = weaved.as_mut().ok_or("weave frame missing")?;
+                    let mut emitted = 0u64;
+                    weave_push_frame(&mut weave_graph, dst.0, output, args, |woven| {
                         let mut out = woven;
                         if (*out).format != src_fmt {
                             convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
                             out = converted.0;
                         }
                         let mut finish = |mut out: *mut AVFrame| -> Result<()> {
-                        let out = if let Some(args) = transform.freezedetect.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
-                            freezedetect_frame(&mut freezedetect_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.pseudocolor.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
-                            pseudocolor_frame(&mut pseudocolor_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.colorspace.as_deref() {
-                            let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
-                            colorspace_frame(&mut colorspace_graph, dst.0, out, args)?;
-                            dst.0
-                        } else {
-                            out
-                        };
-                        let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
-                            zscale_frame(&mut zscale_graph, dst.0, out, args, &name)?;
-                            (dst.0, true)
-                        } else {
-                            (out, false)
-                        };
-                        let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
-                            tonemap_frame(&mut tonemap_graph, dst.0, out, args, &name)?;
-                            (dst.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = target_pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, fmt)?;
-                                converted.0
+                            let out = if let Some(args) = transform.freezedetect.as_deref() {
+                                let src_fmt = (*out).format;
+                                let dst =
+                                    freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
+                                freezedetect_frame(&mut freezedetect_graph, dst.0, out, args)?;
+                                let o = dst.0;
+                                if (*o).format != src_fmt {
+                                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
+                                    converted.0
+                                } else {
+                                    o
+                                }
                             } else {
                                 out
+                            };
+                            let out = if let Some(args) = transform.pseudocolor.as_deref() {
+                                let src_fmt = (*out).format;
+                                let dst =
+                                    pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
+                                pseudocolor_frame(&mut pseudocolor_graph, dst.0, out, args)?;
+                                let o = dst.0;
+                                if (*o).format != src_fmt {
+                                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
+                                    converted.0
+                                } else {
+                                    o
+                                }
+                            } else {
+                                out
+                            };
+                            let out = if let Some(args) = transform.colorspace.as_deref() {
+                                let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
+                                colorspace_frame(&mut colorspace_graph, dst.0, out, args)?;
+                                dst.0
+                            } else {
+                                out
+                            };
+                            let (out, format_done) = if let Some(args) = transform.zscale.as_deref()
+                            {
+                                let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
+                                let name = string(av_get_pix_fmt_name(fmt));
+                                if name.is_empty() {
+                                    return Err("unknown zscale output pixel format".into());
+                                }
+                                let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
+                                zscale_frame(&mut zscale_graph, dst.0, out, args, &name)?;
+                                (dst.0, true)
+                            } else {
+                                (out, false)
+                            };
+                            let (out, format_done) = if let Some(args) =
+                                transform.tonemap.as_deref()
+                            {
+                                let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
+                                let name = string(av_get_pix_fmt_name(fmt));
+                                if name.is_empty() {
+                                    return Err("unknown tonemap output pixel format".into());
+                                }
+                                let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
+                                tonemap_frame(&mut tonemap_graph, dst.0, out, args, &name)?;
+                                (dst.0, format_done)
+                            } else {
+                                (out, format_done)
+                            };
+                            let out = if let Some(fmt) = target_pix_fmt {
+                                if !format_done && (*out).format != fmt {
+                                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, fmt)?;
+                                    converted.0
+                                } else {
+                                    out
+                                }
+                            } else {
+                                out
+                            };
+                            if transform.minterpolate.is_some() || transform.fps.is_some() {
+                                let scratch =
+                                    temporal_scratch.as_mut().ok_or("temporal frame missing")?;
+                                let fps_dst = fps_out.as_mut().map(|f| f.0).unwrap_or(scratch.0);
+                                temporal_push_frame(
+                                    &mut minterpolate_graph,
+                                    scratch.0,
+                                    transform.minterpolate.as_deref(),
+                                    &mut fps_graph,
+                                    fps_dst,
+                                    transform.fps.as_deref(),
+                                    out,
+                                    |_| {
+                                        emitted += 1;
+                                        Ok(())
+                                    },
+                                )?;
+                            } else {
+                                emitted += 1;
                             }
-                        } else {
-                            out
+                            Ok(())
                         };
-                        if transform.minterpolate.is_some() || transform.fps.is_some() {
-                            let scratch =
-                                temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                            let fps_dst = fps_out
-                                .as_mut()
-                                .map(|f| f.0)
-                                .unwrap_or(scratch.0);
-                            temporal_push_frame(
-                                &mut minterpolate_graph,
-                                scratch.0,
-                                transform.minterpolate.as_deref(),
-                                &mut fps_graph,
-                                fps_dst,
-                                transform.fps.as_deref(),
-                                out,
-                                |_| {
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            emitted += 1;
-                        }
-                        Ok(())
-                        };                        let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
+                        let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
                             if transform.thumbnail.is_some() {
-                                let thumb_dst = thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
+                                let thumb_dst =
+                                    thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
                                 push_thumbnail_or_emit(
                                     &mut thumbnail_graph,
                                     thumb_dst.0,
@@ -3015,7 +3105,8 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
                             if transform.shuffleframes.is_some() {
-                                let sf_dst = shuffled.as_mut().ok_or("shuffleframes frame missing")?;
+                                let sf_dst =
+                                    shuffled.as_mut().ok_or("shuffleframes frame missing")?;
                                 push_shuffleframes_or_emit(
                                     &mut shuffleframes_graph,
                                     sf_dst.0,
@@ -3055,10 +3146,11 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                 apply_untile(out)
                             }
                         };
-                        
+
                         let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
                             if transform.framestep.is_some() {
-                                let fs_dst = framestepped.as_mut().ok_or("framestep frame missing")?;
+                                let fs_dst =
+                                    framestepped.as_mut().ok_or("framestep frame missing")?;
                                 push_framestep_or_emit(
                                     &mut framestep_graph,
                                     fs_dst.0,
@@ -3087,8 +3179,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let mut apply_decimate = |out: *mut AVFrame| -> Result<()> {
                             if let Some(dc_args) = transform.decimate.as_deref() {
-                                let dc_dst =
-                                    decimated.as_mut().ok_or("decimate frame missing")?;
+                                let dc_dst = decimated.as_mut().ok_or("decimate frame missing")?;
                                 decimate_push_frame(
                                     &mut decimate_graph,
                                     dc_dst.0,
@@ -3103,8 +3194,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let mut apply_pullup = |out: *mut AVFrame| -> Result<()> {
                             if let Some(pu_args) = transform.pullup.as_deref() {
-                                let pu_dst =
-                                    pulledup.as_mut().ok_or("pullup frame missing")?;
+                                let pu_dst = pulledup.as_mut().ok_or("pullup frame missing")?;
                                 pullup_push_frame(
                                     &mut pullup_graph,
                                     pu_dst.0,
@@ -3119,8 +3209,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let mut apply_telecine = |out: *mut AVFrame| -> Result<()> {
                             if let Some(tc_args) = transform.telecine.as_deref() {
-                                let tc_dst =
-                                    telecined.as_mut().ok_or("telecine frame missing")?;
+                                let tc_dst = telecined.as_mut().ok_or("telecine frame missing")?;
                                 telecine_push_frame(
                                     &mut telecine_graph,
                                     tc_dst.0,
@@ -3163,28 +3252,330 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                             apply_framepack(out)?;
                         }
                         Ok(())
-                    },
-                )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
-            }
-            if let Some(args) = transform.doubleweave.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = doubleweaved.as_mut().ok_or("doubleweave frame missing")?;
-                let mut emitted = 0u64;
-                doubleweave_push_frame(
-                    &mut doubleweave_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |doubled| {
-                        let mut out = doubled;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        let mut finish = |mut out: *mut AVFrame| -> Result<()> {
+                    })?;
+                    video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    return Ok(false);
+                }
+                if let Some(args) = transform.doubleweave.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = doubleweaved.as_mut().ok_or("doubleweave frame missing")?;
+                    let mut emitted = 0u64;
+                    doubleweave_push_frame(
+                        &mut doubleweave_graph,
+                        dst.0,
+                        output,
+                        args,
+                        |doubled| {
+                            let mut out = doubled;
+                            if (*out).format != src_fmt {
+                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                                out = converted.0;
+                            }
+                            let mut finish = |mut out: *mut AVFrame| -> Result<()> {
+                                let out = if let Some(args) = transform.freezedetect.as_deref() {
+                                    let src_fmt = (*out).format;
+                                    let dst = freezedetectd
+                                        .as_mut()
+                                        .ok_or("freezedetect frame missing")?;
+                                    freezedetect_frame(&mut freezedetect_graph, dst.0, out, args)?;
+                                    let o = dst.0;
+                                    if (*o).format != src_fmt {
+                                        convert_pix_fmt_frame(
+                                            &mut fmt_sws,
+                                            converted.0,
+                                            o,
+                                            src_fmt,
+                                        )?;
+                                        converted.0
+                                    } else {
+                                        o
+                                    }
+                                } else {
+                                    out
+                                };
+                                let out = if let Some(args) = transform.pseudocolor.as_deref() {
+                                    let src_fmt = (*out).format;
+                                    let dst = pseudocolored
+                                        .as_mut()
+                                        .ok_or("pseudocolor frame missing")?;
+                                    pseudocolor_frame(&mut pseudocolor_graph, dst.0, out, args)?;
+                                    let o = dst.0;
+                                    if (*o).format != src_fmt {
+                                        convert_pix_fmt_frame(
+                                            &mut fmt_sws,
+                                            converted.0,
+                                            o,
+                                            src_fmt,
+                                        )?;
+                                        converted.0
+                                    } else {
+                                        o
+                                    }
+                                } else {
+                                    out
+                                };
+                                let out = if let Some(args) = transform.colorspace.as_deref() {
+                                    let dst =
+                                        colorspaced.as_mut().ok_or("colorspace frame missing")?;
+                                    colorspace_frame(&mut colorspace_graph, dst.0, out, args)?;
+                                    dst.0
+                                } else {
+                                    out
+                                };
+                                let (out, format_done) =
+                                    if let Some(args) = transform.zscale.as_deref() {
+                                        let fmt =
+                                            target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
+                                        let name = string(av_get_pix_fmt_name(fmt));
+                                        if name.is_empty() {
+                                            return Err("unknown zscale output pixel format".into());
+                                        }
+                                        let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
+                                        zscale_frame(&mut zscale_graph, dst.0, out, args, &name)?;
+                                        (dst.0, true)
+                                    } else {
+                                        (out, false)
+                                    };
+                                let (out, format_done) = if let Some(args) =
+                                    transform.tonemap.as_deref()
+                                {
+                                    let fmt =
+                                        target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
+                                    let name = string(av_get_pix_fmt_name(fmt));
+                                    if name.is_empty() {
+                                        return Err("unknown tonemap output pixel format".into());
+                                    }
+                                    let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
+                                    tonemap_frame(&mut tonemap_graph, dst.0, out, args, &name)?;
+                                    (dst.0, format_done)
+                                } else {
+                                    (out, format_done)
+                                };
+                                let out = if let Some(fmt) = target_pix_fmt {
+                                    if !format_done && (*out).format != fmt {
+                                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, fmt)?;
+                                        converted.0
+                                    } else {
+                                        out
+                                    }
+                                } else {
+                                    out
+                                };
+                                if transform.minterpolate.is_some() || transform.fps.is_some() {
+                                    let scratch = temporal_scratch
+                                        .as_mut()
+                                        .ok_or("temporal frame missing")?;
+                                    let fps_dst =
+                                        fps_out.as_mut().map(|f| f.0).unwrap_or(scratch.0);
+                                    temporal_push_frame(
+                                        &mut minterpolate_graph,
+                                        scratch.0,
+                                        transform.minterpolate.as_deref(),
+                                        &mut fps_graph,
+                                        fps_dst,
+                                        transform.fps.as_deref(),
+                                        out,
+                                        |_| {
+                                            emitted += 1;
+                                            Ok(())
+                                        },
+                                    )?;
+                                } else {
+                                    emitted += 1;
+                                }
+                                Ok(())
+                            };
+                            let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
+                                if transform.thumbnail.is_some() {
+                                    let thumb_dst =
+                                        thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
+                                    push_thumbnail_or_emit(
+                                        &mut thumbnail_graph,
+                                        thumb_dst.0,
+                                        out,
+                                        transform.thumbnail.as_deref(),
+                                        |f| finish(f),
+                                    )
+                                } else {
+                                    finish(out)
+                                }
+                            };
+                            let mut apply_loop = |out: *mut AVFrame| -> Result<()> {
+                                if transform.r#loop.is_some() {
+                                    let loop_dst = looped.as_mut().ok_or("loop frame missing")?;
+                                    push_loop_or_emit(
+                                        &mut loop_graph,
+                                        loop_dst.0,
+                                        out,
+                                        transform.r#loop.as_deref(),
+                                        |f| apply_thumbnail(f),
+                                    )
+                                } else {
+                                    apply_thumbnail(out)
+                                }
+                            };
+                            let mut apply_reverse = |out: *mut AVFrame| -> Result<()> {
+                                if transform.reverse.is_some() {
+                                    let rev_dst =
+                                        reversed.as_mut().ok_or("reverse frame missing")?;
+                                    push_reverse_or_emit(
+                                        &mut reverse_graph,
+                                        rev_dst.0,
+                                        out,
+                                        transform.reverse.as_deref(),
+                                        |f| apply_loop(f),
+                                    )
+                                } else {
+                                    apply_loop(out)
+                                }
+                            };
+                            let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
+                                if transform.shuffleframes.is_some() {
+                                    let sf_dst =
+                                        shuffled.as_mut().ok_or("shuffleframes frame missing")?;
+                                    push_shuffleframes_or_emit(
+                                        &mut shuffleframes_graph,
+                                        sf_dst.0,
+                                        out,
+                                        transform.shuffleframes.as_deref(),
+                                        |f| apply_reverse(f),
+                                    )
+                                } else {
+                                    apply_reverse(out)
+                                }
+                            };
+                            let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
+                                if transform.untile.is_some() {
+                                    let u_dst = untiled.as_mut().ok_or("untile frame missing")?;
+                                    push_untile_or_emit(
+                                        &mut untile_graph,
+                                        u_dst.0,
+                                        out,
+                                        transform.untile.as_deref(),
+                                        |f| apply_shuffleframes(f),
+                                    )
+                                } else {
+                                    apply_shuffleframes(out)
+                                }
+                            };
+                            let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
+                                if transform.tile.is_some() {
+                                    let t_dst = tiled.as_mut().ok_or("tile frame missing")?;
+                                    push_tile_or_emit(
+                                        &mut tile_graph,
+                                        t_dst.0,
+                                        out,
+                                        transform.tile.as_deref(),
+                                        |f| apply_untile(f),
+                                    )
+                                } else {
+                                    apply_untile(out)
+                                }
+                            };
+
+                            let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
+                                if transform.framestep.is_some() {
+                                    let fs_dst =
+                                        framestepped.as_mut().ok_or("framestep frame missing")?;
+                                    push_framestep_or_emit(
+                                        &mut framestep_graph,
+                                        fs_dst.0,
+                                        out,
+                                        transform.framestep.as_deref(),
+                                        |f| apply_tile(f),
+                                    )
+                                } else {
+                                    apply_tile(out)
+                                }
+                            };
+                            let mut apply_mpdecimate = |out: *mut AVFrame| -> Result<()> {
+                                if let Some(mpd_args) = transform.mpdecimate.as_deref() {
+                                    let mpd_dst =
+                                        mpdecimated.as_mut().ok_or("mpdecimate frame missing")?;
+                                    mpdecimate_push_frame(
+                                        &mut mpdecimate_graph,
+                                        mpd_dst.0,
+                                        out,
+                                        mpd_args,
+                                        |mpd| apply_framestep(mpd),
+                                    )
+                                } else {
+                                    apply_framestep(out)
+                                }
+                            };
+                            let mut apply_decimate = |out: *mut AVFrame| -> Result<()> {
+                                if let Some(dc_args) = transform.decimate.as_deref() {
+                                    let dc_dst =
+                                        decimated.as_mut().ok_or("decimate frame missing")?;
+                                    decimate_push_frame(
+                                        &mut decimate_graph,
+                                        dc_dst.0,
+                                        out,
+                                        dc_args,
+                                        |dc| apply_mpdecimate(dc),
+                                    )?;
+                                } else {
+                                    apply_mpdecimate(out)?;
+                                }
+                                Ok(())
+                            };
+                            let mut apply_pullup = |out: *mut AVFrame| -> Result<()> {
+                                if let Some(pu_args) = transform.pullup.as_deref() {
+                                    let pu_dst = pulledup.as_mut().ok_or("pullup frame missing")?;
+                                    pullup_push_frame(
+                                        &mut pullup_graph,
+                                        pu_dst.0,
+                                        out,
+                                        pu_args,
+                                        |pu| apply_decimate(pu),
+                                    )?;
+                                } else {
+                                    apply_decimate(out)?;
+                                }
+                                Ok(())
+                            };
+                            let mut apply_telecine = |out: *mut AVFrame| -> Result<()> {
+                                if let Some(tc_args) = transform.telecine.as_deref() {
+                                    let tc_dst =
+                                        telecined.as_mut().ok_or("telecine frame missing")?;
+                                    telecine_push_frame(
+                                        &mut telecine_graph,
+                                        tc_dst.0,
+                                        out,
+                                        tc_args,
+                                        |tc| apply_pullup(tc),
+                                    )?;
+                                } else {
+                                    apply_pullup(out)?;
+                                }
+                                Ok(())
+                            };
+                            if let Some(fp_args) = transform.framepack.as_deref() {
+                                let fp_dst =
+                                    framepacked.as_mut().ok_or("framepack frame missing")?;
+                                framepack_push_frame(
+                                    &mut framepack_graph,
+                                    fp_dst.0,
+                                    out,
+                                    fp_args,
+                                    |packed| apply_telecine(packed),
+                                )?;
+                            } else {
+                                apply_telecine(out)?;
+                            }
+                            Ok(())
+                        },
+                    )?;
+                    video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    return Ok(false);
+                }
+                if let Some(args) = transform.framepack.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = framepacked.as_mut().ok_or("framepack frame missing")?;
+                    let mut emitted = 0u64;
+                    let mut finish = |mut out: *mut AVFrame| -> Result<()> {
                         let out = if let Some(args) = transform.freezedetect.as_deref() {
                             let src_fmt = (*out).format;
                             let dst = freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
@@ -3257,10 +3648,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         if transform.minterpolate.is_some() || transform.fps.is_some() {
                             let scratch =
                                 temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                            let fps_dst = fps_out
-                                .as_mut()
-                                .map(|f| f.0)
-                                .unwrap_or(scratch.0);
+                            let fps_dst = fps_out.as_mut().map(|f| f.0).unwrap_or(scratch.0);
                             temporal_push_frame(
                                 &mut minterpolate_graph,
                                 scratch.0,
@@ -3278,566 +3666,279 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                             emitted += 1;
                         }
                         Ok(())
-                        };                        let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
-                            if transform.thumbnail.is_some() {
-                                let thumb_dst = thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
-                                push_thumbnail_or_emit(
-                                    &mut thumbnail_graph,
-                                    thumb_dst.0,
-                                    out,
-                                    transform.thumbnail.as_deref(),
-                                    |f| finish(f),
-                                )
-                            } else {
-                                finish(out)
-                            }
-                        };
-                        let mut apply_loop = |out: *mut AVFrame| -> Result<()> {
-                            if transform.r#loop.is_some() {
-                                let loop_dst = looped.as_mut().ok_or("loop frame missing")?;
-                                push_loop_or_emit(
-                                    &mut loop_graph,
-                                    loop_dst.0,
-                                    out,
-                                    transform.r#loop.as_deref(),
-                                    |f| apply_thumbnail(f),
-                                )
-                            } else {
-                                apply_thumbnail(out)
-                            }
-                        };
-                        let mut apply_reverse = |out: *mut AVFrame| -> Result<()> {
-                            if transform.reverse.is_some() {
-                                let rev_dst = reversed.as_mut().ok_or("reverse frame missing")?;
-                                push_reverse_or_emit(
-                                    &mut reverse_graph,
-                                    rev_dst.0,
-                                    out,
-                                    transform.reverse.as_deref(),
-                                    |f| apply_loop(f),
-                                )
-                            } else {
-                                apply_loop(out)
-                            }
-                        };
-                        let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
-                            if transform.shuffleframes.is_some() {
-                                let sf_dst = shuffled.as_mut().ok_or("shuffleframes frame missing")?;
-                                push_shuffleframes_or_emit(
-                                    &mut shuffleframes_graph,
-                                    sf_dst.0,
-                                    out,
-                                    transform.shuffleframes.as_deref(),
-                                    |f| apply_reverse(f),
-                                )
-                            } else {
-                                apply_reverse(out)
-                            }
-                        };
-                        let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
-                            if transform.untile.is_some() {
-                                let u_dst = untiled.as_mut().ok_or("untile frame missing")?;
-                                push_untile_or_emit(
-                                    &mut untile_graph,
-                                    u_dst.0,
-                                    out,
-                                    transform.untile.as_deref(),
-                                    |f| apply_shuffleframes(f),
-                                )
-                            } else {
-                                apply_shuffleframes(out)
-                            }
-                        };
-                        let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
-                            if transform.tile.is_some() {
-                                let t_dst = tiled.as_mut().ok_or("tile frame missing")?;
-                                push_tile_or_emit(
-                                    &mut tile_graph,
-                                    t_dst.0,
-                                    out,
-                                    transform.tile.as_deref(),
-                                    |f| apply_untile(f),
-                                )
-                            } else {
-                                apply_untile(out)
-                            }
-                        };
-                        
-                        let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
-                            if transform.framestep.is_some() {
-                                let fs_dst = framestepped.as_mut().ok_or("framestep frame missing")?;
-                                push_framestep_or_emit(
-                                    &mut framestep_graph,
-                                    fs_dst.0,
-                                    out,
-                                    transform.framestep.as_deref(),
-                                    |f| apply_tile(f),
-                                )
-                            } else {
-                                apply_tile(out)
-                            }
-                        };
-                        let mut apply_mpdecimate = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(mpd_args) = transform.mpdecimate.as_deref() {
-                                let mpd_dst =
-                                    mpdecimated.as_mut().ok_or("mpdecimate frame missing")?;
-                                mpdecimate_push_frame(
-                                    &mut mpdecimate_graph,
-                                    mpd_dst.0,
-                                    out,
-                                    mpd_args,
-                                    |mpd| apply_framestep(mpd),
-                                )
-                            } else {
-                                apply_framestep(out)
-                            }
-                        };
-                        let mut apply_decimate = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(dc_args) = transform.decimate.as_deref() {
-                                let dc_dst =
-                                    decimated.as_mut().ok_or("decimate frame missing")?;
-                                decimate_push_frame(
-                                    &mut decimate_graph,
-                                    dc_dst.0,
-                                    out,
-                                    dc_args,
-                                    |dc| apply_mpdecimate(dc),
-                                )?;
-                            } else {
-                                apply_mpdecimate(out)?;
-                            }
-                            Ok(())
-                        };
-                        let mut apply_pullup = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(pu_args) = transform.pullup.as_deref() {
-                                let pu_dst =
-                                    pulledup.as_mut().ok_or("pullup frame missing")?;
-                                pullup_push_frame(
-                                    &mut pullup_graph,
-                                    pu_dst.0,
-                                    out,
-                                    pu_args,
-                                    |pu| apply_decimate(pu),
-                                )?;
-                            } else {
-                                apply_decimate(out)?;
-                            }
-                            Ok(())
-                        };
-                        let mut apply_telecine = |out: *mut AVFrame| -> Result<()> {
-                            if let Some(tc_args) = transform.telecine.as_deref() {
-                                let tc_dst =
-                                    telecined.as_mut().ok_or("telecine frame missing")?;
-                                telecine_push_frame(
-                                    &mut telecine_graph,
-                                    tc_dst.0,
-                                    out,
-                                    tc_args,
-                                    |tc| apply_pullup(tc),
-                                )?;
-                            } else {
-                                apply_pullup(out)?;
-                            }
-                            Ok(())
-                        };
-                        if let Some(fp_args) = transform.framepack.as_deref() {
-                            let fp_dst =
-                                framepacked.as_mut().ok_or("framepack frame missing")?;
-                            framepack_push_frame(
-                                &mut framepack_graph,
-                                fp_dst.0,
+                    };
+                    let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
+                        if transform.thumbnail.is_some() {
+                            let thumb_dst =
+                                thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
+                            push_thumbnail_or_emit(
+                                &mut thumbnail_graph,
+                                thumb_dst.0,
                                 out,
-                                fp_args,
-                                |packed| apply_telecine(packed),
+                                transform.thumbnail.as_deref(),
+                                |f| finish(f),
+                            )
+                        } else {
+                            finish(out)
+                        }
+                    };
+                    let mut apply_loop = |out: *mut AVFrame| -> Result<()> {
+                        if transform.r#loop.is_some() {
+                            let loop_dst = looped.as_mut().ok_or("loop frame missing")?;
+                            push_loop_or_emit(
+                                &mut loop_graph,
+                                loop_dst.0,
+                                out,
+                                transform.r#loop.as_deref(),
+                                |f| apply_thumbnail(f),
+                            )
+                        } else {
+                            apply_thumbnail(out)
+                        }
+                    };
+                    let mut apply_reverse = |out: *mut AVFrame| -> Result<()> {
+                        if transform.reverse.is_some() {
+                            let rev_dst = reversed.as_mut().ok_or("reverse frame missing")?;
+                            push_reverse_or_emit(
+                                &mut reverse_graph,
+                                rev_dst.0,
+                                out,
+                                transform.reverse.as_deref(),
+                                |f| apply_loop(f),
+                            )
+                        } else {
+                            apply_loop(out)
+                        }
+                    };
+                    let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
+                        if transform.shuffleframes.is_some() {
+                            let sf_dst = shuffled.as_mut().ok_or("shuffleframes frame missing")?;
+                            push_shuffleframes_or_emit(
+                                &mut shuffleframes_graph,
+                                sf_dst.0,
+                                out,
+                                transform.shuffleframes.as_deref(),
+                                |f| apply_reverse(f),
+                            )
+                        } else {
+                            apply_reverse(out)
+                        }
+                    };
+                    let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
+                        if transform.untile.is_some() {
+                            let u_dst = untiled.as_mut().ok_or("untile frame missing")?;
+                            push_untile_or_emit(
+                                &mut untile_graph,
+                                u_dst.0,
+                                out,
+                                transform.untile.as_deref(),
+                                |f| apply_shuffleframes(f),
+                            )
+                        } else {
+                            apply_shuffleframes(out)
+                        }
+                    };
+                    let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
+                        if transform.tile.is_some() {
+                            let t_dst = tiled.as_mut().ok_or("tile frame missing")?;
+                            push_tile_or_emit(
+                                &mut tile_graph,
+                                t_dst.0,
+                                out,
+                                transform.tile.as_deref(),
+                                |f| apply_untile(f),
+                            )
+                        } else {
+                            apply_untile(out)
+                        }
+                    };
+
+                    let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
+                        if transform.framestep.is_some() {
+                            let fs_dst = framestepped.as_mut().ok_or("framestep frame missing")?;
+                            push_framestep_or_emit(
+                                &mut framestep_graph,
+                                fs_dst.0,
+                                out,
+                                transform.framestep.as_deref(),
+                                |f| apply_tile(f),
+                            )
+                        } else {
+                            apply_tile(out)
+                        }
+                    };
+                    let mut apply_mpdecimate = |out: *mut AVFrame| -> Result<()> {
+                        if let Some(mpd_args) = transform.mpdecimate.as_deref() {
+                            let mpd_dst = mpdecimated.as_mut().ok_or("mpdecimate frame missing")?;
+                            mpdecimate_push_frame(
+                                &mut mpdecimate_graph,
+                                mpd_dst.0,
+                                out,
+                                mpd_args,
+                                |mpd| apply_framestep(mpd),
+                            )
+                        } else {
+                            apply_framestep(out)
+                        }
+                    };
+                    let mut apply_decimate = |out: *mut AVFrame| -> Result<()> {
+                        if let Some(dc_args) = transform.decimate.as_deref() {
+                            let dc_dst = decimated.as_mut().ok_or("decimate frame missing")?;
+                            decimate_push_frame(
+                                &mut decimate_graph,
+                                dc_dst.0,
+                                out,
+                                dc_args,
+                                |dc| apply_mpdecimate(dc),
                             )?;
                         } else {
-                            apply_telecine(out)?;
+                            apply_mpdecimate(out)?;
                         }
                         Ok(())
-                    },
-                )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
-            }
-            if let Some(args) = transform.framepack.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = framepacked.as_mut().ok_or("framepack frame missing")?;
-                let mut emitted = 0u64;
-                let mut finish = |mut out: *mut AVFrame| -> Result<()> {
-                        let out = if let Some(args) = transform.freezedetect.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
-                            freezedetect_frame(&mut freezedetect_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
+                    };
+                    let mut apply_pullup = |out: *mut AVFrame| -> Result<()> {
+                        if let Some(pu_args) = transform.pullup.as_deref() {
+                            let pu_dst = pulledup.as_mut().ok_or("pullup frame missing")?;
+                            pullup_push_frame(&mut pullup_graph, pu_dst.0, out, pu_args, |pu| {
+                                apply_decimate(pu)
+                            })?;
                         } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.pseudocolor.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
-                            pseudocolor_frame(&mut pseudocolor_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.colorspace.as_deref() {
-                            let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
-                            colorspace_frame(&mut colorspace_graph, dst.0, out, args)?;
-                            dst.0
-                        } else {
-                            out
-                        };
-                        let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
-                            zscale_frame(&mut zscale_graph, dst.0, out, args, &name)?;
-                            (dst.0, true)
-                        } else {
-                            (out, false)
-                        };
-                        let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
-                            tonemap_frame(&mut tonemap_graph, dst.0, out, args, &name)?;
-                            (dst.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = target_pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, fmt)?;
-                                converted.0
-                            } else {
-                                out
-                            }
-                        } else {
-                            out
-                        };
-                        if transform.minterpolate.is_some() || transform.fps.is_some() {
-                            let scratch =
-                                temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                            let fps_dst = fps_out
-                                .as_mut()
-                                .map(|f| f.0)
-                                .unwrap_or(scratch.0);
-                            temporal_push_frame(
-                                &mut minterpolate_graph,
-                                scratch.0,
-                                transform.minterpolate.as_deref(),
-                                &mut fps_graph,
-                                fps_dst,
-                                transform.fps.as_deref(),
+                            apply_decimate(out)?;
+                        }
+                        Ok(())
+                    };
+                    let mut apply_telecine = |out: *mut AVFrame| -> Result<()> {
+                        if let Some(tc_args) = transform.telecine.as_deref() {
+                            let tc_dst = telecined.as_mut().ok_or("telecine frame missing")?;
+                            telecine_push_frame(
+                                &mut telecine_graph,
+                                tc_dst.0,
                                 out,
-                                |_| {
-                                    emitted += 1;
-                                    Ok(())
-                                },
+                                tc_args,
+                                |tc| apply_pullup(tc),
                             )?;
                         } else {
-                            emitted += 1;
+                            apply_pullup(out)?;
                         }
                         Ok(())
-                };                        let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
-                            if transform.thumbnail.is_some() {
-                                let thumb_dst = thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
-                                push_thumbnail_or_emit(
-                                    &mut thumbnail_graph,
-                                    thumb_dst.0,
-                                    out,
-                                    transform.thumbnail.as_deref(),
-                                    |f| finish(f),
-                                )
-                            } else {
-                                finish(out)
-                            }
-                        };
-                        let mut apply_loop = |out: *mut AVFrame| -> Result<()> {
-                            if transform.r#loop.is_some() {
-                                let loop_dst = looped.as_mut().ok_or("loop frame missing")?;
-                                push_loop_or_emit(
-                                    &mut loop_graph,
-                                    loop_dst.0,
-                                    out,
-                                    transform.r#loop.as_deref(),
-                                    |f| apply_thumbnail(f),
-                                )
-                            } else {
-                                apply_thumbnail(out)
-                            }
-                        };
-                        let mut apply_reverse = |out: *mut AVFrame| -> Result<()> {
-                            if transform.reverse.is_some() {
-                                let rev_dst = reversed.as_mut().ok_or("reverse frame missing")?;
-                                push_reverse_or_emit(
-                                    &mut reverse_graph,
-                                    rev_dst.0,
-                                    out,
-                                    transform.reverse.as_deref(),
-                                    |f| apply_loop(f),
-                                )
-                            } else {
-                                apply_loop(out)
-                            }
-                        };
-                        let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
-                            if transform.shuffleframes.is_some() {
-                                let sf_dst = shuffled.as_mut().ok_or("shuffleframes frame missing")?;
-                                push_shuffleframes_or_emit(
-                                    &mut shuffleframes_graph,
-                                    sf_dst.0,
-                                    out,
-                                    transform.shuffleframes.as_deref(),
-                                    |f| apply_reverse(f),
-                                )
-                            } else {
-                                apply_reverse(out)
-                            }
-                        };
-                        let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
-                            if transform.untile.is_some() {
-                                let u_dst = untiled.as_mut().ok_or("untile frame missing")?;
-                                push_untile_or_emit(
-                                    &mut untile_graph,
-                                    u_dst.0,
-                                    out,
-                                    transform.untile.as_deref(),
-                                    |f| apply_shuffleframes(f),
-                                )
-                            } else {
-                                apply_shuffleframes(out)
-                            }
-                        };
-                        let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
-                            if transform.tile.is_some() {
-                                let t_dst = tiled.as_mut().ok_or("tile frame missing")?;
-                                push_tile_or_emit(
-                                    &mut tile_graph,
-                                    t_dst.0,
-                                    out,
-                                    transform.tile.as_deref(),
-                                    |f| apply_untile(f),
-                                )
-                            } else {
-                                apply_untile(out)
-                            }
-                        };
-                        
-                let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
-                    if transform.framestep.is_some() {
-                        let fs_dst = framestepped.as_mut().ok_or("framestep frame missing")?;
-                        push_framestep_or_emit(
-                            &mut framestep_graph,
-                            fs_dst.0,
-                            out,
-                            transform.framestep.as_deref(),
-                            |f| apply_tile(f),
-                        )
-                    } else {
-                        apply_tile(out)
-                    }
-                };
-                let mut apply_mpdecimate = |out: *mut AVFrame| -> Result<()> {
-                    if let Some(mpd_args) = transform.mpdecimate.as_deref() {
-                        let mpd_dst = mpdecimated.as_mut().ok_or("mpdecimate frame missing")?;
-                        mpdecimate_push_frame(
-                            &mut mpdecimate_graph,
-                            mpd_dst.0,
-                            out,
-                            mpd_args,
-                            |mpd| apply_framestep(mpd),
-                        )
-                    } else {
-                        apply_framestep(out)
-                    }
-                };
-                let mut apply_decimate = |out: *mut AVFrame| -> Result<()> {
-                    if let Some(dc_args) = transform.decimate.as_deref() {
-                        let dc_dst = decimated.as_mut().ok_or("decimate frame missing")?;
-                        decimate_push_frame(
-                            &mut decimate_graph,
-                            dc_dst.0,
-                            out,
-                            dc_args,
-                            |dc| apply_mpdecimate(dc),
-                        )?;
-                    } else {
-                        apply_mpdecimate(out)?;
-                    }
-                    Ok(())
-                };
-                let mut apply_pullup = |out: *mut AVFrame| -> Result<()> {
-                    if let Some(pu_args) = transform.pullup.as_deref() {
-                        let pu_dst = pulledup.as_mut().ok_or("pullup frame missing")?;
-                        pullup_push_frame(
-                            &mut pullup_graph,
-                            pu_dst.0,
-                            out,
-                            pu_args,
-                            |pu| apply_decimate(pu),
-                        )?;
-                    } else {
-                        apply_decimate(out)?;
-                    }
-                    Ok(())
-                };
-                let mut apply_telecine = |out: *mut AVFrame| -> Result<()> {
-                    if let Some(tc_args) = transform.telecine.as_deref() {
-                        let tc_dst = telecined.as_mut().ok_or("telecine frame missing")?;
-                        telecine_push_frame(
-                            &mut telecine_graph,
-                            tc_dst.0,
-                            out,
-                            tc_args,
-                            |tc| apply_pullup(tc),
-                        )?;
-                    } else {
-                        apply_pullup(out)?;
-                    }
-                    Ok(())
-                };
-                framepack_push_frame(
-                    &mut framepack_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |packed| apply_telecine(packed),
-                )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
-            }
-            if let Some(args) = transform.telecine.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = telecined.as_mut().ok_or("telecine frame missing")?;
-                let mut emitted = 0u64;
-                telecine_push_frame(
-                    &mut telecine_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |tc| {
+                    };
+                    framepack_push_frame(&mut framepack_graph, dst.0, output, args, |packed| {
+                        apply_telecine(packed)
+                    })?;
+                    video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    return Ok(false);
+                }
+                if let Some(args) = transform.telecine.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = telecined.as_mut().ok_or("telecine frame missing")?;
+                    let mut emitted = 0u64;
+                    telecine_push_frame(&mut telecine_graph, dst.0, output, args, |tc| {
                         let mut after_decimate = |mut out: *mut AVFrame| -> Result<()> {
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        let out = if let Some(args) = transform.freezedetect.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
-                            freezedetect_frame(&mut freezedetect_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
+                            if (*out).format != src_fmt {
+                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                                out = converted.0;
                             }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.pseudocolor.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
-                            pseudocolor_frame(&mut pseudocolor_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.colorspace.as_deref() {
-                            let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
-                            colorspace_frame(&mut colorspace_graph, dst.0, out, args)?;
-                            dst.0
-                        } else {
-                            out
-                        };
-                        let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
-                            zscale_frame(&mut zscale_graph, dst.0, out, args, &name)?;
-                            (dst.0, true)
-                        } else {
-                            (out, false)
-                        };
-                        let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
-                            tonemap_frame(&mut tonemap_graph, dst.0, out, args, &name)?;
-                            (dst.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = target_pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, fmt)?;
-                                converted.0
+                            let out = if let Some(args) = transform.freezedetect.as_deref() {
+                                let src_fmt = (*out).format;
+                                let dst =
+                                    freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
+                                freezedetect_frame(&mut freezedetect_graph, dst.0, out, args)?;
+                                let o = dst.0;
+                                if (*o).format != src_fmt {
+                                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
+                                    converted.0
+                                } else {
+                                    o
+                                }
                             } else {
                                 out
+                            };
+                            let out = if let Some(args) = transform.pseudocolor.as_deref() {
+                                let src_fmt = (*out).format;
+                                let dst =
+                                    pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
+                                pseudocolor_frame(&mut pseudocolor_graph, dst.0, out, args)?;
+                                let o = dst.0;
+                                if (*o).format != src_fmt {
+                                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
+                                    converted.0
+                                } else {
+                                    o
+                                }
+                            } else {
+                                out
+                            };
+                            let out = if let Some(args) = transform.colorspace.as_deref() {
+                                let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
+                                colorspace_frame(&mut colorspace_graph, dst.0, out, args)?;
+                                dst.0
+                            } else {
+                                out
+                            };
+                            let (out, format_done) = if let Some(args) = transform.zscale.as_deref()
+                            {
+                                let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
+                                let name = string(av_get_pix_fmt_name(fmt));
+                                if name.is_empty() {
+                                    return Err("unknown zscale output pixel format".into());
+                                }
+                                let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
+                                zscale_frame(&mut zscale_graph, dst.0, out, args, &name)?;
+                                (dst.0, true)
+                            } else {
+                                (out, false)
+                            };
+                            let (out, format_done) = if let Some(args) =
+                                transform.tonemap.as_deref()
+                            {
+                                let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
+                                let name = string(av_get_pix_fmt_name(fmt));
+                                if name.is_empty() {
+                                    return Err("unknown tonemap output pixel format".into());
+                                }
+                                let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
+                                tonemap_frame(&mut tonemap_graph, dst.0, out, args, &name)?;
+                                (dst.0, format_done)
+                            } else {
+                                (out, format_done)
+                            };
+                            let out = if let Some(fmt) = target_pix_fmt {
+                                if !format_done && (*out).format != fmt {
+                                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, fmt)?;
+                                    converted.0
+                                } else {
+                                    out
+                                }
+                            } else {
+                                out
+                            };
+                            if transform.minterpolate.is_some() || transform.fps.is_some() {
+                                let scratch =
+                                    temporal_scratch.as_mut().ok_or("temporal frame missing")?;
+                                let fps_dst = fps_out.as_mut().map(|f| f.0).unwrap_or(scratch.0);
+                                temporal_push_frame(
+                                    &mut minterpolate_graph,
+                                    scratch.0,
+                                    transform.minterpolate.as_deref(),
+                                    &mut fps_graph,
+                                    fps_dst,
+                                    transform.fps.as_deref(),
+                                    out,
+                                    |_| {
+                                        emitted += 1;
+                                        Ok(())
+                                    },
+                                )?;
+                            } else {
+                                emitted += 1;
                             }
-                        } else {
-                            out
+                            Ok(())
                         };
-                        if transform.minterpolate.is_some() || transform.fps.is_some() {
-                            let scratch =
-                                temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                            let fps_dst = fps_out
-                                .as_mut()
-                                .map(|f| f.0)
-                                .unwrap_or(scratch.0);
-                            temporal_push_frame(
-                                &mut minterpolate_graph,
-                                scratch.0,
-                                transform.minterpolate.as_deref(),
-                                &mut fps_graph,
-                                fps_dst,
-                                transform.fps.as_deref(),
-                                out,
-                                |_| {
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            emitted += 1;
-                        }
-                        Ok(())
-                        };                        let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
+                        let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
                             if transform.thumbnail.is_some() {
-                                let thumb_dst = thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
+                                let thumb_dst =
+                                    thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
                                 push_thumbnail_or_emit(
                                     &mut thumbnail_graph,
                                     thumb_dst.0,
@@ -3879,7 +3980,8 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
                             if transform.shuffleframes.is_some() {
-                                let sf_dst = shuffled.as_mut().ok_or("shuffleframes frame missing")?;
+                                let sf_dst =
+                                    shuffled.as_mut().ok_or("shuffleframes frame missing")?;
                                 push_shuffleframes_or_emit(
                                     &mut shuffleframes_graph,
                                     sf_dst.0,
@@ -3919,10 +4021,11 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                 apply_untile(out)
                             }
                         };
-                        
+
                         let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
                             if transform.framestep.is_some() {
-                                let fs_dst = framestepped.as_mut().ok_or("framestep frame missing")?;
+                                let fs_dst =
+                                    framestepped.as_mut().ok_or("framestep frame missing")?;
                                 push_framestep_or_emit(
                                     &mut framestep_graph,
                                     fs_dst.0,
@@ -3965,27 +4068,22 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         if let Some(pu_args) = transform.pullup.as_deref() {
                             let pu_dst = pulledup.as_mut().ok_or("pullup frame missing")?;
-                            pullup_push_frame(
-                                &mut pullup_graph,
-                                pu_dst.0,
-                                tc,
-                                pu_args,
-                                |pu| apply_decimate(pu),
-                            )
+                            pullup_push_frame(&mut pullup_graph, pu_dst.0, tc, pu_args, |pu| {
+                                apply_decimate(pu)
+                            })
                         } else {
                             apply_decimate(tc)
                         }
-                    },
-                )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
-            }
-            if let Some(args) = transform.pullup.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = pulledup.as_mut().ok_or("pullup frame missing")?;
-                let mut emitted = 0u64;
-                let mut after_decimate = |mut out: *mut AVFrame| -> Result<()> {
+                    })?;
+                    video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    return Ok(false);
+                }
+                if let Some(args) = transform.pullup.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = pulledup.as_mut().ok_or("pullup frame missing")?;
+                    let mut emitted = 0u64;
+                    let mut after_decimate = |mut out: *mut AVFrame| -> Result<()> {
                         let mut out = out;
                         if (*out).format != src_fmt {
                             convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
@@ -4063,10 +4161,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         if transform.minterpolate.is_some() || transform.fps.is_some() {
                             let scratch =
                                 temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                            let fps_dst = fps_out
-                                .as_mut()
-                                .map(|f| f.0)
-                                .unwrap_or(scratch.0);
+                            let fps_dst = fps_out.as_mut().map(|f| f.0).unwrap_or(scratch.0);
                             temporal_push_frame(
                                 &mut minterpolate_graph,
                                 scratch.0,
@@ -4084,736 +4179,548 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                             emitted += 1;
                         }
                         Ok(())
-                };                        let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
-                            if transform.thumbnail.is_some() {
-                                let thumb_dst = thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
-                                push_thumbnail_or_emit(
-                                    &mut thumbnail_graph,
-                                    thumb_dst.0,
-                                    out,
-                                    transform.thumbnail.as_deref(),
-                                    |f| after_decimate(f),
-                                )
+                    };
+                    let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
+                        if transform.thumbnail.is_some() {
+                            let thumb_dst =
+                                thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
+                            push_thumbnail_or_emit(
+                                &mut thumbnail_graph,
+                                thumb_dst.0,
+                                out,
+                                transform.thumbnail.as_deref(),
+                                |f| after_decimate(f),
+                            )
+                        } else {
+                            after_decimate(out)
+                        }
+                    };
+                    let mut apply_loop = |out: *mut AVFrame| -> Result<()> {
+                        if transform.r#loop.is_some() {
+                            let loop_dst = looped.as_mut().ok_or("loop frame missing")?;
+                            push_loop_or_emit(
+                                &mut loop_graph,
+                                loop_dst.0,
+                                out,
+                                transform.r#loop.as_deref(),
+                                |f| apply_thumbnail(f),
+                            )
+                        } else {
+                            apply_thumbnail(out)
+                        }
+                    };
+                    let mut apply_reverse = |out: *mut AVFrame| -> Result<()> {
+                        if transform.reverse.is_some() {
+                            let rev_dst = reversed.as_mut().ok_or("reverse frame missing")?;
+                            push_reverse_or_emit(
+                                &mut reverse_graph,
+                                rev_dst.0,
+                                out,
+                                transform.reverse.as_deref(),
+                                |f| apply_loop(f),
+                            )
+                        } else {
+                            apply_loop(out)
+                        }
+                    };
+                    let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
+                        if transform.shuffleframes.is_some() {
+                            let sf_dst = shuffled.as_mut().ok_or("shuffleframes frame missing")?;
+                            push_shuffleframes_or_emit(
+                                &mut shuffleframes_graph,
+                                sf_dst.0,
+                                out,
+                                transform.shuffleframes.as_deref(),
+                                |f| apply_reverse(f),
+                            )
+                        } else {
+                            apply_reverse(out)
+                        }
+                    };
+                    let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
+                        if transform.untile.is_some() {
+                            let u_dst = untiled.as_mut().ok_or("untile frame missing")?;
+                            push_untile_or_emit(
+                                &mut untile_graph,
+                                u_dst.0,
+                                out,
+                                transform.untile.as_deref(),
+                                |f| apply_shuffleframes(f),
+                            )
+                        } else {
+                            apply_shuffleframes(out)
+                        }
+                    };
+                    let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
+                        if transform.tile.is_some() {
+                            let t_dst = tiled.as_mut().ok_or("tile frame missing")?;
+                            push_tile_or_emit(
+                                &mut tile_graph,
+                                t_dst.0,
+                                out,
+                                transform.tile.as_deref(),
+                                |f| apply_untile(f),
+                            )
+                        } else {
+                            apply_untile(out)
+                        }
+                    };
+
+                    let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
+                        if transform.framestep.is_some() {
+                            let fs_dst = framestepped.as_mut().ok_or("framestep frame missing")?;
+                            push_framestep_or_emit(
+                                &mut framestep_graph,
+                                fs_dst.0,
+                                out,
+                                transform.framestep.as_deref(),
+                                |f| apply_tile(f),
+                            )
+                        } else {
+                            apply_tile(out)
+                        }
+                    };
+                    let mut apply_mpdecimate = |out: *mut AVFrame| -> Result<()> {
+                        if let Some(mpd_args) = transform.mpdecimate.as_deref() {
+                            let mpd_dst = mpdecimated.as_mut().ok_or("mpdecimate frame missing")?;
+                            mpdecimate_push_frame(
+                                &mut mpdecimate_graph,
+                                mpd_dst.0,
+                                out,
+                                mpd_args,
+                                |mpd| apply_framestep(mpd),
+                            )
+                        } else {
+                            apply_framestep(out)
+                        }
+                    };
+                    let mut apply_decimate = |out: *mut AVFrame| -> Result<()> {
+                        if let Some(dc_args) = transform.decimate.as_deref() {
+                            let dc_dst = decimated.as_mut().ok_or("decimate frame missing")?;
+                            decimate_push_frame(&mut decimate_graph, dc_dst.0, out, dc_args, |dc| {
+                                apply_mpdecimate(dc)
+                            })
+                        } else {
+                            apply_mpdecimate(out)
+                        }
+                    };
+                    pullup_push_frame(&mut pullup_graph, dst.0, output, args, |pu| {
+                        apply_decimate(pu)
+                    })?;
+                    video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    return Ok(false);
+                }
+                if let Some(args) = transform.decimate.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = decimated.as_mut().ok_or("decimate frame missing")?;
+                    let mut emitted = 0u64;
+                    let mut after_tile = |mut out: *mut AVFrame| -> Result<()> {
+                        let mut out = out;
+                        if (*out).format != src_fmt {
+                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                            out = converted.0;
+                        }
+                        let out = if let Some(args) = transform.freezedetect.as_deref() {
+                            let src_fmt = (*out).format;
+                            let dst = freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
+                            freezedetect_frame(&mut freezedetect_graph, dst.0, out, args)?;
+                            let o = dst.0;
+                            if (*o).format != src_fmt {
+                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
+                                converted.0
                             } else {
-                                after_decimate(out)
+                                o
                             }
+                        } else {
+                            out
                         };
-                        let mut apply_loop = |out: *mut AVFrame| -> Result<()> {
-                            if transform.r#loop.is_some() {
-                                let loop_dst = looped.as_mut().ok_or("loop frame missing")?;
-                                push_loop_or_emit(
-                                    &mut loop_graph,
-                                    loop_dst.0,
-                                    out,
-                                    transform.r#loop.as_deref(),
-                                    |f| apply_thumbnail(f),
-                                )
+                        let out = if let Some(args) = transform.pseudocolor.as_deref() {
+                            let src_fmt = (*out).format;
+                            let dst = pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
+                            pseudocolor_frame(&mut pseudocolor_graph, dst.0, out, args)?;
+                            let o = dst.0;
+                            if (*o).format != src_fmt {
+                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
+                                converted.0
                             } else {
-                                apply_thumbnail(out)
+                                o
                             }
+                        } else {
+                            out
                         };
-                        let mut apply_reverse = |out: *mut AVFrame| -> Result<()> {
-                            if transform.reverse.is_some() {
-                                let rev_dst = reversed.as_mut().ok_or("reverse frame missing")?;
-                                push_reverse_or_emit(
-                                    &mut reverse_graph,
-                                    rev_dst.0,
-                                    out,
-                                    transform.reverse.as_deref(),
-                                    |f| apply_loop(f),
-                                )
+                        let out = if let Some(args) = transform.colorspace.as_deref() {
+                            let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
+                            colorspace_frame(&mut colorspace_graph, dst.0, out, args)?;
+                            dst.0
+                        } else {
+                            out
+                        };
+                        let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
+                            let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
+                            let name = string(av_get_pix_fmt_name(fmt));
+                            if name.is_empty() {
+                                return Err("unknown zscale output pixel format".into());
+                            }
+                            let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
+                            zscale_frame(&mut zscale_graph, dst.0, out, args, &name)?;
+                            (dst.0, true)
+                        } else {
+                            (out, false)
+                        };
+                        let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
+                            let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
+                            let name = string(av_get_pix_fmt_name(fmt));
+                            if name.is_empty() {
+                                return Err("unknown tonemap output pixel format".into());
+                            }
+                            let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
+                            tonemap_frame(&mut tonemap_graph, dst.0, out, args, &name)?;
+                            (dst.0, format_done)
+                        } else {
+                            (out, format_done)
+                        };
+                        let out = if let Some(fmt) = target_pix_fmt {
+                            if !format_done && (*out).format != fmt {
+                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, fmt)?;
+                                converted.0
                             } else {
-                                apply_loop(out)
+                                out
                             }
+                        } else {
+                            out
                         };
-                        let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
-                            if transform.shuffleframes.is_some() {
-                                let sf_dst = shuffled.as_mut().ok_or("shuffleframes frame missing")?;
-                                push_shuffleframes_or_emit(
-                                    &mut shuffleframes_graph,
-                                    sf_dst.0,
-                                    out,
-                                    transform.shuffleframes.as_deref(),
-                                    |f| apply_reverse(f),
-                                )
+                        if transform.minterpolate.is_some() || transform.fps.is_some() {
+                            let scratch =
+                                temporal_scratch.as_mut().ok_or("temporal frame missing")?;
+                            let fps_dst = fps_out.as_mut().map(|f| f.0).unwrap_or(scratch.0);
+                            temporal_push_frame(
+                                &mut minterpolate_graph,
+                                scratch.0,
+                                transform.minterpolate.as_deref(),
+                                &mut fps_graph,
+                                fps_dst,
+                                transform.fps.as_deref(),
+                                out,
+                                |_| {
+                                    emitted += 1;
+                                    Ok(())
+                                },
+                            )?;
+                        } else {
+                            emitted += 1;
+                        }
+                        Ok(())
+                    };
+                    let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
+                        if transform.thumbnail.is_some() {
+                            let thumb_dst =
+                                thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
+                            push_thumbnail_or_emit(
+                                &mut thumbnail_graph,
+                                thumb_dst.0,
+                                out,
+                                transform.thumbnail.as_deref(),
+                                |f| after_tile(f),
+                            )
+                        } else {
+                            after_tile(out)
+                        }
+                    };
+                    let mut apply_loop = |out: *mut AVFrame| -> Result<()> {
+                        if transform.r#loop.is_some() {
+                            let loop_dst = looped.as_mut().ok_or("loop frame missing")?;
+                            push_loop_or_emit(
+                                &mut loop_graph,
+                                loop_dst.0,
+                                out,
+                                transform.r#loop.as_deref(),
+                                |f| apply_thumbnail(f),
+                            )
+                        } else {
+                            apply_thumbnail(out)
+                        }
+                    };
+                    let mut apply_reverse = |out: *mut AVFrame| -> Result<()> {
+                        if transform.reverse.is_some() {
+                            let rev_dst = reversed.as_mut().ok_or("reverse frame missing")?;
+                            push_reverse_or_emit(
+                                &mut reverse_graph,
+                                rev_dst.0,
+                                out,
+                                transform.reverse.as_deref(),
+                                |f| apply_loop(f),
+                            )
+                        } else {
+                            apply_loop(out)
+                        }
+                    };
+                    let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
+                        if transform.shuffleframes.is_some() {
+                            let sf_dst = shuffled.as_mut().ok_or("shuffleframes frame missing")?;
+                            push_shuffleframes_or_emit(
+                                &mut shuffleframes_graph,
+                                sf_dst.0,
+                                out,
+                                transform.shuffleframes.as_deref(),
+                                |f| apply_reverse(f),
+                            )
+                        } else {
+                            apply_reverse(out)
+                        }
+                    };
+                    let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
+                        if transform.untile.is_some() {
+                            let u_dst = untiled.as_mut().ok_or("untile frame missing")?;
+                            push_untile_or_emit(
+                                &mut untile_graph,
+                                u_dst.0,
+                                out,
+                                transform.untile.as_deref(),
+                                |f| apply_shuffleframes(f),
+                            )
+                        } else {
+                            apply_shuffleframes(out)
+                        }
+                    };
+                    let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
+                        if transform.framestep.is_some() {
+                            let fs_dst = framestepped.as_mut().ok_or("framestep frame missing")?;
+                            push_framestep_or_emit(
+                                &mut framestep_graph,
+                                fs_dst.0,
+                                out,
+                                transform.framestep.as_deref(),
+                                |f| apply_untile(f),
+                            )
+                        } else {
+                            apply_untile(out)
+                        }
+                    };
+                    let mut apply_mpdecimate = |out: *mut AVFrame| -> Result<()> {
+                        if let Some(mpd_args) = transform.mpdecimate.as_deref() {
+                            let mpd_dst = mpdecimated.as_mut().ok_or("mpdecimate frame missing")?;
+                            mpdecimate_push_frame(
+                                &mut mpdecimate_graph,
+                                mpd_dst.0,
+                                out,
+                                mpd_args,
+                                |mpd| apply_framestep(mpd),
+                            )
+                        } else {
+                            apply_framestep(out)
+                        }
+                    };
+                    decimate_push_frame(&mut decimate_graph, dst.0, output, args, |dc| {
+                        apply_mpdecimate(dc)
+                    })?;
+                    video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    return Ok(false);
+                }
+                if let Some(args) = transform.mpdecimate.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = mpdecimated.as_mut().ok_or("mpdecimate frame missing")?;
+                    let mut emitted = 0u64;
+                    let mut after_tile = |mut out: *mut AVFrame| -> Result<()> {
+                        let mut out = out;
+                        if (*out).format != src_fmt {
+                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                            out = converted.0;
+                        }
+                        let out = if let Some(args) = transform.freezedetect.as_deref() {
+                            let src_fmt = (*out).format;
+                            let dst = freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
+                            freezedetect_frame(&mut freezedetect_graph, dst.0, out, args)?;
+                            let o = dst.0;
+                            if (*o).format != src_fmt {
+                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
+                                converted.0
                             } else {
-                                apply_reverse(out)
+                                o
                             }
+                        } else {
+                            out
                         };
-                        let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
-                            if transform.untile.is_some() {
-                                let u_dst = untiled.as_mut().ok_or("untile frame missing")?;
-                                push_untile_or_emit(
-                                    &mut untile_graph,
-                                    u_dst.0,
-                                    out,
-                                    transform.untile.as_deref(),
-                                    |f| apply_shuffleframes(f),
-                                )
+                        let out = if let Some(args) = transform.pseudocolor.as_deref() {
+                            let src_fmt = (*out).format;
+                            let dst = pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
+                            pseudocolor_frame(&mut pseudocolor_graph, dst.0, out, args)?;
+                            let o = dst.0;
+                            if (*o).format != src_fmt {
+                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
+                                converted.0
                             } else {
-                                apply_shuffleframes(out)
+                                o
                             }
+                        } else {
+                            out
                         };
-                        let mut apply_tile = |out: *mut AVFrame| -> Result<()> {
-                            if transform.tile.is_some() {
-                                let t_dst = tiled.as_mut().ok_or("tile frame missing")?;
-                                push_tile_or_emit(
-                                    &mut tile_graph,
-                                    t_dst.0,
-                                    out,
-                                    transform.tile.as_deref(),
-                                    |f| apply_untile(f),
-                                )
+                        let out = if let Some(args) = transform.colorspace.as_deref() {
+                            let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
+                            colorspace_frame(&mut colorspace_graph, dst.0, out, args)?;
+                            dst.0
+                        } else {
+                            out
+                        };
+                        let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
+                            let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
+                            let name = string(av_get_pix_fmt_name(fmt));
+                            if name.is_empty() {
+                                return Err("unknown zscale output pixel format".into());
+                            }
+                            let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
+                            zscale_frame(&mut zscale_graph, dst.0, out, args, &name)?;
+                            (dst.0, true)
+                        } else {
+                            (out, false)
+                        };
+                        let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
+                            let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
+                            let name = string(av_get_pix_fmt_name(fmt));
+                            if name.is_empty() {
+                                return Err("unknown tonemap output pixel format".into());
+                            }
+                            let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
+                            tonemap_frame(&mut tonemap_graph, dst.0, out, args, &name)?;
+                            (dst.0, format_done)
+                        } else {
+                            (out, format_done)
+                        };
+                        let out = if let Some(fmt) = target_pix_fmt {
+                            if !format_done && (*out).format != fmt {
+                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, fmt)?;
+                                converted.0
                             } else {
-                                apply_untile(out)
+                                out
                             }
+                        } else {
+                            out
                         };
-                        
-                let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
-                    if transform.framestep.is_some() {
-                        let fs_dst = framestepped.as_mut().ok_or("framestep frame missing")?;
-                        push_framestep_or_emit(
-                            &mut framestep_graph,
-                            fs_dst.0,
-                            out,
-                            transform.framestep.as_deref(),
-                            |f| apply_tile(f),
-                        )
-                    } else {
-                        apply_tile(out)
-                    }
-                };
-                let mut apply_mpdecimate = |out: *mut AVFrame| -> Result<()> {
-                    if let Some(mpd_args) = transform.mpdecimate.as_deref() {
-                        let mpd_dst = mpdecimated.as_mut().ok_or("mpdecimate frame missing")?;
-                        mpdecimate_push_frame(
-                            &mut mpdecimate_graph,
-                            mpd_dst.0,
-                            out,
-                            mpd_args,
-                            |mpd| apply_framestep(mpd),
-                        )
-                    } else {
+                        if transform.minterpolate.is_some() || transform.fps.is_some() {
+                            let scratch =
+                                temporal_scratch.as_mut().ok_or("temporal frame missing")?;
+                            let fps_dst = fps_out.as_mut().map(|f| f.0).unwrap_or(scratch.0);
+                            temporal_push_frame(
+                                &mut minterpolate_graph,
+                                scratch.0,
+                                transform.minterpolate.as_deref(),
+                                &mut fps_graph,
+                                fps_dst,
+                                transform.fps.as_deref(),
+                                out,
+                                |_| {
+                                    emitted += 1;
+                                    Ok(())
+                                },
+                            )?;
+                        } else {
+                            emitted += 1;
+                        }
+                        Ok(())
+                    };
+                    let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
+                        if transform.thumbnail.is_some() {
+                            let thumb_dst =
+                                thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
+                            push_thumbnail_or_emit(
+                                &mut thumbnail_graph,
+                                thumb_dst.0,
+                                out,
+                                transform.thumbnail.as_deref(),
+                                |f| after_tile(f),
+                            )
+                        } else {
+                            after_tile(out)
+                        }
+                    };
+                    let mut apply_loop = |out: *mut AVFrame| -> Result<()> {
+                        if transform.r#loop.is_some() {
+                            let loop_dst = looped.as_mut().ok_or("loop frame missing")?;
+                            push_loop_or_emit(
+                                &mut loop_graph,
+                                loop_dst.0,
+                                out,
+                                transform.r#loop.as_deref(),
+                                |f| apply_thumbnail(f),
+                            )
+                        } else {
+                            apply_thumbnail(out)
+                        }
+                    };
+                    let mut apply_reverse = |out: *mut AVFrame| -> Result<()> {
+                        if transform.reverse.is_some() {
+                            let rev_dst = reversed.as_mut().ok_or("reverse frame missing")?;
+                            push_reverse_or_emit(
+                                &mut reverse_graph,
+                                rev_dst.0,
+                                out,
+                                transform.reverse.as_deref(),
+                                |f| apply_loop(f),
+                            )
+                        } else {
+                            apply_loop(out)
+                        }
+                    };
+                    let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
+                        if transform.shuffleframes.is_some() {
+                            let sf_dst = shuffled.as_mut().ok_or("shuffleframes frame missing")?;
+                            push_shuffleframes_or_emit(
+                                &mut shuffleframes_graph,
+                                sf_dst.0,
+                                out,
+                                transform.shuffleframes.as_deref(),
+                                |f| apply_reverse(f),
+                            )
+                        } else {
+                            apply_reverse(out)
+                        }
+                    };
+                    let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
+                        if transform.untile.is_some() {
+                            let u_dst = untiled.as_mut().ok_or("untile frame missing")?;
+                            push_untile_or_emit(
+                                &mut untile_graph,
+                                u_dst.0,
+                                out,
+                                transform.untile.as_deref(),
+                                |f| apply_shuffleframes(f),
+                            )
+                        } else {
+                            apply_shuffleframes(out)
+                        }
+                    };
+                    let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
+                        if transform.framestep.is_some() {
+                            let fs_dst = framestepped.as_mut().ok_or("framestep frame missing")?;
+                            push_framestep_or_emit(
+                                &mut framestep_graph,
+                                fs_dst.0,
+                                out,
+                                transform.framestep.as_deref(),
+                                |f| apply_untile(f),
+                            )
+                        } else {
+                            apply_untile(out)
+                        }
+                    };
+                    mpdecimate_push_frame(&mut mpdecimate_graph, dst.0, output, args, |out| {
                         apply_framestep(out)
-                    }
-                };
-                let mut apply_decimate = |out: *mut AVFrame| -> Result<()> {
-                    if let Some(dc_args) = transform.decimate.as_deref() {
-                        let dc_dst = decimated.as_mut().ok_or("decimate frame missing")?;
-                        decimate_push_frame(
-                            &mut decimate_graph,
-                            dc_dst.0,
-                            out,
-                            dc_args,
-                            |dc| apply_mpdecimate(dc),
-                        )
-                    } else {
-                        apply_mpdecimate(out)
-                    }
-                };
-                pullup_push_frame(
-                    &mut pullup_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |pu| apply_decimate(pu),
-                )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
-            }
-            if let Some(args) = transform.decimate.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = decimated.as_mut().ok_or("decimate frame missing")?;
-                let mut emitted = 0u64;
-                let mut after_tile = |mut out: *mut AVFrame| -> Result<()> {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        let out = if let Some(args) = transform.freezedetect.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
-                            freezedetect_frame(&mut freezedetect_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.pseudocolor.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
-                            pseudocolor_frame(&mut pseudocolor_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.colorspace.as_deref() {
-                            let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
-                            colorspace_frame(&mut colorspace_graph, dst.0, out, args)?;
-                            dst.0
-                        } else {
-                            out
-                        };
-                        let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
-                            zscale_frame(&mut zscale_graph, dst.0, out, args, &name)?;
-                            (dst.0, true)
-                        } else {
-                            (out, false)
-                        };
-                        let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
-                            tonemap_frame(&mut tonemap_graph, dst.0, out, args, &name)?;
-                            (dst.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = target_pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, fmt)?;
-                                converted.0
-                            } else {
-                                out
-                            }
-                        } else {
-                            out
-                        };
-                        if transform.minterpolate.is_some() || transform.fps.is_some() {
-                            let scratch =
-                                temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                            let fps_dst = fps_out
-                                .as_mut()
-                                .map(|f| f.0)
-                                .unwrap_or(scratch.0);
-                            temporal_push_frame(
-                                &mut minterpolate_graph,
-                                scratch.0,
-                                transform.minterpolate.as_deref(),
-                                &mut fps_graph,
-                                fps_dst,
-                                transform.fps.as_deref(),
-                                out,
-                                |_| {
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            emitted += 1;
-                        }
-                        Ok(())
-                };
-                let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
-                    if transform.thumbnail.is_some() {
-                        let thumb_dst = thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
-                        push_thumbnail_or_emit(
-                            &mut thumbnail_graph,
-                            thumb_dst.0,
-                            out,
-                            transform.thumbnail.as_deref(),
-                            |f| after_tile(f),
-                        )
-                    } else {
-                        after_tile(out)
-                    }
-                };
-                let mut apply_loop = |out: *mut AVFrame| -> Result<()> {
-                    if transform.r#loop.is_some() {
-                        let loop_dst = looped.as_mut().ok_or("loop frame missing")?;
-                        push_loop_or_emit(
-                            &mut loop_graph,
-                            loop_dst.0,
-                            out,
-                            transform.r#loop.as_deref(),
-                            |f| apply_thumbnail(f),
-                        )
-                    } else {
-                        apply_thumbnail(out)
-                    }
-                };
-                let mut apply_reverse = |out: *mut AVFrame| -> Result<()> {
-                    if transform.reverse.is_some() {
-                        let rev_dst = reversed.as_mut().ok_or("reverse frame missing")?;
-                        push_reverse_or_emit(
-                            &mut reverse_graph,
-                            rev_dst.0,
-                            out,
-                            transform.reverse.as_deref(),
-                            |f| apply_loop(f),
-                        )
-                    } else {
-                        apply_loop(out)
-                    }
-                };
-                let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
-                    if transform.shuffleframes.is_some() {
-                        let sf_dst = shuffled.as_mut().ok_or("shuffleframes frame missing")?;
-                        push_shuffleframes_or_emit(
-                            &mut shuffleframes_graph,
-                            sf_dst.0,
-                            out,
-                            transform.shuffleframes.as_deref(),
-                            |f| apply_reverse(f),
-                        )
-                    } else {
-                        apply_reverse(out)
-                    }
-                };
-                let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
-                    if transform.untile.is_some() {
-                        let u_dst = untiled.as_mut().ok_or("untile frame missing")?;
-                        push_untile_or_emit(
-                            &mut untile_graph,
-                            u_dst.0,
-                            out,
-                            transform.untile.as_deref(),
-                            |f| apply_shuffleframes(f),
-                        )
-                    } else {
-                        apply_shuffleframes(out)
-                    }
-                };
-                let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
-                    if transform.framestep.is_some() {
-                        let fs_dst = framestepped.as_mut().ok_or("framestep frame missing")?;
-                        push_framestep_or_emit(
-                            &mut framestep_graph,
-                            fs_dst.0,
-                            out,
-                            transform.framestep.as_deref(),
-                            |f| apply_untile(f),
-                        )
-                    } else {
-                        apply_untile(out)
-                    }
-                };
-                let mut apply_mpdecimate = |out: *mut AVFrame| -> Result<()> {
-                    if let Some(mpd_args) = transform.mpdecimate.as_deref() {
-                        let mpd_dst = mpdecimated.as_mut().ok_or("mpdecimate frame missing")?;
-                        mpdecimate_push_frame(
-                            &mut mpdecimate_graph,
-                            mpd_dst.0,
-                            out,
-                            mpd_args,
-                            |mpd| apply_framestep(mpd),
-                        )
-                    } else {
-                        apply_framestep(out)
-                    }
-                };
-                decimate_push_frame(
-                    &mut decimate_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |dc| apply_mpdecimate(dc),
-                )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
-            }
-            if let Some(args) = transform.mpdecimate.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = mpdecimated.as_mut().ok_or("mpdecimate frame missing")?;
-                let mut emitted = 0u64;
-                let mut after_tile = |mut out: *mut AVFrame| -> Result<()> {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        let out = if let Some(args) = transform.freezedetect.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
-                            freezedetect_frame(&mut freezedetect_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.pseudocolor.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
-                            pseudocolor_frame(&mut pseudocolor_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.colorspace.as_deref() {
-                            let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
-                            colorspace_frame(&mut colorspace_graph, dst.0, out, args)?;
-                            dst.0
-                        } else {
-                            out
-                        };
-                        let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
-                            zscale_frame(&mut zscale_graph, dst.0, out, args, &name)?;
-                            (dst.0, true)
-                        } else {
-                            (out, false)
-                        };
-                        let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
-                            tonemap_frame(&mut tonemap_graph, dst.0, out, args, &name)?;
-                            (dst.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = target_pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, fmt)?;
-                                converted.0
-                            } else {
-                                out
-                            }
-                        } else {
-                            out
-                        };
-                        if transform.minterpolate.is_some() || transform.fps.is_some() {
-                            let scratch =
-                                temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                            let fps_dst = fps_out
-                                .as_mut()
-                                .map(|f| f.0)
-                                .unwrap_or(scratch.0);
-                            temporal_push_frame(
-                                &mut minterpolate_graph,
-                                scratch.0,
-                                transform.minterpolate.as_deref(),
-                                &mut fps_graph,
-                                fps_dst,
-                                transform.fps.as_deref(),
-                                out,
-                                |_| {
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            emitted += 1;
-                        }
-                        Ok(())
-                };
-                let mut apply_thumbnail = |out: *mut AVFrame| -> Result<()> {
-                    if transform.thumbnail.is_some() {
-                        let thumb_dst = thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
-                        push_thumbnail_or_emit(
-                            &mut thumbnail_graph,
-                            thumb_dst.0,
-                            out,
-                            transform.thumbnail.as_deref(),
-                            |f| after_tile(f),
-                        )
-                    } else {
-                        after_tile(out)
-                    }
-                };
-                let mut apply_loop = |out: *mut AVFrame| -> Result<()> {
-                    if transform.r#loop.is_some() {
-                        let loop_dst = looped.as_mut().ok_or("loop frame missing")?;
-                        push_loop_or_emit(
-                            &mut loop_graph,
-                            loop_dst.0,
-                            out,
-                            transform.r#loop.as_deref(),
-                            |f| apply_thumbnail(f),
-                        )
-                    } else {
-                        apply_thumbnail(out)
-                    }
-                };
-                let mut apply_reverse = |out: *mut AVFrame| -> Result<()> {
-                    if transform.reverse.is_some() {
-                        let rev_dst = reversed.as_mut().ok_or("reverse frame missing")?;
-                        push_reverse_or_emit(
-                            &mut reverse_graph,
-                            rev_dst.0,
-                            out,
-                            transform.reverse.as_deref(),
-                            |f| apply_loop(f),
-                        )
-                    } else {
-                        apply_loop(out)
-                    }
-                };
-                let mut apply_shuffleframes = |out: *mut AVFrame| -> Result<()> {
-                    if transform.shuffleframes.is_some() {
-                        let sf_dst = shuffled.as_mut().ok_or("shuffleframes frame missing")?;
-                        push_shuffleframes_or_emit(
-                            &mut shuffleframes_graph,
-                            sf_dst.0,
-                            out,
-                            transform.shuffleframes.as_deref(),
-                            |f| apply_reverse(f),
-                        )
-                    } else {
-                        apply_reverse(out)
-                    }
-                };
-                let mut apply_untile = |out: *mut AVFrame| -> Result<()> {
-                    if transform.untile.is_some() {
-                        let u_dst = untiled.as_mut().ok_or("untile frame missing")?;
-                        push_untile_or_emit(
-                            &mut untile_graph,
-                            u_dst.0,
-                            out,
-                            transform.untile.as_deref(),
-                            |f| apply_shuffleframes(f),
-                        )
-                    } else {
-                        apply_shuffleframes(out)
-                    }
-                };
-                let mut apply_framestep = |out: *mut AVFrame| -> Result<()> {
-                    if transform.framestep.is_some() {
-                        let fs_dst = framestepped.as_mut().ok_or("framestep frame missing")?;
-                        push_framestep_or_emit(
-                            &mut framestep_graph,
-                            fs_dst.0,
-                            out,
-                            transform.framestep.as_deref(),
-                            |f| apply_untile(f),
-                        )
-                    } else {
-                        apply_untile(out)
-                    }
-                };
-                mpdecimate_push_frame(
-                    &mut mpdecimate_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |out| apply_framestep(out),
-                )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
-            }
-            if let Some(args) = transform.reverse.as_deref() {
-                if transform.shuffleframes.is_none() {
-                let src_fmt = (*output).format;
-                let dst = reversed.as_mut().ok_or("reverse frame missing")?;
-                let mut emitted = 0u64;
-                reverse_push_frame(
-                    &mut reverse_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |out| unsafe {
-                        push_loop_or_emit(
-                            &mut loop_graph,
-                            looped.as_mut().ok_or("loop frame missing")?.0,
-                            out,
-                            transform.r#loop.as_deref(),
-                            |out| unsafe {
-                                push_thumbnail_or_emit(
-                                    &mut thumbnail_graph,
-                                    thumbnailed.as_mut().ok_or("thumbnail frame missing")?.0,
-                                    out,
-                                    transform.thumbnail.as_deref(),
-                                    |mut out| {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        if transform.minterpolate.is_some() || transform.fps.is_some() {
-                            let scratch =
-                                temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                            let fps_dst = fps_out
-                                .as_mut()
-                                .map(|f| f.0)
-                                .unwrap_or(scratch.0);
-                            temporal_push_frame(
-                                &mut minterpolate_graph,
-                                scratch.0,
-                                transform.minterpolate.as_deref(),
-                                &mut fps_graph,
-                                fps_dst,
-                                transform.fps.as_deref(),
-                                out,
-                                |_| {
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            emitted += 1;
-                        }
-                        Ok(())
-                            },
-                        )
-                            },
-                        )
-                    },
-                )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
+                    })?;
+                    video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    return Ok(false);
                 }
-            }
-            if let Some(args) = transform.r#loop.as_deref() {
-                if transform.shuffleframes.is_none() && transform.reverse.is_none() {
-                let src_fmt = (*output).format;
-                let dst = looped.as_mut().ok_or("loop frame missing")?;
-                let mut emitted = 0u64;
-                loop_push_frame(
-                    &mut loop_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |out| unsafe {
-                        push_thumbnail_or_emit(
-                            &mut thumbnail_graph,
-                            thumbnailed.as_mut().ok_or("thumbnail frame missing")?.0,
-                            out,
-                            transform.thumbnail.as_deref(),
-                            |mut out| {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        if transform.minterpolate.is_some() || transform.fps.is_some() {
-                            let scratch =
-                                temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                            let fps_dst = fps_out
-                                .as_mut()
-                                .map(|f| f.0)
-                                .unwrap_or(scratch.0);
-                            temporal_push_frame(
-                                &mut minterpolate_graph,
-                                scratch.0,
-                                transform.minterpolate.as_deref(),
-                                &mut fps_graph,
-                                fps_dst,
-                                transform.fps.as_deref(),
-                                out,
-                                |_| {
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            emitted += 1;
-                        }
-                        Ok(())
-                            },
-                        )
-                    },
-                )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
-                }
-            }
-            if let Some(args) = transform.thumbnail.as_deref() {
-                if transform.shuffleframes.is_none() && transform.reverse.is_none() && transform.r#loop.is_none() {
-                let src_fmt = (*output).format;
-                let dst = thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
-                let mut emitted = 0u64;
-                thumbnail_push_frame(
-                    &mut thumbnail_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |mut out| {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        if transform.minterpolate.is_some() || transform.fps.is_some() {
-                            let scratch =
-                                temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                            let fps_dst = fps_out
-                                .as_mut()
-                                .map(|f| f.0)
-                                .unwrap_or(scratch.0);
-                            temporal_push_frame(
-                                &mut minterpolate_graph,
-                                scratch.0,
-                                transform.minterpolate.as_deref(),
-                                &mut fps_graph,
-                                fps_dst,
-                                transform.fps.as_deref(),
-                                out,
-                                |_| {
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            emitted += 1;
-                        }
-                        Ok(())
-                    },
-                )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
-                }
-            }
-            if let Some(args) = transform.shuffleframes.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = shuffled.as_mut().ok_or("shuffleframes frame missing")?;
-                let mut emitted = 0u64;
-                shuffleframes_push_frame(
-                    &mut shuffleframes_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |out| unsafe {
-                        push_reverse_or_emit(
+                if let Some(args) = transform.reverse.as_deref() {
+                    if transform.shuffleframes.is_none() {
+                        let src_fmt = (*output).format;
+                        let dst = reversed.as_mut().ok_or("reverse frame missing")?;
+                        let mut emitted = 0u64;
+                        reverse_push_frame(
                             &mut reverse_graph,
-                            reversed.as_mut().ok_or("reverse frame missing")?.0,
-                            out,
-                            transform.reverse.as_deref(),
+                            dst.0,
+                            output,
+                            args,
                             |out| unsafe {
                                 push_loop_or_emit(
                                     &mut loop_graph,
@@ -4823,61 +4730,248 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                     |out| unsafe {
                                         push_thumbnail_or_emit(
                                             &mut thumbnail_graph,
-                                            thumbnailed.as_mut().ok_or("thumbnail frame missing")?.0,
+                                            thumbnailed
+                                                .as_mut()
+                                                .ok_or("thumbnail frame missing")?
+                                                .0,
                                             out,
                                             transform.thumbnail.as_deref(),
                                             |mut out| {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        if transform.minterpolate.is_some() || transform.fps.is_some() {
-                            let scratch =
-                                temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                            let fps_dst = fps_out
-                                .as_mut()
-                                .map(|f| f.0)
-                                .unwrap_or(scratch.0);
-                            temporal_push_frame(
-                                &mut minterpolate_graph,
-                                scratch.0,
-                                transform.minterpolate.as_deref(),
-                                &mut fps_graph,
-                                fps_dst,
-                                transform.fps.as_deref(),
-                                out,
-                                |_| {
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            emitted += 1;
-                        }
-                        Ok(())
+                                                let mut out = out;
+                                                if (*out).format != src_fmt {
+                                                    convert_pix_fmt_frame(
+                                                        &mut fmt_sws,
+                                                        converted.0,
+                                                        out,
+                                                        src_fmt,
+                                                    )?;
+                                                    out = converted.0;
+                                                }
+                                                if transform.minterpolate.is_some()
+                                                    || transform.fps.is_some()
+                                                {
+                                                    let scratch = temporal_scratch
+                                                        .as_mut()
+                                                        .ok_or("temporal frame missing")?;
+                                                    let fps_dst = fps_out
+                                                        .as_mut()
+                                                        .map(|f| f.0)
+                                                        .unwrap_or(scratch.0);
+                                                    temporal_push_frame(
+                                                        &mut minterpolate_graph,
+                                                        scratch.0,
+                                                        transform.minterpolate.as_deref(),
+                                                        &mut fps_graph,
+                                                        fps_dst,
+                                                        transform.fps.as_deref(),
+                                                        out,
+                                                        |_| {
+                                                            emitted += 1;
+                                                            Ok(())
+                                                        },
+                                                    )?;
+                                                } else {
+                                                    emitted += 1;
+                                                }
+                                                Ok(())
+                                            },
+                                        )
                                     },
                                 )
                             },
-                        )
-                    },
-                )
-            },
-        )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
-            }
-            if let Some(args) = transform.tile.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = tiled.as_mut().ok_or("tile frame missing")?;
-                let mut emitted = 0u64;
-                tile_push_frame(
-                    &mut tile_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |out| {
+                        )?;
+                        video_frames += emitted;
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                }
+                if let Some(args) = transform.r#loop.as_deref() {
+                    if transform.shuffleframes.is_none() && transform.reverse.is_none() {
+                        let src_fmt = (*output).format;
+                        let dst = looped.as_mut().ok_or("loop frame missing")?;
+                        let mut emitted = 0u64;
+                        loop_push_frame(&mut loop_graph, dst.0, output, args, |out| unsafe {
+                            push_thumbnail_or_emit(
+                                &mut thumbnail_graph,
+                                thumbnailed.as_mut().ok_or("thumbnail frame missing")?.0,
+                                out,
+                                transform.thumbnail.as_deref(),
+                                |mut out| {
+                                    let mut out = out;
+                                    if (*out).format != src_fmt {
+                                        convert_pix_fmt_frame(
+                                            &mut fmt_sws,
+                                            converted.0,
+                                            out,
+                                            src_fmt,
+                                        )?;
+                                        out = converted.0;
+                                    }
+                                    if transform.minterpolate.is_some() || transform.fps.is_some() {
+                                        let scratch = temporal_scratch
+                                            .as_mut()
+                                            .ok_or("temporal frame missing")?;
+                                        let fps_dst =
+                                            fps_out.as_mut().map(|f| f.0).unwrap_or(scratch.0);
+                                        temporal_push_frame(
+                                            &mut minterpolate_graph,
+                                            scratch.0,
+                                            transform.minterpolate.as_deref(),
+                                            &mut fps_graph,
+                                            fps_dst,
+                                            transform.fps.as_deref(),
+                                            out,
+                                            |_| {
+                                                emitted += 1;
+                                                Ok(())
+                                            },
+                                        )?;
+                                    } else {
+                                        emitted += 1;
+                                    }
+                                    Ok(())
+                                },
+                            )
+                        })?;
+                        video_frames += emitted;
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                }
+                if let Some(args) = transform.thumbnail.as_deref() {
+                    if transform.shuffleframes.is_none()
+                        && transform.reverse.is_none()
+                        && transform.r#loop.is_none()
+                    {
+                        let src_fmt = (*output).format;
+                        let dst = thumbnailed.as_mut().ok_or("thumbnail frame missing")?;
+                        let mut emitted = 0u64;
+                        thumbnail_push_frame(
+                            &mut thumbnail_graph,
+                            dst.0,
+                            output,
+                            args,
+                            |mut out| {
+                                let mut out = out;
+                                if (*out).format != src_fmt {
+                                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                                    out = converted.0;
+                                }
+                                if transform.minterpolate.is_some() || transform.fps.is_some() {
+                                    let scratch = temporal_scratch
+                                        .as_mut()
+                                        .ok_or("temporal frame missing")?;
+                                    let fps_dst =
+                                        fps_out.as_mut().map(|f| f.0).unwrap_or(scratch.0);
+                                    temporal_push_frame(
+                                        &mut minterpolate_graph,
+                                        scratch.0,
+                                        transform.minterpolate.as_deref(),
+                                        &mut fps_graph,
+                                        fps_dst,
+                                        transform.fps.as_deref(),
+                                        out,
+                                        |_| {
+                                            emitted += 1;
+                                            Ok(())
+                                        },
+                                    )?;
+                                } else {
+                                    emitted += 1;
+                                }
+                                Ok(())
+                            },
+                        )?;
+                        video_frames += emitted;
+                        av_frame_unref(frame.0);
+                        return Ok(false);
+                    }
+                }
+                if let Some(args) = transform.shuffleframes.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = shuffled.as_mut().ok_or("shuffleframes frame missing")?;
+                    let mut emitted = 0u64;
+                    shuffleframes_push_frame(
+                        &mut shuffleframes_graph,
+                        dst.0,
+                        output,
+                        args,
+                        |out| unsafe {
+                            push_reverse_or_emit(
+                                &mut reverse_graph,
+                                reversed.as_mut().ok_or("reverse frame missing")?.0,
+                                out,
+                                transform.reverse.as_deref(),
+                                |out| unsafe {
+                                    push_loop_or_emit(
+                                        &mut loop_graph,
+                                        looped.as_mut().ok_or("loop frame missing")?.0,
+                                        out,
+                                        transform.r#loop.as_deref(),
+                                        |out| unsafe {
+                                            push_thumbnail_or_emit(
+                                                &mut thumbnail_graph,
+                                                thumbnailed
+                                                    .as_mut()
+                                                    .ok_or("thumbnail frame missing")?
+                                                    .0,
+                                                out,
+                                                transform.thumbnail.as_deref(),
+                                                |mut out| {
+                                                    let mut out = out;
+                                                    if (*out).format != src_fmt {
+                                                        convert_pix_fmt_frame(
+                                                            &mut fmt_sws,
+                                                            converted.0,
+                                                            out,
+                                                            src_fmt,
+                                                        )?;
+                                                        out = converted.0;
+                                                    }
+                                                    if transform.minterpolate.is_some()
+                                                        || transform.fps.is_some()
+                                                    {
+                                                        let scratch = temporal_scratch
+                                                            .as_mut()
+                                                            .ok_or("temporal frame missing")?;
+                                                        let fps_dst = fps_out
+                                                            .as_mut()
+                                                            .map(|f| f.0)
+                                                            .unwrap_or(scratch.0);
+                                                        temporal_push_frame(
+                                                            &mut minterpolate_graph,
+                                                            scratch.0,
+                                                            transform.minterpolate.as_deref(),
+                                                            &mut fps_graph,
+                                                            fps_dst,
+                                                            transform.fps.as_deref(),
+                                                            out,
+                                                            |_| {
+                                                                emitted += 1;
+                                                                Ok(())
+                                                            },
+                                                        )?;
+                                                    } else {
+                                                        emitted += 1;
+                                                    }
+                                                    Ok(())
+                                                },
+                                            )
+                                        },
+                                    )
+                                },
+                            )
+                        },
+                    )?;
+                    video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    return Ok(false);
+                }
+                if let Some(args) = transform.tile.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = tiled.as_mut().ok_or("tile frame missing")?;
+                    let mut emitted = 0u64;
+                    tile_push_frame(&mut tile_graph, dst.0, output, args, |out| {
                         push_untile_or_emit(
                             &mut untile_graph,
                             untiled.as_mut().ok_or("untile frame missing")?.0,
@@ -4904,108 +4998,190 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                                     |out| unsafe {
                                                         push_thumbnail_or_emit(
                                                             &mut thumbnail_graph,
-                                                            thumbnailed.as_mut().ok_or("thumbnail frame missing")?.0,
+                                                            thumbnailed
+                                                                .as_mut()
+                                                                .ok_or("thumbnail frame missing")?
+                                                                .0,
                                                             out,
                                                             transform.thumbnail.as_deref(),
                                                             |mut out| {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        let out = if let Some(args) = transform.freezedetect.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
-                            freezedetect_frame(&mut freezedetect_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.pseudocolor.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
-                            pseudocolor_frame(&mut pseudocolor_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.colorspace.as_deref() {
-                            let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
-                            colorspace_frame(&mut colorspace_graph, dst.0, out, args)?;
-                            dst.0
-                        } else {
-                            out
-                        };
-                        let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
-                            zscale_frame(&mut zscale_graph, dst.0, out, args, &name)?;
-                            (dst.0, true)
-                        } else {
-                            (out, false)
-                        };
-                        let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
-                            tonemap_frame(&mut tonemap_graph, dst.0, out, args, &name)?;
-                            (dst.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = target_pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, fmt)?;
-                                converted.0
-                            } else {
-                                out
-                            }
-                        } else {
-                            out
-                        };
-                        if transform.minterpolate.is_some() || transform.fps.is_some() {
-                            let scratch =
+                                                                let mut out = out;
+                                                                if (*out).format != src_fmt {
+                                                                    convert_pix_fmt_frame(
+                                                                        &mut fmt_sws,
+                                                                        converted.0,
+                                                                        out,
+                                                                        src_fmt,
+                                                                    )?;
+                                                                    out = converted.0;
+                                                                }
+                                                                let out = if let Some(args) =
+                                                                    transform
+                                                                        .freezedetect
+                                                                        .as_deref()
+                                                                {
+                                                                    let src_fmt = (*out).format;
+                                                                    let dst = freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
+                                                                    freezedetect_frame(
+                                                                        &mut freezedetect_graph,
+                                                                        dst.0,
+                                                                        out,
+                                                                        args,
+                                                                    )?;
+                                                                    let o = dst.0;
+                                                                    if (*o).format != src_fmt {
+                                                                        convert_pix_fmt_frame(
+                                                                            &mut fmt_sws,
+                                                                            converted.0,
+                                                                            o,
+                                                                            src_fmt,
+                                                                        )?;
+                                                                        converted.0
+                                                                    } else {
+                                                                        o
+                                                                    }
+                                                                } else {
+                                                                    out
+                                                                };
+                                                                let out = if let Some(args) =
+                                                                    transform.pseudocolor.as_deref()
+                                                                {
+                                                                    let src_fmt = (*out).format;
+                                                                    let dst = pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
+                                                                    pseudocolor_frame(
+                                                                        &mut pseudocolor_graph,
+                                                                        dst.0,
+                                                                        out,
+                                                                        args,
+                                                                    )?;
+                                                                    let o = dst.0;
+                                                                    if (*o).format != src_fmt {
+                                                                        convert_pix_fmt_frame(
+                                                                            &mut fmt_sws,
+                                                                            converted.0,
+                                                                            o,
+                                                                            src_fmt,
+                                                                        )?;
+                                                                        converted.0
+                                                                    } else {
+                                                                        o
+                                                                    }
+                                                                } else {
+                                                                    out
+                                                                };
+                                                                let out = if let Some(args) =
+                                                                    transform.colorspace.as_deref()
+                                                                {
+                                                                    let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
+                                                                    colorspace_frame(
+                                                                        &mut colorspace_graph,
+                                                                        dst.0,
+                                                                        out,
+                                                                        args,
+                                                                    )?;
+                                                                    dst.0
+                                                                } else {
+                                                                    out
+                                                                };
+                                                                let (out, format_done) =
+                                                                    if let Some(args) =
+                                                                        transform.zscale.as_deref()
+                                                                    {
+                                                                        let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
+                                                                        let name = string(
+                                                                            av_get_pix_fmt_name(
+                                                                                fmt,
+                                                                            ),
+                                                                        );
+                                                                        if name.is_empty() {
+                                                                            return Err("unknown zscale output pixel format".into());
+                                                                        }
+                                                                        let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
+                                                                        zscale_frame(
+                                                                            &mut zscale_graph,
+                                                                            dst.0,
+                                                                            out,
+                                                                            args,
+                                                                            &name,
+                                                                        )?;
+                                                                        (dst.0, true)
+                                                                    } else {
+                                                                        (out, false)
+                                                                    };
+                                                                let (out, format_done) =
+                                                                    if let Some(args) =
+                                                                        transform.tonemap.as_deref()
+                                                                    {
+                                                                        let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
+                                                                        let name = string(
+                                                                            av_get_pix_fmt_name(
+                                                                                fmt,
+                                                                            ),
+                                                                        );
+                                                                        if name.is_empty() {
+                                                                            return Err("unknown tonemap output pixel format".into());
+                                                                        }
+                                                                        let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
+                                                                        tonemap_frame(
+                                                                            &mut tonemap_graph,
+                                                                            dst.0,
+                                                                            out,
+                                                                            args,
+                                                                            &name,
+                                                                        )?;
+                                                                        (dst.0, format_done)
+                                                                    } else {
+                                                                        (out, format_done)
+                                                                    };
+                                                                let out = if let Some(fmt) =
+                                                                    target_pix_fmt
+                                                                {
+                                                                    if !format_done
+                                                                        && (*out).format != fmt
+                                                                    {
+                                                                        convert_pix_fmt_frame(
+                                                                            &mut fmt_sws,
+                                                                            converted.0,
+                                                                            out,
+                                                                            fmt,
+                                                                        )?;
+                                                                        converted.0
+                                                                    } else {
+                                                                        out
+                                                                    }
+                                                                } else {
+                                                                    out
+                                                                };
+                                                                if transform.minterpolate.is_some()
+                                                                    || transform.fps.is_some()
+                                                                {
+                                                                    let scratch =
                                 temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                            let fps_dst = fps_out
-                                .as_mut()
-                                .map(|f| f.0)
-                                .unwrap_or(scratch.0);
-                            temporal_push_frame(
-                                &mut minterpolate_graph,
-                                scratch.0,
-                                transform.minterpolate.as_deref(),
-                                &mut fps_graph,
-                                fps_dst,
-                                transform.fps.as_deref(),
-                                out,
-                                |_| {
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            emitted += 1;
-                        }
-                        Ok(())
+                                                                    let fps_dst = fps_out
+                                                                        .as_mut()
+                                                                        .map(|f| f.0)
+                                                                        .unwrap_or(scratch.0);
+                                                                    temporal_push_frame(
+                                                                        &mut minterpolate_graph,
+                                                                        scratch.0,
+                                                                        transform
+                                                                            .minterpolate
+                                                                            .as_deref(),
+                                                                        &mut fps_graph,
+                                                                        fps_dst,
+                                                                        transform.fps.as_deref(),
+                                                                        out,
+                                                                        |_| {
+                                                                            emitted += 1;
+                                                                            Ok(())
+                                                                        },
+                                                                    )?;
+                                                                } else {
+                                                                    emitted += 1;
+                                                                }
+                                                                Ok(())
+                                                            },
+                                                        )
                                                     },
                                                 )
                                             },
@@ -5014,24 +5190,16 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                 )
                             },
                         )
-                    },
-                )
-            },
-        )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
-            }
-            if let Some(args) = transform.untile.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = untiled.as_mut().ok_or("untile frame missing")?;
-                let mut emitted = 0u64;
-                untile_push_frame(
-                    &mut untile_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |out| unsafe {
+                    })?;
+                    video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    return Ok(false);
+                }
+                if let Some(args) = transform.untile.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = untiled.as_mut().ok_or("untile frame missing")?;
+                    let mut emitted = 0u64;
+                    untile_push_frame(&mut untile_graph, dst.0, output, args, |out| unsafe {
                         push_shuffleframes_or_emit(
                             &mut shuffleframes_graph,
                             shuffled.as_mut().ok_or("shuffleframes frame missing")?.0,
@@ -5052,132 +5220,209 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                             |out| unsafe {
                                                 push_thumbnail_or_emit(
                                                     &mut thumbnail_graph,
-                                                    thumbnailed.as_mut().ok_or("thumbnail frame missing")?.0,
+                                                    thumbnailed
+                                                        .as_mut()
+                                                        .ok_or("thumbnail frame missing")?
+                                                        .0,
                                                     out,
                                                     transform.thumbnail.as_deref(),
                                                     |mut out| {
-                        let mut out = out;
-                        if (*out).format != src_fmt {
-                            convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                            out = converted.0;
-                        }
-                        let out = if let Some(args) = transform.freezedetect.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
-                            freezedetect_frame(&mut freezedetect_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.pseudocolor.as_deref() {
-                            let src_fmt = (*out).format;
-                            let dst = pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
-                            pseudocolor_frame(&mut pseudocolor_graph, dst.0, out, args)?;
-                            let o = dst.0;
-                            if (*o).format != src_fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, o, src_fmt)?;
-                                converted.0
-                            } else {
-                                o
-                            }
-                        } else {
-                            out
-                        };
-                        let out = if let Some(args) = transform.colorspace.as_deref() {
-                            let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
-                            colorspace_frame(&mut colorspace_graph, dst.0, out, args)?;
-                            dst.0
-                        } else {
-                            out
-                        };
-                        let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown zscale output pixel format".into());
-                            }
-                            let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
-                            zscale_frame(&mut zscale_graph, dst.0, out, args, &name)?;
-                            (dst.0, true)
-                        } else {
-                            (out, false)
-                        };
-                        let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
-                            let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
-                            if name.is_empty() {
-                                return Err("unknown tonemap output pixel format".into());
-                            }
-                            let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
-                            tonemap_frame(&mut tonemap_graph, dst.0, out, args, &name)?;
-                            (dst.0, format_done)
-                        } else {
-                            (out, format_done)
-                        };
-                        let out = if let Some(fmt) = target_pix_fmt {
-                            if !format_done && (*out).format != fmt {
-                                convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, fmt)?;
-                                converted.0
-                            } else {
-                                out
-                            }
-                        } else {
-                            out
-                        };
-                        if transform.minterpolate.is_some() || transform.fps.is_some() {
-                            let scratch =
-                                temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                            let fps_dst = fps_out
-                                .as_mut()
-                                .map(|f| f.0)
-                                .unwrap_or(scratch.0);
-                            temporal_push_frame(
-                                &mut minterpolate_graph,
-                                scratch.0,
-                                transform.minterpolate.as_deref(),
-                                &mut fps_graph,
-                                fps_dst,
-                                transform.fps.as_deref(),
-                                out,
-                                |_| {
-                                    emitted += 1;
-                                    Ok(())
-                                },
-                            )?;
-                        } else {
-                            emitted += 1;
-                        }
-                        Ok(())
+                                                        let mut out = out;
+                                                        if (*out).format != src_fmt {
+                                                            convert_pix_fmt_frame(
+                                                                &mut fmt_sws,
+                                                                converted.0,
+                                                                out,
+                                                                src_fmt,
+                                                            )?;
+                                                            out = converted.0;
+                                                        }
+                                                        let out = if let Some(args) =
+                                                            transform.freezedetect.as_deref()
+                                                        {
+                                                            let src_fmt = (*out).format;
+                                                            let dst =
+                                                                freezedetectd.as_mut().ok_or(
+                                                                    "freezedetect frame missing",
+                                                                )?;
+                                                            freezedetect_frame(
+                                                                &mut freezedetect_graph,
+                                                                dst.0,
+                                                                out,
+                                                                args,
+                                                            )?;
+                                                            let o = dst.0;
+                                                            if (*o).format != src_fmt {
+                                                                convert_pix_fmt_frame(
+                                                                    &mut fmt_sws,
+                                                                    converted.0,
+                                                                    o,
+                                                                    src_fmt,
+                                                                )?;
+                                                                converted.0
+                                                            } else {
+                                                                o
+                                                            }
+                                                        } else {
+                                                            out
+                                                        };
+                                                        let out = if let Some(args) =
+                                                            transform.pseudocolor.as_deref()
+                                                        {
+                                                            let src_fmt = (*out).format;
+                                                            let dst =
+                                                                pseudocolored.as_mut().ok_or(
+                                                                    "pseudocolor frame missing",
+                                                                )?;
+                                                            pseudocolor_frame(
+                                                                &mut pseudocolor_graph,
+                                                                dst.0,
+                                                                out,
+                                                                args,
+                                                            )?;
+                                                            let o = dst.0;
+                                                            if (*o).format != src_fmt {
+                                                                convert_pix_fmt_frame(
+                                                                    &mut fmt_sws,
+                                                                    converted.0,
+                                                                    o,
+                                                                    src_fmt,
+                                                                )?;
+                                                                converted.0
+                                                            } else {
+                                                                o
+                                                            }
+                                                        } else {
+                                                            out
+                                                        };
+                                                        let out = if let Some(args) =
+                                                            transform.colorspace.as_deref()
+                                                        {
+                                                            let dst = colorspaced.as_mut().ok_or(
+                                                                "colorspace frame missing",
+                                                            )?;
+                                                            colorspace_frame(
+                                                                &mut colorspace_graph,
+                                                                dst.0,
+                                                                out,
+                                                                args,
+                                                            )?;
+                                                            dst.0
+                                                        } else {
+                                                            out
+                                                        };
+                                                        let (out, format_done) = if let Some(args) =
+                                                            transform.zscale.as_deref()
+                                                        {
+                                                            let fmt = target_pix_fmt.ok_or(
+                                                                "--zscale requires --pix-fmt",
+                                                            )?;
+                                                            let name =
+                                                                string(av_get_pix_fmt_name(fmt));
+                                                            if name.is_empty() {
+                                                                return Err("unknown zscale output pixel format".into());
+                                                            }
+                                                            let dst = zscaled
+                                                                .as_mut()
+                                                                .ok_or("zscale frame missing")?;
+                                                            zscale_frame(
+                                                                &mut zscale_graph,
+                                                                dst.0,
+                                                                out,
+                                                                args,
+                                                                &name,
+                                                            )?;
+                                                            (dst.0, true)
+                                                        } else {
+                                                            (out, false)
+                                                        };
+                                                        let (out, format_done) = if let Some(args) =
+                                                            transform.tonemap.as_deref()
+                                                        {
+                                                            let fmt = target_pix_fmt.ok_or(
+                                                                "--tonemap requires --pix-fmt",
+                                                            )?;
+                                                            let name =
+                                                                string(av_get_pix_fmt_name(fmt));
+                                                            if name.is_empty() {
+                                                                return Err("unknown tonemap output pixel format".into());
+                                                            }
+                                                            let dst = tonemapped
+                                                                .as_mut()
+                                                                .ok_or("tonemap frame missing")?;
+                                                            tonemap_frame(
+                                                                &mut tonemap_graph,
+                                                                dst.0,
+                                                                out,
+                                                                args,
+                                                                &name,
+                                                            )?;
+                                                            (dst.0, format_done)
+                                                        } else {
+                                                            (out, format_done)
+                                                        };
+                                                        let out = if let Some(fmt) = target_pix_fmt
+                                                        {
+                                                            if !format_done && (*out).format != fmt
+                                                            {
+                                                                convert_pix_fmt_frame(
+                                                                    &mut fmt_sws,
+                                                                    converted.0,
+                                                                    out,
+                                                                    fmt,
+                                                                )?;
+                                                                converted.0
+                                                            } else {
+                                                                out
+                                                            }
+                                                        } else {
+                                                            out
+                                                        };
+                                                        if transform.minterpolate.is_some()
+                                                            || transform.fps.is_some()
+                                                        {
+                                                            let scratch = temporal_scratch
+                                                                .as_mut()
+                                                                .ok_or("temporal frame missing")?;
+                                                            let fps_dst = fps_out
+                                                                .as_mut()
+                                                                .map(|f| f.0)
+                                                                .unwrap_or(scratch.0);
+                                                            temporal_push_frame(
+                                                                &mut minterpolate_graph,
+                                                                scratch.0,
+                                                                transform.minterpolate.as_deref(),
+                                                                &mut fps_graph,
+                                                                fps_dst,
+                                                                transform.fps.as_deref(),
+                                                                out,
+                                                                |_| {
+                                                                    emitted += 1;
+                                                                    Ok(())
+                                                                },
+                                                            )?;
+                                                        } else {
+                                                            emitted += 1;
+                                                        }
+                                                        Ok(())
+                                                    },
+                                                )
                                             },
                                         )
                                     },
                                 )
                             },
                         )
-                    },
-                )
-            },
-        )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
-            }
-            if let Some(args) = transform.framestep.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = framestepped.as_mut().ok_or("framestep frame missing")?;
-                let mut emitted = 0u64;
-                framestep_push_frame(
-                    &mut framestep_graph,
-                    dst.0,
-                    output,
-                    args,
-                    |out| {
+                    })?;
+                    video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    return Ok(false);
+                }
+                if let Some(args) = transform.framestep.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = framestepped.as_mut().ok_or("framestep frame missing")?;
+                    let mut emitted = 0u64;
+                    framestep_push_frame(&mut framestep_graph, dst.0, output, args, |out| {
                         push_tile_or_emit(
                             &mut tile_graph,
                             tiled.as_mut().ok_or("tile frame missing")?.0,
@@ -5192,23 +5437,32 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                     |out| {
                                         push_shuffleframes_or_emit(
                                             &mut shuffleframes_graph,
-                                            shuffled.as_mut().ok_or("shuffleframes frame missing")?.0,
+                                            shuffled
+                                                .as_mut()
+                                                .ok_or("shuffleframes frame missing")?
+                                                .0,
                                             out,
                                             transform.shuffleframes.as_deref(),
                                             |out| {
                                                 push_reverse_or_emit(
                                                     &mut reverse_graph,
-                                                    reversed.as_mut().ok_or("reverse frame missing")?.0,
+                                                    reversed
+                                                        .as_mut()
+                                                        .ok_or("reverse frame missing")?
+                                                        .0,
                                                     out,
                                                     transform.reverse.as_deref(),
                                                     |out| unsafe {
                                                         push_loop_or_emit(
                                                             &mut loop_graph,
-                                                            looped.as_mut().ok_or("loop frame missing")?.0,
+                                                            looped
+                                                                .as_mut()
+                                                                .ok_or("loop frame missing")?
+                                                                .0,
                                                             out,
-                                                    transform.r#loop.as_deref(),
-                                                    |out| unsafe {
-                                                        push_thumbnail_or_emit(
+                                                            transform.r#loop.as_deref(),
+                                                            |out| unsafe {
+                                                                push_thumbnail_or_emit(
                                                             &mut thumbnail_graph,
                                                             thumbnailed.as_mut().ok_or("thumbnail frame missing")?.0,
                                                             out,
@@ -5314,6 +5568,8 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         Ok(())
                                                             },
                                                         )
+                                                            },
+                                                        )
                                                     },
                                                 )
                                             },
@@ -5322,159 +5578,153 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                 )
                             },
                         )
-                    },
-                )
-            },
-        )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
-            }
-            let output = if let Some(args) = transform.freezedetect.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
-                freezedetect_frame(&mut freezedetect_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
-                } else {
-                    out
+                    })?;
+                    video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    return Ok(false);
                 }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.pseudocolor.as_deref() {
-                let src_fmt = (*output).format;
-                let dst = pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
-                pseudocolor_frame(&mut pseudocolor_graph, dst.0, output, args)?;
-                let out = dst.0;
-                if (*out).format != src_fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
-                    converted.0
-                } else {
-                    out
-                }
-            } else {
-                output
-            };
-            let output = if let Some(args) = transform.colorspace.as_deref() {
-                let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
-                colorspace_frame(&mut colorspace_graph, dst.0, output, args)?;
-                dst.0
-            } else {
-                output
-            };
-            let (output, format_done) = if let Some(args) = transform.zscale.as_deref() {
-                let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                let name = string(av_get_pix_fmt_name(fmt));
-                if name.is_empty() {
-                    return Err("unknown zscale output pixel format".into());
-                }
-                let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
-                zscale_frame(&mut zscale_graph, dst.0, output, args, &name)?;
-                (dst.0, true)
-            } else {
-                (output, format_done)
-            };
-            let (output, format_done) = if let Some(args) = transform.tonemap.as_deref() {
-                let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                let name = string(av_get_pix_fmt_name(fmt));
-                if name.is_empty() {
-                    return Err("unknown tonemap output pixel format".into());
-                }
-                let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
-                tonemap_frame(&mut tonemap_graph, dst.0, output, args, &name)?;
-                (dst.0, true)
-            } else {
-                (output, format_done)
-            };
-            let output = if let Some(fmt) = target_pix_fmt {
-                if !format_done && (*output).format != fmt {
-                    convert_pix_fmt_frame(&mut fmt_sws, converted.0, output, fmt)?;
-                    converted.0
+                let output = if let Some(args) = transform.freezedetect.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = freezedetectd.as_mut().ok_or("freezedetect frame missing")?;
+                    freezedetect_frame(&mut freezedetect_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
                 } else {
                     output
+                };
+                let output = if let Some(args) = transform.pseudocolor.as_deref() {
+                    let src_fmt = (*output).format;
+                    let dst = pseudocolored.as_mut().ok_or("pseudocolor frame missing")?;
+                    pseudocolor_frame(&mut pseudocolor_graph, dst.0, output, args)?;
+                    let out = dst.0;
+                    if (*out).format != src_fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, out, src_fmt)?;
+                        converted.0
+                    } else {
+                        out
+                    }
+                } else {
+                    output
+                };
+                let output = if let Some(args) = transform.colorspace.as_deref() {
+                    let dst = colorspaced.as_mut().ok_or("colorspace frame missing")?;
+                    colorspace_frame(&mut colorspace_graph, dst.0, output, args)?;
+                    dst.0
+                } else {
+                    output
+                };
+                let (output, format_done) = if let Some(args) = transform.zscale.as_deref() {
+                    let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
+                    let name = string(av_get_pix_fmt_name(fmt));
+                    if name.is_empty() {
+                        return Err("unknown zscale output pixel format".into());
+                    }
+                    let dst = zscaled.as_mut().ok_or("zscale frame missing")?;
+                    zscale_frame(&mut zscale_graph, dst.0, output, args, &name)?;
+                    (dst.0, true)
+                } else {
+                    (output, format_done)
+                };
+                let (output, format_done) = if let Some(args) = transform.tonemap.as_deref() {
+                    let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
+                    let name = string(av_get_pix_fmt_name(fmt));
+                    if name.is_empty() {
+                        return Err("unknown tonemap output pixel format".into());
+                    }
+                    let dst = tonemapped.as_mut().ok_or("tonemap frame missing")?;
+                    tonemap_frame(&mut tonemap_graph, dst.0, output, args, &name)?;
+                    (dst.0, true)
+                } else {
+                    (output, format_done)
+                };
+                let output = if let Some(fmt) = target_pix_fmt {
+                    if !format_done && (*output).format != fmt {
+                        convert_pix_fmt_frame(&mut fmt_sws, converted.0, output, fmt)?;
+                        converted.0
+                    } else {
+                        output
+                    }
+                } else {
+                    output
+                };
+                if let Some(fmt) = target_pix_fmt {
+                    pixel_format = string(av_get_pix_fmt_name(fmt));
                 }
-            } else {
-                output
-            };
-            if let Some(fmt) = target_pix_fmt {
-                pixel_format = string(av_get_pix_fmt_name(fmt));
+                if transform.minterpolate.is_some() || transform.fps.is_some() {
+                    let scratch = temporal_scratch.as_mut().ok_or("temporal frame missing")?;
+                    let fps_dst = fps_out.as_mut().map(|f| f.0).unwrap_or(scratch.0);
+                    let mut emitted = 0u64;
+                    temporal_push_frame(
+                        &mut minterpolate_graph,
+                        scratch.0,
+                        transform.minterpolate.as_deref(),
+                        &mut fps_graph,
+                        fps_dst,
+                        transform.fps.as_deref(),
+                        output,
+                        |_| {
+                            emitted += 1;
+                            Ok(())
+                        },
+                    )?;
+                    video_frames += emitted;
+                    av_frame_unref(frame.0);
+                    return Ok(false);
+                }
             }
-            if transform.minterpolate.is_some() || transform.fps.is_some() {
-                let scratch = temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-                let fps_dst = fps_out
-                    .as_mut()
-                    .map(|f| f.0)
-                    .unwrap_or(scratch.0);
-                let mut emitted = 0u64;
-                temporal_push_frame(
-                    &mut minterpolate_graph,
-                    scratch.0,
-                    transform.minterpolate.as_deref(),
-                    &mut fps_graph,
-                    fps_dst,
-                    transform.fps.as_deref(),
-                    output,
-                    |_| {
-                        emitted += 1;
-                        Ok(())
-                    },
-                )?;
-                video_frames += emitted;
-                av_frame_unref(frame.0);
-                return Ok(false);
+            video_frames += 1;
+            unsafe { av_frame_unref(frame.0) };
+            Ok(false)
+        };
+        'packets: while packet.read(&mut input)? {
+            if unsafe { (*packet.0).stream_index } != video as i32 {
+                continue;
             }
-        }
-        video_frames += 1;
-        unsafe { av_frame_unref(frame.0) };
-        Ok(false)
-    };
-    'packets: while packet.read(&mut input)? {
-        if unsafe { (*packet.0).stream_index } != video as i32 {
-            continue;
-        }
-        if no_reorder
-            && let Some((_, end)) = interval
-            && unsafe { (*packet.0).pts } != NOPTS
-            && unsafe { (*packet.0).pts } >= end
-        {
-            finished = true;
-            break;
-        }
-        check(
-            unsafe { avcodec_send_packet(decoder.0, packet.0) },
-            "send compressed video packet",
-        )?;
-        loop {
-            let code = unsafe { avcodec_receive_frame(decoder.0, frame.0) };
-            if code == AGAIN || code == EOF {
-                break;
-            }
-            check(code, "receive decoded frame")?;
-            if handle(&mut frame)? {
+            if no_reorder
+                && let Some((_, end)) = interval
+                && unsafe { (*packet.0).pts } != NOPTS
+                && unsafe { (*packet.0).pts } >= end
+            {
                 finished = true;
-                break 'packets;
-            }
-        }
-    }
-    if !finished {
-        check(
-            unsafe { avcodec_send_packet(decoder.0, ptr::null_mut()) },
-            "flush decoder",
-        )?;
-        loop {
-            let code = unsafe { avcodec_receive_frame(decoder.0, frame.0) };
-            if code == AGAIN || code == EOF {
                 break;
             }
-            check(code, "flush receive")?;
-            if handle(&mut frame)? {
-                break;
+            check(
+                unsafe { avcodec_send_packet(decoder.0, packet.0) },
+                "send compressed video packet",
+            )?;
+            loop {
+                let code = unsafe { avcodec_receive_frame(decoder.0, frame.0) };
+                if code == AGAIN || code == EOF {
+                    break;
+                }
+                check(code, "receive decoded frame")?;
+                if handle(&mut frame)? {
+                    finished = true;
+                    break 'packets;
+                }
             }
         }
-    }
+        if !finished {
+            check(
+                unsafe { avcodec_send_packet(decoder.0, ptr::null_mut()) },
+                "flush decoder",
+            )?;
+            loop {
+                let code = unsafe { avcodec_receive_frame(decoder.0, frame.0) };
+                if code == AGAIN || code == EOF {
+                    break;
+                }
+                check(code, "flush receive")?;
+                if handle(&mut frame)? {
+                    break;
+                }
+            }
+        }
     } // drop handle so temporal filter graphs can be flushed
     if transform.yadif.is_some() {
         let dst = deinterlaced.as_mut().ok_or("yadif frame missing")?;
@@ -5598,7 +5848,9 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
         }
     }
     if transform.separatefields.is_some() {
-        let dst = separatefieldsd.as_mut().ok_or("separatefields frame missing")?;
+        let dst = separatefieldsd
+            .as_mut()
+            .ok_or("separatefields frame missing")?;
         unsafe {
             separatefields_flush(&mut separatefields_graph, dst.0, |_| {
                 video_frames += 1;
@@ -5686,7 +5938,10 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                         |out| {
                                             push_shuffleframes_or_emit(
                                                 &mut shuffleframes_graph,
-                                                shuffled.as_mut().ok_or("shuffleframes frame missing")?.0,
+                                                shuffled
+                                                    .as_mut()
+                                                    .ok_or("shuffleframes frame missing")?
+                                                    .0,
                                                 out,
                                                 transform.shuffleframes.as_deref(),
                                                 |_| {
@@ -5727,13 +5982,21 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                                 |out| unsafe {
                                                     push_loop_or_emit(
                                                         &mut loop_graph,
-                                                        looped.as_mut().ok_or("loop frame missing")?.0,
+                                                        looped
+                                                            .as_mut()
+                                                            .ok_or("loop frame missing")?
+                                                            .0,
                                                         out,
                                                         transform.r#loop.as_deref(),
                                                         |out| unsafe {
                                                             push_thumbnail_or_emit(
                                                                 &mut thumbnail_graph,
-                                                                thumbnailed.as_mut().ok_or("thumbnail frame missing")?.0,
+                                                                thumbnailed
+                                                                    .as_mut()
+                                                                    .ok_or(
+                                                                        "thumbnail frame missing",
+                                                                    )?
+                                                                    .0,
                                                                 out,
                                                                 transform.thumbnail.as_deref(),
                                                                 |_| {
@@ -5791,7 +6054,10 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                                     |out| unsafe {
                                                         push_thumbnail_or_emit(
                                                             &mut thumbnail_graph,
-                                                            thumbnailed.as_mut().ok_or("thumbnail frame missing")?.0,
+                                                            thumbnailed
+                                                                .as_mut()
+                                                                .ok_or("thumbnail frame missing")?
+                                                                .0,
                                                             out,
                                                             transform.thumbnail.as_deref(),
                                                             |_| {
@@ -5812,10 +6078,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
             })?;
         }
     }
-    if transform.tile.is_some()
-        && transform.framestep.is_none()
-        && transform.mpdecimate.is_none()
-    {
+    if transform.tile.is_some() && transform.framestep.is_none() && transform.mpdecimate.is_none() {
         let dst = tiled.as_mut().ok_or("tile frame missing")?;
         unsafe {
             tile_flush(&mut tile_graph, dst.0, |out| {
@@ -5845,7 +6108,10 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                             |out| unsafe {
                                                 push_thumbnail_or_emit(
                                                     &mut thumbnail_graph,
-                                                    thumbnailed.as_mut().ok_or("thumbnail frame missing")?.0,
+                                                    thumbnailed
+                                                        .as_mut()
+                                                        .ok_or("thumbnail frame missing")?
+                                                        .0,
                                                     out,
                                                     transform.thumbnail.as_deref(),
                                                     |_| {
@@ -5892,7 +6158,10 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                     |out| unsafe {
                                         push_thumbnail_or_emit(
                                             &mut thumbnail_graph,
-                                            thumbnailed.as_mut().ok_or("thumbnail frame missing")?.0,
+                                            thumbnailed
+                                                .as_mut()
+                                                .ok_or("thumbnail frame missing")?
+                                                .0,
                                             out,
                                             transform.thumbnail.as_deref(),
                                             |_| {
@@ -6030,10 +6299,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
     }
     if transform.minterpolate.is_some() || transform.fps.is_some() {
         let scratch = temporal_scratch.as_mut().ok_or("temporal frame missing")?;
-        let fps_dst = fps_out
-            .as_mut()
-            .map(|f| f.0)
-            .unwrap_or(scratch.0);
+        let fps_dst = fps_out.as_mut().map(|f| f.0).unwrap_or(scratch.0);
         unsafe {
             temporal_flush_frames(
                 &mut minterpolate_graph,
