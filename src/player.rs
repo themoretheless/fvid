@@ -25,6 +25,9 @@ pub fn run(path: Option<PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
             .with_inner_size([1280.0, 800.0])
             .with_min_inner_size([480.0, 320.0])
             .with_title("FVid")
+            .with_title_shown(false)
+            .with_titlebar_shown(false)
+            .with_fullsize_content_view(true)
             .with_drag_and_drop(true),
         persist_window: false,
         ..Default::default()
@@ -427,7 +430,9 @@ impl eframe::App for Player {
             let pad = 28.0_f32.min(frame.width() * 0.05);
 
             // Top: title block and close.
-            let top = Pos2::new(frame.left() + pad, frame.top() + 24.0);
+            // Keep the title block clear of the macOS traffic lights over the hidden title bar.
+            let title_left = if fullscreen { pad } else { pad.max(96.0) };
+            let top = Pos2::new(frame.left() + title_left, frame.top() + 24.0);
             if self.reader.is_some() {
                 painter.text(top, Align2::LEFT_TOP, &self.name, FontId::proportional(17.0), TEXT);
                 painter.text(
