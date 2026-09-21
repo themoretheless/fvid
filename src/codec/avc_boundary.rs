@@ -211,6 +211,43 @@ pub fn picture_edges(
     }
     Ok(result)
 }
+/// `picture_edges` for all three components at once. Boundary strengths do
+/// not depend on the component, so they are derived once and only the edge
+/// QPs are recomputed for Cb and Cr.
+pub fn picture_edges_components(
+    input: &[DecodedBlockEdges],
+    width_mbs: usize,
+) -> Result<[Vec<super::avc_deblock::MacroblockEdges>; 3]> {
+    let luma = picture_edges(input, width_mbs, 0)?;
+    let mut chroma = [luma.clone(), luma.clone()];
+    for (grid, component) in chroma.iter_mut().zip(1..) {
+        for (index, (out, current)) in grid.iter_mut().zip(input).enumerate() {
+            out.qp = [[current.qp[component]; 4]; 2];
+            if current.disable_filter == 1 {
+                continue;
+            }
+            for direction in 0..2 {
+                let neighbour = if direction == 0 {
+                    if index % width_mbs == 0 {
+                        None
+                    } else {
+                        Some(index - 1)
+                    }
+                } else {
+                    index.checked_sub(width_mbs)
+                };
+                let Some(neighbour) = neighbour else { continue };
+                let previous = &input[neighbour];
+                if current.disable_filter == 2 && current.slice_id != previous.slice_id {
+                    continue;
+                }
+                out.qp[direction][0] = (current.qp[component] + previous.qp[component] + 1) >> 1;
+            }
+        }
+    }
+    let [cb, cr] = chroma;
+    Ok([luma, cb, cr])
+}
 #[cfg(test)]
 mod grid_tests {
     use super::*;

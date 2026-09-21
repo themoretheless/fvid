@@ -23,13 +23,21 @@ impl<'a> BitReader<'a> {
         if count > 32 || usize::from(count) > self.remaining() {
             return Err(invalid("truncated or oversized bit field"));
         }
-        let mut value = 0;
-        for _ in 0..count {
-            value = (value << 1)
-                | u32::from((self.bytes[self.position / 8] >> (7 - self.position % 8)) & 1);
-            self.position += 1;
+        if count == 0 {
+            return Ok(0);
         }
-        Ok(value)
+        // Gather the covering bytes (at most five for 32 bits at any offset)
+        // into one word and mask the field out, instead of one loop step per bit.
+        let count = usize::from(count);
+        let (byte, bit) = (self.position / 8, self.position % 8);
+        let needed = (bit + count).div_ceil(8);
+        let mut word = 0u64;
+        for &b in &self.bytes[byte..byte + needed] {
+            word = (word << 8) | u64::from(b);
+        }
+        let value = (word >> (needed * 8 - bit - count)) & ((1u64 << count) - 1);
+        self.position += count;
+        Ok(value as u32)
     }
     pub fn bit(&mut self) -> Result<bool> {
         Ok(self.read(1)? != 0)

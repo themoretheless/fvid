@@ -1,7 +1,7 @@
 //! Single-slice progressive CAVLC/CABAC P/B-picture reconstruction, flat scaling lists.
 use super::{
     avc::{Pps, SliceGroups, Sps},
-    avc_boundary::{BlockEdge, DecodedBlockEdges, MotionReference, picture_edges},
+    avc_boundary::{BlockEdge, DecodedBlockEdges, MotionReference},
     avc_compensation::{InterLumaResidual, Reference420},
     avc_deblock::inter_plane,
     avc_inter::{Partition, Prediction},
@@ -430,11 +430,12 @@ pub fn decode_inter_picture_with_motion(
     if seen != count {
         return Err(invalid("incomplete single-slice inter-picture"));
     }
-    for (component, plane) in [&mut out.y, &mut out.cb, &mut out.cr]
+    let grids = super::avc_boundary::picture_edges_components(&edges, w / 16)?;
+    for (component, (plane, grid)) in [&mut out.y, &mut out.cb, &mut out.cr]
         .into_iter()
+        .zip(&grids)
         .enumerate()
     {
-        let grid = picture_edges(&edges, w / 16, component)?;
         let scale = if component == 0 { 1 } else { 2 };
         inter_plane(
             plane,
@@ -442,7 +443,7 @@ pub fn decode_inter_picture_with_motion(
             h / scale,
             sps.bit_depth_luma,
             component != 0,
-            &grid,
+            grid,
         )?;
     }
     Ok((out, motion))

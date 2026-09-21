@@ -228,6 +228,7 @@ mod inter_tests {
 /// Edge metadata for one progressive macroblock. Directions are vertical then
 /// horizontal; edges and their four luma 4-sample segments are spatially ordered.
 /// Slice boundaries disabled by the slice header must have zero strengths.
+#[derive(Clone)]
 pub struct MacroblockEdges {
     pub strengths: [[[u8; 4]; 4]; 2],
     /// Rounded average component QP for each edge, without bit-depth offsets.

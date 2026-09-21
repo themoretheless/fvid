@@ -70,9 +70,13 @@ impl<'a> Cabac<'a> {
         }
     }
     fn renormalize(bits: &mut BitReader<'a>, range: &mut u16, offset: &mut u16) -> Result<()> {
-        while *range < 256 {
-            *range <<= 1;
-            *offset = (*offset << 1) | bits.read(1)? as u16;
+        // `offset < range` holds on entry (the interval arithmetic in every
+        // caller keeps it), so shifting both by the same count in one step and
+        // reading that many bits at once matches the bit-by-bit loop of 9.3.3.2.2.
+        if *range < 256 {
+            let shift = (*range).leading_zeros() - 7;
+            *range <<= shift;
+            *offset = (*offset << shift) | bits.read(shift as u8)? as u16;
         }
         if *offset >= *range {
             return Err(invalid("CABAC offset exceeds coding interval"));
