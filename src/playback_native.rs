@@ -179,6 +179,13 @@ impl<R: BufRead + Seek> NativeReader<R> {
             }
         }
     }
+    /// Whether frames come from the platform's hardware decoder (VideoToolbox).
+    pub fn hardware_accelerated(&self) -> bool {
+        match self {
+            Self::Avc { source, .. } => source.hardware_accelerated(),
+            _ => false,
+        }
+    }
     /// Whether `seek` can position this stream; only containers with a sample
     /// index and sync samples (MP4) support it.
     pub fn seekable(&self) -> bool {

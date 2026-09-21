@@ -1631,6 +1631,7 @@ dependencies = [
  "fvid-cpu",
  "fvid-cuda",
  "fvid-media",
+ "fvid-vt",
  "naga",
  "pollster 0.4.0",
  "rfd",
@@ -1666,6 +1667,10 @@ dependencies = [
  "serde",
  "serde_json",
 ]
+
+[[package]]
+name = "fvid-vt"
+version = "0.1.0"
 
 [[package]]
 name = "gethostname"

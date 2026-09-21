@@ -66,6 +66,7 @@ struct Player {
     playback: Option<Playback>,
     duration: Option<Duration>,
     seekable: bool,
+    hardware: bool,
     /// Geometry, period and timeline interval of the frame on screen.
     dimensions: [usize; 2],
     period: Duration,
@@ -92,6 +93,7 @@ impl Default for Player {
             playback: None,
             duration: None,
             seekable: false,
+            hardware: false,
             dimensions: [0; 2],
             period: Duration::ZERO,
             interval: None,
@@ -117,6 +119,7 @@ impl Player {
         }
         self.duration = reader.duration();
         self.seekable = reader.seekable();
+        self.hardware = reader.hardware_accelerated();
         self.dimensions = reader.dimensions();
         self.period = reader.frame_period();
         self.interval = None;
@@ -287,7 +290,8 @@ impl Player {
         } else {
             format!("{fps:.2}")
         };
-        format!("{w}×{h} · {fps} fps")
+        let decoder = if self.hardware { " · VideoToolbox" } else { "" };
+        format!("{w}×{h} · {fps} fps{decoder}")
     }
 
     fn controls_visible(&self) -> bool {

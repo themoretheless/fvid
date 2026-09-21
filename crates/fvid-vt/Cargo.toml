@@ -1,0 +1,12 @@
+[package]
+name = "fvid-vt"
+version = "0.1.0"
+edition = "2024"
+description = "Hardware H.264 decoding through Apple VideoToolbox (macOS)"
+license = "MIT"
+publish = false
+
+[lints.rust]
+# Raw C bindings to VideoToolbox, CoreMedia and CoreVideo; kept out of the
+# root fvid crate (unsafe forbid).
+unsafe_code = "allow"

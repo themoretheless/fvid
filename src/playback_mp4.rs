@@ -35,9 +35,19 @@ pub struct VideoFrame {
 /// split equally between decode working storage and display reordering.
 /// Decoded frames retained by the caller are outside these budgets.
 /// Audio tracks are exposed by the demuxer but are not decoded by this source.
+/// Hardware decoding through VideoToolbox, with the stream's SPS kept for
+/// colour information the hardware path does not report.
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+struct Hardware {
+    session: fvid_vt::Session,
+    sps: crate::codec::avc::Sps,
+}
+
 pub struct Mp4AvcReader<R> {
     demuxer: Mp4Reader<R>,
     decoder: AvcDecoder,
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    hardware: Option<Hardware>,
     track_index: usize,
     sample_index: usize,
     packet: Vec<u8>,
@@ -92,9 +102,17 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
         }
         future_pts.reverse();
         let decoder = AvcDecoder::new(&track.configuration, decoder_budget - decoder_budget / 2)?;
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        let hardware = if std::env::var_os("FVID_SOFTWARE_DECODE").is_some() {
+            None
+        } else {
+            open_hardware(&track.configuration)
+        };
         Ok(Self {
             demuxer,
             decoder,
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            hardware,
             track_index: index,
             sample_index: 0,
             packet: Vec::new(),
@@ -106,7 +124,34 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
         })
     }
     pub fn active_vui(&self) -> Option<&crate::codec::avc::Vui> {
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        if let Some(hardware) = &self.hardware {
+            return hardware.sps.vui.as_ref();
+        }
         self.decoder.active_vui()
+    }
+    /// Whether frames come from the platform's hardware decoder.
+    pub fn hardware_accelerated(&self) -> bool {
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        {
+            self.hardware.is_some()
+        }
+        #[cfg(not(all(target_os = "macos", feature = "videotoolbox")))]
+        {
+            false
+        }
+    }
+    /// Decode the packet in `self.packet` with whichever decoder is active.
+    fn decode_packet(&mut self) -> Result<Option<Arc<IntraPicture>>> {
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        if let Some(hardware) = &mut self.hardware {
+            let planes = hardware
+                .session
+                .decode(&self.packet)
+                .map_err(|error| invalid(&error.to_string()))?;
+            return Ok(planes.map(|planes| Arc::new(planes_to_picture(planes))));
+        }
+        self.decoder.decode_order(&self.packet)
     }
     pub fn track(&self) -> &Track {
         &self.demuxer.tracks()[self.track_index]
@@ -181,7 +226,7 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
             let sample = self.track().samples[index].clone();
             self.demuxer
                 .read_packet(self.track_index, index, &mut self.packet)?;
-            let picture = self.decoder.decode_order(&self.packet)?;
+            let picture = self.decode_packet()?;
             self.sample_index += 1;
             if let Some(picture) = picture {
                 let frame = VideoFrame {
@@ -211,6 +256,59 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
                 self.pending_bytes = total;
             }
         }
+    }
+}
+
+/// Open a VideoToolbox session for the stream's parameter sets; `None` (with a
+/// note on stderr) leaves decoding to the software decoder.
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+fn open_hardware(configuration: &[u8]) -> Option<Hardware> {
+    let config = crate::codec::config::AvcConfig::parse(configuration).ok()?;
+    let sps = crate::codec::avc::Sps::parse(config.sps.first()?).ok()?;
+    match fvid_vt::Session::new(&config.sps, &config.pps, config.length_size) {
+        Ok(session) => Some(Hardware { session, sps }),
+        Err(error) => {
+            eprintln!("{error}; using the software decoder");
+            None
+        }
+    }
+}
+/// Widen the hardware decoder's packed 8-bit planes into the decoder's picture
+/// layout (even coded size, odd edges cropped).
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+fn planes_to_picture(planes: fvid_vt::Planes) -> IntraPicture {
+    let (w, h) = (planes.width, planes.height);
+    let coded_width = w + w % 2;
+    let coded_height = h + h % 2;
+    let widen = |src: &[u8], width: usize, height: usize, stride: usize, rows: usize| {
+        let mut out = vec![0u16; stride * rows];
+        for (row, line) in src.chunks_exact(width).take(height).enumerate() {
+            for (dst, &s) in out[row * stride..][..width].iter_mut().zip(line) {
+                *dst = u16::from(s);
+            }
+        }
+        out
+    };
+    IntraPicture {
+        coded_width,
+        coded_height,
+        crop: [0, w % 2, 0, h % 2],
+        bit_depth: 8,
+        y: widen(&planes.y, w, h, coded_width, coded_height),
+        cb: widen(
+            &planes.cb,
+            w.div_ceil(2),
+            h.div_ceil(2),
+            coded_width / 2,
+            coded_height / 2,
+        ),
+        cr: widen(
+            &planes.cr,
+            w.div_ceil(2),
+            h.div_ceil(2),
+            coded_width / 2,
+            coded_height / 2,
+        ),
     }
 }
 
