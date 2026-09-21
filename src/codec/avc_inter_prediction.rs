@@ -30,7 +30,7 @@ pub fn predict_macroblock(
     // One buffer per list, reused across partitions, so predictions are never
     // moved by value through the blend and weight steps.
     let mut buffers = [Prediction420::empty(depth), Prediction420::empty(depth)];
-    let mut scratch = [0i32; super::avc_motion::SCRATCH];
+    let mut scratch = super::avc_motion::Scratch::new();
     for (index, (partition, vectors)) in partitions.iter().zip(motion).enumerate() {
         let actual = vectors.map(|v| matches!(v, Neighbour::Inter { .. }));
         let valid = match partition.prediction {

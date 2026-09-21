@@ -1,5 +1,5 @@
 //! Progressive 4:2:0 partition prediction from deblocked reference pictures.
-use super::avc_motion::{ReferencePlane, SCRATCH, bipred_block, weight_block};
+use super::avc_motion::{ReferencePlane, Scratch, bipred_block, weight_block};
 use crate::{Result, invalid};
 
 pub struct Reference420<'a> {
@@ -82,7 +82,7 @@ impl<'a> Reference420<'a> {
         size: [usize; 2],
     ) -> Result<Prediction420> {
         let mut out = Prediction420::empty(self.depth);
-        self.predict_into(origin, motion, size, &mut out, &mut [0; SCRATCH])?;
+        self.predict_into(origin, motion, size, &mut out, &mut Scratch::new())?;
         Ok(out)
     }
     /// `predict` into a caller-owned buffer; only the packed region is written.
@@ -92,7 +92,7 @@ impl<'a> Reference420<'a> {
         motion: [i32; 2],
         size: [usize; 2],
         out: &mut Prediction420,
-        scratch: &mut [i32; SCRATCH],
+        scratch: &mut Scratch,
     ) -> Result<()> {
         let [width, height] = size;
         if ![4, 8, 16].contains(&width)
