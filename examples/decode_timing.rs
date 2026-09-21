@@ -59,6 +59,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             start.elapsed()
         );
     }
+    // The player's pipeline (decode thread + conversion thread): frames per
+    // second as the window would receive them.
+    {
+        let mut reader = fvid::playback_native::NativeReader::without_memory_limit(
+            BufReader::new(File::open(&args[0])?),
+        )?;
+        reader.read_frame()?;
+        let playback = fvid::playback_thread::Playback::start(reader);
+        let start = Instant::now();
+        let mut frames = 0;
+        while frames < limit {
+            match playback.poll() {
+                Some(fvid::playback_thread::Event::Frame(_)) => frames += 1,
+                Some(fvid::playback_thread::Event::Ended(_)) => break,
+                Some(fvid::playback_thread::Event::Error(error)) => return Err(error.into()),
+                None => std::thread::sleep(std::time::Duration::from_micros(200)),
+            }
+        }
+        let elapsed = start.elapsed();
+        println!(
+            "pipeline: frames={frames} total={:?} per_frame={:?}",
+            elapsed,
+            elapsed / frames.max(1) as u32
+        );
+    }
     // Raw AVC decode only, when the input is MP4.
     if let Ok(mut source) = fvid::playback_mp4::Mp4AvcReader::open(
         BufReader::new(File::open(&args[0])?),

@@ -1,9 +1,11 @@
 //! RGB playback adapter for FVid's own Y4M, MP4/AVC and WebM/VP9/AV1 readers.
 use crate::{
-    Result, container::mp4::Limits, invalid, playback::Y4mReader, playback_mp4::Mp4AvcReader,
+    Result, codec::avc_picture::IntraPicture, container::mp4::Limits, invalid,
+    playback::Y4mReader, playback_mp4::Mp4AvcReader,
 };
 use std::{
     io::{BufRead, Seek, SeekFrom},
+    sync::Arc,
     time::Duration,
 };
 
@@ -231,162 +233,235 @@ impl<R: BufRead + Seek> NativeReader<R> {
         match self {
             Self::Y4m(r) => r.read_frame(),
             Self::Webm(r) => r.read_frame(),
-            Self::Avc {
-                source,
-                rgb,
-                dimensions,
-                period,
-                next_pts,
-                frame_start,
-                frames,
-                rgb_budget,
-                media_start,
-                media_end,
-                resync,
-            } => {
-                if media_end.is_some_and(|end| {
-                    i128::from(*next_pts) + i128::from(*media_start) >= i128::from(end)
-                }) {
+            Self::Avc { .. } => {
+                let Some((picture, colour)) = self.advance_avc()? else {
                     return Ok(false);
-                }
-                let frame = loop {
-                    let Some(mut frame) = source.read_frame()? else {
-                        return Ok(false);
-                    };
-                    let begin = frame.presentation_time.ticks;
-                    let end = begin
-                        .checked_add(frame.duration.ticks)
-                        .ok_or_else(|| invalid("video timestamp overflow"))?;
-                    if end <= *media_start {
-                        continue;
-                    }
-                    if media_end.is_some_and(|limit| begin >= limit) {
-                        return Ok(false);
-                    }
-                    let clipped_begin = begin.max(*media_start);
-                    let clipped_end = media_end.map_or(end, |limit| end.min(limit));
-                    frame.presentation_time.ticks = clipped_begin
-                        .checked_sub(*media_start)
-                        .ok_or_else(|| invalid("video edit timestamp overflow"))?;
-                    frame.duration.ticks = clipped_end
-                        .checked_sub(clipped_begin)
-                        .ok_or_else(|| invalid("video edit duration overflow"))?;
-                    break frame;
                 };
-                if *resync {
-                    *next_pts = frame.presentation_time.ticks;
-                    *resync = false;
-                }
-                if frame.presentation_time.ticks != *next_pts || frame.duration.ticks <= 0 {
-                    return Err(invalid(
-                        "non-contiguous AVC presentation timestamps are not implemented",
-                    ));
-                }
-                let nanos = frame.duration.nanoseconds()?;
-                let nanos = u64::try_from(nanos)
-                    .ok()
-                    .filter(|n| *n > 0)
-                    .ok_or_else(|| invalid("invalid video frame duration"))?;
-                let signal = source.active_vui().and_then(|v| v.video_signal);
-                let full = signal.is_some_and(|(_, full, _)| full);
-                let matrix = signal
-                    .and_then(|(_, _, colour)| colour)
-                    .map(|c| c[2])
-                    .unwrap_or(2);
-                let (kr, kb) = match matrix {
-                    1 => (0.2126, 0.0722),
-                    2 | 5 | 6 => (0.299, 0.114),
-                    _ => return Err(invalid("AVC colour matrix is not implemented for playback")),
+                let Self::Avc {
+                    rgb, rgb_budget, ..
+                } = self
+                else {
+                    unreachable!()
                 };
-                let p = &frame.picture;
-                let (w, h) = p.dimensions();
-                let len = w
-                    .checked_mul(h)
-                    .and_then(|n| n.checked_mul(3))
-                    .filter(|n| *n <= *rgb_budget)
-                    .ok_or_else(|| invalid("RGB frame exceeds playback budget"))?;
-                if rgb.len() != len {
-                    *rgb = crate::buffer(len)?;
-                }
-                let scale = f64::from(1u32 << (p.bit_depth - 8));
-                let (y_offset, y_range, c_range) = if full {
-                    (
-                        0.0,
-                        f64::from((1u32 << p.bit_depth) - 1),
-                        f64::from((1u32 << p.bit_depth) - 1),
-                    )
-                } else {
-                    (16.0 * scale, 219.0 * scale, 224.0 * scale)
-                };
-                // Fold the range normalisation and the 255 output scale into
-                // per-component gains so each pixel is three multiply-adds.
-                // G = Y - kr*(2-2kr)/(1-kr-kb) * Cr - kb*(2-2kb)/(1-kr-kb) * Cb.
-                let y_gain = (255.0 / y_range) as f32;
-                let c_gain = 255.0 / c_range;
-                let r_cr = (2.0 * (1.0 - kr) * c_gain) as f32;
-                let b_cb = (2.0 * (1.0 - kb) * c_gain) as f32;
-                let g_cr = (kr * 2.0 * (1.0 - kr) / (1.0 - kr - kb) * c_gain) as f32;
-                let g_cb = (kb * 2.0 * (1.0 - kb) / (1.0 - kr - kb) * c_gain) as f32;
-                let (y_offset, c_offset) = (y_offset as f32, (128.0 * scale) as f32);
-                let chroma_stride = p.coded_width / 2;
-                // Single-threaded on purpose: spreading this over threads measured
-                // slower than the plain loop on a 3-megapixel frame. Each chroma
-                // sample is converted once and applied to its two luma columns.
-                // Terms are applied in the same order as the per-pixel formula
-                // (`luma - g_cr*cr - g_cb*cb`), so results stay bit-identical.
-                let store = |pixel: &mut [u8], luma: u16, t: (f32, f32, f32, f32)| {
-                    let luma = (f32::from(luma) - y_offset) * y_gain;
-                    pixel[0] = (luma + t.0).round().clamp(0.0, 255.0) as u8;
-                    pixel[1] = (luma - t.1 - t.2).round().clamp(0.0, 255.0) as u8;
-                    pixel[2] = (luma + t.3).round().clamp(0.0, 255.0) as u8;
-                };
-                let chroma_terms = |cb: u16, cr: u16| {
-                    let cb = f32::from(cb) - c_offset;
-                    let cr = f32::from(cr) - c_offset;
-                    (r_cr * cr, g_cr * cr, g_cb * cb, b_cb * cb)
-                };
-                let first_chroma = p.crop[0] / 2;
-                let odd_start = p.crop[0] % 2 == 1;
-                for (row, line) in rgb.chunks_exact_mut(w * 3).enumerate() {
-                    let y = row + p.crop[2];
-                    let luma_row = &p.y[y * p.coded_width + p.crop[0]..][..w];
-                    let cb_row = &p.cb[(y / 2) * chroma_stride + first_chroma..];
-                    let cr_row = &p.cr[(y / 2) * chroma_stride + first_chroma..];
-                    let mut col = 0;
-                    let mut chroma = 0;
-                    if odd_start && w > 0 {
-                        let t = chroma_terms(cb_row[0], cr_row[0]);
-                        store(&mut line[..3], luma_row[0], t);
-                        col = 1;
-                        chroma = 1;
-                    }
-                    while col + 1 < w {
-                        let t = chroma_terms(cb_row[chroma], cr_row[chroma]);
-                        store(&mut line[col * 3..][..3], luma_row[col], t);
-                        store(&mut line[col * 3 + 3..][..3], luma_row[col + 1], t);
-                        col += 2;
-                        chroma += 1;
-                    }
-                    if col < w {
-                        let t = chroma_terms(cb_row[chroma], cr_row[chroma]);
-                        store(&mut line[col * 3..][..3], luma_row[col], t);
-                    }
-                }
-                *dimensions = [w, h];
-                *period = Duration::from_nanos(nanos);
-                *frame_start = frame.presentation_time.ticks;
-                *next_pts = frame
-                    .presentation_time
-                    .ticks
-                    .checked_add(frame.duration.ticks)
-                    .ok_or_else(|| invalid("video timestamp overflow"))?;
-                *frames += 1;
+                avc_to_rgb(&picture, colour, rgb, *rgb_budget)?;
                 Ok(true)
             }
         }
     }
+    /// `read_frame` without the RGB conversion. The decoded picture (or, for
+    /// readers that convert internally, the RGB bytes) is handed back so
+    /// another thread can run `RawFrame::into_rgb` while decoding continues.
+    /// For AVC, `rgb()` is stale after this call.
+    pub fn read_frame_raw(&mut self) -> Result<Option<RawFrame>> {
+        match self {
+            Self::Y4m(_) | Self::Webm(_) => Ok(if self.read_frame()? {
+                Some(RawFrame::Rgb(self.rgb().to_vec()))
+            } else {
+                None
+            }),
+            Self::Avc { .. } => Ok(self
+                .advance_avc()?
+                .map(|(picture, colour)| RawFrame::Avc { picture, colour })),
+        }
+    }
+    /// Decode the next AVC frame and update the timeline; conversion is separate.
+    fn advance_avc(&mut self) -> Result<Option<(Arc<IntraPicture>, AvcColour)>> {
+        let Self::Avc {
+            source,
+            dimensions,
+            period,
+            next_pts,
+            frame_start,
+            frames,
+            media_start,
+            media_end,
+            resync,
+            ..
+        } = self
+        else {
+            return Ok(None);
+        };
+        if media_end.is_some_and(|end| {
+            i128::from(*next_pts) + i128::from(*media_start) >= i128::from(end)
+        }) {
+            return Ok(None);
+        }
+        let frame = loop {
+            let Some(mut frame) = source.read_frame()? else {
+                return Ok(None);
+            };
+            let begin = frame.presentation_time.ticks;
+            let end = begin
+                .checked_add(frame.duration.ticks)
+                .ok_or_else(|| invalid("video timestamp overflow"))?;
+            if end <= *media_start {
+                continue;
+            }
+            if media_end.is_some_and(|limit| begin >= limit) {
+                return Ok(None);
+            }
+            let clipped_begin = begin.max(*media_start);
+            let clipped_end = media_end.map_or(end, |limit| end.min(limit));
+            frame.presentation_time.ticks = clipped_begin
+                .checked_sub(*media_start)
+                .ok_or_else(|| invalid("video edit timestamp overflow"))?;
+            frame.duration.ticks = clipped_end
+                .checked_sub(clipped_begin)
+                .ok_or_else(|| invalid("video edit duration overflow"))?;
+            break frame;
+        };
+        if *resync {
+            *next_pts = frame.presentation_time.ticks;
+            *resync = false;
+        }
+        if frame.presentation_time.ticks != *next_pts || frame.duration.ticks <= 0 {
+            return Err(invalid(
+                "non-contiguous AVC presentation timestamps are not implemented",
+            ));
+        }
+        let nanos = frame.duration.nanoseconds()?;
+        let nanos = u64::try_from(nanos)
+            .ok()
+            .filter(|n| *n > 0)
+            .ok_or_else(|| invalid("invalid video frame duration"))?;
+        let signal = source.active_vui().and_then(|v| v.video_signal);
+        let full = signal.is_some_and(|(_, full, _)| full);
+        let matrix = signal
+            .and_then(|(_, _, colour)| colour)
+            .map(|c| c[2])
+            .unwrap_or(2);
+        let (kr, kb) = match matrix {
+            1 => (0.2126, 0.0722),
+            2 | 5 | 6 => (0.299, 0.114),
+            _ => return Err(invalid("AVC colour matrix is not implemented for playback")),
+        };
+        let (w, h) = frame.picture.dimensions();
+        *dimensions = [w, h];
+        *period = Duration::from_nanos(nanos);
+        *frame_start = frame.presentation_time.ticks;
+        *next_pts = frame
+            .presentation_time
+            .ticks
+            .checked_add(frame.duration.ticks)
+            .ok_or_else(|| invalid("video timestamp overflow"))?;
+        *frames += 1;
+        Ok(Some((frame.picture, AvcColour { kr, kb, full })))
+    }
 }
 
+/// Colour interpretation of a decoded AVC picture: VUI matrix coefficients
+/// and whether samples use the full range.
+#[derive(Clone, Copy, Debug)]
+pub struct AvcColour {
+    pub kr: f64,
+    pub kb: f64,
+    pub full: bool,
+}
+/// A decoded frame before RGB conversion.
+pub enum RawFrame {
+    Rgb(Vec<u8>),
+    Avc {
+        picture: Arc<IntraPicture>,
+        colour: AvcColour,
+    },
+}
+impl RawFrame {
+    /// Packed 8-bit RGB of the visible picture area.
+    pub fn into_rgb(self, budget: usize) -> Result<Vec<u8>> {
+        match self {
+            RawFrame::Rgb(rgb) => Ok(rgb),
+            RawFrame::Avc { picture, colour } => {
+                let mut rgb = Vec::new();
+                avc_to_rgb(&picture, colour, &mut rgb, budget)?;
+                Ok(rgb)
+            }
+        }
+    }
+}
+/// Convert the cropped 4:2:0 picture to packed 8-bit RGB into `rgb`, which is
+/// resized when the picture size changes.
+pub fn avc_to_rgb(
+    p: &IntraPicture,
+    colour: AvcColour,
+    rgb: &mut Vec<u8>,
+    budget: usize,
+) -> Result<()> {
+    let AvcColour { kr, kb, full } = colour;
+    let (w, h) = p.dimensions();
+    let len = w
+        .checked_mul(h)
+        .and_then(|n| n.checked_mul(3))
+        .filter(|n| *n <= budget)
+        .ok_or_else(|| invalid("RGB frame exceeds playback budget"))?;
+    if rgb.len() != len {
+        *rgb = crate::buffer(len)?;
+    }
+    let scale = f64::from(1u32 << (p.bit_depth - 8));
+    let (y_offset, y_range, c_range) = if full {
+        (
+            0.0,
+            f64::from((1u32 << p.bit_depth) - 1),
+            f64::from((1u32 << p.bit_depth) - 1),
+        )
+    } else {
+        (16.0 * scale, 219.0 * scale, 224.0 * scale)
+    };
+    // Fold the range normalisation and the 255 output scale into
+    // per-component gains so each pixel is three multiply-adds.
+    // G = Y - kr*(2-2kr)/(1-kr-kb) * Cr - kb*(2-2kb)/(1-kr-kb) * Cb.
+    let y_gain = (255.0 / y_range) as f32;
+    let c_gain = 255.0 / c_range;
+    let r_cr = (2.0 * (1.0 - kr) * c_gain) as f32;
+    let b_cb = (2.0 * (1.0 - kb) * c_gain) as f32;
+    let g_cr = (kr * 2.0 * (1.0 - kr) / (1.0 - kr - kb) * c_gain) as f32;
+    let g_cb = (kb * 2.0 * (1.0 - kb) / (1.0 - kr - kb) * c_gain) as f32;
+    let (y_offset, c_offset) = (y_offset as f32, (128.0 * scale) as f32);
+    let chroma_stride = p.coded_width / 2;
+    // Single-threaded on purpose: spreading this over threads measured
+    // slower than the plain loop on a 3-megapixel frame. Each chroma
+    // sample is converted once and applied to its two luma columns.
+    // Terms are applied in the same order as the per-pixel formula
+    // (`luma - g_cr*cr - g_cb*cb`), so results stay bit-identical.
+    let store = |pixel: &mut [u8], luma: u16, t: (f32, f32, f32, f32)| {
+        let luma = (f32::from(luma) - y_offset) * y_gain;
+        pixel[0] = (luma + t.0).round().clamp(0.0, 255.0) as u8;
+        pixel[1] = (luma - t.1 - t.2).round().clamp(0.0, 255.0) as u8;
+        pixel[2] = (luma + t.3).round().clamp(0.0, 255.0) as u8;
+    };
+    let chroma_terms = |cb: u16, cr: u16| {
+        let cb = f32::from(cb) - c_offset;
+        let cr = f32::from(cr) - c_offset;
+        (r_cr * cr, g_cr * cr, g_cb * cb, b_cb * cb)
+    };
+    let first_chroma = p.crop[0] / 2;
+    let odd_start = p.crop[0] % 2 == 1;
+    for (row, line) in rgb.chunks_exact_mut(w * 3).enumerate() {
+        let y = row + p.crop[2];
+        let luma_row = &p.y[y * p.coded_width + p.crop[0]..][..w];
+        let cb_row = &p.cb[(y / 2) * chroma_stride + first_chroma..];
+        let cr_row = &p.cr[(y / 2) * chroma_stride + first_chroma..];
+        let mut col = 0;
+        let mut chroma = 0;
+        if odd_start && w > 0 {
+            let t = chroma_terms(cb_row[0], cr_row[0]);
+            store(&mut line[..3], luma_row[0], t);
+            col = 1;
+            chroma = 1;
+        }
+        while col + 1 < w {
+            let t = chroma_terms(cb_row[chroma], cr_row[chroma]);
+            store(&mut line[col * 3..][..3], luma_row[col], t);
+            store(&mut line[col * 3 + 3..][..3], luma_row[col + 1], t);
+            col += 2;
+            chroma += 1;
+        }
+        if col < w {
+            let t = chroma_terms(cb_row[chroma], cr_row[chroma]);
+            store(&mut line[col * 3..][..3], luma_row[col], t);
+        }
+    }
+    Ok(())
+}
 /// A single rate-one edit can trim/offset the media timeline without changing
 /// the decode sequence. Empty edits and repeated ranges need a richer scheduler.
 fn playback_window(

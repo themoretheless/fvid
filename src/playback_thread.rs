@@ -1,8 +1,11 @@
-//! Runs a `NativeReader` on its own thread so a slow decoder never blocks the
-//! window. Decoded RGB frames flow through a small bounded queue; control
-//! messages (pause, rewind, seek) go the other way. Every frame carries the
-//! generation of the last rewind or seek so stale queued frames can be dropped.
-use crate::playback_native::NativeReader;
+//! Runs a `NativeReader` on its own threads so a slow decoder never blocks the
+//! window. The decode thread produces raw pictures; a converter thread turns
+//! them into RGB while the next picture is being decoded, so throughput is
+//! the slower of the two stages rather than their sum. Frames flow through a
+//! small bounded queue; control messages (pause, rewind, seek) go the other
+//! way. Every frame carries the generation of the last rewind or seek so
+//! stale queued frames can be dropped.
+use crate::playback_native::{NativeReader, RawFrame};
 use std::{
     io::{BufRead, Seek},
     sync::mpsc::{Receiver, RecvTimeoutError, SyncSender, TryRecvError, TrySendError, sync_channel},
@@ -10,7 +13,7 @@ use std::{
     time::Duration,
 };
 
-/// How many decoded frames may wait for the window. Two keeps the decoder
+/// How many converted frames may wait for the window. Two keeps the decoder
 /// one frame ahead without holding many large RGB buffers.
 const QUEUE: usize = 2;
 
@@ -38,12 +41,25 @@ enum Command {
     Stop,
 }
 
-/// Handle to the decoding thread; dropping it stops the thread.
+/// What the decode thread hands to the converter, in order.
+enum Stage {
+    Raw {
+        raw: RawFrame,
+        dimensions: [usize; 2],
+        period: Duration,
+        interval: Option<(u128, u128, u32)>,
+        generation: u64,
+    },
+    Event(Event),
+}
+
+/// Handle to the decoding threads; dropping it stops them.
 pub struct Playback {
     commands: SyncSender<Command>,
     events: Receiver<Event>,
     generation: u64,
-    thread: Option<thread::JoinHandle<()>>,
+    decoder: Option<thread::JoinHandle<()>>,
+    converter: Option<thread::JoinHandle<()>>,
 }
 
 impl Playback {
@@ -51,16 +67,47 @@ impl Playback {
     /// in the background, playing from that frame.
     pub fn start<R: BufRead + Seek + Send + 'static>(reader: NativeReader<R>) -> Self {
         let (commands, command_rx) = sync_channel(16);
+        let (stage_tx, stage_rx) = sync_channel::<Stage>(1);
         let (event_tx, events) = sync_channel(QUEUE);
-        let thread = thread::Builder::new()
+        let decoder = thread::Builder::new()
             .name("fvid-decode".into())
-            .spawn(move || Worker::new(reader, command_rx, event_tx).run())
+            .spawn(move || Worker::new(reader, command_rx, stage_tx).run())
             .expect("spawn decoder thread");
+        let converter = thread::Builder::new()
+            .name("fvid-convert".into())
+            .spawn(move || {
+                for stage in stage_rx {
+                    let event = match stage {
+                        Stage::Raw {
+                            raw,
+                            dimensions,
+                            period,
+                            interval,
+                            generation,
+                        } => match raw.into_rgb(usize::MAX) {
+                            Ok(rgb) => Event::Frame(Frame {
+                                rgb,
+                                dimensions,
+                                period,
+                                interval,
+                                generation,
+                            }),
+                            Err(error) => Event::Error(error.to_string()),
+                        },
+                        Stage::Event(event) => event,
+                    };
+                    if event_tx.send(event).is_err() {
+                        return;
+                    }
+                }
+            })
+            .expect("spawn converter thread");
         Self {
             commands,
             events,
             generation: 0,
-            thread: Some(thread),
+            decoder: Some(decoder),
+            converter: Some(converter),
         }
     }
     /// Generation of the most recent rewind or seek; frames from earlier
@@ -91,9 +138,16 @@ impl Playback {
 impl Drop for Playback {
     fn drop(&mut self) {
         let _ = self.commands.send(Command::Stop);
-        // Unblock a worker waiting to hand over a frame, then let it exit.
-        while self.events.try_recv().is_ok() {}
-        if let Some(thread) = self.thread.take() {
+        if let Some(thread) = self.decoder.take() {
+            let _ = thread.join();
+        }
+        // The converter may be blocked handing over a frame; keep draining
+        // until it has seen the closed stage channel and exited.
+        if let Some(thread) = self.converter.take() {
+            while !thread.is_finished() {
+                while self.events.try_recv().is_ok() {}
+                thread::sleep(Duration::from_millis(1));
+            }
             let _ = thread.join();
         }
     }
@@ -102,35 +156,49 @@ impl Drop for Playback {
 struct Worker<R> {
     reader: NativeReader<R>,
     commands: Receiver<Command>,
-    events: SyncSender<Event>,
+    stages: SyncSender<Stage>,
     playing: bool,
     ended: bool,
     generation: u64,
-    pending: Option<Event>,
+    pending: Option<Stage>,
 }
 
 impl<R: BufRead + Seek> Worker<R> {
-    fn new(reader: NativeReader<R>, commands: Receiver<Command>, events: SyncSender<Event>) -> Self {
+    fn new(reader: NativeReader<R>, commands: Receiver<Command>, stages: SyncSender<Stage>) -> Self {
         let mut worker = Self {
             reader,
             commands,
-            events,
+            stages,
             playing: true,
             ended: false,
             generation: 0,
             pending: None,
         };
-        worker.pending = Some(worker.current_frame());
+        // The reader already holds its first frame converted.
+        worker.pending = Some(worker.stage(RawFrame::Rgb(worker.reader.rgb().to_vec())));
         worker
     }
-    fn current_frame(&self) -> Event {
-        Event::Frame(Frame {
-            rgb: self.reader.rgb().to_vec(),
+    fn stage(&self, raw: RawFrame) -> Stage {
+        Stage::Raw {
+            raw,
             dimensions: self.reader.dimensions(),
             period: self.reader.frame_period(),
             interval: self.reader.frame_interval(),
             generation: self.generation,
-        })
+        }
+    }
+    fn decode_next(&mut self) -> Stage {
+        match self.reader.read_frame_raw() {
+            Ok(Some(raw)) => self.stage(raw),
+            Ok(None) => {
+                self.ended = true;
+                Stage::Event(Event::Ended(self.generation))
+            }
+            Err(error) => {
+                self.ended = true;
+                Stage::Event(Event::Error(error.to_string()))
+            }
+        }
     }
     /// Returns false when the thread should exit.
     fn handle(&mut self, command: Command) -> bool {
@@ -141,20 +209,19 @@ impl<R: BufRead + Seek> Worker<R> {
                 self.generation += 1;
                 self.playing = true;
                 self.ended = false;
-                self.pending = match self.reader.rewind().and_then(|()| self.reader.read_frame())
-                {
-                    Ok(true) => Some(self.current_frame()),
-                    Ok(false) => Some(Event::Ended(self.generation)),
-                    Err(error) => Some(Event::Error(error.to_string())),
-                };
+                self.pending = Some(match self.reader.rewind() {
+                    Ok(()) => self.decode_next(),
+                    Err(error) => Stage::Event(Event::Error(error.to_string())),
+                });
             }
             Command::Seek(target) => {
                 self.generation += 1;
                 self.ended = false;
-                self.pending = match self.reader.seek(target) {
-                    Ok(()) => Some(self.current_frame()),
-                    Err(error) => Some(Event::Error(error.to_string())),
-                };
+                // `seek` leaves the target frame converted in the reader.
+                self.pending = Some(match self.reader.seek(target) {
+                    Ok(()) => self.stage(RawFrame::Rgb(self.reader.rgb().to_vec())),
+                    Err(error) => Stage::Event(Event::Error(error.to_string())),
+                });
             }
             Command::Stop => return false,
         }
@@ -174,13 +241,13 @@ impl<R: BufRead + Seek> Worker<R> {
                     Err(TryRecvError::Disconnected) => return,
                 }
             }
-            if let Some(event) = self.pending.take() {
-                match self.events.try_send(event) {
+            if let Some(stage) = self.pending.take() {
+                match self.stages.try_send(stage) {
                     Ok(()) => {}
-                    Err(TrySendError::Full(event)) => {
-                        // Queue is full: keep the event and wait for a command or a slot.
-                        self.pending = Some(event);
-                        match self.commands.recv_timeout(Duration::from_millis(4)) {
+                    Err(TrySendError::Full(stage)) => {
+                        // Converter is busy: keep the stage and wait for a command or a slot.
+                        self.pending = Some(stage);
+                        match self.commands.recv_timeout(Duration::from_millis(2)) {
                             Ok(command) => {
                                 if !self.handle(command) {
                                     return;
@@ -195,17 +262,7 @@ impl<R: BufRead + Seek> Worker<R> {
                 continue;
             }
             if self.playing && !self.ended {
-                self.pending = match self.reader.read_frame() {
-                    Ok(true) => Some(self.current_frame()),
-                    Ok(false) => {
-                        self.ended = true;
-                        Some(Event::Ended(self.generation))
-                    }
-                    Err(error) => {
-                        self.ended = true;
-                        Some(Event::Error(error.to_string()))
-                    }
-                };
+                self.pending = Some(self.decode_next());
                 continue;
             }
             // Nothing to do until the window says so.
