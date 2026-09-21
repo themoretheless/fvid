@@ -241,7 +241,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
             Self::Y4m(r) => r.read_frame(),
             Self::Webm(r) => r.read_frame(),
             Self::Avc { .. } => {
-                let Some((picture, colour)) = self.advance_avc()? else {
+                let Some(raw) = self.advance_avc()? else {
                     return Ok(false);
                 };
                 let Self::Avc {
@@ -250,7 +250,13 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 else {
                     unreachable!()
                 };
-                avc_to_rgb(&picture, colour, rgb, *rgb_budget)?;
+                match raw {
+                    RawFrame::Avc { picture, colour } => {
+                        avc_to_rgb(&picture, colour, rgb, *rgb_budget)?
+                    }
+                    RawFrame::Planar8(planes) => planar8_to_rgb(&planes, rgb, *rgb_budget)?,
+                    RawFrame::Rgb(bytes) => *rgb = bytes,
+                }
                 Ok(true)
             }
         }
@@ -266,13 +272,11 @@ impl<R: BufRead + Seek> NativeReader<R> {
             } else {
                 None
             }),
-            Self::Avc { .. } => Ok(self
-                .advance_avc()?
-                .map(|(picture, colour)| RawFrame::Avc { picture, colour })),
+            Self::Avc { .. } => self.advance_avc(),
         }
     }
     /// Decode the next AVC frame and update the timeline; conversion is separate.
-    fn advance_avc(&mut self) -> Result<Option<(Arc<IntraPicture>, AvcColour)>> {
+    fn advance_avc(&mut self) -> Result<Option<RawFrame>> {
         let Self::Avc {
             source,
             dimensions,
@@ -331,17 +335,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
             .ok()
             .filter(|n| *n > 0)
             .ok_or_else(|| invalid("invalid video frame duration"))?;
-        let signal = source.active_vui().and_then(|v| v.video_signal);
-        let full = signal.is_some_and(|(_, full, _)| full);
-        let matrix = signal
-            .and_then(|(_, _, colour)| colour)
-            .map(|c| c[2])
-            .unwrap_or(2);
-        let (kr, kb) = match matrix {
-            1 => (0.2126, 0.0722),
-            2 | 5 | 6 => (0.299, 0.114),
-            _ => return Err(invalid("AVC colour matrix is not implemented for playback")),
-        };
+        let colour = AvcColour::from_vui(source.active_vui())?;
         let (w, h) = frame.picture.dimensions();
         *dimensions = [w, h];
         *period = Duration::from_nanos(nanos);
@@ -352,7 +346,13 @@ impl<R: BufRead + Seek> NativeReader<R> {
             .checked_add(frame.duration.ticks)
             .ok_or_else(|| invalid("video timestamp overflow"))?;
         *frames += 1;
-        Ok(Some((frame.picture, AvcColour { kr, kb, full })))
+        Ok(Some(match frame.planes8 {
+            Some(planes) => RawFrame::Planar8(planes),
+            None => RawFrame::Avc {
+                picture: frame.picture,
+                colour,
+            },
+        }))
     }
 }
 
@@ -363,6 +363,23 @@ pub struct AvcColour {
     pub kr: f64,
     pub kb: f64,
     pub full: bool,
+}
+impl AvcColour {
+    /// Matrix coefficients and range from the VUI; BT.601 when unspecified.
+    pub fn from_vui(vui: Option<&crate::codec::avc::Vui>) -> Result<Self> {
+        let signal = vui.and_then(|v| v.video_signal);
+        let full = signal.is_some_and(|(_, full, _)| full);
+        let matrix = signal
+            .and_then(|(_, _, colour)| colour)
+            .map(|c| c[2])
+            .unwrap_or(2);
+        let (kr, kb) = match matrix {
+            1 => (0.2126, 0.0722),
+            2 | 5 | 6 => (0.299, 0.114),
+            _ => return Err(invalid("AVC colour matrix is not implemented for playback")),
+        };
+        Ok(Self { kr, kb, full })
+    }
 }
 /// The visible picture as packed 8-bit 4:2:0 planes, ready for GPU upload.
 pub struct Planar8 {
@@ -408,18 +425,19 @@ pub enum RawFrame {
         picture: Arc<IntraPicture>,
         colour: AvcColour,
     },
+    /// Hardware decoder output: already cropped 8-bit planes.
+    Planar8(Arc<Planar8>),
 }
 impl RawFrame {
     /// Packed 8-bit RGB of the visible picture area.
     pub fn into_rgb(self, budget: usize) -> Result<Vec<u8>> {
+        let mut rgb = Vec::new();
         match self {
-            RawFrame::Rgb(rgb) => Ok(rgb),
-            RawFrame::Avc { picture, colour } => {
-                let mut rgb = Vec::new();
-                avc_to_rgb(&picture, colour, &mut rgb, budget)?;
-                Ok(rgb)
-            }
+            RawFrame::Rgb(rgb) => return Ok(rgb),
+            RawFrame::Avc { picture, colour } => avc_to_rgb(&picture, colour, &mut rgb, budget)?,
+            RawFrame::Planar8(planes) => planar8_to_rgb(&planes, &mut rgb, budget)?,
         }
+        Ok(rgb)
     }
 }
 /// Convert the cropped 4:2:0 picture to packed 8-bit RGB into `rgb`, which is
@@ -430,8 +448,64 @@ pub fn avc_to_rgb(
     rgb: &mut Vec<u8>,
     budget: usize,
 ) -> Result<()> {
-    let AvcColour { kr, kb, full } = colour;
     let (w, h) = p.dimensions();
+    let (x0, y0) = (p.crop[0], p.crop[2]);
+    let source = PlaneSource {
+        y: &p.y,
+        cb: &p.cb,
+        cr: &p.cr,
+        luma_stride: p.coded_width,
+        chroma_stride: p.coded_width / 2,
+        x0,
+        y0,
+        chroma_x0: x0 / 2,
+        width: w,
+        height: h,
+        bit_depth: p.bit_depth,
+        colour,
+    };
+    rgb_from_planes(source, rgb, budget)
+}
+/// `avc_to_rgb` for packed 8-bit planes.
+pub fn planar8_to_rgb(p: &Planar8, rgb: &mut Vec<u8>, budget: usize) -> Result<()> {
+    let source = PlaneSource {
+        y: &p.y,
+        cb: &p.cb,
+        cr: &p.cr,
+        luma_stride: p.width,
+        chroma_stride: p.chroma_width,
+        x0: 0,
+        y0: 0,
+        chroma_x0: 0,
+        width: p.width,
+        height: p.height,
+        bit_depth: 8,
+        colour: p.colour,
+    };
+    rgb_from_planes(source, rgb, budget)
+}
+/// 4:2:0 planes of any sample width with the visible window to convert.
+struct PlaneSource<'a, T> {
+    y: &'a [T],
+    cb: &'a [T],
+    cr: &'a [T],
+    luma_stride: usize,
+    chroma_stride: usize,
+    x0: usize,
+    y0: usize,
+    chroma_x0: usize,
+    width: usize,
+    height: usize,
+    bit_depth: u8,
+    colour: AvcColour,
+}
+fn rgb_from_planes<T: Copy + Into<f32>>(
+    p: PlaneSource<'_, T>,
+    rgb: &mut Vec<u8>,
+    budget: usize,
+) -> Result<()> {
+    let AvcColour { kr, kb, full } = p.colour;
+    let (w, h) = (p.width, p.height);
     let len = w
         .checked_mul(h)
         .and_then(|n| n.checked_mul(3))
@@ -460,30 +534,30 @@ pub fn avc_to_rgb(
     let g_cr = (kr * 2.0 * (1.0 - kr) / (1.0 - kr - kb) * c_gain) as f32;
     let g_cb = (kb * 2.0 * (1.0 - kb) / (1.0 - kr - kb) * c_gain) as f32;
     let (y_offset, c_offset) = (y_offset as f32, (128.0 * scale) as f32);
-    let chroma_stride = p.coded_width / 2;
     // Single-threaded on purpose: spreading this over threads measured
     // slower than the plain loop on a 3-megapixel frame. Each chroma
     // sample is converted once and applied to its two luma columns.
     // Terms are applied in the same order as the per-pixel formula
     // (`luma - g_cr*cr - g_cb*cb`), so results stay bit-identical.
-    let store = |pixel: &mut [u8], luma: u16, t: (f32, f32, f32, f32)| {
-        let luma = (f32::from(luma) - y_offset) * y_gain;
+    let store = |pixel: &mut [u8], luma: T, t: (f32, f32, f32, f32)| {
+        let luma = (luma.into() - y_offset) * y_gain;
         pixel[0] = (luma + t.0).round().clamp(0.0, 255.0) as u8;
         pixel[1] = (luma - t.1 - t.2).round().clamp(0.0, 255.0) as u8;
         pixel[2] = (luma + t.3).round().clamp(0.0, 255.0) as u8;
     };
-    let chroma_terms = |cb: u16, cr: u16| {
-        let cb = f32::from(cb) - c_offset;
-        let cr = f32::from(cr) - c_offset;
+    let chroma_terms = |cb: T, cr: T| {
+        let cb = cb.into() - c_offset;
+        let cr = cr.into() - c_offset;
         (r_cr * cr, g_cr * cr, g_cb * cb, b_cb * cb)
     };
-    let first_chroma = p.crop[0] / 2;
-    let odd_start = p.crop[0] % 2 == 1;
+    let odd_start = p.x0 % 2 == 1;
     for (row, line) in rgb.chunks_exact_mut(w * 3).enumerate() {
-        let y = row + p.crop[2];
-        let luma_row = &p.y[y * p.coded_width + p.crop[0]..][..w];
-        let cb_row = &p.cb[(y / 2) * chroma_stride + first_chroma..];
-        let cr_row = &p.cr[(y / 2) * chroma_stride + first_chroma..];
+        let y = row + p.y0;
+        let luma_row = &p.y[y * p.luma_stride + p.x0..][..w];
+        // Chroma rows follow the picture row (crop included), as before.
+        let chroma_row = (y / 2) * p.chroma_stride + p.chroma_x0;
+        let cb_row = &p.cb[chroma_row..];
+        let cr_row = &p.cr[chroma_row..];
         let mut col = 0;
         let mut chroma = 0;
         if odd_start && w > 0 {

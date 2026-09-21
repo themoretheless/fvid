@@ -24,7 +24,11 @@ impl MediaTime {
 }
 
 pub struct VideoFrame {
+    /// Decoded samples. For hardware-decoded frames the planes are empty and
+    /// `planes8` carries the picture; the geometry fields are still valid.
     pub picture: Arc<IntraPicture>,
+    /// Hardware decoder output as packed 8-bit planes, when in use.
+    pub planes8: Option<Arc<crate::playback_native::Planar8>>,
     pub presentation_time: MediaTime,
     pub duration: MediaTime,
     pub sample_index: usize,
@@ -41,6 +45,7 @@ pub struct VideoFrame {
 struct Hardware {
     session: fvid_vt::Session,
     sps: crate::codec::avc::Sps,
+    colour: crate::playback_native::AvcColour,
 }
 
 pub struct Mp4AvcReader<R> {
@@ -142,16 +147,26 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
         }
     }
     /// Decode the packet in `self.packet` with whichever decoder is active.
-    fn decode_packet(&mut self) -> Result<Option<Arc<IntraPicture>>> {
+    /// Hardware frames come back as 8-bit planes plus a geometry-only picture.
+    #[allow(clippy::type_complexity)]
+    fn decode_packet(
+        &mut self,
+    ) -> Result<Option<(Arc<IntraPicture>, Option<Arc<crate::playback_native::Planar8>>)>> {
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
         if let Some(hardware) = &mut self.hardware {
             let planes = hardware
                 .session
                 .decode(&self.packet)
                 .map_err(|error| invalid(&error.to_string()))?;
-            return Ok(planes.map(|planes| Arc::new(planes_to_picture(planes))));
+            return Ok(planes.map(|planes| {
+                let (picture, planes8) = hardware_frame(planes, hardware.colour);
+                (Arc::new(picture), Some(Arc::new(planes8)))
+            }));
         }
-        self.decoder.decode_order(&self.packet)
+        Ok(self
+            .decoder
+            .decode_order(&self.packet)?
+            .map(|picture| (picture, None)))
     }
     pub fn track(&self) -> &Track {
         &self.demuxer.tracks()[self.track_index]
@@ -228,9 +243,10 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
                 .read_packet(self.track_index, index, &mut self.packet)?;
             let picture = self.decode_packet()?;
             self.sample_index += 1;
-            if let Some(picture) = picture {
+            if let Some((picture, planes8)) = picture {
                 let frame = VideoFrame {
                     picture,
+                    planes8,
                     presentation_time: MediaTime {
                         ticks: sample.pts,
                         timescale: self.track().timescale,
@@ -265,51 +281,48 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
 fn open_hardware(configuration: &[u8]) -> Option<Hardware> {
     let config = crate::codec::config::AvcConfig::parse(configuration).ok()?;
     let sps = crate::codec::avc::Sps::parse(config.sps.first()?).ok()?;
+    let colour = crate::playback_native::AvcColour::from_vui(sps.vui.as_ref()).ok()?;
     match fvid_vt::Session::new(&config.sps, &config.pps, config.length_size) {
-        Ok(session) => Some(Hardware { session, sps }),
+        Ok(session) => Some(Hardware {
+            session,
+            sps,
+            colour,
+        }),
         Err(error) => {
             eprintln!("{error}; using the software decoder");
             None
         }
     }
 }
-/// Widen the hardware decoder's packed 8-bit planes into the decoder's picture
-/// layout (even coded size, odd edges cropped).
+/// Wrap the hardware decoder's packed 8-bit planes without copying them: the
+/// planes move into a `Planar8`, and a geometry-only picture (empty sample
+/// vectors, even coded size, odd edges cropped) carries the dimensions.
 #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-fn planes_to_picture(planes: fvid_vt::Planes) -> IntraPicture {
+fn hardware_frame(
+    planes: fvid_vt::Planes,
+    colour: crate::playback_native::AvcColour,
+) -> (IntraPicture, crate::playback_native::Planar8) {
     let (w, h) = (planes.width, planes.height);
-    let coded_width = w + w % 2;
-    let coded_height = h + h % 2;
-    let widen = |src: &[u8], width: usize, height: usize, stride: usize, rows: usize| {
-        let mut out = vec![0u16; stride * rows];
-        for (row, line) in src.chunks_exact(width).take(height).enumerate() {
-            for (dst, &s) in out[row * stride..][..width].iter_mut().zip(line) {
-                *dst = u16::from(s);
-            }
-        }
-        out
-    };
-    IntraPicture {
-        coded_width,
-        coded_height,
+    let picture = IntraPicture {
+        coded_width: w + w % 2,
+        coded_height: h + h % 2,
         crop: [0, w % 2, 0, h % 2],
         bit_depth: 8,
-        y: widen(&planes.y, w, h, coded_width, coded_height),
-        cb: widen(
-            &planes.cb,
-            w.div_ceil(2),
-            h.div_ceil(2),
-            coded_width / 2,
-            coded_height / 2,
-        ),
-        cr: widen(
-            &planes.cr,
-            w.div_ceil(2),
-            h.div_ceil(2),
-            coded_width / 2,
-            coded_height / 2,
-        ),
-    }
+        y: Vec::new(),
+        cb: Vec::new(),
+        cr: Vec::new(),
+    };
+    let planar = crate::playback_native::Planar8 {
+        width: w,
+        height: h,
+        chroma_width: w.div_ceil(2),
+        chroma_height: h.div_ceil(2),
+        y: planes.y,
+        cb: planes.cb,
+        cr: planes.cr,
+        colour,
+    };
+    (picture, planar)
 }
 
 fn presentation_duration(pts: i64, next: Option<i64>, final_duration: i64) -> Result<i64> {
@@ -326,6 +339,10 @@ fn presentation_duration(pts: i64, next: Option<i64>, final_duration: i64) -> Re
 }
 
 fn frame_storage(frame: &VideoFrame) -> Result<usize> {
+    let planes8 = frame
+        .planes8
+        .as_ref()
+        .map_or(0, |p| p.y.len() + p.cb.len() + p.cr.len());
     frame
         .picture
         .y
@@ -333,6 +350,7 @@ fn frame_storage(frame: &VideoFrame) -> Result<usize> {
         .checked_add(frame.picture.cb.len())
         .and_then(|n| n.checked_add(frame.picture.cr.len()))
         .and_then(|n| n.checked_mul(2))
+        .and_then(|n| n.checked_add(planes8))
         .and_then(|n| n.checked_add(std::mem::size_of::<VideoFrame>()))
         .ok_or_else(|| invalid("MP4 output frame size overflow"))
 }

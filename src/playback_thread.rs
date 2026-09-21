@@ -104,6 +104,8 @@ impl Playback {
                                 RawFrame::Avc { picture, colour } => {
                                     Pixels::Planar(Arc::new(avc_to_planar8(&picture, colour)))
                                 }
+                                // Hardware output is already 8-bit planes: no copy at all.
+                                RawFrame::Planar8(planes) => Pixels::Planar(planes),
                             };
                             serial += 1;
                             Event::Frame(Frame {
