@@ -211,6 +211,84 @@ pub fn picture_edges(
     }
     Ok(result)
 }
+/// `picture_edges_components` for one macroblock row, given the previous
+/// row (none for the first). Rows are independent apart from that, so a
+/// row's edges can be derived as soon as the parser has finished it.
+pub fn row_edges(
+    previous: Option<&[DecodedBlockEdges]>,
+    current: &[DecodedBlockEdges],
+) -> Result<[Vec<super::avc_deblock::MacroblockEdges>; 3]> {
+    if current.is_empty()
+        || previous.is_some_and(|p| p.len() != current.len())
+        || current.iter().chain(previous.into_iter().flatten()).any(|m| {
+            m.disable_filter > 2
+                || m.qp.iter().any(|q| !(-36..=51).contains(q))
+                || m.offsets.iter().any(|o| !(-12..=12).contains(o))
+        })
+    {
+        return Err(invalid("invalid AVC edge-grid parameters"));
+    }
+    let mut result: [Vec<super::avc_deblock::MacroblockEdges>; 3] =
+        std::array::from_fn(|_| Vec::with_capacity(current.len()));
+    for (index, mb) in current.iter().enumerate() {
+        let neighbour = |direction: usize, edge: usize| -> Option<&DecodedBlockEdges> {
+            if edge != 0 {
+                Some(mb)
+            } else if direction == 0 {
+                index.checked_sub(1).map(|i| &current[i])
+            } else {
+                previous.map(|p| &p[index])
+            }
+        };
+        let mut luma = super::avc_deblock::MacroblockEdges {
+            strengths: [[[0; 4]; 4]; 2],
+            qp: [[mb.qp[0]; 4]; 2],
+            offsets: mb.offsets,
+            transform8: mb.transform8,
+        };
+        let mut chroma_qp = [[[mb.qp[1]; 4]; 2], [[mb.qp[2]; 4]; 2]];
+        if mb.disable_filter != 1 {
+            for direction in 0..2 {
+                for edge in 0..4 {
+                    if mb.transform8 && edge % 2 != 0 {
+                        continue;
+                    }
+                    let Some(prev) = neighbour(direction, edge) else {
+                        continue;
+                    };
+                    if mb.disable_filter == 2 && mb.slice_id != prev.slice_id {
+                        continue;
+                    }
+                    luma.qp[direction][edge] = (mb.qp[0] + prev.qp[0] + 1) >> 1;
+                    for (component, qp) in chroma_qp.iter_mut().enumerate() {
+                        qp[direction][edge] = (mb.qp[component + 1] + prev.qp[component + 1] + 1) >> 1;
+                    }
+                    for segment in 0..4 {
+                        let q = if direction == 0 {
+                            segment * 4 + edge
+                        } else {
+                            edge * 4 + segment
+                        };
+                        let p = if direction == 0 {
+                            segment * 4 + if edge == 0 { 3 } else { edge - 1 }
+                        } else {
+                            (if edge == 0 { 3 } else { edge - 1 }) * 4 + segment
+                        };
+                        luma.strengths[direction][edge][segment] =
+                            strength(prev.blocks[p], mb.blocks[q], edge == 0)?;
+                    }
+                }
+            }
+        }
+        for (component, qp) in chroma_qp.into_iter().enumerate() {
+            let mut edges = luma.clone();
+            edges.qp = qp;
+            result[component + 1].push(edges);
+        }
+        result[0].push(luma);
+    }
+    Ok(result)
+}
 /// `picture_edges` for all three components at once. Boundary strengths do
 /// not depend on the component, so they are derived once and only the edge
 /// QPs are recomputed for Cb and Cr.

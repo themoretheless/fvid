@@ -330,23 +330,46 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 let (y_offset, c_offset) = (y_offset as f32, (128.0 * scale) as f32);
                 let chroma_stride = p.coded_width / 2;
                 // Single-threaded on purpose: spreading this over threads measured
-                // slower than the plain loop on a 3-megapixel frame.
+                // slower than the plain loop on a 3-megapixel frame. Each chroma
+                // sample is converted once and applied to its two luma columns.
+                // Terms are applied in the same order as the per-pixel formula
+                // (`luma - g_cr*cr - g_cb*cb`), so results stay bit-identical.
+                let store = |pixel: &mut [u8], luma: u16, t: (f32, f32, f32, f32)| {
+                    let luma = (f32::from(luma) - y_offset) * y_gain;
+                    pixel[0] = (luma + t.0).round().clamp(0.0, 255.0) as u8;
+                    pixel[1] = (luma - t.1 - t.2).round().clamp(0.0, 255.0) as u8;
+                    pixel[2] = (luma + t.3).round().clamp(0.0, 255.0) as u8;
+                };
+                let chroma_terms = |cb: u16, cr: u16| {
+                    let cb = f32::from(cb) - c_offset;
+                    let cr = f32::from(cr) - c_offset;
+                    (r_cr * cr, g_cr * cr, g_cb * cb, b_cb * cb)
+                };
+                let first_chroma = p.crop[0] / 2;
+                let odd_start = p.crop[0] % 2 == 1;
                 for (row, line) in rgb.chunks_exact_mut(w * 3).enumerate() {
                     let y = row + p.crop[2];
                     let luma_row = &p.y[y * p.coded_width + p.crop[0]..][..w];
-                    let chroma_row = (y / 2) * chroma_stride;
-                    for (col, (pixel, &luma)) in line.chunks_exact_mut(3).zip(luma_row).enumerate()
-                    {
-                        let at = chroma_row + (col + p.crop[0]) / 2;
-                        let luma = (f32::from(luma) - y_offset) * y_gain;
-                        let cb = f32::from(p.cb[at]) - c_offset;
-                        let cr = f32::from(p.cr[at]) - c_offset;
-                        let red = luma + r_cr * cr;
-                        let blue = luma + b_cb * cb;
-                        let green = luma - g_cr * cr - g_cb * cb;
-                        pixel[0] = red.round().clamp(0.0, 255.0) as u8;
-                        pixel[1] = green.round().clamp(0.0, 255.0) as u8;
-                        pixel[2] = blue.round().clamp(0.0, 255.0) as u8;
+                    let cb_row = &p.cb[(y / 2) * chroma_stride + first_chroma..];
+                    let cr_row = &p.cr[(y / 2) * chroma_stride + first_chroma..];
+                    let mut col = 0;
+                    let mut chroma = 0;
+                    if odd_start && w > 0 {
+                        let t = chroma_terms(cb_row[0], cr_row[0]);
+                        store(&mut line[..3], luma_row[0], t);
+                        col = 1;
+                        chroma = 1;
+                    }
+                    while col + 1 < w {
+                        let t = chroma_terms(cb_row[chroma], cr_row[chroma]);
+                        store(&mut line[col * 3..][..3], luma_row[col], t);
+                        store(&mut line[col * 3 + 3..][..3], luma_row[col + 1], t);
+                        col += 2;
+                        chroma += 1;
+                    }
+                    if col < w {
+                        let t = chroma_terms(cb_row[chroma], cr_row[chroma]);
+                        store(&mut line[col * 3..][..3], luma_row[col], t);
                     }
                 }
                 *dimensions = [w, h];

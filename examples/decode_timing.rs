@@ -21,15 +21,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut frames = 0;
         // FNV-1a over every RGB byte, to compare decoder changes for exactness.
         let mut checksum = 0xcbf2_9ce4_8422_2325u64;
-        let per_frame = std::env::var_os("FVID_FRAME_SUMS").is_some();
+        // FVID_CHECKSUM=1 hashes every frame (and prints each on pass 0); it
+        // costs several ms per frame, so timing runs leave it unset.
+        let hashing = std::env::var_os("FVID_CHECKSUM").is_some();
         while frames < limit && reader.read_frame()? {
             frames += 1;
+            if !hashing {
+                continue;
+            }
             let mut frame_sum = 0xcbf2_9ce4_8422_2325u64;
             for &byte in reader.rgb() {
                 frame_sum = (frame_sum ^ u64::from(byte)).wrapping_mul(0x0100_0000_01b3);
             }
             checksum = (checksum ^ frame_sum).wrapping_mul(0x0100_0000_01b3);
-            if per_frame && pass == 0 {
+            if pass == 0 {
                 println!("frame {frames}: {frame_sum:016x}");
             }
         }

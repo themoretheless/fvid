@@ -15,8 +15,9 @@ use super::{
     avc_slice::{SliceHeader, SliceType},
 };
 use crate::{Result, invalid};
+use super::{avc_boundary::row_edges, avc_deblock::MacroblockEdges};
 use std::sync::{
-    Mutex,
+    Condvar, Mutex,
     atomic::{AtomicUsize, Ordering},
 };
 
@@ -31,8 +32,9 @@ struct InterJob {
     eight: bool,
     qps: [u8; 3],
 }
-enum Pending {
-    Inter(InterJob),
+/// Decode-order record replayed by pass B (see below).
+enum Order {
+    Inter([usize; 2]),
     Intra(Box<IntraMacroblock>),
 }
 
@@ -236,8 +238,82 @@ pub fn decode_inter_picture_with_motion(
         cb: vec![0; pixels / 4],
         cr: vec![0; pixels / 4],
     };
-    let mut edges = Vec::with_capacity(count);
-    let mut pending = Vec::with_capacity(count);
+    let width_mbs = w / 16;
+    let row_count = h / 16;
+    // Streaming reconstruction. This thread parses macroblocks in decode
+    // order (entropy decoding, motion derivation, edge metadata) and marks
+    // each finished row; worker threads reconstruct a finished row's inter
+    // macroblocks into their own band of the output planes and derive its
+    // deblocking edges while parsing continues. Intra macroblocks are
+    // reconstructed afterwards in decode order (pass B below).
+    let mut order: Vec<Order> = Vec::with_capacity(count);
+    let edge_rows: Vec<Mutex<Vec<DecodedBlockEdges>>> = (0..row_count)
+        .map(|_| Mutex::new(Vec::with_capacity(width_mbs)))
+        .collect();
+    let grid_rows: Vec<Mutex<Option<[Vec<MacroblockEdges>; 3]>>> =
+        (0..row_count).map(|_| Mutex::new(None)).collect();
+    // Rows the parser has completed; `usize::MAX` tells workers to stop.
+    let progress = (Mutex::new(0usize), Condvar::new());
+    let row_done = |seen: usize| {
+        if seen % width_mbs == 0 {
+            let (rows, signal) = &progress;
+            *rows.lock().unwrap_or_else(|e| e.into_inner()) = seen / width_mbs;
+            signal.notify_all();
+        }
+    };
+    {
+        let bands: Vec<Mutex<(&mut [u16], &mut [u16], &mut [u16], Vec<InterJob>)>> = out
+            .y
+            .chunks_mut(16 * w)
+            .zip(out.cb.chunks_mut(8 * (w / 2)))
+            .zip(out.cr.chunks_mut(8 * (w / 2)))
+            .map(|((y, cb), cr)| Mutex::new((y, cb, cr, Vec::new())))
+            .collect();
+        let next = AtomicUsize::new(0);
+        let threads = std::thread::available_parallelism()
+            .map_or(1, |n| n.get())
+            .min(row_count)
+            .max(1);
+        let depth = sps.bit_depth_luma;
+        let refs = &refs;
+        let results: Vec<Result<()>> = std::thread::scope(|scope| {
+            let handles: Vec<_> = (0..threads)
+                .map(|_| {
+                    let (bands, next, edge_rows, grid_rows, progress) =
+                        (&bands, &next, &edge_rows, &grid_rows, &progress);
+                    scope.spawn(move || -> Result<()> {
+                        loop {
+                            let row = next.fetch_add(1, Ordering::Relaxed);
+                            if row >= bands.len() {
+                                return Ok(());
+                            }
+                            {
+                                let (rows, signal) = progress;
+                                let mut done = rows.lock().unwrap_or_else(|e| e.into_inner());
+                                while *done <= row {
+                                    done = signal.wait(done).unwrap_or_else(|e| e.into_inner());
+                                }
+                                if *done == usize::MAX {
+                                    return Ok(());
+                                }
+                            }
+                            let mut band = bands[row].lock().unwrap_or_else(|e| e.into_inner());
+                            let (y, cb, cr, jobs) = &mut *band;
+                            for job in jobs.drain(..) {
+                                reconstruct_inter_job(job, depth, refs, w, y, cb, cr)?;
+                            }
+                            drop(band);
+                            let current = edge_rows[row].lock().unwrap_or_else(|e| e.into_inner());
+                            let previous = row
+                                .checked_sub(1)
+                                .map(|r| edge_rows[r].lock().unwrap_or_else(|e| e.into_inner()));
+                            let grid = row_edges(previous.as_deref().map(Vec::as_slice), &current)?;
+                            *grid_rows[row].lock().unwrap_or_else(|e| e.into_inner()) = Some(grid);
+                        }
+                    })
+                })
+                .collect();
+            let parsed: Result<()> = (|| {
     let mut seen = 0;
     while let Some(mb) = match (&mut cabac, &mut cavlc) {
         (Some(reader), _) => reader.read_macroblock()?,
@@ -266,7 +342,10 @@ pub fn decode_inter_picture_with_motion(
                     sps.bit_depth_chroma,
                 )) - bd,
             ];
-            edges.push(DecodedBlockEdges {
+            edge_rows[address / width_mbs]
+                .lock()
+                .unwrap_or_else(|e| e.into_inner())
+                .push(DecodedBlockEdges {
                 blocks: [BlockEdge {
                     intra: true,
                     switching_slice: false,
@@ -279,8 +358,9 @@ pub fn decode_inter_picture_with_motion(
                 offsets: [header.alpha_offset, header.beta_offset],
                 transform8: matches!(block.luma, super::avc_macroblock::IntraLuma::Blocks8 { .. }),
             });
-            pending.push(Pending::Intra(block));
+            order.push(Order::Intra(block));
             seen += 1;
+            row_done(seen);
             continue;
         }
 
@@ -446,7 +526,10 @@ pub fn decode_inter_picture_with_motion(
                 };
             }
         }
-        edges.push(DecodedBlockEdges {
+        edge_rows[address / width_mbs]
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .push(DecodedBlockEdges {
             blocks,
             qp: qps.map(|q| i32::from(q) - bd),
             slice_id: 0,
@@ -454,88 +537,53 @@ pub fn decode_inter_picture_with_motion(
             offsets: [header.alpha_offset, header.beta_offset],
             transform8: eight,
         });
-        pending.push(Pending::Inter(InterJob {
-            origin,
-            parts,
-            vectors,
-            weights,
-            coefficients,
-            eight,
-            qps,
-        }));
+        order.push(Order::Inter(origin));
+        bands[origin[1] / 16]
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .3
+            .push(InterJob {
+                origin,
+                parts,
+                vectors,
+                weights,
+                coefficients,
+                eight,
+                qps,
+            });
         seen += 1;
+        row_done(seen);
     }
     if seen != count {
         return Err(invalid("incomplete single-slice inter-picture"));
     }
-    // Pass A: inter macroblocks depend only on the reference pictures, so
-    // each macroblock row band is reconstructed on whichever thread takes it.
-    // Pass B replays decode order: inter macroblocks mark their availability,
-    // intra macroblocks predict from neighbours decoded before them, so a
-    // later inter macroblock (e.g. the top-right of a right-column 4x4 block)
-    // is still unavailable exactly as in single-pass decoding.
-    enum Order {
-        Inter([usize; 2]),
-        Intra(Box<IntraMacroblock>),
-    }
-    let mut rows: Vec<Vec<InterJob>> = (0..h / 16).map(|_| Vec::new()).collect();
-    let mut order = Vec::with_capacity(count);
-    for job in pending {
-        match job {
-            Pending::Inter(job) => {
-                order.push(Order::Inter(job.origin));
-                rows[job.origin[1] / 16].push(job);
+                Ok(())
+            })();
+            {
+                // Release every waiting worker: all rows are done, or abort.
+                let (rows, signal) = &progress;
+                *rows.lock().unwrap_or_else(|e| e.into_inner()) =
+                    if parsed.is_ok() { row_count } else { usize::MAX };
+                signal.notify_all();
             }
-            Pending::Intra(block) => order.push(Order::Intra(block)),
-        }
-    }
-    {
-        let bands: Vec<Mutex<(&mut [u16], &mut [u16], &mut [u16], Vec<InterJob>)>> = out
-            .y
-            .chunks_mut(16 * w)
-            .zip(out.cb.chunks_mut(8 * (w / 2)))
-            .zip(out.cr.chunks_mut(8 * (w / 2)))
-            .zip(rows)
-            .map(|(((y, cb), cr), jobs)| Mutex::new((y, cb, cr, jobs)))
-            .collect();
-        let next = AtomicUsize::new(0);
-        let threads = std::thread::available_parallelism()
-            .map_or(1, |n| n.get())
-            .min(bands.len())
-            .max(1);
-        let depth = sps.bit_depth_luma;
-        let refs = &refs;
-        let results: Vec<Result<()>> = std::thread::scope(|scope| {
-            let handles: Vec<_> = (0..threads)
-                .map(|_| {
-                    let (bands, next) = (&bands, &next);
-                    scope.spawn(move || -> Result<()> {
-                        loop {
-                            let index = next.fetch_add(1, Ordering::Relaxed);
-                            let Some(band) = bands.get(index) else {
-                                return Ok(());
-                            };
-                            let mut guard = band.lock().unwrap_or_else(|e| e.into_inner());
-                            let (y, cb, cr, jobs) = &mut *guard;
-                            for job in jobs.drain(..) {
-                                reconstruct_inter_job(job, depth, refs, w, y, cb, cr)?;
-                            }
-                        }
-                    })
-                })
-                .collect();
-            handles
+            let mut results: Vec<Result<()>> = handles
                 .into_iter()
                 .map(|h| {
                     h.join()
                         .unwrap_or_else(|_| Err(invalid("AVC reconstruction thread panicked")))
                 })
-                .collect()
+                .collect();
+            results.push(parsed);
+            results
         });
         for result in results {
             result?;
         }
     }
+    // Pass B replays decode order: inter macroblocks mark their availability,
+    // intra macroblocks predict from neighbours decoded before them, so a
+    // later inter macroblock (e.g. the top-right of a right-column 4x4 block)
+    // is still unavailable exactly as in single-pass decoding.
     for step in order {
         match step {
             Order::Inter(origin) => {
@@ -551,7 +599,17 @@ pub fn decode_inter_picture_with_motion(
             }
         }
     }
-    let grids = super::avc_boundary::picture_edges_components(&edges, w / 16)?;
+    let mut grids: [Vec<MacroblockEdges>; 3] = std::array::from_fn(|_| Vec::with_capacity(count));
+    for row in &grid_rows {
+        let [y, cb, cr] = row
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .take()
+            .ok_or_else(|| invalid("missing AVC deblocking edges"))?;
+        grids[0].extend(y);
+        grids[1].extend(cb);
+        grids[2].extend(cr);
+    }
     // The three planes deblock independently; run them on their own threads.
     let depth = sps.bit_depth_luma;
     let [y, cb, cr] = std::thread::scope(|scope| {
