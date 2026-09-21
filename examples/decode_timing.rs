@@ -25,6 +25,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         elapsed,
         elapsed / frames.max(1) as u32
     );
+    // Optional third argument: seek to that many seconds and report where we land.
+    if let Some(secs) = args.get(2).and_then(|a| a.to_str()).and_then(|a| a.parse::<f64>().ok()) {
+        let start = Instant::now();
+        reader.seek(std::time::Duration::from_secs_f64(secs))?;
+        let (begin, end, scale) = reader.frame_interval().ok_or("no frame after seek")?;
+        println!(
+            "seek to {secs}s landed on [{:.3}s, {:.3}s) in {:?}",
+            begin as f64 / f64::from(scale),
+            end as f64 / f64::from(scale),
+            start.elapsed()
+        );
+    }
     // Raw AVC decode only, when the input is MP4.
     if let Ok(mut source) = fvid::playback_mp4::Mp4AvcReader::open(
         BufReader::new(File::open(&args[0])?),

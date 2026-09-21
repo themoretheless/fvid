@@ -124,6 +124,21 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
         self.pending.clear();
         self.pending_bytes = 0;
     }
+    /// Restart decoding at the sync sample with the greatest presentation time
+    /// at or before `pts` (the first sample when none qualifies), dropping all
+    /// reference pictures. Returns the presentation time decoding resumes at.
+    pub fn seek_to_sync(&mut self, pts: i64) -> i64 {
+        let samples = &self.track().samples;
+        let index = samples
+            .iter()
+            .enumerate()
+            .filter(|(_, s)| s.sync && s.pts <= pts)
+            .max_by_key(|(_, s)| s.pts)
+            .map_or(0, |(i, _)| i);
+        self.rewind();
+        self.sample_index = index;
+        self.track().samples.get(index).map_or(0, |s| s.pts)
+    }
     pub fn read_frame(&mut self) -> Result<Option<VideoFrame>> {
         if self.failed {
             return Err(invalid("MP4 frame source requires rewind after an error"));

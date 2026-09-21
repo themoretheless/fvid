@@ -21,6 +21,9 @@ pub enum NativeReader<R> {
         rgb_budget: usize,
         media_start: i64,
         media_end: Option<i64>,
+        /// After a seek the next decoded frame defines the timeline position
+        /// instead of having to continue the previous frame exactly.
+        resync: bool,
     },
 }
 impl<R: BufRead + Seek> NativeReader<R> {
@@ -65,6 +68,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
             rgb_budget,
             media_start,
             media_end,
+            resync: false,
         })
     }
     pub fn dimensions(&self) -> [usize; 2] {
@@ -161,15 +165,67 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 next_pts,
                 frame_start,
                 frames,
+                resync,
                 ..
             } => {
                 source.rewind();
                 *next_pts = 0;
                 *frame_start = 0;
                 *frames = 0;
+                *resync = false;
                 Ok(())
             }
         }
+    }
+    /// Whether `seek` can position this stream; only containers with a sample
+    /// index and sync samples (MP4) support it.
+    pub fn seekable(&self) -> bool {
+        matches!(self, Self::Avc { .. })
+    }
+    /// Position playback so the current frame contains `target` (clamped to the
+    /// stream). Decoding restarts at the preceding sync sample and runs forward
+    /// to the target, so the call takes as long as decoding that stretch.
+    /// On failure the stream is rewound to the start.
+    pub fn seek(&mut self, target: Duration) -> Result<()> {
+        let Self::Avc {
+            source,
+            media_start,
+            resync,
+            ..
+        } = self
+        else {
+            return Err(invalid("seeking is only implemented for MP4"));
+        };
+        let timescale = source.track().timescale;
+        let ticks = i128::from(timescale) * target.as_nanos() as i128 / 1_000_000_000;
+        let ticks = i64::try_from(ticks)
+            .ok()
+            .and_then(|t| t.checked_add(*media_start))
+            .ok_or_else(|| invalid("seek target overflow"))?;
+        source.seek_to_sync(ticks);
+        *resync = true;
+        let result = (|| {
+            loop {
+                if !self.read_frame()? {
+                    return Ok(());
+                }
+                let Self::Avc {
+                    next_pts,
+                    media_start,
+                    ..
+                } = self
+                else {
+                    unreachable!()
+                };
+                if i128::from(*next_pts) + i128::from(*media_start) > i128::from(ticks) {
+                    return Ok(());
+                }
+            }
+        })();
+        if result.is_err() {
+            self.rewind()?;
+        }
+        result
     }
     pub fn read_frame(&mut self) -> Result<bool> {
         match self {
@@ -186,6 +242,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 rgb_budget,
                 media_start,
                 media_end,
+                resync,
             } => {
                 if media_end.is_some_and(|end| {
                     i128::from(*next_pts) + i128::from(*media_start) >= i128::from(end)
@@ -216,6 +273,10 @@ impl<R: BufRead + Seek> NativeReader<R> {
                         .ok_or_else(|| invalid("video edit duration overflow"))?;
                     break frame;
                 };
+                if *resync {
+                    *next_pts = frame.presentation_time.ticks;
+                    *resync = false;
+                }
                 if frame.presentation_time.ticks != *next_pts || frame.duration.ticks <= 0 {
                     return Err(invalid(
                         "non-contiguous AVC presentation timestamps are not implemented",

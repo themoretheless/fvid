@@ -71,6 +71,8 @@ struct Player {
     activity: Instant,
     /// An open file picker, polled once per frame so the event loop never nests.
     dialog: Option<Dialog>,
+    /// Fraction of the timeline under a drag on the progress line, shown until release.
+    scrub: Option<f32>,
 }
 
 impl Default for Player {
@@ -86,6 +88,7 @@ impl Default for Player {
             deadline: Instant::now(),
             activity: Instant::now(),
             dialog: None,
+            scrub: None,
         }
     }
 }
@@ -166,6 +169,26 @@ impl Player {
                 Err(error) => self.error = Some(error.to_string()),
             }
         }
+    }
+
+    /// Jump to `fraction` of the known duration; playback state is kept.
+    fn seek_fraction(&mut self, fraction: f32) {
+        let Some(reader) = &mut self.reader else {
+            return;
+        };
+        let Some(total) = reader.duration() else {
+            return;
+        };
+        let target = total.mul_f32(fraction.clamp(0.0, 1.0));
+        match reader.seek(target) {
+            Ok(()) => {
+                self.ended = false;
+                self.error = None;
+            }
+            Err(error) => self.error = Some(error.to_string()),
+        }
+        self.dirty = true;
+        self.deadline = Instant::now() + reader.frame_period();
     }
 
     /// Elapsed time at the end of the frame on screen, and the total when known.
@@ -503,12 +526,41 @@ impl eframe::App for Player {
             );
             painter.rect_filled(bar, CornerRadius::same(2), TRACK);
             let (elapsed, total) = self.timeline();
-            let fraction = match (elapsed, total) {
+            let mut fraction = match (elapsed, total) {
                 (Some(e), Some(t)) if t > Duration::ZERO => {
                     Some((e.as_secs_f32() / t.as_secs_f32()).clamp(0.0, 1.0))
                 }
                 _ => None,
             };
+            // The line takes clicks and drags on a taller hit area; the seek
+            // itself happens on release so a drag decodes only once.
+            if fraction.is_some() && self.reader.as_ref().is_some_and(|r| r.seekable()) {
+                let hit = Rect::from_min_max(
+                    Pos2::new(bar.left(), bar_y - 12.0),
+                    Pos2::new(bar.right(), bar_y + 12.0),
+                );
+                let seek = ui.interact(hit, ui.id().with("seek"), Sense::click_and_drag());
+                let at = |pos: Pos2| ((pos.x - bar.left()) / bar.width()).clamp(0.0, 1.0);
+                if seek.dragged() {
+                    if let Some(pos) = seek.interact_pointer_pos() {
+                        self.scrub = Some(at(pos));
+                    }
+                }
+                if seek.drag_stopped() || seek.clicked() {
+                    if let Some(pos) = seek.interact_pointer_pos() {
+                        let target = at(pos);
+                        self.scrub = None;
+                        self.seek_fraction(target);
+                        fraction = Some(target);
+                    }
+                }
+                if seek.hovered() || self.scrub.is_some() {
+                    ctx.set_cursor_icon(egui::CursorIcon::PointingHand);
+                }
+                if let Some(scrub) = self.scrub {
+                    fraction = Some(scrub);
+                }
+            }
             if let Some(fraction) = fraction {
                 let x = bar.left() + bar.width() * fraction;
                 painter.rect_filled(
