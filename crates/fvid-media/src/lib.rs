@@ -47,6 +47,25 @@ pub use audio_mix::{
 pub use decode::decode_video_cuda;
 pub use decode::{DecodeStats, DecodeTransform, decode_video, decode_video_transformed};
 use ffi::*;
+
+/// Configure a filter graph with slice threads, matching the ffmpeg CLI default.
+/// Per-pixel filters (exposure, grayworld, eq, …) declare AVFILTER_FLAG_SLICE_THREADS;
+/// without this the linked libavfilter runs them single-threaded inside fvid.
+pub(crate) unsafe fn configure_filter_graph(
+    graph: *mut AVFilterGraph,
+) -> i32 {
+    unsafe {
+        if !graph.is_null() {
+            (*graph).thread_type |= AVFILTER_THREAD_SLICE as i32;
+            if (*graph).nb_threads < 1 {
+                (*graph).nb_threads = std::thread::available_parallelism()
+                    .map(|n| n.get() as i32)
+                    .unwrap_or(1);
+            }
+        }
+        avfilter_graph_config(graph, ptr::null_mut())
+    }
+}
 pub use filter::{
     PadRect, RotateAngle, TransposeMode, overlay_cli_vf, subtitles_cli_vf, xfade_cli_vf,
 };

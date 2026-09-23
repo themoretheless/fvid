@@ -175,7 +175,7 @@ impl EburGraph {
                 "link ebur128 to sink",
             )?;
             check(
-                avfilter_graph_config(built.graph, ptr::null_mut()),
+                configure_filter_graph(built.graph),
                 "configure ebur128 graph",
             )?;
             Ok(built)
@@ -312,7 +312,7 @@ impl LoudnormGraph {
                 "link aformat to sink",
             )?;
             check(
-                avfilter_graph_config(built.graph, ptr::null_mut()),
+                configure_filter_graph(built.graph),
                 "configure loudnorm graph",
             )?;
             Ok(built)

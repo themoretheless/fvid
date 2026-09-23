@@ -173,7 +173,7 @@ impl DualXfade {
                 "link format to sink",
             )?;
             check(
-                avfilter_graph_config(built.graph, ptr::null_mut()),
+                configure_filter_graph(built.graph),
                 "configure xfade graph",
             )?;
             Ok(built)

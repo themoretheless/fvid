@@ -277,7 +277,7 @@ impl OverlayGraph {
                 "link overlay to sink",
             )?;
             check(
-                avfilter_graph_config(built.graph, ptr::null_mut()),
+                configure_filter_graph(built.graph),
                 "configure overlay graph",
             )?;
             Ok(built)
@@ -461,7 +461,7 @@ impl XfadeGraph {
                 "link xfade to sink",
             )?;
             check(
-                avfilter_graph_config(built.graph, ptr::null_mut()),
+                configure_filter_graph(built.graph),
                 "configure xfade graph",
             )?;
             Ok(built)
@@ -582,7 +582,7 @@ impl FilterGraph {
                 &format!("link {filter_name} to sink"),
             )?;
             check(
-                avfilter_graph_config(built.graph, ptr::null_mut()),
+                configure_filter_graph(built.graph),
                 &format!("configure {filter_name} graph"),
             )?;
             Ok(built)
@@ -770,7 +770,7 @@ impl FilterGraph {
                 &format!("link {filter_name} to sink"),
             )?;
             check(
-                avfilter_graph_config(built.graph, ptr::null_mut()),
+                configure_filter_graph(built.graph),
                 &format!("configure {filter_name} graph"),
             )?;
             Ok(built)
@@ -873,7 +873,7 @@ impl FilterGraph {
                 &format!("link {filter_name} to sink"),
             )?;
             check(
-                avfilter_graph_config(built.graph, ptr::null_mut()),
+                configure_filter_graph(built.graph),
                 &format!("configure {filter_name} graph"),
             )?;
             Ok(built)
@@ -961,7 +961,7 @@ impl FilterGraph {
                 "link subtitles to sink",
             )?;
             check(
-                avfilter_graph_config(built.graph, ptr::null_mut()),
+                configure_filter_graph(built.graph),
                 "configure subtitles graph",
             )?;
             Ok(built)
@@ -1068,7 +1068,7 @@ impl FilterGraph {
             avfilter_inout_free(&mut outputs);
             check(code, "parse filter chain")?;
             check(
-                avfilter_graph_config(built.graph, ptr::null_mut()),
+                configure_filter_graph(built.graph),
                 "configure parsed filter chain",
             )?;
             Ok(built)
@@ -1246,7 +1246,7 @@ impl FramepackGraph {
                 "link framepack to sink",
             )?;
             check(
-                avfilter_graph_config(built.graph, ptr::null_mut()),
+                configure_filter_graph(built.graph),
                 "configure framepack graph",
             )?;
             Ok(built)
