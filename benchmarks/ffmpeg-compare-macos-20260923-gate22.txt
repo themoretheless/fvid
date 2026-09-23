@@ -1,0 +1,299 @@
+warning: unused import: `std::sync::Arc`
+ --> crates/fvid-cuda/src/nv12.rs:2:5
+  |
+2 | use std::sync::Arc;
+  |     ^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fvid-cuda` (lib) generated 1 warning (run `cargo fix --lib -p fvid-cuda` to apply 1 suggestion)
+    Finished `bench` profile [optimized] target(s) in 0.09s
+     Running benches/ffmpeg_compare.rs (target/release/deps/ffmpeg_compare-20f51c7db5ebacff)
+bench: fvid/full → /Users/themoretheless/Documents/Sources/fvid/target/release/fvid (4998912 bytes)
+bench: fvid/media → /Users/themoretheless/Documents/Sources/fvid/target-media/release/fvid (13794752 bytes)
+bench: fvid/cpu → /Users/themoretheless/Documents/Sources/fvid/target-cpu/release/fvid (521008 bytes)
+bench: media export — fvid_media_cpu=true hw-filter=false ffmpeg_nvenc=false
+bench: skip burn — this ffmpeg build lacks the subtitles filter (no libass)
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/subtitle_remux — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/subtitle_remux — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/subtitle_remux — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/subtitle_remux — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/copy — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/copy — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/copy — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/copy — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/crop — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/crop — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/crop — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/crop — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/hflip — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/hflip — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/hflip — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/hflip — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/vflip — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/vflip — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/vflip — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/vflip — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/fused — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/fused — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/fused — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/fused — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/cut — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/cut — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/cut — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/cut — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/trim — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/trim — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/trim — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/trim — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/concat — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/concat — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/concat — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/concat — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/decode — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/decode — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/decode — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/decode — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/subtitle_convert — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/subtitle_convert — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/subtitle_convert — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/subtitle_convert — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/overlay — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/overlay — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/overlay — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/overlay — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/vfr_identity — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/vfr_identity — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/vfr_identity — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/vfr_identity — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/metadata — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/metadata — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/metadata — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/metadata — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/scale — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/scale — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/scale — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/scale — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/transpose — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/transpose — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/transpose — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/transpose — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/pad — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/pad — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/pad — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/pad — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/rotate — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/rotate — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/rotate — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/rotate — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/hevc_decode — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/hevc_decode — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/hevc_decode — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/hevc_decode — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/bframe_trim — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/bframe_trim — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/bframe_trim — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/bframe_trim — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/midgop_trim — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/midgop_trim — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/midgop_trim — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/midgop_trim — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/hevc_trim — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/hevc_trim — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/hevc_trim — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/hevc_trim — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/av_aac_interval — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/av_aac_interval — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/av_aac_interval — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/av_aac_interval — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/resample — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/resample — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/resample — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/resample — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/channels — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/channels — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/channels — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/channels — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/volume — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/volume — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/volume — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/volume — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/amix — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/amix — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/amix — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/amix — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/amix3 — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/amix3 — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/amix3 — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/amix3 — measuring 21 samples
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/amerge — validating and calibrating
+bench: ffmpeg_compare/media/ffmpeg_cpu/1080p/amerge — measuring 21 samples
+bench: ffmpeg_compare/media/fvid_cpu/1080p/amerge — validating and calibrating
+bench: ffmpeg_compare/media/fvid_cpu/1080p/amerge — measuring 21 samples
+# bench 1790156293685312000-17335
+
+Status: Complete
+
+| Case | Metric | Median | Unit | Scope / statistic | Observations | Processes |
+|---|---|---:|---|---|---:|---:|
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/subtitle_remux [candidate] | wall | 22018479.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/subtitle_remux [candidate] | wall | 19109854.5000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/copy [candidate] | wall | 23039312.5000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/copy [candidate] | wall | 19505937.5000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/crop [candidate] | wall | 55778750.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/crop [candidate] | wall | 43626208.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/hflip [candidate] | wall | 61915583.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/hflip [candidate] | wall | 43302750.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/vflip [candidate] | wall | 47920333.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/vflip [candidate] | wall | 36602584.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/fused [candidate] | wall | 73646167.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/fused [candidate] | wall | 58684958.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/cut [candidate] | wall | 61874125.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/cut [candidate] | wall | 50917708.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/trim [candidate] | wall | 23680625.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/trim [candidate] | wall | 18583354.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/concat [candidate] | wall | 30263541.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/concat [candidate] | wall | 19397896.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/decode [candidate] | wall | 55318625.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/decode [candidate] | wall | 43006584.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/subtitle_convert [candidate] | wall | 39135750.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/subtitle_convert [candidate] | wall | 24463917.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/overlay [candidate] | wall | 29414833.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/overlay [candidate] | wall | 24496625.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/vfr_identity [candidate] | wall | 22846312.5000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/vfr_identity [candidate] | wall | 21566562.5000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/metadata [candidate] | wall | 23249375.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/metadata [candidate] | wall | 19302520.5000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/scale [candidate] | wall | 35208667.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/scale [candidate] | wall | 24959416.5000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/transpose [candidate] | wall | 34803458.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/transpose [candidate] | wall | 24922625.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/pad [candidate] | wall | 34719625.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/pad [candidate] | wall | 24856667.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/rotate [candidate] | wall | 36019416.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/rotate [candidate] | wall | 28239084.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/hevc_decode [candidate] | wall | 35991500.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/hevc_decode [candidate] | wall | 26551916.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/bframe_trim [candidate] | wall | 22259625.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/bframe_trim [candidate] | wall | 18838771.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/midgop_trim [candidate] | wall | 22593833.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/midgop_trim [candidate] | wall | 19015604.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/hevc_trim [candidate] | wall | 23124375.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/hevc_trim [candidate] | wall | 19896396.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/av_aac_interval [candidate] | wall | 21135083.5000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/av_aac_interval [candidate] | wall | 20429333.5000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/resample [candidate] | wall | 19552646.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/resample [candidate] | wall | 19138750.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/channels [candidate] | wall | 19864146.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/channels [candidate] | wall | 19258625.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/volume [candidate] | wall | 19757146.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/volume [candidate] | wall | 18966583.5000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/amix [candidate] | wall | 38720375.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/amix [candidate] | wall | 27405833.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/amix3 [candidate] | wall | 47115542.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/amix3 [candidate] | wall | 28744167.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/amerge [candidate] | wall | 34620458.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+| ffmpeg_compare/media/fvid_cpu/1080p/amerge [candidate] | wall | 28383042.0000 | ns | current thread wall clock; scheduler included / batch_total | 21 | 1 |
+
+# Useful work throughput
+
+| Case | Median batch throughput | Unit |
+|---|---:|---|
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/subtitle_remux [candidate] | 54499.6773 | packets/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/subtitle_remux [candidate] | 62794.8266 | packets/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/copy [candidate] | 6510.6109 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/copy [candidate] | 7689.9662 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/crop [candidate] | 1613.5177 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/crop [candidate] | 2062.9801 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/hflip [candidate] | 1453.5921 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/hflip [candidate] | 2078.3899 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/vflip [candidate] | 1252.0781 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/vflip [candidate] | 1639.2285 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/fused [candidate] | 2036.7659 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/fused [candidate] | 2556.0213 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/cut [candidate] | 1454.5660 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/cut [candidate] | 1767.5580 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/trim [candidate] | 2533.7169 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/trim [candidate] | 3228.6960 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/concat [candidate] | 5947.7508 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/concat [candidate] | 9279.3569 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/decode [candidate] | 1626.9385 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/decode [candidate] | 2092.7028 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/subtitle_convert [candidate] | 102208.3389 | packets/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/subtitle_convert [candidate] | 163506.1139 | packets/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/overlay [candidate] | 169.9823 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/overlay [candidate] | 204.1097 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/vfr_identity [candidate] | 65656.1097 | packets/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/vfr_identity [candidate] | 69552.1134 | packets/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/metadata [candidate] | 6451.7863 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/metadata [candidate] | 7771.0059 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/scale [candidate] | 142.0105 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/scale [candidate] | 200.3252 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/transpose [candidate] | 143.6639 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/transpose [candidate] | 200.6209 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/pad [candidate] | 144.0108 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/pad [candidate] | 201.1533 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/rotate [candidate] | 83.2884 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/rotate [candidate] | 106.2357 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/hevc_decode [candidate] | 416.7651 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/hevc_decode [candidate] | 564.9310 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/bframe_trim [candidate] | 1347.7316 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/bframe_trim [candidate] | 1592.4606 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/midgop_trim [candidate] | 2124.4735 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/midgop_trim [candidate] | 2524.2427 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/hevc_trim [candidate] | 41514.6355 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/hevc_trim [candidate] | 48249.9444 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/av_aac_interval [candidate] | 283.8882 | frames/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/av_aac_interval [candidate] | 293.6953 | frames/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/resample [candidate] | 51.1440 | runs/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/resample [candidate] | 52.2500 | runs/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/channels [candidate] | 50.3420 | runs/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/channels [candidate] | 51.9248 | runs/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/volume [candidate] | 50.6146 | runs/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/volume [candidate] | 52.7243 | runs/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/amix [candidate] | 25.8262 | runs/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/amix [candidate] | 36.4886 | runs/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/amix3 [candidate] | 21.2244 | runs/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/amix3 [candidate] | 34.7897 | runs/s |
+| ffmpeg_compare/media/ffmpeg_cpu/1080p/amerge [candidate] | 28.8847 | runs/s |
+| ffmpeg_compare/media/fvid_cpu/1080p/amerge [candidate] | 35.2323 | runs/s |
+
+Derived from positive wall batches and declared units per operation; zero/unavailable durations omitted.
+
+Medians above summarize observations, not pooled operation-latency percentiles. Comparisons aggregate within each process first.
+
+- Raw batches are not independent process replications. Batch averages are not individual-operation latency. CPU frequency and background load are uncontrolled.
+
+
+Fair pairs: `y4m/fvid_cpu`↔`y4m/ffmpeg`, `media/fvid_cpu`↔`media/ffmpeg_cpu`, `media/fvid_gpu`↔`media/ffmpeg_gpu`.
+Ops: copy/crop/hflip/vflip/fused, subtitle remux, cut, trim, concat, decode.
+`y4m/fvid_full` is CUDA Y4M (PCIe round-trip), not NVENC export.
+
+
+| Pair | fvid | ffmpeg | Δ |
+|---|---:|---:|---:|
+| cpu/subtitle_convert | 24463917 | 39135750 | +37.5% |
+| cpu/overlay | 24496625 | 29414833 | +16.7% |
+| cpu/metadata | 19302520 | 23249375 | +17.0% |
+| cpu/scale | 24959416 | 35208667 | +29.1% |
+| cpu/transpose | 24922625 | 34803458 | +28.4% |
+| cpu/pad | 24856667 | 34719625 | +28.4% |
+| cpu/rotate | 28239084 | 36019416 | +21.6% |
+| cpu/hevc_decode | 26551916 | 35991500 | +26.2% |
+| cpu/bframe_trim | 18838771 | 22259625 | +15.4% |
+| cpu/midgop_trim | 19015604 | 22593833 | +15.8% |
+| cpu/amix | 27405833 | 38720375 | +29.2% |
+| cpu/amix3 | 28744167 | 47115542 | +39.0% |
+| cpu/amerge | 28383042 | 34620458 | +18.0% |
+| cpu/copy | 19505938 | 23039312 | +15.3% |
+| cpu/crop | 43626208 | 55778750 | +21.8% |
+| cpu/hflip | 43302750 | 61915583 | +30.1% |
+| cpu/vflip | 36602584 | 47920333 | +23.6% |
+| cpu/fused | 58684958 | 73646167 | +20.3% |
+| cpu/cut | 50917708 | 61874125 | +17.7% |
+| cpu/trim | 18583354 | 23680625 | +21.5% |
+| cpu/concat | 19397896 | 30263541 | +35.9% |
+| cpu/decode | 43006584 | 55318625 | +22.3% |
+
+Fair-pair gate: all present pairs > +15%.
+bench: run published to /Users/themoretheless/Documents/Sources/fvid/.airbug-bench/ffmpeg_compare/1790156286

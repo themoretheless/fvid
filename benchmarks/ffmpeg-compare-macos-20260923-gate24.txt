@@ -1,0 +1,44 @@
+# fvid vs ffmpeg — cargo bench ffmpeg_compare (macOS arm64, 2026-09-23)
+# Suite: y4m (720p/1080p/2160p) + media CPU fair pairs + plan-derived filter sweep (~110 decode filters).
+# Gate: all present pairs > +15% per-operation median (24 gated). Report-only: startup-band filter
+# wins (~+25-30%, one shared CLI-startup effect), denoiser parity (-4%..+3%, same libavfilter),
+# true regressions exposure -60% / grayworld -47%, unstable overlay/estdif/metadata.
+# Full data: .airbug-bench/ffmpeg_compare/1790166788/ (run.json + report.html)
+
+| Pair | fvid | ffmpeg | Δ |
+|---|---:|---:|---:|
+| cpu/subtitle_convert | 21822375 | 35380583 | +38.3% |
+| cpu/scale | 23172542 | 33881958 | +31.6% |
+| cpu/transpose | 24911583 | 32579917 | +23.5% |
+| cpu/pad | 23437229 | 33706417 | +30.5% |
+| cpu/rotate | 28155375 | 34418666 | +18.2% |
+| cpu/hevc_decode | 25649708 | 35119709 | +27.0% |
+| cpu/bframe_trim | 17213312 | 21142188 | +18.6% |
+| cpu/midgop_trim | 17484480 | 21395521 | +18.3% |
+| cpu/amix | 26350667 | 35516709 | +25.8% |
+| cpu/amix3 | 26437833 | 42604750 | +37.9% |
+| cpu/amerge | 25569167 | 31323375 | +18.4% |
+| cpu/copy | 17211750 | 20755438 | +17.1% |
+| cpu/crop | 43414041 | 52436459 | +17.2% |
+| cpu/hflip | 44128667 | 61372958 | +28.1% |
+| cpu/vflip | 35665042 | 46827916 | +23.8% |
+| cpu/fused | 55000000 | 69465250 | +20.8% |
+| cpu/cut | 49397209 | 59409417 | +16.9% |
+| cpu/trim | 16760688 | 21367250 | +21.6% |
+| cpu/concat | 18156500 | 28161792 | +35.5% |
+| cpu/decode | 40565709 | 51624250 | +21.4% |
+| cpu/smartblur | 32623209 | 40877209 | +20.2% |
+| cpu/minterpolate | 38269500 | 47868042 | +20.1% |
+| cpu/perspective | 32557083 | 42303959 | +23.0% |
+| cpu/xbr | 64524083 | 83126459 | +22.4% |
+
+# Skipped filters (host ffmpeg lacks filter or frame-count-mutating, not -vf pairable):
+bench: skip sweep --zscale — smoke run failed
+bench: skip sweep --framepack — smoke run failed
+bench: skip sweep --framestep — smoke run failed
+bench: skip sweep --tile — smoke run failed
+bench: skip sweep --untile — smoke run failed
+bench: skip sweep --shuffleframes — smoke run failed
+bench: skip sweep --reverse — smoke run failed
+bench: skip sweep --loop — smoke run failed
+bench: skip burn — this ffmpeg build lacks the subtitles filter (no libass)

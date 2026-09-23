@@ -6,3 +6,5 @@
 /benchmarks/data/
 /benchmarks/show_data/
 __pycache__/
+
+/.airbug-bench/
