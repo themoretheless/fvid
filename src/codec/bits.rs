@@ -39,6 +39,27 @@ impl<'a> BitReader<'a> {
         self.position += count;
         Ok(value as u32)
     }
+    /// CABAC renormalization consumes at most eight bits at a time.
+    #[inline]
+    pub(crate) fn read_short(&mut self, count: u8) -> Result<u16> {
+        if count > 8 || usize::from(count) > self.remaining() {
+            return Err(invalid("truncated or oversized short bit field"));
+        }
+        if count == 0 {
+            return Ok(0);
+        }
+        let byte = self.position / 8;
+        let bit = self.position % 8;
+        let count = usize::from(count);
+        let first = u16::from(self.bytes[byte]);
+        let value = if bit + count <= 8 {
+            first >> (8 - bit - count)
+        } else {
+            ((first << 8) | u16::from(self.bytes[byte + 1])) >> (16 - bit - count)
+        };
+        self.position += count;
+        Ok(value & ((1 << count) - 1))
+    }
     pub fn bit(&mut self) -> Result<bool> {
         Ok(self.read(1)? != 0)
     }
@@ -133,6 +154,29 @@ pub fn unescape_rbsp(ebsp: &[u8]) -> Result<Vec<u8>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn short_fields_match_general_reader_and_preserve_position_on_error() {
+        let bytes = [0xa7, 0x93, 0x5c, 0xff, 0, 0x51];
+        for length in 0..=bytes.len() {
+            for position in 0..=length * 8 {
+                for count in 0..=8 {
+                    let mut general = BitReader::new(&bytes[..length]);
+                    general.skip(position).unwrap();
+                    let mut short = general.clone();
+                    let a = general.read(count);
+                    let b = short.read_short(count).map(u32::from);
+                    assert_eq!(a.is_ok(), b.is_ok());
+                    if let Ok(a) = a {
+                        assert_eq!(a, b.unwrap());
+                    }
+                    assert_eq!(general.position(), short.position());
+                }
+            }
+        }
+        let mut reader = BitReader::new(&bytes);
+        assert!(reader.read_short(9).is_err());
+        assert_eq!(reader.position(), 0);
+    }
     #[test]
     fn crosses_bytes_and_preserves_position_on_short_read() {
         let mut bits = BitReader::new(&[0xab, 0xcd, 0xef, 0x01, 0x23]);

@@ -3,7 +3,7 @@ use super::{
     vp9::{self, Header},
     vp9_bool::BoolDecoder,
     vp9_intra::{self, Mode, References},
-    vp9_probs::CompressedHeader,
+    vp9_probs::{CompressedHeader, Counts, count_symbol, counted},
     vp9_residual::{self, Config},
     vp9_tables::*,
     vp9_transform::{self, Kind},
@@ -35,6 +35,7 @@ struct Block {
     mvs: [[i32; 2]; 4],
 }
 struct Decoder<'a> {
+    counts: Counts,
     header: &'a Header,
     ch: &'a CompressedHeader,
     picture: Picture,
@@ -49,6 +50,13 @@ struct Decoder<'a> {
     tile_end: usize,
     references: [Option<&'a Picture>; 3],
     previous: Option<&'a Picture>,
+    scratch: Vec<i32>,
+    pred_scratch: Vec<u16>,
+    tx_scratch: Vec<i64>,
+    residual_scratch: Vec<i32>,
+    coef_values: Vec<i32>,
+    coef_cache: Vec<usize>,
+    dequant_scratch: Vec<i32>,
 }
 const MODE_TREE: [i8; 18] = [
     0, 2, -9, 4, -1, 6, 8, 12, -2, 10, -4, -5, -3, 14, -8, 16, -6, -7,
@@ -84,6 +92,16 @@ pub fn decode_frame(
     previous: Option<&Picture>,
     budget: usize,
 ) -> Result<Picture> {
+    decode_frame_counted(frame, header, ch, references, previous, budget).map(|v| v.0)
+}
+pub(crate) fn decode_frame_counted(
+    frame: &[u8],
+    header: &Header,
+    ch: &CompressedHeader,
+    references: [Option<&Picture>; 3],
+    previous: Option<&Picture>,
+    budget: usize,
+) -> Result<(Picture, Counts)> {
     if header.show_existing.is_some()
         || header.picture.format.subsampling != [true; 2]
         || header.segmentation.enabled
@@ -124,6 +142,7 @@ pub fn decode_frame(
         }
     });
     let mut d = Decoder {
+        counts: Counts::filled([0; 2]),
         header,
         ch,
         picture: Picture {
@@ -143,6 +162,13 @@ pub fn decode_frame(
         tile_end: cols,
         references,
         previous,
+        scratch: Vec::new(),
+        pred_scratch: Vec::new(),
+        tx_scratch: Vec::new(),
+        residual_scratch: Vec::new(),
+        coef_values: Vec::new(),
+        coef_cache: Vec::new(),
+        dequant_scratch: Vec::new(),
     };
     for tile in vp9::tiles(frame, header)? {
         let mut b = BoolDecoder::new(tile.data)?;
@@ -161,7 +187,7 @@ pub fn decode_frame(
     }
     d.filter()?;
     d.picture.blocks = d.blocks;
-    Ok(d.picture)
+    Ok((d.picture, d.counts))
 }
 impl Decoder<'_> {
     fn partition(
@@ -210,6 +236,11 @@ impl Decoder<'_> {
             }
             _ => 3,
         };
+        count_symbol(
+            &[0, 2, -1, 4, -2, -3],
+            &mut self.counts.partition[ctx],
+            part,
+        );
         let (w, h) = match part {
             0 => (size, size),
             1 => (size, size / 2),
@@ -259,7 +290,11 @@ impl Decoder<'_> {
         };
         let ctx =
             usize::from(above.is_some_and(|v| v.skip)) + usize::from(left.is_some_and(|v| v.skip));
-        let mut skip = b.read(self.ch.probabilities.skip[ctx])?;
+        let mut skip = counted(
+            b,
+            self.ch.probabilities.skip[ctx],
+            &mut self.counts.skip[ctx],
+        )?;
         let is_inter = if self.header.is_intra() {
             false
         } else {
@@ -274,7 +309,11 @@ impl Decoder<'_> {
                 (Some(a), None) | (None, Some(a)) => 2 * usize::from(a.reference == 0),
                 _ => 0,
             };
-            b.read(self.ch.probabilities.is_inter[ctx])?
+            counted(
+                b,
+                self.ch.probabilities.is_inter[ctx],
+                &mut self.counts.is_inter[ctx],
+            )?
         };
         let max_tx = (w.min(h).trailing_zeros() as usize - 2).min(3);
         let mut tx = max_tx.min(usize::from(self.ch.tx_mode.min(3)));
@@ -289,7 +328,13 @@ impl Decoder<'_> {
             }
             let ctx = usize::from(at + lt > max_tx);
             tx = 0;
-            while tx < max_tx && b.read(self.ch.probabilities.tx[max_tx][ctx][tx])? {
+            while tx < max_tx
+                && counted(
+                    b,
+                    self.ch.probabilities.tx[max_tx][ctx][tx],
+                    &mut self.counts.tx[max_tx][ctx][tx],
+                )?
+            {
                 tx += 1;
             }
         }
@@ -321,6 +366,11 @@ impl Decoder<'_> {
                         }]
                     },
                 )?);
+                count_symbol(
+                    &MODE_TREE,
+                    &mut self.counts.y_mode[(w.min(h).trailing_zeros() as usize - 2).min(3)],
+                    modes[0],
+                );
             } else {
                 for y in (0..2).step_by(h / 4) {
                     for x in (0..2).step_by(w / 4) {
@@ -347,6 +397,7 @@ impl Decoder<'_> {
                                 }]
                             },
                         )?;
+                        count_symbol(&MODE_TREE, &mut self.counts.y_mode[0], mode);
                         for dy in 0..h / 4 {
                             for dx in 0..w / 4 {
                                 modes[(y + dy) * 2 + x + dx] = mode;
@@ -364,6 +415,11 @@ impl Decoder<'_> {
                     &self.ch.probabilities.uv_mode[usize::from(modes[3])]
                 },
             )?;
+            count_symbol(
+                &MODE_TREE,
+                &mut self.counts.uv_mode[usize::from(modes[3])],
+                uv,
+            );
         }
         let mut any_nonzero = false;
         for plane in 0..3 {
@@ -405,10 +461,36 @@ impl Decoder<'_> {
                                 Kind::AdstAdst,
                             ][usize::from(mode)]
                         };
-                        let pred = if is_inter {
-                            self.inter_prediction(plane, r, c, w, h, x, y, size, &motion)?
+                        let pred_len = size * size;
+                        self.pred_scratch.resize(pred_len, 0);
+                        if is_inter {
+                            let references = self.references;
+                            let picture_size = self.picture.size;
+                            let picture_depth = self.picture.depth;
+                            let rows = self.rows;
+                            let cols = self.cols;
+                            Self::inter_prediction(
+                                references,
+                                picture_size,
+                                picture_depth,
+                                rows,
+                                cols,
+                                plane,
+                                r,
+                                c,
+                                w,
+                                h,
+                                x,
+                                y,
+                                size,
+                                &motion,
+                                &mut self.scratch,
+                                &mut self.pred_scratch,
+                            )?;
                         } else {
-                            self.prediction(
+                            Self::prediction(
+                                &self.picture.planes,
+                                self.picture.depth,
                                 plane,
                                 x,
                                 y,
@@ -417,10 +499,11 @@ impl Decoder<'_> {
                                 above.is_some() || dy > 0,
                                 left.is_some() || dx > 0,
                                 dx + size < bw,
-                            )?
+                                &mut self.pred_scratch,
+                            )?;
                         };
-                        let residual = if skip {
-                            vec![0; size * size]
+                        if skip {
+                            self.residual_scratch.clear();
                         } else {
                             let ctx = usize::from(
                                 self.above_nz[plane][x / 4..(x + size) / 4]
@@ -431,9 +514,10 @@ impl Decoder<'_> {
                                     .iter()
                                     .any(|v| *v),
                             );
-                            let coef = vp9_residual::read(
+                            let coef_nonzero = vp9_residual::read_counted(
                                 b,
                                 &self.ch.probabilities,
+                                &mut self.counts,
                                 Config {
                                     size,
                                     kind,
@@ -442,30 +526,47 @@ impl Decoder<'_> {
                                     inter: is_inter,
                                     initial_context: ctx,
                                 },
+                                &mut self.coef_values,
+                                &mut self.coef_cache,
                             )?;
-                            nz = coef.nonzero_context;
+                            nz = coef_nonzero;
                             let dc = self.header.delta_q[if plane == 0 { 0 } else { 1 }];
                             let ac = if plane == 0 {
                                 0
                             } else {
                                 self.header.delta_q[2]
                             };
-                            let dequant = vp9_residual::dequantize(
-                                &coef.values,
+                            vp9_residual::dequantize(
+                                &self.coef_values,
                                 size,
                                 self.picture.depth,
                                 self.header.base_q,
                                 dc,
                                 ac,
+                                &mut self.dequant_scratch,
                             )?;
-                            vp9_transform::inverse(&dequant, size, self.picture.depth, kind)?
+                            vp9_transform::inverse(
+                                &self.dequant_scratch,
+                                size,
+                                self.picture.depth,
+                                kind,
+                                &mut self.tx_scratch,
+                                &mut self.residual_scratch,
+                            )?;
                         };
                         let max = (1i32 << self.picture.depth) - 1;
+                        let pred = &self.pred_scratch[..pred_len];
+                        let residual = &self.residual_scratch;
                         let p = &mut self.picture.planes[plane];
                         for yy in 0..size.min(p.height - y) {
                             for xx in 0..size.min(p.width - x) {
+                                let delta = if residual.is_empty() {
+                                    0
+                                } else {
+                                    residual[yy * size + xx]
+                                };
                                 p.samples[(y + yy) * p.width + x + xx] =
-                                    (i32::from(pred[yy * size + xx]) + residual[yy * size + xx])
+                                    (i32::from(pred[yy * size + xx]) + delta)
                                         .clamp(0, max) as u16;
                             }
                         }
@@ -495,7 +596,8 @@ impl Decoder<'_> {
     }
     #[allow(clippy::too_many_arguments)]
     fn prediction(
-        &self,
+        planes: &[Plane; 3],
+        depth: u8,
         plane: usize,
         x: usize,
         y: usize,
@@ -504,11 +606,12 @@ impl Decoder<'_> {
         have_above: bool,
         have_left: bool,
         not_right: bool,
-    ) -> Result<Vec<u16>> {
-        let p = &self.picture.planes[plane];
-        let mid = 1u16 << (self.picture.depth - 1);
-        let mut a = vec![mid - 1; 2 * size];
-        let mut l = vec![mid + 1; size];
+        out: &mut Vec<u16>,
+    ) -> Result<()> {
+        let p = &planes[plane];
+        let mid = 1u16 << (depth - 1);
+        let mut a = [mid - 1; 64];
+        let mut l = [mid + 1; 32];
         if have_above {
             for (i, v) in a[..size].iter_mut().enumerate() {
                 *v = p.samples[(y - 1) * p.width + (x + i).min(p.width - 1)];
@@ -522,7 +625,7 @@ impl Decoder<'_> {
             };
         }
         if have_left {
-            for (i, v) in l.iter_mut().enumerate() {
+            for (i, v) in l[..size].iter_mut().enumerate() {
                 *v = p.samples[(y + i).min(p.height - 1) * p.width + x - 1];
             }
         }
@@ -533,13 +636,15 @@ impl Decoder<'_> {
         } else {
             mid - 1
         };
+        out.resize(size * size, 0);
         vp9_intra::predict(
+            out,
             size,
-            self.picture.depth,
+            depth,
             Mode::try_from(mode)?,
             &References {
-                above: &a,
-                left: &l,
+                above: &a[..2 * size],
+                left: &l[..size],
                 corner,
                 have_above,
                 have_left,
@@ -578,13 +683,21 @@ impl Decoder<'_> {
         if lf.level == 0 {
             return Ok(());
         }
+        let depth = self.picture.depth;
+        let sharpness = lf.sharpness;
+        let cols = self.cols;
+        let rows = self.rows;
+        let blocks = &self.blocks;
         for row in (0..self.rows).step_by(8) {
             for col in (0..self.cols).step_by(8) {
                 for plane in 0..3 {
+                    let plane_samples = &mut self.picture.planes[plane];
+                    let pw = plane_samples.width;
+                    let ph = plane_samples.height;
                     for pass in 0..2 {
                         let sub = usize::from(plane > 0);
                         for edge in 0..(16 >> sub) {
-                            for i in 0..(64 >> sub) {
+                            let meta = |i: usize| -> Option<([usize; 16], u8, usize)> {
                                 let x = col * 8
                                     + if pass == 0 {
                                         edge * (4 << sub)
@@ -597,16 +710,16 @@ impl Decoder<'_> {
                                     } else {
                                         edge * (4 << sub)
                                     };
-                                if x >= self.cols * 8
-                                    || y >= self.rows * 8
+                                if x >= cols * 8
+                                    || y >= rows * 8
                                     || (pass == 0 && x == 0)
                                     || (pass == 1 && y == 0)
                                 {
-                                    continue;
+                                    return None;
                                 }
                                 let loop_col = ((x >> 3) >> sub) << sub;
                                 let loop_row = ((y >> 3) >> sub) << sub;
-                                let block = self.blocks[loop_row * self.cols + loop_col];
+                                let block = blocks[loop_row * cols + loop_col];
                                 let delta = if lf.delta_enabled {
                                     i32::from(lf.reference_deltas[usize::from(block.reference)])
                                         + if block.reference > 0 {
@@ -645,13 +758,13 @@ impl Decoder<'_> {
                                 let tx_edge = edge % (1 << tx) == 0
                                     && !(pass == 1
                                         && sub == 1
-                                        && self.cols % 2 != 0
+                                        && cols % 2 != 0
                                         && edge % 2 != 0
-                                        && x + 8 >= self.cols * 8);
+                                        && x + 8 >= cols * 8);
                                 if !block_edge
                                     && !(tx_edge && (block.reference == 0 || !block.skip))
                                 {
-                                    continue;
+                                    return None;
                                 }
                                 let mut filter_tx = if tx == 0 && edge % 8 == 0 {
                                     1
@@ -660,37 +773,66 @@ impl Decoder<'_> {
                                 };
                                 if sub == 1
                                     && filter_tx == 2
-                                    && ((pass == 0 && x >> 3 == self.cols - 1)
-                                        || (pass == 1 && y >> 3 == self.rows - 1))
+                                    && ((pass == 0 && x >> 3 == cols - 1)
+                                        || (pass == 1 && y >> 3 == rows - 1))
                                 {
                                     filter_tx = 1;
                                 }
                                 let (px, py) = (x >> sub, y >> sub);
-                                let p = &mut self.picture.planes[plane];
                                 let position = |offset: isize| {
                                     let xx = (px as isize + if pass == 0 { offset } else { 0 })
-                                        .clamp(0, p.width as isize - 1)
+                                        .clamp(0, pw as isize - 1)
                                         as usize;
                                     let yy = (py as isize + if pass == 1 { offset } else { 0 })
-                                        .clamp(0, p.height as isize - 1)
+                                        .clamp(0, ph as isize - 1)
                                         as usize;
-                                    yy * p.width + xx
+                                    yy * pw + xx
                                 };
                                 let indices: [usize; 16] =
                                     std::array::from_fn(|j| position(j as isize - 8));
-                                let samples = indices.map(|j| p.samples[j]);
-                                let filtered = super::vp9_filter::filter(
-                                    samples,
-                                    self.picture.depth,
-                                    4 << filter_tx,
-                                    level,
-                                    lf.sharpness,
-                                )?;
-                                for j in 0..16 {
-                                    if filtered[j] != samples[j] {
-                                        p.samples[indices[j]] = filtered[j];
+                                Some((indices, level, 4 << filter_tx))
+                            };
+                            let lim = 64 >> sub;
+                            let mut i = 0usize;
+                            let mut idxs = [[0usize; 16]; 4];
+                            while i < lim {
+                                let Some((idx0, level, width)) = meta(i) else {
+                                    i += 1;
+                                    continue;
+                                };
+                                idxs[0] = idx0;
+                                let mut run = 1usize;
+                                while run < 4 && i + run < lim {
+                                    match meta(i + run) {
+                                        Some((idx, lvl, w)) if lvl == level && w == width => {
+                                            idxs[run] = idx;
+                                            run += 1;
+                                        }
+                                        _ => break,
                                     }
                                 }
+                                let mut lines = [[0u16; 16]; 4];
+                                for k in 0..run {
+                                    lines[k] = idxs[k].map(|j| plane_samples.samples[j]);
+                                }
+                                for k in run..4 {
+                                    lines[k] = lines[0];
+                                }
+                                let out = super::vp9_filter::filter_batch4(
+                                    lines,
+                                    depth,
+                                    width,
+                                    level,
+                                    sharpness,
+                                );
+                                for k in 0..run {
+                                    for j in 0..16 {
+                                        if out[k][j] != lines[k][j] {
+                                            plane_samples.samples[idxs[k][j]] = out[k][j];
+                                        }
+                                    }
+                                }
+                                i += run;
                             }
                         }
                     }

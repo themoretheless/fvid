@@ -17,8 +17,21 @@ pub fn filter(
     {
         return Err(invalid("invalid VP9 loop filter parameters"));
     }
+    Ok(filter_fast(samples, depth, width, level, sharpness))
+}
+/// Hot-path filter without per-call validation. The caller guarantees
+/// `depth ∈ {8,10,12}`, `width ∈ {4,8,16}`, `level ≤ 63`, `sharpness ≤ 7`,
+/// and all samples are within `depth` bits.
+#[inline]
+pub fn filter_fast(
+    samples: [u16; 16],
+    depth: u8,
+    width: usize,
+    level: u8,
+    sharpness: u8,
+) -> [u16; 16] {
     if level == 0 {
-        return Ok(samples);
+        return samples;
     }
     let s = samples.map(i32::from);
     let bd = depth - 8;
@@ -39,7 +52,7 @@ pub fn filter(
         || (8..11).any(|i| diff(i, i + 1) > limit)
         || 2 * diff(7, 8) + diff(6, 9) / 2 > blimit
     {
-        return Ok(samples);
+        return samples;
     }
     let hev = diff(6, 7) > thresh || diff(9, 8) > thresh;
     let flat = width >= 8
@@ -73,5 +86,54 @@ pub fn filter(
             out[6] = (clamp(s[6] - mid + v) + mid) as u16;
         }
     }
-    Ok(out)
+    out
+}
+/// Four independent edge lines that share one set of filter parameters. Each
+/// lane is sixteen original samples ordered p7..p0,q0..q7. The lanes are fully
+/// independent, which is what lets the driver fill SIMD lanes with four parallel
+/// rows along an edge. The scalar reference applies [`filter_fast`] per lane.
+#[inline]
+pub fn filter_batch4(
+    lines: [[u16; 16]; 4],
+    depth: u8,
+    width: usize,
+    level: u8,
+    sharpness: u8,
+) -> [[u16; 16]; 4] {
+    fvid_cpu::vp9_filter_batch4(lines, depth, width, level, sharpness)
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn batch4_matches_per_lane_filter() {
+        // Deterministic pseudo-random lines spanning flat, hev, masked and
+        // level-zero cases so every branch of `filter` is exercised per lane.
+        let mut state = 0x2545F491_4F6CDD1Du64;
+        let mut next = || {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            state
+        };
+        for depth in [8u8, 10, 12] {
+            let mask = (1u16 << depth) - 1;
+            for width in [4usize, 8, 16] {
+                for level in [0u8, 1, 16, 33, 63] {
+                    for sharpness in [0u8, 4, 7] {
+                        let mut lines = [[0u16; 16]; 4];
+                        for line in lines.iter_mut() {
+                            for v in line.iter_mut() {
+                                *v = (next() as u16) & mask;
+                            }
+                        }
+                        let batched = filter_batch4(lines, depth, width, level, sharpness);
+                        let expected =
+                            lines.map(|s| filter(s, depth, width, level, sharpness).unwrap());
+                        assert_eq!(batched, expected);
+                    }
+                }
+            }
+        }
+    }
 }

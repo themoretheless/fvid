@@ -73,9 +73,20 @@ const CHIP_STRONG: Color32 = Color32::from_rgba_premultiplied(13, 13, 13, 13);
 const BUTTON: f32 = 44.0;
 const HIDE_AFTER: Duration = Duration::from_millis(2500);
 
+/// How far a frame may lead the audio clock before presentation waits. The
+/// audio clock only advances in whole device buffers, and ITU-R BT.1359 puts
+/// the perceptibility of audio lagging picture at roughly ten frames, so this
+/// stays above the stutter a tighter gate would cause at every rate.
+pub const AUDIO_SYNC_SLACK: f64 = 0.05;
+
 struct Player {
     /// The decoding thread for the open file.
     playback: Option<Playback>,
+    /// Audio playback thread for A/V sync (when audio track is present).
+    audio: Option<crate::audio_thread::AudioPlayback>,
+    /// Audio reached its end or failed, so it no longer gates presentation.
+    audio_ended: bool,
+    playback_activity: Option<fvid_platform::PlaybackActivity>,
     duration: Option<Duration>,
     seekable: bool,
     hardware: bool,
@@ -85,6 +96,9 @@ struct Player {
     interval: Option<(u128, u128, u32)>,
     /// The next decoded frame, waiting for its presentation deadline.
     queued: Option<Frame>,
+    buffering: bool,
+    seek_preview: bool,
+    seek_target: Option<Duration>,
     /// Frame on screen when it is drawn by the GPU shader (planar).
     video: Option<(Arc<Planar8>, u64)>,
     /// Frame on screen when it arrived as packed RGB (Y4M, WebM).
@@ -94,6 +108,8 @@ struct Player {
     paused: bool,
     ended: bool,
     deadline: Instant,
+    presentation_stats: Option<(Instant, u32)>,
+    starved_polls: u32,
     /// Last pointer movement or click; drives the controls fade-out.
     activity: Instant,
     /// An open file picker, polled once per frame so the event loop never nests.
@@ -106,6 +122,9 @@ impl Default for Player {
     fn default() -> Self {
         Self {
             playback: None,
+            audio: None,
+            audio_ended: false,
+            playback_activity: None,
             duration: None,
             seekable: false,
             hardware: false,
@@ -113,6 +132,9 @@ impl Default for Player {
             period: Duration::ZERO,
             interval: None,
             queued: None,
+            buffering: true,
+            seek_preview: false,
+            seek_target: None,
             video: None,
             texture: None,
             name: String::new(),
@@ -120,6 +142,8 @@ impl Default for Player {
             paused: false,
             ended: false,
             deadline: Instant::now(),
+            presentation_stats: std::env::var_os("FVID_PLAYER_STATS").map(|_| (Instant::now(), 0)),
+            starved_polls: 0,
             activity: Instant::now(),
             dialog: None,
             scrub: None,
@@ -133,7 +157,18 @@ impl Player {
         if !reader.read_frame()? {
             return Err(crate::invalid("video has no frames"));
         }
+        if let Ok(seconds) = std::env::var("FVID_PLAYER_START_SECONDS") {
+            let seconds = seconds
+                .parse::<f64>()
+                .map_err(|_| crate::invalid("invalid player start time"))?;
+            let target = Duration::try_from_secs_f64(seconds)
+                .map_err(|_| crate::invalid("invalid player start time"))?;
+            reader.seek(target)?;
+        }
         self.duration = reader.duration();
+        if self.presentation_stats.is_some() {
+            eprintln!("player timeline: duration={:?}", self.duration);
+        }
         self.seekable = reader.seekable();
         self.hardware = reader.hardware_accelerated();
         self.dimensions = reader.dimensions();
@@ -141,9 +176,19 @@ impl Player {
         self.interval = None;
         // Drop the old thread before starting the new one.
         self.playback = None;
+        self.audio = None;
+        self.audio_ended = false;
         self.queued = None;
+        self.buffering = true;
+        self.seek_preview = false;
+        self.seek_target = None;
         self.playback = Some(Playback::start(reader));
+        // Try to start audio playback if the file has an audio track.
+        self.try_start_audio(&path);
         self.deadline = Instant::now();
+        if let Some((_, count)) = &mut self.presentation_stats {
+            *count = 0;
+        }
         self.name = path
             .file_name()
             .unwrap_or_default()
@@ -153,6 +198,39 @@ impl Player {
         self.paused = false;
         self.ended = false;
         Ok(())
+    }
+
+    /// Open the file's audio track, if any, and start decoding it on its own
+    /// thread. Both containers are probed because the video reader accepts
+    /// either and reports no codec information of its own.
+    fn try_start_audio(&mut self, path: &PathBuf) {
+        let mp4 = File::open(path).ok().and_then(|file| {
+            crate::playback_mp4_audio::Mp4AudioReader::open(
+                BufReader::new(file),
+                crate::container::mp4::Limits::default(),
+            )
+            .ok()
+            .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
+        });
+        let stream = mp4.or_else(|| {
+            File::open(path)
+                .ok()
+                .and_then(|file| {
+                    crate::playback_webm_audio::WebmAudioReader::open(
+                        BufReader::new(file),
+                        crate::container::webm::Limits::default(),
+                    )
+                    .ok()
+                })
+                .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
+        });
+        let Some(stream) = stream else {
+            return;
+        };
+        self.audio = Some(crate::audio_thread::AudioPlayback::start(
+            stream,
+            || Box::new(crate::audio::PlatformBackend::new()),
+        ));
     }
 
     fn try_open(&mut self, path: PathBuf) {
@@ -197,20 +275,39 @@ impl Player {
         self.paused = !self.paused;
         if self.paused {
             playback.pause();
+            if let Some(audio) = &self.audio {
+                audio.pause();
+            }
         } else {
             playback.play();
+            if let Some(audio) = &self.audio {
+                audio.play();
+            }
             self.deadline = Instant::now();
+            if let Some((_, count)) = &mut self.presentation_stats {
+                *count = 0;
+            }
         }
     }
 
     fn restart(&mut self) {
         if let Some(playback) = &mut self.playback {
             playback.rewind();
+            if let Some(audio) = &mut self.audio {
+                audio.rewind();
+            }
+            self.audio_ended = false;
             self.queued = None;
+            self.buffering = true;
+            self.seek_preview = false;
+            self.seek_target = None;
             self.ended = false;
             self.paused = false;
             self.error = None;
             self.deadline = Instant::now();
+            if let Some((_, count)) = &mut self.presentation_stats {
+                *count = 0;
+            }
         }
     }
 
@@ -219,15 +316,74 @@ impl Player {
         let (Some(playback), Some(total)) = (&mut self.playback, self.duration) else {
             return;
         };
-        playback.seek(total.mul_f32(fraction.clamp(0.0, 1.0)));
+        let target = total.mul_f32(fraction.clamp(0.0, 1.0));
+        playback.seek(target);
+        if let Some(audio) = &mut self.audio {
+            audio.seek(target);
+        }
+        self.audio_ended = false;
+        self.seek_target = Some(target);
+        self.seek_preview = true;
         self.queued = None;
+        self.buffering = true;
         self.ended = false;
         self.error = None;
         self.deadline = Instant::now();
+        if let Some((_, count)) = &mut self.presentation_stats {
+            *count = 0;
+        }
+    }
+
+    /// Check if a frame is ready for presentation based on A/V sync.
+    /// Returns true if the frame can be shown now (audio clock has reached frame PTS).
+    fn frame_ready_for_sync(&self, frame: &Frame) -> bool {
+        let Some(audio) = &self.audio else {
+            return true;
+        };
+        if self.audio_ended {
+            return true;
+        }
+        let Some((pts, timescale)) = frame.pts else {
+            return true;
+        };
+        if timescale == 0 {
+            return true;
+        }
+        let audio_pos = audio.position();
+        let frame_seconds = pts as f64 / timescale as f64;
+        let audio_seconds = audio_pos.as_secs_f64();
+        audio_seconds >= frame_seconds - AUDIO_SYNC_SLACK
+    }
+
+    /// Drain audio-thread events. Audio that has run out or failed must stop
+    /// gating presentation, otherwise the picture freezes at the last clock.
+    fn poll_audio(&mut self) {
+        let Some(audio) = &self.audio else {
+            return;
+        };
+        let generation = audio.generation();
+        while let Some(event) = audio.poll() {
+            match event {
+                crate::audio_thread::AudioEvent::Started => {}
+                crate::audio_thread::AudioEvent::Ended(at) => {
+                    if at >= generation {
+                        self.audio_ended = true;
+                    }
+                }
+                crate::audio_thread::AudioEvent::Error(error) => {
+                    self.audio_ended = true;
+                    eprintln!("audio: {error}");
+                }
+            }
+        }
     }
 
     /// Take decoded frames from the thread and show the one whose time has come.
     fn present(&mut self, ctx: &egui::Context) {
+        self.poll_audio();
+        if self.paused && !self.seek_preview {
+            return;
+        }
         let Some(playback) = &self.playback else {
             return;
         };
@@ -243,15 +399,46 @@ impl Player {
                 }
                 Some(Event::Error(error)) => {
                     self.error = Some(error);
+                    self.seek_target = None;
                     self.ended = true;
                 }
                 None => break,
             }
         }
         let now = Instant::now();
+        if self.buffering
+            && let Some(frame) = &self.queued
+        {
+            self.deadline = if self.paused {
+                now
+            } else if self.seek_preview {
+                now + frame.period.min(Duration::from_millis(33))
+            } else {
+                now + crate::playback_thread::startup_buffer(frame.period)
+            };
+            self.buffering = false;
+            // Sound and picture have to start from the same instant: the audio
+            // thread was held paused across the preroll, so this is the first
+            // moment its clock can run. Starting it any earlier leaves the
+            // picture behind by the preroll for the whole file, and the sync
+            // gate below can only ever hold video back, never hand it time.
+            if !self.paused
+                && let Some(audio) = &self.audio
+            {
+                audio.play();
+            }
+        }
         if self.queued.is_some() {
-            if now >= self.deadline {
+            // Clock and vsync jitter must not postpone a ready frame by an
+            // entire refresh. The media clock still advances by the exact PTS interval.
+            let tolerance = (self.period / 8).min(Duration::from_millis(1));
+            let frame = self.queued.as_ref().unwrap();
+            let time_ready = now + tolerance >= self.deadline;
+            let av_ready = self.frame_ready_for_sync(frame);
+            if time_ready && av_ready {
                 let frame = self.queued.take().unwrap();
+                self.seek_preview = false;
+                self.seek_target = None;
                 match &frame.pixels {
                     Pixels::Planar(planes) => {
                         self.video = Some((planes.clone(), frame.serial));
@@ -271,6 +458,26 @@ impl Player {
                         self.video = None;
                     }
                 }
+                if let Some((start, count)) = &mut self.presentation_stats {
+                    if *count == 0 {
+                        *start = Instant::now();
+                        self.starved_polls = 0;
+                    }
+                    *count += 1;
+                    if *count == 301 {
+                        eprintln!(
+                            "player presentation: 300 intervals in {:?}, {:.2} fps, visible={:?}, focused={:?}, starved_polls={}",
+                            start.elapsed(),
+                            300.0 / start.elapsed().as_secs_f64(),
+                            ctx.input(|i| i.viewport().visible()),
+                            ctx.input(|i| i.viewport().focused),
+                            self.starved_polls
+                        );
+                        self.starved_polls = 0;
+                        *count = 1;
+                        *start = Instant::now();
+                    }
+                }
                 self.dimensions = frame.dimensions;
                 self.period = frame.period;
                 self.interval = frame.interval;
@@ -285,9 +492,17 @@ impl Player {
             } else {
                 ctx.request_repaint_after(self.deadline.saturating_duration_since(now));
             }
-        } else if !self.paused && !self.ended {
+        } else if (!self.paused || self.seek_preview) && !self.ended {
+            if now >= self.deadline && self.presentation_stats.is_some() {
+                self.starved_polls = self.starved_polls.saturating_add(1);
+            }
             // Waiting on the decoder: check again soon.
             ctx.request_repaint_after(Duration::from_millis(8));
+        }
+        if !self.paused && !self.ended {
+            // Let vsync pace rendering; a timer at the presentation deadline
+            // can wake too late to submit that frame for the next refresh.
+            ctx.request_repaint();
         }
     }
 
@@ -295,6 +510,9 @@ impl Player {
     fn timeline(&self) -> (Option<Duration>, Option<Duration>) {
         if self.playback.is_none() {
             return (None, None);
+        }
+        if let Some(target) = self.seek_target {
+            return (Some(target), self.duration);
         }
         let elapsed = self
             .interval
@@ -471,6 +689,11 @@ impl eframe::App for Player {
             }
         }
         self.present(ctx);
+        if self.playback.is_some() && !self.paused && !self.ended {
+            self.playback_activity.get_or_insert_with(fvid_platform::PlaybackActivity::new);
+        } else {
+            self.playback_activity = None;
+        }
         // Wake up once to let the controls fade after the pointer rests.
         if self.controls_visible() && !self.paused {
             ctx.request_repaint_after(HIDE_AFTER.saturating_sub(self.activity.elapsed()));
@@ -613,7 +836,11 @@ impl eframe::App for Player {
             let (elapsed, total) = self.timeline();
             let mut fraction = match (elapsed, total) {
                 (Some(e), Some(t)) if t > Duration::ZERO => {
-                    Some((e.as_secs_f32() / t.as_secs_f32()).clamp(0.0, 1.0))
+                    Some(if self.ended && self.error.is_none() {
+                        1.0
+                    } else {
+                        (e.as_secs_f32() / t.as_secs_f32()).clamp(0.0, 1.0)
+                    })
                 }
                 _ => None,
             };

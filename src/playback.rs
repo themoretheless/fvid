@@ -1,5 +1,6 @@
 //! FVid-owned raw-video reader. No external container or codec implementation.
 use crate::{Header, Result, buffer, invalid, line};
+use crate::playback_native::yuv_to_rgb;
 use std::io::{BufRead, Seek, SeekFrom};
 use std::time::Duration;
 
@@ -111,6 +112,26 @@ impl<R: BufRead + Seek> Y4mReader<R> {
 
     /// Returns false only at a clean frame boundary; truncated frames are errors.
     pub fn read_frame(&mut self) -> Result<bool> {
+        if !self.read_frame_raw()? {
+            return Ok(false);
+        }
+        let (sx, sy) = self.header.format.subsampling();
+        let luma_len = self.header.width * self.header.height;
+        let chroma_len = luma_len / sx / sy;
+        yuv_to_rgb(
+            &self.yuv,
+            luma_len,
+            chroma_len,
+            self.header.width,
+            self.header.height,
+            sx,
+            sy,
+            &mut self.rgb,
+        );
+        Ok(true)
+    }
+    /// Reads one YUV frame without converting to RGB; `frames_read` advances.
+    pub fn read_frame_raw(&mut self) -> Result<bool> {
         if !line(&mut self.reader, &mut self.marker)? {
             return Ok(false);
         }
@@ -118,21 +139,20 @@ impl<R: BufRead + Seek> Y4mReader<R> {
             return Err(invalid("expected FRAME marker"));
         }
         self.reader.read_exact(&mut self.yuv)?;
-        let (sx, sy) = self.header.format.subsampling();
-        let width = self.header.width;
-        let luma_len = width * self.header.height;
-        let chroma_len = luma_len / sx / sy;
-        for (index, pixel) in self.rgb.chunks_exact_mut(3).enumerate() {
-            let uv = (index / width / sy) * (width / sx) + index % width / sx;
-            let y = i32::from(self.yuv[index]) - 16;
-            let u = i32::from(self.yuv[luma_len + uv]) - 128;
-            let v = i32::from(self.yuv[luma_len + chroma_len + uv]) - 128;
-            pixel[0] = ((298 * y + 409 * v + 128) >> 8).clamp(0, 255) as u8;
-            pixel[1] = ((298 * y - 100 * u - 208 * v + 128) >> 8).clamp(0, 255) as u8;
-            pixel[2] = ((298 * y + 516 * u + 128) >> 8).clamp(0, 255) as u8;
-        }
         self.frames_read += 1;
         Ok(true)
+    }
+    pub fn subsampling(&self) -> (usize, usize) {
+        self.header.format.subsampling()
+    }
+    pub fn width(&self) -> usize {
+        self.header.width
+    }
+    pub fn height(&self) -> usize {
+        self.header.height
+    }
+    pub fn yuv(&self) -> &[u8] {
+        &self.yuv
     }
 }
 

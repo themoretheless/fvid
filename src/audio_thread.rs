@@ -1,0 +1,481 @@
+//! Audio decode thread that runs independently from video decoding.
+//! Reads encoded packets, decodes them to PCM, and pushes to the audio backend.
+use crate::audio::{AudioBackend, AudioDecode, AudioStream};
+use std::sync::mpsc::{Receiver, RecvTimeoutError, SyncSender, TryRecvError, sync_channel};
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
+
+/// Depth of the worker's event channel.
+const QUEUE: usize = 24;
+
+/// Audio the worker keeps queued ahead of the device. The ring behind
+/// `AudioBackend::push` is finite and drops what does not fit, so decoding at
+/// CPU speed would throw most of a track away.
+const LEAD: Duration = Duration::from_millis(200);
+
+/// How long to hold the decoder before queueing another packet, so the decoded
+/// frontier stays `LEAD` ahead of the device instead of running away from it.
+fn pacing(frontier: Duration, device: Duration) -> Duration {
+    frontier.saturating_sub(device).saturating_sub(LEAD)
+}
+
+enum Command {
+    Play,
+    Pause,
+    Rewind,
+    Seek(i64),
+    Stop,
+}
+
+pub enum AudioEvent {
+    Started,
+    Ended(u64),
+    Error(String),
+}
+
+/// Handle to the audio decoding thread; dropping it stops the thread.
+pub struct AudioPlayback {
+    commands: SyncSender<Command>,
+    events: Receiver<AudioEvent>,
+    generation: u64,
+    thread: Option<thread::JoinHandle<()>>,
+    position: Arc<Mutex<Duration>>,
+    timescale: u32,
+}
+
+impl AudioPlayback {
+    /// Open audio in a background thread: build the backend and the decoder,
+    /// then wait for `play`. Starting paused is what lets the caller anchor the
+    /// audio clock at the same instant it starts presenting pictures; a device
+    /// that began clocking here would run ahead by exactly the caller's preroll.
+    /// The factory closure creates the backend on the audio thread, avoiding
+    /// Send requirements on backends whose underlying streams are thread-local
+    /// (e.g. cpal on macOS).
+    pub fn start<F>(stream: Box<dyn AudioStream>, backend_factory: F) -> Self
+    where
+        F: FnOnce() -> Box<dyn AudioBackend> + Send + 'static,
+    {
+        let timescale = stream.timescale();
+        let (commands, command_rx) = sync_channel(16);
+        let (event_tx, events) = sync_channel(QUEUE);
+        let position = Arc::new(Mutex::new(Duration::ZERO));
+        let position_clone = position.clone();
+
+        let thread = thread::Builder::new()
+            .name("fvid-audio-decode".into())
+            .spawn(move || {
+                #[cfg(feature = "player")]
+                fvid_platform::prioritize_playback_thread();
+
+                let sample_rate = stream.sample_rate();
+                let channels = stream.channels();
+
+                let mut backend = backend_factory();
+
+                if let Err(e) = backend.start(crate::audio::AudioSpec {
+                    sample_rate,
+                    channels,
+                    format: crate::audio::SampleFormat::F32,
+                }) {
+                    let _ = event_tx.send(AudioEvent::Error(format!("Audio backend start: {e}")));
+                    return;
+                }
+
+                let decoder = match crate::codec::make_audio_decoder(
+                    stream.codec(),
+                    stream.extra_data(),
+                    sample_rate,
+                    channels,
+                ) {
+                    Ok(d) => d,
+                    Err(e) => {
+                        let _ = event_tx
+                            .send(AudioEvent::Error(format!("Audio decoder init: {e}")));
+                        return;
+                    }
+                };
+
+                let _ = event_tx.send(AudioEvent::Started);
+
+                Worker {
+                    stream,
+                    decoder,
+                    backend,
+                    commands: command_rx,
+                    events: event_tx,
+                    playing: false,
+                    ended: false,
+                    generation: 0,
+                    position: position_clone,
+                }
+                .run();
+            })
+            .expect("spawn audio decode thread");
+
+        Self {
+            commands,
+            events,
+            generation: 0,
+            thread: Some(thread),
+            position,
+            timescale,
+        }
+    }
+
+    /// Generation of the most recent rewind or seek.
+    pub fn generation(&self) -> u64 {
+        self.generation
+    }
+
+    /// Run the audio clock, and the device behind it, from its current position.
+    pub fn play(&self) {
+        let _ = self.commands.send(Command::Play);
+    }
+
+    pub fn pause(&self) {
+        let _ = self.commands.send(Command::Pause);
+    }
+
+    pub fn rewind(&mut self) {
+        self.generation += 1;
+        let _ = self.commands.send(Command::Rewind);
+    }
+
+    /// Seek the audio clock to a stream position.
+    pub fn seek(&mut self, target: Duration) {
+        self.generation += 1;
+        if self.timescale > 0 {
+            let pts = (target.as_secs_f64() * f64::from(self.timescale)) as i64;
+            let _ = self.commands.send(Command::Seek(pts));
+        }
+    }
+
+    /// Poll for the next audio event without blocking.
+    pub fn poll(&self) -> Option<AudioEvent> {
+        self.events.try_recv().ok()
+    }
+
+    /// Current audio playback position (for A/V sync).
+    /// Returns the position tracked by the audio decode thread.
+    pub fn position(&self) -> Duration {
+        *self.position.lock().unwrap()
+    }
+}
+
+impl Drop for AudioPlayback {
+    fn drop(&mut self) {
+        let _ = self.commands.send(Command::Stop);
+        if let Some(thread) = self.thread.take() {
+            let _ = thread.join();
+        }
+    }
+}
+
+struct Worker {
+    stream: Box<dyn AudioStream>,
+    decoder: Box<dyn AudioDecode>,
+    backend: Box<dyn AudioBackend>,
+    commands: Receiver<Command>,
+    events: SyncSender<AudioEvent>,
+    playing: bool,
+    ended: bool,
+    generation: u64,
+    position: Arc<Mutex<Duration>>,
+}
+
+impl Worker {
+    /// Decode and queue one packet, reporting a terminal event if the stream
+    /// ended or failed and how long to wait before feeding the next one.
+    fn decode_next(&mut self) -> (Option<AudioEvent>, Duration) {
+        let packet = match self.stream.next_packet() {
+            Ok(Some(p)) => p,
+            Ok(None) => {
+                self.ended = true;
+                return (Some(AudioEvent::Ended(self.generation)), Duration::ZERO);
+            }
+            Err(e) => {
+                self.ended = true;
+                return (Some(AudioEvent::Error(e.to_string())), Duration::ZERO);
+            }
+        };
+
+        let decoded = match self.decoder.decode_encoded(
+            &packet.data,
+            packet.pts.max(0) as u64,
+            packet.duration.max(0) as u64,
+        ) {
+            Ok(Some(d)) => d,
+            Ok(None) => return (None, Duration::ZERO),
+            Err(e) => {
+                // A packet that cannot be decoded usually means the whole track
+                // is undecodable, so stop rather than report one error per frame.
+                self.ended = true;
+                return (Some(AudioEvent::Error(e.to_string())), Duration::ZERO);
+            }
+        };
+
+        if let Err(e) = self.backend.push(decoded) {
+            self.ended = true;
+            return (
+                Some(AudioEvent::Error(format!("Audio push: {e}"))),
+                Duration::ZERO,
+            );
+        }
+
+        // The backend counts frames actually handed to the audio hardware, so
+        // its clock reflects what has been heard rather than what has decoded.
+        let device_pos = self.backend.position();
+        if let Ok(mut pos) = self.position.lock() {
+            *pos = device_pos;
+        }
+
+        let frontier = self
+            .stream
+            .time_of(packet.pts.max(0).saturating_add(packet.duration.max(0)));
+        (None, pacing(frontier, device_pos))
+    }
+
+    /// Run the device from wherever its clock currently sits. Play is
+    /// idempotent because the caller commands it at every resume as well as at
+    /// the first presentation.
+    fn resume_clock(&mut self) {
+        if self.playing {
+            return;
+        }
+        self.playing = true;
+        // A device that refuses to run means no audio at all, and without a
+        // clock the picture would freeze at the last frame the gate allowed.
+        if let Err(error) = self.backend.resume() {
+            self.ended = true;
+            let _ = self
+                .events
+                .send(AudioEvent::Error(format!("Audio resume: {error}")));
+        }
+    }
+
+    fn handle(&mut self, command: Command) -> bool {
+        match command {
+            Command::Play => self.resume_clock(),
+            Command::Pause => {
+                if self.playing {
+                    self.playing = false;
+                    let _ = self.backend.pause();
+                }
+            }
+            Command::Rewind => {
+                self.generation += 1;
+                self.ended = false;
+                self.stream.rewind();
+                self.decoder.reset();
+                let _ = self.backend.flush(Duration::ZERO);
+                if let Ok(mut pos) = self.position.lock() {
+                    *pos = Duration::ZERO;
+                }
+                self.resume_clock();
+            }
+            Command::Seek(pts) => {
+                self.generation += 1;
+                self.ended = false;
+                let result_pts = self.stream.seek_to(pts);
+                self.decoder.reset();
+                // Anchor the clock at the sample actually landed on, which can
+                // precede the requested point; the backend advances from there.
+                let anchor = self.stream.time_of(result_pts);
+                let _ = self.backend.flush(anchor);
+                if let Ok(mut pos) = self.position.lock() {
+                    *pos = anchor;
+                }
+            }
+            Command::Stop => return false,
+        }
+        true
+    }
+
+    fn run(mut self) {
+        loop {
+            // Drain commands before doing work.
+            loop {
+                match self.commands.try_recv() {
+                    Ok(command) => {
+                        if !self.handle(command) {
+                            return;
+                        }
+                    }
+                    Err(TryRecvError::Empty) => break,
+                    Err(TryRecvError::Disconnected) => return,
+                }
+            }
+
+            if self.playing && !self.ended {
+                let (event, pace) = self.decode_next();
+                if let Some(event) = event {
+                    if self.events.send(event).is_err() {
+                        return;
+                    }
+                }
+                // Waiting on the command channel instead of sleeping lets a seek
+                // or a stop land in the middle of the pacing window.
+                if !pace.is_zero() {
+                    match self.commands.recv_timeout(pace) {
+                        Ok(command) => {
+                            if !self.handle(command) {
+                                return;
+                            }
+                        }
+                        Err(RecvTimeoutError::Timeout) => {}
+                        Err(RecvTimeoutError::Disconnected) => return,
+                    }
+                }
+                continue;
+            }
+
+            // Nothing to do until commanded.
+            match self.commands.recv() {
+                Ok(command) => {
+                    if !self.handle(command) {
+                        return;
+                    }
+                }
+                Err(_) => return,
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::audio::{AudioStream, EncodedPacket, NullBackend};
+
+    /// esds carrying an AAC-LC, 44.1 kHz mono AudioSpecificConfig: the same
+    /// shape the MP4 reader hands to the decoder factory.
+    const ESDS: &[u8] = &[
+        0, 0, 0, 0, 3, 22, 0, 1, 0, 4, 17, 0x40, 0x15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 2,
+        0x12, 0x08,
+    ];
+
+    /// A 44.1 kHz mono track with no packets at all: enough for the thread to
+    /// build a backend and a decoder, so commands reach a live worker.
+    struct FakeStream {
+        seeked: Arc<Mutex<Option<i64>>>,
+    }
+
+    impl AudioStream for FakeStream {
+        fn codec(&self) -> &str {
+            "mp4a"
+        }
+        fn timescale(&self) -> u32 {
+            44100
+        }
+        fn sample_rate(&self) -> u32 {
+            44100
+        }
+        fn channels(&self) -> u16 {
+            1
+        }
+        fn extra_data(&self) -> &[u8] {
+            ESDS
+        }
+        fn next_packet(&mut self) -> crate::Result<Option<EncodedPacket>> {
+            Ok(None)
+        }
+        fn rewind(&mut self) {}
+        fn seek_to(&mut self, pts: i64) -> i64 {
+            *self.seeked.lock().unwrap() = Some(pts);
+            pts
+        }
+    }
+
+    fn start() -> (AudioPlayback, Arc<Mutex<Option<i64>>>) {
+        let seeked = Arc::new(Mutex::new(None));
+        let playback = AudioPlayback::start(
+            Box::new(FakeStream {
+                seeked: seeked.clone(),
+            }),
+            || Box::new(NullBackend::default()),
+        );
+        (playback, seeked)
+    }
+
+    /// Wait for the audio worker to reach a state, failing loudly if it reports
+    /// an error instead of letting the test time out.
+    fn wait(playback: &AudioPlayback, pred: impl Fn() -> bool) -> bool {
+        for _ in 0..2000 {
+            while let Some(event) = playback.poll() {
+                if let AudioEvent::Error(error) = event {
+                    panic!("audio worker: {error}");
+                }
+            }
+            if pred() {
+                return true;
+            }
+            thread::sleep(Duration::from_millis(1));
+        }
+        false
+    }
+
+    /// Consume events for a while, reporting whether the worker said it was done.
+    fn ran_to_end(playback: &AudioPlayback, polls: u32) -> bool {
+        for _ in 0..polls {
+            while let Some(event) = playback.poll() {
+                if let AudioEvent::Error(error) = &event {
+                    panic!("audio worker: {error}");
+                }
+                if matches!(event, AudioEvent::Ended(_)) {
+                    return true;
+                }
+            }
+            thread::sleep(Duration::from_millis(1));
+        }
+        false
+    }
+
+    /// The clock is commanded, not implied: a worker that decoded from the
+    /// moment its thread existed would run ahead of pictures the player has not
+    /// started presenting, and the sync gate can only hold video back.
+    #[test]
+    fn the_track_waits_for_a_play_command() {
+        let (playback, _) = start();
+        // The fake stream has no packets, so a running worker reports its end
+        // within the first milliseconds.
+        assert!(
+            !ran_to_end(&playback, 100),
+            "decoded before it was commanded to play"
+        );
+
+        playback.play();
+        assert!(ran_to_end(&playback, 2000), "play did not start the worker");
+    }
+
+    #[test]
+    fn seek_counts_ticks_in_the_stream_timescale() {
+        let (mut playback, seeked) = start();
+        playback.seek(Duration::from_secs(2));
+        assert!(wait(&playback, || playback.position() > Duration::ZERO));
+
+        // Converting with a movie timescale of 1000 would ask for tick 2000,
+        // which is 44 times earlier than the requested position.
+        assert_eq!(seeked.lock().unwrap().take(), Some(88200));
+        assert!((playback.position().as_secs_f64() - 2.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn pacing_holds_the_decoder_at_the_lead() {
+        let second = Duration::from_secs(1);
+        assert_eq!(pacing(second * 3, Duration::ZERO), second * 3 - LEAD);
+        assert_eq!(pacing(LEAD, Duration::ZERO), Duration::ZERO);
+        // A device that has overtaken the decoder must not be held back.
+        assert_eq!(pacing(Duration::ZERO, second * 5), Duration::ZERO);
+    }
+
+    #[test]
+    fn rewind_anchors_the_clock_at_zero() {
+        let (mut playback, _) = start();
+        playback.seek(Duration::from_secs(2));
+        assert!(wait(&playback, || playback.position() > Duration::ZERO));
+
+        playback.rewind();
+        assert!(wait(&playback, || playback.position() == Duration::ZERO));
+    }
+}

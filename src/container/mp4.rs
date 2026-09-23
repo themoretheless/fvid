@@ -58,6 +58,9 @@ pub struct Mp4Reader<R> {
     tracks: Vec<Track>,
     movie_timescale: u32,
     limits: Limits,
+    /// Byte position the reader was left at by the last packet read, or
+    /// `u64::MAX` when unknown (open, rewind or a failed read).
+    position: u64,
 }
 
 #[derive(Clone, Copy)]
@@ -252,6 +255,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             tracks,
             movie_timescale,
             limits,
+            position: u64::MAX,
         })
     }
     pub fn tracks(&self) -> &[Track] {
@@ -276,12 +280,22 @@ impl<R: Read + Seek> Mp4Reader<R> {
             .try_reserve(size)
             .map_err(|_| invalid("packet allocation failed"))?;
         output.resize(size, 0);
-        self.reader.seek(SeekFrom::Start(sample.offset))?;
+        // Sequential playback reads samples back-to-back inside one mdat chunk,
+        // so the file is usually already positioned at the next packet.
+        if self.position != sample.offset {
+            self.reader.seek(SeekFrom::Start(sample.offset))?;
+        }
         if let Err(error) = self.reader.read_exact(output) {
             output.clear();
+            self.position = u64::MAX;
             return Err(error.into());
         }
+        self.position = sample.offset.saturating_add(u64::from(sample.size));
         Ok(())
+    }
+    /// Forget the tracked read position; the next `read_packet` seeks again.
+    pub fn invalidate_position(&mut self) {
+        self.position = u64::MAX;
     }
 }
 
@@ -353,7 +367,7 @@ fn parse_track(data: &[u8], mdats: &[Range<u64>], limit: usize) -> Result<Track>
         samples: Vec::new(),
     };
     let (config_at, config_kind) = match (&handler, &entry.kind) {
-        (b"vide", b"avc1" | b"avc3" | b"hvc1" | b"hev1") => {
+        (b"vide", b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01") => {
             result.width = u16be(entry.data, 24)?;
             result.height = u16be(entry.data, 26)?;
             if result.width == 0 || result.height == 0 {
@@ -361,10 +375,12 @@ fn parse_track(data: &[u8], mdats: &[Range<u64>], limit: usize) -> Result<Track>
             }
             (
                 78,
-                if matches!(&entry.kind, b"avc1" | b"avc3") {
-                    b"avcC"
-                } else {
-                    b"hvcC"
+                match &entry.kind {
+                    b"avc1" | b"avc3" => b"avcC",
+                    b"hvc1" | b"hev1" => b"hvcC",
+                    b"vp09" => b"vpcC",
+                    b"av01" => b"av1C",
+                    _ => unreachable!(),
                 },
             )
         }
@@ -378,7 +394,7 @@ fn parse_track(data: &[u8], mdats: &[Range<u64>], limit: usize) -> Result<Track>
         }
         _ => {
             return Err(invalid(
-                "unsupported MP4 sample entry (supported: AVC, HEVC, MPEG-4 audio)",
+                "unsupported MP4 sample entry (supported: AVC, HEVC, VP9, AV1, MPEG-4 audio)",
             ));
         }
     };

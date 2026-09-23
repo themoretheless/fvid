@@ -280,37 +280,152 @@ fn luma_core(
             }
         }
     }
-    for row in 0..height {
-        for col in 0..width {
-            let (px, py) = (col + 2, row + 2);
-            let b = || clip((hsum(px, py) + 16) >> 5);
-            let h = || clip((vsum(px, py) + 16) >> 5);
-            let m = || clip((vsum(px + 1, py) + 16) >> 5);
-            let s_ = || clip((hsum(px, py + 1) + 16) >> 5);
-            let j = || {
-                // Do not clip or round the horizontal intermediate values here.
-                let t = |k: usize| sums[(row + k) * width + col];
-                clip((t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10)
-            };
-            output[row * width + col] = match (fx, fy) {
-                (0, 1) => avg(get(px, py), h()),
-                (0, 2) => h(),
-                (0, 3) => avg(h(), get(px, py + 1)),
-                (1, 0) => avg(get(px, py), b()),
-                (2, 0) => b(),
-                (3, 0) => avg(b(), get(px + 1, py)),
-                (1, 1) => avg(b(), h()),
-                (2, 1) => avg(b(), j()),
-                (3, 1) => avg(b(), m()),
-                (1, 2) => avg(h(), j()),
-                (2, 2) => j(),
-                (3, 2) => avg(j(), m()),
-                (1, 3) => avg(h(), s_()),
-                (2, 3) => avg(j(), s_()),
-                (3, 3) => avg(m(), s_()),
-                _ => unreachable!(),
-            };
+    match (fx, fy) {
+        (0, 1) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let (px, py) = (col + 2, row + 2);
+                    let h = clip((vsum(px, py) + 16) >> 5);
+                    output[row * width + col] = avg(get(px, py), h);
+                }
+            }
         }
+        (0, 2) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let (px, py) = (col + 2, row + 2);
+                    output[row * width + col] = clip((vsum(px, py) + 16) >> 5);
+                }
+            }
+        }
+        (0, 3) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let (px, py) = (col + 2, row + 2);
+                    let h = clip((vsum(px, py) + 16) >> 5);
+                    output[row * width + col] = avg(h, get(px, py + 1));
+                }
+            }
+        }
+        (1, 0) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let (px, py) = (col + 2, row + 2);
+                    let b = clip((hsum(px, py) + 16) >> 5);
+                    output[row * width + col] = avg(get(px, py), b);
+                }
+            }
+        }
+        (2, 0) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let (px, py) = (col + 2, row + 2);
+                    output[row * width + col] = clip((hsum(px, py) + 16) >> 5);
+                }
+            }
+        }
+        (3, 0) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let (px, py) = (col + 2, row + 2);
+                    let b = clip((hsum(px, py) + 16) >> 5);
+                    output[row * width + col] = avg(b, get(px + 1, py));
+                }
+            }
+        }
+        (1, 1) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let (px, py) = (col + 2, row + 2);
+                    let b = clip((hsum(px, py) + 16) >> 5);
+                    let h = clip((vsum(px, py) + 16) >> 5);
+                    output[row * width + col] = avg(b, h);
+                }
+            }
+        }
+        (2, 1) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let (px, py) = (col + 2, row + 2);
+                    let b = clip((hsum(px, py) + 16) >> 5);
+                    let t = |k: usize| sums[(row + k) * width + col];
+                    let j = clip((t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10);
+                    output[row * width + col] = avg(b, j);
+                }
+            }
+        }
+        (3, 1) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let (px, py) = (col + 2, row + 2);
+                    let b = clip((hsum(px, py) + 16) >> 5);
+                    let m = clip((vsum(px + 1, py) + 16) >> 5);
+                    output[row * width + col] = avg(b, m);
+                }
+            }
+        }
+        (1, 2) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let (px, py) = (col + 2, row + 2);
+                    let h = clip((vsum(px, py) + 16) >> 5);
+                    let t = |k: usize| sums[(row + k) * width + col];
+                    let j = clip((t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10);
+                    output[row * width + col] = avg(h, j);
+                }
+            }
+        }
+        (2, 2) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let t = |k: usize| sums[(row + k) * width + col];
+                    output[row * width + col] = clip((t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10);
+                }
+            }
+        }
+        (3, 2) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let (px, py) = (col + 2, row + 2);
+                    let m = clip((vsum(px + 1, py) + 16) >> 5);
+                    let t = |k: usize| sums[(row + k) * width + col];
+                    let j = clip((t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10);
+                    output[row * width + col] = avg(j, m);
+                }
+            }
+        }
+        (1, 3) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let (px, py) = (col + 2, row + 2);
+                    let h = clip((vsum(px, py) + 16) >> 5);
+                    let s_ = clip((hsum(px, py + 1) + 16) >> 5);
+                    output[row * width + col] = avg(h, s_);
+                }
+            }
+        }
+        (2, 3) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let (px, py) = (col + 2, row + 2);
+                    let s_ = clip((hsum(px, py + 1) + 16) >> 5);
+                    let t = |k: usize| sums[(row + k) * width + col];
+                    let j = clip((t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10);
+                    output[row * width + col] = avg(j, s_);
+                }
+            }
+        }
+        (3, 3) => {
+            for row in 0..height {
+                for col in 0..width {
+                    let (px, py) = (col + 2, row + 2);
+                    let m = clip((vsum(px + 1, py) + 16) >> 5);
+                    let s_ = clip((hsum(px, py + 1) + 16) >> 5);
+                    output[row * width + col] = avg(m, s_);
+                }
+            }
+        }
+        _ => unreachable!(),
     }
 }
 fn partition(width: usize, height: usize, length: usize) -> Result<()> {

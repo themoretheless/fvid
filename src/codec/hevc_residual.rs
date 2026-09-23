@@ -123,7 +123,22 @@ impl RiceState {
     }
 }
 
-fn scan_positions(side: usize, scan: Scan) -> Vec<[usize; 2]> {
+fn scan_positions(side: usize, scan: Scan) -> &'static [[usize; 2]] {
+    static SCANS: std::sync::OnceLock<[[Vec<[usize; 2]>; 4]; 3]> = std::sync::OnceLock::new();
+    let scans = SCANS.get_or_init(|| {
+        std::array::from_fn(|kind| {
+            let scan = [Scan::Diagonal, Scan::Horizontal, Scan::Vertical][kind];
+            std::array::from_fn(|log| make_scan(1 << log, scan))
+        })
+    });
+    let kind = match scan {
+        Scan::Diagonal => 0,
+        Scan::Horizontal => 1,
+        Scan::Vertical => 2,
+    };
+    &scans[kind][side.ilog2() as usize]
+}
+fn make_scan(side: usize, scan: Scan) -> Vec<[usize; 2]> {
     let mut positions = Vec::with_capacity(side * side);
     match scan {
         Scan::Horizontal => {
@@ -176,7 +191,8 @@ pub fn read_block(
         .iter()
         .position(|&p| p == [last[0] % 4, last[1] % 4])
         .unwrap();
-    let mut coded = vec![false; group_side * group_side];
+    let mut coded_storage = [false; 64];
+    let coded = &mut coded_storage[..group_side * group_side];
     let mut output = vec![0i32; side * side];
     let mut previous_c1 = 1usize;
     for group in (0..=last_group).rev() {
@@ -223,7 +239,15 @@ pub fn read_block(
                 infer_dc = false;
             }
         }
-        let indices: Vec<_> = (0..16).rev().filter(|&n| significant[n]).collect();
+        let mut indices_storage = [0; 16];
+        let mut count = 0;
+        for n in (0..16).rev() {
+            if significant[n] {
+                indices_storage[count] = n;
+                count += 1;
+            }
+        }
+        let indices = &indices_storage[..count];
         if indices.is_empty() {
             continue;
         }
@@ -254,7 +278,7 @@ pub fn read_block(
         let lowest = *indices.last().unwrap();
         let hidden = hide_sign && indices[0] - lowest > 3;
         let mut negative = [false; 16];
-        for &n in &indices {
+        for &n in indices {
             if !hidden || n != lowest {
                 negative[n] = b.bypass()?;
             }

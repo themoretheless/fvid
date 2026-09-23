@@ -1,7 +1,7 @@
-//! RGB playback adapter for FVid's own Y4M, MP4/AVC and WebM/VP9/AV1 readers.
+//! RGB playback adapter for FVid's own Y4M, MP4/AVC/HEVC and WebM/VP9/AV1 readers.
 use crate::{
-    Result, codec::avc_picture::IntraPicture, container::mp4::Limits, invalid,
-    playback::Y4mReader, playback_mp4::Mp4AvcReader,
+    Result, codec::avc_picture::IntraPicture, container::mp4::Limits, invalid, playback::Y4mReader,
+    playback_mp4::Mp4VideoReader,
 };
 use std::{
     io::{BufRead, Seek, SeekFrom},
@@ -13,7 +13,7 @@ pub enum NativeReader<R> {
     Webm(crate::playback_webm::WebmVideoReader<R>),
     Y4m(Y4mReader<R>),
     Avc {
-        source: Mp4AvcReader<R>,
+        source: Mp4VideoReader<R>,
         rgb: Vec<u8>,
         dimensions: [usize; 2],
         period: Duration,
@@ -55,8 +55,30 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 reader, budget,
             )?));
         }
+        let signature = &prefix[..length];
+        if signature.starts_with(&[0xff, 0xd8, 0xff]) {
+            return Err(invalid("JPEG image: still-image playback is not supported"));
+        }
+        if signature.starts_with(b"\x89PNG\r\n\x1a\n")
+            || signature.starts_with(b"GIF87a")
+            || signature.starts_with(b"GIF89a")
+        {
+            return Err(invalid("image file: still-image playback is not supported"));
+        }
+        // Dispatch only recognizable ISO BMFF/QuickTime box headers. A file
+        // with another signature must not be diagnosed as a corrupt MP4.
+        if length < 8
+            || !matches!(
+                &prefix[4..8],
+                b"ftyp" | b"styp" | b"moov" | b"mdat" | b"free" | b"skip" | b"wide" | b"uuid"
+            )
+        {
+            return Err(invalid(
+                "unrecognized video format; supported containers: MP4/MOV, WebM/Matroska and Y4M",
+            ));
+        }
         let rgb_budget = budget / 4;
-        let source = Mp4AvcReader::open(reader, Limits::default(), budget - rgb_budget)?;
+        let source = Mp4VideoReader::open(reader, Limits::default(), budget - rgb_budget)?;
         let track = source.track();
         let (media_start, media_end) = playback_window(track, source.movie_timescale())?;
         Ok(Self::Avc {
@@ -129,12 +151,38 @@ impl<R: BufRead + Seek> NativeReader<R> {
             }
         }
     }
+    /// Current frame's presentation timestamp in track timescale units.
+    /// Returns None if no frame has been read yet or for formats without PTS.
+    pub fn current_pts(&self) -> Option<(i64, u32)> {
+        match self {
+            Self::Webm(r) => r.frame_interval().map(|(start, _, scale)| (start as i64, scale)),
+            Self::Y4m(reader) => {
+                let count = reader.frames_read();
+                if count == 0 {
+                    return None;
+                }
+                let (num, den) = reader.frame_rate();
+                Some(((count - 1) as i64 * den as i64, num))
+            }
+            Self::Avc {
+                source,
+                frame_start,
+                ..
+            } => {
+                if source.track().timescale == 0 {
+                    return None;
+                }
+                Some((*frame_start, source.track().timescale))
+            }
+        }
+    }
     /// Total playable length when the container declares one (MP4 track
-    /// duration, clipped by its edit window). Y4M and WebM streams carry no
-    /// up-front length, so they report `None`.
+    /// duration, clipped by its edit window, or the WebM timeline). Y4M
+    /// streams carry no up-front length, so they report `None`.
     pub fn duration(&self) -> Option<Duration> {
         match self {
-            Self::Y4m(_) | Self::Webm(_) => None,
+            Self::Y4m(_) => None,
+            Self::Webm(r) => r.duration(),
             Self::Avc {
                 source,
                 media_start,
@@ -196,6 +244,33 @@ impl<R: BufRead + Seek> NativeReader<R> {
     /// to the target, so the call takes as long as decoding that stretch.
     /// On failure the stream is rewound to the start.
     pub fn seek(&mut self, target: Duration) -> Result<()> {
+        let result = (|| {
+            if let Some(raw) = self.seek_raw(target)? {
+                if let Self::Avc {
+                    rgb, rgb_budget, ..
+                } = self
+                {
+                    match raw {
+                        RawFrame::Avc { picture, colour } => {
+                            avc_to_rgb(&picture, colour, rgb, *rgb_budget)?
+                        }
+                        RawFrame::Planar8(planes) => planar8_to_rgb(&planes, rgb, *rgb_budget)?,
+                        RawFrame::Rgb(bytes) => *rgb = bytes,
+                        RawFrame::Yuv { .. } => unreachable!(),
+                    }
+                }
+            }
+            Ok(())
+        })();
+        if result.is_err() {
+            self.rewind()?;
+        }
+        result
+    }
+    /// Seek with the same pixel representation used by continuous playback.
+    /// Intermediate reference pictures are decoded without RGB conversion.
+    /// `rgb()` remains unchanged; use `seek` when a packed RGB result is needed.
+    pub fn seek_raw(&mut self, target: Duration) -> Result<Option<RawFrame>> {
         let Self::Avc {
             source,
             media_start,
@@ -214,10 +289,12 @@ impl<R: BufRead + Seek> NativeReader<R> {
         source.seek_to_sync(ticks);
         *resync = true;
         let result = (|| {
+            let mut last = None;
             loop {
-                if !self.read_frame()? {
-                    return Ok(());
-                }
+                let Some(raw) = self.read_frame_raw()? else {
+                    return Ok(last);
+                };
+                last = Some(raw);
                 let Self::Avc {
                     next_pts,
                     media_start,
@@ -227,7 +304,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
                     unreachable!()
                 };
                 if i128::from(*next_pts) + i128::from(*media_start) > i128::from(ticks) {
-                    return Ok(());
+                    return Ok(last);
                 }
             }
         })();
@@ -256,6 +333,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
                     }
                     RawFrame::Planar8(planes) => planar8_to_rgb(&planes, rgb, *rgb_budget)?,
                     RawFrame::Rgb(bytes) => *rgb = bytes,
+                    RawFrame::Yuv { .. } => unreachable!(),
                 }
                 Ok(true)
             }
@@ -264,14 +342,43 @@ impl<R: BufRead + Seek> NativeReader<R> {
     /// `read_frame` without the RGB conversion. The decoded picture (or, for
     /// readers that convert internally, the RGB bytes) is handed back so
     /// another thread can run `RawFrame::into_rgb` while decoding continues.
-    /// For AVC, `rgb()` is stale after this call.
+    /// For AVC, WebM and Y4M, `rgb()` is stale after this call.
     pub fn read_frame_raw(&mut self) -> Result<Option<RawFrame>> {
         match self {
-            Self::Y4m(_) | Self::Webm(_) => Ok(if self.read_frame()? {
-                Some(RawFrame::Rgb(self.rgb().to_vec()))
+            Self::Y4m(reader) => Ok(if reader.read_frame_raw()? {
+                let (sx, sy) = reader.subsampling();
+                let width = reader.width();
+                let height = reader.height();
+                let luma_len = width * height;
+                let chroma_len = luma_len / sx / sy;
+                let chroma_width = width / sx;
+                let chroma_height = height / sy;
+                // Split the contiguous YUV buffer into separate planes so the
+                // GPU shader can do the colour conversion without a CPU pass.
+                let yuv = reader.yuv();
+                let y = yuv[..luma_len].to_vec();
+                let cb = yuv[luma_len..luma_len + chroma_len].to_vec();
+                let cr = yuv[luma_len + chroma_len..].to_vec();
+                Some(RawFrame::Planar8(Arc::new(Planar8 {
+                    width,
+                    height,
+                    chroma_width,
+                    chroma_height,
+                    y,
+                    cb,
+                    cr,
+                    colour: AvcColour {
+                        kr: 0.299,
+                        kb: 0.114,
+                        full: false,
+                    },
+                })))
             } else {
                 None
             }),
+            Self::Webm(reader) => Ok(reader
+                .read_frame_planes()?
+                .map(|planes| RawFrame::Planar8(Arc::new(planes)))),
             Self::Avc { .. } => self.advance_avc(),
         }
     }
@@ -292,9 +399,11 @@ impl<R: BufRead + Seek> NativeReader<R> {
         else {
             return Ok(None);
         };
-        if media_end.is_some_and(|end| {
-            i128::from(*next_pts) + i128::from(*media_start) >= i128::from(end)
-        }) {
+        if !*resync
+            && media_end.is_some_and(|end| {
+                i128::from(*next_pts) + i128::from(*media_start) >= i128::from(end)
+            })
+        {
             return Ok(None);
         }
         let frame = loop {
@@ -335,7 +444,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
             .ok()
             .filter(|n| *n > 0)
             .ok_or_else(|| invalid("invalid video frame duration"))?;
-        let colour = AvcColour::from_vui(source.active_vui())?;
+        let colour = source.active_colour()?;
         let (w, h) = frame.picture.dimensions();
         *dimensions = [w, h];
         *period = Duration::from_nanos(nanos);
@@ -364,7 +473,32 @@ pub struct AvcColour {
     pub kb: f64,
     pub full: bool,
 }
+impl Default for AvcColour {
+    fn default() -> Self {
+        Self {
+            kr: 0.299,
+            kb: 0.114,
+            full: false,
+        }
+    }
+}
 impl AvcColour {
+    pub fn from_hevc_vui(vui: Option<&crate::codec::hevc_vui::Vui>) -> Result<Self> {
+        let signal = vui.and_then(|v| v.signal.as_ref());
+        let full = signal.is_some_and(|s| s.full_range);
+        let matrix = signal.and_then(|s| s.colour).map_or(2, |c| c[2]);
+        let (kr, kb) = match matrix {
+            1 => (0.2126, 0.0722),
+            2 | 5 | 6 => (0.299, 0.114),
+            9 => (0.2627, 0.0593),
+            _ => {
+                return Err(invalid(
+                    "HEVC colour matrix is not implemented for playback",
+                ));
+            }
+        };
+        Ok(Self { kr, kb, full })
+    }
     /// Matrix coefficients and range from the VUI; BT.601 when unspecified.
     pub fn from_vui(vui: Option<&crate::codec::avc::Vui>) -> Result<Self> {
         let signal = vui.and_then(|v| v.video_signal);
@@ -394,16 +528,45 @@ pub struct Planar8 {
 }
 /// Crop the picture and narrow its samples to 8 bits without colour conversion.
 pub fn avc_to_planar8(p: &IntraPicture, colour: AvcColour) -> Planar8 {
-    let (w, h) = p.dimensions();
-    let shift = p.bit_depth.saturating_sub(8);
-    let (x0, y0) = (p.crop[0], p.crop[2]);
+    coded_planes_to_planar8(
+        &p.y,
+        &p.cb,
+        &p.cr,
+        p.coded_width,
+        p.coded_height,
+        p.crop,
+        p.bit_depth,
+        colour,
+    )
+}
+/// Build packed 8-bit 4:2:0 planes from coded 16-bit planes and a crop window.
+/// `crop` is `[left, right, top, bottom]`; chroma stride is `coded_width / 2`.
+#[allow(clippy::too_many_arguments)]
+pub fn coded_planes_to_planar8(
+    y: &[u16],
+    cb: &[u16],
+    cr: &[u16],
+    coded_width: usize,
+    coded_height: usize,
+    crop: [usize; 4],
+    depth: u8,
+    colour: AvcColour,
+) -> Planar8 {
+    let w = coded_width - crop[0] - crop[1];
+    let h = coded_height - crop[2] - crop[3];
+    let shift = depth.saturating_sub(8);
+    let (x0, y0) = (crop[0], crop[2]);
     let (cx0, cy0) = (x0 / 2, y0 / 2);
     let chroma_width = (x0 + w).div_ceil(2) - cx0;
     let chroma_height = (y0 + h).div_ceil(2) - cy0;
     let narrow = |plane: &[u16], stride: usize, x: usize, y: usize, width: usize, height: usize| {
         let mut out = Vec::with_capacity(width * height);
         for row in 0..height {
-            out.extend(plane[(y + row) * stride + x..][..width].iter().map(|&v| (v >> shift) as u8));
+            out.extend(
+                plane[(y + row) * stride + x..][..width]
+                    .iter()
+                    .map(|&v| (v >> shift) as u8),
+            );
         }
         out
     };
@@ -412,10 +575,41 @@ pub fn avc_to_planar8(p: &IntraPicture, colour: AvcColour) -> Planar8 {
         height: h,
         chroma_width,
         chroma_height,
-        y: narrow(&p.y, p.coded_width, x0, y0, w, h),
-        cb: narrow(&p.cb, p.coded_width / 2, cx0, cy0, chroma_width, chroma_height),
-        cr: narrow(&p.cr, p.coded_width / 2, cx0, cy0, chroma_width, chroma_height),
+        y: narrow(y, coded_width, x0, y0, w, h),
+        cb: narrow(cb, coded_width / 2, cx0, cy0, chroma_width, chroma_height),
+        cr: narrow(cr, coded_width / 2, cx0, cy0, chroma_width, chroma_height),
         colour,
+    }
+}
+/// Convert an interleaved planar Y4M frame (`luma`, then `Cb`, then `Cr`) to
+/// packed 8-bit RGB using BT.601 limited range. `sx`/`sy` are the chroma
+/// subsampling factors (1 or 2). `out` is resized only when the size changes.
+#[allow(clippy::too_many_arguments)]
+pub fn yuv_to_rgb(
+    data: &[u8],
+    luma_len: usize,
+    chroma_len: usize,
+    width: usize,
+    height: usize,
+    sx: usize,
+    sy: usize,
+    out: &mut Vec<u8>,
+) {
+    let len = width * height * 3;
+    if out.len() != len {
+        out.resize(len, 0);
+    }
+    for (py, line) in out.chunks_exact_mut(width * 3).enumerate() {
+        let uv_row = (py / sy) * (width / sx);
+        for (px, pixel) in line.chunks_exact_mut(3).enumerate() {
+            let uv = uv_row + px / sx;
+            let y = i32::from(data[py * width + px]) - 16;
+            let u = i32::from(data[luma_len + uv]) - 128;
+            let v = i32::from(data[luma_len + chroma_len + uv]) - 128;
+            pixel[0] = ((298 * y + 409 * v + 128) >> 8).clamp(0, 255) as u8;
+            pixel[1] = ((298 * y - 100 * u - 208 * v + 128) >> 8).clamp(0, 255) as u8;
+            pixel[2] = ((298 * y + 516 * u + 128) >> 8).clamp(0, 255) as u8;
+        }
     }
 }
 /// A decoded frame before RGB conversion.
@@ -427,6 +621,16 @@ pub enum RawFrame {
     },
     /// Hardware decoder output: already cropped 8-bit planes.
     Planar8(Arc<Planar8>),
+    /// Uncompressed Y4M frame (luma, then Cb, then Cr) for off-thread conversion.
+    Yuv {
+        data: Vec<u8>,
+        luma_len: usize,
+        chroma_len: usize,
+        width: usize,
+        height: usize,
+        sx: usize,
+        sy: usize,
+    },
 }
 impl RawFrame {
     /// Packed 8-bit RGB of the visible picture area.
@@ -436,6 +640,15 @@ impl RawFrame {
             RawFrame::Rgb(rgb) => return Ok(rgb),
             RawFrame::Avc { picture, colour } => avc_to_rgb(&picture, colour, &mut rgb, budget)?,
             RawFrame::Planar8(planes) => planar8_to_rgb(&planes, &mut rgb, budget)?,
+            RawFrame::Yuv {
+                data,
+                luma_len,
+                chroma_len,
+                width,
+                height,
+                sx,
+                sy,
+            } => yuv_to_rgb(&data, luma_len, chroma_len, width, height, sx, sy, &mut rgb),
         }
         Ok(rgb)
     }
@@ -596,12 +809,10 @@ fn playback_window(
     }
     let edit = &track.edits[0];
     let numerator = u128::from(edit.duration) * u128::from(track.timescale);
-    if numerator % u128::from(movie_scale) != 0 {
-        return Err(invalid(
-            "fractional media-tick edit endpoint is not implemented",
-        ));
-    }
-    let duration = i64::try_from(numerator / u128::from(movie_scale))
+    // The scheduler uses integral track ticks. Round the exclusive endpoint
+    // upward so a positive fractional interval retains its final sample.
+    // The extension is strictly less than one media tick, never a full frame.
+    let duration = i64::try_from(numerator.div_ceil(u128::from(movie_scale)))
         .map_err(|_| invalid("MP4 edit duration overflow"))?;
     if duration <= 0 {
         return Err(invalid("empty MP4 playback edit"));
@@ -618,6 +829,26 @@ mod tests {
     use super::*;
     use std::io::{BufReader, Cursor};
     #[test]
+    fn images_and_unknown_data_are_not_dispatched_as_mp4() {
+        for data in [
+            b"\xff\xd8\xff\xe0\x00\x10JFIF".as_slice(),
+            b"\x89PNG\r\n\x1a\n",
+            b"GIF89a",
+            b"not video",
+            b"",
+        ] {
+            let error = match NativeReader::new(Cursor::new(data), 1 << 20) {
+                Ok(_) => panic!("non-video accepted"),
+                Err(error) => error.to_string(),
+            };
+            assert!(!error.contains("box"), "{error}");
+            assert!(
+                error.contains("image") || error.contains("unrecognized video"),
+                "{error}"
+            );
+        }
+    }
+    #[test]
     fn webm_signature_never_enters_mp4_parser() {
         let bytes = [0x1a, 0x45, 0xdf, 0xa3, 0x9f, 0x42, 0x86, 0x81, 0x01];
         let error = match NativeReader::new(Cursor::new(bytes), 1 << 20) {
@@ -628,7 +859,7 @@ mod tests {
         assert!(!error.contains("box"));
     }
     #[test]
-    fn edit_window_preserves_track_units_and_rejects_unrepresentable_endpoints() {
+    fn edit_window_preserves_track_units_and_rounds_fractional_end_up() {
         use crate::container::mp4::{Edit, Track};
         let mut track = Track {
             id: 1,
@@ -651,6 +882,8 @@ mod tests {
         });
         assert_eq!(playback_window(&track, 1000).unwrap(), (1024, Some(7168)));
         track.edits[0].duration = 1;
+        assert_eq!(playback_window(&track, 1000).unwrap(), (1024, Some(1037)));
+        track.edits[0].duration = 0;
         assert!(playback_window(&track, 1000).is_err());
         track.edits[0].duration = 480;
         track.edits[0].media_time = -1;

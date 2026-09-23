@@ -76,7 +76,7 @@ impl<'a> Cabac<'a> {
         if *range < 256 {
             let shift = (*range).leading_zeros() - 7;
             *range <<= shift;
-            *offset = (*offset << shift) | bits.read(shift as u8)? as u16;
+            *offset = (*offset << shift) | bits.read_short(shift as u8)?;
         }
         if *offset >= *range {
             return Err(invalid("CABAC offset exceeds coding interval"));
@@ -113,13 +113,13 @@ impl<'a> Cabac<'a> {
     }
     pub fn bypass(&mut self) -> Result<bool> {
         self.active()?;
-        let mut bits = self.bits.clone();
-        let mut offset = (self.offset << 1) | bits.read(1)? as u16;
+        // `read_short` preserves the bit position on a truncated read, so the
+        // engine stays unchanged on error without a temporary copy.
+        let mut offset = (self.offset << 1) | u16::from(self.bits.read_short(1)?);
         let bin = offset >= self.range;
         if bin {
             offset -= self.range;
         }
-        self.bits = bits;
         self.offset = offset;
         Ok(bin)
     }

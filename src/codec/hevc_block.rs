@@ -42,6 +42,14 @@ impl Config {
 /// Call only for a coded component (CBF=1), after any CU QP-delta syntax. Returns
 /// raster-order residual samples. Any error requires abandoning the slice.
 pub fn decode(b: &mut impl ResidualBins, c: Config, scaling: &ScalingLists) -> Result<Vec<i32>> {
+    read(b, c)?.reconstruct(scaling)
+}
+pub(crate) struct Coefficients {
+    config: Config,
+    transform: Transform,
+    values: Vec<i32>,
+}
+pub(crate) fn read(b: &mut impl ResidualBins, c: Config) -> Result<Coefficients> {
     let scan = c.scan()?;
     if !(8..=10).contains(&c.bit_depth) || c.qp > 51 + 6 * (c.bit_depth - 8) {
         return Err(invalid("invalid HEVC block depth or QP"));
@@ -66,16 +74,26 @@ pub fn decode(b: &mut impl ResidualBins, c: Config, scaling: &ScalingLists) -> R
     } else {
         Transform::Dct
     };
-    let matrix = usize::from(c.component) + if c.intra_mode.is_none() { 3 } else { 0 };
-    hevc_transform::reconstruct(
-        &coefficients,
-        c.log2_size,
-        c.bit_depth,
-        c.qp,
+    Ok(Coefficients {
+        config: c,
         transform,
-        scaling,
-        matrix,
-    )
+        values: coefficients,
+    })
+}
+impl Coefficients {
+    pub(crate) fn reconstruct(self, scaling: &ScalingLists) -> Result<Vec<i32>> {
+        let c = self.config;
+        let matrix = usize::from(c.component) + if c.intra_mode.is_none() { 3 } else { 0 };
+        hevc_transform::reconstruct(
+            &self.values,
+            c.log2_size,
+            c.bit_depth,
+            c.qp,
+            self.transform,
+            scaling,
+            matrix,
+        )
+    }
 }
 
 #[cfg(test)]

@@ -220,3 +220,21 @@ fn invalid_box_reports_offset_size_and_remaining_bytes() {
     assert!(error.contains("declared size 100"));
     assert!(error.contains("remaining file bytes 8"));
 }
+
+#[test]
+fn hevc_track_validates_hevc_configuration() {
+    for codec in [b"hvc1", b"hev1"] {
+        let mut data = fixture(false);
+        for (old, new) in [(b"avc1", codec), (b"avcC", b"hvcC")] {
+            let at = data.windows(4).position(|v| v == old).unwrap();
+            data[at..at + 4].copy_from_slice(new);
+        }
+        let error =
+            match fvid::playback_native::NativeReader::without_memory_limit(Cursor::new(data)) {
+                Ok(_) => panic!("HEVC was incorrectly accepted by the AVC playback path"),
+                Err(error) => error.to_string(),
+            };
+        assert!(error.contains("codec configuration"), "{error}");
+        assert!(!error.contains("no supported"), "{error}");
+    }
+}

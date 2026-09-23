@@ -35,3 +35,21 @@ Additional synthetic WebM sequences use `testsrc2`, libvpx-vp9, `-threads 1
 Each matching `.yuv` is generated with `ffmpeg -i FILE.webm -fps_mode passthrough
 -pix_fmt FORMAT -f rawvideo FILE.yuv`, using the corresponding 8/10/12-bit 4:2:0
 format. Tests compare every decoded sample; high-bit-depth files are little-endian.
+
+## Backward probability adaptation
+
+The `adaptive` fixtures contain only generated testsrc2 images. Common encoding:
+
+```sh
+ffmpeg -v error -f lavfi -i 'testsrc2=size=70x50:rate=30' -frames:v 24 \
+  -c:v libvpx-vp9 -deadline good -cpu-used 3 -frame-parallel 0 \
+  -auto-alt-ref 0 -lag-in-frames 0 -aq-mode 0 -g 8 adaptive.webm
+```
+
+`adaptive10` uses 12 frames, `-pix_fmt yuv420p10le -g 6`.
+`adaptive-tiles` uses 512x70, six frames, `-tile-columns 1 -threads 2 -g 3`.
+Raw pixel oracles use the decode command above and the matching pixel format.
+Tests require backward adaptation and context refresh, check every visible sample
+across multiple keyframes and a decoder reset, and assert that the tiled fixture
+really contains two tile columns. The tiled case also exercises implicit MV
+high-precision bits in the adaptation statistics.

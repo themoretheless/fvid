@@ -243,7 +243,16 @@ fn one(t: &mut [i64], n: usize, sine: bool) {
     }
 }
 /// Return residuals in raster order. Coefficients must already be dequantized.
-pub fn inverse(coefficients: &[i32], size: usize, depth: u8, kind: Kind) -> Result<Vec<i32>> {
+/// The `scratch` buffer holds the i64 intermediate and is reused across calls.
+/// The `out` buffer receives the i32 residuals and is resized as needed.
+pub fn inverse(
+    coefficients: &[i32],
+    size: usize,
+    depth: u8,
+    kind: Kind,
+    scratch: &mut Vec<i64>,
+    out: &mut Vec<i32>,
+) -> Result<()> {
     if ![4, 8, 16, 32].contains(&size)
         || ![8, 10, 12].contains(&depth)
         || coefficients.len() != size * size
@@ -262,8 +271,12 @@ pub fn inverse(coefficients: &[i32], size: usize, depth: u8, kind: Kind) -> Resu
         ));
     }
     let n = size.trailing_zeros() as usize;
-    let mut output: Vec<i64> = coefficients.iter().map(|&v| i64::from(v)).collect();
-    for row in output.chunks_exact_mut(size) {
+    let len = size * size;
+    scratch.resize(len, 0);
+    for (d, &c) in scratch[..len].iter_mut().zip(coefficients) {
+        *d = i64::from(c);
+    }
+    for row in scratch[..len].chunks_exact_mut(size) {
         if kind == Kind::Lossless {
             wht(row, 2);
         } else {
@@ -273,7 +286,7 @@ pub fn inverse(coefficients: &[i32], size: usize, depth: u8, kind: Kind) -> Resu
     let mut col = [0i64; 32];
     for x in 0..size {
         for y in 0..size {
-            col[y] = output[y * size + x];
+            col[y] = scratch[y * size + x];
         }
         if kind == Kind::Lossless {
             wht(&mut col[..size], 0);
@@ -285,17 +298,18 @@ pub fn inverse(coefficients: &[i32], size: usize, depth: u8, kind: Kind) -> Resu
             );
         }
         for y in 0..size {
-            output[y * size + x] = if kind == Kind::Lossless {
+            scratch[y * size + x] = if kind == Kind::Lossless {
                 col[y]
             } else {
                 round(col[y], (n + 2).min(6) as u32)
             };
         }
     }
-    output
-        .into_iter()
-        .map(|v| i32::try_from(v).map_err(|_| invalid("VP9 inverse transform overflow")))
-        .collect()
+    out.resize(len, 0);
+    for (d, &s) in out[..len].iter_mut().zip(&scratch[..len]) {
+        *d = i32::try_from(s).map_err(|_| invalid("VP9 inverse transform overflow"))?;
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -306,6 +320,8 @@ mod tests {
         let expected = include_bytes!("../../tests/fixtures/vp9/transforms.bin");
         let mut at = 0;
         let mut rng = 0x73ab9215u32;
+        let mut scratch = Vec::new();
+        let mut out = Vec::new();
         for size in [4, 8, 16, 32] {
             let kinds = if size == 4 {
                 5
@@ -329,8 +345,8 @@ mod tests {
                             ((rng >> 16) % 65) as i32 - 32
                         })
                         .collect();
-                    let residual = inverse(&coefficients, size, 8, *kind).unwrap();
-                    let pixels: Vec<_> = residual
+                    inverse(&coefficients, size, 8, *kind, &mut scratch, &mut out).unwrap();
+                    let pixels: Vec<_> = out
                         .iter()
                         .map(|v| (128 + v).clamp(0, 255) as u8)
                         .collect();

@@ -32,3 +32,31 @@ The expected planar YUV file contains 6,144 bytes.
 The `sao-*` fixture uses the multi-CTU command with `qp=30:sao=1` in place of
 `qp=24:no-sao=1`. Deblocking remains disabled. The test asserts nonzero resolved
 SAO offsets before comparing all 6,144 filtered samples against the oracle.
+
+## I/P/B playback sequences
+
+`main-ipb.mp4` and `main10-ipb.mp4` contain 17 frames of
+`testsrc2=s=128x128:r=30`, encoded with libx265 using:
+
+```
+log-level=error:pools=2:frame-threads=1:ctu=32:wpp=1:aq-mode=2:crf=28:temporal-mvp=0:weightp=0:weightb=0:bframes=3:b-adapt=0:ref=2:keyint=8:min-keyint=8:scenecut=0:open-gop=0
+```
+
+Use `-c:v libx265 -tag:v hvc1 -movie_timescale 30`. Main10 additionally uses
+`-vf format=yuv420p10le`. CRF mode (not fixed QP) is intentional: it enables
+adaptive CU QP deltas. Both in-loop filters remain enabled.
+
+`weighted-tmvp.mp4` uses `testsrc2=s=128x96:r=30`,
+`-vf fade=t=in:st=0:d=0.4`, `-tag:v hev1`, and the same options except
+`temporal-mvp=1:weightp=1:weightb=1:open-gop=1`. It exercises nondefault weights,
+collocated motion, CRA and leading RASL pictures. The integration test checks
+that these features actually occur in the bitstream.
+
+The corresponding `.yuv` files are decoded with:
+
+```
+ffmpeg -v error -i INPUT.mp4 -pix_fmt yuv420p -f rawvideo OUTPUT.yuv
+```
+
+Use `yuv420p10le` for Main10. Samples are in presentation order; tests compare
+all samples, then repeat after rewind. No private video is part of the fixtures.

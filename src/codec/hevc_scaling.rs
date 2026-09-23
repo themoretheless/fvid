@@ -111,24 +111,55 @@ impl ScalingLists {
         let replication = if size > 1 { 1 << (size - 1) } else { 1 };
         let (x, y) = (x / replication, y / replication);
         let n = if size == 0 { 4 } else { 8 };
-        let mut index = 0;
-        for sum in 0..2 * n - 1 {
-            for xx in 0..n {
-                if sum < xx || sum - xx >= n {
-                    continue;
-                }
-                if (xx, sum - xx) == (x, y) {
-                    return Ok(matrix.coefficients[index]);
-                }
-                index += 1;
-            }
-        }
-        Err(invalid("invalid HEVC diagonal scan position"))
+        let diagonal = x + y;
+        let index = if diagonal < n {
+            diagonal * (diagonal + 1) / 2 + x
+        } else {
+            let remaining = 2 * n - 1 - diagonal;
+            n * n - remaining * (remaining + 1) / 2 + x - (diagonal + 1 - n)
+        };
+        Ok(matrix.coefficients[index])
     }
 }
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn direct_diagonal_index_matches_scan_at_every_coordinate() {
+        let mut lists = ScalingLists::default();
+        for matrix in lists.matrices.iter_mut().flatten() {
+            matrix.coefficients = std::array::from_fn(|index| index as u8 + 1);
+            matrix.dc = 97;
+        }
+        for size in 0..4 {
+            let n = if size == 0 { 4 } else { 8 };
+            let replication = if size > 1 { 1 << (size - 1) } else { 1 };
+            for id in 0..6 {
+                let matrix = lists.matrix(size, id).unwrap();
+                let mut index = 0;
+                for sum in 0..2 * n - 1 {
+                    for x in 0..n {
+                        if sum < x || sum - x >= n {
+                            continue;
+                        }
+                        for dx in 0..replication {
+                            for dy in 0..replication {
+                                let xx = x * replication + dx;
+                                let yy = (sum - x) * replication + dy;
+                                let expected = if size > 1 && xx == 0 && yy == 0 {
+                                    matrix.dc
+                                } else {
+                                    matrix.coefficients[index]
+                                };
+                                assert_eq!(lists.factor(size, id, xx, yy).unwrap(), expected);
+                            }
+                        }
+                        index += 1;
+                    }
+                }
+            }
+        }
+    }
     #[test]
     fn explicit_deltas_copy_dc_wraparound_and_chroma_inference() {
         let data = [

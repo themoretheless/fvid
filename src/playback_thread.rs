@@ -5,7 +5,7 @@
 //! small bounded queue; control messages (pause, rewind, seek) go the other
 //! way. Every frame carries the generation of the last rewind or seek so
 //! stale queued frames can be dropped.
-use crate::playback_native::{NativeReader, Planar8, RawFrame, avc_to_planar8};
+use crate::playback_native::{NativeReader, Planar8, RawFrame, avc_to_planar8, yuv_to_rgb};
 use std::{
     io::{BufRead, Seek},
     sync::{
@@ -16,9 +16,15 @@ use std::{
     time::Duration,
 };
 
-/// How many converted frames may wait for the window. Two keeps the decoder
-/// one frame ahead without holding many large buffers.
-const QUEUE: usize = 2;
+/// Bounded presentation lookahead absorbs expensive reference pictures and file I/O.
+/// Twenty-four 60 Hz frames cover about 400 ms without dropping or duplicating frames.
+const QUEUE: usize = 24;
+
+/// Fill twelve presentation intervals before starting/restarting the clock.
+/// Cap startup latency for low-frame-rate sources.
+pub fn startup_buffer(period: Duration) -> Duration {
+    period.saturating_mul(12).min(Duration::from_millis(250))
+}
 
 /// Picture data as the window draws it: packed RGB through an egui texture,
 /// or 8-bit planes converted to RGB by the GPU shader.
@@ -33,6 +39,8 @@ pub struct Frame {
     pub period: Duration,
     /// `NativeReader::frame_interval` of this frame.
     pub interval: Option<(u128, u128, u32)>,
+    /// Presentation timestamp in track timescale units (for A/V sync).
+    pub pts: Option<(i64, u32)>,
     pub generation: u64,
     /// Increases with every frame handed to the window; the GPU uploads a
     /// frame once and skips repaints that show the same one.
@@ -52,6 +60,7 @@ enum Command {
     Rewind,
     Seek(Duration),
     Stop,
+    StageReady,
 }
 
 /// What the decode thread hands to the converter, in order.
@@ -61,6 +70,7 @@ enum Stage {
         dimensions: [usize; 2],
         period: Duration,
         interval: Option<(u128, u128, u32)>,
+        pts: Option<(i64, u32)>,
         generation: u64,
     },
     Event(Event),
@@ -84,19 +94,30 @@ impl Playback {
         let (event_tx, events) = sync_channel(QUEUE);
         let decoder = thread::Builder::new()
             .name("fvid-decode".into())
-            .spawn(move || Worker::new(reader, command_rx, stage_tx).run())
+            .spawn(move || {
+                #[cfg(feature = "player")]
+                fvid_platform::prioritize_playback_thread();
+                Worker::new(reader, command_rx, stage_tx).run()
+            })
             .expect("spawn decoder thread");
+        let stage_ready = commands.clone();
         let converter = thread::Builder::new()
             .name("fvid-convert".into())
             .spawn(move || {
+                #[cfg(feature = "player")]
+                fvid_platform::prioritize_playback_thread();
                 let mut serial = 0;
                 for stage in stage_rx {
+                    // Freeing a slot must wake the producer immediately. A full
+                    // control queue already contains messages that will wake it.
+                    let _ = stage_ready.try_send(Command::StageReady);
                     let event = match stage {
                         Stage::Raw {
                             raw,
                             dimensions,
                             period,
                             interval,
+                            pts,
                             generation,
                         } => {
                             let pixels = match raw {
@@ -106,6 +127,28 @@ impl Playback {
                                 }
                                 // Hardware output is already 8-bit planes: no copy at all.
                                 RawFrame::Planar8(planes) => Pixels::Planar(planes),
+                                RawFrame::Yuv {
+                                    data,
+                                    luma_len,
+                                    chroma_len,
+                                    width,
+                                    height,
+                                    sx,
+                                    sy,
+                                } => {
+                                    let mut rgb = Vec::new();
+                                    yuv_to_rgb(
+                                        &data,
+                                        luma_len,
+                                        chroma_len,
+                                        width,
+                                        height,
+                                        sx,
+                                        sy,
+                                        &mut rgb,
+                                    );
+                                    Pixels::Rgb(rgb)
+                                }
                             };
                             serial += 1;
                             Event::Frame(Frame {
@@ -113,6 +156,7 @@ impl Playback {
                                 dimensions,
                                 period,
                                 interval,
+                                pts,
                                 generation,
                                 serial,
                             })
@@ -187,7 +231,11 @@ struct Worker<R> {
 }
 
 impl<R: BufRead + Seek> Worker<R> {
-    fn new(reader: NativeReader<R>, commands: Receiver<Command>, stages: SyncSender<Stage>) -> Self {
+    fn new(
+        reader: NativeReader<R>,
+        commands: Receiver<Command>,
+        stages: SyncSender<Stage>,
+    ) -> Self {
         let mut worker = Self {
             reader,
             commands,
@@ -207,6 +255,7 @@ impl<R: BufRead + Seek> Worker<R> {
             dimensions: self.reader.dimensions(),
             period: self.reader.frame_period(),
             interval: self.reader.frame_interval(),
+            pts: self.reader.current_pts(),
             generation: self.generation,
         }
     }
@@ -240,12 +289,14 @@ impl<R: BufRead + Seek> Worker<R> {
             Command::Seek(target) => {
                 self.generation += 1;
                 self.ended = false;
-                // `seek` leaves the target frame converted in the reader.
-                self.pending = Some(match self.reader.seek(target) {
-                    Ok(()) => self.stage(RawFrame::Rgb(self.reader.rgb().to_vec())),
+                // Preserve the normal GPU plane path for the target picture.
+                self.pending = Some(match self.reader.seek_raw(target) {
+                    Ok(Some(raw)) => self.stage(raw),
+                    Ok(None) => Stage::Event(Event::Ended(self.generation)),
                     Err(error) => Stage::Event(Event::Error(error.to_string())),
                 });
             }
+            Command::StageReady => {}
             Command::Stop => return false,
         }
         true

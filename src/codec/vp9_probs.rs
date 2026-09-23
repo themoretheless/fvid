@@ -1,30 +1,30 @@
-//! VP9 compressed-header probability updates (specification section 6.3).
+//! VP9 compressed-header updates and backward probability adaptation (sections 6.3 and 8.4).
 use super::{vp9::Header, vp9_bool::BoolDecoder, vp9_tables::*};
 use crate::{Result, invalid};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Probabilities {
-    pub partition: [[u8; 3]; 16],
-    pub y_mode: [[u8; 9]; 4],
-    pub uv_mode: [[u8; 9]; 10],
-    pub skip: [u8; 3],
-    pub is_inter: [u8; 4],
-    pub comp_mode: [u8; 5],
-    pub comp_ref: [u8; 5],
-    pub single_ref: [[u8; 2]; 5],
-    pub mv_sign: [u8; 2],
-    pub mv_bits: [[u8; 10]; 2],
-    pub mv_class0_bit: [u8; 2],
-    pub tx: [[[u8; 3]; 2]; 4],
-    pub inter_mode: [[u8; 3]; 7],
-    pub interp_filter: [[u8; 2]; 4],
-    pub mv_joint: [u8; 3],
-    pub mv_class: [[u8; 10]; 2],
-    pub mv_class0_fr: [[[u8; 3]; 2]; 2],
-    pub mv_class0_hp: [u8; 2],
-    pub mv_fr: [[u8; 3]; 2],
-    pub mv_hp: [u8; 2],
-    pub coef: [[[[[[u8; 3]; 6]; 6]; 2]; 2]; 4],
+pub struct Probabilities<T = u8> {
+    pub partition: [[T; 3]; 16],
+    pub y_mode: [[T; 9]; 4],
+    pub uv_mode: [[T; 9]; 10],
+    pub skip: [T; 3],
+    pub is_inter: [T; 4],
+    pub comp_mode: [T; 5],
+    pub comp_ref: [T; 5],
+    pub single_ref: [[T; 2]; 5],
+    pub mv_sign: [T; 2],
+    pub mv_bits: [[T; 10]; 2],
+    pub mv_class0_bit: [T; 2],
+    pub tx: [[[T; 3]; 2]; 4],
+    pub inter_mode: [[T; 3]; 7],
+    pub interp_filter: [[T; 2]; 4],
+    pub mv_joint: [T; 3],
+    pub mv_class: [[T; 10]; 2],
+    pub mv_class0_fr: [[[T; 3]; 2]; 2],
+    pub mv_class0_hp: [T; 2],
+    pub mv_fr: [[T; 3]; 2],
+    pub mv_hp: [T; 2],
+    pub coef: [[[[[[T; 3]; 6]; 6]; 2]; 2]; 4],
 }
 impl Default for Probabilities {
     fn default() -> Self {
@@ -263,5 +263,182 @@ mod tests {
             assert!(CompressedHeader::parse(frame, &short, &defaults).is_err());
         }
         assert_eq!(defaults, Probabilities::default());
+    }
+}
+
+impl<T: Copy> Probabilities<T> {
+    pub(crate) fn filled(value: T) -> Self {
+        Self {
+            partition: [[value; 3]; 16],
+            y_mode: [[value; 9]; 4],
+            uv_mode: [[value; 9]; 10],
+            skip: [value; 3],
+            is_inter: [value; 4],
+            comp_mode: [value; 5],
+            comp_ref: [value; 5],
+            single_ref: [[value; 2]; 5],
+            mv_sign: [value; 2],
+            mv_bits: [[value; 10]; 2],
+            mv_class0_bit: [value; 2],
+            tx: [[[value; 3]; 2]; 4],
+            inter_mode: [[value; 3]; 7],
+            interp_filter: [[value; 2]; 4],
+            mv_joint: [value; 3],
+            mv_class: [[value; 10]; 2],
+            mv_class0_fr: [[[value; 3]; 2]; 2],
+            mv_class0_hp: [value; 2],
+            mv_fr: [[value; 3]; 2],
+            mv_hp: [value; 2],
+            coef: [[[[[[value; 3]; 6]; 6]; 2]; 2]; 4],
+        }
+    }
+}
+pub(crate) type Counts = Probabilities<[u32; 2]>;
+
+pub(crate) fn counted(
+    b: &mut BoolDecoder<'_>,
+    probability: u8,
+    counts: &mut [u32; 2],
+) -> Result<bool> {
+    let bit = b.read(probability)?;
+    counts[usize::from(bit)] += 1;
+    Ok(bit)
+}
+
+/// Counts are branch totals, equivalent to summing symbol frequencies below each tree node.
+pub(crate) fn count_symbol(tree: &[i8], counts: &mut [[u32; 2]], symbol: u8) {
+    fn visit(tree: &[i8], counts: &mut [[u32; 2]], at: usize, symbol: u8) -> bool {
+        for bit in 0..2 {
+            let child = tree[at + bit];
+            let found = if child <= 0 {
+                (-child) as u8 == symbol
+            } else {
+                visit(tree, counts, child as usize, symbol)
+            };
+            if found {
+                counts[at / 2][bit] += 1;
+                return true;
+            }
+        }
+        false
+    }
+    let found = visit(tree, counts, 0, symbol);
+    debug_assert!(found);
+}
+
+fn merge(pre: u8, c: [u32; 2], saturation: u64, factor: u64) -> u8 {
+    let zero = u64::from(c[0]);
+    let total = zero + u64::from(c[1]);
+    if total == 0 {
+        return pre;
+    }
+    let probability = ((zero * 256 + total / 2) / total).clamp(1, 255);
+    let weight = factor * total.min(saturation) / saturation;
+    ((u64::from(pre) * (256 - weight) + probability * weight + 128) >> 8) as u8
+}
+
+// Apply the same branch update to fixed probability arrays of any rank.
+trait MergeCounts: Sized {
+    type Counts;
+    fn merged(&self, counts: &Self::Counts, saturation: u64, factor: u64) -> Self;
+}
+impl MergeCounts for u8 {
+    type Counts = [u32; 2];
+    fn merged(&self, counts: &Self::Counts, saturation: u64, factor: u64) -> Self {
+        merge(*self, *counts, saturation, factor)
+    }
+}
+impl<T: MergeCounts, const N: usize> MergeCounts for [T; N] {
+    type Counts = [T::Counts; N];
+    fn merged(&self, counts: &Self::Counts, saturation: u64, factor: u64) -> Self {
+        std::array::from_fn(|i| self[i].merged(&counts[i], saturation, factor))
+    }
+}
+impl Probabilities {
+    pub(crate) fn adapt(
+        &mut self,
+        base: &Self,
+        counts: &Counts,
+        intra: bool,
+        previous_key: bool,
+        allow_hp: bool,
+    ) {
+        // Backward adaptation starts from the saved context, not this frame's
+        // compressed-header updates. Intra frames retain updated skip/tx tables.
+        let factor = if !intra && previous_key { 128 } else { 112 };
+        self.coef = base.coef.merged(&counts.coef, 24, factor);
+        if !intra {
+            self.partition = base.partition.merged(&counts.partition, 20, 128);
+            self.y_mode = base.y_mode.merged(&counts.y_mode, 20, 128);
+            self.uv_mode = base.uv_mode.merged(&counts.uv_mode, 20, 128);
+            self.skip = base.skip.merged(&counts.skip, 20, 128);
+            self.is_inter = base.is_inter.merged(&counts.is_inter, 20, 128);
+            self.comp_mode = base.comp_mode.merged(&counts.comp_mode, 20, 128);
+            self.comp_ref = base.comp_ref.merged(&counts.comp_ref, 20, 128);
+            self.single_ref = base.single_ref.merged(&counts.single_ref, 20, 128);
+            self.mv_sign = base.mv_sign.merged(&counts.mv_sign, 20, 128);
+            self.mv_bits = base.mv_bits.merged(&counts.mv_bits, 20, 128);
+            self.mv_class0_bit = base.mv_class0_bit.merged(&counts.mv_class0_bit, 20, 128);
+            self.tx = base.tx.merged(&counts.tx, 20, 128);
+            self.inter_mode = base.inter_mode.merged(&counts.inter_mode, 20, 128);
+            self.interp_filter = base.interp_filter.merged(&counts.interp_filter, 20, 128);
+            self.mv_joint = base.mv_joint.merged(&counts.mv_joint, 20, 128);
+            self.mv_class = base.mv_class.merged(&counts.mv_class, 20, 128);
+            self.mv_class0_fr = base.mv_class0_fr.merged(&counts.mv_class0_fr, 20, 128);
+            self.mv_fr = base.mv_fr.merged(&counts.mv_fr, 20, 128);
+            if allow_hp {
+                self.mv_class0_hp = base.mv_class0_hp.merged(&counts.mv_class0_hp, 20, 128);
+                self.mv_hp = base.mv_hp.merged(&counts.mv_hp, 20, 128);
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod adaptation_tests {
+    use super::*;
+
+    #[test]
+    fn merge_rounding_saturation_and_empty_counts() {
+        for p in 1..=255 {
+            assert_eq!(merge(p, [0, 0], 20, 128), p);
+            for c0 in 0u32..30 {
+                for c1 in 0u32..30 {
+                    if c0 + c1 == 0 {
+                        continue;
+                    }
+                    let total = c0 + c1;
+                    let empirical = ((256 * c0 + total / 2) / total).clamp(1, 255);
+                    let weight = 128 * total.min(20) / 20;
+                    let expected = (u32::from(p) * (256 - weight) + empirical * weight + 128) / 256;
+                    assert_eq!(merge(p, [c0, c1], 20, 128), expected as u8);
+                }
+            }
+        }
+        assert_eq!(merge(128, [24, 0], 24, 112), 184);
+        assert_eq!(merge(128, [24, 0], 24, 128), 192);
+    }
+
+    #[test]
+    fn forced_partition_symbols_include_unread_tree_branches() {
+        let mut counts = [[0; 2]; 3];
+        count_symbol(&[0, 2, -1, 4, -2, -3], &mut counts, 3);
+        count_symbol(&[0, 2, -1, 4, -2, -3], &mut counts, 1);
+        assert_eq!(counts, [[0, 2], [1, 1], [0, 1]]);
+    }
+
+    #[test]
+    fn adaptation_uses_saved_context_and_preserves_intra_header_updates() {
+        let base = Probabilities::filled(128);
+        let mut updated = Probabilities::filled(200);
+        let mut counts = Counts::filled([0; 2]);
+        counts.coef[0][0][0][0][0][0] = [24, 0];
+        counts.skip[0] = [20, 0];
+        updated.adapt(&base, &counts, true, true, false);
+        assert_eq!(updated.coef[0][0][0][0][0], [184, 128, 128]);
+        assert_eq!(updated.skip[0], 200);
+        updated.adapt(&base, &counts, false, true, false);
+        assert_eq!(updated.coef[0][0][0][0][0][0], 192);
+        assert_eq!(updated.skip[0], 192);
     }
 }

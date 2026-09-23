@@ -8,7 +8,7 @@ cargo run --release --no-default-features --features player -- play input.y4m
 ```
 
 Открытие файла, drag-and-drop, Space для паузы, F для полного экрана, Restart и Esc для выхода. Панель управления рисуется поверх картинки и прячется во время воспроизведения.
-FVid самостоятельно читает Y4M, MP4/H.264 и WebM/Matroska с VP9/AV1, декодирует
+FVid самостоятельно читает Y4M, MP4/H.264/H.265 и WebM/Matroska с VP9/AV1, декодирует
 поддерживаемые профили и преобразует YUV → RGB. `eframe` отвечает за окно.
 Для сжатого видео используйте `--release`; звук пока не реализован.
 [Поддерживаемые режимы и ограничения](docs/NATIVE_PLAYBACK.md).

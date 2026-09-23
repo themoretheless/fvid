@@ -14,7 +14,7 @@ unsafe_code = "forbid"
 
 [features]
 default = ["gpu", "cuda"]
-player = ["dep:eframe", "dep:rfd", "videotoolbox"]
+player = ["dep:eframe", "dep:rfd", "dep:fvid-platform", "dep:cpal", "dep:symphonia", "videotoolbox"]
 # Hardware H.264 decoding through Apple VideoToolbox; a no-op off macOS.
 videotoolbox = ["dep:fvid-vt"]
 cuda = ["dep:fvid-cuda"]
@@ -30,8 +30,11 @@ angle = ["gpu", "wgpu/angle"]
 vulkan-portability = ["gpu", "wgpu/vulkan-portability"]
 
 [dependencies]
+fvid-platform = { path = "crates/fvid-platform", optional = true }
 eframe = { version = "0.36", optional = true }
 rfd = { version = "0.17.2", optional = true }
+cpal = { version = "0.15", optional = true }
+symphonia = { version = "0.6", optional = true, features = ["aac", "vorbis", "isomp4"] }
 wgpu = { version = "=30.0.1", optional = true, default-features = false, features = ["std", "parking_lot", "metal", "vulkan", "dx12", "gles", "wgsl"] }
 pollster = { version = "0.4", optional = true }
 
@@ -60,3 +63,12 @@ airbug-bench = { git = "https://github.com/themoretheless/airbug", branch = "rel
 [[bench]]
 name = "ffmpeg_compare"
 harness = false
+
+# Both drive the audio pipeline, which only exists with the player feature.
+[[example]]
+name = "audio_probe"
+required-features = ["player"]
+
+[[example]]
+name = "av_sync"
+required-features = ["player"]

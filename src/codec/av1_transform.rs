@@ -324,7 +324,14 @@ fn transform(t: &mut [i64], kind: u8, r: u8) -> Result<()> {
     Ok(())
 }
 /// AV1 transform type numbers 0..15, raster-order dequantized coefficients.
-pub fn inverse(coefficients: &[i32], size: [usize; 2], depth: u8, kind: u8) -> Result<Vec<i32>> {
+pub fn inverse(
+    coefficients: &[i32],
+    size: [usize; 2],
+    depth: u8,
+    kind: u8,
+    scratch: &mut Vec<i64>,
+    out: &mut Vec<i32>,
+) -> Result<()> {
     let [w, h] = size;
     if ![4, 8, 16, 32, 64].contains(&w)
         || ![4, 8, 16, 32, 64].contains(&h)
@@ -383,21 +390,22 @@ pub fn inverse(coefficients: &[i32], size: [usize; 2], depth: u8, kind: u8) -> R
             *v = clip(round(*v, row_shift), col_range);
         }
     }
-    let mut out = vec![0; w * h];
-    let mut col = vec![0i64; h];
+    out.resize(w * h, 0);
+    out.fill(0);
+    scratch.resize(h, 0);
     for x in 0..w {
         for y in 0..h {
-            col[y] = data[y * w + x];
+            scratch[y] = data[y * w + x];
         }
-        transform(&mut col, vertical, col_range)?;
+        transform(scratch, vertical, col_range)?;
         for y in 0..h {
             let xx = if horizontal == 2 { w - 1 - x } else { x };
             let yy = if vertical == 2 { h - 1 - y } else { y };
-            out[yy * w + xx] = i32::try_from(round(col[y], 4))
+            out[yy * w + xx] = i32::try_from(round(scratch[y], 4))
                 .map_err(|_| invalid("AV1 inverse transform overflow"))?;
         }
     }
-    Ok(out)
+    Ok(())
 }
 
 #[cfg(test)]
@@ -447,8 +455,10 @@ mod tests {
                                 }
                             }
                         }
-                        let actual = inverse(&coeff, [w, h], depth, kind).unwrap();
-                        for (i, v) in actual.iter().enumerate() {
+                        let mut scratch = Vec::new();
+                        let mut out = Vec::new();
+                        inverse(&coeff, [w, h], depth, kind, &mut scratch, &mut out).unwrap();
+                        for (i, v) in out.iter().enumerate() {
                             let pixel = (v + (1 << (depth - 1))).clamp(0, (1 << depth) - 1) as u16;
                             let oracle = u16::from_le_bytes([expected[0], expected[1]]);
                             expected = &expected[2..];

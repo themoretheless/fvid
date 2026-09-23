@@ -1,8 +1,10 @@
-//! Native single-slice HEVC IDR reconstruction. Unsupported tools fail explicitly.
+//! Native single-slice HEVC I/P/B reconstruction with WPP and in-loop filters.
 use super::{
     hevc_block,
     hevc_cabac::{HevcCabac, SliceType, Syntax},
+    hevc_inter_syntax::{self, Partition},
     hevc_intra, hevc_intra_syntax,
+    hevc_motion::{self, Motion, Reference, Spatial},
     hevc_plane::Plane,
     hevc_pps::Pps,
     hevc_qp, hevc_sao,
@@ -20,28 +22,53 @@ pub struct Picture {
     pub planes: [Plane; 3],
     /// Resolved SAO parameters in raster CTU order, including merged values.
     pub sao: Vec<hevc_sao::CtuSao>,
+    /// Collocated motion at the normative 16x16 temporal-prediction grid.
+    pub(crate) motion: Vec<Motion>,
+    pub(crate) reference_pocs: [Vec<i32>; 2],
 }
-/// Decode a complete IDR slice. Currently supports 4:2:0 Main/Main10, fixed QP,
-/// one slice, no PCM, tiles, WPP or deblocking. These tools are rejected,
-/// never silently skipped. Output planes have coded dimensions; crop is metadata.
-/// Budget covers owned pixels, CU/PB metadata and a conservative scratch reserve.
+/// Decode a complete Main/Main10 IDR slice, including WPP, QP deltas and filters.
+/// Output planes have coded dimensions; crop is metadata. The supplied budget
+/// covers owned pixels, CU/PB metadata and reconstruction scratch storage.
 pub fn decode_idr(sps: &Sps, pps: &Pps, slice: &SliceHeader, budget: usize) -> Result<Picture> {
+    if !slice.nal.is_idr() || slice.slice_type != SliceType::I {
+        return Err(invalid("expected HEVC IDR picture"));
+    }
+    decode(sps, pps, slice, 0, &[Vec::new(), Vec::new()], budget)
+}
+pub fn decode(
+    sps: &Sps,
+    pps: &Pps,
+    slice: &SliceHeader,
+    poc: i32,
+    lists: &[Vec<Reference>; 2],
+    budget: usize,
+) -> Result<Picture> {
     if sps.chroma_format != 1
         || sps.separate_colour_plane
         || sps.pcm.is_some()
         || pps.tiles.is_some()
-        || pps.entropy_sync
-        || pps.cu_qp_delta_depth.is_some()
-        || (slice.sao != [false, false] && pps.transquant_bypass)
-        || !slice.deblocking.disabled
+        || ((slice.sao != [false, false] || !slice.deblocking.disabled) && pps.transquant_bypass)
         || !slice.first
         || slice.address != 0
-        || !slice.nal.is_idr()
         || slice.nal.layer_id != 0
-        || slice.nal.temporal_id != 0
-        || !slice.entry_point_offsets.is_empty()
     {
-        return Err(invalid("unsupported HEVC IDR picture tools"));
+        return Err(invalid("unsupported HEVC picture tools"));
+    }
+    if slice.slice_type != SliceType::I && !(1..=5).contains(&slice.max_merge_candidates) {
+        return Err(invalid("invalid HEVC merge candidate count"));
+    }
+    if sps.depth[0] != sps.depth[1] {
+        return Err(invalid("HEVC mixed component bit depths are not supported"));
+    }
+    for list in 0..2 {
+        if lists[list].len() != slice.references[list] as usize {
+            return Err(invalid("HEVC reference-list length mismatch"));
+        }
+        for r in &lists[list] {
+            if r.picture.dimensions != sps.dimensions || r.picture.depth != sps.depth {
+                return Err(invalid("HEVC reference geometry mismatch"));
+            }
+        }
     }
     let [min_cb, max_cb] = sps.coding_block_log2;
     let [min_tb, max_tb] = sps.transform_block_log2;
@@ -70,7 +97,7 @@ pub fn decode_idr(sps: &Sps, pps: &Pps, slice: &SliceHeader, budget: usize) -> R
         .checked_mul(h as usize)
         .ok_or_else(|| invalid("HEVC picture size overflow"))?;
     let required = count
-        .checked_mul(12)
+        .checked_mul(24)
         .and_then(|n| n.checked_add(65536))
         .ok_or_else(|| invalid("HEVC picture budget overflow"))?;
     if required > budget {
@@ -78,18 +105,24 @@ pub fn decode_idr(sps: &Sps, pps: &Pps, slice: &SliceHeader, budget: usize) -> R
     }
     let chroma_offsets = slice.chroma_qp_offsets.map(i32::from);
     hevc_qp::components(slice.qp, sps.depth, chroma_offsets)?;
-    let bit_offset = slice
-        .entropy_byte_offset
-        .checked_mul(8)
-        .ok_or_else(|| invalid("HEVC entropy offset overflow"))?;
-    let mut bins = HevcCabac::new(&slice.rbsp, bit_offset, SliceType::I, false, slice.qp)?;
+
     let mut decoder = Decoder {
         sps,
         pps,
+        slice,
+        poc,
+        lists,
         qp: slice.qp,
         chroma_offsets,
-        leaves: Vec::with_capacity(count / (1usize << (2 * min_cb))),
-        modes: Vec::with_capacity(count / (1usize << (2 * (min_cb - 1)))),
+        qp_coded: false,
+        qp_prediction: slice.qp,
+        qp_grid: vec![slice.qp; count / 64],
+        edges: vec![[0; 2]; count / 16],
+        cells: vec![Cell::default(); count / 16],
+        jobs: None,
+        reconstruction: Vec::new(),
+        scratch: Vec::new(),
+        pred_scratch: Vec::new(),
         planes: [
             Plane::new(w as usize, h as usize, sps.depth[0], count * 3)?,
             Plane::new(w as usize / 2, h as usize / 2, sps.depth[1], count * 3 / 4)?,
@@ -100,40 +133,169 @@ pub fn decode_idr(sps: &Sps, pps: &Pps, slice: &SliceHeader, budget: usize) -> R
     let columns = w.div_ceil(side);
     let rows = h.div_ceil(side);
     let mut sao = Vec::with_capacity(columns as usize * rows as usize);
-    for row in 0..rows {
-        for col in 0..columns {
-            let index = sao.len();
-            let parameters = hevc_sao::read_ctu(
-                &mut bins,
-                slice.sao,
-                sps.depth,
-                if col > 0 { sao.get(index - 1) } else { None },
-                if row > 0 {
-                    sao.get(index - columns as usize)
-                } else {
-                    None
-                },
-            )?;
-            sao.push(parameters);
-            hevc_tree::read_ctu(
-                &mut bins,
-                &mut decoder,
-                [w, h],
-                [col * side, row * side],
-                max_cb,
-                min_cb,
-            )?;
-            let end = bins.terminate()?;
-            let last = row == rows - 1 && col == columns - 1;
-            if end != last {
-                return Err(invalid(
-                    "HEVC slice termination does not match picture extent",
-                ));
-            }
-        }
+    let expected = if pps.entropy_sync { rows as usize } else { 1 };
+    if slice.entropy_substreams.len() != expected {
+        return Err(invalid(
+            "HEVC WPP entry-point count does not match CTU rows",
+        ));
     }
+    if slice
+        .entropy_substreams
+        .iter()
+        .any(|r| r.start >= r.end || r.end > slice.rbsp.len())
+    {
+        return Err(invalid("invalid HEVC entropy substream bounds"));
+    }
+    let mut bins = HevcCabac::new(
+        &slice.rbsp[slice.entropy_substreams[0].clone()],
+        0,
+        slice.slice_type,
+        slice.cabac_init,
+        slice.qp,
+    )?;
+    let initial_contexts = bins.contexts()?;
+    let mut saved_contexts = None;
+    std::thread::scope(|scope| -> Result<()> {
+        let workers = if count >= 128 * 96 && !pps.constrained_intra {
+            let (sender, receiver) = std::sync::mpsc::sync_channel(rows as usize);
+            let placeholders = [
+                Plane::new(1, 1, 8, 3)?,
+                Plane::new(1, 1, 8, 3)?,
+                Plane::new(1, 1, 8, 3)?,
+            ];
+            let planes = std::mem::replace(&mut decoder.planes, placeholders);
+            decoder.jobs = Some(sender);
+            let num_workers = std::thread::available_parallelism()
+                .map_or(1, |n| n.get())
+                .min(rows as usize)
+                .max(1);
+            let completed = std::sync::Arc::new((
+                std::sync::Mutex::new(0usize),
+                std::sync::Condvar::new(),
+            ));
+            let receiver = std::sync::Arc::new(std::sync::Mutex::new(receiver));
+            let planes = std::sync::Arc::new(std::sync::Mutex::new(planes));
+            let handles: Vec<_> = (0..num_workers)
+                .map(|_| {
+                    let receiver = receiver.clone();
+                    let planes = planes.clone();
+                    let completed = completed.clone();
+                    scope.spawn(move || -> Result<()> {
+                        #[cfg(feature = "player")]
+                        fvid_platform::prioritize_playback_thread();
+                        let mut scratch = Vec::new();
+                        let mut pred_scratch = Vec::new();
+                        loop {
+                            let (row, commands) = {
+                                let rx = receiver.lock().unwrap_or_else(|e| e.into_inner());
+                                match rx.recv() {
+                                    Ok(data) => data,
+                                    Err(_) => return Ok(()),
+                                }
+                            };
+                            let (lock, cvar) = &*completed;
+                            {
+                                let mut done = lock.lock().unwrap_or_else(|e| e.into_inner());
+                                while *done < row {
+                                    done = cvar.wait(done).unwrap_or_else(|e| e.into_inner());
+                                }
+                            }
+                            {
+                                let mut planes = planes.lock().unwrap_or_else(|e| e.into_inner());
+                                reconstruct_row(&mut planes, commands, sps, pps, slice, lists, &mut scratch, &mut pred_scratch)?;
+                            }
+                            {
+                                let mut done = lock.lock().unwrap_or_else(|e| e.into_inner());
+                                *done = row + 1;
+                                cvar.notify_all();
+                            }
+                        }
+                    })
+                })
+                .collect();
+            Some((handles, planes, completed))
+        } else {
+            None
+        };
+        let parsed = (|| -> Result<()> {
+            for row in 0..rows {
+                if pps.entropy_sync {
+                    if row > 0 {
+                        bins = HevcCabac::from_contexts(
+                            &slice.rbsp[slice.entropy_substreams[row as usize].clone()],
+                            0,
+                            saved_contexts.as_ref().unwrap_or(&initial_contexts),
+                        )?;
+                    }
+                    decoder.qp = slice.qp;
+                }
+                for col in 0..columns {
+                    let index = sao.len();
+                    let parameters = hevc_sao::read_ctu(
+                        &mut bins,
+                        slice.sao,
+                        sps.depth,
+                        if col > 0 { sao.get(index - 1) } else { None },
+                        if row > 0 {
+                            sao.get(index - columns as usize)
+                        } else {
+                            None
+                        },
+                    )?;
+                    sao.push(parameters);
+                    hevc_tree::read_ctu(
+                        &mut bins,
+                        &mut decoder,
+                        [w, h],
+                        [col * side, row * side],
+                        max_cb,
+                        min_cb,
+                    )?;
+                    if pps.entropy_sync && col == 1 {
+                        saved_contexts = Some(bins.contexts()?);
+                    }
+                    let end = bins.terminate()?;
+                    let last = row == rows - 1 && col == columns - 1;
+                    if end != last {
+                        return Err(invalid(
+                            "HEVC slice termination does not match picture extent",
+                        ));
+                    }
+                    if pps.entropy_sync && col == columns - 1 && !last && !bins.terminate()? {
+                        return Err(invalid("missing Hevc end-of-substream bit"));
+                    }
+                }
+                if let Some(sender) = &decoder.jobs {
+                    sender
+                        .send((row as usize, std::mem::take(&mut decoder.reconstruction)))
+                        .map_err(|_| invalid("HEVC reconstruction worker stopped"))?;
+                }
+            }
+            Ok(())
+        })();
+        // Close the channel on every parse exit, including truncated bitstreams.
+        decoder.jobs.take();
+        if let Some((handles, planes, _)) = workers {
+            for handle in handles {
+                handle
+                    .join()
+                    .map_err(|_| invalid("HEVC reconstruction worker panicked"))??;
+            }
+            parsed?;
+            decoder.planes = std::sync::Arc::try_unwrap(planes)
+                .map_err(|_| invalid("HEVC reconstruction planes still shared"))?
+                .into_inner()
+                .unwrap_or_else(|e| e.into_inner());
+        } else {
+            parsed?;
+        }
+        Ok(())
+    })?;
     if !decoder.planes.iter().all(Plane::complete) {
         return Err(invalid("incomplete HEVC picture"));
+    }
+    if !slice.deblocking.disabled {
+        deblock(&mut decoder, slice)?;
     }
     if slice.sao != [false, false] {
         for (component, plane) in decoder.planes.iter_mut().enumerate() {
@@ -141,7 +303,20 @@ pub fn decode_idr(sps: &Sps, pps: &Pps, slice: &SliceHeader, budget: usize) -> R
             plane.apply_sao(max_cb - u8::from(component != 0), &parameters)?;
         }
     }
+    let motion = if slice.slice_type == SliceType::I {
+        Vec::new()
+    } else {
+        let mut grid = Vec::with_capacity(w.div_ceil(16) as usize * h.div_ceil(16) as usize);
+        for y in (0..h).step_by(16) {
+            for x in (0..w).step_by(16) {
+                grid.push(decoder.cells[y as usize / 4 * (w as usize / 4) + x as usize / 4].motion);
+            }
+        }
+        grid
+    };
     Ok(Picture {
+        motion,
+        reference_pocs: std::array::from_fn(|l| lists[l].iter().map(|r| r.poc).collect()),
         dimensions: [w, h],
         crop: sps.crop,
         depth: sps.depth,
@@ -149,35 +324,88 @@ pub fn decode_idr(sps: &Sps, pps: &Pps, slice: &SliceHeader, budget: usize) -> R
         sao,
     })
 }
+#[derive(Clone, Copy, Default)]
+struct Cell {
+    ready: bool,
+    depth: u8,
+    skip: bool,
+    intra: bool,
+    mode: u8,
+    motion: Motion,
+    cbf: bool,
+}
 struct Decoder<'a> {
     sps: &'a Sps,
     pps: &'a Pps,
+    slice: &'a SliceHeader,
+    poc: i32,
+    lists: &'a [Vec<Reference>; 2],
     qp: i32,
     chroma_offsets: [i32; 2],
-    leaves: Vec<Node>,
+    qp_coded: bool,
+    qp_prediction: i32,
+    qp_grid: Vec<i32>,
+    edges: Vec<[u8; 2]>,
+    cells: Vec<Cell>,
     planes: [Plane; 3],
-    modes: Vec<(Node, u8)>,
+    jobs: Option<std::sync::mpsc::SyncSender<(usize, Vec<Reconstruction>)>>,
+    reconstruction: Vec<Reconstruction>,
+    scratch: Vec<i32>,
+    pred_scratch: Vec<u16>,
 }
 impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
     fn neighbouring_depths(&self, n: Node) -> [Option<u8>; 2] {
         let at = |x: u32, y: u32| {
-            self.leaves
-                .iter()
-                .find(|l| {
-                    x >= l.x && y >= l.y && x - l.x < 1 << l.log2_size && y - l.y < 1 << l.log2_size
-                })
-                .map(|l| l.depth)
+            self.cell(x as i32, y as i32)
+                .filter(|v| v.ready)
+                .map(|v| v.depth)
         };
         [
             n.x.checked_sub(1).and_then(|x| at(x, n.y)),
             n.y.checked_sub(1).and_then(|y| at(n.x, y)),
         ]
     }
-    fn enter(&mut self, _: Node, _: bool) -> Result<()> {
+    fn enter(&mut self, n: Node, split: bool) -> Result<()> {
+        if let Some(depth) = self.pps.cu_qp_delta_depth {
+            let log = self.sps.coding_block_log2[1] - depth;
+            if n.log2_size >= log {
+                self.qp_coded = false;
+                if !split || n.log2_size == log {
+                    let width = self.sps.dimensions[0] as usize / 8;
+                    let ctu = 1 << self.sps.coding_block_log2[1];
+                    let a = (n.x % ctu != 0)
+                        .then(|| self.qp_grid[n.y as usize / 8 * width + (n.x as usize - 1) / 8]);
+                    let b = (n.y % ctu != 0)
+                        .then(|| self.qp_grid[(n.y as usize - 1) / 8 * width + n.x as usize / 8]);
+                    self.qp_prediction = hevc_qp::luma(self.qp, [a, b], 0, self.sps.depth[0])?;
+                    self.qp = self.qp_prediction;
+                }
+            }
+        }
         Ok(())
     }
     fn leaf(&mut self, b: &mut HevcCabac<'a>, n: Node) -> Result<()> {
         let bypass = self.pps.transquant_bypass && b.decision(Syntax::TransquantBypass, 0)?;
+        let skip = if self.slice.slice_type != SliceType::I {
+            let context = [
+                self.cell(n.x as i32 - 1, n.y as i32),
+                self.cell(n.x as i32, n.y as i32 - 1),
+            ]
+            .into_iter()
+            .flatten()
+            .filter(|c| c.ready && c.skip)
+            .count();
+            b.decision(Syntax::Skip, context)?
+        } else {
+            false
+        };
+        let intra =
+            !skip && (self.slice.slice_type == SliceType::I || b.decision(Syntax::PredMode, 0)?);
+        if !intra {
+            self.inter(b, n, skip, bypass)?;
+            self.finish_cu(n, false, skip);
+            return Ok(());
+        }
         let nxn =
             n.log2_size == self.sps.coding_block_log2[0] && !b.decision(Syntax::PartMode, 0)?;
         let codes = hevc_intra_syntax::read_luma(b, nxn)?;
@@ -191,15 +419,9 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                 depth: n.depth,
             };
             let neighbour = |x: u32, y: u32| {
-                self.modes
-                    .iter()
-                    .find(|(l, _)| {
-                        x >= l.x
-                            && y >= l.y
-                            && x - l.x < 1 << l.log2_size
-                            && y - l.y < 1 << l.log2_size
-                    })
-                    .map(|(_, m)| *m)
+                self.cell(x as i32, y as i32)
+                    .filter(|v| v.ready)
+                    .map(|v| if v.intra { v.mode } else { 1 })
             };
             let left = p.x.checked_sub(1).and_then(|x| neighbour(x, p.y));
             let top = if p.y % (1 << self.sps.coding_block_log2[1]) == 0 {
@@ -211,7 +433,18 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
             if i == 0 {
                 mode = derived;
             }
-            self.modes.push((p, derived));
+            let stride = self.sps.dimensions[0] as usize / 4;
+            for y in p.y as usize / 4..(p.y as usize + (1 << p.log2_size)) / 4 {
+                for x in p.x as usize / 4..(p.x as usize + (1 << p.log2_size)) / 4 {
+                    self.cells[y * stride + x] = Cell {
+                        ready: true,
+                        depth: n.depth,
+                        intra: true,
+                        mode: derived,
+                        ..Cell::default()
+                    };
+                }
+            }
         }
         let chroma = hevc_intra::chroma_mode(mode, hevc_intra_syntax::read_chroma(b)?)?;
         let c = hevc_transform_tree::Config {
@@ -223,16 +456,22 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
         };
         hevc_transform_tree::read_intra(b, [n.x, n.y], c, |b, u| {
             let mode = self
-                .modes
-                .iter()
-                .find(|(p, _)| {
-                    u.origin[0] >= p.x
-                        && u.origin[1] >= p.y
-                        && u.origin[0] - p.x < 1 << p.log2_size
-                        && u.origin[1] - p.y < 1 << p.log2_size
-                })
+                .cell(u.origin[0] as i32, u.origin[1] as i32)
                 .ok_or_else(|| invalid("HEVC transform has no prediction block"))?
-                .1;
+                .mode;
+            if self.pps.cu_qp_delta_depth.is_some() && !self.qp_coded && u.coded.iter().any(|&v| v)
+            {
+                let delta = hevc_qp::read_delta(b, self.sps.depth[0])?;
+                self.qp = hevc_qp::luma(self.qp_prediction, [None; 2], delta, self.sps.depth[0])?;
+                self.qp_coded = true;
+            }
+            let stride = self.sps.dimensions[0] as usize / 4;
+            for k in 0..1usize << (u.log2_size - 2) {
+                let x = u.origin[0] as usize / 4;
+                let y = u.origin[1] as usize / 4;
+                self.edges[(y + k) * stride + x][0] |= 2;
+                self.edges[y * stride + x + k][1] |= 2;
+            }
             let qps = hevc_qp::components(self.qp, self.sps.depth, self.chroma_offsets)?;
             for component in 0..3 {
                 if component != 0 && !u.owns_chroma {
@@ -253,36 +492,489 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                     sign_hiding: self.pps.sign_data_hiding,
                 };
                 let residual = if u.coded[component] {
-                    let r = hevc_block::decode(
-                        b,
-                        c,
-                        self.pps
-                            .scaling_lists
-                            .as_ref()
-                            .unwrap_or(&self.sps.scaling_lists),
-                    )?;
-                    r
+                    Some(hevc_block::read(b, c)?)
                 } else {
-                    vec![0; 1 << (2 * c.log2_size)]
+                    None
                 };
                 let origin = if component == 0 {
                     u.origin
                 } else {
                     u.chroma_origin
                 };
-                self.planes[component].reconstruct_intra(
-                    origin.map(|v| v as usize),
-                    c.log2_size,
-                    c.intra_mode.unwrap(),
-                    component != 0,
-                    self.sps.strong_intra_smoothing,
-                    &residual,
-                    |_, _| true,
-                )?;
+                if self.jobs.is_some() {
+                    self.reconstruction.push(Reconstruction::Intra {
+                        component,
+                        origin: origin.map(|v| v as usize),
+                        log: c.log2_size,
+                        mode: c.intra_mode.unwrap(),
+                        residual,
+                    });
+                } else {
+                    let residual = match residual {
+                        Some(block) => block.reconstruct(
+                            self.pps
+                                .scaling_lists
+                                .as_ref()
+                                .unwrap_or(&self.sps.scaling_lists),
+                        )?,
+                        None => Vec::new(),
+                    };
+                    self.planes[component].reconstruct_intra(
+                        origin.map(|v| v as usize),
+                        c.log2_size,
+                        c.intra_mode.unwrap(),
+                        component != 0,
+                        self.sps.strong_intra_smoothing,
+                        &residual,
+                        &mut self.pred_scratch,
+                        |x, y| {
+                            if !self.pps.constrained_intra {
+                                return true;
+                            }
+                            let shift = usize::from(component != 0);
+                            self.cells[((y << shift) / 4) * (self.sps.dimensions[0] as usize / 4)
+                                + (x << shift) / 4]
+                                .intra
+                        },
+                    )?;
+                }
             }
             Ok(())
         })?;
-        self.leaves.push(n);
+        self.finish_cu(n, true, false);
         Ok(())
+    }
+}
+
+// Rows preserve reconstruction order. CABAC and motion metadata can advance
+// independently; intra prediction still sees only previously reconstructed pixels.
+enum Reconstruction {
+    Inter {
+        motion: Motion,
+        rect: [u32; 4],
+    },
+    Intra {
+        component: usize,
+        origin: [usize; 2],
+        log: u8,
+        mode: u8,
+        residual: Option<hevc_block::Coefficients>,
+    },
+    Residual {
+        component: usize,
+        origin: [usize; 2],
+        log: u8,
+        residual: hevc_block::Coefficients,
+    },
+}
+fn reconstruct_row(
+    planes: &mut [Plane; 3],
+    commands: Vec<Reconstruction>,
+    sps: &Sps,
+    pps: &Pps,
+    slice: &SliceHeader,
+    lists: &[Vec<Reference>; 2],
+    scratch: &mut Vec<i32>,
+    pred_scratch: &mut Vec<u16>,
+) -> Result<()> {
+    let scaling = pps.scaling_lists.as_ref().unwrap_or(&sps.scaling_lists);
+    for command in commands {
+        match command {
+            Reconstruction::Inter { motion, rect } => {
+                for c in 0..3 {
+                    let shift = usize::from(c != 0);
+                    let pixels = hevc_motion::predict(
+                        lists,
+                        motion,
+                        rect,
+                        c,
+                        sps.depth[shift],
+                        slice.weights.as_ref(),
+                        scratch,
+                    )?;
+                    planes[c].reconstruct_inter(rect.map(|v| v as usize >> shift), &pixels)?;
+                }
+            }
+            Reconstruction::Intra {
+                component,
+                origin,
+                log,
+                mode,
+                residual,
+            } => {
+                let residual = match residual {
+                    Some(block) => block.reconstruct(scaling)?,
+                    None => Vec::new(),
+                };
+                planes[component].reconstruct_intra(
+                    origin,
+                    log,
+                    mode,
+                    component != 0,
+                    sps.strong_intra_smoothing,
+                    &residual,
+                    pred_scratch,
+                    |_, _| true,
+                )?;
+            }
+            Reconstruction::Residual {
+                component,
+                origin,
+                log,
+                residual,
+            } => {
+                let residual = residual.reconstruct(scaling)?;
+                planes[component].add_residual(origin, log, &residual)?;
+            }
+        }
+    }
+    Ok(())
+}
+
+fn deblock(decoder: &mut Decoder<'_>, slice: &SliceHeader) -> Result<()> {
+    use super::hevc_deblock as d;
+    let [width, height] = decoder.sps.dimensions.map(|v| v as usize);
+    // Complete vertical filtering precedes horizontal filtering.
+    for direction in 0..2 {
+        for y in (0..height).step_by(4) {
+            for x in (0..width).step_by(4) {
+                let edge = if direction == 0 { x } else { y };
+                if edge == 0
+                    || edge % 8 != 0
+                    || decoder.edges[y / 4 * (width / 4) + x / 4][direction] == 0
+                {
+                    continue;
+                }
+                let q = decoder.qp_grid[y / 8 * (width / 8) + x / 8];
+                let p = if direction == 0 {
+                    decoder.qp_grid[y / 8 * (width / 8) + (x - 1) / 8]
+                } else {
+                    decoder.qp_grid[(y - 1) / 8 * (width / 8) + x / 8]
+                };
+                let a = decoder
+                    .cell(
+                        if direction == 0 {
+                            x as i32 - 1
+                        } else {
+                            x as i32
+                        },
+                        if direction == 0 {
+                            y as i32
+                        } else {
+                            y as i32 - 1
+                        },
+                    )
+                    .unwrap();
+                let b = decoder.cell(x as i32, y as i32).unwrap();
+                let strength = if a.intra || b.intra {
+                    2
+                } else if decoder.edges[y / 4 * (width / 4) + x / 4][direction] & 2 != 0
+                    && (a.cbf || b.cbf)
+                {
+                    1
+                } else {
+                    u8::from(motion_boundary(a.motion, b.motion, decoder.lists))
+                };
+                if strength == 0 {
+                    continue;
+                }
+                let [beta, tc] = d::luma_thresholds(
+                    [p, q],
+                    strength,
+                    slice.deblocking.offsets_div2,
+                    decoder.sps.depth[0],
+                )?;
+                let plane = decoder.planes[0].samples_mut();
+                let index = |line: usize, side: usize, distance: usize| {
+                    let delta = if side == 0 {
+                        -(distance as isize) - 1
+                    } else {
+                        distance as isize
+                    };
+                    if direction == 0 {
+                        (y + line) * width + x.checked_add_signed(delta).unwrap()
+                    } else {
+                        y.checked_add_signed(delta).unwrap() * width + x + line
+                    }
+                };
+                let input: [[[u16; 4]; 2]; 4] = std::array::from_fn(|l| {
+                    std::array::from_fn(|s| std::array::from_fn(|v| plane[index(l, s, v)]))
+                });
+                let mode =
+                    d::luma_decision([input[0], input[3]], [beta, tc], decoder.sps.depth[0])?;
+                for l in 0..4 {
+                    let output = d::luma_sample(
+                        input[l][0],
+                        input[l][1],
+                        tc,
+                        decoder.sps.depth[0],
+                        mode,
+                        [true; 2],
+                    )?;
+                    for s in 0..2 {
+                        for v in 0..3 {
+                            plane[index(l, s, v)] = output[s][v];
+                        }
+                    }
+                }
+                if edge % 16 == 0 && (if direction == 0 { y } else { x }) % 8 == 0 && strength == 2
+                {
+                    for c in 1..3 {
+                        let tc = d::chroma_tc(
+                            p,
+                            q,
+                            decoder.pps.chroma_qp_offsets[c - 1],
+                            slice.deblocking.offsets_div2[1],
+                            decoder.sps.depth,
+                        )?;
+                        let plane = decoder.planes[c].samples_mut();
+                        for l in 0..4 {
+                            let index = |side: usize, v: usize| {
+                                let delta = if side == 0 {
+                                    -(v as isize) - 1
+                                } else {
+                                    v as isize
+                                };
+                                if direction == 0 {
+                                    (y / 2 + l) * (width / 2)
+                                        + (x / 2).checked_add_signed(delta).unwrap()
+                                } else {
+                                    (y / 2).checked_add_signed(delta).unwrap() * (width / 2)
+                                        + x / 2
+                                        + l
+                                }
+                            };
+                            let a = [plane[index(0, 0)], plane[index(0, 1)]];
+                            let b = [plane[index(1, 0)], plane[index(1, 1)]];
+                            let output =
+                                d::chroma_sample(a, b, tc, decoder.sps.depth[1], [true; 2])?;
+                            plane[index(0, 0)] = output[0];
+                            plane[index(1, 0)] = output[1];
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+impl Decoder<'_> {
+    fn cell(&self, x: i32, y: i32) -> Option<Cell> {
+        let [w, h] = self.sps.dimensions;
+        if x < 0 || y < 0 || x as u32 >= w || y as u32 >= h {
+            None
+        } else {
+            Some(self.cells[y as usize / 4 * (w as usize / 4) + x as usize / 4])
+        }
+    }
+    fn finish_cu(&mut self, n: Node, intra: bool, skip: bool) {
+        let stride = self.sps.dimensions[0] as usize / 8;
+        for y in n.y as usize / 8..(n.y as usize + (1 << n.log2_size)) / 8 {
+            for x in n.x as usize / 8..(n.x as usize + (1 << n.log2_size)) / 8 {
+                self.qp_grid[y * stride + x] = self.qp;
+            }
+        }
+        let stride = stride * 2;
+        let x = n.x as usize / 4;
+        let y = n.y as usize / 4;
+        let side = 1usize << (n.log2_size - 2);
+        for k in 0..side {
+            self.edges[(y + k) * stride + x][0] |= 2;
+            self.edges[y * stride + x + k][1] |= 2;
+        }
+        for y in n.y as usize / 4..(n.y as usize + (1 << n.log2_size)) / 4 {
+            for x in n.x as usize / 4..(n.x as usize + (1 << n.log2_size)) / 4 {
+                let cell = &mut self.cells[y * stride + x];
+                cell.ready = true;
+                cell.depth = n.depth;
+                cell.intra = intra;
+                cell.skip = skip;
+            }
+        }
+    }
+    fn inter(&mut self, b: &mut HevcCabac<'_>, n: Node, skip: bool, bypass: bool) -> Result<()> {
+        let partition = if skip {
+            Partition::Full
+        } else {
+            hevc_inter_syntax::partition(
+                b,
+                n.log2_size,
+                self.sps.coding_block_log2[0],
+                self.sps.amp,
+            )?
+        };
+        let stride = self.sps.dimensions[0] as usize / 4;
+        let mut full_merge = false;
+        for (part_index, [dx, dy, w, h]) in partition
+            .rectangles(1 << n.log2_size)
+            .into_iter()
+            .enumerate()
+        {
+            let rect = [n.x + dx, n.y + dy, w, h];
+            let syntax = hevc_inter_syntax::prediction(b, self.slice, skip, n.depth, [w, h])?;
+            full_merge = partition == Partition::Full
+                && matches!(syntax, hevc_inter_syntax::Prediction::Merge(_));
+            let spatial = Spatial {
+                rect,
+                cu: [n.x, n.y, 1 << n.log2_size],
+                partition,
+                part_index,
+                merge_log2: self.pps.parallel_merge_log2,
+                ctu_log2: self.sps.coding_block_log2[1],
+                poc: self.poc,
+                lists: self.lists,
+            };
+            let motion = spatial.resolve(syntax, self.slice, |x, y| {
+                self.cell(x, y)
+                    .filter(|c| c.ready && !c.intra)
+                    .map(|c| c.motion)
+            })?;
+            if self.jobs.is_some() {
+                self.reconstruction
+                    .push(Reconstruction::Inter { motion, rect });
+            } else {
+                for c in 0..3 {
+                    let shift = usize::from(c != 0);
+                    let pixels = hevc_motion::predict(
+                        self.lists,
+                        motion,
+                        rect,
+                        c,
+                        self.sps.depth[shift],
+                        self.slice.weights.as_ref(),
+                        &mut self.scratch,
+                    )?;
+                    self.planes[c].reconstruct_inter(rect.map(|v| v as usize >> shift), &pixels)?;
+                }
+            }
+            let [x, y, w, h] = rect.map(|v| v as usize / 4);
+            for yy in y..y + h {
+                for xx in x..x + w {
+                    self.cells[yy * stride + xx] = Cell {
+                        ready: true,
+                        depth: n.depth,
+                        skip,
+                        motion,
+                        ..Cell::default()
+                    };
+                }
+            }
+            for yy in y..y + h {
+                self.edges[yy * stride + x][0] |= 1;
+            }
+            for xx in x..x + w {
+                self.edges[y * stride + xx][1] |= 1;
+            }
+        }
+        if skip || (!full_merge && !b.decision(Syntax::RootCbf, 0)?) {
+            return Ok(());
+        }
+        let config = hevc_transform_tree::Config {
+            log2_cu: n.log2_size,
+            log2_min_transform: self.sps.transform_block_log2[0],
+            log2_max_transform: self.sps.transform_block_log2[1],
+            max_depth: self.sps.transform_hierarchy_depth[0],
+            intra_split: false,
+        };
+        hevc_transform_tree::read_inter(
+            b,
+            [n.x, n.y],
+            config,
+            partition != Partition::Full,
+            |b, u| {
+                if self.pps.cu_qp_delta_depth.is_some()
+                    && !self.qp_coded
+                    && u.coded.iter().any(|&v| v)
+                {
+                    let delta = hevc_qp::read_delta(b, self.sps.depth[0])?;
+                    self.qp =
+                        hevc_qp::luma(self.qp_prediction, [None; 2], delta, self.sps.depth[0])?;
+                    self.qp_coded = true;
+                }
+                let x = u.origin[0] as usize / 4;
+                let y = u.origin[1] as usize / 4;
+                let side = 1usize << (u.log2_size - 2);
+                for k in 0..side {
+                    self.edges[(y + k) * stride + x][0] |= 2;
+                    self.edges[y * stride + x + k][1] |= 2;
+                }
+                for yy in y..y + side {
+                    for xx in x..x + side {
+                        self.cells[yy * stride + xx].cbf = u.coded[0];
+                    }
+                }
+                let qps = hevc_qp::components(self.qp, self.sps.depth, self.chroma_offsets)?;
+                for c in 0..3 {
+                    if !u.coded[c] || (c != 0 && !u.owns_chroma) {
+                        continue;
+                    }
+                    let config = hevc_block::Config {
+                        log2_size: if c == 0 {
+                            u.log2_size
+                        } else {
+                            u.log2_chroma_size
+                        },
+                        component: c as u8,
+                        bit_depth: self.sps.depth[usize::from(c != 0)],
+                        qp: qps[c],
+                        intra_mode: None,
+                        transform_skip_enabled: self.pps.transform_skip,
+                        transquant_bypass: bypass,
+                        sign_hiding: self.pps.sign_data_hiding,
+                    };
+                    let residual = hevc_block::read(b, config)?;
+                    let origin = if c == 0 { u.origin } else { u.chroma_origin };
+                    if self.jobs.is_some() {
+                        self.reconstruction.push(Reconstruction::Residual {
+                            component: c,
+                            origin: origin.map(|v| v as usize),
+                            log: config.log2_size,
+                            residual,
+                        });
+                    } else {
+                        let residual = residual.reconstruct(
+                            self.pps
+                                .scaling_lists
+                                .as_ref()
+                                .unwrap_or(&self.sps.scaling_lists),
+                        )?;
+                        self.planes[c].add_residual(
+                            origin.map(|v| v as usize),
+                            config.log2_size,
+                            &residual,
+                        )?;
+                    }
+                }
+                Ok(())
+            },
+        )
+    }
+}
+
+fn motion_boundary(a: Motion, b: Motion, lists: &[Vec<Reference>; 2]) -> bool {
+    let convert = |m: Motion| {
+        let mut output = [(0, [0; 2]); 2];
+        let mut count = 0;
+        for (l, v) in m.into_iter().enumerate() {
+            if let Some(v) = v {
+                output[count] = (lists[l][v.reference as usize].poc, v.mv);
+                count += 1;
+            }
+        }
+        (output, count)
+    };
+    let (a, na) = convert(a);
+    let (b, nb) = convert(b);
+    if na != nb {
+        return true;
+    }
+    let same = |a: (i32, [i16; 2]), b: (i32, [i16; 2])| {
+        a.0 == b.0 && (0..2).all(|i| (i32::from(a.1[i]) - i32::from(b.1[i])).abs() < 4)
+    };
+    match na {
+        0 => false,
+        1 => !same(a[0], b[0]),
+        _ => !(same(a[0], b[0]) && same(a[1], b[1]) || same(a[0], b[1]) && same(a[1], b[0])),
     }
 }

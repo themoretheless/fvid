@@ -1,14 +1,38 @@
-//! HEVC slice-header parsing. Initial IDR path; entropy data remains untouched.
+//! HEVC I/P/B slice headers, reference lists, weights and escaped entry points.
 use super::{
     bits::BitReader,
+    hevc_cabac::SliceType,
     hevc_nal::{NalHeader, NalRbsp},
     hevc_pps::{Deblocking, Pps},
+    hevc_rps::{self, ShortTermReference},
     hevc_sps::Sps,
 };
 use crate::{Result, invalid};
+#[derive(Clone, Copy, Debug)]
+pub struct Weight {
+    pub values: [i16; 3],
+    pub offsets: [i16; 3],
+}
+#[derive(Clone, Debug)]
+pub struct Weights {
+    pub denominators: [u8; 2],
+    pub lists: [Vec<Weight>; 2],
+}
 #[derive(Clone, Debug)]
 pub struct SliceHeader {
     pub nal: NalHeader,
+    pub slice_type: SliceType,
+    pub poc_lsb: u32,
+    pub short_term: Vec<ShortTermReference>,
+    pub temporal_mvp: bool,
+    pub references: [u8; 2],
+    pub list_modification: [Option<Vec<u8>>; 2],
+    pub mvd_l1_zero: bool,
+    pub cabac_init: bool,
+    pub collocated_list: usize,
+    pub collocated_ref: u8,
+    pub max_merge_candidates: u8,
+    pub weights: Option<Weights>,
     pub first: bool,
     pub no_output_of_prior_pictures: bool,
     pub pps_id: u8,
@@ -27,6 +51,8 @@ pub struct SliceHeader {
     pub extension: Vec<u8>,
     pub rbsp: Vec<u8>,
     pub entropy_byte_offset: usize,
+    /// Entropy substreams in de-escaped RBSP coordinates.
+    pub entropy_substreams: Vec<std::ops::Range<usize>>,
 }
 fn ue(b: &mut BitReader<'_>, max: u32) -> Result<u32> {
     let n = b.unsigned_golomb()?;
@@ -43,18 +69,42 @@ fn se(b: &mut BitReader<'_>, min: i32, max: i32) -> Result<i32> {
     Ok(n)
 }
 impl SliceHeader {
+    pub fn parameter_set_id(nal: &[u8]) -> Result<u8> {
+        let payload = NalRbsp::parse(nal, nal.len())?;
+        if !payload.header.is_vcl() {
+            return Err(invalid("expected HEVC VCL NAL"));
+        }
+        let mut b = BitReader::new(&payload.bytes);
+        b.bit()?;
+        if payload.header.is_irap() {
+            b.bit()?;
+        }
+        Ok(ue(&mut b, 63)? as u8)
+    }
     pub fn parse_idr(nal: &[u8], sps: &Sps, pps: &Pps, budget: usize) -> Result<Self> {
+        let header = Self::parse(nal, sps, pps, budget)?;
+        if !header.nal.is_idr() || header.nal.temporal_id != 0 {
+            return Err(invalid("expected temporal-zero HEVC IDR slice"));
+        }
+        Ok(header)
+    }
+    pub fn parse(nal: &[u8], sps: &Sps, pps: &Pps, budget: usize) -> Result<Self> {
         let payload = NalRbsp::parse(nal, budget)?;
         payload.header.require_base_layer()?;
-        if !payload.header.is_idr() || payload.header.temporal_id != 0 {
-            return Err(invalid("expected temporal-zero HEVC IDR slice"));
+        if !matches!(payload.header.unit_type,0..=9|16..=21)
+            || payload.header.is_irap() && payload.header.temporal_id != 0
+        {
+            return Err(invalid("unsupported HEVC VCL type or IRAP temporal layer"));
+        }
+        if !payload.header.is_vcl() {
+            return Err(invalid("expected HEVC VCL NAL"));
         }
         if pps.sps_id != sps.id {
             return Err(invalid("HEVC slice parameter set mismatch"));
         }
         let b = &mut BitReader::new(&payload.bytes);
         let first = b.bit()?;
-        let no_output_of_prior_pictures = b.bit()?;
+        let no_output_of_prior_pictures = payload.header.is_irap() && b.bit()?;
         let pps_id = ue(b, 63)? as u8;
         if pps_id != pps.id {
             return Err(invalid("HEVC slice references another PPS"));
@@ -82,8 +132,13 @@ impl SliceHeader {
             address
         };
         b.skip(usize::from(pps.extra_slice_header_bits))?;
-        if ue(b, 2)? != 2 {
-            return Err(invalid("HEVC IDR slice must be intra"));
+        let slice_type = match ue(b, 2)? {
+            0 => SliceType::B,
+            1 => SliceType::P,
+            _ => SliceType::I,
+        };
+        if payload.header.is_irap() && slice_type != SliceType::I {
+            return Err(invalid("HEVC IRAP slice must be intra"));
         }
         let picture_output = if pps.output_flag_present {
             b.bit()?
@@ -98,12 +153,152 @@ impl SliceHeader {
         if colour_plane > 2 {
             return Err(invalid("invalid HEVC colour plane"));
         }
+        let mut poc_lsb = 0;
+        let mut short_term = Vec::new();
+        let mut temporal_mvp = false;
+        if !payload.header.is_idr() {
+            poc_lsb = b.read(sps.poc_bits)?;
+            if !b.bit()? {
+                short_term = hevc_rps::read_short_term(b, &sps.short_term, true, 15)?;
+            } else {
+                let index = if sps.short_term.len() > 1 {
+                    b.read((usize::BITS - (sps.short_term.len() - 1).leading_zeros()) as u8)?
+                        as usize
+                } else {
+                    0
+                };
+                short_term = sps
+                    .short_term
+                    .get(index)
+                    .ok_or_else(|| invalid("HEVC slice RPS index out of range"))?
+                    .clone();
+            }
+            if sps.long_term_present {
+                return Err(invalid(
+                    "HEVC long-term slice references are not implemented",
+                ));
+            }
+            temporal_mvp = sps.temporal_mvp && b.bit()?;
+        }
         let chroma = sps.chroma_format != 0 && !sps.separate_colour_plane;
         let sao = if sps.sao {
             [b.bit()?, chroma && b.bit()?]
         } else {
             [false; 2]
         };
+        let mut references = [0; 2];
+        let mut list_modification = [None, None];
+        let mut mvd_l1_zero = false;
+        let mut cabac_init = false;
+        let mut collocated_list = 0;
+        let mut collocated_ref = 0;
+        let mut max_merge_candidates = 0;
+        let mut weights = None;
+        if slice_type != SliceType::I {
+            references = [
+                pps.default_references[0],
+                if slice_type == SliceType::B {
+                    pps.default_references[1]
+                } else {
+                    0
+                },
+            ];
+            if b.bit()? {
+                references[0] = ue(b, 14)? as u8 + 1;
+                if slice_type == SliceType::B {
+                    references[1] = ue(b, 14)? as u8 + 1;
+                }
+            }
+            let total = short_term.iter().filter(|r| r.used).count();
+            if total == 0 {
+                return Err(invalid("HEVC inter slice has no current references"));
+            }
+            if pps.lists_modification && total > 1 {
+                let width = (usize::BITS - (total - 1).leading_zeros()) as u8;
+                for list in 0..if slice_type == SliceType::B { 2 } else { 1 } {
+                    if b.bit()? {
+                        let mut entries = Vec::new();
+                        for _ in 0..references[list] {
+                            let v = b.read(width)?;
+                            if v as usize >= total {
+                                return Err(invalid("HEVC reference-list entry out of range"));
+                            }
+                            entries.push(v as u8);
+                        }
+                        list_modification[list] = Some(entries);
+                    }
+                }
+            }
+            mvd_l1_zero = slice_type == SliceType::B && b.bit()?;
+            cabac_init = pps.cabac_init_present && b.bit()?;
+            if temporal_mvp {
+                if slice_type == SliceType::B {
+                    collocated_list = usize::from(!b.bit()?);
+                }
+                if references[collocated_list] > 1 {
+                    collocated_ref = ue(b, u32::from(references[collocated_list] - 1))? as u8;
+                }
+            }
+            if (slice_type == SliceType::P && pps.weighted_prediction)
+                || (slice_type == SliceType::B && pps.weighted_biprediction)
+            {
+                let luma = ue(b, 7)? as u8;
+                let chroma_denom = if chroma {
+                    i32::from(luma) + se(b, -7, 7)?
+                } else {
+                    i32::from(luma)
+                };
+                if !(0..=7).contains(&chroma_denom) {
+                    return Err(invalid("HEVC chroma weight denominator out of range"));
+                }
+                let mut table = Weights {
+                    denominators: [luma, chroma_denom as u8],
+                    lists: [Vec::new(), Vec::new()],
+                };
+                let mut flags = 0;
+                for list in 0..if slice_type == SliceType::B { 2 } else { 1 } {
+                    let mut luma_flags = Vec::new();
+                    let mut chroma_flags = vec![false; references[list] as usize];
+                    for _ in 0..references[list] {
+                        let flag = b.bit()?;
+                        flags += usize::from(flag);
+                        luma_flags.push(flag);
+                    }
+                    if chroma {
+                        for flag in &mut chroma_flags {
+                            *flag = b.bit()?;
+                            flags += 2 * usize::from(*flag);
+                        }
+                    }
+                    if flags > 24 {
+                        return Err(invalid("HEVC prediction weight flags exceed limit"));
+                    }
+                    for i in 0..references[list] as usize {
+                        let mut weight = Weight {
+                            values: [1 << luma, 1 << chroma_denom, 1 << chroma_denom],
+                            offsets: [0; 3],
+                        };
+                        if luma_flags[i] {
+                            weight.values[0] += se(b, -128, 127)? as i16;
+                            weight.offsets[0] = se(b, -128, 127)? as i16;
+                        }
+                        if chroma_flags[i] {
+                            for c in 1..3 {
+                                weight.values[c] += se(b, -128, 127)? as i16;
+                                let delta = se(b, -512, 511)?;
+                                weight.offsets[c] = (delta + 128
+                                    - ((128 * i32::from(weight.values[c])) >> chroma_denom))
+                                    .clamp(-128, 127)
+                                    as i16;
+                            }
+                        }
+                        table.lists[list].push(weight);
+                    }
+                }
+                weights = Some(table);
+            }
+            max_merge_candidates = 5 - ue(b, 4)? as u8;
+        }
         let min_qp = -6 * (i32::from(sps.depth[0]) - 8);
         let qp = pps
             .initial_qp
@@ -139,7 +334,7 @@ impl SliceHeader {
         if pps.tiles.is_some() || pps.entropy_sync {
             let entries = ue(b, count - 1)? as usize;
             if entries
-                .checked_mul(8)
+                .checked_mul(24)
                 .and_then(|n| n.checked_add(payload.bytes.len()))
                 .is_none_or(|n| n > budget)
             {
@@ -174,8 +369,74 @@ impl SliceHeader {
         if b.remaining() < 8 {
             return Err(invalid("missing HEVC entropy payload"));
         }
+        // Entry-point offsets count emulation-prevention bytes, whereas CABAC
+        // consumes RBSP. Map boundaries before dropping the escaped input.
+        let escaped = &nal[2..];
+        let mut zeros = 0;
+        let mut rbsp_position = 0;
+        let mut next_boundary = None;
+        let mut entry = 0;
+        let mut start = entropy_byte_offset;
+        let mut entropy_substreams = Vec::with_capacity(entry_point_offsets.len() + 1);
+        for (i, &byte) in escaped.iter().enumerate() {
+            let escape = zeros == 2 && byte == 3;
+            if !escape
+                && rbsp_position == entropy_byte_offset
+                && next_boundary.is_none()
+                && entry == 0
+            {
+                if let Some(&length) = entry_point_offsets.first() {
+                    next_boundary = Some(
+                        i.checked_add(
+                            usize::try_from(length)
+                                .map_err(|_| invalid("HEVC entry point overflow"))?,
+                        )
+                        .ok_or_else(|| invalid("HEVC entry point overflow"))?,
+                    );
+                }
+            }
+            if next_boundary == Some(i) {
+                if escape || rbsp_position <= start {
+                    return Err(invalid("HEVC entry point is inside an escape or empty"));
+                }
+                entropy_substreams.push(start..rbsp_position);
+                start = rbsp_position;
+                entry += 1;
+                next_boundary = entry_point_offsets
+                    .get(entry)
+                    .map(|&length| {
+                        usize::try_from(length)
+                            .ok()
+                            .and_then(|length| i.checked_add(length))
+                            .ok_or_else(|| invalid("HEVC entry point overflow"))
+                    })
+                    .transpose()?;
+            }
+            if escape {
+                zeros = 0;
+            } else {
+                zeros = if byte == 0 { zeros + 1 } else { 0 };
+                rbsp_position += 1;
+            }
+        }
+        if entry != entry_point_offsets.len() {
+            return Err(invalid("HEVC entry point exceeds entropy payload"));
+        }
+        entropy_substreams.push(start..payload.bytes.len());
         Ok(Self {
             nal: payload.header,
+            slice_type,
+            poc_lsb,
+            short_term,
+            temporal_mvp,
+            references,
+            list_modification,
+            mvd_l1_zero,
+            cabac_init,
+            collocated_list,
+            collocated_ref,
+            max_merge_candidates,
+            weights,
             first,
             no_output_of_prior_pictures,
             pps_id,
@@ -191,6 +452,7 @@ impl SliceHeader {
             extension,
             rbsp: payload.bytes,
             entropy_byte_offset,
+            entropy_substreams,
         })
     }
 }

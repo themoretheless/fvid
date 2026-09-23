@@ -102,7 +102,8 @@ pub fn predict(
     angle_delta: i32,
     filter_mode: Option<usize>,
     edges: Edges<'_>,
-) -> Result<Vec<u16>> {
+    out: &mut [u16],
+) -> Result<()> {
     let [w, h] = size;
     if ![4, 8, 16, 32, 64].contains(&w)
         || ![4, 8, 16, 32, 64].contains(&h)
@@ -112,16 +113,17 @@ pub fn predict(
         || edges.above.len() < w + h
         || edges.left.len() < w + h
         || filter_mode.is_some_and(|v| v > 4)
+        || out.len() < w * h
     {
         return Err(invalid("invalid AV1 intra predictor configuration"));
     }
+    let out = &mut out[..w * h];
     let mut top = vec![i32::from(edges.corner); 2 * (w + h) + 3];
     let mut left = top.clone();
     for i in 0..w + h {
         top[i + 2] = i32::from(edges.above[i]);
         left[i + 2] = i32::from(edges.left[i]);
     }
-    let mut out = vec![0u16; w * h];
     if let Some(mode) = filter_mode {
         for by in (0..h).step_by(2) {
             for bx in (0..w).step_by(4) {
@@ -154,7 +156,7 @@ pub fn predict(
                 }
             }
         }
-        return Ok(out);
+        return Ok(());
     }
     if (1..=8).contains(&mode) {
         let angle = [0, 90, 180, 45, 135, 113, 157, 203, 67][mode] + angle_delta * 3;
@@ -246,7 +248,7 @@ pub fn predict(
                 };
             }
         }
-        return Ok(out);
+        return Ok(());
     }
     let count = usize::from(edges.have_above) * w + usize::from(edges.have_left) * h;
     let sum = if edges.have_above {
@@ -293,5 +295,5 @@ pub fn predict(
             } as u16;
         }
     }
-    Ok(out)
+    Ok(())
 }

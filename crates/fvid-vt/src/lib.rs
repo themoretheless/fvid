@@ -57,6 +57,26 @@ unsafe extern "C" {
         value_callbacks: *const ValueCallBacks,
     ) -> CFRef;
     fn CFNumberCreate(allocator: CFRef, number_type: isize, value: *const c_void) -> CFRef;
+    fn CFDataCreate(allocator: CFRef, bytes: *const u8, length: usize) -> CFRef;
+    fn CFStringCreateWithCString(
+        allocator: CFRef,
+        c_str: *const u8,
+        encoding: u32,
+    ) -> CFRef;
+}
+const K_CF_STRING_ENCODING_UTF8: u32 = 0x0800_0100;
+fn cfstr(s: &str) -> CFRef {
+    // SAFETY: s is a valid UTF-8 string that we pass as a C string with a null terminator.
+    unsafe {
+        let mut buf = s.as_bytes().to_vec();
+        buf.push(0);
+        CFStringCreateWithCString(ptr::null(), buf.as_ptr(), K_CF_STRING_ENCODING_UTF8)
+    }
+}
+macro_rules! CFSTR {
+    ($s:expr) => {
+        cfstr($s)
+    };
 }
 #[link(name = "CoreMedia", kind = "framework")]
 unsafe extern "C" {
@@ -66,6 +86,23 @@ unsafe extern "C" {
         pointers: *const *const u8,
         sizes: *const usize,
         nal_length_size: i32,
+        out: *mut CFRef,
+    ) -> OSStatus;
+    fn CMVideoFormatDescriptionCreateFromHEVCParameterSets(
+        allocator: CFRef,
+        count: usize,
+        pointers: *const *const u8,
+        sizes: *const usize,
+        nal_length_size: i32,
+        parameter_set_strings: *const c_void,
+        out: *mut CFRef,
+    ) -> OSStatus;
+    fn CMVideoFormatDescriptionCreate(
+        allocator: CFRef,
+        codec_type: u32,
+        width: i32,
+        height: i32,
+        extensions: CFRef,
         out: *mut CFRef,
     ) -> OSStatus;
     fn CMBlockBufferCreateWithMemoryBlock(
@@ -128,6 +165,8 @@ const PLANAR_420: u32 = 0x7934_3230;
 const PLANAR_420_FULL: u32 = 0x6634_3230;
 const CF_NUMBER_SINT32: isize = 3;
 const READ_ONLY_LOCK: u64 = 1;
+const K_CM_VIDEO_CODEC_TYPE_VP9: u32 = 0x7670_3039; // 'vp09'
+const K_CM_VIDEO_CODEC_TYPE_AV1: u32 = 0x6176_3031; // 'av01'
 
 #[derive(Debug)]
 pub struct Error(String);
@@ -233,7 +272,7 @@ unsafe fn copy_planes(image: CFRef) -> Result<Option<Planes>, Error> {
     }
 }
 
-/// A decompression session for one H.264 stream (parameter sets from avcC).
+/// A decompression session for one video stream (parameter sets from avcC or hvcC).
 pub struct Session {
     format: CFRef,
     session: CFRef,
@@ -243,8 +282,9 @@ pub struct Session {
 unsafe impl Send for Session {}
 
 impl Session {
-    /// `sps` and `pps` are NAL units including their header byte, as stored
-    /// in avcC; `nal_length_size` is the sample's length-prefix width (1, 2, 4).
+    /// Create an H.264 session. `sps` and `pps` are NAL units including their
+    /// header byte, as stored in avcC; `nal_length_size` is the sample's
+    /// length-prefix width (1, 2, 4).
     pub fn new(sps: &[&[u8]], pps: &[&[u8]], nal_length_size: u8) -> Result<Self, Error> {
         if sps.is_empty() || pps.is_empty() || !matches!(nal_length_size, 1 | 2 | 4) {
             return Err(Error("VideoToolbox: invalid parameter sets".into()));
@@ -267,6 +307,139 @@ impl Session {
             if code != 0 || format.is_null() {
                 return Err(status("format description", code));
             }
+            Self::from_format(format)
+        }
+    }
+    
+    /// Create an HEVC session. `vps`, `sps`, and `pps` are NAL units including
+    /// their header byte, as stored in hvcC; `nal_length_size` is the sample's
+    /// length-prefix width (1, 2, 4).
+    pub fn new_hevc(
+        vps: &[&[u8]],
+        sps: &[&[u8]],
+        pps: &[&[u8]],
+        nal_length_size: u8,
+    ) -> Result<Self, Error> {
+        if vps.is_empty() || sps.is_empty() || pps.is_empty() || !matches!(nal_length_size, 1 | 2 | 4) {
+            return Err(Error("VideoToolbox: invalid HEVC parameter sets".into()));
+        }
+        let sets: Vec<&[u8]> = vps.iter().chain(sps).chain(pps).copied().collect();
+        let pointers: Vec<*const u8> = sets.iter().map(|s| s.as_ptr()).collect();
+        let sizes: Vec<usize> = sets.iter().map(|s| s.len()).collect();
+        // SAFETY: plain C calls with valid pointers; every created object is
+        // released on failure or in `Drop`.
+        unsafe {
+            let mut format = ptr::null();
+            let code = CMVideoFormatDescriptionCreateFromHEVCParameterSets(
+                ptr::null(),
+                sets.len(),
+                pointers.as_ptr(),
+                sizes.as_ptr(),
+                i32::from(nal_length_size),
+                ptr::null(),
+                &mut format,
+            );
+            if code != 0 || format.is_null() {
+                return Err(status("HEVC format description", code));
+            }
+            Self::from_format(format)
+        }
+    }
+    
+    /// Create a VP9 session. `config` is the vpcC configuration box contents;
+    /// `width` and `height` are the coded dimensions.
+    pub fn new_vp9(config: &[u8], width: u32, height: u32) -> Result<Self, Error> {
+        if config.is_empty() {
+            return Err(Error("VideoToolbox: empty VP9 configuration".into()));
+        }
+        unsafe {
+            let config_data = CFDataCreate(
+                ptr::null(),
+                config.as_ptr(),
+                config.len(),
+            );
+            if config_data.is_null() {
+                return Err(Error("VideoToolbox: VP9 config data creation failed".into()));
+            }
+            let keys = [CFSTR!("vpcC")];
+            let values = [config_data];
+            let extensions = CFDictionaryCreate(
+                ptr::null(),
+                keys.as_ptr(),
+                values.as_ptr(),
+                1,
+                &kCFTypeDictionaryKeyCallBacks,
+                &kCFTypeDictionaryValueCallBacks,
+            );
+            CFRelease(config_data);
+            let mut format = ptr::null();
+            let code = CMVideoFormatDescriptionCreate(
+                ptr::null(),
+                K_CM_VIDEO_CODEC_TYPE_VP9,
+                width as i32,
+                height as i32,
+                extensions,
+                &mut format,
+            );
+            if !extensions.is_null() {
+                CFRelease(extensions);
+            }
+            if code != 0 || format.is_null() {
+                return Err(status("VP9 format description", code));
+            }
+            Self::from_format(format)
+        }
+    }
+    
+    /// Create an AV1 session. `config` is the av1C configuration box contents;
+    /// `width` and `height` are the coded dimensions.
+    pub fn new_av1(config: &[u8], width: u32, height: u32) -> Result<Self, Error> {
+        if config.is_empty() {
+            return Err(Error("VideoToolbox: empty AV1 configuration".into()));
+        }
+        unsafe {
+            let config_data = CFDataCreate(
+                ptr::null(),
+                config.as_ptr(),
+                config.len(),
+            );
+            if config_data.is_null() {
+                return Err(Error("VideoToolbox: AV1 config data creation failed".into()));
+            }
+            let keys = [CFSTR!("av1C")];
+            let values = [config_data];
+            let extensions = CFDictionaryCreate(
+                ptr::null(),
+                keys.as_ptr(),
+                values.as_ptr(),
+                1,
+                &kCFTypeDictionaryKeyCallBacks,
+                &kCFTypeDictionaryValueCallBacks,
+            );
+            CFRelease(config_data);
+            let mut format = ptr::null();
+            let code = CMVideoFormatDescriptionCreate(
+                ptr::null(),
+                K_CM_VIDEO_CODEC_TYPE_AV1,
+                width as i32,
+                height as i32,
+                extensions,
+                &mut format,
+            );
+            if !extensions.is_null() {
+                CFRelease(extensions);
+            }
+            if code != 0 || format.is_null() {
+                return Err(status("AV1 format description", code));
+            }
+            Self::from_format(format)
+        }
+    }
+    
+    unsafe fn from_format(format: CFRef) -> Result<Self, Error> {
+        // SAFETY: format is a valid CMVideoFormatDescription; all created objects
+        // are released on failure or in `Drop`.
+        unsafe {
             let pixel_format: i32 = PLANAR_420 as i32;
             let number = CFNumberCreate(
                 ptr::null(),

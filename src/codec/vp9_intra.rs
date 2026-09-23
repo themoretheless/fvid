@@ -43,9 +43,12 @@ pub struct References<'a> {
     pub have_above: bool,
     pub have_left: bool,
 }
-pub fn predict(size: usize, depth: u8, mode: Mode, refs: &References<'_>) -> Result<Vec<u16>> {
+pub fn predict(out: &mut [u16], size: usize, depth: u8, mode: Mode, refs: &References<'_>) -> Result<()> {
     if ![4, 8, 16, 32].contains(&size) || ![8, 10, 12].contains(&depth) {
         return Err(invalid("invalid VP9 intra geometry or depth"));
+    }
+    if out.len() < size * size {
+        return Err(invalid("VP9 intra output buffer too small"));
     }
     let max = (1u16 << depth) - 1;
     if refs.above.len() != 2 * size
@@ -65,7 +68,8 @@ pub fn predict(size: usize, depth: u8, mode: Mode, refs: &References<'_>) -> Res
     let l = |i: usize| i32::from(refs.left[i.min(size - 1)]);
     let avg2 = |a: i32, b: i32| ((a + b + 1) >> 1) as u16;
     let avg3 = |a: i32, b: i32, c: i32| ((a + 2 * b + c + 2) >> 2) as u16;
-    let mut out = vec![0; size * size];
+    let out = &mut out[..size * size];
+    out.fill(0);
     match mode {
         Mode::Dc => {
             let mut sum = 0u32;
@@ -190,7 +194,7 @@ pub fn predict(size: usize, depth: u8, mode: Mode, refs: &References<'_>) -> Res
             }
         }
     }
-    Ok(out)
+    Ok(())
 }
 
 #[cfg(test)]
@@ -205,20 +209,24 @@ mod tests {
             have_above: true,
             have_left: true,
         };
+        let mut out = vec![0u16; 16];
+        predict(&mut out, 4, 8, Mode::D45, &refs).unwrap();
         assert_eq!(
-            predict(4, 8, Mode::D45, &refs).unwrap(),
+            out,
             [
                 20, 30, 40, 50, 30, 40, 50, 60, 40, 50, 60, 70, 50, 60, 70, 80
             ]
         );
+        predict(&mut out, 4, 8, Mode::D207, &refs).unwrap();
         assert_eq!(
-            predict(4, 8, Mode::D207, &refs).unwrap(),
+            out,
             [
                 95, 100, 105, 110, 105, 110, 115, 118, 115, 118, 120, 120, 120, 120, 120, 120
             ]
         );
+        predict(&mut out, 4, 8, Mode::D135, &refs).unwrap();
         assert_eq!(
-            predict(4, 8, Mode::D135, &refs).unwrap(),
+            out,
             [
                 25, 10, 20, 30, 70, 25, 10, 20, 100, 70, 25, 10, 110, 100, 70, 25
             ]
@@ -230,17 +238,16 @@ mod tests {
             have_above: true,
             have_left: true,
         };
-        assert_eq!(
-            predict(4, 8, Mode::TrueMotion, &extreme).unwrap(),
-            [255; 16]
-        );
+        predict(&mut out, 4, 8, Mode::TrueMotion, &extreme).unwrap();
+        assert_eq!(out, [255; 16]);
         let extreme = References {
             above: &[0; 8],
             left: &[0; 4],
             corner: 255,
             ..extreme
         };
-        assert_eq!(predict(4, 8, Mode::TrueMotion, &extreme).unwrap(), [0; 16]);
+        predict(&mut out, 4, 8, Mode::TrueMotion, &extreme).unwrap();
+        assert_eq!(out, [0; 16]);
     }
     #[test]
     fn every_mode_size_and_depth_preserves_constant_references() {
@@ -256,29 +263,24 @@ mod tests {
                     have_above: true,
                     have_left: true,
                 };
+                let mut out = vec![0u16; size * size];
                 for mode in 0..10 {
-                    assert!(
-                        predict(size, depth, Mode::try_from(mode).unwrap(), &refs)
-                            .unwrap()
-                            .iter()
-                            .all(|&v| v == value)
-                    );
+                    predict(&mut out, size, depth, Mode::try_from(mode).unwrap(), &refs).unwrap();
+                    assert!(out.iter().all(|&v| v == value));
                 }
-                assert!(
-                    predict(
-                        size,
-                        depth,
-                        Mode::Dc,
-                        &References {
-                            have_above: false,
-                            have_left: false,
-                            ..refs
-                        }
-                    )
-                    .unwrap()
-                    .iter()
-                    .all(|&v| v == 1 << (depth - 1))
-                );
+                predict(
+                    &mut out,
+                    size,
+                    depth,
+                    Mode::Dc,
+                    &References {
+                        have_above: false,
+                        have_left: false,
+                        ..refs
+                    },
+                )
+                .unwrap();
+                assert!(out.iter().all(|&v| v == 1 << (depth - 1)));
             }
         }
         assert!(Mode::try_from(10).is_err());

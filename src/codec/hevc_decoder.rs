@@ -1,0 +1,259 @@
+//! Stateful native HEVC access-unit decoding and short-term reference storage.
+use super::{
+    config::{HevcConfig, NalUnits},
+    hevc_motion::Reference,
+    hevc_nal::NalHeader,
+    hevc_picture::{self, Picture},
+    hevc_pps::Pps,
+    hevc_slice::SliceHeader,
+    hevc_sps::Sps,
+};
+use crate::{Result, invalid};
+use std::sync::Arc;
+pub struct Decoded {
+    pub picture: Arc<Picture>,
+    pub poc: i32,
+    pub output: bool,
+}
+pub struct HevcDecoder {
+    pairs: Vec<(Sps, Pps)>,
+    references: Vec<Reference>,
+    previous_poc: Option<i32>,
+    suppress_rasl: bool,
+    active_pps: Option<u8>,
+    length: u8,
+    budget: usize,
+    failed: bool,
+}
+impl HevcDecoder {
+    pub fn from_configuration(data: &[u8], budget: usize) -> Result<Self> {
+        let config = HevcConfig::parse(data)?;
+        let mut sets = Vec::new();
+        for array in &config.arrays {
+            if array.nal_type == 33 {
+                for nal in &array.units {
+                    let sps = Sps::parse(nal, budget)?;
+                    if sets.iter().any(|s: &Sps| s.id == sps.id) {
+                        return Err(invalid("duplicate HEVC SPS"));
+                    }
+                    sets.push(sps);
+                }
+            }
+        }
+        let mut pairs = Vec::new();
+        for array in &config.arrays {
+            if array.nal_type == 34 {
+                for nal in &array.units {
+                    let pair = sets
+                        .iter()
+                        .find_map(|s| Pps::parse(nal, s, budget).ok().map(|p| (s.clone(), p)))
+                        .ok_or_else(|| invalid("HEVC PPS has no valid SPS"))?;
+                    if pairs.iter().any(|(_, p): &(Sps, Pps)| p.id == pair.1.id) {
+                        return Err(invalid("duplicate HEVC PPS"));
+                    }
+                    pairs.push(pair);
+                }
+            }
+        }
+        if pairs.is_empty() {
+            return Err(invalid("HEVC configuration has no parameter-set pair"));
+        }
+        Ok(Self {
+            pairs,
+            references: Vec::new(),
+            previous_poc: None,
+            suppress_rasl: false,
+            active_pps: None,
+            length: config.length_size,
+            budget,
+            failed: false,
+        })
+    }
+    pub fn parameters(&self) -> (&Sps, &Pps) {
+        let (s, p) = self
+            .active_pps
+            .and_then(|id| self.pairs.iter().find(|(_, p)| p.id == id))
+            .unwrap_or(&self.pairs[0]);
+        (s, p)
+    }
+    pub fn reset(&mut self) {
+        self.references.clear();
+        self.previous_poc = None;
+        self.suppress_rasl = false;
+        self.active_pps = None;
+        self.failed = false;
+    }
+    pub fn decode_packet(&mut self, packet: &[u8]) -> Result<Option<Decoded>> {
+        if self.failed {
+            return Err(invalid("HEVC decoder requires reset after error"));
+        }
+        let result = self.decode(packet);
+        self.failed = result.is_err();
+        result
+    }
+    fn decode(&mut self, packet: &[u8]) -> Result<Option<Decoded>> {
+        let mut slice = None;
+        for nal in NalUnits::new(packet, self.length)? {
+            let nal = nal?;
+            let header = NalHeader::parse(nal)?;
+            header.require_base_layer()?;
+            if header.is_vcl() {
+                if slice.is_some() {
+                    return Err(invalid("HEVC multi-slice access units are not implemented"));
+                }
+                slice = Some(nal);
+            } else if matches!(header.unit_type, 32..=34) {
+                // Configuration changes must never reuse stale reference geometry.
+                if header.unit_type == 33
+                    && !self
+                        .pairs
+                        .iter()
+                        .any(|(s, _)| Sps::parse(nal, self.budget).is_ok_and(|new| new == *s))
+                {
+                    return Err(invalid("HEVC in-band SPS change is not implemented"));
+                }
+                if header.unit_type == 34
+                    && !self
+                        .pairs
+                        .iter()
+                        .any(|(s, p)| Pps::parse(nal, s, self.budget).is_ok_and(|new| new == *p))
+                {
+                    return Err(invalid("HEVC in-band PPS change is not implemented"));
+                }
+            } else if !matches!(header.unit_type, 35..=40) {
+                return Err(invalid("unsupported HEVC NAL type"));
+            }
+        }
+        let Some(nal) = slice else { return Ok(None) };
+        let id = SliceHeader::parameter_set_id(nal)?;
+        let (sps, pps) = self
+            .pairs
+            .iter()
+            .find(|(_, p)| p.id == id)
+            .ok_or_else(|| invalid("HEVC slice references unknown PPS"))?;
+        let header = SliceHeader::parse(nal, sps, pps, self.budget)?;
+        if header.nal.temporal_id as usize >= sps.ordering.len() {
+            return Err(invalid("HEVC slice exceeds SPS temporal layers"));
+        }
+        if header.nal.is_irap() {
+            self.suppress_rasl = self.previous_poc.is_none()
+                || header.nal.is_idr()
+                || matches!(header.nal.unit_type, 16..=18);
+        }
+        if self.suppress_rasl && matches!(header.nal.unit_type, 8 | 9) {
+            return Ok(None);
+        }
+        let modulus = 1i32 << sps.poc_bits;
+        let lsb = header.poc_lsb as i32;
+        let poc = if header.nal.is_idr() {
+            0
+        } else if matches!(header.nal.unit_type, 16..=18)
+            || self.previous_poc.is_none() && header.nal.is_irap()
+        {
+            lsb
+        } else {
+            let previous = self
+                .previous_poc
+                .ok_or_else(|| invalid("HEVC stream must start at a random-access picture"))?;
+            let old = previous.rem_euclid(modulus);
+            let mut msb = previous - old;
+            if lsb < old && old - lsb >= modulus / 2 {
+                msb = msb
+                    .checked_add(modulus)
+                    .ok_or_else(|| invalid("HEVC POC overflow"))?;
+            } else if lsb > old && lsb - old > modulus / 2 {
+                msb = msb
+                    .checked_sub(modulus)
+                    .ok_or_else(|| invalid("HEVC POC overflow"))?;
+            }
+            msb.checked_add(lsb)
+                .ok_or_else(|| invalid("HEVC POC overflow"))?
+        };
+        if header.nal.is_idr() {
+            self.references.clear();
+        }
+        let mut retained = Vec::new();
+        let mut before = Vec::new();
+        let mut after = Vec::new();
+        for r in &header.short_term {
+            let target = poc
+                .checked_add(r.delta_poc)
+                .ok_or_else(|| invalid("HEVC reference POC overflow"))?;
+            retained.push(target);
+            if r.used {
+                let reference = self
+                    .references
+                    .iter()
+                    .find(|r| r.poc == target)
+                    .ok_or_else(|| {
+                        invalid(&format!(
+                            "HEVC reference POC {target} is missing for POC {poc} (NAL {})",
+                            header.nal.unit_type
+                        ))
+                    })?
+                    .clone();
+                if r.delta_poc < 0 {
+                    before.push(reference);
+                } else {
+                    after.push(reference);
+                }
+            }
+        }
+        let mut lists: [Vec<Reference>; 2] = [Vec::new(), Vec::new()];
+        for list in 0..2 {
+            let base: Vec<_> = if list == 0 {
+                before.iter().chain(&after)
+            } else {
+                after.iter().chain(&before)
+            }
+            .cloned()
+            .collect();
+            for i in 0..header.references[list] as usize {
+                let index = header.list_modification[list]
+                    .as_ref()
+                    .map_or(i % base.len(), |m| m[i] as usize);
+                lists[list].push(base[index].clone());
+            }
+        }
+        self.references.retain(|r| retained.contains(&r.poc));
+        let retained_bytes = self
+            .references
+            .iter()
+            .try_fold(0usize, |total, r| {
+                let count = (r.picture.dimensions[0] as usize)
+                    .checked_mul(r.picture.dimensions[1] as usize)?;
+                total.checked_add(count.checked_mul(5)?)
+            })
+            .ok_or_else(|| invalid("HEVC reference storage size overflow"))?;
+        let budget = self
+            .budget
+            .checked_sub(retained_bytes)
+            .ok_or_else(|| invalid("HEVC references exceed decode budget"))?;
+        let picture = Arc::new(hevc_picture::decode(
+            sps, pps, &header, poc, &lists, budget,
+        )?);
+        if header.nal.temporal_id == 0 && !matches!(header.nal.unit_type, 0 | 2 | 4 | 6..=9) {
+            self.previous_poc = Some(poc);
+        }
+        if header.nal.unit_type >= 16 || header.nal.unit_type & 1 != 0 {
+            self.references.push(Reference {
+                poc,
+                picture: Arc::clone(&picture),
+            });
+            let capacity = sps
+                .ordering
+                .last()
+                .ok_or_else(|| invalid("HEVC SPS has no DPB ordering"))?
+                .max_decoded_pictures as usize;
+            if self.references.len() > capacity {
+                return Err(invalid("HEVC decoded reference count exceeds SPS"));
+            }
+        }
+        self.active_pps = Some(header.pps_id);
+        Ok(Some(Decoded {
+            picture,
+            poc,
+            output: header.picture_output,
+        }))
+    }
+}

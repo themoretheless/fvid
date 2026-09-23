@@ -1174,3 +1174,96 @@ check complete without warnings. `otool -L target/release/fvid` lists only
 macOS system libraries/frameworks. The release player was launched with the
 24-frame AV1 WebM fixture. No full-spec conformance or general real-time claim
 is inferred from these tests.
+
+
+## 2026-09-22: native HEVC playback
+
+The native MP4 source now dispatches `hvc1`/`hev1` to `HevcDecoder`. It owns
+POC derivation, short-term reference lists and storage, slice CABAC, spatial and
+temporal merge/AMVP, integer/fractional motion compensation, weighted P/B
+prediction and I/P/B reconstruction. WPP restores probability states after the
+second CTU and translates escaped entry-point byte counts into bounded RBSP
+substreams. CU QP deltas, deblocking and SAO now run in the picture pipeline.
+CRA seeking suppresses unavailable leading RASL pictures; normal sequential
+playback keeps them. PTS reordering, crop, VUI range/matrix and player seeking
+reuse the indexed MP4 presentation path. No external HEVC decoder is called.
+
+Main/Main10 4:2:0 fixtures compare every output sample over 17-frame sequences,
+rewind and open-GOP seek. The weighted fixture exercises nondefault luma/chroma
+weights, temporal MVP and CRA/RASL. A local 886x1920 Main screen recording's first
+1,000 frames match the oracle YUV checksums. Unsupported tools are listed in
+NATIVE_PLAYBACK.md; this replaces the earlier IDR-only limitation, not a claim
+of complete HEVC conformance. `Mp4VideoReader` is the codec-neutral API;
+`Mp4AvcReader` remains an alias for source compatibility.
+
+## 2026-09-22: HEVC playback throughput
+
+Motion interpolation now reuses separable intermediate rows and applies taps
+across contiguous sample spans. Integer single-reference blocks use row copies.
+Inverse DCT uses factored fixed-size kernels and a DC-only path; scaling-list
+lookup uses a direct diagonal index. Residual scan tables are shared, and
+coefficient-group and boundary-strength scratch arrays avoid per-group allocation.
+
+For pictures of at least 128x96 without constrained-intra prediction, CABAC and
+motion metadata run ahead of inverse transforms and pixel reconstruction through
+a bounded two-row channel. Reconstruction retains bitstream order, so intra
+sample availability and reference-picture publication remain unchanged. Filters
+run after reconstruction joins. Small/constrained-intra pictures use the serial
+path; malformed late rows close the worker without publishing partial pictures.
+
+On the local 886x1920 recording, the heaviest 10-second packet-size window
+starts near 90 seconds (22.1 Mbps). A 1,200-frame decode/conversion run from
+that position reached 68.62 fps (14.57 ms/frame); an earlier 600-frame probe
+at the same position ran at 56.59 fps. Paced runs at
+90, 430 and 480 seconds delivered 60.02–60.06 fps with no decoder waits over
+1 ms; startup buffering is excluded. These are workload-specific headless
+measurements, not a guarantee for every HEVC stream or display. The first 1,000
+frames still match the oracle's visible YUV checksums exactly. Dense-transform,
+all-phase edge interpolation and late-row failure regressions are also tested.
+
+Pixel availability reductions and residual additions operate on contiguous
+rows; saturating i32 arithmetic preserves the earlier wide-integer clipping at
+both integer limits. CABAC short-field reads avoid the general byte-gather loop.
+WPP context banks have fixed storage and restart from saved states without
+per-row context allocation or initialization. The CABAC arithmetic tests also
+cover the shared AVC path.
+
+Validation after the throughput changes: all 276 unit/integration tests pass
+without default features; all eight HEVC playback tests also pass with the
+player feature. The release player builds without warnings.
+
+The converter now signals a freed stage slot to the decoder immediately,
+removing up to 2 ms of polling latency under presentation backpressure. With
+that change, a continuous window run from the beginning submitted 7,500 new
+frames over 125.025 seconds, including the 90–110-second high-bitrate interval.
+Every 300-interval report was 59.98–60.00 fps, with zero overdue empty-queue
+polls. A separate window run starting at 90 seconds also stayed in that range.
+These counters measure new frames handed to the renderer, not physical display
+scanout. Playback remains the native HEVC implementation, without FFmpeg or
+VideoToolbox decoding. Two additional threaded regressions cover complete frame
+delivery/rewind and dropping a player with both channels full; both pass with
+and without the player feature. The eight HEVC playback tests pass again.
+
+## 2026-09-22: VP9 backward probability adaptation
+
+The native decoder now collects per-frame branch counts for transform tokens,
+EOB decisions, partition/mode/reference/transform choices and motion vectors.
+Counts are shared across tiles and applied to the saved probability context
+only after successful picture reconstruction. The compressed-header context
+remains immutable while decoding tiles. Intra frames adapt coefficients while
+preserving their header-updated skip/transform tables; context refresh and
+keyframe/error-resilient reset keep their existing lifetime rules.
+
+The implementation follows VP9 probability adaptation (specification section
+8.4), including the previous-keyframe coefficient factor, implicit partition
+branches at picture edges, and implied MV high-precision bits. No external
+codec was added. Synthetic 8/10-bit fixtures exercise context refresh, multiple
+keyframes, reset and two tile columns; every visible sample matches the external
+pixel oracle. The reported local 720x1280, 30 fps WebM also decodes completely:
+all 453 displayed frames match the independent raw YUV decode byte for byte.
+The private recording is not included in the repository. Compound prediction,
+segmentation and the other documented VP9 limits remain separate limitations.
+
+Final validation: 282 tests pass without default features; the release player
+build completes without warnings. The full local recording's native/oracle YUV
+SHA-256 is `a970e17cfb55c313e4eb4ded062677854409b0ef06e5aa0c208ade5a8fe778f2`.

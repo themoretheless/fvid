@@ -5,6 +5,7 @@ use super::{
 };
 
 /// Samples p6..p0,q0..q6. Filter width is 4/8/16; chroma uses six taps.
+#[inline]
 pub(crate) fn edge(
     samples: [u16; 14],
     depth: u8,
@@ -75,6 +76,7 @@ pub(crate) fn edge(
     }
     out
 }
+#[inline]
 fn direction(p: &Plane, x: usize, y: usize, depth: u8) -> (usize, i64) {
     let mut partial = [[0i64; 15]; 8];
     for i in 0..8 {
@@ -124,6 +126,7 @@ fn direction(p: &Plane, x: usize, y: usize, depth: u8) -> (usize, i64) {
     }
     (best, (cost[best] - cost[(best + 4) & 7]) >> 10)
 }
+#[inline]
 fn constrain(diff: i32, threshold: i32, damping: i32) -> i32 {
     if threshold == 0 {
         return 0;

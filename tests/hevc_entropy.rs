@@ -155,6 +155,7 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                     component != 0,
                     self.sps.strong_intra_smoothing,
                     &residual,
+                    &mut Vec::new(),
                     |_, _| true,
                 )?;
             }
@@ -292,7 +293,7 @@ fn detailed_fixture(
     assert_eq!(production, expected);
     assert!(fvid::codec::hevc_picture::decode_idr(&sps, &pps, &slice, 100).is_err());
     let mut unsupported = slice.clone();
-    unsupported.deblocking.disabled = false;
+    unsupported.first = false;
     assert!(fvid::codec::hevc_picture::decode_idr(&sps, &pps, &unsupported, 1 << 20).is_err());
     let mut truncated = slice.clone();
     truncated.rbsp.truncate(truncated.entropy_byte_offset + 2);

@@ -1,5 +1,10 @@
 //! VP9 transform coefficient entropy decoding and dequantization.
-use super::{vp9_bool::BoolDecoder, vp9_probs::Probabilities, vp9_tables::*, vp9_transform::Kind};
+use super::{
+    vp9_bool::BoolDecoder,
+    vp9_probs::{Counts, Probabilities, counted},
+    vp9_tables::*,
+    vp9_transform::Kind,
+};
 use crate::{Result, invalid};
 const TREE: [i8; 20] = [
     0, 2, -1, 4, 6, 10, -2, 8, -3, -4, 12, 14, -5, -6, 16, 18, -7, -8, -9, -10,
@@ -59,6 +64,23 @@ pub struct Coefficients {
     pub nonzero_context: bool,
 }
 pub fn read(b: &mut BoolDecoder<'_>, p: &Probabilities, cfg: Config) -> Result<Coefficients> {
+    let mut values = Vec::new();
+    let mut cache = Vec::new();
+    let nonzero_context =
+        read_counted(b, p, &mut Counts::filled([0; 2]), cfg, &mut values, &mut cache)?;
+    Ok(Coefficients {
+        values,
+        nonzero_context,
+    })
+}
+pub(crate) fn read_counted(
+    b: &mut BoolDecoder<'_>,
+    p: &Probabilities,
+    counts: &mut Counts,
+    cfg: Config,
+    values: &mut Vec<i32>,
+    cache: &mut Vec<usize>,
+) -> Result<bool> {
     let Config {
         size,
         kind,
@@ -76,8 +98,10 @@ pub fn read(b: &mut BoolDecoder<'_>, p: &Probabilities, cfg: Config) -> Result<C
     }
     let tx = size.trailing_zeros() as usize - 2;
     let scan = scan(size, kind);
-    let mut values = vec![0; size * size];
-    let mut cache = vec![0usize; size * size];
+    values.resize(size * size, 0);
+    values.iter_mut().for_each(|v| *v = 0);
+    cache.resize(size * size, 0);
+    cache.iter_mut().for_each(|v| *v = 0);
     let mut check_eob = true;
     let mut count = 0;
     for (c, &position) in scan.iter().enumerate() {
@@ -110,13 +134,19 @@ pub fn read(b: &mut BoolDecoder<'_>, p: &Probabilities, cfg: Config) -> Result<C
             (1 + cache[a] + cache[d]) >> 1
         };
         let probs = p.coef[tx][usize::from(chroma)][usize::from(inter)][band][context];
-        if check_eob && !b.read(probs[0])? {
+        let counts = &mut counts.coef[tx][usize::from(chroma)][usize::from(inter)][band][context];
+        if check_eob && !counted(b, probs[0], &mut counts[0])? {
             break;
         }
         let mut node = 0usize;
         let token = loop {
             let prob = pareto(node / 2, probs[(1 + node / 2).min(2)])?;
-            let child = TREE[node + usize::from(b.read(prob)?)];
+            let bit = if node < 4 {
+                counted(b, prob, &mut counts[1 + node / 2])?
+            } else {
+                b.read(prob)?
+            };
+            let child = TREE[node + usize::from(bit)];
             if child <= 0 {
                 break (-child) as usize;
             }
@@ -147,10 +177,7 @@ pub fn read(b: &mut BoolDecoder<'_>, p: &Probabilities, cfg: Config) -> Result<C
         }
         count = c + 1;
     }
-    Ok(Coefficients {
-        values,
-        nonzero_context: count > 0,
-    })
+    Ok(count > 0)
 }
 pub fn dequantize(
     values: &[i32],
@@ -159,7 +186,8 @@ pub fn dequantize(
     q: u8,
     dc_delta: i16,
     ac_delta: i16,
-) -> Result<Vec<i32>> {
+    out: &mut Vec<i32>,
+) -> Result<()> {
     if ![4, 8, 16, 32].contains(&size)
         || values.len() != size * size
         || ![8, 10, 12].contains(&depth)
@@ -171,20 +199,17 @@ pub fn dequantize(
     let ac = i64::from(AC_QLOOKUP[d][(i32::from(q) + i32::from(ac_delta)).clamp(0, 255) as usize]);
     let denom = if size == 32 { 2 } else { 1 };
     let bound = 1i64 << (7 + depth);
-    values
-        .iter()
-        .enumerate()
-        .map(|(i, &v)| {
-            let dequant = i64::from(v) * if i == 0 { dc } else { ac } / denom;
-            if !(-bound..bound).contains(&dequant) {
-                Err(invalid(
-                    "VP9 dequantized coefficient exceeds bit-depth range",
-                ))
-            } else {
-                Ok(dequant as i32)
-            }
-        })
-        .collect()
+    out.resize(values.len(), 0);
+    for (i, (&v, dst)) in values.iter().zip(out.iter_mut()).enumerate() {
+        let dequant = i64::from(v) * if i == 0 { dc } else { ac } / denom;
+        if !(-bound..bound).contains(&dequant) {
+            return Err(invalid(
+                "VP9 dequantized coefficient exceeds bit-depth range",
+            ));
+        }
+        *dst = dequant as i32;
+    }
+    Ok(())
 }
 #[cfg(test)]
 mod tests {
@@ -226,8 +251,10 @@ mod tests {
         let mut v = vec![0; 16];
         v[0] = 1;
         v[1] = -1;
-        assert_eq!(&dequantize(&v, 4, 8, 0, 0, 0).unwrap()[..2], &[4, -4]);
+        let mut out = Vec::new();
+        dequantize(&v, 4, 8, 0, 0, 0, &mut out).unwrap();
+        assert_eq!(&out[..2], &[4, -4]);
         v[0] = i32::MAX;
-        assert!(dequantize(&v, 4, 8, 255, 0, 0).is_err());
+        assert!(dequantize(&v, 4, 8, 255, 0, 0, &mut out).is_err());
     }
 }

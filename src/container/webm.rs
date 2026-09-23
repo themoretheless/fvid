@@ -10,6 +10,12 @@ pub struct Track {
     pub codec: String,
     pub width: u64,
     pub height: u64,
+    pub sample_rate: u64,
+    pub channels: u64,
+    pub bit_depth: u64,
+    /// Codec setup data from `CodecPrivate`. Vorbis carries its three header
+    /// packets concatenated here, and the decoder cannot initialize without it.
+    pub codec_private: Vec<u8>,
 }
 #[derive(Clone, Debug)]
 pub struct Packet {
@@ -38,6 +44,8 @@ pub struct WebmReader<R> {
     reader: R,
     pub tracks: Vec<Track>,
     pub packets: Vec<Packet>,
+    /// Declared Segment duration, converted from TimestampScale units.
+    pub duration_ns: Option<u64>,
     limits: Limits,
 }
 #[derive(Clone, Copy)]
@@ -117,6 +125,15 @@ fn uint<R: Read + Seek>(r: &mut R, e: Element) -> Result<u64> {
         .into_iter()
         .fold(0, |v, b| (v << 8) | u64::from(b)))
 }
+/// Timestamps and rates are IEEE-754, written as either four or eight bytes.
+fn float<R: Read + Seek>(r: &mut R, e: Element) -> Result<f64> {
+    let value = bytes(r, e, 8)?;
+    Ok(match value.as_slice() {
+        [a, b, c, d] => f64::from(f32::from_be_bytes([*a, *b, *c, *d])),
+        [a, b, c, d, e0, e1, e2, e3] => f64::from_be_bytes([*a, *b, *c, *d, *e0, *e1, *e2, *e3]),
+        _ => return Err(invalid("invalid WebM float size")),
+    })
+}
 fn end(e: Element) -> Result<u64> {
     e.end
         .ok_or_else(|| invalid("unsupported unknown-sized EBML element"))
@@ -164,6 +181,7 @@ impl<R: Read + Seek> WebmReader<R> {
         let segment_end = segment.end.unwrap_or(file_end);
         let mut at = segment.data;
         let mut scale = 1_000_000u64;
+        let mut duration_ticks = None;
         let mut tracks = Vec::new();
         let mut packets = Vec::new();
         while at < segment_end {
@@ -172,7 +190,13 @@ impl<R: Read + Seek> WebmReader<R> {
             match e.id {
                 0x1549a966 => {
                     for f in fields(&mut reader, e, &mut count, limits.elements)? {
-                        if f.id == 0x2ad7b1 {
+                        if f.id == 0x4489 {
+                            let value = float(&mut reader, f)?;
+                            if !value.is_finite() || value <= 0.0 {
+                                return Err(invalid("invalid WebM Duration"));
+                            }
+                            duration_ticks = Some(value);
+                        } else if f.id == 0x2ad7b1 {
                             scale = uint(&mut reader, f)?;
                             if scale == 0 {
                                 return Err(invalid("zero WebM timestamp scale"));
@@ -194,6 +218,10 @@ impl<R: Read + Seek> WebmReader<R> {
                             codec: String::new(),
                             width: 0,
                             height: 0,
+                            sample_rate: 0,
+                            channels: 0,
+                            bit_depth: 0,
+                            codec_private: Vec::new(),
                         };
                         for f in fields(&mut reader, entry, &mut count, limits.elements)? {
                             match f.id {
@@ -203,11 +231,32 @@ impl<R: Read + Seek> WebmReader<R> {
                                     track.codec = String::from_utf8(bytes(&mut reader, f, 128)?)
                                         .map_err(|_| invalid("invalid WebM codec ID"))?
                                 }
+                                0x63a2 => {
+                                    track.codec_private = bytes(&mut reader, f, 1 << 20)?;
+                                }
                                 0xe0 => {
                                     for v in fields(&mut reader, f, &mut count, limits.elements)? {
                                         match v.id {
                                             0xb0 => track.width = uint(&mut reader, v)?,
                                             0xba => track.height = uint(&mut reader, v)?,
+                                            _ => {}
+                                        }
+                                    }
+                                }
+                                0xe1 => {
+                                    for v in fields(&mut reader, f, &mut count, limits.elements)? {
+                                        match v.id {
+                                            0xb5 => {
+                                                let value = float(&mut reader, v)?;
+                                                if !value.is_finite() || value <= 0.0 {
+                                                    return Err(invalid(
+                                                        "invalid WebM sampling frequency",
+                                                    ));
+                                                }
+                                                track.sample_rate = value.round() as u64;
+                                            }
+                                            0x9f => track.channels = uint(&mut reader, v)?,
+                                            0x62 => track.bit_depth = uint(&mut reader, v)?,
                                             _ => {}
                                         }
                                     }
@@ -300,8 +349,18 @@ impl<R: Read + Seek> WebmReader<R> {
         if tracks.is_empty() {
             return Err(invalid("WebM has no tracks"));
         }
+        let duration_ns = duration_ticks
+            .map(|ticks| {
+                let nanos = (ticks * scale as f64).round();
+                if !nanos.is_finite() || nanos < 1.0 || nanos >= u64::MAX as f64 {
+                    return Err(invalid("WebM Duration overflow"));
+                }
+                Ok(nanos as u64)
+            })
+            .transpose()?;
         Ok(Self {
             reader,
+            duration_ns,
             tracks,
             packets,
             limits,
@@ -421,9 +480,84 @@ mod tests {
         assert_eq!(r.read_packet(1).unwrap(), [0x82, 0x49]);
         assert!(r.read_packet(2).is_err());
     }
+    /// An audio track's rate is a float element, not an integer, and
+    /// `CodecPrivate` is where Vorbis keeps the setup headers a decoder cannot
+    /// start without.
     #[test]
-    fn malformed_vints_lacing_and_limits_fail() {
-        assert!(vint(&mut Cursor::new([0]), false).is_err());
+    fn audio_track_reads_its_float_rate_and_codec_private() {
+        fn with_rate(rate: Vec<u8>) -> Vec<u8> {
+            let header = atom(&[0x1a, 0x45, 0xdf, 0xa3], &atom(&[0x42, 0x82], b"webm"));
+            let track = atom(
+                &[0xae],
+                &[
+                    atom(&[0xd7], &[2]),
+                    atom(&[0x83], &[2]),
+                    atom(&[0x86], b"A_VORBIS"),
+                    atom(&[0x63, 0xa2], b"\x01vorbisidentification"),
+                    atom(
+                        &[0xe1],
+                        &[atom(&[0xb5], &rate), atom(&[0x9f], &[2])].concat(),
+                    ),
+                ]
+                .concat(),
+            );
+            [
+                header,
+                vec![0x18, 0x53, 0x80, 0x67, 0xff],
+                atom(&[0x16, 0x54, 0xae, 0x6b], &track),
+            ]
+            .concat()
+        }
+        for rate in [
+            44100.0f32.to_be_bytes().to_vec(),
+            44100.0f64.to_be_bytes().to_vec(),
+        ] {
+            let reader = WebmReader::open(Cursor::new(with_rate(rate)), Limits::default()).unwrap();
+            let track = &reader.tracks[0];
+            assert_eq!(track.kind, 2);
+            assert_eq!(track.sample_rate, 44_100);
+            assert_eq!(track.channels, 2);
+            assert_eq!(track.codec_private, b"\x01vorbisidentification");
+        }
+        for rate in [0.0f64.to_be_bytes().to_vec(), f64::NAN.to_be_bytes().to_vec()] {
+            assert!(WebmReader::open(Cursor::new(with_rate(rate)), Limits::default()).is_err());
+        }
+    }
+    #[test]
+    fn declared_duration_uses_final_scale_and_validates_float() {
+        for value in [
+            12.5f32.to_be_bytes().to_vec(),
+            12.5f64.to_be_bytes().to_vec(),
+        ] {
+            let mut data = fixture(false);
+            data.extend(atom(
+                &[0x15, 0x49, 0xa9, 0x66],
+                &[
+                    atom(&[0x44, 0x89], &value),
+                    atom(&[0x2a, 0xd7, 0xb1], &[0x03, 0xe8]),
+                ]
+                .concat(),
+            ));
+            let reader = WebmReader::open(Cursor::new(data), Limits::default()).unwrap();
+            assert_eq!(reader.duration_ns, Some(12_500));
+        }
+        for value in [f64::NAN, f64::INFINITY, -1.0, 0.0, f64::MAX] {
+            let mut data = fixture(false);
+            data.extend(atom(
+                &[0x15, 0x49, 0xa9, 0x66],
+                &atom(&[0x44, 0x89], &value.to_be_bytes()),
+            ));
+            assert!(WebmReader::open(Cursor::new(data), Limits::default()).is_err());
+        }
+        assert_eq!(
+            WebmReader::open(Cursor::new(fixture(false)), Limits::default())
+                .unwrap()
+                .duration_ns,
+            None
+        );
+    }
+    #[test]
+    fn malformed_vints_lacing_and_limits_fail() {        assert!(vint(&mut Cursor::new([0]), false).is_err());
         assert!(vint(&mut Cursor::new([8, 0, 0, 0, 0]), true).is_err());
         assert!(WebmReader::open(Cursor::new(fixture(true)), Limits::default()).is_err());
         for limits in [

@@ -62,6 +62,12 @@ struct Decoder<'a> {
     read_deltas: bool,
     current_q: i32,
     current_block: [usize; 2],
+    scratch: Vec<i32>,
+    pred_scratch: Vec<u16>,
+    tx_scratch: Vec<i64>,
+    residual_scratch: Vec<i32>,
+    lossless_scratch: Vec<i64>,
+    lossless_out: Vec<i32>,
 }
 const MODE_CONTEXT: [usize; 13] = [0, 1, 2, 3, 4, 4, 4, 4, 3, 0, 1, 2, 0];
 fn symbol(d: &mut SymbolDecoder<'_>, c: &mut Cdfs, name: &str, index: &[usize]) -> Result<usize> {
@@ -150,6 +156,12 @@ pub(crate) fn decode(
         read_deltas: false,
         current_q: i32::from(h.quant.base),
         current_block: [0; 2],
+        scratch: Vec::new(),
+        pred_scratch: Vec::new(),
+        tx_scratch: Vec::new(),
+        residual_scratch: Vec::new(),
+        lossless_scratch: Vec::new(),
+        lossless_out: Vec::new(),
     };
     let mut next = 0;
     let mut initial = initial.cloned().unwrap_or_else(|| Cdfs::new(h.quant.base));
@@ -604,20 +616,26 @@ impl Decoder<'_> {
                                     },
                                 )?
                             };
-                            let residual = if self.h.lossless[0] {
+                            let residual: &[i32] = if self.h.lossless[0] {
                                 vp9_transform::inverse(
                                     &dequant,
                                     4,
                                     self.s.color.depth,
                                     Kind::Lossless,
-                                )?
+                                    &mut self.lossless_scratch,
+                                    &mut self.lossless_out,
+                                )?;
+                                &self.lossless_out[..4 * 4]
                             } else {
                                 super::av1_transform::inverse(
                                     &dequant,
                                     size,
                                     self.s.color.depth,
                                     kind,
-                                )?
+                                    &mut self.tx_scratch,
+                                    &mut self.residual_scratch,
+                                )?;
+                                &self.residual_scratch[..size[0] * size[1]]
                             };
                             let plane = &mut self.image.planes[p];
                             for r in 0..th {
@@ -706,7 +724,8 @@ impl Decoder<'_> {
         } else {
             mid
         };
-        let prediction = super::av1_intra::predict(
+        self.pred_scratch.resize(w * h, 0);
+        super::av1_intra::predict(
             size,
             self.s.color.depth,
             mode,
@@ -721,11 +740,12 @@ impl Decoder<'_> {
                 edge_filter: self.s.intra_edge_filter,
                 smooth_neighbor,
             },
+            &mut self.pred_scratch,
         )?;
         let plane = &mut self.image.planes[p];
         for r in 0..h.min(plane.height - y) {
             for col in 0..w.min(plane.width - x) {
-                plane.samples[(y + r) * plane.width + x + col] = prediction[r * w + col];
+                plane.samples[(y + r) * plane.width + x + col] = self.pred_scratch[r * w + col];
             }
         }
         Ok(())

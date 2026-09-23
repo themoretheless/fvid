@@ -1,14 +1,22 @@
 //! Streaming 8-bit planar YUV processing with CPU and optional GPU backends.
 #[cfg(feature = "airbug")]
 pub mod airbug_runtime;
+#[cfg(feature = "player")]
+pub mod audio;
+#[cfg(feature = "player")]
+pub mod audio_thread;
 pub mod backend;
 pub mod codec;
 pub mod container;
 pub mod playback;
 pub mod playback_mp4;
+#[cfg(feature = "player")]
+pub mod playback_mp4_audio;
 pub mod playback_native;
 pub mod playback_thread;
 pub mod playback_webm;
+#[cfg(feature = "player")]
+pub mod playback_webm_audio;
 #[cfg(feature = "player")]
 pub mod player;
 #[cfg(feature = "player")]

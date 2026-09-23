@@ -41,6 +41,7 @@ impl Sao {
     /// Apply one Main/Main10 SAO sample. For edge mode, pass None if either
     /// neighbour is unavailable under picture/tile/slice filter boundaries.
     /// PCM/transquant filter exclusions must be handled by the picture caller.
+    #[inline]
     pub fn apply(self, sample: u16, neighbours: Option<[u16; 2]>, depth: u8) -> Result<u16> {
         if !(8..=10).contains(&depth) {
             return Err(invalid("unsupported SAO bit depth"));

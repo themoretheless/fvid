@@ -264,7 +264,7 @@ impl Decoder<'_> {
     }
     #[allow(clippy::too_many_arguments)]
     pub(super) fn inter_mode(
-        &self,
+        &mut self,
         b: &mut BoolDecoder<'_>,
         r: usize,
         c: usize,
@@ -288,7 +288,11 @@ impl Decoder<'_> {
             }
             _ => 2,
         };
-        let reference = if !b.read(self.ch.probabilities.single_ref[ctx][0])? {
+        let reference = if !counted(
+            b,
+            self.ch.probabilities.single_ref[ctx][0],
+            &mut self.counts.single_ref[ctx][0],
+        )? {
             1
         } else {
             let ctx = match (ar, lr) {
@@ -312,7 +316,11 @@ impl Decoder<'_> {
                 }
                 _ => 2,
             };
-            if b.read(self.ch.probabilities.single_ref[ctx][1])? {
+            if counted(
+                b,
+                self.ch.probabilities.single_ref[ctx][1],
+                &mut self.counts.single_ref[ctx][1],
+            )? {
                 3
             } else {
                 2
@@ -338,6 +346,13 @@ impl Decoder<'_> {
         } else {
             0
         };
+        if w >= 8 && h >= 8 {
+            count_symbol(
+                &[-2, 2, 0, 4, -1, -3],
+                &mut self.counts.inter_mode[ctx],
+                mode - 10,
+            );
+        }
         let filter = if let Some(raw) = self.header.interpolation_filter {
             [1, 0, 2, 3][usize::from(raw)]
         } else {
@@ -352,11 +367,13 @@ impl Decoder<'_> {
             } else {
                 3
             };
-            tree(
+            let filter = tree(
                 b,
                 &[0, 2, -1, -2],
                 &self.ch.probabilities.interp_filter[ctx],
-            )? as usize
+            )?;
+            count_symbol(&[0, 2, -1, -2], &mut self.counts.interp_filter[ctx], filter);
+            usize::from(filter)
         };
         let mut mvs = [[0; 2]; 4];
         if w >= 8 && h >= 8 {
@@ -364,9 +381,10 @@ impl Decoder<'_> {
                 10 => candidates[0],
                 11 => candidates[1],
                 12 => [0; 2],
-                _ => vp9_motion::read_vector(
+                _ => vp9_motion::read_vector_counted(
                     b,
                     &self.ch.probabilities,
+                    &mut self.counts,
                     candidates[0],
                     self.header.high_precision_mv,
                 )?,
@@ -382,11 +400,17 @@ impl Decoder<'_> {
                             &[-2, 2, 0, 4, -1, -3],
                             &self.ch.probabilities.inter_mode[ctx],
                         )?;
+                    count_symbol(
+                        &[-2, 2, 0, 4, -1, -3],
+                        &mut self.counts.inter_mode[ctx],
+                        mode - 10,
+                    );
                     let mv = match mode {
                         12 => [0; 2],
-                        13 => vp9_motion::read_vector(
+                        13 => vp9_motion::read_vector_counted(
                             b,
                             &self.ch.probabilities,
+                            &mut self.counts,
                             candidates[0],
                             self.header.high_precision_mv,
                         )?,
@@ -433,7 +457,11 @@ impl Decoder<'_> {
     }
     #[allow(clippy::too_many_arguments)]
     pub(super) fn inter_prediction(
-        &self,
+        references: [Option<&Picture>; 3],
+        picture_size: [u32; 2],
+        picture_depth: u8,
+        rows: usize,
+        cols: usize,
         plane: usize,
         r: usize,
         c: usize,
@@ -443,10 +471,12 @@ impl Decoder<'_> {
         y: usize,
         size: usize,
         block: &Block,
-    ) -> Result<Vec<u16>> {
-        let reference = self.references[usize::from(block.reference - 1)]
+        scratch: &mut Vec<i32>,
+        out: &mut Vec<u16>,
+    ) -> Result<()> {
+        let reference = references[usize::from(block.reference - 1)]
             .ok_or_else(|| invalid("missing decoded VP9 reference"))?;
-        if reference.size != self.picture.size || reference.depth != self.picture.depth {
+        if reference.size != picture_size || reference.depth != picture_depth {
             return Err(invalid("VP9 scaled references are not yet supported"));
         }
         let sub = usize::from(plane > 0);
@@ -464,7 +494,7 @@ impl Decoder<'_> {
         }
         let units = [h.div_ceil(8) as i32, w.div_ceil(8) as i32];
         let coords = [r as i32, c as i32];
-        let dims = [self.rows as i32, self.cols as i32];
+        let dims = [rows as i32, cols as i32];
         for i in 0..2 {
             let near = (-coords[i] * 128) >> sub;
             let far = ((dims[i] - units[i] - coords[i]) * 128) >> sub;
@@ -484,7 +514,9 @@ impl Decoder<'_> {
             [16, 16],
             [size, size],
             block.filter,
-            self.picture.depth,
+            picture_depth,
+            scratch,
+            out,
         )
     }
 }

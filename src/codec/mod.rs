@@ -103,6 +103,9 @@ pub mod hevc_block;
 pub mod hevc_qp;
 pub mod hevc_plane;
 pub mod hevc_picture;
+pub mod hevc_decoder;
+pub mod hevc_inter_syntax;
+pub mod hevc_motion;
 pub mod hevc_deblock;
 pub mod vp9;
 pub mod vp9_bool;
@@ -140,3 +143,26 @@ mod av1_tables;
 pub mod av1_intra;
 
 mod av1_filter;
+
+#[cfg(feature = "player")]
+pub mod aac_decoder;
+#[cfg(feature = "player")]
+pub mod vorbis_decoder;
+
+/// Build the decoder that matches a container's codec tag.
+#[cfg(feature = "player")]
+pub fn make_audio_decoder(
+    codec: &str,
+    extra_data: &[u8],
+    sample_rate: u32,
+    channels: u16,
+) -> crate::Result<Box<dyn crate::audio::AudioDecode>> {
+    let decoder: Box<dyn crate::audio::AudioDecode> = match codec {
+        "mp4a" => Box::new(aac_decoder::AacDecoder::new(extra_data, sample_rate, channels)?),
+        "A_VORBIS" => {
+            Box::new(vorbis_decoder::VorbisDecoder::new(extra_data, sample_rate, channels)?)
+        }
+        other => return Err(crate::invalid(&format!("unsupported audio codec {other}"))),
+    };
+    Ok(decoder)
+}

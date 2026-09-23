@@ -1,7 +1,10 @@
-//! FVid MP4/AVC frame source. No external demultiplexer or decoder.
+//! Indexed MP4 frame source for AVC, HEVC, VP9 and AV1.
 //! Frame timestamps remain in the track media timeline; `track().edits` describes
 //! presentation edits separately. This source does not silently discard edits.
-use crate::codec::{avc_decoder::AvcDecoder, avc_picture::IntraPicture};
+use crate::codec::{
+    av1_decoder as av1, avc_decoder::AvcDecoder, avc_picture::IntraPicture,
+    hevc_decoder::HevcDecoder, vp9_decoder as vp9,
+};
 use crate::container::mp4::{Limits, Mp4Reader, Track};
 use crate::{Result, invalid};
 use std::io::{Read, Seek};
@@ -44,13 +47,29 @@ pub struct VideoFrame {
 #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
 struct Hardware {
     session: fvid_vt::Session,
-    sps: crate::codec::avc::Sps,
     colour: crate::playback_native::AvcColour,
 }
 
-pub struct Mp4AvcReader<R> {
+enum Decoder {
+    Avc(AvcDecoder),
+    Hevc(HevcDecoder),
+    Vp9(vp9::Decoder),
+    Av1(av1::Decoder),
+}
+impl Decoder {
+    fn reset(&mut self) {
+        match self {
+            Self::Avc(d) => d.reset(),
+            Self::Hevc(d) => d.reset(),
+            Self::Vp9(d) => d.reset(),
+            Self::Av1(d) => d.reset(),
+        }
+    }
+}
+/// Indexed MP4 source with AVC and HEVC codec dispatch.
+pub struct Mp4VideoReader<R> {
     demuxer: Mp4Reader<R>,
-    decoder: AvcDecoder,
+    decoder: Decoder,
     #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
     hardware: Option<Hardware>,
     track_index: usize,
@@ -62,15 +81,23 @@ pub struct Mp4AvcReader<R> {
     pending_bytes: usize,
     queue_budget: usize,
 }
-impl<R: Read + Seek> Mp4AvcReader<R> {
-    /// Selects the first AVC video track. Use `from_demuxer` to choose explicitly.
+/// Backward-compatible name for the indexed MP4 video reader.
+pub type Mp4AvcReader<R> = Mp4VideoReader<R>;
+impl<R: Read + Seek> Mp4VideoReader<R> {
+    /// Selects the first AVC, HEVC, VP9 or AV1 video track. Use `from_demuxer` to choose explicitly.
     pub fn open(reader: R, limits: Limits, decoder_budget: usize) -> Result<Self> {
         let demuxer = Mp4Reader::open(reader, limits)?;
         let index = demuxer
             .tracks()
             .iter()
-            .position(|t| t.handler == *b"vide" && matches!(&t.codec, b"avc1" | b"avc3"))
-            .ok_or_else(|| invalid("MP4 has no AVC video track"))?;
+            .position(|t| {
+                t.handler == *b"vide"
+                    && matches!(
+                        &t.codec,
+                        b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01"
+                    )
+            })
+            .ok_or_else(|| invalid("MP4 has no supported AVC, HEVC, VP9 or AV1 video track"))?;
         Self::from_demuxer(demuxer, index, decoder_budget)
     }
     pub fn from_demuxer(
@@ -82,8 +109,15 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
             .tracks()
             .get(index)
             .ok_or_else(|| invalid("MP4 track index out of range"))?;
-        if track.handler != *b"vide" || !matches!(&track.codec, b"avc1" | b"avc3") {
-            return Err(invalid("selected MP4 track is not AVC video"));
+        if track.handler != *b"vide"
+            || !matches!(
+                &track.codec,
+                b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01"
+            )
+        {
+            return Err(invalid(
+                "selected MP4 track is not AVC, HEVC, VP9 or AV1 video",
+            ));
         }
         // Reserve half the supplied budget for output reordering and its index.
         // Reference storage and reconstruction use the other half.
@@ -106,12 +140,28 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
             future_pts.push(minimum);
         }
         future_pts.reverse();
-        let decoder = AvcDecoder::new(&track.configuration, decoder_budget - decoder_budget / 2)?;
+        let work_budget = decoder_budget - decoder_budget / 2;
+        let decoder = match &track.codec {
+            b"hvc1" | b"hev1" => Decoder::Hevc(HevcDecoder::from_configuration(
+                &track.configuration,
+                work_budget,
+            )?),
+            b"avc1" | b"avc3" => Decoder::Avc(AvcDecoder::new(&track.configuration, work_budget)?),
+            b"vp09" => Decoder::Vp9(vp9::Decoder::new(work_budget)),
+            b"av01" => Decoder::Av1(av1::Decoder::new(work_budget)),
+            _ => unreachable!(),
+        };
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
         let hardware = if std::env::var_os("FVID_SOFTWARE_DECODE").is_some() {
             None
         } else {
-            open_hardware(&track.configuration)
+            open_hardware(
+                &track.codec,
+                &track.configuration,
+                track.width as u64,
+                track.height as u64,
+                work_budget,
+            )
         };
         Ok(Self {
             demuxer,
@@ -129,11 +179,23 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
         })
     }
     pub fn active_vui(&self) -> Option<&crate::codec::avc::Vui> {
+        match &self.decoder {
+            Decoder::Avc(d) => d.active_vui(),
+            Decoder::Hevc(_) | Decoder::Vp9(_) | Decoder::Av1(_) => None,
+        }
+    }
+    pub fn active_colour(&self) -> Result<crate::playback_native::AvcColour> {
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
         if let Some(hardware) = &self.hardware {
-            return hardware.sps.vui.as_ref();
+            return Ok(hardware.colour);
         }
-        self.decoder.active_vui()
+        match &self.decoder {
+            Decoder::Hevc(d) => {
+                crate::playback_native::AvcColour::from_hevc_vui(d.parameters().0.vui.as_ref())
+            }
+            Decoder::Avc(_) => crate::playback_native::AvcColour::from_vui(self.active_vui()),
+            Decoder::Vp9(_) | Decoder::Av1(_) => Ok(crate::playback_native::AvcColour::default()),
+        }
     }
     /// Whether frames come from the platform's hardware decoder.
     pub fn hardware_accelerated(&self) -> bool {
@@ -151,7 +213,12 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
     #[allow(clippy::type_complexity)]
     fn decode_packet(
         &mut self,
-    ) -> Result<Option<(Arc<IntraPicture>, Option<Arc<crate::playback_native::Planar8>>)>> {
+    ) -> Result<
+        Option<(
+            Arc<IntraPicture>,
+            Option<Arc<crate::playback_native::Planar8>>,
+        )>,
+    > {
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
         if let Some(hardware) = &mut self.hardware {
             let planes = hardware
@@ -163,10 +230,138 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
                 (Arc::new(picture), Some(Arc::new(planes8)))
             }));
         }
-        Ok(self
-            .decoder
-            .decode_order(&self.packet)?
-            .map(|picture| (picture, None)))
+        match &mut self.decoder {
+            Decoder::Avc(d) => Ok(d.decode_order(&self.packet)?.map(|picture| (picture, None))),
+            Decoder::Hevc(d) => {
+                let Some(frame) = d.decode_packet(&self.packet)?.filter(|f| f.output) else {
+                    return Ok(None);
+                };
+                let p = &frame.picture;
+                let colour =
+                    crate::playback_native::AvcColour::from_hevc_vui(d.parameters().0.vui.as_ref())?;
+                let coded_width = p.dimensions[0] as usize;
+                let coded_height = p.dimensions[1] as usize;
+                let crop = p.crop.map(|v| v as usize);
+                let picture = IntraPicture {
+                    coded_width,
+                    coded_height,
+                    crop,
+                    bit_depth: p.depth[0],
+                    y: p.planes[0].samples().to_vec(),
+                    cb: p.planes[1].samples().to_vec(),
+                    cr: p.planes[2].samples().to_vec(),
+                };
+                let planes = crate::playback_native::coded_planes_to_planar8(
+                    &picture.y,
+                    &picture.cb,
+                    &picture.cr,
+                    coded_width,
+                    coded_height,
+                    crop,
+                    p.depth[0],
+                    colour,
+                );
+                Ok(Some((Arc::new(picture), Some(Arc::new(planes)))))
+            }
+            Decoder::Vp9(d) => {
+                for frame in crate::codec::vp9::frames(&self.packet)? {
+                    let decoded = d.decode(frame)?;
+                    if decoded.header.show_frame {
+                        let p = &decoded.picture;
+                        let colour = crate::playback_native::AvcColour {
+                            kr: if decoded.header.picture.format.color_space == 1 {
+                                0.2126
+                            } else {
+                                0.299
+                            },
+                            kb: if decoded.header.picture.format.color_space == 1 {
+                                0.0722
+                            } else {
+                                0.114
+                            },
+                            full: decoded.header.picture.format.full_range,
+                        };
+                        let coded_width = p.size[0] as usize;
+                        let coded_height = p.size[1] as usize;
+                        let picture = IntraPicture {
+                            coded_width,
+                            coded_height,
+                            crop: [0; 4],
+                            bit_depth: p.depth,
+                            y: p.planes[0].samples.clone(),
+                            cb: p.planes[1].samples.clone(),
+                            cr: p.planes[2].samples.clone(),
+                        };
+                        let planes = crate::playback_native::coded_planes_to_planar8(
+                            &picture.y,
+                            &picture.cb,
+                            &picture.cr,
+                            coded_width,
+                            coded_height,
+                            [0; 4],
+                            p.depth,
+                            colour,
+                        );
+                        return Ok(Some((Arc::new(picture), Some(Arc::new(planes)))));
+                    }
+                }
+                Ok(None)
+            }
+            Decoder::Av1(d) => {
+                for decoded in d.decode_packet(&self.packet)? {
+                    if decoded.show {
+                        let p = &decoded.picture;
+                        let colour = crate::playback_native::AvcColour {
+                            kr: match decoded.color.matrix {
+                                1 => 0.2126,
+                                2 | 5 | 6 => 0.299,
+                                9 => 0.2627,
+                                _ => {
+                                    return Err(invalid(
+                                        "unsupported AV1 RGB matrix coefficients",
+                                    ))
+                                }
+                            },
+                            kb: match decoded.color.matrix {
+                                1 => 0.0722,
+                                2 | 5 | 6 => 0.114,
+                                9 => 0.0593,
+                                _ => {
+                                    return Err(invalid(
+                                        "unsupported AV1 RGB matrix coefficients",
+                                    ))
+                                }
+                            },
+                            full: decoded.color.full_range,
+                        };
+                        let coded_width = p.size[0] as usize;
+                        let coded_height = p.size[1] as usize;
+                        let crop = [0; 4];
+                        let picture = IntraPicture {
+                            coded_width,
+                            coded_height,
+                            crop,
+                            bit_depth: p.depth,
+                            y: p.planes[0].samples.clone(),
+                            cb: p.planes[1].samples.clone(),
+                            cr: p.planes[2].samples.clone(),
+                        };
+                        let planes = crate::playback_native::coded_planes_to_planar8(
+                            &picture.y,
+                            &picture.cb,
+                            &picture.cr,
+                            coded_width,
+                            coded_height,
+                            crop,
+                            p.depth,
+                            colour,
+                        );
+                        return Ok(Some((Arc::new(picture), Some(Arc::new(planes)))));
+                    }
+                }
+                Ok(None)
+            }
+        }
     }
     pub fn track(&self) -> &Track {
         &self.demuxer.tracks()[self.track_index]
@@ -178,6 +373,7 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
     /// Packet reads seek to indexed offsets, so no eager I/O is needed here.
     pub fn rewind(&mut self) {
         self.decoder.reset();
+        self.demuxer.invalidate_position();
         self.sample_index = 0;
         self.failed = false;
         self.packet.clear();
@@ -278,18 +474,81 @@ impl<R: Read + Seek> Mp4AvcReader<R> {
 /// Open a VideoToolbox session for the stream's parameter sets; `None` (with a
 /// note on stderr) leaves decoding to the software decoder.
 #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-fn open_hardware(configuration: &[u8]) -> Option<Hardware> {
+fn open_hardware(
+    codec: &[u8],
+    configuration: &[u8],
+    width: u64,
+    height: u64,
+    budget: usize,
+) -> Option<Hardware> {
+    match codec {
+        b"hvc1" | b"hev1" => open_hardware_hevc(configuration, budget),
+        b"avc1" | b"avc3" => open_hardware_avc(configuration),
+        b"vp09" => open_hardware_vp9(configuration, width, height),
+        b"av01" => open_hardware_av1(configuration, width, height),
+        _ => None,
+    }
+}
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+fn open_hardware_avc(configuration: &[u8]) -> Option<Hardware> {
     let config = crate::codec::config::AvcConfig::parse(configuration).ok()?;
     let sps = crate::codec::avc::Sps::parse(config.sps.first()?).ok()?;
     let colour = crate::playback_native::AvcColour::from_vui(sps.vui.as_ref()).ok()?;
     match fvid_vt::Session::new(&config.sps, &config.pps, config.length_size) {
-        Ok(session) => Some(Hardware {
-            session,
-            sps,
-            colour,
-        }),
+        Ok(session) => Some(Hardware { session, colour }),
         Err(error) => {
             eprintln!("{error}; using the software decoder");
+            None
+        }
+    }
+}
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+fn open_hardware_hevc(configuration: &[u8], budget: usize) -> Option<Hardware> {
+    use crate::codec::config::HevcConfig;
+    let config = HevcConfig::parse(configuration).ok()?;
+    let mut vps = Vec::new();
+    let mut sps = Vec::new();
+    let mut pps = Vec::new();
+    for array in &config.arrays {
+        match array.nal_type {
+            32 => vps.extend(array.units.iter().copied()),
+            33 => sps.extend(array.units.iter().copied()),
+            34 => pps.extend(array.units.iter().copied()),
+            _ => {}
+        }
+    }
+    if vps.is_empty() || sps.is_empty() || pps.is_empty() {
+        return None;
+    }
+    let sps_parsed = crate::codec::hevc_sps::Sps::parse(sps.first()?, budget).ok()?;
+    let colour =
+        crate::playback_native::AvcColour::from_hevc_vui(sps_parsed.vui.as_ref()).ok()?;
+    match fvid_vt::Session::new_hevc(&vps, &sps, &pps, config.length_size) {
+        Ok(session) => Some(Hardware { session, colour }),
+        Err(error) => {
+            eprintln!("{error}; using the software HEVC decoder");
+            None
+        }
+    }
+}
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+fn open_hardware_vp9(configuration: &[u8], width: u64, height: u64) -> Option<Hardware> {
+    let colour = crate::playback_native::AvcColour::default();
+    match fvid_vt::Session::new_vp9(configuration, width as u32, height as u32) {
+        Ok(session) => Some(Hardware { session, colour }),
+        Err(error) => {
+            eprintln!("{error}; using the software VP9 decoder");
+            None
+        }
+    }
+}
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+fn open_hardware_av1(configuration: &[u8], width: u64, height: u64) -> Option<Hardware> {
+    let colour = crate::playback_native::AvcColour::default();
+    match fvid_vt::Session::new_av1(configuration, width as u32, height as u32) {
+        Ok(session) => Some(Hardware { session, colour }),
+        Err(error) => {
+            eprintln!("{error}; using the software AV1 decoder");
             None
         }
     }

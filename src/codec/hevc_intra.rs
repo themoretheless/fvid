@@ -169,13 +169,17 @@ impl References {
 
     /// Modes 0=planar, 1=DC, 2..34=angular. Chroma means 4:2:0 Cb/Cr:
     /// reference smoothing and luma boundary correction do not apply there.
-    pub fn predict(&self, mode: u8, chroma: bool, strong_smoothing: bool) -> Result<Vec<u16>> {
+    pub fn predict(&self, mode: u8, chroma: bool, strong_smoothing: bool, output: &mut [u16]) -> Result<()> {
         if mode > 34 {
             return Err(invalid("invalid HEVC intra prediction mode"));
         }
         let n = self.side;
+        if output.len() < n * n {
+            return Err(invalid("output buffer too small for HEVC intra prediction"));
+        }
+        let output = &mut output[..n * n];
         let (corner, top, left) = self.filtered(mode, chroma, strong_smoothing);
-        let mut output = vec![0u16; n * n];
+        output.fill(0);
         if mode == 0 {
             for y in 0..n {
                 for x in 0..n {
@@ -253,7 +257,7 @@ impl References {
                 }
             }
         }
-        Ok(output)
+        Ok(())
     }
 }
 
@@ -322,9 +326,12 @@ mod tests {
                 let r = References::new(log, depth, None, &edges, &edges).unwrap();
                 for mode in 0..=34 {
                     for chroma in [false, true] {
+                        let n = 1usize << log;
+                        let mut output = vec![0u16; n * n];
+                        r.predict(mode, chroma, true, &mut output).unwrap();
                         assert_eq!(
-                            r.predict(mode, chroma, true).unwrap(),
-                            vec![1 << (depth - 1); 1 << (2 * log)]
+                            &output[..],
+                            &vec![1 << (depth - 1); 1 << (2 * log)][..]
                         );
                     }
                 }
@@ -359,21 +366,27 @@ mod tests {
             ],
         )
         .unwrap();
+        let mut output = vec![0u16; 16];
+        r.predict(0, true, false, &mut output).unwrap();
         assert_eq!(
-            r.predict(0, true, false).unwrap(),
+            &output[..],
             [
                 70, 69, 68, 66, 89, 85, 81, 78, 108, 101, 95, 89, 126, 118, 109, 100
             ]
         );
-        assert_eq!(r.predict(1, true, false).unwrap(), [75; 16]);
+        let mut output = vec![0u16; 16];
+        r.predict(1, true, false, &mut output).unwrap();
+        assert_eq!(&output[..], &[75; 16]);
+        r.predict(1, false, false, &mut output).unwrap();
         assert_eq!(
-            r.predict(1, false, false).unwrap(),
+            &output[..],
             [
                 68, 64, 66, 69, 84, 75, 75, 75, 86, 75, 75, 75, 89, 75, 75, 75
             ]
         );
+        r.predict(18, true, false, &mut output).unwrap();
         assert_eq!(
-            r.predict(18, true, false).unwrap(),
+            &output[..],
             [
                 10, 20, 30, 40, 100, 10, 20, 30, 110, 100, 10, 20, 120, 110, 100, 10
             ]
@@ -384,20 +397,23 @@ mod tests {
         let top: Vec<_> = (0..8).map(|i| Some(20 + i * 10)).collect();
         let left: Vec<_> = (0..8).map(|i| Some(100 + i * 10)).collect();
         let r = References::new(2, 8, Some(10), &top, &left).unwrap();
+        let mut output = vec![0u16; 16];
+        r.predict(25, true, false, &mut output).unwrap();
         assert_eq!(
-            r.predict(25, true, false).unwrap(),
+            &output[..],
             [
                 19, 29, 39, 49, 19, 29, 39, 49, 18, 28, 38, 48, 18, 28, 38, 48
             ]
         );
+        r.predict(27, true, false, &mut output).unwrap();
         assert_eq!(
-            r.predict(27, true, false).unwrap(),
+            &output[..],
             [
                 21, 31, 41, 51, 21, 31, 41, 51, 22, 32, 42, 52, 23, 33, 43, 53
             ]
         );
-        let a = r.predict(22, true, false).unwrap();
-        assert_eq!([a[0], a[4], a[8], a[12]], [16, 12, 32, 73]);
+        r.predict(22, true, false, &mut output).unwrap();
+        assert_eq!([output[0], output[4], output[8], output[12]], [16, 12, 32, 73]);
     }
     #[test]
     fn strong_smoothing_uses_endpoints_and_strict_midpoint_threshold() {
@@ -424,7 +440,8 @@ mod tests {
         assert!(References::new(2, 8, None, &[None; 7], &[None; 8]).is_err());
         assert!(References::new(2, 8, Some(256), &[None; 8], &[None; 8]).is_err());
         let r = References::new(2, 8, None, &[None; 8], &[None; 8]).unwrap();
-        assert!(r.predict(35, false, false).is_err());
+        let mut output = vec![0u16; 16];
+        assert!(r.predict(35, false, false, &mut output).is_err());
     }
     #[test]
     fn angular_transpose_symmetry_and_boundary_clipping() {
@@ -439,8 +456,10 @@ mod tests {
             let a = References::new(log, 10, Some(1000), &top, &left).unwrap();
             let b = References::new(log, 10, Some(1000), &left, &top).unwrap();
             for mode in 2..=34 {
-                let aa = a.predict(mode, false, true).unwrap();
-                let bb = b.predict(36 - mode, false, true).unwrap();
+                let mut aa = vec![0u16; n * n];
+                let mut bb = vec![0u16; n * n];
+                a.predict(mode, false, true, &mut aa).unwrap();
+                b.predict(36 - mode, false, true, &mut bb).unwrap();
                 for y in 0..n {
                     for x in 0..n {
                         assert_eq!(aa[y * n + x], bb[x * n + y]);
@@ -448,7 +467,9 @@ mod tests {
                 }
             }
             if n < 32 {
-                assert_eq!(a.predict(26, false, false).unwrap()[0], 0);
+                let mut output = vec![0u16; n * n];
+                a.predict(26, false, false, &mut output).unwrap();
+                assert_eq!(output[0], 0);
             }
         }
     }

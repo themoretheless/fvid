@@ -734,14 +734,16 @@ impl Decoder<'_> {
                         if xx >= self.cols >> sub || yy >= self.rows >> sub {
                             continue;
                         }
-                        let residual = if skip {
+                        let residual: &[i32] = if skip {
                             for i in 0..tw / 4 {
                                 self.above[p][xx + i] = (0, 0);
                             }
                             for i in 0..th / 4 {
                                 self.left[p][yy + i] = (0, 0);
                             }
-                            vec![0; tw * th]
+                            self.residual_scratch.resize(tw * th, 0);
+                            self.residual_scratch.fill(0);
+                            &self.residual_scratch
                         } else {
                             let (coeff, kind) =
                                 self.coefficients(d, c, p, xx, yy, bw, bh, size, 0)?;
@@ -751,14 +753,20 @@ impl Decoder<'_> {
                                     4,
                                     self.s.color.depth,
                                     Kind::Lossless,
-                                )?
+                                    &mut self.lossless_scratch,
+                                    &mut self.lossless_out,
+                                )?;
+                                &self.lossless_out[..4 * 4]
                             } else {
                                 super::super::av1_transform::inverse(
                                     &coeff,
                                     size,
                                     self.s.color.depth,
                                     kind,
-                                )?
+                                    &mut self.tx_scratch,
+                                    &mut self.residual_scratch,
+                                )?;
+                                &self.residual_scratch[..size[0] * size[1]]
                             }
                         };
                         let plane = &mut self.image.planes[p];
@@ -981,9 +989,29 @@ impl Decoder<'_> {
         b: Block,
     ) -> Result<()> {
         let compound = b.reference2 > 0;
-        let first = self.motion_samples(p, x, y, size, b, compound)?;
+        let references = self.references;
+        let h_references = self.h.references;
+        let h_size = self.h.size;
+        let color_depth = self.s.color.depth;
+        let first = Self::motion_samples(
+            references,
+            h_references,
+            h_size,
+            color_depth,
+            p,
+            x,
+            y,
+            size,
+            b,
+            compound,
+            &mut self.scratch,
+        )?;
         let second = if compound {
-            Some(self.motion_samples(
+            Some(Self::motion_samples(
+                references,
+                h_references,
+                h_size,
+                color_depth,
                 p,
                 x,
                 y,
@@ -994,6 +1022,7 @@ impl Decoder<'_> {
                     ..b
                 },
                 true,
+                &mut self.scratch,
             )?)
         } else {
             None
@@ -1047,18 +1076,22 @@ impl Decoder<'_> {
         Ok(())
     }
     fn motion_samples(
-        &self,
+        references: [Option<&Picture>; 8],
+        h_references: [usize; 7],
+        h_size: [u32; 2],
+        color_depth: u8,
         p: usize,
         x: usize,
         y: usize,
         size: [usize; 2],
         b: Block,
         compound: bool,
+        scratch: &mut Vec<i32>,
     ) -> Result<Vec<i32>> {
         use super::super::av1_tables::SUBPEL_FILTERS;
-        let reference = self.references[self.h.references[b.reference - 1]]
+        let reference = references[h_references[b.reference - 1]]
             .ok_or_else(|| invalid("missing AV1 reference pixels"))?;
-        if reference.size != self.h.size {
+        if reference.size != h_size {
             return Err(invalid("AV1 scaled reference prediction not implemented"));
         }
         if size[0] >= 8 && size[1] >= 8 {
@@ -1094,9 +1127,11 @@ impl Decoder<'_> {
         };
         let fx = &SUBPEL_FILTERS[filter(1, w)][(coord_x & 15) as usize];
         let fy = &SUBPEL_FILTERS[filter(0, h)][(coord_y & 15) as usize];
-        let round0 = if self.s.color.depth == 12 { 5 } else { 3 };
+        let round0 = if color_depth == 12 { 5 } else { 3 };
         let round1 = if compound { 7 } else { 14 - round0 };
-        let mut temp = vec![0i32; (h + 7) * w];
+        let temp_len = (h + 7) * w;
+        scratch.resize(temp_len, 0);
+        let temp = &mut scratch[..temp_len];
         for r in 0..h + 7 {
             for col in 0..w {
                 let sy = ((coord_y >> 4) + r as i32 - 3).clamp(0, last_y) as usize;

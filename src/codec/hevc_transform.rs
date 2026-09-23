@@ -56,6 +56,10 @@ pub fn reconstruct(
     let level_scale = [40i64, 45, 51, 57, 64, 72][usize::from(qp % 6)];
     let mut scaled = Vec::with_capacity(coefficients.len());
     for (index, &coefficient) in coefficients.iter().enumerate() {
+        if coefficient == 0 {
+            scaled.push(0);
+            continue;
+        }
         let factor = i64::from(scaling.factor(
             usize::from(log2_size - 2),
             matrix_id,
@@ -73,35 +77,120 @@ pub fn reconstruct(
             .map(|v| (((v << (5 + log2_size)) + round) >> final_shift) as i32)
             .collect());
     }
-    let weight = |frequency: usize, sample: usize| -> i64 {
-        i64::from(if transform == Transform::Dst4 {
-            DST[frequency][sample]
+    if transform == Transform::Dct && scaled[1..].iter().all(|&v| v == 0) {
+        let first = ((scaled[0] * 64 + 64) >> 7).clamp(-32768, 32767);
+        return Ok(vec![
+            ((first * 64 + round) >> final_shift) as i32;
+            side * side
+        ]);
+    }
+    let inverse = |input: &[i32], output: &mut [i32]| {
+        if transform == Transform::Dst4 {
+            for (x, value) in output.iter_mut().enumerate() {
+                *value = (0..4).map(|k| i32::from(DST[k][x]) * input[k]).sum();
+            }
         } else {
-            DCT[frequency << (5 - log2_size)][sample]
-        })
+            inverse_dct(input, output);
+        }
     };
-    let mut intermediate = vec![0i64; side * side];
+    let mut intermediate = vec![0i32; side * side];
+    let mut column = [0i32; 32];
+    let mut output = [0i32; 32];
     for x in 0..side {
+        for k in 0..side {
+            column[k] = scaled[k * side + x] as i32;
+        }
+        inverse(&column[..side], &mut output[..side]);
         for y in 0..side {
-            let sum: i64 = (0..side).map(|k| weight(k, y) * scaled[k * side + x]).sum();
-            intermediate[y * side + x] = ((sum + 64) >> 7).clamp(-32768, 32767);
+            intermediate[y * side + x] = ((output[y] + 64) >> 7).clamp(-32768, 32767);
         }
     }
     let mut residual = vec![0i32; side * side];
     for y in 0..side {
+        inverse(&intermediate[y * side..(y + 1) * side], &mut output[..side]);
         for x in 0..side {
-            let sum: i64 = (0..side)
-                .map(|k| weight(k, x) * intermediate[y * side + k])
-                .sum();
-            residual[y * side + x] = ((sum + round) >> final_shift) as i32;
+            residual[y * side + x] = (output[x] + round as i32) >> final_shift;
         }
     }
     Ok(residual)
 }
 
+// Even frequencies form the smaller transform; odd frequencies are antisymmetric.
+// Each sum fits i32: at most 32 * 90 * 32768, before normative clipping.
+fn inverse_dct(input: &[i32], output: &mut [i32]) {
+    if input[1..].iter().all(|&v| v == 0) {
+        output.fill(input[0] * 64);
+        return;
+    }
+    match input.len() {
+        4 => inverse4(input, output),
+        8 => inverse8(input, output),
+        16 => inverse16(input, output),
+        32 => inverse32(input, output),
+        _ => unreachable!("validated HEVC transform size"),
+    }
+}
+fn inverse2(input: &[i32], output: &mut [i32]) {
+    output[0] = 64 * (input[0] + input[1]);
+    output[1] = 64 * (input[0] - input[1]);
+}
+macro_rules! inverse_size {
+    ($name:ident, $smaller:ident, $n:expr) => {
+        fn $name(input: &[i32], output: &mut [i32]) {
+            let input: &[i32; $n] = input.try_into().unwrap();
+            let output: &mut [i32; $n] = output.try_into().unwrap();
+            let even = std::array::from_fn::<_, { $n / 2 }, _>(|k| input[2 * k]);
+            let mut values = [0; $n / 2];
+            $smaller(&even, &mut values);
+            let mut odd = [0; $n / 2];
+            for k in (1..$n).step_by(2) {
+                if input[k] == 0 {
+                    continue;
+                }
+                for x in 0..$n / 2 {
+                    odd[x] += input[k] * i32::from(DCT[k * (32 / $n)][x]);
+                }
+            }
+            for x in 0..$n / 2 {
+                output[x] = values[x] + odd[x];
+                output[$n - 1 - x] = values[x] - odd[x];
+            }
+        }
+    };
+}
+inverse_size!(inverse4, inverse2, 4);
+inverse_size!(inverse8, inverse4, 8);
+inverse_size!(inverse16, inverse8, 16);
+inverse_size!(inverse32, inverse16, 32);
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn factored_dct_matches_dense_matrix_for_all_sizes() {
+        let mut state = 17u32;
+        for n in [4usize, 8, 16, 32] {
+            for case in 0..128 {
+                let mut input = vec![0; n];
+                for (k, v) in input.iter_mut().enumerate() {
+                    state = state.wrapping_mul(1664525).wrapping_add(1013904223);
+                    *v = if case < n && k != case {
+                        0
+                    } else {
+                        (state >> 16) as i16 as i32
+                    };
+                }
+                let mut actual = vec![0; n];
+                inverse_dct(&input, &mut actual);
+                for x in 0..n {
+                    let expected: i64 = (0..n)
+                        .map(|k| i64::from(input[k]) * i64::from(DCT[k * (32 / n)][x]))
+                        .sum();
+                    assert_eq!(i64::from(actual[x]), expected, "n={n} case={case} x={x}");
+                }
+            }
+        }
+    }
     #[test]
     fn dc_scaling_depth_sizes_and_signed_rounding() {
         let flat = ScalingLists::flat();

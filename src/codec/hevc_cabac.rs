@@ -31,6 +31,13 @@ pub enum Syntax {
     Greater1,
     Greater2,
     RootCbf,
+    MergeFlag,
+    MergeIdx,
+    InterPred,
+    RefIdx,
+    Mvp,
+    Mvd0,
+    Mvd1,
 }
 fn values(syntax: Syntax, init: usize) -> Result<Vec<u8>> {
     use super::hevc_cabac_tables::*;
@@ -64,6 +71,31 @@ fn values(syntax: Syntax, init: usize) -> Result<Vec<u8>> {
     }
 
     let base: &[u8] = match syntax {
+        Syntax::MergeFlag if init != 0 => {
+            if init == 1 {
+                &[110]
+            } else {
+                &[154]
+            }
+        }
+        Syntax::MergeIdx if init != 0 => {
+            if init == 1 {
+                &[122]
+            } else {
+                &[137]
+            }
+        }
+        Syntax::InterPred if init != 0 => &[95, 79, 63, 31, 31],
+        Syntax::RefIdx if init != 0 => &[153, 153],
+        Syntax::Mvp if init != 0 => &[168],
+        Syntax::Mvd0 if init != 0 => {
+            if init == 1 {
+                &[140]
+            } else {
+                &[169]
+            }
+        }
+        Syntax::Mvd1 if init != 0 => &[198],
         Syntax::SaoMerge => &[153],
         Syntax::SaoType => [&[200][..], &[185][..], &[160][..]][init],
         Syntax::SplitCu => [
@@ -99,11 +131,51 @@ fn values(syntax: Syntax, init: usize) -> Result<Vec<u8>> {
     };
     Ok(base.to_vec())
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct Bank {
+    values: [Context; 44],
+    length: usize,
+}
+impl Bank {
+    fn empty() -> Self {
+        Self {
+            values: [Context::hevc(154, 0); 44],
+            length: 0,
+        }
+    }
+    fn initialized(entries: &[u8], qp: i32) -> Result<Self> {
+        if entries.len() > 44 {
+            return Err(invalid("HEVC context bank is too large"));
+        }
+        let mut bank = Self::empty();
+        bank.length = entries.len();
+        for (target, &value) in bank.values.iter_mut().zip(entries) {
+            *target = Context::hevc(value, qp);
+        }
+        Ok(bank)
+    }
+    fn len(&self) -> usize {
+        self.length
+    }
+    fn get_mut(&mut self, index: usize) -> Option<&mut Context> {
+        if index < self.len() {
+            self.values.get_mut(index)
+        } else {
+            None
+        }
+    }
+}
+impl std::ops::Index<usize> for Bank {
+    type Output = Context;
+    fn index(&self, index: usize) -> &Context {
+        &self.values[..self.length][index]
+    }
+}
 /// Separate banks preserve shared contexts for syntax aliases (e.g. luma/chroma
 /// SAO type) while keeping the arithmetic state in the existing CABAC engine.
 pub struct HevcCabac<'a> {
     arithmetic: Cabac<'a>,
-    contexts: [Vec<Context>; 21],
+    contexts: [Bank; 28],
     failed: bool,
 }
 fn index(s: Syntax) -> usize {
@@ -129,8 +201,18 @@ fn index(s: Syntax) -> usize {
         Syntax::Greater1 => 18,
         Syntax::Greater2 => 19,
         Syntax::RootCbf => 20,
+        Syntax::MergeFlag => 21,
+        Syntax::MergeIdx => 22,
+        Syntax::InterPred => 23,
+        Syntax::RefIdx => 24,
+        Syntax::Mvp => 25,
+        Syntax::Mvd0 => 26,
+        Syntax::Mvd1 => 27,
     }
 }
+/// Probability states transferred at the second CTU of a WPP row.
+#[derive(Clone, Copy)]
+pub struct Contexts([Bank; 28]);
 impl<'a> HevcCabac<'a> {
     pub fn new(
         rbsp: &'a [u8],
@@ -147,7 +229,7 @@ impl<'a> HevcCabac<'a> {
             (SliceType::P, false) | (SliceType::B, true) => 1,
             _ => 2,
         };
-        let mut contexts: [Vec<Context>; 21] = std::array::from_fn(|_| Vec::new());
+        let mut contexts = [Bank::empty(); 28];
         for s in [
             Syntax::SaoMerge,
             Syntax::SaoType,
@@ -170,9 +252,16 @@ impl<'a> HevcCabac<'a> {
             Syntax::Greater1,
             Syntax::Greater2,
             Syntax::RootCbf,
+            Syntax::MergeFlag,
+            Syntax::MergeIdx,
+            Syntax::InterPred,
+            Syntax::RefIdx,
+            Syntax::Mvp,
+            Syntax::Mvd0,
+            Syntax::Mvd1,
         ] {
             if let Ok(entries) = values(s, init) {
-                contexts[index(s)] = entries.iter().map(|&v| Context::hevc(v, qp)).collect();
+                contexts[index(s)] = Bank::initialized(&entries, qp)?;
             }
         }
         Ok(Self {
@@ -180,6 +269,23 @@ impl<'a> HevcCabac<'a> {
             contexts,
             failed: false,
         })
+    }
+    /// Restart a WPP arithmetic substream without rebuilding probability banks.
+    pub fn from_contexts(rbsp: &'a [u8], bit_offset: usize, saved: &Contexts) -> Result<Self> {
+        Ok(Self {
+            arithmetic: Cabac::new(rbsp, bit_offset)?,
+            contexts: saved.0,
+            failed: false,
+        })
+    }
+    pub fn contexts(&self) -> Result<Contexts> {
+        if self.failed {
+            return Err(invalid("cannot save failed HEVC CABAC state"));
+        }
+        Ok(Contexts(self.contexts))
+    }
+    pub fn restore_contexts(&mut self, saved: &Contexts) {
+        self.contexts = saved.0;
     }
     pub fn decision(&mut self, syntax: Syntax, increment: usize) -> Result<bool> {
         if self.failed {

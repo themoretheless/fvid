@@ -84,6 +84,7 @@ pub fn luma_decision(
 }
 /// Filter one luma line. Inputs/outputs are nearest-to-edge first; p3/q3 stay
 /// unchanged. The edge decision is derived separately from lines 0 and 3.
+#[inline]
 pub fn luma_sample(
     p: [u16; 4],
     q: [u16; 4],
@@ -174,6 +175,7 @@ pub fn chroma_tc(
 /// Filter one pair across an eligible chroma edge (boundary strength 2).
 /// Arrays are nearest-to-edge first. `enabled` applies PCM/bypass exclusions
 /// independently per side, after deriving delta from both unmodified sides.
+#[inline]
 pub fn chroma_sample(
     p: [u16; 2],
     q: [u16; 2],

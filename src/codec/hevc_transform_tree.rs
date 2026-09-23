@@ -31,6 +31,25 @@ pub fn read_intra<B: ResidualBins>(
     bins: &mut B,
     origin: [u32; 2],
     config: Config,
+    leaf: impl FnMut(&mut B, Unit) -> Result<()>,
+) -> Result<()> {
+    read(bins, origin, config, true, false, leaf)
+}
+pub fn read_inter<B: ResidualBins>(
+    bins: &mut B,
+    origin: [u32; 2],
+    config: Config,
+    partitioned: bool,
+    leaf: impl FnMut(&mut B, Unit) -> Result<()>,
+) -> Result<()> {
+    read(bins, origin, config, false, partitioned, leaf)
+}
+fn read<B: ResidualBins>(
+    bins: &mut B,
+    origin: [u32; 2],
+    config: Config,
+    intra: bool,
+    partitioned: bool,
     mut leaf: impl FnMut(&mut B, Unit) -> Result<()>,
 ) -> Result<()> {
     let c = config;
@@ -53,6 +72,8 @@ pub fn read_intra<B: ResidualBins>(
     fn walk<B: ResidualBins>(
         b: &mut B,
         c: Config,
+        intra: bool,
+        partitioned: bool,
         p: [u32; 2],
         base: [u32; 2],
         log: u8,
@@ -61,7 +82,9 @@ pub fn read_intra<B: ResidualBins>(
         parent: [bool; 2],
         leaf: &mut impl FnMut(&mut B, Unit) -> Result<()>,
     ) -> Result<()> {
-        let force = log > c.log2_max_transform || (c.intra_split && depth == 0);
+        let force = log > c.log2_max_transform
+            || (c.intra_split && depth == 0)
+            || (!intra && partitioned && c.max_depth == 0 && depth == 0);
         let split = if force {
             true
         } else if log > c.log2_min_transform && depth < c.max_depth {
@@ -85,6 +108,8 @@ pub fn read_intra<B: ResidualBins>(
                 walk(
                     b,
                     c,
+                    intra,
+                    partitioned,
                     [p[0] + dx * half, p[1] + dy * half],
                     p,
                     log - 1,
@@ -96,7 +121,11 @@ pub fn read_intra<B: ResidualBins>(
             }
             Ok(())
         } else {
-            let y = b.decision(Syntax::CbfLuma, usize::from(depth == 0))?;
+            let y = if intra || depth != 0 || chroma.iter().any(|&v| v) {
+                b.decision(Syntax::CbfLuma, usize::from(depth == 0))?
+            } else {
+                true
+            };
             let cp = if log == 2 { base } else { p };
             leaf(
                 b,
@@ -113,7 +142,17 @@ pub fn read_intra<B: ResidualBins>(
         }
     }
     walk(
-        bins, c, origin, origin, c.log2_cu, 0, 0, [false; 2], &mut leaf,
+        bins,
+        c,
+        intra,
+        partitioned,
+        origin,
+        origin,
+        c.log2_cu,
+        0,
+        0,
+        [false; 2],
+        &mut leaf,
     )
 }
 
