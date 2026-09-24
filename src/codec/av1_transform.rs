@@ -38,7 +38,8 @@ fn h(t: &mut [i64], a: usize, b: usize, flip: bool, r: u8) {
 }
 fn dct(t: &mut [i64], r: u8) {
     let n = t.len().ilog2();
-    let copy = t.to_vec();
+    let mut copy = [0i64; 64];
+    copy[..t.len()].copy_from_slice(t);
     for i in 0..t.len() {
         t[i] = copy[brev(n, i)];
     }
@@ -233,7 +234,8 @@ fn adst(t: &mut [i64], r: u8) {
         return;
     }
     let len = t.len();
-    let copy = t.to_vec();
+    let mut copy = [0i64; 16];
+    copy[..len].copy_from_slice(t);
     for i in 0..len {
         t[i] = copy[if i & 1 != 0 { i - 1 } else { len - i - 1 }];
     }
@@ -283,7 +285,8 @@ fn adst(t: &mut [i64], r: u8) {
     for i in 0..len / 4 {
         b(t, 2 + 4 * i, 3 + 4 * i, 32, true);
     }
-    let copy = t.to_vec();
+    let mut copy = [0i64; 16];
+    copy[..len].copy_from_slice(t);
     let n = len.ilog2();
     for (i, out) in t.iter_mut().enumerate() {
         let a = (i >> 3) & 1;
@@ -374,10 +377,11 @@ pub fn inverse(
         | (64, 32) => 1,
         _ => 2,
     };
-    let mut data = coefficients
-        .iter()
-        .map(|v| i64::from(*v))
-        .collect::<Vec<_>>();
+    scratch.resize(w * h + h, 0);
+    let (data, col) = scratch.split_at_mut(w * h);
+    for (d, c) in data.iter_mut().zip(coefficients) {
+        *d = i64::from(*c);
+    }
     let col_range = (depth + 6).max(16);
     for row in data.chunks_exact_mut(w) {
         if w.ilog2().abs_diff(h.ilog2()) == 1 {
@@ -392,16 +396,16 @@ pub fn inverse(
     }
     out.resize(w * h, 0);
     out.fill(0);
-    scratch.resize(h, 0);
+    let col = &mut *col;
     for x in 0..w {
         for y in 0..h {
-            scratch[y] = data[y * w + x];
+            col[y] = data[y * w + x];
         }
-        transform(scratch, vertical, col_range)?;
+        transform(col, vertical, col_range)?;
         for y in 0..h {
             let xx = if horizontal == 2 { w - 1 - x } else { x };
             let yy = if vertical == 2 { h - 1 - y } else { y };
-            out[yy * w + xx] = i32::try_from(round(scratch[y], 4))
+            out[yy * w + xx] = i32::try_from(round(col[y], 4))
                 .map_err(|_| invalid("AV1 inverse transform overflow"))?;
         }
     }

@@ -1,7 +1,7 @@
 //! Generated normative AV1 default CDF tables; see scripts/generate_av1_tables.py.
 //! Source SHA-256: 9d9a54994541adbd61e83f9af95aad818ea8e5608d090a9553d2178bbef52998
 use crate::{Result, invalid};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 #[derive(Clone)]
 pub struct Table {
     pub shape: &'static [usize],
@@ -9,7 +9,7 @@ pub struct Table {
 }
 #[derive(Clone)]
 pub struct Cdfs {
-    tables: HashMap<&'static str, Table>,
+    tables: BTreeMap<&'static str, Table>,
 }
 impl Cdfs {
     pub fn new(q: u8) -> Self {
@@ -22,7 +22,7 @@ impl Cdfs {
         } else {
             3
         };
-        let mut tables = HashMap::new();
+        let mut tables = BTreeMap::new();
         tables.insert(
             "Intra_Frame_Y_Mode",
             Table {
