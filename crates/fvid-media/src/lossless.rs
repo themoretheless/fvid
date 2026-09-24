@@ -4580,11 +4580,141 @@ pub(crate) unsafe fn flip_view(frame: *mut AVFrame) -> Result<()> {
         Ok(())
     }
 }
-pub(crate) struct Sws(pub *mut SwsContext);
+pub(crate) struct Sws {
+    /// Direct swscale context, used for point scaling.
+    context: *mut SwsContext,
+    /// Same-size format conversions run through a slice-threaded
+    /// buffersrc->(auto-inserted scale)->buffersink mini-graph so the restore
+    /// conversion after each filter uses graph worker threads instead of a
+    /// single-threaded sws_scale call.
+    graph: Option<Box<ConvertGraph>>,
+}
+
+impl Sws {
+    fn direct(context: *mut SwsContext) -> Self {
+        Self { context, graph: None }
+    }
+
+    fn graph() -> Self {
+        Self {
+            context: ptr::null_mut(),
+            graph: None,
+        }
+    }
+}
+
 impl Drop for Sws {
     fn drop(&mut self) {
         unsafe {
-            sws_freeContext(self.0);
+            if !self.context.is_null() {
+                sws_freeContext(self.context);
+            }
+        }
+    }
+}
+
+struct ConvertGraph {
+    graph: *mut AVFilterGraph,
+    src: *mut AVFilterContext,
+    sink: *mut AVFilterContext,
+    width: i32,
+    height: i32,
+    src_format: i32,
+    dst_format: i32,
+}
+
+impl Drop for ConvertGraph {
+    fn drop(&mut self) {
+        // SAFETY: Owns the graph; source/sink contexts are freed with it.
+        unsafe { avfilter_graph_free(&mut self.graph) }
+    }
+}
+
+impl ConvertGraph {
+    unsafe fn open(
+        width: i32,
+        height: i32,
+        src_format: i32,
+        dst_format: i32,
+    ) -> Result<Self> {
+        unsafe {
+            let src_name = string(av_get_pix_fmt_name(src_format));
+            let dst_name = string(av_get_pix_fmt_name(dst_format));
+            if src_name.is_empty() || dst_name.is_empty() {
+                return Err("unknown pixel format for conversion graph".into());
+            }
+            let buffersrc = avfilter_get_by_name(c"buffer".as_ptr());
+            let format = avfilter_get_by_name(c"format".as_ptr());
+            let buffersink = avfilter_get_by_name(c"buffersink".as_ptr());
+            if buffersrc.is_null() || format.is_null() || buffersink.is_null() {
+                return Err("buffer/format/buffersink unavailable in linked libavfilter".into());
+            }
+            let graph = avfilter_graph_alloc();
+            if graph.is_null() {
+                return Err("conversion graph allocation failed".into());
+            }
+            let mut built = Self {
+                graph,
+                src: ptr::null_mut(),
+                sink: ptr::null_mut(),
+                width,
+                height,
+                src_format,
+                dst_format,
+            };
+            let args = format!(
+                "video_size={width}x{height}:pix_fmt={src_name}:time_base=1/1000000:pixel_aspect=1/1"
+            );
+            let args = cstring(&args)?;
+            check(
+                avfilter_graph_create_filter(
+                    &mut built.src,
+                    buffersrc,
+                    c"in".as_ptr(),
+                    args.as_ptr(),
+                    ptr::null_mut(),
+                    built.graph,
+                ),
+                "create conversion source",
+            )?;
+            check(
+                avfilter_graph_create_filter(
+                    &mut built.sink,
+                    buffersink,
+                    c"out".as_ptr(),
+                    ptr::null(),
+                    ptr::null_mut(),
+                    built.graph,
+                ),
+                "create conversion sink",
+            )?;
+            let mut fmt = ptr::null_mut();
+            let fmt_args = format!("pix_fmts={dst_name}");
+            let fmt_args = cstring(&fmt_args)?;
+            check(
+                avfilter_graph_create_filter(
+                    &mut fmt,
+                    format,
+                    c"want".as_ptr(),
+                    fmt_args.as_ptr(),
+                    ptr::null_mut(),
+                    built.graph,
+                ),
+                "create conversion format filter",
+            )?;
+            check(
+                avfilter_link(built.src, 0, fmt, 0),
+                "link conversion source to format",
+            )?;
+            check(
+                avfilter_link(fmt, 0, built.sink, 0),
+                "link format to conversion sink",
+            )?;
+            check(
+                configure_filter_graph(built.graph),
+                "configure conversion graph",
+            )?;
+            Ok(built)
         }
     }
 }
@@ -4606,10 +4736,8 @@ pub(crate) unsafe fn scale_frame(
     }
 }
 
-/// Default swscale flags used by FFmpeg's `format=` filter (bicubic).
-const SWS_BICUBIC: i32 = 4;
-
-/// Convert pixel format at the same size (FFmpeg `format=PIX_FMT`).
+/// Convert pixel format at the same size (FFmpeg `format=PIX_FMT`) through a
+/// slice-threaded conversion graph.
 pub(crate) unsafe fn convert_pix_fmt_frame(
     sws: &mut Option<Sws>,
     dst: *mut AVFrame,
@@ -4618,8 +4746,46 @@ pub(crate) unsafe fn convert_pix_fmt_frame(
 ) -> Result<()> {
     unsafe {
         let s = &*src;
-        scale_or_convert_frame(sws, dst, src, s.width, s.height, out_fmt, SWS_BICUBIC)
+        let sws = sws.get_or_insert_with(Sws::graph);
+        let (width, height, src_format) = (s.width, s.height, s.format);
+        let stale = match sws.graph.as_deref() {
+            Some(g) => {
+                !(g.width == width
+                    && g.height == height
+                    && g.src_format == src_format
+                    && g.dst_format == out_fmt)
+            }
+            None => true,
+        };
+        if stale {
+            sws.graph = Some(Box::new(ConvertGraph::open(
+                width, height, src_format, out_fmt,
+            )?));
+        }
+        let graph = sws.graph.as_deref_mut().unwrap_unchecked();
+        check(
+            av_buffersrc_write_frame(graph.src, src),
+            "feed conversion source",
+        )?;
+        av_frame_unref(dst);
+        check(
+            av_buffersink_get_frame(graph.sink, dst),
+            "receive converted frame",
+        )?;
+        let d = &mut *dst;
+        d.pts = s.pts;
+        d.duration = s.duration;
+        d.pict_type = 0;
+        d.quality = 0;
+        d.flags = s.flags & !(AV_FRAME_FLAG_KEY as i32);
+        d.sample_aspect_ratio = s.sample_aspect_ratio;
+        d.color_range = s.color_range;
+        d.color_primaries = s.color_primaries;
+        d.color_trc = s.color_trc;
+        d.colorspace = s.colorspace;
+        d.chroma_location = s.chroma_location;
     }
+    Ok(())
 }
 
 /// Neighbor resize that may also change pixel format (FFmpeg merges
@@ -4646,7 +4812,8 @@ unsafe fn scale_or_convert_frame(
 ) -> Result<()> {
     unsafe {
         let s = &*src;
-        if sws.is_none() {
+        let sws = sws.get_or_insert_with(Sws::graph);
+        if sws.context.is_null() {
             let context = sws_getContext(
                 s.width,
                 s.height,
@@ -4662,7 +4829,7 @@ unsafe fn scale_or_convert_frame(
             if context.is_null() {
                 return Err("scale/convert context allocation failed".into());
             }
-            *sws = Some(Sws(context));
+            sws.context = context;
         }
         let d = &mut *dst;
         if d.data[0].is_null()
@@ -4692,7 +4859,7 @@ unsafe fn scale_or_convert_frame(
         d.colorspace = s.colorspace;
         d.chroma_location = s.chroma_location;
         let code = sws_scale(
-            sws.as_ref().unwrap().0,
+            sws.context,
             s.data.as_ptr() as *const *const u8,
             s.linesize.as_ptr(),
             0,
