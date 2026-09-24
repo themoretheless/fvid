@@ -123,6 +123,8 @@ pub fn decode(
         reconstruction: Vec::new(),
         scratch: Vec::new(),
         pred_scratch: Vec::new(),
+        transform_scratch: Vec::new(),
+        residual_scratch: Vec::new(),
         planes: [
             Plane::new(w as usize, h as usize, sps.depth[0], count * 3)?,
             Plane::new(w as usize / 2, h as usize / 2, sps.depth[1], count * 3 / 4)?,
@@ -185,6 +187,8 @@ pub fn decode(
                         fvid_platform::prioritize_playback_thread();
                         let mut scratch = Vec::new();
                         let mut pred_scratch = Vec::new();
+                        let mut transform_scratch = Vec::new();
+                        let mut residual_scratch = Vec::new();
                         loop {
                             let (row, commands) = {
                                 let rx = receiver.lock().unwrap_or_else(|e| e.into_inner());
@@ -202,7 +206,7 @@ pub fn decode(
                             }
                             {
                                 let mut planes = planes.lock().unwrap_or_else(|e| e.into_inner());
-                                reconstruct_row(&mut planes, commands, sps, pps, slice, lists, &mut scratch, &mut pred_scratch)?;
+                                reconstruct_row(&mut planes, commands, sps, pps, slice, lists, &mut scratch, &mut pred_scratch, &mut transform_scratch, &mut residual_scratch)?;
                             }
                             {
                                 let mut done = lock.lock().unwrap_or_else(|e| e.into_inner());
@@ -352,6 +356,8 @@ struct Decoder<'a> {
     reconstruction: Vec<Reconstruction>,
     scratch: Vec<i32>,
     pred_scratch: Vec<u16>,
+    transform_scratch: Vec<i32>,
+    residual_scratch: Vec<i32>,
 }
 impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
     fn neighbouring_depths(&self, n: Node) -> [Option<u8>; 2] {
@@ -510,22 +516,25 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                         residual,
                     });
                 } else {
-                    let residual = match residual {
-                        Some(block) => block.reconstruct(
+                    if let Some(block) = residual {
+                        block.reconstruct(
                             self.pps
                                 .scaling_lists
                                 .as_ref()
                                 .unwrap_or(&self.sps.scaling_lists),
-                        )?,
-                        None => Vec::new(),
-                    };
+                            &mut self.transform_scratch,
+                            &mut self.residual_scratch,
+                        )?;
+                    } else {
+                        self.residual_scratch.clear();
+                    }
                     self.planes[component].reconstruct_intra(
                         origin.map(|v| v as usize),
                         c.log2_size,
                         c.intra_mode.unwrap(),
                         component != 0,
                         self.sps.strong_intra_smoothing,
-                        &residual,
+                        &self.residual_scratch,
                         &mut self.pred_scratch,
                         |x, y| {
                             if !self.pps.constrained_intra {
@@ -576,6 +585,8 @@ fn reconstruct_row(
     lists: &[Vec<Reference>; 2],
     scratch: &mut Vec<i32>,
     pred_scratch: &mut Vec<u16>,
+    transform_scratch: &mut Vec<i32>,
+    residual_scratch: &mut Vec<i32>,
 ) -> Result<()> {
     let scaling = pps.scaling_lists.as_ref().unwrap_or(&sps.scaling_lists);
     for command in commands {
@@ -602,17 +613,18 @@ fn reconstruct_row(
                 mode,
                 residual,
             } => {
-                let residual = match residual {
-                    Some(block) => block.reconstruct(scaling)?,
-                    None => Vec::new(),
-                };
+                if let Some(block) = residual {
+                    block.reconstruct(scaling, transform_scratch, residual_scratch)?;
+                } else {
+                    residual_scratch.clear();
+                }
                 planes[component].reconstruct_intra(
                     origin,
                     log,
                     mode,
                     component != 0,
                     sps.strong_intra_smoothing,
-                    &residual,
+                    residual_scratch,
                     pred_scratch,
                     |_, _| true,
                 )?;
@@ -623,8 +635,8 @@ fn reconstruct_row(
                 log,
                 residual,
             } => {
-                let residual = residual.reconstruct(scaling)?;
-                planes[component].add_residual(origin, log, &residual)?;
+                residual.reconstruct(scaling, transform_scratch, residual_scratch)?;
+                planes[component].add_residual(origin, log, residual_scratch)?;
             }
         }
     }
@@ -702,18 +714,27 @@ fn deblock(decoder: &mut Decoder<'_>, slice: &SliceHeader) -> Result<()> {
                 });
                 let mode =
                     d::luma_decision([input[0], input[3]], [beta, tc], decoder.sps.depth[0])?;
+                // Convert to fvid-cpu's HevcLumaFilter for batched processing
+                let batch_filter = match mode {
+                    d::LumaFilter::Off => fvid_cpu::HevcLumaFilter::Off,
+                    d::LumaFilter::Strong => fvid_cpu::HevcLumaFilter::Strong,
+                    d::LumaFilter::Weak { second } => fvid_cpu::HevcLumaFilter::Weak { second },
+                };
+                let p_samples: [[u16; 4]; 4] = std::array::from_fn(|l| input[l][0]);
+                let q_samples: [[u16; 4]; 4] = std::array::from_fn(|l| input[l][1]);
+                let (out_p, out_q) = fvid_cpu::hevc_deblock_luma_batch4(
+                    p_samples,
+                    q_samples,
+                    tc,
+                    decoder.sps.depth[0],
+                    batch_filter,
+                    [[true; 2]; 4],
+                );
                 for l in 0..4 {
-                    let output = d::luma_sample(
-                        input[l][0],
-                        input[l][1],
-                        tc,
-                        decoder.sps.depth[0],
-                        mode,
-                        [true; 2],
-                    )?;
                     for s in 0..2 {
+                        let output = if s == 0 { out_p[l] } else { out_q[l] };
                         for v in 0..3 {
-                            plane[index(l, s, v)] = output[s][v];
+                            plane[index(l, s, v)] = output[v];
                         }
                     }
                 }
@@ -933,16 +954,18 @@ impl Decoder<'_> {
                             residual,
                         });
                     } else {
-                        let residual = residual.reconstruct(
+                        residual.reconstruct(
                             self.pps
                                 .scaling_lists
                                 .as_ref()
                                 .unwrap_or(&self.sps.scaling_lists),
+                            &mut self.transform_scratch,
+                            &mut self.residual_scratch,
                         )?;
                         self.planes[c].add_residual(
                             origin.map(|v| v as usize),
                             config.log2_size,
-                            &residual,
+                            &self.residual_scratch,
                         )?;
                     }
                 }

@@ -41,8 +41,14 @@ impl Config {
 }
 /// Call only for a coded component (CBF=1), after any CU QP-delta syntax. Returns
 /// raster-order residual samples. Any error requires abandoning the slice.
-pub fn decode(b: &mut impl ResidualBins, c: Config, scaling: &ScalingLists) -> Result<Vec<i32>> {
-    read(b, c)?.reconstruct(scaling)
+pub fn decode(
+    b: &mut impl ResidualBins,
+    c: Config,
+    scaling: &ScalingLists,
+    scratch: &mut Vec<i32>,
+    out: &mut Vec<i32>,
+) -> Result<()> {
+    read(b, c)?.reconstruct(scaling, scratch, out)
 }
 pub(crate) struct Coefficients {
     config: Config,
@@ -81,7 +87,12 @@ pub(crate) fn read(b: &mut impl ResidualBins, c: Config) -> Result<Coefficients>
     })
 }
 impl Coefficients {
-    pub(crate) fn reconstruct(self, scaling: &ScalingLists) -> Result<Vec<i32>> {
+    pub(crate) fn reconstruct(
+        self,
+        scaling: &ScalingLists,
+        scratch: &mut Vec<i32>,
+        out: &mut Vec<i32>,
+    ) -> Result<()> {
         let c = self.config;
         let matrix = usize::from(c.component) + if c.intra_mode.is_none() { 3 } else { 0 };
         hevc_transform::reconstruct(
@@ -92,6 +103,8 @@ impl Coefficients {
             self.transform,
             scaling,
             matrix,
+            scratch,
+            out,
         )
     }
 }
@@ -149,9 +162,11 @@ mod tests {
                 (Some(Syntax::Greater2), 0, false),
                 (None, 0, true),
             ]);
-            let output = decode(&mut b, c, &ScalingLists::flat()).unwrap();
-            assert_eq!(output[0], if bypass { -2 } else { -1 });
-            assert!(output[1..].iter().all(|&v| v == 0));
+            let mut scratch = Vec::new();
+            let mut out = Vec::new();
+            decode(&mut b, c, &ScalingLists::flat(), &mut scratch, &mut out).unwrap();
+            assert_eq!(out[0], if bypass { -2 } else { -1 });
+            assert!(out[1..].iter().all(|&v| v == 0));
             assert!(b.0.is_empty());
         }
     }
@@ -183,6 +198,6 @@ mod tests {
         }
         let mut c = config();
         c.bit_depth = 0;
-        assert!(decode(&mut Bins(VecDeque::new()), c, &ScalingLists::flat()).is_err());
+        assert!(decode(&mut Bins(VecDeque::new()), c, &ScalingLists::flat(), &mut Vec::new(), &mut Vec::new()).is_err());
     }
 }

@@ -129,7 +129,8 @@ fn adst(t: &mut [i64], n: usize) {
         return;
     }
     let size = 1 << n;
-    let copy = t.to_vec();
+    let mut copy = [0i64; 32];
+    copy[..size].copy_from_slice(&t[..size]);
     for i in 0..size / 2 {
         t[2 * i] = copy[size - 1 - 2 * i];
         t[2 * i + 1] = copy[2 * i];
@@ -201,7 +202,8 @@ fn adst(t: &mut [i64], n: usize) {
             }
         }
     }
-    let copy = t.to_vec();
+    let mut copy = [0i64; 32];
+    copy[..size].copy_from_slice(&t[..size]);
     for i in 0..size {
         t[i] = copy[brev(n, i ^ (i >> 1))];
     }
@@ -235,7 +237,8 @@ fn one(t: &mut [i64], n: usize, sine: bool) {
     if sine {
         adst(t, n);
     } else {
-        let copy = t.to_vec();
+        let mut copy = [0i64; 32];
+        copy[..t.len()].copy_from_slice(t);
         for i in 0..t.len() {
             t[i] = copy[brev(n, i)];
         }

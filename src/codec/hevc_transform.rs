@@ -22,6 +22,7 @@ pub enum Transform {
 /// nonnegative component QP including its bit-depth offset; chroma QP mapping
 /// belongs to the caller. `matrix_id` is 0..2 for intra Y/Cb/Cr, 3..5 for inter.
 /// Supply resolved flat/default/explicit scaling lists from SPS/PPS.
+/// `scratch` and `out` are caller-provided buffers reused across calls (resized as needed).
 pub fn reconstruct(
     coefficients: &[i32],
     log2_size: u8,
@@ -30,7 +31,9 @@ pub fn reconstruct(
     transform: Transform,
     scaling: &ScalingLists,
     matrix_id: usize,
-) -> Result<Vec<i32>> {
+    scratch: &mut Vec<i32>,
+    out: &mut Vec<i32>,
+) -> Result<()> {
     if !(2..=5).contains(&log2_size) || !(8..=10).contains(&bit_depth) {
         return Err(invalid("unsupported HEVC transform geometry or bit depth"));
     }
@@ -49,15 +52,17 @@ pub fn reconstruct(
             "Main/Main10 DST and transform skip require 4x4 blocks",
         ));
     }
+    out.resize(side * side, 0);
     if transform == Transform::Bypass {
-        return Ok(coefficients.to_vec());
+        out.copy_from_slice(coefficients);
+        return Ok(());
     }
     let shift = bit_depth + log2_size - 5;
     let level_scale = [40i64, 45, 51, 57, 64, 72][usize::from(qp % 6)];
-    let mut scaled = Vec::with_capacity(coefficients.len());
+    scratch.resize(side * side, 0);
     for (index, &coefficient) in coefficients.iter().enumerate() {
         if coefficient == 0 {
-            scaled.push(0);
+            scratch[index] = 0;
             continue;
         }
         let factor = i64::from(scaling.factor(
@@ -67,22 +72,23 @@ pub fn reconstruct(
             index / side,
         )?);
         let product = (i64::from(coefficient) * factor * level_scale) << (qp / 6);
-        scaled.push(((product + (1 << (shift - 1))) >> shift).clamp(-32768, 32767));
+        scratch[index] = ((product + (1 << (shift - 1))) >> shift).clamp(-32768, 32767) as i32;
     }
     let final_shift = 20 - bit_depth;
     let round = 1i64 << (final_shift - 1);
     if transform == Transform::Skip {
-        return Ok(scaled
-            .into_iter()
-            .map(|v| (((v << (5 + log2_size)) + round) >> final_shift) as i32)
-            .collect());
+        for (i, &v) in scratch.iter().enumerate() {
+            out[i] = ((((v as i64) << (5 + log2_size)) + round) >> final_shift) as i32;
+        }
+        return Ok(());
     }
-    if transform == Transform::Dct && scaled[1..].iter().all(|&v| v == 0) {
-        let first = ((scaled[0] * 64 + 64) >> 7).clamp(-32768, 32767);
-        return Ok(vec![
-            ((first * 64 + round) >> final_shift) as i32;
-            side * side
-        ]);
+    if transform == Transform::Dct && scratch[1..].iter().all(|&v| v == 0) {
+        let first = ((scratch[0] as i64 * 64 + 64) >> 7).clamp(-32768, 32767);
+        let value = ((first * 64 + round) >> final_shift) as i32;
+        for v in out.iter_mut() {
+            *v = value;
+        }
+        return Ok(());
     }
     let inverse = |input: &[i32], output: &mut [i32]| {
         if transform == Transform::Dst4 {
@@ -93,26 +99,30 @@ pub fn reconstruct(
             inverse_dct(input, output);
         }
     };
-    let mut intermediate = vec![0i32; side * side];
+    // Use scratch for intermediate (column-wise inverse output)
+    // We need a second scratch buffer, so we'll use a portion of scratch for intermediate
+    // and reuse the beginning for column/output temporaries
+    let intermediate_start = side * side;
+    scratch.resize(intermediate_start + side * side, 0);
+    let (scaled, intermediate) = scratch.split_at_mut(intermediate_start);
     let mut column = [0i32; 32];
-    let mut output = [0i32; 32];
+    let mut output_buf = [0i32; 32];
     for x in 0..side {
         for k in 0..side {
-            column[k] = scaled[k * side + x] as i32;
+            column[k] = scaled[k * side + x];
         }
-        inverse(&column[..side], &mut output[..side]);
+        inverse(&column[..side], &mut output_buf[..side]);
         for y in 0..side {
-            intermediate[y * side + x] = ((output[y] + 64) >> 7).clamp(-32768, 32767);
+            intermediate[y * side + x] = ((output_buf[y] + 64) >> 7).clamp(-32768, 32767);
         }
     }
-    let mut residual = vec![0i32; side * side];
     for y in 0..side {
-        inverse(&intermediate[y * side..(y + 1) * side], &mut output[..side]);
+        inverse(&intermediate[y * side..(y + 1) * side], &mut output_buf[..side]);
         for x in 0..side {
-            residual[y * side + x] = (output[x] + round as i32) >> final_shift;
+            out[y * side + x] = (output_buf[x] + round as i32) >> final_shift;
         }
     }
-    Ok(residual)
+    Ok(())
 }
 
 // Even frequencies form the smaller transform; odd frequencies are antisymmetric.
@@ -199,9 +209,10 @@ mod tests {
                 for (value, expected) in [(64, 10), (-64, -10)] {
                     let mut block = vec![0; 1 << (2 * log)];
                     block[0] = value << (log - 2);
-                    let output =
-                        reconstruct(&block, log, depth, 0, Transform::Dct, &flat, 0).unwrap();
-                    assert!(output.iter().all(|&v| v == expected));
+                    let mut scratch = Vec::new();
+                    let mut out = Vec::new();
+                    reconstruct(&block, log, depth, 0, Transform::Dct, &flat, 0, &mut scratch, &mut out).unwrap();
+                    assert!(out.iter().all(|&v| v == expected));
                 }
             }
         }
@@ -211,17 +222,15 @@ mod tests {
         let flat = ScalingLists::flat();
         let mut block = [0; 16];
         block[0] = 64;
-        assert_eq!(
-            reconstruct(&block, 2, 8, 0, Transform::Dst4, &flat, 0).unwrap(),
-            [2, 4, 5, 6, 4, 7, 10, 11, 5, 10, 13, 15, 6, 11, 15, 17]
-        );
-        let skip = reconstruct(&block, 2, 8, 0, Transform::Skip, &flat, 0).unwrap();
-        assert_eq!(skip[0], 40);
-        assert!(skip[1..].iter().all(|&v| v == 0));
-        assert_eq!(
-            reconstruct(&block, 2, 8, 0, Transform::Bypass, &flat, 0).unwrap(),
-            block
-        );
+        let mut scratch = Vec::new();
+        let mut out = Vec::new();
+        reconstruct(&block, 2, 8, 0, Transform::Dst4, &flat, 0, &mut scratch, &mut out).unwrap();
+        assert_eq!(out, [2, 4, 5, 6, 4, 7, 10, 11, 5, 10, 13, 15, 6, 11, 15, 17]);
+        reconstruct(&block, 2, 8, 0, Transform::Skip, &flat, 0, &mut scratch, &mut out).unwrap();
+        assert_eq!(out[0], 40);
+        assert!(out[1..].iter().all(|&v| v == 0));
+        reconstruct(&block, 2, 8, 0, Transform::Bypass, &flat, 0, &mut scratch, &mut out).unwrap();
+        assert_eq!(out, block);
     }
     #[test]
     fn four_by_four_matches_factored_reference_with_clipping() {
@@ -268,10 +277,10 @@ mod tests {
                         expected[y * 4 + x] = (values[x] + divisor / 2).div_euclid(divisor) as i32;
                     }
                 }
-                assert_eq!(
-                    reconstruct(&block, 2, depth, qp, Transform::Dct, &flat, 0).unwrap(),
-                    expected
-                );
+                let mut scratch = Vec::new();
+                let mut out = Vec::new();
+                reconstruct(&block, 2, depth, qp, Transform::Dct, &flat, 0, &mut scratch, &mut out).unwrap();
+                assert_eq!(out, expected);
             }
         }
     }
@@ -281,17 +290,23 @@ mod tests {
         let defaults = ScalingLists::default();
         let mut block = [0; 64];
         block[63] = 128;
-        let a = reconstruct(&block, 3, 8, 12, Transform::Dct, &flat, 0).unwrap();
-        let b = reconstruct(&block, 3, 8, 12, Transform::Dct, &defaults, 0).unwrap();
-        assert_ne!(a, b);
+        let mut scratch = Vec::new();
+        let mut out_a = Vec::new();
+        let mut out_b = Vec::new();
+        reconstruct(&block, 3, 8, 12, Transform::Dct, &flat, 0, &mut scratch, &mut out_a).unwrap();
+        reconstruct(&block, 3, 8, 12, Transform::Dct, &defaults, 0, &mut scratch, &mut out_b).unwrap();
+        assert_ne!(out_a, out_b);
         for (value, expected) in [(32767, 4096), (-32768, -4096)] {
-            let output = reconstruct(&[value; 16], 2, 10, 63, Transform::Skip, &flat, 0).unwrap();
-            assert_eq!(output, [expected; 16]);
+            let mut out = Vec::new();
+            reconstruct(&[value; 16], 2, 10, 63, Transform::Skip, &flat, 0, &mut scratch, &mut out).unwrap();
+            assert_eq!(out, [expected; 16]);
         }
     }
     #[test]
     fn rejects_invalid_inputs_before_shifting_or_indexing() {
         let flat = ScalingLists::flat();
+        let mut scratch = Vec::new();
+        let mut out = Vec::new();
         for (log, depth, qp, id) in [
             (0, 8, 0, 0),
             (6, 8, 0, 0),
@@ -301,12 +316,12 @@ mod tests {
             (2, 10, 64, 0),
             (2, 8, 0, 6),
         ] {
-            assert!(reconstruct(&[0; 16], log, depth, qp, Transform::Dct, &flat, id).is_err());
+            assert!(reconstruct(&[0; 16], log, depth, qp, Transform::Dct, &flat, id, &mut scratch, &mut out).is_err());
         }
-        assert!(reconstruct(&[0; 15], 2, 8, 0, Transform::Dct, &flat, 0).is_err());
-        assert!(reconstruct(&[i32::MAX; 16], 2, 8, 0, Transform::Dct, &flat, 0).is_err());
+        assert!(reconstruct(&[0; 15], 2, 8, 0, Transform::Dct, &flat, 0, &mut scratch, &mut out).is_err());
+        assert!(reconstruct(&[i32::MAX; 16], 2, 8, 0, Transform::Dct, &flat, 0, &mut scratch, &mut out).is_err());
         for mode in [Transform::Dst4, Transform::Skip] {
-            assert!(reconstruct(&[0; 64], 3, 8, 0, mode, &flat, 0).is_err());
+            assert!(reconstruct(&[0; 64], 3, 8, 0, mode, &flat, 0, &mut scratch, &mut out).is_err());
         }
     }
 }

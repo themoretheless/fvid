@@ -130,16 +130,20 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                     sign_hiding: self.pps.sign_data_hiding,
                 };
                 let residual = if u.coded[component] {
-                    let r = hevc_block::decode(
+                    let mut scratch = Vec::new();
+                    let mut out = Vec::new();
+                    hevc_block::decode(
                         b,
                         c,
                         self.pps
                             .scaling_lists
                             .as_ref()
                             .unwrap_or(&self.sps.scaling_lists),
+                        &mut scratch,
+                        &mut out,
                     )?;
-                    self.blocks.push(r.clone());
-                    r
+                    self.blocks.push(out.clone());
+                    out
                 } else {
                     vec![0; 1 << (2 * c.log2_size)]
                 };
