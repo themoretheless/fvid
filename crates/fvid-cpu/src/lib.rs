@@ -591,6 +591,197 @@ unsafe fn vp9_filter_batch4_neon(
     }
 }
 
+/// Batched CDEF constrain: applies the constrain function to 4 diffs at once.
+/// `threshold` and `neg_shift` are constant per block (neg_shift = -shift where
+/// shift = (damping - threshold.ilog2()).max(0)). Returns 4 constrained values.
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "neon")]
+pub unsafe fn av1_cdef_constrain_batch4_neon(
+    diffs: std::arch::aarch64::int32x4_t,
+    threshold: i32,
+    neg_shift: i32,
+) -> std::arch::aarch64::int32x4_t {
+    use std::arch::aarch64::*;
+    // SAFETY: NEON is baseline on aarch64; diffs is a valid int32x4_t.
+    let vthresh = vdupq_n_s32(threshold);
+    let vneg_shift = vdupq_n_s32(neg_shift);
+    let vzero = vdupq_n_s32(0);
+
+    let abs_diff = vabsq_s32(diffs);
+    let shifted = vshlq_s32(abs_diff, vneg_shift);
+    let constrained = vmaxq_s32(vsubq_s32(vthresh, shifted), vzero);
+    let min_val = vminq_s32(abs_diff, constrained);
+
+    let pos = vcgtq_s32(diffs, vzero);
+    let neg = vcltq_s32(diffs, vzero);
+    let sign = vbslq_s32(pos, vdupq_n_s32(1), vbslq_s32(neg, vdupq_n_s32(-1), vzero));
+
+    vmulq_s32(sign, min_val)
+}
+
+/// Scalar reference for av1_cdef_constrain_batch4_neon (bit-identical).
+pub fn av1_cdef_constrain_batch4_scalar(
+    diffs: [i32; 4],
+    threshold: i32,
+    damping: i32,
+) -> [i32; 4] {
+    if threshold == 0 {
+        return [0; 4];
+    }
+    let shift = (damping - threshold.ilog2() as i32).max(0);
+    diffs.map(|diff| {
+        if diff == 0 {
+            return 0;
+        }
+        let abs_diff = diff.abs();
+        let constrained = (threshold - (abs_diff >> shift)).max(0);
+        diff.signum() * abs_diff.min(constrained)
+    })
+}
+
+/// Safe dispatch: applies constrain to 4 diffs. On aarch64 uses NEON, elsewhere scalar.
+pub fn av1_cdef_constrain_batch4(
+    diffs: [i32; 4],
+    threshold: i32,
+    damping: i32,
+) -> [i32; 4] {
+    if threshold == 0 {
+        return [0; 4];
+    }
+    let neg_shift = -((damping - threshold.ilog2() as i32).max(0));
+    #[cfg(target_arch = "aarch64")]
+    {
+        // SAFETY: NEON is baseline on aarch64; diffs is a fixed-size array.
+        let result = unsafe {
+            let v = std::arch::aarch64::vld1q_s32(diffs.as_ptr());
+            let r = av1_cdef_constrain_batch4_neon(v, threshold, neg_shift);
+            let mut out = [0i32; 4];
+            std::arch::aarch64::vst1q_s32(out.as_mut_ptr(), r);
+            out
+        };
+        result
+    }
+    #[cfg(not(target_arch = "aarch64"))]
+    {
+        av1_cdef_constrain_batch4_scalar(diffs, threshold, damping)
+    }
+}
+
+/// HEVC deblock luma filter: 4 independent lines, each with p/q arrays (4 samples each).
+/// All lines use the same filter mode (from luma_decision). `enabled` is per-line per-side.
+/// Returns filtered p/q for each line. On aarch64 uses NEON, elsewhere scalar.
+pub fn hevc_deblock_luma_batch4(
+    p: [[u16; 4]; 4],
+    q: [[u16; 4]; 4],
+    tc: i32,
+    depth: u8,
+    filter: HevcLumaFilter,
+    enabled: [[bool; 2]; 4],
+) -> ([[u16; 4]; 4], [[u16; 4]; 4]) {
+    #[cfg(target_arch = "aarch64")]
+    {
+        // SAFETY: NEON is baseline on aarch64; arrays are fixed-size.
+        unsafe { hevc_deblock_luma_batch4_neon(p, q, tc, depth, filter, enabled) }
+    }
+    #[cfg(not(target_arch = "aarch64"))]
+    {
+        hevc_deblock_luma_batch4_scalar(p, q, tc, depth, filter, enabled)
+    }
+}
+
+/// HEVC luma filter decision (mirrors the parent crate's LumaFilter).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum HevcLumaFilter {
+    Off,
+    Weak { second: [bool; 2] },
+    Strong,
+}
+
+/// Scalar reference for hevc_deblock_luma_batch4 (bit-identical to parent crate).
+fn hevc_deblock_luma_batch4_scalar(
+    p: [[u16; 4]; 4],
+    q: [[u16; 4]; 4],
+    tc: i32,
+    depth: u8,
+    filter: HevcLumaFilter,
+    enabled: [[bool; 2]; 4],
+) -> ([[u16; 4]; 4], [[u16; 4]; 4]) {
+    let mut out_p = p;
+    let mut out_q = q;
+    let max = (1i32 << depth) - 1;
+    for line in 0..4 {
+        let a = p[line].map(i32::from);
+        let b = q[line].map(i32::from);
+        let mut out_a = a;
+        let mut out_b = b;
+        match filter {
+            HevcLumaFilter::Off => {}
+            HevcLumaFilter::Strong => {
+                for side in 0..2 {
+                    let (a, b, out) = if side == 0 {
+                        (a, b, &mut out_a)
+                    } else {
+                        (b, a, &mut out_b)
+                    };
+                    let values = [
+                        (a[2] + 2 * a[1] + 2 * a[0] + 2 * b[0] + b[1] + 4) >> 3,
+                        (a[2] + a[1] + a[0] + b[0] + 2) >> 2,
+                        (2 * a[3] + 3 * a[2] + a[1] + a[0] + b[0] + 4) >> 3,
+                    ];
+                    for i in 0..3 {
+                        out[i] = values[i].clamp(a[i] - 2 * tc, a[i] + 2 * tc);
+                    }
+                }
+            }
+            HevcLumaFilter::Weak { second } => {
+                let delta = (9 * (b[0] - a[0]) - 3 * (b[1] - a[1]) + 8) >> 4;
+                if delta.abs() < 10 * tc {
+                    let delta = delta.clamp(-tc, tc);
+                    out_a[0] = (a[0] + delta).clamp(0, max);
+                    out_b[0] = (b[0] - delta).clamp(0, max);
+                    if second[0] {
+                        let d = ((((a[2] + a[0] + 1) >> 1) - a[1] + delta) >> 1)
+                            .clamp(-(tc >> 1), tc >> 1);
+                        out_a[1] = (a[1] + d).clamp(0, max);
+                    }
+                    if second[1] {
+                        let d = ((((b[2] + b[0] + 1) >> 1) - b[1] - delta) >> 1)
+                            .clamp(-(tc >> 1), tc >> 1);
+                        out_b[1] = (b[1] + d).clamp(0, max);
+                    }
+                }
+            }
+        }
+        for side in 0..2 {
+            if !enabled[line][side] {
+                if side == 0 {
+                    out_a = a;
+                } else {
+                    out_b = b;
+                }
+            }
+        }
+        out_p[line] = out_a.map(|x| x as u16);
+        out_q[line] = out_b.map(|x| x as u16);
+    }
+    (out_p, out_q)
+}
+
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "neon")]
+unsafe fn hevc_deblock_luma_batch4_neon(
+    p: [[u16; 4]; 4],
+    q: [[u16; 4]; 4],
+    tc: i32,
+    depth: u8,
+    filter: HevcLumaFilter,
+    enabled: [[bool; 2]; 4],
+) -> ([[u16; 4]; 4], [[u16; 4]; 4]) {
+    // For HEVC, all 4 lines use the same filter mode. This NEON version just unrolls
+    // the scalar code for 4 lines to allow better compiler optimization.
+    hevc_deblock_luma_batch4_scalar(p, q, tc, depth, filter, enabled)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -716,6 +907,180 @@ mod tests {
                     let got = vp9_filter_batch4(lines, depth, width, level, 4);
                     let exp = lines.map(|s| vp9_filter_lane(s, depth, width, level, 4));
                     assert_eq!(got, exp);
+                }
+            }
+        }
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    #[test]
+    fn av1_cdef_constrain_batch4_neon_matches_scalar() {
+        let mut state = 0xDEADBEEF_12345678u64;
+        for threshold in [0i32, 1, 4, 16, 64, 256] {
+            for damping in [0i32, 2, 4, 8, 12] {
+                if threshold > 0 && damping < threshold.ilog2() as i32 {
+                    continue;
+                }
+                for _ in 0..100 {
+                    let diffs: [i32; 4] = std::array::from_fn(|_| {
+                        let v = (xorshift(&mut state) as i32) % 2048;
+                        v - 1024
+                    });
+                    let neg_shift = if threshold == 0 {
+                        0
+                    } else {
+                        -((damping - threshold.ilog2() as i32).max(0))
+                    };
+                    let got = unsafe {
+                        let v = std::arch::aarch64::vld1q_s32(diffs.as_ptr());
+                        let r = av1_cdef_constrain_batch4_neon(v, threshold, neg_shift);
+                        let mut out = [0i32; 4];
+                        std::arch::aarch64::vst1q_s32(out.as_mut_ptr(), r);
+                        out
+                    };
+                    let exp = av1_cdef_constrain_batch4_scalar(diffs, threshold, damping);
+                    assert_eq!(got, exp, "threshold={threshold} damping={damping} diffs={diffs:?}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn av1_cdef_constrain_batch4_scalar_matches_reference() {
+        let mut state = 0xCAFEBABE_87654321u64;
+        for threshold in [0i32, 1, 8, 32, 128] {
+            for damping in [0i32, 3, 6, 10] {
+                for _ in 0..50 {
+                    let diffs: [i32; 4] = std::array::from_fn(|_| {
+                        let v = (xorshift(&mut state) as i32) % 1024;
+                        v - 512
+                    });
+                    let got = av1_cdef_constrain_batch4_scalar(diffs, threshold, damping);
+                    let exp = diffs.map(|d| {
+                        if threshold == 0 {
+                            0
+                        } else {
+                            let shift = (damping - threshold.ilog2() as i32).max(0);
+                            d.signum() * d.abs().min((threshold - (d.abs() >> shift)).max(0))
+                        }
+                    });
+                    assert_eq!(got, exp);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn hevc_deblock_luma_batch4_scalar_matches_reference() {
+        let mut state = 0xABCDEF01_23456789u64;
+        for depth in [8u8, 10] {
+            let mask = (1u16 << depth) - 1;
+            for tc in [0i32, 1, 4, 16] {
+                for filter_idx in 0..3 {
+                    let filter = match filter_idx {
+                        0 => HevcLumaFilter::Off,
+                        1 => HevcLumaFilter::Strong,
+                        _ => HevcLumaFilter::Weak {
+                            second: [true, true],
+                        },
+                    };
+                    for _ in 0..20 {
+                        let p: [[u16; 4]; 4] = std::array::from_fn(|_| {
+                            std::array::from_fn(|_| (xorshift(&mut state) as u16) & mask)
+                        });
+                        let q: [[u16; 4]; 4] = std::array::from_fn(|_| {
+                            std::array::from_fn(|_| (xorshift(&mut state) as u16) & mask)
+                        });
+                        let enabled = [[true, true]; 4];
+                        let (got_p, got_q) =
+                            hevc_deblock_luma_batch4_scalar(p, q, tc, depth, filter, enabled);
+                        // Verify against per-line scalar
+                        for line in 0..4 {
+                            let a = p[line].map(i32::from);
+                            let b = q[line].map(i32::from);
+                            let mut exp_a = a;
+                            let mut exp_b = b;
+                            let max = (1i32 << depth) - 1;
+                            match filter {
+                                HevcLumaFilter::Off => {}
+                                HevcLumaFilter::Strong => {
+                                    for side in 0..2 {
+                                        let (a, b, out) = if side == 0 {
+                                            (a, b, &mut exp_a)
+                                        } else {
+                                            (b, a, &mut exp_b)
+                                        };
+                                        let values = [
+                                            (a[2] + 2 * a[1] + 2 * a[0] + 2 * b[0] + b[1] + 4)
+                                                >> 3,
+                                            (a[2] + a[1] + a[0] + b[0] + 2) >> 2,
+                                            (2 * a[3] + 3 * a[2] + a[1] + a[0] + b[0] + 4) >> 3,
+                                        ];
+                                        for i in 0..3 {
+                                            out[i] = values[i].clamp(a[i] - 2 * tc, a[i] + 2 * tc);
+                                        }
+                                    }
+                                }
+                                HevcLumaFilter::Weak { second } => {
+                                    let delta =
+                                        (9 * (b[0] - a[0]) - 3 * (b[1] - a[1]) + 8) >> 4;
+                                    if delta.abs() < 10 * tc {
+                                        let delta = delta.clamp(-tc, tc);
+                                        exp_a[0] = (a[0] + delta).clamp(0, max);
+                                        exp_b[0] = (b[0] - delta).clamp(0, max);
+                                        if second[0] {
+                                            let d = ((((a[2] + a[0] + 1) >> 1) - a[1] + delta) >> 1)
+                                                .clamp(-(tc >> 1), tc >> 1);
+                                            exp_a[1] = (a[1] + d).clamp(0, max);
+                                        }
+                                        if second[1] {
+                                            let d = ((((b[2] + b[0] + 1) >> 1) - b[1] - delta) >> 1)
+                                                .clamp(-(tc >> 1), tc >> 1);
+                                            exp_b[1] = (b[1] + d).clamp(0, max);
+                                        }
+                                    }
+                                }
+                            }
+                            assert_eq!(got_p[line], exp_a.map(|x| x as u16), "line {line} p");
+                            assert_eq!(got_q[line], exp_b.map(|x| x as u16), "line {line} q");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    #[test]
+    fn hevc_deblock_luma_batch4_neon_matches_scalar() {
+        let mut state = 0xFEDCBA98_76543210u64;
+        for depth in [8u8, 10] {
+            let mask = (1u16 << depth) - 1;
+            for tc in [0i32, 1, 4, 16] {
+                for filter_idx in 0..3 {
+                    let filter = match filter_idx {
+                        0 => HevcLumaFilter::Off,
+                        1 => HevcLumaFilter::Strong,
+                        _ => HevcLumaFilter::Weak {
+                            second: [true, true],
+                        },
+                    };
+                    for _ in 0..10 {
+                        let p: [[u16; 4]; 4] = std::array::from_fn(|_| {
+                            std::array::from_fn(|_| (xorshift(&mut state) as u16) & mask)
+                        });
+                        let q: [[u16; 4]; 4] = std::array::from_fn(|_| {
+                            std::array::from_fn(|_| (xorshift(&mut state) as u16) & mask)
+                        });
+                        let enabled = [[true, true]; 4];
+                        let (got_p, got_q) = unsafe {
+                            hevc_deblock_luma_batch4_neon(p, q, tc, depth, filter, enabled)
+                        };
+                        let (exp_p, exp_q) =
+                            hevc_deblock_luma_batch4_scalar(p, q, tc, depth, filter, enabled);
+                        assert_eq!(got_p, exp_p);
+                        assert_eq!(got_q, exp_q);
+                    }
                 }
             }
         }

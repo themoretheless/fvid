@@ -126,14 +126,6 @@ fn direction(p: &Plane, x: usize, y: usize, depth: u8) -> (usize, i64) {
     }
     (best, (cost[best] - cost[(best + 4) & 7]) >> 10)
 }
-#[inline]
-fn constrain(diff: i32, threshold: i32, damping: i32) -> i32 {
-    if threshold == 0 {
-        return 0;
-    }
-    let shift = (damping - threshold.ilog2() as i32).max(0);
-    diff.signum() * diff.abs().min((threshold - (diff.abs() >> shift)).max(0))
-}
 const DIRECTIONS: [[(i32, i32); 2]; 8] = [
     [(-1, 1), (-2, 2)],
     [(0, 1), (-1, 2)],
@@ -206,34 +198,105 @@ pub(crate) fn cdef(
                         let current = i32::from(source.samples[y * source.width + x]);
                         let mut lo = current;
                         let mut hi = current;
-                        let mut sum = 0;
+
+                        // Gather pri neighbors (offset == 0): 4 total
+                        let mut pri_diffs = [0i32; 4];
+                        let mut pri_valid = [false; 4];
+                        let mut pri_weights = [0i32; 4];
+                        let mut idx = 0;
                         for k in 0..2 {
-                            for sign in [-1, 1] {
-                                for offset in [0, 2, 6] {
-                                    let (dy, dx) = DIRECTIONS[(direction + offset) & 7][k];
-                                    let (xx, yy) = (x as i32 + dx * sign, y as i32 + dy * sign);
-                                    if xx < 0
-                                        || yy < 0
-                                        || xx >= source.width as i32
-                                        || yy >= source.height as i32
-                                    {
-                                        continue;
-                                    }
+                            for sign in [-1i32, 1] {
+                                let (dy, dx) = DIRECTIONS[direction][k];
+                                let (xx, yy) =
+                                    (x as i32 + dx * sign, y as i32 + dy * sign);
+                                if xx >= 0
+                                    && yy >= 0
+                                    && xx < source.width as i32
+                                    && yy < source.height as i32
+                                {
                                     let v = i32::from(
-                                        source.samples[yy as usize * source.width + xx as usize],
+                                        source.samples
+                                            [yy as usize * source.width + xx as usize],
                                     );
+                                    pri_diffs[idx] = v - current;
+                                    pri_valid[idx] = true;
+                                    pri_weights[idx] = pri_taps[k];
                                     lo = lo.min(v);
                                     hi = hi.max(v);
-                                    sum += if offset == 0 {
-                                        pri_taps[k] * constrain(v - current, pri, damping)
-                                    } else {
-                                        [2, 1][k] * constrain(v - current, sec, damping)
-                                    };
+                                }
+                                idx += 1;
+                            }
+                        }
+
+                        // Gather sec neighbors (offset in [2, 6]): 8 total
+                        let mut sec_diffs = [0i32; 8];
+                        let mut sec_valid = [false; 8];
+                        let mut sec_weights = [0i32; 8];
+                        let mut idx = 0;
+                        for k in 0..2 {
+                            for sign in [-1i32, 1] {
+                                for offset in [2, 6] {
+                                    let (dy, dx) =
+                                        DIRECTIONS[(direction + offset) & 7][k];
+                                    let (xx, yy) = (
+                                        x as i32 + dx * sign,
+                                        y as i32 + dy * sign,
+                                    );
+                                    if xx >= 0
+                                        && yy >= 0
+                                        && xx < source.width as i32
+                                        && yy < source.height as i32
+                                    {
+                                        let v = i32::from(
+                                            source.samples[yy as usize
+                                                * source.width
+                                                + xx as usize],
+                                        );
+                                        sec_diffs[idx] = v - current;
+                                        sec_valid[idx] = true;
+                                        sec_weights[idx] = [2, 1][k];
+                                        lo = lo.min(v);
+                                        hi = hi.max(v);
+                                    }
+                                    idx += 1;
                                 }
                             }
                         }
+
+                        // Apply constrain in batches
+                        let mut sum = 0;
+
+                        // Pri batch (4 diffs)
+                        if pri != 0 {
+                            let constrained =
+                                fvid_cpu::av1_cdef_constrain_batch4(pri_diffs, pri, damping);
+                            for i in 0..4 {
+                                if pri_valid[i] {
+                                    sum += pri_weights[i] * constrained[i];
+                                }
+                            }
+                        }
+
+                        // Sec batches (2 batches of 4 diffs)
+                        if sec != 0 {
+                            for batch in 0..2 {
+                                let start = batch * 4;
+                                let batch_diffs: [i32; 4] =
+                                    std::array::from_fn(|i| sec_diffs[start + i]);
+                                let constrained = fvid_cpu::av1_cdef_constrain_batch4(
+                                    batch_diffs, sec, damping,
+                                );
+                                for i in 0..4 {
+                                    if sec_valid[start + i] {
+                                        sum += sec_weights[start + i] * constrained[i];
+                                    }
+                                }
+                            }
+                        }
+
                         target.samples[y * target.width + x] =
-                            (current + ((8 + sum - i32::from(sum < 0)) >> 4)).clamp(lo, hi) as u16;
+                            (current + ((8 + sum - i32::from(sum < 0)) >> 4))
+                                .clamp(lo, hi) as u16;
                     }
                 }
             }
