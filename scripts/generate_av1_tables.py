@@ -7,12 +7,32 @@ import ast, hashlib, pathlib, re, sys
 source = pathlib.Path(sys.argv[1]).read_text()
 out = ['//! Generated normative AV1 default CDF tables; see scripts/generate_av1_tables.py.',
        '//! Source SHA-256: ' + hashlib.sha256(source.encode()).hexdigest(),
-       'use std::collections::HashMap;', 'use crate::{Result, invalid};',
+       'use crate::{Result, invalid};',
+       'const SLOT_COUNT: usize = 512;', 'const SLOT_MASK: usize = SLOT_COUNT - 1;',
+       '''#[inline] fn hash_key(name: &[u8]) -> u64 {
+let mut h = 0x9ddfea08eb382d69u64 ^ name.len() as u64; let mut rest = name;
+while !rest.is_empty() {
+ let (head, tail) = rest.split_at(rest.len().min(8));
+ let mut word = [0u8; 8]; word[..head.len()].copy_from_slice(head);
+ h = (h ^ u64::from_le_bytes(word)).wrapping_mul(0xff51afd7ed558ccd); h ^= h >> 29;
+ rest = tail;
+}
+h
+}''',
        '#[derive(Clone)] pub struct Table { pub shape: &\'static [usize], pub values: Vec<u16> }',
-       '#[derive(Clone)] pub struct Cdfs { tables: HashMap<&\'static str, Table> }',
-       'impl Cdfs {', 'pub fn new(q: u8) -> Self {',
+       "#[derive(Clone)] pub struct Cdfs { names: Vec<&'static str>, hashes: Vec<u64>, tables: Vec<Table>, slots: Vec<u16> }",
+       'impl Cdfs {',
+       '''fn insert(&mut self, name: &'static str, table: Table) {
+debug_assert!(self.tables.len() < SLOT_COUNT);
+let index = self.tables.len(); let hash = hash_key(name.as_bytes());
+self.names.push(name); self.hashes.push(hash); self.tables.push(table);
+let mut slot = (hash as usize) & SLOT_MASK;
+while self.slots[slot] != 0 { slot = (slot + 1) & SLOT_MASK; }
+self.slots[slot] = index as u16 + 1;
+}''',
+       'pub fn new(q: u8) -> Self {',
        'let qi = if q <= 20 {0} else if q <= 60 {1} else if q <= 120 {2} else {3};',
-       'let mut tables = HashMap::new();']
+       'let mut cdfs = Self { names: Vec::with_capacity(128), hashes: Vec::with_capacity(128), tables: Vec::with_capacity(128), slots: vec![0; SLOT_COUNT] };']
 constants=[]
 for match in re.finditer(r'^(Default_\w+_Cdf)\s*((?:\[[^\]]+\]\s*)+)\s*=\s*\{', source, re.M):
  name,decl=match.group(1,2); start=match.end()-1; depth=1; end=start+1
@@ -39,9 +59,17 @@ for match in re.finditer(r'^(Default_\w+_Cdf)\s*((?:\[[^\]]+\]\s*)+)\s*=\s*\{', 
    dims=[2,2]+dims; init=f'{init}.repeat(4)'
   else:
    dims=[2]+dims; init=f'{init}.repeat(2)'
- out.append(f'tables.insert("{key}", Table {{ shape: &{dims!r}, values: {init} }});')
-out += ['Self { tables }', '}', '''pub fn reset_counts(&mut self) { for table in self.tables.values_mut() { let n=*table.shape.last().unwrap(); for cdf in table.values.chunks_exact_mut(n) { cdf[n-1]=0; } } }''', '''pub fn get(&mut self, name: &str, indices: &[usize]) -> Result<&mut [u16]> {
-let table = self.tables.get_mut(name).ok_or_else(|| invalid("unknown AV1 CDF table"))?;
+ out.append(f'cdfs.insert("{key}", Table {{ shape: &{dims!r}, values: {init} }});')
+out += ['cdfs', '}', '''pub fn reset_counts(&mut self) { for table in &mut self.tables { let n=*table.shape.last().unwrap(); for cdf in table.values.chunks_exact_mut(n) { cdf[n-1]=0; } } }''', '''pub fn get(&mut self, name: &str, indices: &[usize]) -> Result<&mut [u16]> {
+let hash = hash_key(name.as_bytes()); let mut slot = (hash as usize) & SLOT_MASK;
+let index = loop {
+ let occupant = self.slots[slot];
+ if occupant == 0 { return Err(invalid("unknown AV1 CDF table")); }
+ let candidate = usize::from(occupant) - 1;
+ if self.hashes[candidate] == hash && self.names[candidate] == name { break candidate; }
+ slot = (slot + 1) & SLOT_MASK;
+};
+let table = &mut self.tables[index];
 if indices.len()+1 != table.shape.len() { return Err(invalid("invalid AV1 CDF rank")); }
 let mut offset = 0;
 for (i, index) in indices.iter().enumerate() {

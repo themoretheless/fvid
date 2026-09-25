@@ -1,7 +1,22 @@
 //! Generated normative AV1 default CDF tables; see scripts/generate_av1_tables.py.
 //! Source SHA-256: 9d9a54994541adbd61e83f9af95aad818ea8e5608d090a9553d2178bbef52998
 use crate::{Result, invalid};
-use std::collections::BTreeMap;
+const SLOT_COUNT: usize = 512;
+const SLOT_MASK: usize = SLOT_COUNT - 1;
+#[inline]
+fn hash_key(name: &[u8]) -> u64 {
+    let mut h = 0x9ddfea_08eb38_2d69u64 ^ name.len() as u64;
+    let mut rest = name;
+    while !rest.is_empty() {
+        let (head, tail) = rest.split_at(rest.len().min(8));
+        let mut word = [0u8; 8];
+        word[..head.len()].copy_from_slice(head);
+        h = (h ^ u64::from_le_bytes(word)).wrapping_mul(0xff51_afd7_ed55_8ccd);
+        h ^= h >> 29;
+        rest = tail;
+    }
+    h
+}
 #[derive(Clone)]
 pub struct Table {
     pub shape: &'static [usize],
@@ -9,9 +24,25 @@ pub struct Table {
 }
 #[derive(Clone)]
 pub struct Cdfs {
-    tables: BTreeMap<&'static str, Table>,
+    names: Vec<&'static str>,
+    hashes: Vec<u64>,
+    tables: Vec<Table>,
+    slots: Vec<u16>,
 }
 impl Cdfs {
+    fn insert(&mut self, name: &'static str, table: Table) {
+        debug_assert!(self.tables.len() < SLOT_COUNT);
+        let index = self.tables.len();
+        let hash = hash_key(name.as_bytes());
+        self.names.push(name);
+        self.hashes.push(hash);
+        self.tables.push(table);
+        let mut slot = (hash as usize) & SLOT_MASK;
+        while self.slots[slot] != 0 {
+            slot = (slot + 1) & SLOT_MASK;
+        }
+        self.slots[slot] = index as u16 + 1;
+    }
     pub fn new(q: u8) -> Self {
         let qi = if q <= 20 {
             0
@@ -22,683 +53,688 @@ impl Cdfs {
         } else {
             3
         };
-        let mut tables = BTreeMap::new();
-        tables.insert(
+        let mut cdfs = Self {
+            names: Vec::with_capacity(128),
+            hashes: Vec::with_capacity(128),
+            tables: Vec::with_capacity(128),
+            slots: vec![0; SLOT_COUNT],
+        };
+        cdfs.insert(
             "Intra_Frame_Y_Mode",
             Table {
                 shape: &[5, 5, 14],
                 values: DEFAULT_INTRA_FRAME_Y_MODE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Y_Mode",
             Table {
                 shape: &[4, 14],
                 values: DEFAULT_Y_MODE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Uv_Mode_Cfl_Not_Allowed",
             Table {
                 shape: &[13, 14],
                 values: DEFAULT_UV_MODE_CFL_NOT_ALLOWED_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Uv_Mode_Cfl_Allowed",
             Table {
                 shape: &[13, 15],
                 values: DEFAULT_UV_MODE_CFL_ALLOWED_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Angle_Delta",
             Table {
                 shape: &[8, 8],
                 values: DEFAULT_ANGLE_DELTA_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Intrabc",
             Table {
                 shape: &[3],
                 values: DEFAULT_INTRABC_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Partition_W8",
             Table {
                 shape: &[4, 5],
                 values: DEFAULT_PARTITION_W8_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Partition_W16",
             Table {
                 shape: &[4, 11],
                 values: DEFAULT_PARTITION_W16_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Partition_W32",
             Table {
                 shape: &[4, 11],
                 values: DEFAULT_PARTITION_W32_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Partition_W64",
             Table {
                 shape: &[4, 11],
                 values: DEFAULT_PARTITION_W64_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Partition_W128",
             Table {
                 shape: &[4, 9],
                 values: DEFAULT_PARTITION_W128_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Tx_8x8",
             Table {
                 shape: &[3, 3],
                 values: DEFAULT_TX_8X8_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Tx_16x16",
             Table {
                 shape: &[3, 4],
                 values: DEFAULT_TX_16X16_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Tx_32x32",
             Table {
                 shape: &[3, 4],
                 values: DEFAULT_TX_32X32_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Tx_64x64",
             Table {
                 shape: &[3, 4],
                 values: DEFAULT_TX_64X64_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Txfm_Split",
             Table {
                 shape: &[21, 3],
                 values: DEFAULT_TXFM_SPLIT_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Filter_Intra_Mode",
             Table {
                 shape: &[6],
                 values: DEFAULT_FILTER_INTRA_MODE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Filter_Intra",
             Table {
                 shape: &[22, 3],
                 values: DEFAULT_FILTER_INTRA_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Segment_Id",
             Table {
                 shape: &[3, 9],
                 values: DEFAULT_SEGMENT_ID_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Segment_Id_Predicted",
             Table {
                 shape: &[3, 3],
                 values: DEFAULT_SEGMENT_ID_PREDICTED_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Mv_Class0_Hp",
             Table {
                 shape: &[2, 2, 3],
                 values: DEFAULT_MV_CLASS0_HP_CDF.to_vec().repeat(4),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Mv_Hp",
             Table {
                 shape: &[2, 2, 3],
                 values: DEFAULT_MV_HP_CDF.to_vec().repeat(4),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Mv_Sign",
             Table {
                 shape: &[2, 2, 3],
                 values: DEFAULT_MV_SIGN_CDF.to_vec().repeat(4),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Mv_Bit",
             Table {
                 shape: &[2, 2, 10, 3],
                 values: DEFAULT_MV_BIT_CDF.to_vec().repeat(4),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Mv_Class0_Bit",
             Table {
                 shape: &[2, 2, 3],
                 values: DEFAULT_MV_CLASS0_BIT_CDF.to_vec().repeat(4),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "New_Mv",
             Table {
                 shape: &[6, 3],
                 values: DEFAULT_NEW_MV_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Zero_Mv",
             Table {
                 shape: &[2, 3],
                 values: DEFAULT_ZERO_MV_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Ref_Mv",
             Table {
                 shape: &[6, 3],
                 values: DEFAULT_REF_MV_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Drl_Mode",
             Table {
                 shape: &[3, 3],
                 values: DEFAULT_DRL_MODE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Is_Inter",
             Table {
                 shape: &[4, 3],
                 values: DEFAULT_IS_INTER_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Comp_Mode",
             Table {
                 shape: &[5, 3],
                 values: DEFAULT_COMP_MODE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Skip_Mode",
             Table {
                 shape: &[3, 3],
                 values: DEFAULT_SKIP_MODE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Skip",
             Table {
                 shape: &[3, 3],
                 values: DEFAULT_SKIP_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Comp_Ref",
             Table {
                 shape: &[3, 3, 3],
                 values: DEFAULT_COMP_REF_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Comp_Bwd_Ref",
             Table {
                 shape: &[3, 2, 3],
                 values: DEFAULT_COMP_BWD_REF_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Single_Ref",
             Table {
                 shape: &[3, 6, 3],
                 values: DEFAULT_SINGLE_REF_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Compound_Mode",
             Table {
                 shape: &[8, 9],
                 values: DEFAULT_COMPOUND_MODE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Interp_Filter",
             Table {
                 shape: &[16, 4],
                 values: DEFAULT_INTERP_FILTER_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Motion_Mode",
             Table {
                 shape: &[22, 4],
                 values: DEFAULT_MOTION_MODE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Mv_Joint",
             Table {
                 shape: &[2, 5],
                 values: DEFAULT_MV_JOINT_CDF.to_vec().repeat(2),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Mv_Class",
             Table {
                 shape: &[2, 2, 12],
                 values: DEFAULT_MV_CLASS_CDF.to_vec().repeat(2),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Mv_Class0_Fr",
             Table {
                 shape: &[2, 2, 2, 5],
                 values: DEFAULT_MV_CLASS0_FR_CDF.to_vec().repeat(2),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Mv_Fr",
             Table {
                 shape: &[2, 2, 5],
                 values: DEFAULT_MV_FR_CDF.to_vec().repeat(2),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Y_Size",
             Table {
                 shape: &[7, 8],
                 values: DEFAULT_PALETTE_Y_SIZE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Uv_Size",
             Table {
                 shape: &[7, 8],
                 values: DEFAULT_PALETTE_UV_SIZE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Size_2_Y_Color",
             Table {
                 shape: &[5, 3],
                 values: DEFAULT_PALETTE_SIZE_2_Y_COLOR_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Size_3_Y_Color",
             Table {
                 shape: &[5, 4],
                 values: DEFAULT_PALETTE_SIZE_3_Y_COLOR_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Size_4_Y_Color",
             Table {
                 shape: &[5, 5],
                 values: DEFAULT_PALETTE_SIZE_4_Y_COLOR_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Size_5_Y_Color",
             Table {
                 shape: &[5, 6],
                 values: DEFAULT_PALETTE_SIZE_5_Y_COLOR_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Size_6_Y_Color",
             Table {
                 shape: &[5, 7],
                 values: DEFAULT_PALETTE_SIZE_6_Y_COLOR_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Size_7_Y_Color",
             Table {
                 shape: &[5, 8],
                 values: DEFAULT_PALETTE_SIZE_7_Y_COLOR_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Size_8_Y_Color",
             Table {
                 shape: &[5, 9],
                 values: DEFAULT_PALETTE_SIZE_8_Y_COLOR_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Size_2_Uv_Color",
             Table {
                 shape: &[5, 3],
                 values: DEFAULT_PALETTE_SIZE_2_UV_COLOR_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Size_3_Uv_Color",
             Table {
                 shape: &[5, 4],
                 values: DEFAULT_PALETTE_SIZE_3_UV_COLOR_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Size_4_Uv_Color",
             Table {
                 shape: &[5, 5],
                 values: DEFAULT_PALETTE_SIZE_4_UV_COLOR_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Size_5_Uv_Color",
             Table {
                 shape: &[5, 6],
                 values: DEFAULT_PALETTE_SIZE_5_UV_COLOR_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Size_6_Uv_Color",
             Table {
                 shape: &[5, 7],
                 values: DEFAULT_PALETTE_SIZE_6_UV_COLOR_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Size_7_Uv_Color",
             Table {
                 shape: &[5, 8],
                 values: DEFAULT_PALETTE_SIZE_7_UV_COLOR_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Size_8_Uv_Color",
             Table {
                 shape: &[5, 9],
                 values: DEFAULT_PALETTE_SIZE_8_UV_COLOR_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Y_Mode",
             Table {
                 shape: &[7, 3, 3],
                 values: DEFAULT_PALETTE_Y_MODE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Palette_Uv_Mode",
             Table {
                 shape: &[2, 3],
                 values: DEFAULT_PALETTE_UV_MODE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Delta_Q",
             Table {
                 shape: &[5],
                 values: DEFAULT_DELTA_Q_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Delta_Lf",
             Table {
                 shape: &[5],
                 values: DEFAULT_DELTA_LF_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Intra_Tx_Type_Set1",
             Table {
                 shape: &[2, 13, 8],
                 values: DEFAULT_INTRA_TX_TYPE_SET1_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Intra_Tx_Type_Set2",
             Table {
                 shape: &[3, 13, 6],
                 values: DEFAULT_INTRA_TX_TYPE_SET2_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Inter_Tx_Type_Set1",
             Table {
                 shape: &[2, 17],
                 values: DEFAULT_INTER_TX_TYPE_SET1_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Inter_Tx_Type_Set2",
             Table {
                 shape: &[13],
                 values: DEFAULT_INTER_TX_TYPE_SET2_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Inter_Tx_Type_Set3",
             Table {
                 shape: &[4, 3],
                 values: DEFAULT_INTER_TX_TYPE_SET3_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Compound_Idx",
             Table {
                 shape: &[6, 3],
                 values: DEFAULT_COMPOUND_IDX_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Comp_Group_Idx",
             Table {
                 shape: &[6, 3],
                 values: DEFAULT_COMP_GROUP_IDX_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Compound_Type",
             Table {
                 shape: &[22, 3],
                 values: DEFAULT_COMPOUND_TYPE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Inter_Intra",
             Table {
                 shape: &[3, 3],
                 values: DEFAULT_INTER_INTRA_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Inter_Intra_Mode",
             Table {
                 shape: &[3, 5],
                 values: DEFAULT_INTER_INTRA_MODE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Wedge_Index",
             Table {
                 shape: &[22, 17],
                 values: DEFAULT_WEDGE_INDEX_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Wedge_Inter_Intra",
             Table {
                 shape: &[22, 3],
                 values: DEFAULT_WEDGE_INTER_INTRA_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Use_Obmc",
             Table {
                 shape: &[22, 3],
                 values: DEFAULT_USE_OBMC_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Comp_Ref_Type",
             Table {
                 shape: &[5, 3],
                 values: DEFAULT_COMP_REF_TYPE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Uni_Comp_Ref",
             Table {
                 shape: &[3, 3, 3],
                 values: DEFAULT_UNI_COMP_REF_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Cfl_Sign",
             Table {
                 shape: &[9],
                 values: DEFAULT_CFL_SIGN_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Cfl_Alpha",
             Table {
                 shape: &[6, 17],
                 values: DEFAULT_CFL_ALPHA_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Use_Wiener",
             Table {
                 shape: &[3],
                 values: DEFAULT_USE_WIENER_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Use_Sgrproj",
             Table {
                 shape: &[3],
                 values: DEFAULT_USE_SGRPROJ_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Restoration_Type",
             Table {
                 shape: &[4],
                 values: DEFAULT_RESTORATION_TYPE_CDF.to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Txb_Skip",
             Table {
                 shape: &[5, 13, 3],
                 values: DEFAULT_TXB_SKIP_CDF[qi * 195..(qi + 1) * 195].to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Eob_Pt_16",
             Table {
                 shape: &[2, 2, 6],
                 values: DEFAULT_EOB_PT_16_CDF[qi * 24..(qi + 1) * 24].to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Eob_Pt_32",
             Table {
                 shape: &[2, 2, 7],
                 values: DEFAULT_EOB_PT_32_CDF[qi * 28..(qi + 1) * 28].to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Eob_Pt_64",
             Table {
                 shape: &[2, 2, 8],
                 values: DEFAULT_EOB_PT_64_CDF[qi * 32..(qi + 1) * 32].to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Eob_Pt_128",
             Table {
                 shape: &[2, 2, 9],
                 values: DEFAULT_EOB_PT_128_CDF[qi * 36..(qi + 1) * 36].to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Eob_Pt_256",
             Table {
                 shape: &[2, 2, 10],
                 values: DEFAULT_EOB_PT_256_CDF[qi * 40..(qi + 1) * 40].to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Eob_Pt_512",
             Table {
                 shape: &[2, 11],
                 values: DEFAULT_EOB_PT_512_CDF[qi * 22..(qi + 1) * 22].to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Eob_Pt_1024",
             Table {
                 shape: &[2, 12],
                 values: DEFAULT_EOB_PT_1024_CDF[qi * 24..(qi + 1) * 24].to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Eob_Extra",
             Table {
                 shape: &[5, 2, 9, 3],
                 values: DEFAULT_EOB_EXTRA_CDF[qi * 270..(qi + 1) * 270].to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Dc_Sign",
             Table {
                 shape: &[2, 3, 3],
                 values: DEFAULT_DC_SIGN_CDF[qi * 18..(qi + 1) * 18].to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Coeff_Base_Eob",
             Table {
                 shape: &[5, 2, 4, 4],
                 values: DEFAULT_COEFF_BASE_EOB_CDF[qi * 160..(qi + 1) * 160].to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Coeff_Base",
             Table {
                 shape: &[5, 2, 42, 5],
                 values: DEFAULT_COEFF_BASE_CDF[qi * 2100..(qi + 1) * 2100].to_vec(),
             },
         );
-        tables.insert(
+        cdfs.insert(
             "Coeff_Br",
             Table {
                 shape: &[5, 2, 21, 5],
                 values: DEFAULT_COEFF_BR_CDF[qi * 1050..(qi + 1) * 1050].to_vec(),
             },
         );
-        Self { tables }
+        cdfs
     }
     pub fn reset_counts(&mut self) {
-        for table in self.tables.values_mut() {
+        for table in &mut self.tables {
             let n = *table.shape.last().unwrap();
             for cdf in table.values.chunks_exact_mut(n) {
                 cdf[n - 1] = 0;
@@ -706,10 +742,20 @@ impl Cdfs {
         }
     }
     pub fn get(&mut self, name: &str, indices: &[usize]) -> Result<&mut [u16]> {
-        let table = self
-            .tables
-            .get_mut(name)
-            .ok_or_else(|| invalid("unknown AV1 CDF table"))?;
+        let hash = hash_key(name.as_bytes());
+        let mut slot = (hash as usize) & SLOT_MASK;
+        let index = loop {
+            let occupant = self.slots[slot];
+            if occupant == 0 {
+                return Err(invalid("unknown AV1 CDF table"));
+            }
+            let candidate = usize::from(occupant) - 1;
+            if self.hashes[candidate] == hash && self.names[candidate] == name {
+                break candidate;
+            }
+            slot = (slot + 1) & SLOT_MASK;
+        };
+        let table = &mut self.tables[index];
         if indices.len() + 1 != table.shape.len() {
             return Err(invalid("invalid AV1 CDF rank"));
         }
