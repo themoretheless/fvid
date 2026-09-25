@@ -724,20 +724,6 @@ impl Decoder<'_> {
                                 let loop_col = ((x >> 3) >> sub) << sub;
                                 let loop_row = ((y >> 3) >> sub) << sub;
                                 let block = blocks[loop_row * cols + loop_col];
-                                let delta = if lf.delta_enabled {
-                                    i32::from(lf.reference_deltas[usize::from(block.reference)])
-                                        + if block.reference > 0 {
-                                            i32::from(
-                                                lf.mode_deltas[usize::from(block.inter_mode != 12)],
-                                            )
-                                        } else {
-                                            0
-                                        }
-                                } else {
-                                    0
-                                };
-                                let level = (i32::from(lf.level) + (delta << (lf.level >> 5)))
-                                    .clamp(0, 63) as u8;
                                 let tx = if plane == 0 {
                                     block.tx
                                 } else {
@@ -782,6 +768,23 @@ impl Decoder<'_> {
                                 {
                                     filter_tx = 1;
                                 }
+                                // The level only matters once the edge survives
+                                // the tests above, and most sub-edge positions
+                                // inside a block do not.
+                                let delta = if lf.delta_enabled {
+                                    i32::from(lf.reference_deltas[usize::from(block.reference)])
+                                        + if block.reference > 0 {
+                                            i32::from(
+                                                lf.mode_deltas[usize::from(block.inter_mode != 12)],
+                                            )
+                                        } else {
+                                            0
+                                        }
+                                } else {
+                                    0
+                                };
+                                let level = (i32::from(lf.level) + (delta << (lf.level >> 5)))
+                                    .clamp(0, 63) as u8;
                                 Some((x >> sub, y >> sub, level, filter_tx as u8))
                             };
                             let positions = |px: usize, py: usize| -> [usize; 16] {
