@@ -61,6 +61,31 @@ impl<'a> SymbolDecoder<'a> {
         self.position = start + bits;
         Ok((value & ((1u64 << bits) - 1)) as u32)
     }
+    /// Refill used by renormalisation. `available` already caps the request at
+    /// the bits that remain, and the range window keeps it under 16, so unlike
+    /// `take` this cannot fail and stays on the decoder's critical chain.
+    #[inline(always)]
+    fn refill(&mut self, count: u8) -> u32 {
+        let bits = usize::from(count);
+        if bits == 0 {
+            return 0;
+        }
+        let (start, byte) = (self.position, self.position / 8);
+        let offset = start % 8;
+        let value = match self.data[byte..].first_chunk::<8>() {
+            Some(chunk) => u64::from_be_bytes(*chunk) >> (64 - offset - bits),
+            None => {
+                let needed = (offset + bits).div_ceil(8);
+                let mut word = 0u64;
+                for &b in &self.data[byte..byte + needed] {
+                    word = (word << 8) | u64::from(b);
+                }
+                word >> (needed * 8 - offset - bits)
+            }
+        };
+        self.position = start + bits;
+        (value & ((1u64 << bits) - 1)) as u32
+    }
     /// Cumulative probabilities in ascending order, followed by adaptation count.
     /// The penultimate entry must be 32768 and count must be at most 32.
     pub fn read(&mut self, cdf: &mut [u16]) -> Result<usize> {
@@ -112,7 +137,7 @@ impl<'a> SymbolDecoder<'a> {
     fn renormalize(&mut self) -> Result<()> {
         let bits = (self.range.leading_zeros() - 16) as u8;
         let real_bits = i64::from(bits).min(self.available.max(0)) as u8;
-        let padded = self.take(real_bits)? << (bits - real_bits);
+        let padded = self.refill(real_bits) << (bits - real_bits);
         self.range <<= bits;
         self.value = padded ^ (((self.value + 1) << bits) - 1);
         self.available -= i64::from(bits);
