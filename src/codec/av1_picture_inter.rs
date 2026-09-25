@@ -291,7 +291,7 @@ impl Decoder<'_> {
                 }
                 _ => 1,
             };
-            symbol(d, c, av1_cdfs::COMP_MODE, &[ctx])? != 0
+            symbol(d, c, av1_cdfs::COMP_MODE, [ctx])? != 0
         } else {
             false
         };
@@ -363,19 +363,19 @@ impl Decoder<'_> {
             } else {
                 2
             };
-            if symbol(d, c, av1_cdfs::COMP_REF_TYPE, &[t])? == 0 {
+            if symbol(d, c, av1_cdfs::COMP_REF_TYPE, [t])? == 0 {
                 if symbol(
                     d,
                     c,
                     av1_cdfs::UNI_COMP_REF,
-                    &[ctx(&[1, 2, 3, 4], &[5, 6, 7]), 0],
+                    [ctx(&[1, 2, 3, 4], &[5, 6, 7]), 0],
                 )? != 0
                 {
                     [5, 7]
-                } else if symbol(d, c, av1_cdfs::UNI_COMP_REF, &[ctx(&[2], &[3, 4]), 1])? != 0 {
+                } else if symbol(d, c, av1_cdfs::UNI_COMP_REF, [ctx(&[2], &[3, 4]), 1])? != 0 {
                     [
                         1,
-                        if symbol(d, c, av1_cdfs::UNI_COMP_REF, &[ctx(&[3], &[4]), 2])? != 0 {
+                        if symbol(d, c, av1_cdfs::UNI_COMP_REF, [ctx(&[3], &[4]), 2])? != 0 {
                             4
                         } else {
                             3
@@ -385,22 +385,22 @@ impl Decoder<'_> {
                     [1, 2]
                 }
             } else {
-                let forward = if symbol(d, c, av1_cdfs::COMP_REF, &[ctx(&[1, 2], &[3, 4]), 0])? == 0
+                let forward = if symbol(d, c, av1_cdfs::COMP_REF, [ctx(&[1, 2], &[3, 4]), 0])? == 0
                 {
-                    if symbol(d, c, av1_cdfs::COMP_REF, &[ctx(&[1], &[2]), 1])? != 0 {
+                    if symbol(d, c, av1_cdfs::COMP_REF, [ctx(&[1], &[2]), 1])? != 0 {
                         2
                     } else {
                         1
                     }
-                } else if symbol(d, c, av1_cdfs::COMP_REF, &[ctx(&[3], &[4]), 2])? != 0 {
+                } else if symbol(d, c, av1_cdfs::COMP_REF, [ctx(&[3], &[4]), 2])? != 0 {
                     4
                 } else {
                     3
                 };
                 let backward =
-                    if symbol(d, c, av1_cdfs::COMP_BWD_REF, &[ctx(&[5, 6], &[7]), 0])? != 0 {
+                    if symbol(d, c, av1_cdfs::COMP_BWD_REF, [ctx(&[5, 6], &[7]), 0])? != 0 {
                         7
-                    } else if symbol(d, c, av1_cdfs::COMP_BWD_REF, &[ctx(&[5], &[6]), 1])? != 0 {
+                    } else if symbol(d, c, av1_cdfs::COMP_BWD_REF, [ctx(&[5], &[6]), 1])? != 0 {
                         6
                     } else {
                         5
@@ -409,7 +409,7 @@ impl Decoder<'_> {
             }
         } else {
             let mut bit = |i, a: &[usize], b: &[usize]| -> Result<bool> {
-                Ok(symbol(d, c, av1_cdfs::SINGLE_REF, &[ctx(a, b), i])? != 0)
+                Ok(symbol(d, c, av1_cdfs::SINGLE_REF, [ctx(a, b), i])? != 0)
             };
             let r = if bit(0, &[1, 2, 3, 4], &[5, 6, 7])? {
                 if bit(1, &[5, 6], &[7])? {
@@ -435,12 +435,12 @@ impl Decoder<'_> {
         } else if compound {
             let ctx = [[0, 1, 1, 1, 1], [1, 2, 3, 4, 4], [4, 4, 5, 6, 7]][stack.reference >> 1]
                 [stack.new.min(4)];
-            17 + symbol(d, c, av1_cdfs::COMPOUND_MODE, &[ctx])?
-        } else if symbol(d, c, av1_cdfs::NEW_MV, &[stack.new])? == 0 {
+            17 + symbol(d, c, av1_cdfs::COMPOUND_MODE, [ctx])?
+        } else if symbol(d, c, av1_cdfs::NEW_MV, [stack.new])? == 0 {
             16
-        } else if symbol(d, c, av1_cdfs::ZERO_MV, &[0])? == 0 {
+        } else if symbol(d, c, av1_cdfs::ZERO_MV, [0])? == 0 {
             15
-        } else if symbol(d, c, av1_cdfs::REF_MV, &[stack.reference])? == 0 {
+        } else if symbol(d, c, av1_cdfs::REF_MV, [stack.reference])? == 0 {
             13
         } else {
             14
@@ -456,7 +456,7 @@ impl Decoder<'_> {
                     } else {
                         2
                     };
-                    if symbol(d, c, av1_cdfs::DRL_MODE, &[ctx])? == 0 {
+                    if symbol(d, c, av1_cdfs::DRL_MODE, [ctx])? == 0 {
                         index = i;
                         break;
                     }
@@ -491,20 +491,20 @@ impl Decoder<'_> {
                 stack.mv.get(pos).map_or([0; 2], |v| v.0[list])
             };
             if single == 16 {
-                let joint = symbol(d, c, av1_cdfs::MV_JOINT, &[0])?;
+                let joint = symbol(d, c, av1_cdfs::MV_JOINT, [0])?;
                 for (comp, v) in mv.iter_mut().enumerate() {
                     if joint == 3 || joint == if comp == 0 { 2 } else { 1 } {
-                        let sign = symbol(d, c, av1_cdfs::MV_SIGN, &[0, comp])? != 0;
-                        let class = symbol(d, c, av1_cdfs::MV_CLASS, &[0, comp])?;
+                        let sign = symbol(d, c, av1_cdfs::MV_SIGN, [0, comp])? != 0;
+                        let class = symbol(d, c, av1_cdfs::MV_CLASS, [0, comp])?;
                         let mag = if class == 0 {
-                            let bit = symbol(d, c, av1_cdfs::MV_CLASS0_BIT, &[0, comp])?;
+                            let bit = symbol(d, c, av1_cdfs::MV_CLASS0_BIT, [0, comp])?;
                             let fr = if self.h.integer_mv {
                                 3
                             } else {
-                                symbol(d, c, av1_cdfs::MV_CLASS0_FR, &[0, comp, bit])?
+                                symbol(d, c, av1_cdfs::MV_CLASS0_FR, [0, comp, bit])?
                             };
                             let hp = if self.h.high_precision_mv {
-                                symbol(d, c, av1_cdfs::MV_CLASS0_HP, &[0, comp])?
+                                symbol(d, c, av1_cdfs::MV_CLASS0_HP, [0, comp])?
                             } else {
                                 1
                             };
@@ -512,15 +512,15 @@ impl Decoder<'_> {
                         } else {
                             let mut bits = 0;
                             for i in 0..class {
-                                bits |= symbol(d, c, av1_cdfs::MV_BIT, &[0, comp, i])? << i;
+                                bits |= symbol(d, c, av1_cdfs::MV_BIT, [0, comp, i])? << i;
                             }
                             let fr = if self.h.integer_mv {
                                 3
                             } else {
-                                symbol(d, c, av1_cdfs::MV_FR, &[0, comp])?
+                                symbol(d, c, av1_cdfs::MV_FR, [0, comp])?
                             };
                             let hp = if self.h.high_precision_mv {
-                                symbol(d, c, av1_cdfs::MV_HP, &[0, comp])?
+                                symbol(d, c, av1_cdfs::MV_HP, [0, comp])?
                             } else {
                                 1
                             };
@@ -547,7 +547,7 @@ impl Decoder<'_> {
                 d,
                 c,
                 av1_cdfs::INTER_INTRA,
-                &[(w.min(h).ilog2() as usize) - 1],
+                [(w.min(h).ilog2() as usize) - 1],
             )? != 0
         {
             return Err(invalid("AV1 inter-intra blending not implemented"));
@@ -568,9 +568,9 @@ impl Decoder<'_> {
                     && !self.h.integer_mv
                     && !self.warp_samples(x, y, w, h, reference, mv).is_empty()
                 {
-                    symbol(d, c, av1_cdfs::MOTION_MODE, &[size_id])?
+                    symbol(d, c, av1_cdfs::MOTION_MODE, [size_id])?
                 } else {
-                    symbol(d, c, av1_cdfs::USE_OBMC, &[size_id])?
+                    symbol(d, c, av1_cdfs::USE_OBMC, [size_id])?
                 };
                 if motion == 2 {
                     local_warp = true;
@@ -602,7 +602,7 @@ impl Decoder<'_> {
                 })
                 .sum::<usize>()
                 .min(5);
-            if self.s.masked_compound && symbol(d, c, av1_cdfs::COMP_GROUP_IDX, &[ctx])? != 0 {
+            if self.s.masked_compound && symbol(d, c, av1_cdfs::COMP_GROUP_IDX, [ctx])? != 0 {
                 return Err(invalid("AV1 masked compound prediction not implemented"));
             }
             if self.s.joint_compound {
@@ -619,7 +619,7 @@ impl Decoder<'_> {
                             }
                         })
                         .sum::<usize>();
-                compound_average = symbol(d, c, av1_cdfs::COMPOUND_IDX, &[ctx])? != 0;
+                compound_average = symbol(d, c, av1_cdfs::COMPOUND_IDX, [ctx])? != 0;
             }
         }
         let mut filters = [self.h.interpolation_filter; 2];
@@ -642,7 +642,7 @@ impl Decoder<'_> {
                         } else {
                             3
                         };
-                    filters[dir] = symbol(d, c, av1_cdfs::INTERP_FILTER, &[ctx])?;
+                    filters[dir] = symbol(d, c, av1_cdfs::INTERP_FILTER, [ctx])?;
                 }
             }
             if !self.s.dual_filter {
@@ -940,7 +940,7 @@ impl Decoder<'_> {
                 + (6 - max.ilog2() as usize) * 6
                 + usize::from(above < w)
                 + usize::from(left < h);
-            symbol(d, c, av1_cdfs::TXFM_SPLIT, &[ctx])? != 0
+            symbol(d, c, av1_cdfs::TXFM_SPLIT, [ctx])? != 0
         };
         if split {
             let sub = if w > h {

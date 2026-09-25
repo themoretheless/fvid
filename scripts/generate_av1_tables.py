@@ -47,13 +47,15 @@ for match in re.finditer(r'^(Default_\w+_Cdf)\s*((?:\[[^\]]+\]\s*)+)\s*=\s*\{', 
  ids.append(f'pub const {key.upper()}: usize = {len(ids)};')
  out.append(f'cdfs.insert(Table {{ shape: &{dims!r}, values: {init} }});')
 out[out.index('<<IDS>>')] = '\n'.join(ids)
-out += ['cdfs', '}', '''pub fn reset_counts(&mut self) { for table in &mut self.tables { let n=*table.shape.last().unwrap(); for cdf in table.values.chunks_exact_mut(n) { cdf[n-1]=0; } } }''', '''pub fn get(&mut self, id: usize, indices: &[usize]) -> Option<&mut [u16]> {
+out += ['cdfs', '}', '''pub fn reset_counts(&mut self) { for table in &mut self.tables { let n=*table.shape.last().unwrap(); for cdf in table.values.chunks_exact_mut(n) { cdf[n-1]=0; } } }''', '''pub fn get<const K: usize>(&mut self, id: usize, indices: [usize; K]) -> Option<&mut [u16]> {
 let table = self.tables.get_mut(id)?;
-if indices.len()+1 != table.shape.len() { return None; }
+if K+1 != table.shape.len() { return None; }
 let mut offset = 0;
-for (i, index) in indices.iter().enumerate() {
-if *index >= table.shape[i] { return None; }
-offset = offset * table.shape[i] + index;
+let mut i = 0;
+while i < K {
+if indices[i] >= table.shape[i] { return None; }
+offset = offset * table.shape[i] + indices[i];
+i += 1;
 }
 let n = *table.shape.last().unwrap();
 table.values.chunks_exact_mut(n).nth(offset)

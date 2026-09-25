@@ -72,7 +72,12 @@ struct Decoder<'a> {
     inter_pred2: Vec<i32>,
 }
 const MODE_CONTEXT: [usize; 13] = [0, 1, 2, 3, 4, 4, 4, 4, 3, 0, 1, 2, 0];
-fn symbol(d: &mut SymbolDecoder<'_>, c: &mut Cdfs, id: usize, index: &[usize]) -> Result<usize> {
+fn symbol<const K: usize>(
+    d: &mut SymbolDecoder<'_>,
+    c: &mut Cdfs,
+    id: usize,
+    index: [usize; K],
+) -> Result<usize> {
     let cdf = c
         .get(id, index)
         .ok_or_else(|| invalid("invalid AV1 CDF table access"))?;
@@ -269,10 +274,10 @@ impl Decoder<'_> {
                 av1_cdfs::PARTITION_W128,
             ][n.ilog2() as usize];
             if has_rows && has_cols {
-                symbol(d, c, id, &[ctx])?
+                symbol(d, c, id, [ctx])?
             } else {
                 let table = c
-                    .get(id, &[ctx])
+                    .get(id, [ctx])
                     .ok_or_else(|| invalid("invalid AV1 CDF table access"))?;
                 let indexes: &[usize] = if !has_rows {
                     &[2, 3, 4, 6, 7, 9]
@@ -371,10 +376,10 @@ impl Decoder<'_> {
                 d,
                 c,
                 av1_cdfs::SKIP_MODE,
-                &[usize::from(above.is_some_and(|b| b.skip_mode))
+                [usize::from(above.is_some_and(|b| b.skip_mode))
                     + usize::from(left.is_some_and(|b| b.skip_mode))],
             )? != 0;
-        let skip = skip_mode || symbol(d, c, av1_cdfs::SKIP, &[skip_ctx])? != 0;
+        let skip = skip_mode || symbol(d, c, av1_cdfs::SKIP, [skip_ctx])? != 0;
         if !skip && !self.h.lossless.iter().all(|v| *v) && self.s.cdef && !self.h.intrabc {
             let stride = self.cols.div_ceil(16);
             let index = (y / 16) * stride + x / 16;
@@ -391,7 +396,7 @@ impl Decoder<'_> {
         }
         if self.read_deltas && !(skip && w == if self.s.superblock128 { 32 } else { 16 } && w == h)
         {
-            let mut value = symbol(d, c, av1_cdfs::DELTA_Q, &[])? as i32;
+            let mut value = symbol(d, c, av1_cdfs::DELTA_Q, [])? as i32;
             if value == 3 {
                 let bits = d.literal(3)? as u8 + 1;
                 value = d.literal(bits)? as i32 + (1 << bits) + 1;
@@ -418,25 +423,20 @@ impl Decoder<'_> {
                 (Some(a), None) | (None, Some(a)) => 2 * usize::from(a.reference == 0),
                 _ => 0,
             };
-            if skip_mode || symbol(d, c, av1_cdfs::IS_INTER, &[ctx])? != 0 {
+            if skip_mode || symbol(d, c, av1_cdfs::IS_INTER, [ctx])? != 0 {
                 return self.inter_block(d, c, x, y, w, h, skip, skip_mode);
             }
         }
         let ac = MODE_CONTEXT[above.map_or(0, |b| if b.reference == 0 { b.mode } else { 0 })];
         let lc = MODE_CONTEXT[left.map_or(0, |b| if b.reference == 0 { b.mode } else { 0 })];
         let mode = if matches!(self.h.frame_type, 0 | 2) {
-            symbol(d, c, av1_cdfs::INTRA_FRAME_Y_MODE, &[ac, lc])?
+            symbol(d, c, av1_cdfs::INTRA_FRAME_Y_MODE, [ac, lc])?
         } else {
-            symbol(
-                d,
-                c,
-                av1_cdfs::Y_MODE,
-                &[(w.min(h).ilog2() as usize).min(3)],
-            )?
+            symbol(d, c, av1_cdfs::Y_MODE, [(w.min(h).ilog2() as usize).min(3)])?
         };
         let mut angle = 0i32;
         if w >= 2 && h >= 2 && (1..=8).contains(&mode) {
-            angle = symbol(d, c, av1_cdfs::ANGLE_DELTA, &[mode - 1])? as i32 - 3;
+            angle = symbol(d, c, av1_cdfs::ANGLE_DELTA, [mode - 1])? as i32 - 3;
         }
         let has_chroma =
             !self.s.color.monochrome && !(w == 1 && x % 2 == 0 || h == 1 && y % 2 == 0);
@@ -457,32 +457,32 @@ impl Decoder<'_> {
                 } else {
                     av1_cdfs::UV_MODE_CFL_NOT_ALLOWED
                 },
-                &[mode],
+                [mode],
             )?;
             if uv == 13 {
-                let signs = symbol(d, c, av1_cdfs::CFL_SIGN, &[])? + 1;
+                let signs = symbol(d, c, av1_cdfs::CFL_SIGN, [])? + 1;
                 let (su, sv) = (signs / 3, signs % 3);
                 if su != 0 {
-                    cfl[0] = (symbol(d, c, av1_cdfs::CFL_ALPHA, &[(su - 1) * 3 + sv])? as i32 + 1)
+                    cfl[0] = (symbol(d, c, av1_cdfs::CFL_ALPHA, [(su - 1) * 3 + sv])? as i32 + 1)
                         * if su == 1 { -1 } else { 1 };
                 }
                 if sv != 0 {
-                    cfl[1] = (symbol(d, c, av1_cdfs::CFL_ALPHA, &[(sv - 1) * 3 + su])? as i32 + 1)
+                    cfl[1] = (symbol(d, c, av1_cdfs::CFL_ALPHA, [(sv - 1) * 3 + su])? as i32 + 1)
                         * if sv == 1 { -1 } else { 1 };
                 }
             }
             if w >= 2 && h >= 2 && (1..=8).contains(&uv) {
-                uv_angle = symbol(d, c, av1_cdfs::ANGLE_DELTA, &[uv - 1])? as i32 - 3;
+                uv_angle = symbol(d, c, av1_cdfs::ANGLE_DELTA, [uv - 1])? as i32 - 3;
             }
         }
         if self.h.screen_content && w >= 2 && h >= 2 && w <= 16 && h <= 16 {
             let size_ctx = (w * h).ilog2() as usize - 2;
             let palette_y =
-                mode == 0 && symbol(d, c, av1_cdfs::PALETTE_Y_MODE, &[size_ctx, 0])? != 0;
+                mode == 0 && symbol(d, c, av1_cdfs::PALETTE_Y_MODE, [size_ctx, 0])? != 0;
             if palette_y {
                 return Err(invalid("AV1 palette reconstruction not implemented"));
             }
-            if has_chroma && uv == 0 && symbol(d, c, av1_cdfs::PALETTE_UV_MODE, &[0])? != 0 {
+            if has_chroma && uv == 0 && symbol(d, c, av1_cdfs::PALETTE_UV_MODE, [0])? != 0 {
                 return Err(invalid("AV1 chroma palette not implemented"));
             }
         }
@@ -516,8 +516,8 @@ impl Decoder<'_> {
                 .iter()
                 .position(|v| *v == (w, h))
                 .ok_or_else(|| invalid("invalid AV1 block size"))?;
-            if symbol(d, c, av1_cdfs::FILTER_INTRA, &[size_id])? != 0 {
-                filter_mode = Some(symbol(d, c, av1_cdfs::FILTER_INTRA_MODE, &[])?);
+            if symbol(d, c, av1_cdfs::FILTER_INTRA, [size_id])? != 0 {
+                filter_mode = Some(symbol(d, c, av1_cdfs::FILTER_INTRA_MODE, [])?);
             }
         }
         let mut tx = if self.h.lossless[0] {
@@ -539,7 +539,7 @@ impl Decoder<'_> {
                 av1_cdfs::TX_32X32,
                 av1_cdfs::TX_64X64,
             ][depth as usize];
-            for _ in 0..symbol(d, c, id, &[ctx])? {
+            for _ in 0..symbol(d, c, id, [ctx])? {
                 if tx[0] > tx[1] {
                     tx[0] /= 2;
                 } else if tx[1] > tx[0] {
@@ -1023,20 +1023,20 @@ impl Decoder<'_> {
         let mut kind = 0;
         let mut total = 0;
         let mut dc_category = 0;
-        if symbol(d, c, av1_cdfs::TXB_SKIP, &[txctx, ctx])? == 0 {
+        if symbol(d, c, av1_cdfs::TXB_SKIP, [txctx, ctx])? == 0 {
             let inter = self.blocks[self.current_block[1] * self.cols + self.current_block[0]]
                 .reference
                 != 0;
             if inter && !self.h.lossless[0] && w.max(h) <= 32 {
                 if p == 0 && self.h.quant.base > 0 {
                     kind = if self.h.reduced_tx_set || w.max(h) == 32 {
-                        [9, 0][symbol(d, c, av1_cdfs::INTER_TX_TYPE_SET3, &[min_log])?]
+                        [9, 0][symbol(d, c, av1_cdfs::INTER_TX_TYPE_SET3, [min_log])?]
                     } else if w.min(h) == 16 {
                         [9, 10, 11, 0, 1, 2, 4, 5, 3, 6, 7, 8]
-                            [symbol(d, c, av1_cdfs::INTER_TX_TYPE_SET2, &[])?]
+                            [symbol(d, c, av1_cdfs::INTER_TX_TYPE_SET2, [])?]
                     } else {
                         [9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 4, 5, 3, 6, 7, 8]
-                            [symbol(d, c, av1_cdfs::INTER_TX_TYPE_SET1, &[min_log])?]
+                            [symbol(d, c, av1_cdfs::INTER_TX_TYPE_SET1, [min_log])?]
                     };
                 } else if p > 0 {
                     kind = self.tx_types[(y << sub).max(self.current_block[1]) * self.cols
@@ -1051,10 +1051,10 @@ impl Decoder<'_> {
                 if p == 0 && self.h.quant.base > 0 {
                     kind = if self.h.reduced_tx_set || w.min(h) == 16 {
                         [9, 0, 3, 1, 2]
-                            [symbol(d, c, av1_cdfs::INTRA_TX_TYPE_SET2, &[min_log, mode])?]
+                            [symbol(d, c, av1_cdfs::INTRA_TX_TYPE_SET2, [min_log, mode])?]
                     } else {
                         [9, 0, 10, 11, 3, 1, 2]
-                            [symbol(d, c, av1_cdfs::INTRA_TX_TYPE_SET1, &[min_log, mode])?]
+                            [symbol(d, c, av1_cdfs::INTRA_TX_TYPE_SET1, [min_log, mode])?]
                     };
                 } else if p > 0 {
                     kind = [0, 1, 2, 0, 3, 1, 2, 2, 1, 3, 1, 2, 3, 0][mode];
@@ -1107,13 +1107,13 @@ impl Decoder<'_> {
                 av1_cdfs::EOB_PT_1024,
             ][eob_multi as usize];
             let pt = if eob_multi < 5 {
-                symbol(d, c, id, &[ptype, usize::from(class != 0)])?
+                symbol(d, c, id, [ptype, usize::from(class != 0)])?
             } else {
-                symbol(d, c, id, &[ptype])?
+                symbol(d, c, id, [ptype])?
             } + 1;
             let mut eob = if pt < 2 { pt } else { (1 << (pt - 2)) + 1 };
             if pt >= 3 {
-                eob += symbol(d, c, av1_cdfs::EOB_EXTRA, &[txctx, ptype, pt - 3])? << (pt - 3);
+                eob += symbol(d, c, av1_cdfs::EOB_EXTRA, [txctx, ptype, pt - 3])? << (pt - 3);
                 if pt >= 4 {
                     eob += d.literal((pt - 3) as u8)? as usize;
                 }
@@ -1160,7 +1160,7 @@ impl Decoder<'_> {
                     } else {
                         3
                     };
-                    symbol(d, c, av1_cdfs::COEFF_BASE_EOB, &[txctx, ptype, ctx])? as i32 + 1
+                    symbol(d, c, av1_cdfs::COEFF_BASE_EOB, [txctx, ptype, ctx])? as i32 + 1
                 } else {
                     let neighbors = [
                         [(0, 1), (1, 0), (1, 1), (0, 2), (2, 0)],
@@ -1183,7 +1183,7 @@ impl Decoder<'_> {
                     } else {
                         ctx += 26 + 5 * if class == 2 { r.min(2) } else { col.min(2) };
                     }
-                    symbol(d, c, av1_cdfs::COEFF_BASE, &[txctx, ptype, ctx])? as i32
+                    symbol(d, c, av1_cdfs::COEFF_BASE, [txctx, ptype, ctx])? as i32
                 };
                 if level > 2 {
                     let neighbors = [
@@ -1214,7 +1214,7 @@ impl Decoder<'_> {
                         };
                     for _ in 0..4 {
                         let br =
-                            symbol(d, c, av1_cdfs::COEFF_BR, &[txctx.min(3), ptype, ctx])? as i32;
+                            symbol(d, c, av1_cdfs::COEFF_BR, [txctx.min(3), ptype, ctx])? as i32;
                         level += br;
                         if br < 3 {
                             break;
@@ -1234,7 +1234,7 @@ impl Decoder<'_> {
                     } else {
                         0
                     };
-                    symbol(d, c, av1_cdfs::DC_SIGN, &[ptype, ctx])? != 0
+                    symbol(d, c, av1_cdfs::DC_SIGN, [ptype, ctx])? != 0
                 } else {
                     d.bit()?
                 };

@@ -522,17 +522,21 @@ impl Cdfs {
     }
     /// CDF row for `indices` in table `id`, or `None` when the id, rank or index
     /// is out of range. Only generated call sites use it, all with constant ids.
-    pub fn get(&mut self, id: usize, indices: &[usize]) -> Option<&mut [u16]> {
+    pub fn get<const K: usize>(&mut self, id: usize, indices: [usize; K]) -> Option<&mut [u16]> {
         let table = self.tables.get_mut(id)?;
-        if indices.len() + 1 != table.shape.len() {
+        if K + 1 != table.shape.len() {
             return None;
         }
+        // `K` is a compile time arity, so the shape walk unrolls to a straight
+        // line of loads instead of a loop over a borrowed slice.
         let mut offset = 0;
-        for (i, index) in indices.iter().enumerate() {
-            if *index >= table.shape[i] {
+        let mut i = 0;
+        while i < K {
+            if indices[i] >= table.shape[i] {
                 return None;
             }
-            offset = offset * table.shape[i] + index;
+            offset = offset * table.shape[i] + indices[i];
+            i += 1;
         }
         let n = *table.shape.last().unwrap();
         table.values.chunks_exact_mut(n).nth(offset)
