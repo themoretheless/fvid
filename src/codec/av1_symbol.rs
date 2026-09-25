@@ -62,6 +62,22 @@ impl<'a> SymbolDecoder<'a> {
             }
             symbol += 1;
         }
+        self.renormalize()?;
+        if self.adapt {
+            let rate = 3 + u32::from(cdf[n] > 15) + u32::from(cdf[n] > 31) + (n.ilog2()).min(2);
+            for p in &mut cdf[..symbol] {
+                *p -= *p >> rate;
+            }
+            for p in &mut cdf[symbol..n - 1] {
+                *p += (32768 - *p) >> rate;
+            }
+            cdf[n] += u16::from(cdf[n] < 32);
+        }
+        Ok(symbol)
+    }
+    /// Shared renormalisation: bring `range` back into its 16-bit window and
+    /// refill `value` from the byte reader.
+    fn renormalize(&mut self) -> Result<()> {
         let bits = (self.range.leading_zeros() - 16) as u8;
         let real_bits = i64::from(bits).min(self.available.max(0)) as u8;
         let padded = self.input.read(real_bits)? << (bits - real_bits);
@@ -71,21 +87,32 @@ impl<'a> SymbolDecoder<'a> {
         if self.available < -14 {
             return Err(invalid("truncated AV1 entropy data"));
         }
-        if self.adapt {
-            let rate = 3 + u32::from(cdf[n] > 15) + u32::from(cdf[n] > 31) + (n.ilog2()).min(2);
-            for (i, p) in cdf[..n - 1].iter_mut().enumerate() {
-                if i < symbol {
-                    *p -= *p >> rate;
-                } else {
-                    *p += (32768 - *p) >> rate;
-                }
-            }
-            cdf[n] += u16::from(cdf[n] < 32);
-        }
-        Ok(symbol)
+        Ok(())
     }
+    /// A boolean has a fixed, non-adaptive distribution (AV1 8.2.1), so the
+    /// alphabet checks and model update of `read` would be dead work.
     pub fn bit(&mut self) -> Result<bool> {
-        Ok(self.read(&mut [16384, 32768, 0])? != 0)
+        if self.failed {
+            return Err(invalid("AV1 symbol decoder requires reset after error"));
+        }
+        let result = self.bit_inner();
+        if result.is_err() {
+            self.failed = true;
+        }
+        result
+    }
+    fn bit_inner(&mut self) -> Result<bool> {
+        let boundary = (((self.range >> 8) * 256) >> 1) + 4;
+        // Interval 0 is the one above the split, so a set bit is the value below it.
+        let one = self.value < boundary;
+        if one {
+            self.range = boundary;
+        } else {
+            self.range -= boundary;
+            self.value -= boundary;
+        }
+        self.renormalize()?;
+        Ok(one)
     }
     pub fn literal(&mut self, bits: u8) -> Result<u32> {
         if bits > 32 {
@@ -162,6 +189,33 @@ mod tests {
                 assert!(reads < 1024);
             }
             assert!(d.finish().is_err());
+        }
+    }
+    #[test]
+    fn bit_matches_two_symbol_read_and_survives_truncation() {
+        let mut state = 0x2545F490u32;
+        for trial in 0..600 {
+            let data: Vec<u8> = (0..1 + trial % 5)
+                .map(|_| {
+                    state = state.wrapping_mul(1664525).wrapping_add(1013904223);
+                    (state >> 13) as u8
+                })
+                .collect();
+            let adapt = trial % 2 == 0;
+            let mut generic = SymbolDecoder::new(&data, adapt).unwrap();
+            let mut fast = SymbolDecoder::new(&data, adapt).unwrap();
+            for k in 0..40 {
+                match (generic.read(&mut [16384, 32768, 0]), fast.bit()) {
+                    (Ok(symbol), Ok(bit)) => assert_eq!(symbol == 1, bit, "trial={trial} k={k}"),
+                    (Err(_), Err(_)) => break,
+                    (Ok(_), Err(_)) | (Err(_), Ok(_)) => panic!("trial={trial} k={k} status split"),
+                }
+            }
+            assert_eq!(
+                generic.finish().is_ok(),
+                fast.finish().is_ok(),
+                "trial={trial}"
+            );
         }
     }
 }
