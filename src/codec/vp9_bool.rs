@@ -31,8 +31,15 @@ impl<'a> BoolDecoder<'a> {
             (split, self.value)
         };
         let shifts = range.leading_zeros().saturating_sub(24);
-        // Check before changing any state, including the input position.
-        let suffix = self.bits.read(shifts as u8)?;
+        // A range that is already eight bits wide renormalises without
+        // consuming input, so the common case never enters the bit reader.
+        let suffix = if shifts == 0 {
+            0
+        } else {
+            // `read` checks the stream before changing any state, including
+            // the input position.
+            self.bits.read(shifts as u8)?
+        };
         range <<= shifts;
         value = (value << shifts) | suffix;
         self.range = range;
