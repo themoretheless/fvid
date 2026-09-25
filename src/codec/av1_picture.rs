@@ -865,15 +865,44 @@ impl Decoder<'_> {
                             8
                         });
                         let (dx, dy) = if pass == 0 { (1isize, 0isize) } else { (0, 1) };
+                        // An edge keeps its whole 14-sample window inside the plane once
+                        // the eight-sample halo around it does; then taps need neither
+                        // clamping nor per-sample bounds tests, and a vertical edge even
+                        // reads and writes one contiguous run.
+                        let straight = if pass == 0 {
+                            x >= 7 && x + 7 <= plane.width && y + 4 <= plane.height
+                        } else {
+                            y >= 7 && y + 7 <= plane.height && x + 4 <= plane.width
+                        };
+                        let tap = (dx + dy * plane.width as isize) as usize;
+                        let line = (dy + dx * plane.width as isize) as usize;
+                        let origin = y * plane.width + x;
                         for i in 0..4 {
-                            let xx = x as isize + dy * i;
-                            let yy = y as isize + dx * i;
-                            let samples = std::array::from_fn(|k| {
-                                let t = k as isize - 7;
-                                let sx = (xx + dx * t).clamp(0, plane.width as isize - 1) as usize;
-                                let sy = (yy + dy * t).clamp(0, plane.height as isize - 1) as usize;
-                                plane.samples[sy * plane.width + sx]
-                            });
+                            let base = origin + i * line;
+                            let xx = x as isize + dy * i as isize;
+                            let yy = y as isize + dx * i as isize;
+                            let samples = if straight {
+                                let mut s = [0u16; 14];
+                                if pass == 0 {
+                                    s.copy_from_slice(&plane.samples[base - 7..base + 7]);
+                                } else {
+                                    let mut at = base as isize - 7 * tap as isize;
+                                    for v in s.iter_mut() {
+                                        *v = plane.samples[at as usize];
+                                        at += tap as isize;
+                                    }
+                                }
+                                s
+                            } else {
+                                std::array::from_fn(|k| {
+                                    let t = k as isize - 7;
+                                    let sx =
+                                        (xx + dx * t).clamp(0, plane.width as isize - 1) as usize;
+                                    let sy =
+                                        (yy + dy * t).clamp(0, plane.height as isize - 1) as usize;
+                                    plane.samples[sy * plane.width + sx]
+                                })
+                            };
                             let filtered = super::av1_filter::edge(
                                 samples,
                                 self.s.color.depth,
@@ -882,16 +911,29 @@ impl Decoder<'_> {
                                 level,
                                 self.h.filter.sharpness,
                             );
-                            for (k, value) in filtered.into_iter().enumerate() {
-                                let t = k as isize - 7;
-                                let sx = xx + dx * t;
-                                let sy = yy + dy * t;
-                                if sx >= 0
-                                    && sy >= 0
-                                    && sx < plane.width as isize
-                                    && sy < plane.height as isize
-                                {
-                                    plane.samples[sy as usize * plane.width + sx as usize] = value;
+                            if straight {
+                                if pass == 0 {
+                                    plane.samples[base - 7..base + 7].copy_from_slice(&filtered);
+                                } else {
+                                    let mut at = base as isize - 7 * tap as isize;
+                                    for v in filtered {
+                                        plane.samples[at as usize] = v;
+                                        at += tap as isize;
+                                    }
+                                }
+                            } else {
+                                for (k, value) in filtered.into_iter().enumerate() {
+                                    let t = k as isize - 7;
+                                    let sx = xx + dx * t;
+                                    let sy = yy + dy * t;
+                                    if sx >= 0
+                                        && sy >= 0
+                                        && sx < plane.width as isize
+                                        && sy < plane.height as isize
+                                    {
+                                        plane.samples[sy as usize * plane.width + sx as usize] =
+                                            value;
+                                    }
                                 }
                             }
                         }
