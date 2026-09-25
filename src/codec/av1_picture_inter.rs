@@ -1134,13 +1134,27 @@ impl Decoder<'_> {
         let temp_len = (h + 7) * w;
         temp.resize(temp_len, 0);
         let temp = &mut temp[..temp_len];
+        // One source row slice feeds all eight taps of every output column, so a
+        // prediction that stays inside the reference needs no per-tap clamping.
+        // Taps span reference columns `base_x..base_x + w + 6`.
+        let base_x = (coord_x >> 4) - 3;
+        let inside_x = base_x >= 0 && base_x + w as i32 + 6 <= last_x;
         for r in 0..h + 7 {
+            let sy = ((coord_y >> 4) + r as i32 - 3).clamp(0, last_y) as usize;
+            let row = &src.samples[sy * src.width..];
             for col in 0..w {
-                let sy = ((coord_y >> 4) + r as i32 - 3).clamp(0, last_y) as usize;
                 let mut sum = 0;
-                for (t, k) in fx.iter().enumerate() {
-                    let sx = ((coord_x >> 4) + col as i32 + t as i32 - 3).clamp(0, last_x) as usize;
-                    sum += k * i32::from(src.samples[sy * src.width + sx]);
+                if inside_x {
+                    let start = (base_x + col as i32) as usize;
+                    for (t, k) in fx.iter().enumerate() {
+                        sum += k * i32::from(row[start + t]);
+                    }
+                } else {
+                    for (t, k) in fx.iter().enumerate() {
+                        let sx =
+                            ((coord_x >> 4) + col as i32 + t as i32 - 3).clamp(0, last_x) as usize;
+                        sum += k * i32::from(row[sx]);
+                    }
                 }
                 temp[r * w + col] = (sum + (1 << (round0 - 1))) >> round0;
             }
