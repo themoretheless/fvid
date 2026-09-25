@@ -566,8 +566,7 @@ impl Decoder<'_> {
                                     residual[yy * size + xx]
                                 };
                                 p.samples[(y + yy) * p.width + x + xx] =
-                                    (i32::from(pred[yy * size + xx]) + delta)
-                                        .clamp(0, max) as u16;
+                                    (i32::from(pred[yy * size + xx]) + delta).clamp(0, max) as u16;
                             }
                         }
                     }
@@ -697,7 +696,12 @@ impl Decoder<'_> {
                     for pass in 0..2 {
                         let sub = usize::from(plane > 0);
                         for edge in 0..(16 >> sub) {
-                            let meta = |i: usize| -> Option<([usize; 16], u8, usize)> {
+                            // `props` answers only what the run detection
+                            // below compares — filter level and transform
+                            // width — so the sixteen sample positions are
+                            // built once per batched line instead of on
+                            // every probe that is then discarded.
+                            let props = |i: usize| -> Option<(usize, usize, u8, u8)> {
                                 let x = col * 8
                                     + if pass == 0 {
                                         edge * (4 << sub)
@@ -778,7 +782,9 @@ impl Decoder<'_> {
                                 {
                                     filter_tx = 1;
                                 }
-                                let (px, py) = (x >> sub, y >> sub);
+                                Some((x >> sub, y >> sub, level, filter_tx as u8))
+                            };
+                            let positions = |px: usize, py: usize| -> [usize; 16] {
                                 let position = |offset: isize| {
                                     let xx = (px as isize + if pass == 0 { offset } else { 0 })
                                         .clamp(0, pw as isize - 1)
@@ -788,42 +794,41 @@ impl Decoder<'_> {
                                         as usize;
                                     yy * pw + xx
                                 };
-                                let indices: [usize; 16] =
-                                    std::array::from_fn(|j| position(j as isize - 8));
-                                Some((indices, level, 4 << filter_tx))
+                                std::array::from_fn(|j| position(j as isize - 8))
                             };
                             let lim = 64 >> sub;
                             let mut i = 0usize;
+                            let mut batch = [(0usize, 0usize, 0u8, 0u8); 4];
                             let mut idxs = [[0usize; 16]; 4];
                             while i < lim {
-                                let Some((idx0, level, width)) = meta(i) else {
+                                let Some(props0) = props(i) else {
                                     i += 1;
                                     continue;
                                 };
-                                idxs[0] = idx0;
+                                let (_, _, level, filter_tx) = props0;
+                                batch[0] = props0;
                                 let mut run = 1usize;
                                 while run < 4 && i + run < lim {
-                                    match meta(i + run) {
-                                        Some((idx, lvl, w)) if lvl == level && w == width => {
-                                            idxs[run] = idx;
+                                    match props(i + run) {
+                                        Some(next) if next.2 == level && next.3 == filter_tx => {
+                                            batch[run] = next;
                                             run += 1;
                                         }
                                         _ => break,
                                     }
                                 }
+                                let width = 4usize << filter_tx;
                                 let mut lines = [[0u16; 16]; 4];
                                 for k in 0..run {
+                                    let (px, py, _, _) = batch[k];
+                                    idxs[k] = positions(px, py);
                                     lines[k] = idxs[k].map(|j| plane_samples.samples[j]);
                                 }
                                 for k in run..4 {
                                     lines[k] = lines[0];
                                 }
                                 let out = super::vp9_filter::filter_batch4(
-                                    lines,
-                                    depth,
-                                    width,
-                                    level,
-                                    sharpness,
+                                    lines, depth, width, level, sharpness,
                                 );
                                 for k in 0..run {
                                     for j in 0..16 {
