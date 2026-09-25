@@ -429,6 +429,15 @@ impl Decoder<'_> {
             let size = (4 << tx).min(bw.min(bh));
             let base_x = c * 8 >> sub;
             let base_y = r * 8 >> sub;
+            // Distances from the block to the frame edges in eighth-pel units,
+            // as in the specification's clipped-block rules. A negative value
+            // means the block overflows the frame in that direction.
+            let edge_x = (self.cols as isize - (w.max(8) / 8) as isize - c as isize) * 64;
+            let edge_y = (self.rows as isize - (h.max(8) / 8) as isize - r as isize) * 64;
+            // First four-pixel unit of the block's span that lies outside the
+            // frame, or the end of the span when nothing is clipped.
+            let bound_x = (base_x / 4 + bw / 4) as isize + (edge_x >> (5 + sub)).min(0);
+            let bound_y = (base_y / 4 + bh / 4) as isize + (edge_y >> (5 + sub)).min(0);
             for dy in (0..bh).step_by(size) {
                 for dx in (0..bw).step_by(size) {
                     let x = base_x + dx;
@@ -571,8 +580,21 @@ impl Decoder<'_> {
                         }
                     }
                     any_nonzero |= nz;
-                    self.above_nz[plane][x / 4..(x + size) / 4].fill(nz);
-                    self.left_nz[plane][y / 4..(y + size) / 4].fill(nz);
+                    // A transform block that overflows the frame carries its
+                    // nonzero context only into the units inside the frame;
+                    // the clipped tail of the span is cleared.
+                    let ux = x / 4;
+                    let uy = y / 4;
+                    let ex = (x + size) / 4;
+                    let ey = (y + size) / 4;
+                    let wx = bound_x.clamp(ux as isize, ex as isize) as usize;
+                    let wy = bound_y.clamp(uy as isize, ey as isize) as usize;
+                    let above = &mut self.above_nz[plane];
+                    above[ux..wx].fill(nz);
+                    above[wx..ex].fill(false);
+                    let left = &mut self.left_nz[plane];
+                    left[uy..wy].fill(nz);
+                    left[wy..ey].fill(false);
                 }
             }
         }
