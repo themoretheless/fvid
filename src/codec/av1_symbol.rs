@@ -1,10 +1,9 @@
 //! AV1 section 8.2 adaptive multi-symbol range decoder.
-use super::bits::BitReader;
 use crate::{Result, invalid};
 
 pub struct SymbolDecoder<'a> {
-    input: BitReader<'a>,
     data: &'a [u8],
+    position: usize,
     range: u32,
     value: u32,
     available: i64,
@@ -16,18 +15,51 @@ impl<'a> SymbolDecoder<'a> {
         if data.is_empty() || data.len() > (i32::MAX as usize / 8) {
             return Err(invalid("invalid AV1 tile entropy size"));
         }
-        let mut input = BitReader::new(data);
-        let n = input.remaining().min(15) as u8;
-        let value = 32767 ^ (input.read(n)? << (15 - n));
-        Ok(Self {
-            input,
+        let mut decoder = Self {
             data,
+            position: 0,
             range: 32768,
-            value,
+            value: 32767,
             available: data.len() as i64 * 8 - 15,
             adapt,
             failed: false,
-        })
+        };
+        let n = decoder.remaining().min(15) as u8;
+        decoder.value ^= decoder.take(n)? << (15 - usize::from(n));
+        Ok(decoder)
+    }
+    fn remaining(&self) -> usize {
+        self.data
+            .len()
+            .saturating_mul(8)
+            .saturating_sub(self.position)
+    }
+    /// MSB-first field read. Entropy refill needs at most 15 bits, so one
+    /// big-endian word covers the field whenever eight bytes remain.
+    #[inline]
+    fn take(&mut self, count: u8) -> Result<u32> {
+        let bits = usize::from(count);
+        if count > 15 || bits > self.remaining() {
+            return Err(invalid("truncated or oversized bit field"));
+        }
+        if bits == 0 {
+            return Ok(0);
+        }
+        let (start, byte) = (self.position, self.position / 8);
+        let offset = start % 8;
+        let value = match self.data[byte..].first_chunk::<8>() {
+            Some(chunk) => u64::from_be_bytes(*chunk) >> (64 - offset - bits),
+            None => {
+                let needed = (offset + bits).div_ceil(8);
+                let mut word = 0u64;
+                for &b in &self.data[byte..byte + needed] {
+                    word = (word << 8) | u64::from(b);
+                }
+                word >> (needed * 8 - offset - bits)
+            }
+        };
+        self.position = start + bits;
+        Ok((value & ((1u64 << bits) - 1)) as u32)
     }
     /// Cumulative probabilities in ascending order, followed by adaptation count.
     /// The penultimate entry must be 32768 and count must be at most 32.
@@ -80,7 +112,7 @@ impl<'a> SymbolDecoder<'a> {
     fn renormalize(&mut self) -> Result<()> {
         let bits = (self.range.leading_zeros() - 16) as u8;
         let real_bits = i64::from(bits).min(self.available.max(0)) as u8;
-        let padded = self.input.read(real_bits)? << (bits - real_bits);
+        let padded = self.take(real_bits)? << (bits - real_bits);
         self.range <<= bits;
         self.value = padded ^ (((self.value + 1) << bits) - 1);
         self.available -= i64::from(bits);
@@ -130,8 +162,7 @@ impl<'a> SymbolDecoder<'a> {
         }
         let back = (self.available + 15).min(15) as usize;
         let start = self
-            .input
-            .position()
+            .position
             .checked_sub(back)
             .ok_or_else(|| invalid("invalid AV1 entropy termination"))?;
         for bit in start..self.data.len() * 8 {
