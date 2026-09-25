@@ -379,11 +379,26 @@ pub fn inverse(
     };
     scratch.resize(w * h + h, 0);
     let (data, col) = scratch.split_at_mut(w * h);
-    for (d, c) in data.iter_mut().zip(coefficients) {
-        *d = i64::from(*c);
+    // Each transform stage maps zero to zero, so a coefficient row that is entirely
+    // empty needs no horizontal pass; the vertical pass still spans every column
+    // because the horizontal stage fills them.
+    let mut last_row = 0;
+    for (y, (row, source)) in data
+        .chunks_exact_mut(w)
+        .zip(coefficients.chunks_exact(w))
+        .enumerate()
+    {
+        let mut any = false;
+        for (d, c) in row.iter_mut().zip(source) {
+            *d = i64::from(*c);
+            any |= *c != 0;
+        }
+        if any {
+            last_row = y;
+        }
     }
     let col_range = (depth + 6).max(16);
-    for row in data.chunks_exact_mut(w) {
+    for row in data.chunks_exact_mut(w).take(last_row + 1) {
         if w.ilog2().abs_diff(h.ilog2()) == 1 {
             for v in row.iter_mut() {
                 *v = round(*v * 2896, 12);
