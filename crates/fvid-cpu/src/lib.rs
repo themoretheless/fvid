@@ -796,6 +796,9 @@ unsafe fn av1_cdef_block_neon(
         let zero = vdupq_n_s16(0);
         let eight = vdupq_n_s16(8);
         let one = vdupq_n_s16(1);
+        let zero4 = vdup_n_s16(0);
+        let eight4 = vdup_n_s16(8);
+        let one4 = vdup_n_s16(1);
         let mut offsets = [0isize; 12];
         for (offset, t) in offsets.iter_mut().zip(taps) {
             *offset = i64::from(t.dy) as isize * stride as isize + i64::from(t.dx) as isize;
@@ -825,6 +828,32 @@ unsafe fn av1_cdef_block_neon(
                 let out = vmaxq_s16(vminq_s16(vaddq_s16(current, delta), hi), lo);
                 vst1q_u16(dst.add(base), vreinterpretq_u16_s16(out));
                 col += 8;
+            }
+            // Chroma CDEF blocks are only four pixels wide, so they never reach the
+            // eight-lane body; a four-lane chunk keeps them off the scalar tail.
+            while col + 4 <= w {
+                let base = (y + row) * stride + x + col;
+                let current = vreinterpret_s16_u16(vld1_u16(src.add(base)));
+                let mut sum = zero4;
+                let mut lo = current;
+                let mut hi = current;
+                for (offset, t) in offsets.iter().zip(taps) {
+                    let near = vreinterpret_s16_u16(vld1_u16(src.add(base).offset(*offset)));
+                    let diff = vsub_s16(near, current);
+                    let abs = vabs_s16(diff);
+                    let scaled = vshl_s16(abs, vdup_n_s16(-t.shift));
+                    let limit = vmax_s16(vsub_s16(vdup_n_s16(t.threshold), scaled), zero4);
+                    let filtered = vmin_s16(abs, limit);
+                    let signed = vbsl_s16(vclt_s16(diff, zero4), vneg_s16(filtered), filtered);
+                    sum = vadd_s16(sum, vmul_s16(signed, vdup_n_s16(t.weight)));
+                    lo = vmin_s16(lo, near);
+                    hi = vmax_s16(hi, near);
+                }
+                let bias = vand_s16(vshr_n_s16(sum, 15), one4);
+                let delta = vshr_n_s16(vsub_s16(vadd_s16(sum, eight4), bias), 4);
+                let out = vmax_s16(vmin_s16(vadd_s16(current, delta), hi), lo);
+                vst1_u16(dst.add(base), vreinterpret_u16_s16(out));
+                col += 4;
             }
             for c in col..w {
                 let base = (y + row) * stride + x + c;
@@ -1112,6 +1141,10 @@ mod tests {
             (8, 2, 16, 5),
             (2, 2, 13, 7),
             (30, 30, 8, 8),
+            (2, 2, 4, 16),
+            (3, 5, 5, 4),
+            (2, 2, 12, 4),
+            (5, 2, 4, 2),
         ];
         for &(x, y, w, h) in &shapes {
             for trial in 0..40 {
