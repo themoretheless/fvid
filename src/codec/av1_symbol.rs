@@ -134,6 +134,7 @@ impl<'a> SymbolDecoder<'a> {
     }
     /// Shared renormalisation: bring `range` back into its 16-bit window and
     /// refill `value` from the byte reader.
+    #[inline(always)]
     fn renormalize(&mut self) -> Result<()> {
         let bits = (self.range.leading_zeros() - 16) as u8;
         let real_bits = i64::from(bits).min(self.available.max(0)) as u8;
