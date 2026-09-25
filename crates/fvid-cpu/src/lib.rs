@@ -796,6 +796,10 @@ unsafe fn av1_cdef_block_neon(
         let zero = vdupq_n_s16(0);
         let eight = vdupq_n_s16(8);
         let one = vdupq_n_s16(1);
+        let mut offsets = [0isize; 12];
+        for (offset, t) in offsets.iter_mut().zip(taps) {
+            *offset = i64::from(t.dy) as isize * stride as isize + i64::from(t.dx) as isize;
+        }
         for row in 0..h {
             let mut col = 0usize;
             while col + 8 <= w {
@@ -804,13 +808,8 @@ unsafe fn av1_cdef_block_neon(
                 let mut sum = zero;
                 let mut lo = current;
                 let mut hi = current;
-                for t in taps {
-                    let near = vreinterpretq_s16_u16(vld1q_u16(src.add(
-                        ((row + y) as isize + i64::from(t.dy) as isize) as usize * stride
-                            + x
-                            + col
-                            + t.dx as usize,
-                    )));
+                for (offset, t) in offsets.iter().zip(taps) {
+                    let near = vreinterpretq_s16_u16(vld1q_u16(src.add(base).offset(*offset)));
                     let diff = vsubq_s16(near, current);
                     let abs = vabsq_s16(diff);
                     let scaled = vshlq_s16(abs, vdupq_n_s16(-t.shift));
