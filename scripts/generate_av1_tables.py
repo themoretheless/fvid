@@ -8,7 +8,6 @@ source = pathlib.Path(sys.argv[1]).read_text()
 out = ['//! Generated normative AV1 default CDF tables; see scripts/generate_av1_tables.py.',
        '//! Source SHA-256: ' + hashlib.sha256(source.encode()).hexdigest(),
        '#![allow(dead_code)]',
-       'use crate::{Result, invalid};',
        '/// Table ids, in `Cdfs::new` insertion order; call sites name them instead of hashing a string.',
        '<<IDS>>',
        '#[derive(Clone)] pub struct Table { pub shape: &\'static [usize], pub values: Vec<u16> }',
@@ -48,16 +47,16 @@ for match in re.finditer(r'^(Default_\w+_Cdf)\s*((?:\[[^\]]+\]\s*)+)\s*=\s*\{', 
  ids.append(f'pub const {key.upper()}: usize = {len(ids)};')
  out.append(f'cdfs.insert(Table {{ shape: &{dims!r}, values: {init} }});')
 out[out.index('<<IDS>>')] = '\n'.join(ids)
-out += ['cdfs', '}', '''pub fn reset_counts(&mut self) { for table in &mut self.tables { let n=*table.shape.last().unwrap(); for cdf in table.values.chunks_exact_mut(n) { cdf[n-1]=0; } } }''', '''pub fn get(&mut self, id: usize, indices: &[usize]) -> Result<&mut [u16]> {
-let table = self.tables.get_mut(id).ok_or_else(|| invalid("unknown AV1 CDF table"))?;
-if indices.len()+1 != table.shape.len() { return Err(invalid("invalid AV1 CDF rank")); }
+out += ['cdfs', '}', '''pub fn reset_counts(&mut self) { for table in &mut self.tables { let n=*table.shape.last().unwrap(); for cdf in table.values.chunks_exact_mut(n) { cdf[n-1]=0; } } }''', '''pub fn get(&mut self, id: usize, indices: &[usize]) -> Option<&mut [u16]> {
+let table = self.tables.get_mut(id)?;
+if indices.len()+1 != table.shape.len() { return None; }
 let mut offset = 0;
 for (i, index) in indices.iter().enumerate() {
-if *index >= table.shape[i] { return Err(invalid("AV1 CDF index outside table")); }
+if *index >= table.shape[i] { return None; }
 offset = offset * table.shape[i] + index;
 }
 let n = *table.shape.last().unwrap();
-Ok(&mut table.values[offset*n..(offset+1)*n])
+table.values.chunks_exact_mut(n).nth(offset)
 }''','}']+constants
 pathlib.Path('src/codec/av1_cdfs.rs').write_text('\n'.join(out)+'\n')
 print(len(constants), 'tables generated')

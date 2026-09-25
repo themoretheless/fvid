@@ -73,7 +73,10 @@ struct Decoder<'a> {
 }
 const MODE_CONTEXT: [usize; 13] = [0, 1, 2, 3, 4, 4, 4, 4, 3, 0, 1, 2, 0];
 fn symbol(d: &mut SymbolDecoder<'_>, c: &mut Cdfs, id: usize, index: &[usize]) -> Result<usize> {
-    d.read(c.get(id, index)?)
+    let cdf = c
+        .get(id, index)
+        .ok_or_else(|| invalid("invalid AV1 CDF table access"))?;
+    d.read(cdf)
 }
 
 pub fn decode_intra(s: &Sequence, h: &Header, groups: &[&[u8]], budget: usize) -> Result<Picture> {
@@ -268,7 +271,9 @@ impl Decoder<'_> {
             if has_rows && has_cols {
                 symbol(d, c, id, &[ctx])?
             } else {
-                let table = c.get(id, &[ctx])?;
+                let table = c
+                    .get(id, &[ctx])
+                    .ok_or_else(|| invalid("invalid AV1 CDF table access"))?;
                 let indexes: &[usize] = if !has_rows {
                     &[2, 3, 4, 6, 7, 9]
                 } else {

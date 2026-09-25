@@ -1,7 +1,6 @@
 //! Generated normative AV1 default CDF tables; see scripts/generate_av1_tables.py.
 //! Source SHA-256: 9d9a54994541adbd61e83f9af95aad818ea8e5608d090a9553d2178bbef52998
 #![allow(dead_code)]
-use crate::{Result, invalid};
 
 /// Table ids, in `Cdfs::new` insertion order; call sites name them instead of hashing a string.
 pub const INTRA_FRAME_Y_MODE: usize = 0;
@@ -521,23 +520,22 @@ impl Cdfs {
             }
         }
     }
-    pub fn get(&mut self, id: usize, indices: &[usize]) -> Result<&mut [u16]> {
-        let table = self
-            .tables
-            .get_mut(id)
-            .ok_or_else(|| invalid("unknown AV1 CDF table"))?;
+    /// CDF row for `indices` in table `id`, or `None` when the id, rank or index
+    /// is out of range. Only generated call sites use it, all with constant ids.
+    pub fn get(&mut self, id: usize, indices: &[usize]) -> Option<&mut [u16]> {
+        let table = self.tables.get_mut(id)?;
         if indices.len() + 1 != table.shape.len() {
-            return Err(invalid("invalid AV1 CDF rank"));
+            return None;
         }
         let mut offset = 0;
         for (i, index) in indices.iter().enumerate() {
             if *index >= table.shape[i] {
-                return Err(invalid("AV1 CDF index outside table"));
+                return None;
             }
             offset = offset * table.shape[i] + index;
         }
         let n = *table.shape.last().unwrap();
-        Ok(&mut table.values[offset * n..(offset + 1) * n])
+        table.values.chunks_exact_mut(n).nth(offset)
     }
 }
 const DEFAULT_INTRA_FRAME_Y_MODE_CDF: &[u16] = &[
