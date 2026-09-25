@@ -1263,27 +1263,36 @@ impl Decoder<'_> {
         for i in 0..h4 {
             self.left[p][y + i] = (total.min(63) as u8, dc_category);
         }
+        // A transform block whose levels are all zero dequantizes to zeros, so
+        // the pass over every sample is only needed once a coefficient survives.
         let mut dequant = vec![0; w * h];
-        let base = self.current_q;
-        let dc_delta = self.h.quant.delta[if p == 0 { 0 } else { p * 2 - 1 }];
-        let ac_delta = if p == 0 { 0 } else { self.h.quant.delta[p * 2] };
-        let depth_index = ((self.s.color.depth - 8) / 2) as usize;
-        let dc = DC_QLOOKUP[depth_index][(base + dc_delta).clamp(0, 255) as usize];
-        let ac = AC_QLOOKUP[depth_index][(base + ac_delta).clamp(0, 255) as usize];
-        let denom = if w * h > 1024 {
-            4
-        } else if w * h >= 512 {
-            2
-        } else {
-            1
-        };
-        for (pos, value) in q.iter().enumerate() {
-            let dq = i64::from(*value) * i64::from(if pos == 0 { dc } else { ac });
-            let dq = dq.signum() * (dq.abs() & 0xffffff) / denom;
-            dequant[(pos / tw) * w + pos % tw] = dq.clamp(
-                -(1 << (7 + self.s.color.depth)),
-                (1 << (7 + self.s.color.depth)) - 1,
-            ) as i32;
+        if total != 0 {
+            let base = self.current_q;
+            let dc_delta = self.h.quant.delta[if p == 0 { 0 } else { p * 2 - 1 }];
+            let ac_delta = if p == 0 { 0 } else { self.h.quant.delta[p * 2] };
+            let depth_index = ((self.s.color.depth - 8) / 2) as usize;
+            let dc = DC_QLOOKUP[depth_index][(base + dc_delta).clamp(0, 255) as usize];
+            let ac = AC_QLOOKUP[depth_index][(base + ac_delta).clamp(0, 255) as usize];
+            let shift = if w * h > 1024 {
+                2
+            } else if w * h >= 512 {
+                1
+            } else {
+                0
+            };
+            let limit = 1i64 << (7 + self.s.color.depth);
+            // Rows of the coefficient block map one to one onto rows of the
+            // residual, so walking them keeps the store sequential instead of
+            // dividing the linear coefficient index back out per sample.
+            for (r, row) in q.chunks(tw).enumerate() {
+                for (c, value) in row.iter().enumerate() {
+                    let dq = i64::from(*value) * i64::from(if r == 0 && c == 0 { dc } else { ac });
+                    // The magnitude is truncated towards zero, which for a
+                    // power of two is a shift of the absolute value.
+                    dequant[r * w + c] = (dq.signum() * ((dq.abs() & 0xffffff) >> shift))
+                        .clamp(-limit, limit - 1) as i32;
+                }
+            }
         }
         Ok((dequant, kind))
     }
