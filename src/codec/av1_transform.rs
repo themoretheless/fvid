@@ -24,23 +24,28 @@ fn clip(x: i64, r: u8) -> i64 {
 fn brev(n: u32, x: usize) -> usize {
     x.reverse_bits() >> (usize::BITS - n)
 }
-fn b(t: &mut [i64], a: usize, c: usize, angle: i32, flip: bool) {
+/// One angle-pair butterfly over the `N`-sample stage buffer. `N` is a compile
+/// time length so the stage indices below fold to constants: the whole 1-D
+/// transform then needs no bounds checks and no runtime angle lookups.
+#[inline(always)]
+fn b<const N: usize>(t: &mut [i64; N], a: usize, c: usize, angle: i32, flip: bool) {
     let x = round(t[a] * cos(angle) - t[c] * cos(angle - 64), 12);
     let y = round(t[a] * cos(angle - 64) + t[c] * cos(angle), 12);
     t[a] = if flip { y } else { x };
     t[c] = if flip { x } else { y };
 }
-fn h(t: &mut [i64], a: usize, b: usize, flip: bool, r: u8) {
+#[inline(always)]
+fn h<const N: usize>(t: &mut [i64; N], a: usize, b: usize, flip: bool, r: u8) {
     let (a, b) = if flip { (b, a) } else { (a, b) };
     let (x, y) = (t[a], t[b]);
     t[a] = clip(x + y, r);
     t[b] = clip(x - y, r);
 }
-fn dct(t: &mut [i64], r: u8) {
-    let n = t.len().ilog2();
-    let mut copy = [0i64; 64];
-    copy[..t.len()].copy_from_slice(t);
-    for i in 0..t.len() {
+fn dct<const N: usize>(t: &mut [i64; N], r: u8) {
+    let n = N.ilog2();
+    let mut copy = [0i64; N];
+    copy.copy_from_slice(t);
+    for i in 0..N {
         t[i] = copy[brev(n, i)];
     }
     if n == 6 {
@@ -221,8 +226,8 @@ fn dct(t: &mut [i64], r: u8) {
         }
     }
 }
-fn adst(t: &mut [i64], r: u8) {
-    if t.len() == 4 {
+fn adst<const N: usize>(t: &mut [i64; N], r: u8) {
+    if N == 4 {
         let a = 1321 * t[0] + 3803 * t[2] + 2482 * t[3];
         let b = 2482 * t[0] - 1321 * t[2] - 3803 * t[3];
         let c = 3344 * t[1];
@@ -233,13 +238,12 @@ fn adst(t: &mut [i64], r: u8) {
         t[3] = round(a + b - c, 12);
         return;
     }
-    let len = t.len();
-    let mut copy = [0i64; 16];
-    copy[..len].copy_from_slice(t);
-    for i in 0..len {
-        t[i] = copy[if i & 1 != 0 { i - 1 } else { len - i - 1 }];
+    let mut copy = [0i64; N];
+    copy.copy_from_slice(t);
+    for i in 0..N {
+        t[i] = copy[if i & 1 != 0 { i - 1 } else { N - i - 1 }];
     }
-    if len == 8 {
+    if N == 8 {
         for i in 0..4 {
             b(t, 2 * i, 2 * i + 1, 60 - 16 * i as i32, true);
         }
@@ -277,17 +281,17 @@ fn adst(t: &mut [i64], r: u8) {
             }
         }
     }
-    for j in 0..len / 4 {
+    for j in 0..N / 4 {
         for i in 0..2 {
             h(t, 4 * j + i, 2 + 4 * j + i, false, r);
         }
     }
-    for i in 0..len / 4 {
+    for i in 0..N / 4 {
         b(t, 2 + 4 * i, 3 + 4 * i, 32, true);
     }
-    let mut copy = [0i64; 16];
-    copy[..len].copy_from_slice(t);
-    let n = len.ilog2();
+    let mut copy = [0i64; N];
+    copy.copy_from_slice(t);
+    let n = N.ilog2();
     for (i, out) in t.iter_mut().enumerate() {
         let a = (i >> 3) & 1;
         let b = ((i >> 2) ^ (i >> 3)) & 1;
@@ -301,19 +305,18 @@ fn adst(t: &mut [i64], r: u8) {
         };
     }
 }
-fn transform(t: &mut [i64], kind: u8, r: u8) -> Result<()> {
-    let length = t.len();
+fn transform<const N: usize>(t: &mut [i64; N], kind: u8, r: u8) -> Result<()> {
     match kind {
         0 => dct(t, r),
         1 | 2 => {
-            if t.len() > 16 {
+            if N > 16 {
                 return Err(invalid("AV1 ADST exceeds 16 samples"));
             }
             adst(t, r);
         }
         3 => {
             for v in t.iter_mut() {
-                *v = match length {
+                *v = match N {
                     4 => round(*v * 5793, 12),
                     8 => *v * 2,
                     16 => round(*v * 11586, 12),
@@ -398,31 +401,61 @@ pub fn inverse(
         }
     }
     let col_range = (depth + 6).max(16);
-    for row in data.chunks_exact_mut(w).take(last_row + 1) {
-        if w.ilog2().abs_diff(h.ilog2()) == 1 {
-            for v in row.iter_mut() {
-                *v = round(*v * 2896, 12);
+    let prescale = w.ilog2().abs_diff(h.ilog2()) == 1;
+    // The 1-D stages are instantiated per line length, which is one of the five
+    // transform sizes, so the stage buffer is a fixed array and every butterfly
+    // index and cosine angle folds at compile time.
+    macro_rules! row_stage {
+        ($w:literal) => {{
+            let (rows, _) = data.as_chunks_mut::<$w>();
+            for row in rows.iter_mut().take(last_row + 1) {
+                if prescale {
+                    for v in row.iter_mut() {
+                        *v = round(*v * 2896, 12);
+                    }
+                }
+                transform(row, horizontal, depth + 8)?;
+                for v in row.iter_mut() {
+                    *v = clip(round(*v, row_shift), col_range);
+                }
             }
-        }
-        transform(row, horizontal, depth + 8)?;
-        for v in row {
-            *v = clip(round(*v, row_shift), col_range);
-        }
+        }};
+    }
+    match w {
+        4 => row_stage!(4),
+        8 => row_stage!(8),
+        16 => row_stage!(16),
+        32 => row_stage!(32),
+        _ => row_stage!(64),
     }
     out.resize(w * h, 0);
     out.fill(0);
-    let col = &mut *col;
-    for x in 0..w {
-        for y in 0..h {
-            col[y] = data[y * w + x];
-        }
-        transform(col, vertical, col_range)?;
-        for y in 0..h {
-            let xx = if horizontal == 2 { w - 1 - x } else { x };
-            let yy = if vertical == 2 { h - 1 - y } else { y };
-            out[yy * w + xx] = i32::try_from(round(col[y], 4))
-                .map_err(|_| invalid("AV1 inverse transform overflow"))?;
-        }
+    let lines = &mut *col;
+    macro_rules! col_stage {
+        ($h:literal) => {{
+            let Ok(col) = <&mut [i64; $h]>::try_from(lines) else {
+                return Err(invalid("invalid AV1 transform column buffer"));
+            };
+            for x in 0..w {
+                for (y, value) in col.iter_mut().enumerate() {
+                    *value = data[y * w + x];
+                }
+                transform(col, vertical, col_range)?;
+                for (y, value) in col.iter().enumerate() {
+                    let xx = if horizontal == 2 { w - 1 - x } else { x };
+                    let yy = if vertical == 2 { $h - 1 - y } else { y };
+                    out[yy * w + xx] = i32::try_from(round(*value, 4))
+                        .map_err(|_| invalid("AV1 inverse transform overflow"))?;
+                }
+            }
+        }};
+    }
+    match h {
+        4 => col_stage!(4),
+        8 => col_stage!(8),
+        16 => col_stage!(16),
+        32 => col_stage!(32),
+        _ => col_stage!(64),
     }
     Ok(())
 }
