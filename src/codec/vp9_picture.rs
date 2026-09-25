@@ -788,6 +788,18 @@ impl Decoder<'_> {
                                 Some((x >> sub, y >> sub, level, filter_tx as u8))
                             };
                             let positions = |px: usize, py: usize| -> [usize; 16] {
+                                // Only a window that reaches a plane border
+                                // needs per-index clamping. An interior one is
+                                // a fixed run (pass 0) or a fixed stride
+                                // (pass 1) around the edge.
+                                if pass == 0 && px >= 8 && px + 8 <= pw {
+                                    let first = py * pw + px - 8;
+                                    return std::array::from_fn(|j| first + j);
+                                }
+                                if pass == 1 && py >= 8 && py + 8 <= ph {
+                                    let first = (py - 8) * pw + px;
+                                    return std::array::from_fn(|j| first + j * pw);
+                                }
                                 let position = |offset: isize| {
                                     let xx = (px as isize + if pass == 0 { offset } else { 0 })
                                         .clamp(0, pw as isize - 1)
@@ -822,10 +834,23 @@ impl Decoder<'_> {
                                 }
                                 let width = 4usize << filter_tx;
                                 let mut lines = [[0u16; 16]; 4];
+                                let mut runs = [usize::MAX; 4];
                                 for k in 0..run {
                                     let (px, py, _, _) = batch[k];
-                                    idxs[k] = positions(px, py);
-                                    lines[k] = idxs[k].map(|j| plane_samples.samples[j]);
+                                    // A pass-0 window clear of the plane border
+                                    // is one contiguous run, so it is copied
+                                    // rather than gathered through sixteen
+                                    // indices.
+                                    if pass == 0 && px >= 8 && px + 8 <= pw && py < ph {
+                                        let base = py * pw + px - 8;
+                                        runs[k] = base;
+                                        lines[k].copy_from_slice(
+                                            &plane_samples.samples[base..base + 16],
+                                        );
+                                    } else {
+                                        idxs[k] = positions(px, py);
+                                        lines[k] = idxs[k].map(|j| plane_samples.samples[j]);
+                                    }
                                 }
                                 for k in run..4 {
                                     lines[k] = lines[0];
@@ -834,9 +859,14 @@ impl Decoder<'_> {
                                     lines, depth, width, level, sharpness,
                                 );
                                 for k in 0..run {
-                                    for j in 0..16 {
-                                        if out[k][j] != lines[k][j] {
-                                            plane_samples.samples[idxs[k][j]] = out[k][j];
+                                    if runs[k] != usize::MAX {
+                                        plane_samples.samples[runs[k]..runs[k] + 16]
+                                            .copy_from_slice(&out[k]);
+                                    } else {
+                                        for j in 0..16 {
+                                            if out[k][j] != lines[k][j] {
+                                                plane_samples.samples[idxs[k][j]] = out[k][j];
+                                            }
                                         }
                                     }
                                 }
