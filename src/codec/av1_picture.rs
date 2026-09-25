@@ -68,6 +68,8 @@ struct Decoder<'a> {
     residual_scratch: Vec<i32>,
     lossless_scratch: Vec<i64>,
     lossless_out: Vec<i32>,
+    inter_pred: Vec<i32>,
+    inter_pred2: Vec<i32>,
 }
 const MODE_CONTEXT: [usize; 13] = [0, 1, 2, 3, 4, 4, 4, 4, 3, 0, 1, 2, 0];
 fn symbol(d: &mut SymbolDecoder<'_>, c: &mut Cdfs, name: &str, index: &[usize]) -> Result<usize> {
@@ -162,6 +164,8 @@ pub(crate) fn decode(
         residual_scratch: Vec::new(),
         lossless_scratch: Vec::new(),
         lossless_out: Vec::new(),
+        inter_pred: Vec::new(),
+        inter_pred2: Vec::new(),
     };
     let mut next = 0;
     let mut initial = initial.cloned().unwrap_or_else(|| Cdfs::new(h.quant.base));

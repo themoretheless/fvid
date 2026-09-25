@@ -993,7 +993,7 @@ impl Decoder<'_> {
         let h_references = self.h.references;
         let h_size = self.h.size;
         let color_depth = self.s.color.depth;
-        let first = Self::motion_samples(
+        Self::motion_samples(
             references,
             h_references,
             h_size,
@@ -1005,9 +1005,10 @@ impl Decoder<'_> {
             b,
             compound,
             &mut self.scratch,
+            &mut self.inter_pred,
         )?;
-        let second = if compound {
-            Some(Self::motion_samples(
+        if compound {
+            Self::motion_samples(
                 references,
                 h_references,
                 h_size,
@@ -1023,7 +1024,12 @@ impl Decoder<'_> {
                 },
                 true,
                 &mut self.scratch,
-            )?)
+                &mut self.inter_pred2,
+            )?;
+        }
+        let first = &self.inter_pred;
+        let second = if compound {
+            Some(&self.inter_pred2)
         } else {
             None
         };
@@ -1086,8 +1092,9 @@ impl Decoder<'_> {
         size: [usize; 2],
         b: Block,
         compound: bool,
-        scratch: &mut Vec<i32>,
-    ) -> Result<Vec<i32>> {
+        temp: &mut Vec<i32>,
+        out: &mut Vec<i32>,
+    ) -> Result<()> {
         use super::super::av1_tables::SUBPEL_FILTERS;
         let reference = references[h_references[b.reference - 1]]
             .ok_or_else(|| invalid("missing AV1 reference pixels"))?;
@@ -1096,14 +1103,9 @@ impl Decoder<'_> {
         }
         if size[0] >= 8 && size[1] >= 8 {
             if let Some(params) = b.warp {
-                return super::super::av1_warp::predict(
-                    reference,
-                    p,
-                    [x, y],
-                    size,
-                    params,
-                    compound,
-                );
+                *out =
+                    super::super::av1_warp::predict(reference, p, [x, y], size, params, compound)?;
+                return Ok(());
             }
         }
         let sub = usize::from(p > 0);
@@ -1130,8 +1132,8 @@ impl Decoder<'_> {
         let round0 = if color_depth == 12 { 5 } else { 3 };
         let round1 = if compound { 7 } else { 14 - round0 };
         let temp_len = (h + 7) * w;
-        scratch.resize(temp_len, 0);
-        let temp = &mut scratch[..temp_len];
+        temp.resize(temp_len, 0);
+        let temp = &mut temp[..temp_len];
         for r in 0..h + 7 {
             for col in 0..w {
                 let sy = ((coord_y >> 4) + r as i32 - 3).clamp(0, last_y) as usize;
@@ -1143,7 +1145,8 @@ impl Decoder<'_> {
                 temp[r * w + col] = (sum + (1 << (round0 - 1))) >> round0;
             }
         }
-        let mut output = vec![0; w * h];
+        out.resize(w * h, 0);
+        let output = &mut out[..w * h];
         for r in 0..h {
             for col in 0..w {
                 let sum = fy
@@ -1154,6 +1157,6 @@ impl Decoder<'_> {
                 output[r * w + col] = (sum + (1 << (round1 - 1))) >> round1;
             }
         }
-        Ok(output)
+        Ok(())
     }
 }
