@@ -136,62 +136,26 @@ const DIRECTIONS: [[(i32, i32); 2]; 8] = [
     [(1, 0), (2, 0)],
     [(1, 0), (2, -1)],
 ];
-/// One CDEF neighbour: its plane offset, its delta for bounds tests, and the
-/// fixed threshold, right shift and weight applied to the sample difference.
-#[derive(Clone, Copy, Default)]
-struct Tap {
-    offset: isize,
-    dx: i32,
-    dy: i32,
-    threshold: i32,
-    shift: u32,
-    weight: i32,
-}
-
-#[inline(always)]
-fn tap(dy: i32, dx: i32, sign: i32, width: usize, threshold: i32, shift: u32, weight: i32) -> Tap {
-    let (dy, dx) = (dy * sign, dx * sign);
-    Tap {
-        offset: dy as isize * width as isize + dx as isize,
-        dx,
-        dy,
-        threshold,
-        shift,
-        weight,
+/// One CDEF neighbour tap: the position relative to the filtered pixel plus the
+/// fixed threshold, right shift and weight for the sample difference.
+fn tap(dy: i32, dx: i32, sign: i32, threshold: i32, shift: i32, weight: i32) -> fvid_cpu::CdefTap {
+    fvid_cpu::CdefTap {
+        dx: dx * sign,
+        dy: dy * sign,
+        threshold: threshold as i16,
+        shift: shift as i16,
+        weight: weight as i16,
     }
 }
 
-#[inline(always)]
-fn neighbour<const CHECK: bool>(
-    src: &[u16],
-    base: usize,
-    x: usize,
-    y: usize,
-    width: usize,
-    height: usize,
-    tap: &Tap,
-    current: i32,
-) -> i32 {
-    if CHECK
-        && (x as i32 + tap.dx < 0
-            || y as i32 + tap.dy < 0
-            || x as i32 + tap.dx >= width as i32
-            || y as i32 + tap.dy >= height as i32)
-    {
-        return current;
-    }
-    i32::from(src[(base as isize + tap.offset) as usize])
-}
-
-/// Filters one `size` by `size` run of samples. `CHECK` selects the edge variant,
-/// where a neighbour outside the plane contributes nothing.
-fn block<const CHECK: bool>(
+/// Blocks whose tap window leaves the plane. A neighbour outside contributes nothing.
+fn block_edge(
     source: &Plane,
     target: &mut [u16],
     x0: usize,
     y0: usize,
     size: usize,
-    taps: &[Tap],
+    taps: &[fvid_cpu::CdefTap],
 ) {
     let (width, height) = (source.width, source.height);
     let src = &source.samples;
@@ -201,10 +165,15 @@ fn block<const CHECK: bool>(
             let current = i32::from(src[base]);
             let (mut lo, mut hi, mut sum) = (current, current, 0);
             for tap in taps {
-                let value = neighbour::<CHECK>(src, base, x, y, width, height, tap, current);
+                let (nx, ny) = (x as i32 + tap.dx, y as i32 + tap.dy);
+                if nx < 0 || ny < 0 || nx >= width as i32 || ny >= height as i32 {
+                    continue;
+                }
+                let value = i32::from(src[ny as usize * width + nx as usize]);
                 let difference = (value - current).abs();
-                let filtered = difference.min((tap.threshold - (difference >> tap.shift)).max(0));
-                sum += tap.weight * if value < current { -filtered } else { filtered };
+                let filtered = difference
+                    .min((i32::from(tap.threshold) - (difference >> i32::from(tap.shift))).max(0));
+                sum += i32::from(tap.weight) * if value < current { -filtered } else { filtered };
                 lo = lo.min(value);
                 hi = hi.max(value);
             }
@@ -273,41 +242,25 @@ pub(crate) fn cdef(
                 // Four primary taps along the detected direction, then eight secondary
                 // taps two steps further round. A zero threshold contributes nothing,
                 // so those taps are left out and a plane with none stays untouched.
-                let mut taps = [Tap::default(); 12];
+                let mut taps = [fvid_cpu::CdefTap::default(); 12];
                 let mut count = 0;
                 if pri != 0 {
-                    let threshold_shift = (damping - pri.ilog2() as i32).max(0) as u32;
+                    let threshold_shift = (damping - pri.ilog2() as i32).max(0);
                     for k in 0..2 {
                         let (dy, dx) = DIRECTIONS[direction][k];
                         for sign in [-1, 1] {
-                            taps[count] = tap(
-                                dy,
-                                dx,
-                                sign,
-                                source.width,
-                                pri,
-                                threshold_shift,
-                                pri_taps[k],
-                            );
+                            taps[count] = tap(dy, dx, sign, pri, threshold_shift, pri_taps[k]);
                             count += 1;
                         }
                     }
                 }
                 if sec != 0 {
-                    let threshold_shift = (damping - sec.ilog2() as i32).max(0) as u32;
+                    let threshold_shift = (damping - sec.ilog2() as i32).max(0);
                     for k in 0..2 {
                         for sign in [-1, 1] {
                             for offset in [2, 6] {
                                 let (dy, dx) = DIRECTIONS[(direction + offset) & 7][k];
-                                taps[count] = tap(
-                                    dy,
-                                    dx,
-                                    sign,
-                                    source.width,
-                                    sec,
-                                    threshold_shift,
-                                    [2, 1][k],
-                                );
+                                taps[count] = tap(dy, dx, sign, sec, threshold_shift, [2, 1][k]);
                                 count += 1;
                             }
                         }
@@ -323,9 +276,18 @@ pub(crate) fn cdef(
                     && x0 + size + 1 < source.width
                     && y0 + size + 1 < source.height
                 {
-                    block::<false>(source, &mut target.samples, x0, y0, size, taps);
+                    fvid_cpu::av1_cdef_block(
+                        &source.samples,
+                        &mut target.samples,
+                        source.width,
+                        x0,
+                        y0,
+                        size,
+                        size,
+                        taps,
+                    );
                 } else {
-                    block::<true>(source, &mut target.samples, x0, y0, size, taps);
+                    block_edge(source, &mut target.samples, x0, y0, size, taps);
                 }
             }
         }
