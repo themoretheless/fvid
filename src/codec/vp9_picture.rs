@@ -744,8 +744,15 @@ impl Decoder<'_> {
                                 } else {
                                     block.height.max(16)
                                 };
-                                let block_edge = if pass == 0 { x % bw == 0 } else { y % bh == 0 };
-                                let tx_edge = edge % (1 << tx) == 0
+                                // Block dimensions are always powers of two, so
+                                // the edge tests hold as masks; as divisions
+                                // they stayed on the per-position path.
+                                let block_edge = if pass == 0 {
+                                    x & (bw - 1) == 0
+                                } else {
+                                    y & (bh - 1) == 0
+                                };
+                                let tx_edge = edge & ((1 << tx) - 1) == 0
                                     && !(pass == 1
                                         && sub == 1
                                         && cols % 2 != 0
