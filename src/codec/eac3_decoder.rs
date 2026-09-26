@@ -13,11 +13,13 @@
 //! length into the header rather than a code into a table, so `(frmsiz + 1) * 2` is
 //! the byte count at which the next syncframe starts.
 //!
-//! The strategy codes are handed back exactly as the frame writes them. What a code
-//! means - the band structure and bit allocation it asks a block for - is a lookup in
-//! Table E2.10 and then in the main body's Table 7.1, which is a block decoder's
-//! work; a header reader has no use for the answer and every use for the bits, since
-//! they sit between the frame flags and the audio.
+//! The strategy codes are handed back as the frame writes them, and
+//! [`Frame::strategies`] resolves them into what one block codes by: Table E2.10 turns
+//! a frame-wide code into the six per-block ones, and Table 7.4 and Table 7.5 are the
+//! per-block codes themselves. What a resolved strategy then asks of a block - its band
+//! structure and the bit allocation that follows - is a block decoder's work, and a
+//! header reader has no use for that answer and every use for the bits, since they sit
+//! between the frame flags and the audio.
 //!
 //! The metadata behind the geometry is stepped over field by field because none of
 //! it changes how the audio unpacks - with one exception worth naming where it is,
@@ -114,9 +116,9 @@ pub struct Frame {
 }
 
 /// The exponent strategy codes a frame states, in one of the two forms `expstre`
-/// selects. Both are codes, not band structures: Table E2.10 expands a frame-wide
-/// code into the six per-block codes, and a code of either width names one of the
-/// strategies of the main body's Table 7.1.
+/// selects. Both are codes, not band structures: [`Frame::strategies`] resolves them
+/// into the [`Strategy`] one block codes by, through Table E2.10 for a frame-wide code
+/// and Table 7.4 for a per-block one.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Exponents {
     /// `expstre`: each block states a 2-bit code for the coupling channel, when it
@@ -131,6 +133,180 @@ pub enum Exponents {
         coupling: Option<u8>,
         channels: [u8; CHANS],
     },
+}
+
+/// What one block codes one channel's exponents by, once a frame's own code is read
+/// for that block. The three differential strategies differ only in how many
+/// exponents share a coded group, which is what makes one cheaper than another: D15
+/// carries three to a group, D25 six, D45 twelve.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Strategy {
+    /// Reuse the exponents the block before this one decoded, which is what Table
+    /// E2.10 names for most of the blocks of most of its rows. Never the strategy of
+    /// block 0: the standard states that information is never shared across
+    /// syncframes, so a frame's first block always carries a strategy of its own.
+    Reuse,
+    /// Differentially coded exponents, three of them to a coded group.
+    D15,
+    /// Differentially coded exponents, six to a group.
+    D25,
+    /// Differentially coded exponents, twelve to a group.
+    D45,
+}
+
+impl Strategy {
+    /// Table 7.4: the 2-bit code of a frame that states strategies per block.
+    fn per_block(code: u8) -> Self {
+        match code {
+            0 => Strategy::Reuse,
+            1 => Strategy::D15,
+            2 => Strategy::D25,
+            _ => Strategy::D45,
+        }
+    }
+
+    /// Table 7.5: the low frequency channel is offered reuse or D15, and nothing else.
+    fn low_frequency(flag: bool) -> Self {
+        if flag {
+            Strategy::D15
+        } else {
+            Strategy::Reuse
+        }
+    }
+
+    /// Table E2.10: the strategy one of the frame's 5-bit codes names for one block.
+    fn per_frame(code: u8, block: usize) -> Self {
+        FRAME_STRATEGIES[usize::from(code)][block]
+    }
+}
+
+/// Table E2.10, the frame-wide exponent strategy codes expanded into the six blocks of
+/// a syncframe. The rows are the codes in order.
+const FRAME_STRATEGIES: [[Strategy; BLOCKS]; 32] = [
+    //  0
+    [Strategy::D15, Strategy::Reuse, Strategy::Reuse, Strategy::Reuse, Strategy::Reuse, Strategy::Reuse],
+    //  1
+    [Strategy::D15, Strategy::Reuse, Strategy::Reuse, Strategy::Reuse, Strategy::Reuse, Strategy::D45],
+    //  2
+    [Strategy::D15, Strategy::Reuse, Strategy::Reuse, Strategy::Reuse, Strategy::D25, Strategy::Reuse],
+    //  3
+    [Strategy::D15, Strategy::Reuse, Strategy::Reuse, Strategy::Reuse, Strategy::D45, Strategy::D45],
+    //  4
+    [Strategy::D25, Strategy::Reuse, Strategy::Reuse, Strategy::D25, Strategy::Reuse, Strategy::Reuse],
+    //  5
+    [Strategy::D25, Strategy::Reuse, Strategy::Reuse, Strategy::D25, Strategy::Reuse, Strategy::D45],
+    //  6
+    [Strategy::D25, Strategy::Reuse, Strategy::Reuse, Strategy::D45, Strategy::D25, Strategy::Reuse],
+    //  7
+    [Strategy::D25, Strategy::Reuse, Strategy::Reuse, Strategy::D45, Strategy::D45, Strategy::D45],
+    //  8
+    [Strategy::D25, Strategy::Reuse, Strategy::D15, Strategy::Reuse, Strategy::Reuse, Strategy::Reuse],
+    //  9
+    [Strategy::D25, Strategy::Reuse, Strategy::D25, Strategy::Reuse, Strategy::Reuse, Strategy::D45],
+    // 10
+    [Strategy::D25, Strategy::Reuse, Strategy::D25, Strategy::Reuse, Strategy::D25, Strategy::Reuse],
+    // 11
+    [Strategy::D25, Strategy::Reuse, Strategy::D25, Strategy::Reuse, Strategy::D45, Strategy::D45],
+    // 12
+    [Strategy::D25, Strategy::Reuse, Strategy::D45, Strategy::D25, Strategy::Reuse, Strategy::Reuse],
+    // 13
+    [Strategy::D25, Strategy::Reuse, Strategy::D45, Strategy::D25, Strategy::Reuse, Strategy::D45],
+    // 14
+    [Strategy::D25, Strategy::Reuse, Strategy::D45, Strategy::D45, Strategy::D25, Strategy::Reuse],
+    // 15
+    [Strategy::D25, Strategy::Reuse, Strategy::D45, Strategy::D45, Strategy::D45, Strategy::D45],
+    // 16
+    [Strategy::D45, Strategy::D15, Strategy::Reuse, Strategy::Reuse, Strategy::Reuse, Strategy::Reuse],
+    // 17
+    [Strategy::D45, Strategy::D15, Strategy::Reuse, Strategy::Reuse, Strategy::Reuse, Strategy::D45],
+    // 18
+    [Strategy::D45, Strategy::D25, Strategy::Reuse, Strategy::Reuse, Strategy::D25, Strategy::Reuse],
+    // 19
+    [Strategy::D45, Strategy::D25, Strategy::Reuse, Strategy::Reuse, Strategy::D45, Strategy::D45],
+    // 20
+    [Strategy::D45, Strategy::D25, Strategy::Reuse, Strategy::D25, Strategy::Reuse, Strategy::Reuse],
+    // 21
+    [Strategy::D45, Strategy::D25, Strategy::Reuse, Strategy::D25, Strategy::Reuse, Strategy::D45],
+    // 22
+    [Strategy::D45, Strategy::D25, Strategy::Reuse, Strategy::D45, Strategy::D25, Strategy::Reuse],
+    // 23
+    [Strategy::D45, Strategy::D25, Strategy::Reuse, Strategy::D45, Strategy::D45, Strategy::D45],
+    // 24
+    [Strategy::D45, Strategy::D45, Strategy::D15, Strategy::Reuse, Strategy::Reuse, Strategy::Reuse],
+    // 25
+    [Strategy::D45, Strategy::D45, Strategy::D25, Strategy::Reuse, Strategy::Reuse, Strategy::D45],
+    // 26
+    [Strategy::D45, Strategy::D45, Strategy::D25, Strategy::Reuse, Strategy::D25, Strategy::Reuse],
+    // 27
+    [Strategy::D45, Strategy::D45, Strategy::D25, Strategy::Reuse, Strategy::D45, Strategy::D45],
+    // 28
+    [Strategy::D45, Strategy::D45, Strategy::D45, Strategy::D25, Strategy::Reuse, Strategy::Reuse],
+    // 29
+    [Strategy::D45, Strategy::D45, Strategy::D45, Strategy::D25, Strategy::Reuse, Strategy::D45],
+    // 30
+    [Strategy::D45, Strategy::D45, Strategy::D45, Strategy::D45, Strategy::D25, Strategy::Reuse],
+    // 31
+    [Strategy::D45, Strategy::D45, Strategy::D45, Strategy::D45, Strategy::D45, Strategy::D45],
+];
+
+/// The strategies of one block, which is what a block decoder reads before it reads a
+/// single exponent.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct BlockStrategies {
+    /// The coupling channel's strategy, absent for a block that does not couple and so
+    /// codes no coupling channel.
+    pub coupling: Option<Strategy>,
+    /// One per full-bandwidth channel, in the frame's own channel order. The slots past
+    /// [`Frame::full_bandwidth`] are padding the frame never states.
+    pub channels: [Strategy; CHANS],
+    /// `lfeexpstr[blk]` of Table 7.5, absent when the frame has no low frequency
+    /// channel at all.
+    pub low_frequency: Option<Strategy>,
+}
+
+impl Frame {
+    /// The channels of this frame that carry full-bandwidth audio: its own count
+    /// without the low frequency one, which is `nfchans` of the `acmod` it states.
+    pub fn full_bandwidth(&self) -> usize {
+        usize::from(self.channels) - usize::from(self.low_frequency)
+    }
+
+    /// What `block` codes its exponents by, resolved from whichever form `expstre`
+    /// wrote. `None` for a block index past the ones this frame carries.
+    pub fn strategies(&self, block: usize) -> Option<BlockStrategies> {
+        if block >= self.blocks {
+            return None;
+        }
+        let coupling = match self.exponents {
+            Exponents::PerBlock { coupling, .. } if self.coupling[block] => {
+                Some(Strategy::per_block(coupling[block]))
+            }
+            Exponents::PerFrame {
+                coupling: Some(code), ..
+            } if self.coupling[block] => Some(Strategy::per_frame(code, block)),
+            _ => None,
+        };
+        let resolved: [Strategy; CHANS] = match self.exponents {
+            Exponents::PerBlock { channels, .. } => {
+                let codes = channels[block];
+                std::array::from_fn(|index| Strategy::per_block(codes[index]))
+            }
+            Exponents::PerFrame { channels, .. } => {
+                std::array::from_fn(|index| Strategy::per_frame(channels[index], block))
+            }
+        };
+        let mut channels = [Strategy::Reuse; CHANS];
+        let stated = self.full_bandwidth();
+        channels[..stated].copy_from_slice(&resolved[..stated]);
+        let low_frequency = self
+            .low_frequency
+            .then(|| Strategy::low_frequency(self.low_frequency_strategies[block]));
+        Some(BlockStrategies {
+            coupling,
+            channels,
+            low_frequency,
+        })
+    }
 }
 
 /// The pair of signal-to-noise offsets a frame states for its blocks, which a block
@@ -171,7 +347,7 @@ pub struct BlocksState {
 ///
 /// A bare `.ec3` file states its geometry in every frame rather than once up front,
 /// so the walker that lists a stream's packets needs the same numbers the decoder
-/// will. `None` for the same refusals [`header`] makes.
+/// will. `None` for the same refusals `header()` makes.
 pub fn frame(bytes: &[u8]) -> Option<Frame> {
     header(&mut BitReader::new(bytes)).ok()
 }
@@ -1340,6 +1516,147 @@ mod tests {
         // The flags, the block coupling, the frame's code and the channels' five
         // apiece, the low frequency channel's per block, and the converter's own.
         assert_eq!(read.audio_bit, 54 + 12 + 6 + 5 + 25 + 6 + 25 + 10 + 1);
+    }
+
+    /// One frame-wide code is six per-block ones, and most rows of Table E2.10 spend
+    /// only the first block or two on strategies and let the rest reuse them: the
+    /// stereo fixture codes exponents in blocks 0 and 1 and lets the four behind stand,
+    /// both channels alike because the frame states one code for each and the same one.
+    #[test]
+    fn a_stereo_frame_codes_exponents_in_two_of_its_six_blocks() {
+        let read = frame(STEREO).expect("the committed stereo stream");
+        assert_eq!(read.full_bandwidth(), 2);
+        let stated: Vec<_> = (0..read.blocks)
+            .map(|block| read.strategies(block).expect("a block the frame has"))
+            .collect();
+        for block in &stated {
+            assert_eq!(
+                block.channels[..2],
+                [block.channels[0]; 2],
+                "the frame names one code per channel, and both are the same"
+            );
+            assert_eq!(
+                block.channels[2..],
+                [Strategy::Reuse; CHANS - 2],
+                "the slots the frame never states stay padding"
+            );
+        }
+        let resolved: Vec<_> = stated
+            .iter()
+            .map(|block| (block.coupling, block.channels[0], block.low_frequency))
+            .collect();
+        assert_eq!(
+            resolved,
+            vec![
+                (Some(Strategy::D45), Strategy::D45, None),
+                (Some(Strategy::D15), Strategy::D15, None),
+                (Some(Strategy::Reuse), Strategy::Reuse, None),
+                (Some(Strategy::Reuse), Strategy::Reuse, None),
+                (Some(Strategy::Reuse), Strategy::Reuse, None),
+                (Some(Strategy::Reuse), Strategy::Reuse, None),
+            ],
+            "row 16 of Table E2.10, which is the code every channel of this frame states"
+        );
+    }
+
+    /// The 5.1 fixture states row 22 for its coupling channel and all five of its
+    /// channels, and Table 7.5 for the low frequency one, where a single flag of block 0
+    /// is the difference between coding exponents and letting the previous block's stand.
+    #[test]
+    fn a_surround_frame_reuses_the_exponents_its_earlier_blocks_coded() {
+        let read = frame(SURROUND).expect("the committed 5.1 stream");
+        assert_eq!(read.full_bandwidth(), 5);
+        let stated: Vec<_> = (0..read.blocks)
+            .map(|block| read.strategies(block).expect("a block the frame has"))
+            .collect();
+        assert_eq!(
+            stated
+                .iter()
+                .map(|block| block.coupling)
+                .collect::<Vec<_>>(),
+            vec![
+                Some(Strategy::D45),
+                Some(Strategy::D25),
+                Some(Strategy::Reuse),
+                Some(Strategy::D45),
+                Some(Strategy::D25),
+                Some(Strategy::Reuse),
+            ],
+            "row 22 of Table E2.10"
+        );
+        for block in &stated {
+            assert_eq!(
+                block.channels[..5],
+                [block.channels[0]; 5],
+                "every channel of the frame states the same code"
+            );
+        }
+        assert_eq!(
+            stated
+                .iter()
+                .map(|block| block.low_frequency)
+                .collect::<Vec<_>>(),
+            vec![
+                Some(Strategy::D15),
+                Some(Strategy::Reuse),
+                Some(Strategy::Reuse),
+                Some(Strategy::Reuse),
+                Some(Strategy::Reuse),
+                Some(Strategy::Reuse),
+            ],
+            "Table 7.5, read off the one flag of block 0 the walk recorded"
+        );
+    }
+
+    /// A frame that hands each block its own 2-bit code needs no row of Table E2.10 to
+    /// resolve: the codes of Table 7.4 are the strategies, and the low frequency
+    /// channel's bit is already one of the two Table 7.5 offers it.
+    #[test]
+    fn a_frame_that_states_a_strategy_per_block_resolves_it_as_written() {
+        let read = walked(&audio_frame(2, true, |written| {
+            written.couple = true;
+            written.expstre = true;
+        }));
+        assert_eq!(Strategy::per_block(0), Strategy::Reuse);
+        assert_eq!(Strategy::per_block(1), Strategy::D15);
+        assert_eq!(Strategy::per_block(2), Strategy::D25);
+        assert_eq!(Strategy::per_block(3), Strategy::D45);
+        assert_eq!(Strategy::low_frequency(true), Strategy::D15);
+        let stated = read.strategies(0).expect("the frame's first block");
+        assert_eq!(stated.coupling, Some(Strategy::Reuse));
+        assert_eq!(stated.channels[..2], [Strategy::Reuse; 2]);
+        assert_eq!(stated.low_frequency, Some(Strategy::Reuse));
+        assert_eq!(read.strategies(read.blocks), None, "past its last block");
+    }
+
+    /// A block that does not couple codes no coupling channel, so a walk that resolved
+    /// the frame's coupling code for it anyway would hand a decoder exponents to read
+    /// out of a channel the block never folded anything into.
+    #[test]
+    fn a_block_that_does_not_couple_resolves_nothing_for_coupling() {
+        let read = walked(&audio_frame(2, false, |written| written.expstre = true));
+        assert_eq!(read.coupling, [false; BLOCKS]);
+        for block in 0..read.blocks {
+            assert_eq!(
+                read.strategies(block).expect("a block the frame has").coupling,
+                None
+            );
+        }
+    }
+
+    /// The standard's own promise about Table E2.10: every row names a strategy for
+    /// block 0, because exponent information never crosses a syncframe boundary. A row
+    /// that began with reuse would leave a block decoder with nothing to reuse, and it
+    /// is the table that says so, not the encoder.
+    #[test]
+    fn no_frame_code_leaves_its_first_block_without_a_strategy() {
+        for (code, row) in FRAME_STRATEGIES.iter().enumerate() {
+            assert_ne!(
+                row[0],
+                Strategy::Reuse,
+                "code {code} would leave the frame's first block with nothing to reuse"
+            );
+        }
     }
 }
 
