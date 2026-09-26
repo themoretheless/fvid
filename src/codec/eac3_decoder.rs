@@ -76,6 +76,14 @@ const CHANS: usize = 5;
 pub struct Frame {
     /// The rate the frame's audio plays back at, from `fscod`.
     pub sample_rate: u32,
+    /// `fscod` itself. The rate in hertz is what a caller plays at; the band edges and
+    /// the masking thresholds the audio is decoded with are keyed to the row of
+    /// Table E2.2 the frame names, and only the code carries that.
+    rate_code: u8,
+    /// `acmod`: the audio coding mode, which a block reader needs for its own syntax -
+    /// a 1+1 frame states a second program's dynamic range, and a 2/0 frame states
+    /// rematrixing and may state phase restoration.
+    pub layout: u8,
     /// The frame's own channel count in native order, which is what a decoder handed
     /// this frame produces when the container states no other layout.
     pub channels: u16,
@@ -94,6 +102,14 @@ pub struct Frame {
     /// channel. A block that inherits the flag from the one before it is recorded
     /// with the flag it inherited, so this is the block's own state.
     pub coupling: [bool; BLOCKS],
+    /// `cplstre[blk]`: whether each block states its coupling strategy in the block
+    /// rather than taking the one the frame last stated. Block 0 always states its own,
+    /// which is why the frame reads its flag outright, and a frame of one or two
+    /// channels states nothing at all.
+    pub coupling_stated: [bool; BLOCKS],
+    /// The Lo/Ro downmix coefficients this stream's mixing metadata carries, which is
+    /// where an E-AC-3 fold finds its levels instead of the fixed ones AC-3 mixes by.
+    pub downmix: Option<Downmix>,
     /// The exponent strategy codes of the frame, in whichever of the two forms
     /// `expstre` writes them.
     pub exponents: Exponents,
@@ -114,6 +130,30 @@ pub struct Frame {
     /// writes when it is content for the blocks to divide what the header leaves.
     pub block_starts: Option<[usize; BLOCKS - 1]>,
 }
+
+/// The Lo/Ro downmix levels the frame's mixing metadata states, held as the 3-bit
+/// codes Table D2.5 and Table D2.6 name them rather than as levels, so that a frame
+/// reads back as the bits that were written to it. [`Eac3Decoder`] turns a code into
+/// the level the fold mixes by, and supplies the `-3 dB` default for the level a
+/// stream does not name: Annex E puts these coefficients inside `bsi`, where AC-3's
+/// own 2-bit `cmixlev` and `surmixlev` sit beside `acmod`, and its tables are the
+/// wider Lo/Ro ones - the Lt/Rt codes of the same group are for a stream that asks to
+/// be folded to Lt/Rt, which is not what a stereo container states.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Downmix {
+    /// `lorocmixlev`, present only for a mode with a centre channel.
+    pub centre: Option<u8>,
+    /// `lorosurmixlev`, present only for a mode with surround channels.
+    pub surround: Option<u8>,
+}
+
+/// Table D2.5, the Lo/Ro centre mix level per `lorocmixlev`.
+const LORO_CENTRE: [f32; 8] = [1.414, 1.189, 1.000, 0.841, 0.707, 0.595, 0.500, 0.000];
+
+/// Table D2.6, the Lo/Ro surround mix level per `lorosurmixlev`. The three lowest
+/// codes are reserved, and the table's own instruction is to mix by `-1.5 dB` for
+/// one of them.
+const LORO_SURROUND: [f32; 8] = [0.841, 0.841, 0.841, 0.841, 0.707, 0.595, 0.500, 0.000];
 
 /// The exponent strategy codes a frame states, in one of the two forms `expstre`
 /// selects. Both are codes, not band structures: [`Frame::strategies`] resolves them
@@ -271,6 +311,22 @@ impl Frame {
         usize::from(self.channels) - usize::from(self.low_frequency)
     }
 
+    /// The level the centre channel joins a Lo/Ro fold at. A stream whose mixing
+    /// metadata names none mixes at `-3 dB`, which is the default AC-3's own
+    /// `cmixlev` falls back to and the level Table D2.5 gives for `-3 dB` alike.
+    fn centre_level(&self) -> f32 {
+        self.downmix
+            .and_then(|mix| mix.centre)
+            .map_or(0.707, |code| LORO_CENTRE[usize::from(code)])
+    }
+
+    /// The level the surround channels join a Lo/Ro fold at, with the same default.
+    fn surround_level(&self) -> f32 {
+        self.downmix
+            .and_then(|mix| mix.surround)
+            .map_or(0.707, |code| LORO_SURROUND[usize::from(code)])
+    }
+
     /// What `block` codes its exponents by, resolved from whichever form `expstre`
     /// wrote. `None` for a block index past the ones this frame carries.
     pub fn strategies(&self, block: usize) -> Option<BlockStrategies> {
@@ -393,7 +449,7 @@ fn header(bits: &mut BitReader<'_>) -> Result<Frame> {
             if bsid < EAC3_BSID { "AC-3's own syntax" } else { "a later revision" }
         )));
     }
-    bsi(bits, acmod, lfeon, BLOCKS)?;
+    let downmix = bsi(bits, acmod, lfeon, BLOCKS)?;
     let audio = audfrm(bits, acmod, lfeon, frame_bytes)?;
     let position = bits.position();
     if position > frame_bytes * 8 {
@@ -401,12 +457,16 @@ fn header(bits: &mut BitReader<'_>) -> Result<Frame> {
     }
     Ok(Frame {
         sample_rate: rate,
+        rate_code: fscod as u8,
+        layout: acmod as u8,
         channels: (NFCHANS[acmod] + usize::from(lfeon)) as u16,
         low_frequency: lfeon,
         frame_bytes,
         blocks: BLOCKS,
         audio_bit: position,
         coupling: audio.coupling,
+        coupling_stated: audio.coupling_stated,
+        downmix,
         exponents: audio.exponents,
         low_frequency_strategies: audio.low_frequency_strategies,
         converter_strategies: audio.converter_strategies,
@@ -420,6 +480,7 @@ fn header(bits: &mut BitReader<'_>) -> Result<Frame> {
 /// assemble the geometry it read before the walk with what the walk leaves behind.
 struct Audio {
     coupling: [bool; BLOCKS],
+    coupling_stated: [bool; BLOCKS],
     exponents: Exponents,
     low_frequency_strategies: [bool; BLOCKS],
     converter_strategies: [u8; CHANS],
@@ -441,6 +502,11 @@ fn audfrm(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, frame_bytes: usiz
         ));
     }
     let snr_strategy = bits.read(2)? as u8;
+    if snr_strategy == 3 {
+        return Err(unsupported(
+            "an E-AC-3 frame whose SNR offset strategy code is the reserved one",
+        ));
+    }
     let transient_processing = bits.bit()?;
     if bits.bit()? {
         return Err(unsupported(
@@ -461,14 +527,20 @@ fn audfrm(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, frame_bytes: usiz
     // Coupling: the first block states its own flag, and a later block that does not
     // state one keeps the flag of the block before it.
     let mut coupling = [false; BLOCKS];
+    let mut coupling_stated = [false; BLOCKS];
     if acmod > 1 {
+        // Block 0's flag is one the frame states, which is what Table E1.4 means by
+        // `cplstre[0]`: the block will state its strategy, because the frame has just
+        // stated whether it couples at all.
         coupling[0] = bits.bit()?;
+        coupling_stated[0] = true;
         for blk in 1..BLOCKS {
-            if bits.bit()? {
-                coupling[blk] = bits.bit()?;
+            coupling_stated[blk] = bits.bit()?;
+            coupling[blk] = if coupling_stated[blk] {
+                bits.bit()?
             } else {
-                coupling[blk] = coupling[blk - 1];
-            }
+                coupling[blk - 1]
+            };
         }
     }
     let coupled = coupling.iter().any(|&flag| flag);
@@ -542,6 +614,7 @@ fn audfrm(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, frame_bytes: usiz
     }
     Ok(Audio {
         coupling,
+        coupling_stated,
         exponents,
         low_frequency_strategies,
         converter_strategies,
@@ -596,7 +669,8 @@ fn ceil_log2(n: usize) -> usize {
 /// Step over `bsi` past the fields `header` has already read: Table E1.2 from
 /// `dialnorm` on. `strmtyp` is known independent and `numblkscod` known six blocks,
 /// which is what retires the dependent-stream and conversion fields of the table.
-fn bsi(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Result<()> {
+/// The Lo/Ro coefficients the metadata carries come back with the walk.
+fn bsi(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Result<Option<Downmix>> {
     bits.skip(5)?; // dialnorm
     if bits.bit()? {
         bits.skip(8)?; // compr
@@ -608,9 +682,11 @@ fn bsi(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Re
             bits.skip(8)?; // compr2
         }
     }
-    if bits.bit()? {
-        mixing(bits, acmod, lfeon, blocks)?;
-    }
+    let downmix = if bits.bit()? {
+        mixing(bits, acmod, lfeon, blocks)?
+    } else {
+        None
+    };
     if bits.bit()? {
         information(bits, acmod)?;
     }
@@ -618,23 +694,28 @@ fn bsi(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Re
         let length = bits.read(6)? as usize;
         bits.skip((length + 1) * 8)?; // addbsi
     }
-    Ok(())
+    Ok(downmix)
 }
 
-/// Step over the mixing metadata of Table E1.2, which is where the downmix
-/// coefficients an E-AC-3 fold reads live.
-fn mixing(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Result<()> {
+/// Step over the mixing metadata of Table E1.2, and take the two Lo/Ro coefficients a
+/// stream's own fold reads from it. Each sits behind its Lt/Rt twin, which is for a
+/// stream encoded to surround-aware decoding rather than to a stereo container.
+fn mixing(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Result<Option<Downmix>> {
     if acmod > 2 {
         bits.skip(2)?; // dmixmod
     }
-    if acmod > 2 && acmod & 1 != 0 {
+    let centre = if acmod > 2 && acmod & 1 != 0 {
         bits.skip(3)?; // ltrtcmixlev
-        bits.skip(3)?; // lorocmixlev
-    }
-    if acmod & 4 != 0 {
+        Some(bits.read(3)? as u8) // lorocmixlev
+    } else {
+        None
+    };
+    let surround = if acmod & 4 != 0 {
         bits.skip(3)?; // ltrtsurmixlev
-        bits.skip(3)?; // lorosurmixlev
-    }
+        Some(bits.read(3)? as u8) // lorosurmixlev
+    } else {
+        None
+    };
     if lfeon && bits.bit()? {
         bits.skip(5)?; // lfemixlevcod
     }
@@ -677,7 +758,7 @@ fn mixing(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) ->
             }
         }
     }
-    Ok(())
+    Ok(Some(Downmix { centre, surround }))
 }
 
 /// Step over the most flexible mixing definition: `mixdeflen` says how many bytes
@@ -795,7 +876,7 @@ mod tests {
 
     /// What every frame of one stream agrees on, as against the strategy codes, which
     /// an encoder is free to change from frame to frame.
-    fn layout(read: &Frame) -> (u32, u16, bool, usize, usize, usize, usize) {
+    fn geometry(read: &Frame) -> (u32, u16, bool, usize, usize, usize, usize) {
         (
             read.sample_rate,
             read.channels,
@@ -1033,12 +1114,16 @@ mod tests {
             frames[0],
             Frame {
                 sample_rate: 48_000,
+                rate_code: 0,
+                layout: 2,
                 channels: 2,
                 low_frequency: false,
                 frame_bytes: 768,
                 blocks: 6,
                 audio_bit: 108,
                 coupling: [true; BLOCKS],
+                coupling_stated: [true, false, false, false, false, false],
+                downmix: None,
                 exponents: Exponents::PerFrame {
                     coupling: Some(16),
                     channels: [16, 16, 0, 0, 0],
@@ -1060,7 +1145,7 @@ mod tests {
         );
         assert_eq!(frames.len(), STEREO.len() / 768);
         assert!(
-            frames.windows(2).all(|pair| layout(&pair[0]) == layout(&pair[1])),
+            frames.windows(2).all(|pair| geometry(&pair[0]) == geometry(&pair[1])),
             "a stream that changed its geometry mid-file would be a different stream"
         );
     }
@@ -1072,12 +1157,16 @@ mod tests {
             frames[0],
             Frame {
                 sample_rate: 48_000,
+                rate_code: 0,
+                layout: 7,
                 channels: 6,
                 low_frequency: true,
                 frame_bytes: 1792,
                 blocks: 6,
                 audio_bit: 144,
                 coupling: [true; BLOCKS],
+                coupling_stated: [true, false, false, false, false, false],
+                downmix: None,
                 exponents: Exponents::PerFrame {
                     coupling: Some(22),
                     channels: [16, 16, 16, 16, 16],
@@ -1440,21 +1529,33 @@ mod tests {
     }
 
     /// `snroffststr` = 0 is the frame saying it carries the offsets its blocks mix by;
-    /// the other three codes leave each block to state its own, and there is nothing at
-    /// the frame level left to read for them then.
+    /// the two it replaces that with leave each block to state its own, and there is
+    /// nothing at the frame level left to read for them then.
     #[test]
     fn a_frame_carries_its_blocks_offsets_only_when_the_strategy_says_so() {
         let read = walked(&audio_frame(2, false, |written| {
             written.couple = true;
-            written.snroffststr = 3;
+            written.snroffststr = 2;
         }));
         assert_eq!(read.snr_offsets, None);
-        assert_eq!(read.blocks_state.snr_offsets, 3);
+        assert_eq!(read.blocks_state.snr_offsets, 2);
         assert_eq!(read.audio_bit, 98, "ten bits of offsets the frame does not write");
 
         let read = walked(&audio_frame(2, false, |written| written.couple = true));
         assert_eq!(read.snr_offsets, Some(SnrOffsets { coarse: 0, fast: 0 }));
         assert_eq!(read.blocks_state.snr_offsets, 0);
+    }
+
+    /// The fourth `snroffststr` is the one Table E2.9 leaves reserved, so a frame that
+    /// names it promises offsets no block of it knows how to spell.
+    #[test]
+    fn a_frame_that_names_the_reserved_offset_strategy_is_refused_by_name() {
+        let error = header(&mut BitReader::new(&audio_frame(2, false, |written| {
+            written.couple = true;
+            written.snroffststr = 3;
+        })))
+        .unwrap_err();
+        assert!(error.to_string().contains("reserved"), "{error}");
     }
 
     /// The flags that say what a block may state for itself move nothing in the frame:
