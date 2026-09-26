@@ -37,7 +37,8 @@ pub struct VideoFrame {
     pub sample_index: usize,
 }
 
-/// Indexed non-fragmented MP4 source for the currently supported AVC I/P/B tools.
+/// Indexed MP4/MOV source for the currently supported AVC I/P/B tools,
+/// progressive or fragmented (moof/traf/trun). Demux metadata/packet limits are separate.
 /// Demux metadata/packet limits are separate. The supplied decoder budget is
 /// split equally between decode working storage and display reordering.
 /// Decoded frames retained by the caller are outside these budgets.
@@ -122,8 +123,14 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         // Reserve half the supplied budget for output reordering and its index.
         // Reference storage and reconstruction use the other half.
         let queue_budget = decoder_budget / 2;
-        let index_bytes = track
-            .samples
+        // A video track indexes one record per sample; the compact form belongs
+        // to uncompressed audio, which this source never decodes.
+        let Some(samples) = track.samples.expanded() else {
+            return Err(invalid(
+                "selected MP4 track is not AVC, HEVC, VP9 or AV1 video",
+            ));
+        };
+        let index_bytes = samples
             .len()
             .checked_mul(std::mem::size_of::<i64>())
             .ok_or_else(|| invalid("MP4 reorder index overflow"))?;
@@ -132,10 +139,10 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             .ok_or_else(|| invalid("MP4 reorder index exceeds budget"))?;
         let mut future_pts = Vec::new();
         future_pts
-            .try_reserve_exact(track.samples.len())
+            .try_reserve_exact(samples.len())
             .map_err(|_| invalid("cannot allocate MP4 reorder index"))?;
         let mut minimum = i64::MAX;
-        for sample in track.samples.iter().rev() {
+        for sample in samples.iter().rev() {
             minimum = minimum.min(sample.pts);
             future_pts.push(minimum);
         }
@@ -237,8 +244,9 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     return Ok(None);
                 };
                 let p = &frame.picture;
-                let colour =
-                    crate::playback_native::AvcColour::from_hevc_vui(d.parameters().0.vui.as_ref())?;
+                let colour = crate::playback_native::AvcColour::from_hevc_vui(
+                    d.parameters().0.vui.as_ref(),
+                )?;
                 let coded_width = p.dimensions[0] as usize;
                 let coded_height = p.dimensions[1] as usize;
                 let crop = p.crop.map(|v| v as usize);
@@ -317,9 +325,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                                 2 | 5 | 6 => 0.299,
                                 9 => 0.2627,
                                 _ => {
-                                    return Err(invalid(
-                                        "unsupported AV1 RGB matrix coefficients",
-                                    ))
+                                    return Err(invalid("unsupported AV1 RGB matrix coefficients"));
                                 }
                             },
                             kb: match decoded.color.matrix {
@@ -327,9 +333,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                                 2 | 5 | 6 => 0.114,
                                 9 => 0.0593,
                                 _ => {
-                                    return Err(invalid(
-                                        "unsupported AV1 RGB matrix coefficients",
-                                    ))
+                                    return Err(invalid("unsupported AV1 RGB matrix coefficients"));
                                 }
                             },
                             full: decoded.color.full_range,
@@ -384,7 +388,9 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
     /// at or before `pts` (the first sample when none qualifies), dropping all
     /// reference pictures. Returns the presentation time decoding resumes at.
     pub fn seek_to_sync(&mut self, pts: i64) -> i64 {
-        let samples = &self.track().samples;
+        // A video track always indexes one record per sample; with no such index
+        // there is nothing to restart from but the first sample.
+        let samples = self.track().samples.expanded().unwrap_or(&[]);
         let index = samples
             .iter()
             .enumerate()
@@ -429,12 +435,10 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     return Ok(Some(frame));
                 }
             }
-            if self.sample_index == self.track().samples.len() {
-                return Ok(None);
-            }
-
             let index = self.sample_index;
-            let sample = self.track().samples[index].clone();
+            let Some(sample) = self.track().samples.get(index) else {
+                return Ok(None);
+            };
             self.demuxer
                 .read_packet(self.track_index, index, &mut self.packet)?;
             let picture = self.decode_packet()?;
@@ -521,8 +525,7 @@ fn open_hardware_hevc(configuration: &[u8], budget: usize) -> Option<Hardware> {
         return None;
     }
     let sps_parsed = crate::codec::hevc_sps::Sps::parse(sps.first()?, budget).ok()?;
-    let colour =
-        crate::playback_native::AvcColour::from_hevc_vui(sps_parsed.vui.as_ref()).ok()?;
+    let colour = crate::playback_native::AvcColour::from_hevc_vui(sps_parsed.vui.as_ref()).ok()?;
     match fvid_vt::Session::new_hevc(&vps, &sps, &pps, config.length_size) {
         Ok(session) => Some(Hardware { session, colour }),
         Err(error) => {

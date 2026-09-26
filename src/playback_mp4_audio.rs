@@ -1,10 +1,11 @@
 //! Audio packet extraction from MP4 containers.
 //!
-//! The audio reader extracts encoded packets from an AAC track and provides
-//! them to a decoder. Packet timestamps remain in the track media timeline.
+//! The audio reader extracts packets from an AAC or uncompressed PCM track and
+//! provides them to a decoder. Packet timestamps remain in the track media
+//! timeline.
 
 use crate::container::mp4::{Limits, Mp4Reader, Track};
-use crate::{Result, invalid};
+use crate::{Result, invalid, unsupported};
 use std::io::{Read, Seek};
 
 /// Audio packet with presentation timestamp.
@@ -27,16 +28,101 @@ pub struct Mp4AudioReader<R> {
     packet: Vec<u8>,
 }
 
+/// Audio fourccs this player has a decoder for: AAC in an `mp4a` entry, the
+/// uncompressed QuickTime PCM tags whose byte order is already settled by the
+/// tag itself, the three ADPCM tags the container reads a block length for, Apple
+/// Lossless in its own entry, and Apple's two MACE codings, whose sample entries state
+/// nothing beyond the geometry every audio entry carries: their block is the coding's
+/// own, so the fourcc names them and no atom is read for a length. The four PCM
+/// spellings `in24`, `in32`, `l16` and `raw` are left out because they state their
+/// width or endianness in child atoms this reader does not resolve.
+const CODECS: [[u8; 4]; 12] = [
+    *b"mp4a",
+    *b"sowt",
+    *b"twos",
+    *b"fl32",
+    *b"fl64",
+    *b"ima4",
+    *b"ms\x00\x02",
+    *b"ms\x00\x11",
+    *b"alac",
+    *b"MAC3",
+    *b"MAC6",
+    *b"ac-3",
+];
+
+/// The decoder dispatch's name for a tag that cannot spell it itself. Not just the
+/// ADPCM trio needs this: `ms\0\xNN` is not text at all, and both the player and
+/// the coverage gate know these codings by what they code, not by four bytes. MACE's
+/// two are spelled `MAC3` and `MAC6` in their entries: text, but not the names the
+/// dispatch matches on.
+fn codec_name(codec: &[u8; 4]) -> Option<&'static str> {
+    Some(match codec {
+        b"ima4" => "adpcm_ima_qt",
+        b"ms\x00\x02" => "adpcm_ms",
+        b"ms\x00\x11" => "adpcm_ima_wav",
+        b"MAC3" => "mace3",
+        b"MAC6" => "mace6",
+        _ => return None,
+    })
+}
+
 impl<R: Read + Seek> Mp4AudioReader<R> {
     /// Open the first audio track that a decoder exists for.
     pub fn open(reader: R, limits: Limits) -> Result<Self> {
+        Self::open_at(reader, limits, 0)
+    }
+
+    /// Open the `nth` audio track a decoder exists for, counting in container
+    /// order. Which one the player wants is the player's choice; the container
+    /// only reports the ones a decoder exists for.
+    pub fn open_at(reader: R, limits: Limits, nth: usize) -> Result<Self> {
         let demuxer = Mp4Reader::open(reader, limits)?;
-        let index = demuxer
+        let index = match Self::supported(&demuxer).get(nth).copied() {
+            Some(index) => index,
+            // An audio track the container listed says what it is coded as, so a
+            // refusal that names one is the player having no arm for that coding -
+            // not a file it failed to read.
+            None => match Self::first_audio(&demuxer) {
+                Some(codec) => {
+                    return Err(unsupported(&format!(
+                        "MP4 audio track coded `{}` has no decoder here",
+                        String::from_utf8_lossy(&codec)
+                    )));
+                }
+                None => return Err(invalid("MP4 has no such audio track")),
+            },
+        };
+        Self::from_demuxer(demuxer, index)
+    }
+
+    /// Fourcc of the first audio track the container found, whether or not a
+    /// decoder exists for it: one this reader indexed, or one it read to the end
+    /// of the sample entry and set aside for want of an arm.
+    fn first_audio(demuxer: &Mp4Reader<R>) -> Option<[u8; 4]> {
+        demuxer
             .tracks()
             .iter()
-            .position(|t| t.handler == *b"soun" && matches!(&t.codec, b"mp4a"))
-            .ok_or_else(|| invalid("MP4 has no supported audio track"))?;
-        Self::from_demuxer(demuxer, index)
+            .find(|t| t.handler == *b"soun")
+            .map(|t| t.codec)
+            .or_else(|| {
+                demuxer
+                    .refused()
+                    .iter()
+                    .find(|t| t.handler == *b"soun")
+                    .map(|t| t.codec)
+            })
+    }
+
+    /// Container indices of the audio tracks a decoder exists for.
+    fn supported(demuxer: &Mp4Reader<R>) -> Vec<usize> {
+        demuxer
+            .tracks()
+            .iter()
+            .enumerate()
+            .filter(|(_, t)| t.handler == *b"soun" && CODECS.contains(&t.codec))
+            .map(|(index, _)| index)
+            .collect()
     }
 
     /// Open a specific audio track by index.
@@ -68,7 +154,8 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         let pts = sample.pts;
         let duration = sample.duration as i64;
 
-        self.demuxer.read_packet(track_index, sample_index, &mut self.packet)?;
+        self.demuxer
+            .read_packet(track_index, sample_index, &mut self.packet)?;
 
         let packet = AudioPacket {
             data: self.packet.clone(),
@@ -96,13 +183,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     /// Seek to the sample with the greatest PTS at or before `pts`.
     pub fn seek(&mut self, pts: i64) -> i64 {
         let track = self.track();
-        let index = track
-            .samples
-            .iter()
-            .enumerate()
-            .filter(|(_, s)| s.pts <= pts)
-            .max_by_key(|(_, s)| s.pts)
-            .map_or(0, |(i, _)| i);
+        let index = track.samples.at_or_before(pts);
         let result_pts = track.samples.get(index).map_or(0, |s| s.pts);
         self.rewind();
         self.sample_index = index;
@@ -114,7 +195,11 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
 /// movie timescale in most files (sample rate versus a nominal 1000 Hz).
 impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     fn codec(&self) -> &str {
-        std::str::from_utf8(&self.track().codec).unwrap_or("")
+        let track = self.track();
+        match codec_name(&track.codec) {
+            Some(name) => name,
+            None => std::str::from_utf8(&track.codec).unwrap_or(""),
+        }
     }
 
     fn timescale(&self) -> u32 {
@@ -129,16 +214,45 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         self.track().channels
     }
 
+    fn bits_per_sample(&self) -> u16 {
+        self.track().bit_depth
+    }
+
+    fn duration(&self) -> Option<std::time::Duration> {
+        let track = self.track();
+        (track.timescale > 0 && track.duration > 0).then(|| {
+            let nanos = u128::from(track.duration) * 1_000_000_000 / u128::from(track.timescale);
+            std::time::Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX))
+        })
+    }
+
     fn extra_data(&self) -> &[u8] {
         &self.track().configuration
     }
 
+    fn audio_tracks(&self) -> Vec<crate::audio::AudioTrack> {
+        Mp4AudioReader::supported(&self.demuxer)
+            .into_iter()
+            .map(|index| {
+                let track = &self.demuxer.tracks()[index];
+                crate::audio::AudioTrack {
+                    sample_rate: track.sample_rate,
+                    channels: track.channels,
+                    name: track.name.clone(),
+                    language: track.language.clone(),
+                }
+            })
+            .collect()
+    }
+
     fn next_packet(&mut self) -> Result<Option<crate::audio::EncodedPacket>> {
-        Ok(Mp4AudioReader::read_packet(self)?.map(|p| crate::audio::EncodedPacket {
-            data: p.data,
-            pts: p.pts,
-            duration: p.duration,
-        }))
+        Ok(
+            Mp4AudioReader::read_packet(self)?.map(|p| crate::audio::EncodedPacket {
+                data: p.data,
+                pts: p.pts,
+                duration: p.duration,
+            }),
+        )
     }
 
     fn rewind(&mut self) {
@@ -147,5 +261,365 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
 
     fn seek_to(&mut self, pts: i64) -> i64 {
         Mp4AudioReader::seek(self, pts)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Mp4AudioReader;
+    use crate::audio::{AudioStream, AudioTrack};
+    use crate::container::mp4::{Limits, Mp4Reader, SampleIndex};
+    use std::io::Cursor;
+    use std::mem::size_of;
+
+    /// Two mono AAC tracks at different rates behind one H.264 track, written by
+    /// ffmpeg so the listing comes from a real `trak` table rather than one
+    /// assembled here:
+    ///
+    /// ```sh
+    /// ffmpeg -f lavfi -i testsrc=size=64x64:rate=25:duration=2 \
+    ///   -f lavfi -i sine=frequency=440:sample_rate=48000:duration=2 \
+    ///   -f lavfi -i sine=frequency=880:sample_rate=32000:duration=2 \
+    ///   -map 0:v -map 1:a -map 2:a -c:v libx264 -profile:v baseline \
+    ///   -pix_fmt yuv420p -c:a aac -movflags +faststart two-audio.mp4
+    /// ```
+    const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/two-audio.mp4");
+
+    /// Every audio track a decoder exists for is listed in container order, and
+    /// `open_at` takes a place in that list rather than a container index — the
+    /// video track in between is skipped without the caller noticing.
+    #[test]
+    fn both_audio_tracks_are_listed_and_openable() {
+        let first = Mp4AudioReader::open(Cursor::new(FIXTURE), Limits::default()).expect("audio");
+        assert_eq!(
+            first.audio_tracks(),
+            vec![
+                AudioTrack {
+                    sample_rate: 48_000,
+                    channels: 1,
+                    name: String::new(),
+                    language: String::new(),
+                },
+                AudioTrack {
+                    sample_rate: 32_000,
+                    channels: 1,
+                    name: String::new(),
+                    language: String::new(),
+                },
+            ]
+        );
+        assert_eq!((first.sample_rate(), first.channels()), (48_000, 1));
+
+        let second =
+            Mp4AudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 1).expect("second");
+        assert_eq!((second.sample_rate(), second.channels()), (32_000, 1));
+        assert_eq!(second.track().codec, *b"mp4a");
+        // Past the end is an error, not a silent return to the first track.
+        assert!(Mp4AudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 2).is_err());
+    }
+
+    /// The second track is not just listed: its own setup record decodes, so a
+    /// track switch does not hand the old track's configuration to the decoder.
+    #[test]
+    fn the_second_track_decodes_at_its_own_rate() {
+        let mut stream =
+            Mp4AudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 1).expect("second");
+        let mut decoder = crate::codec::make_audio_decoder(
+            stream.codec(),
+            stream.extra_data(),
+            stream.sample_rate(),
+            stream.channels(),
+            stream.bits_per_sample(),
+        )
+        .expect("AAC decoder");
+        let mut frames = 0usize;
+        while let Some(packet) = stream.next_packet().expect("packet") {
+            let Some(pcm) = decoder
+                .decode_encoded(
+                    &packet.data,
+                    packet.pts.max(0) as u64,
+                    packet.duration.max(0) as u64,
+                )
+                .expect("decode")
+            else {
+                continue;
+            };
+            assert_eq!((pcm.timebase_num, pcm.timebase_den), (1, 32_000));
+            frames += pcm.data.len() / (size_of::<f32>() * usize::from(stream.channels()));
+        }
+        // Two seconds at 32 kHz, allowing for the encoder's priming and the
+        // trailing frame the container still lists.
+        assert!(
+            (60_000..66_000).contains(&frames),
+            "decoded {frames} frames"
+        );
+    }
+
+    /// The whole PCM path over a real file: a QuickTime track the container used
+    /// to refuse, indexed, decoded and timed. Half a second of a 0.75-amplitude
+    /// 440 Hz sine at 48 kHz stereo, muxed beside an AVC picture:
+    ///
+    /// ```sh
+    /// ffmpeg -f lavfi -i testsrc=size=64x64:rate=25:duration=0.5 \
+    ///   -f lavfi -i 'aevalsrc=0.75*sin(880*PI*t)|0.75*sin(880*PI*t):d=0.5:s=48000' \
+    ///   -map 0:v -map 1:a -c:v libx264 -pix_fmt yuv420p -preset ultrafast \
+    ///   -c:a pcm_s16le tests/fixtures/audio/pcm-screen.mov
+    /// ```
+    ///
+    /// ffmpeg writes the lossless `sowt` tag, and its `mov` muxer puts one audio
+    /// frame in every sample, so the index lists 24000 of them against the 24
+    /// blocks `ffprobe` shows when it coalesces them on read. The frames are all
+    /// the same four bytes long, so they are indexed as runs of chunks rather than
+    /// one record each, which is what lets a recording of any length in at all.
+    #[test]
+    fn a_pcm_track_decodes_sample_by_sample() {
+        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/pcm-screen.mov");
+        let mut stream =
+            Mp4AudioReader::open(Cursor::new(FIXTURE), Limits::default()).expect("PCM track");
+        assert_eq!(stream.codec(), "sowt");
+        assert_eq!((stream.sample_rate(), stream.channels()), (48_000, 2));
+        // The sample entry's `sample_size`, which is what tells the decoder how
+        // many bytes a sample has.
+        assert_eq!(stream.bits_per_sample(), 16);
+        assert!(stream.extra_data().is_empty(), "PCM has no setup record");
+
+        let mut decoder = crate::codec::make_audio_decoder(
+            stream.codec(),
+            stream.extra_data(),
+            stream.sample_rate(),
+            stream.channels(),
+            stream.bits_per_sample(),
+        )
+        .expect("PCM decoder");
+        let bytes = usize::from(stream.channels()) * size_of::<f32>();
+        let mut frames = 0usize;
+        let mut packets = 0usize;
+        let mut peak = 0.0f32;
+        while let Some(packet) = stream.next_packet().expect("packet") {
+            let pcm = decoder
+                .decode_encoded(
+                    &packet.data,
+                    packet.pts.max(0) as u64,
+                    packet.duration.max(0) as u64,
+                )
+                .expect("decode")
+                .expect("PCM always yields a packet");
+            assert_eq!((pcm.timebase_num, pcm.timebase_den), (1, 48_000));
+            // A block's bytes widen by exactly the ratio of the two widths.
+            assert_eq!(pcm.data.len(), packet.data.len() * 2);
+            frames += pcm.data.len() / bytes;
+            packets += 1;
+            for sample in pcm.data.chunks_exact(size_of::<f32>()) {
+                peak = peak.max(f32::from_le_bytes(sample.try_into().unwrap()).abs());
+            }
+        }
+        assert_eq!((packets, frames), (24_000, 24_000));
+        // 24576 of 32768, the exact top of the sine as ffmpeg's own decode of the
+        // file reports it: lossless coding makes the equality exact.
+        assert_eq!(peak, 0.75);
+    }
+
+    /// Every PCM tag QuickTime writes, in one file: the two integer byte orders, a
+    /// float track, and a 24-bit big-endian track that keeps its width and order
+    /// in child atoms (`wave`/`frma`/`enda`) this reader does not resolve.
+    ///
+    /// ```sh
+    /// ffmpeg -f lavfi -i 'aevalsrc=0.75*sin(880*PI*t)|0.75*sin(880*PI*t):d=0.05:s=48000' \
+    ///   -map 0:a -map 0:a -map 0:a -map 0:a -c:a:0 pcm_s16le -c:a:1 pcm_s16be \
+    ///   -c:a:2 pcm_f32le -c:a:3 pcm_s24be tests/fixtures/audio/pcm-tags.mov
+    /// ```
+    ///
+    /// Each of the three tags this player reads has to reach the decoder as its
+    /// own layout, because a byte order or width guessed wrongly still yields
+    /// 2400 frames of plausible-looking noise. The same 0.75-amplitude sine in all
+    /// of them is what says the samples came out at the right scale and sign — and
+    /// `fl32` is written as a version 1 entry, so it also checks that the fields
+    /// read before the extra ones still line up.
+    #[test]
+    fn each_pcm_tag_is_read_at_its_own_width_and_order() {
+        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/pcm-tags.mov");
+        let listing = Mp4AudioReader::open(Cursor::new(FIXTURE), Limits::default()).expect("PCM");
+        // `in24` is not among them, and the list stops at three.
+        assert_eq!(listing.audio_tracks().len(), 3);
+        assert!(Mp4AudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 3).is_err());
+
+        for (nth, codec, stated) in [(0, "sowt", 16u16), (1, "twos", 16), (2, "fl32", 16)] {
+            let mut stream = Mp4AudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), nth)
+                .unwrap_or_else(|error| panic!("track {nth}: {error}"));
+            assert_eq!(stream.codec(), codec);
+            assert_eq!((stream.sample_rate(), stream.channels()), (48_000, 2));
+            // What the sample entry's `sample_size` states. `fl32` states 16 while
+            // carrying 32-bit floats, which is why a float's width comes from the
+            // fourcc and not from this field.
+            assert_eq!(stream.bits_per_sample(), stated, "{codec} sample entry");
+            let mut decoder = crate::codec::make_audio_decoder(
+                stream.codec(),
+                stream.extra_data(),
+                stream.sample_rate(),
+                stream.channels(),
+                stream.bits_per_sample(),
+            )
+            .expect("PCM decoder");
+            let mut frames = 0usize;
+            let mut peak = 0.0f32;
+            while let Some(packet) = stream.next_packet().expect("packet") {
+                let pcm = decoder
+                    .decode_encoded(&packet.data, packet.pts.max(0) as u64, 0)
+                    .expect("decode")
+                    .expect("PCM always yields a packet");
+                frames += pcm.data.len() / (2 * size_of::<f32>());
+                for sample in pcm.data.chunks_exact(size_of::<f32>()) {
+                    peak = peak.max(f32::from_le_bytes(sample.try_into().unwrap()).abs());
+                }
+            }
+            assert_eq!(frames, 2_400, "{codec}");
+            assert_eq!(peak, 0.75, "{codec}");
+        }
+    }
+
+    /// The total a listener with no picture is shown. Each track states its own
+    /// duration in its own timescale, so the two tracks of the fixture count the
+    /// same sound in 48000 and 32000 ticks; the half second of PCM counts in
+    /// samples. The AAC totals run a touch past the audible two seconds because
+    /// the muxer writes its priming and padding into the track duration, which is
+    /// what a timeline needs to be long enough to play to silence.
+    #[test]
+    fn each_track_states_its_own_length() {
+        const TWO: &[u8] = include_bytes!("../tests/fixtures/audio/two-audio.mp4");
+        for (nth, total) in [(0, 2_021_333_333_u64), (1, 2_032_000_000)] {
+            let stream = Mp4AudioReader::open_at(Cursor::new(TWO), Limits::default(), nth).unwrap();
+            assert_eq!(
+                stream.duration(),
+                Some(std::time::Duration::from_nanos(total)),
+                "track {nth}"
+            );
+        }
+        const PCM: &[u8] = include_bytes!("../tests/fixtures/audio/pcm-screen.mov");
+        let stream = Mp4AudioReader::open(Cursor::new(PCM), Limits::default()).unwrap();
+        assert_eq!(
+            stream.duration(),
+            Some(std::time::Duration::from_millis(500))
+        );
+    }
+
+    /// The frames of an uncompressed track all state the same width and the same
+    /// length, so its index keeps one record per chunk instead of one per frame.
+    /// The half second of the fixture is 24 000 frames over 13 chunks, which a
+    /// budget of 100 records covers; the same limits used to drop the track and
+    /// leave only the picture beside it. What bounded the length of PCM a file
+    /// could carry was the index, not the sound.
+    ///
+    /// Reading the whole track through that budget is what says the compact
+    /// records point at the same bytes the per-frame ones did: a stride wrong by
+    /// two still yields four bytes of plausible sine wave.
+    #[test]
+    fn a_pcm_track_indexes_as_runs_of_chunks() {
+        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/pcm-screen.mov");
+        let tight = Limits {
+            samples: 100,
+            ..Limits::default()
+        };
+        let mp4 = Mp4Reader::open(Cursor::new(FIXTURE), tight).expect("both tracks index");
+        let audio = mp4
+            .tracks()
+            .iter()
+            .find(|t| t.handler == *b"soun")
+            .expect("PCM track");
+        let SampleIndex::Uniform(runs) = &audio.samples else {
+            panic!("expected runs of chunks, got {:?}", audio.samples);
+        };
+        assert_eq!(
+            (
+                runs.count,
+                runs.runs.len(),
+                runs.bytes_per_frame,
+                runs.duration
+            ),
+            (24_000, 13, 4, 1)
+        );
+        // Inside a run the frames are the next four bytes and the next tick. The
+        // runs themselves are not contiguous: the writer interleaves them with
+        // the picture's chunks, which is the only reason there are 13 of them.
+        for frame in 0..runs.count {
+            let at = audio.samples.get(frame).unwrap();
+            assert_eq!(
+                (at.pts, at.dts, at.duration, at.size, at.sync),
+                (frame as i64, frame as u64, 1, 4, true)
+            );
+        }
+        let mut covered = 0usize;
+        for run in &runs.runs {
+            assert_eq!(run.first, covered, "runs follow one another");
+            for frame in run.first..run.first + run.frames {
+                let at = audio.samples.get(frame).unwrap();
+                assert_eq!(at.offset, run.offset + 4 * (frame - run.first) as u64);
+            }
+            covered += run.frames;
+        }
+        assert_eq!(covered, runs.count);
+        assert!(audio.samples.get(runs.count).is_none(), "no frame past end");
+
+        let mut stream = Mp4AudioReader::open(Cursor::new(FIXTURE), tight).expect("PCM");
+        let mut frames = 0usize;
+        while let Some(packet) = stream.next_packet().expect("packet") {
+            assert_eq!((packet.pts, packet.duration), (frames as i64, 1));
+            frames += 1;
+        }
+        assert_eq!(frames, 24_000);
+        // A seek lands on the frame named, in a track it never indexed per frame.
+        assert_eq!(stream.seek(12_345), 12_345);
+        let packet = stream.next_packet().expect("packet").expect("frame");
+        assert_eq!(packet.pts, 12_345);
+    }
+
+    /// The budget still means something: a track whose chunks alone outnumber it
+    /// is left out the way an over-long one used to be, because the picture
+    /// beside it is worth more than either. One record short of what the two
+    /// tracks of the fixture together ask for is the smallest case that reaches
+    /// the rule, and it only works because the picture is indexed first.
+    #[test]
+    fn a_pcm_track_over_the_sample_budget_leaves_the_picture() {
+        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/pcm-screen.mov");
+        let wide = Mp4Reader::open(Cursor::new(FIXTURE), Limits::default()).unwrap();
+        assert_eq!(wide.tracks()[0].handler, *b"vide", "picture indexed first");
+        let cost = |handler: [u8; 4]| {
+            wide.tracks()
+                .iter()
+                .filter(|t| t.handler == handler)
+                .map(|t| t.samples.cost())
+                .sum::<usize>()
+        };
+        let tight = Limits {
+            samples: cost(*b"vide") + cost(*b"soun") - 1,
+            ..Limits::default()
+        };
+        drop(wide);
+        let mp4 = Mp4Reader::open(Cursor::new(FIXTURE), tight).expect("the file still opens");
+        assert_eq!(mp4.tracks().len(), 1);
+        assert_eq!(mp4.tracks()[0].handler, *b"vide");
+        assert!(Mp4AudioReader::open(Cursor::new(FIXTURE), tight).is_err());
+    }
+
+    /// The three audio tracks of the named file, listed the way the player
+    /// shows them: the title where the file gives one, the language where it
+    /// only states a language, and the layout the track carries after either.
+    /// `tests/fixtures/tracks/named.mp4`, whose command `tests/mp4.rs` records.
+    #[test]
+    fn a_named_file_lists_its_audio_tracks_by_what_it_says() {
+        const NAMED: &[u8] = include_bytes!("../tests/fixtures/tracks/named.mp4");
+        let stream = Mp4AudioReader::open(Cursor::new(NAMED), Limits::default()).expect("audio");
+        let labels: Vec<String> = stream
+            .audio_tracks()
+            .iter()
+            .map(crate::audio::AudioTrack::label)
+            .collect();
+        assert_eq!(
+            labels,
+            [
+                "Первая · 1 ch 48000 Hz",
+                "fre · 1 ch 32000 Hz",
+                "1 ch 44100 Hz",
+            ]
+        );
     }
 }

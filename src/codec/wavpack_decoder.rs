@@ -128,22 +128,19 @@ const FULL_SCALE: f32 = 1.0 / (1u64 << 31) as f32;
 /// `2^(n/256) - 1` at eight bits: the table the stream's magnitudes are interpolated
 /// through, copied entry for entry from the reference's.
 const EXP2_TABLE: [u8; 256] = [
-      0,   1,   1,   2,   3,   3,   4,   5,   6,   6,   7,   8,   8,   9,  10,  11,
-     11,  12,  13,  14,  14,  15,  16,  16,  17,  18,  19,  19,  20,  21,  22,  22,
-     23,  24,  25,  25,  26,  27,  28,  29,  29,  30,  31,  32,  32,  33,  34,  35,
-     36,  36,  37,  38,  39,  40,  40,  41,  42,  43,  44,  44,  45,  46,  47,  48,
-     48,  49,  50,  51,  52,  53,  53,  54,  55,  56,  57,  58,  58,  59,  60,  61,
-     62,  63,  64,  65,  65,  66,  67,  68,  69,  70,  71,  72,  72,  73,  74,  75,
-     76,  77,  78,  79,  80,  81,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,
-     91,  92,  93,  94,  94,  95,  96,  97,  98,  99, 100, 101, 102, 103, 104, 105,
-    106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121,
-    122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 135, 136, 137, 138,
-    139, 140, 141, 142, 143, 144, 145, 146, 147, 149, 150, 151, 152, 153, 154, 155,
-    156, 157, 159, 160, 161, 162, 163, 164, 165, 166, 168, 169, 170, 171, 172, 173,
-    175, 176, 177, 178, 179, 180, 182, 183, 184, 185, 186, 188, 189, 190, 191, 192,
-    194, 195, 196, 197, 198, 200, 201, 202, 203, 205, 206, 207, 208, 210, 211, 212,
-    214, 215, 216, 217, 219, 220, 221, 222, 224, 225, 226, 228, 229, 230, 232, 233,
-    234, 236, 237, 238, 240, 241, 242, 244, 245, 246, 248, 249, 250, 252, 253, 255,
+    0, 1, 1, 2, 3, 3, 4, 5, 6, 6, 7, 8, 8, 9, 10, 11, 11, 12, 13, 14, 14, 15, 16, 16, 17, 18, 19,
+    19, 20, 21, 22, 22, 23, 24, 25, 25, 26, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 36, 36, 37,
+    38, 39, 40, 40, 41, 42, 43, 44, 44, 45, 46, 47, 48, 48, 49, 50, 51, 52, 53, 53, 54, 55, 56, 57,
+    58, 58, 59, 60, 61, 62, 63, 64, 65, 65, 66, 67, 68, 69, 70, 71, 72, 72, 73, 74, 75, 76, 77, 78,
+    79, 80, 81, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 94, 95, 96, 97, 98, 99,
+    100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118,
+    119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 135, 136, 137, 138,
+    139, 140, 141, 142, 143, 144, 145, 146, 147, 149, 150, 151, 152, 153, 154, 155, 156, 157, 159,
+    160, 161, 162, 163, 164, 165, 166, 168, 169, 170, 171, 172, 173, 175, 176, 177, 178, 179, 180,
+    182, 183, 184, 185, 186, 188, 189, 190, 191, 192, 194, 195, 196, 197, 198, 200, 201, 202, 203,
+    205, 206, 207, 208, 210, 211, 212, 214, 215, 216, 217, 219, 220, 221, 222, 224, 225, 226, 228,
+    229, 230, 232, 233, 234, 236, 237, 238, 240, 241, 242, 244, 245, 246, 248, 249, 250, 252, 253,
+    255,
 ];
 
 fn le16(data: &[u8], at: usize) -> i16 {
@@ -215,7 +212,8 @@ impl<'a> Block<'a> {
         let bytes = data
             .get(at..at + length)
             .ok_or_else(|| invalid("WavPack block runs past the packet"))?;
-        let version = u16::from_le_bytes(bytes[VERSION..VERSION + 2].try_into().expect("two bytes"));
+        let version =
+            u16::from_le_bytes(bytes[VERSION..VERSION + 2].try_into().expect("two bytes"));
         if !(MIN_VERSION..=MAX_VERSION).contains(&version) {
             return Err(invalid("WavPack block is not of the 4.x coding"));
         }
@@ -225,7 +223,9 @@ impl<'a> Block<'a> {
         }
         let flags = le32(bytes, FLAGS);
         if flags & (HYBRID | HYBRID_BITRATE | SHAPING) != 0 {
-            return Err(invalid("WavPack hybrid block: lossy coding is not supported"));
+            return Err(invalid(
+                "WavPack hybrid block: lossy coding is not supported",
+            ));
         }
         if flags & FLOAT != 0 {
             return Err(invalid("WavPack floating-point block is not supported"));
@@ -279,12 +279,15 @@ impl<'a> Block<'a> {
                 None => return Err(invalid("WavPack metadata item length overflow")),
             };
             if words == 0 && id & IDF_ODD != 0 {
-                return Err(invalid("WavPack metadata item trims a byte it does not have"));
+                return Err(invalid(
+                    "WavPack metadata item trims a byte it does not have",
+                ));
             }
             if at + item_header + words > length {
                 return Err(invalid("WavPack metadata item runs past its block"));
             }
-            let body = &bytes[at + item_header..at + item_header + words - usize::from(id & IDF_ODD != 0)];
+            let body =
+                &bytes[at + item_header..at + item_header + words - usize::from(id & IDF_ODD != 0)];
             match id & ID_MASK {
                 ID_DECORR_TERMS => block.terms = body,
                 ID_DECORR_WEIGHTS => block.weights = body,
@@ -387,7 +390,9 @@ impl<'a> Block<'a> {
         let stereo = self.channels == 2;
         let stride = usize::from(stereo) + 1;
         if self.weights.len() / stride > passes.len() {
-            return Err(invalid("WavPack block states more weights than it has passes"));
+            return Err(invalid(
+                "WavPack block states more weights than it has passes",
+            ));
         }
         // One signed byte per channel per pass, from the last-named pass down; the passes
         // the item stops short of start cold, as the encoder left them.
@@ -452,7 +457,7 @@ impl<'a> Block<'a> {
         let mut holding_one = false;
         let mut zeros_run = 0i32;
         let mut buffer = Vec::with_capacity(count);
-        
+
         while buffer.len() < count {
             let slot = buffer.len();
             // Get current channel's medians by reference when needed
@@ -461,14 +466,14 @@ impl<'a> Block<'a> {
             } else {
                 (0, 0)
             };
-            
+
             // Check for zero run BEFORE any mutable borrows
             let can_skip_zeros = if stereo && slot & 1 != 0 {
                 (med0[0] as u32) < 2 && !holding_one && (med1[0] as u32) < 2
             } else {
                 (med0[0] as u32) < 2 && !holding_one
             };
-            
+
             if can_skip_zeros && !holding_zero {
                 if zeros_run != 0 {
                     zeros_run -= 1;
@@ -486,7 +491,7 @@ impl<'a> Block<'a> {
                     }
                 }
             }
-            
+
             if holding_zero {
                 holding_zero = false;
                 let current_med = match current_med_idx {
@@ -500,7 +505,7 @@ impl<'a> Block<'a> {
                 buffer.push(sample);
                 continue;
             }
-            
+
             let mut ones = 0i32;
             while ones < LIMIT_ONES + 1 && stream.get_bit()? != 0 {
                 ones += 1;
@@ -511,17 +516,17 @@ impl<'a> Block<'a> {
                 }
                 ones = LIMIT_ONES + read_run(&mut stream)?;
             }
-            
+
             let low = i32::from(holding_one);
             holding_one = ones & 1 != 0;
             holding_zero = ones & 1 == 0;
             let ones = (ones >> 1) + low;
-            
+
             let mut current_med = match current_med_idx {
                 0 => &mut med0,
                 _ => &mut med1,
             };
-            
+
             let base_band = band(current_med, 0);
             let (low, width) = if ones == 0 {
                 dec_med(current_med, 0);
@@ -535,7 +540,10 @@ impl<'a> Block<'a> {
                 let (base, width) = if ones == 2 {
                     (base_band + band(current_med, 1), band(current_med, 2) - 1)
                 } else {
-                    (base_band + band(current_med, 1) + (ones - 2) * band(current_med, 2), band(current_med, 2) - 1)
+                    (
+                        base_band + band(current_med, 1) + (ones - 2) * band(current_med, 2),
+                        band(current_med, 2) - 1,
+                    )
                 };
                 inc_med(current_med, 0);
                 inc_med(current_med, 1);
@@ -546,7 +554,7 @@ impl<'a> Block<'a> {
                 }
                 (base, width)
             };
-            
+
             let value = low + read_code(&mut stream, width)?;
             let sign_bit = stream.get_bit()? != 0;
             let sample = if sign_bit { !value } else { value };
@@ -585,7 +593,10 @@ impl<'a> Block<'a> {
             return Err(invalid("WavPack block checksum does not match its samples"));
         }
         let limit = (1i64 << ((self.flags >> MAG_FIELD) & 0x1f)) + 2;
-        if let Some(&sample) = buffer.iter().find(|&&sample| i64::from(sample).abs() > limit) {
+        if let Some(&sample) = buffer
+            .iter()
+            .find(|&&sample| i64::from(sample).abs() > limit)
+        {
             return Err(invalid(&format!(
                 "WavPack sample {sample} is past the magnitude the block declares"
             )));
@@ -599,7 +610,8 @@ impl<'a> Block<'a> {
     fn widen(&self, buffer: &[i32]) -> Result<Vec<i32>> {
         let stored = usize::from(self.bits_per_sample / 8);
         let shift = ((self.flags >> SHIFT_FIELD) & 0x1f) as usize;
-        let post_shift = usize::try_from(if stored <= 2 { 2 } else { 4 }).unwrap() * 8 - stored * 8 + shift;
+        let post_shift =
+            usize::try_from(if stored <= 2 { 2 } else { 4 }).unwrap() * 8 - stored * 8 + shift;
         if post_shift > 31 {
             return Err(invalid("WavPack block shifts its samples out of a word"));
         }
@@ -639,7 +651,9 @@ impl<'a> Block<'a> {
                 // The stream's own checksum is the first four bytes of its first item,
                 // and the bits the block sent follow them.
                 if head.len() <= 4 {
-                    return Err(invalid("WavPack extra bits have no room for their checksum"));
+                    return Err(invalid(
+                        "WavPack extra bits have no room for their checksum",
+                    ));
                 }
                 expected = Some(le32(head, 0));
                 parts.push(&head[4..]);
@@ -1051,7 +1065,9 @@ impl AudioDecode for WavpackDecoder {
     ) -> Result<Option<AudioPacket>> {
         let block = Block::parse(data, 0)?;
         if block.channels != self.channels {
-            return Err(invalid("WavPack block's channels disagree with the container"));
+            return Err(invalid(
+                "WavPack block's channels disagree with the container",
+            ));
         }
         let mut out = Vec::with_capacity(data.len() * 2);
         for sample in block.samples()? {
