@@ -4,7 +4,7 @@ use crate::{
     playback_mp4::Mp4VideoReader,
 };
 use std::{
-    io::{BufRead, Seek, SeekFrom},
+    io::{BufRead, Read, Seek, SeekFrom},
     sync::Arc,
     time::Duration,
 };
@@ -26,8 +26,116 @@ pub enum NativeReader<R> {
         /// After a seek the next decoded frame defines the timeline position
         /// instead of having to continue the previous frame exactly.
         resync: bool,
+        /// Degrees clockwise the container's transform turns the coded picture,
+        /// so the size and the bytes the reader hands over are the ones to show.
+        rotation: u16,
     },
 }
+/// Turn one picture by the quarter turn a container states. `bytes` is the size
+/// of a pixel — 1 for a colour plane, 3 for packed RGB — and the two side turns
+/// swap the axes, so the result is `height × width` for those.
+pub fn rotate_plane(
+    data: &[u8],
+    width: usize,
+    height: usize,
+    rotation: u16,
+    bytes: usize,
+) -> Vec<u8> {
+    let (w, h) = match rotation {
+        90 | 270 => (height, width),
+        _ => (width, height),
+    };
+    let mut out = vec![0u8; w * h * bytes];
+    for (y, row) in out.chunks_exact_mut(w * bytes).enumerate() {
+        for (x, pixel) in row.chunks_exact_mut(bytes).enumerate() {
+            // Where this pixel was in the picture as decoded.
+            let (sx, sy) = match rotation {
+                90 => (y, height - 1 - x),
+                180 => (width - 1 - x, height - 1 - y),
+                270 => (width - 1 - y, x),
+                _ => (x, y),
+            };
+            let from = (sy * width + sx) * bytes;
+            pixel.copy_from_slice(&data[from..from + bytes]);
+        }
+    }
+    out
+}
+/// The same picture turned to be shown upright. Both chroma planes turn with the
+/// luma, so a 4:2:0 picture stays aligned with itself however it is set down.
+pub fn rotate_planar8(planes: &Planar8, rotation: u16) -> Planar8 {
+    let quarter = rotation == 90 || rotation == 270;
+    Planar8 {
+        width: if quarter { planes.height } else { planes.width },
+        height: if quarter { planes.width } else { planes.height },
+        chroma_width: if quarter {
+            planes.chroma_height
+        } else {
+            planes.chroma_width
+        },
+        chroma_height: if quarter {
+            planes.chroma_width
+        } else {
+            planes.chroma_height
+        },
+        y: rotate_plane(&planes.y, planes.width, planes.height, rotation, 1),
+        cb: rotate_plane(
+            &planes.cb,
+            planes.chroma_width,
+            planes.chroma_height,
+            rotation,
+            1,
+        ),
+        cr: rotate_plane(
+            &planes.cr,
+            planes.chroma_width,
+            planes.chroma_height,
+            rotation,
+            1,
+        ),
+        colour: planes.colour,
+    }
+}
+/// Restart a Matroska stream at the keyframe opening the stretch that holds
+/// `target` and decode forward to the frame covering it, in the plane form the
+/// decode thread stages. The pre-roll costs what decoding it costs.
+fn seek_webm_to<R: Read + Seek>(
+    reader: &mut crate::playback_webm::WebmVideoReader<R>,
+    target: Duration,
+) -> Result<Option<RawFrame>> {
+    let nanos = target.as_nanos();
+    let target = i64::try_from(nanos).map_err(|_| invalid("seek target overflow"))?;
+    reader.seek_to_sync(target);
+    let mut last = None;
+    loop {
+        let Some(planes) = reader.read_frame_planes()? else {
+            return Ok(last);
+        };
+        let frame = RawFrame::Planar8(Arc::new(planes));
+        if reader
+            .frame_interval()
+            .is_some_and(|(_, end, _)| end > nanos)
+        {
+            return Ok(Some(frame));
+        }
+        last = Some(frame);
+    }
+}
+
+/// What the fourcc heading an MP4/MOV video entry is called, spelled the way a
+/// viewer's media information spells it rather than the way the container does.
+/// The six tags are the four codec families the player builds a decoder for, so
+/// no other reaches here: `Mp4VideoReader` refuses the entry before that.
+pub fn mp4_codec(fourcc: &[u8; 4]) -> &'static str {
+    match fourcc {
+        b"avc1" | b"avc3" => "H.264",
+        b"hvc1" | b"hev1" => "H.265",
+        b"vp09" => "VP9",
+        b"av01" => "AV1",
+        _ => unreachable!(),
+    }
+}
+
 impl<R: BufRead + Seek> NativeReader<R> {
     /// Playback without an application-imposed memory cap. Format bounds and
     /// checked size arithmetic still apply; storage is allocated as needed.
@@ -81,6 +189,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
         let source = Mp4VideoReader::open(reader, Limits::default(), budget - rgb_budget)?;
         let track = source.track();
         let (media_start, media_end) = playback_window(track, source.movie_timescale())?;
+        let rotation = track.rotation;
         Ok(Self::Avc {
             source,
             rgb: Vec::new(),
@@ -93,13 +202,53 @@ impl<R: BufRead + Seek> NativeReader<R> {
             media_start,
             media_end,
             resync: false,
+            rotation,
         })
     }
+    /// The size the picture is shown at: the coded one, turned the way the
+    /// container says it is stored.
     pub fn dimensions(&self) -> [usize; 2] {
         match self {
             Self::Y4m(r) => r.dimensions(),
             Self::Webm(r) => r.dimensions(),
             Self::Avc { dimensions, .. } => *dimensions,
+        }
+    }
+    /// Degrees clockwise the container turns the coded picture to be shown
+    /// upright. The reader applies it to the bytes it hands over, so a caller
+    /// that shapes a `RawFrame` itself has to.
+    pub fn rotation(&self) -> u16 {
+        match self {
+            Self::Y4m(_) | Self::Webm(_) => 0,
+            Self::Avc { rotation, .. } => *rotation,
+        }
+    }
+    /// How much wider a coded pixel is than it is tall, as the container states
+    /// it. A stream that states nothing is drawn with square pixels.
+    pub fn pixel_aspect(&self) -> (u32, u32) {
+        match self {
+            Self::Y4m(_) => (1, 1),
+            Self::Webm(r) => r.pixel_aspect(),
+            Self::Avc { source, .. } => source.track().pixel_aspect,
+        }
+    }
+    /// The borders the container asks to be kept off screen, as pixel insets
+    /// into the coded frame. Only Matroska has a way to state them; the others
+    /// show the whole picture.
+    pub fn insets(&self) -> [u32; 4] {
+        match self {
+            Self::Y4m(_) | Self::Avc { .. } => [0; 4],
+            Self::Webm(r) => r.insets(),
+        }
+    }
+    /// Which codec the picture is decoded from, named the way a viewer names it.
+    /// A Y4M stream carries finished pixels, so the format it is written in is
+    /// the answer.
+    pub fn video_codec(&self) -> &'static str {
+        match self {
+            Self::Y4m(_) => "Y4M",
+            Self::Webm(r) => r.codec(),
+            Self::Avc { source, .. } => mp4_codec(&source.track().codec),
         }
     }
     pub fn rgb(&self) -> &[u8] {
@@ -155,7 +304,9 @@ impl<R: BufRead + Seek> NativeReader<R> {
     /// Returns None if no frame has been read yet or for formats without PTS.
     pub fn current_pts(&self) -> Option<(i64, u32)> {
         match self {
-            Self::Webm(r) => r.frame_interval().map(|(start, _, scale)| (start as i64, scale)),
+            Self::Webm(r) => r
+                .frame_interval()
+                .map(|(start, _, scale)| (start as i64, scale)),
             Self::Y4m(reader) => {
                 let count = reader.frames_read();
                 if count == 0 {
@@ -234,30 +385,37 @@ impl<R: BufRead + Seek> NativeReader<R> {
             _ => false,
         }
     }
-    /// Whether `seek` can position this stream; only containers with a sample
-    /// index and sync samples (MP4) support it.
+    /// Whether `seek` can position this stream: MP4 indexes its sync samples and
+    /// Matroska marks every block's keyframe, so both can restart decoding at
+    /// the preceding keyframe. Y4M carries no index to consult.
     pub fn seekable(&self) -> bool {
-        matches!(self, Self::Avc { .. })
+        matches!(self, Self::Avc { .. } | Self::Webm(_))
     }
     /// Position playback so the current frame contains `target` (clamped to the
     /// stream). Decoding restarts at the preceding sync sample and runs forward
     /// to the target, so the call takes as long as decoding that stretch.
     /// On failure the stream is rewound to the start.
     pub fn seek(&mut self, target: Duration) -> Result<()> {
+        if let Self::Webm(reader) = self {
+            let target = i64::try_from(target.as_nanos())
+                .map_err(|_| invalid("seek target overflow"))
+                .and_then(|target| reader.seek_to_frame(target));
+            if target.is_err() {
+                self.rewind()?;
+            }
+            return target;
+        }
         let result = (|| {
             if let Some(raw) = self.seek_raw(target)? {
                 if let Self::Avc {
-                    rgb, rgb_budget, ..
+                    rgb,
+                    rgb_budget,
+                    rotation,
+                    dimensions,
+                    ..
                 } = self
                 {
-                    match raw {
-                        RawFrame::Avc { picture, colour } => {
-                            avc_to_rgb(&picture, colour, rgb, *rgb_budget)?
-                        }
-                        RawFrame::Planar8(planes) => planar8_to_rgb(&planes, rgb, *rgb_budget)?,
-                        RawFrame::Rgb(bytes) => *rgb = bytes,
-                        RawFrame::Yuv { .. } => unreachable!(),
-                    }
+                    fill_rgb(raw, rgb, *rgb_budget, *rotation, *dimensions)?;
                 }
             }
             Ok(())
@@ -271,6 +429,13 @@ impl<R: BufRead + Seek> NativeReader<R> {
     /// Intermediate reference pictures are decoded without RGB conversion.
     /// `rgb()` remains unchanged; use `seek` when a packed RGB result is needed.
     pub fn seek_raw(&mut self, target: Duration) -> Result<Option<RawFrame>> {
+        if let Self::Webm(reader) = self {
+            let result = seek_webm_to(reader, target);
+            if result.is_err() {
+                self.rewind()?;
+            }
+            return result;
+        }
         let Self::Avc {
             source,
             media_start,
@@ -278,7 +443,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
             ..
         } = self
         else {
-            return Err(invalid("seeking is only implemented for MP4"));
+            return Err(invalid("seeking is only implemented for MP4 and Matroska"));
         };
         let timescale = source.track().timescale;
         let ticks = i128::from(timescale) * target.as_nanos() as i128 / 1_000_000_000;
@@ -322,19 +487,16 @@ impl<R: BufRead + Seek> NativeReader<R> {
                     return Ok(false);
                 };
                 let Self::Avc {
-                    rgb, rgb_budget, ..
+                    rgb,
+                    rgb_budget,
+                    rotation,
+                    dimensions,
+                    ..
                 } = self
                 else {
                     unreachable!()
                 };
-                match raw {
-                    RawFrame::Avc { picture, colour } => {
-                        avc_to_rgb(&picture, colour, rgb, *rgb_budget)?
-                    }
-                    RawFrame::Planar8(planes) => planar8_to_rgb(&planes, rgb, *rgb_budget)?,
-                    RawFrame::Rgb(bytes) => *rgb = bytes,
-                    RawFrame::Yuv { .. } => unreachable!(),
-                }
+                fill_rgb(raw, rgb, *rgb_budget, *rotation, *dimensions)?;
                 Ok(true)
             }
         }
@@ -394,6 +556,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
             media_start,
             media_end,
             resync,
+            rotation,
             ..
         } = self
         else {
@@ -446,7 +609,13 @@ impl<R: BufRead + Seek> NativeReader<R> {
             .ok_or_else(|| invalid("invalid video frame duration"))?;
         let colour = source.active_colour()?;
         let (w, h) = frame.picture.dimensions();
-        *dimensions = [w, h];
+        // The size the picture is shown at, which for a side turn is the coded
+        // one standing on its head.
+        *dimensions = if *rotation == 90 || *rotation == 270 {
+            [h, w]
+        } else {
+            [w, h]
+        };
         *period = Duration::from_nanos(nanos);
         *frame_start = frame.presentation_time.ticks;
         *next_pts = frame
@@ -679,6 +848,36 @@ pub fn avc_to_rgb(
     };
     rgb_from_planes(source, rgb, budget)
 }
+/// Shape a decoded frame into the packed RGB the reader shows, turned the way the
+/// container says its picture is stored. `dimensions` is the size the picture is
+/// shown at, so the bytes and the size the reader reports agree.
+fn fill_rgb(
+    raw: RawFrame,
+    rgb: &mut Vec<u8>,
+    budget: usize,
+    rotation: u16,
+    dimensions: [usize; 2],
+) -> Result<()> {
+    match raw {
+        RawFrame::Avc { picture, colour } => avc_to_rgb(&picture, colour, rgb, budget)?,
+        RawFrame::Planar8(planes) => planar8_to_rgb(&planes, rgb, budget)?,
+        RawFrame::Rgb(bytes) => *rgb = bytes,
+        RawFrame::Yuv { .. } => unreachable!(),
+    }
+    if rotation != 0 {
+        // The bytes are still the way they were coded, which for a side turn is
+        // the shown size the other way round.
+        let [w, h] = dimensions;
+        let (cw, ch) = if rotation == 90 || rotation == 270 {
+            (h, w)
+        } else {
+            (w, h)
+        };
+        let turned = rotate_plane(rgb, cw, ch, rotation, 3);
+        *rgb = turned;
+    }
+    Ok(())
+}
 /// `avc_to_rgb` for packed 8-bit planes.
 pub fn planar8_to_rgb(p: &Planar8, rgb: &mut Vec<u8>, budget: usize) -> Result<()> {
     let source = PlaneSource {
@@ -858,22 +1057,42 @@ mod tests {
         assert!(error.contains("EBML"));
         assert!(!error.contains("box"));
     }
+    /// The tags the player builds a decoder for, read out as the names a viewer
+    /// shows rather than the four bytes the container stores.
+    #[test]
+    fn video_fourccs_read_as_the_names_a_viewer_shows() {
+        for (fourcc, name) in [
+            (b"avc1", "H.264"),
+            (b"avc3", "H.264"),
+            (b"hvc1", "H.265"),
+            (b"hev1", "H.265"),
+            (b"vp09", "VP9"),
+            (b"av01", "AV1"),
+        ] {
+            assert_eq!(mp4_codec(&fourcc), name, "{fourcc:?}");
+        }
+    }
     #[test]
     fn edit_window_preserves_track_units_and_rounds_fractional_end_up() {
-        use crate::container::mp4::{Edit, Track};
+        use crate::container::mp4::{Edit, SampleIndex, Track};
         let mut track = Track {
             id: 1,
             handler: *b"vide",
             codec: *b"avc1",
+            name: String::new(),
+            language: String::new(),
             timescale: 12800,
             duration: 6144,
             width: 64,
             height: 64,
             channels: 0,
             sample_rate: 0,
+            bit_depth: 0,
             configuration: vec![],
             edits: vec![],
-            samples: vec![],
+            samples: SampleIndex::Expanded(vec![]),
+            pixel_aspect: (1, 1),
+            rotation: 0,
         };
         assert_eq!(playback_window(&track, 1000).unwrap(), (0, None));
         track.edits.push(Edit {
@@ -910,5 +1129,137 @@ mod tests {
         assert!(!reader.read_frame().unwrap());
         reader.rewind().unwrap();
         assert!(reader.read_frame().unwrap());
+    }
+    /// The shape of a pixel belongs to the container, not to the decoder: two
+    /// files of one 64x64 source, each muxed to be drawn twice as wide as it is
+    /// stored, and a file that says nothing.
+    ///
+    /// ```text
+    /// ffmpeg -f lavfi -i testsrc2=size=64x64:rate=25:duration=0.4 -vf setsar=2 \
+    ///   -c:v libx264 -pix_fmt yuv420p tests/fixtures/display/par-2x1.mp4
+    /// ffmpeg -f lavfi -i testsrc2=size=64x64:rate=25:duration=0.4 -vf setsar=2 \
+    ///   -c:v libvpx-vp9 -b:v 0 -crf 60 -deadline realtime \
+    ///   tests/fixtures/display/par-2x1.webm
+    /// ```
+    #[test]
+    fn an_item_states_the_shape_of_its_pixels() {
+        let aspect = |bytes: &[u8]| {
+            NativeReader::new(BufReader::new(Cursor::new(bytes)), 1 << 20)
+                .unwrap()
+                .pixel_aspect()
+        };
+        assert_eq!(
+            aspect(include_bytes!("../tests/fixtures/display/par-2x1.mp4")),
+            (2, 1)
+        );
+        assert_eq!(
+            aspect(include_bytes!("../tests/fixtures/display/par-2x1.webm")),
+            (2, 1)
+        );
+        // Nothing stated is square pixels, which is what the overwhelming
+        // majority of files mean; a guessed shape would stretch all of them.
+        assert_eq!(
+            aspect(include_bytes!("../tests/fixtures/vp9/motion.webm")),
+            (1, 1)
+        );
+        let raw = b"YUV4MPEG2 W2 H2 F25:1 Ip C420jpeg\nFRAME\n";
+        assert_eq!(
+            NativeReader::new(BufReader::new(Cursor::new(raw)), 18)
+                .unwrap()
+                .pixel_aspect(),
+            (1, 1)
+        );
+    }
+    /// Every turn a container can ask for, on a grid whose pixels are
+    /// distinguishable and whose edges are not: 2 wide, 3 tall, numbered as
+    /// stored.
+    ///
+    /// ```text
+    /// 1 2
+    /// 3 4
+    /// 5 6
+    /// ```
+    #[test]
+    fn a_turn_moves_every_pixel_to_its_place() {
+        let stored = [1u8, 2, 3, 4, 5, 6];
+        assert_eq!(rotate_plane(&stored, 2, 3, 0, 1), stored);
+        assert_eq!(rotate_plane(&stored, 2, 3, 90, 1), [5, 3, 1, 6, 4, 2]);
+        assert_eq!(rotate_plane(&stored, 2, 3, 180, 1), [6, 5, 4, 3, 2, 1]);
+        assert_eq!(rotate_plane(&stored, 2, 3, 270, 1), [2, 4, 6, 1, 3, 5]);
+        // Four quarter turns, each over the size the previous one left, are the
+        // picture again.
+        let once = rotate_plane(&stored, 2, 3, 90, 1);
+        let twice = rotate_plane(&once, 3, 2, 90, 1);
+        let thrice = rotate_plane(&twice, 2, 3, 90, 1);
+        assert_eq!(rotate_plane(&thrice, 3, 2, 90, 1), stored);
+        // A pixel wider than one byte travels whole: no turn shears a channel
+        // away from its two neighbours.
+        let rgb: Vec<u8> = (1..=12).collect();
+        assert_eq!(
+            rotate_plane(&rgb, 2, 2, 90, 3),
+            [7, 8, 9, 1, 2, 3, 10, 11, 12, 4, 5, 6]
+        );
+    }
+    /// Planes turn with their own geometry: the luma grid and the two smaller
+    /// chroma grids each go through the same turn, and the sizes that describe
+    /// them change with them.
+    #[test]
+    fn planes_turn_with_their_own_geometry() {
+        let y: Vec<u8> = (1..=24u8).collect();
+        let cb: Vec<u8> = (101..=106u8).collect();
+        let cr: Vec<u8> = (201..=206u8).collect();
+        let planes = Planar8 {
+            width: 4,
+            height: 6,
+            chroma_width: 2,
+            chroma_height: 3,
+            y: y.clone(),
+            cb: cb.clone(),
+            cr: cr.clone(),
+            colour: AvcColour::default(),
+        };
+        let turned = rotate_planar8(&planes, 90);
+        assert_eq!((turned.width, turned.height), (6, 4));
+        assert_eq!((turned.chroma_width, turned.chroma_height), (3, 2));
+        assert_eq!(turned.y, rotate_plane(&y, 4, 6, 90, 1));
+        assert_eq!(turned.cb, rotate_plane(&cb, 2, 3, 90, 1));
+        assert_eq!(turned.cr, rotate_plane(&cr, 2, 3, 90, 1));
+        // A stated nothing leaves the bytes where they are.
+        let same = rotate_planar8(&planes, 0);
+        assert_eq!((same.y, same.cb, same.cr), (y.clone(), cb.clone(), cr));
+        assert_eq!((same.width, same.height), (4, 6));
+        // The colour the decoder carried travels with the pixels.
+        assert_eq!(turned.colour.kr, planes.colour.kr);
+        assert_eq!(turned.colour.kb, planes.colour.kb);
+        assert_eq!(turned.colour.full, planes.colour.full);
+    }
+    /// The fixture of `an_item_states_the_shape_of_its_pixels` again with its
+    /// `tkhd` transform set to a quarter turn, which is the shape of a file
+    /// from a camera held sideways. No muxer here writes one: ffmpeg drops the
+    /// rotation option it once had, so the header is patched by hand over the
+    /// bytes it did write.
+    #[test]
+    fn a_turned_item_is_shown_upright() {
+        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/display/par-2x1.mp4");
+        let mut upright = NativeReader::new(BufReader::new(Cursor::new(FIXTURE)), 1 << 20).unwrap();
+        assert_eq!(upright.rotation(), 0);
+        assert!(upright.read_frame().unwrap());
+        assert_eq!(upright.dimensions(), [64, 64]);
+        let rgb = upright.rgb().to_vec();
+        let mut turned = FIXTURE.to_vec();
+        let matrix = turned.windows(4).position(|w| w == b"tkhd").unwrap() + 4 + 40;
+        for (at, value) in [(0, 0u32), (4, 0x0001_0000), (12, 0xFFFF_0000), (16, 0)] {
+            turned[matrix + at..matrix + at + 4].copy_from_slice(&value.to_be_bytes());
+        }
+        let mut reader = NativeReader::new(BufReader::new(Cursor::new(turned)), 1 << 20).unwrap();
+        assert!(reader.read_frame().unwrap());
+        assert_eq!(reader.rotation(), 90);
+        // A square picture keeps its size through a quarter turn; the shape of
+        // a stored pixel, which the turn stands on its side, does not.
+        assert_eq!(reader.dimensions(), [64, 64]);
+        assert_eq!(reader.pixel_aspect(), (1, 2));
+        assert_eq!(reader.rgb(), rotate_plane(&rgb, 64, 64, 90, 3));
+        // The test would pass on a symmetric picture without saying anything.
+        assert_ne!(reader.rgb(), rgb.as_slice());
     }
 }

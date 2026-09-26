@@ -5,7 +5,9 @@
 
 use crate::audio::{AudioPacket, AudioSpec, SampleFormat};
 use symphonia::core::audio::Channels;
-use symphonia::core::codecs::audio::{AudioCodecParameters, AudioDecoderOptions, well_known::CODEC_ID_AAC};
+use symphonia::core::codecs::audio::{
+    AudioCodecParameters, AudioDecoderOptions, well_known::CODEC_ID_AAC,
+};
 use symphonia::core::packet::Packet;
 use symphonia::default::get_codecs;
 
@@ -56,8 +58,18 @@ impl AacDecoder {
     }
 
     /// Decode an AAC packet and return PCM samples as interleaved f32.
-    pub fn decode(&mut self, packet_data: &[u8], pts: u64, duration: u64) -> crate::Result<Option<AudioPacket>> {
-        let packet = Packet::new(0, (pts as i64).into(), duration.into(), packet_data.to_vec());
+    pub fn decode(
+        &mut self,
+        packet_data: &[u8],
+        pts: u64,
+        duration: u64,
+    ) -> crate::Result<Option<AudioPacket>> {
+        let packet = Packet::new(
+            0,
+            (pts as i64).into(),
+            duration.into(),
+            packet_data.to_vec(),
+        );
 
         let audio_buf = match self.decoder.decode(&packet) {
             Ok(buf) => buf,
@@ -72,10 +84,7 @@ impl AacDecoder {
         let mut samples: Vec<f32> = Vec::with_capacity(num_samples);
         audio_buf.copy_to_vec_interleaved(&mut samples);
 
-        let sample_bytes: Vec<u8> = samples
-            .iter()
-            .flat_map(|s| s.to_le_bytes())
-            .collect();
+        let sample_bytes: Vec<u8> = samples.iter().flat_map(|s| s.to_le_bytes()).collect();
 
         Ok(Some(AudioPacket {
             data: sample_bytes,

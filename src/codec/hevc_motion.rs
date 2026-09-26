@@ -530,8 +530,7 @@ pub fn predict(
             &mut block_output,
         );
         for (out, &value) in output.iter_mut().zip(block_output.iter()) {
-            *out = (((value * first_input.2 + (1 << (precision - 1))) >> precision)
-                + first_input.3)
+            *out = (((value * first_input.2 + (1 << (precision - 1))) >> precision) + first_input.3)
                 .clamp(0, max) as u16;
         }
     } else {

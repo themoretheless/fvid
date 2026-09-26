@@ -10,8 +10,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .and_then(|a| a.to_str())
         .and_then(|a| a.parse().ok())
         .unwrap_or(60);
-    let mut reader =
-        fvid::playback_native::NativeReader::without_memory_limit(BufReader::new(File::open(&args[0])?))?;
+    let mut reader = fvid::playback_native::NativeReader::without_memory_limit(BufReader::new(
+        File::open(&args[0])?,
+    ))?;
     // Two passes: the first also pays for cold file reads, the second is warm.
     for pass in 0..2 {
         if pass == 1 {
@@ -48,7 +49,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
     }
     // Optional third argument: seek to that many seconds and report where we land.
-    if let Some(secs) = args.get(2).and_then(|a| a.to_str()).and_then(|a| a.parse::<f64>().ok()) {
+    if let Some(secs) = args
+        .get(2)
+        .and_then(|a| a.to_str())
+        .and_then(|a| a.parse::<f64>().ok())
+    {
         let start = Instant::now();
         reader.seek(std::time::Duration::from_secs_f64(secs))?;
         let (begin, end, scale) = reader.frame_interval().ok_or("no frame after seek")?;

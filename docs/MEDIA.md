@@ -27,6 +27,10 @@ Qualified: macOS/FFmpeg 9.0.1; Windows/FFmpeg 9.0.1 shared (BtbN n9.0.1-29). `va
 # bitrate, frame rate, disposition, размеров и временных шкал.
 fvid media probe input.mp4
 
+# Формат без сигнатуры в байтах читается только если демуксер назван (аналог `ffmpeg -f`).
+fvid media probe frame.gem --input-format gem_pipe
+fvid media decode frame.gem --input-format gem_pipe
+
 # Окно: software decode, звук устройства вывода. Space — пауза, Esc — выход.
 fvid play input.mp4
 fvid media play input.mp4 --no-audio
@@ -154,6 +158,8 @@ Pixel format, subsampling и bit depth не преобразуются авто�
 
 Выход резервируется во временном файле рядом с destination и публикуется no-clobber hard link после успешного trailer/close. Существующий файл не заменяется. Нужна поддержка hard links; crash durability/fsync не гарантированы.
 
+Decode-пути терпимы к повреждённому входу ровно в одном месте: чтение пакета, которое demuxer отдаёт как `AVERROR_INVALIDDATA`, пропускается и суммируется в поле `decode_errors` в JSON-выводе `media decode` и `media decode-audio`. Больше 64 таких чтений обрывают чтение, но уже декодированное сохраняется: декодер опоражнивается, `video_frames`/`sample_frames` остаются честными, и ошибкой падает только вход, не отдавший ни кадра и ни сэмпла. Ошибки самого декодера в видео-ветке строги; аудио-путь к тому же пропускает дальше пакет, отвергнутый декодером как `AVERROR_INVALID_DATA`. Пакеты под флагом `AV_PKT_FLAG_CORRUPT` в обоих decode-путях доходят до декодера — решение за ним. `remux`/`trim`/`concat` и остальные copy-пути не терпят ничего: битые байты, включая corrupt-флаг, не должны попасть в новый файл.
+
 ```sh
 cargo test --features media
 cargo test --manifest-path crates/fvid-media/Cargo.toml
@@ -227,6 +233,21 @@ fvid media transcode input.mp4 exact.webm --encoder libvpx-vp9 --encoder-option 
 Проверены libx264 CRF0, libx265 lossless и libvpx-vp9 lossless=1 с точным сравнением пикселей после crop/hflip, а также lossy H.264 CRF28 с сохранением количества кадров/геометрии. Для CRF28 равенство пикселей не заявляется. HEVC/AV1/ProRes квалифицированы как decode inputs для crop-lossless. Наличие остальных энкодеров в capabilities не доказывает их end-to-end поддержку. Hardware encoder selection не создаёт hardware decoder/filter interop и не означает zero-copy GPU. [H.264 lossless бенчмарк](../benchmarks/encoder-benchmark.json) сравнивает одинаковое преобразование и качество на коротком корпусе.
 
 Rust API: `EncoderSettings { name, options }` и `transcode(...)`; тип результата исторически называется `LosslessStats`, но в общем режиме это статистика обработки, а не гарантия lossless. Поле `encoder` указывает фактически запрошенный энкодер.
+
+## Явное имя демуксера
+
+`--input-format NAME` принимается только командами, которые ничего не пишут (`probe`, `decode`), и
+работает как `-f` у ffmpeg: `avformat_open_input` вызывается с названным `AVInputFormat`, проба
+контейнера не выполняется. Это единственный способ прочесть файл, чьи байты не описывают себя (`gem`
+и другие форматы, читаемые у ffmpeg только по имени демуксера); имени, которого в сборке нет,
+соответствует ошибка `no demuxer named NAME`, а не молчаливая проба другого.
+
+Названный демуксер обходит белый список контейнеров, который иначе выставляет политика автономного
+входа, поэтому под этой политикой (`fvid mcp`, `fvid_media::with_standalone_inputs`) указание формата
+отвергается: политика не может проверить то, что вызывающий утверждает сам. Тест
+`the_standalone_input_policy_refuses_a_demuxer_the_caller_names`
+в `crates/fvid-media` держит это как контракт, и поэтому у строки `gem` в матрице
+[K-Lite](KLITE_COVERAGE.md) стоит «нет» в колонке MCP.
 
 ## Декодирование сжатого аудио в PCM
 

@@ -285,7 +285,16 @@ mod tests {
             let mut intra = Plane::new(4, 4, depth, 48).unwrap();
             let mut pred_scratch = Vec::new();
             intra
-                .reconstruct_intra([0, 0], 2, 1, false, false, &residual, &mut pred_scratch, |_, _| true)
+                .reconstruct_intra(
+                    [0, 0],
+                    2,
+                    1,
+                    false,
+                    false,
+                    &residual,
+                    &mut pred_scratch,
+                    |_, _| true,
+                )
                 .unwrap();
             assert_eq!(intra.samples(), expected);
         }
@@ -323,16 +332,43 @@ mod tests {
     fn published_blocks_feed_prediction_but_future_samples_do_not() {
         let mut p = Plane::new(8, 4, 8, 96).unwrap();
         let mut pred_scratch = Vec::new();
-        p.reconstruct_intra([0, 0], 2, 1, false, false, &[12; 16], &mut pred_scratch, |_, _| true)
-            .unwrap();
-        p.reconstruct_intra([4, 0], 2, 10, false, false, &[0; 16], &mut pred_scratch, |_, _| true)
-            .unwrap();
+        p.reconstruct_intra(
+            [0, 0],
+            2,
+            1,
+            false,
+            false,
+            &[12; 16],
+            &mut pred_scratch,
+            |_, _| true,
+        )
+        .unwrap();
+        p.reconstruct_intra(
+            [4, 0],
+            2,
+            10,
+            false,
+            false,
+            &[0; 16],
+            &mut pred_scratch,
+            |_, _| true,
+        )
+        .unwrap();
         assert!(p.complete());
         assert_eq!(p.samples(), [140; 32]);
         let saved = p.samples().to_vec();
         assert!(
-            p.reconstruct_intra([0, 0], 2, 1, false, false, &[0; 16], &mut pred_scratch, |_, _| true)
-                .is_err()
+            p.reconstruct_intra(
+                [0, 0],
+                2,
+                1,
+                false,
+                false,
+                &[0; 16],
+                &mut pred_scratch,
+                |_, _| true
+            )
+            .is_err()
         );
         assert_eq!(p.samples(), saved);
         assert!(Plane::new(8, 4, 8, 95).is_err());
@@ -341,10 +377,28 @@ mod tests {
     fn unavailable_boundaries_and_extreme_residuals_are_safe() {
         let mut p = Plane::new(8, 4, 10, 96).unwrap();
         let mut pred_scratch = Vec::new();
-        p.reconstruct_intra([0, 0], 2, 1, true, false, &[i32::MAX; 16], &mut pred_scratch, |_, _| true)
-            .unwrap();
-        p.reconstruct_intra([4, 0], 2, 10, true, false, &[0; 16], &mut pred_scratch, |_, _| false)
-            .unwrap();
+        p.reconstruct_intra(
+            [0, 0],
+            2,
+            1,
+            true,
+            false,
+            &[i32::MAX; 16],
+            &mut pred_scratch,
+            |_, _| true,
+        )
+        .unwrap();
+        p.reconstruct_intra(
+            [4, 0],
+            2,
+            10,
+            true,
+            false,
+            &[0; 16],
+            &mut pred_scratch,
+            |_, _| false,
+        )
+        .unwrap();
         for row in p.samples().chunks_exact(8) {
             assert_eq!(&row[..4], &[1023; 4]);
             assert_eq!(&row[4..], &[512; 4]);

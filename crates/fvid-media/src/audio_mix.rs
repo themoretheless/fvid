@@ -322,6 +322,7 @@ fn decode_to_packed_f32(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
                         channels: f.ch_layout.nb_channels,
                         sample_format: "flt".into(),
                         planar_interleave_bytes: 0,
+                        decode_errors: 0,
                     });
                 } else {
                     let active = stats.as_ref().unwrap();

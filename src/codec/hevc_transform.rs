@@ -117,7 +117,10 @@ pub fn reconstruct(
         }
     }
     for y in 0..side {
-        inverse(&intermediate[y * side..(y + 1) * side], &mut output_buf[..side]);
+        inverse(
+            &intermediate[y * side..(y + 1) * side],
+            &mut output_buf[..side],
+        );
         for x in 0..side {
             out[y * side + x] = (output_buf[x] + round as i32) >> final_shift;
         }
@@ -211,7 +214,18 @@ mod tests {
                     block[0] = value << (log - 2);
                     let mut scratch = Vec::new();
                     let mut out = Vec::new();
-                    reconstruct(&block, log, depth, 0, Transform::Dct, &flat, 0, &mut scratch, &mut out).unwrap();
+                    reconstruct(
+                        &block,
+                        log,
+                        depth,
+                        0,
+                        Transform::Dct,
+                        &flat,
+                        0,
+                        &mut scratch,
+                        &mut out,
+                    )
+                    .unwrap();
                     assert!(out.iter().all(|&v| v == expected));
                 }
             }
@@ -224,12 +238,48 @@ mod tests {
         block[0] = 64;
         let mut scratch = Vec::new();
         let mut out = Vec::new();
-        reconstruct(&block, 2, 8, 0, Transform::Dst4, &flat, 0, &mut scratch, &mut out).unwrap();
-        assert_eq!(out, [2, 4, 5, 6, 4, 7, 10, 11, 5, 10, 13, 15, 6, 11, 15, 17]);
-        reconstruct(&block, 2, 8, 0, Transform::Skip, &flat, 0, &mut scratch, &mut out).unwrap();
+        reconstruct(
+            &block,
+            2,
+            8,
+            0,
+            Transform::Dst4,
+            &flat,
+            0,
+            &mut scratch,
+            &mut out,
+        )
+        .unwrap();
+        assert_eq!(
+            out,
+            [2, 4, 5, 6, 4, 7, 10, 11, 5, 10, 13, 15, 6, 11, 15, 17]
+        );
+        reconstruct(
+            &block,
+            2,
+            8,
+            0,
+            Transform::Skip,
+            &flat,
+            0,
+            &mut scratch,
+            &mut out,
+        )
+        .unwrap();
         assert_eq!(out[0], 40);
         assert!(out[1..].iter().all(|&v| v == 0));
-        reconstruct(&block, 2, 8, 0, Transform::Bypass, &flat, 0, &mut scratch, &mut out).unwrap();
+        reconstruct(
+            &block,
+            2,
+            8,
+            0,
+            Transform::Bypass,
+            &flat,
+            0,
+            &mut scratch,
+            &mut out,
+        )
+        .unwrap();
         assert_eq!(out, block);
     }
     #[test]
@@ -279,7 +329,18 @@ mod tests {
                 }
                 let mut scratch = Vec::new();
                 let mut out = Vec::new();
-                reconstruct(&block, 2, depth, qp, Transform::Dct, &flat, 0, &mut scratch, &mut out).unwrap();
+                reconstruct(
+                    &block,
+                    2,
+                    depth,
+                    qp,
+                    Transform::Dct,
+                    &flat,
+                    0,
+                    &mut scratch,
+                    &mut out,
+                )
+                .unwrap();
                 assert_eq!(out, expected);
             }
         }
@@ -293,12 +354,45 @@ mod tests {
         let mut scratch = Vec::new();
         let mut out_a = Vec::new();
         let mut out_b = Vec::new();
-        reconstruct(&block, 3, 8, 12, Transform::Dct, &flat, 0, &mut scratch, &mut out_a).unwrap();
-        reconstruct(&block, 3, 8, 12, Transform::Dct, &defaults, 0, &mut scratch, &mut out_b).unwrap();
+        reconstruct(
+            &block,
+            3,
+            8,
+            12,
+            Transform::Dct,
+            &flat,
+            0,
+            &mut scratch,
+            &mut out_a,
+        )
+        .unwrap();
+        reconstruct(
+            &block,
+            3,
+            8,
+            12,
+            Transform::Dct,
+            &defaults,
+            0,
+            &mut scratch,
+            &mut out_b,
+        )
+        .unwrap();
         assert_ne!(out_a, out_b);
         for (value, expected) in [(32767, 4096), (-32768, -4096)] {
             let mut out = Vec::new();
-            reconstruct(&[value; 16], 2, 10, 63, Transform::Skip, &flat, 0, &mut scratch, &mut out).unwrap();
+            reconstruct(
+                &[value; 16],
+                2,
+                10,
+                63,
+                Transform::Skip,
+                &flat,
+                0,
+                &mut scratch,
+                &mut out,
+            )
+            .unwrap();
             assert_eq!(out, [expected; 16]);
         }
     }
@@ -316,12 +410,53 @@ mod tests {
             (2, 10, 64, 0),
             (2, 8, 0, 6),
         ] {
-            assert!(reconstruct(&[0; 16], log, depth, qp, Transform::Dct, &flat, id, &mut scratch, &mut out).is_err());
+            assert!(
+                reconstruct(
+                    &[0; 16],
+                    log,
+                    depth,
+                    qp,
+                    Transform::Dct,
+                    &flat,
+                    id,
+                    &mut scratch,
+                    &mut out
+                )
+                .is_err()
+            );
         }
-        assert!(reconstruct(&[0; 15], 2, 8, 0, Transform::Dct, &flat, 0, &mut scratch, &mut out).is_err());
-        assert!(reconstruct(&[i32::MAX; 16], 2, 8, 0, Transform::Dct, &flat, 0, &mut scratch, &mut out).is_err());
+        assert!(
+            reconstruct(
+                &[0; 15],
+                2,
+                8,
+                0,
+                Transform::Dct,
+                &flat,
+                0,
+                &mut scratch,
+                &mut out
+            )
+            .is_err()
+        );
+        assert!(
+            reconstruct(
+                &[i32::MAX; 16],
+                2,
+                8,
+                0,
+                Transform::Dct,
+                &flat,
+                0,
+                &mut scratch,
+                &mut out
+            )
+            .is_err()
+        );
         for mode in [Transform::Dst4, Transform::Skip] {
-            assert!(reconstruct(&[0; 64], 3, 8, 0, mode, &flat, 0, &mut scratch, &mut out).is_err());
+            assert!(
+                reconstruct(&[0; 64], 3, 8, 0, mode, &flat, 0, &mut scratch, &mut out).is_err()
+            );
         }
     }
 }

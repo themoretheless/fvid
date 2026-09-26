@@ -5,7 +5,9 @@
 //! small bounded queue; control messages (pause, rewind, seek) go the other
 //! way. Every frame carries the generation of the last rewind or seek so
 //! stale queued frames can be dropped.
-use crate::playback_native::{NativeReader, Planar8, RawFrame, avc_to_planar8, yuv_to_rgb};
+use crate::playback_native::{
+    NativeReader, Planar8, RawFrame, avc_to_planar8, rotate_planar8, yuv_to_rgb,
+};
 use std::{
     io::{BufRead, Seek},
     sync::{
@@ -72,6 +74,10 @@ enum Stage {
         interval: Option<(u128, u128, u32)>,
         pts: Option<(i64, u32)>,
         generation: u64,
+        /// Degrees clockwise the picture is stored away from upright. Only the
+        /// plane path is turned with it: packed RGB reaches this thread already
+        /// turned, shaped that way by the reader.
+        rotation: u16,
     },
     Event(Event),
 }
@@ -119,6 +125,7 @@ impl Playback {
                             interval,
                             pts,
                             generation,
+                            rotation,
                         } => {
                             let pixels = match raw {
                                 RawFrame::Rgb(rgb) => Pixels::Rgb(rgb),
@@ -138,17 +145,20 @@ impl Playback {
                                 } => {
                                     let mut rgb = Vec::new();
                                     yuv_to_rgb(
-                                        &data,
-                                        luma_len,
-                                        chroma_len,
-                                        width,
-                                        height,
-                                        sx,
-                                        sy,
+                                        &data, luma_len, chroma_len, width, height, sx, sy,
                                         &mut rgb,
                                     );
                                     Pixels::Rgb(rgb)
                                 }
+                            };
+                            // The turn the container asked for, still owed to the
+                            // planes: packed RGB reaches this thread already
+                            // turned, shaped that way by the reader.
+                            let pixels = match (pixels, rotation) {
+                                (Pixels::Planar(planes), rotation) if rotation != 0 => {
+                                    Pixels::Planar(Arc::new(rotate_planar8(&planes, rotation)))
+                                }
+                                (pixels, _) => pixels,
                             };
                             serial += 1;
                             Event::Frame(Frame {
@@ -257,6 +267,7 @@ impl<R: BufRead + Seek> Worker<R> {
             interval: self.reader.frame_interval(),
             pts: self.reader.current_pts(),
             generation: self.generation,
+            rotation: self.reader.rotation(),
         }
     }
     fn decode_next(&mut self) -> Stage {

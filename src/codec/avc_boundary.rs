@@ -220,11 +220,14 @@ pub fn row_edges(
 ) -> Result<[Vec<super::avc_deblock::MacroblockEdges>; 3]> {
     if current.is_empty()
         || previous.is_some_and(|p| p.len() != current.len())
-        || current.iter().chain(previous.into_iter().flatten()).any(|m| {
-            m.disable_filter > 2
-                || m.qp.iter().any(|q| !(-36..=51).contains(q))
-                || m.offsets.iter().any(|o| !(-12..=12).contains(o))
-        })
+        || current
+            .iter()
+            .chain(previous.into_iter().flatten())
+            .any(|m| {
+                m.disable_filter > 2
+                    || m.qp.iter().any(|q| !(-36..=51).contains(q))
+                    || m.offsets.iter().any(|o| !(-12..=12).contains(o))
+            })
     {
         return Err(invalid("invalid AVC edge-grid parameters"));
     }
@@ -261,7 +264,8 @@ pub fn row_edges(
                     }
                     luma.qp[direction][edge] = (mb.qp[0] + prev.qp[0] + 1) >> 1;
                     for (component, qp) in chroma_qp.iter_mut().enumerate() {
-                        qp[direction][edge] = (mb.qp[component + 1] + prev.qp[component + 1] + 1) >> 1;
+                        qp[direction][edge] =
+                            (mb.qp[component + 1] + prev.qp[component + 1] + 1) >> 1;
                     }
                     for segment in 0..4 {
                         let q = if direction == 0 {

@@ -14,8 +14,8 @@ use super::{
     avc_picture::{IntraPicture, chroma_qp},
     avc_slice::{SliceHeader, SliceType},
 };
-use crate::{Result, invalid};
 use super::{avc_boundary::row_edges, avc_deblock::MacroblockEdges};
+use crate::{Result, invalid};
 use std::sync::{
     Condvar, Mutex,
     atomic::{AtomicUsize, Ordering},
@@ -314,256 +314,272 @@ pub fn decode_inter_picture_with_motion(
                 })
                 .collect();
             let parsed: Result<()> = (|| {
-    let mut seen = 0;
-    while let Some(mb) = match (&mut cabac, &mut cavlc) {
-        (Some(reader), _) => reader.read_macroblock()?,
-        (_, Some(reader)) => reader.read_macroblock()?,
-        _ => return Err(invalid("missing AVC entropy reader")),
-    } {
-        if let InterMacroblock::Intra(block) = mb {
-            let address = block.address as usize;
-            motion.store(
-                [address % (w / 16) * 16, address / (w / 16) * 16],
-                [16, 16],
-                0,
-                [Neighbour::NoPrediction; 2],
-            )?;
-            let bd = 6 * (i32::from(sps.bit_depth_luma) - 8);
-            let qps = [
-                block.qp,
-                i32::from(chroma_qp(
-                    block.qp,
-                    pps.chroma_qp_offset,
-                    sps.bit_depth_chroma,
-                )) - bd,
-                i32::from(chroma_qp(
-                    block.qp,
-                    pps.second_chroma_qp_offset,
-                    sps.bit_depth_chroma,
-                )) - bd,
-            ];
-            edge_rows[address / width_mbs]
-                .lock()
-                .unwrap_or_else(|e| e.into_inner())
-                .push(DecodedBlockEdges {
-                blocks: [BlockEdge {
-                    intra: true,
-                    switching_slice: false,
-                    nonzero_luma: false,
-                    motion: [None; 2],
-                }; 16],
-                qp: qps,
-                slice_id: 0,
-                disable_filter: header.disable_deblocking_filter_idc as u8,
-                offsets: [header.alpha_offset, header.beta_offset],
-                transform8: matches!(block.luma, super::avc_macroblock::IntraLuma::Blocks8 { .. }),
-            });
-            order.push(Order::Intra(block));
-            seen += 1;
-            row_done(seen);
-            continue;
-        }
+                let mut seen = 0;
+                while let Some(mb) = match (&mut cabac, &mut cavlc) {
+                    (Some(reader), _) => reader.read_macroblock()?,
+                    (_, Some(reader)) => reader.read_macroblock()?,
+                    _ => return Err(invalid("missing AVC entropy reader")),
+                } {
+                    if let InterMacroblock::Intra(block) = mb {
+                        let address = block.address as usize;
+                        motion.store(
+                            [address % (w / 16) * 16, address / (w / 16) * 16],
+                            [16, 16],
+                            0,
+                            [Neighbour::NoPrediction; 2],
+                        )?;
+                        let bd = 6 * (i32::from(sps.bit_depth_luma) - 8);
+                        let qps = [
+                            block.qp,
+                            i32::from(chroma_qp(
+                                block.qp,
+                                pps.chroma_qp_offset,
+                                sps.bit_depth_chroma,
+                            )) - bd,
+                            i32::from(chroma_qp(
+                                block.qp,
+                                pps.second_chroma_qp_offset,
+                                sps.bit_depth_chroma,
+                            )) - bd,
+                        ];
+                        edge_rows[address / width_mbs]
+                            .lock()
+                            .unwrap_or_else(|e| e.into_inner())
+                            .push(DecodedBlockEdges {
+                                blocks: [BlockEdge {
+                                    intra: true,
+                                    switching_slice: false,
+                                    nonzero_luma: false,
+                                    motion: [None; 2],
+                                }; 16],
+                                qp: qps,
+                                slice_id: 0,
+                                disable_filter: header.disable_deblocking_filter_idc as u8,
+                                offsets: [header.alpha_offset, header.beta_offset],
+                                transform8: matches!(
+                                    block.luma,
+                                    super::avc_macroblock::IntraLuma::Blocks8 { .. }
+                                ),
+                            });
+                        order.push(Order::Intra(block));
+                        seen += 1;
+                        row_done(seen);
+                        continue;
+                    }
 
-        let (address, qp, parts, coefficients, eight) = match mb {
-            InterMacroblock::Intra(_) => {
-                return Err(invalid(
-                    "mixed intra picture reconstruction is not connected",
-                ));
-            }
-            InterMacroblock::Skip { address, qp } if is_b => {
-                let super::avc_inter::MacroblockType::Inter { partitions, .. } =
-                    super::avc_inter::macroblock_type(SliceType::B, 0)?
-                else {
-                    return Err(invalid("invalid B-skip partition layout"));
-                };
-                (address, qp, partitions, None, false)
-            }
-            InterMacroblock::Skip { address, qp } => (
-                address,
-                qp,
-                vec![Partition {
-                    origin: [0, 0],
-                    size: [16, 16],
-                    prediction: Prediction::L0,
-                    group: 0,
-                    references: [Some(0), None],
-                    differences: [[0; 2]; 2],
-                }],
-                None,
-                false,
-            ),
-            InterMacroblock::Coded {
-                address,
-                header,
-                coefficients,
-            } => (
-                address,
-                header.residual.qp,
-                header.partitions,
-                Some(coefficients),
-                header.residual.transform8,
-            ),
-        };
-        let origin = [address % (w / 16) * 16, address / (w / 16) * 16];
-        let vectors = if coefficients.is_none() && !is_b {
-            vec![[
-                Neighbour::Inter {
-                    reference: 0,
-                    vector: motion.decode_p_skip(origin, 0)?,
-                },
-                Neighbour::NoPrediction,
-            ]]
-        } else {
-            motion.decode_macroblock_with_direct(origin, 0, &parts, direct)?
-        };
-        let weights = if explicit_weights || (is_b && pps.weighted_bipred == 2) {
-            let mut weights = Vec::with_capacity(parts.len());
-            for vector in &vectors {
-                let mut weight = [[ComponentWeight::default(); 3]; 2];
-                if explicit_weights {
-                    let table = header.weights.as_ref().unwrap();
-                    for list in 0..2 {
-                        if let Neighbour::Inter { reference, .. } = vector[list] {
-                            let entry = [&table.l0, &table.l1][list]
-                                .get(reference as usize)
-                                .ok_or_else(|| invalid("missing explicit reference weight"))?;
-                            weight[list] = [
-                                ComponentWeight {
-                                    weight: entry.luma.0,
-                                    offset: entry.luma.1,
-                                    denominator: table.luma_denom,
-                                },
-                                ComponentWeight {
-                                    weight: entry.chroma[0].0,
-                                    offset: entry.chroma[0].1,
-                                    denominator: table.chroma_denom,
-                                },
-                                ComponentWeight {
-                                    weight: entry.chroma[1].0,
-                                    offset: entry.chroma[1].1,
-                                    denominator: table.chroma_denom,
-                                },
-                            ];
+                    let (address, qp, parts, coefficients, eight) = match mb {
+                        InterMacroblock::Intra(_) => {
+                            return Err(invalid(
+                                "mixed intra picture reconstruction is not connected",
+                            ));
+                        }
+                        InterMacroblock::Skip { address, qp } if is_b => {
+                            let super::avc_inter::MacroblockType::Inter { partitions, .. } =
+                                super::avc_inter::macroblock_type(SliceType::B, 0)?
+                            else {
+                                return Err(invalid("invalid B-skip partition layout"));
+                            };
+                            (address, qp, partitions, None, false)
+                        }
+                        InterMacroblock::Skip { address, qp } => (
+                            address,
+                            qp,
+                            vec![Partition {
+                                origin: [0, 0],
+                                size: [16, 16],
+                                prediction: Prediction::L0,
+                                group: 0,
+                                references: [Some(0), None],
+                                differences: [[0; 2]; 2],
+                            }],
+                            None,
+                            false,
+                        ),
+                        InterMacroblock::Coded {
+                            address,
+                            header,
+                            coefficients,
+                        } => (
+                            address,
+                            header.residual.qp,
+                            header.partitions,
+                            Some(coefficients),
+                            header.residual.transform8,
+                        ),
+                    };
+                    let origin = [address % (w / 16) * 16, address / (w / 16) * 16];
+                    let vectors = if coefficients.is_none() && !is_b {
+                        vec![[
+                            Neighbour::Inter {
+                                reference: 0,
+                                vector: motion.decode_p_skip(origin, 0)?,
+                            },
+                            Neighbour::NoPrediction,
+                        ]]
+                    } else {
+                        motion.decode_macroblock_with_direct(origin, 0, &parts, direct)?
+                    };
+                    let weights = if explicit_weights || (is_b && pps.weighted_bipred == 2) {
+                        let mut weights = Vec::with_capacity(parts.len());
+                        for vector in &vectors {
+                            let mut weight = [[ComponentWeight::default(); 3]; 2];
+                            if explicit_weights {
+                                let table = header.weights.as_ref().unwrap();
+                                for list in 0..2 {
+                                    if let Neighbour::Inter { reference, .. } = vector[list] {
+                                        let entry = [&table.l0, &table.l1][list]
+                                            .get(reference as usize)
+                                            .ok_or_else(|| {
+                                                invalid("missing explicit reference weight")
+                                            })?;
+                                        weight[list] = [
+                                            ComponentWeight {
+                                                weight: entry.luma.0,
+                                                offset: entry.luma.1,
+                                                denominator: table.luma_denom,
+                                            },
+                                            ComponentWeight {
+                                                weight: entry.chroma[0].0,
+                                                offset: entry.chroma[0].1,
+                                                denominator: table.chroma_denom,
+                                            },
+                                            ComponentWeight {
+                                                weight: entry.chroma[1].0,
+                                                offset: entry.chroma[1].1,
+                                                denominator: table.chroma_denom,
+                                            },
+                                        ];
+                                    }
+                                }
+                            } else if let [
+                                Neighbour::Inter { reference: a, .. },
+                                Neighbour::Inter { reference: b, .. },
+                            ] = *vector
+                            {
+                                let context = direct.unwrap();
+                                let a = context
+                                    .list0
+                                    .get(a as usize)
+                                    .ok_or_else(|| invalid("implicit L0 reference missing"))?;
+                                let b = context
+                                    .list1
+                                    .get(b as usize)
+                                    .ok_or_else(|| invalid("implicit L1 reference missing"))?;
+                                let values = super::avc_mv::implicit_weights(
+                                    context.current_poc.into(),
+                                    a.poc.into(),
+                                    b.poc.into(),
+                                    a.long_term_index.is_some() || b.long_term_index.is_some(),
+                                );
+                                for list in 0..2 {
+                                    weight[list] = [ComponentWeight {
+                                        weight: values[list],
+                                        offset: 0,
+                                        denominator: 5,
+                                    }; 3];
+                                }
+                            }
+                            weights.push(weight);
+                        }
+                        Some(weights)
+                    } else {
+                        None
+                    };
+                    let bd = 6 * (i32::from(sps.bit_depth_luma) - 8);
+                    let qps = [
+                        (qp + bd) as u8,
+                        chroma_qp(qp, pps.chroma_qp_offset, sps.bit_depth_chroma),
+                        chroma_qp(qp, pps.second_chroma_qp_offset, sps.bit_depth_chroma),
+                    ];
+                    let empty = BlockEdge {
+                        intra: false,
+                        switching_slice: false,
+                        nonzero_luma: false,
+                        motion: [None; 2],
+                    };
+                    let mut blocks = [empty; 16];
+                    for (p, v) in parts.iter().zip(&vectors) {
+                        for y in
+                            usize::from(p.origin[1]) / 4..usize::from(p.origin[1] + p.size[1]) / 4
+                        {
+                            for x in usize::from(p.origin[0]) / 4
+                                ..usize::from(p.origin[0] + p.size[0]) / 4
+                            {
+                                blocks[y * 4 + x].motion = std::array::from_fn(|list| {
+                                    let n = v[list];
+                                    if let Neighbour::Inter { reference, vector } = n {
+                                        Some(MotionReference {
+                                            picture: all_references
+                                                .iter()
+                                                .position(|r| {
+                                                    std::ptr::eq(
+                                                        *r,
+                                                        references[list][usize::from(reference)],
+                                                    )
+                                                })
+                                                .unwrap()
+                                                as u64,
+                                            vector,
+                                        })
+                                    } else {
+                                        None
+                                    }
+                                });
+                            }
                         }
                     }
-                } else if let [
-                    Neighbour::Inter { reference: a, .. },
-                    Neighbour::Inter { reference: b, .. },
-                ] = *vector
-                {
-                    let context = direct.unwrap();
-                    let a = context
-                        .list0
-                        .get(a as usize)
-                        .ok_or_else(|| invalid("implicit L0 reference missing"))?;
-                    let b = context
-                        .list1
-                        .get(b as usize)
-                        .ok_or_else(|| invalid("implicit L1 reference missing"))?;
-                    let values = super::avc_mv::implicit_weights(
-                        context.current_poc.into(),
-                        a.poc.into(),
-                        b.poc.into(),
-                        a.long_term_index.is_some() || b.long_term_index.is_some(),
-                    );
-                    for list in 0..2 {
-                        weight[list] = [ComponentWeight {
-                            weight: values[list],
-                            offset: 0,
-                            denominator: 5,
-                        }; 3];
-                    }
-                }
-                weights.push(weight);
-            }
-            Some(weights)
-        } else {
-            None
-        };
-        let bd = 6 * (i32::from(sps.bit_depth_luma) - 8);
-        let qps = [
-            (qp + bd) as u8,
-            chroma_qp(qp, pps.chroma_qp_offset, sps.bit_depth_chroma),
-            chroma_qp(qp, pps.second_chroma_qp_offset, sps.bit_depth_chroma),
-        ];
-        let empty = BlockEdge {
-            intra: false,
-            switching_slice: false,
-            nonzero_luma: false,
-            motion: [None; 2],
-        };
-        let mut blocks = [empty; 16];
-        for (p, v) in parts.iter().zip(&vectors) {
-            for y in usize::from(p.origin[1]) / 4..usize::from(p.origin[1] + p.size[1]) / 4 {
-                for x in usize::from(p.origin[0]) / 4..usize::from(p.origin[0] + p.size[0]) / 4 {
-                    blocks[y * 4 + x].motion = std::array::from_fn(|list| {
-                        let n = v[list];
-                        if let Neighbour::Inter { reference, vector } = n {
-                            Some(MotionReference {
-                                picture: all_references
+                    if let Some(c) = &coefficients {
+                        for i in 0..16 {
+                            blocks[i].nonzero_luma = if eight {
+                                c.luma8[(i / 4 / 2) * 2 + (i % 4 / 2)]
                                     .iter()
-                                    .position(|r| {
-                                        std::ptr::eq(*r, references[list][usize::from(reference)])
-                                    })
-                                    .unwrap() as u64,
-                                vector,
-                            })
-                        } else {
-                            None
+                                    .any(|&v| v != 0)
+                            } else {
+                                c.luma_counts[i] != 0
+                            };
                         }
-                    });
+                    }
+                    edge_rows[address / width_mbs]
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner())
+                        .push(DecodedBlockEdges {
+                            blocks,
+                            qp: qps.map(|q| i32::from(q) - bd),
+                            slice_id: 0,
+                            disable_filter: header.disable_deblocking_filter_idc as u8,
+                            offsets: [header.alpha_offset, header.beta_offset],
+                            transform8: eight,
+                        });
+                    order.push(Order::Inter(origin));
+                    bands[origin[1] / 16]
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner())
+                        .3
+                        .push(InterJob {
+                            origin,
+                            parts,
+                            vectors,
+                            weights,
+                            coefficients,
+                            eight,
+                            qps,
+                        });
+                    seen += 1;
+                    row_done(seen);
                 }
-            }
-        }
-        if let Some(c) = &coefficients {
-            for i in 0..16 {
-                blocks[i].nonzero_luma = if eight {
-                    c.luma8[(i / 4 / 2) * 2 + (i % 4 / 2)]
-                        .iter()
-                        .any(|&v| v != 0)
-                } else {
-                    c.luma_counts[i] != 0
-                };
-            }
-        }
-        edge_rows[address / width_mbs]
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .push(DecodedBlockEdges {
-            blocks,
-            qp: qps.map(|q| i32::from(q) - bd),
-            slice_id: 0,
-            disable_filter: header.disable_deblocking_filter_idc as u8,
-            offsets: [header.alpha_offset, header.beta_offset],
-            transform8: eight,
-        });
-        order.push(Order::Inter(origin));
-        bands[origin[1] / 16]
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .3
-            .push(InterJob {
-                origin,
-                parts,
-                vectors,
-                weights,
-                coefficients,
-                eight,
-                qps,
-            });
-        seen += 1;
-        row_done(seen);
-    }
-    if seen != count {
-        return Err(invalid("incomplete single-slice inter-picture"));
-    }
+                if seen != count {
+                    return Err(invalid("incomplete single-slice inter-picture"));
+                }
                 Ok(())
             })();
             {
                 // Release every waiting worker: all rows are done, or abort.
                 let (rows, signal) = &progress;
-                *rows.lock().unwrap_or_else(|e| e.into_inner()) =
-                    if parsed.is_ok() { row_count } else { usize::MAX };
+                *rows.lock().unwrap_or_else(|e| e.into_inner()) = if parsed.is_ok() {
+                    row_count
+                } else {
+                    usize::MAX
+                };
                 signal.notify_all();
             }
             let mut results: Vec<Result<()>> = handles

@@ -198,6 +198,15 @@ mod tests {
         }
         let mut c = config();
         c.bit_depth = 0;
-        assert!(decode(&mut Bins(VecDeque::new()), c, &ScalingLists::flat(), &mut Vec::new(), &mut Vec::new()).is_err());
+        assert!(
+            decode(
+                &mut Bins(VecDeque::new()),
+                c,
+                &ScalingLists::flat(),
+                &mut Vec::new(),
+                &mut Vec::new()
+            )
+            .is_err()
+        );
     }
 }

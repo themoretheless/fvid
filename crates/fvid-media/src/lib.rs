@@ -313,6 +313,8 @@ pub use xfade::{xfade_filter_complex, xfade_video};
 pub type Result<T> = std::result::Result<T, String>;
 const NOPTS: i64 = i64::MIN;
 const EOF: i32 = -541478725;
+/// `AVERROR_INVALIDDATA`; FFmpeg's own CLI reads and decodes past it instead of failing.
+const INVALID_DATA: i32 = -1094995529;
 const MAX_STREAMS: usize = 64;
 fn cstring(text: &str) -> Result<CString> {
     CString::new(text).map_err(|_| "embedded NUL".into())
@@ -353,24 +355,46 @@ fn string(pointer: *const std::ffi::c_char) -> String {
     unsafe { CStr::from_ptr(pointer).to_string_lossy().into_owned() }
 }
 struct Input(*mut AVFormatContext);
+/// Whether a file's own container header carries the codec parameters and stream timing, so a
+/// decode-only reader can skip FFmpeg's packet probe of the stream table.
+fn header_carries_params(path: &Path) -> bool {
+    path.extension()
+        .and_then(|value| value.to_str())
+        .is_some_and(|value| {
+            value.eq_ignore_ascii_case("mp4")
+                || value.eq_ignore_ascii_case("mov")
+                || value.eq_ignore_ascii_case("m4v")
+                || value.eq_ignore_ascii_case("m4a")
+                || value.eq_ignore_ascii_case("srt")
+        })
+}
 impl Input {
     fn open(path: &Path) -> Result<Self> {
-        Self::open_with_stream_info(path, true)
+        Self::open_hinted(path, true, None)
     }
     /// MP4-family headers carry complete codec parameters and stream timing.
     /// Decode-only/filter paths can avoid a redundant packet probe at startup.
     fn open_fast(path: &Path) -> Result<Self> {
-        let header_complete = path
-            .extension()
-            .and_then(|value| value.to_str())
-            .is_some_and(|value| {
-                value.eq_ignore_ascii_case("mp4")
-                    || value.eq_ignore_ascii_case("mov")
-                    || value.eq_ignore_ascii_case("m4v")
-                    || value.eq_ignore_ascii_case("m4a")
-                    || value.eq_ignore_ascii_case("srt")
-            });
-        Self::open_with_stream_info(path, !header_complete)
+        Self::open_hinted(path, !header_carries_params(path), None)
+    }
+    /// As [`Input::open_fast`], for a caller that names the demuxer itself.
+    pub(crate) fn open_fast_hinted(path: &Path, format: Option<&str>) -> Result<Self> {
+        Self::open_hinted(path, !header_carries_params(path), format)
+    }
+    /// A file whose bytes name no demuxer is read through one the caller states, which is what
+    /// ffmpeg's `-f` does. A named demuxer is used without probing, so the format whitelist that
+    /// the standalone input policy sets has no say over it: under that policy a hint is refused
+    /// rather than trusted. A hinted demuxer states nothing in its header either, so the stream
+    /// table is always read.
+    pub(crate) fn open_hinted(
+        path: &Path,
+        find_stream_info: bool,
+        format: Option<&str>,
+    ) -> Result<Self> {
+        if format.is_some() && input_policy::active() {
+            return Err("an input format hint is not accepted under the standalone input policy".into());
+        }
+        Self::open_with_stream_info(path, find_stream_info, format)
     }
     /// Local file, or a playback URL (`http`, `https`, `rtsp`, `rtmp`, `udp`, …).
     fn open_playback(location: &str) -> Result<Self> {
@@ -445,10 +469,19 @@ impl Input {
             starts
         }
     }
-    fn open_with_stream_info(path: &Path, find_stream_info: bool) -> Result<Self> {
+    fn open_with_stream_info(
+        path: &Path,
+        mut find_stream_info: bool,
+        format: Option<&str>,
+    ) -> Result<Self> {
         if !path.is_file() {
             return Err("media input must be an existing local file".into());
         }
+        let name = format.map(cstring).transpose()?;
+        let hint = format.unwrap_or("");
+        // A demuxer chosen by name is not the one a header would have named, so its own
+        // description of the stream table is the only one worth trusting.
+        find_stream_info |= format.is_some();
         let path = path_string(path)?;
         // SAFETY: Fresh context, immediately guarded. FFmpeg owns/frees its fields.
         let mut input = Self(unsafe { avformat_alloc_context() });
@@ -479,7 +512,17 @@ impl Input {
                     check(code, "set standalone input policy")?;
                 }
             }
-            let code = avformat_open_input(&mut input.0, path.as_ptr(), ptr::null(), &mut options);
+            let mut hinted = ptr::null();
+            if let Some(name) = name.as_ref() {
+                // SAFETY: The name is a live NUL-terminated string; the lookup only reads
+                // the library's own demuxer table and returns a static descriptor or null.
+                hinted = av_find_input_format(name.as_ptr());
+                if hinted.is_null() {
+                    av_dict_free(&mut options);
+                    return Err(format!("no demuxer named {hint}"));
+                }
+            }
+            let code = avformat_open_input(&mut input.0, path.as_ptr(), hinted, &mut options);
             av_dict_free(&mut options);
             check(code, "open input")?;
         }
@@ -527,14 +570,23 @@ impl Packet {
         }
     }
     fn read(&mut self, input: &mut Input) -> Result<bool> {
+        match self.try_read(input) {
+            Ok(available) => Ok(available),
+            Err(code) => Err(check(code, "read packet").unwrap_err()),
+        }
+    }
+    /// Like [`Packet::read`], but hands back the raw FFmpeg code so a caller that tolerates
+    /// damaged input can decide per code whether the stream is still worth reading.
+    fn try_read(&mut self, input: &mut Input) -> std::result::Result<bool, i32> {
         // SAFETY: Both resources are exclusively borrowed and valid. Unref permits reuse.
         unsafe {
             av_packet_unref(self.0);
             let code = av_read_frame(input.0, self.0);
             if code == EOF {
                 Ok(false)
+            } else if code < 0 {
+                Err(code)
             } else {
-                check(code, "read packet")?;
                 Ok(true)
             }
         }
@@ -611,7 +663,16 @@ unsafe fn dictionary(dictionary: *mut AVDictionary) -> BTreeMap<String, String> 
     values
 }
 pub fn probe(path: &Path) -> Result<MediaInfo> {
-    let input = Input::open(path)?;
+    probe_as(path, None)
+}
+/// `probe` for a file whose own bytes name no demuxer, read through the one `format` names —
+/// what ffmpeg's `-f` states. Without that name the file opens as nothing, so a demuxer that
+/// probes for no signature is only reachable through here.
+pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo> {
+    let input = Input::open_hinted(path, true, format)?;
+    describe(path, &input)
+}
+fn describe(path: &Path, input: &Input) -> Result<MediaInfo> {
     // SAFETY: Input owns all contexts, stream parameters and strings for this block.
     unsafe {
         let mut streams = Vec::new();
@@ -1222,6 +1283,26 @@ pub(crate) fn selection(input: &Input, options: &CopyOptions) -> Result<Vec<usiz
     Ok(selected)
 }
 fn packet_info(packet: &Packet, input: &Input, options: &CopyOptions) -> Result<(usize, usize)> {
+    validate_packet(packet, input, options, true)
+}
+
+/// Like [`packet_info`], but lets `AV_PKT_FLAG_CORRUPT` through to the decoder, which is what
+/// FFmpeg's CLI does: the decoder decides whether the damage matters. Copy and remux keep the
+/// strict check so damaged bytes never land in a new file.
+pub(crate) fn packet_info_for_decode(
+    packet: &Packet,
+    input: &Input,
+    options: &CopyOptions,
+) -> Result<(usize, usize)> {
+    validate_packet(packet, input, options, false)
+}
+
+fn validate_packet(
+    packet: &Packet,
+    input: &Input,
+    options: &CopyOptions,
+    reject_corrupt: bool,
+) -> Result<(usize, usize)> {
     // SAFETY: Live packet created by av_read_frame; numeric fields checked before use.
     let (index, size, flags) = unsafe {
         (
@@ -1236,7 +1317,7 @@ fn packet_info(packet: &Packet, input: &Input, options: &CopyOptions) -> Result<
     if size < 0 || size as usize > options.max_packet_bytes {
         return Err("packet exceeds payload budget".into());
     }
-    if flags & AV_PKT_FLAG_CORRUPT as i32 != 0 {
+    if reject_corrupt && flags & AV_PKT_FLAG_CORRUPT as i32 != 0 {
         return Err("corrupt packet rejected".into());
     }
     Ok((index as usize, size as usize))
@@ -1292,4 +1373,144 @@ fn remux_input(mut input: Input, destination: &Path, options: &CopyOptions) -> R
     emit_progress_done(options, stats.packets, stats.payload_bytes);
     output.finish()?;
     Ok(stats)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    /// A GEM raster of 8x2 at one bit per pixel: two bytes the format skips, then seven
+    /// big-endian words — header length in words, colour planes, pattern block size, sample
+    /// aspect, width, height — and a run copying two row bytes. Nothing in these bytes states
+    /// which format they are in, which is what a hint is for.
+    const GEM: [u8; 20] = [0, 0, 0, 8, 0, 1, 0, 8, 0, 1, 0, 1, 0, 8, 0, 2, 0x80, 2, 0xAA, 0x55];
+
+    /// Each test writes its own copy: the reads happen in parallel, and a file another test
+    /// removes mid-run would fail this one for the wrong reason.
+    fn signatureless(name: &str) -> PathBuf {
+        let path = std::env::temp_dir().join(format!("fvid-hint-{name}-{}.gem", std::process::id()));
+        std::fs::write(&path, GEM).expect("the fixture is written for the reading tests");
+        path
+    }
+
+    #[test]
+    fn a_file_that_probes_as_nothing_reads_when_the_caller_names_the_demuxer() {
+        let path = signatureless("read");
+        assert!(
+            probe(&path).is_err(),
+            "GEM states no signature, so a probe has nothing to find"
+        );
+        let info = probe_as(&path, Some("gem_pipe")).expect("the named demuxer reads the file");
+        assert_eq!(info.format, "gem_pipe");
+        assert_eq!(
+            (info.streams[0].codec.as_str(), info.streams[0].width, info.streams[0].height),
+            ("gem", 8, 2)
+        );
+        let stats = decode_video_transformed(
+            &path,
+            DecodeTransform {
+                input_format: Some("gem_pipe".into()),
+                ..Default::default()
+            },
+        )
+        .expect("the same name carries the decode path");
+        assert_eq!(stats.video_frames, 1);
+        assert_eq!(
+            stats.decode_errors, 0,
+            "a read that met no damage reports none: the counter is not a constant"
+        );
+        std::fs::remove_file(&path).ok();
+    }
+
+    #[test]
+    fn a_hint_that_names_no_demuxer_says_so_instead_of_reading_anyway() {
+        let path = signatureless("unknown");
+        let error = probe_as(&path, Some("no_such_demuxer"))
+            .err()
+            .expect("a name the build has no demuxer for is not a read");
+        assert!(error.contains("no demuxer named no_such_demuxer"), "{error}");
+        std::fs::remove_file(&path).ok();
+    }
+
+    /// A demuxer named by the caller is taken without probing, so the format whitelist the
+    /// standalone policy sets screens nothing of it: under that policy the hint is refused.
+    #[test]
+    fn the_standalone_input_policy_refuses_a_demuxer_the_caller_names() {
+        let path = signatureless("policy");
+        let error = with_standalone_inputs(|| probe_as(&path, Some("gem_pipe")))
+            .err()
+            .expect("the policy cannot check what the caller states");
+        assert!(error.contains("standalone input policy"), "{error}");
+        std::fs::remove_file(&path).ok();
+    }
+
+    /// A Bitmap Brothers JV file: the signature the format probes for, a 64x64 frame table with one
+    /// record, and the palette that record points at. Whole, this file is read by the reference with
+    /// one frame; stripped of its pixels it is still read, with none.
+    fn jv(pixels: bool) -> Vec<u8> {
+        let mut file = b"JV\x00\x00 Compression by John M Phillips Copyright (C) 1995 \
+                         The Bitmap Brothers Ltd."
+            .to_vec();
+        let mut words: Vec<u8> = vec![0];
+        for value in [64u16, 64, 1, 40] {
+            words.extend(value.to_le_bytes());
+        }
+        words.extend([0; 4]);
+        words.extend(8000u16.to_le_bytes());
+        words.extend([0; 10]);
+        for value in [769u32, 0, 1] {
+            words.extend(value.to_le_bytes());
+        }
+        words.extend([1, 0, 2, 0]);
+        file.extend(words);
+        if pixels {
+            file.push(0x40);
+            file.extend((0..256).flat_map(|i| [i as u8, 255 - i as u8, (i * 2) as u8]));
+        }
+        file
+    }
+
+    fn written(name: &str, bytes: &[u8]) -> PathBuf {
+        let path = std::env::temp_dir().join(format!("fvid-jv-{name}-{}.jv", std::process::id()));
+        std::fs::write(&path, bytes).expect("the fixture is written for the reading tests");
+        path
+    }
+
+    /// JV's demuxer answers the read after its last frame with `AVERROR_INVALIDDATA`, so every
+    /// well-formed file of this format ends in damage. The strict video path used to call that a
+    /// failed decode; it now keeps the frames and reports what it skipped.
+    #[test]
+    fn a_demuxer_that_ends_its_stream_with_an_error_keeps_the_frames_it_gave() {
+        let path = written("whole", &jv(true));
+        let stats = decode_video_transformed(&path, DecodeTransform::default())
+            .expect("the damaged end of stream is not a failed decode");
+        assert_eq!(
+            (stats.video_frames, stats.width, stats.height),
+            (1, 64, 64),
+            "the one frame the file declares arrives"
+        );
+        assert!(
+            stats.decode_errors > 0,
+            "the tolerance ran, and says so: {:?}",
+            stats.decode_errors
+        );
+        std::fs::remove_file(&path).ok();
+    }
+
+    /// The control on that tolerance: the same header without its pixels is not read as a covered
+    /// file. Fewer frames than the whole fixture is the only outcome that keeps the counter above
+    /// from being a way to declare any damaged input decoded.
+    #[test]
+    fn a_stream_that_yielded_nothing_before_the_damage_is_still_a_failure_of_count() {
+        let path = written("stripped", &jv(false));
+        let stats = decode_video_transformed(&path, DecodeTransform::default())
+            .expect("the demuxer ends this file at EOF rather than in damage");
+        assert_eq!(
+            stats.video_frames, 0,
+            "a file with no pixels must not read as the whole one: {:?}",
+            (stats.video_frames, stats.decode_errors)
+        );
+        std::fs::remove_file(&path).ok();
+    }
 }

@@ -1,0 +1,367 @@
+{
+  "components": [
+    {
+      "component": "Media Player Classic Home Cinema (MPC-HC)",
+      "editions": {
+        "basic": "no",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "Player",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "LAV Video decoder",
+      "editions": {
+        "basic": "yes",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "DirectShow video filters",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "ffdshow video processor",
+      "editions": {
+        "basic": "no",
+        "full": "no",
+        "mega": "partial",
+        "standard": "no"
+      },
+      "section": "DirectShow video filters",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "LAV Audio decoder",
+      "editions": {
+        "basic": "yes",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "DirectShow audio filters",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "ffdshow audio processor",
+      "editions": {
+        "basic": "no",
+        "full": "no",
+        "mega": "partial",
+        "standard": "no"
+      },
+      "section": "DirectShow audio filters",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "LAV Splitter",
+      "editions": {
+        "basic": "yes",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "DirectShow source filters",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "Bass Audio Source",
+      "editions": {
+        "basic": "no",
+        "full": "no",
+        "mega": "yes",
+        "standard": "no"
+      },
+      "section": "DirectShow source filters",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "MPC Image Source",
+      "editions": {
+        "basic": "no",
+        "full": "no",
+        "mega": "yes",
+        "standard": "no"
+      },
+      "section": "DirectShow source filters",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "DirectVobSub (xy-VSFilter)",
+      "editions": {
+        "basic": "yes",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "DirectShow subtitle filters",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "MPC Video Renderer",
+      "editions": {
+        "basic": "no",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "DirectShow video renderers",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "madVR",
+      "editions": {
+        "basic": "no",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "no"
+      },
+      "section": "DirectShow video renderers",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "x264",
+      "editions": {
+        "basic": "no",
+        "full": "no",
+        "mega": "yes",
+        "standard": "no"
+      },
+      "section": "VFW codecs",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "Xvid",
+      "editions": {
+        "basic": "no",
+        "full": "no",
+        "mega": "yes",
+        "standard": "no"
+      },
+      "section": "VFW codecs",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "Lagarith",
+      "editions": {
+        "basic": "no",
+        "full": "no",
+        "mega": "yes",
+        "standard": "no"
+      },
+      "section": "VFW codecs",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "Huffyuv",
+      "editions": {
+        "basic": "no",
+        "full": "no",
+        "mega": "yes",
+        "standard": "no"
+      },
+      "section": "VFW codecs",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "ffdshow VFW interface (32-bit only)",
+      "editions": {
+        "basic": "no",
+        "full": "no",
+        "mega": "partial",
+        "standard": "no"
+      },
+      "section": "VFW codecs",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "AC3ACM",
+      "editions": {
+        "basic": "no",
+        "full": "no",
+        "mega": "yes",
+        "standard": "no"
+      },
+      "section": "ACM codecs",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "LAME MP3 Encoder",
+      "editions": {
+        "basic": "no",
+        "full": "no",
+        "mega": "partial",
+        "standard": "no"
+      },
+      "section": "ACM codecs",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "Icaros ThumbnailProvider",
+      "editions": {
+        "basic": "yes",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "Shell extensions",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "Icaros PropertyHandler",
+      "editions": {
+        "basic": "yes",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "Shell extensions",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "Codec Tweak Tool",
+      "editions": {
+        "basic": "yes",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "Tools",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "MediaInfo Lite",
+      "editions": {
+        "basic": "no",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "Tools",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "GraphStudioNext",
+      "editions": {
+        "basic": "no",
+        "full": "no",
+        "mega": "yes",
+        "standard": "no"
+      },
+      "section": "Tools",
+      "source": "https://www.codecguide.com/klcp_contents_comparison.htm"
+    },
+    {
+      "component": "Plugin for 3D video decoding (H.264 MVC)",
+      "editions": {
+        "basic": "no",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "no"
+      },
+      "section": "3D video decoding",
+      "source": "https://www.codecguide.com/download_kl.htm"
+    },
+    {
+      "component": "HDR video playback",
+      "editions": {
+        "basic": "no",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "Playback capabilities",
+      "source": "https://www.codecguide.com/download_kl.htm"
+    },
+    {
+      "component": "Subtitle display",
+      "editions": {
+        "basic": "no",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "Playback capabilities",
+      "source": "https://www.codecguide.com/download_kl.htm"
+    },
+    {
+      "component": "Hardware accelerated video decoding",
+      "editions": {
+        "basic": "no",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "Playback capabilities",
+      "source": "https://www.codecguide.com/download_kl.htm"
+    },
+    {
+      "component": "Audio bitstreaming",
+      "editions": {
+        "basic": "no",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "Playback capabilities",
+      "source": "https://www.codecguide.com/download_kl.htm"
+    },
+    {
+      "component": "DVD and Blu-ray (after decryption)",
+      "editions": {
+        "basic": "no",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "Playback capabilities",
+      "source": "https://www.codecguide.com/download_kl.htm"
+    },
+    {
+      "component": "Video thumbnails in Explorer",
+      "editions": {
+        "basic": "no",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "Shell integration",
+      "source": "https://www.codecguide.com/download_kl.htm"
+    },
+    {
+      "component": "File association options",
+      "editions": {
+        "basic": "no",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "Shell integration",
+      "source": "https://www.codecguide.com/download_kl.htm"
+    },
+    {
+      "component": "Broken codec detection",
+      "editions": {
+        "basic": "no",
+        "full": "yes",
+        "mega": "yes",
+        "standard": "yes"
+      },
+      "section": "Shell integration",
+      "source": "https://www.codecguide.com/download_kl.htm"
+    }
+  ],
+  "editions": [
+    "basic",
+    "standard",
+    "full",
+    "mega"
+  ],
+  "fetched": "2026-09-24",
+  "sources": {
+    "contents": "https://www.codecguide.com/klcp_contents_comparison.htm",
+    "editions": "https://www.codecguide.com/download_kl.htm"
+  }
+}

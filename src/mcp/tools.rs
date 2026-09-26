@@ -322,7 +322,9 @@ pub(super) fn execute(
                     }),
                     horizontal_flip: a.hflip,
                     vertical_flip: a.vflip,
-                    scale: a.scale.map(|[width, height]| media::ScaleSize { width, height }),
+                    scale: a
+                        .scale
+                        .map(|[width, height]| media::ScaleSize { width, height }),
                     transpose: a
                         .transpose
                         .as_deref()
@@ -439,6 +441,7 @@ pub(super) fn execute(
                     reverse: None,
                     r#loop: None,
                     thumbnail: None,
+                    freezedetect: None,
                     pseudocolor: None,
                     minterpolate: None,
                     fps: None,

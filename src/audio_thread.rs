@@ -25,6 +25,10 @@ enum Command {
     Pause,
     Rewind,
     Seek(i64),
+    /// Output gain in thousandths.
+    Level(u32),
+    /// Stream frames consumed per device frame, in thousandths.
+    Tempo(u32),
     Stop,
 }
 
@@ -42,6 +46,7 @@ pub struct AudioPlayback {
     thread: Option<thread::JoinHandle<()>>,
     position: Arc<Mutex<Duration>>,
     timescale: u32,
+    duration: Option<Duration>,
 }
 
 impl AudioPlayback {
@@ -57,6 +62,7 @@ impl AudioPlayback {
         F: FnOnce() -> Box<dyn AudioBackend> + Send + 'static,
     {
         let timescale = stream.timescale();
+        let duration = stream.duration();
         let (commands, command_rx) = sync_channel(16);
         let (event_tx, events) = sync_channel(QUEUE);
         let position = Arc::new(Mutex::new(Duration::ZERO));
@@ -87,11 +93,12 @@ impl AudioPlayback {
                     stream.extra_data(),
                     sample_rate,
                     channels,
+                    stream.bits_per_sample(),
                 ) {
                     Ok(d) => d,
                     Err(e) => {
-                        let _ = event_tx
-                            .send(AudioEvent::Error(format!("Audio decoder init: {e}")));
+                        let _ =
+                            event_tx.send(AudioEvent::Error(format!("Audio decoder init: {e}")));
                         return;
                     }
                 };
@@ -120,7 +127,14 @@ impl AudioPlayback {
             thread: Some(thread),
             position,
             timescale,
+            duration,
         }
+    }
+
+    /// Length of the track, as the container stated it when the stream opened.
+    /// An item with no picture takes its timeline total from here.
+    pub fn duration(&self) -> Option<Duration> {
+        self.duration
     }
 
     /// Generation of the most recent rewind or seek.
@@ -135,6 +149,16 @@ impl AudioPlayback {
 
     pub fn pause(&self) {
         let _ = self.commands.send(Command::Pause);
+    }
+
+    /// Set the output gain in thousandths; 1000 is the recorded level.
+    pub fn set_volume(&self, milli: u32) {
+        let _ = self.commands.send(Command::Level(milli));
+    }
+
+    /// Set how much stream audio the device pulls per unit of its own time.
+    pub fn set_rate(&self, milli: u32) {
+        let _ = self.commands.send(Command::Tempo(milli));
     }
 
     pub fn rewind(&mut self) {
@@ -287,6 +311,20 @@ impl Worker {
                     *pos = anchor;
                 }
             }
+            Command::Level(milli) => {
+                if let Err(error) = self.backend.set_volume(milli) {
+                    let _ = self
+                        .events
+                        .send(AudioEvent::Error(format!("Audio volume: {error}")));
+                }
+            }
+            Command::Tempo(milli) => {
+                if let Err(error) = self.backend.set_rate(milli) {
+                    let _ = self
+                        .events
+                        .send(AudioEvent::Error(format!("Audio rate: {error}")));
+                }
+            }
             Command::Stop => return false,
         }
         true
@@ -351,8 +389,8 @@ mod tests {
     /// esds carrying an AAC-LC, 44.1 kHz mono AudioSpecificConfig: the same
     /// shape the MP4 reader hands to the decoder factory.
     const ESDS: &[u8] = &[
-        0, 0, 0, 0, 3, 22, 0, 1, 0, 4, 17, 0x40, 0x15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 2,
-        0x12, 0x08,
+        0, 0, 0, 0, 3, 22, 0, 1, 0, 4, 17, 0x40, 0x15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 2, 0x12,
+        0x08,
     ];
 
     /// A 44.1 kHz mono track with no packets at all: enough for the thread to
@@ -364,6 +402,9 @@ mod tests {
     impl AudioStream for FakeStream {
         fn codec(&self) -> &str {
             "mp4a"
+        }
+        fn audio_tracks(&self) -> Vec<crate::audio::AudioTrack> {
+            Vec::new()
         }
         fn timescale(&self) -> u32 {
             44100
@@ -467,6 +508,63 @@ mod tests {
         assert_eq!(pacing(LEAD, Duration::ZERO), Duration::ZERO);
         // A device that has overtaken the decoder must not be held back.
         assert_eq!(pacing(Duration::ZERO, second * 5), Duration::ZERO);
+    }
+
+    /// A device that records what it was commanded, standing in for the
+    /// hardware volume and rate controls.
+    #[derive(Clone, Default)]
+    struct Controls(Arc<Mutex<(u32, u32)>>);
+
+    impl crate::audio::AudioBackend for Controls {
+        fn start(&mut self, _: crate::audio::AudioSpec) -> Result<(), crate::audio::AudioError> {
+            Ok(())
+        }
+        fn push(&mut self, _: crate::audio::AudioPacket) -> Result<(), crate::audio::AudioError> {
+            Ok(())
+        }
+        fn position(&self) -> Duration {
+            Duration::ZERO
+        }
+        fn flush(&mut self, _: Duration) -> Result<(), crate::audio::AudioError> {
+            Ok(())
+        }
+        fn pause(&mut self) -> Result<(), crate::audio::AudioError> {
+            Ok(())
+        }
+        fn resume(&mut self) -> Result<(), crate::audio::AudioError> {
+            Ok(())
+        }
+        fn stop(&mut self) -> Result<(), crate::audio::AudioError> {
+            Ok(())
+        }
+        fn set_volume(&mut self, milli: u32) -> Result<(), crate::audio::AudioError> {
+            self.0.lock().unwrap().0 = milli;
+            Ok(())
+        }
+        fn set_rate(&mut self, milli: u32) -> Result<(), crate::audio::AudioError> {
+            self.0.lock().unwrap().1 = milli;
+            Ok(())
+        }
+    }
+
+    /// The keys act on the device behind the thread, so a level set while the
+    /// worker was still building its backend must still arrive.
+    #[test]
+    fn level_and_rate_reach_the_device() {
+        let controls = Controls::default();
+        let seen = controls.clone();
+        let playback = AudioPlayback::start(
+            Box::new(FakeStream {
+                seeked: Arc::new(Mutex::new(None)),
+            }),
+            move || Box::new(controls),
+        );
+        playback.set_volume(350);
+        playback.set_rate(2_000);
+        assert!(wait(&playback, || {
+            let (volume, rate) = *seen.0.lock().unwrap();
+            volume == 350 && rate == 2_000
+        }));
     }
 
     #[test]

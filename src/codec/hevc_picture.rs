@@ -171,10 +171,8 @@ pub fn decode(
                 .map_or(1, |n| n.get())
                 .min(rows as usize)
                 .max(1);
-            let completed = std::sync::Arc::new((
-                std::sync::Mutex::new(0usize),
-                std::sync::Condvar::new(),
-            ));
+            let completed =
+                std::sync::Arc::new((std::sync::Mutex::new(0usize), std::sync::Condvar::new()));
             let receiver = std::sync::Arc::new(std::sync::Mutex::new(receiver));
             let planes = std::sync::Arc::new(std::sync::Mutex::new(planes));
             let handles: Vec<_> = (0..num_workers)
@@ -206,7 +204,18 @@ pub fn decode(
                             }
                             {
                                 let mut planes = planes.lock().unwrap_or_else(|e| e.into_inner());
-                                reconstruct_row(&mut planes, commands, sps, pps, slice, lists, &mut scratch, &mut pred_scratch, &mut transform_scratch, &mut residual_scratch)?;
+                                reconstruct_row(
+                                    &mut planes,
+                                    commands,
+                                    sps,
+                                    pps,
+                                    slice,
+                                    lists,
+                                    &mut scratch,
+                                    &mut pred_scratch,
+                                    &mut transform_scratch,
+                                    &mut residual_scratch,
+                                )?;
                             }
                             {
                                 let mut done = lock.lock().unwrap_or_else(|e| e.into_inner());

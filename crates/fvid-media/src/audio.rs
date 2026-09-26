@@ -10,6 +10,9 @@ pub struct AudioDecodeStats {
     pub channels: i32,
     pub sample_format: String,
     pub planar_interleave_bytes: u64,
+    /// Packets or frames the decoder could not use; the stream still decoded everything
+    /// readable, exactly like the FFmpeg CLI does with these files.
+    pub decode_errors: u64,
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -330,6 +333,7 @@ impl AudioSink {
                 channels: f.ch_layout.nb_channels,
                 sample_format: string(av_get_sample_fmt_name(format)),
                 planar_interleave_bytes: 0,
+                decode_errors: 0,
             };
             let direct_float_wav = destination.extension().and_then(|v| v.to_str()) == Some("wav")
                 && format == AVSampleFormat_AV_SAMPLE_FMT_FLT;
@@ -692,26 +696,60 @@ pub fn decode_audio_transformed(
     let mut sample_bounds = None;
     let mut output_sample_frames = 0u64;
     let mut finished = false;
+    let mut decode_errors = 0u64;
+    let mut demux_errors = 0u64;
+    let mut final_drain = false;
 
     'packets: loop {
-        let available = packet.read(&mut input)?;
+        let available = match if final_drain {
+            Ok(false)
+        } else {
+            packet.try_read(&mut input)
+        } {
+            Ok(available) => available,
+            Err(INVALID_DATA) => {
+                demux_errors += 1;
+                // A demuxer that keeps reporting damage without advancing has nothing left to
+                // salvage. Stop where the CLI stops: keep the audio already decoded, drain what
+                // the decoder still holds and report the error count. Only a stream that never
+                // produced anything is an outright failure.
+                if demux_errors > 64 {
+                    if sink.is_none() {
+                        return Err(check(INVALID_DATA, "read packet").unwrap_err());
+                    }
+                    final_drain = true;
+                }
+                continue;
+            }
+            Err(code) => return Err(check(code, "read packet").unwrap_err()),
+        };
         if available {
-            let (stream, _) = packet_info(&packet, &input, options)?;
+            let (stream, _) = packet_info_for_decode(&packet, &input, options)?;
             if stream != index {
                 continue;
             }
         }
         // SAFETY: Packet remains live for send; null signals final decoder drain.
-        check(
-            unsafe {
-                avcodec_send_packet(decoder.0, if available { packet.0 } else { ptr::null() })
-            },
-            "send audio packet",
-        )?;
+        let send = unsafe {
+            avcodec_send_packet(decoder.0, if available { packet.0 } else { ptr::null() })
+        };
+        if send == INVALID_DATA {
+            decode_errors += 1;
+            if !available {
+                break;
+            }
+            continue 'packets;
+        }
+        check(send, "send audio packet")?;
         loop {
             // SAFETY: Decoder and reusable frame are live; receive owns returned buffers.
             let code = unsafe { avcodec_receive_frame(decoder.0, frame.0) };
             if code == -libc::EAGAIN || code == EOF {
+                break;
+            }
+            if code == INVALID_DATA {
+                decode_errors += 1;
+                unsafe { av_frame_unref(frame.0) };
                 break;
             }
             check(code, "receive audio frame")?;
@@ -815,7 +853,8 @@ pub fn decode_audio_transformed(
             }
         }
     }
-    let sink = sink.ok_or("no decoded audio samples")?;
+    let mut sink = sink.ok_or("no decoded audio samples")?;
+    sink.stats.decode_errors = decode_errors + demux_errors;
     sink.finish()
 }
 
@@ -1038,7 +1077,7 @@ pub(super) fn mux_interval_pcm_from_path(
     loop {
         let available = packet.read(&mut input)?;
         if available {
-            let (index, _) = packet_info(&packet, &input, &options)?;
+            let (index, _) = packet_info_for_decode(&packet, &input, &options)?;
             if index != stream_index {
                 continue;
             }

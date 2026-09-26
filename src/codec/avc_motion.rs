@@ -211,12 +211,7 @@ impl<'a> ReferencePlane<'a> {
         let fx = motion[0] & 7;
         let fy = motion[1] & 7;
         let (samples, stride) = self.window(x, y, width + 1, height + 1, &mut scratch.window);
-        let w = [
-            (8 - fx) * (8 - fy),
-            fx * (8 - fy),
-            (8 - fx) * fy,
-            fx * fy,
-        ];
+        let w = [(8 - fx) * (8 - fy), fx * (8 - fy), (8 - fx) * fy, fx * fy];
         for row in 0..height {
             let top = &samples[row * stride..][..width + 1];
             let bottom = &samples[(row + 1) * stride..][..width + 1];
@@ -260,7 +255,8 @@ fn luma_core(
     };
     let vsum = |px: usize, py: usize| -> i32 {
         let base = (py - 2) * stride + px;
-        i32::from(s[base]) - 5 * i32::from(s[base + stride]) + 20 * i32::from(s[base + 2 * stride])
+        i32::from(s[base]) - 5 * i32::from(s[base + stride])
+            + 20 * i32::from(s[base + 2 * stride])
             + 20 * i32::from(s[base + 3 * stride])
             - 5 * i32::from(s[base + 4 * stride])
             + i32::from(s[base + 5 * stride])
@@ -349,7 +345,9 @@ fn luma_core(
                     let (px, py) = (col + 2, row + 2);
                     let b = clip((hsum(px, py) + 16) >> 5);
                     let t = |k: usize| sums[(row + k) * width + col];
-                    let j = clip((t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10);
+                    let j = clip(
+                        (t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10,
+                    );
                     output[row * width + col] = avg(b, j);
                 }
             }
@@ -370,7 +368,9 @@ fn luma_core(
                     let (px, py) = (col + 2, row + 2);
                     let h = clip((vsum(px, py) + 16) >> 5);
                     let t = |k: usize| sums[(row + k) * width + col];
-                    let j = clip((t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10);
+                    let j = clip(
+                        (t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10,
+                    );
                     output[row * width + col] = avg(h, j);
                 }
             }
@@ -379,7 +379,9 @@ fn luma_core(
             for row in 0..height {
                 for col in 0..width {
                     let t = |k: usize| sums[(row + k) * width + col];
-                    output[row * width + col] = clip((t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10);
+                    output[row * width + col] = clip(
+                        (t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10,
+                    );
                 }
             }
         }
@@ -389,7 +391,9 @@ fn luma_core(
                     let (px, py) = (col + 2, row + 2);
                     let m = clip((vsum(px + 1, py) + 16) >> 5);
                     let t = |k: usize| sums[(row + k) * width + col];
-                    let j = clip((t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10);
+                    let j = clip(
+                        (t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10,
+                    );
                     output[row * width + col] = avg(j, m);
                 }
             }
@@ -410,7 +414,9 @@ fn luma_core(
                     let (px, py) = (col + 2, row + 2);
                     let s_ = clip((hsum(px, py + 1) + 16) >> 5);
                     let t = |k: usize| sums[(row + k) * width + col];
-                    let j = clip((t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10);
+                    let j = clip(
+                        (t(0) - 5 * t(1) + 20 * t(2) + 20 * t(3) - 5 * t(4) + t(5) + 512) >> 10,
+                    );
                     output[row * width + col] = avg(j, s_);
                 }
             }
@@ -489,8 +495,8 @@ pub fn weight_block(
     let (weight, offset) = (i32::from(weight), i32::from(offset) << (depth - 8));
     let max = max as i32;
     for sample in samples {
-        *sample = (((i32::from(*sample) * weight + rounding) >> denominator) + offset)
-            .clamp(0, max) as u16;
+        *sample = (((i32::from(*sample) * weight + rounding) >> denominator) + offset).clamp(0, max)
+            as u16;
     }
     Ok(())
 }

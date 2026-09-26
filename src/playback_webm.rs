@@ -43,6 +43,13 @@ pub struct WebmVideoReader<R> {
     pending: Option<Frame>,
     rgb: Vec<u8>,
     dimensions: [usize; 2],
+    pixel_aspect: (u32, u32),
+    /// The stated crop borders as pixel insets into the coded frame, `[0; 4]`
+    /// when the track states none it can keep.
+    insets: [u32; 4],
+    /// Which of the two codecs the track's CodecID picked, named for a reader
+    /// rather than for a match arm.
+    codec: &'static str,
     start: u128,
     end: u128,
     base: Option<i64>,
@@ -60,6 +67,19 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             .find(|t| t.kind == 1 && matches!(t.codec.as_str(), "V_VP9" | "V_AV1"))
             .ok_or_else(|| invalid("WebM/Matroska has no supported VP9 or AV1 video track"))?;
         let av1 = track.codec == "V_AV1";
+        let pixel_aspect = track.pixel_aspect();
+        // The validated crop borders are each smaller than the coded size they
+        // divide; one that cannot be a pixel offset on this machine is read as
+        // a file stating a crop it cannot keep.
+        let insets = {
+            let mut sides = [0u32; 4];
+            let mut keeps = true;
+            for (side, value) in sides.iter_mut().zip(track.crop) {
+                *side = u32::try_from(value).unwrap_or(0);
+                keeps &= u32::try_from(value).is_ok();
+            }
+            if keeps { sides } else { [0; 4] }
+        };
         let track = track.number;
         let rgb_budget = budget / 4;
         Ok(Self {
@@ -76,6 +96,9 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             pending: None,
             rgb: Vec::new(),
             dimensions: [0; 2],
+            pixel_aspect,
+            insets,
+            codec: if av1 { "AV1" } else { "VP9" },
             start: 0,
             end: 0,
             base: None,
@@ -87,6 +110,17 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     }
     pub fn dimensions(&self) -> [usize; 2] {
         self.dimensions
+    }
+    pub fn pixel_aspect(&self) -> (u32, u32) {
+        self.pixel_aspect
+    }
+    /// The picture's own crop borders as pixel insets, `[0; 4]` when the track
+    /// states none it can keep.
+    pub fn insets(&self) -> [u32; 4] {
+        self.insets
+    }
+    pub fn codec(&self) -> &'static str {
+        self.codec
     }
     pub fn rgb(&self) -> &[u8] {
         &self.rgb
@@ -141,6 +175,85 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         self.frames = 0;
         self.failed = false;
         self.last_duration = 33_333_333;
+    }
+    /// Where the timeline starts for the reader: the first frame once one has
+    /// been displayed, and the first packet of the track before that, which is
+    /// the same fallback `duration` uses.
+    fn origin(&self) -> i64 {
+        self.base.unwrap_or_else(|| {
+            self.demux
+                .packets
+                .iter()
+                .find(|p| p.track == self.track)
+                .map_or(0, |p| p.pts_ns)
+        })
+    }
+    /// Restart decoding at the keyframe that opens the stretch of timeline
+    /// containing `target_ns`, counted where `frame_interval` counts, and report
+    /// the position landed on. Blocks are indexed in decode order, which a
+    /// reordered track need not state in, so the scan takes the latest keyframe
+    /// rather than the last one it meets; a target in front of every keyframe
+    /// restarts the track at its first block.
+    pub fn seek_to_sync(&mut self, target_ns: i64) -> i64 {
+        let origin = self.origin();
+        let target = target_ns.saturating_add(origin);
+        let mut chosen: Option<(usize, i64)> = None;
+        for (index, packet) in self.demux.packets.iter().enumerate() {
+            if packet.track != self.track || !packet.keyframe || packet.pts_ns > target {
+                continue;
+            }
+            if chosen.is_none_or(|(_, at)| packet.pts_ns >= at) {
+                chosen = Some((index, packet.pts_ns));
+            }
+        }
+        let chosen = chosen.or_else(|| {
+            let index = self
+                .demux
+                .packets
+                .iter()
+                .position(|p| p.track == self.track)?;
+            Some((index, self.demux.packets[index].pts_ns))
+        });
+        let Some((index, pts)) = chosen else {
+            return 0;
+        };
+        match &mut self.decoder {
+            VideoDecoder::Vp9(d) => d.reset(),
+            VideoDecoder::Av1(d) => d.reset(),
+        };
+        // The picture held over from before belongs to the stretch being left
+        // behind, and a decoder that had just failed is the one rebuilt here.
+        self.pending = None;
+        self.failed = false;
+        self.index = index;
+        // Pinning the origin matters only before the first frame: without it the
+        // keyframe jumped to would become the start of the timeline and the
+        // position would read back as zero.
+        self.base = Some(origin);
+        let landed = i64::try_from(i128::from(pts) - i128::from(origin))
+            .unwrap_or(0)
+            .max(0);
+        self.start = u128::try_from(landed).unwrap_or_default();
+        self.end = self.start;
+        landed
+    }
+    /// Seek and land on the frame covering `target_ns`, refreshing `rgb()` the
+    /// way continuous playback does. The pre-roll costs what decoding it costs.
+    pub fn seek_to_frame(&mut self, target_ns: i64) -> Result<()> {
+        self.seek_to_sync(target_ns);
+        let target = u128::try_from(target_ns.max(0)).unwrap_or(u128::MAX);
+        let result = (|| {
+            while self.read_inner()? {
+                if self.end > target {
+                    return Ok(());
+                }
+            }
+            Ok(())
+        })();
+        if result.is_err() {
+            self.failed = true;
+        }
+        result
     }
     fn next_decoded(&mut self) -> Result<Option<Frame>> {
         while self.index < self.demux.packets.len() {
@@ -519,6 +632,140 @@ mod tests {
             reader.frame_interval(),
             Some((0, 100_000_000, 1_000_000_000))
         );
+    }
+
+    /// Every frame of a fixture in order: the start of its interval and the RGB
+    /// continuous playback shows for it.
+    fn shown_frames(input: &'static [u8]) -> Vec<(u128, Vec<u8>)> {
+        let mut reader =
+            crate::playback_native::NativeReader::without_memory_limit(Cursor::new(input)).unwrap();
+        let mut frames = Vec::new();
+        while reader.read_frame().unwrap() {
+            let (start, _, _) = reader.frame_interval().unwrap();
+            frames.push((start, reader.rgb().to_vec()));
+        }
+        frames
+    }
+
+    /// Seeking restarts the decoder at the keyframe before the target and runs
+    /// it forward, so the picture that lands on the target has to be the one
+    /// continuous playback shows there: a decoder left holding references from
+    /// the stretch behind would show a different one. The fixture is 10 frames
+    /// at 100 ms across three clusters, so a target inside the second cluster is
+    /// reached by decoding from its own keyframe rather than from the start.
+    #[test]
+    fn a_seek_lands_on_the_frame_continuous_playback_shows() {
+        use super::Duration;
+        let input = include_bytes!("../tests/fixtures/vp9/motion.webm");
+        let forward = shown_frames(input);
+        assert_eq!(forward.len(), 10);
+        let mut reader =
+            crate::playback_native::NativeReader::new(Cursor::new(input), 16 << 20).unwrap();
+        assert!(reader.seekable());
+        for target in [0u64, 50, 400, 600, 850] {
+            reader.seek(Duration::from_millis(target)).unwrap();
+            let at = forward
+                .iter()
+                .position(|(start, _)| *start > u128::from(target) * 1_000_000)
+                .unwrap_or(forward.len())
+                - 1;
+            let (start, _, _) = reader.frame_interval().unwrap();
+            assert_eq!(
+                (start, reader.rgb()),
+                (forward[at].0, forward[at].1.as_slice()),
+                "seek to {target} ms"
+            );
+        }
+        // The cursor resumes just after the frame landed on, not where the
+        // keyframe behind it started.
+        assert!(reader.read_frame().unwrap());
+        assert_eq!(
+            reader.frame_interval(),
+            Some((900_000_000, 1_000_000_000, 1_000_000_000))
+        );
+        // Past the last frame there is nothing to land on but the last frame.
+        reader.seek(Duration::from_secs(9)).unwrap();
+        assert_eq!(
+            reader.frame_interval(),
+            Some((900_000_000, 1_000_000_000, 1_000_000_000))
+        );
+        assert!(!reader.read_frame().unwrap());
+    }
+
+    /// A seek is also how `--start-time` opens a file, before a single frame has
+    /// been shown. The keyframe jumped to must not become the start of the
+    /// timeline: position still counts from the first frame of the track.
+    #[test]
+    fn seeking_before_the_first_frame_keeps_the_track_origin() {
+        use super::Duration;
+        let input = include_bytes!("../tests/fixtures/vp9/motion.webm");
+        let mut reader =
+            crate::playback_native::NativeReader::new(Cursor::new(input), 16 << 20).unwrap();
+        reader.seek(Duration::from_millis(600)).unwrap();
+        assert_eq!(
+            reader.frame_interval(),
+            Some((600_000_000, 700_000_000, 1_000_000_000))
+        );
+        assert_eq!(reader.duration(), Some(Duration::from_secs(1)));
+    }
+
+    /// The fixture is a 16×16 VP9 picture with `PixelCropLeft/Top/Right/Bottom`
+    /// of two pixels each, so ffmpeg's own decode of it reports the frame side
+    /// data `Frame Cropping: 2/2/2/2`:
+    ///
+    /// ```text
+    /// ffmpeg -f lavfi -i testsrc2=size=16x16:rate=4:duration=1 \
+    ///   -c:v libvpx-vp9 -crf 63 -b:v 0 -pix_fmt yuv420p -an \
+    ///   -write_crc32 0 tests/fixtures/display/crops.mkv
+    /// ```
+    ///
+    /// No ffmpeg version writes the crop elements themselves, so the file is
+    /// that one with four `54 cc/bb/dd/aa 84 00000002` elements inserted at the
+    /// end of the `Video` element and the sizes of `Video`, `TrackEntry`,
+    /// `Tracks` and `Segment` grown to hold them; `-write_crc32 0` is what
+    /// leaves those sizes widen-able in place. The reader's side of the
+    /// contract: the crop reaches the player as insets, the coded frame keeps
+    /// its full size, and two-pixel-square drawing of a 16×16 coded frame
+    /// states square pixels rather than a stretched ones.
+    #[test]
+    fn a_cropped_webm_reaches_the_player_with_its_borders_and_full_frames() {
+        let input = include_bytes!("../tests/fixtures/display/crops.mkv");
+        let mut reader =
+            crate::playback_native::NativeReader::without_memory_limit(Cursor::new(input)).unwrap();
+        assert_eq!(reader.insets(), [2, 2, 2, 2]);
+        assert_eq!(reader.pixel_aspect(), (1, 1));
+        assert_eq!(reader.video_codec(), "VP9");
+        let mut count = 0;
+        while reader.read_frame().unwrap() {
+            // Decoding is unaffected: the frame arrives coded, borders and all.
+            assert_eq!(reader.dimensions(), [16, 16]);
+            assert_eq!(reader.rgb().len(), 16 * 16 * 3);
+            count += 1;
+        }
+        assert_eq!(count, 4);
+    }
+
+    /// One cluster for the whole file, so every seek decodes the entire
+    /// pre-roll. The point is that a rebuilt AV1 decoder still arrives at the
+    /// same pictures, wherever in the file it was asked to start.
+    #[test]
+    fn seeking_a_single_cluster_av1_file_replays_the_same_pictures() {
+        use super::Duration;
+        let input = include_bytes!("../tests/fixtures/av1/random-access.webm");
+        let forward = shown_frames(input);
+        assert_eq!(forward.len(), 24);
+        let mut reader =
+            crate::playback_native::NativeReader::without_memory_limit(Cursor::new(input)).unwrap();
+        assert!(reader.seekable());
+        for at in [forward.len() / 2, forward.len() - 1] {
+            let target = u64::try_from(forward[at].0).unwrap() + 1;
+            reader.seek(Duration::from_nanos(target)).unwrap();
+            assert_eq!(
+                (reader.frame_interval().unwrap().0, reader.rgb()),
+                (forward[at].0, forward[at].1.as_slice()),
+                "seek to frame {at}"
+            );
+        }
     }
 }
 

@@ -66,8 +66,14 @@ pub struct Coefficients {
 pub fn read(b: &mut BoolDecoder<'_>, p: &Probabilities, cfg: Config) -> Result<Coefficients> {
     let mut values = Vec::new();
     let mut cache = Vec::new();
-    let nonzero_context =
-        read_counted(b, p, &mut Counts::filled([0; 2]), cfg, &mut values, &mut cache)?;
+    let nonzero_context = read_counted(
+        b,
+        p,
+        &mut Counts::filled([0; 2]),
+        cfg,
+        &mut values,
+        &mut cache,
+    )?;
     Ok(Coefficients {
         values,
         nonzero_context,

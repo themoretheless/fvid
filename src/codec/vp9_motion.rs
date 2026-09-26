@@ -187,12 +187,45 @@ mod tests {
         let mut scratch = Vec::new();
         let mut out = Vec::new();
         for filter in 0..4 {
-            interpolate(&p, [4, 4], [0, 0], [16, 16], [4, 4], filter, 8, &mut scratch, &mut out).unwrap();
+            interpolate(
+                &p,
+                [4, 4],
+                [0, 0],
+                [16, 16],
+                [4, 4],
+                filter,
+                8,
+                &mut scratch,
+                &mut out,
+            )
+            .unwrap();
             assert_eq!(out, p.samples);
         }
-        interpolate(&p, [4, 4], [8, 8], [16, 16], [1, 1], 3, 8, &mut scratch, &mut out).unwrap();
+        interpolate(
+            &p,
+            [4, 4],
+            [8, 8],
+            [16, 16],
+            [1, 1],
+            3,
+            8,
+            &mut scratch,
+            &mut out,
+        )
+        .unwrap();
         assert_eq!(out, [20]);
-        interpolate(&p, [4, 4], [-128, -128], [16, 16], [2, 2], 0, 8, &mut scratch, &mut out).unwrap();
+        interpolate(
+            &p,
+            [4, 4],
+            [-128, -128],
+            [16, 16],
+            [2, 2],
+            0,
+            8,
+            &mut scratch,
+            &mut out,
+        )
+        .unwrap();
         assert_eq!(out, [0; 4]);
     }
 }

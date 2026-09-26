@@ -5358,7 +5358,7 @@ pub fn transcode_lossless(
             .extension()
             .and_then(|value| value.to_str())
             .is_some_and(|value| value.eq_ignore_ascii_case("mkv"));
-        let input = Input::open_with_stream_info(source, !mkv)?;
+        let input = Input::open_with_stream_info(source, !mkv, None)?;
         let selected = selection(&input, options)?;
         if selected.len() == 1
             && unsafe {

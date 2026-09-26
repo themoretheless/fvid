@@ -169,7 +169,13 @@ impl References {
 
     /// Modes 0=planar, 1=DC, 2..34=angular. Chroma means 4:2:0 Cb/Cr:
     /// reference smoothing and luma boundary correction do not apply there.
-    pub fn predict(&self, mode: u8, chroma: bool, strong_smoothing: bool, output: &mut [u16]) -> Result<()> {
+    pub fn predict(
+        &self,
+        mode: u8,
+        chroma: bool,
+        strong_smoothing: bool,
+        output: &mut [u16],
+    ) -> Result<()> {
         if mode > 34 {
             return Err(invalid("invalid HEVC intra prediction mode"));
         }
@@ -329,10 +335,7 @@ mod tests {
                         let n = 1usize << log;
                         let mut output = vec![0u16; n * n];
                         r.predict(mode, chroma, true, &mut output).unwrap();
-                        assert_eq!(
-                            &output[..],
-                            &vec![1 << (depth - 1); 1 << (2 * log)][..]
-                        );
+                        assert_eq!(&output[..], &vec![1 << (depth - 1); 1 << (2 * log)][..]);
                     }
                 }
             }
@@ -413,7 +416,10 @@ mod tests {
             ]
         );
         r.predict(22, true, false, &mut output).unwrap();
-        assert_eq!([output[0], output[4], output[8], output[12]], [16, 12, 32, 73]);
+        assert_eq!(
+            [output[0], output[4], output[8], output[12]],
+            [16, 12, 32, 73]
+        );
     }
     #[test]
     fn strong_smoothing_uses_endpoints_and_strict_midpoint_threshold() {

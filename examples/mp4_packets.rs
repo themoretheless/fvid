@@ -155,7 +155,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     println!("track,offset,size,dts,pts,duration,sync");
     for (i, track) in mp4.tracks().iter().enumerate() {
-        for s in &track.samples {
+        // A track that indexes itself per chunk still holds one frame per
+        // sample, so ask for each frame the way playback does.
+        for index in 0..track.samples.len() {
+            let Some(s) = track.samples.get(index) else {
+                break;
+            };
             println!(
                 "{i},{},{},{},{},{},{}",
                 s.offset,

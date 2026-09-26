@@ -22,8 +22,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut packet = Vec::new();
     let mut frames = Vec::new();
     let mut bytes = 0usize;
-    for index in 0..demux.tracks()[track].samples.len() {
-        let pts = demux.tracks()[track].samples[index].pts;
+    let total = demux.tracks()[track].samples.len();
+    for index in 0..total {
+        let pts = demux.tracks()[track]
+            .samples
+            .get(index)
+            .ok_or("sample index out of range")?
+            .pts;
         demux.read_packet(track, index, &mut packet)?;
         if let Some(picture) = decoder.decode_order(&packet)? {
             bytes = bytes

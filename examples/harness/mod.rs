@@ -13,30 +13,157 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 use std::time::{Duration, Instant};
 
-/// Open the first audio track the player can decode, from MP4 or WebM.
+/// One reader of the chain: it either hands over a track or says why this file is
+/// not the kind it reads.
+type Opener = fn(&str) -> fvid::Result<Box<dyn AudioStream>>;
+
+fn track_of<R: AudioStream + 'static>(reader: R) -> Box<dyn AudioStream> {
+    Box::new(reader)
+}
+
+fn open_mp4(path: &str) -> fvid::Result<Box<dyn AudioStream>> {
+    let file = File::open(path)?;
+    Ok(track_of(fvid::playback_mp4_audio::Mp4AudioReader::open(
+        BufReader::new(file),
+        fvid::container::mp4::Limits::default(),
+    )?))
+}
+
+fn open_webm(path: &str) -> fvid::Result<Box<dyn AudioStream>> {
+    let file = File::open(path)?;
+    Ok(track_of(fvid::playback_webm_audio::WebmAudioReader::open(
+        BufReader::new(file),
+        fvid::container::webm::Limits::default(),
+    )?))
+}
+
+/// An AVI file states one stream's geometry in two headers and repeats it again in
+/// an index beside the run, so its reader cross-checks all three and refuses a file
+/// whose own accounts disagree; it frames records for the codings whose counting it
+/// has measured, and names the Wave format number of the rest.
+fn open_avi(path: &str) -> fvid::Result<Box<dyn AudioStream>> {
+    let file = File::open(path)?;
+    Ok(track_of(fvid::playback_avi_audio::AviAudioReader::open(
+        BufReader::new(file),
+        fvid::container::avi::Limits::default(),
+    )?))
+}
+
+fn open_smf(path: &str) -> fvid::Result<Box<dyn AudioStream>> {
+    let file = File::open(path)?;
+    Ok(track_of(fvid::playback_smf::SmfAudioReader::open(
+        BufReader::new(file),
+        fvid::container::smf::Limits::default(),
+    )?))
+}
+
+fn open_xm(path: &str) -> fvid::Result<Box<dyn AudioStream>> {
+    let file = File::open(path)?;
+    Ok(track_of(fvid::playback_xm::XmAudioReader::open(
+        BufReader::new(file),
+        fvid::container::xm::Limits::default(),
+    )?))
+}
+
+/// An Ogg file states nothing about its codec in its pages, so this reader walks
+/// the framing and reads the coding out of the first bytes of the first packet:
+/// Vorbis has an arm, and every other bitstream is refused by the name it opened
+/// with.
+fn open_ogg(path: &str) -> fvid::Result<Box<dyn AudioStream>> {
+    let file = File::open(path)?;
+    Ok(track_of(fvid::playback_ogg_audio::OggAudioReader::open(
+        BufReader::new(file),
+        fvid::container::ogg::Limits::default(),
+    )?))
+}
+
+/// A Wave file first of the three that state nothing but a geometry: its parser is
+/// the strictest, since a header whose redundant fields disagree is refused rather
+/// than guessed at.
+fn open_wav(path: &str) -> fvid::Result<Box<dyn AudioStream>> {
+    let file = File::open(path)?;
+    Ok(track_of(fvid::playback_wav::WavAudioReader::open(
+        BufReader::new(file),
+        fvid::playback_wav::Limits::default(),
+    )?))
+}
+
+/// An AIFF file states each number of its geometry once, in big-endian, and spells
+/// its rate as an 80-bit extended number.
+fn open_aiff(path: &str) -> fvid::Result<Box<dyn AudioStream>> {
+    let file = File::open(path)?;
+    Ok(track_of(fvid::playback_aiff::AiffAudioReader::open(
+        BufReader::new(file),
+        fvid::playback_aiff::Limits::default(),
+    )?))
+}
+
+/// A Sun header last of the readers that state nothing but a geometry: six words and
+/// a run, and an encoding table whose numbers above 3 the readers of the format
+/// disagree about, so only what this one names plays out of it.
+fn open_au(path: &str) -> fvid::Result<Box<dyn AudioStream>> {
+    let file = File::open(path)?;
+    Ok(track_of(fvid::playback_au::AuAudioReader::open(
+        BufReader::new(file),
+        fvid::playback_au::Limits::default(),
+    )?))
+}
+
+/// A `.flac` file states its geometry in a block and its frames carry no length, so
+/// every packet boundary is proved by the frame's own CRC-16.
+fn open_flac(path: &str) -> fvid::Result<Box<dyn AudioStream>> {
+    let file = File::open(path)?;
+    Ok(track_of(fvid::playback_flac::FlacAudioReader::open(
+        BufReader::new(file),
+        fvid::playback_flac::Limits::default(),
+    )?))
+}
+
+/// A bare MPEG audio file states nothing up front at all: its geometry comes from the
+/// first frame that carries audio, one frame after an `Info` header the demuxer eats,
+/// and every packet is a whole frame with its own header. Having no magic to look for,
+/// it goes last, after every reader that begins with something that says what the
+/// file is.
+fn open_mp3(path: &str) -> fvid::Result<Box<dyn AudioStream>> {
+    let file = File::open(path)?;
+    Ok(track_of(fvid::playback_mp3::Mp3AudioReader::open(
+        BufReader::new(file),
+        fvid::playback_mp3::Limits::default(),
+    )?))
+}
+
+/// Every audio reader the player has, in the order it tries them.
+const OPENERS: &[Opener] = &[
+    open_mp4, open_webm, open_avi, open_smf, open_xm, open_ogg, open_wav, open_aiff, open_au,
+    open_flac, open_mp3,
+];
+
+/// Open the first audio track the player can decode, from MP4, WebM or AVI, a MIDI
+/// performance, a tracker module, an Ogg file, a Wave, AIFF or Sun file, a bare
+/// FLAC file, or a bare MPEG audio file.
 pub fn open_stream(path: &str) -> Option<Box<dyn AudioStream>> {
-    let mp4 = File::open(path)
-        .ok()
-        .and_then(|file| {
-            fvid::playback_mp4_audio::Mp4AudioReader::open(
-                BufReader::new(file),
-                fvid::container::mp4::Limits::default(),
-            )
-            .ok()
-        })
-        .map(|reader| Box::new(reader) as Box<dyn AudioStream>);
-    mp4.or_else(|| {
-        File::open(path)
-            .ok()
-            .and_then(|file| {
-                fvid::playback_webm_audio::WebmAudioReader::open(
-                    BufReader::new(file),
-                    fvid::container::webm::Limits::default(),
-                )
-                .ok()
-            })
-            .map(|reader| Box::new(reader) as Box<dyn AudioStream>)
-    })
+    open_stream_reason(path).0
+}
+
+/// The same walk, and when it finds no track the half of the pipeline that is
+/// missing: `Some(coding)` is a reader that understood the envelope and refused the
+/// coding it names for want of a decode arm, `None` that no reader recognised the
+/// envelope at all. The two are different queues of work, so a caller that reports a
+/// refusal has to say which one it hit.
+pub fn open_stream_reason(path: &str) -> (Option<Box<dyn AudioStream>>, Option<String>) {
+    let mut refused = None;
+    for open in OPENERS {
+        match open(path) {
+            Ok(stream) => return (Some(stream), None),
+            Err(fvid::Error::Unsupported(coding)) => {
+                if refused.is_none() {
+                    refused = Some(coding);
+                }
+            }
+            Err(_) => {}
+        }
+    }
+    (None, refused)
 }
 
 /// Frame counts the device accumulates. Shared with the caller because the
@@ -165,7 +292,8 @@ impl AudioBackend for Device {
     fn position(&self) -> Duration {
         let (played, _) = self.consumed(self.runnable());
         let seconds = played as f64 / f64::from(self.sample_rate.max(1));
-        self.base.checked_add(Duration::from_secs_f64(seconds))
+        self.base
+            .checked_add(Duration::from_secs_f64(seconds))
             .unwrap_or(self.base)
     }
 

@@ -411,10 +411,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
                     }
                     let mut data = crate::buffer(len)?;
                     reader.read_exact(&mut data)?;
-                    fragments.push(Fragment {
-                        start: at,
-                        data,
-                    });
+                    fragments.push(Fragment { start: at, data });
                 }
                 _ => {}
             }
@@ -1536,9 +1533,9 @@ fn index_fragments(
                         u64be(stamp, 4)?
                     }
                 }
-                None => list.last().map_or(0, |last| {
-                    last.dts.saturating_add(u64::from(last.duration))
-                }),
+                None => list
+                    .last()
+                    .map_or(0, |last| last.dts.saturating_add(u64::from(last.duration))),
             };
             for run in boxes.iter().filter(|atom| &atom.kind == b"trun") {
                 let bytes = run.data;
@@ -1558,7 +1555,9 @@ fn index_fragments(
                         at += 4;
                         if shift < 0 {
                             base.checked_sub(u64::try_from(-shift).unwrap_or(u64::MAX))
-                                .ok_or_else(|| invalid("MP4 fragment data offset before its base"))?
+                                .ok_or_else(|| {
+                                    invalid("MP4 fragment data offset before its base")
+                                })?
                         } else {
                             base.checked_add(u64::try_from(shift).unwrap_or(u64::MAX))
                                 .ok_or_else(|| invalid("MP4 fragment data offset overflow"))?
@@ -1581,7 +1580,10 @@ fn index_fragments(
                     + usize::from(flags & 0x00_0200 != 0)
                     + usize::from(flags & 0x00_0400 != 0)
                     + usize::from(flags & 0x00_0800 != 0);
-                if count.checked_mul(fields * 4).and_then(|n| n.checked_add(at)) != Some(bytes.len())
+                if count
+                    .checked_mul(fields * 4)
+                    .and_then(|n| n.checked_add(at))
+                    != Some(bytes.len())
                 {
                     return Err(invalid("MP4 track-run size does not match its rows"));
                 }
@@ -2124,9 +2126,7 @@ mod tests {
         bytes
     }
 
-    fn demux(
-        bytes: &[u8],
-    ) -> crate::Result<super::Mp4Reader<std::io::Cursor<&[u8]>>> {
+    fn demux(bytes: &[u8]) -> crate::Result<super::Mp4Reader<std::io::Cursor<&[u8]>>> {
         super::Mp4Reader::open(std::io::Cursor::new(bytes), super::Limits::default())
     }
 
@@ -2150,7 +2150,10 @@ mod tests {
             panic!("one audio track, as ffprobe says");
         };
         assert_eq!((track.handler, track.codec), (*b"soun", *b"mp4a"));
-        assert_eq!((track.timescale, track.sample_rate, track.channels), (48_000, 48_000, 1));
+        assert_eq!(
+            (track.timescale, track.sample_rate, track.channels),
+            (48_000, 48_000, 1)
+        );
         // The `mvex` promises samples by fragment and the `stbl` holds none, so
         // every number below came out of the `moof`: 58 rows of a duration and a
         // size, laid from the run's own offset inside the `mdat` that follows it.
@@ -2168,10 +2171,15 @@ mod tests {
             "the fill row the encoder ends on, and the last byte of media the take holds"
         );
         assert!(
-            samples.iter().all(|s| s.pts == i64::try_from(s.dts).unwrap()),
+            samples
+                .iter()
+                .all(|s| s.pts == i64::try_from(s.dts).unwrap()),
             "sound is displayed as it is decoded"
         );
-        assert!(samples.iter().all(|s| s.sync), "every row of sound restarts");
+        assert!(
+            samples.iter().all(|s| s.sync),
+            "every row of sound restarts"
+        );
         assert_eq!(
             samples.iter().map(|s| u64::from(s.duration)).sum::<u64>(),
             track.duration,
@@ -2187,7 +2195,10 @@ mod tests {
             panic!("one video track, as ffprobe says");
         };
         assert_eq!((track.handler, track.codec), (*b"vide", *b"avc1"));
-        assert_eq!((track.width, track.height, track.timescale), (320, 240, 12_800));
+        assert_eq!(
+            (track.width, track.height, track.timescale),
+            (320, 240, 12_800)
+        );
         // The init segment describes the coding in its `stsd`, exactly as a file
         // with a complete sample table does: a fragment adds nothing to it, and a
         // decoder that got no `avcC` here could not start at any of these rows.
@@ -2234,7 +2245,10 @@ mod tests {
         for (index, sample) in samples.iter().enumerate() {
             assert_eq!(entry(sample), expected[index], "sample {index}");
         }
-        assert_eq!(track.duration, 12_800, "one second, as the last sample ends");
+        assert_eq!(
+            track.duration, 12_800,
+            "one second, as the last sample ends"
+        );
     }
 
     #[test]
@@ -2277,12 +2291,24 @@ mod tests {
         // the ones the first fragment's samples add up to.
         let take = hiding(FRAG_VIDEO, VIDEO_TFDT2_KIND);
         let file = demux(&take).expect("the take opens");
-        let samples = file.tracks()[0].samples.expanded().expect("an expanded index");
+        let samples = file.tracks()[0]
+            .samples
+            .expanded()
+            .expect("an expanded index");
         assert_eq!(samples.len(), 25);
-        assert_eq!(samples[5].dts, 2_560, "where the last sample of the one before ended");
+        assert_eq!(
+            samples[5].dts, 2_560,
+            "where the last sample of the one before ended"
+        );
         assert_eq!(samples[5].pts, 3_584, "and its own shift on top");
-        assert_eq!(samples[10].dts, 5_120, "the next fragment still says its own");
-        assert_eq!(samples[9].offset, 8_384, "and the run still measures from a row's end");
+        assert_eq!(
+            samples[10].dts, 5_120,
+            "the next fragment still says its own"
+        );
+        assert_eq!(
+            samples[9].offset, 8_384,
+            "and the run still measures from a row's end"
+        );
     }
 
     #[test]
@@ -2294,7 +2320,10 @@ mod tests {
         use crate::audio::AudioStream as _;
         let mut reader = open(FRAG_AUDIO).expect("the take opens for playback");
         assert_eq!(reader.codec(), "mp4a");
-        assert_eq!(reader.duration(), Some(std::time::Duration::new(1, 221_333_333)));
+        assert_eq!(
+            reader.duration(),
+            Some(std::time::Duration::new(1, 221_333_333))
+        );
         let mut decoder = crate::codec::make_audio_decoder(
             reader.codec(),
             reader.extra_data(),
@@ -2310,7 +2339,11 @@ mod tests {
                 .decode_encoded(&packet.data, packet.pts as u64, packet.duration as u64)
                 .expect("a frame of a real file decodes")
                 .expect("and sounds");
-            assert_eq!(audio.data.len() / 4, 1_024, "one raw block of interleaved f32 mono");
+            assert_eq!(
+                audio.data.len() / 4,
+                1_024,
+                "one raw block of interleaved f32 mono"
+            );
             assert_eq!((audio.pts, audio.timebase_den), (packet.pts as u64, 48_000));
             stamps.push((packet.pts, packet.duration));
         }

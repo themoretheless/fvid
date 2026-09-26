@@ -1,5 +1,9 @@
 //! Decode a file's audio track and report what the playback pipeline sees.
-//! Usage: audio_probe [--play] INPUT
+//! Usage: audio_probe [--play] [--pcm FILE] INPUT
+//!
+//! `--pcm` appends the decoded interleaved f32 bytes to FILE, which is how a
+//! decoder's output gets compared byte for byte with a reference renderer of the
+//! same track.
 //!
 //! Without `--play` this only decodes, so it needs no audio device. With it the
 //! file runs through the real audio thread and a silent modelled device, which
@@ -9,6 +13,8 @@
 mod harness;
 
 use harness::{Counters, Device};
+use std::fs::File;
+use std::io::Write;
 use std::time::{Duration, Instant};
 
 /// Start the audio thread against the modelled device and wait for it to
@@ -20,9 +26,8 @@ fn play_through_device(path: &str) -> Result<(), Box<dyn std::error::Error>> {
     let started = Instant::now();
     let counters = Counters::default();
     let device = counters.clone();
-    let playback = fvid::audio_thread::AudioPlayback::start(stream, move || {
-        Box::new(Device::new(device))
-    });
+    let playback =
+        fvid::audio_thread::AudioPlayback::start(stream, move || Box::new(Device::new(device)));
     // The thread opens the track paused, so nothing runs until commanded —
     // the same hand the player gives it when it starts presenting.
     playback.play();
@@ -65,25 +70,53 @@ fn play_through_device(path: &str) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 /// Decode every packet and report the counts, without a device in the loop.
-fn probe(path: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let Some(mut stream) = harness::open_stream(path) else {
-        return Err("no audio track this player can decode".into());
+fn probe(path: &str, pcm_to: Option<&str>) -> Result<(), Box<dyn std::error::Error>> {
+    let (found, refused) = harness::open_stream_reason(path);
+    let Some(mut stream) = found else {
+        // Which half of the pipeline is missing is the answer, not that one of them
+        // is: a container no reader opens and a container whose coding has no arm
+        // are two different queues of work.
+        return Err(match refused {
+            Some(coding) => {
+                format!("player read the container, refused its audio coding: {coding}").into()
+            }
+            None => "no reader recognised this envelope".into(),
+        });
     };
+    let mut dump = pcm_to.map(File::create).transpose()?;
 
     let codec = stream.codec().to_owned();
     let sample_rate = stream.sample_rate();
     let channels = u64::from(stream.channels());
-    let mut decoder =
-        fvid::codec::make_audio_decoder(&codec, stream.extra_data(), sample_rate, channels as u16)?;
+    let mut decoder = match fvid::codec::make_audio_decoder(
+        &codec,
+        stream.extra_data(),
+        sample_rate,
+        channels as u16,
+        stream.bits_per_sample(),
+    ) {
+        Ok(decoder) => decoder,
+        // The container and its track are read at this point, so a refusal here is
+        // the dispatch having no arm for the tag the container named. The tag goes
+        // out with it, because that is the row this file proves or does not.
+        Err(error) => {
+            return Err(format!(
+                "player read the container and a track coded {codec}, and has no decoder arm for it: {error}"
+            )
+            .into());
+        }
+    };
 
     let mut encoded = 0usize;
     let mut decoded = 0usize;
     let mut frames = 0u64;
+    let mut stamps = 0i64;
     let mut first = None;
     let mut last = None;
 
     while let Some(packet) = stream.next_packet()? {
         encoded += 1;
+        stamps += packet.duration.max(0);
         let at = stream.time_of(packet.pts);
         first = first.or(Some(at));
         last = Some(at);
@@ -97,11 +130,18 @@ fn probe(path: &str) -> Result<(), Box<dyn std::error::Error>> {
         };
         decoded += 1;
         frames += (pcm.data.len() as u64 / 4) / channels;
+        if let Some(file) = &mut dump {
+            file.write_all(&pcm.data)?;
+        }
     }
 
     let seconds = frames as f64 / f64::from(sample_rate);
     println!("codec={codec} rate={sample_rate} channels={channels}");
     println!("packets={encoded} decoded={decoded} frames={frames}");
+    // What the container's own stamps add up to, beside what the decoder handed
+    // over: the two agreeing is the track being as long as its timeline claims.
+    let timescale = stream.timescale().max(1);
+    println!("stamped={:.3}s", stamps as f64 / f64::from(timescale));
     println!(
         "audio={seconds:.3}s first={:?} last={:?}",
         first.unwrap_or_default(),
@@ -112,18 +152,21 @@ fn probe(path: &str) -> Result<(), Box<dyn std::error::Error>> {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut play = false;
+    let mut pcm = None;
     let mut path = None;
-    for arg in std::env::args().skip(1) {
+    let mut args = std::env::args().skip(1);
+    while let Some(arg) = args.next() {
         match arg.as_str() {
             "--play" => play = true,
+            "--pcm" => pcm = Some(args.next().ok_or("--pcm needs a path")?),
             _ if path.is_none() => path = Some(arg),
             other => return Err(format!("unexpected argument: {other}").into()),
         }
     }
-    let path = path.ok_or("usage: audio_probe [--play] INPUT")?;
+    let path = path.ok_or("usage: audio_probe [--play] [--pcm FILE] INPUT")?;
     if play {
         play_through_device(&path)
     } else {
-        probe(&path)
+        probe(&path, pcm.as_deref())
     }
 }

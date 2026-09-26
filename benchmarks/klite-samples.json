@@ -1,0 +1,608 @@
+{
+  "4xm": {
+    "bytes": 211000,
+    "file": "4xm--version2.4xm",
+    "sha256": "0bde2d25eaf2bc9aeddd7f34c807bc8955e8ef8c17986259ca0469c3f7d5dca9",
+    "url": "https://fate-suite.ffmpeg.org/4xm/version2.4xm"
+  },
+  "8bps": {
+    "bytes": 6346584,
+    "codec": "8bps",
+    "file": "8bps--8bpsbgra.mov",
+    "sha256": "610310881c10e5ee5dd936d59ab2fd90bd0d4060fac36e5897cd7d7af342a860",
+    "url": "https://samples.ffmpeg.org/V-codecs/8BPS-PlanarRGB/8bpsbgra.mov"
+  },
+  "aasc": {
+    "bytes": 1024214,
+    "codec": "aasc",
+    "cut_frames": 20,
+    "file": "aasc--AASC-cut.AVI",
+    "sha256": "80bf7cc10c186ada3e794be3ac0d216ce8153fdbec26550cf463dac22df33b19",
+    "url": "https://samples.ffmpeg.org/V-codecs/AASC/AASC.AVI"
+  },
+  "adpcm_ct": {
+    "bytes": 262144,
+    "codec": "adpcm_ct",
+    "file": "adpcm_ct--intro-partial.wav",
+    "sha256": "6279f9bd60ff56cc15b32b255431a0ae3f587916a372cc1a0cc60d6e713669dd",
+    "url": "https://fate-suite.ffmpeg.org/creative/intro-partial.wav"
+  },
+  "als": {
+    "bytes": 796389,
+    "codec": "mp4als",
+    "file": "als--als_01_2ch48k16b.mp4",
+    "sha256": "4e8011dd39fa5a823396bd6d1749babc089856cccee1eb3155426503de2b1855",
+    "url": "https://fate-suite.ffmpeg.org/lossless-audio/als_01_2ch48k16b.mp4"
+  },
+  "amr": {
+    "bytes": 3698,
+    "file": "amr--4.75k.amr",
+    "sha256": "02f83e3d2cf78d9224e57d2441e521f8063eeea5d92de67b4e574e6b3f229973",
+    "url": "https://fate-suite.ffmpeg.org/amrnb/4.75k.amr"
+  },
+  "ape": {
+    "bytes": 328000,
+    "file": "ape--luckynight-mac380-c4000.ape",
+    "sha256": "a82adead4ea0473d4691a1fc33e0660068d359077b6cba20005e0d94520c1b61",
+    "url": "https://fate-suite.ffmpeg.org/lossless-audio/luckynight-mac380-c4000.ape"
+  },
+  "arbc": {
+    "bytes": 4010988,
+    "codec": "arbc",
+    "file": "arbc--ED.AVI",
+    "sha256": "7e9177f81bab06304d8b904ce65ed3c8913803d069cbc26fb1e2ae3b1e561d73",
+    "url": "https://samples.ffmpeg.org/V-codecs/ARBC/ED.AVI"
+  },
+  "atrac1": {
+    "bytes": 100000,
+    "file": "atrac1--test_tones_small.aea",
+    "sha256": "7e08012f297ff4099fc803bea87c0bcf34f263affa222b92150a4230c3b1d05c",
+    "url": "https://fate-suite.ffmpeg.org/atrac1/test_tones_small.aea"
+  },
+  "atrac3": {
+    "bytes": 50000,
+    "file": "atrac3--mc_sich_at3_066_small.wav",
+    "sha256": "594aa0cb2e99f8ca7bd85fd1a10a0b36f6ac2515e393a551f36c22ad4e3d3cbf",
+    "url": "https://fate-suite.ffmpeg.org/atrac3/mc_sich_at3_066_small.wav"
+  },
+  "atrac3p": {
+    "bytes": 102400,
+    "file": "atrac3p--sonateno14op27-2-cut.aa3",
+    "sha256": "286be6541a3175584b974e38f62bb69e11f4eb501318864dd7908ed5be5141e6",
+    "url": "https://fate-suite.ffmpeg.org/atrac3p/sonateno14op27-2-cut.aa3"
+  },
+  "bink": {
+    "bytes": 2668,
+    "codec": "binkvideo",
+    "file": "bink--Snd0a7d9b58.dee",
+    "sha256": "f392af430901111a2f4b80d5e5b88902b26a1059e27ec622d3460c4eff8b16f4",
+    "url": "https://fate-suite.ffmpeg.org/bink/Snd0a7d9b58.dee"
+  },
+  "brender_pix": {
+    "bytes": 3134,
+    "codec": "brender_pix",
+    "file": "brender_pix--gears.pix",
+    "sha256": "6c8dfeff7a53bf2a9d28377ea8bb624079aa21891f47b1e2af94c4ab00c22a1e",
+    "url": "https://fate-suite.ffmpeg.org/brenderpix/gears.pix"
+  },
+  "camstudio": {
+    "bytes": 537600,
+    "codec": "cscd",
+    "file": "camstudio--sample_video.avi",
+    "sha256": "e215c94427671e36259442dcabac76b64216c0fbc163a04c42d8cb9247cf5161",
+    "url": "https://fate-suite.ffmpeg.org/CSCD/sample_video.avi"
+  },
+  "canopushq": {
+    "bytes": 213354,
+    "codec": "hqx",
+    "file": "canopushq--hqx422.avi",
+    "sha256": "a1c0e0686ec01e82176508e4e18151f31ddee146a10498b209a04ee6dd7a717e",
+    "url": "https://fate-suite.ffmpeg.org/canopus/hqx422.avi"
+  },
+  "cook": {
+    "bytes": 50000,
+    "file": "cook--ra_cook.rm",
+    "sha256": "5c7a13412f8cf544896c11fe8bc5440ac21b830e699bd6b14817dfc3745ec577",
+    "url": "https://fate-suite.ffmpeg.org/real/ra_cook.rm"
+  },
+  "cpng": {
+    "bytes": 3599334,
+    "codec": "png",
+    "file": "cpng--corepng.avi",
+    "sha256": "f6b7c624d25deca113df0549bf7e8af1b564f832bf45f49392a22b335cac2209",
+    "url": "https://samples.ffmpeg.org/V-codecs/PNG1/corepng.avi"
+  },
+  "cyuv": {
+    "bytes": 2862232,
+    "codec": "cyuv",
+    "file": "cyuv--cyuv.avi",
+    "sha256": "00d0aa2535b04d9d442bd72090dd6948cd716b09a24a2ac99fa7eb841ac7184e",
+    "url": "https://fate-suite.ffmpeg.org/cyuv/cyuv.avi"
+  },
+  "dav": {
+    "bytes": 25788416,
+    "codec": "h264",
+    "file": "dav--19.25.00-19.25.50[R].dav",
+    "sha256": "c17602dd3958ef850e8b435a1c23a652a28fd8733ca15ad4661fc1fd15b2da07",
+    "url": "https://samples.ffmpeg.org/ffmpeg-bugs/trac/ticket6144/19.25.00-19.25.50%5BR%5D.dav"
+  },
+  "dds": {
+    "bytes": 2080,
+    "codec": "dds",
+    "file": "dds--fate_monob.dds",
+    "sha256": "b678d114ece2aae5d58009478a9ebf6bc5e05d817b4d4cb6095bb081f8c38ada",
+    "url": "https://fate-suite.ffmpeg.org/dds/fate_monob.dds"
+  },
+  "dirac": {
+    "bytes": 92249,
+    "file": "dirac--vts.profile-main.drc",
+    "sha256": "6f8bf6af2a79f12f163fdfb831109c18da30ce7edd215d5983b807a2bef4d3de",
+    "url": "https://fate-suite.ffmpeg.org/dirac/vts.profile-main.drc"
+  },
+  "dsd": {
+    "bytes": 276588908,
+    "codec": "dsd_lsbf_planar",
+    "file": "dsd--2L-125_stereo-11289k-1b_04.dsf",
+    "sha256": "0ffcbd09b598e8fe70a975a74d63abef33e03c899d6bb2d5c2f573f9938a3a75",
+    "url": "https://samples.ffmpeg.org/ffmpeg-bugs/trac/ticket5489/2L-125_stereo-11289k-1b_04.dsf"
+  },
+  "dss": {
+    "bytes": 14848,
+    "codec": "dss_sp",
+    "file": "dss--sp.dss",
+    "sha256": "6e7ae1427368462fb1e9cf5e0e3a12fc21aaf48d66e9c10cfe39ce4de9645001",
+    "url": "https://fate-suite.ffmpeg.org/dss/sp.dss"
+  },
+  "eac3": {
+    "bytes": 48128,
+    "file": "eac3--csi_miami_5.1_256_spx_small.eac3",
+    "sha256": "84f50317a49a98509bf174ace814b39860e6ab2a1d61bdbd10ada9081f2bb2b3",
+    "url": "https://fate-suite.ffmpeg.org/eac3/csi_miami_5.1_256_spx_small.eac3"
+  },
+  "flic": {
+    "bytes": 296632,
+    "file": "flic--intel.dat",
+    "sha256": "99febabe09b5f7e5eb7774b71270b386d2c37ff1fce56aef30003c42afa3d51b",
+    "url": "https://fate-suite.ffmpeg.org/fli/intel.dat"
+  },
+  "fraps": {
+    "bytes": 235840,
+    "file": "fraps--sample-v1.avi",
+    "sha256": "8aeec0f16174ffbaacbc8fd6345fb7656e84e4da42f5e10fc6d90735372ead43",
+    "url": "https://fate-suite.ffmpeg.org/fraps/sample-v1.avi"
+  },
+  "g2m": {
+    "bytes": 128723,
+    "codec": "g2m",
+    "file": "g2m--g2m4.asf",
+    "sha256": "45793e2b1bf7fd18fee6a41ecec2ae697cd1c3f2a1deaf91d165079f7c9765fd",
+    "url": "https://fate-suite.ffmpeg.org/g2m/g2m4.asf"
+  },
+  "g729": {
+    "bytes": 66560,
+    "codec": "g729",
+    "file": "g729--REC03.act",
+    "sha256": "136b9169232536a5b86bae09cf12ab0952ae7010375c3e774791b1d1ce2d6457",
+    "url": "https://fate-suite.ffmpeg.org/act/REC03.act"
+  },
+  "geov": {
+    "bytes": 3263554,
+    "codec": "h264",
+    "file": "geov--GeoVision_camera.avi",
+    "sha256": "df19a659c30cff648dd7a4b7dedad75d4a09f85496532df0600ed3bf78acaa4d",
+    "url": "https://samples.ffmpeg.org/V-codecs/GAVC/GeoVision_camera.avi"
+  },
+  "gsm_ms": {
+    "bytes": 5846,
+    "file": "gsm_ms--ciao.wav",
+    "sha256": "40c39ebf1f088f8092c148e57a15aefc943972549519765bd885f5c595c08fce",
+    "url": "https://fate-suite.ffmpeg.org/gsm/ciao.wav"
+  },
+  "hap": {
+    "bytes": 3935,
+    "file": "hap--HapAlphaOnly_snappy1chunk_127x71.mov",
+    "sha256": "160da40cffa803eb026c3e96e7ee8ea0e6858031e4909172df54e515999a9df4",
+    "url": "https://fate-suite.ffmpeg.org/hap/HapAlphaOnly_snappy1chunk_127x71.mov"
+  },
+  "i263": {
+    "bytes": 339968,
+    "codec": "h263i",
+    "file": "i263--i263.avi",
+    "sha256": "e80ade1a4c928cdcd256dab9aaec835c834d79e8d2be667211449cea96c30815",
+    "url": "https://samples.ffmpeg.org/V-codecs/I263/i263.avi"
+  },
+  "icod": {
+    "bytes": 1668540,
+    "codec": "aic",
+    "cut_frames": 5,
+    "file": "icod--small_apple_intermediate_codec-cut.mov",
+    "sha256": "eeaffb4c76bd5ac7c6a6b3c5eaf34b7dbf462375baa4213bd107a4c82416b41f",
+    "url": "https://samples.ffmpeg.org/V-codecs/icod/small_apple_intermediate_codec.mov"
+  },
+  "imc": {
+    "bytes": 121054,
+    "file": "imc--imc.avi",
+    "sha256": "991700fa15aecb1f1de961bb574125884830f8665f16253d1983f2bf1dd3d113",
+    "url": "https://fate-suite.ffmpeg.org/imc/imc.avi"
+  },
+  "indeo2": {
+    "bytes": 994686,
+    "file": "indeo2--ISKATE.AVI",
+    "sha256": "fc87eb8eb39c5296e01dcf97fe6a14b77af100b45be6ddff58e7a87b9ca46e9a",
+    "url": "https://fate-suite.ffmpeg.org/rt21/ISKATE.AVI"
+  },
+  "indeo3": {
+    "bytes": 121458,
+    "file": "indeo3--cubes.mov",
+    "sha256": "1c17bd44f55f3e6f0ee4f82c7c8bdea91160e7416363efc3a1bd7924a7728518",
+    "url": "https://fate-suite.ffmpeg.org/iv32/cubes.mov"
+  },
+  "indeo4": {
+    "bytes": 153600,
+    "codec": "indeo4",
+    "file": "indeo4--iv41.avi",
+    "sha256": "cbd20048c391ba4f6a4778e278527acc89bc4434c4c2ffc59d0f0378fb9bcf60",
+    "url": "https://samples.ffmpeg.org/testsuite/iv41.avi"
+  },
+  "indeo5": {
+    "bytes": 939260,
+    "file": "indeo5--Educ_Movie_DeadlyForce.avi",
+    "sha256": "70564f095c92527c5e55f503207d579c5a3e177f4592a9e146e19e98d081d464",
+    "url": "https://fate-suite.ffmpeg.org/iv50/Educ_Movie_DeadlyForce.avi"
+  },
+  "jpegls": {
+    "bytes": 27118,
+    "codec": "jpegls",
+    "file": "jpegls--ilv1_rst.jls",
+    "sha256": "e99569e9b01cf4e9faf8c22db9f51ba0261deaba1b58201db14d26962f6e984f",
+    "url": "https://fate-suite.ffmpeg.org/jpegls/ilv1_rst.jls"
+  },
+  "lagarith": {
+    "bytes": 8946,
+    "file": "lagarith--lagarith-red.avi",
+    "sha256": "597c88fba8f0e1a24aa789bc531216921144f248bcd6c6168f4baec962d3ceac",
+    "url": "https://fate-suite.ffmpeg.org/lagarith/lagarith-red.avi"
+  },
+  "loco": {
+    "bytes": 94208,
+    "file": "loco--pig-loco-0.avi",
+    "sha256": "4c9cef2113970ff3e043de8d2d81c4b35ab46a2f47a9e5bc2830caca8fe714ec",
+    "url": "https://fate-suite.ffmpeg.org/loco/pig-loco-0.avi"
+  },
+  "mace": {
+    "bytes": 3052917,
+    "codec": "mace3",
+    "file": "mace--mac3audio.mov",
+    "sha256": "19cd872d386f502729c4cbd73381306ebe5bb694f0240229cf98136d6e6230a3",
+    "url": "https://samples.ffmpeg.org/A-codecs/MACE/mac3/mac3audio.mov"
+  },
+  "mdec": {
+    "bytes": 700000,
+    "file": "mdec--abc000_cut.str",
+    "sha256": "681df9dd0a50fccdd55553c1fa6b985fc47b3ea0177d18848158134944dab0a8",
+    "url": "https://fate-suite.ffmpeg.org/psx-str/abc000_cut.str"
+  },
+  "metasound": {
+    "bytes": 599146,
+    "codec": "metasound",
+    "file": "metasound--Saolin.audio_0x75-VoxwareMetaSound.V4CC_MP42.asf",
+    "sha256": "8ef972538df441cecb2d97d7ea20d27ed6c196e8da081c2d2c4558a8e1c04ec8",
+    "url": "https://samples.ffmpeg.org/asf-wmv/Saolin.audio_0x75-VoxwareMetaSound.V4CC_MP42.asf"
+  },
+  "midi": {
+    "bytes": 1686,
+    "codec": "",
+    "file": "midi--breeze.mid",
+    "sha256": "88c89d2197a549d9d8ccfdece663ad1ab2fdf3c8ce6f8e95a626497aa7ec8499",
+    "url": "https://samples.ffmpeg.org/A-codecs/suite/MIDI/breeze.mid"
+  },
+  "mirillis": {
+    "bytes": 2097152,
+    "codec": "fic",
+    "file": "mirillis--fic-partial-2MB.avi",
+    "sha256": "01c11add3b55e3d378442b64bc6799f6d90c238f2a477316afe33b549e4300a7",
+    "url": "https://fate-suite.ffmpeg.org/fic/fic-partial-2MB.avi"
+  },
+  "mp1": {
+    "bytes": 12538,
+    "codec": "mp3",
+    "file": "mp1--hecommon.bit",
+    "sha256": "21999b77716aeba047c7f55c2c1ce17b54c780b6dc007912f251b7ea189676ef",
+    "url": "https://fate-suite.ffmpeg.org/mp3-conformance/hecommon.bit"
+  },
+  "msmpeg4v1": {
+    "bytes": 317440,
+    "file": "msmpeg4v1--mpg4.avi",
+    "sha256": "b410cdbb97c64f2ecf75ace0dc6a7fd941411283bc0972f7cc0cd745d4d3939a",
+    "url": "https://fate-suite.ffmpeg.org/msmpeg4v1/mpg4.avi"
+  },
+  "mszh": {
+    "bytes": 200704,
+    "file": "mszh--mszh-1frame.avi",
+    "sha256": "d89ca0c15effd7b23396223f8cf17cefebe0e37ff52f8918931efdd90d574e9e",
+    "url": "https://fate-suite.ffmpeg.org/lcl/mszh-1frame.avi"
+  },
+  "mtv": {
+    "bytes": 19808768,
+    "codec": "rawvideo",
+    "file": "mtv--comedian_auto.mtv",
+    "sha256": "47fc80453f0751a74b506c3ac1ad61fdbc367ec58f1354df3ab7c3050e028d79",
+    "url": "https://samples.ffmpeg.org/mtv/comedian_auto.mtv"
+  },
+  "musepack": {
+    "bytes": 243306,
+    "codec": "musepack8",
+    "file": "musepack--inside-mp8.mpc",
+    "sha256": "62ee2237bd95e7704d9835abb6bcca694e5a29ba8ea76d34cb6ecdac0e8b5fac",
+    "url": "https://fate-suite.ffmpeg.org/musepack/inside-mp8.mpc"
+  },
+  "nclc": {
+    "bytes": 5389862,
+    "codec": "notchlc",
+    "cut_frames": 5,
+    "file": "nclc--big_buck_bunny NotchLC Optimal Encoding 1920-cut.mov",
+    "sha256": "f213f82a81464c797805410c35aacacd1f8810f9c6910044fa1ff6d14909e112",
+    "url": "https://samples.ffmpeg.org/V-codecs/NotchLC/big_buck_bunny%20NotchLC%20Optimal%20Encoding%201920.mov"
+  },
+  "ogv": {
+    "bytes": 59943,
+    "file": "ogv--bear.ogv",
+    "sha256": "c6281b645fc9ddcba7ecc8eb16c525758cec498de9645a5e6be44f6a8962ce57",
+    "url": "https://fate-suite.ffmpeg.org/ogg/bear.ogv"
+  },
+  "opus": {
+    "bytes": 3299,
+    "file": "opus--chained-meta.ogg",
+    "sha256": "14ef86e6d37476d4008ec33722c406136f261bb76dfb8fad5ddb8d6f64cdbd6c",
+    "url": "https://fate-suite.ffmpeg.org/ogg-opus/chained-meta.ogg"
+  },
+  "ptx": {
+    "bytes": 262188,
+    "codec": "ptx",
+    "file": "ptx--_113kw_pic.ptx",
+    "sha256": "d08aa95e36a727142ea26c7ffa08917cac70f43197b07403a9799d7549c4624f",
+    "url": "https://fate-suite.ffmpeg.org/ptx/_113kw_pic.ptx"
+  },
+  "pva": {
+    "bytes": 1048576,
+    "codec": "mp2",
+    "file": "pva--PVA_test-partial.pva",
+    "sha256": "2cf38eeb06313f4ea531e9305f43f3c1a98c187fd3601e14cd62dded8ab21a2e",
+    "url": "https://fate-suite.ffmpeg.org/pva/PVA_test-partial.pva"
+  },
+  "qdm2": {
+    "bytes": 4209165,
+    "codec": "qdm2",
+    "file": "qdm2--resurrection.mov",
+    "sha256": "63281635e74b8b414957a90cf326dd6998f7eb7fa0a91e9427fb16eb002d1263",
+    "url": "https://samples.ffmpeg.org/A-codecs/QDM2/fft8/resurrection.mov"
+  },
+  "qpeg": {
+    "bytes": 1942528,
+    "file": "qpeg--Clock.avi",
+    "sha256": "54fe0234d6f871babd0a4a5cc739ceb3281a8e943a154e9a0f339569cf5be980",
+    "url": "https://fate-suite.ffmpeg.org/qpeg/Clock.avi"
+  },
+  "ra_144": {
+    "bytes": 1066,
+    "codec": "ra_144",
+    "file": "ra_144--ra3.ra",
+    "sha256": "fca93f9f536ed3461e3645743dc391a523f9469a49b7caf4c856cc57f8ae7ea0",
+    "url": "https://fate-suite.ffmpeg.org/realaudio/ra3.ra"
+  },
+  "ralf": {
+    "bytes": 3089286,
+    "file": "ralf--Wonderful_RA10_Lossless_706K_30s.rm",
+    "sha256": "88eda3b29ba408d66bcf75f59a5e3dc2116cac6b15eafc8fcc491b55b377ff9b",
+    "url": "https://samples.ffmpeg.org/real/AC-ralf/Wonderful_RA10_Lossless_706K_30s.rm"
+  },
+  "realvideo": {
+    "bytes": 201000,
+    "file": "realvideo--rv30.rm",
+    "sha256": "e448c7720cff6a2eec9c20ce12d577c5d5c2d6748ecd4acc09102e3e08c67106",
+    "url": "https://fate-suite.ffmpeg.org/real/rv30.rm"
+  },
+  "rm": {
+    "bytes": 2097152,
+    "file": "rm--spygames-2MB.rmvb",
+    "sha256": "e9904307a07c84be11b7e4f35693f9ae8f62867078160f89798599439433d3b7",
+    "url": "https://fate-suite.ffmpeg.org/real/spygames-2MB.rmvb"
+  },
+  "rv40": {
+    "bytes": 2097152,
+    "codec": "rv40",
+    "file": "rv40--dquant1.rm",
+    "sha256": "03c50bd1541d06865144ac9bdf69d62bc22dc8983c497dae50c3937f60393530",
+    "url": "https://samples.ffmpeg.org/real/VC-RV40/dquant1.rm"
+  },
+  "shorten": {
+    "bytes": 1048576,
+    "file": "shorten--luckynight-partial.shn",
+    "sha256": "84e58dfb03c6b7ed6fc44f09fd6c25021be6b578db3485c1025f417b8aaeb6ba",
+    "url": "https://fate-suite.ffmpeg.org/lossless-audio/luckynight-partial.shn"
+  },
+  "sipr": {
+    "bytes": 48632,
+    "file": "sipr--sipr_5k0.rm",
+    "sha256": "669be770479d1650313bb76401221b09e9d1361329e80235063256802db0cf4c",
+    "url": "https://fate-suite.ffmpeg.org/sipr/sipr_5k0.rm"
+  },
+  "smacker": {
+    "bytes": 724092,
+    "codec": "smackvideo",
+    "file": "smacker--wetlogo.smk",
+    "sha256": "dfba9d646f0889f073edb3c3241115f92b4c84f5c567da3e0f5bc7900f646c49",
+    "url": "https://fate-suite.ffmpeg.org/smacker/wetlogo.smk"
+  },
+  "speex": {
+    "bytes": 66182,
+    "file": "speex--fabula_01_005_esopo.spx",
+    "sha256": "5a39010799b4b78a96ba81fd392fe51a09786aa5e06c8f17e1b16b6f43222f16",
+    "url": "https://archive.org/download/fabulas_esopo_01_librivox_speex/fabula_01_005_esopo.spx"
+  },
+  "svq3": {
+    "bytes": 77201,
+    "file": "svq3--svq3_watermark.mov",
+    "sha256": "840bba868381dcfe417a01738f2bf38e7c34a7df795cb1d875ef630206040c58",
+    "url": "https://fate-suite.ffmpeg.org/svq3/svq3_watermark.mov"
+  },
+  "tak": {
+    "bytes": 1010411,
+    "file": "tak--luckynight-partial.tak",
+    "sha256": "e84f57bd1e070bfd0fec20971bfc5b9bede4a58f74ef669d03080c547e2fd0e0",
+    "url": "https://fate-suite.ffmpeg.org/lossless-audio/luckynight-partial.tak"
+  },
+  "theora": {
+    "bytes": 59943,
+    "file": "theora--bear.ogv",
+    "sha256": "c6281b645fc9ddcba7ecc8eb16c525758cec498de9645a5e6be44f6a8962ce57",
+    "url": "https://fate-suite.ffmpeg.org/ogg/bear.ogv"
+  },
+  "truemotion1": {
+    "bytes": 349960,
+    "file": "truemotion1--sonic3dblast_intro-partial.avi",
+    "sha256": "5b6d6841c93268cba05d2830315b267d92ff6a67efa09b22608a3f75aa5a31ff",
+    "url": "https://fate-suite.ffmpeg.org/duck/sonic3dblast_intro-partial.avi"
+  },
+  "truemotion2": {
+    "bytes": 12514,
+    "codec": "truemotion2rt",
+    "file": "truemotion2--tr20_low.avi",
+    "sha256": "b241964bbd92f43e369a0c90b3c809ca1588618997ff5b264b13301f4495aaf8",
+    "url": "https://fate-suite.ffmpeg.org/duck/tr20_low.avi"
+  },
+  "truespeech": {
+    "bytes": 46234,
+    "file": "truespeech--a6.wav",
+    "sha256": "6848b62fde3d2fa29cb8a4d6a07355b51a5299dc0568d7c0a589ea491437ca6e",
+    "url": "https://fate-suite.ffmpeg.org/truespeech/a6.wav"
+  },
+  "tscc": {
+    "bytes": 932864,
+    "codec": "tscc",
+    "file": "tscc--oneminute.avi",
+    "sha256": "45067f75d126eea42ba5edb3d01e6a3851f0ce6801a2955472f580bbe3617ded",
+    "url": "https://fate-suite.ffmpeg.org/tscc/oneminute.avi"
+  },
+  "tscc2": {
+    "bytes": 660159,
+    "file": "tscc2--rec.trec",
+    "sha256": "659d9d8a993c17f59c8729ec3e9e8d372e72cf10b977dc0d17d691fccd840eb4",
+    "url": "https://fate-suite.ffmpeg.org/tscc/rec.trec"
+  },
+  "txd": {
+    "bytes": 23976,
+    "codec": "txd",
+    "file": "txd--misc.txd",
+    "sha256": "72a542baf687e9ee97b2b906a434c98c95b5ba08f908f846fccdc0b327e1aaaa",
+    "url": "https://fate-suite.ffmpeg.org/txd/misc.txd"
+  },
+  "ultimotion": {
+    "bytes": 773590,
+    "codec": "ulti",
+    "file": "ultimotion--hit12w.avi",
+    "sha256": "879b620fb90ef408d814faf19e00203a92c23d09d275c3b04ab45030d1ba0e3d",
+    "url": "https://fate-suite.ffmpeg.org/ulti/hit12w.avi"
+  },
+  "vc1": {
+    "bytes": 24097,
+    "file": "vc1--SA00040.vc1",
+    "sha256": "898035e63cfe0ddb1cc2c8749d7dafdfcc1b12fe5dac7e5b65941e6c4e41c860",
+    "url": "https://fate-suite.ffmpeg.org/vc1/SA00040.vc1"
+  },
+  "vcr1": {
+    "bytes": 2431488,
+    "file": "vcr1--VCR1test.avi",
+    "sha256": "13670f13bf8a9718839b285aeebdf8e345e29964744c9cbcc3dd03e48a3502b0",
+    "url": "https://fate-suite.ffmpeg.org/vcr1/VCR1test.avi"
+  },
+  "vixl": {
+    "bytes": 965632,
+    "file": "vixl--pig-vixl.avi",
+    "sha256": "6eb11e4438a41e873406bd70441f338b05469f03f990c293da44bcb2fdba31c6",
+    "url": "https://fate-suite.ffmpeg.org/vixl/pig-vixl.avi"
+  },
+  "vmnc": {
+    "bytes": 692224,
+    "file": "vmnc--test.avi",
+    "sha256": "7ef05cd68f866308b97a8a81d24718beea7106d8ce54925254c27c18085fd014",
+    "url": "https://fate-suite.ffmpeg.org/VMnc/test.avi"
+  },
+  "vorbis": {
+    "bytes": 7151,
+    "file": "vorbis--chained-meta.ogg",
+    "sha256": "9a664f79d0a201b8733a26a3a178a14f3c07c2f116f4e87738f692a69f187804",
+    "url": "https://fate-suite.ffmpeg.org/ogg-vorbis/chained-meta.ogg"
+  },
+  "vp3": {
+    "bytes": 634880,
+    "file": "vp3--vp31.avi",
+    "sha256": "457f17e9ebe46ca7f217f853976199c77c8321c170b40ce8531317137f0cf5c3",
+    "url": "https://fate-suite.ffmpeg.org/vp3/vp31.avi"
+  },
+  "vp5": {
+    "bytes": 409600,
+    "file": "vp5--potter512-400-partial.avi",
+    "sha256": "9be2d439ea5c7d827321487871a6480537c1f2f38cb4343f4073c5965a3c1307",
+    "url": "https://fate-suite.ffmpeg.org/vp5/potter512-400-partial.avi"
+  },
+  "vp6": {
+    "bytes": 66206,
+    "file": "vp6--interlaced32x32.avi",
+    "sha256": "a5850478c339f341330eabc3f155d1647cd73c4a6d8a4cac5ef2d2d5335bb378",
+    "url": "https://fate-suite.ffmpeg.org/vp6/interlaced32x32.avi"
+  },
+  "vp7": {
+    "bytes": 662310,
+    "file": "vp7--potter-40.vp7",
+    "sha256": "f1fd4420353ff5a17d9bbfd582f2f79dd9943a2351472bb71b429e07da86be44",
+    "url": "https://fate-suite.ffmpeg.org/vp7/potter-40.vp7"
+  },
+  "vvc": {
+    "bytes": 1953,
+    "file": "vvc--wpp-single-slice-pic.vvc",
+    "sha256": "3e84f434f351d6b6a38be6d398b15fa5f6ab184efab6e26b29e869e71612c4bb",
+    "url": "https://fate-suite.ffmpeg.org/vvc/wpp-single-slice-pic.vvc"
+  },
+  "webp": {
+    "bytes": 100,
+    "codec": "webp",
+    "file": "webp--rgb_q80.webp",
+    "sha256": "456e70361e10baaffa4e4bb72f000f1c7ba49e8f29391c18bd5c05c703feea53",
+    "url": "https://fate-suite.ffmpeg.org/webp/rgb_q80.webp"
+  },
+  "wmalossless": {
+    "bytes": 6585473,
+    "codec": "wmalossless",
+    "file": "wmalossless--luckynight.wma",
+    "sha256": "37fe6efab1231f07f46ed8d8bec212c0b97e1535f4931ba02d92138a32f2b6ee",
+    "url": "https://samples.ffmpeg.org/A-codecs/lossless/luckynight.wma"
+  },
+  "wmapro": {
+    "bytes": 30000,
+    "codec": "wmapro",
+    "file": "wmapro--latin_192_mulitchannel_cut.wma",
+    "sha256": "3f3a18ce22ac061d4abc38b553a1d00cfe6795d76e2366c1aa5aa7a4c8c230b8",
+    "url": "https://fate-suite.ffmpeg.org/wmapro/latin_192_mulitchannel_cut.wma"
+  },
+  "wnv1": {
+    "bytes": 948224,
+    "file": "wnv1--wnv1-codec.avi",
+    "sha256": "74d974cb4df97f96f241775090faa7db40b65a5f4a4a0b997268183ee35e36b7",
+    "url": "https://fate-suite.ffmpeg.org/wnv1/wnv1-codec.avi"
+  },
+  "wtv": {
+    "bytes": 1048576,
+    "codec": "mpeg2video",
+    "file": "wtv--law-and-order-partial.wtv",
+    "sha256": "1eb14237d0edc4968ea4e26ffa9f8567b3e2976a885705d6ed23386a694ecdd5",
+    "url": "https://fate-suite.ffmpeg.org/wtv/law-and-order-partial.wtv"
+  },
+  "xface": {
+    "bytes": 243,
+    "codec": "xface",
+    "file": "xface--lena.xface",
+    "sha256": "5a67204280fe618d120a3b69b9f4dccc3e3b5a4593e249f7a21983dc449b9a57",
+    "url": "https://fate-suite.ffmpeg.org/xface/lena.xface"
+  }
+}

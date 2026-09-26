@@ -76,6 +76,11 @@ pub struct DecodeStats {
     pub width: u32,
     pub height: u32,
     pub pixel_format: String,
+    /// Reads the demuxer reported as damaged, which were skipped while keeping what the stream had
+    /// already produced. Non-zero means the format's demuxer ends the stream with an error code
+    /// instead of EOF; the count is reported rather than swallowed, so a tolerant read stays
+    /// auditable.
+    pub decode_errors: u64,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -304,6 +309,9 @@ pub struct DecodeTransform {
     pub pix_fmt: Option<String>,
     /// Half-open presentation interval in microseconds from container start.
     pub interval: Option<(i64, i64)>,
+    /// Demuxer to read the file with, for a format whose bytes carry no signature — the
+    /// equivalent of ffmpeg's `-f`. `None` lets FFmpeg probe, as every other reader here does.
+    pub input_format: Option<String>,
 }
 
 /// Software decode of the first video stream; frames are dropped after optional
@@ -313,7 +321,7 @@ pub fn decode_video(source: &Path) -> Result<DecodeStats> {
 }
 
 pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Result<DecodeStats> {
-    let mut input = Input::open_fast(source)?;
+    let mut input = Input::open_fast_hinted(source, transform.input_format.as_deref())?;
     let video = input
         .streams()
         .iter()
@@ -1460,6 +1468,8 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
     }
     let mut video_frames = 0u64;
     let mut finished = false;
+    let mut decode_errors = 0u64;
+    let mut stopped_by_damage = false;
     {
         let mut handle = |frame: &mut Frame| -> Result<bool> {
             unsafe {
@@ -5681,7 +5691,32 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
             unsafe { av_frame_unref(frame.0) };
             Ok(false)
         };
-        'packets: while packet.read(&mut input)? {
+        // A demuxer can answer the read that follows its last packet with AVERROR_INVALIDDATA rather
+        // than EOF, and a well-formed file of that format ends exactly that way — JV's does on every
+        // file. The audio path already treats such a read as salvageable, so the video path mirrors
+        // its rule: count the damaged reads, keep reading while the stream may still have frames,
+        // then drain the decoder as an ordinary end of stream does. A stream that never yielded a
+        // frame still fails, so this stays a rule about one format's manners and not about damage.
+        let mut demux_errors = 0u64;
+        'packets: loop {
+            let available = match packet.try_read(&mut input) {
+                Ok(available) => available,
+                Err(INVALID_DATA) => {
+                    decode_errors += 1;
+                    demux_errors += 1;
+                    if demux_errors > 64 {
+                        // Read no further, but keep what came through: the frame count decides
+                        // below, once the decoder has been drained like any other end of stream.
+                        stopped_by_damage = true;
+                        break 'packets;
+                    }
+                    continue;
+                }
+                Err(code) => return Err(check(code, "read packet").unwrap_err()),
+            };
+            if !available {
+                break;
+            }
             if unsafe { (*packet.0).stream_index } != video as i32 {
                 continue;
             }
@@ -6315,12 +6350,18 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
             )?;
         }
     }
+    if stopped_by_damage && video_frames == 0 {
+        // Tolerating the damaged read was worth nothing: the stream gave no frame before it stopped.
+        // That is the old behaviour, and it is what a damaged file deserves.
+        return Err(check(INVALID_DATA, "read packet").unwrap_err());
+    }
     Ok(DecodeStats {
         backend: "native libavcodec decode",
         video_frames,
         width: out_w,
         height: out_h,
         pixel_format,
+        decode_errors,
     })
 }
 
@@ -6333,5 +6374,7 @@ pub fn decode_video_cuda(source: &Path, device: usize) -> Result<DecodeStats> {
         width,
         height,
         pixel_format: "cuda/nv12".into(),
+        // The device path reads its packets strictly, so nothing was ever skipped here.
+        decode_errors: 0,
     })
 }

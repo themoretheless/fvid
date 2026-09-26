@@ -60,9 +60,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
     let counters = Counters::default();
     let device = counters.clone();
-    let mut audio = fvid::audio_thread::AudioPlayback::start(stream, move || {
-        Box::new(Device::new(device))
-    });
+    let mut audio =
+        fvid::audio_thread::AudioPlayback::start(stream, move || Box::new(Device::new(device)));
     if seek > 0.0 {
         audio.seek(Duration::from_secs_f64(seek));
     }

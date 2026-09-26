@@ -1,5 +1,5 @@
 //! Bounded seekable WebM/Matroska indexing, without an external demultiplexer.
-use crate::{Result, invalid};
+use crate::{Result, container::FileTags, invalid};
 use std::io::{Read, Seek, SeekFrom};
 const SEGMENT: u32 = 0x18538067;
 const CLUSTER: u32 = 0x1f43b675;
@@ -8,14 +8,42 @@ pub struct Track {
     pub number: u64,
     pub kind: u64,
     pub codec: String,
+    /// `Name`, which muxers fill from the stream's `title` tag; empty when the
+    /// file gives the track no name.
+    pub name: String,
+    /// The track's language as the file states it, empty when it states none.
+    /// Read from whichever of the current element and the older one the muxer
+    /// wrote, and left in the shape the file used, so a three-letter code and
+    /// a `pt-BR`-style tag reach the player alike.
+    pub language: String,
     pub width: u64,
     pub height: u64,
+    /// `DisplayWidth`/`DisplayHeight`: the size in pixels the coded picture is
+    /// drawn at. `(0, 0)` when the track states no such size, which most do, or
+    /// states it in a unit other than pixels.
+    pub display: (u64, u64),
+    /// `PixelCropLeft/Top/Right/Bottom`: the border of coded pixels the track
+    /// asks not to be shown, as read from the elements in that order. A track
+    /// that states none, or states one the file cannot show with — a crop that
+    /// leaves nothing, a crop too wide to subtract — keeps the whole picture.
+    pub crop: [u64; 4],
     pub sample_rate: u64,
     pub channels: u64,
     pub bit_depth: u64,
+    /// `DefaultDuration` in nanoseconds, 0 when the track declares none. Text
+    /// subtitle blocks carry no length of their own, so this is the timing a
+    /// track-level reader has left for the last block.
+    pub default_duration_ns: u64,
     /// Codec setup data from `CodecPrivate`. Vorbis carries its three header
     /// packets concatenated here, and the decoder cannot initialize without it.
     pub codec_private: Vec<u8>,
+}
+/// A named point in the file a player can jump to.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Chapter {
+    pub start_ns: u64,
+    /// The first `ChapterDisplay` string, empty when the atom names no title.
+    pub title: String,
 }
 #[derive(Clone, Debug)]
 pub struct Packet {
@@ -24,6 +52,31 @@ pub struct Packet {
     pub keyframe: bool,
     pub offset: u64,
     pub size: usize,
+}
+impl Track {
+    /// The size the picture is meant to be seen at: the coded one with the
+    /// stated crop borders taken off it. Equal to the coded size when the
+    /// track states no crop, or states one that leaves nothing to show.
+    pub fn visible(&self) -> (u64, u64) {
+        (
+            self.width - self.crop[0] - self.crop[2],
+            self.height - self.crop[1] - self.crop[3],
+        )
+    }
+    /// How much wider a coded pixel is than it is tall, as the file states it.
+    /// `(1, 1)` when the file states no display size, which is what most
+    /// writers mean. The display size is a statement about the picture the
+    /// viewer is meant to see, so the coded size it is compared against is the
+    /// cropped one.
+    pub fn pixel_aspect(&self) -> (u32, u32) {
+        let coded = self.visible();
+        let drawn = (self.display.0, self.display.1);
+        // (drawn width / coded width) over (drawn height / coded height). A
+        // size too large to multiply is one this reader cannot divide either.
+        let wide = drawn.0.checked_mul(coded.1).unwrap_or(0);
+        let tall = drawn.1.checked_mul(coded.0).unwrap_or(0);
+        super::reduce_ratio(wide, tall)
+    }
 }
 #[derive(Clone, Copy)]
 pub struct Limits {
@@ -46,6 +99,13 @@ pub struct WebmReader<R> {
     pub packets: Vec<Packet>,
     /// Declared Segment duration, converted from TimestampScale units.
     pub duration_ns: Option<u64>,
+    /// Chapter atoms of the file's editions, in order of their start. Empty
+    /// when the file carries none or its chapter list cannot be walked.
+    pub chapters: Vec<Chapter>,
+    /// What the file's own tags say about it as a whole. Its title answers by
+    /// either of the two places a writer can put it: the `Title` of a tag of the
+    /// whole segment and the older `Title` of the information block.
+    pub tags: FileTags,
     limits: Limits,
 }
 #[derive(Clone, Copy)]
@@ -120,6 +180,13 @@ fn bytes<R: Read + Seek>(r: &mut R, e: Element, max: usize) -> Result<Vec<u8>> {
     r.read_exact(&mut out)?;
     Ok(out)
 }
+/// A UTF-8 string element, without the trailing NUL byte some muxers write.
+fn text<R: Read + Seek>(r: &mut R, e: Element, max: usize) -> Result<String> {
+    Ok(String::from_utf8(bytes(r, e, max)?)
+        .map_err(|_| invalid("invalid WebM text"))?
+        .trim_end_matches('\0')
+        .to_owned())
+}
 fn uint<R: Read + Seek>(r: &mut R, e: Element) -> Result<u64> {
     Ok(bytes(r, e, 8)?
         .into_iter()
@@ -184,6 +251,9 @@ impl<R: Read + Seek> WebmReader<R> {
         let mut duration_ticks = None;
         let mut tracks = Vec::new();
         let mut packets = Vec::new();
+        let mut chapter_runs: Vec<(u64, String)> = Vec::new();
+        let mut block_title = String::new();
+        let mut tags = FileTags::default();
         while at < segment_end {
             reader.seek(SeekFrom::Start(at))?;
             let e = element(&mut reader, segment_end, &mut count, limits.elements)?;
@@ -196,6 +266,8 @@ impl<R: Read + Seek> WebmReader<R> {
                                 return Err(invalid("invalid WebM Duration"));
                             }
                             duration_ticks = Some(value);
+                        } else if f.id == 0x7ba9 {
+                            block_title = lenient_text(&mut reader, f, 1024).unwrap_or_default();
                         } else if f.id == 0x2ad7b1 {
                             scale = uint(&mut reader, f)?;
                             if scale == 0 {
@@ -216,31 +288,78 @@ impl<R: Read + Seek> WebmReader<R> {
                             number: 0,
                             kind: 0,
                             codec: String::new(),
+                            name: String::new(),
+                            language: String::new(),
                             width: 0,
                             height: 0,
+                            display: (0, 0),
+                            crop: [0; 4],
                             sample_rate: 0,
                             channels: 0,
                             bit_depth: 0,
+                            default_duration_ns: 0,
                             codec_private: Vec::new(),
                         };
+                        // Two elements can state a language: the one in use now
+                        // and, in files muxed before it existed, the older one in
+                        // the same place. Whichever the newer spelling is wins, in
+                        // either writing order, so a track that carries both does
+                        // not read as two different languages.
+                        let mut older = String::new();
+                        let mut current = String::new();
                         for f in fields(&mut reader, entry, &mut count, limits.elements)? {
                             match f.id {
                                 0xd7 => track.number = uint(&mut reader, f)?,
                                 0x83 => track.kind = uint(&mut reader, f)?,
                                 0x86 => {
+                                    // Some muxers NUL-terminate the CodecID string.
                                     track.codec = String::from_utf8(bytes(&mut reader, f, 128)?)
                                         .map_err(|_| invalid("invalid WebM codec ID"))?
+                                        .trim_end_matches('\0')
+                                        .to_owned();
                                 }
+                                0x536e => {
+                                    track.name = text(&mut reader, f, 1024)?;
+                                }
+                                0x22b59c => current = text(&mut reader, f, 128)?,
+                                0x447a => older = text(&mut reader, f, 128)?,
+                                0x23e383 => track.default_duration_ns = uint(&mut reader, f)?,
                                 0x63a2 => {
                                     track.codec_private = bytes(&mut reader, f, 1 << 20)?;
                                 }
                                 0xe0 => {
+                                    let mut drawn = (0, 0);
+                                    // A display size is only in pixels while
+                                    // `DisplayUnit` says so; counted lines or
+                                    // centimetres divide into nothing here.
+                                    let mut unit = 0;
+                                    // Read in the order the elements state —
+                                    // bottom, top, left, right — and kept in
+                                    // the order a viewer cuts them: left, top,
+                                    // right, bottom.
+                                    let mut crop = [0; 4];
                                     for v in fields(&mut reader, f, &mut count, limits.elements)? {
                                         match v.id {
                                             0xb0 => track.width = uint(&mut reader, v)?,
                                             0xba => track.height = uint(&mut reader, v)?,
+                                            0x54b0 => drawn.0 = uint(&mut reader, v)?,
+                                            0x54ba => drawn.1 = uint(&mut reader, v)?,
+                                            0x54b2 => unit = uint(&mut reader, v)?,
+                                            0x54aa => crop[3] = uint(&mut reader, v)?,
+                                            0x54bb => crop[1] = uint(&mut reader, v)?,
+                                            0x54cc => crop[0] = uint(&mut reader, v)?,
+                                            0x54dd => crop[2] = uint(&mut reader, v)?,
                                             _ => {}
                                         }
+                                    }
+                                    track.display = if unit == 0 { drawn } else { (0, 0) };
+                                    // A crop that leaves no picture is a file
+                                    // making a statement it cannot keep; the
+                                    // whole picture is shown.
+                                    if crop[0] + crop[2] < track.width
+                                        && crop[1] + crop[3] < track.height
+                                    {
+                                        track.crop = crop;
                                     }
                                 }
                                 0xe1 => {
@@ -256,7 +375,10 @@ impl<R: Read + Seek> WebmReader<R> {
                                                 track.sample_rate = value.round() as u64;
                                             }
                                             0x9f => track.channels = uint(&mut reader, v)?,
-                                            0x62 => track.bit_depth = uint(&mut reader, v)?,
+                                            // `BitDepth` under `Audio`, in the two-byte
+                                            // form the specification gives it; PCM has
+                                            // nothing else to state its sample width in.
+                                            0x6264 => track.bit_depth = uint(&mut reader, v)?,
                                             _ => {}
                                         }
                                     }
@@ -269,6 +391,15 @@ impl<R: Read + Seek> WebmReader<R> {
                                 _ => {}
                             }
                         }
+                        // A track whose only statement is the `und` writers use
+                        // for "nothing was said" leaves the player knowing no
+                        // more than one that states nothing at all.
+                        let stated = if current.is_empty() { older } else { current };
+                        track.language = if stated == "und" {
+                            String::new()
+                        } else {
+                            stated
+                        };
                         if track.number == 0
                             || tracks.iter().any(|t: &Track| t.number == track.number)
                             || track.codec.is_empty()
@@ -277,6 +408,18 @@ impl<R: Read + Seek> WebmReader<R> {
                         }
                         tracks.push(track);
                     }
+                }
+                0x1254c367 => {
+                    read_tags(&mut reader, e, &mut count, limits.elements, &mut tags);
+                }
+                0x1043a770 => {
+                    read_chapters(
+                        &mut reader,
+                        e,
+                        &mut count,
+                        limits.elements,
+                        &mut chapter_runs,
+                    );
                 }
                 CLUSTER => {
                     let cluster_end = e.end.unwrap_or(segment_end);
@@ -358,9 +501,45 @@ impl<R: Read + Seek> WebmReader<R> {
                 Ok(nanos as u64)
             })
             .transpose()?;
+        // Chapter times ride in `TimestampScale` units like every other
+        // timestamp of the file.
+        // Chapter times state their units badly: the specification puts them in
+        // `TimestampScale` steps, which is how `mkvmerge` writes them, while
+        // `ffmpeg` writes them in nanoseconds under the same 1 ms scale. A
+        // chapter cannot start after the file ends, so a declared length tells
+        // the two readings apart; without one the specification wins.
+        let overruns = duration_ns.is_some_and(|duration| {
+            let last = chapter_runs
+                .iter()
+                .map(|(start, _)| *start)
+                .max()
+                .unwrap_or(0);
+            last.checked_mul(scale)
+                .is_none_or(|spaced| spaced > duration)
+                && last <= duration
+        });
+        let factor = if overruns { 1 } else { scale };
+        let mut chapters: Vec<Chapter> = chapter_runs
+            .iter()
+            .filter_map(|(start, title)| {
+                start.checked_mul(factor).map(|start_ns| Chapter {
+                    start_ns,
+                    title: title.clone(),
+                })
+            })
+            .collect();
+        chapters.sort_by_key(|chapter| chapter.start_ns);
+        // A file that wrote its name in both places wrote it in the tags, which
+        // is where the specification puts it; the information block is the older
+        // spelling and the only one some muxers reach for.
+        if tags.title.is_empty() {
+            tags.title = block_title;
+        }
         Ok(Self {
             reader,
             duration_ns,
+            chapters,
+            tags,
             tracks,
             packets,
             limits,
@@ -378,6 +557,166 @@ impl<R: Read + Seek> WebmReader<R> {
         let mut data = vec![0; p.size];
         self.reader.read_exact(&mut data)?;
         Ok(data)
+    }
+}
+/// The words a text element holds, with an encoding this reader cannot spell
+/// left as the characters it happens to decode to rather than as a file it
+/// refuses: a name is worth showing however it was written, and a file with a
+/// badly coded one still plays.
+fn lenient_text<R: Read + Seek>(r: &mut R, e: Element, max: usize) -> Option<String> {
+    Some(
+        String::from_utf8_lossy(&bytes(r, e, max).ok()?)
+            .trim_end_matches('\0')
+            .to_owned(),
+    )
+}
+/// The children of a master up to the first one this reader cannot read, which
+/// `fields` would take as the whole list being bad. A `Tags` master is where
+/// this is needed: some muxers rewrite it in place and leave a byte of padding
+/// behind the last tag, and the tags standing before it are still the file's.
+fn fields_to_first_gap<R: Read + Seek>(
+    r: &mut R,
+    e: Element,
+    count: &mut usize,
+    max: usize,
+) -> Vec<Element> {
+    let Ok(limit) = end(e) else {
+        return Vec::new();
+    };
+    let mut at = e.data;
+    let mut out = Vec::new();
+    while at < limit {
+        if r.seek(SeekFrom::Start(at)).is_err() {
+            break;
+        }
+        let Ok(child) = element(r, limit, count, max) else {
+            break;
+        };
+        let Ok(next) = end(child) else {
+            break;
+        };
+        out.push(child);
+        at = next;
+    }
+    out
+}
+/// What the whole file says about itself among its `Tags`: the `SimpleTag`
+/// values of a `Tag` whose `Targets` single out no track, edition, chapter or
+/// attachment. A list this reader cannot walk, or one that names nothing of the
+/// kind, leaves the file stating nothing instead of failing it — as does a tag
+/// of a name this player has no line for.
+fn read_tags<R: Read + Seek>(
+    r: &mut R,
+    e: Element,
+    count: &mut usize,
+    max: usize,
+    out: &mut FileTags,
+) {
+    for tag in fields_to_first_gap(r, e, count, max) {
+        if tag.id != 0x7373 {
+            continue;
+        }
+        let Ok(parts) = fields(r, tag, count, max) else {
+            continue;
+        };
+        // Either order the two parts come in is settled before the tag is kept,
+        // so a `SimpleTag` written before its `Targets` still has them.
+        let mut names_a_part = false;
+        let mut stated: Vec<(String, String)> = Vec::new();
+        for part in parts {
+            match part.id {
+                0x63c0 => {
+                    let entries = fields(r, part, count, max).unwrap_or_default();
+                    names_a_part = entries
+                        .iter()
+                        .any(|entry| matches!(entry.id, 0x63c4 | 0x63c5 | 0x63c6 | 0x63c9));
+                }
+                0x67c8 => {
+                    let Ok(fields_of_tag) = fields(r, part, count, max) else {
+                        continue;
+                    };
+                    let (mut name, mut value) = (String::new(), String::new());
+                    for field in fields_of_tag {
+                        match field.id {
+                            0x45a3 => name = lenient_text(r, field, 128).unwrap_or_default(),
+                            0x4487 => value = lenient_text(r, field, 1024).unwrap_or_default(),
+                            _ => {}
+                        }
+                    }
+                    if !name.is_empty() && !value.is_empty() {
+                        stated.push((name, value));
+                    }
+                }
+                _ => {}
+            }
+        }
+        if !names_a_part {
+            for (name, value) in stated {
+                out.insert(&name, &value);
+            }
+        }
+    }
+}
+
+/// The chapter atoms of one `Chapters` master, kept in the units the file's
+/// `TimestampScale` states so the scale — which the `Info` may still be to come
+/// by — can be applied later. A list this reader cannot walk leaves no
+/// chapters at all rather than failing the file, which plays fine without them.
+fn read_chapters<R: Read + Seek>(
+    r: &mut R,
+    e: Element,
+    count: &mut usize,
+    max: usize,
+    out: &mut Vec<(u64, String)>,
+) {
+    // A master may carry no chapters at all rather than a bad one, so an
+    // unknown-sized parent or a truncated list simply yields nothing.
+    let Ok(editions) = fields(r, e, count, max) else {
+        return;
+    };
+    for edition in editions {
+        if edition.id != 0x45b9 {
+            continue;
+        }
+        let Ok(atoms) = fields(r, edition, count, max) else {
+            return;
+        };
+        for atom in atoms {
+            if atom.id != 0xb6 {
+                continue;
+            }
+            if out.len() >= 1_024 {
+                return;
+            }
+            let Ok(entries) = fields(r, atom, count, max) else {
+                return;
+            };
+            let mut start = None;
+            let mut title = String::new();
+            for field in entries {
+                match field.id {
+                    0x91 => start = uint(r, field).ok(),
+                    // A chapter may be displayed in several languages; what the
+                    // file leads with is what a player has to show.
+                    0x80 if title.is_empty() => {
+                        if let Ok(texts) = fields(r, field, count, max) {
+                            for text in texts {
+                                if text.id != 0x85 {
+                                    continue;
+                                }
+                                if let Ok(bytes) = bytes(r, text, 1024) {
+                                    title = String::from_utf8_lossy(&bytes)
+                                        .trim_end_matches('\0')
+                                        .to_owned();
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            out.push((start.unwrap_or_default(), title));
+        }
     }
 }
 fn read_block<R: Read + Seek>(
@@ -480,6 +819,115 @@ mod tests {
         assert_eq!(r.read_packet(1).unwrap(), [0x82, 0x49]);
         assert!(r.read_packet(2).is_err());
     }
+    /// A track's display size says what shape its pixels have only against the
+    /// size it stores them at, and only while `DisplayUnit` keeps both in
+    /// pixels: a track measured in some other unit states no size to divide.
+    #[test]
+    fn a_video_track_display_size_becomes_the_shape_of_its_pixels() {
+        fn video(extra: &[Vec<u8>]) -> Vec<u8> {
+            let mut block = vec![atom(&[0xb0], &[16]), atom(&[0xba], &[8])];
+            block.extend_from_slice(extra);
+            let header = atom(&[0x1a, 0x45, 0xdf, 0xa3], &atom(&[0x42, 0x82], b"webm"));
+            let track = atom(
+                &[0xae],
+                &[
+                    atom(&[0xd7], &[1]),
+                    atom(&[0x83], &[1]),
+                    atom(&[0x86], b"V_VP9"),
+                    atom(&[0xe0], &block.concat()),
+                ]
+                .concat(),
+            );
+            [
+                header,
+                vec![0x18, 0x53, 0x80, 0x67, 0xff],
+                atom(&[0x16, 0x54, 0xae, 0x6b], &track),
+            ]
+            .concat()
+        }
+        let track = |extra: &[Vec<u8>]| {
+            let data = video(extra);
+            let reader = WebmReader::open(Cursor::new(data), Limits::default()).unwrap();
+            reader.tracks[0].clone()
+        };
+        // 16x8 stored, drawn 32x8: every pixel twice as wide as it is tall.
+        let wide = track(&[atom(&[0x54, 0xb0], &[32]), atom(&[0x54, 0xba], &[8])]);
+        assert_eq!((wide.width, wide.height, wide.display), (16, 8, (32, 8)));
+        assert_eq!(wide.pixel_aspect(), (2, 1));
+        // Drawn at the size it is stored: square, stated rather than silent.
+        assert_eq!(
+            track(&[atom(&[0x54, 0xb0], &[16]), atom(&[0x54, 0xba], &[8])]).pixel_aspect(),
+            (1, 1)
+        );
+        assert_eq!(track(&[]).pixel_aspect(), (1, 1));
+        // Measured in centimetres rather than pixels, the pair is a size on a
+        // screen whose dots this reader does not know.
+        let counted = track(&[
+            atom(&[0x54, 0xb0], &[100]),
+            atom(&[0x54, 0xba], &[50]),
+            atom(&[0x54, 0xb2], &[2]),
+        ]);
+        assert_eq!((counted.display, counted.pixel_aspect()), ((0, 0), (1, 1)));
+    }
+    /// The four `PixelCrop*` elements state a border of coded pixels to keep
+    /// off screen. They arrive in the order the specification writes them —
+    /// bottom, top, left, right — and are kept in the order a viewer cuts them;
+    /// a crop that leaves nothing to show is a statement the file cannot keep,
+    /// so the whole picture stands and the pixels stay square.
+    #[test]
+    fn a_video_track_keeps_its_crop_borders_and_shows_only_what_survives_them() {
+        fn video(extra: &[Vec<u8>]) -> Vec<u8> {
+            let mut block = vec![atom(&[0xb0], &[16]), atom(&[0xba], &[16])];
+            block.extend_from_slice(extra);
+            let header = atom(&[0x1a, 0x45, 0xdf, 0xa3], &atom(&[0x42, 0x82], b"webm"));
+            let track = atom(
+                &[0xae],
+                &[
+                    atom(&[0xd7], &[1]),
+                    atom(&[0x83], &[1]),
+                    atom(&[0x86], b"V_VP9"),
+                    atom(&[0xe0], &block.concat()),
+                ]
+                .concat(),
+            );
+            [
+                header,
+                vec![0x18, 0x53, 0x80, 0x67, 0xff],
+                atom(&[0x16, 0x54, 0xae, 0x6b], &track),
+            ]
+            .concat()
+        }
+        let track = |extra: &[Vec<u8>]| {
+            let reader = WebmReader::open(Cursor::new(video(extra)), Limits::default()).unwrap();
+            reader.tracks[0].clone()
+        };
+        let cropped = track(&[
+            atom(&[0x54, 0xaa], &[2]),
+            atom(&[0x54, 0xbb], &[3]),
+            atom(&[0x54, 0xcc], &[4]),
+            atom(&[0x54, 0xdd], &[2]),
+        ]);
+        assert_eq!(cropped.crop, [4, 3, 2, 2]);
+        assert_eq!(cropped.visible(), (10, 11));
+        // Nothing cropped, nothing to keep off screen.
+        assert_eq!(track(&[]).visible(), (16, 16));
+        // A border as wide as the picture leaves no picture to show.
+        let greedy = track(&[atom(&[0x54, 0xcc], &[8]), atom(&[0x54, 0xdd], &[8])]);
+        assert_eq!(greedy.crop, [0; 4]);
+        assert_eq!(greedy.visible(), (16, 16));
+        // The display size is a statement about the visible picture, so the
+        // crop divides into the coded size before the shape of a pixel does:
+        // 16 stored with a 4-pixel border leaves 12x16 to draw, and a file
+        // that draws that into 16x16 means pixels four parts wide to three
+        // parts tall.
+        let stretched = track(&[
+            atom(&[0x54, 0xcc], &[4]),
+            atom(&[0x54, 0xb0], &[16]),
+            atom(&[0x54, 0xba], &[16]),
+        ]);
+        assert_eq!(stretched.visible(), (12, 16));
+        assert_eq!(stretched.pixel_aspect(), (4, 3));
+    }
     /// An audio track's rate is a float element, not an integer, and
     /// `CodecPrivate` is where Vorbis keeps the setup headers a decoder cannot
     /// start without.
@@ -519,7 +967,10 @@ mod tests {
             assert_eq!(track.channels, 2);
             assert_eq!(track.codec_private, b"\x01vorbisidentification");
         }
-        for rate in [0.0f64.to_be_bytes().to_vec(), f64::NAN.to_be_bytes().to_vec()] {
+        for rate in [
+            0.0f64.to_be_bytes().to_vec(),
+            f64::NAN.to_be_bytes().to_vec(),
+        ] {
             assert!(WebmReader::open(Cursor::new(with_rate(rate)), Limits::default()).is_err());
         }
     }
@@ -557,7 +1008,8 @@ mod tests {
         );
     }
     #[test]
-    fn malformed_vints_lacing_and_limits_fail() {        assert!(vint(&mut Cursor::new([0]), false).is_err());
+    fn malformed_vints_lacing_and_limits_fail() {
+        assert!(vint(&mut Cursor::new([0]), false).is_err());
         assert!(vint(&mut Cursor::new([8, 0, 0, 0, 0]), true).is_err());
         assert!(WebmReader::open(Cursor::new(fixture(true)), Limits::default()).is_err());
         for limits in [
@@ -580,5 +1032,408 @@ mod tests {
         for len in 0..bytes.len() {
             let _ = WebmReader::open(Cursor::new(&bytes[..len]), Limits::default());
         }
+    }
+    /// `tests/fixtures/chapters/chapters.mkv`, made with:
+    /// ffmpeg -f lavfi -i testsrc=size=16x16:rate=4:duration=4 -i chapters.txt \
+    ///   -map 0:v -map_metadata 1 -c:v libvpx-vp9 -crf 63 -b:v 0 \
+    ///   -pix_fmt yuv420p tests/fixtures/chapters/chapters.mkv
+    /// where `chapters.txt` is an FFmetadata file naming the three chapters at
+    /// 0-1 s, 1-3 s and 3-4 s.
+    const CHAPTERS: &[u8] = include_bytes!("../../tests/fixtures/chapters/chapters.mkv");
+    #[test]
+    fn chapter_atoms_come_out_in_the_files_own_clock() {
+        let reader = WebmReader::open(Cursor::new(CHAPTERS), Limits::default())
+            .expect("fixture has chapters");
+        let shown: Vec<(u64, &str)> = reader
+            .chapters
+            .iter()
+            .map(|c| (c.start_ns, c.title.as_str()))
+            .collect();
+        assert_eq!(
+            shown,
+            [
+                (0, "Opening"),
+                // A title written in another alphabet reaches the player as is.
+                (1_000_000_000, "Глава 2"),
+                (3_000_000_000, "End"),
+            ]
+        );
+    }
+    fn chapter(atoms: &[u8]) -> Vec<u8> {
+        atom(&[0x45, 0xb9], &atom(&[0xb6], atoms))
+    }
+    #[test]
+    fn a_chapter_time_in_the_stated_scale_reaches_the_player_as_nanoseconds() {
+        let mut file = fixture(false);
+        // Times in the default 1 ms scale, so a value of 100 is 100 ms. The
+        // file declares no length, which leaves the stated scale the only
+        // reading there is.
+        file.extend(atom(
+            &[0x10, 0x43, 0xa7, 0x70],
+            &[
+                chapter(&[0x91, 0x81, 100]),
+                chapter(
+                    &[
+                        &[0x91, 0x81, 250][..],
+                        &[0x92, 0x82, 0x01, 0x90][..],
+                        &atom(&[0x80], &atom(&[0x85], b"Ok\0")),
+                    ]
+                    .concat(),
+                ),
+            ]
+            .concat(),
+        ));
+        let reader =
+            WebmReader::open(Cursor::new(file), Limits::default()).expect("built file opens");
+        let shown: Vec<(u64, &str)> = reader
+            .chapters
+            .iter()
+            .map(|c| (c.start_ns / 1_000_000, c.title.as_str()))
+            .collect();
+        assert_eq!(shown, [(100, ""), (250, "Ok")]);
+    }
+    #[test]
+    fn a_chapter_list_that_cannot_be_walked_leaves_the_file_playable() {
+        let mut file = fixture(false);
+        // An edition written with an unknown size has no end for the walker to
+        // stop at, so its chapters are dropped rather than the whole file,
+        // which plays fine without them.
+        file.extend(atom(
+            &[0x10, 0x43, 0xa7, 0x70],
+            &[
+                &[0x45, 0xb9, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff][..],
+                &[0x91, 0x81, 1],
+            ]
+            .concat(),
+        ));
+        let reader =
+            WebmReader::open(Cursor::new(file), Limits::default()).expect("built file opens");
+        assert!(reader.chapters.is_empty());
+        assert!(!reader.packets.is_empty());
+    }
+    /// What a track is called and which language it speaks are each written in
+    /// two spellings: the element in use now and, in files muxed before it, the
+    /// older one in the same place. The newer statement wins in either writing
+    /// order, the `und` a writer uses for "nothing was said" reads as a track
+    /// that states no language, and a name the muxer ended with a NUL byte is
+    /// the name without it.
+    #[test]
+    fn a_track_keeps_the_name_and_the_language_either_spelling_gives_it() {
+        fn track(extra: &[Vec<u8>]) -> Track {
+            let mut body = vec![
+                atom(&[0xd7], &[1]),
+                atom(&[0x83], &[2]),
+                atom(&[0x86], b"A_VORBIS"),
+            ];
+            body.extend_from_slice(extra);
+            let file = [
+                atom(&[0x1a, 0x45, 0xdf, 0xa3], &atom(&[0x42, 0x82], b"webm")),
+                vec![0x18, 0x53, 0x80, 0x67, 0xff],
+                atom(&[0x16, 0x54, 0xae, 0x6b], &atom(&[0xae], &body.concat())),
+            ]
+            .concat();
+            WebmReader::open(Cursor::new(file), Limits::default())
+                .expect("built file opens")
+                .tracks[0]
+                .clone()
+        }
+        let said = |name: &[u8], current: &[u8], older: &[u8]| {
+            let track = track(&[
+                atom(&[0x53, 0x6e], name),
+                atom(&[0x22, 0xb5, 0x9c], current),
+                atom(&[0x44, 0x7a], older),
+            ]);
+            (track.name, track.language)
+        };
+        assert_eq!(
+            said(b"Commentary", b"ru", b"rus"),
+            ("Commentary".into(), "ru".into())
+        );
+        // Only the older spelling, which is all a file muxed years ago states.
+        assert_eq!(said(b"", b"", b"por"), ("".into(), "por".into()));
+        // The `und` of either is the writer saying nothing, not a language.
+        assert_eq!(said(b"", b"und", b"und"), ("".into(), "".into()));
+        assert_eq!(
+            said(b"Tail\0", b"eng\0", b""),
+            ("Tail".into(), "eng".into())
+        );
+    }
+    /// The same fields as a real muxer writes them: a titled audio track, a
+    /// second one that states only its language, a subtitle track with both and
+    /// a picture that states neither. `tests/fixtures/tracks/named.mkv`, made
+    /// with:
+    ///
+    /// ```text
+    /// ffmpeg -f lavfi -i testsrc=size=64x64:rate=10:duration=0.4 \
+    ///   -f lavfi -i sine=frequency=440:sample_rate=48000:duration=0.4 \
+    ///   -f lavfi -i sine=frequency=880:sample_rate=32000:duration=0.4 \
+    ///   -i one.srt -i two.srt \
+    ///   -map 0:v -map 1:a -map 2:a -map 3:0 -map 4:0 \
+    ///   -c:v libvpx-vp9 -pix_fmt yuv420p -c:a flac -ac 1 -c:s srt \
+    ///   -metadata:s:a:0 title=Первая -metadata:s:a:0 language=rus \
+    ///   -metadata:s:a:1 language=fre \
+    ///   -metadata:s:s:0 title=Титры -metadata:s:s:0 language=rus \
+    ///   tests/fixtures/tracks/named.mkv
+    /// ```
+    #[test]
+    fn a_real_file_lets_the_reader_name_its_tracks() {
+        const FIXTURE: &[u8] = include_bytes!("../../tests/fixtures/tracks/named.mkv");
+        let reader =
+            WebmReader::open(Cursor::new(FIXTURE), Limits::default()).expect("fixture opens");
+        let shown: Vec<(u64, &str, &str)> = reader
+            .tracks
+            .iter()
+            .map(|track| (track.number, track.name.as_str(), track.language.as_str()))
+            .collect();
+        assert_eq!(
+            shown,
+            [
+                (1, "", ""),
+                (2, "Первая", "rus"),
+                (3, "", "fre"),
+                (4, "Титры", "rus"),
+                (5, "", ""),
+            ]
+        );
+    }
+    /// What a writer that follows the specification calls the file: a `Tag` whose
+    /// `Targets` single out nothing, holding a `SimpleTag` named `TITLE`. A tag
+    /// aimed at one track is that track's business, and a tag written after a
+    /// byte of padding the muxer left behind is still read.
+    fn file_tag(name: &[u8], value: &[u8]) -> Vec<u8> {
+        atom(
+            &[0x73, 0x73],
+            &[
+                atom(&[0x63, 0xc0], &[]),
+                atom(
+                    &[0x67, 0xc8],
+                    &[atom(&[0x45, 0xa3], name), atom(&[0x44, 0x87], value)].concat(),
+                ),
+            ]
+            .concat(),
+        )
+    }
+    fn track_tag(name: &[u8], value: &[u8]) -> Vec<u8> {
+        atom(
+            &[0x73, 0x73],
+            &[
+                atom(
+                    &[0x63, 0xc0],
+                    &atom(&[0x63, 0xc5], &[0, 0, 0, 0, 0, 0, 7, 9]),
+                ),
+                atom(
+                    &[0x67, 0xc8],
+                    &[atom(&[0x45, 0xa3], name), atom(&[0x44, 0x87], value)].concat(),
+                ),
+            ]
+            .concat(),
+        )
+    }
+    /// A list of tags is longer than one byte of length states, so the master
+    /// carrying it writes its size as a two-byte variable integer.
+    fn masters(body: &[u8]) -> Vec<u8> {
+        assert!(body.len() < 16_383);
+        let size = (0x4000 | body.len() as u16).to_be_bytes();
+        [&[0x12, 0x54, 0xc3, 0x67][..], &size, body].concat()
+    }
+    #[test]
+    fn a_tag_of_the_file_names_it_and_a_tag_of_one_track_does_not() {
+        for (built, name) in [
+            (file_tag(b"TITLE", "Имя".as_bytes()), "Имя"),
+            // The name is matched whatever case the writer chose for it.
+            (file_tag(b"title", b"Ok"), "Ok"),
+            // A file-level tag still names the file after one aimed at a track.
+            (
+                [track_tag(b"TITLE", b"No"), file_tag(b"TITLE", b"Ok")].concat(),
+                "Ok",
+            ),
+            (
+                [file_tag(b"TITLE", b"Ok"), track_tag(b"TITLE", b"No")].concat(),
+                "Ok",
+            ),
+            // The last byte is what a muxer rewrites the list over: a tag this
+            // reader cannot reach is left alone, and the ones before it stand.
+            ([file_tag(b"TITLE", b"Ok"), vec![0]].concat(), "Ok"),
+        ] {
+            let file = [fixture(false), masters(&built)].concat();
+            let reader =
+                WebmReader::open(Cursor::new(file), Limits::default()).expect("built file opens");
+            assert_eq!(reader.tags.title, name);
+        }
+        // A list holding nothing a file is named by leaves the file unnamed.
+        let file = [
+            fixture(false),
+            masters(&track_tag(b"AUTHOR", "Не имя".as_bytes())),
+        ]
+        .concat();
+        let reader = WebmReader::open(Cursor::new(file), Limits::default()).expect("opens");
+        assert_eq!(reader.tags, FileTags::default());
+    }
+
+    /// The rest of what a file states about itself sits in the same list as its
+    /// name, one `SimpleTag` per fact. A fact this player has no line for is
+    /// dropped on the way, and a fact aimed at one track does not become a fact
+    /// about the file.
+    #[test]
+    fn a_file_keeps_every_tag_that_names_it_rather_than_one_track() {
+        let built = [
+            file_tag(b"TITLE", b"T"),
+            file_tag(b"ARTIST", "Артист".as_bytes()),
+            file_tag(b"album", b"B"),
+            file_tag(b"GENRE", b"G"),
+            file_tag(b"DATE", b"2026"),
+            file_tag(b"COMMENT", b"C"),
+            file_tag(b"ENCODER", b"Lavf"),
+            track_tag(b"ARTIST", b"Not the file's"),
+            // A file that states one fact twice is not asked to mean it twice.
+            file_tag(b"TITLE", b"later"),
+        ]
+        .concat();
+        let file = [fixture(false), masters(&built)].concat();
+        let reader =
+            WebmReader::open(Cursor::new(file), Limits::default()).expect("built file opens");
+        assert_eq!(
+            reader.tags,
+            FileTags {
+                title: "T".to_owned(),
+                artist: "Артист".to_owned(),
+                album: "B".to_owned(),
+                genre: "G".to_owned(),
+                date: "2026".to_owned(),
+                comment: "C".to_owned(),
+                track: String::new(),
+                album_artist: String::new(),
+                disc: String::new(),
+                publisher: String::new(),
+                copyright: String::new(),
+                description: String::new(),
+                rating: String::new(),
+            }
+        );
+    }
+
+    /// ```text
+    /// ffmpeg -f lavfi -i testsrc2=size=16x16:rate=4:duration=1 \
+    ///   -metadata title="Имя из контейнера" -c:v libvpx-vp9 -crf 63 -b:v 0 \
+    ///   -pix_fmt yuv420p -an tests/fixtures/tags/title.mkv
+    /// ```
+    /// The muxer here puts the title in the file's own information block rather
+    /// than in its tags, and leaves the encoder's name in the tags — which is
+    /// what keeps a block's title and a tag of a track from being read as one.
+    #[test]
+    fn a_real_file_names_itself_in_its_information_block() {
+        const FIXTURE: &[u8] = include_bytes!("../../tests/fixtures/tags/title.mkv");
+        let reader =
+            WebmReader::open(Cursor::new(FIXTURE), Limits::default()).expect("fixture opens");
+        assert_eq!(reader.tags.title, "Имя из контейнера");
+    }
+
+    /// ```text
+    /// ffmpeg -f lavfi -i testsrc2=size=16x16:rate=4:duration=1 \
+    ///   -metadata title=T -metadata artist=A -metadata album=B \
+    ///   -metadata genre=G -metadata date=2026 -metadata comment=C \
+    ///   -c:v libvpx-vp9 -crf 63 -b:v 0 -pix_fmt yuv420p -an \
+    ///   tests/fixtures/tags/tags.mkv
+    /// ```
+    /// What that muxer leaves behind: every fact in its own tag of the whole
+    /// file, the title among the tags rather than in the information block, and
+    /// the encoder's name standing between them for nothing the player asks.
+    #[test]
+    fn a_real_file_names_itself_and_its_author_in_its_tags() {
+        const FIXTURE: &[u8] = include_bytes!("../../tests/fixtures/tags/tags.mkv");
+        let reader =
+            WebmReader::open(Cursor::new(FIXTURE), Limits::default()).expect("fixture opens");
+        assert_eq!(
+            reader.tags,
+            FileTags {
+                title: "T".to_owned(),
+                artist: "A".to_owned(),
+                album: "B".to_owned(),
+                genre: "G".to_owned(),
+                date: "2026".to_owned(),
+                comment: "C".to_owned(),
+                track: String::new(),
+                album_artist: String::new(),
+                disc: String::new(),
+                publisher: String::new(),
+                copyright: String::new(),
+                description: String::new(),
+                rating: String::new(),
+            }
+        );
+    }
+
+    /// A track number travels to the player under any of the three names its
+    /// writers choose: the plain word, the Vorbis field the Matroska tag docs
+    /// list, and the spelling ffmpeg's Matroska muxer writes for it. The value
+    /// is text here rather than a number's bytes, so a place within an album
+    /// keeps its second half: `3/12` arrives as it was written.
+    #[test]
+    fn a_track_number_arrives_under_whichever_name_its_writer_chose() {
+        for name in [b"TRACK".as_slice(), b"TRACKNUMBER", b"PART_NUMBER"] {
+            let file = [fixture(false), masters(&file_tag(name, b"3/12"))].concat();
+            let reader =
+                WebmReader::open(Cursor::new(file), Limits::default()).expect("built file opens");
+            assert_eq!(reader.tags.track, "3/12", "under {name:?}");
+        }
+        // The first spelling a file states wins, as with every other fact.
+        let built = [
+            file_tag(b"TRACKNUMBER", b"2"),
+            file_tag(b"PART_NUMBER", b"9"),
+        ]
+        .concat();
+        let file = [fixture(false), masters(&built)].concat();
+        let reader =
+            WebmReader::open(Cursor::new(file), Limits::default()).expect("built file opens");
+        assert_eq!(reader.tags.track, "2");
+    }
+
+    /// The album's own artist, its disc and its publisher arrive under either
+    /// spelling their writers choose — the Vorbis field, and the name ffmpeg's
+    /// Matroska muxer keeps when it has no mapping of its own — and the disc
+    /// keeps a total the file states, text here rather than a number's bytes.
+    /// The rights and the file's own note of itself arrive the same way, under
+    /// the plain names both muxers give them, and so does the rating that only
+    /// this container carries.
+    #[test]
+    fn the_album_artist_the_disc_and_the_publisher_keep_their_spellings() {
+        for name in [b"ALBUMARTIST".as_slice(), b"ALBUM_ARTIST"] {
+            let file = [fixture(false), masters(&file_tag(name, b"AA"))].concat();
+            let reader =
+                WebmReader::open(Cursor::new(file), Limits::default()).expect("built file opens");
+            assert_eq!(reader.tags.album_artist, "AA", "under {name:?}");
+        }
+        for name in [b"DISC".as_slice(), b"DISCNUMBER"] {
+            let file = [fixture(false), masters(&file_tag(name, b"2/10"))].concat();
+            let reader =
+                WebmReader::open(Cursor::new(file), Limits::default()).expect("built file opens");
+            assert_eq!(reader.tags.disc, "2/10", "under {name:?}");
+        }
+        let file = [fixture(false), masters(&file_tag(b"PUBLISHER", b"PB"))].concat();
+        let reader =
+            WebmReader::open(Cursor::new(file), Limits::default()).expect("built file opens");
+        assert_eq!(reader.tags.publisher, "PB");
+        let file = [
+            fixture(false),
+            masters(
+                &[
+                    file_tag(b"COPYRIGHT", b"2026 The Holder"),
+                    file_tag(b"DESCRIPTION", b"A note"),
+                    file_tag(b"RATING", b"5"),
+                ]
+                .concat(),
+            ),
+        ]
+        .concat();
+        let reader =
+            WebmReader::open(Cursor::new(file), Limits::default()).expect("built file opens");
+        assert_eq!(
+            (
+                reader.tags.copyright.as_str(),
+                reader.tags.description.as_str(),
+                reader.tags.rating.as_str(),
+            ),
+            ("2026 The Holder", "A note", "5")
+        );
     }
 }

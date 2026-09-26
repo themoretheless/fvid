@@ -43,7 +43,13 @@ pub struct References<'a> {
     pub have_above: bool,
     pub have_left: bool,
 }
-pub fn predict(out: &mut [u16], size: usize, depth: u8, mode: Mode, refs: &References<'_>) -> Result<()> {
+pub fn predict(
+    out: &mut [u16],
+    size: usize,
+    depth: u8,
+    mode: Mode,
+    refs: &References<'_>,
+) -> Result<()> {
     if ![4, 8, 16, 32].contains(&size) || ![8, 10, 12].contains(&depth) {
         return Err(invalid("invalid VP9 intra geometry or depth"));
     }

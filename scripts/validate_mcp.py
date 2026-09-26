@@ -99,9 +99,17 @@ with tempfile.TemporaryDirectory(prefix='fvid-mcp-') as directory:
             assert reply['result']['serverInfo']['name']=='fvid'
             client.notify({'jsonrpc':'2.0','method':'notifications/initialized'})
             assert client.request(rpc('ping'))['result']=={}
-            tools=client.request(rpc('tools/list'))['result']['tools'];assert len(tools)==11
+            tools=client.request(rpc('tools/list'))['result']['tools']
+            # The catalog is compared with the source that declares it: a hard-coded count went stale
+            # the day a tool was added, and a suite that asserts a number nobody maintains asserts
+            # nothing.
+            definitions=re.search(r'const DEFINITIONS.*?\n\];',
+                                  (ROOT/'src/mcp/tools.rs').read_text(), re.S).group(0)
+            declared=sorted(set(re.findall(r'"(fvid_[a-z0-9_]+)"', definitions)))
+            served=sorted(tool['name'] for tool in tools)
+            assert served==declared, f'tool catalog differs: {set(served)^set(declared)}'
             assert all(t['inputSchema']['additionalProperties'] is False for t in tools)
-            record(prefix+'initialize, ping, 11 tool schemas')
+            record(prefix+f'initialize, ping, {len(served)} tool schemas')
             capabilities=call(client,'fvid_capabilities',{});assert 'library' in capabilities
             session={'transport':transport,'server':reply['result'],'tools':[tool['name'] for tool in tools],'library_version':capabilities['library']['library_version']}
             sessions.append(session)

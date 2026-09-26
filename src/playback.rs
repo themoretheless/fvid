@@ -1,6 +1,6 @@
 //! FVid-owned raw-video reader. No external container or codec implementation.
-use crate::{Header, Result, buffer, invalid, line};
 use crate::playback_native::yuv_to_rgb;
+use crate::{Header, Result, buffer, invalid, line};
 use std::io::{BufRead, Seek, SeekFrom};
 use std::time::Duration;
 

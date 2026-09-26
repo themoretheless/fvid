@@ -349,10 +349,8 @@ mod tests {
                         })
                         .collect();
                     inverse(&coefficients, size, 8, *kind, &mut scratch, &mut out).unwrap();
-                    let pixels: Vec<_> = out
-                        .iter()
-                        .map(|v| (128 + v).clamp(0, 255) as u8)
-                        .collect();
+                    let pixels: Vec<_> =
+                        out.iter().map(|v| (128 + v).clamp(0, 255) as u8).collect();
                     assert_eq!(
                         pixels,
                         &expected[at..at + size * size],

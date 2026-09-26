@@ -1,0 +1,972 @@
+[
+ {
+  "section": null,
+  "label": "DVD and Blu-ray",
+  "tags": "Notes"
+ },
+ {
+  "section": null,
+  "label": "Blu-ray playback",
+  "tags": "Works only if AACS protection has been removed! You can do that with tools such as Xreveal or Passkey Lite . Menus are not supported."
+ },
+ {
+  "section": null,
+  "label": "DVD playback in MPC-HC",
+  "tags": ""
+ },
+ {
+  "section": null,
+  "label": "DVD playback in WMP",
+  "tags": "Windows Vista/7: works with all variants of the codec pack Windows 8: requires Media Center Add-On Windows 10/11: WMP does not support DVD playback!"
+ },
+ {
+  "section": null,
+  "label": "VCD, SVCD and XCD",
+  "tags": "Note: requires using MPC-HC"
+ },
+ {
+  "section": null,
+  "label": "DTS audio CD",
+  "tags": "Note: requires using MPC-HC"
+ },
+ {
+  "section": "container",
+  "label": "Supported video containers",
+  "tags": "File extensions"
+ },
+ {
+  "section": "container",
+  "label": "AVI",
+  "tags": ".avi .divx .amv"
+ },
+ {
+  "section": "container",
+  "label": "MPEG-PS",
+  "tags": ".mpg .mpeg .mpe .m1v .m2v .mpv2 .mp2v .m2p .vob .evo .mod"
+ },
+ {
+  "section": "container",
+  "label": "MPEG-TS",
+  "tags": ".ts .m2ts .m2t .mts .pva .tp .tpr .trp .tps .rec"
+ },
+ {
+  "section": "container",
+  "label": "MP4",
+  "tags": ".mp4 .m4v .mp4v .mpv4 .hdmov .mqv .k3g"
+ },
+ {
+  "section": "container",
+  "label": "MOV",
+  "tags": ".mov"
+ },
+ {
+  "section": "container",
+  "label": "3GP",
+  "tags": ".3gp .3gpp .3g2 .3gp2"
+ },
+ {
+  "section": "container",
+  "label": "Matroska",
+  "tags": ".mkv .mk3d"
+ },
+ {
+  "section": "container",
+  "label": "WebM",
+  "tags": ".webm .webp .weba"
+ },
+ {
+  "section": "container",
+  "label": "Ogg",
+  "tags": ".ogm .ogv"
+ },
+ {
+  "section": "container",
+  "label": "Flash Video",
+  "tags": ".flv .f4v"
+ },
+ {
+  "section": "container",
+  "label": "Windows Media",
+  "tags": ".wmv .asf"
+ },
+ {
+  "section": "container",
+  "label": "RealMedia",
+  "tags": ".rmvb .rm"
+ },
+ {
+  "section": "container",
+  "label": "Digital Video",
+  "tags": ".dv"
+ },
+ {
+  "section": "container",
+  "label": "Material Exchange Format",
+  "tags": ".mxf"
+ },
+ {
+  "section": "container",
+  "label": "DHAV",
+  "tags": ".dav"
+ },
+ {
+  "section": "container",
+  "label": "Y4M",
+  "tags": ".y4m"
+ },
+ {
+  "section": "container",
+  "label": "Windows Recorded TV Show",
+  "tags": ".wtv"
+ },
+ {
+  "section": "container",
+  "label": "FLIC",
+  "tags": ".flic .fli .flc"
+ },
+ {
+  "section": "container",
+  "label": "Various other formats",
+  "tags": ".smk .bik .mtv .ivf"
+ },
+ {
+  "section": "container",
+  "label": "Supported audio files",
+  "tags": "File extensions"
+ },
+ {
+  "section": "container",
+  "label": "MP3",
+  "tags": ".mp3"
+ },
+ {
+  "section": "container",
+  "label": "Ogg",
+  "tags": ".ogg .oga"
+ },
+ {
+  "section": "container",
+  "label": "Matroska",
+  "tags": ".mka"
+ },
+ {
+  "section": "container",
+  "label": "MPEG-4 Audio",
+  "tags": ".m4a .aac"
+ },
+ {
+  "section": "container",
+  "label": "FLAC",
+  "tags": ".flac"
+ },
+ {
+  "section": "container",
+  "label": "WavPack",
+  "tags": ".wv"
+ },
+ {
+  "section": "container",
+  "label": "Musepack",
+  "tags": ".mpc"
+ },
+ {
+  "section": "container",
+  "label": "Monkey's Audio",
+  "tags": ".ape"
+ },
+ {
+  "section": "container",
+  "label": "Apple Lossless Audio Codec",
+  "tags": ".alac"
+ },
+ {
+  "section": "container",
+  "label": "AMR",
+  "tags": ".amr"
+ },
+ {
+  "section": "container",
+  "label": "True Audio",
+  "tags": ".tta"
+ },
+ {
+  "section": "container",
+  "label": "AC3",
+  "tags": ".ac3"
+ },
+ {
+  "section": "container",
+  "label": "DTS",
+  "tags": ".dts"
+ },
+ {
+  "section": "container",
+  "label": "TrueHD",
+  "tags": ".thd .mlp"
+ },
+ {
+  "section": "container",
+  "label": "DTS-MA/HD",
+  "tags": ".dtsma .dtshd"
+ },
+ {
+  "section": "container",
+  "label": "RealMedia",
+  "tags": ".ra"
+ },
+ {
+  "section": "container",
+  "label": "Opus",
+  "tags": ".opus"
+ },
+ {
+  "section": "container",
+  "label": "Speex",
+  "tags": ".spx"
+ },
+ {
+  "section": "container",
+  "label": "AIFF",
+  "tags": ".aif .aiff .aifc"
+ },
+ {
+  "section": "container",
+  "label": "CoreAudio Format",
+  "tags": ".caf"
+ },
+ {
+  "section": "container",
+  "label": "TAK",
+  "tags": ".tak"
+ },
+ {
+  "section": "container",
+  "label": "Shorten",
+  "tags": ".shr"
+ },
+ {
+  "section": "container",
+  "label": "CAF",
+  "tags": ".caf"
+ },
+ {
+  "section": "container",
+  "label": "Direct Stream Digital (DSD)",
+  "tags": ".dsf .dff"
+ },
+ {
+  "section": "container",
+  "label": "MIDI",
+  "tags": ".midi .mid"
+ },
+ {
+  "section": "container",
+  "label": "Various other formats",
+  "tags": ".snd .au .aob .als .cda .dss"
+ },
+ {
+  "section": "container",
+  "label": "OptimFrog",
+  "tags": ".ofr .ofs"
+ },
+ {
+  "section": "container",
+  "label": "Tracker",
+  "tags": ".it .mo3 .mod .mtm .s3m .umx .xm"
+ },
+ {
+  "section": "video",
+  "label": "Supported video formats (within a container)",
+  "tags": "FourCC"
+ },
+ {
+  "section": "video",
+  "label": "H.264/AVC",
+  "tags": "H264, AVC1, X264, CCV1, xalg, avlg"
+ },
+ {
+  "section": "video",
+  "label": "H.265/HEVC",
+  "tags": "HEVC, HVC1, HM10, H265"
+ },
+ {
+  "section": "video",
+  "label": "H.266/VVC",
+  "tags": "VVC1"
+ },
+ {
+  "section": "video",
+  "label": "AV1",
+  "tags": "AV01"
+ },
+ {
+  "section": "video",
+  "label": "MPEG-1",
+  "tags": "MPEG, MPG1"
+ },
+ {
+  "section": "video",
+  "label": "MPEG-2",
+  "tags": "MPG2"
+ },
+ {
+  "section": "video",
+  "label": "MPEG-4/DivX/Xvid",
+  "tags": "DIVX, DX50, XVID, MP4V, 3IVX, BLZ0, MPG3, DIV3, DIV4, DIV5, DIV6, 3IV1, 3IV2, FMP4, MP4S, M4S2, DVX3, SEDG, SMP4, DXGM"
+ },
+ {
+  "section": "video",
+  "label": "VC-1",
+  "tags": "WVC1, WMVA, WVP2"
+ },
+ {
+  "section": "video",
+  "label": "Windows Media Video",
+  "tags": "WMV1, WMV2, WMV3, WMVP"
+ },
+ {
+  "section": "video",
+  "label": "MP41",
+  "tags": "MP41, MPG4, DIV1"
+ },
+ {
+  "section": "video",
+  "label": "MP42",
+  "tags": "MP42, DIV2"
+ },
+ {
+  "section": "video",
+  "label": "MP43",
+  "tags": "MP43, MPG3, DIV3, DIV4, DIV5, DIV6, DVX3, 3IVD"
+ },
+ {
+  "section": "video",
+  "label": "H.261",
+  "tags": "H261, M261"
+ },
+ {
+  "section": "video",
+  "label": "H.263",
+  "tags": "H263, S263"
+ },
+ {
+  "section": "video",
+  "label": "Flash Video (H.263)",
+  "tags": "FLV1"
+ },
+ {
+  "section": "video",
+  "label": "Flash Video (VP6)",
+  "tags": "FLV4, VP6F, FSV1"
+ },
+ {
+  "section": "video",
+  "label": "Theora",
+  "tags": "THEO"
+ },
+ {
+  "section": "video",
+  "label": "VP3",
+  "tags": "VP31"
+ },
+ {
+  "section": "video",
+  "label": "VP5",
+  "tags": "VP50"
+ },
+ {
+  "section": "video",
+  "label": "VP6",
+  "tags": "VP60, VP61, VP62, VP6A"
+ },
+ {
+  "section": "video",
+  "label": "VP7",
+  "tags": "VP70"
+ },
+ {
+  "section": "video",
+  "label": "VP8",
+  "tags": "VP80"
+ },
+ {
+  "section": "video",
+  "label": "VP9",
+  "tags": "VP90"
+ },
+ {
+  "section": "video",
+  "label": "Huffyuv",
+  "tags": "HFYU, FFVH"
+ },
+ {
+  "section": "video",
+  "label": "MJPEG",
+  "tags": "MJPG, AVRN, AMVV, AMVF, LJPG, JPGL, MJLS, MJPA, MJPB, SP5X"
+ },
+ {
+  "section": "video",
+  "label": "Sorenson Video 1",
+  "tags": "SVQ1"
+ },
+ {
+  "section": "video",
+  "label": "Sorenson Video 3",
+  "tags": "SVQ3"
+ },
+ {
+  "section": "video",
+  "label": "Digital Video",
+  "tags": "DVSD, CDVC, CDV5, DV25, DV50, CDVH, DVCP, DV5P, DV5N, DVPP, DVC, DVH1, DVH2, DVH3, DVH4, DVH5, DVH6, DVHQ, DVHP, AVdv, AVd1"
+ },
+ {
+  "section": "video",
+  "label": "QuickTime Planar RGB",
+  "tags": "8BPS"
+ },
+ {
+  "section": "video",
+  "label": "QuickTime Animation",
+  "tags": "QRLE"
+ },
+ {
+  "section": "video",
+  "label": "QuickTime RPZA",
+  "tags": "RPZA"
+ },
+ {
+  "section": "video",
+  "label": "QuickTime SMC",
+  "tags": "smc"
+ },
+ {
+  "section": "video",
+  "label": "FFV1",
+  "tags": "FFV1"
+ },
+ {
+  "section": "video",
+  "label": "Camstudio",
+  "tags": "CSCD"
+ },
+ {
+  "section": "video",
+  "label": "CorePNG",
+  "tags": "PNG1, MPNG"
+ },
+ {
+  "section": "video",
+  "label": "LOCO",
+  "tags": "LOCO"
+ },
+ {
+  "section": "video",
+  "label": "LCL Lossless Codec Library",
+  "tags": "MSZH"
+ },
+ {
+  "section": "video",
+  "label": "TechSmith Camtasia",
+  "tags": "TSCC"
+ },
+ {
+  "section": "video",
+  "label": "ZLIB Lossless Codec Library",
+  "tags": "ZLIB"
+ },
+ {
+  "section": "video",
+  "label": "Zip Motion Blocks Video",
+  "tags": "ZMVB"
+ },
+ {
+  "section": "video",
+  "label": "Autodesc RLE",
+  "tags": "AASC"
+ },
+ {
+  "section": "video",
+  "label": "ATI VCR1",
+  "tags": "VCR1"
+ },
+ {
+  "section": "video",
+  "label": "Cinepak",
+  "tags": "CVID"
+ },
+ {
+  "section": "video",
+  "label": "Intel Indeo 2",
+  "tags": "RT21"
+ },
+ {
+  "section": "video",
+  "label": "Intel Indeo 3",
+  "tags": "IV31, IV32"
+ },
+ {
+  "section": "video",
+  "label": "Intel Indeo 4",
+  "tags": "IV41"
+ },
+ {
+  "section": "video",
+  "label": "Intel Indeo 5",
+  "tags": "IV50"
+ },
+ {
+  "section": "video",
+  "label": "Intel H.263",
+  "tags": "I263"
+ },
+ {
+  "section": "video",
+  "label": "Fraps",
+  "tags": "FPS1"
+ },
+ {
+  "section": "video",
+  "label": "MS Video 1",
+  "tags": "CRAM, MSVC, WHAM"
+ },
+ {
+  "section": "video",
+  "label": "MS RLE",
+  "tags": "MRLE"
+ },
+ {
+  "section": "video",
+  "label": "Q-Team QPEG",
+  "tags": "QPEG, QP10, QP11"
+ },
+ {
+  "section": "video",
+  "label": "RealVideo",
+  "tags": "RV10, RV20, RV30, RV40"
+ },
+ {
+  "section": "video",
+  "label": "Truemotion 1/2",
+  "tags": "DUCK, TM20"
+ },
+ {
+  "section": "video",
+  "label": "Dirac",
+  "tags": "DRAC"
+ },
+ {
+  "section": "video",
+  "label": "Lagarith",
+  "tags": "LAGS"
+ },
+ {
+  "section": "video",
+  "label": "ProRes",
+  "tags": "APCH, APCN, APCS, APCO, AP4H, AP4X"
+ },
+ {
+  "section": "video",
+  "label": "utVideo",
+  "tags": "ULRA, ULRG, ULY0, ULY2, ULY4, UQY2, UQRG, UQRA, ULH0, ULH2, ULH4, UMY2, UMH2, UMY4, UMH4, UMRG, UMRA"
+ },
+ {
+  "section": "video",
+  "label": "DNxHD",
+  "tags": "AVdn"
+ },
+ {
+  "section": "video",
+  "label": "DNxHR (partial)",
+  "tags": "AVdh"
+ },
+ {
+  "section": "video",
+  "label": "VMware video",
+  "tags": "VMnc"
+ },
+ {
+  "section": "video",
+  "label": "JPEG2000 DCinema",
+  "tags": "MJP2, MJ2C, LJ2C, LJ2K, IPJ2"
+ },
+ {
+  "section": "video",
+  "label": "BINK video",
+  "tags": "BIKI, BIKB"
+ },
+ {
+  "section": "video",
+  "label": "Smacker video",
+  "tags": "SMK2, SMK4"
+ },
+ {
+  "section": "video",
+  "label": "GoToMeeting",
+  "tags": "G2M2, G2M3, G2M4, G2M5"
+ },
+ {
+  "section": "video",
+  "label": "Apple Intermediate Codec",
+  "tags": "ICOD"
+ },
+ {
+  "section": "video",
+  "label": "GeoVision",
+  "tags": "GEOV"
+ },
+ {
+  "section": "video",
+  "label": "Miro VideoXL",
+  "tags": "VIXL"
+ },
+ {
+  "section": "video",
+  "label": "Ultimotion",
+  "tags": "ULTI"
+ },
+ {
+  "section": "video",
+  "label": "ASUS v1/v2",
+  "tags": "ASV1, ASV2"
+ },
+ {
+  "section": "video",
+  "label": "Creative YUV",
+  "tags": "CYUV"
+ },
+ {
+  "section": "video",
+  "label": "Winnov v1",
+  "tags": "WNV1"
+ },
+ {
+  "section": "video",
+  "label": "Mirillis FIC",
+  "tags": "FICV"
+ },
+ {
+  "section": "video",
+  "label": "Cineform HD (partial)",
+  "tags": "CFHD"
+ },
+ {
+  "section": "video",
+  "label": "MagicYUV",
+  "tags": "MAGY, M8RG, M8RA, M8G0, M8Y0, M8Y2, M8Y4, M8YA"
+ },
+ {
+  "section": "video",
+  "label": "Hap",
+  "tags": "Hap1, Hap5, HapY"
+ },
+ {
+  "section": "video",
+  "label": "DXV",
+  "tags": "DXD3, DXDI"
+ },
+ {
+  "section": "video",
+  "label": "Motion Decoder",
+  "tags": "MDEC"
+ },
+ {
+  "section": "video",
+  "label": "4XM video",
+  "tags": "4XMV"
+ },
+ {
+  "section": "video",
+  "label": "Gryphon's Anim Compressor",
+  "tags": "ARBC"
+ },
+ {
+  "section": "video",
+  "label": "Canopus HQ",
+  "tags": "CUVC"
+ },
+ {
+  "section": "video",
+  "label": "NotchLC",
+  "tags": "NCLC"
+ },
+ {
+  "section": "audio",
+  "label": "Supported audio formats (within a container)",
+  "tags": "AudioTag or FourCC"
+ },
+ {
+  "section": "audio",
+  "label": "MP3",
+  "tags": "55, 85"
+ },
+ {
+  "section": "audio",
+  "label": "MP2",
+  "tags": "80"
+ },
+ {
+  "section": "audio",
+  "label": "MP1",
+  "tags": ""
+ },
+ {
+  "section": "audio",
+  "label": "AC3 (Dolby Digital)",
+  "tags": "2000, 8192"
+ },
+ {
+  "section": "audio",
+  "label": "E-AC3 (Dolby Digital Plus)",
+  "tags": "EAC3"
+ },
+ {
+  "section": "audio",
+  "label": "DTS",
+  "tags": "2001"
+ },
+ {
+  "section": "audio",
+  "label": "DTS-HD (Master Audio / HRA)",
+  "tags": ""
+ },
+ {
+  "section": "audio",
+  "label": "DTS-ES",
+  "tags": ""
+ },
+ {
+  "section": "audio",
+  "label": "DTS Express (LBR)",
+  "tags": ""
+ },
+ {
+  "section": "audio",
+  "label": "Dolby TrueHD/MLP",
+  "tags": "DTSH, MLP"
+ },
+ {
+  "section": "audio",
+  "label": "AAC",
+  "tags": "00FF, 01FF, MP4A, RACP"
+ },
+ {
+  "section": "audio",
+  "label": "LPCM",
+  "tags": "LPCM"
+ },
+ {
+  "section": "audio",
+  "label": "Vorbis",
+  "tags": "26447, 674F"
+ },
+ {
+  "section": "audio",
+  "label": "FLAC",
+  "tags": "f1ac"
+ },
+ {
+  "section": "audio",
+  "label": "WavPack",
+  "tags": "5756"
+ },
+ {
+  "section": "audio",
+  "label": "Musepack",
+  "tags": ""
+ },
+ {
+  "section": "audio",
+  "label": "AMR",
+  "tags": "FE, samr"
+ },
+ {
+  "section": "audio",
+  "label": "True Audio",
+  "tags": "77a1"
+ },
+ {
+  "section": "audio",
+  "label": "MPEG-4 ALS",
+  "tags": ""
+ },
+ {
+  "section": "audio",
+  "label": "Microsoft ADPCM",
+  "tags": "2, 17"
+ },
+ {
+  "section": "audio",
+  "label": "IMA ADPCM",
+  "tags": "11, 61, 62, AMVA"
+ },
+ {
+  "section": "audio",
+  "label": "Creative ADPCM",
+  "tags": "200"
+ },
+ {
+  "section": "audio",
+  "label": "G.711 (A-law / Mu-law)",
+  "tags": "7, 6c75, ALAW, ULAW"
+ },
+ {
+  "section": "audio",
+  "label": "G.726",
+  "tags": "45"
+ },
+ {
+  "section": "audio",
+  "label": "G.729",
+  "tags": "G729, 729A"
+ },
+ {
+  "section": "audio",
+  "label": "MS GSM",
+  "tags": "49"
+ },
+ {
+  "section": "audio",
+  "label": "TrueSpeech",
+  "tags": "22"
+ },
+ {
+  "section": "audio",
+  "label": "QDM2",
+  "tags": "QDM2"
+ },
+ {
+  "section": "audio",
+  "label": "MACE",
+  "tags": "MAC3, MAC6"
+ },
+ {
+  "section": "audio",
+  "label": "RealAudio 1/2",
+  "tags": "14_4, 28_8"
+ },
+ {
+  "section": "audio",
+  "label": "RealAudio Lossless",
+  "tags": "RALF"
+ },
+ {
+  "section": "audio",
+  "label": "Cook",
+  "tags": "COOK"
+ },
+ {
+  "section": "audio",
+  "label": "Sipr",
+  "tags": "SIPR"
+ },
+ {
+  "section": "audio",
+  "label": "Intel Music Coder (IMC)",
+  "tags": "401"
+ },
+ {
+  "section": "audio",
+  "label": "ATRAC 1/3/3+",
+  "tags": "ATRC, 270"
+ },
+ {
+  "section": "audio",
+  "label": "Nellymoser",
+  "tags": "NELL"
+ },
+ {
+  "section": "audio",
+  "label": "WMA v1",
+  "tags": "160"
+ },
+ {
+  "section": "audio",
+  "label": "WMA v2",
+  "tags": "161"
+ },
+ {
+  "section": "audio",
+  "label": "WMA Pro",
+  "tags": "162"
+ },
+ {
+  "section": "audio",
+  "label": "WMA Lossless",
+  "tags": "163"
+ },
+ {
+  "section": "audio",
+  "label": "DivX WMA",
+  "tags": "353"
+ },
+ {
+  "section": "audio",
+  "label": "Speex",
+  "tags": "A109"
+ },
+ {
+  "section": "audio",
+  "label": "S302M",
+  "tags": "AES3"
+ },
+ {
+  "section": "audio",
+  "label": "Voware Metasound",
+  "tags": "RT29"
+ },
+ {
+  "section": "audio",
+  "label": "Various other formats",
+  "tags": "TWOS, SOWT"
+ },
+ {
+  "section": "audio",
+  "label": "Dolby AC4",
+  "tags": "AC-4 (Note: partial support)"
+ },
+ {
+  "section": "encode",
+  "label": "Video encoding (VFW)",
+  "tags": "Works only in applications that use VFW codecs"
+ },
+ {
+  "section": "encode",
+  "label": "MPEG-4 (Xvid)",
+  "tags": ""
+ },
+ {
+  "section": "encode",
+  "label": "H.264 (x264VFW)",
+  "tags": ""
+ },
+ {
+  "section": "encode",
+  "label": "Lagarith",
+  "tags": ""
+ },
+ {
+  "section": "encode",
+  "label": "Huffyuv",
+  "tags": ""
+ },
+ {
+  "section": "encode",
+  "label": "Audio encoding (ACM)",
+  "tags": "Works only in applications that use ACM codecs"
+ },
+ {
+  "section": "encode",
+  "label": "MP3",
+  "tags": ""
+ },
+ {
+  "section": "encode",
+  "label": "AC3",
+  "tags": ""
+ },
+ {
+  "section": "encode",
+  "label": "Green = supported Red = not supported",
+  "tags": ""
+ }
+]
