@@ -2023,6 +2023,7 @@ mod tests {
 
     use super::{is_mace, mace_block};
 
+    #[cfg(feature = "player")]
     fn open(
         bytes: &[u8],
     ) -> crate::Result<crate::playback_mp4_audio::Mp4AudioReader<std::io::Cursor<&[u8]>>> {
@@ -2046,6 +2047,7 @@ mod tests {
         assert!(is_mace(b"MAC3") && is_mace(b"MAC6") && !is_mace(b"MAC0"));
     }
 
+    #[cfg(feature = "player")]
     #[test]
     fn a_mace_track_is_indexed_in_blocks_though_its_table_counts_samples() {
         use crate::audio::AudioStream as _;
@@ -2067,6 +2069,7 @@ mod tests {
         assert_eq!(ticks, 17_856, "as many samples as `stsz` counts");
     }
 
+    #[cfg(feature = "player")]
     #[test]
     fn a_mace_table_that_does_not_divide_into_blocks_is_refused() {
         // The three ways the geometry can lie, each caught before a packet is read: a sample
@@ -2321,6 +2324,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "player")]
     #[test]
     fn the_sound_a_fragment_indexes_is_the_sound_the_player_hears() {
         // The route a file takes to the speaker, not just the index behind it:

@@ -31,7 +31,7 @@ Codec-паритет с внешним «проигрывает всё» эта�
 | CUDA / Vulkan / DX12 / GL (прочее) | CUDA / wgpu adapters | Реализация; Linux/прочие GPU — отдельная квалификация |
 | Цепочки GPU без промежуточного RAM (CUDA) | Rust + CUDA | Windows RTX 5090; lifetime/reuse/counters; без codec interop |
 | NVDEC → CUDA NV12 filter → NVENC | FFmpeg CUDA + fvid-cuda | Windows RTX 5090; `media hw-filter`; host_frame_copies=0 |
-| MCP-модуль | rmcp + Rust handlers | 11 tools, stdio/локальный HTTP, CPU/media/Metal; без публичного deployment |
+| MCP-модуль | rmcp + Rust handlers | 13 tools, stdio/локальный HTTP, CPU/media/Metal; без публичного deployment |
 | Probe обычного файла | native libavformat adapter | MP4/MKV, streams, codec/profile/level, bitrate/rate, metadata, disposition, chapters, exact timebase |
 | Remux без encoder/decoder | native libavformat adapter | MP4→MKV, MP4+AAC→MP4, SRT→MKV, mapped SubRip in MKV, packet equality |
 | Выбор/удаление дорожек | native adapter | `--streams`; PCM audio extraction to WAV |

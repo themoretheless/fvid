@@ -193,6 +193,6 @@ FVID_BENCH_BIN_FULL=$PWD/target/release/fvid-media-cuda cargo bench --bench ffmp
 
 ## MCP
 
-`cargo build --release --features mcp` добавляет `fvid mcp --root DIRECTORY`: 11 инструментов обработки через stdio или локальный Streamable HTTP с bearer-токеном. Прямые вызовы Rust API, новые выходные файлы без перезаписи, одна операция за раз. [Подключение, схемы и ограничения](docs/MCP.md) · [Пример конфигурации](examples/mcp/client.json). Публичный плагин ChatGPT и передача файлов из облака не настроены.
+`cargo build --release --features mcp` добавляет `fvid mcp --root DIRECTORY`: 13 инструментов обработки через stdio или локальный Streamable HTTP с bearer-токеном. Прямые вызовы Rust API, новые выходные файлы без перезаписи, одна операция за раз. [Подключение, схемы и ограничения](docs/MCP.md) · [Пример конфигурации](examples/mcp/client.json). Публичный плагин ChatGPT и передача файлов из облака не настроены.
 
 MCP поддерживает `--jobs 2` для ограниченной параллельной обработки независимых вызовов; по умолчанию одна операция. Транспорт остаётся асинхронным, лишние вызовы получают busy. Память и потоки кодеков расходуются на каждую операцию отдельно; подробности в [MCP.md](docs/MCP.md).
