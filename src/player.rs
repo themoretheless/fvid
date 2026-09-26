@@ -2259,7 +2259,9 @@ impl Player {
                         "ogg", "mid", "xm",
                     ],
                 ),
-            Pick::Subtitles => dialog.add_filter("Subtitles", &["srt", "vtt", "ass", "ssa"]),
+            Pick::Subtitles => {
+                dialog.add_filter("Subtitles", &["srt", "vtt", "ass", "ssa", "smi", "smil"])
+            }
         };
         self.dialog = Some((what, Box::pin(dialog.pick_file())));
     }
@@ -5346,10 +5348,9 @@ mod tests {
     /// The panel names the coding the sound on screen is actually reading, and
     /// the track key changes that name together with the sound.
     /// `tests/fixtures/audio/ac3-flac-mp3.mkv`: an AC-3 track, then FLAC and MP3.
-    /// The list keeps two, because the Matroska audio reader's own codec list stops
-    /// before `A_AC3` - the decoder exists, but nothing hands the track to it, so the
-    /// name it would arrive under is the one the panel has to reach from a track the
-    /// reader does accept.
+    /// All three are in the list now that the reader hands `A_AC3` to the decoder,
+    /// so the key walks the panel from Dolby Digital through the two lossy ones and
+    /// the count it prints is the three the file offers.
     #[test]
     fn the_panel_names_the_codec_and_the_track_key_keeps_it_current() {
         let directory = scratch("fvid-player-sound-codec", &[]);
@@ -5373,17 +5374,22 @@ mod tests {
                 .unwrap_or_default()
         };
         assert!(
-            sound(&player).starts_with("Sound: 1/2 · FLAC · "),
+            sound(&player).starts_with("Sound: 1/3 · Dolby Digital · "),
             "{}",
             sound(&player)
         );
         player.cycle_audio_track(true);
         assert_eq!(
             (player.audio_track, player.sound_codec.as_str()),
-            (1, "MP3")
+            (1, "FLAC")
+        );
+        player.cycle_audio_track(true);
+        assert_eq!(
+            (player.audio_track, player.sound_codec.as_str()),
+            (2, "MP3")
         );
         assert!(
-            sound(&player).starts_with("Sound: 2/2 · MP3 · "),
+            sound(&player).starts_with("Sound: 3/3 · MP3 · "),
             "{}",
             sound(&player)
         );
@@ -6315,6 +6321,45 @@ mod tests {
         player.apply(Control::SubtitleTrack(true));
         assert_eq!(player.osd.as_ref().unwrap().0, "Subtitles 2/3 UTF-8");
         assert_eq!(player.subtitle_line(seconds(700)), Some("plain first"));
+        drop(player);
+        std::fs::remove_dir_all(&directory).unwrap();
+    }
+
+    /// A SAMI file — the Windows-era caption, where every line carries its own
+    /// time in the tag that opens it — is a sidecar like the others, so the line
+    /// reaches the screen at the milliseconds its `Begin` and `End` name.
+    #[test]
+    fn a_sami_sidecar_captions_the_item_beside_which_it_lies() {
+        let directory = scratch("fvid-player-sami-sidecar", &[]);
+        std::fs::write(
+            directory.join("clip.mkv"),
+            include_bytes!("../tests/fixtures/subtitles/text-tracks.mkv"),
+        )
+        .unwrap();
+        std::fs::write(
+            directory.join("clip.smi"),
+            "<SAMI>\n<HEAD><TITLE>Clip</TITLE></HEAD>\n<BODY>\n\
+             <p class=eng Begin=500 End=1500>from the sami file\n",
+        )
+        .unwrap();
+        let mut player = Player {
+            queue: vec![directory.join("clip.mkv")],
+            ..Default::default()
+        };
+        player.play_index(0);
+        assert!(player.error.is_none(), "{:?}", player.error);
+        assert_eq!(player.subtitle_name, "clip.smi");
+        assert_eq!(
+            player.subtitle_line(seconds(1_000)),
+            Some("from the sami file")
+        );
+        assert_eq!(
+            player.subtitle_line(seconds(2_000)),
+            None,
+            "the caption's own end is what takes it away"
+        );
+        // The file's two text tracks are still there, behind it.
+        assert_eq!(player.subtitle_sources.len(), 3);
         drop(player);
         std::fs::remove_dir_all(&directory).unwrap();
     }

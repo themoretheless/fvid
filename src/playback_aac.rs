@@ -284,25 +284,44 @@ impl Aac {
 
     /// The `esds` payload the AAC decoder asks its setup block for: the frame's
     /// two-byte AudioSpecificConfig inside the descriptors the MP4 sample entry
-    /// would have carried. The lengths below are the byte counts of the records
-    /// that follow them, and the bitrates are left at zero, which is what a
-    /// variable-rate stream states and what the decoder ignores.
+    /// would have carried.
     pub fn extra_data(&self) -> Vec<u8> {
-        let asc = self.frames[0].asc;
-        vec![
-            0, 0, 0, 0, // version and flags of the box itself
-            3, 22, // ES descriptor: the three bytes below and the record after them
-            0, 1, // ES_ID, the same for every track of a file that names none
-            0, // no stream name, no URL, no opaque data follows
-            4, 17,   // DecoderConfigDescriptor: its header and the record after it
-            0x40, // MPEG-4 audio
-            0x15, // stream type 5 for audio, with no upstream and no backward config
-            0, 0, 0, // buffer size, in 16-bit units
-            0, 0, 0, 0, // maximum bitrate
-            0, 0, 0, 0, // average bitrate
-            5, 2, asc[0], asc[1], // DecSpecificInfo, holding the two-byte config
-        ]
+        esds_for(&self.frames[0].asc).expect("an ADTS frame header is always two bytes")
     }
+}
+
+/// Wrap an AudioSpecificConfig in the `esds` descriptors the MP4 sample entry
+/// would have carried around it. Two containers hand that config over and
+/// neither gives the wrapper: a bare `.aac` file states it in every frame
+/// header, and Matroska keeps it in `CodecPrivate` under the tag `A_AAC`.
+///
+/// The lengths below are the byte counts of the records that follow them, and
+/// the bitrates are left at zero, which is what a variable-rate stream states
+/// and what the decoder ignores.
+pub fn esds_for(asc: &[u8]) -> Option<Vec<u8>> {
+    let width = asc.len();
+    // Two bytes is the shortest config that names an object type, a rate and a
+    // channel layout. Past 107 the outermost descriptor's own length no longer
+    // fits the single byte every writer here uses for it, and no real
+    // AudioSpecificConfig comes close: the fields 14496-3 defines sum to 17.
+    if width < 2 || width > 107 {
+        return None;
+    }
+    let mut out = vec![
+        0, 0, 0, 0, // version and flags of the box itself
+        3, (20 + width) as u8, // ES descriptor: the three bytes below and the record after them
+        0, 1, // ES_ID, the same for every track of a file that names none
+        0, // no stream name, no URL, no opaque data follows
+        4, (15 + width) as u8, // DecoderConfigDescriptor: its header and the record after it
+        0x40, // MPEG-4 audio
+        0x15, // stream type 5 for audio, with no upstream and no backward config
+        0, 0, 0, // buffer size, in 16-bit units
+        0, 0, 0, 0, // maximum bitrate
+        0, 0, 0, 0, // average bitrate
+        5, width as u8, // DecSpecificInfo, holding the config itself
+    ];
+    out.extend_from_slice(asc);
+    Some(out)
 }
 
 /// A `.aac` file read as an audio track.
@@ -402,7 +421,7 @@ impl AudioStream for AacAudioReader {
 
 #[cfg(test)]
 mod tests {
-    use super::{Aac, AacAudioReader, Frame, Header, Limits, TAG, header};
+    use super::{Aac, AacAudioReader, Frame, Header, Limits, TAG, esds_for, header};
     use crate::audio::{AudioStream, EncodedPacket};
     use crate::codec::{config::aac_specific_config, make_audio_decoder};
 
@@ -513,6 +532,29 @@ mod tests {
             "the AudioSpecificConfig the frames spell"
         );
         assert_eq!(aac.frames[0].asc, [0x11, 0x90], "LC, 48000 Hz, 2 ch");
+    }
+
+    /// Matroska hands the same config over at its full written length, not the
+    /// two bytes an ADTS header carries, so the wrapper has to grow with it:
+    /// every descriptor states the length of what follows it.
+    #[test]
+    fn the_wrapper_grows_with_a_config_a_container_handed_over() {
+        // The five bytes `tests/fixtures/audio/aac-stereo.mka` carries: the two
+        // an ADTS header would state, plus the writer's own tail.
+        let private = [0x11, 0x90, 0x56, 0xe5, 0x00];
+        let esds = esds_for(&private).expect("a config of the written length");
+        assert_eq!(esds.len(), 26 + private.len());
+        assert_eq!(
+            aac_specific_config(&esds).expect("a record the parser accepts"),
+            private,
+            "the whole config, not only its first two bytes"
+        );
+        // The two-byte ADTS case keeps its old shape, because the fixture tests
+        // and the K-Lite gate read its length.
+        assert_eq!(esds_for(&[0x11, 0x90]).expect("two bytes").len(), 28);
+        // A block too short to name a coding is refused rather than wrapped.
+        assert!(esds_for(&[0x11]).is_none());
+        assert!(esds_for(&[]).is_none());
     }
 
     /// The reader is only useful if the decoder accepts what it hands over:

@@ -5,9 +5,13 @@
 | Source | Codec | Path | Verified |
 | --- | --- | --- | --- |
 | MP4 | AAC-LC (`mp4a`) | `playback_mp4_audio` → `codec::aac_decoder` → cpal | yes, headless |
+| WebM | AAC (`A_AAC`) | `playback_webm_audio` → `playback_aac::esds_for` → `codec::aac_decoder` | yes, headless |
 | WebM | Vorbis (`A_VORBIS`) | `playback_webm_audio` → symphonia Vorbis → cpal | yes, headless |
 | WebM | Opus (`A_OPUS`) | — | not supported |
-| MP4 | AC-3, E-AC-3 | — | not supported |
+| WebM | MP3, MP2 (`A_MPEG/L3`, `A_MPEG/L2`) | `playback_webm_audio` → symphonia MP2 → cpal | yes, headless |
+| WebM | FLAC, ALAC, PCM (`A_FLAC`, `A_ALAC`, `A_PCM/*`) | `playback_webm_audio` → own or symphonia decoder | yes, headless |
+| MP4, WebM | AC-3 (`ac-3`, `A_AC3`) | `playback_mp4_audio` / `playback_webm_audio` → `codec::ac3_decoder` → cpal | yes, headless |
+| either | E-AC-3 | — | not supported |
 
 MP4/AAC was proven end to end on a generated tone file with
 `cargo run --features player --example audio_probe -- file.mp4`, which reports
@@ -18,6 +22,14 @@ WebM/Vorbis uses the same probe, and `playback_webm_audio::tests` decodes a 2 s
 tone fixture (`tests/fixtures/audio/vorbis-stereo.webm`) through the demuxer,
 header handling and decoder together: 88 packets in, 89 088 stereo frames out,
 peak amplitude matching ffmpeg's own reading of the file.
+Matroska's MPEG audio tags share symphonia's one MP2/MP3 decoder and one dispatch
+arm, so `A_MPEG/L2` only had to join the container's tag list; `mp2-stereo.mkv`
+checks the whole route (1152 samples per Layer II block, the decoded peak matching
+ffmpeg's reading of the same stream).
+AC-3 in the two containers is checked by `tests/native_container_audio.rs`. That
+decoder also drops the 256 samples of leading padding its encoder puts in front
+of the sound: measured against ffmpeg's reading of the same stream at 48 000,
+44 100 and 32 000 Hz, the two align at exactly that shift and at no other.
 
 ## Pipeline
 
@@ -50,6 +62,13 @@ quietly moved seeks ~44x too early on 44.1 kHz files;
 - MP4: the `esds` box is not a codec configuration. `codec::config::aac_specific_config`
   unwraps it to the bare AudioSpecificConfig that symphonia parses, and that
   unwrap happens inside `AacDecoder::new`.
+- WebM AAC: `A_AAC` names the same coding but keeps only the bare
+  AudioSpecificConfig in `CodecPrivate` (five bytes for the 48 kHz stereo take
+  under `tests/fixtures/audio/aac-stereo.mka`). `playback_aac::esds_for` wraps
+  those bytes in the descriptors an MP4 sample entry would have carried, the
+  track is then handed to the dispatch under `mp4a`, and the rebuilt box is fed
+  back through `aac_specific_config` before it is accepted, so a config this
+  reader wrapped wrongly is refused at open instead of two frames in.
 - WebM: `CodecPrivate` holds the three Vorbis header packets. The comment
   packet is dropped for the raw-concatenation layout, and Xiph-laced payloads
   pass through untouched. ffmpeg writes the laced form, so the pass-through

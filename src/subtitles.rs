@@ -1,10 +1,10 @@
 //! Text subtitles read from a file next to the video.
 //!
 //! VLC renders these with libass; FVid's own player has no external
-//! dependency, so SubRip, WebVTT and ASS/SSA events are parsed here into plain
-//! text cues. Styling a file carries is dropped deliberately — painting styled
-//! text would need a font engine and a shaper, and the player draws the cue
-//! with its own font, outline and position instead.
+//! dependency, so SubRip, WebVTT, ASS/SSA and SAMI events are parsed here into
+//! plain text cues. Styling a file carries is dropped deliberately — painting
+//! styled text would need a font engine and a shaper, and the player draws the
+//! cue with its own font, outline and position instead.
 
 use std::path::Path;
 use std::time::Duration;
@@ -29,9 +29,22 @@ pub fn parse(text: &str) -> Vec<Cue> {
         parse_webvtt(text)
     } else if text.contains("[Events]") {
         parse_ass(text)
+    } else if is_sami(text) {
+        parse_sami(text)
     } else {
         parse_srt(text)
     }
+}
+
+/// A SAMI file says what it is at its head, and no other caption format puts
+/// `<sami` there; an XML declaration and a document type may stand in front of
+/// the word, so the look reaches past the first bytes rather than only at them.
+fn is_sami(text: &str) -> bool {
+    let mut head = text.len().min(1 << 12);
+    while !text.is_char_boundary(head) {
+        head -= 1;
+    }
+    text[..head].to_ascii_lowercase().contains("<sami")
 }
 
 /// `HH:MM:SS,mmm`, `HH:MM:SS.mmm`, and the WebVTT short form `MM:SS.mmm`.
@@ -208,6 +221,209 @@ pub fn ass_block(block: &str) -> (Option<(Duration, Duration)>, String) {
     (None, plain(fields.trim()))
 }
 
+/// One caption line of a SAMI file, with what the tag around it said.
+struct SamiLine {
+    /// The language the tag names for itself, folded; one file commonly holds
+    /// the same film captioned in several.
+    language: String,
+    /// The time the line comes on, which a line without one takes from the line
+    /// before it.
+    start: Option<Duration>,
+    /// The time the file says it leaves, when it says one at all.
+    end: Option<Duration>,
+    /// Text with the markup taken out and `<br>` become a real line break.
+    text: String,
+}
+
+/// SAMI: the captions of a Windows Media file, where every line is a `<p>` whose
+/// timing sits in the tag's own attributes instead of in a range line. `Begin`
+/// and `End` count milliseconds, and the older `Sync` names a clock the way
+/// SubRip does, so the two forms are read apart rather than guessed at.
+pub fn parse_sami(text: &str) -> Vec<Cue> {
+    let folded = text.to_ascii_lowercase();
+    let mut lines = Vec::new();
+    let mut heard = None;
+    for (tag, body) in sami_tags(&folded, text) {
+        let start = attribute(tag, "begin")
+            .and_then(milliseconds)
+            .or_else(|| attribute(tag, "sync").filter(|clock| clock.contains(':')).and_then(clock));
+        let start = start.or(heard);
+        heard = start;
+        lines.push(SamiLine {
+            language: attribute(tag, "class").unwrap_or_default().to_owned(),
+            start,
+            end: attribute(tag, "end").and_then(milliseconds),
+            text: plain(&line_breaks(body)),
+        });
+    }
+    let wanted = sami_language(&lines);
+    let mut shown: Vec<(Duration, Option<Duration>, String)> = Vec::new();
+    for line in lines
+        .iter()
+        .filter(|line| line.language == wanted && !line.text.is_empty())
+    {
+        let Some(start) = line.start else { continue };
+        match shown.last_mut().filter(|last| last.0 == start) {
+            // A line that names no time of its own is the second line of the
+            // caption before it, not a caption that replaces it.
+            Some(last) => {
+                last.1 = last.1.max(line.end);
+                last.2.push('\n');
+                last.2.push_str(&line.text);
+            }
+            None => shown.push((start, line.end, line.text.clone())),
+        }
+    }
+    let starts: Vec<Duration> = shown.iter().map(|(start, _, _)| *start).collect();
+    let mut cues = Vec::with_capacity(shown.len());
+    for (nth, (start, end, text)) in shown.into_iter().enumerate() {
+        let next = starts.get(nth + 1).copied();
+        let end = end
+            .filter(|end| *end > start)
+            .or_else(|| next.filter(|next| *next > start))
+            .unwrap_or_else(|| start.saturating_add(LAST_LINE));
+        cues.push(Cue { start, end, text });
+    }
+    cues
+}
+
+/// The language a SAMI file captions in: the one its lines mostly carry, since a
+/// file written for two audiences holds both in the same paragraphs and a viewer
+/// reads one at a time. Ties go to the language that appears first, which is the
+/// one the writer put in front.
+fn sami_language(lines: &[SamiLine]) -> &str {
+    let mut counted: Vec<(&str, usize)> = Vec::new();
+    for line in lines.iter().filter(|line| !line.text.is_empty()) {
+        match counted
+            .iter_mut()
+            .find(|(seen, _)| *seen == line.language.as_str())
+        {
+            Some((_, seen)) => *seen += 1,
+            None => counted.push((line.language.as_str(), 1)),
+        }
+    }
+    let mut best = 0;
+    let mut wanted = "";
+    for (language, seen) in &counted {
+        if *seen > best {
+            best = *seen;
+            wanted = language;
+        }
+    }
+    wanted
+}
+
+/// The `<p>` tags of a SAMI body, each with the text that runs until the next
+/// one. A tag comes back folded because its attributes are matched case-blind;
+/// its text keeps the letters the file wrote.
+fn sami_tags<'a>(folded: &'a str, text: &'a str) -> Vec<(&'a str, &'a str)> {
+    let bytes = folded.as_bytes();
+    let last = folded.find("</body").unwrap_or(folded.len());
+    let first = folded
+        .find("<body")
+        .map_or(0, |at| at + "<body".len())
+        .min(last);
+    let mut opens = Vec::new();
+    let mut at = first;
+    while at < last {
+        // `<p` opens a caption; `</p>` closes one, and `<param>` and `<pre>` are
+        // neither, so the byte after the name has to be the end of the name.
+        if bytes[at] == b'<'
+            && bytes.get(at + 1) == Some(&b'p')
+            && !bytes.get(at + 2).is_some_and(|byte| byte.is_ascii_alphanumeric())
+        {
+            opens.push(at);
+            at += 2;
+        } else {
+            at += 1;
+        }
+    }
+    let mut found = Vec::with_capacity(opens.len());
+    for (nth, open) in opens.iter().enumerate() {
+        let tag_end = tag_closed_at(bytes, *open).min(last);
+        let body_end = opens.get(nth + 1).copied().unwrap_or(last);
+        let tag = folded.get(*open..tag_end).unwrap_or_default();
+        let body = text.get(tag_end..body_end).unwrap_or_default();
+        found.push((tag, body));
+    }
+    found
+}
+
+/// The byte past the `>` that ends a tag, which an attribute value may have put
+/// inside itself by quoting one: `<p class="a>b">` is one tag.
+fn tag_closed_at(bytes: &[u8], from: usize) -> usize {
+    let mut at = from;
+    let mut quote = None;
+    while at < bytes.len() {
+        match bytes[at] {
+            byte @ (b'"' | b'\'') if Some(byte) == quote => quote = None,
+            byte @ (b'"' | b'\'') if quote.is_none() => quote = Some(byte),
+            b'>' if quote.is_none() => return at + 1,
+            _ => {}
+        }
+        at += 1;
+    }
+    bytes.len()
+}
+
+/// The value a folded tag gives an attribute: `name=value`, `name = "value"`, in
+/// either case the writer chose. A name that only appears inside another
+/// attribute's value names nothing.
+fn attribute<'a>(tag: &'a str, name: &str) -> Option<&'a str> {
+    let bytes = tag.as_bytes();
+    let mut from = 0;
+    loop {
+        let at = tag[from..].find(name)? + from;
+        from = at + name.len();
+        if at != 0 && bytes[at - 1].is_ascii_alphanumeric() {
+            continue;
+        }
+        let Some(rest) = tag.get(at + name.len()..).map(str::trim_start) else {
+            continue;
+        };
+        let Some(value) = rest.strip_prefix('=').map(str::trim_start) else {
+            continue;
+        };
+        return match value.strip_prefix(['"', '\'']) {
+            Some(quoted) => Some(quoted.split(['"', '\'']).next().unwrap_or_default()),
+            None => Some(value.split_whitespace().next()?.trim_end_matches(['/', '>'])),
+        };
+    }
+}
+
+/// The time a `Begin` or `End` attribute names, in the milliseconds the format
+/// counts them in. A value that is not a plain number names no time.
+fn milliseconds(value: &str) -> Option<Duration> {
+    if value.is_empty() || !value.bytes().all(|byte| byte.is_ascii_digit()) {
+        return None;
+    }
+    value.parse::<u64>().ok().map(Duration::from_millis)
+}
+
+/// The line breaks of a SAMI caption. The format writes one as `<br>`, `<br/>`
+/// or `<br class=…>`; every other tag is markup `plain()` already drops.
+fn line_breaks(text: &str) -> String {
+    let bytes = text.as_bytes();
+    let mut out = String::with_capacity(text.len());
+    let (mut at, mut from) = (0, 0);
+    while at < bytes.len() {
+        if bytes[at] == b'<'
+            && bytes.get(at + 1).is_some_and(|byte| *byte == b'b')
+            && bytes.get(at + 2).is_some_and(|byte| *byte == b'r')
+            && !bytes.get(at + 3).is_some_and(|byte| byte.is_ascii_alphanumeric())
+        {
+            out.push_str(&text[from..at]);
+            out.push('\n');
+            at = tag_closed_at(bytes, at);
+            from = at;
+        } else {
+            at += 1;
+        }
+    }
+    out.push_str(&text[from..]);
+    out
+}
+
 /// The cue to show at a media time, with the cues shifted by `delay`.
 pub fn active(cues: &[Cue], at: Duration, delay: Duration) -> Option<&Cue> {
     cues.iter().find(|cue| {
@@ -253,7 +469,7 @@ pub fn sidecars(video: &Path) -> Vec<std::path::PathBuf> {
                 .and_then(|extension| extension.to_str())
                 .map(|extension| extension.to_ascii_lowercase())
                 .as_deref(),
-            Some("srt") | Some("vtt") | Some("ass") | Some("ssa")
+            Some("srt") | Some("vtt") | Some("ass") | Some("ssa") | Some("smi") | Some("smil")
         );
         if !is_subtitle {
             continue;
@@ -358,7 +574,7 @@ pub fn load(path: &Path) -> Option<Vec<Cue>> {
 mod tests {
     use super::{
         DELAY_STEP, LAST_LINE, active, ass_block, clock, cue_end, decode_text, load, parse,
-        parse_ass, parse_srt, parse_webvtt, sidecars,
+        parse_ass, parse_sami, parse_srt, parse_webvtt, sidecars,
     };
     use std::time::Duration;
 
@@ -473,6 +689,96 @@ mod tests {
             parse("[Events]\nDialogue: 0,0:00:01.00,0:00:02.00,,,,,,,Hi\n").len(),
             1
         );
+        assert_eq!(parse("<SAMI>\n<BODY>\n<p class=eng Begin=0 End=1000>Hi\n").len(), 1);
+        // A declaration in front of the word is the format's own, too.
+        assert_eq!(
+            parse(
+                "<?xml version=\"1.0\"?>\n<SAMI Class=\"SMIL\">\n<BODY>\n<p class=eng Begin=0 End=1000>Hi\n"
+            )
+            .len(),
+            1
+        );
+    }
+
+    /// A SAMI paragraph keeps its own clocks in its tag, spelled in either case
+    /// and with values either bare or quoted; its markup is dropped the way an
+    /// ASS line's is, and its `<br>` is the line break the format writes. The
+    /// head of the file speaks about the film, not about a caption, so nothing
+    /// there shows.
+    #[test]
+    fn a_sami_paragraph_carries_its_own_clock() {
+        let cues = parse_sami(
+            "<SAMI>\n<HEAD><TITLE>Sample</TITLE></HEAD>\n<BODY>\n<Div Class=English>\n\
+             <P CLASS=English BEGIN=1000 END=2500>Hello<br><font color=\"#FFFF00\">world</font>\n\
+             <p class=\"English\" begin=3000 end=4000>Second cue\n\
+             </Div>\n</BODY>\n",
+        );
+        assert_eq!(cues.len(), 2);
+        assert_eq!(cues[0].text, "Hello\nworld");
+        assert_eq!((cues[0].start, cues[0].end), (seconds(1.0), seconds(2.5)));
+        assert_eq!((cues[1].start, cues[1].end), (seconds(3.0), seconds(4.0)));
+    }
+
+    /// A paragraph that names no time of its own continues the caption before
+    /// it rather than replacing it, and one that names no end holds the screen
+    /// until its successor starts — or, for the last of a file, the length every
+    /// other format's untimed line takes too. A time that only appears inside a
+    /// quoted attribute value names nothing, so the tag has to be read whole.
+    #[test]
+    fn a_sami_line_inherits_the_time_it_was_given() {
+        let cues = parse_sami(
+            "<SAMI>\n<BODY>\n<p class=eng Begin=1000>One\n<p class=eng>Still one\n\
+             <p class=eng Begin=4000>Two\n<p class=eng Begin=9000>Three\n",
+        );
+        assert_eq!(cues.len(), 3);
+        assert_eq!(cues[0].text, "One\nStill one");
+        assert_eq!((cues[0].start, cues[0].end), (seconds(1.0), seconds(4.0)));
+        assert_eq!((cues[1].start, cues[1].end), (seconds(4.0), seconds(9.0)));
+        assert_eq!(cues[2].end, seconds(9.0) + LAST_LINE);
+        // The `>` inside the value is part of the value, so the tag runs past it.
+        let timed = parse_sami(
+            "<SAMI>\n<BODY>\n<p Note=\"a>b\" class=eng Begin=7000 End=8000>Odd\n",
+        );
+        assert_eq!(
+            (timed.len(), timed[0].text.as_str(), timed[0].start, timed[0].end),
+            (1, "Odd", seconds(7.0), seconds(8.0)),
+        );
+    }
+
+    /// Two audiences, one file: the language the paragraphs mostly carry is the
+    /// one shown, because a viewer reads one caption at a time, and where the
+    /// two are even the writer's own order decides.
+    #[test]
+    fn a_sami_file_shows_the_language_it_captions_in() {
+        let cues = parse_sami(
+            "<SAMI>\n<BODY>\n<p class=rus Begin=0 End=2000>Привет\n\
+             <p class=eng Begin=0 End=2000>Hello\n<p class=eng Begin=3000 End=5000>Second\n",
+        );
+        assert_eq!(
+            cues.iter()
+                .map(|cue| cue.text.as_str())
+                .collect::<Vec<_>>()
+                .join(" / "),
+            "Hello / Second"
+        );
+        let tied = parse_sami("<SAMI>\n<BODY>\n<p class=rus Begin=0>Привет\n<p class=eng Begin=1000>Hello\n");
+        assert_eq!(tied.len(), 1);
+        assert_eq!(tied[0].text, "Привет");
+    }
+
+    /// Before milliseconds were the unit, `Sync` named a clock the way SubRip
+    /// does. It is a different shape of number, so the two are told apart by what
+    /// they hold rather than by which attribute wrote them.
+    #[test]
+    fn an_old_sami_sync_names_a_clock() {
+        let cues = parse_sami(
+            "<SAMI>\n<BODY>\n<p class=eng Sync=0:00:02.000>Old form\n\
+             <p class=eng Sync=0:00:05.500>Next\n",
+        );
+        assert_eq!(cues.len(), 2);
+        assert_eq!((cues[0].start, cues[0].end), (seconds(2.0), seconds(5.5)));
+        // A paragraph the file gives no time at all has nowhere to sit.
+        assert!(parse_sami("<SAMI>\n<BODY>\n<p class=eng>Nowhere\n").is_empty());
     }
 
     #[test]
@@ -552,18 +858,24 @@ mod tests {
         }
         std::fs::write(directory.join("other.srt"), cue).unwrap();
         std::fs::write(directory.join("movie.txt"), "not a subtitle file\n").unwrap();
+        std::fs::write(
+            directory.join("movie.smi"),
+            "<SAMI>\n<BODY>\n<p class=eng Begin=0 End=1000>Hi\n",
+        )
+        .unwrap();
 
         let video = directory.join("Movie.mp4");
         let found: Vec<String> = sidecars(&video)
             .iter()
             .map(|path| path.file_name().unwrap().to_string_lossy().into_owned())
             .collect();
-        assert_eq!(found, ["MOVIE.vtt", "movie.srt", "movie.extra.srt"]);
+        assert_eq!(found, ["MOVIE.vtt", "movie.smi", "movie.srt", "movie.extra.srt"]);
         // A loose match only counts when it carries the whole stem.
         assert!(!found.contains(&"other.srt".to_string()));
         // Reading is separate from listing: an unparseable sibling yields none.
         assert!(load(&directory.join("movie.txt")).is_none());
         assert_eq!(load(&video.clone().with_extension("srt")).unwrap().len(), 1);
+        assert_eq!(load(&video.with_extension("smi")).unwrap()[0].text, "Hi");
         std::fs::remove_dir_all(&directory).unwrap();
     }
 

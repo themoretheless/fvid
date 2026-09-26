@@ -385,9 +385,13 @@ mod tests {
                 .decode_encoded(&data, pts as u64, duration as u64)
                 .expect("a frame of a real file decodes")
                 .expect("and sounds");
+            // The first block carries the encoder's 256 samples of padding, which
+            // the decoder withholds so the sound starts where every other player
+            // starts it; the frames after it sound their full length.
+            let frames = 1536 - 256 * usize::from(stamps.len() == 1);
             assert_eq!(
                 audio.data.len() / 4,
-                1536 * 2,
+                frames * 2,
                 "one frame of interleaved f32 per channel"
             );
             assert_eq!((audio.pts, audio.timebase_den), (pts as u64, 48_000));
@@ -395,7 +399,7 @@ mod tests {
         }
         assert_eq!(stamps.len(), reader.ac3().packets());
         assert_eq!(stamps[1], (1536, 1536), "pts is samples, not bytes");
-        assert_eq!(heard, 8 * 1536 * 2, "every frame sounded its samples");
+        assert_eq!(heard, 8 * 1536 * 2 - 256 * 2, "every frame sounded its samples");
         reader.rewind();
         assert_eq!(reader.next_packet().expect("packet").expect("first").pts, 0);
     }

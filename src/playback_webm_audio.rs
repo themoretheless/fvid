@@ -12,31 +12,52 @@ const TIMESCALE_NS: u32 = 1_000_000_000;
 
 /// Codec IDs the player has a decoder for, as Matroska spells them. The three
 /// `A_PCM/*` IDs are uncompressed audio, whose width the track states in
-/// `BitDepth`.
-const CODECS: [&str; 9] = [
+/// `BitDepth`. `A_AAC` is spelled `mp4a` by the decoder dispatch, whichever
+/// container named it, and needs its setup block rebuilt (see `aac_setup`).
+const CODECS: [&str; 10] = [
     "A_VORBIS",
     "A_MPEG/L3",
+    "A_MPEG/L2",
     "A_FLAC",
     "A_ALAC",
     "A_AC3",
+    "A_AAC",
     "A_PCM/INT/LIT",
     "A_PCM/INT/BIG",
     "A_PCM/FLOAT/IEEE",
-    "A_EAC3",
 ];
 
 /// The codec setup bytes a decoder needs for a track. Vorbis keeps its header
 /// packets in `CodecPrivate`; FLAC keeps its metadata blocks, from which the
 /// decoder reads only the STREAMINFO body; Apple Lossless keeps its magic cookie,
-/// which is the whole of its geometry; MP3 frames describe themselves and want
-/// nothing.
+/// which is the whole of its geometry; both MPEG audio layers describe their own
+/// frames and want nothing.
 fn setup_data(track: &Track) -> Result<Vec<u8>> {
     match track.codec.as_str() {
         "A_VORBIS" => vorbis_setup_headers(&track.codec_private),
         "A_FLAC" => Ok(flac_stream_info(&track.codec_private)),
         "A_ALAC" => Ok(track.codec_private.clone()),
+        "A_AAC" => aac_setup(&track.codec_private),
         _ => Ok(Vec::new()),
     }
+}
+
+/// Matroska states an AAC track's setup as the bare AudioSpecificConfig, while
+/// the decoder here reads an MP4 `esds` box that holds the same bytes inside its
+/// descriptors. A file written by a tool that knows only Matroska carries the
+/// short form, so the wrapper is rebuilt around it; a track whose setup block is
+/// too short to name a coding is refused by the reason the config parser gives.
+fn aac_setup(private: &[u8]) -> Result<Vec<u8>> {
+    let Some(esds) = crate::playback_aac::esds_for(private) else {
+        return Err(unsupported(&format!(
+            "AAC in WebM names its setup block {} bytes, and a config shorter than two states no coding",
+            private.len()
+        )));
+    };
+    // Let the decoder's own parser judge the rebuilt box, so a config this
+    // reader wraps wrongly is refused here rather than two frames in.
+    crate::codec::config::aac_specific_config(&esds)?;
+    Ok(esds)
 }
 
 /// The STREAMINFO body of a FLAC setup block. Matroska stores the metadata
@@ -66,8 +87,11 @@ pub struct WebmAudioReader<R> {
     demuxer: WebmReader<R>,
     track_number: u64,
     packet_index: usize,
-    /// Vorbis setup headers in the layout the decoder expects.
+    /// The setup bytes the decoder asks for, in the layout it reads.
     extra_data: Vec<u8>,
+    /// The name the decoder dispatch answers: the container's own tag for every
+    /// coding but AAC, which dispatches as `mp4a` whichever container named it.
+    codec_tag: String,
 }
 
 impl<R: Read + Seek> WebmAudioReader<R> {
@@ -117,6 +141,11 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             .find(|t| t.number == track_number)
             .ok_or_else(|| invalid("WebM has no such audio track"))?;
         let extra_data = setup_data(track)?;
+        let codec_tag = if track.codec == "A_AAC" {
+            "mp4a".to_string()
+        } else {
+            track.codec.clone()
+        };
         if track.sample_rate == 0 || track.sample_rate > u64::from(u32::MAX) {
             return Err(invalid("WebM audio track has no usable sample rate"));
         }
@@ -128,6 +157,7 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             track_number,
             packet_index: 0,
             extra_data,
+            codec_tag,
         })
     }
 
@@ -216,7 +246,7 @@ fn vorbis_setup_headers(private: &[u8]) -> Result<Vec<u8>> {
 
 #[cfg(test)]
 mod tests {
-    use super::{WebmAudioReader, flac_stream_info, vorbis_setup_headers};
+    use super::{WebmAudioReader, aac_setup, flac_stream_info, vorbis_setup_headers};
     use crate::audio::{AudioStream, AudioTrack};
     use crate::container::webm::Limits;
     use std::io::Cursor;
@@ -450,14 +480,33 @@ mod tests {
         assert!((0.28..=0.30).contains(&peak), "peak={peak}");
     }
 
-    /// Three audio tracks, one of them AC-3, from one source:
+    /// A track in a coding with no decoder is left out of the list entirely, so the
+    /// keys the player is handed count only what it can actually play:
+    /// ffmpeg -f lavfi -i 'aevalsrc=0.3*sin(880*PI*t)|0.3*sin(880*PI*t):d=0.25:s=44100' \
+    ///   -vn -map 0:a -c:a:0 libopus -b:a:0 32k -map 0:a -c:a:1 flac \
+    ///   tests/fixtures/audio/opus-flac.mkv
+    /// Opus is the file's first track and absent from the list, so the one track
+    /// there is to choose is numbered zero.
+    #[test]
+    fn the_track_list_skips_a_codec_there_is_no_decoder_for() {
+        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/opus-flac.mkv");
+        let stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
+            .expect("fixture has audio tracks");
+        assert_eq!(stream.audio_tracks().len(), 1, "the Opus track is not offered");
+        let chosen = WebmAudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 0)
+            .unwrap_or_else(|error| panic!("track 0: {error}"));
+        assert_eq!(chosen.codec(), "A_FLAC");
+        assert!(WebmAudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 1).is_err());
+    }
+
+    /// Three audio tracks from one source, every one of them decodable:
     /// ffmpeg -f lavfi -i 'aevalsrc=0.3*sin(880*PI*t)|0.3*sin(880*PI*t):d=1:s=44100' \
     ///   -vn -map 0:a -c:a:0 ac3 -b:a:0 96k -map 0:a -c:a:1 flac \
     ///   -map 0:a -c:a:2 libmp3lame -b:a:2 96k tests/fixtures/audio/ac3-flac-mp3.mkv
-    /// The list holds only the two the player can decode, in the order the file
-    /// gives them.
+    /// The Dolby track used to be the one this list dropped. It is here now, in
+    /// the order the file gives, and only a key past all three is an error.
     #[test]
-    fn the_track_list_skips_a_codec_there_is_no_decoder_for() {
+    fn a_dolby_track_is_listed_with_the_lossy_ones_it_sits_beside() {
         const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/ac3-flac-mp3.mkv");
         let stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
             .expect("fixture has audio tracks");
@@ -467,7 +516,98 @@ mod tests {
                 .unwrap_or_else(|error| panic!("track {nth}: {error}"));
             assert_eq!(chosen.codec(), codec);
         }
-        assert!(WebmAudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 2).is_err());
+        assert!(WebmAudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 3).is_err());
+    }
+
+    /// One second of two sines coded as AAC and copied into Matroska, which is
+    /// what a remux of an `.m4a` leaves behind:
+    /// ```sh
+    /// ffmpeg -f lavfi -i 'aevalsrc=0.3*sin(880*PI*t)|0.3*sin(1100*PI*t):d=1:s=48000' \
+    ///   -c:a aac -b:a 128k /tmp/aac-src.m4a
+    /// ffmpeg -i /tmp/aac-src.m4a -vn -c copy tests/fixtures/audio/aac-stereo.mka
+    /// ```
+    /// The track names itself `A_AAC` and carries its setup as the bare
+    /// AudioSpecificConfig — five bytes, which `ffprobe` reports as the file's
+    /// `extradata_size`. The decoder asks for an MP4 `esds`, so the wrapper is
+    /// rebuilt, and the dispatch answers this coding as `mp4a` whatever the
+    /// container called it.
+    #[test]
+    fn an_aac_track_arrives_with_only_the_config_and_is_wrapped() {
+        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/aac-stereo.mka");
+        let mut stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
+            .expect("fixture has an AAC track");
+        assert_eq!(stream.codec(), "mp4a");
+        assert_eq!((stream.sample_rate(), stream.channels()), (48_000, 2));
+        assert_eq!(
+            crate::codec::config::aac_specific_config(stream.extra_data())
+                .expect("a setup block the decoder's own parser accepts")
+                .len(),
+            5,
+            "the whole config the container handed over, not a truncated copy"
+        );
+        let (frames, peak) = decode_all(&mut stream);
+        // 48 kHz AAC blocks are 1024 samples; a second of sound is 47 of them and
+        // the decoder hands over the priming frame the encoder put in front.
+        assert!(
+            (47 * 1024..49 * 1024).contains(&frames),
+            "decoded {frames} frames of a one second track"
+        );
+        // The loudest sample this route produces is the one ffmpeg's own reading
+        // of the same stream produces, to the last bit: 0.41567978. It is well
+        // above the 0.3 the sine was written at, and that overshoot belongs to
+        // the coding rather than to this decode, which is why the number is
+        // checked against the reference instead of against the amplitude.
+        assert!(
+            (peak - 0.415_679_78).abs() < 5e-5,
+            "peak={peak}, the reference reads 0.41567978"
+        );
+    }
+
+    /// A setup block that cannot name a coding is refused with the length it
+    /// states, so a file with an empty `CodecPrivate` does not reach the decoder
+    /// and fail there instead.
+    #[test]
+    fn an_aac_track_without_a_usable_setup_block_is_refused_by_name() {
+        let error = aac_setup(&[0x11]).expect_err("one byte states no coding");
+        assert!(
+            error.to_string().contains("1 bytes"),
+            "the refusal quotes the setup length: {error}"
+        );
+        assert!(aac_setup(&[0x11, 0x90]).is_ok(), "two bytes is enough");
+    }
+
+    /// The coding DVB and broadcast rips keep in Matroska, one second of a 440 Hz
+    /// sine in two channels:
+    /// ```sh
+    /// ffmpeg -f lavfi -i 'aevalsrc=0.3*sin(880*PI*t)|0.3*sin(880*PI*t):d=1:s=48000' \
+    ///   -vn -c:a mp2 -b:a 256k tests/fixtures/audio/mp2-stereo.mkv
+    /// ```
+    /// MPEG Layer II has had a decoder arm here for a while, because a bare
+    /// `.mp2` file names itself with this very tag; what it never had was a
+    /// container route, so a track Matroska called `A_MPEG/L2` was dropped from
+    /// the list before the dispatch was ever asked.
+    #[test]
+    fn a_layer_ii_track_reaches_the_arm_the_layer_iii_route_shares() {
+        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/mp2-stereo.mkv");
+        let mut stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
+            .expect("fixture has an MP2 track");
+        assert_eq!(stream.codec(), "A_MPEG/L2");
+        assert_eq!((stream.sample_rate(), stream.channels()), (48_000, 2));
+        let (frames, peak) = decode_all(&mut stream);
+        // Layer II blocks are 1152 samples at this rate, so a second is 41 of them
+        // and change; the reference reads 47 903 frames after its own 481-sample
+        // priming, and this route keeps the priming it is handed, so the count is
+        // bounded rather than pinned.
+        assert!(
+            (41 * 1152..43 * 1152).contains(&frames),
+            "decoded {frames} frames of a one second track"
+        );
+        // Both channels carry the same tone, and this is the number ffmpeg's
+        // reading of the same stream gives.
+        assert!(
+            (peak - 0.301_391_6).abs() < 5e-5,
+            "peak={peak}, the reference reads 0.3013916"
+        );
     }
 
     /// One quarter second of the 0.3-amplitude stereo sine, written as the lossless
@@ -581,7 +721,7 @@ mod tests {
 
 impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     fn codec(&self) -> &str {
-        &self.track().codec
+        &self.codec_tag
     }
 
     fn timescale(&self) -> u32 {
