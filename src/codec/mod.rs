@@ -149,6 +149,8 @@ pub mod aac_decoder;
 #[cfg(feature = "player")]
 pub mod ac3_decoder;
 #[cfg(feature = "player")]
+pub mod eac3_decoder;
+#[cfg(feature = "player")]
 pub mod adpcm_ct_decoder;
 #[cfg(feature = "player")]
 pub mod adpcm_decoder;
