@@ -59,14 +59,14 @@ const SEGMENTS: usize = 8;
 /// Audio blocks in a syncframe.
 const BLOCKS: usize = 6;
 /// Samples one audio block contributes per channel.
-const SAMPLES: usize = 256;
+pub(crate) const SAMPLES: usize = 256;
 /// Samples the encoder put in front of the sound, which the first block therefore
 /// carries as padding: a decoder that hands them out plays the whole track some
 /// milliseconds behind the picture every other player shows. The count is the same
 /// at all three rates - measured against the reference decoder on streams at
 /// 48 000, 44 100 and 32 000 Hz, where the earliest sample that lines up after it
 /// sits 256 samples into this decoder's own output.
-const ENCODER_DELAY: usize = 256;
+pub(crate) const ENCODER_DELAY: usize = 256;
 /// Windowed time-domain slots one block's inverse transform fills.
 const SLOTS_512: usize = 512;
 /// The longest complex inverse transform the 512-sample path needs: a quarter of
@@ -634,6 +634,14 @@ pub(crate) struct Params {
     pub(crate) fgaincod: [usize; PLANES],
     /// `cplfleak` and `cplsleak`, the coupling plane's own masking leaks.
     pub(crate) cplleak: [i32; 2],
+    /// `cplleake`: the coupling plane's own masking leaks are new this block. The
+    /// leaks move that plane's curve, so an allocation carried from the last block is
+    /// wrong beside them even when every exponent run is reused.
+    pub(crate) leaks: bool,
+    /// `fgaincode`: the block stated its per-plane fast gain codes. Annex E lets a
+    /// block state gains while reusing its offsets, and a gain scales the curve the
+    /// same way an offset does.
+    pub(crate) gains: bool,
     /// `deltbaie`: the block restates at least one plane's delta bit allocation.
     pub(crate) delt: bool,
 }
@@ -655,6 +663,8 @@ impl Default for Params {
             fsnroffst: [15; PLANES],
             fgaincod: [7; PLANES],
             cplleak: [7, 7],
+            leaks: false,
+            gains: false,
             delt: false,
         }
     }
@@ -813,6 +823,10 @@ pub(crate) struct Strategy {
     /// Whether each channel still owes its first set of coupling coordinates, which
     /// Annex E asks after and Table 5.3 does not.
     pub(crate) firstcplcos: [bool; FBW],
+    /// Whether the coupling plane still owes its first pair of masking leaks, which is
+    /// the same promise Annex E makes of the coordinates above: a block that begins
+    /// coupling states its leaks without saying that it does.
+    pub(crate) firstcplleak: bool,
     /// Phase restoration: whether it is in use, the per-channel master coordinate
     /// gain, and the coordinates and phase flags already expanded to the sub-bands
     /// decoupling addresses them by.
@@ -848,6 +862,7 @@ impl Default for Strategy {
             bnd: 0,
             bndstrc: [false; SUBDN],
             firstcplcos: [true; FBW],
+            firstcplleak: true,
             phsflginu: false,
             mstr: [0; FBW],
             coord: [[0.0; SUBDN]; FBW],
@@ -961,6 +976,30 @@ impl Strategy {
         self.phsflginu = header.acmod == 2 && bits.flag();
         let begin = bits.take(4) as usize;
         let end = bits.take(4) as usize;
+        self.open_coupling(header, continued, begin, end, true, bits)
+    }
+
+    /// The coupling geometry both Table 5.3 and Table E1.4 state the same way once
+    /// their differences are read elsewhere: the band set the block couples over, the
+    /// banding structure that groups its sub-bands, and the checks that say no block
+    /// can be decoded from what was named. `false` for a coupling span the decoupling
+    /// loop could not walk, which mutes the frame.
+    ///
+    /// `continued` is whether the block before this one coupled too, which the reuse
+    /// conditions of Section 7.10.2 answer to. `banding_stated` says whether the
+    /// block's own `cplbndstrc` flags follow in the bitstream: Table 5.3 always sends
+    /// them, Annex E only when its `cplbndstrce` bit says so, and a block that withholds
+    /// them hands over the structure it already settled on - Table E2.12's for a frame's
+    /// first coupled block, the last block's for any other.
+    pub(crate) fn open_coupling(
+        &mut self,
+        header: Header,
+        continued: bool,
+        begin: usize,
+        end: usize,
+        banding_stated: bool,
+        bits: &mut Bits<'_>,
+    ) -> bool {
         // Section 7.10.2 conditions 6 and 7: exponents a block does not send may only
         // be reused while coupling still covers the same bands.
         self.cpl_opened = !continued;
@@ -975,9 +1014,13 @@ impl Strategy {
             return false;
         }
         self.subnd = subnd;
+        if banding_stated {
+            for bnd in 1..subnd {
+                self.bndstrc[bnd] = bits.flag();
+            }
+        }
         let mut merged = 0;
         for bnd in 1..subnd {
-            self.bndstrc[bnd] = bits.flag();
             if self.bndstrc[bnd] {
                 merged += 1;
             }
@@ -1097,6 +1140,10 @@ impl Strategy {
     /// `false` for the reserved `deltbae` state, which Table 5.16 mutes on.
     fn allocation_side(&mut self, header: Header, first: bool, bits: &mut Bits<'_>) -> bool {
         self.params.snre = bits.flag();
+        // Table 5.3 interleaves one block's gains with its offsets under the same
+        // flag, so the two always move together here - unlike Annex E, where a block
+        // states gain codes of its own.
+        self.params.gains = self.params.snre;
         if self.params.snre {
             self.params.csnroffst = bits.take(6);
             if self.cplinu {
@@ -1115,17 +1162,26 @@ impl Strategy {
             // Section 5.4.3.36: the first block states the SNR offsets itself.
             return false;
         }
+        self.params.leaks = false;
         if self.cplinu {
             let leak = bits.flag();
             if leak {
                 let fast = bits.take(3);
                 let slow = bits.take(3);
                 self.params.cplleak = [fast, slow];
+                self.params.leaks = true;
             } else if first {
                 // Section 7.10.2 condition 14.
                 return false;
             }
         }
+        self.delta_ba(header, bits)
+    }
+
+    /// The `deltbaie` syntax, which Table 5.3 and Table E1.4 write the same way: the
+    /// mode of every plane the block carries, then the segment list of each plane that
+    /// sends a new one. `false` for the reserved mode, which Table 5.16 mutes on.
+    pub(crate) fn delta_ba(&mut self, header: Header, bits: &mut Bits<'_>) -> bool {
         self.params.delt = bits.flag();
         if !self.params.delt {
             return true;
@@ -1165,6 +1221,8 @@ impl Strategy {
     pub(crate) fn needs_allocation(&self, header: Header) -> bool {
         self.params.baie
             || self.params.snre
+            || self.params.gains
+            || self.params.leaks
             || self.params.delt
             || self.expstr[..header.nfchans]
                 .iter()
