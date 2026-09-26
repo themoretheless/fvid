@@ -502,7 +502,7 @@ impl Module {
 
     /// The cells of one timeline row.
     pub fn row_cells(&self, row: &TimelineRow) -> &[Cell] {
-        self.patterns[row.order].row(row.row)
+        self.patterns[usize::from(self.orders[row.order])].row(row.row)
     }
 
     /// Which sample of an instrument a note selects, as an index into its
@@ -1723,6 +1723,36 @@ mod tests {
                 .collect::<Vec<_>>(),
             vec![0, 1]
         );
+    }
+
+    #[test]
+    fn a_row_plays_the_pattern_its_order_names() {
+        // The order table names pattern 1 first and pattern 0 second, and song
+        // length exceeds the pattern count: a row's cells come from the pattern
+        // its order entry names, not from the pattern at the order's index.
+        let bytes = write_module(&ModuleSpec {
+            version: 0x0104,
+            linear: true,
+            speed: 6,
+            bpm: 125,
+            orders: vec![1, 0, 1],
+            patterns: vec![
+                vec![vec![cell(60, 1, 0x40, 0, 0)]],
+                vec![vec![cell(72, 1, 0x40, 0, 0)]],
+            ],
+            instruments: Vec::new(),
+            packed: true,
+        });
+        let module = parse(&bytes).expect("the module opens");
+        let notes: Vec<u8> = module
+            .timeline()
+            .iter()
+            .map(|row| module.row_cells(row)[0].note)
+            .collect();
+        assert_eq!(notes, vec![72, 60, 72]);
+        for index in 0..module.packets() {
+            module.packet(index);
+        }
     }
 
     #[test]
