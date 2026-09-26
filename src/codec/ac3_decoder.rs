@@ -39,21 +39,21 @@ use crate::audio::{AudioDecode, AudioPacket, AudioSpec, SampleFormat};
 use crate::{Result, invalid};
 
 /// Transform coefficients, mantissas and exponents per block and per plane.
-const BINS: usize = 256;
+pub(crate) const BINS: usize = 256;
 /// Full-bandwidth channels a stream can carry.
-const FBW: usize = 5;
+pub(crate) const FBW: usize = 5;
 /// Plane index of the coupling channel, which the standard numbers after the five.
-const CPL: usize = 5;
+pub(crate) const CPL: usize = 5;
 /// Plane index of the low frequency effects channel.
-const LFE: usize = 6;
+pub(crate) const LFE: usize = 6;
 /// Planes whose coefficients a block can hold: five full-bandwidth, coupling, LFE.
-const PLANES: usize = 7;
+pub(crate) const PLANES: usize = 7;
 /// Output channel slots: left, right, centre, LFE, and the two surrounds.
 const SLOTS: usize = 6;
 /// Bit allocation bands, the sixth-octave groups the masking curve lives in.
 const NBANDS: usize = 50;
 /// Coupling sub-bands: coefficients 37 through 252 in groups of 12.
-const SUBDN: usize = 18;
+pub(crate) const SUBDN: usize = 18;
 /// Delta bit allocation segments, which the 3-bit count spells as 1 through 8.
 const SEGMENTS: usize = 8;
 /// Audio blocks in a syncframe.
@@ -326,7 +326,7 @@ const DITHER_SEED: u32 = 0x9E37_79B9;
 /// The dynamic range gain of Section 7.7.1.2: the top three bits of the code are a
 /// signed power of two and the bottom five refine it, with the all-zeros code
 /// standing for unity.
-fn dynrng_gain(code: i32) -> f32 {
+pub(crate) fn dynrng_gain(code: i32) -> f32 {
     if code == 0 {
         return 1.0;
     }
@@ -396,14 +396,14 @@ fn calc_lowcomp(a: i32, first: i32, second: i32, bin: usize) -> i32 {
 /// Bits read from the top of each byte down, which is the order Section 5.3 states.
 /// Reading past the packet sets `overrun` and yields zeros: one flag checked once
 /// per frame says the same thing as a `Result` threaded through every loop.
-struct Bits<'a> {
-    data: &'a [u8],
-    pos: usize,
-    overrun: bool,
+pub(crate) struct Bits<'a> {
+    pub(crate) data: &'a [u8],
+    pub(crate) pos: usize,
+    pub(crate) overrun: bool,
 }
 
 impl<'a> Bits<'a> {
-    fn new(data: &'a [u8]) -> Self {
+    pub(crate) fn new(data: &'a [u8]) -> Self {
         Self {
             data,
             pos: 0,
@@ -411,8 +411,18 @@ impl<'a> Bits<'a> {
         }
     }
 
+    /// A reader positioned at bit `bit` of `data`, which is how a caller that has
+    /// read a frame's header by other means hands the audio to this one.
+    pub(crate) fn at(data: &'a [u8], bit: usize) -> Self {
+        Self {
+            data,
+            pos: bit,
+            overrun: false,
+        }
+    }
+
     /// The next `count` bits as an unsigned value, for `count` up to 32.
-    fn take(&mut self, count: usize) -> i32 {
+    pub(crate) fn take(&mut self, count: usize) -> i32 {
         let mut value = 0i32;
         for _ in 0..count {
             value = (value << 1) | self.bit();
@@ -421,12 +431,12 @@ impl<'a> Bits<'a> {
     }
 
     /// One bit as a flag.
-    fn flag(&mut self) -> bool {
+    pub(crate) fn flag(&mut self) -> bool {
         self.bit() == 1
     }
 
     /// Move past `count` bits whose content no part of the decoder reads.
-    fn skip(&mut self, count: usize) {
+    pub(crate) fn skip(&mut self, count: usize) {
         self.pos += count;
     }
 
@@ -447,16 +457,16 @@ impl<'a> Bits<'a> {
 /// `bsi` that change how the audio is unpacked. The rest of `bsi` is stepped over
 /// field by field, since none of it is.
 #[derive(Clone, Copy)]
-struct Header {
+pub(crate) struct Header {
     /// `fscod` itself, the index into the rate, frame length and threshold tables.
-    rate: usize,
+    pub(crate) rate: usize,
     /// Bytes this syncframe occupies, from Table 5.18.
-    frame_bytes: usize,
-    acmod: usize,
-    nfchans: usize,
-    lfeon: bool,
-    clev: f32,
-    slev: f32,
+    pub(crate) frame_bytes: usize,
+    pub(crate) acmod: usize,
+    pub(crate) nfchans: usize,
+    pub(crate) lfeon: bool,
+    pub(crate) clev: f32,
+    pub(crate) slev: f32,
 }
 
 impl Header {
@@ -544,9 +554,32 @@ impl Header {
         })
     }
 
+    /// The geometry of an Annex E frame, whose `bsi` says the same three things in a
+    /// different order and whose length comes from `frmsiz` rather than from a code
+    /// into Table 5.18. `centre` and `surround` are the Lo/Ro downmix levels, which
+    /// the annex carries among its mixing metadata instead of beside `acmod`.
+    pub(crate) fn annex_e(
+        rate: usize,
+        frame_bytes: usize,
+        acmod: usize,
+        lfeon: bool,
+        centre: f32,
+        surround: f32,
+    ) -> Self {
+        Self {
+            rate,
+            frame_bytes,
+            acmod,
+            nfchans: NFCHANS[acmod],
+            lfeon,
+            clev: centre,
+            slev: surround,
+        }
+    }
+
     /// How many planes this frame carries: the mode's full-bandwidth channels plus
     /// the LFE when the stream has one.
-    fn native_channels(&self) -> usize {
+    pub(crate) fn native_channels(&self) -> usize {
         self.nfchans + usize::from(self.lfeon)
     }
 }
@@ -583,26 +616,26 @@ pub fn syncframe(bytes: &[u8]) -> Option<Syncframe> {
 /// The bit allocation parameters a block states, held between blocks because a
 /// block that omits them reuses them.
 #[derive(Clone, Copy)]
-struct Params {
+pub(crate) struct Params {
     /// `baie`: the five prototype curve codes are present this block.
-    baie: bool,
-    sdcycod: usize,
-    fdcycod: usize,
-    sgaincod: usize,
-    dbpbcod: usize,
-    floorcod: usize,
+    pub(crate) baie: bool,
+    pub(crate) sdcycod: usize,
+    pub(crate) fdcycod: usize,
+    pub(crate) sgaincod: usize,
+    pub(crate) dbpbcod: usize,
+    pub(crate) floorcod: usize,
     /// `snroffste`, and with it the per-plane offsets and gains below.
-    snre: bool,
-    csnroffst: i32,
+    pub(crate) snre: bool,
+    pub(crate) csnroffst: i32,
     /// Fine grain SNR offset per plane: `fsnroffst` for the channels,
     /// `cplfsnroffst` for the coupling plane, `lfefsnroffst` for the LFE.
-    fsnroffst: [i32; PLANES],
+    pub(crate) fsnroffst: [i32; PLANES],
     /// Fast gain code per plane, split the same way as the offsets.
-    fgaincod: [usize; PLANES],
+    pub(crate) fgaincod: [usize; PLANES],
     /// `cplfleak` and `cplsleak`, the coupling plane's own masking leaks.
-    cplleak: [i32; 2],
+    pub(crate) cplleak: [i32; 2],
     /// `deltbaie`: the block restates at least one plane's delta bit allocation.
-    delt: bool,
+    pub(crate) delt: bool,
 }
 
 impl Default for Params {
@@ -630,11 +663,11 @@ impl Default for Params {
 /// Delta bit allocation for one plane: up to eight segments, each of which lifts or
 /// drops the masking curve over a run of bands.
 #[derive(Clone, Copy)]
-struct Dba {
-    segments: usize,
-    offset: [usize; SEGMENTS],
-    length: [usize; SEGMENTS],
-    ba: [usize; SEGMENTS],
+pub(crate) struct Dba {
+    pub(crate) segments: usize,
+    pub(crate) offset: [usize; SEGMENTS],
+    pub(crate) length: [usize; SEGMENTS],
+    pub(crate) ba: [usize; SEGMENTS],
 }
 
 impl Default for Dba {
@@ -652,7 +685,7 @@ impl Dba {
     /// Read the segment list a `deltbae` of new information introduces. The 3-bit
     /// count is one less than the number of segments it states, and the fields of a
     /// segment are packed without padding.
-    fn read(bits: &mut Bits<'_>) -> Self {
+    pub(crate) fn read(bits: &mut Bits<'_>) -> Self {
         let mut dba = Self::default();
         let count = (bits.take(3) as usize + 1).min(SEGMENTS);
         for segment in 0..count {
@@ -690,11 +723,11 @@ impl Dba {
 /// inclusive coefficient numbers, and the point where coupling begins caps the top
 /// band whenever coupling is on.
 #[derive(Clone, Copy)]
-struct Rematrix {
+pub(crate) struct Rematrix {
     /// Low and high coefficient of each band, in the standard's own order.
-    bands: [(usize, usize); 4],
-    flags: [bool; 4],
-    count: usize,
+    pub(crate) bands: [(usize, usize); 4],
+    pub(crate) flags: [bool; 4],
+    pub(crate) count: usize,
 }
 
 impl Default for Rematrix {
@@ -711,7 +744,7 @@ impl Default for Rematrix {
 impl Rematrix {
     /// The band set the current coupling state calls for: Table 7.26 through Table
     /// 7.28, where the top band ends where coupling begins.
-    fn reshape(&mut self, cplinu: bool, cplbegf: usize) {
+    pub(crate) fn reshape(&mut self, cplinu: bool, cplbegf: usize) {
         let top = 36 + cplbegf * 12;
         let (bands, count) = if !cplinu {
             ([(13, 24), (25, 36), (37, 60), (61, 252)], 4)
@@ -737,53 +770,56 @@ impl Rematrix {
 /// because block 0 of every syncframe restates the coupling strategy, the bandwidths
 /// and the SNR offsets.
 #[derive(Clone)]
-struct Strategy {
+pub(crate) struct Strategy {
     /// First and last mantissa bin of each plane, per Section 7.2.2.1.
-    start: [usize; PLANES],
-    end: [usize; PLANES],
+    pub(crate) start: [usize; PLANES],
+    pub(crate) end: [usize; PLANES],
     /// Exponent strategy per plane: 0 reuses the stored run, 1 to 3 are D15, D25 and
     /// D45. The LFE states reuse with a single bit, so it only ever holds 0 or 1.
-    expstr: [usize; PLANES],
+    pub(crate) expstr: [usize; PLANES],
     /// `chbwcod` per channel, kept so a block that reuses an exponent strategy and
     /// sends no bandwidth code still knows where its channel ends.
-    bwcod: [usize; FBW],
+    pub(crate) bwcod: [usize; FBW],
     /// Decoded exponents, and the mantissa widths bit allocation derives from them.
-    exp: [[i32; BINS]; PLANES],
-    bap: [[u8; BINS]; PLANES],
+    pub(crate) exp: [[i32; BINS]; PLANES],
+    pub(crate) bap: [[u8; BINS]; PLANES],
     /// Block switch and dither flags.
-    blksw: [bool; FBW],
-    dither: [bool; FBW],
+    pub(crate) blksw: [bool; FBW],
+    pub(crate) dither: [bool; FBW],
     /// Dynamic range gain of the program, and of the second program a 1+1 stream
     /// carries.
-    gain: [f32; 2],
-    params: Params,
-    dba: [Dba; PLANES],
-    rematrix: Rematrix,
+    pub(crate) gain: [f32; 2],
+    pub(crate) params: Params,
+    pub(crate) dba: [Dba; PLANES],
+    pub(crate) rematrix: Rematrix,
     /// Coupling strategy: whether coupling is on, which channels take part, where it
     /// starts and stops, and how the sub-bands between them group into bands.
-    cplinu: bool,
+    pub(crate) cplinu: bool,
     /// Whether coupling opened in this block, which the reuse checks of Section
     /// 7.10.2 answer to: a strategy that only carries over may leave parameters
     /// unsent, one that begins may not.
-    cpl_opened: bool,
+    pub(crate) cpl_opened: bool,
     /// Whether this block moved coupling to a different band set than the last one.
-    cpl_moved: bool,
-    incpl: [bool; FBW],
-    cplbegf: usize,
-    cplendf: usize,
+    pub(crate) cpl_moved: bool,
+    pub(crate) incpl: [bool; FBW],
+    pub(crate) cplbegf: usize,
+    pub(crate) cplendf: usize,
     /// `ncplsubnd` and `ncplbnd`: the sub-bands coupling covers, and how many
     /// coupling bands those group into.
-    subnd: usize,
-    bnd: usize,
+    pub(crate) subnd: usize,
+    pub(crate) bnd: usize,
     /// `cplbndstrc`, indexed relative to the first coupling sub-band.
-    bndstrc: [bool; SUBDN],
+    pub(crate) bndstrc: [bool; SUBDN],
+    /// Whether each channel still owes its first set of coupling coordinates, which
+    /// Annex E asks after and Table 5.3 does not.
+    pub(crate) firstcplcos: [bool; FBW],
     /// Phase restoration: whether it is in use, the per-channel master coordinate
     /// gain, and the coordinates and phase flags already expanded to the sub-bands
     /// decoupling addresses them by.
-    phsflginu: bool,
-    mstr: [usize; FBW],
-    coord: [[f32; SUBDN]; FBW],
-    phsflg: [bool; SUBDN],
+    pub(crate) phsflginu: bool,
+    pub(crate) mstr: [usize; FBW],
+    pub(crate) coord: [[f32; SUBDN]; FBW],
+    pub(crate) phsflg: [bool; SUBDN],
 }
 
 impl Default for Strategy {
@@ -811,6 +847,7 @@ impl Default for Strategy {
             subnd: 0,
             bnd: 0,
             bndstrc: [false; SUBDN],
+            firstcplcos: [true; FBW],
             phsflginu: false,
             mstr: [0; FBW],
             coord: [[0.0; SUBDN]; FBW],
@@ -824,7 +861,7 @@ impl Strategy {
     /// coupling state of this block. A channel that reuses its exponents still moves
     /// its end when coupling moves, which is why this runs every block rather than
     /// only when exponents are new.
-    fn measure(&mut self, header: Header) {
+    pub(crate) fn measure(&mut self, header: Header) {
         let cplstart = (37 + 12 * self.cplbegf).min(BINS);
         for ch in 0..header.nfchans {
             self.start[ch] = 0;
@@ -849,7 +886,7 @@ impl Strategy {
     /// width of its mantissa run. The three formulas of Section 7.1.3 are one
     /// formula once the exponents-per-group are factored in, because the run length
     /// is always a multiple of three.
-    fn group_count(&self, plane: usize) -> usize {
+    pub(crate) fn group_count(&self, plane: usize) -> usize {
         let grpsize = GRPSIZE[self.expstr[plane]];
         if plane == CPL {
             (self.end[CPL] - self.start[CPL]) / (3 * grpsize)
@@ -867,7 +904,7 @@ impl Strategy {
     /// rather than a coefficient's exponent, and its run starts at the first coupled
     /// bin instead of at bin 1, so the decoded array is offset by the plane's start
     /// (Section 7.1.3).
-    fn exponents(&mut self, bits: &mut Bits<'_>, plane: usize, absexp: i32) {
+    pub(crate) fn exponents(&mut self, bits: &mut Bits<'_>, plane: usize, absexp: i32) {
         let grpsize = GRPSIZE[self.expstr[plane]];
         let start = if plane == CPL {
             self.start[plane]
@@ -913,6 +950,7 @@ impl Strategy {
         self.cplinu = false;
         self.incpl = [false; FBW];
         self.bndstrc = [false; SUBDN];
+        self.firstcplcos = [true; FBW];
         self.phsflginu = false;
         if !bits.flag() {
             return true;
@@ -968,16 +1006,30 @@ impl Strategy {
     /// last block delivered, so only a channel that states a new set rewrites its
     /// bands. Table 5.3 asks the question per coupled channel, so every one of them
     /// costs a bit whether or not it answers.
-    fn coupling_coordinates(&mut self, header: Header, bits: &mut Bits<'_>) -> bool {
+    ///
+    /// `implicit_first` is the one thing Annex E does differently: a channel whose
+    /// coordinates no block has delivered yet - because coupling only now covers it -
+    /// states them without saying so, and pays no `cplcoe` bit for the privilege.
+    /// The coupling state that makes a fresh set necessary is otherwise the same one
+    /// Section 7.10.2 conditions 4 and 23 hold Table 5.3 to.
+    pub(crate) fn coupling_coordinates(
+        &mut self,
+        header: Header,
+        bits: &mut Bits<'_>,
+        implicit_first: bool,
+    ) -> bool {
         let mut band_coord = [[0.0f32; SUBDN]; FBW];
         let mut band_phs = [false; SUBDN];
         let mut coordinates = [false; FBW];
         let mut ok = true;
         for ch in 0..header.nfchans {
             if !self.incpl[ch] {
+                self.firstcplcos[ch] = true;
                 continue;
             }
-            if !bits.flag() {
+            let owed = implicit_first && self.firstcplcos[ch];
+            self.firstcplcos[ch] = false;
+            if !owed && !bits.flag() {
                 // Section 7.10.2 conditions 4 and 23: coordinates cannot be reused
                 // before any were sent, nor after coupling moved to other bands.
                 ok = ok && !(self.cpl_opened || self.cpl_moved);
@@ -1110,7 +1162,7 @@ impl Strategy {
     /// run does, and so does any change to the parameters the curve is built from.
     /// Recomputing a plane whose inputs did not change is wasted work but not a
     /// different answer, which is why the coarse test below is enough.
-    fn needs_allocation(&self, header: Header) -> bool {
+    pub(crate) fn needs_allocation(&self, header: Header) -> bool {
         self.params.baie
             || self.params.snre
             || self.params.delt
@@ -1240,7 +1292,7 @@ const fn ifft_scale(n: usize) -> f32 {
 /// How a frame's planes reach the track's declared channels: a weight per plane for
 /// each output channel, so native order and both downmixes share one inner loop.
 #[derive(Clone, Copy)]
-struct Folding {
+pub(crate) struct Folding {
     /// Output channels, which is the count the container stated.
     width: usize,
     /// Weight of each plane in each output channel.
@@ -1254,7 +1306,7 @@ impl Folding {
     /// keeps every combination of full-scale channels inside range is not applied,
     /// because the fold clamps instead and clamping only the rare peak keeps the
     /// level of ordinary programme up.
-    fn new(header: Header, declared: usize) -> Option<Self> {
+    pub(crate) fn new(header: Header, declared: usize) -> Option<Self> {
         let mut folding = Self {
             width: declared,
             weight: [[0.0; PLANES]; SLOTS],
@@ -1332,20 +1384,7 @@ pub struct Ac3Decoder {
     /// The channel count the container stated, which fixes what the folding below
     /// has to produce.
     channels: usize,
-    strategy: Strategy,
-    /// Transform coefficients per plane: the only thing that crosses a block's
-    /// mantissa read and its inverse transform.
-    coef: [[f32; BINS]; PLANES],
-    /// The previous block's second half, which the overlap-add step folds into the
-    /// next block's first.
-    delay: [[f32; SAMPLES]; PLANES],
-    scratch: Scratch,
-    tables: Tables,
-    /// The Section 7.3.4 dither sequence. The standard leaves the generator to the
-    /// decoder and only asks that it be reasonably random, so this is a fixed walk
-    /// from a fixed seed: the values it hands out are uncorrelated with the
-    /// mantissas around them, and a decode stays repeatable.
-    dither_state: u32,
+    core: Core,
     /// Samples still owed to `ENCODER_DELAY`, which the stream's first blocks pay off.
     lead: usize,
 }
@@ -1371,12 +1410,7 @@ impl Ac3Decoder {
         Ok(Self {
             sample_rate,
             channels: usize::from(channels),
-            strategy: Strategy::default(),
-            coef: [[0.0; BINS]; PLANES],
-            delay: [[0.0; SAMPLES]; PLANES],
-            scratch: Scratch::default(),
-            tables: Tables::new(),
-            dither_state: DITHER_SEED,
+            core: Core::new(),
             lead: ENCODER_DELAY,
         })
     }
@@ -1433,7 +1467,7 @@ impl Ac3Decoder {
             return false;
         };
         // Reuse is a within-frame promise.
-        self.strategy = Strategy::default();
+        self.core.begin_frame();
         for blknum in 0..BLOCKS {
             if !self.block(blknum, header, &folding, bits, out) {
                 return false;
@@ -1456,7 +1490,7 @@ impl Ac3Decoder {
         // Section 7.10.2 states the reuse parameters a first block cannot leave unsent.
         let first = blknum == 0;
         let nfchans = header.nfchans;
-        let mut strategy = std::mem::take(&mut self.strategy);
+        let mut strategy = std::mem::take(&mut self.core.strategy);
         for ch in 0..nfchans {
             strategy.blksw[ch] = bits.flag();
         }
@@ -1471,7 +1505,7 @@ impl Ac3Decoder {
         }
         let mut ok = strategy.coupling_strategy(header, first, bits);
         if ok && strategy.cplinu {
-            ok = strategy.coupling_coordinates(header, bits);
+            ok = strategy.coupling_coordinates(header, bits, false);
         }
         if header.acmod == 2 {
             strategy.rematrix.reshape(strategy.cplinu, strategy.cplbegf);
@@ -1524,7 +1558,7 @@ impl Ac3Decoder {
             }
         }
         if !ok {
-            self.strategy = strategy;
+            self.core.strategy = strategy;
             return false;
         }
         strategy.measure(header);
@@ -1554,31 +1588,82 @@ impl Ac3Decoder {
             strategy.params.floorcod = bits.take(3) as usize;
         } else if first {
             // Section 5.4.3.30: the first block states the bit allocation prototype.
-            self.strategy = strategy;
+            self.core.strategy = strategy;
             return false;
         }
         if !strategy.allocation_side(header, first, bits) {
-            self.strategy = strategy;
+            self.core.strategy = strategy;
             return false;
         }
         if bits.flag() {
             let skipl = bits.take(9) as usize;
             bits.skip(skipl * 8);
         }
-        self.strategy = strategy;
-        if self.strategy.needs_allocation(header) {
-            self.allocate_all(header);
+        self.core.strategy = strategy;
+        if self.core.strategy.needs_allocation(header) {
+            self.core.allocate_all(header);
         }
-        self.mantissas(header, bits);
-        self.decouple(header);
-        self.rematrix_restore(header);
-        self.spectrum_to_sound(header, folding, out);
+        self.core.mantissas(header, bits);
+        self.core.decouple(header);
+        self.core.rematrix_restore(header);
+        self.core.spectrum_to_sound(header, folding, out);
         true
+    }
+}
+
+/// The block-level half of an A/52 decode: the strategy state that passes from one
+/// block of a frame to the next, the bit allocation, the mantissa unpacking, the
+/// coupling and rematrixing restoration, the inverse transform and the folding of
+/// planes into channels.
+///
+/// Annex E (E-AC-3) decodes audio exactly this way and changes only the side
+/// information above it - where the exponent strategies come from, which frame
+/// supplies them, and how the offsets are laid out - so its reader drives this core
+/// rather than repeating it. Section 3.3 of the annex names the parameters it
+/// modifies and leaves the rest of the core's behaviour to Section 7.
+pub(crate) struct Core {
+    pub(crate) strategy: Strategy,
+    /// Transform coefficients per plane: the only thing that crosses a block's
+    /// mantissa read and its inverse transform.
+    coef: [[f32; BINS]; PLANES],
+    /// The previous block's second half, which the overlap-add step folds into the
+    /// next block's first.
+    delay: [[f32; SAMPLES]; PLANES],
+    scratch: Scratch,
+    tables: Tables,
+    /// The Section 7.3.4 dither sequence. The standard leaves the generator to the
+    /// decoder and only asks that it be reasonably random, so this is a fixed walk
+    /// from a fixed seed: the values it hands out are uncorrelated with the
+    /// mantissas around them, and a decode stays repeatable.
+    dither_state: u32,
+}
+
+impl Core {
+    /// A core that reuses nothing, holds no sound, and carries no overlap from a
+    /// block it has not seen. The tables are the same for every stream, so a seek
+    /// that rebuilds this still reads the same window.
+    pub(crate) fn new() -> Self {
+        Self {
+            strategy: Strategy::default(),
+            coef: [[0.0; BINS]; PLANES],
+            delay: [[0.0; SAMPLES]; PLANES],
+            scratch: Scratch::default(),
+            tables: Tables::new(),
+            dither_state: DITHER_SEED,
+        }
+    }
+
+    /// Start a frame: the strategy a frame carries to its own blocks stops being
+    /// available to the next one, which Section 7.10.2 states outright. The overlap
+    /// tail and the dither sequence keep running, because a packet's frames are one
+    /// continuous stream of blocks.
+    pub(crate) fn begin_frame(&mut self) {
+        self.strategy = Strategy::default();
     }
 
     /// Bit allocation for every plane the frame carries, in the standard's own order:
     /// each full-bandwidth channel, the coupling plane, then the LFE.
-    fn allocate_all(&mut self, header: Header) {
+    pub(crate) fn allocate_all(&mut self, header: Header) {
         if self.all_snr_offsets_zero(header) {
             for plane in 0..PLANES {
                 self.strategy.bap[plane] = [0; BINS];
@@ -1767,7 +1852,7 @@ impl Ac3Decoder {
     /// next channel's, which is where Table 5.3 puts it; the grouped quantizers share
     /// half-filled groups across those runs, so the group state is reset here rather
     /// than per plane.
-    fn mantissas(&mut self, header: Header, bits: &mut Bits<'_>) {
+    pub(crate) fn mantissas(&mut self, header: Header, bits: &mut Bits<'_>) {
         for plane in 0..PLANES {
             self.coef[plane] = [0.0; BINS];
         }
@@ -1848,7 +1933,7 @@ impl Ac3Decoder {
     /// are extracted so that each channel's upper-frequency noise stays uncorrelated.
     /// The exponent is the coupling plane's: above the coupling point a coupled channel
     /// has no exponent run of its own, and inherits this one through the coefficient.
-    fn decouple(&mut self, header: Header) {
+    pub(crate) fn decouple(&mut self, header: Header) {
         if !self.strategy.cplinu {
             return;
         }
@@ -1897,7 +1982,7 @@ impl Ac3Decoder {
     }
 
     /// Undo the sums and differences the 2/0 mode coded in place of left and right.
-    fn rematrix_restore(&mut self, header: Header) {
+    pub(crate) fn rematrix_restore(&mut self, header: Header) {
         if header.acmod != 2 {
             return;
         }
@@ -1921,7 +2006,7 @@ impl Ac3Decoder {
 
     /// Inverse transform every plane of the block, overlap it with the last one, and
     /// fold the result into the frame's interleaved samples.
-    fn spectrum_to_sound(&mut self, header: Header, folding: &Folding, out: &mut Vec<f32>) {
+    pub(crate) fn spectrum_to_sound(&mut self, header: Header, folding: &Folding, out: &mut Vec<f32>) {
         for ch in 0..header.nfchans {
             let short = self.strategy.blksw[ch];
             self.transform(ch, short);
@@ -2149,11 +2234,7 @@ impl AudioDecode for Ac3Decoder {
     /// restarts from its seed with them, which is what makes a packet decoded twice
     /// after a seek the same packet rather than the same signal plus different noise.
     fn reset(&mut self) {
-        self.strategy = Strategy::default();
-        self.coef = [[0.0; BINS]; PLANES];
-        self.delay = [[0.0; SAMPLES]; PLANES];
-        self.scratch = Scratch::default();
-        self.dither_state = DITHER_SEED;
+        self.core = Core::new();
         self.lead = ENCODER_DELAY;
     }
 }
