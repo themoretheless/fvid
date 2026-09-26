@@ -11,7 +11,7 @@
 | WebM | MP3, MP2 (`A_MPEG/L3`, `A_MPEG/L2`) | `playback_webm_audio` → symphonia MP2 → cpal | yes, headless |
 | WebM | FLAC, ALAC, PCM (`A_FLAC`, `A_ALAC`, `A_PCM/*`) | `playback_webm_audio` → own or symphonia decoder | yes, headless |
 | MP4, WebM | AC-3 (`ac-3`, `A_AC3`) | `playback_mp4_audio` / `playback_webm_audio` → `codec::ac3_decoder` → cpal | yes, headless |
-| either | E-AC-3 | — | not supported |
+| either | E-AC-3 | `codec::eac3_decoder` reads headers only (gap 6) | not supported |
 
 MP4/AAC was proven end to end on a generated tone file with
 `cargo run --features player --example audio_probe -- file.mp4`, which reports
@@ -203,3 +203,11 @@ from filling the bounded event channel and blocking the decode thread.
    plays video-only.
 5. No pause-aware clock: pausing stops the device, and the video deadline is
    reset on resume rather than re-derived from the audio clock.
+6. E-AC-3 reads its frames but not its audio. `codec::eac3_decoder` walks a
+   syncframe's `syncinfo`, `bsi` and `audfrm` to the bit its first block starts
+   at, and refuses by name the three frame shapes this route cannot place: the
+   adaptive hybrid transform, blocks switched to the short transform, and an
+   attenuated high band. What is missing is a block decoder — Table E2.10's
+   exponent strategies, the band structures they name, bit allocation, mantissas,
+   the 512-point long transform and the downmix. That is a decoder of the AC-3
+   core's size, not a wiring task.
