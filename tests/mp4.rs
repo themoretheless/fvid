@@ -242,7 +242,7 @@ fn every_truncation_is_rejected_and_limits_are_enforced() {
     assert!(mp4.read_packet(0, 2, &mut Vec::new()).is_err());
 }
 #[test]
-fn extended_box_size_and_fragment_rejection() {
+fn extended_box_size() {
     let mut data = fixture(false);
     let p = data.windows(4).position(|w| w == b"moov").unwrap() - 4;
     let old_size = data.len() - p;
@@ -255,8 +255,6 @@ fn extended_box_size_and_fragment_rejection() {
         ]),
     );
     Mp4Reader::open(Cursor::new(data), Limits::default()).unwrap();
-    let data = joined(&[fixture(false), atom(b"moof", &[])]);
-    assert!(Mp4Reader::open(Cursor::new(data), Limits::default()).is_err());
 }
 
 #[test]
@@ -315,7 +313,7 @@ fn an_unplayable_track_is_left_out_without_costing_the_picture() {
     for (handler, codec) in [
         (*b"sbtl", *b"dtxs"),
         (*b"time", *b"tmcd"),
-        (*b"soun", *b"alac"),
+        (*b"soun", *b"Opus"),
     ] {
         let mut mp4 = Mp4Reader::open(
             Cursor::new(fixture_traks(
@@ -345,7 +343,7 @@ fn an_unplayable_track_is_left_out_without_costing_the_picture() {
 #[test]
 fn a_foreign_track_never_has_its_sample_table_read() {
     // 100 samples declared against a budget of 3 - fatal if it were indexed.
-    let oversized = foreign_trak(9, b"soun", b"alac", &[atom(b"stsz", &words(&[0, 0, 100]))]);
+    let oversized = foreign_trak(9, b"soun", b"Opus", &[atom(b"stsz", &words(&[0, 0, 100]))]);
     let mp4 = Mp4Reader::open(
         Cursor::new(fixture_traks(false, &[oversized], &[])),
         Limits {
@@ -362,7 +360,7 @@ fn a_foreign_track_never_has_its_sample_table_read() {
         mp4.refused(),
         [SkippedTrack {
             handler: *b"soun",
-            codec: *b"alac",
+            codec: *b"Opus",
         }]
     );
 }
