@@ -326,7 +326,10 @@ mod tests {
             let v = Transfer::Pq.from_nits(nits, SDR_PEAK_NITS).unwrap();
             assert!(close(v, want, 1e-6), "{nits} -> {v}");
             let rt = Transfer::Pq.to_nits(v, 0.0).unwrap();
-            assert!(close(rt, nits, nits.max(1.0) * 1e-4), "{nits} -> {v} -> {rt}");
+            assert!(
+                close(rt, nits, nits.max(1.0) * 1e-4),
+                "{nits} -> {v} -> {rt}"
+            );
         }
         assert!(close(Transfer::Pq.eotf(0.0).unwrap(), 0.0, 1e-9));
     }
@@ -395,7 +398,11 @@ mod tests {
         // standard's own inconsistency rather than a bug in either branch.
         let linear = 4.5 * 0.018;
         let power = 1.099 * 0.018f32.powf(0.45) - 0.099;
-        assert!(close(Transfer::Bt709.eotf(0.080).unwrap(), 0.080 / 4.5, 1e-6));
+        assert!(close(
+            Transfer::Bt709.eotf(0.080).unwrap(),
+            0.080 / 4.5,
+            1e-6
+        ));
         assert!((linear - power).abs() > 2e-4 && (linear - power).abs() < 3e-4);
     }
 
@@ -405,7 +412,11 @@ mod tests {
         // light for the same signal. The exponent that used to live here broke
         // both that ordering and continuity at the joint.
         assert!(close(Transfer::Bt240.oetf(0.18).unwrap(), 0.402_247, 1e-6));
-        assert!(close(Transfer::Bt709.oetf(0.18).unwrap(), 0.409_007_7, 1e-6));
+        assert!(close(
+            Transfer::Bt709.oetf(0.18).unwrap(),
+            0.409_007_7,
+            1e-6
+        ));
         for l in [0.0227, 0.022_821_586, 0.0229] {
             let below = Transfer::Bt240.eotf(4.0 * l - 1e-5).unwrap();
             let above = Transfer::Bt240.eotf(4.0 * l + 1e-5).unwrap();
@@ -425,7 +436,10 @@ mod tests {
     #[test]
     fn hdr_curves_round_trip_in_nits() {
         for (t, peaks) in [
-            (Transfer::Pq, [1.0f32, 100.0, 1_000.0, 4_000.0, 10_000.0].as_slice()),
+            (
+                Transfer::Pq,
+                [1.0f32, 100.0, 1_000.0, 4_000.0, 10_000.0].as_slice(),
+            ),
             (Transfer::Hlg, &[1.0, 100.0, 600.0, 1_000.0]),
         ] {
             for n in peaks {
@@ -456,7 +470,11 @@ mod tests {
         let g = hlg_system_gamma(1_000.0);
         assert!(close(g, 1.2, 1e-6), "{g}");
         // BT.2100-2 Note 5f's system gamma at the peaks displays ship at.
-        for (nits, want) in [(400.0, 1.032_865), (2_000.0, 1.326_433), (4_000.0, 1.452_865)] {
+        for (nits, want) in [
+            (400.0, 1.032_865),
+            (2_000.0, 1.326_433),
+            (4_000.0, 1.452_865),
+        ] {
             assert!(
                 close(hlg_system_gamma(nits), want, 1e-5),
                 "{nits} -> {}",

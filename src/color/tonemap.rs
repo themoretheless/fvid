@@ -246,16 +246,24 @@ mod tests {
 
     #[test]
     fn every_curve_is_monotonic_and_stays_in_range() {
-        for (mode, param) in [(ToneMap::Linear, 1.0), (ToneMap::Gamma, 0.5), (ToneMap::Clip, 1.0),
-            (ToneMap::Reinhard, 1.0), (ToneMap::Hable, 0.0), (ToneMap::Mobius, 0.3)]
-        {
+        for (mode, param) in [
+            (ToneMap::Linear, 1.0),
+            (ToneMap::Gamma, 0.5),
+            (ToneMap::Clip, 1.0),
+            (ToneMap::Reinhard, 1.0),
+            (ToneMap::Hable, 0.0),
+            (ToneMap::Mobius, 0.3),
+        ] {
             let peak = 4.0;
             let mut prev = -1.0;
             for i in 0..=2000u32 {
                 let x = i as f32 / 500.0;
                 let y = curve(mode, x, param, peak);
                 assert!(y >= -1e-6 && y <= 1.0 + 1e-6, "{mode:?} {x} -> {y}");
-                assert!(y + 1e-5 >= prev, "{mode:?} not monotonic at {x}: {prev} -> {y}");
+                assert!(
+                    y + 1e-5 >= prev,
+                    "{mode:?} not monotonic at {x}: {prev} -> {y}"
+                );
                 prev = y;
             }
             assert!(close(curve(mode, 0.0, param, peak), 0.0, 1e-6), "{mode:?}");
@@ -275,18 +283,30 @@ mod tests {
             (1.0, 0.426_646_6, 0.686_567_2, 0.625_000_0, 0.062_500_0),
             (2.0, 0.691_099_7, 0.872_561_8, 0.833_333_3, 0.250_000_0),
         ] {
-            assert!(close(curve(ToneMap::Hable, x, 0.0, peak), hable_out, 1e-5), "hable {x}");
-            assert!(close(curve(ToneMap::Mobius, x, 0.3, peak), mobius_out, 1e-5), "mobius {x}");
+            assert!(
+                close(curve(ToneMap::Hable, x, 0.0, peak), hable_out, 1e-5),
+                "hable {x}"
+            );
+            assert!(
+                close(curve(ToneMap::Mobius, x, 0.3, peak), mobius_out, 1e-5),
+                "mobius {x}"
+            );
             assert!(
                 close(curve(ToneMap::Reinhard, x, 1.0, peak), reinhard_out, 1e-5),
                 "reinhard {x}"
             );
-            assert!(close(curve(ToneMap::Gamma, x, 0.5, peak), gamma_out, 1e-5), "gamma {x}");
+            assert!(
+                close(curve(ToneMap::Gamma, x, 0.5, peak), gamma_out, 1e-5),
+                "gamma {x}"
+            );
         }
         // Möbius is 1:1 up to its joint whatever the peak.
         for peak in [1.0f32, 2.5, 10.0] {
             for x in [0.0f32, 0.1, 0.25, 0.3] {
-                assert!(close(curve(ToneMap::Mobius, x, 0.3, peak), x, 1e-6), "{peak} {x}");
+                assert!(
+                    close(curve(ToneMap::Mobius, x, 0.3, peak), x, 1e-6),
+                    "{peak} {x}"
+                );
             }
         }
     }
@@ -334,8 +354,14 @@ mod tests {
         let rgb = [80.0f32, 40.0, 20.0];
         for mode in [ToneMap::Clip, ToneMap::Reinhard, ToneMap::Hable] {
             let out = tone_map_rgb(rgb, mode, target, ContentLight::default(), Primaries::BT709);
-            assert!(close(out[0] / out[1], rgb[0] / rgb[1], 1e-4), "{mode:?} {out:?}");
-            assert!(close(out[2] / out[1], rgb[2] / rgb[1], 1e-4), "{mode:?} {out:?}");
+            assert!(
+                close(out[0] / out[1], rgb[0] / rgb[1], 1e-4),
+                "{mode:?} {out:?}"
+            );
+            assert!(
+                close(out[2] / out[1], rgb[2] / rgb[1], 1e-4),
+                "{mode:?} {out:?}"
+            );
         }
     }
 
@@ -347,8 +373,17 @@ mod tests {
             ..Default::default()
         };
         for mode in ToneMap::ALL {
-            let out = tone_map_rgb([500.0, 500.0, 500.0], mode, target, content, Primaries::BT2020);
-            assert!(close(out[0], out[1], 1e-6) && close(out[1], out[2], 1e-6), "{mode:?} {out:?}");
+            let out = tone_map_rgb(
+                [500.0, 500.0, 500.0],
+                mode,
+                target,
+                content,
+                Primaries::BT2020,
+            );
+            assert!(
+                close(out[0], out[1], 1e-6) && close(out[1], out[2], 1e-6),
+                "{mode:?} {out:?}"
+            );
         }
     }
 
@@ -359,8 +394,20 @@ mod tests {
             max_cll: 400.0,
             ..Default::default()
         };
-        let dark = tone_map_rgb([80.0, 20.0, 20.0], ToneMap::Reinhard, target, content, Primaries::BT709);
-        let bright = tone_map_rgb([320.0, 80.0, 80.0], ToneMap::Reinhard, target, content, Primaries::BT709);
+        let dark = tone_map_rgb(
+            [80.0, 20.0, 20.0],
+            ToneMap::Reinhard,
+            target,
+            content,
+            Primaries::BT709,
+        );
+        let bright = tone_map_rgb(
+            [320.0, 80.0, 80.0],
+            ToneMap::Reinhard,
+            target,
+            content,
+            Primaries::BT709,
+        );
         // An over-bright sample is also a darker one after the gain, so
         // chroma only means something relative to the sample's own luma.
         let (kr, kb) = Primaries::BT709.kr_kb();
@@ -370,7 +417,10 @@ mod tests {
             (v[0] - v[1]) / y.max(1e-6)
         };
         let ratio = saturation(bright) / saturation(dark);
-        assert!(ratio < 0.8, "chroma did not narrow: {dark:?} {bright:?} {ratio}");
+        assert!(
+            ratio < 0.8,
+            "chroma did not narrow: {dark:?} {bright:?} {ratio}"
+        );
     }
 
     #[test]
@@ -392,9 +442,20 @@ mod tests {
             max_cll: 1000.0,
             ..Default::default()
         };
-        let mapped_hi = tone_map_rgb([hi_nits; 3], ToneMap::Reinhard, target, content, Primaries::BT2020);
-        let mapped_lo =
-            tone_map_rgb([203.0; 3], ToneMap::Reinhard, target, content, Primaries::BT2020);
+        let mapped_hi = tone_map_rgb(
+            [hi_nits; 3],
+            ToneMap::Reinhard,
+            target,
+            content,
+            Primaries::BT2020,
+        );
+        let mapped_lo = tone_map_rgb(
+            [203.0; 3],
+            ToneMap::Reinhard,
+            target,
+            content,
+            Primaries::BT2020,
+        );
         assert!(mapped_hi[0] > mapped_lo[0], "{mapped_hi:?} {mapped_lo:?}");
         assert!(mapped_hi[0] <= 1.0);
     }
