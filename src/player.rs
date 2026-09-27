@@ -4424,6 +4424,7 @@ mod tests {
         rate_step, repeat_osd, retreat, shown_insets, shown_size, snapshot_name, sound_codec,
         subtitles, track_step, uv_window, video_rect, volume_osd, volume_step, zoom_osd, zoom_step,
     };
+    use super::{Event, NativeReader, Playback};
     use crate::color::{ColourDescription, HdrMetadata, Log, Lut, Primaries, ToneMap, Transfer};
     use std::sync::Arc;
     use std::time::{Duration, Instant};
@@ -6603,6 +6604,180 @@ mod tests {
         };
         let file = player.picture().expect("planes become a picture");
         assert_eq!(&file[16..24], &[0, 0, 0, 2, 0, 0, 0, 2]);
+        std::fs::remove_dir_all(&directory).unwrap();
+    }
+
+    /// The snapshot key is the one place this tool writes colour out as a file,
+    /// so the picture it saves has to be the graded one. A two-node cube that
+    /// turns green end for end is read off text, handed to the thread that shows
+    /// a synthetic stream, and the frame that thread shows is saved: the saved
+    /// file's own scanlines come out byte for byte as that frame, and that
+    /// frame's green is what the cube's text says of the ungraded picture. The
+    /// file's own header is asked as well, because a stored, unfiltered PNG
+    /// carries one flat run of bytes and a picture encoded at the wrong size
+    /// still reads back as the same pixels. Three mutations die here: rows
+    /// labelled with a filter that was never applied, byte tables built without
+    /// the cube, and dimensions swapped on the way into the encoder.
+    #[test]
+    fn a_saved_picture_is_the_one_the_grade_made() {
+        const INVERT_GREEN: &str = "LUT_1D_SIZE 2
+0.0 1.0 0.0
+1.0 0.0 1.0
+";
+        fn stream() -> Vec<u8> {
+            let mut bytes = b"YUV4MPEG2 W4 H2 F60:1 Ip C420jpeg\n".to_vec();
+            for frame in 0..2u8 {
+                bytes.extend_from_slice(b"FRAME\n");
+                for y in 0..2u8 {
+                    for x in 0..4u8 {
+                        bytes.push(16 + x * 40 + y * 7 + frame * 3);
+                    }
+                }
+                bytes.push(64 + frame);
+                bytes.push(190 - frame);
+            }
+            bytes
+        }
+        fn reader() -> NativeReader<std::io::Cursor<Vec<u8>>> {
+            let mut reader = NativeReader::without_memory_limit(std::io::Cursor::new(stream()))
+                .expect("a written stream reads");
+            assert!(reader.read_frame().expect("a first frame"));
+            reader
+        }
+        fn shown(player: &mut Playback) -> Frame {
+            let deadline = Instant::now() + Duration::from_secs(5);
+            loop {
+                assert!(Instant::now() < deadline, "playback stalled");
+                match player.poll() {
+                    Some(Event::Frame(frame)) => return frame,
+                    Some(Event::Error(error)) => panic!("{error}"),
+                    Some(Event::Ended(_)) => panic!("the stream ended before its first frame"),
+                    None => std::thread::sleep(Duration::from_millis(1)),
+                }
+            }
+        }
+        fn rgb(pixels: &Pixels, budget: usize) -> Vec<u8> {
+            match pixels {
+                Pixels::Rgb(rgb) => rgb.clone(),
+                Pixels::Planar(planes) => {
+                    let mut rgb = Vec::new();
+                    crate::playback_native::planar8_to_rgb(planes, &mut rgb, budget)
+                        .expect("converted");
+                    rgb
+                }
+            }
+        }
+        /// The scanlines a stored-block PNG carries, filter bytes removed.
+        fn scanlines(file: &[u8]) -> Vec<u8> {
+            let (width, height) = (
+                usize::try_from(u32::from_be_bytes(file[16..20].try_into().unwrap())).unwrap(),
+                usize::try_from(u32::from_be_bytes(file[20..24].try_into().unwrap())).unwrap(),
+            );
+            let row = width * 3 + 1;
+            let mut at = 8;
+            let idat = loop {
+                let len = u32::from_be_bytes(file[at..at + 4].try_into().unwrap()) as usize;
+                if &file[at + 4..at + 8] == b"IDAT" {
+                    break &file[at + 8..at + 8 + len];
+                }
+                at += 12 + len;
+            };
+            assert_eq!(&idat[..2], &[0x78, 0x01], "stored deflate, no dictionary");
+            // The stream ends with its four-byte Adler checksum.
+            let rows = &idat[7..idat.len() - 4];
+            assert_eq!(rows.len(), row * height, "more than one stored block");
+            let mut rgb = Vec::with_capacity(width * height * 3);
+            for (line, number) in rows.chunks_exact(row).zip(0..height) {
+                assert_eq!(line[0], 0, "row {number} was filtered");
+                rgb.extend_from_slice(&line[1..]);
+            }
+            rgb
+        }
+
+        let signal = ColourDescription {
+            primaries: 1,
+            transfer: 1,
+            matrix: 1,
+            full_range: false,
+        };
+        let settings = crate::color::Settings::video(crate::color::DisplayTarget::sdr(240.0));
+        assert!(
+            crate::color::Grade::new(signal, &HdrMetadata::default(), settings, None).is_identity(),
+            "these settings already move this stream on their own, so a cube would not be the only change"
+        );
+        let grade = crate::color::Grade::new(
+            signal,
+            &HdrMetadata::default(),
+            settings,
+            Some(Lut::from_cube(INVERT_GREEN).expect("a written cube is a cube")),
+        );
+        let budget = reader().rgb_budget();
+        let mut plain = Playback::start(reader(), None);
+        let mut graded = Playback::start(reader(), Some(grade));
+        let untouched = rgb(&shown(&mut plain).pixels, budget);
+        let frame = shown(&mut graded);
+        let dimensions = frame.dimensions;
+        let painted = rgb(&frame.pixels, budget);
+        assert_ne!(untouched, painted, "the cube reached no pixels");
+        assert_eq!(dimensions, [4, 2]);
+        for (pixel, out) in untouched
+            .as_chunks::<3>()
+            .0
+            .iter()
+            .zip(painted.as_chunks::<3>().0)
+        {
+            for channel in 0..3 {
+                let want = if channel == 1 {
+                    255 - i16::from(pixel[1])
+                } else {
+                    i16::from(pixel[channel])
+                };
+                let step = (i16::from(out[channel]) - want).abs();
+                assert!(
+                    step <= 1,
+                    "channel {channel}: {} shown as {}, the cube's own text says {want}",
+                    pixel[channel],
+                    out[channel]
+                );
+            }
+        }
+
+        let directory = scratch("fvid-player-snapshot-graded", &[]);
+        let video = directory.join("clip.mp4");
+        std::fs::write(&video, b"an mp4 as far as the snapshot cares").unwrap();
+        let mut player = Player {
+            opened: Some(video),
+            presented: Some(frame),
+            ..Default::default()
+        };
+        player.apply(Control::Snapshot);
+        let saved = player.osd.as_ref().unwrap().0.clone();
+        let name = saved
+            .strip_prefix("Saved ")
+            .unwrap_or_else(|| panic!("the snapshot key said {saved}"));
+        let file = std::fs::read(directory.join(name)).expect("written");
+        // A stored, unfiltered PNG carries its pixels as one flat run, so a file
+        // written for the wrong size still hands back the same bytes: the header
+        // has to be asked what picture it says, not only the scanlines.
+        let saved = [
+            usize::try_from(u32::from_be_bytes(file[16..20].try_into().unwrap())).unwrap(),
+            usize::try_from(u32::from_be_bytes(file[20..24].try_into().unwrap())).unwrap(),
+        ];
+        assert_eq!(
+            saved, dimensions,
+            "the file says a different size from the picture shown"
+        );
+        assert_eq!(
+            scanlines(&file),
+            painted,
+            "the file holds a different picture from the one shown"
+        );
+        assert_ne!(
+            scanlines(&file),
+            untouched,
+            "the file holds the ungraded picture"
+        );
+        drop(player);
         std::fs::remove_dir_all(&directory).unwrap();
     }
 
