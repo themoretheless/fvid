@@ -79,6 +79,122 @@ impl Primaries {
         white: WHITE_D65,
     };
 
+    // Camera working gamuts. Several have a negative blue y, which is not an
+    // error: a wide gamut's imaginary blue lies outside the spectral locus, and
+    // the matrices below still derive consistently from these points.
+    //
+    // Canon's Cinema Gamut is deliberately absent. Canon documents it as a
+    // triangle drawn on a chart, and the coordinates circulating in libraries
+    // are read off that figure rather than published, so a conversion through
+    // them could not be checked against the vendor. C-Log material therefore
+    // converts from whatever source gamut the caller states.
+
+    /// Sony S-Gamut3, the native gamut of S-Log3 and S-Log2 material.
+    pub const S_GAMUT3: Primaries = Primaries {
+        r: Chromaticity { x: 0.730, y: 0.280 },
+        g: Chromaticity { x: 0.140, y: 0.855 },
+        b: Chromaticity {
+            x: 0.100,
+            y: -0.050,
+        },
+        white: WHITE_D65,
+    };
+    /// Sony S-Gamut3.Cine, the same capture light pulled toward film primaries.
+    pub const S_GAMUT3_CINE: Primaries = Primaries {
+        r: Chromaticity { x: 0.766, y: 0.275 },
+        g: Chromaticity { x: 0.225, y: 0.800 },
+        b: Chromaticity {
+            x: 0.089,
+            y: -0.087,
+        },
+        white: WHITE_D65,
+    };
+    /// Panasonic V-Gamut, stated with the matrix that ships in the Varicam docs.
+    pub const V_GAMUT: Primaries = Primaries {
+        r: Chromaticity {
+            x: 0.7300,
+            y: 0.2800,
+        },
+        g: Chromaticity {
+            x: 0.1650,
+            y: 0.8400,
+        },
+        b: Chromaticity {
+            x: 0.1000,
+            y: -0.0300,
+        },
+        white: WHITE_D65,
+    };
+    /// ARRI ALEX3 Wide, the gamut LogC and LogC4 are stated in.
+    pub const ALEX3_WIDE: Primaries = Primaries {
+        r: Chromaticity {
+            x: 0.6840,
+            y: 0.3130,
+        },
+        g: Chromaticity {
+            x: 0.2210,
+            y: 0.8480,
+        },
+        b: Chromaticity {
+            x: 0.0861,
+            y: -0.1020,
+        },
+        white: WHITE_D65,
+    };
+    /// ARRI ALEX3 Expanded, the wider alternative on ALEXA 35.
+    pub const ALEX3_EXPANDED: Primaries = Primaries {
+        r: Chromaticity {
+            x: 0.7347,
+            y: 0.2653,
+        },
+        g: Chromaticity {
+            x: 0.1424,
+            y: 0.8576,
+        },
+        b: Chromaticity {
+            x: 0.0991,
+            y: -0.0308,
+        },
+        white: WHITE_D65,
+    };
+    /// DJI D-Gamut for D-Log.
+    pub const D_GAMUT: Primaries = Primaries {
+        r: Chromaticity { x: 0.710, y: 0.310 },
+        g: Chromaticity { x: 0.210, y: 0.880 },
+        b: Chromaticity {
+            x: 0.090,
+            y: -0.080,
+        },
+        white: WHITE_D65,
+    };
+    /// Fujifilm F-Gamut C; F-Log itself is stated in BT.2020.
+    pub const F_GAMUT_C: Primaries = Primaries {
+        r: Chromaticity {
+            x: 0.73470,
+            y: 0.26530,
+        },
+        g: Chromaticity {
+            x: 0.02630,
+            y: 0.97370,
+        },
+        b: Chromaticity {
+            x: 0.11730,
+            y: -0.02240,
+        },
+        white: WHITE_D65,
+    };
+
+    /// Every camera working gamut, in vendor-family order.
+    pub const CAMERA: [Primaries; 7] = [
+        Primaries::S_GAMUT3,
+        Primaries::S_GAMUT3_CINE,
+        Primaries::V_GAMUT,
+        Primaries::ALEX3_WIDE,
+        Primaries::ALEX3_EXPANDED,
+        Primaries::D_GAMUT,
+        Primaries::F_GAMUT_C,
+    ];
+
     /// Luminance weight of each primary, derived from the chromaticities.
     pub fn kr_kb(&self) -> (f64, f64) {
         let s = self.scales();
@@ -150,6 +266,20 @@ impl Primaries {
             "Adobe RGB"
         } else if self == Self::BT601_EBU {
             "BT.601 EBU"
+        } else if self == Self::S_GAMUT3 {
+            "S-Gamut3"
+        } else if self == Self::S_GAMUT3_CINE {
+            "S-Gamut3.Cine"
+        } else if self == Self::V_GAMUT {
+            "V-Gamut"
+        } else if self == Self::ALEX3_WIDE {
+            "ALEX3 Wide"
+        } else if self == Self::ALEX3_EXPANDED {
+            "ALEX3 Expanded"
+        } else if self == Self::D_GAMUT {
+            "D-Gamut"
+        } else if self == Self::F_GAMUT_C {
+            "F-Gamut C"
         } else {
             "custom"
         }
@@ -185,7 +315,10 @@ impl Primaries {
     }
 }
 
-pub const WHITE_D65: Chromaticity = Chromaticity { x: 0.3127, y: 0.3290 };
+pub const WHITE_D65: Chromaticity = Chromaticity {
+    x: 0.3127,
+    y: 0.3290,
+};
 pub const WHITE_DCI: Chromaticity = Chromaticity { x: 0.314, y: 0.351 };
 pub const WHITE_D93: Chromaticity = Chromaticity { x: 0.285, y: 0.293 };
 pub const WHITE_C: Chromaticity = Chromaticity { x: 0.310, y: 0.316 };
@@ -197,8 +330,7 @@ fn xyz_of(c: Chromaticity) -> [f64; 3] {
 type Col = [f64; 3];
 
 fn det3(c0: Col, c1: Col, c2: Col) -> f64 {
-    c0[0] * (c1[1] * c2[2] - c1[2] * c2[1])
-        - c0[1] * (c1[0] * c2[2] - c1[2] * c2[0])
+    c0[0] * (c1[1] * c2[2] - c1[2] * c2[1]) - c0[1] * (c1[0] * c2[2] - c1[2] * c2[0])
         + c0[2] * (c1[0] * c2[1] - c1[1] * c2[0])
 }
 
@@ -394,11 +526,7 @@ impl YuvMatrix {
         let dr = (2.0 - 2.0 * self.kr) * e_r;
         let db = (2.0 - 2.0 * self.kb) * e_b;
         let kg = 1.0 - self.kr - self.kb;
-        [
-            e_y + dr,
-            e_y - (self.kr * dr + self.kb * db) / kg,
-            e_y + db,
-        ]
+        [e_y + dr, e_y - (self.kr * dr + self.kb * db) / kg, e_y + db]
     }
 }
 
@@ -505,7 +633,11 @@ mod tests {
     #[test]
     fn gamut_remap_is_identity_within_one_space() {
         let m = rgb_to_rgb(Primaries::BT709, Primaries::BT709);
-        for (got, want) in m.iter().flatten().zip([1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]) {
+        for (got, want) in m
+            .iter()
+            .flatten()
+            .zip([1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0])
+        {
             assert!(close(*got, want, 1e-9), "{got}");
         }
     }
@@ -534,7 +666,10 @@ mod tests {
             let [r, g, b] = m.decode(0.5, 0.5 + 0.1, 0.5 + 0.2);
             assert!(close(r, 0.5 + r_chroma * 0.2, 1e-3), "{r}");
             assert!(close(b, 0.5 + b_chroma * 0.1, 1e-3), "{b}");
-            assert!(close(g, 0.5 + g_from_cb * 0.1 + g_from_cr * 0.2, 1e-3), "{g}");
+            assert!(
+                close(g, 0.5 + g_from_cb * 0.1 + g_from_cr * 0.2, 1e-3),
+                "{g}"
+            );
             let [y, cb, cr] = m.encode(0.5, 0.5, 0.5);
             assert!(close(y, 0.5, 1e-12) && close(cb, 0.5, 1e-12) && close(cr, 0.5, 1e-12));
         }
@@ -561,7 +696,12 @@ mod tests {
     fn bt709_to_bt2020_is_identity_on_rec709_gamut() {
         let m = rgb_to_rgb(Primaries::BT709, Primaries::BT2020);
         let mi = rgb_to_rgb(Primaries::BT2020, Primaries::BT709);
-        for v in [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.3, 0.6, 0.1]] {
+        for v in [
+            [1.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [0.0, 0.0, 1.0],
+            [0.3, 0.6, 0.1],
+        ] {
             let rt = apply(mi, apply(m, v));
             for i in 0..3 {
                 assert!(close(v[i], rt[i], 1e-9), "{v:?} -> {rt:?}");
@@ -614,6 +754,104 @@ mod tests {
         assert!(MatrixCoeff::Bt2020Cl.constant_luma());
         assert!(!MatrixCoeff::Bt2020Ncl.constant_luma());
         assert_eq!(MatrixCoeff::YCgCo.kr_kb(), None);
+    }
+
+    /// Largest absolute element difference between two 3×3 matrices.
+    fn matrix_diff(a: [[f64; 3]; 3], b: [[f64; 3]; 3]) -> f64 {
+        let mut worst = 0.0f64;
+        for i in 0..3 {
+            for j in 0..3 {
+                worst = worst.max((a[i][j] - b[i][j]).abs());
+            }
+        }
+        worst
+    }
+
+    #[test]
+    fn camera_gamuts_derive_the_published_luma_weights() {
+        // kr and kb follow only from the typed chromaticities, so a
+        // transcription error in any of the ten published coordinates shows
+        // up here before a conversion is ever built on it.
+        for (p, kr, kb) in [
+            (Primaries::S_GAMUT3, 0.270_980, -0.057_586),
+            (Primaries::S_GAMUT3_CINE, 0.215_076, -0.100_144),
+            (Primaries::V_GAMUT, 0.260_686, -0.035_580),
+            (Primaries::ALEX3_WIDE, 0.291_954, -0.115_795),
+            (Primaries::ALEX3_EXPANDED, 0.254_524, -0.036_002),
+            (Primaries::D_GAMUT, 0.283_005, -0.096_201),
+        ] {
+            let (got_kr, got_kb) = p.kr_kb();
+            assert!(
+                close(got_kr, kr, 1e-5) && close(got_kb, kb, 1e-5),
+                "{}: {got_kr} {got_kb} vs {kr} {kb}",
+                p.label()
+            );
+            assert!(close(got_kr + p.kg() + got_kb, 1.0, 1e-12));
+        }
+    }
+
+    #[test]
+    fn camera_gamut_to_bt709_matches_the_published_matrices() {
+        // V-Gamut and ALEX3 Wide both ship with a Rec.709 conversion matrix in
+        // the vendor's own documentation, so the derivation can be checked
+        // against numbers produced independently of this code.
+        for (src, want) in [
+            (
+                Primaries::V_GAMUT,
+                [
+                    [1.806_576, -0.695_697, -0.110_879],
+                    [-0.170_090, 1.305_955, -0.135_865],
+                    [-0.025_206, -0.154_468, 1.179_674],
+                ],
+            ),
+            (
+                Primaries::ALEX3_WIDE,
+                [
+                    [1.617_523, -0.537_287, -0.080_237],
+                    [-0.070_573, 1.334_613, -0.264_040],
+                    [-0.021_102, -0.226_954, 1.248_056],
+                ],
+            ),
+        ] {
+            let got = rgb_to_rgb(src, Primaries::BT709);
+            let worst = matrix_diff(got, want);
+            assert!(
+                worst < 2e-5,
+                "{} -> BT.709 off by {worst}: {got:?}",
+                src.label()
+            );
+            // A conversion for a display must hold white.
+            let w = apply(got, [1.0, 1.0, 1.0]);
+            for v in w {
+                assert!(close(v, 1.0, 1e-9), "{:?} {v}", src.label());
+            }
+        }
+    }
+
+    #[test]
+    fn camera_gamuts_are_wider_than_bt709_and_mutually_distinct() {
+        let to709 = Primaries::CAMERA.map(|p| {
+            let m = rgb_to_rgb(p, Primaries::BT709);
+            // BT.709 green must land inside each capture gamut, so its legs
+            // stay non-negative when read from the wider space.
+            let back = rgb_to_rgb(Primaries::BT709, p);
+            let g = apply(back, [0.0, 1.0, 0.0]);
+            (p, m, g)
+        });
+        let mut seen = Vec::new();
+        for (p, m, bt709_green) in to709 {
+            assert!(
+                !seen.contains(&m),
+                "{} duplicates another camera gamut",
+                p.label()
+            );
+            seen.push(m);
+            assert!(
+                bt709_green.iter().all(|v| *v > -1e-9),
+                "{} cannot hold BT.709 green: {bt709_green:?}",
+                p.label()
+            );
+        }
     }
 
     #[test]

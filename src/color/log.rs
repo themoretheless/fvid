@@ -17,6 +17,8 @@
 
 use std::f64::consts::LN_2;
 
+use crate::color::primaries::Primaries;
+
 /// Sony and Canon author their curves against IRE: 100 % reflectance = 0.9.
 const IRE_FROM_REFLECTANCE: f64 = 0.9;
 
@@ -141,6 +143,23 @@ impl Log {
 
     pub fn from_label(label: &str) -> Option<Self> {
         Self::ALL.into_iter().find(|p| p.label() == label)
+    }
+
+    /// The camera's own working gamut, when the vendor publishes its primaries.
+    ///
+    /// `None` means the curve is citable but the matching gamut's coordinates
+    /// are not: S-Log1/2 predate a published S-Gamut table, and Canon draws
+    /// Cinema Gamut as a figure rather than a set of numbers. Log material from
+    /// those profiles arrives in a container gamut the demuxer already knows,
+    /// so the caller should convert from the source it is given rather than
+    /// from a guessed triangle.
+    pub fn gamut(self) -> Option<Primaries> {
+        Some(match self {
+            Self::SLog3 => Primaries::S_GAMUT3,
+            Self::VLog => Primaries::V_GAMUT,
+            Self::LogC | Self::LogC4 => Primaries::ALEX3_WIDE,
+            Self::SLog1 | Self::SLog2 | Self::CLog | Self::CLog2 | Self::CLog3 => return None,
+        })
     }
 
     /// The code range the vendor authored this curve over, at 10-bit.
@@ -436,7 +455,10 @@ mod tests {
         ] {
             for &(reflectance, w) in want {
                 let got = code_at(profile, reflectance, 10);
-                assert!(close(got, w, 0.7), "{profile:?} {reflectance} → {got} vs {w}");
+                assert!(
+                    close(got, w, 0.7),
+                    "{profile:?} {reflectance} → {got} vs {w}"
+                );
             }
         }
     }
@@ -488,8 +510,14 @@ mod tests {
             for w in tab.windows(2) {
                 assert!(w[1] >= w[0], "{profile:?} {w:?}");
             }
-            assert!(profile.to_linear(0.0) < profile.to_linear(0.5), "{profile:?}");
-            assert!(profile.to_linear(0.5) < profile.to_linear(1.0), "{profile:?}");
+            assert!(
+                profile.to_linear(0.0) < profile.to_linear(0.5),
+                "{profile:?}"
+            );
+            assert!(
+                profile.to_linear(0.5) < profile.to_linear(1.0),
+                "{profile:?}"
+            );
         }
     }
 
@@ -509,7 +537,11 @@ mod tests {
     #[test]
     fn labels_round_trip() {
         for profile in Log::ALL {
-            assert_eq!(Log::from_label(profile.label()), Some(profile), "{profile:?}");
+            assert_eq!(
+                Log::from_label(profile.label()),
+                Some(profile),
+                "{profile:?}"
+            );
         }
         assert_eq!(Log::from_label("n-Log"), None);
     }
@@ -520,7 +552,10 @@ mod tests {
             let (black, span) = (profile.codes().black, profile.codes().span);
             let at_10 = profile.code_from_signal(0.5, 10);
             let at_12 = profile.code_from_signal(0.5, 12);
-            assert!(close(at_12, at_10 * 4.0, 0.5), "{profile:?} {at_10} {at_12}");
+            assert!(
+                close(at_12, at_10 * 4.0, 0.5),
+                "{profile:?} {at_10} {at_12}"
+            );
             let back = profile.signal_from_code(at_10, 10);
             assert!(close(back, 0.5, 1e-4), "{profile:?} {back}");
             assert!(black <= 64.0 && span > 0.0, "{profile:?}");

@@ -35,9 +35,7 @@ impl Lut1d {
 
     pub fn identity(size: usize) -> Self {
         let size = size.max(2);
-        let ramp: Vec<f32> = (0..size)
-            .map(|i| i as f32 / (size - 1) as f32)
-            .collect();
+        let ramp: Vec<f32> = (0..size).map(|i| i as f32 / (size - 1) as f32).collect();
         Self {
             data: [ramp.clone(), ramp.clone(), ramp],
         }
@@ -240,10 +238,16 @@ impl Lut {
                 continue;
             }
             if is_number_line(line) {
-                values.extend(line.split_whitespace().filter_map(|t| t.parse::<f32>().ok()));
+                values.extend(
+                    line.split_whitespace()
+                        .filter_map(|t| t.parse::<f32>().ok()),
+                );
                 continue;
             }
-            return Err(invalid(&format!("unknown .cube key on line {}", line_no + 1)));
+            return Err(invalid(&format!(
+                "unknown .cube key on line {}",
+                line_no + 1
+            )));
         }
         let nan = values.iter().any(|v| !v.is_finite());
         if nan {
@@ -287,7 +291,13 @@ impl Lut {
                 }
                 let data = values
                     .chunks_exact(3)
-                    .map(|c| [c[0].clamp(0.0, 1.0), c[1].clamp(0.0, 1.0), c[2].clamp(0.0, 1.0)])
+                    .map(|c| {
+                        [
+                            c[0].clamp(0.0, 1.0),
+                            c[1].clamp(0.0, 1.0),
+                            c[2].clamp(0.0, 1.0),
+                        ]
+                    })
                     .collect();
                 Ok(Self::Three(Lut3d {
                     size: n,
@@ -454,7 +464,10 @@ fn parse_size(rest: &str, line_no: usize) -> Result<usize> {
 }
 
 fn parse3(rest: &str, line_no: usize) -> Result<[f32; 3]> {
-    let nums: Vec<f32> = rest.split_whitespace().filter_map(|t| t.parse().ok()).collect();
+    let nums: Vec<f32> = rest
+        .split_whitespace()
+        .filter_map(|t| t.parse().ok())
+        .collect();
     if nums.len() != 3 {
         return Err(invalid(&format!(
             "expected 3 numbers on line {}",
@@ -550,6 +563,16 @@ impl CubePlan {
             log: Some(profile),
             ..Self::transfer(Transfer::Linear, to, source, dest, size)
         }
+    }
+
+    /// Camera log material converted with the gamut its vendor publishes.
+    ///
+    /// Profiles whose working gamut has no citable chromaticities convert as
+    /// though the material is already in `dest`, which leaves the curve
+    /// correction intact and the colour untouched.
+    pub fn camera(profile: Log, to: Transfer, dest: Primaries, size: usize) -> Self {
+        let source = profile.gamut().unwrap_or(dest);
+        Self::camera_log(profile, to, source, dest, size)
     }
 
     /// The same converter, tone mapped for one display.
@@ -649,7 +672,10 @@ LUT_3D_SIZE 2
         assert_eq!(one.size(), 2);
         assert!(matches!(one, Lut::One(_)));
         let three = Lut::from_cube("LUT_1D_SIZE 2\n0 0 0\n1 1 1\n").unwrap();
-        assert_eq!(three.sample([0.5, 0.5, 0.5], Interpolation::default()), [0.5, 0.5, 0.5]);
+        assert_eq!(
+            three.sample([0.5, 0.5, 0.5], Interpolation::default()),
+            [0.5, 0.5, 0.5]
+        );
     }
 
     #[test]
@@ -677,7 +703,10 @@ LUT_3D_SIZE 2
         };
         assert_eq!(l.domain_min, [0.05; 3]);
         // Below the domain clamps to the first node.
-        assert_eq!(l.sample([0.0, 0.5, 0.5], Interpolation::Nearest), [0.0, 0.0, 0.0]);
+        assert_eq!(
+            l.sample([0.0, 0.5, 0.5], Interpolation::Nearest),
+            [0.0, 0.0, 0.0]
+        );
     }
 
     #[test]
@@ -706,11 +735,7 @@ LUT_3D_SIZE 2
         for b in 0..=2usize {
             for g in 0..=2 {
                 for r in 0..=2 {
-                    let p = [
-                        r as f32 / n,
-                        g as f32 / n,
-                        b as f32 / n,
-                    ];
+                    let p = [r as f32 / n, g as f32 / n, b as f32 / n];
                     let want = f(p);
                     for mode in [
                         Interpolation::Nearest,
@@ -754,7 +779,10 @@ LUT_3D_SIZE 2
             for mode in [Interpolation::Trilinear, Interpolation::Tetrahedral] {
                 let got = lut.sample(p, mode);
                 for ch in 0..3 {
-                    assert!(close(got[ch], want[ch], 1e-5), "{mode:?} {p:?} ch {ch}: {got:?} vs {want:?}");
+                    assert!(
+                        close(got[ch], want[ch], 1e-5),
+                        "{mode:?} {p:?} ch {ch}: {got:?} vs {want:?}"
+                    );
                 }
             }
             assert_ne!(lut.sample(p, Interpolation::Nearest), want);
@@ -774,7 +802,9 @@ LUT_3D_SIZE 2
         let want = f(probe);
         let grid_err = |size: usize, mode: Interpolation| {
             let got = Lut3d::from_fn(size, f).sample(probe, mode);
-            (0..3).map(|ch| (got[ch] - want[ch]).abs()).fold(0.0f32, f32::max)
+            (0..3)
+                .map(|ch| (got[ch] - want[ch]).abs())
+                .fold(0.0f32, f32::max)
         };
         let coarse_tri = grid_err(5, Interpolation::Trilinear);
         let fine_tri = grid_err(33, Interpolation::Trilinear);
@@ -782,8 +812,14 @@ LUT_3D_SIZE 2
         let fine_tet = grid_err(33, Interpolation::Tetrahedral);
         assert!(coarse_tri < 0.02, "trilinear grid error {coarse_tri}");
         assert!(coarse_tet < 0.02, "tetrahedral grid error {coarse_tet}");
-        assert!(fine_tri * 4.0 < coarse_tri, "trilinear {coarse_tri} -> {fine_tri}");
-        assert!(fine_tet * 4.0 < coarse_tet, "tetrahedral {coarse_tet} -> {fine_tet}");
+        assert!(
+            fine_tri * 4.0 < coarse_tri,
+            "trilinear {coarse_tri} -> {fine_tri}"
+        );
+        assert!(
+            fine_tet * 4.0 < coarse_tet,
+            "tetrahedral {coarse_tet} -> {fine_tet}"
+        );
     }
 
     #[test]
@@ -806,6 +842,54 @@ LUT_3D_SIZE 2
         assert!(close(black[0], 0.0, 1e-3), "{black:?}");
         let top = cube.sample([1.0; 3], Interpolation::Trilinear);
         assert!(close(top[0], 1.0, 1e-3), "{top:?}");
+    }
+
+    #[test]
+    fn camera_cube_converts_through_the_vendor_gamut_when_one_is_published() {
+        let wide = CubePlan::camera(Log::SLog3, Transfer::Bt709, Primaries::BT709, 65).build();
+        let plain = CubePlan::camera_log(
+            Log::SLog3,
+            Transfer::Bt709,
+            Primaries::BT709,
+            Primaries::BT709,
+            65,
+        )
+        .build();
+        // Sony's 90 % code on a pure S-Gamut3 red is far outside BT.709, so the
+        // gamut conversion overshoots 1.0 and the destination clips it, while
+        // the same code stated in BT.709 stays below paper white.
+        let red = [598.0 / 1023.0, 0.0, 0.0];
+        let from_wide = wide.sample(red, Interpolation::Trilinear);
+        let from_709 = plain.sample(red, Interpolation::Trilinear);
+        assert!(
+            from_wide[0] > from_709[0] + 0.02,
+            "{from_wide:?} vs {from_709:?}"
+        );
+        assert!(
+            from_wide.iter().all(|v| *v >= 0.0 && *v <= 1.0),
+            "{from_wide:?}"
+        );
+        // The out-of-gamut green and blue legs have to come back up from
+        // negative, which is what keeps the clipped red from turning black.
+        assert!(from_wide[1] >= 0.0 && from_wide[2] > 0.0, "{from_wide:?}");
+        // Every gamut matrix has grey as a fixed point. The residual here is
+        // the enclosing cell's off-diagonal corners, which do differ, not the
+        // grey nodes themselves.
+        let grey = [420.0 / 1023.0; 3];
+        let gw = wide.sample(grey, Interpolation::Trilinear);
+        let gp = plain.sample(grey, Interpolation::Trilinear);
+        for i in 0..3 {
+            assert!(close(gw[i], gp[i], 2e-3), "{gw:?} vs {gp:?}");
+        }
+    }
+
+    #[test]
+    fn log_without_a_published_gamut_converts_in_the_destination_space() {
+        // Canon draws Cinema Gamut rather than stating it, so guessing its
+        // corners would move colour with no source behind the move.
+        let plan = CubePlan::camera(Log::CLog3, Transfer::Bt709, Primaries::BT709, 17);
+        assert_eq!(plan.source, Primaries::BT709);
+        assert!(Log::SLog3.gamut().is_some());
     }
 
     #[test]
@@ -837,12 +921,7 @@ LUT_3D_SIZE 2
         for b in 0..3 {
             for g in 0..3 {
                 for r in 0..3 {
-                    text.push_str(&format!(
-                        "{} {} {}\n",
-                        r * 2047,
-                        g * 2047,
-                        b * 2047
-                    ));
+                    text.push_str(&format!("{} {} {}\n", r * 2047, g * 2047, b * 2047));
                 }
             }
         }
@@ -873,7 +952,11 @@ LUT_3D_SIZE 2
         assert!(close(lut.data[0][1023], 1.0, 1e-6));
         // PQ spends codes on highlights: the midpoint of the scale is only
         // ~93 cd/m², which is what makes a naive 8-bit LUT useless for HDR.
-        assert!(close(lut.data[0][512], 0.009_27, 1e-4), "{}", lut.data[0][512]);
+        assert!(
+            close(lut.data[0][512], 0.009_27, 1e-4),
+            "{}",
+            lut.data[0][512]
+        );
     }
 
     #[test]
@@ -894,8 +977,16 @@ LUT_3D_SIZE 2
             grey.iter().all(|v| close(*v, 0.3480, 3e-3)),
             "1000-nit grey came out {grey:?}"
         );
-        assert!(close(cube.sample([0.0; 3], Interpolation::Trilinear)[0], 0.0, 1e-6));
-        assert!(close(cube.sample([1.0; 3], Interpolation::Trilinear)[0], 1.0, 1e-3));
+        assert!(close(
+            cube.sample([0.0; 3], Interpolation::Trilinear)[0],
+            0.0,
+            1e-6
+        ));
+        assert!(close(
+            cube.sample([1.0; 3], Interpolation::Trilinear)[0],
+            1.0,
+            1e-3
+        ));
     }
 
     #[test]
@@ -925,7 +1016,10 @@ LUT_3D_SIZE 2
         // 100 cd/m² diffuse white lands mid-scale and stays neutral.
         let grey = cube.sample([code(100.0); 3], Interpolation::Tetrahedral);
         assert!(grey[0] > 0.4 && grey[0] < 0.9, "{grey:?}");
-        assert!(close(grey[0], grey[1], 1e-4) && close(grey[1], grey[2], 1e-4), "{grey:?}");
+        assert!(
+            close(grey[0], grey[1], 1e-4) && close(grey[1], grey[2], 1e-4),
+            "{grey:?}"
+        );
         // Monotonic along the diagonal, with no banding step at the joint.
         let mut prev = -1.0;
         for i in 0..=100u32 {
