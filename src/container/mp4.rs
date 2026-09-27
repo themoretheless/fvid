@@ -2,7 +2,7 @@
 //! complete sample table a non-fragmented file writes and the run of `moof`
 //! fragments a stream-derived file writes in its place.
 //! Timestamps are in the track media timeline; edit lists are returned separately.
-use crate::{Result, container::FileTags, invalid, unsupported};
+use crate::{container::FileTags, invalid, unsupported, Result};
 use std::io::{Read, Seek, SeekFrom};
 use std::ops::Range;
 
@@ -177,6 +177,57 @@ pub struct Track {
     /// `tkhd` transform states it. One of 0, 90, 180 or 270; a transform that
     /// mirrors or skews states none of them and leaves the picture as decoded.
     pub rotation: u16,
+    /// The colour description the sample entry states for itself, from `colr`.
+    ///
+    /// Zeros when the entry says nothing, which is common: an AVC or HEVC track
+    /// usually carries this in its own VUI, and the decoder reads it there. The
+    /// two agree on well-formed files, and this one is what a container-only
+    /// path — a stream copy, or a coding whose parameter sets are not parsed —
+    /// has to go on.
+    pub colour: ColourDescription,
+    /// Mastering display and light level from `mdcv` and `ccll`, which a tone
+    /// map needs and no bitstream field carries.
+    pub hdr: crate::color::hdr::HdrMetadata,
+}
+
+/// The CICP triple plus range a `colr` atom states, ITU-T H.273 indices.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct ColourDescription {
+    pub primaries: u8,
+    pub transfer: u8,
+    pub matrix: u8,
+    /// Set when the coded range is full (0..max) rather than studio.
+    pub full_range: bool,
+}
+
+/// Read a `colr` atom's payload.
+///
+/// The atom opens with its colour type. `nclx` is a four-byte version and
+/// flags header, then the CICP triple and a range flag; `nclc`, the older
+/// QuickTime spelling, is the bare triple with no range statement at all. An
+/// ICC-based `rICC`/`nICC` describes colour as a profile rather than as three
+/// indices and is not decoded here.
+fn colr_description(payload: &[u8]) -> Option<ColourDescription> {
+    let full_range_stated = match payload.get(..4)? {
+        b"nclx" => true,
+        b"nclc" => false,
+        _ => return None,
+    };
+    // `nclx` puts a version byte and three flag bytes between the type and the
+    // indices; `nclc` goes straight to them.
+    let body = if full_range_stated {
+        payload.get(8..)?
+    } else {
+        payload.get(4..)?
+    };
+    let [primaries, transfer, matrix] = *body.first_chunk::<3>()?;
+    let range_byte = if full_range_stated { *body.get(3)? } else { 0 };
+    Some(ColourDescription {
+        primaries,
+        transfer,
+        matrix,
+        full_range: range_byte >> 7 != 0,
+    })
 }
 /// A named part of the film, from the movie's own chapter list.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -991,6 +1042,8 @@ fn parse_track(
         samples: SampleIndex::Expanded(Vec::new()),
         pixel_aspect: (1, 1),
         rotation: 0,
+        colour: ColourDescription::default(),
+        hdr: crate::color::hdr::HdrMetadata::default(),
     };
     // The byte offset the entry's child atoms start at, and which of them holds
     // the codec configuration; PCM has none, its entry is the whole description.
@@ -1129,6 +1182,26 @@ fn parse_track(
     result.samples = index;
     let spacing =
         optional(&configs, b"pasp")?.and_then(|p| Some((u32be(p, 0).ok()?, u32be(p, 4).ok()?)));
+    if let Some(colr) = optional(&configs, b"colr")? {
+        if let Some(description) = colr_description(colr) {
+            result.colour = description;
+        }
+    }
+    // The two HDR blocks hold the payload an HEVC SEI message would carry, box
+    // header and all, so the same decoders read them. A track can state either,
+    // both, or none, and `merge` keeps whichever half each one knows.
+    for kind in [*b"mdcv", *b"ccll"] {
+        if let Some(payload) = optional(&configs, &kind)? {
+            let metadata = if kind == *b"mdcv" {
+                crate::color::hdr::HdrMetadata::from_mdcv(payload)
+            } else {
+                crate::color::hdr::HdrMetadata::from_clli(payload)
+            };
+            if let Some(metadata) = metadata {
+                result.hdr.merge(metadata);
+            }
+        }
+    }
     result.rotation = rotation;
     result.pixel_aspect = pixel_aspect(
         spacing,
@@ -1771,7 +1844,9 @@ fn chunk_runs(
 
 #[cfg(test)]
 mod tests {
+    use super::colr_description;
     use super::read_tags;
+    use super::ColourDescription;
     use crate::container::FileTags;
 
     fn atom(kind: &[u8; 4], payload: &[u8]) -> Vec<u8> {
@@ -1816,6 +1891,54 @@ mod tests {
         ima4.extend_from_slice(&atom(b"chan", &[0u8; 16]));
         assert_eq!(wave_record(&ima4, 44, *b"ms\x00\x02"), None);
         assert!(is_adpcm(b"ima4") && is_adpcm(b"ms\x00\x11") && !is_adpcm(b"mp4a"));
+    }
+
+    #[test]
+    fn colr_reads_both_writers_spellings_of_the_cicp_triple() {
+        // BT.2020 primaries, PQ transfer, BT.2020 NCL matrix, full-range flag
+        // in the top bit of the fourth byte.
+        let nclx = [
+            b"nclx"[..].to_vec(),
+            vec![0x01, 0x00, 0x00, 0x00],
+            vec![9, 16, 9, 0x80],
+        ]
+        .concat();
+        assert_eq!(
+            colr_description(&nclx),
+            Some(ColourDescription {
+                primaries: 9,
+                transfer: 16,
+                matrix: 9,
+                full_range: true,
+            })
+        );
+        let narrow = {
+            let mut v = nclx.clone();
+            v[11] = 0x00;
+            v
+        };
+        assert_eq!(colr_description(&narrow).map(|c| c.full_range), Some(false));
+        // QuickTime's older spelling has no version header and no range at all.
+        let mut nclc = b"nclc"[..].to_vec();
+        nclc.extend_from_slice(&[1, 1, 1]);
+        assert_eq!(
+            colr_description(&nclc),
+            Some(ColourDescription {
+                primaries: 1,
+                transfer: 1,
+                matrix: 1,
+                full_range: false,
+            })
+        );
+        // An ICC profile states colour another way and is not guessed at here.
+        assert_eq!(colr_description(b"rICC\x00\x00\x00\x00"), None);
+        // Truncated atoms of either spelling are refused, not read past.
+        for len in 0..nclc.len() {
+            assert_eq!(colr_description(&nclc[..len]), None, "{len} bytes");
+        }
+        for len in 0..nclx.len() {
+            assert_eq!(colr_description(&nclx[..len]), None, "{len} bytes");
+        }
     }
     /// Every fact the movie can be named by, in the spelling a QuickTime file
     /// states it — text standing in the tag itself — and in the one an

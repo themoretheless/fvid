@@ -1,7 +1,7 @@
 //! RGB playback adapter for FVid's own Y4M, MP4/AVC/HEVC and WebM/VP9/AV1 readers.
 use crate::{
-    Result, codec::avc_picture::IntraPicture, container::mp4::Limits, invalid, playback::Y4mReader,
-    playback_mp4::Mp4VideoReader,
+    codec::avc_picture::IntraPicture, container::mp4::Limits, invalid, playback::Y4mReader,
+    playback_mp4::Mp4VideoReader, Result,
 };
 use std::{
     io::{BufRead, Read, Seek, SeekFrom},
@@ -1113,6 +1113,8 @@ mod tests {
             samples: SampleIndex::Expanded(vec![]),
             pixel_aspect: (1, 1),
             rotation: 0,
+            colour: Default::default(),
+            hdr: Default::default(),
         };
         assert_eq!(playback_window(&track, 1000).unwrap(), (0, None));
         track.edits.push(Edit {
