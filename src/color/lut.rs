@@ -593,10 +593,19 @@ impl CubePlan {
         let m = rgb_to_rgb(self.source, self.dest);
         let (kr, kb) = self.dest.kr_kb();
         let (kr, kb) = (kr as f32, kb as f32);
+        // The panel the plan is baked for, in cd/m². An unmapped plan has no
+        // panel of its own; BT.2100's reference display answers for it.
+        let panel = self.target.map_or(1_000.0, |t| t.peak_nits);
         // A log curve states 1.0 at diffuse white, while an SDR video curve has
-        // no absolute scale at all and PQ already is one.
+        // no absolute scale at all and PQ already is one. HLG is the one HDR
+        // curve whose 1.0 means "whatever this panel reaches": BT.2100 makes its
+        // scene light display-size dependent and lets γ follow the panel, so
+        // fixing HLG to the 1 000 cd/m² reference here would claim ten times the
+        // headroom a 100-nit destination has and clip every code above 0.45 to
+        // white. PQ keeps its absolute scale, because it states one.
         let scale = match self.log {
             Some(_) => self.sdr_white_nits,
+            None if self.from == Transfer::Hlg => panel,
             None => self.from.full_scale_nits(self.sdr_white_nits),
         };
         Lut3d::from_fn(self.size, |rgb| {
@@ -608,8 +617,7 @@ impl CubePlan {
                 };
             }
             if self.from == Transfer::Hlg && self.log.is_none() {
-                let gamma = hlg_system_gamma(self.target.map_or(1_000.0, |t| t.peak_nits));
-                lin = hlg_ootf_rgb(lin, kr, kb, gamma);
+                lin = hlg_ootf_rgb(lin, kr, kb, hlg_system_gamma(panel));
             }
             let mapped = compress_gamut(apply(m, lin.map(f64::from)).map(|v| v as f32), self.dest);
             let display = match self.tone_map {
@@ -1028,5 +1036,78 @@ LUT_3D_SIZE 2
             assert!(out >= prev - 1e-4, "{v}: {prev} -> {out}");
             prev = out;
         }
+    }
+
+    /// HLG asks to be read by the panel that shows it: BT.2100-2 normalises its
+    /// scene light to that panel's peak and lets γ follow it — 0.78 at 100 cd/m²,
+    /// 1.2 at 1 000 — so the same code leaves the grid at a different level for
+    /// each, and both follow the standard's own `oetf(inv_oetf(c)^γ)`. What this
+    /// rules out is the one reading that cannot be right: claiming the format's
+    /// 1 000-cd/m² reference peak *and* compressing onto a 100-nit panel with
+    /// nothing stated, which turns every code above 0.45 into pure white.
+    #[test]
+    fn an_hlg_picture_is_scaled_to_the_panel_that_reads_it() {
+        use crate::color::transfer::hlg_inverse_oetf;
+        let baked = |peak: f32| {
+            CubePlan::transfer(
+                Transfer::Hlg,
+                Transfer::Bt709,
+                Primaries::BT2020,
+                Primaries::BT709,
+                33,
+            )
+            .grade(
+                ToneMap::Clip,
+                DisplayTarget::sdr(peak),
+                ContentLight::default(),
+            )
+            .build()
+        };
+        for peak in [100.0f32, 1_000.0] {
+            let cube = baked(peak);
+            let gamma = hlg_system_gamma(peak);
+            let want = |c: f32| {
+                Transfer::Bt709
+                    .oetf(hlg_inverse_oetf(c).powf(gamma))
+                    .unwrap()
+            };
+            // A tenth of the code scale, at both panel sizes.
+            for i in 0..=10u32 {
+                let c = i as f32 / 10.0;
+                let got = cube.sample([c; 3], Interpolation::Tetrahedral)[0];
+                assert!(
+                    close(got, want(c), 2e-3),
+                    "{peak} nits, code {c}: {got} against the standard's {}",
+                    want(c)
+                );
+            }
+            assert!(close(
+                cube.sample([0.0; 3], Interpolation::Tetrahedral)[0],
+                0.0,
+                1e-6
+            ));
+            assert!(close(
+                cube.sample([1.0; 3], Interpolation::Tetrahedral)[0],
+                1.0,
+                1e-3
+            ));
+            // The four codes a burned-out picture would fold together stay apart,
+            // and the mid code is mid-dark rather than white on either panel.
+            let steps: Vec<f32> = [0.5f32, 0.65, 0.8, 1.0]
+                .iter()
+                .map(|c| cube.sample([*c; 3], Interpolation::Tetrahedral)[0])
+                .collect();
+            assert!(
+                steps.windows(2).all(|w| w[1] > w[0] + 5e-2),
+                "{peak} nits: {steps:?}"
+            );
+            assert!(steps[0] < 0.5, "{peak} nits: {steps:?}");
+        }
+        // The 100-nit answer is the brighter one in relative terms, because the
+        // standard's γ falls below 1 as the panel darkens: mid-code HLG leaves a
+        // desktop panel near a third of the scale, a reference display near a fifth.
+        let sdr = baked(100.0).sample([0.5; 3], Interpolation::Tetrahedral)[0];
+        let hdr = baked(1_000.0).sample([0.5; 3], Interpolation::Tetrahedral)[0];
+        assert!(sdr > hdr + 0.1, "{sdr} vs {hdr}");
     }
 }
