@@ -146,7 +146,7 @@ mod allocation_tests {
         .join()
         .unwrap();
         assert!(Arc::ptr_eq(&tool.input_schema, &other.input_schema));
-        assert_eq!(tools::catalog().len(), 11);
+        assert_eq!(tools::catalog().len(), 13);
         assert!(server.get_tool("missing").is_none());
     }
 }

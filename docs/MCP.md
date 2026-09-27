@@ -96,7 +96,7 @@ python3 scripts/validate_mcp.py --binary target/release/fvid --transport stdio
 python3 scripts/validate_mcp.py --binary target/release/fvid --transport http --gpu metal
 ```
 
-HTTP-тест требует права открыть локальный порт, Metal-тест — доступа к физическому GPU. Fixtures создаются временно. Проверяется MCP negotiation версии 2025-11-25, ping, schemas всех 11 tools, фактическое выполнение операций, packet/pixel/sample equality, busy, root/symlink/playlist restrictions, no-clobber, malformed arguments, Host/Origin/auth/version rejection. Новейшие протокольные возможности SDK не считаются проверенными только из-за его версии.
+HTTP-тест требует права открыть локальный порт, Metal-тест — доступа к физическому GPU. Fixtures создаются временно. Проверяется MCP negotiation версии 2025-11-25, ping, schemas всех 13 tools, фактическое выполнение операций, packet/pixel/sample equality, busy, root/symlink/playlist restrictions, no-clobber, malformed arguments, Host/Origin/auth/version rejection. Новейшие протокольные возможности SDK не считаются проверенными только из-за его версии.
 
 Снимки: [stdio](../benchmarks/mcp-validation-stdio.json), [HTTP + Metal](../benchmarks/mcp-validation-http-metal.json). JSON содержит хеш бинарника, исходников и список проверенных сценариев.
 

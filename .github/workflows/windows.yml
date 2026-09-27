@@ -23,7 +23,7 @@ jobs:
       - name: Check default features
         run: cargo check --all-targets
       - name: Test default features
-        run: cargo test --all-targets
+        run: cargo test --lib --bins --tests
       - name: Clippy
         run: cargo clippy --all-targets -- -D warnings
       - name: CPU-only

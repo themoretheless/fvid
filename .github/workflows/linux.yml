@@ -1,0 +1,26 @@
+name: Linux
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.98.1
+      - uses: Swatinem/rust-cache@v2
+      - name: ALSA headers for the player's audio output
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev
+      # The ffmpeg_compare bench needs ffmpeg on PATH, so benches are left out.
+      - name: Test default features
+        run: cargo test --lib --bins --tests
+      - name: Test CPU-only
+        run: cargo test --no-default-features
+      - name: Test player
+        run: cargo test --no-default-features --features player --lib --bins --tests

@@ -2053,6 +2053,7 @@ mod tests {
         assert!(is_mace(b"MAC3") && is_mace(b"MAC6") && !is_mace(b"MAC0"));
     }
 
+    #[cfg(feature = "player")]
     #[test]
     #[cfg(feature = "player")]
     fn a_mace_track_is_indexed_in_blocks_though_its_table_counts_samples() {
@@ -2075,6 +2076,7 @@ mod tests {
         assert_eq!(ticks, 17_856, "as many samples as `stsz` counts");
     }
 
+    #[cfg(feature = "player")]
     #[test]
     #[cfg(feature = "player")]
     fn a_mace_table_that_does_not_divide_into_blocks_is_refused() {
@@ -2330,6 +2332,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "player")]
     #[test]
     #[cfg(feature = "player")]
     fn the_sound_a_fragment_indexes_is_the_sound_the_player_hears() {
