@@ -9,6 +9,7 @@ use crate::container::FileTags;
 use crate::subtitles::{self, Cue};
 use crate::{
     playback_native::{NativeReader, Planar8},
+    playback_spool::SpoolHandle,
     playback_thread::{Event, Frame, Pixels, Playback},
     player_gpu::VideoCallback,
 };
@@ -1013,6 +1014,10 @@ struct Player {
     /// The next decoded frame, waiting for its presentation deadline.
     queued: Option<Frame>,
     buffering: bool,
+    /// The local copy of a source too slow to stream its own item, and when the
+    /// wait for its lead started. Nothing while the source keeps up.
+    spool: Option<SpoolHandle>,
+    spool_wait: Option<Instant>,
     seek_preview: bool,
     seek_target: Option<Duration>,
     /// Frame on screen when it is drawn by the GPU shader (planar).
@@ -1148,6 +1153,8 @@ impl Default for Player {
             interval: None,
             queued: None,
             buffering: true,
+            spool: None,
+            spool_wait: None,
             seek_preview: false,
             seek_target: None,
             video: None,
@@ -1204,14 +1211,27 @@ impl Default for Player {
 
 impl Player {
     fn open(&mut self, path: PathBuf) -> crate::Result<()> {
-        let video = NativeReader::without_memory_limit(BufReader::new(File::open(&path)?))
-            .and_then(|mut reader| {
-                if reader.read_frame()? {
-                    Ok(reader)
-                } else {
-                    Err(crate::invalid("video has no frames"))
-                }
-            });
+        // A cloud drive answers in bursts no frame clock can wait inside, so
+        // the source is measured before it is read: what cannot keep up with
+        // its own item is copied to local disk while it plays.
+        let (source, spool) = crate::playback_spool::Source::open(
+            &path,
+            crate::playback_spool::SPOOL_UNDER,
+            crate::playback_spool::SPOOL_LEAD,
+        )?;
+        self.spool_wait = spool.is_some().then(Instant::now);
+        self.spool = spool;
+        let video = NativeReader::without_memory_limit(BufReader::with_capacity(
+            crate::playback_spool::READ_AHEAD,
+            source,
+        ))
+        .and_then(|mut reader| {
+            if reader.read_frame()? {
+                Ok(reader)
+            } else {
+                Err(crate::invalid("video has no frames"))
+            }
+        });
         let mut reader = match video {
             Ok(reader) => reader,
             // A file with nothing to show can still be all sound, and a listener
@@ -2364,6 +2384,37 @@ impl Player {
         ctx.request_repaint();
     }
 
+    /// Whether the local copy of a slow source has taken the lead the first
+    /// picture is meant to wait for. The wait ends by itself when the copier
+    /// stops, and on a timer, because a picture shown late beats a window that
+    /// never answers.
+    fn spool_primed(&self) -> bool {
+        let Some(spool) = &self.spool else {
+            return true;
+        };
+        let Some(wanted) = self.spool_lead() else {
+            return true;
+        };
+        if spool.ready(wanted) {
+            return true;
+        }
+        match self.spool_wait {
+            Some(started) if started.elapsed() < crate::playback_spool::SPOOL_WAIT => false,
+            _ => true,
+        }
+    }
+
+    /// How many bytes of the item make its first span of local copy, or nothing
+    /// for an item whose size or length the container never stated.
+    fn spool_lead(&self) -> Option<u64> {
+        let (bytes, duration) = (self.bytes?, self.duration?);
+        Some(crate::playback_spool::lead_bytes(
+            bytes,
+            duration,
+            crate::playback_spool::SPOOL_PREROLL,
+        ))
+    }
+
     /// Take decoded frames from the thread and show the one whose time has come.
     fn present(&mut self, ctx: &egui::Context) {
         self.poll_audio();
@@ -2406,6 +2457,10 @@ impl Player {
         if self.buffering
             && let Some(frame) = &self.queued
         {
+            if !self.spool_primed() {
+                ctx.request_repaint();
+                return;
+            }
             self.deadline = if self.paused || stepping {
                 now
             } else if self.seek_preview {
@@ -2666,6 +2721,9 @@ impl Player {
                 self.period,
             ));
         }
+        if let (Some(spool), Some(bytes), Some(total)) = (&self.spool, self.bytes, self.duration) {
+            lines.push(spool_text(spool.ahead(), bytes, total));
+        }
         if let Some(track) = self.audio_tracks.get(self.audio_track) {
             lines.push(format!(
                 "Sound: {} · {} · {}",
@@ -2763,6 +2821,16 @@ fn buffered_fraction(played: f32, frames: usize, period: Duration, total: Option
 fn buffer_text(frames: usize, depth: usize, period: Duration) -> String {
     let seconds = period.saturating_mul(frames as u32).as_secs_f64();
     format!("Buffer {seconds:.1} s · {frames}/{depth}")
+}
+
+/// How far the local copy of a slow source runs ahead of the picture, in the
+/// picture's own units. The window on disk is a fixed span of bytes, so only
+/// the item's bitrate can say what it is worth, and a copier that has fallen
+/// behind the playhead shows as the shrinking lead it is rather than as a
+/// share of the file, which a window can never finish.
+fn spool_text(ahead: u64, bytes: u64, total: Duration) -> String {
+    let seconds = ahead as f64 * total.as_secs_f64() / bytes.max(1) as f64;
+    format!("Spool {seconds:.1} s ahead")
 }
 
 /// The sound of the open item, named the way a viewer names it. Every
@@ -4327,8 +4395,8 @@ mod tests {
         cycle_repeat, deal_cycle, delay_step, delayed_clock, display_size, expand_inputs,
         file_size, fps_text, jump_size, loop_press, loop_rewind, paced_period, parse_clock,
         parse_play_args, playlist_osd, position_from_digit, rate_fine, rate_osd, rate_step,
-        repeat_osd, retreat, shown_insets, shown_size, snapshot_name, sound_codec, subtitles,
-        track_step, uv_window, video_rect, volume_osd, volume_step, zoom_osd, zoom_step,
+        repeat_osd, retreat, shown_insets, shown_size, snapshot_name, sound_codec, spool_text,
+        subtitles, track_step, uv_window, video_rect, volume_osd, volume_step, zoom_osd, zoom_step,
     };
     use std::sync::Arc;
     use std::time::{Duration, Instant};
@@ -5068,15 +5136,17 @@ mod tests {
         std::fs::remove_dir_all(&directory).unwrap();
     }
 
-    /// The buffer line counts pictures that move while the panel is read, so its
-    /// number differs between runs; the panel tests hold every other line to an
-    /// exact list and flatten it to a fixed word.
+    /// The buffer and spool lines count progress that moves while the panel is
+    /// read, so their numbers differ between runs; the panel tests hold every
+    /// other line to an exact list and flatten those two to fixed words.
     fn panel_lines(lines: &[String]) -> Vec<String> {
         lines
             .iter()
             .map(|line| {
                 if line.starts_with("Buffer ") {
                     "Buffer …".to_owned()
+                } else if line.starts_with("Spool ") {
+                    "Spool …".to_owned()
                 } else {
                     line.clone()
                 }
@@ -6654,6 +6724,51 @@ mod tests {
             buffer_text(0, 2, Duration::from_millis(40)),
             "Buffer 0.0 s · 0/2"
         );
+    }
+
+    /// A copy of a slow source is worth the picture it covers, so the panel
+    /// says both how far it has got and how much of the file that is.
+    #[test]
+    fn the_local_copy_says_what_it_covers() {
+        assert_eq!(
+            spool_text(600, 1200, Duration::from_secs(60)),
+            "Spool 30.0 s ahead"
+        );
+        assert_eq!(
+            spool_text(0, 1200, Duration::from_secs(60)),
+            "Spool 0.0 s ahead",
+            "a bitten lead is the wait, not an empty copy"
+        );
+        // A window is a span of bytes, not a share of the file: a 3.6 GB item
+        // at a 256 MiB lead can never show more than the lead is worth.
+        assert_eq!(
+            spool_text(256 << 20, 3603 << 20, Duration::from_secs(3603)),
+            "Spool 256.0 s ahead"
+        );
+        assert_eq!(spool_text(0, 0, Duration::ZERO), "Spool 0.0 s ahead");
+    }
+
+    /// The preroll is a span of picture paid for in bytes, so it needs the
+    /// item's size and length together; without one of them nothing is waited
+    /// for, and a first picture is not held behind a question no one can answer.
+    #[test]
+    fn the_preroll_is_measured_against_the_item_it_buffers_for() {
+        let player = Player {
+            bytes: Some(1200),
+            duration: Some(Duration::from_secs(60)),
+            ..Default::default()
+        };
+        assert_eq!(player.spool_lead(), Some(100), "a twelfth of the item");
+        assert!(
+            player.spool_primed(),
+            "a source read directly has nothing to wait for"
+        );
+        let blind = Player {
+            bytes: Some(1200),
+            ..Default::default()
+        };
+        assert_eq!(blind.spool_lead(), None, "an unsized item has no lead");
+        assert!(blind.spool_primed());
     }
 
     #[test]
