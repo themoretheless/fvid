@@ -116,7 +116,17 @@ struct Planes {
 
 /// Create the pipeline once and register it with the renderer.
 pub fn install(state: &egui_wgpu::RenderState) {
-    let device = &state.device;
+    let gpu = build(&state.device, state.target_format);
+    state.renderer.write().callback_resources.insert(gpu);
+}
+
+/// The objects one video draw needs for one target format: the pipeline, its
+/// bind group layout, the sampler that magnifies the picture, and the parameter
+/// buffer [`upload`](VideoGpu::upload) fills. `install` asks for the window's
+/// format; a test asks for a plain 8-bit one so the picture the shader paints
+/// can be read back and set against `planar8_to_rgb`, the conversion the player
+/// falls back to as soon as a frame has to be graded.
+fn build(device: &wgpu::Device, target_format: wgpu::TextureFormat) -> VideoGpu {
     let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: Some("fvid video"),
         source: wgpu::ShaderSource::Wgsl(SHADER.into()),
@@ -177,7 +187,7 @@ pub fn install(state: &egui_wgpu::RenderState) {
             entry_point: Some("fs"),
             compilation_options: Default::default(),
             targets: &[Some(wgpu::ColorTargetState {
-                format: state.target_format,
+                format: target_format,
                 blend: None,
                 write_mask: wgpu::ColorWrites::ALL,
             })],
@@ -204,17 +214,17 @@ pub fn install(state: &egui_wgpu::RenderState) {
         usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         mapped_at_creation: false,
     });
-    state.renderer.write().callback_resources.insert(VideoGpu {
+    VideoGpu {
         pipeline,
         layout,
         sampler,
         uniform,
-        srgb: state.target_format.is_srgb(),
+        srgb: target_format.is_srgb(),
         planes: None,
         serial: u64::MAX,
         window: [0.0; 4],
         adjust: IDENTITY_ADJUST,
-    });
+    }
 }
 
 impl VideoGpu {
@@ -411,6 +421,8 @@ impl egui_wgpu::CallbackTrait for VideoCallback {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     /// The shader is written by hand next to the byte array that feeds it, so
     /// the one thing a machine can check without a driver is that naga accepts
     /// the WGSL and that the parameter block the upload writes is exactly as
@@ -436,6 +448,242 @@ mod tests {
         assert_eq!(
             layouter[params].size, 80,
             "Params must match the 80-byte uniform the upload writes"
+        );
+    }
+
+    /// A device with no window, so a test can own the texture it paints into.
+    /// A machine that reports no adapter has nothing here to measure against.
+    fn headless() -> Option<(wgpu::Device, wgpu::Queue)> {
+        let instance = wgpu::Instance::default();
+        let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+            compatible_surface: None,
+            ..Default::default()
+        }))
+        .ok()?;
+        let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
+            required_features: wgpu::Features::empty(),
+            required_limits: wgpu::Limits::downlevel_defaults(),
+            ..Default::default()
+        }))
+        .ok()?;
+        Some((device, queue))
+    }
+
+    /// The codes one frame's draw leaves behind: the product's own pipeline,
+    /// the product's own `upload` filling the parameter buffer, into a plain
+    /// 8-bit target so the shader's `srgb` branch stays off and the bytes it
+    /// writes are the coded RGB the CPU conversion also hands back.
+    fn painted(device: &wgpu::Device, queue: &wgpu::Queue, frame: &Planar8) -> Vec<u8> {
+        let (width, height) = (frame.width, frame.height);
+        let mut gpu = build(device, wgpu::TextureFormat::Rgba8Unorm);
+        gpu.upload(
+            device,
+            queue,
+            frame,
+            0,
+            [0.0, 0.0, 1.0, 1.0],
+            IDENTITY_ADJUST,
+        );
+        let target = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("fvid test picture"),
+            size: wgpu::Extent3d {
+                width: width as u32,
+                height: height as u32,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8Unorm,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
+            view_formats: &[],
+        });
+        let view = target.create_view(&wgpu::TextureViewDescriptor::default());
+        let planes = gpu.planes.as_ref().expect("an upload makes the planes");
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("fvid test picture"),
+        });
+        {
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("fvid test picture"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &view,
+                    depth_slice: None,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
+                multiview_mask: None,
+            });
+            pass.set_pipeline(&gpu.pipeline);
+            pass.set_bind_group(0, &planes.bind_group, &[]);
+            pass.draw(0..6, 0..1);
+        }
+        queue.submit([encoder.finish()]);
+        let stride = (width * 4).next_multiple_of(256) as u64;
+        let readback = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("fvid test readback"),
+            size: stride * height as u64,
+            usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("fvid test readback"),
+        });
+        encoder.copy_texture_to_buffer(
+            wgpu::TexelCopyTextureInfo {
+                texture: &target,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            wgpu::TexelCopyBufferInfo {
+                buffer: &readback,
+                layout: wgpu::TexelCopyBufferLayout {
+                    offset: 0,
+                    bytes_per_row: Some(stride as u32),
+                    rows_per_image: Some(height as u32),
+                },
+            },
+            wgpu::Extent3d {
+                width: width as u32,
+                height: height as u32,
+                depth_or_array_layers: 1,
+            },
+        );
+        queue.submit([encoder.finish()]);
+        let (done, waited) = std::sync::mpsc::channel();
+        readback
+            .slice(..)
+            .map_async(wgpu::MapMode::Read, move |result| {
+                let _ = done.send(result);
+            });
+        device
+            .poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            })
+            .expect("the readback must finish");
+        waited
+            .recv()
+            .expect("the mapping callback must run")
+            .expect("the buffer must map");
+        let mut out = vec![0u8; width * height * 4];
+        {
+            let mapped = readback.slice(..).get_mapped_range().expect("mapped");
+            for row in 0..height {
+                let from = row * stride as usize;
+                let to = (row + 1) * stride as usize;
+                let keep = row * width * 4;
+                out[keep..keep + width * 4].copy_from_slice(&mapped[from..to][..width * 4]);
+            }
+        }
+        readback.unmap();
+        out
+    }
+
+    /// A 64 by 64 frame whose luma walks the whole code range, so the picture
+    /// holds samples the limited-range mapping clamps at both ends.
+    fn frame(cb: impl Fn(usize, usize) -> u8, cr: impl Fn(usize, usize) -> u8) -> Planar8 {
+        let (width, height) = (64, 64);
+        let y: Vec<u8> = (0..width * height).map(|i| (i % 256) as u8).collect();
+        let mut cb_plane = Vec::new();
+        let mut cr_plane = Vec::new();
+        for row in 0..height / 2 {
+            for column in 0..width / 2 {
+                cb_plane.push(cb(column, row));
+                cr_plane.push(cr(column, row));
+            }
+        }
+        Planar8 {
+            width,
+            height,
+            chroma_width: width / 2,
+            chroma_height: height / 2,
+            y,
+            cb: cb_plane,
+            cr: cr_plane,
+            colour: crate::playback_native::AvcColour::default(),
+        }
+    }
+
+    /// The two plane routes measured against each other on a picture whose
+    /// chroma is flat: a field with no gradient has nothing for the sampler to
+    /// place differently, so the shader and the CPU conversion are left doing
+    /// the same arithmetic and have to land on the same bytes. Four corners of
+    /// the chroma square stand in for the neutral one, because a chroma of 128
+    /// zeroes the very gains a matrix is made of — and a flat field cannot hide
+    /// a wrong one: writing `2.4` where the shader scales Cr by `2.0` moves
+    /// these bytes and fails the test, while leaving a neutral field alone.
+    #[test]
+    fn a_frame_with_flat_chroma_pays_the_shader_the_cpus_bytes() {
+        let Some((device, queue)) = headless() else {
+            eprintln!("no GPU adapter: the shader has nothing to be compared with");
+            return;
+        };
+        for (blue, red) in [(128u8, 128u8), (100, 180), (64, 224), (192, 32)] {
+            let frame = frame(move |_, _| blue, move |_, _| red);
+            let painted = painted(&device, &queue, &frame);
+            let mut cpu = Vec::new();
+            crate::playback_native::planar8_to_rgb(&frame, &mut cpu, 64 * 64 * 3)
+                .expect("converted");
+            for (index, (shown, other)) in painted
+                .as_chunks::<4>()
+                .0
+                .iter()
+                .zip(cpu.as_chunks::<3>().0)
+                .enumerate()
+            {
+                for channel in 0..3 {
+                    assert_eq!(
+                        shown[channel], other[channel],
+                        "{blue}/{red} pixel {index} channel {channel}: {shown:?} against {other:?}"
+                    );
+                }
+            }
+        }
+    }
+
+    /// Where the two routes are known to part, and by how much: the sampler
+    /// sits a chroma sample half a luma column and half a row away from where
+    /// the CPU applies it, so on a ramp that steps one code per sample the
+    /// worst weight error is three quarters of a chroma code. One of those
+    /// moves red by 1.80 RGB codes, so the whole difference is predicted to
+    /// stay under 1.35 and two codes leave a driver's rounding somewhere to
+    /// live; measured here, `[1, 1, 0]` — blue never moves, because its
+    /// component is flat in this frame. The bound is what the interpolation
+    /// costs, not what the matrix is worth: writing `2.4` for the `2.0` that
+    /// scales Cr shows up here as `[11, 6, 0]`.
+    #[test]
+    fn a_chroma_ramp_divides_the_routes_by_its_interpolation() {
+        let Some((device, queue)) = headless() else {
+            eprintln!("no GPU adapter: the shader has nothing to be compared with");
+            return;
+        };
+        let frame = frame(|_, _| 128, |i, _| 96 + i as u8);
+        let painted = painted(&device, &queue, &frame);
+        let mut cpu = Vec::new();
+        crate::playback_native::planar8_to_rgb(&frame, &mut cpu, 64 * 64 * 3).expect("converted");
+        let mut worst = [0u32; 3];
+        for (pair, other) in painted
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .zip(cpu.as_chunks::<3>().0)
+        {
+            for channel in 0..3 {
+                let delta = pair[channel] as i32 - other[channel] as i32;
+                worst[channel] = worst[channel].max(delta.unsigned_abs());
+            }
+        }
+        assert!(
+            worst.iter().all(|d| *d <= 2),
+            "chroma interpolation moved the routes by {worst:?}"
         );
     }
 }
