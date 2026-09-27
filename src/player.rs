@@ -2659,6 +2659,13 @@ impl Player {
                 fps_text(self.period)
             ));
         }
+        if let Some(playback) = &self.playback {
+            lines.push(buffer_text(
+                playback.filled(),
+                playback.depth(),
+                self.period,
+            ));
+        }
         if let Some(track) = self.audio_tracks.get(self.audio_track) {
             lines.push(format!(
                 "Sound: {} · {} · {}",
@@ -2730,6 +2737,32 @@ fn fps_text(period: Duration) -> String {
     } else {
         format!("{fps:.2}")
     }
+}
+
+/// How far along the progress line the loaded pictures reach: the point already
+/// shown, plus the pictures the queue is holding ahead of it, as a share of the
+/// item. An item with no stated length cannot carry a share of it, so the
+/// segment stops where the picture is.
+///
+/// The span is measured in time rather than in frames because a queue full of
+/// pictures means nothing on its own: twelve of them are a fifth of a second at
+/// 60 fps and a twelfth of a second at six, and what a viewer wants to know is
+/// how far ahead of the stall the player has got.
+fn buffered_fraction(played: f32, frames: usize, period: Duration, total: Option<Duration>) -> f32 {
+    let played = played.clamp(0.0, 1.0);
+    let Some(total) = total.filter(|t| *t > Duration::ZERO) else {
+        return played;
+    };
+    let ahead = period.saturating_mul(frames as u32).as_secs_f32() / total.as_secs_f32();
+    (played + ahead).clamp(0.0, 1.0)
+}
+
+/// The buffer as the panel says it: the seconds of picture in hand and how full
+/// the queue is, so a mount delivering too few bytes and a decoder too slow to
+/// use them read differently on screen.
+fn buffer_text(frames: usize, depth: usize, period: Duration) -> String {
+    let seconds = period.saturating_mul(frames as u32).as_secs_f64();
+    format!("Buffer {seconds:.1} s · {frames}/{depth}")
 }
 
 /// The sound of the open item, named the way a viewer names it. Every
@@ -4119,6 +4152,23 @@ impl eframe::App for Player {
                 }
                 _ => None,
             };
+            // Where the picture actually stands, kept apart from the fraction
+            // the line may be showing under a drag: the loaded span is measured
+            // from the picture, not from the pointer.
+            let played = fraction;
+            // The pictures already in hand, drawn between the played part and
+            // the part the source has not delivered, so one line answers both
+            // questions a stall raises: how far ahead the player has got, and
+            // whether the answer is shrinking.
+            let loaded = match (played, self.playback.as_ref()) {
+                (Some(played), Some(playback)) => Some(buffered_fraction(
+                    played,
+                    playback.filled(),
+                    self.period,
+                    total,
+                )),
+                _ => None,
+            };
             // The line takes clicks and drags on a taller hit area; the seek
             // itself happens on release so a drag decodes only once.
             if fraction.is_some() && self.seekable {
@@ -4146,6 +4196,17 @@ impl eframe::App for Player {
                 }
                 if let Some(scrub) = self.scrub {
                     fraction = Some(scrub);
+                }
+            }
+            if let (Some(played), Some(loaded)) = (played, loaded) {
+                let from = bar.left() + bar.width() * played;
+                let to = bar.left() + bar.width() * loaded;
+                if to > from {
+                    painter.rect_filled(
+                        Rect::from_min_max(Pos2::new(from, bar.min.y), Pos2::new(to, bar.max.y)),
+                        CornerRadius::same(2),
+                        DIM,
+                    );
                 }
             }
             if let Some(fraction) = fraction {
@@ -4260,7 +4321,8 @@ mod tests {
         ADJUST_IDENTITY, ASPECTS, Adjust, Aspect, CROPS, ChapterMark, Control, FileTags, Frame,
         HIDE_AFTER, LoopMark, NO_CROP, PathBuf, Pixels, Planar8, PlayArgs, PlayBounds, Player,
         Pos2, RATES, Rect, Repeat, SubtitleSource, VOLUME_MAX, Vec2, adjust_luma, adjust_rgb,
-        adjust_scalars, advance, aspect_label, aspect_osd, aspect_step, bitrate_text, byte_size,
+        adjust_scalars, advance, aspect_label, aspect_osd, aspect_step, bitrate_text, buffer_text,
+        buffered_fraction, byte_size,
         chapter_ahead, container_facts, crop_insets, crop_label, crop_osd, crop_step, cropped_size,
         cycle_repeat, deal_cycle, delay_step, delayed_clock, display_size, expand_inputs,
         file_size, fps_text, jump_size, loop_press, loop_rewind, paced_period, parse_clock,
@@ -5006,6 +5068,22 @@ mod tests {
         std::fs::remove_dir_all(&directory).unwrap();
     }
 
+    /// The buffer line counts pictures that move while the panel is read, so its
+    /// number differs between runs; the panel tests hold every other line to an
+    /// exact list and flatten it to a fixed word.
+    fn panel_lines(lines: &[String]) -> Vec<String> {
+        lines
+            .iter()
+            .map(|line| {
+                if line.starts_with("Buffer ") {
+                    "Buffer …".to_owned()
+                } else {
+                    line.clone()
+                }
+            })
+            .collect()
+    }
+
     /// The panel says what the open item is in the player's own words: the
     /// picture names the codec its container tagged, the size it is stored at
     /// and the rate it runs at; a track names its place in the file's own list;
@@ -5035,9 +5113,10 @@ mod tests {
             ""
         };
         assert_eq!(
-            player.info_lines(),
+            panel_lines(&player.info_lines()),
             [
                 format!("Video: H.264 · 64×64 · 25 fps{decoder}"),
+                "Buffer …".to_owned(),
                 "Sound: 1/3 · AAC · Первая · 1 ch 48000 Hz".to_owned(),
                 "Subtitles: 1/2 · Титры".to_owned(),
                 "File: 21 kB · 0:00 · 413 kb/s".to_owned(),
@@ -5069,9 +5148,10 @@ mod tests {
         player.play_index(0);
         assert!(player.error.is_none(), "{:?}", player.error);
         assert_eq!(
-            player.info_lines(),
+            panel_lines(&player.info_lines()),
             [
                 "Video: VP9 · 16×16 · 4 fps",
+                "Buffer …",
                 "File: 1.2 kB · 0:04 · 2 kb/s",
                 "Chapters: 3",
             ]
@@ -6523,6 +6603,57 @@ mod tests {
         assert!(parse_clock("-5").is_err());
         assert!(parse_clock("").is_err());
         assert!(parse_clock("abc").is_err());
+    }
+
+    /// The loaded span is a share of the item, so it is the same length on
+    /// screen whatever the frame rate, and it never runs past the end or back
+    /// before the picture.
+    #[test]
+    fn the_buffer_span_scales_with_the_item() {
+        let tenth = Duration::from_millis(40);
+        // Ten pictures of a 40 ms period are 0.4 s of picture: a thirtieth of a
+        // twelve-second item, a tenth of a four-second one.
+        assert!(
+            (buffered_fraction(0.0, 10, tenth, Some(seconds(12_000))) - 1.0 / 30.0).abs() < 1e-6
+        );
+        assert!(
+            (buffered_fraction(0.0, 10, tenth, Some(seconds(4_000))) - 1.0 / 10.0).abs() < 1e-6
+        );
+        // Further along the item, the same load adds the same share.
+        assert!(
+            (buffered_fraction(0.9, 10, tenth, Some(seconds(12_000))) - (0.9 + 1.0 / 30.0)).abs()
+                < 1e-6
+        );
+        // And the span never runs past the end of the line.
+        assert_eq!(
+            buffered_fraction(0.99, 1_000, Duration::from_secs(1), Some(seconds(60_000))),
+            1.0
+        );
+        // Nothing loaded reads as the picture itself, and an item of no stated
+        // length has no share to draw.
+        assert_eq!(
+            buffered_fraction(0.25, 0, tenth, Some(seconds(12_000))),
+            0.25
+        );
+        assert_eq!(buffered_fraction(0.25, 9, tenth, None), 0.25);
+        assert_eq!(
+            buffered_fraction(0.25, 9, tenth, Some(Duration::ZERO)),
+            0.25
+        );
+    }
+
+    /// The panel says the same thing in seconds, which is what differs between
+    /// a full queue on a fast source and a full queue on a slow one.
+    #[test]
+    fn the_buffer_line_names_seconds_and_slots() {
+        assert_eq!(
+            buffer_text(6, 12, Duration::from_millis(40)),
+            "Buffer 0.2 s · 6/12"
+        );
+        assert_eq!(
+            buffer_text(0, 2, Duration::from_millis(40)),
+            "Buffer 0.0 s · 0/2"
+        );
     }
 
     #[test]
