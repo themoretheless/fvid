@@ -74,6 +74,8 @@ pub mod hevc_vps;
 
 pub mod hevc_hrd;
 
+pub mod hevc_sei;
+
 pub mod hevc_vui;
 
 pub mod hevc_sps;

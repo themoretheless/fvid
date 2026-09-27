@@ -1,0 +1,348 @@
+//! H.265 D.2.2 SEI messages: the payload-type/payload-size walk over an RBSP.
+//!
+//! An SEI NAL unit is a sequence of messages, each announced by a type and a
+//! size written as a run of `0xFF` bytes followed by the remainder, so a
+//! decoder can pass over the messages it does not implement. The two static
+//! HDR messages carry the payloads [`crate::color::hdr`] reads: SEI 137 holds
+//! the mastering display volume and SEI 144 the content light levels, in the
+//! same 24 and 4 bytes an MP4 `mdcv`/`ccll` box holds.
+use super::hevc_nal::NalRbsp;
+use crate::color::hdr::{HdrMetadata, SEI_CLLI, SEI_MDCV};
+use crate::{Result, invalid};
+
+/// Prefix SEI, carried before the coded picture it describes.
+pub const NAL_UNIT_PREFIX_SEI: u8 = 39;
+/// Suffix SEI, carried after it.
+pub const NAL_UNIT_SUFFIX_SEI: u8 = 40;
+
+pub fn is_sei_unit(unit_type: u8) -> bool {
+    matches!(unit_type, NAL_UNIT_PREFIX_SEI | NAL_UNIT_SUFFIX_SEI)
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Message<'a> {
+    pub payload_type: u32,
+    pub payload: &'a [u8],
+}
+
+/// A `payloadType` or `payloadSize`, extended by a run of `0xFF` bytes.
+fn code(bytes: &[u8], cursor: &mut usize) -> Result<u32> {
+    let mut sum = 0u32;
+    while let Some(&byte) = bytes.get(*cursor) {
+        *cursor += 1;
+        if byte != 0xff {
+            return Ok(sum + u32::from(byte));
+        }
+        sum += u32::from(byte);
+    }
+    Err(invalid("SEI message field ends inside a 0xFF run"))
+}
+
+/// The padding that follows the last message: an `0x80` marker bit, then zeros.
+/// A zero-length message of type 128 would look the same; none is in use.
+fn is_trailing(bytes: &[u8]) -> bool {
+    bytes.first() == Some(&0x80) && bytes[1..].iter().all(|&byte| byte == 0)
+}
+
+/// Every message in an SEI RBSP, unknown payloads returned unread.
+pub fn messages(rbsp: &[u8]) -> Result<Vec<Message<'_>>> {
+    let mut found = Vec::new();
+    let mut cursor = 0;
+    loop {
+        let rest = &rbsp[cursor..];
+        if rest.is_empty() || is_trailing(rest) {
+            return Ok(found);
+        }
+        let payload_type = code(rbsp, &mut cursor)?;
+        let size = code(rbsp, &mut cursor)?;
+        let size: usize = size
+            .try_into()
+            .map_err(|_| invalid("SEI payload size too large"))?;
+        let end = cursor + size;
+        let payload = rbsp
+            .get(cursor..end)
+            .ok_or_else(|| invalid("SEI payload runs past the RBSP"))?;
+        found.push(Message {
+            payload_type,
+            payload,
+        });
+        cursor = end;
+    }
+}
+
+/// The static HDR metadata an SEI RBSP states, message by message.
+///
+/// A malformed 137 or 144 payload is dropped rather than failed: the metadata
+/// only guides tone mapping, so it must not cost the picture it describes.
+pub fn hdr_from_rbsp(rbsp: &[u8]) -> Result<HdrMetadata> {
+    let mut hdr = HdrMetadata::default();
+    for message in messages(rbsp)? {
+        let decoded = if message.payload_type == u32::from(SEI_MDCV) {
+            HdrMetadata::from_mdcv(message.payload)
+        } else if message.payload_type == u32::from(SEI_CLLI) {
+            HdrMetadata::from_clli(message.payload)
+        } else {
+            None
+        };
+        if let Some(decoded) = decoded {
+            hdr.merge(decoded);
+        }
+    }
+    Ok(hdr)
+}
+
+/// Static HDR metadata from one NAL unit, or `None` when it states none.
+pub fn hdr_from_nal(nal: &[u8], budget: usize) -> Result<Option<HdrMetadata>> {
+    let rbsp = NalRbsp::parse(nal, budget)?;
+    if !is_sei_unit(rbsp.header.unit_type) {
+        return Ok(None);
+    }
+    rbsp.header.require_base_layer()?;
+    Ok(Some(hdr_from_rbsp(&rbsp.bytes)?))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// An SEI NAL header plus the messages written after it.
+    fn sei(messages: &[u8]) -> Vec<u8> {
+        let mut nal = vec![0x4e, 0x01];
+        nal.extend_from_slice(messages);
+        nal
+    }
+
+    /// The two HDR messages x265 wrote for a BT.2020/PQ encode of a
+    /// `master-display=G(8500,39850)B(6550,2300)R(35400,14600)WP(15635,16450)L(10000000,1)
+    /// max-cll=1234,567` stream, taken from the container's own bitstream.
+    const MDCV: &str = "4e01891821349baa199608fc8a4839083d13404200989680000003000180";
+    const CLLI: &str = "4e01900404d2023780";
+    /// The same volume with the encoder's emulation-prevention byte removed:
+    /// four `00` bytes in the minimum luminance need one `03` to travel.
+    const MDCV_PAYLOAD: &str = "21349baa199608fc8a4839083d1340420098968000000001";
+
+    fn hex(bytes: &str) -> Vec<u8> {
+        (0..bytes.len())
+            .step_by(2)
+            .map(|i| u8::from_str_radix(&bytes[i..i + 2], 16).unwrap())
+            .collect()
+    }
+
+    /// The copy an encoder makes of a payload that carries start-code patterns:
+    /// a third `00` inserts a `03`, which is why the travelling bytes and the
+    /// payload the reader sees differ in length.
+    fn escape(bytes: &[u8]) -> Vec<u8> {
+        let mut out = Vec::new();
+        let mut zeros = 0;
+        for &byte in bytes {
+            if zeros == 2 && byte <= 3 {
+                out.push(0x03);
+                zeros = 0;
+            }
+            out.push(byte);
+            zeros = if byte == 0 { zeros + 1 } else { 0 };
+        }
+        out
+    }
+
+    #[test]
+    fn a_field_of_0ff_runs_adds_up_to_one_number() {
+        let bytes = [0xffu8, 0xff, 0x01, 0x00];
+        let mut cursor = 0;
+        assert_eq!(code(&bytes, &mut cursor).unwrap(), 511);
+        assert_eq!(cursor, 3);
+        assert_eq!(code(&bytes[3..], &mut 0).unwrap(), 0);
+        // A run that never ends states no number at all.
+        assert!(code(&[0xff, 0xff], &mut 0).is_err());
+    }
+
+    #[test]
+    fn messages_are_read_by_type_and_size_and_a_known_payload_is_not_consumed() {
+        // A type of 0xFF + 0x41 is 320, and an empty payload travels as one
+        // size byte.
+        let rbsp = [
+            0x05, 0x03, 0xaa, 0xbb, 0xcc, // type 5, three bytes
+            0x81, 0x00, // type 129, empty
+            0xff, 0x41, 0x01, 0x7f, 0x80, // type 320, one byte, then trailing bits
+        ];
+        let found = messages(&rbsp).unwrap();
+        assert_eq!(
+            found,
+            vec![
+                Message {
+                    payload_type: 5,
+                    payload: &[0xaa, 0xbb, 0xcc]
+                },
+                Message {
+                    payload_type: 129,
+                    payload: &[]
+                },
+                Message {
+                    payload_type: 320,
+                    payload: &[0x7f]
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn trailing_bits_end_the_walk_and_a_truncated_payload_does_not() {
+        assert_eq!(messages(&[0x05, 0x01, 0x7f, 0x80]).unwrap().len(), 1);
+        assert!(messages(&[]).unwrap().is_empty());
+        assert!(messages(&[0x80]).unwrap().is_empty());
+        let truncated: [&[u8]; 4] = [&[0x05], &[0x05, 0x01], &[0x05, 0x04, 0x7f, 0x80], &[0xff]];
+        for bytes in truncated {
+            assert!(messages(bytes).is_err(), "{bytes:x?} is not a message list");
+        }
+    }
+
+    #[test]
+    fn a_real_mastering_display_message_describes_the_volume_it_names() {
+        let nal = hex(MDCV);
+        let rbsp = NalRbsp::parse(&nal, 1 << 20).unwrap();
+        assert_eq!(rbsp.header.unit_type, NAL_UNIT_PREFIX_SEI);
+        let found = messages(&rbsp.bytes).unwrap();
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0].payload_type, u32::from(SEI_MDCV));
+        // The emulation-prevention byte the encoder inserted inside the
+        // luminance field leaves a payload of the size the standard fixes.
+        assert_eq!(found[0].payload.len(), 24);
+        assert_eq!(found[0].payload, hex(MDCV_PAYLOAD).as_slice());
+        let hdr = hdr_from_rbsp(&rbsp.bytes).unwrap();
+        let display = hdr.mastering.unwrap();
+        // Back to the encoder's own integers: the corners land where they are
+        // named, not in the order the payload carries them.
+        let unit = |c: f64| (c / 0.000_02).round();
+        assert_eq!(
+            [
+                (unit(display.green.x), unit(display.green.y)),
+                (unit(display.blue.x), unit(display.blue.y)),
+                (unit(display.red.x), unit(display.red.y)),
+                (unit(display.white.x), unit(display.white.y)),
+            ],
+            [
+                (8500.0, 39_850.0),
+                (6550.0, 2300.0),
+                (35_400.0, 14_600.0),
+                (15_635.0, 16_450.0),
+            ]
+        );
+        assert!((display.max_luminance / 0.000_1).round() == 10_000_000.0);
+        assert!((display.min_luminance / 0.000_1).round() == 1.0);
+        assert!(display.is_hdr10());
+        assert!(hdr.light.max_cll == 0.0);
+        // The escape rule above is the encoder's own: it rebuilds this unit.
+        assert_eq!(
+            sei(&[
+                &[SEI_MDCV, 0x18][..],
+                &escape(&hex(MDCV_PAYLOAD)),
+                &[0x80][..]
+            ]
+            .concat()),
+            hex(MDCV)
+        );
+    }
+
+    #[test]
+    fn a_real_light_level_message_states_the_lights_it_names() {
+        let nal = hex(CLLI);
+        let hdr = hdr_from_nal(&nal, 1 << 20).unwrap().unwrap();
+        assert_eq!(hdr.light.max_cll, 1234.0);
+        assert_eq!(hdr.light.max_fall, 567.0);
+        assert!(hdr.mastering.is_none());
+    }
+
+    #[test]
+    fn the_two_halves_of_one_stream_add_up_to_the_whole_volume() {
+        let mut hdr = hdr_from_nal(&hex(MDCV), 1 << 20).unwrap().unwrap();
+        assert!(hdr.mastering.unwrap().is_hdr10());
+        assert!(hdr.light.max_cll == 0.0 && hdr.light.max_fall == 0.0);
+        hdr.merge(hdr_from_nal(&hex(CLLI), 1 << 20).unwrap().unwrap());
+        assert_eq!(hdr.light.max_cll, 1234.0);
+        assert_eq!(hdr.light.max_fall, 567.0);
+        assert_eq!(hdr.content_light(1000.0).max_cll, 1234.0);
+        // A volume names the panel it was graded on, to within the payload's
+        // own quantization step; only a VUI or a colr box names the curve.
+        assert!(hdr.mastering.unwrap().is_hdr10());
+    }
+
+    #[test]
+    fn an_unread_message_is_passed_over_and_leaves_no_metadata() {
+        // x265 writes its options as one user-data message, in the form the
+        // encoder really used: a size of nine 0xFF bytes plus 0x51 = 2 376.
+        let mut rbsp = vec![0x05u8];
+        rbsp.extend_from_slice(&[0xff; 9]);
+        rbsp.push(0x51);
+        rbsp.extend_from_slice(&[0x2c; 2376]);
+        rbsp.push(0x80);
+        let found = messages(&rbsp).unwrap();
+        assert_eq!(found.len(), 1);
+        assert_eq!((found[0].payload_type, found[0].payload.len()), (5, 2_376));
+        assert!(hdr_from_rbsp(&rbsp).unwrap().is_empty());
+        // A header whose payload never arrives is not a message list.
+        assert!(messages(&rbsp[..11]).is_err());
+    }
+
+    #[test]
+    fn only_sei_units_are_walked_and_a_multilayer_one_is_refused() {
+        let nal = hex(CLLI);
+        assert!(is_sei_unit(
+            NalRbsp::parse(&nal, 1 << 20).unwrap().header.unit_type
+        ));
+        // A VPS NAL states no picture metadata.
+        assert!(hdr_from_nal(&hex("40010c01ffff0220"), 1 << 20)
+            .unwrap()
+            .is_none());
+        // The same payload under a header that names a non-base layer.
+        let mut multilayer = nal;
+        multilayer[0] |= 1;
+        assert!(hdr_from_nal(&multilayer, 1 << 20).is_err());
+        let mut suffix = hex(CLLI);
+        suffix[0] = (NAL_UNIT_SUFFIX_SEI << 1) | (suffix[0] & 1);
+        assert_eq!(
+            hdr_from_nal(&suffix, 1 << 20)
+                .unwrap()
+                .unwrap()
+                .light
+                .max_cll,
+            1234.0
+        );
+        // A payload budget stops the walk before it allocates for a big one.
+        assert!(hdr_from_nal(&hex(MDCV), 8).is_err());
+    }
+
+    #[test]
+    fn a_message_that_is_too_short_for_the_volume_it_claims_states_nothing() {
+        let hdr = hdr_from_nal(&sei(&[SEI_MDCV, 0x02, 0x21, 0x34, 0x80]), 1 << 20)
+            .unwrap()
+            .unwrap();
+        assert!(hdr.is_empty());
+        let hdr = hdr_from_nal(&sei(&[SEI_CLLI, 0x02, 0x04, 0xd2, 0x80]), 1 << 20)
+            .unwrap()
+            .unwrap();
+        assert!(hdr.is_empty());
+    }
+
+    #[test]
+    fn one_unit_can_carry_both_halves_and_a_later_block_overrides_only_what_it_knows() {
+        let volume = escape(&hex(MDCV_PAYLOAD));
+        let both = sei(&[
+            &[SEI_CLLI, 0x04, 0x04, 0xd2, 0x02, 0x37][..],
+            &[SEI_MDCV, 0x18][..],
+            &volume,
+            &[0x80][..],
+        ]
+        .concat());
+        let hdr = hdr_from_nal(&both, 1 << 20).unwrap().unwrap();
+        assert!(hdr.mastering.unwrap().is_hdr10());
+        assert_eq!(hdr.light.max_fall, 567.0);
+        // A block that only knows the light level must not clear the volume.
+        let mut volume = hdr;
+        volume.merge(HdrMetadata::from_clli(&[0x01, 0x00, 0x00, 0x64]).unwrap());
+        assert_eq!(volume.mastering, hdr.mastering);
+        assert_eq!(
+            (volume.light.max_cll, volume.light.max_fall),
+            (256.0, 100.0)
+        );
+    }
+}
