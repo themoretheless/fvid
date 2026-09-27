@@ -1,6 +1,6 @@
 use fvid::{
-    color::{ColourDescription, DisplayTarget, Grade, HdrMetadata, Settings, Transfer},
-    playback_native::NativeReader,
+    color::{ColourDescription, DisplayTarget, Grade, HdrMetadata, Settings, ToneMap, Transfer},
+    playback_native::{NativeReader, planar8_to_rgb},
     playback_thread::{Event, Frame, Pixels, Playback},
 };
 use std::{
@@ -209,6 +209,91 @@ fn a_grade_that_would_change_nothing_leaves_a_picture_as_planes() {
             Some(Event::Error(error)) => panic!("{error}"),
             Some(Event::Ended(_)) => panic!("the stream ended early"),
             None => thread::sleep(Duration::from_millis(1)),
+        }
+    }
+}
+
+/// A real HDR10 clip on the thread that shows it, which is where a grade has to
+/// land for a viewer to see anything of it. The file is Main10 HEVC that states
+/// its light nowhere but in-band SEI, so the peak the grade compresses from comes
+/// out of the coding; asked blind, the same settings have only the panel's own
+/// 100 cd/m² to work against and their curve becomes clipping. Measured on this
+/// clip's first two pictures, codes at the ceiling per channel: 835/631/428 and
+/// 800/595/413 against the master's stated peak, versus 957/665/580 and
+/// 950/645/568 blind — the shoulder holds highlights back on decoded pixels, not
+/// only on the code values the grade's own tests hand it.
+#[test]
+fn a_real_hdr10_picture_is_tone_mapped_by_the_thread_that_shows_it() {
+    fn hdr10(data: &[u8]) -> NativeReader<Cursor<Vec<u8>>> {
+        let mut reader = NativeReader::without_memory_limit(Cursor::new(data.to_vec())).unwrap();
+        assert!(reader.read_frame().unwrap());
+        reader
+    }
+    fn at_the_ceiling(rgb: &[u8]) -> [usize; 3] {
+        let mut counts = [0usize; 3];
+        for pixel in rgb.as_chunks::<3>().0 {
+            for (channel, code) in pixel.iter().enumerate() {
+                if *code == 255 {
+                    counts[channel] += 1;
+                }
+            }
+        }
+        counts
+    }
+    let data = include_bytes!("fixtures/hevc/hdr10.mp4").to_vec();
+    let reader = hdr10(&data);
+    let (signal, hdr) = (reader.colour(), reader.hdr());
+    assert!(signal.is_hdr());
+    assert_eq!(hdr.content_light(100.0).max_cll, 1_000.0);
+    let settings = Settings::video(DisplayTarget::sdr(100.0));
+    let stated = Grade::new(signal, &hdr, settings, None);
+    let blind = Grade::new(signal, &HdrMetadata::default(), settings, None);
+    assert_eq!(stated.plan().tone_map, Some(ToneMap::Mobius));
+    assert_eq!(blind.plan().tone_map, Some(ToneMap::Clip));
+
+    let plain_reader = hdr10(&data);
+    let budget = plain_reader.rgb_budget();
+    let mut plain = Playback::start(plain_reader, None);
+    let mut shown = Playback::start(hdr10(&data), Some(stated));
+    let mut burnt = Playback::start(hdr10(&data), Some(blind));
+
+    // A graded picture is always packed RGB on this thread; one with nothing done
+    // to its colour is packed only where the reader left it that way, which for
+    // this file is its first picture, and planes after that.
+    fn packed(pixels: Pixels, budget: usize) -> Vec<u8> {
+        match pixels {
+            Pixels::Rgb(rgb) => rgb,
+            Pixels::Planar(planes) => {
+                let mut rgb = Vec::new();
+                planar8_to_rgb(&planes, &mut rgb, budget).expect("converted");
+                rgb
+            }
+        }
+    }
+    for frame in 0..2 {
+        let untouched = first_frame(&mut plain);
+        if frame > 0 {
+            assert!(
+                matches!(untouched.pixels, Pixels::Planar(_)),
+                "an ungraded picture was made to lose its planes"
+            );
+        }
+        let untouched = packed(untouched.pixels, budget);
+        let graded = first_frame(&mut shown);
+        assert!(
+            matches!(graded.pixels, Pixels::Rgb(_)),
+            "a graded picture stayed planes"
+        );
+        let graded = packed(graded.pixels, budget);
+        let clipped = packed(first_frame(&mut burnt).pixels, budget);
+        assert_ne!(untouched, graded, "the grade reached no pixels");
+        let rolled = at_the_ceiling(&graded);
+        let burnt = at_the_ceiling(&clipped);
+        for channel in 0..3 {
+            assert!(
+                rolled[channel] < burnt[channel],
+                "frame {frame} channel {channel}: the master's own peak left {rolled:?} at the ceiling, blind clipping {burnt:?}"
+            );
         }
     }
 }
