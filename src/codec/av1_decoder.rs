@@ -3,10 +3,12 @@ use super::{
     av1::Obus,
     av1_cdfs::Cdfs,
     av1_frame::Header,
+    av1_metadata,
     av1_picture::{self, Picture},
     av1_sequence::{Color, Sequence},
     bits::BitReader,
 };
+use crate::color::hdr::HdrMetadata;
 use crate::{Result, invalid};
 use std::sync::Arc;
 #[derive(Clone)]
@@ -22,6 +24,7 @@ pub struct Decoder {
     reference_types: [u8; 8],
     headers: [Option<Arc<Header>>; 8],
     cdfs: [Option<Arc<Cdfs>>; 8],
+    hdr: HdrMetadata,
     budget: usize,
     failed: bool,
 }
@@ -34,6 +37,7 @@ impl Decoder {
             reference_types: [0; 8],
             headers: std::array::from_fn(|_| None),
             cdfs: std::array::from_fn(|_| None),
+            hdr: HdrMetadata::default(),
             budget,
             failed: false,
         }
@@ -47,6 +51,13 @@ impl Decoder {
     /// the decoder as well as the file.
     pub fn color(&self) -> Option<&Color> {
         self.sequence.as_ref().map(|s| &s.color)
+    }
+    /// The static HDR light the stream's own metadata OBUs stated, since this
+    /// decoder was last flushed. A volume written in-band by an encoder is
+    /// often written nowhere else, so a reader that grades a picture for a
+    /// panel asks the coding as well as the file.
+    pub fn hdr(&self) -> HdrMetadata {
+        self.hdr
     }
     pub fn decode_packet(&mut self, data: &[u8]) -> Result<Vec<Decoded>> {
         if self.failed {
@@ -73,10 +84,18 @@ impl Decoder {
                         self.showable.fill(false);
                         self.headers.fill(None);
                         self.cdfs.fill(None);
+                        self.hdr = HdrMetadata::default();
                     }
                     self.sequence = Some(sequence);
                 }
-                2 | 5 | 15 | 0 | 9..=14 => {}
+                2 | 15 | 0 | 9..=14 => {}
+                5 => {
+                    // A metadata OBU this module cannot read costs the
+                    // guidance, never the picture it travels with.
+                    if let Some(hdr) = av1_metadata::hdr_from_obu(&obu) {
+                        self.hdr.merge(hdr);
+                    }
+                }
                 3 | 6 => {
                     if output.len() >= 8 {
                         return Err(invalid("too many AV1 frames per packet"));
@@ -298,6 +317,36 @@ mod tests {
             changed[i] ^= 0xff;
             let _ = Decoder::new(8 << 20).decode_packet(&changed);
         }
+    }
+    #[test]
+    fn metadata_obus_hold_their_light_until_the_stream_is_flushed() {
+        fn hex(bytes: &str) -> Vec<u8> {
+            (0..bytes.len())
+                .step_by(2)
+                .map(|at| u8::from_str_radix(&bytes[at..at + 2], 16).unwrap())
+                .collect()
+        }
+        // SVT-AV1 v4.2.0 writing `--content-light 1234,567` and
+        // `--mastering-display "G(0.170,0.797)B(0.131,0.046)R(0.708,0.292)WP(0.3127,0.3290)L(1000.0,0.0001)"`
+        // into one packet: the decoder remembers both halves as it walks the
+        // OBUs, so a stream that writes them nowhere else still has a volume to
+        // tone map from.
+        let mut packet = hex("2a060104d2023780");
+        packet.extend_from_slice(&hex(
+            "2a1a02b53f4ac12b85cc0821890bc7500d54390003e8000000000280",
+        ));
+        let mut d = Decoder::new(8 << 20);
+        assert!(d.hdr().is_empty());
+        assert!(d.decode_packet(&packet).unwrap().is_empty());
+        let hdr = d.hdr();
+        assert!(hdr.mastering.unwrap().is_hdr10());
+        assert_eq!((hdr.light.max_cll, hdr.light.max_fall), (1234.0, 567.0));
+        // A later packet that states nothing leaves the volume standing, and a
+        // flush forgets it along with the rest of the stream.
+        assert!(d.decode_packet(&hex("1200")).unwrap().is_empty());
+        assert_eq!(d.hdr(), hdr);
+        d.reset();
+        assert!(d.hdr().is_empty());
     }
     #[test]
     fn publishes_only_complete_frames_and_reset_recovers() {

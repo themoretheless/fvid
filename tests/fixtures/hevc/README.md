@@ -83,5 +83,8 @@ mastering display and the 1 000/400 cd/m² light levels are likewise written
 nowhere in the container: they travel as SEI messages 137 and 144, which
 `ffprobe` surfaces as per-frame side data. So this fixture is the case where a
 container says nothing about colour and the coding says everything, and the
-in-band half of it is still unread — a reader's `hdr` is empty for it.
+in-band half of it is what a reader reports: the HEVC decoder caches SEI 137 and
+144 as it walks an access unit, so `bitstream_hdr` states this volume and these
+light levels once the first packet has been decoded — and a container with no
+box of its own has nothing to override them with.
 

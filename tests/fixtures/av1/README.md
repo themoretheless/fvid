@@ -67,6 +67,36 @@ ffmpeg -v error -r 12 -i random-access.obu -c copy random-access.webm
 SVT-AV1 4.2.0 maps preset 12 to preset 11. These are finite pixel-oracle tests,
 not a claim of full AV1 conformance; see `docs/NATIVE_PLAYBACK.md` for limits.
 
+## `hdr-metadata.mp4` — light stated only in metadata OBUs
+
+The one-frame 32x32 `ramp.obu` with SVT-AV1 4.2.0's two HDR metadata OBUs
+spliced in behind its sequence header, then muxed into an MP4:
+
+```sh
+python3 - <<'EOF'
+src = open('tests/fixtures/av1/ramp.obu', 'rb').read()
+cll = bytes.fromhex('2a060104d2023780')  # --content-light 1234,567
+mdcv = bytes.fromhex('2a1a02b53f4ac12b85cc0821890bc7500d54390003e8000000000280')
+open('/tmp/ramp-hdr.obu', 'wb').write(src[:14] + cll + mdcv + src[14:])
+EOF
+ffmpeg -v error -fflags +bitexact -i /tmp/ramp-hdr.obu -c copy hdr-metadata.mp4
+```
+
+One 32x32 picture, 1 598 bytes, sha256
+`ad39fed10e5dbd99fb49855e19ca2c186de0db027e4301a35ba1d7acfb865490`; two runs of
+the mux reproduce it byte for byte. The two OBU bodies are the bytes that
+encoder really wrote for `--content-light 1234,567` and
+`--mastering-display "G(0.170,0.797)B(0.131,0.046)R(0.708,0.292)WP(0.3127,0.3290)L(1000.0,0.0001)"`,
+so the payload is a real encoder's statement rather than a hand-written one, and
+only their position is chosen here: inserted at byte 14 of `ramp.obu`, straight
+after its sequence header.
+
+What it is for is measured: the mov muxer writes no `colr`, `mdcv` or `ccll` box
+for this file (counted in its bytes: zero of each), so the volume and the light
+levels exist nowhere but inside the packet. That is the case a reader's
+`bitstream_hdr` answers — and, like the coding's signal, the answer appears once
+the packet has been decoded rather than when the file was opened.
+
 ## Independent primitive oracles
 
 `symbols.bin`: 30 libaom streams, 1024 symbols each; alphabet sizes 2–16 with

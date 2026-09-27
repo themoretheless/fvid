@@ -277,15 +277,17 @@ impl<R: BufRead + Seek> NativeReader<R> {
         }
     }
     /// The light the source names for its pictures: a mastering display and a
-    /// peak and average level, all empty where nothing is named. Only the two
-    /// container families have anywhere to write them outside the bitstream, so
-    /// a stream whose HDR is carried as in-band SEI or metadata OBU still reads
-    /// as empty here.
+    /// peak and average level, all empty where nothing is named. The container
+    /// states them from its own box — MP4's `mdcv`/`ccll`, Matroska's `Colour`
+    /// element — and the coding's SEI message or metadata OBU fills any half the
+    /// box left out, which is the whole answer for a file whose HDR was written
+    /// only in-band. That half appears once the packets carrying it have been
+    /// decoded, so asking after the first frame sees more than asking at open.
     pub fn hdr(&self) -> HdrMetadata {
         match self {
             Self::Y4m(_) => HdrMetadata::default(),
-            Self::Webm(r) => r.hdr(),
-            Self::Avc { source, .. } => source.track().hdr,
+            Self::Webm(r) => r.hdr().filled_with(r.bitstream_hdr()),
+            Self::Avc { source, .. } => source.track().hdr.filled_with(source.bitstream_hdr()),
         }
     }
     /// The cap this reader sizes a packed RGB picture by, so a caller that
@@ -1368,9 +1370,7 @@ mod tests {
     /// VUI names BT.2020 primaries, a PQ curve and the BT.2020-NCL matrix. The
     /// muxer wrote no `colr` atom for it — counted in the file's bytes, zero — so
     /// the whole statement comes out of the parameter set, which is the case a
-    /// reader has to reach into the coding for. Its mastering volume and light
-    /// level travel as in-band SEI, which the decoder does not read yet, so `hdr`
-    /// is still empty here.
+    /// reader has to reach into the coding for.
     #[test]
     fn a_real_hdr10_files_signal_reaches_the_caller_that_grades_it() {
         use crate::color::{Primaries, Transfer};
@@ -1395,6 +1395,27 @@ mod tests {
             assert!(reader.read_frame_raw().unwrap().is_some());
         }
         assert_eq!(reader.colour(), stated);
+    }
+
+    /// The same file's light, which travels nowhere but in-band: SEI 137 and 144
+    /// in the first access unit. The reader is empty at open because the coding
+    /// has said nothing yet, and states the mastering volume and the content
+    /// light once a packet has been walked — the point a tone mapper needs them.
+    /// Only the software path reads the bitstream, so a VideoToolbox build,
+    /// where samples go to the hardware session untouched, is the one case this
+    /// cannot assert.
+    #[cfg(not(all(target_os = "macos", feature = "videotoolbox")))]
+    #[test]
+    fn a_real_hdr10_files_light_reaches_the_caller_that_tone_maps_it() {
+        let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
+        assert!(reader.hdr().is_empty());
+        assert!(reader.read_frame_raw().unwrap().is_some());
+        let hdr = reader.hdr();
+        assert!(hdr.mastering.unwrap().is_hdr10());
+        assert_eq!((hdr.light.max_cll, hdr.light.max_fall), (1000.0, 400.0));
+        // The stated peak, not a fallback, is what a tone map compresses from.
+        assert_eq!(hdr.content_light(400.0).max_cll, 1000.0);
     }
 
     /// An AV1 track whose WebM header writes no `Colour` element: every code the

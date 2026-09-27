@@ -5,7 +5,7 @@ use crate::codec::{
     av1_decoder as av1, avc_decoder::AvcDecoder, avc_picture::IntraPicture,
     hevc_decoder::HevcDecoder, vp9_decoder as vp9,
 };
-use crate::color::hdr::ColourDescription;
+use crate::color::hdr::{ColourDescription, HdrMetadata};
 use crate::container::mp4::{Limits, Mp4Reader, Track};
 use crate::{Result, invalid};
 use std::io::{Read, Seek};
@@ -246,6 +246,19 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 .map(crate::codec::av1_sequence::Color::signal)
                 .unwrap_or_default(),
             Decoder::Vp9(_) => ColourDescription::default(),
+        }
+    }
+    /// The light the coding itself names for its pictures: an HEVC stream's
+    /// mastering display and content light level SEI messages, or the AV1
+    /// metadata OBUs of the same volume. An encoder that writes them in-band
+    /// often writes them nowhere else, so a container with no `mdcv`/`ccll` box
+    /// still has a tone-mappable answer. Like the coding's signal, it appears
+    /// once the packets carrying it have been decoded.
+    pub fn bitstream_hdr(&self) -> HdrMetadata {
+        match &self.decoder {
+            Decoder::Hevc(d) => d.hdr(),
+            Decoder::Av1(d) => d.hdr(),
+            Decoder::Avc(_) | Decoder::Vp9(_) => HdrMetadata::default(),
         }
     }
     /// Whether frames come from the platform's hardware decoder.
@@ -736,5 +749,41 @@ mod tests {
                 full_range: false,
             }
         );
+    }
+
+    /// An AV1 clip that states its light the same way, in the only place it is
+    /// written: SVT-AV1's own metadata OBUs for a BT.2020/1 000 cd/m² volume and
+    /// a 1 234/567 content light level, spliced into the first packet of the
+    /// 32x32 ramp and muxed into a file with no `ccll`/`mdcv` box beside it.
+    #[cfg(not(all(target_os = "macos", feature = "videotoolbox")))]
+    #[test]
+    fn an_av1_metadata_obu_states_its_own_light() {
+        let data = include_bytes!("../tests/fixtures/av1/hdr-metadata.mp4").to_vec();
+        let mut source =
+            Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
+        assert!(source.bitstream_hdr().is_empty());
+        assert!(source.read_frame().unwrap().is_some());
+        let hdr = source.bitstream_hdr();
+        assert!(hdr.mastering.unwrap().is_hdr10());
+        assert_eq!((hdr.light.max_cll, hdr.light.max_fall), (1_234.0, 567.0));
+    }
+
+    /// The same clip's light, which the file writes in no box at all: SEI 137
+    /// states the BT.2020 mastering volume and SEI 144 the content light levels
+    /// of the first access unit, and the decoder keeps both as it walks the
+    /// packet. Only the software walk reads the bitstream, so a VideoToolbox
+    /// build — where the samples go to the hardware session untouched — is the
+    /// one case this cannot assert.
+    #[cfg(not(all(target_os = "macos", feature = "videotoolbox")))]
+    #[test]
+    fn an_hevc_sei_states_its_own_light() {
+        let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let mut source =
+            Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
+        assert!(source.bitstream_hdr().is_empty());
+        assert!(source.read_frame().unwrap().is_some());
+        let hdr = source.bitstream_hdr();
+        assert!(hdr.mastering.unwrap().is_hdr10());
+        assert_eq!((hdr.light.max_cll, hdr.light.max_fall), (1000.0, 400.0));
     }
 }

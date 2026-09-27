@@ -163,6 +163,16 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             VideoDecoder::Vp9(_) => ColourDescription::default(),
         }
     }
+    /// The light the coding names for itself: an AV1 stream's mastering display
+    /// and content light level metadata OBUs, which are there in a file whose
+    /// Matroska `Colour` element left them out. Like the coding's signal, they
+    /// appear once the packets carrying them have been decoded.
+    pub fn bitstream_hdr(&self) -> HdrMetadata {
+        match &self.decoder {
+            VideoDecoder::Av1(d) => d.hdr(),
+            VideoDecoder::Vp9(_) => HdrMetadata::default(),
+        }
+    }
     /// The cap this reader sizes its RGB picture by, which is the cap a caller
     /// converting the planes it hands over has to size by too.
     pub fn rgb_budget(&self) -> usize {

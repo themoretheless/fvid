@@ -5,9 +5,11 @@ use super::{
     hevc_nal::NalHeader,
     hevc_picture::{self, Picture},
     hevc_pps::Pps,
+    hevc_sei,
     hevc_slice::SliceHeader,
     hevc_sps::Sps,
 };
+use crate::color::hdr::HdrMetadata;
 use crate::{Result, invalid};
 use std::sync::Arc;
 pub struct Decoded {
@@ -21,6 +23,7 @@ pub struct HevcDecoder {
     previous_poc: Option<i32>,
     suppress_rasl: bool,
     active_pps: Option<u8>,
+    hdr: HdrMetadata,
     length: u8,
     budget: usize,
     failed: bool,
@@ -64,6 +67,7 @@ impl HevcDecoder {
             previous_poc: None,
             suppress_rasl: false,
             active_pps: None,
+            hdr: HdrMetadata::default(),
             length: config.length_size,
             budget,
             failed: false,
@@ -81,7 +85,15 @@ impl HevcDecoder {
         self.previous_poc = None;
         self.suppress_rasl = false;
         self.active_pps = None;
+        self.hdr = HdrMetadata::default();
         self.failed = false;
+    }
+    /// The static HDR light the stream's own SEI messages stated, since this
+    /// decoder was last flushed. A reader that grades a picture for a panel asks
+    /// the coding as well as the file, because an encoder that wrote its
+    /// mastering volume in-band often wrote it nowhere else.
+    pub fn hdr(&self) -> HdrMetadata {
+        self.hdr
     }
     pub fn decode_packet(&mut self, packet: &[u8]) -> Result<Option<Decoded>> {
         if self.failed {
@@ -119,6 +131,12 @@ impl HevcDecoder {
                         .any(|(s, p)| Pps::parse(nal, s, self.budget).is_ok_and(|new| new == *p))
                 {
                     return Err(invalid("HEVC in-band PPS change is not implemented"));
+                }
+            } else if hevc_sei::is_sei_unit(header.unit_type) {
+                // An SEI this module cannot walk costs the guidance, never the
+                // picture it travels with.
+                if let Ok(Some(hdr)) = hevc_sei::hdr_from_nal(nal, self.budget) {
+                    self.hdr.merge(hdr);
                 }
             } else if !matches!(header.unit_type, 35..=40) {
                 return Err(invalid("unsupported HEVC NAL type"));

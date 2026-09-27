@@ -195,6 +195,22 @@ impl HdrMetadata {
         }
     }
 
+    /// This statement with each half it leaves unnamed taken from a weaker one,
+    /// which in practice is a file's `mdcv`/`ccll` box or `Colour` element
+    /// completed by the coding's own SEI message or metadata OBU. A half this
+    /// statement names is kept whichever of the two it came from.
+    pub fn filled_with(self, fallback: Self) -> Self {
+        let unnamed = |light: &ContentLight| light.max_cll == 0.0 && light.max_fall == 0.0;
+        Self {
+            mastering: self.mastering.or(fallback.mastering),
+            light: if unnamed(&self.light) {
+                fallback.light
+            } else {
+                self.light
+            },
+        }
+    }
+
     /// Content peak to tone map from, given a fallback for streams that carry
     /// no light level at all.
     pub fn content_light(&self, fallback_peak: f32) -> ContentLight {
@@ -437,6 +453,37 @@ mod tests {
         m.merge(HdrMetadata::from_clli(&[0x0F, 0xA0, 0x01, 0x90]).unwrap());
         assert!(m.mastering.is_some());
         assert_eq!(m.light.max_cll, 4_000.0);
+    }
+
+    /// The direction a reader needs, which is the reverse of `merge`: a
+    /// container's box owns whichever half it named, and the coding's in-band
+    /// message counts only for the half the box never wrote.
+    #[test]
+    fn a_containers_box_owns_the_half_it_names() {
+        let container = HdrMetadata::from_clli(&[0x04, 0xD2, 0x02, 0x37]).unwrap();
+        let mut bitstream = HdrMetadata::from_mdcv(&hdr10_bytes()).unwrap();
+        bitstream.merge(HdrMetadata::from_clli(&[0x03, 0xE8, 0x01, 0x90]).unwrap());
+        let filled = container.filled_with(bitstream);
+        assert!(filled.mastering.unwrap().is_hdr10());
+        assert_eq!(
+            (filled.light.max_cll, filled.light.max_fall),
+            (1_234.0, 567.0)
+        );
+        // A box that states nothing takes both halves from the stream.
+        assert_eq!(HdrMetadata::default().filled_with(bitstream), bitstream);
+        // A box that states the volume keeps it against the stream's.
+        let mut bright = HdrMetadata::from_clli(&[0x0F, 0xA0, 0x00, 0x00]).unwrap();
+        bright.mastering = MasteringDisplay::from_corners(
+            (0.7, 0.3),
+            (0.2, 0.8),
+            (0.13, 0.05),
+            (0.3127, 0.329),
+            4_000.0,
+            0.0001,
+        );
+        let filled = bright.filled_with(bitstream);
+        assert_eq!(filled.mastering, bright.mastering);
+        assert_eq!(filled.light.max_cll, 4_000.0);
     }
 
     /// The same volume spelled the way Matroska spells it: a value per corner,
