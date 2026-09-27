@@ -6625,15 +6625,21 @@ fn hable_tonemap(x: f32) -> f32 {
     ((x * (a * x + c * b) + d * e) / (x * (a * x + b) + d * f)) - e / f
 }
 
+/// Möbius shoulder from FFmpeg/mpv: 1:1 below the joint `j`, rational above it,
+/// reaching exactly 1.0 at the content peak. `PEAK` is this file's own highlight
+/// ceiling — the one [`hable_tonemap`] is normalised by — so the modes agree on
+/// where the top of the range sits even though only some of them know it.
 fn mobius_tonemap(x: f32, j: f32) -> f32 {
-    let j = j.clamp(0.0, 1.0);
+    const PEAK: f32 = 11.2;
+    let j = j.clamp(0.0, 0.999);
     let x = x.max(0.0);
     if x <= j {
         return x;
     }
-    let a = -j * j * (x - 1.0) / ((j - 1.0) * (j - 1.0)).max(1e-6);
-    let b = (2.0 * j - 1.0) * (j * j - x) / ((j - 1.0) * (j - 1.0)).max(1e-6);
-    ((x + a) / (x + b)).clamp(0.0, 1.0)
+    let a = -j * j * (PEAK - 1.0) / (j * j - 2.0 * j + PEAK);
+    let b = (j * j - 2.0 * j * PEAK + PEAK) / (PEAK - 1.0);
+    let scale = (b * b + 2.0 * b * j + j * j) / (b - a);
+    (scale * (x + a) / (x + b)).clamp(0.0, 1.0)
 }
 
 fn aces_tonemap(x: f32) -> f32 {
