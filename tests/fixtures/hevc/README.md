@@ -90,3 +90,30 @@ the `hvcC`'s NAL unit array as well, and the decoder reads that array as it is
 built, so `bitstream_hdr` already states this volume and these light levels at
 open — before a single packet has been decoded.
 
+## `hlg.mp4` — a curve stated with no light at all
+
+```sh
+ffmpeg -v error -y -f lavfi -i testsrc2=size=64x64:rate=24:duration=0.2 \
+  -c:v libx265 -pix_fmt yuv420p10le \
+  -color_primaries bt2020 -color_trc arib-std-b67 -colorspace bt2020nc \
+  -x265-params 'colorprim=bt2020:transfer=arib-std-b67:colormatrix=bt2020nc' \
+  -frames:v 5 hlg.mp4
+```
+
+Five 64x64 Main10 pictures, `hev1`, 4 571 bytes, sha256
+`f8dd6121bb1a7897adbd09eb78bfdcea6e93d1329b328fd9df339853e2581ef6`. Two runs of
+the command above reproduce it byte for byte. `ffprobe` reports
+`color_primaries=bt2020`, `color_transfer=arib-std-b67`, `color_space=bt2020nc`.
+
+Like the HDR10 file, this one has no `colr`, `nclx`, `mdcv` or `ccll` atom —
+counted in its bytes, zero of each — so the BT.2020 / HLG / BT.2020-NCL triple
+again comes out of the parameter set alone. Unlike it, nothing states any light:
+this encoder writes no mastering-display or content-light message for HLG, in the
+container or in the bitstream, and the reader's `hdr()` stays empty at open and
+after every picture. That absence is the point. HLG's scene light is normalised
+to whatever panel shows it, so a grade for this file has no headroom to compress
+and takes the panel's own peak — the case
+`an_hlg_picture_is_scaled_to_the_panel_that_reads_it`,
+`a_real_hlg_files_signal_reaches_the_caller_that_grades_it` and
+`an_hlg_item_is_graded_at_the_panels_own_peak` hold to.
+

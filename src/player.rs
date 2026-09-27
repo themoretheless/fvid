@@ -4414,11 +4414,11 @@ impl eframe::App for Player {
 mod tests {
     use super::{
         ADJUST_IDENTITY, ASPECTS, Adjust, Aspect, CROPS, ChapterMark, Control, FileTags, Frame,
-        Grading, HIDE_AFTER, LoopMark, NO_CROP, PathBuf, Pixels, Planar8, PlayArgs, PlayBounds,
-        Player, Pos2, RATES, Rect, Repeat, SubtitleSource, VOLUME_MAX, Vec2, adjust_luma,
-        adjust_rgb, adjust_scalars, advance, aspect_label, aspect_osd, aspect_step, bitrate_text,
-        byte_size, chapter_ahead, container_facts, crop_insets, crop_label, crop_osd, crop_step,
-        cropped_size, cycle_repeat, deal_cycle, delay_step, delayed_clock, display_size,
+        Grading, HIDE_AFTER, LoopMark, NO_CROP, PANEL_NITS, PathBuf, Pixels, Planar8, PlayArgs,
+        PlayBounds, Player, Pos2, RATES, Rect, Repeat, SubtitleSource, VOLUME_MAX, Vec2,
+        adjust_luma, adjust_rgb, adjust_scalars, advance, aspect_label, aspect_osd, aspect_step,
+        bitrate_text, byte_size, chapter_ahead, container_facts, crop_insets, crop_label, crop_osd,
+        crop_step, cropped_size, cycle_repeat, deal_cycle, delay_step, delayed_clock, display_size,
         expand_inputs, file_size, fps_text, jump_size, loop_press, loop_rewind, paced_period,
         parse_clock, parse_play_args, playlist_osd, position_from_digit, rate_fine, rate_osd,
         rate_step, repeat_osd, retreat, shown_insets, shown_size, snapshot_name, sound_codec,
@@ -7629,5 +7629,41 @@ LUT_3D_SIZE 2
             .grade_for(signal, &HdrMetadata::default())
             .unwrap();
         assert_eq!(grade.rgb(highlight), clip_blind.rgb(highlight));
+    }
+
+    /// The same chain on a file that states a curve and no light at all: an HLG
+    /// clip. Nothing was asked from the command line, yet BT.2100 material still
+    /// gets the compression [`Grade::new`] picks, and with no MaxCLL the only
+    /// peak there is to compress against is the panel's own — which for HLG is
+    /// not a compromise but what the format means, its scene light being
+    /// normalised to whatever display shows it. So the top of the code scale
+    /// stays separated on the way to the screen instead of folding into white,
+    /// and mid-code grey arrives as grey.
+    #[test]
+    fn an_hlg_item_is_graded_at_the_panels_own_peak() {
+        use crate::playback_native::NativeReader;
+        let data = include_bytes!("../tests/fixtures/hevc/hlg.mp4").to_vec();
+        let reader = NativeReader::without_memory_limit(std::io::Cursor::new(data)).unwrap();
+        let (signal, hdr) = (reader.colour(), reader.hdr());
+        assert!(signal.is_hdr());
+        assert!(hdr.is_empty());
+        let grade = Grading::default()
+            .grade_for(signal, &hdr)
+            .expect("BT.2100 material is graded for the panel");
+        let plan = grade.plan();
+        assert_eq!(plan.from, Transfer::Hlg);
+        assert_eq!(plan.to, Transfer::Bt709);
+        assert_eq!(plan.tone_map, Some(ToneMap::Clip));
+        assert_eq!(plan.content.max_cll, PANEL_NITS);
+        // Four codes that a 1 000-cd/m² reading of this signal would have
+        // crushed together into white stay apart, in order, with mid grey below
+        // half the scale.
+        let steps: Vec<f32> = [0.5f32, 0.65, 0.8, 1.0]
+            .iter()
+            .map(|c| grade.rgb([*c; 3])[0])
+            .collect();
+        assert!(steps[0] < 0.5, "{steps:?}");
+        assert!(steps.windows(2).all(|w| w[1] > w[0] + 0.05), "{steps:?}");
+        assert!((steps[3] - 1.0).abs() < 1e-3, "{steps:?}");
     }
 }

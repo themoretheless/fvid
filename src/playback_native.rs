@@ -1414,6 +1414,44 @@ mod tests {
         assert_eq!(hdr.content_light(400.0).max_cll, 1_000.0);
     }
 
+    /// An HLG clip, stated the same way the HDR10 one is — in the parameter set,
+    /// with no `colr` atom in the file to read — except that here the coding says
+    /// everything and means by it something the reader must not over-read: HLG
+    /// carries no mastering volume and no content light, because the format's
+    /// scene light is normalised to whatever panel shows it. So the triple comes
+    /// through and the light stays empty, which is what leaves the grade with the
+    /// panel's own peak rather than a headroom the file never claimed.
+    #[test]
+    fn a_real_hlg_files_signal_reaches_the_caller_that_grades_it() {
+        use crate::color::{Primaries, Transfer};
+        let data = include_bytes!("../tests/fixtures/hevc/hlg.mp4").to_vec();
+        let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
+        let stated = reader.colour();
+        assert_eq!(
+            stated,
+            ColourDescription {
+                primaries: 9,
+                transfer: 18,
+                matrix: 9,
+                full_range: false,
+            }
+        );
+        assert!(stated.is_hdr());
+        assert_eq!(stated.transfer_function(), Transfer::Hlg);
+        assert_eq!(stated.primary_set(), Some(Primaries::BT2020));
+        assert_eq!(stated.matrix_coefficients(), Some(MatrixCoeff::Bt2020Ncl));
+        // Nothing about light is stated, in either direction.
+        let hdr = reader.hdr();
+        assert!(hdr.is_empty());
+        assert!(hdr.mastering.is_none());
+        // Decoding the whole clip changes neither half.
+        for _ in 0..5 {
+            assert!(reader.read_frame_raw().unwrap().is_some());
+        }
+        assert_eq!(reader.colour(), stated);
+        assert!(reader.hdr().is_empty());
+    }
+
     /// An AV1 track whose WebM header writes no `Colour` element: every code the
     /// container states is zero, which is silence rather than a value, and once a
     /// frame has been decoded the sequence header's own triple is what the reader
