@@ -142,6 +142,37 @@ fn packed(pixels: Pixels, budget: usize) -> Vec<u8> {
     }
 }
 
+fn graded_from(bytes: Vec<u8>) -> NativeReader<Cursor<Vec<u8>>> {
+    let mut reader = NativeReader::without_memory_limit(Cursor::new(bytes)).unwrap();
+    assert!(reader.read_frame().unwrap());
+    reader
+}
+// 32x16, 4:2:0, two frames: luma runs across the width while both chroma
+// planes run down their own axes, so no two chroma cells share a colour.
+fn stream() -> Vec<u8> {
+    let (width, height) = (32usize, 16usize);
+    let mut bytes = b"YUV4MPEG2 W32 H16 F60:1 Ip C420jpeg\n".to_vec();
+    for _ in 0..2 {
+        bytes.extend_from_slice(b"FRAME\n");
+        for y in 0..height {
+            for x in 0..width {
+                bytes.push(16 + (x * 7 + y * 3) as u8 % 220);
+            }
+        }
+        for cy in 0..height / 2 {
+            for cx in 0..width / 2 {
+                bytes.push(16 + (cx * 14) as u8);
+            }
+        }
+        for cy in 0..height / 2 {
+            for cx in 0..width / 2 {
+                bytes.push(16 + (cy * 28) as u8);
+            }
+        }
+    }
+    bytes
+}
+
 /// BT.709 codes shown as the desktop's own: a curve and nothing else.
 fn recurve() -> Grade {
     Grade::new(
@@ -318,36 +349,6 @@ fn a_real_hdr10_picture_is_tone_mapped_by_the_thread_that_shows_it() {
 fn a_cube_on_disk_regrades_the_pictures_the_thread_shows() {
     const SIZE: usize = 17;
     const CUBE: &str = include_str!("fixtures/lut/grade-17.cube");
-    fn graded_from(bytes: Vec<u8>) -> NativeReader<Cursor<Vec<u8>>> {
-        let mut reader = NativeReader::without_memory_limit(Cursor::new(bytes)).unwrap();
-        assert!(reader.read_frame().unwrap());
-        reader
-    }
-    // 32x16, 4:2:0, two frames: luma runs across the width while both chroma
-    // planes run down their own axes, so no two chroma cells share a colour.
-    fn stream() -> Vec<u8> {
-        let (width, height) = (32usize, 16usize);
-        let mut bytes = b"YUV4MPEG2 W32 H16 F60:1 Ip C420jpeg\n".to_vec();
-        for _ in 0..2 {
-            bytes.extend_from_slice(b"FRAME\n");
-            for y in 0..height {
-                for x in 0..width {
-                    bytes.push(16 + (x * 7 + y * 3) as u8 % 220);
-                }
-            }
-            for cy in 0..height / 2 {
-                for cx in 0..width / 2 {
-                    bytes.push(16 + (cx * 14) as u8);
-                }
-            }
-            for cy in 0..height / 2 {
-                for cx in 0..width / 2 {
-                    bytes.push(16 + (cy * 28) as u8);
-                }
-            }
-        }
-        bytes
-    }
     // The file lists red fastest, then green, then blue.
     let nodes: Vec<[f64; 3]> = CUBE
         .lines()
@@ -463,6 +464,115 @@ fn a_cube_on_disk_regrades_the_pictures_the_thread_shows() {
     );
     assert!(
         channels >= 3 * 1024,
+        "only {channels} channels were compared against the cube's text"
+    );
+}
+
+/// The other half of a grade. A 1D cube keeps the channels apart, so the thread
+/// is handed three 256-entry tables and paints by indexing them. The tables the
+/// curve-only test above walks come out of the colour conversion alone, and the
+/// 3D cube that follows this one mixes channels and takes the float route, so
+/// nothing until now had put a viewer's own cube in front of this branch. Two
+/// frames of the synthetic stream put 253 of the 256 codes each table is
+/// indexed by in front of it, over 3 072 channels, and every one of those
+/// channels is held to what the cube's own text says by an independent linear
+/// walk of its nine nodes.
+#[test]
+fn a_per_channel_cube_paints_the_shown_pictures_from_byte_tables() {
+    // Nine nodes, each channel its own shape: red lifted off black, green opened
+    // through the mids, blue turned end for end. A table sent to the wrong
+    // channel cannot survive that, and neither can one that never got built.
+    const ONE: &str = "LUT_1D_SIZE 9
+0.00 0.00 1.00
+0.10 0.18 0.87
+0.20 0.36 0.75
+0.32 0.53 0.62
+0.45 0.68 0.50
+0.58 0.80 0.37
+0.72 0.89 0.25
+0.86 0.95 0.12
+1.00 1.00 0.00
+";
+    let nodes: Vec<[f64; 3]> = ONE
+        .lines()
+        .filter(|line| {
+            line.as_bytes()
+                .first()
+                .is_some_and(|byte| byte.is_ascii_digit() || *byte == b'.')
+        })
+        .map(|line| {
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            [
+                parts[0].parse().expect("red"),
+                parts[1].parse().expect("green"),
+                parts[2].parse().expect("blue"),
+            ]
+        })
+        .collect();
+    assert_eq!(nodes.len(), 9);
+    let lookup = |code: f64, channel: usize| -> f64 {
+        let pos = code.clamp(0.0, 1.0) * 8.0;
+        let low = pos.floor() as usize;
+        let high = (low + 1).min(8);
+        let frac = pos - f64::from(low as u32);
+        nodes[low][channel] * (1.0 - frac) + nodes[high][channel] * frac
+    };
+    let signal = ColourDescription {
+        primaries: 1,
+        transfer: 1,
+        matrix: 1,
+        full_range: false,
+    };
+    let settings = Settings::video(DisplayTarget::sdr(240.0));
+    assert!(
+        Grade::new(signal, &HdrMetadata::default(), settings, None).is_identity(),
+        "these settings already move this stream on their own, so a cube would not be the only change"
+    );
+    let grade = Grade::new(
+        signal,
+        &HdrMetadata::default(),
+        settings,
+        Some(Lut::from_cube(ONE).expect("a written 1D cube is a cube")),
+    );
+    assert!(
+        !grade.is_identity(),
+        "a cube that inverts blue claims to change nothing"
+    );
+    let reader = graded_from(stream());
+    let budget = reader.rgb_budget();
+    let mut plain = Playback::start(graded_from(stream()), None);
+    let mut shown = Playback::start(graded_from(stream()), Some(grade));
+    let mut channels = 0usize;
+    let mut walked = [0usize; 256];
+    for frame in 0..2 {
+        let untouched = packed(first_frame(&mut plain).pixels, budget);
+        let graded = packed(first_frame(&mut shown).pixels, budget);
+        assert_eq!(untouched.len(), graded.len());
+        assert_ne!(untouched, graded, "the 1D cube reached no pixels");
+        for (pixel, out) in untouched
+            .as_chunks::<3>()
+            .0
+            .iter()
+            .zip(graded.as_chunks::<3>().0)
+        {
+            for channel in 0..3 {
+                let code = pixel[channel];
+                walked[usize::from(code)] += 1;
+                let want = (lookup(f64::from(code) / 255.0, channel) * 255.0).round() as i16;
+                let step = (i16::from(out[channel]) - want).abs();
+                assert!(
+                    step <= 1,
+                    "frame {frame} channel {channel}: {code} shown as {}, the cube's own text says {want}",
+                    out[channel]
+                );
+                channels += 1;
+            }
+        }
+    }
+    let codes = walked.iter().filter(|hits| **hits > 0).count();
+    assert!(codes >= 250, "only {codes} input codes met the tables");
+    assert!(
+        channels >= 3 * 1_000,
         "only {channels} channels were compared against the cube's text"
     );
 }
