@@ -209,7 +209,7 @@ impl Grade {
         if self.is_identity() {
             return;
         }
-        let workers = workers_for(rgb.len());
+        let workers = crate::span_workers(rgb.len());
         if workers < 2 {
             self.paint(rgb);
             return;
@@ -247,18 +247,6 @@ impl Grade {
             }
         }
     }
-}
-
-/// How many workers a packed frame of this many bytes is cut between. Each span
-/// has to hold enough pixels to outpay the cost of starting its worker, so a
-/// small picture keeps the one thread it came with.
-fn workers_for(bytes: usize) -> usize {
-    /// Pixels a span has to carry before a worker is worth waking for it: about
-    /// a quarter of a megapixel's worth of grid reads, well over the tens of
-    /// microseconds a thread costs to start.
-    const MIN_SPAN_PIXELS: usize = 1 << 14;
-    let parallelism = std::thread::available_parallelism().map_or(1, |n| n.get());
-    parallelism.min(bytes / 3 / MIN_SPAN_PIXELS).max(1)
 }
 
 /// The 256 output codes of each channel, read off the two stages at once.
@@ -362,8 +350,8 @@ mod tests {
 
     #[test]
     fn a_small_frame_is_painted_by_the_thread_that_called_it() {
-        assert_eq!(workers_for(3 * 1024), 1);
-        assert!(workers_for(3 * 1920 * 1080) > 1);
+        assert_eq!(crate::span_workers(3 * 1024), 1);
+        assert!(crate::span_workers(3 * 1920 * 1080) > 1);
     }
 
     #[test]
