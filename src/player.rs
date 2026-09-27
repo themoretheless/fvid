@@ -455,18 +455,24 @@ pub fn run(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-// Palette from the design canvas. Every overlay element sits at 50% opacity
-// over the picture; only the window and frame backgrounds are opaque.
-const WINDOW: Color32 = Color32::from_rgb(0x0e, 0x0e, 0x10);
+// Palette from the design canvas: warm off-white type and one orange accent
+// over the picture, with the control panel and the key messages on a dark
+// backing at half opacity so the picture still shows through them.
+const WINDOW: Color32 = Color32::from_rgb(0x0b, 0x0b, 0x0a);
 const FRAME: Color32 = Color32::from_rgb(0x1a, 0x1a, 0x1d);
-const TEXT: Color32 = Color32::from_rgba_premultiplied(0x7a, 0x7a, 0x79, 128);
-const MUTED: Color32 = Color32::from_rgba_premultiplied(0x51, 0x51, 0x53, 128);
-const DIM: Color32 = Color32::from_rgba_premultiplied(0x3e, 0x3e, 0x41, 128);
-const ACCENT: Color32 = Color32::from_rgba_premultiplied(0x74, 0x71, 0x6b, 128);
-const ERROR: Color32 = Color32::from_rgba_premultiplied(0x70, 0x45, 0x3d, 128);
-const TRACK: Color32 = Color32::from_rgba_premultiplied(23, 23, 23, 23);
-const CHIP: Color32 = Color32::from_rgba_premultiplied(8, 8, 8, 8);
-const CHIP_STRONG: Color32 = Color32::from_rgba_premultiplied(13, 13, 13, 13);
+const TEXT: Color32 = Color32::from_rgb(0xee, 0xeb, 0xe4);
+const MUTED: Color32 = Color32::from_rgb(0xa8, 0xa4, 0x9b);
+const DIM: Color32 = Color32::from_rgb(0x7a, 0x77, 0x70);
+const ACCENT: Color32 = Color32::from_rgb(0xf2, 0x6b, 0x1d);
+const ERROR: Color32 = Color32::from_rgb(0xf0, 0x7a, 0x6a);
+/// The unplayed part of the progress line.
+const TRACK: Color32 = Color32::from_rgba_premultiplied(43, 42, 41, 46);
+/// The dark backing of the control panel, the key messages and the scrub tip.
+const PANEL: Color32 = Color32::from_rgba_premultiplied(6, 6, 6, 128);
+const CHIP: Color32 = Color32::from_rgba_premultiplied(6, 6, 6, 158);
+const CHIP_STRONG: Color32 = Color32::from_rgba_premultiplied(19, 19, 18, 20);
+/// Corner of the control panel and the key messages.
+const PANEL_RADIUS: u8 = 14;
 
 const BUTTON: f32 = 44.0;
 const HIDE_AFTER: Duration = Duration::from_millis(2500);
@@ -1047,6 +1053,9 @@ struct Player {
     step: u32,
     /// Transient control message (volume, rate, jump) and when it appeared.
     osd: Option<(String, Instant)>,
+    /// Whether the clock at the right end of the progress line counts what is
+    /// left rather than the whole length; clicking it flips the two.
+    remaining: bool,
     /// Cues from the subtitle source on screen.
     cues: Vec<Cue>,
     /// Label of that source: a sidecar file name or an embedded track name.
@@ -1168,6 +1177,7 @@ impl Default for Player {
             rate_milli: 1_000,
             step: 0,
             osd: None,
+            remaining: false,
             cues: Vec::new(),
             subtitle_name: String::new(),
             subtitle_sources: Vec::new(),
@@ -2917,6 +2927,25 @@ fn clock(time: Duration) -> String {
     }
 }
 
+/// The clock at the right end of the progress line: the whole length, or what
+/// is left of it behind a minus sign, the two VLC flips between on a click.
+fn end_clock(elapsed: Duration, total: Duration, remaining: bool) -> String {
+    if remaining {
+        format!("\u{2212}{}", clock(total.saturating_sub(elapsed)))
+    } else {
+        clock(total)
+    }
+}
+
+/// The chapter a moment falls in, counted from one, with its title: the last
+/// one starting at or before it. `None` before the first chapter starts.
+fn chapter_at(chapters: &[ChapterMark], at: Duration) -> Option<(usize, &str)> {
+    chapters
+        .iter()
+        .rposition(|mark| mark.start <= at)
+        .map(|nth| (nth + 1, chapters[nth].title.as_str()))
+}
+
 /// How many bytes a path takes up, once the file system has answered for it.
 fn file_size(path: &Path) -> Option<u64> {
     std::fs::metadata(path).ok().map(|meta| meta.len())
@@ -3845,6 +3874,12 @@ impl eframe::App for Player {
         if self.controls_visible() && !self.paused {
             ctx.request_repaint_after(HIDE_AFTER.saturating_sub(self.activity.elapsed()));
         }
+        // And once more to take a key message down when its time is up.
+        if let Some((_, since)) = &self.osd
+            && since.elapsed() < OSD_AFTER
+        {
+            ctx.request_repaint_after(OSD_AFTER.saturating_sub(since.elapsed()));
+        }
     }
 
     fn ui(&mut self, ui: &mut egui::Ui, _: &mut eframe::Frame) {
@@ -4003,11 +4038,71 @@ impl eframe::App for Player {
                 }
             }
 
-            if !visible {
-                return;
+            // A file carried over the window lights the frame up before it is let go.
+            if ctx.input(|i| !i.raw.hovered_files.is_empty()) {
+                painter.rect_stroke(
+                    frame.shrink(12.0),
+                    CornerRadius::same(20),
+                    Stroke::new(2.0, ACCENT),
+                    egui::StrokeKind::Inside,
+                );
             }
 
             let pad = 28.0_f32.min(frame.width() * 0.05);
+
+            // Captions and key messages stay on screen while the panel hides, so
+            // a key pressed during playback still answers without a mouse move.
+            // Captions go first, so a key message can still be read over them.
+            if let Some(line) = self
+                .timeline()
+                .0
+                .and_then(|at| self.subtitle_line(at))
+                .map(str::to_owned)
+            {
+                let font = FontId::proportional(self.subtitle_font);
+                let wrapped = painter.layout(
+                    line.replace('\n', " "),
+                    font,
+                    Color32::WHITE,
+                    frame.width() * 0.86,
+                );
+                let at = Pos2::new(
+                    frame.center().x,
+                    frame.bottom() - self.subtitle_margin - wrapped.size().y,
+                );
+                // A hard outline keeps white text readable on a bright picture.
+                for offset in [
+                    Vec2::new(-1.5, 0.0),
+                    Vec2::new(1.5, 0.0),
+                    Vec2::new(0.0, -1.5),
+                    Vec2::new(0.0, 1.5),
+                ] {
+                    painter.galley(at + offset, wrapped.clone(), Color32::from_rgb(0, 0, 0));
+                }
+                painter.galley(at, wrapped, Color32::from_rgb(0xff, 0xff, 0xff));
+            }
+            // The key message sits in the corner opposite the title, clear of
+            // the close button while the panel shows.
+            if let Some((message, since)) = &self.osd
+                && since.elapsed() < OSD_AFTER
+            {
+                let galley =
+                    painter.layout_no_wrap(message.clone(), FontId::proportional(15.0), TEXT);
+                let size = galley.size() + Vec2::new(32.0, 20.0);
+                let right = if visible {
+                    frame.right() - pad - BUTTON - 12.0
+                } else {
+                    frame.right() - pad
+                };
+                let backing =
+                    Rect::from_min_size(Pos2::new(right - size.x, frame.top() + 24.0), size);
+                painter.rect_filled(backing, CornerRadius::same(10), PANEL);
+                painter.galley(backing.min + Vec2::new(16.0, 10.0), galley, TEXT);
+            }
+
+            if !visible {
+                return;
+            }
 
             // Top: title block and close.
             // Keep the title block clear of the macOS traffic lights over the hidden title bar.
@@ -4061,47 +4156,6 @@ impl eframe::App for Player {
                     );
                 }
             }
-            // Subtitle first, so a control message can still be read over it.
-            if let Some(line) = self
-                .timeline()
-                .0
-                .and_then(|at| self.subtitle_line(at))
-                .map(str::to_owned)
-            {
-                let font = FontId::proportional(self.subtitle_font);
-                let wrapped = painter.layout(
-                    line.replace('\n', " "),
-                    font,
-                    Color32::WHITE,
-                    frame.width() * 0.86,
-                );
-                let at = Pos2::new(
-                    frame.center().x,
-                    frame.bottom() - self.subtitle_margin - wrapped.size().y,
-                );
-                // A hard outline keeps white text readable on a bright picture.
-                for offset in [
-                    Vec2::new(-1.5, 0.0),
-                    Vec2::new(1.5, 0.0),
-                    Vec2::new(0.0, -1.5),
-                    Vec2::new(0.0, 1.5),
-                ] {
-                    painter.galley(at + offset, wrapped.clone(), Color32::from_rgb(0, 0, 0));
-                }
-                painter.galley(at, wrapped, Color32::from_rgb(0xff, 0xff, 0xff));
-            }
-
-            if let Some((message, since)) = &self.osd
-                && since.elapsed() < OSD_AFTER
-            {
-                painter.text(
-                    Pos2::new(frame.center().x, frame.top() + 24.0),
-                    Align2::CENTER_TOP,
-                    message,
-                    FontId::proportional(15.0),
-                    TEXT,
-                );
-            }
             let close_at = Pos2::new(
                 frame.right() - pad - BUTTON / 2.0,
                 frame.top() + 24.0 + BUTTON / 2.0,
@@ -4116,14 +4170,24 @@ impl eframe::App for Player {
                 }
             }
 
-            // Bottom: progress line, then the control row.
-            let row_y = frame.bottom() - 22.0 - BUTTON / 2.0;
-            let bar_y = row_y - BUTTON / 2.0 - 14.0;
-            let bar = Rect::from_min_max(
-                Pos2::new(frame.left() + pad, bar_y - 2.0),
-                Pos2::new(frame.right() - pad, bar_y + 2.0),
+            // Bottom: one panel holding the clocks, the progress line under
+            // them and the control row, on a backing the picture shows through.
+            let panel_bottom = frame.bottom() - 20.0;
+            let row_y = panel_bottom - 8.0 - BUTTON / 2.0;
+            let bar_y = row_y - BUTTON / 2.0 - 12.0;
+            let clock_y = bar_y - 18.0;
+            let panel = Rect::from_min_max(
+                Pos2::new(frame.left() + pad, clock_y - 22.0),
+                Pos2::new(frame.right() - pad, panel_bottom),
             );
-            painter.rect_filled(bar, CornerRadius::same(2), TRACK);
+            // The panel takes the pointer itself, so a click between its
+            // buttons does not fall through to the picture and pause it.
+            ui.interact(panel, ui.id().with("panel"), Sense::click());
+            painter.rect_filled(panel, CornerRadius::same(PANEL_RADIUS), PANEL);
+            let hit = Rect::from_min_max(
+                Pos2::new(panel.left() + 22.0, bar_y - 12.0),
+                Pos2::new(panel.right() - 22.0, bar_y + 12.0),
+            );
             let (elapsed, total) = self.timeline();
             let mut fraction = match (elapsed, total) {
                 (Some(e), Some(t)) if t > Duration::ZERO => {
@@ -4136,14 +4200,12 @@ impl eframe::App for Player {
                 _ => None,
             };
             // The line takes clicks and drags on a taller hit area; the seek
-            // itself happens on release so a drag decodes only once.
+            // itself happens on release so a drag decodes only once. Where the
+            // pointer rests on it, the line thickens and names the moment.
+            let mut hover = None;
             if fraction.is_some() && self.seekable {
-                let hit = Rect::from_min_max(
-                    Pos2::new(bar.left(), bar_y - 12.0),
-                    Pos2::new(bar.right(), bar_y + 12.0),
-                );
                 let seek = ui.interact(hit, ui.id().with("seek"), Sense::click_and_drag());
-                let at = |pos: Pos2| ((pos.x - bar.left()) / bar.width()).clamp(0.0, 1.0);
+                let at = |pos: Pos2| ((pos.x - hit.left()) / hit.width()).clamp(0.0, 1.0);
                 if seek.dragged()
                     && let Some(pos) = seek.interact_pointer_pos()
                 {
@@ -4159,23 +4221,101 @@ impl eframe::App for Player {
                 }
                 if seek.hovered() || self.scrub.is_some() {
                     ctx.set_cursor_icon(egui::CursorIcon::PointingHand);
+                    hover = self.scrub.or_else(|| seek.hover_pos().map(at));
                 }
                 if let Some(scrub) = self.scrub {
                     fraction = Some(scrub);
                 }
             }
+            let thick = if hover.is_some() { 8.0 } else { 4.0 };
+            let bar = Rect::from_min_max(
+                Pos2::new(hit.left(), bar_y - thick / 2.0),
+                Pos2::new(hit.right(), bar_y + thick / 2.0),
+            );
+            let round = CornerRadius::same((thick / 2.0) as u8);
+            painter.rect_filled(bar, round, TRACK);
             if let Some(fraction) = fraction {
                 let x = bar.left() + bar.width() * fraction;
                 painter.rect_filled(
                     Rect::from_min_max(bar.min, Pos2::new(x, bar.max.y)),
-                    CornerRadius::same(2),
+                    round,
                     ACCENT,
                 );
-                painter.circle_filled(Pos2::new(x, bar_y), 7.0, TEXT);
+            }
+            // Chapter starts cut the line, the way the canvas marks them.
+            if let Some(total) = total.filter(|t| *t > Duration::ZERO) {
+                for mark in self.chapters.iter().filter(|m| m.start > Duration::ZERO) {
+                    let x =
+                        bar.left() + bar.width() * (mark.start.as_secs_f32() / total.as_secs_f32());
+                    if x < bar.right() {
+                        painter.rect_filled(
+                            Rect::from_min_max(
+                                Pos2::new(x - 1.0, bar.top()),
+                                Pos2::new(x + 1.0, bar.bottom()),
+                            ),
+                            CornerRadius::ZERO,
+                            WINDOW,
+                        );
+                    }
+                }
+            }
+            if let Some(fraction) = fraction {
+                painter.circle_filled(
+                    Pos2::new(bar.left() + bar.width() * fraction, bar_y),
+                    7.0,
+                    TEXT,
+                );
+            }
+            // The tip over the panel: the moment under the pointer and the
+            // chapter it falls in.
+            if let (Some(hover), Some(total)) = (hover, total) {
+                let moment = total.mul_f32(hover);
+                let mut label = clock(moment);
+                if let Some((_, title)) = chapter_at(&self.chapters, moment)
+                    && !title.is_empty()
+                {
+                    label = format!("{label} \u{b7} {title}");
+                }
+                let galley = painter.layout_no_wrap(label, FontId::monospace(13.0), TEXT);
+                let size = galley.size() + Vec2::new(16.0, 8.0);
+                let x = (bar.left() + bar.width() * hover - size.x / 2.0)
+                    .clamp(frame.left() + 8.0, frame.right() - 8.0 - size.x);
+                let tip = Rect::from_min_size(Pos2::new(x, panel.top() - 8.0 - size.y), size);
+                painter.rect_filled(tip, CornerRadius::same(6), PANEL);
+                painter.galley(tip.min + Vec2::new(8.0, 4.0), galley, TEXT);
+            }
+            // Clocks over the two ends of the line; the right one flips between
+            // the whole length and what is left of it.
+            if let Some(elapsed) = elapsed {
+                let font = FontId::monospace(13.0);
+                painter.text(
+                    Pos2::new(hit.left(), clock_y),
+                    Align2::LEFT_CENTER,
+                    clock(elapsed),
+                    font.clone(),
+                    TEXT,
+                );
+                if let Some(total) = total {
+                    let shown = painter.text(
+                        Pos2::new(hit.right(), clock_y),
+                        Align2::RIGHT_CENTER,
+                        end_clock(elapsed, total, self.remaining),
+                        font,
+                        MUTED,
+                    );
+                    let flip =
+                        ui.interact(shown.expand(6.0), ui.id().with("end-clock"), Sense::click());
+                    if flip.hovered() {
+                        ctx.set_cursor_icon(egui::CursorIcon::PointingHand);
+                    }
+                    if flip.clicked() {
+                        self.remaining = !self.remaining;
+                    }
+                }
             }
 
-            // Left group: play/pause, restart, time.
-            let mut x = frame.left() + pad + BUTTON / 2.0;
+            // Left group: play/pause, restart, the chapter playing.
+            let mut x = panel.left() + 8.0 + BUTTON / 2.0;
             let playing = self.item_open() && !self.paused && !self.ended;
             let clicked = round_button(
                 ui,
@@ -4211,29 +4351,28 @@ impl eframe::App for Player {
             ) {
                 self.restart();
             }
-            x += BUTTON / 2.0 + 16.0;
-            if let Some(elapsed) = elapsed {
-                let font = FontId::monospace(13.0);
+            x += BUTTON / 2.0 + 12.0;
+            if let Some((nth, title)) = elapsed.and_then(|at| chapter_at(&self.chapters, at)) {
                 let end = painter.text(
                     Pos2::new(x, row_y),
                     Align2::LEFT_CENTER,
-                    clock(elapsed),
-                    font.clone(),
-                    TEXT,
+                    format!("Chapter {nth} of {}", self.chapters.len()),
+                    FontId::proportional(13.0),
+                    MUTED,
                 );
-                if let Some(total) = total {
+                if !title.is_empty() {
                     painter.text(
-                        Pos2::new(end.right() + 6.0, row_y),
+                        Pos2::new(end.right() + 10.0, row_y),
                         Align2::LEFT_CENTER,
-                        format!("/ {}", clock(total)),
-                        font,
-                        DIM,
+                        title,
+                        FontId::proportional(13.0),
+                        TEXT,
                     );
                 }
             }
 
-            // Right group: open, fullscreen.
-            let mut x = frame.right() - pad - BUTTON / 2.0;
+            // Right group: rate, open, fullscreen.
+            let mut x = panel.right() - 8.0 - BUTTON / 2.0;
             if round_button(
                 ui,
                 "fullscreen",
@@ -4266,6 +4405,35 @@ impl eframe::App for Player {
             if open.clicked() {
                 self.pick_file(Pick::Item);
             }
+            // A rate other than the recorded one stays in sight in the accent,
+            // and a click on it goes back to 1x, as the `\` key does.
+            if self.rate_milli != 1_000 {
+                let font = FontId::monospace(14.0);
+                let label = rate_osd(self.rate_milli);
+                let width = painter
+                    .layout_no_wrap(label.clone(), font.clone(), ACCENT)
+                    .size()
+                    .x
+                    + 24.0;
+                let rate_rect = Rect::from_center_size(
+                    Pos2::new(open_rect.left() - 4.0 - width / 2.0, row_y),
+                    Vec2::new(width, BUTTON),
+                );
+                let rate = ui.interact(rate_rect, ui.id().with("rate"), Sense::click());
+                if rate.hovered() {
+                    painter.rect_filled(rate_rect, CornerRadius::same(10), CHIP_STRONG);
+                }
+                painter.text(
+                    rate_rect.center(),
+                    Align2::CENTER_CENTER,
+                    label,
+                    font,
+                    ACCENT,
+                );
+                if rate.clicked() {
+                    self.set_rate(1_000);
+                }
+            }
         });
     }
 }
@@ -4277,12 +4445,12 @@ mod tests {
         HIDE_AFTER, LoopMark, NO_CROP, PathBuf, Pixels, Planar8, PlayArgs, PlayBounds, Player,
         Pos2, RATES, Rect, Repeat, SubtitleSource, VOLUME_MAX, Vec2, adjust_luma, adjust_rgb,
         adjust_scalars, advance, aspect_label, aspect_osd, aspect_step, bitrate_text, byte_size,
-        chapter_ahead, container_facts, crop_insets, crop_label, crop_osd, crop_step, cropped_size,
-        cycle_repeat, deal_cycle, delay_step, delayed_clock, display_size, expand_inputs,
-        file_size, fps_text, jump_size, loop_press, loop_rewind, paced_period, parse_clock,
-        parse_play_args, playlist_osd, position_from_digit, rate_fine, rate_osd, rate_step,
-        repeat_osd, retreat, shown_insets, shown_size, snapshot_name, sound_codec, subtitles,
-        track_step, uv_window, video_rect, volume_osd, volume_step, zoom_osd, zoom_step,
+        chapter_ahead, chapter_at, container_facts, crop_insets, crop_label, crop_osd, crop_step,
+        cropped_size, cycle_repeat, deal_cycle, delay_step, delayed_clock, display_size, end_clock,
+        expand_inputs, file_size, fps_text, jump_size, loop_press, loop_rewind, paced_period,
+        parse_clock, parse_play_args, playlist_osd, position_from_digit, rate_fine, rate_osd,
+        rate_step, repeat_osd, retreat, shown_insets, shown_size, snapshot_name, sound_codec,
+        subtitles, track_step, uv_window, video_rect, volume_osd, volume_step, zoom_osd, zoom_step,
     };
     use std::sync::Arc;
     use std::time::{Duration, Instant};
@@ -6525,6 +6693,37 @@ mod tests {
                 .paths
                 .len(),
             1
+        );
+    }
+
+    #[test]
+    fn the_end_clock_flips_between_length_and_what_is_left() {
+        let (at, total) = (Duration::from_secs(2_537), Duration::from_secs(7_083));
+        assert_eq!(end_clock(at, total, false), "1:58:03");
+        assert_eq!(end_clock(at, total, true), "\u{2212}1:15:46");
+        assert_eq!(end_clock(total * 2, total, true), "\u{2212}0:00");
+    }
+
+    #[test]
+    fn a_moment_falls_in_the_last_chapter_started() {
+        let chapters = [
+            ChapterMark {
+                start: Duration::from_secs(10),
+                title: "Opening".to_owned(),
+            },
+            ChapterMark {
+                start: Duration::from_secs(60),
+                title: String::new(),
+            },
+        ];
+        assert_eq!(chapter_at(&chapters, Duration::from_secs(5)), None);
+        assert_eq!(
+            chapter_at(&chapters, Duration::from_secs(10)),
+            Some((1, "Opening"))
+        );
+        assert_eq!(
+            chapter_at(&chapters, Duration::from_secs(90)),
+            Some((2, ""))
         );
     }
 
