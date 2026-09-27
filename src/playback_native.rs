@@ -1,4 +1,8 @@
 //! RGB playback adapter for FVid's own Y4M, MP4/AVC/HEVC and WebM/VP9/AV1 readers.
+use crate::color::{
+    hdr::{ColourDescription, HdrMetadata},
+    primaries::MatrixCoeff,
+};
 use crate::{
     codec::avc_picture::IntraPicture, container::mp4::Limits, invalid, playback::Y4mReader,
     playback_mp4::Mp4VideoReader, Result,
@@ -249,6 +253,39 @@ impl<R: BufRead + Seek> NativeReader<R> {
             Self::Y4m(_) => "Y4M",
             Self::Webm(r) => r.codec(),
             Self::Avc { source, .. } => mp4_codec(&source.track().codec),
+        }
+    }
+    /// The signal the source states its pictures in, which is what a grade is
+    /// built from: the container's own description first, with the coding's VUI
+    /// or sequence header filling any code the container left unspecified.
+    ///
+    /// A Y4M stream has nowhere to write primaries or a curve, so it states
+    /// only what its converter assumes — BT.601 luma weights over a studio
+    /// range — and a caller grades the rest by deciding what the picture is.
+    /// The coding's half of the answer appears once a parameter set has been
+    /// read, so asking after the first frame sees more than asking at open.
+    pub fn colour(&self) -> ColourDescription {
+        match self {
+            Self::Y4m(_) => ColourDescription {
+                matrix: MatrixCoeff::Bt601.code(),
+                ..Default::default()
+            },
+            Self::Webm(r) => r.colour().filled_with(r.bitstream_colour()),
+            Self::Avc { source, .. } => {
+                source.track().colour.filled_with(source.bitstream_colour())
+            }
+        }
+    }
+    /// The light the source names for its pictures: a mastering display and a
+    /// peak and average level, all empty where nothing is named. Only the two
+    /// container families have anywhere to write them outside the bitstream, so
+    /// a stream whose HDR is carried as in-band SEI or metadata OBU still reads
+    /// as empty here.
+    pub fn hdr(&self) -> HdrMetadata {
+        match self {
+            Self::Y4m(_) => HdrMetadata::default(),
+            Self::Webm(r) => r.hdr(),
+            Self::Avc { source, .. } => source.track().hdr,
         }
     }
     /// The cap this reader sizes a packed RGB picture by, so a caller that
@@ -1306,5 +1343,81 @@ mod tests {
         assert_eq!(reader.rgb(), rotate_plane(&rgb, 64, 64, 90, 3));
         // The test would pass on a symmetric picture without saying anything.
         assert_ne!(reader.rgb(), rgb.as_slice());
+    }
+
+    /// BT.601 is the only thing a Y4M stream can state about its colour: the
+    /// format has no field for primaries or a curve, and the weights its
+    /// converter applies are that matrix's. So the reader says what is known
+    /// and leaves the rest for a caller to decide.
+    #[test]
+    fn a_y4m_stream_states_only_the_matrix_its_converter_uses() {
+        let bytes = b"YUV4MPEG2 W2 H2 F60:1 Ip C420jpeg\nFRAME\n\x10\x20\x30\x40\x80\x80";
+        let reader = NativeReader::without_memory_limit(Cursor::new(bytes.to_vec())).unwrap();
+        assert_eq!(
+            reader.colour(),
+            ColourDescription {
+                matrix: MatrixCoeff::Bt601.code(),
+                ..Default::default()
+            }
+        );
+        assert!(!reader.colour().is_hdr());
+        assert!(reader.hdr().is_empty());
+    }
+
+    /// A real HDR10 file, muxed by FFmpeg from synthetic input: Main10 HEVC whose
+    /// VUI names BT.2020 primaries, a PQ curve and the BT.2020-NCL matrix. The
+    /// muxer wrote no `colr` atom for it — counted in the file's bytes, zero — so
+    /// the whole statement comes out of the parameter set, which is the case a
+    /// reader has to reach into the coding for. Its mastering volume and light
+    /// level travel as in-band SEI, which the decoder does not read yet, so `hdr`
+    /// is still empty here.
+    #[test]
+    fn a_real_hdr10_files_signal_reaches_the_caller_that_grades_it() {
+        use crate::color::{Primaries, Transfer};
+        let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
+        let stated = reader.colour();
+        assert_eq!(
+            stated,
+            ColourDescription {
+                primaries: 9,
+                transfer: 16,
+                matrix: 9,
+                full_range: false,
+            }
+        );
+        assert!(stated.is_hdr());
+        assert_eq!(stated.primary_set(), Some(Primaries::BT2020));
+        assert_eq!(stated.transfer_function(), Transfer::Pq);
+        assert_eq!(stated.matrix_coefficients(), Some(MatrixCoeff::Bt2020Ncl));
+        // Decoding a whole clip does not change what it is stated in.
+        for _ in 0..5 {
+            assert!(reader.read_frame_raw().unwrap().is_some());
+        }
+        assert_eq!(reader.colour(), stated);
+    }
+
+    /// An AV1 track whose WebM header writes no `Colour` element: every code the
+    /// container states is zero, which is silence rather than a value, and once a
+    /// frame has been decoded the sequence header's own triple is what the reader
+    /// hands over. AV1's default is 2/2/2, and H.273 numbers 2 *unspecified*
+    /// rather than absent, so the zeroes become 2s and stay unknown: the reader
+    /// reports what the stream says instead of guessing on its behalf.
+    #[test]
+    fn a_codings_own_statement_replaces_a_containers_silence() {
+        let data = include_bytes!("../tests/fixtures/av1/ramp.webm").to_vec();
+        let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
+        assert_eq!(reader.colour(), ColourDescription::default());
+        assert!(reader.read_frame_raw().unwrap().is_some());
+        assert_eq!(
+            reader.colour(),
+            ColourDescription {
+                primaries: 2,
+                transfer: 2,
+                matrix: 2,
+                full_range: false,
+            }
+        );
+        assert!(!reader.colour().is_hdr());
     }
 }

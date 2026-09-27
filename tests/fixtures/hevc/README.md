@@ -60,3 +60,28 @@ ffmpeg -v error -i INPUT.mp4 -pix_fmt yuv420p -f rawvideo OUTPUT.yuv
 
 Use `yuv420p10le` for Main10. Samples are in presentation order; tests compare
 all samples, then repeat after rewind. No private video is part of the fixtures.
+
+## `hdr10.mp4` — a signal stated only in the parameter set
+
+```sh
+ffmpeg -v error -y -f lavfi -i testsrc2=size=64x64:rate=24:duration=0.2 \
+  -c:v libx265 -pix_fmt yuv420p10le \
+  -color_primaries bt2020 -color_trc smpte2084 -colorspace bt2020nc \
+  -x265-params 'colorprim=bt2020:transfer=smpte2084:colormatrix=bt2020nc:master-display=G(8500,39850)B(6550,2300)R(35400,14600)WP(15635,16450)L(10000000,1):max-cll=1000,400' \
+  -frames:v 5 hdr10.mp4
+```
+
+Five 64x64 Main10 pictures, `hev1`, 7 226 bytes, sha256
+`5c58c83bb1b03b6cf65012a80bd58a6b274b23250fa931ef3e9ad7eaf2e39113`. Two runs of
+the command above reproduce it byte for byte.
+
+What it is for is measured rather than assumed: FFmpeg 9.0.2's mov muxer writes
+**no** `colr`, `mdcv` or `ccll` atom for this file (counted in its bytes: zero of
+each), so the BT.2020 / PQ / BT.2020-NCL triple and the limited range a reader
+reports come out of the `hvcC`'s VUI and the in-band SPS and nowhere else. The
+mastering display and the 1 000/400 cd/m² light levels are likewise written
+nowhere in the container: they travel as SEI messages 137 and 144, which
+`ffprobe` surfaces as per-frame side data. So this fixture is the case where a
+container says nothing about colour and the coding says everything, and the
+in-band half of it is still unread — a reader's `hdr` is empty for it.
+

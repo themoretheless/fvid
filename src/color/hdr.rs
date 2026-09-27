@@ -263,6 +263,27 @@ impl ColourDescription {
             ..self
         }
     }
+
+    /// Fill each of the three codes this statement leaves unspecified from
+    /// another statement of the same picture, which in practice is a file's
+    /// `colr` atom or `Colour` element completed by the coding's own VUI or
+    /// sequence header.
+    ///
+    /// H.273 numbers 0 as "unspecified", so 0 is the only value the fall-back
+    /// may replace: a source that names a code keeps it whichever of the two it
+    /// came from. A range flag has no unspecified value to be replaced by, so
+    /// it falls back only when this statement named none of the three codes,
+    /// which is the case of a container with no colour description at all.
+    pub fn filled_with(self, fallback: Self) -> Self {
+        let named = |mine: u8, theirs: u8| if mine == 0 { theirs } else { mine };
+        let stated_triple = (self.primaries | self.transfer | self.matrix) != 0;
+        Self {
+            primaries: named(self.primaries, fallback.primaries),
+            transfer: named(self.transfer, fallback.transfer),
+            matrix: named(self.matrix, fallback.matrix),
+            full_range: self.full_range || (!stated_triple && fallback.full_range),
+        }
+    }
 }
 
 fn be16(b: &[u8]) -> u16 {
@@ -537,5 +558,45 @@ mod tests {
         let mut long = hdr10_bytes();
         long.push(0x80);
         assert!(MasteringDisplay::from_payload(&long).is_some());
+    }
+
+    /// A container that names none of the three codes names no range beside
+    /// them either, so a wholly silent triple is the one case where the
+    /// coding's range flag carries over; a container that names any code owns
+    /// the range it wrote with it.
+    #[test]
+    fn a_statement_fills_only_the_codes_it_leaves_unspecified() {
+        let container = ColourDescription {
+            primaries: 9,
+            ..Default::default()
+        };
+        let bitstream = ColourDescription {
+            primaries: 1,
+            transfer: 16,
+            matrix: 9,
+            full_range: true,
+        };
+        assert_eq!(
+            container.filled_with(bitstream),
+            ColourDescription {
+                primaries: 9,
+                transfer: 16,
+                matrix: 9,
+                full_range: false,
+            }
+        );
+        assert_eq!(
+            ColourDescription::default().filled_with(bitstream),
+            bitstream
+        );
+        assert!(
+            ColourDescription {
+                transfer: 1,
+                full_range: true,
+                ..Default::default()
+            }
+            .filled_with(ColourDescription::default())
+            .full_range
+        );
     }
 }

@@ -5,6 +5,7 @@ use crate::codec::{
     av1_decoder as av1, avc_decoder::AvcDecoder, avc_picture::IntraPicture,
     hevc_decoder::HevcDecoder, vp9_decoder as vp9,
 };
+use crate::color::hdr::ColourDescription;
 use crate::container::mp4::{Limits, Mp4Reader, Track};
 use crate::{Result, invalid};
 use std::io::{Read, Seek};
@@ -202,6 +203,49 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             }
             Decoder::Avc(_) => crate::playback_native::AvcColour::from_vui(self.active_vui()),
             Decoder::Vp9(_) | Decoder::Av1(_) => Ok(crate::playback_native::AvcColour::default()),
+        }
+    }
+    /// The signal the coding itself states, which is what a picture is graded
+    /// by when the container's own `colr` atom says nothing: an HEVC or AVC
+    /// VUI's three H.273 codes with the range its `video_signal_type` names, or
+    /// the colour an AV1 sequence header carries. VP9 states nothing of its own
+    /// and is left to the container.
+    pub fn bitstream_colour(&self) -> ColourDescription {
+        match &self.decoder {
+            Decoder::Hevc(d) => d
+                .parameters()
+                .0
+                .vui
+                .as_ref()
+                .and_then(|vui| vui.signal.as_ref())
+                .map(|signal| {
+                    let [primaries, transfer, matrix] = signal.colour.unwrap_or([0; 3]);
+                    ColourDescription {
+                        primaries,
+                        transfer,
+                        matrix,
+                        full_range: signal.full_range,
+                    }
+                })
+                .unwrap_or_default(),
+            Decoder::Avc(d) => d
+                .active_vui()
+                .and_then(|vui| vui.video_signal)
+                .map(|(_, full_range, colour)| {
+                    let [primaries, transfer, matrix] = colour.unwrap_or([0; 3]);
+                    ColourDescription {
+                        primaries,
+                        transfer,
+                        matrix,
+                        full_range,
+                    }
+                })
+                .unwrap_or_default(),
+            Decoder::Av1(d) => d
+                .color()
+                .map(crate::codec::av1_sequence::Color::signal)
+                .unwrap_or_default(),
+            Decoder::Vp9(_) => ColourDescription::default(),
         }
     }
     /// Whether frames come from the platform's hardware decoder.
@@ -666,6 +710,31 @@ mod tests {
             }
             .nanoseconds()
             .is_err()
+        );
+    }
+
+    /// The coding's half of a file's signal, read out of the stream itself: an
+    /// HEVC clip whose parameter sets name BT.2020 primaries, a PQ curve and the
+    /// BT.2020-NCL matrix states that triple through the reader, which is what
+    /// fills in a container that wrote no `colr` atom.
+    #[test]
+    fn an_hevc_parameter_set_states_its_own_signal() {
+        let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let mut source =
+            Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
+        let mut frames = 0;
+        while source.read_frame().unwrap().is_some() {
+            frames += 1;
+        }
+        assert_eq!(frames, 5);
+        assert_eq!(
+            source.bitstream_colour(),
+            ColourDescription {
+                primaries: 9,
+                transfer: 16,
+                matrix: 9,
+                full_range: false,
+            }
         );
     }
 }

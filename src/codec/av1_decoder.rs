@@ -41,6 +41,13 @@ impl Decoder {
     pub fn reset(&mut self) {
         *self = Self::new(self.budget);
     }
+    /// The colour the stream's own sequence header states, once one has been
+    /// read. An AV1 picture says what it is coded in where the container says
+    /// nothing, so a reader that wants the signal a picture is stated in asks
+    /// the decoder as well as the file.
+    pub fn color(&self) -> Option<&Color> {
+        self.sequence.as_ref().map(|s| &s.color)
+    }
     pub fn decode_packet(&mut self, data: &[u8]) -> Result<Vec<Decoded>> {
         if self.failed {
             return Err(invalid("AV1 decoder requires reset after error"));
