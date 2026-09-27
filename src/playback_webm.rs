@@ -1,6 +1,5 @@
 //! Native WebM/Matroska VP9 and AV1 playback with bounded decode-ahead and source timestamps.
 use crate::{
-    Result,
     codec::{
         vp9,
         vp9_decoder::{Decoded, Decoder},
@@ -8,6 +7,7 @@ use crate::{
     container::webm::{Limits, WebmReader},
     invalid,
     playback_native::{AvcColour, Planar8},
+    Result,
 };
 use std::{
     io::{Read, Seek},
@@ -78,7 +78,11 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 *side = u32::try_from(value).unwrap_or(0);
                 keeps &= u32::try_from(value).is_ok();
             }
-            if keeps { sides } else { [0; 4] }
+            if keeps {
+                sides
+            } else {
+                [0; 4]
+            }
         };
         let track = track.number;
         let rgb_budget = budget / 4;
@@ -121,6 +125,11 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     }
     pub fn codec(&self) -> &'static str {
         self.codec
+    }
+    /// The cap this reader sizes its RGB picture by, which is the cap a caller
+    /// converting the planes it hands over has to size by too.
+    pub fn rgb_budget(&self) -> usize {
+        self.rgb_budget
     }
     pub fn rgb(&self) -> &[u8] {
         &self.rgb

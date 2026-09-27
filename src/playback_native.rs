@@ -251,6 +251,18 @@ impl<R: BufRead + Seek> NativeReader<R> {
             Self::Avc { source, .. } => mp4_codec(&source.track().codec),
         }
     }
+    /// The cap this reader sizes a packed RGB picture by, so a caller that
+    /// converts one of the reader's own plane frames asks the same question the
+    /// reader does. A Y4M stream converts inside its reader, which checked the
+    /// frame against the caller's limit when it opened and has no cap left to
+    /// hand on.
+    pub fn rgb_budget(&self) -> usize {
+        match self {
+            Self::Y4m(_) => usize::MAX,
+            Self::Webm(r) => r.rgb_budget(),
+            Self::Avc { rgb_budget, .. } => *rgb_budget,
+        }
+    }
     pub fn rgb(&self) -> &[u8] {
         match self {
             Self::Y4m(r) => r.rgb(),

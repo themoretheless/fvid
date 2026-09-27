@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         reader.read_frame()?;
     }
     let period = reader.frame_period();
-    let playback = Playback::start(reader);
+    let playback = Playback::start(reader, None);
     if paced {
         thread::sleep(fvid::playback_thread::startup_buffer(period));
     }

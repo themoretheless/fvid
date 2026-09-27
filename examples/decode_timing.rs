@@ -71,7 +71,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             BufReader::new(File::open(&args[0])?),
         )?;
         reader.read_frame()?;
-        let playback = fvid::playback_thread::Playback::start(reader);
+        let playback = fvid::playback_thread::Playback::start(reader, None);
         let start = Instant::now();
         let mut frames = 0;
         while frames < limit {

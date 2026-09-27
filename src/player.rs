@@ -1257,7 +1257,7 @@ impl Player {
         // A–B marks belong to the item that was on screen before this one.
         self.loop_a = None;
         self.loop_b = None;
-        self.playback = Some(Playback::start(reader));
+        self.playback = Some(Playback::start(reader, None));
         // The picture of the item before this one is no longer on screen.
         self.presented = None;
         // Try to start audio playback if the file has an audio track.
