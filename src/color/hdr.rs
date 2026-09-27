@@ -211,11 +211,21 @@ impl HdrMetadata {
         }
     }
 
-    /// Content peak to tone map from, given a fallback for streams that carry
-    /// no light level at all.
+    /// Content peak to tone map from, given a fallback for a stream that states
+    /// no light at all.
+    ///
+    /// MaxCLL is the statement about the content, so it wins wherever it is
+    /// written. A mastering volume names the peak the content was authored
+    /// against, which answers for the many files that write `mdcv` and no
+    /// `ccll`; the two are not maxed together, because a dim master under a
+    /// bright display still deserves its highlights kept. Only when neither is
+    /// stated does the caller's own headroom stand in.
     pub fn content_light(&self, fallback_peak: f32) -> ContentLight {
+        let authored = self
+            .mastering
+            .map_or(fallback_peak, |volume| volume.max_luminance);
         ContentLight {
-            max_cll: self.light.peak_or(fallback_peak),
+            max_cll: self.light.peak_or(authored),
             max_fall: self.light.max_fall,
         }
     }
@@ -453,6 +463,29 @@ mod tests {
         m.merge(HdrMetadata::from_clli(&[0x0F, 0xA0, 0x01, 0x90]).unwrap());
         assert!(m.mastering.is_some());
         assert_eq!(m.light.max_cll, 4_000.0);
+    }
+
+    /// The state a master that writes `mdcv` and no `ccll` leaves a reader in:
+    /// the volume names the peak the content was authored against, and nothing
+    /// states what the content itself reaches.
+    #[test]
+    fn a_mastering_volume_answers_for_a_peak_the_content_never_stated() {
+        let mut m = HdrMetadata::from_mdcv(&hdr10_bytes()).unwrap();
+        assert_eq!(m.light.max_cll, 0.0);
+        // The authored 1 000 cd/m², not the 100-nit panel a grade is asked for.
+        assert_eq!(m.content_light(100.0).max_cll, 1_000.0);
+        // A dim master under a bright caller stays dim: the caller's headroom is
+        // a fallback, not something to max the authored volume against.
+        let volume = m.mastering.unwrap();
+        m.mastering = Some(MasteringDisplay {
+            max_luminance: 400.0,
+            ..volume
+        });
+        assert_eq!(m.content_light(1_000.0).max_cll, 400.0);
+        // Where the content does state its own peak, that statement wins.
+        m.merge(HdrMetadata::from_clli(&[0x04, 0xD2, 0, 0]).unwrap());
+        assert_eq!(m.content_light(100.0).max_cll, 1_234.0);
+        assert!(m.mastering.is_some());
     }
 
     /// The direction a reader needs, which is the reverse of `merge`: a

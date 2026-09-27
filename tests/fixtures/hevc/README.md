@@ -117,3 +117,32 @@ and takes the panel's own peak — the case
 `a_real_hlg_files_signal_reaches_the_caller_that_grades_it` and
 `an_hlg_item_is_graded_at_the_panels_own_peak` hold to.
 
+## `mdcv-only.mp4` — a volume with no content light beside it
+
+```sh
+ffmpeg -v error -y -f lavfi -i testsrc2=size=64x64:rate=24:duration=0.2 \
+  -c:v libx265 -pix_fmt yuv420p10le \
+  -color_primaries bt2020 -color_trc smpte2084 -colorspace bt2020nc \
+  -x265-params 'colorprim=bt2020:transfer=smpte2084:colormatrix=bt2020nc:master-display=G(8500,39850)B(6550,2300)R(35400,14600)WP(15635,16450)L(10000000,1)' \
+  -frames:v 5 mdcv-only.mp4
+```
+
+The `hdr10.mp4` command with `max-cll` left off, which is how an encoder is
+usually driven: `--master-display` is what people remember and `--max-cll` is
+optional. Five 64x64 Main10 pictures, `hev1`, 7 218 bytes, sha256
+`7832f5f3f55e0e4c0053be7c6247166068e86b50e29c7ace327d4fc671de014b`, again byte
+for byte across two runs. `ffprobe` reports `color_primaries=bt2020`,
+`color_transfer=smpte2084`, `color_space=bt2020nc`.
+
+Again no `colr`, `nclx`, `mdcv` or `ccll` atom (counted in the file's bytes: zero
+of each), so everything is in-band. What the band says is the point: SEI 137
+states the BT.2020 volume and its 1 000 cd/m² authored peak, and SEI 144 *is*
+written — with `max_content=0, max_average=0`. BT.2408 reads a zero MaxCLL as
+"nothing stated", so this file has a mastering volume and no content light,
+which is the state most real HDR10 files are in and the one where a reader that
+only asked `ccll` silently tone maps from the panel it happens to be drawing
+on. `a_volume_without_a_content_light_grades_against_its_own_peak` holds that the
+grade compresses from the authored 1 000 cd/m² rather than the 100-nit panel's
+fallback.
+
+

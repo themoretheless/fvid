@@ -1414,6 +1414,37 @@ mod tests {
         assert_eq!(hdr.content_light(400.0).max_cll, 1_000.0);
     }
 
+    /// A master that writes its volume and no content light, which is what most
+    /// encoders produce: `x265` needs `--max-cll` spelled out, while
+    /// `--master-display` alone is enough for HDR10. Nothing in the file states
+    /// a content peak, so the peak the grade compresses from has to come from
+    /// the authored volume — a caller that only knows its own 100-nit panel would
+    /// otherwise treat a 1 000 cd/m² master as if it already fit.
+    #[test]
+    fn a_volume_without_a_content_light_grades_against_its_own_peak() {
+        use crate::color::{DisplayTarget, Grade, Settings};
+        let data = include_bytes!("../tests/fixtures/hevc/mdcv-only.mp4").to_vec();
+        let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
+        let hdr = reader.hdr();
+        let volume = hdr.mastering.unwrap();
+        assert!(volume.is_hdr10());
+        assert_eq!(volume.max_luminance, 1_000.0);
+        assert!(hdr.light.max_cll == 0.0 && hdr.light.max_fall == 0.0);
+        assert_eq!(hdr.content_light(100.0).max_cll, 1_000.0);
+        let grade = Grade::new(
+            reader.colour(),
+            &hdr,
+            Settings::video(DisplayTarget::sdr(100.0)),
+            None,
+        );
+        assert_eq!(grade.plan().content.max_cll, 1_000.0);
+        // Decoding the packets that repeat the messages states the same light.
+        for _ in 0..5 {
+            assert!(reader.read_frame_raw().unwrap().is_some());
+        }
+        assert_eq!(reader.hdr(), hdr);
+    }
+
     /// An HLG clip, stated the same way the HDR10 one is — in the parameter set,
     /// with no `colr` atom in the file to read — except that here the coding says
     /// everything and means by it something the reader must not over-read: HLG
