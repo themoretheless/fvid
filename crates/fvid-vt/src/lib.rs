@@ -192,6 +192,11 @@ pub struct Planes {
 }
 
 /// One frame's output slot, addressed through the source refcon.
+/// kVTVideoDecoderReferenceMissingErr: the frame predicts from a picture the
+/// decoder never saw (a stream opening mid-GOP, open-GOP leading frames).
+/// Nothing can be shown for it, but decoding recovers at the next keyframe.
+const REFERENCE_MISSING: OSStatus = -17694;
+
 struct Slot {
     result: Result<Option<Planes>, Error>,
 }
@@ -208,6 +213,10 @@ unsafe extern "C" fn output(
     // SAFETY: `source` is the `Slot` the synchronous decode call passed and
     // still owns; VideoToolbox invokes this callback before that call returns.
     let slot = unsafe { &mut *(source as *mut Slot) };
+    if code == REFERENCE_MISSING {
+        slot.result = Ok(None);
+        return;
+    }
     if code != 0 {
         slot.result = Err(status("frame decode", code));
         return;
@@ -533,6 +542,9 @@ impl Session {
             );
             CFRelease(sample);
             CFRelease(block);
+            if code == REFERENCE_MISSING {
+                return Ok(None);
+            }
             if code != 0 {
                 return Err(status("decode", code));
             }

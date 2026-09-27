@@ -8,6 +8,7 @@
 //!
 //! These run as an integration target so they exercise only the public surface
 //! the player itself uses.
+#![cfg(feature = "player")]
 
 use fvid::audio::AudioStream;
 use fvid::codec::make_audio_decoder;
