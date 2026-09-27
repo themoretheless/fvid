@@ -7,6 +7,7 @@ pub mod audio;
 pub mod audio_thread;
 pub mod backend;
 pub mod codec;
+pub mod color;
 pub mod container;
 #[cfg(feature = "mcp")]
 pub mod mcp;
