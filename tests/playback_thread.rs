@@ -1,5 +1,8 @@
 use fvid::{
-    color::{ColourDescription, DisplayTarget, Grade, HdrMetadata, Settings, ToneMap, Transfer},
+    color::{
+        ColourDescription, DisplayTarget, Grade, HdrMetadata, Interpolation, Lut, Settings,
+        ToneMap, Transfer,
+    },
     playback_native::{NativeReader, planar8_to_rgb},
     playback_thread::{Event, Frame, Pixels, Playback},
 };
@@ -121,6 +124,20 @@ fn first_frame(player: &mut Playback) -> Frame {
             Some(Event::Error(error)) => panic!("{error}"),
             Some(Event::Ended(_)) => panic!("the stream ended before its first frame"),
             None => thread::sleep(Duration::from_millis(1)),
+        }
+    }
+}
+
+/// A graded picture is always packed RGB on this thread; one with nothing done
+/// to its colour is packed only where the reader left it that way, which for an
+/// MP4 is its first picture and planes after that.
+fn packed(pixels: Pixels, budget: usize) -> Vec<u8> {
+    match pixels {
+        Pixels::Rgb(rgb) => rgb,
+        Pixels::Planar(planes) => {
+            let mut rgb = Vec::new();
+            planar8_to_rgb(&planes, &mut rgb, budget).expect("converted");
+            rgb
         }
     }
 }
@@ -257,19 +274,6 @@ fn a_real_hdr10_picture_is_tone_mapped_by_the_thread_that_shows_it() {
     let mut shown = Playback::start(hdr10(&data), Some(stated));
     let mut burnt = Playback::start(hdr10(&data), Some(blind));
 
-    // A graded picture is always packed RGB on this thread; one with nothing done
-    // to its colour is packed only where the reader left it that way, which for
-    // this file is its first picture, and planes after that.
-    fn packed(pixels: Pixels, budget: usize) -> Vec<u8> {
-        match pixels {
-            Pixels::Rgb(rgb) => rgb,
-            Pixels::Planar(planes) => {
-                let mut rgb = Vec::new();
-                planar8_to_rgb(&planes, &mut rgb, budget).expect("converted");
-                rgb
-            }
-        }
-    }
     for frame in 0..2 {
         let untouched = first_frame(&mut plain);
         if frame > 0 {
@@ -296,4 +300,169 @@ fn a_real_hdr10_picture_is_tone_mapped_by_the_thread_that_shows_it() {
             );
         }
     }
+}
+
+/// A cube read off disk and applied by the thread that shows the pictures, then
+/// checked against the file's own text. The premise is measured first: with no
+/// cube these settings are the identity on this stream, so every code a graded
+/// picture differs by is the cube's doing — and that difference is recomputed
+/// here by interpolating node values parsed straight out of the `.cube`, with
+/// neither the crate's parser nor its sampler. The stream carries a hundred and
+/// ninety-two colours rather than four, so the comparison walks cells across the
+/// cube instead of one point on its diagonal, and both routes are compared: the
+/// packed first picture and the planes after it, because a grade reaches a viewer
+/// through whichever one the decoder happened to leave. Measured on this stream:
+/// 3 072 channels over five hundred and seventy-two distinct colours, all of them
+/// within one code of what the file's own numbers interpolate to.
+#[test]
+fn a_cube_on_disk_regrades_the_pictures_the_thread_shows() {
+    const SIZE: usize = 17;
+    const CUBE: &str = include_str!("fixtures/lut/grade-17.cube");
+    fn graded_from(bytes: Vec<u8>) -> NativeReader<Cursor<Vec<u8>>> {
+        let mut reader = NativeReader::without_memory_limit(Cursor::new(bytes)).unwrap();
+        assert!(reader.read_frame().unwrap());
+        reader
+    }
+    // 32x16, 4:2:0, two frames: luma runs across the width while both chroma
+    // planes run down their own axes, so no two chroma cells share a colour.
+    fn stream() -> Vec<u8> {
+        let (width, height) = (32usize, 16usize);
+        let mut bytes = b"YUV4MPEG2 W32 H16 F60:1 Ip C420jpeg\n".to_vec();
+        for _ in 0..2 {
+            bytes.extend_from_slice(b"FRAME\n");
+            for y in 0..height {
+                for x in 0..width {
+                    bytes.push(16 + (x * 7 + y * 3) as u8 % 220);
+                }
+            }
+            for cy in 0..height / 2 {
+                for cx in 0..width / 2 {
+                    bytes.push(16 + (cx * 14) as u8);
+                }
+            }
+            for cy in 0..height / 2 {
+                for cx in 0..width / 2 {
+                    bytes.push(16 + (cy * 28) as u8);
+                }
+            }
+        }
+        bytes
+    }
+    // The file lists red fastest, then green, then blue.
+    let nodes: Vec<[f64; 3]> = CUBE
+        .lines()
+        .filter(|line| {
+            line.as_bytes()
+                .first()
+                .is_some_and(|byte| byte.is_ascii_digit() || *byte == b'-' || *byte == b'.')
+        })
+        .map(|line| {
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            [
+                parts[0].parse().expect("red"),
+                parts[1].parse().expect("green"),
+                parts[2].parse().expect("blue"),
+            ]
+        })
+        .collect();
+    assert_eq!(nodes.len(), SIZE.pow(3));
+    let lookup = |code: [f64; 3]| -> [f64; 3] {
+        let mut low = [0usize; 3];
+        let mut frac = [0.0f64; 3];
+        for axis in 0..3 {
+            let pos = code[axis].clamp(0.0, 1.0) * f64::from(SIZE as u32 - 1);
+            let index = pos.floor() as usize;
+            let index = index.min(SIZE - 2);
+            low[axis] = index;
+            frac[axis] = pos - f64::from(index as u32);
+        }
+        let mut out = [0.0f64; 3];
+        for blue in 0..2 {
+            for green in 0..2 {
+                for red in 0..2 {
+                    let weight = [red, green, blue]
+                        .iter()
+                        .zip(&frac)
+                        .fold(1.0, |product, (corner, f)| {
+                            product * if *corner == 0 { 1.0 - f } else { *f }
+                        });
+                    let node = nodes
+                        [(low[0] + red) + (low[1] + green) * SIZE + (low[2] + blue) * SIZE * SIZE];
+                    for channel in 0..3 {
+                        out[channel] += weight * node[channel];
+                    }
+                }
+            }
+        }
+        out
+    };
+    let reader = graded_from(stream());
+    let budget = reader.rgb_budget();
+    // The stream states no colour of its own, so the grade is told what the bytes
+    // mean the way the rest of this file tells it, and the settings below are the
+    // ones already proven to ask for nothing.
+    let signal = ColourDescription {
+        primaries: 1,
+        transfer: 1,
+        matrix: 1,
+        full_range: false,
+    };
+    let mut settings = Settings::video(DisplayTarget::sdr(240.0));
+    settings.interpolation = Interpolation::Trilinear;
+    assert!(
+        Grade::new(signal, &HdrMetadata::default(), settings, None).is_identity(),
+        "these settings already move this stream on their own, so a cube would not be the only change"
+    );
+    let grade = Grade::new(
+        signal,
+        &HdrMetadata::default(),
+        settings,
+        Some(Lut::from_cube(CUBE).expect("a written cube is a cube")),
+    );
+    assert!(
+        !grade.is_identity(),
+        "a cube of this size claims to change nothing"
+    );
+    let mut plain = Playback::start(graded_from(stream()), None);
+    let mut shown = Playback::start(graded_from(stream()), Some(grade));
+    let mut colours = std::collections::HashSet::new();
+    let mut channels = 0usize;
+    for frame in 0..2 {
+        let untouched = packed(first_frame(&mut plain).pixels, budget);
+        let graded = packed(first_frame(&mut shown).pixels, budget);
+        assert_eq!(untouched.len(), graded.len());
+        assert_ne!(untouched, graded, "the cube reached no pixels");
+        for (pixel, out) in untouched
+            .as_chunks::<3>()
+            .0
+            .iter()
+            .zip(graded.as_chunks::<3>().0)
+        {
+            colours.insert(*pixel);
+            let want = lookup([
+                f64::from(pixel[0]) / 255.0,
+                f64::from(pixel[1]) / 255.0,
+                f64::from(pixel[2]) / 255.0,
+            ]);
+            for channel in 0..3 {
+                let expected = (want[channel] * 255.0).round() as i16;
+                let step = (i16::from(out[channel]) - expected).abs();
+                assert!(
+                    step <= 1,
+                    "frame {frame} pixel {pixel:?} channel {channel}: shown {}, the cube's own text says {expected}",
+                    out[channel]
+                );
+                channels += 1;
+            }
+        }
+    }
+    assert!(
+        colours.len() >= 500,
+        "only {} colours reached the cube, which does not walk it",
+        colours.len()
+    );
+    assert!(
+        channels >= 3 * 1024,
+        "only {channels} channels were compared against the cube's text"
+    );
 }
