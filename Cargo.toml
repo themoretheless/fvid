@@ -72,3 +72,8 @@ required-features = ["player"]
 [[example]]
 name = "av_sync"
 required-features = ["player"]
+
+# Drives the audio readers and decoders, which only exist with the player feature.
+[[test]]
+name = "native_container_audio"
+required-features = ["player"]

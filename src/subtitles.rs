@@ -874,8 +874,8 @@ mod tests {
         assert!(!found.contains(&"other.srt".to_string()));
         // Reading is separate from listing: an unparseable sibling yields none.
         assert!(load(&directory.join("movie.txt")).is_none());
-        assert_eq!(load(&video.clone().with_extension("srt")).unwrap().len(), 1);
-        assert_eq!(load(&video.with_extension("smi")).unwrap()[0].text, "Hi");
+        assert_eq!(load(&directory.join("movie.srt")).unwrap().len(), 1);
+        assert_eq!(load(&directory.join("movie.smi")).unwrap()[0].text, "Hi");
         std::fs::remove_dir_all(&directory).unwrap();
     }
 

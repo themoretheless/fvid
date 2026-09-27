@@ -998,15 +998,35 @@ fn playback_window(
     track: &crate::container::mp4::Track,
     movie_scale: u32,
 ) -> Result<(i64, Option<i64>)> {
-    if track.edits.is_empty() {
+    // Leading empty edits only delay the track's start; QuickTime writers
+    // emit them routinely. Playback starts at the first media edit instead.
+    let edits: Vec<_> = track
+        .edits
+        .iter()
+        .skip_while(|edit| edit.media_time < 0)
+        .collect();
+    if edits.is_empty() {
         return Ok((0, None));
     }
-    if track.edits.len() != 1 || track.edits[0].media_time < 0 || movie_scale == 0 {
-        return Err(invalid(
-            "multiple or empty MP4 playback edits are not implemented",
-        ));
+    if movie_scale == 0 {
+        return Err(invalid("MP4 movie timescale is zero"));
     }
-    let edit = &track.edits[0];
+    let ticks = |duration: u64| {
+        u128::from(duration) * u128::from(track.timescale) / u128::from(movie_scale)
+    };
+    // Back-to-back edits that continue the media timeline play as one window.
+    for pair in edits.windows(2) {
+        let expected = i128::from(pair[0].media_time) + ticks(pair[0].duration) as i128;
+        if pair[1].media_time < 0 || (i128::from(pair[1].media_time) - expected).abs() > 1 {
+            return Err(invalid(
+                "non-contiguous MP4 playback edits are not implemented",
+            ));
+        }
+    }
+    let edit = crate::container::mp4::Edit {
+        duration: edits.iter().map(|edit| edit.duration).sum(),
+        media_time: edits[0].media_time,
+    };
     let numerator = u128::from(edit.duration) * u128::from(track.timescale);
     // The scheduler uses integral track ticks. Round the exclusive endpoint
     // upward so a positive fractional interval retains its final sample.
@@ -1106,7 +1126,18 @@ mod tests {
         assert!(playback_window(&track, 1000).is_err());
         track.edits[0].duration = 480;
         track.edits[0].media_time = -1;
-        assert!(playback_window(&track, 1000).is_err());
+        assert_eq!(playback_window(&track, 1000).unwrap(), (0, None));
+        // A leading delay is skipped; contiguous edits join into one window.
+        track.edits.push(Edit {
+            duration: 240,
+            media_time: 1024,
+        });
+        track.edits.push(Edit {
+            duration: 240,
+            media_time: 1024 + 3072,
+        });
+        assert_eq!(playback_window(&track, 1000).unwrap(), (1024, Some(7168)));
+        track.edits.truncate(1);
         track.edits[0].media_time = i64::MAX;
         assert!(playback_window(&track, 1000).is_err());
         track.edits[0].media_time = 0;
