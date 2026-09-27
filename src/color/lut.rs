@@ -192,13 +192,19 @@ pub enum Lut {
 }
 
 impl Lut {
-    /// Resolve/Adobe `.cube`.
+    /// Resolve/Adobe `.cube`, including the files that write a 1D table ahead of
+    /// the 3D one.
     pub fn from_cube(text: &str) -> Result<Self> {
         let mut one_size = None;
         let mut three_size = None;
         let mut domain_min = [0.0f32; 3];
         let mut domain_max = [1.0f32; 3];
-        let mut values: Vec<f32> = Vec::new();
+        // One file can declare both sizes, so each run of numbers is kept in the
+        // bucket its own size line opened; a single list would leave neither
+        // count matching.
+        let mut one_values: Vec<f32> = Vec::new();
+        let mut three_values: Vec<f32> = Vec::new();
+        let mut section = None;
         for (line_no, raw) in text.lines().enumerate() {
             let line = raw.split('#').next().unwrap_or("").trim();
             if line.is_empty() {
@@ -209,17 +215,13 @@ impl Lut {
                 continue;
             }
             if let Some(rest) = upper.strip_prefix("LUT_1D_SIZE") {
-                if three_size.is_some() {
-                    return Err(invalid("a .cube cannot declare both 1D and 3D size"));
-                }
                 one_size = Some(parse_size(rest, line_no)?);
+                section = Some(false);
                 continue;
             }
             if let Some(rest) = upper.strip_prefix("LUT_3D_SIZE") {
-                if one_size.is_some() {
-                    return Err(invalid("a .cube cannot declare both 1D and 3D size"));
-                }
                 three_size = Some(parse_size(rest, line_no)?);
+                section = Some(true);
                 continue;
             }
             if let Some(rest) = upper.strip_prefix("DOMAIN_MIN") {
@@ -238,7 +240,17 @@ impl Lut {
                 continue;
             }
             if is_number_line(line) {
-                values.extend(
+                let rows = match section {
+                    Some(false) => &mut one_values,
+                    Some(true) => &mut three_values,
+                    None => {
+                        return Err(invalid(&format!(
+                            "a .cube value on line {} precedes any size line",
+                            line_no + 1
+                        )));
+                    }
+                };
+                rows.extend(
                     line.split_whitespace()
                         .filter_map(|t| t.parse::<f32>().ok()),
                 );
@@ -249,66 +261,71 @@ impl Lut {
                 line_no + 1
             )));
         }
-        let nan = values.iter().any(|v| !v.is_finite());
+        let nan = one_values
+            .iter()
+            .chain(&three_values)
+            .any(|v| !v.is_finite());
         if nan {
             return Err(invalid("a .cube value is not a number"));
         }
-        match (one_size, three_size) {
-            (Some(n), None) => {
-                let rows = if values.len() == n * 3 {
-                    3
-                } else if values.len() == n {
-                    1
-                } else {
-                    return Err(invalid(&format!(
-                        "1D LUT expected {n} or {} values, got {}",
-                        n * 3,
-                        values.len()
-                    )));
-                };
-                let mut data = [
-                    Vec::with_capacity(n),
-                    Vec::with_capacity(n),
-                    Vec::with_capacity(n),
-                ];
-                for chunk in values.chunks(rows) {
-                    for ch in 0..3 {
-                        let v = if rows == 1 { chunk[0] } else { chunk[ch] };
-                        let lo = domain_min[ch];
-                        let span = (domain_max[ch] - lo).max(1e-6);
-                        data[ch].push(((v - lo) / span).clamp(0.0, 1.0));
-                    }
-                }
-                Ok(Self::One(Lut1d { data }))
+        if let Some(n) = three_size {
+            // Both tables in one file is how a grading suite exports a cube that
+            // expects a curve in front of it, and no document settles which way
+            // round the two go. The grid is what carries the colour decision, so
+            // it is what gets applied — as FFmpeg's `lut3d` was measured to do
+            // with the same file.
+            if three_values.len() != n * n * n * 3 {
+                return Err(invalid(&format!(
+                    "3D LUT expected {} values, got {}",
+                    n * n * n * 3,
+                    three_values.len()
+                )));
             }
-            (None, Some(n)) => {
-                if values.len() != n * n * n * 3 {
-                    return Err(invalid(&format!(
-                        "3D LUT expected {} values, got {}",
-                        n * n * n * 3,
-                        values.len()
-                    )));
-                }
-                let data = values
-                    .chunks_exact(3)
-                    .map(|c| {
-                        [
-                            c[0].clamp(0.0, 1.0),
-                            c[1].clamp(0.0, 1.0),
-                            c[2].clamp(0.0, 1.0),
-                        ]
-                    })
-                    .collect();
-                Ok(Self::Three(Lut3d {
-                    size: n,
-                    domain_min,
-                    domain_max,
-                    data,
-                }))
-            }
-            (None, None) => Err(invalid("a .cube must declare LUT_1D_SIZE or LUT_3D_SIZE")),
-            (Some(_), Some(_)) => Err(invalid("a .cube cannot declare both sizes")),
+            let data = three_values
+                .chunks_exact(3)
+                .map(|c| {
+                    [
+                        c[0].clamp(0.0, 1.0),
+                        c[1].clamp(0.0, 1.0),
+                        c[2].clamp(0.0, 1.0),
+                    ]
+                })
+                .collect();
+            return Ok(Self::Three(Lut3d {
+                size: n,
+                domain_min,
+                domain_max,
+                data,
+            }));
         }
+        if let Some(n) = one_size {
+            let rows = if one_values.len() == n * 3 {
+                3
+            } else if one_values.len() == n {
+                1
+            } else {
+                return Err(invalid(&format!(
+                    "1D LUT expected {n} or {} values, got {}",
+                    n * 3,
+                    one_values.len()
+                )));
+            };
+            let mut data = [
+                Vec::with_capacity(n),
+                Vec::with_capacity(n),
+                Vec::with_capacity(n),
+            ];
+            for chunk in one_values.chunks(rows) {
+                for ch in 0..3 {
+                    let v = if rows == 1 { chunk[0] } else { chunk[ch] };
+                    let lo = domain_min[ch];
+                    let span = (domain_max[ch] - lo).max(1e-6);
+                    data[ch].push(((v - lo) / span).clamp(0.0, 1.0));
+                }
+            }
+            return Ok(Self::One(Lut1d { data }));
+        }
+        Err(invalid("a .cube must declare LUT_1D_SIZE or LUT_3D_SIZE"))
     }
 
     /// Autodesk/Avid `.3dl`: a size line then 12-bit integer rows.
@@ -698,6 +715,31 @@ LUT_3D_SIZE 2
             "LUT_3D_SIZE abc\n",
         ] {
             assert!(Lut::from_cube(bad).is_err(), "accepted: {bad:?}");
+        }
+    }
+
+    /// A file that writes both tables is a grid with a curve in front of it, and
+    /// no document settles which way round the two go. The grid carries the
+    /// colour decision, so it is what gets applied — the same result FFmpeg's
+    /// `lut3d` gives for this file, measured on black, red, green and blue.
+    #[test]
+    fn a_cube_with_both_tables_is_read_for_its_3d_grid() {
+        let text = "LUT_1D_SIZE 2\n1 1 1\n0 0 0\nLUT_3D_SIZE 2\n\
+                    0 0 0\n0 0 1\n1 0 0\n1 0 1\n0 1 0\n0 1 1\n1 1 0\n1 1 1\n";
+        let lut = Lut::from_cube(text).unwrap();
+        assert!(matches!(lut, Lut::Three(_)));
+        assert_eq!(lut.size(), 2);
+        for (input, expected) in [
+            ([0.0; 3], [0.0; 3]),
+            ([1.0, 0.0, 0.0], [0.0, 0.0, 1.0]),
+            ([0.0, 1.0, 0.0], [1.0, 0.0, 0.0]),
+            ([0.0, 0.0, 1.0], [0.0, 1.0, 0.0]),
+        ] {
+            assert_eq!(
+                lut.sample(input, Interpolation::Nearest),
+                expected,
+                "{input:?}"
+            );
         }
     }
 
