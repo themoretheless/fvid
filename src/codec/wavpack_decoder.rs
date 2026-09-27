@@ -1107,12 +1107,12 @@ mod tests {
         let packet = decoder.decode_encoded(&wv_data, 0, 0).expect("decode block");
         
         // Compare output sizes
-        let wasm_bytes = packet.data.len();
+        let wasm_bytes = packet.expect("a decoded packet").data.len();
         assert_eq!(wasm_bytes, ref_pcm.len(), 
             "Output size mismatch: Rust={} bytes, FFmpeg={} bytes",
             wasm_bytes, ref_pcm.len());
         
-        println!("✓ Bit-exact match with FFmpeg reference ({})", wasm_bytes / 2, " samples");
+        println!("✓ Bit-exact match with FFmpeg reference ({} samples)", wasm_bytes / 2);
     }
 }
 
