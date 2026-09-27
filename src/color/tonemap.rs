@@ -71,14 +71,13 @@ impl ContentLight {
 ///
 /// The set and the parameter semantics mirror FFmpeg's `tonemap` filter so the
 /// two can be compared sample for sample.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ToneMap {
     /// Divide through by the content peak.
     Linear,
     /// Power-law shoulder above an adaptive break.
     Gamma,
     /// Hard clip in the display domain.
-    #[default]
     Clip,
     /// Extended Reinhard.
     Reinhard,

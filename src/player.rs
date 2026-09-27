@@ -7546,7 +7546,7 @@ LUT_3D_SIZE 2
             (plan.source, plan.dest),
             (Primaries::BT2020, Primaries::BT709)
         );
-        assert_eq!(plan.tone_map, Some(ToneMap::default()));
+        assert_eq!(plan.tone_map, Some(ToneMap::Clip));
         // `--tonemap` replaces the curve the plan would have picked.
         let hable = Grading {
             tone_map: Some(ToneMap::Hable),
@@ -7595,9 +7595,10 @@ LUT_3D_SIZE 2
     /// in-band SEI messages, which the decoder reads out of the configuration
     /// record as it is built, so a session that was told nothing still grades the
     /// file against the 1 000 cd/m² peak the encoder stated rather than a blind
-    /// guess. Which curve reads that peak is measured here too: the default clips
-    /// and so ignores it, while a curve that compresses highlights moves the same
-    /// code once the peak is known.
+    /// guess. That peak is also what the default curve is chosen from: the panel
+    /// reaches 100 cd/m² and the master was authored at ten times that, so the
+    /// session rolls its highlights instead of folding them to white, which a
+    /// grade that never read the peak cannot show.
     #[test]
     fn a_files_in_band_light_reaches_the_grade_the_session_bakes() {
         use crate::playback_native::NativeReader;
@@ -7625,20 +7626,32 @@ LUT_3D_SIZE 2
         .grade_for(signal, &HdrMetadata::default())
         .unwrap();
         assert_ne!(reinhard.rgb(highlight), blind.rgb(highlight));
-        let clip_blind = Grading::default()
+        // The default reads the peak too, and that is the difference a viewer
+        // sees: a code above the panel's own reach keeps its place in the
+        // shoulder instead of folding into white.
+        let blind_default = Grading::default()
             .grade_for(signal, &HdrMetadata::default())
             .unwrap();
-        assert_eq!(grade.rgb(highlight), clip_blind.rgb(highlight));
+        assert_eq!(grade.plan().tone_map, Some(ToneMap::Mobius));
+        assert_eq!(blind_default.plan().tone_map, Some(ToneMap::Clip));
+        // PQ's 0.62 is about 190 cd/m², which a 100-nit panel has no number for
+        // until the master's own peak says how far above it to roll.
+        let kept = grade.rgb([0.62; 3])[0];
+        let burnt = blind_default.rgb([0.62; 3])[0];
+        assert!(burnt > 0.999, "{burnt}");
+        assert!((0.85..0.96).contains(&kept), "{kept}");
+        // And a code the panel shows outright is untouched by the choice.
+        assert_eq!(grade.rgb([0.3; 3]), blind_default.rgb([0.3; 3]));
     }
 
     /// The same chain on a file that states a curve and no light at all: an HLG
     /// clip. Nothing was asked from the command line, yet BT.2100 material still
-    /// gets the compression [`Grade::new`] picks, and with no MaxCLL the only
-    /// peak there is to compress against is the panel's own — which for HLG is
-    /// not a compromise but what the format means, its scene light being
-    /// normalised to whatever display shows it. So the top of the code scale
-    /// stays separated on the way to the screen instead of folding into white,
-    /// and mid-code grey arrives as grey.
+    /// gets the display-domain pass [`Grade::new`] picks — and because the panel's
+    /// own peak is the only peak this file states, the headroom rule answers
+    /// "nothing to roll", which for HLG is not a compromise but what the format
+    /// means, its scene light being normalised to whatever display shows it. So
+    /// the top of the code scale stays separated on the way to the screen instead
+    /// of folding into white, and mid-code grey arrives as grey.
     #[test]
     fn an_hlg_item_is_graded_at_the_panels_own_peak() {
         use crate::playback_native::NativeReader;

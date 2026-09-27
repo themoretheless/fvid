@@ -94,7 +94,10 @@ impl Grade {
     /// Highlight compression is on for BT.2100 material even when
     /// [`Settings::tone_map`] is `None`, unless the destination curve is BT.2100
     /// too: an unmapped PQ picture on an SDR panel is a flat grey one, and a
-    /// caller who really wants that asks for a BT.2100 `to`.
+    /// caller who really wants that asks for a BT.2100 `to`. The curve picked
+    /// for a caller who asks for none follows the headroom: content that stays
+    /// within the panel needs no shoulder, and content that reaches past it
+    /// needs one that keeps highlights instead of folding them to white.
     pub fn new(
         signal: ColourDescription,
         hdr: &HdrMetadata,
@@ -106,9 +109,23 @@ impl Grade {
             Some(_) => Transfer::Linear,
             None => signal.transfer_function(),
         };
+        let content = hdr.content_light(settings.target.peak_nits);
         let tone_map = match settings.tone_map {
             Some(mode) => Some(mode),
-            None if from.is_hdr() && !settings.to.is_hdr() => Some(ToneMap::default()),
+            None if from.is_hdr() && !settings.to.is_hdr() => {
+                // Measured against the other four on a 1 000 cd/m² master going
+                // onto a 100-nit panel: `linear` and `gamma` take the whole
+                // picture down with the highlights, `reinhard` and `hable` move
+                // even codes the panel already shows, and Möbius holds every
+                // value under its joint put while it rolls the rest in. Where
+                // the content never exceeds the panel there is nothing to roll,
+                // and the clip is exactly the identity below white.
+                Some(if content.max_cll > settings.target.peak_nits {
+                    ToneMap::Mobius
+                } else {
+                    ToneMap::Clip
+                })
+            }
             None => None,
         };
         // Which primaries the coded values are stated in, asked of the file
@@ -130,7 +147,7 @@ impl Grade {
             size: settings.size,
             sdr_white_nits: settings.target.paper_white_nits,
             target: tone_map.map(|_| settings.target),
-            content: hdr.content_light(settings.target.peak_nits),
+            content,
             tone_map,
         };
         let cube = Lut::Three(plan.build());
@@ -293,7 +310,9 @@ mod tests {
         let settings = Settings::video(DisplayTarget::sdr(203.0));
         assert!(settings.tone_map.is_none());
         let grade = Grade::new(bt2100(16), &HdrMetadata::default(), settings, None);
-        assert_eq!(grade.plan().tone_map, Some(ToneMap::default()));
+        // Nothing is stated above this panel's peak, so the pick is the curve
+        // that invents no shoulder.
+        assert_eq!(grade.plan().tone_map, Some(ToneMap::Clip));
         assert_eq!(grade.plan().target, Some(DisplayTarget::sdr(203.0)));
         // PQ's full scale is 10 000 cd/m² onto a 203-nit panel: a shoulder has
         // to bring the top of the code range under white.
@@ -353,6 +372,78 @@ mod tests {
         assert_ne!(grey(&unstated, 0.75), grey(&stated, 0.75));
         // The volume's own corners decide the gamut, not the container's code.
         assert_eq!(stated.plan().source, Primaries::BT2020);
+    }
+
+    /// The curve a caller who names none leaves fvid to pick follows how much of
+    /// the light the panel cannot show, not the coding it came in with. Measured
+    /// on a 1 000 cd/m² master going onto a 100-nit panel against the other four:
+    /// `clip` keeps every code the panel reaches and folds the rest to one white,
+    /// `linear` and `gamma` take the whole picture down with the highlights,
+    /// `reinhard` and `hable` move even the codes the panel already shows, and
+    /// `mobius` leaves everything under its joint exactly where it was.
+    #[test]
+    fn a_master_beyond_the_panels_reach_rolls_instead_of_burning() {
+        let settings = Settings::video(DisplayTarget::sdr(100.0));
+        let bright = HdrMetadata {
+            mastering: None,
+            light: ContentLight {
+                max_cll: 1_000.0,
+                max_fall: 400.0,
+            },
+        };
+        let rolled = Grade::new(bt2100(16), &bright, settings, None);
+        assert_eq!(rolled.plan().tone_map, Some(ToneMap::Mobius));
+        // A file that states no peak leaves the panel's own headroom as the only
+        // answer, and then there is nothing to roll.
+        let blind = Grade::new(bt2100(16), &HdrMetadata::default(), settings, None);
+        assert_eq!(blind.plan().tone_map, Some(ToneMap::Clip));
+        // Which is the same picture below the joint: 18 cd/m² is identical on
+        // both routes, so the shoulder costs the darks nothing.
+        assert_eq!(grey(&rolled, 0.3), grey(&blind, 0.3));
+        // Above the panel the two part: 189 cd/m² is a highlight the clip has no
+        // number for, and the roll puts it under white with room left over.
+        let (hot_rolled, hot_blind) = (rolled.rgb([0.62; 3])[0], blind.rgb([0.62; 3])[0]);
+        assert!(hot_blind > 0.999, "{hot_blind}");
+        assert!(
+            (0.85..0.96).contains(&hot_rolled),
+            "{hot_rolled} not a rolled highlight"
+        );
+        // Three highlights the clip cannot tell apart stay three separate ones.
+        let codes = [0.62, 0.70, 0.75];
+        let r: Vec<f32> = codes.iter().map(|c| rolled.rgb([*c; 3])[0]).collect();
+        let b: Vec<f32> = codes.iter().map(|c| blind.rgb([*c; 3])[0]).collect();
+        assert!(r[0] < r[1] && r[1] < r[2], "{r:?}");
+        assert!(b.iter().all(|v| (v - 1.0).abs() < 1e-3), "{b:?}");
+        // Content that stays inside the panel needs no shoulder either, and HLG,
+        // whose scene light is the panel's own by definition, keeps that path.
+        let dim = HdrMetadata {
+            mastering: None,
+            light: ContentLight {
+                max_cll: 60.0,
+                max_fall: 30.0,
+            },
+        };
+        assert_eq!(
+            Grade::new(bt2100(16), &dim, settings, None).plan().tone_map,
+            Some(ToneMap::Clip)
+        );
+        assert_eq!(
+            Grade::new(bt2100(18), &HdrMetadata::default(), settings, None)
+                .plan()
+                .tone_map,
+            Some(ToneMap::Clip)
+        );
+        // A curve named from the command line still beats the headroom.
+        let asked = Grade::new(
+            bt2100(16),
+            &bright,
+            Settings {
+                tone_map: Some(ToneMap::Hable),
+                ..settings
+            },
+            None,
+        );
+        assert_eq!(asked.plan().tone_map, Some(ToneMap::Hable));
     }
 
     #[test]
