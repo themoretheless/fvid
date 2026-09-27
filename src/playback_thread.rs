@@ -89,8 +89,9 @@ enum Stage {
 /// CPU-bound frame passes through before the window sees it, and it is applied
 /// after the container's turn so the codes are looked up in the orientation
 /// they are shown in. A plane picture that is graded has to become packed RGB
-/// for it; ungraded, its planes go to the window as they are and the shader
-/// does the rest.
+/// for it; a picture with nothing done to its colour keeps its planes, and so
+/// does one whose grade turns out to be its own input — which is what a caller
+/// asking for the panel's own curve gets.
 fn into_pixels(
     raw: RawFrame,
     rotation: u16,
@@ -126,7 +127,7 @@ fn into_pixels(
         }
         (pixels, _) => pixels,
     };
-    let Some(grade) = grade else {
+    let Some(grade) = grade.filter(|grade| !grade.is_identity()) else {
         return Ok(pixels);
     };
     let mut rgb = match pixels {

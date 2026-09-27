@@ -1,5 +1,5 @@
 use fvid::{
-    color::{ColourDescription, Grade, HdrMetadata, Settings, Transfer},
+    color::{ColourDescription, DisplayTarget, Grade, HdrMetadata, Settings, Transfer},
     playback_native::NativeReader,
     playback_thread::{Event, Frame, Pixels, Playback},
 };
@@ -168,6 +168,44 @@ fn a_grade_reaches_the_pictures_a_stream_hands_over_on_both_routes() {
                 Pixels::Rgb(_) => graded += 1,
                 Pixels::Planar(_) => panic!("a graded picture stayed planes"),
             },
+            Some(Event::Error(error)) => panic!("{error}"),
+            Some(Event::Ended(_)) => panic!("the stream ended early"),
+            None => thread::sleep(Duration::from_millis(1)),
+        }
+    }
+}
+
+#[test]
+fn a_grade_that_would_change_nothing_leaves_a_picture_as_planes() {
+    // BT.709 codes written out as BT.709 codes on their own panel: the lookup
+    // a caller gets for asking for nothing is its own input, and copying planes
+    // into RGB to prove that would be the work this thread exists to avoid.
+    let same = Grade::new(
+        ColourDescription {
+            primaries: 1,
+            transfer: 1,
+            matrix: 1,
+            full_range: false,
+        },
+        &HdrMetadata::default(),
+        Settings::video(DisplayTarget::sdr(240.0)),
+        None,
+    );
+    assert!(same.is_identity());
+    let mut player = Playback::start(y4m(), Some(same));
+    assert!(matches!(first_frame(&mut player).pixels, Pixels::Rgb(_)));
+    let mut planes = 0;
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while planes < 3 {
+        assert!(Instant::now() < deadline, "playback stalled");
+        match player.poll() {
+            Some(Event::Frame(frame)) => {
+                assert!(
+                    matches!(frame.pixels, Pixels::Planar(_)),
+                    "an identity grade converted the picture"
+                );
+                planes += 1;
+            }
             Some(Event::Error(error)) => panic!("{error}"),
             Some(Event::Ended(_)) => panic!("the stream ended early"),
             None => thread::sleep(Duration::from_millis(1)),
