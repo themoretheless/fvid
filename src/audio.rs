@@ -578,6 +578,44 @@ pub trait AudioDecode: Send {
     fn reset(&mut self);
 }
 
+/// Registry entry for an audio codec: its dispatch tag(s) + name.
+pub struct CodecEntry {
+    pub tags: &'static [&'static str],
+    pub name: &'static str,
+}
+
+// Registry of known audio codec tags with their display names.
+const CODEC_ENTRIES: &[CodecEntry] = &[
+    CodecEntry { tags: &["A_VORBIS"], name: "Vorbis" },
+    CodecEntry { tags: &["A_MPEG/L3"], name: "MP3" },
+    CodecEntry { tags: &["A_MPEG/L2"], name: "MP2" },
+    CodecEntry { tags: &["A_FLAC"], name: "FLAC" },
+    CodecEntry { tags: &["alac", "A_ALAC"], name: "ALAC" },
+    CodecEntry { tags: &["A_AC3", "ac-3"], name: "Dolby Digital" },
+    CodecEntry { tags: &["mp4a"], name: "AAC" },
+    CodecEntry { 
+        tags: &[
+            "A_PCM/INT/LIT", "A_PCM/INT/BIG", "A_PCM/FLOAT/IEEE",
+            "sowt", "twos", "fl32", "fl64",
+        ], 
+        name: "PCM", 
+    },
+    CodecEntry { tags: &["pcm_alaw"], name: "G.711 (a-law)" },
+    CodecEntry { tags: &["pcm_mulaw"], name: "G.711 (mu-law)" },
+    CodecEntry { tags: &["adpcm_ms"], name: "ADPCM (MS)" },
+    CodecEntry { tags: &["adpcm_ima_wav", "adpcm_ima_qt"], name: "ADPCM (IMA)" },
+    CodecEntry { tags: &["midi"], name: "MIDI" },
+    CodecEntry { tags: &["xm"], name: "XM" },
+];
+
+/// Look up the display name for a codec tag from the registry.
+pub fn codec_name(tag: &str) -> String {
+    CODEC_ENTRIES.iter()
+        .find(|entry| entry.tags.contains(&tag))
+        .map_or_else(|| tag.to_owned(), |entry| entry.name.to_owned())
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::{
@@ -853,6 +891,37 @@ mod tests {
     }
 
     #[test]
+    #[test]
+    fn all_known_codecs_have_a_display_name() {
+        let tags_and_names = [
+            ("A_VORBIS", "Vorbis"),
+            ("A_MPEG/L3", "MP3"),
+            ("A_MPEG/L2", "MP2"),
+            ("A_FLAC", "FLAC"),
+            ("alac", "ALAC"),
+            ("A_ALAC", "ALAC"),
+            ("A_AC3", "Dolby Digital"),
+            ("ac-3", "Dolby Digital"),
+            ("mp4a", "AAC"),
+            ("A_PCM/INT/LIT", "PCM"),
+            ("A_PCM/INT/BIG", "PCM"),
+            ("sowt", "PCM"),
+            ("twos", "PCM"),
+            ("pcm_alaw", "G.711 (a-law)"),
+            ("pcm_mulaw", "G.711 (mu-law)"),
+            ("adpcm_ms", "ADPCM (MS)"),
+            ("adpcm_ima_wav", "ADPCM (IMA)"),
+            ("midi", "MIDI"),
+            ("xm", "XM"),
+        ];
+        
+        for (tag, expected) in tags_and_names {
+            assert_eq!(super::codec_name(tag), expected, "{tag}");
+        }
+        assert_eq!(super::codec_name("unknown"), "unknown");
+    }
+
+
     fn default_rate_consumes_one_frame_per_frame() {
         for _ in 0..8 {
             let (frames, carry) = scaled_frames(128, 1_000, 0);

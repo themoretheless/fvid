@@ -52,8 +52,13 @@
 //! The constants and field layouts are transcribed from the public ATSC A/52:2012
 //! text, Annex E, sections 2.2.1 to 2.3.2.
 
+use crate::audio::{AudioDecode, AudioPacket, AudioSpec, SampleFormat};
+use crate::codec::ac3_decoder::{
+    Bits, Core, dynrng_gain, ENCODER_DELAY, FBW, Folding, Header, LFE, PLANES, SAMPLES, Strategy as BlockStrategy, SUBDN,
+    CPL,
+};
 use crate::codec::bits::BitReader;
-use crate::{Result, invalid, unsupported};
+use crate::{Error, Result, invalid, unsupported};
 
 /// The 16-bit mark a syncframe opens with, shared with AC-3 by Table E1.1.
 const SYNCWORD: u32 = 0x0B77;
@@ -76,6 +81,14 @@ const CHANS: usize = 5;
 pub struct Frame {
     /// The rate the frame's audio plays back at, from `fscod`.
     pub sample_rate: u32,
+    /// `fscod` itself. The rate in hertz is what a caller plays at; the band edges and
+    /// the masking thresholds the audio is decoded with are keyed to the row of
+    /// Table E2.2 the frame names, and only the code carries that.
+    rate_code: u8,
+    /// `acmod`: the audio coding mode, which a block reader needs for its own syntax -
+    /// a 1+1 frame states a second program's dynamic range, and a 2/0 frame states
+    /// rematrixing and may state phase restoration.
+    pub layout: u8,
     /// The frame's own channel count in native order, which is what a decoder handed
     /// this frame produces when the container states no other layout.
     pub channels: u16,
@@ -94,6 +107,14 @@ pub struct Frame {
     /// channel. A block that inherits the flag from the one before it is recorded
     /// with the flag it inherited, so this is the block's own state.
     pub coupling: [bool; BLOCKS],
+    /// `cplstre[blk]`: whether each block states its coupling strategy in the block
+    /// rather than taking the one the frame last stated. Block 0 always states its own,
+    /// which is why the frame reads its flag outright, and a frame of one or two
+    /// channels states nothing at all.
+    pub coupling_stated: [bool; BLOCKS],
+    /// The Lo/Ro downmix coefficients this stream's mixing metadata carries, which is
+    /// where an E-AC-3 fold finds its levels instead of the fixed ones AC-3 mixes by.
+    pub downmix: Option<Downmix>,
     /// The exponent strategy codes of the frame, in whichever of the two forms
     /// `expstre` writes them.
     pub exponents: Exponents,
@@ -114,6 +135,30 @@ pub struct Frame {
     /// writes when it is content for the blocks to divide what the header leaves.
     pub block_starts: Option<[usize; BLOCKS - 1]>,
 }
+
+/// The Lo/Ro downmix levels the frame's mixing metadata states, held as the 3-bit
+/// codes Table D2.5 and Table D2.6 name them rather than as levels, so that a frame
+/// reads back as the bits that were written to it. [`Eac3Decoder`] turns a code into
+/// the level the fold mixes by, and supplies the `-3 dB` default for the level a
+/// stream does not name: Annex E puts these coefficients inside `bsi`, where AC-3's
+/// own 2-bit `cmixlev` and `surmixlev` sit beside `acmod`, and its tables are the
+/// wider Lo/Ro ones - the Lt/Rt codes of the same group are for a stream that asks to
+/// be folded to Lt/Rt, which is not what a stereo container states.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Downmix {
+    /// `lorocmixlev`, present only for a mode with a centre channel.
+    pub centre: Option<u8>,
+    /// `lorosurmixlev`, present only for a mode with surround channels.
+    pub surround: Option<u8>,
+}
+
+/// Table D2.5, the Lo/Ro centre mix level per `lorocmixlev`.
+const LORO_CENTRE: [f32; 8] = [1.414, 1.189, 1.000, 0.841, 0.707, 0.595, 0.500, 0.000];
+
+/// Table D2.6, the Lo/Ro surround mix level per `lorosurmixlev`. The three lowest
+/// codes are reserved, and the table's own instruction is to mix by `-1.5 dB` for
+/// one of them.
+const LORO_SURROUND: [f32; 8] = [0.841, 0.841, 0.841, 0.841, 0.707, 0.595, 0.500, 0.000];
 
 /// The exponent strategy codes a frame states, in one of the two forms `expstre`
 /// selects. Both are codes, not band structures: [`Frame::strategies`] resolves them
@@ -177,6 +222,17 @@ impl Strategy {
     /// Table E2.10: the strategy one of the frame's 5-bit codes names for one block.
     fn per_frame(code: u8, block: usize) -> Self {
         FRAME_STRATEGIES[usize::from(code)][block]
+    }
+
+    /// The 2-bit `*expstr` code a block reads for this strategy, Table E2.10's own
+    /// numbering: 0 is reuse, and 1, 2, 3 are the three differential lengths.
+    fn code(self) -> usize {
+        match self {
+            Strategy::Reuse => 0,
+            Strategy::D15 => 1,
+            Strategy::D25 => 2,
+            Strategy::D45 => 3,
+        }
     }
 }
 
@@ -269,6 +325,22 @@ impl Frame {
     /// without the low frequency one, which is `nfchans` of the `acmod` it states.
     pub fn full_bandwidth(&self) -> usize {
         usize::from(self.channels) - usize::from(self.low_frequency)
+    }
+
+    /// The level the centre channel joins a Lo/Ro fold at. A stream whose mixing
+    /// metadata names none mixes at `-3 dB`, which is the default AC-3's own
+    /// `cmixlev` falls back to and the level Table D2.5 gives for `-3 dB` alike.
+    fn centre_level(&self) -> f32 {
+        self.downmix
+            .and_then(|mix| mix.centre)
+            .map_or(0.707, |code| LORO_CENTRE[usize::from(code)])
+    }
+
+    /// The level the surround channels join a Lo/Ro fold at, with the same default.
+    fn surround_level(&self) -> f32 {
+        self.downmix
+            .and_then(|mix| mix.surround)
+            .map_or(0.707, |code| LORO_SURROUND[usize::from(code)])
     }
 
     /// What `block` codes its exponents by, resolved from whichever form `expstre`
@@ -393,7 +465,7 @@ fn header(bits: &mut BitReader<'_>) -> Result<Frame> {
             if bsid < EAC3_BSID { "AC-3's own syntax" } else { "a later revision" }
         )));
     }
-    bsi(bits, acmod, lfeon, BLOCKS)?;
+    let downmix = bsi(bits, acmod, lfeon, BLOCKS)?;
     let audio = audfrm(bits, acmod, lfeon, frame_bytes)?;
     let position = bits.position();
     if position > frame_bytes * 8 {
@@ -401,12 +473,16 @@ fn header(bits: &mut BitReader<'_>) -> Result<Frame> {
     }
     Ok(Frame {
         sample_rate: rate,
+        rate_code: fscod as u8,
+        layout: acmod as u8,
         channels: (NFCHANS[acmod] + usize::from(lfeon)) as u16,
         low_frequency: lfeon,
         frame_bytes,
         blocks: BLOCKS,
         audio_bit: position,
         coupling: audio.coupling,
+        coupling_stated: audio.coupling_stated,
+        downmix,
         exponents: audio.exponents,
         low_frequency_strategies: audio.low_frequency_strategies,
         converter_strategies: audio.converter_strategies,
@@ -420,6 +496,7 @@ fn header(bits: &mut BitReader<'_>) -> Result<Frame> {
 /// assemble the geometry it read before the walk with what the walk leaves behind.
 struct Audio {
     coupling: [bool; BLOCKS],
+    coupling_stated: [bool; BLOCKS],
     exponents: Exponents,
     low_frequency_strategies: [bool; BLOCKS],
     converter_strategies: [u8; CHANS],
@@ -441,6 +518,11 @@ fn audfrm(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, frame_bytes: usiz
         ));
     }
     let snr_strategy = bits.read(2)? as u8;
+    if snr_strategy == 3 {
+        return Err(unsupported(
+            "an E-AC-3 frame whose SNR offset strategy code is the reserved one",
+        ));
+    }
     let transient_processing = bits.bit()?;
     if bits.bit()? {
         return Err(unsupported(
@@ -461,14 +543,20 @@ fn audfrm(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, frame_bytes: usiz
     // Coupling: the first block states its own flag, and a later block that does not
     // state one keeps the flag of the block before it.
     let mut coupling = [false; BLOCKS];
+    let mut coupling_stated = [false; BLOCKS];
     if acmod > 1 {
+        // Block 0's flag is one the frame states, which is what Table E1.4 means by
+        // `cplstre[0]`: the block will state its strategy, because the frame has just
+        // stated whether it couples at all.
         coupling[0] = bits.bit()?;
+        coupling_stated[0] = true;
         for blk in 1..BLOCKS {
-            if bits.bit()? {
-                coupling[blk] = bits.bit()?;
+            coupling_stated[blk] = bits.bit()?;
+            coupling[blk] = if coupling_stated[blk] {
+                bits.bit()?
             } else {
-                coupling[blk] = coupling[blk - 1];
-            }
+                coupling[blk - 1]
+            };
         }
     }
     let coupled = coupling.iter().any(|&flag| flag);
@@ -542,6 +630,7 @@ fn audfrm(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, frame_bytes: usiz
     }
     Ok(Audio {
         coupling,
+        coupling_stated,
         exponents,
         low_frequency_strategies,
         converter_strategies,
@@ -596,7 +685,8 @@ fn ceil_log2(n: usize) -> usize {
 /// Step over `bsi` past the fields `header` has already read: Table E1.2 from
 /// `dialnorm` on. `strmtyp` is known independent and `numblkscod` known six blocks,
 /// which is what retires the dependent-stream and conversion fields of the table.
-fn bsi(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Result<()> {
+/// The Lo/Ro coefficients the metadata carries come back with the walk.
+fn bsi(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Result<Option<Downmix>> {
     bits.skip(5)?; // dialnorm
     if bits.bit()? {
         bits.skip(8)?; // compr
@@ -608,9 +698,11 @@ fn bsi(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Re
             bits.skip(8)?; // compr2
         }
     }
-    if bits.bit()? {
-        mixing(bits, acmod, lfeon, blocks)?;
-    }
+    let downmix = if bits.bit()? {
+        mixing(bits, acmod, lfeon, blocks)?
+    } else {
+        None
+    };
     if bits.bit()? {
         information(bits, acmod)?;
     }
@@ -618,23 +710,28 @@ fn bsi(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Re
         let length = bits.read(6)? as usize;
         bits.skip((length + 1) * 8)?; // addbsi
     }
-    Ok(())
+    Ok(downmix)
 }
 
-/// Step over the mixing metadata of Table E1.2, which is where the downmix
-/// coefficients an E-AC-3 fold reads live.
-fn mixing(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Result<()> {
+/// Step over the mixing metadata of Table E1.2, and take the two Lo/Ro coefficients a
+/// stream's own fold reads from it. Each sits behind its Lt/Rt twin, which is for a
+/// stream encoded to surround-aware decoding rather than to a stereo container.
+fn mixing(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Result<Option<Downmix>> {
     if acmod > 2 {
         bits.skip(2)?; // dmixmod
     }
-    if acmod > 2 && acmod & 1 != 0 {
+    let centre = if acmod > 2 && acmod & 1 != 0 {
         bits.skip(3)?; // ltrtcmixlev
-        bits.skip(3)?; // lorocmixlev
-    }
-    if acmod & 4 != 0 {
+        Some(bits.read(3)? as u8) // lorocmixlev
+    } else {
+        None
+    };
+    let surround = if acmod & 4 != 0 {
         bits.skip(3)?; // ltrtsurmixlev
-        bits.skip(3)?; // lorosurmixlev
-    }
+        Some(bits.read(3)? as u8) // lorosurmixlev
+    } else {
+        None
+    };
     if lfeon && bits.bit()? {
         bits.skip(5)?; // lfemixlevcod
     }
@@ -677,7 +774,7 @@ fn mixing(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) ->
             }
         }
     }
-    Ok(())
+    Ok(Some(Downmix { centre, surround }))
 }
 
 /// Step over the most flexible mixing definition: `mixdeflen` says how many bytes
@@ -752,6 +849,885 @@ fn information(bits: &mut BitReader<'_>, acmod: usize) -> Result<()> {
     Ok(())
 }
 
+/// Table E2.12, the coupling banding structure a frame's first coupled block assumes
+/// when it withholds its own. Sub-band 0 carries no flag, since the structure is
+/// written from the second sub-band of the coupling region up, which is where
+/// [`open_coupling`] reads it.
+const DEF_CPL_BNDSTRC: [bool; SUBDN] = [
+    false, false, false, false, false, false, false, false, true, false, true, true, false, true,
+    true, true, true, true,
+];
+
+/// Table E3.13, the first transform coefficient of each spectral extension sub-band.
+/// The last row is not a sub-band at all: it is the coefficient one past the region a
+/// frame with `spxendf` = 7 synthesises, which is why the table reaches to index 17.
+const SPX_BAND: [usize; 18] = [
+    25, 37, 49, 61, 73, 85, 97, 109, 121, 133, 145, 157, 169, 181, 193, 205, 217, 229,
+];
+/// The most bands the sub-bands of the synthesised region can group into: `spx_begin_subbnd`
+/// starts at 2, `spx_end_subbnd` stops at 17, and the structure is written from the second
+/// of them up.
+const SPX_BANDS: usize = 16;
+/// Table E2.11, the banding structure a frame's first spectral extension block assumes
+/// when it withholds its own - the same trick [`DEF_CPL_BNDSTRC`] plays for coupling, and
+/// indexed by absolute sub-band for the same reason.
+const DEF_SPX_BNDSTRC: [bool; 18] = [
+    false, false, false, false, false, false, false, false, false, true, false, true, false, true,
+    false, true, false, true,
+];
+
+/// What one block of a frame knows about its spectral extension, and what it hands to
+/// the blocks after it: where the synthesised region begins and ends, how its sub-bands
+/// group into the bands coordinates are sent for, which channels take part and which of
+/// them still owes its first set of them, and the envelope and blend factors of the bands
+/// themselves.
+///
+/// Table E1.4 writes this state per block and Section E3.6.1 keeps it to the frame, so
+/// [`Spx::begin_frame`] restores it between frames exactly as [`Core::begin_frame`] does
+/// the AC-3 strategy - and the default banding structure is in it from the start, which
+/// is what makes a block that sends no structure mean Table E2.11's in its first block
+/// and the previous block's in any other.
+#[derive(Clone, Copy)]
+struct Spx {
+    /// `spxinu`: whether this block synthesises its high bands at all.
+    in_use: bool,
+    /// `spxbegf` itself, which is what the end of coupling and the rematrixing band
+    /// count are derived from rather than the sub-band below.
+    beginf: usize,
+    /// `chinspx[ch]`, and `firstspxcos[ch]`: which channels' high bands are synthesized,
+    /// and which of them owes a set of coordinates it has never been sent.
+    channels: [bool; FBW],
+    owed: [bool; FBW],
+    /// `spxbandtable[spxstrtf]`, the lowest coefficient the copy region draws from.
+    copy_first: usize,
+    /// `spxbandtable[spx_begin_subbnd]` and `spxbandtable[spx_end_subbnd]`: the first
+    /// synthesized coefficient and the last plus one.
+    first: usize,
+    last: usize,
+    /// `spxbndstrc[]` by absolute sub-band, and `nspxbnds` with `spxbndsztab[]` read out
+    /// of it: the coefficients each of the block's bands holds.
+    grouping: [bool; 18],
+    bands: [usize; SPX_BANDS],
+    count: usize,
+    /// `spxco[ch][bnd] * 32`, the envelope the blended coefficients are scaled to, and
+    /// the two blend factors beside it: one band's share of its energy goes to the noise
+    /// drawn for it and the rest to the coefficients copied under it.
+    scale: [[f32; SPX_BANDS]; FBW],
+    signal: [[f32; SPX_BANDS]; FBW],
+    noise: [[f32; SPX_BANDS]; FBW],
+}
+
+impl Default for Spx {
+    /// A block that synthesises nothing, owes coordinates for every channel, and would
+    /// group its bands by Table E2.11.
+    fn default() -> Self {
+        Self {
+            in_use: false,
+            beginf: 0,
+            channels: [false; FBW],
+            owed: [true; FBW],
+            copy_first: 0,
+            first: 0,
+            last: 0,
+            grouping: DEF_SPX_BNDSTRC,
+            bands: [0; SPX_BANDS],
+            count: 0,
+            scale: [[0.0; SPX_BANDS]; FBW],
+            signal: [[0.0; SPX_BANDS]; FBW],
+            noise: [[0.0; SPX_BANDS]; FBW],
+        }
+    }
+}
+
+/// The seed the [`dice_noise`] walk starts on, which is as arbitrary as the generator it
+/// seeds and only has to be somewhere other than zero.
+const NOISE_SEED: u32 = 0x7F3A_5C19;
+
+/// Section E3.6.4.2.4's pseudo-random number: Annex E asks only that the generator be
+/// zero-mean and unity-variance and leaves the rest to the decoder, so this is a
+/// linear congruential walk of its own drawn into [-1, 1] and widened to a variance of
+/// one. It keeps its own state rather than sharing the Section 7.3.4 dither sequence so
+/// that blending high bands cannot disturb the noise a zero-bit bin was given.
+fn dice_noise(state: &mut u32) -> f32 {
+    *state = state
+        .wrapping_mul(1_664_525)
+        .wrapping_add(1_013_904_223);
+    let unit = ((*state >> 8) as f32) * (1.0 / (1 << 24) as f32);
+    (2.0 * unit - 1.0) * 1.732_050_8
+}
+
+impl Spx {
+    /// The state of a frame's first block, which is no block at all: the reuse promise
+    /// of Section E3.6.1 reaches one frame and no further.
+    fn begin_frame(&mut self) {
+        *self = Self::default();
+    }
+
+    /// Table E1.4's spectral extension strategy: which channels take part, where the
+    /// region begins and ends, and how its sub-bands group into bands. `false` for a
+    /// structure no coefficient could be written against.
+    fn read_strategy(&mut self, header: Header, bits: &mut Bits<'_>) -> bool {
+        self.in_use = true;
+        if header.acmod == 1 {
+            // A 1+1 block puts the first of its two programs into spectral extension and
+            // states nothing about either of them; the second codes its own bands.
+            self.channels = [false; FBW];
+            self.channels[0] = true;
+        } else {
+            for ch in 0..header.nfchans {
+                self.channels[ch] = bits.flag();
+            }
+        }
+        let copy = bits.take(2) as usize;
+        let begin = bits.take(3) as usize;
+        let end = bits.take(3) as usize;
+        self.copy_first = SPX_BAND[copy];
+        self.beginf = begin;
+        // Sections E2.3.3.5 and E2.3.3.6: the two codes name sub-bands, and the region
+        // is worth writing only if the ones they name hold at least one band each.
+        let begin = if begin < 6 { begin + 2 } else { begin * 2 - 3 };
+        let end = if end < 3 { end + 5 } else { end * 2 + 3 };
+        self.first = SPX_BAND[begin];
+        self.last = SPX_BAND[end];
+        if begin >= end || self.copy_first >= self.first {
+            return false;
+        }
+        if bits.flag() {
+            for bnd in begin + 1..end {
+                self.grouping[bnd] = bits.flag();
+            }
+        }
+        // `nspxbnds` and `spxbndsztab[]`, section E3.6.2: a band begins at each sub-band
+        // whose flag says so and joins the one before it at each that says otherwise.
+        self.bands = [0; SPX_BANDS];
+        self.bands[0] = 12;
+        self.count = 1;
+        for bnd in begin + 1..end {
+            if self.grouping[bnd] {
+                self.bands[self.count - 1] += 12;
+            } else {
+                self.bands[self.count] = 12;
+                self.count += 1;
+            }
+        }
+        true
+    }
+
+    /// A block that leaves spectral extension off clears every channel's part in it and
+    /// leaves each of them owing a set of coordinates, which is Table E1.4's own
+    /// `firstspxcos[ch] = 1`.
+    fn closed(&mut self) {
+        self.in_use = false;
+        self.channels = [false; FBW];
+        self.owed = [true; FBW];
+    }
+
+    /// The `cplendf` coupling stops at when the block synthesises what is above it:
+    /// Section E3.3.1 takes the 4-bit code out of the stream and derives it from
+    /// `spxbegf`, which is also what makes the last coupled coefficient sit one below the
+    /// first synthesized one. Signed, because the derived value is -2 for `spxbegf` = 0.
+    fn coupling_end(&self) -> i32 {
+        let begin = i32::try_from(self.beginf).unwrap_or(0);
+        if begin < 6 {
+            begin - 2
+        } else {
+            begin * 2 - 7
+        }
+    }
+
+    /// Table E1.4's spectral extension coordinates: a `spxcoe` bit per channel that takes
+    /// part, forced on the first set that channel is ever sent, and for each channel that
+    /// states them its blend, its master gain, and an exponent and mantissa per band.
+    /// The blend factors fall out of the coordinates, since a block that reuses them
+    /// reuses the way it blends noise with them too.
+    fn read_coordinates(&mut self, header: Header, bits: &mut Bits<'_>) {
+        for ch in 0..header.nfchans {
+            if !self.channels[ch] {
+                self.owed[ch] = true;
+                continue;
+            }
+            let stated = if self.owed[ch] {
+                self.owed[ch] = false;
+                true
+            } else {
+                bits.flag()
+            };
+            if !stated {
+                continue;
+            }
+            let blend = bits.take(5) as f32 / 32.0;
+            let master = bits.take(2) as usize;
+            let mut offset = self.first;
+            for bnd in 0..self.count {
+                let exponent = bits.take(4) as usize;
+                let mantissa = bits.take(2) as f32;
+                // Section E3.6.3: an exponent below its top value says the mantissa's
+                // leading bit is one and was left out, and the master gain shifts every
+                // band of the channel by three exponents apiece. The 32 is the scale
+                // Section E3.6.4.3 applies to the blend, folded in here because it is the
+                // same for every bin of every band.
+                let value = if exponent == 15 {
+                    mantissa / 4.0
+                } else {
+                    (mantissa + 4.0) / 8.0
+                };
+                let shift = (exponent + 3 * master) as i32;
+                self.scale[ch][bnd] = value * 32.0 / (2f32.powi(shift));
+                // Section E3.6.4.2.1: how far the band's middle sits above the copy
+                // region decides how much of it is noise, and `spxblnd` offsets that.
+                let centre = offset as f32 + 0.5 * self.bands[bnd] as f32;
+                let ratio = (centre / self.last as f32 - blend).clamp(0.0, 1.0);
+                self.noise[ch][bnd] = ratio.sqrt();
+                self.signal[ch][bnd] = (1.0 - ratio).sqrt();
+                offset += self.bands[bnd];
+            }
+        }
+    }
+
+    /// Section E3.3.3: the coded run of a channel whose high bands are synthesized stops
+    /// where they begin, and no bandwidth code is sent to say where that is. A coupled
+    /// channel stops earlier still, where coupling begins, which is what
+    /// [`BlockStrategy::measure`] already wrote for it.
+    fn reach(&self, header: Header, strategy: &mut BlockStrategy) {
+        for ch in 0..header.nfchans {
+            if self.channels[ch] && !(strategy.cplinu && strategy.incpl[ch]) {
+                strategy.end[ch] = self.first;
+            }
+        }
+    }
+}
+
+/// Enhanced AC-3 decoder: a packet of Annex E syncframes in, interleaved f32 out.
+///
+/// Annex E changes the side information around an AC-3 block and almost nothing
+/// inside it: the same 256 coefficients, the same 512-point window, the same bit
+/// allocation and the same mantissa runs, which is why the unpacking here is the AC-3
+/// core's. What this decoder adds is Table E1.4's walk - the order a block's fields
+/// arrive in, which of them the frame already answered for it, and which of them say
+/// the block is asking for syntax this module does not have - and, above it all, the
+/// high bands Section E3.6 synthesises for a block that codes none of them.
+pub struct Eac3Decoder {
+    /// The rate the container stamped the track with, which is also the timebase the
+    /// samples are handed back on.
+    sample_rate: u32,
+    /// The channel count the container stated, which fixes what the folding has to
+    /// produce.
+    channels: usize,
+    core: Core,
+    /// Samples still owed to [`ENCODER_DELAY`], which the stream's first blocks pay off.
+    lead: usize,
+    /// What this block knows about its spectral extension, and what the frame's next
+    /// block inherits from it.
+    spx: Spx,
+    /// The state of the [`dice_noise`] walk, which is high bands' only randomness.
+    noise_state: u32,
+}
+
+impl Eac3Decoder {
+    /// Open an Enhanced AC-3 stream. `configuration` holds nothing this codec needs,
+    /// since the geometry is in the frames themselves, and is only taken to match the
+    /// other decoders' signature. The rate has to be one Annex E names and the channel
+    /// count one the folding can reach; anything else is refused by name.
+    pub fn new(configuration: &[u8], sample_rate: u32, channels: u16) -> Result<Self> {
+        let _ = configuration;
+        if !SAMPLE_RATES.contains(&sample_rate) {
+            return Err(invalid(&format!(
+                "E-AC-3 track at {sample_rate} Hz is outside Annex E's 48000, 44100 and 32000 Hz"
+            )));
+        }
+        if !(1..=6).contains(&channels) {
+            return Err(invalid(&format!(
+                "E-AC-3 track of {channels} channels has neither a native layout nor a downmix here"
+            )));
+        }
+        Ok(Self {
+            sample_rate,
+            channels: usize::from(channels),
+            core: Core::new(),
+            lead: ENCODER_DELAY,
+            spx: Spx::default(),
+            noise_state: NOISE_SEED,
+        })
+    }
+
+    /// Current audio specification: the rate and channel count the track states, which
+    /// is what the decoder holds its output to.
+    pub fn spec(&self) -> AudioSpec {
+        AudioSpec {
+            sample_rate: self.sample_rate,
+            channels: self.channels as u16,
+            format: SampleFormat::F32,
+        }
+    }
+
+    /// The geometry an Annex E frame hands the AC-3 core: the same count of channels
+    /// and the same rate code AC-3 reads out of its own `syncinfo`, with the Lo/Ro
+    /// levels the frame's mixing metadata states in place of the 2-bit codes AC-3
+    /// keeps beside `acmod`.
+    fn geometry(frame: &Frame) -> Header {
+        Header::annex_e(
+            usize::from(frame.rate_code),
+            frame.frame_bytes,
+            usize::from(frame.layout),
+            frame.low_frequency,
+            frame.centre_level(),
+            frame.surround_level(),
+        )
+    }
+
+    /// Every syncframe the packet holds, each standing on its own. A frame whose syntax
+    /// faults contributes its full length of silence, so a bad frame costs a frame
+    /// rather than the packet's timing, while a frame that names syntax this module does
+    /// not read ends the packet with the error that says so: a missing feature is not a
+    /// broken file, and only the caller can keep them apart.
+    fn frames(&mut self, data: &[u8], out: &mut Vec<f32>) -> Result<()> {
+        let mut offset = 0usize;
+        let mut decoded = 0usize;
+        while offset < data.len() {
+            let raw = &data[offset..];
+            let frame = match header(&mut BitReader::new(raw)) {
+                Ok(frame) => frame,
+                Err(reason @ Error::Unsupported(_)) => return Err(reason),
+                // A header that runs off the end of the packet is the stream ending.
+                Err(_) => break,
+            };
+            let silence = frame.blocks * SAMPLES * self.channels;
+            let usable = frame.frame_bytes.min(raw.len());
+            // The header is read from the packet's own bytes, because only its length
+            // says where the frame ends; the view the blocks are read from is trimmed to
+            // that end, so a truncated tail mutes rather than reaching into whatever
+            // follows the packet.
+            let mut bits = Bits::at(&raw[..usable], frame.audio_bit);
+            let mut samples = Vec::with_capacity(silence);
+            let sound = usable == frame.frame_bytes
+                && self.syncframe(&frame, &mut bits, &mut samples)?;
+            if std::env::var("EAC3_TRACE").is_ok() {
+                eprintln!(
+                    "frame@{offset} bytes={} bits={} audio_bit={} ends={} overrun={} sound={sound}",
+                    frame.frame_bytes,
+                    frame.frame_bytes * 8,
+                    frame.audio_bit,
+                    bits.pos,
+                    bits.overrun,
+                );
+            }
+            if sound {
+                samples.truncate(silence);
+            } else {
+                samples.clear();
+                samples.resize(silence, 0.0);
+            }
+            out.extend(samples);
+            offset += frame.frame_bytes;
+            decoded += 1;
+        }
+        if decoded == 0 {
+            return Err(invalid("E-AC-3 packet holds no syncframe"));
+        }
+        Ok(())
+    }
+
+    /// One syncframe: the blocks the frame says it carries, in the order it carries
+    /// them. `false` mutes the frame.
+    fn syncframe(
+        &mut self,
+        frame: &Frame,
+        bits: &mut Bits<'_>,
+        out: &mut Vec<f32>,
+    ) -> Result<bool> {
+        let header = Self::geometry(frame);
+        let Some(folding) = Folding::new(header, self.channels) else {
+            return Ok(false);
+        };
+        // Reuse is a within-frame promise, and so is the coupling state a block
+        // inherits when its frame says it states nothing.
+        self.core.begin_frame();
+        self.spx.begin_frame();
+        let starts = frame.block_starts;
+        for blk in 0..frame.blocks {
+            if let Some(starts) = starts {
+                if blk > 0 {
+                    // The frame said where this block begins. A frame that states no
+                    // starts lets its blocks divide what the header leaves between them.
+                    bits.pos = starts[blk - 1];
+                }
+            }
+            if !self.block(blk, frame, header, &folding, bits, out)? {
+                return Ok(false);
+            }
+        }
+        Ok(!bits.overrun)
+    }
+
+    /// One audio block, read in the order Table E1.4 lays out, then unpacked the way
+    /// Section 7.9 does for AC-3. `Ok(false)` mutes the frame, which is what
+    /// Section 5.4.3.24 and Table 5.16 prescribe for syntax that cannot describe audio;
+    /// `Err` names a shape this module does not read at all.
+    fn block(
+        &mut self,
+        blk: usize,
+        frame: &Frame,
+        header: Header,
+        folding: &Folding,
+        bits: &mut Bits<'_>,
+        out: &mut Vec<f32>,
+    ) -> Result<bool> {
+        // Section 7.10.2 states the reuse parameters a first block cannot leave unsent.
+        let first = blk == 0;
+        let nfchans = header.nfchans;
+        let state = frame.blocks_state;
+        let mut strategy = std::mem::take(&mut self.core.strategy);
+
+        // Block switching went out with the `blkswe` refusal that closed the frame, so
+        // no block says anything here and every one keeps the frame's long window.
+        // Dither is the frame's choice too: a block that states no flags dithers, which
+        // is Table E1.4's own `dithflag[ch] = 1`.
+        for ch in 0..nfchans {
+            strategy.dither[ch] = if state.dither_flags { bits.flag() } else { true };
+        }
+        say("dither", blk, bits.pos);
+        // Dynamic range: a block that sends no code keeps the gain the block before it
+        // sent, and the first block of a frame that sends none is at 0 dB - which is
+        // what `begin_frame` leaves standing.
+        if bits.flag() {
+            strategy.gain[0] = dynrng_gain(bits.take(8));
+        }
+        if header.acmod == 0 && bits.flag() {
+            strategy.gain[1] = dynrng_gain(bits.take(8));
+        }
+        say("dynrng", blk, bits.pos);
+        // Spectral extension: `spxstre` is implicit at block 0, and a block that puts
+        // SPX in use rebuilds its high bands by rules of their own. It is the only
+        // block-level shape the frame's flags do not settle beforehand, and it is read
+        // here because Table E1.4 writes it ahead of everything else a block says about
+        // its bands - coupling stops where the synthesized region begins, and the
+        // rematrixing count and each channel's coded run both answer to it.
+        let mut ok = true;
+        if first || bits.flag() {
+            if bits.flag() {
+                ok = self.spx.read_strategy(header, bits);
+            } else {
+                self.spx.closed();
+            }
+        }
+        if ok && self.spx.in_use {
+            self.spx.read_coordinates(header, bits);
+        }
+        say("spx", blk, bits.pos);
+        // Coupling strategy: `cplstre[blk]` and `cplinu[blk]` both come from the frame,
+        // so a block that inherits a strategy reads no coupling bits here at all, and
+        // only the band set of a block that begins or restates coupling is its own.
+        strategy.cpl_opened = false;
+        strategy.cpl_moved = false;
+        if frame.coupling_stated[blk] {
+            let continued = strategy.cplinu;
+            if frame.coupling[blk] {
+                // Enhanced coupling describes an amplitude and an angle per band in
+                // place of one coordinate, which is a decoder of its own rather than a
+                // variant of this one.
+                if bits.flag() {
+                    return Err(unsupported(
+                        "an E-AC-3 block that couples by enhanced coupling",
+                    ));
+                }
+                strategy.incpl = [false; FBW];
+                if header.acmod == 2 {
+                    // A 2/0 block that couples couples both channels, and says so with
+                    // no bits at all.
+                    strategy.incpl[..2].fill(true);
+                } else {
+                    for ch in 0..nfchans {
+                        strategy.incpl[ch] = bits.flag();
+                    }
+                }
+                strategy.phsflginu = header.acmod == 2 && bits.flag();
+                let begin = bits.take(4) as usize;
+                // Section E3.3.1: the block that synthesises the bands above coupling
+                // leaves the end of coupling to the spectral extension begin frequency,
+                // and sends no code for it.
+                let end = if self.spx.in_use {
+                    self.spx.coupling_end()
+                } else {
+                    bits.take(4) as i32
+                };
+                let banding = bits.flag(); // `cplbndstrce`
+                if !banding && !continued {
+                    // Section E2.3.3.15: a frame's first coupled block that sends no
+                    // banding structure means Table E2.12's, while any other reuses the
+                    // structure the block before it settled on - which is already here.
+                    strategy.bndstrc = DEF_CPL_BNDSTRC;
+                }
+                ok = strategy.open_coupling(header, continued, begin, end, banding, bits);
+            } else {
+                // A block that does not couple leaves every coupling parameter off, and
+                // the next block that couples owes its coordinates and its leaks to
+                // itself rather than to a bit saying that it does.
+                strategy.cplinu = false;
+                strategy.incpl = [false; FBW];
+                strategy.phsflginu = false;
+                strategy.firstcplcos = [true; FBW];
+                strategy.firstcplleak = true;
+            }
+        }
+        say("cplstrategy", blk, bits.pos);
+        if ok && strategy.cplinu {
+            // Annex E's one change to the coordinates: a channel whose coordinates no
+            // block has delivered yet states them without paying a `cplcoe` bit.
+            ok = strategy.coupling_coordinates(header, bits, true);
+        }
+        say("cplcoords", blk, bits.pos);
+        if header.acmod == 2 {
+            strategy.rematrix.reshape(strategy.cplinu, strategy.cplbegf);
+            if !strategy.cplinu && self.spx.in_use {
+                // Section E3.3.2: a 2/0 block that synthesises its high bands and couples
+                // none of them states one band fewer above the copy region than one that
+                // codes them, and the bands themselves stay Table 7.25's.
+                strategy.rematrix.count = if self.spx.beginf < 2 { 3 } else { 4 };
+            }
+            // `rematstr` is implicit at block 0; a later block that withholds its flags
+            // keeps the ones the block before it sent.
+            if first || bits.flag() {
+                for band in 0..strategy.rematrix.count {
+                    strategy.rematrix.flags[band] = bits.flag();
+                }
+            }
+        }
+        say("rematrix", blk, bits.pos);
+        // Exponent strategies: the frame wrote these, in whichever of the two forms
+        // `expstre` selects, and [`Frame::strategies`] resolves them for this block, so
+        // the block carries no strategy bits of its own.
+        strategy.expstr = [0; PLANES];
+        if let Some(strategies) = frame.strategies(blk) {
+            if let Some(coupling) = strategies.coupling {
+                strategy.expstr[CPL] = coupling.code();
+            }
+            for ch in 0..nfchans {
+                strategy.expstr[ch] = strategies.channels[ch].code();
+            }
+            if let Some(low_frequency) = strategies.low_frequency {
+                strategy.expstr[LFE] = low_frequency.code();
+            }
+        }
+        if strategy.expstr[CPL] == 0
+            && strategy.cplinu
+            && (strategy.cpl_opened || strategy.cpl_moved)
+        {
+            // Section 7.10.2 conditions 6 and 7, which Annex E keeps: exponents coded
+            // for one band set cannot describe another.
+            ok = false;
+        }
+        for ch in 0..nfchans {
+            if first && strategy.expstr[ch] == 0 {
+                // Section 7.10.2 condition 8: nothing may be reused before anything was
+                // sent, and a frame whose own code left a channel at reuse for its first
+                // block cannot be read.
+                ok = false;
+            }
+        }
+        if first && header.lfeon && strategy.expstr[LFE] == 0 {
+            ok = false;
+        }
+        for ch in 0..nfchans {
+            if !ok {
+                break;
+            }
+            // A channel whose high bands went into the coupling plane, or whose are
+            // synthesized above the region it codes, states no bandwidth for them.
+            if strategy.expstr[ch] != 0 && !strategy.incpl[ch] && !self.spx.channels[ch] {
+                let code = bits.take(6) as usize;
+                // Section 5.4.3.24: above this bandwidth the stream is invalid and the
+                // decoder shall cease decoding audio and mute.
+                if code > 60 {
+                    ok = false;
+                    break;
+                }
+                strategy.bwcod[ch] = code;
+            }
+        }
+        if !ok {
+            self.core.strategy = strategy;
+            return Ok(false);
+        }
+        say("sideinfo", blk, bits.pos);
+        strategy.measure(header);
+        if std::env::var("EAC3_TRACE").is_ok() {
+            let p = &strategy.params;
+            eprintln!(
+                "      expstr={:?} start={:?} end={:?} cpl beg={} end={} sub={} bnd={} incpl={:?} ph={:?}",
+                strategy.expstr, strategy.start, strategy.end, strategy.cplbegf,
+                strategy.cplendf, strategy.subnd, strategy.bnd, strategy.incpl, strategy.phsflginu,
+            );
+            eprintln!(
+                "      params baie={} snre={} cs={} fs={:?} floor={} sd={} fd={} sg={} db={} gains={} fg={:?} leak={:?} delt={}",
+                p.baie, p.snre, p.csnroffst, p.fsnroffst, p.floorcod, p.sdcycod, p.fdcycod,
+                p.sgaincod, p.dbpbcod, p.gains, p.fgaincod, p.cplleak, p.delt,
+            );
+            eprintln!(
+                "      frame expstrategies {:?} snr={:?} lfe={:?}",
+                frame.strategies(blk), frame.snr_offsets, frame.low_frequency_strategies,
+            );
+            eprintln!("      raw exponents {:?}", frame.exponents);
+        }
+        if self.spx.in_use {
+            // Section E3.3.3: a channel that is one of the synthesized ones stops where
+            // the region begins, and its coded run is measured from there rather than
+            // from a bandwidth code it never sent.
+            self.spx.reach(header, &mut strategy);
+        }
+        if strategy.expstr[CPL] != 0 {
+            // Section 7.1.3: the coupling plane's absolute exponent is a reference
+            // rather than a coefficient's, and arrives doubled.
+            let absexp = bits.take(4) << 1;
+            strategy.exponents(bits, CPL, absexp);
+        }
+        for ch in 0..nfchans {
+            if strategy.expstr[ch] != 0 {
+                let absexp = bits.take(4);
+                strategy.exponents(bits, ch, absexp);
+                // `gainrng` is Section 7.9.5's optional pre-scale for a decoder working
+                // in integers; f32 output needs no headroom taken back.
+                bits.skip(2);
+            }
+        }
+        if header.lfeon && strategy.expstr[LFE] != 0 {
+            let absexp = bits.take(4);
+            strategy.exponents(bits, LFE, absexp);
+        }
+        if state.bit_allocation {
+            strategy.params.baie = bits.flag();
+            if strategy.params.baie {
+                strategy.params.sdcycod = bits.take(2) as usize;
+                strategy.params.fdcycod = bits.take(2) as usize;
+                strategy.params.sgaincod = bits.take(2) as usize;
+                strategy.params.dbpbcod = bits.take(2) as usize;
+                strategy.params.floorcod = bits.take(3) as usize;
+            } else if first {
+                // Section 5.4.3.30: the first block states the allocation prototype.
+                self.core.strategy = strategy;
+                return Ok(false);
+            }
+        } else {
+            // `bamode` = 0 is the frame saying every block of it mixes by one fixed
+            // curve, which Table E1.4 names outright instead of reaching for AC-3's
+            // Table 5.20.
+            strategy.params.baie = false;
+            strategy.params.sdcycod = 2;
+            strategy.params.fdcycod = 1;
+            strategy.params.sgaincod = 1;
+            strategy.params.dbpbcod = 2;
+            strategy.params.floorcod = 7;
+        }
+        // Signal-to-noise offsets. Strategy 0 is the frame handing the same pair to
+        // every block; the two per-block strategies leave the block to state its own,
+        // with `snroffste` implicit at block 0 so that the frame's first block always
+        // pays for them.
+        strategy.params.snre = false;
+        if let Some(offsets) = frame.snr_offsets {
+            strategy.params.snre = true;
+            strategy.params.csnroffst = i32::from(offsets.coarse);
+            let fine = i32::from(offsets.fast);
+            for plane in strategy.params.fsnroffst.iter_mut() {
+                *plane = fine;
+            }
+        } else if first || bits.flag() {
+            strategy.params.snre = true;
+            strategy.params.csnroffst = bits.take(6);
+            if state.snr_offsets == 1 {
+                // Strategy 1 is one block-wide offset for every plane of the block.
+                let fine = bits.take(4);
+                for plane in strategy.params.fsnroffst.iter_mut() {
+                    *plane = fine;
+                }
+            } else {
+                if strategy.cplinu {
+                    strategy.params.fsnroffst[CPL] = bits.take(4);
+                }
+                for ch in 0..nfchans {
+                    strategy.params.fsnroffst[ch] = bits.take(4);
+                }
+                if header.lfeon {
+                    strategy.params.fsnroffst[LFE] = bits.take(4);
+                }
+            }
+        }
+        // Fast gain codes, which travel on their own flag rather than with the offsets
+        // as they do in Table 5.3.
+        strategy.params.gains = state.gain_codes && bits.flag();
+        if strategy.params.gains {
+            if strategy.cplinu {
+                strategy.params.fgaincod[CPL] = bits.take(3) as usize;
+            }
+            for ch in 0..nfchans {
+                strategy.params.fgaincod[ch] = bits.take(3) as usize;
+            }
+            if header.lfeon {
+                strategy.params.fgaincod[LFE] = bits.take(3) as usize;
+            }
+        } else {
+            // Table E1.4's own default, which is not AC-3's: a block that states no
+            // gains mixes by `FASTGAIN[4]`, not by the last entry of Table 5.32.
+            for plane in strategy.params.fgaincod.iter_mut() {
+                *plane = 4;
+            }
+        }
+        // The offsets of the AC-3 syncframes this stream converts to, which no player
+        // that sounds E-AC-3 out as itself reads. They are there for every independent
+        // stream, which is every stream this decoder opens.
+        if bits.flag() {
+            bits.skip(10); // convsnroffst
+        }
+        strategy.params.leaks = false;
+        if strategy.cplinu {
+            // A block that begins coupling states its leaks with no flag saying so,
+            // which is all `firstcplleak` is for.
+            let leak = if strategy.firstcplleak {
+                strategy.firstcplleak = false;
+                true
+            } else {
+                bits.flag()
+            };
+            if leak {
+                let fast = bits.take(3);
+                let slow = bits.take(3);
+                strategy.params.cplleak = [fast, slow];
+                strategy.params.leaks = true;
+            }
+        }
+        strategy.params.delt = false;
+        if state.dynamic_parameters && !strategy.delta_ba(header, bits) {
+            // The reserved delta bit allocation mode, which mutes the frame.
+            self.core.strategy = strategy;
+            return Ok(false);
+        }
+        if state.skip_fields && bits.flag() {
+            let skip = bits.take(9) as usize;
+            bits.skip(skip * 8);
+        }
+        // From here the block is an AC-3 block: the mantissas Table E1.4 writes in
+        // Table 5.3's own order, the coupling and rematrixing that rebuild the planes,
+        // the transform, and the fold into the channels the track plays.
+        self.core.strategy = strategy;
+        if self.core.strategy.needs_allocation(header) {
+            self.core.allocate_all(header);
+        }
+        say("mantissas", blk, bits.pos);
+        self.core.mantissas(header, bits);
+        say("after mantissa", blk, bits.pos);
+        self.core.decouple(header);
+        if self.spx.in_use {
+            self.synthesise(header);
+        }
+        self.core.rematrix_restore(header);
+        self.core.spectrum_to_sound(header, folding, out);
+        Ok(true)
+    }
+
+    /// Section E3.6.4: fill the region this block synthesises by copying the bands below
+    /// it up, blending the copies with noise, and scaling the blend to the envelope the
+    /// block's coordinates describe. It runs after decoupling because the copy region is
+    /// the whole coded band - what the channel coded itself and what coupling restored
+    /// for it alike - and before the transform, which sees the result as coefficients the
+    /// stream had sent.
+    ///
+    /// The scaling is what makes the region right: the noise is the standard's own
+    /// freedom, so a decoder's high bands match a reference decode band for band rather
+    /// than sample for sample.
+    fn synthesise(&mut self, header: Header) {
+        let spx = self.spx;
+        for ch in 0..header.nfchans {
+            if !spx.channels[ch] {
+                continue;
+            }
+            let coefficients = self.core.coefficients(ch);
+            // Section E3.6.4.1: the copy walks up from `spxstrtf` while the insert walks
+            // up from the begin frequency, and a band that would copy past the coded
+            // region restarts the copy at its bottom.
+            let mut copy = spx.copy_first;
+            let mut insert = spx.first;
+            for bnd in 0..spx.count {
+                let size = spx.bands[bnd];
+                if copy + size > spx.first {
+                    copy = spx.copy_first;
+                }
+                for _ in 0..size {
+                    if copy == spx.first {
+                        copy = spx.copy_first;
+                    }
+                    let value = coefficients[copy];
+                    coefficients[insert] = value;
+                    insert += 1;
+                    copy += 1;
+                }
+            }
+            let mut noise_state = self.noise_state;
+            let mut start = spx.first;
+            for bnd in 0..spx.count {
+                let size = spx.bands[bnd];
+                // Section E3.6.4.2.2: the band's own energy is what the noise is scaled
+                // to, so that blending it in changes the band's character and not its
+                // level.
+                let mut accum = 0.0f64;
+                for bin in start..start + size {
+                    let value = f64::from(coefficients[bin]);
+                    accum += value * value;
+                }
+                let energy = (accum / size as f64).sqrt() as f32 * spx.noise[ch][bnd];
+                let signal = spx.signal[ch][bnd];
+                let scale = spx.scale[ch][bnd];
+                for bin in start..start + size {
+                    let copied = coefficients[bin];
+                    coefficients[bin] =
+                        (copied * signal + dice_noise(&mut noise_state) * energy) * scale;
+                }
+                start += size;
+            }
+            self.noise_state = noise_state;
+        }
+    }
+}
+
+impl AudioDecode for Eac3Decoder {
+    /// Decode every syncframe of the packet. A packet is normally one frame or a few,
+    /// and each contributes its 1536 samples per channel.
+    fn decode_encoded(
+        &mut self,
+        data: &[u8],
+        pts: u64,
+        _duration: u64,
+    ) -> Result<Option<AudioPacket>> {
+        let mut samples = Vec::new();
+        self.frames(data, &mut samples)?;
+        // The padding the encoder put at the head of the stream is not sound, and a
+        // player that plays it starts every track behind the picture.
+        let frames = samples.len() / self.channels;
+        let skip = self.lead.min(frames);
+        if skip > 0 {
+            self.lead -= skip;
+            samples.drain(..skip * self.channels);
+        }
+        let bytes: Vec<u8> = samples
+            .iter()
+            .flat_map(|sample| sample.to_le_bytes())
+            .collect();
+        Ok(Some(AudioPacket {
+            data: bytes,
+            pts,
+            timebase_num: 1,
+            timebase_den: self.sample_rate,
+        }))
+    }
+
+    /// A seek starts a new frame, and every frame states its own strategies, so the
+    /// state to undo is the reuse history and the overlap tail. The dither sequence
+    /// restarts from its seed with them, which is what makes a packet decoded twice
+    /// after a seek the same packet rather than the same signal plus different noise.
+    fn reset(&mut self) {
+        self.core = Core::new();
+        self.lead = ENCODER_DELAY;
+        self.spx.begin_frame();
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -795,7 +1771,7 @@ mod tests {
 
     /// What every frame of one stream agrees on, as against the strategy codes, which
     /// an encoder is free to change from frame to frame.
-    fn layout(read: &Frame) -> (u32, u16, bool, usize, usize, usize, usize) {
+    fn geometry(read: &Frame) -> (u32, u16, bool, usize, usize, usize, usize) {
         (
             read.sample_rate,
             read.channels,
@@ -1033,12 +2009,16 @@ mod tests {
             frames[0],
             Frame {
                 sample_rate: 48_000,
+                rate_code: 0,
+                layout: 2,
                 channels: 2,
                 low_frequency: false,
                 frame_bytes: 768,
                 blocks: 6,
                 audio_bit: 108,
                 coupling: [true; BLOCKS],
+                coupling_stated: [true, false, false, false, false, false],
+                downmix: None,
                 exponents: Exponents::PerFrame {
                     coupling: Some(16),
                     channels: [16, 16, 0, 0, 0],
@@ -1060,7 +2040,7 @@ mod tests {
         );
         assert_eq!(frames.len(), STEREO.len() / 768);
         assert!(
-            frames.windows(2).all(|pair| layout(&pair[0]) == layout(&pair[1])),
+            frames.windows(2).all(|pair| geometry(&pair[0]) == geometry(&pair[1])),
             "a stream that changed its geometry mid-file would be a different stream"
         );
     }
@@ -1072,12 +2052,16 @@ mod tests {
             frames[0],
             Frame {
                 sample_rate: 48_000,
+                rate_code: 0,
+                layout: 7,
                 channels: 6,
                 low_frequency: true,
                 frame_bytes: 1792,
                 blocks: 6,
                 audio_bit: 144,
                 coupling: [true; BLOCKS],
+                coupling_stated: [true, false, false, false, false, false],
+                downmix: None,
                 exponents: Exponents::PerFrame {
                     coupling: Some(22),
                     channels: [16, 16, 16, 16, 16],
@@ -1440,21 +2424,33 @@ mod tests {
     }
 
     /// `snroffststr` = 0 is the frame saying it carries the offsets its blocks mix by;
-    /// the other three codes leave each block to state its own, and there is nothing at
-    /// the frame level left to read for them then.
+    /// the two it replaces that with leave each block to state its own, and there is
+    /// nothing at the frame level left to read for them then.
     #[test]
     fn a_frame_carries_its_blocks_offsets_only_when_the_strategy_says_so() {
         let read = walked(&audio_frame(2, false, |written| {
             written.couple = true;
-            written.snroffststr = 3;
+            written.snroffststr = 2;
         }));
         assert_eq!(read.snr_offsets, None);
-        assert_eq!(read.blocks_state.snr_offsets, 3);
+        assert_eq!(read.blocks_state.snr_offsets, 2);
         assert_eq!(read.audio_bit, 98, "ten bits of offsets the frame does not write");
 
         let read = walked(&audio_frame(2, false, |written| written.couple = true));
         assert_eq!(read.snr_offsets, Some(SnrOffsets { coarse: 0, fast: 0 }));
         assert_eq!(read.blocks_state.snr_offsets, 0);
+    }
+
+    /// The fourth `snroffststr` is the one Table E2.9 leaves reserved, so a frame that
+    /// names it promises offsets no block of it knows how to spell.
+    #[test]
+    fn a_frame_that_names_the_reserved_offset_strategy_is_refused_by_name() {
+        let error = header(&mut BitReader::new(&audio_frame(2, false, |written| {
+            written.couple = true;
+            written.snroffststr = 3;
+        })))
+        .unwrap_err();
+        assert!(error.to_string().contains("reserved"), "{error}");
     }
 
     /// The flags that say what a block may state for itself move nothing in the frame:
@@ -1660,3 +2656,60 @@ mod tests {
     }
 }
 
+
+fn say(name: &str, blk: usize, pos: usize) {
+    if std::env::var("EAC3_TRACE").is_ok() {
+        eprintln!("  blk {blk} {pos:6} {name}");
+    }
+}
+
+#[cfg(test)]
+mod walker_trace {
+    use super::*;
+
+    /// Walk one file named by `FVID_EAC3`, printing the position every block's sections
+    /// end at alongside the frame's own geometry, so an independent walk of the same
+    /// tables can be diffed against it field for field.
+    #[test]
+    fn trace_one_file() {
+        let Ok(path) = std::env::var("FVID_EAC3") else {
+            return;
+        };
+        let data = std::fs::read(&path).expect("readable");
+        let frame = {
+            let mut reader = BitReader::new(&data);
+            header(&mut reader).expect("header")
+        };
+        eprintln!(
+            "== {path}: {} bytes, {} Hz, {} ch",
+            data.len(),
+            frame.sample_rate,
+            frame.channels
+        );
+        let mut decoder =
+            Eac3Decoder::new(&[], frame.sample_rate, frame.channels).expect("opens");
+        let raw = decoder
+            .decode_encoded(&data, 0, 0)
+            .expect("decodes")
+            .expect("audio");
+        let floats: Vec<f32> = raw
+            .data
+            .chunks_exact(4)
+            .map(|w| f32::from_le_bytes(w.try_into().unwrap()))
+            .collect();
+        let mut squared = 0.0f64;
+        let mut peak = 0.0f32;
+        for x in &floats {
+            squared += f64::from(*x) * f64::from(*x);
+            if x.abs() > peak {
+                peak = x.abs();
+            }
+        }
+        eprintln!(
+            "   {} words, rms {:.6}, peak {peak:.6}, nonzero {}",
+            floats.len(),
+            (squared / floats.len().max(1) as f64).sqrt() as f32,
+            floats.iter().filter(|x| **x != 0.0).count(),
+        );
+    }
+}
