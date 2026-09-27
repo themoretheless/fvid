@@ -1381,225 +1381,19 @@ impl Player {
     /// order it holds them, until one reads a track out of it: the video reader
     /// accepts either main container and reports no codec information of its own.
     /// False when the file has no such track.
+    /// thread. The file is offered to every audio reader the table
+    /// [`AUDIO_READERS`] holds, in the order it holds them, until one reads a
+    /// track out of it: the video reader accepts either main container and
+    /// reports no codec information of its own.
+    /// False when the file has no such track.
     fn try_start_audio(&mut self, path: &Path, nth: usize) -> bool {
-        let mp4 = File::open(path).ok().and_then(|file| {
-            crate::playback_mp4_audio::Mp4AudioReader::open_at(
-                BufReader::new(file),
-                crate::container::mp4::Limits::default(),
-                nth,
-            )
-            .ok()
-            .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-        });
-        let stream = mp4
-            .or_else(|| {
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_webm_audio::WebmAudioReader::open_at(
-                            BufReader::new(file),
-                            crate::container::webm::Limits::default(),
-                            nth,
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // An AVI file keeps one program's audio in a stream of its own among the
-            // file's several, so the track key counts those; its reader frames records
-            // for the codings whose record counting it has measured, of which the
-            // Microsoft-spelled ADPCM blocks are the ones this build decodes.
-            .or_else(|| {
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_avi_audio::AviAudioReader::open_at(
-                            BufReader::new(file),
-                            crate::container::avi::Limits::default(),
-                            nth,
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // A MIDI performance is one track of its own, so the second and later
-            // track keys have nothing to land on.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_smf::SmfAudioReader::open(
-                            BufReader::new(file),
-                            crate::container::smf::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // A module is one performance too, and one track of it: every channel
-            // is mixed into what is heard rather than offered separately.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_xm::XmAudioReader::open(
-                            BufReader::new(file),
-                            crate::container::xm::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // An Ogg file names its codec in the first bytes of its first packet
-            // rather than in a field, and one program can be written as several
-            // chains after each other, so it is still one track to choose.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_ogg_audio::OggAudioReader::open(
-                            BufReader::new(file),
-                            crate::container::ogg::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // A Wave file holds one run of samples, so as with the two performances
-            // above there is no second track key to land on.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_wav::WavAudioReader::open(
-                            BufReader::new(file),
-                            crate::playback_wav::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // An AIFF file holds one run too, with its geometry stated once and in
-            // big-endian, and its rate as an 80-bit extended number.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_aiff::AiffAudioReader::open(
-                            BufReader::new(file),
-                            crate::playback_aiff::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // A Sun `.snd` header states only a geometry too, and reads even its
-            // width through a table its consumers disagree about.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_au::AuAudioReader::open(
-                            BufReader::new(file),
-                            crate::playback_au::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // A `.flac` file names itself with `fLaC` and states its geometry once,
-            // but its frames carry no length, so the walk that lists them proves
-            // each end by the checksum the frame holds.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_flac::FlacAudioReader::open(
-                            BufReader::new(file),
-                            crate::playback_flac::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // A bare MPEG audio file states nothing before its frames at all, so it
-            // opens last: its first bytes are free to look like anything, and every
-            // other reader here begins with a magic that says what it is.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_mp3::Mp3AudioReader::open(
-                            BufReader::new(file),
-                            crate::playback_mp3::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // A bare Dolby Digital file states its geometry in every frame too, but
-            // its frames open on a syncword no other reader here claims, so it is
-            // offered alongside the MPEG one and only takes a file whose whole run of
-            // frame lengths is measured out of Table 5.18.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_ac3::Ac3AudioReader::open(
-                            BufReader::new(file),
-                            crate::playback_ac3::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // An ADTS file names its geometry in its frame headers as the two
-            // elementary readers above do, but it keeps no setup block, so its
-            // reader synthesizes the one the MP4 decoder asks for. It is offered
-            // last because its syncword is the loosest of the three: only a file
-            // whose whole run of self-stated lengths fills it is taken.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_aac::AacAudioReader::open(
-                            BufReader::new(file),
-                            crate::playback_aac::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            });
+        let mut stream = None;
+        for &attempt in AUDIO_READERS {
+            if let Some(found) = attempt(path, nth) {
+                stream = Some(found);
+                break;
+            }
+        }
         let Some(stream) = stream else {
             return false;
         };
@@ -2966,6 +2760,196 @@ fn sound_codec(tag: &str) -> String {
     }
     .to_owned()
 }
+
+/// One file format's claim on a path: open its nth audio track, or say the
+/// file isn't ours. Each reader below is the whole of its format's arm: the
+/// table only states the order they are tried in.
+type AudioAttempt = fn(&Path, usize) -> Option<Box<dyn crate::audio::AudioStream>>;
+
+/// MP4 first: it is the container the video reader already opened for the
+/// picture, so its audio track is the one most often asked for.
+fn mp4_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    let file = File::open(path).ok()?;
+    crate::playback_mp4_audio::Mp4AudioReader::<std::io::BufReader<File>>::open_at(BufReader::new(file), crate::container::mp4::Limits::default(), nth)
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A Matroska file names its tracks with the same dispatch tags the
+/// audio decoder answers for, and it follows the MP4 one the way the
+/// picture's reader order does.
+fn webm_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    let file = File::open(path).ok()?;
+    crate::playback_webm_audio::WebmAudioReader::<std::io::BufReader<File>>::open_at(BufReader::new(file), crate::container::webm::Limits::default(), nth)
+        .ok()
+        .map(boxed_stream)
+}
+
+/// An AVI file keeps one program's audio in a stream of its own among the
+/// file's several, so the track key counts those; its reader frames records
+/// for the codings whose record counting it has measured, of which the
+/// Microsoft-spelled ADPCM blocks are the ones this build decodes.
+fn avi_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    let file = File::open(path).ok()?;
+    crate::playback_avi_audio::AviAudioReader::open_at::<std::io::BufReader<File>>(BufReader::new(file), crate::container::avi::Limits::default(), nth)
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A MIDI performance is one track of its own, so the second and later
+/// track keys have nothing to land on.
+fn smf_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_smf::SmfAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::container::smf::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A module is one performance too, and one track of it: every channel is
+/// mixed into what is heard rather than offered separately.
+fn xm_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_xm::XmAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::container::xm::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// An Ogg file names its codec in the first bytes of its first packet
+/// rather than in a field, and one program can be written as several
+/// chains after each other, so it is still one track to choose.
+fn ogg_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_ogg_audio::OggAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::container::ogg::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A Wave file holds one run of samples, so as with the two performances
+/// above there is no second track key to land on.
+fn wav_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_wav::WavAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_wav::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// An AIFF file holds one run too, with its geometry stated once and in
+/// big-endian, and its rate as an 80-bit extended number.
+fn aiff_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_aiff::AiffAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_aiff::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A Sun `.snd` header states only a geometry too, and reads even its
+/// width through a table its consumers disagree about.
+fn au_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_au::AuAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_au::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A `.flac` file names itself with `fLaC` and states its geometry once,
+/// but its frames carry no length, so the walk that lists them proves
+/// each end by the checksum the frame holds.
+fn flac_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_flac::FlacAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_flac::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A bare MPEG audio file states nothing before its frames at all, so it
+/// opens last: its first bytes are free to look like anything, and every
+/// other reader here begins with a magic that says what it is.
+fn mp3_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_mp3::Mp3AudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_mp3::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A bare Dolby Digital file states its geometry in every frame too, but
+/// its frames open on a syncword no other reader here claims, so it is
+/// offered alongside the MPEG one and only takes a file whose whole run of
+/// frame lengths is measured out of Table 5.18.
+fn ac3_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_ac3::Ac3AudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_ac3::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// An ADTS file names its geometry in its frame headers as the two
+/// elementary readers above do, but it keeps no setup block, so its
+/// reader synthesizes the one the MP4 decoder asks for. It is offered
+/// last because its syncword is the loosest of the three: only a file
+/// whose whole run of self-stated lengths fills it is taken.
+fn adts_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_aac::AacAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_aac::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// Hand a reader to the player's one stream slot: every reader already
+/// implements the trait, only the trait object's type must be stated.
+fn boxed_stream<R: crate::audio::AudioStream + 'static>(
+    reader: R,
+) -> Box<dyn crate::audio::AudioStream> {
+    Box::new(reader)
+}
+
+/// The audio readers the player holds, in the order a file is offered to them.
+/// A container that names itself with a magic goes first; the bare elementary
+/// streams open last, because their first bytes are free to look like anything.
+const AUDIO_READERS: &[AudioAttempt] = &[
+    mp4_audio_stream,
+    webm_audio_stream,
+    avi_audio_stream,
+    smf_audio_stream,
+    xm_audio_stream,
+    ogg_audio_stream,
+    wav_audio_stream,
+    aiff_audio_stream,
+    au_audio_stream,
+    flac_audio_stream,
+    mp3_audio_stream,
+    ac3_audio_stream,
+    adts_audio_stream,
+];
 
 /// A file's size in the units an information panel counts in: the largest one
 /// that still leaves a whole number, with a decimal place only while the number
