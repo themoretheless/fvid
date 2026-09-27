@@ -1,5 +1,6 @@
 //! 1D and 3D colour lookup tables: `.cube` / `.3dl` parsing, sampling, inversion.
 
+use crate::color::log::Log;
 use crate::color::primaries::{apply, rgb_to_rgb, Primaries};
 use crate::color::tonemap::{compress_gamut, tone_map_rgb, ContentLight, DisplayTarget, ToneMap};
 use crate::color::transfer::{hlg_ootf_rgb, hlg_system_gamma, Transfer};
@@ -491,6 +492,8 @@ pub fn transfer_lut(transfer: Transfer, n: usize) -> Lut1d {
 pub struct CubePlan {
     /// Transfer the input codes are read with.
     pub from: Transfer,
+    /// Camera log curve the input codes carry, which replaces `from`.
+    pub log: Option<Log>,
     /// Primaries the input codes are stated in.
     pub source: Primaries,
     /// Transfer the output codes are written with.
@@ -520,6 +523,7 @@ impl CubePlan {
     ) -> Self {
         Self {
             from,
+            log: None,
             source,
             to,
             dest,
@@ -528,6 +532,23 @@ impl CubePlan {
             target: None,
             content: ContentLight::default(),
             tone_map: None,
+        }
+    }
+
+    /// Camera log material read as `profile`, converted to `to`/`dest`.
+    ///
+    /// `source` is the camera gamut the profile was authored with; passing the
+    /// destination gamut makes the cube a pure transfer conversion.
+    pub fn camera_log(
+        profile: Log,
+        to: Transfer,
+        source: Primaries,
+        dest: Primaries,
+        size: usize,
+    ) -> Self {
+        Self {
+            log: Some(profile),
+            ..Self::transfer(Transfer::Linear, to, source, dest, size)
         }
     }
 
@@ -549,17 +570,25 @@ impl CubePlan {
         let m = rgb_to_rgb(self.source, self.dest);
         let (kr, kb) = self.dest.kr_kb();
         let (kr, kb) = (kr as f32, kb as f32);
-        let scale = self.from.full_scale_nits(self.sdr_white_nits);
+        // A log curve states 1.0 at diffuse white, while an SDR video curve has
+        // no absolute scale at all and PQ already is one.
+        let scale = match self.log {
+            Some(_) => self.sdr_white_nits,
+            None => self.from.full_scale_nits(self.sdr_white_nits),
+        };
         Lut3d::from_fn(self.size, |rgb| {
             let mut lin = [0.0f32; 3];
             for (out, v) in lin.iter_mut().zip(rgb) {
-                *out = self.from.eotf(v).unwrap_or(v);
+                *out = match self.log {
+                    Some(profile) => profile.to_linear(v),
+                    None => self.from.eotf(v).unwrap_or(v),
+                };
             }
-            if self.from == Transfer::Hlg {
+            if self.from == Transfer::Hlg && self.log.is_none() {
                 let gamma = hlg_system_gamma(self.target.map_or(1_000.0, |t| t.peak_nits));
                 lin = hlg_ootf_rgb(lin, kr, kb, gamma);
             }
-            let mapped = compress_gamut(apply(m, lin.map(f64::from)).map(|v| v as f32));
+            let mapped = compress_gamut(apply(m, lin.map(f64::from)).map(|v| v as f32), self.dest);
             let display = match self.tone_map {
                 None => mapped,
                 Some(mode) => tone_map_rgb(
@@ -755,6 +784,51 @@ LUT_3D_SIZE 2
         assert!(coarse_tet < 0.02, "tetrahedral grid error {coarse_tet}");
         assert!(fine_tri * 4.0 < coarse_tri, "trilinear {coarse_tri} -> {fine_tri}");
         assert!(fine_tet * 4.0 < coarse_tet, "tetrahedral {coarse_tet} -> {fine_tet}");
+    }
+
+    #[test]
+    fn camera_log_cube_delivers_the_destination_curve_at_the_vendor_anchor() {
+        // S-Log3 at Sony's own 18 % code (420/1023) has to arrive at Rec.709's
+        // code for 18 % reflectance when nothing but the transfer changes.
+        let plan = CubePlan::camera_log(
+            Log::SLog3,
+            Transfer::Bt709,
+            Primaries::BT709,
+            Primaries::BT709,
+            65,
+        );
+        let cube = plan.build();
+        let grey = cube.sample([420.0 / 1023.0; 3], Interpolation::Trilinear);
+        assert!(close(grey[0], 0.409_008, 2e-3), "{grey:?}");
+        // Sub-black exposure is clamped away, and the top of a log curve is far
+        // above white, so it has to saturate the destination.
+        let black = cube.sample([0.0; 3], Interpolation::Trilinear);
+        assert!(close(black[0], 0.0, 1e-3), "{black:?}");
+        let top = cube.sample([1.0; 3], Interpolation::Trilinear);
+        assert!(close(top[0], 1.0, 1e-3), "{top:?}");
+    }
+
+    #[test]
+    fn every_log_profile_produces_a_usable_rec709_cube() {
+        for profile in Log::ALL {
+            let plan = CubePlan::camera_log(
+                profile,
+                Transfer::Bt709,
+                Primaries::BT709,
+                Primaries::BT709,
+                33,
+            );
+            let cube = plan.build();
+            let mut prev = -1.0f32;
+            for i in 0..=32u32 {
+                let code = i as f32 / 32.0;
+                let got = cube.sample([code; 3], Interpolation::Trilinear)[0];
+                assert!(got >= prev - 1e-3, "{profile:?} {code} {prev} -> {got}");
+                assert!((0.0..=1.0).contains(&got), "{profile:?} {code} {got}");
+                prev = got;
+            }
+            assert!(prev > 0.9, "{profile:?} never reaches the top");
+        }
     }
 
     #[test]

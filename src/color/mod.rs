@@ -4,11 +4,13 @@
 //! Every curve here is implemented from its published standard rather than
 //! fitted, so a code value can be checked against the standard's own tables.
 
+pub mod log;
 pub mod lut;
 pub mod primaries;
 pub mod tonemap;
 pub mod transfer;
 
+pub use log::{Codes, Log};
 pub use lut::{CubePlan, Interpolation, Lut, Lut1d, Lut3d};
 pub use primaries::{
     apply, Chromaticity, MatrixCoeff, Primaries, YuvMatrix, rgb_to_rgb,

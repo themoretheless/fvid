@@ -208,30 +208,30 @@ pub fn luma_nits(rgb_nits: [f32; 3], kr: f32, kb: f32) -> f32 {
     rgb_nits[0] * kr + rgb_nits[1] * (1.0 - kr - kb) + rgb_nits[2] * kb
 }
 
-/// Compress out-of-gamut RGB toward its own luma instead of hard-clipping legs.
+/// Compress an out-of-gamut RGB triplet along its own saturation axis.
 ///
-/// Input and output are normalised linear light in the destination primaries.
-pub fn compress_gamut(rgb: [f32; 3]) -> [f32; 3] {
-    let out = rgb.map(|v| v.clamp(0.0, 1.0));
-    let clipped = out[0] != rgb[0] || out[1] != rgb[1] || out[2] != rgb[2];
-    if !clipped {
+/// Input and output are normalised linear light in `primaries`. Only a negative
+/// leg counts as out of gamut: in a relative-linear pipeline a leg above 1.0 is
+/// super-white, and capping it here would discard exactly the highlights the
+/// tone mapper downstream exists to fit. Luminance and hue survive; the chroma
+/// is scaled by the least that brings every leg back to zero or above.
+pub fn compress_gamut(rgb: [f32; 3], primaries: Primaries) -> [f32; 3] {
+    if rgb.iter().all(|v| *v >= 0.0) {
         return rgb;
     }
-    let (kr, kb) = Primaries::BT709.kr_kb();
+    let (kr, kb) = primaries.kr_kb();
     let (kr, kb) = (kr as f32, kb as f32);
-    let y = luma_nits(rgb, kr, kb).clamp(0.0, 1.0);
-    let mut res = [0.0f32; 3];
-    for i in 0..3 {
-        let v = rgb[i];
-        res[i] = if v < 0.0 {
-            v.mul_add(0.15, y * 0.85).max(0.0)
-        } else if v > 1.0 {
-            (v - 1.0).mul_add(-0.15, y * 0.15 + 0.85).min(1.0)
-        } else {
-            v
-        };
+    let y = luma_nits(rgb, kr, kb);
+    if y <= 0.0 {
+        return [0.0; 3];
     }
-    res
+    let mut scale = 1.0f32;
+    for v in rgb {
+        if v < 0.0 {
+            scale = scale.min(y / (y - v));
+        }
+    }
+    rgb.map(|v| (y + (v - y) * scale).max(0.0))
 }
 
 #[cfg(test)]
@@ -400,12 +400,23 @@ mod tests {
     }
 
     #[test]
-    fn gamut_compression_only_touches_out_of_range_legs() {
+    fn gamut_compression_fixes_negative_legs_and_keeps_super_white() {
         let inside = [0.2f32, 0.7, 0.1];
-        assert_eq!(compress_gamut(inside), inside);
-        let out = compress_gamut([1.4, -0.3, 0.5]);
-        assert!(out.iter().all(|v| *v >= 0.0 && *v <= 1.0), "{out:?}");
-        assert!(out[1] > 0.0, "negative leg lifted: {out:?}");
+        assert_eq!(compress_gamut(inside, Primaries::BT709), inside);
+        // A leg above 1.0 is a highlight, not a gamut error, so it survives.
+        let bright = [1.4f32, 1.2, 0.5];
+        assert_eq!(compress_gamut(bright, Primaries::BT709), bright);
+
+        let rgb = [1.4f32, -0.3, 0.5];
+        let out = compress_gamut(rgb, Primaries::BT709);
+        assert!(out.iter().all(|v| *v >= 0.0), "{out:?}");
+        assert!(out[1] < out[0], "{out:?}");
+        // The fix is a pure chroma scale, so luma and hue both carry over.
+        let (kr, kb) = Primaries::BT709.kr_kb();
+        let (kr, kb) = (kr as f32, kb as f32);
+        assert!(close(luma_nits(out, kr, kb), luma_nits(rgb, kr, kb), 1e-5));
+        let ratio = |v: [f32; 3]| (v[0] - v[1]) / (v[2] - v[1]);
+        assert!(close(ratio(out), ratio(rgb), 1e-4), "{out:?}");
     }
 
     #[test]
