@@ -1,4 +1,4 @@
-//! 1D and 3D colour lookup tables: `.cube` / `.3dl` parsing, sampling, inversion.
+//! 1D and 3D colour lookup tables: `.cube` / `.3dl` parsing and sampling.
 
 use crate::color::log::Log;
 use crate::color::primaries::{apply, rgb_to_rgb, Primaries};
