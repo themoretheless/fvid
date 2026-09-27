@@ -21,7 +21,8 @@ use crate::color::transfer::Transfer;
 /// The panel and destination signal a caller grades for.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Settings {
-    /// Camera log curve the coded values carry, which replaces the file's transfer.
+    /// Camera log curve the coded values carry, which replaces the file's
+    /// transfer and, where the file names no primaries, its primaries too.
     pub log: Option<Log>,
     /// Highlight compression to run. `None` on BT.2100 material still compresses;
     /// see [`Grade::new`].
@@ -110,10 +111,20 @@ impl Grade {
             None if from.is_hdr() && !settings.to.is_hdr() => Some(ToneMap::default()),
             None => None,
         };
+        // Which primaries the coded values are stated in, asked of the file
+        // first: a camera that named its own gamut knows these particular bytes
+        // better than any profile does. Only when it names none does a log
+        // curve bring its vendor's working gamut with it, which is what the
+        // camera recorded into, and BT.709 answers for material that states
+        // neither.
+        let source = signal
+            .primary_set()
+            .or_else(|| settings.log.and_then(Log::gamut))
+            .unwrap_or(Primaries::BT709);
         let plan = CubePlan {
             from,
             log: settings.log,
-            source: signal.primary_set().unwrap_or(Primaries::BT709),
+            source,
             to: settings.to,
             dest: settings.dest,
             size: settings.size,
@@ -368,6 +379,32 @@ mod tests {
         assert!(grey(&grade, 0.0)[0] < 0.002);
         // Above 90 % the log holds six more stops, which video has to clip.
         assert!(grey(&grade, 1.0)[0] > 0.99);
+    }
+
+    /// A log curve brings its vendor's working gamut with it, since that is the
+    /// triangle the camera recorded into — but only where the file itself names
+    /// no primaries, and only where the vendor published one at all.
+    #[test]
+    fn a_log_curve_lends_its_gamut_where_the_file_names_none() {
+        let silent = ColourDescription::default();
+        let s_log3 = Settings {
+            log: Some(Log::SLog3),
+            ..Settings::video(DisplayTarget::sdr(240.0))
+        };
+        let grade = Grade::new(silent, &HdrMetadata::default(), s_log3, None);
+        assert_eq!(grade.plan().source, Primaries::S_GAMUT3);
+        // A file that names its own primaries is the better authority on these
+        // particular bytes, whatever curve it is read with.
+        let named = Grade::new(bt709(), &HdrMetadata::default(), s_log3, None);
+        assert_eq!(named.plan().source, Primaries::BT709);
+        // S-Log2 predates a published S-Gamut table, so a silent file is left in
+        // the space the destination is asked for rather than a guessed one.
+        let s_log2 = Settings {
+            log: Some(Log::SLog2),
+            ..s_log3
+        };
+        let grade = Grade::new(silent, &HdrMetadata::default(), s_log2, None);
+        assert_eq!(grade.plan().source, Primaries::BT709);
     }
 
     /// Every code of every channel, both routes to the same byte.
