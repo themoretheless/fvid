@@ -1126,7 +1126,18 @@ mod tests {
         assert!(playback_window(&track, 1000).is_err());
         track.edits[0].duration = 480;
         track.edits[0].media_time = -1;
-        assert!(playback_window(&track, 1000).is_err());
+        assert_eq!(playback_window(&track, 1000).unwrap(), (0, None));
+        // A leading delay is skipped; contiguous edits join into one window.
+        track.edits.push(Edit {
+            duration: 240,
+            media_time: 1024,
+        });
+        track.edits.push(Edit {
+            duration: 240,
+            media_time: 1024 + 3072,
+        });
+        assert_eq!(playback_window(&track, 1000).unwrap(), (1024, Some(7168)));
+        track.edits.truncate(1);
         track.edits[0].media_time = i64::MAX;
         assert!(playback_window(&track, 1000).is_err());
         track.edits[0].media_time = 0;
