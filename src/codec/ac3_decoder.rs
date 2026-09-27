@@ -813,7 +813,9 @@ pub(crate) struct Strategy {
     pub(crate) cpl_moved: bool,
     pub(crate) incpl: [bool; FBW],
     pub(crate) cplbegf: usize,
-    pub(crate) cplendf: usize,
+    /// Signed because Annex E lets a frame that uses spectral extension derive it from
+    /// `spxbegf`, and Section E3.3.1 states the derived range as -2 to 7.
+    pub(crate) cplendf: i32,
     /// `ncplsubnd` and `ncplbnd`: the sub-bands coupling covers, and how many
     /// coupling bands those group into.
     pub(crate) subnd: usize,
@@ -888,7 +890,7 @@ impl Strategy {
         }
         if self.cplinu {
             self.start[CPL] = cplstart;
-            self.end[CPL] = (37 + 12 * (self.cplendf + 3)).min(BINS);
+            self.end[CPL] = (37 + 12 * (self.cplendf + 3)).clamp(0, BINS as i32) as usize;
         } else {
             self.start[CPL] = 0;
             self.end[CPL] = 0;
@@ -975,7 +977,7 @@ impl Strategy {
         }
         self.phsflginu = header.acmod == 2 && bits.flag();
         let begin = bits.take(4) as usize;
-        let end = bits.take(4) as usize;
+        let end = bits.take(4) as i32;
         self.open_coupling(header, continued, begin, end, true, bits)
     }
 
@@ -996,7 +998,7 @@ impl Strategy {
         header: Header,
         continued: bool,
         begin: usize,
-        end: usize,
+        end: i32,
         banding_stated: bool,
         bits: &mut Bits<'_>,
     ) -> bool {
@@ -1006,13 +1008,11 @@ impl Strategy {
         self.cpl_moved = continued && (begin, end) != (self.cplbegf, self.cplendf);
         self.cplbegf = begin;
         self.cplendf = end;
-        if self.cplbegf > self.cplendf + 2 {
+        let subnd = 3 + end - begin as i32;
+        if !(1..=SUBDN as i32).contains(&subnd) {
             return false;
         }
-        let subnd = 3 + self.cplendf - self.cplbegf;
-        if subnd > SUBDN {
-            return false;
-        }
+        let subnd = subnd as usize;
         self.subnd = subnd;
         if banding_stated {
             for bnd in 1..subnd {
@@ -1937,6 +1937,23 @@ impl Core {
     fn plane_mantissas(&mut self, bits: &mut Bits<'_>, plane: usize) {
         let start = self.strategy.start[plane];
         let end = self.strategy.end[plane];
+        if std::env::var("EAC3_TRACE").is_ok() {
+            let run = &self.strategy.bap[plane][start.min(BINS)..end.min(BINS)];
+            let exp = &self.strategy.exp[plane][start.min(BINS)..end.min(BINS)];
+            let words: usize = run
+                .iter()
+                .map(|&b| usize::from(b))
+                .filter(|&b| b != 0)
+                .map(|b| usize::from(MANTISSA_BITS[b]))
+                .sum();
+            eprintln!(
+                "        plane {plane} {start}..{end} bap nonzero={} words={words} exp {:?}..{:?} bapmax {:?}",
+                run.iter().filter(|&&b| b != 0).count(),
+                exp.iter().min(),
+                exp.iter().max(),
+                run.iter().max(),
+            );
+        }
         let dithered = plane < FBW && self.strategy.dither[plane];
         for bin in start..end {
             let bap = usize::from(self.strategy.bap[plane][bin]);
@@ -1980,6 +1997,13 @@ impl Core {
         }
     }
 
+    /// One plane's transform coefficients as the core leaves them between its own
+    /// unpacking and its inverse transform, which is where Annex E's spectral extension
+    /// rewrites the bins above its begin frequency.
+    pub(crate) fn coefficients(&mut self, plane: usize) -> &mut [f32] {
+        &mut self.coef[plane]
+    }
+
     /// Rebuild each coupled channel above the coupling point from the coupling
     /// plane, its per-sub-band coordinate, and - for the right channel of a 2/0
     /// stream whose phase flags are on - a sign flip that undoes what the encoder's
@@ -1995,7 +2019,7 @@ impl Core {
         if !self.strategy.cplinu {
             return;
         }
-        let last = (3 + self.strategy.cplendf).min(SUBDN);
+        let last = (3 + self.strategy.cplendf).clamp(0, SUBDN as i32) as usize;
         let begf = self.strategy.cplbegf;
         for ch in 0..header.nfchans {
             if !self.strategy.incpl[ch] {
