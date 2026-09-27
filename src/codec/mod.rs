@@ -123,6 +123,8 @@ pub mod vp9_transform;
 
 pub mod av1;
 
+pub mod av1_metadata;
+
 pub mod av1_sequence;
 
 pub mod av1_symbol;
