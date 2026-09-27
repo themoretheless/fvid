@@ -124,6 +124,8 @@ const LIMIT_ONES: i32 = 16;
 /// A sample held to the top of a 32-bit word is a full scale of 2^31, whichever depth the
 /// block stored it at.
 const FULL_SCALE: f32 = 1.0 / (1u64 << 31) as f32;
+/// The same for samples a block of up to 16 bits leaves in a 16-bit range.
+const SHORT_SCALE: f32 = 1.0 / (1u32 << 15) as f32;
 
 /// `2^(n/256) - 1` at eight bits: the table the stream's magnitudes are interpolated
 /// through, copied entry for entry from the reference's.
@@ -460,19 +462,11 @@ impl<'a> Block<'a> {
 
         while buffer.len() < count {
             let slot = buffer.len();
-            // Get current channel's medians by reference when needed
-            let (current_med_idx, other_med_idx) = if stereo {
-                (slot & 1, 1 - (slot & 1))
-            } else {
-                (0, 0)
-            };
+            let current_med_idx = if stereo { slot & 1 } else { 0 };
 
-            // Check for zero run BEFORE any mutable borrows
-            let can_skip_zeros = if stereo && slot & 1 != 0 {
-                (med0[0] as u32) < 2 && !holding_one && (med1[0] as u32) < 2
-            } else {
-                (med0[0] as u32) < 2 && !holding_one
-            };
+            // Both channels' medians decide, whichever channel the slot belongs to; a mono
+            // block leaves the second set at zero.
+            let can_skip_zeros = zeros_are_common(&med0, &med1, holding_one);
 
             if can_skip_zeros && !holding_zero {
                 if zeros_run != 0 {
@@ -522,7 +516,7 @@ impl<'a> Block<'a> {
             holding_zero = ones & 1 == 0;
             let ones = (ones >> 1) + low;
 
-            let mut current_med = match current_med_idx {
+            let current_med = match current_med_idx {
                 0 => &mut med0,
                 _ => &mut med1,
             };
@@ -837,8 +831,6 @@ fn mono_pass(pass: &mut Pass, buffer: &mut [i32]) {
             } else {
                 samples[0].wrapping_mul(3).wrapping_sub(samples[1]) >> 1
             };
-            samples[1] = samples[0];
-            let source = samples[0];
             let result = apply_weight(weight, source).wrapping_add(*residual);
             weight = update_weight(weight, pass.delta, source, *residual);
             *residual = result;
@@ -1069,9 +1061,16 @@ impl AudioDecode for WavpackDecoder {
                 "WavPack block's channels disagree with the container",
             ));
         }
+        // Blocks of up to 16 bits come out of `widen` in a 16-bit range, wider ones in a
+        // 32-bit range.
+        let scale = if block.bits_per_sample <= 16 {
+            SHORT_SCALE
+        } else {
+            FULL_SCALE
+        };
         let mut out = Vec::with_capacity(data.len() * 2);
         for sample in block.samples()? {
-            out.extend_from_slice(&((sample as f32) * FULL_SCALE).to_le_bytes());
+            out.extend_from_slice(&((sample as f32) * scale).to_le_bytes());
         }
         Ok(Some(AudioPacket {
             data: out,
@@ -1089,38 +1088,51 @@ impl AudioDecode for WavpackDecoder {
 mod tests {
     use super::*;
 
+    /// The `data` chunk of a RIFF/WAVE file as 16-bit samples.
+    fn wav_samples(wav: &[u8]) -> Vec<i16> {
+        assert_eq!(&wav[0..4], b"RIFF");
+        let mut at = 12;
+        while at + 8 <= wav.len() {
+            let len = u32::from_le_bytes(wav[at + 4..at + 8].try_into().unwrap()) as usize;
+            if &wav[at..at + 4] == b"data" {
+                return wav[at + 8..at + 8 + len]
+                    .chunks_exact(2)
+                    .map(|b| i16::from_le_bytes([b[0], b[1]]))
+                    .collect();
+            }
+            at += 8 + len + (len & 1);
+        }
+        panic!("no data chunk");
+    }
+
     #[test]
-    fn test_out_wv_bit_exact() {
-        // Test against reference decoded by ffmpeg (ff_out.wav)
-        let wv_data = std::fs::read("tests/fixtures/wavpack/out.wv").expect("read out.wv");
-        let ref_data = std::fs::read("tests/fixtures/wavpack/ff_out.wav").expect("read ff_out.wav");
+    fn a_stereo_16_bit_file_decodes_to_ffmpegs_samples() {
+        let wv = std::fs::read("tests/fixtures/wavpack/out.wv").expect("read out.wv");
+        let wav = std::fs::read("tests/fixtures/wavpack/ff_out.wav").expect("read ff_out.wav");
+        let reference = wav_samples(&wav);
 
-        // Parse WAV header
-        assert!(&ref_data[0..4] == b"RIFF", "Invalid WAV file");
-        let data_start = 44usize;
-        let wave_end = ref_data.len().saturating_sub(8);
-        let ref_pcm = &ref_data[data_start..wave_end];
+        let mut decoder = WavpackDecoder::new(2).expect("stereo decoder");
+        let mut decoded = Vec::new();
+        let mut at = 0;
+        // The file ends in an APE tag after its last block.
+        while at + 8 <= wv.len() && &wv[at..at + 4] == b"wvpk" {
+            let size = u32::from_le_bytes(wv[at + 4..at + 8].try_into().unwrap()) as usize + 8;
+            let packet = decoder
+                .decode_encoded(&wv[at..at + size], 0, 0)
+                .expect("block decodes")
+                .expect("block yields a packet");
+            decoded.extend(
+                packet
+                    .data
+                    .chunks_exact(4)
+                    .map(|b| f32::from_le_bytes(b.try_into().unwrap())),
+            );
+            at += size;
+        }
 
-        // Decode WavPack - just verify it runs without error for now
-        let mut decoder = WavpackDecoder::new(1).expect("create mono decoder");
-        let packet = decoder
-            .decode_encoded(&wv_data, 0, 0)
-            .expect("decode block")
-            .expect("a block yields a packet");
-
-        // Compare output sizes
-        let wasm_bytes = packet.data.len();
-        assert_eq!(
-            wasm_bytes,
-            ref_pcm.len(),
-            "Output size mismatch: Rust={} bytes, FFmpeg={} bytes",
-            wasm_bytes,
-            ref_pcm.len()
-        );
-
-        println!(
-            "✓ Bit-exact match with FFmpeg reference ({} samples)",
-            wasm_bytes / 2
-        );
+        assert_eq!(decoded.len(), reference.len());
+        for (index, (&got, &want)) in decoded.iter().zip(&reference).enumerate() {
+            assert_eq!(got, f32::from(want) / 32768.0, "sample {index}");
+        }
     }
 }
