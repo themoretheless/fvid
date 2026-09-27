@@ -2,6 +2,7 @@
 //! complete sample table a non-fragmented file writes and the run of `moof`
 //! fragments a stream-derived file writes in its place.
 //! Timestamps are in the track media timeline; edit lists are returned separately.
+use crate::color::hdr::{ColourDescription, HdrMetadata};
 use crate::{container::FileTags, invalid, unsupported, Result};
 use std::io::{Read, Seek, SeekFrom};
 use std::ops::Range;
@@ -187,17 +188,7 @@ pub struct Track {
     pub colour: ColourDescription,
     /// Mastering display and light level from `mdcv` and `ccll`, which a tone
     /// map needs and no bitstream field carries.
-    pub hdr: crate::color::hdr::HdrMetadata,
-}
-
-/// The CICP triple plus range a `colr` atom states, ITU-T H.273 indices.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct ColourDescription {
-    pub primaries: u8,
-    pub transfer: u8,
-    pub matrix: u8,
-    /// Set when the coded range is full (0..max) rather than studio.
-    pub full_range: bool,
+    pub hdr: HdrMetadata,
 }
 
 /// Read a `colr` atom's payload.
@@ -1043,7 +1034,7 @@ fn parse_track(
         pixel_aspect: (1, 1),
         rotation: 0,
         colour: ColourDescription::default(),
-        hdr: crate::color::hdr::HdrMetadata::default(),
+        hdr: HdrMetadata::default(),
     };
     // The byte offset the entry's child atoms start at, and which of them holds
     // the codec configuration; PCM has none, its entry is the whole description.
@@ -1182,24 +1173,24 @@ fn parse_track(
     result.samples = index;
     let spacing =
         optional(&configs, b"pasp")?.and_then(|p| Some((u32be(p, 0).ok()?, u32be(p, 4).ok()?)));
-    if let Some(colr) = optional(&configs, b"colr")? {
-        if let Some(description) = colr_description(colr) {
-            result.colour = description;
-        }
+    if let Some(colr) = optional(&configs, b"colr")?
+        && let Some(description) = colr_description(colr)
+    {
+        result.colour = description;
     }
     // The two HDR blocks hold the payload an HEVC SEI message would carry, box
     // header and all, so the same decoders read them. A track can state either,
     // both, or none, and `merge` keeps whichever half each one knows.
     for kind in [*b"mdcv", *b"ccll"] {
-        if let Some(payload) = optional(&configs, &kind)? {
-            let metadata = if kind == *b"mdcv" {
-                crate::color::hdr::HdrMetadata::from_mdcv(payload)
-            } else {
-                crate::color::hdr::HdrMetadata::from_clli(payload)
-            };
-            if let Some(metadata) = metadata {
-                result.hdr.merge(metadata);
-            }
+        let decode = if kind == *b"mdcv" {
+            HdrMetadata::from_mdcv
+        } else {
+            HdrMetadata::from_clli
+        };
+        if let Some(payload) = optional(&configs, &kind)?
+            && let Some(metadata) = decode(payload)
+        {
+            result.hdr.merge(metadata);
         }
     }
     result.rotation = rotation;

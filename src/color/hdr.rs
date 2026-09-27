@@ -1,21 +1,23 @@
 //! Static HDR signalling: the mastering display a grade was shot on and the
 //! light level the content actually reaches.
 //!
-//! Both arrive as byte-aligned integer payloads rather than bit fields, so a
-//! payload can be decoded without the bitstream reader that surrounds it. The
-//! framing differs per container — an HEVC SEI message, an MP4 `mdcv`/`ccll`
-//! box, a Matroska `MasteringMetadata` element — but the payload itself is the
-//! same bytes in all three, which is why the decoders live here and not in
-//! `crate::codec`.
+//! The mastering display and light level travel as one byte-aligned payload
+//! wherever they are stored as raw bytes: an HEVC SEI message and an MP4
+//! `mdcv`/`ccll` box carry the same bytes, which is why those decoders live
+//! here and not in `crate::codec`. Matroska spells the same numbers as one
+//! element per value, so its reader builds through
+//! [`MasteringDisplay::from_corners`] instead of a payload.
 //!
-//! Units are the ones SMPTE ST 2086 prescribes: chromaticity coordinates in
-//! multiples of 0.00002 and luminance in multiples of 0.0001 cd/m². The three
-//! primaries are carried in **green, blue, red** order, which is the order
-//! ITU-T H.265 indexes them; reading them as red, green, blue swaps two
-//! corners of the mastering volume and silently shifts every saturated colour.
+//! Units of the payload are the ones SMPTE ST 2086 prescribes: chromaticity
+//! coordinates in multiples of 0.00002 and luminance in multiples of 0.0001
+//! cd/m². The three primaries are carried in **green, blue, red** order, which
+//! is the order ITU-T H.265 indexes them; reading them as red, green, blue
+//! swaps two corners of the mastering volume and silently shifts every
+//! saturated colour.
 
-use crate::color::primaries::{Chromaticity, Primaries};
+use crate::color::primaries::{Chromaticity, MatrixCoeff, Primaries, YuvMatrix};
 use crate::color::tonemap::{ContentLight, DisplayTarget};
+use crate::color::transfer::Transfer;
 
 /// One chromaticity unit, in CIE 1931 coordinate space.
 const CHROMA_STEP: f64 = 0.00002;
@@ -33,10 +35,9 @@ pub const SEI_MDCV: u8 = 137;
 /// SEI payload type carrying the content light level, ITU-T H.265 D.2.29.
 pub const SEI_CLLI: u8 = 144;
 
-fn chroma(raw: u16) -> f64 {
+fn chroma(raw: u32) -> f64 {
     f64::from(raw) * CHROMA_STEP
 }
-
 fn luminance(raw: u32) -> f32 {
     raw as f32 * LUMA_STEP
 }
@@ -55,10 +56,41 @@ pub struct MasteringDisplay {
 }
 
 impl MasteringDisplay {
-    /// Decode a mastering display colour volume payload.
+    /// Assemble a volume from coordinates and luminances already in their own
+    /// units.
     ///
-    /// The coordinates are read in the standard's green, blue, red order and
-    /// placed into the corners they name.
+    /// This is the shape Matroska's `MasteringMetadata` and any in-memory
+    /// source use, and the one place a volume can be rejected for describing
+    /// no display: a chromaticity outside the unit square, or a negative
+    /// luminance, is a file that has lost its own meaning.
+    pub fn from_corners(
+        red: (f64, f64),
+        green: (f64, f64),
+        blue: (f64, f64),
+        white: (f64, f64),
+        max_luminance: f32,
+        min_luminance: f32,
+    ) -> Option<Self> {
+        let point = |(x, y): (f64, f64)| {
+            (x.is_finite() && y.is_finite() && (0.0..=1.0).contains(&x) && (0.0..=1.0).contains(&y))
+                .then_some(Chromaticity { x, y })
+        };
+        let display = Some(Self {
+            red: point(red)?,
+            green: point(green)?,
+            blue: point(blue)?,
+            white: point(white)?,
+            max_luminance,
+            min_luminance,
+        })?;
+        (display.max_luminance.is_finite()
+            && display.min_luminance.is_finite()
+            && display.max_luminance >= 0.0
+            && display.min_luminance >= 0.0)
+            .then_some(display)
+    }
+
+    /// Decode a mastering display colour volume payload.
     pub fn from_payload(bytes: &[u8]) -> Option<Self> {
         if bytes.len() < MDCV_PAYLOAD_LEN {
             return None;
@@ -70,18 +102,17 @@ impl MasteringDisplay {
                 be16(&bytes[slot * 4 + 2..slot * 4 + 4]),
             );
         }
-        let point = |(x, y): (u16, u16)| Chromaticity {
-            x: chroma(x),
-            y: chroma(y),
-        };
-        Some(Self {
-            green: point(pairs[0]),
-            blue: point(pairs[1]),
-            red: point(pairs[2]),
-            white: point(pairs[3]),
-            max_luminance: luminance(be32(&bytes[16..20])),
-            min_luminance: luminance(be32(&bytes[20..24])),
-        })
+        let point = |p: (u16, u16)| (chroma(u32::from(p.0)), chroma(u32::from(p.1)));
+        // The corners are carried in the standard's green, blue, red order and
+        // placed into the corners they name.
+        Self::from_corners(
+            point(pairs[2]),
+            point(pairs[0]),
+            point(pairs[1]),
+            point(pairs[3]),
+            luminance(be32(&bytes[16..20])),
+            luminance(be32(&bytes[20..24])),
+        )
     }
 
     /// The primaries of this display, usable directly as a conversion source or
@@ -176,6 +207,61 @@ impl HdrMetadata {
     /// True when nothing was signalled.
     pub fn is_empty(&self) -> bool {
         self.mastering.is_none() && self.light.max_cll == 0.0 && self.light.max_fall == 0.0
+    }
+}
+
+/// The ITU-T H.273 signal a container or parameter set states for a picture:
+/// which primaries, which transfer curve, which luma matrix, and whether the
+/// coded range is full.
+///
+/// This is the same four facts an MP4 `colr` atom, a Matroska `Colour` element
+/// and an HEVC VUI each spell in their own syntax, so they are held once and
+/// resolved through the code tables in `color`.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct ColourDescription {
+    pub primaries: u8,
+    pub transfer: u8,
+    pub matrix: u8,
+    /// Set when the coded range is full (0..max) rather than studio.
+    pub full_range: bool,
+}
+
+impl ColourDescription {
+    /// The named primary set, when the code means one this module can convert.
+    pub fn primary_set(self) -> Option<Primaries> {
+        Primaries::from_code(self.primaries)
+    }
+
+    /// The named transfer curve. Codes this module has no implementation for
+    /// come back as [`Transfer::Unknown`] rather than a guess.
+    pub fn transfer_function(self) -> Transfer {
+        Transfer::from_code(self.transfer)
+    }
+
+    pub fn matrix_coefficients(self) -> Option<MatrixCoeff> {
+        MatrixCoeff::from_code(self.matrix)
+    }
+
+    /// The RGB → YCbCr matrix this description calls for, when its luma weights
+    /// are known.
+    pub fn yuv_matrix(self) -> Option<YuvMatrix> {
+        YuvMatrix::from_matrix(self.matrix_coefficients()?, self.full_range)
+    }
+
+    /// True when the stated curve is one of BT.2100's two, which is what makes
+    /// a picture HDR whatever its container says.
+    pub fn is_hdr(self) -> bool {
+        self.transfer_function().is_hdr()
+    }
+
+    /// Describe a picture already decoded into these primaries and curve,
+    /// keeping whatever range and matrix were stated.
+    pub fn with_signal(self, primaries: Primaries, transfer: Transfer) -> Self {
+        Self {
+            primaries: primaries.code().unwrap_or(self.primaries),
+            transfer: transfer.code(),
+            ..self
+        }
     }
 }
 
@@ -330,6 +416,106 @@ mod tests {
         m.merge(HdrMetadata::from_clli(&[0x0F, 0xA0, 0x01, 0x90]).unwrap());
         assert!(m.mastering.is_some());
         assert_eq!(m.light.max_cll, 4_000.0);
+    }
+
+    /// The same volume spelled the way Matroska spells it: a value per corner,
+    /// already in its own units, in named order rather than the payload's.
+    #[test]
+    fn corners_and_payload_describe_the_same_volume() {
+        let from_payload = MasteringDisplay::from_payload(&hdr10_bytes()).unwrap();
+        let from_corners = MasteringDisplay::from_corners(
+            (0.708, 0.292),
+            (0.17, 0.797),
+            (0.131, 0.046),
+            (0.3127, 0.3290),
+            1_000.0,
+            0.0001,
+        )
+        .unwrap();
+        assert!(from_corners.is_hdr10());
+        // The payload quantises to ST 2086 units, so the two agree to that
+        // step rather than bit for bit.
+        assert_eq!(mdcv_payload(&from_corners), mdcv_payload(&from_payload));
+    }
+
+    /// A volume that names no corner in the unit square is not a display, and
+    /// a tone map built from one would be worse than no tone map at all.
+    #[test]
+    fn a_volume_outside_the_unit_square_is_refused() {
+        let red_at = |x: f64| {
+            MasteringDisplay::from_corners(
+                (x, 0.292),
+                (0.17, 0.797),
+                (0.131, 0.046),
+                (0.3127, 0.329),
+                1_000.0,
+                0.0001,
+            )
+        };
+        assert!(red_at(0.708).is_some());
+        assert!(red_at(1.4).is_none());
+        assert!(red_at(-0.1).is_none());
+        assert!(red_at(f64::NAN).is_none());
+        // A payload of all 0xff bytes puts 1.31 in every coordinate.
+        assert!(MasteringDisplay::from_payload(&[0xff; MDCV_PAYLOAD_LEN]).is_none());
+    }
+
+    #[test]
+    fn colour_description_resolves_h273_codes() {
+        // BT.2020 primaries on PQ with the BT.2020 non-constant-luminance
+        // matrix — the HDR10 signalling, code 9/16/9.
+        let hdr10 = ColourDescription {
+            primaries: 9,
+            transfer: 16,
+            matrix: 9,
+            full_range: false,
+        };
+        assert_eq!(hdr10.primary_set(), Some(Primaries::BT2020));
+        assert_eq!(hdr10.transfer_function(), Transfer::Pq);
+        assert!(hdr10.is_hdr());
+        assert!(hdr10.yuv_matrix().is_some());
+        // An SDR file's 1/1/1 is not HDR, and full range changes the matrix.
+        let sdr = ColourDescription {
+            primaries: 1,
+            transfer: 1,
+            matrix: 1,
+            full_range: false,
+        };
+        assert!(!sdr.is_hdr());
+        assert_eq!(
+            sdr.yuv_matrix(),
+            YuvMatrix::new(0.2126, 0.0722, false).into()
+        );
+        assert_ne!(
+            sdr.yuv_matrix(),
+            ColourDescription {
+                full_range: true,
+                ..sdr
+            }
+            .yuv_matrix()
+        );
+        // Code 2 is "unspecified": the corner set is unknown but the curve of
+        // a known transfer code still resolves.
+        let vague = ColourDescription {
+            primaries: 2,
+            transfer: 13,
+            matrix: 2,
+            full_range: false,
+        };
+        assert_eq!(vague.primary_set(), None);
+        assert_eq!(vague.matrix_coefficients(), None);
+        assert_eq!(vague.transfer_function(), Transfer::Srgb);
+        assert!(!vague.is_hdr());
+        // Stating a decoded picture's own space keeps the range and matrix.
+        let moved = sdr.with_signal(Primaries::BT2020, Transfer::Hlg);
+        assert_eq!(
+            moved,
+            ColourDescription {
+                primaries: 9,
+                transfer: 18,
+                ..sdr
+            }
+        );
     }
 
     #[test]

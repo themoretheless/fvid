@@ -12,8 +12,8 @@ pub mod tonemap;
 pub mod transfer;
 
 pub use hdr::{
-    mdcv_payload, HdrMetadata, MasteringDisplay, CLLI_PAYLOAD_LEN, MDCV_PAYLOAD_LEN, SEI_CLLI,
-    SEI_MDCV,
+    mdcv_payload, ColourDescription, HdrMetadata, MasteringDisplay, CLLI_PAYLOAD_LEN,
+    MDCV_PAYLOAD_LEN, SEI_CLLI, SEI_MDCV,
 };
 pub use log::{Codes, Log};
 pub use lut::{CubePlan, Interpolation, Lut, Lut1d, Lut3d};
