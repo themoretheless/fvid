@@ -281,8 +281,9 @@ impl<R: BufRead + Seek> NativeReader<R> {
     /// states them from its own box — MP4's `mdcv`/`ccll`, Matroska's `Colour`
     /// element — and the coding's SEI message or metadata OBU fills any half the
     /// box left out, which is the whole answer for a file whose HDR was written
-    /// only in-band. That half appears once the packets carrying it have been
-    /// decoded, so asking after the first frame sees more than asking at open.
+    /// only in-band. An HEVC stream's messages are read from its `hvcC` as the
+    /// decoder is built, so that half already stands at open; a stream that
+    /// writes them only inside its packets states them once one has been decoded.
     pub fn hdr(&self) -> HdrMetadata {
         match self {
             Self::Y4m(_) => HdrMetadata::default(),
@@ -1397,25 +1398,20 @@ mod tests {
         assert_eq!(reader.colour(), stated);
     }
 
-    /// The same file's light, which travels nowhere but in-band: SEI 137 and 144
-    /// in the first access unit. The reader is empty at open because the coding
-    /// has said nothing yet, and states the mastering volume and the content
-    /// light once a packet has been walked — the point a tone mapper needs them.
-    /// Only the software path reads the bitstream, so a VideoToolbox build,
-    /// where samples go to the hardware session untouched, is the one case this
-    /// cannot assert.
-    #[cfg(not(all(target_os = "macos", feature = "videotoolbox")))]
+    /// The same file's light, which the container writes in no box at all: SEI
+    /// 137 and 144, carried by the configuration record the decoder is built
+    /// from. So the reader states them the moment the file is open — the point a
+    /// tone map needs them, before a single packet has been decoded — and a
+    /// container that named none has nothing to contradict them with.
     #[test]
     fn a_real_hdr10_files_light_reaches_the_caller_that_tone_maps_it() {
         let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
-        let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
-        assert!(reader.hdr().is_empty());
-        assert!(reader.read_frame_raw().unwrap().is_some());
+        let reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
         let hdr = reader.hdr();
         assert!(hdr.mastering.unwrap().is_hdr10());
-        assert_eq!((hdr.light.max_cll, hdr.light.max_fall), (1000.0, 400.0));
+        assert_eq!((hdr.light.max_cll, hdr.light.max_fall), (1_000.0, 400.0));
         // The stated peak, not a fallback, is what a tone map compresses from.
-        assert_eq!(hdr.content_light(400.0).max_cll, 1000.0);
+        assert_eq!(hdr.content_light(400.0).max_cll, 1_000.0);
     }
 
     /// An AV1 track whose WebM header writes no `Colour` element: every code the

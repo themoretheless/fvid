@@ -252,8 +252,10 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
     /// mastering display and content light level SEI messages, or the AV1
     /// metadata OBUs of the same volume. An encoder that writes them in-band
     /// often writes them nowhere else, so a container with no `mdcv`/`ccll` box
-    /// still has a tone-mappable answer. Like the coding's signal, it appears
-    /// once the packets carrying it have been decoded.
+    /// still has a tone-mappable answer. HEVC's messages are read from the
+    /// `hvcC`'s own NAL unit array as the decoder is built, so that half stands
+    /// at open; a stream that writes them only inside its packets states them
+    /// once one has been decoded.
     pub fn bitstream_hdr(&self) -> HdrMetadata {
         match &self.decoder {
             Decoder::Hevc(d) => d.hdr(),
@@ -769,21 +771,25 @@ mod tests {
     }
 
     /// The same clip's light, which the file writes in no box at all: SEI 137
-    /// states the BT.2020 mastering volume and SEI 144 the content light levels
-    /// of the first access unit, and the decoder keeps both as it walks the
-    /// packet. Only the software walk reads the bitstream, so a VideoToolbox
-    /// build — where the samples go to the hardware session untouched — is the
-    /// one case this cannot assert.
-    #[cfg(not(all(target_os = "macos", feature = "videotoolbox")))]
+    /// states the BT.2020 mastering volume and SEI 144 the content light levels.
+    /// x265 wrote both messages into the `hvcC`'s NAL unit array as well as into
+    /// the first access unit, so a reader states them the moment the file is
+    /// open — which is when a caller that grades the first picture asks — and
+    /// this holds whether samples go to the software walk or a hardware session.
     #[test]
     fn an_hevc_sei_states_its_own_light() {
         let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
         let mut source =
             Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
-        assert!(source.bitstream_hdr().is_empty());
+        let opened = source.bitstream_hdr();
+        assert!(opened.mastering.unwrap().is_hdr10());
+        assert_eq!(
+            (opened.light.max_cll, opened.light.max_fall),
+            (1_000.0, 400.0)
+        );
+        // Decoding the packets that repeat the messages states the same light,
+        // by whichever route the samples went.
         assert!(source.read_frame().unwrap().is_some());
-        let hdr = source.bitstream_hdr();
-        assert!(hdr.mastering.unwrap().is_hdr10());
-        assert_eq!((hdr.light.max_cll, hdr.light.max_fall), (1000.0, 400.0));
+        assert_eq!(source.bitstream_hdr(), opened);
     }
 }

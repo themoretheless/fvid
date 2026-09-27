@@ -7590,4 +7590,44 @@ LUT_3D_SIZE 2
         assert_eq!(grade.plan().from, grade.plan().to);
         assert!(grade.is_identity());
     }
+
+    /// The chain end to end on a real file: this clip's light exists only as
+    /// in-band SEI messages, which the decoder reads out of the configuration
+    /// record as it is built, so a session that was told nothing still grades the
+    /// file against the 1 000 cd/m² peak the encoder stated rather than a blind
+    /// guess. Which curve reads that peak is measured here too: the default clips
+    /// and so ignores it, while a curve that compresses highlights moves the same
+    /// code once the peak is known.
+    #[test]
+    fn a_files_in_band_light_reaches_the_grade_the_session_bakes() {
+        use crate::playback_native::NativeReader;
+        let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let reader = NativeReader::without_memory_limit(std::io::Cursor::new(data)).unwrap();
+        let (signal, hdr) = (reader.colour(), reader.hdr());
+        assert!(signal.is_hdr());
+        let grade = Grading::default()
+            .grade_for(signal, &hdr)
+            .expect("BT.2100 material is graded for the panel");
+        assert_eq!(grade.plan().content.max_cll, 1_000.0);
+        // Asked for by name, the same peak steers the curve that reads it.
+        let reinhard = Grading {
+            tone_map: Some(ToneMap::Reinhard),
+            ..Default::default()
+        }
+        .grade_for(signal, &hdr)
+        .unwrap();
+        assert_eq!(reinhard.plan().content.max_cll, 1_000.0);
+        let highlight = [1.0, 0.85, 0.7];
+        let blind = Grading {
+            tone_map: Some(ToneMap::Reinhard),
+            ..Default::default()
+        }
+        .grade_for(signal, &HdrMetadata::default())
+        .unwrap();
+        assert_ne!(reinhard.rgb(highlight), blind.rgb(highlight));
+        let clip_blind = Grading::default()
+            .grade_for(signal, &HdrMetadata::default())
+            .unwrap();
+        assert_eq!(grade.rgb(highlight), clip_blind.rgb(highlight));
+    }
 }
