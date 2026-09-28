@@ -1,13 +1,14 @@
 //! Native WebM/Matroska VP9 and AV1 playback with bounded decode-ahead and source timestamps.
 use crate::{
-    Result,
     codec::{
         vp9,
         vp9_decoder::{Decoded, Decoder},
     },
+    color::hdr::{ColourDescription, HdrMetadata},
     container::webm::{Limits, WebmReader},
     invalid,
     playback_native::{AvcColour, Planar8},
+    Result,
 };
 use std::{
     io::{Read, Seek},
@@ -47,6 +48,11 @@ pub struct WebmVideoReader<R> {
     /// The stated crop borders as pixel insets into the coded frame, `[0; 4]`
     /// when the track states none it can keep.
     insets: [u32; 4],
+    /// The signal the track's own `Colour` element states, zeroes where it wrote
+    /// none.
+    colour: ColourDescription,
+    /// The light the track's `MasteringMetadata` and `MaxCLL`/`MaxFALL` name.
+    hdr: HdrMetadata,
     /// Which of the two codecs the track's CodecID picked, named for a reader
     /// rather than for a match arm.
     codec: &'static str,
@@ -78,8 +84,17 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 *side = u32::try_from(value).unwrap_or(0);
                 keeps &= u32::try_from(value).is_ok();
             }
-            if keeps { sides } else { [0; 4] }
+            if keeps {
+                sides
+            } else {
+                [0; 4]
+            }
         };
+        // What the muxer wrote about the signal, kept beside the track it
+        // describes. An AV1 stream states the same triple again in its own
+        // sequence header, and a track with no `Colour` element is graded by
+        // that instead, so the two are read apart.
+        let (colour, hdr) = (track.colour, track.hdr);
         let track = track.number;
         let rgb_budget = budget / 4;
         Ok(Self {
@@ -98,6 +113,8 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             dimensions: [0; 2],
             pixel_aspect,
             insets,
+            colour,
+            hdr,
             codec: if av1 { "AV1" } else { "VP9" },
             start: 0,
             end: 0,
@@ -121,6 +138,45 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     }
     pub fn codec(&self) -> &'static str {
         self.codec
+    }
+    /// The signal the track's `Colour` element states, zeroes where the muxer
+    /// wrote none or wrote only some of the three codes.
+    pub fn colour(&self) -> ColourDescription {
+        self.colour
+    }
+    /// The mastering display and light level the track names, empty where it
+    /// names none. A tone map needs these and no AV1 or VP9 track header beyond
+    /// the `Colour` element carries them.
+    pub fn hdr(&self) -> HdrMetadata {
+        self.hdr
+    }
+    /// The signal the coding states for itself: an AV1 sequence header's colour
+    /// description, which is readable once a header has been decoded. VP9
+    /// carries a colour matrix and a range flag in every frame header rather
+    /// than an H.273 triple, so it is left to the container.
+    pub fn bitstream_colour(&self) -> ColourDescription {
+        match &self.decoder {
+            VideoDecoder::Av1(d) => d
+                .color()
+                .map(crate::codec::av1_sequence::Color::signal)
+                .unwrap_or_default(),
+            VideoDecoder::Vp9(_) => ColourDescription::default(),
+        }
+    }
+    /// The light the coding names for itself: an AV1 stream's mastering display
+    /// and content light level metadata OBUs, which are there in a file whose
+    /// Matroska `Colour` element left them out. Like the coding's signal, they
+    /// appear once the packets carrying them have been decoded.
+    pub fn bitstream_hdr(&self) -> HdrMetadata {
+        match &self.decoder {
+            VideoDecoder::Av1(d) => d.hdr(),
+            VideoDecoder::Vp9(_) => HdrMetadata::default(),
+        }
+    }
+    /// The cap this reader sizes its RGB picture by, which is the cap a caller
+    /// converting the planes it hands over has to size by too.
+    pub fn rgb_budget(&self) -> usize {
+        self.rgb_budget
     }
     pub fn rgb(&self) -> &[u8] {
         &self.rgb

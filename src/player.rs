@@ -5,6 +5,9 @@
 //! button in the middle while paused, and a thin progress line with round
 //! controls along the bottom. Controls fade out while the video plays and
 //! the pointer rests; any movement brings them back.
+use crate::color::{
+    ColourDescription, DisplayTarget, Grade, HdrMetadata, Log, Lut, Settings, ToneMap,
+};
 use crate::container::FileTags;
 use crate::subtitles::{self, Cue};
 use crate::{
@@ -37,6 +40,64 @@ type Dialog = Pin<Box<dyn Future<Output = Option<rfd::FileHandle>>>>;
 struct PlayBounds {
     start: Option<Duration>,
     stop: Option<Duration>,
+}
+
+/// The panel every picture of the session is graded for: a desktop screen's
+/// diffuse white, which is what an SDR player is asked to fill. Naming one of
+/// the colour options writes the picture for this much light; a screen that
+/// reaches higher would want a bigger number and an HDR destination.
+const PANEL_NITS: f32 = 100.0;
+
+/// What the command line asked to be done to a picture's colour: read before
+/// any item is opened, and applied to each one from the signal that item
+/// states for itself. As with the crop and the aspect, the request holds for
+/// the whole session.
+#[derive(Clone, Debug, Default)]
+struct Grading {
+    /// Camera log curve the coded values carry.
+    log: Option<Log>,
+    /// Highlight compression to run in place of the one the plan picks for the
+    /// item.
+    tone_map: Option<ToneMap>,
+    /// Grading LUT read out of the named file, applied after the conversion the
+    /// other two ask for.
+    lut: Option<Lut>,
+}
+
+impl Grading {
+    /// Whether the command line named no colour change at all.
+    fn silent(&self) -> bool {
+        self.log.is_none() && self.tone_map.is_none() && self.lut.is_none()
+    }
+
+    /// Bake what this session asks for against the signal `signal` and the
+    /// light `hdr` describe, or `None` when the bytes the reader hands over are
+    /// the picture to show.
+    ///
+    /// A log curve or a BT.2100 transfer has to be turned into something an SDR
+    /// panel can show, so the destination is the video signal a screen is fed:
+    /// BT.709 codes over BT.709 primaries. A request that names neither is a
+    /// look over the item's own codes, so the destination becomes the statement
+    /// the file itself makes and the LUT is the one thing that moves; a curve
+    /// this module has no name for passes a code value straight through, which
+    /// is the same picture. Naming nothing leaves an SDR item ungraded, while
+    /// BT.2100 material still gets the compression [`Grade::new`] picks, since
+    /// unmapped it is a flat grey one.
+    fn grade_for(&self, signal: ColourDescription, hdr: &HdrMetadata) -> Option<Grade> {
+        if self.silent() && !signal.is_hdr() {
+            return None;
+        }
+        let mut settings = Settings::video(DisplayTarget::sdr(PANEL_NITS));
+        settings.log = self.log;
+        settings.tone_map = self.tone_map;
+        if !signal.is_hdr() && self.log.is_none() {
+            settings.to = signal.transfer_function();
+            if let Some(primaries) = signal.primary_set() {
+                settings.dest = primaries;
+            }
+        }
+        Some(Grade::new(signal, hdr, settings, self.lut.clone()))
+    }
 }
 
 /// What `fvid play` was asked for: the inputs to queue, and how the first of
@@ -78,6 +139,12 @@ struct PlayArgs {
     /// own Enable on; naming none leaves the pixels alone until a key says
     /// otherwise.
     adjust: Adjust,
+    /// The colour the session starts graded with: the camera log to read the
+    /// codes as, the highlight compression to run, and the LUT to apply after
+    /// them. Naming any of the three asks for the grade; naming none leaves the
+    /// picture as the reader hands it over, except on BT.2100 material, which an
+    /// SDR panel cannot show unmapped.
+    grading: Grading,
 }
 
 /// Read the options `fvid play` answers, in either `--flag VALUE` or
@@ -102,6 +169,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
     let mut crop = NO_CROP;
     let mut aspect = Aspect::Source;
     let mut adjust = Adjust::default();
+    let mut grading = Grading::default();
     let mut index = 0;
     while index < args.len() {
         let arg = args[index].as_str();
@@ -208,6 +276,18 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
                 adjust.hue = parse_setting(&value, "hue", -180.0..=180.0)?;
                 adjust.on = true;
             }
+            "--log" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                grading.log = Some(parse_log(&value)?);
+            }
+            "--tonemap" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                grading.tone_map = Some(parse_tone_map(&value)?);
+            }
+            "--lut" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                grading.lut = Some(read_lut(&value)?);
+            }
             _ if arg.starts_with('-') => {
                 return Err(crate::invalid(&format!("unknown play option {arg}")));
             }
@@ -239,6 +319,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         crop,
         aspect,
         adjust,
+        grading,
     })
 }
 
@@ -395,6 +476,52 @@ fn parse_ratio(text: &str, flag: &str) -> crate::Result<(u32, u32)> {
     Ok(shape)
 }
 
+/// `--log` as one of the camera curves fvid knows how to un-wrap. The names are
+/// the vendors' own spellings, lowercased, so what a manual calls the profile is
+/// what the option takes. A word that names none is a mistake at the door, and
+/// the message says which ones do.
+fn parse_log(text: &str) -> crate::Result<Log> {
+    let label = text.trim().to_ascii_lowercase();
+    let known = || {
+        let names = Log::ALL
+            .iter()
+            .map(|log| log.label())
+            .collect::<Vec<_>>()
+            .join(", ");
+        crate::invalid(&format!("unknown --log {text:?}; fvid unwraps {names}"))
+    };
+    Log::from_label(&label).ok_or_else(known)
+}
+
+/// `--tonemap` as one of the highlight curves fvid can run, spelled the way
+/// FFmpeg's `tonemap` filter spells them. Naming none of them is a mistake at
+/// the door, and the message says which are on offer.
+fn parse_tone_map(text: &str) -> crate::Result<ToneMap> {
+    let label = text.trim().to_ascii_lowercase();
+    let known = || {
+        let names = ToneMap::ALL
+            .iter()
+            .map(|mode| mode.label())
+            .collect::<Vec<_>>()
+            .join(", ");
+        crate::invalid(&format!(
+            "unknown --tonemap {text:?}; fvid compresses with {names}"
+        ))
+    };
+    ToneMap::from_label(&label).ok_or_else(known)
+}
+
+/// `--lut`: the grading look the session starts with, read out of the named file
+/// before anything is opened. A look the player cannot parse stops the command
+/// at startup rather than showing an ungraded picture, so the file's own name is
+/// in every message about it. `.cube` and `.3dl` are told apart by their content,
+/// not their suffix.
+fn read_lut(path: &str) -> crate::Result<Lut> {
+    let text = std::fs::read_to_string(path)
+        .map_err(|error| crate::invalid(&format!("cannot read --lut {path:?}: {error}")))?;
+    Lut::from_text(&text).map_err(|error| crate::invalid(&format!("bad --lut {path:?}: {error}")))
+}
+
 pub fn run(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
     let parsed = parse_play_args(&args)?;
     let mut app = Player {
@@ -419,6 +546,7 @@ pub fn run(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
         crop: parsed.crop,
         aspect: parsed.aspect,
         adjust: parsed.adjust,
+        grading: parsed.grading,
         ..Default::default()
     };
     if app.shuffle {
@@ -988,6 +1116,12 @@ struct Player {
     /// The five sliders and their switch, kept across items the way VLC keeps
     /// the filter's settings running until its dialog turns them off.
     adjust: Adjust,
+    /// The colour the command line asked for: the camera log to read the coded
+    /// values as, the highlight compression to run, and the LUT to apply after
+    /// them. Held for the session like the sliders, but baked again for every
+    /// item from the signal that item states, so one request means a different
+    /// conversion on a BT.709 file and a BT.2100 one.
+    grading: Grading,
     /// The last RGB frame as the reader handed it over, with the bundle its
     /// texture was built from, so a slider moved while that same frame stands
     /// on screen can rebuild it. The GPU path keeps no copy: its bundle rides
@@ -1150,6 +1284,7 @@ impl Default for Player {
             info: false,
             effects: false,
             adjust: Adjust::default(),
+            grading: Grading::default(),
             rgb_frame: None,
             dimensions: [0; 2],
             pixel_aspect: (1, 1),
@@ -1287,7 +1422,12 @@ impl Player {
         // A–B marks belong to the item that was on screen before this one.
         self.loop_a = None;
         self.loop_b = None;
-        self.playback = Some(Playback::start(reader));
+        // What the colour request means depends on the signal this item states
+        // for itself, so the grade is baked from it here, before the reader
+        // moves into the thread that will carry the answer.
+        let (signal, hdr) = (reader.colour(), reader.hdr());
+        let grade = self.grading.grade_for(signal, &hdr);
+        self.playback = Some(Playback::start(reader, grade));
         // The picture of the item before this one is no longer on screen.
         self.presented = None;
         // Try to start audio playback if the file has an audio track.
@@ -4555,6 +4695,7 @@ impl eframe::App for Player {
 mod tests {
     use super::{
         ADJUST_IDENTITY, ASPECTS, Adjust, Aspect, CROPS, ChapterMark, Control, FileTags, Frame,
+        Grading, PANEL_NITS,
         HIDE_AFTER, LoopMark, NO_CROP, PathBuf, Pixels, Planar8, PlayArgs, PlayBounds, Player,
         Pos2, RATES, Rect, Repeat, SubtitleSource, VOLUME_MAX, Vec2, adjust_luma, adjust_rgb,
         adjust_scalars, advance, aspect_label, aspect_osd, aspect_step, bitrate_text, buffer_text,
@@ -4567,6 +4708,8 @@ mod tests {
         spool_text,
         subtitles, track_step, uv_window, video_rect, volume_osd, volume_step, zoom_osd, zoom_step,
     };
+    use super::{Event, NativeReader, Playback};
+    use crate::color::{ColourDescription, HdrMetadata, Log, Lut, Primaries, ToneMap, Transfer};
     use std::sync::Arc;
     use std::time::{Duration, Instant};
 
@@ -6768,6 +6911,180 @@ mod tests {
         std::fs::remove_dir_all(&directory).unwrap();
     }
 
+    /// The snapshot key is the one place this tool writes colour out as a file,
+    /// so the picture it saves has to be the graded one. A two-node cube that
+    /// turns green end for end is read off text, handed to the thread that shows
+    /// a synthetic stream, and the frame that thread shows is saved: the saved
+    /// file's own scanlines come out byte for byte as that frame, and that
+    /// frame's green is what the cube's text says of the ungraded picture. The
+    /// file's own header is asked as well, because a stored, unfiltered PNG
+    /// carries one flat run of bytes and a picture encoded at the wrong size
+    /// still reads back as the same pixels. Three mutations die here: rows
+    /// labelled with a filter that was never applied, byte tables built without
+    /// the cube, and dimensions swapped on the way into the encoder.
+    #[test]
+    fn a_saved_picture_is_the_one_the_grade_made() {
+        const INVERT_GREEN: &str = "LUT_1D_SIZE 2
+0.0 1.0 0.0
+1.0 0.0 1.0
+";
+        fn stream() -> Vec<u8> {
+            let mut bytes = b"YUV4MPEG2 W4 H2 F60:1 Ip C420jpeg\n".to_vec();
+            for frame in 0..2u8 {
+                bytes.extend_from_slice(b"FRAME\n");
+                for y in 0..2u8 {
+                    for x in 0..4u8 {
+                        bytes.push(16 + x * 40 + y * 7 + frame * 3);
+                    }
+                }
+                bytes.push(64 + frame);
+                bytes.push(190 - frame);
+            }
+            bytes
+        }
+        fn reader() -> NativeReader<std::io::Cursor<Vec<u8>>> {
+            let mut reader = NativeReader::without_memory_limit(std::io::Cursor::new(stream()))
+                .expect("a written stream reads");
+            assert!(reader.read_frame().expect("a first frame"));
+            reader
+        }
+        fn shown(player: &mut Playback) -> Frame {
+            let deadline = Instant::now() + Duration::from_secs(5);
+            loop {
+                assert!(Instant::now() < deadline, "playback stalled");
+                match player.poll() {
+                    Some(Event::Frame(frame)) => return frame,
+                    Some(Event::Error(error)) => panic!("{error}"),
+                    Some(Event::Ended(_)) => panic!("the stream ended before its first frame"),
+                    None => std::thread::sleep(Duration::from_millis(1)),
+                }
+            }
+        }
+        fn rgb(pixels: &Pixels, budget: usize) -> Vec<u8> {
+            match pixels {
+                Pixels::Rgb(rgb) => rgb.clone(),
+                Pixels::Planar(planes) => {
+                    let mut rgb = Vec::new();
+                    crate::playback_native::planar8_to_rgb(planes, &mut rgb, budget)
+                        .expect("converted");
+                    rgb
+                }
+            }
+        }
+        /// The scanlines a stored-block PNG carries, filter bytes removed.
+        fn scanlines(file: &[u8]) -> Vec<u8> {
+            let (width, height) = (
+                usize::try_from(u32::from_be_bytes(file[16..20].try_into().unwrap())).unwrap(),
+                usize::try_from(u32::from_be_bytes(file[20..24].try_into().unwrap())).unwrap(),
+            );
+            let row = width * 3 + 1;
+            let mut at = 8;
+            let idat = loop {
+                let len = u32::from_be_bytes(file[at..at + 4].try_into().unwrap()) as usize;
+                if &file[at + 4..at + 8] == b"IDAT" {
+                    break &file[at + 8..at + 8 + len];
+                }
+                at += 12 + len;
+            };
+            assert_eq!(&idat[..2], &[0x78, 0x01], "stored deflate, no dictionary");
+            // The stream ends with its four-byte Adler checksum.
+            let rows = &idat[7..idat.len() - 4];
+            assert_eq!(rows.len(), row * height, "more than one stored block");
+            let mut rgb = Vec::with_capacity(width * height * 3);
+            for (line, number) in rows.chunks_exact(row).zip(0..height) {
+                assert_eq!(line[0], 0, "row {number} was filtered");
+                rgb.extend_from_slice(&line[1..]);
+            }
+            rgb
+        }
+
+        let signal = ColourDescription {
+            primaries: 1,
+            transfer: 1,
+            matrix: 1,
+            full_range: false,
+        };
+        let settings = crate::color::Settings::video(crate::color::DisplayTarget::sdr(240.0));
+        assert!(
+            crate::color::Grade::new(signal, &HdrMetadata::default(), settings, None).is_identity(),
+            "these settings already move this stream on their own, so a cube would not be the only change"
+        );
+        let grade = crate::color::Grade::new(
+            signal,
+            &HdrMetadata::default(),
+            settings,
+            Some(Lut::from_cube(INVERT_GREEN).expect("a written cube is a cube")),
+        );
+        let budget = reader().rgb_budget();
+        let mut plain = Playback::start(reader(), None);
+        let mut graded = Playback::start(reader(), Some(grade));
+        let untouched = rgb(&shown(&mut plain).pixels, budget);
+        let frame = shown(&mut graded);
+        let dimensions = frame.dimensions;
+        let painted = rgb(&frame.pixels, budget);
+        assert_ne!(untouched, painted, "the cube reached no pixels");
+        assert_eq!(dimensions, [4, 2]);
+        for (pixel, out) in untouched
+            .as_chunks::<3>()
+            .0
+            .iter()
+            .zip(painted.as_chunks::<3>().0)
+        {
+            for channel in 0..3 {
+                let want = if channel == 1 {
+                    255 - i16::from(pixel[1])
+                } else {
+                    i16::from(pixel[channel])
+                };
+                let step = (i16::from(out[channel]) - want).abs();
+                assert!(
+                    step <= 1,
+                    "channel {channel}: {} shown as {}, the cube's own text says {want}",
+                    pixel[channel],
+                    out[channel]
+                );
+            }
+        }
+
+        let directory = scratch("fvid-player-snapshot-graded", &[]);
+        let video = directory.join("clip.mp4");
+        std::fs::write(&video, b"an mp4 as far as the snapshot cares").unwrap();
+        let mut player = Player {
+            opened: Some(video),
+            presented: Some(frame),
+            ..Default::default()
+        };
+        player.apply(Control::Snapshot);
+        let saved = player.osd.as_ref().unwrap().0.clone();
+        let name = saved
+            .strip_prefix("Saved ")
+            .unwrap_or_else(|| panic!("the snapshot key said {saved}"));
+        let file = std::fs::read(directory.join(name)).expect("written");
+        // A stored, unfiltered PNG carries its pixels as one flat run, so a file
+        // written for the wrong size still hands back the same bytes: the header
+        // has to be asked what picture it says, not only the scanlines.
+        let saved = [
+            usize::try_from(u32::from_be_bytes(file[16..20].try_into().unwrap())).unwrap(),
+            usize::try_from(u32::from_be_bytes(file[20..24].try_into().unwrap())).unwrap(),
+        ];
+        assert_eq!(
+            saved, dimensions,
+            "the file says a different size from the picture shown"
+        );
+        assert_eq!(
+            scanlines(&file),
+            painted,
+            "the file holds a different picture from the one shown"
+        );
+        assert_ne!(
+            scanlines(&file),
+            untouched,
+            "the file holds the ungraded picture"
+        );
+        drop(player);
+        std::fs::remove_dir_all(&directory).unwrap();
+    }
+
     #[test]
     fn a_snapshot_without_a_picture_says_so() {
         let mut player = Player::default();
@@ -7700,5 +8017,272 @@ mod tests {
         );
         drop(player);
         std::fs::remove_dir_all(&directory).unwrap();
+    }
+
+    /// A two-node cube that hands every code back: the look a test asks for when
+    /// it wants a LUT file without wanting a colour change.
+    const IDENTITY_CUBE: &str = "\
+LUT_3D_SIZE 2
+0 0 0
+1 0 0
+0 1 0
+1 1 0
+0 0 1
+1 0 1
+0 1 1
+1 1 1
+";
+
+    /// The three colour options name what the session grades with. A curve and a
+    /// compression are matched to fvid's own spellings whatever the case, while a
+    /// LUT has to be a file that actually parses: a word on the list, a readable
+    /// grid.
+    #[test]
+    fn the_command_line_names_the_colour_grade_to_start_with() {
+        let parsed = play_args(&["--log", "SLog3", "--tonemap=Hable", "c"]).unwrap();
+        assert_eq!(parsed.grading.log, Some(Log::SLog3));
+        assert_eq!(parsed.grading.tone_map, Some(ToneMap::Hable));
+        assert_eq!(parsed.grading.lut, None);
+        let parsed = play_args(&["--log", " logc4 ", "c"]).unwrap();
+        assert_eq!(parsed.grading.log, Some(Log::LogC4));
+        assert!(play_args(&["c"]).unwrap().grading.silent());
+        for words in [
+            vec!["--log", "slog4"],
+            vec!["--log", "s-log3"],
+            vec!["--log", ""],
+            vec!["--log"],
+            vec!["--tonemap", "mobius2"],
+            vec!["--tonemap", "bt244"],
+            vec!["--tonemap"],
+            vec!["--lut", "no-such-file.cube"],
+        ] {
+            assert!(
+                play_args(&[words.as_slice(), &["c"]].concat()).is_err(),
+                "{words:?} is not a grade"
+            );
+        }
+        // A refusal names what is on offer, so the caller sees the spellings
+        // that would have worked.
+        let error = play_args(&["--log", "slog4", "c"])
+            .err()
+            .unwrap()
+            .to_string();
+        assert!(
+            error.contains("slog3") && error.contains("logc4"),
+            "{error}"
+        );
+        let error = play_args(&["--tonemap", "bt244", "c"])
+            .err()
+            .unwrap()
+            .to_string();
+        assert!(
+            error.contains("reinhard") && error.contains("mobius"),
+            "{error}"
+        );
+    }
+
+    /// `--lut` reads the look at startup, from a file named either way round:
+    /// `.cube` and `.3dl` are told apart by their contents, not their suffix, and
+    /// a file that holds neither stops the command before a window opens.
+    #[test]
+    fn the_command_line_reads_the_lut_before_anything_is_opened() {
+        let directory = std::env::temp_dir().join("fvid-player-lut-option");
+        let _ = std::fs::remove_dir_all(&directory);
+        std::fs::create_dir_all(&directory).unwrap();
+        let cube = directory.join("identity.cube");
+        std::fs::write(&cube, IDENTITY_CUBE).unwrap();
+        let parsed = play_args(&["--lut", cube.to_str().unwrap(), "c"]).unwrap();
+        assert_eq!(
+            parsed.grading.lut,
+            Some(Lut::from_cube(IDENTITY_CUBE).unwrap())
+        );
+        // The same bytes under the wrong name are still a cube.
+        let mislabelled = directory.join("identity.3dl");
+        std::fs::write(&mislabelled, IDENTITY_CUBE).unwrap();
+        assert!(
+            play_args(&["--lut", mislabelled.to_str().unwrap(), "c"])
+                .unwrap()
+                .grading
+                .lut
+                .is_some()
+        );
+        let broken = directory.join("broken.cube");
+        std::fs::write(&broken, "LUT_3D_SIZE 2\n0 0 0\n").unwrap();
+        let error = play_args(&["--lut", broken.to_str().unwrap(), "c"])
+            .err()
+            .unwrap();
+        // The file's own name is in the message, since that is what the caller
+        // has to go and fix.
+        assert!(error.to_string().contains("broken.cube"), "{error}");
+        std::fs::remove_dir_all(&directory).unwrap();
+    }
+
+    /// One request, several files: each item is graded from the signal it states
+    /// for itself. BT.2100 material is compressed for the screen even when the
+    /// session asked for nothing, a log file is read the way the camera recorded
+    /// it, and a look over a stated curve is the look alone.
+    #[test]
+    fn each_item_is_graded_from_the_signal_it_states() {
+        let empty = HdrMetadata::default();
+        let video = ColourDescription {
+            primaries: 1,
+            transfer: 1,
+            matrix: 1,
+            full_range: false,
+        };
+        // Nothing asked and nothing to undo: the bytes go to the screen as read.
+        assert!(Grading::default().grade_for(video, &empty).is_none());
+        assert!(
+            Grading::default()
+                .grade_for(ColourDescription::default(), &empty)
+                .is_none()
+        );
+        // HDR10 states BT.2100 codes over BT.2020 primaries, which no desktop
+        // panel shows unmapped, so the grade is on without being asked for.
+        let hdr10 = ColourDescription {
+            primaries: 9,
+            transfer: 16,
+            matrix: 9,
+            full_range: false,
+        };
+        let grade = Grading::default().grade_for(hdr10, &empty).unwrap();
+        let plan = grade.plan();
+        assert_eq!((plan.from, plan.to), (Transfer::Pq, Transfer::Bt709));
+        assert_eq!(
+            (plan.source, plan.dest),
+            (Primaries::BT2020, Primaries::BT709)
+        );
+        assert_eq!(plan.tone_map, Some(ToneMap::Clip));
+        // `--tonemap` replaces the curve the plan would have picked.
+        let hable = Grading {
+            tone_map: Some(ToneMap::Hable),
+            ..Default::default()
+        }
+        .grade_for(hdr10, &empty)
+        .unwrap();
+        assert_eq!(hable.plan().tone_map, Some(ToneMap::Hable));
+        // `--log` reads the codes as the camera wrote them and hands the panel
+        // finished video instead; the file's own primaries still win over the
+        // profile's working gamut, because they describe these bytes.
+        let logged = Grading {
+            log: Some(Log::VLog),
+            ..Default::default()
+        }
+        .grade_for(video, &empty)
+        .unwrap();
+        let plan = logged.plan();
+        assert_eq!(plan.log, Some(Log::VLog));
+        assert_eq!((plan.from, plan.to), (Transfer::Linear, Transfer::Bt709));
+        assert_eq!(plan.source, Primaries::BT709);
+        assert!(plan.tone_map.is_none());
+        // A look is asked for on its own, so the plan writes the item's own
+        // signal back and the file's own curve becomes the destination. Nothing
+        // in the grid moves: an identity look on any file is no change at all.
+        let look = Grading {
+            lut: Some(Lut::from_cube(IDENTITY_CUBE).unwrap()),
+            ..Default::default()
+        };
+        let grade = look.grade_for(video, &empty).unwrap();
+        let plan = grade.plan();
+        assert_eq!((plan.from, plan.to), (Transfer::Bt709, Transfer::Bt709));
+        assert_eq!(plan.source, plan.dest);
+        assert!(plan.tone_map.is_none());
+        assert!(grade.is_identity());
+        // A file that names no curve is read as the codes come out of the
+        // converter, so a look over it is still the look alone.
+        let grade = look
+            .grade_for(ColourDescription::default(), &empty)
+            .unwrap();
+        assert_eq!(grade.plan().from, grade.plan().to);
+        assert!(grade.is_identity());
+    }
+
+    /// The chain end to end on a real file: this clip's light exists only as
+    /// in-band SEI messages, which the decoder reads out of the configuration
+    /// record as it is built, so a session that was told nothing still grades the
+    /// file against the 1 000 cd/m² peak the encoder stated rather than a blind
+    /// guess. That peak is also what the default curve is chosen from: the panel
+    /// reaches 100 cd/m² and the master was authored at ten times that, so the
+    /// session rolls its highlights instead of folding them to white, which a
+    /// grade that never read the peak cannot show.
+    #[test]
+    fn a_files_in_band_light_reaches_the_grade_the_session_bakes() {
+        use crate::playback_native::NativeReader;
+        let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let reader = NativeReader::without_memory_limit(std::io::Cursor::new(data)).unwrap();
+        let (signal, hdr) = (reader.colour(), reader.hdr());
+        assert!(signal.is_hdr());
+        let grade = Grading::default()
+            .grade_for(signal, &hdr)
+            .expect("BT.2100 material is graded for the panel");
+        assert_eq!(grade.plan().content.max_cll, 1_000.0);
+        // Asked for by name, the same peak steers the curve that reads it.
+        let reinhard = Grading {
+            tone_map: Some(ToneMap::Reinhard),
+            ..Default::default()
+        }
+        .grade_for(signal, &hdr)
+        .unwrap();
+        assert_eq!(reinhard.plan().content.max_cll, 1_000.0);
+        let highlight = [1.0, 0.85, 0.7];
+        let blind = Grading {
+            tone_map: Some(ToneMap::Reinhard),
+            ..Default::default()
+        }
+        .grade_for(signal, &HdrMetadata::default())
+        .unwrap();
+        assert_ne!(reinhard.rgb(highlight), blind.rgb(highlight));
+        // The default reads the peak too, and that is the difference a viewer
+        // sees: a code above the panel's own reach keeps its place in the
+        // shoulder instead of folding into white.
+        let blind_default = Grading::default()
+            .grade_for(signal, &HdrMetadata::default())
+            .unwrap();
+        assert_eq!(grade.plan().tone_map, Some(ToneMap::Mobius));
+        assert_eq!(blind_default.plan().tone_map, Some(ToneMap::Clip));
+        // PQ's 0.62 is about 190 cd/m², which a 100-nit panel has no number for
+        // until the master's own peak says how far above it to roll.
+        let kept = grade.rgb([0.62; 3])[0];
+        let burnt = blind_default.rgb([0.62; 3])[0];
+        assert!(burnt > 0.999, "{burnt}");
+        assert!((0.85..0.96).contains(&kept), "{kept}");
+        // And a code the panel shows outright is untouched by the choice.
+        assert_eq!(grade.rgb([0.3; 3]), blind_default.rgb([0.3; 3]));
+    }
+
+    /// The same chain on a file that states a curve and no light at all: an HLG
+    /// clip. Nothing was asked from the command line, yet BT.2100 material still
+    /// gets the display-domain pass [`Grade::new`] picks — and because the panel's
+    /// own peak is the only peak this file states, the headroom rule answers
+    /// "nothing to roll", which for HLG is not a compromise but what the format
+    /// means, its scene light being normalised to whatever display shows it. So
+    /// the top of the code scale stays separated on the way to the screen instead
+    /// of folding into white, and mid-code grey arrives as grey.
+    #[test]
+    fn an_hlg_item_is_graded_at_the_panels_own_peak() {
+        use crate::playback_native::NativeReader;
+        let data = include_bytes!("../tests/fixtures/hevc/hlg.mp4").to_vec();
+        let reader = NativeReader::without_memory_limit(std::io::Cursor::new(data)).unwrap();
+        let (signal, hdr) = (reader.colour(), reader.hdr());
+        assert!(signal.is_hdr());
+        assert!(hdr.is_empty());
+        let grade = Grading::default()
+            .grade_for(signal, &hdr)
+            .expect("BT.2100 material is graded for the panel");
+        let plan = grade.plan();
+        assert_eq!(plan.from, Transfer::Hlg);
+        assert_eq!(plan.to, Transfer::Bt709);
+        assert_eq!(plan.tone_map, Some(ToneMap::Clip));
+        assert_eq!(plan.content.max_cll, PANEL_NITS);
+        // Four codes that a 1 000-cd/m² reading of this signal would have
+        // crushed together into white stay apart, in order, with mid grey below
+        // half the scale.
+        let steps: Vec<f32> = [0.5f32, 0.65, 0.8, 1.0]
+            .iter()
+            .map(|c| grade.rgb([*c; 3])[0])
+            .collect();
+        assert!(steps[0] < 0.5, "{steps:?}");
+        assert!(steps.windows(2).all(|w| w[1] > w[0] + 0.05), "{steps:?}");
+        assert!((steps[3] - 1.0).abs() < 1e-3, "{steps:?}");
     }
 }

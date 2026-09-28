@@ -5,15 +5,16 @@
 //! queue sized to a span of presentation time and a budget of bytes; control
 //! messages (pause, rewind, seek) go the other way. Every frame carries the
 //! generation of the last rewind or seek so stale queued frames can be dropped.
+use crate::color::Grade;
 use crate::playback_native::{
-    NativeReader, Planar8, RawFrame, avc_to_planar8, rotate_planar8, yuv_to_rgb,
+    avc_to_planar8, planar8_to_rgb, rotate_planar8, yuv_to_rgb, NativeReader, Planar8, RawFrame,
 };
 use std::{
     io::{BufRead, Seek},
     sync::{
+        mpsc::{sync_channel, Receiver, RecvTimeoutError, SyncSender, TryRecvError, TrySendError},
         Arc,
         atomic::{AtomicUsize, Ordering},
-        mpsc::{Receiver, RecvTimeoutError, SyncSender, TryRecvError, TrySendError, sync_channel},
     },
     thread,
     time::Duration,
@@ -115,6 +116,65 @@ enum Stage {
     Event(Event),
 }
 
+/// The picture a stage carries, in the form the window draws it.
+///
+/// This is where a [`Grade`] is applied, because it is the one place every
+/// CPU-bound frame passes through before the window sees it, and it is applied
+/// after the container's turn so the codes are looked up in the orientation
+/// they are shown in. A plane picture that is graded has to become packed RGB
+/// for it; a picture with nothing done to its colour keeps its planes, and so
+/// does one whose grade turns out to be its own input — which is what a caller
+/// asking for the panel's own curve gets.
+fn into_pixels(
+    raw: RawFrame,
+    rotation: u16,
+    budget: usize,
+    grade: Option<&Grade>,
+) -> crate::Result<Pixels> {
+    let pixels = match raw {
+        RawFrame::Rgb(rgb) => Pixels::Rgb(rgb),
+        RawFrame::Avc { picture, colour } => {
+            Pixels::Planar(Arc::new(avc_to_planar8(&picture, colour)))
+        }
+        // Hardware output is already 8-bit planes: no copy at all.
+        RawFrame::Planar8(planes) => Pixels::Planar(planes),
+        RawFrame::Yuv {
+            data,
+            luma_len,
+            chroma_len,
+            width,
+            height,
+            sx,
+            sy,
+        } => {
+            let mut rgb = Vec::new();
+            yuv_to_rgb(&data, luma_len, chroma_len, width, height, sx, sy, &mut rgb);
+            Pixels::Rgb(rgb)
+        }
+    };
+    // The turn the container asked for, still owed to the planes: packed RGB
+    // reaches this thread already turned, shaped that way by the reader.
+    let pixels = match (pixels, rotation) {
+        (Pixels::Planar(planes), rotation) if rotation != 0 => {
+            Pixels::Planar(Arc::new(rotate_planar8(&planes, rotation)))
+        }
+        (pixels, _) => pixels,
+    };
+    let Some(grade) = grade.filter(|grade| !grade.is_identity()) else {
+        return Ok(pixels);
+    };
+    let mut rgb = match pixels {
+        Pixels::Rgb(rgb) => rgb,
+        Pixels::Planar(planes) => {
+            let mut rgb = Vec::new();
+            planar8_to_rgb(&planes, &mut rgb, budget)?;
+            rgb
+        }
+    };
+    grade.apply(&mut rgb);
+    Ok(Pixels::Rgb(rgb))
+}
+
 /// Handle to the decoding threads; dropping it stops them.
 pub struct Playback {
     commands: SyncSender<Command>,
@@ -132,8 +192,13 @@ pub struct Playback {
 
 impl Playback {
     /// Takes a reader whose first frame is already decoded and starts decoding
-    /// in the background, playing from that frame.
-    pub fn start<R: BufRead + Seek + Send + 'static>(reader: NativeReader<R>) -> Self {
+    /// in the background, playing from that frame. A `grade` is applied to every
+    /// picture this thread hands over, on its converter thread.
+    pub fn start<R: BufRead + Seek + Send + 'static>(
+        reader: NativeReader<R>,
+        grade: Option<Grade>,
+    ) -> Self {
+        let budget = reader.rgb_budget();
         let [width, height] = reader.dimensions();
         let depth = queue_depth(
             reader.frame_period(),
@@ -172,51 +237,21 @@ impl Playback {
                             pts,
                             generation,
                             rotation,
-                        } => {
-                            let pixels = match raw {
-                                RawFrame::Rgb(rgb) => Pixels::Rgb(rgb),
-                                RawFrame::Avc { picture, colour } => {
-                                    Pixels::Planar(Arc::new(avc_to_planar8(&picture, colour)))
-                                }
-                                // Hardware output is already 8-bit planes: no copy at all.
-                                RawFrame::Planar8(planes) => Pixels::Planar(planes),
-                                RawFrame::Yuv {
-                                    data,
-                                    luma_len,
-                                    chroma_len,
-                                    width,
-                                    height,
-                                    sx,
-                                    sy,
-                                } => {
-                                    let mut rgb = Vec::new();
-                                    yuv_to_rgb(
-                                        &data, luma_len, chroma_len, width, height, sx, sy,
-                                        &mut rgb,
-                                    );
-                                    Pixels::Rgb(rgb)
-                                }
-                            };
-                            // The turn the container asked for, still owed to the
-                            // planes: packed RGB reaches this thread already
-                            // turned, shaped that way by the reader.
-                            let pixels = match (pixels, rotation) {
-                                (Pixels::Planar(planes), rotation) if rotation != 0 => {
-                                    Pixels::Planar(Arc::new(rotate_planar8(&planes, rotation)))
-                                }
-                                (pixels, _) => pixels,
-                            };
-                            serial += 1;
-                            Event::Frame(Frame {
-                                pixels,
-                                dimensions,
-                                period,
-                                interval,
-                                pts,
-                                generation,
-                                serial,
-                            })
-                        }
+                        } => match into_pixels(raw, rotation, budget, grade.as_ref()) {
+                            Ok(pixels) => {
+                                serial += 1;
+                                Event::Frame(Frame {
+                                    pixels,
+                                    dimensions,
+                                    period,
+                                    interval,
+                                    pts,
+                                    generation,
+                                    serial,
+                                })
+                            }
+                            Err(error) => Event::Error(error.to_string()),
+                        },
                         Stage::Event(event) => event,
                     };
                     // Counted before the send: the window can take the picture

@@ -1,7 +1,11 @@
 //! RGB playback adapter for FVid's own Y4M, MP4/AVC/HEVC and WebM/VP9/AV1 readers.
+use crate::color::{
+    hdr::{ColourDescription, HdrMetadata},
+    primaries::MatrixCoeff,
+};
 use crate::{
-    Result, codec::avc_picture::IntraPicture, container::mp4::Limits, invalid, playback::Y4mReader,
-    playback_mp4::Mp4VideoReader,
+    codec::avc_picture::IntraPicture, container::mp4::Limits, invalid, playback::Y4mReader,
+    playback_mp4::Mp4VideoReader, Result,
 };
 use std::{
     io::{BufRead, Read, Seek, SeekFrom},
@@ -249,6 +253,54 @@ impl<R: BufRead + Seek> NativeReader<R> {
             Self::Y4m(_) => "Y4M",
             Self::Webm(r) => r.codec(),
             Self::Avc { source, .. } => mp4_codec(&source.track().codec),
+        }
+    }
+    /// The signal the source states its pictures in, which is what a grade is
+    /// built from: the container's own description first, with the coding's VUI
+    /// or sequence header filling any code the container left unspecified.
+    ///
+    /// A Y4M stream has nowhere to write primaries or a curve, so it states
+    /// only what its converter assumes — BT.601 luma weights over a studio
+    /// range — and a caller grades the rest by deciding what the picture is.
+    /// The coding's half of the answer appears once a parameter set has been
+    /// read, so asking after the first frame sees more than asking at open.
+    pub fn colour(&self) -> ColourDescription {
+        match self {
+            Self::Y4m(_) => ColourDescription {
+                matrix: MatrixCoeff::Bt601.code(),
+                ..Default::default()
+            },
+            Self::Webm(r) => r.colour().filled_with(r.bitstream_colour()),
+            Self::Avc { source, .. } => {
+                source.track().colour.filled_with(source.bitstream_colour())
+            }
+        }
+    }
+    /// The light the source names for its pictures: a mastering display and a
+    /// peak and average level, all empty where nothing is named. The container
+    /// states them from its own box — MP4's `mdcv`/`ccll`, Matroska's `Colour`
+    /// element — and the coding's SEI message or metadata OBU fills any half the
+    /// box left out, which is the whole answer for a file whose HDR was written
+    /// only in-band. An HEVC stream's messages are read from its `hvcC` as the
+    /// decoder is built, so that half already stands at open; a stream that
+    /// writes them only inside its packets states them once one has been decoded.
+    pub fn hdr(&self) -> HdrMetadata {
+        match self {
+            Self::Y4m(_) => HdrMetadata::default(),
+            Self::Webm(r) => r.hdr().filled_with(r.bitstream_hdr()),
+            Self::Avc { source, .. } => source.track().hdr.filled_with(source.bitstream_hdr()),
+        }
+    }
+    /// The cap this reader sizes a packed RGB picture by, so a caller that
+    /// converts one of the reader's own plane frames asks the same question the
+    /// reader does. A Y4M stream converts inside its reader, which checked the
+    /// frame against the caller's limit when it opened and has no cap left to
+    /// hand on.
+    pub fn rgb_budget(&self) -> usize {
+        match self {
+            Self::Y4m(_) => usize::MAX,
+            Self::Webm(r) => r.rgb_budget(),
+            Self::Avc { rgb_budget, .. } => *rgb_budget,
         }
     }
     pub fn rgb(&self) -> &[u8] {
@@ -911,7 +963,7 @@ struct PlaneSource<'a, T> {
     bit_depth: u8,
     colour: AvcColour,
 }
-fn rgb_from_planes<T: Copy + Into<f32>>(
+fn rgb_from_planes<T: Copy + Into<f32> + Sync>(
     p: PlaneSource<'_, T>,
     rgb: &mut Vec<u8>,
     budget: usize,
@@ -946,11 +998,14 @@ fn rgb_from_planes<T: Copy + Into<f32>>(
     let g_cr = (kr * 2.0 * (1.0 - kr) / (1.0 - kr - kb) * c_gain) as f32;
     let g_cb = (kb * 2.0 * (1.0 - kb) / (1.0 - kr - kb) * c_gain) as f32;
     let (y_offset, c_offset) = (y_offset as f32, (128.0 * scale) as f32);
-    // Single-threaded on purpose: spreading this over threads measured
-    // slower than the plain loop on a 3-megapixel frame. Each chroma
-    // sample is converted once and applied to its two luma columns.
-    // Terms are applied in the same order as the per-pixel formula
-    // (`luma - g_cr*cr - g_cb*cb`), so results stay bit-identical.
+    // Each chroma sample is converted once and applied to its two luma columns.
+    // Rows never share a write, so the row loop is cut between workers the way
+    // the grade is: this measured 4.5 ms for a 1080p frame and 16.1 ms for a 4K
+    // one on one thread, and 0.8 ms and 2.2 ms once cut, so what the frame waited
+    // on was the arithmetic rather than the memory. Terms are applied in the same
+    // order as the per-pixel formula (`luma - g_cr*cr - g_cb*cb`), and
+    // `a_frame_split_between_workers_matches_its_own_strips` holds the cut to the
+    // bytes the same rows give a single thread.
     let store = |pixel: &mut [u8], luma: T, t: (f32, f32, f32, f32)| {
         let luma = (luma.into() - y_offset) * y_gain;
         pixel[0] = (luma + t.0).round().clamp(0.0, 255.0) as u8;
@@ -963,33 +1018,47 @@ fn rgb_from_planes<T: Copy + Into<f32>>(
         (r_cr * cr, g_cr * cr, g_cb * cb, b_cb * cb)
     };
     let odd_start = p.x0 % 2 == 1;
-    for (row, line) in rgb.chunks_exact_mut(w * 3).enumerate() {
-        let y = row + p.y0;
-        let luma_row = &p.y[y * p.luma_stride + p.x0..][..w];
-        // Chroma rows follow the picture row (crop included), as before.
-        let chroma_row = (y / 2) * p.chroma_stride + p.chroma_x0;
-        let cb_row = &p.cb[chroma_row..];
-        let cr_row = &p.cr[chroma_row..];
-        let mut col = 0;
-        let mut chroma = 0;
-        if odd_start && w > 0 {
-            let t = chroma_terms(cb_row[0], cr_row[0]);
-            store(&mut line[..3], luma_row[0], t);
-            col = 1;
-            chroma = 1;
+    let rows = |first: usize, span: &mut [u8]| {
+        for (offset, line) in span.chunks_exact_mut(w * 3).enumerate() {
+            let y = first + offset + p.y0;
+            let luma_row = &p.y[y * p.luma_stride + p.x0..][..w];
+            // Chroma rows follow the picture row (crop included), as before.
+            let chroma_row = (y / 2) * p.chroma_stride + p.chroma_x0;
+            let cb_row = &p.cb[chroma_row..];
+            let cr_row = &p.cr[chroma_row..];
+            let mut col = 0;
+            let mut chroma = 0;
+            if odd_start && w > 0 {
+                let t = chroma_terms(cb_row[0], cr_row[0]);
+                store(&mut line[..3], luma_row[0], t);
+                col = 1;
+                chroma = 1;
+            }
+            while col + 1 < w {
+                let t = chroma_terms(cb_row[chroma], cr_row[chroma]);
+                store(&mut line[col * 3..][..3], luma_row[col], t);
+                store(&mut line[col * 3 + 3..][..3], luma_row[col + 1], t);
+                col += 2;
+                chroma += 1;
+            }
+            if col < w {
+                let t = chroma_terms(cb_row[chroma], cr_row[chroma]);
+                store(&mut line[col * 3..][..3], luma_row[col], t);
+            }
         }
-        while col + 1 < w {
-            let t = chroma_terms(cb_row[chroma], cr_row[chroma]);
-            store(&mut line[col * 3..][..3], luma_row[col], t);
-            store(&mut line[col * 3 + 3..][..3], luma_row[col + 1], t);
-            col += 2;
-            chroma += 1;
-        }
-        if col < w {
-            let t = chroma_terms(cb_row[chroma], cr_row[chroma]);
-            store(&mut line[col * 3..][..3], luma_row[col], t);
-        }
+    };
+    let rgb = rgb.as_mut_slice();
+    let workers = crate::span_workers(len);
+    if workers < 2 {
+        rows(0, rgb);
+        return Ok(());
     }
+    let rows_per_span = h.div_ceil(workers);
+    std::thread::scope(|scope| {
+        for (index, span) in rgb.chunks_mut(rows_per_span * w * 3).enumerate() {
+            scope.spawn(move || rows(index * rows_per_span, span));
+        }
+    });
     Ok(())
 }
 /// A single rate-one edit can trim/offset the media timeline without changing
@@ -1047,6 +1116,47 @@ fn playback_window(
 mod tests {
     use super::*;
     use std::io::{BufReader, Cursor};
+
+    /// A frame cut between workers has to hold the same bytes as the same rows
+    /// converted by a single thread, because no two rows share a write. The
+    /// strips below are each exactly the size that keeps one worker, so they
+    /// stand as the serial picture of the parallel one.
+    #[test]
+    fn a_frame_split_between_workers_matches_its_own_strips() {
+        let (w, h) = (4096, 2160);
+        let planes = Planar8 {
+            width: w,
+            height: h,
+            chroma_width: w / 2,
+            chroma_height: h / 2,
+            y: (0..w * h).map(|i| (i % 251) as u8).collect(),
+            cb: (0..w * h / 4).map(|i| (i * 3) as u8).collect(),
+            cr: (0..w * h / 4).map(|i| (i * 7) as u8).collect(),
+            colour: AvcColour::default(),
+        };
+        let mut whole = Vec::new();
+        planar8_to_rgb(&planes, &mut whole, w * h * 3).unwrap();
+        assert!(crate::span_workers(w * h * 3) > 1);
+        let mut strips = Vec::new();
+        for band in 0..h / 4 {
+            let part = Planar8 {
+                width: w,
+                height: 4,
+                chroma_width: w / 2,
+                chroma_height: 2,
+                y: planes.y[band * 4 * w..][..4 * w].to_vec(),
+                cb: planes.cb[band * (w / 2)..][..2 * (w / 2)].to_vec(),
+                cr: planes.cr[band * (w / 2)..][..2 * (w / 2)].to_vec(),
+                colour: AvcColour::default(),
+            };
+            assert_eq!(crate::span_workers(part.width * part.height * 3), 1);
+            let mut rgb = Vec::new();
+            planar8_to_rgb(&part, &mut rgb, w * h * 3).unwrap();
+            strips.extend_from_slice(&rgb);
+        }
+        assert_eq!(whole, strips);
+    }
+
     #[test]
     fn images_and_unknown_data_are_not_dispatched_as_mp4() {
         for data in [
@@ -1113,6 +1223,8 @@ mod tests {
             samples: SampleIndex::Expanded(vec![]),
             pixel_aspect: (1, 1),
             rotation: 0,
+            colour: Default::default(),
+            hdr: Default::default(),
         };
         assert_eq!(playback_window(&track, 1000).unwrap(), (0, None));
         track.edits.push(Edit {
@@ -1292,5 +1404,164 @@ mod tests {
         assert_eq!(reader.rgb(), rotate_plane(&rgb, 64, 64, 90, 3));
         // The test would pass on a symmetric picture without saying anything.
         assert_ne!(reader.rgb(), rgb.as_slice());
+    }
+
+    /// BT.601 is the only thing a Y4M stream can state about its colour: the
+    /// format has no field for primaries or a curve, and the weights its
+    /// converter applies are that matrix's. So the reader says what is known
+    /// and leaves the rest for a caller to decide.
+    #[test]
+    fn a_y4m_stream_states_only_the_matrix_its_converter_uses() {
+        let bytes = b"YUV4MPEG2 W2 H2 F60:1 Ip C420jpeg\nFRAME\n\x10\x20\x30\x40\x80\x80";
+        let reader = NativeReader::without_memory_limit(Cursor::new(bytes.to_vec())).unwrap();
+        assert_eq!(
+            reader.colour(),
+            ColourDescription {
+                matrix: MatrixCoeff::Bt601.code(),
+                ..Default::default()
+            }
+        );
+        assert!(!reader.colour().is_hdr());
+        assert!(reader.hdr().is_empty());
+    }
+
+    /// A real HDR10 file, muxed by FFmpeg from synthetic input: Main10 HEVC whose
+    /// VUI names BT.2020 primaries, a PQ curve and the BT.2020-NCL matrix. The
+    /// muxer wrote no `colr` atom for it — counted in the file's bytes, zero — so
+    /// the whole statement comes out of the parameter set, which is the case a
+    /// reader has to reach into the coding for.
+    #[test]
+    fn a_real_hdr10_files_signal_reaches_the_caller_that_grades_it() {
+        use crate::color::{Primaries, Transfer};
+        let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
+        let stated = reader.colour();
+        assert_eq!(
+            stated,
+            ColourDescription {
+                primaries: 9,
+                transfer: 16,
+                matrix: 9,
+                full_range: false,
+            }
+        );
+        assert!(stated.is_hdr());
+        assert_eq!(stated.primary_set(), Some(Primaries::BT2020));
+        assert_eq!(stated.transfer_function(), Transfer::Pq);
+        assert_eq!(stated.matrix_coefficients(), Some(MatrixCoeff::Bt2020Ncl));
+        // Decoding a whole clip does not change what it is stated in.
+        for _ in 0..5 {
+            assert!(reader.read_frame_raw().unwrap().is_some());
+        }
+        assert_eq!(reader.colour(), stated);
+    }
+
+    /// The same file's light, which the container writes in no box at all: SEI
+    /// 137 and 144, carried by the configuration record the decoder is built
+    /// from. So the reader states them the moment the file is open — the point a
+    /// tone map needs them, before a single packet has been decoded — and a
+    /// container that named none has nothing to contradict them with.
+    #[test]
+    fn a_real_hdr10_files_light_reaches_the_caller_that_tone_maps_it() {
+        let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
+        let hdr = reader.hdr();
+        assert!(hdr.mastering.unwrap().is_hdr10());
+        assert_eq!((hdr.light.max_cll, hdr.light.max_fall), (1_000.0, 400.0));
+        // The stated peak, not a fallback, is what a tone map compresses from.
+        assert_eq!(hdr.content_light(400.0).max_cll, 1_000.0);
+    }
+
+    /// A master that writes its volume and no content light, which is what most
+    /// encoders produce: `x265` needs `--max-cll` spelled out, while
+    /// `--master-display` alone is enough for HDR10. Nothing in the file states
+    /// a content peak, so the peak the grade compresses from has to come from
+    /// the authored volume — a caller that only knows its own 100-nit panel would
+    /// otherwise treat a 1 000 cd/m² master as if it already fit.
+    #[test]
+    fn a_volume_without_a_content_light_grades_against_its_own_peak() {
+        use crate::color::{DisplayTarget, Grade, Settings};
+        let data = include_bytes!("../tests/fixtures/hevc/mdcv-only.mp4").to_vec();
+        let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
+        let hdr = reader.hdr();
+        let volume = hdr.mastering.unwrap();
+        assert!(volume.is_hdr10());
+        assert_eq!(volume.max_luminance, 1_000.0);
+        assert!(hdr.light.max_cll == 0.0 && hdr.light.max_fall == 0.0);
+        assert_eq!(hdr.content_light(100.0).max_cll, 1_000.0);
+        let grade = Grade::new(
+            reader.colour(),
+            &hdr,
+            Settings::video(DisplayTarget::sdr(100.0)),
+            None,
+        );
+        assert_eq!(grade.plan().content.max_cll, 1_000.0);
+        // Decoding the packets that repeat the messages states the same light.
+        for _ in 0..5 {
+            assert!(reader.read_frame_raw().unwrap().is_some());
+        }
+        assert_eq!(reader.hdr(), hdr);
+    }
+
+    /// An HLG clip, stated the same way the HDR10 one is — in the parameter set,
+    /// with no `colr` atom in the file to read — except that here the coding says
+    /// everything and means by it something the reader must not over-read: HLG
+    /// carries no mastering volume and no content light, because the format's
+    /// scene light is normalised to whatever panel shows it. So the triple comes
+    /// through and the light stays empty, which is what leaves the grade with the
+    /// panel's own peak rather than a headroom the file never claimed.
+    #[test]
+    fn a_real_hlg_files_signal_reaches_the_caller_that_grades_it() {
+        use crate::color::{Primaries, Transfer};
+        let data = include_bytes!("../tests/fixtures/hevc/hlg.mp4").to_vec();
+        let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
+        let stated = reader.colour();
+        assert_eq!(
+            stated,
+            ColourDescription {
+                primaries: 9,
+                transfer: 18,
+                matrix: 9,
+                full_range: false,
+            }
+        );
+        assert!(stated.is_hdr());
+        assert_eq!(stated.transfer_function(), Transfer::Hlg);
+        assert_eq!(stated.primary_set(), Some(Primaries::BT2020));
+        assert_eq!(stated.matrix_coefficients(), Some(MatrixCoeff::Bt2020Ncl));
+        // Nothing about light is stated, in either direction.
+        let hdr = reader.hdr();
+        assert!(hdr.is_empty());
+        assert!(hdr.mastering.is_none());
+        // Decoding the whole clip changes neither half.
+        for _ in 0..5 {
+            assert!(reader.read_frame_raw().unwrap().is_some());
+        }
+        assert_eq!(reader.colour(), stated);
+        assert!(reader.hdr().is_empty());
+    }
+
+    /// An AV1 track whose WebM header writes no `Colour` element: every code the
+    /// container states is zero, which is silence rather than a value, and once a
+    /// frame has been decoded the sequence header's own triple is what the reader
+    /// hands over. AV1's default is 2/2/2, and H.273 numbers 2 *unspecified*
+    /// rather than absent, so the zeroes become 2s and stay unknown: the reader
+    /// reports what the stream says instead of guessing on its behalf.
+    #[test]
+    fn a_codings_own_statement_replaces_a_containers_silence() {
+        let data = include_bytes!("../tests/fixtures/av1/ramp.webm").to_vec();
+        let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
+        assert_eq!(reader.colour(), ColourDescription::default());
+        assert!(reader.read_frame_raw().unwrap().is_some());
+        assert_eq!(
+            reader.colour(),
+            ColourDescription {
+                primaries: 2,
+                transfer: 2,
+                matrix: 2,
+                full_range: false,
+            }
+        );
+        assert!(!reader.colour().is_hdr());
     }
 }

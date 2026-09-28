@@ -5,9 +5,11 @@ use super::{
     hevc_nal::NalHeader,
     hevc_picture::{self, Picture},
     hevc_pps::Pps,
+    hevc_sei,
     hevc_slice::SliceHeader,
     hevc_sps::Sps,
 };
+use crate::color::hdr::HdrMetadata;
 use crate::{Result, invalid};
 use std::sync::Arc;
 pub struct Decoded {
@@ -21,6 +23,8 @@ pub struct HevcDecoder {
     previous_poc: Option<i32>,
     suppress_rasl: bool,
     active_pps: Option<u8>,
+    hdr: HdrMetadata,
+    primed: HdrMetadata,
     length: u8,
     budget: usize,
     failed: bool,
@@ -58,12 +62,30 @@ impl HevcDecoder {
         if pairs.is_empty() {
             return Err(invalid("HEVC configuration has no parameter-set pair"));
         }
+        let mut primed = HdrMetadata::default();
+        for array in &config.arrays {
+            // A muxer that wrote the encoder's HDR SEI messages into the
+            // configuration record states the light before a single packet is
+            // decoded, which is when a caller grading the first picture needs
+            // it. A message this module cannot walk says nothing here rather
+            // than failing an open.
+            if !hevc_sei::is_sei_unit(array.nal_type) {
+                continue;
+            }
+            for nal in &array.units {
+                if let Ok(Some(hdr)) = hevc_sei::hdr_from_nal(nal, budget) {
+                    primed.merge(hdr);
+                }
+            }
+        }
         Ok(Self {
             pairs,
             references: Vec::new(),
             previous_poc: None,
             suppress_rasl: false,
             active_pps: None,
+            hdr: primed,
+            primed,
             length: config.length_size,
             budget,
             failed: false,
@@ -81,7 +103,18 @@ impl HevcDecoder {
         self.previous_poc = None;
         self.suppress_rasl = false;
         self.active_pps = None;
+        self.hdr = self.primed;
         self.failed = false;
+    }
+    /// The static HDR light the stream stated of itself: the SEI messages its
+    /// configuration record carried, plus every one the decoder has walked since
+    /// it was last flushed. A reader that grades a picture for a panel asks the
+    /// coding as well as the file, because an encoder that wrote its mastering
+    /// volume in-band often wrote it nowhere else — and a caller that grades at
+    /// open, before a packet has been decoded, only ever sees the half the
+    /// configuration record states.
+    pub fn hdr(&self) -> HdrMetadata {
+        self.hdr
     }
     pub fn decode_packet(&mut self, packet: &[u8]) -> Result<Option<Decoded>> {
         if self.failed {
@@ -119,6 +152,12 @@ impl HevcDecoder {
                         .any(|(s, p)| Pps::parse(nal, s, self.budget).is_ok_and(|new| new == *p))
                 {
                     return Err(invalid("HEVC in-band PPS change is not implemented"));
+                }
+            } else if hevc_sei::is_sei_unit(header.unit_type) {
+                // An SEI this module cannot walk costs the guidance, never the
+                // picture it travels with.
+                if let Ok(Some(hdr)) = hevc_sei::hdr_from_nal(nal, self.budget) {
+                    self.hdr.merge(hdr);
                 }
             } else if !matches!(header.unit_type, 35..=40) {
                 return Err(invalid("unsupported HEVC NAL type"));

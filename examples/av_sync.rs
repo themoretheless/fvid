@@ -53,7 +53,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         reader.read_frame()?;
     }
     let period = reader.frame_period();
-    let video = Playback::start(reader);
+    let video = Playback::start(reader, None);
 
     let Some(stream) = harness::open_stream(path) else {
         return Err("no audio track this player can decode".into());

@@ -1,4 +1,6 @@
 //! Bounded seekable WebM/Matroska indexing, without an external demultiplexer.
+use crate::color::hdr::{ColourDescription, HdrMetadata, MasteringDisplay};
+use crate::color::tonemap::ContentLight;
 use crate::{Result, container::FileTags, invalid};
 use std::io::{Read, Seek, SeekFrom};
 const SEGMENT: u32 = 0x18538067;
@@ -37,6 +39,15 @@ pub struct Track {
     /// Codec setup data from `CodecPrivate`. Vorbis carries its three header
     /// packets concatenated here, and the decoder cannot initialize without it.
     pub codec_private: Vec<u8>,
+    /// The `Colour` element's H.273 triple and range, as coded by the muxer.
+    ///
+    /// Zeros when the track states none, which an SD track usually does; an
+    /// HEVC or AV1 stream also states this in its own sequence header, and the
+    /// decoder reads it there.
+    pub colour: ColourDescription,
+    /// `MasteringMetadata` and `MaxCLL`/`MaxFALL`, which a tone map needs and no
+    /// bitstream of a container-only stream carries.
+    pub hdr: HdrMetadata,
 }
 /// A named point in the file a player can jump to.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -222,6 +233,80 @@ fn fields<R: Read + Seek>(
     }
     Ok(out)
 }
+/// An ITU-T H.273 index stored as a `uInt` element.
+///
+/// The indices are one byte wide; a value past that is not an index the
+/// standard defines, and 2 is what the standard itself uses for "unspecified"
+/// in all three of them, so it reads as nothing stated.
+fn cicp_code<R: Read + Seek>(r: &mut R, e: Element) -> Result<u8> {
+    Ok(uint(r, e)?.try_into().unwrap_or(2))
+}
+/// Read a `Colour` element and everything under it into the track it describes.
+///
+/// Matroska states the H.273 triple and the mastering volume as one element per
+/// value instead of the byte payload MP4 and the bitstream use, and two of its
+/// spellings differ from the standards they otherwise copy: `Range` numbers
+/// studio as 1 and full as 2, where the flag in an HEVC VUI or an MP4 `colr`
+/// sets the high bit for full; and `MasteringMetadata` states its corners in
+/// the named red, green, blue order the payload never uses, as floats already
+/// in candelas rather than in ST 2086 units.
+fn read_colour<R: Read + Seek>(
+    r: &mut R,
+    colour: Element,
+    count: &mut usize,
+    max: usize,
+    track: &mut Track,
+) -> Result<()> {
+    let mut corners = [0.0f64; 10];
+    let mut stated = [false; 10];
+    let mut light = ContentLight::default();
+    for f in fields(r, colour, count, max)? {
+        match f.id {
+            0x55b1 => track.colour.matrix = cicp_code(r, f)?,
+            0x55ba => track.colour.transfer = cicp_code(r, f)?,
+            0x55bb => track.colour.primaries = cicp_code(r, f)?,
+            0x55b9 => track.colour.full_range = uint(r, f)? == 2,
+            0x55bc => light.max_cll = uint(r, f)? as f32,
+            0x55bd => light.max_fall = uint(r, f)? as f32,
+            0x55d0 => {
+                for m in fields(r, f, count, max)? {
+                    let slot = match m.id {
+                        0x55d1 => Some(0),
+                        0x55d2 => Some(1),
+                        0x55d3 => Some(2),
+                        0x55d4 => Some(3),
+                        0x55d5 => Some(4),
+                        0x55d6 => Some(5),
+                        0x55d7 => Some(6),
+                        0x55d8 => Some(7),
+                        0x55d9 => Some(8),
+                        0x55da => Some(9),
+                        _ => None,
+                    };
+                    if let Some(i) = slot {
+                        corners[i] = float(r, m)?;
+                        stated[i] = true;
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    // A volume missing a corner describes no display a tone map could fit into,
+    // so it is not read at all rather than read as a partial one.
+    if stated.iter().all(|s| *s) {
+        track.hdr.mastering = MasteringDisplay::from_corners(
+            (corners[0], corners[1]),
+            (corners[2], corners[3]),
+            (corners[4], corners[5]),
+            (corners[6], corners[7]),
+            corners[8] as f32,
+            corners[9] as f32,
+        );
+    }
+    track.hdr.light = light;
+    Ok(())
+}
 impl<R: Read + Seek> WebmReader<R> {
     pub fn open(mut reader: R, limits: Limits) -> Result<Self> {
         let file_end = reader.seek(SeekFrom::End(0))?;
@@ -299,6 +384,8 @@ impl<R: Read + Seek> WebmReader<R> {
                             bit_depth: 0,
                             default_duration_ns: 0,
                             codec_private: Vec::new(),
+                            colour: ColourDescription::default(),
+                            hdr: HdrMetadata::default(),
                         };
                         // Two elements can state a language: the one in use now
                         // and, in files muxed before it existed, the older one in
@@ -349,6 +436,13 @@ impl<R: Read + Seek> WebmReader<R> {
                                             0x54bb => crop[1] = uint(&mut reader, v)?,
                                             0x54cc => crop[0] = uint(&mut reader, v)?,
                                             0x54dd => crop[2] = uint(&mut reader, v)?,
+                                            0x55b0 => read_colour(
+                                                &mut reader,
+                                                v,
+                                                &mut count,
+                                                limits.elements,
+                                                &mut track,
+                                            )?,
                                             _ => {}
                                         }
                                     }
@@ -1435,5 +1529,159 @@ mod tests {
             ),
             ("2026 The Holder", "A note", "5")
         );
+    }
+    /// An element whose size is too long for `atom`'s single length byte.
+    ///
+    /// Matroska allows a float element of either four or eight bytes and muxers
+    /// use both, so the fixtures here do too.
+    fn element(id: &[u8], payload: &[u8]) -> Vec<u8> {
+        assert!(payload.len() < 0x4000);
+        [
+            id,
+            &[0x40 | (payload.len() >> 8) as u8, payload.len() as u8],
+            payload,
+        ]
+        .concat()
+    }
+    /// A video track whose `Video` element carries exactly the given `Colour`
+    /// payload and nothing else.
+    fn coloured(colour: &[u8]) -> Track {
+        let data = [
+            atom(&[0x1a, 0x45, 0xdf, 0xa3], &atom(&[0x42, 0x82], b"webm")),
+            vec![0x18, 0x53, 0x80, 0x67, 0xff],
+            element(
+                &[0x16, 0x54, 0xae, 0x6b],
+                &element(
+                    &[0xae],
+                    &[
+                        atom(&[0xd7], &[1]),
+                        atom(&[0x83], &[1]),
+                        atom(&[0x86], b"V_MPEGH/ISO/HEVC"),
+                        element(
+                            &[0xe0],
+                            &[
+                                atom(&[0xb0], &[16]),
+                                atom(&[0xba], &[8]),
+                                element(&[0x55, 0xb0], colour),
+                            ]
+                            .concat(),
+                        ),
+                    ]
+                    .concat(),
+                ),
+            ),
+        ]
+        .concat();
+        WebmReader::open(Cursor::new(data), Limits::default())
+            .unwrap()
+            .tracks[0]
+            .clone()
+    }
+    /// `Colour` states the same H.273 indices an MP4 `colr` atom does, but
+    /// numbers its range the other way round: 1 is the studio range a flag
+    /// would call 0, and 2 the full range it would call 1. A muxer that wrote
+    /// the flag's numbers here would have every file it writes stretched wrong.
+    #[test]
+    fn a_colour_element_states_its_range_in_matroskas_own_numbers() {
+        // The eight bytes ffmpeg's muxer writes for a bt2020nc studio-range
+        // track, taken from the file it produced.
+        let t = coloured(&[atom(&[0x55, 0xb1], &[9]), atom(&[0x55, 0xb9], &[1])].concat());
+        assert_eq!(t.colour.matrix, 9);
+        assert!(!t.colour.full_range);
+        assert!(t.colour.primary_set().is_none());
+        assert!(t.hdr.is_empty());
+        let t = coloured(&[atom(&[0x55, 0xb9], &[2])].concat());
+        assert!(t.colour.full_range);
+        // Nothing stated at all reads the same way, and an element this reader
+        // has no meaning for — `BitsPerChannel` — is passed over.
+        let t = coloured(&[atom(&[0x55, 0xb2], &[10])].concat());
+        assert_eq!(t.colour, ColourDescription::default());
+    }
+    /// The triple, the light level and the mastering volume in one element,
+    /// which is what an HDR10 track muxed by a tool that knows the elements
+    /// states.
+    #[test]
+    fn a_colour_element_carries_the_triple_and_the_mastering_volume() {
+        use crate::color::primaries::Primaries;
+        let t = coloured(
+            &[
+                atom(&[0x55, 0xbb], &[9]),
+                atom(&[0x55, 0xba], &[16]),
+                atom(&[0x55, 0xb1], &[9]),
+                atom(&[0x55, 0xb9], &[2]),
+            ]
+            .concat(),
+        );
+        assert_eq!(
+            t.colour,
+            ColourDescription {
+                primaries: 9,
+                transfer: 16,
+                matrix: 9,
+                full_range: true,
+            }
+        );
+        assert!(t.colour.is_hdr());
+        assert_eq!(t.colour.primary_set(), Some(Primaries::BT2020));
+
+        // One element per coordinate, in the named red, green, blue order the
+        // byte payload never uses, and already in the units they mean.
+        let ids: [[u8; 2]; 10] = [
+            [0x55, 0xd1],
+            [0x55, 0xd2],
+            [0x55, 0xd3],
+            [0x55, 0xd4],
+            [0x55, 0xd5],
+            [0x55, 0xd6],
+            [0x55, 0xd7],
+            [0x55, 0xd8],
+            [0x55, 0xd9],
+            [0x55, 0xda],
+        ];
+        let corners: [f64; 10] = [
+            0.708, 0.292, 0.17, 0.797, 0.131, 0.046, 0.3127, 0.329, 1000.0, 0.0001,
+        ];
+        let volume = |drop: Option<usize>, wide: bool| {
+            let mut out = Vec::new();
+            for (i, (id, value)) in ids.iter().zip(corners).enumerate() {
+                if drop == Some(i) {
+                    continue;
+                }
+                let bytes: Vec<u8> = if wide {
+                    value.to_be_bytes().to_vec()
+                } else {
+                    (value as f32).to_be_bytes().to_vec()
+                };
+                out.extend_from_slice(&element(id, &bytes));
+            }
+            out
+        };
+        let light = || {
+            [
+                atom(&[0x55, 0xbc], &[0x04, 0xd2]),
+                atom(&[0x55, 0xbd], &[0x02, 0x37]),
+            ]
+            .concat()
+        };
+        for wide in [true, false] {
+            let mut payload = element(&[0x55, 0xd0], &volume(None, wide));
+            payload.extend_from_slice(&light());
+            let t = coloured(&payload);
+            let display = t.hdr.mastering.expect("a complete volume");
+            assert!(display.is_hdr10(), "{display:?}");
+            assert_eq!(display.max_luminance, 1_000.0);
+            assert_eq!(display.min_luminance, 0.0001);
+            assert_eq!(t.hdr.light.max_cll, 1_234.0);
+            assert_eq!(t.hdr.light.max_fall, 567.0);
+            // The volume is also the tone map's destination panel.
+            assert_eq!(display.display_target().peak_nits, 1_000.0);
+        }
+        // A corner short is not a display: the light level the same element
+        // states still reaches the player, and no volume is claimed.
+        let mut payload = element(&[0x55, 0xd0], &volume(Some(3), true));
+        payload.extend_from_slice(&light());
+        let t = coloured(&payload);
+        assert!(t.hdr.mastering.is_none());
+        assert_eq!(t.hdr.light.max_cll, 1_234.0);
     }
 }

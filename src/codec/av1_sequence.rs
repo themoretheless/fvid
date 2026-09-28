@@ -1,5 +1,6 @@
 //! AV1 sequence headers, including timing, operating points and color configuration.
 use super::bits::BitReader;
+use crate::color::hdr::ColourDescription;
 use crate::{Result, invalid};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -34,6 +35,21 @@ pub struct Color {
     pub subsampling: [bool; 2],
     pub chroma_position: u8,
     pub separate_uv_delta_q: bool,
+}
+impl Color {
+    /// The H.273 signal the sequence header states. AV1's own tables for
+    /// primaries, transfer characteristics and matrix coefficients are the same
+    /// code points ISO/IEC 23091-2 writes, so the three values and the range
+    /// flag carry over as they are; a code this module has no curve for stays
+    /// the code the stream said.
+    pub fn signal(&self) -> ColourDescription {
+        ColourDescription {
+            primaries: self.primaries,
+            transfer: self.transfer,
+            matrix: self.matrix,
+            full_range: self.full_range,
+        }
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Sequence {

@@ -5,6 +5,7 @@ use crate::codec::{
     av1_decoder as av1, avc_decoder::AvcDecoder, avc_picture::IntraPicture,
     hevc_decoder::HevcDecoder, vp9_decoder as vp9,
 };
+use crate::color::hdr::{ColourDescription, HdrMetadata};
 use crate::container::mp4::{Limits, Mp4Reader, Track};
 use crate::{Result, invalid};
 use std::io::{Read, Seek};
@@ -202,6 +203,64 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             }
             Decoder::Avc(_) => crate::playback_native::AvcColour::from_vui(self.active_vui()),
             Decoder::Vp9(_) | Decoder::Av1(_) => Ok(crate::playback_native::AvcColour::default()),
+        }
+    }
+    /// The signal the coding itself states, which is what a picture is graded
+    /// by when the container's own `colr` atom says nothing: an HEVC or AVC
+    /// VUI's three H.273 codes with the range its `video_signal_type` names, or
+    /// the colour an AV1 sequence header carries. VP9 states nothing of its own
+    /// and is left to the container.
+    pub fn bitstream_colour(&self) -> ColourDescription {
+        match &self.decoder {
+            Decoder::Hevc(d) => d
+                .parameters()
+                .0
+                .vui
+                .as_ref()
+                .and_then(|vui| vui.signal.as_ref())
+                .map(|signal| {
+                    let [primaries, transfer, matrix] = signal.colour.unwrap_or([0; 3]);
+                    ColourDescription {
+                        primaries,
+                        transfer,
+                        matrix,
+                        full_range: signal.full_range,
+                    }
+                })
+                .unwrap_or_default(),
+            Decoder::Avc(d) => d
+                .active_vui()
+                .and_then(|vui| vui.video_signal)
+                .map(|(_, full_range, colour)| {
+                    let [primaries, transfer, matrix] = colour.unwrap_or([0; 3]);
+                    ColourDescription {
+                        primaries,
+                        transfer,
+                        matrix,
+                        full_range,
+                    }
+                })
+                .unwrap_or_default(),
+            Decoder::Av1(d) => d
+                .color()
+                .map(crate::codec::av1_sequence::Color::signal)
+                .unwrap_or_default(),
+            Decoder::Vp9(_) => ColourDescription::default(),
+        }
+    }
+    /// The light the coding itself names for its pictures: an HEVC stream's
+    /// mastering display and content light level SEI messages, or the AV1
+    /// metadata OBUs of the same volume. An encoder that writes them in-band
+    /// often writes them nowhere else, so a container with no `mdcv`/`ccll` box
+    /// still has a tone-mappable answer. HEVC's messages are read from the
+    /// `hvcC`'s own NAL unit array as the decoder is built, so that half stands
+    /// at open; a stream that writes them only inside its packets states them
+    /// once one has been decoded.
+    pub fn bitstream_hdr(&self) -> HdrMetadata {
+        match &self.decoder {
+            Decoder::Hevc(d) => d.hdr(),
+            Decoder::Av1(d) => d.hdr(),
+            Decoder::Avc(_) | Decoder::Vp9(_) => HdrMetadata::default(),
         }
     }
     /// Whether frames come from the platform's hardware decoder.
@@ -667,5 +726,70 @@ mod tests {
             .nanoseconds()
             .is_err()
         );
+    }
+
+    /// The coding's half of a file's signal, read out of the stream itself: an
+    /// HEVC clip whose parameter sets name BT.2020 primaries, a PQ curve and the
+    /// BT.2020-NCL matrix states that triple through the reader, which is what
+    /// fills in a container that wrote no `colr` atom.
+    #[test]
+    fn an_hevc_parameter_set_states_its_own_signal() {
+        let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let mut source =
+            Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
+        let mut frames = 0;
+        while source.read_frame().unwrap().is_some() {
+            frames += 1;
+        }
+        assert_eq!(frames, 5);
+        assert_eq!(
+            source.bitstream_colour(),
+            ColourDescription {
+                primaries: 9,
+                transfer: 16,
+                matrix: 9,
+                full_range: false,
+            }
+        );
+    }
+
+    /// An AV1 clip that states its light the same way, in the only place it is
+    /// written: SVT-AV1's own metadata OBUs for a BT.2020/1 000 cd/m² volume and
+    /// a 1 234/567 content light level, spliced into the first packet of the
+    /// 32x32 ramp and muxed into a file with no `ccll`/`mdcv` box beside it.
+    #[cfg(not(all(target_os = "macos", feature = "videotoolbox")))]
+    #[test]
+    fn an_av1_metadata_obu_states_its_own_light() {
+        let data = include_bytes!("../tests/fixtures/av1/hdr-metadata.mp4").to_vec();
+        let mut source =
+            Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
+        assert!(source.bitstream_hdr().is_empty());
+        assert!(source.read_frame().unwrap().is_some());
+        let hdr = source.bitstream_hdr();
+        assert!(hdr.mastering.unwrap().is_hdr10());
+        assert_eq!((hdr.light.max_cll, hdr.light.max_fall), (1_234.0, 567.0));
+    }
+
+    /// The same clip's light, which the file writes in no box at all: SEI 137
+    /// states the BT.2020 mastering volume and SEI 144 the content light levels.
+    /// x265 wrote both messages into the `hvcC`'s NAL unit array as well as into
+    /// the first access unit, so a reader states them the moment the file is
+    /// open — which is when a caller that grades the first picture asks — and
+    /// this holds whether samples go to the software walk or a hardware session.
+    #[test]
+    fn an_hevc_sei_states_its_own_light() {
+        let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let mut source =
+            Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
+        let opened = source.bitstream_hdr();
+        assert!(opened.mastering.unwrap().is_hdr10());
+        assert_eq!(
+            (opened.light.max_cll, opened.light.max_fall),
+            (1_000.0, 400.0)
+        );
+        // Decoding the packets that repeat the messages states the same light,
+        // by whichever route the samples went.
+        assert!(source.read_frame().unwrap().is_some());
+        assert_eq!(source.bitstream_hdr(), opened);
     }
 }

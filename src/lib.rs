@@ -7,6 +7,7 @@ pub mod audio;
 pub mod audio_thread;
 pub mod backend;
 pub mod codec;
+pub mod color;
 pub mod container;
 #[cfg(feature = "mcp")]
 pub mod mcp;
@@ -415,6 +416,18 @@ fn buffer(size: usize) -> Result<Vec<u8>> {
         .map_err(|_| invalid("frame allocation failed"))?;
     result.resize(size, 0);
     Ok(result)
+}
+/// How many workers a packed frame of this many bytes is cut between. Each span
+/// has to hold enough pixels to outpay the cost of starting its worker, so a
+/// small picture keeps the one thread it came with. Both the YUV-to-RGB pass and
+/// the grade read this: each costs a few nanoseconds a pixel, so the same floor
+/// serves both.
+fn span_workers(bytes: usize) -> usize {
+    /// Pixels a span has to carry before a worker is worth waking for it: well
+    /// over the tens of microseconds a thread costs to start.
+    const MIN_SPAN_PIXELS: usize = 1 << 14;
+    let parallelism = std::thread::available_parallelism().map_or(1, |n| n.get());
+    parallelism.min(bytes / 3 / MIN_SPAN_PIXELS).max(1)
 }
 #[derive(Debug)]
 pub struct Stats {
@@ -2431,6 +2444,140 @@ mod play_controls {
         );
         let bright = fvid_media::render_play_pixels(2, 2, &gray, &hdr_opts, None);
         assert_ne!(base.2[0], bright.2[0]);
+    }
+
+    /// The curves behind `fvid media play --hdr-tonemap`, held to numbers instead
+    /// of to their own existence. Every mode is non-decreasing over 2000 steps of
+    /// the range a decoded channel actually arrives in, keeps black at black and
+    /// never leaves the displayable span. Reinhard, Hable, Möbius and ACES are then
+    /// pinned to sixteen points measured off this code. The ceiling alone would
+    /// not qualify them: both Hable and Möbius reach exactly 1.0 at 11.2, the white
+    /// the file normalises by, and both still report 1.0 there after the white is
+    /// pulled to 10 — only their 0.91803 and 0.98180 at 8.0 say which ceiling the
+    /// curve actually has. `pq_eotf` is ST 2084 written again from the standard's own
+    /// rationals and agrees to better than 1e-3 on a scale where full code is 100
+    /// — that is 100 cd/m² per unit, not the code's relative light. `hlg_eotf` is
+    /// twelve times BT.2100 scene light at every point probed (0.250000 against
+    /// 0.020833, 1.000000 against 0.083333, 3.179551 against 0.264963, 12.000002
+    /// against 1.000000): both of its branches lost the dividing 12 and this
+    /// records the factor as a named expectation, so repairing it has to change a
+    /// test rather than pass one silently. Möbius is checked against the native
+    /// track's own shoulder at the same joint and ceiling — after that curve was
+    /// rebuilt the two agree to six decimals across the range, which is more than
+    /// can be said for the modes whose numbers still do not transfer.
+    #[test]
+    fn the_legacy_hdr_curves_are_held_to_numbers() {
+        let st2084 = |v: f64| {
+            let m1 = 2610.0 / 16384.0;
+            let m2 = 2523.0 / 4096.0 * 128.0;
+            let (c1, c2, c3) = (3424.0 / 4096.0, 2413.0 / 4096.0 * 32.0, 2392.0 / 4096.0 * 32.0);
+            let vm = v.powf(1.0 / m2);
+            ((vm - c1).max(0.0) / (c2 - c3 * vm).max(1e-9)).powf(1.0 / m1)
+        };
+        let bt2100_hlg = |e: f64| {
+            let (a, b, c) = (0.17883277, 0.28466892, 0.55991073);
+            if e <= 0.5 {
+                (e * e) / 3.0
+            } else {
+                (((e - c) / a).exp() + b) / 12.0
+            }
+        };
+        let modes = [
+            fvid_media::HdrTonemap::Off,
+            fvid_media::HdrTonemap::Clip,
+            fvid_media::HdrTonemap::Reinhard,
+            fvid_media::HdrTonemap::Hable,
+            fvid_media::HdrTonemap::Mobius,
+            fvid_media::HdrTonemap::Aces,
+            fvid_media::HdrTonemap::MaxRgb,
+        ];
+        for mode in modes {
+            let label = fvid_media::hdr_tonemap_label(mode);
+            let mut previous = -1.0f32;
+            for step in 0..=2000u16 {
+                let x = 12.0 * f32::from(step) / 2000.0;
+                let y = fvid_media::tonemap_channel(x, mode);
+                assert!(
+                    y <= 1.0 + 1e-6,
+                    "{label} left the displayable span at {x}: {y}"
+                );
+                assert!(
+                    y + 1e-6 >= previous,
+                    "{label} went backwards from {previous} to {y} at {x}"
+                );
+                previous = y;
+            }
+            assert!(
+                fvid_media::tonemap_channel(0.0, mode).abs() < 1e-6,
+                "{label} lifted black"
+            );
+        }
+        // Points measured off this code, to five decimals. A curve that clamps
+        // cannot be qualified by its ceiling alone: normalise Hable by a smaller
+        // white, or give Möbius a lower peak, and both still report exactly 1.0 at
+        // 11.2 while saturating a stop early. The row below 11.2 is what names it.
+        let anchors = [
+            (fvid_media::HdrTonemap::Reinhard, 1.0f32, 0.5f32),
+            (fvid_media::HdrTonemap::Reinhard, 5.0, 0.833_33),
+            (fvid_media::HdrTonemap::Hable, 0.5, 0.171_97),
+            (fvid_media::HdrTonemap::Hable, 1.0, 0.304_30),
+            (fvid_media::HdrTonemap::Hable, 2.0, 0.492_92),
+            (fvid_media::HdrTonemap::Hable, 5.0, 0.783_15),
+            (fvid_media::HdrTonemap::Hable, 8.0, 0.918_03),
+            (fvid_media::HdrTonemap::Hable, 11.2, 1.0),
+            (fvid_media::HdrTonemap::Mobius, 0.5, 0.457_81),
+            (fvid_media::HdrTonemap::Mobius, 1.0, 0.661_61),
+            (fvid_media::HdrTonemap::Mobius, 2.0, 0.819_46),
+            (fvid_media::HdrTonemap::Mobius, 5.0, 0.945_33),
+            (fvid_media::HdrTonemap::Mobius, 8.0, 0.981_80),
+            (fvid_media::HdrTonemap::Mobius, 11.2, 1.0),
+            (fvid_media::HdrTonemap::Aces, 1.0, 0.803_80),
+            (fvid_media::HdrTonemap::Aces, 2.0, 0.914_86),
+        ];
+        for (mode, x, expected) in anchors {
+            let measured = fvid_media::tonemap_channel(x, mode);
+            assert!(
+                (measured - expected).abs() < 1e-4,
+                "{} is {measured} at {x}, measured as {expected}",
+                fvid_media::hdr_tonemap_label(mode)
+            );
+        }
+        // Möbius stays 1:1 below its joint, then gives ground without inverting.
+        for x in [0.0f32, 0.1, 0.25, 0.3] {
+            assert_eq!(fvid_media::tonemap_channel(x, fvid_media::HdrTonemap::Mobius), x);
+        }
+        for i in 0..=48u16 {
+            let x = 12.0 * f32::from(i) / 48.0;
+            let legacy = fvid_media::tonemap_channel(x, fvid_media::HdrTonemap::Mobius);
+            let native = crate::color::curve(crate::color::ToneMap::Mobius, x, 0.3, 11.2);
+            assert!(
+                (legacy - native).abs() < 1e-6,
+                "the two tracks' Möbius disagree at {x}: legacy {legacy}, native {native}"
+            );
+        }
+        for code in [0.25f32, 0.5, 0.75, 1.0] {
+            let expected = st2084(f64::from(code)) * 100.0;
+            let measured = f64::from(fvid_media::pq_eotf(code));
+            assert!(
+                (measured - expected).abs() < 1e-3,
+                "pq_eotf({code}) is {measured}, ST 2084 on this scale is {expected}"
+            );
+            let expected = bt2100_hlg(f64::from(code)) * 12.0;
+            let measured = f64::from(fvid_media::hlg_eotf(code));
+            assert!(
+                (measured - expected).abs() < 1e-4,
+                "hlg_eotf({code}) is {measured}, twelve times BT.2100 scene light is {expected}"
+            );
+        }
+        // The three transfer branches hand the same curve ranges that differ by
+        // factors of the standard's own units; pinning them keeps a future
+        // "fix" to one branch from quietly changing what the others mean.
+        assert!(
+            (fvid_media::expand_hdr_channel(1.0, fvid_media::COLOR_TRC_SMPTE2084) - 100.0).abs()
+                < 1e-4
+        );
+        assert!((fvid_media::expand_hdr_channel(1.0, fvid_media::COLOR_TRC_HLG) - 12.0).abs() < 1e-4);
+        assert_eq!(fvid_media::expand_hdr_channel(1.0, 1), 2.5);
     }
 }
 

@@ -74,6 +74,8 @@ pub mod hevc_vps;
 
 pub mod hevc_hrd;
 
+pub mod hevc_sei;
+
 pub mod hevc_vui;
 
 pub mod hevc_sps;
@@ -120,6 +122,8 @@ mod vp9_tables;
 pub mod vp9_transform;
 
 pub mod av1;
+
+pub mod av1_metadata;
 
 pub mod av1_sequence;
 
