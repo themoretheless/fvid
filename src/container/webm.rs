@@ -36,6 +36,8 @@ pub struct Track {
     /// subtitle blocks carry no length of their own, so this is the timing a
     /// track-level reader has left for the last block.
     pub default_duration_ns: u64,
+    /// CodecDelay in nanoseconds, independent of Segment TimestampScale.
+    pub codec_delay_ns: u64,
     /// Codec setup data from `CodecPrivate`. Vorbis carries its three header
     /// packets concatenated here, and the decoder cannot initialize without it.
     pub codec_private: Vec<u8>,
@@ -63,6 +65,8 @@ pub struct Packet {
     pub keyframe: bool,
     pub offset: u64,
     pub size: usize,
+    /// DiscardPadding in nanoseconds: positive trims end, negative trims start.
+    pub discard_padding_ns: i64,
 }
 impl Track {
     /// The size the picture is meant to be seen at: the coded one with the
@@ -254,6 +258,12 @@ fn uint<R: Read + Seek>(r: &mut R, e: Element) -> Result<u64> {
     Ok(bytes(r, e, 8)?
         .into_iter()
         .fold(0, |v, b| (v << 8) | u64::from(b)))
+}
+fn sint<R: Read + Seek>(r: &mut R, e: Element) -> Result<i64> {
+    let value = bytes(r, e, 8)?;
+    let mut signed = if value.first().is_some_and(|byte| byte & 0x80 != 0) { -1i64 } else { 0 };
+    for byte in value { signed = (signed << 8) | i64::from(byte); }
+    Ok(signed)
 }
 /// Timestamps and rates are IEEE-754, written as either four or eight bytes.
 fn float<R: Read + Seek>(r: &mut R, e: Element) -> Result<f64> {
@@ -487,6 +497,7 @@ impl<R: Read + Seek> WebmReader<R> {
                             channels: 0,
                             bit_depth: 0,
                             default_duration_ns: 0,
+                            codec_delay_ns: 0,
                             codec_private: Vec::new(),
                             colour: ColourDescription::default(),
                             hdr: HdrMetadata::default(),
@@ -515,6 +526,7 @@ impl<R: Read + Seek> WebmReader<R> {
                                 0x22b59c => current = text(&mut *reader, f, 128)?,
                                 0x447a => older = text(&mut *reader, f, 128)?,
                                 0x23e383 => track.default_duration_ns = uint(&mut *reader, f)?,
+                                0x56aa => track.codec_delay_ns = uint(&mut *reader, f)?,
                                 0x63a2 => {
                                     track.codec_private = bytes(&mut *reader, f, 1 << 20)?;
                                 }
@@ -655,6 +667,14 @@ impl<R: Read + Seek> WebmReader<R> {
                             0xa0 => {
                                 let fs = fields(&mut *reader, child, &mut *elements, limits.elements)?;
                                 let key = !fs.iter().any(|f| f.id == 0xfb);
+                                let mut padding = None;
+                                for field in &fs {
+                                    if field.id == 0x75a2 {
+                                        if padding.is_some() { return Err(invalid("duplicate Matroska DiscardPadding")); }
+                                        padding = Some(sint(&mut *reader, *field)?);
+                                    }
+                                }
+                                let first = packets.len();
                                 for block in fs {
                                     if block.id == 0xa1 {
                                         read_block(
@@ -667,6 +687,9 @@ impl<R: Read + Seek> WebmReader<R> {
                                             *limits,
                                         )?;
                                     }
+                                }
+                                for packet in &mut packets[first..] {
+                                    packet.discard_padding_ns = padding.unwrap_or(0);
                                 }
                             }
                             _ => {}
@@ -1021,6 +1044,7 @@ fn read_block<R: Read + Seek>(
         keyframe: if simple { h[2] & 0x80 != 0 } else { key },
         offset,
         size,
+        discard_padding_ns: 0,
     });
     Ok(())
 }
@@ -1033,6 +1057,36 @@ mod tests {
         assert!(payload.len() < 127);
         [id, &[0x80 | payload.len() as u8], payload].concat()
     }
+    #[test]
+    fn delay_and_signed_discard_padding_keep_nanosecond_units() {
+        let header = atom(&[0x1a, 0x45, 0xdf, 0xa3], &atom(&[0x42, 0x82], b"matroska"));
+        let info = atom(&[0x15, 0x49, 0xa9, 0x66], &atom(&[0x2a, 0xd7, 0xb1], &2_000_000u32.to_be_bytes()));
+        let track = atom(&[0xae], &[
+            atom(&[0xd7], &[1]), atom(&[0x83], &[2]), atom(&[0x86], b"A_AAC"),
+            atom(&[0x56, 0xaa], &21_333_333u32.to_be_bytes()),
+        ].concat());
+        let tracks = atom(&[0x16, 0x54, 0xae, 0x6b], &track);
+        for value in [0i64, 1, -1, 128, -129, 1_000_000, -1_000_000, i64::MIN, i64::MAX] {
+            // Include both compact negative/positive signed encodings and 8-byte extremes.
+            let encoded = value.to_be_bytes();
+            let width = if (-128..=127).contains(&value) { 1 } else { 8 };
+            for padding_first in [false, true] {
+                let block = atom(&[0xa1], &[0x81, 0, 3, 0, 0xe0]);
+                let padding = atom(&[0x75, 0xa2], &encoded[8-width..]);
+                let children = if padding_first { [padding, block] } else { [block, padding] };
+                let group = atom(&[0xa0], &children.concat());
+                let cluster = atom(&[0x1f, 0x43, 0xb6, 0x75], &[atom(&[0xe7], &[1]), group].concat());
+                let bytes = [header.clone(), vec![0x18, 0x53, 0x80, 0x67, 0xff], info.clone(), tracks.clone(), cluster].concat();
+                let mut reader = WebmReader::open(Cursor::new(bytes), Limits::default()).unwrap();
+                reader.scan_all().unwrap();
+                assert_eq!(reader.tracks[0].codec_delay_ns, 21_333_333);
+                assert_eq!(reader.packets[0].discard_padding_ns, value);
+                assert_eq!(reader.packets[0].pts_ns, 8_000_000);
+                assert_eq!(reader.read_packet(0).unwrap(), [0xe0]);
+            }
+        }
+    }
+
     fn fixture(lace: bool) -> Vec<u8> {
         let header = atom(&[0x1a, 0x45, 0xdf, 0xa3], &atom(&[0x42, 0x82], b"webm"));
         let track = atom(

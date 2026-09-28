@@ -476,3 +476,12 @@ repeated edits. Cumulative movie boundaries are rounded up to sample indices
 without per-edit duration drift. User intervals address this composed timeline.
 Nine integration tests pass, including exact range/silence/repeat PCM and a
 cross-edit interval; source edits beyond available audio fail explicitly.
+
+Matroska AAC export preparation: the owned demuxer now retains track CodecDelay
+and signed per-BlockGroup DiscardPadding. Both retain nanosecond units regardless
+of TimestampScale; positive padding trims the block end, negative its beginning.
+Reference: https://www.matroska.org/technical/elements.html . A synthetic EBML
+regression checks both child orders, compact signed values and i64 extremes with
+a non-default segment clock. 23 container tests pass. These fields are metadata
+only at this stage; native Matroska AAC PCM export and playback trimming are not
+yet connected to them.
