@@ -1057,13 +1057,27 @@ fn parse_track(
             )
         }
         (b"soun", b"mp4a") => {
-            // Only version 0 keeps `esds` at the offset the spec gives it; a later
-            // version inserts its extra fields before the configuration, and the
-            // track is skipped rather than searched at the wrong place.
-            if !audio_entry(entry.data, &mut result)? || u16be(entry.data, 8)? != 0 {
-                return Ok(None);
+            match u16be(entry.data, 8)? {
+                0 => {
+                    audio_entry(entry.data, &mut result)?;
+                    (28, Some(b"esds"))
+                }
+                2 => {
+                    if u32be(entry.data, 28)? != 72 || u32be(entry.data, 44)? != 0x7f000000 {
+                        return Err(invalid("invalid AAC version-2 sample description"));
+                    }
+                    let rate = f64::from_be_bytes(entry.data.get(32..40)
+                        .ok_or_else(|| invalid("truncated AAC sample rate"))?.try_into().unwrap());
+                    if !rate.is_finite() || rate < 1.0 || rate > f64::from(u32::MAX) || rate.fract() != 0.0 {
+                        return Err(invalid("invalid AAC version-2 sample rate"));
+                    }
+                    result.sample_rate = rate as u32;
+                    result.channels = u16::try_from(u32be(entry.data, 40)?)
+                        .ok().filter(|n| *n > 0).ok_or_else(|| invalid("invalid AAC channel count"))?;
+                    (64, Some(b"esds"))
+                }
+                _ => return Ok(None),
             }
-            (28, Some(b"esds"))
         }
         // Uncompressed PCM, as QuickTime writes it for a screen recording: the
         // fourcc states the byte order and `sample_size` the depth, so the entry

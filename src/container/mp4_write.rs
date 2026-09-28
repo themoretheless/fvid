@@ -40,12 +40,8 @@ pub fn write_adts_aac(data: &[u8], output: &mut impl Write) -> Result<u64> {
         u32::try_from(stream.packets()).map_err(|_| invalid("MP4 sample count overflow"))?;
     let duration = u32::try_from(stream.samples()).map_err(|_| invalid("MP4 duration overflow"))?;
     // Version-0 AudioSampleEntry represents sample rate in unsigned 16.16.
-    if stream.sample_rate > 65535 {
-        return Err(invalid(
-            "MP4 AAC sample rates above 65535 require an extended sample entry",
-        ));
-    }
-    let ftyp = atom(b"ftyp", b"M4A \0\0\0\0M4A isommp42")?;
+    let extended = stream.sample_rate > 65535;
+    let ftyp = atom(b"ftyp", if extended { b"qt  \0\0\0\0qt  " } else { b"M4A \0\0\0\0M4A isommp42" })?;
     let sizes: Vec<_> = (0..stream.packets())
         .map(|i| stream.packet(i).len() as u32)
         .collect();
@@ -78,6 +74,19 @@ pub fn write_adts_aac(data: &[u8], output: &mut impl Write) -> Result<u64> {
     entry[16..18].copy_from_slice(&stream.channels.to_be_bytes());
     entry[18..20].copy_from_slice(&16u16.to_be_bytes());
     put(&mut entry, 24, rate << 16);
+    if extended {
+        // QuickTime v2 stores sample rate as f64 and channels as u32.
+        entry.resize(64, 0);
+        entry[8..10].copy_from_slice(&2u16.to_be_bytes());
+        entry[16..18].copy_from_slice(&3u16.to_be_bytes());
+        entry[20..22].copy_from_slice(&(-2i16).to_be_bytes());
+        put(&mut entry, 24, 65536);
+        put(&mut entry, 28, 72);
+        entry[32..40].copy_from_slice(&f64::from(rate).to_be_bytes());
+        put(&mut entry, 40, u32::from(stream.channels));
+        put(&mut entry, 44, 0x7f000000);
+        put(&mut entry, 60, stream.samples_per_frame);
+    }
     // Add the terminal SLConfigDescriptor required by the ES descriptor.
     let mut esds = stream.extra_data();
     esds[5] += 3;

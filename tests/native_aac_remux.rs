@@ -3,7 +3,9 @@ use fvid::container::{adts, mp4, mp4_write};
 fn adts_to_mp4_preserves_packets_clock_and_owned_pcm() {
     for data in [include_bytes!("fixtures/audio/aac-stereo.aac").as_slice(),
         include_bytes!("fixtures/audio/aac-mono-44k.aac").as_slice(),
-        include_bytes!("fixtures/audio/aac-51-active.aac").as_slice()] {
+        include_bytes!("fixtures/audio/aac-51-active.aac").as_slice(),
+        include_bytes!("fixtures/audio/aac-96k.aac").as_slice(),
+        include_bytes!("fixtures/audio/aac-88k.aac").as_slice()] {
         let source = adts::Aac::parse(data, &Default::default()).unwrap();
         let mut output = Vec::new();
         assert_eq!(mp4_write::write_adts_aac(data, &mut output).unwrap(), source.packets() as u64);
@@ -44,4 +46,23 @@ fn remux_cli_never_overwrites_and_rejects_truncated_tail() {
     assert!(!failed.exists());
     assert_eq!(std::fs::read_dir(&dir).unwrap().count(),2);
     std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn extended_audio_entry_rejects_invalid_rates_and_channels() {
+    let mut bytes = Vec::new();
+    mp4_write::write_adts_aac(include_bytes!("fixtures/audio/aac-96k.aac"), &mut bytes).unwrap();
+    let entry = bytes.windows(4).rposition(|s| s == b"mp4a").unwrap()+4;
+    assert_eq!(&bytes[entry+8..entry+10], &2u16.to_be_bytes());
+    assert_eq!(f64::from_be_bytes(bytes[entry+32..entry+40].try_into().unwrap()),96000.0);
+    for rate in [f64::NAN,f64::INFINITY,-1.0,0.0,96000.5] {
+        let mut invalid = bytes.clone();
+        invalid[entry+32..entry+40].copy_from_slice(&rate.to_be_bytes());
+        assert!(mp4::Mp4Reader::open(std::io::Cursor::new(invalid),Default::default()).is_err());
+    }
+    for channels in [0u32,65536] {
+        let mut invalid = bytes.clone();
+        invalid[entry+40..entry+44].copy_from_slice(&channels.to_be_bytes());
+        assert!(mp4::Mp4Reader::open(std::io::Cursor::new(invalid),Default::default()).is_err());
+    }
 }

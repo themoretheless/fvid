@@ -533,11 +533,16 @@ conversion. Fourteen integration tests pass, including CLI rate+stereo+gain.
 packets into a single-track indexed MP4, using owned sample tables, ES descriptors
 and file writing. It does not decode or re-encode packets. No priming edit is
 invented, because ADTS does not state one. Leading/trailing unrepresented data
-and truncated frames are rejected. Version-0 audio entries currently restrict
-sample rate to <=65535 Hz; other rates need extended entries. Output publication
+and truncated frames are rejected. Rates through 65535 Hz use version-0 audio entries; higher rates use
+QuickTime-compatible version-2 descriptions with floating-point sample rate. Output publication
 is atomic and does not replace existing paths.
 Two integration tests verify mono/stereo/5.1 packet equality, timing and exact
 owned PCM before/after remux, plus CLI/no-overwrite/truncation behavior. Independent
 ffprobe identified 13 AAC packets, 48000 Hz, 13312 samples; FFmpeg reference-only
 decoding of the output matched the saved source PCM byte-for-byte. This adds an
 owned AAC MP4 writer; it does not yet replace arbitrary multi-track remux.
+
+Owned MP4 AAC parsing/writing now supports v2 sound descriptions. Real 88200
+and 96000 Hz fixtures preserve packets and decoded PCM. Invalid floating-point
+rates, fractional rates and invalid channel counts are rejected. High-rate output
+uses the qt compatible brand rather than claiming version-0 ISO sample entries.
