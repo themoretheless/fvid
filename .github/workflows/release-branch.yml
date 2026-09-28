@@ -1,0 +1,44 @@
+name: Advance release branch
+
+on:
+  push:
+    tags:
+      - 'fvid-v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-fvid
+  cancel-in-progress: false
+
+jobs:
+  advance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout tagged commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+
+      - name: Install Rust
+        uses: themoretheless/.github/.github/actions/setup-rust@a6c40a906bc786a3668362d270ca95212b5bffce # v1
+        with:
+          rust-toolchain: "1.98.1"
+
+      - name: Resolve package version
+        id: package
+        uses: themoretheless/.github/.github/actions/cargo-package-version@a6c40a906bc786a3668362d270ca95212b5bffce # v1
+        with:
+          package-name: fvid
+          tag-prefix: fvid-v
+
+      - name: Validate tag and advance release branch
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          EXPECTED_TAG: ${{ steps.package.outputs.tag }}
+        run: |
+          test "$RELEASE_TAG" = "$EXPECTED_TAG"
+          bash scripts/advance-release-branch.sh "$RELEASE_TAG"

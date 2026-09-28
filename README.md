@@ -1,5 +1,7 @@
 # Fvid
 
+Релизы: [процесс выпуска](docs/RELEASING.md), ветка `release` и теги `fvid-v*`.
+
 ## Собственный плеер без FFmpeg
 
 ```sh
