@@ -13,7 +13,7 @@
 //! derives for itself are the same kind of object by the time they are applied.
 use crate::color::hdr::{ColourDescription, HdrMetadata};
 use crate::color::log::Log;
-use crate::color::lut::{CubePlan, Interpolation, Lut};
+use crate::color::lut::{CubePlan, Interpolation, Lut, Lut3d};
 use crate::color::primaries::Primaries;
 use crate::color::tonemap::{DisplayTarget, ToneMap};
 use crate::color::transfer::Transfer;
@@ -204,6 +204,24 @@ impl Grade {
         match &self.lut {
             None => mapped,
             Some(lut) => lut.sample(mapped, self.interpolation),
+        }
+    }
+
+    /// The grid the fragment shader binds, for the grades a single texture read
+    /// can carry.
+    ///
+    /// A grade with no LUT after its baked conversion *is* one grid already, so
+    /// the shader is handed the plan's own table and both routes read the same
+    /// nodes. A grade that carries a LUT is two tables read one after the other,
+    /// and one texture cannot hold that; joining them is not a rounding detail
+    /// either — measured at `a_chained_grade_is_not_a_single_lookup` below, a
+    /// composed grid moves a code by as much as six at the edge length a caller
+    /// is given by default, and no edge length fixes it. So a chained grade
+    /// stays on the route that takes both steps.
+    pub fn shader_grid(&self) -> Option<Lut3d> {
+        match (&self.lut, &self.cube) {
+            (None, Lut::Three(cube)) => Some(cube.clone()),
+            _ => None,
         }
     }
 
@@ -954,5 +972,123 @@ mod tests {
         // The stray byte is not a colour value, so no channel ever saw it.
         assert_eq!(tail[3], 4);
         grade.apply(&mut []);
+    }
+
+    /// BT.2100 PQ master with its own light figures.
+    fn hdr10() -> HdrMetadata {
+        HdrMetadata {
+            light: ContentLight {
+                max_cll: 1_000.0,
+                max_fall: 400.0,
+            },
+            ..Default::default()
+        }
+    }
+
+    /// A look with a shoulder of its own and cross-talk between two channels,
+    /// so a grade that carries it is joined from two curved tables rather than
+    /// one flat ramp.
+    fn look() -> Lut {
+        Lut::Three(Lut3d::from_fn(17, |v| {
+            let s = |x: f32| {
+                let smooth = x * x * (3.0 - 2.0 * x);
+                x + 0.25 * (smooth - x)
+            };
+            [
+                s(v[0]) + 0.05 * (v[1] - v[2]),
+                s(v[1]),
+                s(v[2]) - 0.05 * (v[1] - v[2]),
+            ]
+        }))
+    }
+
+    /// The grid a LUT-less grade hands the shader is the plan's own table: the
+    /// same nodes, unsampled, so what the fragment reads and what the CPU loop
+    /// reads are the same numbers and neither route rebakes anything.
+    #[test]
+    fn a_grade_without_a_lut_hands_the_shader_its_own_grid() {
+        let plain = mixing();
+        let grid = plain.shader_grid().expect("no LUT, one grid");
+        let Lut::Three(cube) = &plain.cube else {
+            panic!("a baked plan is a grid");
+        };
+        assert_eq!(grid.size, 33);
+        assert_eq!(grid.data.len(), cube.data.len());
+        for (a, b) in grid.data.iter().zip(&cube.data) {
+            assert_eq!(a, b);
+        }
+        // The camera-log route separates into byte tables on the CPU, and it is
+        // still one grid for the shader — the tables are a fast path, not a
+        // different colour.
+        let log = Grade::new(
+            bt709(),
+            &HdrMetadata::default(),
+            Settings {
+                log: Some(Log::SLog3),
+                ..Settings::default()
+            },
+            None,
+        );
+        assert!(log.tables.is_some());
+        assert!(log.shader_grid().is_some());
+    }
+
+    /// A LUT after the baked grid cannot be folded into it, which is why
+    /// [`Grade::shader_grid`] refuses a chained grade instead of handing the
+    /// shader a table that lies. The comparison is a composed grid read at the
+    /// very edge length the grade was baked at, against the two-step read the
+    /// grade itself makes, over 64³ sample points and every interpolation:
+    /// nearest lands on the same node either way (0 of 786 432 channels moved),
+    /// but the reads that mix nodes part by up to six codes at a 17 grid, four
+    /// at 33 and three at 64 — and getting *bigger* does not close it, because
+    /// the two routes interpolate different functions, not the same one at
+    /// different resolutions.
+    #[test]
+    fn a_chained_grade_is_not_a_single_lookup() {
+        let step = |code: u8| f32::from(code) / 255.0;
+        for (size, nearest, trilinear, tetrahedral) in
+            [(17usize, 0i32, 6i32, 6i32), (33, 0, 4, 5), (64, 0, 3, 3)]
+        {
+            for (interp, want) in [
+                (Interpolation::Nearest, nearest),
+                (Interpolation::Trilinear, trilinear),
+                (Interpolation::Tetrahedral, tetrahedral),
+            ] {
+                let grade = Grade::new(
+                    bt2100(16),
+                    &hdr10(),
+                    Settings {
+                        size,
+                        interpolation: interp,
+                        ..Settings::video(DisplayTarget::sdr(100.0))
+                    },
+                    Some(look()),
+                );
+                assert!(
+                    grade.shader_grid().is_none(),
+                    "{interp:?}: a grade with a LUT after its grid is two tables, not one"
+                );
+                let composed = Lut3d::from_fn(size, |rgb| grade.rgb(rgb));
+                let mut worst = 0i32;
+                for r in 0..64u8 {
+                    for g in 0..64u8 {
+                        for b in 0..64u8 {
+                            let codes = [step(r * 4), step(g * 4), step(b * 4)];
+                            let two = grade.rgb(codes);
+                            let one = composed.sample(codes, interp);
+                            for ch in 0..3 {
+                                let a = (two[ch].clamp(0.0, 1.0) * 255.0).round() as i32;
+                                let b2 = (one[ch].clamp(0.0, 1.0) * 255.0).round() as i32;
+                                worst = worst.max((a - b2).abs());
+                            }
+                        }
+                    }
+                }
+                assert_eq!(
+                    worst, want,
+                    "{interp:?} at a {size} grid: the codes one composed read is off by"
+                );
+            }
+        }
     }
 }
