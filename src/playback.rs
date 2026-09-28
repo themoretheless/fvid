@@ -211,3 +211,31 @@ mod tests {
         assert!(reader.read_frame().is_err());
     }
 }
+
+
+/// Video-container readers and the common native reader.
+pub mod video {
+    pub use crate::{playback_mp4 as mp4, playback_native as native, playback_webm as webm};
+}
+
+/// Audio readers by source/container. The old `crate::playback_*` names remain supported.
+#[cfg(feature = "player")]
+pub mod audio {
+    pub use crate::{
+        playback_aac as aac, playback_ac3 as ac3, playback_aiff as aiff, playback_au as au,
+        playback_avi_audio as avi, playback_flac as flac, playback_mp3 as mp3,
+        playback_mp4_audio as mp4, playback_ogg_audio as ogg, playback_smf as smf,
+        playback_wav as wav, playback_webm_audio as webm, playback_xm as xm,
+    };
+}
+
+/// Subtitle readers attached to supported video containers.
+#[cfg(feature = "player")]
+pub mod subtitle_tracks {
+    pub use crate::{playback_mp4_subtitles as mp4, playback_webm_subtitles as webm};
+}
+
+/// Playback worker and bounded-spool implementation details.
+pub mod runtime {
+    pub use crate::{playback_spool as spool, playback_thread as thread};
+}
