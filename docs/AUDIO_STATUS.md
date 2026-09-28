@@ -321,7 +321,7 @@ raw-data-block dispatch and output normalization remain unfinished.
 
 `codec::aac_pair` reads independent/common-window channel pairs and all valid
 mid/side mask modes. Both channel reads are one transaction. Tests cover masks,
-truncation, reserved mode rejection, and the first real packet from
-`aac-stereo.aac` through its END element. This establishes real packet syntax
-coverage for that packet, not decoded PCM correctness or complete-file support;
+truncation, reserved mode rejection, and all 13 real packets from
+`aac-stereo.aac` through their END elements. This establishes complete syntax
+coverage for this fixture, not decoded PCM correctness or general file support;
 stereo reconstruction and the remaining tools still need integration.

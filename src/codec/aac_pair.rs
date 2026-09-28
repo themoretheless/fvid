@@ -89,31 +89,41 @@ mod tests {
         }
     }
     #[test]
-    fn real_adts_stereo_first_pair_parses() {
+    fn real_adts_stereo_all_pairs_parse() {
         let data = include_bytes!("../../tests/fixtures/audio/aac-stereo.aac");
-        let length =
-            ((data[3] as usize & 3) << 11) | ((data[4] as usize) << 3) | (data[5] as usize >> 5);
-        let mut bits = BitReader::new(&data[7..length]);
-        // Encoder metadata may precede the first channel pair in a fill element.
-        loop {
-            let element = bits.read(3).unwrap();
-            if element == 6 {
-                let mut count = bits.read(4).unwrap() as usize;
-                if count == 15 {
-                    count += bits.read(8).unwrap() as usize;
-                    count -= 1;
+        let mut start = 0;
+        let mut frames = 0;
+        while start < data.len() {
+            let data = &data[start..];
+            let length = ((data[3] as usize & 3) << 11)
+                | ((data[4] as usize) << 3)
+                | (data[5] as usize >> 5);
+            let mut bits = BitReader::new(&data[7..length]);
+            // Encoder metadata may precede the first channel pair in a fill element.
+            loop {
+                let element = bits.read(3).unwrap();
+                if element == 6 {
+                    let mut count = bits.read(4).unwrap() as usize;
+                    if count == 15 {
+                        count += bits.read(8).unwrap() as usize;
+                        count -= 1;
+                    }
+                    bits.skip(count * 8).unwrap();
+                } else {
+                    assert_eq!(element, 1);
+                    bits.read(4).unwrap();
+                    break;
                 }
-                bits.skip(count * 8).unwrap();
-            } else {
-                assert_eq!(element, 1);
-                bits.read(4).unwrap();
-                break;
             }
+            let config = AacConfig::parse(&[0x11, 0x90]).unwrap();
+            let pair = ChannelPair::read(&mut bits, &config)
+                .unwrap_or_else(|e| panic!("frame {frames}: {e}"));
+            assert!(!pair.left.quantized.is_empty());
+            assert_eq!(bits.read(3).unwrap(), 7);
+            start += length;
+            frames += 1;
         }
-        let config = AacConfig::parse(&[0x11, 0x90]).unwrap();
-        let pair = ChannelPair::read(&mut bits, &config).unwrap();
-        assert!(!pair.left.quantized.is_empty());
-        assert_eq!(bits.read(3).unwrap(), 7);
+        assert_eq!(frames, 13);
     }
     #[test]
     fn reserved_mask_is_rejected_before_channels() {
