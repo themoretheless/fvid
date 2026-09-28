@@ -45,7 +45,7 @@ impl ChannelData {
         *noise = next;
         Ok(output)
     }
-    fn spectrum_tools(
+    pub(crate) fn spectrum_tools(
         &self,
         config: &AacConfig,
         allow: bool,

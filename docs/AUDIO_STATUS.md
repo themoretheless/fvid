@@ -357,3 +357,10 @@ and commits random state only after successful reconstruction of the channel.
 Tests verify band energies across eight short windows and state rollback after
 a later invalid band. Correlated stereo PNS and final PCM validation remain
 pending; the existing ordinary-only entry point still rejects noise explicitly.
+
+`ChannelPair::spectra_with_noise` integrates stereo PNS, sharing the left noise
+shape at the right energy for correlated bands and bypassing ordinary mid/side
+on noise bands. Random state commits after both channels and stereo validation.
+All 13 stereo-fixture packets now reconstruct finite full-size spectra. Tests
+cover correlation, independence, energy and rollback. This is not yet a PCM
+reference comparison; TNS and final playback integration remain pending.

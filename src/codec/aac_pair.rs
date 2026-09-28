@@ -14,10 +14,34 @@ impl ChannelPair {
     /// Restore ordinary and intensity stereo bands. Noise bands still require
     /// their dedicated reconstruction tool and are rejected.
     pub fn ordinary_spectra(&self, config: &AacConfig) -> Result<(Vec<f32>, Vec<f32>)> {
-        let mut left = self.left.ordinary_spectrum(config)?;
-        let mut right = self
+        let left = self.left.ordinary_spectrum(config)?;
+        let right = self
             .right
             .spectrum_with_intensity(config, self.mid_side.is_some())?;
+        self.stereo_tools(config, left, right)
+    }
+    /// Reconstruct PNS and stereo jointly; any channel or geometry error
+    /// leaves the caller's noise generator at its original state.
+    pub fn spectra_with_noise(
+        &self,
+        config: &AacConfig,
+        noise: &mut super::aac_noise::NoiseState,
+    ) -> Result<(Vec<f32>, Vec<f32>)> {
+        let mut next = noise.clone();
+        let left = self.left.spectrum_tools(config, false, Some(&mut next))?;
+        let right = self
+            .right
+            .spectrum_tools(config, self.mid_side.is_some(), Some(&mut next))?;
+        let result = self.stereo_tools(config, left, right)?;
+        *noise = next;
+        Ok(result)
+    }
+    fn stereo_tools(
+        &self,
+        config: &AacConfig,
+        mut left: Vec<f32>,
+        mut right: Vec<f32>,
+    ) -> Result<(Vec<f32>, Vec<f32>)> {
         if let Some(mask) = &self.mid_side {
             if self.left.info != self.right.info
                 || mask.len() != self.left.info.group_lengths.len()
@@ -52,6 +76,24 @@ impl ChannelPair {
                                 let invert = self.explicit_mask && enabled;
                                 let sign = if positive != invert { 1.0 } else { -1.0 };
                                 right[i] = left[i] * sign * 2.0f32.powf(-f32::from(position) / 4.0);
+                                continue;
+                            }
+                            let left_noise = self.left.codebooks[group][band] == 13;
+                            let right_noise = self.right.codebooks[group][band] == 13;
+                            if left_noise || right_noise {
+                                if left_noise && right_noise && enabled {
+                                    if let (
+                                        super::aac_scalefactors::BandScale::Noise(le),
+                                        super::aac_scalefactors::BandScale::Noise(re),
+                                    ) = (
+                                        self.left.scales[group][band],
+                                        self.right.scales[group][band],
+                                    ) {
+                                        right[i] = (f64::from(left[i])
+                                            * 2.0f64.powf(f64::from(re - le) / 4.0))
+                                            as f32;
+                                    }
+                                }
                                 continue;
                             }
                             let (mid, side) = (left[i], right[i]);
@@ -153,6 +195,7 @@ mod tests {
         let data = include_bytes!("../../tests/fixtures/audio/aac-stereo.aac");
         let mut start = 0;
         let mut frames = 0;
+        let mut noise = super::super::aac_noise::NoiseState::default();
         while start < data.len() {
             let data = &data[start..];
             let length = ((data[3] as usize & 3) << 11)
@@ -179,6 +222,9 @@ mod tests {
             let pair = ChannelPair::read(&mut bits, &config)
                 .unwrap_or_else(|e| panic!("frame {frames}: {e}"));
             assert!(!pair.left.quantized.is_empty());
+            let (left, right) = pair.spectra_with_noise(&config, &mut noise).unwrap();
+            assert_eq!((left.len(), right.len()), (1024, 1024));
+            assert!(left.iter().chain(&right).all(|x| x.is_finite()));
             assert_eq!(bits.read(3).unwrap(), 7);
             start += length;
             frames += 1;
@@ -252,6 +298,51 @@ mod tests {
         }
         pair.mid_side = None;
         assert!(pair.ordinary_spectra(&config).is_err());
+    }
+    #[test]
+    fn stereo_noise_correlation_energy_and_error_rollback() {
+        use crate::codec::{
+            aac_ics::IcsInfo,
+            aac_noise::NoiseState,
+            aac_scalefactors::BandScale,
+            aac_synthesis::{WindowSequence, WindowShape},
+        };
+        let channel = |energy| ChannelData {
+            info: IcsInfo {
+                sequence: WindowSequence::OnlyLong,
+                shape: WindowShape::Sine,
+                max_sfb: 1,
+                group_lengths: vec![1],
+            },
+            codebooks: vec![vec![13]],
+            scales: vec![vec![BandScale::Noise(energy)]],
+            quantized: vec![0; 4],
+            pulse: None,
+        };
+        let mut pair = ChannelPair {
+            left: channel(0),
+            right: channel(4),
+            mid_side: Some(vec![vec![true]]),
+            explicit_mask: true,
+        };
+        let config = AacConfig::parse(&[0x11, 0x90]).unwrap();
+        let mut noise = NoiseState::default();
+        let (left, right) = pair.spectra_with_noise(&config, &mut noise).unwrap();
+        for i in 0..4 {
+            assert_eq!(right[i], 2.0 * left[i]);
+        }
+        let energy: f64 = right.iter().map(|&v| f64::from(v).powi(2)).sum();
+        assert!((energy - 4.0).abs() < 1e-6);
+        pair.mid_side = Some(vec![vec![false]]);
+        noise.reset();
+        let (independent_left, independent_right) =
+            pair.spectra_with_noise(&config, &mut noise).unwrap();
+        assert_eq!(left, independent_left);
+        assert_ne!(right, independent_right);
+        let saved = noise.clone();
+        pair.mid_side = Some(vec![]);
+        assert!(pair.spectra_with_noise(&config, &mut noise).is_err());
+        assert_eq!(noise, saved);
     }
     #[test]
     fn reserved_mask_is_rejected_before_channels() {
