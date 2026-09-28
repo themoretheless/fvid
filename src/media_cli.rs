@@ -2,6 +2,12 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str) == Some("export-y4m") {
+        if args.len() != 3 { return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m".into()); }
+        let frames = fvid::native_export::export_y4m(std::path::Path::new(&args[1]), std::path::Path::new(&args[2]))?;
+        println!("{{\"backend\":\"fvid\",\"video_frames\":{frames}}}");
+        return Ok(());
+    }
     if let Some((path, quiet, interval)) = plain_decode(args)? {
         let stats = fvid::native_media::decode_video_interval(std::path::Path::new(path), interval)?;
         if !quiet {

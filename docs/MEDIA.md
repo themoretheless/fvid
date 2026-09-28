@@ -325,3 +325,24 @@ Native media and the camera bridge call `NativeReader::software`; codec
 selection is local to that reader and requires no process-wide environment
 change. Regression tests also run with `videotoolbox` enabled and still require
 backend `fvid` and the original Main10 sample format.
+
+## Native planar export
+
+```sh
+cargo run --offline --locked --no-default-features -- media export-y4m INPUT OUTPUT.y4m
+```
+
+`native_export::export_y4m` writes decoded planar samples directly, including
+10-bit HEVC, with rational frame rate, pixel aspect and full/limited range in
+the Y4M header. This route uses owned software codecs and no FFmpeg. It requires
+constant contiguous frame timing and fixed supported planar geometry/depth;
+rotated inputs and unsupported layouts are rejected instead of silently changed.
+It is an uncompressed planar export, not a replacement for every legacy codec
+encoder or filtered transcode operation.
+
+The output is staged in the destination directory, flushed and published by a
+non-overwriting hard link. An existing destination is never replaced; a decode
+failure cleans the temporary file. Filesystems without hard-link support report
+an error rather than falling back to an overwriting rename. Tests run the CLI,
+compare every Main10 sample with the stored oracle, preserve an existing output,
+and check cleanup after a truncated second frame.

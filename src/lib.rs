@@ -54,6 +54,7 @@ pub mod player_gpu;
 #[cfg(feature = "media")]
 pub mod media;
 pub mod native_media;
+pub mod native_export;
 pub mod publish;
 pub mod resident;
 #[cfg(feature = "player")]
