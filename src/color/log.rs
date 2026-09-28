@@ -511,6 +511,39 @@ mod tests {
         assert_eq!(Log::SLog3.gamut(), Some(Primaries::S_GAMUT3));
     }
 
+    /// Every code a camera writes has to come back to itself: the claim a log
+    /// profile exists for is not that a curve bends the right way at the points
+    /// a vendor's table quotes, but that the whole integer range survives the
+    /// walk out of the codes, through linear light, and back. Swept at 10 and 12
+    /// bits and over the legal range in both directions, since a clip's own
+    /// blanks sit below the pedestal and an extended recording above the top.
+    /// Worst measured error 6.1e-5 of a code at 10 bits and 2.4e-4 at 12, both
+    /// at code 949 of the S-Log curves, at the end of the range where a signal
+    /// is largest and f32 is coarsest; no other profile exceeds 3.3e-5.
+    ///
+    /// Walking integers rather than sampling 201 points is what makes this more
+    /// than a repeat of `every_profile_round_trips_over_its_own_domain`: the
+    /// steps of a coarse sample land between the branch seams, while an exact
+    /// code hits them. Drifting one S-Log3 constant by a part in 10 000 leaves
+    /// the sampled test green and fails this one at code 172, the toe seam,
+    /// because decode then lands on the other branch of the curve.
+    #[test]
+    fn every_code_a_camera_writes_comes_back_to_itself() {
+        for profile in Log::ALL {
+            for bits in [10u32, 12] {
+                for code in 0..=(1u32 << bits) - 1 {
+                    let signal = profile.signal_from_code(code as f32, bits);
+                    let linear = profile.to_linear(signal);
+                    let back = profile.code_from_signal(profile.from_linear(linear), bits);
+                    assert!(
+                        (back - code as f32).abs() <= 2e-3,
+                        "{profile:?} {bits}-bit code {code} → {signal} → {linear} → {back}"
+                    );
+                }
+            }
+        }
+    }
+
     #[test]
     fn every_profile_round_trips_over_its_own_domain() {
         for profile in Log::ALL {
