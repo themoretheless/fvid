@@ -373,3 +373,28 @@ fn surround_to_stereo_and_mono_preserves_timing_and_wav_layout() {
     }
     std::fs::remove_dir_all(dir).unwrap();
 }
+
+#[test]
+fn native_resample_cli_keeps_duration_and_sets_output_geometry() {
+    let dir = std::env::temp_dir().join(format!("fvid-aac-rate-{}", std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/audio/aac-native-edit.m4a");
+    for rate in [16000u32, 48000] {
+        let output = dir.join(format!("{rate}.wav"));
+        let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "decode-audio"]).arg(&source).arg(&output)
+            .args(["--rate", &rate.to_string(), "--channels", "2", "--volume", "0.5"])
+            .output().unwrap();
+        assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
+        let bytes = std::fs::read(output).unwrap();
+        let frames = (5645u64*u64::from(rate)).div_ceil(44100) as u32;
+        assert_eq!(u32::from_le_bytes(bytes[24..28].try_into().unwrap()), rate);
+        assert_eq!(u32::from_le_bytes(bytes[28..32].try_into().unwrap()), rate*8);
+        assert_eq!(u32::from_le_bytes(bytes[68..72].try_into().unwrap()), frames);
+        assert_eq!(bytes.len(), 80+frames as usize*8);
+        for pair in bytes[80..].chunks_exact(8) { assert_eq!(&pair[..4], &pair[4..]); }
+        // Mono source remains audible in both output channels.
+        assert!(bytes[80..].chunks_exact(4).any(|v| f32::from_le_bytes(v.try_into().unwrap()).abs()>0.01));
+    }
+    std::fs::remove_dir_all(dir).unwrap();
+}

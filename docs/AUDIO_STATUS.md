@@ -514,3 +514,15 @@ bit-identical libswresample policy. Gain is applied after mixing. WAV channel
 mask, byte rate and payload size describe the output layout, while sample-frame
 count/timing stay unchanged. Other output layouts remain unsupported. Tests use
 six distinct active source channels and an independent f64 mixing calculation.
+
+Native AAC export supports `--rate HZ` (also `--sample-rate`) in 8000..=384000.
+The owned streaming resampler uses a Blackman-windowed sinc, a ratio-dependent
+low-pass cutoff/support, and integer rational output positions. It holds only
+filter history/lookahead, extends edge samples at stream boundaries, and emits
+ceil(input_frames * output_rate / input_rate) frames. Equal-rate conversion is
+byte-preserving. Interval selection precedes mixing/gain/resampling; WAV sizes,
+rate and frame statistics reflect the final output. This is a FVid algorithm,
+not an assertion of libswresample-identical samples or broad quality benchmarking.
+Two DSP tests verify exact counts, constant signals, channel isolation, chunk
+independence, 1 kHz passband amplitude and 12 kHz rejection during 48-to-16 kHz
+conversion. Fourteen integration tests pass, including CLI rate+stereo+gain.

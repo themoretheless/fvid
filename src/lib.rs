@@ -105,3 +105,5 @@ pub use y4m::process_gpu_chain;
 pub(crate) use y4m::line;
 
 pub mod virtual_camera;
+
+mod pcm_resample;

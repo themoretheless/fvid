@@ -222,6 +222,21 @@ pub fn export_aac_pcm_transformed(
     volume: f64,
     channels: Option<u16>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
+    export_aac_pcm_resampled(source, destination, interval, volume, channels, None)
+}
+
+/// Native AAC export including band-limited sample-rate conversion.
+pub fn export_aac_pcm_resampled(
+    source: &Path,
+    destination: &Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    volume: f64,
+    channels: Option<u16>,
+    sample_rate: Option<u32>,
+) -> Result<crate::native_media::AudioDecodeStats> {
+    if sample_rate.is_some_and(|rate| !(8000..=384000).contains(&rate)) {
+        return Err(invalid("sample rate must be within 8000..=384000"));
+    }
     if !volume.is_finite() || !(0.0..=64.0).contains(&volume) {
         return Err(invalid("volume must be a finite linear gain within 0..=64"));
     }
@@ -237,7 +252,8 @@ pub fn export_aac_pcm_transformed(
     if data.len() > limits.file_bytes {
         return Err(invalid("AAC input exceeds container byte limit"));
     }
-    let input_channels = aac_channels(&data)?;
+    let (input_rate, input_channels) = aac_geometry(&data)?;
+    let output_rate = sample_rate.unwrap_or(input_rate);
     let output_channels = channels.unwrap_or(input_channels);
     if output_channels != input_channels && !matches!(output_channels, 1 | 2) {
         return Err(invalid("native AAC channel conversion supports mono or stereo output"));
@@ -253,7 +269,8 @@ pub fn export_aac_pcm_transformed(
     }).ok_or_else(|| invalid("cannot reserve PCM output"))??;
     let mut output = BufWriter::new(file);
     if wav { output.write_all(&[0; 80])?; }
-    let mut pcm = PcmGain { output: &mut output, gain: volume as f32, input_channels, output_channels, frame: [0.0; 6], filled: 0 };
+    let mut resampler = crate::pcm_resample::Resampler::new(&mut output, input_rate, output_rate, output_channels)?;
+    let mut pcm = PcmGain { output: &mut resampler, gain: volume as f32, input_channels, output_channels, frame: [0.0; 6], filled: 0 };
     let mut stats = if data.get(4..8) == Some(b"ftyp") {
         crate::native_media::decode_mp4_aac_pcm_interval(&data, &mut pcm, interval)?
     } else if data.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
@@ -263,6 +280,8 @@ pub fn export_aac_pcm_transformed(
     };
     if pcm.filled != 0 { return Err(invalid("incomplete decoded audio frame")); }
     stats.channels = output_channels;
+    stats.sample_frames = resampler.finish()?;
+    stats.sample_rate = output_rate;
     if wav {
         let header = float_wav_header(&stats)?;
         output.seek(SeekFrom::Start(0))?;
@@ -359,7 +378,7 @@ impl<W: Write> Write for PcmGain<'_, W> {
     fn flush(&mut self) -> std::io::Result<()> { self.output.flush() }
 }
 
-fn aac_channels(data: &[u8]) -> Result<u16> {
+fn aac_geometry(data: &[u8]) -> Result<(u32, u16)> {
     let asc = if data.get(4..8) == Some(b"ftyp") {
         let reader = crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())?;
         let tracks: Vec<_> = reader.tracks().iter().filter(|t| t.handler == *b"soun").collect();
@@ -374,5 +393,5 @@ fn aac_channels(data: &[u8]) -> Result<u16> {
         crate::container::adts::Aac::parse(data, &Default::default())?.frames[0].asc.to_vec()
     };
     let decoder = crate::codec::aac_native::NativeAacDecoder::new(&asc)?;
-    Ok(u16::from(decoder.channels()))
+    Ok((decoder.sample_rate(), u16::from(decoder.channels())))
 }
