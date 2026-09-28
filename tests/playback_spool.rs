@@ -1,4 +1,6 @@
-use fvid::playback_spool::{Source, Spool, lead_bytes, source_rate};
+use fvid::playback_spool::{
+    SPOOL_LEAD, Source, Spool, lead_ahead, lead_bytes, preroll_bytes, source_rate,
+};
 use std::{
     fs,
     io::{Read, Seek, SeekFrom},
@@ -164,6 +166,63 @@ fn a_window_move_does_not_invent_bytes_behind_it() {
 }
 
 #[test]
+fn a_reader_behind_the_window_is_told_only_what_is_local() {
+    // A camera MP4 keeps its index at the tail, so opening seeks to the end of
+    // the file and back before the first frame is asked for. The window follows
+    // that first seek and is still there when the reader returns to byte zero,
+    // and the gap between the two is gigabytes of item nobody has copied - a
+    // lead counted from the reader would report all of it as local.
+    let path = item("gap", 64 << 20);
+    let mut source = spooled(&path, 4 << 20);
+    let handle = source.handle();
+    source.seek(SeekFrom::Start(48 << 20)).unwrap();
+    let mut there = vec![0u8; 1 << 20];
+    source.read_exact(&mut there).unwrap();
+    let started = Instant::now();
+    while handle.copied() < 4 << 20 && started.elapsed() < Duration::from_secs(10) {
+        std::thread::sleep(Duration::from_millis(2));
+    }
+    assert!(handle.copied() > 0, "the window never filled at the tail");
+    // A step back shorter than a lead gives the copier no reason to move the
+    // window, so what is on disk stays what it was.
+    source.seek(SeekFrom::Start(45 << 20)).unwrap();
+    // The two counters are separate mirrors, so a block the copier lands
+    // between the loads legitimately shows in one and not the other. Three
+    // megabytes of reader-behind-window are not that.
+    assert!(
+        handle.ahead() <= handle.copied() + (1 << 20),
+        "the reader sat behind a window of {} bytes and was told {} were ahead of it",
+        handle.copied(),
+        handle.ahead()
+    );
+    assert!(
+        handle.covered().0 <= handle.covered().1,
+        "the covered span is inverted"
+    );
+    drop(source);
+    let _ = fs::remove_dir_all(path.parent().unwrap());
+}
+
+/// The lead a reader is told about has to be measured from the bytes it will
+/// actually reach. A camera MP4 keeps its index at the tail, so opening seeks to
+/// the end of the file and the window goes there with it; counting the far edge
+/// of that window from a reader back at byte zero priced three gigabytes of
+/// never-fetched item as picture already on disk, and the first frame was shown
+/// on the strength of it.
+#[test]
+fn a_lead_is_counted_from_where_the_reader_reaches() {
+    // Inside the window: what it holds ahead of the reader.
+    assert_eq!(lead_ahead(48 << 20, 44 << 20, 52 << 20), 4 << 20);
+    // At the far edge: the window is entirely bitten.
+    assert_eq!(lead_ahead(52 << 20, 44 << 20, 52 << 20), 0);
+    // Behind it, by the whole length of a clip: the copy covers bytes the reader
+    // will not ask for until the window comes back to it.
+    assert_eq!(lead_ahead(0, 3 << 30, (3 << 30) + (256 << 20)), 0);
+    // And ahead of it, which is what the reader does when it jumps forward.
+    assert_eq!(lead_ahead(60 << 20, 44 << 20, 52 << 20), 0);
+}
+
+#[test]
 fn rewinding_re_serves_bytes_from_the_local_copy() {
     let path = item("rewind", 8 << 20);
     let wanted = fs::read(&path).unwrap();
@@ -253,6 +312,60 @@ fn the_buffer_a_lead_costs_is_the_share_of_the_item_it_runs_for() {
     assert_eq!(lead_bytes(900, Duration::ZERO, Duration::from_secs(5)), 900);
 }
 
+/// The wait a first picture pays follows the item: a tenth of it where that is
+/// less than half a minute of picture, the cap where the tenth would be longer,
+/// the five-second floor where a tenth of a short clip is barely a wait, and
+/// the window where an item's bitrate makes all three of them too big to hold.
+#[test]
+fn the_preroll_is_a_tenth_of_the_item_or_half_a_minute() {
+    let mib = 1 << 20;
+    // An hour at a megabyte a second: its tenth is 360 MB, twelve times what
+    // half a minute of the same picture costs.
+    assert_eq!(
+        preroll_bytes(3600 * mib, Duration::from_secs(3600)),
+        30 * mib,
+        "a long item waited on its tenth"
+    );
+    // Three minutes at the same rate: the tenth is 18 MB, less than the cap.
+    assert_eq!(
+        preroll_bytes(180 * mib, Duration::from_secs(180)),
+        18 * mib,
+        "a short item waited out the cap"
+    );
+    // Twelve seconds of picture: a tenth is 1.2 MB, so the floor of five seconds
+    // of the item is what holds the first picture.
+    assert_eq!(
+        preroll_bytes(12 * mib, Duration::from_secs(12)),
+        5 * mib,
+        "the floor did not hold a short item's wait up"
+    );
+    // Forty gigabytes in a hundred seconds asks for more than any window keeps.
+    assert_eq!(
+        preroll_bytes(40 << 30, Duration::from_secs(100)),
+        SPOOL_LEAD
+    );
+}
+
+/// A window longer than the item is disk no copier ever fills: the ring is
+/// clamped to the item, and reading the window back is the only way a caller
+/// knows what the spool actually cost.
+#[test]
+fn a_window_the_item_cannot_fill_is_clamped_to_the_item() {
+    let path = item("narrow", 4 << 20);
+    let spool = spooled(&path, SPOOL_LEAD);
+    assert_eq!(spool.lead(), 4 << 20, "the ring outgrew its item");
+    let wide = item("wider", 6 << 20);
+    let spool = spooled(&wide, 2 << 20);
+    assert_eq!(
+        spool.lead(),
+        2 << 20,
+        "an asked lead was widened to the item"
+    );
+    drop(spool);
+    let _ = fs::remove_dir_all(path.parent().unwrap());
+    let _ = fs::remove_dir_all(wide.parent().unwrap());
+}
+
 #[test]
 fn a_source_answer_for_its_speed_only_when_the_file_is_there() {
     let path = item("rate", 4 << 20);
@@ -316,6 +429,14 @@ fn the_lead_is_filled_by_the_copier_and_eaten_by_the_reader() {
         "the copier put {} bytes on disk and none of them ahead",
         handle.copied()
     );
+    // Where the copy sits is a second question from how much of it there is:
+    // with the reader still at byte zero the window starts at the item's own
+    // front, which is what the progress line draws.
+    assert_eq!(
+        handle.covered().0,
+        0,
+        "the copy did not start where the reader did"
+    );
     let mut got = Vec::new();
     let mut filled = false;
     let mut piece = vec![0u8; 1 << 20];
@@ -338,6 +459,20 @@ fn the_lead_is_filled_by_the_copier_and_eaten_by_the_reader() {
     assert!(
         handle.copied() > 0,
         "the window gave all its room back before the end"
+    );
+    // The item is longer than the window, so by the end the copy has left the
+    // front of it behind: both edges moved, and they still say where the same
+    // bytes the `copied` mirror counts are kept.
+    let (near, far) = handle.covered();
+    assert!(
+        near > 0,
+        "the window never followed the reader off the front"
+    );
+    assert_eq!(far, 8 << 20, "the copy stopped short of the end it read to");
+    assert_eq!(
+        far - near,
+        handle.copied(),
+        "the window's own edges and its published size disagree"
     );
     assert_eq!(got.len(), 8 << 20);
     drop(source);

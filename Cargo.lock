@@ -170,13 +170,13 @@ dependencies = [
 
 [[package]]
 name = "airbug"
-version = "0.6.0"
-source = "git+https://github.com/themoretheless/airbug?branch=release#75b1321b5d7ff2cee983379f539c07726a7d27e5"
+version = "0.6.2"
+source = "git+https://github.com/themoretheless/airbug?branch=release#06b74ea57c516aaea49c7a5ccce55b220199fdb8"
 
 [[package]]
 name = "airbug-bench"
-version = "0.6.0"
-source = "git+https://github.com/themoretheless/airbug?branch=release#75b1321b5d7ff2cee983379f539c07726a7d27e5"
+version = "0.8.0"
+source = "git+https://github.com/themoretheless/airbug?branch=release#06b74ea57c516aaea49c7a5ccce55b220199fdb8"
 dependencies = [
  "airbug-bench-macros",
  "serde",
@@ -187,8 +187,8 @@ dependencies = [
 
 [[package]]
 name = "airbug-bench-macros"
-version = "0.6.0"
-source = "git+https://github.com/themoretheless/airbug?branch=release#75b1321b5d7ff2cee983379f539c07726a7d27e5"
+version = "0.8.0"
+source = "git+https://github.com/themoretheless/airbug?branch=release#06b74ea57c516aaea49c7a5ccce55b220199fdb8"
 dependencies = [
  "quote",
  "syn 2.0.119",
@@ -196,8 +196,8 @@ dependencies = [
 
 [[package]]
 name = "airbug-err"
-version = "0.6.0"
-source = "git+https://github.com/themoretheless/airbug?branch=release#75b1321b5d7ff2cee983379f539c07726a7d27e5"
+version = "0.6.1"
+source = "git+https://github.com/themoretheless/airbug?branch=release#06b74ea57c516aaea49c7a5ccce55b220199fdb8"
 dependencies = [
  "backtrace",
  "reqwest",
@@ -211,8 +211,8 @@ dependencies = [
 
 [[package]]
 name = "airbug-otel"
-version = "0.6.0"
-source = "git+https://github.com/themoretheless/airbug?branch=release#75b1321b5d7ff2cee983379f539c07726a7d27e5"
+version = "0.6.1"
+source = "git+https://github.com/themoretheless/airbug?branch=release#06b74ea57c516aaea49c7a5ccce55b220199fdb8"
 dependencies = [
  "opentelemetry",
  "opentelemetry-otlp",

@@ -37,15 +37,26 @@ const CHUNK_WAIT: Duration = Duration::from_secs(2);
 /// the question once per frame and a megabyte asks it a hundred times less.
 pub const READ_AHEAD: usize = 1 << 20;
 
-/// How far ahead of the reader the copier runs, in bytes: the disk a spool
-/// costs while an item plays, and the span a source slower than its item can
-/// still be caught up in.
+/// How far ahead of the reader the copier runs, in bytes: the most a window
+/// costs on disk while an item plays, and the span a source slower than its
+/// item can still be caught up in. An item shorter than this gets a window of
+/// its own length rather than one it cannot fill.
 pub const SPOOL_LEAD: u64 = 256 << 20;
 
-/// The preroll a caller waits for before the first picture: five seconds is
+/// The shortest preroll a caller waits for, whatever the item: five seconds is
 /// more than a whole group of pictures needs and little enough that a source
 /// which cannot stream the item at all is known about at once.
 pub const SPOOL_PREROLL: Duration = Duration::from_secs(5);
+
+/// The longest preroll, however large the item: half a minute is as long as a
+/// viewer will stand behind a window that shows nothing.
+pub const SPOOL_PREROLL_CAP: Duration = Duration::from_secs(30);
+
+/// The share of an item the first picture waits for, where that is shorter than
+/// the cap. A tenth of a three-minute clip is eighteen seconds of it; a tenth
+/// of an hour is six minutes of black window, which no amount of buffering is
+/// worth, so the cap answers for long items and the share for short ones.
+pub const SPOOL_SHARE: f64 = 0.10;
 
 /// How long the first picture will wait for that preroll before it is shown
 /// with whatever lead a very slow source has managed.
@@ -71,6 +82,38 @@ pub fn lead_bytes(item_bytes: u64, duration: Duration, lead: Duration) -> u64 {
     }
     let lead = lead.min(duration);
     (item_bytes as u128 * lead.as_nanos() / duration.as_nanos().max(1)) as u64
+}
+
+/// How much of an item the first picture waits for: the lesser of a tenth of it
+/// and half a minute of its picture, never less than five seconds of picture,
+/// and never more than one window or the item itself. Both ends matter because
+/// the same span of time costs wildly different amounts of bytes - five seconds
+/// of a phone clip is a megabyte and of a 4K record six times the whole clip -
+/// and a fixed wait is wrong at one end or the other.
+pub fn preroll_bytes(item_bytes: u64, duration: Duration) -> u64 {
+    let share = (item_bytes as f64 * SPOOL_SHARE) as u64;
+    let longest = lead_bytes(item_bytes, duration, SPOOL_PREROLL_CAP);
+    let shortest = lead_bytes(item_bytes, duration, SPOOL_PREROLL);
+    share
+        .min(longest)
+        .max(shortest)
+        .min(item_bytes)
+        .min(SPOOL_LEAD)
+}
+
+/// Bytes of the local copy that lie in front of a reader standing at `read_at`,
+/// for a window holding `[base, end)`: none at all while the reader is behind
+/// the window, because the run of bytes it can take without asking the source
+/// starts where the copy starts. The window follows the reader and the reader
+/// can leave it far behind - a file whose index sits at the tail is opened by
+/// seeking there, and the window goes with it - and counting the far edge from
+/// the reader then reports the whole gap as a lead that has been fetched.
+pub fn lead_ahead(read_at: u64, base: u64, end: u64) -> u64 {
+    if read_at >= base {
+        end.saturating_sub(read_at)
+    } else {
+        0
+    }
 }
 
 /// Where a speed probe reads: just past the header, because that is where the
@@ -121,6 +164,13 @@ struct Shared {
     /// much room the copier has filled, this says how much of it is still
     /// unbitten.
     slack: Arc<AtomicU64>,
+    /// Where the window sits in the item, as the two edges of `[base, end)`, so
+    /// a watcher can draw the local copy where it belongs on the file rather
+    /// than as a pile of bytes. The pair is published together under the
+    /// window's lock but read one at a time, which can show an edge a block
+    /// stale for a frame; it can never show a byte the spool does not have.
+    from: Arc<AtomicU64>,
+    to: Arc<AtomicU64>,
     /// The copier has stopped: end of file, an unmet read, or shutdown.
     finished: Arc<AtomicBool>,
     /// The offset the copier has a block in flight for, or `u64::MAX` while it
@@ -156,8 +206,12 @@ impl Shared {
     fn mirror(&self, window: &Window) {
         self.held
             .store(window.end.saturating_sub(window.base), Ordering::Release);
-        self.slack
-            .store(window.end.saturating_sub(window.read_at), Ordering::Release);
+        self.slack.store(
+            lead_ahead(window.read_at, window.base, window.end),
+            Ordering::Release,
+        );
+        self.from.store(window.base, Ordering::Release);
+        self.to.store(window.end, Ordering::Release);
     }
 
     /// Records the reader's position and wakes the copier: the reader has just
@@ -184,6 +238,8 @@ impl Shared {
 pub struct SpoolHandle {
     held: Arc<AtomicU64>,
     slack: Arc<AtomicU64>,
+    from: Arc<AtomicU64>,
+    to: Arc<AtomicU64>,
     finished: Arc<AtomicBool>,
 }
 
@@ -200,6 +256,17 @@ impl SpoolHandle {
     /// copier that has fallen behind the playhead shows up here first.
     pub fn ahead(&self) -> u64 {
         self.slack.load(Ordering::Acquire)
+    }
+
+    /// Where the local copy sits in the item, as `[from, to)` offsets: the
+    /// window has a place as well as a size, because it follows the reader and
+    /// leaves the bytes behind it on the mount again. A bar drawn from this says
+    /// which stretch of the file answers without asking the source.
+    pub fn covered(&self) -> (u64, u64) {
+        (
+            self.from.load(Ordering::Acquire),
+            self.to.load(Ordering::Acquire),
+        )
     }
 
     /// Whether the copier has stopped, so a wait for a lead this source cannot
@@ -221,6 +288,9 @@ pub struct Spool {
     spool: File,
     source: File,
     size: u64,
+    /// The window this spool runs in: what was asked for, less what the item
+    /// cannot fill.
+    lead: u64,
     path: PathBuf,
     position: u64,
     staging: Vec<u8>,
@@ -239,6 +309,10 @@ impl Spool {
     pub fn open(path: &Path, lead: u64) -> io::Result<Self> {
         let source = File::open(path)?;
         let size = source.metadata()?.len();
+        // A window longer than the item is disk the copier never fills: it has
+        // the whole item locally as soon as it reaches the end, which is all a
+        // short item's reader was asking for.
+        let lead = lead.min(size);
         let spool_path = temporary(path, size);
         let spool = OpenOptions::new()
             .read(true)
@@ -254,6 +328,8 @@ impl Spool {
         let shared = Arc::new(Shared {
             held: Arc::new(AtomicU64::new(0)),
             slack: Arc::new(AtomicU64::new(0)),
+            from: Arc::new(AtomicU64::new(0)),
+            to: Arc::new(AtomicU64::new(0)),
             finished: Arc::new(AtomicBool::new(false)),
             claim: AtomicU64::new(u64::MAX),
             slots,
@@ -283,6 +359,7 @@ impl Spool {
             spool,
             source,
             size,
+            lead,
             path: spool_path,
             position: 0,
             staging: vec![0u8; CHUNK],
@@ -297,6 +374,8 @@ impl Spool {
         SpoolHandle {
             held: self.shared.held.clone(),
             slack: self.shared.slack.clone(),
+            from: self.shared.from.clone(),
+            to: self.shared.to.clone(),
             finished: self.shared.finished.clone(),
         }
     }
@@ -304,6 +383,12 @@ impl Spool {
     /// Bytes of the item the spool already holds.
     pub fn copied(&self) -> u64 {
         self.shared.held.load(Ordering::Acquire)
+    }
+
+    /// How far ahead of the reader this window runs, so what the spool costs on
+    /// disk can be read back rather than assumed from what was asked for.
+    pub fn lead(&self) -> u64 {
+        self.lead
     }
 
     /// Whether the copier has stopped, so a caller can stop waiting for a lead
