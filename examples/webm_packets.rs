@@ -5,6 +5,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         std::io::BufReader::new(std::fs::File::open(path)?),
         Limits::default(),
     )?;
+    // Diagnostics report the whole item, so they take the cost of indexing it.
+    r.scan_all()?;
     for track in &r.tracks {
         println!(
             "track {} {} {}x{}",

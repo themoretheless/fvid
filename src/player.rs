@@ -6142,7 +6142,10 @@ mod tests {
             lines,
             [
                 "Sound: 1/1 · FLAC · 2 ch 44100 Hz",
-                "File: 105 kB · 0:02 · 415 kb/s",
+                // The length comes from the item's own two seconds, which is the
+                // one statement the panel has before every block is indexed;
+                // the rate it gives is the one ffmpeg prints for this file.
+                "File: 105 kB · 0:02 · 419 kb/s",
             ]
         );
         drop(player);
