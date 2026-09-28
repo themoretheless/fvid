@@ -395,3 +395,28 @@ fn aac_geometry(data: &[u8]) -> Result<(u32, u16)> {
     let decoder = crate::codec::aac_native::NativeAacDecoder::new(&asc)?;
     Ok((decoder.sample_rate(), u16::from(decoder.channels())))
 }
+
+/// Lossless ADTS-to-MP4 packet remux with atomic no-overwrite publication.
+pub fn remux_adts_aac(source: &Path, destination: &Path) -> Result<u64> {
+    use std::io::Read;
+    let mut data = Vec::new();
+    let cap = crate::container::adts::Limits::default().file_bytes as u64;
+    File::open(source)?.take(cap+1).read_to_end(&mut data)?;
+    if data.len() as u64 > cap { return Err(invalid("AAC input exceeds container byte limit")); }
+    let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+    let (temporary, file) = (0..100).find_map(|_| {
+        let path = directory.join(format!(".fvid-mp4-{}-{}.tmp", std::process::id(), NEXT.fetch_add(1, Ordering::Relaxed)));
+        match OpenOptions::new().write(true).create_new(true).open(&path) {
+            Ok(file) => Some(Ok((Temporary(path), file))),
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => None,
+            Err(error) => Some(Err(error)),
+        }
+    }).ok_or_else(|| invalid("cannot reserve MP4 output"))??;
+    let mut output = BufWriter::new(file);
+    let packets = crate::container::mp4_write::write_adts_aac(&data, &mut output)?;
+    output.flush()?;
+    output.get_ref().sync_all()?;
+    drop(output);
+    std::fs::hard_link(&temporary.0, destination)?;
+    Ok(packets)
+}
