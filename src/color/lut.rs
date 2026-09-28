@@ -336,10 +336,16 @@ impl Lut {
     /// neither is read from its row count, which has to be an exact cube. A
     /// mesh line is only read as one while no row has been seen and it is not
     /// three values wide, since a row and the mesh of a three-node grid look
-    /// alike.
+    /// alike. Codes are 12-bit unless a `Mesh <in> <out>` line declares the
+    /// output depth the file was written at, which is the only way a 16-bit
+    /// `.3dl` says so.
     pub fn from_3dl(text: &str) -> Result<Self> {
         let mut rows: Vec<[f32; 3]> = Vec::new();
         let mut size = None;
+        // 12-bit codes unless the header says otherwise, which is what the
+        // writers that state nothing mean: 35 of the 36 files measured hold
+        // values up to 4095, and only the one `Mesh 4 16` file goes beyond it.
+        let mut scale = 4095.0f32;
         for (line_no, raw) in text.lines().enumerate() {
             let line = raw.split('#').next().unwrap_or("").trim();
             if line.is_empty() {
@@ -347,10 +353,18 @@ impl Lut {
             }
             let fields: Vec<&str> = line.split_whitespace().collect();
             if fields[0].parse::<f32>().is_err() {
-                // A header line, with or without arguments: `3DMESH`, `LUT8`,
-                // `Mesh 4 12`, `FROM 0 4095`. Nothing here is a node value, and
-                // every writer seen so far means by it what the grid already
-                // says, so it is read and dropped.
+                // A header line: `3DMESH`, `LUT8`, `Mesh 4 12`, `FROM 0 4095`.
+                // None of it is a node value, and the grid says for itself what
+                // the mesh means, so it is read and dropped — except for `Mesh`,
+                // whose second number is the one thing here a reader needs and
+                // the rows cannot tell it: the depth the codes are written at.
+                if fields.len() == 3 && fields[0].eq_ignore_ascii_case("Mesh") {
+                    if let Ok(bits) = fields[2].parse::<u32>() {
+                        if (4..=24).contains(&bits) {
+                            scale = (2.0f32).powi(bits as i32) - 1.0;
+                        }
+                    }
+                }
                 continue;
             }
             if fields.len() == 1 {
@@ -393,7 +407,7 @@ impl Lut {
                 let n: f32 = f
                     .parse()
                     .map_err(|_| invalid(&format!("bad .3dl value `{f}`")))?;
-                v[i] = (n / 4095.0).clamp(0.0, 1.0);
+                v[i] = (n / scale).clamp(0.0, 1.0);
             }
             rows.push(v);
         }
@@ -402,14 +416,12 @@ impl Lut {
             // Some writers state neither: no size line and no mesh line, just
             // the rows. Their count is then the only declaration the file has,
             // and only an exact cube can be a grid.
-            None => (2..=64)
-                .find(|n| n * n * n == rows.len())
-                .ok_or_else(|| {
-                    invalid(&format!(
-                        "a .3dl declares no size and its {} rows are not a grid",
-                        rows.len()
-                    ))
-                })?,
+            None => (2..=64).find(|n| n * n * n == rows.len()).ok_or_else(|| {
+                invalid(&format!(
+                    "a .3dl declares no size and its {} rows are not a grid",
+                    rows.len()
+                ))
+            })?,
         };
         if rows.len() != size * size * size {
             return Err(invalid(&format!(
@@ -1126,6 +1138,70 @@ LUT_3D_SIZE 2
         );
         // 28 rows are no one's grid.
         assert!(Lut::from_3dl(&format!("{text}0 0 0\n")).is_err());
+    }
+
+    /// One file of the 36 measured is written at 16 bits, and says so only in
+    /// its header: `Mesh 4 16`, with nodes up to 65 535 where every other file
+    /// stops at 4095. The second number is the depth the format's own writers
+    /// put there, so it is the divisor the codes mean to be read at. The
+    /// instrument is the real file's own shape — an identity grid, whose every
+    /// node stores its own coordinates — because nothing else in the format
+    /// states the scale it was written at: read at the declared depth it comes
+    /// back as the ramp, and at any other it does not exist at all.
+    #[test]
+    fn a_3dl_divides_by_the_depth_its_header_declares() {
+        const N: usize = 7;
+        let code = |i: usize| (i as f32 * 65535.0 / (N - 1) as f32).round() as u32;
+        let mut body = String::new();
+        for r in 0..N {
+            for g in 0..N {
+                for b in 0..N {
+                    body.push_str(&format!("{} {} {}\n", code(r), code(g), code(b)));
+                }
+            }
+        }
+        let lut = Lut::from_3dl(&format!("3DMESH\nMesh 4 16\n{N}\n{body}"))
+            .expect("a 16-bit .3dl is read");
+        assert_eq!(lut.size(), N);
+        let mut worst = 0.0f32;
+        for r in 0..N {
+            for g in 0..N {
+                for b in 0..N {
+                    let rgb = [
+                        r as f32 / (N - 1) as f32,
+                        g as f32 / (N - 1) as f32,
+                        b as f32 / (N - 1) as f32,
+                    ];
+                    let out = lut.sample(rgb, Interpolation::Nearest);
+                    for ch in 0..3 {
+                        worst = worst.max((out[ch] - rgb[ch]).abs());
+                    }
+                }
+            }
+        }
+        assert!(
+            worst <= 1.0 / 65535.0 + 1e-7,
+            "the declared depth left the ramp by {worst}, over a code of {}",
+            1.0 / 65535.0
+        );
+        // The same rows at the 12-bit divisor are a wall of white: everything
+        // but black clips, which is what makes reading the header matter.
+        let blind = Lut::from_3dl(&format!("3DMESH\nMesh 4 12\n{N}\n{body}")).unwrap();
+        let mut saturated = 0usize;
+        for i in 0..N * N * N {
+            let rgb = [
+                (i / (N * N)) as f32 / (N - 1) as f32,
+                (i / N % N) as f32 / (N - 1) as f32,
+                (i % N) as f32 / (N - 1) as f32,
+            ];
+            let out = blind.sample(rgb, Interpolation::Nearest);
+            saturated += usize::from(out.iter().any(|v| *v >= 0.999_9));
+        }
+        assert_eq!(
+            saturated,
+            N * N * N - 1,
+            "at the wrong divisor all but black should clip"
+        );
     }
 
     #[test]

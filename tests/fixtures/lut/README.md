@@ -211,7 +211,9 @@ third-party work, and what matters is their shape rather than their pixels.
 | grid declared by a mesh line of 16 codes | 4 |
 | grid declared by a mesh line of 7 codes (one Photoshop export) | 1 |
 | nothing declares the grid at all | 1 |
-| Color Finesse keyword headers (`3DMESH`, `Mesh 4 12`) | 12 |
+| Color Finesse headers: `3DMESH` + `Mesh 4 12` | 11 |
+| Color Finesse headers: `3DMESH` + `Mesh 4 16` | 1 |
+| other keywords, `LUT8` and `gamma`, always beside the two above | 5 each |
 | bare size line | 0 |
 
 A mesh line lists one input code value per node along an axis, always on a
@@ -232,9 +234,33 @@ line. Its row count is the only statement of the grid in it — an exact cube,
 17 — and counting it is what makes the census 36 of 36 parse.
 
 What that leaves wrong about the same file is not its shape but its scale: it is
-the one `Mesh 4 16` declaration among them, and its nodes reach 65 535. Read at
-the 12-bit scale every other file uses, it is a wall of white — mid-grey samples
-to 1.0, and all 289 nodes of the blue plane at full scale come back clipped.
+the one `Mesh 4 16` among them, and its nodes reach 65 535. The second number of
+`Mesh <in> <out>` is the depth the output codes are written at — Color Finesse's
+writer puts a constant 12 there, and its grid sizes are 17 — so Fvid reads it as
+the divisor, `2^out − 1`, and falls back on 4095 when no `Mesh` line is present.
+
+That file turns out to be an identity grid, which settles the divisor on the
+spot. Divided by 65 535, all 4 913 of its nodes come back within 0.00001 of the
+ramp they stand for. Divided by 4095 — which is what `ffmpeg` does, whatever the
+file declares — 4 912 of the 4 913 clip to white and only black survives.
+`a_3dl_divides_by_the_depth_its_header_declares` asserts both halves of that on a
+generated 7-node identity, since the file itself is third-party and is not
+committed.
+
+OpenColorIO reaches the same numbers by another road, and on these 36 files the
+two agree everywhere: it infers the depth from the largest code in the file with
+a 2× overshoot window (12-bit for anything in 2048…8191), so the 12 files that
+declare come out 12 or 16 exactly as their headers say, and the 24 with no
+`Mesh` line all max out at 4095, which is 12 either way. The header is what
+Fvid follows, because the inference is not sound on its own — a legitimate
+12-bit look that never rises above half scale would be read as 10-bit and come
+out four times too bright. The census has one near miss of that shape already:
+CH_Faded's nodes top out at 3743, and a darker preset would cross the 2048 line.
+
+There is no oracle for any of this: `ffmpeg` refuses the Color Finesse headers
+outright, so these three readings — the mesh line, the row count and the
+declared depth — are held by Fvid's own tests and by the numbers above rather
+than by a second implementation's bytes.
 
 `ffmpeg` cannot arbitrate any of that: it refuses the keyword files outright.
 What it does settle is that a mesh line is *only* a size declaration, which is
