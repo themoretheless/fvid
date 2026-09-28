@@ -711,12 +711,25 @@ fn colour_line(signal: ColourDescription) -> Option<String> {
     if expected {
         return None;
     }
-    let named = |part: Option<&'static str>| part.unwrap_or("not stated");
+    let named = |code: u8, label: Option<&'static str>| match label {
+        Some(word) => word.to_owned(),
+        // H.273 spells unspecified as 0 or 2, and a container that wrote no
+        // colour at all leaves exactly those. Any other number is a part the
+        // file did state and fvid cannot resolve, so the line gives the number
+        // rather than the same words the silent file got.
+        None if code == 0 || code == 2 => "not stated".to_owned(),
+        None => format!("code {code}"),
+    };
+    let curve = match transfer {
+        Transfer::Unknown if signal.transfer != 0 && signal.transfer != 2 => {
+            format!("code {}", signal.transfer)
+        }
+        _ => transfer.label().to_owned(),
+    };
     Some(format!(
-        "Colour: {} · {} · {} · {}",
-        named(primaries.map(|set| set.label())),
-        transfer.label(),
-        named(matrix.map(|coeff| coeff.label())),
+        "Colour: {} · {curve} · {} · {}",
+        named(signal.primaries, primaries.map(|set| set.label())),
+        named(signal.matrix, matrix.map(|coeff| coeff.label())),
         if signal.full_range { "full" } else { "limited" }
     ))
 }
@@ -8413,6 +8426,20 @@ LUT_3D_SIZE 2
             })
             .unwrap(),
             "Colour: not stated · unknown · not stated · limited"
+        );
+        // A part the file does state, by a number this module cannot resolve, is
+        // reported by that number: "not stated" would blame the file for saying
+        // nothing when it said something fvid has no table for. The other two
+        // halves of the same triple are named, because their numbers do land.
+        assert_eq!(
+            colour_line(ColourDescription {
+                primaries: 13,
+                transfer: 13,
+                matrix: 13,
+                full_range: true,
+            })
+            .unwrap(),
+            "Colour: code 13 · sRGB · chroma-derived CL · full"
         );
         let display = MasteringDisplay::from_corners(
             (0.708, 0.292),
