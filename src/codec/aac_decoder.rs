@@ -16,6 +16,7 @@ pub struct AacDecoder {
     decoder: Box<dyn symphonia::core::codecs::audio::AudioDecoder>,
     sample_rate: u32,
     channels: u16,
+    failed: bool,
 }
 
 impl AacDecoder {
@@ -54,6 +55,7 @@ impl AacDecoder {
             decoder,
             sample_rate,
             channels,
+            failed: false,
         })
     }
 
@@ -64,20 +66,18 @@ impl AacDecoder {
         pts: u64,
         duration: u64,
     ) -> crate::Result<Option<AudioPacket>> {
-        let packet = Packet::new(
-            0,
-            (pts as i64).into(),
-            duration.into(),
-            packet_data.to_vec(),
-        );
+        if self.failed {
+            return Err(crate::invalid("AAC decoder requires reset after an error"));
+        }
+        let timestamp = i64::try_from(pts).map_err(|_| crate::invalid("AAC timestamp overflow"))?;
+        let packet = Packet::new(0, timestamp.into(), duration.into(), packet_data.to_vec());
 
         let audio_buf = match self.decoder.decode(&packet) {
             Ok(buf) => buf,
-            Err(symphonia::core::errors::Error::DecodeError(e)) => {
-                eprintln!("AAC decode error: {e}");
-                return Ok(None);
+            Err(e) => {
+                self.failed = true;
+                return Err(crate::invalid(&format!("AAC decode: {e}")));
             }
-            Err(e) => return Err(crate::invalid(&format!("AAC decode: {e}"))),
         };
 
         let num_samples = audio_buf.samples_interleaved();
@@ -106,6 +106,7 @@ impl AacDecoder {
     /// Reset decoder state (e.g., after a seek).
     pub fn reset(&mut self) {
         self.decoder.reset();
+        self.failed = false;
     }
 }
 
@@ -121,5 +122,32 @@ impl crate::audio::AudioDecode for AacDecoder {
 
     fn reset(&mut self) {
         AacDecoder::reset(self);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn decoder() -> AacDecoder {
+        let esds = crate::playback_aac::esds_for(&[0x12, 0x10]).unwrap();
+        AacDecoder::new(&esds, 44_100, 2).unwrap()
+    }
+    #[test]
+    fn damaged_packet_is_an_error_and_requires_reset() {
+        let mut decoder = decoder();
+        assert!(decoder.decode(&[0], 0, 1024).is_err());
+        let error = decoder.decode(&[0], 1024, 1024).err().unwrap();
+        assert!(error.to_string().contains("requires reset"));
+        decoder.reset();
+        let error = decoder.decode(&[0], 0, 1024).err().unwrap();
+        assert!(error.to_string().contains("AAC decode:"));
+    }
+    #[test]
+    fn timestamp_overflow_does_not_wrap_or_poison_codec_state() {
+        let mut decoder = decoder();
+        let error = decoder.decode(&[0], u64::MAX, 1024).err().unwrap();
+        assert!(error.to_string().contains("timestamp overflow"));
+        let error = decoder.decode(&[0], 0, 1024).err().unwrap();
+        assert!(error.to_string().contains("AAC decode:"));
     }
 }

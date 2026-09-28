@@ -1,5 +1,12 @@
 # Audio Implementation Status
 
+Ownership status: AAC currently uses Symphonia behind `codec::aac_decoder`.
+Its working MP4/Matroska playback is not evidence of an FVid-owned AAC codec.
+Replacing that implementation remains required by the own-codecs objective.
+Malformed AAC packets now return errors and require decoder reset; they are
+not reported as successful empty output. Out-of-range unsigned timestamps
+are rejected before touching codec state instead of wrapping to negative PTS.
+
 ## What works
 
 | Source | Codec | Path | Verified |
