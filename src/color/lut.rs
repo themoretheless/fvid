@@ -1,4 +1,5 @@
-//! 1D and 3D colour lookup tables: `.cube` / `.3dl` parsing and sampling.
+//! 1D and 3D colour lookup tables: `.cube` / `.3dl` / `.spi1d` / `.spi3d`
+//! parsing and sampling.
 
 use crate::color::log::Log;
 use crate::color::primaries::{apply, rgb_to_rgb, Primaries};
@@ -492,24 +493,311 @@ impl Lut {
         }))
     }
 
-    /// Read either format from content: a `.cube` always names its size.
-    pub fn from_text(text: &str) -> Result<Self> {
-        if text.contains("_SIZE") {
-            Self::from_cube(text)
-        } else {
-            // The `.cube` half of the pair cannot be reached here, because the
-            // test that sent us away from it is what a `.cube` must pass: every
-            // real colour table declares a size line. What does arrive without
-            // one is the `.cube` extension taken by another format entirely —
-            // Gaussian volumetric dumps, git-lfs pointers, prose — so say both
-            // of those things and quote the line that gives the file away.
-            Self::from_3dl(text).map_err(|error| {
-                let first = text.lines().next().unwrap_or("").trim();
-                invalid(&format!(
-                    "not a LUT: no size line, so it is not a .cube either ({error}); it starts {first:?}"
-                ))
-            })
+    /// SPI `.spi1d`: the header tags `Version`, `From`, `Length` and
+    /// `Components` in any order, a `{`, then `Length` rows of `Components`
+    /// values each. A row's index is its position in the file rather than a
+    /// number in the row, which is why a 4 101-entry table is 4 101 lines long.
+    /// `From` is one pair shared by every channel, so it lands on all three
+    /// domains; the format states no per-channel input range a reader could
+    /// disagree about. The value rules are OpenColorIO's, which is the only
+    /// specification this format has: one value is the same curve on all three
+    /// channels, two values leave blue at nothing, three are red, green, blue.
+    /// `Components 0` is refused rather than read as the empty table the
+    /// reference reader makes of it.
+    pub fn from_spi1d(text: &str) -> Result<Self> {
+        let mut version = false;
+        let mut length = None;
+        let mut components = None;
+        let mut from = [0.0f32, 1.0];
+        let mut rows: Vec<[f32; 3]> = Vec::new();
+        let mut body = false;
+        for (line_no, raw) in text.lines().enumerate() {
+            let line = raw.trim();
+            if line.is_empty() {
+                continue;
+            }
+            if !body {
+                if line.starts_with('{') {
+                    body = true;
+                    continue;
+                }
+                // A header line that names none of the four tags holds a tag
+                // this format has no meaning for, which is what the reference
+                // reader does with it too: read on and keep the table.
+                if let Some(rest) = spi_tag(line, "Version") {
+                    let stated = rest
+                        .split_whitespace()
+                        .next()
+                        .is_some_and(|t| t.parse::<i64>().is_ok());
+                    if !stated {
+                        return Err(invalid(&format!("bad Version on line {}", line_no + 1)));
+                    }
+                    version = true;
+                } else if let Some(rest) = spi_tag(line, "From") {
+                    let nums: Vec<f32> = rest
+                        .split_whitespace()
+                        .take(2)
+                        .map(|t| {
+                            t.parse::<f32>().map_err(|_| {
+                                invalid(&format!("bad From value on line {}", line_no + 1))
+                            })
+                        })
+                        .collect::<Result<_>>()?;
+                    if nums.len() != 2 {
+                        return Err(invalid(&format!(
+                            "From needs two numbers on line {}",
+                            line_no + 1
+                        )));
+                    }
+                    from = [nums[0], nums[1]];
+                } else if let Some(rest) = spi_tag(line, "Length") {
+                    let n: usize = rest
+                        .split_whitespace()
+                        .next()
+                        .unwrap_or("")
+                        .parse()
+                        .map_err(|_| invalid(&format!("bad Length on line {}", line_no + 1)))?;
+                    if !(2..=MAX_1D_ENTRIES).contains(&n) {
+                        return Err(invalid(&format!(
+                            "a .spi1d Length must be 2..={MAX_1D_ENTRIES}"
+                        )));
+                    }
+                    length = Some(n);
+                } else if let Some(rest) = spi_tag(line, "Components") {
+                    let n: usize = rest
+                        .split_whitespace()
+                        .next()
+                        .unwrap_or("")
+                        .parse()
+                        .map_err(|_| invalid(&format!("bad Components on line {}", line_no + 1)))?;
+                    if !(1..=3).contains(&n) {
+                        return Err(invalid("a .spi1d Components must be 1, 2 or 3"));
+                    }
+                    components = Some(n);
+                }
+                continue;
+            }
+            if line.starts_with('}') {
+                break;
+            }
+            let Some(n) = components else {
+                return Err(invalid(&format!(
+                    "a .spi1d row on line {} precedes its Components tag",
+                    line_no + 1
+                )));
+            };
+            let fields: Vec<f32> = line
+                .split_whitespace()
+                .map(|t| {
+                    t.parse::<f32>()
+                        .map_err(|_| invalid(&format!("bad .spi1d value on line {}", line_no + 1)))
+                })
+                .collect::<Result<_>>()?;
+            if fields.len() != n {
+                return Err(invalid(&format!(
+                    "line {} holds {} values and the table declares {n}",
+                    line_no + 1,
+                    fields.len()
+                )));
+            }
+            let mut v = [fields[0]; 3];
+            if n >= 2 {
+                v[1] = fields[1];
+                v[2] = if n == 2 { 0.0 } else { fields[2] };
+            }
+            rows.push(v);
         }
+        if !version {
+            return Err(invalid("a .spi1d carries no Version tag"));
+        }
+        let len = length.ok_or_else(|| invalid("a .spi1d carries no Length tag"))?;
+        if components.is_none() {
+            return Err(invalid("a .spi1d carries no Components tag"));
+        }
+        if rows.len() != len {
+            return Err(invalid(&format!(
+                "a .spi1d declares {len} entries and holds {}",
+                rows.len()
+            )));
+        }
+        if rows.iter().flatten().any(|v| !v.is_finite()) {
+            return Err(invalid("a .spi1d value is not a number"));
+        }
+        let mut data = [
+            Vec::with_capacity(len),
+            Vec::with_capacity(len),
+            Vec::with_capacity(len),
+        ];
+        for row in rows {
+            for ch in 0..3 {
+                data[ch].push(row[ch]);
+            }
+        }
+        Ok(Self::One(Lut1d {
+            data,
+            domain_min: [from[0]; 3],
+            domain_max: [from[1]; 3],
+        }))
+    }
+
+    /// SPI `.spi3d`: a `SPILUT` head, the tag line every writer puts behind it,
+    /// three equal axis sizes, then rows of `r g b R G B` — a node's own indices
+    /// ahead of its values, so no order is asked of the file, a node written
+    /// twice is an error instead of the last row winning, and a node never
+    /// written is caught by the row count. Values keep their overshoot exactly
+    /// as a `.cube` keeps it. The tag line is consumed whether or not it says
+    /// anything, which is what the reference reader does with it, so a writer
+    /// that leaves it out is refused by both.
+    pub fn from_spi3d(text: &str) -> Result<Self> {
+        let mut lines = text.lines().enumerate();
+        let (_, head) =
+            spi_line(&mut lines).ok_or_else(|| invalid("an empty file is not a .spi3d"))?;
+        if !head
+            .split_whitespace()
+            .next()
+            .is_some_and(|t| t.eq_ignore_ascii_case("SPILUT"))
+        {
+            return Err(invalid(&format!(
+                "a .spi3d must open with SPILUT, found {head:?}"
+            )));
+        }
+        let _ = spi_line(&mut lines);
+        let (size_no, size_line) =
+            spi_line(&mut lines).ok_or_else(|| invalid("a .spi3d declares no grid size"))?;
+        let fields: Vec<&str> = size_line.split_whitespace().collect();
+        if fields.len() != 3 {
+            return Err(invalid(&format!(
+                "a .spi3d size line {} must hold three numbers",
+                size_no + 1
+            )));
+        }
+        let mut side = [0usize; 3];
+        for (i, f) in fields.iter().enumerate() {
+            side[i] = f
+                .parse()
+                .map_err(|_| invalid(&format!("bad .spi3d size on line {}", size_no + 1)))?;
+        }
+        // Three axes are named and one grid is held: the format can state a box
+        // that is not a cube, and neither this table nor the reference reader
+        // can fill one — it is the thing that format refuses outright.
+        if side[1] != side[0] || side[2] != side[0] {
+            return Err(invalid(&format!(
+                "a .spi3d must be a cube, its axes on line {} are {side:?}",
+                size_no + 1
+            )));
+        }
+        if !(2..=MAX_3D_SIDE).contains(&side[0]) {
+            return Err(invalid(&format!(
+                "a .spi3d size must be 2..={MAX_3D_SIDE}, line {} says {}",
+                size_no + 1,
+                side[0]
+            )));
+        }
+        let size = side[0];
+        let mut data = vec![[0.0f32; 3]; size * size * size];
+        let mut filled = vec![false; data.len()];
+        let mut rows = 0usize;
+        for (line_no, raw) in lines {
+            let line = raw.trim();
+            if line.is_empty() {
+                continue;
+            }
+            let fields: Vec<&str> = line.split_whitespace().collect();
+            if fields.len() != 6 {
+                return Err(invalid(&format!(
+                    "a .spi3d row is three indices and three values, line {} has {}",
+                    line_no + 1,
+                    fields.len()
+                )));
+            }
+            let mut idx = [0usize; 3];
+            let mut val = [0.0f32; 3];
+            for (i, f) in fields.iter().enumerate() {
+                if i < 3 {
+                    let n: i64 = f.parse().map_err(|_| {
+                        invalid(&format!("bad .spi3d index `{f}` on line {}", line_no + 1))
+                    })?;
+                    if n < 0 || n >= size as i64 {
+                        return Err(invalid(&format!(
+                            "a .spi3d index {n} on line {} is outside the {size}³ grid",
+                            line_no + 1
+                        )));
+                    }
+                    idx[i] = n as usize;
+                } else {
+                    val[i - 3] = f.parse().map_err(|_| {
+                        invalid(&format!("bad .spi3d value `{f}` on line {}", line_no + 1))
+                    })?;
+                }
+            }
+            if !val.iter().all(|v| v.is_finite()) {
+                return Err(invalid(&format!(
+                    "a .spi3d value on line {} is not a number",
+                    line_no + 1
+                )));
+            }
+            let slot = idx[0] + size * (idx[1] + size * idx[2]);
+            if filled[slot] {
+                return Err(invalid(&format!(
+                    "a .spi3d node {} {} {} on line {} is written twice",
+                    idx[0],
+                    idx[1],
+                    idx[2],
+                    line_no + 1
+                )));
+            }
+            filled[slot] = true;
+            data[slot] = val;
+            rows += 1;
+        }
+        if rows != data.len() {
+            return Err(invalid(&format!(
+                "a .spi3d expected {} rows, got {rows}",
+                data.len()
+            )));
+        }
+        Ok(Self::Three(Lut3d {
+            size,
+            domain_min: [0.0; 3],
+            domain_max: [1.0; 3],
+            data,
+        }))
+    }
+
+    /// Read any of the four formats from content, which is how `--lut` takes a
+    /// path without asking its extension for a hint: a `.cube` always names a
+    /// size keyword, a `.spi3d` always opens with `SPILUT`, a `.spi1d` is the
+    /// only one with a brace, and what has none of the three is a `.3dl`.
+    pub fn from_text(text: &str) -> Result<Self> {
+        // Each test here is one the format it selects must always pass, so a
+        // file cannot be handed to the wrong reader by it.
+        let head = text
+            .lines()
+            .map(str::trim)
+            .find(|l| !l.is_empty())
+            .unwrap_or("");
+        if head
+            .split_whitespace()
+            .next()
+            .is_some_and(|t| t.eq_ignore_ascii_case("SPILUT"))
+        {
+            return Self::from_spi3d(text);
+        }
+        if text.contains("_SIZE") {
+            return Self::from_cube(text);
+        }
+        if text.contains('{') {
+            return Self::from_spi1d(text);
+        }
+        // What arrives with none of those marks is the `.cube` extension taken by
+        // some format entirely — Gaussian volumetric dumps, git-lfs pointers,
+        // prose — so name every format ruled out and quote the line that gives
+        // the file away.
+        Self::from_3dl(text).map_err(|error| {
+            invalid(&format!(
+                "not a LUT: no .cube size line, no .spi3d SPILUT head and no .spi1d brace ({error}); it starts {head:?}"
+            ))
+        })
     }
 
     pub fn sample(&self, rgb: [f32; 3], interp: Interpolation) -> [f32; 3] {
@@ -662,6 +950,20 @@ fn is_number_line(line: &str) -> bool {
     line.split_whitespace()
         .next()
         .is_some_and(|t| t.parse::<f32>().is_ok())
+}
+
+/// The next line of a SPI file that holds anything, with its leading and
+/// trailing space gone, leaving the reader on the line after it.
+fn spi_line<'a>(lines: &mut impl Iterator<Item = (usize, &'a str)>) -> Option<(usize, &'a str)> {
+    lines.find(|(_, raw)| !raw.trim().is_empty())
+}
+
+/// The remainder of a header line behind one of the SPI tags, whose name the
+/// writers may spell without the space before its value.
+fn spi_tag<'a>(line: &'a str, tag: &str) -> Option<&'a str> {
+    line.get(..tag.len())
+        .is_some_and(|t| t.eq_ignore_ascii_case(tag))
+        .then(|| line[tag.len()..].trim())
 }
 
 /// Sample a transfer function as a 1D LUT over `n` codes.
@@ -1487,6 +1789,268 @@ LUT_3D_SIZE 2
         assert!(Lut::from_3dl("0 171 341 512 682 853 1023\n0 0 0\n").is_err());
         // Neither line says how wide the grid is.
         assert!(Lut::from_3dl("3\n0 0 0\n3\n1 1 1\n").is_err());
+    }
+
+    const SPI1D_CURVE: &str = "\
+Version 1
+From -0.125 1.125
+Length 3
+Components 1
+{
+        -0.0096749
+        0.5
+        1.3083107
+}
+";
+
+    const SPI1D_SRGB: &str = include_str!("../../tests/fixtures/lut/sRGB_to_linear.spi1d");
+    const SPI3D_BIZARRE: &str = include_str!("../../tests/fixtures/lut/lut3d_bizarre.spi3d");
+
+    /// A `.spi1d` states the signal range once, for all three channels, as
+    /// `From`, and the row count is the table's length — the index is the
+    /// position in the file, so there is nothing in a row to place it.
+    #[test]
+    fn a_spi1d_curve_is_read_with_its_from_pair_as_the_input_range() {
+        let Lut::One(l) = &Lut::from_spi1d(SPI1D_CURVE).unwrap() else {
+            panic!("a .spi1d is a 1D table");
+        };
+        assert_eq!(l.len(), 3);
+        assert_eq!(l.domain_min, [-0.125; 3]);
+        assert_eq!(l.domain_max, [1.125; 3]);
+        // One value per row is the same curve on all three channels.
+        assert_eq!(l.data[0], l.data[1]);
+        assert_eq!(l.data[1], l.data[2]);
+        // The declared ends are what the sampler reads them as, and the values
+        // beyond them are kept: a curve that runs past the ends is the signal.
+        assert!(close(l.sample(0, -0.125), -0.009_674_9, 1e-6));
+        assert!(close(l.sample(0, 0.5), 0.5, 1e-6));
+        assert!(close(l.sample(0, 1.125), 1.308_310_7, 1e-6));
+        assert!(l.data[0][0] < 0.0 && l.data[0][2] > 1.0);
+    }
+
+    #[test]
+    fn a_spi1d_spreads_one_two_or_three_values_per_row() {
+        let Lut::One(l) =
+            &Lut::from_spi1d("Version 1\nLength 2\nComponents 1\n{\n0.2\n0.8\n}\n").unwrap()
+        else {
+            panic!("1D");
+        };
+        assert_eq!(l.data, [vec![0.2f32, 0.8], vec![0.2, 0.8], vec![0.2, 0.8]]);
+        // No `From` tag is the display range, which is the same default a .cube
+        // carries when it states no domain.
+        assert_eq!(l.domain_min, [0.0; 3]);
+        assert_eq!(l.domain_max, [1.0; 3]);
+        // Two values state red and green and leave blue at nothing; three are
+        // red, green, blue. These are the reference reader's rules, and a table
+        // that got them the other way round would grade blue to a constant.
+        let Lut::One(two) =
+            &Lut::from_spi1d("Version 1\nLength 2\nComponents 2\n{\n0.2 0.4\n0.6 0.8\n}\n")
+                .unwrap()
+        else {
+            panic!("1D");
+        };
+        assert_eq!(
+            two.data,
+            [vec![0.2f32, 0.6], vec![0.4, 0.8], vec![0.0, 0.0]]
+        );
+        let Lut::One(three) =
+            &Lut::from_spi1d("Version 1\nLength 2\nComponents 3\n{\n0.2 0.4 0.6\n0.8 0.9 1.0\n}\n")
+                .unwrap()
+        else {
+            panic!("1D");
+        };
+        assert_eq!(
+            three.data,
+            [vec![0.2f32, 0.8], vec![0.4, 0.9], vec![0.6, 1.0]]
+        );
+    }
+
+    /// The table OpenColorIO ships as its sRGB shaper, checked against fvid's own
+    /// sRGB curve. This is the check that the `From` pair is an input range and
+    /// not a scale on the output: at −0.125 the index it declares is 0 and the
+    /// value there is not zero, and at 1.0 the index is 3690 and the value is one.
+    #[test]
+    fn a_real_spi1d_is_the_srgb_curve_over_the_range_it_declares() {
+        let lut = Lut::from_text(SPI1D_SRGB).expect("the OpenColorIO table reads");
+        let Lut::One(l) = &lut else {
+            panic!("a .spi1d is a 1D table");
+        };
+        assert_eq!(l.len(), 4101);
+        assert_eq!(l.domain_min, [-0.125; 3]);
+        assert_eq!(l.domain_max, [1.125; 3]);
+        for i in (410..=3690).step_by(97) {
+            let signal = -0.125f32 + i as f32 * (1.25 / 4100.0);
+            let want = Transfer::Srgb.eotf(signal).unwrap();
+            assert!(
+                close(l.data[0][i], want, 1e-5),
+                "entry {i} at signal {signal}: {} against {want}",
+                l.data[0][i]
+            );
+        }
+        // Past the ends the curve keeps running, which is the headroom a shaper
+        // space is there to carry.
+        assert!(close(l.data[0][0], -0.009_674_9, 1e-5));
+        assert!(close(l.data[0][4100], 1.308_31, 1e-5));
+        // Sampling is what a grade does with the table, so the declared range has
+        // to reach the sampler at its ends and in its middle.
+        assert!(close(l.sample(0, -0.125), -0.009_674_9, 1e-5));
+        assert!(close(l.sample(2, 1.0), 1.0, 1e-5));
+        assert!(close(
+            l.sample(1, 0.5),
+            Transfer::Srgb.eotf(0.5).unwrap(),
+            1e-5
+        ));
+    }
+
+    /// The grid OpenColorIO's own test suite uses to catch a reader that assumes a
+    /// row order: its rows run with blue fastest, which is the reverse of how
+    /// fvid's table stores a node, and every row states the node it means.
+    #[test]
+    fn a_spi3d_row_places_its_node_by_its_own_indices() {
+        let lut = Lut::from_spi3d(SPI3D_BIZARRE).unwrap();
+        assert_eq!(lut.size(), 3);
+        let Lut::Three(l) = &lut else {
+            panic!("a .spi3d is a grid");
+        };
+        assert_eq!(l.domain_min, [0.0; 3]);
+        assert_eq!(l.domain_max, [1.0; 3]);
+        // (2, 0, 0) is the eleventh row of the file; read by position it would
+        // land in slot 10 of a table whose slot 2 is red at full scale.
+        assert!(close(l.at(2, 0, 0)[0], 1.622_678_4, 1e-6));
+        assert!(close(l.at(0, 0, 2)[1], 0.097_751_71, 1e-6));
+        assert!(close(l.at(1, 1, 1)[0], 0.371_456_5, 1e-6));
+        assert!(close(l.at(2, 2, 2)[2], 1.173_020_5, 1e-6));
+        // Overshoot is kept as authored, the same way a `.cube` keeps it.
+        assert!(l.at(0, 2, 0)[1] > 1.4);
+        assert!(l.at(0, 0, 0)[0] < 0.0);
+        // The rows in reverse order cannot change the table, because the order is
+        // not what says where a node goes.
+        let mut rows: Vec<&str> = SPI3D_BIZARRE
+            .lines()
+            .skip(3)
+            .filter(|line| !line.trim().is_empty())
+            .collect();
+        assert_eq!(rows.len(), 27);
+        rows.reverse();
+        let shuffled = format!("SPILUT 1.0\n3 3\n3 3 3\n{}\n", rows.join("\n"));
+        assert_eq!(Lut::from_spi3d(&shuffled).unwrap(), lut);
+    }
+
+    /// The two readers of the same numbers must not disagree: the grid written out
+    /// as a `.cube`, red fastest, reads back as the same table.
+    #[test]
+    fn a_spi3d_and_the_cube_of_the_same_numbers_agree() {
+        let spi = Lut::from_spi3d(SPI3D_BIZARRE).unwrap();
+        let cube = Lut::from_cube(&spi.to_cube()).unwrap();
+        assert_eq!(cube, spi);
+        for mode in Interpolation::ALL {
+            for i in 0..=8 {
+                let rgb = [i as f32 / 8.0, 1.0 - i as f32 / 8.0, (i % 5) as f32 / 4.0];
+                assert_eq!(
+                    cube.sample(rgb, mode),
+                    spi.sample(rgb, mode),
+                    "{mode:?} {rgb:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn bad_spi_files_are_rejected() {
+        fn spi3d(rows: &[&str]) -> String {
+            format!("SPILUT 1.0\n2 2\n2 2 2\n{}\n", rows.join("\n"))
+        }
+        const NODES: [(u32, u32, u32); 8] = [
+            (0, 0, 0),
+            (0, 0, 1),
+            (0, 1, 0),
+            (0, 1, 1),
+            (1, 0, 0),
+            (1, 0, 1),
+            (1, 1, 0),
+            (1, 1, 1),
+        ];
+        let rows: Vec<String> = NODES
+            .iter()
+            .map(|(r, g, b)| format!("{r} {g} {b} 0 0 0"))
+            .collect();
+        let all: Vec<&str> = rows.iter().map(String::as_str).collect();
+        // The positive control first: all eight nodes is a grid.
+        assert!(Lut::from_text(&spi3d(&all)).is_ok());
+        let mut seven = all.clone();
+        seven[7] = "2 0 0 0 0 0";
+        // Eight rows, one index twice and one node never: the count is right, so
+        // only the duplicate check can refuse this.
+        let mut dup = all.clone();
+        dup[7] = all[0];
+        let mut wide = all.clone();
+        wide[7] = "1 1 1 0 0";
+        let mut prose = all.clone();
+        prose[7] = "1 1 1 0 0 x";
+        for bad in [
+            // A grid with most of its nodes missing is not a smaller grid.
+            spi3d(&all[..1]),
+            spi3d(&dup),
+            // An index the declared grid has no node at.
+            spi3d(&seven),
+            // A row that is not six fields, and a value that is not a number.
+            spi3d(&wide),
+            spi3d(&prose),
+            "SPILUT 1.0\n2 2\n3 3 3\n0 0 0 0 0 0\n".to_string(),
+            "SPILUT 1.0\n2 2\n4 4 2\n".to_string(),
+            "SPILUT 1.0\n2 2\n1 1 1\n".to_string(),
+            "SPILUT 1.0\n2 2\n130 130 130\n".to_string(),
+            "SPILUT 1.0\n2 2\n2 2\n".to_string(),
+            "COLOURLUT 1.0\n2 2\n2 2 2\n".to_string(),
+            String::new(),
+            // The four tags a .spi1d has to state.
+            "Length 2\nComponents 1\n{\n0\n1\n}\n".to_string(),
+            "Version 1\nComponents 1\n{\n0\n1\n}\n".to_string(),
+            "Version 1\nLength 2\n{\n0\n1\n}\n".to_string(),
+            "Version 1\nLength 2\nComponents 0\n{\n\n}\n".to_string(),
+            "Version 1\nLength 2\nComponents 4\n{\n0 0 0 0\n1 1 1 1\n}\n".to_string(),
+            "Version 1\nLength 1\nComponents 1\n{\n0\n}\n".to_string(),
+            // Short, and over: the count is a declaration, not a guess.
+            "Version 1\nLength 4\nComponents 1\n{\n0\n1\n}\n".to_string(),
+            "Version 1\nLength 2\nComponents 1\n{\n0\n1\n2\n}\n".to_string(),
+            // A row of the width the table does not declare, and a value that is
+            // not a number.
+            "Version 1\nLength 2\nComponents 2\n{\n0 0 0\n1 1 1\n}\n".to_string(),
+            "Version 1\nLength 2\nComponents 1\n{\n0\nx\n}\n".to_string(),
+            // A table that never opens its brace holds no rows at all.
+            "Version 1\nLength 2\nComponents 1\n{\n0\n".to_string(),
+            // A row ahead of the tag that says how wide a row is.
+            "Version 1\nLength 2\n{\n0\n1\n}\n".to_string(),
+        ] {
+            assert!(Lut::from_text(&bad).is_err(), "accepted: {bad:?}");
+        }
+    }
+
+    /// Every one of the four formats is reached from the content alone, which is
+    /// how `--lut` takes a path, and a file that is none of them says so about all
+    /// four.
+    #[test]
+    fn from_text_routes_each_format_to_its_own_reader() {
+        assert!(matches!(Lut::from_text(SPI1D_CURVE).unwrap(), Lut::One(_)));
+        assert!(matches!(
+            Lut::from_text(SPI3D_BIZARRE).unwrap(),
+            Lut::Three(_)
+        ));
+        assert!(matches!(Lut::from_text(CUBE_2).unwrap(), Lut::Three(_)));
+        let three_dl = "3DMESH\nMesh 4 12\n2\n0 0 0\n4095 0 0\n0 4095 0\n4095 4095 0\n0 0 4095\n4095 0 4095\n0 4095 4095\n4095 4095 4095\n";
+        assert!(Lut::from_text(three_dl).is_ok());
+        // A grid that stops short is judged as a .spi3d, not as a .3dl whose
+        // header lines happen to look like numbers.
+        let short = Lut::from_text("SPILUT 1.0\n3 3\n3 3 3\n0 0 0 0 0 0\n").unwrap_err();
+        assert!(short.to_string().contains(".spi3d"), "{short}");
+        let short = Lut::from_text("Version 1\nLength 4\nComponents 1\n{\n0\n}\n").unwrap_err();
+        assert!(short.to_string().contains(".spi1d"), "{short}");
+        let err = Lut::from_text("Psi4 Gaussian Cube File.\n\n5 0.0 0.0 0.0\n")
+            .unwrap_err()
+            .to_string();
+        for name in [".cube", ".spi1d", ".spi3d", ".3dl"] {
+            assert!(err.contains(name), "{err}: {name} is not named");
+        }
     }
 
     #[test]

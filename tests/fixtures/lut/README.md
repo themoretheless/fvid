@@ -417,3 +417,39 @@ row-count fallback added for undeclared `.3dl` files reads it as a 17-grid — t
 two shapes are not distinguishable from the inside. Nothing sensible comes of it
 (the codes reach 16 303, so the grid divides to white), but it is imported, and
 that is the price of the rule recorded above.
+
+## The SPI tables
+
+Two files from OpenColorIO's own test data, taken byte for byte (`cmp` says so)
+from `https://raw.githubusercontent.com/AcademySoftwareFoundation/OpenColorIO/main/tests/data/files/`,
+where they are unmodified test inputs under that project's BSD-3-Clause licence:
+
+| file | bytes | sha256 |
+| --- | --- | --- |
+| `sRGB_to_linear.spi1d` | 96 311 | `4240e29bd6638d46d68bdcb83ea321428c1a00e4360e44dd84864f78b86ff0e9` |
+| `lut3d_bizarre.spi3d` | 1 246 | `1bb96707129632920e50237696feade4907dc27081076ad0ca3741fcc9a2916e` |
+
+Neither is read by `tests/lut_ffmpeg.rs`, because `ffmpeg lut3d` has no SPI
+reader to agree or disagree with — measured on 9.0.2, the same one-liner that
+accepts `grade-17.cube` fails the grid:
+
+```console
+$ ffmpeg -f lavfi -i color=gray:s=8x8 -vf lut3d=file=lut3d_bizarre.spi3d -f null -
+[AVFilterGraph] Error initializing filters ... Invalid argument
+```
+
+Both are read by the module tests in `src/color/lut.rs`.
+
+`sRGB_to_linear.spi1d` is the sRGB shaper: `From -0.125 1.125`, `Length 4101`,
+`Components 1`. The pair is the input range, so entry 410 is the EOTF at signal
+0.0 and entry 3690 at 1.0, while the ends of the table run on to −0.0096 and
+1.3083 past them — the headroom a shaper space is there to carry, and what the
+test compares against fvid's own `Transfer::Srgb` curve
+(`a_real_spi1d_is_the_srgb_curve_over_the_range_it_declares`).
+
+`lut3d_bizarre.spi3d` is a 3³ grid whose rows are deliberately not in the order
+the table stores a node: the file lists blue fastest and each row states its own
+`r g b` ahead of its values, and its nodes reach 1.76 above white and −0.098
+below black. Read by row position instead of by those indices, the grid is a
+different look — which is the mistake the file exists to catch
+(`a_spi3d_row_places_its_node_by_its_own_indices`).
