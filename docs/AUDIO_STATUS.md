@@ -408,3 +408,10 @@ two active filters and compares every decoded sample to the saved FFmpeg 9.0.2
 oracle. RMS error 1.5812e-8, peak 1.7882e-7; PNS disabled. Fixture generation is
 documented alongside it. Multichannel, 960-sample bands and player replacement
 remain incomplete.
+
+Native AAC now accepts standard ordered element layouts for 3–6 channels,
+including LFE, and maps AAC center-first syntax into PCM channel order. A new
+5.1 fixture has distinct tones in all channels: per-channel RMS <7.5e-9 and
+peak <4.5e-8 against the saved oracle. Duplicate element tags and unexpected
+layout/order are rejected. 7.1, arbitrary reordered elements/PCE, 960-sample
+packet support and player replacement remain pending.

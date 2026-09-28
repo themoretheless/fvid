@@ -15,10 +15,8 @@ impl NativeAacDecoder {
     pub fn new(asc: &[u8]) -> Result<Self> {
         let config = AacConfig::parse(asc)?;
         BandTables::for_config(&config)?;
-        if !matches!(config.channels, 1 | 2) {
-            return Err(unsupported(
-                "owned AAC multichannel layout is not implemented",
-            ));
+        if !(1..=6).contains(&config.channels) {
+            return Err(unsupported("owned AAC layout above 5.1 is not implemented"));
         }
         let synthesis = (0..config.channels)
             .map(|_| LongSineSynthesis::new(config.frame_samples as usize))
@@ -47,23 +45,39 @@ impl NativeAacDecoder {
         let mut bits = BitReader::new(packet);
         let mut noise = self.noise.clone();
         let mut channels = Vec::new();
+        let elements: &[u32] = match self.config.channels {
+            1 => &[0],
+            2 => &[1],
+            3 => &[0, 1],
+            4 => &[0, 1, 0],
+            5 => &[0, 1, 1],
+            6 => &[0, 1, 1, 3],
+            _ => unreachable!(),
+        };
+        let mut element_index = 0;
+        let mut tags = std::collections::HashSet::new();
         loop {
-            match bits.read(3)? {
-                0 => {
-                    if self.config.channels != 1 || !channels.is_empty() {
-                        return Err(unsupported("unexpected AAC single-channel layout"));
-                    }
-                    bits.read(4)?; // element tag
+            let element = bits.read(3)?;
+            if matches!(element, 0 | 1 | 3) {
+                if elements.get(element_index) != Some(&element) {
+                    return Err(unsupported(
+                        "AAC element order differs from standard layout",
+                    ));
+                }
+                element_index += 1;
+                let tag = bits.read(4)?;
+                if !tags.insert((element, tag)) {
+                    return Err(invalid("duplicate AAC element tag"));
+                }
+            }
+            match element {
+                0 | 3 => {
                     let channel = ChannelData::read(&mut bits, &self.config)?;
                     let spectrum = channel.spectrum_with_noise(&self.config, &mut noise)?;
                     let spectrum = channel.apply_tns(&self.config, spectrum)?;
                     channels.push((channel.info, spectrum));
                 }
                 1 => {
-                    if self.config.channels != 2 || !channels.is_empty() {
-                        return Err(unsupported("unexpected AAC channel-pair layout"));
-                    }
-                    bits.read(4)?;
                     let pair = ChannelPair::read(&mut bits, &self.config)?;
                     let (left, right) = pair.spectra_with_noise(&self.config, &mut noise)?;
                     let left = pair.left.apply_tns(&self.config, left)?;
@@ -115,7 +129,18 @@ impl NativeAacDecoder {
         for (index, (info, spectrum)) in channels.iter().enumerate() {
             synthesis[index].synthesize_pcm(info.sequence, info.shape, spectrum, &mut pcm)?;
             for i in 0..n {
-                output[i * channels.len() + index] = pcm[i] as f32;
+                // AAC syntax: center, front pair, surrounds, LFE. PCM:
+                // front L/R, center, LFE (if present), rear/surround channels.
+                let mapping: &[usize] = match channels.len() {
+                    1 => &[0],
+                    2 => &[0, 1],
+                    3 => &[2, 0, 1],
+                    4 => &[2, 0, 1, 3],
+                    5 => &[2, 0, 1, 3, 4],
+                    6 => &[2, 0, 1, 4, 5, 3],
+                    _ => unreachable!(),
+                };
+                output[i * channels.len() + mapping[index]] = pcm[i] as f32;
             }
         }
         self.synthesis = synthesis;
@@ -311,6 +336,39 @@ mod tests {
         let rms = (squared / samples.len() as f64).sqrt();
         assert!(rms < 0.0000001, "RMS {rms}");
         assert!(peak < 0.000001, "peak {peak}");
+    }
+    #[test]
+    fn surround_pcm_matches_reference_channel_order() {
+        let data = include_bytes!("../../tests/fixtures/audio/aac-51-active.aac");
+        let reference = include_bytes!("../../tests/fixtures/audio/aac-51-reference.f32le");
+        let mut decoder = NativeAacDecoder::new(&[0x11, 0xb0]).unwrap();
+        let mut at = 0;
+        let mut samples = Vec::new();
+        while at < data.len() {
+            let n = ((data[at + 3] as usize & 3) << 11)
+                | ((data[at + 4] as usize) << 3)
+                | (data[at + 5] as usize >> 5);
+            samples.extend(
+                decoder
+                    .decode(&data[at + 7..at + n])
+                    .unwrap_or_else(|e| panic!("offset {at}: {e}")),
+            );
+            at += n;
+        }
+        assert_eq!(samples.len() * 4, reference.len());
+        let mut squared = [0.0; 6];
+        let mut peak = [0.0f64; 6];
+        for (i, (&sample, bytes)) in samples.iter().zip(reference.chunks_exact(4)).enumerate() {
+            let error =
+                f64::from(sample) - f64::from(f32::from_le_bytes(bytes.try_into().unwrap()));
+            squared[i % 6] += error * error;
+            peak[i % 6] = peak[i % 6].max(error.abs());
+        }
+        for ch in 0..6 {
+            let rms = (squared[ch] / (samples.len() / 6) as f64).sqrt();
+            assert!(rms < 1e-7, "channel {ch} RMS {rms}");
+            assert!(peak[ch] < 1e-6, "channel {ch} peak {}", peak[ch]);
+        }
     }
     #[test]
     fn bad_packet_does_not_advance_noise_or_overlap() {
