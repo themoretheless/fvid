@@ -93,9 +93,51 @@ after its sequence header.
 
 What it is for is measured: the mov muxer writes no `colr`, `mdcv` or `ccll` box
 for this file (counted in its bytes: zero of each), so the volume and the light
-levels exist nowhere but inside the packet. That is the case a reader's
-`bitstream_hdr` answers — and, like the coding's signal, the answer appears once
-the packet has been decoded rather than when the file was opened.
+levels exist nowhere but inside the packet. That is the case the reader meets at
+open: it unpacks the first packet while the file is opening, so `bitstream_hdr`
+answers the volume and the levels before a single picture has been decoded.
+
+## `hdr-in-band.mkv` — the whole signal stated only in the stream
+
+Two pictures of 64x64 testsrc2 at 3 fps, encoded by SVT-AV1 4.2.0 with a
+BT.2020 triple, the HDR10 mastering volume and a 1 234/567 content light, and
+muxed to Matroska:
+
+```sh
+ffmpeg -hide_banner -y -f lavfi \
+  -i "testsrc2=size=64x64:rate=3:duration=0.35" -frames:v 3 -c:v libsvtav1 \
+  -pix_fmt yuv420p10le -preset 12 \
+  -svtav1-params "lp=1:gop-size=3:mastering-display=G(0.170,0.797)B(0.131,0.046)R(0.708,0.292)WP(0.3127,0.3290)L(1000.0,0.0001):content-light=1234,567:color-primaries=9:transfer-characteristics=16:matrix-coefficients=9:color-range=1" \
+  -fflags +bitexact -f matroska tests/fixtures/av1/hdr-in-band.mkv
+```
+
+Two pictures, not three, because the source runs out 0.35 s into a 3 fps rate.
+2 489 bytes, sha256
+`b31dafe129332d4a7579d9b4c6988207a2579d18199152dd35e5bc257487a6cd`; two runs of
+the command above reproduce it byte for byte (`cmp`), SVT-AV1 4.2.0 with its
+preset 12 mapped to 11.
+
+Nothing about this file was chosen here except its length; every element was
+measured out of its own bytes. The track's `Colour` element sits at 0x14c and is
+`55 b0 84 55 b9 81 01` — four bytes of content, one of them a range flag, and no
+primaries, no transfer characteristic and no matrix. `MasteringMetadata`
+(`55 d0`), `MaxCLL` (`55 bc`) and `CodecPrivate` (`1a 96 97`) are absent, so the
+volume and the light levels exist only as metadata OBUs inside the first
+SimpleBlock, at 0x1fd and 0x205: the same `2a 06 01 04 d2 02 37 80` and
+`2a 1a 02 b5 3f …` bytes libsvtav1 wrote for the two `-svtav1-params` above. The
+encoder writes its triple into the sequence header, where it reads BT.2020 / PQ /
+BT.2020-NCL.
+
+So this is a file whose entire HDR answer belongs to the coding, which is what a
+player that bakes its grade at open asks. One disagreement between the halves is
+in the bytes rather than in this reading: the container's lone range flag says
+limited and the sequence header, written from `color-range=1`, says full. A
+second difference is between the standards rather than the halves: the command
+line above asks for a black of 0.0001 cd/m², AV1 states luminance in 18.14 fixed
+point, and the payload that comes out of the encoder carries 2/16 384 —
+0.00012207031 — where the ST 2086 quantum an `mdcv` box or SEI 137 would use is
+0.00002 and keeps 0.0001 exact. The info panel prints the number the file
+actually carries.
 
 ## Independent primitive oracles
 

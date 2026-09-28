@@ -8781,6 +8781,59 @@ LUT_3D_SIZE 2
         );
     }
 
+    /// The same chain on an AV1 file that writes its signal in no container
+    /// element at all: SVT-AV1 stated the BT.2020 triple in its sequence header
+    /// and the HDR10 volume and a 1 234/567 light in metadata OBUs inside the
+    /// first packet, and the muxer's `Colour` element holds one range flag. The
+    /// grade a session bakes before showing a picture still reads the encoder's
+    /// own peak, because the reader unpacks that packet while the file opens.
+    /// And the coding's range flag replaces the container's, since a lone range
+    /// with no triple beside it states no signal for the composition to keep.
+    #[test]
+    fn an_av1_tracks_in_band_signal_is_graded_at_open() {
+        use crate::playback_native::NativeReader;
+        let data = include_bytes!("../tests/fixtures/av1/hdr-in-band.mkv").to_vec();
+        let reader = NativeReader::without_memory_limit(std::io::Cursor::new(data)).unwrap();
+        let (signal, hdr) = (reader.colour(), reader.hdr());
+        assert_eq!(
+            signal,
+            ColourDescription {
+                primaries: 9,
+                transfer: 16,
+                matrix: 9,
+                full_range: true,
+            }
+        );
+        assert!(signal.is_hdr());
+        assert_eq!(hdr.content_light(PANEL_NITS).max_cll, 1_234.0);
+        let grade = Grading::default()
+            .grade_for(signal, &hdr)
+            .expect("BT.2100 material is graded for the panel");
+        let plan = grade.plan();
+        assert_eq!((plan.from, plan.to), (Transfer::Pq, Transfer::Bt709));
+        assert_eq!(plan.tone_map, Some(ToneMap::Mobius));
+        assert_eq!(plan.content.max_cll, 1_234.0);
+        assert_eq!(
+            colour_line(signal).unwrap(),
+            "Colour: BT.2020 · PQ · BT.2020 NCL · full"
+        );
+        assert_eq!(
+            light_line(&hdr).unwrap(),
+            // The floor is AV1's own number, not ST 2086's: the volume writes
+            // luminance in 18.14 fixed point, so the black this encoder means
+            // arrives as 2/16 384 rather than the 0.0001 a `mdcv` box carries.
+            // The name above is unaffected — the corners and the 1 000 cd/m²
+            // peak decide it, and no floor is compared — and the line states
+            // what the file says rather than rounding it toward the other
+            // standard's quantum.
+            "HDR: BT.2020 · 0.00012207031–1000 cd/m² · MaxCLL 1234 cd/m² · MaxFALL 567 cd/m²"
+        );
+        assert_eq!(
+            grade_text(&plan, grade.interpolation(), grade.lut()),
+            "PQ → BT.709 · BT.2020 → BT.709 · mobius · 100 cd/m² · 33³ tetrahedral"
+        );
+    }
+
     /// The same chain on a file that states a curve and no light at all: an HLG
     /// clip. Nothing was asked from the command line, yet BT.2100 material still
     /// gets the display-domain pass [`Grade::new`] picks — and because the panel's
