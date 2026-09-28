@@ -132,10 +132,31 @@ fn open_mp3(path: &str) -> fvid::Result<Box<dyn AudioStream>> {
     )?))
 }
 
+/// A bare AC-3 file states nothing before its frames: each syncframe carries its own
+/// geometry, so the reader walks the stream the way the MPEG walker does.
+fn open_ac3(path: &str) -> fvid::Result<Box<dyn AudioStream>> {
+    let file = File::open(path)?;
+    Ok(track_of(fvid::playback_ac3::Ac3AudioReader::open(
+        BufReader::new(file),
+        fvid::playback_ac3::Limits::default(),
+    )?))
+}
+
+/// A bare ADTS AAC file: the frame headers state geometry and no setup block exists,
+/// so the reader builds the `esds` the container-shaped decoder asks for. Last,
+/// because its syncword is the loosest of the walkers.
+fn open_aac(path: &str) -> fvid::Result<Box<dyn AudioStream>> {
+    let file = File::open(path)?;
+    Ok(track_of(fvid::playback_aac::AacAudioReader::open(
+        BufReader::new(file),
+        fvid::playback_aac::Limits::default(),
+    )?))
+}
+
 /// Every audio reader the player has, in the order it tries them.
 const OPENERS: &[Opener] = &[
     open_mp4, open_webm, open_avi, open_smf, open_xm, open_ogg, open_wav, open_aiff, open_au,
-    open_flac, open_mp3,
+    open_flac, open_mp3, open_ac3, open_aac,
 ];
 
 /// Open the first audio track the player can decode, from MP4, WebM or AVI, a MIDI
