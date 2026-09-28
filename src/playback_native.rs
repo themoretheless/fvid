@@ -109,7 +109,7 @@ fn seek_webm_to<R: Read + Seek>(
 ) -> Result<Option<RawFrame>> {
     let nanos = target.as_nanos();
     let target = i64::try_from(nanos).map_err(|_| invalid("seek target overflow"))?;
-    reader.seek_to_sync(target);
+    reader.seek_to_sync(target)?;
     let mut last = None;
     loop {
         let Some(planes) = reader.read_frame_planes()? else {

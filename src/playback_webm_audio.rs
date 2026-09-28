@@ -163,7 +163,9 @@ impl<R: Read + Seek> WebmAudioReader<R> {
 
     /// Read the next audio packet. Returns None at end of track.
     pub fn read_packet(&mut self) -> Result<Option<AudioPacket>> {
-        while self.packet_index < self.demuxer.packets.len() {
+        // Blocks are indexed a cluster at a time, so running out of them asks
+        // the file for more rather than meaning the track has ended.
+        while self.packet_index < self.demuxer.packets.len() || self.demuxer.scan_more()? {
             let idx = self.packet_index;
             let (pts_ns, track) = {
                 let packet = &self.demuxer.packets[idx];
@@ -203,6 +205,12 @@ impl<R: Read + Seek> WebmAudioReader<R> {
     /// Seek to the packet with the greatest PTS at or before `pts_ns`.
     /// Returns that packet's PTS, or the first one when the whole track follows.
     pub fn seek(&mut self, pts_ns: i64) -> i64 {
+        // A jump needs the blocks behind its target, which an index that grew a
+        // cluster at a time has not necessarily reached yet. The infallible
+        // signature is the audio stream's own; a walk that fails leaves the
+        // index short, and the next packet read reports the same failure where
+        // the caller can still hear it.
+        let _ = self.demuxer.scan_until(pts_ns);
         let mut best: Option<(usize, i64)> = None;
         for (i, packet) in self.demuxer.packets.iter().enumerate() {
             if packet.track != self.track_number || packet.pts_ns > pts_ns {
@@ -741,6 +749,16 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     /// where the writer declared one. A lone block states nothing about its
     /// length, so the total stays unknown rather than guessed.
     fn duration(&self) -> Option<std::time::Duration> {
+        // Blocks are indexed a cluster at a time, so an index that has not met
+        // the file's tail has no last block to measure against. What the muxer
+        // stated for the whole item is the only answer such an index can give,
+        // and the only one a file that states it needs no walk to reach.
+        if !self.demuxer.fully_indexed() {
+            return self
+                .demuxer
+                .duration_ns
+                .map(std::time::Duration::from_nanos);
+        }
         let mut stamps = self
             .demuxer
             .packets

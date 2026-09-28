@@ -157,6 +157,9 @@ mod motion_tests {
             Limits::default(),
         )
         .unwrap();
+        // A fixture that states its own length indexes one cluster at a time;
+        // this test walks the whole stream.
+        reader.scan_all().unwrap();
         let oracle = include_bytes!("../../tests/fixtures/vp9/motion.yuv");
         let mut decoder = Decoder::new(16 << 20);
         let size = 128 * 96 * 3 / 2;
@@ -192,6 +195,7 @@ mod edge_transform_tests {
             Limits::default(),
         )
         .unwrap();
+        reader.scan_all().unwrap();
         let oracle = include_bytes!("../../tests/fixtures/vp9/edge-tx-last.yuv");
         let mut decoder = Decoder::new(16 << 20);
         let mut last = Vec::new();
@@ -233,6 +237,7 @@ mod depth_tests {
         ];
         for (input, expected, [w, h], depth) in cases {
             let mut demux = WebmReader::open(Cursor::new(input), Limits::default()).unwrap();
+            demux.scan_all().unwrap();
             let mut decoder = Decoder::new(16 << 20);
             let mut output = Vec::new();
             for i in 0..demux.packets.len() {
@@ -312,6 +317,7 @@ mod adaptation_tests {
         ];
         for (data, oracle, frames, tiled) in cases {
             let mut reader = WebmReader::open(Cursor::new(data), Limits::default()).unwrap();
+            reader.scan_all().unwrap();
             let mut decoder = Decoder::new(16 << 20);
             for _ in 0..2 {
                 decoder.reset();

@@ -17,6 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .transpose()?
         .unwrap_or(usize::MAX);
     let mut reader = WebmReader::open(BufReader::new(File::open(input)?), Limits::default())?;
+    reader.scan_all()?;
     let track = reader
         .tracks
         .iter()

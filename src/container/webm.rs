@@ -118,6 +118,27 @@ pub struct WebmReader<R> {
     /// whole segment and the older `Title` of the information block.
     pub tags: FileTags,
     limits: Limits,
+    /// Where the walk of the Segment's children stands. Blocks are indexed a
+    /// cluster at a time, so the first picture does not wait for the whole file.
+    at: u64,
+    segment_end: u64,
+    /// The `TimestampScale` the file's `Info` block states, or the one the
+    /// specification gives it. Kept because a cluster's blocks arrive in it.
+    scale: u64,
+    duration_ticks: Option<f64>,
+    /// Whether `Info` has been read, which is what makes a scale final and a
+    /// track nameable: blocks before it are not indexed for a first picture.
+    info_seen: bool,
+    chapter_runs: Vec<(u64, String)>,
+    block_title: String,
+    /// How many EBML elements the walk has made, counted over the whole file so
+    /// the limit means the same thing whether the index grew in one pass or ten.
+    elements: usize,
+    /// Whether the walk reached the end of the Segment.
+    scanned: bool,
+    /// The latest block timestamp indexed so far, so a jump knows how far ahead
+    /// of itself the walk has already been.
+    tail_ns: i64,
 }
 #[derive(Clone, Copy)]
 struct Element {
@@ -146,6 +167,37 @@ fn vint(r: &mut impl Read, id: bool) -> Result<(u64, bool)> {
         value = (value << 8) | u64::from(b[0]);
     }
     Ok((value, !id && value == (1u64 << (7 * len)) - 1))
+}
+/// Stand at `pos` on the way past it rather than by starting again. A walk moves
+/// from one element to the next, and the bytes in between are the payload it has
+/// just measured: reading them costs their own length, while a seek costs the
+/// buffer behind the reader its whole capacity and the next read fetches the
+/// same bytes back. Only a gap longer than any block the reader steps over, or a
+/// move backwards, is a jump worth the seek.
+const SKIP: u64 = 8 << 20;
+fn goto<R: Read + Seek>(r: &mut R, pos: u64) -> Result<()> {
+    let here = r.stream_position()?;
+    if pos == here {
+        return Ok(());
+    }
+    if pos > here && pos - here <= SKIP {
+        let mut buf = [0u8; 1 << 13];
+        let mut left = pos - here;
+        while left > 0 {
+            let want = (left as usize).min(buf.len());
+            // A short read is the source answering less than asked, not an end:
+            // no bytes at all means the item stopped before the element its own
+            // size promised.
+            let taken = r.read(&mut buf[..want])?;
+            if taken == 0 {
+                return Err(invalid("truncated EBML element"));
+            }
+            left -= taken as u64;
+        }
+        return Ok(());
+    }
+    r.seek(SeekFrom::Start(pos))?;
+    Ok(())
 }
 fn element<R: Read + Seek>(
     r: &mut R,
@@ -226,7 +278,7 @@ fn fields<R: Read + Seek>(
     let mut at = e.data;
     let mut out = Vec::new();
     while at < limit {
-        r.seek(SeekFrom::Start(at))?;
+        goto(r, at)?;
         let child = element(r, limit, count, max)?;
         at = end(child)?;
         out.push(child);
@@ -330,39 +382,91 @@ impl<R: Read + Seek> WebmReader<R> {
         if segment.id != SEGMENT {
             return Err(invalid("missing WebM Segment"));
         }
-        let segment_end = segment.end.unwrap_or(file_end);
-        let mut at = segment.data;
-        let mut scale = 1_000_000u64;
-        let mut duration_ticks = None;
-        let mut tracks = Vec::new();
-        let mut packets = Vec::new();
-        let mut chapter_runs: Vec<(u64, String)> = Vec::new();
-        let mut block_title = String::new();
-        let mut tags = FileTags::default();
-        while at < segment_end {
-            reader.seek(SeekFrom::Start(at))?;
-            let e = element(&mut reader, segment_end, &mut count, limits.elements)?;
+        let mut this = Self {
+            reader,
+            tracks: Vec::new(),
+            packets: Vec::new(),
+            duration_ns: None,
+            chapters: Vec::new(),
+            tags: FileTags::default(),
+            limits,
+            segment_end: segment.end.unwrap_or(file_end),
+            at: segment.data,
+            scale: 1_000_000u64,
+            duration_ticks: None,
+            info_seen: false,
+            chapter_runs: Vec::new(),
+            block_title: String::new(),
+            elements: count,
+            scanned: false,
+            tail_ns: i64::MIN,
+        };
+        // One cluster is what a first picture needs, and indexing the rest of
+        // them is the whole file read on a mount that answers in bursts: a WebM
+        // with no `Cues` element has every block walked to be listed at all.
+        this.walk(true)?;
+        // Two things a reader cannot do without a complete index, both of which
+        // the head answers before the first cluster is reached: tracks some
+        // streaming muxers leave at the end, and a length the file never states,
+        // which only the last block's timestamp can supply.
+        if this.tracks.is_empty() || this.duration_ticks.is_none() {
+            this.walk(false)?;
+        }
+        this.settle()?;
+        Ok(this)
+    }
+
+    /// Index what the file holds next: the cluster that opens the picture, or
+    /// every cluster that is left when a reader has to know the whole item.
+    fn walk(&mut self, one_cluster: bool) -> Result<()> {
+        let Self {
+            reader,
+            tracks,
+            packets,
+            limits,
+            at,
+            segment_end,
+            scale,
+            duration_ticks,
+            info_seen,
+            chapter_runs,
+            block_title,
+            tags,
+            elements,
+            scanned,
+            tail_ns,
+            duration_ns: _,
+            chapters: _,
+        } = self;
+        let indexed = packets.len();
+        while *at < *segment_end {
+            goto(&mut *reader, *at)?;
+            let e = element(&mut *reader, *segment_end, &mut *elements, limits.elements)?;
             match e.id {
                 0x1549a966 => {
-                    for f in fields(&mut reader, e, &mut count, limits.elements)? {
+                    for f in fields(&mut *reader, e, &mut *elements, limits.elements)? {
                         if f.id == 0x4489 {
-                            let value = float(&mut reader, f)?;
+                            let value = float(&mut *reader, f)?;
                             if !value.is_finite() || value <= 0.0 {
                                 return Err(invalid("invalid WebM Duration"));
                             }
-                            duration_ticks = Some(value);
+                            *duration_ticks = Some(value);
                         } else if f.id == 0x7ba9 {
-                            block_title = lenient_text(&mut reader, f, 1024).unwrap_or_default();
+                            *block_title = lenient_text(&mut *reader, f, 1024).unwrap_or_default();
                         } else if f.id == 0x2ad7b1 {
-                            scale = uint(&mut reader, f)?;
-                            if scale == 0 {
+                            *scale = uint(&mut *reader, f)?;
+                            if *scale == 0 {
                                 return Err(invalid("zero WebM timestamp scale"));
                             }
                         }
                     }
+                    // Whatever the block states or leaves out, the scale it did
+                    // not name is the one the specification gives, and no later
+                    // cluster can change what a timestamp of this file means.
+                    *info_seen = true;
                 }
                 0x1654ae6b => {
-                    for entry in fields(&mut reader, e, &mut count, limits.elements)? {
+                    for entry in fields(&mut *reader, e, &mut *elements, limits.elements)? {
                         if entry.id != 0xae {
                             continue;
                         }
@@ -394,25 +498,25 @@ impl<R: Read + Seek> WebmReader<R> {
                         // not read as two different languages.
                         let mut older = String::new();
                         let mut current = String::new();
-                        for f in fields(&mut reader, entry, &mut count, limits.elements)? {
+                        for f in fields(&mut *reader, entry, &mut *elements, limits.elements)? {
                             match f.id {
-                                0xd7 => track.number = uint(&mut reader, f)?,
-                                0x83 => track.kind = uint(&mut reader, f)?,
+                                0xd7 => track.number = uint(&mut *reader, f)?,
+                                0x83 => track.kind = uint(&mut *reader, f)?,
                                 0x86 => {
                                     // Some muxers NUL-terminate the CodecID string.
-                                    track.codec = String::from_utf8(bytes(&mut reader, f, 128)?)
+                                    track.codec = String::from_utf8(bytes(&mut *reader, f, 128)?)
                                         .map_err(|_| invalid("invalid WebM codec ID"))?
                                         .trim_end_matches('\0')
                                         .to_owned();
                                 }
                                 0x536e => {
-                                    track.name = text(&mut reader, f, 1024)?;
+                                    track.name = text(&mut *reader, f, 1024)?;
                                 }
-                                0x22b59c => current = text(&mut reader, f, 128)?,
-                                0x447a => older = text(&mut reader, f, 128)?,
-                                0x23e383 => track.default_duration_ns = uint(&mut reader, f)?,
+                                0x22b59c => current = text(&mut *reader, f, 128)?,
+                                0x447a => older = text(&mut *reader, f, 128)?,
+                                0x23e383 => track.default_duration_ns = uint(&mut *reader, f)?,
                                 0x63a2 => {
-                                    track.codec_private = bytes(&mut reader, f, 1 << 20)?;
+                                    track.codec_private = bytes(&mut *reader, f, 1 << 20)?;
                                 }
                                 0xe0 => {
                                     let mut drawn = (0, 0);
@@ -425,21 +529,21 @@ impl<R: Read + Seek> WebmReader<R> {
                                     // the order a viewer cuts them: left, top,
                                     // right, bottom.
                                     let mut crop = [0; 4];
-                                    for v in fields(&mut reader, f, &mut count, limits.elements)? {
+                                    for v in fields(&mut *reader, f, &mut *elements, limits.elements)? {
                                         match v.id {
-                                            0xb0 => track.width = uint(&mut reader, v)?,
-                                            0xba => track.height = uint(&mut reader, v)?,
-                                            0x54b0 => drawn.0 = uint(&mut reader, v)?,
-                                            0x54ba => drawn.1 = uint(&mut reader, v)?,
-                                            0x54b2 => unit = uint(&mut reader, v)?,
-                                            0x54aa => crop[3] = uint(&mut reader, v)?,
-                                            0x54bb => crop[1] = uint(&mut reader, v)?,
-                                            0x54cc => crop[0] = uint(&mut reader, v)?,
-                                            0x54dd => crop[2] = uint(&mut reader, v)?,
+                                            0xb0 => track.width = uint(&mut *reader, v)?,
+                                            0xba => track.height = uint(&mut *reader, v)?,
+                                            0x54b0 => drawn.0 = uint(&mut *reader, v)?,
+                                            0x54ba => drawn.1 = uint(&mut *reader, v)?,
+                                            0x54b2 => unit = uint(&mut *reader, v)?,
+                                            0x54aa => crop[3] = uint(&mut *reader, v)?,
+                                            0x54bb => crop[1] = uint(&mut *reader, v)?,
+                                            0x54cc => crop[0] = uint(&mut *reader, v)?,
+                                            0x54dd => crop[2] = uint(&mut *reader, v)?,
                                             0x55b0 => read_colour(
-                                                &mut reader,
+                                                &mut *reader,
                                                 v,
-                                                &mut count,
+                                                &mut *elements,
                                                 limits.elements,
                                                 &mut track,
                                             )?,
@@ -457,10 +561,10 @@ impl<R: Read + Seek> WebmReader<R> {
                                     }
                                 }
                                 0xe1 => {
-                                    for v in fields(&mut reader, f, &mut count, limits.elements)? {
+                                    for v in fields(&mut *reader, f, &mut *elements, limits.elements)? {
                                         match v.id {
                                             0xb5 => {
-                                                let value = float(&mut reader, v)?;
+                                                let value = float(&mut *reader, v)?;
                                                 if !value.is_finite() || value <= 0.0 {
                                                     return Err(invalid(
                                                         "invalid WebM sampling frequency",
@@ -468,11 +572,11 @@ impl<R: Read + Seek> WebmReader<R> {
                                                 }
                                                 track.sample_rate = value.round() as u64;
                                             }
-                                            0x9f => track.channels = uint(&mut reader, v)?,
+                                            0x9f => track.channels = uint(&mut *reader, v)?,
                                             // `BitDepth` under `Audio`, in the two-byte
                                             // form the specification gives it; PCM has
                                             // nothing else to state its sample width in.
-                                            0x6264 => track.bit_depth = uint(&mut reader, v)?,
+                                            0x6264 => track.bit_depth = uint(&mut *reader, v)?,
                                             _ => {}
                                         }
                                     }
@@ -504,24 +608,24 @@ impl<R: Read + Seek> WebmReader<R> {
                     }
                 }
                 0x1254c367 => {
-                    read_tags(&mut reader, e, &mut count, limits.elements, &mut tags);
+                    read_tags(&mut *reader, e, &mut *elements, limits.elements, &mut *tags);
                 }
                 0x1043a770 => {
                     read_chapters(
-                        &mut reader,
+                        &mut *reader,
                         e,
-                        &mut count,
+                        &mut *elements,
                         limits.elements,
-                        &mut chapter_runs,
+                        &mut *chapter_runs,
                     );
                 }
                 CLUSTER => {
-                    let cluster_end = e.end.unwrap_or(segment_end);
+                    let cluster_end = e.end.unwrap_or(*segment_end);
                     let mut pos = e.data;
                     let mut timestamp = None;
                     while pos < cluster_end {
-                        reader.seek(SeekFrom::Start(pos))?;
-                        let child = element(&mut reader, cluster_end, &mut count, limits.elements)?;
+                        goto(&mut *reader, pos)?;
+                        let child = element(&mut *reader, cluster_end, &mut *elements, limits.elements)?;
                         if e.end.is_none()
                             && matches!(
                                 child.id,
@@ -538,29 +642,29 @@ impl<R: Read + Seek> WebmReader<R> {
                             break;
                         }
                         match child.id {
-                            0xe7 => timestamp = Some(uint(&mut reader, child)?),
+                            0xe7 => timestamp = Some(uint(&mut *reader, child)?),
                             0xa3 => read_block(
-                                &mut reader,
+                                &mut *reader,
                                 child,
                                 timestamp,
                                 true,
                                 true,
-                                &mut packets,
-                                limits,
+                                &mut *packets,
+                                *limits,
                             )?,
                             0xa0 => {
-                                let fs = fields(&mut reader, child, &mut count, limits.elements)?;
+                                let fs = fields(&mut *reader, child, &mut *elements, limits.elements)?;
                                 let key = !fs.iter().any(|f| f.id == 0xfb);
                                 for block in fs {
                                     if block.id == 0xa1 {
                                         read_block(
-                                            &mut reader,
+                                            &mut *reader,
                                             block,
                                             timestamp,
                                             false,
                                             key,
-                                            &mut packets,
-                                            limits,
+                                            &mut *packets,
+                                            *limits,
                                         )?;
                                     }
                                 }
@@ -569,32 +673,57 @@ impl<R: Read + Seek> WebmReader<R> {
                         }
                         pos = end(child)?;
                     }
-                    at = pos;
+                    *at = pos;
+                    // The first picture can be shown once a cluster's blocks are
+                    // known, so a walk asked for one cluster stops here. It waits
+                    // for the file to state its scale and its tracks first, which
+                    // the head of a file always does and a pathological one does
+                    // not get to skip past.
+                    if one_cluster
+                        && *info_seen
+                        && !tracks.is_empty()
+                        && packets.len() > indexed
+                    {
+                        break;
+                    }
                     continue;
                 }
                 _ => {}
             }
-            at = end(e)?;
+            *at = end(e)?;
         }
-        for p in &mut packets {
-            p.pts_ns = i64::try_from(i128::from(p.pts_ns) * i128::from(scale))
+        // Blocks are indexed in the cluster timestamps they carry, which ride in
+        // `TimestampScale`, so the scale is put on what this pass recorded: an
+        // index that grew over several walks still reads in nanoseconds.
+        for p in &mut packets[indexed..] {
+            p.pts_ns = i64::try_from(i128::from(p.pts_ns) * i128::from(*scale))
                 .map_err(|_| invalid("WebM timestamp overflow"))?;
-            if !tracks.iter().any(|t| t.number == p.track) {
+            *tail_ns = (*tail_ns).max(p.pts_ns);
+            if !tracks.iter().any(|t: &Track| t.number == p.track) {
                 return Err(invalid("WebM packet references missing track"));
             }
         }
-        if tracks.is_empty() {
+        *scanned = *at >= *segment_end;
+        if tracks.is_empty() && *scanned {
             return Err(invalid("WebM has no tracks"));
         }
-        let duration_ns = duration_ticks
-            .map(|ticks| {
-                let nanos = (ticks * scale as f64).round();
+        Ok(())
+    }
+
+    /// What the walk has read so far, turned into the answers a reader asks the
+    /// file for: its length, its chapters and the name it gave itself. Run after
+    /// every pass, because any of the three can sit behind the clusters.
+    fn settle(&mut self) -> Result<()> {
+        self.duration_ns = match self.duration_ticks {
+            Some(ticks) => {
+                let nanos = (ticks * self.scale as f64).round();
                 if !nanos.is_finite() || nanos < 1.0 || nanos >= u64::MAX as f64 {
                     return Err(invalid("WebM Duration overflow"));
                 }
-                Ok(nanos as u64)
-            })
-            .transpose()?;
+                Some(nanos as u64)
+            }
+            None => None,
+        };
         // Chapter times ride in `TimestampScale` units like every other
         // timestamp of the file.
         // Chapter times state their units badly: the specification puts them in
@@ -602,18 +731,20 @@ impl<R: Read + Seek> WebmReader<R> {
         // `ffmpeg` writes them in nanoseconds under the same 1 ms scale. A
         // chapter cannot start after the file ends, so a declared length tells
         // the two readings apart; without one the specification wins.
-        let overruns = duration_ns.is_some_and(|duration| {
-            let last = chapter_runs
+        let overruns = self.duration_ns.is_some_and(|duration| {
+            let last = self
+                .chapter_runs
                 .iter()
                 .map(|(start, _)| *start)
                 .max()
                 .unwrap_or(0);
-            last.checked_mul(scale)
+            last.checked_mul(self.scale)
                 .is_none_or(|spaced| spaced > duration)
                 && last <= duration
         });
-        let factor = if overruns { 1 } else { scale };
-        let mut chapters: Vec<Chapter> = chapter_runs
+        let factor = if overruns { 1 } else { self.scale };
+        let mut chapters: Vec<Chapter> = self
+            .chapter_runs
             .iter()
             .filter_map(|(start, title)| {
                 start.checked_mul(factor).map(|start_ns| Chapter {
@@ -623,21 +754,55 @@ impl<R: Read + Seek> WebmReader<R> {
             })
             .collect();
         chapters.sort_by_key(|chapter| chapter.start_ns);
+        self.chapters = chapters;
         // A file that wrote its name in both places wrote it in the tags, which
         // is where the specification puts it; the information block is the older
         // spelling and the only one some muxers reach for.
-        if tags.title.is_empty() {
-            tags.title = block_title;
+        if self.tags.title.is_empty() {
+            self.tags.title = self.block_title.clone();
         }
-        Ok(Self {
-            reader,
-            duration_ns,
-            chapters,
-            tags,
-            tracks,
-            packets,
-            limits,
-        })
+        Ok(())
+    }
+    /// Index the cluster after everything known so far, which is what a reader
+    /// that has run out of blocks asks before it believes the item ended. Says
+    /// whether the file still holds clusters behind this one.
+    pub fn scan_more(&mut self) -> Result<bool> {
+        if self.scanned {
+            return Ok(false);
+        }
+        let before = self.packets.len();
+        self.walk(true)?;
+        self.settle()?;
+        Ok(self.packets.len() > before)
+    }
+
+    /// Index clusters until a block at or after `pts_ns` is known. A jump only
+    /// needs the blocks behind its target, and a file's clusters are timed in
+    /// order, so the walk can stop the moment it passes the point asked for
+    /// rather than reaching the end of the item to answer it.
+    pub fn scan_until(&mut self, pts_ns: i64) -> Result<()> {
+        while !self.scanned && self.tail_ns < pts_ns {
+            self.walk(true)?;
+            self.settle()?;
+        }
+        Ok(())
+    }
+
+    /// Index every block the file holds. A seek needs the blocks behind the
+    /// reader as well as the ones in front of it, and a reader that would take
+    /// the item's length from its own blocks has no cheaper question to ask.
+    pub fn scan_all(&mut self) -> Result<()> {
+        if self.scanned {
+            return Ok(());
+        }
+        self.walk(false)?;
+        self.settle()
+    }
+    /// Whether every cluster the file holds has been indexed. A reader that
+    /// measures the item from its own blocks can only do that once the tail has
+    /// been met, so it asks before trusting a short answer.
+    pub fn fully_indexed(&self) -> bool {
+        self.scanned
     }
     pub fn read_packet(&mut self, index: usize) -> Result<Vec<u8>> {
         let p = self
@@ -647,7 +812,10 @@ impl<R: Read + Seek> WebmReader<R> {
         if p.size > self.limits.packet_bytes {
             return Err(invalid("WebM packet exceeds budget"));
         }
-        self.reader.seek(SeekFrom::Start(p.offset))?;
+        // Blocks are read in the order the walk found them, which is the order
+        // they sit in the file, so the reader is usually already standing on the
+        // packet it is asked for and the bytes stay where they were read to.
+        goto(&mut self.reader, p.offset)?;
         let mut data = vec![0; p.size];
         self.reader.read_exact(&mut data)?;
         Ok(data)
@@ -825,7 +993,7 @@ fn read_block<R: Read + Seek>(
     if out.len() >= limits.packets {
         return Err(invalid("WebM packet count exceeds limit"));
     }
-    r.seek(SeekFrom::Start(e.data))?;
+    goto(r, e.data)?;
     let (track, unknown) = vint(r, false)?;
     if track == 0 || unknown {
         return Err(invalid("invalid WebM block track"));
@@ -1683,5 +1851,157 @@ mod tests {
         let t = coloured(&payload);
         assert!(t.hdr.mastering.is_none());
         assert_eq!(t.hdr.light.max_cll, 1_234.0);
+    }
+    /// A source that reports the furthest byte it has actually handed over, so
+    /// a test can say what an opening walk read rather than what it might have.
+    struct Reach {
+        inner: Cursor<Vec<u8>>,
+        high: u64,
+    }
+    impl Read for Reach {
+        fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+            let at = self.inner.stream_position()?;
+            let n = self.inner.read(buf)?;
+            self.high = self.high.max(at + n as u64);
+            Ok(n)
+        }
+    }
+    impl Seek for Reach {
+        fn seek(&mut self, from: SeekFrom) -> std::io::Result<u64> {
+            self.inner.seek(from)
+        }
+    }
+    /// A file that states its own length, with `clusters` blocks of `payload`
+    /// bytes each, and the offset at which every cluster ends.
+    fn timed(clusters: usize, payload: usize) -> (Vec<u8>, Vec<u64>) {
+        let info = element(
+            &[0x15, 0x49, 0xa9, 0x66],
+            &[
+                atom(&[0x2a, 0xd7, 0xb1], &[0x0f, 0x42, 0x40]),
+                element(&[0x44, 0x89], &5000.0f32.to_be_bytes()),
+            ]
+            .concat(),
+        );
+        let tracks = element(
+            &[0x16, 0x54, 0xae, 0x6b],
+            &element(
+                &[0xae],
+                &[
+                    atom(&[0xd7], &[1]),
+                    atom(&[0x83], &[1]),
+                    atom(&[0x86], b"V_VP9"),
+                    element(
+                        &[0xe0],
+                        &[atom(&[0xb0], &[16]), atom(&[0xba], &[16])].concat(),
+                    ),
+                ]
+                .concat(),
+            ),
+        );
+        let cluster = |time: u8| {
+            let mut block = vec![0x81, 0x00, 0x00, 0x80];
+            block.extend(std::iter::repeat_n(0x27, payload));
+            element(
+                &[0x1f, 0x43, 0xb6, 0x75],
+                &[
+                    atom(&[0xe7], &[time]),
+                    element(&[0xa3], &block),
+                ]
+                .concat(),
+            )
+        };
+        let mut file = [
+            atom(&[0x1a, 0x45, 0xdf, 0xa3], &atom(&[0x42, 0x82], b"webm")),
+            vec![0x18, 0x53, 0x80, 0x67, 0xff],
+            info,
+            tracks,
+        ]
+        .concat();
+        let mut ends = Vec::new();
+        for time in 0..clusters {
+            file.extend_from_slice(&cluster(time as u8));
+            ends.push(file.len() as u64);
+        }
+        (file, ends)
+    }
+    /// The hang this indexing shape exists to avoid: an item on a slow mount is
+    /// opened by reading it end to end, because blocks can only be listed by
+    /// walking the clusters that hold them. With a stated length the walk stops
+    /// at the first cluster whose blocks are known, and everything behind it is
+    /// read only when a reader asks for the picture that lives there.
+    #[test]
+    fn opening_a_timed_file_stops_at_the_first_cluster() {
+        let (file, ends) = timed(3, 4096);
+        let mut r = WebmReader::open(Reach {
+            inner: Cursor::new(file),
+            high: 0,
+        }, Limits::default())
+        .expect("built file opens");
+        assert_eq!(r.duration_ns, Some(5_000_000_000), "the length the file stated");
+        assert_eq!(r.packets.len(), 1);
+        assert!(!r.fully_indexed());
+        assert!(
+            r.reader.high < ends[0],
+            "the second cluster begins at {} and open read to {}",
+            ends[0],
+            r.reader.high
+        );
+        assert_eq!(r.packets[0].size, 4096);
+        assert_eq!(r.read_packet(0).unwrap(), vec![0x27; 4096]);
+        // The rest arrives a cluster at a time, and the last cluster is reported
+        // as the growth it is rather than as the end of the file.
+        assert!(r.scan_more().unwrap());
+        assert_eq!(r.packets.len(), 2);
+        assert!(r.reader.high > ends[0]);
+        assert!(r.scan_more().unwrap(), "the last cluster still indexes");
+        assert_eq!(r.packets.len(), 3);
+        assert!(!r.scan_more().unwrap(), "nothing is left behind it");
+        assert!(r.fully_indexed());
+        assert_eq!(r.duration_ns, Some(5_000_000_000), "a settled index keeps it");
+    }
+    /// A jump costs the distance it travels, not the length of the item: the
+    /// walk stops at the first block past the point asked for, and the clusters
+    /// behind it stay unread until something needs them. The fixture times one
+    /// millisecond per cluster, so a target is reached by the cluster of that
+    /// number.
+    #[test]
+    fn scanning_to_a_point_leaves_the_file_behind_it_unread() {
+        let (file, ends) = timed(6, 4096);
+        let mut r = WebmReader::open(
+            Reach {
+                inner: Cursor::new(file),
+                high: 0,
+            },
+            Limits::default(),
+        )
+        .expect("built file opens");
+        r.scan_until(2_000_000).unwrap();
+        assert_eq!(r.packets.len(), 3, "the walk stopped at the target");
+        assert!(!r.fully_indexed());
+        assert!(
+            r.reader.high < ends[3],
+            "the fourth cluster begins at {} and the walk read to {}",
+            ends[3],
+            r.reader.high
+        );
+        // Asking past the last block is asking for the end, and gets it.
+        r.scan_until(i64::MAX).unwrap();
+        assert_eq!(r.packets.len(), 6);
+        assert!(r.fully_indexed());
+        assert!(
+            r.reader.high > ends[4],
+            "the walk reached the last cluster, having read to {}",
+            r.reader.high
+        );
+    }
+    /// A file that states no length has its tail as the only statement of it, so
+    /// the opening walk still measures the whole item and a consumer that reads
+    /// the duration off its own blocks gets the answer it always got.
+    #[test]
+    fn a_file_with_no_stated_length_is_indexed_whole_at_open() {
+        let r = WebmReader::open(Cursor::new(fixture(false)), Limits::default())
+            .expect("built file opens");
+        assert_eq!(r.packets.len(), 2);
+        assert!(r.fully_indexed());
     }
 }
