@@ -328,7 +328,8 @@ impl Lut {
         Err(invalid("a .cube must declare LUT_1D_SIZE or LUT_3D_SIZE"))
     }
 
-    /// Autodesk/Avid `.3dl`: a size line then 12-bit integer rows.
+    /// Autodesk/Avid `.3dl`: a size line then 12-bit integer rows, listing the
+    /// grid with the blue axis varying fastest — the reverse of a `.cube`.
     pub fn from_3dl(text: &str) -> Result<Self> {
         let mut rows: Vec<[f32; 3]> = Vec::new();
         let mut size = None;
@@ -380,11 +381,20 @@ impl Lut {
                 rows.len()
             )));
         }
+        // Row `b + size·(g + size·r)` of the file is node (r, g, b); the table
+        // holds node (r, g, b) at `r + size·(g + size·b)`.
+        let mut data = vec![[0.0f32; 3]; rows.len()];
+        for (i, row) in rows.into_iter().enumerate() {
+            let b = i % size;
+            let g = i / size % size;
+            let r = i / (size * size);
+            data[r + size * (g + size * b)] = row;
+        }
         Ok(Self::Three(Lut3d {
             size,
             domain_min: [0.0; 3],
             domain_max: [1.0; 3],
-            data: rows,
+            data,
         }))
     }
 
@@ -967,10 +977,12 @@ LUT_3D_SIZE 2
 
     #[test]
     fn cube_3dl_parses_12bit_rows() {
+        // Each node's row carries that node's own axis coordinates, so an entry
+        // filed against the wrong axis comes back in the wrong channel.
         let mut text = String::from("3\n");
-        for b in 0..3 {
+        for r in 0..3 {
             for g in 0..3 {
-                for r in 0..3 {
+                for b in 0..3 {
                     text.push_str(&format!("{} {} {}\n", r * 2047, g * 2047, b * 2047));
                 }
             }
@@ -981,6 +993,18 @@ LUT_3D_SIZE 2
         assert!(close(out[0], 0.0, 1e-6), "{out:?}");
         let hi = lut.sample([1.0, 1.0, 1.0], Interpolation::Nearest);
         assert!(close(hi[0], 1.0, 1e-3), "{hi:?}");
+        // The first row after the size line is the blue neighbour of black, not
+        // the red one: a `.3dl` runs its grid blue-fastest, opposite to a cube.
+        let blue = lut.sample([0.0, 0.0, 0.5], Interpolation::Nearest);
+        assert!(
+            blue[2] > 0.49 && blue[0] < 1e-3 && blue[1] < 1e-3,
+            "the file's first row landed on the wrong axis: {blue:?}"
+        );
+        let red = lut.sample([1.0, 0.0, 0.0], Interpolation::Nearest);
+        assert!(
+            close(red[0], 1.0, 1e-3) && close(red[1], 0.0, 1e-6) && close(red[2], 0.0, 1e-3),
+            "red came back as {red:?}"
+        );
     }
 
     #[test]
