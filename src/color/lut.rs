@@ -1,5 +1,5 @@
-//! 1D and 3D colour lookup tables: `.cube` / `.3dl` / `.spi1d` / `.spi3d`
-//! parsing and sampling.
+//! 1D and 3D colour lookup tables: `.cube` / `.3dl` / `.dat` / `.spi1d` /
+//! `.spi3d`, parsing and sampling.
 
 use crate::color::log::Log;
 use crate::color::primaries::{apply, rgb_to_rgb, Primaries};
@@ -476,20 +476,133 @@ impl Lut {
                 rows.len()
             )));
         }
-        // Row `b + size·(g + size·r)` of the file is node (r, g, b); the table
-        // holds node (r, g, b) at `r + size·(g + size·b)`.
-        let mut data = vec![[0.0f32; 3]; rows.len()];
-        for (i, row) in rows.into_iter().enumerate() {
-            let b = i % size;
-            let g = i / size % size;
-            let r = i / (size * size);
-            data[r + size * (g + size * b)] = row;
-        }
+        // The file lists the grid with blue fastest; the table does not.
+        let data = blue_fastest_to_slots(rows, size);
         Ok(Self::Three(Lut3d {
             size,
             domain_min: [0.0; 3],
             domain_max: [1.0; 3],
             data,
+        }))
+    }
+
+    /// Iridas `.dat`: one optional `3DLUTSIZE <side>` line and then side³ rows
+    /// of three floats each, with nothing else in the file — no index in the
+    /// row, no brace, no keyword but that one line, and blank or `#`-comment
+    /// lines anywhere between them. `ffmpeg`'s `lut3d` is the only
+    /// implementation that reads it, so its `parse_dat` is the whole grammar,
+    /// and the one thing that grammar does not say is which axis runs fastest.
+    /// `ffmpeg`'s own array answers it: `parse_dat` puts its innermost loop in
+    /// the ones place of the slot `r·size² + g·size + b`, so the rows run blue
+    /// fastest — the same order a `.3dl` uses and the reverse of a `.cube`, so
+    /// this reader transposes like that one does.
+    ///
+    /// Measured, not inferred: the rows of the 17-grid look were written out in
+    /// all six assignments of the file's three digit places to red, green and
+    /// blue, and `ffmpeg` was run on each. Only the blue-fastest file reproduces
+    /// its own `.cube` output — all 12 288 probe bytes, in all three
+    /// interpolations. The five others differ on 10 542 to 12 184 of them
+    /// (`tests/fixtures/lut/README.md`), which is the width of the mistake a
+    /// reader cannot talk itself out of.
+    ///
+    /// Three places are held tighter than `parse_dat`, and the first two are the
+    /// places where it reads the wrong file rather than a different one: it takes
+    /// the first three numbers of a wider row and stops at the last row it needs,
+    /// so a 17-grid with a fourth column or a stray row behind it passes there
+    /// and is refused here. The third is the grid bound every format here shares
+    /// — 128 nodes to a side, where `ffmpeg` goes to 256 and a file that large is
+    /// 16 777 216 lines of text.
+    ///
+    /// Values are taken as written and unscaled, so a table that overshoots white
+    /// keeps its headroom, and a file with no directive is read at whatever exact
+    /// cube its rows make rather than at the 33 nodes `ffmpeg` fixes them to.
+    pub fn from_dat(text: &str) -> Result<Self> {
+        let mut rows: Vec<[f32; 3]> = Vec::new();
+        let mut declared = None;
+        for (line_no, raw) in text.lines().enumerate() {
+            let line = raw.trim();
+            if line.is_empty() || line.starts_with('#') {
+                continue;
+            }
+            let fields: Vec<&str> = line.split_whitespace().collect();
+            if fields[0].eq_ignore_ascii_case("3DLUTSIZE") {
+                if declared.is_some() || !rows.is_empty() {
+                    return Err(invalid(
+                        "a .dat states 3DLUTSIZE twice, or after its rows have begun",
+                    ));
+                }
+                let Some(value) = fields.get(1) else {
+                    return Err(invalid(&format!(
+                        "3DLUTSIZE on line {} carries no number",
+                        line_no + 1
+                    )));
+                };
+                let Ok(n) = value.parse::<usize>() else {
+                    return Err(invalid(&format!(
+                        "bad .dat size `{value}` on line {}",
+                        line_no + 1
+                    )));
+                };
+                if !(2..=MAX_3D_SIDE).contains(&n) {
+                    return Err(invalid(&format!(
+                        "a .dat size must be 2..={MAX_3D_SIDE}, line {} says {n}",
+                        line_no + 1
+                    )));
+                }
+                declared = Some(n);
+                continue;
+            }
+            if fields.len() != 3 {
+                return Err(invalid(&format!(
+                    "a .dat row needs 3 channels on line {}, it has {}",
+                    line_no + 1,
+                    fields.len()
+                )));
+            }
+            let mut v = [0.0f32; 3];
+            for (i, f) in fields.iter().enumerate() {
+                let Ok(n) = f.parse::<f32>() else {
+                    return Err(invalid(&format!(
+                        "bad .dat value `{f}` on line {}",
+                        line_no + 1
+                    )));
+                };
+                v[i] = n;
+            }
+            if !v.iter().all(|c| c.is_finite()) {
+                return Err(invalid(&format!(
+                    "a .dat value on line {} is not a number",
+                    line_no + 1
+                )));
+            }
+            rows.push(v);
+        }
+        let size = match declared {
+            Some(n) => n,
+            // No directive: the row count is the only declaration the file has.
+            // `ffmpeg` fixes such a file at 33 nodes; an exact cube says for
+            // itself what it is, which is the rule the `.3dl` reader uses.
+            None => (2..=MAX_3D_SIDE)
+                .find(|n| n * n * n == rows.len())
+                .ok_or_else(|| {
+                    invalid(&format!(
+                        "a .dat states no 3DLUTSIZE and its {} rows are not a grid",
+                        rows.len()
+                    ))
+                })?,
+        };
+        if rows.len() != size * size * size {
+            return Err(invalid(&format!(
+                "a .dat expected {} rows, got {}",
+                size * size * size,
+                rows.len()
+            )));
+        }
+        Ok(Self::Three(Lut3d {
+            size,
+            domain_min: [0.0; 3],
+            domain_max: [1.0; 3],
+            data: blue_fastest_to_slots(rows, size),
         }))
     }
 
@@ -764,17 +877,20 @@ impl Lut {
         }))
     }
 
-    /// Read any of the four formats from content, which is how `--lut` takes a
+    /// Read any of the five formats from content, which is how `--lut` takes a
     /// path without asking its extension for a hint: a `.cube` always names a
-    /// size keyword, a `.spi3d` always opens with `SPILUT`, a `.spi1d` is the
-    /// only one with a brace, and what has none of the three is a `.3dl`.
+    /// size keyword, a `.spi3d` always opens with `SPILUT`, a `.dat` states
+    /// `3DLUTSIZE` or is nothing but normalised rows, a `.spi1d` is the only one
+    /// with a brace, and what has none of those is a `.3dl`.
     pub fn from_text(text: &str) -> Result<Self> {
         // Each test here is one the format it selects must always pass, so a
-        // file cannot be handed to the wrong reader by it.
+        // file cannot be handed to the wrong reader by it. The head is the first
+        // line that carries anything, comments included, since a `.dat` puts its
+        // `3DLUTSIZE` behind them the way `ffmpeg` reads it.
         let head = text
             .lines()
             .map(str::trim)
-            .find(|l| !l.is_empty())
+            .find(|l| !l.is_empty() && !l.starts_with('#'))
             .unwrap_or("");
         if head
             .split_whitespace()
@@ -786,6 +902,14 @@ impl Lut {
         if text.contains("_SIZE") {
             return Self::from_cube(text);
         }
+        if head
+            .split_whitespace()
+            .next()
+            .is_some_and(|t| t.eq_ignore_ascii_case("3DLUTSIZE"))
+            || is_normalised_dat(text)
+        {
+            return Self::from_dat(text);
+        }
         if text.contains('{') {
             return Self::from_spi1d(text);
         }
@@ -795,7 +919,7 @@ impl Lut {
         // the file away.
         Self::from_3dl(text).map_err(|error| {
             invalid(&format!(
-                "not a LUT: no .cube size line, no .spi3d SPILUT head and no .spi1d brace ({error}); it starts {head:?}"
+                "not a LUT: no .cube size line, no .spi3d SPILUT head, no .dat 3DLUTSIZE and no .spi1d brace ({error}); it starts {head:?}"
             ))
         })
     }
@@ -950,6 +1074,60 @@ fn is_number_line(line: &str) -> bool {
     line.split_whitespace()
         .next()
         .is_some_and(|t| t.parse::<f32>().is_ok())
+}
+
+/// Re-index a grid whose file lists the blue axis fastest into the table's own
+/// layout, where red runs fastest: line `b + size·(g + size·r)` holds node
+/// (r, g, b), which the sampler reads at `r + size·(g + size·b)`. Both the
+/// `.3dl` and the `.dat` reader need it, and neither of them guesses the order:
+/// each has it measured against `ffmpeg`.
+fn blue_fastest_to_slots(rows: Vec<[f32; 3]>, size: usize) -> Vec<[f32; 3]> {
+    let mut data = vec![[0.0f32; 3]; rows.len()];
+    for (i, row) in rows.into_iter().enumerate() {
+        let b = i % size;
+        let g = i / size % size;
+        let r = i / (size * size);
+        data[r + size * (g + size * b)] = row;
+    }
+    data
+}
+
+/// Above this, three numbers to a line are node codes rather than a normalised
+/// table: a `.3dl` writes its nodes at 2^bits−1 — 4 095 for the files here, and
+/// never below 15 for a grid that says its mesh — while a `.dat` writes them at
+/// one and the headroom above it.
+const DAT_NORMALISED_CEILING: f32 = 1.5;
+
+/// A `.dat` that states no `3DLUTSIZE` is a file of nothing but rows: an exact
+/// cube of lines, three values on each, every one of them normalised. A `.3dl`
+/// is that same shape at another scale — its nodes are codes up to 2^bits−1,
+/// a `.dat`'s are fractions of white — and since both list the grid with blue
+/// fastest, nothing but the scale can tell them apart. It does, wherever the
+/// `.3dl` uses a code of 2 or more; a table written at 4-bit output that never
+/// leaves 0 and 1 is the one file the sniff cannot separate, and it is not a
+/// grade.
+fn is_normalised_dat(text: &str) -> bool {
+    let mut rows = 0usize;
+    for line in text.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        let fields: Vec<&str> = line.split_whitespace().collect();
+        if fields.len() != 3 {
+            return false;
+        }
+        for f in fields {
+            let Ok(n) = f.parse::<f32>() else {
+                return false;
+            };
+            if !n.is_finite() || n.abs() > DAT_NORMALISED_CEILING {
+                return false;
+            }
+        }
+        rows += 1;
+    }
+    (2..=MAX_3D_SIDE).any(|n| n * n * n == rows)
 }
 
 /// The next line of a SPI file that holds anything, with its leading and
@@ -1791,6 +1969,188 @@ LUT_3D_SIZE 2
         assert!(Lut::from_3dl("3\n0 0 0\n3\n1 1 1\n").is_err());
     }
 
+    /// Which axis a `.dat` varies fastest is settled against `ffmpeg` by the
+    /// fixture test in `tests/lut_ffmpeg.rs`. What is held here is the shape of
+    /// the grid on a table whose every row carries its own node's coordinates, so
+    /// a node filed against the wrong axis comes back in the wrong channel.
+    #[test]
+    fn a_dat_lists_its_grid_blue_fastest_like_a_3dl() {
+        let mut text = String::from("3DLUTSIZE 3\n");
+        let mut rows: Vec<[f32; 3]> = Vec::new();
+        for r in 0..3 {
+            for g in 0..3 {
+                for b in 0..3 {
+                    let row = [r as f32 / 2.0, g as f32 / 2.0, b as f32 / 2.0];
+                    text.push_str(&format!("{} {} {}\n", row[0], row[1], row[2]));
+                    rows.push(row);
+                }
+            }
+        }
+        let lut = Lut::from_dat(&text).unwrap();
+        assert_eq!(lut.size(), 3);
+        // The line straight after the directive is the blue neighbour of black
+        // rather than the red one, and red is nine lines in — one for each node
+        // along blue.
+        let blue = lut.sample([0.0, 0.0, 0.5], Interpolation::Nearest);
+        assert!(
+            blue[2] > 0.49 && blue[0] < 1e-6 && blue[1] < 1e-6,
+            "the file's first row landed on the wrong axis: {blue:?}"
+        );
+        let red = lut.sample([1.0, 0.0, 0.0], Interpolation::Nearest);
+        assert!(
+            red[0] > 0.99 && red[1] < 1e-6 && red[2] < 1e-6,
+            "red came back as {red:?}"
+        );
+        // The identical rows taken in the order a `.cube` lists them are a
+        // different look, so the transposition is not a matter of tidiness.
+        let blind = Lut::Three(Lut3d {
+            size: 3,
+            domain_min: [0.0; 3],
+            domain_max: [1.0; 3],
+            data: rows,
+        });
+        let moved = blind.sample([1.0, 0.0, 0.0], Interpolation::Nearest);
+        assert!(
+            moved[0] < 1e-6 && moved[2] > 0.99,
+            "a `.dat` read as a `.cube` puts red on blue: {moved:?}"
+        );
+    }
+
+    /// `ffmpeg` drops blank and `#` lines anywhere in a `.dat`, and with no
+    /// `3DLUTSIZE` line in front it fixes the grid at 33 nodes and reads the rows
+    /// that follow — so a headerless 8-line file is an unexpected EOF there, not
+    /// a 2-grid. Here the row count declares the grid as it does for a `.3dl`
+    /// that states nothing, and the comments do not count towards it.
+    #[test]
+    fn a_dat_without_a_directive_is_read_from_its_row_count_past_comments() {
+        let commented = "\
+# an Iridas look
+3DLUTSIZE 2
+0 0 0
+
+0 0 1
+0 1 0
+0 1 1
+1 0 0
+1 0 1
+1 1 0
+# a note before the last corner
+1 1 1
+";
+        let lut = Lut::from_dat(commented).unwrap();
+        assert_eq!(lut.size(), 2);
+        assert_eq!(
+            Lut::from_text(commented).unwrap(),
+            lut,
+            "a comment in front of the directive moved the file to another reader"
+        );
+        let headerless = "\
+0 0 0
+0 0 1
+0 1 0
+0 1 1
+1 0 0
+1 0 1
+1 1 0
+1 1 1
+";
+        assert_eq!(
+            Lut::from_text(headerless).unwrap(),
+            Lut::from_dat(headerless).unwrap()
+        );
+    }
+
+    /// A `.dat` carries fractions of white and a `.3dl` carries codes up to
+    /// 2^bits−1, which is the only thing telling the two apart when neither
+    /// states its grid — so the sniff has to be one the codes cannot pass, and
+    /// each reader keeps its own scale.
+    #[test]
+    fn a_dat_of_fractions_and_a_3dl_of_codes_do_not_change_places() {
+        let codes = "\
+0 0 0
+0 0 4095
+0 4095 0
+0 4095 4095
+4095 0 0
+4095 0 4095
+4095 4095 0
+4095 4095 4095
+";
+        let lut = Lut::from_text(codes).unwrap();
+        assert!(
+            matches!(lut, Lut::Three(_)),
+            "a headerless grid of codes up to 4 095 is a .3dl"
+        );
+        let blue = lut.sample([0.0, 0.0, 1.0], Interpolation::Nearest);
+        assert!(close(blue[2], 1.0, 1e-6), "{blue:?}");
+
+        let fractions = codes.replace("4095", "1");
+        let as_dat = Lut::from_text(&fractions).unwrap();
+        let unscaled = as_dat.sample([0.0, 0.0, 1.0], Interpolation::Nearest);
+        assert!(close(unscaled[2], 1.0, 1e-6), "{unscaled:?}");
+        // The same rows taken by the other reader are a picture at nothing: the
+        // one scale that separates the formats is the one that matters.
+        let as_3dl = Lut::from_3dl(&fractions).unwrap();
+        let divided = as_3dl.sample([0.0, 0.0, 1.0], Interpolation::Nearest);
+        assert!(
+            close(divided[2], 1.0 / 4095.0, 1e-6),
+            "{divided:?} against {unscaled:?}"
+        );
+    }
+
+    /// The nodes are the look, unscaled and unclipped: a `.dat` that runs below
+    /// black or above white carries that as written, the way a `.cube` does, so
+    /// the interpolators can bend the shoulder instead of flattening it.
+    #[test]
+    fn a_dat_keeps_its_nodes_unscaled_and_unclipped() {
+        let text = "\
+3DLUTSIZE 2
+-0.05 -0.05 -0.05
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+1.2 1.2 1.2
+";
+        let lut = Lut::from_dat(text).unwrap();
+        let black = lut.sample([0.0, 0.0, 0.0], Interpolation::Nearest);
+        assert!(close(black[0], -0.05, 1e-6), "{black:?}");
+        let white = lut.sample([1.0, 1.0, 1.0], Interpolation::Nearest);
+        assert!(close(white[0], 1.2, 1e-6), "{white:?}");
+    }
+
+    #[test]
+    fn bad_dat_files_are_rejected() {
+        // Nothing at all, and a directive with nothing to say.
+        assert!(Lut::from_dat("").is_err());
+        assert!(Lut::from_dat("3DLUTSIZE\n0 0 0\n").is_err());
+        assert!(Lut::from_dat("3DLUTSIZE x\n0 0 0\n").is_err());
+        // A grid of one node has nothing to interpolate, and the bound the
+        // sampler is sized for is the one the grid formats share.
+        assert!(Lut::from_dat("3DLUTSIZE 1\n0 0 0\n").is_err());
+        assert!(Lut::from_dat(&format!("3DLUTSIZE {}\n0 0 0\n", MAX_3D_SIDE + 1)).is_err());
+        // One directive, and only before the rows begin.
+        assert!(Lut::from_dat("0 0 0\n3DLUTSIZE 2\n").is_err());
+        assert!(Lut::from_dat("3DLUTSIZE 2\n3DLUTSIZE 2\n").is_err());
+        // A row is three numbers: a fourth is not ignored, and neither is a
+        // word or an infinite value.
+        assert!(Lut::from_dat("3DLUTSIZE 2\n0 0 0 0\n").is_err());
+        assert!(Lut::from_dat("3DLUTSIZE 2\n0 0\n").is_err());
+        assert!(Lut::from_dat("3DLUTSIZE 2\n0 0 off\n").is_err());
+        assert!(Lut::from_dat("3DLUTSIZE 2\n0 0 inf\n").is_err());
+        // The rows have to make the grid the file names.
+        assert!(Lut::from_dat("3DLUTSIZE 2\n0 0 0\n").is_err());
+        let mut one_row_short = String::from("3DLUTSIZE 2\n");
+        for i in 0..7 {
+            one_row_short.push_str(&format!("0 0 {i}\n"));
+        }
+        assert!(Lut::from_dat(&one_row_short).is_err());
+        // With no directive, a count that is not an exact cube declares nothing.
+        assert!(Lut::from_dat("0 0 0\n1 1 1\n").is_err());
+    }
+
     const SPI1D_CURVE: &str = "\
 Version 1
 From -0.125 1.125
@@ -2026,9 +2386,9 @@ Components 1
         }
     }
 
-    /// Every one of the four formats is reached from the content alone, which is
+    /// Every one of the five formats is reached from the content alone, which is
     /// how `--lut` takes a path, and a file that is none of them says so about all
-    /// four.
+    /// five.
     #[test]
     fn from_text_routes_each_format_to_its_own_reader() {
         assert!(matches!(Lut::from_text(SPI1D_CURVE).unwrap(), Lut::One(_)));
@@ -2039,6 +2399,10 @@ Components 1
         assert!(matches!(Lut::from_text(CUBE_2).unwrap(), Lut::Three(_)));
         let three_dl = "3DMESH\nMesh 4 12\n2\n0 0 0\n4095 0 0\n0 4095 0\n4095 4095 0\n0 0 4095\n4095 0 4095\n0 4095 4095\n4095 4095 4095\n";
         assert!(Lut::from_text(three_dl).is_ok());
+        // One `3DLUTSIZE` line at the head is all a `.dat` needs to be recognised,
+        // and it is read as a grid of nodes rather than a table of codes.
+        let dat = "3DLUTSIZE 2\n0 0 0\n0 0 1\n0 1 0\n0 1 1\n1 0 0\n1 0 1\n1 1 0\n1 1 1\n";
+        assert!(Lut::from_text(dat).is_ok());
         // A grid that stops short is judged as a .spi3d, not as a .3dl whose
         // header lines happen to look like numbers.
         let short = Lut::from_text("SPILUT 1.0\n3 3\n3 3 3\n0 0 0 0 0 0\n").unwrap_err();
@@ -2048,7 +2412,7 @@ Components 1
         let err = Lut::from_text("Psi4 Gaussian Cube File.\n\n5 0.0 0.0 0.0\n")
             .unwrap_err()
             .to_string();
-        for name in [".cube", ".spi1d", ".spi3d", ".3dl"] {
+        for name in [".cube", ".spi1d", ".spi3d", ".dat", ".3dl"] {
             assert!(err.contains(name), "{err}: {name} is not named");
         }
     }

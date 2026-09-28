@@ -840,8 +840,8 @@ fn parse_tone_map(text: &str) -> crate::Result<ToneMap> {
 /// `--lut`: the grading look the session starts with, read out of the named file
 /// before anything is opened. A look the player cannot parse stops the command
 /// at startup rather than showing an ungraded picture, so the file's own name is
-/// in every message about it. `.cube` and `.3dl` are told apart by their content,
-/// not their suffix.
+/// in every message about it. The five table formats — `.cube`, `.3dl`, `.dat`,
+/// `.spi1d`, `.spi3d` — are told apart by their content, not their suffix.
 fn read_lut(path: &str) -> crate::Result<Lut> {
     let text = std::fs::read_to_string(path)
         .map_err(|error| crate::invalid(&format!("cannot read --lut {path:?}: {error}")))?;

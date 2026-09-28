@@ -13,6 +13,7 @@ use fvid::color::{Interpolation, Lut, Lut3d};
 const CUBE: &str = include_str!("fixtures/lut/grade-17.cube");
 const OVER: &str = include_str!("fixtures/lut/over-17.cube");
 const THREE_DL: &str = include_str!("fixtures/lut/grade-17.3dl");
+const DAT: &str = include_str!("fixtures/lut/grade-17.dat");
 const PROBE: &[u8] = include_bytes!("fixtures/lut/probe.rgb");
 const SIZE: usize = 17;
 
@@ -60,6 +61,27 @@ fn three_dl_rows() -> Vec<[f32; 3]> {
                 r.parse::<f32>().expect("red") / 4095.0,
                 g.parse::<f32>().expect("green") / 4095.0,
                 b.parse::<f32>().expect("blue") / 4095.0,
+            ]
+        })
+        .collect()
+}
+
+/// The `.dat`'s rows, read in the order the file lists them.
+fn dat_rows() -> Vec<[f32; 3]> {
+    DAT.lines()
+        .filter(|line| {
+            let line = line.trim_start();
+            !line.is_empty() && !line.starts_with('#') && !line.starts_with("3DLUTSIZE")
+        })
+        .map(|line| {
+            let mut parts = line.split_whitespace();
+            let (Some(r), Some(g), Some(b)) = (parts.next(), parts.next(), parts.next()) else {
+                panic!("a .dat row has three channels: {line}");
+            };
+            [
+                r.parse().expect("red"),
+                g.parse().expect("green"),
+                b.parse().expect("blue"),
             ]
         })
         .collect()
@@ -348,6 +370,111 @@ fn a_3dl_that_declares_its_mesh_gives_ffmpeg_the_same_table() {
         assert_eq!(
             theirs_above, 0,
             "{mode}: `ffmpeg` came out higher than Fvid"
+        );
+    }
+}
+
+/// The third transcription of the same look, and the one whose axis order the
+/// format itself never states: an Iridas `.dat` is a `3DLUTSIZE` line and then
+/// the grid, with nothing marking which channel the rows walk. `ffmpeg`'s
+/// `parse_dat` answers it only in code, by putting its innermost loop in the
+/// ones place of its own slot — blue fastest, as in a `.3dl`. The fixture was
+/// therefore written out in all six assignments of the file's digit places to
+/// red, green and blue and given to `ffmpeg`; the blue-fastest one is the only
+/// file whose output matches its own `.cube` byte for byte on all 12 288 probe
+/// channels in every mode, and the table Fvid builds from it is then the same
+/// 4 913 nodes the cube reader builds, with the same residue against `ffmpeg` as
+/// the cube itself has: rounding, one code, one-sided.
+#[test]
+fn a_dat_of_the_same_look_walks_with_ffmpeg() {
+    let lut = Lut::from_text(DAT).expect("a written .dat is a .dat");
+    let cube = Lut::from_cube(CUBE).expect("a written cube is a cube");
+    let (Lut::Three(dat), Lut::Three(cub)) = (&lut, &cube) else {
+        panic!("both fixtures are grids");
+    };
+    assert_eq!(dat.size, cub.size);
+    assert_eq!(dat.domain_min, cub.domain_min);
+    assert_eq!(dat.domain_max, cub.domain_max);
+    assert_eq!(
+        dat.data, cub.data,
+        "the .dat and the .cube of one look built different tables"
+    );
+
+    let colours = probe_colours();
+    for (mode, interp, rounded_differently) in [
+        ("nearest", Interpolation::Nearest, 4_826usize),
+        ("trilinear", Interpolation::Trilinear, 5_354),
+        ("tetrahedral", Interpolation::Tetrahedral, 5_298),
+    ] {
+        let theirs = reference(mode);
+        let mut differences = 0usize;
+        for (i, rgb) in colours.iter().enumerate() {
+            let exact = lut.sample(*rgb, interp);
+            for ch in 0..3 {
+                let mine = (exact[ch] * 255.0).round() as i32;
+                let other = i32::from(theirs[i * 3 + ch]);
+                let delta = (mine - other).abs();
+                assert!(
+                    delta <= 1,
+                    "{mode}: pixel {i} channel {ch} moved {delta} codes, {mine} against {other}"
+                );
+                differences += usize::from(delta == 1);
+                assert_eq!(
+                    other,
+                    (exact[ch] * 255.0).floor() as i32,
+                    "{mode}: the gap is meant to be rounding alone"
+                );
+            }
+        }
+        assert_eq!(
+            differences, rounded_differently,
+            "{mode}: the count that differs by one code"
+        );
+    }
+}
+
+/// Which axis a `.dat` runs fastest is worth 9 696 channels of the look: taken
+/// in the order a `.cube` lists them — Fvid's own table layout — the same 4 913
+/// rows become a grid transposed between red and blue, moving that many of the
+/// probe's 12 288 channels by more than one code at nearest, the worst by the
+/// full 255, against the 4 826 the rounding leaves. Trilinear and tetrahedral
+/// are worse again (10 061 and 10 056), because mixing transposed nodes spreads
+/// the error instead of moving it in blocks.
+#[test]
+fn a_dat_read_red_fastest_is_a_different_look_not_a_rounding_gap() {
+    let rows = dat_rows();
+    assert_eq!(rows.len(), SIZE.pow(3));
+    let blind = Lut::Three(Lut3d {
+        size: SIZE,
+        domain_min: [0.0; 3],
+        domain_max: [1.0; 3],
+        data: rows,
+    });
+    let colours = probe_colours();
+    for (mode, interp, misplaced) in [
+        ("nearest", Interpolation::Nearest, 9_696usize),
+        ("trilinear", Interpolation::Trilinear, 10_061),
+        ("tetrahedral", Interpolation::Tetrahedral, 10_056),
+    ] {
+        let theirs = reference(mode);
+        let mut moved = 0usize;
+        let mut worst = 0i32;
+        for (i, rgb) in colours.iter().enumerate() {
+            let exact = blind.sample(*rgb, interp);
+            for ch in 0..3 {
+                let delta =
+                    ((exact[ch] * 255.0).round() as i32 - i32::from(theirs[i * 3 + ch])).abs();
+                moved += usize::from(delta > 1);
+                worst = worst.max(delta);
+            }
+        }
+        assert_eq!(
+            moved, misplaced,
+            "{mode}: the wrong axis order moved this many channels by more than one code"
+        );
+        assert_eq!(
+            worst, 255,
+            "{mode}: the wrong order's worst channel moved {worst} codes"
         );
     }
 }

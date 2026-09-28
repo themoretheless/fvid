@@ -453,3 +453,97 @@ the table stores a node: the file lists blue fastest and each row states its own
 below black. Read by row position instead of by those indices, the grid is a
 different look — which is the mistake the file exists to catch
 (`a_spi3d_row_places_its_node_by_its_own_indices`).
+
+## The Iridas `.dat`
+
+`ffmpeg`'s `parse_dat` is the only implementation of this format, and between
+them its grammar is four lines: one optional `3DLUTSIZE <side>` first line (33 if
+the file states none), then side³ rows of three floats, blank and `#` lines
+skipped anywhere, the values taken as written and never divided by anything. What
+the grammar does not say is which axis the rows run fastest, so the same
+instrument that settled the `.3dl` was run against it — a 17-grid whose every row
+records its own file position, one digit per channel, so the output byte triple
+decodes back to the row `ffmpeg` sampled for that node:
+
+```sh
+python3 - <<'PY'
+N = 17
+with open("pos-17.dat", "w") as f:
+    f.write("3DLUTSIZE 17\n")
+    for d in range(N**3):      # the row records its own position, one digit per channel
+        f.write("{} {} {}\n".format((d % N) / 16, ((d // N) % N) / 16, (d // (N * N)) / 16))
+codes = [round(255 * j / (N - 1)) for j in range(N)]
+px = bytearray()
+for jr in range(N):
+    for jg in range(N):
+        for jb in range(N):
+            px += bytes([codes[jr], codes[jg], codes[jb]])
+open("probe-17.rgb", "wb").write(bytes(px))
+PY
+ffmpeg -v error -y -f rawvideo -pix_fmt rgb24 -s 4913x1 -i probe-17.rgb \
+  -vf "lut3d=file=pos-17.dat:interp=nearest" -frames:v 1 -pix_fmt rgb24 -f rawvideo out-pos.rgb
+```
+
+Every one of the 4 913 nodes answers to `b + 17·(g + 17·r)`, and none to the
+red-fastest order — a clean sweep rather than the 289-node diagonals the `.3dl`
+run left over, because this grid states all three digits instead of one count. A
+`.dat` lists its grid blue fastest, the same way round as a `.3dl` and the
+reverse of a `.cube`, so `from_dat` transposes through the same helper `from_3dl`
+uses.
+
+`grade-17.dat` is that reading of the same look as `grade-17.cube`, and it was
+chosen out of all six assignments of the file's digit places to red, green and
+blue. Each candidate was run through `ffmpeg` and compared with the committed
+`.cube` references — same probe, same interpolation, byte for byte:
+
+| digit order (fastest first) | nearest | trilinear | tetrahedral |
+| --- | --- | --- | --- |
+| blue, green, red | **0** | **0** | **0** |
+| red, green, blue | 10 601 | 11 101 | 11 082 |
+| red, blue, green | 12 026 | 12 166 | 12 162 |
+| green, red, blue | 12 053 | 12 184 | 12 178 |
+| green, blue, red | 10 874 | 11 533 | 11 516 |
+| blue, red, green | 10 542 | 11 156 | 11 168 |
+
+One file of six is the look; the other five disagree with it on 10 542 to 12 184
+of the probe's 12 288 bytes. That the winner needs no reference files of its own
+is the point: it is byte-identical to the cube's, so the oracle is shared.
+
+```sh
+for m in nearest trilinear tetrahedral; do
+  ffmpeg -v error -y -f rawvideo -pix_fmt rgb24 -s 64x64 -i probe.rgb \
+    -vf "lut3d=file=grade-17.dat:interp=$m" -frames:v 1 -pix_fmt rgb24 \
+    -f rawvideo dat-$m.rgb
+done
+```
+
+| file | bytes | sha256 |
+| --- | --- | --- |
+| `grade-17.dat` | 132 664 | `331064f3db3a27b7b6bc816094dc0fd0720f3f72392b300a8c20880990e75e13` |
+
+`tests/lut_ffmpeg.rs` holds the agreement: the table Fvid builds from the `.dat`
+is the same 4 913 nodes it builds from the `.cube` — every value bit-identical,
+since both files carry the same six decimals — and its samples meet `ffmpeg`
+within one code on all 12 288 channels in each mode, 4 826 / 5 354 / 5 298 of
+them by exactly one, which is the cube's own residue, with `ffmpeg`'s byte still
+the floor of Fvid's float. Taken in the order a `.cube` lists instead, the
+identical rows move 9 696 channels by more than one code at nearest (10 061 and
+10 056 through trilinear and tetrahedral), the worst by the full 255
+(`a_dat_of_the_same_look_walks_with_ffmpeg`,
+`a_dat_read_red_fastest_is_a_different_look_not_a_rounding_gap`).
+
+Three places where Fvid is tighter than the reference, each of them a file
+`ffmpeg` reads and this one refuses — measured on 9.0.2, not inferred:
+
+* rows behind the grid it needs: accepted there (`... 0 0 0` past a 2³ stops the
+  loop), refused here;
+* a row with a fourth number: accepted there, since its scan reads three,
+  refused here;
+* no `3DLUTSIZE` line at all: `ffmpeg` then fixes the file at 33 nodes and says
+  `Unexpected EOF` for the 35 929 rows it is short of, where an exact row count
+  is read as the declaration the way a headerless `.3dl` is.
+
+The other bound goes the other way: `parse_dat` accepts a grid up to 256 nodes a
+side (257 answers `Too large or invalid 3D LUT size`), where every grid format
+here stops at 128 — 201 MiB of nodes rather than 25, in a file of 16 777 216
+lines.
