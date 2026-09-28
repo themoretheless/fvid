@@ -9,6 +9,7 @@ pub mod backend;
 pub mod codec;
 pub mod color;
 pub mod container;
+pub mod edit;
 #[cfg(feature = "mcp")]
 pub mod mcp;
 pub mod playback;

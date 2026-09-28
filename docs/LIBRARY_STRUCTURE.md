@@ -24,6 +24,14 @@ src/
   planner/               # выбор форматов/backend и объяснение конверсий (после вертикального среза)
   runtime/               # offline/preview/live scheduling, backpressure, cancel и flush
   format/                # контейнеры; модуль на формат, без логики UI
+  edit/                  # намерение редактирования и выбор execution plan
+    trim.rs              # временные диапазоны
+    concat.rs            # модель склейки
+    transform.rs         # crop / flip
+    plan.rs              # выбор packet-copy или transcode
+    planner.rs           # гибридный план по дорожкам
+    project.rs           # описание проекта редактирования
+    stream_policy.rs     # copy / transcode / drop для дорожек
   codec/
     video/               # avc, hevc, vp9, av1
     audio/               # pcm, aac, ac3, flac, ...
@@ -70,7 +78,7 @@ Ports/capabilities определяются со стороны потребит
 
 ## Порядок изменений
 
-1. **Сделано частично.** Корневой фасад `fvid` сохранён; добавлены `fvid::y4m` и сгруппированные `fvid::playback::{video,audio,subtitle_tracks,runtime}`. Старые module paths остаются рабочими. Следующее — так же упорядочить `format` API и сократить случайную публичность implementation modules.
+1. **Сделано частично.** Корневой фасад `fvid` сохранён; добавлены `fvid::y4m`, `fvid::edit` и сгруппированные `fvid::playback::{video,audio,subtitle_tracks,runtime}`. `fvid::edit` пока содержит только модель операций и объяснимый выбор между packet-copy и decode/process/encode; выполнение будет подключено после стабилизации format/runtime контрактов. Старые module paths остаются рабочими. Следующее — так же упорядочить `format` API и сократить случайную публичность implementation modules.
 2. **Сделана физическая группировка.** Playback reader-файлы разложены в `playback/{video,audio,subtitles,runtime}/`; legacy root declarations указывают на эти пути. Внутри групп API пока реэкспортирует root-модули для совместимости; дальнейшее сужение visibility требует отдельного migration plan.
 3. Разделить верхние уровни API/CLI: библиотечные команды и файловая публикация — в application/binary слое, не в codec или core.
 4. Изолировать legacy `fvid-media` за feature/адаптером и постепенно заменить необходимую функциональность собственными format/codec путями. Не смешивать его типы с `fvid-core` без явного mapping.
