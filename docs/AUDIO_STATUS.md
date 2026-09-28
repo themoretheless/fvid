@@ -382,3 +382,9 @@ packets without altering subsequent output. Synthesis state is currently cloned
 per packet for transactional behavior; no performance claim is made. The player
 still uses the existing wrapper; TNS, multichannel and 960-sample packet support
 are not complete.
+
+The public owned decoder now also passes the full `aac-mono-44k.aac` fixture
+against a saved FFmpeg 9.0.2 mono PCM oracle: RMS error 0.0000315593 and peak
+0.000223995. Separate regression gates are 0.00004 and 0.0003. This verifies
+the SCE/44.1-kHz path in addition to CPE/48-kHz; it does not establish coverage
+for the still-unimplemented TNS, multichannel or 960-sample packet cases.
