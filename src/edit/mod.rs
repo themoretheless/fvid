@@ -6,54 +6,24 @@
 
 mod concat;
 mod plan;
+mod planner;
+mod project;
+mod stream_policy;
 mod transform;
 mod trim;
 
 pub use plan::{execution_mode, ExecutionMode};
+pub use planner::{plan, EditPlan, StreamPlan};
+pub use project::EditProject;
+pub use stream_policy::{StreamMode, StreamPolicy};
 pub use transform::{CropRect, Transform};
 pub use trim::TimeRange;
 
-/// Editing intent. Operations are applied in declaration order.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Operation {
     Trim(TimeRange),
     Concat,
     Transform(Transform),
-}
-
-/// A small, explainable editing request.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct EditProject {
-    operations: Vec<Operation>,
-}
-
-impl EditProject {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn trim(mut self, range: TimeRange) -> Self {
-        self.operations.push(Operation::Trim(range));
-        self
-    }
-
-    pub fn transform(mut self, transform: Transform) -> Self {
-        self.operations.push(Operation::Transform(transform));
-        self
-    }
-
-    pub fn concat(mut self) -> Self {
-        self.operations.push(Operation::Concat);
-        self
-    }
-
-    pub fn operations(&self) -> &[Operation] {
-        &self.operations
-    }
-
-    pub fn execution_mode(&self) -> ExecutionMode {
-        execution_mode(&self.operations)
-    }
 }
 
 #[cfg(test)]
@@ -69,9 +39,14 @@ mod tests {
     }
 
     #[test]
-    fn trim_can_use_packet_copy() {
+    fn hybrid_plan_transcodes_video_and_copies_audio() {
         let range = TimeRange::new(Duration::from_secs(1), Duration::from_secs(2)).unwrap();
-        let project = EditProject::new().trim(range);
-        assert_eq!(project.execution_mode(), ExecutionMode::PacketCopy);
+        let project = EditProject::new()
+            .trim(range)
+            .transform(Transform::VerticalFlip)
+            .streams(StreamPolicy::new().audio(StreamMode::Copy));
+        let plan = plan(&project);
+        assert_eq!(plan.video, StreamPlan::Transcode);
+        assert_eq!(plan.audio, StreamPlan::Copy);
     }
 }

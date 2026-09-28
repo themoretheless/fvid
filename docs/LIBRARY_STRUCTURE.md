@@ -29,6 +29,9 @@ src/
     concat.rs            # модель склейки
     transform.rs         # crop / flip
     plan.rs              # выбор packet-copy или transcode
+    planner.rs           # гибридный план по дорожкам
+    project.rs           # описание проекта редактирования
+    stream_policy.rs     # copy / transcode / drop для дорожек
   codec/
     video/               # avc, hevc, vp9, av1
     audio/               # pcm, aac, ac3, flac, ...
