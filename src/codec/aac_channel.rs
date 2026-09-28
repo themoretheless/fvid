@@ -9,7 +9,7 @@ use super::{
     bits::BitReader,
     config::AacConfig,
 };
-use crate::{Result, unsupported};
+use crate::{Result, invalid, unsupported};
 
 pub struct ChannelData {
     pub info: IcsInfo,
@@ -20,6 +20,84 @@ pub struct ChannelData {
     pub pulse: Option<PulseData>,
 }
 impl ChannelData {
+    /// Reconstruct ordinary spectral bands into per-window order. Special
+    /// noise/intensity bands need separate tools and are rejected here.
+    /// Output uses AAC spectral units; PCM normalization is not applied.
+    pub fn ordinary_spectrum(&self, config: &AacConfig) -> Result<Vec<f32>> {
+        let tables = BandTables::for_config(config)?;
+        let offsets = if self.info.sequence == WindowSequence::EightShort {
+            tables.short
+        } else {
+            tables.long
+        };
+        let n = config.frame_samples as usize;
+        if self.scales.len() != self.info.group_lengths.len()
+            || self.codebooks.len() != self.scales.len()
+            || self
+                .scales
+                .iter()
+                .any(|g| g.len() != self.info.max_sfb as usize)
+            || self
+                .codebooks
+                .iter()
+                .any(|g| g.len() != self.info.max_sfb as usize)
+        {
+            return Err(invalid("AAC reconstruction band layout mismatch"));
+        }
+        let mut ordered = vec![0.0; n];
+        self.info.deinterleave(
+            offsets,
+            &self.quantized.iter().map(|&q| q as f32).collect::<Vec<_>>(),
+            &mut ordered,
+        )?;
+        let mut quantized: Vec<i16> = ordered.iter().map(|&q| q as i16).collect();
+        if let Some(pulse) = &self.pulse {
+            if self.info.sequence == WindowSequence::EightShort {
+                return Err(invalid("pulse on short AAC window"));
+            }
+            pulse.apply(&mut quantized)?;
+            if quantized[offsets[self.info.max_sfb as usize]..]
+                .iter()
+                .any(|&v| v != 0)
+            {
+                return Err(unsupported(
+                    "AAC pulse above coded bands requires reconstruction",
+                ));
+            }
+        }
+        ordered.fill(0.0);
+        let size = *offsets.last().unwrap();
+        let mut first_window = 0;
+        for (group, &length) in self.info.group_lengths.iter().enumerate() {
+            for (band, scale) in self.scales[group].iter().enumerate() {
+                let book = self.codebooks[group][band];
+                match (book, scale) {
+                    (0, BandScale::Zero) | (1..=11, BandScale::Spectral(_)) => {}
+                    (13, BandScale::Noise(_)) | (14..=15, BandScale::Intensity(_)) => {
+                        return Err(unsupported(
+                            "AAC noise/intensity reconstruction is not implemented",
+                        ));
+                    }
+                    _ => return Err(invalid("AAC codebook/scalefactor mismatch")),
+                }
+                for window in first_window..first_window + length as usize {
+                    let range = window * size + offsets[band]..window * size + offsets[band + 1];
+                    if let BandScale::Spectral(scale) = scale {
+                        super::aac_quant::inverse_quantize(
+                            &quantized[range.clone()],
+                            i16::from(*scale),
+                            &mut ordered[range],
+                        )?;
+                    } else if quantized[range].iter().any(|&q| q != 0) {
+                        return Err(invalid("nonzero AAC zero-codebook band"));
+                    }
+                }
+            }
+            first_window += length as usize;
+        }
+        Ok(ordered)
+    }
+
     /// Starts at global_gain, after the element tag. Transactional on failure.
     pub fn read(bits: &mut BitReader<'_>, config: &AacConfig) -> Result<Self> {
         Self::read_common(bits, config, None)
@@ -113,6 +191,9 @@ mod tests {
         assert_eq!(bits.position(), count);
         assert_eq!(channel.quantized, [1, 1, 1, 1]);
         assert_eq!(channel.scales, vec![vec![BandScale::Spectral(100)]]);
+        let reconstructed = channel.ordinary_spectrum(&config).unwrap();
+        assert_eq!(&reconstructed[..4], &[1.0; 4]);
+        assert!(reconstructed[4..].iter().all(|&x| x == 0.0));
         let mut grouped = [0.0; 4];
         aac_quant::inverse_quantize(&channel.quantized, 100, &mut grouped).unwrap();
         let mut spectrum = vec![0.0; 1024];
@@ -138,6 +219,48 @@ mod tests {
             assert!(ChannelData::read(&mut bits, &config).is_err());
             assert_eq!(bits.position(), 0);
         }
+    }
+    #[test]
+    fn reconstruction_scales_each_short_group_and_band() {
+        let config = AacConfig::parse(&[0x11, 0x90]).unwrap();
+        let mut channel = ChannelData {
+            info: IcsInfo {
+                sequence: WindowSequence::EightShort,
+                shape: crate::codec::aac_synthesis::WindowShape::Sine,
+                max_sfb: 2,
+                group_lengths: vec![3, 5],
+            },
+            codebooks: vec![vec![5, 5], vec![5, 5]],
+            scales: vec![
+                vec![BandScale::Spectral(100), BandScale::Spectral(104)],
+                vec![BandScale::Spectral(96), BandScale::Spectral(100)],
+            ],
+            quantized: [vec![8; 12], vec![-8; 12], vec![8; 20], vec![-8; 20]].concat(),
+            pulse: None,
+        };
+        let spectrum = channel.ordinary_spectrum(&config).unwrap();
+        for window in 0..8 {
+            assert_eq!(
+                &spectrum[window * 128..window * 128 + 4],
+                &[if window < 3 { 16.0 } else { 8.0 }; 4]
+            );
+            assert_eq!(
+                &spectrum[window * 128 + 4..window * 128 + 8],
+                &[if window < 3 { -32.0 } else { -16.0 }; 4]
+            );
+            assert!(
+                spectrum[window * 128 + 8..(window + 1) * 128]
+                    .iter()
+                    .all(|&v| v == 0.0)
+            );
+        }
+        channel.scales[0][0] = BandScale::Noise(0);
+        assert!(channel.ordinary_spectrum(&config).is_err());
+        channel.codebooks[0][0] = 13;
+        assert!(matches!(
+            channel.ordinary_spectrum(&config),
+            Err(crate::Error::Unsupported(_))
+        ));
     }
     #[test]
     fn unsupported_tools_do_not_consume_channel_header() {

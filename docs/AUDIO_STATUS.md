@@ -325,3 +325,10 @@ truncation, reserved mode rejection, and all 13 real packets from
 `aac-stereo.aac` through their END elements. This establishes complete syntax
 coverage for this fixture, not decoded PCM correctness or general file support;
 stereo reconstruction and the remaining tools still need integration.
+
+`ChannelData::ordinary_spectrum` joins deinterleaving, optional long-window
+pulse correction and per-band inverse quantization, yielding window-ordered
+spectral units. Tests verify different scales across short-window groups and
+band boundaries. Noise/intensity bands and pulse corrections above max_sfb are
+explicitly unsupported here; they must not silently become zeros. This stage
+still needs stereo tools, PCM normalization and playback integration.
