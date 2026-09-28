@@ -9,8 +9,8 @@ pub fn inverse_quantize(quantized: &[i16], scalefactor: i16, output: &mut [f32])
     if quantized.len() != output.len() || !(0..=255).contains(&scalefactor) {
         return Err(invalid("invalid AAC spectral band size or scalefactor"));
     }
-    // AAC escape-coded magnitudes are bounded by 8191.
-    if quantized.iter().any(|&q| i32::from(q).abs() > 8191) {
+    // Escape magnitudes reach 8191; four pulse corrections can add 60.
+    if quantized.iter().any(|&q| i32::from(q).abs() > 8251) {
         return Err(invalid("AAC quantized coefficient exceeds escape range"));
     }
     let scale = 2.0f64.powf((f64::from(scalefactor) - 100.0) / 4.0);
@@ -55,7 +55,7 @@ mod tests {
     }
     #[test]
     fn invalid_input_does_not_partially_write_band() {
-        for q in [8192, -8192, i16::MIN, i16::MAX] {
+        for q in [8252, -8252, i16::MIN, i16::MAX] {
             let mut out = [17.0; 2];
             assert!(inverse_quantize(&[1, q], 100, &mut out).is_err());
             assert_eq!(out, [17.0; 2]);

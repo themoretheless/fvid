@@ -273,3 +273,11 @@ cover every escape magnitude, quarter-step scale factors, exact cube/fourth-powe
 anchors, and transactional rejection of invalid input. Output remains in AAC
 spectral units: PCM normalization, noise/intensity reconstruction, entropy
 parsing and packet integration are still required.
+
+Owned `codec::aac_pulse` reads cumulative long-window pulse offsets and applies
+up to four signed corrections before inverse quantization. It handles repeated
+positions and zero coefficients, validates all positions before committing the
+bit cursor, and rejects short-window use. The inverse quantizer now accepts the
+post-pulse maximum magnitude 8251 (8191 plus four amplitude-15 corrections).
+Tests exercise pulse parsing through inverse quantization, including both signs
+at the maximum magnitude. Full packet decoding remains pending.
