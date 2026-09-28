@@ -230,3 +230,12 @@ and that disabling repeat holds the last frame. The test and unsigned app
 build pass. The live host exposes repeat/pause/restart; activation remains
 unverified, and the unsigned host reports the missing system-extension-install
 entitlement. No installed cross-process camera delivery is claimed.
+
+## Pixel aspect in camera fitting
+
+The source bridge retains the reader's pixel aspect and uses Rust
+`fit_bgra_aspect` when producing square-pixel camera frames. Matching coded and
+output dimensions no longer bypass that conversion. CameraAspectTests.swift
+checks a nonsquare-pixel Y4M through the actual Swift/C/Rust path, including
+black borders, white samples and opaque alpha at two output sizes. The unsigned
+bundle builds successfully; installed delivery still requires signing.

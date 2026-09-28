@@ -15,6 +15,7 @@ pub struct CameraSource {
     latest: LatestFrame,
     failed: bool,
     duration_ns: u64,
+    pixel_aspect: [u32; 2],
 }
 #[repr(C)]
 #[derive(Default, Clone, Copy)]
@@ -39,12 +40,15 @@ pub unsafe extern "C" fn fvid_camera_open(
             return None;
         }
         let path = std::str::from_utf8(unsafe { std::slice::from_raw_parts(path, length) }).ok()?;
-        let mut reader = NativeReader::software(BufReader::new(File::open(path).ok()?), budget).ok()?;
+        let mut reader =
+            NativeReader::software(BufReader::new(File::open(path).ok()?), budget).ok()?;
         if !reader.read_frame().ok()? {
             return None;
         }
         let [width, height] = reader.dimensions();
         let latest = LatestFrame::new(width, height, 64 << 20).ok()?;
+        let (num, den) = reader.pixel_aspect();
+        let pixel_aspect = [num, den];
         let duration_ns = reader
             .duration()
             .and_then(|d| u64::try_from(d.as_nanos()).ok())
@@ -55,6 +59,7 @@ pub unsafe extern "C" fn fvid_camera_open(
             latest,
             failed: false,
             duration_ns,
+            pixel_aspect,
         })))
     }))
     .ok()
@@ -243,4 +248,40 @@ pub unsafe extern "C" fn fvid_camera_duration(handle: *const CameraSource) -> u6
     } else {
         unsafe { &*handle }.duration_ns
     }
+}
+
+/// Fit this source's BGRA samples into square output pixels, preserving display aspect.
+/// # Safety
+/// Handle must be live and serialized; input/output must be disjoint readable/writable
+/// regions of their stated lengths, also disjoint from the handle and its storage.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn fvid_camera_fit_source(
+    handle: *const CameraSource,
+    input: *const u8,
+    input_len: usize,
+    output: *mut u8,
+    output_len: usize,
+    target: CameraSize,
+) -> i32 {
+    if handle.is_null()
+        || input.is_null()
+        || output.is_null()
+        || input_len > 64 << 20
+        || output_len > 64 << 20
+    {
+        return -1;
+    }
+    catch_unwind(AssertUnwindSafe(|| {
+        let source = unsafe { &*handle };
+        fvid::virtual_camera::fit_bgra_aspect(
+            unsafe { std::slice::from_raw_parts(input, input_len) },
+            source.latest.dimensions(),
+            source.pixel_aspect,
+            unsafe { std::slice::from_raw_parts_mut(output, output_len) },
+            [target.width as usize, target.height as usize],
+        )
+        .map(|_| 1)
+        .unwrap_or(-1)
+    }))
+    .unwrap_or(-1)
 }

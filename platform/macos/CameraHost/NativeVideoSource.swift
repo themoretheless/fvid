@@ -30,13 +30,11 @@ final class NativeVideoSource {
     func cameraFrame(mediaTime: UInt64, hostTime: UInt64, sequence: UInt64, targetWidth: Int, targetHeight: Int) throws -> Data {
         guard targetWidth > 0, targetHeight > 0, targetWidth <= 4096, targetHeight <= 4096 else { throw NativeVideoError.invalidDimensions }
         let input = try frame(mediaTime: mediaTime, hostTime: hostTime, sequence: sequence)
-        if targetWidth == width && targetHeight == height { return input }
         let count = targetWidth * targetHeight * 4
         if scaled.count != count { scaled = Data(count: count) }
         let result = input.withUnsafeBytes { source in
             scaled.withUnsafeMutableBytes { destination in
-                fvid_camera_fit(source.bindMemory(to: UInt8.self).baseAddress, input.count,
-                    FVidCameraSize(width: UInt32(width), height: UInt32(height)),
+                fvid_camera_fit_source(handle, source.bindMemory(to: UInt8.self).baseAddress, input.count,
                     destination.bindMemory(to: UInt8.self).baseAddress, count,
                     FVidCameraSize(width: UInt32(targetWidth), height: UInt32(targetHeight)))
             }

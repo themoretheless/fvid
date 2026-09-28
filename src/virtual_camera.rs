@@ -435,6 +435,14 @@ pub fn fit_bgra(
     output: &mut [u8],
     target: [usize; 2],
 ) -> Result<()> {
+    fit_bgra_aspect(input, source, [1, 1], output, target)
+}
+/// Fit packed samples using the source pixel aspect ratio; output pixels are square.
+pub fn fit_bgra_aspect(
+    input: &[u8], source: [usize; 2], pixel_aspect: [u32; 2],
+    output: &mut [u8], target: [usize; 2],
+) -> Result<()> {
+    if pixel_aspect.contains(&0) { return Err(invalid("invalid camera pixel aspect")); }
     if source.into_iter().chain(target).any(|n| n == 0 || n > 4096)
         || input.len() != source[0] * source[1] * 4
         || output.len() != target[0] * target[1] * 4
@@ -443,10 +451,12 @@ pub fn fit_bgra(
     }
     let [sw, sh] = source;
     let [tw, th] = target;
-    let (w, h) = if sw * th > sh * tw {
-        (tw, (sh * tw / sw).max(1))
+    let display_w = sw as u128 * u128::from(pixel_aspect[0]);
+    let display_h = sh as u128 * u128::from(pixel_aspect[1]);
+    let (w, h) = if display_w * th as u128 > display_h * tw as u128 {
+        (tw, (display_h * tw as u128 / display_w).max(1) as usize)
     } else {
-        ((sw * th / sh).max(1), th)
+        ((display_w * th as u128 / display_h).max(1) as usize, th)
     };
     for pixel in output.chunks_exact_mut(4) {
         pixel.copy_from_slice(&[0, 0, 0, 255]);

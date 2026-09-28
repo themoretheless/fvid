@@ -22,4 +22,6 @@ int32_t fvid_camera_clock_poll(FVidCameraClock *clock, uint64_t now, FVidCameraT
 // 0 seek (ns), 1 pause (boolean), 2 loop duration (ns, 0 disables).
 int32_t fvid_camera_clock_control(FVidCameraClock *clock, uint32_t command, uint64_t value, uint64_t now);
 void fvid_camera_clock_close(FVidCameraClock *clock);
+int32_t fvid_camera_fit_source(const FVidCameraSource *source, const uint8_t *input, size_t input_len,
+                                uint8_t *output, size_t output_len, FVidCameraSize target);
 #endif
