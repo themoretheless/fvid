@@ -13,7 +13,7 @@
 //! derives for itself are the same kind of object by the time they are applied.
 use crate::color::hdr::{ColourDescription, HdrMetadata};
 use crate::color::log::Log;
-use crate::color::lut::{CubePlan, Interpolation, Lut};
+use crate::color::lut::{CubePlan, Interpolation, Lut, Lut3d};
 use crate::color::primaries::Primaries;
 use crate::color::tonemap::{DisplayTarget, ToneMap};
 use crate::color::transfer::Transfer;
@@ -172,7 +172,22 @@ impl Grade {
             || (plan.from == Transfer::Hlg && plan.log.is_none())
             || matches!(lut, Some(Lut::Three(_)));
         let interpolation = settings.interpolation;
-        let tables = (!mixes_channels).then(|| byte_tables(&cube, lut.as_ref(), interpolation));
+        let mut tables = (!mixes_channels).then(|| byte_tables(&cube, lut.as_ref(), interpolation));
+        // That is the cheap no; this is the measured yes. A plan can clear every
+        // clause above and still fold channels together: a log curve goes
+        // negative below its toe, and the gamut compress that guards the grid's
+        // ends desaturates any negative channel toward luma. So an S-Log3 or
+        // V-Log route with no tone map looks separable and is not — a byte table
+        // baked on the grey axis is twenty codes out for a pixel that is not
+        // grey. Comparing the tables against the grid off that axis is the only
+        // check that catches it, and giving up the fast path costs speed and
+        // never colour.
+        if tables
+            .as_ref()
+            .is_some_and(|tables| !keeps_channels_apart(&cube, lut.as_ref(), interpolation, tables))
+        {
+            tables = None;
+        }
         Self {
             cube,
             plan,
@@ -205,6 +220,38 @@ impl Grade {
             None => mapped,
             Some(lut) => lut.sample(mapped, self.interpolation),
         }
+    }
+
+    /// The table a fragment shader can bind for this grade, if one is enough.
+    ///
+    /// A grade that is one lookup hands the shader the very table the CPU reads:
+    /// the byte tables when the plan keeps its channels apart — they already
+    /// fold in a 1D LUT chained after the conversion — and the plan's own grid
+    /// when it does not. Either way both routes read the same numbers, which is
+    /// the point; a rebake at the shader's resolution would be a different
+    /// picture, and the two are compared byte for byte in `player_gpu`'s
+    /// readback tests.
+    ///
+    /// A grid-shaped LUT after the conversion is a second, three-dimensional
+    /// table, and one binding cannot hold it read after the first. Joining them
+    /// is not a rounding detail either — measured at
+    /// `a_chained_grade_is_not_a_single_lookup` below, a composed grid moves a
+    /// code by as much as six at the edge length a caller is given by default,
+    /// and no edge length fixes it. So a chained 3D grade answers `None` and
+    /// stays on the route that takes both steps.
+    pub fn shader_look(&self) -> Option<ShaderLook> {
+        match (&self.cube, &self.tables) {
+            (Lut::Three(_), Some(tables)) => Some(ShaderLook::Tables(tables.clone())),
+            (Lut::Three(cube), None) if self.lut.is_none() => Some(ShaderLook::Grid(cube.clone())),
+            _ => None,
+        }
+    }
+
+    /// True when a fragment shader can show this grade from one lookup, which is
+    /// what lets a plane picture keep its planes and still be graded. Says the
+    /// same as [`shader_look`](Self::shader_look) without copying a table.
+    pub fn is_shader_look(&self) -> bool {
+        self.shader_look().is_some()
     }
 
     /// True when applying this grade could not change a pixel: the grid is its
@@ -268,6 +315,20 @@ impl Grade {
     }
 }
 
+/// The table a fragment shader binds for a grade that is one lookup: whichever
+/// of the two the CPU reads for it, so that the picture on the screen and the
+/// same picture graded for a snapshot come out of the same numbers. A grade whose
+/// channels stay apart is read as 256 output bytes a channel; one that mixes them
+/// is read as the grid it was baked at, between its nodes.
+#[derive(Clone, Debug, PartialEq)]
+pub enum ShaderLook {
+    /// Output bytes per input code, per channel: the CPU's fast path, and the
+    /// only kind of table that is exact at every one of the 256 codes.
+    Tables([Vec<u8>; 3]),
+    /// The grid the plan was baked at, read with the grade's interpolation.
+    Grid(Lut3d),
+}
+
 /// The 256 output codes of each channel, read off the two stages at once.
 fn byte_tables(cube: &Lut, lut: Option<&Lut>, interp: Interpolation) -> [Vec<u8>; 3] {
     [0, 1, 2].map(|channel| {
@@ -280,6 +341,47 @@ fn byte_tables(cube: &Lut, lut: Option<&Lut>, interp: Interpolation) -> [Vec<u8>
             })
             .collect()
     })
+}
+
+/// True when each channel's byte table answers for the whole grid, whatever the
+/// other two codes are.
+///
+/// The tables are baked along the grey axis, which is only the whole answer when
+/// a plan maps each channel on its own. The tolerance is one output code: a byte
+/// table rounds, so one code of difference between it and a float sample is the
+/// table's own step and not a mixed channel — a genuinely separable curve route
+/// was measured at 1.5e-8 of deviation, millionths of a code — while the
+/// smallest real mix found was twenty-two codes of it for S-Log3 and forty-one
+/// for V-Log. So the bound catches the defect with a margin and never
+/// second-guesses a rounding step.
+fn keeps_channels_apart(
+    cube: &Lut,
+    lut: Option<&Lut>,
+    interp: Interpolation,
+    tables: &[Vec<u8>; 3],
+) -> bool {
+    // The tables answer byte codes, so the probe asks them in byte codes: four
+    // unequal ones per channel, none of them grey, with 33 and 158 landing in
+    // the toe and the shoulder where a log curve's `to_linear` is negative and
+    // above one.
+    const CODES: [u8; 4] = [0, 33, 158, 255];
+    for &r in &CODES {
+        for &g in &CODES {
+            for &b in &CODES {
+                let inputs = [r, g, b];
+                let mapped = cube.sample(inputs.map(|code| f32::from(code) / 255.0), interp);
+                let graded = lut.map_or(mapped, |lut| lut.sample(mapped, interp));
+                for (channel, &value) in graded.iter().enumerate() {
+                    let shown = value.clamp(0.0, 1.0) * 255.0;
+                    let tabled = f32::from(tables[channel][usize::from(inputs[channel])]);
+                    if (shown - tabled).abs() > 1.0 {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    true
 }
 
 #[cfg(test)]
@@ -819,18 +921,19 @@ mod tests {
         }
     }
 
+    /// A conversion that only reshapes each channel's curve is 256 output bytes
+    /// a channel, and the grid says the same thing node for node.
     #[test]
     fn a_curve_only_conversion_runs_off_byte_tables_that_the_grid_agrees_with() {
-        let settings = Settings {
-            log: Some(Log::SLog3),
-            ..Settings::video(DisplayTarget::sdr(240.0))
+        let settings = Settings::video(DisplayTarget::sdr(240.0));
+        // Gamma-2.2 codes onto the panel's own curve over the primaries it
+        // already shows: nothing moves between channels, and nothing of the
+        // plan's goes negative, so the grey axis answers for the whole cube.
+        let gamma = ColourDescription {
+            transfer: 4,
+            ..bt709()
         };
-        tables_match_the_grid(&Grade::new(
-            bt709(),
-            &HdrMetadata::default(),
-            settings,
-            None,
-        ));
+        tables_match_the_grid(&Grade::new(gamma, &HdrMetadata::default(), settings, None));
         // A per-channel LUT is baked into the same three tables, not a fourth
         // lookup at the pixel.
         let contrast = {
@@ -842,11 +945,53 @@ mod tests {
             }
         };
         tables_match_the_grid(&Grade::new(
-            bt709(),
+            gamma,
             &HdrMetadata::default(),
             settings,
             Some(Lut::One(contrast)),
         ));
+    }
+
+    /// A camera log curve is the plan that looks separable and is not: no tone
+    /// map runs, the camera's working gamut is the panel's own once the caller
+    /// names BT.709 for both ends, and no LUT follows — every cheap clause says
+    /// per-channel tables. The curve's `to_linear` is negative below the toe,
+    /// and the gamut compress that keeps the grid inside its ends desaturates
+    /// any negative channel toward luma, which reads the other two. So the
+    /// measured guard has to fire, and what a whole pixel looks like is the
+    /// grid's answer rather than three tables' — measured here at the pixel the
+    /// tables would have got wrong, and by more than a code.
+    #[test]
+    fn a_camera_log_plan_gets_no_byte_tables() {
+        for log in [Log::SLog3, Log::VLog, Log::CLog2, Log::LogC] {
+            let grade = Grade::new(
+                bt709(),
+                &HdrMetadata::default(),
+                Settings {
+                    log: Some(log),
+                    ..Settings::video(DisplayTarget::sdr(240.0))
+                },
+                None,
+            );
+            assert_eq!(grade.plan().tone_map, None);
+            assert_eq!(grade.plan().source, grade.plan().dest);
+            assert!(grade.lut().is_none());
+            assert!(grade.tables.is_none(), "{log:?} was given the fast path");
+            // The route that is left reads the whole pixel, so a saturated one
+            // comes out where the grid says rather than where three independent
+            // curves say.
+            let pixel = [255u8, 0u8, 33u8];
+            let mut shown = pixel;
+            grade.apply(&mut shown);
+            let codes = pixel.map(|code| f32::from(code) / 255.0);
+            let want = grade
+                .rgb(codes)
+                .map(|value| (value.clamp(0.0, 1.0) * 255.0).round() as u8);
+            assert_eq!(shown, want, "{log:?} graded a pixel off the grid");
+            // And the shader is handed that same grid, not the tables that were
+            // refused it.
+            assert!(matches!(grade.shader_look(), Some(ShaderLook::Grid(_))));
+        }
     }
 
     #[test]
@@ -954,5 +1099,157 @@ mod tests {
         // The stray byte is not a colour value, so no channel ever saw it.
         assert_eq!(tail[3], 4);
         grade.apply(&mut []);
+    }
+
+    /// BT.2100 PQ master with its own light figures.
+    fn hdr10() -> HdrMetadata {
+        HdrMetadata {
+            light: ContentLight {
+                max_cll: 1_000.0,
+                max_fall: 400.0,
+            },
+            ..Default::default()
+        }
+    }
+
+    /// A look with a shoulder of its own and cross-talk between two channels,
+    /// so a grade that carries it is joined from two curved tables rather than
+    /// one flat ramp.
+    fn look() -> Lut {
+        Lut::Three(Lut3d::from_fn(17, |v| {
+            let s = |x: f32| {
+                let smooth = x * x * (3.0 - 2.0 * x);
+                x + 0.25 * (smooth - x)
+            };
+            [
+                s(v[0]) + 0.05 * (v[1] - v[2]),
+                s(v[1]),
+                s(v[2]) - 0.05 * (v[1] - v[2]),
+            ]
+        }))
+    }
+
+    /// What a grade hands the fragment shader is the table the CPU reads, not a
+    /// rebake of it: the plan's own nodes where the conversion mixes its channels,
+    /// the byte tables where it does not. Both kinds are the same numbers, so both
+    /// routes owe the caller the same bytes — which is what `player_gpu`'s readback
+    /// tests hold them to.
+    #[test]
+    fn a_grade_hands_the_shader_the_table_it_reads() {
+        let plain = mixing();
+        let ShaderLook::Grid(grid) = plain.shader_look().expect("no LUT, one grid") else {
+            panic!("a plan that moves between primaries has no byte tables");
+        };
+        let Lut::Three(cube) = &plain.cube else {
+            panic!("a baked plan is a grid");
+        };
+        assert_eq!(grid.size, 33);
+        assert_eq!(grid.data.len(), cube.data.len());
+        for (a, b) in grid.data.iter().zip(&cube.data) {
+            assert_eq!(a, b);
+        }
+        // A curve-only plan runs off three byte tables on the CPU, so the shader
+        // is given exactly those bytes. Handing it the grid instead would be a
+        // second, approximate colour decision where an exact one is available:
+        // the tables answer all 256 codes, the grid only its nodes.
+        let curve = Grade::new(
+            ColourDescription {
+                transfer: 4,
+                ..bt709()
+            },
+            &HdrMetadata::default(),
+            Settings::default(),
+            None,
+        );
+        let tables = curve.tables.as_ref().expect("a curve alone");
+        let ShaderLook::Tables(look) = curve.shader_look().expect("no LUT, one lookup") else {
+            panic!("a grade with byte tables gives the shader those tables");
+        };
+        assert_eq!(&look, tables);
+        // A camera-log plan looks like three tables and is not one, so it reaches
+        // the shader as a grid — see `a_camera_log_plan_gets_no_byte_tables`.
+        let log = Grade::new(
+            bt709(),
+            &HdrMetadata::default(),
+            Settings {
+                log: Some(Log::SLog3),
+                ..Settings::default()
+            },
+            None,
+        );
+        assert!(log.tables.is_none());
+        assert!(matches!(log.shader_look(), Some(ShaderLook::Grid(_))));
+        // A LUT after the conversion is a second table, and no kind covers it.
+        let chained = Grade::new(
+            bt709(),
+            &HdrMetadata::default(),
+            Settings::default(),
+            Some(Lut::Three(Lut3d::from_fn(4, |rgb| rgb.map(|v| 1.0 - v)))),
+        );
+        assert!(chained.shader_look().is_none());
+        // What one lookup is worth is decided the same way either it is asked.
+        for grade in [&plain, &curve, &log, &chained] {
+            assert_eq!(grade.is_shader_look(), grade.shader_look().is_some());
+        }
+        assert!(!plain.is_identity() && !curve.is_identity() && !log.is_identity());
+    }
+
+    /// A LUT after the baked grid cannot be folded into it, which is why
+    /// [`Grade::shader_look`] refuses a chained grade instead of handing the
+    /// shader a table that lies. The comparison is a composed grid read at the
+    /// very edge length the grade was baked at, against the two-step read the
+    /// grade itself makes, over 64³ sample points and every interpolation:
+    /// nearest lands on the same node either way (0 of 786 432 channels moved),
+    /// but the reads that mix nodes part by up to six codes at a 17 grid, four
+    /// at 33 and three at 64 — and getting *bigger* does not close it, because
+    /// the two routes interpolate different functions, not the same one at
+    /// different resolutions.
+    #[test]
+    fn a_chained_grade_is_not_a_single_lookup() {
+        let step = |code: u8| f32::from(code) / 255.0;
+        for (size, nearest, trilinear, tetrahedral) in
+            [(17usize, 0i32, 6i32, 6i32), (33, 0, 4, 5), (64, 0, 3, 3)]
+        {
+            for (interp, want) in [
+                (Interpolation::Nearest, nearest),
+                (Interpolation::Trilinear, trilinear),
+                (Interpolation::Tetrahedral, tetrahedral),
+            ] {
+                let grade = Grade::new(
+                    bt2100(16),
+                    &hdr10(),
+                    Settings {
+                        size,
+                        interpolation: interp,
+                        ..Settings::video(DisplayTarget::sdr(100.0))
+                    },
+                    Some(look()),
+                );
+                assert!(
+                    !grade.is_shader_look() && grade.shader_look().is_none(),
+                    "{interp:?}: a grade with a LUT after its grid is two tables, not one"
+                );
+                let composed = Lut3d::from_fn(size, |rgb| grade.rgb(rgb));
+                let mut worst = 0i32;
+                for r in 0..64u8 {
+                    for g in 0..64u8 {
+                        for b in 0..64u8 {
+                            let codes = [step(r * 4), step(g * 4), step(b * 4)];
+                            let two = grade.rgb(codes);
+                            let one = composed.sample(codes, interp);
+                            for ch in 0..3 {
+                                let a = (two[ch].clamp(0.0, 1.0) * 255.0).round() as i32;
+                                let b2 = (one[ch].clamp(0.0, 1.0) * 255.0).round() as i32;
+                                worst = worst.max((a - b2).abs());
+                            }
+                        }
+                    }
+                }
+                assert_eq!(
+                    worst, want,
+                    "{interp:?} at a {size} grid: the codes one composed read is off by"
+                );
+            }
+        }
     }
 }

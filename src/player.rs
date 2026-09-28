@@ -1487,8 +1487,9 @@ struct Player {
     buffering: bool,
     seek_preview: bool,
     seek_target: Option<Duration>,
-    /// Frame on screen when it is drawn by the GPU shader (planar).
-    video: Option<(Arc<Planar8>, u64)>,
+    /// Frame on screen when it is drawn by the GPU shader (planar), with the
+    /// grade it still owes and that shader reads.
+    video: Option<(Arc<Planar8>, u64, Option<Arc<Grade>>)>,
     /// Frame on screen when it arrived as packed RGB (Y4M, WebM).
     texture: Option<egui::TextureHandle>,
     /// The frame last shown, in whichever layout it came. The snapshot key
@@ -2454,13 +2455,20 @@ impl Player {
             .as_ref()
             .ok_or_else(|| crate::invalid("nothing has been shown yet"))?;
         match &frame.pixels {
-            Pixels::Planar(planes) => {
+            Pixels::Planar(planes, grade) => {
                 let mut rgb = Vec::new();
                 crate::playback_native::planar8_to_rgb(
                     planes,
                     &mut rgb,
                     planes.width * planes.height * 3,
                 )?;
+                // The grade a plane picture kept for the shader is applied here
+                // instead, and it is the same table read the same way: both
+                // routes land on these bytes, which is what lets the snapshot
+                // stand for what is on screen.
+                if let Some(grade) = grade {
+                    grade.apply(&mut rgb);
+                }
                 crate::snapshot::png(planes.width, planes.height, &rgb)
             }
             Pixels::Rgb(rgb) => crate::snapshot::png(frame.dimensions[0], frame.dimensions[1], rgb),
@@ -3136,8 +3144,8 @@ impl Player {
                 self.seek_preview = false;
                 self.seek_target = None;
                 match &frame.pixels {
-                    Pixels::Planar(planes) => {
-                        self.video = Some((planes.clone(), frame.serial));
+                    Pixels::Planar(planes, grade) => {
+                        self.video = Some((planes.clone(), frame.serial, grade.clone()));
                         self.texture = None;
                         self.rgb_frame = None;
                     }
@@ -4362,8 +4370,9 @@ impl eframe::App for Player {
             // aspect menu or its container gives it, fitted inside the frame and
             // then magnified the way its Zoom menu does, the window keeping its
             // size. Planar frames are converted to RGB by the GPU shader while
-            // drawing, which is handed the crop as texture coordinates.
-            if let Some((planes, serial)) = &self.video {
+            // drawing, which is handed the crop as texture coordinates and the
+            // grade the picture kept for it.
+            if let Some((planes, serial, grade)) = &self.video {
                 let source = Vec2::new(planes.width as f32, planes.height as f32);
                 let insets =
                     shown_insets(source, self.container_insets, self.pixel_aspect, self.crop);
@@ -4381,6 +4390,10 @@ impl eframe::App for Player {
                         serial: *serial,
                         window: uv_window(source, insets),
                         adjust: adjust_scalars(&self.adjust),
+                        // The grade this picture kept its planes for, which the
+                        // shader reads out of the table the CPU would have read;
+                        // see [`Grade::shader_look`] for what reaches here.
+                        grade: grade.clone(),
                     },
                 ));
             } else if let Some(texture) = &self.texture {
@@ -6940,36 +6953,120 @@ mod tests {
         std::fs::remove_dir_all(&directory).unwrap();
     }
 
+    /// A two-entry cube that turns green end for end and leaves the other two
+    /// channels alone — a grade whose every step is a per-channel table.
+    const INVERT_GREEN: &str = "LUT_1D_SIZE 2
+0.0 1.0 0.0
+1.0 0.0 1.0
+";
+
+    /// The scanlines a stored-block PNG carries, filter bytes removed. Every
+    /// snapshot in these tests is written stored and unfiltered, so the picture
+    /// can be read back out of the file it was saved as.
+    fn scanlines(file: &[u8]) -> Vec<u8> {
+        let (width, height) = (
+            usize::try_from(u32::from_be_bytes(file[16..20].try_into().unwrap())).unwrap(),
+            usize::try_from(u32::from_be_bytes(file[20..24].try_into().unwrap())).unwrap(),
+        );
+        let row = width * 3 + 1;
+        let mut at = 8;
+        let idat = loop {
+            let len = u32::from_be_bytes(file[at..at + 4].try_into().unwrap()) as usize;
+            if &file[at + 4..at + 8] == b"IDAT" {
+                break &file[at + 8..at + 8 + len];
+            }
+            at += 12 + len;
+        };
+        assert_eq!(&idat[..2], &[0x78, 0x01], "stored deflate, no dictionary");
+        // The stream ends with its four-byte Adler checksum.
+        let rows = &idat[7..idat.len() - 4];
+        assert_eq!(rows.len(), row * height, "more than one stored block");
+        let mut rgb = Vec::with_capacity(width * height * 3);
+        for (line, number) in rows.chunks_exact(row).zip(0..height) {
+            assert_eq!(line[0], 0, "row {number} was filtered");
+            rgb.extend_from_slice(&line[1..]);
+        }
+        rgb
+    }
+
+    /// Planes are the one form the window shows without touching its pixels, so
+    /// they are also the form a grade can ride to the shader with. The snapshot
+    /// has to finish that grade itself: the same planes saved with nothing owed
+    /// and with a green turned end for end come out as one picture's scanlines
+    /// with their green inverted and no other channel moved.
     #[test]
     fn a_snapshot_converts_planes_before_writing_them() {
         let directory = scratch("fvid-player-snapshot-planes", &[]);
         let video = directory.join("clip.mp4");
         std::fs::write(&video, b"an mp4 as far as the snapshot cares").unwrap();
-        let planes = Planar8 {
-            width: 2,
-            height: 2,
-            chroma_width: 1,
-            chroma_height: 1,
-            y: vec![16, 128, 200, 235],
-            cb: vec![128],
-            cr: vec![128],
-            colour: Default::default(),
+        let shown = |grade: Option<crate::color::Grade>| {
+            let planes = Planar8 {
+                width: 2,
+                height: 2,
+                chroma_width: 1,
+                chroma_height: 1,
+                y: vec![16, 128, 200, 235],
+                cb: vec![128],
+                cr: vec![128],
+                colour: Default::default(),
+            };
+            let player = Player {
+                opened: Some(video.clone()),
+                presented: Some(Frame {
+                    pixels: Pixels::Planar(Arc::new(planes), grade.map(Arc::new)),
+                    dimensions: [2, 2],
+                    period: Duration::from_millis(40),
+                    interval: None,
+                    pts: None,
+                    generation: 0,
+                    serial: 1,
+                }),
+                ..Default::default()
+            };
+            player.picture().expect("planes become a picture")
         };
-        let player = Player {
-            opened: Some(video),
-            presented: Some(Frame {
-                pixels: Pixels::Planar(Arc::new(planes)),
-                dimensions: [2, 2],
-                period: Duration::from_millis(40),
-                interval: None,
-                pts: None,
-                generation: 0,
-                serial: 1,
-            }),
-            ..Default::default()
+        let plain = shown(None);
+        assert_eq!(&plain[16..24], &[0, 0, 0, 2, 0, 0, 0, 2]);
+        let signal = ColourDescription {
+            primaries: 1,
+            transfer: 1,
+            matrix: 1,
+            full_range: false,
         };
-        let file = player.picture().expect("planes become a picture");
-        assert_eq!(&file[16..24], &[0, 0, 0, 2, 0, 0, 0, 2]);
+        let grade = crate::color::Grade::new(
+            signal,
+            &HdrMetadata::default(),
+            crate::color::Settings::video(DisplayTarget::sdr(240.0)),
+            Some(Lut::from_cube(INVERT_GREEN).expect("a written cube is a cube")),
+        );
+        // The route this is about: a grade the shader carries, which is why a
+        // plane picture would reach the window still owing it.
+        assert!(
+            grade.is_shader_look(),
+            "a plane picture that never keeps a grade tests nothing here"
+        );
+        let graded = shown(Some(grade));
+        let (plain, graded) = (scanlines(&plain), scanlines(&graded));
+        assert_eq!(plain.len(), graded.len());
+        for (before, after) in plain
+            .as_chunks::<3>()
+            .0
+            .iter()
+            .zip(graded.as_chunks::<3>().0)
+        {
+            for channel in 0..3 {
+                let want = if channel == 1 {
+                    255 - u16::from(before[1])
+                } else {
+                    u16::from(before[channel])
+                };
+                assert_eq!(
+                    u16::from(after[channel]),
+                    want,
+                    "channel {channel} of a graded plane snapshot"
+                );
+            }
+        }
         std::fs::remove_dir_all(&directory).unwrap();
     }
 
@@ -6986,10 +7083,6 @@ mod tests {
     /// the cube, and dimensions swapped on the way into the encoder.
     #[test]
     fn a_saved_picture_is_the_one_the_grade_made() {
-        const INVERT_GREEN: &str = "LUT_1D_SIZE 2
-0.0 1.0 0.0
-1.0 0.0 1.0
-";
         fn stream() -> Vec<u8> {
             let mut bytes = b"YUV4MPEG2 W4 H2 F60:1 Ip C420jpeg\n".to_vec();
             for frame in 0..2u8 {
@@ -7025,39 +7118,18 @@ mod tests {
         fn rgb(pixels: &Pixels, budget: usize) -> Vec<u8> {
             match pixels {
                 Pixels::Rgb(rgb) => rgb.clone(),
-                Pixels::Planar(planes) => {
+                Pixels::Planar(planes, grade) => {
                     let mut rgb = Vec::new();
                     crate::playback_native::planar8_to_rgb(planes, &mut rgb, budget)
                         .expect("converted");
+                    // What the window shows is the planes and whatever grade they
+                    // kept for the shader.
+                    if let Some(grade) = grade {
+                        grade.apply(&mut rgb);
+                    }
                     rgb
                 }
             }
-        }
-        /// The scanlines a stored-block PNG carries, filter bytes removed.
-        fn scanlines(file: &[u8]) -> Vec<u8> {
-            let (width, height) = (
-                usize::try_from(u32::from_be_bytes(file[16..20].try_into().unwrap())).unwrap(),
-                usize::try_from(u32::from_be_bytes(file[20..24].try_into().unwrap())).unwrap(),
-            );
-            let row = width * 3 + 1;
-            let mut at = 8;
-            let idat = loop {
-                let len = u32::from_be_bytes(file[at..at + 4].try_into().unwrap()) as usize;
-                if &file[at + 4..at + 8] == b"IDAT" {
-                    break &file[at + 8..at + 8 + len];
-                }
-                at += 12 + len;
-            };
-            assert_eq!(&idat[..2], &[0x78, 0x01], "stored deflate, no dictionary");
-            // The stream ends with its four-byte Adler checksum.
-            let rows = &idat[7..idat.len() - 4];
-            assert_eq!(rows.len(), row * height, "more than one stored block");
-            let mut rgb = Vec::with_capacity(width * height * 3);
-            for (line, number) in rows.chunks_exact(row).zip(0..height) {
-                assert_eq!(line[0], 0, "row {number} was filtered");
-                rgb.extend_from_slice(&line[1..]);
-            }
-            rgb
         }
 
         let signal = ColourDescription {
