@@ -1074,6 +1074,16 @@ fn parse_track(
             }
             (28, Some(b"alac"))
         }
+        // Dolby Digital: Matroska names the coding `A_AC3` and an ISO BMFF sample
+        // entry spells it `ac-3`. Every frame carries its own geometry, so no
+        // configuration box follows; the `dac3` some writers nest states only what
+        // the frames restate, and the setup block the decoder is handed stays empty.
+        (b"soun", b"ac-3") => {
+            if !audio_entry(entry.data, &mut result)? {
+                return Ok(None);
+            }
+            (entry.data.len(), None)
+        }
         // A text subtitle: `tx3g`, which is what a muxer writes for a track
         // whose handler calls itself a subtitle (`sbtl`), plain text (`text`) or
         // MPEG-4 text (`subt`). The sample entry describes how the letters are

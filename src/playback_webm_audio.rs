@@ -13,7 +13,7 @@ const TIMESCALE_NS: u32 = 1_000_000_000;
 /// Codec IDs the player has a decoder for, as Matroska spells them. The three
 /// `A_PCM/*` IDs are uncompressed audio, whose width the track states in
 /// `BitDepth`.
-const CODECS: [&str; 9] = [
+const CODECS: [&str; 8] = [
     "A_VORBIS",
     "A_MPEG/L3",
     "A_FLAC",
@@ -22,7 +22,6 @@ const CODECS: [&str; 9] = [
     "A_PCM/INT/LIT",
     "A_PCM/INT/BIG",
     "A_PCM/FLOAT/IEEE",
-    "A_EAC3",
 ];
 
 /// The codec setup bytes a decoder needs for a track. Vorbis keeps its header
@@ -450,14 +449,33 @@ mod tests {
         assert!((0.28..=0.30).contains(&peak), "peak={peak}");
     }
 
-    /// Three audio tracks, one of them AC-3, from one source:
+    /// A track in a coding with no decoder is left out of the list entirely, so the
+    /// keys the player is handed count only what it can actually play:
+    /// ffmpeg -f lavfi -i 'aevalsrc=0.3*sin(880*PI*t)|0.3*sin(880*PI*t):d=0.25:s=44100' \
+    ///   -vn -map 0:a -c:a:0 libopus -b:a:0 32k -map 0:a -c:a:1 flac \
+    ///   tests/fixtures/audio/opus-flac.mkv
+    /// Opus is the file's first track and absent from the list, so the one track
+    /// there is to choose is numbered zero.
+    #[test]
+    fn the_track_list_skips_a_codec_there_is_no_decoder_for() {
+        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/opus-flac.mkv");
+        let stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
+            .expect("fixture has audio tracks");
+        assert_eq!(stream.audio_tracks().len(), 1, "the Opus track is not offered");
+        let chosen = WebmAudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 0)
+            .unwrap_or_else(|error| panic!("track 0: {error}"));
+        assert_eq!(chosen.codec(), "A_FLAC");
+        assert!(WebmAudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 1).is_err());
+    }
+
+    /// Three audio tracks from one source, every one of them decodable:
     /// ffmpeg -f lavfi -i 'aevalsrc=0.3*sin(880*PI*t)|0.3*sin(880*PI*t):d=1:s=44100' \
     ///   -vn -map 0:a -c:a:0 ac3 -b:a:0 96k -map 0:a -c:a:1 flac \
     ///   -map 0:a -c:a:2 libmp3lame -b:a:2 96k tests/fixtures/audio/ac3-flac-mp3.mkv
-    /// The list holds only the two the player can decode, in the order the file
-    /// gives them.
+    /// The Dolby track used to be the one this list dropped. It is here now, in
+    /// the order the file gives, and only a key past all three is an error.
     #[test]
-    fn the_track_list_skips_a_codec_there_is_no_decoder_for() {
+    fn a_dolby_track_is_listed_with_the_lossy_ones_it_sits_beside() {
         const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/ac3-flac-mp3.mkv");
         let stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
             .expect("fixture has audio tracks");
@@ -467,7 +485,7 @@ mod tests {
                 .unwrap_or_else(|error| panic!("track {nth}: {error}"));
             assert_eq!(chosen.codec(), codec);
         }
-        assert!(WebmAudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 2).is_err());
+        assert!(WebmAudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 3).is_err());
     }
 
     /// One quarter second of the 0.3-amplitude stereo sine, written as the lossless

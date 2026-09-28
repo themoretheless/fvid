@@ -60,6 +60,13 @@ const SEGMENTS: usize = 8;
 const BLOCKS: usize = 6;
 /// Samples one audio block contributes per channel.
 const SAMPLES: usize = 256;
+/// Samples the encoder put in front of the sound, which the first block therefore
+/// carries as padding: a decoder that hands them out plays the whole track some
+/// milliseconds behind the picture every other player shows. The count is the same
+/// at all three rates - measured against the reference decoder on streams at
+/// 48 000, 44 100 and 32 000 Hz, where the earliest sample that lines up after it
+/// sits 256 samples into this decoder's own output.
+const ENCODER_DELAY: usize = 256;
 /// Windowed time-domain slots one block's inverse transform fills.
 const SLOTS_512: usize = 512;
 /// The longest complex inverse transform the 512-sample path needs: a quarter of
@@ -1339,6 +1346,8 @@ pub struct Ac3Decoder {
     /// from a fixed seed: the values it hands out are uncorrelated with the
     /// mantissas around them, and a decode stays repeatable.
     dither_state: u32,
+    /// Samples still owed to `ENCODER_DELAY`, which the stream's first blocks pay off.
+    lead: usize,
 }
 
 impl Ac3Decoder {
@@ -1368,6 +1377,7 @@ impl Ac3Decoder {
             scratch: Scratch::default(),
             tables: Tables::new(),
             dither_state: DITHER_SEED,
+            lead: ENCODER_DELAY,
         })
     }
 
@@ -2114,6 +2124,14 @@ impl AudioDecode for Ac3Decoder {
     ) -> Result<Option<AudioPacket>> {
         let mut samples = Vec::new();
         self.frames(data, &mut samples)?;
+        // The padding the encoder put at the head of the stream is not sound, and a
+        // player that plays it starts every track behind the picture.
+        let frames = samples.len() / self.channels;
+        let skip = self.lead.min(frames);
+        if skip > 0 {
+            self.lead -= skip;
+            samples.drain(..skip * self.channels);
+        }
         let bytes: Vec<u8> = samples
             .iter()
             .flat_map(|sample| sample.to_le_bytes())
@@ -2136,6 +2154,7 @@ impl AudioDecode for Ac3Decoder {
         self.delay = [[0.0; SAMPLES]; PLANES];
         self.scratch = Scratch::default();
         self.dither_state = DITHER_SEED;
+        self.lead = ENCODER_DELAY;
     }
 }
 
@@ -2283,7 +2302,11 @@ mod tests {
     fn a_stereo_pair_keeps_its_two_tone_mixtures() {
         let channels = 2;
         let samples = decode(STEREO, 48_000, channels);
-        assert_eq!(samples.len(), 8 * BLOCKS * SAMPLES * 2, "eight frames");
+        assert_eq!(
+            samples.len(),
+            8 * BLOCKS * SAMPLES * 2 - ENCODER_DELAY * 2,
+            "eight frames, less the padding the encoder put at the head of the stream"
+        );
         for (channel, (rms, peak)) in [(0, (0.220_970, 0.400_1)), (1, (0.156_250, 0.300_0))] {
             let (measured_rms, measured_peak) = level(&samples, channel, channels as usize);
             matches(measured_rms, rms, 0.1, &format!("left rms {channel}"));
@@ -2299,7 +2322,11 @@ mod tests {
     fn a_coupled_pair_rebuilds_from_one_spectrum() {
         let channels = 2;
         let samples = decode(COUPLED, 48_000, channels);
-        assert_eq!(samples.len(), 8 * BLOCKS * SAMPLES * 2, "eight frames");
+        assert_eq!(
+            samples.len(),
+            8 * BLOCKS * SAMPLES * 2 - ENCODER_DELAY * 2,
+            "eight frames, less the padding the encoder put at the head of the stream"
+        );
         for (channel, rms) in [(0, 0.051_579), (1, 0.055_860)] {
             let (measured, _) = level(&samples, channel, channels as usize);
             matches(measured, rms, 0.15, &format!("coupled rms {channel}"));
@@ -2315,7 +2342,7 @@ mod tests {
         let samples = decode(SURROUND, 48_000, channels as u16);
         assert_eq!(
             samples.len(),
-            8 * BLOCKS * SAMPLES * channels,
+            8 * BLOCKS * SAMPLES * channels - ENCODER_DELAY * channels,
             "eight frames"
         );
         let expected: [(f32, f32); 6] = [
@@ -2357,7 +2384,7 @@ mod tests {
         let samples = decode(SURROUND, 48_000, 2);
         assert_eq!(
             samples.len(),
-            8 * BLOCKS * SAMPLES * 2,
+            8 * BLOCKS * SAMPLES * 2 - ENCODER_DELAY * 2,
             "eight frames of two"
         );
         let (left, _) = level(&samples, 0, 2);
@@ -2394,7 +2421,11 @@ mod tests {
     #[test]
     fn a_mono_frame_at_32_khz_holds_its_own_rate() {
         let samples = decode(MONO_32, 32_000, 1);
-        assert_eq!(samples.len(), 6 * BLOCKS * SAMPLES, "six frames of one");
+        assert_eq!(
+            samples.len(),
+            6 * BLOCKS * SAMPLES - ENCODER_DELAY,
+            "six frames of one"
+        );
         let (rms, peak) = level(&samples, 0, 1);
         matches(rms, 0.082_333, 0.15, "mono rms");
         matches(peak, 0.125_0, 0.15, "mono peak");
@@ -2410,13 +2441,14 @@ mod tests {
         let mut data = STEREO[..2 * frame].to_vec();
         data.truncate(frame + 64);
         let samples = decode(&data, 48_000, 2);
+        let withheld = ENCODER_DELAY * 2;
         assert_eq!(
             samples.len(),
-            2 * per_frame,
-            "both frames still sound their length"
+            2 * per_frame - withheld,
+            "both frames still sound their length, less the stream's leading padding"
         );
         assert!(
-            samples[per_frame..].iter().all(|&value| value == 0.0),
+            samples[per_frame - withheld..].iter().all(|&value| value == 0.0),
             "the second frame is silence"
         );
         let (rms, _) = level(&samples, 0, 2);

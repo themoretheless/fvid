@@ -1104,7 +1104,10 @@ mod tests {
         
         // Decode WavPack - just verify it runs without error for now
         let mut decoder = WavpackDecoder::new(1).expect("create mono decoder");
-        let packet = decoder.decode_encoded(&wv_data, 0, 0).expect("decode block");
+        let packet = decoder
+            .decode_encoded(&wv_data, 0, 0)
+            .expect("decode block")
+            .expect("a block");
         
         // Compare output sizes
         let wasm_bytes = packet.data.len();
@@ -1112,7 +1115,7 @@ mod tests {
             "Output size mismatch: Rust={} bytes, FFmpeg={} bytes",
             wasm_bytes, ref_pcm.len());
         
-        println!("✓ Bit-exact match with FFmpeg reference ({})", wasm_bytes / 2, " samples");
+        println!("✓ Bit-exact match with FFmpeg reference ({} samples)", wasm_bytes / 2);
     }
 }
 

@@ -5346,10 +5346,9 @@ mod tests {
     /// The panel names the coding the sound on screen is actually reading, and
     /// the track key changes that name together with the sound.
     /// `tests/fixtures/audio/ac3-flac-mp3.mkv`: an AC-3 track, then FLAC and MP3.
-    /// The list keeps two, because the Matroska audio reader's own codec list stops
-    /// before `A_AC3` - the decoder exists, but nothing hands the track to it, so the
-    /// name it would arrive under is the one the panel has to reach from a track the
-    /// reader does accept.
+    /// All three are in the list now that the reader hands `A_AC3` to the decoder,
+    /// so the key walks the panel from Dolby Digital through the two lossy ones and
+    /// the count it prints is the three the file offers.
     #[test]
     fn the_panel_names_the_codec_and_the_track_key_keeps_it_current() {
         let directory = scratch("fvid-player-sound-codec", &[]);
@@ -5373,17 +5372,22 @@ mod tests {
                 .unwrap_or_default()
         };
         assert!(
-            sound(&player).starts_with("Sound: 1/2 · FLAC · "),
+            sound(&player).starts_with("Sound: 1/3 · Dolby Digital · "),
             "{}",
             sound(&player)
         );
         player.cycle_audio_track(true);
         assert_eq!(
             (player.audio_track, player.sound_codec.as_str()),
-            (1, "MP3")
+            (1, "FLAC")
+        );
+        player.cycle_audio_track(true);
+        assert_eq!(
+            (player.audio_track, player.sound_codec.as_str()),
+            (2, "MP3")
         );
         assert!(
-            sound(&player).starts_with("Sound: 2/2 · MP3 · "),
+            sound(&player).starts_with("Sound: 3/3 · MP3 · "),
             "{}",
             sound(&player)
         );

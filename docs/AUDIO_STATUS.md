@@ -7,7 +7,8 @@
 | MP4 | AAC-LC (`mp4a`) | `playback_mp4_audio` → `codec::aac_decoder` → cpal | yes, headless |
 | WebM | Vorbis (`A_VORBIS`) | `playback_webm_audio` → symphonia Vorbis → cpal | yes, headless |
 | WebM | Opus (`A_OPUS`) | — | not supported |
-| MP4 | AC-3, E-AC-3 | — | not supported |
+| MP4, WebM | AC-3 (`ac-3`, `A_AC3`) | `playback_mp4_audio` / `playback_webm_audio` → `codec::ac3_decoder` → cpal | yes, headless |
+| either | E-AC-3 | — | not supported |
 
 MP4/AAC was proven end to end on a generated tone file with
 `cargo run --features player --example audio_probe -- file.mp4`, which reports
@@ -18,6 +19,10 @@ WebM/Vorbis uses the same probe, and `playback_webm_audio::tests` decodes a 2 s
 tone fixture (`tests/fixtures/audio/vorbis-stereo.webm`) through the demuxer,
 header handling and decoder together: 88 packets in, 89 088 stereo frames out,
 peak amplitude matching ffmpeg's own reading of the file.
+AC-3 in the two containers is checked by `tests/native_container_audio.rs`. That
+decoder also drops the 256 samples of leading padding its encoder puts in front
+of the sound: measured against ffmpeg's reading of the same stream at 48 000,
+44 100 and 32 000 Hz, the two align at exactly that shift and at no other.
 
 ## Pipeline
 
