@@ -17,6 +17,31 @@ pub enum Interpolation {
     Tetrahedral,
 }
 
+impl Interpolation {
+    /// The word an option takes for this mode.
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Nearest => "nearest",
+            Self::Trilinear => "trilinear",
+            Self::Tetrahedral => "tetrahedral",
+        }
+    }
+
+    /// Read a mode back from its label, taking `linear` as another spelling of
+    /// `trilinear` because that is the name the tools outside fvid use.
+    pub fn from_label(label: &str) -> Option<Self> {
+        Some(match label {
+            "nearest" => Self::Nearest,
+            "trilinear" | "linear" => Self::Trilinear,
+            "tetrahedral" => Self::Tetrahedral,
+            _ => return None,
+        })
+    }
+
+    /// Every mode, in the order a message offers them.
+    pub const ALL: [Interpolation; 3] = [Self::Nearest, Self::Trilinear, Self::Tetrahedral];
+}
+
 /// A per-channel 1D LUT.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Lut1d {
@@ -1053,6 +1078,19 @@ LUT_3D_SIZE 2
         let text = Lut::Three(src.clone()).to_cube();
         let back = Lut::from_cube(&text).unwrap();
         assert_eq!(back, Lut::Three(src));
+    }
+
+    #[test]
+    fn every_reading_has_a_label_that_reads_back() {
+        for mode in Interpolation::ALL {
+            assert_eq!(Interpolation::from_label(mode.label()), Some(mode));
+        }
+        // `linear` is the word the tools outside fvid use for a trilinear read.
+        assert_eq!(
+            Interpolation::from_label("linear"),
+            Some(Interpolation::Trilinear)
+        );
+        assert_eq!(Interpolation::from_label("bicubic"), None);
     }
 
     #[test]

@@ -6,8 +6,8 @@
 //! controls along the bottom. Controls fade out while the video plays and
 //! the pointer rests; any movement brings them back.
 use crate::color::{
-    ColourDescription, DisplayTarget, Grade, HdrMetadata, Log, Lut, Primaries, Settings, ToneMap,
-    Transfer,
+    ColourDescription, DisplayTarget, Grade, HdrMetadata, Interpolation, Log, Lut, Primaries,
+    Settings, ToneMap, Transfer,
 };
 use crate::container::FileTags;
 use crate::subtitles::{self, Cue};
@@ -102,6 +102,14 @@ struct Grading {
     gamut: Option<Primaries>,
     /// The panel the picture is graded for, named instead of assumed.
     panel: Option<Panel>,
+    /// Edge length of the grid the conversion is baked on, named instead of the
+    /// 33 nodes every session starts with. A modifier of how a grade is computed
+    /// rather than a request to change a picture, so it is not in [`Self::silent`].
+    grid: Option<usize>,
+    /// How that grid and a `--lut` file are read between their nodes. Also a
+    /// modifier: `nearest` on a coarse look keeps its steps instead of blending
+    /// them away.
+    interp: Option<Interpolation>,
 }
 
 impl Grading {
@@ -131,7 +139,9 @@ impl Grading {
     /// how a wrong label gets corrected. A panel it names outranks the item too,
     /// because writing BT.2100 codes is the only way to hand a screen an HDR
     /// picture, and a caller who asks for one does not want the file's curve
-    /// kept over the request.
+    /// kept over the request. A grid and a reading of it change how finely the
+    /// conversion is baked and how its nodes are joined, which says nothing about
+    /// the picture and so never asks for one on its own.
     fn grade_for(&self, signal: ColourDescription, hdr: &HdrMetadata) -> Option<Grade> {
         if self.silent() && !signal.is_hdr() {
             return None;
@@ -141,6 +151,12 @@ impl Grading {
         settings.log = self.log;
         settings.gamut = self.gamut;
         settings.tone_map = self.tone_map;
+        if let Some(size) = self.grid {
+            settings.size = size;
+        }
+        if let Some(mode) = self.interp {
+            settings.interpolation = mode;
+        }
         if !signal.is_hdr() && self.log.is_none() {
             settings.to = signal.transfer_function();
             if let Some(primaries) = signal.primary_set() {
@@ -350,6 +366,14 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
             "--lut" => {
                 let value = option_value(args, &mut index, flag, inline)?;
                 grading.lut = Some(read_lut(&value)?);
+            }
+            "--grid" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                grading.grid = Some(parse_grid(&value)?);
+            }
+            "--interp" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                grading.interp = Some(parse_interpolation(&value)?);
             }
             _ if arg.starts_with('-') => {
                 return Err(crate::invalid(&format!("unknown play option {arg}")));
@@ -625,6 +649,41 @@ fn parse_nits(text: &str) -> crate::Result<f32> {
         )));
     }
     Ok(nits)
+}
+
+/// `--grid` as the edge length the conversion is baked on. A cube is the whole
+/// colour decision of a frame, so its edge trades accuracy for build time and
+/// memory: 33 nodes are what a session uses by default, 128 is the largest grid
+/// `fvid` reads out of a file, and below two nodes there is nothing to join.
+fn parse_grid(text: &str) -> crate::Result<usize> {
+    let size = text
+        .trim()
+        .parse::<usize>()
+        .map_err(|_| crate::invalid(&format!("--grid needs a node count, {text:?} is none")))?;
+    if !(2..=128).contains(&size) {
+        return Err(crate::invalid(&format!(
+            "--grid {size} is outside 2..=128 nodes"
+        )));
+    }
+    Ok(size)
+}
+
+/// `--interp` as the way a grid's nodes are joined: `nearest` for the step a
+/// look was authored with, `trilinear` for the six-sided box around a point,
+/// `tetrahedral` for the split that keeps an edge sharp. It reads both the baked
+/// conversion and a `--lut` file, so the two are never asked for separately.
+fn parse_interpolation(text: &str) -> crate::Result<Interpolation> {
+    let label = text.trim().to_ascii_lowercase();
+    Interpolation::from_label(&label).ok_or_else(|| {
+        crate::invalid(&format!(
+            "unknown --interp {text:?}; fvid reads a grid by {}",
+            Interpolation::ALL
+                .iter()
+                .map(|mode| mode.label())
+                .collect::<Vec<_>>()
+                .join(", ")
+        ))
+    })
 }
 
 /// `--tonemap` as one of the highlight curves fvid can run, spelled the way
@@ -4561,7 +4620,8 @@ mod tests {
     };
     use super::{Event, NativeReader, Playback};
     use crate::color::{
-        ColourDescription, DisplayTarget, HdrMetadata, Log, Lut, Primaries, ToneMap, Transfer,
+        ColourDescription, DisplayTarget, HdrMetadata, Interpolation, Log, Lut, Primaries, ToneMap,
+        Transfer,
     };
     use std::sync::Arc;
     use std::time::{Duration, Instant};
@@ -8006,6 +8066,147 @@ LUT_3D_SIZE 2
         .grade_for(ColourDescription::default(), &HdrMetadata::default())
         .unwrap();
         assert_eq!(graded.plan().source, Primaries::D_GAMUT);
+    }
+
+    /// A cube's edge and the way its nodes are joined say how finely the colour
+    /// decision is baked, so they move the picture a request produces; naming
+    /// either of them alone asks for no picture at all.
+    #[test]
+    fn a_named_grid_and_reading_change_how_the_picture_is_baked() {
+        let empty = HdrMetadata::default();
+        let hdr10 = ColourDescription {
+            primaries: 9,
+            transfer: 16,
+            matrix: 9,
+            full_range: false,
+        };
+        let video = ColourDescription {
+            primaries: 1,
+            transfer: 1,
+            matrix: 1,
+            full_range: false,
+        };
+        let baked = |grid, interp| {
+            Grading {
+                grid,
+                interp,
+                ..Default::default()
+            }
+            .grade_for(hdr10, &empty)
+            .unwrap()
+        };
+        assert_eq!(baked(None, None).plan().size, 33);
+        let coarse = baked(Some(2), None);
+        let fine = baked(Some(64), None);
+        assert_eq!((coarse.plan().size, fine.plan().size), (2, 64));
+        assert_ne!(coarse.rgb([0.5; 3]), fine.rgb([0.5; 3]));
+        let stepped = baked(Some(2), Some(Interpolation::Nearest));
+        assert_ne!(stepped.rgb([0.5; 3]), coarse.rgb([0.5; 3]));
+        // The same reading is what a look from a file gets: a two-node grid whose
+        // top corner is off-white blends towards it when the box around a point
+        // is read, and keeps its step when only the nearest corner is.
+        let look = Lut::from_cube(
+            "LUT_3D_SIZE 2\n0 0 0\n1 0 0\n0 1 0\n1 1 0\n0 0 1\n1 0 1\n0 1 1\n1 1 0\n",
+        )
+        .unwrap();
+        let with = |interp| {
+            Grading {
+                lut: Some(look.clone()),
+                interp,
+                ..Default::default()
+            }
+            .grade_for(video, &empty)
+            .unwrap()
+        };
+        assert_ne!(
+            with(None).rgb([0.5; 3]),
+            with(Some(Interpolation::Nearest)).rgb([0.5; 3])
+        );
+        for modifier in [
+            Grading {
+                grid: Some(64),
+                ..Default::default()
+            },
+            Grading {
+                interp: Some(Interpolation::Nearest),
+                ..Default::default()
+            },
+        ] {
+            assert!(modifier.grade_for(video, &empty).is_none());
+        }
+    }
+
+    /// `--grid` takes the node count the conversion is baked at and `--interp`
+    /// one of the readings fvid knows, in either spelling of the option; the
+    /// bound and the set of readings are both in the answer a mistake gets.
+    #[test]
+    fn the_command_line_names_the_cube_and_how_its_nodes_are_joined() {
+        let grid = |args: &[&str]| play_args(args).unwrap().grading.grid;
+        let interp = |args: &[&str]| play_args(args).unwrap().grading.interp;
+        assert_eq!(grid(&["--grid=64", "c"]), Some(64));
+        assert_eq!(grid(&["--grid", " 12 ", "c"]), Some(12));
+        assert_eq!(grid(&["--grid", "2", "c"]), Some(2));
+        assert_eq!(grid(&["--grid", "128", "c"]), Some(128));
+        assert!(grid(&["c"]).is_none());
+        assert_eq!(
+            interp(&["--interp=nearest", "c"]),
+            Some(Interpolation::Nearest)
+        );
+        assert_eq!(
+            interp(&["--interp", " TRILINEAR ", "c"]),
+            Some(Interpolation::Trilinear)
+        );
+        assert_eq!(
+            interp(&["--interp=linear", "c"]),
+            Some(Interpolation::Trilinear)
+        );
+        assert_eq!(
+            interp(&["--interp", "tetrahedral", "c"]),
+            Some(Interpolation::Tetrahedral)
+        );
+        assert!(interp(&["c"]).is_none());
+        for bad in [
+            "--grid=1",
+            "--grid=129",
+            "--grid=deep",
+            "--grid=-4",
+            "--interp=bilinear",
+            "--interp=",
+        ] {
+            let option = if bad.starts_with("--grid") {
+                "--grid"
+            } else {
+                "--interp"
+            };
+            let error = play_args(&[bad, "c"]).err().unwrap().to_string();
+            assert!(error.contains(option), "{bad} said {error:?}");
+        }
+        assert!(
+            play_args(&["--grid=129", "c"])
+                .err()
+                .unwrap()
+                .to_string()
+                .contains("2..=128")
+        );
+        let error = play_args(&["--interp=bilinear", "c"])
+            .err()
+            .unwrap()
+            .to_string();
+        assert!(
+            error.contains("nearest")
+                && error.contains("trilinear")
+                && error.contains("tetrahedral"),
+            "{error}"
+        );
+        // With no value at all the message names the option, as every option of
+        // this command does.
+        assert!(
+            play_args(&["--grid", "c"])
+                .err()
+                .unwrap()
+                .to_string()
+                .contains("--grid")
+        );
     }
 
     /// `--lut` reads the look at startup, from a file named either way round:
