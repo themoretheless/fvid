@@ -490,10 +490,7 @@ unsafe fn vp9_filter_batch4_neon(
         masked = vorrq_u32(masked, gt!(8, 9));
         masked = vorrq_u32(masked, gt!(9, 10));
         masked = vorrq_u32(masked, gt!(10, 11));
-        let bl = vaddq_s32(
-            vshlq_n_s32::<1>(dif!(7, 8)),
-            vshrq_n_s32::<1>(dif!(6, 9)),
-        );
+        let bl = vaddq_s32(vshlq_n_s32::<1>(dif!(7, 8)), vshrq_n_s32::<1>(dif!(6, 9)));
         masked = vorrq_u32(masked, vcgtq_s32(bl, vblim));
 
         let hev = vorrq_u32(
@@ -588,82 +585,6 @@ unsafe fn vp9_filter_batch4_neon(
             }
         }
         out_lines
-    }
-}
-
-/// Batched CDEF constrain: applies the constrain function to 4 diffs at once.
-/// `threshold` and `neg_shift` are constant per block (neg_shift = -shift where
-/// shift = (damping - threshold.ilog2()).max(0)). Returns 4 constrained values.
-#[cfg(target_arch = "aarch64")]
-#[target_feature(enable = "neon")]
-pub unsafe fn av1_cdef_constrain_batch4_neon(
-    diffs: std::arch::aarch64::int32x4_t,
-    threshold: i32,
-    neg_shift: i32,
-) -> std::arch::aarch64::int32x4_t {
-    use std::arch::aarch64::*;
-    // SAFETY: NEON is baseline on aarch64; diffs is a valid int32x4_t.
-    let vthresh = vdupq_n_s32(threshold);
-    let vneg_shift = vdupq_n_s32(neg_shift);
-    let vzero = vdupq_n_s32(0);
-
-    let abs_diff = vabsq_s32(diffs);
-    let shifted = vshlq_s32(abs_diff, vneg_shift);
-    let constrained = vmaxq_s32(vsubq_s32(vthresh, shifted), vzero);
-    let min_val = vminq_s32(abs_diff, constrained);
-
-    let pos = vcgtq_s32(diffs, vzero);
-    let neg = vcltq_s32(diffs, vzero);
-    let sign = vbslq_s32(pos, vdupq_n_s32(1), vbslq_s32(neg, vdupq_n_s32(-1), vzero));
-
-    vmulq_s32(sign, min_val)
-}
-
-/// Scalar reference for av1_cdef_constrain_batch4_neon (bit-identical).
-pub fn av1_cdef_constrain_batch4_scalar(
-    diffs: [i32; 4],
-    threshold: i32,
-    damping: i32,
-) -> [i32; 4] {
-    if threshold == 0 {
-        return [0; 4];
-    }
-    let shift = (damping - threshold.ilog2() as i32).max(0);
-    diffs.map(|diff| {
-        if diff == 0 {
-            return 0;
-        }
-        let abs_diff = diff.abs();
-        let constrained = (threshold - (abs_diff >> shift)).max(0);
-        diff.signum() * abs_diff.min(constrained)
-    })
-}
-
-/// Safe dispatch: applies constrain to 4 diffs. On aarch64 uses NEON, elsewhere scalar.
-pub fn av1_cdef_constrain_batch4(
-    diffs: [i32; 4],
-    threshold: i32,
-    damping: i32,
-) -> [i32; 4] {
-    if threshold == 0 {
-        return [0; 4];
-    }
-    let neg_shift = -((damping - threshold.ilog2() as i32).max(0));
-    #[cfg(target_arch = "aarch64")]
-    {
-        // SAFETY: NEON is baseline on aarch64; diffs is a fixed-size array.
-        let result = unsafe {
-            let v = std::arch::aarch64::vld1q_s32(diffs.as_ptr());
-            let r = av1_cdef_constrain_batch4_neon(v, threshold, neg_shift);
-            let mut out = [0i32; 4];
-            std::arch::aarch64::vst1q_s32(out.as_mut_ptr(), r);
-            out
-        };
-        result
-    }
-    #[cfg(not(target_arch = "aarch64"))]
-    {
-        av1_cdef_constrain_batch4_scalar(diffs, threshold, damping)
     }
 }
 
@@ -782,6 +703,153 @@ unsafe fn hevc_deblock_luma_batch4_neon(
     hevc_deblock_luma_batch4_scalar(p, q, tc, depth, filter, enabled)
 }
 
+/// One CDEF neighbour tap: its position relative to the filtered pixel and the
+/// fixed threshold, right shift and weight applied to the sample difference.
+#[derive(Clone, Copy, Default, Debug)]
+pub struct CdefTap {
+    pub dx: i32,
+    pub dy: i32,
+    pub threshold: i16,
+    pub shift: i16,
+    pub weight: i16,
+}
+
+/// Constrained directional enhancement of one block. NEON on aarch64, scalar
+/// elsewhere and for any partial eight-sample chunk (bit-identical).
+///
+/// The caller must keep every tap neighbourhood in bounds for the whole block,
+/// so border blocks are filtered by the parent crate's bounds-checked path.
+pub fn av1_cdef_block(
+    src: &[u16],
+    dst: &mut [u16],
+    stride: usize,
+    x: usize,
+    y: usize,
+    w: usize,
+    h: usize,
+    taps: &[CdefTap],
+) {
+    debug_assert!(taps.len() <= 12);
+    #[cfg(target_arch = "aarch64")]
+    {
+        // SAFETY: NEON is baseline on aarch64; the caller guarantees the extents.
+        unsafe {
+            av1_cdef_block_neon(src, dst, stride, x, y, w, h, taps);
+        }
+        return;
+    }
+    #[cfg(not(target_arch = "aarch64"))]
+    av1_cdef_block_scalar(src, dst, stride, x, y, w, h, taps);
+}
+
+/// Scalar reference for `av1_cdef_block`, mirroring the parent crate's loop.
+#[allow(dead_code)]
+fn av1_cdef_block_scalar(
+    src: &[u16],
+    dst: &mut [u16],
+    stride: usize,
+    x: usize,
+    y: usize,
+    w: usize,
+    h: usize,
+    taps: &[CdefTap],
+) {
+    for row in 0..h {
+        for col in 0..w {
+            let base = (y + row) * stride + x + col;
+            let current = i32::from(src[base]);
+            let (mut lo, mut hi, mut sum) = (current, current, 0);
+            for t in taps {
+                let index = (base as isize
+                    + i64::from(t.dy) as isize * stride as isize
+                    + i64::from(t.dx) as isize) as usize;
+                let value = i32::from(src[index]);
+                let difference = (value - current).abs();
+                let filtered = difference
+                    .min((i32::from(t.threshold) - (difference >> i32::from(t.shift))).max(0));
+                sum += i32::from(t.weight) * if value < current { -filtered } else { filtered };
+                lo = lo.min(value);
+                hi = hi.max(value);
+            }
+            dst[base] = (current + ((8 + sum - i32::from(sum < 0)) >> 4)).clamp(lo, hi) as u16;
+        }
+    }
+}
+
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "neon")]
+unsafe fn av1_cdef_block_neon(
+    src: &[u16],
+    dst: &mut [u16],
+    stride: usize,
+    x: usize,
+    y: usize,
+    w: usize,
+    h: usize,
+    taps: &[CdefTap],
+) {
+    use std::arch::aarch64::*;
+    // SAFETY: the caller guarantees every tap window lies inside both planes.
+    unsafe {
+        let src = src.as_ptr();
+        let dst = dst.as_mut_ptr();
+        let zero = vdupq_n_s16(0);
+        let eight = vdupq_n_s16(8);
+        let one = vdupq_n_s16(1);
+        let mut offsets = [0isize; 12];
+        for (offset, t) in offsets.iter_mut().zip(taps) {
+            *offset = i64::from(t.dy) as isize * stride as isize + i64::from(t.dx) as isize;
+        }
+        for row in 0..h {
+            let mut col = 0usize;
+            while col + 8 <= w {
+                let base = (y + row) * stride + x + col;
+                let current = vreinterpretq_s16_u16(vld1q_u16(src.add(base)));
+                let mut sum = zero;
+                let mut lo = current;
+                let mut hi = current;
+                for (offset, t) in offsets.iter().zip(taps) {
+                    let near = vreinterpretq_s16_u16(vld1q_u16(src.add(base).offset(*offset)));
+                    let diff = vsubq_s16(near, current);
+                    let abs = vabsq_s16(diff);
+                    let scaled = vshlq_s16(abs, vdupq_n_s16(-t.shift));
+                    let limit = vmaxq_s16(vsubq_s16(vdupq_n_s16(t.threshold), scaled), zero);
+                    let filtered = vminq_s16(abs, limit);
+                    let signed = vbslq_s16(vcltq_s16(diff, zero), vnegq_s16(filtered), filtered);
+                    sum = vaddq_s16(sum, vmulq_s16(signed, vdupq_n_s16(t.weight)));
+                    lo = vminq_s16(lo, near);
+                    hi = vmaxq_s16(hi, near);
+                }
+                let bias = vandq_s16(vshrq_n_s16(sum, 15), one);
+                let delta = vshrq_n_s16(vsubq_s16(vaddq_s16(sum, eight), bias), 4);
+                let out = vmaxq_s16(vminq_s16(vaddq_s16(current, delta), hi), lo);
+                vst1q_u16(dst.add(base), vreinterpretq_u16_s16(out));
+                col += 8;
+            }
+            for c in col..w {
+                let base = (y + row) * stride + x + c;
+                let current = i32::from(*src.add(base));
+                let (mut lo, mut hi, mut sum) = (current, current, 0);
+                for t in taps {
+                    let value = i32::from(*src.add(
+                        (base as isize
+                            + i64::from(t.dy) as isize * stride as isize
+                            + i64::from(t.dx) as isize) as usize,
+                    ));
+                    let difference = (value - current).abs();
+                    let filtered = difference
+                        .min((i32::from(t.threshold) - (difference >> i32::from(t.shift))).max(0));
+                    sum += i32::from(t.weight) * if value < current { -filtered } else { filtered };
+                    lo = lo.min(value);
+                    hi = hi.max(value);
+                }
+                *dst.add(base) =
+                    (current + ((8 + sum - i32::from(sum < 0)) >> 4)).clamp(lo, hi) as u16;
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -878,8 +946,9 @@ mod tests {
                             }
                         }
                         for lines in [rnd, flat] {
-                            let got =
-                                unsafe { vp9_filter_batch4_neon(lines, depth, width, level, sharpness) };
+                            let got = unsafe {
+                                vp9_filter_batch4_neon(lines, depth, width, level, sharpness)
+                            };
                             let exp =
                                 lines.map(|s| vp9_filter_lane(s, depth, width, level, sharpness));
                             assert_eq!(got, exp, "d{depth} w{width} l{level} s{sharpness}");
@@ -906,64 +975,6 @@ mod tests {
                     }
                     let got = vp9_filter_batch4(lines, depth, width, level, 4);
                     let exp = lines.map(|s| vp9_filter_lane(s, depth, width, level, 4));
-                    assert_eq!(got, exp);
-                }
-            }
-        }
-    }
-
-    #[cfg(target_arch = "aarch64")]
-    #[test]
-    fn av1_cdef_constrain_batch4_neon_matches_scalar() {
-        let mut state = 0xDEADBEEF_12345678u64;
-        for threshold in [0i32, 1, 4, 16, 64, 256] {
-            for damping in [0i32, 2, 4, 8, 12] {
-                if threshold > 0 && damping < threshold.ilog2() as i32 {
-                    continue;
-                }
-                for _ in 0..100 {
-                    let diffs: [i32; 4] = std::array::from_fn(|_| {
-                        let v = (xorshift(&mut state) as i32) % 2048;
-                        v - 1024
-                    });
-                    let neg_shift = if threshold == 0 {
-                        0
-                    } else {
-                        -((damping - threshold.ilog2() as i32).max(0))
-                    };
-                    let got = unsafe {
-                        let v = std::arch::aarch64::vld1q_s32(diffs.as_ptr());
-                        let r = av1_cdef_constrain_batch4_neon(v, threshold, neg_shift);
-                        let mut out = [0i32; 4];
-                        std::arch::aarch64::vst1q_s32(out.as_mut_ptr(), r);
-                        out
-                    };
-                    let exp = av1_cdef_constrain_batch4_scalar(diffs, threshold, damping);
-                    assert_eq!(got, exp, "threshold={threshold} damping={damping} diffs={diffs:?}");
-                }
-            }
-        }
-    }
-
-    #[test]
-    fn av1_cdef_constrain_batch4_scalar_matches_reference() {
-        let mut state = 0xCAFEBABE_87654321u64;
-        for threshold in [0i32, 1, 8, 32, 128] {
-            for damping in [0i32, 3, 6, 10] {
-                for _ in 0..50 {
-                    let diffs: [i32; 4] = std::array::from_fn(|_| {
-                        let v = (xorshift(&mut state) as i32) % 1024;
-                        v - 512
-                    });
-                    let got = av1_cdef_constrain_batch4_scalar(diffs, threshold, damping);
-                    let exp = diffs.map(|d| {
-                        if threshold == 0 {
-                            0
-                        } else {
-                            let shift = (damping - threshold.ilog2() as i32).max(0);
-                            d.signum() * d.abs().min((threshold - (d.abs() >> shift)).max(0))
-                        }
-                    });
                     assert_eq!(got, exp);
                 }
             }
@@ -1011,8 +1022,7 @@ mod tests {
                                             (b, a, &mut exp_b)
                                         };
                                         let values = [
-                                            (a[2] + 2 * a[1] + 2 * a[0] + 2 * b[0] + b[1] + 4)
-                                                >> 3,
+                                            (a[2] + 2 * a[1] + 2 * a[0] + 2 * b[0] + b[1] + 4) >> 3,
                                             (a[2] + a[1] + a[0] + b[0] + 2) >> 2,
                                             (2 * a[3] + 3 * a[2] + a[1] + a[0] + b[0] + 4) >> 3,
                                         ];
@@ -1022,19 +1032,20 @@ mod tests {
                                     }
                                 }
                                 HevcLumaFilter::Weak { second } => {
-                                    let delta =
-                                        (9 * (b[0] - a[0]) - 3 * (b[1] - a[1]) + 8) >> 4;
+                                    let delta = (9 * (b[0] - a[0]) - 3 * (b[1] - a[1]) + 8) >> 4;
                                     if delta.abs() < 10 * tc {
                                         let delta = delta.clamp(-tc, tc);
                                         exp_a[0] = (a[0] + delta).clamp(0, max);
                                         exp_b[0] = (b[0] - delta).clamp(0, max);
                                         if second[0] {
-                                            let d = ((((a[2] + a[0] + 1) >> 1) - a[1] + delta) >> 1)
+                                            let d = ((((a[2] + a[0] + 1) >> 1) - a[1] + delta)
+                                                >> 1)
                                                 .clamp(-(tc >> 1), tc >> 1);
                                             exp_a[1] = (a[1] + d).clamp(0, max);
                                         }
                                         if second[1] {
-                                            let d = ((((b[2] + b[0] + 1) >> 1) - b[1] - delta) >> 1)
+                                            let d = ((((b[2] + b[0] + 1) >> 1) - b[1] - delta)
+                                                >> 1)
                                                 .clamp(-(tc >> 1), tc >> 1);
                                             exp_b[1] = (b[1] + d).clamp(0, max);
                                         }
@@ -1082,6 +1093,44 @@ mod tests {
                         assert_eq!(got_q, exp_q);
                     }
                 }
+            }
+        }
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    #[test]
+    fn av1_cdef_block_neon_matches_scalar() {
+        let mut state = 0x0EED_1234_5678_9ABCu64;
+        let (stride, rows) = (40usize, 40usize);
+        let mut src = vec![0u16; stride * rows];
+        for v in src.iter_mut() {
+            *v = (xorshift(&mut state) & 0xFFF) as u16;
+        }
+        let shapes = [
+            (2, 2, 8, 8),
+            (2, 3, 4, 4),
+            (8, 2, 16, 5),
+            (2, 2, 13, 7),
+            (30, 30, 8, 8),
+        ];
+        for &(x, y, w, h) in &shapes {
+            for trial in 0..40 {
+                let count = (xorshift(&mut state) % 13) as usize;
+                let taps: Vec<CdefTap> = (0..count)
+                    .map(|i| CdefTap {
+                        dx: (xorshift(&mut state) % 5) as i32 - 2,
+                        dy: (xorshift(&mut state) % 5) as i32 - 2,
+                        threshold: (xorshift(&mut state) % 241) as i16,
+                        shift: (xorshift(&mut state) % 20) as i16,
+                        weight: [1, 2, 3, 4][(trial + i) % 4] as i16,
+                    })
+                    .collect();
+                let mut neon = src.clone();
+                let mut scalar = src.clone();
+                // SAFETY: every block keeps its two-sample halo inside the plane.
+                unsafe { av1_cdef_block_neon(&src, &mut neon, stride, x, y, w, h, &taps) };
+                av1_cdef_block_scalar(&src, &mut scalar, stride, x, y, w, h, &taps);
+                assert_eq!(neon, scalar, "x={x} y={y} w={w} h={h} taps={count}");
             }
         }
     }

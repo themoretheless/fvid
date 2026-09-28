@@ -136,6 +136,52 @@ const DIRECTIONS: [[(i32, i32); 2]; 8] = [
     [(1, 0), (2, 0)],
     [(1, 0), (2, -1)],
 ];
+/// One CDEF neighbour tap: the position relative to the filtered pixel plus the
+/// fixed threshold, right shift and weight for the sample difference.
+fn tap(dy: i32, dx: i32, sign: i32, threshold: i32, shift: i32, weight: i32) -> fvid_cpu::CdefTap {
+    fvid_cpu::CdefTap {
+        dx: dx * sign,
+        dy: dy * sign,
+        threshold: threshold as i16,
+        shift: shift as i16,
+        weight: weight as i16,
+    }
+}
+
+/// Blocks whose tap window leaves the plane. A neighbour outside contributes nothing.
+fn block_edge(
+    source: &Plane,
+    target: &mut [u16],
+    x0: usize,
+    y0: usize,
+    size: usize,
+    taps: &[fvid_cpu::CdefTap],
+) {
+    let (width, height) = (source.width, source.height);
+    let src = &source.samples;
+    for y in y0..y0 + size {
+        for x in x0..x0 + size {
+            let base = y * width + x;
+            let current = i32::from(src[base]);
+            let (mut lo, mut hi, mut sum) = (current, current, 0);
+            for tap in taps {
+                let (nx, ny) = (x as i32 + tap.dx, y as i32 + tap.dy);
+                if nx < 0 || ny < 0 || nx >= width as i32 || ny >= height as i32 {
+                    continue;
+                }
+                let value = i32::from(src[ny as usize * width + nx as usize]);
+                let difference = (value - current).abs();
+                let filtered = difference
+                    .min((i32::from(tap.threshold) - (difference >> i32::from(tap.shift))).max(0));
+                sum += i32::from(tap.weight) * if value < current { -filtered } else { filtered };
+                lo = lo.min(value);
+                hi = hi.max(value);
+            }
+            target[base] = (current + ((8 + sum - i32::from(sum < 0)) >> 4)).clamp(lo, hi) as u16;
+        }
+    }
+}
+
 pub(crate) fn cdef(
     image: &mut Picture,
     params: &Cdef,
@@ -193,111 +239,55 @@ pub(crate) fn cdef(
                 } else {
                     [3, 3]
                 };
-                for y in r * 4 >> sub..(r * 4 >> sub) + size {
-                    for x in col * 4 >> sub..(col * 4 >> sub) + size {
-                        let current = i32::from(source.samples[y * source.width + x]);
-                        let mut lo = current;
-                        let mut hi = current;
-
-                        // Gather pri neighbors (offset == 0): 4 total
-                        let mut pri_diffs = [0i32; 4];
-                        let mut pri_valid = [false; 4];
-                        let mut pri_weights = [0i32; 4];
-                        let mut idx = 0;
-                        for k in 0..2 {
-                            for sign in [-1i32, 1] {
-                                let (dy, dx) = DIRECTIONS[direction][k];
-                                let (xx, yy) =
-                                    (x as i32 + dx * sign, y as i32 + dy * sign);
-                                if xx >= 0
-                                    && yy >= 0
-                                    && xx < source.width as i32
-                                    && yy < source.height as i32
-                                {
-                                    let v = i32::from(
-                                        source.samples
-                                            [yy as usize * source.width + xx as usize],
-                                    );
-                                    pri_diffs[idx] = v - current;
-                                    pri_valid[idx] = true;
-                                    pri_weights[idx] = pri_taps[k];
-                                    lo = lo.min(v);
-                                    hi = hi.max(v);
-                                }
-                                idx += 1;
-                            }
+                // Four primary taps along the detected direction, then eight secondary
+                // taps two steps further round. A zero threshold contributes nothing,
+                // so those taps are left out and a plane with none stays untouched.
+                let mut taps = [fvid_cpu::CdefTap::default(); 12];
+                let mut count = 0;
+                if pri != 0 {
+                    let threshold_shift = (damping - pri.ilog2() as i32).max(0);
+                    for k in 0..2 {
+                        let (dy, dx) = DIRECTIONS[direction][k];
+                        for sign in [-1, 1] {
+                            taps[count] = tap(dy, dx, sign, pri, threshold_shift, pri_taps[k]);
+                            count += 1;
                         }
-
-                        // Gather sec neighbors (offset in [2, 6]): 8 total
-                        let mut sec_diffs = [0i32; 8];
-                        let mut sec_valid = [false; 8];
-                        let mut sec_weights = [0i32; 8];
-                        let mut idx = 0;
-                        for k in 0..2 {
-                            for sign in [-1i32, 1] {
-                                for offset in [2, 6] {
-                                    let (dy, dx) =
-                                        DIRECTIONS[(direction + offset) & 7][k];
-                                    let (xx, yy) = (
-                                        x as i32 + dx * sign,
-                                        y as i32 + dy * sign,
-                                    );
-                                    if xx >= 0
-                                        && yy >= 0
-                                        && xx < source.width as i32
-                                        && yy < source.height as i32
-                                    {
-                                        let v = i32::from(
-                                            source.samples[yy as usize
-                                                * source.width
-                                                + xx as usize],
-                                        );
-                                        sec_diffs[idx] = v - current;
-                                        sec_valid[idx] = true;
-                                        sec_weights[idx] = [2, 1][k];
-                                        lo = lo.min(v);
-                                        hi = hi.max(v);
-                                    }
-                                    idx += 1;
-                                }
-                            }
-                        }
-
-                        // Apply constrain in batches
-                        let mut sum = 0;
-
-                        // Pri batch (4 diffs)
-                        if pri != 0 {
-                            let constrained =
-                                fvid_cpu::av1_cdef_constrain_batch4(pri_diffs, pri, damping);
-                            for i in 0..4 {
-                                if pri_valid[i] {
-                                    sum += pri_weights[i] * constrained[i];
-                                }
-                            }
-                        }
-
-                        // Sec batches (2 batches of 4 diffs)
-                        if sec != 0 {
-                            for batch in 0..2 {
-                                let start = batch * 4;
-                                let batch_diffs: [i32; 4] =
-                                    std::array::from_fn(|i| sec_diffs[start + i]);
-                                let constrained = fvid_cpu::av1_cdef_constrain_batch4(
-                                    batch_diffs, sec, damping,
-                                );
-                                for i in 0..4 {
-                                    if sec_valid[start + i] {
-                                        sum += sec_weights[start + i] * constrained[i];
-                                    }
-                                }
-                            }
-                        }
-
-                        target.samples[y * target.width + x] =
-                            (current + ((8 + sum - i32::from(sum < 0)) >> 4))
-                                .clamp(lo, hi) as u16;
                     }
+                }
+                if sec != 0 {
+                    let threshold_shift = (damping - sec.ilog2() as i32).max(0);
+                    for k in 0..2 {
+                        for sign in [-1, 1] {
+                            for offset in [2, 6] {
+                                let (dy, dx) = DIRECTIONS[(direction + offset) & 7][k];
+                                taps[count] = tap(dy, dx, sign, sec, threshold_shift, [2, 1][k]);
+                                count += 1;
+                            }
+                        }
+                    }
+                }
+                if count == 0 {
+                    continue;
+                }
+                let taps = &taps[..count];
+                let (x0, y0) = ((col * 4) >> sub, (r * 4) >> sub);
+                if x0 >= 2
+                    && y0 >= 2
+                    && x0 + size + 1 < source.width
+                    && y0 + size + 1 < source.height
+                {
+                    fvid_cpu::av1_cdef_block(
+                        &source.samples,
+                        &mut target.samples,
+                        source.width,
+                        x0,
+                        y0,
+                        size,
+                        size,
+                        taps,
+                    );
+                } else {
+                    block_edge(source, &mut target.samples, x0, y0, size, taps);
                 }
             }
         }
