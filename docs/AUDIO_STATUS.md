@@ -252,3 +252,11 @@ locally (alpha 4 for long, 6 for short) and checked against independent Bessel
 integral quadrature. The previous shape is retained for the first half-window.
 Packet integration remains pending;
 playback continues to use Symphonia until that work is complete.
+
+Owned `codec::aac_ics` now reads AAC-LC window/shape/max_sfb syntax, all
+128 short-window grouping masks, and section codebook runs including escape
+lengths. The caller supplies the selected band-table limits. Reserved values,
+LC prediction, truncated input, empty sections and band overruns are rejected
+without advancing the caller's bit cursor. This parser is not yet wired into
+the playback decoder; band tables and spectral/scalefactor entropy decoding
+remain prerequisites for replacing Symphonia.

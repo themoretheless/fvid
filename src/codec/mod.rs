@@ -400,3 +400,5 @@ pub fn make_audio_decoder(
 pub mod aac_imdct;
 
 pub mod aac_synthesis;
+
+pub mod aac_ics;
