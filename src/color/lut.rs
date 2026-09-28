@@ -1883,6 +1883,73 @@ LUT_3D_SIZE 2
     }
 
     #[test]
+    fn every_camera_log_cube_can_stop_at_linear_light() {
+        // A destination of `Transfer::Linear` writes the light itself: the curve
+        // has no encoding, its `oetf` answers `None`, and the bake leaves the
+        // value as it stands. Nothing else in the suite names that stop, so the
+        // anchors here are the vendors' own code tables, read the way each table
+        // is scaled — S-Log3 and Canon Log over 0..=1023, S-Log2/1 over the
+        // 64..=940 legal range — and the expectation is scene reflectance rather
+        // than a code for it.
+        for (profile, code18, code90) in [
+            (Log::SLog3, 420.0, 598.0),
+            (Log::SLog2, 347.0, 582.0),
+            (Log::SLog1, 394.0, 636.0),
+            (Log::CLog, 351.0, 614.0),
+        ] {
+            let codes = profile.codes();
+            let signal = |code: f32| (code - codes.black) / codes.span;
+            let cube = CubePlan::camera_log(
+                profile,
+                Transfer::Linear,
+                Primaries::BT709,
+                Primaries::BT709,
+                65,
+            )
+            .build();
+            let grey = cube.sample([signal(code18); 3], Interpolation::Trilinear);
+            let white = cube.sample([signal(code90); 3], Interpolation::Trilinear);
+            // The residual is the grid and the reading between its nodes, not the
+            // curve: at S-Log3's 90 % code the same probe reads 0.829 631 at 17
+            // nodes, 0.903 043 at 65 and 0.901 261 at 129, closing on the tabled
+            // 0.90 as the nodes multiply. The bounds below hold the measured worst
+            // of the four curves at 65 nodes — 3.8e-4 on grey, 3.1e-3 on white,
+            // the top of a log curve being where light-space nodes sit furthest
+            // apart — with the headroom of one 8-bit code step (3.9e-3).
+            assert!(close(grey[0], 0.18, 1e-3), "{profile:?} grey {grey:?}");
+            assert!(close(white[0], 0.90, 4e-3), "{profile:?} white {white:?}");
+            assert!(
+                grey.iter().all(|v| (0.0..=1.0).contains(v)),
+                "{profile:?} {grey:?}"
+            );
+        }
+        // The stop is what separates the two answers: the same Sony 18 % code
+        // measured as Rec.709 code for the same exposure is 0.409, not 0.18.
+        let gamma = CubePlan::camera_log(
+            Log::SLog3,
+            Transfer::Bt709,
+            Primaries::BT709,
+            Primaries::BT709,
+            65,
+        )
+        .build()
+        .sample([420.0 / 1023.0; 3], Interpolation::Trilinear);
+        assert!(close(gamma[0], 0.409_008, 2e-3), "{gamma:?}");
+        // Above diffuse white a linear stop has nowhere to go, so the top of the
+        // curve arrives at 1.0 and stays there — the price of asking for light.
+        let linear = CubePlan::camera_log(
+            Log::SLog3,
+            Transfer::Linear,
+            Primaries::BT709,
+            Primaries::BT709,
+            65,
+        )
+        .build();
+        let top = linear.sample([1.0; 3], Interpolation::Trilinear);
+        assert!(close(top[0], 1.0, 1e-4), "{top:?}");
+    }
+
+    #[test]
     fn camera_cube_converts_through_the_vendor_gamut_when_one_is_published() {
         let wide = CubePlan::camera(Log::SLog3, Transfer::Bt709, Primaries::BT709, 65).build();
         let plain = CubePlan::camera_log(
