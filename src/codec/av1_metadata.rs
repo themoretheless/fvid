@@ -19,12 +19,16 @@
 //! Since every field here sits at a fixed offset from the type, that byte is
 //! passed over rather than subtracted.
 use super::av1::{Obu, Obus};
-use crate::color::hdr::{HdrMetadata, MasteringDisplay};
+use super::av1_sequence::Sequence;
+use crate::color::hdr::{ColourDescription, HdrMetadata, MasteringDisplay};
 use crate::invalid;
 use crate::Result;
 
 /// An OBU carrying a `metadata_type` and the syntax that type names.
 pub const OBU_METADATA: u8 = 5;
+/// An OBU carrying the sequence header: the coding's own statement of the
+/// signal its pictures are in.
+pub const OBU_SEQUENCE_HEADER: u8 = 1;
 /// `METADATA_TYPE_HDR_CLL`: content light levels.
 pub const METADATA_HDR_CLL: u64 = 1;
 /// `METADATA_TYPE_HDR_MDCV`: the mastering display colour volume.
@@ -114,6 +118,35 @@ pub fn hdr_from_packet(packet: &[u8]) -> Result<HdrMetadata> {
         }
     }
     Ok(hdr)
+}
+
+/// What one set of AV1 bytes states about its pictures without any of them
+/// being decoded: the signal of the first sequence header and the static light
+/// of the metadata OBUs that travel with it.
+///
+/// This is the whole answer for a file whose HDR is written nowhere else — an
+/// MP4 with no `mdcv`/`ccll` box, or a Matroska track whose `Colour` element
+/// names neither the primaries nor the volume. A reader that grades the first
+/// picture asks when the file is opened, so it asks these bytes rather than
+/// waiting for a decoded frame. Bytes this module cannot read state nothing;
+/// they do not fail the open, because the picture route meets the same bytes
+/// later and reports what it makes of them there.
+pub fn signal_from_bytes(bytes: &[u8]) -> (ColourDescription, HdrMetadata) {
+    let mut colour = None;
+    let mut hdr = HdrMetadata::default();
+    for obu in Obus::new(bytes) {
+        let Ok(obu) = obu else { continue };
+        if obu.kind == OBU_SEQUENCE_HEADER {
+            if colour.is_none() {
+                colour = Sequence::parse(obu.payload)
+                    .ok()
+                    .map(|sequence| sequence.color.signal());
+            }
+        } else if let Some(metadata) = hdr_from_obu(&obu) {
+            hdr.merge(metadata);
+        }
+    }
+    (colour.unwrap_or_default(), hdr)
 }
 
 #[cfg(test)]
@@ -216,6 +249,51 @@ mod tests {
         assert!(hdr.mastering.unwrap().is_hdr10());
         assert_eq!(hdr.content_light(400.0).max_cll, 1234.0);
         assert_eq!(hdr.content_light(400.0).max_fall, 567.0);
+    }
+
+    #[test]
+    fn the_same_packet_states_its_signal_without_a_decoded_picture() {
+        // The four OBUs of a real first packet, read as a reader at open reads
+        // them: the light from the metadata and the triple from the sequence
+        // header, neither of them waiting on a frame.
+        let mut packet = hex(BEFORE);
+        packet.extend_from_slice(&hex(CLL_OBU));
+        packet.extend_from_slice(&hex(MDCV_OBU));
+        let (colour, hdr) = signal_from_bytes(&packet);
+        assert!(hdr.mastering.unwrap().is_hdr10());
+        assert_eq!((hdr.light.max_cll, hdr.light.max_fall), (1234.0, 567.0));
+        // The triple this header writes for itself: BT.2020 primaries, the PQ
+        // curve and the BT.2020 luma weights over a studio range, which is the
+        // HDR10 statement the metadata OBUs beside it describe a panel for.
+        assert_eq!(
+            colour,
+            ColourDescription {
+                primaries: 9,
+                transfer: 16,
+                matrix: 9,
+                full_range: false,
+            }
+        );
+    }
+
+    #[test]
+    fn bytes_that_are_not_a_stream_state_nothing_rather_than_failing() {
+        // An open must survive a codec private that is empty, a block that is
+        // truncated mid-OBU, and a sequence header too short to parse.
+        for bytes in [
+            &[][..],
+            &[0x0a, 0x40, 0x01][..],
+            &[0x0a, 0x02, 0x00, 0x00][..],
+        ] {
+            let (colour, hdr) = signal_from_bytes(bytes);
+            assert_eq!(colour, ColourDescription::default());
+            assert!(hdr.is_empty());
+        }
+        // And light that is readable with no sequence header beside it still
+        // arrives, with nothing stated about the signal.
+        let (colour, hdr) = signal_from_bytes(&hex(CLL_OBU));
+        assert_eq!(colour, ColourDescription::default());
+        assert_eq!((hdr.light.max_cll, hdr.light.max_fall), (1234.0, 567.0));
     }
 
     #[test]

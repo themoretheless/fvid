@@ -2,7 +2,7 @@
 //! Frame timestamps remain in the track media timeline; `track().edits` describes
 //! presentation edits separately. This source does not silently discard edits.
 use crate::codec::{
-    av1_decoder as av1, avc_decoder::AvcDecoder, avc_picture::IntraPicture,
+    av1_decoder as av1, av1_metadata, avc_decoder::AvcDecoder, avc_picture::IntraPicture,
     hevc_decoder::HevcDecoder, vp9_decoder as vp9,
 };
 use crate::color::hdr::{ColourDescription, HdrMetadata};
@@ -77,6 +77,14 @@ pub struct Mp4VideoReader<R> {
     track_index: usize,
     sample_index: usize,
     packet: Vec<u8>,
+    /// What an AV1 track states about its own pictures in bytes this reader can
+    /// see the moment the file is open: the signal of its sequence header and
+    /// the light of its metadata OBUs, read from the `av1C` configuration and
+    /// the first sample. A caller that grades the first picture asks then, not
+    /// after a frame has been decoded, and an encoder that writes its light
+    /// only in-band writes it there. `None` for every other codec, which the
+    /// coding answers from its parameter sets instead.
+    open_signal: Option<(ColourDescription, HdrMetadata)>,
     failed: bool,
     future_pts: Vec<i64>,
     pending: Vec<VideoFrame>,
@@ -171,7 +179,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 work_budget,
             )
         };
-        Ok(Self {
+        let mut source = Self {
             demuxer,
             decoder,
             #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
@@ -179,16 +187,55 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             track_index: index,
             sample_index: 0,
             packet: Vec::new(),
+            open_signal: None,
             failed: false,
             future_pts,
             pending: Vec::new(),
             pending_bytes: 0,
             queue_budget,
-        })
+        };
+        source.read_open_signal();
+        Ok(source)
+    }
+    /// Ask an AV1 track what its own bytes state before any picture is decoded,
+    /// keeping the answer for [`Self::bitstream_colour`] and
+    /// [`Self::bitstream_hdr`] to hand on. The `av1C` configuration OBUs and the
+    /// first sample are the two places an encoder puts them; bytes that do not
+    /// parse state nothing, since the picture route meets the same bytes later
+    /// and reports what it makes of them there.
+    fn read_open_signal(&mut self) {
+        if self.track().codec != *b"av01" {
+            return;
+        }
+        let mut seed = av1_metadata::signal_from_bytes(&self.track().configuration);
+        let mut packet = Vec::new();
+        if self
+            .demuxer
+            .read_packet(self.track_index, 0, &mut packet)
+            .is_ok()
+        {
+            // The sample is the later statement of the two, so it wins and the
+            // configuration record fills whatever it left out.
+            let (stated, light) = av1_metadata::signal_from_bytes(&packet);
+            seed = (stated.filled_with(seed.0), light.filled_with(seed.1));
+        }
+        self.open_signal = Some(seed);
     }
     pub fn active_vui(&self) -> Option<&crate::codec::avc::Vui> {
         match &self.decoder {
             Decoder::Avc(d) => d.active_vui(),
+            Decoder::Hevc(_) | Decoder::Vp9(_) | Decoder::Av1(_) => None,
+        }
+    }
+    /// The VUI this reader's pictures are read with: the parameter set a decoded
+    /// picture named, or, while none has, the first one the `avcC` record lists.
+    /// A coded picture selects its own set, so the active answer wins as soon as
+    /// there is one; a stream that states its signal only in the recorded set is
+    /// thereby described the moment the file is open, which is when a caller that
+    /// grades the first picture asks.
+    fn avc_vui(&self) -> Option<&crate::codec::avc::Vui> {
+        match &self.decoder {
+            Decoder::Avc(d) => d.active_vui().or_else(|| d.recorded_vui()),
             Decoder::Hevc(_) | Decoder::Vp9(_) | Decoder::Av1(_) => None,
         }
     }
@@ -201,7 +248,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             Decoder::Hevc(d) => {
                 crate::playback_native::AvcColour::from_hevc_vui(d.parameters().0.vui.as_ref())
             }
-            Decoder::Avc(_) => crate::playback_native::AvcColour::from_vui(self.active_vui()),
+            Decoder::Avc(_) => crate::playback_native::AvcColour::from_vui(self.avc_vui()),
             Decoder::Vp9(_) | Decoder::Av1(_) => Ok(crate::playback_native::AvcColour::default()),
         }
     }
@@ -210,6 +257,13 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
     /// VUI's three H.273 codes with the range its `video_signal_type` names, or
     /// the colour an AV1 sequence header carries. VP9 states nothing of its own
     /// and is left to the container.
+    ///
+    /// An AV1 and an AVC answer are both there the moment the file is open: the
+    /// first from the `av1C` configuration or the sample behind it, the second
+    /// from the parameter set the `avcC` record lists. A decoded picture that
+    /// names a set of its own then wins, so a stream that changes its signal
+    /// mid-file is graded by what it is coding then, not by what its first
+    /// picture said.
     pub fn bitstream_colour(&self) -> ColourDescription {
         match &self.decoder {
             Decoder::Hevc(d) => d
@@ -228,8 +282,8 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     }
                 })
                 .unwrap_or_default(),
-            Decoder::Avc(d) => d
-                .active_vui()
+            Decoder::Avc(_) => self
+                .avc_vui()
                 .and_then(|vui| vui.video_signal)
                 .map(|(_, full_range, colour)| {
                     let [primaries, transfer, matrix] = colour.unwrap_or([0; 3]);
@@ -241,10 +295,16 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     }
                 })
                 .unwrap_or_default(),
-            Decoder::Av1(d) => d
-                .color()
-                .map(crate::codec::av1_sequence::Color::signal)
-                .unwrap_or_default(),
+            Decoder::Av1(d) => {
+                let seed = self
+                    .open_signal
+                    .map(|(seed, _)| seed)
+                    .unwrap_or_default();
+                d.color()
+                    .map(crate::codec::av1_sequence::Color::signal)
+                    .unwrap_or_default()
+                    .filled_with(seed)
+            }
             Decoder::Vp9(_) => ColourDescription::default(),
         }
     }
@@ -252,14 +312,26 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
     /// mastering display and content light level SEI messages, or the AV1
     /// metadata OBUs of the same volume. An encoder that writes them in-band
     /// often writes them nowhere else, so a container with no `mdcv`/`ccll` box
-    /// still has a tone-mappable answer. HEVC's messages are read from the
-    /// `hvcC`'s own NAL unit array as the decoder is built, so that half stands
-    /// at open; a stream that writes them only inside its packets states them
-    /// once one has been decoded.
+    /// still has a tone-mappable answer.
+    ///
+    /// Both codecs give it the moment the file is open: HEVC's messages are read
+    /// from the `hvcC`'s own NAL unit array as the decoder is built, and an AV1
+    /// stream's OBUs are read from its `av1C` configuration and its first sample
+    /// before a picture is decoded. That is what a caller grading the first
+    /// picture needs; a stream that first states its light deeper in still
+    /// states it there, once that packet has been decoded.
     pub fn bitstream_hdr(&self) -> HdrMetadata {
         match &self.decoder {
             Decoder::Hevc(d) => d.hdr(),
-            Decoder::Av1(d) => d.hdr(),
+            Decoder::Av1(d) => {
+                let seed = self
+                    .open_signal
+                    .map(|(_, seed)| seed)
+                    .unwrap_or_default();
+                let mut hdr = d.hdr();
+                hdr.merge(seed);
+                hdr
+            }
             Decoder::Avc(_) | Decoder::Vp9(_) => HdrMetadata::default(),
         }
     }
@@ -737,45 +809,53 @@ mod tests {
         let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
         let mut source =
             Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
+        let stated = ColourDescription {
+            primaries: 9,
+            transfer: 16,
+            matrix: 9,
+            full_range: false,
+        };
+        // The `hvcC`'s own parameter sets answer before a picture has been read.
+        assert_eq!(source.bitstream_colour(), stated);
         let mut frames = 0;
         while source.read_frame().unwrap().is_some() {
             frames += 1;
         }
         assert_eq!(frames, 5);
-        assert_eq!(
-            source.bitstream_colour(),
-            ColourDescription {
-                primaries: 9,
-                transfer: 16,
-                matrix: 9,
-                full_range: false,
-            }
-        );
+        assert_eq!(source.bitstream_colour(), stated);
     }
 
-    /// An AV1 clip that states its light the same way, in the only place it is
-    /// written: SVT-AV1's own metadata OBUs for a BT.2020/1 000 cd/m² volume and
-    /// a 1 234/567 content light level, spliced into the first packet of the
-    /// 32x32 ramp and muxed into a file with no `ccll`/`mdcv` box beside it.
-    #[cfg(not(all(target_os = "macos", feature = "videotoolbox")))]
+    /// An AV1 clip's light, in the only place its file writes it: SVT-AV1 4.2.0's
+    /// own metadata OBUs for a BT.2020/1 000 cd/m² volume and a 1 234/567 content
+    /// light level, spliced into the first packet of the 32x32 ramp and muxed
+    /// into an MP4 with no `ccll`/`mdcv` box beside it. The reader states them
+    /// the moment the file is open, because the grade a first picture gets is
+    /// decided then — it asks the packet for its OBUs before it asks a decoder to
+    /// turn them into a picture.
     #[test]
     fn an_av1_metadata_obu_states_its_own_light() {
         let data = include_bytes!("../tests/fixtures/av1/hdr-metadata.mp4").to_vec();
         let mut source =
             Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
-        assert!(source.bitstream_hdr().is_empty());
+        let opened = source.bitstream_hdr();
+        assert!(opened.mastering.unwrap().is_hdr10());
+        assert_eq!(
+            (opened.light.max_cll, opened.light.max_fall),
+            (1_234.0, 567.0)
+        );
+        // Decoding the packet that carries them states the same light again,
+        // by whichever route the samples went.
         assert!(source.read_frame().unwrap().is_some());
-        let hdr = source.bitstream_hdr();
-        assert!(hdr.mastering.unwrap().is_hdr10());
-        assert_eq!((hdr.light.max_cll, hdr.light.max_fall), (1_234.0, 567.0));
+        assert_eq!(source.bitstream_hdr(), opened);
     }
 
-    /// The same clip's light, which the file writes in no box at all: SEI 137
-    /// states the BT.2020 mastering volume and SEI 144 the content light levels.
-    /// x265 wrote both messages into the `hvcC`'s NAL unit array as well as into
-    /// the first access unit, so a reader states them the moment the file is
-    /// open — which is when a caller that grades the first picture asks — and
-    /// this holds whether samples go to the software walk or a hardware session.
+    /// The same light as an HEVC clip states it, which the file writes in no box
+    /// at all: SEI 137 states the BT.2020 mastering volume and SEI 144 the
+    /// content light levels. x265 wrote both messages into the `hvcC`'s NAL unit
+    /// array as well as into the first access unit, so a reader states them the
+    /// moment the file is open — which is when a caller that grades the first
+    /// picture asks — and this holds whether samples go to the software walk or a
+    /// hardware session.
     #[test]
     fn an_hevc_sei_states_its_own_light() {
         let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
@@ -791,5 +871,32 @@ mod tests {
         // by whichever route the samples went.
         assert!(source.read_frame().unwrap().is_some());
         assert_eq!(source.bitstream_hdr(), opened);
+    }
+
+    /// An H.264 clip whose whole signal lives in the VUI of the sequence
+    /// parameter set inside its `avcC`: libx264 wrote BT.2020 primaries, the
+    /// ARIB STD-B67 curve and the BT.2020 NCL weights over a studio range into
+    /// that SPS, and the muxer wrote no `colr` atom at all — measured from this
+    /// file's own bytes, which hold neither `colr` nor `nclx`. A caller that
+    /// grades the first picture asks when the file is open, so the recorded
+    /// parameter set answers then rather than waiting for a picture to select
+    /// one.
+    #[test]
+    fn an_avc_parameter_set_in_the_record_states_its_signal_at_open() {
+        let data = include_bytes!("../tests/fixtures/avc/hlg-vui-only.mp4").to_vec();
+        let mut source =
+            Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
+        // The container says nothing about the signal; the coding says HLG.
+        assert_eq!(source.track().colour, ColourDescription::default());
+        let stated = ColourDescription {
+            primaries: 9,
+            transfer: 18,
+            matrix: 9,
+            full_range: false,
+        };
+        assert_eq!(source.bitstream_colour(), stated);
+        // A decoded picture that selects the very same SPS changes nothing.
+        assert!(source.read_frame().unwrap().is_some());
+        assert_eq!(source.bitstream_colour(), stated);
     }
 }

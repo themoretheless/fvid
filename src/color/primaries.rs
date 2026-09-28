@@ -125,7 +125,12 @@ impl Primaries {
         },
         white: WHITE_D65,
     };
-    /// ARRI ALEX3 Wide, the gamut LogC and LogC4 are stated in.
+    /// The gamut [`crate::color::log::Log::LogC`] is read in. ARRI names its
+    /// wide gamuts "ALEXA Wide Gamut RGB", "ARRI Wide Gamut 3" and "ARRI Wide
+    /// Gamut 4" and prints no "ALEX3 Wide", so this triangle travels with the
+    /// curve it was transcribed alongside rather than with a cited table; only
+    /// LogC4 has a vendor document that names its primaries (see
+    /// [`Self::ALEX3_EXPANDED`]).
     pub const ALEX3_WIDE: Primaries = Primaries {
         r: Chromaticity {
             x: 0.6840,
@@ -141,7 +146,10 @@ impl Primaries {
         },
         white: WHITE_D65,
     };
-    /// ARRI ALEX3 Expanded, the wider alternative on ALEXA 35.
+    /// ARRI Wide Gamut 4, the primaries ARRI's LogC4 specification §4.2.1
+    /// prints and §4.3 makes part of LogC4. The constant's own name is not
+    /// ARRI's; the coordinates are, and the matrix test below holds them to
+    /// the ARRI-published conversion.
     pub const ALEX3_EXPANDED: Primaries = Primaries {
         r: Chromaticity {
             x: 0.7347,
@@ -283,6 +291,49 @@ impl Primaries {
         } else {
             "custom"
         }
+    }
+
+    /// Every triangle this module can name, in table order: the broadcast and
+    /// display spaces first, then the camera working gamuts. [`Self::label`]
+    /// answers "custom" to anything outside it, and nothing listed here is one
+    /// of those, so each entry can be typed back.
+    ///
+    /// One entry per triangle, which is fewer rows than the H.273 code table
+    /// has: SMPTE 240M signals code 7 over the very primaries SMPTE 170M
+    /// signals as code 6, and a [`Primaries`] carries no tag to tell them
+    /// apart, so its name would resolve to whichever row was asked first.
+    pub const NAMED: [Primaries; 16] = [
+        Primaries::BT709,
+        Primaries::BT2020,
+        Primaries::BT601_EBU,
+        Primaries::BT470M,
+        Primaries::BT470BG,
+        Primaries::SMPTE170M,
+        Primaries::DCI_P3,
+        Primaries::DISPLAY_P3,
+        Primaries::ADOBE_RGB,
+        Primaries::S_GAMUT3,
+        Primaries::S_GAMUT3_CINE,
+        Primaries::V_GAMUT,
+        Primaries::ALEX3_WIDE,
+        Primaries::ALEX3_EXPANDED,
+        Primaries::D_GAMUT,
+        Primaries::F_GAMUT_C,
+    ];
+
+    pub fn from_label(name: &str) -> Option<Self> {
+        let typed = slug(name);
+        if let Some(p) = Self::NAMED
+            .iter()
+            .copied()
+            .find(|p| slug(p.label()) == typed)
+        {
+            return Some(p);
+        }
+        ALIASES
+            .iter()
+            .find(|(alias, _)| *alias == typed)
+            .map(|&(_, p)| p)
     }
 
     /// Cone-response scales solving `M·S = white` with each primary at Y = 1.
@@ -584,6 +635,28 @@ pub fn apply(m: [[f64; 3]; 3], v: [f64; 3]) -> [f64; 3] {
     ]
 }
 
+/// The part of a gamut name a caller has to get right: lowercase letters and
+/// digits, with every separator a name can be written with folded away.
+fn slug(label: &str) -> String {
+    label
+        .chars()
+        .filter_map(|c| c.to_lowercase().next())
+        .filter(char::is_ascii_alphanumeric)
+        .collect()
+}
+
+/// The names these triangles go by outside [`Primaries::NAMED`]: how the ITU
+/// recommendation and ARRI's LogC4 specification write them. Keys are already
+/// folded the way [`slug`] folds a typed name, so a lookup compares like with
+/// like. Nothing is offered for the gamut LogC is read in, because no vendor
+/// document prints a name for it to alias to.
+const ALIASES: [(&str, Primaries); 4] = [
+    ("rec709", Primaries::BT709),
+    ("rec2020", Primaries::BT2020),
+    ("awg4", Primaries::ALEX3_EXPANDED),
+    ("arriwidegamut4", Primaries::ALEX3_EXPANDED),
+];
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -826,6 +899,104 @@ mod tests {
                 assert!(close(v, 1.0, 1e-9), "{:?} {v}", src.label());
             }
         }
+    }
+
+    /// A caller who types a gamut must reach the same triangle the panel
+    /// prints, so every name in the table resolves back to its own row, and
+    /// the typed spellings differ from the printed ones only by case and
+    /// separators.
+    #[test]
+    fn every_named_gamut_resolves_from_its_own_label() {
+        for p in Primaries::NAMED {
+            assert_eq!(
+                Primaries::from_label(p.label()),
+                Some(p),
+                "{} does not resolve",
+                p.label()
+            );
+        }
+        // No two labels may collide once separators are dropped, or one name
+        // silently shadows another.
+        let mut slugs: Vec<String> = Primaries::NAMED.iter().map(|p| slug(p.label())).collect();
+        slugs.sort();
+        let count = slugs.len();
+        slugs.dedup();
+        assert_eq!(slugs.len(), count, "two named gamuts share a typed name");
+    }
+
+    #[test]
+    fn a_typed_gamut_name_survives_case_and_separators() {
+        for spelling in [
+            "S-Gamut3.Cine",
+            "sgamut3-cine",
+            "SGAMUT3_CINE",
+            "  s gamut 3 cine ",
+        ] {
+            assert_eq!(
+                Primaries::from_label(spelling),
+                Some(Primaries::S_GAMUT3_CINE),
+                "{spelling:?}"
+            );
+        }
+        assert_eq!(
+            Primaries::from_label("alex3 expanded"),
+            Some(Primaries::ALEX3_EXPANDED)
+        );
+        assert_eq!(Primaries::from_label("bt709"), Some(Primaries::BT709));
+        assert_eq!(Primaries::from_label("BT.2020"), Some(Primaries::BT2020));
+    }
+
+    /// `awg4` and `rec709` are not this module's labels: they are how ARRI's
+    /// own specification and the ITU recommendation name the same triangles, so
+    /// they are accepted as aliases. No shorthand is offered for the gamut LogC
+    /// is read in, because no vendor document prints its name to alias to.
+    #[test]
+    fn vendor_and_recommendation_names_reach_the_same_triangle() {
+        for spelling in ["awg4", "AWG 4", "arri wide gamut 4"] {
+            assert_eq!(
+                Primaries::from_label(spelling),
+                Some(Primaries::ALEX3_EXPANDED),
+                "{spelling:?}"
+            );
+        }
+        for (spelling, want) in [
+            ("rec709", Primaries::BT709),
+            ("Rec. 709", Primaries::BT709),
+            ("rec2020", Primaries::BT2020),
+            ("Rec. 2020", Primaries::BT2020),
+        ] {
+            assert_eq!(Primaries::from_label(spelling), Some(want), "{spelling:?}");
+        }
+        assert_eq!(Primaries::from_label("awg3"), None);
+        assert_eq!(Primaries::from_label("cine"), None);
+        assert_eq!(Primaries::from_label(""), None);
+        assert_eq!(Primaries::from_label("sgamut"), None);
+    }
+
+    /// ARRI LogC4 Specification (May 2022), §4.2.1 and equation (5a): the six
+    /// primaries it prints and the ARRI Wide Gamut 4 → CIE XYZ matrix it
+    /// publishes are independent statements of the same triangle, so
+    /// reproducing the matrix from the coordinates checks the transcription of
+    /// every one of them. ARRI's third row reads 0, 0, 1.089… because its red
+    /// and green sit exactly on x + y = 1, where the derivation puts no Z.
+    #[test]
+    fn arri_wide_gamut_4_reproduces_arri_s_published_xyz_matrix() {
+        let want = [
+            [
+                0.704_858_320_407_232_064,
+                0.129_760_295_170_463_003,
+                0.115_837_311_473_976_537,
+            ],
+            [
+                0.254_524_176_404_027_025,
+                0.781_477_732_712_002_049,
+                -0.036_001_909_116_029_039,
+            ],
+            [0.0, 0.0, 1.089_057_750_759_878_429],
+        ];
+        let got = Primaries::ALEX3_EXPANDED.rgb_to_xyz();
+        let worst = matrix_diff(got, want);
+        assert!(worst < 1e-12, "AWG4 -> XYZ off by {worst}: {got:?}");
     }
 
     #[test]

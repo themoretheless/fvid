@@ -83,6 +83,14 @@ impl AvcDecoder {
             .find(|(s, _)| Some(s.id) == self.active_sps)
             .and_then(|(s, _)| s.vui.as_ref())
     }
+    /// The VUI of the sequence parameter set the configuration record lists
+    /// first. A coded picture names the set it wants, so [`Self::active_vui`]
+    /// answers only once one has been decoded; what a stream says about its
+    /// pictures before that is here, and a reader that grades the first picture
+    /// asks at that moment.
+    pub fn recorded_vui(&self) -> Option<&super::avc::Vui> {
+        self.pairs.first().and_then(|(s, _)| s.vui.as_ref())
+    }
     /// Drops reference pictures and requires the next coded picture to be IDR.
     pub fn reset(&mut self) {
         self.poc = PocDecoder::new();

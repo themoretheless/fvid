@@ -53,6 +53,13 @@ pub struct WebmVideoReader<R> {
     colour: ColourDescription,
     /// The light the track's `MasteringMetadata` and `MaxCLL`/`MaxFALL` name.
     hdr: HdrMetadata,
+    /// What an AV1 track states about its own pictures in the bytes a reader
+    /// holds the moment the file is open: the signal of its sequence header and
+    /// the light of its metadata OBUs, read from the track's CodecPrivate and
+    /// from its first packet, which is where an encoder that writes its light
+    /// in-band writes it. A caller grading the first picture asks then. `None`
+    /// for VP9, which states no signal of its own.
+    open_signal: Option<(ColourDescription, HdrMetadata)>,
     /// Which of the two codecs the track's CodecID picked, named for a reader
     /// rather than for a match arm.
     codec: &'static str,
@@ -66,7 +73,7 @@ pub struct WebmVideoReader<R> {
 }
 impl<R: Read + Seek> WebmVideoReader<R> {
     pub fn open(reader: R, budget: usize) -> Result<Self> {
-        let demux = WebmReader::open(reader, Limits::default())?;
+        let mut demux = WebmReader::open(reader, Limits::default())?;
         let track = demux
             .tracks
             .iter()
@@ -95,8 +102,26 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         // sequence header, and a track with no `Colour` element is graded by
         // that instead, so the two are read apart.
         let (colour, hdr) = (track.colour, track.hdr);
-        let track = track.number;
+        let (track, private) = (track.number, track.codec_private.clone());
         let rgb_budget = budget / 4;
+        // An AV1 track's own statement, read before a single picture is
+        // decoded: the configuration OBUs the muxer put in CodecPrivate and the
+        // first packet of the track, which is where SVT-AV1 puts a mastering
+        // volume and a content light level a Matroska `Colour` element names
+        // neither of. Bytes that do not parse state nothing; the walk reports
+        // what it makes of them when it meets them again.
+        let open_signal = av1.then(|| {
+            let mut seed = crate::codec::av1_metadata::signal_from_bytes(&private);
+            if let Some(index) = demux.packets.iter().position(|p| p.track == track) {
+                if let Ok(packet) = demux.read_packet(index) {
+                    // The packet is the later of the two statements, so it wins
+                    // and the CodecPrivate fills whatever it left out.
+                    let (stated, light) = crate::codec::av1_metadata::signal_from_bytes(&packet);
+                    seed = (stated.filled_with(seed.0), light.filled_with(seed.1));
+                }
+            }
+            seed
+        });
         Ok(Self {
             demux,
             decoder: if av1 {
@@ -116,6 +141,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             colour,
             hdr,
             codec: if av1 { "AV1" } else { "VP9" },
+            open_signal,
             start: 0,
             end: 0,
             base: None,
@@ -151,27 +177,43 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         self.hdr
     }
     /// The signal the coding states for itself: an AV1 sequence header's colour
-    /// description, which is readable once a header has been decoded. VP9
-    /// carries a colour matrix and a range flag in every frame header rather
-    /// than an H.273 triple, so it is left to the container.
+    /// description, which the reader takes from the track's own bytes when it
+    /// opens — the CodecPrivate configuration OBUs and the first packet — and
+    /// afterwards from whatever the decoder is currently holding. VP9 carries a
+    /// colour matrix and a range flag in every frame header rather than an H.273
+    /// triple, so it is left to the container.
     pub fn bitstream_colour(&self) -> ColourDescription {
-        match &self.decoder {
+        let live = match &self.decoder {
             VideoDecoder::Av1(d) => d
                 .color()
                 .map(crate::codec::av1_sequence::Color::signal)
                 .unwrap_or_default(),
             VideoDecoder::Vp9(_) => ColourDescription::default(),
-        }
+        };
+        let seed = self
+            .open_signal
+            .map(|(seed, _)| seed)
+            .unwrap_or_default();
+        live.filled_with(seed)
     }
     /// The light the coding names for itself: an AV1 stream's mastering display
     /// and content light level metadata OBUs, which are there in a file whose
-    /// Matroska `Colour` element left them out. Like the coding's signal, they
-    /// appear once the packets carrying them have been decoded.
+    /// Matroska `Colour` element left them out — and, at that, in no box at all
+    /// for the files that write them only inside a packet. The reader asks those
+    /// bytes when it opens, so a caller that grades the first picture is not left
+    /// asking a decoder that has not run yet.
     pub fn bitstream_hdr(&self) -> HdrMetadata {
-        match &self.decoder {
+        let live = match &self.decoder {
             VideoDecoder::Av1(d) => d.hdr(),
             VideoDecoder::Vp9(_) => HdrMetadata::default(),
-        }
+        };
+        let seed = self
+            .open_signal
+            .map(|(_, seed)| seed)
+            .unwrap_or_default();
+        let mut hdr = live;
+        hdr.merge(seed);
+        hdr
     }
     /// The cap this reader sizes its RGB picture by, which is the cap a caller
     /// converting the planes it hands over has to size by too.
@@ -822,6 +864,63 @@ mod tests {
                 "seek to frame {at}"
             );
         }
+    }
+
+    /// A file that states its light in no box at all: SVT-AV1 4.2.0 wrote a
+    /// BT.2020 triple and a PQ curve into its sequence header, the BT.2020
+    /// mastering volume and a 1 234/567 content light level into metadata OBUs
+    /// inside the first packet, and the muxer put in the track's `Colour` element
+    /// one range flag and nothing else — measured from this file's own bytes,
+    /// which hold no `MasteringMetadata`, no `MaxCLL`, no primaries and no curve.
+    /// So the whole HDR answer belongs to the coding, and a reader that grades
+    /// the first picture needs it the moment the file is open.
+    #[test]
+    fn a_track_that_writes_its_light_only_in_band_answers_at_open() {
+        use super::*;
+        let input = include_bytes!("../tests/fixtures/av1/hdr-in-band.mkv");
+        let mut reader = WebmVideoReader::open(Cursor::new(input.as_slice()), 16 << 20).unwrap();
+        // The container's half, which is the range flag it wrote and nothing more.
+        assert_eq!(reader.colour(), ColourDescription::default());
+        assert!(reader.hdr().is_empty());
+        // The coding's half, before a single picture has been decoded. Its
+        // range flag is the one place the two halves of this real file point
+        // apart: the muxer wrote `55 b9 81 01`, which Matroska reads as limited,
+        // while the sequence header SVT-AV1 wrote from the same `color-range=1`
+        // says full. Limited is the value silence already has, so nothing
+        // competes with the coding's triple and the composed answer takes its
+        // full range — which is what the player's own test of these bytes pins.
+        assert_eq!(
+            reader.bitstream_colour(),
+            ColourDescription {
+                primaries: 9,
+                transfer: 16,
+                matrix: 9,
+                full_range: true,
+            }
+        );
+        let light = reader.bitstream_hdr();
+        assert!(light.mastering.unwrap().is_hdr10());
+        assert_eq!(
+            (light.light.max_cll, light.light.max_fall),
+            (1_234.0, 567.0)
+        );
+        // The answer a player asks, which is the two halves composed: HDR enough
+        // to grade, with the volume a tone map rolls a shoulder against.
+        let player =
+            crate::playback_native::NativeReader::without_memory_limit(Cursor::new(input)).unwrap();
+        assert!(player.colour().is_hdr());
+        assert!(!player.hdr().is_empty());
+        // And the same picture route that met these bytes at open still decodes
+        // them, so a seek or a walk states the light it stated at open. The
+        // encoder was asked for three pictures but its source ran out 0.35
+        // seconds into a 3 fps rate, so the file holds two.
+        let mut frames = 0;
+        while reader.read_frame().unwrap() {
+            assert_eq!(reader.dimensions(), [64, 64]);
+            frames += 1;
+        }
+        assert_eq!(frames, 2);
+        assert_eq!(reader.bitstream_hdr(), light);
     }
 }
 

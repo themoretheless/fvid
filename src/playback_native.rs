@@ -262,8 +262,12 @@ impl<R: BufRead + Seek> NativeReader<R> {
     /// A Y4M stream has nowhere to write primaries or a curve, so it states
     /// only what its converter assumes — BT.601 luma weights over a studio
     /// range — and a caller grades the rest by deciding what the picture is.
-    /// The coding's half of the answer appears once a parameter set has been
-    /// read, so asking after the first frame sees more than asking at open.
+    /// All three codings answer this as the file opens. An AV1 reader parses
+    /// its sequence header then rather than waiting on a picture, so a track
+    /// that writes its triple in no box at all still has one for the first
+    /// frame; an H.264 or HEVC reader parses the parameter sets its
+    /// configuration record carries, and for H.264 the set a later picture
+    /// selects replaces that one.
     pub fn colour(&self) -> ColourDescription {
         match self {
             Self::Y4m(_) => ColourDescription {
@@ -282,8 +286,9 @@ impl<R: BufRead + Seek> NativeReader<R> {
     /// element — and the coding's SEI message or metadata OBU fills any half the
     /// box left out, which is the whole answer for a file whose HDR was written
     /// only in-band. An HEVC stream's messages are read from its `hvcC` as the
-    /// decoder is built, so that half already stands at open; a stream that
-    /// writes them only inside its packets states them once one has been decoded.
+    /// decoder is built, so that half already stands at open; an AV1 stream
+    /// writes them inside its packets and the reader unpacks the first packet
+    /// when the file opens, so that half stands open too.
     pub fn hdr(&self) -> HdrMetadata {
         match self {
             Self::Y4m(_) => HdrMetadata::default(),
@@ -1542,26 +1547,27 @@ mod tests {
     }
 
     /// An AV1 track whose WebM header writes no `Colour` element: every code the
-    /// container states is zero, which is silence rather than a value, and once a
-    /// frame has been decoded the sequence header's own triple is what the reader
-    /// hands over. AV1's default is 2/2/2, and H.273 numbers 2 *unspecified*
-    /// rather than absent, so the zeroes become 2s and stay unknown: the reader
-    /// reports what the stream says instead of guessing on its behalf.
+    /// container states is zero, which is silence rather than a value, and the
+    /// sequence header's own triple is what the reader hands over from the
+    /// moment the file is open — the reader unpacks the first packet as it
+    /// opens, so a caller that grades the first picture never asks a decoder
+    /// that has not run. AV1's default is 2/2/2, and H.273 numbers 2
+    /// *unspecified* rather than absent, so the zeroes become 2s and stay
+    /// unknown: the reader reports what the stream says instead of guessing on
+    /// its behalf.
     #[test]
     fn a_codings_own_statement_replaces_a_containers_silence() {
         let data = include_bytes!("../tests/fixtures/av1/ramp.webm").to_vec();
         let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
-        assert_eq!(reader.colour(), ColourDescription::default());
+        let stated = ColourDescription {
+            primaries: 2,
+            transfer: 2,
+            matrix: 2,
+            full_range: false,
+        };
+        assert_eq!(reader.colour(), stated);
         assert!(reader.read_frame_raw().unwrap().is_some());
-        assert_eq!(
-            reader.colour(),
-            ColourDescription {
-                primaries: 2,
-                transfer: 2,
-                matrix: 2,
-                full_range: false,
-            }
-        );
+        assert_eq!(reader.colour(), stated);
         assert!(!reader.colour().is_hdr());
     }
 }

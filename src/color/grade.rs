@@ -24,6 +24,11 @@ pub struct Settings {
     /// Camera log curve the coded values carry, which replaces the file's
     /// transfer and, where the file names no primaries, its primaries too.
     pub log: Option<Log>,
+    /// The working gamut the coded values are stated in, named by the caller
+    /// instead of read off the file or the curve. It outranks both, which is how
+    /// a container that labels its bytes wrongly gets corrected; see
+    /// [`Grade::new`].
+    pub gamut: Option<Primaries>,
     /// Highlight compression to run. `None` on BT.2100 material still compresses;
     /// see [`Grade::new`].
     pub tone_map: Option<ToneMap>,
@@ -45,6 +50,7 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             log: None,
+            gamut: None,
             tone_map: None,
             target: DisplayTarget::sdr(100.0),
             to: Transfer::Srgb,
@@ -128,14 +134,17 @@ impl Grade {
             }
             None => None,
         };
-        // Which primaries the coded values are stated in, asked of the file
-        // first: a camera that named its own gamut knows these particular bytes
-        // better than any profile does. Only when it names none does a log
+        // Which primaries the coded values are stated in. A gamut the caller
+        // names comes first, because naming one is how you correct a container
+        // that labels these bytes wrongly or not at all. After that the file is
+        // asked: a camera that named its own gamut knows these particular bytes
+        // better than any profile does. Only when neither names one does a log
         // curve bring its vendor's working gamut with it, which is what the
         // camera recorded into, and BT.709 answers for material that states
-        // neither.
-        let source = signal
-            .primary_set()
+        // nothing.
+        let source = settings
+            .gamut
+            .or_else(|| signal.primary_set())
             .or_else(|| settings.log.and_then(Log::gamut))
             .unwrap_or(Primaries::BT709);
         let plan = CubePlan {
@@ -146,7 +155,11 @@ impl Grade {
             dest: settings.dest,
             size: settings.size,
             sdr_white_nits: settings.target.paper_white_nits,
-            target: tone_map.map(|_| settings.target),
+            // The panel travels with the plan whether or not something
+            // compresses onto it: HLG's codes mean "whatever this panel
+            // reaches", so a caller who named a peak has to be heard even on an
+            // unmapped route. Whether a shoulder ran is `tone_map`'s to say.
+            target: Some(settings.target),
             content,
             tone_map,
         };
@@ -177,6 +190,12 @@ impl Grade {
     /// The LUT the caller supplied, if any.
     pub fn lut(&self) -> Option<&Lut> {
         self.lut.as_ref()
+    }
+
+    /// How the baked grid and that LUT are read between their nodes, which an
+    /// OSD line says along with the plan.
+    pub fn interpolation(&self) -> Interpolation {
+        self.interpolation
     }
 
     /// Code values in, code values out.
@@ -417,6 +436,40 @@ mod tests {
         assert!(grade.is_identity());
     }
 
+    /// HLG is the one HDR curve whose codes only mean light on the panel they
+    /// were written for, so the panel a caller names has to reach an unmapped
+    /// plan too. Before the target travelled with the plan every HLG
+    /// destination was written against BT.2100's 1 000 cd/m² reference, which
+    /// left a 400-nit screen showing the same code as a screen two and a half
+    /// times as bright.
+    #[test]
+    fn a_named_panel_is_what_an_hlg_code_means() {
+        for peak in [400.0, 1_000.0] {
+            let target = DisplayTarget::hdr(peak);
+            let grade = Grade::new(
+                bt709(),
+                &HdrMetadata::default(),
+                Settings {
+                    to: Transfer::Hlg,
+                    dest: Primaries::BT2020,
+                    ..Settings::video(target)
+                },
+                None,
+            );
+            assert!(grade.plan().tone_map.is_none());
+            assert_eq!(grade.plan().target, Some(target));
+            // The light an SDR code states on this panel's white, read back out
+            // of the code the grade wrote.
+            let want = Transfer::Bt709.eotf(0.5).unwrap() * target.paper_white_nits;
+            let back = Transfer::Hlg.eotf(grey(&grade, 0.5)[0]).unwrap() * peak;
+            assert!(
+                close(back, want, want * 0.02),
+                "a {peak}-nit panel got {:?} for code 0.5, meaning {back} cd/m² not {want}",
+                grey(&grade, 0.5)
+            );
+        }
+    }
+
     #[test]
     fn a_stream_that_states_its_light_compresses_from_it() {
         let settings = Settings {
@@ -576,6 +629,175 @@ mod tests {
         };
         let grade = Grade::new(silent, &HdrMetadata::default(), s_log2, None);
         assert_eq!(grade.plan().source, Primaries::BT709);
+        // The two ARRI curves lend different triangles, which is what their
+        // specifications say and what the plan has to carry for the bake.
+        let logc4 = Settings {
+            log: Some(Log::LogC4),
+            ..s_log3
+        };
+        let grade = Grade::new(silent, &HdrMetadata::default(), logc4, None);
+        assert_eq!(grade.plan().source, Primaries::ALEX3_EXPANDED);
+        let logc = Settings {
+            log: Some(Log::LogC),
+            ..logc4
+        };
+        let grade = Grade::new(silent, &HdrMetadata::default(), logc, None);
+        assert_eq!(grade.plan().source, Primaries::ALEX3_WIDE);
+    }
+
+    /// A caller who names a working gamut is correcting the file, not adding to
+    /// it: a clip can carry S-Gamut3.Cine pixels under a BT.709 tag, and the one
+    /// way to see them is to read the bytes as that gamut and ignore the label.
+    /// So the name outranks both authorities the plan consults — the primaries
+    /// the file states and the triangle a log curve lends — and it is what makes
+    /// the gamuts no curve lends reachable at all: S-Gamut3.Cine, D-Gamut and
+    /// F-Gamut C among them.
+    #[test]
+    fn a_gamut_the_caller_names_outranks_the_file_and_the_curve() {
+        let cine = Primaries::S_GAMUT3_CINE;
+        let settings = Settings {
+            log: Some(Log::SLog3),
+            gamut: Some(cine),
+            ..Settings::video(DisplayTarget::sdr(240.0))
+        };
+        // Ahead of S-Gamut3, the triangle S-Log3 would otherwise lend.
+        let grade = Grade::new(
+            ColourDescription::default(),
+            &HdrMetadata::default(),
+            settings,
+            None,
+        );
+        assert_eq!(grade.plan().source, cine);
+        // Ahead of the primaries the file states for itself.
+        let grade = Grade::new(bt709(), &HdrMetadata::default(), settings, None);
+        assert_eq!(grade.plan().source, cine);
+        // Naming nothing leaves the two authorities in charge, as before.
+        let unset = Settings {
+            gamut: None,
+            ..settings
+        };
+        let grade = Grade::new(bt709(), &HdrMetadata::default(), unset, None);
+        assert_eq!(grade.plan().source, Primaries::BT709);
+        let grade = Grade::new(
+            ColourDescription::default(),
+            &HdrMetadata::default(),
+            unset,
+            None,
+        );
+        assert_eq!(grade.plan().source, Primaries::S_GAMUT3);
+    }
+
+    /// The player's help text promises an order — the log unfolds the codes, the
+    /// tone curve fits the highlights, and a `.cube` or `.3dl` look is applied
+    /// *after* them — so that order is what this test holds. Each leg is pinned
+    /// on its own elsewhere; here they are walked together on the grey diagonal
+    /// of the grid the settings bake at, where a channel is a single number:
+    /// Sony's published constants unfold the code, the published Hable filmic
+    /// response fits it, BT.709's OETF writes it back, and the cube's own text
+    /// is walked by hand. Inputs are nodes of that grid (the settings' own 33),
+    /// which is where a baked grid carries its curve without a step in between.
+    /// The widest gap between the two orders there measures 0.617 — 157 codes —
+    /// and the grid stands 2.1e-7 off the arithmetic, so what fails is the order
+    /// and not a rounding that could fall either way.
+    #[test]
+    fn a_told_grade_applies_the_log_then_the_tone_map_then_the_cube() {
+        // Three different shapes, so a leg sent to the wrong channel or dropped
+        // on the floor shows up on one of them.
+        const CUBE: &str = "LUT_1D_SIZE 5
+0.00 0.00 1.00
+0.25 0.60 0.70
+0.60 0.25 0.35
+0.85 0.90 0.10
+1.00 1.00 0.00
+";
+        let nodes: Vec<[f64; 3]> = CUBE
+            .lines()
+            .filter(|line| {
+                line.as_bytes()
+                    .first()
+                    .is_some_and(|byte| byte.is_ascii_digit() || *byte == b'.')
+            })
+            .map(|line| {
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                [
+                    parts[0].parse().expect("red"),
+                    parts[1].parse().expect("green"),
+                    parts[2].parse().expect("blue"),
+                ]
+            })
+            .collect();
+        assert_eq!(nodes.len(), 5);
+        let cube = |code: f64, channel: usize| -> f64 {
+            let pos = code.clamp(0.0, 1.0) * 4.0;
+            let low = pos.floor() as usize;
+            let high = (low + 1).min(4);
+            let frac = pos - low as f64;
+            nodes[low][channel] * (1.0 - frac) + nodes[high][channel] * frac
+        };
+        // Sony's S-Log3 summary: 18 % reflectance at code 420 of 1 023, one
+        // and a half decades per 261.5 codes, and 0.01 of offset to subtract.
+        let slog3 = |signal: f64| -> f64 {
+            let cv = signal * 1023.0;
+            if cv > 171.210_294_7 {
+                10f64.powf((cv - 420.0) / 261.5) * 0.19 - 0.01
+            } else {
+                (cv - 95.0) * 0.011_25 / (171.210_294_7 - 95.0)
+            }
+        };
+        // Hable's Uncharted 2 filmic response, as published, normalised by its
+        // own value at the panel's peak — which is code 1.0 here, the file
+        // naming no content peak of its own.
+        let hable = |x: f64| -> f64 {
+            let (a, b, c, d, e, f) = (0.15, 0.50, 0.10, 0.20, 0.02, 0.30);
+            (x * (a * x + c * b) + d * e) / (x * (a * x + b) + d * f) - e / f
+        };
+        let fit = |light: f64| (hable(light) / hable(1.0)).clamp(0.0, 1.0);
+        let written = |light: f64| -> f64 {
+            if light <= 0.018 {
+                4.5 * light
+            } else {
+                1.099 * light.max(0.0).powf(0.45) - 0.099
+            }
+        };
+        // The promised order, and the one that would follow from wiring the
+        // cube in front of the grade instead of behind it.
+        let forward = |code: f64, channel: usize| cube(written(fit(slog3(code))), channel);
+        let reversed = |code: f64, channel: usize| written(fit(slog3(cube(code, channel))));
+        let settings = Settings {
+            log: Some(Log::SLog3),
+            tone_map: Some(ToneMap::Hable),
+            ..Settings::video(DisplayTarget::sdr(240.0))
+        };
+        let grade = Grade::new(
+            bt709(),
+            &HdrMetadata::default(),
+            settings,
+            Some(Lut::from_cube(CUBE).expect("a written 1D cube is a cube")),
+        );
+        let mut apart = 0.0f64;
+        let mut worst = 0.0f64;
+        for node in 0..=32 {
+            let code = node as f64 / 32.0;
+            let shown = grade.rgb([code as f32; 3]);
+            for channel in 0..3 {
+                let want = forward(code, channel);
+                let got = f64::from(shown[channel]);
+                apart = apart.max((want - reversed(code, channel)).abs());
+                worst = worst.max((want - got).abs());
+                assert!(
+                    (want - got).abs() <= 1e-5,
+                    "node {node} channel {channel}: shown {got} over {want}"
+                );
+            }
+        }
+        assert!(
+            apart > 0.05,
+            "the two orders never differ by more than {apart}, so this test could not tell them apart"
+        );
+        assert!(
+            worst < 1e-5,
+            "the grid is {worst} off the curve it bakes, which is more than a float rounding"
+        );
     }
 
     /// Every code of every channel, both routes to the same byte.
@@ -615,6 +837,8 @@ mod tests {
             let ramp = vec![0.0, 0.3, 1.0];
             Lut1d {
                 data: [ramp.clone(), ramp.clone(), ramp],
+                domain_min: [0.0; 3],
+                domain_max: [1.0; 3],
             }
         };
         tables_match_the_grid(&Grade::new(
@@ -670,6 +894,8 @@ mod tests {
                 vec![0.0, 0.5, 1.0],
                 vec![0.8, 0.5, 0.2],
             ],
+            domain_min: [0.0; 3],
+            domain_max: [1.0; 3],
         };
         let lifted = Grade::new(
             bt709(),

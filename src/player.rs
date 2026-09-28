@@ -6,7 +6,8 @@
 //! controls along the bottom. Controls fade out while the video plays and
 //! the pointer rests; any movement brings them back.
 use crate::color::{
-    ColourDescription, DisplayTarget, Grade, HdrMetadata, Log, Lut, Settings, ToneMap,
+    Chromaticity, ColourDescription, CubePlan, DisplayTarget, Grade, HdrMetadata, Interpolation,
+    Log, Lut, MasteringDisplay, MatrixCoeff, Primaries, Settings, ToneMap, Transfer,
 };
 use crate::container::FileTags;
 use crate::subtitles::{self, Cue};
@@ -42,11 +43,46 @@ struct PlayBounds {
     stop: Option<Duration>,
 }
 
-/// The panel every picture of the session is graded for: a desktop screen's
-/// diffuse white, which is what an SDR player is asked to fill. Naming one of
-/// the colour options writes the picture for this much light; a screen that
-/// reaches higher would want a bigger number and an HDR destination.
+/// The panel a session defaults to grading for: a desktop screen's diffuse
+/// white, which is what an SDR player is asked to fill. `--display` replaces it
+/// for a screen that reaches higher, or one that takes BT.2100 codes at all.
 const PANEL_NITS: f32 = 100.0;
+
+/// The destinations `--display` offers, each with the codes its panel is fed.
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Panel {
+    /// An SDR screen: BT.709 codes over whatever primaries the item states, so
+    /// the destination curve stays the one [`Grading::grade_for`] picks.
+    Sdr(f32),
+    /// An HDR10 screen: PQ codes over BT.2020 at this peak.
+    Pq(f32),
+    /// A broadcast HDR screen: HLG codes over BT.2020 at this peak.
+    Hlg(f32),
+}
+
+impl Panel {
+    /// A desktop panel at the diffuse white the session assumes for it.
+    const DEFAULT: Self = Self::Sdr(PANEL_NITS);
+
+    /// The light this panel shows: reference white rides with the kind, since
+    /// an HDR panel's grey is not the desktop's.
+    fn target(self) -> DisplayTarget {
+        match self {
+            Self::Sdr(nits) => DisplayTarget::sdr(nits),
+            Self::Pq(nits) | Self::Hlg(nits) => DisplayTarget::hdr(nits),
+        }
+    }
+
+    /// The codes to write, when the panel's own kind decides them rather than
+    /// the item.
+    fn destination(self) -> Option<(Transfer, Primaries)> {
+        match self {
+            Self::Sdr(_) => None,
+            Self::Pq(_) => Some((Transfer::Pq, Primaries::BT2020)),
+            Self::Hlg(_) => Some((Transfer::Hlg, Primaries::BT2020)),
+        }
+    }
+}
 
 /// What the command line asked to be done to a picture's colour: read before
 /// any item is opened, and applied to each one from the signal that item
@@ -62,12 +98,29 @@ struct Grading {
     /// Grading LUT read out of the named file, applied after the conversion the
     /// other two ask for.
     lut: Option<Lut>,
+    /// The working gamut the coded values are read in, named instead of taken
+    /// from the file or the curve.
+    gamut: Option<Primaries>,
+    /// The panel the picture is graded for, named instead of assumed.
+    panel: Option<Panel>,
+    /// Edge length of the grid the conversion is baked on, named instead of the
+    /// 33 nodes every session starts with. A modifier of how a grade is computed
+    /// rather than a request to change a picture, so it is not in [`Self::silent`].
+    grid: Option<usize>,
+    /// How that grid and a `--lut` file are read between their nodes. Also a
+    /// modifier: `nearest` on a coarse look keeps its steps instead of blending
+    /// them away.
+    interp: Option<Interpolation>,
 }
 
 impl Grading {
     /// Whether the command line named no colour change at all.
     fn silent(&self) -> bool {
-        self.log.is_none() && self.tone_map.is_none() && self.lut.is_none()
+        self.log.is_none()
+            && self.gamut.is_none()
+            && self.panel.is_none()
+            && self.tone_map.is_none()
+            && self.lut.is_none()
     }
 
     /// Bake what this session asks for against the signal `signal` and the
@@ -82,19 +135,38 @@ impl Grading {
     /// this module has no name for passes a code value straight through, which
     /// is the same picture. Naming nothing leaves an SDR item ungraded, while
     /// BT.2100 material still gets the compression [`Grade::new`] picks, since
-    /// unmapped it is a flat grey one.
+    /// unmapped it is a flat grey one. A gamut the session names is a request on
+    /// its own and outranks the primaries the file states, since naming one is
+    /// how a wrong label gets corrected. A panel it names outranks the item too,
+    /// because writing BT.2100 codes is the only way to hand a screen an HDR
+    /// picture, and a caller who asks for one does not want the file's curve
+    /// kept over the request. A grid and a reading of it change how finely the
+    /// conversion is baked and how its nodes are joined, which says nothing about
+    /// the picture and so never asks for one on its own.
     fn grade_for(&self, signal: ColourDescription, hdr: &HdrMetadata) -> Option<Grade> {
         if self.silent() && !signal.is_hdr() {
             return None;
         }
-        let mut settings = Settings::video(DisplayTarget::sdr(PANEL_NITS));
+        let panel = self.panel.unwrap_or(Panel::DEFAULT);
+        let mut settings = Settings::video(panel.target());
         settings.log = self.log;
+        settings.gamut = self.gamut;
         settings.tone_map = self.tone_map;
+        if let Some(size) = self.grid {
+            settings.size = size;
+        }
+        if let Some(mode) = self.interp {
+            settings.interpolation = mode;
+        }
         if !signal.is_hdr() && self.log.is_none() {
             settings.to = signal.transfer_function();
             if let Some(primaries) = signal.primary_set() {
                 settings.dest = primaries;
             }
+        }
+        if let Some((transfer, primaries)) = panel.destination() {
+            settings.to = transfer;
+            settings.dest = primaries;
         }
         Some(Grade::new(signal, hdr, settings, self.lut.clone()))
     }
@@ -280,6 +352,14 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
                 let value = option_value(args, &mut index, flag, inline)?;
                 grading.log = Some(parse_log(&value)?);
             }
+            "--gamut" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                grading.gamut = Some(parse_gamut(&value)?);
+            }
+            "--display" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                grading.panel = Some(parse_panel(&value)?);
+            }
             "--tonemap" => {
                 let value = option_value(args, &mut index, flag, inline)?;
                 grading.tone_map = Some(parse_tone_map(&value)?);
@@ -287,6 +367,14 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
             "--lut" => {
                 let value = option_value(args, &mut index, flag, inline)?;
                 grading.lut = Some(read_lut(&value)?);
+            }
+            "--grid" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                grading.grid = Some(parse_grid(&value)?);
+            }
+            "--interp" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                grading.interp = Some(parse_interpolation(&value)?);
             }
             _ if arg.starts_with('-') => {
                 return Err(crate::invalid(&format!("unknown play option {arg}")));
@@ -493,6 +581,245 @@ fn parse_log(text: &str) -> crate::Result<Log> {
     Log::from_label(&label).ok_or_else(known)
 }
 
+/// `--gamut` as one of the working gamuts fvid converts a picture from. A
+/// caller names one to correct a container that labels its bytes wrongly or
+/// leaves them unlabelled, so the triangle it picks outranks both the primaries
+/// the file states and the one a `--log` curve lends. Case and the separators a
+/// name is written with make no difference, and the vendor's own shorthand for
+/// the same triangle (`awg4`, `rec709`) reaches it too. A word that names none
+/// is a mistake at the door, and the message lists the names on offer.
+fn parse_gamut(text: &str) -> crate::Result<Primaries> {
+    let known = || {
+        let names = Primaries::NAMED
+            .iter()
+            .map(|p| p.label())
+            .collect::<Vec<_>>()
+            .join(", ");
+        crate::invalid(&format!(
+            "unknown --gamut {text:?}; fvid converts from {names}"
+        ))
+    };
+    Primaries::from_label(text.trim()).ok_or_else(known)
+}
+
+/// `--display` as the panel the session grades every picture for: a kind and
+/// optionally the peak luminance it reaches. The kinds are the destinations
+/// `fvid` writes codes for — `sdr` for the BT.709 signal a desktop screen is
+/// fed, `pq` for HDR10's ST 2084, `hlg` for broadcast's ARIB curve — and both
+/// BT.2100 kinds land on BT.2020 primaries; `hdr` is taken as another spelling
+/// of `pq`, since that is the format the word usually names. Omitting the
+/// number takes what the kind is authored against: 100 cd/m² of diffuse white
+/// for SDR, 1 000 for an HDR panel. A screen of another peak is the caller's to
+/// say, since where its white sits is what decides how hard the highlights get
+/// compressed.
+fn parse_panel(text: &str) -> crate::Result<Panel> {
+    let unknown = || {
+        crate::invalid(&format!(
+            "unknown --display {text:?}; fvid grades for sdr[:nits], pq[:nits] or hlg[:nits]"
+        ))
+    };
+    let (kind, nits) = match text.split_once(':') {
+        Some((kind, nits)) => (kind, Some(nits)),
+        None => (text, None),
+    };
+    let kind = kind.trim().to_ascii_lowercase();
+    let panel = match (kind.as_str(), nits) {
+        ("sdr", None) => Panel::Sdr(PANEL_NITS),
+        ("pq" | "hdr", None) => Panel::Pq(1_000.0),
+        ("hlg", None) => Panel::Hlg(1_000.0),
+        ("sdr", Some(nits)) => Panel::Sdr(parse_nits(nits)?),
+        ("pq" | "hdr", Some(nits)) => Panel::Pq(parse_nits(nits)?),
+        ("hlg", Some(nits)) => Panel::Hlg(parse_nits(nits)?),
+        _ => return Err(unknown()),
+    };
+    Ok(panel)
+}
+
+/// The peak a `--display` names, in cd/m². The range covers a laptop lid and
+/// the brightest reference monitor a grade is checked on; 10 000 is where PQ's
+/// own scale ends, so nothing above it can be written as a code.
+fn parse_nits(text: &str) -> crate::Result<f32> {
+    let nits = text.trim().parse::<f32>().map_err(|_| {
+        crate::invalid(&format!(
+            "--display needs a peak in cd/m², {text:?} is none"
+        ))
+    })?;
+    if !(1.0..=10_000.0).contains(&nits) {
+        return Err(crate::invalid(&format!(
+            "--display peak {text:?} is outside 1..=10000 cd/m²"
+        )));
+    }
+    Ok(nits)
+}
+
+/// `--grid` as the edge length the conversion is baked on. A cube is the whole
+/// colour decision of a frame, so its edge trades accuracy for build time and
+/// memory: 33 nodes are what a session uses by default, 128 is the largest grid
+/// `fvid` reads out of a file, and below two nodes there is nothing to join.
+fn parse_grid(text: &str) -> crate::Result<usize> {
+    let size = text
+        .trim()
+        .parse::<usize>()
+        .map_err(|_| crate::invalid(&format!("--grid needs a node count, {text:?} is none")))?;
+    if !(2..=128).contains(&size) {
+        return Err(crate::invalid(&format!(
+            "--grid {size} is outside 2..=128 nodes"
+        )));
+    }
+    Ok(size)
+}
+
+/// `--interp` as the way a grid's nodes are joined: `nearest` for the step a
+/// look was authored with, `trilinear` for the six-sided box around a point,
+/// `tetrahedral` for the split that keeps an edge sharp. It reads both the baked
+/// conversion and a `--lut` file, so the two are never asked for separately.
+fn parse_interpolation(text: &str) -> crate::Result<Interpolation> {
+    let label = text.trim().to_ascii_lowercase();
+    Interpolation::from_label(&label).ok_or_else(|| {
+        crate::invalid(&format!(
+            "unknown --interp {text:?}; fvid reads a grid by {}",
+            Interpolation::ALL
+                .iter()
+                .map(|mode| mode.label())
+                .collect::<Vec<_>>()
+                .join(", ")
+        ))
+    })
+}
+
+/// What the item on screen states about its colour, said only when it is worth
+/// saying. BT.709 codes over BT.709 primaries with the BT.709 luma and the video
+/// range are what every screen expects, so repeating them for every file would
+/// tell a viewer nothing; a part the file leaves unstated is a statement of its
+/// own, since it is the part the grade has to answer for.
+fn colour_line(signal: ColourDescription) -> Option<String> {
+    // H.273 counts 0 as unspecified, and a container that wrote no colour at all
+    // leaves exactly that in all three fields. Naming a shape for the matrix code
+    // of a file that claimed none would tell a viewer something the file never
+    // said, so an all-zero triple with the studio range gets no line — the same
+    // reading `ColourDescription::filled_with` gives it upstream.
+    let stated = (signal.primaries | signal.transfer | signal.matrix) != 0;
+    if !stated && !signal.full_range {
+        return None;
+    }
+    let primaries = signal.primary_set();
+    let transfer = signal.transfer_function();
+    let matrix = signal.matrix_coefficients();
+    let expected = primaries == Some(Primaries::BT709)
+        && transfer == Transfer::Bt709
+        && matrix == Some(MatrixCoeff::Bt709)
+        && !signal.full_range;
+    if expected {
+        return None;
+    }
+    let named = |code: u8, label: Option<&'static str>| match label {
+        Some(word) => word.to_owned(),
+        // H.273 spells unspecified as 0 or 2, and a container that wrote no
+        // colour at all leaves exactly those. Any other number is a part the
+        // file did state and fvid cannot resolve, so the line gives the number
+        // rather than the same words the silent file got.
+        None if code == 0 || code == 2 => "not stated".to_owned(),
+        None => format!("code {code}"),
+    };
+    let curve = match transfer {
+        Transfer::Unknown if signal.transfer != 0 && signal.transfer != 2 => {
+            format!("code {}", signal.transfer)
+        }
+        _ => transfer.label().to_owned(),
+    };
+    Some(format!(
+        "Colour: {} · {curve} · {} · {}",
+        named(signal.primaries, primaries.map(|set| set.label())),
+        named(signal.matrix, matrix.map(|coeff| coeff.label())),
+        if signal.full_range { "full" } else { "limited" }
+    ))
+}
+
+/// The panel a master was graded for, from the corners the file itself states.
+/// They are carried in multiples of 0.00002, so an exact compare answers
+/// "custom" to a BT.2020 HDR10 master — the same rounding `MasteringDisplay::is_hdr10`
+/// exists to cover. A volume no table entry rounds onto is genuinely another
+/// panel, and the line says so.
+fn mastered_on(display: &MasteringDisplay) -> &'static str {
+    let corners = display.primaries();
+    let close = |x: f64, y: f64| (x - y).abs() <= 0.002;
+    let near = |a: Chromaticity, b: Chromaticity| close(a.x, b.x) && close(a.y, b.y);
+    Primaries::NAMED
+        .iter()
+        .copied()
+        .find(|panel| {
+            near(panel.r, corners.r)
+                && near(panel.g, corners.g)
+                && near(panel.b, corners.b)
+                && near(panel.white, corners.white)
+        })
+        .map_or("custom", |panel| panel.label())
+}
+
+/// The light the item carries: the display it was mastered for and the two
+/// content limits, with the parts a file leaves unstated left out rather than
+/// guessed at. A file that states neither has no line here, since the panel's
+/// job is to say what the picture is made of.
+fn light_line(hdr: &HdrMetadata) -> Option<String> {
+    if hdr.is_empty() {
+        return None;
+    }
+    let mut parts: Vec<String> = Vec::new();
+    if let Some(display) = hdr.mastering {
+        parts.push(format!(
+            "{} · {}–{} cd/m²",
+            mastered_on(&display),
+            display.min_luminance,
+            display.max_luminance
+        ));
+    }
+    if hdr.light.max_cll > 0.0 {
+        parts.push(format!("MaxCLL {} cd/m²", hdr.light.max_cll));
+    }
+    if hdr.light.max_fall > 0.0 {
+        parts.push(format!("MaxFALL {} cd/m²", hdr.light.max_fall));
+    }
+    Some(format!("HDR: {}", parts.join(" · ")))
+}
+
+/// What the grade does to the picture: the curve its bytes are read as and the
+/// curve they are written as, the triangle they change when the two differ, the
+/// shoulder the highlights go through, the panel all of it is fitted to, the
+/// look applied after it and the grid all of that is baked on with its reading.
+/// Taken from the plan the grade baked, so the line says what is being done
+/// rather than what was asked — the two part whenever fvid picks a shoulder for
+/// material that asked for none.
+fn grade_text(plan: &CubePlan, interpolation: Interpolation, lut: Option<&Lut>) -> String {
+    let mut parts = vec![format!(
+        "{} → {}",
+        match plan.log {
+            Some(profile) => profile.label(),
+            None => plan.from.label(),
+        },
+        plan.to.label()
+    )];
+    if plan.source != plan.dest {
+        parts.push(format!("{} → {}", plan.source.label(), plan.dest.label()));
+    }
+    if let Some(mode) = plan.tone_map {
+        parts.push(mode.label().to_owned());
+    }
+    if let Some(target) = plan.target {
+        parts.push(format!("{} cd/m²", target.peak_nits));
+    }
+    if let Some(lut) = lut {
+        parts.push(match lut {
+            // A look's own grid is the only thing about it a viewer can act on:
+            // the file's title is not carried through the parse, and the shape
+            // and node count say what was applied and how coarse it is.
+            Lut::One(table) => format!("look 1D {}", table.len()),
+            Lut::Three(table) => format!("look {}³", table.size),
+        });
+    }
+    parts.push(format!("{}³ {}", plan.size, interpolation.label()));
+    parts.join(" · ")
+}
+
 /// `--tonemap` as one of the highlight curves fvid can run, spelled the way
 /// FFmpeg's `tonemap` filter spells them. Naming none of them is a mistake at
 /// the door, and the message says which are on offer.
@@ -514,8 +841,8 @@ fn parse_tone_map(text: &str) -> crate::Result<ToneMap> {
 /// `--lut`: the grading look the session starts with, read out of the named file
 /// before anything is opened. A look the player cannot parse stops the command
 /// at startup rather than showing an ungraded picture, so the file's own name is
-/// in every message about it. `.cube` and `.3dl` are told apart by their content,
-/// not their suffix.
+/// in every message about it. The five table formats — `.cube`, `.3dl`, `.dat`,
+/// `.spi1d`, `.spi3d` — are told apart by their content, not their suffix.
 fn read_lut(path: &str) -> crate::Result<Lut> {
     let text = std::fs::read_to_string(path)
         .map_err(|error| crate::invalid(&format!("cannot read --lut {path:?}: {error}")))?;
@@ -1136,6 +1463,17 @@ struct Player {
     /// insets into the coded frame: what Matroska's `PixelCrop*` elements
     /// state, `[0; 4]` for a file that states none.
     container_insets: [u32; 4],
+    /// The colour signal the item on screen states for itself and the light it
+    /// carries, kept from the open so the panel can say what the picture is
+    /// before anything is done to it.
+    signal: ColourDescription,
+    hdr: HdrMetadata,
+    /// The panel's line for what is being done to the item on screen: the plan
+    /// the grade baked, the reading it applies to that grid and the look that
+    /// follows it, said while the grade is still in hand. `None` when the item's
+    /// bytes are the picture. The line says what is being done, not what was
+    /// asked, because the two part whenever fvid picks a shoulder on its own.
+    grade_line: Option<String>,
     /// Which rung of VLC's Zoom menu the picture is drawn at, kept across files
     /// like the level and the rate.
     zoom_milli: u32,
@@ -1289,6 +1627,9 @@ impl Default for Player {
             dimensions: [0; 2],
             pixel_aspect: (1, 1),
             container_insets: [0; 4],
+            signal: ColourDescription::default(),
+            hdr: HdrMetadata::default(),
+            grade_line: None,
             zoom_milli: 1_000,
             pan: Vec2::ZERO,
             crop: NO_CROP,
@@ -1427,6 +1768,14 @@ impl Player {
         // moves into the thread that will carry the answer.
         let (signal, hdr) = (reader.colour(), reader.hdr());
         let grade = self.grading.grade_for(signal, &hdr);
+        self.grade_line = grade.as_ref().map(|grade| {
+            format!(
+                "Grade: {}",
+                grade_text(&grade.plan(), grade.interpolation(), grade.lut())
+            )
+        });
+        self.signal = signal;
+        self.hdr = hdr;
         self.playback = Some(Playback::start(reader, grade));
         // The picture of the item before this one is no longer on screen.
         self.presented = None;
@@ -1484,6 +1833,10 @@ impl Player {
         self.dimensions = [0; 2];
         self.pixel_aspect = (1, 1);
         self.container_insets = [0; 4];
+        // An item with no picture states no colour and gets no grade.
+        self.signal = ColourDescription::default();
+        self.hdr = HdrMetadata::default();
+        self.grade_line = None;
         self.period = Duration::ZERO;
         self.hardware = false;
         // An item that refused the picture has no codec to name for it.
@@ -2863,6 +3216,15 @@ impl Player {
                 self.video_codec,
                 fps_text(self.period)
             ));
+            if let Some(line) = colour_line(self.signal) {
+                lines.push(line);
+            }
+            if let Some(line) = light_line(&self.hdr) {
+                lines.push(line);
+            }
+            if let Some(line) = &self.grade_line {
+                lines.push(line.clone());
+            }
         }
         if let Some(playback) = &self.playback {
             lines.push(buffer_text(
@@ -4695,21 +5057,23 @@ impl eframe::App for Player {
 mod tests {
     use super::{
         ADJUST_IDENTITY, ASPECTS, Adjust, Aspect, CROPS, ChapterMark, Control, FileTags, Frame,
-        Grading, PANEL_NITS,
-        HIDE_AFTER, LoopMark, NO_CROP, PathBuf, Pixels, Planar8, PlayArgs, PlayBounds, Player,
-        Pos2, RATES, Rect, Repeat, SubtitleSource, VOLUME_MAX, Vec2, adjust_luma, adjust_rgb,
-        adjust_scalars, advance, aspect_label, aspect_osd, aspect_step, bitrate_text, buffer_text,
-        buffered_fraction, byte_size,
-        chapter_ahead, chapter_at, container_facts, crop_insets, crop_label, crop_osd, crop_step,
-        cropped_size, cycle_repeat, deal_cycle, delay_step, delayed_clock, display_size, end_clock,
-        expand_inputs, file_size, fps_text, jump_size, loop_press, loop_rewind, paced_period,
-        parse_clock, parse_play_args, playlist_osd, position_from_digit, rate_fine, rate_osd,
-        rate_step, repeat_osd, retreat, shown_insets, shown_size, snapshot_name, sound_codec,
-        spool_text,
-        subtitles, track_step, uv_window, video_rect, volume_osd, volume_step, zoom_osd, zoom_step,
+        Grading, HIDE_AFTER, LoopMark, NO_CROP, PANEL_NITS, Panel, PathBuf, Pixels, Planar8,
+        PlayArgs, PlayBounds, Player, Pos2, RATES, Rect, Repeat, SubtitleSource, VOLUME_MAX, Vec2,
+        adjust_luma, adjust_rgb, adjust_scalars, advance, aspect_label, aspect_osd, aspect_step,
+        bitrate_text, buffer_text, buffered_fraction, byte_size, chapter_ahead, chapter_at,
+        colour_line, container_facts, crop_insets, crop_label, crop_osd, crop_step, cropped_size,
+        cycle_repeat, deal_cycle, delay_step, delayed_clock, display_size, end_clock,
+        expand_inputs, file_size, fps_text, grade_text, jump_size, light_line, loop_press,
+        loop_rewind, paced_period, parse_clock, parse_play_args, playlist_osd, position_from_digit,
+        rate_fine, rate_osd, rate_step, repeat_osd, retreat, shown_insets, shown_size,
+        snapshot_name, sound_codec, spool_text, subtitles, track_step, uv_window, video_rect,
+        volume_osd, volume_step, zoom_osd, zoom_step,
     };
     use super::{Event, NativeReader, Playback};
-    use crate::color::{ColourDescription, HdrMetadata, Log, Lut, Primaries, ToneMap, Transfer};
+    use crate::color::{
+        ColourDescription, ContentLight, DisplayTarget, HdrMetadata, Interpolation, Log, Lut,
+        MasteringDisplay, Primaries, ToneMap, Transfer,
+    };
     use std::sync::Arc;
     use std::time::{Duration, Instant};
 
@@ -8081,6 +8445,587 @@ LUT_3D_SIZE 2
         );
     }
 
+    /// `--gamut` names the working gamut the bytes are read in, which is how a
+    /// container that labels them wrongly gets corrected: the flag outranks the
+    /// primaries the file states and the triangle a `--log` curve lends, and it
+    /// is the only route to the gamuts no curve lends — S-Gamut3.Cine, D-Gamut
+    /// and F-Gamut C among them. Spellings fold case and separators, so
+    /// `S-Gamut3.Cine`, `sgamut3_cine` and a vendor's own `AWG 4` all land on a
+    /// triangle, and a word that names none stops the command at the door with
+    /// the spellings that would have worked.
+    #[test]
+    fn the_command_line_names_the_gamut_the_bytes_are_read_in() {
+        let parsed = play_args(&["--gamut", "S-Gamut3.Cine", "c"]).unwrap();
+        assert_eq!(parsed.grading.gamut, Some(Primaries::S_GAMUT3_CINE));
+        assert_eq!(
+            play_args(&["--gamut=sgamut3_cine", "c"])
+                .unwrap()
+                .grading
+                .gamut,
+            Some(Primaries::S_GAMUT3_CINE)
+        );
+        assert_eq!(
+            play_args(&["--gamut", " AWG 4 ", "c"])
+                .unwrap()
+                .grading
+                .gamut,
+            Some(Primaries::ALEX3_EXPANDED)
+        );
+        assert_eq!(
+            play_args(&["--gamut", "rec709", "c"])
+                .unwrap()
+                .grading
+                .gamut,
+            Some(Primaries::BT709)
+        );
+        assert!(play_args(&["c"]).unwrap().grading.gamut.is_none());
+        for words in [
+            vec!["--gamut", "sgamut"],
+            vec!["--gamut", "awg3"],
+            vec!["--gamut", ""],
+            vec!["--gamut"],
+        ] {
+            assert!(
+                play_args(&[words.as_slice(), &["c"]].concat()).is_err(),
+                "{words:?} names no gamut"
+            );
+        }
+        let error = play_args(&["--gamut", "sgamut", "c"])
+            .err()
+            .unwrap()
+            .to_string();
+        assert!(
+            error.contains("S-Gamut3.Cine") && error.contains("F-Gamut C"),
+            "{error}"
+        );
+    }
+
+    /// `--display` names the panel the session grades for, and a panel is a
+    /// request in its own right: it moves where the picture's light lands
+    /// whether the item states BT.2100 or nothing at all.
+    #[test]
+    fn a_named_panel_moves_where_the_picture_lands() {
+        let empty = HdrMetadata::default();
+        let video = ColourDescription {
+            primaries: 1,
+            transfer: 1,
+            matrix: 1,
+            full_range: false,
+        };
+        let hdr10 = ColourDescription {
+            primaries: 9,
+            transfer: 16,
+            matrix: 9,
+            full_range: false,
+        };
+        // A brighter SDR panel has a higher white, so the same 100 cd/m² of the
+        // master is a darker code on the screen that reaches 600.
+        let panel = |nits| Grading {
+            panel: Some(Panel::Sdr(nits)),
+            ..Default::default()
+        };
+        let lid = Grading::default().grade_for(hdr10, &empty).unwrap();
+        let bright = panel(600.0).grade_for(hdr10, &empty).unwrap();
+        assert_eq!(lid.plan().target, Some(DisplayTarget::sdr(PANEL_NITS)));
+        assert_eq!(bright.plan().target, Some(DisplayTarget::sdr(600.0)));
+        assert!(lid.rgb([0.5; 3])[0] > 0.9, "on a 100-nit lid: {lid:?}");
+        assert!(
+            bright.rgb([0.5; 3])[0] < 0.45,
+            "on a 600-nit panel: {:?}",
+            bright.rgb([0.5; 3])
+        );
+        // A BT.2100 destination writes BT.2100 codes over BT.2020 and runs no
+        // shoulder, which on HDR10 material is the whole point: the bytes the
+        // file holds are the picture the screen wants.
+        let hdr = Grading {
+            panel: Some(Panel::Pq(1_000.0)),
+            ..Default::default()
+        }
+        .grade_for(hdr10, &empty)
+        .unwrap();
+        let plan = hdr.plan();
+        assert_eq!(
+            (plan.to, plan.dest, plan.tone_map),
+            (Transfer::Pq, Primaries::BT2020, None)
+        );
+        assert!(hdr.is_identity(), "HDR10 onto HDR10 changes nothing");
+        // An SDR item asked for a PQ destination is the same picture in codes
+        // that state its light: white leaves at the panel's diffuse white, not
+        // at the top of PQ's 10 000-nit scale.
+        let up = Grading {
+            panel: Some(Panel::Pq(1_000.0)),
+            ..Default::default()
+        }
+        .grade_for(video, &empty)
+        .unwrap();
+        assert!(!up.is_identity());
+        let nits = Transfer::Pq.to_nits(up.rgb([1.0; 3])[0], 262.0).unwrap();
+        assert!(
+            (nits - 262.0).abs() < 6.0,
+            "SDR white reached {nits} cd/m² on a 1 000-nit PQ panel"
+        );
+        // The peak a caller names is what an HLG code means, so two panels of
+        // different capability cannot share the grade.
+        let hlg = |peak| Grading {
+            panel: Some(Panel::Hlg(peak)),
+            ..Default::default()
+        };
+        let small = hlg(400.0).grade_for(hdr10, &empty).unwrap();
+        let big = hlg(1_000.0).grade_for(hdr10, &empty).unwrap();
+        assert_eq!(
+            (small.plan().to, small.plan().dest),
+            (Transfer::Hlg, Primaries::BT2020)
+        );
+        assert_eq!(small.plan().target, Some(DisplayTarget::hdr(400.0)));
+        assert_ne!(small.rgb([0.5; 3]), big.rgb([0.5; 3]));
+    }
+
+    /// `--display` takes a kind and optionally the cd/m² it reaches, in either
+    /// spelling of the option; anything else stops the command at the door.
+    #[test]
+    fn the_command_line_names_the_panel_the_picture_is_graded_for() {
+        let parsed = |args: &[&str]| play_args(args).unwrap().grading.panel;
+        assert_eq!(parsed(&["--display=pq", "c"]), Some(Panel::Pq(1_000.0)));
+        assert_eq!(
+            parsed(&["--display", "hdr:600", "c"]),
+            Some(Panel::Pq(600.0))
+        );
+        assert_eq!(
+            parsed(&["--display", " SDR : 240 ", "c"]),
+            Some(Panel::Sdr(240.0))
+        );
+        assert_eq!(parsed(&["--display=hlg", "c"]), Some(Panel::Hlg(1_000.0)));
+        assert_eq!(
+            parsed(&["--display=sdr", "c"]),
+            Some(Panel::Sdr(PANEL_NITS))
+        );
+        assert!(parsed(&["c"]).is_none());
+        for bad in [
+            "--display=bt2020",
+            "--display=sdr:0",
+            "--display=pq:99999",
+            "--display=hlg:high",
+            "--display=pq:",
+        ] {
+            let error = play_args(&[bad, "c"]).err().unwrap().to_string();
+            assert!(error.contains("--display"), "{bad} said {error:?}");
+        }
+        // A kind fvid writes no codes for is answered with the kinds it does.
+        let error = play_args(&["--display=bt2020", "c"])
+            .err()
+            .unwrap()
+            .to_string();
+        assert!(
+            error.contains("sdr[:nits]") && error.contains("hlg[:nits]"),
+            "{error}"
+        );
+        // With no value at all the message is the one every option of this
+        // command gives, which names the option rather than its grammar.
+        assert!(
+            play_args(&["--display", "c"])
+                .err()
+                .unwrap()
+                .to_string()
+                .contains("--display")
+        );
+    }
+
+    /// Naming a gamut is a request in its own right, not a modifier: an SDR item
+    /// that states BT.709 has to be re-read as the gamut the caller names, and
+    /// written back in the signal the file states for itself. The picture is not
+    /// the one the label implied, so nothing here is an identity.
+    #[test]
+    fn a_named_gamut_grades_an_item_that_asked_for_nothing_else() {
+        let video = ColourDescription {
+            primaries: 1,
+            transfer: 1,
+            matrix: 1,
+            full_range: false,
+        };
+        let grade = Grading {
+            gamut: Some(Primaries::S_GAMUT3_CINE),
+            ..Default::default()
+        }
+        .grade_for(video, &HdrMetadata::default())
+        .expect("a named gamut is a request");
+        let plan = grade.plan();
+        assert_eq!(plan.source, Primaries::S_GAMUT3_CINE);
+        assert_eq!(
+            (plan.from, plan.to, plan.dest),
+            (Transfer::Bt709, Transfer::Bt709, Primaries::BT709)
+        );
+        assert!(!grade.is_identity());
+        // With a curve, the name still wins over the triangle the profile lends.
+        let graded = Grading {
+            gamut: Some(Primaries::D_GAMUT),
+            log: Some(Log::VLog),
+            ..Default::default()
+        }
+        .grade_for(ColourDescription::default(), &HdrMetadata::default())
+        .unwrap();
+        assert_eq!(graded.plan().source, Primaries::D_GAMUT);
+    }
+
+    /// A cube's edge and the way its nodes are joined say how finely the colour
+    /// decision is baked, so they move the picture a request produces; naming
+    /// either of them alone asks for no picture at all.
+    #[test]
+    fn a_named_grid_and_reading_change_how_the_picture_is_baked() {
+        let empty = HdrMetadata::default();
+        let hdr10 = ColourDescription {
+            primaries: 9,
+            transfer: 16,
+            matrix: 9,
+            full_range: false,
+        };
+        let video = ColourDescription {
+            primaries: 1,
+            transfer: 1,
+            matrix: 1,
+            full_range: false,
+        };
+        let baked = |grid, interp| {
+            Grading {
+                grid,
+                interp,
+                ..Default::default()
+            }
+            .grade_for(hdr10, &empty)
+            .unwrap()
+        };
+        assert_eq!(baked(None, None).plan().size, 33);
+        let coarse = baked(Some(2), None);
+        let fine = baked(Some(64), None);
+        assert_eq!((coarse.plan().size, fine.plan().size), (2, 64));
+        assert_ne!(coarse.rgb([0.5; 3]), fine.rgb([0.5; 3]));
+        let stepped = baked(Some(2), Some(Interpolation::Nearest));
+        assert_ne!(stepped.rgb([0.5; 3]), coarse.rgb([0.5; 3]));
+        // The same reading is what a look from a file gets: a two-node grid whose
+        // top corner is off-white blends towards it when the box around a point
+        // is read, and keeps its step when only the nearest corner is.
+        let look = Lut::from_cube(
+            "LUT_3D_SIZE 2\n0 0 0\n1 0 0\n0 1 0\n1 1 0\n0 0 1\n1 0 1\n0 1 1\n1 1 0\n",
+        )
+        .unwrap();
+        let with = |interp| {
+            Grading {
+                lut: Some(look.clone()),
+                interp,
+                ..Default::default()
+            }
+            .grade_for(video, &empty)
+            .unwrap()
+        };
+        assert_ne!(
+            with(None).rgb([0.5; 3]),
+            with(Some(Interpolation::Nearest)).rgb([0.5; 3])
+        );
+        for modifier in [
+            Grading {
+                grid: Some(64),
+                ..Default::default()
+            },
+            Grading {
+                interp: Some(Interpolation::Nearest),
+                ..Default::default()
+            },
+        ] {
+            assert!(modifier.grade_for(video, &empty).is_none());
+        }
+    }
+
+    /// `--grid` takes the node count the conversion is baked at and `--interp`
+    /// one of the readings fvid knows, in either spelling of the option; the
+    /// bound and the set of readings are both in the answer a mistake gets.
+    #[test]
+    fn the_command_line_names_the_cube_and_how_its_nodes_are_joined() {
+        let grid = |args: &[&str]| play_args(args).unwrap().grading.grid;
+        let interp = |args: &[&str]| play_args(args).unwrap().grading.interp;
+        assert_eq!(grid(&["--grid=64", "c"]), Some(64));
+        assert_eq!(grid(&["--grid", " 12 ", "c"]), Some(12));
+        assert_eq!(grid(&["--grid", "2", "c"]), Some(2));
+        assert_eq!(grid(&["--grid", "128", "c"]), Some(128));
+        assert!(grid(&["c"]).is_none());
+        assert_eq!(
+            interp(&["--interp=nearest", "c"]),
+            Some(Interpolation::Nearest)
+        );
+        assert_eq!(
+            interp(&["--interp", " TRILINEAR ", "c"]),
+            Some(Interpolation::Trilinear)
+        );
+        assert_eq!(
+            interp(&["--interp=linear", "c"]),
+            Some(Interpolation::Trilinear)
+        );
+        assert_eq!(
+            interp(&["--interp", "tetrahedral", "c"]),
+            Some(Interpolation::Tetrahedral)
+        );
+        assert!(interp(&["c"]).is_none());
+        for bad in [
+            "--grid=1",
+            "--grid=129",
+            "--grid=deep",
+            "--grid=-4",
+            "--interp=bilinear",
+            "--interp=",
+        ] {
+            let option = if bad.starts_with("--grid") {
+                "--grid"
+            } else {
+                "--interp"
+            };
+            let error = play_args(&[bad, "c"]).err().unwrap().to_string();
+            assert!(error.contains(option), "{bad} said {error:?}");
+        }
+        assert!(
+            play_args(&["--grid=129", "c"])
+                .err()
+                .unwrap()
+                .to_string()
+                .contains("2..=128")
+        );
+        let error = play_args(&["--interp=bilinear", "c"])
+            .err()
+            .unwrap()
+            .to_string();
+        assert!(
+            error.contains("nearest")
+                && error.contains("trilinear")
+                && error.contains("tetrahedral"),
+            "{error}"
+        );
+        // With no value at all the message names the option, as every option of
+        // this command does.
+        assert!(
+            play_args(&["--grid", "c"])
+                .err()
+                .unwrap()
+                .to_string()
+                .contains("--grid")
+        );
+    }
+
+    /// The panel says the three things a screen cannot show on its own: what the
+    /// item states its colour to be, what light it carries, and what the grade
+    /// does with the two.
+    #[test]
+    fn the_panel_says_what_a_picture_is_and_what_is_done_to_it() {
+        let bt709 = ColourDescription {
+            primaries: 1,
+            transfer: 1,
+            matrix: 1,
+            full_range: false,
+        };
+        // The signal every screen expects is not worth a line of its own.
+        assert!(colour_line(bt709).is_none());
+        // Neither is a file that wrote no colour at all: three zeros are
+        // H.273's way of saying unspecified, and calling matrix 0 "RGB" would
+        // report a shape the file never claimed.
+        assert!(colour_line(ColourDescription::default()).is_none());
+        // The same triangle over the full range is, since the grade reads its
+        // codes by a different rule.
+        assert_eq!(
+            colour_line(ColourDescription {
+                full_range: true,
+                ..bt709
+            })
+            .unwrap(),
+            "Colour: BT.709 · BT.709 · BT.709 · full"
+        );
+        let hdr10 = ColourDescription {
+            primaries: 9,
+            transfer: 16,
+            matrix: 9,
+            full_range: false,
+        };
+        assert_eq!(
+            colour_line(hdr10).unwrap(),
+            "Colour: BT.2020 · PQ · BT.2020 NCL · limited"
+        );
+        // A part the container leaves unstated is named as unstated, because it
+        // is the part the grade has to answer for.
+        assert_eq!(
+            colour_line(ColourDescription {
+                primaries: 2,
+                transfer: 2,
+                matrix: 2,
+                full_range: false,
+            })
+            .unwrap(),
+            "Colour: not stated · unknown · not stated · limited"
+        );
+        // A part the file does state, by a number this module cannot resolve, is
+        // reported by that number: "not stated" would blame the file for saying
+        // nothing when it said something fvid has no table for. The other two
+        // halves of the same triple are named, because their numbers do land.
+        assert_eq!(
+            colour_line(ColourDescription {
+                primaries: 13,
+                transfer: 13,
+                matrix: 13,
+                full_range: true,
+            })
+            .unwrap(),
+            "Colour: code 13 · sRGB · chroma-derived CL · full"
+        );
+        let display = MasteringDisplay::from_corners(
+            (0.708, 0.292),
+            (0.170, 0.797),
+            (0.131, 0.046),
+            (0.3127, 0.3290),
+            1_000.0,
+            0.005,
+        )
+        .unwrap();
+        let hdr = HdrMetadata {
+            mastering: Some(display),
+            light: ContentLight {
+                max_cll: 1_000.0,
+                max_fall: 400.0,
+            },
+        };
+        assert!(light_line(&HdrMetadata::default()).is_none());
+        assert_eq!(
+            light_line(&hdr).unwrap(),
+            "HDR: BT.2020 · 0.005–1000 cd/m² · MaxCLL 1000 cd/m² · MaxFALL 400 cd/m²"
+        );
+        // A limit the file does not state is left off the line rather than
+        // invented for it.
+        assert_eq!(
+            light_line(&HdrMetadata {
+                mastering: Some(display),
+                light: ContentLight::default(),
+            })
+            .unwrap(),
+            "HDR: BT.2020 · 0.005–1000 cd/m²"
+        );
+        // A volume no table rounds onto is another panel, and the line says so
+        // instead of naming the nearest one it half matches.
+        let projector = MasteringDisplay::from_corners(
+            (0.680, 0.320),
+            (0.265, 0.690),
+            (0.150, 0.060),
+            (0.314, 0.351),
+            500.0,
+            0.001,
+        )
+        .unwrap();
+        assert_eq!(
+            light_line(&HdrMetadata {
+                mastering: Some(projector),
+                light: ContentLight::default(),
+            })
+            .unwrap(),
+            "HDR: DCI-P3 · 0.001–500 cd/m²"
+        );
+        let odd = MasteringDisplay::from_corners(
+            (0.680, 0.320),
+            (0.200, 0.750),
+            (0.150, 0.060),
+            (0.3127, 0.3290),
+            4_000.0,
+            0.0001,
+        )
+        .unwrap();
+        assert_eq!(
+            light_line(&HdrMetadata {
+                mastering: Some(odd),
+                light: ContentLight::default(),
+            })
+            .unwrap(),
+            "HDR: custom · 0.0001–4000 cd/m²"
+        );
+        // The grade line tells what is being done, which is not only what was
+        // asked: HDR10 on the panel every session starts with compresses its
+        // highlights although no shoulder was named, and the one picked is on
+        // the line along with the grid it is baked on.
+        let grade = Grading::default().grade_for(hdr10, &hdr).unwrap();
+        let text = grade_text(&grade.plan(), grade.interpolation(), None);
+        assert!(
+            text.contains("PQ → BT.709")
+                && text.contains("BT.2020 → BT.709")
+                && text.contains("33³ tetrahedral"),
+            "{text}"
+        );
+        // A look the session was given is on the same line, by the shape and
+        // node count it was read as: a file's title does not survive the parse,
+        // and how coarse the grid under the picture is what a viewer weighs.
+        let looked = Grading {
+            lut: Some(Lut::from_cube(IDENTITY_CUBE).unwrap()),
+            ..Default::default()
+        }
+        .grade_for(hdr10, &hdr)
+        .unwrap();
+        let looked_text = grade_text(&looked.plan(), looked.interpolation(), looked.lut());
+        assert!(looked_text.contains("look 2³"), "{looked_text}");
+        let lifted = Grading {
+            lut: Some(Lut::from_cube("LUT_1D_SIZE 2\n0 0 0\n1 1 1\n").unwrap()),
+            ..Default::default()
+        }
+        .grade_for(hdr10, &hdr)
+        .unwrap();
+        let lifted_text = grade_text(&lifted.plan(), lifted.interpolation(), lifted.lut());
+        assert!(lifted_text.contains("look 1D 2"), "{lifted_text}");
+        // A log curve named at the door is the first word of the line, because
+        // the grade reads the bytes as that curve rather than as the curve the
+        // file states — the thing a viewer blames when a picture comes out flat.
+        // It is the same word the option takes, so the panel and the command
+        // line say the curve one way.
+        let logged = Grading {
+            log: Some(Log::SLog3),
+            ..Default::default()
+        }
+        .grade_for(hdr10, &hdr)
+        .unwrap();
+        let logged_text = grade_text(&logged.plan(), logged.interpolation(), logged.lut());
+        assert!(logged_text.starts_with("slog3 → BT.709"), "{logged_text}");
+        // The sample file writes no colour element and asks for no grade, so the
+        // panel shows only the picture's own line; the three lines are then put
+        // on by hand to check the order the panel keeps them in.
+        let directory = scratch("fvid-player-info-colour", &[]);
+        let path = directory.join("chapters.mkv");
+        std::fs::write(
+            &path,
+            include_bytes!("../tests/fixtures/chapters/chapters.mkv"),
+        )
+        .unwrap();
+        let mut player = Player {
+            queue: vec![path],
+            ..Default::default()
+        };
+        player.play_index(0);
+        assert!(player.error.is_none(), "{:?}", player.error);
+        // The absence on the panel comes from the file stating nothing, not from
+        // the helper dropping a signal the reader carried.
+        assert_eq!(player.signal, ColourDescription::default());
+        assert!(player.hdr.is_empty());
+        assert!(player.grade_line.is_none());
+        let plain = player.info_lines();
+        assert_eq!(plain[0], "Video: VP9 · 16×16 · 4 fps");
+        assert!(
+            !plain
+                .iter()
+                .any(|line| line.starts_with("Colour:") || line.starts_with("Grade:")),
+            "{plain:?}"
+        );
+        player.signal = hdr10;
+        player.hdr = hdr;
+        player.grade_line = Some(format!("Grade: {text}"));
+        let lines = player.info_lines();
+        assert_eq!(
+            lines[1..4],
+            [
+                "Colour: BT.2020 · PQ · BT.2020 NCL · limited",
+                "HDR: BT.2020 · 0.005–1000 cd/m² · MaxCLL 1000 cd/m² · MaxFALL 400 cd/m²",
+                format!("Grade: {text}").as_str(),
+            ]
+        );
+        drop(player);
+        std::fs::remove_dir_all(&directory).unwrap();
+    }
+
     /// `--lut` reads the look at startup, from a file named either way round:
     /// `.cube` and `.3dl` are told apart by their contents, not their suffix, and
     /// a file that holds neither stops the command before a window opens.
@@ -8248,6 +9193,104 @@ LUT_3D_SIZE 2
         assert!((0.85..0.96).contains(&kept), "{kept}");
         // And a code the panel shows outright is untouched by the choice.
         assert_eq!(grade.rgb([0.3; 3]), blind_default.rgb([0.3; 3]));
+        // The panel words the same decision, from the file's own bytes: the
+        // corners are BT.2020 in the payload's multiples of 0.00002, which the
+        // line names as a panel rather than leaving as an exact-compare miss.
+        assert_eq!(
+            colour_line(signal).unwrap(),
+            "Colour: BT.2020 · PQ · BT.2020 NCL · limited"
+        );
+        assert_eq!(
+            light_line(&hdr).unwrap(),
+            "HDR: BT.2020 · 0.0001–1000 cd/m² · MaxCLL 1000 cd/m² · MaxFALL 400 cd/m²"
+        );
+        assert_eq!(
+            grade_text(&grade.plan(), grade.interpolation(), grade.lut()),
+            "PQ → BT.709 · BT.2020 → BT.709 · mobius · 100 cd/m² · 33³ tetrahedral"
+        );
+    }
+
+    /// The same chain on an H.264 clip that states HLG in the only place the
+    /// coding has for it: the VUI of the sequence parameter set inside the
+    /// `avcC` record, with no `colr` atom in the file at all. The triple has to
+    /// answer when the file opens, because that is when the grade is baked — a
+    /// reader that waited for a picture to select its parameter set would show
+    /// this clip as if its codes were BT.709.
+    #[test]
+    fn an_avc_records_vui_is_graded_at_open() {
+        use crate::playback_native::NativeReader;
+        let data = include_bytes!("../tests/fixtures/avc/hlg-vui-only.mp4").to_vec();
+        let reader = NativeReader::without_memory_limit(std::io::Cursor::new(data)).unwrap();
+        let (signal, hdr) = (reader.colour(), reader.hdr());
+        assert!(signal.is_hdr());
+        assert!(hdr.is_empty());
+        let grade = Grading::default()
+            .grade_for(signal, &hdr)
+            .expect("BT.2100 material is graded for the panel");
+        let plan = grade.plan();
+        assert_eq!((plan.from, plan.to), (Transfer::Hlg, Transfer::Bt709));
+        assert_eq!(plan.tone_map, Some(ToneMap::Clip));
+        assert_eq!(
+            colour_line(signal).unwrap(),
+            "Colour: BT.2020 · HLG · BT.2020 NCL · limited"
+        );
+        assert_eq!(
+            grade_text(&plan, grade.interpolation(), grade.lut()),
+            "HLG → BT.709 · BT.2020 → BT.709 · clip · 100 cd/m² · 33³ tetrahedral"
+        );
+    }
+
+    /// The same chain on an AV1 file that writes its signal in no container
+    /// element at all: SVT-AV1 stated the BT.2020 triple in its sequence header
+    /// and the HDR10 volume and a 1 234/567 light in metadata OBUs inside the
+    /// first packet, and the muxer's `Colour` element holds one range flag. The
+    /// grade a session bakes before showing a picture still reads the encoder's
+    /// own peak, because the reader unpacks that packet while the file opens.
+    /// And the coding's range flag replaces the container's, since a lone range
+    /// with no triple beside it states no signal for the composition to keep.
+    #[test]
+    fn an_av1_tracks_in_band_signal_is_graded_at_open() {
+        use crate::playback_native::NativeReader;
+        let data = include_bytes!("../tests/fixtures/av1/hdr-in-band.mkv").to_vec();
+        let reader = NativeReader::without_memory_limit(std::io::Cursor::new(data)).unwrap();
+        let (signal, hdr) = (reader.colour(), reader.hdr());
+        assert_eq!(
+            signal,
+            ColourDescription {
+                primaries: 9,
+                transfer: 16,
+                matrix: 9,
+                full_range: true,
+            }
+        );
+        assert!(signal.is_hdr());
+        assert_eq!(hdr.content_light(PANEL_NITS).max_cll, 1_234.0);
+        let grade = Grading::default()
+            .grade_for(signal, &hdr)
+            .expect("BT.2100 material is graded for the panel");
+        let plan = grade.plan();
+        assert_eq!((plan.from, plan.to), (Transfer::Pq, Transfer::Bt709));
+        assert_eq!(plan.tone_map, Some(ToneMap::Mobius));
+        assert_eq!(plan.content.max_cll, 1_234.0);
+        assert_eq!(
+            colour_line(signal).unwrap(),
+            "Colour: BT.2020 · PQ · BT.2020 NCL · full"
+        );
+        assert_eq!(
+            light_line(&hdr).unwrap(),
+            // The floor is AV1's own number, not ST 2086's: the volume writes
+            // luminance in 18.14 fixed point, so the black this encoder means
+            // arrives as 2/16 384 rather than the 0.0001 a `mdcv` box carries.
+            // The name above is unaffected — the corners and the 1 000 cd/m²
+            // peak decide it, and no floor is compared — and the line states
+            // what the file says rather than rounding it toward the other
+            // standard's quantum.
+            "HDR: BT.2020 · 0.00012207031–1000 cd/m² · MaxCLL 1234 cd/m² · MaxFALL 567 cd/m²"
+        );
+        assert_eq!(
+            grade_text(&plan, grade.interpolation(), grade.lut()),
+            "PQ → BT.709 · BT.2020 → BT.709 · mobius · 100 cd/m² · 33³ tetrahedral"
+        );
     }
 
     /// The same chain on a file that states a curve and no light at all: an HLG
@@ -8284,5 +9327,17 @@ LUT_3D_SIZE 2
         assert!(steps[0] < 0.5, "{steps:?}");
         assert!(steps.windows(2).all(|w| w[1] > w[0] + 0.05), "{steps:?}");
         assert!((steps[3] - 1.0).abs() < 1e-3, "{steps:?}");
+        // The panel's words for this file: HLG states no light, so only the
+        // signal it does state is on the panel, and the grade line says which
+        // display-domain pass it took and against what peak.
+        assert_eq!(
+            colour_line(signal).unwrap(),
+            "Colour: BT.2020 · HLG · BT.2020 NCL · limited"
+        );
+        assert!(light_line(&hdr).is_none());
+        assert_eq!(
+            grade_text(&plan, grade.interpolation(), grade.lut()),
+            "HLG → BT.709 · BT.2020 → BT.709 · clip · 100 cd/m² · 33³ tetrahedral"
+        );
     }
 }

@@ -1,10 +1,14 @@
-//! Camera log transfer curves: Sony S-Log, Canon Log, Panasonic V-Log, ARRI LogC.
+//! Camera log transfer curves: Sony S-Log, Canon Log, Panasonic V-Log, ARRI
+//! LogC, Apple Log.
 //!
 //! Each curve is transcribed from the vendor's own specification and pinned by
 //! that specification's published code-value anchors (see the tests), so a
 //! decoded pixel can be checked against the camera manufacturer's tables
-//! rather than against a fitting. Curves whose constants are not published by
-//! the vendor — and so cannot be checked — are deliberately absent.
+//! rather than against a fitting. One exception is made, and it is stated where
+//! it applies: a curve whose paper the vendor only hands over a login is
+//! admitted when several independent implementations agree on the constants and
+//! the set proves self-consistent, since that is a transcription check rather
+//! than a fit. A curve with no paper at all stays absent.
 //!
 //! Two normalisations are in play and they are not the same:
 //!
@@ -43,6 +47,8 @@ pub enum Log {
     LogC,
     /// ARRI LogC4 for ALEXA 35 (ARRI LogC4 Specification, EI-independent).
     LogC4,
+    /// Apple Log (Apple's Log white paper; Apple Log 2 reuses this curve).
+    AppleLog,
 }
 
 /// Where a profile's normalised signal sits in an integer code range.
@@ -114,8 +120,31 @@ const LOGC4_A: f64 = (262_144.0 - 16.0) / 117.45;
 const LOGC4_B: f64 = (1023.0 - 95.0) / 1023.0;
 const LOGC4_C: f64 = 95.0 / 1023.0;
 
+// Apple Log. Apple's 2023 Log white paper defines these six numbers but only
+// ships them over an Apple ID, so the transcription is checked against the two
+// implementations that cite it: OpenColorIO's `AppleCameras.cpp` and colour's
+// `apple_log_profile.py` print the same digits, the same three branches and the
+// same derived seam, colour additionally pinning 18 % grey at
+// 0.488_272_458_526_867_63 in its own doctest, and the quadratic's scale turns
+// up unchanged in the ACES dctl transform sets, in `color-space`, `alwan` and
+// `hdr-toys`. The set then checks itself too: the two branches meet at
+// `APPLE_CUT` to within 3e-9 of signal, which is as close as
+// eight-significant-figure constants allow, and the top of the code range lands
+// on 12.0 times diffuse white — a designed ceiling, not a round number that
+// happened to fall out.
+/// Reflectance the quadratic toe is mirrored about; also the value at signal 0.
+const APPLE_R0: f64 = -0.056_410_88;
+/// Reflectance where the toe hands over to the log branch.
+const APPLE_RT: f64 = 0.01;
+const APPLE_C: f64 = 47.287_112_36;
+const APPLE_BETA: f64 = 0.009_640_52;
+const APPLE_GAMMA: f64 = 0.085_504_79;
+const APPLE_DELTA: f64 = 0.693_369_45;
+/// Signal at the seam, which Apple prints nowhere and every implementation derives.
+const APPLE_CUT: f64 = APPLE_C * (APPLE_RT - APPLE_R0) * (APPLE_RT - APPLE_R0);
+
 impl Log {
-    pub const ALL: [Log; 9] = [
+    pub const ALL: [Log; 10] = [
         Log::SLog1,
         Log::SLog2,
         Log::SLog3,
@@ -125,6 +154,7 @@ impl Log {
         Log::VLog,
         Log::LogC,
         Log::LogC4,
+        Log::AppleLog,
     ];
 
     pub fn label(self) -> &'static str {
@@ -138,6 +168,7 @@ impl Log {
             Self::VLog => "vlog",
             Self::LogC => "logc",
             Self::LogC4 => "logc4",
+            Self::AppleLog => "applelog",
         }
     }
 
@@ -148,17 +179,30 @@ impl Log {
     /// The camera's own working gamut, when the vendor publishes its primaries.
     ///
     /// `None` means the curve is citable but the matching gamut's coordinates
-    /// are not: S-Log1/2 predate a published S-Gamut table, and Canon draws
-    /// Cinema Gamut as a figure rather than a set of numbers. Log material from
-    /// those profiles arrives in a container gamut the demuxer already knows,
-    /// so the caller should convert from the source it is given rather than
-    /// from a guessed triangle.
+    /// are not, or not uniquely: S-Log1/2 predate a published S-Gamut table,
+    /// Canon draws Cinema Gamut as a figure rather than a set of numbers, and
+    /// Apple Log is shipped against two gamuts by two generations of one curve.
+    /// Log material from those profiles arrives in a container gamut the
+    /// demuxer already knows, so the caller should convert from the source it is
+    /// given rather than from a guessed triangle.
     pub fn gamut(self) -> Option<Primaries> {
         Some(match self {
             Self::SLog3 => Primaries::S_GAMUT3,
             Self::VLog => Primaries::V_GAMUT,
-            Self::LogC | Self::LogC4 => Primaries::ALEX3_WIDE,
+            Self::LogC => Primaries::ALEX3_WIDE,
+            // ARRI's LogC4 specification makes ARRI Wide Gamut 4 part of the
+            // definition rather than an option, so the curve has to hand its
+            // pixels to those primaries and to nothing else.
+            Self::LogC4 => Primaries::ALEX3_EXPANDED,
             Self::SLog1 | Self::SLog2 | Self::CLog | Self::CLog2 | Self::CLog3 => return None,
+            // The curve is citable; the gamut it arrives in is not settled.
+            // OpenColorIO converts Apple Log through Rec.2020, and Apple Log 2
+            // — which shares this curve — through the wider Apple Wide Gamut,
+            // whose corners it prints from that paper. One profile cannot carry
+            // both answers, and picking one would recolour pixels on a guess
+            // about the generation of the clip, so `--gamut` or the container's
+            // own label decides here as it does for Canon.
+            Self::AppleLog => return None,
         })
     }
 
@@ -259,6 +303,18 @@ impl Log {
                     y * s + t
                 }
             }
+            Self::AppleLog => {
+                if y >= APPLE_CUT {
+                    2f64.powf((y - APPLE_DELTA) / APPLE_GAMMA) - APPLE_BETA
+                } else if y >= 0.0 {
+                    (y / APPLE_C).sqrt() + APPLE_R0
+                } else {
+                    // Below the bottom of the code range the toe would turn
+                    // around, so both reference implementations stop at its
+                    // mirror point and so does this.
+                    APPLE_R0
+                }
+            }
         };
         let reflection = if self.uses_ire() {
             x * IRE_FROM_REFLECTANCE
@@ -336,6 +392,15 @@ impl Log {
                     ((LOGC4_A * x + 64.0).log2() - 6.0) / 14.0 * LOGC4_B + LOGC4_C
                 } else {
                     (x - t) / s
+                }
+            }
+            Self::AppleLog => {
+                if x >= APPLE_RT {
+                    APPLE_GAMMA * (x + APPLE_BETA).log2() + APPLE_DELTA
+                } else if x >= APPLE_R0 {
+                    APPLE_C * (x - APPLE_R0) * (x - APPLE_R0)
+                } else {
+                    0.0
                 }
             }
         };
@@ -485,6 +550,120 @@ mod tests {
         let grey4 = Log::LogC4.from_linear(0.18);
         assert!(close(grey4, 0.278_4, 3e-4), "logc4 {grey4}");
         assert!(close(Log::LogC4.from_linear(0.0), 0.092_864, 1e-5));
+    }
+
+    /// ARRI's LogC4 specification §4.3 defines LogC4 as the LogC4 curve *and*
+    /// ARRI Wide Gamut 4, so a decoded LogC4 pixel has to leave the curve in
+    /// those primaries. Before this, it left in the gamut LogC uses, and the
+    /// wrong triangle recoloured it without touching luminance: measured
+    /// through `primaries::rgb_to_rgb(…, BT709)`, a skin tone moves 12.7 8-bit
+    /// steps and a saturated leg of the triangle 42–70, while white and 18 %
+    /// grey do not move at all — which is why no brightness check caught it.
+    #[test]
+    fn log_c_4_unwraps_in_the_gamut_its_specification_names() {
+        assert_eq!(Log::LogC4.gamut(), Some(Primaries::ALEX3_EXPANDED));
+        // LogC keeps the gamut its curve was transcribed with; ARRI prints no
+        // vendor matrix for it here, so nothing else is claimed.
+        assert_eq!(Log::LogC.gamut(), Some(Primaries::ALEX3_WIDE));
+        for profile in [
+            Log::SLog1,
+            Log::SLog2,
+            Log::CLog,
+            Log::CLog2,
+            Log::CLog3,
+            Log::AppleLog,
+        ] {
+            assert_eq!(profile.gamut(), None, "{profile:?}");
+        }
+        assert_eq!(Log::VLog.gamut(), Some(Primaries::V_GAMUT));
+        assert_eq!(Log::SLog3.gamut(), Some(Primaries::S_GAMUT3));
+    }
+
+    /// The check a gated paper forces: a mistyped digit in the transcription
+    /// has to show up in a value, since the page itself cannot be read. It does
+    /// for all but one place — the grey point is `colour`'s own doctest value to
+    /// 17 digits, the seam is the breakpoint both `colour` and OpenColorIO
+    /// derive, and the 12 × top is the highlight range the curve is sized for,
+    /// landing on 12.0000021 where no plausible typo does. The exception, found
+    /// by mutating each constant in turn: the last place of the quadratic's
+    /// scale moves every signal the curve reaches by under half an f32 bit, so
+    /// that one digit rides on the transcriptions rather than on arithmetic.
+    #[test]
+    fn apple_log_hits_the_anchors_its_transcriptions_publish() {
+        let grey = Log::AppleLog.from_linear(0.18);
+        assert!(close(grey, 0.488_272_4585, 1e-7), "grey {grey}");
+        assert!(
+            close(Log::AppleLog.to_linear(0.488_272_4585), 0.18, 1e-7),
+            "grey back"
+        );
+        // 18 % grey at 10-bit full range, and black one third of the way up the
+        // code range: the quadratic runs from its mirror point below 0 %
+        // reflectance, so 0 % is not the bottom of the toe.
+        assert!(
+            close(code_at(Log::AppleLog, 0.18, 10), 499.5, 0.05),
+            "grey code"
+        );
+        assert!(
+            close(Log::AppleLog.from_linear(0.0), 0.150_476_4523, 1e-7),
+            "black"
+        );
+        assert!(
+            close(Log::AppleLog.to_linear(0.0), APPLE_R0 as f32, 1e-7),
+            "the bottom of the toe"
+        );
+        // 100 % white, and the ceiling a signal of 1.0 asks for: 12 times
+        // diffuse white, and the residue past it says which constants the curve
+        // was built from.
+        assert!(
+            close(Log::AppleLog.from_linear(1.0), 0.694_552_9831, 1e-7),
+            "white"
+        );
+        assert!(
+            close(Log::AppleLog.to_linear(1.0), 12.000_002, 1e-5),
+            "ceiling"
+        );
+        let seam = APPLE_GAMMA * (APPLE_RT + APPLE_BETA).log2() + APPLE_DELTA;
+        assert!((seam - APPLE_CUT).abs() < 3e-9, "{seam} vs {APPLE_CUT}");
+        // Below the mirror point the toe would turn around, so exposure is
+        // crushed to it rather than run back up the parabola.
+        assert!(close(Log::AppleLog.from_linear(-0.07), 0.0, 1e-9), "crush");
+        assert!(
+            close(Log::AppleLog.to_linear(-0.07), APPLE_R0 as f32, 1e-9),
+            "crush from below"
+        );
+    }
+
+    /// Every code a camera writes has to come back to itself: the claim a log
+    /// profile exists for is not that a curve bends the right way at the points
+    /// a vendor's table quotes, but that the whole integer range survives the
+    /// walk out of the codes, through linear light, and back. Swept at 10 and 12
+    /// bits and over the legal range in both directions, since a clip's own
+    /// blanks sit below the pedestal and an extended recording above the top.
+    /// Worst measured error 6.1e-5 of a code at 10 bits and 2.4e-4 at 12, both
+    /// at code 949 of the S-Log curves, at the end of the range where a signal
+    /// is largest and f32 is coarsest; no other profile exceeds 3.3e-5.
+    ///
+    /// Walking integers rather than sampling 201 points is what makes this more
+    /// than a repeat of `every_profile_round_trips_over_its_own_domain`: the
+    /// steps of a coarse sample land between the branch seams, while an exact
+    /// code hits them. Drifting one S-Log3 constant by a part in 10 000 leaves
+    /// the sampled test green and fails this one at code 172, the toe seam,
+    /// because decode then lands on the other branch of the curve.
+    #[test]
+    fn every_code_a_camera_writes_comes_back_to_itself() {
+        for profile in Log::ALL {
+            for bits in [10u32, 12] {
+                for code in 0..=(1u32 << bits) - 1 {
+                    let signal = profile.signal_from_code(code as f32, bits);
+                    let linear = profile.to_linear(signal);
+                    let back = profile.code_from_signal(profile.from_linear(linear), bits);
+                    assert!(
+                        (back - code as f32).abs() <= 2e-3,
+                        "{profile:?} {bits}-bit code {code} → {signal} → {linear} → {back}"
+                    );
+                }
+            }
+        }
     }
 
     #[test]
