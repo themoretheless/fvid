@@ -179,6 +179,18 @@ pub fn decode_mp4_aac_pcm(
     data: &[u8],
     output: &mut impl std::io::Write,
 ) -> Result<AudioDecodeStats> {
+    decode_mp4_aac_pcm_interval(data, output, None)
+}
+
+/// Select an interval relative to the edited presentation timeline.
+pub fn decode_mp4_aac_pcm_interval(
+    data: &[u8],
+    output: &mut impl std::io::Write,
+    interval: Option<(Duration, Duration)>,
+) -> Result<AudioDecodeStats> {
+    if interval.is_some_and(|(from, to)| from >= to) {
+        return Err(invalid("audio interval requires from < to"));
+    }
     use crate::container::mp4::{Limits, Mp4Reader};
     let mut reader = Mp4Reader::open(std::io::Cursor::new(data), Limits::default())?;
     let indices: Vec<_> = reader.tracks().iter().enumerate()
@@ -205,6 +217,16 @@ pub fn decode_mp4_aac_pcm(
         }
         _ => return Err(invalid("MP4 AAC multi-segment or empty edits are not implemented")),
     };
+    let (from, to) = if let Some((begin, end)) = interval {
+        let boundary = |time: Duration| -> Result<u64> {
+            let value = time.as_nanos().checked_mul(u128::from(rate))
+                .ok_or_else(|| invalid("audio interval overflow"))?.div_ceil(1_000_000_000);
+            let value = u64::try_from(value).map_err(|_| invalid("audio interval overflow"))?;
+            from.checked_add(value).ok_or_else(|| invalid("audio interval overflow"))
+        };
+        (boundary(begin)?, boundary(end)?.min(to))
+    } else { (from, to) };
+    if from >= to { return Err(invalid("audio interval contains no samples")); }
     let mut stats = AudioDecodeStats { sample_frames: 0, decoded_frames: 0, sample_rate: rate, channels };
     let mut packet = Vec::new();
     let mut expected = None;

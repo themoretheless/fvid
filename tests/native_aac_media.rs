@@ -146,3 +146,24 @@ fn mp4_aac_edit_removes_priming_and_encoder_tail() {
     }
     assert!(peak < 1e-6, "peak error {peak}");
 }
+
+#[test]
+fn mp4_interval_is_relative_to_edited_audio_and_clips_at_tail() {
+    use std::time::Duration;
+    let source = include_bytes!("fixtures/audio/aac-native-edit.m4a");
+    let mut whole = Vec::new();
+    fvid::native_media::decode_mp4_aac_pcm(source, &mut whole).unwrap();
+    for (from, to, first, last) in [(30001, 70001, 1324, 3088), (120000, 200000, 5292, 5645)] {
+        let mut part = Vec::new();
+        let stats = fvid::native_media::decode_mp4_aac_pcm_interval(source, &mut part,
+            Some((Duration::from_micros(from), Duration::from_micros(to)))).unwrap();
+        assert_eq!(part, whole[first*4..last*4]);
+        assert_eq!(stats.sample_frames as usize, last-first);
+    }
+    for (from, to) in [(2, 3), (1, 1), (2, 1)] {
+        let mut out = Vec::new();
+        assert!(fvid::native_media::decode_mp4_aac_pcm_interval(source, &mut out,
+            Some((Duration::from_secs(from), Duration::from_secs(to)))).is_err());
+        assert!(out.is_empty());
+    }
+}

@@ -454,7 +454,13 @@ Native PCM/WAV CLI export also accepts MP4/M4A with a single AAC audio track.
 The owned MP4 reader supplies packets and the owned AAC decoder applies one
 media edit to remove priming and trailing encoder padding. Current support
 requires a sample-rate track clock; empty/multi-segment edits, discontinuous
-packet timing and user-selected intervals on MP4 are explicitly rejected.
+packet timing are explicitly rejected.
 The M4A fixture presents exactly 5645 mono samples at 44100 Hz; six native audio
 integration tests pass, and a CLI-created WAV was independently inspected with
 that exact sample count. Other MP4 audio codecs retain their previous routing.
+
+Native MP4/M4A AAC export now accepts `--from`/`--to` relative to the edited
+presentation timeline. Boundaries round up to sample starts, decoding pre-roll
+for AAC state and clipping the requested endpoint to the media edit. Tests
+compare exact slices after priming removal and check empty/reversed ranges.
+CLI inspection confirmed 1764 samples at 44100 Hz for 0.030001–0.070001 seconds.
