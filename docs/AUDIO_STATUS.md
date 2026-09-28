@@ -303,3 +303,11 @@ bits for zero/noise/intensity bands. Special-band zero placeholders still need
 noise/intensity reconstruction. Tests cover mixed groups through deinterleaving,
 zero-only spectra, truncation and malformed layouts. Playback integration is
 still pending.
+
+`codec::aac_bands::BandTables` selects 1024/128 AAC-LC band geometry directly
+from AudioSpecificConfig sample rate, including explicit-rate intervals, and
+supplies limits to the owned ICS parser. Numeric tables retain their Symphonia
+0.6.1 MPL-2.0 notice in `aac_band_tables.rs`. Tests check indexed rates, interval
+boundaries, complete/aligned band coverage and ASC-to-ICS validation. 960/120
+band tables are still pending and are rejected explicitly, even though the
+transform/synthesis components already support those sizes.

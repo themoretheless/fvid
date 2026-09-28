@@ -413,3 +413,6 @@ pub mod aac_huffman;
 pub mod aac_scalefactors;
 
 pub mod aac_spectral;
+
+mod aac_band_tables;
+pub mod aac_bands;
