@@ -11,6 +11,7 @@
 use fvid::color::{Interpolation, Lut, Lut3d};
 
 const CUBE: &str = include_str!("fixtures/lut/grade-17.cube");
+const OVER: &str = include_str!("fixtures/lut/over-17.cube");
 const THREE_DL: &str = include_str!("fixtures/lut/grade-17.3dl");
 const PROBE: &[u8] = include_bytes!("fixtures/lut/probe.rgb");
 const SIZE: usize = 17;
@@ -32,6 +33,16 @@ fn reference_3dl(mode: &str) -> Vec<u8> {
         "trilinear" => include_bytes!("fixtures/lut/ffmpeg-3dl-trilinear.rgb").to_vec(),
         "tetrahedral" => include_bytes!("fixtures/lut/ffmpeg-3dl-tetrahedral.rgb").to_vec(),
         other => unreachable!("no .3dl reference for {other}"),
+    }
+}
+
+/// The reference `ffmpeg` wrote for the overshooting cube.
+fn reference_over(mode: &str) -> Vec<u8> {
+    match mode {
+        "nearest" => include_bytes!("fixtures/lut/ffmpeg-over-nearest.rgb").to_vec(),
+        "trilinear" => include_bytes!("fixtures/lut/ffmpeg-over-trilinear.rgb").to_vec(),
+        "tetrahedral" => include_bytes!("fixtures/lut/ffmpeg-over-tetrahedral.rgb").to_vec(),
+        other => unreachable!("no overshoot reference for {other}"),
     }
 }
 
@@ -71,8 +82,8 @@ fn probe_colours() -> Vec<[f32; 3]> {
 }
 
 /// The cube's own node values, read from its text in the order it lists them.
-fn nodes() -> Vec<[f32; 3]> {
-    CUBE.lines()
+fn cube_nodes(text: &str) -> Vec<[f32; 3]> {
+    text.lines()
         .filter_map(|line| {
             // A value line begins with a number; every other line in the file
             // is a directive or a comment.
@@ -101,7 +112,7 @@ fn nodes() -> Vec<[f32; 3]> {
 #[test]
 fn the_text_and_the_sampler_agree_on_which_node_is_which() {
     let lut = Lut::from_cube(CUBE).expect("a written cube is a cube");
-    let nodes = nodes();
+    let nodes = cube_nodes(CUBE);
     assert_eq!(nodes.len(), SIZE.pow(3));
     for (index, node) in nodes.iter().enumerate() {
         // The file lists red fastest, then green, then blue.
@@ -337,6 +348,142 @@ fn a_3dl_that_declares_its_mesh_gives_ffmpeg_the_same_table() {
         assert_eq!(
             theirs_above, 0,
             "{mode}: `ffmpeg` came out higher than Fvid"
+        );
+    }
+}
+
+/// Real grading LUTs overshoot: the six `.cube` exports in the D-LUT set run to
+/// 1.07 and below 0, and a log-to-linear table runs to 12. `ffmpeg` reads such a
+/// file as written — it keeps the node value and only saturates the byte it
+/// emits, which a size-2 cube with a red node at 1.5 shows directly: its
+/// trilinear output at mid-grey is red 192, i.e. half of 1.5, where a reader
+/// that clipped the node at parse time can only ever return 128. The same
+/// instrument holds for `.3dl` (README, "Domains and out-of-range values").
+///
+/// So the nodes stay as they are and the ends are decided at the code. Held to
+/// that, Fvid meets `ffmpeg` within one code on all 12 288 channels of the probe
+/// in each mode, and the residue is still rounding alone: `ffmpeg`'s byte is the
+/// saturated floor of Fvid's float.
+#[test]
+fn a_cube_that_overshoots_the_display_range_keeps_its_nodes() {
+    let lut = Lut::from_cube(OVER).expect("an overshooting cube is still a cube");
+    let Lut::Three(cube) = &lut else {
+        panic!("a 17-grid is a 3D LUT");
+    };
+    assert_eq!(cube.data.len(), SIZE.pow(3));
+    // The table's own layout: node (r, g, b) at `r + size·(g + size·b)`.
+    let corner = |r: usize, g: usize, b: usize| cube.data[r + SIZE * (g + SIZE * b)];
+    for (node, want) in [
+        ((0, 0, 0), [-0.0227, -0.0107, -0.0038]),
+        ((16, 16, 16), [1.0695, 1.0588, 1.0192]),
+    ] {
+        let got = corner(node.0, node.1, node.2);
+        for ch in 0..3 {
+            assert!(
+                (got[ch] - want[ch]).abs() < 1e-6,
+                "node {node:?} channel {ch} came back {got:?}, the file says {want:?}"
+            );
+        }
+    }
+
+    let colours = probe_colours();
+    for (mode, interp, rounded_differently) in [
+        ("nearest", Interpolation::Nearest, 6_400usize),
+        ("trilinear", Interpolation::Trilinear, 5_888),
+        ("tetrahedral", Interpolation::Tetrahedral, 5_888),
+    ] {
+        let theirs = reference_over(mode);
+        assert_eq!(theirs.len(), PROBE.len());
+        let mut differences = 0usize;
+        for (i, rgb) in colours.iter().enumerate() {
+            let exact = cube.sample(*rgb, interp);
+            for ch in 0..3 {
+                let float = exact[ch] * 255.0;
+                let mine = float.round().clamp(0.0, 255.0) as i32;
+                let other = i32::from(theirs[i * 3 + ch]);
+                let delta = (mine - other).abs();
+                assert!(
+                    delta <= 1,
+                    "{mode}: pixel {i} channel {ch} moved {delta} codes, {mine} against {other}"
+                );
+                differences += usize::from(delta == 1);
+                assert_eq!(
+                    other,
+                    float.floor().clamp(0.0, 255.0) as i32,
+                    "{mode}: the gap is meant to be rounding alone"
+                );
+            }
+        }
+        assert_eq!(
+            differences, rounded_differently,
+            "{mode}: the count that differs by one code"
+        );
+    }
+}
+
+/// The clamp is not a rounding question. Read the identical nodes with the ends
+/// cut off before they reach the table — what `from_cube` did — and 384 of the
+/// probe's 12 288 channels move by more than one code through the interpolators
+/// that read between nodes, the worst by four, and 256 channels that should
+/// sit hard at 0 or 255 come back inside the range instead. Nearest is untouched
+/// because it never mixes two nodes, which is why the defect only shows up in a
+/// graded picture rather than in a node-by-node check.
+#[test]
+fn clamping_a_cube_at_parse_is_a_different_look_not_a_rounding_gap() {
+    let blind = Lut3d {
+        size: SIZE,
+        domain_min: [0.0; 3],
+        domain_max: [1.0; 3],
+        data: cube_nodes(OVER)
+            .into_iter()
+            .map(|n| {
+                [
+                    n[0].clamp(0.0, 1.0),
+                    n[1].clamp(0.0, 1.0),
+                    n[2].clamp(0.0, 1.0),
+                ]
+            })
+            .collect(),
+    };
+    let colours = probe_colours();
+    for mode in ["trilinear", "tetrahedral"] {
+        let theirs = reference_over(mode);
+        let interp = if mode == "trilinear" {
+            Interpolation::Trilinear
+        } else {
+            Interpolation::Tetrahedral
+        };
+        let mut misplaced = 0usize;
+        let mut worst = 0i32;
+        let mut short_of_white = 0usize;
+        let mut short_of_black = 0usize;
+        for (i, rgb) in colours.iter().enumerate() {
+            let exact = blind.sample(*rgb, interp);
+            for ch in 0..3 {
+                let mine = (exact[ch] * 255.0).round().clamp(0.0, 255.0) as i32;
+                let other = i32::from(theirs[i * 3 + ch]);
+                let delta = (mine - other).abs();
+                misplaced += usize::from(delta > 1);
+                worst = worst.max(delta);
+                short_of_white += usize::from(other == 255 && mine != 255);
+                short_of_black += usize::from(other == 0 && mine != 0);
+            }
+        }
+        assert_eq!(
+            misplaced, 384,
+            "{mode}: the clamp moved this many channels by more than one code"
+        );
+        assert_eq!(
+            worst, 4,
+            "{mode}: the clamp's worst channel moved {worst} codes"
+        );
+        assert_eq!(
+            short_of_white, 192,
+            "{mode}: channels `ffmpeg` clips to white that the clamped table leaves short"
+        );
+        assert_eq!(
+            short_of_black, 64,
+            "{mode}: channels `ffmpeg` clips to black that the clamped table leaves short"
         );
     }
 }

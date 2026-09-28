@@ -193,7 +193,8 @@ pub enum Lut {
 
 impl Lut {
     /// Resolve/Adobe `.cube`, including the files that write a 1D table ahead of
-    /// the 3D one.
+    /// the 3D one. A node outside the display range is kept as authored; only
+    /// the code a graded sample becomes is decided by the ends.
     pub fn from_cube(text: &str) -> Result<Self> {
         let mut one_size = None;
         let mut three_size = None;
@@ -281,15 +282,18 @@ impl Lut {
                     three_values.len()
                 )));
             }
+            // A node may sit outside the display range — the `.cube` exports in
+            // circulation run from −0.02 to 1.07, and a log-to-linear table
+            // beyond that — and the overshoot is the look: it is what makes the
+            // interpolators bend the shoulder instead of flattening it. So the
+            // value is stored as authored, and only the code a graded sample
+            // becomes is decided by the ends. `ffmpeg`'s `lut3d` was measured to
+            // do exactly this: a size-2 cube with a red node at 1.5 puts red 192
+            // at mid-grey, half of 1.5, where clipping the node on the way in
+            // could only ever return 128.
             let data = three_values
                 .chunks_exact(3)
-                .map(|c| {
-                    [
-                        c[0].clamp(0.0, 1.0),
-                        c[1].clamp(0.0, 1.0),
-                        c[2].clamp(0.0, 1.0),
-                    ]
-                })
+                .map(|c| [c[0], c[1], c[2]])
                 .collect();
             return Ok(Self::Three(Lut3d {
                 size: n,
@@ -816,6 +820,32 @@ LUT_3D_SIZE 2
             l.sample([0.0, 0.5, 0.5], Interpolation::Nearest),
             [0.0, 0.0, 0.0]
         );
+    }
+
+    #[test]
+    fn a_node_outside_the_display_range_survives_the_parse() {
+        // Red authored to run from -0.2 to 1.5, green and blue plain ramps: the
+        // middle of the ramp then reads 0.65, which is (-0.2 + 1.5) / 2, not the
+        // 0.5 a table clipped on the way in can only give. This is the shape the
+        // `ffmpeg` oracle in tests/lut_ffmpeg.rs measures.
+        let mut text = String::from("LUT_3D_SIZE 2\n");
+        for b in 0..2 {
+            for g in 0..2 {
+                for r in 0..2 {
+                    text.push_str(&format!("{} {g} {b}\n", if r == 0 { -0.2 } else { 1.5 }));
+                }
+            }
+        }
+        let Lut::Three(l) = Lut::from_cube(&text).unwrap() else {
+            panic!("3d");
+        };
+        assert_eq!(l.data[0][0], -0.2);
+        assert_eq!(l.data[7][0], 1.5);
+        let mid = l.sample([0.5, 0.5, 0.5], Interpolation::Trilinear);
+        assert!((mid[0] - 0.65).abs() < 1e-6, "{mid:?}");
+        assert!((mid[1] - 0.5).abs() < 1e-6, "{mid:?}");
+        // The writer keeps it too, so the file round trips rather than drifts.
+        assert!(Lut::Three(l).to_cube().contains("1.5"));
     }
 
     #[test]
