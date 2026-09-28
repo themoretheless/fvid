@@ -257,6 +257,62 @@ mod tests {
         );
     }
     #[test]
+    fn real_tns_file_matches_pcm_reference() {
+        let data = include_bytes!("../../tests/fixtures/audio/aac-tns.aac");
+        let reference = include_bytes!("../../tests/fixtures/audio/aac-tns-reference.f32le");
+        let config = AacConfig::parse(&[0x11, 0x88]).unwrap();
+        let mut decoder = NativeAacDecoder::new(&[0x11, 0x88]).unwrap();
+        let mut at = 0;
+        let mut samples = Vec::new();
+        let mut active = 0;
+        while at < data.len() {
+            let n = ((data[at + 3] as usize & 3) << 11)
+                | ((data[at + 4] as usize) << 3)
+                | (data[at + 5] as usize >> 5);
+            let packet = &data[at + 7..at + n];
+            let mut bits = BitReader::new(packet);
+            loop {
+                let element = bits.read(3).unwrap();
+                if element == 6 {
+                    let mut count = bits.read(4).unwrap() as usize;
+                    if count == 15 {
+                        count += bits.read(8).unwrap() as usize;
+                        count -= 1;
+                    }
+                    bits.skip(count * 8).unwrap();
+                } else {
+                    assert_eq!(element, 0);
+                    bits.read(4).unwrap();
+                    let channel = ChannelData::read(&mut bits, &config).unwrap();
+                    if let Some(tns) = channel.tns {
+                        active += tns
+                            .windows
+                            .iter()
+                            .flatten()
+                            .filter(|f| !f.lpc.is_empty())
+                            .count();
+                    }
+                    break;
+                }
+            }
+            samples.extend(decoder.decode(packet).unwrap());
+            at += n;
+        }
+        assert_eq!(active, 2, "fixture must exercise active TNS");
+        assert_eq!(samples.len() * 4, reference.len());
+        let mut squared = 0.0;
+        let mut peak = 0.0f64;
+        for (&sample, bytes) in samples.iter().zip(reference.chunks_exact(4)) {
+            let error =
+                f64::from(sample) - f64::from(f32::from_le_bytes(bytes.try_into().unwrap()));
+            squared += error * error;
+            peak = peak.max(error.abs());
+        }
+        let rms = (squared / samples.len() as f64).sqrt();
+        assert!(rms < 0.0000001, "RMS {rms}");
+        assert!(peak < 0.000001, "peak {peak}");
+    }
+    #[test]
     fn bad_packet_does_not_advance_noise_or_overlap() {
         let packets = packets();
         let mut decoder = NativeAacDecoder::new(&[0x11, 0x90]).unwrap();

@@ -402,3 +402,9 @@ limits. The owned AAC suite passed (52 tests before the additional packet test).
 An active-TNS synthetic mono packet produces exactly the independently filtered
 and synthesized PCM; mono/stereo saved-oracle tests still pass. Real-file TNS
 coverage, 960-sample bands, multichannel and player replacement remain pending.
+
+Real encoder TNS coverage is now verified with `aac-tns.aac`: the test requires
+two active filters and compares every decoded sample to the saved FFmpeg 9.0.2
+oracle. RMS error 1.5812e-8, peak 1.7882e-7; PNS disabled. Fixture generation is
+documented alongside it. Multichannel, 960-sample bands and player replacement
+remain incomplete.
