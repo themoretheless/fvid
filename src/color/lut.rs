@@ -228,12 +228,12 @@ impl Lut {
                 continue;
             }
             if let Some(rest) = upper.strip_prefix("LUT_1D_SIZE") {
-                one_size = Some(parse_size(rest, line_no)?);
+                one_size = Some(parse_size(rest, line_no, MAX_1D_ENTRIES)?);
                 section = Some(false);
                 continue;
             }
             if let Some(rest) = upper.strip_prefix("LUT_3D_SIZE") {
-                three_size = Some(parse_size(rest, line_no)?);
+                three_size = Some(parse_size(rest, line_no, MAX_3D_SIDE)?);
                 section = Some(true);
                 continue;
             }
@@ -556,7 +556,17 @@ impl Lut {
     }
 }
 
-fn parse_size(rest: &str, line_no: usize) -> Result<usize> {
+/// The declared side of a 3D grid: 128 is 2,1 million nodes, and a grid's own
+/// memory is why a grid is bounded at all.
+const MAX_3D_SIDE: usize = 128;
+
+/// The declared length of a 1D table, which is a list rather than a cube: log
+/// and density curves are written with an entry per code of the *encoded*
+/// signal, so 4096 is ordinary and the value lines settle the count anyway.
+/// OpenColorIO's ceiling for a 1D table is 300 000 against 129 for a grid.
+const MAX_1D_ENTRIES: usize = 300_000;
+
+fn parse_size(rest: &str, line_no: usize, limit: usize) -> Result<usize> {
     let n: usize = rest
         .trim()
         .split_whitespace()
@@ -564,8 +574,8 @@ fn parse_size(rest: &str, line_no: usize) -> Result<usize> {
         .unwrap_or("")
         .parse()
         .map_err(|_| invalid(&format!("bad LUT size on line {}", line_no + 1)))?;
-    if !(2..=128).contains(&n) {
-        return Err(invalid("LUT size must be 2..=128"));
+    if !(2..=limit).contains(&n) {
+        return Err(invalid(&format!("LUT size must be 2..={limit}")));
     }
     Ok(n)
 }
@@ -930,6 +940,37 @@ LUT_3D_SIZE 2
             back,
             "a 1D table drifts through a write/read cycle"
         );
+    }
+
+    /// A log-to-linear table is one entry per code of the *log* encoding, and
+    /// cameras record at 10 and 12 bits: Apple's published Apple Log to Linear
+    /// export lists 4096, and the density tables used for negative printing list
+    /// 512 and 1024. A bound that keeps a 3D grid's memory sane says nothing
+    /// about a one-dimensional list, whose length its own value lines settle
+    /// anyway, so it has to be lifted for the 1D case. OpenColorIO draws the
+    /// same line at different places: 129 for a grid side, 300 000 for a 1D
+    /// table.
+    #[test]
+    fn a_long_1d_table_is_read_while_a_grid_keeps_its_bound() {
+        // The shape of a log-to-linear curve: an eighth of a stop per entry
+        // running from 2^-12 up to 2^2, so its own end sits well above white.
+        let mut text = String::from("LUT_1D_SIZE 4096\n");
+        for i in 0..4096 {
+            let v = 2f32.powf(i as f32 / 4095.0 * 14.0 - 12.0);
+            text.push_str(&format!("{v} {v} {v}\n"));
+        }
+        let Lut::One(l) = Lut::from_cube(&text).unwrap() else {
+            panic!("4096 entries is a 1D table");
+        };
+        assert_eq!(l.len(), 4096);
+        assert_eq!(Lut::One(l.clone()).size(), 4096);
+        assert!(l.data[0][4095] > 3.9, "the superwhite end is the point");
+        // A length the file declares but never fills is still refused.
+        assert!(Lut::from_cube("LUT_1D_SIZE 4096\n0 0 0\n1 1 1\n").is_err());
+        // Past the ceiling it is refused before its rows are read, and a grid
+        // keeps the bound it always had.
+        assert!(Lut::from_cube("LUT_1D_SIZE 300001\n0\n1\n").is_err());
+        assert!(Lut::from_cube("LUT_3D_SIZE 200\n0 0 0\n1 1 1\n").is_err());
     }
 
     #[test]
