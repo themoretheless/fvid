@@ -286,3 +286,18 @@ This is one migrated operation, not removal of the full FFmpeg dependency:
 legacy `fvid-media` APIs still depend on the adapter. The `media` feature still
 links it. The native operation is tested separately with no default features;
 its public compatibility wrapper is also tested with `media` enabled.
+
+Plain CLI decode is migrated as well:
+
+```sh
+cargo run --offline --locked --no-default-features -- media decode INPUT
+```
+
+This command builds without the legacy media adapter, emits the native decode
+statistics as JSON, and supports `--quiet` and `--` for option-like paths.
+Additional decode options continue through the existing transform parser;
+unknown options are never silently ignored. CLI tests launch the built binary
+and verify all 25 frames and 320x240 geometry of the fragmented AVC fixture.
+On macOS, `otool -L` of this no-default-features binary lists only libSystem,
+with no FFmpeg libraries. This linkage result applies to that configuration;
+the full `media` feature still requires migration.

@@ -2,6 +2,17 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if let Some((path, quiet)) = plain_decode(args) {
+        let stats = fvid::native_media::decode_video(std::path::Path::new(path))?;
+        if !quiet {
+            // These strings are internal backend/pixel-format names; paths and
+            // other user input are never interpolated into this JSON document.
+            println!("{{\"backend\":\"{}\",\"video_frames\":{},\"width\":{},\"height\":{},\"pixel_format\":\"{}\",\"decode_errors\":{}}}",
+                stats.backend, stats.video_frames, stats.width, stats.height,
+                stats.pixel_format, stats.decode_errors);
+        }
+        return Ok(());
+    }
     #[cfg(feature = "media")]
     {
         run_native(args)
@@ -9,9 +20,25 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(not(feature = "media"))]
     {
         let _ = args;
-        Err("media commands require cargo build --release --features media and FFmpeg development libraries".into())
+        Err("this media operation still requires cargo build --release --features media and FFmpeg development libraries; plain media decode INPUT is available without them".into())
     }
 }
+// Only the untransformed command is migrated here. Leave every option that
+// changes decode semantics to the full parser, never silently ignore it.
+fn plain_decode(args: &[String]) -> Option<(&str, bool)> {
+    if args.first()?.as_str() != "decode" { return None; }
+    let mut path = None;
+    let mut quiet = false;
+    let mut positional = false;
+    for arg in &args[1..] {
+        if !positional && arg == "--" { positional = true; }
+        else if !positional && arg == "--quiet" { quiet = true; }
+        else if !positional && arg.starts_with('-') { return None; }
+        else if path.replace(arg.as_str()).is_some() { return None; }
+    }
+    Some((path?, quiet))
+}
+
 #[cfg(feature = "media")]
 fn emit_json(quiet: bool, json: String) {
     if !quiet {
