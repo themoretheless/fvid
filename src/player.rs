@@ -1350,7 +1350,7 @@ fn adjust_luma(y: f32, s: &[f32; 5]) -> f32 {
 /// bundle run over them, and the result returns as RGB, clamped like the
 /// filter's tables clamp. Grey (chroma at zero and luma at either anchor)
 /// behaves as it does in VLC: grey stays grey through a hue turn.
-fn adjust_rgb(source: &[u8], out: &mut Vec<u8>, s: &[f32; 5]) {
+pub(crate) fn adjust_rgb(source: &[u8], out: &mut Vec<u8>, s: &[f32; 5]) {
     out.clear();
     out.reserve(source.len());
     for pixel in source.as_chunks::<3>().0.iter() {
@@ -1366,12 +1366,15 @@ fn adjust_rgb(source: &[u8], out: &mut Vec<u8>, s: &[f32; 5]) {
         let cb = (-0.168_736 * r - 0.331_264 * g + 0.5 * b) * (224.0 / 255.0);
         let cr = (0.5 * r - 0.418_688 * g - 0.081_312 * b) * (224.0 / 255.0);
         let y = adjust_luma(y, s);
-        let cb = s[3] * cb + s[4] * cr;
-        let cr = s[3] * cr - s[4] * cb;
+        // Both of VLC's two lines read the pair as it was stored, which is what
+        // makes the turn a rotation: read the turned Cb back in the second line
+        // and a 45° hue leaves the Cr row two thirds short, so the chroma lands
+        // off the colour wheel rather than around it.
+        let (cb_adj, cr_adj) = (s[3] * cb + s[4] * cr, s[3] * cr - s[4] * cb);
         let y = 1.164 * (y - 16.0);
-        let r = y + 1.596 * cr;
-        let g = y - 0.391 * cb - 0.813 * cr;
-        let b = y + 2.013 * cb;
+        let r = y + 1.596 * cr_adj;
+        let g = y - 0.391 * cb_adj - 0.813 * cr_adj;
+        let b = y + 2.013 * cb_adj;
         out.extend([r, g, b].map(|v| v.round().clamp(0.0, 255.0) as u8));
     }
 }
