@@ -75,3 +75,43 @@ fn truncated_input_cleans_partial_export() {
     assert!(!output.exists());
     assert_eq!(std::fs::read_dir(&dir.0).unwrap().count(), 1);
 }
+
+#[test]
+fn a_fragment_timestamp_gap_is_not_silently_retimed() {
+    let dir = directory();
+    let mut data = include_bytes!("fixtures/video.mp4").to_vec();
+    let offsets: Vec<_> = data
+        .windows(4)
+        .enumerate()
+        .filter_map(|(i, bytes)| (bytes == b"tfdt").then_some(i))
+        .collect();
+    assert_eq!(
+        offsets.len(),
+        5,
+        "fixture must contain five timed fragments"
+    );
+    let at = offsets[1];
+    match data[at + 4] {
+        0 => {
+            let value = u32::from_be_bytes(data[at + 8..at + 12].try_into().unwrap());
+            data[at + 8..at + 12].copy_from_slice(&(value + 512).to_be_bytes());
+        }
+        1 => {
+            let value = u64::from_be_bytes(data[at + 8..at + 16].try_into().unwrap());
+            data[at + 8..at + 16].copy_from_slice(&(value + 512).to_be_bytes());
+        }
+        _ => panic!("unexpected tfdt version"),
+    }
+    let input = dir.0.join("gap.mp4");
+    std::fs::write(&input, data).unwrap();
+    let output = dir.0.join("out.y4m");
+    let error = fvid::native_export::export_y4m(&input, &output).unwrap_err();
+    assert!(
+        error
+            .to_string()
+            .contains("constant contiguous frame timing"),
+        "{error}"
+    );
+    assert!(!output.exists());
+    assert_eq!(std::fs::read_dir(&dir.0).unwrap().count(), 1);
+}
