@@ -11,6 +11,7 @@
 use fvid::color::{Interpolation, Lut, Lut3d};
 
 const CUBE: &str = include_str!("fixtures/lut/grade-17.cube");
+const THREE_DL: &str = include_str!("fixtures/lut/grade-17.3dl");
 const PROBE: &[u8] = include_bytes!("fixtures/lut/probe.rgb");
 const SIZE: usize = 17;
 
@@ -22,6 +23,51 @@ fn reference(mode: &str) -> Vec<u8> {
         "tetrahedral" => include_bytes!("fixtures/lut/ffmpeg-tetrahedral.rgb").to_vec(),
         other => unreachable!("no reference for {other}"),
     }
+}
+
+/// The reference `ffmpeg` wrote for the `.3dl` twin of the same look.
+fn reference_3dl(mode: &str) -> Vec<u8> {
+    match mode {
+        "nearest" => include_bytes!("fixtures/lut/ffmpeg-3dl-nearest.rgb").to_vec(),
+        "trilinear" => include_bytes!("fixtures/lut/ffmpeg-3dl-trilinear.rgb").to_vec(),
+        "tetrahedral" => include_bytes!("fixtures/lut/ffmpeg-3dl-tetrahedral.rgb").to_vec(),
+        other => unreachable!("no .3dl reference for {other}"),
+    }
+}
+
+/// The `.3dl`'s rows, read in the order the file lists them, unscaled.
+fn three_dl_rows() -> Vec<[f32; 3]> {
+    THREE_DL
+        .lines()
+        .skip(1)
+        .map(|line| {
+            let mut parts = line.split_whitespace();
+            let (Some(r), Some(g), Some(b)) = (parts.next(), parts.next(), parts.next()) else {
+                panic!("a .3dl row has three channels: {line}");
+            };
+            [
+                r.parse::<f32>().expect("red") / 4095.0,
+                g.parse::<f32>().expect("green") / 4095.0,
+                b.parse::<f32>().expect("blue") / 4095.0,
+            ]
+        })
+        .collect()
+}
+
+/// The probe's pixels as normalised codes.
+fn probe_colours() -> Vec<[f32; 3]> {
+    PROBE
+        .as_chunks::<3>()
+        .0
+        .iter()
+        .map(|p| {
+            [
+                f32::from(p[0]) / 255.0,
+                f32::from(p[1]) / 255.0,
+                f32::from(p[2]) / 255.0,
+            ]
+        })
+        .collect()
 }
 
 /// The cube's own node values, read from its text in the order it lists them.
@@ -141,4 +187,92 @@ fn each_interpolation_walks_with_ffmpeg() {
             "{mode}: the count that differs by one code"
         );
     }
+}
+
+/// The same look written as a `.3dl` rather than a `.cube`: the file lists its
+/// grid with the blue axis fastest and carries 12-bit integers where a cube
+/// carries floats, and Fvid's sampler still meets `ffmpeg` one code at most on
+/// every one of the probe's 12 288 channels, in each of the three modes.
+///
+/// The residue is wider than the cube's — 6 564 channels moved by one code at
+/// nearest against 4 826 — because the nodes themselves are quantised to 1/4095,
+/// so a value on a rounding boundary is decided by six bits the picture does not
+/// have. It stays one-sided, which is the part that matters: `ffmpeg` is never
+/// the higher byte, where a disagreement about the grid or the interpolation
+/// would put it on both sides.
+#[test]
+fn a_3dl_of_the_same_look_walks_with_ffmpeg() {
+    let lut = Lut::from_text(THREE_DL).expect("a written .3dl is a .3dl");
+    let colours = probe_colours();
+    for (mode, interp, rounded_differently) in [
+        ("nearest", Interpolation::Nearest, 6_564usize),
+        ("trilinear", Interpolation::Trilinear, 6_635),
+        ("tetrahedral", Interpolation::Tetrahedral, 6_621),
+    ] {
+        let theirs = reference_3dl(mode);
+        assert_eq!(theirs.len(), PROBE.len());
+        let mut differences = 0usize;
+        let mut theirs_above = 0usize;
+        for (i, rgb) in colours.iter().enumerate() {
+            let exact = lut.sample(*rgb, interp);
+            for ch in 0..3 {
+                let mine = (exact[ch] * 255.0).round() as i32;
+                let other = i32::from(theirs[i * 3 + ch]);
+                let delta = (mine - other).abs();
+                assert!(
+                    delta <= 1,
+                    "{mode}: pixel {i} channel {ch} moved {delta} codes, over {mine} against {other}"
+                );
+                differences += usize::from(delta == 1);
+                theirs_above += usize::from(mine < other);
+            }
+        }
+        assert_eq!(
+            differences, rounded_differently,
+            "{mode}: the count that differs by one code"
+        );
+        assert_eq!(
+            theirs_above, 0,
+            "{mode}: `ffmpeg` came out higher than Fvid, which truncation does not explain"
+        );
+    }
+}
+
+/// Which axis a `.3dl` file varies fastest is not a detail a tolerance can
+/// absorb: read the same rows as red-fastest — Fvid's own table layout, and the
+/// order a `.cube` lists — and the look is transposed between red and blue. On
+/// this probe that is 9 687 of 12 288 channels moved by more than one code, the
+/// worst of them by the full 255, against the 6 564 the rounding leaves.
+///
+/// `ffmpeg`'s bytes are the arbiter, and they are blue-fastest: given a grid
+/// whose every node stores its own file position, its nearest output selects
+/// node `b + size·(g + size·r)` for all 4 913 of them — which is also what
+/// Autodesk's own reader says the format stores.
+#[test]
+fn a_3dl_read_red_fastest_is_a_different_look_not_a_rounding_gap() {
+    let blind = Lut::Three(Lut3d {
+        size: SIZE,
+        domain_min: [0.0; 3],
+        domain_max: [1.0; 3],
+        data: three_dl_rows(),
+    });
+    let theirs = reference_3dl("nearest");
+    let mut misplaced = 0usize;
+    let mut worst = 0i32;
+    for (i, rgb) in probe_colours().iter().enumerate() {
+        let exact = blind.sample(*rgb, Interpolation::Nearest);
+        for ch in 0..3 {
+            let delta = ((exact[ch] * 255.0).round() as i32 - i32::from(theirs[i * 3 + ch])).abs();
+            misplaced += usize::from(delta > 1);
+            worst = worst.max(delta);
+        }
+    }
+    assert_eq!(
+        misplaced, 9_687,
+        "the wrong axis order moved this many channels by more than one code"
+    );
+    assert_eq!(
+        worst, 255,
+        "the wrong order's worst channel moved {worst} codes"
+    );
 }
