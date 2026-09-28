@@ -1,6 +1,6 @@
 use fvid::{
     color::{
-        ColourDescription, DisplayTarget, Grade, HdrMetadata, Interpolation, Lut, Settings,
+        ColourDescription, DisplayTarget, Grade, HdrMetadata, Interpolation, Log, Lut, Settings,
         ToneMap, Transfer,
     },
     playback_native::{NativeReader, planar8_to_rgb},
@@ -159,13 +159,13 @@ fn stream() -> Vec<u8> {
                 bytes.push(16 + (x * 7 + y * 3) as u8 % 220);
             }
         }
-        for cy in 0..height / 2 {
+        for _ in 0..height / 2 {
             for cx in 0..width / 2 {
                 bytes.push(16 + (cx * 14) as u8);
             }
         }
         for cy in 0..height / 2 {
-            for cx in 0..width / 2 {
+            for _ in 0..width / 2 {
                 bytes.push(16 + (cy * 28) as u8);
             }
         }
@@ -574,5 +574,150 @@ fn a_per_channel_cube_paints_the_shown_pictures_from_byte_tables() {
     assert!(
         channels >= 3 * 1_000,
         "only {channels} channels were compared against the cube's text"
+    );
+}
+
+/// A camera log on the thread that shows it. S-Log3 is decoded from Sony's own
+/// published numbers, written out here rather than borrowed, and put through
+/// BT.709's opto-electronic transfer from the standard's own constants, so the
+/// picture the thread shows is held to arithmetic the standard states instead
+/// of to the curve that produced it. The synthetic ramp stays above Sony's
+/// black code and out of the toe, which the profile's own tests walk.
+///
+/// A grade is a baked grid, so an input between two nodes is legitimately a
+/// step towards one of them: the comparison runs at the nodes only, where the
+/// grid carries the curve exactly and one code is the whole rounding. A grid of
+/// 86 puts a node on every third code, which leaves 1 032 of this ramp's
+/// 3 072 channels to check over 63 distinct nodes. 33 of those 63 sit two
+/// codes or more away from what sRGB's exponent makes of the same light,
+/// sixteen apart at the widest, so a wrong output curve cannot hide in the
+/// rounding.
+#[test]
+fn a_camera_log_unfolds_in_the_picture_the_thread_shows() {
+    let slog3 = |signal: f64| -> f64 {
+        let cv = signal * 1023.0;
+        if cv > 171.210_294_7 {
+            10f64.powf((cv - 420.0) / 261.5) * 0.19 - 0.01
+        } else {
+            (cv - 95.0) * 0.011_25 / (171.210_294_7 - 95.0)
+        }
+    };
+    let bt709 = |light: f64| -> f64 {
+        if light <= 0.018 {
+            4.5 * light
+        } else {
+            1.099 * light.powf(0.45) - 0.099
+        }
+    };
+    let srgb = |light: f64| -> f64 {
+        if light <= 0.003_130_8 {
+            12.92 * light
+        } else {
+            1.055 * light.powf(1.0 / 2.4) - 0.055
+        }
+    };
+    // 32x16, 4:2:0, neutral chroma, two frames of a luma ramp between Sony's
+    // black code and the top of legal range.
+    fn log_stream() -> Vec<u8> {
+        let (width, height) = (32usize, 16usize);
+        let mut bytes = b"YUV4MPEG2 W32 H16 F60:1 Ip C420jpeg\n".to_vec();
+        for frame in 0..2u8 {
+            bytes.extend_from_slice(b"FRAME\n");
+            for y in 0..height {
+                for x in 0..width {
+                    bytes.push(60 + (((x * 10 + y * 3) as u32 + u32::from(frame) * 5) % 161) as u8);
+                }
+            }
+            for _ in 0..height / 2 {
+                for _ in 0..width / 2 {
+                    bytes.push(128);
+                }
+            }
+            for _ in 0..height / 2 {
+                for _ in 0..width / 2 {
+                    bytes.push(128);
+                }
+            }
+        }
+        bytes
+    }
+    fn graded(bytes: Vec<u8>) -> NativeReader<Cursor<Vec<u8>>> {
+        let mut reader = NativeReader::without_memory_limit(Cursor::new(bytes)).unwrap();
+        assert!(reader.read_frame().unwrap());
+        reader
+    }
+    // The file names BT.709 as its own gamut, so the log curve is the only
+    // thing the grade has to do: no primaries, no matrix, no tone map.
+    let signal = ColourDescription {
+        primaries: 1,
+        transfer: 1,
+        matrix: 1,
+        full_range: false,
+    };
+    let mut settings = Settings::video(DisplayTarget::sdr(240.0));
+    settings.log = Some(Log::SLog3);
+    settings.size = 86;
+    let grade = Grade::new(signal, &HdrMetadata::default(), settings, None);
+    assert!(
+        !grade.is_identity(),
+        "a log curve asked for in place of the file's own transfer claims to change nothing"
+    );
+    let budget = graded(log_stream()).rgb_budget();
+    let mut plain = Playback::start(graded(log_stream()), None);
+    let mut shown = Playback::start(graded(log_stream()), Some(grade));
+    let mut checked = 0usize;
+    let mut walked = 0usize;
+    for frame in 0..2 {
+        let untouched = packed(first_frame(&mut plain).pixels, budget);
+        let unfolded = packed(first_frame(&mut shown).pixels, budget);
+        assert_eq!(untouched.len(), unfolded.len());
+        assert_ne!(untouched, unfolded, "the log reached no pixels");
+        let mut walk: Vec<(u8, u8)> = Vec::new();
+        for (pixel, out) in untouched
+            .as_chunks::<3>()
+            .0
+            .iter()
+            .zip(unfolded.as_chunks::<3>().0)
+        {
+            for channel in 0..3 {
+                let input = pixel[channel];
+                let code = f64::from(input) / 255.0;
+                assert!(
+                    code * 1023.0 > 171.210_294_7,
+                    "the ramp reached S-Log3's linear toe at code {input}"
+                );
+                walk.push((input, out[channel]));
+                walked += 1;
+                // A code between two nodes is where the grid is allowed to step,
+                // so only the nodes carry the standard's arithmetic exactly.
+                if input % 3 != 0 {
+                    continue;
+                }
+                let want709 = (bt709(slog3(code)) * 255.0).clamp(0.0, 255.0).round() as i16;
+                let want_srgb = (srgb(slog3(code)) * 255.0).clamp(0.0, 255.0).round() as i16;
+                let shown = i16::from(out[channel]);
+                assert!(
+                    (shown - want709).abs() <= 1,
+                    "frame {frame} channel {channel}: node {input} shown as {shown}, BT.709's own arithmetic says {want709} and sRGB's says {want_srgb}",
+                );
+                checked += 1;
+            }
+        }
+        for pair in walk.windows(2) {
+            if pair[0].0 < pair[1].0 {
+                assert!(
+                    pair[0].1 <= pair[1].1,
+                    "the log turned {} -> {} and {} -> {}, which is not one direction",
+                    pair[0].0,
+                    pair[0].1,
+                    pair[1].0,
+                    pair[1].1
+                );
+            }
+        }
+    }
+    assert!(
+        checked >= 1_000,
+        "only {checked} of {walked} channels met a node of the grid"
     );
 }
