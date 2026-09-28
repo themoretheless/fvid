@@ -34,7 +34,7 @@ fvid-platform = { path = "crates/fvid-platform", optional = true }
 eframe = { version = "0.36", optional = true }
 rfd = { version = "0.17.2", optional = true }
 cpal = { version = "0.15", optional = true }
-symphonia = { version = "0.6", optional = true, features = ["aac", "adpcm", "vorbis", "mp3", "mp2", "flac", "isomp4"] }
+symphonia = { version = "0.6", optional = true, features = ["adpcm", "vorbis", "mp3", "mp2", "flac", "isomp4"] }
 wgpu = { version = "=30.0.1", optional = true, default-features = false, features = ["std", "parking_lot", "metal", "vulkan", "dx12", "gles", "wgsl"] }
 pollster = { version = "0.4", optional = true }
 

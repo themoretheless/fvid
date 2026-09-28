@@ -654,13 +654,7 @@ mod tests {
         assert_eq!(heard, 7 * 1024);
     }
 
-    /// Six channels is the widest layout the header's three channel bits name,
-    /// and the setup block the reader writes for it is what the decoder reads.
-    /// Whether that decoder takes the layout is measured here rather than
-    /// assumed: this build's AAC decoder answers a five-one configuration with
-    /// "aac too complex", so the file keeps its geometry in the reader and gets
-    /// no sound out of symphonia. The refusal is the decoder's, not the walk's,
-    /// and the frame list above is what the reader reports for it either way.
+    /// The owned AAC decoder accepts the six-channel setup emitted by ADTS.
     #[test]
     fn a_five_one_file_states_the_setup_block_its_frames_describe() {
         let reader = AacAudioReader::open(SURROUND, Limits::default()).expect("opens");
@@ -669,11 +663,10 @@ mod tests {
             aac_specific_config(reader.extra_data()).expect("a record the parser accepts"),
             &[0x11, 0xb0]
         );
-        let error = match make_audio_decoder(TAG, reader.extra_data(), 48_000, 6, 0) {
-            Err(error) => error,
-            Ok(_) => panic!("the six-channel decoder was expected to be refused"),
-        };
-        assert!(error.to_string().contains("too complex"), "{error}");
+        let frames = reader.aac().packets();
+        let (width, heard) = decode_all(SURROUND);
+        assert_eq!(width, 6);
+        assert_eq!(heard, frames * 1024 * 6);
     }
 
     #[test]

@@ -1,8 +1,10 @@
 # Audio Implementation Status
 
-Ownership status: AAC currently uses Symphonia behind `codec::aac_decoder`.
-Its working MP4/Matroska playback is not evidence of an FVid-owned AAC codec.
-Replacing that implementation remains required by the own-codecs objective.
+Ownership status: `codec::aac_decoder` now uses FVid NativeAacDecoder for AAC
+playback; the Symphonia AAC dependency/feature is removed. Numeric protocol
+tables retain their MPL-2.0 provenance. AAC-LC 1024-sample standard layouts
+through 5.1 are implemented; 960-sample bands, 7.1/PCE and other profiles remain
+unsupported. The incremental implementation notes below describe earlier states.
 Malformed AAC packets now return errors and require decoder reset; they are
 not reported as successful empty output. Out-of-range unsigned timestamps
 are rejected before touching codec state instead of wrapping to negative PTS.
