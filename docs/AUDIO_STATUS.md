@@ -281,3 +281,11 @@ bit cursor, and rejects short-window use. The inverse quantizer now accepts the
 post-pulse maximum magnitude 8251 (8191 plus four amplitude-15 corrections).
 Tests exercise pulse parsing through inverse quantization, including both signs
 at the maximum magnitude. Full packet decoding remains pending.
+
+Owned `codec::aac_huffman` now decodes all eleven spectral codebooks and the
+scalefactor codebook, including unsigned signs and book-11 escape magnitudes.
+Reads are transactional. The initial implementation scans codewords and is not
+a throughput claim. Exhaustive tests cover codewords and spectral tuples.
+Numeric protocol tables in `aac_huffman_tables.rs` are extracted from Symphonia
+0.6.1 and retain its MPL-2.0 notice (see LICENSE-MPL-2.0); the FVid decoding
+implementation is separate. This does not yet replace the playback decoder.

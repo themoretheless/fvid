@@ -3,7 +3,7 @@ name = "fvid"
 version = "0.1.0"
 edition = "2024"
 description = "Bounded, fused planar video processing in safe Rust"
-license = "MIT"
+license = "MIT AND MPL-2.0"
 
 [profile.release]
 lto = "thin"
