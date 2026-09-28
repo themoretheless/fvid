@@ -24,6 +24,11 @@ pub struct Settings {
     /// Camera log curve the coded values carry, which replaces the file's
     /// transfer and, where the file names no primaries, its primaries too.
     pub log: Option<Log>,
+    /// The working gamut the coded values are stated in, named by the caller
+    /// instead of read off the file or the curve. It outranks both, which is how
+    /// a container that labels its bytes wrongly gets corrected; see
+    /// [`Grade::new`].
+    pub gamut: Option<Primaries>,
     /// Highlight compression to run. `None` on BT.2100 material still compresses;
     /// see [`Grade::new`].
     pub tone_map: Option<ToneMap>,
@@ -45,6 +50,7 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             log: None,
+            gamut: None,
             tone_map: None,
             target: DisplayTarget::sdr(100.0),
             to: Transfer::Srgb,
@@ -128,14 +134,17 @@ impl Grade {
             }
             None => None,
         };
-        // Which primaries the coded values are stated in, asked of the file
-        // first: a camera that named its own gamut knows these particular bytes
-        // better than any profile does. Only when it names none does a log
+        // Which primaries the coded values are stated in. A gamut the caller
+        // names comes first, because naming one is how you correct a container
+        // that labels these bytes wrongly or not at all. After that the file is
+        // asked: a camera that named its own gamut knows these particular bytes
+        // better than any profile does. Only when neither names one does a log
         // curve bring its vendor's working gamut with it, which is what the
         // camera recorded into, and BT.709 answers for material that states
-        // neither.
-        let source = signal
-            .primary_set()
+        // nothing.
+        let source = settings
+            .gamut
+            .or_else(|| signal.primary_set())
             .or_else(|| settings.log.and_then(Log::gamut))
             .unwrap_or(Primaries::BT709);
         let plan = CubePlan {
@@ -590,6 +599,48 @@ mod tests {
         };
         let grade = Grade::new(silent, &HdrMetadata::default(), logc, None);
         assert_eq!(grade.plan().source, Primaries::ALEX3_WIDE);
+    }
+
+    /// A caller who names a working gamut is correcting the file, not adding to
+    /// it: a clip can carry S-Gamut3.Cine pixels under a BT.709 tag, and the one
+    /// way to see them is to read the bytes as that gamut and ignore the label.
+    /// So the name outranks both authorities the plan consults — the primaries
+    /// the file states and the triangle a log curve lends — and it is what makes
+    /// the gamuts no curve lends reachable at all: S-Gamut3.Cine, D-Gamut and
+    /// F-Gamut C among them.
+    #[test]
+    fn a_gamut_the_caller_names_outranks_the_file_and_the_curve() {
+        let cine = Primaries::S_GAMUT3_CINE;
+        let settings = Settings {
+            log: Some(Log::SLog3),
+            gamut: Some(cine),
+            ..Settings::video(DisplayTarget::sdr(240.0))
+        };
+        // Ahead of S-Gamut3, the triangle S-Log3 would otherwise lend.
+        let grade = Grade::new(
+            ColourDescription::default(),
+            &HdrMetadata::default(),
+            settings,
+            None,
+        );
+        assert_eq!(grade.plan().source, cine);
+        // Ahead of the primaries the file states for itself.
+        let grade = Grade::new(bt709(), &HdrMetadata::default(), settings, None);
+        assert_eq!(grade.plan().source, cine);
+        // Naming nothing leaves the two authorities in charge, as before.
+        let unset = Settings {
+            gamut: None,
+            ..settings
+        };
+        let grade = Grade::new(bt709(), &HdrMetadata::default(), unset, None);
+        assert_eq!(grade.plan().source, Primaries::BT709);
+        let grade = Grade::new(
+            ColourDescription::default(),
+            &HdrMetadata::default(),
+            unset,
+            None,
+        );
+        assert_eq!(grade.plan().source, Primaries::S_GAMUT3);
     }
 
     /// The player's help text promises an order — the log unfolds the codes, the
