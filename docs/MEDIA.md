@@ -295,7 +295,8 @@ cargo run --offline --locked --no-default-features -- media decode INPUT
 
 This command builds without the legacy media adapter, emits the native decode
 statistics as JSON, and supports `--quiet` and `--` for option-like paths.
-Additional decode options continue through the existing transform parser;
+The `--from`/`--to` interval also uses the native route. Transformation options
+continue through the existing transform parser;
 unknown options are never silently ignored. CLI tests launch the built binary
 and verify all 25 frames and 320x240 geometry of the fragmented AVC fixture.
 On macOS, `otool -L` of this no-default-features binary lists only libSystem,
@@ -309,5 +310,13 @@ for prediction but discarded. Comparisons use checked integer products against
 the source timescale rather than rounded nanosecond timestamps. Invalid or
 empty ranges return errors. This API currently decodes pre-roll sequentially.
 Tests cover an interval around a fractional 1/30-second timestamp and Main10
-raw-frame seeks against the exact sequential samples. CLI `--from`/`--to` still
-use the legacy transform route until that parser is migrated.
+raw-frame seeks against the exact sequential samples. CLI `--from`/`--to` use
+this API without FFmpeg. Both boundaries are required, specified as nonnegative
+decimal seconds with at most six fractional digits and `from < to`:
+
+```sh
+cargo run --offline --locked --no-default-features -- media decode INPUT --from 0.04 --to 0.12
+```
+
+Boundary parsing uses integer microseconds, rejects overflow, and never accepts
+NaN or an incomplete pair. Geometry/filter flags still require the legacy path.

@@ -41,3 +41,34 @@ fn unknown_options_are_not_ignored_by_native_dispatch() {
         .unwrap();
     assert!(!output.status.success());
 }
+
+#[test]
+fn interval_decode_uses_native_frames_and_rejects_bad_boundaries() {
+    let input = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/hevc/main10-ipb.mp4");
+    let output = Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "decode", "--from", "0.04", "--to", "0.12"])
+        .arg(&input)
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let text = String::from_utf8(output.stdout).unwrap();
+    assert!(text.contains("\"video_frames\":2"), "{text}");
+    for flags in [
+        vec!["--from", "0.04"],
+        vec!["--from", "0.12", "--to", "0.04"],
+        vec!["--from", "NaN", "--to", "1"],
+        vec!["--from", "0", "--to", "18446744073709551615"],
+    ] {
+        let result = Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "decode"])
+            .args(flags)
+            .arg(&input)
+            .output()
+            .unwrap();
+        assert!(!result.status.success());
+    }
+}

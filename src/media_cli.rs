@@ -2,8 +2,8 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
-    if let Some((path, quiet)) = plain_decode(args) {
-        let stats = fvid::native_media::decode_video(std::path::Path::new(path))?;
+    if let Some((path, quiet, interval)) = plain_decode(args)? {
+        let stats = fvid::native_media::decode_video_interval(std::path::Path::new(path), interval)?;
         if !quiet {
             // These strings are internal backend/pixel-format names; paths and
             // other user input are never interpolated into this JSON document.
@@ -23,20 +23,45 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         Err("this media operation still requires cargo build --release --features media and FFmpeg development libraries; plain media decode INPUT is available without them".into())
     }
 }
-// Only the untransformed command is migrated here. Leave every option that
-// changes decode semantics to the full parser, never silently ignore it.
-fn plain_decode(args: &[String]) -> Option<(&str, bool)> {
-    if args.first()?.as_str() != "decode" { return None; }
-    let mut path = None;
-    let mut quiet = false;
-    let mut positional = false;
-    for arg in &args[1..] {
+type DecodeRequest<'a> = (&'a str, bool, Option<(std::time::Duration, std::time::Duration)>);
+// Unknown transformation options belong to the full parser, never ignore them.
+fn plain_decode(args: &[String]) -> Result<Option<DecodeRequest<'_>>, Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str) != Some("decode") { return Ok(None); }
+    let (mut path, mut quiet, mut positional) = (None, false, false);
+    let (mut from, mut to) = (None, None);
+    let mut args = args[1..].iter();
+    while let Some(arg) = args.next() {
         if !positional && arg == "--" { positional = true; }
         else if !positional && arg == "--quiet" { quiet = true; }
-        else if !positional && arg.starts_with('-') { return None; }
-        else if path.replace(arg.as_str()).is_some() { return None; }
+        else if !positional && (arg == "--from" || arg == "--to") {
+            let value = args.next().ok_or("missing decode interval boundary")?;
+            let time = decode_time(value)?;
+            if arg == "--from" { from = Some(time); } else { to = Some(time); }
+        }
+        else if !positional && arg.starts_with('-') { return Ok(None); }
+        else if path.replace(arg.as_str()).is_some() { return Ok(None); }
     }
-    Some((path?, quiet))
+    let interval = match (from, to) {
+        (None, None) => None,
+        (Some(a), Some(b)) if a < b => Some((a, b)),
+        _ => return Err("decode interval requires both --from and --to with from < to".into()),
+    };
+    Ok(path.map(|path| (path, quiet, interval)))
+}
+fn decode_time(text: &str) -> Result<std::time::Duration, Box<dyn std::error::Error>> {
+    let (whole, fraction) = text.split_once('.').unwrap_or((text, ""));
+    if whole.is_empty() || !whole.bytes().all(|b| b.is_ascii_digit())
+        || fraction.len() > 6 || !fraction.bytes().all(|b| b.is_ascii_digit()) {
+        return Err("time must be nonnegative decimal seconds with at most 6 fractional digits".into());
+    }
+    let whole: u64 = whole.parse()?;
+    let digits = fraction.len();
+    let fraction: u64 = if fraction.is_empty() { 0 } else { fraction.parse()? };
+    let micros = whole.checked_mul(1_000_000)
+        .and_then(|v| v.checked_add(fraction * 10u64.pow(6 - digits as u32)));
+    // Match the existing media API's signed microsecond range.
+    let micros = micros.filter(|v| *v <= i64::MAX as u64).ok_or("time overflow")?;
+    Ok(std::time::Duration::from_micros(micros))
 }
 
 #[cfg(feature = "media")]
