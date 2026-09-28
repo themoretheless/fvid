@@ -37,15 +37,26 @@ const CHUNK_WAIT: Duration = Duration::from_secs(2);
 /// the question once per frame and a megabyte asks it a hundred times less.
 pub const READ_AHEAD: usize = 1 << 20;
 
-/// How far ahead of the reader the copier runs, in bytes: the disk a spool
-/// costs while an item plays, and the span a source slower than its item can
-/// still be caught up in.
+/// How far ahead of the reader the copier runs, in bytes: the most a window
+/// costs on disk while an item plays, and the span a source slower than its
+/// item can still be caught up in. An item shorter than this gets a window of
+/// its own length rather than one it cannot fill.
 pub const SPOOL_LEAD: u64 = 256 << 20;
 
-/// The preroll a caller waits for before the first picture: five seconds is
+/// The shortest preroll a caller waits for, whatever the item: five seconds is
 /// more than a whole group of pictures needs and little enough that a source
 /// which cannot stream the item at all is known about at once.
 pub const SPOOL_PREROLL: Duration = Duration::from_secs(5);
+
+/// The longest preroll, however large the item: half a minute is as long as a
+/// viewer will stand behind a window that shows nothing.
+pub const SPOOL_PREROLL_CAP: Duration = Duration::from_secs(30);
+
+/// The share of an item the first picture waits for, where that is shorter than
+/// the cap. A tenth of a three-minute clip is eighteen seconds of it; a tenth
+/// of an hour is six minutes of black window, which no amount of buffering is
+/// worth, so the cap answers for long items and the share for short ones.
+pub const SPOOL_SHARE: f64 = 0.10;
 
 /// How long the first picture will wait for that preroll before it is shown
 /// with whatever lead a very slow source has managed.
@@ -71,6 +82,23 @@ pub fn lead_bytes(item_bytes: u64, duration: Duration, lead: Duration) -> u64 {
     }
     let lead = lead.min(duration);
     (item_bytes as u128 * lead.as_nanos() / duration.as_nanos().max(1)) as u64
+}
+
+/// How much of an item the first picture waits for: the lesser of a tenth of it
+/// and half a minute of its picture, never less than five seconds of picture,
+/// and never more than one window or the item itself. Both ends matter because
+/// the same span of time costs wildly different amounts of bytes - five seconds
+/// of a phone clip is a megabyte and of a 4K record six times the whole clip -
+/// and a fixed wait is wrong at one end or the other.
+pub fn preroll_bytes(item_bytes: u64, duration: Duration) -> u64 {
+    let share = (item_bytes as f64 * SPOOL_SHARE) as u64;
+    let longest = lead_bytes(item_bytes, duration, SPOOL_PREROLL_CAP);
+    let shortest = lead_bytes(item_bytes, duration, SPOOL_PREROLL);
+    share
+        .min(longest)
+        .max(shortest)
+        .min(item_bytes)
+        .min(SPOOL_LEAD)
 }
 
 /// Bytes of the local copy that lie in front of a reader standing at `read_at`,
@@ -238,6 +266,9 @@ pub struct Spool {
     spool: File,
     source: File,
     size: u64,
+    /// The window this spool runs in: what was asked for, less what the item
+    /// cannot fill.
+    lead: u64,
     path: PathBuf,
     position: u64,
     staging: Vec<u8>,
@@ -256,6 +287,10 @@ impl Spool {
     pub fn open(path: &Path, lead: u64) -> io::Result<Self> {
         let source = File::open(path)?;
         let size = source.metadata()?.len();
+        // A window longer than the item is disk the copier never fills: it has
+        // the whole item locally as soon as it reaches the end, which is all a
+        // short item's reader was asking for.
+        let lead = lead.min(size);
         let spool_path = temporary(path, size);
         let spool = OpenOptions::new()
             .read(true)
@@ -300,6 +335,7 @@ impl Spool {
             spool,
             source,
             size,
+            lead,
             path: spool_path,
             position: 0,
             staging: vec![0u8; CHUNK],
@@ -321,6 +357,12 @@ impl Spool {
     /// Bytes of the item the spool already holds.
     pub fn copied(&self) -> u64 {
         self.shared.held.load(Ordering::Acquire)
+    }
+
+    /// How far ahead of the reader this window runs, so what the spool costs on
+    /// disk can be read back rather than assumed from what was asked for.
+    pub fn lead(&self) -> u64 {
+        self.lead
     }
 
     /// Whether the copier has stopped, so a caller can stop waiting for a lead

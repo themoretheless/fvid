@@ -2558,11 +2558,7 @@ impl Player {
     /// for an item whose size or length the container never stated.
     fn spool_lead(&self) -> Option<u64> {
         let (bytes, duration) = (self.bytes?, self.duration?);
-        Some(crate::playback_spool::lead_bytes(
-            bytes,
-            duration,
-            crate::playback_spool::SPOOL_PREROLL,
-        ))
+        Some(crate::playback_spool::preroll_bytes(bytes, duration))
     }
 
     /// Take decoded frames from the thread and show the one whose time has come.
@@ -7275,7 +7271,7 @@ mod tests {
             duration: Some(Duration::from_secs(60)),
             ..Default::default()
         };
-        assert_eq!(player.spool_lead(), Some(100), "a twelfth of the item");
+        assert_eq!(player.spool_lead(), Some(120), "a tenth of the item");
         assert!(
             player.spool_primed(),
             "a source read directly has nothing to wait for"
