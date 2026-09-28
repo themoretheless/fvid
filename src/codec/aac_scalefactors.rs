@@ -1,0 +1,144 @@
+//! AAC band scalefactor syntax. Values retain their distinct spectral,
+//! noise-energy and intensity-position units until reconstruction.
+use super::{aac_huffman, bits::BitReader};
+use crate::{Result, invalid};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BandScale {
+    Zero,
+    Spectral(u8),
+    Noise(i16),
+    Intensity(i16),
+}
+
+/// Read group-major scalefactors. Accumulators carry across group boundaries;
+/// only the first noise band uses a nine-bit absolute delta. Failure preserves
+/// the cursor, including failures after earlier bands decoded successfully.
+pub fn read(bits: &mut BitReader<'_>, gain: u8, books: &[Vec<u8>]) -> Result<Vec<Vec<BandScale>>> {
+    if books.is_empty()
+        || books.len() > 8
+        || books.iter().any(|g| g.len() > 63)
+        || books.iter().any(|g| g.len() != books[0].len())
+    {
+        return Err(invalid("invalid AAC scalefactor group layout"));
+    }
+    let mut cursor = bits.clone();
+    let mut spectral = i16::from(gain);
+    let mut noise = i16::from(gain) - 90;
+    let mut intensity = 0i16;
+    let mut first_noise = true;
+    let mut result = Vec::with_capacity(books.len());
+    for group in books {
+        let mut scales = Vec::with_capacity(group.len());
+        for &book in group {
+            let value = match book {
+                0 => BandScale::Zero,
+                1..=11 => {
+                    spectral += aac_huffman::scalefactor(&mut cursor)?;
+                    if !(0..=255).contains(&spectral) {
+                        return Err(invalid("AAC spectral scalefactor out of range"));
+                    }
+                    BandScale::Spectral(spectral as u8)
+                }
+                13 => {
+                    noise += if first_noise {
+                        first_noise = false;
+                        cursor.read(9)? as i16 - 256
+                    } else {
+                        aac_huffman::scalefactor(&mut cursor)?
+                    };
+                    if !(-100..=155).contains(&noise) {
+                        return Err(invalid("AAC noise energy out of range"));
+                    }
+                    BandScale::Noise(noise)
+                }
+                14 | 15 => {
+                    intensity += aac_huffman::scalefactor(&mut cursor)?;
+                    if !(-155..=100).contains(&intensity) {
+                        return Err(invalid("AAC intensity position out of range"));
+                    }
+                    BandScale::Intensity(intensity)
+                }
+                _ => return Err(invalid("invalid AAC scalefactor codebook")),
+            };
+            scales.push(value);
+        }
+        result.push(scales);
+    }
+    *bits = cursor;
+    Ok(result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::codec::aac_huffman_tables::{SCF_CODEBOOK_CODES, SCF_CODEBOOK_LENS};
+    fn delta(value: i16) -> (u32, u8) {
+        let i = (value + 60) as usize;
+        (SCF_CODEBOOK_CODES[i], SCF_CODEBOOK_LENS[i])
+    }
+    fn pack(fields: &[(u32, u8)]) -> (Vec<u8>, usize) {
+        let mut out = Vec::new();
+        let mut n = 0;
+        for &(v, width) in fields {
+            for b in (0..width).rev() {
+                if n % 8 == 0 {
+                    out.push(0);
+                }
+                *out.last_mut().unwrap() |= ((v >> b & 1) as u8) << (7 - n % 8);
+                n += 1;
+            }
+        }
+        (out, n)
+    }
+    #[test]
+    fn accumulators_remain_separate_and_cross_groups() {
+        let (data, count) = pack(&[delta(3), (256, 9), delta(-4), delta(2), delta(5), delta(1)]);
+        let mut bits = BitReader::new(&data);
+        let scales = read(&mut bits, 100, &[vec![0, 1, 13, 14], vec![2, 13, 15, 0]]).unwrap();
+        assert_eq!(
+            scales,
+            vec![
+                vec![
+                    BandScale::Zero,
+                    BandScale::Spectral(103),
+                    BandScale::Noise(10),
+                    BandScale::Intensity(-4)
+                ],
+                vec![
+                    BandScale::Spectral(105),
+                    BandScale::Noise(15),
+                    BandScale::Intensity(-3),
+                    BandScale::Zero
+                ]
+            ]
+        );
+        assert_eq!(bits.position(), count);
+    }
+    #[test]
+    fn first_noise_is_absolute_even_after_group_boundary() {
+        let (data, count) = pack(&[(255, 9)]);
+        let mut bits = BitReader::new(&data);
+        assert_eq!(
+            read(&mut bits, 90, &[vec![0], vec![13]]).unwrap(),
+            vec![vec![BandScale::Zero], vec![BandScale::Noise(-1)]]
+        );
+        assert_eq!(bits.position(), count);
+    }
+    #[test]
+    fn out_of_range_truncated_and_reserved_inputs_are_transactional() {
+        for (gain, books, fields) in [
+            (255, vec![1], vec![delta(1)]),
+            (0, vec![1], vec![delta(-1)]),
+            (100, vec![14, 14], vec![delta(60), delta(60)]),
+            (0, vec![13], vec![(0, 9)]),
+            (100, vec![12], vec![]),
+            (100, vec![13], vec![(0, 1)]),
+        ] {
+            let (data, _) = pack(&fields);
+            let mut bits = BitReader::new(&data);
+            assert!(read(&mut bits, gain, &[books]).is_err());
+            assert_eq!(bits.position(), 0);
+        }
+    }
+}

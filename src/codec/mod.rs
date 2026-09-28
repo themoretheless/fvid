@@ -409,3 +409,5 @@ pub mod aac_pulse;
 
 mod aac_huffman_tables;
 pub mod aac_huffman;
+
+pub mod aac_scalefactors;

@@ -289,3 +289,9 @@ a throughput claim. Exhaustive tests cover codewords and spectral tuples.
 Numeric protocol tables in `aac_huffman_tables.rs` are extracted from Symphonia
 0.6.1 and retain its MPL-2.0 notice (see LICENSE-MPL-2.0); the FVid decoding
 implementation is separate. This does not yet replace the playback decoder.
+
+`codec::aac_scalefactors` connects section codebooks to the owned Huffman reader.
+It retains separate spectral scale, noise energy and intensity position values,
+including the first noise band's nine-bit delta and accumulation across groups.
+Invalid ranges/codebooks/truncation leave the input cursor unchanged. Noise and
+intensity reconstruction and full packet integration remain pending.
