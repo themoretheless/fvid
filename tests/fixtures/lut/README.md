@@ -291,3 +291,127 @@ values wide, which is exactly a row, and nothing in the file tells them apart.
 Fvid reads such a line as a row, which leaves the file without a size and it is
 refused. No writer seen does this; the smallest real grid measured is 7.
 
+
+## Values past the ends, and what real `.cube` files carry
+
+A LUT's numbers are not display codes. A size-2 cube whose red nodes read `1.5`
+rather than `1` says what the reader is supposed to do with that:
+
+```sh
+cd /tmp/cubeover
+python3 - <<'PY'
+rows = [f"{1.5*r} {g} {b}" for b in (0, 1) for g in (0, 1) for r in (0, 1)]
+open("over.cube", "w").write("LUT_3D_SIZE 2\n" + "\n".join(rows) + "\n")
+open("ramp256.rgb", "wb").write(bytes(v for v in range(256) for _ in range(3)))
+PY
+ffmpeg -v error -y -f rawvideo -pix_fmt rgb24 -s 256x1 -i ramp256.rgb \
+  -vf "lut3d=file=over.cube:interp=trilinear" -frames:v 1 -pix_fmt rgb24 out.rgb
+```
+
+`out.rgb` reads `(0,0,0)` (255,255,255) at the ends and `(192,128,128)` at input
+128 — the red channel is `1.5 · 0.502`, so the node reached the interpolator
+whole and only the byte it emits is decided by the range. A reader that clamps
+the node on the way in returns `(128,128,128)` there and cannot be told apart by
+any nearest-neighbour check, only by one that mixes two nodes.
+
+`over-17.cube` is that instrument at the size real files use: a per-channel ramp
+whose ends sit at exactly the minima and maxima of the six D-LUT exports in the
+census below (red −0.0227 to 1.0695, green −0.0107 to 1.0588, blue −0.0038 to
+1.0192).
+
+```sh
+cd tests/fixtures/lut
+for m in nearest trilinear tetrahedral; do
+  ffmpeg -v error -y -f rawvideo -pix_fmt rgb24 -s 64x64 -i probe.rgb \
+    -vf "lut3d=file=over-17.cube:interp=$m" -frames:v 1 -pix_fmt rgb24 \
+    "ffmpeg-over-$m.rgb"
+done
+```
+
+`ffmpeg` 9.0.2. Sizes and hashes:
+
+| file | bytes | sha256 |
+| --- | --- | --- |
+| `over-17.cube` | 133 718 | `200524c02b6bd272102939a41097d5fadec3c08e7304bb317917ade692961e3b` |
+| `ffmpeg-over-nearest.rgb` | 12 288 | `710c1588cb9f0f48b641a15fe41b915773c1e64461d5c44cfb4286878cf631d5` |
+| `ffmpeg-over-trilinear.rgb` | 12 288 | `9ba5181e5aa05eb44e1a1f7acff16f328391cef67b1cc2a5e6d730e2ba373c39` |
+| `ffmpeg-over-tetrahedral.rgb` | 12 288 | `9ba5181e5aa05eb44e1a1f7acff16f328391cef67b1cc2a5e6d730e2ba373c39` |
+
+The last two are the same bytes: the table is a ramp per channel, and both
+interpolators reproduce a linear function exactly, so this fixture separates the
+clamp question from everything else rather than testing the two interpolators
+against each other. Held to the raw nodes, Fvid is within one code on all 12 288
+channels — 6 400 of them by exactly one at nearest, 5 888 at each of the others,
+and `ffmpeg`'s byte is the saturated floor of Fvid's float in every mode. Read
+with the ends cut off before the table, as `from_cube` used to do, 384 channels
+move by more than one code through trilinear and through tetrahedral alike, the
+worst by four, and 192 channels `ffmpeg` clips to white and 64 to black come back
+inside the range instead. Nearest is untouched by the clamp, which is why the
+defect shows up in a graded picture and not in a node-by-node check.
+
+## Domains: no oracle, and the file that states it
+
+`ffmpeg` ignores `DOMAIN_MIN`/`DOMAIN_MAX` — for `.3dl` and for `.cube` both. A
+size-2 cube whose nodes are seven red nodes and one blue, run once with
+`DOMAIN_MAX 0.1 0.1 0.1` and once with the two DOMAIN lines stripped, writes the
+same 16 pixels byte for byte: the switch stays at the ramp's own midpoint, not at
+0.1. So the domain cannot be measured against `ffmpeg`, and there is no oracle at
+all for the one-dimensional case, because `lut3d` refuses a 1D `.cube` outright
+("3D LUT is empty").
+
+Two authorities are enough without it. The first is a real file: abpy's
+negative-printing table opens with `# input: log10/density, output: linear`,
+declares `DOMAIN_MIN 0` / `DOMAIN_MAX 4` and lists 1024 rows whose every value is
+`10^(in − 2)` for `in` over that declared range — the largest error over the
+whole table is 5e-9. Its values run from 0.01 to 100, which is a *linear light*
+output, not an input: the domain belongs to the index, and a reader that divides
+the rows by it pins 358 of the 1024 to white. The second is OpenColorIO's
+`FileFormatResolveCube.cpp`, which for both kinds of table stores the numbers
+unrescaled and puts a `MinMaxOp` with the declared range *in front* of the LUT
+op.
+
+## What real `.cube` files look like
+
+Sixty `.cube` files pulled from GitHub for measurement, not committed, in
+`/tmp/dlcube/samples`. Counting a colour LUT as a file with a size line:
+
+| shape | files |
+| --- | --- |
+| 3D, size 13 | 13 |
+| 3D, size 15 | 6 |
+| 3D, size 16 | 3 |
+| 3D, size 17 | 10 |
+| 3D, size 2 / 4 | 2 / 1 |
+| 1D, length 2 / 4 | 1 / 1 |
+| 1D, length 512 | 1 |
+| 1D, length 1024 | 5 |
+| 1D, length 4096 | 1 |
+| both tables in one file | 0 |
+| non-default `DOMAIN_MIN`/`MAX` | 5 |
+| CRLF line endings | 2 |
+| any value outside 0..1 | 10 |
+| no size line at all | 16 |
+
+All 44 with a size line import, and they did not before this section's fixes:
+seven of the nine 1D tables are longer than 128 entries — the Apple Log to Linear
+export at 4096 and six density/inverse tables at 512 and 1024 — and one bound for
+both size lines refused every one of them. A grid's bound is the grid's memory;
+a list's length its own rows settle. OpenColorIO keeps the two apart at 129 for a
+side and 300 000 for a table, which is where Fvid's ceilings now sit.
+
+Ten of the 44 carry values past the ends, which is what makes the clamp a look
+question rather than a validation one: the six D-LUT grids (`-0.023..1.07`), the
+Apple log-to-linear table (`-0.056..12.0`, so 3 753 of its 12 288 numbers are
+above white and 1 851 below black), and three of abpy's density tables.
+
+The 16 files with no size line are not colour LUTs and are refused: twelve
+Gaussian volumetric dumps (`Psi4 Gaussian Cube File.`), one `chem.cr` spectral
+cube, one git-lfs pointer, two prose and type-signature notes. Their first line
+says which, and it is quoted in the refusal, because the `.cube` extension is
+shared and a user typing `--lut` has no way to know. One file is imported and
+should be looked at squarely: `XUANTIE-RV` ships an ISP configuration table of
+4 913 integer rows, which is exactly `17³` — the row-count fallback added for
+undeclared `.3dl` files reads it as a 17-grid, and the two shapes are not
+distinguishable from the inside. It is refused as a colour LUT only in the sense
+that it is nonsense as one; the grid it builds divides to white, since its codes
+reach 16 303.
