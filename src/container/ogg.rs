@@ -377,7 +377,7 @@ const TABLE: [u32; 256] = {
 /// the refusal it proves is the one about the field it broke rather than the one
 /// about the checksum. A doctored copy that trips the CRC first has proved only
 /// that the CRC fires.
-#[cfg(test)]
+#[cfg(all(test, feature = "player"))]
 pub(crate) fn rechecksum(bytes: &mut [u8]) {
     let mut at = 0usize;
     while bytes.get(at..at + 4) == Some(b"OggS") {

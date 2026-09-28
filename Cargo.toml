@@ -14,7 +14,7 @@ unsafe_code = "forbid"
 
 [features]
 default = ["gpu", "cuda"]
-player = ["dep:eframe", "dep:rfd", "dep:fvid-platform", "dep:cpal", "dep:symphonia", "videotoolbox"]
+player = ["dep:eframe", "dep:rfd", "dep:fvid-platform", "dep:cpal", "dep:symphonia", "videotoolbox", "fvid-media?/player"]
 # Hardware H.264 decoding through Apple VideoToolbox; a no-op off macOS.
 videotoolbox = ["dep:fvid-vt"]
 cuda = ["dep:fvid-cuda"]
@@ -56,6 +56,7 @@ airbug-otel = { git = "https://github.com/themoretheless/airbug", branch = "rele
 fvid-vt = { path = "crates/fvid-vt", optional = true }
 
 [dev-dependencies]
+pollster = "0.4"
 naga = { version = "=30.0.1", features = ["wgsl-in", "glsl-out", "hlsl-out", "spv-out", "msl-out"] }
 airbug = { git = "https://github.com/themoretheless/airbug", branch = "release" }
 airbug-bench = { git = "https://github.com/themoretheless/airbug", branch = "release", features = ["macros"] }

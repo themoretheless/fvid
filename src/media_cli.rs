@@ -19,7 +19,7 @@ fn emit_json(quiet: bool, json: String) {
     }
 }
 
-#[cfg(feature = "media")]
+#[cfg(all(feature = "media", feature = "player"))]
 fn play_command(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     let mut audio = true;
     let mut rate = 1.0f32;
@@ -300,7 +300,14 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
     if command == "play" {
-        return play_command(&args[1..]);
+        #[cfg(feature = "player")]
+        {
+            return play_command(&args[1..]);
+        }
+        #[cfg(not(feature = "player"))]
+        {
+            return Err("play requires cargo build --features media,player".into());
+        }
     }
     if command == "capabilities" {
         if args.len() != 1 {

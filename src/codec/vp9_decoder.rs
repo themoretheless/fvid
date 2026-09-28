@@ -180,6 +180,37 @@ mod motion_tests {
 }
 
 #[cfg(test)]
+mod edge_transform_tests {
+    use super::*;
+    use crate::container::webm::{Limits, WebmReader};
+    use std::io::Cursor;
+
+    #[test]
+    fn transform_blocks_clipped_by_the_frame_edge_keep_their_context_in_frame() {
+        let mut reader = WebmReader::open(
+            Cursor::new(include_bytes!("../../tests/fixtures/vp9/edge-tx.webm")),
+            Limits::default(),
+        )
+        .unwrap();
+        let oracle = include_bytes!("../../tests/fixtures/vp9/edge-tx-last.yuv");
+        let mut decoder = Decoder::new(16 << 20);
+        let mut last = Vec::new();
+        for i in 0..reader.packets.len() {
+            let packet = reader.read_packet(i).unwrap();
+            let out = decoder.decode(&packet).unwrap();
+            last = out
+                .picture
+                .planes
+                .iter()
+                .flat_map(|p| p.samples.iter().map(|&v| v as u8))
+                .collect();
+        }
+        assert_eq!(reader.packets.len(), 56);
+        assert_eq!(last, oracle);
+    }
+}
+
+#[cfg(test)]
 mod depth_tests {
     use super::*;
     use crate::container::webm::{Limits, WebmReader};

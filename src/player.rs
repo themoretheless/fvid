@@ -13,6 +13,7 @@ use crate::container::FileTags;
 use crate::subtitles::{self, Cue};
 use crate::{
     playback_native::{NativeReader, Planar8},
+    playback_spool::SpoolHandle,
     playback_thread::{Event, Frame, Pixels, Playback},
     player_gpu::VideoCallback,
 };
@@ -910,18 +911,24 @@ pub fn run(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-// Palette from the design canvas. Every overlay element sits at 50% opacity
-// over the picture; only the window and frame backgrounds are opaque.
-const WINDOW: Color32 = Color32::from_rgb(0x0e, 0x0e, 0x10);
+// Palette from the design canvas: warm off-white type and one orange accent
+// over the picture, with the control panel and the key messages on a dark
+// backing at half opacity so the picture still shows through them.
+const WINDOW: Color32 = Color32::from_rgb(0x0b, 0x0b, 0x0a);
 const FRAME: Color32 = Color32::from_rgb(0x1a, 0x1a, 0x1d);
-const TEXT: Color32 = Color32::from_rgba_premultiplied(0x7a, 0x7a, 0x79, 128);
-const MUTED: Color32 = Color32::from_rgba_premultiplied(0x51, 0x51, 0x53, 128);
-const DIM: Color32 = Color32::from_rgba_premultiplied(0x3e, 0x3e, 0x41, 128);
-const ACCENT: Color32 = Color32::from_rgba_premultiplied(0x74, 0x71, 0x6b, 128);
-const ERROR: Color32 = Color32::from_rgba_premultiplied(0x70, 0x45, 0x3d, 128);
-const TRACK: Color32 = Color32::from_rgba_premultiplied(23, 23, 23, 23);
-const CHIP: Color32 = Color32::from_rgba_premultiplied(8, 8, 8, 8);
-const CHIP_STRONG: Color32 = Color32::from_rgba_premultiplied(13, 13, 13, 13);
+const TEXT: Color32 = Color32::from_rgb(0xee, 0xeb, 0xe4);
+const MUTED: Color32 = Color32::from_rgb(0xa8, 0xa4, 0x9b);
+const DIM: Color32 = Color32::from_rgb(0x7a, 0x77, 0x70);
+const ACCENT: Color32 = Color32::from_rgb(0xf2, 0x6b, 0x1d);
+const ERROR: Color32 = Color32::from_rgb(0xf0, 0x7a, 0x6a);
+/// The unplayed part of the progress line.
+const TRACK: Color32 = Color32::from_rgba_premultiplied(43, 42, 41, 46);
+/// The dark backing of the control panel, the key messages and the scrub tip.
+const PANEL: Color32 = Color32::from_rgba_premultiplied(6, 6, 6, 128);
+const CHIP: Color32 = Color32::from_rgba_premultiplied(6, 6, 6, 158);
+const CHIP_STRONG: Color32 = Color32::from_rgba_premultiplied(19, 19, 18, 20);
+/// Corner of the control panel and the key messages.
+const PANEL_RADIUS: u8 = 14;
 
 const BUTTON: f32 = 44.0;
 const HIDE_AFTER: Duration = Duration::from_millis(2500);
@@ -1485,6 +1492,10 @@ struct Player {
     /// The next decoded frame, waiting for its presentation deadline.
     queued: Option<Frame>,
     buffering: bool,
+    /// The local copy of a source too slow to stream its own item, and when the
+    /// wait for its lead started. Nothing while the source keeps up.
+    spool: Option<SpoolHandle>,
+    spool_wait: Option<Instant>,
     seek_preview: bool,
     seek_target: Option<Duration>,
     /// Frame on screen when it is drawn by the GPU shader (planar).
@@ -1519,6 +1530,9 @@ struct Player {
     step: u32,
     /// Transient control message (volume, rate, jump) and when it appeared.
     osd: Option<(String, Instant)>,
+    /// Whether the clock at the right end of the progress line counts what is
+    /// left rather than the whole length; clicking it flips the two.
+    remaining: bool,
     /// Cues from the subtitle source on screen.
     cues: Vec<Cue>,
     /// Label of that source: a sidecar file name or an embedded track name.
@@ -1624,6 +1638,8 @@ impl Default for Player {
             interval: None,
             queued: None,
             buffering: true,
+            spool: None,
+            spool_wait: None,
             seek_preview: false,
             seek_target: None,
             video: None,
@@ -1644,6 +1660,7 @@ impl Default for Player {
             rate_milli: 1_000,
             step: 0,
             osd: None,
+            remaining: false,
             cues: Vec::new(),
             subtitle_name: String::new(),
             subtitle_sources: Vec::new(),
@@ -1680,14 +1697,27 @@ impl Default for Player {
 
 impl Player {
     fn open(&mut self, path: PathBuf) -> crate::Result<()> {
-        let video = NativeReader::without_memory_limit(BufReader::new(File::open(&path)?))
-            .and_then(|mut reader| {
-                if reader.read_frame()? {
-                    Ok(reader)
-                } else {
-                    Err(crate::invalid("video has no frames"))
-                }
-            });
+        // A cloud drive answers in bursts no frame clock can wait inside, so
+        // the source is measured before it is read: what cannot keep up with
+        // its own item is copied to local disk while it plays.
+        let (source, spool) = crate::playback_spool::Source::open(
+            &path,
+            crate::playback_spool::SPOOL_UNDER,
+            crate::playback_spool::SPOOL_LEAD,
+        )?;
+        self.spool_wait = spool.is_some().then(Instant::now);
+        self.spool = spool;
+        let video = NativeReader::without_memory_limit(BufReader::with_capacity(
+            crate::playback_spool::READ_AHEAD,
+            source,
+        ))
+        .and_then(|mut reader| {
+            if reader.read_frame()? {
+                Ok(reader)
+            } else {
+                Err(crate::invalid("video has no frames"))
+            }
+        });
         let mut reader = match video {
             Ok(reader) => reader,
             // A file with nothing to show can still be all sound, and a listener
@@ -1874,225 +1904,19 @@ impl Player {
     /// order it holds them, until one reads a track out of it: the video reader
     /// accepts either main container and reports no codec information of its own.
     /// False when the file has no such track.
+    /// thread. The file is offered to every audio reader the table
+    /// [`AUDIO_READERS`] holds, in the order it holds them, until one reads a
+    /// track out of it: the video reader accepts either main container and
+    /// reports no codec information of its own.
+    /// False when the file has no such track.
     fn try_start_audio(&mut self, path: &Path, nth: usize) -> bool {
-        let mp4 = File::open(path).ok().and_then(|file| {
-            crate::playback_mp4_audio::Mp4AudioReader::open_at(
-                BufReader::new(file),
-                crate::container::mp4::Limits::default(),
-                nth,
-            )
-            .ok()
-            .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-        });
-        let stream = mp4
-            .or_else(|| {
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_webm_audio::WebmAudioReader::open_at(
-                            BufReader::new(file),
-                            crate::container::webm::Limits::default(),
-                            nth,
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // An AVI file keeps one program's audio in a stream of its own among the
-            // file's several, so the track key counts those; its reader frames records
-            // for the codings whose record counting it has measured, of which the
-            // Microsoft-spelled ADPCM blocks are the ones this build decodes.
-            .or_else(|| {
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_avi_audio::AviAudioReader::open_at(
-                            BufReader::new(file),
-                            crate::container::avi::Limits::default(),
-                            nth,
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // A MIDI performance is one track of its own, so the second and later
-            // track keys have nothing to land on.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_smf::SmfAudioReader::open(
-                            BufReader::new(file),
-                            crate::container::smf::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // A module is one performance too, and one track of it: every channel
-            // is mixed into what is heard rather than offered separately.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_xm::XmAudioReader::open(
-                            BufReader::new(file),
-                            crate::container::xm::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // An Ogg file names its codec in the first bytes of its first packet
-            // rather than in a field, and one program can be written as several
-            // chains after each other, so it is still one track to choose.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_ogg_audio::OggAudioReader::open(
-                            BufReader::new(file),
-                            crate::container::ogg::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // A Wave file holds one run of samples, so as with the two performances
-            // above there is no second track key to land on.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_wav::WavAudioReader::open(
-                            BufReader::new(file),
-                            crate::playback_wav::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // An AIFF file holds one run too, with its geometry stated once and in
-            // big-endian, and its rate as an 80-bit extended number.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_aiff::AiffAudioReader::open(
-                            BufReader::new(file),
-                            crate::playback_aiff::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // A Sun `.snd` header states only a geometry too, and reads even its
-            // width through a table its consumers disagree about.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_au::AuAudioReader::open(
-                            BufReader::new(file),
-                            crate::playback_au::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // A `.flac` file names itself with `fLaC` and states its geometry once,
-            // but its frames carry no length, so the walk that lists them proves
-            // each end by the checksum the frame holds.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_flac::FlacAudioReader::open(
-                            BufReader::new(file),
-                            crate::playback_flac::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // A bare MPEG audio file states nothing before its frames at all, so it
-            // opens last: its first bytes are free to look like anything, and every
-            // other reader here begins with a magic that says what it is.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_mp3::Mp3AudioReader::open(
-                            BufReader::new(file),
-                            crate::playback_mp3::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // A bare Dolby Digital file states its geometry in every frame too, but
-            // its frames open on a syncword no other reader here claims, so it is
-            // offered alongside the MPEG one and only takes a file whose whole run of
-            // frame lengths is measured out of Table 5.18.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_ac3::Ac3AudioReader::open(
-                            BufReader::new(file),
-                            crate::playback_ac3::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            })
-            // An ADTS file names its geometry in its frame headers as the two
-            // elementary readers above do, but it keeps no setup block, so its
-            // reader synthesizes the one the MP4 decoder asks for. It is offered
-            // last because its syncword is the loosest of the three: only a file
-            // whose whole run of self-stated lengths fills it is taken.
-            .or_else(move || {
-                if nth > 0 {
-                    return None;
-                }
-                File::open(path)
-                    .ok()
-                    .and_then(|file| {
-                        crate::playback_aac::AacAudioReader::open(
-                            BufReader::new(file),
-                            crate::playback_aac::Limits::default(),
-                        )
-                        .ok()
-                    })
-                    .map(|reader| Box::new(reader) as Box<dyn crate::audio::AudioStream>)
-            });
+        let mut stream = None;
+        for &attempt in AUDIO_READERS {
+            if let Some(found) = attempt(path, nth) {
+                stream = Some(found);
+                break;
+            }
+        }
         let Some(stream) = stream else {
             return false;
         };
@@ -3063,6 +2887,37 @@ impl Player {
         ctx.request_repaint();
     }
 
+    /// Whether the local copy of a slow source has taken the lead the first
+    /// picture is meant to wait for. The wait ends by itself when the copier
+    /// stops, and on a timer, because a picture shown late beats a window that
+    /// never answers.
+    fn spool_primed(&self) -> bool {
+        let Some(spool) = &self.spool else {
+            return true;
+        };
+        let Some(wanted) = self.spool_lead() else {
+            return true;
+        };
+        if spool.ready(wanted) {
+            return true;
+        }
+        match self.spool_wait {
+            Some(started) if started.elapsed() < crate::playback_spool::SPOOL_WAIT => false,
+            _ => true,
+        }
+    }
+
+    /// How many bytes of the item make its first span of local copy, or nothing
+    /// for an item whose size or length the container never stated.
+    fn spool_lead(&self) -> Option<u64> {
+        let (bytes, duration) = (self.bytes?, self.duration?);
+        Some(crate::playback_spool::lead_bytes(
+            bytes,
+            duration,
+            crate::playback_spool::SPOOL_PREROLL,
+        ))
+    }
+
     /// Take decoded frames from the thread and show the one whose time has come.
     fn present(&mut self, ctx: &egui::Context) {
         self.poll_audio();
@@ -3105,6 +2960,10 @@ impl Player {
         if self.buffering
             && let Some(frame) = &self.queued
         {
+            if !self.spool_primed() {
+                ctx.request_repaint();
+                return;
+            }
             self.deadline = if self.paused || stepping {
                 now
             } else if self.seek_preview {
@@ -3367,6 +3226,16 @@ impl Player {
                 lines.push(line.clone());
             }
         }
+        if let Some(playback) = &self.playback {
+            lines.push(buffer_text(
+                playback.filled(),
+                playback.depth(),
+                self.period,
+            ));
+        }
+        if let (Some(spool), Some(bytes), Some(total)) = (&self.spool, self.bytes, self.duration) {
+            lines.push(spool_text(spool.ahead(), bytes, total));
+        }
         if let Some(track) = self.audio_tracks.get(self.audio_track) {
             lines.push(format!(
                 "Sound: {} · {} · {}",
@@ -3419,6 +3288,25 @@ fn clock(time: Duration) -> String {
     }
 }
 
+/// The clock at the right end of the progress line: the whole length, or what
+/// is left of it behind a minus sign, the two VLC flips between on a click.
+fn end_clock(elapsed: Duration, total: Duration, remaining: bool) -> String {
+    if remaining {
+        format!("\u{2212}{}", clock(total.saturating_sub(elapsed)))
+    } else {
+        clock(total)
+    }
+}
+
+/// The chapter a moment falls in, counted from one, with its title: the last
+/// one starting at or before it. `None` before the first chapter starts.
+fn chapter_at(chapters: &[ChapterMark], at: Duration) -> Option<(usize, &str)> {
+    chapters
+        .iter()
+        .rposition(|mark| mark.start <= at)
+        .map(|nth| (nth + 1, chapters[nth].title.as_str()))
+}
+
 /// How many bytes a path takes up, once the file system has answered for it.
 fn file_size(path: &Path) -> Option<u64> {
     std::fs::metadata(path).ok().map(|meta| meta.len())
@@ -3438,6 +3326,42 @@ fn fps_text(period: Duration) -> String {
     } else {
         format!("{fps:.2}")
     }
+}
+
+/// How far along the progress line the loaded pictures reach: the point already
+/// shown, plus the pictures the queue is holding ahead of it, as a share of the
+/// item. An item with no stated length cannot carry a share of it, so the
+/// segment stops where the picture is.
+///
+/// The span is measured in time rather than in frames because a queue full of
+/// pictures means nothing on its own: twelve of them are a fifth of a second at
+/// 60 fps and a twelfth of a second at six, and what a viewer wants to know is
+/// how far ahead of the stall the player has got.
+fn buffered_fraction(played: f32, frames: usize, period: Duration, total: Option<Duration>) -> f32 {
+    let played = played.clamp(0.0, 1.0);
+    let Some(total) = total.filter(|t| *t > Duration::ZERO) else {
+        return played;
+    };
+    let ahead = period.saturating_mul(frames as u32).as_secs_f32() / total.as_secs_f32();
+    (played + ahead).clamp(0.0, 1.0)
+}
+
+/// The buffer as the panel says it: the seconds of picture in hand and how full
+/// the queue is, so a mount delivering too few bytes and a decoder too slow to
+/// use them read differently on screen.
+fn buffer_text(frames: usize, depth: usize, period: Duration) -> String {
+    let seconds = period.saturating_mul(frames as u32).as_secs_f64();
+    format!("Buffer {seconds:.1} s · {frames}/{depth}")
+}
+
+/// How far the local copy of a slow source runs ahead of the picture, in the
+/// picture's own units. The window on disk is a fixed span of bytes, so only
+/// the item's bitrate can say what it is worth, and a copier that has fallen
+/// behind the playhead shows as the shrinking lead it is rather than as a
+/// share of the file, which a window can never finish.
+fn spool_text(ahead: u64, bytes: u64, total: Duration) -> String {
+    let seconds = ahead as f64 * total.as_secs_f64() / bytes.max(1) as f64;
+    format!("Spool {seconds:.1} s ahead")
 }
 
 /// The sound of the open item, named the way a viewer names it. Every
@@ -3468,6 +3392,196 @@ fn sound_codec(tag: &str) -> String {
     }
     .to_owned()
 }
+
+/// One file format's claim on a path: open its nth audio track, or say the
+/// file isn't ours. Each reader below is the whole of its format's arm: the
+/// table only states the order they are tried in.
+type AudioAttempt = fn(&Path, usize) -> Option<Box<dyn crate::audio::AudioStream>>;
+
+/// MP4 first: it is the container the video reader already opened for the
+/// picture, so its audio track is the one most often asked for.
+fn mp4_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    let file = File::open(path).ok()?;
+    crate::playback_mp4_audio::Mp4AudioReader::<std::io::BufReader<File>>::open_at(BufReader::new(file), crate::container::mp4::Limits::default(), nth)
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A Matroska file names its tracks with the same dispatch tags the
+/// audio decoder answers for, and it follows the MP4 one the way the
+/// picture's reader order does.
+fn webm_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    let file = File::open(path).ok()?;
+    crate::playback_webm_audio::WebmAudioReader::<std::io::BufReader<File>>::open_at(BufReader::new(file), crate::container::webm::Limits::default(), nth)
+        .ok()
+        .map(boxed_stream)
+}
+
+/// An AVI file keeps one program's audio in a stream of its own among the
+/// file's several, so the track key counts those; its reader frames records
+/// for the codings whose record counting it has measured, of which the
+/// Microsoft-spelled ADPCM blocks are the ones this build decodes.
+fn avi_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    let file = File::open(path).ok()?;
+    crate::playback_avi_audio::AviAudioReader::open_at::<std::io::BufReader<File>>(BufReader::new(file), crate::container::avi::Limits::default(), nth)
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A MIDI performance is one track of its own, so the second and later
+/// track keys have nothing to land on.
+fn smf_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_smf::SmfAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::container::smf::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A module is one performance too, and one track of it: every channel is
+/// mixed into what is heard rather than offered separately.
+fn xm_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_xm::XmAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::container::xm::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// An Ogg file names its codec in the first bytes of its first packet
+/// rather than in a field, and one program can be written as several
+/// chains after each other, so it is still one track to choose.
+fn ogg_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_ogg_audio::OggAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::container::ogg::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A Wave file holds one run of samples, so as with the two performances
+/// above there is no second track key to land on.
+fn wav_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_wav::WavAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_wav::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// An AIFF file holds one run too, with its geometry stated once and in
+/// big-endian, and its rate as an 80-bit extended number.
+fn aiff_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_aiff::AiffAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_aiff::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A Sun `.snd` header states only a geometry too, and reads even its
+/// width through a table its consumers disagree about.
+fn au_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_au::AuAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_au::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A `.flac` file names itself with `fLaC` and states its geometry once,
+/// but its frames carry no length, so the walk that lists them proves
+/// each end by the checksum the frame holds.
+fn flac_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_flac::FlacAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_flac::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A bare MPEG audio file states nothing before its frames at all, so it
+/// opens last: its first bytes are free to look like anything, and every
+/// other reader here begins with a magic that says what it is.
+fn mp3_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_mp3::Mp3AudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_mp3::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// A bare Dolby Digital file states its geometry in every frame too, but
+/// its frames open on a syncword no other reader here claims, so it is
+/// offered alongside the MPEG one and only takes a file whose whole run of
+/// frame lengths is measured out of Table 5.18.
+fn ac3_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_ac3::Ac3AudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_ac3::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// An ADTS file names its geometry in its frame headers as the two
+/// elementary readers above do, but it keeps no setup block, so its
+/// reader synthesizes the one the MP4 decoder asks for. It is offered
+/// last because its syncword is the loosest of the three: only a file
+/// whose whole run of self-stated lengths fills it is taken.
+fn adts_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
+    if nth > 0 {
+        return None;
+    }
+    let file = File::open(path).ok()?;
+    crate::playback_aac::AacAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_aac::Limits::default())
+        .ok()
+        .map(boxed_stream)
+}
+
+/// Hand a reader to the player's one stream slot: every reader already
+/// implements the trait, only the trait object's type must be stated.
+fn boxed_stream<R: crate::audio::AudioStream + 'static>(
+    reader: R,
+) -> Box<dyn crate::audio::AudioStream> {
+    Box::new(reader)
+}
+
+/// The audio readers the player holds, in the order a file is offered to them.
+/// A container that names itself with a magic goes first; the bare elementary
+/// streams open last, because their first bytes are free to look like anything.
+const AUDIO_READERS: &[AudioAttempt] = &[
+    mp4_audio_stream,
+    webm_audio_stream,
+    avi_audio_stream,
+    smf_audio_stream,
+    xm_audio_stream,
+    ogg_audio_stream,
+    wav_audio_stream,
+    aiff_audio_stream,
+    au_audio_stream,
+    flac_audio_stream,
+    mp3_audio_stream,
+    ac3_audio_stream,
+    adts_audio_stream,
+];
 
 /// A file's size in the units an information panel counts in: the largest one
 /// that still leaves a whole number, with a decimal place only while the number
@@ -4347,6 +4461,12 @@ impl eframe::App for Player {
         if self.controls_visible() && !self.paused {
             ctx.request_repaint_after(HIDE_AFTER.saturating_sub(self.activity.elapsed()));
         }
+        // And once more to take a key message down when its time is up.
+        if let Some((_, since)) = &self.osd
+            && since.elapsed() < OSD_AFTER
+        {
+            ctx.request_repaint_after(OSD_AFTER.saturating_sub(since.elapsed()));
+        }
     }
 
     fn ui(&mut self, ui: &mut egui::Ui, _: &mut eframe::Frame) {
@@ -4505,11 +4625,71 @@ impl eframe::App for Player {
                 }
             }
 
-            if !visible {
-                return;
+            // A file carried over the window lights the frame up before it is let go.
+            if ctx.input(|i| !i.raw.hovered_files.is_empty()) {
+                painter.rect_stroke(
+                    frame.shrink(12.0),
+                    CornerRadius::same(20),
+                    Stroke::new(2.0, ACCENT),
+                    egui::StrokeKind::Inside,
+                );
             }
 
             let pad = 28.0_f32.min(frame.width() * 0.05);
+
+            // Captions and key messages stay on screen while the panel hides, so
+            // a key pressed during playback still answers without a mouse move.
+            // Captions go first, so a key message can still be read over them.
+            if let Some(line) = self
+                .timeline()
+                .0
+                .and_then(|at| self.subtitle_line(at))
+                .map(str::to_owned)
+            {
+                let font = FontId::proportional(self.subtitle_font);
+                let wrapped = painter.layout(
+                    line.replace('\n', " "),
+                    font,
+                    Color32::WHITE,
+                    frame.width() * 0.86,
+                );
+                let at = Pos2::new(
+                    frame.center().x,
+                    frame.bottom() - self.subtitle_margin - wrapped.size().y,
+                );
+                // A hard outline keeps white text readable on a bright picture.
+                for offset in [
+                    Vec2::new(-1.5, 0.0),
+                    Vec2::new(1.5, 0.0),
+                    Vec2::new(0.0, -1.5),
+                    Vec2::new(0.0, 1.5),
+                ] {
+                    painter.galley(at + offset, wrapped.clone(), Color32::from_rgb(0, 0, 0));
+                }
+                painter.galley(at, wrapped, Color32::from_rgb(0xff, 0xff, 0xff));
+            }
+            // The key message sits in the corner opposite the title, clear of
+            // the close button while the panel shows.
+            if let Some((message, since)) = &self.osd
+                && since.elapsed() < OSD_AFTER
+            {
+                let galley =
+                    painter.layout_no_wrap(message.clone(), FontId::proportional(15.0), TEXT);
+                let size = galley.size() + Vec2::new(32.0, 20.0);
+                let right = if visible {
+                    frame.right() - pad - BUTTON - 12.0
+                } else {
+                    frame.right() - pad
+                };
+                let backing =
+                    Rect::from_min_size(Pos2::new(right - size.x, frame.top() + 24.0), size);
+                painter.rect_filled(backing, CornerRadius::same(10), PANEL);
+                painter.galley(backing.min + Vec2::new(16.0, 10.0), galley, TEXT);
+            }
+
+            if !visible {
+                return;
+            }
 
             // Top: title block and close.
             // Keep the title block clear of the macOS traffic lights over the hidden title bar.
@@ -4563,47 +4743,6 @@ impl eframe::App for Player {
                     );
                 }
             }
-            // Subtitle first, so a control message can still be read over it.
-            if let Some(line) = self
-                .timeline()
-                .0
-                .and_then(|at| self.subtitle_line(at))
-                .map(str::to_owned)
-            {
-                let font = FontId::proportional(self.subtitle_font);
-                let wrapped = painter.layout(
-                    line.replace('\n', " "),
-                    font,
-                    Color32::WHITE,
-                    frame.width() * 0.86,
-                );
-                let at = Pos2::new(
-                    frame.center().x,
-                    frame.bottom() - self.subtitle_margin - wrapped.size().y,
-                );
-                // A hard outline keeps white text readable on a bright picture.
-                for offset in [
-                    Vec2::new(-1.5, 0.0),
-                    Vec2::new(1.5, 0.0),
-                    Vec2::new(0.0, -1.5),
-                    Vec2::new(0.0, 1.5),
-                ] {
-                    painter.galley(at + offset, wrapped.clone(), Color32::from_rgb(0, 0, 0));
-                }
-                painter.galley(at, wrapped, Color32::from_rgb(0xff, 0xff, 0xff));
-            }
-
-            if let Some((message, since)) = &self.osd
-                && since.elapsed() < OSD_AFTER
-            {
-                painter.text(
-                    Pos2::new(frame.center().x, frame.top() + 24.0),
-                    Align2::CENTER_TOP,
-                    message,
-                    FontId::proportional(15.0),
-                    TEXT,
-                );
-            }
             let close_at = Pos2::new(
                 frame.right() - pad - BUTTON / 2.0,
                 frame.top() + 24.0 + BUTTON / 2.0,
@@ -4618,14 +4757,24 @@ impl eframe::App for Player {
                 }
             }
 
-            // Bottom: progress line, then the control row.
-            let row_y = frame.bottom() - 22.0 - BUTTON / 2.0;
-            let bar_y = row_y - BUTTON / 2.0 - 14.0;
-            let bar = Rect::from_min_max(
-                Pos2::new(frame.left() + pad, bar_y - 2.0),
-                Pos2::new(frame.right() - pad, bar_y + 2.0),
+            // Bottom: one panel holding the clocks, the progress line under
+            // them and the control row, on a backing the picture shows through.
+            let panel_bottom = frame.bottom() - 20.0;
+            let row_y = panel_bottom - 8.0 - BUTTON / 2.0;
+            let bar_y = row_y - BUTTON / 2.0 - 12.0;
+            let clock_y = bar_y - 18.0;
+            let panel = Rect::from_min_max(
+                Pos2::new(frame.left() + pad, clock_y - 22.0),
+                Pos2::new(frame.right() - pad, panel_bottom),
             );
-            painter.rect_filled(bar, CornerRadius::same(2), TRACK);
+            // The panel takes the pointer itself, so a click between its
+            // buttons does not fall through to the picture and pause it.
+            ui.interact(panel, ui.id().with("panel"), Sense::click());
+            painter.rect_filled(panel, CornerRadius::same(PANEL_RADIUS), PANEL);
+            let hit = Rect::from_min_max(
+                Pos2::new(panel.left() + 22.0, bar_y - 12.0),
+                Pos2::new(panel.right() - 22.0, bar_y + 12.0),
+            );
             let (elapsed, total) = self.timeline();
             let mut fraction = match (elapsed, total) {
                 (Some(e), Some(t)) if t > Duration::ZERO => {
@@ -4637,15 +4786,30 @@ impl eframe::App for Player {
                 }
                 _ => None,
             };
+            // Where the picture actually stands, kept apart from the fraction
+            // the line may be showing under a drag: the loaded span is measured
+            // from the picture, not from the pointer.
+            let played = fraction;
+            // The pictures already in hand, drawn between the played part and
+            // the part the source has not delivered, so one line answers both
+            // questions a stall raises: how far ahead the player has got, and
+            // whether the answer is shrinking.
+            let loaded = match (played, self.playback.as_ref()) {
+                (Some(played), Some(playback)) => Some(buffered_fraction(
+                    played,
+                    playback.filled(),
+                    self.period,
+                    total,
+                )),
+                _ => None,
+            };
             // The line takes clicks and drags on a taller hit area; the seek
-            // itself happens on release so a drag decodes only once.
+            // itself happens on release so a drag decodes only once. Where the
+            // pointer rests on it, the line thickens and names the moment.
+            let mut hover = None;
             if fraction.is_some() && self.seekable {
-                let hit = Rect::from_min_max(
-                    Pos2::new(bar.left(), bar_y - 12.0),
-                    Pos2::new(bar.right(), bar_y + 12.0),
-                );
                 let seek = ui.interact(hit, ui.id().with("seek"), Sense::click_and_drag());
-                let at = |pos: Pos2| ((pos.x - bar.left()) / bar.width()).clamp(0.0, 1.0);
+                let at = |pos: Pos2| ((pos.x - hit.left()) / hit.width()).clamp(0.0, 1.0);
                 if seek.dragged()
                     && let Some(pos) = seek.interact_pointer_pos()
                 {
@@ -4661,23 +4825,112 @@ impl eframe::App for Player {
                 }
                 if seek.hovered() || self.scrub.is_some() {
                     ctx.set_cursor_icon(egui::CursorIcon::PointingHand);
+                    hover = self.scrub.or_else(|| seek.hover_pos().map(at));
                 }
                 if let Some(scrub) = self.scrub {
                     fraction = Some(scrub);
+                }
+            }
+            let thick = if hover.is_some() { 8.0 } else { 4.0 };
+            let bar = Rect::from_min_max(
+                Pos2::new(hit.left(), bar_y - thick / 2.0),
+                Pos2::new(hit.right(), bar_y + thick / 2.0),
+            );
+            let round = CornerRadius::same((thick / 2.0) as u8);
+            painter.rect_filled(bar, round, TRACK);
+            if let (Some(played), Some(loaded)) = (played, loaded) {
+                let from = bar.left() + bar.width() * played;
+                let to = bar.left() + bar.width() * loaded;
+                if to > from {
+                    painter.rect_filled(
+                        Rect::from_min_max(Pos2::new(from, bar.min.y), Pos2::new(to, bar.max.y)),
+                        CornerRadius::same(2),
+                        DIM,
+                    );
                 }
             }
             if let Some(fraction) = fraction {
                 let x = bar.left() + bar.width() * fraction;
                 painter.rect_filled(
                     Rect::from_min_max(bar.min, Pos2::new(x, bar.max.y)),
-                    CornerRadius::same(2),
+                    round,
                     ACCENT,
                 );
-                painter.circle_filled(Pos2::new(x, bar_y), 7.0, TEXT);
+            }
+            // Chapter starts cut the line, the way the canvas marks them.
+            if let Some(total) = total.filter(|t| *t > Duration::ZERO) {
+                for mark in self.chapters.iter().filter(|m| m.start > Duration::ZERO) {
+                    let x =
+                        bar.left() + bar.width() * (mark.start.as_secs_f32() / total.as_secs_f32());
+                    if x < bar.right() {
+                        painter.rect_filled(
+                            Rect::from_min_max(
+                                Pos2::new(x - 1.0, bar.top()),
+                                Pos2::new(x + 1.0, bar.bottom()),
+                            ),
+                            CornerRadius::ZERO,
+                            WINDOW,
+                        );
+                    }
+                }
+            }
+            if let Some(fraction) = fraction {
+                painter.circle_filled(
+                    Pos2::new(bar.left() + bar.width() * fraction, bar_y),
+                    7.0,
+                    TEXT,
+                );
+            }
+            // The tip over the panel: the moment under the pointer and the
+            // chapter it falls in.
+            if let (Some(hover), Some(total)) = (hover, total) {
+                let moment = total.mul_f32(hover);
+                let mut label = clock(moment);
+                if let Some((_, title)) = chapter_at(&self.chapters, moment)
+                    && !title.is_empty()
+                {
+                    label = format!("{label} \u{b7} {title}");
+                }
+                let galley = painter.layout_no_wrap(label, FontId::monospace(13.0), TEXT);
+                let size = galley.size() + Vec2::new(16.0, 8.0);
+                let x = (bar.left() + bar.width() * hover - size.x / 2.0)
+                    .clamp(frame.left() + 8.0, frame.right() - 8.0 - size.x);
+                let tip = Rect::from_min_size(Pos2::new(x, panel.top() - 8.0 - size.y), size);
+                painter.rect_filled(tip, CornerRadius::same(6), PANEL);
+                painter.galley(tip.min + Vec2::new(8.0, 4.0), galley, TEXT);
+            }
+            // Clocks over the two ends of the line; the right one flips between
+            // the whole length and what is left of it.
+            if let Some(elapsed) = elapsed {
+                let font = FontId::monospace(13.0);
+                painter.text(
+                    Pos2::new(hit.left(), clock_y),
+                    Align2::LEFT_CENTER,
+                    clock(elapsed),
+                    font.clone(),
+                    TEXT,
+                );
+                if let Some(total) = total {
+                    let shown = painter.text(
+                        Pos2::new(hit.right(), clock_y),
+                        Align2::RIGHT_CENTER,
+                        end_clock(elapsed, total, self.remaining),
+                        font,
+                        MUTED,
+                    );
+                    let flip =
+                        ui.interact(shown.expand(6.0), ui.id().with("end-clock"), Sense::click());
+                    if flip.hovered() {
+                        ctx.set_cursor_icon(egui::CursorIcon::PointingHand);
+                    }
+                    if flip.clicked() {
+                        self.remaining = !self.remaining;
+                    }
+                }
             }
 
-            // Left group: play/pause, restart, time.
-            let mut x = frame.left() + pad + BUTTON / 2.0;
+            // Left group: play/pause, restart, the chapter playing.
+            let mut x = panel.left() + 8.0 + BUTTON / 2.0;
             let playing = self.item_open() && !self.paused && !self.ended;
             let clicked = round_button(
                 ui,
@@ -4713,29 +4966,28 @@ impl eframe::App for Player {
             ) {
                 self.restart();
             }
-            x += BUTTON / 2.0 + 16.0;
-            if let Some(elapsed) = elapsed {
-                let font = FontId::monospace(13.0);
+            x += BUTTON / 2.0 + 12.0;
+            if let Some((nth, title)) = elapsed.and_then(|at| chapter_at(&self.chapters, at)) {
                 let end = painter.text(
                     Pos2::new(x, row_y),
                     Align2::LEFT_CENTER,
-                    clock(elapsed),
-                    font.clone(),
-                    TEXT,
+                    format!("Chapter {nth} of {}", self.chapters.len()),
+                    FontId::proportional(13.0),
+                    MUTED,
                 );
-                if let Some(total) = total {
+                if !title.is_empty() {
                     painter.text(
-                        Pos2::new(end.right() + 6.0, row_y),
+                        Pos2::new(end.right() + 10.0, row_y),
                         Align2::LEFT_CENTER,
-                        format!("/ {}", clock(total)),
-                        font,
-                        DIM,
+                        title,
+                        FontId::proportional(13.0),
+                        TEXT,
                     );
                 }
             }
 
-            // Right group: open, fullscreen.
-            let mut x = frame.right() - pad - BUTTON / 2.0;
+            // Right group: rate, open, fullscreen.
+            let mut x = panel.right() - 8.0 - BUTTON / 2.0;
             if round_button(
                 ui,
                 "fullscreen",
@@ -4768,6 +5020,35 @@ impl eframe::App for Player {
             if open.clicked() {
                 self.pick_file(Pick::Item);
             }
+            // A rate other than the recorded one stays in sight in the accent,
+            // and a click on it goes back to 1x, as the `\` key does.
+            if self.rate_milli != 1_000 {
+                let font = FontId::monospace(14.0);
+                let label = rate_osd(self.rate_milli);
+                let width = painter
+                    .layout_no_wrap(label.clone(), font.clone(), ACCENT)
+                    .size()
+                    .x
+                    + 24.0;
+                let rate_rect = Rect::from_center_size(
+                    Pos2::new(open_rect.left() - 4.0 - width / 2.0, row_y),
+                    Vec2::new(width, BUTTON),
+                );
+                let rate = ui.interact(rate_rect, ui.id().with("rate"), Sense::click());
+                if rate.hovered() {
+                    painter.rect_filled(rate_rect, CornerRadius::same(10), CHIP_STRONG);
+                }
+                painter.text(
+                    rate_rect.center(),
+                    Align2::CENTER_CENTER,
+                    label,
+                    font,
+                    ACCENT,
+                );
+                if rate.clicked() {
+                    self.set_rate(1_000);
+                }
+            }
         });
     }
 }
@@ -4779,13 +5060,14 @@ mod tests {
         Grading, HIDE_AFTER, LoopMark, NO_CROP, PANEL_NITS, Panel, PathBuf, Pixels, Planar8,
         PlayArgs, PlayBounds, Player, Pos2, RATES, Rect, Repeat, SubtitleSource, VOLUME_MAX, Vec2,
         adjust_luma, adjust_rgb, adjust_scalars, advance, aspect_label, aspect_osd, aspect_step,
-        bitrate_text, byte_size, chapter_ahead, colour_line, container_facts, crop_insets,
-        crop_label, crop_osd, crop_step, cropped_size, cycle_repeat, deal_cycle, delay_step,
-        delayed_clock, display_size, expand_inputs, file_size, fps_text, grade_text, jump_size,
-        light_line, loop_press, loop_rewind, paced_period, parse_clock, parse_play_args,
-        playlist_osd, position_from_digit, rate_fine, rate_osd, rate_step, repeat_osd, retreat,
-        shown_insets, shown_size, snapshot_name, sound_codec, subtitles, track_step, uv_window,
-        video_rect, volume_osd, volume_step, zoom_osd, zoom_step,
+        bitrate_text, buffer_text, buffered_fraction, byte_size, chapter_ahead, chapter_at,
+        colour_line, container_facts, crop_insets, crop_label, crop_osd, crop_step, cropped_size,
+        cycle_repeat, deal_cycle, delay_step, delayed_clock, display_size, end_clock,
+        expand_inputs, file_size, fps_text, grade_text, jump_size, light_line, loop_press,
+        loop_rewind, paced_period, parse_clock, parse_play_args, playlist_osd, position_from_digit,
+        rate_fine, rate_osd, rate_step, repeat_osd, retreat, shown_insets, shown_size,
+        snapshot_name, sound_codec, spool_text, subtitles, track_step, uv_window, video_rect,
+        volume_osd, volume_step, zoom_osd, zoom_step,
     };
     use super::{Event, NativeReader, Playback};
     use crate::color::{
@@ -5530,6 +5812,24 @@ mod tests {
         std::fs::remove_dir_all(&directory).unwrap();
     }
 
+    /// The buffer and spool lines count progress that moves while the panel is
+    /// read, so their numbers differ between runs; the panel tests hold every
+    /// other line to an exact list and flatten those two to fixed words.
+    fn panel_lines(lines: &[String]) -> Vec<String> {
+        lines
+            .iter()
+            .map(|line| {
+                if line.starts_with("Buffer ") {
+                    "Buffer …".to_owned()
+                } else if line.starts_with("Spool ") {
+                    "Spool …".to_owned()
+                } else {
+                    line.clone()
+                }
+            })
+            .collect()
+    }
+
     /// The panel says what the open item is in the player's own words: the
     /// picture names the codec its container tagged, the size it is stored at
     /// and the rate it runs at; a track names its place in the file's own list;
@@ -5559,9 +5859,10 @@ mod tests {
             ""
         };
         assert_eq!(
-            player.info_lines(),
+            panel_lines(&player.info_lines()),
             [
                 format!("Video: H.264 · 64×64 · 25 fps{decoder}"),
+                "Buffer …".to_owned(),
                 "Sound: 1/3 · AAC · Первая · 1 ch 48000 Hz".to_owned(),
                 "Subtitles: 1/2 · Титры".to_owned(),
                 "File: 21 kB · 0:00 · 413 kb/s".to_owned(),
@@ -5593,9 +5894,10 @@ mod tests {
         player.play_index(0);
         assert!(player.error.is_none(), "{:?}", player.error);
         assert_eq!(
-            player.info_lines(),
+            panel_lines(&player.info_lines()),
             [
                 "Video: VP9 · 16×16 · 4 fps",
+                "Buffer …",
                 "File: 1.2 kB · 0:04 · 2 kb/s",
                 "Chapters: 3",
             ]
@@ -7211,6 +7513,37 @@ mod tests {
     }
 
     #[test]
+    fn the_end_clock_flips_between_length_and_what_is_left() {
+        let (at, total) = (Duration::from_secs(2_537), Duration::from_secs(7_083));
+        assert_eq!(end_clock(at, total, false), "1:58:03");
+        assert_eq!(end_clock(at, total, true), "\u{2212}1:15:46");
+        assert_eq!(end_clock(total * 2, total, true), "\u{2212}0:00");
+    }
+
+    #[test]
+    fn a_moment_falls_in_the_last_chapter_started() {
+        let chapters = [
+            ChapterMark {
+                start: Duration::from_secs(10),
+                title: "Opening".to_owned(),
+            },
+            ChapterMark {
+                start: Duration::from_secs(60),
+                title: String::new(),
+            },
+        ];
+        assert_eq!(chapter_at(&chapters, Duration::from_secs(5)), None);
+        assert_eq!(
+            chapter_at(&chapters, Duration::from_secs(10)),
+            Some((1, "Opening"))
+        );
+        assert_eq!(
+            chapter_at(&chapters, Duration::from_secs(90)),
+            Some((2, ""))
+        );
+    }
+
+    #[test]
     fn clocks_are_seconds_or_a_ladder_of_them() {
         assert_eq!(parse_clock("90").expect("plain seconds"), seconds(90_000));
         assert_eq!(parse_clock("1:30").expect("minutes"), seconds(90_000));
@@ -7221,6 +7554,102 @@ mod tests {
         assert!(parse_clock("-5").is_err());
         assert!(parse_clock("").is_err());
         assert!(parse_clock("abc").is_err());
+    }
+
+    /// The loaded span is a share of the item, so it is the same length on
+    /// screen whatever the frame rate, and it never runs past the end or back
+    /// before the picture.
+    #[test]
+    fn the_buffer_span_scales_with_the_item() {
+        let tenth = Duration::from_millis(40);
+        // Ten pictures of a 40 ms period are 0.4 s of picture: a thirtieth of a
+        // twelve-second item, a tenth of a four-second one.
+        assert!(
+            (buffered_fraction(0.0, 10, tenth, Some(seconds(12_000))) - 1.0 / 30.0).abs() < 1e-6
+        );
+        assert!(
+            (buffered_fraction(0.0, 10, tenth, Some(seconds(4_000))) - 1.0 / 10.0).abs() < 1e-6
+        );
+        // Further along the item, the same load adds the same share.
+        assert!(
+            (buffered_fraction(0.9, 10, tenth, Some(seconds(12_000))) - (0.9 + 1.0 / 30.0)).abs()
+                < 1e-6
+        );
+        // And the span never runs past the end of the line.
+        assert_eq!(
+            buffered_fraction(0.99, 1_000, Duration::from_secs(1), Some(seconds(60_000))),
+            1.0
+        );
+        // Nothing loaded reads as the picture itself, and an item of no stated
+        // length has no share to draw.
+        assert_eq!(
+            buffered_fraction(0.25, 0, tenth, Some(seconds(12_000))),
+            0.25
+        );
+        assert_eq!(buffered_fraction(0.25, 9, tenth, None), 0.25);
+        assert_eq!(
+            buffered_fraction(0.25, 9, tenth, Some(Duration::ZERO)),
+            0.25
+        );
+    }
+
+    /// The panel says the same thing in seconds, which is what differs between
+    /// a full queue on a fast source and a full queue on a slow one.
+    #[test]
+    fn the_buffer_line_names_seconds_and_slots() {
+        assert_eq!(
+            buffer_text(6, 12, Duration::from_millis(40)),
+            "Buffer 0.2 s · 6/12"
+        );
+        assert_eq!(
+            buffer_text(0, 2, Duration::from_millis(40)),
+            "Buffer 0.0 s · 0/2"
+        );
+    }
+
+    /// A copy of a slow source is worth the picture it covers, so the panel
+    /// says both how far it has got and how much of the file that is.
+    #[test]
+    fn the_local_copy_says_what_it_covers() {
+        assert_eq!(
+            spool_text(600, 1200, Duration::from_secs(60)),
+            "Spool 30.0 s ahead"
+        );
+        assert_eq!(
+            spool_text(0, 1200, Duration::from_secs(60)),
+            "Spool 0.0 s ahead",
+            "a bitten lead is the wait, not an empty copy"
+        );
+        // A window is a span of bytes, not a share of the file: a 3.6 GB item
+        // at a 256 MiB lead can never show more than the lead is worth.
+        assert_eq!(
+            spool_text(256 << 20, 3603 << 20, Duration::from_secs(3603)),
+            "Spool 256.0 s ahead"
+        );
+        assert_eq!(spool_text(0, 0, Duration::ZERO), "Spool 0.0 s ahead");
+    }
+
+    /// The preroll is a span of picture paid for in bytes, so it needs the
+    /// item's size and length together; without one of them nothing is waited
+    /// for, and a first picture is not held behind a question no one can answer.
+    #[test]
+    fn the_preroll_is_measured_against_the_item_it_buffers_for() {
+        let player = Player {
+            bytes: Some(1200),
+            duration: Some(Duration::from_secs(60)),
+            ..Default::default()
+        };
+        assert_eq!(player.spool_lead(), Some(100), "a twelfth of the item");
+        assert!(
+            player.spool_primed(),
+            "a source read directly has nothing to wait for"
+        );
+        let blind = Player {
+            bytes: Some(1200),
+            ..Default::default()
+        };
+        assert_eq!(blind.spool_lead(), None, "an unsized item has no lead");
+        assert!(blind.spool_primed());
     }
 
     #[test]

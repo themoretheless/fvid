@@ -2117,16 +2117,22 @@ mod tests {
     /// 17 856 samples of one byte each in one `stts` run of one tick, `stsc` lays them out as
     /// two chunks of 12 252 and 5 604, and `stco` puts them at 633 536 and 886 874 inside an
     /// `mdat` that ends at 887 808. Every one of those numbers is the file's own.
+    #[cfg(feature = "player")]
     const MJPEGA: &[u8] = include_bytes!("../../tests/fixtures/mace/mjpega.mov");
     /// Where the take states the four of those numbers a lying file can get wrong: the
     /// `stts` run and the `stsz` count that both name 17 856 samples, the `stsc` entry that
     /// names a chunk of 12 252 of them, and the `stco` offset the last chunk starts at.
+    #[cfg(feature = "player")]
     const STTS_COUNT: usize = 889_166;
+    #[cfg(feature = "player")]
     const STSZ_COUNT: usize = 889_230;
+    #[cfg(feature = "player")]
     const STSC_PER_CHUNK: usize = 889_194;
+    #[cfg(feature = "player")]
     const STCO_SECOND: usize = 889_254;
 
     /// The take with its big-endian table fields rewritten.
+    #[cfg(feature = "player")]
     fn stating(patches: &[(usize, u32)]) -> Vec<u8> {
         let mut bytes = MJPEGA.to_vec();
         for (at, value) in patches {
@@ -2163,6 +2169,7 @@ mod tests {
 
     #[cfg(feature = "player")]
     #[test]
+    #[cfg(feature = "player")]
     fn a_mace_track_is_indexed_in_blocks_though_its_table_counts_samples() {
         use crate::audio::AudioStream as _;
         // The reader's grain is a block, so the packets are the 2 976 of them the 17 856 samples
@@ -2185,6 +2192,7 @@ mod tests {
 
     #[cfg(feature = "player")]
     #[test]
+    #[cfg(feature = "player")]
     fn a_mace_table_that_does_not_divide_into_blocks_is_refused() {
         // The three ways the geometry can lie, each caught before a packet is read: a sample
         // count that is not a whole number of six-sample blocks, a chunk that is not either,
@@ -2440,6 +2448,7 @@ mod tests {
 
     #[cfg(feature = "player")]
     #[test]
+    #[cfg(feature = "player")]
     fn the_sound_a_fragment_indexes_is_the_sound_the_player_hears() {
         // The route a file takes to the speaker, not just the index behind it:
         // the audio reader opens the fragmented take the same way it opens an

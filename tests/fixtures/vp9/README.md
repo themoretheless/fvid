@@ -36,6 +36,28 @@ Each matching `.yuv` is generated with `ffmpeg -i FILE.webm -fps_mode passthroug
 -pix_fmt FORMAT -f rawvideo FILE.yuv`, using the corresponding 8/10/12-bit 4:2:0
 format. Tests compare every decoded sample; high-bit-depth files are little-endian.
 
+## Transform blocks clipped by the frame edge
+
+`edge-tx.webm` is 56 frames of 512x56, cropped from the bottom band of a
+1920x1080 sequence, so the picture is one superblock row tall and that row is
+clipped by eight lines:
+
+```sh
+ffmpeg -f rawvideo -pix_fmt yuv420p -s 1920x1080 -r 30 -i band.yuv \
+  -frames:v 56 -vf crop=512:56:0:1024 -c:v libvpx-vp9 -deadline good \
+  -cpu-used 3 -frame-parallel 0 -auto-alt-ref 0 -lag-in-frames 0 -aq-mode 0 \
+  -crf 30 -b:v 0 -g 8 edge-tx.webm
+```
+
+There, a transform block can straddle the bottom edge. Such a block carries its
+nonzero-coefficient context into the four-pixel units that lie inside the frame
+and clears the units beyond it; writing the value across the whole span instead
+makes a later block in the same row band decode its coefficients with the wrong
+neighbour context, which desynchronises the tile and fails packet 54. The matching
+oracle `edge-tx-last.yuv` holds only the final frame (43008 bytes, raw 4:2:0 of the
+whole picture) because the divergence starts at frame 54; earlier frames are
+identical either way.
+
 ## Backward probability adaptation
 
 The `adaptive` fixtures contain only generated testsrc2 images. Common encoding:

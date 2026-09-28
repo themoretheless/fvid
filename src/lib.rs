@@ -36,6 +36,7 @@ pub mod playback_native;
 pub mod playback_ogg_audio;
 #[cfg(feature = "player")]
 pub mod playback_smf;
+pub mod playback_spool;
 pub mod playback_thread;
 #[cfg(feature = "player")]
 pub mod playback_wav;

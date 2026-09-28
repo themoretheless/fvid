@@ -2,31 +2,64 @@
 //! window. The decode thread produces raw pictures; a converter thread turns
 //! them into RGB while the next picture is being decoded, so throughput is
 //! the slower of the two stages rather than their sum. Frames flow through a
-//! small bounded queue; control messages (pause, rewind, seek) go the other
-//! way. Every frame carries the generation of the last rewind or seek so
-//! stale queued frames can be dropped.
+//! queue sized to a span of presentation time and a budget of bytes; control
+//! messages (pause, rewind, seek) go the other way. Every frame carries the
+//! generation of the last rewind or seek so stale queued frames can be dropped.
 use crate::color::Grade;
 use crate::playback_native::{
-    avc_to_planar8, planar8_to_rgb, rotate_planar8, yuv_to_rgb, NativeReader, Planar8, RawFrame,
+    NativeReader, Planar8, RawFrame, avc_to_planar8, planar8_to_rgb, rotate_planar8, yuv_to_rgb,
 };
 use std::{
     io::{BufRead, Seek},
     sync::{
-        mpsc::{sync_channel, Receiver, RecvTimeoutError, SyncSender, TryRecvError, TrySendError},
         Arc,
+        atomic::{AtomicUsize, Ordering},
+        mpsc::{Receiver, RecvTimeoutError, SyncSender, TryRecvError, TrySendError, sync_channel},
     },
     thread,
     time::Duration,
 };
 
-/// Bounded presentation lookahead absorbs expensive reference pictures and file I/O.
-/// Twenty-four 60 Hz frames cover about 400 ms without dropping or duplicating frames.
-const QUEUE: usize = 24;
+/// Presentation slack the queue holds, matching the `LEAD` the audio thread
+/// keeps ahead of its device so both clocks wait the same span of time.
+const LEAD: Duration = Duration::from_millis(200);
 
-/// Fill twelve presentation intervals before starting/restarting the clock.
-/// Cap startup latency for low-frame-rate sources.
+/// Most and least a queue may hold for one item, whatever its rate and size.
+/// The floor keeps a picture in hand while the window shows one; the ceiling
+/// stops a very high frame rate from asking for an unreasonable count.
+const QUEUE_MIN: usize = 2;
+const QUEUE_MAX: usize = 24;
+
+/// Most picture data a queue may hold for one item.
+const QUEUE_BYTES: usize = 64 << 20;
+
+/// Queue depth holding `LEAD` of presentation within `QUEUE_BYTES` of pictures.
+///
+/// A fixed count is wrong at both ends. Twenty-four pictures are 4.8 seconds of
+/// slack at 5 fps and 200 ms at 120, so the same constant gives one source a
+/// buffer twenty-four times the other's; and the same count holds 142 MiB of
+/// 1080p RGB or 570 MiB at 4K, which the reader's own budget never covered.
+/// How much the window needs is a span of time, and what the item costs is a
+/// span of bytes, so depth is taken from those and not from a count.
+pub fn queue_depth(period: Duration, frame_bytes: usize) -> usize {
+    if period.is_zero() {
+        return QUEUE_MAX;
+    }
+    let frames = LEAD
+        .as_nanos()
+        .div_ceil(period.as_nanos().max(1))
+        .clamp(QUEUE_MIN as u128, QUEUE_MAX as u128) as usize;
+    if frame_bytes == 0 {
+        return frames;
+    }
+    frames.min(QUEUE_BYTES / frame_bytes).max(QUEUE_MIN)
+}
+
+/// Fill the queue's span of presentation before starting/restarting the clock,
+/// so the first picture appears with the buffer as full as it ever runs.
+/// The cap keeps a low-frame-rate source from waiting out a stale twelve.
 pub fn startup_buffer(period: Duration) -> Duration {
-    period.saturating_mul(12).min(Duration::from_millis(250))
+    period.saturating_mul(12).min(LEAD)
 }
 
 /// Picture data as the window draws it: packed RGB through an egui texture,
@@ -146,6 +179,12 @@ fn into_pixels(
 pub struct Playback {
     commands: SyncSender<Command>,
     events: Receiver<Event>,
+    /// How many pictures the event queue can hold; `filled` is measured against it.
+    depth: usize,
+    /// Pictures sitting in the queue: the converter raises it as one goes in,
+    /// the window lowers it as one comes out. `Receiver::len` is not available,
+    /// and a display of the buffer has to say something between the two ends.
+    filled: Arc<AtomicUsize>,
     generation: u64,
     decoder: Option<thread::JoinHandle<()>>,
     converter: Option<thread::JoinHandle<()>>,
@@ -160,9 +199,16 @@ impl Playback {
         grade: Option<Grade>,
     ) -> Self {
         let budget = reader.rgb_budget();
+        let [width, height] = reader.dimensions();
+        let depth = queue_depth(
+            reader.frame_period(),
+            width.saturating_mul(height).saturating_mul(3),
+        );
         let (commands, command_rx) = sync_channel(16);
         let (stage_tx, stage_rx) = sync_channel::<Stage>(1);
-        let (event_tx, events) = sync_channel(QUEUE);
+        let (event_tx, events) = sync_channel(depth);
+        let filled = Arc::new(AtomicUsize::new(0));
+        let queued = filled.clone();
         let decoder = thread::Builder::new()
             .name("fvid-decode".into())
             .spawn(move || {
@@ -208,6 +254,10 @@ impl Playback {
                         },
                         Stage::Event(event) => event,
                     };
+                    // Counted before the send: the window can take the picture
+                    // out of the channel before this thread is scheduled again,
+                    // and a count raised after that would leave it high forever.
+                    queued.fetch_add(1, Ordering::Relaxed);
                     if event_tx.send(event).is_err() {
                         return;
                     }
@@ -217,10 +267,25 @@ impl Playback {
         Self {
             commands,
             events,
+            depth,
+            filled,
             generation: 0,
             decoder: Some(decoder),
             converter: Some(converter),
         }
+    }
+    /// How many pictures the queue can hold for this item.
+    pub fn depth(&self) -> usize {
+        self.depth
+    }
+    /// How many decoded pictures are waiting for the window right now. Empty
+    /// means the producer cannot keep up, whether that is the decoder or the
+    /// bytes behind it; full means presentation is the only thing in the way.
+    ///
+    /// A converter held at a full channel has already counted the picture it is
+    /// trying to place, so the reading is kept inside the depth it is drawn against.
+    pub fn filled(&self) -> usize {
+        self.filled.load(Ordering::Relaxed).min(self.depth)
     }
     /// Generation of the most recent rewind or seek; frames from earlier
     /// generations are stale.
@@ -241,9 +306,17 @@ impl Playback {
         self.generation += 1;
         let _ = self.commands.send(Command::Seek(target));
     }
-    /// The next queued event, if any, without waiting.
+    /// Take the next event, counting it out of the queue the fill display reads.
     pub fn poll(&self) -> Option<Event> {
-        self.events.try_recv().ok()
+        let event = self.events.try_recv().ok();
+        if event.is_some() {
+            let _ = self
+                .filled
+                .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| {
+                    Some(n.saturating_sub(1))
+                });
+        }
+        event
     }
 }
 
