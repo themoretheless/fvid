@@ -116,15 +116,20 @@ fn a_forward_seek_costs_a_window_rather_than_the_item_behind_it() {
     // The 48 MiB the reader skipped are nobody's business: chasing them would
     // copy, and pay network for, the whole item to reach one byte of it.
     let spool = temporary_of("follow").expect("a spool file for the item");
-    let held = fs::metadata(&spool).unwrap();
-    let blocks = {
+    // How much disk a spool costs is a block-count question, and blocks are a
+    // POSIX idea: Windows metadata answers a file's length, which the ring is
+    // whatever its size, so it cannot say how many bytes landed in it.
+    #[cfg(unix)]
+    {
         use std::os::unix::fs::MetadataExt;
-        held.blocks() * 512
-    };
-    assert!(
-        blocks < (6 << 20),
-        "the spool holds {blocks} bytes of the 64 MiB item after a jump to {jump}"
-    );
+        let blocks = fs::metadata(&spool).unwrap().blocks() * 512;
+        assert!(
+            blocks < (6 << 20),
+            "the spool holds {blocks} bytes of the 64 MiB item after a jump to {jump}"
+        );
+    }
+    #[cfg(not(unix))]
+    let _ = spool;
     drop(source);
     let _ = fs::remove_dir_all(path.parent().unwrap());
 }
