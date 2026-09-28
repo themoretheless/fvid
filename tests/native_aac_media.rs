@@ -167,3 +167,38 @@ fn mp4_interval_is_relative_to_edited_audio_and_clips_at_tail() {
         assert!(out.is_empty());
     }
 }
+
+#[test]
+fn mp4_clock_rescaling_preserves_pcm_and_edit_selection() {
+    use std::time::Duration;
+    let original = include_bytes!("fixtures/audio/aac-native-edit.m4a");
+    let mut rescaled = original.to_vec();
+    let at = |tag: &[u8]| original.windows(4).position(|v| v == tag).unwrap();
+    let double = |bytes: &mut [u8], offset: usize| {
+        let value = u32::from_be_bytes(bytes[offset..offset+4].try_into().unwrap());
+        bytes[offset..offset+4].copy_from_slice(&(value * 2).to_be_bytes());
+    };
+    let mdhd = at(b"mdhd");
+    assert_eq!(original[mdhd+4], 0);
+    double(&mut rescaled, mdhd+16); // timescale
+    double(&mut rescaled, mdhd+20); // track duration
+    let stts = at(b"stts");
+    let entries = u32::from_be_bytes(original[stts+8..stts+12].try_into().unwrap());
+    for entry in 0..entries as usize { double(&mut rescaled, stts+16+entry*8); }
+    let elst = at(b"elst");
+    assert_eq!(original[elst+4], 0);
+    double(&mut rescaled, elst+16); // media_time; movie duration stays unchanged
+    for interval in [None, Some((Duration::from_micros(30001), Duration::from_micros(70001)))] {
+        let mut expected = Vec::new();
+        let mut actual = Vec::new();
+        let a = fvid::native_media::decode_mp4_aac_pcm_interval(original, &mut expected, interval).unwrap();
+        let b = fvid::native_media::decode_mp4_aac_pcm_interval(&rescaled, &mut actual, interval).unwrap();
+        assert_eq!(a, b);
+        assert_eq!(actual, expected);
+    }
+    // A one-tick shift at twice the sample clock would be half a sample.
+    let value = u32::from_be_bytes(rescaled[elst+16..elst+20].try_into().unwrap());
+    rescaled[elst+16..elst+20].copy_from_slice(&(value+1).to_be_bytes());
+    let error = fvid::native_media::decode_mp4_aac_pcm(&rescaled, &mut Vec::new()).unwrap_err();
+    assert!(error.to_string().contains("not aligned"));
+}

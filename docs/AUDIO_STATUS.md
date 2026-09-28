@@ -453,7 +453,7 @@ Example: `fvid media decode-audio input.aac clip.wav --from 0.030001 --to 0.0700
 Native PCM/WAV CLI export also accepts MP4/M4A with a single AAC audio track.
 The owned MP4 reader supplies packets and the owned AAC decoder applies one
 media edit to remove priming and trailing encoder padding. Current support
-requires a sample-rate track clock; empty/multi-segment edits, discontinuous
+requires sample-aligned track timestamps; empty/multi-segment edits, discontinuous
 packet timing are explicitly rejected.
 The M4A fixture presents exactly 5645 mono samples at 44100 Hz; six native audio
 integration tests pass, and a CLI-created WAV was independently inspected with
@@ -464,3 +464,8 @@ presentation timeline. Boundaries round up to sample starts, decoding pre-roll
 for AAC state and clipping the requested endpoint to the media edit. Tests
 compare exact slices after priming removal and check empty/reversed ranges.
 CLI inspection confirmed 1764 samples at 44100 Hz for 0.030001–0.070001 seconds.
+
+MP4 AAC timing now converts track ticks to sample indices with checked integer
+arithmetic instead of requiring timescale == sample_rate. A regression doubles
+mdhd/stts/elst media ticks while preserving the timeline and checks byte-identical
+full and interval PCM. Fractional-sample timestamps remain explicitly rejected.

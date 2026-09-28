@@ -173,8 +173,8 @@ pub fn decode_aac_pcm_interval(
 }
 
 /// Decode a single AAC MP4 track with its priming/tail edit applied.
-/// Currently accepts the standard sample-rate track clock and a single media
-/// edit. Multi-segment edits require a timeline scheduler and are rejected.
+/// Accepts sample-aligned track clocks and a single media edit.
+/// Multi-segment edits require a timeline scheduler and are rejected.
 pub fn decode_mp4_aac_pcm(
     data: &[u8],
     output: &mut impl std::io::Write,
@@ -203,13 +203,21 @@ pub fn decode_mp4_aac_pcm_interval(
     let mut decoder = crate::codec::aac_native::NativeAacDecoder::new(asc)?;
     let rate = decoder.sample_rate();
     let channels = u16::from(decoder.channels());
-    if track.timescale != rate || track.sample_rate != rate || track.channels != channels {
-        return Err(invalid("MP4 AAC export requires matching sample-rate clock and geometry"));
+    if track.timescale == 0 || track.sample_rate != rate || track.channels != channels {
+        return Err(invalid("MP4 AAC export requires valid clock and matching audio geometry"));
     }
+    let sample_position = |ticks: u64| -> Result<u64> {
+        let numerator = u128::from(ticks) * u128::from(rate);
+        let denominator = u128::from(track.timescale);
+        if numerator % denominator != 0 {
+            return Err(invalid("MP4 AAC timestamp is not aligned to a sample"));
+        }
+        u64::try_from(numerator / denominator).map_err(|_| invalid("AAC sample position overflow"))
+    };
     let (from, to) = match track.edits.as_slice() {
-        [] => (0, track.duration),
+        [] => (0, sample_position(track.duration)?),
         [edit] if edit.media_time >= 0 && reader.movie_timescale() != 0 => {
-            let start = edit.media_time as u64;
+            let start = sample_position(edit.media_time as u64)?;
             let length = (u128::from(edit.duration) * u128::from(rate))
                 .div_ceil(u128::from(reader.movie_timescale()));
             let length = u64::try_from(length).map_err(|_| invalid("AAC edit duration overflow"))?;
@@ -232,7 +240,8 @@ pub fn decode_mp4_aac_pcm_interval(
     let mut expected = None;
     for sample_index in 0..track.samples.len() {
         let sample = track.samples.get(sample_index).ok_or_else(|| invalid("missing AAC sample"))?;
-        let start = u64::try_from(sample.pts).map_err(|_| invalid("negative AAC timestamp"))?;
+        let start = sample_position(u64::try_from(sample.pts).map_err(|_| invalid("negative AAC timestamp"))?)?;
+        let duration = sample_position(u64::from(sample.duration))?;
         if expected.is_some_and(|value| value != start) {
             return Err(invalid("non-contiguous MP4 AAC timeline"));
         }
@@ -240,16 +249,16 @@ pub fn decode_mp4_aac_pcm_interval(
         reader.read_packet(index, sample_index, &mut packet)?;
         let samples = decoder.decode(&packet)?;
         let frames = (samples.len() / usize::from(channels)) as u64;
-        if sample.duration == 0 || u64::from(sample.duration) > frames {
+        if duration == 0 || duration > frames {
             return Err(invalid("MP4 AAC packet duration disagrees with decoded samples"));
         }
         // A short final sample duration explicitly excludes encoder padding.
-        if u64::from(sample.duration) < frames && sample_index + 1 != track.samples.len() {
+        if duration < frames && sample_index + 1 != track.samples.len() {
             return Err(invalid("short interior MP4 AAC packet"));
         }
         expected = Some(start.checked_add(frames).ok_or_else(|| invalid("AAC timestamp overflow"))?);
-        let first = from.saturating_sub(start).min(u64::from(sample.duration)) as usize;
-        let last = to.saturating_sub(start).min(u64::from(sample.duration)) as usize;
+        let first = from.saturating_sub(start).min(duration) as usize;
+        let last = to.saturating_sub(start).min(duration) as usize;
         for value in &samples[first * usize::from(channels)..last.max(first) * usize::from(channels)] {
             output.write_all(&value.to_le_bytes())?;
         }
