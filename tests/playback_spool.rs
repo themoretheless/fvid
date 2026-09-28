@@ -195,6 +195,10 @@ fn a_reader_behind_the_window_is_told_only_what_is_local() {
         handle.copied(),
         handle.ahead()
     );
+    assert!(
+        handle.covered().0 <= handle.covered().1,
+        "the covered span is inverted"
+    );
     drop(source);
     let _ = fs::remove_dir_all(path.parent().unwrap());
 }
@@ -425,6 +429,14 @@ fn the_lead_is_filled_by_the_copier_and_eaten_by_the_reader() {
         "the copier put {} bytes on disk and none of them ahead",
         handle.copied()
     );
+    // Where the copy sits is a second question from how much of it there is:
+    // with the reader still at byte zero the window starts at the item's own
+    // front, which is what the progress line draws.
+    assert_eq!(
+        handle.covered().0,
+        0,
+        "the copy did not start where the reader did"
+    );
     let mut got = Vec::new();
     let mut filled = false;
     let mut piece = vec![0u8; 1 << 20];
@@ -447,6 +459,20 @@ fn the_lead_is_filled_by_the_copier_and_eaten_by_the_reader() {
     assert!(
         handle.copied() > 0,
         "the window gave all its room back before the end"
+    );
+    // The item is longer than the window, so by the end the copy has left the
+    // front of it behind: both edges moved, and they still say where the same
+    // bytes the `copied` mirror counts are kept.
+    let (near, far) = handle.covered();
+    assert!(
+        near > 0,
+        "the window never followed the reader off the front"
+    );
+    assert_eq!(far, 8 << 20, "the copy stopped short of the end it read to");
+    assert_eq!(
+        far - near,
+        handle.copied(),
+        "the window's own edges and its published size disagree"
     );
     assert_eq!(got.len(), 8 << 20);
     drop(source);
