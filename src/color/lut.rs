@@ -332,9 +332,11 @@ impl Lut {
     /// axis fastest — the reverse of a `.cube`. The grid side is declared either
     /// by a line holding a single size, or, as Autodesk's and Color Finesse's
     /// own writers emit it, by a mesh line of `size` input code values behind
-    /// header keywords such as `3DMESH` and `Mesh 4 12`. A mesh line is only
-    /// read as one while no row has been seen and it is not three values wide,
-    /// since a row and the mesh of a three-node grid look alike.
+    /// header keywords such as `3DMESH` and `Mesh 4 12`. A file that states
+    /// neither is read from its row count, which has to be an exact cube. A
+    /// mesh line is only read as one while no row has been seen and it is not
+    /// three values wide, since a row and the mesh of a three-node grid look
+    /// alike.
     pub fn from_3dl(text: &str) -> Result<Self> {
         let mut rows: Vec<[f32; 3]> = Vec::new();
         let mut size = None;
@@ -395,7 +397,20 @@ impl Lut {
             }
             rows.push(v);
         }
-        let size = size.ok_or_else(|| invalid("a .3dl has no size line"))?;
+        let size = match size {
+            Some(n) => n,
+            // Some writers state neither: no size line and no mesh line, just
+            // the rows. Their count is then the only declaration the file has,
+            // and only an exact cube can be a grid.
+            None => (2..=64)
+                .find(|n| n * n * n == rows.len())
+                .ok_or_else(|| {
+                    invalid(&format!(
+                        "a .3dl declares no size and its {} rows are not a grid",
+                        rows.len()
+                    ))
+                })?,
+        };
         if rows.len() != size * size * size {
             return Err(invalid(&format!(
                 "a .3dl expected {} rows, got {}",
@@ -1087,9 +1102,36 @@ LUT_3D_SIZE 2
         );
     }
 
+    /// One writer in the census states nothing: no size line and no mesh line,
+    /// just the rows behind a comment and a `3DMESH` keyword. Their count is
+    /// then the only declaration the file carries, so it is read as one — and
+    /// only where it is an exact cube.
+    #[test]
+    fn a_3dl_with_no_declaration_is_read_from_its_row_count() {
+        let mut text = String::new();
+        for r in 0..3 {
+            for g in 0..3 {
+                for b in 0..3 {
+                    text.push_str(&format!("{} {} {}\n", r * 2047, g * 2047, b * 2047));
+                }
+            }
+        }
+        let lut = Lut::from_3dl(&text).unwrap_or_else(|e| panic!("27 rows are a 3-grid: {e}"));
+        assert_eq!(lut.size(), 3);
+        // Read as a grid of the right width, the rows land on their own axes.
+        let blue = lut.sample([0.0, 0.0, 1.0], Interpolation::Nearest);
+        assert!(
+            blue[2] > 0.99 && blue[0] < 1e-3,
+            "the rows were filed against the wrong axis: {blue:?}"
+        );
+        // 28 rows are no one's grid.
+        assert!(Lut::from_3dl(&format!("{text}0 0 0\n")).is_err());
+    }
+
     #[test]
     fn bad_3dl_files_are_rejected() {
         assert!(Lut::from_3dl("3\n0 0 0\n").is_err());
+        // Two rows with nothing to say how wide the grid is: not a cube.
         assert!(Lut::from_3dl("0 0 0\n1 1 1\n").is_err());
         assert!(Lut::from_3dl("3\n0 0\n").is_err());
         // A line of four or more values is a mesh declaration only before the

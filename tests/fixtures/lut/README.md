@@ -224,11 +224,17 @@ on lines 3–4, in front of the mesh line.
 
 Before a mesh line or a keyword line was understood, 0 of the 36 parsed: 12 died
 on `3DMESH`, which was read as a size, and 24 died for want of a size, because
-the mesh line had been quietly folded into the rows. After it, 35 of 36 parse,
-with grid sides `{7: 1, 16: 4, 17: 30}`. The refusal left is the undeclared
-file, `toru-ver4_sip__hoge.fuga.3dl`: 4 913 rows, no size and no mesh line, so
-only a count of them says it is a 17-grid — and it is the 16-bit one, whose
-scale is the second thing that file needs before it reads correctly.
+the mesh line had been quietly folded into the rows. Reading the mesh line and
+skipping the keywords took it to 35 of 36, with grid sides `{7: 1, 16: 4,
+17: 30}`. The last one, `toru-ver4_sip__hoge.fuga.3dl`, declares nothing at all:
+4 913 rows behind a comment and a `3DMESH` keyword, no size line and no mesh
+line. Its row count is the only statement of the grid in it — an exact cube,
+17 — and counting it is what makes the census 36 of 36 parse.
+
+What that leaves wrong about the same file is not its shape but its scale: it is
+the one `Mesh 4 16` declaration among them, and its nodes reach 65 535. Read at
+the 12-bit scale every other file uses, it is a wall of white — mid-grey samples
+to 1.0, and all 289 nodes of the blue plane at full scale come back clipped.
 
 `ffmpeg` cannot arbitrate any of that: it refuses the keyword files outright.
 What it does settle is that a mesh line is *only* a size declaration, which is
