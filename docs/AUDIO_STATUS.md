@@ -388,3 +388,10 @@ against a saved FFmpeg 9.0.2 mono PCM oracle: RMS error 0.0000315593 and peak
 0.000223995. Separate regression gates are 0.00004 and 0.0003. This verifies
 the SCE/44.1-kHz path in addition to CPE/48-kHz; it does not establish coverage
 for the still-unimplemented TNS, multichannel or 960-sample packet cases.
+
+Owned `codec::aac_tns` parses LC TNS filters, converts signed/compressed
+reflection coefficients into predictors, and applies directional spectral
+filtering within clipped band intervals. Tests verify coefficient resolution,
+zero-order/short-window syntax, transactional parsing, band clipping and exact
+first-order impulse responses in both directions. Sample-rate TNS limits and
+channel integration remain pending, so packet decoding still rejects TNS.
