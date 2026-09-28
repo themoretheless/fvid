@@ -34,3 +34,34 @@ fn destination_errors_are_propagated() {
         &mut Fails, &Limits::default()).unwrap_err();
     assert!(error.to_string().contains("destination failed"));
 }
+
+#[test]
+fn cli_exports_complete_pcm_without_overwriting_or_partial_files() {
+    let dir = std::env::temp_dir().join(format!("fvid-aac-export-{}", std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    struct Cleanup(std::path::PathBuf);
+    impl Drop for Cleanup { fn drop(&mut self) { let _ = std::fs::remove_dir_all(&self.0); } }
+    let _cleanup = Cleanup(dir.clone());
+    let source = dir.join("source.aac");
+    let output = dir.join("out.f32le");
+    let fixture = include_bytes!("fixtures/audio/aac-mono-44k.aac");
+    std::fs::write(&source, fixture).unwrap();
+    let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "decode-audio"]).arg(&source).arg(&output).output().unwrap();
+    assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
+    assert!(String::from_utf8_lossy(&run.stdout).contains("\"sample_frames\":7168"));
+    let mut expected = Vec::new();
+    decode_aac_pcm(fixture, &mut expected, &Limits::default()).unwrap();
+    assert_eq!(std::fs::read(&output).unwrap(), expected);
+    assert!(fvid::native_export::export_aac_pcm(&source, &output).is_err());
+    assert_eq!(std::fs::read(&output).unwrap(), expected);
+    let frames = fvid::container::adts::Aac::parse(fixture, &Limits::default()).unwrap();
+    let second = frames.frames[1];
+    let mut corrupt = fixture.to_vec();
+    corrupt[second.start + second.header_bytes..second.start + second.size].fill(0xff);
+    std::fs::write(&source, corrupt).unwrap();
+    let failed = dir.join("failed.f32le");
+    assert!(fvid::native_export::export_aac_pcm(&source, &failed).is_err());
+    assert!(!failed.exists());
+    assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 2);
+}

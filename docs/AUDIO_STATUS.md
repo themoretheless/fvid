@@ -426,5 +426,8 @@ packet support and player replacement remain pending.
 producing interleaved f32 little-endian PCM with sample/frame statistics.
 It uses NativeAacDecoder without Symphonia or FFmpeg. ADTS encoder priming and
 padding are retained; writer/decode errors propagate and may leave partial
-output in the caller's writer. This is currently an API, not yet the replacement
-for the legacy transformed `media decode-audio` CLI operation.
+output in the caller's writer. The plain CLI path `fvid media decode-audio INPUT.aac OUTPUT.f32le` now uses
+this API without the `media` feature. It writes raw interleaved f32le samples
+through a temporary file and publishes only on successful decode, never
+replacing existing destinations. Other output containers and transformed audio
+operations still use the legacy implementation.

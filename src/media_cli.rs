@@ -2,6 +2,16 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str) == Some("decode-audio") && args.len() == 3
+        && std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()) == Some("f32le")
+    {
+        let stats = fvid::native_export::export_aac_pcm(
+            std::path::Path::new(&args[1]), std::path::Path::new(&args[2]),
+        )?;
+        println!("{{\"backend\":\"fvid\",\"sample_frames\":{},\"decoded_frames\":{},\"sample_rate\":{},\"channels\":{},\"sample_format\":\"f32le\",\"decode_errors\":0}}",
+            stats.sample_frames, stats.decoded_frames, stats.sample_rate, stats.channels);
+        return Ok(());
+    }
     if args.first().map(String::as_str) == Some("export-y4m") {
         if args.len() < 3 { return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m [--from SECONDS --to SECONDS]".into()); }
         let (mut from, mut to) = (None, None);

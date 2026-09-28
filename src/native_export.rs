@@ -189,3 +189,34 @@ fn product(a: u128, b: u128) -> Result<u128> {
     a.checked_mul(b)
         .ok_or_else(|| invalid("Y4M timestamp overflow"))
 }
+
+/// Export ADTS AAC to raw interleaved f32le, publishing only a complete decode.
+/// The extension must be `.f32le` so raw samples cannot masquerade as a container.
+pub fn export_aac_pcm(source: &Path, destination: &Path) -> Result<crate::native_media::AudioDecodeStats> {
+    use std::io::Read;
+    if destination.extension().and_then(|s| s.to_str()) != Some("f32le") {
+        return Err(invalid("native AAC PCM output requires .f32le extension"));
+    }
+    let limits = crate::container::adts::Limits::default();
+    let mut data = Vec::new();
+    File::open(source)?.take(limits.file_bytes as u64 + 1).read_to_end(&mut data)?;
+    if data.len() > limits.file_bytes {
+        return Err(invalid("AAC input exceeds container byte limit"));
+    }
+    let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+    let (temporary, file) = (0..100).find_map(|_| {
+        let path = directory.join(format!(".fvid-pcm-{}-{}.tmp", std::process::id(), NEXT.fetch_add(1, Ordering::Relaxed)));
+        match OpenOptions::new().write(true).create_new(true).open(&path) {
+            Ok(file) => Some(Ok((Temporary(path), file))),
+            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => None,
+            Err(e) => Some(Err(e)),
+        }
+    }).ok_or_else(|| invalid("cannot reserve PCM output"))??;
+    let mut output = BufWriter::new(file);
+    let stats = crate::native_media::decode_aac_pcm(&data, &mut output, &limits)?;
+    output.flush()?;
+    output.get_ref().sync_all()?;
+    drop(output);
+    std::fs::hard_link(&temporary.0, destination)?;
+    Ok(stats)
+}
