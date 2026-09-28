@@ -214,14 +214,28 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             .read_packet(self.track_index, 0, &mut packet)
             .is_ok()
         {
-            let (colour, hdr) = av1_metadata::signal_from_bytes(&packet);
-            seed = (seed.0.filled_with(colour), seed.1.filled_with(hdr));
+            // The sample is the later statement of the two, so it wins and the
+            // configuration record fills whatever it left out.
+            let (stated, light) = av1_metadata::signal_from_bytes(&packet);
+            seed = (stated.filled_with(seed.0), light.filled_with(seed.1));
         }
         self.open_signal = Some(seed);
     }
     pub fn active_vui(&self) -> Option<&crate::codec::avc::Vui> {
         match &self.decoder {
             Decoder::Avc(d) => d.active_vui(),
+            Decoder::Hevc(_) | Decoder::Vp9(_) | Decoder::Av1(_) => None,
+        }
+    }
+    /// The VUI this reader's pictures are read with: the parameter set a decoded
+    /// picture named, or, while none has, the first one the `avcC` record lists.
+    /// A coded picture selects its own set, so the active answer wins as soon as
+    /// there is one; a stream that states its signal only in the recorded set is
+    /// thereby described the moment the file is open, which is when a caller that
+    /// grades the first picture asks.
+    fn avc_vui(&self) -> Option<&crate::codec::avc::Vui> {
+        match &self.decoder {
+            Decoder::Avc(d) => d.active_vui().or_else(|| d.recorded_vui()),
             Decoder::Hevc(_) | Decoder::Vp9(_) | Decoder::Av1(_) => None,
         }
     }
@@ -234,7 +248,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             Decoder::Hevc(d) => {
                 crate::playback_native::AvcColour::from_hevc_vui(d.parameters().0.vui.as_ref())
             }
-            Decoder::Avc(_) => crate::playback_native::AvcColour::from_vui(self.active_vui()),
+            Decoder::Avc(_) => crate::playback_native::AvcColour::from_vui(self.avc_vui()),
             Decoder::Vp9(_) | Decoder::Av1(_) => Ok(crate::playback_native::AvcColour::default()),
         }
     }
@@ -244,10 +258,12 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
     /// the colour an AV1 sequence header carries. VP9 states nothing of its own
     /// and is left to the container.
     ///
-    /// An AV1 answer is the sequence header's, read from the configuration or
-    /// the first sample at open, until a decoded frame states one of its own —
-    /// a stream that changes its signal mid-file is graded by what it is coding
-    /// then, not by what its first picture said.
+    /// An AV1 and an AVC answer are both there the moment the file is open: the
+    /// first from the `av1C` configuration or the sample behind it, the second
+    /// from the parameter set the `avcC` record lists. A decoded picture that
+    /// names a set of its own then wins, so a stream that changes its signal
+    /// mid-file is graded by what it is coding then, not by what its first
+    /// picture said.
     pub fn bitstream_colour(&self) -> ColourDescription {
         match &self.decoder {
             Decoder::Hevc(d) => d
@@ -266,8 +282,8 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     }
                 })
                 .unwrap_or_default(),
-            Decoder::Avc(d) => d
-                .active_vui()
+            Decoder::Avc(_) => self
+                .avc_vui()
                 .and_then(|vui| vui.video_signal)
                 .map(|(_, full_range, colour)| {
                     let [primaries, transfer, matrix] = colour.unwrap_or([0; 3]);
@@ -280,14 +296,14 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 })
                 .unwrap_or_default(),
             Decoder::Av1(d) => {
-                let live = d
-                    .color()
-                    .map(crate::codec::av1_sequence::Color::signal)
-                    .unwrap_or_default();
-                self.open_signal
+                let seed = self
+                    .open_signal
                     .map(|(seed, _)| seed)
+                    .unwrap_or_default();
+                d.color()
+                    .map(crate::codec::av1_sequence::Color::signal)
                     .unwrap_or_default()
-                    .filled_with(live)
+                    .filled_with(seed)
             }
             Decoder::Vp9(_) => ColourDescription::default(),
         }
@@ -308,8 +324,12 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         match &self.decoder {
             Decoder::Hevc(d) => d.hdr(),
             Decoder::Av1(d) => {
-                let mut hdr = self.open_signal.map(|(_, seed)| seed).unwrap_or_default();
-                hdr.merge(d.hdr());
+                let seed = self
+                    .open_signal
+                    .map(|(_, seed)| seed)
+                    .unwrap_or_default();
+                let mut hdr = d.hdr();
+                hdr.merge(seed);
                 hdr
             }
             Decoder::Avc(_) | Decoder::Vp9(_) => HdrMetadata::default(),
@@ -789,20 +809,20 @@ mod tests {
         let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
         let mut source =
             Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
+        let stated = ColourDescription {
+            primaries: 9,
+            transfer: 16,
+            matrix: 9,
+            full_range: false,
+        };
+        // The `hvcC`'s own parameter sets answer before a picture has been read.
+        assert_eq!(source.bitstream_colour(), stated);
         let mut frames = 0;
         while source.read_frame().unwrap().is_some() {
             frames += 1;
         }
         assert_eq!(frames, 5);
-        assert_eq!(
-            source.bitstream_colour(),
-            ColourDescription {
-                primaries: 9,
-                transfer: 16,
-                matrix: 9,
-                full_range: false,
-            }
-        );
+        assert_eq!(source.bitstream_colour(), stated);
     }
 
     /// An AV1 clip's light, in the only place its file writes it: SVT-AV1 4.2.0's
@@ -851,5 +871,32 @@ mod tests {
         // by whichever route the samples went.
         assert!(source.read_frame().unwrap().is_some());
         assert_eq!(source.bitstream_hdr(), opened);
+    }
+
+    /// An H.264 clip whose whole signal lives in the VUI of the sequence
+    /// parameter set inside its `avcC`: libx264 wrote BT.2020 primaries, the
+    /// ARIB STD-B67 curve and the BT.2020 NCL weights over a studio range into
+    /// that SPS, and the muxer wrote no `colr` atom at all — measured from this
+    /// file's own bytes, which hold neither `colr` nor `nclx`. A caller that
+    /// grades the first picture asks when the file is open, so the recorded
+    /// parameter set answers then rather than waiting for a picture to select
+    /// one.
+    #[test]
+    fn an_avc_parameter_set_in_the_record_states_its_signal_at_open() {
+        let data = include_bytes!("../tests/fixtures/avc/hlg-vui-only.mp4").to_vec();
+        let mut source =
+            Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
+        // The container says nothing about the signal; the coding says HLG.
+        assert_eq!(source.track().colour, ColourDescription::default());
+        let stated = ColourDescription {
+            primaries: 9,
+            transfer: 18,
+            matrix: 9,
+            full_range: false,
+        };
+        assert_eq!(source.bitstream_colour(), stated);
+        // A decoded picture that selects the very same SPS changes nothing.
+        assert!(source.read_frame().unwrap().is_some());
+        assert_eq!(source.bitstream_colour(), stated);
     }
 }

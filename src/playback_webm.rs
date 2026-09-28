@@ -114,8 +114,10 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             let mut seed = crate::codec::av1_metadata::signal_from_bytes(&private);
             if let Some(index) = demux.packets.iter().position(|p| p.track == track) {
                 if let Ok(packet) = demux.read_packet(index) {
+                    // The packet is the later of the two statements, so it wins
+                    // and the CodecPrivate fills whatever it left out.
                     let (stated, light) = crate::codec::av1_metadata::signal_from_bytes(&packet);
-                    seed = (seed.0.filled_with(stated), seed.1.filled_with(light));
+                    seed = (stated.filled_with(seed.0), light.filled_with(seed.1));
                 }
             }
             seed
@@ -188,10 +190,11 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 .unwrap_or_default(),
             VideoDecoder::Vp9(_) => ColourDescription::default(),
         };
-        self.open_signal
+        let seed = self
+            .open_signal
             .map(|(seed, _)| seed)
-            .unwrap_or_default()
-            .filled_with(live)
+            .unwrap_or_default();
+        live.filled_with(seed)
     }
     /// The light the coding names for itself: an AV1 stream's mastering display
     /// and content light level metadata OBUs, which are there in a file whose
@@ -204,8 +207,12 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             VideoDecoder::Av1(d) => d.hdr(),
             VideoDecoder::Vp9(_) => HdrMetadata::default(),
         };
-        let mut hdr = self.open_signal.map(|(_, seed)| seed).unwrap_or_default();
-        hdr.merge(live);
+        let seed = self
+            .open_signal
+            .map(|(_, seed)| seed)
+            .unwrap_or_default();
+        let mut hdr = live;
+        hdr.merge(seed);
         hdr
     }
     /// The cap this reader sizes its RGB picture by, which is the cap a caller

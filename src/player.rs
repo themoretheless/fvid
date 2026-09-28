@@ -8781,6 +8781,36 @@ LUT_3D_SIZE 2
         );
     }
 
+    /// The same chain on an H.264 clip that states HLG in the only place the
+    /// coding has for it: the VUI of the sequence parameter set inside the
+    /// `avcC` record, with no `colr` atom in the file at all. The triple has to
+    /// answer when the file opens, because that is when the grade is baked — a
+    /// reader that waited for a picture to select its parameter set would show
+    /// this clip as if its codes were BT.709.
+    #[test]
+    fn an_avc_records_vui_is_graded_at_open() {
+        use crate::playback_native::NativeReader;
+        let data = include_bytes!("../tests/fixtures/avc/hlg-vui-only.mp4").to_vec();
+        let reader = NativeReader::without_memory_limit(std::io::Cursor::new(data)).unwrap();
+        let (signal, hdr) = (reader.colour(), reader.hdr());
+        assert!(signal.is_hdr());
+        assert!(hdr.is_empty());
+        let grade = Grading::default()
+            .grade_for(signal, &hdr)
+            .expect("BT.2100 material is graded for the panel");
+        let plan = grade.plan();
+        assert_eq!((plan.from, plan.to), (Transfer::Hlg, Transfer::Bt709));
+        assert_eq!(plan.tone_map, Some(ToneMap::Clip));
+        assert_eq!(
+            colour_line(signal).unwrap(),
+            "Colour: BT.2020 · HLG · BT.2020 NCL · limited"
+        );
+        assert_eq!(
+            grade_text(&plan, grade.interpolation(), grade.lut()),
+            "HLG → BT.709 · BT.2020 → BT.709 · clip · 100 cd/m² · 33³ tetrahedral"
+        );
+    }
+
     /// The same chain on an AV1 file that writes its signal in no container
     /// element at all: SVT-AV1 stated the BT.2020 triple in its sequence header
     /// and the HDR10 volume and a 1 234/567 light in metadata OBUs inside the

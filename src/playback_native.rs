@@ -262,11 +262,12 @@ impl<R: BufRead + Seek> NativeReader<R> {
     /// A Y4M stream has nowhere to write primaries or a curve, so it states
     /// only what its converter assumes — BT.601 luma weights over a studio
     /// range — and a caller grades the rest by deciding what the picture is.
-    /// An AV1 stream answers for itself as the file opens, since the reader
-    /// reads its sequence header then rather than waiting on a picture: a track
+    /// All three codings answer this as the file opens. An AV1 reader parses
+    /// its sequence header then rather than waiting on a picture, so a track
     /// that writes its triple in no box at all still has one for the first
-    /// frame. H.264 names its VUI from the SPS a decoded picture selects, so
-    /// that half arrives once one has been decoded.
+    /// frame; an H.264 or HEVC reader parses the parameter sets its
+    /// configuration record carries, and for H.264 the set a later picture
+    /// selects replaces that one.
     pub fn colour(&self) -> ColourDescription {
         match self {
             Self::Y4m(_) => ColourDescription {
