@@ -239,3 +239,15 @@ output dimensions no longer bypass that conversion. CameraAspectTests.swift
 checks a nonsquare-pixel Y4M through the actual Swift/C/Rust path, including
 black borders, white samples and opaque alpha at two output sizes. The unsigned
 bundle builds successfully; installed delivery still requires signing.
+
+Run the clock, repeat and aspect bridge regression suites with:
+
+```sh
+python3 scripts/test_macos_camera_bridge.py
+```
+
+The runner rebuilds the Rust static library, compiles Swift with warnings as
+errors and executes all three suites. The aspect suite also patches the known
+MP4 fixture with a 90-degree track matrix and compares every fitted pixel and
+opaque side border against the rotated source. These tests run without system
+extension activation; they do not replace an installed-camera client test.
