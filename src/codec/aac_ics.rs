@@ -6,7 +6,7 @@ use super::{
 };
 use crate::{Result, invalid, unsupported};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct IcsInfo {
     pub sequence: WindowSequence,
     pub shape: WindowShape,

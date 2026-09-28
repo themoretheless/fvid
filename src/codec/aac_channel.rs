@@ -1,4 +1,4 @@
-//! Owned AAC-LC individual channel parsing (without common-window stereo yet).
+//! Owned AAC-LC individual channel parsing.
 use super::{
     aac_bands::BandTables,
     aac_ics::IcsInfo,
@@ -22,10 +22,20 @@ pub struct ChannelData {
 impl ChannelData {
     /// Starts at global_gain, after the element tag. Transactional on failure.
     pub fn read(bits: &mut BitReader<'_>, config: &AacConfig) -> Result<Self> {
+        Self::read_common(bits, config, None)
+    }
+    pub(crate) fn read_common(
+        bits: &mut BitReader<'_>,
+        config: &AacConfig,
+        common: Option<&IcsInfo>,
+    ) -> Result<Self> {
         let tables = BandTables::for_config(config)?;
         let mut cursor = bits.clone();
         let gain = cursor.read(8)? as u8;
-        let info = tables.read_ics(&mut cursor)?;
+        let info = match common {
+            Some(info) => info.clone(),
+            None => tables.read_ics(&mut cursor)?,
+        };
         let codebooks = info.read_sections(&mut cursor)?;
         let scales = aac_scalefactors::read(&mut cursor, gain, &codebooks)?;
         let pulse = if cursor.bit()? {

@@ -318,3 +318,10 @@ channel reader. A constructed nonzero channel payload is tested through owned
 inverse quantization, deinterleaving and synthesis. This is not yet real-file
 playback proof: common-window stereo, TNS, gain control, special reconstruction,
 raw-data-block dispatch and output normalization remain unfinished.
+
+`codec::aac_pair` reads independent/common-window channel pairs and all valid
+mid/side mask modes. Both channel reads are one transaction. Tests cover masks,
+truncation, reserved mode rejection, and the first real packet from
+`aac-stereo.aac` through its END element. This establishes real packet syntax
+coverage for that packet, not decoded PCM correctness or complete-file support;
+stereo reconstruction and the remaining tools still need integration.

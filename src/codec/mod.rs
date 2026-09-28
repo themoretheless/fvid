@@ -418,3 +418,5 @@ mod aac_band_tables;
 pub mod aac_bands;
 
 pub mod aac_channel;
+
+pub mod aac_pair;
