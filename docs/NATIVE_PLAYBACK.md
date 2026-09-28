@@ -1112,3 +1112,9 @@ Y4M retains planar samples (including HEVC Main10), pixel aspect and range;
 output timing starts at zero. Only constant, contiguous frame timing is accepted.
 Empty intervals fail without publishing an output. Existing files are never
 replaced. This does not yet replace legacy compressed-container trim/export.
+
+Native Y4M export applies MP4 display rotation (90, 180 or 270 degrees) to
+all three decoded YUV420 planes, retaining 8/10-bit samples and the displayed
+pixel aspect ratio. Main10 rotation is checked sample-by-sample against the
+saved decoded fixture for all three angles; a non-square pixel fixture checks
+that aspect is inverted exactly once by container metadata handling.

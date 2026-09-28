@@ -85,9 +85,7 @@ pub fn export_y4m_interval(
         }
         previous = Some((end, duration, u128::from(scale)));
         let [width, height] = reader.dimensions();
-        if reader.rotation() != 0 {
-            return Err(invalid("Y4M export of rotated video is not implemented"));
-        }
+        let rotation = reader.rotation();
         let (chroma, depth) = match &frame {
             RawFrame::Avc { picture, .. }
                 if width % 2 == 0
@@ -133,6 +131,7 @@ pub fn export_y4m_interval(
             } else {
                 format!("{chroma}p{depth}")
             };
+            // MP4 parsing already expresses aspect after the display rotation.
             let (an, ad) = reader.pixel_aspect();
             writeln!(
                 output,
@@ -144,6 +143,20 @@ pub fn export_y4m_interval(
         }
         output.write_all(b"FRAME\n")?;
         match frame {
+            RawFrame::Avc { picture, .. } if rotation != 0 => {
+                let (w, h) = picture.dimensions();
+                let bytes = if picture.bit_depth == 8 { 1 } else { 2 };
+                let mut planar = Vec::new();
+                picture.write_planar(&mut planar)?;
+                let mut offset = 0;
+                for (pw, ph) in [(w, h), (w / 2, h / 2), (w / 2, h / 2)] {
+                    let end = offset + pw * ph * bytes;
+                    output.write_all(&crate::playback_native::rotate_plane(
+                        &planar[offset..end], pw, ph, rotation, bytes,
+                    ))?;
+                    offset = end;
+                }
+            }
             RawFrame::Avc { picture, .. } => picture.write_planar(&mut output)?,
             RawFrame::Planar8(p) => {
                 output.write_all(&p.y)?;

@@ -243,3 +243,76 @@ fn empty_or_invalid_interval_does_not_publish_output() {
         assert_eq!(std::fs::read_dir(&dir.0).unwrap().count(), 0);
     }
 }
+
+#[test]
+fn rotated_main10_export_turns_every_sample_without_precision_loss() {
+    let dir = directory();
+    let source = dir.0.join("rotated.mp4");
+    let fixture = include_bytes!("fixtures/hevc/main10-ipb.mp4");
+    let oracle = include_bytes!("fixtures/hevc/main10-ipb.yuv");
+    // The saved oracle is 128x128 planar 4:2:0, 16-bit sample storage.
+    let size = oracle.len() / 17;
+    assert_eq!(size, 128 * 128 * 3);
+    for rotation in [90, 180, 270] {
+        let mut mp4 = fixture.to_vec();
+        let at = mp4.windows(4).position(|w| w == b"tkhd").unwrap();
+        assert_eq!(mp4[at + 4], 0);
+        let matrix = at + 44;
+        let values: [i32; 4] = match rotation {
+            90 => [0, 65536, -65536, 0],
+            180 => [-65536, 0, 0, -65536],
+            _ => [0, -65536, 65536, 0],
+        };
+        for (offset, value) in [0, 4, 12, 16].into_iter().zip(values) {
+            mp4[matrix + offset..matrix + offset + 4].copy_from_slice(&value.to_be_bytes());
+        }
+        std::fs::write(&source, mp4).unwrap();
+        let output = dir.0.join(format!("{rotation}.y4m"));
+        assert_eq!(fvid::native_export::export_y4m(&source, &output).unwrap(), 17);
+        let data = std::fs::read(output).unwrap();
+        let end = data.iter().position(|b| *b == b'\n').unwrap() + 1;
+        let header = std::str::from_utf8(&data[..end]).unwrap();
+        assert!(header.contains("W128 H128"));
+        let mut expected = Vec::new();
+        for frame in oracle.chunks_exact(size) {
+            expected.extend_from_slice(b"FRAME\n");
+            let mut offset = 0;
+            for (w, h) in [(128, 128), (64, 64), (64, 64)] {
+                let plane = &frame[offset..offset + w * h * 2];
+                let (ow, oh) = if rotation == 180 { (w, h) } else { (h, w) };
+                let mut turned = vec![0; plane.len()];
+                // Independent forward mapping from source to destination.
+                for y in 0..h { for x in 0..w {
+                    let (dx, dy) = match rotation {
+                        90 => (h - 1 - y, x),
+                        180 => (w - 1 - x, h - 1 - y),
+                        _ => (y, w - 1 - x),
+                    };
+                    assert!(dy < oh);
+                    turned[(dy * ow + dx) * 2..(dy * ow + dx) * 2 + 2]
+                        .copy_from_slice(&plane[(y * w + x) * 2..(y * w + x) * 2 + 2]);
+                }}
+                expected.extend(turned);
+                offset += w * h * 2;
+            }
+        }
+        assert_eq!(&data[end..], expected);
+    }
+}
+
+#[test]
+fn quarter_turn_inverts_exported_pixel_aspect() {
+    let dir = directory();
+    let mut mp4 = include_bytes!("fixtures/display/par-2x1.mp4").to_vec();
+    let matrix = mp4.windows(4).position(|w| w == b"tkhd").unwrap() + 44;
+    for (offset, value) in [(0, 0i32), (4, 65536), (12, -65536), (16, 0)] {
+        mp4[matrix + offset..matrix + offset + 4].copy_from_slice(&value.to_be_bytes());
+    }
+    let source = dir.0.join("par.mp4");
+    let output = dir.0.join("par.y4m");
+    std::fs::write(&source, mp4).unwrap();
+    fvid::native_export::export_y4m(&source, &output).unwrap();
+    let bytes = std::fs::read(output).unwrap();
+    let end = bytes.iter().position(|b| *b == b'\n').unwrap();
+    assert!(std::str::from_utf8(&bytes[..end]).unwrap().contains("A1:2"));
+}
