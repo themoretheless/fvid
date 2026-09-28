@@ -6,7 +6,7 @@
 //! controls along the bottom. Controls fade out while the video plays and
 //! the pointer rests; any movement brings them back.
 use crate::color::{
-    ColourDescription, DisplayTarget, Grade, HdrMetadata, Log, Lut, Settings, ToneMap,
+    ColourDescription, DisplayTarget, Grade, HdrMetadata, Log, Lut, Primaries, Settings, ToneMap,
 };
 use crate::container::FileTags;
 use crate::subtitles::{self, Cue};
@@ -61,12 +61,15 @@ struct Grading {
     /// Grading LUT read out of the named file, applied after the conversion the
     /// other two ask for.
     lut: Option<Lut>,
+    /// The working gamut the coded values are read in, named instead of taken
+    /// from the file or the curve.
+    gamut: Option<Primaries>,
 }
 
 impl Grading {
     /// Whether the command line named no colour change at all.
     fn silent(&self) -> bool {
-        self.log.is_none() && self.tone_map.is_none() && self.lut.is_none()
+        self.log.is_none() && self.gamut.is_none() && self.tone_map.is_none() && self.lut.is_none()
     }
 
     /// Bake what this session asks for against the signal `signal` and the
@@ -81,13 +84,16 @@ impl Grading {
     /// this module has no name for passes a code value straight through, which
     /// is the same picture. Naming nothing leaves an SDR item ungraded, while
     /// BT.2100 material still gets the compression [`Grade::new`] picks, since
-    /// unmapped it is a flat grey one.
+    /// unmapped it is a flat grey one. A gamut the session names is a request on
+    /// its own and outranks the primaries the file states, since naming one is
+    /// how a wrong label gets corrected.
     fn grade_for(&self, signal: ColourDescription, hdr: &HdrMetadata) -> Option<Grade> {
         if self.silent() && !signal.is_hdr() {
             return None;
         }
         let mut settings = Settings::video(DisplayTarget::sdr(PANEL_NITS));
         settings.log = self.log;
+        settings.gamut = self.gamut;
         settings.tone_map = self.tone_map;
         if !signal.is_hdr() && self.log.is_none() {
             settings.to = signal.transfer_function();
@@ -278,6 +284,10 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
             "--log" => {
                 let value = option_value(args, &mut index, flag, inline)?;
                 grading.log = Some(parse_log(&value)?);
+            }
+            "--gamut" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                grading.gamut = Some(parse_gamut(&value)?);
             }
             "--tonemap" => {
                 let value = option_value(args, &mut index, flag, inline)?;
@@ -490,6 +500,27 @@ fn parse_log(text: &str) -> crate::Result<Log> {
         crate::invalid(&format!("unknown --log {text:?}; fvid unwraps {names}"))
     };
     Log::from_label(&label).ok_or_else(known)
+}
+
+/// `--gamut` as one of the working gamuts fvid converts a picture from. A
+/// caller names one to correct a container that labels its bytes wrongly or
+/// leaves them unlabelled, so the triangle it picks outranks both the primaries
+/// the file states and the one a `--log` curve lends. Case and the separators a
+/// name is written with make no difference, and the vendor's own shorthand for
+/// the same triangle (`awg4`, `rec709`) reaches it too. A word that names none
+/// is a mistake at the door, and the message lists the names on offer.
+fn parse_gamut(text: &str) -> crate::Result<Primaries> {
+    let known = || {
+        let names = Primaries::NAMED
+            .iter()
+            .map(|p| p.label())
+            .collect::<Vec<_>>()
+            .join(", ");
+        crate::invalid(&format!(
+            "unknown --gamut {text:?}; fvid converts from {names}"
+        ))
+    };
+    Primaries::from_label(text.trim()).ok_or_else(known)
 }
 
 /// `--tonemap` as one of the highlight curves fvid can run, spelled the way
@@ -7648,6 +7679,97 @@ LUT_3D_SIZE 2
             error.contains("reinhard") && error.contains("mobius"),
             "{error}"
         );
+    }
+
+    /// `--gamut` names the working gamut the bytes are read in, which is how a
+    /// container that labels them wrongly gets corrected: the flag outranks the
+    /// primaries the file states and the triangle a `--log` curve lends, and it
+    /// is the only route to the gamuts no curve lends — S-Gamut3.Cine, D-Gamut
+    /// and F-Gamut C among them. Spellings fold case and separators, so
+    /// `S-Gamut3.Cine`, `sgamut3_cine` and a vendor's own `AWG 4` all land on a
+    /// triangle, and a word that names none stops the command at the door with
+    /// the spellings that would have worked.
+    #[test]
+    fn the_command_line_names_the_gamut_the_bytes_are_read_in() {
+        let parsed = play_args(&["--gamut", "S-Gamut3.Cine", "c"]).unwrap();
+        assert_eq!(parsed.grading.gamut, Some(Primaries::S_GAMUT3_CINE));
+        assert_eq!(
+            play_args(&["--gamut=sgamut3_cine", "c"])
+                .unwrap()
+                .grading
+                .gamut,
+            Some(Primaries::S_GAMUT3_CINE)
+        );
+        assert_eq!(
+            play_args(&["--gamut", " AWG 4 ", "c"])
+                .unwrap()
+                .grading
+                .gamut,
+            Some(Primaries::ALEX3_EXPANDED)
+        );
+        assert_eq!(
+            play_args(&["--gamut", "rec709", "c"])
+                .unwrap()
+                .grading
+                .gamut,
+            Some(Primaries::BT709)
+        );
+        assert!(play_args(&["c"]).unwrap().grading.gamut.is_none());
+        for words in [
+            vec!["--gamut", "sgamut"],
+            vec!["--gamut", "awg3"],
+            vec!["--gamut", ""],
+            vec!["--gamut"],
+        ] {
+            assert!(
+                play_args(&[words.as_slice(), &["c"]].concat()).is_err(),
+                "{words:?} names no gamut"
+            );
+        }
+        let error = play_args(&["--gamut", "sgamut", "c"])
+            .err()
+            .unwrap()
+            .to_string();
+        assert!(
+            error.contains("S-Gamut3.Cine") && error.contains("F-Gamut C"),
+            "{error}"
+        );
+    }
+
+    /// Naming a gamut is a request in its own right, not a modifier: an SDR item
+    /// that states BT.709 has to be re-read as the gamut the caller names, and
+    /// written back in the signal the file states for itself. The picture is not
+    /// the one the label implied, so nothing here is an identity.
+    #[test]
+    fn a_named_gamut_grades_an_item_that_asked_for_nothing_else() {
+        let video = ColourDescription {
+            primaries: 1,
+            transfer: 1,
+            matrix: 1,
+            full_range: false,
+        };
+        let grade = Grading {
+            gamut: Some(Primaries::S_GAMUT3_CINE),
+            ..Default::default()
+        }
+        .grade_for(video, &HdrMetadata::default())
+        .expect("a named gamut is a request");
+        let plan = grade.plan();
+        assert_eq!(plan.source, Primaries::S_GAMUT3_CINE);
+        assert_eq!(
+            (plan.from, plan.to, plan.dest),
+            (Transfer::Bt709, Transfer::Bt709, Primaries::BT709)
+        );
+        assert!(!grade.is_identity());
+        // With a curve, the name still wins over the triangle the profile lends.
+        let graded = Grading {
+            gamut: Some(Primaries::D_GAMUT),
+            log: Some(Log::VLog),
+            ..Default::default()
+        }
+        .grade_for(ColourDescription::default(), &HdrMetadata::default())
+        .unwrap();
+        assert_eq!(graded.plan().source, Primaries::D_GAMUT);
     }
 
     /// `--lut` reads the look at startup, from a file named either way round:
