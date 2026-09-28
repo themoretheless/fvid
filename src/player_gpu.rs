@@ -28,7 +28,7 @@ struct Params {
     // the chroma pair rotates by the hue and scales by the saturation around
     // grey. The identity bundle — 1, 0, 1, 1, 0 — leaves both as they stand.
     adjust_a: vec4<f32>, // contrast, lum, inverse gamma, cos·saturation
-    adjust_b: vec4<f32>, // sin·saturation, then spare
+    adjust_b: vec4<f32>, // sin·saturation, then whether the bundle moves at all
     // The grade the CPU baked, as one lookup into the table it itself reads.
     // `grid.x` is a grid's edge length, `grid.y` how to read between its nodes —
     // 0 for nearest, 1 for trilinear, 2 for tetrahedral — and `grid.z` says
@@ -197,31 +197,73 @@ fn grade_read(rgb: vec3<f32>) -> vec3<f32> {
     return n0 * (1.0 - sa) + n1 * (sa - sb) + n2 * (sb - sc) + n3 * sc;
 }
 
+/// The five numbers of the bundle run over display codes, which is what the
+/// CPU draw path does to a picture that has already left the planes behind:
+/// BT.601 limited range solved back out of the bytes, the luma line and its
+/// gamma curve, the chroma turned around grey, and the same matrix forward
+/// again. `adjust_rgb` is the other half of this and both are read by the same
+/// test, because a viewer's slider has to move the shown picture the same way
+/// whichever route drew it.
+fn adjust_codes(rgb: vec3<f32>) -> vec3<f32> {
+    // The same landing on a byte the lookup in front of it makes: the CPU route
+    // hands its sliders a frame of stored codes, not the grid's float answer.
+    let stored = round(rgb * vec3(255.0));
+    let solved = (0.299 * stored.x + 0.587 * stored.y + 0.114 * stored.z) / 1.164 + 16.0;
+    let cb = (-0.168736 * stored.x - 0.331264 * stored.y + 0.5 * stored.z) * (224.0 / 255.0);
+    let cr = (0.5 * stored.x - 0.418688 * stored.y - 0.081312 * stored.z) * (224.0 / 255.0);
+    let luma = clamp(params.adjust_a.x * solved + params.adjust_a.y, 0.0, 255.0);
+    let turned = pow(luma / 255.0, params.adjust_a.z) * 255.0;
+    // Both lines read the pair as it was solved, which is the rotation VLC's
+    // filter works out.
+    let cb_adj = params.adjust_a.w * cb + params.adjust_b.x * cr;
+    let cr_adj = params.adjust_a.w * cr - params.adjust_b.x * cb;
+    let y = 1.164 * (turned - 16.0);
+    let r = y + 1.596 * cr_adj;
+    let g = y - 0.391 * cb_adj - 0.813 * cr_adj;
+    let b = y + 2.013 * cb_adj;
+    let shown = clamp(round(vec3(r, g, b)), vec3(0.0), vec3(255.0));
+    return shown / vec3(255.0);
+}
+
 @fragment
 fn fs(in: VertexOut) -> @location(0) vec4<f32> {
-    // VLC's adjust filter works on the stored 8-bit samples, so the numbers
-    // are applied here — the luma line first, clamped like its tables, then
-    // its gamma curve; the chroma around grey, both before any range maths.
-    let stored_y = textureSample(plane_y, plane_sampler, in.uv).r * 255.0;
-    let luma = clamp(params.adjust_a.x * stored_y + params.adjust_a.y, 0.0, 255.0);
-    let y_stored = pow(luma / 255.0, params.adjust_a.z) * 255.0;
-    let cb_c = textureSample(plane_cb, plane_sampler, in.uv).r * 255.0 - params.c_offset;
-    let cr_c = textureSample(plane_cr, plane_sampler, in.uv).r * 255.0 - params.c_offset;
-    let cb_adj = params.adjust_a.w * cb_c + params.adjust_b.x * cr_c;
-    let cr_adj = params.adjust_a.w * cr_c - params.adjust_b.x * cb_c;
+    let graded = params.grid.w > 0.5;
+    // VLC's picture settings work on the stored 8-bit samples, so with no grade
+    // to run first they are applied here: the luma line, clamped like the
+    // filter's tables, then its gamma curve, and the chroma turned around grey
+    // — all before any range maths, the way the filter sees the frame it is
+    // given. Under a grade there is no stored sample left to step over: the
+    // grade is the colour management and the sliders belong on the codes it
+    // leaves, which is the only picture a brightness slider can promise to
+    // brighten. That order is what the CPU route has always drawn, so the two
+    // agree by construction rather than by approximation.
+    var y_stored = textureSample(plane_y, plane_sampler, in.uv).r * 255.0;
+    var cb_c = textureSample(plane_cb, plane_sampler, in.uv).r * 255.0 - params.c_offset;
+    var cr_c = textureSample(plane_cr, plane_sampler, in.uv).r * 255.0 - params.c_offset;
+    if !graded {
+        let luma = clamp(params.adjust_a.x * y_stored + params.adjust_a.y, 0.0, 255.0);
+        y_stored = pow(luma / 255.0, params.adjust_a.z) * 255.0;
+        let cb_turned = params.adjust_a.w * cb_c + params.adjust_b.x * cr_c;
+        let cr_turned = params.adjust_a.w * cr_c - params.adjust_b.x * cb_c;
+        cb_c = cb_turned;
+        cr_c = cr_turned;
+    }
     let y = (y_stored - params.y_offset) * params.y_gain;
-    let cb = cb_adj * params.c_gain;
-    let cr = cr_adj * params.c_gain;
+    let cb = cb_c * params.c_gain;
+    let cr = cr_c * params.c_gain;
     let r = y + 2.0 * (1.0 - params.kr) * cr;
     let b = y + 2.0 * (1.0 - params.kb) * cb;
     let g = (y - params.kr * r - params.kb * b) / (1.0 - params.kr - params.kb);
     var rgb = clamp(vec3(r, g, b), vec3(0.0), vec3(1.0));
-    if params.grid.w > 0.5 {
+    if graded {
         // The CPU route indexes its grid by the byte it stores, so land on that
         // byte first: the two routes then read the same nodes, and what is left
         // between them is arithmetic rather than a different colour decision.
         let code = round(rgb * 255.0) / 255.0;
         rgb = clamp(grade_read(code), vec3(0.0), vec3(1.0));
+        if params.adjust_b.y > 0.5 {
+            rgb = clamp(adjust_codes(rgb), vec3(0.0), vec3(1.0));
+        }
     }
     if params.srgb > 0.5 {
         // The swapchain encodes to sRGB on write; hand it linear light.
@@ -733,8 +775,12 @@ impl VideoGpu {
             (16.0, 219.0, 224.0)
         };
         // The settings ride as the shader's two vectors: the luma trio with
-        // the cosine of the turn in the fourth slot, the sine alone in the
-        // other, the rest of the space padding to the vector width. The grid
+        // the cosine of the turn in the fourth slot, the sine and a switch in
+        // the other, the rest of the space padding to the vector width. The
+        // switch says the bundle is not the identity, which is when the shader
+        // steps the shown picture through the matrix round trip at all — the
+        // draw path hands over the frame untouched for that one bundle, and a
+        // round trip costs a step of rounding even when nothing moves. The grid
         // vector is the texture's own shape, filled in when it was last
         // written: edge length, how to read between nodes, and whether to.
         let params: [f32; 24] = [
@@ -755,7 +801,7 @@ impl VideoGpu {
             adjust[2],
             adjust[3],
             adjust[4],
-            0.0,
+            f32::from(adjust != IDENTITY_ADJUST),
             0.0,
             0.0,
             self.grid.params[0],
@@ -916,8 +962,20 @@ mod tests {
         frame: &Planar8,
         grade: Option<&Arc<Grade>>,
     ) -> Vec<u8> {
+        paint_adjust(device, queue, frame, grade, IDENTITY_ADJUST)
+    }
+
+    /// …and the same draw with a settings bundle on it, for a test that has to
+    /// set a slider's maths against the grade's.
+    fn paint_adjust(
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        frame: &Planar8,
+        grade: Option<&Arc<Grade>>,
+        adjust: [f32; 5],
+    ) -> Vec<u8> {
         let mut gpu = build(device, wgpu::TextureFormat::Rgba8Unorm);
-        show(device, queue, &mut gpu, frame, grade)
+        show(device, queue, &mut gpu, frame, grade, adjust)
     }
 
     /// One draw of `frame` as `gpu` holds it: the product's own `upload` filling
@@ -931,17 +989,10 @@ mod tests {
         gpu: &mut VideoGpu,
         frame: &Planar8,
         grade: Option<&Arc<Grade>>,
+        adjust: [f32; 5],
     ) -> Vec<u8> {
         let (width, height) = (frame.width, frame.height);
-        gpu.upload(
-            device,
-            queue,
-            frame,
-            0,
-            [0.0, 0.0, 1.0, 1.0],
-            IDENTITY_ADJUST,
-            grade,
-        );
+        gpu.upload(device, queue, frame, 0, [0.0, 0.0, 1.0, 1.0], adjust, grade);
         let target = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("fvid test picture"),
             size: wgpu::Extent3d {
@@ -1346,11 +1397,18 @@ mod tests {
         ];
         for (index, (what, grade)) in steps.iter().enumerate() {
             let grade = Arc::new(grade.clone());
-            let shown = show(&device, &queue, &mut gpu, &frame, Some(&grade));
+            let shown = show(
+                &device,
+                &queue,
+                &mut gpu,
+                &frame,
+                Some(&grade),
+                IDENTITY_ADJUST,
+            );
             let worst = worst_between(&shown, &cpu_graded(&frame, &grade));
             assert_eq!(worst, [0, 0, 0], "step {index}, {what}: {worst:?}");
         }
-        let shown = show(&device, &queue, &mut gpu, &frame, None);
+        let shown = show(&device, &queue, &mut gpu, &frame, None, IDENTITY_ADJUST);
         let mut plain = Vec::new();
         crate::playback_native::planar8_to_rgb(&frame, &mut plain, 64 * 64 * 3).expect("converted");
         assert_eq!(
@@ -1454,5 +1512,195 @@ mod tests {
             plain,
             "a grade that changes no pixel proves nothing here"
         );
+    }
+
+    /// The bytes the CPU route leaves for the window when a picture is graded
+    /// and then stepped through VLC's settings: converted, graded, the bundle
+    /// over the graded codes, which is the order the draw path has always used.
+    fn cpu_graded_and_adjusted(frame: &Planar8, grade: &Grade, bundle: &[f32; 5]) -> Vec<u8> {
+        let rgb = cpu_graded(frame, grade);
+        if *bundle == IDENTITY_ADJUST {
+            return rgb;
+        }
+        let mut adjusted = Vec::new();
+        crate::player::adjust_rgb(&rgb, &mut adjusted, bundle);
+        adjusted
+    }
+
+    /// VLC's picture settings and a grade, both asked for at once: the order the
+    /// window shows them in, and the space the sliders work in.
+    ///
+    /// The grade is the colour management, so it runs first and the sliders are
+    /// stepped over the codes it leaves — the picture the viewer is looking at,
+    /// which is the only picture a brightness slider can promise to brighten.
+    /// Contrast and gamma over log codes before the curve unwraps them would be
+    /// swallowed or doubled by the curve instead, and the CPU draw path has
+    /// always graded first, so the shader that keeps a plane picture's planes
+    /// has to follow it here. Every step of both routes is the same arithmetic
+    /// on the same bytes, including the byte the lookup lands on before the
+    /// sliders run, so this is an `assert_eq!` on the whole frame rather than a
+    /// tolerance: a slider applied before the grade, a turn that reads its own
+    /// answer back, a grid's float answer fed to the matrix instead of its byte,
+    /// or the identity bundle stepped through the round trip the CPU skips, each
+    /// moves these codes.
+    #[test]
+    fn a_grade_and_a_slider_reach_the_window_in_the_cpus_order() {
+        let Some((device, queue)) = headless() else {
+            eprintln!("no GPU adapter: the shader has nothing to be compared with");
+            return;
+        };
+        // Every one of the five numbers away from the identity, so no term of
+        // either half of the bundle is left unexercised: contrast, brightness
+        // through the lum offset, gamma, saturation and a hue turn — and the
+        // same bundle turned over, which is the other half of the turn's maths.
+        for bundle in [
+            [1.3, 14.0, 1.0 / 1.25, 0.6, 0.35],
+            [0.75, -22.0, 1.0 / 0.8, 1.7, -0.5],
+            IDENTITY_ADJUST,
+        ] {
+            for interpolation in Interpolation::ALL {
+                // One grade read from the grid, one from the byte tables, one
+                // whose plan a cheap look calls separable and the measurement
+                // sends back to the grid.
+                for grade in [
+                    hdr10(33, interpolation),
+                    gamma(33, interpolation),
+                    slog3(33, interpolation),
+                ] {
+                    let grade = Arc::new(grade);
+                    for (blue, red) in [(128u8, 128u8), (100, 180), (64, 224), (192, 32)] {
+                        let frame = frame(move |_, _| blue, move |_, _| red);
+                        let shader = paint_adjust(&device, &queue, &frame, Some(&grade), bundle);
+                        let worst = worst_between(
+                            &shader,
+                            &cpu_graded_and_adjusted(&frame, &grade, &bundle),
+                        );
+                        assert_eq!(
+                            worst,
+                            [0, 0, 0],
+                            "bundle {bundle:?}, {interpolation:?}, chroma {blue}/{red}: the \
+                             routes parted by {worst:?}"
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    /// A slider moved over a picture the window is holding, with a grade on it:
+    /// the frame, its planes and its table all stay, so the only thing that
+    /// changes is the parameter block, and the switch that turns the bundle's
+    /// round trip on rides in it. Drawn twice over one pipeline, the second
+    /// answer has to be the second bundle's and the third the first one's again,
+    /// because a stale switch would leave the picture either graded without the
+    /// slider the viewer just moved, or stepped through the matrix when nothing
+    /// asked for it.
+    #[test]
+    fn a_slider_moved_over_a_held_graded_picture_reaches_the_shader() {
+        let Some((device, queue)) = headless() else {
+            eprintln!("no GPU adapter: the shader has nothing to be compared with");
+            return;
+        };
+        let mut gpu = build(&device, wgpu::TextureFormat::Rgba8Unorm);
+        let frame = frame(|_, _| 64, |_, _| 224);
+        let grade = Arc::new(hdr10(33, Interpolation::Tetrahedral));
+        let bundle = [1.25, 10.0, 1.0 / 1.2, 0.8, -0.3];
+        for step in [IDENTITY_ADJUST, bundle, IDENTITY_ADJUST] {
+            let shown = show(&device, &queue, &mut gpu, &frame, Some(&grade), step);
+            let worst = worst_between(&shown, &cpu_graded_and_adjusted(&frame, &grade, &step));
+            assert_eq!(
+                worst,
+                [0, 0, 0],
+                "step {step:?} over a held picture: {worst:?}"
+            );
+        }
+    }
+
+    /// The same bundle with no grade in front of it, which is the picture
+    /// settings' own parity between the routes: the shader turns the planes it
+    /// was given, the CPU solves BT.601 back out of the bytes the converter
+    /// stored and turns that. Where both routes' samples survive the conversion
+    /// the two are the same maths with one stored byte in the middle, so what
+    /// separates them is what that rounding costs at either end — measured here,
+    /// on four corners of the chroma square and a turn that scales no channel
+    /// down, because a wrong turn cannot hide at a step or two.
+    ///
+    /// The picture is deliberately mild at both ends: a sample outside the coded
+    /// range makes the routes incomparable rather than disagreeing, because the
+    /// converter clamps it and the packed route then adjusts a luma the file
+    /// never carried. The last two frames are exactly that, kept in the test as
+    /// the record of it — thirty-two codes for a luma of 0 under a contrast of
+    /// 1.3, and fifty-three for chroma at the top of the range — every one of
+    /// them the shader's stored sample against the black or white the converter
+    /// left behind, which no maths recovers afterwards.
+    #[test]
+    fn a_slider_over_a_plain_picture_costs_a_rounding_step() {
+        let Some((device, queue)) = headless() else {
+            eprintln!("no GPU adapter: the shader has nothing to be compared with");
+            return;
+        };
+        let plains = |blue: u8, red: u8, luma: &dyn Fn(usize) -> u8| {
+            let (width, height) = (64, 64);
+            Planar8 {
+                width,
+                height,
+                chroma_width: width / 2,
+                chroma_height: height / 2,
+                y: (0..width * height).map(luma).collect(),
+                cb: vec![blue; width * height / 4],
+                cr: vec![red; width * height / 4],
+                colour: crate::playback_native::AvcColour::default(),
+            }
+        };
+        let within = |blue, red| plains(blue, red, &|i| (60 + i % 91) as u8);
+        for bundle in [
+            [1.15, 8.0, 1.0 / 1.1, 0.7, 0.4],
+            [1.0, 0.0, 1.0, 0.0, 1.0],
+            [1.0, 0.0, 1.0, -1.0, 0.0],
+            IDENTITY_ADJUST,
+        ] {
+            for (blue, red) in [(128u8, 128u8), (104, 152), (152, 104), (104, 104)] {
+                let frame = within(blue, red);
+                let shader = paint_adjust(&device, &queue, &frame, None, bundle);
+                let mut rgb = Vec::new();
+                crate::playback_native::planar8_to_rgb(&frame, &mut rgb, 64 * 64 * 3)
+                    .expect("converted");
+                let mut cpu = Vec::new();
+                crate::player::adjust_rgb(&rgb, &mut cpu, &bundle);
+                let worst = worst_between(&shader, &cpu);
+                assert!(
+                    worst.iter().all(|d| *d <= 2),
+                    "bundle {bundle:?} over a {blue}/{red} chroma: the routes parted by {worst:?}"
+                );
+            }
+        }
+        // Where the converter does clamp, the routes are not comparable and this
+        // is the record of that rather than a tolerance for it: the plane route
+        // has the stored sample, the packed route has the black or white the
+        // converter left instead, and no maths afterwards recovers it.
+        for (what, frame, bundle) in [
+            (
+                "luma below black",
+                plains(128, 128, &|i| (i % 256) as u8),
+                [1.3, 14.0, 1.0 / 1.25, 1.0, 0.0],
+            ),
+            (
+                "chroma at the top of the range",
+                plains(64, 224, &|i| (60 + i % 91) as u8),
+                [1.0, 0.0, 1.0, 0.7, 0.4],
+            ),
+        ] {
+            let shader = paint_adjust(&device, &queue, &frame, None, bundle);
+            let mut rgb = Vec::new();
+            crate::playback_native::planar8_to_rgb(&frame, &mut rgb, 64 * 64 * 3)
+                .expect("converted");
+            let mut cpu = Vec::new();
+            crate::player::adjust_rgb(&rgb, &mut cpu, &bundle);
+            let worst = worst_between(&shader, &cpu);
+            assert!(
+                worst.iter().any(|d| *d > 20),
+                "{what}: the clamped route was expected to part by tens, {worst:?}"
+            );
+        }
     }
 }
