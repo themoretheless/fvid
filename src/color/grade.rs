@@ -578,6 +578,119 @@ mod tests {
         assert_eq!(grade.plan().source, Primaries::BT709);
     }
 
+    /// The player's help text promises an order — the log unfolds the codes, the
+    /// tone curve fits the highlights, and a `.cube` or `.3dl` look is applied
+    /// *after* them — so that order is what this test holds. Each leg is pinned
+    /// on its own elsewhere; here they are walked together on the grey diagonal
+    /// of the grid the settings bake at, where a channel is a single number:
+    /// Sony's published constants unfold the code, the published Hable filmic
+    /// response fits it, BT.709's OETF writes it back, and the cube's own text
+    /// is walked by hand. Inputs are nodes of that grid (the settings' own 33),
+    /// which is where a baked grid carries its curve without a step in between.
+    /// The widest gap between the two orders there measures 0.617 — 157 codes —
+    /// and the grid stands 2.1e-7 off the arithmetic, so what fails is the order
+    /// and not a rounding that could fall either way.
+    #[test]
+    fn a_told_grade_applies_the_log_then_the_tone_map_then_the_cube() {
+        // Three different shapes, so a leg sent to the wrong channel or dropped
+        // on the floor shows up on one of them.
+        const CUBE: &str = "LUT_1D_SIZE 5
+0.00 0.00 1.00
+0.25 0.60 0.70
+0.60 0.25 0.35
+0.85 0.90 0.10
+1.00 1.00 0.00
+";
+        let nodes: Vec<[f64; 3]> = CUBE
+            .lines()
+            .filter(|line| {
+                line.as_bytes()
+                    .first()
+                    .is_some_and(|byte| byte.is_ascii_digit() || *byte == b'.')
+            })
+            .map(|line| {
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                [
+                    parts[0].parse().expect("red"),
+                    parts[1].parse().expect("green"),
+                    parts[2].parse().expect("blue"),
+                ]
+            })
+            .collect();
+        assert_eq!(nodes.len(), 5);
+        let cube = |code: f64, channel: usize| -> f64 {
+            let pos = code.clamp(0.0, 1.0) * 4.0;
+            let low = pos.floor() as usize;
+            let high = (low + 1).min(4);
+            let frac = pos - low as f64;
+            nodes[low][channel] * (1.0 - frac) + nodes[high][channel] * frac
+        };
+        // Sony's S-Log3 summary: 18 % reflectance at code 420 of 1 023, one
+        // and a half decades per 261.5 codes, and 0.01 of offset to subtract.
+        let slog3 = |signal: f64| -> f64 {
+            let cv = signal * 1023.0;
+            if cv > 171.210_294_7 {
+                10f64.powf((cv - 420.0) / 261.5) * 0.19 - 0.01
+            } else {
+                (cv - 95.0) * 0.011_25 / (171.210_294_7 - 95.0)
+            }
+        };
+        // Hable's Uncharted 2 filmic response, as published, normalised by its
+        // own value at the panel's peak — which is code 1.0 here, the file
+        // naming no content peak of its own.
+        let hable = |x: f64| -> f64 {
+            let (a, b, c, d, e, f) = (0.15, 0.50, 0.10, 0.20, 0.02, 0.30);
+            (x * (a * x + c * b) + d * e) / (x * (a * x + b) + d * f) - e / f
+        };
+        let fit = |light: f64| (hable(light) / hable(1.0)).clamp(0.0, 1.0);
+        let written = |light: f64| -> f64 {
+            if light <= 0.018 {
+                4.5 * light
+            } else {
+                1.099 * light.max(0.0).powf(0.45) - 0.099
+            }
+        };
+        // The promised order, and the one that would follow from wiring the
+        // cube in front of the grade instead of behind it.
+        let forward = |code: f64, channel: usize| cube(written(fit(slog3(code))), channel);
+        let reversed = |code: f64, channel: usize| written(fit(slog3(cube(code, channel))));
+        let settings = Settings {
+            log: Some(Log::SLog3),
+            tone_map: Some(ToneMap::Hable),
+            ..Settings::video(DisplayTarget::sdr(240.0))
+        };
+        let grade = Grade::new(
+            bt709(),
+            &HdrMetadata::default(),
+            settings,
+            Some(Lut::from_cube(CUBE).expect("a written 1D cube is a cube")),
+        );
+        let mut apart = 0.0f64;
+        let mut worst = 0.0f64;
+        for node in 0..=32 {
+            let code = node as f64 / 32.0;
+            let shown = grade.rgb([code as f32; 3]);
+            for channel in 0..3 {
+                let want = forward(code, channel);
+                let got = f64::from(shown[channel]);
+                apart = apart.max((want - reversed(code, channel)).abs());
+                worst = worst.max((want - got).abs());
+                assert!(
+                    (want - got).abs() <= 1e-5,
+                    "node {node} channel {channel}: shown {got} over {want}"
+                );
+            }
+        }
+        assert!(
+            apart > 0.05,
+            "the two orders never differ by more than {apart}, so this test could not tell them apart"
+        );
+        assert!(
+            worst < 1e-5,
+            "the grid is {worst} off the curve it bakes, which is more than a float rounding"
+        );
+    }
+
     /// Every code of every channel, both routes to the same byte.
     fn tables_match_the_grid(grade: &Grade) {
         assert!(grade.tables.is_some());
