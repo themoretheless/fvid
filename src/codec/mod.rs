@@ -396,3 +396,5 @@ pub fn make_audio_decoder(
     };
     Ok(decoder)
 }
+
+pub mod aac_imdct;

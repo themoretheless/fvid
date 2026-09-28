@@ -218,3 +218,23 @@ from filling the bounded event channel and blocking the decode thread.
    exponent strategies, the band structures they name, bit allocation, mantissas,
    the 512-point long transform and the downmix. That is a decoder of the AC-3
    core's size, not a wiring task.
+
+## Owned AAC synthesis kernel in progress
+
+`codec::aac_imdct` implements inverse MDCT independently of Symphonia for
+120, 128, 960 and 1024 coefficients. Its explicit windowed normalization is
+2/N; windowing and overlap-add belong to the caller. A precomputed cosine
+recurrence avoids transcendental calls in the coefficient loop and reuses the
+caller's output, but the kernel is still quadratic and is not yet wired into
+packet decoding. Do not count this as a working owned AAC decoder.
+
+Tests compare basis vectors against direct cosine evaluation for all four
+sizes, reconstruct an independently analysed signal using overlapping sine
+windows, and verify invalid input leaves output untouched. Spectrum entropy
+parsing, inverse quantization, AAC window transitions and codec tools still
+need implementation/integration before replacing Symphonia.
+
+Transform reference: Shao and Johnson, “Type-IV DCT, DST, and MDCT algorithms
+with reduced numbers of arithmetic operations”, section VII:
+https://arxiv.org/abs/0708.4399 . The current kernel is a direct recurrence,
+not an implementation or performance claim for that paper's fast algorithm.
