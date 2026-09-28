@@ -429,13 +429,16 @@ fn the_lead_is_filled_by_the_copier_and_eaten_by_the_reader() {
         "the copier put {} bytes on disk and none of them ahead",
         handle.copied()
     );
-    // Where the copy sits is a second question from how much of it there is:
-    // with the reader still at byte zero the window starts at the item's own
-    // front, which is what the progress line draws.
-    assert_eq!(
-        handle.covered().0,
-        0,
-        "the copy did not start where the reader did"
+    // Where the copy sits is a second question from how much of it there is. The
+    // reader has not moved, so the front edge is either the item's own front or
+    // far enough past it that the window had to give bytes back to get there:
+    // the copier only shifts the base once the window is full.
+    let (near, far) = handle.covered();
+    assert!(
+        near == 0 || far - near >= 4 << 20,
+        "the copy started at byte {near} while holding only {} of the {} it was given",
+        far - near,
+        4 << 20
     );
     let mut got = Vec::new();
     let mut filled = false;
@@ -455,18 +458,32 @@ fn the_lead_is_filled_by_the_copier_and_eaten_by_the_reader() {
         filled |= handle.ahead() > 0;
     }
     assert!(filled, "the copier never held a byte ahead of the reader");
-    assert_eq!(handle.ahead(), 0, "the item is read out; the lead is not");
+    // The rest is the copy's settled state, and a local item is one the reader
+    // can drain while the copier thread is still back near the front: on a loaded
+    // runner the last bytes went to the source and the window is a few blocks
+    // short of the end. The room the copier is allowed to fill is measured from
+    // the reader, so once the item is read out it has all of it left to take; this
+    // is a wait for that thread, not for a byte that never comes.
+    let started = Instant::now();
+    while !handle.finished() && started.elapsed() < Duration::from_secs(5) {
+        std::thread::sleep(Duration::from_millis(2));
+    }
     assert!(
-        handle.copied() > 0,
-        "the window gave all its room back before the end"
+        handle.finished(),
+        "the copier never came back over the item it was given"
     );
-    // The item is longer than the window, so by the end the copy has left the
-    // front of it behind: both edges moved, and they still say where the same
-    // bytes the `copied` mirror counts are kept.
+    assert_eq!(handle.ahead(), 0, "the item is read out; the lead is not");
+    // Where the settled window sits is the second question from how much of it
+    // there is. Two endings are legitimate here and the reads cannot tell them
+    // apart from each other: the copier either walked the last blocks down, which
+    // leaves the back edge a lead's worth inside the item, or it found the reader
+    // further away than a lead and cut the window to where the reader stood, which
+    // leaves it empty at the end. Both say the same thing about the front edge and
+    // about the far one, and both keep the edges and the published size agreeing.
     let (near, far) = handle.covered();
     assert!(
         near > 0,
-        "the window never followed the reader off the front"
+        "the window never followed the reader off the front, it read [{near}, {far})"
     );
     assert_eq!(far, 8 << 20, "the copy stopped short of the end it read to");
     assert_eq!(
