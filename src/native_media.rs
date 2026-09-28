@@ -101,3 +101,39 @@ fn planar_format(w: usize, h: usize, cw: usize, ch: usize) -> Result<String> {
     }
     .into())
 }
+
+/// Result of owned AAC-LC decoding to interleaved little-endian float PCM.
+#[derive(Debug, PartialEq, Eq)]
+pub struct AudioDecodeStats {
+    pub sample_frames: u64,
+    pub decoded_frames: u64,
+    pub sample_rate: u32,
+    pub channels: u16,
+}
+
+/// Decode ADTS packets using the owned AAC codec, without playback dependencies.
+/// Encoder priming/padding is retained because ADTS carries no trim metadata.
+/// The caller owns the destination; an error can leave partial PCM in it.
+pub fn decode_aac_pcm(
+    data: &[u8],
+    output: &mut impl std::io::Write,
+    limits: &crate::container::adts::Limits,
+) -> Result<AudioDecodeStats> {
+    let stream = crate::container::adts::Aac::parse(data, limits)?;
+    let mut decoder = crate::codec::aac_native::NativeAacDecoder::new(&stream.frames[0].asc)?;
+    let mut stats = AudioDecodeStats {
+        sample_frames: 0,
+        decoded_frames: 0,
+        sample_rate: stream.sample_rate,
+        channels: stream.channels,
+    };
+    for index in 0..stream.packets() {
+        let samples = decoder.decode(stream.packet(index))?;
+        for sample in &samples {
+            output.write_all(&sample.to_le_bytes())?;
+        }
+        stats.sample_frames += (samples.len() / usize::from(stream.channels)) as u64;
+        stats.decoded_frames += 1;
+    }
+    Ok(stats)
+}

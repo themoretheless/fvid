@@ -417,3 +417,14 @@ including LFE, and maps AAC center-first syntax into PCM channel order. A new
 peak <4.5e-8 against the saved oracle. Duplicate element tags and unexpected
 layout/order are rejected. 7.1, arbitrary reordered elements/PCE, 960-sample
 packet support and player replacement remain pending.
+
+## Headless native AAC media API
+
+`container::adts` now owns ADTS framing/configuration independently of the
+`player` feature. The playback adapter reexports its existing parser API.
+`native_media::decode_aac_pcm` accepts ADTS bytes and a caller-owned writer,
+producing interleaved f32 little-endian PCM with sample/frame statistics.
+It uses NativeAacDecoder without Symphonia or FFmpeg. ADTS encoder priming and
+padding are retained; writer/decode errors propagate and may leave partial
+output in the caller's writer. This is currently an API, not yet the replacement
+for the legacy transformed `media decode-audio` CLI operation.
