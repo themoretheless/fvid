@@ -35,7 +35,7 @@ mod tests {
     fn geometry_requires_decode() {
         let crop = CropRect::new(0, 0, 640, 360).unwrap();
         let project = EditProject::new().transform(Transform::Crop(crop));
-        assert_eq!(project.execution_mode(), ExecutionMode::DecodeProcessEncode);
+        assert_eq!(plan(&project).mode, ExecutionMode::DecodeProcessEncode);
     }
 
     #[test]
