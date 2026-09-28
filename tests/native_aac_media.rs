@@ -202,3 +202,47 @@ fn mp4_clock_rescaling_preserves_pcm_and_edit_selection() {
     let error = fvid::native_media::decode_mp4_aac_pcm(&rescaled, &mut Vec::new()).unwrap_err();
     assert!(error.to_string().contains("not aligned"));
 }
+
+#[test]
+fn mp4_edit_schedule_repeats_ranges_and_inserts_silence() {
+    use std::time::Duration;
+    let original = include_bytes!("fixtures/audio/aac-native-edit.m4a");
+    let mut edited = original.to_vec();
+    let at = |tag: &[u8]| original.windows(4).position(|v| v == tag).unwrap();
+    let movie = at(b"mvhd");
+    assert_eq!(u32::from_be_bytes(original[movie+16..movie+20].try_into().unwrap()), 44100);
+    let elst = at(b"elst");
+    let entries = [(1000u32, 1024i32), (441, -1), (500, 2500), (500, 1024)];
+    let mut body = Vec::new();
+    for (duration, start) in entries {
+        body.extend_from_slice(&duration.to_be_bytes());
+        body.extend_from_slice(&start.to_be_bytes());
+        body.extend_from_slice(&0x10000u32.to_be_bytes());
+    }
+    edited[elst+8..elst+12].copy_from_slice(&4u32.to_be_bytes());
+    // moov follows mdat, so expanding metadata cannot move packet offsets.
+    assert!(at(b"moov") > at(b"mdat"));
+    for tag in [b"moov", b"trak", b"edts", b"elst"] {
+        let size_at = at(tag)-4;
+        let size = u32::from_be_bytes(edited[size_at..size_at+4].try_into().unwrap());
+        edited[size_at..size_at+4].copy_from_slice(&(size+36).to_be_bytes());
+    }
+    edited.splice(elst+12..elst+24, body);
+    let mut whole = Vec::new();
+    fvid::native_media::decode_mp4_aac_pcm(original, &mut whole).unwrap();
+    let mut expected = whole[..1000*4].to_vec();
+    expected.extend_from_slice(&vec![0; 441*4]);
+    expected.extend_from_slice(&whole[1476*4..1976*4]);
+    expected.extend_from_slice(&whole[..500*4]);
+    let mut actual = Vec::new();
+    let stats = fvid::native_media::decode_mp4_aac_pcm(&edited, &mut actual).unwrap();
+    assert_eq!(stats.sample_frames, 2441);
+    assert_eq!(actual, expected);
+    let mut part = Vec::new();
+    fvid::native_media::decode_mp4_aac_pcm_interval(&edited, &mut part,
+        Some((Duration::from_millis(10), Duration::from_millis(50)))).unwrap();
+    assert_eq!(part, expected[441*4..2205*4]);
+    // A requested source segment beyond the actual audio must fail.
+    edited[elst+16..elst+20].copy_from_slice(&100000i32.to_be_bytes());
+    assert!(fvid::native_media::decode_mp4_aac_pcm(&edited, &mut Vec::new()).is_err());
+}

@@ -451,10 +451,9 @@ reflect only the selected samples; decoded-frame statistics include pre-roll.
 Example: `fvid media decode-audio input.aac clip.wav --from 0.030001 --to 0.070001`.
 
 Native PCM/WAV CLI export also accepts MP4/M4A with a single AAC audio track.
-The owned MP4 reader supplies packets and the owned AAC decoder applies one
-media edit to remove priming and trailing encoder padding. Current support
-requires sample-aligned track timestamps; empty/multi-segment edits, discontinuous
-packet timing are explicitly rejected.
+The owned MP4 reader supplies packets and the owned AAC decoder applies media
+edits to remove priming and trailing encoder padding. Current support requires
+sample-aligned source timestamps; discontinuous packet timing is rejected.
 The M4A fixture presents exactly 5645 mono samples at 44100 Hz; six native audio
 integration tests pass, and a CLI-created WAV was independently inspected with
 that exact sample count. Other MP4 audio codecs retain their previous routing.
@@ -469,3 +468,11 @@ MP4 AAC timing now converts track ticks to sample indices with checked integer
 arithmetic instead of requiring timescale == sample_rate. A regression doubles
 mdhd/stts/elst media ticks while preserving the timeline and checks byte-identical
 full and interval PCM. Fractional-sample timestamps remain explicitly rejected.
+
+MP4 AAC edit scheduling now handles multiple/repeated media ranges and empty
+edits (silence). Each selected media range resets the decoder and replays its
+pre-roll, avoiding a whole-track PCM cache at the cost of extra decoding for
+repeated edits. Cumulative movie boundaries are rounded up to sample indices
+without per-edit duration drift. User intervals address this composed timeline.
+Nine integration tests pass, including exact range/silence/repeat PCM and a
+cross-edit interval; source edits beyond available audio fail explicitly.
