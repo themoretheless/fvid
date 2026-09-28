@@ -130,7 +130,7 @@ pub use play::{
     apply_video_post_fx_with_prev, apply_vr_vignette_pixel, apply_white_balance_pixel,
     aspect_label, ass_override_margin_px, atempo_duration_us, audio_bargraph_fills,
     audio_channel_label, audio_delay_frames, audio_desync_ms_from_us, audio_desync_us,
-    audio_duck_gain_milli, audio_output_devices, audio_peak_milli, audio_pitch_step_milli,
+    audio_duck_gain_milli, audio_peak_milli, audio_pitch_step_milli,
     auto_hdr_tonemap, average_rgb_pixel, balance_step_milli, barrel_distort_uv_milli,
     blend_rgba_over_rgb, blend_tonemap_channel, blit_bitmap_subtitle, bookmark_step,
     brown_conrady_uv_milli, bt2020_to_bt709_rgb, bt2446_tonemap_channel, buffer_health_pct,
@@ -260,8 +260,8 @@ pub use play::{
     parse_resume_positions, parse_smil_clip_line, parse_spherical_projection,
     parse_spherical_stereo, parse_srt, parse_subtitle_clock, parse_subtitle_text, parse_ttml_clock,
     parse_webvtt_region_id, parse_webvtt_timestamp, passthrough_blend_milli,
-    phase_correlation_milli, pip_rect, pitch_from_swipe_px, pitch_step_milli, plain_subtitle, play,
-    play_paths, play_stereo3d_label, playback_continue, playlist_edge_fade_gain_milli,
+    phase_correlation_milli, pip_rect, pitch_from_swipe_px, pitch_step_milli, plain_subtitle,
+    play_stereo3d_label, playback_continue, playlist_edge_fade_gain_milli,
     playlist_sort_label, playlist_step, position_us_from_digit, pq_eotf, pq_oetf,
     prefer_abr_rendition_index, prefer_album_art_path, prefer_external_subtitle_path,
     prefer_forced_subtitle_index, prefer_hearing_impaired_subtitle_index,
@@ -298,6 +298,8 @@ pub use play::{
     waveform_column_fills, white_point_xy_milli, width_step_milli, wiggle_yaw_offset_milli,
     yaw_from_swipe_px, yaw_step_milli, zoom_label, zoom_pan_rect, zoom_size, zoom_step,
 };
+#[cfg(feature = "player")]
+pub use play::{audio_output_devices, play, play_paths};
 use serde::Serialize;
 use std::{
     collections::BTreeMap,

@@ -1,19 +1,12 @@
 //! Local window playback. Software decode to a display-sized BGRA buffer, optional
 //! device audio, and an egui window. Not a streaming server and not a hardware presenter.
-use super::lossless::{Codec, Frame};
 use super::*;
-use cpal::SampleFormat;
-use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use eframe::egui;
 use serde::Serialize;
 use std::collections::VecDeque;
-use std::ffi::CStr;
 use std::path::{Path, PathBuf};
-use std::ptr;
 use std::sync::atomic::{AtomicBool, AtomicI32, AtomicI64, AtomicU32, AtomicU64, Ordering};
-use std::sync::{Arc, Condvar, Mutex, MutexGuard};
-use std::thread;
-use std::time::{Duration, Instant};
+use std::sync::{Arc, Condvar, Mutex};
+use std::time::Instant;
 
 const MAX_W: i32 = 1920;
 const MAX_H: i32 = 1080;
@@ -7976,7 +7969,9 @@ pub fn find_audio_device<'a>(names: &'a [String], wanted: &str) -> Option<&'a st
 }
 
 /// Names of the host's output devices. Empty when the host reports none.
+#[cfg(feature = "player")]
 pub fn audio_output_devices() -> Vec<String> {
+    use cpal::traits::{DeviceTrait, HostTrait};
     let host = cpal::default_host();
     host.output_devices()
         .map(|devices| devices.filter_map(|device| device.name().ok()).collect())
@@ -9417,7 +9412,44 @@ pub(crate) fn take_aligned(
     out
 }
 
-fn lock<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
+fn playback_seek_ts(origin_us: i64, media_us: i64) -> i64 {
+    origin_us.saturating_add(media_us.max(0))
+}
+
+fn format_rate(rate_milli: u32) -> String {
+    format!("{:.2}x", rate_milli as f32 / 1000.0)
+}
+
+fn format_clock(us: i64) -> String {
+    let total = (us.max(0) / 1_000_000) as u64;
+    let hours = total / 3600;
+    let minutes = (total % 3600) / 60;
+    let seconds = total % 60;
+    if hours > 0 {
+        format!("{hours}:{minutes:02}:{seconds:02}")
+    } else {
+        format!("{minutes:02}:{seconds:02}")
+    }
+}
+
+/// The playback runtime: software decode, cpal audio output, and the egui
+/// window. It is the only part of this module that links a GUI toolkit, so the
+/// whole block is a `player`-gated inner module; a library build that leaves the
+/// feature off compiles none of it.
+#[cfg(feature = "player")]
+mod runtime {
+    use super::*;
+    use crate::lossless::{Codec, Frame};
+    use cpal::SampleFormat;
+    use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+    use eframe::egui;
+    use std::ffi::CStr;
+    use std::ptr;
+    use std::sync::MutexGuard;
+    use std::thread;
+    use std::time::Duration;
+
+    fn lock<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex.lock().unwrap_or_else(|poison| poison.into_inner())
 }
 
@@ -10327,10 +10359,6 @@ fn subtitle_rect_text(subtitle: &AVSubtitle) -> String {
 fn take_seek(shared: &Shared) -> Option<i64> {
     let value = shared.seek_us.swap(-1, Ordering::AcqRel);
     (value >= 0).then_some(value)
-}
-
-fn playback_seek_ts(origin_us: i64, media_us: i64) -> i64 {
-    origin_us.saturating_add(media_us.max(0))
 }
 
 fn apply_playback_seek(
@@ -15722,22 +15750,6 @@ fn window_title(name: &str, shared: &Shared, media_now: i64, position: PositionD
     )
 }
 
-fn format_rate(rate_milli: u32) -> String {
-    format!("{:.2}x", rate_milli as f32 / 1000.0)
-}
-
-fn format_clock(us: i64) -> String {
-    let total = (us.max(0) / 1_000_000) as u64;
-    let hours = total / 3600;
-    let minutes = (total % 3600) / 60;
-    let seconds = total % 60;
-    if hours > 0 {
-        format!("{hours}:{minutes:02}:{seconds:02}")
-    } else {
-        format!("{minutes:02}:{seconds:02}")
-    }
-}
-
 fn master_clock(
     shared: &Shared,
     clock: &mut Clock,
@@ -16005,6 +16017,10 @@ impl PlayResampler {
         }
     }
 }
+}
+
+#[cfg(feature = "player")]
+pub use runtime::{play, play_paths};
 
 #[cfg(test)]
 mod tests {
