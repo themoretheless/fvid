@@ -504,3 +504,13 @@ linear 0..=64, applied as f32 multiplication without integer clipping. Headers
 bypass processing; invalid gain is rejected before output creation and any PCM
 overflow aborts atomic publication. Twelve integration tests pass, including
 all three containers with 0, 0.5 and 64 gain and exact sample-byte comparisons.
+
+Owned AAC export supports `--channels 1` and `--channels 2`, or unchanged source
+channel count. Mono duplicates to stereo; stereo averages to mono. For standard
+3–6 channel layouts, the centre and back channels contribute at 1/sqrt(2), LFE
+is omitted, and mono is the stereo average. This explicit FVid mixing policy
+uses float arithmetic without clipping or normalization; it is not a claim of
+bit-identical libswresample policy. Gain is applied after mixing. WAV channel
+mask, byte rate and payload size describe the output layout, while sample-frame
+count/timing stay unchanged. Other output layouts remain unsupported. Tests use
+six distinct active source channels and an independent f64 mixing calculation.

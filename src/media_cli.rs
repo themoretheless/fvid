@@ -4,21 +4,25 @@ use std::path::PathBuf;
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.first().map(String::as_str) == Some("decode-audio") && args.len() >= 3
         && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("f32le" | "wav"))
-        && args[3..].iter().all(|arg| !arg.starts_with('-') || matches!(arg.as_str(), "--from" | "--to" | "--quiet" | "--volume"))
+        && args[3..].iter().all(|arg| !arg.starts_with('-') || matches!(arg.as_str(), "--from" | "--to" | "--quiet" | "--volume" | "--channels"))
         && native_aac_input(std::path::Path::new(&args[1]))?
     {
         let mut parse_args = vec!["decode".to_owned(), args[1].clone()];
         let mut volume = None;
+        let mut channels = None;
         let mut options = args[3..].iter();
         while let Some(option) = options.next() {
             if option == "--volume" {
                 if volume.is_some() { return Err("duplicate volume option".into()); }
                 volume = Some(options.next().ok_or("missing volume")?.parse::<f64>()?);
+            } else if option == "--channels" {
+                if channels.is_some() { return Err("duplicate channels option".into()); }
+                channels = Some(options.next().ok_or("missing channels")?.parse::<u16>()?);
             } else { parse_args.push(option.clone()); }
         }
         let (_, quiet, interval) = plain_decode(&parse_args)?.ok_or("invalid native audio arguments")?;
-        let stats = fvid::native_export::export_aac_pcm_with_volume(
-            std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), interval, volume.unwrap_or(1.0),
+        let stats = fvid::native_export::export_aac_pcm_transformed(
+            std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), interval, volume.unwrap_or(1.0), channels,
         )?;
         if !quiet {
             println!("{{\"backend\":\"fvid\",\"sample_frames\":{},\"decoded_frames\":{},\"sample_rate\":{},\"channels\":{},\"sample_format\":\"f32le\",\"decode_errors\":0}}",

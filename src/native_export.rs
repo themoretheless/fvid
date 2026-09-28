@@ -211,6 +211,17 @@ pub fn export_aac_pcm_with_volume(
     interval: Option<(std::time::Duration, std::time::Duration)>,
     volume: f64,
 ) -> Result<crate::native_media::AudioDecodeStats> {
+    export_aac_pcm_transformed(source, destination, interval, volume, None)
+}
+
+/// Native mono/stereo conversion. Unchanged channel layouts pass through.
+pub fn export_aac_pcm_transformed(
+    source: &Path,
+    destination: &Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    volume: f64,
+    channels: Option<u16>,
+) -> Result<crate::native_media::AudioDecodeStats> {
     if !volume.is_finite() || !(0.0..=64.0).contains(&volume) {
         return Err(invalid("volume must be a finite linear gain within 0..=64"));
     }
@@ -226,6 +237,11 @@ pub fn export_aac_pcm_with_volume(
     if data.len() > limits.file_bytes {
         return Err(invalid("AAC input exceeds container byte limit"));
     }
+    let input_channels = aac_channels(&data)?;
+    let output_channels = channels.unwrap_or(input_channels);
+    if output_channels != input_channels && !matches!(output_channels, 1 | 2) {
+        return Err(invalid("native AAC channel conversion supports mono or stereo output"));
+    }
     let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
     let (temporary, file) = (0..100).find_map(|_| {
         let path = directory.join(format!(".fvid-pcm-{}-{}.tmp", std::process::id(), NEXT.fetch_add(1, Ordering::Relaxed)));
@@ -237,14 +253,16 @@ pub fn export_aac_pcm_with_volume(
     }).ok_or_else(|| invalid("cannot reserve PCM output"))??;
     let mut output = BufWriter::new(file);
     if wav { output.write_all(&[0; 80])?; }
-    let mut pcm = PcmGain { output: &mut output, gain: volume as f32 };
-    let stats = if data.get(4..8) == Some(b"ftyp") {
+    let mut pcm = PcmGain { output: &mut output, gain: volume as f32, input_channels, output_channels, frame: [0.0; 6], filled: 0 };
+    let mut stats = if data.get(4..8) == Some(b"ftyp") {
         crate::native_media::decode_mp4_aac_pcm_interval(&data, &mut pcm, interval)?
     } else if data.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
         crate::native_media::decode_matroska_aac_pcm_interval(&data, &mut pcm, interval)?
     } else {
         crate::native_media::decode_aac_pcm_interval(&data, &mut pcm, &limits, interval)?
     };
+    if pcm.filled != 0 { return Err(invalid("incomplete decoded audio frame")); }
+    stats.channels = output_channels;
     if wav {
         let header = float_wav_header(&stats)?;
         output.seek(SeekFrom::Start(0))?;
@@ -291,25 +309,70 @@ fn float_wav_header(stats: &crate::native_media::AudioDecodeStats) -> Result<Vec
     Ok(header)
 }
 
-// Native decoders write complete f32 samples (silence uses whole-sample blocks).
-// Only PCM passes here; container headers bypass gain processing.
-struct PcmGain<'a, W> { output: &'a mut W, gain: f32 }
+// Native decoder writes may split channel frames, but always contain whole samples.
+struct PcmGain<'a, W> {
+    output: &'a mut W, gain: f32,
+    input_channels: u16, output_channels: u16,
+    frame: [f32; 6], filled: usize,
+}
 impl<W: Write> Write for PcmGain<'_, W> {
     fn write(&mut self, data: &[u8]) -> std::io::Result<usize> {
         if data.len() % 4 != 0 {
             return Err(std::io::Error::new(std::io::ErrorKind::InvalidData, "unaligned PCM write"));
         }
-        if self.gain == 1.0 { self.output.write_all(data)?; }
-        else {
-            for bytes in data.chunks_exact(4) {
-                let value = f32::from_le_bytes(bytes.try_into().unwrap()) * self.gain;
+        for bytes in data.chunks_exact(4) {
+            self.frame[self.filled] = f32::from_le_bytes(bytes.try_into().unwrap());
+            self.filled += 1;
+            if self.filled != usize::from(self.input_channels) { continue; }
+            let frame = &self.frame;
+            let mut mixed = [0.0; 6];
+            if self.input_channels == self.output_channels {
+                mixed = *frame;
+            } else {
+                // Standard decoded order: FL FR FC [LFE] BL BR or BC.
+                // LFE is omitted. Centre/surround contributions use -3 dB.
+                let k = std::f32::consts::FRAC_1_SQRT_2;
+                let (mut left, mut right) = if self.input_channels == 1 {
+                    (frame[0], frame[0])
+                } else { (frame[0], frame[1]) };
+                if self.input_channels >= 3 { left += k*frame[2]; right += k*frame[2]; }
+                match self.input_channels {
+                    4 => { left += k*frame[3]; right += k*frame[3]; }
+                    5 => { left += k*frame[3]; right += k*frame[4]; }
+                    6 => { left += k*frame[4]; right += k*frame[5]; }
+                    _ => {}
+                }
+                if self.output_channels == 1 { mixed[0] = (left + right)*0.5; }
+                else { mixed[0] = left; mixed[1] = right; }
+            }
+            for sample in &mixed[..usize::from(self.output_channels)] {
+                let value = sample * self.gain;
                 if !value.is_finite() {
                     return Err(std::io::Error::new(std::io::ErrorKind::InvalidData, "PCM gain overflow"));
                 }
                 self.output.write_all(&value.to_le_bytes())?;
             }
+            self.filled = 0;
         }
         Ok(data.len())
     }
     fn flush(&mut self) -> std::io::Result<()> { self.output.flush() }
+}
+
+fn aac_channels(data: &[u8]) -> Result<u16> {
+    let asc = if data.get(4..8) == Some(b"ftyp") {
+        let reader = crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data), Default::default())?;
+        let tracks: Vec<_> = reader.tracks().iter().filter(|t| t.handler == *b"soun").collect();
+        if tracks.len() != 1 || tracks[0].codec != *b"mp4a" { return Err(invalid("expected one AAC audio track")); }
+        crate::codec::config::aac_specific_config(&tracks[0].configuration)?.to_vec()
+    } else if data.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
+        let reader = crate::container::webm::WebmReader::open(std::io::Cursor::new(data), Default::default())?;
+        let tracks: Vec<_> = reader.tracks.iter().filter(|t| t.kind == 2).collect();
+        if tracks.len() != 1 || tracks[0].codec != "A_AAC" { return Err(invalid("expected one AAC audio track")); }
+        tracks[0].codec_private.clone()
+    } else {
+        crate::container::adts::Aac::parse(data, &Default::default())?.frames[0].asc.to_vec()
+    };
+    let decoder = crate::codec::aac_native::NativeAacDecoder::new(&asc)?;
+    Ok(u16::from(decoder.channels()))
 }

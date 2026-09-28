@@ -341,3 +341,35 @@ fn native_volume_scales_all_aac_containers_without_clipping() {
     }
     std::fs::remove_dir_all(dir).unwrap();
 }
+
+#[test]
+fn surround_to_stereo_and_mono_preserves_timing_and_wav_layout() {
+    let dir = std::env::temp_dir().join(format!("fvid-aac-remix-{}", std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/audio/aac-51-active.aac");
+    let mut original = Vec::new();
+    let stats = decode_aac_pcm(include_bytes!("fixtures/audio/aac-51-active.aac"), &mut original, &Limits::default()).unwrap();
+    for channels in [1u16, 2] {
+        let output = dir.join(format!("mix{channels}.wav"));
+        let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "decode-audio"]).arg(&source).arg(&output)
+            .args(["--channels", &channels.to_string(), "--volume", "0.5"])
+            .output().unwrap();
+        assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
+        let data = std::fs::read(output).unwrap();
+        assert_eq!(u16::from_le_bytes(data[22..24].try_into().unwrap()), channels);
+        assert_eq!(u32::from_le_bytes(data[40..44].try_into().unwrap()), if channels == 1 {4} else {3});
+        assert_eq!(data.len()-80, stats.sample_frames as usize * channels as usize * 4);
+        for (input, actual) in original.chunks_exact(24).zip(data[80..].chunks_exact(channels as usize*4)) {
+            let samples: Vec<_> = input.chunks_exact(4).map(|v| f32::from_le_bytes(v.try_into().unwrap()) as f64).collect();
+            let left = samples[0] + (samples[2]+samples[4])/2f64.sqrt();
+            let right = samples[1] + (samples[2]+samples[5])/2f64.sqrt();
+            let expected = if channels == 1 {vec![(left+right)*0.25]} else {vec![left*0.5,right*0.5]};
+            for (bytes, reference) in actual.chunks_exact(4).zip(expected) {
+                let value = f32::from_le_bytes(bytes.try_into().unwrap()) as f64;
+                assert!((value-reference).abs() < 5e-8);
+            }
+        }
+    }
+    std::fs::remove_dir_all(dir).unwrap();
+}
