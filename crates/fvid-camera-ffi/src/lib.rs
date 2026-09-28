@@ -154,3 +154,75 @@ pub unsafe extern "C" fn fvid_camera_fit(
     }))
     .unwrap_or(-1)
 }
+
+/// Opaque clock owned by the serial camera producer.
+#[unsafe(no_mangle)]
+pub extern "C" fn fvid_camera_clock_open(now: u64) -> *mut fvid::virtual_camera::CameraClock {
+    fvid::virtual_camera::CameraClock::new(30, 1, now)
+        .map(|clock| Box::into_raw(Box::new(clock)))
+        .unwrap_or(std::ptr::null_mut())
+}
+#[repr(C)]
+#[derive(Default)]
+pub struct ClockTick {
+    pub sequence: u64,
+    pub host_ns: u64,
+    pub media_ns: u64,
+}
+/// Returns 1 for a tick, 0 for a skipped slot, -1 for invalid time/pointers.
+/// # Safety
+/// Clock must be live and exclusively borrowed; output must be writable and disjoint.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn fvid_camera_clock_poll(
+    clock: *mut fvid::virtual_camera::CameraClock,
+    now: u64,
+    output: *mut ClockTick,
+) -> i32 {
+    if clock.is_null() || output.is_null() {
+        return -1;
+    }
+    match unsafe { &mut *clock }.poll(now) {
+        Ok(Some(tick)) => {
+            unsafe {
+                *output = ClockTick {
+                    sequence: tick.sequence,
+                    host_ns: tick.host_time_ns,
+                    media_ns: tick.media_time_ns,
+                };
+            }
+            1
+        }
+        Ok(None) => 0,
+        Err(_) => -1,
+    }
+}
+/// Commands: 0 seek to value ns, 1 pause (value != 0), 2 loop duration (0 disables).
+/// # Safety
+/// Clock must be null or live and exclusively borrowed; calls must be serialized.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn fvid_camera_clock_control(
+    clock: *mut fvid::virtual_camera::CameraClock,
+    command: u32,
+    value: u64,
+    now: u64,
+) -> i32 {
+    if clock.is_null() {
+        return -1;
+    }
+    let clock = unsafe { &mut *clock };
+    let result = match command {
+        0 => clock.seek(value, now),
+        1 => clock.set_paused(value != 0, now),
+        2 => clock.set_loop_duration((value != 0).then_some(value), now),
+        _ => return -1,
+    };
+    result.map(|_| 1).unwrap_or(-1)
+}
+/// # Safety
+/// Clock must be null or a uniquely owned live handle; it is invalid after this call.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn fvid_camera_clock_close(clock: *mut fvid::virtual_camera::CameraClock) {
+    if !clock.is_null() {
+        drop(unsafe { Box::from_raw(clock) });
+    }
+}

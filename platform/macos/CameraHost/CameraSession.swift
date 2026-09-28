@@ -47,9 +47,8 @@ final class CameraSession {
     private var producer: CameraProducer?
     private var builder: CameraFrameBuilder?
     private var timer: DispatchSourceTimer?
-    private var startTime: UInt64 = 0
-    private var sequence: UInt64 = 0
-    private var lastTime: UInt64 = 0
+    private var clock: OpaquePointer?
+    private var paused = false
     var onStatus: ((String) -> Void)?
     func start(url: URL) {
         queue.async { [weak self] in
@@ -62,7 +61,9 @@ final class CameraSession {
                 let builder = try CameraFrameBuilder(width: width, height: height)
                 try producer.start()
                 self.source = source; self.producer = producer; self.builder = builder
-                self.startTime = try Self.hostTime(); self.sequence = 0; self.lastTime = 0
+                self.clock = fvid_camera_clock_open(try Self.hostTime())
+                guard self.clock != nil else { throw CameraError.invalidFrame }
+                self.paused = false
                 let timer = DispatchSource.makeTimerSource(queue: self.queue)
                 timer.schedule(deadline: .now(), repeating: .nanoseconds(1_000_000_000 / 30))
                 timer.setEventHandler { [weak self] in self?.tick() }
@@ -81,20 +82,42 @@ final class CameraSession {
             catch { self.report("Cannot stop camera stream: \(error)") }
         }
     }
+    func togglePause() {
+        queue.async { [weak self] in
+            guard let self, let clock = self.clock else { return }
+            do {
+                guard fvid_camera_clock_control(clock, 1, self.paused ? 0 : 1, try Self.hostTime()) == 1 else { throw CameraError.invalidFrame }
+                self.paused.toggle()
+                self.report(self.paused ? "Video paused; camera holds the current frame." : "Camera video resumed.")
+            } catch { self.report("Cannot pause camera video: \(error)") }
+        }
+    }
+    func restart() {
+        queue.async { [weak self] in
+            guard let self, let clock = self.clock else { return }
+            do {
+                guard fvid_camera_clock_control(clock, 0, 0, try Self.hostTime()) == 1 else { throw CameraError.invalidFrame }
+                self.report("Camera video restarted.")
+            } catch { self.report("Cannot restart camera video: \(error)") }
+        }
+    }
     func shutdown() { queue.sync { try? stopOnQueue() } }
     private func stopOnQueue() throws {
         timer?.cancel(); timer = nil
+        fvid_camera_clock_close(clock); clock = nil
         try producer?.stop()
         producer = nil; source = nil; builder = nil
     }
     private func tick() {
-        guard let source, let producer, let builder, producer.canEnqueue else { return }
+        guard let source, let producer, let builder, let clock, producer.canEnqueue else { return }
         do {
             let now = try Self.hostTime()
-            guard now > lastTime, now >= startTime else { return }
-            let pixels = try source.cameraFrame(mediaTime: now - startTime, hostTime: now,
-                sequence: sequence, targetWidth: builder.width, targetHeight: builder.height)
-            lastTime = now; sequence &+= 1
+            var tick = FVidCameraTick()
+            let result = fvid_camera_clock_poll(clock, now, &tick)
+            guard result >= 0 else { throw CameraError.invalidFrame }
+            guard result == 1 else { return }
+            let pixels = try source.cameraFrame(mediaTime: tick.media_ns, hostTime: tick.host_ns,
+                sequence: tick.sequence, targetWidth: builder.width, targetHeight: builder.height)
             if let sample = try builder.sample(pixels, hostTime: now) { _ = try producer.enqueue(sample) }
         } catch {
             try? stopOnQueue(); report("Camera video failed: \(error)")

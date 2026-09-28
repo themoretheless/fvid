@@ -195,3 +195,22 @@ Signing preflight: `security find-identity -v -p codesigning` returned
 camera-client test therefore remain unavailable here. No unsigned installation
 or system-security workaround was attempted. Codec implementation work is not
 blocked by this signing prerequisite.
+
+## Rust clock connected to the host (2026-09-28)
+
+CameraSession now owns a Rust CameraClock through the C bridge instead of
+computing file position directly from elapsed host time. The host exposes
+Pause / Resume and Restart. Pausing freezes file time while camera timestamps
+continue increasing; restarting seeks to zero without resetting camera time.
+The clock skips missed slots rather than catching up with queued frames.
+The bridge also exposes loop duration; the host does not yet expose a loop UI.
+
+CameraClockTests.swift exercises the actual Swift/C/Rust boundary for skipped
+slots, pause, restart while paused, resume, wrapping loop time, backward-clock
+rejection and recovery. This does not prove installed camera delivery.
+Signing preflight still reports zero valid identities on this host.
+
+The separate `fvid-media` crate currently links FFmpeg through build.rs. The
+camera bridge disables FVid default features and does not depend on that crate.
+Removing FFmpeg from `media` remains outstanding; a camera-only dependency
+check must not be interpreted as proving that wider requirement.
