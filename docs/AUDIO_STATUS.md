@@ -344,3 +344,10 @@ The parser retains explicit versus all-band mid/side mode so only explicit
 mask bits invert intensity polarity. Tests cover both books, both mask modes,
 masked/unmasked bands and all short windows. Noise substitution, PCM reference
 comparison and playback integration remain pending.
+
+Owned `codec::aac_noise::NoiseState` generates normalized spectral noise bands
+for decoded energy scalefactors. State cloning reproduces correlated shapes at
+different energies; reset is deterministic. Tests cover every valid energy,
+multiple widths including one coefficient, correlation and error state retention.
+The generator still needs integration into channel/pair reconstruction; its
+random sequence is not a bit-identical claim against other decoders.

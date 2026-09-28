@@ -420,3 +420,5 @@ pub mod aac_bands;
 pub mod aac_channel;
 
 pub mod aac_pair;
+
+pub mod aac_noise;
