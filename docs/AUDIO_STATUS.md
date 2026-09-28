@@ -240,12 +240,15 @@ https://arxiv.org/abs/0708.4399 . The current kernel is a direct recurrence,
 not an implementation or performance claim for that paper's fast algorithm.
 
 `codec::aac_synthesis::LongSineSynthesis` now owns the persistent overlap for
-long and eight-short sine-window spectra (960 or 1024 coefficients per frame),
+long and eight-short sine/KBD-window spectra (960 or 1024 coefficients per frame),
 including long-start and long-stop transitions. Short spectra must already be
 deinterleaved into eight consecutive windows by the packet decoder. It reuses
 scratch/output buffers, validates input before changing overlap, and resets
 past-frame contributions explicitly. Tests independently calculate forward
 spectra of a multitone signal and recover interior PCM blocks within 1e-7;
 error and reset behavior are also verified. Transition reconstruction is checked
-for both supported frame sizes. KBD windows and packet integration remain pending;
+for both supported frame sizes, including shape changes. KBD windows are generated
+locally (alpha 4 for long, 6 for short) and checked against independent Bessel
+integral quadrature. The previous shape is retained for the first half-window.
+Packet integration remains pending;
 playback continues to use Symphonia until that work is complete.
