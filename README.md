@@ -150,6 +150,8 @@ cargo build --release --features media
 
 Добавлена resident GPU-цепочка: `--backend metal --hflip --then --crop 2:2:1280:720 --then --vflip`. Между этапами кадр остаётся на GPU, загрузка и выгрузка происходят только на границах Y4M. В Rust API выгрузка явная и необязательная. Реализован также CUDA-путь; на Windows + NVIDIA RTX 5090 проверены DX12/CUDA Y4M и resident CUDA. Codec-surface interop: вертикальный срез `cargo build --release --features media-cuda` → `fvid media hw-filter` (NVDEC→NV12 filter→NVENC, без host frame copies).
 
+Поддерживаются только 64-битные цели — aarch64 и x86-64. 32-битный x86 не поддерживается и не проверяется: потоковое чтение файла оперирует 64-битными смещениями, но остальной разбор индексирует память через `usize`, поэтому на целевой ширине слова меньше 64 бит сборка не гарантирована.
+
 ```sh
 cargo build --release
 ./target/release/fvid --list-devices
