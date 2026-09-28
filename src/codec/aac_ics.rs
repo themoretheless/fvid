@@ -60,6 +60,65 @@ impl IcsInfo {
         })
     }
 
+    /// Map decoded coefficients in group/band/window order into full per-window
+    /// spectra. Input contains every band below max_sfb, including zero/noise/
+    /// intensity placeholders; higher bands are zero-filled. No allocations.
+    pub fn deinterleave(
+        &self,
+        offsets: &[usize],
+        grouped: &[f32],
+        output: &mut [f32],
+    ) -> Result<()> {
+        if !matches!(output.len(), 960 | 1024) {
+            return Err(invalid("AAC spectrum requires 960 or 1024 samples"));
+        }
+        let windows = if self.sequence == WindowSequence::EightShort {
+            8
+        } else {
+            1
+        };
+        let size = output.len() / windows;
+        if self.group_lengths.is_empty()
+            || self.group_lengths.len() > windows
+            || self.group_lengths.iter().any(|&n| n == 0)
+            || self
+                .group_lengths
+                .iter()
+                .map(|&n| n as usize)
+                .sum::<usize>()
+                != windows
+        {
+            return Err(invalid("invalid AAC window groups"));
+        }
+        if offsets.first() != Some(&0)
+            || offsets.last() != Some(&size)
+            || offsets.windows(2).any(|p| p[0] >= p[1])
+            || self.max_sfb as usize >= offsets.len()
+        {
+            return Err(invalid("invalid AAC scale-factor band offsets"));
+        }
+        let coded = offsets[self.max_sfb as usize];
+        if grouped.len() != coded * windows || grouped.iter().any(|x| !x.is_finite()) {
+            return Err(invalid("AAC grouped spectrum size or value is invalid"));
+        }
+        // All geometry is checked before touching the caller's output.
+        output.fill(0.0);
+        let mut source = 0;
+        let mut first_window = 0;
+        for &count in &self.group_lengths {
+            for band in offsets.windows(2).take(self.max_sfb as usize) {
+                let width = band[1] - band[0];
+                for window in first_window..first_window + count as usize {
+                    let start = window * size + band[0];
+                    output[start..start + width].copy_from_slice(&grouped[source..source + width]);
+                    source += width;
+                }
+            }
+            first_window += count as usize;
+        }
+        Ok(())
+    }
+
     /// One codebook per scale-factor band in each window group. Codebook 12
     /// is reserved; 0 is zero, 13 noise, and 14/15 intensity stereo.
     pub fn read_sections(&self, bits: &mut BitReader<'_>) -> Result<Vec<Vec<u8>>> {
@@ -134,6 +193,72 @@ mod tests {
                 assert_eq!(mask & (1 << (7 - boundaries)), 0);
             }
         }
+    }
+    #[test]
+    fn deinterleave_restores_every_coefficient_for_all_groupings() {
+        for n in [960, 1024] {
+            let size = n / 8;
+            let offsets = [0, 4, 12, 28, size];
+            for mask in 0..128 {
+                let (data, _) = packed(&[(0, 1), (2, 2), (0, 1), (3, 4), (mask, 7)]);
+                let info = IcsInfo::read(&mut BitReader::new(&data), (49, 4)).unwrap();
+                // Build the wire ordering by sorting independent coefficient
+                // coordinates by (group, band, window, bin).
+                let mut coordinates = Vec::new();
+                let mut window_groups = Vec::new();
+                for (group, &length) in info.group_lengths.iter().enumerate() {
+                    window_groups.extend(std::iter::repeat_n(group, length as usize));
+                }
+                for window in 0..8 {
+                    for bin in 0..28 {
+                        let band = offsets.iter().position(|&end| end > bin).unwrap() - 1;
+                        coordinates.push((window_groups[window], band, window, bin));
+                    }
+                }
+                coordinates.sort();
+                let grouped: Vec<_> = coordinates
+                    .iter()
+                    .map(|&(_, _, w, b)| (w * size + b + 1) as f32)
+                    .collect();
+                let mut output = vec![-1.0; n];
+                info.deinterleave(&offsets, &grouped, &mut output).unwrap();
+                for (i, &value) in output.iter().enumerate() {
+                    assert_eq!(value, if i % size < 28 { (i + 1) as f32 } else { 0.0 });
+                }
+            }
+        }
+    }
+    #[test]
+    fn bad_spectral_layout_preserves_output_and_empty_bands_zero_fill() {
+        let mut info = IcsInfo {
+            sequence: WindowSequence::OnlyLong,
+            shape: WindowShape::Sine,
+            max_sfb: 1,
+            group_lengths: vec![1],
+        };
+        let mut output = vec![17.0; 1024];
+        for offsets in [&[1, 1024][..], &[0, 0, 1024], &[0, 1025], &[0]] {
+            assert!(info.deinterleave(offsets, &[1.0; 4], &mut output).is_err());
+            assert!(output.iter().all(|&v| v == 17.0));
+        }
+        assert!(
+            info.deinterleave(&[0, 4, 1024], &[f32::NAN; 4], &mut output)
+                .is_err()
+        );
+        info.group_lengths = vec![0, 1];
+        assert!(
+            info.deinterleave(&[0, 4, 1024], &[0.0; 4], &mut output)
+                .is_err()
+        );
+        assert!(output.iter().all(|&v| v == 17.0));
+        info.group_lengths = vec![1];
+        info.deinterleave(&[0, 4, 1024], &[1.0, 2.0, 3.0, 4.0], &mut output)
+            .unwrap();
+        assert_eq!(&output[..4], &[1.0, 2.0, 3.0, 4.0]);
+        assert!(output[4..].iter().all(|&v| v == 0.0));
+        info.max_sfb = 0;
+        info.deinterleave(&[0, 1024], &[], &mut output).unwrap();
+        assert!(output.iter().all(|&v| v == 0.0));
     }
     #[test]
     fn long_syntax_and_errors_preserve_cursor() {

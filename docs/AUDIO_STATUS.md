@@ -260,3 +260,9 @@ LC prediction, truncated input, empty sections and band overruns are rejected
 without advancing the caller's bit cursor. This parser is not yet wired into
 the playback decoder; band tables and spectral/scalefactor entropy decoding
 remain prerequisites for replacing Symphonia.
+
+`IcsInfo::deinterleave` now restores per-window spectra from group/band/window
+ordering, zero-filling bands above max_sfb. It accepts decoded placeholders for
+zero, noise and intensity bands; their actual reconstruction remains separate.
+All 128 grouping patterns are checked for both frame sizes using independently
+sorted coefficient coordinates. Invalid layouts leave output untouched.
