@@ -238,3 +238,12 @@ Transform reference: Shao and Johnson, “Type-IV DCT, DST, and MDCT algorithms
 with reduced numbers of arithmetic operations”, section VII:
 https://arxiv.org/abs/0708.4399 . The current kernel is a direct recurrence,
 not an implementation or performance claim for that paper's fast algorithm.
+
+`codec::aac_synthesis::LongSineSynthesis` now owns the persistent overlap for
+consecutive long sine-window spectra (960 or 1024 coefficients). It reuses
+scratch/output buffers, validates input before changing overlap, and resets
+past-frame contributions explicitly. Tests independently calculate forward
+spectra of a multitone signal and recover interior PCM blocks within 1e-7;
+error and reset behavior are also verified. This covers only consecutive long
+sine windows. KBD windows, short sequences and packet integration remain pending;
+playback continues to use Symphonia until that work is complete.
