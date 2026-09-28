@@ -246,3 +246,68 @@ fn mp4_edit_schedule_repeats_ranges_and_inserts_silence() {
     edited[elst+16..elst+20].copy_from_slice(&100000i32.to_be_bytes());
     assert!(fvid::native_media::decode_mp4_aac_pcm(&edited, &mut Vec::new()).is_err());
 }
+
+#[test]
+fn matroska_aac_matches_saved_reference_and_interval() {
+    use std::time::Duration;
+    let data = include_bytes!("fixtures/audio/aac-stereo.mka");
+    let mut pcm = Vec::new();
+    let stats = fvid::native_media::decode_matroska_aac_pcm_interval(data, &mut pcm, None).unwrap();
+    assert_eq!((stats.sample_rate, stats.channels), (48000, 2));
+    let oracle = include_bytes!("fixtures/audio/aac-matroska-reference.f32le");
+    assert_eq!(pcm.len(), oracle.len());
+    let mut squared = 0.0f64;
+    let mut peak = 0.0f64;
+    for (a, b) in pcm.chunks_exact(4).zip(oracle.chunks_exact(4)) {
+        let delta = f64::from(f32::from_le_bytes(a.try_into().unwrap()))
+            - f64::from(f32::from_le_bytes(b.try_into().unwrap()));
+        squared += delta*delta; peak = peak.max(delta.abs());
+    }
+    assert!((squared/(pcm.len()/4) as f64).sqrt() < 0.00015);
+    assert!(peak < 0.003, "peak {peak}");
+    let mut part = Vec::new();
+    fvid::native_media::decode_matroska_aac_pcm_interval(data, &mut part,
+        Some((Duration::from_micros(30001), Duration::from_micros(70001)))).unwrap();
+    assert_eq!(part, pcm[1441*8..3361*8]);
+}
+
+#[test]
+fn matroska_delay_and_both_padding_directions_trim_exact_samples() {
+    fn element(id: &[u8], body: &[u8]) -> Vec<u8> {
+        let size = (body.len() as u32 | 0x1000_0000).to_be_bytes();
+        [id, &size, body].concat()
+    }
+    let adts = include_bytes!("fixtures/audio/aac-stereo.aac");
+    let stream = fvid::container::adts::Aac::parse(adts, &Limits::default()).unwrap();
+    let mut whole = Vec::new();
+    decode_aac_pcm(adts, &mut whole, &Limits::default()).unwrap();
+    let header = element(&[0x1a,0x45,0xdf,0xa3], &element(&[0x42,0x82], b"matroska"));
+    let info = element(&[0x15,0x49,0xa9,0x66], &element(&[0x2a,0xd7,0xb1], &1_000_000u32.to_be_bytes()));
+    let audio = element(&[0xe1], &[
+        element(&[0xb5], &48000f64.to_be_bytes()), element(&[0x9f], &[2]),
+    ].concat());
+    let track = element(&[0xae], &[
+        element(&[0xd7], &[1]), element(&[0x83], &[2]), element(&[0x86], b"A_AAC"),
+        element(&[0x63,0xa2], &stream.frames[0].asc),
+        element(&[0x56,0xaa], &2_083_333u32.to_be_bytes()), audio,
+    ].concat());
+    let tracks = element(&[0x16,0x54,0xae,0x6b], &track);
+    for padding in [1_041_666i64, -1_041_666] {
+        let first = element(&[0xa3], &[&[0x81,0,0,0x80][..], stream.packet(0)].concat());
+        let second = element(&[0xa0], &[
+            element(&[0xa1], &[&[0x81,0,21,0][..], stream.packet(1)].concat()),
+            element(&[0x75,0xa2], &padding.to_be_bytes()),
+        ].concat());
+        let cluster = element(&[0x1f,0x43,0xb6,0x75], &[
+            element(&[0xe7], &[0]), first, second,
+        ].concat());
+        let data = [header.clone(), element(&[0x18,0x53,0x80,0x67],
+            &[info.clone(), tracks.clone(), cluster].concat())].concat();
+        let mut actual = Vec::new();
+        let stats = fvid::native_media::decode_matroska_aac_pcm_interval(&data, &mut actual, None).unwrap();
+        let expected = if padding > 0 { whole[100*8..1998*8].to_vec() }
+            else { [&whole[100*8..1024*8], &whole[1074*8..2048*8]].concat() };
+        assert_eq!(stats.sample_frames, 1898);
+        assert_eq!(actual, expected);
+    }
+}

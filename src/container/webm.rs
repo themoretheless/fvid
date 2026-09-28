@@ -370,6 +370,8 @@ fn read_colour<R: Read + Seek>(
     Ok(())
 }
 impl<R: Read + Seek> WebmReader<R> {
+    /// Precision of block timestamps; CodecDelay and DiscardPadding use ns.
+    pub fn timestamp_scale_ns(&self) -> u64 { self.scale }
     pub fn open(mut reader: R, limits: Limits) -> Result<Self> {
         let file_end = reader.seek(SeekFrom::End(0))?;
         reader.seek(SeekFrom::Start(0))?;

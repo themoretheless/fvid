@@ -226,6 +226,8 @@ pub fn export_aac_pcm_interval(
     if wav { output.write_all(&[0; 80])?; }
     let stats = if data.get(4..8) == Some(b"ftyp") {
         crate::native_media::decode_mp4_aac_pcm_interval(&data, &mut output, interval)?
+    } else if data.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
+        crate::native_media::decode_matroska_aac_pcm_interval(&data, &mut output, interval)?
     } else {
         crate::native_media::decode_aac_pcm_interval(&data, &mut output, &limits, interval)?
     };

@@ -67,6 +67,13 @@ fn native_aac_input(path: &std::path::Path) -> std::io::Result<bool> {
     let mut file = std::fs::File::open(path)?;
     let mut prefix = [0; 8];
     match file.read_exact(&mut prefix) {
+        Ok(()) if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) => {
+            use std::io::{Seek, SeekFrom};
+            file.seek(SeekFrom::Start(0))?;
+            let reader = fvid::container::webm::WebmReader::open(file, Default::default())
+                .map_err(std::io::Error::other)?;
+            Ok(reader.tracks.iter().any(|track| track.kind == 2 && track.codec == "A_AAC"))
+        }
         Ok(()) if &prefix[4..8] == b"ftyp" => {
             use std::io::{Seek, SeekFrom};
             file.seek(SeekFrom::Start(0))?;

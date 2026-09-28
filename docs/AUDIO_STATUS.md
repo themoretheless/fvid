@@ -485,3 +485,15 @@ regression checks both child orders, compact signed values and i64 extremes with
 a non-default segment clock. 23 container tests pass. These fields are metadata
 only at this stage; native Matroska AAC PCM export and playback trimming are not
 yet connected to them.
+
+Native Matroska AAC PCM/WAV export is now connected to CodecDelay and signed
+DiscardPadding. `media decode-audio input.mka output.wav` uses owned container
+and codec code, including `--from`/`--to` on the trimmed sample sequence. Trim
+metadata rounds to nearest samples to undo muxer nanosecond rounding; user
+intervals still select sample starts with ceiling boundaries. A contiguous
+packet clock may vary within the container timestamp precision; larger gaps
+are rejected. Laced blocks remain unsupported by the container. Playback's
+separate audio adapter has not yet been switched to this trim handling.
+Eleven integration tests pass; an independent PCM oracle and CLI WAV inspection
+both confirm exactly 48000 stereo samples for the MKA fixture. Synthetic files
+verify CodecDelay and both DiscardPadding signs by exact PCM slicing.

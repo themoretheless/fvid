@@ -369,3 +369,117 @@ pub fn decode_mp4_aac_pcm_interval(
     }
     Ok(stats)
 }
+
+/// Decode a contiguous Matroska AAC stream, discarding codec delay and per-block
+/// padding. Sub-tick timestamp quantization is tolerated without drifting PCM.
+/// Intervals address the trimmed sample sequence starting at its first sample.
+pub fn decode_matroska_aac_pcm_interval(
+    data: &[u8],
+    output: &mut impl std::io::Write,
+    interval: Option<(Duration, Duration)>,
+) -> Result<AudioDecodeStats> {
+    use crate::container::webm::{Limits, WebmReader};
+    if interval.is_some_and(|(from, to)| from >= to) {
+        return Err(invalid("audio interval requires from < to"));
+    }
+    let mut reader = WebmReader::open(std::io::Cursor::new(data), Limits::default())?;
+    reader.scan_all()?;
+    let tracks: Vec<_> = reader.tracks.iter().filter(|t| t.kind == 2).collect();
+    if tracks.len() != 1 || tracks[0].codec != "A_AAC" {
+        return Err(invalid(
+            "native Matroska AAC export requires one AAC audio track",
+        ));
+    }
+    let track = tracks[0].clone();
+    let mut decoder = crate::codec::aac_native::NativeAacDecoder::new(&track.codec_private)?;
+    let rate = decoder.sample_rate();
+    let channels = u16::from(decoder.channels());
+    if track.sample_rate != u64::from(rate) || track.channels != u64::from(channels) {
+        return Err(invalid(
+            "Matroska AAC geometry disagrees with configuration",
+        ));
+    }
+    let boundary = |ns: u128| -> Result<u64> {
+        let samples = ns
+            .checked_mul(u128::from(rate))
+            .ok_or_else(|| invalid("AAC time overflow"))?
+            .div_ceil(1_000_000_000);
+        u64::try_from(samples).map_err(|_| invalid("AAC sample position overflow"))
+    };
+    let (from, to) = match interval {
+        Some((from, to)) => (boundary(from.as_nanos())?, boundary(to.as_nanos())?),
+        None => (0, u64::MAX),
+    };
+    // Muxers express integral sample counts in rounded nanoseconds. Restore
+    // the nearest sample for this metadata; user interval boundaries still ceil.
+    let trim_samples = |ns: u64| -> Result<u64> {
+        u64::try_from((u128::from(ns) * u128::from(rate) + 500_000_000) / 1_000_000_000)
+            .map_err(|_| invalid("AAC trim length overflow"))
+    };
+    let mut delay = trim_samples(track.codec_delay_ns)?;
+    let mut decoded = 0u64;
+    let mut position = 0u64;
+    let mut origin = None;
+    let mut stats = AudioDecodeStats {
+        sample_frames: 0,
+        decoded_frames: 0,
+        sample_rate: rate,
+        channels,
+    };
+    for index in 0..reader.packets.len() {
+        let packet = reader.packets[index].clone();
+        if packet.track != track.number {
+            continue;
+        }
+        if position >= to {
+            break;
+        }
+        let base = *origin.get_or_insert(packet.pts_ns);
+        let timestamp = (i128::from(packet.pts_ns) - i128::from(base)) * i128::from(rate);
+        let exact = i128::from(decoded) * 1_000_000_000;
+        let precision = i128::from(reader.timestamp_scale_ns()) * i128::from(rate);
+        if (timestamp - exact).abs() > precision {
+            return Err(invalid("non-contiguous Matroska AAC timestamps"));
+        }
+        let samples = decoder.decode(&reader.read_packet(index)?)?;
+        let frames = (samples.len() / usize::from(channels)) as u64;
+        decoded = decoded
+            .checked_add(frames)
+            .ok_or_else(|| invalid("AAC sample count overflow"))?;
+        let padding = trim_samples(packet.discard_padding_ns.unsigned_abs())?;
+        if padding > frames {
+            return Err(invalid("Matroska discard padding exceeds AAC packet"));
+        }
+        let head = if packet.discard_padding_ns < 0 {
+            padding
+        } else {
+            0
+        };
+        let tail = if packet.discard_padding_ns > 0 {
+            padding
+        } else {
+            0
+        };
+        let skip_delay = delay.min(frames);
+        delay -= skip_delay;
+        let first = head.max(skip_delay);
+        let end = frames - tail;
+        if first > end {
+            return Err(invalid("Matroska AAC trimming overlaps"));
+        }
+        let available = end - first;
+        let begin = from.saturating_sub(position).min(available);
+        let end = to.saturating_sub(position).min(available).max(begin);
+        let width = usize::from(channels);
+        for sample in &samples[(first + begin) as usize * width..(first + end) as usize * width] {
+            output.write_all(&sample.to_le_bytes())?;
+        }
+        stats.sample_frames += end - begin;
+        stats.decoded_frames += 1;
+        position += available;
+    }
+    if stats.sample_frames == 0 {
+        return Err(invalid("Matroska AAC interval contains no samples"));
+    }
+    Ok(stats)
+}
