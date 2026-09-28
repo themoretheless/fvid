@@ -7,14 +7,14 @@
 //! generation of the last rewind or seek so stale queued frames can be dropped.
 use crate::color::Grade;
 use crate::playback_native::{
-    avc_to_planar8, planar8_to_rgb, rotate_planar8, yuv_to_rgb, NativeReader, Planar8, RawFrame,
+    NativeReader, Planar8, RawFrame, avc_to_planar8, planar8_to_rgb, rotate_planar8, yuv_to_rgb,
 };
 use std::{
     io::{BufRead, Seek},
     sync::{
-        mpsc::{sync_channel, Receiver, RecvTimeoutError, SyncSender, TryRecvError, TrySendError},
         Arc,
         atomic::{AtomicUsize, Ordering},
+        mpsc::{Receiver, RecvTimeoutError, SyncSender, TryRecvError, TrySendError, sync_channel},
     },
     thread,
     time::Duration,
