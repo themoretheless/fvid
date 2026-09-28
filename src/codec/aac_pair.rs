@@ -195,6 +195,9 @@ mod tests {
         let data = include_bytes!("../../tests/fixtures/audio/aac-stereo.aac");
         let mut start = 0;
         let mut frames = 0;
+        let mut synth_left = super::super::aac_synthesis::LongSineSynthesis::new(1024).unwrap();
+        let mut synth_right = super::super::aac_synthesis::LongSineSynthesis::new(1024).unwrap();
+        let mut decoded = Vec::new();
         let mut noise = super::super::aac_noise::NoiseState::default();
         while start < data.len() {
             let data = &data[start..];
@@ -225,11 +228,43 @@ mod tests {
             let (left, right) = pair.spectra_with_noise(&config, &mut noise).unwrap();
             assert_eq!((left.len(), right.len()), (1024, 1024));
             assert!(left.iter().chain(&right).all(|x| x.is_finite()));
+            let mut l = vec![0.0; 1024];
+            let mut r = vec![0.0; 1024];
+            synth_left
+                .synthesize_pcm(pair.left.info.sequence, pair.left.info.shape, &left, &mut l)
+                .unwrap();
+            synth_right
+                .synthesize_pcm(
+                    pair.right.info.sequence,
+                    pair.right.info.shape,
+                    &right,
+                    &mut r,
+                )
+                .unwrap();
+            for i in 0..1024 {
+                decoded.push(l[i] as f32);
+                decoded.push(r[i] as f32);
+            }
             assert_eq!(bits.read(3).unwrap(), 7);
             start += length;
             frames += 1;
         }
         assert_eq!(frames, 13);
+        let reference = include_bytes!("../../tests/fixtures/audio/aac-stereo-reference.f32le");
+        assert_eq!(decoded.len() * 4, reference.len());
+        let mut squared_error = 0.0;
+        let mut peak_error = 0.0f64;
+        for (&actual, bytes) in decoded.iter().zip(reference.chunks_exact(4)) {
+            let expected = f32::from_le_bytes(bytes.try_into().unwrap());
+            let error = f64::from(actual) - f64::from(expected);
+            squared_error += error * error;
+            peak_error = peak_error.max(error.abs());
+        }
+        let rms = (squared_error / decoded.len() as f64).sqrt();
+        // PNS random sequences differ. Bound aggregate error and transients,
+        // retaining sensitivity to amplitude, window or stereo regressions.
+        assert!(rms < 0.00015, "RMS {rms}");
+        assert!(peak_error < 0.003, "peak {peak_error}");
     }
     #[test]
     fn mid_side_reconstructs_only_masked_bands_in_each_short_group() {

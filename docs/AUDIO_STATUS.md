@@ -364,3 +364,11 @@ on noise bands. Random state commits after both channels and stereo validation.
 All 13 stereo-fixture packets now reconstruct finite full-size spectra. Tests
 cover correlation, independence, energy and rollback. This is not yet a PCM
 reference comparison; TNS and final playback integration remain pending.
+
+`synthesize_pcm` now applies AAC PCM normalization (1/65536 after the existing
+2/N mathematical IMDCT). All 13 stereo-fixture packets pass owned parsing,
+spectral reconstruction and synthesis against a saved FFmpeg 9.0.2 float PCM
+oracle. RMS error is 0.000135962 and peak error 0.00264216, with different PNS
+sequences; this is not bit-exact. Fixture provenance and thresholds are recorded
+beside the reference. No runtime/test invocation of FFmpeg is introduced. TNS,
+remaining profiles/tools, public packet decoding and playback remain pending.

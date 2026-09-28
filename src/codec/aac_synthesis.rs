@@ -189,6 +189,21 @@ impl LongSineSynthesis {
         self.previous_shape = shape;
         Ok(())
     }
+    /// Synthesize normalized floating-point AAC PCM. The mathematical IMDCT
+    /// above uses 2/N; AAC spectral units require the additional 1/65536 factor.
+    pub fn synthesize_pcm(
+        &mut self,
+        sequence: WindowSequence,
+        shape: WindowShape,
+        spectrum: &[f32],
+        pcm: &mut [f64],
+    ) -> Result<()> {
+        self.synthesize_shaped(sequence, shape, spectrum, pcm)?;
+        for sample in pcm {
+            *sample /= 65536.0;
+        }
+        Ok(())
+    }
     /// Discard the previous frame's contribution after a seek/reset.
     pub fn reset(&mut self) {
         self.overlap.fill(0.0);
