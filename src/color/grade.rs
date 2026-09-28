@@ -728,6 +728,8 @@ mod tests {
             let ramp = vec![0.0, 0.3, 1.0];
             Lut1d {
                 data: [ramp.clone(), ramp.clone(), ramp],
+                domain_min: [0.0; 3],
+                domain_max: [1.0; 3],
             }
         };
         tables_match_the_grid(&Grade::new(
@@ -783,6 +785,8 @@ mod tests {
                 vec![0.0, 0.5, 1.0],
                 vec![0.8, 0.5, 0.2],
             ],
+            domain_min: [0.0; 3],
+            domain_max: [1.0; 3],
         };
         let lifted = Grade::new(
             bt709(),

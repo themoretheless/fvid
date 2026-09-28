@@ -20,8 +20,13 @@ pub enum Interpolation {
 /// A per-channel 1D LUT.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Lut1d {
-    /// `data[channel][code]`, each normalised 0..=1.
+    /// `data[channel][code]`, each as authored: a density or log-to-linear table
+    /// runs well past the display range, and the overshoot is the signal.
     pub data: [Vec<f32>; 3],
+    /// The input range the table was written for, which a `.cube` states per
+    /// channel as `DOMAIN_MIN` and `DOMAIN_MAX`.
+    pub domain_min: [f32; 3],
+    pub domain_max: [f32; 3],
 }
 
 impl Lut1d {
@@ -38,6 +43,8 @@ impl Lut1d {
         let ramp: Vec<f32> = (0..size).map(|i| i as f32 / (size - 1) as f32).collect();
         Self {
             data: [ramp.clone(), ramp.clone(), ramp],
+            domain_min: [0.0; 3],
+            domain_max: [1.0; 3],
         }
     }
 
@@ -49,7 +56,12 @@ impl Lut1d {
         if lut.len() == 1 {
             return lut[0];
         }
-        let pos = value.clamp(0.0, 1.0) * (lut.len() - 1) as f32;
+        // The declared range scales the index, never the values: an input at the
+        // top of the domain reads the last node whatever numbers that node holds.
+        let ch = channel.min(2);
+        let lo = self.domain_min[ch];
+        let span = (self.domain_max[ch] - lo).max(1e-6);
+        let pos = ((value - lo) / span).clamp(0.0, 1.0) * (lut.len() - 1) as f32;
         let lo = pos.floor() as usize;
         let hi = (lo + 1).min(lut.len() - 1);
         let frac = pos - lo as f32;
@@ -319,15 +331,19 @@ impl Lut {
                 Vec::with_capacity(n),
                 Vec::with_capacity(n),
             ];
+            // The values are the table's output and stay as they are, whether
+            // that is 100 or −0.05; the domain belongs to its input, so it goes
+            // to the sampler rather than being divided into the rows here.
             for chunk in one_values.chunks(rows) {
                 for ch in 0..3 {
-                    let v = if rows == 1 { chunk[0] } else { chunk[ch] };
-                    let lo = domain_min[ch];
-                    let span = (domain_max[ch] - lo).max(1e-6);
-                    data[ch].push(((v - lo) / span).clamp(0.0, 1.0));
+                    data[ch].push(if rows == 1 { chunk[0] } else { chunk[ch] });
                 }
             }
-            return Ok(Self::One(Lut1d { data }));
+            return Ok(Self::One(Lut1d {
+                data,
+                domain_min,
+                domain_max,
+            }));
         }
         Err(invalid("a .cube must declare LUT_1D_SIZE or LUT_3D_SIZE"))
     }
@@ -501,6 +517,17 @@ impl Lut {
         match self {
             Self::One(l) => {
                 out.push_str(&format!("LUT_1D_SIZE {}\n", l.len()));
+                if l.domain_min != [0.0; 3] || l.domain_max != [1.0; 3] {
+                    out.push_str(&format!(
+                        "DOMAIN_MIN {} {} {}\nDOMAIN_MAX {} {} {}\n",
+                        l.domain_min[0],
+                        l.domain_min[1],
+                        l.domain_min[2],
+                        l.domain_max[0],
+                        l.domain_max[1],
+                        l.domain_max[2],
+                    ));
+                }
                 for i in 0..l.len() {
                     out.push_str(&format!(
                         "{} {} {}\n",
@@ -573,6 +600,8 @@ pub fn transfer_lut(transfer: Transfer, n: usize) -> Lut1d {
         .collect();
     Lut1d {
         data: [ramp.clone(), ramp.clone(), ramp],
+        domain_min: [0.0; 3],
+        domain_max: [1.0; 3],
     }
 }
 
@@ -846,6 +875,61 @@ LUT_3D_SIZE 2
         assert!((mid[1] - 0.5).abs() < 1e-6, "{mid:?}");
         // The writer keeps it too, so the file round trips rather than drifts.
         assert!(Lut::Three(l).to_cube().contains("1.5"));
+    }
+
+    /// A 1D table's `DOMAIN_MIN`/`DOMAIN_MAX` state the range of its *input*,
+    /// the same as a 3D grid's: the file abpy ships for negative printing says
+    /// so in its own header ("# input: log10/density, output: linear") and its
+    /// 1024 rows then fit 10^(in-2) over 0..4 to 5e-9, while its values run from
+    /// 0.01 to 100 — a range no display code lives in. Autodesk's reader in
+    /// OpenColorIO agrees for both kinds: the declared range becomes an op in
+    /// front of the table, and the table's own numbers are never rescaled.
+    #[test]
+    fn a_1d_domain_is_the_input_range_and_its_values_are_left_alone() {
+        let mut text = String::from("LUT_1D_SIZE 5\nDOMAIN_MIN 0 0 0\nDOMAIN_MAX 4 4 4\n");
+        for i in 0..5 {
+            let v = 10f32.powf(4.0 * i as f32 / 4.0 - 2.0);
+            text.push_str(&format!("{v} {v} {v}\n"));
+        }
+        let Lut::One(l) = Lut::from_cube(&text).unwrap() else {
+            panic!("1d");
+        };
+        assert_eq!(l.domain_max, [4.0; 3]);
+        assert_eq!(l.data[0][0], 0.01);
+        assert_eq!(l.data[0][4], 100.0, "a 1D table is not a display range");
+        // An input of 1.0 is a quarter of the declared domain, i.e. the second
+        // node of this five-node table.
+        assert_eq!(l.sample(0, 1.0), 0.1);
+        assert_eq!(l.sample(0, 0.0), 0.01);
+        // Outside the domain the sampler holds at the ends, as it does for 3D.
+        assert_eq!(l.sample(0, 4.0), 100.0);
+        assert_eq!(l.sample(0, 2.0), 1.0);
+    }
+
+    /// A log-to-linear table is the same case with the domain left at its
+    /// default: superwhite is the whole point, so a value above 1.0 is the
+    /// signal, not a file to be repaired. Apple's own export runs from −0.056 to
+    /// 12 over 4096 entries, which is a third of the table above white and an
+    /// eighth below black.
+    #[test]
+    fn a_1d_table_keeps_its_values_past_the_ends() {
+        let text = "LUT_1D_SIZE 3\n-0.05 0 0\n1 1 1\n12 12 12\n";
+        let Lut::One(l) = Lut::from_cube(text).unwrap() else {
+            panic!("1d");
+        };
+        assert_eq!(l.data[0], [-0.05, 1.0, 12.0]);
+        assert_eq!(l.data[2], [0.0, 1.0, 12.0]);
+        assert_eq!(l.sample(0, 0.5), 1.0);
+        assert_eq!(l.sample(0, 1.0), 12.0);
+        // Half-way between the last two nodes, and it stays above white.
+        assert_eq!(l.sample(0, 0.75), 6.5);
+        // The writer keeps both the values and the domain they were authored in.
+        let back = Lut::One(l.clone());
+        assert_eq!(
+            Lut::from_cube(&back.to_cube()).unwrap(),
+            back,
+            "a 1D table drifts through a write/read cycle"
+        );
     }
 
     #[test]
