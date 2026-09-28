@@ -266,3 +266,10 @@ ordering, zero-filling bands above max_sfb. It accepts decoded placeholders for
 zero, noise and intensity bands; their actual reconstruction remains separate.
 All 128 grouping patterns are checked for both frame sizes using independently
 sorted coefficient coordinates. Invalid layouts leave output untouched.
+
+`codec::aac_quant::inverse_quantize` reconstructs ordinary spectral bands using
+signed magnitude to the 4/3 power and accumulated scalefactor scaling. Tests
+cover every escape magnitude, quarter-step scale factors, exact cube/fourth-power
+anchors, and transactional rejection of invalid input. Output remains in AAC
+spectral units: PCM normalization, noise/intensity reconstruction, entropy
+parsing and packet integration are still required.
