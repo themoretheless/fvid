@@ -100,6 +100,9 @@ impl<R: Read + Seek> WebmSubtitleReader<R> {
 
     /// Cues of the `nth` readable track, counting in container order.
     pub fn cues(&mut self, nth: usize) -> Result<Vec<Cue>> {
+        // A subtitle file is read as a whole, so the list wants every block in
+        // it rather than the clusters walked so far.
+        self.demuxer.scan_all()?;
         let number = *self
             .supported()
             .get(nth)

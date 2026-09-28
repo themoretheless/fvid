@@ -292,9 +292,14 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     /// reordered track need not state in, so the scan takes the latest keyframe
     /// rather than the last one it meets; a target in front of every keyframe
     /// restarts the track at its first block.
-    pub fn seek_to_sync(&mut self, target_ns: i64) -> i64 {
+    pub fn seek_to_sync(&mut self, target_ns: i64) -> Result<i64> {
         let origin = self.origin();
         let target = target_ns.saturating_add(origin);
+        // A jump needs the blocks behind its target as well as the ones in
+        // front of it, which is the one question lazy indexing cannot dodge —
+        // and the walk stops at the target, so the price is the distance
+        // travelled rather than the length of the item.
+        self.demux.scan_until(target)?;
         let mut chosen: Option<(usize, i64)> = None;
         for (index, packet) in self.demux.packets.iter().enumerate() {
             if packet.track != self.track || !packet.keyframe || packet.pts_ns > target {
@@ -313,7 +318,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             Some((index, self.demux.packets[index].pts_ns))
         });
         let Some((index, pts)) = chosen else {
-            return 0;
+            return Ok(0);
         };
         match &mut self.decoder {
             VideoDecoder::Vp9(d) => d.reset(),
@@ -333,12 +338,12 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             .max(0);
         self.start = u128::try_from(landed).unwrap_or_default();
         self.end = self.start;
-        landed
+        Ok(landed)
     }
     /// Seek and land on the frame covering `target_ns`, refreshing `rgb()` the
     /// way continuous playback does. The pre-roll costs what decoding it costs.
     pub fn seek_to_frame(&mut self, target_ns: i64) -> Result<()> {
-        self.seek_to_sync(target_ns);
+        self.seek_to_sync(target_ns)?;
         let target = u128::try_from(target_ns.max(0)).unwrap_or(u128::MAX);
         let result = (|| {
             while self.read_inner()? {
@@ -354,7 +359,10 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         result
     }
     fn next_decoded(&mut self) -> Result<Option<Frame>> {
-        while self.index < self.demux.packets.len() {
+        // The index only holds the clusters walked so far, so a reader that has
+        // run out of blocks asks the demuxer for the next one before it believes
+        // the item has ended.
+        while self.index < self.demux.packets.len() || self.demux.scan_more()? {
             let index = self.index;
             self.index += 1;
             if self.demux.packets[index].track != self.track {
@@ -678,6 +686,9 @@ mod tests {
         let input = include_bytes!("../tests/fixtures/vp9/motion.webm");
         let mut reader = WebmVideoReader::open(Cursor::new(input), 16 << 20).unwrap();
         assert_eq!(reader.duration(), Some(Duration::from_secs(1)));
+        // The estimate below reads the item's own blocks, so it is made with
+        // every block indexed.
+        reader.demux.scan_all().unwrap();
         assert!(reader.read_frame().unwrap());
         assert_eq!(
             reader.frame_interval(),

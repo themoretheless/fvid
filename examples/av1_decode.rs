@@ -62,6 +62,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     file.read_exact(&mut prefix)?;
     if prefix == [0x1a, 0x45, 0xdf, 0xa3] {
         let mut reader = WebmReader::open(File::open(input)?, Limits::default())?;
+        reader.scan_all()?;
         let track = reader
             .tracks
             .iter()
