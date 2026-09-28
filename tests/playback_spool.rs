@@ -1,4 +1,4 @@
-use fvid::playback_spool::{Source, Spool, lead_bytes, source_rate};
+use fvid::playback_spool::{Source, Spool, lead_ahead, lead_bytes, source_rate};
 use std::{
     fs,
     io::{Read, Seek, SeekFrom},
@@ -158,6 +158,56 @@ fn a_window_move_does_not_invent_bytes_behind_it() {
         differs(&first, &again).is_empty(),
         "a rewind after the move: {}",
         differs(&first, &again)
+    );
+    drop(source);
+    let _ = fs::remove_dir_all(path.parent().unwrap());
+}
+
+/// The lead a reader is told about has to be measured from the bytes it will
+/// actually reach. A camera MP4 keeps its index at the tail, so opening seeks to
+/// the end of the file and the window goes there with it; counting the far edge
+/// of that window from a reader back at byte zero priced three gigabytes of
+/// never-fetched item as picture already on disk, and the first frame was shown
+/// on the strength of it.
+#[test]
+fn a_lead_is_counted_from_where_the_reader_reaches() {
+    // Inside the window: what it holds ahead of the reader.
+    assert_eq!(lead_ahead(48 << 20, 44 << 20, 52 << 20), 4 << 20);
+    // At the far edge: the window is entirely bitten.
+    assert_eq!(lead_ahead(52 << 20, 44 << 20, 52 << 20), 0);
+    // Behind it, by the whole length of a clip: the copy covers bytes the reader
+    // will not ask for until the window comes back to it.
+    assert_eq!(lead_ahead(0, 3 << 30, (3 << 30) + (256 << 20)), 0);
+    // And ahead of it, which is what the reader does when it jumps forward.
+    assert_eq!(lead_ahead(60 << 20, 44 << 20, 52 << 20), 0);
+}
+
+/// A window the reader has left behind still holds bytes, just not bytes this
+/// reader is standing in front of: the lead has to stay inside the copy.
+#[test]
+fn a_reader_behind_the_window_is_told_only_what_is_local() {
+    let path = item("gap", 64 << 20);
+    let mut source = spooled(&path, 4 << 20);
+    let handle = source.handle();
+    source.seek(SeekFrom::Start(48 << 20)).unwrap();
+    let mut there = vec![0u8; 1 << 20];
+    source.read_exact(&mut there).unwrap();
+    let started = Instant::now();
+    while handle.copied() < 4 << 20 && started.elapsed() < Duration::from_secs(10) {
+        std::thread::sleep(Duration::from_millis(2));
+    }
+    assert!(handle.copied() > 0, "the window never filled at the tail");
+    // A step back shorter than a lead gives the copier no reason to move the
+    // window, so what is on disk stays what it was.
+    source.seek(SeekFrom::Start(45 << 20)).unwrap();
+    // The two counters are separate mirrors, so a block the copier lands
+    // between the loads legitimately shows in one and not the other. Three
+    // megabytes of reader-behind-window are not that.
+    assert!(
+        handle.ahead() <= handle.copied() + (1 << 20),
+        "the reader sat behind a window of {} bytes and was told {} were ahead of it",
+        handle.copied(),
+        handle.ahead()
     );
     drop(source);
     let _ = fs::remove_dir_all(path.parent().unwrap());

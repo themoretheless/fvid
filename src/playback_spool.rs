@@ -73,6 +73,21 @@ pub fn lead_bytes(item_bytes: u64, duration: Duration, lead: Duration) -> u64 {
     (item_bytes as u128 * lead.as_nanos() / duration.as_nanos().max(1)) as u64
 }
 
+/// Bytes of the local copy that lie in front of a reader standing at `read_at`,
+/// for a window holding `[base, end)`: none at all while the reader is behind
+/// the window, because the run of bytes it can take without asking the source
+/// starts where the copy starts. The window follows the reader and the reader
+/// can leave it far behind - a file whose index sits at the tail is opened by
+/// seeking there, and the window goes with it - and counting the far edge from
+/// the reader then reports the whole gap as a lead that has been fetched.
+pub fn lead_ahead(read_at: u64, base: u64, end: u64) -> u64 {
+    if read_at >= base {
+        end.saturating_sub(read_at)
+    } else {
+        0
+    }
+}
+
 /// Where a speed probe reads: just past the header, because that is where the
 /// item's own bytes begin and playback goes first. A drive that has cached the
 /// header says nothing about the body behind it, and the middle of a large item
@@ -156,8 +171,10 @@ impl Shared {
     fn mirror(&self, window: &Window) {
         self.held
             .store(window.end.saturating_sub(window.base), Ordering::Release);
-        self.slack
-            .store(window.end.saturating_sub(window.read_at), Ordering::Release);
+        self.slack.store(
+            lead_ahead(window.read_at, window.base, window.end),
+            Ordering::Release,
+        );
     }
 
     /// Records the reader's position and wakes the copier: the reader has just
