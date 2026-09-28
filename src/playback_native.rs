@@ -600,7 +600,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
                     colour: AvcColour {
                         kr: 0.299,
                         kb: 0.114,
-                        full: false,
+                        full: reader.full_range(),
                     },
                 })))
             } else {
@@ -832,6 +832,14 @@ pub fn yuv_to_rgb(
     sy: usize,
     out: &mut Vec<u8>,
 ) {
+    yuv_to_rgb_range(data, luma_len, chroma_len, width, height, sx, sy, false, out)
+}
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn yuv_to_rgb_range(
+    data: &[u8], luma_len: usize, chroma_len: usize,
+    width: usize, height: usize, sx: usize, sy: usize,
+    full: bool, out: &mut Vec<u8>,
+) {
     let len = width * height * 3;
     if out.len() != len {
         out.resize(len, 0);
@@ -843,6 +851,15 @@ pub fn yuv_to_rgb(
             let y = i32::from(data[py * width + px]) - 16;
             let u = i32::from(data[luma_len + uv]) - 128;
             let v = i32::from(data[luma_len + chroma_len + uv]) - 128;
+            if full {
+                let y = f64::from(y + 16);
+                let u = f64::from(u);
+                let v = f64::from(v);
+                pixel[0] = (y + 1.402 * v).round().clamp(0.0, 255.0) as u8;
+                pixel[1] = (y - (0.114 * 1.772 * u + 0.299 * 1.402 * v) / 0.587).round().clamp(0.0, 255.0) as u8;
+                pixel[2] = (y + 1.772 * u).round().clamp(0.0, 255.0) as u8;
+                continue;
+            }
             pixel[0] = ((298 * y + 409 * v + 128) >> 8).clamp(0, 255) as u8;
             pixel[1] = ((298 * y - 100 * u - 208 * v + 128) >> 8).clamp(0, 255) as u8;
             pixel[2] = ((298 * y + 516 * u + 128) >> 8).clamp(0, 255) as u8;

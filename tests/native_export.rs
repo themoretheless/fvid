@@ -152,3 +152,59 @@ fn y4m_pixel_aspect_rejects_ambiguous_or_invalid_ratios() {
         fvid::playback_native::NativeReader::software(std::io::Cursor::new(bytes), 1024).unwrap();
     assert_eq!(reader.pixel_aspect(), (1, 1));
 }
+
+#[test]
+fn full_range_y4m_roundtrip_keeps_black_white_and_range_tag() {
+    let dir = directory();
+    let input = dir.0.join("full.y4m");
+    let output = dir.0.join("out.y4m");
+    let mut bytes = b"YUV4MPEG2 W2 H2 F30:1 Ip C420 XCOLORRANGE=FULL\nFRAME\n".to_vec();
+    bytes.extend_from_slice(&[0, 255, 16, 235, 128, 128]);
+    std::fs::write(&input, &bytes).unwrap();
+    let mut reader =
+        fvid::playback_native::NativeReader::software(std::io::Cursor::new(bytes), 1024).unwrap();
+    assert!(reader.read_frame().unwrap());
+    assert_eq!(
+        reader.rgb(),
+        &[0, 0, 0, 255, 255, 255, 16, 16, 16, 235, 235, 235]
+    );
+    reader.rewind().unwrap();
+    let raw = reader.read_frame_raw().unwrap().unwrap();
+    assert_eq!(raw.into_rgb(1024).unwrap(), reader.rgb());
+    assert_eq!(fvid::native_export::export_y4m(&input, &output).unwrap(), 1);
+    let bytes = std::fs::read(output).unwrap();
+    assert!(
+        bytes
+            .windows(b"XCOLORRANGE=FULL\n".len())
+            .any(|w| w == b"XCOLORRANGE=FULL\n")
+    );
+    assert!(bytes.ends_with(&[0, 255, 16, 235, 128, 128]));
+}
+
+#[test]
+fn full_range_colour_agrees_between_direct_and_raw_readers() {
+    let mut bytes = b"YUV4MPEG2 W2 H2 F30:1 C420 XCOLORRANGE=FULL\nFRAME\n".to_vec();
+    bytes.extend_from_slice(&[0, 255, 100, 180, 32, 220]);
+    let mut reader =
+        fvid::playback_native::NativeReader::software(std::io::Cursor::new(bytes), 1024).unwrap();
+    reader.read_frame().unwrap();
+    let expected = reader.rgb().to_vec();
+    reader.rewind().unwrap();
+    let actual = reader
+        .read_frame_raw()
+        .unwrap()
+        .unwrap()
+        .into_rgb(1024)
+        .unwrap();
+    assert!(actual.iter().zip(expected).all(|(a, b)| a.abs_diff(b) <= 1));
+    for range in [
+        "XCOLORRANGE=INVALID",
+        "XCOLORRANGE=FULL XCOLORRANGE=LIMITED",
+    ] {
+        let header = format!("YUV4MPEG2 W2 H2 F30:1 C420 {range}\n");
+        assert!(
+            fvid::playback_native::NativeReader::software(std::io::Cursor::new(header), 1024)
+                .is_err()
+        );
+    }
+}

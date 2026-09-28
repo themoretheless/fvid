@@ -1,10 +1,10 @@
 //! FVid-owned raw-video reader. No external container or codec implementation.
-use crate::playback_native::yuv_to_rgb;
+use crate::playback_native::yuv_to_rgb_range;
 use crate::{Header, Result, buffer, invalid, line};
 use std::io::{BufRead, Seek, SeekFrom};
 use std::time::Duration;
 
-/// Streaming 8-bit planar Y4M playback, using BT.601 limited-range colour.
+/// Streaming 8-bit planar Y4M playback, using BT.601 limited or full-range colour.
 /// Frame storage is reused; the budget covers the YUV and RGB buffers only.
 pub struct Y4mReader<R> {
     reader: R,
@@ -15,6 +15,7 @@ pub struct Y4mReader<R> {
     period: Duration,
     rate: (u32, u32),
     pixel_aspect: (u32, u32),
+    full_range: bool,
     first_frame: u64,
     frames_read: u64,
 }
@@ -33,6 +34,7 @@ impl<R: BufRead + Seek> Y4mReader<R> {
         let header = Header::parse(&marker)?;
         let mut rate = None;
         let mut pixel_aspect = None;
+        let mut full_range = None;
         for token in &header.tokens {
             if let Some(value) = token.strip_prefix('A') {
                 if pixel_aspect.is_some() {
@@ -63,10 +65,15 @@ impl<R: BufRead + Seek> Y4mReader<R> {
                 }
                 rate = Some((num, den));
             }
-            if token.starts_with("XCOLORRANGE=") && token != "XCOLORRANGE=LIMITED" {
-                return Err(invalid(
-                    "playback currently supports limited-range Y4M only",
-                ));
+            if let Some(value) = token.strip_prefix("XCOLORRANGE=") {
+                if full_range.is_some() {
+                    return Err(invalid("duplicate Y4M colour range"));
+                }
+                full_range = Some(match value {
+                    "LIMITED" => false,
+                    "FULL" => true,
+                    _ => return Err(invalid("invalid Y4M colour range")),
+                });
             }
             if matches!(token.as_str(), "C420mpeg2" | "C420paldv") {
                 return Err(invalid(
@@ -101,11 +108,15 @@ impl<R: BufRead + Seek> Y4mReader<R> {
             period,
             rate,
             pixel_aspect: pixel_aspect.unwrap_or((1, 1)),
+            full_range: full_range.unwrap_or(false),
             first_frame,
             frames_read: 0,
         })
     }
 
+    pub fn full_range(&self) -> bool {
+        self.full_range
+    }
     pub fn pixel_aspect(&self) -> (u32, u32) {
         self.pixel_aspect
     }
@@ -139,7 +150,7 @@ impl<R: BufRead + Seek> Y4mReader<R> {
         let (sx, sy) = self.header.format.subsampling();
         let luma_len = self.header.width * self.header.height;
         let chroma_len = luma_len / sx / sy;
-        yuv_to_rgb(
+        yuv_to_rgb_range(
             &self.yuv,
             luma_len,
             chroma_len,
@@ -147,6 +158,7 @@ impl<R: BufRead + Seek> Y4mReader<R> {
             self.header.height,
             sx,
             sy,
+            self.full_range,
             &mut self.rgb,
         );
         Ok(true)
