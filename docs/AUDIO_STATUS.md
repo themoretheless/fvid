@@ -311,3 +311,10 @@ supplies limits to the owned ICS parser. Numeric tables retain their Symphonia
 boundaries, complete/aligned band coverage and ASC-to-ICS validation. 960/120
 band tables are still pending and are rejected explicitly, even though the
 transform/synthesis components already support those sizes.
+
+`codec::aac_channel::ChannelData` now joins global gain, ICS, sections,
+scalefactors, pulse syntax and spectral decoding into a transactional individual
+channel reader. A constructed nonzero channel payload is tested through owned
+inverse quantization, deinterleaving and synthesis. This is not yet real-file
+playback proof: common-window stereo, TNS, gain control, special reconstruction,
+raw-data-block dispatch and output normalization remain unfinished.
