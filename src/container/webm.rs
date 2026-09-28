@@ -147,6 +147,37 @@ fn vint(r: &mut impl Read, id: bool) -> Result<(u64, bool)> {
     }
     Ok((value, !id && value == (1u64 << (7 * len)) - 1))
 }
+/// Stand at `pos` on the way past it rather than by starting again. A walk moves
+/// from one element to the next, and the bytes in between are the payload it has
+/// just measured: reading them costs their own length, while a seek costs the
+/// buffer behind the reader its whole capacity and the next read fetches the
+/// same bytes back. Only a gap longer than any block the reader steps over, or a
+/// move backwards, is a jump worth the seek.
+const SKIP: u64 = 8 << 20;
+fn goto<R: Read + Seek>(r: &mut R, pos: u64) -> Result<()> {
+    let here = r.stream_position()?;
+    if pos == here {
+        return Ok(());
+    }
+    if pos > here && pos - here <= SKIP {
+        let mut buf = [0u8; 1 << 13];
+        let mut left = pos - here;
+        while left > 0 {
+            let want = (left as usize).min(buf.len());
+            // A short read is the source answering less than asked, not an end:
+            // no bytes at all means the item stopped before the element its own
+            // size promised.
+            let taken = r.read(&mut buf[..want])?;
+            if taken == 0 {
+                return Err(invalid("truncated EBML element"));
+            }
+            left -= taken as u64;
+        }
+        return Ok(());
+    }
+    r.seek(SeekFrom::Start(pos))?;
+    Ok(())
+}
 fn element<R: Read + Seek>(
     r: &mut R,
     limit: u64,
@@ -226,7 +257,7 @@ fn fields<R: Read + Seek>(
     let mut at = e.data;
     let mut out = Vec::new();
     while at < limit {
-        r.seek(SeekFrom::Start(at))?;
+        goto(r, at)?;
         let child = element(r, limit, count, max)?;
         at = end(child)?;
         out.push(child);
@@ -340,7 +371,7 @@ impl<R: Read + Seek> WebmReader<R> {
         let mut block_title = String::new();
         let mut tags = FileTags::default();
         while at < segment_end {
-            reader.seek(SeekFrom::Start(at))?;
+            goto(&mut reader, at)?;
             let e = element(&mut reader, segment_end, &mut count, limits.elements)?;
             match e.id {
                 0x1549a966 => {
@@ -520,7 +551,7 @@ impl<R: Read + Seek> WebmReader<R> {
                     let mut pos = e.data;
                     let mut timestamp = None;
                     while pos < cluster_end {
-                        reader.seek(SeekFrom::Start(pos))?;
+                        goto(&mut reader, pos)?;
                         let child = element(&mut reader, cluster_end, &mut count, limits.elements)?;
                         if e.end.is_none()
                             && matches!(
@@ -647,7 +678,10 @@ impl<R: Read + Seek> WebmReader<R> {
         if p.size > self.limits.packet_bytes {
             return Err(invalid("WebM packet exceeds budget"));
         }
-        self.reader.seek(SeekFrom::Start(p.offset))?;
+        // Blocks are read in the order the walk found them, which is the order
+        // they sit in the file, so the reader is usually already standing on the
+        // packet it is asked for and the bytes stay where they were read to.
+        goto(&mut self.reader, p.offset)?;
         let mut data = vec![0; p.size];
         self.reader.read_exact(&mut data)?;
         Ok(data)
@@ -825,7 +859,7 @@ fn read_block<R: Read + Seek>(
     if out.len() >= limits.packets {
         return Err(invalid("WebM packet count exceeds limit"));
     }
-    r.seek(SeekFrom::Start(e.data))?;
+    goto(r, e.data)?;
     let (track, unknown) = vint(r, false)?;
     if track == 0 || unknown {
         return Err(invalid("invalid WebM block track"));
