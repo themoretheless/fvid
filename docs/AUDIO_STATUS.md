@@ -338,3 +338,9 @@ to masked ordinary bands after per-channel inverse quantization. Tests verify
 opposite masks in two short-window groups and preserve unmasked coefficients.
 Noise/intensity remain explicitly rejected by this path; full stereo PCM
 correctness has not yet been established.
+
+Channel-pair reconstruction now includes intensity stereo (books 14/15).
+The parser retains explicit versus all-band mid/side mode so only explicit
+mask bits invert intensity polarity. Tests cover both books, both mask modes,
+masked/unmasked bands and all short windows. Noise substitution, PCM reference
+comparison and playback integration remain pending.

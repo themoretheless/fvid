@@ -7,13 +7,17 @@ pub struct ChannelPair {
     pub right: ChannelData,
     /// Group/band mask; absent when channels have independent windows.
     pub mid_side: Option<Vec<Vec<bool>>>,
+    /// Only explicit mask mode 1 inverts intensity stereo polarity.
+    pub explicit_mask: bool,
 }
 impl ChannelPair {
-    /// Restore ordinary stereo spectral bands. Noise/intensity bands are
-    /// rejected by channel reconstruction until their dedicated tools exist.
+    /// Restore ordinary and intensity stereo bands. Noise bands still require
+    /// their dedicated reconstruction tool and are rejected.
     pub fn ordinary_spectra(&self, config: &AacConfig) -> Result<(Vec<f32>, Vec<f32>)> {
         let mut left = self.left.ordinary_spectrum(config)?;
-        let mut right = self.right.ordinary_spectrum(config)?;
+        let mut right = self
+            .right
+            .spectrum_with_intensity(config, self.mid_side.is_some())?;
         if let Some(mask) = &self.mid_side {
             if self.left.info != self.right.info
                 || mask.len() != self.left.info.group_lengths.len()
@@ -34,11 +38,22 @@ impl ChannelPair {
             let mut first = 0;
             for (group, &length) in self.left.info.group_lengths.iter().enumerate() {
                 for (band, &enabled) in mask[group].iter().enumerate() {
-                    if !enabled {
+                    let intensity = match self.right.scales[group][band] {
+                        super::aac_scalefactors::BandScale::Intensity(position) => Some(position),
+                        _ => None,
+                    };
+                    if !enabled && intensity.is_none() {
                         continue;
                     }
                     for window in first..first + length as usize {
                         for i in window * size + offsets[band]..window * size + offsets[band + 1] {
+                            if let Some(position) = intensity {
+                                let positive = self.right.codebooks[group][band] == 15;
+                                let invert = self.explicit_mask && enabled;
+                                let sign = if positive != invert { 1.0 } else { -1.0 };
+                                right[i] = left[i] * sign * 2.0f32.powf(-f32::from(position) / 4.0);
+                                continue;
+                            }
                             let (mid, side) = (left[i], right[i]);
                             left[i] = mid + side;
                             right[i] = mid - side;
@@ -60,8 +75,10 @@ impl ChannelPair {
         } else {
             None
         };
+        let mut explicit_mask = false;
         let mid_side = if let Some(info) = &common {
             let mode = cursor.read(2)?;
+            explicit_mask = mode == 1;
             if mode == 3 {
                 return Err(invalid("reserved AAC mid/side mask mode"));
             }
@@ -84,6 +101,7 @@ impl ChannelPair {
             left,
             right,
             mid_side,
+            explicit_mask,
         })
     }
 }
@@ -187,6 +205,7 @@ mod tests {
             pulse: None,
         };
         let mut pair = ChannelPair {
+            explicit_mask: true,
             left: channel(8),
             right: channel(1),
             mid_side: Some(vec![vec![true, false], vec![false, true]]),
@@ -208,6 +227,31 @@ mod tests {
         pair.mid_side = None;
         let (left, right) = pair.ordinary_spectra(&config).unwrap();
         assert_eq!((left[0], right[0]), (16.0, 1.0));
+        pair.right.quantized.fill(0);
+        pair.right.scales = vec![vec![BandScale::Intensity(4); 2]; 2];
+        for book in [14, 15] {
+            pair.right.codebooks = vec![vec![book; 2]; 2];
+            for explicit in [false, true] {
+                pair.explicit_mask = explicit;
+                for enabled in [false, true] {
+                    pair.mid_side = Some(vec![vec![enabled; 2]; 2]);
+                    let (left, right) = pair.ordinary_spectra(&config).unwrap();
+                    let sign = if (book == 15) != (explicit && enabled) {
+                        1.0
+                    } else {
+                        -1.0
+                    };
+                    for w in 0..8 {
+                        for b in 0..8 {
+                            assert_eq!(left[w * 128 + b], 16.0);
+                            assert_eq!(right[w * 128 + b], sign * 8.0);
+                        }
+                    }
+                }
+            }
+        }
+        pair.mid_side = None;
+        assert!(pair.ordinary_spectra(&config).is_err());
     }
     #[test]
     fn reserved_mask_is_rejected_before_channels() {

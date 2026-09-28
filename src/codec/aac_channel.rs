@@ -24,6 +24,13 @@ impl ChannelData {
     /// noise/intensity bands need separate tools and are rejected here.
     /// Output uses AAC spectral units; PCM normalization is not applied.
     pub fn ordinary_spectrum(&self, config: &AacConfig) -> Result<Vec<f32>> {
+        self.spectrum_with_intensity(config, false)
+    }
+    pub(crate) fn spectrum_with_intensity(
+        &self,
+        config: &AacConfig,
+        allow: bool,
+    ) -> Result<Vec<f32>> {
         let tables = BandTables::for_config(config)?;
         let offsets = if self.info.sequence == WindowSequence::EightShort {
             tables.short
@@ -73,6 +80,7 @@ impl ChannelData {
                 let book = self.codebooks[group][band];
                 match (book, scale) {
                     (0, BandScale::Zero) | (1..=11, BandScale::Spectral(_)) => {}
+                    (14..=15, BandScale::Intensity(_)) if allow => {}
                     (13, BandScale::Noise(_)) | (14..=15, BandScale::Intensity(_)) => {
                         return Err(unsupported(
                             "AAC noise/intensity reconstruction is not implemented",
