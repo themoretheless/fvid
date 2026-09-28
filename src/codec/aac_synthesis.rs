@@ -49,6 +49,7 @@ fn kbd_window(n: usize, alpha: f64) -> Vec<f64> {
     full
 }
 
+#[derive(Clone)]
 pub struct LongSineSynthesis {
     kbd_long: Vec<f64>,
     kbd_short: Vec<f64>,

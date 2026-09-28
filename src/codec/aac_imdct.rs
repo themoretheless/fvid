@@ -5,6 +5,7 @@
 use crate::{Result, invalid};
 use std::f64::consts::PI;
 
+#[derive(Clone)]
 pub struct Imdct {
     coefficients: usize,
     recurrence: Vec<[f64; 3]>,

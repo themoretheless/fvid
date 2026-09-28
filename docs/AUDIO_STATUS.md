@@ -372,3 +372,13 @@ oracle. RMS error is 0.000135962 and peak error 0.00264216, with different PNS
 sequences; this is not bit-exact. Fixture provenance and thresholds are recorded
 beside the reference. No runtime/test invocation of FFmpeg is introduced. TNS,
 remaining profiles/tools, public packet decoding and playback remain pending.
+
+`codec::aac_native::NativeAacDecoder` now exposes owned raw AAC-LC packet-to-PCM
+operation for mono/SCE and stereo/CPE configurations, plus reset. It supports
+fill metadata and data-stream skipping, rejects unimplemented elements/tools,
+and commits synthesis/noise state only after a whole block succeeds. Public-API
+tests match the complete stereo PCM oracle, verify reset, and reject malformed
+packets without altering subsequent output. Synthesis state is currently cloned
+per packet for transactional behavior; no performance claim is made. The player
+still uses the existing wrapper; TNS, multichannel and 960-sample packet support
+are not complete.
