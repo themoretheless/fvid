@@ -4,7 +4,7 @@ use fvid::playback_spool::{
 use std::{
     fs,
     io::{Read, Seek, SeekFrom},
-    path::PathBuf,
+    path::{Path, PathBuf},
     time::{Duration, Instant},
 };
 
@@ -26,7 +26,7 @@ fn item(name: &str, size: usize) -> PathBuf {
     path
 }
 
-fn spooled(path: &PathBuf, lead: u64) -> Spool {
+fn spooled(path: &Path, lead: u64) -> Spool {
     Spool::open(path, lead).unwrap()
 }
 
