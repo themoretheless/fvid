@@ -472,7 +472,18 @@ impl Lut {
         if text.contains("_SIZE") {
             Self::from_cube(text)
         } else {
-            Self::from_3dl(text)
+            // The `.cube` half of the pair cannot be reached here, because the
+            // test that sent us away from it is what a `.cube` must pass: every
+            // real colour table declares a size line. What does arrive without
+            // one is the `.cube` extension taken by another format entirely —
+            // Gaussian volumetric dumps, git-lfs pointers, prose — so say both
+            // of those things and quote the line that gives the file away.
+            Self::from_3dl(text).map_err(|error| {
+                let first = text.lines().next().unwrap_or("").trim();
+                invalid(&format!(
+                    "not a LUT: no size line, so it is not a .cube either ({error}); it starts {first:?}"
+                ))
+            })
         }
     }
 
@@ -971,6 +982,29 @@ LUT_3D_SIZE 2
         // keeps the bound it always had.
         assert!(Lut::from_cube("LUT_1D_SIZE 300001\n0\n1\n").is_err());
         assert!(Lut::from_cube("LUT_3D_SIZE 200\n0 0 0\n1 1 1\n").is_err());
+    }
+
+    /// A `.cube` that is not a colour LUT — the extension is shared with
+    /// Gaussian volumetric dumps and git-lfs pointers — has to be refused with a
+    /// reason that fits, not one that names the other format. Every real colour
+    /// table declares a size line, so a file without one is never a `.cube`, and
+    /// the line that identifies it is the first one.
+    #[test]
+    fn a_cube_that_is_not_a_lut_says_what_it_is() {
+        let gaussian = "Psi4 Gaussian Cube File.\n\n5 0.0 0.0 0.0\n1 0.1 0.0 0.0\n";
+        let error = Lut::from_text(gaussian).unwrap_err().to_string();
+        assert!(error.contains("not a LUT"), "{error}");
+        assert!(error.contains(".cube"), "{error}");
+        assert!(
+            error.contains("\"Psi4 Gaussian Cube File.\""),
+            "{error}: the line that gives the file away is not quoted"
+        );
+        // A size line still goes to the .cube reader and keeps its own errors.
+        let short = Lut::from_text("LUT_3D_SIZE 2\n0 0 0\n1 1 1\n").unwrap_err();
+        assert!(
+            short.to_string().contains("3D LUT expected"),
+            "{short}: a .cube must be judged as a .cube"
+        );
     }
 
     #[test]
