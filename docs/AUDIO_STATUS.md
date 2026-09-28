@@ -332,3 +332,9 @@ spectral units. Tests verify different scales across short-window groups and
 band boundaries. Noise/intensity bands and pulse corrections above max_sfb are
 explicitly unsupported here; they must not silently become zeros. This stage
 still needs stereo tools, PCM normalization and playback integration.
+
+`ChannelPair::ordinary_spectra` applies mid/side sum/difference reconstruction
+to masked ordinary bands after per-channel inverse quantization. Tests verify
+opposite masks in two short-window groups and preserve unmasked coefficients.
+Noise/intensity remain explicitly rejected by this path; full stereo PCM
+correctness has not yet been established.

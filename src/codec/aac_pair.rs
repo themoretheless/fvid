@@ -9,6 +9,48 @@ pub struct ChannelPair {
     pub mid_side: Option<Vec<Vec<bool>>>,
 }
 impl ChannelPair {
+    /// Restore ordinary stereo spectral bands. Noise/intensity bands are
+    /// rejected by channel reconstruction until their dedicated tools exist.
+    pub fn ordinary_spectra(&self, config: &AacConfig) -> Result<(Vec<f32>, Vec<f32>)> {
+        let mut left = self.left.ordinary_spectrum(config)?;
+        let mut right = self.right.ordinary_spectrum(config)?;
+        if let Some(mask) = &self.mid_side {
+            if self.left.info != self.right.info
+                || mask.len() != self.left.info.group_lengths.len()
+                || mask
+                    .iter()
+                    .any(|g| g.len() != self.left.info.max_sfb as usize)
+            {
+                return Err(invalid("AAC mid/side geometry mismatch"));
+            }
+            let tables = BandTables::for_config(config)?;
+            let offsets =
+                if self.left.info.sequence == super::aac_synthesis::WindowSequence::EightShort {
+                    tables.short
+                } else {
+                    tables.long
+                };
+            let size = *offsets.last().unwrap();
+            let mut first = 0;
+            for (group, &length) in self.left.info.group_lengths.iter().enumerate() {
+                for (band, &enabled) in mask[group].iter().enumerate() {
+                    if !enabled {
+                        continue;
+                    }
+                    for window in first..first + length as usize {
+                        for i in window * size + offsets[band]..window * size + offsets[band + 1] {
+                            let (mid, side) = (left[i], right[i]);
+                            left[i] = mid + side;
+                            right[i] = mid - side;
+                        }
+                    }
+                }
+                first += length as usize;
+            }
+        }
+        Ok((left, right))
+    }
+
     /// Starts after element_instance_tag. A failure in either channel rolls
     /// back the entire pair's input cursor.
     pub fn read(bits: &mut BitReader<'_>, config: &AacConfig) -> Result<Self> {
@@ -124,6 +166,48 @@ mod tests {
             frames += 1;
         }
         assert_eq!(frames, 13);
+    }
+    #[test]
+    fn mid_side_reconstructs_only_masked_bands_in_each_short_group() {
+        use crate::codec::{
+            aac_ics::IcsInfo,
+            aac_scalefactors::BandScale,
+            aac_synthesis::{WindowSequence, WindowShape},
+        };
+        let channel = |value| ChannelData {
+            info: IcsInfo {
+                sequence: WindowSequence::EightShort,
+                shape: WindowShape::Sine,
+                max_sfb: 2,
+                group_lengths: vec![3, 5],
+            },
+            codebooks: vec![vec![5, 5]; 2],
+            scales: vec![vec![BandScale::Spectral(100); 2]; 2],
+            quantized: vec![value; 64],
+            pulse: None,
+        };
+        let mut pair = ChannelPair {
+            left: channel(8),
+            right: channel(1),
+            mid_side: Some(vec![vec![true, false], vec![false, true]]),
+        };
+        let config = AacConfig::parse(&[0x11, 0x90]).unwrap();
+        let (left, right) = pair.ordinary_spectra(&config).unwrap();
+        for w in 0..8 {
+            for band in 0..2 {
+                for bin in 0..4 {
+                    let i = w * 128 + band * 4 + bin;
+                    let enabled = (w < 3) == (band == 0);
+                    assert_eq!(left[i], if enabled { 17.0 } else { 16.0 });
+                    assert_eq!(right[i], if enabled { 15.0 } else { 1.0 });
+                }
+            }
+        }
+        pair.mid_side = Some(vec![vec![true]]);
+        assert!(pair.ordinary_spectra(&config).is_err());
+        pair.mid_side = None;
+        let (left, right) = pair.ordinary_spectra(&config).unwrap();
+        assert_eq!((left[0], right[0]), (16.0, 1.0));
     }
     #[test]
     fn reserved_mask_is_rejected_before_channels() {
