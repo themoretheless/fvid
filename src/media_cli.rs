@@ -3,7 +3,8 @@ use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.first().map(String::as_str) == Some("decode-audio") && args.len() == 3
-        && std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()) == Some("f32le")
+        && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("f32le" | "wav"))
+        && native_adts_input(std::path::Path::new(&args[1]))?
     {
         let stats = fvid::native_export::export_aac_pcm(
             std::path::Path::new(&args[1]), std::path::Path::new(&args[2]),
@@ -53,6 +54,16 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     {
         let _ = args;
         Err("this media operation still requires cargo build --release --features media and FFmpeg development libraries; plain media decode INPUT is available without them".into())
+    }
+}
+fn native_adts_input(path: &std::path::Path) -> std::io::Result<bool> {
+    use std::io::Read;
+    let mut file = std::fs::File::open(path)?;
+    let mut prefix = [0; 7];
+    match file.read_exact(&mut prefix) {
+        Ok(()) => Ok(fvid::container::adts::header(&prefix).is_some()),
+        Err(error) if error.kind() == std::io::ErrorKind::UnexpectedEof => Ok(false),
+        Err(error) => Err(error),
     }
 }
 type DecodeRequest<'a> = (&'a str, bool, Option<(std::time::Duration, std::time::Duration)>);

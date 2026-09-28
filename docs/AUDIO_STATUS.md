@@ -431,3 +431,13 @@ this API without the `media` feature. It writes raw interleaved f32le samples
 through a temporary file and publishes only on successful decode, never
 replacing existing destinations. Other output containers and transformed audio
 operations still use the legacy implementation.
+
+Plain ADTS `media decode-audio INPUT.aac OUTPUT.wav` now also uses the owned
+path. Its WAVEFORMATEXTENSIBLE IEEE-float header carries a standard channel
+mask (mono through 5.1), valid sample bits, and a `fact` sample-frame count.
+PCM is streamed to temporary output and the RIFF header is finalized before
+publication; outputs exceeding RIFF's 32-bit size are rejected. No FFmpeg
+runtime is used. Validation covered exact six-channel sample preservation,
+header sizes/mask/count, and no-overwrite; independent ffprobe inspection
+reported pcm_f32le, 48000 Hz, 5.1, 11264 frames for the active surround fixture.
+The independent inspector is a validation tool, not part of export.

@@ -190,13 +190,14 @@ fn product(a: u128, b: u128) -> Result<u128> {
         .ok_or_else(|| invalid("Y4M timestamp overflow"))
 }
 
-/// Export ADTS AAC to raw interleaved f32le, publishing only a complete decode.
-/// The extension must be `.f32le` so raw samples cannot masquerade as a container.
+/// Export ADTS AAC to raw f32le or float WAV, publishing only a complete decode.
 pub fn export_aac_pcm(source: &Path, destination: &Path) -> Result<crate::native_media::AudioDecodeStats> {
-    use std::io::Read;
-    if destination.extension().and_then(|s| s.to_str()) != Some("f32le") {
-        return Err(invalid("native AAC PCM output requires .f32le extension"));
-    }
+    use std::io::{Read, Seek, SeekFrom};
+    let wav = match destination.extension().and_then(|s| s.to_str()) {
+        Some("wav") => true,
+        Some("f32le") => false,
+        _ => return Err(invalid("native AAC PCM output requires .f32le or .wav extension")),
+    };
     let limits = crate::container::adts::Limits::default();
     let mut data = Vec::new();
     File::open(source)?.take(limits.file_bytes as u64 + 1).read_to_end(&mut data)?;
@@ -213,10 +214,50 @@ pub fn export_aac_pcm(source: &Path, destination: &Path) -> Result<crate::native
         }
     }).ok_or_else(|| invalid("cannot reserve PCM output"))??;
     let mut output = BufWriter::new(file);
+    if wav { output.write_all(&[0; 80])?; }
     let stats = crate::native_media::decode_aac_pcm(&data, &mut output, &limits)?;
+    if wav {
+        let header = float_wav_header(&stats)?;
+        output.seek(SeekFrom::Start(0))?;
+        output.write_all(&header)?;
+    }
     output.flush()?;
     output.get_ref().sync_all()?;
     drop(output);
     std::fs::hard_link(&temporary.0, destination)?;
     Ok(stats)
+}
+
+fn float_wav_header(stats: &crate::native_media::AudioDecodeStats) -> Result<Vec<u8>> {
+    let mask: u32 = match stats.channels {
+        1 => 0x4, 2 => 0x3, 3 => 0x7, 4 => 0x107, 5 => 0x37, 6 => 0x3f,
+        _ => return Err(invalid("unsupported WAV channel layout")),
+    };
+    let align = stats.channels * 4;
+    let bytes = stats.sample_frames.checked_mul(u64::from(align))
+        .and_then(|n| u32::try_from(n).ok()).filter(|n| *n <= u32::MAX - 72)
+        .ok_or_else(|| invalid("WAV exceeds RIFF size limit"))?;
+    let rate = stats.sample_rate.checked_mul(u32::from(align))
+        .ok_or_else(|| invalid("WAV byte rate overflow"))?;
+    let mut header = Vec::with_capacity(80);
+    header.extend_from_slice(b"RIFF");
+    header.extend_from_slice(&(bytes + 72).to_le_bytes());
+    header.extend_from_slice(b"WAVEfmt ");
+    header.extend_from_slice(&40u32.to_le_bytes());
+    header.extend_from_slice(&0xfffeu16.to_le_bytes());
+    header.extend_from_slice(&stats.channels.to_le_bytes());
+    header.extend_from_slice(&stats.sample_rate.to_le_bytes());
+    header.extend_from_slice(&rate.to_le_bytes());
+    header.extend_from_slice(&align.to_le_bytes());
+    header.extend_from_slice(&32u16.to_le_bytes());
+    header.extend_from_slice(&22u16.to_le_bytes());
+    header.extend_from_slice(&32u16.to_le_bytes());
+    header.extend_from_slice(&mask.to_le_bytes());
+    header.extend_from_slice(&[3, 0, 0, 0, 0, 0, 0x10, 0, 0x80, 0, 0, 0xaa, 0, 0x38, 0x9b, 0x71]);
+    header.extend_from_slice(b"fact");
+    header.extend_from_slice(&4u32.to_le_bytes());
+    header.extend_from_slice(&(stats.sample_frames as u32).to_le_bytes());
+    header.extend_from_slice(b"data");
+    header.extend_from_slice(&bytes.to_le_bytes());
+    Ok(header)
 }

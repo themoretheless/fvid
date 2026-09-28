@@ -65,3 +65,37 @@ fn cli_exports_complete_pcm_without_overwriting_or_partial_files() {
     assert!(!failed.exists());
     assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 2);
 }
+
+#[test]
+fn float_wav_preserves_surround_samples_and_channel_layout() {
+    let dir = std::env::temp_dir().join(format!("fvid-aac-wav-{}", std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    let source = dir.join("source.aac");
+    let output = dir.join("out.wav");
+    let input = include_bytes!("fixtures/audio/aac-51-active.aac");
+    std::fs::write(&source, input).unwrap();
+    let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "decode-audio"]).arg(&source).arg(&output).output().unwrap();
+    assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
+    let wave = std::fs::read(&output).unwrap();
+    let read32 = |at| u32::from_le_bytes(wave[at..at+4].try_into().unwrap());
+    assert_eq!(&wave[..4], b"RIFF");
+    assert_eq!(read32(4) as usize + 8, wave.len());
+    assert_eq!(&wave[8..16], b"WAVEfmt ");
+    assert_eq!(read32(16), 40);
+    assert_eq!(&wave[20..24], &[0xfe, 0xff, 6, 0]);
+    assert_eq!(read32(24), 48000);
+    assert_eq!(read32(28), 48000 * 24);
+    assert_eq!(read32(40), 0x3f);
+    assert_eq!(&wave[44..60], &[3,0,0,0,0,0,16,0,128,0,0,170,0,56,155,113]);
+    assert_eq!(&wave[60..64], b"fact");
+    assert_eq!(&wave[72..76], b"data");
+    let mut pcm = Vec::new();
+    let stats = decode_aac_pcm(input, &mut pcm, &Limits::default()).unwrap();
+    assert_eq!(u64::from(read32(68)), stats.sample_frames);
+    assert_eq!(read32(76) as usize, pcm.len());
+    assert_eq!(&wave[80..], pcm);
+    assert!(fvid::native_export::export_aac_pcm(&source, &output).is_err());
+    assert_eq!(std::fs::read(&output).unwrap(), wave);
+    std::fs::remove_dir_all(dir).unwrap();
+}
