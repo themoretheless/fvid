@@ -192,6 +192,12 @@ impl Grade {
         self.lut.as_ref()
     }
 
+    /// How the baked grid and that LUT are read between their nodes, which an
+    /// OSD line says along with the plan.
+    pub fn interpolation(&self) -> Interpolation {
+        self.interpolation
+    }
+
     /// Code values in, code values out.
     pub fn rgb(&self, rgb: [f32; 3]) -> [f32; 3] {
         let mapped = self.cube.sample(rgb, self.interpolation);

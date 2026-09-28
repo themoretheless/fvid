@@ -6,8 +6,8 @@
 //! controls along the bottom. Controls fade out while the video plays and
 //! the pointer rests; any movement brings them back.
 use crate::color::{
-    ColourDescription, DisplayTarget, Grade, HdrMetadata, Interpolation, Log, Lut, Primaries,
-    Settings, ToneMap, Transfer,
+    Chromaticity, ColourDescription, CubePlan, DisplayTarget, Grade, HdrMetadata, Interpolation,
+    Log, Lut, MasteringDisplay, MatrixCoeff, Primaries, Settings, ToneMap, Transfer,
 };
 use crate::container::FileTags;
 use crate::subtitles::{self, Cue};
@@ -686,6 +686,126 @@ fn parse_interpolation(text: &str) -> crate::Result<Interpolation> {
     })
 }
 
+/// What the item on screen states about its colour, said only when it is worth
+/// saying. BT.709 codes over BT.709 primaries with the BT.709 luma and the video
+/// range are what every screen expects, so repeating them for every file would
+/// tell a viewer nothing; a part the file leaves unstated is a statement of its
+/// own, since it is the part the grade has to answer for.
+fn colour_line(signal: ColourDescription) -> Option<String> {
+    // H.273 counts 0 as unspecified, and a container that wrote no colour at all
+    // leaves exactly that in all three fields. Naming a shape for the matrix code
+    // of a file that claimed none would tell a viewer something the file never
+    // said, so an all-zero triple with the studio range gets no line — the same
+    // reading `ColourDescription::filled_with` gives it upstream.
+    let stated = (signal.primaries | signal.transfer | signal.matrix) != 0;
+    if !stated && !signal.full_range {
+        return None;
+    }
+    let primaries = signal.primary_set();
+    let transfer = signal.transfer_function();
+    let matrix = signal.matrix_coefficients();
+    let expected = primaries == Some(Primaries::BT709)
+        && transfer == Transfer::Bt709
+        && matrix == Some(MatrixCoeff::Bt709)
+        && !signal.full_range;
+    if expected {
+        return None;
+    }
+    let named = |part: Option<&'static str>| part.unwrap_or("not stated");
+    Some(format!(
+        "Colour: {} · {} · {} · {}",
+        named(primaries.map(|set| set.label())),
+        transfer.label(),
+        named(matrix.map(|coeff| coeff.label())),
+        if signal.full_range { "full" } else { "limited" }
+    ))
+}
+
+/// The panel a master was graded for, from the corners the file itself states.
+/// They are carried in multiples of 0.00002, so an exact compare answers
+/// "custom" to a BT.2020 HDR10 master — the same rounding `MasteringDisplay::is_hdr10`
+/// exists to cover. A volume no table entry rounds onto is genuinely another
+/// panel, and the line says so.
+fn mastered_on(display: &MasteringDisplay) -> &'static str {
+    let corners = display.primaries();
+    let close = |x: f64, y: f64| (x - y).abs() <= 0.002;
+    let near = |a: Chromaticity, b: Chromaticity| close(a.x, b.x) && close(a.y, b.y);
+    Primaries::NAMED
+        .iter()
+        .copied()
+        .find(|panel| {
+            near(panel.r, corners.r)
+                && near(panel.g, corners.g)
+                && near(panel.b, corners.b)
+                && near(panel.white, corners.white)
+        })
+        .map_or("custom", |panel| panel.label())
+}
+
+/// The light the item carries: the display it was mastered for and the two
+/// content limits, with the parts a file leaves unstated left out rather than
+/// guessed at. A file that states neither has no line here, since the panel's
+/// job is to say what the picture is made of.
+fn light_line(hdr: &HdrMetadata) -> Option<String> {
+    if hdr.is_empty() {
+        return None;
+    }
+    let mut parts: Vec<String> = Vec::new();
+    if let Some(display) = hdr.mastering {
+        parts.push(format!(
+            "{} · {}–{} cd/m²",
+            mastered_on(&display),
+            display.min_luminance,
+            display.max_luminance
+        ));
+    }
+    if hdr.light.max_cll > 0.0 {
+        parts.push(format!("MaxCLL {} cd/m²", hdr.light.max_cll));
+    }
+    if hdr.light.max_fall > 0.0 {
+        parts.push(format!("MaxFALL {} cd/m²", hdr.light.max_fall));
+    }
+    Some(format!("HDR: {}", parts.join(" · ")))
+}
+
+/// What the grade does to the picture: the curve its bytes are read as and the
+/// curve they are written as, the triangle they change when the two differ, the
+/// shoulder the highlights go through, the panel all of it is fitted to, the
+/// look applied after it and the grid all of that is baked on with its reading.
+/// Taken from the plan the grade baked, so the line says what is being done
+/// rather than what was asked — the two part whenever fvid picks a shoulder for
+/// material that asked for none.
+fn grade_text(plan: &CubePlan, interpolation: Interpolation, lut: Option<&Lut>) -> String {
+    let mut parts = vec![format!(
+        "{} → {}",
+        match plan.log {
+            Some(profile) => profile.label(),
+            None => plan.from.label(),
+        },
+        plan.to.label()
+    )];
+    if plan.source != plan.dest {
+        parts.push(format!("{} → {}", plan.source.label(), plan.dest.label()));
+    }
+    if let Some(mode) = plan.tone_map {
+        parts.push(mode.label().to_owned());
+    }
+    if let Some(target) = plan.target {
+        parts.push(format!("{} cd/m²", target.peak_nits));
+    }
+    if let Some(lut) = lut {
+        parts.push(match lut {
+            // A look's own grid is the only thing about it a viewer can act on:
+            // the file's title is not carried through the parse, and the shape
+            // and node count say what was applied and how coarse it is.
+            Lut::One(table) => format!("look 1D {}", table.len()),
+            Lut::Three(table) => format!("look {}³", table.size),
+        });
+    }
+    parts.push(format!("{}³ {}", plan.size, interpolation.label()));
+    parts.join(" · ")
+}
+
 /// `--tonemap` as one of the highlight curves fvid can run, spelled the way
 /// FFmpeg's `tonemap` filter spells them. Naming none of them is a mistake at
 /// the door, and the message says which are on offer.
@@ -1323,6 +1443,17 @@ struct Player {
     /// insets into the coded frame: what Matroska's `PixelCrop*` elements
     /// state, `[0; 4]` for a file that states none.
     container_insets: [u32; 4],
+    /// The colour signal the item on screen states for itself and the light it
+    /// carries, kept from the open so the panel can say what the picture is
+    /// before anything is done to it.
+    signal: ColourDescription,
+    hdr: HdrMetadata,
+    /// The panel's line for what is being done to the item on screen: the plan
+    /// the grade baked, the reading it applies to that grid and the look that
+    /// follows it, said while the grade is still in hand. `None` when the item's
+    /// bytes are the picture. The line says what is being done, not what was
+    /// asked, because the two part whenever fvid picks a shoulder on its own.
+    grade_line: Option<String>,
     /// Which rung of VLC's Zoom menu the picture is drawn at, kept across files
     /// like the level and the rate.
     zoom_milli: u32,
@@ -1469,6 +1600,9 @@ impl Default for Player {
             dimensions: [0; 2],
             pixel_aspect: (1, 1),
             container_insets: [0; 4],
+            signal: ColourDescription::default(),
+            hdr: HdrMetadata::default(),
+            grade_line: None,
             zoom_milli: 1_000,
             pan: Vec2::ZERO,
             crop: NO_CROP,
@@ -1591,6 +1725,14 @@ impl Player {
         // moves into the thread that will carry the answer.
         let (signal, hdr) = (reader.colour(), reader.hdr());
         let grade = self.grading.grade_for(signal, &hdr);
+        self.grade_line = grade.as_ref().map(|grade| {
+            format!(
+                "Grade: {}",
+                grade_text(&grade.plan(), grade.interpolation(), grade.lut())
+            )
+        });
+        self.signal = signal;
+        self.hdr = hdr;
         self.playback = Some(Playback::start(reader, grade));
         // The picture of the item before this one is no longer on screen.
         self.presented = None;
@@ -1648,6 +1790,10 @@ impl Player {
         self.dimensions = [0; 2];
         self.pixel_aspect = (1, 1);
         self.container_insets = [0; 4];
+        // An item with no picture states no colour and gets no grade.
+        self.signal = ColourDescription::default();
+        self.hdr = HdrMetadata::default();
+        self.grade_line = None;
         self.period = Duration::ZERO;
         self.hardware = false;
         // An item that refused the picture has no codec to name for it.
@@ -3198,6 +3344,15 @@ impl Player {
                 self.video_codec,
                 fps_text(self.period)
             ));
+            if let Some(line) = colour_line(self.signal) {
+                lines.push(line);
+            }
+            if let Some(line) = light_line(&self.hdr) {
+                lines.push(line);
+            }
+            if let Some(line) = &self.grade_line {
+                lines.push(line.clone());
+            }
         }
         if let Some(track) = self.audio_tracks.get(self.audio_track) {
             lines.push(format!(
@@ -4611,17 +4766,18 @@ mod tests {
         Grading, HIDE_AFTER, LoopMark, NO_CROP, PANEL_NITS, Panel, PathBuf, Pixels, Planar8,
         PlayArgs, PlayBounds, Player, Pos2, RATES, Rect, Repeat, SubtitleSource, VOLUME_MAX, Vec2,
         adjust_luma, adjust_rgb, adjust_scalars, advance, aspect_label, aspect_osd, aspect_step,
-        bitrate_text, byte_size, chapter_ahead, container_facts, crop_insets, crop_label, crop_osd,
-        crop_step, cropped_size, cycle_repeat, deal_cycle, delay_step, delayed_clock, display_size,
-        expand_inputs, file_size, fps_text, jump_size, loop_press, loop_rewind, paced_period,
-        parse_clock, parse_play_args, playlist_osd, position_from_digit, rate_fine, rate_osd,
-        rate_step, repeat_osd, retreat, shown_insets, shown_size, snapshot_name, sound_codec,
-        subtitles, track_step, uv_window, video_rect, volume_osd, volume_step, zoom_osd, zoom_step,
+        bitrate_text, byte_size, chapter_ahead, colour_line, container_facts, crop_insets,
+        crop_label, crop_osd, crop_step, cropped_size, cycle_repeat, deal_cycle, delay_step,
+        delayed_clock, display_size, expand_inputs, file_size, fps_text, grade_text, jump_size,
+        light_line, loop_press, loop_rewind, paced_period, parse_clock, parse_play_args,
+        playlist_osd, position_from_digit, rate_fine, rate_osd, rate_step, repeat_osd, retreat,
+        shown_insets, shown_size, snapshot_name, sound_codec, subtitles, track_step, uv_window,
+        video_rect, volume_osd, volume_step, zoom_osd, zoom_step,
     };
     use super::{Event, NativeReader, Playback};
     use crate::color::{
-        ColourDescription, DisplayTarget, HdrMetadata, Interpolation, Log, Lut, Primaries, ToneMap,
-        Transfer,
+        ColourDescription, ContentLight, DisplayTarget, HdrMetadata, Interpolation, Log, Lut,
+        MasteringDisplay, Primaries, ToneMap, Transfer,
     };
     use std::sync::Arc;
     use std::time::{Duration, Instant};
@@ -8209,6 +8365,211 @@ LUT_3D_SIZE 2
         );
     }
 
+    /// The panel says the three things a screen cannot show on its own: what the
+    /// item states its colour to be, what light it carries, and what the grade
+    /// does with the two.
+    #[test]
+    fn the_panel_says_what_a_picture_is_and_what_is_done_to_it() {
+        let bt709 = ColourDescription {
+            primaries: 1,
+            transfer: 1,
+            matrix: 1,
+            full_range: false,
+        };
+        // The signal every screen expects is not worth a line of its own.
+        assert!(colour_line(bt709).is_none());
+        // Neither is a file that wrote no colour at all: three zeros are
+        // H.273's way of saying unspecified, and calling matrix 0 "RGB" would
+        // report a shape the file never claimed.
+        assert!(colour_line(ColourDescription::default()).is_none());
+        // The same triangle over the full range is, since the grade reads its
+        // codes by a different rule.
+        assert_eq!(
+            colour_line(ColourDescription {
+                full_range: true,
+                ..bt709
+            })
+            .unwrap(),
+            "Colour: BT.709 · BT.709 · BT.709 · full"
+        );
+        let hdr10 = ColourDescription {
+            primaries: 9,
+            transfer: 16,
+            matrix: 9,
+            full_range: false,
+        };
+        assert_eq!(
+            colour_line(hdr10).unwrap(),
+            "Colour: BT.2020 · PQ · BT.2020 NCL · limited"
+        );
+        // A part the container leaves unstated is named as unstated, because it
+        // is the part the grade has to answer for.
+        assert_eq!(
+            colour_line(ColourDescription {
+                primaries: 2,
+                transfer: 2,
+                matrix: 2,
+                full_range: false,
+            })
+            .unwrap(),
+            "Colour: not stated · unknown · not stated · limited"
+        );
+        let display = MasteringDisplay::from_corners(
+            (0.708, 0.292),
+            (0.170, 0.797),
+            (0.131, 0.046),
+            (0.3127, 0.3290),
+            1_000.0,
+            0.005,
+        )
+        .unwrap();
+        let hdr = HdrMetadata {
+            mastering: Some(display),
+            light: ContentLight {
+                max_cll: 1_000.0,
+                max_fall: 400.0,
+            },
+        };
+        assert!(light_line(&HdrMetadata::default()).is_none());
+        assert_eq!(
+            light_line(&hdr).unwrap(),
+            "HDR: BT.2020 · 0.005–1000 cd/m² · MaxCLL 1000 cd/m² · MaxFALL 400 cd/m²"
+        );
+        // A limit the file does not state is left off the line rather than
+        // invented for it.
+        assert_eq!(
+            light_line(&HdrMetadata {
+                mastering: Some(display),
+                light: ContentLight::default(),
+            })
+            .unwrap(),
+            "HDR: BT.2020 · 0.005–1000 cd/m²"
+        );
+        // A volume no table rounds onto is another panel, and the line says so
+        // instead of naming the nearest one it half matches.
+        let projector = MasteringDisplay::from_corners(
+            (0.680, 0.320),
+            (0.265, 0.690),
+            (0.150, 0.060),
+            (0.314, 0.351),
+            500.0,
+            0.001,
+        )
+        .unwrap();
+        assert_eq!(
+            light_line(&HdrMetadata {
+                mastering: Some(projector),
+                light: ContentLight::default(),
+            })
+            .unwrap(),
+            "HDR: DCI-P3 · 0.001–500 cd/m²"
+        );
+        let odd = MasteringDisplay::from_corners(
+            (0.680, 0.320),
+            (0.200, 0.750),
+            (0.150, 0.060),
+            (0.3127, 0.3290),
+            4_000.0,
+            0.0001,
+        )
+        .unwrap();
+        assert_eq!(
+            light_line(&HdrMetadata {
+                mastering: Some(odd),
+                light: ContentLight::default(),
+            })
+            .unwrap(),
+            "HDR: custom · 0.0001–4000 cd/m²"
+        );
+        // The grade line tells what is being done, which is not only what was
+        // asked: HDR10 on the panel every session starts with compresses its
+        // highlights although no shoulder was named, and the one picked is on
+        // the line along with the grid it is baked on.
+        let grade = Grading::default().grade_for(hdr10, &hdr).unwrap();
+        let text = grade_text(&grade.plan(), grade.interpolation(), None);
+        assert!(
+            text.contains("PQ → BT.709")
+                && text.contains("BT.2020 → BT.709")
+                && text.contains("33³ tetrahedral"),
+            "{text}"
+        );
+        // A look the session was given is on the same line, by the shape and
+        // node count it was read as: a file's title does not survive the parse,
+        // and how coarse the grid under the picture is what a viewer weighs.
+        let looked = Grading {
+            lut: Some(Lut::from_cube(IDENTITY_CUBE).unwrap()),
+            ..Default::default()
+        }
+        .grade_for(hdr10, &hdr)
+        .unwrap();
+        let looked_text = grade_text(&looked.plan(), looked.interpolation(), looked.lut());
+        assert!(looked_text.contains("look 2³"), "{looked_text}");
+        let lifted = Grading {
+            lut: Some(Lut::from_cube("LUT_1D_SIZE 2\n0 0 0\n1 1 1\n").unwrap()),
+            ..Default::default()
+        }
+        .grade_for(hdr10, &hdr)
+        .unwrap();
+        let lifted_text = grade_text(&lifted.plan(), lifted.interpolation(), lifted.lut());
+        assert!(lifted_text.contains("look 1D 2"), "{lifted_text}");
+        // A log curve named at the door is the first word of the line, because
+        // the grade reads the bytes as that curve rather than as the curve the
+        // file states — the thing a viewer blames when a picture comes out flat.
+        // It is the same word the option takes, so the panel and the command
+        // line say the curve one way.
+        let logged = Grading {
+            log: Some(Log::SLog3),
+            ..Default::default()
+        }
+        .grade_for(hdr10, &hdr)
+        .unwrap();
+        let logged_text = grade_text(&logged.plan(), logged.interpolation(), logged.lut());
+        assert!(logged_text.starts_with("slog3 → BT.709"), "{logged_text}");
+        // The sample file writes no colour element and asks for no grade, so the
+        // panel shows only the picture's own line; the three lines are then put
+        // on by hand to check the order the panel keeps them in.
+        let directory = scratch("fvid-player-info-colour", &[]);
+        let path = directory.join("chapters.mkv");
+        std::fs::write(
+            &path,
+            include_bytes!("../tests/fixtures/chapters/chapters.mkv"),
+        )
+        .unwrap();
+        let mut player = Player {
+            queue: vec![path],
+            ..Default::default()
+        };
+        player.play_index(0);
+        assert!(player.error.is_none(), "{:?}", player.error);
+        // The absence on the panel comes from the file stating nothing, not from
+        // the helper dropping a signal the reader carried.
+        assert_eq!(player.signal, ColourDescription::default());
+        assert!(player.hdr.is_empty());
+        assert!(player.grade_line.is_none());
+        let plain = player.info_lines();
+        assert_eq!(plain[0], "Video: VP9 · 16×16 · 4 fps");
+        assert!(
+            !plain
+                .iter()
+                .any(|line| line.starts_with("Colour:") || line.starts_with("Grade:")),
+            "{plain:?}"
+        );
+        player.signal = hdr10;
+        player.hdr = hdr;
+        player.grade_line = Some(format!("Grade: {text}"));
+        let lines = player.info_lines();
+        assert_eq!(
+            lines[1..4],
+            [
+                "Colour: BT.2020 · PQ · BT.2020 NCL · limited",
+                "HDR: BT.2020 · 0.005–1000 cd/m² · MaxCLL 1000 cd/m² · MaxFALL 400 cd/m²",
+                format!("Grade: {text}").as_str(),
+            ]
+        );
+        drop(player);
+        std::fs::remove_dir_all(&directory).unwrap();
+    }
+
     /// `--lut` reads the look at startup, from a file named either way round:
     /// `.cube` and `.3dl` are told apart by their contents, not their suffix, and
     /// a file that holds neither stops the command before a window opens.
@@ -8376,6 +8737,21 @@ LUT_3D_SIZE 2
         assert!((0.85..0.96).contains(&kept), "{kept}");
         // And a code the panel shows outright is untouched by the choice.
         assert_eq!(grade.rgb([0.3; 3]), blind_default.rgb([0.3; 3]));
+        // The panel words the same decision, from the file's own bytes: the
+        // corners are BT.2020 in the payload's multiples of 0.00002, which the
+        // line names as a panel rather than leaving as an exact-compare miss.
+        assert_eq!(
+            colour_line(signal).unwrap(),
+            "Colour: BT.2020 · PQ · BT.2020 NCL · limited"
+        );
+        assert_eq!(
+            light_line(&hdr).unwrap(),
+            "HDR: BT.2020 · 0.0001–1000 cd/m² · MaxCLL 1000 cd/m² · MaxFALL 400 cd/m²"
+        );
+        assert_eq!(
+            grade_text(&grade.plan(), grade.interpolation(), grade.lut()),
+            "PQ → BT.709 · BT.2020 → BT.709 · mobius · 100 cd/m² · 33³ tetrahedral"
+        );
     }
 
     /// The same chain on a file that states a curve and no light at all: an HLG
@@ -8412,5 +8788,17 @@ LUT_3D_SIZE 2
         assert!(steps[0] < 0.5, "{steps:?}");
         assert!(steps.windows(2).all(|w| w[1] > w[0] + 0.05), "{steps:?}");
         assert!((steps[3] - 1.0).abs() < 1e-3, "{steps:?}");
+        // The panel's words for this file: HLG states no light, so only the
+        // signal it does state is on the panel, and the grade line says which
+        // display-domain pass it took and against what peak.
+        assert_eq!(
+            colour_line(signal).unwrap(),
+            "Colour: BT.2020 · HLG · BT.2020 NCL · limited"
+        );
+        assert!(light_line(&hdr).is_none());
+        assert_eq!(
+            grade_text(&plan, grade.interpolation(), grade.lut()),
+            "HLG → BT.709 · BT.2020 → BT.709 · clip · 100 cd/m² · 33³ tetrahedral"
+        );
     }
 }
