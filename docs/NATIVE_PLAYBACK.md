@@ -1100,3 +1100,15 @@ FVID_PLAYER_STATS=1 cargo run --release --no-default-features --features player 
 плеер после потери фокуса. Токен снимается на паузе, при завершении и закрытии;
 запрета сна экрана или системы нет. Флаги описаны в [документации Apple](https://developer.apple.com/documentation/foundation/processinfo/activityoptions). Обёртка Foundation изолирована в
 `crates/fvid-platform`; HEVC остаётся собственным программным декодером.
+
+### Native interval export
+
+`fvid media export-y4m INPUT OUTPUT.y4m --from 0.1 --to 0.2`
+exports frames whose presentation starts belong to the half-open interval
+`[0.1, 0.2)`. Both boundaries are required when selecting an interval; decimal
+seconds accept up to six fractional digits. This command works without the
+`media` feature or FFmpeg, using owned software codecs with reference pre-roll.
+Y4M retains planar samples (including HEVC Main10), pixel aspect and range;
+output timing starts at zero. Only constant, contiguous frame timing is accepted.
+Empty intervals fail without publishing an output. Existing files are never
+replaced. This does not yet replace legacy compressed-container trim/export.

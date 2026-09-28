@@ -3,8 +3,24 @@ use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.first().map(String::as_str) == Some("export-y4m") {
-        if args.len() != 3 { return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m".into()); }
-        let frames = fvid::native_export::export_y4m(std::path::Path::new(&args[1]), std::path::Path::new(&args[2]))?;
+        if args.len() < 3 { return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m [--from SECONDS --to SECONDS]".into()); }
+        let (mut from, mut to) = (None, None);
+        let mut options = args[3..].iter();
+        while let Some(option) = options.next() {
+            let slot = match option.as_str() {
+                "--from" => &mut from,
+                "--to" => &mut to,
+                _ => return Err(format!("unknown export option: {option}").into()),
+            };
+            if slot.is_some() { return Err("duplicate export boundary".into()); }
+            *slot = Some(decode_time(options.next().ok_or("missing export boundary")?)?);
+        }
+        let interval = match (from, to) {
+            (None, None) => None,
+            (Some(from), Some(to)) if from < to => Some((from, to)),
+            _ => return Err("export interval requires both --from and --to with from < to".into()),
+        };
+        let frames = fvid::native_export::export_y4m_interval(std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), interval)?;
         println!("{{\"backend\":\"fvid\",\"video_frames\":{frames}}}");
         return Ok(());
     }

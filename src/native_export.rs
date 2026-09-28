@@ -21,6 +21,19 @@ impl Drop for Temporary {
 /// rather than silently retimed. The destination is created only on success;
 /// an existing destination (including a symlink) is never replaced.
 pub fn export_y4m(source: &Path, destination: &Path) -> Result<u64> {
+    export_y4m_interval(source, destination, None)
+}
+
+/// Export frames with presentation starts in [from, to), decoding reference
+/// pre-roll through the owned codec. The resulting Y4M starts at time zero.
+pub fn export_y4m_interval(
+    source: &Path,
+    destination: &Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+) -> Result<u64> {
+    if interval.is_some_and(|(from, to)| from >= to) {
+        return Err(invalid("export interval requires from < to"));
+    }
     let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
     let directory = destination
         .parent()
@@ -48,6 +61,15 @@ pub fn export_y4m(source: &Path, destination: &Path) -> Result<u64> {
         let (start, end, scale) = reader
             .frame_interval()
             .ok_or_else(|| invalid("missing frame timing"))?;
+        if let Some((from, to)) = interval {
+            let stamp = product(start, 1_000_000_000)?;
+            if stamp >= product(to.as_nanos(), u128::from(scale))? {
+                break;
+            }
+            if stamp < product(from.as_nanos(), u128::from(scale))? {
+                continue;
+            }
+        }
         let duration = end
             .checked_sub(start)
             .filter(|n| *n > 0)

@@ -208,3 +208,38 @@ fn full_range_colour_agrees_between_direct_and_raw_readers() {
         );
     }
 }
+
+#[test]
+fn interval_export_preserves_main10_pixels_and_half_open_boundaries() {
+    let dir = directory();
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/hevc/main10-ipb.mp4");
+    let output = dir.0.join("interval.y4m");
+    let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "export-y4m"])
+        .arg(&source).arg(&output)
+        .args(["--from", "0.1", "--to", "0.2"])
+        .output().unwrap();
+    assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
+    assert!(String::from_utf8_lossy(&run.stdout).contains("\"video_frames\":3"));
+    let bytes = std::fs::read(&output).unwrap();
+    let end = bytes.iter().position(|b| *b == b'\n').unwrap() + 1;
+    assert!(std::str::from_utf8(&bytes[..end]).unwrap().contains("C420p10"));
+    let oracle = include_bytes!("fixtures/hevc/main10-ipb.yuv");
+    let size = oracle.len() / 17;
+    let expected: Vec<u8> = oracle.chunks_exact(size).skip(3).take(3)
+        .flat_map(|frame| b"FRAME\n".iter().chain(frame).copied()).collect();
+    assert_eq!(&bytes[end..], expected);
+}
+
+#[test]
+fn empty_or_invalid_interval_does_not_publish_output() {
+    use std::time::Duration;
+    let dir = directory();
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/hevc/main10-ipb.mp4");
+    let output = dir.0.join("empty.y4m");
+    for (from, to) in [(2, 3), (1, 1), (2, 1)] {
+        assert!(fvid::native_export::export_y4m_interval(&source, &output,
+            Some((Duration::from_secs(from), Duration::from_secs(to)))).is_err());
+        assert_eq!(std::fs::read_dir(&dir.0).unwrap().count(), 0);
+    }
+}
