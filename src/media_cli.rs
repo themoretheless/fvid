@@ -5,7 +5,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.first().map(String::as_str) == Some("decode-audio") && args.len() >= 3
         && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("f32le" | "wav"))
         && args[3..].iter().all(|arg| !arg.starts_with('-') || matches!(arg.as_str(), "--from" | "--to" | "--quiet"))
-        && native_adts_input(std::path::Path::new(&args[1]))?
+        && native_aac_input(std::path::Path::new(&args[1]))?
     {
         let mut parse_args = vec!["decode".to_owned(), args[1].clone()];
         parse_args.extend_from_slice(&args[3..]);
@@ -62,11 +62,18 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         Err("this media operation still requires cargo build --release --features media and FFmpeg development libraries; plain media decode INPUT is available without them".into())
     }
 }
-fn native_adts_input(path: &std::path::Path) -> std::io::Result<bool> {
+fn native_aac_input(path: &std::path::Path) -> std::io::Result<bool> {
     use std::io::Read;
     let mut file = std::fs::File::open(path)?;
-    let mut prefix = [0; 7];
+    let mut prefix = [0; 8];
     match file.read_exact(&mut prefix) {
+        Ok(()) if &prefix[4..8] == b"ftyp" => {
+            use std::io::{Seek, SeekFrom};
+            file.seek(SeekFrom::Start(0))?;
+            let reader = fvid::container::mp4::Mp4Reader::open(file, Default::default())
+                .map_err(std::io::Error::other)?;
+            Ok(reader.tracks().iter().any(|track| track.handler == *b"soun" && track.codec == *b"mp4a"))
+        }
         Ok(()) => Ok(fvid::container::adts::header(&prefix).is_some()),
         Err(error) if error.kind() == std::io::ErrorKind::UnexpectedEof => Ok(false),
         Err(error) => Err(error),

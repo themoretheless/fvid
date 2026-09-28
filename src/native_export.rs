@@ -224,7 +224,14 @@ pub fn export_aac_pcm_interval(
     }).ok_or_else(|| invalid("cannot reserve PCM output"))??;
     let mut output = BufWriter::new(file);
     if wav { output.write_all(&[0; 80])?; }
-    let stats = crate::native_media::decode_aac_pcm_interval(&data, &mut output, &limits, interval)?;
+    let stats = if data.get(4..8) == Some(b"ftyp") {
+        if interval.is_some() {
+            return Err(invalid("MP4 AAC user intervals are not implemented"));
+        }
+        crate::native_media::decode_mp4_aac_pcm(&data, &mut output)?
+    } else {
+        crate::native_media::decode_aac_pcm_interval(&data, &mut output, &limits, interval)?
+    };
     if wav {
         let header = float_wav_header(&stats)?;
         output.seek(SeekFrom::Start(0))?;

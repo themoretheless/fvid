@@ -130,3 +130,19 @@ fn interval_pcm_equals_exact_slice_including_decoder_preroll() {
         assert!(out.is_empty());
     }
 }
+
+#[test]
+fn mp4_aac_edit_removes_priming_and_encoder_tail() {
+    let source = include_bytes!("fixtures/audio/aac-native-edit.m4a");
+    let mut pcm = Vec::new();
+    let stats = fvid::native_media::decode_mp4_aac_pcm(source, &mut pcm).unwrap();
+    assert_eq!((stats.sample_rate, stats.channels, stats.sample_frames), (44100, 1, 5645));
+    let oracle = include_bytes!("fixtures/audio/aac-native-edit-reference.f32le");
+    assert!(oracle.len() >= pcm.len());
+    let mut peak = 0.0f32;
+    for (a, b) in pcm.chunks_exact(4).zip(oracle.chunks_exact(4)) {
+        peak = peak.max((f32::from_le_bytes(a.try_into().unwrap())
+            - f32::from_le_bytes(b.try_into().unwrap())).abs());
+    }
+    assert!(peak < 1e-6, "peak error {peak}");
+}

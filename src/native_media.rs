@@ -171,3 +171,69 @@ pub fn decode_aac_pcm_interval(
     if stats.sample_frames == 0 { return Err(invalid("audio interval contains no samples")); }
     Ok(stats)
 }
+
+/// Decode a single AAC MP4 track with its priming/tail edit applied.
+/// Currently accepts the standard sample-rate track clock and a single media
+/// edit. Multi-segment edits require a timeline scheduler and are rejected.
+pub fn decode_mp4_aac_pcm(
+    data: &[u8],
+    output: &mut impl std::io::Write,
+) -> Result<AudioDecodeStats> {
+    use crate::container::mp4::{Limits, Mp4Reader};
+    let mut reader = Mp4Reader::open(std::io::Cursor::new(data), Limits::default())?;
+    let indices: Vec<_> = reader.tracks().iter().enumerate()
+        .filter(|(_, track)| track.handler == *b"soun").map(|(index, _)| index).collect();
+    if indices.len() != 1 { return Err(invalid("native AAC export requires exactly one MP4 audio track")); }
+    let index = indices[0];
+    let track = reader.tracks()[index].clone();
+    if track.codec != *b"mp4a" { return Err(invalid("MP4 audio track is not AAC")); }
+    let asc = crate::codec::config::aac_specific_config(&track.configuration)?;
+    let mut decoder = crate::codec::aac_native::NativeAacDecoder::new(asc)?;
+    let rate = decoder.sample_rate();
+    let channels = u16::from(decoder.channels());
+    if track.timescale != rate || track.sample_rate != rate || track.channels != channels {
+        return Err(invalid("MP4 AAC export requires matching sample-rate clock and geometry"));
+    }
+    let (from, to) = match track.edits.as_slice() {
+        [] => (0, track.duration),
+        [edit] if edit.media_time >= 0 && reader.movie_timescale() != 0 => {
+            let start = edit.media_time as u64;
+            let length = (u128::from(edit.duration) * u128::from(rate))
+                .div_ceil(u128::from(reader.movie_timescale()));
+            let length = u64::try_from(length).map_err(|_| invalid("AAC edit duration overflow"))?;
+            (start, start.checked_add(length).ok_or_else(|| invalid("AAC edit endpoint overflow"))?)
+        }
+        _ => return Err(invalid("MP4 AAC multi-segment or empty edits are not implemented")),
+    };
+    let mut stats = AudioDecodeStats { sample_frames: 0, decoded_frames: 0, sample_rate: rate, channels };
+    let mut packet = Vec::new();
+    let mut expected = None;
+    for sample_index in 0..track.samples.len() {
+        let sample = track.samples.get(sample_index).ok_or_else(|| invalid("missing AAC sample"))?;
+        let start = u64::try_from(sample.pts).map_err(|_| invalid("negative AAC timestamp"))?;
+        if expected.is_some_and(|value| value != start) {
+            return Err(invalid("non-contiguous MP4 AAC timeline"));
+        }
+        if start >= to { break; }
+        reader.read_packet(index, sample_index, &mut packet)?;
+        let samples = decoder.decode(&packet)?;
+        let frames = (samples.len() / usize::from(channels)) as u64;
+        if sample.duration == 0 || u64::from(sample.duration) > frames {
+            return Err(invalid("MP4 AAC packet duration disagrees with decoded samples"));
+        }
+        // A short final sample duration explicitly excludes encoder padding.
+        if u64::from(sample.duration) < frames && sample_index + 1 != track.samples.len() {
+            return Err(invalid("short interior MP4 AAC packet"));
+        }
+        expected = Some(start.checked_add(frames).ok_or_else(|| invalid("AAC timestamp overflow"))?);
+        let first = from.saturating_sub(start).min(u64::from(sample.duration)) as usize;
+        let last = to.saturating_sub(start).min(u64::from(sample.duration)) as usize;
+        for value in &samples[first * usize::from(channels)..last.max(first) * usize::from(channels)] {
+            output.write_all(&value.to_le_bytes())?;
+        }
+        stats.sample_frames += last.saturating_sub(first) as u64;
+        stats.decoded_frames += 1;
+    }
+    if stats.sample_frames == 0 { return Err(invalid("MP4 AAC edit contains no samples")); }
+    Ok(stats)
+}
