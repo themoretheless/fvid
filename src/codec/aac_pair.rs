@@ -284,6 +284,7 @@ mod tests {
             scales: vec![vec![BandScale::Spectral(100); 2]; 2],
             quantized: vec![value; 64],
             pulse: None,
+            tns: None,
         };
         let mut pair = ChannelPair {
             explicit_mask: true,
@@ -353,6 +354,7 @@ mod tests {
             scales: vec![vec![BandScale::Noise(energy)]],
             quantized: vec![0; 4],
             pulse: None,
+            tns: None,
         };
         let mut pair = ChannelPair {
             left: channel(0),

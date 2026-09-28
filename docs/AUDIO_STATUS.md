@@ -395,3 +395,10 @@ filtering within clipped band intervals. Tests verify coefficient resolution,
 zero-order/short-window syntax, transactional parsing, band clipping and exact
 first-order impulse responses in both directions. Sample-rate TNS limits and
 channel integration remain pending, so packet decoding still rejects TNS.
+
+TNS is now parsed by `ChannelData` and applied by `NativeAacDecoder` after
+stereo reconstruction, before synthesis, using rate-specific long/short band
+limits. The owned AAC suite passed (52 tests before the additional packet test).
+An active-TNS synthetic mono packet produces exactly the independently filtered
+and synthesized PCM; mono/stereo saved-oracle tests still pass. Real-file TNS
+coverage, 960-sample bands, multichannel and player replacement remain pending.

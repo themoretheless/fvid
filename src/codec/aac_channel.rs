@@ -18,6 +18,7 @@ pub struct ChannelData {
     /// Group/band/window order, with special-band placeholders.
     pub quantized: Vec<i16>,
     pub pulse: Option<PulseData>,
+    pub tns: Option<super::aac_tns::TnsData>,
 }
 impl ChannelData {
     /// Reconstruct ordinary spectral bands into per-window order. Special
@@ -132,6 +133,19 @@ impl ChannelData {
         Ok(ordered)
     }
 
+    /// Apply TNS after stereo tools, immediately before window synthesis.
+    pub fn apply_tns(&self, config: &AacConfig, spectrum: Vec<f32>) -> Result<Vec<f32>> {
+        if let Some(tns) = &self.tns {
+            let tables = BandTables::for_config(config)?;
+            let short = self.info.sequence == WindowSequence::EightShort;
+            let offsets = if short { tables.short } else { tables.long };
+            let limit =
+                BandTables::tns_limit(config.sample_rate, short).min(self.info.max_sfb as usize);
+            tns.filter(&spectrum, offsets, limit)
+        } else {
+            Ok(spectrum)
+        }
+    }
     /// Starts at global_gain, after the element tag. Transactional on failure.
     pub fn read(bits: &mut BitReader<'_>, config: &AacConfig) -> Result<Self> {
         Self::read_common(bits, config, None)
@@ -155,9 +169,11 @@ impl ChannelData {
         } else {
             None
         };
-        if cursor.bit()? {
-            return Err(unsupported("owned AAC TNS parsing is not implemented"));
-        }
+        let tns = if cursor.bit()? {
+            Some(super::aac_tns::TnsData::read(&mut cursor, info.sequence)?)
+        } else {
+            None
+        };
         if cursor.bit()? {
             return Err(unsupported("owned AAC gain control is not implemented"));
         }
@@ -180,6 +196,7 @@ impl ChannelData {
             scales,
             quantized,
             pulse,
+            tns,
         })
     }
 }
@@ -271,6 +288,7 @@ mod tests {
             ],
             quantized: [vec![8; 12], vec![-8; 12], vec![8; 20], vec![-8; 20]].concat(),
             pulse: None,
+            tns: None,
         };
         let spectrum = channel.ordinary_spectrum(&config).unwrap();
         for window in 0..8 {
@@ -310,6 +328,7 @@ mod tests {
             scales: vec![vec![BandScale::Noise(0), BandScale::Noise(4)]],
             quantized: vec![0; 64],
             pulse: None,
+            tns: None,
         };
         let mut noise = crate::codec::aac_noise::NoiseState::default();
         let spectrum = channel.spectrum_with_noise(&config, &mut noise).unwrap();
@@ -331,7 +350,7 @@ mod tests {
     #[test]
     fn unsupported_tools_do_not_consume_channel_header() {
         let config = AacConfig::parse(&[0x11, 0x90]).unwrap();
-        for (tns, gain) in [(1, 0), (0, 1)] {
+        for (tns, gain) in [(0, 1)] {
             let (data, _) = pack(&[
                 (100, 8),
                 (0, 1),

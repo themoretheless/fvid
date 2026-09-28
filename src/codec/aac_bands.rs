@@ -32,6 +32,19 @@ impl BandTables {
         };
         Ok(Self { long, short })
     }
+    pub fn tns_limit(rate: u32, short: bool) -> usize {
+        let (long, small) = match rate {
+            75132.. => (31, 9),
+            55426..=75131 => (34, 10),
+            46009..=55425 => (40, 14),
+            37566..=46008 => (42, 14),
+            27713..=37565 => (51, 14),
+            18783..=27712 => (46, 14),
+            9391..=18782 => (42, 14),
+            _ => (39, 14),
+        };
+        if short { small } else { long }
+    }
     pub fn read_ics(&self, bits: &mut BitReader<'_>) -> Result<IcsInfo> {
         IcsInfo::read(
             bits,

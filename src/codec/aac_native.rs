@@ -56,6 +56,7 @@ impl NativeAacDecoder {
                     bits.read(4)?; // element tag
                     let channel = ChannelData::read(&mut bits, &self.config)?;
                     let spectrum = channel.spectrum_with_noise(&self.config, &mut noise)?;
+                    let spectrum = channel.apply_tns(&self.config, spectrum)?;
                     channels.push((channel.info, spectrum));
                 }
                 1 => {
@@ -65,6 +66,8 @@ impl NativeAacDecoder {
                     bits.read(4)?;
                     let pair = ChannelPair::read(&mut bits, &self.config)?;
                     let (left, right) = pair.spectra_with_noise(&self.config, &mut noise)?;
+                    let left = pair.left.apply_tns(&self.config, left)?;
+                    let right = pair.right.apply_tns(&self.config, right)?;
                     channels.push((pair.left.info, left));
                     channels.push((pair.right.info, right));
                 }
@@ -189,6 +192,69 @@ mod tests {
         let rms = (squared / samples.len() as f64).sqrt();
         assert!(rms < 0.00004, "RMS {rms}");
         assert!(peak < 0.0003, "peak {peak}");
+    }
+    #[test]
+    fn packet_tns_filters_spectrum_before_synthesis() {
+        use crate::codec::aac_huffman_tables::*;
+        let fields = [
+            (0u32, 3u8),
+            (0, 4),
+            (100, 8),
+            (0, 1),
+            (0, 2),
+            (0, 1),
+            (1, 6),
+            (0, 1),
+            (1, 4),
+            (1, 5),
+            (SCF_CODEBOOK_CODES[60], SCF_CODEBOOK_LENS[60]),
+            (0, 1),
+            (1, 1), // pulse absent, TNS present
+            (1, 2),
+            (0, 1),
+            (49, 6),
+            (1, 5),
+            (0, 1),
+            (0, 1),
+            (1, 3),
+            (0, 1),
+            (SPECTRUM_CODEBOOK1_CODES[80], SPECTRUM_CODEBOOK1_LENS[80]),
+            (7, 3),
+        ];
+        let mut packet = Vec::new();
+        let mut n = 0;
+        for (v, w) in fields {
+            for b in (0..w).rev() {
+                if n % 8 == 0 {
+                    packet.push(0);
+                }
+                *packet.last_mut().unwrap() |= ((v >> b & 1) as u8) << (7 - n % 8);
+                n += 1;
+            }
+        }
+        let mut decoder = NativeAacDecoder::new(&[0x11, 0x88]).unwrap();
+        let actual = decoder.decode(&packet).unwrap();
+        let coefficient = (std::f64::consts::FRAC_PI_2 / 3.5).sin();
+        let mut spectrum = vec![0.0; 1024];
+        let mut previous = 0.0;
+        for v in &mut spectrum[..4] {
+            previous = 1.0 - coefficient * previous;
+            *v = previous as f32;
+        }
+        let mut expected = vec![0.0; 1024];
+        LongSineSynthesis::new(1024)
+            .unwrap()
+            .synthesize_pcm(
+                crate::codec::aac_synthesis::WindowSequence::OnlyLong,
+                crate::codec::aac_synthesis::WindowShape::Sine,
+                &spectrum,
+                &mut expected,
+            )
+            .unwrap();
+        assert_eq!(
+            actual,
+            expected.iter().map(|&v| v as f32).collect::<Vec<_>>()
+        );
     }
     #[test]
     fn bad_packet_does_not_advance_noise_or_overlap() {
