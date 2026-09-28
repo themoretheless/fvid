@@ -1,5 +1,5 @@
 //! Borrowed CPU frame geometry. Creating views never copies pixel payloads.
-use crate::{Plan, Plane};
+use crate::y4m::{Plan, Plane};
 
 /// A transformed frame borrowing both the checked plan and the original storage.
 /// The source cannot be mutated or recycled while a view remains in use.
