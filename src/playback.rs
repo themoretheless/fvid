@@ -14,6 +14,7 @@ pub struct Y4mReader<R> {
     rgb: Vec<u8>,
     period: Duration,
     rate: (u32, u32),
+    pixel_aspect: (u32, u32),
     first_frame: u64,
     frames_read: u64,
 }
@@ -31,7 +32,23 @@ impl<R: BufRead + Seek> Y4mReader<R> {
         }
         let header = Header::parse(&marker)?;
         let mut rate = None;
+        let mut pixel_aspect = None;
         for token in &header.tokens {
+            if let Some(value) = token.strip_prefix('A') {
+                if pixel_aspect.is_some() {
+                    return Err(invalid("duplicate pixel aspect"));
+                }
+                let (num, den) = value
+                    .split_once(':')
+                    .ok_or_else(|| invalid("invalid pixel aspect"))?;
+                let num: u32 = num.parse().map_err(|_| invalid("invalid pixel aspect"))?;
+                let den: u32 = den.parse().map_err(|_| invalid("invalid pixel aspect"))?;
+                pixel_aspect = Some(match (num, den) {
+                    (0, 0) => (1, 1),
+                    (0, _) | (_, 0) => return Err(invalid("invalid pixel aspect")),
+                    pair => pair,
+                });
+            }
             if let Some(value) = token.strip_prefix('F') {
                 if rate.is_some() {
                     return Err(invalid("duplicate frame rate"));
@@ -83,11 +100,15 @@ impl<R: BufRead + Seek> Y4mReader<R> {
             rgb: buffer(rgb_len)?,
             period,
             rate,
+            pixel_aspect: pixel_aspect.unwrap_or((1, 1)),
             first_frame,
             frames_read: 0,
         })
     }
 
+    pub fn pixel_aspect(&self) -> (u32, u32) {
+        self.pixel_aspect
+    }
     pub fn dimensions(&self) -> [usize; 2] {
         [self.header.width, self.header.height]
     }

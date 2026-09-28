@@ -242,7 +242,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
     /// it. A stream that states nothing is drawn with square pixels.
     pub fn pixel_aspect(&self) -> (u32, u32) {
         match self {
-            Self::Y4m(_) => (1, 1),
+            Self::Y4m(reader) => reader.pixel_aspect(),
             Self::Webm(r) => r.pixel_aspect(),
             Self::Avc { source, .. } => source.track().pixel_aspect,
         }
