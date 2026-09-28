@@ -14,6 +14,7 @@ pub struct CameraSource {
     source: Source,
     latest: LatestFrame,
     failed: bool,
+    duration_ns: u64,
 }
 #[repr(C)]
 #[derive(Default, Clone, Copy)]
@@ -44,11 +45,16 @@ pub unsafe extern "C" fn fvid_camera_open(
         }
         let [width, height] = reader.dimensions();
         let latest = LatestFrame::new(width, height, 64 << 20).ok()?;
+        let duration_ns = reader
+            .duration()
+            .and_then(|d| u64::try_from(d.as_nanos()).ok())
+            .unwrap_or(0);
         reader.rewind().ok()?;
         Some(Box::into_raw(Box::new(CameraSource {
             source: NativeCameraSource::new(reader),
             latest,
             failed: false,
+            duration_ns,
         })))
     }))
     .ok()
@@ -224,5 +230,17 @@ pub unsafe extern "C" fn fvid_camera_clock_control(
 pub unsafe extern "C" fn fvid_camera_clock_close(clock: *mut fvid::virtual_camera::CameraClock) {
     if !clock.is_null() {
         drop(unsafe { Box::from_raw(clock) });
+    }
+}
+
+/// Duration in nanoseconds, or zero when unknown. Does not scan the entire file.
+/// # Safety
+/// Handle must be null or live; all operations on the handle must be serialized.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn fvid_camera_duration(handle: *const CameraSource) -> u64 {
+    if handle.is_null() {
+        0
+    } else {
+        unsafe { &*handle }.duration_ns
     }
 }

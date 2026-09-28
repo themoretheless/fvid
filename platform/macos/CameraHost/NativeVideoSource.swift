@@ -6,6 +6,7 @@ final class NativeVideoSource {
     private let handle: OpaquePointer
     let width: Int
     let height: Int
+    let durationNS: UInt64
     private var scaled = Data()
     private var pixels: Data
     init(url: URL, budget: Int = 256 << 20) throws {
@@ -21,6 +22,7 @@ final class NativeVideoSource {
             fvid_camera_close(opened)
             throw NativeVideoError.invalidDimensions
         }
+        durationNS = fvid_camera_duration(opened)
         handle = opened
         width = Int(size.width); height = Int(size.height)
         pixels = Data(count: width * height * 4)

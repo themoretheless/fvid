@@ -214,3 +214,19 @@ The separate `fvid-media` crate currently links FFmpeg through build.rs. The
 camera bridge disables FVid default features and does not depend on that crate.
 Removing FFmpeg from `media` remains outstanding; a camera-only dependency
 check must not be interpreted as proving that wider requirement.
+
+## Repeat control (2026-09-29)
+
+The host now exposes Repeat video. The source bridge reports the native
+container duration in nanoseconds; the host passes it to Rust CameraClock.
+Looping rebases only file position, preserving increasing camera timestamps.
+The preference survives opening another file. If duration is unavailable,
+the host reports that repeat cannot be enabled for that file and holds EOF.
+It does not scan an entire unknown-duration file during opening.
+
+CameraRepeatTests.swift uses an actual moving MP4 through Swift/C/Rust, checks
+that a middle frame differs, that the loop returns exactly the first frame,
+and that disabling repeat holds the last frame. The test and unsigned app
+build pass. The live host exposes repeat/pause/restart; activation remains
+unverified, and the unsigned host reports the missing system-extension-install
+entitlement. No installed cross-process camera delivery is claimed.

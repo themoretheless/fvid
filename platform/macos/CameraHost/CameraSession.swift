@@ -49,6 +49,7 @@ final class CameraSession {
     private var timer: DispatchSourceTimer?
     private var clock: OpaquePointer?
     private var paused = false
+    private var looping = false
     var onStatus: ((String) -> Void)?
     func start(url: URL) {
         queue.async { [weak self] in
@@ -64,11 +65,16 @@ final class CameraSession {
                 self.clock = fvid_camera_clock_open(try Self.hostTime())
                 guard self.clock != nil else { throw CameraError.invalidFrame }
                 self.paused = false
+                if self.looping && source.durationNS > 0 {
+                    guard fvid_camera_clock_control(self.clock, 2, source.durationNS, try Self.hostTime()) == 1 else { throw CameraError.invalidFrame }
+                }
                 let timer = DispatchSource.makeTimerSource(queue: self.queue)
                 timer.schedule(deadline: .now(), repeating: .nanoseconds(1_000_000_000 / 30))
                 timer.setEventHandler { [weak self] in self?.tick() }
                 self.timer = timer; timer.resume()
-                self.report("Sending \(url.lastPathComponent) to FVid Camera. Select FVid Camera in your video application.")
+                if self.looping && source.durationNS == 0 {
+                    self.report("Video duration is unknown; holding the final frame instead of looping.")
+                } else { self.report("Sending \(url.lastPathComponent) to FVid Camera. Select FVid Camera in your video application.") }
             } catch {
                 try? self.stopOnQueue()
                 self.report("Cannot start camera video: \(error)")
@@ -99,6 +105,19 @@ final class CameraSession {
                 guard fvid_camera_clock_control(clock, 0, 0, try Self.hostTime()) == 1 else { throw CameraError.invalidFrame }
                 self.report("Camera video restarted.")
             } catch { self.report("Cannot restart camera video: \(error)") }
+        }
+    }
+    func setLooping(_ enabled: Bool) {
+        queue.async { [weak self] in
+            guard let self else { return }
+            self.looping = enabled
+            guard let clock = self.clock, let source = self.source else { return }
+            do {
+                guard fvid_camera_clock_control(clock, 2, enabled ? source.durationNS : 0, try Self.hostTime()) == 1 else { throw CameraError.invalidFrame }
+                self.report(enabled && source.durationNS == 0
+                    ? "Video duration is unknown; holding the final frame instead of looping."
+                    : (enabled ? "Video repeat enabled." : "Video repeat disabled; final frame will be held."))
+            } catch { self.report("Cannot change video repeat: \(error)") }
         }
     }
     func shutdown() { queue.sync { try? stopOnQueue() } }

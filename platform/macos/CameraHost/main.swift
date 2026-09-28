@@ -30,6 +30,9 @@ final class CameraHost: NSObject, NSApplicationDelegate, OSSystemExtensionReques
         let restart = NSButton(title: "Restart", target: self, action: #selector(restartVideo))
         restart.frame = NSRect(x: 358, y: 60, width: 150, height: 32)
         window.contentView?.addSubview(pause); window.contentView?.addSubview(restart)
+        let repeatVideo = NSButton(checkboxWithTitle: "Repeat video", target: self, action: #selector(changeRepeat(_:)))
+        repeatVideo.frame = NSRect(x: 24, y: 60, width: 160, height: 32)
+        window.contentView?.addSubview(repeatVideo)
         session.onStatus = { [weak self] text in self?.status.stringValue = text }
         window.center(); window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
@@ -44,6 +47,7 @@ final class CameraHost: NSObject, NSApplicationDelegate, OSSystemExtensionReques
             self?.session.start(url: url)
         }
     }
+    @objc private func changeRepeat(_ sender: NSButton) { session.setLooping(sender.state == .on) }
     @objc private func pauseVideo() { session.togglePause() }
     @objc private func restartVideo() { session.restart() }
     @objc private func stopVideo() { session.stop() }
