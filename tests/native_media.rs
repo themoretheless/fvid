@@ -64,3 +64,66 @@ fn raw_main10_preserves_every_decoded_sample() {
         include_bytes!("fixtures/hevc/main10-ipb.yuv")
     );
 }
+
+#[test]
+fn interval_counts_presentation_frames_after_reference_preroll() {
+    use std::time::Duration;
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/hevc/main10-ipb.mp4");
+    let range = Some((Duration::from_millis(40), Duration::from_millis(120)));
+    let stats = fvid::native_media::decode_video_interval(&path, range).unwrap();
+    assert_eq!(stats.video_frames, 2);
+    let fractional = Some((
+        Duration::from_nanos(33_333_333),
+        Duration::from_nanos(33_333_334),
+    ));
+    assert_eq!(
+        fvid::native_media::decode_video_interval(&path, fractional)
+            .unwrap()
+            .video_frames,
+        1
+    );
+    assert!(
+        fvid::native_media::decode_video_interval(
+            &path,
+            Some((Duration::from_secs(1), Duration::ZERO))
+        )
+        .is_err()
+    );
+}
+
+#[cfg(not(feature = "videotoolbox"))]
+#[test]
+fn raw_main10_seek_matches_sequential_ten_bit_samples() {
+    use fvid::playback_native::{NativeReader, RawFrame};
+    use std::{io::Cursor, time::Duration};
+    let mut reader = NativeReader::without_memory_limit(Cursor::new(include_bytes!(
+        "fixtures/hevc/main10-ipb.mp4"
+    )))
+    .unwrap();
+    let mut expected = Vec::new();
+    while let Some(frame) = reader.read_frame_raw().unwrap() {
+        let RawFrame::Avc { picture, .. } = frame else {
+            panic!("lost sample depth");
+        };
+        let mut bytes = Vec::new();
+        picture.write_planar(&mut bytes).unwrap();
+        expected.push((reader.frame_interval().unwrap(), bytes));
+    }
+    for index in [10, 0, 16, 3] {
+        let (start, end, scale) = expected[index].0;
+        let target =
+            Duration::from_nanos(((start + end) * 1_000_000_000 / (2 * u128::from(scale))) as u64);
+        let raw = reader.seek_raw(target).unwrap().unwrap();
+        let RawFrame::Avc { picture, .. } = raw else {
+            panic!("seek lost sample depth");
+        };
+        assert_eq!(picture.bit_depth, 10);
+        let mut bytes = Vec::new();
+        picture.write_planar(&mut bytes).unwrap();
+        assert_eq!(reader.frame_interval(), Some(expected[index].0));
+        assert!(
+            bytes == expected[index].1,
+            "sample mismatch at frame {index}"
+        );
+    }
+}

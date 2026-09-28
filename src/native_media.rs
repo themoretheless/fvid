@@ -2,7 +2,7 @@
 //! This module is available without the legacy `media` feature or FFmpeg.
 use crate::playback_native::{NativeReader, RawFrame};
 use crate::{Result, invalid};
-use std::{fs::File, io::BufReader, path::Path};
+use std::{fs::File, io::BufReader, path::Path, time::Duration};
 
 #[derive(Debug)]
 pub struct DecodeStats {
@@ -18,6 +18,19 @@ pub struct DecodeStats {
 /// Errors are propagated, never retried through a foreign decoder. When built
 /// with VideoToolbox, the backend name explicitly identifies its use.
 pub fn decode_video(source: &Path) -> Result<DecodeStats> {
+    decode_video_interval(source, None)
+}
+
+/// Decode frames whose presentation start belongs to the half-open interval.
+/// Reference frames before the interval are decoded but not counted. Timing
+/// comparisons retain source-clock precision; no rounded frame rate is used.
+pub fn decode_video_interval(
+    source: &Path,
+    interval: Option<(Duration, Duration)>,
+) -> Result<DecodeStats> {
+    if interval.is_some_and(|(from, to)| from >= to) {
+        return Err(invalid("decode interval requires from < to"));
+    }
     let mut reader = NativeReader::without_memory_limit(BufReader::new(File::open(source)?))?;
     let mut stats = DecodeStats {
         backend: if reader.hardware_accelerated() {
@@ -32,6 +45,28 @@ pub fn decode_video(source: &Path) -> Result<DecodeStats> {
         decode_errors: 0,
     };
     while let Some(frame) = reader.read_frame_raw()? {
+        if let Some((from, to)) = interval {
+            let (start, _, scale) = reader
+                .frame_interval()
+                .ok_or_else(|| invalid("missing frame timestamp"))?;
+            let stamp = start
+                .checked_mul(1_000_000_000)
+                .ok_or_else(|| invalid("frame timestamp overflow"))?;
+            let from = from
+                .as_nanos()
+                .checked_mul(u128::from(scale))
+                .ok_or_else(|| invalid("interval overflow"))?;
+            let to = to
+                .as_nanos()
+                .checked_mul(u128::from(scale))
+                .ok_or_else(|| invalid("interval overflow"))?;
+            if stamp >= to {
+                break;
+            }
+            if stamp < from {
+                continue;
+            }
+        }
         let [width, height] = reader.dimensions();
         stats.width = u32::try_from(width).map_err(|_| invalid("video width overflow"))?;
         stats.height = u32::try_from(height).map_err(|_| invalid("video height overflow"))?;

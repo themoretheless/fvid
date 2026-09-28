@@ -301,3 +301,13 @@ and verify all 25 frames and 320x240 geometry of the fragmented AVC fixture.
 On macOS, `otool -L` of this no-default-features binary lists only libSystem,
 with no FFmpeg libraries. This linkage result applies to that configuration;
 the full `media` feature still requires migration.
+
+`native_media::decode_video_interval` and `media::decode_video_interval` accept
+an optional half-open pair of `Duration` values. A frame is counted when its
+presentation start lies in the interval; earlier reference frames are decoded
+for prediction but discarded. Comparisons use checked integer products against
+the source timescale rather than rounded nanosecond timestamps. Invalid or
+empty ranges return errors. This API currently decodes pre-roll sequentially.
+Tests cover an interval around a fractional 1/30-second timestamp and Main10
+raw-frame seeks against the exact sequential samples. CLI `--from`/`--to` still
+use the legacy transform route until that parser is migrated.
