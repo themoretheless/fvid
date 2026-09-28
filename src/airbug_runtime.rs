@@ -46,5 +46,5 @@ pub fn install() -> Result<Runtime, String> {
 
 /// Forward a surfaced CLI/library error to the hub (no-op if init failed earlier).
 pub fn capture_error(err: &dyn std::error::Error) {
-    let _ = airbug_err::capture_error(err);
+    let _ = airbug_err::capture_error(&err);
 }
