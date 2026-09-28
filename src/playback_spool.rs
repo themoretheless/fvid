@@ -164,6 +164,13 @@ struct Shared {
     /// much room the copier has filled, this says how much of it is still
     /// unbitten.
     slack: Arc<AtomicU64>,
+    /// Where the window sits in the item, as the two edges of `[base, end)`, so
+    /// a watcher can draw the local copy where it belongs on the file rather
+    /// than as a pile of bytes. The pair is published together under the
+    /// window's lock but read one at a time, which can show an edge a block
+    /// stale for a frame; it can never show a byte the spool does not have.
+    from: Arc<AtomicU64>,
+    to: Arc<AtomicU64>,
     /// The copier has stopped: end of file, an unmet read, or shutdown.
     finished: Arc<AtomicBool>,
     /// The offset the copier has a block in flight for, or `u64::MAX` while it
@@ -203,6 +210,8 @@ impl Shared {
             lead_ahead(window.read_at, window.base, window.end),
             Ordering::Release,
         );
+        self.from.store(window.base, Ordering::Release);
+        self.to.store(window.end, Ordering::Release);
     }
 
     /// Records the reader's position and wakes the copier: the reader has just
@@ -229,6 +238,8 @@ impl Shared {
 pub struct SpoolHandle {
     held: Arc<AtomicU64>,
     slack: Arc<AtomicU64>,
+    from: Arc<AtomicU64>,
+    to: Arc<AtomicU64>,
     finished: Arc<AtomicBool>,
 }
 
@@ -245,6 +256,17 @@ impl SpoolHandle {
     /// copier that has fallen behind the playhead shows up here first.
     pub fn ahead(&self) -> u64 {
         self.slack.load(Ordering::Acquire)
+    }
+
+    /// Where the local copy sits in the item, as `[from, to)` offsets: the
+    /// window has a place as well as a size, because it follows the reader and
+    /// leaves the bytes behind it on the mount again. A bar drawn from this says
+    /// which stretch of the file answers without asking the source.
+    pub fn covered(&self) -> (u64, u64) {
+        (
+            self.from.load(Ordering::Acquire),
+            self.to.load(Ordering::Acquire),
+        )
     }
 
     /// Whether the copier has stopped, so a wait for a lead this source cannot
@@ -306,6 +328,8 @@ impl Spool {
         let shared = Arc::new(Shared {
             held: Arc::new(AtomicU64::new(0)),
             slack: Arc::new(AtomicU64::new(0)),
+            from: Arc::new(AtomicU64::new(0)),
+            to: Arc::new(AtomicU64::new(0)),
             finished: Arc::new(AtomicBool::new(false)),
             claim: AtomicU64::new(u64::MAX),
             slots,
@@ -350,6 +374,8 @@ impl Spool {
         SpoolHandle {
             held: self.shared.held.clone(),
             slack: self.shared.slack.clone(),
+            from: self.shared.from.clone(),
+            to: self.shared.to.clone(),
             finished: self.shared.finished.clone(),
         }
     }

@@ -919,6 +919,9 @@ const FRAME: Color32 = Color32::from_rgb(0x1a, 0x1a, 0x1d);
 const TEXT: Color32 = Color32::from_rgb(0xee, 0xeb, 0xe4);
 const MUTED: Color32 = Color32::from_rgb(0xa8, 0xa4, 0x9b);
 const DIM: Color32 = Color32::from_rgb(0x7a, 0x77, 0x70);
+/// The part of the item already on local disk, as a faint cut of the played
+/// bar's own colour: the same bytes the picture is made of, held back a step.
+const COVER: Color32 = Color32::from_rgba_premultiplied(242, 107, 29, 38);
 const ACCENT: Color32 = Color32::from_rgb(0xf2, 0x6b, 0x1d);
 const ERROR: Color32 = Color32::from_rgb(0xf0, 0x7a, 0x6a);
 /// The unplayed part of the progress line.
@@ -3360,6 +3363,22 @@ fn spool_text(ahead: u64, bytes: u64, total: Duration) -> String {
     format!("Spool {seconds:.1} s ahead")
 }
 
+/// The local copy of a slow source as the two ends of a share of the item, near
+/// edge first. A window is a stretch of the file rather than a prefix of it -
+/// it follows the reader and hands the bytes behind it back to the mount - so
+/// both edges move, and the line has to show where the copy sits and not just
+/// how much of it there is. An item of no stated size has no share to draw.
+fn covered_span(covered: (u64, u64), total: u64) -> [f32; 2] {
+    if total == 0 {
+        return [0.0, 0.0];
+    }
+    let total = total as f32;
+    [
+        (covered.0 as f32 / total).clamp(0.0, 1.0),
+        (covered.1 as f32 / total).clamp(0.0, 1.0),
+    ]
+}
+
 /// The sound of the open item, named the way a viewer names it. Every
 /// container files the same coding under its own tag — AAC is `mp4a` in MP4,
 /// PCM is `sowt` in QuickTime and `A_PCM/INT/LIT` in Matroska, and Microsoft's
@@ -4834,6 +4853,22 @@ impl eframe::App for Player {
             );
             let round = CornerRadius::same((thick / 2.0) as u8);
             painter.rect_filled(bar, round, TRACK);
+            // What the swap file covers: the stretch of the item that answers
+            // without asking the source, drawn under the pictures already in
+            // hand so the two read as one growing load with the nearer,
+            // brighter part inside the further one.
+            if let (Some(spool), Some(bytes)) = (&self.spool, self.bytes) {
+                let [near, far] = covered_span(spool.covered(), bytes);
+                let left = bar.left() + bar.width() * near;
+                let right = bar.left() + bar.width() * far;
+                if right > left {
+                    painter.rect_filled(
+                        Rect::from_min_max(Pos2::new(left, bar.min.y), Pos2::new(right, bar.max.y)),
+                        CornerRadius::same(2),
+                        COVER,
+                    );
+                }
+            }
             if let (Some(played), Some(loaded)) = (played, loaded) {
                 let from = bar.left() + bar.width() * played;
                 let to = bar.left() + bar.width() * loaded;
@@ -5057,7 +5092,8 @@ mod tests {
         PlayArgs, PlayBounds, Player, Pos2, RATES, Rect, Repeat, SubtitleSource, VOLUME_MAX, Vec2,
         adjust_luma, adjust_rgb, adjust_scalars, advance, aspect_label, aspect_osd, aspect_step,
         bitrate_text, buffer_text, buffered_fraction, byte_size, chapter_ahead, chapter_at,
-        colour_line, container_facts, crop_insets, crop_label, crop_osd, crop_step, cropped_size,
+        colour_line, container_facts, covered_span, crop_insets, crop_label, crop_osd,
+        crop_step, cropped_size,
         cycle_repeat, deal_cycle, delay_step, delayed_clock, display_size, end_clock,
         expand_inputs, file_size, fps_text, grade_text, jump_size, light_line, loop_press,
         loop_rewind, paced_period, parse_clock, parse_play_args, playlist_osd, position_from_digit,
@@ -7623,6 +7659,26 @@ mod tests {
             "Spool 256.0 s ahead"
         );
         assert_eq!(spool_text(0, 0, Duration::ZERO), "Spool 0.0 s ahead");
+    }
+
+    /// The swap on the line is a stretch of the item with two moving ends, not
+    /// a share of it earned: a window in the middle of a file covers the
+    /// middle, and a file with no stated size has no share for it to cover.
+    #[test]
+    fn the_local_copy_is_drawn_where_the_item_keeps_it() {
+        assert_eq!(covered_span((0, 600), 1200), [0.0, 0.5]);
+        assert_eq!(covered_span((600, 900), 1200), [0.5, 0.75]);
+        // Past either end of the item the line has no more room for the copy.
+        assert_eq!(
+            covered_span((1000, 4000), 1200),
+            [1000.0 / 1200.0, 1.0],
+            "the far edge did not stop at the end of the item"
+        );
+        // A window the reader has run past reads as behind it rather than as a
+        // span, which is what the drawing tests for before it paints anything.
+        let behind = covered_span((900, 300), 1200);
+        assert!(behind[0] > behind[1], "{behind:?} read as forwards");
+        assert_eq!(covered_span((0, 10), 0), [0.0, 0.0]);
     }
 
     /// The preroll is a span of picture paid for in bytes, so it needs the
