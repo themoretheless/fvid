@@ -19,7 +19,6 @@ fn decodes_owned_avc_and_hevc_without_media_dependency() {
             assert_eq!(stats.video_frames, 17);
         }
         assert_eq!(stats.decode_errors, 0);
-        #[cfg(not(feature = "videotoolbox"))]
         {
             assert_eq!(stats.backend, "fvid");
             assert_eq!(stats.pixel_format, format);

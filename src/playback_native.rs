@@ -147,7 +147,14 @@ impl<R: BufRead + Seek> NativeReader<R> {
         Self::new(reader, usize::MAX)
     }
 
-    pub fn new(mut reader: R, budget: usize) -> Result<Self> {
+    pub fn new(reader: R, budget: usize) -> Result<Self> {
+        Self::with_hardware(reader, budget, true)
+    }
+    /// Own container/codec path even when platform decoder features are enabled.
+    pub fn software(reader: R, budget: usize) -> Result<Self> {
+        Self::with_hardware(reader, budget, false)
+    }
+    fn with_hardware(mut reader: R, budget: usize, allow_hardware: bool) -> Result<Self> {
         let start = reader.stream_position()?;
         let mut prefix = [0u8; 9];
         let mut length = 0;
@@ -190,7 +197,11 @@ impl<R: BufRead + Seek> NativeReader<R> {
             ));
         }
         let rgb_budget = budget / 4;
-        let source = Mp4VideoReader::open(reader, Limits::default(), budget - rgb_budget)?;
+        let source = if allow_hardware {
+            Mp4VideoReader::open(reader, Limits::default(), budget - rgb_budget)?
+        } else {
+            Mp4VideoReader::open_software(reader, Limits::default(), budget - rgb_budget)?
+        };
         let track = source.track();
         let (media_start, media_end) = playback_window(track, source.movie_timescale())?;
         let rotation = track.rotation;

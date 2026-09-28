@@ -39,7 +39,7 @@ pub unsafe extern "C" fn fvid_camera_open(
             return None;
         }
         let path = std::str::from_utf8(unsafe { std::slice::from_raw_parts(path, length) }).ok()?;
-        let mut reader = NativeReader::new(BufReader::new(File::open(path).ok()?), budget).ok()?;
+        let mut reader = NativeReader::software(BufReader::new(File::open(path).ok()?), budget).ok()?;
         if !reader.read_frame().ok()? {
             return None;
         }

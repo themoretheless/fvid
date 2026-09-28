@@ -96,6 +96,13 @@ pub type Mp4AvcReader<R> = Mp4VideoReader<R>;
 impl<R: Read + Seek> Mp4VideoReader<R> {
     /// Selects the first AVC, HEVC, VP9 or AV1 video track. Use `from_demuxer` to choose explicitly.
     pub fn open(reader: R, limits: Limits, decoder_budget: usize) -> Result<Self> {
+        Self::open_with_hardware(reader, limits, decoder_budget, true)
+    }
+    /// Decode only with FVid codecs, regardless of compiled platform features.
+    pub fn open_software(reader: R, limits: Limits, decoder_budget: usize) -> Result<Self> {
+        Self::open_with_hardware(reader, limits, decoder_budget, false)
+    }
+    fn open_with_hardware(reader: R, limits: Limits, decoder_budget: usize, allow_hardware: bool) -> Result<Self> {
         let demuxer = Mp4Reader::open(reader, limits)?;
         let index = demuxer
             .tracks()
@@ -108,13 +115,19 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     )
             })
             .ok_or_else(|| invalid("MP4 has no supported AVC, HEVC, VP9 or AV1 video track"))?;
-        Self::from_demuxer(demuxer, index, decoder_budget)
+        Self::from_demuxer_with_hardware(demuxer, index, decoder_budget, allow_hardware)
     }
     pub fn from_demuxer(
         demuxer: Mp4Reader<R>,
         index: usize,
         decoder_budget: usize,
     ) -> Result<Self> {
+        Self::from_demuxer_with_hardware(demuxer, index, decoder_budget, true)
+    }
+    fn from_demuxer_with_hardware(
+        demuxer: Mp4Reader<R>, index: usize, decoder_budget: usize, allow_hardware: bool,
+    ) -> Result<Self> {
+        let _ = allow_hardware;
         let track = demuxer
             .tracks()
             .get(index)
@@ -168,7 +181,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             _ => unreachable!(),
         };
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-        let hardware = if std::env::var_os("FVID_SOFTWARE_DECODE").is_some() {
+        let hardware = if !allow_hardware || std::env::var_os("FVID_SOFTWARE_DECODE").is_some() {
             None
         } else {
             open_hardware(

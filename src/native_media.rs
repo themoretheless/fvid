@@ -15,8 +15,8 @@ pub struct DecodeStats {
 }
 
 /// Decode and discard video frames without converting them to RGB.
-/// Errors are propagated, never retried through a foreign decoder. When built
-/// with VideoToolbox, the backend name explicitly identifies its use.
+/// Errors are propagated, never retried through a foreign decoder. Platform
+/// decoder features do not override the owned software codec selection.
 pub fn decode_video(source: &Path) -> Result<DecodeStats> {
     decode_video_interval(source, None)
 }
@@ -31,7 +31,7 @@ pub fn decode_video_interval(
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("decode interval requires from < to"));
     }
-    let mut reader = NativeReader::without_memory_limit(BufReader::new(File::open(source)?))?;
+    let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
     let mut stats = DecodeStats {
         backend: if reader.hardware_accelerated() {
             "videotoolbox"

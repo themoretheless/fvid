@@ -278,8 +278,8 @@ fvid media merge-audio stereo.wav left.m4a right.m4a
 which reads containers and decodes frames through FVid's NativeReader. The
 latter is available without the `media` feature. It discards raw frames without
 RGB conversion, reports the actual backend and decoded pixel format, and
-propagates errors without falling back to FFmpeg. Builds without VideoToolbox
-use the owned software decoders. Native Main10 frames retain their 10-bit planes.
+propagates errors without falling back to FFmpeg. This API explicitly selects the owned software decoders even when
+VideoToolbox is enabled for other playback paths. Native Main10 frames retain their 10-bit planes.
 
 This is one migrated operation, not removal of the full FFmpeg dependency:
 `decode_video_transformed`, the CLI transform route, export and the remaining
@@ -320,3 +320,8 @@ cargo run --offline --locked --no-default-features -- media decode INPUT --from 
 
 Boundary parsing uses integer microseconds, rejects overflow, and never accepts
 NaN or an incomplete pair. Geometry/filter flags still require the legacy path.
+
+Native media and the camera bridge call `NativeReader::software`; codec
+selection is local to that reader and requires no process-wide environment
+change. Regression tests also run with `videotoolbox` enabled and still require
+backend `fvid` and the original Main10 sample format.

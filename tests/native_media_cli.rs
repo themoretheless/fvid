@@ -16,7 +16,6 @@ fn plain_decode_is_available_without_the_media_adapter() {
         String::from_utf8_lossy(&output.stderr)
     );
     let text = String::from_utf8(output.stdout).unwrap();
-    #[cfg(not(feature = "videotoolbox"))]
     assert!(text.contains("\"backend\":\"fvid\""), "{text}");
     assert!(text.contains("\"video_frames\":25"), "{text}");
     assert!(text.contains("\"width\":320"), "{text}");
