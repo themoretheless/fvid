@@ -1,7 +1,7 @@
 use fvid::{
     color::{
-        ColourDescription, DisplayTarget, Grade, HdrMetadata, Interpolation, Log, Lut, Settings,
-        ToneMap, Transfer,
+        ColourDescription, DisplayTarget, Grade, HdrMetadata, Interpolation, Log, Lut, Lut3d,
+        Settings, ToneMap, Transfer,
     },
     playback_native::{NativeReader, planar8_to_rgb},
     playback_thread::{Event, Frame, Pixels, Playback, queue_depth},
@@ -154,7 +154,7 @@ fn paused_seek_discards_old_generation_and_delivers_one_planar_preview() {
             _ => thread::sleep(Duration::from_millis(1)),
         }
     };
-    assert!(matches!(preview.pixels, Pixels::Planar(_)));
+    assert!(matches!(preview.pixels, Pixels::Planar(..)));
     let (start, end, scale) = preview.interval.unwrap();
     assert!(start * 1000 <= 350 * u128::from(scale));
     assert!(end * 1000 > 350 * u128::from(scale));
@@ -181,12 +181,16 @@ fn paused_seek_discards_old_generation_and_delivers_one_planar_preview() {
 /// Two by two, a hundred times: the first picture reaches the converter as the
 /// packed RGB the reader left behind and every picture after it as planes, so
 /// one stream walks both routes.
-fn y4m() -> NativeReader<Cursor<Vec<u8>>> {
+fn y4m_bytes() -> Vec<u8> {
     let mut bytes = b"YUV4MPEG2 W2 H2 F60:1 Ip C420jpeg\n".to_vec();
     for _ in 0..100 {
         bytes.extend_from_slice(b"FRAME\n\x10\x20\x30\x40\x80\x80");
     }
-    let mut reader = NativeReader::without_memory_limit(Cursor::new(bytes)).unwrap();
+    bytes
+}
+
+fn y4m() -> NativeReader<Cursor<Vec<u8>>> {
+    let mut reader = NativeReader::without_memory_limit(Cursor::new(y4m_bytes())).unwrap();
     assert!(reader.read_frame().unwrap());
     reader
 }
@@ -204,15 +208,19 @@ fn first_frame(player: &mut Playback) -> Frame {
     }
 }
 
-/// A graded picture is always packed RGB on this thread; one with nothing done
-/// to its colour is packed only where the reader left it that way, which for an
-/// MP4 is its first picture and planes after that.
+/// A picture with nothing done to its colour is packed only where the reader
+/// left it that way, which for an MP4 is its first picture and planes after
+/// that. Planes that still owe a grade the shader carries are graded here too,
+/// because the window reads that table and a test asking what was shown has to.
 fn packed(pixels: Pixels, budget: usize) -> Vec<u8> {
     match pixels {
         Pixels::Rgb(rgb) => rgb,
-        Pixels::Planar(planes) => {
+        Pixels::Planar(planes, grade) => {
             let mut rgb = Vec::new();
             planar8_to_rgb(&planes, &mut rgb, budget).expect("converted");
+            if let Some(grade) = grade {
+                grade.apply(&mut rgb);
+            }
             rgb
         }
     }
@@ -249,15 +257,20 @@ fn stream() -> Vec<u8> {
     bytes
 }
 
+/// BT.709 codes shown as the desktop's own, as a source would state them.
+fn recurve_signal() -> ColourDescription {
+    ColourDescription {
+        primaries: 1,
+        transfer: 1,
+        matrix: 1,
+        full_range: false,
+    }
+}
+
 /// BT.709 codes shown as the desktop's own: a curve and nothing else.
 fn recurve() -> Grade {
     Grade::new(
-        ColourDescription {
-            primaries: 1,
-            transfer: 1,
-            matrix: 1,
-            full_range: false,
-        },
+        recurve_signal(),
         &HdrMetadata::default(),
         Settings::default(),
         None,
@@ -281,21 +294,99 @@ fn a_grade_reaches_the_pictures_a_stream_hands_over_on_both_routes() {
         let step = (i16::from(*after) - want).abs();
         assert!(step <= 1, "{before} -> {after}, not {want}");
     }
-    // The pictures after the first arrive as planes, and a plane picture has to
-    // become packed RGB for a grade to be applied to it on this thread.
-    let mut graded = 0;
+    // The pictures after the first arrive as planes. A grade that is one table
+    // the fragment shader can bind travels with them rather than copying the
+    // whole picture into RGB on this thread, and the table it travels with is
+    // the one asked for above.
+    let mut owed = 0;
     let deadline = Instant::now() + Duration::from_secs(5);
-    while graded < 3 {
+    while owed < 3 {
         assert!(Instant::now() < deadline, "playback stalled");
         match player.poll() {
-            Some(Event::Frame(frame)) => match frame.pixels {
-                Pixels::Rgb(_) => graded += 1,
-                Pixels::Planar(_) => panic!("a graded picture stayed planes"),
-            },
+            Some(Event::Frame(frame)) => {
+                let Pixels::Planar(_, grade) = frame.pixels else {
+                    panic!("a plane picture was made to lose its planes");
+                };
+                let grade = grade.expect("the picture kept no grade for the shader");
+                assert!(grade.is_shader_look());
+                owed += 1;
+            }
             Some(Event::Error(error)) => panic!("{error}"),
             Some(Event::Ended(_)) => panic!("the stream ended early"),
             None => thread::sleep(Duration::from_millis(1)),
         }
+    }
+}
+
+/// The other half of the plane route: a grade the fragment shader cannot bind is
+/// this thread's own work, because two lookups read one after the other need the
+/// picture in RGB. A per-channel LUT after the plan folds into the one table the
+/// shader reads and so still travels with the planes; a grid after it does not,
+/// and the picture is converted and graded here instead. Held to the bytes, not
+/// just to the shape it arrives in, because a route that quietly dropped the
+/// second lookup would still hand over RGB.
+#[test]
+fn a_grade_the_shader_cannot_carry_is_applied_on_the_thread() {
+    let budget = NativeReader::without_memory_limit(Cursor::new(y4m_bytes()))
+        .unwrap()
+        .rgb_budget();
+    let kept = Grade::new(
+        recurve_signal(),
+        &HdrMetadata::default(),
+        Settings::default(),
+        Some(Lut::from_cube("LUT_1D_SIZE 2\n0.0 1.0 0.0\n1.0 0.0 1.0\n").unwrap()),
+    );
+    assert!(kept.is_shader_look(), "a per-channel LUT is one table");
+    let owed = Grade::new(
+        recurve_signal(),
+        &HdrMetadata::default(),
+        Settings::default(),
+        Some(Lut::Three(Lut3d::from_fn(2, |rgb| {
+            [1.0 - rgb[0], rgb[1], rgb[2]]
+        }))),
+    );
+    assert!(!owed.is_shader_look(), "two grids are not one lookup");
+
+    // The 1D chain folds into the table the shader reads, so that grade still
+    // rides with the planes instead of converting them here.
+    let mut riding = Playback::start(y4m(), Some(kept));
+    let Pixels::Rgb(_) = first_frame(&mut riding).pixels else {
+        panic!("a stream's first picture is the RGB its reader left");
+    };
+    let frame = first_frame(&mut riding);
+    let Pixels::Planar(planes, grade) = frame.pixels else {
+        panic!("a folded 1D LUT converted the picture instead of riding with it");
+    };
+    assert_eq!(
+        planes.y,
+        [0x10, 0x20, 0x30, 0x40],
+        "the planes were touched"
+    );
+    assert!(
+        grade
+            .expect("no table rode with the planes")
+            .is_shader_look(),
+        "the riding grade is not one lookup"
+    );
+
+    // A grid after the plan is two lookups and has to be applied here, on the
+    // converted picture — held to the bytes of the same walk, because a route
+    // that quietly dropped the second lookup would still hand over RGB.
+    let mut plain = Playback::start(y4m(), None);
+    let mut shown = Playback::start(y4m(), Some(owed.clone()));
+    for frame in 0..3 {
+        let mut want = packed(first_frame(&mut plain).pixels, budget);
+        owed.apply(&mut want);
+        let after = first_frame(&mut shown);
+        assert!(
+            matches!(after.pixels, Pixels::Rgb(_)),
+            "frame {frame}: a grade the shader refused left the picture as planes"
+        );
+        assert_eq!(
+            packed(after.pixels, budget),
+            want,
+            "frame {frame} was not graded both ways"
+        );
     }
 }
 
@@ -325,7 +416,7 @@ fn a_grade_that_would_change_nothing_leaves_a_picture_as_planes() {
         match player.poll() {
             Some(Event::Frame(frame)) => {
                 assert!(
-                    matches!(frame.pixels, Pixels::Planar(_)),
+                    matches!(frame.pixels, Pixels::Planar(..)),
                     "an identity grade converted the picture"
                 );
                 planes += 1;
@@ -385,16 +476,23 @@ fn a_real_hdr10_picture_is_tone_mapped_by_the_thread_that_shows_it() {
         let untouched = first_frame(&mut plain);
         if frame > 0 {
             assert!(
-                matches!(untouched.pixels, Pixels::Planar(_)),
+                matches!(untouched.pixels, Pixels::Planar(..)),
                 "an ungraded picture was made to lose its planes"
             );
         }
         let untouched = packed(untouched.pixels, budget);
         let graded = first_frame(&mut shown);
-        assert!(
-            matches!(graded.pixels, Pixels::Rgb(_)),
-            "a graded picture stayed planes"
-        );
+        // A tone map folds channels, so this grade has no byte tables and reaches
+        // the window as the one grid the fragment shader samples: the picture it
+        // travels in is whatever route the thread took, packed for the first
+        // picture and planes with the grid riding on them after that.
+        match &graded.pixels {
+            Pixels::Rgb(_) => {}
+            Pixels::Planar(_, grade) => assert!(
+                grade.as_ref().is_some_and(|grade| grade.is_shader_look()),
+                "a plane picture went to the shader with no table on it"
+            ),
+        }
         let graded = packed(graded.pixels, budget);
         let clipped = packed(first_frame(&mut burnt).pixels, budget);
         assert_ne!(untouched, graded, "the grade reached no pixels");

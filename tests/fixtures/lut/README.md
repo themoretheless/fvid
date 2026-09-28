@@ -103,6 +103,72 @@ ffmpeg -v error -y -f rawvideo -pix_fmt rgb24 -s 64x64 -i probe.rgb \
   -f rawvideo - | cmp - probe.rgb && echo 'ffmpeg: identity held'
 ```
 
+## The same grid with a pre-LUT in front of it
+
+`preluted-17.cube` is `grade-17.cube` with the header a grading suite writes
+ahead of a grid: two comment lines, then `LUT_TYPE 3D`,
+`VERTEX_FORMAT UNSIGNED_BYTE`, `NUM_SAMPLES 100`,
+`LUT_3D_OUTPUT_RANGE 0.0 0.0 0.0`, a `LUT_1D_SHAPER_SIZE 3` curve, a
+`LUT_PRELUT_1D_SIZE 3` pair that maps white to black and a
+`LUT_PRELUT_3D_SIZE 5` grid of zeros.
+
+```sh
+for m in nearest trilinear tetrahedral; do
+  ffmpeg -v error -y -f rawvideo -pix_fmt rgb24 -s 64x64 -i probe.rgb \
+    -vf "lut3d=file=preluted-17.cube:interp=$m" -frames:v 1 -pix_fmt rgb24 \
+    -f rawvideo ffmpeg-preluted-$m.rgb
+  cmp ffmpeg-preluted-$m.rgb ffmpeg-$m.rgb && echo "$m: sections moved nothing"
+done
+```
+
+All three compare equal, so `ffmpeg` read the file and dropped every one of
+those sections — the pre-LUT that maps white to black included. The committed
+hashes say so as plainly as the `cmp` does; they are the same three numbers as
+above, byte for byte:
+
+```
+34339e05641f7d99c52038cbcce1aa9c47a48611fe58adc4160eae9dc138ee65  preluted-17.cube
+b661856c00a38aa82af0a476148a492871d77db87b9f9ca31f96d22b0b1fb585  ffmpeg-preluted-nearest.rgb
+e693f4e55d381e2d2b43866455fb747dd92083ba9936e04e50d36b6b4af4e80a  ffmpeg-preluted-trilinear.rgb
+b951cb32f78210de397efd326463681c06a75af25d887ecabbddefec639ab56b  ffmpeg-preluted-tetrahedral.rgb
+```
+
+OpenColorIO 2.5.2 does not read this file at all. `ociochecklut` tries both
+cube readers and reports each: `'resolve_cube' failed with: Error parsing
+Resolve .cube file (preluted-17.cube). At line (3): 'LUT_TYPE 3D'. Malformed
+color triples specified`, and the same sentence for `VERTEX_FORMAT`,
+`NUM_SAMPLES`, `LUT_3D_OUTPUT_RANGE`, `LUT_PRELUT_1D_SIZE`,
+`LUT_PRELUT_3D_SIZE` and `LUT_1D_SHAPER_SIZE` one at a time. So the tolerance
+of those keys follows FFmpeg, and the refusal of them is not evidence that a
+file is broken — it is one reader's grammar being narrower than the other's.
+
+## What the domain keys are worth
+
+`DOMAIN_MIN`/`DOMAIN_MAX` were measured above, and OCIO reads them; `ffmpeg`
+does not read them at all. The two other spellings of the same idea are worth
+measuring on a file OCIO's Resolve reader accepts, which the crafted 2-node
+cubes above are not (there OCIO answers through its Iridas reader). Take
+`grade-17.cube` with its own `DOMAIN_` lines removed, and ask `ociochecklut`
+for 0.25 0.25 0.25:
+
+| file | first line added | OCIO at 0.25 |
+| --- | --- | --- |
+| bare | — | 0.251519 |
+| pair | `LUT_3D_INPUT_RANGE 0.0 0.5` | 0.531026 |
+| triple | `DOMAIN_MIN 0 0 0` + `DOMAIN_MAX 0.5 0.5 0.5` | 0.531026 |
+| six | `LUT_3D_INPUT_RANGE 0 0 0 0.5 0.5 0.5` | 0.251519 |
+| other table | `LUT_1D_INPUT_RANGE 0.0 0.5` | 0.251519 |
+
+The pair under the grid's own key moves the answer to 0.531026, which is what
+the bare file gives at 0.5 — so half the declared range is the whole grid, and
+`DOMAIN_MAX` says the identical thing. Six numbers on that line are not the
+pair and are left unread, and the pair written under the *1D* key does not
+grid; it belongs to a 1D table, where over a 17-entry ramp OCIO answers 0.25
+with 0.5 and 0.5 with 1.0, the ramp read at half its own length. `ffmpeg`
+returns the input byte — 64 for a 64 probe — for every row of that table, its
+reader knowing neither spelling. `Lut::from_cube` follows OCIO, which is what it
+already did for `DOMAIN_MIN`/`DOMAIN_MAX`.
+
 ## The `.3dl` twin
 
 `grade-17.3dl` is the same look written in the other format: 12-bit integers
@@ -439,6 +505,37 @@ $ ffmpeg -f lavfi -i color=gray:s=8x8 -vf lut3d=file=lut3d_bizarre.spi3d -f null
 ```
 
 Both are read by the module tests in `src/color/lut.rs`.
+
+OpenColorIO does read both, and since it authored these two files it is the
+reader to ask when FFmpeg cannot answer. Measured on 2.5.2, the CLI evaluates a
+colour through each file:
+
+```console
+$ ociochecklut sRGB_to_linear.spi1d 0.25 0.25 0.25
+0.05087609 0.05087609 0.05087609
+$ ociochecklut sRGB_to_linear.spi1d 0.5 0.5 0.5
+0.2140411 0.2140411 0.2140411
+$ ociochecklut sRGB_to_linear.spi1d 0.75 0.75 0.75
+0.5225216 0.5225216 0.5225216
+$ ociochecklut lut3d_bizarre.spi3d 1.0 0.0 0.0
+1.622678 -0.04887585 -0.09775171
+$ ociochecklut lut3d_bizarre.spi3d 0.0 0.0 1.0
+0 0.09775171 1.17302
+$ ociochecklut lut3d_bizarre.spi3d 0.5 0.5 0.5
+0.3714565 0.3910069 0.3910069
+```
+
+Every answer is the sRGB decode of the input for the shaper, and for the grid it
+is the node the file's own `r g b` indices point at — the red 1.622 678 at
+[1, 0, 0] and the green 0.097 751 71 at [0, 0, 1] are the two digits a reader
+that walked the rows by position would get wrong. `ociochecklut` also prints the
+range it parsed for the grid as `minrgb=[-0.0782014, -0.0977517, -0.0977517]`,
+`maxrgb=[1.62268, 1.75953, 1.17302]`, so the overshoot the tests keep
+uncoloured is what the reference reader itself sees.
+
+Note that the CLI takes its probe as separate arguments: passing `"0.5 0.5 0.5"`
+as one word answers `ERROR: Expecting either RGB or RGBA pixel`, which reads
+like a refusal of the file and is not one.
 
 `sRGB_to_linear.spi1d` is the sRGB shaper: `From -0.125 1.125`, `Length 4101`,
 `Components 1`. The pair is the input range, so entry 410 is the EOTF at signal
