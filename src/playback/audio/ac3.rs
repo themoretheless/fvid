@@ -289,10 +289,10 @@ mod tests {
     /// inside them is a tone, but the encoder's input command was not written down
     /// when these files were cut, so nothing here claims a byte-for-byte
     /// reproduction of them - only the geometry they state is asserted.
-    const STEREO: &[u8] = include_bytes!("../tests/fixtures/audio/ac3-stereo.ac3");
-    const COUPLED: &[u8] = include_bytes!("../tests/fixtures/audio/ac3-coupled.ac3");
-    const SURROUND: &[u8] = include_bytes!("../tests/fixtures/audio/ac3-51.ac3");
-    const MONO_32K: &[u8] = include_bytes!("../tests/fixtures/audio/ac3-mono-32k.ac3");
+    const STEREO: &[u8] = include_bytes!("../../../tests/fixtures/audio/ac3-stereo.ac3");
+    const COUPLED: &[u8] = include_bytes!("../../../tests/fixtures/audio/ac3-coupled.ac3");
+    const SURROUND: &[u8] = include_bytes!("../../../tests/fixtures/audio/ac3-51.ac3");
+    const MONO_32K: &[u8] = include_bytes!("../../../tests/fixtures/audio/ac3-mono-32k.ac3");
 
     fn parse(bytes: &[u8]) -> Ac3 {
         Ac3::parse(bytes, &Limits::default()).expect("parses")
@@ -429,7 +429,7 @@ mod tests {
     /// machine holds.
     #[test]
     fn a_file_that_is_not_a_run_of_syncframes_is_refused() {
-        let mp3 = include_bytes!("../tests/fixtures/mp3/tone.mp3");
+        let mp3 = include_bytes!("../../../tests/fixtures/mp3/tone.mp3");
         let error = Ac3::parse(mp3, &Limits::default()).expect_err("an MP3 is not AC-3");
         assert!(error.to_string().contains("no AC-3 syncframes"), "{error}");
         // Bytes that name a syncword but run out mid-frame are a stream that stops

@@ -270,7 +270,7 @@ mod tests {
     /// is an error rather than a silent fallback to the first track.
     #[test]
     fn the_fixture_lists_its_audio_tracks() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/vorbis-stereo.webm");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/vorbis-stereo.webm");
         let stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default()).unwrap();
         assert_eq!(
             stream.audio_tracks(),
@@ -312,7 +312,7 @@ mod tests {
     /// container's own test records.
     #[test]
     fn a_named_file_lists_its_audio_tracks_by_what_it_says() {
-        const NAMED: &[u8] = include_bytes!("../tests/fixtures/tracks/named.mkv");
+        const NAMED: &[u8] = include_bytes!("../../../tests/fixtures/tracks/named.mkv");
         let stream = WebmAudioReader::open(Cursor::new(NAMED), Limits::default()).unwrap();
         let labels: Vec<String> = stream
             .audio_tracks()
@@ -350,7 +350,7 @@ mod tests {
     /// peak is checked against that rather than against full scale.
     #[test]
     fn vorbis_fixture_decodes_to_pcm() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/vorbis-stereo.webm");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/vorbis-stereo.webm");
         let mut stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
             .expect("fixture has a decodable audio track");
         assert_eq!(stream.codec(), "A_VORBIS");
@@ -453,7 +453,7 @@ mod tests {
     /// and match what ffmpeg's own decode of the same file reports.
     #[test]
     fn a_flac_track_decodes_to_its_exact_length() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/flac-stereo.mkv");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/flac-stereo.mkv");
         let mut stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
             .expect("fixture has a FLAC track");
         assert_eq!(stream.codec(), "A_FLAC");
@@ -477,7 +477,7 @@ mod tests {
     /// ffmpeg's own decode of this file peaks at 0.291.
     #[test]
     fn an_mp3_track_decodes_frame_by_frame() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/mp3-stereo.mkv");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/mp3-stereo.mkv");
         let mut stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
             .expect("fixture has an MP3 track");
         assert_eq!(stream.codec(), "A_MPEG/L3");
@@ -497,7 +497,7 @@ mod tests {
     /// there is to choose is numbered zero.
     #[test]
     fn the_track_list_skips_a_codec_there_is_no_decoder_for() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/opus-flac.mkv");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/opus-flac.mkv");
         let stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
             .expect("fixture has audio tracks");
         assert_eq!(stream.audio_tracks().len(), 1, "the Opus track is not offered");
@@ -515,7 +515,7 @@ mod tests {
     /// the order the file gives, and only a key past all three is an error.
     #[test]
     fn a_dolby_track_is_listed_with_the_lossy_ones_it_sits_beside() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/ac3-flac-mp3.mkv");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/ac3-flac-mp3.mkv");
         let stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
             .expect("fixture has audio tracks");
         assert_eq!(stream.audio_tracks().len(), 3);
@@ -541,7 +541,7 @@ mod tests {
     /// container called it.
     #[test]
     fn an_aac_track_arrives_with_only_the_config_and_is_wrapped() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/aac-stereo.mka");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/aac-stereo.mka");
         let mut stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
             .expect("fixture has an AAC track");
         assert_eq!(stream.codec(), "mp4a");
@@ -596,7 +596,7 @@ mod tests {
     /// the list before the dispatch was ever asked.
     #[test]
     fn a_layer_ii_track_reaches_the_arm_the_layer_iii_route_shares() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/mp2-stereo.mkv");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/mp2-stereo.mkv");
         let mut stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
             .expect("fixture has an MP2 track");
         assert_eq!(stream.codec(), "A_MPEG/L2");
@@ -629,7 +629,7 @@ mod tests {
     /// what a decoder has to trust here and cannot in an ISO BMFF fourcc.
     #[test]
     fn a_24_bit_pcm_track_decodes_block_by_block() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/pcm-int.mkv");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/pcm-int.mkv");
         let mut stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
             .expect("fixture has a PCM track");
         assert_eq!(stream.codec(), "A_PCM/INT/LIT");
@@ -650,7 +650,7 @@ mod tests {
     /// where the decoder only has to read the width and hand the samples over.
     #[test]
     fn a_float_pcm_track_decodes_block_by_block() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/pcm-float.mkv");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/pcm-float.mkv");
         let mut stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
             .expect("fixture has a float PCM track");
         assert_eq!(stream.codec(), "A_PCM/FLOAT/IEEE");
@@ -670,25 +670,25 @@ mod tests {
         for (name, fixture, low, high) in [
             (
                 "mp3",
-                include_bytes!("../tests/fixtures/audio/mp3-stereo.mkv") as &[u8],
+                include_bytes!("../../../tests/fixtures/audio/mp3-stereo.mkv") as &[u8],
                 2.02,
                 2.05,
             ),
             (
                 "flac",
-                include_bytes!("../tests/fixtures/audio/flac-stereo.mkv") as &[u8],
+                include_bytes!("../../../tests/fixtures/audio/flac-stereo.mkv") as &[u8],
                 1.98,
                 2.06,
             ),
             (
                 "vorbis",
-                include_bytes!("../tests/fixtures/audio/vorbis-stereo.webm") as &[u8],
+                include_bytes!("../../../tests/fixtures/audio/vorbis-stereo.webm") as &[u8],
                 1.99,
                 2.06,
             ),
             (
                 "pcm",
-                include_bytes!("../tests/fixtures/audio/pcm-int.mkv") as &[u8],
+                include_bytes!("../../../tests/fixtures/audio/pcm-int.mkv") as &[u8],
                 0.24,
                 0.26,
             ),

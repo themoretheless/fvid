@@ -164,7 +164,7 @@ mod tests {
     /// rows over two channels - the two notes, a row that holds them, the key-off
     /// - and two instruments, a looping 16-bit sine and an 8-bit square that does
     /// not loop.
-    const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/xm/two-notes.xm");
+    const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/xm/two-notes.xm");
 
     fn open() -> XmAudioReader {
         XmAudioReader::open(FIXTURE, xm::Limits::default()).expect("opens")

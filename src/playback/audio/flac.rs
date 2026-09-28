@@ -664,10 +664,10 @@ mod tests {
     ///          -c:a flac -frames:a 200 tests/fixtures/flac/small-block.flac
     /// The frame lists asserted below are ffprobe's, packet for packet, and the
     /// sample counts are what `ffmpeg -f f32le` writes for the same file.
-    const TONE: &[u8] = include_bytes!("../tests/fixtures/flac/tone.flac");
-    const STEREO: &[u8] = include_bytes!("../tests/fixtures/flac/stereo.flac");
-    const WIDE: &[u8] = include_bytes!("../tests/fixtures/flac/twenty-four.flac");
-    const SMALL: &[u8] = include_bytes!("../tests/fixtures/flac/small-block.flac");
+    const TONE: &[u8] = include_bytes!("../../../tests/fixtures/flac/tone.flac");
+    const STEREO: &[u8] = include_bytes!("../../../tests/fixtures/flac/stereo.flac");
+    const WIDE: &[u8] = include_bytes!("../../../tests/fixtures/flac/twenty-four.flac");
+    const SMALL: &[u8] = include_bytes!("../../../tests/fixtures/flac/small-block.flac");
 
     fn parse(bytes: &[u8]) -> Flac {
         Flac::parse(bytes, &Limits::default()).expect("parses")
@@ -899,7 +899,7 @@ mod tests {
                 "{name} opened as FLAC"
             );
         }
-        let video = include_bytes!("../tests/fixtures/audio/pcm-screen.mov");
+        let video = include_bytes!("../../../tests/fixtures/audio/pcm-screen.mov");
         let error = Flac::parse(video, &Limits::default()).expect_err("a movie is not a FLAC file");
         assert!(
             error.to_string().contains("not a FLAC file"),

@@ -446,9 +446,9 @@ mod tests {
     /// last frame does. The first frame of each is the encoder's tag: its audio is
     /// a fill element carrying `Lavc63.1.102` rather than samples, and FFmpeg's
     /// own demuxer lists it as a packet, so this one does too.
-    const STEREO: &[u8] = include_bytes!("../tests/fixtures/audio/aac-stereo.aac");
-    const MONO_44K: &[u8] = include_bytes!("../tests/fixtures/audio/aac-mono-44k.aac");
-    const SURROUND: &[u8] = include_bytes!("../tests/fixtures/audio/aac-51.aac");
+    const STEREO: &[u8] = include_bytes!("../../../tests/fixtures/audio/aac-stereo.aac");
+    const MONO_44K: &[u8] = include_bytes!("../../../tests/fixtures/audio/aac-mono-44k.aac");
+    const SURROUND: &[u8] = include_bytes!("../../../tests/fixtures/audio/aac-51.aac");
 
     fn parse(bytes: &[u8]) -> Aac {
         Aac::parse(bytes, &Limits::default()).expect("parses")
@@ -701,7 +701,7 @@ mod tests {
     /// codec.
     #[test]
     fn a_file_that_is_not_a_run_of_adts_frames_is_refused() {
-        let mp3 = include_bytes!("../tests/fixtures/mp3/tone.mp3");
+        let mp3 = include_bytes!("../../../tests/fixtures/mp3/tone.mp3");
         let error = Aac::parse(mp3, &Limits::default()).expect_err("an MP3 is no ADTS run");
         assert!(error.to_string().contains("no ADTS frames"), "{error}");
         // A truncated tail is the file's own damage, not another container's, so

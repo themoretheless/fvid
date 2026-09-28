@@ -11,7 +11,7 @@ pub enum PixelFormat {
     Yuv444,
 }
 impl PixelFormat {
-    fn subsampling(self) -> (usize, usize) {
+    pub(crate) fn subsampling(self) -> (usize, usize) {
         match self {
             Self::Yuv420 => (2, 2),
             Self::Yuv422 => (2, 1),
@@ -24,7 +24,7 @@ pub struct Header {
     pub width: usize,
     pub height: usize,
     pub format: PixelFormat,
-    tokens: Vec<String>,
+    pub(crate) tokens: Vec<String>,
 }
 impl Header {
     pub fn parse(line: &[u8]) -> Result<Self> {

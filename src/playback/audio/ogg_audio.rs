@@ -343,12 +343,12 @@ mod tests {
     ///          -ac 2 -c:a vorbis -strict -2 -b:a 32k tests/fixtures/ogg/vorbis-stereo.ogg
     /// The page list, the packet lengths and the two granules asserted below are
     /// ffprobe's and the framing walk's, page for page.
-    const TONE: &[u8] = include_bytes!("../tests/fixtures/ogg/vorbis-stereo.ogg");
+    const TONE: &[u8] = include_bytes!("../../../tests/fixtures/ogg/vorbis-stereo.ogg");
     /// `tests/fixtures/ogg/opus-mono.ogg`, the same tone out of the one Ogg bitstream
     /// on this machine with a writer and no arm here:
     ///   ffmpeg -f lavfi -i sine=frequency=440:sample_rate=48000:duration=0.2 \
     ///          -ac 1 -c:a libopus -b:a 24k tests/fixtures/ogg/opus-mono.ogg
-    const OPUS: &[u8] = include_bytes!("../tests/fixtures/ogg/opus-mono.ogg");
+    const OPUS: &[u8] = include_bytes!("../../../tests/fixtures/ogg/opus-mono.ogg");
 
     fn open(bytes: &[u8]) -> Result<OggAudioReader> {
         OggAudioReader::open(bytes, Limits::default())

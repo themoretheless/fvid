@@ -817,14 +817,14 @@ mod tests {
     /// material - the 3-to-1 pair is the first 512 blocks of the shipped `mac3audio.mov` take,
     /// the 6-to-1 pair the first 512 bytes of `mjpega.mov` - and the `.s16` beside each is what
     /// this build's reference reads out of it.
-    const MAC3_MONO: &[u8] = include_bytes!("../tests/fixtures/mace/mac3-mono.aiff");
-    const MAC3_MONO_S16: &[u8] = include_bytes!("../tests/fixtures/mace/mac3-mono.s16");
-    const MAC3_STEREO: &[u8] = include_bytes!("../tests/fixtures/mace/mac3-stereo.aiff");
-    const MAC6_MONO: &[u8] = include_bytes!("../tests/fixtures/mace/mac6-mono.aiff");
-    const MAC6_MONO_S16: &[u8] = include_bytes!("../tests/fixtures/mace/mac6-mono.s16");
-    const MAC6_STEREO: &[u8] = include_bytes!("../tests/fixtures/mace/mac6-stereo.aiff");
+    const MAC3_MONO: &[u8] = include_bytes!("../../../tests/fixtures/mace/mac3-mono.aiff");
+    const MAC3_MONO_S16: &[u8] = include_bytes!("../../../tests/fixtures/mace/mac3-mono.s16");
+    const MAC3_STEREO: &[u8] = include_bytes!("../../../tests/fixtures/mace/mac3-stereo.aiff");
+    const MAC6_MONO: &[u8] = include_bytes!("../../../tests/fixtures/mace/mac6-mono.aiff");
+    const MAC6_MONO_S16: &[u8] = include_bytes!("../../../tests/fixtures/mace/mac6-mono.s16");
+    const MAC6_STEREO: &[u8] = include_bytes!("../../../tests/fixtures/mace/mac6-stereo.aiff");
     /// The 3-to-1 mono run with one byte standing over its last block.
-    const MAC3_TAIL: &[u8] = include_bytes!("../tests/fixtures/mace/mac3-mono-tail.aiff");
+    const MAC3_TAIL: &[u8] = include_bytes!("../../../tests/fixtures/mace/mac3-mono-tail.aiff");
 
     /// The `COMM` chunk's own fields stand where the muxer put them: the envelope's 12 bytes,
     /// the chunk's 8-byte header, then channels, frames, width and the 80-bit rate.

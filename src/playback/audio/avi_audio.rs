@@ -344,10 +344,10 @@ mod tests {
     /// with `-ac` and the coder varied. The whole tone comes out as five records of
     /// one block each for a mono stream and ten for a stereo one, and the four files
     /// regenerate byte for byte from the command above.
-    const IMA_MONO: &[u8] = include_bytes!("../tests/fixtures/avi/adpcm-ima-mono.avi");
-    const IMA_STEREO: &[u8] = include_bytes!("../tests/fixtures/avi/adpcm-ima-stereo.avi");
-    const MS_MONO: &[u8] = include_bytes!("../tests/fixtures/avi/adpcm-ms-mono.avi");
-    const MS_STEREO: &[u8] = include_bytes!("../tests/fixtures/avi/adpcm-ms-stereo.avi");
+    const IMA_MONO: &[u8] = include_bytes!("../../../tests/fixtures/avi/adpcm-ima-mono.avi");
+    const IMA_STEREO: &[u8] = include_bytes!("../../../tests/fixtures/avi/adpcm-ima-stereo.avi");
+    const MS_MONO: &[u8] = include_bytes!("../../../tests/fixtures/avi/adpcm-ms-mono.avi");
+    const MS_STEREO: &[u8] = include_bytes!("../../../tests/fixtures/avi/adpcm-ms-stereo.avi");
 
     /// Where a header record's body starts, given the fourcc that introduces it: a
     /// chunk's fields are read from eight bytes past its id, which is where the real

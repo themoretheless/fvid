@@ -1325,17 +1325,17 @@ mod tests {
                 .pixel_aspect()
         };
         assert_eq!(
-            aspect(include_bytes!("../tests/fixtures/display/par-2x1.mp4")),
+            aspect(include_bytes!("../../../tests/fixtures/display/par-2x1.mp4")),
             (2, 1)
         );
         assert_eq!(
-            aspect(include_bytes!("../tests/fixtures/display/par-2x1.webm")),
+            aspect(include_bytes!("../../../tests/fixtures/display/par-2x1.webm")),
             (2, 1)
         );
         // Nothing stated is square pixels, which is what the overwhelming
         // majority of files mean; a guessed shape would stretch all of them.
         assert_eq!(
-            aspect(include_bytes!("../tests/fixtures/vp9/motion.webm")),
+            aspect(include_bytes!("../../../tests/fixtures/vp9/motion.webm")),
             (1, 1)
         );
         let raw = b"YUV4MPEG2 W2 H2 F25:1 Ip C420jpeg\nFRAME\n";
@@ -1416,7 +1416,7 @@ mod tests {
     /// bytes it did write.
     #[test]
     fn a_turned_item_is_shown_upright() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/display/par-2x1.mp4");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/display/par-2x1.mp4");
         let mut upright = NativeReader::new(BufReader::new(Cursor::new(FIXTURE)), 1 << 20).unwrap();
         assert_eq!(upright.rotation(), 0);
         assert!(upright.read_frame().unwrap());
@@ -1466,7 +1466,7 @@ mod tests {
     #[test]
     fn a_real_hdr10_files_signal_reaches_the_caller_that_grades_it() {
         use crate::color::{Primaries, Transfer};
-        let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let data = include_bytes!("../../../tests/fixtures/hevc/hdr10.mp4").to_vec();
         let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
         let stated = reader.colour();
         assert_eq!(
@@ -1496,7 +1496,7 @@ mod tests {
     /// container that named none has nothing to contradict them with.
     #[test]
     fn a_real_hdr10_files_light_reaches_the_caller_that_tone_maps_it() {
-        let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let data = include_bytes!("../../../tests/fixtures/hevc/hdr10.mp4").to_vec();
         let reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
         let hdr = reader.hdr();
         assert!(hdr.mastering.unwrap().is_hdr10());
@@ -1514,7 +1514,7 @@ mod tests {
     #[test]
     fn a_volume_without_a_content_light_grades_against_its_own_peak() {
         use crate::color::{DisplayTarget, Grade, Settings};
-        let data = include_bytes!("../tests/fixtures/hevc/mdcv-only.mp4").to_vec();
+        let data = include_bytes!("../../../tests/fixtures/hevc/mdcv-only.mp4").to_vec();
         let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
         let hdr = reader.hdr();
         let volume = hdr.mastering.unwrap();
@@ -1546,7 +1546,7 @@ mod tests {
     #[test]
     fn a_real_hlg_files_signal_reaches_the_caller_that_grades_it() {
         use crate::color::{Primaries, Transfer};
-        let data = include_bytes!("../tests/fixtures/hevc/hlg.mp4").to_vec();
+        let data = include_bytes!("../../../tests/fixtures/hevc/hlg.mp4").to_vec();
         let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
         let stated = reader.colour();
         assert_eq!(
@@ -1585,7 +1585,7 @@ mod tests {
     /// its behalf.
     #[test]
     fn a_codings_own_statement_replaces_a_containers_silence() {
-        let data = include_bytes!("../tests/fixtures/av1/ramp.webm").to_vec();
+        let data = include_bytes!("../../../tests/fixtures/av1/ramp.webm").to_vec();
         let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
         let stated = ColourDescription {
             primaries: 2,

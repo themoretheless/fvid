@@ -1703,7 +1703,7 @@ mod tests {
     /// extension stating the block's 320 samples and a `fact` stating the whole run.
     #[test]
     fn the_reference_gsm_take_reads_as_its_own_blocks() {
-        const TAKE: &[u8] = include_bytes!("../tests/fixtures/gsm/ciao.wav");
+        const TAKE: &[u8] = include_bytes!("../../../tests/fixtures/gsm/ciao.wav");
         let reader = open(TAKE);
         let wav = reader.wav();
         assert_eq!(wav.pcm.coding, Coding::Gsm);
@@ -1871,7 +1871,7 @@ mod tests {
     /// bytes, since 2 048 frames of two codes each is 1 024 of them.
     #[test]
     fn the_reference_creative_take_reads_as_its_own_bytes() {
-        const TAKE: &[u8] = include_bytes!("../tests/fixtures/adpcm_ct/intro-partial.wav");
+        const TAKE: &[u8] = include_bytes!("../../../tests/fixtures/adpcm_ct/intro-partial.wav");
         let reader = open(TAKE);
         let wav = reader.wav();
         assert_eq!(wav.pcm.coding, Coding::AdpcmCt);

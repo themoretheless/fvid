@@ -243,7 +243,7 @@ mod tests {
     /// `tests/fixtures/subtitles/mov-text.mp4`, made with the command written
     /// out in `tests/mp4.rs`: twelve AVC frames, one AAC track and a
     /// `ffmpeg -c:s mov_text` subtitle track of two lines.
-    const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/subtitles/mov-text.mp4");
+    const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/subtitles/mov-text.mp4");
 
     fn fixture() -> Mp4SubtitleReader<Cursor<&'static [u8]>> {
         Mp4SubtitleReader::open(Cursor::new(FIXTURE), Limits::default())
@@ -296,7 +296,7 @@ mod tests {
     /// beside the line, so the cue is the words on their own.
     #[test]
     fn both_mov_text_tracks_are_listed_and_read_apart() {
-        const BOTH: &[u8] = include_bytes!("../tests/fixtures/subtitles/mov-text-tracks.mp4");
+        const BOTH: &[u8] = include_bytes!("../../../tests/fixtures/subtitles/mov-text-tracks.mp4");
         let mut reader = Mp4SubtitleReader::open(Cursor::new(BOTH), Limits::default())
             .expect("fixture has two text tracks");
         let tracks = reader.tracks();
@@ -378,7 +378,7 @@ mod tests {
     /// read, whose command `tests/mp4.rs` records.
     #[test]
     fn a_titled_subtitle_track_is_listed_by_its_title() {
-        const NAMED: &[u8] = include_bytes!("../tests/fixtures/tracks/named.mp4");
+        const NAMED: &[u8] = include_bytes!("../../../tests/fixtures/tracks/named.mp4");
         let reader =
             Mp4SubtitleReader::open(Cursor::new(NAMED), Limits::default()).expect("tracks");
         let labels: Vec<String> = reader

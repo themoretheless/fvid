@@ -166,7 +166,7 @@ mod tests {
     ///   tests/fixtures/subtitles/text-tracks.mkv
     /// `one.srt` holds the two `plain` cues at 200 ms and 1.1 s, `two.srt` the
     /// other two at 500 ms and 1.2 s.
-    const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/subtitles/text-tracks.mkv");
+    const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/subtitles/text-tracks.mkv");
 
     fn fixture() -> WebmSubtitleReader<Cursor<&'static [u8]>> {
         WebmSubtitleReader::open(Cursor::new(FIXTURE), Limits::default())
@@ -422,7 +422,7 @@ mod tests {
     /// why the first line ends where the next block starts.
     #[test]
     fn an_ass_track_is_listed_by_its_title_and_read_from_its_blocks() {
-        const ASS: &[u8] = include_bytes!("../tests/fixtures/subtitles/ass-track.mkv");
+        const ASS: &[u8] = include_bytes!("../../../tests/fixtures/subtitles/ass-track.mkv");
         let mut reader = WebmSubtitleReader::open(Cursor::new(ASS), Limits::default())
             .expect("fixture has an ASS track");
         let labels: Vec<String> = reader.tracks().iter().map(SubtitleTrack::label).collect();
@@ -484,7 +484,7 @@ mod tests {
     /// records.
     #[test]
     fn a_titled_subtitle_track_is_listed_by_its_title() {
-        const NAMED: &[u8] = include_bytes!("../tests/fixtures/tracks/named.mkv");
+        const NAMED: &[u8] = include_bytes!("../../../tests/fixtures/tracks/named.mkv");
         let reader = WebmSubtitleReader::open(Cursor::new(NAMED), Limits::default())
             .expect("fixture has subtitle tracks");
         let labels: Vec<String> = reader.tracks().iter().map(SubtitleTrack::label).collect();

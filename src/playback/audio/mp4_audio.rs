@@ -283,7 +283,7 @@ mod tests {
     ///   -map 0:v -map 1:a -map 2:a -c:v libx264 -profile:v baseline \
     ///   -pix_fmt yuv420p -c:a aac -movflags +faststart two-audio.mp4
     /// ```
-    const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/two-audio.mp4");
+    const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/two-audio.mp4");
 
     /// Every audio track a decoder exists for is listed in container order, and
     /// `open_at` takes a place in that list rather than a container index — the
@@ -373,7 +373,7 @@ mod tests {
     /// one record each, which is what lets a recording of any length in at all.
     #[test]
     fn a_pcm_track_decodes_sample_by_sample() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/pcm-screen.mov");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/pcm-screen.mov");
         let mut stream =
             Mp4AudioReader::open(Cursor::new(FIXTURE), Limits::default()).expect("PCM track");
         assert_eq!(stream.codec(), "sowt");
@@ -437,7 +437,7 @@ mod tests {
     /// read before the extra ones still line up.
     #[test]
     fn each_pcm_tag_is_read_at_its_own_width_and_order() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/pcm-tags.mov");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/pcm-tags.mov");
         let listing = Mp4AudioReader::open(Cursor::new(FIXTURE), Limits::default()).expect("PCM");
         // `in24` is not among them, and the list stops at three.
         assert_eq!(listing.audio_tracks().len(), 3);
@@ -485,7 +485,7 @@ mod tests {
     /// what a timeline needs to be long enough to play to silence.
     #[test]
     fn each_track_states_its_own_length() {
-        const TWO: &[u8] = include_bytes!("../tests/fixtures/audio/two-audio.mp4");
+        const TWO: &[u8] = include_bytes!("../../../tests/fixtures/audio/two-audio.mp4");
         for (nth, total) in [(0, 2_021_333_333_u64), (1, 2_032_000_000)] {
             let stream = Mp4AudioReader::open_at(Cursor::new(TWO), Limits::default(), nth).unwrap();
             assert_eq!(
@@ -494,7 +494,7 @@ mod tests {
                 "track {nth}"
             );
         }
-        const PCM: &[u8] = include_bytes!("../tests/fixtures/audio/pcm-screen.mov");
+        const PCM: &[u8] = include_bytes!("../../../tests/fixtures/audio/pcm-screen.mov");
         let stream = Mp4AudioReader::open(Cursor::new(PCM), Limits::default()).unwrap();
         assert_eq!(
             stream.duration(),
@@ -514,7 +514,7 @@ mod tests {
     /// two still yields four bytes of plausible sine wave.
     #[test]
     fn a_pcm_track_indexes_as_runs_of_chunks() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/pcm-screen.mov");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/pcm-screen.mov");
         let tight = Limits {
             samples: 100,
             ..Limits::default()
@@ -579,7 +579,7 @@ mod tests {
     /// the rule, and it only works because the picture is indexed first.
     #[test]
     fn a_pcm_track_over_the_sample_budget_leaves_the_picture() {
-        const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/audio/pcm-screen.mov");
+        const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/pcm-screen.mov");
         let wide = Mp4Reader::open(Cursor::new(FIXTURE), Limits::default()).unwrap();
         assert_eq!(wide.tracks()[0].handler, *b"vide", "picture indexed first");
         let cost = |handler: [u8; 4]| {
@@ -606,7 +606,7 @@ mod tests {
     /// `tests/fixtures/tracks/named.mp4`, whose command `tests/mp4.rs` records.
     #[test]
     fn a_named_file_lists_its_audio_tracks_by_what_it_says() {
-        const NAMED: &[u8] = include_bytes!("../tests/fixtures/tracks/named.mp4");
+        const NAMED: &[u8] = include_bytes!("../../../tests/fixtures/tracks/named.mp4");
         let stream = Mp4AudioReader::open(Cursor::new(NAMED), Limits::default()).expect("audio");
         let labels: Vec<String> = stream
             .audio_tracks()

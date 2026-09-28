@@ -819,7 +819,7 @@ mod tests {
     /// fills in a container that wrote no `colr` atom.
     #[test]
     fn an_hevc_parameter_set_states_its_own_signal() {
-        let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let data = include_bytes!("../../../tests/fixtures/hevc/hdr10.mp4").to_vec();
         let mut source =
             Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
         let stated = ColourDescription {
@@ -847,7 +847,7 @@ mod tests {
     /// turn them into a picture.
     #[test]
     fn an_av1_metadata_obu_states_its_own_light() {
-        let data = include_bytes!("../tests/fixtures/av1/hdr-metadata.mp4").to_vec();
+        let data = include_bytes!("../../../tests/fixtures/av1/hdr-metadata.mp4").to_vec();
         let mut source =
             Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
         let opened = source.bitstream_hdr();
@@ -871,7 +871,7 @@ mod tests {
     /// hardware session.
     #[test]
     fn an_hevc_sei_states_its_own_light() {
-        let data = include_bytes!("../tests/fixtures/hevc/hdr10.mp4").to_vec();
+        let data = include_bytes!("../../../tests/fixtures/hevc/hdr10.mp4").to_vec();
         let mut source =
             Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
         let opened = source.bitstream_hdr();
@@ -896,7 +896,7 @@ mod tests {
     /// one.
     #[test]
     fn an_avc_parameter_set_in_the_record_states_its_signal_at_open() {
-        let data = include_bytes!("../tests/fixtures/avc/hlg-vui-only.mp4").to_vec();
+        let data = include_bytes!("../../../tests/fixtures/avc/hlg-vui-only.mp4").to_vec();
         let mut source =
             Mp4VideoReader::open(std::io::Cursor::new(data), Limits::default(), 16 << 20).unwrap();
         // The container says nothing about the signal; the coding says HLG.

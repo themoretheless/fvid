@@ -660,7 +660,7 @@ mod tests {
     use std::io::Cursor;
     #[test]
     fn av1_video_uses_native_reader_and_rewinds() {
-        let data = include_bytes!("../tests/fixtures/av1/random-access.webm");
+        let data = include_bytes!("../../../tests/fixtures/av1/random-access.webm");
         let mut reader =
             crate::playback_native::NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
         assert!(reader.duration().is_some());
@@ -683,7 +683,7 @@ mod tests {
     #[test]
     fn duration_and_progress_use_video_origin_and_index_fallback() {
         use super::*;
-        let input = include_bytes!("../tests/fixtures/vp9/motion.webm");
+        let input = include_bytes!("../../../tests/fixtures/vp9/motion.webm");
         let mut reader = WebmVideoReader::open(Cursor::new(input), 16 << 20).unwrap();
         assert_eq!(reader.duration(), Some(Duration::from_secs(1)));
         // The estimate below reads the item's own blocks, so it is made with
@@ -710,7 +710,7 @@ mod tests {
     }
     #[test]
     fn native_detection_timing_rgb_eof_and_rewind() {
-        let input = include_bytes!("../tests/fixtures/vp9/motion.webm");
+        let input = include_bytes!("../../../tests/fixtures/vp9/motion.webm");
         let mut reader =
             crate::playback_native::NativeReader::new(Cursor::new(input), 16 << 20).unwrap();
         assert!(reader.duration().is_some());
@@ -765,7 +765,7 @@ mod tests {
     #[test]
     fn a_seek_lands_on_the_frame_continuous_playback_shows() {
         use super::Duration;
-        let input = include_bytes!("../tests/fixtures/vp9/motion.webm");
+        let input = include_bytes!("../../../tests/fixtures/vp9/motion.webm");
         let forward = shown_frames(input);
         assert_eq!(forward.len(), 10);
         let mut reader =
@@ -807,7 +807,7 @@ mod tests {
     #[test]
     fn seeking_before_the_first_frame_keeps_the_track_origin() {
         use super::Duration;
-        let input = include_bytes!("../tests/fixtures/vp9/motion.webm");
+        let input = include_bytes!("../../../tests/fixtures/vp9/motion.webm");
         let mut reader =
             crate::playback_native::NativeReader::new(Cursor::new(input), 16 << 20).unwrap();
         reader.seek(Duration::from_millis(600)).unwrap();
@@ -838,7 +838,7 @@ mod tests {
     /// states square pixels rather than a stretched ones.
     #[test]
     fn a_cropped_webm_reaches_the_player_with_its_borders_and_full_frames() {
-        let input = include_bytes!("../tests/fixtures/display/crops.mkv");
+        let input = include_bytes!("../../../tests/fixtures/display/crops.mkv");
         let mut reader =
             crate::playback_native::NativeReader::without_memory_limit(Cursor::new(input)).unwrap();
         assert_eq!(reader.insets(), [2, 2, 2, 2]);
@@ -860,7 +860,7 @@ mod tests {
     #[test]
     fn seeking_a_single_cluster_av1_file_replays_the_same_pictures() {
         use super::Duration;
-        let input = include_bytes!("../tests/fixtures/av1/random-access.webm");
+        let input = include_bytes!("../../../tests/fixtures/av1/random-access.webm");
         let forward = shown_frames(input);
         assert_eq!(forward.len(), 24);
         let mut reader =
@@ -888,7 +888,7 @@ mod tests {
     #[test]
     fn a_track_that_writes_its_light_only_in_band_answers_at_open() {
         use super::*;
-        let input = include_bytes!("../tests/fixtures/av1/hdr-in-band.mkv");
+        let input = include_bytes!("../../../tests/fixtures/av1/hdr-in-band.mkv");
         let mut reader = WebmVideoReader::open(Cursor::new(input.as_slice()), 16 << 20).unwrap();
         // The container's half, which is the range flag it wrote and nothing more.
         assert_eq!(reader.colour(), ColourDescription::default());

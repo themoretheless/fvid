@@ -514,8 +514,8 @@ mod tests {
     ///   ffmpeg -f lavfi -i sine=frequency=440:sample_rate=48000:duration=0.2 \
     ///          -c:a mp2 -b:a 128k -frames:a 40 tests/fixtures/mp3/layer-ii.mp2
     /// The frame lists asserted below are ffprobe's, packet for packet.
-    const TONE: &[u8] = include_bytes!("../tests/fixtures/mp3/tone.mp3");
-    const LAYER_II_FILE: &[u8] = include_bytes!("../tests/fixtures/mp3/layer-ii.mp2");
+    const TONE: &[u8] = include_bytes!("../../../tests/fixtures/mp3/tone.mp3");
+    const LAYER_II_FILE: &[u8] = include_bytes!("../../../tests/fixtures/mp3/layer-ii.mp2");
 
     fn parse(bytes: &[u8]) -> Mp3 {
         Mp3::parse(bytes, &Limits::default()).expect("parses")
@@ -680,7 +680,7 @@ mod tests {
         // And a file of another container entirely: a MOV whose PCM this player
         // reads elsewhere, which is not to be mistaken for MPEG audio because some
         // four bytes of it lined up.
-        const MOV: &[u8] = include_bytes!("../tests/fixtures/audio/pcm-screen.mov");
+        const MOV: &[u8] = include_bytes!("../../../tests/fixtures/audio/pcm-screen.mov");
         assert!(Mp3::parse(MOV, &Limits::default()).is_err());
     }
 

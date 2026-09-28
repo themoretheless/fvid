@@ -150,7 +150,7 @@ mod tests {
     /// melody += vlq(480) + b"\xff\x2f\x00"
     /// MThd(1, 2, 480) + MTrk(conductor) + MTrk(melody)
     /// ```
-    const FIXTURE: &[u8] = include_bytes!("../tests/fixtures/midi/two-notes.mid");
+    const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/midi/two-notes.mid");
 
     fn open() -> SmfAudioReader {
         SmfAudioReader::open(FIXTURE, smf::Limits::default()).expect("opens")
