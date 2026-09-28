@@ -276,3 +276,67 @@ fn a_3dl_read_red_fastest_is_a_different_look_not_a_rounding_gap() {
         "the wrong order's worst channel moved {worst} codes"
     );
 }
+
+/// The `.3dl` writers actually in use — Autodesk's export, Synthetic Aperture's
+/// Color Finesse, Photoshop's lookup plugin — declare the grid with a mesh line
+/// instead of a bare size: one 10-bit input code per node along an axis, so
+/// `0 64 128 … 960 1023` for a 17-grid. `ffmpeg` reads that line as the size
+/// declaration and nothing else, and re-running its three commands on this
+/// twin gives the reference bytes above unchanged (README, same section), so
+/// the same comparison holds — and the table Fvid builds has to be identical to
+/// the one it builds from the size line, not merely close.
+#[test]
+fn a_3dl_that_declares_its_mesh_gives_ffmpeg_the_same_table() {
+    let mesh = (0..SIZE)
+        .map(|i| {
+            let code = (i as f32 * 1023.0 / (SIZE - 1) as f32).round() as usize;
+            code.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join(" ");
+    let body = THREE_DL.split_once('\n').expect("the fixture has rows").1;
+    let declared =
+        Lut::from_text(&format!("{mesh}\n{body}")).expect("a mesh-declared .3dl is read as a .3dl");
+    let sized = Lut::from_text(THREE_DL).expect("the size line is read too");
+    let (Lut::Three(declared), Lut::Three(sized)) = (&declared, &sized) else {
+        panic!("a .3dl grid is a 3D LUT");
+    };
+    assert_eq!(declared.size, sized.size);
+    assert_eq!(
+        declared.data, sized.data,
+        "the mesh line was read as something other than the size declaration"
+    );
+
+    let colours = probe_colours();
+    for (mode, interp, rounded_differently) in [
+        ("nearest", Interpolation::Nearest, 6_564usize),
+        ("trilinear", Interpolation::Trilinear, 6_635),
+        ("tetrahedral", Interpolation::Tetrahedral, 6_621),
+    ] {
+        let theirs = reference_3dl(mode);
+        let mut differences = 0usize;
+        let mut theirs_above = 0usize;
+        for (i, rgb) in colours.iter().enumerate() {
+            let exact = declared.sample(*rgb, interp);
+            for ch in 0..3 {
+                let mine = (exact[ch] * 255.0).round() as i32;
+                let other = i32::from(theirs[i * 3 + ch]);
+                let delta = (mine - other).abs();
+                assert!(
+                    delta <= 1,
+                    "{mode}: pixel {i} channel {ch} moved {delta} codes"
+                );
+                differences += usize::from(delta == 1);
+                theirs_above += usize::from(mine < other);
+            }
+        }
+        assert_eq!(
+            differences, rounded_differently,
+            "{mode}: the count that differs by one code"
+        );
+        assert_eq!(
+            theirs_above, 0,
+            "{mode}: `ffmpeg` came out higher than Fvid"
+        );
+    }
+}

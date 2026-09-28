@@ -328,8 +328,13 @@ impl Lut {
         Err(invalid("a .cube must declare LUT_1D_SIZE or LUT_3D_SIZE"))
     }
 
-    /// Autodesk/Avid `.3dl`: a size line then 12-bit integer rows, listing the
-    /// grid with the blue axis varying fastest — the reverse of a `.cube`.
+    /// Autodesk/Avid `.3dl`: 12-bit integer rows listing the grid with the blue
+    /// axis fastest — the reverse of a `.cube`. The grid side is declared either
+    /// by a line holding a single size, or, as Autodesk's and Color Finesse's
+    /// own writers emit it, by a mesh line of `size` input code values behind
+    /// header keywords such as `3DMESH` and `Mesh 4 12`. A mesh line is only
+    /// read as one while no row has been seen and it is not three values wide,
+    /// since a row and the mesh of a three-node grid look alike.
     pub fn from_3dl(text: &str) -> Result<Self> {
         let mut rows: Vec<[f32; 3]> = Vec::new();
         let mut size = None;
@@ -339,6 +344,13 @@ impl Lut {
                 continue;
             }
             let fields: Vec<&str> = line.split_whitespace().collect();
+            if fields[0].parse::<f32>().is_err() {
+                // A header line, with or without arguments: `3DMESH`, `LUT8`,
+                // `Mesh 4 12`, `FROM 0 4095`. Nothing here is a node value, and
+                // every writer seen so far means by it what the grid already
+                // says, so it is read and dropped.
+                continue;
+            }
             if fields.len() == 1 {
                 let n: usize = fields[0]
                     .parse()
@@ -352,20 +364,30 @@ impl Lut {
                 size = Some(n);
                 continue;
             }
-            if fields.len() > 1 && fields[0].parse::<f32>().is_err() {
-                return Err(invalid(&format!(
-                    "unknown .3dl key on line {}",
-                    line_no + 1
-                )));
+            let numeric = fields.iter().all(|f| f.parse::<f32>().is_ok());
+            if !numeric {
+                return Err(invalid(&format!("bad .3dl value on line {}", line_no + 1)));
             }
-            if fields.len() < 3 {
+            if fields.len() != 3 && size.is_none() && rows.is_empty() {
+                // The mesh line: one input code value per node along an axis,
+                // which is the declaration the grid size is read from. Rows are
+                // three fields wide, so a line of any other width that comes
+                // before any row can only be this.
+                let n = fields.len();
+                if !(2..=64).contains(&n) {
+                    return Err(invalid("a .3dl size must be 2..=64"));
+                }
+                size = Some(n);
+                continue;
+            }
+            if fields.len() != 3 {
                 return Err(invalid(&format!(
                     "a .3dl row needs 3 channels on line {}",
                     line_no + 1
                 )));
             }
             let mut v = [0.0f32; 3];
-            for (i, f) in fields.iter().take(3).enumerate() {
+            for (i, f) in fields.iter().enumerate() {
                 let n: f32 = f
                     .parse()
                     .map_err(|_| invalid(&format!("bad .3dl value `{f}`")))?;
@@ -1008,10 +1030,78 @@ LUT_3D_SIZE 2
     }
 
     #[test]
+    fn a_3dl_can_declare_its_grid_by_a_mesh_line_behind_keywords() {
+        // Autodesk's export, Color Finesse and Photoshop's lookup plugin all
+        // write a mesh line — one input code value per node along an axis, on
+        // the 0…1023 scale — where a bare size would go, and Color Finesse
+        // leads it with keyword lines that carry no node at all. This is the
+        // 7-node shape of one of Photoshop's own files.
+        const N: usize = 7;
+        let mut sized = format!("{N}\n");
+        let mut meshed = String::from(
+            "#Do not edit\n\
+             # LUT created by Synthetic Aperture Color Finesse 3 3.0.6(275)\n\
+             \n\
+             3DMESH\n\
+             Mesh 4 12\n\
+             0 171 341 512 682 853 1023\n",
+        );
+        for r in 0..N {
+            for g in 0..N {
+                for b in 0..N {
+                    let row = format!("{} {} {}\n", r * 682, g * 682, b * 682);
+                    sized.push_str(&row);
+                    meshed.push_str(&row);
+                }
+            }
+        }
+        let a = Lut::from_3dl(&sized).unwrap();
+        let b = Lut::from_3dl(&meshed).unwrap_or_else(|e| panic!("the mesh form: {e}"));
+        assert_eq!(b.size(), N, "the mesh line declares the grid side");
+        for rgb in [
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0],
+            [0.5, 0.25, 0.75],
+            [1.0, 1.0, 1.0],
+        ] {
+            for interp in [
+                Interpolation::Nearest,
+                Interpolation::Trilinear,
+                Interpolation::Tetrahedral,
+            ] {
+                assert_eq!(
+                    a.sample(rgb, interp),
+                    b.sample(rgb, interp),
+                    "{rgb:?} under {interp:?}: the header changed the look"
+                );
+            }
+        }
+        // The mesh line is not read as a row: the node red reaches is the one
+        // the file's last row holds, not the ramp's top value.
+        let red = b.sample([1.0, 0.0, 0.0], Interpolation::Nearest);
+        assert!(close(red[0], 1.0, 1e-3), "{red:?}");
+        assert!(
+            close(red[1], 0.0, 1e-6) && close(red[2], 0.0, 1e-6),
+            "{red:?}"
+        );
+    }
+
+    #[test]
     fn bad_3dl_files_are_rejected() {
         assert!(Lut::from_3dl("3\n0 0 0\n").is_err());
         assert!(Lut::from_3dl("0 0 0\n1 1 1\n").is_err());
         assert!(Lut::from_3dl("3\n0 0\n").is_err());
+        // A line of four or more values is a mesh declaration only before the
+        // grid starts; once rows are coming in it is a row of the wrong width.
+        assert!(
+            Lut::from_3dl("3DMESH\n0 171 341 512 682 853 1023\n0 0 0\n0 0 0 0\n").is_err(),
+            "a wide row after the grid starts"
+        );
+        // A mesh line that does not match the rows behind it is not a size.
+        assert!(Lut::from_3dl("0 171 341 512 682 853 1023\n0 0 0\n").is_err());
+        // Neither line says how wide the grid is.
+        assert!(Lut::from_3dl("3\n0 0 0\n3\n1 1 1\n").is_err());
     }
 
     #[test]

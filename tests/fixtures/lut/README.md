@@ -196,3 +196,66 @@ Two format quirks the runs above also showed, neither of them a Fvid problem:
 `.cube` at all — `lut3d` says "3D LUT is empty" — so a one-dimensional look has
 no oracle here beyond `lut1d`, which has a different syntax again.
 
+## What real `.3dl` files look like
+
+The twin above is written the way the specification-ish descriptions say, with a
+bare size line on line 1. Thirty-six files from public repositories — Babylon.js
+and three.js assets, Color Finesse and Photoshop preset dumps, Truelight and
+Autodesk 3D Studio exports, a Blender export — were measured against the reader
+instead, and not one of them is in that shape. They are not committed: they are
+third-party work, and what matters is their shape rather than their pixels.
+
+| shape | files |
+| --- | --- |
+| grid declared by a mesh line of 17 input codes | 30 |
+| grid declared by a mesh line of 16 codes | 4 |
+| grid declared by a mesh line of 7 codes (one Photoshop export) | 1 |
+| nothing declares the grid at all | 1 |
+| Color Finesse keyword headers (`3DMESH`, `Mesh 4 12`) | 12 |
+| bare size line | 0 |
+
+A mesh line lists one input code value per node along an axis, always on a
+0…1023 scale whatever the grid — `0 64 128 … 960 1023` for a 17-grid — so it
+carries no output information beyond the count of values, which is the size. The
+second number of `Mesh 4 12` is the output depth: 35 of the 36 files hold values
+up to 4095, and the one that declares `Mesh 4 16` holds values up to 65 535.
+Every file has at least a `#` comment; the Color Finesse ones put their keywords
+on lines 3–4, in front of the mesh line.
+
+Before a mesh line or a keyword line was understood, 0 of the 36 parsed: 12 died
+on `3DMESH`, which was read as a size, and 24 died for want of a size, because
+the mesh line had been quietly folded into the rows. After it, 35 of 36 parse,
+with grid sides `{7: 1, 16: 4, 17: 30}`. The refusal left is the undeclared
+file, `toru-ver4_sip__hoge.fuga.3dl`: 4 913 rows, no size and no mesh line, so
+only a count of them says it is a 17-grid — and it is the 16-bit one, whose
+scale is the second thing that file needs before it reads correctly.
+
+`ffmpeg` cannot arbitrate any of that: it refuses the keyword files outright.
+What it does settle is that a mesh line is *only* a size declaration, which is
+what `a_3dl_that_declares_its_mesh_gives_ffmpeg_the_same_table` relies on.
+Rewriting the committed twin that way leaves its references untouched:
+
+```sh
+python3 - <<'PY'
+t = open("grade-17.3dl").read().splitlines()
+mesh = " ".join(str(round(i * 1023 / 16)) for i in range(17))
+open("mesh-17.3dl", "w").write(mesh + "\n" + "\n".join(t[1:]) + "\n")
+PY
+for m in nearest trilinear tetrahedral; do
+  ffmpeg -v error -y -f rawvideo -pix_fmt rgb24 -s 64x64 -i probe.rgb \
+    -vf "lut3d=file=mesh-17.3dl:interp=$m" -frames:v 1 -pix_fmt rgb24 \
+    -f rawvideo mesh-$m.rgb
+  cmp mesh-$m.rgb ffmpeg-3dl-$m.rgb && echo "$m: mesh form == size form"
+done
+```
+
+All three modes print their line: the mesh-declared file and the size-declared
+file are the same input to `ffmpeg`, byte for byte, so the counts recorded in
+the section above — 6 564, 6 635, 6 621 — are asserted against the mesh form
+too, and are the same numbers.
+
+One ambiguity the census cannot resolve: a 3-node grid's mesh line is three
+values wide, which is exactly a row, and nothing in the file tells them apart.
+Fvid reads such a line as a row, which leaves the file without a size and it is
+refused. No writer seen does this; the smallest real grid measured is 7.
+
