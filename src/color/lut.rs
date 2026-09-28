@@ -231,19 +231,37 @@ pub enum Lut {
 
 impl Lut {
     /// Resolve/Adobe `.cube`, including the files that write a 1D table ahead of
-    /// the 3D one. A node outside the display range is kept as authored; only
-    /// the code a graded sample becomes is decided by the ends.
+    /// the 3D one and the exports that carry a pre-LUT or a shaper in front of
+    /// it — those sections are read and dropped, which is what both reference
+    /// readers were measured to do. A node outside the display range is kept as
+    /// authored, and only the code a graded sample becomes is decided by the ends.
     pub fn from_cube(text: &str) -> Result<Self> {
         let mut one_size = None;
         let mut three_size = None;
         let mut domain_min = [0.0f32; 3];
         let mut domain_max = [1.0f32; 3];
+        let mut one_min = None;
+        let mut one_max = None;
+        let mut three_min = None;
+        let mut three_max = None;
         // One file can declare both sizes, so each run of numbers is kept in the
         // bucket its own size line opened; a single list would leave neither
         // count matching.
         let mut one_values: Vec<f32> = Vec::new();
         let mut three_values: Vec<f32> = Vec::new();
         let mut section = None;
+        // A pre-LUT or a shaper is a section of its own, ahead of the grid, and
+        // FFmpeg's `lut3d` — the reader this repository qualifies against — reads
+        // it and drops it: `ffmpeg-preluted-*.rgb` in `tests/fixtures/lut/` are the
+        // bytes it wrote for `preluted-17.cube`, a 17-grid with a `LUT_PRELUT_1D_SIZE`
+        // pair, a `LUT_PRELUT_3D_SIZE` grid and a `LUT_1D_SHAPER_SIZE` curve written
+        // in front of it, and they are `cmp`-identical to the bytes it wrote for the
+        // bare grid in all three interpolation modes. That holds with a pre-LUT that
+        // maps white to black. So the rows are counted out and thrown away here;
+        // leaving them to the grid's bucket would shift the colour instead of leaving
+        // it alone, and applying them would move fvid off the reader. OpenColorIO's
+        // Resolve reader refuses these files outright, so it decides nothing here.
+        let mut skip_rows = 0usize;
         for (line_no, raw) in text.lines().enumerate() {
             let line = raw.split('#').next().unwrap_or("").trim();
             if line.is_empty() {
@@ -271,11 +289,55 @@ impl Lut {
                 domain_max = parse3(rest, line_no)?;
                 continue;
             }
-            if upper.starts_with("LUT_1D_INPUT_RANGE")
-                || upper.starts_with("LUT_1D_OUTPUT_RANGE")
-                || upper.starts_with("OUTPUT_DOMAIN_MIN")
-                || upper.starts_with("OUTPUT_DOMAIN_MAX")
-            {
+            if let Some(rest) = upper.strip_prefix("LUT_PRELUT_1D_SIZE") {
+                skip_rows = parse_size(rest, line_no, MAX_1D_ENTRIES)?;
+                continue;
+            }
+            if let Some(rest) = upper.strip_prefix("LUT_PRELUT_3D_SIZE") {
+                // The key states the side, and a section of side `n` runs `n³`
+                // rows, so the count to read past is the grid's, not the number on
+                // the line.
+                skip_rows = parse_size(rest, line_no, MAX_3D_SIDE)?.pow(3);
+                continue;
+            }
+            if let Some(rest) = upper.strip_prefix("LUT_1D_SHAPER_SIZE") {
+                skip_rows = parse_size(rest, line_no, MAX_1D_ENTRIES)?;
+                continue;
+            }
+            // The two `*_INPUT_RANGE` keys are the other spelling the input domain
+            // has, written as a scalar pair rather than a triple, and each one
+            // belongs to its own table. On the 17-grid of `grade-17.cube` with its
+            // DOMAIN lines taken out, OCIO's `ociochecklut` answers 0.25 with
+            // 0.251519 — and with `LUT_3D_INPUT_RANGE 0.0 0.5` written ahead of it,
+            // with 0.531026, which is the same file's own answer at 0.5, so half the
+            // declared range is the whole grid; `DOMAIN_MAX 0.5 0.5 0.5` gives the
+            // identical number, and `LUT_1D_INPUT_RANGE 0.0 0.5` on that grid leaves
+            // it at 0.251519, so the pair belongs to its own table. `ffmpeg lut3d`
+            // reads neither key, nor DOMAIN_MIN/MAX, so the domain follows OCIO here
+            // the way it already does for DOMAIN_*. A line that writes the pair as
+            // two triples is not the pair: OCIO leaves that form unread too.
+            let range = upper
+                .strip_prefix("LUT_1D_INPUT_RANGE")
+                .or_else(|| upper.strip_prefix("LUT_3D_INPUT_RANGE"));
+            if let Some(rest) = range {
+                let three = upper.starts_with("LUT_3D_INPUT_RANGE");
+                if let Some((lo, hi)) = parse_pair(rest) {
+                    if three {
+                        three_min = Some(lo);
+                        three_max = Some(hi);
+                    } else {
+                        one_min = Some(lo);
+                        one_max = Some(hi);
+                    }
+                }
+                continue;
+            }
+            // The rows of a section this reader drops still have to be read past,
+            // or the table beside them swallows them as its own.
+            if skip_rows > 0 {
+                if is_number_line(line) {
+                    skip_rows -= 1;
+                }
                 continue;
             }
             if is_number_line(line) {
@@ -295,10 +357,17 @@ impl Lut {
                 );
                 continue;
             }
-            return Err(invalid(&format!(
-                "unknown .cube key on line {}",
-                line_no + 1
-            )));
+            // What is left is a key this reader has no clause for, and the file
+            // keeps opening: `LUT_TYPE 3D`, `VERTEX_FORMAT UNSIGNED_BYTE`,
+            // `NUM_SAMPLES 100`, `LUT_3D_OUTPUT_RANGE` and a line written
+            // `BOGUS_KEY 3` all leave `ffmpeg lut3d` answering with the grid alone,
+            // byte for byte the same frame it writes without them. OpenColorIO's
+            // Resolve reader rejects each of them instead — it is FFmpeg that decides
+            // this. Refusing a key would lock out a file whose colour is settled, and
+            // accepting one cannot quiet a real mistake: the rows a section needs are
+            // counted against its own size line, so numbers belonging to an unknown
+            // key land in the bucket of the table beside them and fail that table's
+            // count — an error, not a wrong colour.
         }
         let nan = one_values
             .iter()
@@ -335,8 +404,8 @@ impl Lut {
                 .collect();
             return Ok(Self::Three(Lut3d {
                 size: n,
-                domain_min,
-                domain_max,
+                domain_min: three_min.unwrap_or(domain_min),
+                domain_max: three_max.unwrap_or(domain_max),
                 data,
             }));
         }
@@ -367,8 +436,8 @@ impl Lut {
             }
             return Ok(Self::One(Lut1d {
                 data,
-                domain_min,
-                domain_max,
+                domain_min: one_min.unwrap_or(domain_min),
+                domain_max: one_max.unwrap_or(domain_max),
             }));
         }
         Err(invalid("a .cube must declare LUT_1D_SIZE or LUT_3D_SIZE"))
@@ -1070,6 +1139,21 @@ fn parse3(rest: &str, line_no: usize) -> Result<[f32; 3]> {
     Ok([nums[0], nums[1], nums[2]])
 }
 
+/// A key's scalar pair, which is how `LUT_1D_INPUT_RANGE` and
+/// `LUT_3D_INPUT_RANGE` state the input domain: two numbers, the ends, applied to
+/// every channel. Any other count on that line is not the pair and is left alone,
+/// as OCIO leaves the six-number form of it alone.
+fn parse_pair(rest: &str) -> Option<([f32; 3], [f32; 3])> {
+    let nums: Vec<f32> = rest
+        .split_whitespace()
+        .filter_map(|t| t.parse().ok())
+        .collect();
+    if nums.len() != 2 {
+        return None;
+    }
+    Some(([nums[0]; 3], [nums[1]; 3]))
+}
+
 fn is_number_line(line: &str) -> bool {
     line.split_whitespace()
         .next()
@@ -1374,6 +1458,104 @@ LUT_3D_SIZE 2
         ] {
             assert!(Lut::from_cube(bad).is_err(), "accepted: {bad:?}");
         }
+    }
+
+    /// A pre-LUT is a section the writers put in front of the grid, and FFmpeg's
+    /// `lut3d` was measured to read it and drop it: the bytes it writes for a grid
+    /// with a `LUT_PRELUT_1D_SIZE` pair, a `LUT_PRELUT_3D_SIZE` grid and a
+    /// `LUT_1D_SHAPER_SIZE` curve ahead of it are `cmp`-identical to the bytes it
+    /// writes for the bare grid in all three modes, including a pair that maps white
+    /// to black (`tests/fixtures/lut/preluted-17.cube`). The rows are read past here,
+    /// so the grid keeps both its colour and its count.
+    #[test]
+    fn a_pre_lut_section_is_read_past_and_leaves_the_grid_alone() {
+        let grid = "LUT_3D_SIZE 2\n0 0 0\n0 0 1\n1 0 0\n1 0 1\n0 1 0\n0 1 1\n1 1 0\n1 1 1\n";
+        let plain = Lut::from_cube(grid).unwrap();
+        for head in [
+            "LUT_PRELUT_1D_SIZE 2\n0 0 0\n0 0 0\n",
+            "LUT_PRELUT_1D_SIZE 2\n1 1 1\n0 0 0\n",
+            "LUT_PRELUT_3D_SIZE 2\n0 0 0\n0 0 0\n0 0 0\n0 0 0\n1 1 1\n1 1 1\n1 1 1\n1 1 1\n",
+            "LUT_1D_SHAPER_SIZE 4\n0 0 0\n0.3 0.3 0.3\n0.7 0.7 0.7\n1 1 1\n",
+        ] {
+            let with = Lut::from_cube(&format!("{head}{grid}"))
+                .unwrap_or_else(|e| panic!("{head:?}: {e}"));
+            assert_eq!(with, plain, "{head:?}");
+            for input in [
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0],
+            ] {
+                assert_eq!(
+                    with.sample(input, Interpolation::Nearest),
+                    plain.sample(input, Interpolation::Nearest),
+                    "{head:?} at {input:?}"
+                );
+            }
+        }
+    }
+
+    /// A key this reader has no clause for does not close the file, because the
+    /// reader this repository qualifies against lets it move nothing: with
+    /// `LUT_TYPE 3D`, `VERTEX_FORMAT UNSIGNED_BYTE`, `NUM_SAMPLES 100` and a
+    /// `LUT_3D_OUTPUT_RANGE` triple ahead of the same grid, `ffmpeg lut3d` writes
+    /// the frame it writes without them, byte for byte. OpenColorIO's Resolve reader
+    /// rejects each of those keys instead, so FFmpeg decides this: the file is read
+    /// as though the key were a comment.
+    #[test]
+    fn a_vendor_key_line_does_not_move_the_grid_or_close_the_file() {
+        let grid = "LUT_3D_SIZE 2\n0.1 0.1 0.1\n0.1 0.1 0.1\n0.1 0.1 0.1\n0.1 0.1 0.1\n\
+                    0.1 0.1 0.1\n0.1 0.1 0.1\n0.1 0.1 0.1\n0.9 0.9 0.9\n";
+        for head in [
+            "LUT_TYPE 3D",
+            "VERTEX_FORMAT UNSIGNED_BYTE",
+            "NUM_SAMPLES 100",
+            "LUT_3D_OUTPUT_RANGE 0.0 0.0 0.0",
+            "BOGUS_KEY 3",
+        ] {
+            let lut = Lut::from_cube(&format!("{head}\n{grid}")).unwrap();
+            assert_eq!(
+                lut.sample([1.0, 1.0, 1.0], Interpolation::Nearest),
+                [0.9, 0.9, 0.9],
+                "{head}"
+            );
+        }
+    }
+
+    /// `LUT_3D_INPUT_RANGE a b` is the grid's domain in the other spelling, and
+    /// OCIO applies it: on a `LUT_3D_SIZE 2` identity grid whose range is written
+    /// 0.0 0.5, `ociochecklut` answers 0.25 with 0.5, half of the declared range
+    /// being the whole grid. The same pair under `LUT_1D_INPUT_RANGE` on that grid
+    /// leaves the answer at 0.25, and the six-number form of the grid's own key
+    /// leaves it there too, so only a table's own scalar pair is read. `ffmpeg
+    /// lut3d` reads neither of them, nor DOMAIN_MIN/MAX, so the domain follows
+    /// OCIO the way it already does for DOMAIN_*.
+    #[test]
+    fn an_input_range_pair_is_read_as_the_domain_of_its_own_table() {
+        let grid = "LUT_3D_SIZE 2\n0 0 0\n1 0 0\n0 1 0\n1 1 0\n0 0 1\n1 0 1\n0 1 1\n1 1 1\n";
+        for (head, expected) in [
+            ("LUT_3D_INPUT_RANGE 0.0 0.5", [0.5; 3]),
+            ("LUT_1D_INPUT_RANGE 0.0 0.5", [0.25; 3]),
+            ("LUT_3D_INPUT_RANGE 0 0 0 0.5 0.5 0.5", [0.25; 3]),
+        ] {
+            let lut = Lut::from_cube(&format!("{head}\n{grid}")).unwrap();
+            assert_eq!(
+                lut.sample([0.25; 3], Interpolation::Trilinear),
+                expected,
+                "{head}"
+            );
+        }
+        // The 1D key on a 1D table is its domain as well, pinned on the two
+        // answers OCIO gives for the same file: 0.25 lands on the middle entry and
+        // 0.5 on the top one, the range being half of what the codes say.
+        let one =
+            "LUT_1D_SIZE 3\nLUT_1D_INPUT_RANGE 0.0 0.5\n0.0 0.0 0.0\n0.5 0.5 0.5\n1.0 1.0 0.0\n";
+        let lut = Lut::from_cube(one).unwrap();
+        assert_eq!(lut.sample([0.25; 3], Interpolation::Trilinear), [0.5; 3]);
+        assert_eq!(
+            lut.sample([0.5; 3], Interpolation::Trilinear),
+            [1.0, 1.0, 0.0]
+        );
     }
 
     /// A file that writes both tables is a grid with a curve in front of it, and
@@ -1698,6 +1880,73 @@ LUT_3D_SIZE 2
         assert!(close(black[0], 0.0, 1e-3), "{black:?}");
         let top = cube.sample([1.0; 3], Interpolation::Trilinear);
         assert!(close(top[0], 1.0, 1e-3), "{top:?}");
+    }
+
+    #[test]
+    fn every_camera_log_cube_can_stop_at_linear_light() {
+        // A destination of `Transfer::Linear` writes the light itself: the curve
+        // has no encoding, its `oetf` answers `None`, and the bake leaves the
+        // value as it stands. Nothing else in the suite names that stop, so the
+        // anchors here are the vendors' own code tables, read the way each table
+        // is scaled — S-Log3 and Canon Log over 0..=1023, S-Log2/1 over the
+        // 64..=940 legal range — and the expectation is scene reflectance rather
+        // than a code for it.
+        for (profile, code18, code90) in [
+            (Log::SLog3, 420.0, 598.0),
+            (Log::SLog2, 347.0, 582.0),
+            (Log::SLog1, 394.0, 636.0),
+            (Log::CLog, 351.0, 614.0),
+        ] {
+            let codes = profile.codes();
+            let signal = |code: f32| (code - codes.black) / codes.span;
+            let cube = CubePlan::camera_log(
+                profile,
+                Transfer::Linear,
+                Primaries::BT709,
+                Primaries::BT709,
+                65,
+            )
+            .build();
+            let grey = cube.sample([signal(code18); 3], Interpolation::Trilinear);
+            let white = cube.sample([signal(code90); 3], Interpolation::Trilinear);
+            // The residual is the grid and the reading between its nodes, not the
+            // curve: at S-Log3's 90 % code the same probe reads 0.829 631 at 17
+            // nodes, 0.903 043 at 65 and 0.901 261 at 129, closing on the tabled
+            // 0.90 as the nodes multiply. The bounds below hold the measured worst
+            // of the four curves at 65 nodes — 3.8e-4 on grey, 3.1e-3 on white,
+            // the top of a log curve being where light-space nodes sit furthest
+            // apart — with the headroom of one 8-bit code step (3.9e-3).
+            assert!(close(grey[0], 0.18, 1e-3), "{profile:?} grey {grey:?}");
+            assert!(close(white[0], 0.90, 4e-3), "{profile:?} white {white:?}");
+            assert!(
+                grey.iter().all(|v| (0.0..=1.0).contains(v)),
+                "{profile:?} {grey:?}"
+            );
+        }
+        // The stop is what separates the two answers: the same Sony 18 % code
+        // measured as Rec.709 code for the same exposure is 0.409, not 0.18.
+        let gamma = CubePlan::camera_log(
+            Log::SLog3,
+            Transfer::Bt709,
+            Primaries::BT709,
+            Primaries::BT709,
+            65,
+        )
+        .build()
+        .sample([420.0 / 1023.0; 3], Interpolation::Trilinear);
+        assert!(close(gamma[0], 0.409_008, 2e-3), "{gamma:?}");
+        // Above diffuse white a linear stop has nowhere to go, so the top of the
+        // curve arrives at 1.0 and stays there — the price of asking for light.
+        let linear = CubePlan::camera_log(
+            Log::SLog3,
+            Transfer::Linear,
+            Primaries::BT709,
+            Primaries::BT709,
+            65,
+        )
+        .build();
+        let top = linear.sample([1.0; 3], Interpolation::Trilinear);
+        assert!(close(top[0], 1.0, 1e-4), "{top:?}");
     }
 
     #[test]
@@ -2229,6 +2478,11 @@ Components 1
     /// sRGB curve. This is the check that the `From` pair is an input range and
     /// not a scale on the output: at −0.125 the index it declares is 0 and the
     /// value there is not zero, and at 1.0 the index is 3690 and the value is one.
+    ///
+    /// FFmpeg has no reader for this format, so the second answer comes from
+    /// `ociochecklut` of OpenColorIO 2.5.2, which reads the same file and returns
+    /// 0.050 876 09 at 0.25, 0.214 041 1 at 0.5 and 0.522 521 6 at 0.75 — the sRGB
+    /// decode of each input, which is what the probes below assert.
     #[test]
     fn a_real_spi1d_is_the_srgb_curve_over_the_range_it_declares() {
         let lut = Lut::from_text(SPI1D_SRGB).expect("the OpenColorIO table reads");
@@ -2265,6 +2519,12 @@ Components 1
     /// The grid OpenColorIO's own test suite uses to catch a reader that assumes a
     /// row order: its rows run with blue fastest, which is the reverse of how
     /// fvid's table stores a node, and every row states the node it means.
+    ///
+    /// FFmpeg refuses this file, so the corroborating reader is `ociochecklut` of
+    /// OpenColorIO 2.5.2 again, and it answers at the corners the row order
+    /// decides: 1.622 678 red at [1, 0, 0], 0.097 751 71 green at [0, 0, 1],
+    /// 0.371 456 5 red at [0.5, 0.5, 0.5]. The same digits the three asserts below
+    /// read off the parsed grid.
     #[test]
     fn a_spi3d_row_places_its_node_by_its_own_indices() {
         let lut = Lut::from_spi3d(SPI3D_BIZARRE).unwrap();

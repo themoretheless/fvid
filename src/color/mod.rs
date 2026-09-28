@@ -12,7 +12,7 @@ pub mod primaries;
 pub mod tonemap;
 pub mod transfer;
 
-pub use grade::{Grade, Settings};
+pub use grade::{Grade, Settings, ShaderLook};
 pub use hdr::{
     mdcv_payload, ColourDescription, HdrMetadata, MasteringDisplay, CLLI_PAYLOAD_LEN,
     MDCV_PAYLOAD_LEN, SEI_CLLI, SEI_MDCV,

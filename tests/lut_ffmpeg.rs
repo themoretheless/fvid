@@ -11,6 +11,7 @@
 use fvid::color::{Interpolation, Lut, Lut3d};
 
 const CUBE: &str = include_str!("fixtures/lut/grade-17.cube");
+const PRELUTED: &str = include_str!("fixtures/lut/preluted-17.cube");
 const OVER: &str = include_str!("fixtures/lut/over-17.cube");
 const THREE_DL: &str = include_str!("fixtures/lut/grade-17.3dl");
 const DAT: &str = include_str!("fixtures/lut/grade-17.dat");
@@ -24,6 +25,17 @@ fn reference(mode: &str) -> Vec<u8> {
         "trilinear" => include_bytes!("fixtures/lut/ffmpeg-trilinear.rgb").to_vec(),
         "tetrahedral" => include_bytes!("fixtures/lut/ffmpeg-tetrahedral.rgb").to_vec(),
         other => unreachable!("no reference for {other}"),
+    }
+}
+
+/// The reference `ffmpeg` wrote for the same grid with sections and vendor keys
+/// written in front of it.
+fn reference_preluted(mode: &str) -> Vec<u8> {
+    match mode {
+        "nearest" => include_bytes!("fixtures/lut/ffmpeg-preluted-nearest.rgb").to_vec(),
+        "trilinear" => include_bytes!("fixtures/lut/ffmpeg-preluted-trilinear.rgb").to_vec(),
+        "tetrahedral" => include_bytes!("fixtures/lut/ffmpeg-preluted-tetrahedral.rgb").to_vec(),
+        other => unreachable!("no pre-LUT reference for {other}"),
     }
 }
 
@@ -613,4 +625,113 @@ fn clamping_a_cube_at_parse_is_a_different_look_not_a_rounding_gap() {
             "{mode}: channels `ffmpeg` clips to black that the clamped table leaves short"
         );
     }
+}
+
+/// The same 17-grid with the sections a grading suite writes in front of it: a
+/// `LUT_PRELUT_1D_SIZE` curve, a `LUT_PRELUT_3D_SIZE` grid, a
+/// `LUT_1D_SHAPER_SIZE` curve and the `LUT_TYPE`, `VERTEX_FORMAT`,
+/// `NUM_SAMPLES` and `LUT_3D_OUTPUT_RANGE` keys, behind two comment lines.
+/// `ffmpeg lut3d` opens the file and moves nothing: the bytes it wrote for it are
+/// the bytes it wrote for the bare grid, byte for byte in all three modes, so the
+/// shaper that maps white to black leaves the picture exactly as white.
+///
+/// OpenColorIO's Resolve reader refuses the same file outright — `ociochecklut`
+/// reports `At line (1): 'LUT_TYPE 3D'. Malformed color triples specified`, and
+/// the same for each of the other keys — so the tolerance here follows FFmpeg,
+/// the reader this repository qualifies against, and the record of what each key
+/// is worth sits in `tests/fixtures/lut/README.md`. Refusing a key this reader
+/// has no clause for would lock out a file whose colour is settled; a section's
+/// rows are counted out instead, so they cannot land in the grid's own bucket and
+/// shift the look it carries.
+#[test]
+fn a_cube_with_a_pre_lut_and_vendor_keys_walks_with_ffmpeg() {
+    let with = Lut::from_cube(PRELUTED).expect("a grid with sections ahead of it is still a cube");
+    let plain = Lut::from_cube(CUBE).expect("a written cube is a cube");
+    assert_eq!(with, plain, "the sections moved what the sampler reads");
+    // The player and `--lut` hand the file to the sniffing entry, not to
+    // `from_cube`, so the same file has to be read as a cube there too.
+    let sniffed = Lut::from_text(PRELUTED).expect("the sniffer reads a preluted file as a cube");
+    assert_eq!(sniffed, plain, "the sniffer and the cube reader agree");
+
+    let colours = probe_colours();
+    for (mode, interp, rounded_differently) in [
+        ("nearest", Interpolation::Nearest, 4_826usize),
+        ("trilinear", Interpolation::Trilinear, 5_354),
+        ("tetrahedral", Interpolation::Tetrahedral, 5_298),
+    ] {
+        let theirs = reference_preluted(mode);
+        assert_eq!(
+            theirs,
+            reference(mode),
+            "{mode}: the oracle's own answer for the two files"
+        );
+        let mut differences = 0usize;
+        for (i, rgb) in colours.iter().enumerate() {
+            let exact = with.sample(*rgb, interp);
+            for ch in 0..3 {
+                let mine = (exact[ch] * 255.0).round() as i32;
+                let other = i32::from(theirs[i * 3 + ch]);
+                let delta = (mine - other).abs();
+                assert!(delta <= 1, "{mode} channel {ch} moved {delta} codes");
+                differences += usize::from(delta == 1);
+            }
+        }
+        assert_eq!(
+            differences, rounded_differently,
+            "{mode}: the count that differs by one code"
+        );
+    }
+}
+
+/// `LUT_3D_INPUT_RANGE 0.0 0.5` is the grid's input domain in a scalar pair, and
+/// OCIO reads it as one: over the 17-grid of `grade-17.cube` with its DOMAIN lines
+/// taken out, `ociochecklut` answers 0.25 with 0.251519, and answers it with
+/// 0.531026 once that pair is written ahead of the grid — the same file's own
+/// answer at 0.5, so half the declared range is the whole grid. `DOMAIN_MAX 0.5`
+/// gives the identical 0.531026, which is the disagreement FFmpeg has with this
+/// reader about `DOMAIN_MIN`/`DOMAIN_MAX` too, and which the domain has followed
+/// OCIO on since it was first read. The 2-grid below is that measurement written
+/// down in the smallest file that states it, and the tables beside it are the
+/// same key over a 1D table, where OCIO returns 0.5 for 0.25 and the grid's own
+/// 0.25 for a pair written under the other table's key.
+#[test]
+fn a_cube_naming_its_input_range_grids_the_domain() {
+    let text = "LUT_3D_SIZE 2\nLUT_3D_INPUT_RANGE 0.0 0.5\n\
+                0 0 0\n1 0 0\n0 1 0\n1 1 0\n0 0 1\n1 0 1\n0 1 1\n1 1 1\n";
+    let lut = Lut::from_cube(text).expect("a grid with its range stated is a cube");
+    let Lut::Three(cube) = &lut else {
+        panic!("a size line makes it a grid");
+    };
+    assert_eq!(cube.domain_min, [0.0; 3]);
+    assert_eq!(cube.domain_max, [0.5; 3]);
+    assert_eq!(lut.sample([0.25; 3], Interpolation::Trilinear), [0.5; 3]);
+    // A pair under the other table's key is not this grid's range, and OCIO says
+    // so with the same 0.25 it returns for a file that states no range at all.
+    let other = text.replace("LUT_3D_INPUT_RANGE", "LUT_1D_INPUT_RANGE");
+    let lut = Lut::from_cube(&other).expect("the 1D key does not close a grid");
+    assert_eq!(lut.sample([0.25; 3], Interpolation::Trilinear), [0.25; 3]);
+    // The same key over a 1D table is that table's domain, pinned on OCIO's two
+    // answers for it: 0.25 of a 0…0.5 range is the middle entry, 0.5 is the top.
+    let one = "LUT_1D_SIZE 3\nLUT_1D_INPUT_RANGE 0.0 0.5\n0.0 0.0 0.0\n0.5 0.5 0.5\n1.0 1.0 0.0\n";
+    let lut = Lut::from_cube(one).expect("a 1D table with its range stated");
+    let Lut::One(table) = &lut else {
+        panic!("a size line makes it a table");
+    };
+    assert_eq!(table.domain_max, [0.5; 3]);
+    assert_eq!(lut.sample([0.25; 3], Interpolation::Trilinear), [0.5; 3]);
+    assert_eq!(
+        lut.sample([0.5; 3], Interpolation::Trilinear),
+        [1.0, 1.0, 0.0]
+    );
+    // The same over a ramp long enough to place the answer inside the table rather
+    // than on an entry: OCIO returns 0.5 for 0.25 and 1.0 for 0.5 against a 17-entry
+    // ramp, which is the ramp read at half its own length.
+    let mut ramp = String::from("LUT_1D_SIZE 17\nLUT_1D_INPUT_RANGE 0.0 0.5\n");
+    for i in 0..17 {
+        let v = i as f32 / 16.0;
+        ramp.push_str(&format!("{v:.6} {v:.6} {v:.6}\n"));
+    }
+    let lut = Lut::from_cube(&ramp).expect("a long table with its range stated");
+    assert_eq!(lut.sample([0.25; 3], Interpolation::Trilinear), [0.5; 3]);
+    assert_eq!(lut.sample([0.5; 3], Interpolation::Trilinear), [1.0; 3]);
 }

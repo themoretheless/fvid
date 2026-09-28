@@ -66,7 +66,11 @@ pub fn startup_buffer(period: Duration) -> Duration {
 /// or 8-bit planes converted to RGB by the GPU shader.
 pub enum Pixels {
     Rgb(Vec<u8>),
-    Planar(Arc<Planar8>),
+    /// 8-bit planes, and the grade they still owe the window. A plane picture
+    /// only keeps its planes when that grade is one table the fragment shader
+    /// can bind — see [`Grade::shader_look`] — so the second half is never a
+    /// grade the shader would have to refuse.
+    Planar(Arc<Planar8>, Option<Arc<Grade>>),
 }
 
 pub struct Frame {
@@ -121,23 +125,26 @@ enum Stage {
 /// This is where a [`Grade`] is applied, because it is the one place every
 /// CPU-bound frame passes through before the window sees it, and it is applied
 /// after the container's turn so the codes are looked up in the orientation
-/// they are shown in. A plane picture that is graded has to become packed RGB
-/// for it; a picture with nothing done to its colour keeps its planes, and so
-/// does one whose grade turns out to be its own input — which is what a caller
-/// asking for the panel's own curve gets.
+/// they are shown in. A plane picture whose grade is a single table does not
+/// have to become packed RGB for it: the fragment shader reads that table, so
+/// the planes travel with it and are named by the `Planar` arm's second half.
+/// Anything the shader cannot carry — a second grid after the conversion, or
+/// nothing at all — is applied here, and a grade that turns out to be its own
+/// input leaves the picture untouched, which is what a caller asking for the
+/// panel's own curve gets.
 fn into_pixels(
     raw: RawFrame,
     rotation: u16,
     budget: usize,
-    grade: Option<&Grade>,
+    grade: Option<&Arc<Grade>>,
 ) -> crate::Result<Pixels> {
     let pixels = match raw {
         RawFrame::Rgb(rgb) => Pixels::Rgb(rgb),
         RawFrame::Avc { picture, colour } => {
-            Pixels::Planar(Arc::new(avc_to_planar8(&picture, colour)))
+            Pixels::Planar(Arc::new(avc_to_planar8(&picture, colour)), None)
         }
         // Hardware output is already 8-bit planes: no copy at all.
-        RawFrame::Planar8(planes) => Pixels::Planar(planes),
+        RawFrame::Planar8(planes) => Pixels::Planar(planes, None),
         RawFrame::Yuv {
             data,
             luma_len,
@@ -155,24 +162,32 @@ fn into_pixels(
     // The turn the container asked for, still owed to the planes: packed RGB
     // reaches this thread already turned, shaped that way by the reader.
     let pixels = match (pixels, rotation) {
-        (Pixels::Planar(planes), rotation) if rotation != 0 => {
-            Pixels::Planar(Arc::new(rotate_planar8(&planes, rotation)))
+        (Pixels::Planar(planes, None), rotation) if rotation != 0 => {
+            Pixels::Planar(Arc::new(rotate_planar8(&planes, rotation)), None)
         }
         (pixels, _) => pixels,
     };
     let Some(grade) = grade.filter(|grade| !grade.is_identity()) else {
         return Ok(pixels);
     };
-    let mut rgb = match pixels {
-        Pixels::Rgb(rgb) => rgb,
-        Pixels::Planar(planes) => {
+    match pixels {
+        Pixels::Rgb(mut rgb) => {
+            grade.apply(&mut rgb);
+            Ok(Pixels::Rgb(rgb))
+        }
+        // One table the shader can bind is one table the planes can travel to it
+        // with, and the window's own draw reads it there. Measured in
+        // `player_gpu`, the two routes then land on the same bytes.
+        Pixels::Planar(planes, _) if grade.is_shader_look() => {
+            Ok(Pixels::Planar(planes, Some(Arc::clone(grade))))
+        }
+        Pixels::Planar(planes, _) => {
             let mut rgb = Vec::new();
             planar8_to_rgb(&planes, &mut rgb, budget)?;
-            rgb
+            grade.apply(&mut rgb);
+            Ok(Pixels::Rgb(rgb))
         }
-    };
-    grade.apply(&mut rgb);
-    Ok(Pixels::Rgb(rgb))
+    }
 }
 
 /// Handle to the decoding threads; dropping it stops them.
@@ -193,7 +208,9 @@ pub struct Playback {
 impl Playback {
     /// Takes a reader whose first frame is already decoded and starts decoding
     /// in the background, playing from that frame. A `grade` is applied to every
-    /// picture this thread hands over, on its converter thread.
+    /// picture this thread hands over, on its converter thread — or handed over
+    /// with the picture for the fragment shader to apply, when it is one the
+    /// shader can carry.
     pub fn start<R: BufRead + Seek + Send + 'static>(
         reader: NativeReader<R>,
         grade: Option<Grade>,
@@ -224,6 +241,9 @@ impl Playback {
                 #[cfg(feature = "player")]
                 fvid_platform::prioritize_playback_thread();
                 let mut serial = 0;
+                // Shared rather than moved per frame: a plane picture hands the
+                // same baked table to the window with itself.
+                let grade = grade.map(Arc::new);
                 for stage in stage_rx {
                     // Freeing a slot must wake the producer immediately. A full
                     // control queue already contains messages that will wake it.
