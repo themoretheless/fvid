@@ -155,7 +155,11 @@ impl Grade {
             dest: settings.dest,
             size: settings.size,
             sdr_white_nits: settings.target.paper_white_nits,
-            target: tone_map.map(|_| settings.target),
+            // The panel travels with the plan whether or not something
+            // compresses onto it: HLG's codes mean "whatever this panel
+            // reaches", so a caller who named a peak has to be heard even on an
+            // unmapped route. Whether a shoulder ran is `tone_map`'s to say.
+            target: Some(settings.target),
             content,
             tone_map,
         };
@@ -424,6 +428,40 @@ mod tests {
         );
         assert!(grade.plan().tone_map.is_none());
         assert!(grade.is_identity());
+    }
+
+    /// HLG is the one HDR curve whose codes only mean light on the panel they
+    /// were written for, so the panel a caller names has to reach an unmapped
+    /// plan too. Before the target travelled with the plan every HLG
+    /// destination was written against BT.2100's 1 000 cd/m² reference, which
+    /// left a 400-nit screen showing the same code as a screen two and a half
+    /// times as bright.
+    #[test]
+    fn a_named_panel_is_what_an_hlg_code_means() {
+        for peak in [400.0, 1_000.0] {
+            let target = DisplayTarget::hdr(peak);
+            let grade = Grade::new(
+                bt709(),
+                &HdrMetadata::default(),
+                Settings {
+                    to: Transfer::Hlg,
+                    dest: Primaries::BT2020,
+                    ..Settings::video(target)
+                },
+                None,
+            );
+            assert!(grade.plan().tone_map.is_none());
+            assert_eq!(grade.plan().target, Some(target));
+            // The light an SDR code states on this panel's white, read back out
+            // of the code the grade wrote.
+            let want = Transfer::Bt709.eotf(0.5).unwrap() * target.paper_white_nits;
+            let back = Transfer::Hlg.eotf(grey(&grade, 0.5)[0]).unwrap() * peak;
+            assert!(
+                close(back, want, want * 0.02),
+                "a {peak}-nit panel got {:?} for code 0.5, meaning {back} cd/m² not {want}",
+                grey(&grade, 0.5)
+            );
+        }
     }
 
     #[test]

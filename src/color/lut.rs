@@ -754,17 +754,21 @@ impl CubePlan {
         // The panel the plan is baked for, in cd/m². An unmapped plan has no
         // panel of its own; BT.2100's reference display answers for it.
         let panel = self.target.map_or(1_000.0, |t| t.peak_nits);
-        // A log curve states 1.0 at diffuse white, while an SDR video curve has
-        // no absolute scale at all and PQ already is one. HLG is the one HDR
-        // curve whose 1.0 means "whatever this panel reaches": BT.2100 makes its
-        // scene light display-size dependent and lets γ follow the panel, so
-        // fixing HLG to the 1 000 cd/m² reference here would claim ten times the
-        // headroom a 100-nit destination has and clip every code above 0.45 to
-        // white. PQ keeps its absolute scale, because it states one.
+        // What a curve's 1.0 stands for, in cd/m². A log curve states it at
+        // diffuse white, an SDR video curve has no absolute scale at all and
+        // takes the panel's white, PQ is absolute and already is one. HLG is the
+        // one HDR curve whose 1.0 means "whatever this panel reaches": BT.2100
+        // makes its scene light display-size dependent and lets γ follow the
+        // panel, so fixing HLG to the 1 000 cd/m² reference here would claim ten
+        // times the headroom a 100-nit destination has and clip every code above
+        // 0.45 to white.
+        let full_scale = |curve: Transfer| match curve {
+            Transfer::Hlg => panel,
+            curve => curve.full_scale_nits(self.sdr_white_nits),
+        };
         let scale = match self.log {
             Some(_) => self.sdr_white_nits,
-            None if self.from == Transfer::Hlg => panel,
-            None => self.from.full_scale_nits(self.sdr_white_nits),
+            None => full_scale(self.from),
         };
         Lut3d::from_fn(self.size, |rgb| {
             let mut lin = [0.0f32; 3];
@@ -779,7 +783,15 @@ impl CubePlan {
             }
             let mapped = compress_gamut(apply(m, lin.map(f64::from)).map(|v| v as f32), self.dest);
             let display = match self.tone_map {
-                None => mapped,
+                // No compression means no panel to fit the light into, but the
+                // two curves still disagree about how much light a code carries:
+                // read the source's linear as cd/m² and hand the destination
+                // curve its own fraction of that. Where the families agree the
+                // ratio is one and the conversion stays what it was.
+                None => {
+                    let to = full_scale(self.to);
+                    mapped.map(|v| v * (scale / to))
+                }
                 Some(mode) => tone_map_rgb(
                     mapped.map(|v| v * scale),
                     mode,
@@ -1498,10 +1510,12 @@ LUT_3D_SIZE 2
         assert!(!lut.is_identity(tol), "the triangle moved");
     }
 
+    /// A cube with no tone map changes the curve and nothing else, which means
+    /// the light a code states survives: BT.2100's two families read the same
+    /// code as ten times as many cd/m² apart, and an unmapped conversion that
+    /// ignored that made a code carrying 1 000 cd/m² leave as a dark grey.
     #[test]
-    fn plain_transfer_cube_only_reaches_the_dest_curve() {
-        // No tone map: PQ's 10 000-nit scale is carried over as relative light,
-        // so 1000 nits (code 0.7518) leaves as 0.1 on the destination scale.
+    fn a_plain_transfer_cube_keeps_the_light_its_codes_state() {
         let cube = CubePlan::transfer(
             Transfer::Pq,
             Transfer::Srgb,
@@ -1511,21 +1525,64 @@ LUT_3D_SIZE 2
         )
         .build();
         assert_eq!(cube.size, 33);
-        let grey = cube.sample([0.751_827_1; 3], Interpolation::Tetrahedral);
-        assert!(
-            grey.iter().all(|v| close(*v, 0.3480, 3e-3)),
-            "1000-nit grey came out {grey:?}"
-        );
+        // The destination is an SDR curve with no panel of its own, so its
+        // scale is the reference white BT.2100 prints for one.
+        let white = crate::color::transfer::SDR_PEAK_NITS;
+        // Up to the destination's own white. The last stop short of it, since a
+        // 33-node grid interpolates the codes either side of the clip and cannot
+        // land on it from between them.
+        for nits in [5.0, 20.0, 100.0] {
+            let code = Transfer::Pq.from_nits(nits, white).unwrap();
+            let out = cube.sample([code; 3], Interpolation::Tetrahedral);
+            for channel in out {
+                let back = Transfer::Srgb.to_nits(channel, white).unwrap();
+                assert!(
+                    close(back, nits, nits * 0.03),
+                    "{nits} cd/m² (PQ {code:.4}) came out {out:?}"
+                );
+            }
+        }
         assert!(close(
             cube.sample([0.0; 3], Interpolation::Trilinear)[0],
             0.0,
             1e-6
         ));
+        // Past the destination's own white there is no code left to hold the
+        // light, so PQ's whole 10 000-nit top lands on the one code there is.
         assert!(close(
             cube.sample([1.0; 3], Interpolation::Trilinear)[0],
             1.0,
             1e-3
         ));
+    }
+
+    /// The same rule where the two families disagree by an order of magnitude:
+    /// SDR's 1.0 is a panel's white and PQ's is 10 000 cd/m², so carrying one
+    /// into the other has to move the numbers or the picture changes brightness.
+    #[test]
+    fn an_unmapped_conversion_moves_between_curve_families() {
+        let white = crate::color::transfer::SDR_PEAK_NITS;
+        let up = CubePlan::transfer(
+            Transfer::Bt709,
+            Transfer::Pq,
+            Primaries::BT709,
+            Primaries::BT2020,
+            33,
+        )
+        .build();
+        // Diffuse white leaves as the code that states it, not as the top of a
+        // 10 000-nit scale.
+        let out = up.sample([1.0; 3], Interpolation::Trilinear)[0];
+        let nits = Transfer::Pq.to_nits(out, white).unwrap();
+        assert!(close(nits, white, 2.0), "SDR white left as {nits} cd/m²");
+        // A quarter of the panel's white rides the same ratio down the scale.
+        let out = up.sample([0.5; 3], Interpolation::Trilinear)[0];
+        let nits = Transfer::Pq.to_nits(out, white).unwrap();
+        let video = Transfer::Bt709.eotf(0.5).unwrap() * white;
+        assert!(
+            close(nits, video, video * 0.02),
+            "code 0.5 states {video} cd/m², left as {nits}"
+        );
     }
 
     #[test]
