@@ -62,7 +62,7 @@ This path is still synchronous and in-process, without system-camera exposure.
 device and source stream, validates BGRA submissions, copies rows respecting
 CVPixelBuffer stride, wraps frames in timed CMSampleBuffers and sends them to
 active camera consumers. `main.swift` starts the service with a fixed initial
-1280x720/30 format. The source compiles and links with warnings-as-errors using
+1280x720/60 format. The source compiles and links with warnings-as-errors using
 the installed macOS SDK; otool reports no FFmpeg libraries for this executable.
 
 This is not yet an installable extension bundle. Host app, signing/entitlements,
@@ -173,7 +173,7 @@ and a real client-camera test.
 
 The host now has Open video and Stop video controls. CameraSession runs file
 opening, decoding, timestamp generation, frame creation and CMIO enqueue on a
-serial playback queue. Its 30-fps timer uses the CM host-clock epoch and elapsed
+serial playback queue. Its 60-fps timer uses the CM host-clock epoch and elapsed
 media time; the source holds the final frame. Full CMIO queues skip the tick.
 Stop cancels the timer, stops the stream and releases the Rust source.
 
@@ -247,7 +247,24 @@ python3 scripts/test_macos_camera_bridge.py
 ```
 
 The runner rebuilds the Rust static library, compiles Swift with warnings as
-errors and executes all three suites. The aspect suite also patches the known
+errors and executes all four suites. The aspect suite also patches the known
 MP4 fixture with a 90-degree track matrix and compares every fitted pixel and
 opaque side border against the rotated source. These tests run without system
 extension activation; they do not replace an installed-camera client test.
+
+
+### Shared 60 fps camera cadence
+
+`Shared/CameraFormat.swift` now defines 60 fps for both the host sample duration
+and extension format. Host and sink timer periods round upward to avoid polling
+before an exact rational clock slot. The host opens the Rust clock through the
+new rate-explicit FFI function; the old 30 fps constructor remains ABI-compatible.
+Clock tests verify every 60 fps slot through one second and suppress duplicate
+polls. Pipeline tests check the 1/60 sample duration, exact BGRA, timestamps and
+bounded pool reuse, alongside repeat and pixel-aspect suites. All four passed
+with host access (the sandbox could not allocate IOSurface, error -6662).
+
+An unsigned bundle built at `/tmp/FVidCamera-60fps-20260929.app`. Current signing
+inspection still found zero valid identities; installed extension and external
+CMIO client delivery remain unverified. Configuring 60 fps is not a throughput
+measurement or interpolation of lower-rate source video.

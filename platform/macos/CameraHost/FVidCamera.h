@@ -18,6 +18,7 @@ int32_t fvid_camera_fit(const uint8_t *input, size_t input_len, FVidCameraSize s
 typedef struct CameraClock FVidCameraClock;
 typedef struct { uint64_t sequence; uint64_t host_ns; uint64_t media_ns; } FVidCameraTick;
 FVidCameraClock *fvid_camera_clock_open(uint64_t now);
+FVidCameraClock *fvid_camera_clock_open_rate(uint32_t numerator, uint32_t denominator, uint64_t now);
 int32_t fvid_camera_clock_poll(FVidCameraClock *clock, uint64_t now, FVidCameraTick *output);
 // 0 seek (ns), 1 pause (boolean), 2 loop duration (ns, 0 disables).
 int32_t fvid_camera_clock_control(FVidCameraClock *clock, uint32_t command, uint64_t value, uint64_t now);

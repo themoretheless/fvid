@@ -52,7 +52,7 @@ final class CameraSink: NSObject, CMIOExtensionStreamSource {
         guard !running else { return }
         running = true
         let timer = DispatchSource.makeTimerSource(queue: queue)
-        timer.schedule(deadline: .now(), repeating: .nanoseconds(1_000_000_000 / Int(fps)))
+        timer.schedule(deadline: .now(), repeating: .nanoseconds((1_000_000_000 + Int(fps) - 1) / Int(fps)))
         timer.setEventHandler { [weak self] in self?.consume() }
         self.timer = timer
         timer.resume()

@@ -18,11 +18,15 @@ def main():
     common = [
         "xcrun", "swiftc", "-parse-as-library", "-warnings-as-errors",
         "-module-cache-path", str(cache),
+        str(PLATFORM / "Shared/CameraFormat.swift"),
         "-import-objc-header", str(PLATFORM / "CameraHost/FVidCamera.h"),
         str(FFI / "target/debug/libfvid_camera_ffi.a"),
     ]
     cases = [
         ("CameraClockTests", [], []),
+        ("CameraPipelineTests", ["NativeVideoSource.swift", "CameraSession.swift", "CameraProducer.swift",
+            "../CameraExtension/PixelPool.swift", "../CameraExtension/CameraProvider.swift",
+            "../CameraExtension/CameraSink.swift"], []),
         ("CameraRepeatTests", ["NativeVideoSource.swift"], ["tests/fixtures/video.mp4"]),
         ("CameraAspectTests", ["NativeVideoSource.swift"], ["tests/fixtures/display/par-2x1.mp4"]),
     ]
@@ -32,7 +36,7 @@ def main():
             subprocess.run(common + [str(PLATFORM / "CameraHost" / s) for s in sources]
                            + [str(PLATFORM / "Tests" / (name + ".swift")), "-o", str(output)], check=True)
             subprocess.run([str(output)] + [str(ROOT / f) for f in fixtures], check=True)
-    print("All three camera bridge suites passed; installed CMIO delivery is not tested.")
+    print("All four camera bridge suites passed; installed CMIO delivery is not tested.")
 
 
 if __name__ == "__main__":

@@ -15,6 +15,7 @@ import CoreMedia
         var samples: [CMSampleBuffer] = []
         for time in UInt64(1)...3 { samples.append(try builder.sample(pixels, hostTime: time)!) }
         for _ in 0..<100 { let extra = try builder.sample(pixels, hostTime: 4); precondition(extra == nil) }
+        precondition(CMTimeCompare(CMSampleBufferGetDuration(samples[0]), CMTime(value: 1, timescale: CameraFormat.framesPerSecond)) == 0)
         let unpacked = try CameraSink.copyBGRA(samples[0], width: 4, height: 2)
         precondition(unpacked == pixels)
         precondition(CMTimeCompare(CMSampleBufferGetPresentationTimeStamp(samples[0]), CMTime(value: 1, timescale: 1_000_000_000)) == 0)

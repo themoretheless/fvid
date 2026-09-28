@@ -31,7 +31,7 @@ final class CameraFrameBuilder {
             }
         }
         CVPixelBufferUnlockBaseAddress(image, [])
-        var timing = CMSampleTimingInfo(duration: CMTime(value: 1, timescale: 30),
+        var timing = CMSampleTimingInfo(duration: CMTime(value: 1, timescale: CameraFormat.framesPerSecond),
             presentationTimeStamp: CMTime(value: Int64(hostTime), timescale: 1_000_000_000), decodeTimeStamp: .invalid)
         var result: CMSampleBuffer?
         let status = CMSampleBufferCreateReadyWithImageBuffer(allocator: kCFAllocatorDefault, imageBuffer: image,
@@ -62,14 +62,14 @@ final class CameraSession {
                 let builder = try CameraFrameBuilder(width: width, height: height)
                 try producer.start()
                 self.source = source; self.producer = producer; self.builder = builder
-                self.clock = fvid_camera_clock_open(try Self.hostTime())
+                self.clock = fvid_camera_clock_open_rate(UInt32(CameraFormat.framesPerSecond), 1, try Self.hostTime())
                 guard self.clock != nil else { throw CameraError.invalidFrame }
                 self.paused = false
                 if self.looping && source.durationNS > 0 {
                     guard fvid_camera_clock_control(self.clock, 2, source.durationNS, try Self.hostTime()) == 1 else { throw CameraError.invalidFrame }
                 }
                 let timer = DispatchSource.makeTimerSource(queue: self.queue)
-                timer.schedule(deadline: .now(), repeating: .nanoseconds(1_000_000_000 / 30))
+                timer.schedule(deadline: .now(), repeating: .nanoseconds(CameraFormat.timerNanoseconds))
                 timer.setEventHandler { [weak self] in self?.tick() }
                 self.timer = timer; timer.resume()
                 if self.looping && source.durationNS == 0 {

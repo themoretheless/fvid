@@ -25,6 +25,16 @@ struct CameraClockTests {
         assert(fvid_camera_clock_control(clock, 99, 0, 500_000_100) == -1)
         assert(fvid_camera_clock_poll(clock, 600_000_100, &tick) == 1)
         assert(tick.media_ns == 0 && tick.host_ns == 600_000_100)
+        assert(fvid_camera_clock_open_rate(0, 1, 0) == nil)
+        assert(fvid_camera_clock_open_rate(60, 0, 0) == nil)
+        let fast = fvid_camera_clock_open_rate(UInt32(CameraFormat.framesPerSecond), 1, 0)!
+        defer { fvid_camera_clock_close(fast) }
+        for sequence in UInt64(0)...60 {
+            let now = (sequence * 1_000_000_000 + 59) / 60
+            assert(fvid_camera_clock_poll(fast, now, &tick) == 1)
+            assert(tick.sequence == sequence && tick.host_ns == now)
+            assert(fvid_camera_clock_poll(fast, now, &tick) == 0)
+        }
         print("Camera clock C/Swift/Rust tests passed")
     }
 }

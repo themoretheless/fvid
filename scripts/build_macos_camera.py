@@ -43,7 +43,7 @@ with (ext / 'Contents/Info.plist').open('wb') as f:
     plistlib.dump(ext_info, f)
 cache = ROOT / 'target/camera-swift-cache'
 cache.mkdir(parents=True, exist_ok=True)
-common = ['xcrun', 'swiftc', '-warnings-as-errors', '-module-cache-path', str(cache)]
+common = ['xcrun', 'swiftc', '-warnings-as-errors', '-module-cache-path', str(cache), str(platform / 'Shared/CameraFormat.swift')]
 ffi = ROOT / 'crates/fvid-camera-ffi'
 subprocess.run(['cargo', 'build', '--locked', '--offline', '--manifest-path', str(ffi / 'Cargo.toml')], check=True)
 bridge = ['-import-objc-header', str(platform / 'CameraHost/FVidCamera.h'), str(ffi / 'target/debug/libfvid_camera_ffi.a')]

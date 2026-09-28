@@ -169,7 +169,13 @@ pub unsafe extern "C" fn fvid_camera_fit(
 /// Opaque clock owned by the serial camera producer.
 #[unsafe(no_mangle)]
 pub extern "C" fn fvid_camera_clock_open(now: u64) -> *mut fvid::virtual_camera::CameraClock {
-    fvid::virtual_camera::CameraClock::new(30, 1, now)
+    fvid_camera_clock_open_rate(30, 1, now)
+}
+
+/// Create an exact rational-rate camera clock; null on invalid rate.
+#[unsafe(no_mangle)]
+pub extern "C" fn fvid_camera_clock_open_rate(numerator: u32, denominator: u32, now: u64) -> *mut fvid::virtual_camera::CameraClock {
+    fvid::virtual_camera::CameraClock::new(numerator, denominator, now)
         .map(|clock| Box::into_raw(Box::new(clock)))
         .unwrap_or(std::ptr::null_mut())
 }
