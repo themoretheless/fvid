@@ -576,6 +576,20 @@ mod tests {
         };
         let grade = Grade::new(silent, &HdrMetadata::default(), s_log2, None);
         assert_eq!(grade.plan().source, Primaries::BT709);
+        // The two ARRI curves lend different triangles, which is what their
+        // specifications say and what the plan has to carry for the bake.
+        let logc4 = Settings {
+            log: Some(Log::LogC4),
+            ..s_log3
+        };
+        let grade = Grade::new(silent, &HdrMetadata::default(), logc4, None);
+        assert_eq!(grade.plan().source, Primaries::ALEX3_EXPANDED);
+        let logc = Settings {
+            log: Some(Log::LogC),
+            ..logc4
+        };
+        let grade = Grade::new(silent, &HdrMetadata::default(), logc, None);
+        assert_eq!(grade.plan().source, Primaries::ALEX3_WIDE);
     }
 
     /// The player's help text promises an order — the log unfolds the codes, the

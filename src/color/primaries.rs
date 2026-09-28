@@ -125,7 +125,12 @@ impl Primaries {
         },
         white: WHITE_D65,
     };
-    /// ARRI ALEX3 Wide, the gamut LogC and LogC4 are stated in.
+    /// The gamut [`crate::color::log::Log::LogC`] is read in. ARRI names its
+    /// wide gamuts "ALEXA Wide Gamut RGB", "ARRI Wide Gamut 3" and "ARRI Wide
+    /// Gamut 4" and prints no "ALEX3 Wide", so this triangle travels with the
+    /// curve it was transcribed alongside rather than with a cited table; only
+    /// LogC4 has a vendor document that names its primaries (see
+    /// [`Self::ALEX3_EXPANDED`]).
     pub const ALEX3_WIDE: Primaries = Primaries {
         r: Chromaticity {
             x: 0.6840,
@@ -141,7 +146,10 @@ impl Primaries {
         },
         white: WHITE_D65,
     };
-    /// ARRI ALEX3 Expanded, the wider alternative on ALEXA 35.
+    /// ARRI Wide Gamut 4, the primaries ARRI's LogC4 specification §4.2.1
+    /// prints and §4.3 makes part of LogC4. The constant's own name is not
+    /// ARRI's; the coordinates are, and the matrix test below holds them to
+    /// the ARRI-published conversion.
     pub const ALEX3_EXPANDED: Primaries = Primaries {
         r: Chromaticity {
             x: 0.7347,
@@ -826,6 +834,32 @@ mod tests {
                 assert!(close(v, 1.0, 1e-9), "{:?} {v}", src.label());
             }
         }
+    }
+
+    /// ARRI LogC4 Specification (May 2022), §4.2.1 and equation (5a): the six
+    /// primaries it prints and the ARRI Wide Gamut 4 → CIE XYZ matrix it
+    /// publishes are independent statements of the same triangle, so
+    /// reproducing the matrix from the coordinates checks the transcription of
+    /// every one of them. ARRI's third row reads 0, 0, 1.089… because its red
+    /// and green sit exactly on x + y = 1, where the derivation puts no Z.
+    #[test]
+    fn arri_wide_gamut_4_reproduces_arri_s_published_xyz_matrix() {
+        let want = [
+            [
+                0.704_858_320_407_232_064,
+                0.129_760_295_170_463_003,
+                0.115_837_311_473_976_537,
+            ],
+            [
+                0.254_524_176_404_027_025,
+                0.781_477_732_712_002_049,
+                -0.036_001_909_116_029_039,
+            ],
+            [0.0, 0.0, 1.089_057_750_759_878_429],
+        ];
+        let got = Primaries::ALEX3_EXPANDED.rgb_to_xyz();
+        let worst = matrix_diff(got, want);
+        assert!(worst < 1e-12, "AWG4 -> XYZ off by {worst}: {got:?}");
     }
 
     #[test]

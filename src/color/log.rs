@@ -157,7 +157,11 @@ impl Log {
         Some(match self {
             Self::SLog3 => Primaries::S_GAMUT3,
             Self::VLog => Primaries::V_GAMUT,
-            Self::LogC | Self::LogC4 => Primaries::ALEX3_WIDE,
+            Self::LogC => Primaries::ALEX3_WIDE,
+            // ARRI's LogC4 specification makes ARRI Wide Gamut 4 part of the
+            // definition rather than an option, so the curve has to hand its
+            // pixels to those primaries and to nothing else.
+            Self::LogC4 => Primaries::ALEX3_EXPANDED,
             Self::SLog1 | Self::SLog2 | Self::CLog | Self::CLog2 | Self::CLog3 => return None,
         })
     }
@@ -485,6 +489,26 @@ mod tests {
         let grey4 = Log::LogC4.from_linear(0.18);
         assert!(close(grey4, 0.278_4, 3e-4), "logc4 {grey4}");
         assert!(close(Log::LogC4.from_linear(0.0), 0.092_864, 1e-5));
+    }
+
+    /// ARRI's LogC4 specification §4.3 defines LogC4 as the LogC4 curve *and*
+    /// ARRI Wide Gamut 4, so a decoded LogC4 pixel has to leave the curve in
+    /// those primaries. Before this, it left in the gamut LogC uses, and the
+    /// wrong triangle recoloured it without touching luminance: measured
+    /// through `primaries::rgb_to_rgb(…, BT709)`, a skin tone moves 12.7 8-bit
+    /// steps and a saturated leg of the triangle 42–70, while white and 18 %
+    /// grey do not move at all — which is why no brightness check caught it.
+    #[test]
+    fn log_c_4_unwraps_in_the_gamut_its_specification_names() {
+        assert_eq!(Log::LogC4.gamut(), Some(Primaries::ALEX3_EXPANDED));
+        // LogC keeps the gamut its curve was transcribed with; ARRI prints no
+        // vendor matrix for it here, so nothing else is claimed.
+        assert_eq!(Log::LogC.gamut(), Some(Primaries::ALEX3_WIDE));
+        for profile in [Log::SLog1, Log::SLog2, Log::CLog, Log::CLog2, Log::CLog3] {
+            assert_eq!(profile.gamut(), None, "{profile:?}");
+        }
+        assert_eq!(Log::VLog.gamut(), Some(Primaries::V_GAMUT));
+        assert_eq!(Log::SLog3.gamut(), Some(Primaries::S_GAMUT3));
     }
 
     #[test]
