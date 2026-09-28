@@ -514,12 +514,40 @@ impl Lut {
     }
 
     /// True when sampling changes nothing within `tol`.
+    ///
+    /// A 3D grid is compared node by node, not along its grey diagonal: a
+    /// conversion that only changes the triangle maps every grey to itself, so
+    /// the diagonal cannot see the change the whole picture is made of.
     pub fn is_identity(&self, tol: f32) -> bool {
-        (0..=16).all(|i| {
-            let v = i as f32 / 16.0;
-            let out = self.sample([v, v, v], Interpolation::Tetrahedral);
-            out.iter().zip([v, v, v]).all(|(a, b)| (a - b).abs() <= tol)
-        })
+        match self {
+            // Three per-channel curves hide nothing from a grey: one value fed
+            // to all three has to come back the same value three times.
+            Self::One(_) => (0..=16).all(|i| {
+                let v = i as f32 / 16.0;
+                let out = self.sample([v, v, v], Interpolation::Tetrahedral);
+                out.iter().zip([v, v, v]).all(|(a, b)| (a - b).abs() <= tol)
+            }),
+            Self::Three(l) => {
+                let s = l.size;
+                let step = 1.0 / (s - 1) as f32;
+                (0..s).all(|b| {
+                    (0..s).all(|g| {
+                        (0..s).all(|r| {
+                            let node = l.data[r + s * (g + s * b)];
+                            let want = [
+                                l.domain_min[0]
+                                    + r as f32 * step * (l.domain_max[0] - l.domain_min[0]),
+                                l.domain_min[1]
+                                    + g as f32 * step * (l.domain_max[1] - l.domain_min[1]),
+                                l.domain_min[2]
+                                    + b as f32 * step * (l.domain_max[2] - l.domain_min[2]),
+                            ];
+                            node.iter().zip(want).all(|(a, w)| (a - w).abs() <= tol)
+                        })
+                    })
+                })
+            }
+        }
     }
 
     /// Serialise back to `.cube`, so a generated LUT survives a write/read cycle.
@@ -1428,6 +1456,46 @@ LUT_3D_SIZE 2
             "{}",
             lut.data[0][512]
         );
+    }
+
+    /// A conversion that only changes the triangle leaves every grey exactly
+    /// where it is — both spaces state the same white, so a node on the diagonal
+    /// maps to itself through XYZ and back. A check that reads the diagonal
+    /// therefore calls such a grid no change at all, and a grade built on one is
+    /// skipped even though every saturated colour moves: measured here, the
+    /// camera's own red leaves the diagonal by more than two codes a channel
+    /// while seventeen greys come back untouched.
+    #[test]
+    fn a_grid_that_only_moves_the_triangle_is_not_an_identity() {
+        let tol = 0.5 / 255.0;
+        let lut = Lut::Three(
+            CubePlan::transfer(
+                Transfer::Bt709,
+                Transfer::Bt709,
+                Primaries::S_GAMUT3_CINE,
+                Primaries::BT709,
+                33,
+            )
+            .build(),
+        );
+        for i in 0..=16 {
+            let v = i as f32 / 16.0;
+            let out = lut.sample([v, v, v], Interpolation::Tetrahedral);
+            assert!(
+                out.iter().zip([v, v, v]).all(|(a, b)| (a - b).abs() <= tol),
+                "grey {v} came out {out:?}"
+            );
+        }
+        for corner in [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]] {
+            let out = lut.sample(corner, Interpolation::Trilinear);
+            assert!(
+                out.iter()
+                    .zip(corner)
+                    .any(|(a, b)| (a - b).abs() > 8.0 * tol),
+                "{corner:?} came out {out:?}"
+            );
+        }
+        assert!(!lut.is_identity(tol), "the triangle moved");
     }
 
     #[test]
