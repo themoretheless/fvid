@@ -1071,6 +1071,47 @@ mod tests {
     }
 
     #[test]
+    fn a_curve_the_module_cannot_name_hands_its_codes_to_the_lut_as_they_came() {
+        // The player's own assembly for a file whose curve fvid has no
+        // implementation for: an unassigned transfer code (17) over BT.709
+        // primaries, asked to leave the transfer at what the file states.
+        let unnamed = ColourDescription {
+            primaries: 1,
+            transfer: 17,
+            matrix: 1,
+            full_range: false,
+        };
+        let settings = || {
+            let mut s = Settings::video(DisplayTarget::sdr(240.0));
+            s.to = unnamed.transfer_function();
+            s.dest = unnamed.primary_set().unwrap();
+            s
+        };
+        assert_eq!(settings().to, Transfer::Unknown);
+        // With nothing to decode to and nothing to re-encode into, the codes are
+        // the picture, so a grade that names no LUT costs nothing.
+        let bare = Grade::new(unnamed, &HdrMetadata::default(), settings(), None);
+        assert!(bare.is_identity());
+        assert!(
+            close(grey(&bare, 0.4)[0], 0.4, 1e-6),
+            "{:?}",
+            grey(&bare, 0.4)
+        );
+        // And a LUT lands on the code, not on a curve guessed under it: decoding
+        // 0.4 as BT.709 first moves all three channels, the same probe reading
+        // [0.826 869, 0.173 131, 0.173 131], where the passthrough touches only
+        // the channel the LUT flips.
+        let flip_red = Lut::Three(Lut3d::from_fn(4, |rgb| [1.0 - rgb[0], rgb[1], rgb[2]]));
+        let graded = Grade::new(unnamed, &HdrMetadata::default(), settings(), Some(flip_red));
+        let out = graded.rgb([0.4, 0.4, 0.4]);
+        assert!(close(out[0], 0.6, 1e-3), "{}", out[0]);
+        assert!(
+            close(out[1], 0.4, 1e-3) && close(out[2], 0.4, 1e-3),
+            "{out:?}"
+        );
+    }
+
+    #[test]
     fn a_row_of_pixels_is_rewritten_in_place_and_a_identity_grade_skips_it() {
         let grade = Grade::new(bt709(), &HdrMetadata::default(), Settings::default(), None);
         let mut row = vec![0u8, 128, 255, 64, 64, 64];
