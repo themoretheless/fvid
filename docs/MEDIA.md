@@ -271,3 +271,18 @@ fvid media merge-audio stereo.wav left.m4a right.m4a
 ### Проверка аудиооптимизаций
 
 Добавлены тесты unaligned buffers, SIMD tails, byte guards, разных размеров сэмплов/числа каналов, удержания ссылок и padding пула. Отдельный stereo AAC fixture содержит разные сигналы в каналах. Скрипт `benchmark_audio.py --baseline PATH --runs 21 --duration 30` перемешивает новый Fvid, старый бинарник и FFmpeg в каждом раунде; полный и интервальный выход каждого варианта сверяется по PCM-сэмплам перед измерениями. Интервальные пары имеют строгий gate >15%. JSON сохраняет оба binary hashes и исходные замеры.
+
+## Native decode migration
+
+`fvid::media::decode_video` now delegates to `fvid::native_media::decode_video`,
+which reads containers and decodes frames through FVid's NativeReader. The
+latter is available without the `media` feature. It discards raw frames without
+RGB conversion, reports the actual backend and decoded pixel format, and
+propagates errors without falling back to FFmpeg. Builds without VideoToolbox
+use the owned software decoders. Native Main10 frames retain their 10-bit planes.
+
+This is one migrated operation, not removal of the full FFmpeg dependency:
+`decode_video_transformed`, the CLI transform route, export and the remaining
+legacy `fvid-media` APIs still depend on the adapter. The `media` feature still
+links it. The native operation is tested separately with no default features;
+its public compatibility wrapper is also tested with `media` enabled.

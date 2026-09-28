@@ -52,7 +52,8 @@ pub mod player;
 #[cfg(feature = "player")]
 pub mod player_gpu;
 #[cfg(feature = "media")]
-pub use fvid_media as media;
+pub mod media;
+pub mod native_media;
 pub mod publish;
 pub mod resident;
 #[cfg(feature = "player")]

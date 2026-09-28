@@ -654,9 +654,9 @@ impl<R: BufRead + Seek> NativeReader<R> {
             *next_pts = frame.presentation_time.ticks;
             *resync = false;
         }
-        if frame.presentation_time.ticks != *next_pts || frame.duration.ticks <= 0 {
+        if frame.presentation_time.ticks < *next_pts || frame.duration.ticks <= 0 {
             return Err(invalid(
-                "non-contiguous AVC presentation timestamps are not implemented",
+                "overlapping video presentation timestamps or invalid duration",
             ));
         }
         let nanos = frame.duration.nanoseconds()?;
@@ -682,8 +682,8 @@ impl<R: BufRead + Seek> NativeReader<R> {
             .ok_or_else(|| invalid("video timestamp overflow"))?;
         *frames += 1;
         Ok(Some(match frame.planes8 {
-            Some(planes) => RawFrame::Planar8(planes),
-            None => RawFrame::Avc {
+            Some(planes) if frame.picture.bit_depth == 8 => RawFrame::Planar8(planes),
+            _ => RawFrame::Avc {
                 picture: frame.picture,
                 colour,
             },
