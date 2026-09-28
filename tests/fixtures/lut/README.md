@@ -506,6 +506,37 @@ $ ffmpeg -f lavfi -i color=gray:s=8x8 -vf lut3d=file=lut3d_bizarre.spi3d -f null
 
 Both are read by the module tests in `src/color/lut.rs`.
 
+OpenColorIO does read both, and since it authored these two files it is the
+reader to ask when FFmpeg cannot answer. Measured on 2.5.2, the CLI evaluates a
+colour through each file:
+
+```console
+$ ociochecklut sRGB_to_linear.spi1d 0.25 0.25 0.25
+0.05087609 0.05087609 0.05087609
+$ ociochecklut sRGB_to_linear.spi1d 0.5 0.5 0.5
+0.2140411 0.2140411 0.2140411
+$ ociochecklut sRGB_to_linear.spi1d 0.75 0.75 0.75
+0.5225216 0.5225216 0.5225216
+$ ociochecklut lut3d_bizarre.spi3d 1.0 0.0 0.0
+1.622678 -0.04887585 -0.09775171
+$ ociochecklut lut3d_bizarre.spi3d 0.0 0.0 1.0
+0 0.09775171 1.17302
+$ ociochecklut lut3d_bizarre.spi3d 0.5 0.5 0.5
+0.3714565 0.3910069 0.3910069
+```
+
+Every answer is the sRGB decode of the input for the shaper, and for the grid it
+is the node the file's own `r g b` indices point at — the red 1.622 678 at
+[1, 0, 0] and the green 0.097 751 71 at [0, 0, 1] are the two digits a reader
+that walked the rows by position would get wrong. `ociochecklut` also prints the
+range it parsed for the grid as `minrgb=[-0.0782014, -0.0977517, -0.0977517]`,
+`maxrgb=[1.62268, 1.75953, 1.17302]`, so the overshoot the tests keep
+uncoloured is what the reference reader itself sees.
+
+Note that the CLI takes its probe as separate arguments: passing `"0.5 0.5 0.5"`
+as one word answers `ERROR: Expecting either RGB or RGBA pixel`, which reads
+like a refusal of the file and is not one.
+
 `sRGB_to_linear.spi1d` is the sRGB shaper: `From -0.125 1.125`, `Length 4101`,
 `Components 1`. The pair is the input range, so entry 410 is the EOTF at signal
 0.0 and entry 3690 at 1.0, while the ends of the table run on to −0.0096 and

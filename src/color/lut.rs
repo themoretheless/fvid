@@ -2478,6 +2478,11 @@ Components 1
     /// sRGB curve. This is the check that the `From` pair is an input range and
     /// not a scale on the output: at −0.125 the index it declares is 0 and the
     /// value there is not zero, and at 1.0 the index is 3690 and the value is one.
+    ///
+    /// FFmpeg has no reader for this format, so the second answer comes from
+    /// `ociochecklut` of OpenColorIO 2.5.2, which reads the same file and returns
+    /// 0.050 876 09 at 0.25, 0.214 041 1 at 0.5 and 0.522 521 6 at 0.75 — the sRGB
+    /// decode of each input, which is what the probes below assert.
     #[test]
     fn a_real_spi1d_is_the_srgb_curve_over_the_range_it_declares() {
         let lut = Lut::from_text(SPI1D_SRGB).expect("the OpenColorIO table reads");
@@ -2514,6 +2519,12 @@ Components 1
     /// The grid OpenColorIO's own test suite uses to catch a reader that assumes a
     /// row order: its rows run with blue fastest, which is the reverse of how
     /// fvid's table stores a node, and every row states the node it means.
+    ///
+    /// FFmpeg refuses this file, so the corroborating reader is `ociochecklut` of
+    /// OpenColorIO 2.5.2 again, and it answers at the corners the row order
+    /// decides: 1.622 678 red at [1, 0, 0], 0.097 751 71 green at [0, 0, 1],
+    /// 0.371 456 5 red at [0.5, 0.5, 0.5]. The same digits the three asserts below
+    /// read off the parsed grid.
     #[test]
     fn a_spi3d_row_places_its_node_by_its_own_indices() {
         let lut = Lut::from_spi3d(SPI3D_BIZARRE).unwrap();
