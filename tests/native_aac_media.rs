@@ -311,3 +311,33 @@ fn matroska_delay_and_both_padding_directions_trim_exact_samples() {
         assert_eq!(actual, expected);
     }
 }
+
+#[test]
+fn native_volume_scales_all_aac_containers_without_clipping() {
+    let dir = std::env::temp_dir().join(format!("fvid-aac-gain-{}", std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    for (index, name) in ["aac-stereo.aac", "aac-native-edit.m4a", "aac-stereo.mka"].iter().enumerate() {
+        let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/audio").join(name);
+        let base = dir.join(format!("base{index}.f32le"));
+        let baseline = fvid::native_export::export_aac_pcm(&source, &base).unwrap();
+        let pcm = std::fs::read(base).unwrap();
+        for gain in [0.0f32, 0.5, 64.0] {
+            let output = dir.join(format!("gain{index}-{gain}.wav"));
+            let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+                .args(["media", "decode-audio"]).arg(&source).arg(&output)
+                .args(["--volume", &gain.to_string()]).output().unwrap();
+            assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
+            let wave = std::fs::read(&output).unwrap();
+            assert_eq!(u32::from_le_bytes(wave[68..72].try_into().unwrap()) as u64, baseline.sample_frames);
+            let expected: Vec<_> = pcm.chunks_exact(4).flat_map(|bytes|
+                (f32::from_le_bytes(bytes.try_into().unwrap()) * gain).to_le_bytes()).collect();
+            assert_eq!(&wave[80..], expected);
+        }
+        for gain in [-1.0, 65.0, f64::NAN, f64::INFINITY] {
+            let output = dir.join("invalid.wav");
+            assert!(fvid::native_export::export_aac_pcm_with_volume(&source, &output, None, gain).is_err());
+            assert!(!output.exists());
+        }
+    }
+    std::fs::remove_dir_all(dir).unwrap();
+}

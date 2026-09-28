@@ -201,6 +201,19 @@ pub fn export_aac_pcm_interval(
     destination: &Path,
     interval: Option<(std::time::Duration, std::time::Duration)>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
+    export_aac_pcm_with_volume(source, destination, interval, 1.0)
+}
+
+/// Decode AAC to PCM/WAV with finite linear gain after interval selection.
+pub fn export_aac_pcm_with_volume(
+    source: &Path,
+    destination: &Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    volume: f64,
+) -> Result<crate::native_media::AudioDecodeStats> {
+    if !volume.is_finite() || !(0.0..=64.0).contains(&volume) {
+        return Err(invalid("volume must be a finite linear gain within 0..=64"));
+    }
     use std::io::{Read, Seek, SeekFrom};
     let wav = match destination.extension().and_then(|s| s.to_str()) {
         Some("wav") => true,
@@ -224,12 +237,13 @@ pub fn export_aac_pcm_interval(
     }).ok_or_else(|| invalid("cannot reserve PCM output"))??;
     let mut output = BufWriter::new(file);
     if wav { output.write_all(&[0; 80])?; }
+    let mut pcm = PcmGain { output: &mut output, gain: volume as f32 };
     let stats = if data.get(4..8) == Some(b"ftyp") {
-        crate::native_media::decode_mp4_aac_pcm_interval(&data, &mut output, interval)?
+        crate::native_media::decode_mp4_aac_pcm_interval(&data, &mut pcm, interval)?
     } else if data.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        crate::native_media::decode_matroska_aac_pcm_interval(&data, &mut output, interval)?
+        crate::native_media::decode_matroska_aac_pcm_interval(&data, &mut pcm, interval)?
     } else {
-        crate::native_media::decode_aac_pcm_interval(&data, &mut output, &limits, interval)?
+        crate::native_media::decode_aac_pcm_interval(&data, &mut pcm, &limits, interval)?
     };
     if wav {
         let header = float_wav_header(&stats)?;
@@ -275,4 +289,27 @@ fn float_wav_header(stats: &crate::native_media::AudioDecodeStats) -> Result<Vec
     header.extend_from_slice(b"data");
     header.extend_from_slice(&bytes.to_le_bytes());
     Ok(header)
+}
+
+// Native decoders write complete f32 samples (silence uses whole-sample blocks).
+// Only PCM passes here; container headers bypass gain processing.
+struct PcmGain<'a, W> { output: &'a mut W, gain: f32 }
+impl<W: Write> Write for PcmGain<'_, W> {
+    fn write(&mut self, data: &[u8]) -> std::io::Result<usize> {
+        if data.len() % 4 != 0 {
+            return Err(std::io::Error::new(std::io::ErrorKind::InvalidData, "unaligned PCM write"));
+        }
+        if self.gain == 1.0 { self.output.write_all(data)?; }
+        else {
+            for bytes in data.chunks_exact(4) {
+                let value = f32::from_le_bytes(bytes.try_into().unwrap()) * self.gain;
+                if !value.is_finite() {
+                    return Err(std::io::Error::new(std::io::ErrorKind::InvalidData, "PCM gain overflow"));
+                }
+                self.output.write_all(&value.to_le_bytes())?;
+            }
+        }
+        Ok(data.len())
+    }
+    fn flush(&mut self) -> std::io::Result<()> { self.output.flush() }
 }

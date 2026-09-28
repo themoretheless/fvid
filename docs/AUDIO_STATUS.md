@@ -497,3 +497,10 @@ separate audio adapter has not yet been switched to this trim handling.
 Eleven integration tests pass; an independent PCM oracle and CLI WAV inspection
 both confirm exactly 48000 stereo samples for the MKA fixture. Synthetic files
 verify CodecDelay and both DiscardPadding signs by exact PCM slicing.
+
+Owned AAC PCM/WAV export supports `--volume GAIN` for ADTS, MP4 and Matroska,
+including interval selection. Gain follows the existing CLI contract: finite
+linear 0..=64, applied as f32 multiplication without integer clipping. Headers
+bypass processing; invalid gain is rejected before output creation and any PCM
+overflow aborts atomic publication. Twelve integration tests pass, including
+all three containers with 0, 0.5 and 64 gain and exact sample-byte comparisons.
