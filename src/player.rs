@@ -7,6 +7,7 @@
 //! the pointer rests; any movement brings them back.
 use crate::color::{
     ColourDescription, DisplayTarget, Grade, HdrMetadata, Log, Lut, Primaries, Settings, ToneMap,
+    Transfer,
 };
 use crate::container::FileTags;
 use crate::subtitles::{self, Cue};
@@ -41,11 +42,46 @@ struct PlayBounds {
     stop: Option<Duration>,
 }
 
-/// The panel every picture of the session is graded for: a desktop screen's
-/// diffuse white, which is what an SDR player is asked to fill. Naming one of
-/// the colour options writes the picture for this much light; a screen that
-/// reaches higher would want a bigger number and an HDR destination.
+/// The panel a session defaults to grading for: a desktop screen's diffuse
+/// white, which is what an SDR player is asked to fill. `--display` replaces it
+/// for a screen that reaches higher, or one that takes BT.2100 codes at all.
 const PANEL_NITS: f32 = 100.0;
+
+/// The destinations `--display` offers, each with the codes its panel is fed.
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Panel {
+    /// An SDR screen: BT.709 codes over whatever primaries the item states, so
+    /// the destination curve stays the one [`Grading::grade_for`] picks.
+    Sdr(f32),
+    /// An HDR10 screen: PQ codes over BT.2020 at this peak.
+    Pq(f32),
+    /// A broadcast HDR screen: HLG codes over BT.2020 at this peak.
+    Hlg(f32),
+}
+
+impl Panel {
+    /// A desktop panel at the diffuse white the session assumes for it.
+    const DEFAULT: Self = Self::Sdr(PANEL_NITS);
+
+    /// The light this panel shows: reference white rides with the kind, since
+    /// an HDR panel's grey is not the desktop's.
+    fn target(self) -> DisplayTarget {
+        match self {
+            Self::Sdr(nits) => DisplayTarget::sdr(nits),
+            Self::Pq(nits) | Self::Hlg(nits) => DisplayTarget::hdr(nits),
+        }
+    }
+
+    /// The codes to write, when the panel's own kind decides them rather than
+    /// the item.
+    fn destination(self) -> Option<(Transfer, Primaries)> {
+        match self {
+            Self::Sdr(_) => None,
+            Self::Pq(_) => Some((Transfer::Pq, Primaries::BT2020)),
+            Self::Hlg(_) => Some((Transfer::Hlg, Primaries::BT2020)),
+        }
+    }
+}
 
 /// What the command line asked to be done to a picture's colour: read before
 /// any item is opened, and applied to each one from the signal that item
@@ -64,12 +100,18 @@ struct Grading {
     /// The working gamut the coded values are read in, named instead of taken
     /// from the file or the curve.
     gamut: Option<Primaries>,
+    /// The panel the picture is graded for, named instead of assumed.
+    panel: Option<Panel>,
 }
 
 impl Grading {
     /// Whether the command line named no colour change at all.
     fn silent(&self) -> bool {
-        self.log.is_none() && self.gamut.is_none() && self.tone_map.is_none() && self.lut.is_none()
+        self.log.is_none()
+            && self.gamut.is_none()
+            && self.panel.is_none()
+            && self.tone_map.is_none()
+            && self.lut.is_none()
     }
 
     /// Bake what this session asks for against the signal `signal` and the
@@ -86,12 +128,16 @@ impl Grading {
     /// BT.2100 material still gets the compression [`Grade::new`] picks, since
     /// unmapped it is a flat grey one. A gamut the session names is a request on
     /// its own and outranks the primaries the file states, since naming one is
-    /// how a wrong label gets corrected.
+    /// how a wrong label gets corrected. A panel it names outranks the item too,
+    /// because writing BT.2100 codes is the only way to hand a screen an HDR
+    /// picture, and a caller who asks for one does not want the file's curve
+    /// kept over the request.
     fn grade_for(&self, signal: ColourDescription, hdr: &HdrMetadata) -> Option<Grade> {
         if self.silent() && !signal.is_hdr() {
             return None;
         }
-        let mut settings = Settings::video(DisplayTarget::sdr(PANEL_NITS));
+        let panel = self.panel.unwrap_or(Panel::DEFAULT);
+        let mut settings = Settings::video(panel.target());
         settings.log = self.log;
         settings.gamut = self.gamut;
         settings.tone_map = self.tone_map;
@@ -100,6 +146,10 @@ impl Grading {
             if let Some(primaries) = signal.primary_set() {
                 settings.dest = primaries;
             }
+        }
+        if let Some((transfer, primaries)) = panel.destination() {
+            settings.to = transfer;
+            settings.dest = primaries;
         }
         Some(Grade::new(signal, hdr, settings, self.lut.clone()))
     }
@@ -288,6 +338,10 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
             "--gamut" => {
                 let value = option_value(args, &mut index, flag, inline)?;
                 grading.gamut = Some(parse_gamut(&value)?);
+            }
+            "--display" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                grading.panel = Some(parse_panel(&value)?);
             }
             "--tonemap" => {
                 let value = option_value(args, &mut index, flag, inline)?;
@@ -521,6 +575,56 @@ fn parse_gamut(text: &str) -> crate::Result<Primaries> {
         ))
     };
     Primaries::from_label(text.trim()).ok_or_else(known)
+}
+
+/// `--display` as the panel the session grades every picture for: a kind and
+/// optionally the peak luminance it reaches. The kinds are the destinations
+/// `fvid` writes codes for — `sdr` for the BT.709 signal a desktop screen is
+/// fed, `pq` for HDR10's ST 2084, `hlg` for broadcast's ARIB curve — and both
+/// BT.2100 kinds land on BT.2020 primaries; `hdr` is taken as another spelling
+/// of `pq`, since that is the format the word usually names. Omitting the
+/// number takes what the kind is authored against: 100 cd/m² of diffuse white
+/// for SDR, 1 000 for an HDR panel. A screen of another peak is the caller's to
+/// say, since where its white sits is what decides how hard the highlights get
+/// compressed.
+fn parse_panel(text: &str) -> crate::Result<Panel> {
+    let unknown = || {
+        crate::invalid(&format!(
+            "unknown --display {text:?}; fvid grades for sdr[:nits], pq[:nits] or hlg[:nits]"
+        ))
+    };
+    let (kind, nits) = match text.split_once(':') {
+        Some((kind, nits)) => (kind, Some(nits)),
+        None => (text, None),
+    };
+    let kind = kind.trim().to_ascii_lowercase();
+    let panel = match (kind.as_str(), nits) {
+        ("sdr", None) => Panel::Sdr(PANEL_NITS),
+        ("pq" | "hdr", None) => Panel::Pq(1_000.0),
+        ("hlg", None) => Panel::Hlg(1_000.0),
+        ("sdr", Some(nits)) => Panel::Sdr(parse_nits(nits)?),
+        ("pq" | "hdr", Some(nits)) => Panel::Pq(parse_nits(nits)?),
+        ("hlg", Some(nits)) => Panel::Hlg(parse_nits(nits)?),
+        _ => return Err(unknown()),
+    };
+    Ok(panel)
+}
+
+/// The peak a `--display` names, in cd/m². The range covers a laptop lid and
+/// the brightest reference monitor a grade is checked on; 10 000 is where PQ's
+/// own scale ends, so nothing above it can be written as a code.
+fn parse_nits(text: &str) -> crate::Result<f32> {
+    let nits = text.trim().parse::<f32>().map_err(|_| {
+        crate::invalid(&format!(
+            "--display needs a peak in cd/m², {text:?} is none"
+        ))
+    })?;
+    if !(1.0..=10_000.0).contains(&nits) {
+        return Err(crate::invalid(&format!(
+            "--display peak {text:?} is outside 1..=10000 cd/m²"
+        )));
+    }
+    Ok(nits)
 }
 
 /// `--tonemap` as one of the highlight curves fvid can run, spelled the way
@@ -4445,8 +4549,8 @@ impl eframe::App for Player {
 mod tests {
     use super::{
         ADJUST_IDENTITY, ASPECTS, Adjust, Aspect, CROPS, ChapterMark, Control, FileTags, Frame,
-        Grading, HIDE_AFTER, LoopMark, NO_CROP, PANEL_NITS, PathBuf, Pixels, Planar8, PlayArgs,
-        PlayBounds, Player, Pos2, RATES, Rect, Repeat, SubtitleSource, VOLUME_MAX, Vec2,
+        Grading, HIDE_AFTER, LoopMark, NO_CROP, PANEL_NITS, Panel, PathBuf, Pixels, Planar8,
+        PlayArgs, PlayBounds, Player, Pos2, RATES, Rect, Repeat, SubtitleSource, VOLUME_MAX, Vec2,
         adjust_luma, adjust_rgb, adjust_scalars, advance, aspect_label, aspect_osd, aspect_step,
         bitrate_text, byte_size, chapter_ahead, container_facts, crop_insets, crop_label, crop_osd,
         crop_step, cropped_size, cycle_repeat, deal_cycle, delay_step, delayed_clock, display_size,
@@ -4456,7 +4560,9 @@ mod tests {
         subtitles, track_step, uv_window, video_rect, volume_osd, volume_step, zoom_osd, zoom_step,
     };
     use super::{Event, NativeReader, Playback};
-    use crate::color::{ColourDescription, HdrMetadata, Log, Lut, Primaries, ToneMap, Transfer};
+    use crate::color::{
+        ColourDescription, DisplayTarget, HdrMetadata, Log, Lut, Primaries, ToneMap, Transfer,
+    };
     use std::sync::Arc;
     use std::time::{Duration, Instant};
 
@@ -7733,6 +7839,136 @@ LUT_3D_SIZE 2
         assert!(
             error.contains("S-Gamut3.Cine") && error.contains("F-Gamut C"),
             "{error}"
+        );
+    }
+
+    /// `--display` names the panel the session grades for, and a panel is a
+    /// request in its own right: it moves where the picture's light lands
+    /// whether the item states BT.2100 or nothing at all.
+    #[test]
+    fn a_named_panel_moves_where_the_picture_lands() {
+        let empty = HdrMetadata::default();
+        let video = ColourDescription {
+            primaries: 1,
+            transfer: 1,
+            matrix: 1,
+            full_range: false,
+        };
+        let hdr10 = ColourDescription {
+            primaries: 9,
+            transfer: 16,
+            matrix: 9,
+            full_range: false,
+        };
+        // A brighter SDR panel has a higher white, so the same 100 cd/m² of the
+        // master is a darker code on the screen that reaches 600.
+        let panel = |nits| Grading {
+            panel: Some(Panel::Sdr(nits)),
+            ..Default::default()
+        };
+        let lid = Grading::default().grade_for(hdr10, &empty).unwrap();
+        let bright = panel(600.0).grade_for(hdr10, &empty).unwrap();
+        assert_eq!(lid.plan().target, Some(DisplayTarget::sdr(PANEL_NITS)));
+        assert_eq!(bright.plan().target, Some(DisplayTarget::sdr(600.0)));
+        assert!(lid.rgb([0.5; 3])[0] > 0.9, "on a 100-nit lid: {lid:?}");
+        assert!(
+            bright.rgb([0.5; 3])[0] < 0.45,
+            "on a 600-nit panel: {:?}",
+            bright.rgb([0.5; 3])
+        );
+        // A BT.2100 destination writes BT.2100 codes over BT.2020 and runs no
+        // shoulder, which on HDR10 material is the whole point: the bytes the
+        // file holds are the picture the screen wants.
+        let hdr = Grading {
+            panel: Some(Panel::Pq(1_000.0)),
+            ..Default::default()
+        }
+        .grade_for(hdr10, &empty)
+        .unwrap();
+        let plan = hdr.plan();
+        assert_eq!(
+            (plan.to, plan.dest, plan.tone_map),
+            (Transfer::Pq, Primaries::BT2020, None)
+        );
+        assert!(hdr.is_identity(), "HDR10 onto HDR10 changes nothing");
+        // An SDR item asked for a PQ destination is the same picture in codes
+        // that state its light: white leaves at the panel's diffuse white, not
+        // at the top of PQ's 10 000-nit scale.
+        let up = Grading {
+            panel: Some(Panel::Pq(1_000.0)),
+            ..Default::default()
+        }
+        .grade_for(video, &empty)
+        .unwrap();
+        assert!(!up.is_identity());
+        let nits = Transfer::Pq.to_nits(up.rgb([1.0; 3])[0], 262.0).unwrap();
+        assert!(
+            (nits - 262.0).abs() < 6.0,
+            "SDR white reached {nits} cd/m² on a 1 000-nit PQ panel"
+        );
+        // The peak a caller names is what an HLG code means, so two panels of
+        // different capability cannot share the grade.
+        let hlg = |peak| Grading {
+            panel: Some(Panel::Hlg(peak)),
+            ..Default::default()
+        };
+        let small = hlg(400.0).grade_for(hdr10, &empty).unwrap();
+        let big = hlg(1_000.0).grade_for(hdr10, &empty).unwrap();
+        assert_eq!(
+            (small.plan().to, small.plan().dest),
+            (Transfer::Hlg, Primaries::BT2020)
+        );
+        assert_eq!(small.plan().target, Some(DisplayTarget::hdr(400.0)));
+        assert_ne!(small.rgb([0.5; 3]), big.rgb([0.5; 3]));
+    }
+
+    /// `--display` takes a kind and optionally the cd/m² it reaches, in either
+    /// spelling of the option; anything else stops the command at the door.
+    #[test]
+    fn the_command_line_names_the_panel_the_picture_is_graded_for() {
+        let parsed = |args: &[&str]| play_args(args).unwrap().grading.panel;
+        assert_eq!(parsed(&["--display=pq", "c"]), Some(Panel::Pq(1_000.0)));
+        assert_eq!(
+            parsed(&["--display", "hdr:600", "c"]),
+            Some(Panel::Pq(600.0))
+        );
+        assert_eq!(
+            parsed(&["--display", " SDR : 240 ", "c"]),
+            Some(Panel::Sdr(240.0))
+        );
+        assert_eq!(parsed(&["--display=hlg", "c"]), Some(Panel::Hlg(1_000.0)));
+        assert_eq!(
+            parsed(&["--display=sdr", "c"]),
+            Some(Panel::Sdr(PANEL_NITS))
+        );
+        assert!(parsed(&["c"]).is_none());
+        for bad in [
+            "--display=bt2020",
+            "--display=sdr:0",
+            "--display=pq:99999",
+            "--display=hlg:high",
+            "--display=pq:",
+        ] {
+            let error = play_args(&[bad, "c"]).err().unwrap().to_string();
+            assert!(error.contains("--display"), "{bad} said {error:?}");
+        }
+        // A kind fvid writes no codes for is answered with the kinds it does.
+        let error = play_args(&["--display=bt2020", "c"])
+            .err()
+            .unwrap()
+            .to_string();
+        assert!(
+            error.contains("sdr[:nits]") && error.contains("hlg[:nits]"),
+            "{error}"
+        );
+        // With no value at all the message is the one every option of this
+        // command gives, which names the option rather than its grammar.
+        assert!(
+            play_args(&["--display", "c"])
+                .err()
+                .unwrap()
+                .to_string()
+                .contains("--display")
         );
     }
 
