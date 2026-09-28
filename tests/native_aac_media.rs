@@ -97,5 +97,36 @@ fn float_wav_preserves_surround_samples_and_channel_layout() {
     assert_eq!(&wave[80..], pcm);
     assert!(fvid::native_export::export_aac_pcm(&source, &output).is_err());
     assert_eq!(std::fs::read(&output).unwrap(), wave);
+    let clip = dir.join("clip.wav");
+    let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "decode-audio"]).arg(&source).arg(&clip)
+        .args(["--from", "0.030001", "--to", "0.070001", "--quiet"])
+        .output().unwrap();
+    assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
+    assert!(run.stdout.is_empty());
+    let clipped = std::fs::read(clip).unwrap();
+    assert_eq!(u32::from_le_bytes(clipped[68..72].try_into().unwrap()), 1920);
+    assert_eq!(&clipped[80..], &pcm[1441*24..3361*24]);
     std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn interval_pcm_equals_exact_slice_including_decoder_preroll() {
+    use std::time::Duration;
+    let data = include_bytes!("fixtures/audio/aac-stereo.aac");
+    let mut whole = Vec::new();
+    decode_aac_pcm(data, &mut whole, &Limits::default()).unwrap();
+    let mut part = Vec::new();
+    let stats = fvid::native_media::decode_aac_pcm_interval(data, &mut part, &Limits::default(),
+        Some((Duration::from_micros(30001), Duration::from_micros(70001)))).unwrap();
+    // ceil(30001*48000/1e6)=1441; ceil(70001*48000/1e6)=3361.
+    assert_eq!(stats.sample_frames, 1920);
+    assert_eq!(stats.decoded_frames, 4);
+    assert_eq!(part, whole[1441*8..3361*8]);
+    for (from, to) in [(2, 3), (1, 1), (2, 1)] {
+        let mut out = Vec::new();
+        assert!(fvid::native_media::decode_aac_pcm_interval(data, &mut out, &Limits::default(),
+            Some((Duration::from_secs(from), Duration::from_secs(to)))).is_err());
+        assert!(out.is_empty());
+    }
 }

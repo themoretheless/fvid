@@ -2,15 +2,21 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
-    if args.first().map(String::as_str) == Some("decode-audio") && args.len() == 3
+    if args.first().map(String::as_str) == Some("decode-audio") && args.len() >= 3
         && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("f32le" | "wav"))
+        && args[3..].iter().all(|arg| !arg.starts_with('-') || matches!(arg.as_str(), "--from" | "--to" | "--quiet"))
         && native_adts_input(std::path::Path::new(&args[1]))?
     {
-        let stats = fvid::native_export::export_aac_pcm(
-            std::path::Path::new(&args[1]), std::path::Path::new(&args[2]),
+        let mut parse_args = vec!["decode".to_owned(), args[1].clone()];
+        parse_args.extend_from_slice(&args[3..]);
+        let (_, quiet, interval) = plain_decode(&parse_args)?.ok_or("invalid native audio arguments")?;
+        let stats = fvid::native_export::export_aac_pcm_interval(
+            std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), interval,
         )?;
-        println!("{{\"backend\":\"fvid\",\"sample_frames\":{},\"decoded_frames\":{},\"sample_rate\":{},\"channels\":{},\"sample_format\":\"f32le\",\"decode_errors\":0}}",
-            stats.sample_frames, stats.decoded_frames, stats.sample_rate, stats.channels);
+        if !quiet {
+            println!("{{\"backend\":\"fvid\",\"sample_frames\":{},\"decoded_frames\":{},\"sample_rate\":{},\"channels\":{},\"sample_format\":\"f32le\",\"decode_errors\":0}}",
+                stats.sample_frames, stats.decoded_frames, stats.sample_rate, stats.channels);
+        }
         return Ok(());
     }
     if args.first().map(String::as_str) == Some("export-y4m") {

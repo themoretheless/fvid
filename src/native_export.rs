@@ -192,6 +192,15 @@ fn product(a: u128, b: u128) -> Result<u128> {
 
 /// Export ADTS AAC to raw f32le or float WAV, publishing only a complete decode.
 pub fn export_aac_pcm(source: &Path, destination: &Path) -> Result<crate::native_media::AudioDecodeStats> {
+    export_aac_pcm_interval(source, destination, None)
+}
+
+/// Export a half-open interval from the ADTS decoded sample timeline.
+pub fn export_aac_pcm_interval(
+    source: &Path,
+    destination: &Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+) -> Result<crate::native_media::AudioDecodeStats> {
     use std::io::{Read, Seek, SeekFrom};
     let wav = match destination.extension().and_then(|s| s.to_str()) {
         Some("wav") => true,
@@ -215,7 +224,7 @@ pub fn export_aac_pcm(source: &Path, destination: &Path) -> Result<crate::native
     }).ok_or_else(|| invalid("cannot reserve PCM output"))??;
     let mut output = BufWriter::new(file);
     if wav { output.write_all(&[0; 80])?; }
-    let stats = crate::native_media::decode_aac_pcm(&data, &mut output, &limits)?;
+    let stats = crate::native_media::decode_aac_pcm_interval(&data, &mut output, &limits, interval)?;
     if wav {
         let header = float_wav_header(&stats)?;
         output.seek(SeekFrom::Start(0))?;

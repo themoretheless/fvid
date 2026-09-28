@@ -119,7 +119,31 @@ pub fn decode_aac_pcm(
     output: &mut impl std::io::Write,
     limits: &crate::container::adts::Limits,
 ) -> Result<AudioDecodeStats> {
+    decode_aac_pcm_interval(data, output, limits, None)
+}
+
+/// Select sample starts in [from, to), rounding each boundary up to a sample.
+/// Decode preceding packets to preserve overlap, noise and prediction state.
+pub fn decode_aac_pcm_interval(
+    data: &[u8],
+    output: &mut impl std::io::Write,
+    limits: &crate::container::adts::Limits,
+    interval: Option<(Duration, Duration)>,
+) -> Result<AudioDecodeStats> {
+    if interval.is_some_and(|(from, to)| from >= to) {
+        return Err(invalid("audio interval requires from < to"));
+    }
     let stream = crate::container::adts::Aac::parse(data, limits)?;
+    let boundary = |time: Duration| -> Result<u64> {
+        let ticks = time.as_nanos().checked_mul(u128::from(stream.sample_rate))
+            .ok_or_else(|| invalid("audio interval overflow"))?;
+        u64::try_from(ticks.div_ceil(1_000_000_000))
+            .map_err(|_| invalid("audio interval overflow"))
+    };
+    let (from, to) = match interval {
+        Some((from, to)) => (boundary(from)?, boundary(to)?),
+        None => (0, u64::MAX),
+    };
     let mut decoder = crate::codec::aac_native::NativeAacDecoder::new(&stream.frames[0].asc)?;
     let mut stats = AudioDecodeStats {
         sample_frames: 0,
@@ -127,13 +151,23 @@ pub fn decode_aac_pcm(
         sample_rate: stream.sample_rate,
         channels: stream.channels,
     };
+    let mut position = 0u64;
     for index in 0..stream.packets() {
+        if position >= to { break; }
         let samples = decoder.decode(stream.packet(index))?;
-        for sample in &samples {
+        let channels = usize::from(stream.channels);
+        let frames = (samples.len() / channels) as u64;
+        let end = position.checked_add(frames).ok_or_else(|| invalid("audio position overflow"))?;
+        let first = from.saturating_sub(position).min(frames) as usize;
+        let last = to.saturating_sub(position).min(frames) as usize;
+        let selected = &samples[first * channels..last.max(first) * channels];
+        for sample in selected {
             output.write_all(&sample.to_le_bytes())?;
         }
-        stats.sample_frames += (samples.len() / usize::from(stream.channels)) as u64;
+        stats.sample_frames += (selected.len() / channels) as u64;
         stats.decoded_frames += 1;
+        position = end;
     }
+    if stats.sample_frames == 0 { return Err(invalid("audio interval contains no samples")); }
     Ok(stats)
 }

@@ -441,3 +441,11 @@ runtime is used. Validation covered exact six-channel sample preservation,
 header sizes/mask/count, and no-overwrite; independent ffprobe inspection
 reported pcm_f32le, 48000 Hz, 5.1, 11264 frames for the active surround fixture.
 The independent inspector is a validation tool, not part of export.
+
+Owned ADTS PCM/WAV export accepts `--from SECONDS --to SECONDS` and `--quiet`.
+Boundaries select sample starts in a half-open interval and round up using
+integer arithmetic at the source sample rate. Reference/overlap pre-roll is
+decoded before selection; the exported PCM matches the corresponding slice of
+full decoding exactly. Empty or reversed intervals fail. WAV fact/data sizes
+reflect only the selected samples; decoded-frame statistics include pre-roll.
+Example: `fvid media decode-audio input.aac clip.wav --from 0.030001 --to 0.070001`.
