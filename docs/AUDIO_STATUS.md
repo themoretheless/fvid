@@ -295,3 +295,11 @@ It retains separate spectral scale, noise energy and intensity position values,
 including the first noise band's nine-bit delta and accumulation across groups.
 Invalid ranges/codebooks/truncation leave the input cursor unchanged. Noise and
 intensity reconstruction and full packet integration remain pending.
+
+`codec::aac_spectral` connects section codebooks and grouped band geometry to
+owned Huffman tuple decoding. It emits group/band/window-ordered quantized data
+for the existing deinterleaver, checks tuple alignment, and consumes no spectral
+bits for zero/noise/intensity bands. Special-band zero placeholders still need
+noise/intensity reconstruction. Tests cover mixed groups through deinterleaving,
+zero-only spectra, truncation and malformed layouts. Playback integration is
+still pending.

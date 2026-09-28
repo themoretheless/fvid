@@ -411,3 +411,5 @@ mod aac_huffman_tables;
 pub mod aac_huffman;
 
 pub mod aac_scalefactors;
+
+pub mod aac_spectral;
