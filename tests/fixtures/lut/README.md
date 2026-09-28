@@ -404,14 +404,16 @@ question rather than a validation one: the six D-LUT grids (`-0.023..1.07`), the
 Apple log-to-linear table (`-0.056..12.0`, so 3 753 of its 12 288 numbers are
 above white and 1 851 below black), and three of abpy's density tables.
 
-The 16 files with no size line are not colour LUTs and are refused: twelve
+The 16 files with no size line share the extension without the format: ten
 Gaussian volumetric dumps (`Psi4 Gaussian Cube File.`), one `chem.cr` spectral
-cube, one git-lfs pointer, two prose and type-signature notes. Their first line
-says which, and it is quoted in the refusal, because the `.cube` extension is
-shared and a user typing `--lut` has no way to know. One file is imported and
-should be looked at squarely: `XUANTIE-RV` ships an ISP configuration table of
-4 913 integer rows, which is exactly `17³` — the row-count fallback added for
-undeclared `.3dl` files reads it as a 17-grid, and the two shapes are not
-distinguishable from the inside. It is refused as a colour LUT only in the sense
-that it is nonsense as one; the grid it builds divides to white, since its codes
-reach 16 303.
+cube, one git-lfs pointer and three prose and type-signature notes. Fifteen of
+them are refused. Each first line says what the file is, and it is quoted in the
+refusal, because a user typing `--lut` has no way to know that the extension is
+taken by chemistry output.
+
+The sixteenth deserves the record rather than a footnote: `XUANTIE-RV` ships an
+ISP configuration table of 4 913 integer rows, which is exactly `17³`, so the
+row-count fallback added for undeclared `.3dl` files reads it as a 17-grid — the
+two shapes are not distinguishable from the inside. Nothing sensible comes of it
+(the codes reach 16 303, so the grid divides to white), but it is imported, and
+that is the price of the rule recorded above.
