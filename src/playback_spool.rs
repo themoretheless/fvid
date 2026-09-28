@@ -21,10 +21,15 @@ use std::{
     time::{Duration, Instant},
 };
 
-/// Bytes the copier and a beyond-spool read move at a time. Small enough that
-/// one slow read of a cloud drive is a fraction of a second rather than the
-/// several seconds a megabyte-hungry request can cost.
-const CHUNK: usize = 1 << 20;
+/// Bytes the copier and a beyond-spool read move at a time, as an offset into
+/// the item: small enough that one slow read of a cloud drive is a fraction of
+/// a second rather than the several seconds a megabyte-hungry request can cost.
+const CHUNK: u64 = 1 << 20;
+
+/// The same block as a buffer length. Memory is indexed in machine words while
+/// the item is counted in 64-bit offsets, and only the handful of places where
+/// the two meet need this: every one of them is a `Vec` or a slice bound.
+const CHUNK_BYTES: usize = CHUNK as usize;
 
 /// How long a reader will wait for the copier to reach the next block off the
 /// source rather than fetching it itself. Past this the mount is being answered
@@ -32,10 +37,11 @@ const CHUNK: usize = 1 << 20;
 /// is just the buffering the reader came for.
 const CHUNK_WAIT: Duration = Duration::from_secs(2);
 
-/// How much of the source a reader buffers in front of itself. Small reads are
-/// what turn a mount's latency into a stutter: eight kilobytes at a time asks
-/// the question once per frame and a megabyte asks it a hundred times less.
-pub const READ_AHEAD: usize = 1 << 20;
+/// How much of the source a reader buffers in front of itself, as a buffer
+/// capacity: small reads are what turn a mount's latency into a stutter - eight
+/// kilobytes at a time asks the question once per frame and a megabyte asks it a
+/// hundred times less.
+pub const READ_AHEAD: usize = CHUNK_BYTES;
 
 /// How far ahead of the reader the copier runs, in bytes: the most a window
 /// costs on disk while an item plays, and the span a source slower than its
@@ -126,16 +132,16 @@ fn probe_at(size: u64) -> u64 {
 
 /// How fast a source really is: the megabytes per second one cold read of the
 /// item's body delivers, or nothing when the file cannot be read at all.
-pub fn source_rate(path: &Path, probe: usize) -> Option<f64> {
+pub fn source_rate(path: &Path, probe: u64) -> Option<f64> {
     let mut file = File::open(path).ok()?;
     let size = file.metadata().ok()?.len();
     if size == 0 {
         return None;
     }
     file.seek(SeekFrom::Start(probe_at(size))).ok()?;
-    let mut buffer = vec![0u8; probe];
+    let mut buffer = vec![0u8; probe as usize];
     let started = Instant::now();
-    let read = file.read(&mut buffer).ok()?;
+    let read = file.read(&mut buffer).ok()? as u64;
     let elapsed = started.elapsed();
     if read == 0 || elapsed.is_zero() {
         return None;
@@ -181,7 +187,7 @@ struct Shared {
     /// to spare: the copy is written round these, so a lead costs the ring's
     /// size and never the item's. A file cannot be cut from the front, so the
     /// oldest block is given up to the newest one that overwrites it.
-    slots: usize,
+    slots: u64,
     stop: AtomicBool,
     window: Mutex<Window>,
     wake: Condvar,
@@ -190,7 +196,7 @@ struct Shared {
 impl Shared {
     /// Where a block of the item lives in the ring.
     fn slot(&self, at: u64) -> u64 {
-        (at as usize / CHUNK % self.slots) as u64 * CHUNK as u64
+        (at / CHUNK % self.slots) * CHUNK
     }
 
     /// Where the window stands, for a reader that has to know what is on disk.
@@ -323,8 +329,8 @@ impl Spool {
         // The ring is a whole number of blocks, long enough for a lead, the
         // block being written and one to spare, and it is sized up front so no
         // write can ever extend it past that.
-        let slots = (lead as usize).div_ceil(CHUNK) + 3;
-        spool.set_len(slots as u64 * CHUNK as u64)?;
+        let slots = lead.div_ceil(CHUNK) + 3;
+        spool.set_len(slots * CHUNK)?;
         let shared = Arc::new(Shared {
             held: Arc::new(AtomicU64::new(0)),
             slack: Arc::new(AtomicU64::new(0)),
@@ -362,7 +368,7 @@ impl Spool {
             lead,
             path: spool_path,
             position: 0,
-            staging: vec![0u8; CHUNK],
+            staging: vec![0u8; CHUNK_BYTES],
             staged: 0,
             staged_at: 0,
             copier: Some(copier),
@@ -401,7 +407,7 @@ impl Spool {
 /// Extends the window one block at a time, pausing while it is `lead` ahead of
 /// the reader and following the reader when it moves further away than that.
 fn copy(mut source: File, spool: &mut File, size: u64, lead: u64, shared: &Arc<Shared>) {
-    let mut buffer = vec![0u8; CHUNK];
+    let mut buffer = vec![0u8; CHUNK_BYTES];
     loop {
         if shared.stop.load(Ordering::Relaxed) {
             break;
@@ -420,7 +426,7 @@ fn copy(mut source: File, spool: &mut File, size: u64, lead: u64, shared: &Arc<S
                 // download the whole item to reach a byte the reader is already
                 // asking for - and pay twice, since the reader is taking those
                 // bytes from the source itself meanwhile.
-                let base = (read_at / CHUNK as u64) * CHUNK as u64;
+                let base = (read_at / CHUNK) * CHUNK;
                 window.base = base;
                 window.end = base;
                 shared.mirror(&window);
@@ -449,26 +455,26 @@ fn copy(mut source: File, spool: &mut File, size: u64, lead: u64, shared: &Arc<S
         // A block is copied whole before it is laid down: the ring is made of
         // blocks, and a short one would leave everything after it out of
         // position. Only the end of the item is allowed to be a short block.
-        let wanted = CHUNK.min(size.saturating_sub(at) as usize);
-        if source.read_exact(&mut buffer[..wanted]).is_err() {
+        let wanted = CHUNK.min(size.saturating_sub(at));
+        let bytes = wanted as usize;
+        if source.read_exact(&mut buffer[..bytes]).is_err() {
             break;
         }
         if spool
             .seek(SeekFrom::Start(shared.slot(at)))
-            .and_then(|_| spool.write_all(&buffer[..wanted]))
+            .and_then(|_| spool.write_all(&buffer[..bytes]))
             .is_err()
         {
             break;
         }
-        let read = wanted;
         let mut window = shared.window.lock().unwrap_or_else(|p| p.into_inner());
-        window.end = at.saturating_add(read as u64);
+        window.end = at.saturating_add(wanted);
         // The window is the disk this spool costs, so its back edge follows its
         // front: what the reader has passed is not watched again, and a lead that
         // only ever extends forward is a copy of the whole item. Nothing is
         // released by it - the file is a ring of the window's size, and a slot is
         // given up by the block that overwrites it.
-        window.base = window.end.saturating_sub(lead + CHUNK as u64);
+        window.base = window.end.saturating_sub(lead + CHUNK);
         shared.mirror(&window);
         shared.wake.notify_all();
         // The block has landed, so nothing is in flight for it: a stale claim
@@ -488,7 +494,7 @@ impl Read for Spool {
         // the copier is not heading, the reader is served directly.
         let claim = self.shared.claim.load(Ordering::Acquire);
         if self.position >= claim
-            && self.position < claim.saturating_add(CHUNK as u64)
+            && self.position < claim.saturating_add(CHUNK)
             && !self.exhausted()
         {
             let until = Instant::now() + CHUNK_WAIT;
@@ -510,8 +516,8 @@ impl Read for Spool {
             let mut done = 0usize;
             while done < want {
                 let at = self.position + done as u64;
-                let inside = (at % CHUNK as u64) as usize;
-                let take = (CHUNK - inside).min(want - done);
+                let inside = (at % CHUNK) as usize;
+                let take = (CHUNK_BYTES - inside).min(want - done);
                 self.spool
                     .seek(SeekFrom::Start(self.shared.slot(at) + inside as u64))?;
                 let read = self.spool.read(&mut out[done..done + take])?;
@@ -543,8 +549,9 @@ impl Read for Spool {
         out[..take].copy_from_slice(&self.staging[..take]);
         self.staging.copy_within(take..self.staged, 0);
         self.staged -= take;
-        self.staged_at += take as u64;
-        self.advance(take as u64);
+        let taken = take as u64;
+        self.staged_at += taken;
+        self.advance(taken);
         Ok(take)
     }
 }
