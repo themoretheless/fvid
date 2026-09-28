@@ -31,6 +31,26 @@ impl ChannelData {
         config: &AacConfig,
         allow: bool,
     ) -> Result<Vec<f32>> {
+        self.spectrum_tools(config, allow, None)
+    }
+    /// Reconstruct a single channel including noise substitution. Generator
+    /// state commits only on success, allowing packet-level rollback.
+    pub fn spectrum_with_noise(
+        &self,
+        config: &AacConfig,
+        noise: &mut super::aac_noise::NoiseState,
+    ) -> Result<Vec<f32>> {
+        let mut next = noise.clone();
+        let output = self.spectrum_tools(config, false, Some(&mut next))?;
+        *noise = next;
+        Ok(output)
+    }
+    fn spectrum_tools(
+        &self,
+        config: &AacConfig,
+        allow: bool,
+        mut noise: Option<&mut super::aac_noise::NoiseState>,
+    ) -> Result<Vec<f32>> {
         let tables = BandTables::for_config(config)?;
         let offsets = if self.info.sequence == WindowSequence::EightShort {
             tables.short
@@ -81,6 +101,7 @@ impl ChannelData {
                 match (book, scale) {
                     (0, BandScale::Zero) | (1..=11, BandScale::Spectral(_)) => {}
                     (14..=15, BandScale::Intensity(_)) if allow => {}
+                    (13, BandScale::Noise(_)) if noise.is_some() => {}
                     (13, BandScale::Noise(_)) | (14..=15, BandScale::Intensity(_)) => {
                         return Err(unsupported(
                             "AAC noise/intensity reconstruction is not implemented",
@@ -96,8 +117,13 @@ impl ChannelData {
                             i16::from(*scale),
                             &mut ordered[range],
                         )?;
-                    } else if quantized[range].iter().any(|&q| q != 0) {
+                    } else if quantized[range.clone()].iter().any(|&q| q != 0) {
                         return Err(invalid("nonzero AAC zero-codebook band"));
+                    } else if let BandScale::Noise(energy) = scale {
+                        noise
+                            .as_deref_mut()
+                            .unwrap()
+                            .band(*energy, &mut ordered[range])?;
                     }
                 }
             }
@@ -269,6 +295,38 @@ mod tests {
             channel.ordinary_spectrum(&config),
             Err(crate::Error::Unsupported(_))
         ));
+    }
+    #[test]
+    fn noise_bands_reconstruct_per_window_and_rollback_on_late_error() {
+        let config = AacConfig::parse(&[0x11, 0x90]).unwrap();
+        let mut channel = ChannelData {
+            info: IcsInfo {
+                sequence: WindowSequence::EightShort,
+                shape: crate::codec::aac_synthesis::WindowShape::Sine,
+                max_sfb: 2,
+                group_lengths: vec![8],
+            },
+            codebooks: vec![vec![13, 13]],
+            scales: vec![vec![BandScale::Noise(0), BandScale::Noise(4)]],
+            quantized: vec![0; 64],
+            pulse: None,
+        };
+        let mut noise = crate::codec::aac_noise::NoiseState::default();
+        let spectrum = channel.spectrum_with_noise(&config, &mut noise).unwrap();
+        for w in 0..8 {
+            for band in 0..2 {
+                let start = w * 128 + band * 4;
+                let energy: f64 = spectrum[start..start + 4]
+                    .iter()
+                    .map(|&x| f64::from(x).powi(2))
+                    .sum();
+                assert!((energy - if band == 0 { 1.0 } else { 4.0 }).abs() < 1e-6);
+            }
+        }
+        let saved = noise.clone();
+        channel.scales[0][1] = BandScale::Noise(156);
+        assert!(channel.spectrum_with_noise(&config, &mut noise).is_err());
+        assert_eq!(noise, saved);
     }
     #[test]
     fn unsupported_tools_do_not_consume_channel_header() {

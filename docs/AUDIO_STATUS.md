@@ -351,3 +351,9 @@ different energies; reset is deterministic. Tests cover every valid energy,
 multiple widths including one coefficient, correlation and error state retention.
 The generator still needs integration into channel/pair reconstruction; its
 random sequence is not a bit-identical claim against other decoders.
+
+`ChannelData::spectrum_with_noise` now applies owned PNS to each window/band
+and commits random state only after successful reconstruction of the channel.
+Tests verify band energies across eight short windows and state rollback after
+a later invalid band. Correlated stereo PNS and final PCM validation remain
+pending; the existing ordinary-only entry point still rejects noise explicitly.
