@@ -25,6 +25,12 @@ impl AacDecoder {
         // symphonia parses `extra_data` as a bare AudioSpecificConfig, so the
         // descriptor wrapper has to come off before the decoder is built.
         let asc = crate::codec::config::aac_specific_config(configuration)?;
+        let parsed = crate::codec::config::AacConfig::parse(asc)?;
+        if parsed.sample_rate != sample_rate || u16::from(parsed.channels) != channels {
+            return Err(crate::invalid(
+                "AAC configuration disagrees with container sample rate or channels",
+            ));
+        }
 
         let mut codec_params = AudioCodecParameters::new();
         codec_params
@@ -149,5 +155,16 @@ mod tests {
         assert!(error.to_string().contains("timestamp overflow"));
         let error = decoder.decode(&[0], 0, 1024).err().unwrap();
         assert!(error.to_string().contains("AAC decode:"));
+    }
+    #[test]
+    fn container_and_aac_config_must_describe_the_same_pcm() {
+        let esds = crate::playback_aac::esds_for(&[0x12, 0x10]).unwrap();
+        for (rate, channels) in [(48_000, 2), (44_100, 1), (0, 2), (44_100, 0)] {
+            let error = AacDecoder::new(&esds, rate, channels).err().unwrap();
+            assert!(error.to_string().contains("disagrees with container"));
+        }
+        let accepted = AacDecoder::new(&esds, 44_100, 2).unwrap();
+        assert_eq!(accepted.spec().sample_rate, 44_100);
+        assert_eq!(accepted.spec().channels, 2);
     }
 }
