@@ -1991,3 +1991,30 @@ only by the ignored test when `FVID_REFERENCE_FFMPEG` is explicitly set.
 
 Expressions and combinations containing unmigrated filters retain existing
 adapter handling under `media`; aggregate FFmpeg independence is unfinished.
+
+### Owned FFV1 encoder foundation (2026-09-29)
+
+`codec::ffv1_encoder::encode` produces self-contained FFV1 version 1 keyframe
+packets using the default range coder and a median predictor, following
+[RFC 9043](https://www.rfc-editor.org/rfc/rfc9043.html). A single residual
+context is used for luma and a shared context for chroma. This is lossless;
+the context quantizers do not quantize sample values. The implementation
+includes the specified signed predictor exception for 16-bit YCbCr.
+
+The current encoder accepts packed planar YCbCr at 8–16 bits, validates
+layout and sample ranges before coding, and uses one slice per frame.
+`matroska_write::Encoding::Ffv1V1` writes `V_FFV1` without CodecPrivate,
+because v1 keyframes carry their parameters. No external encoder or muxer
+is called. RGB/alpha, v3 slice CRCs, richer context modeling and an owned
+FFV1 decoder remain to implement; the existing `media transcode-lossless`
+route is not yet switched to this encoder. Its stream-copy, metadata,
+timestamp and transformation contracts must be preserved during integration.
+
+`tests/ffv1_encoder.rs` checks input validation, independent frame state and
+flat-image compression. The explicit ignored FFmpeg reference tests decode
+135 synthetic frames (zero/full/ramp/textured data, 1x1, even and odd sizes,
+YUV420/422/444, 8/9/10/12/14/16-bit) from the owned Matroska writer and compare
+all bytes. A separate reference test uses owned decoding of AVC, HEVC Main
+and HEVC Main10 fixtures, re-encodes their pixels and verifies every sample
+through the independent FFV1 decoder. Those tests do not claim preservation
+of source timing or full lossless-export migration.

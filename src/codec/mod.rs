@@ -426,3 +426,5 @@ pub mod aac_noise;
 pub mod aac_native;
 
 pub mod aac_tns;
+
+pub mod ffv1_encoder;

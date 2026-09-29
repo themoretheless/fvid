@@ -1,4 +1,4 @@
-//! Owned AVC/HEVC/AAC Matroska muxing. No external muxer is used.
+//! Owned AVC/HEVC/AAC/FFV1 Matroska muxing. No external muxer is used.
 //! Mapping: https://www.matroska.org/technical/codec_specs.html#a_aac
 use crate::{Result, invalid};
 use fvid_control::{CancelFlag, ProgressEvent, ProgressHook};
@@ -133,8 +133,10 @@ pub struct PacketOptions {
     pub invisible: bool,
 }
 
-/// Packet storage is unchanged: length-prefixed AVC/HEVC NAL units or raw AAC.
+/// Encoded packet storage is passed through without rewriting codec payloads.
 pub enum Encoding<'a> {
+    /// FFV1 v1 packets contain their configuration in every keyframe.
+    Ffv1V1 { width: u32, height: u32 },
     Avc {
         configuration: &'a [u8],
         width: u32,
@@ -206,6 +208,9 @@ fn track_entry(
     }
     use crate::codec::config::{AacConfig, AvcConfig, HevcConfig};
     let (id, config, kind, geometry) = match spec.encoding {
+        Encoding::Ffv1V1 { width, height } => (
+            "V_FFV1", &[][..], 1, video(width, height, metadata, rotation)?,
+        ),
         Encoding::Avc {
             configuration,
             width,
@@ -269,7 +274,7 @@ fn track_entry(
         uint(0x83, kind)?,
         uint(0x9c, 0)?,
         element(0x86, id.as_bytes())?,
-        element(0x63a2, config)?,
+        if config.is_empty() { Vec::new() } else { element(0x63a2, config)? },
         geometry,
     ]
     .concat();
