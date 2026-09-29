@@ -2137,3 +2137,38 @@ its original HEVC MP4 using the same player binary. Thus actual on-screen
 presentation is not verified by this run; the comparison does not establish
 its cause. Pixel and threaded-presentation tests pass independently. Aggregate
 `media` FFmpeg removal and installed virtual-camera validation remain open.
+
+### macOS player bundle and visible FFV1 verification (2026-09-29)
+
+The blank-window observation above was traced to Metal surface acquisition
+returning `Occluded`, despite egui reporting a visible UI and a loaded first
+frame texture. A normal app-bundle launch followed by raising its window showed
+the FFV1 test picture, filename, 128x128 dimensions, 30 fps and playback controls.
+This confirms on-screen FFV1 presentation for that fixture. It does not measure
+60 fps performance or verify a virtual camera in another application. Temporary
+visibility/surface tracing was removed from the player.
+
+The `fvid-player` executable starts the desktop player directly; `fvid` remains
+the default Cargo executable, preserving existing CLI and Zed commands. Build a
+local app on macOS with:
+
+```sh
+python3 scripts/build_macos_player.py --profile dev --output /tmp/FVid.app
+open /tmp/FVid.app
+# Optional startup arguments use the player directly, without a `play` subcommand:
+open -n /tmp/FVid.app --args /path/to/video.mkv --start-paused --no-audio
+```
+
+The default profile is `release`; `dev` is useful for a quick local check. The
+builder uses locked, offline Cargo with default features disabled and only
+`player` enabled. It follows Cargo's reported artifact path (including a custom
+`CARGO_TARGET_DIR`), refuses an existing output, and checks the copied Mach-O
+binary for non-system dynamic dependencies. The bundle records its source
+revision, dirty-state flag, build command, binary SHA-256 and linked libraries
+in `Contents/Resources/build.json`. The development bundle is neither installed
+nor notarized and does not register file associations. Its no-argument startup
+was also checked in the desktop UI.
+
+This standalone player's absence of FFmpeg does not imply that the aggregate
+`media` feature is migrated. Legacy `fvid-media` routes and signed virtual-camera
+installation/validation remain separate unfinished requirements.

@@ -200,3 +200,19 @@ FVID_BENCH_BIN_FULL=$PWD/target/release/fvid-media-cuda cargo bench --bench ffmp
 `cargo build --release --features mcp` добавляет `fvid mcp --root DIRECTORY`: 13 инструментов обработки через stdio или локальный Streamable HTTP с bearer-токеном. Прямые вызовы Rust API, новые выходные файлы без перезаписи, одна операция за раз. [Подключение, схемы и ограничения](docs/MCP.md) · [Пример конфигурации](examples/mcp/client.json). Публичный плагин ChatGPT и передача файлов из облака не настроены.
 
 MCP поддерживает `--jobs 2` для ограниченной параллельной обработки независимых вызовов; по умолчанию одна операция. Транспорт остаётся асинхронным, лишние вызовы получают busy. Память и потоки кодеков расходуются на каждую операцию отдельно; подробности в [MCP.md](docs/MCP.md).
+
+### macOS player app
+
+Build a local player bundle without the FFmpeg-backed `media` feature:
+
+```sh
+python3 scripts/build_macos_player.py --output /tmp/FVid.app
+open /tmp/FVid.app
+```
+
+Use `--profile dev` for a faster debug build. The output must be a new `.app`
+path. The bundle opens the player directly and accepts media paths via
+`open -n /tmp/FVid.app --args /path/to/video.mkv`. This is a local development
+bundle, not an installed or notarized release. Existing `cargo run ... -- play`
+commands keep working. See [native playback coverage](docs/NATIVE_PLAYBACK.md)
+for codec limitations and the remaining `media` migration.

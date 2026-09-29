@@ -1,5 +1,6 @@
 [package]
 name = "fvid"
+default-run = "fvid"
 version = "0.1.0"
 edition = "2024"
 description = "Bounded, fused planar video processing in safe Rust"
@@ -79,4 +80,9 @@ required-features = ["player"]
 # Drives the audio readers and decoders, which only exist with the player feature.
 [[test]]
 name = "native_container_audio"
+required-features = ["player"]
+
+[[bin]]
+name = "fvid-player"
+path = "src/bin/fvid-player.rs"
 required-features = ["player"]
