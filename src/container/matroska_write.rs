@@ -89,6 +89,8 @@ pub struct TrackOptions {
     pub video: Option<VideoMetadata>,
     /// Rectangular rotations supported by the native player: 0, 90, 180, 270.
     pub rotation: u16,
+    /// Priming to discard, in nanoseconds, subtracted from block timestamps.
+    pub codec_delay_ns: u64,
 }
 
 fn track_entry(
@@ -98,6 +100,10 @@ fn track_entry(
 ) -> Result<Vec<u8>> {
     let metadata = options.and_then(|o| o.video.as_ref());
     let rotation = options.map_or(0, |o| o.rotation);
+    let delay = options.map_or(0, |o| o.codec_delay_ns);
+    if delay > i64::MAX as u64 {
+        return Err(invalid("Matroska codec delay overflow"));
+    }
     use crate::codec::config::{AacConfig, AvcConfig, HevcConfig};
     let (id, config, kind, geometry) = match spec.encoding {
         Encoding::Avc {
@@ -167,6 +173,9 @@ fn track_entry(
         geometry,
     ]
     .concat();
+    if delay != 0 {
+        data.extend(uint(0x56aa, delay)?);
+    }
     if !spec.name.is_empty() {
         data.extend(element(0x536e, spec.name.as_bytes())?);
     }
@@ -317,6 +326,7 @@ pub struct PacketWriter<'a, W> {
     segment_size: u64,
     duration_offset: u64,
     written: Vec<bool>,
+    delays: Vec<u64>,
     end_ns: u64,
     event: ProgressEvent,
     failed: bool,
@@ -343,6 +353,7 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
             .map(|video| TrackOptions {
                 video: *video,
                 rotation: 0,
+                codec_delay_ns: 0,
             })
             .collect();
         Self::new_with_options(output, tracks, &options)
@@ -398,6 +409,9 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
             segment_size,
             duration_offset,
             written: vec![false; tracks.len()],
+            delays: (0..tracks.len())
+                .map(|i| options.get(i).map_or(0, |o| o.codec_delay_ns))
+                .collect(),
             end_ns: 0,
             event: ProgressEvent {
                 packets: 0,
@@ -421,10 +435,30 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         sync: bool,
         payload: &[u8],
     ) -> Result<()> {
+        self.write_packet_with_padding(track, pts_ns, duration_ns, sync, payload, 0)
+    }
+    /// Positive padding discards the end; negative padding discards the start.
+    /// Nanoseconds are independent of the segment timestamp scale.
+    pub fn write_packet_with_padding(
+        &mut self,
+        track: usize,
+        pts_ns: u64,
+        duration_ns: u64,
+        sync: bool,
+        payload: &[u8],
+        discard_padding_ns: i64,
+    ) -> Result<()> {
         if self.failed {
             return Err(invalid("Matroska writer failed"));
         }
-        let result = self.packet(track, pts_ns, duration_ns, sync, payload);
+        let result = self.packet(
+            track,
+            pts_ns,
+            duration_ns,
+            sync,
+            payload,
+            discard_padding_ns,
+        );
         self.failed = result.is_err();
         result
     }
@@ -435,9 +469,13 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         duration_ns: u64,
         sync: bool,
         payload: &[u8],
+        discard_padding_ns: i64,
     ) -> Result<()> {
         if track >= self.written.len() || duration_ns == 0 || payload.is_empty() {
             return Err(invalid("invalid Matroska packet"));
+        }
+        if discard_padding_ns.unsigned_abs() > duration_ns {
+            return Err(invalid("Matroska padding exceeds packet duration"));
         }
         let end = pts_ns
             .checked_add(duration_ns)
@@ -462,9 +500,18 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         } else {
             element(0xfb, &[0])?
         };
+        let padding = if discard_padding_ns == 0 {
+            Vec::new()
+        } else {
+            element(0x75a2, &discard_padding_ns.to_be_bytes())?
+        };
         let block = 4 + payload.len() as u64;
-        let group =
-            1 + size(block)?.len() as u64 + block + duration.len() as u64 + reference.len() as u64;
+        let group = 1
+            + size(block)?.len() as u64
+            + block
+            + duration.len() as u64
+            + reference.len() as u64
+            + padding.len() as u64;
         let cluster = timestamp.len() as u64 + 1 + size(group)?.len() as u64 + group;
         head(self.output, 0x1f43b675, cluster)?;
         self.output.write_all(&timestamp)?;
@@ -475,8 +522,12 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         self.output.write_all(payload)?;
         self.output.write_all(&duration)?;
         self.output.write_all(&reference)?;
+        self.output.write_all(&padding)?;
         self.written[track] = true;
-        self.end_ns = self.end_ns.max(end);
+        let presented_end = end
+            .saturating_sub(self.delays[track])
+            .saturating_sub(discard_padding_ns.max(0) as u64);
+        self.end_ns = self.end_ns.max(presented_end);
         self.event.packets = packets;
         self.event.payload_bytes = bytes;
         Ok(())

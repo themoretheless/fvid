@@ -89,6 +89,7 @@ fn write_rotation(meta: VideoMetadata, rotation: u16) -> Vec<u8> {
         &[fvid::container::matroska_write::TrackOptions {
             video: Some(meta),
             rotation,
+            ..Default::default()
         }],
     )
     .unwrap();

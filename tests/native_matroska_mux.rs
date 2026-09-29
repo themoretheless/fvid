@@ -245,3 +245,116 @@ fn sequence_failure_is_terminal_and_matroska_concat_discards_partial_output() {
     assert!(fvid::native_export::concat_adts_aac(&sources, &out, None, None).is_err());
     assert!(!out.exists());
 }
+
+#[test]
+fn codec_delay_and_signed_padding_preserve_audible_aac_samples() {
+    use matroska_write::{Encoding, PacketWriter, TrackOptions, TrackSpec};
+    let data = std::fs::read(fixture("aac-mono-44k.aac")).unwrap();
+    let source = adts::Aac::parse(&data, &Default::default()).unwrap();
+    let ns = |samples: u64| {
+        (samples * 1_000_000_000 + u64::from(source.sample_rate) / 2)
+            / u64::from(source.sample_rate)
+    };
+    let mut original = Vec::new();
+    fvid::native_media::decode_aac_pcm(&data, &mut original, &Default::default()).unwrap();
+    for (delay, head, tail) in [(128, 0, 256), (0, 128, 256)] {
+        let mut output = std::io::Cursor::new(Vec::new());
+        let mut writer = PacketWriter::new_with_options(
+            &mut output,
+            &[TrackSpec {
+                encoding: Encoding::Aac {
+                    configuration: &source.frames[0].asc,
+                    sample_rate: source.sample_rate,
+                    channels: source.channels,
+                },
+                name: "",
+                language: "und",
+            }],
+            &[TrackOptions {
+                codec_delay_ns: ns(delay),
+                ..Default::default()
+            }],
+        )
+        .unwrap();
+        for i in 0..source.packets() {
+            let padding = if i == 0 {
+                -(ns(head) as i64)
+            } else if i + 1 == source.packets() {
+                ns(tail) as i64
+            } else {
+                0
+            };
+            writer
+                .write_packet_with_padding(
+                    0,
+                    ns(i as u64 * 1024),
+                    ns((i as u64 + 1) * 1024) - ns(i as u64 * 1024),
+                    true,
+                    source.packet(i),
+                    padding,
+                )
+                .unwrap();
+        }
+        writer.finish().unwrap();
+        let mut reader =
+            webm::WebmReader::open(std::io::Cursor::new(output.get_ref()), Default::default())
+                .unwrap();
+        reader.scan_all().unwrap();
+        assert_eq!(reader.tracks[0].codec_delay_ns, ns(delay));
+        assert_eq!(reader.packets[0].discard_padding_ns, -(ns(head) as i64));
+        assert_eq!(
+            reader.packets.last().unwrap().discard_padding_ns,
+            ns(tail) as i64
+        );
+        assert_eq!(
+            reader.duration_ns,
+            Some(ns(source.packets() as u64 * 1024) - ns(delay) - ns(tail))
+        );
+        let mut decoded = Vec::new();
+        fvid::native_media::decode_matroska_aac_pcm_interval(output.get_ref(), &mut decoded, None)
+            .unwrap();
+        let stride = usize::from(source.channels) * 4;
+        assert_eq!(
+            decoded,
+            original[(delay.max(head) as usize * stride)..original.len() - tail as usize * stride]
+        );
+    }
+}
+
+#[test]
+fn excessive_padding_poisoning_and_delay_overflow_are_rejected() {
+    use matroska_write::{Encoding, PacketWriter, TrackOptions, TrackSpec};
+    let tracks = [TrackSpec {
+        encoding: Encoding::Aac {
+            configuration: &[0x12, 0x08],
+            sample_rate: 44100,
+            channels: 1,
+        },
+        name: "",
+        language: "und",
+    }];
+    let mut output = std::io::Cursor::new(Vec::new());
+    assert!(
+        PacketWriter::new_with_options(
+            &mut output,
+            &tracks,
+            &[TrackOptions {
+                codec_delay_ns: u64::MAX,
+                ..Default::default()
+            }]
+        )
+        .is_err()
+    );
+    assert!(output.get_ref().is_empty());
+    for padding in [11, -11, i64::MIN] {
+        let mut output = std::io::Cursor::new(Vec::new());
+        let mut writer = PacketWriter::new(&mut output, &tracks).unwrap();
+        assert!(
+            writer
+                .write_packet_with_padding(0, 0, 10, true, &[1], padding)
+                .is_err()
+        );
+        assert!(writer.write_packet(0, 0, 10, true, &[1]).is_err());
+        assert!(writer.finish().is_err());
+    }
+}
