@@ -2083,3 +2083,28 @@ MP4 against independent FFmpeg decode/filter results. Additional tests cover
 API/CLI byte identity, retained AAC packets/timing, aspect/rotation metadata,
 invalid crop cleanup, and both sampling conventions. Full `media` dependency
 removal and native decoding of exported FFV1 remain outstanding.
+
+### Owned FFV1 range decoder foundation (2026-09-29)
+
+`codec::ffv1_decoder::Decoder` now decodes FFV1 version 0/1 YCbCr packets
+with default or custom range probability transitions. It implements all five
+context quantizers, sign-normalized context selection, shared Cb/Cr models,
+and model persistence between non-keyframes. Output retains the coded sample
+depth (8–16 bits), odd dimensions and chroma subsampling as packed planar
+`GeometryFrame` data. Container callers supply dimensions and a memory budget;
+checked sizes and fallible allocations bound frame/context storage. Any error
+invalidates the adaptation state; a keyframe or reset establishes a new history.
+
+Ordinary tests cover 810 owned encoder/decoder frame round trips, truncated
+input, memory limits, mutated packets and keyframe recovery. The explicit
+`FVID_REFERENCE_FFMPEG` oracle independently encodes 36 seven-frame sequences
+(252 frames): versions 0/1, both range coder tables, both context presets,
+8/10/12/16-bit 420/422/444, odd 17x13 dimensions and GOP 3. All decoded
+samples must match the original raw input; non-keyframes must fail without
+preceding context. Existing independent decoding of our encoder also remains
+covered. FFmpeg is used only by these opt-in reference tests.
+
+This is a packet decoder API; playback/container dispatch has not yet been
+connected to it. Golomb Rice, FFV1 v3+, RGB, alpha and monochrome are still
+unsupported. No claim of aggregate `media` FFmpeg independence follows from
+this addition.

@@ -204,3 +204,179 @@ fn owned_avc_hevc_decode_to_ffv1_preserves_all_samples() {
         assert_eq!(out.stdout, expected, "{name}");
     }
 }
+
+#[test]
+fn owned_decoder_roundtrips_all_depths_and_subsampling() {
+    use fvid::codec::ffv1_decoder::Decoder;
+    for depth in 8..=16 {
+        for (sx, sy) in [(1, 1), (2, 1), (2, 2), (1, 2), (4, 1), (4, 4)] {
+            for (w, h) in [(1, 1), (8, 6), (17, 13)] {
+                let mut decoder = Decoder::new(w, h, 1 << 20).unwrap();
+                for pattern in 0..5 {
+                    let original = image(w, h, sx, sy, depth, pattern);
+                    let encoded = ffv1_encoder::encode(&original, depth).unwrap();
+                    let decoded = decoder.decode(&encoded).unwrap();
+                    assert!(decoded.keyframe);
+                    assert_eq!(decoded.depth, depth);
+                    assert_eq!(decoded.frame.subsampling, original.subsampling);
+                    assert_eq!(
+                        decoded.frame.data, original.data,
+                        "{w}x{h} {depth} {sx}:{sy} pattern {pattern}"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn decoder_enforces_storage_and_recovers_at_keyframe() {
+    use fvid::codec::ffv1_decoder::Decoder;
+    let source = image(17, 13, 2, 2, 10, 3);
+    let packet = ffv1_encoder::encode(&source, 10).unwrap();
+    let mut decoder = Decoder::new(17, 13, 1 << 20).unwrap();
+    assert!(decoder.decode(&[]).is_err());
+    assert!(decoder.decode(&[255, 255]).is_err());
+    assert!(decoder.decode(&packet[..packet.len() / 2]).is_err());
+    assert_eq!(decoder.decode(&packet).unwrap().frame.data, source.data);
+    decoder.reset();
+    assert_eq!(decoder.decode(&packet).unwrap().frame.data, source.data);
+    assert!(Decoder::new(17, 13, 100).unwrap().decode(&packet).is_err());
+    assert!(Decoder::new(usize::MAX, 2, usize::MAX).is_err());
+}
+
+#[test]
+#[ignore = "requires FVID_REFERENCE_FFMPEG; independent encoder only"]
+fn owned_decoder_reads_independently_encoded_contexts_and_nonkeyframes() {
+    use fvid::{
+        codec::ffv1_decoder::Decoder,
+        container::webm::{Limits, WebmReader},
+    };
+    use std::{
+        io::Write,
+        process::{Command, Stdio},
+    };
+    let ffmpeg = std::env::var("FVID_REFERENCE_FFMPEG").unwrap();
+    for (depth, format, sx, sy) in [
+        (8, "yuv420p", 2, 2),
+        (8, "yuv422p", 2, 1),
+        (8, "yuv444p", 1, 1),
+        (10, "yuv420p10le", 2, 2),
+        (12, "yuv422p12le", 2, 1),
+        (16, "yuv444p16le", 1, 1),
+    ] {
+        for level in if depth == 8 {
+            vec!["0", "1"]
+        } else {
+            vec!["1"]
+        } {
+            for coder in ["-2", "2"] {
+                for context in ["0", "1"] {
+                    let (w, h) = (17, 13);
+                    let frames: Vec<_> = (0..7).map(|i| image(w, h, sx, sy, depth, i)).collect();
+                    let input: Vec<_> =
+                        frames.iter().flat_map(|f| f.data.iter().copied()).collect();
+                    let mut child = Command::new(&ffmpeg)
+                        .args([
+                            "-v",
+                            "error",
+                            "-f",
+                            "rawvideo",
+                            "-pixel_format",
+                            format,
+                            "-video_size",
+                            "17x13",
+                            "-framerate",
+                            "25",
+                            "-i",
+                            "pipe:0",
+                            "-c:v",
+                            "ffv1",
+                            "-level",
+                            level,
+                            "-coder",
+                            coder,
+                            "-context",
+                            context,
+                            "-g",
+                            "3",
+                            "-threads",
+                            "1",
+                            "-f",
+                            "matroska",
+                            "pipe:1",
+                        ])
+                        .stdin(Stdio::piped())
+                        .stdout(Stdio::piped())
+                        .stderr(Stdio::piped())
+                        .spawn()
+                        .unwrap();
+                    child.stdin.take().unwrap().write_all(&input).unwrap();
+                    let output = child.wait_with_output().unwrap();
+                    assert!(
+                        output.status.success(),
+                        "{}",
+                        String::from_utf8_lossy(&output.stderr)
+                    );
+                    let mut reader =
+                        WebmReader::open(Cursor::new(output.stdout), Limits::default()).unwrap();
+                    reader.scan_all().unwrap();
+                    assert_eq!(reader.packets.len(), frames.len());
+                    let mut decoder = Decoder::new(w, h, 8 << 20).unwrap();
+                    let mut nonkeys = 0;
+                    for (i, expected) in frames.iter().enumerate() {
+                        let packet = reader.read_packet(i).unwrap();
+                        let decoded = decoder.decode(&packet).unwrap_or_else(|e| {
+                            panic!("{format} coder {coder} context {context} frame {i}: {e}")
+                        });
+                        nonkeys += usize::from(!decoded.keyframe);
+                        assert_eq!(decoded.depth, depth);
+                        assert_eq!(
+                            decoded.frame.data, expected.data,
+                            "{format} coder {coder} context {context} frame {i}"
+                        );
+                        if !decoded.keyframe {
+                            assert!(
+                                Decoder::new(w, h, 8 << 20)
+                                    .unwrap()
+                                    .decode(&packet)
+                                    .is_err()
+                            );
+                        }
+                    }
+                    assert!(nonkeys > 0);
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn malformed_packets_never_panic_or_poison_keyframe_recovery() {
+    use fvid::codec::ffv1_decoder::Decoder;
+    let original = image(8, 6, 2, 2, 10, 4);
+    let packet = ffv1_encoder::encode(&original, 10).unwrap();
+    let mut decoder = Decoder::new(8, 6, 1 << 20).unwrap();
+    for at in 0..packet.len() {
+        for value in [0, 1, 127, 255] {
+            let mut corrupt = packet.clone();
+            corrupt[at] = value;
+            let _ = decoder.decode(&corrupt);
+            assert_eq!(decoder.decode(&packet).unwrap().frame.data, original.data);
+        }
+    }
+    // Arbitrary headers exercise invalid exponents, runs and model transitions.
+    let mut random = 0x51384b762dc19u64;
+    for len in 0..256 {
+        let data: Vec<u8> = (0..len)
+            .map(|_| {
+                random ^= random << 13;
+                random ^= random >> 7;
+                random ^= random << 17;
+                random as u8
+            })
+            .collect();
+        let _ = decoder.decode(&data);
+    }
+    assert_eq!(decoder.decode(&packet).unwrap().frame.data, original.data);
+}
