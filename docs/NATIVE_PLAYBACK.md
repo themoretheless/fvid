@@ -1177,3 +1177,12 @@ owns synchronization and publication.
 lines on stderr without enabling the `media` feature. The final result stays
 on stdout. This migration does not yet remove the legacy media crate's FFmpeg
 build/link dependencies or add these controls to every native operation.
+
+MP4 fast-start relocation exposes the same controls through
+`native_export::remux_mp4_controlled` and
+`fvid media remux INPUT.mp4 OUTPUT.mp4 --progress`. It checks cancellation
+between 64 KiB copy blocks and before publication. Progress is emitted at start,
+after each additional MiB of media data, and at completion; `payload_bytes`
+counts only `mdat` payload, excluding headers and metadata. `packets` stays zero
+because relocation copies opaque boxes without parsing packet boundaries.
+Only publication emits `done=true`. Existing destinations are never overwritten.

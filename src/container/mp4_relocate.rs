@@ -115,10 +115,40 @@ fn patch(data: &mut [u8], spans: &[BoxSpan], locations: &[u64], depth: usize) ->
 /// are rejected. A caller must discard output on error. Index limit is 32 MiB;
 /// media bytes stream through a fixed copy buffer rather than loading the file.
 pub fn fast_start<R: Read + Seek>(reader: &mut R, output: &mut impl Write) -> Result<()> {
+    fast_start_controlled(reader, output, None, None).map(|_| ())
+}
+
+/// Relocate with cooperative cancellation and media-byte progress. `packets`
+/// stays zero because this operation copies opaque boxes, not parsed samples.
+/// `payload_bytes` counts mdat payload only, excluding all box headers/indexes.
+/// The caller owns output publication and must emit the final done event.
+pub fn fast_start_controlled<R: Read + Seek>(
+    reader: &mut R,
+    output: &mut impl Write,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::media_control::ProgressEvent> {
+    let check = || -> Result<()> {
+        if cancel.is_some_and(|flag| flag.is_cancelled()) {
+            return Err(invalid("media operation cancelled"));
+        }
+        Ok(())
+    };
+    let mut event = crate::media_control::ProgressEvent {
+        packets: 0,
+        payload_bytes: 0,
+        done: false,
+    };
+    check()?;
+    if let Some(hook) = progress {
+        hook.emit(event);
+    }
+    check()?;
     let end = reader.seek(SeekFrom::End(0))?;
     let mut spans = Vec::new();
     let mut at = 0;
     while at < end {
+        check()?;
         if spans.len() >= 100_000 {
             return Err(invalid("too many top-level MP4 boxes"));
         }
@@ -162,16 +192,40 @@ pub fn fast_start<R: Read + Seek>(reader: &mut R, output: &mut impl Write) -> Re
         moov[..4].copy_from_slice(&(spans[movie].size as u32).to_be_bytes());
     }
     patch(&mut moov, &spans, &locations, 0)?;
+    let mut buffer = [0u8; 64 << 10];
+    let mut reported = 0u64;
     for index in order {
+        check()?;
         if index == movie {
             output.write_all(&moov)?;
         } else {
-            reader.seek(SeekFrom::Start(spans[index].start))?;
-            let copied = std::io::copy(&mut reader.take(spans[index].size), output)?;
-            if copied != spans[index].size {
-                return Err(invalid("MP4 input truncated during copy"));
+            let span = &spans[index];
+            reader.seek(SeekFrom::Start(span.start))?;
+            let mut copied = 0u64;
+            while copied < span.size {
+                check()?;
+                let size = (span.size - copied).min(buffer.len() as u64) as usize;
+                reader.read_exact(&mut buffer[..size])?;
+                output.write_all(&buffer[..size])?;
+                if span.kind == *b"mdat" {
+                    let before = copied.saturating_sub(span.header);
+                    let after = (copied + size as u64).saturating_sub(span.header);
+                    event.payload_bytes += after - before;
+                }
+                copied += size as u64;
+                if event.payload_bytes - reported >= 1 << 20 {
+                    if let Some(hook) = progress {
+                        hook.emit(event);
+                    }
+                    reported = event.payload_bytes;
+                }
             }
         }
     }
-    Ok(())
+    check()?;
+    if let Some(hook) = progress {
+        hook.emit(event);
+    }
+    check()?;
+    Ok(event)
 }

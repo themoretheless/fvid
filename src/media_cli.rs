@@ -10,18 +10,20 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         let mut prefix = [0; 8];
         let mut source = std::fs::File::open(&args[1])?;
         source.read_exact(&mut prefix)?;
+        let progress = (args.len() == 4).then(|| fvid::media_control::ProgressHook::new(|event| {
+            eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}", event.packets, event.payload_bytes, event.done);
+        }));
         if fvid::container::adts::header(&prefix).is_some() {
-            let progress = (args.len() == 4).then(|| fvid::media_control::ProgressHook::new(|event| {
-                eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}", event.packets, event.payload_bytes, event.done);
-            }));
             let packets = fvid::native_export::remux_adts_aac_controlled(
                 std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), None, progress.as_ref(),
             )?;
             println!("{{\"backend\":\"fvid\",\"audio_packets\":{packets}}}");
             return Ok(());
         }
-        if &prefix[4..8] == b"ftyp" && args.len() == 3 {
-            fvid::native_export::remux_mp4(std::path::Path::new(&args[1]), std::path::Path::new(&args[2]))?;
+        if &prefix[4..8] == b"ftyp" {
+            fvid::native_export::remux_mp4_controlled(
+                std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), None, progress.as_ref(),
+            )?;
             println!("{{\"backend\":\"fvid\",\"remux\":\"mp4-faststart\"}}");
             return Ok(());
         }

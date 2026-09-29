@@ -135,3 +135,110 @@ fn cli_progress_works_without_media_feature() {
     assert!(lines[2].ends_with("\"done\":true}"));
     assert!(output.exists());
 }
+
+#[test]
+fn mp4_relocation_counts_media_bytes_and_cancels_without_publication() {
+    use fvid::native_export::remux_mp4_controlled;
+    let fixture = include_bytes!("fixtures/hevc/main10-ipb.mp4");
+    let mdat = fixture.windows(4).position(|b| b == b"mdat").unwrap();
+    let media_size = u32::from_be_bytes(fixture[mdat - 4..mdat].try_into().unwrap()) as u64 - 8;
+    let extra = 3u32 << 20;
+    let total = media_size + u64::from(extra);
+    let mut source_bytes = fixture.to_vec();
+    source_bytes.extend_from_slice(&(extra + 8).to_be_bytes());
+    source_bytes.extend_from_slice(b"mdat");
+    source_bytes.resize(source_bytes.len() + extra as usize, 0);
+    for (name, stop) in [
+        ("mp4-success", None),
+        ("mp4-start", Some(0)),
+        ("mp4-mid", Some(1 << 20)),
+        ("mp4-end", Some(total)),
+    ] {
+        let dir = directory(name);
+        let source = dir.0.join("input.mp4");
+        let output = dir.0.join("output.mp4");
+        std::fs::write(&source, &source_bytes).unwrap();
+        let flag = CancelFlag::new();
+        let shared = flag.clone();
+        let events = Arc::new(Mutex::new(Vec::<ProgressEvent>::new()));
+        let captured = events.clone();
+        let destination = output.clone();
+        let hook = ProgressHook::new(move |event| {
+            assert_eq!(event.packets, 0);
+            assert_eq!(destination.exists(), event.done);
+            captured.lock().unwrap().push(event);
+            if stop.is_some_and(|limit| event.payload_bytes >= limit) {
+                shared.cancel();
+            }
+        });
+        let result = remux_mp4_controlled(&source, &output, Some(&flag), Some(&hook));
+        let events = events.lock().unwrap();
+        assert_eq!(events[0].payload_bytes, 0);
+        for pair in events.windows(2) {
+            assert!(pair[0].payload_bytes <= pair[1].payload_bytes);
+        }
+        if stop.is_some() {
+            assert!(result.unwrap_err().to_string().contains("cancelled"));
+            assert!(!output.exists());
+            assert!(events.iter().all(|event| !event.done));
+            assert_eq!(std::fs::read_dir(&dir.0).unwrap().count(), 1);
+        } else {
+            result.unwrap();
+            assert_eq!(
+                events.last().unwrap(),
+                &ProgressEvent {
+                    packets: 0,
+                    payload_bytes: total,
+                    done: true
+                }
+            );
+            assert_eq!(events.iter().filter(|event| event.done).count(), 1);
+            assert!(
+                events
+                    .iter()
+                    .any(|event| event.payload_bytes >= 1 << 20 && event.payload_bytes < total)
+            );
+            let mut expected = Vec::new();
+            fvid::container::mp4_relocate::fast_start(
+                &mut std::io::Cursor::new(&source_bytes),
+                &mut expected,
+            )
+            .unwrap();
+            assert_eq!(std::fs::read(output).unwrap(), expected);
+        }
+    }
+}
+
+#[test]
+fn mp4_cli_progress_stays_on_native_backend() {
+    let dir = directory("mp4-cli");
+    let source = dir.0.join("input.mp4");
+    let output = dir.0.join("output.mp4");
+    std::fs::write(&source, include_bytes!("fixtures/hevc/main10-ipb.mp4")).unwrap();
+    let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "remux"])
+        .arg(&source)
+        .arg(&output)
+        .arg("--progress")
+        .output()
+        .unwrap();
+    assert!(
+        run.status.success(),
+        "{}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    assert!(
+        String::from_utf8(run.stdout)
+            .unwrap()
+            .contains("mp4-faststart")
+    );
+    assert!(
+        String::from_utf8(run.stderr)
+            .unwrap()
+            .lines()
+            .last()
+            .unwrap()
+            .ends_with("\"done\":true}")
+    );
+    assert!(output.exists());
+}

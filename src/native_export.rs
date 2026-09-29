@@ -437,6 +437,17 @@ pub fn remux_adts_aac_controlled(
 
 /// Stream a non-fragmented MP4 into fast-start layout without changing packets.
 pub fn remux_mp4(source: &Path, destination: &Path) -> Result<()> {
+    remux_mp4_controlled(source, destination, None, None)
+}
+
+/// Byte progress and cancellation for native MP4 relocation. Only mdat payload
+/// bytes are counted; packets remain zero. Done is emitted after publication.
+pub fn remux_mp4_controlled(
+    source: &Path, destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<()> {
+    if cancel.is_some_and(|flag| flag.is_cancelled()) { return Err(invalid("media operation cancelled")); }
     let mut input=BufReader::new(File::open(source)?);
     let directory=destination.parent().filter(|p|!p.as_os_str().is_empty()).unwrap_or(Path::new("."));
     let (temporary,file)=(0..100).find_map(|_| {
@@ -448,8 +459,10 @@ pub fn remux_mp4(source: &Path, destination: &Path) -> Result<()> {
         }
     }).ok_or_else(||invalid("cannot reserve MP4 output"))??;
     let mut output=BufWriter::new(file);
-    crate::container::mp4_relocate::fast_start(&mut input,&mut output)?;
+    let event = crate::container::mp4_relocate::fast_start_controlled(&mut input, &mut output, cancel, progress)?;
     output.flush()?;output.get_ref().sync_all()?;drop(output);
+    if cancel.is_some_and(|flag| flag.is_cancelled()) { return Err(invalid("media operation cancelled")); }
     std::fs::hard_link(&temporary.0,destination)?;
+    if let Some(hook) = progress { hook.emit(crate::media_control::ProgressEvent { done: true, ..event }); }
     Ok(())
 }
