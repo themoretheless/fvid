@@ -102,6 +102,35 @@ fn planar_format(w: usize, h: usize, cw: usize, ch: usize) -> Result<String> {
     .into())
 }
 
+/// Shared packet-work reporting for native AAC container paths.
+pub(crate) struct DecodeProgress<'a> {
+    cancel: Option<&'a crate::media_control::CancelFlag>,
+    hook: Option<&'a crate::media_control::ProgressHook>,
+    event: crate::media_control::ProgressEvent,
+}
+impl<'a> DecodeProgress<'a> {
+    pub(crate) fn new(cancel: Option<&'a crate::media_control::CancelFlag>, hook: Option<&'a crate::media_control::ProgressHook>) -> Result<Self> {
+        let state = Self { cancel, hook, event: crate::media_control::ProgressEvent { packets: 0, payload_bytes: 0, done: false } };
+        state.check()?;
+        state.emit(false);
+        state.check()?;
+        Ok(state)
+    }
+    pub(crate) fn check(&self) -> Result<()> {
+        if self.cancel.is_some_and(|flag| flag.is_cancelled()) { return Err(invalid("media operation cancelled")); }
+        Ok(())
+    }
+    pub(crate) fn emit(&self, done: bool) {
+        if let Some(hook) = self.hook { hook.emit(crate::media_control::ProgressEvent { done, ..self.event }); }
+    }
+    fn packet(&mut self, bytes: usize) -> Result<()> {
+        self.event.packets = self.event.packets.checked_add(1).ok_or_else(|| invalid("AAC packet count overflow"))?;
+        self.event.payload_bytes = self.event.payload_bytes.checked_add(bytes as u64).ok_or_else(|| invalid("AAC byte count overflow"))?;
+        if self.event.packets % 256 == 0 { self.emit(false); }
+        self.check()
+    }
+}
+
 /// Result of owned AAC-LC decoding to interleaved little-endian float PCM.
 #[derive(Debug, PartialEq, Eq)]
 pub struct AudioDecodeStats {
@@ -183,10 +212,21 @@ pub fn decode_aac_pcm_interval(
 /// Stops reading once the requested interval ends. A full export validates every
 /// frame boundary and rejects truncated tails; ADTS has no priming metadata.
 pub fn decode_adts_aac_reader<R: std::io::Read>(
-    mut reader: crate::container::adts::StreamReader<R>,
+    reader: crate::container::adts::StreamReader<R>,
     output: &mut impl std::io::Write,
     interval: Option<(Duration, Duration)>,
 ) -> Result<AudioDecodeStats> {
+    let mut control = DecodeProgress::new(None, None)?;
+    decode_adts_aac_reader_controlled(reader, output, interval, &mut control)
+}
+
+pub(crate) fn decode_adts_aac_reader_controlled<R: std::io::Read>(
+    mut reader: crate::container::adts::StreamReader<R>,
+    output: &mut impl std::io::Write,
+    interval: Option<(Duration, Duration)>,
+    control: &mut DecodeProgress<'_>,
+) -> Result<AudioDecodeStats> {
+    control.check()?;
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("audio interval requires from < to"));
     }
@@ -206,6 +246,7 @@ pub fn decode_adts_aac_reader<R: std::io::Read>(
     let channels = usize::from(config.channels);
     let mut position = 0u64;
     while position < to {
+        control.check()?;
         let Some(packet) = reader.next_packet()? else { break; };
         let samples = decoder.decode(&packet)?;
         let frames = (samples.len() / channels) as u64;
@@ -217,6 +258,7 @@ pub fn decode_adts_aac_reader<R: std::io::Read>(
         }
         stats.sample_frames += last.saturating_sub(first) as u64;
         stats.decoded_frames += 1;
+        control.packet(packet.len())?;
         position = end;
     }
     if stats.sample_frames == 0 { return Err(invalid("audio interval contains no samples")); }
@@ -253,10 +295,21 @@ pub fn decode_mp4_aac_pcm_interval(
 /// state are needed for media. Edits and pre-roll use the same sample timeline as
 /// the byte-slice API. The caller must discard partial output if decoding fails.
 pub fn decode_mp4_aac_reader<R: std::io::Read + std::io::Seek>(
-    mut reader: crate::container::mp4::Mp4Reader<R>,
+    reader: crate::container::mp4::Mp4Reader<R>,
     output: &mut impl std::io::Write,
     interval: Option<(Duration, Duration)>,
 ) -> Result<AudioDecodeStats> {
+    let mut control = DecodeProgress::new(None, None)?;
+    decode_mp4_aac_reader_controlled(reader, output, interval, &mut control)
+}
+
+pub(crate) fn decode_mp4_aac_reader_controlled<R: std::io::Read + std::io::Seek>(
+    mut reader: crate::container::mp4::Mp4Reader<R>,
+    output: &mut impl std::io::Write,
+    interval: Option<(Duration, Duration)>,
+    control: &mut DecodeProgress<'_>,
+) -> Result<AudioDecodeStats> {
+    control.check()?;
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("audio interval requires from < to"));
     }
@@ -361,6 +414,7 @@ pub fn decode_mp4_aac_reader<R: std::io::Read + std::io::Seek>(
                 .checked_mul(u64::from(channels) * 4)
                 .ok_or_else(|| invalid("AAC silence size overflow"))?;
             while bytes != 0 {
+                control.check()?;
                 let count = bytes.min(zeros.len() as u64) as usize;
                 output.write_all(&zeros[..count])?;
                 bytes -= count as u64;
@@ -378,6 +432,7 @@ pub fn decode_mp4_aac_reader<R: std::io::Read + std::io::Seek>(
         let mut written = 0u64;
         let mut expected = None;
         for sample_index in 0..track.samples.len() {
+            control.check()?;
             let sample = track
                 .samples
                 .get(sample_index)
@@ -418,6 +473,7 @@ pub fn decode_mp4_aac_reader<R: std::io::Read + std::io::Seek>(
             }
             written += last.saturating_sub(first) as u64;
             stats.decoded_frames += 1;
+            control.packet(packet.len())?;
         }
         if written != length {
             return Err(invalid("AAC edit extends outside available samples"));
@@ -448,10 +504,21 @@ pub fn decode_matroska_aac_pcm_interval(
 /// Container delay, signed discard padding and interval selection are preserved.
 /// The container index is retained; encoded payloads are read one packet at a time.
 pub fn decode_matroska_aac_reader<R: std::io::Read + std::io::Seek>(
-    mut reader: crate::container::webm::WebmReader<R>,
+    reader: crate::container::webm::WebmReader<R>,
     output: &mut impl std::io::Write,
     interval: Option<(Duration, Duration)>,
 ) -> Result<AudioDecodeStats> {
+    let mut control = DecodeProgress::new(None, None)?;
+    decode_matroska_aac_reader_controlled(reader, output, interval, &mut control)
+}
+
+pub(crate) fn decode_matroska_aac_reader_controlled<R: std::io::Read + std::io::Seek>(
+    mut reader: crate::container::webm::WebmReader<R>,
+    output: &mut impl std::io::Write,
+    interval: Option<(Duration, Duration)>,
+    control: &mut DecodeProgress<'_>,
+) -> Result<AudioDecodeStats> {
+    control.check()?;
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("audio interval requires from < to"));
     }
@@ -499,6 +566,7 @@ pub fn decode_matroska_aac_reader<R: std::io::Read + std::io::Seek>(
         channels,
     };
     for index in 0..reader.packets.len() {
+        control.check()?;
         let packet = reader.packets[index].clone();
         if packet.track != track.number {
             continue;
@@ -513,7 +581,8 @@ pub fn decode_matroska_aac_reader<R: std::io::Read + std::io::Seek>(
         if (timestamp - exact).abs() > precision {
             return Err(invalid("non-contiguous Matroska AAC timestamps"));
         }
-        let samples = decoder.decode(&reader.read_packet(index)?)?;
+        let encoded = reader.read_packet(index)?;
+        let samples = decoder.decode(&encoded)?;
         let frames = (samples.len() / usize::from(channels)) as u64;
         decoded = decoded
             .checked_add(frames)
@@ -548,6 +617,7 @@ pub fn decode_matroska_aac_reader<R: std::io::Read + std::io::Seek>(
         }
         stats.sample_frames += end - begin;
         stats.decoded_frames += 1;
+        control.packet(encoded.len())?;
         position += available;
     }
     if stats.sample_frames == 0 {

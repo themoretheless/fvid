@@ -234,6 +234,22 @@ pub fn export_aac_pcm_resampled(
     channels: Option<u16>,
     sample_rate: Option<u32>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
+    export_aac_pcm_controlled(source, destination, interval, volume, channels, sample_rate, None, None)
+}
+
+/// AAC PCM export with encoded-packet progress and cancellation. Counts include
+/// reference pre-roll/replayed edits; done is emitted only after publication.
+pub fn export_aac_pcm_controlled(
+    source: &Path,
+    destination: &Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    volume: f64,
+    channels: Option<u16>,
+    sample_rate: Option<u32>,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::native_media::AudioDecodeStats> {
+    let mut control = crate::native_media::DecodeProgress::new(cancel, progress)?;
     if sample_rate.is_some_and(|rate| !(8000..=384000).contains(&rate)) {
         return Err(invalid("sample rate must be within 8000..=384000"));
     }
@@ -295,12 +311,14 @@ pub fn export_aac_pcm_resampled(
     let mut resampler = crate::pcm_resample::Resampler::new(&mut output, input_rate, output_rate, output_channels)?;
     let mut pcm = PcmGain { output: &mut resampler, gain: volume as f32, input_channels, output_channels, frame: [0.0; 6], filled: 0 };
     let mut stats = if let Some(reader) = mp4 {
-        crate::native_media::decode_mp4_aac_reader(reader, &mut pcm, interval)?
+        crate::native_media::decode_mp4_aac_reader_controlled(reader, &mut pcm, interval, &mut control)?
     } else if let Some(reader) = matroska {
-        crate::native_media::decode_matroska_aac_reader(reader, &mut pcm, interval)?
+        crate::native_media::decode_matroska_aac_reader_controlled(reader, &mut pcm, interval, &mut control)?
     } else {
-        crate::native_media::decode_adts_aac_reader(adts.ok_or_else(|| invalid("missing ADTS reader"))?, &mut pcm, interval)?
+        crate::native_media::decode_adts_aac_reader_controlled(adts.ok_or_else(|| invalid("missing ADTS reader"))?, &mut pcm, interval, &mut control)?
     };
+    control.emit(false);
+    control.check()?;
     if pcm.filled != 0 { return Err(invalid("incomplete decoded audio frame")); }
     stats.channels = output_channels;
     stats.sample_frames = resampler.finish()?;
@@ -313,7 +331,9 @@ pub fn export_aac_pcm_resampled(
     output.flush()?;
     output.get_ref().sync_all()?;
     drop(output);
+    control.check()?;
     std::fs::hard_link(&temporary.0, destination)?;
+    control.emit(true);
     Ok(stats)
 }
 

@@ -1186,3 +1186,17 @@ after each additional MiB of media data, and at completion; `payload_bytes`
 counts only `mdat` payload, excluding headers and metadata. `packets` stays zero
 because relocation copies opaque boxes without parsing packet boundaries.
 Only publication emits `done=true`. Existing destinations are never overwritten.
+
+`native_export::export_aac_pcm_controlled` adds the same cancellation/progress
+contracts to PCM/WAV export from ADTS, MP4 and Matroska, including interval,
+gain, channel conversion and resampling. The CLI accepts `--progress` together
+with these options and `--quiet`; progress remains on stderr and quiet suppresses
+only the final stdout summary. Counts represent successfully decoded encoded
+packets and their payload bytes, including pre-roll and repeated edit decoding,
+not output samples or a percentage of elapsed presentation time.
+
+The decoder checks cancellation between packets and while writing silence for
+empty MP4 edits. Progress is sampled every 256 decoded packets and before
+publication. The final `done=true` event follows WAV header finalization, flush,
+sync and publication. Cancellation does not interrupt an in-flight filesystem
+read or container indexing; it is observed at the next decoder control check.

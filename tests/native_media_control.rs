@@ -242,3 +242,180 @@ fn mp4_cli_progress_stays_on_native_backend() {
     );
     assert!(output.exists());
 }
+
+#[test]
+fn aac_pcm_progress_covers_all_containers_and_done_follows_publication() {
+    use fvid::native_export::{export_aac_pcm_controlled, export_aac_pcm_resampled};
+    for (name, file) in [
+        ("adts", "aac-mono-44k.aac"),
+        ("mp4", "aac-native-edit.m4a"),
+        ("mka", "aac-stereo.mka"),
+    ] {
+        let dir = directory(&format!("pcm-{name}"));
+        let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/audio")
+            .join(file);
+        let output = dir.0.join("controlled.wav");
+        let baseline = dir.0.join("baseline.wav");
+        let events = Arc::new(Mutex::new(Vec::<ProgressEvent>::new()));
+        let captured = events.clone();
+        let destination = output.clone();
+        let hook = ProgressHook::new(move |event| {
+            assert_eq!(destination.exists(), event.done);
+            captured.lock().unwrap().push(event);
+        });
+        let stats = export_aac_pcm_controlled(
+            &source,
+            &output,
+            None,
+            0.5,
+            Some(2),
+            Some(16000),
+            None,
+            Some(&hook),
+        )
+        .unwrap();
+        let expected =
+            export_aac_pcm_resampled(&source, &baseline, None, 0.5, Some(2), Some(16000)).unwrap();
+        assert_eq!(stats, expected);
+        assert_eq!(
+            std::fs::read(output).unwrap(),
+            std::fs::read(baseline).unwrap()
+        );
+        let events = events.lock().unwrap();
+        assert_eq!(
+            events[0],
+            ProgressEvent {
+                packets: 0,
+                payload_bytes: 0,
+                done: false
+            }
+        );
+        let final_event = events.last().unwrap();
+        assert_eq!(final_event.packets, stats.decoded_frames);
+        assert!(final_event.payload_bytes > 0);
+        assert_eq!(events.iter().filter(|e| e.done).count(), 1);
+    }
+}
+
+#[test]
+fn aac_pcm_cancellation_cleans_files_in_each_container_path() {
+    use fvid::native_export::export_aac_pcm_controlled;
+    for (name, file) in [
+        ("adts", "aac-mono-44k.aac"),
+        ("mp4", "aac-native-edit.m4a"),
+        ("mka", "aac-stereo.mka"),
+    ] {
+        for before in [true, false] {
+            let dir = directory(&format!("pcm-cancel-{name}-{before}"));
+            let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/fixtures/audio")
+                .join(file);
+            let flag = CancelFlag::new();
+            if before {
+                flag.cancel();
+            }
+            let shared = flag.clone();
+            let hook = ProgressHook::new(move |event| {
+                assert!(!event.done);
+                if event.packets > 0 {
+                    shared.cancel();
+                }
+            });
+            let error = export_aac_pcm_controlled(
+                &source,
+                &dir.0.join("out.wav"),
+                None,
+                1.0,
+                None,
+                None,
+                Some(&flag),
+                Some(&hook),
+            )
+            .unwrap_err();
+            assert!(error.to_string().contains("cancelled"));
+            assert_eq!(std::fs::read_dir(&dir.0).unwrap().count(), 0);
+        }
+    }
+    let dir = directory("pcm-cancel-mid");
+    let source = dir.0.join("long.aac");
+    std::fs::write(
+        &source,
+        include_bytes!("fixtures/audio/aac-mono-44k.aac").repeat(40),
+    )
+    .unwrap();
+    let flag = CancelFlag::new();
+    let shared = flag.clone();
+    let count = Arc::new(Mutex::new(0));
+    let captured = count.clone();
+    let hook = ProgressHook::new(move |event| {
+        assert!(!event.done);
+        *captured.lock().unwrap() = event.packets;
+        if event.packets >= 256 {
+            shared.cancel();
+        }
+    });
+    assert!(
+        export_aac_pcm_controlled(
+            &source,
+            &dir.0.join("out.wav"),
+            None,
+            1.0,
+            None,
+            None,
+            Some(&flag),
+            Some(&hook)
+        )
+        .unwrap_err()
+        .to_string()
+        .contains("cancelled")
+    );
+    assert_eq!(*count.lock().unwrap(), 256);
+    assert_eq!(std::fs::read_dir(&dir.0).unwrap().count(), 1);
+}
+
+#[test]
+fn aac_pcm_cli_progress_with_transforms_remains_native_and_quiet() {
+    for (name, file) in [
+        ("adts", "aac-mono-44k.aac"),
+        ("mp4", "aac-native-edit.m4a"),
+        ("mka", "aac-stereo.mka"),
+    ] {
+        let dir = directory(&format!("pcm-cli-{name}"));
+        let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/audio")
+            .join(file);
+        let output = dir.0.join("out.wav");
+        let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "decode-audio"])
+            .arg(&source)
+            .arg(&output)
+            .args([
+                "--progress",
+                "--quiet",
+                "--from",
+                "0.001",
+                "--to",
+                "0.003",
+                "--rate",
+                "16000",
+                "--channels",
+                "1",
+                "--volume",
+                "0.5",
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        assert!(run.stdout.is_empty());
+        let events = String::from_utf8(run.stderr).unwrap();
+        assert!(events.lines().last().unwrap().ends_with("\"done\":true}"));
+        let wav = std::fs::read(output).unwrap();
+        assert_eq!(u32::from_le_bytes(wav[24..28].try_into().unwrap()), 16000);
+        assert_eq!(u16::from_le_bytes(wav[22..24].try_into().unwrap()), 1);
+    }
+}
