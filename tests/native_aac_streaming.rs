@@ -108,3 +108,69 @@ fn indexed_decode_propagates_writer_failure() {
             .contains("sink failed")
     );
 }
+
+#[test]
+fn large_matroska_skips_sparse_void_and_preserves_trimmed_interval() {
+    use fvid::{container::webm::WebmReader, native_media::decode_matroska_aac_reader};
+    let dir = std::env::temp_dir().join(format!("fvid-mka-streaming-{}", std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    let _cleanup = Cleanup(dir.clone());
+    let fixture = include_bytes!("fixtures/audio/aac-stereo.mka");
+    let mut head = fixture.to_vec();
+    let segment = head
+        .windows(4)
+        .position(|v| v == [0x18, 0x53, 0x80, 0x67])
+        .unwrap();
+    let width = head[segment + 4].leading_zeros() as usize + 1;
+    assert_eq!(width, 8);
+    let payload = 3u64 << 30;
+    let new_length = head.len() as u64 + 9 + payload;
+    let segment_size = new_length - (segment + 4 + width) as u64;
+    head[segment + 4..segment + 12].copy_from_slice(&((1u64 << 56) | segment_size).to_be_bytes());
+    let path = dir.join("large.mka");
+    let mut file = File::create(&path).unwrap();
+    file.write_all(&head).unwrap();
+    file.write_all(&[0xec]).unwrap(); // EBML Void inside Segment.
+    file.write_all(&((1u64 << 56) | payload).to_be_bytes())
+        .unwrap();
+    file.set_len(new_length).unwrap();
+    drop(file);
+    let interval = Some((Duration::from_micros(30001), Duration::from_micros(70001)));
+    let mut expected = Vec::new();
+    let wanted =
+        fvid::native_media::decode_matroska_aac_pcm_interval(fixture, &mut expected, interval)
+            .unwrap();
+    let bytes = Rc::new(Cell::new(0));
+    let reader = WebmReader::open(
+        Count {
+            inner: File::open(&path).unwrap(),
+            bytes: bytes.clone(),
+        },
+        Default::default(),
+    )
+    .unwrap();
+    let mut actual = Vec::new();
+    let got = decode_matroska_aac_reader(reader, &mut actual, interval).unwrap();
+    assert_eq!(got, wanted);
+    assert_eq!(actual, expected);
+    assert!(
+        bytes.get() < 8 * fixture.len(),
+        "read {} bytes",
+        bytes.get()
+    );
+    let output = dir.join("audio.f32le");
+    let status = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "decode-audio"])
+        .arg(&path)
+        .arg(&output)
+        .args(["--from", "0.030001", "--to", "0.070001", "--quiet"])
+        .output()
+        .unwrap();
+    assert!(
+        status.status.success(),
+        "{}",
+        String::from_utf8_lossy(&status.stderr)
+    );
+    assert!(status.stdout.is_empty());
+    assert_eq!(std::fs::read(output).unwrap(), expected);
+}

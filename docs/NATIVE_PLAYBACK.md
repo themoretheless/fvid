@@ -1139,4 +1139,9 @@ limit no longer applies to this path; MP4 metadata, sample-count and individual
 packet limits still apply. Sample-aligned edits, decoder pre-roll, interval
 selection, channel mixing and resampling are unchanged. The reader API
 `native_media::decode_mp4_aac_reader` also accepts custom `Read + Seek` sources.
-ADTS and Matroska AAC export still use their bounded in-memory input paths.
+Matroska AAC export likewise uses a seekable source through
+`native_media::decode_matroska_aac_reader`, retaining the packet index rather
+than the whole file. CodecDelay, signed DiscardPadding and sample-exact
+intervals keep their existing semantics. Building the Matroska index may still
+read unselected block payloads; this is bounded-memory file access, not a promise
+of constant startup time. ADTS export still uses a bounded in-memory input path.

@@ -252,14 +252,16 @@ pub fn export_aac_pcm_resampled(
     input.read_exact(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;
     let mut data = Vec::new();
-    let mp4 = if &prefix[4..8] == b"ftyp" {
-        Some(crate::container::mp4::Mp4Reader::open(input, Default::default())?)
+    let (mp4, matroska) = if &prefix[4..8] == b"ftyp" {
+        (Some(crate::container::mp4::Mp4Reader::open(input, Default::default())?), None)
+    } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
+        (None, Some(crate::container::webm::WebmReader::open(input, Default::default())?))
     } else {
         input.take(limits.file_bytes as u64 + 1).read_to_end(&mut data)?;
         if data.len() > limits.file_bytes {
             return Err(invalid("AAC input exceeds container byte limit"));
         }
-        None
+        (None, None)
     };
     let (input_rate, input_channels) = if let Some(reader) = &mp4 {
         let tracks: Vec<_> = reader.tracks().iter().filter(|t| t.handler == *b"soun").collect();
@@ -268,6 +270,13 @@ pub fn export_aac_pcm_resampled(
         }
         let asc = crate::codec::config::aac_specific_config(&tracks[0].configuration)?;
         let decoder = crate::codec::aac_native::NativeAacDecoder::new(asc)?;
+        (decoder.sample_rate(), u16::from(decoder.channels()))
+    } else if let Some(reader) = &matroska {
+        let tracks: Vec<_> = reader.tracks.iter().filter(|t| t.kind == 2).collect();
+        if tracks.len() != 1 || tracks[0].codec != "A_AAC" {
+            return Err(invalid("expected one AAC audio track"));
+        }
+        let decoder = crate::codec::aac_native::NativeAacDecoder::new(&tracks[0].codec_private)?;
         (decoder.sample_rate(), u16::from(decoder.channels()))
     } else { aac_geometry(&data)? };
     let output_rate = sample_rate.unwrap_or(input_rate);
@@ -290,8 +299,8 @@ pub fn export_aac_pcm_resampled(
     let mut pcm = PcmGain { output: &mut resampler, gain: volume as f32, input_channels, output_channels, frame: [0.0; 6], filled: 0 };
     let mut stats = if let Some(reader) = mp4 {
         crate::native_media::decode_mp4_aac_reader(reader, &mut pcm, interval)?
-    } else if data.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        crate::native_media::decode_matroska_aac_pcm_interval(&data, &mut pcm, interval)?
+    } else if let Some(reader) = matroska {
+        crate::native_media::decode_matroska_aac_reader(reader, &mut pcm, interval)?
     } else {
         crate::native_media::decode_aac_pcm_interval(&data, &mut pcm, &limits, interval)?
     };
@@ -396,14 +405,7 @@ impl<W: Write> Write for PcmGain<'_, W> {
 }
 
 fn aac_geometry(data: &[u8]) -> Result<(u32, u16)> {
-    let asc = if data.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        let reader = crate::container::webm::WebmReader::open(std::io::Cursor::new(data), Default::default())?;
-        let tracks: Vec<_> = reader.tracks.iter().filter(|t| t.kind == 2).collect();
-        if tracks.len() != 1 || tracks[0].codec != "A_AAC" { return Err(invalid("expected one AAC audio track")); }
-        tracks[0].codec_private.clone()
-    } else {
-        crate::container::adts::Aac::parse(data, &Default::default())?.frames[0].asc.to_vec()
-    };
+    let asc = crate::container::adts::Aac::parse(data, &Default::default())?.frames[0].asc;
     let decoder = crate::codec::aac_native::NativeAacDecoder::new(&asc)?;
     Ok((decoder.sample_rate(), u16::from(decoder.channels())))
 }

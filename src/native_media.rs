@@ -394,11 +394,23 @@ pub fn decode_matroska_aac_pcm_interval(
     output: &mut impl std::io::Write,
     interval: Option<(Duration, Duration)>,
 ) -> Result<AudioDecodeStats> {
-    use crate::container::webm::{Limits, WebmReader};
+    let reader = crate::container::webm::WebmReader::open(
+        std::io::Cursor::new(data), Default::default(),
+    )?;
+    decode_matroska_aac_reader(reader, output, interval)
+}
+
+/// Decode indexed AAC from a seekable Matroska source without retaining the file.
+/// Container delay, signed discard padding and interval selection are preserved.
+/// The container index is retained; encoded payloads are read one packet at a time.
+pub fn decode_matroska_aac_reader<R: std::io::Read + std::io::Seek>(
+    mut reader: crate::container::webm::WebmReader<R>,
+    output: &mut impl std::io::Write,
+    interval: Option<(Duration, Duration)>,
+) -> Result<AudioDecodeStats> {
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("audio interval requires from < to"));
     }
-    let mut reader = WebmReader::open(std::io::Cursor::new(data), Limits::default())?;
     reader.scan_all()?;
     let tracks: Vec<_> = reader.tracks.iter().filter(|t| t.kind == 2).collect();
     if tracks.len() != 1 || tracks[0].codec != "A_AAC" {
