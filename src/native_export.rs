@@ -568,6 +568,39 @@ pub fn remux_adts_aac_stats(
 ) -> Result<crate::media_control::ProgressEvent> {
     if cancel.is_some_and(|flag| flag.is_cancelled()) { return Err(invalid("media operation cancelled")); }
     let input = crate::container::adts::StreamReader::open(BufReader::new(File::open(source)?))?;
+    publish_adts_readers(vec![input],destination,cancel,progress)
+}
+
+/// Content detection for the owned ADTS concat route.
+pub fn is_adts_source(source: &Path) -> Result<bool> {
+    use std::io::Read;
+    let mut input=File::open(source)?;
+    let mut header=[0;7];
+    match input.read_exact(&mut header) {
+        Ok(())=>Ok(crate::container::adts::header(&header).is_some()),
+        Err(e) if e.kind()==std::io::ErrorKind::UnexpectedEof=>Ok(false),
+        Err(e)=>Err(e.into()),
+    }
+}
+
+/// Copy ADTS segments into a single MP4 track without decoding. Encoder
+/// priming/padding is retained; this is packet concatenation, not gapless editing.
+pub fn concat_adts_aac(sources: &[std::path::PathBuf], destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::media_control::ProgressEvent> {
+    if !(2..=256).contains(&sources.len()) {return Err(invalid("concat requires 2..=256 inputs"));}
+    if !matches!(destination.extension().and_then(|s|s.to_str()),Some("mp4"|"m4a")) {return Err(invalid("native ADTS concat output requires .mp4 or .m4a"));}
+    let mut readers=Vec::with_capacity(sources.len());
+    for source in sources {
+        if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
+        readers.push(crate::container::adts::StreamReader::open(BufReader::new(File::open(source)?))?);
+    }
+    publish_adts_readers(readers,destination,cancel,progress)
+}
+
+fn publish_adts_readers(mut readers: Vec<crate::container::adts::StreamReader<BufReader<File>>>, destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::media_control::ProgressEvent> {
     let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
     let (temporary, file) = (0..100).find_map(|_| {
         let path = directory.join(format!(".fvid-mp4-{}-{}.tmp", std::process::id(), NEXT.fetch_add(1, Ordering::Relaxed)));
@@ -578,7 +611,11 @@ pub fn remux_adts_aac_stats(
         }
     }).ok_or_else(|| invalid("cannot reserve MP4 output"))??;
     let mut output = BufWriter::new(file);
-    let event = crate::container::mp4_write::write_adts_aac_reader_controlled(input, &mut output, cancel, progress)?;
+    let event = if readers.len()==1 {
+        crate::container::mp4_write::write_adts_aac_reader_controlled(readers.remove(0), &mut output, cancel, progress)?
+    } else {
+        crate::container::mp4_write::concat_adts_readers(readers, &mut output, cancel, progress)?
+    };
     output.flush()?;
     output.get_ref().sync_all()?;
     drop(output);

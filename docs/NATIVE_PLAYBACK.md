@@ -1516,3 +1516,21 @@ RIFF/data/fact lengths are recomputed, including odd data padding. Total size is
 validated before output creation; RF64-sized output is rejected. Cancellation,
 I/O failure and incompatible input leave no published output, and existing
 outputs are never overwritten. The writer is shared with sample-exact WAVE trim.
+
+### Owned ADTS AAC concatenation (2026-09-29)
+
+`fvid media concat OUTPUT.m4a INPUT.aac INPUT.aac ...` now streams 2..=256 ADTS
+segments into one native MP4 audio track. `.mp4` output is also accepted. The
+headless CLI, `media::concat`, and `media::plan_concat` use the owned path;
+`plan concat` validates every segment and the total sample-index limit.
+Configurations must match. Each segment has its own strict ADTS reader, so a
+truncated final packet cannot borrow bytes from the following input. AAC packets
+are retained byte-for-byte with contiguous sample timestamps; no decoding or
+whole-payload accumulation is involved. The existing bounded sample index and
+atomic, no-overwrite MP4 publisher are shared with single-input remux.
+
+This is packet concatenation: encoder priming and padding from every input are
+retained. No gapless trimming or crossfade is implied, and independent encoder
+boundaries may be audible. The concatenator does not merge container metadata.
+Only stream 0 is selectable. Unsupported custom policies are errors. Structural
+errors, cancellation, and mismatched AAC configuration leave no published file.

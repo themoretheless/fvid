@@ -178,6 +178,40 @@ pub fn write_adts_aac_reader_controlled<R: std::io::Read, W: Write + std::io::Se
     cancel: Option<&fvid_control::CancelFlag>,
     progress: Option<&fvid_control::ProgressHook>,
 ) -> Result<fvid_control::ProgressEvent> {
+    let config = reader.configuration();
+    write_aac_packets(config, || reader.next_packet(), output, cancel, progress)
+}
+
+/// Concatenate independently framed ADTS streams; a truncated input cannot
+/// consume bytes from the next stream. Priming samples remain in each segment.
+pub fn concat_adts_readers<R: std::io::Read, W: Write + std::io::Seek>(
+    readers: Vec<super::adts::StreamReader<R>>, output: &mut W,
+    cancel: Option<&fvid_control::CancelFlag>, progress: Option<&fvid_control::ProgressHook>,
+) -> Result<fvid_control::ProgressEvent> {
+    if !(2..=256).contains(&readers.len()) {return Err(invalid("concat requires 2..=256 inputs"));}
+    let config = readers[0].configuration();
+    for reader in &readers {
+        let other = reader.configuration();
+        if (config.asc,config.channels,config.sample_rate) != (other.asc,other.channels,other.sample_rate) {
+            return Err(invalid("ADTS concat requires identical AAC configurations"));
+        }
+    }
+    let mut readers = readers.into_iter();
+    let mut current = readers.next();
+    write_aac_packets(config, || {
+        loop {
+            let Some(reader) = current.as_mut() else {return Ok(None);};
+            if let Some(packet) = reader.next_packet()? {return Ok(Some(packet));}
+            current = readers.next();
+        }
+    }, output, cancel, progress)
+}
+
+fn write_aac_packets<W: Write + std::io::Seek>(
+    config: super::adts::Header,
+    mut next_packet: impl FnMut() -> Result<Option<Vec<u8>>>, output: &mut W,
+    cancel: Option<&fvid_control::CancelFlag>, progress: Option<&fvid_control::ProgressHook>,
+) -> Result<fvid_control::ProgressEvent> {
     let check = || -> Result<()> {
         if cancel.is_some_and(|flag| flag.is_cancelled()) {
             return Err(invalid("media operation cancelled"));
@@ -198,7 +232,6 @@ pub fn write_adts_aac_reader_controlled<R: std::io::Read, W: Write + std::io::Se
     if output.stream_position()? != 0 {
         return Err(invalid("MP4 output must start at byte zero"));
     }
-    let config = reader.configuration();
     let samples = u32::from(crate::codec::config::AacConfig::parse(&config.asc)?.frame_samples);
     output.write_all(&file_type(config.sample_rate)?)?;
     let mdat = output.stream_position()?;
@@ -209,7 +242,7 @@ pub fn write_adts_aac_reader_controlled<R: std::io::Read, W: Write + std::io::Se
     let mut sizes = Vec::new();
     loop {
         check()?;
-        let Some(packet) = reader.next_packet()? else {
+        let Some(packet) = next_packet()? else {
             break;
         };
         if sizes.len() >= super::mp4::Limits::default().samples {

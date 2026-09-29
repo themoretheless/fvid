@@ -140,7 +140,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         }
         return Ok(());
     }
-    if try_wave_concat(args)? { return Ok(()); }
+    if try_native_audio_concat(args)? { return Ok(()); }
     if try_wave_trim(args)? { return Ok(()); }
     if args.first().map(String::as_str) == Some("export-y4m") {
         if args.len() < 3 { return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m [--crop X:Y:W:H] [--hflip] [--vflip] [--transpose MODE] [--pad W:H:X:Y] [--scale W:H] [--from SECONDS --to SECONDS]".into()); }
@@ -3094,13 +3094,14 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn try_wave_concat(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+fn try_native_audio_concat(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
     let plan = args.first().map(String::as_str)==Some("plan");
     let start = usize::from(plan);
     if args.get(start).map(String::as_str)!=Some("concat") {return Ok(false);}
     let first = start + if plan {1} else {2};
     let Some(source) = args.get(first) else {return Ok(false);};
-    if !fvid::native_pcm::is_wave(std::path::Path::new(source))? {return Ok(false);}
+    let adts=fvid::native_export::is_adts_source(std::path::Path::new(source))?;
+    if !adts && !fvid::native_pcm::is_wave(std::path::Path::new(source))? {return Ok(false);}
     let mut paths=Vec::new();
     let mut quiet=false;
     let mut progress=false;
@@ -3109,17 +3110,23 @@ fn try_wave_concat(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> 
         match arg.as_str() {
             "--quiet"=>quiet=true,
             "--progress" if !plan=>progress=true,
-            "--streams"=>{if options.next().map(String::as_str)!=Some("0") {return Err("WAVE has only stream 0".into());}},
-            _ if arg.starts_with('-')=>return Err(format!("unsupported native WAVE concat option: {arg}").into()),
+            "--streams"=>{if options.next().map(String::as_str)!=Some("0") {return Err("audio input has only stream 0".into());}},
+            _ if arg.starts_with('-')=>return Err(format!("unsupported native audio concat option: {arg}").into()),
             _=>paths.push(std::path::PathBuf::from(arg)),
         }
     }
     if plan {
-        println!("{}",serde_json::to_string_pretty(&fvid::native_plan::concat_wave(&paths)?)?);
+        let plan=if adts {fvid::native_plan::concat_adts(&paths)?} else {fvid::native_plan::concat_wave(&paths)?};
+        println!("{}",serde_json::to_string_pretty(&plan)?);
     } else {
         let hook=progress.then(||fvid::media_control::ProgressHook::new(|event|{
             eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",event.packets,event.payload_bytes,event.done);
         }));
+        if adts {
+            let stats=fvid::native_export::concat_adts_aac(&paths,std::path::Path::new(&args[start+1]),None,hook.as_ref())?;
+            if !quiet {println!("{{\"packets\":{},\"payload_bytes\":{},\"segments\":{},\"backend\":\"fvid\",\"fvid_payload_copies\":0}}",stats.packets,stats.payload_bytes,paths.len());}
+            return Ok(true);
+        }
         let stats=fvid::native_pcm::concat_wave(&paths,std::path::Path::new(&args[start+1]),None,hook.as_ref())?;
         if !quiet {println!("{{\"packets\":{},\"sample_frames\":{},\"payload_bytes\":{},\"segments\":{},\"backend\":\"fvid\",\"fvid_payload_copies\":0}}",stats.packets,stats.sample_frames,stats.payload_bytes,paths.len());}
     }

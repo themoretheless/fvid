@@ -175,3 +175,29 @@ pub fn concat_wave(sources: &[std::path::PathBuf]) -> Result<MediaPlan> {
         graph:None,notes:vec!["backend: fvid; no external demuxer or codec".into(),"retain first input metadata; all PCM formats and channel masks must match".into()],
     })
 }
+
+/// Validate each ADTS segment independently and describe packet concatenation.
+pub fn concat_adts(sources: &[std::path::PathBuf]) -> Result<MediaPlan> {
+    if !(2..=256).contains(&sources.len()) {return Err("concat requires 2..=256 inputs".into());}
+    let mut asc=None;
+    let mut packets=0usize;
+    for source in sources {
+        let file=std::fs::File::open(source).map_err(|e|e.to_string())?;
+        let mut reader=crate::container::adts::StreamReader::open(std::io::BufReader::new(file)).map_err(|e|e.to_string())?;
+        let config=reader.configuration().asc;
+        if asc.is_some_and(|v|v!=config) {return Err("ADTS concat requires identical AAC configurations".into());}
+        asc=Some(config);
+        while reader.next_packet().map_err(|e|e.to_string())?.is_some() {
+            packets+=1;
+            if packets>crate::container::mp4::Limits::default().samples {return Err("AAC remux sample index exceeds limit".into());}
+        }
+    }
+    Ok(MediaPlan {
+        command:"concat".into(),input:sources[0].clone(),inputs:sources.to_vec(),
+        streams:vec![PlanStream {index:0,media_type:"audio".into(),codec:"aac".into(),disposition:"copy".into()}],
+        steps:vec![PlanStep {action:"copy".into(),detail:format!("append {packets} AAC packets into one MP4 track without decoding")},
+            PlanStep {action:"publish".into(),detail:"write sample tables; sync and publish without overwriting".into()}],
+        graph:None,notes:vec!["backend: fvid; output requires .mp4 or .m4a".into(),
+            "ADTS encoder priming and padding remain in every segment; no gapless trimming".into()],
+    })
+}
