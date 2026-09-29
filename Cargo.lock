@@ -1639,6 +1639,7 @@ dependencies = [
  "fvid-cpu",
  "fvid-cuda",
  "fvid-media",
+ "fvid-media-info",
  "fvid-platform",
  "fvid-vt",
  "naga",
@@ -1677,10 +1678,18 @@ dependencies = [
  "fvid-control",
  "fvid-cpu",
  "fvid-cuda",
+ "fvid-media-info",
  "libc",
  "rfd",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "fvid-media-info"
+version = "0.1.0"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

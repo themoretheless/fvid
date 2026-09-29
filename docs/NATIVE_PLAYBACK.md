@@ -1286,3 +1286,14 @@ otherwise probe infers an end from the next chapter or Segment duration. Missing
 starts and reversed chapter intervals are excluded. Normalized supported tags,
 stream language/title and codec-private byte counts are exposed; arbitrary tags,
 stream dispositions and decoded codec properties still require more work.
+
+Probe is now available in the ordinary headless build:
+`cargo build --locked --no-default-features`, then
+`fvid media probe INPUT [--input-format aac|mov|mp4|matroska|webm]`.
+The public `native_probe::{probe, probe_as}` API and its shared
+`fvid-media-info` schema have no FFmpeg dependency. The legacy adapter reexports
+that schema, preserving JSON field names and type compatibility. Native parsing
+errors do not trigger fallback; `try_probe_as` returns `None` only for an unknown
+format. Unmigrated containers require the legacy feature. Other legacy operations
+still keep `media` itself dependent on FFmpeg; independent probe is one completed
+part of that migration, not a claim about the entire feature.

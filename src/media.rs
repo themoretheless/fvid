@@ -188,54 +188,12 @@ pub fn remux(
         segments: 1, backend: "fvid", fvid_payload_copies: 0 })
 }
 
-/// Native ADTS, MP4 and Matroska inspection; other container descriptions remain on the legacy
-/// adapter until their metadata/timing contracts have been migrated.
+/// Own parsers describe supported containers; unmigrated formats retain the
+/// legacy adapter. A native parsing error never falls back to another parser.
 pub fn probe(source: &std::path::Path) -> Result<MediaInfo> { probe_as(source, None) }
-
 pub fn probe_as(source: &std::path::Path, format: Option<&str>) -> Result<MediaInfo> {
-    use std::io::{BufReader, Read, Seek, SeekFrom};
-    if matches!(format, Some("mov" | "mp4" | "m4a")) {
-        return crate::media_probe::mp4(source);
+    match crate::native_probe::try_probe_as(source, format)? {
+        Some(info) => Ok(info),
+        None => fvid_media::probe_as(source, format),
     }
-    if matches!(format, Some("matroska" | "webm")) {
-        return crate::media_probe::matroska(source);
-    }
-    if format.is_none() {
-        let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
-        let mut signature = [0; 8];
-        if file.read_exact(&mut signature).is_ok() {
-            if &signature[4..] == b"ftyp" { return crate::media_probe::mp4(source); }
-            if signature.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-                return crate::media_probe::matroska(source);
-            }
-        }
-    }
-    if format.is_some_and(|format| format != "aac") {
-        return fvid_media::probe_as(source, format);
-    }
-    let mut input = BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
-    let mut prefix = [0; 7];
-    let detected = match input.read_exact(&mut prefix) {
-        Ok(()) => crate::container::adts::header(&prefix).is_some(),
-        Err(error) if error.kind() == std::io::ErrorKind::UnexpectedEof => false,
-        Err(error) => return Err(error.to_string()),
-    };
-    if !detected && format.is_none() { return fvid_media::probe_as(source, format); }
-    input.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
-    let info = crate::native_media::inspect_adts(input).map_err(|e| e.to_string())?;
-    let duration = i64::try_from(info.sample_frames).map_err(|_| "AAC duration exceeds API range")?;
-    let duration_us = i64::try_from(u128::from(info.sample_frames) * 1_000_000 / u128::from(info.sample_rate))
-        .map_err(|_| "AAC duration exceeds API range")?;
-    Ok(MediaInfo {
-        path: source.to_path_buf(), format: "aac".into(), start_us: Some(0),
-        duration_us: Some(duration_us), bit_rate: None, metadata: Default::default(), chapters: vec![],
-        streams: vec![StreamInfo {
-            index: 0, media_type: "audio".into(), codec: "aac".into(),
-            time_base: [1, info.sample_rate as i32], start: Some(0), duration: Some(duration),
-            bit_rate: None, average_frame_rate: [0, 1], profile: Some("LC".into()), level: None,
-            disposition: 0, metadata: Default::default(), width: 0, height: 0, pixel_format: -1,
-            sample_rate: info.sample_rate as i32, channels: i32::from(info.channels),
-            video_delay: 0, extradata_bytes: 2,
-        }],
-    })
 }

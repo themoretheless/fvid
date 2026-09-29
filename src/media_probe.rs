@@ -1,5 +1,6 @@
 //! Container-only descriptions, without opening an external demuxer/decoder.
-use crate::media::{ChapterInfo, MediaInfo, Result, StreamInfo};
+pub use fvid_media_info::{ChapterInfo, MediaInfo, StreamInfo};
+type Result<T> = std::result::Result<T, String>;
 use std::{collections::BTreeMap, fs::File, io::BufReader, path::Path};
 
 fn ticks(value: u128, scale: u32, target: u32) -> Result<i64> {
@@ -308,4 +309,84 @@ pub(crate) fn matroska(path: &Path) -> Result<MediaInfo> {
         chapters,
         streams,
     })
+}
+
+/// Inspect only with FVid-owned parsers. Unknown containers return an error.
+pub fn probe(source: &Path) -> Result<MediaInfo> {
+    probe_as(source, None)
+}
+pub fn probe_as(source: &Path, format: Option<&str>) -> Result<MediaInfo> {
+    try_probe_as(source, format)?
+        .ok_or_else(|| "native probe does not yet support this container".into())
+}
+/// `None` means no owned parser recognizes the requested format/signature.
+/// A recognized but malformed source returns an error, never `None`.
+pub fn try_probe_as(source: &Path, format: Option<&str>) -> Result<Option<MediaInfo>> {
+    use std::io::{Read, Seek, SeekFrom};
+    match format {
+        Some("mov" | "mp4" | "m4a") => return mp4(source).map(Some),
+        Some("matroska" | "webm") => return matroska(source).map(Some),
+        Some("aac") | None => {}
+        Some(_) => return Ok(None),
+    }
+    let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+    let mut signature = [0; 8];
+    // Read up to eight bytes, retaining a valid seven-byte ADTS header at EOF.
+    let mut count = 0;
+    while count < signature.len() {
+        match input.read(&mut signature[count..]) {
+            Ok(0) => break,
+            Ok(n) => count += n,
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(error) => return Err(error.to_string()),
+        }
+    }
+    if format.is_none() {
+        if count == 8 && &signature[4..] == b"ftyp" {
+            return mp4(source).map(Some);
+        }
+        if signature[..count].starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
+            return matroska(source).map(Some);
+        }
+        if crate::container::adts::header(&signature[..count]).is_none() {
+            return Ok(None);
+        }
+    }
+    input.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+    let info = crate::native_media::inspect_adts(input).map_err(|e| e.to_string())?;
+    let duration =
+        i64::try_from(info.sample_frames).map_err(|_| "AAC duration exceeds API range")?;
+    let duration_us =
+        i64::try_from(u128::from(info.sample_frames) * 1_000_000 / u128::from(info.sample_rate))
+            .map_err(|_| "AAC duration exceeds API range")?;
+    Ok(Some(MediaInfo {
+        path: source.to_path_buf(),
+        format: "aac".into(),
+        start_us: Some(0),
+        duration_us: Some(duration_us),
+        bit_rate: None,
+        metadata: Default::default(),
+        chapters: vec![],
+        streams: vec![StreamInfo {
+            index: 0,
+            media_type: "audio".into(),
+            codec: "aac".into(),
+            time_base: [1, info.sample_rate as i32],
+            start: Some(0),
+            duration: Some(duration),
+            bit_rate: None,
+            average_frame_rate: [0, 1],
+            profile: Some("LC".into()),
+            level: None,
+            disposition: 0,
+            metadata: Default::default(),
+            width: 0,
+            height: 0,
+            pixel_format: -1,
+            sample_rate: info.sample_rate as i32,
+            channels: i32::from(info.channels),
+            video_delay: 0,
+            extradata_bytes: 2,
+        }],
+    }))
 }

@@ -2,6 +2,19 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str) == Some("probe") {
+        let hint = match args.len() {
+            2 => None,
+            4 if args[2] == "--input-format" => Some(args[3].as_str()),
+            _ => return Err("usage: fvid media probe INPUT [--input-format FORMAT]".into()),
+        };
+        if let Some(info) = fvid::native_probe::try_probe_as(std::path::Path::new(&args[1]), hint)? {
+            println!("{}", serde_json::to_string_pretty(&info)?);
+            return Ok(());
+        }
+        #[cfg(not(feature = "media"))]
+        return Err("native probe does not yet support this container".into());
+    }
     if args.first().map(String::as_str) == Some("remux")
         && (args.len() == 3 || (args.len() == 4 && args[3] == "--progress"))
         && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("mp4" | "m4a"))

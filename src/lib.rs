@@ -109,5 +109,5 @@ pub mod virtual_camera;
 
 mod pcm_resample;
 
-#[cfg(feature = "media")]
-mod media_probe;
+#[path = "media_probe.rs"]
+pub mod native_probe;

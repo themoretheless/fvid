@@ -19,11 +19,10 @@ fn sequential_probe_counts_samples_and_rejects_truncation_and_configuration_chan
     let mut unsupported = MONO.to_vec(); unsupported[2] &= 0x3f; // AAC Main
     assert!(inspect_adts(Cursor::new(unsupported)).unwrap_err().to_string().contains("AAC-LC"));
 }
-#[cfg(feature="media")]
 #[test]
 fn public_probe_and_cli_use_exact_sample_clock() {
     let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/audio/aac-mono-44k.aac");
-    for info in [fvid::media::probe(&source).unwrap(), fvid::media::probe_as(&source, Some("aac")).unwrap()] {
+    for info in [fvid::native_probe::probe(&source).unwrap(), fvid::native_probe::probe_as(&source, Some("aac")).unwrap()] {
         assert_eq!(info.format, "aac");
         assert_eq!(info.duration_us, Some(7168*1_000_000/44100));
         assert_eq!(info.streams[0].time_base, [1,44100]);
@@ -38,5 +37,5 @@ fn public_probe_and_cli_use_exact_sample_clock() {
     let json: serde_json::Value = serde_json::from_slice(&run.stdout).unwrap();
     assert_eq!(json["streams"][0]["time_base"], serde_json::json!([1,44100]));
     let invalid = source.with_file_name("aac-native-edit.m4a");
-    assert!(fvid::media::probe_as(&invalid, Some("aac")).is_err());
+    assert!(fvid::native_probe::probe_as(&invalid, Some("aac")).is_err());
 }

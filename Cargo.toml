@@ -20,7 +20,7 @@ videotoolbox = ["dep:fvid-vt"]
 cuda = ["dep:fvid-cuda"]
 gpu = ["dep:wgpu", "dep:pollster"]
 mcp = ["media", "dep:rmcp", "dep:tokio", "dep:axum", "dep:serde"]
-media = ["dep:fvid-media", "dep:serde_json"]
+media = ["dep:fvid-media"]
 # Native media + CUDA NVDEC/NVENC vertical slice (pulls fvid-media/cuda-hw).
 media-cuda = ["media", "cuda", "fvid-media/cuda-hw"]
 # Local airbug toolkit from themoretheless/airbug@release (err + OTLP).
@@ -30,6 +30,7 @@ angle = ["gpu", "wgpu/angle"]
 vulkan-portability = ["gpu", "wgpu/vulkan-portability"]
 
 [dependencies]
+fvid-media-info = { path = "crates/fvid-media-info" }
 fvid-control = { path = "crates/fvid-control" }
 fvid-platform = { path = "crates/fvid-platform", optional = true }
 eframe = { version = "0.36", optional = true }
@@ -42,7 +43,7 @@ pollster = { version = "0.4", optional = true }
 fvid-cuda = { path = "crates/fvid-cuda", optional = true }
 fvid-media = { path = "crates/fvid-media", optional = true }
 fvid-cpu = { path = "crates/fvid-cpu" }
-serde_json = { version = "1", optional = true }
+serde_json = "1"
 
 rmcp = { version = "=3.1.2", optional = true, default-features = false, features = ["server", "transport-io", "transport-streamable-http-server"] }
 tokio = { version = "1", optional = true, features = ["rt-multi-thread", "net", "signal", "sync"] }
