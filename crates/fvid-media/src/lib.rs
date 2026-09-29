@@ -752,48 +752,7 @@ pub fn capabilities() -> Capabilities {
 
 pub use fvid_control::{CancelFlag, ProgressEvent, ProgressHook};
 
-#[derive(Clone, Debug)]
-pub struct CopyOptions {
-    /// Empty selects every stream; otherwise indices are preserved in this order.
-    pub streams: Vec<usize>,
-    pub max_packet_bytes: usize,
-    /// Optional hard stop after this many muxed packets (native budget slice).
-    pub max_packets: Option<u64>,
-    /// Optional admission limit on estimated decoder DPB + Fvid scratch bytes.
-    /// Not a promise of peak OS RSS from libav alone.
-    pub max_controlled_bytes: Option<usize>,
-    /// Optional process RSS limit probed every 256 packets (and at start when set).
-    pub max_rss_bytes: Option<u64>,
-    /// Cooperative cancellation checked between packets.
-    pub cancel: Option<CancelFlag>,
-    /// Optional progress hook sampled every 256 packets and once with `done=true`.
-    pub progress: Option<ProgressHook>,
-    /// Container-level tags to set after copying source metadata (`KEY=VALUE`).
-    pub metadata_set: Vec<(String, String)>,
-    /// Container-level tag keys to delete after the copy.
-    pub metadata_delete: Vec<String>,
-    /// Source-stream tags to set: `(stream_index, key, value)`.
-    pub stream_metadata_set: Vec<(usize, String, String)>,
-    /// Source-stream tags to delete: `(stream_index, key)`.
-    pub stream_metadata_delete: Vec<(usize, String)>,
-}
-impl Default for CopyOptions {
-    fn default() -> Self {
-        Self {
-            streams: vec![],
-            max_packet_bytes: 64 * 1024 * 1024,
-            max_packets: None,
-            max_controlled_bytes: None,
-            max_rss_bytes: None,
-            cancel: None,
-            progress: None,
-            metadata_set: vec![],
-            metadata_delete: vec![],
-            stream_metadata_set: vec![],
-            stream_metadata_delete: vec![],
-        }
-    }
-}
+pub use fvid_control::CopyOptions;
 
 pub(crate) use budget::{check_budget, check_budget_with_bytes, emit_progress_done};
 
@@ -870,14 +829,8 @@ unsafe fn apply_stream_metadata(
     }
     Ok(())
 }
-#[derive(Serialize, Default, Debug)]
-pub struct CopyStats {
-    pub packets: u64,
-    pub payload_bytes: u64,
-    pub segments: usize,
-    pub backend: &'static str,
-    pub fvid_payload_copies: u64,
-}
+pub use fvid_media_info::CopyStats;
+
 struct Output {
     context: *mut AVFormatContext,
     temporary: Option<PathBuf>,

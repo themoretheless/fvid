@@ -164,13 +164,8 @@ pub(super) fn trim(
     }
 }
 
-#[derive(Serialize, Debug)]
-pub struct PcmTrimStats {
-    pub packets: u64,
-    pub sample_frames: u64,
-    pub payload_bytes: u64,
-    pub fvid_payload_copies: u64,
-}
+pub use fvid_media_info::PcmTrimStats;
+
 /// Cut selected packed PCM streams without decoding or allocating a new payload.
 pub fn trim_pcm(
     source: &Path,

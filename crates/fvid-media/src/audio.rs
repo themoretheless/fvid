@@ -2,18 +2,7 @@
 use super::lossless::{Codec, Frame, Parameters};
 use super::*;
 
-#[derive(Serialize, Debug)]
-pub struct AudioDecodeStats {
-    pub sample_frames: u64,
-    pub decoded_frames: u64,
-    pub sample_rate: i32,
-    pub channels: i32,
-    pub sample_format: String,
-    pub planar_interleave_bytes: u64,
-    /// Packets or frames the decoder could not use; the stream still decoded everything
-    /// readable, exactly like the FFmpeg CLI does with these files.
-    pub decode_errors: u64,
-}
+pub use fvid_media_info::AudioDecodeStats;
 
 pub use fvid_media_info::AudioDecodeTransform;
 

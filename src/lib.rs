@@ -1,5 +1,6 @@
 //! FVid library facade: media formats, codecs, processing, playback, and adapters.
 pub use fvid_control as media_control;
+pub use fvid_media_info as media_info;
 #[cfg(feature = "airbug")]
 pub mod airbug_runtime;
 #[cfg(feature = "player")]

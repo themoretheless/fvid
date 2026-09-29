@@ -1,4 +1,4 @@
-//! Shared media description schema, with no demuxer or codec dependencies.
+//! Shared media descriptions and operation results, with no demuxer or codec dependencies.
 #![forbid(unsafe_code)]
 use serde::Serialize;
 use std::{collections::BTreeMap, path::PathBuf};
@@ -85,4 +85,66 @@ pub struct AudioDecodeTransform {
     /// Linear gain on decoded float PCM. Native execution applies it after
     /// channel conversion and before resampling; consult the operation plan.
     pub volume: Option<f64>,
+}
+
+
+#[derive(Serialize, Default, Debug)]
+pub struct CopyStats {
+    pub packets: u64,
+    pub payload_bytes: u64,
+    pub segments: usize,
+    pub backend: &'static str,
+    pub fvid_payload_copies: u64,
+}
+
+#[derive(Serialize, Debug)]
+pub struct DecodeStats {
+    pub backend: &'static str,
+    pub video_frames: u64,
+    pub width: u32,
+    pub height: u32,
+    pub pixel_format: String,
+    /// Reads the demuxer reported as damaged, which were skipped while keeping what the stream had
+    /// already produced. Non-zero means the format's demuxer ends the stream with an error code
+    /// instead of EOF; the count is reported rather than swallowed, so a tolerant read stays
+    /// auditable.
+    pub decode_errors: u64,
+}
+
+#[derive(Serialize, Debug)]
+pub struct AudioDecodeStats {
+    pub sample_frames: u64,
+    pub decoded_frames: u64,
+    pub sample_rate: i32,
+    pub channels: i32,
+    pub sample_format: String,
+    pub planar_interleave_bytes: u64,
+    /// Packets or frames skipped by a tolerant decoder. Strict backends return an
+    /// error rather than producing a successful result with damaged media.
+    pub decode_errors: u64,
+}
+
+#[derive(Serialize, Debug, Clone, Copy)]
+pub struct PcmTrimStats {
+    /// Packets or aligned I/O blocks, depending on the selected container path.
+    pub packets: u64,
+    pub sample_frames: u64,
+    pub payload_bytes: u64,
+    pub fvid_payload_copies: u64,
+}
+
+#[derive(Serialize, Debug)]
+pub struct LosslessStats {
+    pub backend: &'static str,
+    pub video_frames: u64,
+    pub decoded_frames: u64,
+    pub seek_used: bool,
+    pub video_packets: u64,
+    pub copied_packets: u64,
+    pub trimmed_audio_sample_frames: u64,
+    pub pixel_format: String,
+    pub encoder: String,
+    pub fvid_crop_payload_copies: u64,
+    pub vertical_flip: bool,
+    pub horizontal_flip: bool,
 }

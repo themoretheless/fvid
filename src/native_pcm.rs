@@ -10,15 +10,8 @@ use std::{
     sync::atomic::{AtomicU64, Ordering},
 };
 
-#[derive(Debug, Clone, Copy)]
-pub struct PcmTrimStats {
-    /// Number of aligned I/O blocks containing retained audio (at most 64 KiB each).
-    pub packets: u64,
-    pub sample_frames: u64,
-    pub payload_bytes: u64,
-    /// Additional PCM payload clones, excluding the bounded file I/O buffer.
-    pub fvid_payload_copies: u64,
-}
+pub use fvid_media_info::PcmTrimStats;
+
 #[derive(Debug, Clone, Copy)]
 pub struct WaveInfo {
     pub sample_rate: u32,

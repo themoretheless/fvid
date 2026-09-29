@@ -12,16 +12,7 @@ pub fn decode_video_interval(
     source: &std::path::Path,
     interval: Option<(std::time::Duration, std::time::Duration)>,
 ) -> Result<DecodeStats> {
-    let stats =
-        crate::native_media::decode_video_interval(source, interval).map_err(|e| e.to_string())?;
-    Ok(DecodeStats {
-        backend: stats.backend,
-        video_frames: stats.video_frames,
-        width: stats.width,
-        height: stats.height,
-        pixel_format: stats.pixel_format,
-        decode_errors: stats.decode_errors,
-    })
+    crate::native_media::decode_video_interval(source, interval).map_err(|e| e.to_string())
 }
 
 
@@ -157,9 +148,7 @@ pub fn decode_video_transformed(source: &std::path::Path, transform: DecodeTrans
         transpose: transform.transpose.map(|r| crate::native_geometry::Transpose::parse(r.as_str())).transpose().map_err(|e| e.to_string())?,
         pad: transform.pad.map(|r| [r.width as usize, r.height as usize, r.x as usize, r.y as usize]),
     };
-    let stats = crate::native_media::decode_video_transformed(source, interval, &geometry).map_err(|e| e.to_string())?;
-    Ok(DecodeStats { backend: stats.backend, video_frames: stats.video_frames, width: stats.width,
-        height: stats.height, pixel_format: stats.pixel_format, decode_errors: stats.decode_errors })
+    crate::native_media::decode_video_transformed(source, interval, &geometry).map_err(|e| e.to_string())
 }
 
 /// Export AAC or packed WAVE PCM through the owned audio pipeline.
@@ -300,8 +289,7 @@ pub fn trim_pcm(source:&std::path::Path,destination:&std::path::Path,from:i64,to
     }
     validate_native_copy_options(options,true)?;
     if options.streams.first().is_some_and(|&n|n!=0) {return Err("WAVE has only stream 0".into());}
-    let stats=crate::native_pcm::trim_wave(source,destination,from,to,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())?;
-    Ok(PcmTrimStats{packets:stats.packets,sample_frames:stats.sample_frames,payload_bytes:stats.payload_bytes,fvid_payload_copies:stats.fvid_payload_copies})
+    crate::native_pcm::trim_wave(source,destination,from,to,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())
 }
 
 /// Plan owned RIFF PCM slicing; other containers retain the legacy adapter.

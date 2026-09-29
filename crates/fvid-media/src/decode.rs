@@ -63,25 +63,12 @@ use lossless::{
     Codec, CropRect, Frame, ScaleSize, Sws, convert_pix_fmt_frame, flip_view,
     horizontal_copy_frame, parse_pix_fmt, scale_convert_frame, scale_frame, validate_scale,
 };
-use serde::Serialize;
 use std::path::{Path, PathBuf};
 use std::ptr;
 
 const AGAIN: i32 = -libc::EAGAIN;
 
-#[derive(Serialize, Debug)]
-pub struct DecodeStats {
-    pub backend: &'static str,
-    pub video_frames: u64,
-    pub width: u32,
-    pub height: u32,
-    pub pixel_format: String,
-    /// Reads the demuxer reported as damaged, which were skipped while keeping what the stream had
-    /// already produced. Non-zero means the format's demuxer ends the stream with an error code
-    /// instead of EOF; the count is reported rather than swallowed, so a tolerant read stays
-    /// auditable.
-    pub decode_errors: u64,
-}
+pub use fvid_media_info::DecodeStats;
 
 #[derive(Clone, Debug, Default)]
 pub struct DecodeTransform {

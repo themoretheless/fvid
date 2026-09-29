@@ -4,15 +4,7 @@ use crate::playback_native::{NativeReader, RawFrame};
 use crate::{Result, invalid};
 use std::{fs::File, io::BufReader, path::Path, time::Duration};
 
-#[derive(Debug)]
-pub struct DecodeStats {
-    pub backend: &'static str,
-    pub video_frames: u64,
-    pub width: u32,
-    pub height: u32,
-    pub pixel_format: String,
-    pub decode_errors: u64,
-}
+pub use fvid_media_info::DecodeStats;
 
 /// Decode and discard video frames without converting them to RGB.
 /// Errors are propagated, never retried through a foreign decoder. Platform

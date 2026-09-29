@@ -314,21 +314,8 @@ pub struct LosslessTransform {
     /// Use demuxer seeking before decoding; requires an interval.
     pub seek: bool,
 }
-#[derive(Serialize, Debug)]
-pub struct LosslessStats {
-    pub backend: &'static str,
-    pub video_frames: u64,
-    pub decoded_frames: u64,
-    pub seek_used: bool,
-    pub video_packets: u64,
-    pub copied_packets: u64,
-    pub trimmed_audio_sample_frames: u64,
-    pub pixel_format: String,
-    pub encoder: String,
-    pub fvid_crop_payload_copies: u64,
-    pub vertical_flip: bool,
-    pub horizontal_flip: bool,
-}
+pub use fvid_media_info::LosslessStats;
+
 fn drain_encoder(
     encoder: &mut Codec,
     output: &mut Output,

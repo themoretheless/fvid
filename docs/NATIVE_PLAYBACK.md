@@ -1662,3 +1662,23 @@ compare every encoded packet, nanosecond timestamp and decoded PCM against the
 original. CLI/API results, malformed boundaries, mismatched configuration,
 cancellation, terminal reader failure and overwrite protection are covered;
 existing MP4 concatenation/remux regressions pass with the shared reader.
+
+### Backend-independent media operation contracts (2026-09-29)
+
+`CopyOptions` now belongs to the dependency-free `fvid-control` crate and is
+available as `fvid::media_control::CopyOptions` without enabling `media`.
+`CopyStats`, `DecodeStats`, `AudioDecodeStats`, `PcmTrimStats` and `LosslessStats`
+now belong to `fvid-media-info`, exposed through `fvid::media_info`. The legacy
+adapter re-exports the same types at its previous paths, preserving field names,
+serde output, default policies, cancellation sharing and progress hooks.
+
+Native video decode and PCM trim now return aliases to those shared result
+schemas instead of separate lookalike structs. The public migration wrapper can
+return them directly; no result conversion through libav-owned types is needed.
+This removes a type-ownership dependency, not the remaining runtime dependency:
+`media` still enables the legacy implementation until its remaining operations
+are migrated. No operation support was disabled by this extraction.
+
+Tests compile and exercise the contracts without `media`, compare serialization,
+check exact type compatibility through old API paths, and verify that cloned
+options retain the same cancellation flag/progress hook across native calls.
