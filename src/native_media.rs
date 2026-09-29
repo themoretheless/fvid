@@ -28,6 +28,15 @@ pub fn decode_video_interval(
     source: &Path,
     interval: Option<(Duration, Duration)>,
 ) -> Result<DecodeStats> {
+    decode_video_transformed(source, interval, &crate::native_geometry::VideoGeometry::default())
+}
+
+/// Owned decoding followed by sample-preserving crop, flips and nearest resize.
+pub fn decode_video_transformed(
+    source: &Path,
+    interval: Option<(Duration, Duration)>,
+    geometry: &crate::native_geometry::VideoGeometry,
+) -> Result<DecodeStats> {
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("decode interval requires from < to"));
     }
@@ -79,6 +88,12 @@ pub fn decode_video_interval(
             RawFrame::Planar8(p) => planar_format(width, height, p.chroma_width, p.chroma_height)?,
             RawFrame::Yuv { sx, sy, .. } => planar_format(width, height, width / sx, height / sy)?,
         };
+        if !geometry.is_identity() {
+            let output = geometry.apply(&frame, width, height)?;
+            stats.width = u32::try_from(output.width).map_err(|_| invalid("video width overflow"))?;
+            stats.height = u32::try_from(output.height).map_err(|_| invalid("video height overflow"))?;
+            std::hint::black_box(output);
+        }
         stats.video_frames = stats
             .video_frames
             .checked_add(1)

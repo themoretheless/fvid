@@ -1340,3 +1340,25 @@ explicit `media` tree correctly exposed `fvid-media`. This dependency check is
 separate from binary linkage and runtime-path verification. The combined native
 player/library/media-operation run passed 1191 tests after the AAC transform,
 probe, chapter timing and selected-audio changes.
+
+### Owned video geometry (2026-09-29)
+
+`fvid media decode INPUT --crop X:Y:W:H --hflip --vflip --scale W:H`
+now runs without `media` or FFmpeg. The same path is available through
+`native_media::decode_video_transformed`; the compatibility
+`media::decode_video_transformed` routes geometry-only requests to it, including
+presentation intervals. Geometry is applied to decoded pixels before they are
+discarded, rather than merely changing the reported dimensions.
+
+`native_geometry::VideoGeometry::apply` exposes the transformed sample buffer:
+packed RGB stays RGB; planar YUV retains its subsampling and sample bytes,
+including little-endian 10-bit HEVC. Operations are crop, reflections, then
+nearest resize using pixel-centre coordinates (ties select the higher source
+index). Chroma-unaligned rectangles and output sizes are rejected explicitly.
+This sampling definition does not claim byte equivalence to every libswscale
+configuration. Crop/flip of all 17 Main10 fixture frames is compared against
+saved reference YUV, independently of the owned decoded output.
+
+Legacy filter combinations, format overrides and other unmigrated media
+operations still use the old adapter: the full `media` feature is not yet
+FFmpeg-independent. Native geometry does not change that outstanding requirement.

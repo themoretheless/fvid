@@ -149,8 +149,9 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         println!("{{\"backend\":\"fvid\",\"video_frames\":{frames}}}");
         return Ok(());
     }
-    if let Some((path, quiet, interval)) = plain_decode(args)? {
-        let stats = fvid::native_media::decode_video_interval(std::path::Path::new(path), interval)?;
+    let (decode_args, geometry) = geometry_decode_args(args)?;
+    if let Some((path, quiet, interval)) = plain_decode(&decode_args)? {
+        let stats = fvid::native_media::decode_video_transformed(std::path::Path::new(path), interval, &geometry)?;
         if !quiet {
             // These strings are internal backend/pixel-format names; paths and
             // other user input are never interpolated into this JSON document.
@@ -169,6 +170,40 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         let _ = args;
         Err("this media operation still requires cargo build --release --features media and FFmpeg development libraries; plain media decode INPUT is available without them".into())
     }
+}
+// Strip only the native geometry options. The remaining parser still rejects
+// extra paths and returns unknown filters to the existing full media parser.
+fn geometry_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_geometry::VideoGeometry), Box<dyn std::error::Error>> {
+    let mut geometry = fvid::native_geometry::VideoGeometry::default();
+    if args.first().map(String::as_str) != Some("decode") { return Ok((args.to_vec(), geometry)); }
+    let mut result = vec![args[0].clone()];
+    let mut args = args[1..].iter();
+    while let Some(arg) = args.next() {
+        match arg.as_str() {
+            "--" => { result.push(arg.clone()); result.extend(args.cloned()); break; }
+            "--hflip" => {
+                if geometry.horizontal_flip { return Err("duplicate hflip".into()); }
+                geometry.horizontal_flip = true;
+            }
+            "--vflip" => {
+                if geometry.vertical_flip { return Err("duplicate vflip".into()); }
+                geometry.vertical_flip = true;
+            }
+            "--crop" | "--scale" => {
+                let fields = args.next().ok_or("missing geometry value")?.split(':')
+                    .map(str::parse::<usize>).collect::<Result<Vec<_>, _>>()?;
+                if arg == "--crop" {
+                    if geometry.crop.is_some() { return Err("duplicate crop".into()); }
+                    geometry.crop = Some(fields.try_into().map_err(|_| "crop requires X:Y:WIDTH:HEIGHT")?);
+                } else {
+                    if geometry.scale.is_some() { return Err("duplicate scale".into()); }
+                    geometry.scale = Some(fields.try_into().map_err(|_| "scale requires WIDTH:HEIGHT")?);
+                }
+            }
+            _ => result.push(arg.clone()),
+        }
+    }
+    Ok((result, geometry))
 }
 type DecodeRequest<'a> = (&'a str, bool, Option<(std::time::Duration, std::time::Duration)>);
 // Unknown transformation options belong to the full parser, never ignore them.
@@ -1928,7 +1963,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 return Err("decode --device requires cargo build --features media-cuda".into());
             }
         } else {
-            fvid_media::decode_video_transformed(
+            fvid::media::decode_video_transformed(
                 &paths[0],
                 fvid_media::DecodeTransform {
                     input_format,
