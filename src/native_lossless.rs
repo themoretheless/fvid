@@ -378,7 +378,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             erosion: _,
             colorize: None,
             exposure: None,
-            chromashift: None,
+            chromashift: _,
             colorcontrast: None,
             colorcorrect: None,
             histeq: None,
@@ -467,6 +467,7 @@ pub fn configuration(
         scharr: transform.scharr.clone(),
         dilation: transform.dilation.clone(),
         erosion: transform.erosion.clone(),
+        chromashift: transform.chromashift.clone(),
         ..Default::default()
     };
     Ok((

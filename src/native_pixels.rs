@@ -277,10 +277,11 @@ impl Gradient {
 }
 
 /// Native filter order matches the public media request, independent of CLI
-/// flag order: inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, dilation, erosion.
+/// flag order: inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, dilation, erosion, chroma shift.
 #[derive(Default)]
 pub struct PixelFilters {
     pub negate: Option<Negate>,
+    pub chromashift: Option<crate::native_chromashift::ChromaShift>,
     pub gradients: Vec<Gradient>,
     pub morphology: Vec<crate::native_morphology::Morphology>,
 }
@@ -288,6 +289,11 @@ impl PixelFilters {
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
         let mut result = Self {
             negate: request.negate.as_deref().map(Negate::parse).transpose()?,
+            chromashift: request
+                .chromashift
+                .as_deref()
+                .map(crate::native_chromashift::ChromaShift::parse)
+                .transpose()?,
             gradients: Vec::new(),
             morphology: Vec::new(),
         };
@@ -314,7 +320,10 @@ impl PixelFilters {
         Ok(result)
     }
     pub fn is_empty(&self) -> bool {
-        self.negate.is_none() && self.gradients.is_empty() && self.morphology.is_empty()
+        self.chromashift.is_none()
+            && self.negate.is_none()
+            && self.gradients.is_empty()
+            && self.morphology.is_empty()
     }
     pub fn apply(&self, frame: &mut GeometryFrame, depth: u8) -> Result<()> {
         if let Some(negate) = self.negate {
@@ -324,6 +333,9 @@ impl PixelFilters {
             filter.apply(frame, depth)?;
         }
         for filter in &self.morphology {
+            filter.apply(frame, depth)?;
+        }
+        if let Some(filter) = self.chromashift {
             filter.apply(frame, depth)?;
         }
         Ok(())

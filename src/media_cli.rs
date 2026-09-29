@@ -4,7 +4,20 @@ use std::path::PathBuf;
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.first().map(String::as_str)==Some("transcode-lossless") && args.len()>=3 {
         let mut owned=args.to_vec();owned[0]="decode".into();
-        let (pixel_args,filters)=pixel_decode_args(&owned)?;
+        let mut chromashift = None;
+        let mut i = 3;
+        while i < owned.len() {
+            if owned[i] == "--" { break; }
+            if owned[i] != "--chromashift" { i += 1; continue; }
+            if chromashift.is_some() { return Err("duplicate chromashift".into()); }
+            let value = owned.get(i + 1).ok_or("missing chromashift args")?;
+            match fvid::native_chromashift::ChromaShift::parse(value) {
+                Ok(filter) => { chromashift = Some(filter); owned.drain(i..i + 2); }
+                Err(_) => { i += 2; }
+            }
+        }
+        let (pixel_args,mut filters)=pixel_decode_args(&owned)?;
+        filters.chromashift = chromashift;
         let (remaining,geometry)=geometry_decode_args(&pixel_args)?;
         if remaining.len()>=3 && remaining[3..].iter().all(|s|matches!(s.as_str(),"--quiet"|"--progress"))
             && fvid::native_lossless::eligible(std::path::Path::new(&remaining[1]))? {

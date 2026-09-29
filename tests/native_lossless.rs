@@ -373,6 +373,7 @@ fn spatial_request() -> fvid::media_info::LosslessTransform {
             width: 12,
             height: 8,
         }),
+        chromashift: Some("cbh=1:cbv=-2:crh=-3:crv=2:edge=wrap".into()),
         negate: Some("1".into()),
         sobel: Some("planes=1:scale=0.125".into()),
         dilation: Some("coordinates=170:threshold0=3:threshold1=0:threshold2=0".into()),
@@ -417,6 +418,8 @@ fn spatial_export_cli_api_metadata_and_failures() {
             "16:12:2:2",
             "--scale",
             "12:8",
+            "--chromashift",
+            "cbh=1:cbv=-2:crh=-3:crv=2:edge=wrap",
             "--negate",
             "1",
             "--sobel",
@@ -530,6 +533,7 @@ fn independent_pixels_match_spatial_transforms_and_rotation() {
                 },
                 _ => {
                     let mut r = spatial_request();
+                    r.chromashift = None;
                     r.negate = None;
                     r.sobel = None;
                     r.dilation = None;
@@ -551,7 +555,7 @@ fn independent_pixels_match_spatial_transforms_and_rotation() {
             };
             let filter = match mode {
                 0 => {
-                    "crop=8:8:0:0,hflip,vflip,transpose=clock,pad=16:12:2:2,scale=12:8:flags=neighbor,negate,sobel=planes=1:scale=0.125,dilation=coordinates=170:threshold0=3:threshold1=0:threshold2=0"
+                    "crop=8:8:0:0,hflip,vflip,transpose=clock,pad=16:12:2:2,scale=12:8:flags=neighbor,negate,sobel=planes=1:scale=0.125,dilation=coordinates=170:threshold0=3:threshold1=0:threshold2=0,chromashift=cbh=1:cbv=-2:crh=-3:crv=2:edge=wrap"
                 }
                 1 => "hflip",
                 2 => "erosion=coordinates=1",

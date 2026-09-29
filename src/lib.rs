@@ -79,6 +79,7 @@ pub mod media;
 pub mod native_media;
 pub mod native_pcm;
 pub mod native_geometry;
+pub mod native_chromashift;
 pub mod native_pixels;
 pub mod native_lossless;
 pub mod native_morphology;

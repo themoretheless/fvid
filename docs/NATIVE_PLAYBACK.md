@@ -2184,3 +2184,18 @@ never overwrites an existing file; cancellation removes the temporary output.
 Stream selection and metadata edits remain on the legacy media adapter.
 `tests/native_matroska_copy.rs` covers exact bytes, packet accounting, publication,
 cancellation, invalid input, audio-only validation, CLI and media API dispatch.
+
+### Owned chroma shift in lossless exports
+
+The owned MP4 AVC/HEVC → FFV1/Matroska route accepts `--chromashift`
+and `LosslessTransform.chromashift`. Integer `cbh:cbv:crh:crv:edge` options
+shift Cb and Cr in their own sample coordinates, preserving luma and bit depth.
+Edges support `smear`/`0` and `wrap`/`1`; shifts range from -255 to 255.
+The operation follows morphology in the existing spatial filter order.
+This does not migrate the separate general decode filter route or RGB conversion.
+Independent reference tests cover 92 format/option combinations (six YUV
+subsamplings, supported depths from 8 to 16), plus complete transformed lossless
+exports, rotation, CLI/API dispatch and unchanged AAC companion packets.
+Reference command: `FVID_REFERENCE_FFMPEG=/opt/homebrew/bin/ffmpeg cargo test
+--locked --offline --no-default-features --test native_chromashift --test
+native_lossless -- --include-ignored`. FFmpeg is used only by these opt-in tests.
