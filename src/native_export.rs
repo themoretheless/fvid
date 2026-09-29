@@ -817,3 +817,22 @@ fn remux_mp4_matroska_inner(source: &Path, destination: &Path,
     if let Some(hook) = progress { hook.emit(event); }
     Ok(event)
 }
+
+/// Decode MP4 video to owned FFV1 and copy all supported AAC companions.
+/// Destination is atomically published only after successful flush and sync.
+pub fn transcode_mp4_ffv1(source:&Path,destination:&Path,cancel:Option<&crate::media_control::CancelFlag>,progress:Option<&crate::media_control::ProgressHook>)->Result<crate::media_info::LosslessStats> {
+    if destination.extension().and_then(|s|s.to_str())!=Some("mkv"){return Err(invalid("lossless export requires FFV1 in .mkv"));}
+    if cancel.is_some_and(|c|c.is_cancelled()){return Err(invalid("media operation cancelled"));}
+    let directory=destination.parent().filter(|p|!p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+    let (temporary,file)=(0..100).find_map(|_|{
+        let path=directory.join(format!(".fvid-ffv1-{}-{}.tmp",std::process::id(),NEXT.fetch_add(1,Ordering::Relaxed)));
+        match OpenOptions::new().write(true).create_new(true).open(&path){Ok(file)=>Some(Ok((Temporary(path),file))),Err(error) if error.kind()==std::io::ErrorKind::AlreadyExists=>None,Err(error)=>Some(Err(error))}
+    }).ok_or_else(||invalid("cannot reserve FFV1 output"))??;
+    let mut output=BufWriter::new(file);
+    let (stats,event)=crate::native_lossless::write_mp4(source,&mut output,cancel,progress)?;
+    output.flush()?;output.get_ref().sync_all()?;drop(output);
+    if cancel.is_some_and(|c|c.is_cancelled()){return Err(invalid("media operation cancelled"));}
+    std::fs::hard_link(&temporary.0,destination)?;
+    if let Some(hook)=progress{hook.emit(crate::media_control::ProgressEvent{done:true,..event});}
+    Ok(stats)
+}

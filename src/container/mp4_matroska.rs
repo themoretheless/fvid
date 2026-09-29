@@ -33,15 +33,15 @@ fn check(cancel: Option<&CancelFlag>) -> Result<()> {
         Ok(())
     }
 }
-struct PacketTime {
-    pts: u64,
-    duration: u64,
-    dts: i128,
-    options: PacketOptions,
+pub(crate) struct PacketTime {
+    pub(crate) pts: u64,
+    pub(crate) duration: u64,
+    pub(crate) dts: i128,
+    pub(crate) options: PacketOptions,
 }
-struct TrackPlan {
-    options: TrackOptions,
-    packets: Vec<PacketTime>,
+pub(crate) struct TrackPlan {
+    pub(crate) options: TrackOptions,
+    pub(crate) packets: Vec<PacketTime>,
 }
 fn nanoseconds(ticks: i128, scale: u32) -> Result<i128> {
     if scale == 0 {
@@ -58,7 +58,7 @@ fn as_time(n: i128) -> Result<u64> {
         .filter(|n| *n <= i64::MAX as u64)
         .ok_or_else(|| invalid("Matroska timestamp overflow"))
 }
-fn plan(track: &Track, movie_scale: u32, cancel: Option<&CancelFlag>) -> Result<TrackPlan> {
+pub(crate) fn plan(track: &Track, movie_scale: u32, cancel: Option<&CancelFlag>) -> Result<TrackPlan> {
     let mut packets = Vec::new();
     packets
         .try_reserve_exact(track.samples.len())

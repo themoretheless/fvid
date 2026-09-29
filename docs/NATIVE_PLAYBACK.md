@@ -2006,9 +2006,9 @@ layout and sample ranges before coding, and uses one slice per frame.
 `matroska_write::Encoding::Ffv1V1` writes `V_FFV1` without CodecPrivate,
 because v1 keyframes carry their parameters. No external encoder or muxer
 is called. RGB/alpha, v3 slice CRCs, richer context modeling and an owned
-FFV1 decoder remain to implement; the existing `media transcode-lossless`
-route is not yet switched to this encoder. Its stream-copy, metadata,
-timestamp and transformation contracts must be preserved during integration.
+FFV1 decoder remain to implement. The identity MP4 `media transcode-lossless`
+route now uses this encoder as described below; remaining input formats and
+transformation contracts still require migration.
 
 `tests/ffv1_encoder.rs` checks input validation, independent frame state and
 flat-image compression. The explicit ignored FFmpeg reference tests decode
@@ -2018,3 +2018,35 @@ all bytes. A separate reference test uses owned decoding of AVC, HEVC Main
 and HEVC Main10 fixtures, re-encodes their pixels and verifies every sample
 through the independent FFV1 decoder. Those tests do not claim preservation
 of source timing or full lossless-export migration.
+
+
+### Owned MP4 lossless export with AAC companions (2026-09-29)
+
+`media transcode-lossless INPUT.mp4 OUTPUT.mkv [--progress] [--quiet]` and
+`media::transcode_lossless` now use the owned decoder, FFV1 encoder and
+Matroska writer for an identity request with one AVC/HEVC video track and
+zero or more AAC tracks. All represented tracks must be supported. The
+existing MP4 remux planner supplies copied AAC packet timing, CodecDelay,
+DiscardPadding, track names/languages, pixel aspect, rotation, colour/HDR,
+file tags and chapters. The new FFV1 packets use the native decoder's exact
+presentation intervals rounded independently to nanoseconds, so variable
+cadence and contiguous edit boundaries are retained. Video pixels remain
+in coded orientation, with rotation represented in metadata.
+
+`native_lossless::write_mp4` is the streaming primitive;
+`native_export::transcode_mp4_ffv1` adds temporary-file cleanup, flush/sync,
+no-overwrite publication and cooperative cancellation. Successful `done`
+is emitted only after publication. Probability models reset each FFV1 frame;
+reference pre-roll needed for the source edit is decoded but not exported.
+
+Validation in `tests/native_lossless.rs` covers AVC, HEVC Main/Main10, HDR,
+anamorphic/rotated video, edited HEVC windows, multiple AAC tracks, exact
+packet payloads/timestamps, API/CLI routing, cancellation and publication.
+The explicit FFmpeg oracle verifies all video samples and the exact audible
+AAC interval after encoder delay and tail trimming. Its fixture preparation
+and independent decode are reference-only; production does not invoke it.
+
+Nonidentity transforms, custom selection/budgets/metadata mutations, other
+containers/codecs, multiple video tracks and complex edit schedules retain
+the existing adapter path. Native FFV1 playback/decoding is still absent.
+This closes one real lossless-export path, not aggregate `media` independence.
