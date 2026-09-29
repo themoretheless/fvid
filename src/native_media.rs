@@ -198,8 +198,24 @@ pub fn decode_mp4_aac_pcm_interval(
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("audio interval requires from < to"));
     }
-    use crate::container::mp4::{Limits, Mp4Reader};
-    let mut reader = Mp4Reader::open(std::io::Cursor::new(data), Limits::default())?;
+    let reader = crate::container::mp4::Mp4Reader::open(
+        std::io::Cursor::new(data), Default::default(),
+    )?;
+    decode_mp4_aac_reader(reader, output, interval)
+}
+
+/// Decode indexed AAC packets without loading the MP4 media payload into memory.
+/// The reader retains container tables; only the current encoded packet and decoder
+/// state are needed for media. Edits and pre-roll use the same sample timeline as
+/// the byte-slice API. The caller must discard partial output if decoding fails.
+pub fn decode_mp4_aac_reader<R: std::io::Read + std::io::Seek>(
+    mut reader: crate::container::mp4::Mp4Reader<R>,
+    output: &mut impl std::io::Write,
+    interval: Option<(Duration, Duration)>,
+) -> Result<AudioDecodeStats> {
+    if interval.is_some_and(|(from, to)| from >= to) {
+        return Err(invalid("audio interval requires from < to"));
+    }
     let indices: Vec<_> = reader
         .tracks()
         .iter()

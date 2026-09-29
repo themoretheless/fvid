@@ -1132,3 +1132,11 @@ This path accepts non-fragmented MP4 with an initial `ftyp` box. Fragmented
 files, recognized auxiliary/item offset extensions, and 32-bit chunk offsets
 that would require promotion to `co64` are rejected. Other container remuxing
 and transformation options still use the legacy media path.
+
+Native AAC export from MP4/M4A now reads indexed packets from the source file
+rather than retaining the entire encoded file. The former 128 MiB input-size
+limit no longer applies to this path; MP4 metadata, sample-count and individual
+packet limits still apply. Sample-aligned edits, decoder pre-roll, interval
+selection, channel mixing and resampling are unchanged. The reader API
+`native_media::decode_mp4_aac_reader` also accepts custom `Read + Seek` sources.
+ADTS and Matroska AAC export still use their bounded in-memory input paths.
