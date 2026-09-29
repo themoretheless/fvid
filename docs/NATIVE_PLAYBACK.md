@@ -1118,3 +1118,17 @@ all three decoded YUV420 planes, retaining 8/10-bit samples and the displayed
 pixel aspect ratio. Main10 rotation is checked sample-by-sample against the
 saved decoded fixture for all three angles; a non-square pixel fixture checks
 that aspect is inverted exactly once by container metadata handling.
+
+### Native MP4 fast-start remux
+
+`fvid media remux INPUT.mp4 OUTPUT.mp4` moves the `moov` index before media
+data and updates `stco`/`co64` chunk offsets without decoding or changing
+encoded packets. It works without the `media` feature or FFmpeg. Metadata,
+track timing, edits and codec configuration are retained. Media bytes stream
+through the copy buffer; the index is limited to 32 MiB. Existing destinations
+are never replaced, and failed exports do not publish a partial output.
+
+This path accepts non-fragmented MP4 with an initial `ftyp` box. Fragmented
+files, recognized auxiliary/item offset extensions, and 32-bit chunk offsets
+that would require promotion to `co64` are rejected. Other container remuxing
+and transformation options still use the legacy media path.

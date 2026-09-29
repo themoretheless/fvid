@@ -420,3 +420,22 @@ pub fn remux_adts_aac(source: &Path, destination: &Path) -> Result<u64> {
     std::fs::hard_link(&temporary.0, destination)?;
     Ok(packets)
 }
+
+/// Stream a non-fragmented MP4 into fast-start layout without changing packets.
+pub fn remux_mp4(source: &Path, destination: &Path) -> Result<()> {
+    let mut input=BufReader::new(File::open(source)?);
+    let directory=destination.parent().filter(|p|!p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+    let (temporary,file)=(0..100).find_map(|_| {
+        let path=directory.join(format!(".fvid-relocate-{}-{}.tmp",std::process::id(),NEXT.fetch_add(1,Ordering::Relaxed)));
+        match OpenOptions::new().write(true).create_new(true).open(&path) {
+            Ok(file)=>Some(Ok((Temporary(path),file))),
+            Err(error) if error.kind()==std::io::ErrorKind::AlreadyExists=>None,
+            Err(error)=>Some(Err(error)),
+        }
+    }).ok_or_else(||invalid("cannot reserve MP4 output"))??;
+    let mut output=BufWriter::new(file);
+    crate::container::mp4_relocate::fast_start(&mut input,&mut output)?;
+    output.flush()?;output.get_ref().sync_all()?;drop(output);
+    std::fs::hard_link(&temporary.0,destination)?;
+    Ok(())
+}

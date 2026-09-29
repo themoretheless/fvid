@@ -6,11 +6,17 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("mp4" | "m4a"))
     {
         use std::io::Read;
-        let mut prefix = [0; 7];
+        let mut prefix = [0; 8];
         let mut source = std::fs::File::open(&args[1])?;
-        if source.read_exact(&mut prefix).is_ok() && fvid::container::adts::header(&prefix).is_some() {
+        source.read_exact(&mut prefix)?;
+        if fvid::container::adts::header(&prefix).is_some() {
             let packets = fvid::native_export::remux_adts_aac(std::path::Path::new(&args[1]), std::path::Path::new(&args[2]))?;
             println!("{{\"backend\":\"fvid\",\"audio_packets\":{packets}}}");
+            return Ok(());
+        }
+        if &prefix[4..8] == b"ftyp" {
+            fvid::native_export::remux_mp4(std::path::Path::new(&args[1]), std::path::Path::new(&args[2]))?;
+            println!("{{\"backend\":\"fvid\",\"remux\":\"mp4-faststart\"}}");
             return Ok(());
         }
     }
