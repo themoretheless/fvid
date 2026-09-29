@@ -174,3 +174,99 @@ fn large_matroska_skips_sparse_void_and_preserves_trimmed_interval() {
     assert!(status.stdout.is_empty());
     assert_eq!(std::fs::read(output).unwrap(), expected);
 }
+
+#[test]
+fn sequential_adts_interval_stops_on_an_unbounded_short_read_source() {
+    use fvid::{container::adts::StreamReader, native_media::decode_adts_aac_reader};
+    struct Repeating {
+        data: &'static [u8],
+        bytes: Rc<Cell<usize>>,
+    }
+    impl Read for Repeating {
+        fn read(&mut self, output: &mut [u8]) -> std::io::Result<usize> {
+            let length = output.len().min(3);
+            let at = self.bytes.get();
+            for (index, byte) in output[..length].iter_mut().enumerate() {
+                *byte = self.data[(at + index) % self.data.len()];
+            }
+            self.bytes.set(at + length);
+            Ok(length)
+        }
+    }
+    let data = include_bytes!("fixtures/audio/aac-mono-44k.aac");
+    let interval = Some((Duration::from_micros(30001), Duration::from_micros(70001)));
+    let mut expected = Vec::new();
+    let wanted = fvid::native_media::decode_aac_pcm_interval(
+        data,
+        &mut expected,
+        &Default::default(),
+        interval,
+    )
+    .unwrap();
+    let bytes = Rc::new(Cell::new(0));
+    let reader = StreamReader::open(Repeating {
+        data,
+        bytes: bytes.clone(),
+    })
+    .unwrap();
+    let mut actual = Vec::new();
+    let got = decode_adts_aac_reader(reader, &mut actual, interval).unwrap();
+    assert_eq!(got, wanted);
+    assert_eq!(actual, expected);
+    assert!(bytes.get() < data.len());
+}
+
+#[test]
+fn sequential_adts_rejects_partial_frames_and_configuration_changes() {
+    use fvid::container::adts::{StreamReader, header};
+    let data = include_bytes!("fixtures/audio/aac-mono-44k.aac");
+    let size = header(data).unwrap().frame_bytes;
+    for length in 0..size {
+        match StreamReader::open(&data[..length]) {
+            Err(_) => assert!(length < 7),
+            Ok(mut reader) => assert!(reader.next_packet().is_err(), "accepted {length}/{size}"),
+        }
+    }
+    let mut changed = data[..size].to_vec();
+    changed.extend_from_slice(&data[..size]);
+    changed[size + 2] ^= 4; // A different sampling frequency in the second header.
+    let mut reader = StreamReader::open(changed.as_slice()).unwrap();
+    assert!(reader.next_packet().unwrap().is_some());
+    assert!(
+        reader
+            .next_packet()
+            .unwrap_err()
+            .to_string()
+            .contains("configuration")
+    );
+    let mut reader = StreamReader::open(&data[..size]).unwrap();
+    assert_eq!(reader.next_packet().unwrap().unwrap(), data[7..size]);
+    assert!(reader.next_packet().unwrap().is_none());
+}
+
+#[test]
+fn sequential_adts_removes_crc_bytes_and_full_export_does_not_publish_truncation() {
+    use fvid::container::adts::{StreamReader, header};
+    let data = include_bytes!("fixtures/audio/aac-mono-44k.aac");
+    let size = header(data).unwrap().frame_bytes;
+    let mut crc = data[..7].to_vec();
+    crc[1] &= !1;
+    let length = size + 2;
+    crc[3] = (crc[3] & !3) | ((length >> 11) as u8 & 3);
+    crc[4] = (length >> 3) as u8;
+    crc[5] = (crc[5] & 31) | (((length & 7) as u8) << 5);
+    crc.extend_from_slice(&[0, 0]);
+    crc.extend_from_slice(&data[7..size]);
+    let mut reader = StreamReader::open(crc.as_slice()).unwrap();
+    assert_eq!(reader.next_packet().unwrap().unwrap(), data[7..size]);
+    assert!(reader.next_packet().unwrap().is_none());
+    let dir = std::env::temp_dir().join(format!("fvid-adts-truncation-{}", std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    let _cleanup = Cleanup(dir.clone());
+    let source = dir.join("broken.aac");
+    std::fs::write(&source, &data[..data.len() - 1]).unwrap();
+    let destination = dir.join("broken.wav");
+    assert!(fvid::native_export::export_aac_pcm(&source, &destination).is_err());
+    assert!(!destination.exists());
+    assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 1);
+}

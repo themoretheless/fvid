@@ -266,18 +266,99 @@ pub fn esds_for(asc: &[u8]) -> Option<Vec<u8>> {
         return None;
     }
     let mut out = vec![
-        0, 0, 0, 0, // version and flags of the box itself
-        3, (20 + width) as u8, // ES descriptor: the three bytes below and the record after them
-        0, 1, // ES_ID, the same for every track of a file that names none
+        0,
+        0,
+        0,
+        0, // version and flags of the box itself
+        3,
+        (20 + width) as u8, // ES descriptor: the three bytes below and the record after them
+        0,
+        1, // ES_ID, the same for every track of a file that names none
         0, // no stream name, no URL, no opaque data follows
-        4, (15 + width) as u8, // DecoderConfigDescriptor: its header and the record after it
-        0x40, // MPEG-4 audio
-        0x15, // stream type 5 for audio, with no upstream and no backward config
-        0, 0, 0, // buffer size, in 16-bit units
-        0, 0, 0, 0, // maximum bitrate
-        0, 0, 0, 0, // average bitrate
-        5, width as u8, // DecSpecificInfo, holding the config itself
+        4,
+        (15 + width) as u8, // DecoderConfigDescriptor: its header and the record after it
+        0x40,               // MPEG-4 audio
+        0x15,               // stream type 5 for audio, with no upstream and no backward config
+        0,
+        0,
+        0, // buffer size, in 16-bit units
+        0,
+        0,
+        0,
+        0, // maximum bitrate
+        0,
+        0,
+        0,
+        0, // average bitrate
+        5,
+        width as u8, // DecSpecificInfo, holding the config itself
     ];
     out.extend_from_slice(asc);
     Some(out)
+}
+
+/// Sequential ADTS reader. Retains at most one frame (ADTS length is 13 bits),
+/// with no file-size or packet-count allocation. Input starts at an ADTS header;
+/// unlike the recovery-oriented slice parser, truncated tails are errors.
+pub struct StreamReader<R> {
+    source: R,
+    configuration: Header,
+    first: Option<Header>,
+    finished: bool,
+}
+impl<R: std::io::Read> StreamReader<R> {
+    pub fn open(mut source: R) -> Result<Self> {
+        let mut bytes = [0; 7];
+        source.read_exact(&mut bytes)?;
+        let configuration = header(&bytes).ok_or_else(|| invalid("invalid ADTS header"))?;
+        let config = AacConfig::parse(&configuration.asc)?;
+        if config.sample_rate != configuration.sample_rate
+            || u16::from(config.channels) != configuration.channels
+        {
+            return Err(invalid("ADTS configuration disagrees with header"));
+        }
+        Ok(Self {
+            source,
+            configuration,
+            first: Some(configuration),
+            finished: false,
+        })
+    }
+
+    pub fn configuration(&self) -> Header {
+        self.configuration
+    }
+
+    /// Return the raw AAC block, excluding ADTS header/CRC. An error terminates
+    /// this reader; callers must not publish partially decoded output as success.
+    pub fn next_packet(&mut self) -> Result<Option<Vec<u8>>> {
+        if self.finished {
+            return Ok(None);
+        }
+        self.finished = true;
+        let next = if let Some(header) = self.first.take() {
+            header
+        } else {
+            let mut bytes = [0; 7];
+            match self.source.read_exact(&mut bytes[..1]) {
+                Ok(()) => {}
+                Err(error) if error.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
+                Err(error) => return Err(error.into()),
+            }
+            self.source.read_exact(&mut bytes[1..])?;
+            header(&bytes).ok_or_else(|| invalid("invalid ADTS frame boundary"))?
+        };
+        if next.asc != self.configuration.asc
+            || next.header_bytes != self.configuration.header_bytes
+        {
+            return Err(invalid("ADTS configuration changes between frames"));
+        }
+        let mut remaining = vec![0; next.frame_bytes - 7];
+        self.source.read_exact(&mut remaining)?;
+        if next.header_bytes == 9 {
+            remaining.drain(..2);
+        }
+        self.finished = false;
+        Ok(Some(remaining))
+    }
 }

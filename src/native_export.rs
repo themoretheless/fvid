@@ -246,22 +246,16 @@ pub fn export_aac_pcm_resampled(
         Some("f32le") => false,
         _ => return Err(invalid("native AAC PCM output requires .f32le or .wav extension")),
     };
-    let limits = crate::container::adts::Limits::default();
     let mut input = BufReader::new(File::open(source)?);
     let mut prefix = [0; 8];
     input.read_exact(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;
-    let mut data = Vec::new();
-    let (mp4, matroska) = if &prefix[4..8] == b"ftyp" {
-        (Some(crate::container::mp4::Mp4Reader::open(input, Default::default())?), None)
+    let (mp4, matroska, adts) = if &prefix[4..8] == b"ftyp" {
+        (Some(crate::container::mp4::Mp4Reader::open(input, Default::default())?), None, None)
     } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        (None, Some(crate::container::webm::WebmReader::open(input, Default::default())?))
+        (None, Some(crate::container::webm::WebmReader::open(input, Default::default())?), None)
     } else {
-        input.take(limits.file_bytes as u64 + 1).read_to_end(&mut data)?;
-        if data.len() > limits.file_bytes {
-            return Err(invalid("AAC input exceeds container byte limit"));
-        }
-        (None, None)
+        (None, None, Some(crate::container::adts::StreamReader::open(input)?))
     };
     let (input_rate, input_channels) = if let Some(reader) = &mp4 {
         let tracks: Vec<_> = reader.tracks().iter().filter(|t| t.handler == *b"soun").collect();
@@ -278,7 +272,10 @@ pub fn export_aac_pcm_resampled(
         }
         let decoder = crate::codec::aac_native::NativeAacDecoder::new(&tracks[0].codec_private)?;
         (decoder.sample_rate(), u16::from(decoder.channels()))
-    } else { aac_geometry(&data)? };
+    } else {
+        let config = adts.as_ref().ok_or_else(|| invalid("missing ADTS reader"))?.configuration();
+        (config.sample_rate, config.channels)
+    };
     let output_rate = sample_rate.unwrap_or(input_rate);
     let output_channels = channels.unwrap_or(input_channels);
     if output_channels != input_channels && !matches!(output_channels, 1 | 2) {
@@ -302,7 +299,7 @@ pub fn export_aac_pcm_resampled(
     } else if let Some(reader) = matroska {
         crate::native_media::decode_matroska_aac_reader(reader, &mut pcm, interval)?
     } else {
-        crate::native_media::decode_aac_pcm_interval(&data, &mut pcm, &limits, interval)?
+        crate::native_media::decode_adts_aac_reader(adts.ok_or_else(|| invalid("missing ADTS reader"))?, &mut pcm, interval)?
     };
     if pcm.filled != 0 { return Err(invalid("incomplete decoded audio frame")); }
     stats.channels = output_channels;
@@ -402,12 +399,6 @@ impl<W: Write> Write for PcmGain<'_, W> {
         Ok(data.len())
     }
     fn flush(&mut self) -> std::io::Result<()> { self.output.flush() }
-}
-
-fn aac_geometry(data: &[u8]) -> Result<(u32, u16)> {
-    let asc = crate::container::adts::Aac::parse(data, &Default::default())?.frames[0].asc;
-    let decoder = crate::codec::aac_native::NativeAacDecoder::new(&asc)?;
-    Ok((decoder.sample_rate(), u16::from(decoder.channels())))
 }
 
 /// Lossless ADTS-to-MP4 packet remux with atomic no-overwrite publication.

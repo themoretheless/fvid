@@ -1144,4 +1144,11 @@ Matroska AAC export likewise uses a seekable source through
 than the whole file. CodecDelay, signed DiscardPadding and sample-exact
 intervals keep their existing semantics. Building the Matroska index may still
 read unselected block payloads; this is bounded-memory file access, not a promise
-of constant startup time. ADTS export still uses a bounded in-memory input path.
+of constant startup time. ADTS PCM export uses `container::adts::StreamReader` and
+`native_media::decode_adts_aac_reader`: only the current encoded frame is held,
+with no whole-file size limit or packet index. Interval exports stop reading
+when the selected sample range ends. Full sequential exports require contiguous
+ADTS frames and reject truncated tails or changing configurations; the existing
+byte-slice parser keeps its recovery-oriented behavior. CRC header bytes are
+removed, but CRC checksums are not verified. ADTS-to-MP4 remux still uses its
+bounded in-memory parser.
