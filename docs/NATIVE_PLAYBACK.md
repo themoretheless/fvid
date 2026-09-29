@@ -1961,3 +1961,33 @@ Option expressions such as `scale=PI` and combinations with filters not yet
 migrated still use the existing adapter when the `media` feature is enabled;
 the headless build rejects them. Aggregate `media` is therefore not yet
 FFmpeg-independent.
+
+### Owned dilation and erosion (2026-09-29)
+
+`native_morphology::Morphology` applies threshold-limited dilation or erosion
+without external libraries. `coordinates` selects the eight surrounding
+samples in row order; `threshold0` through `threshold3` bound each plane's
+change in sample units. The parser accepts named or positional integer
+literals, including hexadecimal masks. Plane 3 is retained for option
+compatibility; current `GeometryFrame` storage has three components.
+Horizontal boundaries reflect, vertical boundaries clamp, and one-pixel
+planes remain well-defined. Invalid storage/depth/sample values fail before
+mutation. RGB24 retains its layout and uses G/B/R threshold numbering.
+
+Native API and headless `media decode` execute these filters after geometry,
+negate and the gradient operators, always dilation then erosion regardless
+of flag order. For example:
+
+```sh
+fvid media decode input.mp4 --dilation 'coordinates=170:threshold0=16' --erosion 'threshold1=0'
+```
+
+`tests/native_morphology.rs` checks per-plane limits, identity masks, invalid
+inputs without mutation, degenerate planes, and API/CLI AVC and HEVC Main10
+routing. Its explicit reference-only test compares 220 cases against FFmpeg:
+both operators, all individual coordinate bits, mixed masks/thresholds,
+YUV420/422/444 at 8/10/16 bits and RGB24. The reference executable is launched
+only by the ignored test when `FVID_REFERENCE_FFMPEG` is explicitly set.
+
+Expressions and combinations containing unmigrated filters retain existing
+adapter handling under `media`; aggregate FFmpeg independence is unfinished.

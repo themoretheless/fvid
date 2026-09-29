@@ -39,7 +39,7 @@ pub fn decode_video_filtered(
     geometry: &crate::native_geometry::VideoGeometry,
     negate: Option<crate::native_pixels::Negate>,
 ) -> Result<DecodeStats> {
-    let filters = crate::native_pixels::PixelFilters { negate, gradients: Vec::new() };
+    let filters = crate::native_pixels::PixelFilters { negate, ..Default::default() };
     decode_video_pipeline(source, interval, geometry, &filters)
 }
 
@@ -835,8 +835,8 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         removegrain: None,
         yaepblur: None,
         vibrance: None,
-        dilation: None,
-        erosion: None,
+        dilation: _,
+        erosion: _,
         colorize: None,
         exposure: None,
         chromashift: None,

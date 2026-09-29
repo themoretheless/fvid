@@ -277,17 +277,19 @@ impl Gradient {
 }
 
 /// Native filter order matches the public media request, independent of CLI
-/// flag order: inversion, Sobel, Prewitt, Roberts, Kirsch, then Scharr.
+/// flag order: inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, dilation, erosion.
 #[derive(Default)]
 pub struct PixelFilters {
     pub negate: Option<Negate>,
     pub gradients: Vec<Gradient>,
+    pub morphology: Vec<crate::native_morphology::Morphology>,
 }
 impl PixelFilters {
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
         let mut result = Self {
             negate: request.negate.as_deref().map(Negate::parse).transpose()?,
             gradients: Vec::new(),
+            morphology: Vec::new(),
         };
         for (kind, args) in [
             (GradientKind::Sobel, &request.sobel),
@@ -300,16 +302,28 @@ impl PixelFilters {
                 result.gradients.push(Gradient::parse(kind, args)?);
             }
         }
+        use crate::native_morphology::{Morphology, MorphologyKind};
+        for (kind, args) in [
+            (MorphologyKind::Dilation, &request.dilation),
+            (MorphologyKind::Erosion, &request.erosion),
+        ] {
+            if let Some(args) = args {
+                result.morphology.push(Morphology::parse(kind, args)?);
+            }
+        }
         Ok(result)
     }
     pub fn is_empty(&self) -> bool {
-        self.negate.is_none() && self.gradients.is_empty()
+        self.negate.is_none() && self.gradients.is_empty() && self.morphology.is_empty()
     }
     pub fn apply(&self, frame: &mut GeometryFrame, depth: u8) -> Result<()> {
         if let Some(negate) = self.negate {
             negate.apply(frame, depth)?;
         }
         for filter in &self.gradients {
+            filter.apply(frame, depth)?;
+        }
+        for filter in &self.morphology {
             filter.apply(frame, depth)?;
         }
         Ok(())

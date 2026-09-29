@@ -80,6 +80,7 @@ pub mod native_media;
 pub mod native_pcm;
 pub mod native_geometry;
 pub mod native_pixels;
+pub mod native_morphology;
 pub mod native_export;
 pub mod publish;
 pub mod resident;

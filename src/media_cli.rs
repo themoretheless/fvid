@@ -321,11 +321,28 @@ fn pixel_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_pixel
     let mut result = vec![args[0].clone()];
     let mut args = args[1..].iter();
     let mut seen = std::collections::BTreeSet::new();
+    let mut seen_morphology = std::collections::BTreeSet::new();
     while let Some(arg) = args.next() {
         if arg == "--" { result.push(arg.clone()); result.extend(args.cloned()); break; }
         if arg == "--negate" {
             if filters.negate.is_some() { return Err("duplicate negate".into()); }
             filters.negate = Some(Negate::parse(args.next().ok_or("missing negate args")?)?);
+            continue;
+        }
+        if matches!(arg.as_str(), "--dilation" | "--erosion") {
+            use fvid::native_morphology::{Morphology, MorphologyKind};
+            let kind = if arg == "--dilation" { MorphologyKind::Dilation } else { MorphologyKind::Erosion };
+            if !seen_morphology.insert(kind) { return Err(format!("duplicate {}", kind.name()).into()); }
+            let value = args.next().ok_or_else(|| format!("missing {} args", kind.name()))?;
+            match Morphology::parse(kind, value) {
+                Ok(filter) => filters.morphology.push(filter),
+                Err(error) => {
+                    #[cfg(feature = "media")]
+                    { let _ = error; result.push(arg.clone()); result.push(value.clone()); }
+                    #[cfg(not(feature = "media"))]
+                    { return Err(error.into()); }
+                }
+            }
             continue;
         }
         let kind = match arg.as_str() {
@@ -351,6 +368,7 @@ fn pixel_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_pixel
         }
     }
     filters.gradients.sort_by_key(|filter| filter.kind());
+    filters.morphology.sort_by_key(|filter| filter.kind());
     Ok((result, filters))
 }
 
