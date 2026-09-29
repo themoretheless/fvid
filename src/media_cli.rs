@@ -169,9 +169,10 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         println!("{{\"backend\":\"fvid\",\"video_frames\":{frames}}}");
         return Ok(());
     }
-    let (decode_args, geometry) = geometry_decode_args(args)?;
+    let (pixel_args, negate) = negate_decode_args(args)?;
+    let (decode_args, geometry) = geometry_decode_args(&pixel_args)?;
     if let Some((path, quiet, interval)) = plain_decode(&decode_args)? {
-        let stats = fvid::native_media::decode_video_transformed(std::path::Path::new(path), interval, &geometry)?;
+        let stats = fvid::native_media::decode_video_filtered(std::path::Path::new(path), interval, &geometry, negate)?;
         if !quiet {
             // These strings are internal backend/pixel-format names; paths and
             // other user input are never interpolated into this JSON document.
@@ -295,6 +296,21 @@ fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Er
         }
     }
     Ok(true)
+}
+
+fn negate_decode_args(args: &[String]) -> Result<(Vec<String>, Option<fvid::native_pixels::Negate>), Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str) != Some("decode") { return Ok((args.to_vec(), None)); }
+    let mut result = vec![args[0].clone()];
+    let mut negate = None;
+    let mut args = args[1..].iter();
+    while let Some(arg) = args.next() {
+        if arg == "--" { result.push(arg.clone()); result.extend(args.cloned()); break; }
+        if arg == "--negate" {
+            if negate.is_some() { return Err("duplicate negate".into()); }
+            negate = Some(fvid::native_pixels::Negate::parse(args.next().ok_or("missing negate args")?)?);
+        } else { result.push(arg.clone()); }
+    }
+    Ok((result, negate))
 }
 
 // Strip only the native geometry options. The remaining parser still rejects

@@ -4785,7 +4785,7 @@ pub(crate) fn validate_colorchannelmixer_args(args: &str) -> Result<()> {
 }
 
 /// Apply FFmpeg-compatible `negate` into a reusable destination frame.
-/// `args` is empty (defaults) or `1` to also negate alpha (`negate=1`).
+/// `args` is empty (defaults) or `1` to also negate alpha (`negate=negate_alpha=1`).
 pub(crate) unsafe fn negate_frame(
     graph: &mut Option<FilterGraph>,
     dst: *mut AVFrame,
@@ -4796,7 +4796,7 @@ pub(crate) unsafe fn negate_frame(
     let filter_args = if args.is_empty() || args == "0" {
         ""
     } else {
-        args
+        "negate_alpha=1"
     };
     unsafe { apply_video_filter(graph, dst, src, "negate", filter_args) }
 }

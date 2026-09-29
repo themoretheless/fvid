@@ -29,6 +29,16 @@ pub fn decode_video_transformed(
     interval: Option<(Duration, Duration)>,
     geometry: &crate::native_geometry::VideoGeometry,
 ) -> Result<DecodeStats> {
+    decode_video_filtered(source, interval, geometry, None)
+}
+
+/// Owned geometry followed by optional sample inversion.
+pub fn decode_video_filtered(
+    source: &Path,
+    interval: Option<(Duration, Duration)>,
+    geometry: &crate::native_geometry::VideoGeometry,
+    negate: Option<crate::native_pixels::Negate>,
+) -> Result<DecodeStats> {
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("decode interval requires from < to"));
     }
@@ -80,8 +90,8 @@ pub fn decode_video_transformed(
             RawFrame::Planar8(p) => planar_format(width, height, p.chroma_width, p.chroma_height)?,
             RawFrame::Yuv { sx, sy, .. } => planar_format(width, height, width / sx, height / sy)?,
         };
-        if !geometry.is_identity() {
-            let output = geometry.apply_display(&frame, width, height, reader.rotation())?;
+        if !geometry.is_identity() || negate.is_some() {
+            let mut output = geometry.apply_display(&frame, width, height, reader.rotation())?;
             stats.width = u32::try_from(output.width).map_err(|_| invalid("video width overflow"))?;
             stats.height = u32::try_from(output.height).map_err(|_| invalid("video height overflow"))?;
             if geometry.transpose.is_some() {
@@ -90,6 +100,10 @@ pub fn decode_video_transformed(
                     "yuv440p" => "yuv422p".into(),
                     _ => stats.pixel_format,
                 };
+            }
+            if let Some(negate) = negate {
+                let depth = match &frame { RawFrame::Avc { picture, .. } => picture.bit_depth, _ => 8 };
+                negate.apply(&mut output, depth)?;
             }
             std::hint::black_box(output);
         }
@@ -773,7 +787,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         hue: None,
         avgblur: None,
         boxblur: None,
-        negate: None,
+        negate: _,
         edgedetect: None,
         sobel: None,
         prewitt: None,
@@ -884,5 +898,6 @@ pub fn decode_video_request(source: &Path, transform: &DecodeTransform) -> Resul
         transpose: transform.transpose.map(|r| crate::native_geometry::Transpose::parse(r.as_str())).transpose()?,
         pad: transform.pad.map(|r| [r.width as usize, r.height as usize, r.x as usize, r.y as usize]),
     };
-    decode_video_transformed(source, interval, &geometry)
+    let negate = transform.negate.as_deref().map(crate::native_pixels::Negate::parse).transpose()?;
+    decode_video_filtered(source, interval, &geometry, negate)
 }

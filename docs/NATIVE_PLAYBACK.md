@@ -1702,3 +1702,22 @@ ignored and future additions require an explicit support decision. The public
 operations while retaining its existing legacy dispatch for the remaining ones.
 Headless and `media,mcp` tests verify request execution, old type compatibility,
 invalid/unsupported requests and existing geometry/frame decode behavior.
+
+### Owned sample inversion (2026-09-29)
+
+`native_media::decode_video_request` and `media decode INPUT --negate 0|1`
+now execute inversion in FVid after geometry. `native_pixels::Negate` operates
+on RGB24 and packed Y/Cb/Cr planes, using `255 - sample` for 8-bit and
+`(2^depth - 1) - sample` for 9–16-bit little-endian storage. Limited-range YUV
+uses the storage maximum too. Invalid high-depth storage is rejected before
+any samples are changed. Current native frame layouts contain no alpha, so
+`0` and `1` have identical native output; `1` retains its documented meaning
+of including alpha when the legacy pipeline supplies alpha-bearing frames.
+The legacy adapter now passes the explicit `negate_alpha=1` option instead of
+an ambiguous positional option.
+
+The headless regression covers exact pixels, malformed samples, request/CLI
+routing and an explicit ignored FFmpeg reference test (`FVID_REFERENCE_FFMPEG`
+plus `--include-ignored`). FFmpeg is only the test oracle. Combinations with
+filters that have not yet been migrated still use the existing legacy media
+pipeline; this does not remove the complete `media` feature's libav dependency.
