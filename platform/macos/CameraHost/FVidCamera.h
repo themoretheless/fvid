@@ -6,6 +6,9 @@
 typedef struct CameraSource FVidCameraSource;
 typedef struct { uint32_t width; uint32_t height; } FVidCameraSize;
 FVidCameraSource *fvid_camera_open(const uint8_t *path, size_t length, size_t budget);
+// Diagnostic for the last source open/frame/fit on this thread; read immediately.
+// Returns UTF-8 byte length, excludes NUL. NULL output queries size; copy uses min(capacity,length).
+size_t fvid_camera_error(uint8_t *output, size_t capacity);
 // Zero means duration unknown. Serialized with other source operations.
 uint64_t fvid_camera_duration(const FVidCameraSource *source);
 FVidCameraSize fvid_camera_size(const FVidCameraSource *source);

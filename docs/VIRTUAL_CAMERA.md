@@ -289,3 +289,19 @@ bundle. The camera dependency graph contains only `fvid`, `fvid-camera-ffi`,
 Signing inspection still reported zero valid identities. The bundle has not
 been installed, and external application camera selection/frame delivery remain
 unverified. In-process suites do not establish sustained 60 fps throughput.
+
+### Source error diagnostics (2026-09-29)
+
+The Rust bridge now preserves the concrete source-open, frame-decode and BGRA
+conversion error instead of reducing it to a null handle or `-1`. The additive
+`fvid_camera_error` ABI copies up to 4096 UTF-8 bytes from a thread-local diagnostic;
+callers query/read it immediately on the failing thread. Successful source
+operations clear the previous diagnostic. Swift captures it synchronously into
+`NativeVideoError`, whose description is displayed by the camera session status.
+A frame error still poisons the source handle and requires reopening.
+
+Two Rust ABI tests verify bounded UTF-8, thread isolation and invalid-pointer
+rejection; all eight Swift/Rust bridge suites pass with diagnostic propagation
+and success-clearing checks. The host still requires a valid signing identity
+and macOS extension activation for installed third-party camera delivery; no
+valid signing identity was available during this verification.

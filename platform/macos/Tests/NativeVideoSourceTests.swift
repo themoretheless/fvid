@@ -17,12 +17,16 @@ import Foundation
             precondition(pixels == expected)
         }
         do { _ = try source.frame(mediaTime: 0, hostTime: 1, sequence: 0); fatalError("stale timestamp accepted") }
-        catch NativeVideoError.decodeFailed {}
+        catch NativeVideoError.decodeFailed(let reason) { precondition(!reason.isEmpty) }
         do { _ = try source.frame(mediaTime: 0, hostTime: 10, sequence: 10); fatalError("failed handle reused") }
-        catch NativeVideoError.decodeFailed {}
+        catch NativeVideoError.decodeFailed(let reason) { precondition(!reason.isEmpty) }
         let missing = url.appendingPathExtension("missing")
         do { _ = try NativeVideoSource(url: missing); fatalError("missing input opened") }
-        catch NativeVideoError.openFailed {}
+        catch NativeVideoError.openFailed(let reason) { precondition(!reason.isEmpty); precondition(!reason.contains("openFailed")) }
+        // A successful operation clears the thread's previous source diagnostic.
+        let reopened = try NativeVideoSource(url: url)
+        _ = try reopened.frame(mediaTime: 0, hostTime: 1, sequence: 0)
+        precondition(fvid_camera_error(nil, 0) == 0)
         if CommandLine.arguments.count == 3 {
             let compressed = try NativeVideoSource(url: URL(fileURLWithPath: CommandLine.arguments[1]))
             let expectedRGB = try Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[2]))

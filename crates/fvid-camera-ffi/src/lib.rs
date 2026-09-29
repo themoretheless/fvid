@@ -9,6 +9,40 @@ use std::{
     panic::{AssertUnwindSafe, catch_unwind},
 };
 
+thread_local! {
+    static LAST_ERROR: std::cell::RefCell<String> = const { std::cell::RefCell::new(String::new()) };
+}
+fn set_error(message: impl AsRef<str>) {
+    LAST_ERROR.with(|value| {
+        let message = message.as_ref();
+        let mut end = message.len().min(4096);
+        while !message.is_char_boundary(end) { end -= 1; }
+        let mut value = value.borrow_mut(); value.clear(); value.push_str(&message[..end]);
+    });
+}
+/// UTF-8 diagnostic for the last source open/frame/fit operation on this thread.
+/// Returns required bytes, without a NUL terminator. A null output queries size.
+/// Read immediately after failure, on the same thread. Reading does not clear it.
+/// # Safety
+/// Non-null output must reference capacity writable bytes, with no live alias.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn fvid_camera_error(output: *mut u8, capacity: usize) -> usize {
+    LAST_ERROR.with(|value| {
+        let value = value.borrow();
+        if !output.is_null() {
+            unsafe { std::ptr::copy_nonoverlapping(value.as_ptr(), output, capacity.min(value.len())); }
+        }
+        value.len()
+    })
+}
+fn status(result: std::thread::Result<fvid::Result<()>>) -> i32 {
+    match result {
+        Ok(Ok(())) => 1,
+        Ok(Err(error)) => { set_error(error.to_string()); -1 },
+        Err(_) => { set_error("camera frame conversion panicked"); -1 },
+    }
+}
+
 type Source = NativeCameraSource<BufReader<File>>;
 pub struct CameraSource {
     source: Source,
@@ -35,36 +69,34 @@ pub unsafe extern "C" fn fvid_camera_open(
     length: usize,
     budget: usize,
 ) -> *mut CameraSource {
-    catch_unwind(AssertUnwindSafe(|| {
+    set_error("");
+    let result = catch_unwind(AssertUnwindSafe(|| -> Result<*mut CameraSource, String> {
         if path.is_null() || length == 0 || length > 32768 {
-            return None;
+            return Err("invalid camera source path".into());
         }
-        let path = std::str::from_utf8(unsafe { std::slice::from_raw_parts(path, length) }).ok()?;
-        let mut reader =
-            NativeReader::software(BufReader::new(File::open(path).ok()?), budget).ok()?;
-        if !reader.read_frame().ok()? {
-            return None;
+        let path = std::str::from_utf8(unsafe { std::slice::from_raw_parts(path, length) })
+            .map_err(|error| error.to_string())?;
+        let mut reader = NativeReader::software(
+            BufReader::new(File::open(path).map_err(|error| error.to_string())?), budget)
+            .map_err(|error| error.to_string())?;
+        if !reader.read_frame().map_err(|error| error.to_string())? {
+            return Err("camera source contains no video frames".into());
         }
         let [width, height] = reader.dimensions();
-        let latest = LatestFrame::new(width, height, 64 << 20).ok()?;
+        let latest = LatestFrame::new(width, height, 64 << 20).map_err(|error| error.to_string())?;
         let (num, den) = reader.pixel_aspect();
-        let pixel_aspect = [num, den];
-        let duration_ns = reader
-            .duration()
-            .and_then(|d| u64::try_from(d.as_nanos()).ok())
-            .unwrap_or(0);
-        reader.rewind().ok()?;
-        Some(Box::into_raw(Box::new(CameraSource {
-            source: NativeCameraSource::new(reader),
-            latest,
-            failed: false,
-            duration_ns,
-            pixel_aspect,
+        let duration_ns = reader.duration().and_then(|d| u64::try_from(d.as_nanos()).ok()).unwrap_or(0);
+        reader.rewind().map_err(|error| error.to_string())?;
+        Ok(Box::into_raw(Box::new(CameraSource {
+            source: NativeCameraSource::new(reader), latest, failed: false, duration_ns,
+            pixel_aspect: [num,den],
         })))
-    }))
-    .ok()
-    .flatten()
-    .unwrap_or(std::ptr::null_mut())
+    }));
+    match result {
+        Ok(Ok(handle)) => handle,
+        Ok(Err(error)) => { set_error(error); std::ptr::null_mut() },
+        Err(_) => { set_error("camera source initialization panicked"); std::ptr::null_mut() },
+    }
 }
 /// # Safety
 /// `handle` must be null or a live handle returned by `fvid_camera_open`.
@@ -94,17 +126,21 @@ pub unsafe extern "C" fn fvid_camera_frame(
     output: *mut u8,
     length: usize,
 ) -> i32 {
+    set_error("");
     if handle.is_null() || output.is_null() {
+        set_error("null camera handle or frame buffer");
         return -1;
     }
     let source = unsafe { &mut *handle };
     if source.failed {
+        set_error("camera source failed; close and reopen it");
         return -1;
     }
     source.failed = true;
     let result = catch_unwind(AssertUnwindSafe(|| -> fvid::Result<bool> {
         let [w, h] = source.latest.dimensions();
         if length != w * h * 4 {
+            set_error("invalid camera frame buffer length");
             return Ok(false);
         }
         if !source.source.publish(
@@ -125,7 +161,12 @@ pub unsafe extern "C" fn fvid_camera_frame(
             source.failed = false;
             1
         }
-        _ => -1,
+        Ok(Err(error)) => { set_error(error.to_string()); -1 },
+        Ok(Ok(false)) => {
+            if LAST_ERROR.with(|error| error.borrow().is_empty()) { set_error("camera source produced no frame"); }
+            -1
+        },
+        Err(_) => { set_error("camera source decoding panicked"); -1 },
     }
 }
 /// # Safety
@@ -150,20 +191,19 @@ pub unsafe extern "C" fn fvid_camera_fit(
     output_len: usize,
     target: CameraSize,
 ) -> i32 {
+    set_error("");
     if input.is_null() || output.is_null() || input_len > 64 << 20 || output_len > 64 << 20 {
+        set_error("invalid camera conversion buffer or handle");
         return -1;
     }
-    catch_unwind(AssertUnwindSafe(|| {
+    status(catch_unwind(AssertUnwindSafe(|| {
         fvid::virtual_camera::fit_bgra(
             unsafe { std::slice::from_raw_parts(input, input_len) },
             [source.width as usize, source.height as usize],
             unsafe { std::slice::from_raw_parts_mut(output, output_len) },
             [target.width as usize, target.height as usize],
         )
-        .map(|_| 1)
-        .unwrap_or(-1)
-    }))
-    .unwrap_or(-1)
+    })))
 }
 
 /// Opaque clock owned by the serial camera producer.
@@ -269,15 +309,17 @@ pub unsafe extern "C" fn fvid_camera_fit_source(
     output_len: usize,
     target: CameraSize,
 ) -> i32 {
+    set_error("");
     if handle.is_null()
         || input.is_null()
         || output.is_null()
         || input_len > 64 << 20
         || output_len > 64 << 20
     {
+        set_error("invalid camera conversion buffer or handle");
         return -1;
     }
-    catch_unwind(AssertUnwindSafe(|| {
+    status(catch_unwind(AssertUnwindSafe(|| {
         let source = unsafe { &*handle };
         fvid::virtual_camera::fit_bgra_aspect(
             unsafe { std::slice::from_raw_parts(input, input_len) },
@@ -286,8 +328,37 @@ pub unsafe extern "C" fn fvid_camera_fit_source(
             unsafe { std::slice::from_raw_parts_mut(output, output_len) },
             [target.width as usize, target.height as usize],
         )
-        .map(|_| 1)
-        .unwrap_or(-1)
-    }))
-    .unwrap_or(-1)
+    })))
+}
+
+#[cfg(test)]
+mod diagnostic_tests {
+    use super::*;
+    fn message() -> String {
+        let count = unsafe { fvid_camera_error(std::ptr::null_mut(), 0) };
+        let mut bytes = vec![0; count];
+        assert_eq!(unsafe { fvid_camera_error(bytes.as_mut_ptr(), bytes.len()) }, count);
+        String::from_utf8(bytes).unwrap()
+    }
+    #[test]
+    fn diagnostics_are_bounded_utf8_and_thread_local() {
+        set_error("Ошибка камеры".repeat(1000));
+        let original = message();
+        assert!(original.len() <= 4096);
+        let mut tiny = [0;3];
+        assert_eq!(unsafe { fvid_camera_error(tiny.as_mut_ptr(),tiny.len()) }, original.len());
+        assert_eq!(&tiny, &original.as_bytes()[..3]);
+        std::thread::spawn(|| { assert!(message().is_empty()); set_error("other thread"); }).join().unwrap();
+        assert_eq!(message(),original);
+        set_error(""); assert!(message().is_empty());
+    }
+    #[test]
+    fn invalid_source_and_buffers_report_errors_without_unwinding() {
+        let opened = unsafe { fvid_camera_open(std::ptr::null(),0,1024) };
+        assert!(opened.is_null()); assert!(message().contains("path"));
+        let result = unsafe { fvid_camera_frame(std::ptr::null_mut(),0,0,0,std::ptr::null_mut(),0) };
+        assert_eq!(result,-1); assert!(message().contains("handle"));
+        let result = unsafe { fvid_camera_fit(std::ptr::null(),0,CameraSize::default(),std::ptr::null_mut(),0,CameraSize::default()) };
+        assert_eq!(result,-1); assert!(message().contains("buffer"));
+    }
 }

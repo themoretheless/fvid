@@ -10,12 +10,12 @@ final class NativeVideoSource {
     private var scaled = Data()
     private var pixels: Data
     init(url: URL, budget: Int = 256 << 20) throws {
-        guard url.isFileURL, budget > 0 else { throw NativeVideoError.openFailed }
+        guard url.isFileURL, budget > 0 else { throw NativeVideoError.openFailed("Expected a local file and a positive decoder budget") }
         let path = Array(url.path.utf8)
         let opened = path.withUnsafeBufferPointer { bytes in
             fvid_camera_open(bytes.baseAddress, bytes.count, budget)
         }
-        guard let opened else { throw NativeVideoError.openFailed }
+        guard let opened else { throw NativeVideoError.openFailed(nativeCameraDiagnostic("Cannot open video")) }
         let size = fvid_camera_size(opened)
         guard size.width > 0, size.height > 0,
               UInt64(size.width) * UInt64(size.height) * 4 <= 64 << 20 else {
@@ -39,7 +39,7 @@ final class NativeVideoSource {
                     FVidCameraSize(width: UInt32(targetWidth), height: UInt32(targetHeight)))
             }
         }
-        guard result == 1 else { throw NativeVideoError.decodeFailed }
+        guard result == 1 else { throw NativeVideoError.decodeFailed(nativeCameraDiagnostic("Cannot decode or convert video frame")) }
         return scaled
     }
     deinit { fvid_camera_close(handle) }
@@ -49,8 +49,28 @@ final class NativeVideoSource {
             fvid_camera_frame(handle, mediaTime, hostTime, sequence,
                 bytes.bindMemory(to: UInt8.self).baseAddress, length)
         }
-        guard result == 1 else { throw NativeVideoError.decodeFailed }
+        guard result == 1 else { throw NativeVideoError.decodeFailed(nativeCameraDiagnostic("Cannot decode or convert video frame")) }
         return pixels
     }
 }
-enum NativeVideoError: Error { case openFailed, invalidDimensions, decodeFailed }
+private func nativeCameraDiagnostic(_ fallback: String) -> String {
+    let count = fvid_camera_error(nil, 0)
+    guard count > 0 && count <= 4096 else { return fallback }
+    var bytes = [UInt8](repeating: 0, count: count)
+    let actual = bytes.withUnsafeMutableBufferPointer { buffer in
+        fvid_camera_error(buffer.baseAddress, buffer.count)
+    }
+    guard actual == count else { return fallback }
+    return String(bytes: bytes, encoding: .utf8) ?? fallback
+}
+enum NativeVideoError: LocalizedError, CustomStringConvertible {
+    case openFailed(String), invalidDimensions, decodeFailed(String)
+    var description: String {
+        switch self {
+        case .openFailed(let reason): return "Cannot open video: \(reason)"
+        case .invalidDimensions: return "Invalid or oversized video dimensions"
+        case .decodeFailed(let reason): return "Cannot read video frame: \(reason)"
+        }
+    }
+    var errorDescription: String? { description }
+}
