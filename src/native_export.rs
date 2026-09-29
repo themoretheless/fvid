@@ -770,9 +770,27 @@ pub fn remux_mp4_aac_matroska(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::media_control::ProgressEvent> {
+    remux_mp4_matroska_inner(source, destination, cancel, progress, true)
+}
+
+/// Select the owned AVC/HEVC/AAC Matroska remux route without discarding tracks.
+pub fn is_native_mp4_matroska(source: &Path) -> Result<bool> {
+    let input = crate::container::mp4::Mp4Reader::open(BufReader::new(File::open(source)?), Default::default())?;
+    Ok(crate::container::mp4_matroska::eligible(&input))
+}
+
+/// Publish all supported MP4 video/audio tracks as Matroska, with metadata and edits.
+pub fn remux_mp4_matroska(source: &Path, destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::media_control::ProgressEvent> {
+    remux_mp4_matroska_inner(source, destination, cancel, progress, false)
+}
+fn remux_mp4_matroska_inner(source: &Path, destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>, aac_only: bool,
+) -> Result<crate::media_control::ProgressEvent> {
     if cancel.is_some_and(|c| c.is_cancelled()) { return Err(invalid("media operation cancelled")); }
     if !matches!(destination.extension().and_then(|s| s.to_str()), Some("mka" | "mkv")) {
-        return Err(invalid("AAC Matroska remux output requires .mka or .mkv"));
+        return Err(invalid("Matroska remux output requires .mka or .mkv"));
     }
     let mut input = crate::container::mp4::Mp4Reader::open(BufReader::new(File::open(source)?), Default::default())?;
     let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
@@ -785,7 +803,11 @@ pub fn remux_mp4_aac_matroska(
         }
     }).ok_or_else(|| invalid("cannot reserve Matroska output"))??;
     let mut output = BufWriter::new(file);
-    let event = crate::container::matroska_write::write_mp4_aac_file(&mut input, &mut output, cancel, progress)?;
+    let event = if aac_only {
+        crate::container::matroska_write::write_mp4_aac_file(&mut input, &mut output, cancel, progress)?
+    } else {
+        crate::container::mp4_matroska::write(&mut input, &mut output, cancel, progress)?
+    };
     output.flush()?;
     output.get_ref().sync_all()?;
     drop(output);

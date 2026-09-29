@@ -1741,11 +1741,10 @@ payload, PTS, keyframe flag and codec configuration. The opt-in independent
 FFmpeg test decodes each resulting file and compares all video pixels and AAC
 PCM against the source. FFmpeg remains reference-only in these tests.
 
-This is the encoded-packet layer, not yet a general MP4-to-Matroska command:
-MP4 edit lists, colour/HDR/rotation, other metadata and gapless presentation
-still need a high-level mapping. Native AVC/HEVC Matroska playback is described
-below. Existing MP4-to-MKV media operations retain their legacy implementation
-until the presentation and metadata mapping is implemented.
+This is the encoded-packet layer. The high-level AVC/HEVC/AAC MP4 remux mapping
+is implemented by `container::mp4_matroska`, described below, including
+contiguous media edits, colour/HDR/rotation and represented file metadata.
+Unmigrated codecs and complex edit schedules still use the legacy media path.
 
 Format references: https://www.matroska.org/technical/codec_specs.html and
 https://www.matroska.org/technical/elements.html#ReferenceBlock .
@@ -1797,9 +1796,8 @@ range byte; neither has a version/flags header. Tests cover both spellings,
 truncation, unrepresentable codes and a real nclx atom produced independently
 by FFmpeg. This avoids losing or misreading container colour on future remux.
 
-The packet layer still does not map MP4 edit lists, rotation or general file
-metadata; the existing high-level MP4-to-Matroska route remains legacy until
-those mappings are implemented.
+The packet layer accepts explicit metadata. `container::mp4_matroska` supplies
+it from the MP4 reader together with presentation edits and track rotation.
 
 References: https://www.matroska.org/technical/elements.html and
 https://github.com/FFmpeg/FFmpeg/blob/master/libavformat/mov.c (`mov_read_colr`).
@@ -1872,7 +1870,7 @@ Publication uses a temporary file in the output directory, flush/sync, then a
 non-overwriting hard link. Cancellation/failure discards partial output;
 `done=true` is emitted only after publication. Multiple or refused tracks are
 rejected by this file wrapper rather than dropped. The general `media` adapter
-still handles unmigrated codecs, multiple tracks, complex edits and metadata
+still handles unmigrated codecs, complex edits and metadata
 mutation options; this change does not remove its aggregate FFmpeg dependency.
 
 The CLI/API integration test preserves PCM, tags and chapters together and
@@ -1894,7 +1892,7 @@ an error, rather than being skipped along with the picture.
 `PacketOptions::invisible`. Such blocks count toward packet/byte progress but do
 not extend the declared presentation duration. Existing write methods retain
 visible-block behavior. This supports video edit pre-roll without discarding
-reference pictures; full MP4 video edit-list remux is not connected yet.
+reference pictures. The MP4 Matroska remuxer uses it for contiguous video edits.
 
 Tests cover AVC, HEVC Main/Main10 with B frames, VP9 and AV1, including initial
 seek, rewind, exact displayed pixels and malformed hidden references. The
@@ -1906,3 +1904,38 @@ it is not claimed as successful interoperability for edited video.
 
 The flag's decode-without-display meaning and bit position follow the
 [Matroska block specification](https://www.matroska.org/technical/notes.html#block-structure).
+
+
+### Owned multi-track MP4 to Matroska remux
+
+`fvid media remux INPUT.mp4 OUTPUT.mkv [--progress]` and `media::remux` now use
+`container::mp4_matroska` when every track is AVC, HEVC or AAC and each has no
+edit or one nonempty, contiguous media edit. Multiple video/audio tracks are
+retained in source track order. The headless CLI does not need FFmpeg or the
+`media` feature for this route. Existing single-AAC entrypoints remain available.
+
+Packet payloads and codec configuration are unchanged. A bounded per-track
+priority queue interleaves edited DTS while retaining each track's decode
+order. AAC shares the already verified sample-exact delay/padding plan with
+the single-track writer. Video presentation intervals use sorted PTS (not
+`stts` decode durations for reordered variable cadence), intersect the media
+edit and retain the decode prefix through the last displayed picture. Required
+reference pictures outside the edit are marked invisible. The previously
+measured FFmpeg INV limitation still applies to files needing such pictures;
+independent pixel/PCM equivalence is verified on full-presentation remuxes.
+
+The mapping retains track name/language, pixel aspect, rotation, colour/HDR,
+file tags and chapter points represented by the MP4 reader. Atomic publication,
+no-overwrite, cancellation and progress share the AAC publisher. Explicit file
+remux rejects unsupported/refused tracks and invalid schedules before emitting
+a header. The public adapter preserves its previous route for unmigrated
+codecs, complex edits and custom metadata/stream options; the aggregate `media`
+feature therefore still depends on the legacy FFmpeg adapter.
+
+`native_mp4_matroska` verifies source/output pixels and presentation intervals,
+B-frame seeking, in-GOP edit pre-roll, rotated anamorphic video, HDR/Main10,
+multiple AAC tracks, packet identity, PTS alignment, DTS interleaving, CLI/API
+publication and cancellation. The opt-in `FVID_REFERENCE_FFMPEG` test creates
+combined AVC/HEVC/AAC sources and independently checks every video frame and
+all audible samples on each audio track. A separate unit test covers reordered
+variable-rate presentation intervals.

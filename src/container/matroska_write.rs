@@ -840,6 +840,82 @@ fn write_mp4_aac_metadata<R: Read + Seek, W: Write + Seek>(
         .get(track_index)
         .ok_or_else(|| invalid("MP4 AAC track index out of range"))?
         .clone();
+    let plan = aac_packet_plan(&track, input.movie_timescale(), cancel)?;
+    let asc = crate::codec::config::aac_specific_config(&track.configuration)?;
+    let mut writer = PacketWriter::new_with_metadata(
+        output,
+        &[TrackSpec {
+            encoding: Encoding::Aac {
+                configuration: asc,
+                sample_rate: plan.rate,
+                channels: track.channels,
+            },
+            name: &track.name,
+            language: &track.language,
+        }],
+        &[TrackOptions {
+            codec_delay_ns: plan.delay,
+            ..Default::default()
+        }],
+        metadata,
+    )?;
+    if let Some(h) = progress {
+        h.emit(writer.event());
+    }
+    let mut packet = Vec::new();
+    for i in 0..plan.count {
+        check()?;
+        input.read_packet(track_index, i, &mut packet)?;
+        let (begin, duration, padding) = plan.packet(i)?;
+        writer.write_packet_with_padding(0, begin, duration, true, &packet, padding)?;
+        if let Some(h) = progress {
+            h.emit(writer.event());
+        }
+    }
+    check()?;
+    let event = writer.finish()?;
+    check()?;
+    Ok(event)
+}
+
+fn check_cancel(cancel: Option<&CancelFlag>) -> Result<()> {
+    if cancel.is_some_and(|c| c.is_cancelled()) {
+        Err(invalid("media operation cancelled"))
+    } else {
+        Ok(())
+    }
+}
+fn sample_ns(samples: u64, rate: u32) -> Result<u64> {
+    u64::try_from((u128::from(samples) * 1_000_000_000 + u128::from(rate) / 2) / u128::from(rate))
+        .map_err(|_| invalid("AAC nanosecond timestamp overflow"))
+}
+pub(crate) struct AacPacketPlan {
+    pub count: usize,
+    pub delay: u64,
+    padding: i64,
+    frame: u64,
+    pub rate: u32,
+}
+impl AacPacketPlan {
+    pub fn packet(&self, index: usize) -> Result<(u64, u64, i64)> {
+        let begin = sample_ns(index as u64 * self.frame, self.rate)?;
+        let end = sample_ns((index as u64 + 1) * self.frame, self.rate)?;
+        Ok((
+            begin,
+            end - begin,
+            if index + 1 == self.count {
+                self.padding
+            } else {
+                0
+            },
+        ))
+    }
+}
+pub(crate) fn aac_packet_plan(
+    track: &super::mp4::Track,
+    movie_scale: u32,
+    cancel: Option<&CancelFlag>,
+) -> Result<AacPacketPlan> {
     if track.handler != *b"soun" || track.codec != *b"mp4a" {
         return Err(invalid("MP4 track is not AAC"));
     }
@@ -863,12 +939,11 @@ fn write_mp4_aac_metadata<R: Read + Seek, W: Write + Seek>(
     let media_end = position(track.duration)?;
     let (start, end) = match track.edits.as_slice() {
         [] => (0, media_end),
-        [edit] if edit.media_time >= 0 && input.movie_timescale() != 0 => {
+        [edit] if edit.media_time >= 0 && movie_scale != 0 => {
             let start = position(edit.media_time as u64)?;
-            let length = u64::try_from(
-                (u128::from(edit.duration) * rate).div_ceil(u128::from(input.movie_timescale())),
-            )
-            .map_err(|_| invalid("AAC edit duration overflow"))?;
+            let length =
+                u64::try_from((u128::from(edit.duration) * rate).div_ceil(u128::from(movie_scale)))
+                    .map_err(|_| invalid("AAC edit duration overflow"))?;
             (
                 start,
                 start
@@ -894,7 +969,7 @@ fn write_mp4_aac_metadata<R: Read + Seek, W: Write + Seek>(
     // Validate before producing a header. The AAC frame clock, rather than a
     // shortened final stts duration, determines the actual decoded frame size.
     for i in 0..track.samples.len() {
-        check()?;
+        check_cancel(cancel)?;
         let sample = track
             .samples
             .get(i)
@@ -918,56 +993,17 @@ fn write_mp4_aac_metadata<R: Read + Seek, W: Write + Seek>(
             return Err(invalid("AAC media duration disagrees with packet timeline"));
         }
     }
-    let ns = |samples: u64| -> Result<u64> {
-        u64::try_from((u128::from(samples) * 1_000_000_000 + rate / 2) / rate)
-            .map_err(|_| invalid("AAC nanosecond timestamp overflow"))
-    };
-    let delay = ns(start)?;
+    let delay = sample_ns(start, config.sample_rate)?;
     let coded_end = (count as u64)
         .checked_mul(frame)
         .ok_or_else(|| invalid("AAC timeline overflow"))?;
-    let padding =
-        i64::try_from(ns(coded_end - end)?).map_err(|_| invalid("AAC padding overflow"))?;
-    let mut writer = PacketWriter::new_with_metadata(
-        output,
-        &[TrackSpec {
-            encoding: Encoding::Aac {
-                configuration: asc,
-                sample_rate: config.sample_rate,
-                channels: track.channels,
-            },
-            name: &track.name,
-            language: &track.language,
-        }],
-        &[TrackOptions {
-            codec_delay_ns: delay,
-            ..Default::default()
-        }],
-        metadata,
-    )?;
-    if let Some(h) = progress {
-        h.emit(writer.event());
-    }
-    let mut packet = Vec::new();
-    for i in 0..count {
-        check()?;
-        input.read_packet(track_index, i, &mut packet)?;
-        let begin = ns(i as u64 * frame)?;
-        let finish = ns((i as u64 + 1) * frame)?;
-        writer.write_packet_with_padding(
-            0,
-            begin,
-            finish - begin,
-            true,
-            &packet,
-            if i + 1 == count { padding } else { 0 },
-        )?;
-        if let Some(h) = progress {
-            h.emit(writer.event());
-        }
-    }
-    check()?;
-    let event = writer.finish()?;
-    check()?;
-    Ok(event)
+    let padding = i64::try_from(sample_ns(coded_end - end, config.sample_rate)?)
+        .map_err(|_| invalid("AAC padding overflow"))?;
+    Ok(AacPacketPlan {
+        count,
+        delay,
+        padding,
+        frame,
+        rate: config.sample_rate,
+    })
 }

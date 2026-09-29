@@ -98,6 +98,14 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             println!("{{\"backend\":\"fvid\",\"audio_packets\":{}}}", stats.packets);
             return Ok(());
         }
+        if &prefix[4..8] == b"ftyp"
+            && matches!(std::path::Path::new(&args[2]).extension().and_then(|s|s.to_str()),Some("mka"|"mkv"))
+            && fvid::native_export::is_native_mp4_matroska(std::path::Path::new(&args[1]))? {
+            let stats = fvid::native_export::remux_mp4_matroska(
+                std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), None, progress.as_ref())?;
+            println!("{{\"backend\":\"fvid\",\"packets\":{}}}", stats.packets);
+            return Ok(());
+        }
         if &prefix[4..8] == b"ftyp" && matches!(std::path::Path::new(&args[2]).extension().and_then(|s|s.to_str()),Some("mp4"|"m4a")) {
             fvid::native_export::remux_mp4_controlled(
                 std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), None, progress.as_ref(),
