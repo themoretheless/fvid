@@ -467,7 +467,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         };
         println!(
             "{}",
-            serde_json::to_string_pretty(&fvid_media::probe_as(&PathBuf::from(&args[1]), hint)?)?
+            serde_json::to_string_pretty(&fvid::media::probe_as(&PathBuf::from(&args[1]), hint)?)?
         );
         return Ok(());
     }

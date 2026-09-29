@@ -701,3 +701,28 @@ pub fn aac_source_info(source: &Path) -> Result<AacSourceInfo> {
     }
     Ok(AacSourceInfo { stream_index, sample_rate, channels })
 }
+
+/// Exact ADTS packet/sample counts from a sequential owned parser. Encoder
+/// priming is retained because ADTS provides no trimming metadata. Raw AAC
+/// packet contents are not decoded by this inspection operation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AdtsInfo {
+    pub packets: u64,
+    pub payload_bytes: u64,
+    pub sample_frames: u64,
+    pub sample_rate: u32,
+    pub channels: u16,
+}
+pub fn inspect_adts<R: std::io::Read>(source: R) -> Result<AdtsInfo> {
+    let mut reader = crate::container::adts::StreamReader::open(source)?;
+    let header = reader.configuration();
+    let config = crate::codec::config::AacConfig::parse(&header.asc)?;
+    let mut info = AdtsInfo { packets: 0, payload_bytes: 0, sample_frames: 0,
+        sample_rate: config.sample_rate, channels: u16::from(config.channels) };
+    while let Some(packet) = reader.next_packet()? {
+        info.packets = info.packets.checked_add(1).ok_or_else(|| crate::invalid("AAC packet count overflow"))?;
+        info.payload_bytes = info.payload_bytes.checked_add(packet.len() as u64).ok_or_else(|| crate::invalid("AAC payload size overflow"))?;
+        info.sample_frames = info.sample_frames.checked_add(u64::from(config.frame_samples)).ok_or_else(|| crate::invalid("AAC duration overflow"))?;
+    }
+    Ok(info)
+}

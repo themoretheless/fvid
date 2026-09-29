@@ -1246,3 +1246,13 @@ The copy validates top-level box bounds and retains progress, cancellation and
 atomic publication. Files needing initialization moved past fragment data remain
 unsupported until their offset rewriting is implemented. MP4 byte counters retain
 the same mdat-only semantics.
+
+ADTS/AAC-LC `media::probe`, `probe_as(..., Some("aac"))`, CLI probe and MCP probe
+now use the owned sequential parser. Stream duration is an exact sample count
+with time base `1/sample_rate`; file duration is that count converted to integral
+microseconds. Encoder priming remains included. Probing reads every ADTS frame
+without retaining the complete file, rejects truncated or changing headers, and
+does not decode raw AAC payloads. Unknown bitrate/sample-format fields remain
+unset rather than guessed. MP4/Matroska public probe still uses the legacy adapter
+pending migration of its metadata and chapter contract. The headless
+`native_media::inspect_adts` API is available without the `media` feature.
