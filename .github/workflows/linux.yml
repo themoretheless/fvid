@@ -26,3 +26,5 @@ jobs:
         run: cargo test --no-default-features
       - name: Test player
         run: cargo test --no-default-features --features player --lib --bins --tests
+      - name: Guard native build graphs against FFmpeg dependencies
+        run: python3 scripts/check_native_dependencies.py --offline

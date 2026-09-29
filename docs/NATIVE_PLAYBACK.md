@@ -1323,3 +1323,20 @@ unsupported there. Existing APIs retain their default single-audio-track behavio
 Tests cover two AAC tracks at 48/32 kHz in MP4/Matroska, selected intervals,
 CLI/API byte equality and saved independent PCM references with documented
 numerical tolerances in `tests/fixtures/audio/two-audio-selection.md`.
+
+### Native dependency regression guard (2026-09-29)
+
+`scripts/check_native_dependencies.py --offline` checks the selected headless,
+player and standalone camera normal/build dependency trees for the current host
+(or an explicit `--target`). It rejects the legacy `fvid-media` adapter and known
+FFmpeg binding packages. Linux CI runs this after its build/test steps, when
+platform dependencies are available locally. It intentionally does not assert
+that the legacy `media` feature is migrated: enabling that feature still fails
+the guard's negative control.
+
+The guard uses `cargo tree`, since Cargo metadata can retain inactive optional
+edges reached through weak dependency features. Local macOS trees passed; an
+explicit `media` tree correctly exposed `fvid-media`. This dependency check is
+separate from binary linkage and runtime-path verification. The combined native
+player/library/media-operation run passed 1191 tests after the AAC transform,
+probe, chapter timing and selected-audio changes.
