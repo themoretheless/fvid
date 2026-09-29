@@ -69,6 +69,8 @@ pub struct Packet {
     pub size: usize,
     /// DiscardPadding in nanoseconds: positive trims end, negative trims start.
     pub discard_padding_ns: i64,
+    /// Explicit BlockDuration, scaled to nanoseconds; absent for SimpleBlock.
+    pub duration_ns: Option<u64>,
 }
 impl Track {
     /// The size the picture is meant to be seen at: the coded one with the
@@ -672,7 +674,12 @@ impl<R: Read + Seek> WebmReader<R> {
                                 let fs = fields(&mut *reader, child, &mut *elements, limits.elements)?;
                                 let key = !fs.iter().any(|f| f.id == 0xfb);
                                 let mut padding = None;
+                                let mut duration = None;
                                 for field in &fs {
+                                    if field.id == 0x9b {
+                                        if duration.is_some() { return Err(invalid("duplicate Matroska BlockDuration")); }
+                                        duration = Some(uint(&mut *reader, *field)?);
+                                    }
                                     if field.id == 0x75a2 {
                                         if padding.is_some() { return Err(invalid("duplicate Matroska DiscardPadding")); }
                                         padding = Some(sint(&mut *reader, *field)?);
@@ -694,6 +701,7 @@ impl<R: Read + Seek> WebmReader<R> {
                                 }
                                 for packet in &mut packets[first..] {
                                     packet.discard_padding_ns = padding.unwrap_or(0);
+                                    packet.duration_ns = duration;
                                 }
                             }
                             _ => {}
@@ -725,6 +733,8 @@ impl<R: Read + Seek> WebmReader<R> {
         for p in &mut packets[indexed..] {
             p.pts_ns = i64::try_from(i128::from(p.pts_ns) * i128::from(*scale))
                 .map_err(|_| invalid("WebM timestamp overflow"))?;
+            p.duration_ns = p.duration_ns.map(|ticks| ticks.checked_mul(*scale)
+                .ok_or_else(|| invalid("WebM block duration overflow"))).transpose()?;
             *tail_ns = (*tail_ns).max(p.pts_ns);
             if !tracks.iter().any(|t: &Track| t.number == p.track) {
                 return Err(invalid("WebM packet references missing track"));
@@ -1029,6 +1039,7 @@ fn read_block<R: Read + Seek>(
         offset,
         size,
         discard_padding_ns: 0,
+        duration_ns: None,
     });
     Ok(())
 }
@@ -1040,6 +1051,31 @@ mod tests {
     fn atom(id: &[u8], payload: &[u8]) -> Vec<u8> {
         assert!(payload.len() < 127);
         [id, &[0x80 | payload.len() as u8], payload].concat()
+    }
+    #[test]
+    fn block_duration_scales_once_across_lazy_clusters_and_rejects_overflow() {
+        let header = atom(&[0x1a, 0x45, 0xdf, 0xa3], &atom(&[0x42, 0x82], b"matroska"));
+        let info = atom(&[0x15, 0x49, 0xa9, 0x66], &atom(&[0x2a, 0xd7, 0xb1], &2_000_000u32.to_be_bytes()));
+        let tracks = atom(&[0x16, 0x54, 0xae, 0x6b], &atom(&[0xae], &[
+            atom(&[0xd7], &[1]), atom(&[0x83], &[2]), atom(&[0x86], b"A_AAC"),
+        ].concat()));
+        let cluster = |ticks: u64, duplicate: bool| {
+            let mut group = atom(&[0xa1], &[0x81, 0, 0, 0, 1]);
+            group.extend(atom(&[0x9b], &ticks.to_be_bytes()));
+            if duplicate { group.extend(atom(&[0x9b], &[1])); }
+            atom(&[0x1f, 0x43, 0xb6, 0x75], &[atom(&[0xe7], &[0]), atom(&[0xa0], &group)].concat())
+        };
+        let prefix = [header, vec![0x18, 0x53, 0x80, 0x67, 0xff], info, tracks].concat();
+        let data = [prefix.clone(), cluster(5, false), cluster(7, false)].concat();
+        let mut reader = WebmReader::open(Cursor::new(data), Limits::default()).unwrap();
+        reader.scan_all().unwrap();
+        reader.scan_all().unwrap();
+        assert_eq!(reader.packets.iter().map(|p| p.duration_ns).collect::<Vec<_>>(), [Some(10_000_000), Some(14_000_000)]);
+        for invalid in [cluster(u64::MAX, false), cluster(5, true)] {
+            let result = WebmReader::open(Cursor::new([prefix.clone(), invalid].concat()), Limits::default())
+                .and_then(|mut r| r.scan_all());
+            assert!(result.is_err());
+        }
     }
     #[test]
     fn delay_and_signed_discard_padding_keep_nanosecond_units() {

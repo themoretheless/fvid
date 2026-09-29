@@ -1743,9 +1743,33 @@ PCM against the source. FFmpeg remains reference-only in these tests.
 
 This is the encoded-packet layer, not yet a general MP4-to-Matroska command:
 MP4 edit lists, colour/HDR/rotation, other metadata and gapless presentation
-still need a high-level mapping. Native Matroska video playback also currently
-selects VP9/AV1 only; AVC/HEVC dispatch is still required. Existing MP4-to-MKV
-media operations therefore retain their legacy implementation for now.
+still need a high-level mapping. Native AVC/HEVC Matroska playback is described
+below. Existing MP4-to-MKV media operations retain their legacy implementation
+until the presentation and metadata mapping is implemented.
 
 Format references: https://www.matroska.org/technical/codec_specs.html and
 https://www.matroska.org/technical/elements.html#ReferenceBlock .
+
+### AVC/HEVC Matroska playback (2026-09-29)
+
+The native Matroska reader now selects `V_MPEG4/ISO/AVC` and
+`V_MPEGH/ISO/HEVC` and uses FVid's own decoders. AVC/HEVC packets are decoded in
+file order; an indexed suffix minimum of PTS releases queued pictures in
+presentation order. These two codecs scan the bounded packet metadata index
+at open, while payload reads remain on demand. VP9/AV1 keep their existing
+lazy index path. Decode working storage and the reorder queue each receive
+half the non-RGB budget. Matroska frame conversion preserves the codec's VUI
+and HEVC HDR data, and raw reads retain 10-bit planes for export/camera input.
+
+The demuxer now exposes explicit BlockDuration in nanoseconds with checked
+scaling. Playback uses it, limits overlapping intervals at the next PTS, and
+uses DefaultDuration or a stable indexed tail interval when no explicit final
+duration exists. Rewind and keyframe seeks clear queued pictures and codec
+reference state. Packet failures require rewind rather than continuing with
+stale references.
+
+Tests compare all owned-decoded pixels against MP4 AVC, HEVC Main and Main10,
+then compare raw and RGB seek results against continuous playback at first,
+middle and last frames. An opt-in reference test also reads Matroska generated
+by FFmpeg, so compatibility is checked beyond FVid's own writer. MP4 edit-list
+and metadata mapping for high-level remux remain outstanding.

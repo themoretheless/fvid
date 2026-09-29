@@ -112,10 +112,9 @@ fn seek_webm_to<R: Read + Seek>(
     reader.seek_to_sync(target)?;
     let mut last = None;
     loop {
-        let Some(planes) = reader.read_frame_planes()? else {
+        let Some(frame) = reader.read_frame_raw()? else {
             return Ok(last);
         };
-        let frame = RawFrame::Planar8(Arc::new(planes));
         if reader
             .frame_interval()
             .is_some_and(|(_, end, _)| end > nanos)
@@ -606,9 +605,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
             } else {
                 None
             }),
-            Self::Webm(reader) => Ok(reader
-                .read_frame_planes()?
-                .map(|planes| RawFrame::Planar8(Arc::new(planes)))),
+            Self::Webm(reader) => reader.read_frame_raw(),
             Self::Avc { .. } => self.advance_avc(),
         }
     }

@@ -79,7 +79,7 @@ fn mux(name: &str) -> Vec<u8> {
             writer
                 .write_packet(1, apts, end - apts, true, &data)
                 .unwrap();
-            expected.push((2, apts as i64, true, data));
+            expected.push((2, apts as i64, true, data, end - apts));
             ai += 1;
             audio_packet = audio.next_packet().unwrap();
         } else {
@@ -87,11 +87,13 @@ fn mux(name: &str) -> Vec<u8> {
             source.read_packet(track_index, vi, &mut buffer).unwrap();
             let pts =
                 u64::try_from(sample.pts).unwrap() * 1_000_000_000 / u64::from(video.timescale);
-            let duration = u64::from(sample.duration) * 1_000_000_000 / u64::from(video.timescale);
+            let duration = (sample.pts as u64 + u64::from(sample.duration)) * 1_000_000_000
+                / u64::from(video.timescale)
+                - pts;
             writer
                 .write_packet(0, pts, duration, sample.sync, &buffer)
                 .unwrap();
-            expected.push((1, pts as i64, sample.sync, buffer.clone()));
+            expected.push((1, pts as i64, sample.sync, buffer.clone(), duration));
             vi += 1;
         }
     }
@@ -111,12 +113,13 @@ fn mux(name: &str) -> Vec<u8> {
     assert_eq!(reader.tracks[1].language, "rus");
     assert_eq!(reader.tracks[1].codec_private, config.asc);
     assert_eq!(reader.packets.len(), expected.len());
-    for (i, (track, pts, sync, data)) in expected.iter().enumerate() {
+    for (i, (track, pts, sync, data, duration)) in expected.iter().enumerate() {
         let packet = &reader.packets[i];
         assert_eq!(
             (packet.track, packet.pts_ns, packet.keyframe),
             (*track, *pts, *sync)
         );
+        assert_eq!(packet.duration_ns, Some(*duration));
         assert_eq!(reader.read_packet(i).unwrap(), *data);
     }
     let times: Vec<_> = expected.iter().filter(|v| v.0 == 1).map(|v| v.1).collect();
@@ -131,6 +134,73 @@ fn mux(name: &str) -> Vec<u8> {
 fn avc_hevc_main_and_main10_interleave_with_aac_without_changing_packets() {
     for name in ["video.mp4", "hevc/main-ipb.mp4", "hevc/main10-ipb.mp4"] {
         mux(name);
+    }
+}
+
+#[test]
+fn owned_player_preserves_pixels_reorders_b_frames_and_seeks() {
+    use fvid::{native_geometry::VideoGeometry, playback_native::NativeReader};
+    use std::time::Duration;
+    for name in ["video.mp4", "hevc/main-ipb.mp4", "hevc/main10-ipb.mp4"] {
+        let bytes = mux(name);
+        let decode = |bytes: Vec<u8>| {
+            let mut r = NativeReader::software(Cursor::new(bytes), usize::MAX).unwrap();
+            let mut frames = Vec::new();
+            while let Some(frame) = r.read_frame_raw().unwrap() {
+                let [w, h] = r.dimensions();
+                frames.push(VideoGeometry::default().apply(&frame, w, h).unwrap().data);
+            }
+            frames
+        };
+        let expected = decode(std::fs::read(fixture(name)).unwrap());
+        assert!(expected == decode(bytes.clone()), "pixels for {name}");
+        let mut r = NativeReader::software(Cursor::new(bytes), usize::MAX).unwrap();
+        let mut times = Vec::new();
+        let mut rgb = Vec::new();
+        while r.read_frame().unwrap() {
+            times.push(r.frame_interval().unwrap());
+            rgb.push(r.rgb().to_vec());
+        }
+        assert_eq!(times.len(), expected.len());
+        assert!(times.windows(2).all(|t| t[0].1 == t[1].0));
+        assert!(!r.read_frame().unwrap());
+        for i in [0, times.len() / 2, times.len() - 1, 0] {
+            let target = Duration::from_nanos(times[i].0 as u64);
+            let frame = r.seek_raw(target).unwrap().unwrap();
+            let [w, h] = r.dimensions();
+            assert_eq!(
+                VideoGeometry::default().apply(&frame, w, h).unwrap().data,
+                expected[i],
+                "seek {name} frame {i}"
+            );
+            assert_eq!(r.frame_interval().unwrap(), times[i]);
+            r.seek(target).unwrap();
+            assert_eq!(r.rgb(), rgb[i]);
+        }
+        r.rewind().unwrap();
+        assert!(r.read_frame().unwrap());
+        assert_eq!(r.rgb(), rgb[0]);
+    }
+}
+
+#[test]
+fn damaged_nal_packet_requires_rewind_and_small_budgets_fail() {
+    use fvid::playback_native::NativeReader;
+    let mut data = mux("video.mp4");
+    let mut demux = webm::WebmReader::open(Cursor::new(&data), Default::default()).unwrap();
+    demux.scan_all().unwrap();
+    let first = demux.packets.iter().find(|p| p.track == 1).unwrap().offset as usize;
+    drop(demux);
+    data[first..first + 4].copy_from_slice(&u32::MAX.to_be_bytes());
+    let mut reader = NativeReader::software(Cursor::new(data), usize::MAX).unwrap();
+    assert!(reader.read_frame_raw().is_err());
+    let error = reader.read_frame_raw().err().unwrap().to_string();
+    assert!(error.contains("rewind"));
+    reader.rewind().unwrap();
+    assert!(reader.read_frame_raw().is_err());
+    match NativeReader::software(Cursor::new(mux("video.mp4")), 1) {
+        Err(_) => {}
+        Ok(mut reader) => assert!(reader.read_frame_raw().is_err()),
     }
 }
 
@@ -189,6 +259,41 @@ fn independent_decoder_preserves_all_video_frames_and_aac_pcm() {
     }
     let _clean = Clean(directory.clone());
     for name in ["video.mp4", "hevc/main-ipb.mp4", "hevc/main10-ipb.mp4"] {
+        // Read Matroska produced independently, not just our own writer.
+        let external = directory.join("external.mkv");
+        let result = Command::new(&ffmpeg)
+            .args(["-v", "error", "-y", "-i"])
+            .arg(fixture(name))
+            .args(["-map", "0:v:0", "-c:v", "copy", "-an"])
+            .arg(&external)
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let own_pixels = |data: Vec<u8>| {
+            let mut r =
+                fvid::playback_native::NativeReader::software(Cursor::new(data), usize::MAX)
+                    .unwrap();
+            let mut pixels = Vec::new();
+            while let Some(frame) = r.read_frame_raw().unwrap() {
+                let [w, h] = r.dimensions();
+                pixels.extend(
+                    fvid::native_geometry::VideoGeometry::default()
+                        .apply(&frame, w, h)
+                        .unwrap()
+                        .data,
+                );
+            }
+            pixels
+        };
+        assert!(
+            own_pixels(std::fs::read(fixture(name)).unwrap())
+                == own_pixels(std::fs::read(&external).unwrap()),
+            "external Matroska {name}"
+        );
         let dest = directory.join("output.mkv");
         std::fs::write(&dest, mux(name)).unwrap();
         let decode = |path: &Path, audio: bool| {
