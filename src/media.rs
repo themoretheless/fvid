@@ -251,7 +251,7 @@ pub fn plan_decode_audio(
     crate::native_plan::decode_audio_selected(source, transform, options.streams.first().copied())
 }
 
-/// Native ADTS-to-MP4 muxing and MP4 fast-start relocation. Other container
+/// Native ADTS-to-MP4/Matroska muxing and MP4 fast-start relocation. Other container
 /// conversions retain the legacy adapter until their owned muxers are available.
 /// For opaque MP4 relocation, packets=0 means uncounted; payload_bytes counts
 /// mdat bytes. fvid_payload_copies counts additional per-packet payload clones,
@@ -262,7 +262,7 @@ pub fn remux(
     options: &CopyOptions,
 ) -> Result<CopyStats> {
     use std::io::Read;
-    if !matches!(destination.extension().and_then(|s| s.to_str()), Some("mp4" | "m4a")) {
+    if !matches!(destination.extension().and_then(|s| s.to_str()), Some("mp4" | "m4a" | "mka" | "mkv")) {
         return fvid_media::remux(source, destination, options);
     }
     let mut input = std::fs::File::open(source).map_err(|e| e.to_string())?;
@@ -270,7 +270,7 @@ pub fn remux(
     input.read_exact(&mut prefix).map_err(|e| e.to_string())?;
     let adts = crate::container::adts::header(&prefix).is_some();
     let mp4 = &prefix[4..8] == b"ftyp";
-    if !adts && !mp4 { return fvid_media::remux(source, destination, options); }
+    if !adts && (matches!(destination.extension().and_then(|s|s.to_str()),Some("mka"|"mkv")) || !mp4) { return fvid_media::remux(source, destination, options); }
     validate_native_copy_options(options, false)?;
     let stats = if adts {
         crate::native_export::remux_adts_aac_stats(source, destination,

@@ -74,7 +74,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     }
     if args.first().map(String::as_str) == Some("remux")
         && (args.len() == 3 || (args.len() == 4 && args[3] == "--progress"))
-        && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("mp4" | "m4a"))
+        && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("mp4" | "m4a" | "mka" | "mkv"))
     {
         use std::io::Read;
         let mut prefix = [0; 8];
@@ -90,7 +90,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             println!("{{\"backend\":\"fvid\",\"audio_packets\":{packets}}}");
             return Ok(());
         }
-        if &prefix[4..8] == b"ftyp" {
+        if &prefix[4..8] == b"ftyp" && matches!(std::path::Path::new(&args[2]).extension().and_then(|s|s.to_str()),Some("mp4"|"m4a")) {
             fvid::native_export::remux_mp4_controlled(
                 std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), None, progress.as_ref(),
             )?;

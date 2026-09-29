@@ -4,6 +4,7 @@ pub mod avi;
 pub mod mp4;
 pub mod mp4_relocate;
 pub mod mp4_write;
+pub mod matroska_write;
 pub mod ogg;
 pub mod smf;
 pub mod webm;

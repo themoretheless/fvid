@@ -147,7 +147,7 @@ pub fn remux(source: &std::path::Path) -> Result<Option<MediaPlan>> {
         crate::container::mp4_relocate::fast_start(&mut input, &mut std::io::sink()).map_err(|e| e.to_string())?;
         "FVid MP4 fast-start relocation; initialized fragmented MP4 is copied unchanged"
     } else {
-        "FVid ADTS AAC packet copy into MP4; preserve encoder priming and write sample tables"
+        "FVid ADTS AAC packet copy into MP4 or Matroska; preserve encoder priming"
     };
     let info = crate::native_probe::probe(source)?;
     Ok(Some(MediaPlan {
@@ -159,7 +159,7 @@ pub fn remux(source: &std::path::Path) -> Result<Option<MediaPlan>> {
             PlanStep { action: "publish".into(), detail: "flush and sync temporary output, then publish without overwriting".into() }],
         graph: None,
         notes: vec!["backend: fvid; no decode/encode or external demuxer".into(),
-            "owned output requires .mp4 or .m4a; all streams retained".into(),
+            if adts {"owned ADTS output: .mp4/.m4a or .mka/.mkv; all packets retained".into()} else {"owned MP4 output requires .mp4 or .m4a; all streams retained".into()},
             "input structure scanned without writing an output; execution revalidates the current source".into()],
     }))
 }

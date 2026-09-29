@@ -1617,3 +1617,27 @@ AVC, HEVC Main and Main10 tests compare output against the independently selecte
 frame slices of a full native decode, including the AVC fixture's 80 ms initial
 PTS, fractional frame boundaries and empty intervals. CLI/public API and explicit
 plans are checked alongside existing Y4M export regressions.
+
+### Owned AAC Matroska muxing (2026-09-29)
+
+ADTS `remux INPUT.aac OUTPUT.mka` (or `.mkv`) now uses the owned Matroska writer
+in the headless CLI and public `media::remux`. The same atomic publisher used for
+MP4 flushes/syncs the complete file before publishing without overwrite. AAC
+packets and AudioSpecificConfig remain unchanged; encoder priming is retained.
+The destination suffix selects Matroska in the existing `remux_adts_aac*` API.
+Other input codecs/container conversions still require their writer migrations.
+
+The writer implements [A_AAC codec mapping](https://www.matroska.org/technical/codec_specs.html#a_aac)
+and [Matroska elements](https://www.matroska.org/technical/elements.html): Info,
+Tracks and one Cluster/BlockGroup per packet. A 1 ns timestamp scale, integer
+sample-clock timestamps and per-block durations avoid cumulative rounding drift.
+Segment size and duration are completed by seeking after the last packet.
+No packet payload clones or complete payload/index buffers are retained; no Cues
+or SeekHead are emitted yet, so readers may scan clusters to build a seek index.
+Cancellation and structural errors discard the unpublished temporary file.
+
+Tests cover mono/stereo/5.1 and 44.1/48/88.2/96 kHz, exact packet and owned PCM
+roundtrips, timestamps, CLI/API parity, truncation, cancellation and overwrite
+protection. Independent FFmpeg reference-only decoding of all five generated
+Matroska files was byte-identical to FFmpeg decoding their ADTS sources. This is
+container interoperability evidence, not a claim of new AAC codec conformance.

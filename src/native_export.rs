@@ -610,7 +610,8 @@ impl<W: Write> Write for PcmGain<'_, W> {
     fn flush(&mut self) -> std::io::Result<()> { self.output.flush() }
 }
 
-/// Lossless ADTS-to-MP4 packet remux with atomic no-overwrite publication.
+/// Lossless ADTS packet remux with atomic no-overwrite publication.
+/// .mka/.mkv selects Matroska; other destination names retain the MP4 contract.
 pub fn remux_adts_aac(source: &Path, destination: &Path) -> Result<u64> {
     remux_adts_aac_controlled(source, destination, None, None)
 }
@@ -676,7 +677,9 @@ fn publish_adts_readers(mut readers: Vec<crate::container::adts::StreamReader<Bu
         }
     }).ok_or_else(|| invalid("cannot reserve MP4 output"))??;
     let mut output = BufWriter::new(file);
-    let event = if readers.len()==1 {
+    let event = if readers.len()==1 && matches!(destination.extension().and_then(|s|s.to_str()),Some("mka"|"mkv")) {
+        crate::container::matroska_write::write_adts(readers.remove(0), &mut output, cancel, progress)?
+    } else if readers.len()==1 {
         crate::container::mp4_write::write_adts_aac_reader_controlled(readers.remove(0), &mut output, cancel, progress)?
     } else {
         crate::container::mp4_write::concat_adts_readers(readers, &mut output, cancel, progress)?
