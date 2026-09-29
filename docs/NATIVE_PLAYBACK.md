@@ -1939,3 +1939,18 @@ publication and cancellation. The opt-in `FVID_REFERENCE_FFMPEG` test creates
 combined AVC/HEVC/AAC sources and independently checks every video frame and
 all audible samples on each audio track. A separate unit test covers reordered
 variable-rate presentation intervals.
+
+### Spatial gradient primitives (2026-09-29)
+
+`native_pixels::Gradient` provides owned Sobel, Prewitt, Roberts, Kirsch and
+Scharr processing on `GeometryFrame`, with literal `planes`, `scale` and
+`delta` options. `PixelFilters::from_request` constructs the ordered pixel
+pipeline; these gradient primitives are not yet connected to the decode CLI
+or the public media dispatch. Existing adapter routing remains unchanged.
+
+`tests/native_gradients.rs` validates masks, constant output, degenerate
+geometry and rejection without mutation. Its explicit reference-only test
+compares all five operators against FFmpeg for YUV444 8/10/16-bit frames,
+including border pixels and scaled luma-only output (30 comparisons).
+FFmpeg is not a runtime dependency of these primitives. RGB and subsampled
+formats are implemented but not covered by this reference corpus.
