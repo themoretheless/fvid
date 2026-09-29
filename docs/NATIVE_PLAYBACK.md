@@ -1223,3 +1223,17 @@ libswresample filter graph. Unsupported request options are rejected consistentl
 with export. Planning checks stream geometry/configuration, but does not decode
 packets or certify timeline validity; those remain execution checks. The public
 `native_media::aac_source_info` metadata API itself needs no `media` feature.
+
+Public `media::remux` (also used by MCP) now uses the owned ADTS-to-MP4 writer and
+MP4 fast-start relocation for `.mp4`/`.m4a` destinations. Progress/cancellation
+and atomic no-overwrite publication match the native CLI. Source track metadata
+is preserved by relocation; requested metadata changes, explicit stream selection
+and custom budgets are rejected until implemented natively. Other conversions
+still use the legacy adapter.
+
+Native remux stats report `backend = "fvid"`. ADTS reports AAC packet count and
+raw AAC payload bytes; MP4 relocation reports mdat bytes and `packets = 0` because
+it copies opaque media ranges without enumerating packets. `fvid_payload_copies`
+counts extra packet clones (zero), not buffered file I/O. Callers needing counters
+without the legacy feature can use `native_export::remux_adts_aac_stats` and
+`remux_mp4_stats`; their returned event has `done = true` only after publication.

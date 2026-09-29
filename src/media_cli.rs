@@ -2853,7 +2853,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     }
     let stats = match command.as_str() {
         "remux" if paths.len() == 2 && from.is_none() && to.is_none() => {
-            fvid_media::remux(&paths[0], &paths[1], &options)?
+            fvid::media::remux(&paths[0], &paths[1], &options)?
         }
         "trim" if paths.len() == 2 => fvid_media::trim(
             &paths[0],

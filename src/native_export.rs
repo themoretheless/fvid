@@ -433,6 +433,15 @@ pub fn remux_adts_aac_controlled(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<u64> {
+    Ok(remux_adts_aac_stats(source, destination, cancel, progress)?.packets)
+}
+
+/// Native remux counters returned after successful atomic publication.
+pub fn remux_adts_aac_stats(
+    source: &Path, destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::media_control::ProgressEvent> {
     if cancel.is_some_and(|flag| flag.is_cancelled()) { return Err(invalid("media operation cancelled")); }
     let input = crate::container::adts::StreamReader::open(BufReader::new(File::open(source)?))?;
     let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
@@ -452,7 +461,7 @@ pub fn remux_adts_aac_controlled(
     if cancel.is_some_and(|flag| flag.is_cancelled()) { return Err(invalid("media operation cancelled")); }
     std::fs::hard_link(&temporary.0, destination)?;
     if let Some(hook) = progress { hook.emit(crate::media_control::ProgressEvent { done: true, ..event }); }
-    Ok(event.packets)
+    Ok(crate::media_control::ProgressEvent { done: true, ..event })
 }
 
 /// Stream a non-fragmented MP4 into fast-start layout without changing packets.
@@ -467,6 +476,15 @@ pub fn remux_mp4_controlled(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<()> {
+    remux_mp4_stats(source, destination, cancel, progress).map(|_| ())
+}
+
+/// MP4 relocation counters: mdat bytes, with packets zero (not inspected).
+pub fn remux_mp4_stats(
+    source: &Path, destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::media_control::ProgressEvent> {
     if cancel.is_some_and(|flag| flag.is_cancelled()) { return Err(invalid("media operation cancelled")); }
     let mut input=BufReader::new(File::open(source)?);
     let directory=destination.parent().filter(|p|!p.as_os_str().is_empty()).unwrap_or(Path::new("."));
@@ -484,5 +502,5 @@ pub fn remux_mp4_controlled(
     if cancel.is_some_and(|flag| flag.is_cancelled()) { return Err(invalid("media operation cancelled")); }
     std::fs::hard_link(&temporary.0,destination)?;
     if let Some(hook) = progress { hook.emit(crate::media_control::ProgressEvent { done: true, ..event }); }
-    Ok(())
+    Ok(crate::media_control::ProgressEvent { done: true, ..event })
 }

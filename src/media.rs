@@ -55,7 +55,7 @@ pub fn decode_audio_transformed(
     if !crate::native_media::is_aac_source(source).map_err(|e| e.to_string())? {
         return fvid_media::decode_audio_transformed(source, destination, transform, options);
     }
-    validate_native_aac_options(options)?;
+    validate_native_copy_options(options)?;
     let interval = transform.interval.map(|(from, to)| {
         if from < 0 || to <= from {
             return Err("decode-audio interval requires 0 <= from < to".to_owned());
@@ -82,7 +82,7 @@ pub fn decode_audio_transformed(
     })
 }
 
-fn validate_native_aac_options(options: &CopyOptions) -> Result<()> {
+fn validate_native_copy_options(options: &CopyOptions) -> Result<()> {
     if !options.streams.is_empty()
         || options.max_packet_bytes != CopyOptions::default().max_packet_bytes
         || options.max_packets.is_some()
@@ -93,7 +93,7 @@ fn validate_native_aac_options(options: &CopyOptions) -> Result<()> {
         || !options.stream_metadata_set.is_empty()
         || !options.stream_metadata_delete.is_empty()
     {
-        return Err("native AAC export does not yet support stream selection, custom budgets or metadata mutations".into());
+        return Err("native media operation does not yet support stream selection, custom budgets or metadata mutations".into());
     }
     Ok(())
 }
@@ -108,7 +108,7 @@ pub fn plan_decode_audio(
     if !crate::native_media::is_aac_source(source).map_err(|e| e.to_string())? {
         return fvid_media::plan_decode_audio(source, transform, options);
     }
-    validate_native_aac_options(options)?;
+    validate_native_copy_options(options)?;
     if transform.interval.is_some_and(|(from, to)| from < 0 || to <= from) {
         return Err("decode-audio interval requires 0 <= from < to".into());
     }
@@ -154,4 +154,36 @@ pub fn plan_decode_audio(
             "metadata-only plan: packet contents and timeline consistency are verified during execution".into(),
         ],
     })
+}
+
+/// Native ADTS-to-MP4 muxing and MP4 fast-start relocation. Other container
+/// conversions retain the legacy adapter until their owned muxers are available.
+/// For opaque MP4 relocation, packets=0 means uncounted; payload_bytes counts
+/// mdat bytes. fvid_payload_copies counts additional per-packet payload clones,
+/// not file I/O buffering (MP4 relocation does not create packet objects).
+pub fn remux(
+    source: &std::path::Path,
+    destination: &std::path::Path,
+    options: &CopyOptions,
+) -> Result<CopyStats> {
+    use std::io::Read;
+    if !matches!(destination.extension().and_then(|s| s.to_str()), Some("mp4" | "m4a")) {
+        return fvid_media::remux(source, destination, options);
+    }
+    let mut input = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let mut prefix = [0; 8];
+    input.read_exact(&mut prefix).map_err(|e| e.to_string())?;
+    let adts = crate::container::adts::header(&prefix).is_some();
+    let mp4 = &prefix[4..8] == b"ftyp";
+    if !adts && !mp4 { return fvid_media::remux(source, destination, options); }
+    validate_native_copy_options(options)?;
+    let stats = if adts {
+        crate::native_export::remux_adts_aac_stats(source, destination,
+            options.cancel.as_ref(), options.progress.as_ref())
+    } else {
+        crate::native_export::remux_mp4_stats(source, destination,
+            options.cancel.as_ref(), options.progress.as_ref())
+    }.map_err(|e| e.to_string())?;
+    Ok(CopyStats { packets: stats.packets, payload_bytes: stats.payload_bytes,
+        segments: 1, backend: "fvid", fvid_payload_copies: 0 })
 }
