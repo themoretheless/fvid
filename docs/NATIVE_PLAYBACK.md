@@ -1237,3 +1237,12 @@ it copies opaque media ranges without enumerating packets. `fvid_payload_copies`
 counts extra packet clones (zero), not buffered file I/O. Callers needing counters
 without the legacy feature can use `native_export::remux_adts_aac_stats` and
 `remux_mp4_stats`; their returned event has `done = true` only after publication.
+
+Initialized fragmented MP4 is now supported by the native same-container remux:
+when `moov` precedes both the first `moof` and `mdat`, the file is copied exactly,
+including fragment indexes and absolute/relative offsets. This preserves the
+fragmented layout; it does not flatten fragments or validate every encoded packet.
+The copy validates top-level box bounds and retains progress, cancellation and
+atomic publication. Files needing initialization moved past fragment data remain
+unsupported until their offset rewriting is implemented. MP4 byte counters retain
+the same mdat-only semantics.

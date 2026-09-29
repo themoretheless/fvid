@@ -1,4 +1,4 @@
-//! Owned non-fragmented MP4 index relocation. Media and metadata stay encoded.
+//! Owned MP4 index relocation and position-preserving fragmented MP4 copy. Media and metadata stay encoded.
 use crate::{Result, invalid};
 use std::io::{Read, Seek, SeekFrom, Write};
 #[derive(Clone)]
@@ -112,7 +112,8 @@ fn patch(data: &mut [u8], spans: &[BoxSpan], locations: &[u64], depth: usize) ->
 
 /// Move moov before mdat and update stco/co64 without interpreting encoded media.
 /// Preserves opaque metadata boxes. Fragmented/auxiliary-offset/item-offset variants
-/// are rejected. A caller must discard output on error. Index limit is 32 MiB;
+/// requiring relocation are rejected. Already initialized fragmented files are
+/// copied byte-for-byte, preserving all offsets and fragment metadata. A caller must discard output on error. Index limit is 32 MiB;
 /// media bytes stream through a fixed copy buffer rather than loading the file.
 pub fn fast_start<R: Read + Seek>(reader: &mut R, output: &mut impl Write) -> Result<()> {
     fast_start_controlled(reader, output, None, None).map(|_| ())
@@ -153,9 +154,6 @@ pub fn fast_start_controlled<R: Read + Seek>(
             return Err(invalid("too many top-level MP4 boxes"));
         }
         let span = header(reader, at, end)?;
-        if matches!(&span.kind, b"moof" | b"sidx" | b"mfra" | b"meta") {
-            return Err(invalid("MP4 relocation requires non-fragmented media"));
-        }
         at += span.size;
         spans.push(span);
     }
@@ -173,31 +171,55 @@ pub fn fast_start_controlled<R: Read + Seek>(
         .iter()
         .position(|s| s.kind == *b"mdat")
         .ok_or_else(|| invalid("MP4 has no mdat"))?;
+    // Fragment offsets (including absolute base-data-offset and sidx/mfra)
+    // remain valid only if every byte keeps its original position. An existing
+    // initialization segment before all fragments already has fast-start order.
+    let fragmented = spans.iter().any(|s| s.kind == *b"moof");
+    if fragmented {
+        let first_fragment = spans.iter().position(|s| s.kind == *b"moof").unwrap();
+        if movie > first_fragment || movie > media {
+            return Err(invalid(
+                "fragmented MP4 relocation requires initialization before media",
+            ));
+        }
+    } else if spans
+        .iter()
+        .any(|s| matches!(&s.kind, b"sidx" | b"mfra" | b"meta"))
+    {
+        return Err(invalid(
+            "MP4 relocation does not support these offset-bearing extensions",
+        ));
+    }
     if spans[movie].size > 32 << 20 {
         return Err(invalid("MP4 index exceeds relocation budget"));
     }
-    let mut order: Vec<_> = (0..spans.len()).filter(|i| *i != movie).collect();
-    let position = order.iter().position(|i| *i == media).unwrap();
-    order.insert(position, movie);
-    let mut locations = vec![0; spans.len()];
-    let mut next = 0u64;
-    for &index in &order {
-        locations[index] = next;
-        next += spans[index].size;
-    }
-    let mut moov = vec![0; spans[movie].size as usize];
-    reader.seek(SeekFrom::Start(spans[movie].start))?;
-    reader.read_exact(&mut moov)?;
-    if moov[..4] == [0; 4] {
-        moov[..4].copy_from_slice(&(spans[movie].size as u32).to_be_bytes());
-    }
-    patch(&mut moov, &spans, &locations, 0)?;
+    let (order, moov) = if fragmented {
+        ((0..spans.len()).collect::<Vec<_>>(), None)
+    } else {
+        let mut order: Vec<_> = (0..spans.len()).filter(|i| *i != movie).collect();
+        let position = order.iter().position(|i| *i == media).unwrap();
+        order.insert(position, movie);
+        let mut locations = vec![0; spans.len()];
+        let mut next = 0u64;
+        for &index in &order {
+            locations[index] = next;
+            next += spans[index].size;
+        }
+        let mut moov = vec![0; spans[movie].size as usize];
+        reader.seek(SeekFrom::Start(spans[movie].start))?;
+        reader.read_exact(&mut moov)?;
+        if moov[..4] == [0; 4] {
+            moov[..4].copy_from_slice(&(spans[movie].size as u32).to_be_bytes());
+        }
+        patch(&mut moov, &spans, &locations, 0)?;
+        (order, Some(moov))
+    };
     let mut buffer = [0u8; 64 << 10];
     let mut reported = 0u64;
     for index in order {
         check()?;
-        if index == movie {
-            output.write_all(&moov)?;
+        if index == movie && moov.is_some() {
+            output.write_all(moov.as_ref().unwrap())?;
         } else {
             let span = &spans[index];
             reader.seek(SeekFrom::Start(span.start))?;

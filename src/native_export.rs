@@ -464,7 +464,8 @@ pub fn remux_adts_aac_stats(
     Ok(crate::media_control::ProgressEvent { done: true, ..event })
 }
 
-/// Stream a non-fragmented MP4 into fast-start layout without changing packets.
+/// Stream MP4 into fast-start layout without changing packets. Already
+/// initialized fragmented MP4 is copied unchanged; fragment relocation is rejected.
 pub fn remux_mp4(source: &Path, destination: &Path) -> Result<()> {
     remux_mp4_controlled(source, destination, None, None)
 }

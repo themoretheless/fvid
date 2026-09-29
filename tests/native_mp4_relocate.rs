@@ -71,14 +71,11 @@ fn avc_hevc_aac_tables_and_packets_survive_relocation() {
     verify(&co64);
 }
 #[test]
-fn invalid_offsets_and_fragmented_inputs_fail_before_output() {
+fn invalid_offsets_fail_before_output() {
     let mut corrupted = include_bytes!("fixtures/audio/aac-native-edit.m4a").to_vec();
     let table = corrupted.windows(4).position(|v| v == b"stco").unwrap();
     corrupted[table + 12..table + 16].copy_from_slice(&1u32.to_be_bytes());
-    for source in [
-        corrupted.as_slice(),
-        include_bytes!("fixtures/video.mp4").as_slice(),
-    ] {
+    for source in [corrupted.as_slice()] {
         let mut output = Vec::new();
         assert!(fast_start(&mut Cursor::new(source), &mut output).is_err());
         assert!(output.is_empty());
@@ -108,7 +105,84 @@ fn cli_relocation_preserves_destination_and_cleans_failure() {
     assert_eq!(std::fs::read(&output).unwrap(), bytes);
     let fragmented =
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4");
-    assert!(fvid::native_export::remux_mp4(&fragmented, &dir.join("failed.mp4")).is_err());
-    assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 1);
+    fvid::native_export::remux_mp4(&fragmented, &dir.join("fragmented.mp4")).unwrap();
+    assert_eq!(
+        std::fs::read(&fragmented).unwrap(),
+        std::fs::read(dir.join("fragmented.mp4")).unwrap()
+    );
+    assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 2);
     std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn fragments_keep_positions_and_cancel_without_claiming_completion() {
+    use fvid::{
+        container::mp4_relocate::fast_start_controlled,
+        media_control::{CancelFlag, ProgressHook},
+    };
+    let source = include_bytes!("fixtures/video.mp4");
+    let mut output = Vec::new();
+    let event = fast_start_controlled(&mut Cursor::new(source), &mut output, None, None).unwrap();
+    assert_eq!(output, source);
+    assert!(!event.done);
+    assert_eq!(event.packets, 0);
+    let mut boxes = Vec::new();
+    let mut at = 0;
+    let mut payload = 0;
+    while at < source.len() {
+        let size = u32::from_be_bytes(source[at..at + 4].try_into().unwrap()) as usize;
+        assert!(size >= 8);
+        if &source[at + 4..at + 8] == b"mdat" {
+            payload += size - 8;
+        }
+        boxes.push(&source[at..at + size]);
+        at += size;
+    }
+    assert_eq!(event.payload_bytes, payload as u64);
+    // Moving initialization past the fragments would require rewriting offsets.
+    let mut late = Vec::new();
+    for item in &boxes {
+        if &item[4..8] != b"moov" {
+            late.extend_from_slice(item);
+        }
+    }
+    for item in &boxes {
+        if &item[4..8] == b"moov" {
+            late.extend_from_slice(item);
+        }
+    }
+    let mut failed = Vec::new();
+    assert!(
+        fast_start(&mut Cursor::new(late), &mut failed)
+            .unwrap_err()
+            .to_string()
+            .contains("initialization before media")
+    );
+    assert!(failed.is_empty());
+    let flag = CancelFlag::new();
+    let captured = flag.clone();
+    let hook = ProgressHook::new(move |event| {
+        assert!(!event.done);
+        if event.payload_bytes > 0 {
+            captured.cancel();
+        }
+    });
+    assert!(
+        fast_start_controlled(
+            &mut Cursor::new(source),
+            &mut Vec::new(),
+            Some(&flag),
+            Some(&hook)
+        )
+        .unwrap_err()
+        .to_string()
+        .contains("cancelled")
+    );
+    assert!(
+        fast_start(
+            &mut Cursor::new(&source[..source.len() - 1]),
+            &mut Vec::new()
+        )
+        .is_err()
+    );
 }
