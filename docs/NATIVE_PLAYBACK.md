@@ -1466,3 +1466,18 @@ to the retained samples, so it has no predictive pre-roll. Progress and
 sub-microsecond CLI boundaries instead of truncating them to the API's microsecond
 representation. Decode execution can accept nanosecond boundaries through its
 Duration-based API and CLI.
+
+### Owned WAVE probing (2026-09-29)
+
+`probe` recognizes RIFF/WAVE PCM by content and accepts the explicit `wav`
+format hint through the owned inspector. The CLI works without the `media`
+feature; `media::probe[_as]` uses the same description. Corrupt recognized WAVE
+files return the owned parser's error, without trying an external demuxer.
+
+Descriptions report the stored PCM codec, channel count, sample rate, exact
+sample-frame duration with time base `1/sample_rate`, microsecond duration and
+stream payload bit rate. Probing does not require a supported decoder channel
+layout and does not read sample payloads. RIFF validation restrictions match
+owned PCM trimming; RF64 and RIFX remain unsupported. INFO text tags are not yet
+exposed in the description. Container bit rate is left unknown rather than
+conflating header/metadata overhead with the PCM payload rate.

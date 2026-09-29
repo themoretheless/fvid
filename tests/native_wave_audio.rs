@@ -345,3 +345,83 @@ fn invalid_intervals_selection_and_cancel_leave_no_export() {
         .unwrap();
     assert!(!run.status.success());
 }
+
+#[test]
+fn wave_probe_uses_sample_clock_and_owned_dispatch() {
+    let d = dir();
+    let path = d.0.join("input.bin");
+    for (bits, float, codec) in [
+        (8, false, "pcm_u8"),
+        (16, false, "pcm_s16le"),
+        (24, false, "pcm_s24le"),
+        (32, false, "pcm_s32le"),
+        (32, true, "pcm_f32le"),
+        (64, true, "pcm_f64le"),
+    ] {
+        std::fs::write(
+            &path,
+            wave(
+                bits,
+                2,
+                float,
+                None,
+                &vec![0; 17 * 2 * usize::from(bits / 8)],
+            ),
+        )
+        .unwrap();
+        let info = fvid::native_probe::probe(&path).unwrap();
+        assert_eq!(info.format, "wav");
+        assert_eq!(info.duration_us, Some(2125));
+        let stream = &info.streams[0];
+        assert_eq!(stream.codec, codec);
+        assert_eq!(stream.duration, Some(17));
+        assert_eq!(stream.time_base, [1, 8000]);
+        assert_eq!(stream.channels, 2);
+        assert_eq!(stream.bit_rate, Some(8000 * 2 * i64::from(bits)));
+        let expected = serde_json::to_value(info).unwrap();
+        let cli = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "probe"])
+            .arg(&path)
+            .output()
+            .unwrap();
+        assert!(
+            cli.status.success(),
+            "{}",
+            String::from_utf8_lossy(&cli.stderr)
+        );
+        assert_eq!(
+            serde_json::from_slice::<serde_json::Value>(&cli.stdout).unwrap(),
+            expected
+        );
+        assert_eq!(
+            serde_json::to_value(fvid::native_probe::probe_as(&path, Some("wav")).unwrap())
+                .unwrap(),
+            expected
+        );
+        #[cfg(feature = "media")]
+        assert_eq!(
+            serde_json::to_value(fvid::media::probe(&path).unwrap()).unwrap(),
+            expected
+        );
+    }
+    // Metadata inspection does not impose decoder channel layout restrictions.
+    std::fs::write(&path, wave(16, 8, false, None, &[0; 32])).unwrap();
+    assert_eq!(
+        fvid::native_probe::probe(&path).unwrap().streams[0].channels,
+        8
+    );
+    // Known WAVE corruption is never handed to the legacy adapter.
+    let mut bytes = wave(16, 1, false, None, &[0; 4]);
+    bytes.pop();
+    std::fs::write(&path, bytes).unwrap();
+    assert!(fvid::native_probe::try_probe_as(&path, None).is_err());
+    #[cfg(feature = "media")]
+    assert!(fvid::media::probe(&path).is_err());
+    std::fs::write(&path, b"RIFF\0\0\0\0AVI ").unwrap();
+    assert!(
+        fvid::native_probe::try_probe_as(&path, None)
+            .unwrap()
+            .is_none()
+    );
+    assert!(fvid::native_probe::probe_as(&path, Some("wav")).is_err());
+}

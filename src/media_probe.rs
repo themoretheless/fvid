@@ -311,6 +311,30 @@ pub(crate) fn matroska(path: &Path) -> Result<MediaInfo> {
     })
 }
 
+/// Inspect packed PCM without reading or decoding sample payloads.
+fn wave(source: &Path) -> Result<MediaInfo> {
+    let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+    let info = crate::native_pcm::inspect(&mut input, None).map_err(|e| e.to_string())?;
+    let rate = i32::try_from(info.sample_rate).map_err(|_| "WAVE rate exceeds probe API range")?;
+    let duration = i64::try_from(info.sample_frames).map_err(|_| "WAVE duration exceeds probe API range")?;
+    let duration_us = i64::try_from(u128::from(info.sample_frames) * 1_000_000 / u128::from(info.sample_rate))
+        .map_err(|_| "WAVE duration exceeds probe API range")?;
+    let bit_rate = i64::from(info.sample_rate) * i64::from(info.channels) * i64::from(info.bits_per_sample);
+    Ok(MediaInfo {
+        path: source.to_path_buf(), format: "wav".into(), start_us: Some(0),
+        duration_us: Some(duration_us), bit_rate: None,
+        metadata: Default::default(), chapters: vec![],
+        streams: vec![StreamInfo {
+            index: 0, media_type: "audio".into(), codec: info.codec(),
+            time_base: [1, rate], start: Some(0), duration: Some(duration),
+            bit_rate: Some(bit_rate), average_frame_rate: [0, 1], profile: None,
+            level: None, disposition: 0, metadata: Default::default(),
+            width: 0, height: 0, pixel_format: -1, sample_rate: rate,
+            channels: i32::from(info.channels), video_delay: 0, extradata_bytes: 0,
+        }],
+    })
+}
+
 /// Inspect only with FVid-owned parsers. Unknown containers return an error.
 pub fn probe(source: &Path) -> Result<MediaInfo> {
     probe_as(source, None)
@@ -326,12 +350,13 @@ pub fn try_probe_as(source: &Path, format: Option<&str>) -> Result<Option<MediaI
     match format {
         Some("mov" | "mp4" | "m4a") => return mp4(source).map(Some),
         Some("matroska" | "webm") => return matroska(source).map(Some),
+        Some("wav") => return wave(source).map(Some),
         Some("aac") | None => {}
         Some(_) => return Ok(None),
     }
     let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
-    let mut signature = [0; 8];
-    // Read up to eight bytes, retaining a valid seven-byte ADTS header at EOF.
+    let mut signature = [0; 12];
+    // Read up to twelve bytes, retaining a valid seven-byte ADTS header at EOF.
     let mut count = 0;
     while count < signature.len() {
         match input.read(&mut signature[count..]) {
@@ -342,7 +367,11 @@ pub fn try_probe_as(source: &Path, format: Option<&str>) -> Result<Option<MediaI
         }
     }
     if format.is_none() {
-        if count == 8 && &signature[4..] == b"ftyp" {
+        if count == 12 && &signature[8..12] == b"WAVE"
+            && matches!(&signature[..4], b"RIFF" | b"RIFX" | b"RF64") {
+            return wave(source).map(Some);
+        }
+        if count >= 8 && &signature[4..8] == b"ftyp" {
             return mp4(source).map(Some);
         }
         if signature[..count].starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
