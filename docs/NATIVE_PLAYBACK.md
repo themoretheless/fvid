@@ -1395,3 +1395,28 @@ Y4M output currently supports 4:2:0, 4:2:2 and 4:4:4. A transform producing
 unrecognized header or silently resampling chroma. The native Y4M reader still
 accepts 8-bit input only; Main10 exports are validated directly against saved
 reference samples, not claimed as an owned high-bit-depth Y4M roundtrip.
+
+### Native packed-PCM WAVE trim (2026-09-29)
+
+`fvid media trim-pcm INPUT.wav OUTPUT.wav --from SECONDS --to SECONDS`
+uses the owned RIFF reader and sample slicer without the `media` feature.
+The public `media::trim_pcm` API (and its MCP caller) routes WAVE input to the
+same implementation. Supported options are stream 0, quiet CLI output,
+progress, and API cancellation. Custom legacy budgets and metadata edits are
+rejected explicitly instead of ignored.
+
+Packed PCM widths 8/16/24/32 and IEEE float 32/64 are copied unchanged,
+including extensible headers, valid-bit counts and channel masks. Both interval
+boundaries must be exact sample positions; the CLI also rejects sub-microsecond
+boundaries instead of rounding them. An end beyond EOF is clipped; an empty
+selection fails. RIFF, data and fact sample counts are updated. `fmt `, INFO
+lists, JUNK and PAD chunks are retained byte-for-byte. Timed/unknown chunks,
+multiple data chunks, RF64/RIFX and malformed/truncated RIFF are rejected until
+implemented. Non-WAVE containers still use the legacy adapter.
+
+Scanning and copying use bounded memory (64 KiB payload buffer), with cooperative
+cancellation between chunks/blocks. `packets` reports retained aligned I/O blocks,
+not a fabricated source packet index; `fvid_payload_copies=0` counts additional
+payload clones, excluding file I/O. Publication is non-overwriting and atomic
+via a same-directory hard link; failed/cancelled work removes its temporary file.
+The final progress event is emitted only after publication succeeds.

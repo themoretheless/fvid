@@ -127,6 +127,37 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         }
         return Ok(());
     }
+    if args.first().map(String::as_str)==Some("trim-pcm") && args.len()>=3
+        && fvid::native_pcm::is_wave(std::path::Path::new(&args[1]))? {
+        let (mut from,mut to,mut selected)=(None,None,None);
+        let (mut quiet,mut report)=(false,false);
+        let mut args_iter=args[3..].iter();
+        while let Some(arg)=args_iter.next() {
+            match arg.as_str() {
+                "--from"|"--to" => {
+                    let slot=if arg=="--from" {&mut from} else {&mut to};
+                    if slot.is_some() {return Err("duplicate PCM interval boundary".into());}
+                    let time=decode_time(args_iter.next().ok_or("missing PCM interval boundary")?)?;
+                    if time.subsec_nanos()%1000!=0 {return Err("PCM boundary must be representable in microseconds".into());}
+                    *slot=Some(i64::try_from(time.as_micros()).map_err(|_|"PCM interval overflow")?);
+                }
+                "--streams" => {
+                    if selected.is_some() {return Err("duplicate streams option".into());}
+                    selected=Some(args_iter.next().ok_or("missing stream index")?.parse::<usize>()?);
+                }
+                "--quiet"=>quiet=true,"--progress"=>report=true,
+                _=>return Err(format!("unsupported native PCM trim option: {arg}").into()),
+            }
+        }
+        if selected.is_some_and(|n|n!=0) {return Err("WAVE has only stream 0".into());}
+        let progress=report.then(||fvid::media_control::ProgressHook::new(|e| {
+            eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",e.packets,e.payload_bytes,e.done);
+        }));
+        let stats=fvid::native_pcm::trim_wave(std::path::Path::new(&args[1]),std::path::Path::new(&args[2]),
+            from.ok_or("--from required")?,to.ok_or("--to required")?,None,progress.as_ref())?;
+        if !quiet {println!("{{\"packets\":{},\"sample_frames\":{},\"payload_bytes\":{},\"fvid_payload_copies\":{}}}",stats.packets,stats.sample_frames,stats.payload_bytes,stats.fvid_payload_copies);}
+        return Ok(());
+    }
     if args.first().map(String::as_str) == Some("export-y4m") {
         if args.len() < 3 { return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m [--crop X:Y:W:H] [--hflip] [--vflip] [--transpose MODE] [--pad W:H:X:Y] [--scale W:H] [--from SECONDS --to SECONDS]".into()); }
         let mut geometry_args=vec!["decode".to_owned()];
@@ -2929,7 +2960,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         return Err("--overlay requires decode, overlay, transcode-lossless, or transcode".into());
     }
     if command == "trim-pcm" && paths.len() == 2 {
-        let stats = fvid_media::trim_pcm(
+        let stats = fvid::media::trim_pcm(
             &paths[0],
             &paths[1],
             from.ok_or("--from required")?,

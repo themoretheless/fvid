@@ -292,3 +292,14 @@ pub fn probe_as(source: &std::path::Path, format: Option<&str>) -> Result<MediaI
         None => fvid_media::probe_as(source, format),
     }
 }
+
+/// Sample-exact RIFF PCM uses the owned streaming slicer and publisher.
+pub fn trim_pcm(source:&std::path::Path,destination:&std::path::Path,from:i64,to:i64,options:&CopyOptions)->Result<PcmTrimStats> {
+    if !crate::native_pcm::is_wave(source).map_err(|e|e.to_string())? {
+        return fvid_media::trim_pcm(source,destination,from,to,options);
+    }
+    validate_native_copy_options(options,true)?;
+    if options.streams.first().is_some_and(|&n|n!=0) {return Err("WAVE has only stream 0".into());}
+    let stats=crate::native_pcm::trim_wave(source,destination,from,to,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())?;
+    Ok(PcmTrimStats{packets:stats.packets,sample_frames:stats.sample_frames,payload_bytes:stats.payload_bytes,fvid_payload_copies:stats.fvid_payload_copies})
+}
