@@ -589,3 +589,30 @@ aac_imdct_bench`. This compares transform kernels only, not total player through
 or virtual-camera delivery. Peak difference from the previous recurrence was
 1.41e-13 for the benchmark spectrum; independent basis tests use a 1e-10 bound.
 No external FFT/codec dependency or FFmpeg execution is used.
+
+### Full owned AAC path measurement (2026-09-29)
+
+`cargo run --release --locked --no-default-features --example aac_decode_bench`
+now measures fresh container indexing, decoder construction, all packet decoding
+and PCM delivery to a black-box sink. File loading, disk output, resampling and
+speaker scheduling are outside the timed region. It checks stable output stats
+and PCM byte counts on every iteration; five timed batches report the median.
+Optional positional paths allow measuring other supported AAC files.
+
+Local results after the fast IMDCT change:
+
+| Fixture | PCM duration | Decode median | Audio duration / decode time |
+|---|---:|---:|---:|
+| mono ADTS, 44.1 kHz | 0.163 s | 0.641 ms | 253.7x |
+| stereo ADTS, 48 kHz | 0.277 s | 1.847 ms | 150.1x |
+| mono ADTS with TNS | 1.024 s | 4.668 ms | 219.3x |
+| active 5.1 ADTS | 0.235 s | 4.527 ms | 51.8x |
+| MP4 with edit list | 0.128 s | 0.626 ms | 204.6x |
+| stereo Matroska | 1.000 s | 7.890 ms | 126.7x |
+| 960-sample Matroska | 0.140 s | 1.273 ms | 110.0x |
+| 960-sample MP4 | 0.140 s | 0.777 ms | 180.1x |
+
+These short fixture measurements show AAC headroom on this machine; they are not
+before/after end-to-end speedup numbers, video FPS, a virtual-camera delivery test,
+or a guarantee for all input streams. Correctness remains covered separately by
+the saved PCM and direct-transform reference tests.
