@@ -55,7 +55,7 @@ pub fn decode_audio_transformed(
     if !crate::native_media::is_aac_source(source).map_err(|e| e.to_string())? {
         return fvid_media::decode_audio_transformed(source, destination, transform, options);
     }
-    validate_native_copy_options(options)?;
+    validate_native_copy_options(options, true)?;
     let interval = transform.interval.map(|(from, to)| {
         if from < 0 || to <= from {
             return Err("decode-audio interval requires 0 <= from < to".to_owned());
@@ -67,9 +67,9 @@ pub fn decode_audio_transformed(
         .map_err(|_| "invalid channel count".to_owned())).transpose()?;
     let sample_rate = transform.sample_rate.map(|n| u32::try_from(n)
         .map_err(|_| "invalid sample rate".to_owned())).transpose()?;
-    let stats = crate::native_export::export_aac_pcm_controlled(
+    let stats = crate::native_export::export_aac_pcm_selected(
         source, destination, interval, transform.volume.unwrap_or(1.0),
-        channels, sample_rate, options.cancel.as_ref(), options.progress.as_ref(),
+        channels, sample_rate, options.streams.first().copied(), options.cancel.as_ref(), options.progress.as_ref(),
     ).map_err(|e| e.to_string())?;
     Ok(AudioDecodeStats {
         sample_frames: stats.sample_frames,
@@ -82,8 +82,8 @@ pub fn decode_audio_transformed(
     })
 }
 
-fn validate_native_copy_options(options: &CopyOptions) -> Result<()> {
-    if !options.streams.is_empty()
+fn validate_native_copy_options(options: &CopyOptions, audio_selection: bool) -> Result<()> {
+    if (if audio_selection { options.streams.len() > 1 } else { !options.streams.is_empty() })
         || options.max_packet_bytes != CopyOptions::default().max_packet_bytes
         || options.max_packets.is_some()
         || options.max_controlled_bytes.is_some()
@@ -108,8 +108,8 @@ pub fn plan_decode_audio(
     if !crate::native_media::is_aac_source(source).map_err(|e| e.to_string())? {
         return fvid_media::plan_decode_audio(source, transform, options);
     }
-    validate_native_copy_options(options)?;
-    crate::native_plan::decode_audio(source, transform)
+    validate_native_copy_options(options, true)?;
+    crate::native_plan::decode_audio_selected(source, transform, options.streams.first().copied())
 }
 
 /// Native ADTS-to-MP4 muxing and MP4 fast-start relocation. Other container
@@ -132,7 +132,7 @@ pub fn remux(
     let adts = crate::container::adts::header(&prefix).is_some();
     let mp4 = &prefix[4..8] == b"ftyp";
     if !adts && !mp4 { return fvid_media::remux(source, destination, options); }
-    validate_native_copy_options(options)?;
+    validate_native_copy_options(options, false)?;
     let stats = if adts {
         crate::native_export::remux_adts_aac_stats(source, destination,
             options.cancel.as_ref(), options.progress.as_ref())

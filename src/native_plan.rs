@@ -8,6 +8,15 @@ pub fn decode_audio(
     source: &std::path::Path,
     transform: &AudioDecodeTransform,
 ) -> Result<MediaPlan> {
+    decode_audio_selected(source, transform, None)
+}
+
+/// Plan one explicitly selected zero-based container stream.
+pub fn decode_audio_selected(
+    source: &std::path::Path,
+    transform: &AudioDecodeTransform,
+    selected: Option<usize>,
+) -> Result<MediaPlan> {
     if transform
         .interval
         .is_some_and(|(from, to)| from < 0 || to <= from)
@@ -26,7 +35,8 @@ pub fn decode_audio(
     {
         return Err("volume must be a finite linear gain within 0..=64".into());
     }
-    let info = crate::native_media::aac_source_info(source).map_err(|e| e.to_string())?;
+    let info = crate::native_media::aac_source_info_selected(source, selected)
+        .map_err(|e| e.to_string())?;
     let channels = transform.channels.unwrap_or(i32::from(info.channels));
     if channels != i32::from(info.channels) && !matches!(channels, 1 | 2) {
         return Err("native AAC channel conversion supports mono or stereo output".into());

@@ -60,7 +60,7 @@ fn public_transforms_intervals_cancellation_and_options_are_honored() {
     let cancel = CancelFlag::new(); cancel.cancel();
     assert!(media::decode_audio(&source, &cancelled, &CopyOptions { cancel: Some(cancel), ..Default::default() }).unwrap_err().contains("cancelled"));
     assert!(!cancelled.exists());
-    for options in [CopyOptions { streams: vec![0], ..Default::default() },
+    for options in [CopyOptions { streams: vec![0, 1], ..Default::default() },
         CopyOptions { max_packets: Some(1), ..Default::default() },
         CopyOptions { metadata_set: vec![("title".into(), "x".into())], ..Default::default() }] {
         assert!(media::decode_audio(&source, &cancelled, &options).unwrap_err().contains("does not yet support"));

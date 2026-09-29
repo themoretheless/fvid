@@ -30,7 +30,7 @@ fn native_plan_rejects_invalid_requests_before_execution() {
     let source = fixture("aac-mono-44k.aac");
     for options in [vec!["--from","0.1"], vec!["--volume","NaN"], vec!["--channels","7"],
         vec!["--rate","0"], vec!["--rate","32000","--sample-rate","48000"],
-        vec!["--from","2","--to","1"], vec!["--streams","0"], vec!["--volume"]] {
+        vec!["--from","2","--to","1"], vec!["--streams","1"], vec!["--volume"]] {
         let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
             .args(["media","plan","decode-audio"]).arg(&source).args(options).output().unwrap();
         assert!(!run.status.success()); assert!(run.stdout.is_empty()); assert!(!run.stderr.is_empty());

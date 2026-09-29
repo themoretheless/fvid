@@ -1306,3 +1306,20 @@ the existing `media` API reexports them and delegates AAC plans to this path.
 The native CLI rejects unsupported or duplicate options and emits the same JSON
 as the library plan. This is metadata/configuration planning, not packet decoding;
 execution still validates packet contents and timing.
+
+Native AAC export/planning now supports one explicit container stream index:
+`media decode-audio INPUT OUTPUT.wav --streams INDEX` and
+`media plan decode-audio INPUT --streams INDEX`. The zero-based index includes
+video/data streams and matches native probe order; ADTS has only stream 0.
+Without selection, exactly one audio track is still required. MP4 files with
+unindexed sample entries reject explicit selection rather than renumbering it.
+Absent, non-audio and non-AAC selections fail before publication.
+
+Library entry points are `native_export::export_aac_pcm_selected`,
+`native_plan::decode_audio_selected`, and `native_media::aac_source_info_selected`.
+The public `media` API accepts a singleton `CopyOptions.streams` for AAC decode
+and planning; multiple selections, metadata edits and custom budgets remain
+unsupported there. Existing APIs retain their default single-audio-track behavior.
+Tests cover two AAC tracks at 48/32 kHz in MP4/Matroska, selected intervals,
+CLI/API byte equality and saved independent PCM references with documented
+numerical tolerances in `tests/fixtures/audio/two-audio-selection.md`.

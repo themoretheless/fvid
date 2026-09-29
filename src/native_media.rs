@@ -300,32 +300,21 @@ pub fn decode_mp4_aac_reader<R: std::io::Read + std::io::Seek>(
     interval: Option<(Duration, Duration)>,
 ) -> Result<AudioDecodeStats> {
     let mut control = DecodeProgress::new(None, None)?;
-    decode_mp4_aac_reader_controlled(reader, output, interval, &mut control)
+    decode_mp4_aac_reader_controlled(reader, output, interval, None, &mut control)
 }
 
 pub(crate) fn decode_mp4_aac_reader_controlled<R: std::io::Read + std::io::Seek>(
     mut reader: crate::container::mp4::Mp4Reader<R>,
     output: &mut impl std::io::Write,
     interval: Option<(Duration, Duration)>,
+    selected: Option<usize>,
     control: &mut DecodeProgress<'_>,
 ) -> Result<AudioDecodeStats> {
     control.check()?;
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("audio interval requires from < to"));
     }
-    let indices: Vec<_> = reader
-        .tracks()
-        .iter()
-        .enumerate()
-        .filter(|(_, track)| track.handler == *b"soun")
-        .map(|(index, _)| index)
-        .collect();
-    if indices.len() != 1 {
-        return Err(invalid(
-            "native AAC export requires exactly one MP4 audio track",
-        ));
-    }
-    let index = indices[0];
+    let index = mp4_aac_index(&reader, selected)?;
     let track = reader.tracks()[index].clone();
     if track.codec != *b"mp4a" {
         return Err(invalid("MP4 audio track is not AAC"));
@@ -509,13 +498,14 @@ pub fn decode_matroska_aac_reader<R: std::io::Read + std::io::Seek>(
     interval: Option<(Duration, Duration)>,
 ) -> Result<AudioDecodeStats> {
     let mut control = DecodeProgress::new(None, None)?;
-    decode_matroska_aac_reader_controlled(reader, output, interval, &mut control)
+    decode_matroska_aac_reader_controlled(reader, output, interval, None, &mut control)
 }
 
 pub(crate) fn decode_matroska_aac_reader_controlled<R: std::io::Read + std::io::Seek>(
     mut reader: crate::container::webm::WebmReader<R>,
     output: &mut impl std::io::Write,
     interval: Option<(Duration, Duration)>,
+    selected: Option<usize>,
     control: &mut DecodeProgress<'_>,
 ) -> Result<AudioDecodeStats> {
     control.check()?;
@@ -523,13 +513,8 @@ pub(crate) fn decode_matroska_aac_reader_controlled<R: std::io::Read + std::io::
         return Err(invalid("audio interval requires from < to"));
     }
     reader.scan_all()?;
-    let tracks: Vec<_> = reader.tracks.iter().filter(|t| t.kind == 2).collect();
-    if tracks.len() != 1 || tracks[0].codec != "A_AAC" {
-        return Err(invalid(
-            "native Matroska AAC export requires one AAC audio track",
-        ));
-    }
-    let track = tracks[0].clone();
+    let index = matroska_aac_index(&reader, selected)?;
+    let track = reader.tracks[index].clone();
     let mut decoder = crate::codec::aac_native::NativeAacDecoder::new(&track.codec_private)?;
     let rate = decoder.sample_rate();
     let channels = u16::from(decoder.channels());
@@ -664,6 +649,11 @@ pub struct AacSourceInfo {
 }
 
 pub fn aac_source_info(source: &Path) -> Result<AacSourceInfo> {
+    aac_source_info_selected(source, None)
+}
+
+/// Select a zero-based container stream index; None requires one audio track.
+pub fn aac_source_info_selected(source: &Path, selected: Option<usize>) -> Result<AacSourceInfo> {
     use std::io::{BufReader, Read, Seek, SeekFrom};
     let mut input = BufReader::new(std::fs::File::open(source)?);
     let mut prefix = [0; 8];
@@ -671,24 +661,17 @@ pub fn aac_source_info(source: &Path) -> Result<AacSourceInfo> {
     input.seek(SeekFrom::Start(0))?;
     let (stream_index, asc, declared) = if &prefix[4..8] == b"ftyp" {
         let reader = crate::container::mp4::Mp4Reader::open(input, Default::default())?;
-        let tracks: Vec<_> = reader.tracks().iter().enumerate()
-            .filter(|(_, t)| t.handler == *b"soun").collect();
-        if tracks.len() != 1 || tracks[0].1.codec != *b"mp4a" {
-            return Err(crate::invalid("expected one AAC audio track"));
-        }
-        let (index, track) = tracks[0];
+        let index = mp4_aac_index(&reader, selected)?;
+        let track = &reader.tracks()[index];
         (index, crate::codec::config::aac_specific_config(&track.configuration)?.to_vec(),
             (u64::from(track.sample_rate), u64::from(track.channels)))
     } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
         let reader = crate::container::webm::WebmReader::open(input, Default::default())?;
-        let tracks: Vec<_> = reader.tracks.iter().enumerate()
-            .filter(|(_, t)| t.kind == 2).collect();
-        if tracks.len() != 1 || tracks[0].1.codec != "A_AAC" {
-            return Err(crate::invalid("expected one AAC audio track"));
-        }
-        let (index, track) = tracks[0];
+        let index = matroska_aac_index(&reader, selected)?;
+        let track = &reader.tracks[index];
         (index, track.codec_private.clone(), (track.sample_rate, track.channels))
     } else {
+        if selected.is_some_and(|index| index != 0) { return Err(invalid("ADTS has only stream 0")); }
         let reader = crate::container::adts::StreamReader::open(input)?;
         let header = reader.configuration();
         (0, header.asc.to_vec(), (u64::from(header.sample_rate), u64::from(header.channels)))
@@ -725,4 +708,25 @@ pub fn inspect_adts<R: std::io::Read>(source: R) -> Result<AdtsInfo> {
         info.sample_frames = info.sample_frames.checked_add(u64::from(config.frame_samples)).ok_or_else(|| crate::invalid("AAC duration overflow"))?;
     }
     Ok(info)
+}
+
+fn audio_index(kinds: impl Iterator<Item=bool>, selected: Option<usize>) -> Result<usize> {
+    let indices: Vec<_> = kinds.enumerate().filter_map(|(index,audio)| audio.then_some(index)).collect();
+    if let Some(index) = selected {
+        if indices.contains(&index) { return Ok(index); }
+        return Err(invalid("selected stream is absent or is not audio"));
+    }
+    if indices.len() != 1 { return Err(invalid("native AAC export requires exactly one audio track or an explicit stream index")); }
+    Ok(indices[0])
+}
+pub(crate) fn mp4_aac_index<R: std::io::Read + std::io::Seek>(reader: &crate::container::mp4::Mp4Reader<R>, selected: Option<usize>) -> Result<usize> {
+    if selected.is_some() && !reader.refused().is_empty() { return Err(invalid("cannot select an MP4 stream while some sample entries are unindexed")); }
+    let index = audio_index(reader.tracks().iter().map(|t| t.handler == *b"soun"),selected)?;
+    if reader.tracks()[index].codec != *b"mp4a" { return Err(invalid("selected MP4 audio stream is not AAC")); }
+    Ok(index)
+}
+pub(crate) fn matroska_aac_index<R: std::io::Read + std::io::Seek>(reader: &crate::container::webm::WebmReader<R>, selected: Option<usize>) -> Result<usize> {
+    let index = audio_index(reader.tracks.iter().map(|t| t.kind == 2),selected)?;
+    if reader.tracks[index].codec != "A_AAC" { return Err(invalid("selected Matroska audio stream is not AAC")); }
+    Ok(index)
 }

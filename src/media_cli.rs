@@ -7,10 +7,15 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         && fvid::native_media::is_aac_source(std::path::Path::new(&args[2]))?
     {
         let mut transform = fvid::native_plan::AudioDecodeTransform::default();
+        let mut selected = None;
         let (mut from, mut to) = (None, None);
         let mut options = args[3..].iter();
         while let Some(option) = options.next() {
             match option.as_str() {
+                "--streams" => {
+                    if selected.is_some() { return Err("duplicate streams option".into()); }
+                    selected = Some(options.next().ok_or("missing stream index")?.parse::<usize>()?);
+                }
                 "--from" | "--to" => {
                     let slot = if option == "--from" { &mut from } else { &mut to };
                     if slot.is_some() { return Err("duplicate interval boundary".into()); }
@@ -37,7 +42,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             (Some(from),Some(to)) => Some((from,to)),
             _ => return Err("plan interval requires both --from and --to".into()),
         };
-        let plan = fvid::native_plan::decode_audio(std::path::Path::new(&args[2]), &transform)?;
+        let plan = fvid::native_plan::decode_audio_selected(std::path::Path::new(&args[2]), &transform, selected)?;
         println!("{}", serde_json::to_string_pretty(&plan)?);
         return Ok(());
     }
@@ -82,7 +87,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     }
     if args.first().map(String::as_str) == Some("decode-audio") && args.len() >= 3
         && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("f32le" | "wav"))
-        && args[3..].iter().all(|arg| !arg.starts_with('-') || matches!(arg.as_str(), "--from" | "--to" | "--quiet" | "--progress" | "--volume" | "--channels" | "--sample-rate" | "--rate"))
+        && args[3..].iter().all(|arg| !arg.starts_with('-') || matches!(arg.as_str(), "--from" | "--to" | "--quiet" | "--progress" | "--streams" | "--volume" | "--channels" | "--sample-rate" | "--rate"))
         && fvid::native_media::is_aac_source(std::path::Path::new(&args[1]))?
     {
         let mut parse_args = vec!["decode".to_owned(), args[1].clone()];
@@ -90,9 +95,13 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         let mut channels = None;
         let mut sample_rate = None;
         let mut report_progress = false;
+        let mut selected = None;
         let mut options = args[3..].iter();
         while let Some(option) = options.next() {
-            if option == "--progress" {
+            if option == "--streams" {
+                if selected.is_some() { return Err("duplicate streams option".into()); }
+                selected = Some(options.next().ok_or("missing stream index")?.parse::<usize>()?);
+            } else if option == "--progress" {
                 report_progress = true;
             } else if option == "--volume" {
                 if volume.is_some() { return Err("duplicate volume option".into()); }
@@ -109,8 +118,8 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         let progress = report_progress.then(|| fvid::media_control::ProgressHook::new(|event| {
             eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}", event.packets, event.payload_bytes, event.done);
         }));
-        let stats = fvid::native_export::export_aac_pcm_controlled(
-            std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), interval, volume.unwrap_or(1.0), channels, sample_rate, None, progress.as_ref(),
+        let stats = fvid::native_export::export_aac_pcm_selected(
+            std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), interval, volume.unwrap_or(1.0), channels, sample_rate, selected, None, progress.as_ref(),
         )?;
         if !quiet {
             println!("{{\"backend\":\"fvid\",\"sample_frames\":{},\"decoded_frames\":{},\"sample_rate\":{},\"channels\":{},\"sample_format\":\"f32le\",\"decode_errors\":0}}",
