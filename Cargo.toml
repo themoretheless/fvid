@@ -30,6 +30,7 @@ angle = ["gpu", "wgpu/angle"]
 vulkan-portability = ["gpu", "wgpu/vulkan-portability"]
 
 [dependencies]
+fvid-control = { path = "crates/fvid-control" }
 fvid-platform = { path = "crates/fvid-platform", optional = true }
 eframe = { version = "0.36", optional = true }
 rfd = { version = "0.17.2", optional = true }

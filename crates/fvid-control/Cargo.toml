@@ -1,0 +1,8 @@
+[package]
+name = "fvid-control"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "Backend-independent FVid cancellation and progress contracts"
+
+[dependencies]

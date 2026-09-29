@@ -403,6 +403,17 @@ impl<W: Write> Write for PcmGain<'_, W> {
 
 /// Lossless ADTS-to-MP4 packet remux with atomic no-overwrite publication.
 pub fn remux_adts_aac(source: &Path, destination: &Path) -> Result<u64> {
+    remux_adts_aac_controlled(source, destination, None, None)
+}
+
+/// Native remux with packet progress and cancellation. `done=true` is emitted
+/// only after the complete output has been synced and published without overwrite.
+pub fn remux_adts_aac_controlled(
+    source: &Path, destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<u64> {
+    if cancel.is_some_and(|flag| flag.is_cancelled()) { return Err(invalid("media operation cancelled")); }
     let input = crate::container::adts::StreamReader::open(BufReader::new(File::open(source)?))?;
     let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
     let (temporary, file) = (0..100).find_map(|_| {
@@ -414,12 +425,14 @@ pub fn remux_adts_aac(source: &Path, destination: &Path) -> Result<u64> {
         }
     }).ok_or_else(|| invalid("cannot reserve MP4 output"))??;
     let mut output = BufWriter::new(file);
-    let packets = crate::container::mp4_write::write_adts_aac_reader(input, &mut output)?;
+    let event = crate::container::mp4_write::write_adts_aac_reader_controlled(input, &mut output, cancel, progress)?;
     output.flush()?;
     output.get_ref().sync_all()?;
     drop(output);
+    if cancel.is_some_and(|flag| flag.is_cancelled()) { return Err(invalid("media operation cancelled")); }
     std::fs::hard_link(&temporary.0, destination)?;
-    Ok(packets)
+    if let Some(hook) = progress { hook.emit(crate::media_control::ProgressEvent { done: true, ..event }); }
+    Ok(event.packets)
 }
 
 /// Stream a non-fragmented MP4 into fast-start layout without changing packets.

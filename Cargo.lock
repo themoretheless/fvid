@@ -1635,6 +1635,7 @@ dependencies = [
  "axum",
  "cpal",
  "eframe",
+ "fvid-control",
  "fvid-cpu",
  "fvid-cuda",
  "fvid-media",
@@ -1650,6 +1651,10 @@ dependencies = [
  "tokio",
  "wgpu",
 ]
+
+[[package]]
+name = "fvid-control"
+version = "0.1.0"
 
 [[package]]
 name = "fvid-cpu"
@@ -1669,6 +1674,7 @@ dependencies = [
  "bindgen",
  "cpal",
  "eframe",
+ "fvid-control",
  "fvid-cpu",
  "fvid-cuda",
  "libc",

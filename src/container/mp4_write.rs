@@ -163,9 +163,37 @@ fn movie(
 /// support seeking to finish the extended-size mdat header. The default MP4
 /// sample-count limit bounds index storage. Discard output on any error.
 pub fn write_adts_aac_reader<R: std::io::Read, W: Write + std::io::Seek>(
-    mut reader: super::adts::StreamReader<R>,
+    reader: super::adts::StreamReader<R>,
     output: &mut W,
 ) -> Result<u64> {
+    Ok(write_adts_aac_reader_controlled(reader, output, None, None)?.packets)
+}
+
+/// Packet progress and cooperative cancellation for native muxing. Returned
+/// progress has `done=false`: publishing/syncing the destination is the caller's
+/// responsibility. A hook is called at start, every 256 packets and after muxing.
+pub fn write_adts_aac_reader_controlled<R: std::io::Read, W: Write + std::io::Seek>(
+    mut reader: super::adts::StreamReader<R>,
+    output: &mut W,
+    cancel: Option<&fvid_control::CancelFlag>,
+    progress: Option<&fvid_control::ProgressHook>,
+) -> Result<fvid_control::ProgressEvent> {
+    let check = || -> Result<()> {
+        if cancel.is_some_and(|flag| flag.is_cancelled()) {
+            return Err(invalid("media operation cancelled"));
+        }
+        Ok(())
+    };
+    let mut event = fvid_control::ProgressEvent {
+        packets: 0,
+        payload_bytes: 0,
+        done: false,
+    };
+    check()?;
+    if let Some(hook) = progress {
+        hook.emit(event);
+    }
+    check()?;
     use std::io::SeekFrom;
     if output.stream_position()? != 0 {
         return Err(invalid("MP4 output must start at byte zero"));
@@ -179,13 +207,28 @@ pub fn write_adts_aac_reader<R: std::io::Read, W: Write + std::io::Seek>(
     output.write_all(&0u64.to_be_bytes())?;
     let offset = output.stream_position()?;
     let mut sizes = Vec::new();
-    while let Some(packet) = reader.next_packet()? {
+    loop {
+        check()?;
+        let Some(packet) = reader.next_packet()? else {
+            break;
+        };
         if sizes.len() >= super::mp4::Limits::default().samples {
             return Err(invalid("AAC remux sample index exceeds limit"));
         }
         sizes.push(u32::try_from(packet.len()).map_err(|_| invalid("AAC packet size overflow"))?);
         output.write_all(&packet)?;
+        event.packets += 1;
+        event.payload_bytes = event
+            .payload_bytes
+            .checked_add(packet.len() as u64)
+            .ok_or_else(|| invalid("AAC payload size overflow"))?;
+        if event.packets % 256 == 0 {
+            if let Some(hook) = progress {
+                hook.emit(event);
+            }
+        }
     }
+    check()?;
     let end = output.stream_position()?;
     let length = end
         .checked_sub(mdat)
@@ -195,5 +238,9 @@ pub fn write_adts_aac_reader<R: std::io::Read, W: Write + std::io::Seek>(
     output.write_all(&length.to_be_bytes())?;
     output.seek(SeekFrom::Start(end))?;
     output.write_all(&moov)?;
-    Ok(sizes.len() as u64)
+    if let Some(hook) = progress {
+        hook.emit(event);
+    }
+    check()?;
+    Ok(event)
 }

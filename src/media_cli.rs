@@ -2,7 +2,8 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
-    if args.first().map(String::as_str) == Some("remux") && args.len() == 3
+    if args.first().map(String::as_str) == Some("remux")
+        && (args.len() == 3 || (args.len() == 4 && args[3] == "--progress"))
         && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("mp4" | "m4a"))
     {
         use std::io::Read;
@@ -10,11 +11,16 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         let mut source = std::fs::File::open(&args[1])?;
         source.read_exact(&mut prefix)?;
         if fvid::container::adts::header(&prefix).is_some() {
-            let packets = fvid::native_export::remux_adts_aac(std::path::Path::new(&args[1]), std::path::Path::new(&args[2]))?;
+            let progress = (args.len() == 4).then(|| fvid::media_control::ProgressHook::new(|event| {
+                eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}", event.packets, event.payload_bytes, event.done);
+            }));
+            let packets = fvid::native_export::remux_adts_aac_controlled(
+                std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), None, progress.as_ref(),
+            )?;
             println!("{{\"backend\":\"fvid\",\"audio_packets\":{packets}}}");
             return Ok(());
         }
-        if &prefix[4..8] == b"ftyp" {
+        if &prefix[4..8] == b"ftyp" && args.len() == 3 {
             fvid::native_export::remux_mp4(std::path::Path::new(&args[1]), std::path::Path::new(&args[2]))?;
             println!("{{\"backend\":\"fvid\",\"remux\":\"mp4-faststart\"}}");
             return Ok(());

@@ -1157,3 +1157,23 @@ offset, retaining only sample sizes until the final `moov` index is written.
 The MP4 sample-count limit still bounds index storage. The destination must be
 seekable; partial output is discarded on failure. The older byte-slice muxing
 API remains available with its existing limits.
+
+### Native operation progress and cancellation
+
+`fvid::media_control::{CancelFlag, ProgressHook, ProgressEvent}` are shared
+backend-independent contracts from the dependency-free `fvid-control` crate.
+The legacy media API reexports the same types, so callers can reuse cancellation
+flags and hooks while migrating operations to the owned implementation.
+
+`native_export::remux_adts_aac_controlled` checks cancellation between packets
+and before publication, and reports encoded packet/payload counts at start,
+every 256 packets and after muxing. Only the successfully synced and published
+file produces `done=true`; errors and cancellation leave no destination or
+temporary file. Cancellation is cooperative, not an interruption of a blocked
+filesystem read. The lower-level muxer reports `done=false` because its caller
+owns synchronization and publication.
+
+`fvid media remux INPUT.aac OUTPUT.m4a --progress` exposes these events as JSON
+lines on stderr without enabling the `media` feature. The final result stays
+on stdout. This migration does not yet remove the legacy media crate's FFmpeg
+build/link dependencies or add these controls to every native operation.
