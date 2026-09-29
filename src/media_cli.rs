@@ -203,9 +203,9 @@ fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Er
     let source_index = command_index + 1;
     let option_start = source_index + if plan { 1 } else { 2 };
     if args.len() < option_start {return Ok(false);}
-    let adts=command=="trim" && fvid::native_export::is_adts_source(std::path::Path::new(&args[source_index]))?
+    let aac=command=="trim" && fvid::native_media::is_aac_source(std::path::Path::new(&args[source_index]))?
         && (plan || std::path::Path::new(&args[source_index+1]).extension().and_then(|s|s.to_str())==Some("wav"));
-    if !adts && !fvid::native_pcm::is_wave(std::path::Path::new(&args[source_index]))? {return Ok(false);}
+    if !aac && !fvid::native_pcm::is_wave(std::path::Path::new(&args[source_index]))? {return Ok(false);}
     let (mut from, mut to, mut selected) = (None, None, None);
     let (mut quiet, mut report) = (false, false);
     let mut args_iter = args[option_start..].iter();
@@ -238,7 +238,7 @@ fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Er
             _ => return Err(format!("unsupported native PCM trim option: {arg}").into()),
         }
     }
-    if selected.is_some_and(|n| n != 0) {
+    if !aac && selected.is_some_and(|n| n != 0) {
         return Err("audio input has only stream 0".into());
     }
     let (from, to) = (from.ok_or("--from required")?, to.ok_or("--to required")?);
@@ -246,7 +246,7 @@ fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Er
         if report {
             return Err("progress applies to PCM trim execution, not planning".into());
         }
-        let mut result = if adts {fvid::native_plan::trim_adts(std::path::Path::new(&args[source_index]),from,to)?} else {fvid::native_plan::trim_pcm(
+        let mut result = if aac {fvid::native_plan::trim_aac(std::path::Path::new(&args[source_index]),from,to,selected)?} else {fvid::native_plan::trim_pcm(
             std::path::Path::new(&args[source_index]),
             from,
             to,
@@ -266,8 +266,8 @@ fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Er
             );
         })
     });
-    if adts {
-        let stats=fvid::native_export::trim_adts_wave(std::path::Path::new(&args[source_index]),std::path::Path::new(&args[source_index+1]),from,to,None,progress.as_ref())?;
+    if aac {
+        let stats=fvid::native_export::trim_aac_wave(std::path::Path::new(&args[source_index]),std::path::Path::new(&args[source_index+1]),from,to,selected,None,progress.as_ref())?;
         if !quiet {println!("{}",serde_json::json!({"packets":stats.decoded_frames,"sample_frames":stats.sample_frames,"payload_bytes":stats.sample_frames*u64::from(stats.channels)*4,"segments":1,"backend":"fvid","fvid_payload_copies":0}));}
         return Ok(true);
     }

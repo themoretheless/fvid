@@ -1553,3 +1553,20 @@ priming is retained in the ADTS timeline. No rate/channel conversion is applied.
 and input payload bytes. All other native export cancellation and atomic
 publication guarantees apply. `trim-pcm` still denotes raw packed PCM slicing,
 not compressed AAC decoding. Only stream 0 is selectable in this ADTS route.
+
+### Selected container AAC trim to WAVE (2026-09-29)
+
+The owned `trim ... OUTPUT.wav` route now also accepts AAC in MP4 and Matroska,
+using the existing presentation-aware decoder (MP4 edits, Matroska delay and
+padding, decoder pre-roll). `native_export::trim_aac_wave` and
+`native_plan::trim_aac` expose this route without the legacy `media` dependency.
+ADTS compatibility entrypoints remain available.
+
+A container with exactly one AAC stream can be trimmed without stream selection.
+When any other tracks exist, `--streams INDEX` / `CopyOptions.streams` must name
+one AAC audio track explicitly. This prevents WAV export from silently dropping
+video, subtitles or other audio. Non-AAC, nonexistent and multiple selections
+fail. Plans describe PCM WAVE output; compressed MP4/MKV trim destinations still
+need their remaining native writer migration. Float samples from the selected
+MP4/Matroska tracks are checked against saved independent PCM references, and
+single-track edit/960-sample fixtures exercise the existing decoder timeline.

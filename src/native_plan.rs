@@ -216,3 +216,31 @@ pub fn trim_adts(source: &std::path::Path, from: i64, to: i64) -> Result<MediaPl
     plan.notes.push("decode AAC pre-roll from the beginning; ADTS encoder priming remains part of its timeline".into());
     Ok(plan)
 }
+
+/// Require either a single AAC stream or an explicit AAC stream selection.
+/// A PCM destination must not silently discard other container tracks.
+pub(crate) fn aac_trim_selection(source: &std::path::Path, selected: Option<usize>) -> Result<usize> {
+    let info=crate::native_probe::probe(source)?;
+    let index=match selected {
+        Some(index)=>index,
+        None if info.streams.len()==1=>info.streams[0].index,
+        None=>return Err("AAC-to-WAVE trim requires an explicit audio stream when other tracks exist".into()),
+    };
+    if !info.streams.iter().any(|s|s.index==index && s.media_type=="audio" && s.codec=="aac") {
+        return Err("selected trim stream is not AAC audio".into());
+    }
+    Ok(index)
+}
+
+/// Plan AAC interval export using source edits and trim metadata.
+pub fn trim_aac(source: &std::path::Path, from: i64, to: i64, selected: Option<usize>) -> Result<MediaPlan> {
+    let index=aac_trim_selection(source,selected)?;
+    if crate::native_export::is_adts_source(source).map_err(|e|e.to_string())? {
+        return trim_adts(source,from,to);
+    }
+    let mut plan=decode_audio_selected(source,&AudioDecodeTransform {interval:Some((from,to)),..Default::default()},Some(index))?;
+    plan.command="trim".into();
+    plan.steps.last_mut().ok_or("missing write step")?.detail="publish selected audio as float32 PCM .wav without overwriting".into();
+    plan.notes.push("only explicitly selected audio is exported; source presentation edits and decoder pre-roll apply".into());
+    Ok(plan)
+}

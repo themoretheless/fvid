@@ -133,3 +133,144 @@ fn invalid_ranges_cancel_and_existing_outputs_do_not_publish() {
             .unwrap()
     );
 }
+
+#[test]
+fn selected_container_audio_keeps_timing_and_rejects_implicit_track_loss() {
+    let d = dir("containers");
+    for (name, stream, reference) in [
+        (
+            "two-audio.mp4",
+            1,
+            include_bytes!("fixtures/audio/two-audio-stream1-reference.f32le").as_slice(),
+        ),
+        (
+            "two-audio.mp4",
+            2,
+            include_bytes!("fixtures/audio/two-audio-stream2-reference.f32le").as_slice(),
+        ),
+        (
+            "two-audio.mka",
+            0,
+            include_bytes!("fixtures/audio/two-audio-mka0-reference.f32le").as_slice(),
+        ),
+        (
+            "two-audio.mka",
+            1,
+            include_bytes!("fixtures/audio/two-audio-mka1-reference.f32le").as_slice(),
+        ),
+    ] {
+        let source = fixture(name);
+        let dest = d.0.join(format!("{name}-{stream}.wav"));
+        assert!(
+            fvid::native_export::trim_aac_wave(&source, &dest, 0, 40000, None, None, None).is_err()
+        );
+        assert!(fvid::native_plan::trim_aac(&source, 0, 40000, None).is_err());
+        assert!(!dest.exists());
+        let stats =
+            fvid::native_export::trim_aac_wave(&source, &dest, 0, 40000, Some(stream), None, None)
+                .unwrap();
+        let bytes = std::fs::read(&dest).unwrap();
+        let pcm = &bytes[80..];
+        assert_eq!(pcm.len(), reference.len());
+        let mut square = 0.0f64;
+        let mut peak = 0.0f64;
+        for (actual, expected) in pcm.chunks_exact(4).zip(reference.chunks_exact(4)) {
+            let delta = f64::from(f32::from_le_bytes(actual.try_into().unwrap()))
+                - f64::from(f32::from_le_bytes(expected.try_into().unwrap()));
+            square += delta * delta;
+            peak = peak.max(delta.abs());
+        }
+        assert!(peak < 5e-4 && (square / (pcm.len() / 4) as f64).sqrt() < 1e-4);
+        assert_eq!(
+            stats.sample_frames,
+            u64::from(stats.sample_rate) * 40 / 1000
+        );
+        let cli = d.0.join(format!("cli-{name}-{stream}.wav"));
+        let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "trim"])
+            .arg(&source)
+            .arg(&cli)
+            .args([
+                "--from",
+                "0",
+                "--to",
+                "0.04",
+                "--streams",
+                &stream.to_string(),
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        assert_eq!(std::fs::read(cli).unwrap(), bytes);
+        let plan = fvid::native_plan::trim_aac(&source, 0, 40000, Some(stream)).unwrap();
+        assert_eq!(plan.streams[0].index, stream);
+        #[cfg(feature = "media")]
+        {
+            let options = fvid::media::CopyOptions {
+                streams: vec![stream],
+                ..Default::default()
+            };
+            let api = d.0.join(format!("api-{name}-{stream}.wav"));
+            assert!(fvid::media::trim(&source, &api, 0, 40000, &Default::default()).is_err());
+            fvid::media::trim(&source, &api, 0, 40000, &options).unwrap();
+            assert_eq!(std::fs::read(api).unwrap(), bytes);
+            assert_eq!(
+                fvid::media::plan_trim(&source, 0, 40000, &options).unwrap(),
+                plan
+            );
+        }
+    }
+    let source = fixture("two-audio.mp4");
+    assert!(
+        fvid::native_export::trim_aac_wave(
+            &source,
+            &d.0.join("video.wav"),
+            0,
+            40000,
+            Some(0),
+            None,
+            None
+        )
+        .is_err()
+    );
+    assert!(fvid::native_plan::trim_aac(&source, 0, 40000, Some(9)).is_err());
+}
+
+#[test]
+fn single_container_track_can_be_trimmed_without_selection() {
+    let d = dir("single");
+    for name in [
+        "aac-native-edit.m4a",
+        "aac-stereo.mka",
+        "aac-960-48000.m4a",
+        "aac-960-48000.mka",
+    ] {
+        let source = fixture(name);
+        let dest = d.0.join(format!("{name}.wav"));
+        let baseline = d.0.join(format!("{name}.f32le"));
+        fvid::native_export::export_aac_pcm_selected(
+            &source,
+            &baseline,
+            Some((
+                std::time::Duration::from_millis(10),
+                std::time::Duration::from_millis(30),
+            )),
+            1.0,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
+        .unwrap();
+        fvid::native_export::trim_aac_wave(&source, &dest, 10000, 30000, None, None, None).unwrap();
+        assert_eq!(
+            &std::fs::read(dest).unwrap()[80..],
+            std::fs::read(baseline).unwrap()
+        );
+    }
+}
