@@ -248,7 +248,7 @@ pub fn trim_aac(source: &std::path::Path, from: i64, to: i64, selected: Option<u
 /// Metadata-only plan for decoded, constant-rate video concatenation to Y4M.
 pub fn concat_y4m(sources: &[std::path::PathBuf], selected: Option<usize>) -> Result<MediaPlan> {
     if !(2..=256).contains(&sources.len()) {return Err("concat requires 2..=256 inputs".into());}
-    for source in sources {crate::native_export::validate_concat_video(source,selected).map_err(|e|e.to_string())?;}
+    for source in sources {crate::native_export::validate_video_selection(source,selected).map_err(|e|e.to_string())?;}
     Ok(MediaPlan {
         command:"concat".into(),input:sources[0].clone(),inputs:sources.to_vec(),
         streams:vec![PlanStream {index:selected.unwrap_or(0),media_type:"video".into(),codec:"rawvideo".into(),disposition:"decode".into()}],
@@ -257,5 +257,20 @@ pub fn concat_y4m(sources: &[std::path::PathBuf], selected: Option<usize>) -> Re
         graph:None,notes:vec!["backend: fvid; output .y4m only, no external codecs".into(),
             "metadata-only plan; exact frame timing and decoded layout are validated during execution".into(),
             "timestamps restart at zero in each segment and become contiguous in output; audio is not exported".into()],
+    })
+}
+
+/// Plan decoded video interval export with an explicit Y4M output contract.
+pub fn trim_y4m(source: &std::path::Path, from: i64, to: i64, selected: Option<usize>) -> Result<MediaPlan> {
+    if from < 0 || to <= from {return Err("trim requires 0 <= from < to".into());}
+    crate::native_export::validate_video_selection(source,selected).map_err(|e|e.to_string())?;
+    Ok(MediaPlan {
+        command:"trim".into(),input:source.to_owned(),inputs:vec![source.to_owned()],
+        streams:vec![PlanStream {index:selected.unwrap_or(0),media_type:"video".into(),codec:"rawvideo".into(),disposition:"decode".into()}],
+        steps:vec![PlanStep {action:"decode".into(),detail:"FVid software decode including reference pre-roll".into()},
+            PlanStep {action:"trim".into(),detail:format!("retain frame presentation starts in [{from}, {to}) microseconds from the first presented frame")},
+            PlanStep {action:"write".into(),detail:"require constant contiguous selected frame timing; publish Y4M without overwriting".into()}],
+        graph:None,notes:vec!["backend: fvid; output .y4m only; no audio is exported".into(),
+            "metadata-only plan; decoded frames, nonempty interval and exact timing are validated during execution".into()],
     })
 }

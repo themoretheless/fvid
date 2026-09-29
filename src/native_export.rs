@@ -47,7 +47,7 @@ pub fn export_y4m_transformed(
     interval: Option<(std::time::Duration, std::time::Duration)>,
     geometry: &crate::native_geometry::VideoGeometry,
 ) -> Result<u64> {
-    Ok(export_y4m_sources(&[source.to_owned()],destination,interval,geometry,None,None)?.packets)
+    Ok(export_y4m_sources(&[source.to_owned()],destination,interval,geometry,false,None,None)?.packets)
 }
 
 /// Decode compatible video segments in order into one constant-rate Y4M stream.
@@ -59,12 +59,12 @@ pub fn concat_y4m(sources: &[PathBuf], destination: &Path, selected: Option<usiz
     if destination.extension().and_then(|s|s.to_str())!=Some("y4m") {return Err(invalid("native video concat output requires .y4m"));}
     for source in sources {
         if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
-        validate_concat_video(source,selected)?;
+        validate_video_selection(source,selected)?;
     }
-    export_y4m_sources(sources,destination,None,&Default::default(),cancel,progress)
+    export_y4m_sources(sources,destination,None,&Default::default(),false,cancel,progress)
 }
 
-pub(crate) fn validate_concat_video(source: &Path, selected: Option<usize>) -> Result<()> {
+pub(crate) fn validate_video_selection(source: &Path, selected: Option<usize>) -> Result<()> {
     use std::io::Read;
     let mut file=File::open(source)?;
     let mut prefix=[0;9];file.read_exact(&mut prefix)?;
@@ -74,16 +74,16 @@ pub(crate) fn validate_concat_video(source: &Path, selected: Option<usize>) -> R
     }
     let info=crate::native_probe::probe(source).map_err(|e|invalid(&e))?;
     let videos:Vec<_>=info.streams.iter().filter(|s|s.media_type=="video").collect();
-    if videos.len()!=1 {return Err(invalid("native video concat requires exactly one video track per input"));}
+    if videos.len()!=1 {return Err(invalid("native video export requires exactly one video track per input"));}
     if selected.is_some_and(|i|i!=videos[0].index) || (selected.is_none() && info.streams.len()!=1) {
-        return Err(invalid("video-only concat requires explicit selection when other tracks exist"));
+        return Err(invalid("video-only export requires explicit selection when other tracks exist"));
     }
     Ok(())
 }
 
 fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
     interval: Option<(std::time::Duration,std::time::Duration)>, geometry: &crate::native_geometry::VideoGeometry,
-    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
+    relative_interval: bool, cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::media_control::ProgressEvent> {
     let mut control=crate::native_media::DecodeProgress::new(cancel,progress)?;
     if interval.is_some_and(|(from, to)| from >= to) {
@@ -116,13 +116,17 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
     control.check()?;
     let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
     let segment_start=count;
+    let mut origin=None;
     let mut previous: Option<(u128, u128, u128)> = None;
     while let Some(frame) = reader.read_frame_raw()? {
+        control.check()?;
         let (start, end, scale) = reader
             .frame_interval()
             .ok_or_else(|| invalid("missing frame timing"))?;
+        let first=*origin.get_or_insert(start);
         if let Some((from, to)) = interval {
-            let stamp = product(start, 1_000_000_000)?;
+            let relative_start=if relative_interval {start.checked_sub(first).ok_or_else(||invalid("frame precedes segment origin"))?} else {start};
+            let stamp = product(relative_start, 1_000_000_000)?;
             if stamp >= product(to.as_nanos(), u128::from(scale))? {
                 break;
             }
@@ -749,4 +753,16 @@ pub fn trim_aac_wave(source: &Path, destination: &Path, from: i64, to: i64, sele
     if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
     let index=crate::native_plan::aac_trim_selection(source,selected).map_err(|e|invalid(&e))?;
     export_aac_pcm_selected(source,destination,Some((std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64))),1.0,None,None,Some(index),cancel,progress)
+}
+
+/// Decode video reference pre-roll and retain presentation starts in [from,to).
+/// Bounds are relative to the first presented frame. Output retains source cadence.
+pub fn trim_y4m(source: &Path, destination: &Path, from: i64, to: i64, selected: Option<usize>,
+    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::media_control::ProgressEvent> {
+    if from < 0 || to <= from {return Err(invalid("trim requires 0 <= from < to"));}
+    if destination.extension().and_then(|s|s.to_str())!=Some("y4m") {return Err(invalid("native video trim output requires .y4m"));}
+    if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
+    validate_video_selection(source,selected)?;
+    export_y4m_sources(&[source.to_owned()],destination,Some((std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64))),&Default::default(),true,cancel,progress)
 }

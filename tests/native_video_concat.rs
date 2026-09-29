@@ -123,3 +123,93 @@ fn mismatched_rates_range_empty_segment_and_cancel_never_publish() {
     assert!(fvid::native_plan::concat_y4m(&mixed, Some(1)).is_err());
     assert!(fvid::native_plan::concat_y4m(&mixed, Some(0)).is_ok());
 }
+
+#[test]
+fn interval_trim_matches_full_decode_presentation_frames() {
+    let d = dir("trim");
+    for (i, name) in ["video.mp4", "hevc/main-ipb.mp4", "hevc/main10-ipb.mp4"]
+        .iter()
+        .enumerate()
+    {
+        let source = fixture(name);
+        let full = d.0.join(format!("{i}-full.y4m"));
+        let total = fvid::native_export::export_y4m(&source, &full).unwrap();
+        let bytes = std::fs::read(full).unwrap();
+        let split = bytes.iter().position(|&b| b == b'\n').unwrap() + 1;
+        let header = std::str::from_utf8(&bytes[..split]).unwrap();
+        let rate = header
+            .split_whitespace()
+            .find(|s| s.starts_with('F'))
+            .unwrap();
+        let (num, den) = rate[1..].split_once(':').unwrap();
+        let num = num.parse::<u128>().unwrap();
+        let den = den.parse::<u128>().unwrap();
+        let stride = (bytes.len() - split) / total as usize;
+        assert_eq!((bytes.len() - split) % total as usize, 0);
+        let (from, to) = (41000i64, 221000i64);
+        let mut expected = bytes[..split].to_vec();
+        let mut count = 0;
+        for frame in 0..total as usize {
+            let time = frame as u128 * den * 1000000;
+            if time >= from as u128 * num && time < to as u128 * num {
+                expected.extend_from_slice(
+                    &bytes[split + frame * stride..split + (frame + 1) * stride],
+                );
+                count += 1;
+            }
+        }
+        assert!(count > 0);
+        let output = d.0.join(format!("{i}-trim.y4m"));
+        let stats =
+            fvid::native_export::trim_y4m(&source, &output, from, to, None, None, None).unwrap();
+        assert_eq!(stats.packets, count);
+        assert!(std::fs::read(output).unwrap()==expected,"trim pixels differ for {name}");
+        let cli = d.0.join(format!("{i}-cli.y4m"));
+        let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "trim"])
+            .arg(&source)
+            .arg(&cli)
+            .args(["--from", "0.041", "--to", "0.221", "--progress"])
+            .output()
+            .unwrap();
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        assert_eq!(std::fs::read(cli).unwrap(), expected);
+        let plan = fvid::native_plan::trim_y4m(&source, from, to, None).unwrap();
+        let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "plan", "trim"])
+            .arg(&source)
+            .args(["--from", "0.041", "--to", "0.221", "--output-format", "y4m"])
+            .output()
+            .unwrap();
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        assert_eq!(
+            serde_json::from_slice::<serde_json::Value>(&run.stdout).unwrap(),
+            serde_json::to_value(&plan).unwrap()
+        );
+        #[cfg(feature = "media")]
+        {
+            let api = d.0.join(format!("{i}-api.y4m"));
+            let stats = fvid::media::trim(&source, &api, from, to, &Default::default()).unwrap();
+            assert_eq!(stats.backend, "fvid");
+            assert_eq!(std::fs::read(api).unwrap(), expected);
+            assert_eq!(
+                fvid::media::plan_trim_y4m(&source, from, to, &Default::default()).unwrap(),
+                plan
+            );
+        }
+        let empty = d.0.join(format!("{i}-empty.y4m"));
+        assert!(
+            fvid::native_export::trim_y4m(&source, &empty, 9000000, 10000000, None, None, None)
+                .is_err()
+        );
+        assert!(!empty.exists());
+    }
+}

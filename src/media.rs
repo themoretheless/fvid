@@ -326,6 +326,11 @@ pub fn trim(
     to: i64,
     options: &CopyOptions,
 ) -> Result<CopyStats> {
+    if destination.extension().and_then(|s|s.to_str())==Some("y4m") {
+        validate_native_copy_options(options,true)?;
+        let stats=crate::native_export::trim_y4m(source,destination,from,to,options.streams.first().copied(),options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())?;
+        return Ok(CopyStats {packets:stats.packets,payload_bytes:stats.payload_bytes,segments:1,backend:"fvid",fvid_payload_copies:0});
+    }
     if crate::native_media::is_aac_source(source).map_err(|e|e.to_string())?
         && destination.extension().and_then(|s|s.to_str())==Some("wav") {
         validate_native_copy_options(options,true)?;
@@ -410,4 +415,10 @@ pub fn plan_concat(sources: &[std::path::PathBuf], options: &CopyOptions) -> Res
 pub fn plan_concat_y4m(sources: &[std::path::PathBuf], options: &CopyOptions) -> Result<MediaPlan> {
     validate_native_copy_options(options,true)?;
     crate::native_plan::concat_y4m(sources,options.streams.first().copied())
+}
+
+/// Plan an explicitly requested decoded Y4M video trim.
+pub fn plan_trim_y4m(source: &std::path::Path, from: i64, to: i64, options: &CopyOptions) -> Result<MediaPlan> {
+    validate_native_copy_options(options,true)?;
+    crate::native_plan::trim_y4m(source,from,to,options.streams.first().copied())
 }

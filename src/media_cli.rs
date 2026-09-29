@@ -140,6 +140,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         }
         return Ok(());
     }
+    if try_video_trim(args)? {return Ok(());}
     if try_video_concat(args)? {return Ok(());}
     if try_native_audio_concat(args)? { return Ok(()); }
     if try_native_audio_trim(args)? { return Ok(()); }
@@ -3161,6 +3162,39 @@ fn try_video_concat(args: &[String]) -> Result<bool, Box<dyn std::error::Error>>
         let hook=report.then(||fvid::media_control::ProgressHook::new(|e|eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",e.packets,e.payload_bytes,e.done)));
         let stats=fvid::native_export::concat_y4m(&paths,std::path::Path::new(&args[command+1]),selected,None,hook.as_ref())?;
         if !quiet {println!("{}",serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":paths.len(),"backend":"fvid","fvid_payload_copies":0}));}
+    }
+    Ok(true)
+}
+
+fn try_video_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let plan=args.first().map(String::as_str)==Some("plan");let command=usize::from(plan);
+    if args.get(command).map(String::as_str)!=Some("trim") {return Ok(false);}
+    let matches=if plan {args.windows(2).any(|s|s[0]=="--output-format" && s[1]=="y4m")} else {args.get(command+2).is_some_and(|p|std::path::Path::new(p).extension().and_then(|s|s.to_str())==Some("y4m"))};
+    if !matches {return Ok(false);}
+    let source=args.get(command+1).ok_or("missing input")?;
+    let (mut from,mut to,mut selected)=(None,None,None);let mut quiet=false;let mut report=false;
+    let mut items=args[command+if plan {2} else {3}..].iter();
+    while let Some(arg)=items.next() {
+        match arg.as_str() {
+            "--output-format" if plan=>{if items.next().map(String::as_str)!=Some("y4m") {return Err("expected y4m output format".into());}},
+            "--from"|"--to"=>{
+                let slot=if arg=="--from" {&mut from} else {&mut to};if slot.is_some() {return Err("duplicate trim boundary".into());}
+                let value=decode_time(items.next().ok_or("missing trim boundary")?)?;
+                if value.subsec_nanos()%1000!=0 {return Err("trim boundary must be representable in microseconds".into());}
+                *slot=Some(i64::try_from(value.as_micros()).map_err(|_|"trim boundary overflow")?);
+            },
+            "--streams"=>{if selected.is_some() {return Err("duplicate streams option".into());}selected=Some(items.next().ok_or("missing stream")?.parse::<usize>()?);},
+            "--quiet"=>quiet=true,
+            "--progress" if !plan=>report=true,
+            _=>return Err(format!("unsupported native video trim option: {arg}").into()),
+        }
+    }
+    let (from,to)=(from.ok_or("--from required")?,to.ok_or("--to required")?);
+    if plan {println!("{}",serde_json::to_string_pretty(&fvid::native_plan::trim_y4m(std::path::Path::new(source),from,to,selected)?)?);}
+    else {
+        let hook=report.then(||fvid::media_control::ProgressHook::new(|e|eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",e.packets,e.payload_bytes,e.done)));
+        let stats=fvid::native_export::trim_y4m(std::path::Path::new(source),std::path::Path::new(&args[command+2]),from,to,selected,None,hook.as_ref())?;
+        if !quiet {println!("{}",serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":1,"backend":"fvid","fvid_payload_copies":0}));}
     }
     Ok(true)
 }

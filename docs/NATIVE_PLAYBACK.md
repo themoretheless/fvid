@@ -1596,3 +1596,24 @@ The output preserves raw planes, not compressed packets; no audio is exported.
 The existing Y4M export format restrictions remain, including unsupported chroma
 layouts. Tests compare concatenated AVC, HEVC Main and Main10 planes against
 individual native exports and exercise incompatible rates/ranges and cancellation.
+
+### Owned video trim to Y4M (2026-09-29)
+
+`fvid media trim INPUT OUTPUT.y4m --from SECONDS --to SECONDS` and
+`media::trim` use the software decoders and atomic Y4M writer. The explicit plan
+is `plan trim INPUT --from SECONDS --to SECONDS --output-format y4m`, or
+`media::plan_trim_y4m`. Source selection follows video concat: exactly one video
+track, and explicit selection when other tracks exist. No audio is exported.
+
+Trim bounds are relative to the first presented frame, so a nonzero initial MP4
+PTS does not shift the requested cut. Reference pre-roll is decoded before the
+first retained frame, with cancellation checked during that work. Frame starts
+in the half-open interval are retained without interpolation; selected timing
+must be constant and contiguous. Empty intervals produce no output. Progress
+counts written frames/planes, not discarded pre-roll. The existing lower-level
+`export_y4m_interval` source-timestamp contract is unchanged.
+
+AVC, HEVC Main and Main10 tests compare output against the independently selected
+frame slices of a full native decode, including the AVC fixture's 80 ms initial
+PTS, fractional frame boundaries and empty intervals. CLI/public API and explicit
+plans are checked alongside existing Y4M export regressions.
