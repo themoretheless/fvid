@@ -193,9 +193,9 @@ pub struct Track {
 
 /// Read a `colr` atom's payload.
 ///
-/// The atom opens with its colour type. `nclx` is a four-byte version and
-/// flags header, then the CICP triple and a range flag; `nclc`, the older
-/// QuickTime spelling, is the bare triple with no range statement at all. An
+/// The atom opens with its four-byte colour type, then three big-endian
+/// 16-bit CICP codes. `nclx` adds a range flag byte; the older QuickTime
+/// `nclc` spelling has no range statement. Neither is a FullBox. An
 /// ICC-based `rICC`/`nICC` describes colour as a profile rather than as three
 /// indices and is not decoded here.
 fn colr_description(payload: &[u8]) -> Option<ColourDescription> {
@@ -204,15 +204,14 @@ fn colr_description(payload: &[u8]) -> Option<ColourDescription> {
         b"nclc" => false,
         _ => return None,
     };
-    // `nclx` puts a version byte and three flag bytes between the type and the
-    // indices; `nclc` goes straight to them.
-    let body = if full_range_stated {
-        payload.get(8..)?
-    } else {
-        payload.get(4..)?
+    let body = payload.get(4..)?;
+    let code = |offset: usize| -> Option<u8> {
+        let bytes: [u8; 2] = body.get(offset..offset + 2)?.try_into().ok()?;
+        // Do not alias an unrepresentable code to a different 8-bit CICP code.
+        u8::try_from(u16::from_be_bytes(bytes)).ok()
     };
-    let [primaries, transfer, matrix] = *body.first_chunk::<3>()?;
-    let range_byte = if full_range_stated { *body.get(3)? } else { 0 };
+    let (primaries, transfer, matrix) = (code(0)?, code(2)?, code(4)?);
+    let range_byte = if full_range_stated { *body.get(6)? } else { 0 };
     Some(ColourDescription {
         primaries,
         transfer,
@@ -1904,11 +1903,10 @@ mod tests {
     #[test]
     fn colr_reads_both_writers_spellings_of_the_cicp_triple() {
         // BT.2020 primaries, PQ transfer, BT.2020 NCL matrix, full-range flag
-        // in the top bit of the fourth byte.
+        // in the top bit of the byte following the three 16-bit codes.
         let nclx = [
             b"nclx"[..].to_vec(),
-            vec![0x01, 0x00, 0x00, 0x00],
-            vec![9, 16, 9, 0x80],
+            vec![0, 9, 0, 16, 0, 9, 0x80],
         ]
         .concat();
         assert_eq!(
@@ -1922,13 +1920,13 @@ mod tests {
         );
         let narrow = {
             let mut v = nclx.clone();
-            v[11] = 0x00;
+            v[10] = 0x00;
             v
         };
         assert_eq!(colr_description(&narrow).map(|c| c.full_range), Some(false));
         // QuickTime's older spelling has no version header and no range at all.
         let mut nclc = b"nclc"[..].to_vec();
-        nclc.extend_from_slice(&[1, 1, 1]);
+        nclc.extend_from_slice(&[0, 1, 0, 1, 0, 1]);
         assert_eq!(
             colr_description(&nclc),
             Some(ColourDescription {
@@ -1938,6 +1936,9 @@ mod tests {
                 full_range: false,
             })
         );
+        let mut wide_code = nclx.clone();
+        wide_code[4] = 1;
+        assert_eq!(colr_description(&wide_code), None, "0x0109 must not alias BT.2020");
         // An ICC profile states colour another way and is not guessed at here.
         assert_eq!(colr_description(b"rICC\x00\x00\x00\x00"), None);
         // Truncated atoms of either spelling are refused, not read past.

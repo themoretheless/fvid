@@ -21,8 +21,8 @@ pub struct Track {
     pub width: u64,
     pub height: u64,
     /// `DisplayWidth`/`DisplayHeight`: the size in pixels the coded picture is
-    /// drawn at. `(0, 0)` when the track states no such size, which most do, or
-    /// states it in a unit other than pixels.
+    /// drawn at, or the display aspect ratio when DisplayUnit is 3.
+    /// `(0, 0)` when absent or stated in physical/unknown units.
     pub display: (u64, u64),
     /// `PixelCropLeft/Top/Right/Bottom`: the border of coded pixels the track
     /// asks not to be shown, as read from the elements in that order. A track
@@ -90,11 +90,17 @@ impl Track {
     pub fn pixel_aspect(&self) -> (u32, u32) {
         let coded = self.visible();
         let drawn = (self.display.0, self.display.1);
-        // (drawn width / coded width) over (drawn height / coded height). A
-        // size too large to multiply is one this reader cannot divide either.
-        let wide = drawn.0.checked_mul(coded.1).unwrap_or(0);
-        let tall = drawn.1.checked_mul(coded.0).unwrap_or(0);
-        super::reduce_ratio(wide, tall)
+        // Products of two u64 dimensions fit u128. Reduce before narrowing so
+        // large exact display ratios do not silently become square pixels.
+        let wide = u128::from(drawn.0) * u128::from(coded.1);
+        let tall = u128::from(drawn.1) * u128::from(coded.0);
+        if wide == 0 || tall == 0 { return (1, 1); }
+        let (mut a, mut b) = (wide, tall);
+        while b != 0 { let rest = a % b; a = b; b = rest; }
+        match (u32::try_from(wide / a), u32::try_from(tall / a)) {
+            (Ok(n), Ok(d)) => (n, d),
+            _ => (1, 1),
+        }
     }
 }
 #[derive(Clone, Copy)]
@@ -568,7 +574,7 @@ impl<R: Read + Seek> WebmReader<R> {
                                             _ => {}
                                         }
                                     }
-                                    track.display = if unit == 0 { drawn } else { (0, 0) };
+                                    track.display = if unit == 0 || unit == 3 { drawn } else { (0, 0) };
                                     // A crop that leaves no picture is a file
                                     // making a statement it cannot keep; the
                                     // whole picture is shown.
@@ -1156,8 +1162,8 @@ mod tests {
         assert!(r.read_packet(2).is_err());
     }
     /// A track's display size says what shape its pixels have only against the
-    /// size it stores them at, and only while `DisplayUnit` keeps both in
-    /// pixels: a track measured in some other unit states no size to divide.
+    /// size it stores them at. Pixel dimensions and explicit display ratios
+    /// both specify shape; physical display units remain unsupported.
     #[test]
     fn a_video_track_display_size_becomes_the_shape_of_its_pixels() {
         fn video(extra: &[Vec<u8>]) -> Vec<u8> {
@@ -1196,6 +1202,8 @@ mod tests {
             (1, 1)
         );
         assert_eq!(track(&[]).pixel_aspect(), (1, 1));
+        let ratio = track(&[atom(&[0x54, 0xb0], &[16]), atom(&[0x54, 0xba], &[9]), atom(&[0x54, 0xb2], &[3])]);
+        assert_eq!(ratio.pixel_aspect(), (8, 9));
         // Measured in centimetres rather than pixels, the pair is a size on a
         // screen whose dots this reader does not know.
         let counted = track(&[

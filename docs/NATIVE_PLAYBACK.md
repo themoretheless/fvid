@@ -1773,3 +1773,33 @@ then compare raw and RGB seek results against continuous playback at first,
 middle and last frames. An opt-in reference test also reads Matroska generated
 by FFmpeg, so compatibility is checked beyond FVid's own writer. MP4 edit-list
 and metadata mapping for high-level remux remain outstanding.
+
+### Matroska display and HDR metadata (2026-09-29)
+
+`PacketWriter::new_with_video_metadata` accepts optional per-video-track
+`VideoMetadata`: coded-pixel crop borders, pixel aspect ratio, an explicit
+CICP/range declaration, mastering-display chromaticities/luminances and
+MaxCLL/MaxFALL. The existing `new` constructor and AAC routes keep their API.
+Metadata is validated before output is written; mismatched track counts,
+video metadata on audio, empty crops, zero aspect ratios, nonfinite values and
+noninteger content-light levels fail rather than being silently rounded.
+
+Non-square pixels use exact `DisplayUnit=3` display aspect ratios. The native
+reader now understands this unit and reduces dimension products in u128 before
+narrowing, retaining even large valid u32 pixel ratios. The native player sees
+the same crop, aspect, colour and HDR properties after writing and reopening.
+An opt-in FFprobe test independently checks the aspect, CICP/range, all ten
+mastering-display values and both content-light values.
+
+The prerequisite MP4 `colr` reader was also corrected: both nclx and nclc place
+three big-endian 16-bit CICP codes immediately after the type. nclx adds the
+range byte; neither has a version/flags header. Tests cover both spellings,
+truncation, unrepresentable codes and a real nclx atom produced independently
+by FFmpeg. This avoids losing or misreading container colour on future remux.
+
+The packet layer still does not map MP4 edit lists, rotation or general file
+metadata; the existing high-level MP4-to-Matroska route remains legacy until
+those mappings are implemented.
+
+References: https://www.matroska.org/technical/elements.html and
+https://github.com/FFmpeg/FFmpeg/blob/master/libavformat/mov.c (`mov_read_colr`).
