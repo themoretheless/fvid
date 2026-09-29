@@ -133,9 +133,18 @@ pub fn remux(
     input.read_exact(&mut prefix).map_err(|e| e.to_string())?;
     let adts = crate::container::adts::header(&prefix).is_some();
     let mp4 = &prefix[4..8] == b"ftyp";
-    if !adts && (matches!(destination.extension().and_then(|s|s.to_str()),Some("mka"|"mkv")) || !mp4) { return fvid_media::remux(source, destination, options); }
+    let matroska = matches!(destination.extension().and_then(|s|s.to_str()),Some("mka"|"mkv"));
+    let mp4_aac = mp4 && matroska && crate::native_export::is_single_track_mp4_aac(source).map_err(|e| e.to_string())?;
+    if !adts && !mp4_aac && (matroska || !mp4) { return fvid_media::remux(source, destination, options); }
+    // Preserve unmigrated metadata mutations/stream options on the legacy path.
+    if mp4_aac && validate_native_copy_options(options, false).is_err() {
+        return fvid_media::remux(source, destination, options);
+    }
     validate_native_copy_options(options, false)?;
-    let stats = if adts {
+    let stats = if mp4_aac {
+        crate::native_export::remux_mp4_aac_matroska(source, destination,
+            options.cancel.as_ref(), options.progress.as_ref())
+    } else if adts {
         crate::native_export::remux_adts_aac_stats(source, destination,
             options.cancel.as_ref(), options.progress.as_ref())
     } else {

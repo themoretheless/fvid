@@ -556,3 +556,150 @@ fn independent_tools_confirm_written_hdr_and_real_mp4_colour_layout() {
         }
     );
 }
+
+fn file_metadata_fixture() -> fvid::container::matroska_write::FileMetadata {
+    use fvid::container::{FileTags, matroska_write::FileMetadata};
+    FileMetadata {
+        tags: FileTags {
+            title: "Заголовок 🎬".into(),
+            artist: "Artist".into(),
+            album: "Album".into(),
+            genre: "Documentary".into(),
+            date: "2026-09-29".into(),
+            comment: "Line 1\nLine 2".into(),
+            track: "3/12".into(),
+            album_artist: "Album artist".into(),
+            disc: "1/2".into(),
+            publisher: "Publisher".into(),
+            copyright: "© Author".into(),
+            description: "Description".into(),
+            rating: "4".into(),
+        },
+        chapters: vec![
+            webm::Chapter {
+                start_ns: 0,
+                end_ns: Some(10_000_001),
+                title: "Начало".into(),
+            },
+            webm::Chapter {
+                start_ns: 10_000_001,
+                end_ns: Some(20_000_002),
+                title: "Середина".into(),
+            },
+            webm::Chapter {
+                start_ns: 20_000_002,
+                end_ns: None,
+                title: "".into(),
+            },
+        ],
+    }
+}
+fn write_file_metadata(meta: &fvid::container::matroska_write::FileMetadata) -> Vec<u8> {
+    let data = std::fs::read(fixture("audio/aac-mono-44k.aac")).unwrap();
+    let source = fvid::container::adts::Aac::parse(&data, &Default::default()).unwrap();
+    let mut out = Cursor::new(Vec::new());
+    let mut writer = PacketWriter::new_with_metadata(
+        &mut out,
+        &[TrackSpec {
+            encoding: Encoding::Aac {
+                configuration: &source.frames[0].asc,
+                sample_rate: source.sample_rate,
+                channels: source.channels,
+            },
+            name: "Sound",
+            language: "und",
+        }],
+        &[],
+        meta,
+    )
+    .unwrap();
+    writer
+        .write_packet(0, 0, 30_000_003, true, source.packet(0))
+        .unwrap();
+    writer.finish().unwrap();
+    out.into_inner()
+}
+#[test]
+fn file_tags_and_chapter_boundaries_survive_owned_writer() {
+    let metadata = file_metadata_fixture();
+    let bytes = write_file_metadata(&metadata);
+    let mut reader = webm::WebmReader::open(Cursor::new(&bytes), Default::default()).unwrap();
+    reader.scan_all().unwrap();
+    assert_eq!(reader.tags, metadata.tags);
+    assert_eq!(reader.chapters, metadata.chapters);
+    assert_eq!(reader.duration_ns, Some(30_000_003));
+    for bad in [
+        fvid::container::matroska_write::FileMetadata {
+            tags: fvid::container::FileTags {
+                title: "bad\0title".into(),
+                ..Default::default()
+            },
+            ..Default::default()
+        },
+        fvid::container::matroska_write::FileMetadata {
+            chapters: vec![webm::Chapter {
+                start_ns: 2,
+                end_ns: Some(1),
+                title: "".into(),
+            }],
+            ..Default::default()
+        },
+    ] {
+        let mut out = Cursor::new(Vec::new());
+        let track = source();
+        assert!(PacketWriter::new_with_metadata(&mut out, &[spec(&track)], &[], &bad).is_err());
+        assert!(out.get_ref().is_empty());
+    }
+}
+#[test]
+#[ignore = "requires FVID_REFERENCE_FFPROBE"]
+fn independent_probe_reads_file_tags_and_chapters() {
+    let d = std::env::temp_dir().join(format!("fvid-file-meta-{}.mka", std::process::id()));
+    std::fs::write(&d, write_file_metadata(&file_metadata_fixture())).unwrap();
+    let output = std::process::Command::new(std::env::var_os("FVID_REFERENCE_FFPROBE").unwrap())
+        .args([
+            "-v",
+            "error",
+            "-show_format",
+            "-show_chapters",
+            "-of",
+            "json",
+        ])
+        .arg(&d)
+        .output()
+        .unwrap();
+    std::fs::remove_file(&d).unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let tags = value["format"]["tags"].as_object().unwrap();
+    for (key, expected) in [
+        ("TITLE", "Заголовок 🎬"),
+        ("ARTIST", "Artist"),
+        ("ALBUM", "Album"),
+        ("GENRE", "Documentary"),
+        ("DATE", "2026-09-29"),
+        ("COMMENT", "Line 1\nLine 2"),
+        ("track", "3/12"),
+        ("ALBUM_ARTIST", "Album artist"),
+        ("DISCNUMBER", "1/2"),
+        ("PUBLISHER", "Publisher"),
+        ("COPYRIGHT", "© Author"),
+        ("DESCRIPTION", "Description"),
+        ("RATING", "4"),
+    ] {
+        let got = tags
+            .iter()
+            .find(|(name, _)| name.eq_ignore_ascii_case(key))
+            .unwrap_or_else(|| panic!("missing {key}: {tags:?}"));
+        assert_eq!(got.1.as_str(), Some(expected), "{key}");
+    }
+    let chapters = value["chapters"].as_array().unwrap();
+    assert_eq!(chapters.len(), 3);
+    assert_eq!(chapters[1]["start"], 10_000_001);
+    assert_eq!(chapters[1]["end"], 20_000_002);
+    assert_eq!(chapters[1]["tags"]["title"], "Середина");
+}

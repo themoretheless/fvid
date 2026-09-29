@@ -1851,3 +1851,31 @@ output must be discarded by the publisher, and this primitive never reports
 and 960-sample frames, checks rejected edits and cancellation, and has an opt-in
 `FVID_REFERENCE_FFMPEG` oracle test for independent priming/tail trimming. FFmpeg
 is used only by that reference test, never by the export implementation.
+
+
+### Owned AAC MP4 to Matroska file remux
+
+`fvid media remux INPUT.m4a OUTPUT.mka [--progress]` and `media::remux`
+now use `native_export::remux_mp4_aac_matroska` for a single AAC track with
+no edit or one contiguous media edit. `.mkv` output is also accepted. The
+headless CLI requires neither the `media` feature nor the FFmpeg adapter.
+
+The file wrapper `matroska_write::write_mp4_aac_file` preserves the MP4 reader's
+`FileTags`, chapter starts/titles, and track language/title while using the same
+sample-exact priming/tail mapping as the track primitive. `PacketWriter` accepts
+`FileMetadata` with all thirteen tag fields and flat, unordered chapters,
+including optional exclusive ends. Chapter times use nanoseconds as specified
+by <https://www.matroska.org/technical/elements.html>. Invalid chapter ranges or
+embedded NUL strings fail before the writer emits a header.
+
+Publication uses a temporary file in the output directory, flush/sync, then a
+non-overwriting hard link. Cancellation/failure discards partial output;
+`done=true` is emitted only after publication. Multiple or refused tracks are
+rejected by this file wrapper rather than dropped. The general `media` adapter
+still handles unmigrated codecs, multiple tracks, complex edits and metadata
+mutation options; this change does not remove its aggregate FFmpeg dependency.
+
+The CLI/API integration test preserves PCM, tags and chapters together and
+checks cancellation, existing-output protection and rejection of multiple
+tracks. An opt-in independent ffprobe test checks all tag fields and exact
+chapter boundaries; ffprobe canonically reports `PART_NUMBER` as `track`.

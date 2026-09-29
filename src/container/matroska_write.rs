@@ -33,6 +33,98 @@ fn uint(id: u32, value: u64) -> Result<Vec<u8>> {
     element(id, &b[b.iter().position(|&v| v != 0).unwrap_or(7)..])
 }
 
+/// File-level metadata. Chapter timestamps are nanoseconds on the presentation
+/// timeline; editions are flat and unordered. No implicit chapter ends are added.
+#[derive(Clone, Debug, Default)]
+pub struct FileMetadata {
+    pub tags: super::FileTags,
+    pub chapters: Vec<super::webm::Chapter>,
+}
+
+impl FileMetadata {
+    pub fn from_mp4<R: Read + Seek>(input: &super::mp4::Mp4Reader<R>) -> Self {
+        Self {
+            tags: input.tags().clone(),
+            chapters: input
+                .chapters()
+                .iter()
+                .map(|c| super::webm::Chapter {
+                    start_ns: c.start_ns,
+                    end_ns: None,
+                    title: c.title.clone(),
+                })
+                .collect(),
+        }
+    }
+}
+
+fn file_metadata(value: &FileMetadata) -> Result<Vec<u8>> {
+    let tags = &value.tags;
+    let mut simple = Vec::new();
+    for (name, value) in [
+        ("TITLE", &tags.title),
+        ("ARTIST", &tags.artist),
+        ("ALBUM", &tags.album),
+        ("GENRE", &tags.genre),
+        ("DATE", &tags.date),
+        ("COMMENT", &tags.comment),
+        ("PART_NUMBER", &tags.track),
+        ("ALBUM_ARTIST", &tags.album_artist),
+        ("DISCNUMBER", &tags.disc),
+        ("PUBLISHER", &tags.publisher),
+        ("COPYRIGHT", &tags.copyright),
+        ("DESCRIPTION", &tags.description),
+        ("RATING", &tags.rating),
+    ] {
+        if value.contains('\0') {
+            return Err(invalid("NUL in Matroska tag"));
+        }
+        if !value.is_empty() {
+            simple.extend(element(
+                0x67c8,
+                &[
+                    element(0x45a3, name.as_bytes())?,
+                    element(0x4487, value.as_bytes())?,
+                ]
+                .concat(),
+            )?);
+        }
+    }
+    let mut out = Vec::new();
+    if !simple.is_empty() {
+        let mut tag = element(0x63c0, &[])?; // No target UID: the whole file.
+        tag.extend(simple);
+        out.extend(element(0x1254c367, &element(0x7373, &tag)?)?);
+    }
+    let mut atoms = Vec::new();
+    for (i, chapter) in value.chapters.iter().enumerate() {
+        if chapter.end_ns.is_some_and(|end| end < chapter.start_ns) || chapter.title.contains('\0')
+        {
+            return Err(invalid("invalid Matroska chapter"));
+        }
+        let mut atom = uint(0x73c4, i as u64 + 1)?;
+        atom.extend(uint(0x91, chapter.start_ns)?);
+        if let Some(end) = chapter.end_ns {
+            atom.extend(uint(0x92, end)?);
+        }
+        if !chapter.title.is_empty() {
+            atom.extend(element(
+                0x80,
+                &[
+                    element(0x85, chapter.title.as_bytes())?,
+                    element(0x437c, b"und")?,
+                ]
+                .concat(),
+            )?);
+        }
+        atoms.extend(element(0xb6, &atom)?);
+    }
+    if !atoms.is_empty() {
+        out.extend(element(0x1043a770, &element(0x45b9, &atoms)?)?);
+    }
+    Ok(out)
+}
+
 /// Packet storage is unchanged: length-prefixed AVC/HEVC NAL units or raw AAC.
 pub enum Encoding<'a> {
     Avc {
@@ -364,6 +456,17 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         tracks: &[TrackSpec<'_>],
         options: &[TrackOptions],
     ) -> Result<Self> {
+        Self::new_with_metadata(output, tracks, options, &FileMetadata::default())
+    }
+    /// Supply file tags and chapters alongside track metadata. Metadata is
+    /// validated before writing any output; packet payloads remain streamed.
+    pub fn new_with_metadata(
+        output: &'a mut W,
+        tracks: &[TrackSpec<'_>],
+        options: &[TrackOptions],
+        metadata: &FileMetadata,
+    ) -> Result<Self> {
+        let file_elements = file_metadata(metadata)?;
         if tracks.is_empty() || tracks.len() > 126 {
             return Err(invalid("Matroska requires 1..=126 tracks"));
         }
@@ -404,6 +507,7 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         let duration_offset = output.stream_position()? + info.len() as u64 - 8;
         output.write_all(&info)?;
         output.write_all(&element(0x1654ae6b, &entries)?)?;
+        output.write_all(&file_elements)?;
         Ok(Self {
             output,
             segment_size,
@@ -657,6 +761,39 @@ pub fn write_mp4_aac<R: Read + Seek, W: Write + Seek>(
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
 ) -> Result<ProgressEvent> {
+    write_mp4_aac_metadata(
+        input,
+        track_index,
+        output,
+        &FileMetadata::default(),
+        cancel,
+        progress,
+    )
+}
+
+/// Remux a single-track AAC MP4 file, including all represented tags and chapters.
+/// Other tracks are rejected rather than silently discarded.
+pub fn write_mp4_aac_file<R: Read + Seek, W: Write + Seek>(
+    input: &mut super::mp4::Mp4Reader<R>,
+    output: &mut W,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+) -> Result<ProgressEvent> {
+    if input.tracks().len() != 1 || !input.refused().is_empty() {
+        return Err(invalid("AAC Matroska remux requires a single audio track"));
+    }
+    let metadata = FileMetadata::from_mp4(input);
+    write_mp4_aac_metadata(input, 0, output, &metadata, cancel, progress)
+}
+
+fn write_mp4_aac_metadata<R: Read + Seek, W: Write + Seek>(
+    input: &mut super::mp4::Mp4Reader<R>,
+    track_index: usize,
+    output: &mut W,
+    metadata: &FileMetadata,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+) -> Result<ProgressEvent> {
     let check = || {
         if cancel.is_some_and(|c| c.is_cancelled()) {
             Err(invalid("media operation cancelled"))
@@ -758,7 +895,7 @@ pub fn write_mp4_aac<R: Read + Seek, W: Write + Seek>(
         .ok_or_else(|| invalid("AAC timeline overflow"))?;
     let padding =
         i64::try_from(ns(coded_end - end)?).map_err(|_| invalid("AAC padding overflow"))?;
-    let mut writer = PacketWriter::new_with_options(
+    let mut writer = PacketWriter::new_with_metadata(
         output,
         &[TrackSpec {
             encoding: Encoding::Aac {
@@ -773,6 +910,7 @@ pub fn write_mp4_aac<R: Read + Seek, W: Write + Seek>(
             codec_delay_ns: delay,
             ..Default::default()
         }],
+        metadata,
     )?;
     if let Some(h) = progress {
         h.emit(writer.event());

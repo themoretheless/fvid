@@ -752,3 +752,46 @@ pub fn trim_y4m(source: &Path, destination: &Path, from: i64, to: i64, selected:
     validate_video_selection(source,selected)?;
     export_y4m_sources(&[source.to_owned()],destination,Some((std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64))),&Default::default(),true,cancel,progress)
 }
+
+/// Whether the MP4 contains exactly one AAC track and no omitted tracks.
+/// A single contiguous media edit is eligible; packet validation occurs during remux.
+pub fn is_single_track_mp4_aac(source: &Path) -> Result<bool> {
+    let input = crate::container::mp4::Mp4Reader::open(BufReader::new(File::open(source)?), Default::default())?;
+    Ok(input.refused().is_empty() && input.tracks().len() == 1
+        && input.tracks()[0].handler == *b"soun" && input.tracks()[0].codec == *b"mp4a"
+        && (input.tracks()[0].edits.is_empty() || (input.tracks()[0].edits.len() == 1
+            && input.tracks()[0].edits[0].media_time >= 0)))
+}
+
+/// Publish a single-track AAC MP4 as Matroska using owned packets, edits,
+/// file tags and chapters. Existing outputs are never replaced.
+pub fn remux_mp4_aac_matroska(
+    source: &Path, destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::media_control::ProgressEvent> {
+    if cancel.is_some_and(|c| c.is_cancelled()) { return Err(invalid("media operation cancelled")); }
+    if !matches!(destination.extension().and_then(|s| s.to_str()), Some("mka" | "mkv")) {
+        return Err(invalid("AAC Matroska remux output requires .mka or .mkv"));
+    }
+    let mut input = crate::container::mp4::Mp4Reader::open(BufReader::new(File::open(source)?), Default::default())?;
+    let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+    let (temporary, file) = (0..100).find_map(|_| {
+        let path = directory.join(format!(".fvid-mka-{}-{}.tmp", std::process::id(), NEXT.fetch_add(1, Ordering::Relaxed)));
+        match OpenOptions::new().write(true).create_new(true).open(&path) {
+            Ok(file) => Some(Ok((Temporary(path), file))),
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => None,
+            Err(error) => Some(Err(error)),
+        }
+    }).ok_or_else(|| invalid("cannot reserve Matroska output"))??;
+    let mut output = BufWriter::new(file);
+    let event = crate::container::matroska_write::write_mp4_aac_file(&mut input, &mut output, cancel, progress)?;
+    output.flush()?;
+    output.get_ref().sync_all()?;
+    drop(output);
+    if cancel.is_some_and(|c| c.is_cancelled()) { return Err(invalid("media operation cancelled")); }
+    std::fs::hard_link(&temporary.0, destination)?;
+    let event = crate::media_control::ProgressEvent { done: true, ..event };
+    if let Some(hook) = progress { hook.emit(event); }
+    Ok(event)
+}

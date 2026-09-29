@@ -482,3 +482,150 @@ fn mp4_aac_invalid_edits_and_cancellation_never_report_completion() {
     );
     assert!(untouched.get_ref().is_empty());
 }
+
+// Use real AAC packet/index bytes and real MP4 tag boxes, adding two chpl
+// entries after mdat so sample offsets remain untouched.
+fn tagged_aac_mp4() -> Vec<u8> {
+    fn children(bytes: &[u8]) -> Vec<(&[u8], &[u8])> {
+        let mut out = Vec::new();
+        let mut at = 0;
+        while at < bytes.len() {
+            let size = u32::from_be_bytes(bytes[at..at + 4].try_into().unwrap()) as usize;
+            assert!(size >= 8 && at + size <= bytes.len());
+            out.push((&bytes[at + 4..at + 8], &bytes[at..at + size]));
+            at += size;
+        }
+        out
+    }
+    fn atom(id: &[u8; 4], body: &[u8]) -> Vec<u8> {
+        let mut out = ((body.len() + 8) as u32).to_be_bytes().to_vec();
+        out.extend(id);
+        out.extend(body);
+        out
+    }
+    let tags =
+        std::fs::read(Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tags/tags.mp4"))
+            .unwrap();
+    let moov = children(&tags)
+        .into_iter()
+        .find(|(id, _)| *id == b"moov")
+        .unwrap()
+        .1;
+    let udta = children(&moov[8..])
+        .into_iter()
+        .find(|(id, _)| *id == b"udta")
+        .unwrap()
+        .1;
+    let mut metadata = udta[8..].to_vec();
+    let mut chapter = vec![1, 0, 0, 0, 0, 0, 0, 0, 2];
+    for (start, title) in [(0u64, "Opening"), (500_000, "Глава 2")] {
+        chapter.extend(start.to_be_bytes());
+        chapter.push(title.len() as u8);
+        chapter.extend(title.as_bytes());
+    }
+    metadata.extend(atom(b"chpl", &chapter));
+    let source = std::fs::read(fixture("aac-native-edit.m4a")).unwrap();
+    let mut result = Vec::new();
+    for (id, bytes) in children(&source) {
+        if id != b"moov" {
+            result.extend(bytes);
+            continue;
+        }
+        assert!(result.windows(4).any(|w| w == b"mdat"));
+        let mut movie = Vec::new();
+        for (id, bytes) in children(&bytes[8..]) {
+            if id != b"udta" {
+                movie.extend(bytes);
+            }
+        }
+        movie.extend(atom(b"udta", &metadata));
+        result.extend(atom(b"moov", &movie));
+    }
+    result
+}
+
+#[test]
+fn mp4_aac_cli_and_api_publish_metadata_and_preserve_existing_output() {
+    let d = dir("mp4-publish");
+    let source = d.0.join("source.m4a");
+    let bytes = tagged_aac_mp4();
+    std::fs::write(&source, &bytes).unwrap();
+    let mp4 =
+        fvid::container::mp4::Mp4Reader::open(std::io::Cursor::new(&bytes), Default::default())
+            .unwrap();
+    assert_eq!(mp4.chapters().len(), 2);
+    assert_eq!(mp4.chapters()[1].start_ns, 50_000_000);
+    assert_eq!(mp4.tags().title, "T");
+    let multiple = fixture("two-audio.mp4");
+    assert!(!fvid::native_export::is_single_track_mp4_aac(&multiple).unwrap());
+    let rejected = d.0.join("rejected.mka");
+    assert!(fvid::native_export::remux_mp4_aac_matroska(&multiple, &rejected, None, None).is_err());
+    assert!(!rejected.exists());
+    let destination = d.0.join("out.mka");
+    let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "remux"])
+        .arg(&source)
+        .arg(&destination)
+        .arg("--progress")
+        .output()
+        .unwrap();
+    assert!(
+        run.status.success(),
+        "{}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    assert!(String::from_utf8_lossy(&run.stdout).contains("\"backend\":\"fvid\""));
+    let progress = String::from_utf8_lossy(&run.stderr);
+    assert!(progress.lines().last().unwrap().contains("\"done\":true"));
+    let result = std::fs::read(&destination).unwrap();
+    let mut mkv =
+        webm::WebmReader::open(std::io::Cursor::new(&result), Default::default()).unwrap();
+    mkv.scan_all().unwrap();
+    assert_eq!(&mkv.tags, mp4.tags());
+    assert_eq!(
+        mkv.chapters,
+        fvid::container::matroska_write::FileMetadata::from_mp4(&mp4).chapters
+    );
+    let mut before = Vec::new();
+    let mut after = Vec::new();
+    fvid::native_media::decode_mp4_aac_pcm(&bytes, &mut before).unwrap();
+    fvid::native_media::decode_matroska_aac_pcm_interval(&result, &mut after, None).unwrap();
+    assert!(before == after);
+    assert!(
+        fvid::native_export::remux_mp4_aac_matroska(&source, &destination, None, None).is_err()
+    );
+    assert_eq!(std::fs::read(&destination).unwrap(), result);
+    let cancel = fvid::media_control::CancelFlag::default();
+    let stop = cancel.clone();
+    let hook = fvid::media_control::ProgressHook::new(move |e| {
+        assert!(!e.done);
+        if e.packets > 0 {
+            stop.cancel();
+        }
+    });
+    let cancelled = d.0.join("cancelled.mka");
+    assert!(
+        fvid::native_export::remux_mp4_aac_matroska(
+            &source,
+            &cancelled,
+            Some(&cancel),
+            Some(&hook)
+        )
+        .is_err()
+    );
+    assert!(!cancelled.exists());
+    assert!(
+        !std::fs::read_dir(&d.0).unwrap().any(|p| p
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .ends_with(".tmp"))
+    );
+    #[cfg(feature = "media")]
+    {
+        let api = d.0.join("api.mkv");
+        let stats = fvid::media::remux(&source, &api, &Default::default()).unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert_eq!(std::fs::read(api).unwrap(), result);
+    }
+}
