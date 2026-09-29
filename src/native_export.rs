@@ -403,11 +403,7 @@ impl<W: Write> Write for PcmGain<'_, W> {
 
 /// Lossless ADTS-to-MP4 packet remux with atomic no-overwrite publication.
 pub fn remux_adts_aac(source: &Path, destination: &Path) -> Result<u64> {
-    use std::io::Read;
-    let mut data = Vec::new();
-    let cap = crate::container::adts::Limits::default().file_bytes as u64;
-    File::open(source)?.take(cap+1).read_to_end(&mut data)?;
-    if data.len() as u64 > cap { return Err(invalid("AAC input exceeds container byte limit")); }
+    let input = crate::container::adts::StreamReader::open(BufReader::new(File::open(source)?))?;
     let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
     let (temporary, file) = (0..100).find_map(|_| {
         let path = directory.join(format!(".fvid-mp4-{}-{}.tmp", std::process::id(), NEXT.fetch_add(1, Ordering::Relaxed)));
@@ -418,7 +414,7 @@ pub fn remux_adts_aac(source: &Path, destination: &Path) -> Result<u64> {
         }
     }).ok_or_else(|| invalid("cannot reserve MP4 output"))??;
     let mut output = BufWriter::new(file);
-    let packets = crate::container::mp4_write::write_adts_aac(&data, &mut output)?;
+    let packets = crate::container::mp4_write::write_adts_aac_reader(input, &mut output)?;
     output.flush()?;
     output.get_ref().sync_all()?;
     drop(output);

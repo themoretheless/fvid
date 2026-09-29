@@ -1150,5 +1150,10 @@ with no whole-file size limit or packet index. Interval exports stop reading
 when the selected sample range ends. Full sequential exports require contiguous
 ADTS frames and reject truncated tails or changing configurations; the existing
 byte-slice parser keeps its recovery-oriented behavior. CRC header bytes are
-removed, but CRC checksums are not verified. ADTS-to-MP4 remux still uses its
-bounded in-memory parser.
+removed, but CRC checksums are not verified. ADTS-to-MP4 file remux also reads sequentially through
+`container::mp4_write::write_adts_aac_reader`, copying encoded packets without
+loading the source file. It writes an extended-size `mdat` and a `co64` chunk
+offset, retaining only sample sizes until the final `moov` index is written.
+The MP4 sample-count limit still bounds index storage. The destination must be
+seekable; partial output is discarded on failure. The older byte-slice muxing
+API remains available with its existing limits.

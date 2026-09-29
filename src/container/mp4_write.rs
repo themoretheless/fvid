@@ -36,19 +36,55 @@ pub fn write_adts_aac(data: &[u8], output: &mut impl Write) -> Result<u64> {
             "ADTS remux requires complete frames without unrepresented leading or trailing data",
         ));
     }
-    let count =
-        u32::try_from(stream.packets()).map_err(|_| invalid("MP4 sample count overflow"))?;
-    let duration = u32::try_from(stream.samples()).map_err(|_| invalid("MP4 duration overflow"))?;
-    // Version-0 AudioSampleEntry represents sample rate in unsigned 16.16.
-    let extended = stream.sample_rate > 65535;
-    let ftyp = atom(b"ftyp", if extended { b"qt  \0\0\0\0qt  " } else { b"M4A \0\0\0\0M4A isommp42" })?;
+    let config = super::adts::header(data).ok_or_else(|| invalid("invalid ADTS header"))?;
+    let ftyp = file_type(config.sample_rate)?;
     let sizes: Vec<_> = (0..stream.packets())
         .map(|i| stream.packet(i).len() as u32)
         .collect();
     let payload: u64 = sizes.iter().map(|v| u64::from(*v)).sum();
     let mdat_size = u32::try_from(payload + 8).map_err(|_| invalid("MP4 mdat size overflow"))?;
-    let offset = ftyp.len() as u64 + 8;
-    let rate = stream.sample_rate;
+    let moov = movie(
+        config,
+        stream.samples_per_frame,
+        &sizes,
+        ftyp.len() as u64 + 8,
+    )?;
+    output.write_all(&ftyp)?;
+    output.write_all(&mdat_size.to_be_bytes())?;
+    output.write_all(b"mdat")?;
+    for index in 0..stream.packets() {
+        output.write_all(stream.packet(index))?;
+    }
+    output.write_all(&moov)?;
+    Ok(stream.packets() as u64)
+}
+
+fn file_type(rate: u32) -> Result<Vec<u8>> {
+    atom(
+        b"ftyp",
+        if rate > 65535 {
+            b"qt  \0\0\0\0qt  "
+        } else {
+            b"M4A \0\0\0\0M4A isommp42"
+        },
+    )
+}
+
+fn movie(
+    config: super::adts::Header,
+    samples_per_frame: u32,
+    sizes: &[u32],
+    offset: u64,
+) -> Result<Vec<u8>> {
+    let count = u32::try_from(sizes.len()).map_err(|_| invalid("MP4 sample count overflow"))?;
+    if count == 0 {
+        return Err(invalid("empty AAC stream"));
+    }
+    let duration = count
+        .checked_mul(samples_per_frame)
+        .ok_or_else(|| invalid("MP4 duration overflow"))?;
+    let rate = config.sample_rate;
+    let extended = rate > 65535;
     let mut mvhd = vec![0; 100];
     put(&mut mvhd, 12, rate);
     put(&mut mvhd, 16, duration);
@@ -71,7 +107,7 @@ pub fn write_adts_aac(data: &[u8], output: &mut impl Write) -> Result<u64> {
     hdlr.extend_from_slice(b"FVid Audio\0");
     let mut entry = vec![0; 28];
     entry[6..8].copy_from_slice(&1u16.to_be_bytes());
-    entry[16..18].copy_from_slice(&stream.channels.to_be_bytes());
+    entry[16..18].copy_from_slice(&config.channels.to_be_bytes());
     entry[18..20].copy_from_slice(&16u16.to_be_bytes());
     put(&mut entry, 24, rate << 16);
     if extended {
@@ -83,12 +119,13 @@ pub fn write_adts_aac(data: &[u8], output: &mut impl Write) -> Result<u64> {
         put(&mut entry, 24, 65536);
         put(&mut entry, 28, 72);
         entry[32..40].copy_from_slice(&f64::from(rate).to_be_bytes());
-        put(&mut entry, 40, u32::from(stream.channels));
+        put(&mut entry, 40, u32::from(config.channels));
         put(&mut entry, 44, 0x7f000000);
-        put(&mut entry, 60, stream.samples_per_frame);
+        put(&mut entry, 60, samples_per_frame);
     }
     // Add the terminal SLConfigDescriptor required by the ES descriptor.
-    let mut esds = stream.extra_data();
+    let mut esds =
+        super::adts::esds_for(&config.asc).ok_or_else(|| invalid("invalid AAC descriptor"))?;
     esds[5] += 3;
     esds.extend_from_slice(&[6, 1, 2]);
     entry.extend(atom(b"esds", &esds)?);
@@ -96,7 +133,7 @@ pub fn write_adts_aac(data: &[u8], output: &mut impl Write) -> Result<u64> {
     let stts = table(
         b"stts",
         1,
-        &[count.to_be_bytes(), stream.samples_per_frame.to_be_bytes()].concat(),
+        &[count.to_be_bytes(), samples_per_frame.to_be_bytes()].concat(),
     )?;
     let stsc = table(
         b"stsc",
@@ -118,13 +155,45 @@ pub fn write_adts_aac(data: &[u8], output: &mut impl Write) -> Result<u64> {
         &[atom(b"mdhd", &mdhd)?, atom(b"hdlr", &hdlr)?, minf].concat(),
     )?;
     let trak = atom(b"trak", &[atom(b"tkhd", &tkhd)?, mdia].concat())?;
-    let moov = atom(b"moov", &[atom(b"mvhd", &mvhd)?, trak].concat())?;
-    output.write_all(&ftyp)?;
-    output.write_all(&mdat_size.to_be_bytes())?;
-    output.write_all(b"mdat")?;
-    for index in 0..stream.packets() {
-        output.write_all(stream.packet(index))?;
+    atom(b"moov", &[atom(b"mvhd", &mvhd)?, trak].concat())
+}
+
+/// Sequential AAC packet copy into MP4. Only sample sizes are retained; the media
+/// payload streams directly to output. The output must start at byte zero and
+/// support seeking to finish the extended-size mdat header. The default MP4
+/// sample-count limit bounds index storage. Discard output on any error.
+pub fn write_adts_aac_reader<R: std::io::Read, W: Write + std::io::Seek>(
+    mut reader: super::adts::StreamReader<R>,
+    output: &mut W,
+) -> Result<u64> {
+    use std::io::SeekFrom;
+    if output.stream_position()? != 0 {
+        return Err(invalid("MP4 output must start at byte zero"));
     }
+    let config = reader.configuration();
+    let samples = u32::from(crate::codec::config::AacConfig::parse(&config.asc)?.frame_samples);
+    output.write_all(&file_type(config.sample_rate)?)?;
+    let mdat = output.stream_position()?;
+    output.write_all(&1u32.to_be_bytes())?;
+    output.write_all(b"mdat")?;
+    output.write_all(&0u64.to_be_bytes())?;
+    let offset = output.stream_position()?;
+    let mut sizes = Vec::new();
+    while let Some(packet) = reader.next_packet()? {
+        if sizes.len() >= super::mp4::Limits::default().samples {
+            return Err(invalid("AAC remux sample index exceeds limit"));
+        }
+        sizes.push(u32::try_from(packet.len()).map_err(|_| invalid("AAC packet size overflow"))?);
+        output.write_all(&packet)?;
+    }
+    let end = output.stream_position()?;
+    let length = end
+        .checked_sub(mdat)
+        .ok_or_else(|| invalid("MP4 output position moved backwards"))?;
+    let moov = movie(config, samples, &sizes, offset)?;
+    output.seek(SeekFrom::Start(mdat + 8))?;
+    output.write_all(&length.to_be_bytes())?;
+    output.seek(SeekFrom::Start(end))?;
     output.write_all(&moov)?;
-    Ok(u64::from(count))
+    Ok(sizes.len() as u64)
 }
