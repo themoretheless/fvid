@@ -126,3 +126,40 @@ pub fn trim_pcm(
             "metadata-only plan: RIFF geometry and interval are validated; payload reading, output permissions and publication are checked during execution".into()],
     })
 }
+
+/// Plan owned MP4 output. A dry run validates relocation without publishing a file.
+/// Unknown input signatures return None for the caller's remaining format dispatch.
+pub fn remux(source: &std::path::Path) -> Result<Option<MediaPlan>> {
+    use std::io::{Read, Seek, SeekFrom};
+    let mut input = std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
+    let mut signature = [0; 8];
+    let mut count = 0;
+    while count < signature.len() {
+        let n = input.read(&mut signature[count..]).map_err(|e| e.to_string())?;
+        if n == 0 { break; }
+        count += n;
+    }
+    let mp4 = count == 8 && &signature[4..8] == b"ftyp";
+    let adts = crate::container::adts::header(&signature[..count]).is_some();
+    if !mp4 && !adts { return Ok(None); }
+    input.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+    let detail = if mp4 {
+        crate::container::mp4_relocate::fast_start(&mut input, &mut std::io::sink()).map_err(|e| e.to_string())?;
+        "FVid MP4 fast-start relocation; initialized fragmented MP4 is copied unchanged"
+    } else {
+        "FVid ADTS AAC packet copy into MP4; preserve encoder priming and write sample tables"
+    };
+    let info = crate::native_probe::probe(source)?;
+    Ok(Some(MediaPlan {
+        command: "remux".into(), input: source.to_owned(), inputs: vec![source.to_owned()],
+        streams: info.streams.into_iter().map(|s| PlanStream {
+            index: s.index, media_type: s.media_type, codec: s.codec, disposition: "copy".into(),
+        }).collect(),
+        steps: vec![PlanStep { action: "copy".into(), detail: detail.into() },
+            PlanStep { action: "publish".into(), detail: "flush and sync temporary output, then publish without overwriting".into() }],
+        graph: None,
+        notes: vec!["backend: fvid; no decode/encode or external demuxer".into(),
+            "owned output requires .mp4 or .m4a; all streams retained".into(),
+            "input structure scanned without writing an output; execution revalidates the current source".into()],
+    }))
+}

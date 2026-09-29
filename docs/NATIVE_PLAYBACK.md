@@ -1481,3 +1481,19 @@ layout and does not read sample payloads. RIFF validation restrictions match
 owned PCM trimming; RF64 and RIFX remain unsupported. INFO text tags are not yet
 exposed in the description. Container bit rate is left unknown rather than
 conflating header/metadata overhead with the PCM payload rate.
+
+### Owned ADTS/MP4 remux plans (2026-09-29)
+
+`fvid media plan remux INPUT` now works in the headless build for ADTS AAC and
+MP4 inputs. `media::plan_remux` returns the same plan. These plans describe the
+owned `.mp4`/`.m4a` output path, retaining all streams without metadata edits or
+custom budgets; unsupported options fail explicitly. Other formats still use
+the legacy adapter when enabled.
+
+MP4 planning runs relocation into a discard writer to validate its structural
+requirements, then describes streams with the owned probe. This reads the file
+but does not create or publish an output. ADTS planning scans packet structure
+and configuration. Execution revalidates the source and applies writer limits.
+Unsupported MP4 sample entries cannot yet be described by this planner, even
+when the opaque relocation writer could retain them. Plans do not decode media
+and never claim that a destination is writable or that publication has occurred.

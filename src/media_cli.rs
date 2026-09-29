@@ -3,6 +3,18 @@ use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.first().map(String::as_str) == Some("plan")
+        && args.get(1).map(String::as_str) == Some("remux") && args.len() >= 3
+    {
+        if let Some(plan) = fvid::native_plan::remux(std::path::Path::new(&args[2]))? {
+            if args[3..].iter().any(|s| s != "--quiet") {
+                return Err("native remux plan supports all streams without metadata mutations or custom budgets".into());
+            }
+            println!("{}", serde_json::to_string_pretty(&plan)?);
+            return Ok(());
+        }
+    }
+
+    if args.first().map(String::as_str) == Some("plan")
         && args.get(1).map(String::as_str) == Some("decode-audio") && args.len() >= 3
         && (fvid::native_media::is_aac_source(std::path::Path::new(&args[2]))? || fvid::native_pcm::is_wave(std::path::Path::new(&args[2]))?)
     {
@@ -1867,7 +1879,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 if plan_paths.len() != 1 || from.is_some() || to.is_some() || geometry {
                     return Err("plan remux requires a single INPUT without transform flags".into());
                 }
-                fvid_media::plan_remux(&plan_paths[0], &options)?
+                fvid::media::plan_remux(&plan_paths[0], &options)?
             }
             Some("transcode-lossless") => {
                 if plan_paths.len() != 1 {
@@ -1992,7 +2004,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 }
                 let idle = !geometry && transform.interval.is_none();
                 if idle {
-                    fvid_media::plan_remux(&plan_paths[0], &options)?
+                    fvid::media::plan_remux(&plan_paths[0], &options)?
                 } else {
                     fvid_media::plan_transcode_lossless(&plan_paths[0], &transform, &options, None)?
                 }

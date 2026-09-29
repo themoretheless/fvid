@@ -351,3 +351,11 @@ pub fn plan_trim(
     plan.command = "trim".into();
     Ok(plan)
 }
+
+/// Plan owned ADTS/MP4 remuxing with the same option restrictions as execution.
+pub fn plan_remux(source: &std::path::Path, options: &CopyOptions) -> Result<MediaPlan> {
+    match crate::native_plan::remux(source)? {
+        Some(plan) => { validate_native_copy_options(options, false)?; Ok(plan) }
+        None => fvid_media::plan_remux(source, options),
+    }
+}
