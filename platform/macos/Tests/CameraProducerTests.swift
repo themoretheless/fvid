@@ -8,7 +8,7 @@ import CoreVideo
         precondition(CVPixelBufferCreate(kCFAllocatorDefault, 2, 2, kCVPixelFormatType_32BGRA, nil, &image) == kCVReturnSuccess)
         var format: CMVideoFormatDescription?
         precondition(CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault, imageBuffer: image!, formatDescriptionOut: &format) == noErr)
-        var timing = CMSampleTimingInfo(duration: CMTime(value: 1, timescale: 30), presentationTimeStamp: .zero, decodeTimeStamp: .invalid)
+        var timing = CMSampleTimingInfo(duration: CMTime(value: 1, timescale: CameraFormat.framesPerSecond), presentationTimeStamp: .zero, decodeTimeStamp: .invalid)
         var sample: CMSampleBuffer?
         precondition(CMSampleBufferCreateReadyWithImageBuffer(allocator: kCFAllocatorDefault, imageBuffer: image!, formatDescription: format!, sampleTiming: &timing, sampleBufferOut: &sample) == noErr)
         var created: CMSimpleQueue?

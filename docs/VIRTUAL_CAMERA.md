@@ -268,3 +268,24 @@ An unsigned bundle built at `/tmp/FVidCamera-60fps-20260929.app`. Current signin
 inspection still found zero valid identities; installed extension and external
 CMIO client delivery remain unverified. Configuring 60 fps is not a throughput
 measurement or interpolation of lower-rate source video.
+
+## Current bridge verification (2026-09-29)
+
+The standalone camera and media lockfiles now include the shared `fvid-control`
+crate; the camera build had failed under `--locked` after that dependency was
+introduced. Linux CI now checks the standalone camera manifest with `--locked`
+as well as the root package. This CI definition has been added; the remote run
+has not yet been observed.
+
+The bridge runner now executes all eight existing suites: clock, end-to-end
+in-process pipeline, repeat, pixel aspect, source errors/reset, producer queue
+ownership/backpressure, pixel-pool limits, and sink row/format validation. All
+eight passed locally with host access. Producer test sample duration now uses
+the shared 60 fps format instead of a stale 30 fps literal.
+
+`/private/tmp/FVidCamera-current-00fcf08.app` was built successfully as an unsigned
+bundle. The camera dependency graph contains only `fvid`, `fvid-camera-ffi`,
+`fvid-control` and `fvid-cpu`; neither host nor extension links FFmpeg libraries.
+Signing inspection still reported zero valid identities. The bundle has not
+been installed, and external application camera selection/frame delivery remain
+unverified. In-process suites do not establish sustained 60 fps throughput.

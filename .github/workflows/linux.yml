@@ -17,6 +17,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: ALSA headers for the player's audio output
         run: sudo apt-get update && sudo apt-get install -y libasound2-dev
+      - name: Check standalone camera bridge and locked dependency graph
+        run: cargo check --locked --manifest-path crates/fvid-camera-ffi/Cargo.toml
       # The ffmpeg_compare bench needs ffmpeg on PATH, so benches are left out.
       - name: Test default features
         run: cargo test --lib --bins --tests

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run native camera timing, repeat and geometry tests; no extension installation."""
+"""Run all native camera bridge suites; no extension installation."""
 from pathlib import Path
 import subprocess
 import tempfile
@@ -22,6 +22,9 @@ def main():
         "-import-objc-header", str(PLATFORM / "CameraHost/FVidCamera.h"),
         str(FFI / "target/debug/libfvid_camera_ffi.a"),
     ]
+    extension_sources = ["../CameraExtension/PixelPool.swift",
+                         "../CameraExtension/CameraProvider.swift",
+                         "../CameraExtension/CameraSink.swift"]
     cases = [
         ("CameraClockTests", [], []),
         ("CameraPipelineTests", ["NativeVideoSource.swift", "CameraSession.swift", "CameraProducer.swift",
@@ -29,6 +32,10 @@ def main():
             "../CameraExtension/CameraSink.swift"], []),
         ("CameraRepeatTests", ["NativeVideoSource.swift"], ["tests/fixtures/video.mp4"]),
         ("CameraAspectTests", ["NativeVideoSource.swift"], ["tests/fixtures/display/par-2x1.mp4"]),
+        ("NativeVideoSourceTests", ["NativeVideoSource.swift"], []),
+        ("CameraProducerTests", ["CameraProducer.swift"], []),
+        ("PixelPoolTests", extension_sources, []),
+        ("CameraSinkTests", extension_sources, []),
     ]
     with tempfile.TemporaryDirectory(prefix="fvid-camera-bridge-") as directory:
         for name, sources, fixtures in cases:
@@ -36,7 +43,7 @@ def main():
             subprocess.run(common + [str(PLATFORM / "CameraHost" / s) for s in sources]
                            + [str(PLATFORM / "Tests" / (name + ".swift")), "-o", str(output)], check=True)
             subprocess.run([str(output)] + [str(ROOT / f) for f in fixtures], check=True)
-    print("All four camera bridge suites passed; installed CMIO delivery is not tested.")
+    print(f"All {len(cases)} camera bridge suites passed; installed CMIO delivery is not tested.")
 
 
 if __name__ == "__main__":

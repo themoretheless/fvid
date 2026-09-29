@@ -6,6 +6,7 @@ version = 4
 name = "fvid"
 version = "0.1.0"
 dependencies = [
+ "fvid-control",
  "fvid-cpu",
 ]
 
@@ -15,6 +16,10 @@ version = "0.1.0"
 dependencies = [
  "fvid",
 ]
+
+[[package]]
+name = "fvid-control"
+version = "0.1.0"
 
 [[package]]
 name = "fvid-cpu"
