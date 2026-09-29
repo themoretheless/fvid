@@ -55,6 +55,7 @@ pub struct WebmVideoReader<R> {
     rgb: Vec<u8>,
     dimensions: [usize; 2],
     pixel_aspect: (u32, u32),
+    rotation: u16,
     /// The stated crop borders as pixel insets into the coded frame, `[0; 4]`
     /// when the track states none it can keep.
     insets: [u32; 4],
@@ -104,6 +105,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         let avc = track.codec == "V_MPEG4/ISO/AVC";
         let hevc = track.codec == "V_MPEGH/ISO/HEVC";
         let pixel_aspect = track.pixel_aspect();
+        let rotation = track.rotation;
         // The validated crop borders are each smaller than the coded size they
         // divide; one that cannot be a pixel offset on this machine is read as
         // a file stating a crop it cannot keep.
@@ -203,6 +205,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             rgb: Vec::new(),
             dimensions: [0; 2],
             pixel_aspect,
+            rotation,
             insets,
             colour,
             hdr,
@@ -229,13 +232,26 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     pub fn dimensions(&self) -> [usize; 2] {
         self.dimensions
     }
+    pub fn rotation(&self) -> u16 {
+        self.rotation
+    }
     pub fn pixel_aspect(&self) -> (u32, u32) {
-        self.pixel_aspect
+        if matches!(self.rotation, 90 | 270) {
+            (self.pixel_aspect.1, self.pixel_aspect.0)
+        } else {
+            self.pixel_aspect
+        }
     }
     /// The picture's own crop borders as pixel insets, `[0; 4]` when the track
     /// states none it can keep.
     pub fn insets(&self) -> [u32; 4] {
-        self.insets
+        let [l, t, r, b] = self.insets;
+        match self.rotation {
+            90 => [b, l, t, r],
+            180 => [r, b, l, t],
+            270 => [t, r, b, l],
+            _ => self.insets,
+        }
     }
     pub fn codec(&self) -> &'static str {
         self.codec
@@ -614,7 +630,17 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         let Some(current) = self.advance()? else {
             return Ok(false);
         };
-        self.convert_to_rgb(&current)
+        self.convert_to_rgb(&current)?;
+        if self.rotation != 0 {
+            self.rgb = crate::playback_native::rotate_plane(
+                &self.rgb,
+                current.size[0] as usize,
+                current.size[1] as usize,
+                self.rotation,
+                3,
+            );
+        }
+        Ok(true)
     }
     /// Advances to the next visible frame and updates timing/geometry state.
     /// The decoded picture is returned for the caller to convert.
@@ -681,7 +707,11 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         let w = size[0] as usize;
         let h = size[1] as usize;
         self.pending = next;
-        self.dimensions = [w, h];
+        self.dimensions = if matches!(self.rotation, 90 | 270) {
+            [h, w]
+        } else {
+            [w, h]
+        };
         self.start = start;
         self.end = start + u128::from(duration);
         self.last_duration = duration;
@@ -770,7 +800,8 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         Ok(true)
     }
     /// Decode the next visible frame and return it as packed 8-bit planes for
-    /// GPU conversion (no CPU RGB pass). `rgb()` is not updated by this call.
+    /// GPU conversion (no CPU RGB pass). Planes retain coded orientation;
+    /// callers apply `rotation()`. `rgb()` is not updated by this call.
     pub fn read_frame_planes(&mut self) -> Result<Option<Planar8>> {
         if self.failed {
             return Err(invalid("WebM playback requires rewind after an error"));

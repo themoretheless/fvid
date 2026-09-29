@@ -83,11 +83,21 @@ impl Default for VideoMetadata {
     }
 }
 
+/// Per-track container options. Rotation is clockwise in display space.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct TrackOptions {
+    pub video: Option<VideoMetadata>,
+    /// Rectangular rotations supported by the native player: 0, 90, 180, 270.
+    pub rotation: u16,
+}
+
 fn track_entry(
     spec: &TrackSpec<'_>,
     number: u64,
-    metadata: Option<&VideoMetadata>,
+    options: Option<&TrackOptions>,
 ) -> Result<Vec<u8>> {
+    let metadata = options.and_then(|o| o.video.as_ref());
+    let rotation = options.map_or(0, |o| o.rotation);
     use crate::codec::config::{AacConfig, AvcConfig, HevcConfig};
     let (id, config, kind, geometry) = match spec.encoding {
         Encoding::Avc {
@@ -100,7 +110,7 @@ fn track_entry(
                 "V_MPEG4/ISO/AVC",
                 configuration,
                 1,
-                video(width, height, metadata)?,
+                video(width, height, metadata, rotation)?,
             )
         }
         Encoding::Hevc {
@@ -113,7 +123,7 @@ fn track_entry(
                 "V_MPEGH/ISO/HEVC",
                 configuration,
                 1,
-                video(width, height, metadata)?,
+                video(width, height, metadata, rotation)?,
             )
         }
         Encoding::Aac {
@@ -121,7 +131,7 @@ fn track_entry(
             sample_rate,
             channels,
         } => {
-            if metadata.is_some() {
+            if metadata.is_some() || rotation != 0 {
                 return Err(invalid("video metadata supplied for AAC track"));
             }
             let config = AacConfig::parse(configuration)?;
@@ -171,7 +181,12 @@ fn track_entry(
     )?);
     element(0xae, &data)
 }
-fn video(width: u32, height: u32, metadata: Option<&VideoMetadata>) -> Result<Vec<u8>> {
+fn video(
+    width: u32,
+    height: u32,
+    metadata: Option<&VideoMetadata>,
+    rotation: u16,
+) -> Result<Vec<u8>> {
     if width == 0 || height == 0 {
         return Err(invalid("empty Matroska video dimensions"));
     }
@@ -277,6 +292,19 @@ fn video(width: u32, height: u32, metadata: Option<&VideoMetadata>) -> Result<Ve
             data.extend(element(0x55b0, &colour)?);
         }
     }
+    let roll: f64 = match rotation {
+        0 => 0.0,
+        90 => -90.0,
+        180 => 180.0,
+        270 => 90.0,
+        _ => return Err(invalid("Matroska rotation must be 0, 90, 180, or 270")),
+    };
+    if rotation != 0 {
+        data.extend(element(
+            0x7670,
+            &[uint(0x7671, 0)?, element(0x7675, &roll.to_be_bytes())?].concat(),
+        )?);
+    }
     element(0xe0, &data)
 }
 
@@ -310,13 +338,30 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         if !metadata.is_empty() && metadata.len() != tracks.len() {
             return Err(invalid("Matroska metadata track count mismatch"));
         }
+        let options: Vec<_> = metadata
+            .iter()
+            .map(|video| TrackOptions {
+                video: *video,
+                rotation: 0,
+            })
+            .collect();
+        Self::new_with_options(output, tracks, &options)
+    }
+    /// Empty options select defaults, otherwise supply one entry per track.
+    pub fn new_with_options(
+        output: &'a mut W,
+        tracks: &[TrackSpec<'_>],
+        options: &[TrackOptions],
+    ) -> Result<Self> {
+        if tracks.is_empty() || tracks.len() > 126 {
+            return Err(invalid("Matroska requires 1..=126 tracks"));
+        }
+        if !options.is_empty() && options.len() != tracks.len() {
+            return Err(invalid("Matroska metadata track count mismatch"));
+        }
         let mut entries = Vec::new();
         for (index, track) in tracks.iter().enumerate() {
-            entries.extend(track_entry(
-                track,
-                index as u64 + 1,
-                metadata.get(index).and_then(Option::as_ref),
-            )?);
+            entries.extend(track_entry(track, index as u64 + 1, options.get(index))?);
         }
         if output.stream_position()? != 0 {
             return Err(invalid("Matroska output must start at zero"));

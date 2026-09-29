@@ -233,7 +233,8 @@ impl<R: BufRead + Seek> NativeReader<R> {
     /// that shapes a `RawFrame` itself has to.
     pub fn rotation(&self) -> u16 {
         match self {
-            Self::Y4m(_) | Self::Webm(_) => 0,
+            Self::Y4m(_) => 0,
+            Self::Webm(r) => r.rotation(),
             Self::Avc { rotation, .. } => *rotation,
         }
     }
@@ -247,7 +248,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
         }
     }
     /// The borders the container asks to be kept off screen, as pixel insets
-    /// into the coded frame. Only Matroska has a way to state them; the others
+    /// into the oriented display frame. Only Matroska has a way to state them; the others
     /// show the whole picture.
     pub fn insets(&self) -> [u32; 4] {
         match self {

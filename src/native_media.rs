@@ -87,7 +87,7 @@ pub fn decode_video_filtered(
                 8 => "yuv420p".into(),
                 depth => format!("yuv420p{depth}le"),
             },
-            RawFrame::Planar8(p) => planar_format(width, height, p.chroma_width, p.chroma_height)?,
+            RawFrame::Planar8(p) => planar_format(p.width, p.height, p.chroma_width, p.chroma_height)?,
             RawFrame::Yuv { sx, sy, .. } => planar_format(width, height, width / sx, height / sy)?,
         };
         if !geometry.is_identity() || negate.is_some() {

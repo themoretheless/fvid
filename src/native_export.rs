@@ -166,16 +166,16 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
             {
                 ("420", picture.bit_depth)
             }
-            RawFrame::Planar8(p) if p.chroma_width == width && p.chroma_height == height => {
+            RawFrame::Planar8(p) if p.chroma_width == p.width && p.chroma_height == p.height => {
                 ("444", 8)
             }
             RawFrame::Planar8(p)
-                if p.chroma_width == width.div_ceil(2) && p.chroma_height == height =>
+                if p.chroma_width == p.width.div_ceil(2) && p.chroma_height == p.height =>
             {
                 ("422", 8)
             }
             RawFrame::Planar8(p)
-                if p.chroma_width == width.div_ceil(2) && p.chroma_height == height.div_ceil(2) =>
+                if p.chroma_width == p.width.div_ceil(2) && p.chroma_height == p.height.div_ceil(2) =>
             {
                 ("420", 8)
             }
@@ -187,7 +187,7 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
             _ => false,
         };
         let aspect = transformed_aspect(reader.pixel_aspect(), width, height, geometry)?;
-        let transformed = if geometry.is_identity() {
+        let transformed = if geometry.is_identity() && rotation == 0 {
             None
         } else {
             Some(geometry.apply_display(&frame, width, height, rotation)?)
@@ -222,7 +222,7 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
             } else {
                 format!("{chroma}p{depth}")
             };
-            // MP4 parsing already expresses aspect after the display rotation.
+            // The native reader expresses aspect after the display rotation.
             let (an, ad) = aspect;
             writeln!(
                 output,
@@ -237,24 +237,6 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
             output.write_all(&picture.data)?;
         } else {
             match frame {
-                RawFrame::Avc { picture, .. } if rotation != 0 => {
-                    let (w, h) = picture.dimensions();
-                    let bytes = if picture.bit_depth == 8 { 1 } else { 2 };
-                    let mut planar = Vec::new();
-                    picture.write_planar(&mut planar)?;
-                    let mut offset = 0;
-                    for (pw, ph) in [(w, h), (w / 2, h / 2), (w / 2, h / 2)] {
-                        let end = offset + pw * ph * bytes;
-                        output.write_all(&crate::playback_native::rotate_plane(
-                            &planar[offset..end],
-                            pw,
-                            ph,
-                            rotation,
-                            bytes,
-                        ))?;
-                        offset = end;
-                    }
-                }
                 RawFrame::Avc { picture, .. } => picture.write_planar(&mut output)?,
                 RawFrame::Planar8(p) => {
                     output.write_all(&p.y)?;

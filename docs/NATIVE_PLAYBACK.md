@@ -1803,3 +1803,28 @@ those mappings are implemented.
 
 References: https://www.matroska.org/technical/elements.html and
 https://github.com/FFmpeg/FFmpeg/blob/master/libavformat/mov.c (`mov_read_colr`).
+
+### Matroska rectangular orientation (2026-09-29)
+
+`PacketWriter::new_with_options` accepts per-track `TrackOptions` with the
+existing optional video metadata and a clockwise rotation of 0/90/180/270.
+Existing constructors remain compatible. Nonzero rotations are written as
+rectangular ProjectionPoseRoll with the opposite sign, according to Matroska's
+counter-clockwise roll convention. Invalid rotations and audio-track video
+options fail before output bytes are written.
+
+The reader recognizes these rectangular rolls. Spherical projections, yaw/
+pitch transforms and non-quarter-turn rolls retain the prior coded view;
+this does not implement a general 3D projection renderer. Nonfinite poses
+are rejected. Native RGB reads and seeks apply rotation. Raw planes retain
+coded orientation with `rotation()` reporting the required transform; displayed
+dimensions, pixel aspect and crop insets all follow the oriented image.
+The existing playback worker and camera conversion path can use that contract.
+
+Tests cover all four orientations through RGB, raw reads, seeks and metadata,
+and compare FFmpeg's automatic orientation with explicit transpose/flip filters.
+A one-frame Y4M export retains the oriented 10-bit samples and aspect ratio.
+An independently created rotated VP9 file covers the 8-bit Planar8 export path;
+its chroma classification now uses coded plane dimensions instead of the
+rotated display dimensions. MP4 edit-list mapping for high-level remux remains
+outstanding.

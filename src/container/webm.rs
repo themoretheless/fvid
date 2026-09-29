@@ -29,6 +29,8 @@ pub struct Track {
     /// that states none, or states one the file cannot show with — a crop that
     /// leaves nothing, a crop too wide to subtract — keeps the whole picture.
     pub crop: [u64; 4],
+    /// Clockwise rectangular projection rotation; unsupported projections stay coded.
+    pub rotation: u16,
     pub sample_rate: u64,
     pub channels: u64,
     pub bit_depth: u64,
@@ -313,6 +315,24 @@ fn fields<R: Read + Seek>(
 fn cicp_code<R: Read + Seek>(r: &mut R, e: Element) -> Result<u8> {
     Ok(uint(r, e)?.try_into().unwrap_or(2))
 }
+/// Rectangular projection roll is counter-clockwise in Matroska.
+/// Preserve the existing coded view for spherical, mirrored or arbitrary poses.
+fn read_rotation<R: Read + Seek>(r: &mut R, projection: Element, count: &mut usize, max: usize) -> Result<u16> {
+    let (mut kind, mut yaw, mut pitch, mut roll) = (0, 0.0, 0.0, 0.0);
+    for field in fields(r, projection, count, max)? {
+        match field.id {
+            0x7671 => kind = uint(r, field)?,
+            0x7673 => yaw = float(r, field)?,
+            0x7674 => pitch = float(r, field)?,
+            0x7675 => roll = float(r, field)?,
+            _ => {},
+        }
+    }
+    if !yaw.is_finite() || !pitch.is_finite() || !roll.is_finite() { return Err(invalid("nonfinite Matroska projection pose")); }
+    if kind != 0 || yaw != 0.0 || pitch != 0.0 { return Ok(0); }
+    Ok(match roll { 90.0 => 270, -90.0 => 90, 180.0 | -180.0 => 180, _ => 0 })
+}
+
 /// Read a `Colour` element and everything under it into the track it describes.
 ///
 /// Matroska states the H.273 triple and the mastering volume as one element per
@@ -505,6 +525,7 @@ impl<R: Read + Seek> WebmReader<R> {
                             height: 0,
                             display: (0, 0),
                             crop: [0; 4],
+                            rotation: 0,
                             sample_rate: 0,
                             channels: 0,
                             bit_depth: 0,
@@ -564,6 +585,7 @@ impl<R: Read + Seek> WebmReader<R> {
                                             0x54bb => crop[1] = uint(&mut *reader, v)?,
                                             0x54cc => crop[0] = uint(&mut *reader, v)?,
                                             0x54dd => crop[2] = uint(&mut *reader, v)?,
+                                            0x7670 => track.rotation = read_rotation(&mut *reader, v, &mut *elements, limits.elements)?,
                                             0x55b0 => read_colour(
                                                 &mut *reader,
                                                 v,
@@ -1057,6 +1079,28 @@ mod tests {
     fn atom(id: &[u8], payload: &[u8]) -> Vec<u8> {
         assert!(payload.len() < 127);
         [id, &[0x80 | payload.len() as u8], payload].concat()
+    }
+    #[test]
+    fn rectangular_projection_roll_has_clockwise_display_orientation() {
+        let parse = |kind: u8, yaw: f64, pitch: f64, roll: f64| {
+            let data = [atom(&[0x76, 0x71], &[kind]),
+                atom(&[0x76, 0x73], &yaw.to_be_bytes()), atom(&[0x76, 0x74], &pitch.to_be_bytes()),
+                atom(&[0x76, 0x75], &roll.to_be_bytes())].concat();
+            let parent = Element { id: 0x7670, data: 0, end: Some(data.len() as u64) };
+            read_rotation(&mut Cursor::new(data), parent, &mut 0, 100)
+        };
+        for (roll, angle) in [(0.0, 0), (-90.0, 90), (90.0, 270), (180.0, 180), (-180.0, 180)] {
+            assert_eq!(parse(0, 0.0, 0.0, roll).unwrap(), angle);
+        }
+        assert_eq!(parse(1, 0.0, 0.0, 90.0).unwrap(), 0);
+        assert_eq!(parse(0, 180.0, 0.0, 90.0).unwrap(), 0);
+        assert_eq!(parse(0, 0.0, 90.0, 90.0).unwrap(), 0);
+        assert_eq!(parse(0, 0.0, 0.0, 45.0).unwrap(), 0);
+        for bad in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
+            assert!(parse(0, 0.0, 0.0, bad).is_err());
+            assert!(parse(0, bad, 0.0, 0.0).is_err());
+            assert!(parse(0, 0.0, bad, 0.0).is_err());
+        }
     }
     #[test]
     fn block_duration_scales_once_across_lazy_clusters_and_rejects_overflow() {
