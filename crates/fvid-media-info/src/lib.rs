@@ -1,5 +1,8 @@
 //! Shared media descriptions and operation results, with no demuxer or codec dependencies.
 #![forbid(unsafe_code)]
+mod video;
+pub use video::{CropRect, ScaleSize, OverlaySpec, XfadeSpec, LosslessTransform, DecodeTransform, TransposeMode, PadRect, RotateAngle};
+
 use serde::Serialize;
 use std::{collections::BTreeMap, path::PathBuf};
 

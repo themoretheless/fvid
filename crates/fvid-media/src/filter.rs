@@ -3,129 +3,7 @@ use super::*;
 use std::path::Path;
 use std::ptr;
 
-/// FFmpeg `transpose=` modes (all swap width/height).
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum TransposeMode {
-    Clock,
-    CClock,
-    ClockFlip,
-    CClockFlip,
-}
-
-impl TransposeMode {
-    pub fn parse(value: &str) -> Result<Self> {
-        match value {
-            "clock" => Ok(Self::Clock),
-            "cclock" => Ok(Self::CClock),
-            "clock_flip" => Ok(Self::ClockFlip),
-            "cclock_flip" => Ok(Self::CClockFlip),
-            _ => Err("transpose must be clock, cclock, clock_flip, or cclock_flip".into()),
-        }
-    }
-
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Self::Clock => "clock",
-            Self::CClock => "cclock",
-            Self::ClockFlip => "clock_flip",
-            Self::CClockFlip => "cclock_flip",
-        }
-    }
-
-    /// Output size after a 90° transpose of `width`×`height`.
-    pub fn size(self, width: u32, height: u32) -> (u32, u32) {
-        let _ = self;
-        (height, width)
-    }
-}
-
-/// FFmpeg-compatible `pad=W:H:X:Y:black` geometry.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct PadRect {
-    pub width: u32,
-    pub height: u32,
-    pub x: u32,
-    pub y: u32,
-}
-
-impl PadRect {
-    pub fn validate(self, input_w: u32, input_h: u32) -> Result<()> {
-        if self.width == 0
-            || self.height == 0
-            || self.width > 8192
-            || self.height > 4320
-            || self.width < input_w
-            || self.height < input_h
-        {
-            return Err(
-                "pad size must contain the input and stay within 1..=8192 x 1..=4320".into(),
-            );
-        }
-        if self.width % 2 != 0 || self.height % 2 != 0 || self.x % 2 != 0 || self.y % 2 != 0 {
-            return Err("pad size and origin must be even for 4:2:0 chroma".into());
-        }
-        if self
-            .x
-            .checked_add(input_w)
-            .is_none_or(|right| right > self.width)
-            || self
-                .y
-                .checked_add(input_h)
-                .is_none_or(|bottom| bottom > self.height)
-        {
-            return Err("pad offset must keep the input inside the output canvas".into());
-        }
-        Ok(())
-    }
-
-    fn filter_args(self) -> String {
-        format!("{}:{}:{}:{}:black", self.width, self.height, self.x, self.y)
-    }
-}
-
-/// Arbitrary rotation in degrees; fair-pairs FFmpeg
-/// `rotate=a=DEG*PI/180:ow=rotw(a):oh=roth(a):c=black`.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct RotateAngle {
-    pub degrees: f64,
-}
-
-impl RotateAngle {
-    pub fn parse(value: &str) -> Result<Self> {
-        let degrees: f64 = value
-            .parse()
-            .map_err(|_| "rotate must be a number of degrees")?;
-        Self::validate(degrees)?;
-        Ok(Self { degrees })
-    }
-
-    fn validate(degrees: f64) -> Result<()> {
-        if !degrees.is_finite() || !(-3600.0..=3600.0).contains(&degrees) {
-            return Err("rotate degrees must be finite within -3600..=3600".into());
-        }
-        Ok(())
-    }
-
-    /// Output canvas size matching FFmpeg `rotw(a)` / `roth(a)` (trunc toward zero).
-    pub fn size(self, width: u32, height: u32) -> (u32, u32) {
-        let a = self.degrees.to_radians();
-        let (c, s) = (a.cos().abs(), a.sin().abs());
-        let ow = ((width as f64) * c + (height as f64) * s) as u32;
-        let oh = ((width as f64) * s + (height as f64) * c) as u32;
-        (ow.max(1), oh.max(1))
-    }
-
-    fn filter_args(self, width: u32, height: u32) -> String {
-        // Numeric ow/oh avoid broken rotw(a)/roth(a) expression parsing on some builds;
-        // values match FFmpeg's rotw/roth geometry.
-        let (ow, oh) = self.size(width, height);
-        format!("a={}*PI/180:ow={ow}:oh={oh}:c=black", self.degrees)
-    }
-
-    fn is_identity(self) -> bool {
-        self.degrees.abs() < 1e-12
-    }
-}
+pub use fvid_media_info::{TransposeMode, PadRect, RotateAngle};
 
 pub(crate) struct FilterGraph {
     graph: *mut AVFilterGraph,
@@ -7263,7 +7141,7 @@ pub(crate) unsafe fn pad_frame(
     src: *mut AVFrame,
     pad: PadRect,
 ) -> Result<()> {
-    let args = pad.filter_args();
+    let args = format!("{}:{}:{}:{}:black", pad.width, pad.height, pad.x, pad.y);
     unsafe { apply_video_filter(graph, dst, src, "pad", &args) }
 }
 
@@ -7274,7 +7152,7 @@ pub(crate) unsafe fn rotate_frame(
     src: *mut AVFrame,
     angle: RotateAngle,
 ) -> Result<()> {
-    if angle.is_identity() {
+    if angle.degrees.abs() < 1e-12 {
         unsafe {
             av_frame_unref(dst);
             check(av_frame_ref(dst, src), "reference identity rotate frame")?;
@@ -7283,7 +7161,8 @@ pub(crate) unsafe fn rotate_frame(
     }
     unsafe {
         let s = &*src;
-        let args = angle.filter_args(s.width as u32, s.height as u32);
+        let (ow, oh) = angle.size(s.width as u32, s.height as u32);
+        let args = format!("a={}*PI/180:ow={ow}:oh={oh}:c=black", angle.degrees);
         apply_video_filter(graph, dst, src, "rotate", &args)
     }
 }

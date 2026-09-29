@@ -4,7 +4,7 @@ use crate::playback_native::{NativeReader, RawFrame};
 use crate::{Result, invalid};
 use std::{fs::File, io::BufReader, path::Path, time::Duration};
 
-pub use fvid_media_info::DecodeStats;
+pub use fvid_media_info::{DecodeStats, DecodeTransform};
 
 /// Decode and discard video frames without converting them to RGB.
 /// Errors are propagated, never retried through a foreign decoder. Platform
@@ -745,4 +745,144 @@ pub(crate) fn matroska_aac_index<R: std::io::Read + std::io::Seek>(reader: &crat
     let index = audio_index(reader.tracks.iter().map(|t| t.kind == 2),selected)?;
     if reader.tracks[index].codec != "A_AAC" { return Err(invalid("selected Matroska audio stream is not AAC")); }
     Ok(index)
+}
+
+/// Whether all requested operations have an owned implementation.
+/// Exhaustive matching forces new request fields to receive an explicit policy.
+pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
+    matches!(transform, DecodeTransform {
+        crop: _,
+        vertical_flip: _,
+        horizontal_flip: _,
+        scale: _,
+        epx: None,
+        transpose: _,
+        rotate: None,
+        pad: _,
+        burn_subs: None,
+        overlay: None,
+        yadif: None,
+        bwdif: None,
+        w3fdif: None,
+        tblend: None,
+        tmix: None,
+        hqdn3d: None,
+        gblur: None,
+        eq: None,
+        unsharp: None,
+        hue: None,
+        avgblur: None,
+        boxblur: None,
+        negate: None,
+        edgedetect: None,
+        sobel: None,
+        prewitt: None,
+        roberts: None,
+        kirsch: None,
+        scharr: None,
+        atadenoise: None,
+        owdenoise: None,
+        vaguedenoiser: None,
+        nlmeans: None,
+        bm3d: None,
+        dctdnoiz: None,
+        fftdnoiz: None,
+        smartblur: None,
+        sab: None,
+        bilateral: None,
+        cas: None,
+        vignette: None,
+        curves: None,
+        colorbalance: None,
+        colorlevels: None,
+        colorchannelmixer: None,
+        deflicker: None,
+        photosensitivity: None,
+        monochrome: None,
+        grayworld: None,
+        drawbox: None,
+        drawgrid: None,
+        lagfun: None,
+        amplify: None,
+        bitplanenoise: None,
+        deband: None,
+        gradfun: None,
+        lenscorrection: None,
+        pixelize: None,
+        removegrain: None,
+        yaepblur: None,
+        vibrance: None,
+        dilation: None,
+        erosion: None,
+        colorize: None,
+        exposure: None,
+        chromashift: None,
+        colorcontrast: None,
+        colorcorrect: None,
+        histeq: None,
+        shuffleplanes: None,
+        lutyuv: None,
+        colorhold: None,
+        fade: None,
+        perspective: None,
+        lumakey: None,
+        chromakey: None,
+        colorkey: None,
+        despill: None,
+        selectivecolor: None,
+        stereo3d: None,
+        field: None,
+        hqx: None,
+        xbr: None,
+        il: None,
+        super2xsai: None,
+        kerndeint: None,
+        phase: None,
+        estdif: None,
+        tinterlace: None,
+        separatefields: None,
+        weave: None,
+        doubleweave: None,
+        framepack: None,
+        telecine: None,
+        pullup: None,
+        decimate: None,
+        mpdecimate: None,
+        framestep: None,
+        tile: None,
+        untile: None,
+        shuffleframes: None,
+        reverse: None,
+        r#loop: None,
+        thumbnail: None,
+        freezedetect: None,
+        pseudocolor: None,
+        minterpolate: None,
+        fps: None,
+        colorspace: None,
+        zscale: None,
+        tonemap: None,
+        pix_fmt: None,
+        interval: _,
+        input_format: None,
+    })
+}
+
+/// Execute a shared video request without enabling `media` or any external codec.
+/// Unsupported filters are errors, never ignored or routed to another backend.
+pub fn decode_video_request(source: &Path, transform: &DecodeTransform) -> Result<DecodeStats> {
+    if !supports_video_request(transform) {return Err(invalid("video request contains a filter not yet supported by the owned decoder"));}
+    let interval = transform.interval.map(|(from, to)| {
+        if from < 0 || to <= from { return Err(invalid("decode interval requires 0 <= from < to")); }
+        Ok((std::time::Duration::from_micros(from as u64), std::time::Duration::from_micros(to as u64)))
+    }).transpose()?;
+    let geometry = crate::native_geometry::VideoGeometry {
+        crop: transform.crop.map(|r| [r.x, r.y, r.width, r.height]),
+        horizontal_flip: transform.horizontal_flip,
+        vertical_flip: transform.vertical_flip,
+        scale: transform.scale.map(|r| [r.width as usize, r.height as usize]),
+        transpose: transform.transpose.map(|r| crate::native_geometry::Transpose::parse(r.as_str())).transpose()?,
+        pad: transform.pad.map(|r| [r.width as usize, r.height as usize, r.x as usize, r.y as usize]),
+    };
+    decode_video_transformed(source, interval, &geometry)
 }

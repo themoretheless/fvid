@@ -104,3 +104,63 @@ fn independent_options_preserve_shared_cancellation_and_progress() {
         assert!(alias.cancel.unwrap().is_cancelled());
     }
 }
+
+#[test]
+fn shared_video_requests_execute_headlessly_and_keep_legacy_type_compatibility() {
+    use media_info::{CropRect, DecodeTransform, ScaleSize, TransposeMode};
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4");
+    let transform = DecodeTransform {
+        crop: Some(CropRect {
+            x: 0,
+            y: 0,
+            width: 8,
+            height: 4,
+        }),
+        horizontal_flip: true,
+        transpose: Some(TransposeMode::Clock),
+        scale: Some(ScaleSize {
+            width: 4,
+            height: 4,
+        }),
+        interval: Some((0, 200000)),
+        ..Default::default()
+    };
+    let stats = fvid::native_media::decode_video_request(&path, &transform).unwrap();
+    assert_eq!((stats.width, stats.height), (4, 4));
+    assert_eq!(stats.backend, "fvid");
+    assert!(stats.video_frames > 0);
+    let unsupported = DecodeTransform {
+        gblur: Some("sigma=1".into()),
+        ..Default::default()
+    };
+    assert!(
+        fvid::native_media::decode_video_request(&path, &unsupported)
+            .unwrap_err()
+            .to_string()
+            .contains("not yet supported")
+    );
+    let invalid = DecodeTransform {
+        interval: Some((-1, 0)),
+        ..Default::default()
+    };
+    assert!(fvid::native_media::decode_video_request(&path, &invalid).is_err());
+    #[cfg(feature = "media")]
+    {
+        let legacy: fvid::media::DecodeTransform = transform;
+        assert_eq!(
+            serde_json::to_value(fvid::media::decode_video_transformed(&path, legacy).unwrap())
+                .unwrap(),
+            serde_json::to_value(stats).unwrap()
+        );
+        let _: fvid::media::LosslessTransform = media_info::LosslessTransform::default();
+        let _: fvid::media::OverlaySpec = media_info::OverlaySpec::default();
+        let _: fvid::media::XfadeSpec = media_info::XfadeSpec::default();
+        let _: fvid::media::RotateAngle = media_info::RotateAngle::parse("90").unwrap();
+        let _: fvid::media::PadRect = media_info::PadRect {
+            width: 4,
+            height: 4,
+            x: 0,
+            y: 0,
+        };
+    }
+}

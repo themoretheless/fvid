@@ -1682,3 +1682,23 @@ are migrated. No operation support was disabled by this extraction.
 Tests compile and exercise the contracts without `media`, compare serialization,
 check exact type compatibility through old API paths, and verify that cloned
 options retain the same cancellation flag/progress hook across native calls.
+
+### Independent video request types (2026-09-29)
+
+`DecodeTransform`, `LosslessTransform`, `CropRect`, `ScaleSize`, `OverlaySpec`,
+`XfadeSpec`, `TransposeMode`, `PadRect` and `RotateAngle` now reside in
+`fvid-media-info` and are accessible through `fvid::media_info`. Legacy paths
+re-export these exact types. Fields, defaults and geometry parsing/validation
+retain their prior contracts; libavfilter string formatting remains in the
+adapter. Moving a request type does not mean every requested filter has an owned
+implementation.
+
+`native_media::decode_video_request` executes the shared `DecodeTransform`
+without the `media` feature. It accepts the existing owned crop/flips/quarter-turn,
+black padding, nearest resize and interval paths. An exhaustive field match
+rejects unsupported filter requests before decoding, so fields are not silently
+ignored and future additions require an explicit support decision. The public
+`media::decode_video_transformed` uses that same request executor for supported
+operations while retaining its existing legacy dispatch for the remaining ones.
+Headless and `media,mcp` tests verify request execution, old type compatibility,
+invalid/unsupported requests and existing geometry/frame decode behavior.
