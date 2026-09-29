@@ -1534,3 +1534,22 @@ retained. No gapless trimming or crossfade is implied, and independent encoder
 boundaries may be audible. The concatenator does not merge container metadata.
 Only stream 0 is selectable. Unsupported custom policies are errors. Structural
 errors, cancellation, and mismatched AAC configuration leave no published file.
+
+### Owned ADTS interval trim to WAVE (2026-09-29)
+
+`fvid media trim INPUT.aac OUTPUT.wav --from SECONDS --to SECONDS` uses the own
+AAC decoder and float32 WAVE exporter, including in headless builds. Public
+`media::trim` routes this input/output combination identically; `plan trim` for
+ADTS describes this PCM output. Other destination formats have not migrated.
+This route decodes rather than pretending that arbitrary audio boundaries can
+be copied as whole AAC packets.
+
+Sample starts are retained in the half-open requested interval, with each bound
+rounded up to the input sample grid and the end clipped to EOF. Pre-roll is
+decoded from the start of the ADTS stream to preserve AAC overlap state. Encoder
+priming is retained in the ADTS timeline. No rate/channel conversion is applied.
+`packets` in trim statistics counts decoded AAC frames, including pre-roll;
+`payload_bytes` counts retained float PCM output. Progress reports input packets
+and input payload bytes. All other native export cancellation and atomic
+publication guarantees apply. `trim-pcm` still denotes raw packed PCM slicing,
+not compressed AAC decoding. Only stream 0 is selectable in this ADTS route.

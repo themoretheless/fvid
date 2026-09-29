@@ -201,3 +201,18 @@ pub fn concat_adts(sources: &[std::path::PathBuf]) -> Result<MediaPlan> {
             "ADTS encoder priming and padding remain in every segment; no gapless trimming".into()],
     })
 }
+
+/// Describe ADTS-to-WAVE interval decoding, including exact retained sample count.
+pub fn trim_adts(source: &std::path::Path, from: i64, to: i64) -> Result<MediaPlan> {
+    if from < 0 || to <= from {return Err("trim requires 0 <= from < to".into());}
+    let input=std::io::BufReader::new(std::fs::File::open(source).map_err(|e|e.to_string())?);
+    let info=crate::native_media::inspect_adts(input).map_err(|e|e.to_string())?;
+    let boundary=|us:i64| (us as u128 * u128::from(info.sample_rate)).div_ceil(1_000_000).min(u128::from(info.sample_frames)) as u64;
+    let frames=boundary(to)-boundary(from);
+    if frames==0 {return Err("audio interval contains no samples".into());}
+    let mut plan=decode_audio(source,&AudioDecodeTransform {interval:Some((from,to)),..Default::default()})?;
+    plan.command="trim".into();
+    plan.steps.last_mut().ok_or("missing write step")?.detail=format!("publish {frames} float32 PCM sample frames to .wav without overwriting");
+    plan.notes.push("decode AAC pre-roll from the beginning; ADTS encoder priming remains part of its timeline".into());
+    Ok(plan)
+}

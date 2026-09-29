@@ -141,7 +141,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
     if try_native_audio_concat(args)? { return Ok(()); }
-    if try_wave_trim(args)? { return Ok(()); }
+    if try_native_audio_trim(args)? { return Ok(()); }
     if args.first().map(String::as_str) == Some("export-y4m") {
         if args.len() < 3 { return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m [--crop X:Y:W:H] [--hflip] [--vflip] [--transpose MODE] [--pad W:H:X:Y] [--scale W:H] [--from SECONDS --to SECONDS]".into()); }
         let mut geometry_args=vec!["decode".to_owned()];
@@ -191,7 +191,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 /// Shared native CLI routing for PCM trim and its read-only plan.
-fn try_wave_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
     let plan = args.first().map(String::as_str) == Some("plan");
     let command_index = usize::from(plan);
     let Some(command) = args.get(command_index).map(String::as_str) else {
@@ -202,11 +202,10 @@ fn try_wave_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
     }
     let source_index = command_index + 1;
     let option_start = source_index + if plan { 1 } else { 2 };
-    if args.len() < option_start
-        || !fvid::native_pcm::is_wave(std::path::Path::new(&args[source_index]))?
-    {
-        return Ok(false);
-    }
+    if args.len() < option_start {return Ok(false);}
+    let adts=command=="trim" && fvid::native_export::is_adts_source(std::path::Path::new(&args[source_index]))?
+        && (plan || std::path::Path::new(&args[source_index+1]).extension().and_then(|s|s.to_str())==Some("wav"));
+    if !adts && !fvid::native_pcm::is_wave(std::path::Path::new(&args[source_index]))? {return Ok(false);}
     let (mut from, mut to, mut selected) = (None, None, None);
     let (mut quiet, mut report) = (false, false);
     let mut args_iter = args[option_start..].iter();
@@ -240,19 +239,19 @@ fn try_wave_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
         }
     }
     if selected.is_some_and(|n| n != 0) {
-        return Err("WAVE has only stream 0".into());
+        return Err("audio input has only stream 0".into());
     }
     let (from, to) = (from.ok_or("--from required")?, to.ok_or("--to required")?);
     if plan {
         if report {
             return Err("progress applies to PCM trim execution, not planning".into());
         }
-        let mut result = fvid::native_plan::trim_pcm(
+        let mut result = if adts {fvid::native_plan::trim_adts(std::path::Path::new(&args[source_index]),from,to)?} else {fvid::native_plan::trim_pcm(
             std::path::Path::new(&args[source_index]),
             from,
             to,
             selected,
-        )?;
+        )?};
         result.command = command.to_owned();
         if !quiet {
             println!("{}", serde_json::to_string_pretty(&result)?);
@@ -267,6 +266,11 @@ fn try_wave_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
             );
         })
     });
+    if adts {
+        let stats=fvid::native_export::trim_adts_wave(std::path::Path::new(&args[source_index]),std::path::Path::new(&args[source_index+1]),from,to,None,progress.as_ref())?;
+        if !quiet {println!("{}",serde_json::json!({"packets":stats.decoded_frames,"sample_frames":stats.sample_frames,"payload_bytes":stats.sample_frames*u64::from(stats.channels)*4,"segments":1,"backend":"fvid","fvid_payload_copies":0}));}
+        return Ok(true);
+    }
     let stats = fvid::native_pcm::trim_wave(
         std::path::Path::new(&args[source_index]),
         std::path::Path::new(&args[source_index + 1]),

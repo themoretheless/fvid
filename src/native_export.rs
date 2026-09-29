@@ -666,3 +666,14 @@ pub fn remux_mp4_stats(
     if let Some(hook) = progress { hook.emit(crate::media_control::ProgressEvent { done: true, ..event }); }
     Ok(crate::media_control::ProgressEvent { done: true, ..event })
 }
+
+/// Trim ADTS audio to float WAVE, decoding pre-roll from the beginning so AAC
+/// overlap state is retained. Select sample starts in [from,to), in microseconds.
+pub fn trim_adts_wave(source: &Path, destination: &Path, from: i64, to: i64,
+    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::native_media::AudioDecodeStats> {
+    if from < 0 || to <= from {return Err(invalid("trim requires 0 <= from < to"));}
+    if destination.extension().and_then(|s|s.to_str()) != Some("wav") {return Err(invalid("native ADTS trim output requires .wav"));}
+    if !is_adts_source(source)? {return Err(invalid("ADTS input required"));}
+    export_aac_pcm_selected(source,destination,Some((std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64))),1.0,None,None,None,cancel,progress)
+}

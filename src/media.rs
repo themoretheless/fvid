@@ -326,6 +326,13 @@ pub fn trim(
     to: i64,
     options: &CopyOptions,
 ) -> Result<CopyStats> {
+    if crate::native_export::is_adts_source(source).map_err(|e|e.to_string())?
+        && destination.extension().and_then(|s|s.to_str())==Some("wav") {
+        validate_native_copy_options(options,true)?;
+        if options.streams.first().is_some_and(|&s|s!=0) {return Err("ADTS has only stream 0".into());}
+        let stats=crate::native_export::trim_adts_wave(source,destination,from,to,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())?;
+        return Ok(CopyStats {packets:stats.decoded_frames,payload_bytes:stats.sample_frames*u64::from(stats.channels)*4,segments:1,backend:"fvid",fvid_payload_copies:0});
+    }
     if !crate::native_pcm::is_wave(source).map_err(|e| e.to_string())? {
         return fvid_media::trim(source, destination, from, to, options);
     }
@@ -344,6 +351,11 @@ pub fn plan_trim(
     to: i64,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
+    if crate::native_export::is_adts_source(source).map_err(|e|e.to_string())? {
+        validate_native_copy_options(options,true)?;
+        if options.streams.first().is_some_and(|&s|s!=0) {return Err("ADTS has only stream 0".into());}
+        return crate::native_plan::trim_adts(source,from,to);
+    }
     if !crate::native_pcm::is_wave(source).map_err(|e| e.to_string())? {
         return fvid_media::plan_trim(source, from, to, options);
     }
