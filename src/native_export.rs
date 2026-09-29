@@ -157,6 +157,15 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
         let [width, height] = reader.dimensions();
         let rotation = reader.rotation();
         let (mut chroma, depth) = match &frame {
+            RawFrame::Planar(p) => (
+                match p.frame.subsampling {
+                    Some([2, 2]) => "420",
+                    Some([2, 1]) => "422",
+                    Some([1, 1]) => "444",
+                    _ => return Err(invalid("unsupported Y4M chroma layout")),
+                },
+                p.depth,
+            ),
             RawFrame::Avc { picture, .. }
                 if width % 2 == 0
                     && height % 2 == 0
@@ -184,6 +193,7 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
         let full = match &frame {
             RawFrame::Avc { colour, .. } => colour.full,
             RawFrame::Planar8(p) => p.colour.full,
+            RawFrame::Planar(p) => p.colour.full,
             _ => false,
         };
         let aspect = transformed_aspect(reader.pixel_aspect(), width, height, geometry)?;
@@ -238,6 +248,7 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
         } else {
             match frame {
                 RawFrame::Avc { picture, .. } => picture.write_planar(&mut output)?,
+                RawFrame::Planar(p) => output.write_all(&p.frame.data)?,
                 RawFrame::Planar8(p) => {
                     output.write_all(&p.y)?;
                     output.write_all(&p.cb)?;

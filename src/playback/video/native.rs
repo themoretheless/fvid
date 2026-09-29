@@ -1,4 +1,4 @@
-//! RGB playback adapter for FVid's own Y4M, MP4/AVC/HEVC and WebM/VP9/AV1 readers.
+//! RGB playback adapter for FVid's own Y4M, MP4 and Matroska readers.
 use crate::color::{
     hdr::{ColourDescription, HdrMetadata},
     primaries::MatrixCoeff,
@@ -12,6 +12,10 @@ use std::{
     sync::Arc,
     time::Duration,
 };
+
+#[path = "packed.rs"]
+mod packed;
+pub use packed::PackedPlanar;
 
 pub enum NativeReader<R> {
     Webm(crate::playback_webm::WebmVideoReader<R>),
@@ -873,6 +877,8 @@ pub enum RawFrame {
     },
     /// Hardware decoder output: already cropped 8-bit planes.
     Planar8(Arc<Planar8>),
+    /// Packed planar output retaining source precision and chroma geometry.
+    Planar(Arc<PackedPlanar>),
     /// Uncompressed Y4M frame (luma, then Cb, then Cr) for off-thread conversion.
     Yuv {
         data: Vec<u8>,
@@ -892,6 +898,7 @@ impl RawFrame {
             RawFrame::Rgb(rgb) => return Ok(rgb),
             RawFrame::Avc { picture, colour } => avc_to_rgb(&picture, colour, &mut rgb, budget)?,
             RawFrame::Planar8(planes) => planar8_to_rgb(&planes, &mut rgb, budget)?,
+            RawFrame::Planar(p) => p.to_rgb(&mut rgb, budget)?,
             RawFrame::Yuv {
                 data,
                 luma_len,
@@ -944,6 +951,7 @@ fn fill_rgb(
     match raw {
         RawFrame::Avc { picture, colour } => avc_to_rgb(&picture, colour, rgb, budget)?,
         RawFrame::Planar8(planes) => planar8_to_rgb(&planes, rgb, budget)?,
+        RawFrame::Planar(p) => p.to_rgb(rgb, budget)?,
         RawFrame::Rgb(bytes) => *rgb = bytes,
         RawFrame::Yuv { .. } => unreachable!(),
     }

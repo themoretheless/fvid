@@ -140,6 +140,16 @@ fn into_pixels(
 ) -> crate::Result<Pixels> {
     let pixels = match raw {
         RawFrame::Rgb(rgb) => Pixels::Rgb(rgb),
+        RawFrame::Planar(p) => {
+            let mut rgb = Vec::new();
+            p.to_rgb(&mut rgb, budget)?;
+            if rotation != 0 {
+                rgb = crate::playback_native::rotate_plane(
+                    &rgb, p.frame.width, p.frame.height, rotation, 3,
+                );
+            }
+            Pixels::Rgb(rgb)
+        }
         RawFrame::Avc { picture, colour } => {
             Pixels::Planar(Arc::new(avc_to_planar8(&picture, colour)), None)
         }

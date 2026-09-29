@@ -226,6 +226,7 @@ pub(crate) fn matroska(path: &Path) -> Result<MediaInfo> {
             "V_VP8" => "vp8",
             "V_VP9" => "vp9",
             "V_AV1" => "av1",
+            "V_FFV1" => "ffv1",
             "A_AAC" => "aac",
             "A_OPUS" => "opus",
             "A_VORBIS" => "vorbis",

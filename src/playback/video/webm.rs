@@ -1,4 +1,4 @@
-//! Native WebM/Matroska AVC, HEVC, VP9 and AV1 playback with bounded decode-ahead and source timestamps.
+//! Native WebM/Matroska AVC, HEVC, VP9, AV1 and FFV1 playback with bounded decode-ahead and source timestamps.
 use crate::codec::{avc_decoder::AvcDecoder, avc_picture::IntraPicture, hevc_decoder::HevcDecoder};
 use crate::{
     Result,
@@ -9,7 +9,7 @@ use crate::{
     color::hdr::{ColourDescription, HdrMetadata},
     container::webm::{Limits, WebmReader},
     invalid,
-    playback_native::{AvcColour, Planar8},
+    playback_native::{AvcColour, PackedPlanar, Planar8},
 };
 use std::sync::Arc;
 use std::{
@@ -19,12 +19,14 @@ use std::{
 
 enum Picture {
     Coded(Arc<IntraPicture>, AvcColour),
+    Ffv1(Arc<PackedPlanar>),
     Vp9(Decoded),
     Av1(crate::codec::av1_decoder::Decoded),
 }
 enum VideoDecoder {
     Avc(AvcDecoder),
     Hevc(HevcDecoder),
+    Ffv1(crate::codec::ffv1_decoder::Decoder),
     Vp9(Decoder),
     Av1(crate::codec::av1_decoder::Decoder),
 }
@@ -93,14 +95,28 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 t.kind == 1
                     && matches!(
                         t.codec.as_str(),
-                        "V_VP9" | "V_AV1" | "V_MPEG4/ISO/AVC" | "V_MPEGH/ISO/HEVC"
+                        "V_VP9" | "V_AV1" | "V_MPEG4/ISO/AVC" | "V_MPEGH/ISO/HEVC" | "V_FFV1"
                     )
             })
             .ok_or_else(|| {
-                invalid("WebM/Matroska has no supported AVC, HEVC, VP9 or AV1 video track")
+                invalid("WebM/Matroska has no supported AVC, HEVC, VP9, AV1 or FFV1 video track")
             })?;
         let mut default_duration =
             (track.default_duration_ns > 0).then_some(track.default_duration_ns);
+        let ffv1 = track.codec == "V_FFV1";
+        let ffv1_size = if ffv1 {
+            if !track.codec_private.is_empty() {
+                return Err(crate::unsupported(
+                    "FFV1 configuration-record versions are not implemented",
+                ));
+            }
+            Some((
+                u32::try_from(track.width).map_err(|_| invalid("FFV1 width overflow"))? as usize,
+                u32::try_from(track.height).map_err(|_| invalid("FFV1 height overflow"))? as usize,
+            ))
+        } else {
+            None
+        };
         let av1 = track.codec == "V_AV1";
         let avc = track.codec == "V_MPEG4/ISO/AVC";
         let hevc = track.codec == "V_MPEGH/ISO/HEVC";
@@ -185,7 +201,13 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         };
         Ok(Self {
             demux,
-            decoder: if avc {
+            decoder: if let Some((w, h)) = ffv1_size {
+                VideoDecoder::Ffv1(crate::codec::ffv1_decoder::Decoder::new(
+                    w,
+                    h,
+                    queue_budget,
+                )?)
+            } else if avc {
                 VideoDecoder::Avc(AvcDecoder::new(&private, queue_budget)?)
             } else if hevc {
                 VideoDecoder::Hevc(HevcDecoder::from_configuration(&private, queue_budget)?)
@@ -209,7 +231,9 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             insets,
             colour,
             hdr,
-            codec: if avc {
+            codec: if ffv1 {
+                "FFV1"
+            } else if avc {
                 "H.264"
             } else if hevc {
                 "H.265"
@@ -279,7 +303,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 .color()
                 .map(crate::codec::av1_sequence::Color::signal)
                 .unwrap_or_default(),
-            VideoDecoder::Vp9(_) => ColourDescription::default(),
+            VideoDecoder::Vp9(_) | VideoDecoder::Ffv1(_) => ColourDescription::default(),
             VideoDecoder::Avc(d) => d
                 .active_vui()
                 .or_else(|| d.recorded_vui())
@@ -323,7 +347,9 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     pub fn bitstream_hdr(&self) -> HdrMetadata {
         let live = match &self.decoder {
             VideoDecoder::Av1(d) => d.hdr(),
-            VideoDecoder::Vp9(_) | VideoDecoder::Avc(_) => HdrMetadata::default(),
+            VideoDecoder::Vp9(_) | VideoDecoder::Avc(_) | VideoDecoder::Ffv1(_) => {
+                HdrMetadata::default()
+            }
             VideoDecoder::Hevc(d) => d.hdr(),
         };
         let seed = self.open_signal.map(|(_, seed)| seed).unwrap_or_default();
@@ -382,6 +408,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             VideoDecoder::Hevc(d) => d.reset(),
             VideoDecoder::Vp9(d) => d.reset(),
             VideoDecoder::Av1(d) => d.reset(),
+            VideoDecoder::Ffv1(d) => d.reset(),
         };
         self.index = 0;
         self.pending = None;
@@ -462,6 +489,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             VideoDecoder::Hevc(d) => d.reset(),
             VideoDecoder::Vp9(d) => d.reset(),
             VideoDecoder::Av1(d) => d.reset(),
+            VideoDecoder::Ffv1(d) => d.reset(),
         };
         // The picture held over from before belongs to the stretch being left
         // behind, and a decoder that had just failed is the one rebuilt here.
@@ -586,6 +614,27 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                         });
                     }
                 }
+                VideoDecoder::Ffv1(d) => {
+                    let decoded = d.decode(&packet)?;
+                    let (kr, kb) = match self.colour.matrix {
+                        0 | 2 | 5 | 6 => (0.299, 0.114),
+                        1 => (0.2126, 0.0722),
+                        7 => (0.212, 0.087),
+                        9 => (0.2627, 0.0593),
+                        _ => return Err(invalid("unsupported FFV1 display colour matrix")),
+                    };
+                    let colour = AvcColour {
+                        kr,
+                        kb,
+                        full: self.colour.full_range,
+                    };
+                    let p = PackedPlanar::new(decoded.frame, decoded.depth, colour)?;
+                    visible = Some(Frame {
+                        decoded: Picture::Ffv1(Arc::new(p)),
+                        pts,
+                        duration,
+                    });
+                }
                 VideoDecoder::Vp9(d) => {
                     for frame in vp9::frames(&packet)? {
                         let decoded = d.decode(frame)?;
@@ -692,6 +741,13 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 let (w, h) = p.dimensions();
                 ([w as u32, h as u32], p.bit_depth, colour.full, 0, false)
             }
+            Picture::Ffv1(p) => (
+                [p.frame.width as u32, p.frame.height as u32],
+                p.depth,
+                p.colour.full,
+                0,
+                false,
+            ),
             Picture::Vp9(d) => (
                 d.picture.size,
                 d.picture.depth,
@@ -738,6 +794,10 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         }))
     }
     fn convert_to_rgb(&mut self, current: &CurrentFrame) -> Result<bool> {
+        if let Picture::Ffv1(p) = &current.decoded {
+            p.to_rgb(&mut self.rgb, self.rgb_budget)?;
+            return Ok(true);
+        }
         if let Picture::Coded(p, colour) = &current.decoded {
             crate::playback_native::avc_to_rgb(p, *colour, &mut self.rgb, self.rgb_budget)?;
             return Ok(true);
@@ -770,7 +830,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             (16.0 * scale, 219.0 * scale, 224.0 * scale)
         };
         let planes = match &current.decoded {
-            Picture::Coded(_, _) => unreachable!("coded planes handled above"),
+            Picture::Coded(_, _) | Picture::Ffv1(_) => unreachable!("coded planes handled above"),
             Picture::Vp9(d) => d
                 .picture
                 .planes
@@ -824,7 +884,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         }
         result
     }
-    /// Keep AVC/HEVC sample depth for export and off-thread rendering.
+    /// Keep AVC/HEVC/FFV1 sample depth for export and off-thread rendering.
     pub fn read_frame_raw(&mut self) -> Result<Option<crate::playback_native::RawFrame>> {
         if self.failed {
             return Err(invalid("WebM playback requires rewind after an error"));
@@ -834,6 +894,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 return Ok(None);
             };
             let raw = match &current.decoded {
+                Picture::Ffv1(p) => crate::playback_native::RawFrame::Planar(p.clone()),
                 Picture::Coded(picture, colour) => crate::playback_native::RawFrame::Avc {
                     picture: picture.clone(),
                     colour: *colour,
@@ -856,6 +917,9 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         self.current_planes(&current).map(Some)
     }
     fn current_planes(&self, current: &CurrentFrame) -> Result<Planar8> {
+        if let Picture::Ffv1(p) = &current.decoded {
+            return p.to_planar8(self.rgb_budget);
+        }
         if let Picture::Coded(p, colour) = &current.decoded {
             let (w, h) = p.dimensions();
             let bytes = w
@@ -903,7 +967,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             out
         };
         let planes = match &current.decoded {
-            Picture::Coded(_, _) => unreachable!("coded planes handled above"),
+            Picture::Coded(_, _) | Picture::Ffv1(_) => unreachable!("coded planes handled above"),
             Picture::Vp9(d) => d
                 .picture
                 .planes

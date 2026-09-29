@@ -319,7 +319,8 @@ fn owned_decoder_reads_independently_encoded_contexts_and_nonkeyframes() {
                         String::from_utf8_lossy(&output.stderr)
                     );
                     let mut reader =
-                        WebmReader::open(Cursor::new(output.stdout), Limits::default()).unwrap();
+                        WebmReader::open(Cursor::new(output.stdout.clone()), Limits::default())
+                            .unwrap();
                     reader.scan_all().unwrap();
                     assert_eq!(reader.packets.len(), frames.len());
                     let mut decoder = Decoder::new(w, h, 8 << 20).unwrap();
@@ -345,6 +346,31 @@ fn owned_decoder_reads_independently_encoded_contexts_and_nonkeyframes() {
                         }
                     }
                     assert!(nonkeys > 0);
+                    // Exercise the production container dispatch as well as the packet API.
+                    use fvid::playback_native::{NativeReader, RawFrame};
+                    let mut native =
+                        NativeReader::software(Cursor::new(output.stdout), 8 << 20).unwrap();
+                    for expected in &frames {
+                        let RawFrame::Planar(p) = native.read_frame_raw().unwrap().unwrap() else {
+                            panic!("expected full-precision planar frame")
+                        };
+                        assert_eq!(p.depth, depth);
+                        assert_eq!(p.frame.data, expected.data);
+                    }
+                    assert!(native.read_frame_raw().unwrap().is_none());
+                    for index in [4usize, 1, 6, 0] {
+                        let RawFrame::Planar(p) = native
+                            .seek_raw(std::time::Duration::from_millis(index as u64 * 40 + 1))
+                            .unwrap()
+                            .unwrap()
+                        else {
+                            panic!("expected full-precision seek")
+                        };
+                        assert_eq!(
+                            p.frame.data, frames[index].data,
+                            "{format} coder {coder} context {context} seek {index}"
+                        );
+                    }
                 }
             }
         }

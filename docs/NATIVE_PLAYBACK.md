@@ -2108,3 +2108,32 @@ This is a packet decoder API; playback/container dispatch has not yet been
 connected to it. Golomb Rice, FFV1 v3+, RGB, alpha and monochrome are still
 unsupported. No claim of aggregate `media` FFmpeg independence follows from
 this addition.
+
+### Owned FFV1 Matroska playback and raw media path (2026-09-29)
+
+`WebmVideoReader` now selects `V_FFV1` and feeds packets into the owned v0/v1
+range decoder. Rewind and keyframe seek reset adaptation history, while invisible
+blocks still update it. Container timestamps, frame durations, colour matrix,
+range, pixel aspect, rotation and HDR metadata follow the existing native path.
+Configuration-record versions remain explicitly unsupported.
+
+`RawFrame::Planar(Arc<PackedPlanar>)` preserves packed source samples, depth and
+explicit chroma axes. This avoids the former assumption that every non-AVC
+Matroska picture could be reduced to 8-bit 4:2:0. FFV1 RGB presentation uses the
+source depth and actual chroma positions; the threaded renderer applies rotation
+once. Raw decoding and Y4M export retain 8–16-bit samples. Y4M export accepts its
+existing 420/422/444 layouts; this is not a replacement for FFV1/MKV export.
+The media probe names FFV1 tracks as `ffv1`.
+
+Tests exercise 162 owned-muxed frames across all encoder depths/subsampling
+layouts with odd dimensions, 32 colour/range/rotation combinations, exact raw
+and Y4M bytes, headless CLI/API decoding, high-depth geometry, threaded playback
+and paused seeking. The independent encoder oracle additionally reads its 252
+frames through `NativeReader` and seeks forward/back across non-keyframes.
+Existing Matroska AVC/HEVC/VP9/AV1 and playback-thread suites remain passing.
+
+The desktop smoke test produced a blank window for both the new FFV1 file and
+its original HEVC MP4 using the same player binary. Thus actual on-screen
+presentation is not verified by this run; the comparison does not establish
+its cause. Pixel and threaded-presentation tests pass independently. Aggregate
+`media` FFmpeg removal and installed virtual-camera validation remain open.

@@ -94,6 +94,7 @@ pub fn decode_video_pipeline(
         stats.height = u32::try_from(height).map_err(|_| invalid("video height overflow"))?;
         stats.pixel_format = match &frame {
             RawFrame::Rgb(_) => "rgb24".into(),
+            RawFrame::Planar(p) => p.pixel_format()?,
             RawFrame::Avc { picture, .. } => match picture.bit_depth {
                 8 => "yuv420p".into(),
                 depth => format!("yuv420p{depth}le"),
@@ -112,7 +113,11 @@ pub fn decode_video_pipeline(
                     _ => stats.pixel_format,
                 };
             }
-            let depth = match &frame { RawFrame::Avc { picture, .. } => picture.bit_depth, _ => 8 };
+            let depth = match &frame {
+                RawFrame::Avc { picture, .. } => picture.bit_depth,
+                RawFrame::Planar(p) => p.depth,
+                _ => 8,
+            };
             filters.apply(&mut output, depth)?;
             std::hint::black_box(output);
         }

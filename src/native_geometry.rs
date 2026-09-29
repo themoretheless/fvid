@@ -129,6 +129,17 @@ impl VideoGeometry {
                 picture.write_planar(&mut data)?;
                 (Cow::Owned(data), 2, 2, false)
             }
+            RawFrame::Planar(p) => {
+                p.validate()?;
+                if (p.frame.width, p.frame.height) != (width, height) {
+                    return Err(invalid("inconsistent packed plane dimensions"));
+                }
+                let [sx, sy] = p
+                    .frame
+                    .subsampling
+                    .ok_or_else(|| invalid("missing planar subsampling"))?;
+                (Cow::Borrowed(p.frame.data.as_slice()), sx, sy, false)
+            }
             RawFrame::Planar8(p) => {
                 if (p.width, p.height) != (width, height) {
                     return Err(invalid("inconsistent plane dimensions"));
@@ -175,6 +186,7 @@ impl VideoGeometry {
         let (depth, full) = match frame {
             RawFrame::Avc { picture, colour } => (picture.bit_depth, colour.full),
             RawFrame::Planar8(p) => (8, p.colour.full),
+            RawFrame::Planar(p) => (p.depth, p.colour.full),
             // The legacy untagged Y4M variant represents limited-range samples.
             RawFrame::Yuv { .. } => (8, false),
             RawFrame::Rgb(_) => (8, true),
@@ -248,6 +260,7 @@ impl VideoGeometry {
         let (depth, full) = match frame {
             RawFrame::Avc { picture, colour } => (picture.bit_depth, colour.full),
             RawFrame::Planar8(p) => (8, p.colour.full),
+            RawFrame::Planar(p) => (p.depth, p.colour.full),
             RawFrame::Rgb(_) => (8, true),
             RawFrame::Yuv { .. } => (8, false),
         };
