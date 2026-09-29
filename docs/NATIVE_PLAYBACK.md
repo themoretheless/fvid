@@ -1375,3 +1375,23 @@ and neutral chroma `128 << (depth-8)`. In particular 10-bit chroma padding is
 quarter-turn reference fixtures compare every interior sample byte with FFmpeg;
 padding has separate exact range/depth assertions. See
 `tests/fixtures/geometry/README.md` for the generator commands and hashes.
+
+### Saving native geometry to Y4M (2026-09-29)
+
+`media export-y4m INPUT OUTPUT.y4m` accepts the same `--crop`, `--hflip`,
+`--vflip`, `--transpose`, `--pad`, and `--scale` options, optionally combined
+with `--from`/`--to`. `native_export::export_y4m_transformed` is available without
+features and is reexported by `media`. It writes the transformed samples through
+the existing atomic, non-overwriting Y4M publisher; it uses no external process.
+
+Container display rotation is applied before user geometry for both transformed
+decode and export. A user quarter-turn inverts pixel aspect; resize then adjusts
+it to retain the display aspect of the cropped/padded picture. Range, sample
+depth and exact constant frame timing are preserved. Changes of output layout,
+range, depth or pixel aspect within a stream are rejected.
+
+Y4M output currently supports 4:2:0, 4:2:2 and 4:4:4. A transform producing
+4:4:0 is rejected without publishing an output, rather than writing an
+unrecognized header or silently resampling chroma. The native Y4M reader still
+accepts 8-bit input only; Main10 exports are validated directly against saved
+reference samples, not claimed as an owned high-bit-depth Y4M roundtrip.

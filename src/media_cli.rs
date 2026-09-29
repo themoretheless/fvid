@@ -128,9 +128,12 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
     if args.first().map(String::as_str) == Some("export-y4m") {
-        if args.len() < 3 { return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m [--from SECONDS --to SECONDS]".into()); }
+        if args.len() < 3 { return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m [--crop X:Y:W:H] [--hflip] [--vflip] [--transpose MODE] [--pad W:H:X:Y] [--scale W:H] [--from SECONDS --to SECONDS]".into()); }
+        let mut geometry_args=vec!["decode".to_owned()];
+        geometry_args.extend_from_slice(&args[3..]);
+        let (geometry_args, geometry)=geometry_decode_args(&geometry_args)?;
         let (mut from, mut to) = (None, None);
-        let mut options = args[3..].iter();
+        let mut options = geometry_args[1..].iter();
         while let Some(option) = options.next() {
             let slot = match option.as_str() {
                 "--from" => &mut from,
@@ -145,7 +148,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             (Some(from), Some(to)) if from < to => Some((from, to)),
             _ => return Err("export interval requires both --from and --to with from < to".into()),
         };
-        let frames = fvid::native_export::export_y4m_interval(std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), interval)?;
+        let frames = fvid::native_export::export_y4m_transformed(std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), interval, &geometry)?;
         println!("{{\"backend\":\"fvid\",\"video_frames\":{frames}}}");
         return Ok(());
     }

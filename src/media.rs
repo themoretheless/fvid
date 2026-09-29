@@ -1,6 +1,7 @@
 //! Media API migration: plain video decode and AAC PCM export use FVid's native pipeline.
 //! Remaining exports still use the legacy adapter and retain its dependencies.
 pub use fvid_media::*;
+pub use crate::native_export::{export_y4m, export_y4m_interval, export_y4m_transformed};
 
 pub fn decode_video(source: &std::path::Path) -> Result<DecodeStats> {
     decode_video_interval(source, None)

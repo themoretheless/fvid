@@ -316,3 +316,165 @@ fn quarter_turn_inverts_exported_pixel_aspect() {
     let end = bytes.iter().position(|b| *b == b'\n').unwrap();
     assert!(std::str::from_utf8(&bytes[..end]).unwrap().contains("A1:2"));
 }
+
+#[test]
+fn transformed_main10_export_keeps_reference_pixels_and_black_padding() {
+    let dir = directory();
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/hevc/main10-ipb.mp4");
+    let output = dir.0.join("geometry.y4m");
+    let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "export-y4m"])
+        .arg(&source)
+        .arg(&output)
+        .args([
+            "--crop",
+            "2:4:32:16",
+            "--hflip",
+            "--transpose",
+            "clock",
+            "--pad",
+            "20:36:2:2",
+            "--from",
+            "0.1",
+            "--to",
+            "0.2",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        run.status.success(),
+        "{}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    let bytes = std::fs::read(&output).unwrap();
+    let end = bytes.iter().position(|&b| b == b'\n').unwrap() + 1;
+    let header = std::str::from_utf8(&bytes[..end]).unwrap();
+    assert!(header.contains("W20 H36 F30:1 Ip A1:1 C420p10"), "{header}");
+    let reference = include_bytes!("fixtures/hevc/main10-ipb.yuv");
+    let mut expected = Vec::new();
+    for frame in reference.chunks_exact(128 * 128 * 3).skip(3).take(3) {
+        expected.extend_from_slice(b"FRAME\n");
+        let mut source_offset = 0;
+        for (sw, sh, cx, cy, cw, ch, ow, oh, pad, black) in [
+            (128, 128, 2, 4, 32, 16, 20, 36, 2, 64u16),
+            (64, 64, 1, 2, 16, 8, 10, 18, 1, 512),
+            (64, 64, 1, 2, 16, 8, 10, 18, 1, 512),
+        ] {
+            let mut plane = black.to_le_bytes().repeat(ow * oh);
+            // Independent forward mapping: reflect the cropped x, then rotate.
+            for y in 0..ch {
+                for x in 0..cw {
+                    let at = source_offset + ((cy + y) * sw + cx + x) * 2;
+                    let (dx, dy) = (pad + ch - 1 - y, pad + cw - 1 - x);
+                    plane[(dy * ow + dx) * 2..(dy * ow + dx) * 2 + 2]
+                        .copy_from_slice(&frame[at..at + 2]);
+                }
+            }
+            expected.extend(plane);
+            source_offset += sw * sh * 2;
+        }
+    }
+    assert_eq!(&bytes[end..], expected);
+}
+
+#[test]
+fn transformed_y4m_retains_range_and_display_aspect_when_resized() {
+    use fvid::native_geometry::{Transpose, VideoGeometry};
+    let dir = directory();
+    let input = dir.0.join("source.y4m");
+    let output = dir.0.join("out.y4m");
+    let mut bytes = b"YUV4MPEG2 W4 H2 F25:1 Ip A2:1 C444 XCOLORRANGE=FULL\nFRAME\n".to_vec();
+    bytes.extend(0..8);
+    bytes.extend([128; 16]);
+    std::fs::write(&input, bytes).unwrap();
+    let geometry = VideoGeometry {
+        transpose: Some(Transpose::Clock),
+        scale: Some([4, 4]),
+        ..Default::default()
+    };
+    assert_eq!(
+        fvid::native_export::export_y4m_transformed(&input, &output, None, &geometry).unwrap(),
+        1
+    );
+    let bytes = std::fs::read(&output).unwrap();
+    let end = bytes.iter().position(|&b| b == b'\n').unwrap() + 1;
+    let header = std::str::from_utf8(&bytes[..end]).unwrap();
+    assert!(
+        header.contains("W4 H4 F25:1 Ip A1:4 C444 XCOLORRANGE=FULL"),
+        "{header}"
+    );
+    assert_eq!(&bytes[end..end + 6], b"FRAME\n");
+    assert_eq!(
+        &bytes[end + 6..end + 22],
+        &[4, 4, 0, 0, 5, 5, 1, 1, 6, 6, 2, 2, 7, 7, 3, 3]
+    );
+    let mut reader =
+        fvid::playback_native::NativeReader::software(std::io::Cursor::new(bytes), usize::MAX)
+            .unwrap();
+    assert_eq!(reader.pixel_aspect(), (1, 4));
+    assert!(reader.read_frame_raw().unwrap().is_some());
+}
+
+#[test]
+fn invalid_export_geometry_and_unrepresentable_chroma_publish_nothing() {
+    use fvid::native_geometry::{Transpose, VideoGeometry};
+    let dir = directory();
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/geometry/422.y4m");
+    for geometry in [
+        VideoGeometry {
+            crop: Some([2, 0, 4, 2]),
+            ..Default::default()
+        },
+        VideoGeometry {
+            scale: Some([0, 2]),
+            ..Default::default()
+        },
+        VideoGeometry {
+            transpose: Some(Transpose::Clock),
+            ..Default::default()
+        },
+    ] {
+        assert!(
+            fvid::native_export::export_y4m_transformed(
+                &source,
+                &dir.0.join("out.y4m"),
+                None,
+                &geometry
+            )
+            .is_err()
+        );
+        assert_eq!(std::fs::read_dir(&dir.0).unwrap().count(), 0);
+    }
+}
+
+#[test]
+fn user_turn_can_undo_container_display_rotation_before_export() {
+    use fvid::native_geometry::{Transpose, VideoGeometry};
+    let dir = directory();
+    let fixture = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/display/par-2x1.mp4");
+    let baseline = dir.0.join("baseline.y4m");
+    fvid::native_export::export_y4m(&fixture, &baseline).unwrap();
+    let mut mp4 = std::fs::read(&fixture).unwrap();
+    let matrix = mp4.windows(4).position(|w| w == b"tkhd").unwrap() + 44;
+    for (offset, value) in [(0, 0i32), (4, 65536), (12, -65536), (16, 0)] {
+        mp4[matrix + offset..matrix + offset + 4].copy_from_slice(&value.to_be_bytes());
+    }
+    let source = dir.0.join("rotated.mp4");
+    std::fs::write(&source, mp4).unwrap();
+    let output = dir.0.join("undone.y4m");
+    let geometry = VideoGeometry {
+        transpose: Some(Transpose::CClock),
+        ..Default::default()
+    };
+    fvid::native_export::export_y4m_transformed(&source, &output, None, &geometry).unwrap();
+    assert_eq!(
+        std::fs::read(output).unwrap(),
+        std::fs::read(baseline).unwrap()
+    );
+    let plain = fvid::native_media::decode_video(&fixture).unwrap();
+    let turned = fvid::native_media::decode_video_transformed(&source, None, &geometry).unwrap();
+    assert_eq!(
+        (plain.width, plain.height, plain.video_frames),
+        (turned.width, turned.height, turned.video_frames)
+    );
+}

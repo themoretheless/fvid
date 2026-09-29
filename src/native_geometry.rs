@@ -74,8 +74,8 @@ impl VideoGeometry {
         if width == 0 || height == 0 {
             return Err(invalid("empty video geometry"));
         }
-        let (data, sx, sy, bytes, rgb) = match frame {
-            RawFrame::Rgb(data) => (Cow::Borrowed(data.as_slice()), 1, 1, 3, true),
+        let (data, sx, sy, rgb) = match frame {
+            RawFrame::Rgb(data) => (Cow::Borrowed(data.as_slice()), 1, 1, true),
             RawFrame::Avc { picture, .. } => {
                 let [left, right, top, bottom] = picture.crop;
                 if picture
@@ -108,13 +108,7 @@ impl VideoGeometry {
                 }
                 let mut data = Vec::new();
                 picture.write_planar(&mut data)?;
-                (
-                    Cow::Owned(data),
-                    2,
-                    2,
-                    if picture.bit_depth == 8 { 1 } else { 2 },
-                    false,
-                )
+                (Cow::Owned(data), 2, 2, false)
             }
             RawFrame::Planar8(p) => {
                 if (p.width, p.height) != (width, height) {
@@ -143,7 +137,7 @@ impl VideoGeometry {
                 let mut data = p.y.clone();
                 data.extend_from_slice(&p.cb);
                 data.extend_from_slice(&p.cr);
-                (Cow::Owned(data), sx, sy, 1, false)
+                (Cow::Owned(data), sx, sy, false)
             }
             RawFrame::Yuv {
                 data,
@@ -156,8 +150,98 @@ impl VideoGeometry {
                 if (*w, *h) != (width, height) || ![1, 2].contains(sx) || ![1, 2].contains(sy) {
                     return Err(invalid("invalid Y4M geometry"));
                 }
-                (Cow::Borrowed(data.as_slice()), *sx, *sy, 1, false)
+                (Cow::Borrowed(data.as_slice()), *sx, *sy, false)
             }
+        };
+        let (depth, full) = match frame {
+            RawFrame::Avc { picture, colour } => (picture.bit_depth, colour.full),
+            RawFrame::Planar8(p) => (8, p.colour.full),
+            // The legacy untagged Y4M variant represents limited-range samples.
+            RawFrame::Yuv { .. } => (8, false),
+            RawFrame::Rgb(_) => (8, true),
+        };
+        self.apply_samples(
+            &data,
+            width,
+            height,
+            (!rgb).then_some([sx, sy]),
+            depth,
+            full,
+        )
+    }
+
+    /// Apply user geometry after the container's display rotation. The decoder
+    /// keeps AVC/HEVC sample planes in coded orientation even when its reported
+    /// dimensions describe the display, so normalize those planes first.
+    pub fn apply_display(
+        &self,
+        frame: &RawFrame,
+        width: usize,
+        height: usize,
+        rotation: u16,
+    ) -> Result<GeometryFrame> {
+        if rotation == 0 {
+            return self.apply(frame, width, height);
+        }
+        let display = match rotation {
+            90 => Self {
+                transpose: Some(Transpose::Clock),
+                ..Default::default()
+            },
+            180 => Self {
+                horizontal_flip: true,
+                vertical_flip: true,
+                ..Default::default()
+            },
+            270 => Self {
+                transpose: Some(Transpose::CClock),
+                ..Default::default()
+            },
+            _ => return Err(invalid("invalid container display rotation")),
+        };
+        let (w, h) = if rotation == 180 {
+            (width, height)
+        } else {
+            (height, width)
+        };
+        let normalized = display.apply(frame, w, h)?;
+        let (depth, full) = match frame {
+            RawFrame::Avc { picture, colour } => (picture.bit_depth, colour.full),
+            RawFrame::Planar8(p) => (8, p.colour.full),
+            RawFrame::Rgb(_) => (8, true),
+            RawFrame::Yuv { .. } => (8, false),
+        };
+        if self.is_identity() {
+            return Ok(normalized);
+        }
+        self.apply_samples(
+            &normalized.data,
+            width,
+            height,
+            normalized.subsampling,
+            depth,
+            full,
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn apply_samples(
+        &self,
+        data: &[u8],
+        width: usize,
+        height: usize,
+        subsampling: Option<[usize; 2]>,
+        depth: u8,
+        full: bool,
+    ) -> Result<GeometryFrame> {
+        let rgb = subsampling.is_none();
+        let [sx, sy] = subsampling.unwrap_or([1, 1]);
+        let bytes = if rgb {
+            3
+        } else if depth == 8 {
+            1
+        } else {
+            2
         };
         let [x, y, w, h] = self.crop.unwrap_or([0, 0, width, height]);
         let (tw, th) = if self.transpose.is_some() {
@@ -206,13 +290,6 @@ impl VideoGeometry {
         };
         let mut result = Vec::new();
         let mut offset: usize = 0;
-        let (depth, full) = match frame {
-            RawFrame::Avc { picture, colour } => (picture.bit_depth, colour.full),
-            RawFrame::Planar8(p) => (8, p.colour.full),
-            // The legacy untagged Y4M variant represents limited-range samples.
-            RawFrame::Yuv { .. } => (8, false),
-            RawFrame::Rgb(_) => (8, true),
-        };
         for (plane, (dx, dy)) in shapes.into_iter().enumerate() {
             let pw = width.div_ceil(dx);
             let ph = height.div_ceil(dy);

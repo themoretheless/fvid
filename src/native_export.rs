@@ -31,6 +31,22 @@ pub fn export_y4m_interval(
     destination: &Path,
     interval: Option<(std::time::Duration, std::time::Duration)>,
 ) -> Result<u64> {
+    export_y4m_transformed(
+        source,
+        destination,
+        interval,
+        &crate::native_geometry::VideoGeometry::default(),
+    )
+}
+
+/// Save owned geometry transformations after container display orientation.
+/// Scaling retains the pre-scale display aspect by adjusting pixel aspect.
+pub fn export_y4m_transformed(
+    source: &Path,
+    destination: &Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    geometry: &crate::native_geometry::VideoGeometry,
+) -> Result<u64> {
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("export interval requires from < to"));
     }
@@ -86,7 +102,7 @@ pub fn export_y4m_interval(
         previous = Some((end, duration, u128::from(scale)));
         let [width, height] = reader.dimensions();
         let rotation = reader.rotation();
-        let (chroma, depth) = match &frame {
+        let (mut chroma, depth) = match &frame {
             RawFrame::Avc { picture, .. }
                 if width % 2 == 0
                     && height % 2 == 0
@@ -116,7 +132,28 @@ pub fn export_y4m_interval(
             RawFrame::Planar8(p) => p.colour.full,
             _ => false,
         };
-        let current = (width, height, chroma, depth, full);
+        let aspect = transformed_aspect(reader.pixel_aspect(), width, height, geometry)?;
+        let transformed = if geometry.is_identity() {
+            None
+        } else {
+            Some(geometry.apply_display(&frame, width, height, rotation)?)
+        };
+        let (width, height) = if let Some(picture) = &transformed {
+            chroma = match picture.subsampling {
+                Some([2, 2]) => "420",
+                Some([2, 1]) => "422",
+                Some([1, 1]) => "444",
+                _ => {
+                    return Err(invalid(
+                        "Y4M export cannot represent this transformed chroma layout",
+                    ));
+                }
+            };
+            (picture.width, picture.height)
+        } else {
+            (width, height)
+        };
+        let current = (width, height, chroma, depth, full, aspect);
         if let Some(first) = layout {
             if first != current {
                 return Err(invalid(
@@ -132,7 +169,7 @@ pub fn export_y4m_interval(
                 format!("{chroma}p{depth}")
             };
             // MP4 parsing already expresses aspect after the display rotation.
-            let (an, ad) = reader.pixel_aspect();
+            let (an, ad) = aspect;
             writeln!(
                 output,
                 "YUV4MPEG2 W{width} H{height} F{}:{} Ip A{an}:{ad} C{tag} XCOLORRANGE={}",
@@ -142,28 +179,36 @@ pub fn export_y4m_interval(
             )?;
         }
         output.write_all(b"FRAME\n")?;
-        match frame {
-            RawFrame::Avc { picture, .. } if rotation != 0 => {
-                let (w, h) = picture.dimensions();
-                let bytes = if picture.bit_depth == 8 { 1 } else { 2 };
-                let mut planar = Vec::new();
-                picture.write_planar(&mut planar)?;
-                let mut offset = 0;
-                for (pw, ph) in [(w, h), (w / 2, h / 2), (w / 2, h / 2)] {
-                    let end = offset + pw * ph * bytes;
-                    output.write_all(&crate::playback_native::rotate_plane(
-                        &planar[offset..end], pw, ph, rotation, bytes,
-                    ))?;
-                    offset = end;
+        if let Some(picture) = transformed {
+            output.write_all(&picture.data)?;
+        } else {
+            match frame {
+                RawFrame::Avc { picture, .. } if rotation != 0 => {
+                    let (w, h) = picture.dimensions();
+                    let bytes = if picture.bit_depth == 8 { 1 } else { 2 };
+                    let mut planar = Vec::new();
+                    picture.write_planar(&mut planar)?;
+                    let mut offset = 0;
+                    for (pw, ph) in [(w, h), (w / 2, h / 2), (w / 2, h / 2)] {
+                        let end = offset + pw * ph * bytes;
+                        output.write_all(&crate::playback_native::rotate_plane(
+                            &planar[offset..end],
+                            pw,
+                            ph,
+                            rotation,
+                            bytes,
+                        ))?;
+                        offset = end;
+                    }
                 }
+                RawFrame::Avc { picture, .. } => picture.write_planar(&mut output)?,
+                RawFrame::Planar8(p) => {
+                    output.write_all(&p.y)?;
+                    output.write_all(&p.cb)?;
+                    output.write_all(&p.cr)?;
+                }
+                _ => unreachable!(),
             }
-            RawFrame::Avc { picture, .. } => picture.write_planar(&mut output)?,
-            RawFrame::Planar8(p) => {
-                output.write_all(&p.y)?;
-                output.write_all(&p.cb)?;
-                output.write_all(&p.cr)?;
-            }
-            _ => unreachable!(),
         }
         count += 1;
     }
@@ -178,6 +223,36 @@ pub fn export_y4m_interval(
     std::fs::hard_link(&temporary.0, destination)?;
     Ok(count)
 }
+fn transformed_aspect(
+    aspect: (u32, u32),
+    width: usize,
+    height: usize,
+    geometry: &crate::native_geometry::VideoGeometry,
+) -> Result<(u32, u32)> {
+    let (mut n, mut d) = (u128::from(aspect.0), u128::from(aspect.1));
+    let [_, _, mut w, mut h] = geometry.crop.unwrap_or([0, 0, width, height]);
+    if geometry.transpose.is_some() {
+        std::mem::swap(&mut n, &mut d);
+        std::mem::swap(&mut w, &mut h);
+    }
+    if let Some([pw, ph, _, _]) = geometry.pad {
+        w = pw;
+        h = ph;
+    }
+    if let Some([ow, oh]) = geometry.scale {
+        n = product(product(n, w as u128)?, oh as u128)?;
+        d = product(product(d, h as u128)?, ow as u128)?;
+    }
+    if n == 0 || d == 0 {
+        return Err(invalid("invalid transformed pixel aspect"));
+    }
+    let divisor = gcd(n, d);
+    Ok((
+        u32::try_from(n / divisor).map_err(|_| invalid("pixel aspect overflow"))?,
+        u32::try_from(d / divisor).map_err(|_| invalid("pixel aspect overflow"))?,
+    ))
+}
+
 fn gcd(mut a: u128, mut b: u128) -> u128 {
     while b != 0 {
         (a, b) = (b, a % b);
