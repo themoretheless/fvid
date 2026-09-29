@@ -1762,7 +1762,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                         );
                     }
                 };
-                fvid_media::plan_decode_audio(
+                fvid::media::plan_decode_audio(
                     &plan_paths[0],
                     &fvid_media::AudioDecodeTransform {
                         interval,

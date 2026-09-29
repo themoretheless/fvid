@@ -69,3 +69,36 @@ fn public_transforms_intervals_cancellation_and_options_are_honored() {
     assert!(media::decode_audio_interval(&source, &cancelled, Some((-1, 1)), &CopyOptions::default()).is_err());
     assert!(!cancelled.exists());
 }
+
+#[test]
+fn native_plan_describes_the_actual_export_pipeline_and_rejects_unsupported_options() {
+    for name in ["aac-mono-44k.aac", "aac-native-edit.m4a", "aac-stereo.mka", "aac-960-48000.m4a"] {
+        let source = fixture(name);
+        let info = fvid::native_media::aac_source_info(&source).unwrap();
+        let transform = AudioDecodeTransform { interval: Some((10000, 50000)),
+            sample_rate: Some(32000), channels: Some(if info.channels == 1 { 2 } else { 1 }), volume: Some(0.5) };
+        let plan = media::plan_decode_audio(&source, &transform, &CopyOptions::default()).unwrap();
+        assert_eq!(plan.streams[0].index, info.stream_index);
+        assert_eq!(plan.streams[0].disposition, "decode");
+        assert!(plan.graph.is_none());
+        assert_eq!(plan.steps.iter().map(|s| s.action.as_str()).collect::<Vec<_>>(),
+            ["decode", "trim", "rematrix", "volume", "resample", "write"]);
+        assert!(!format!("{plan:?}").contains("libswresample"));
+        for bad in [AudioDecodeTransform { channels: Some(0), ..transform },
+            AudioDecodeTransform { channels: Some(7), ..transform },
+            AudioDecodeTransform { volume: Some(f64::NAN), ..transform },
+            AudioDecodeTransform { sample_rate: Some(0), ..transform },
+            AudioDecodeTransform { interval: Some((10, 1)), ..transform }] {
+            assert!(media::plan_decode_audio(&source, &bad, &CopyOptions::default()).is_err());
+        }
+        assert!(media::plan_decode_audio(&source, &transform,
+            &CopyOptions { max_packets: Some(1), ..Default::default() }).is_err());
+    }
+    let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "decode-audio"]).arg(fixture("aac-mono-44k.aac"))
+        .args(["--rate", "32000", "--channels", "2", "--volume", "0.5"]).output().unwrap();
+    assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
+    let json: serde_json::Value = serde_json::from_slice(&run.stdout).unwrap();
+    assert_eq!(json["streams"][0]["disposition"], "decode");
+    assert!(json["notes"][0].as_str().unwrap().contains("backend: fvid"));
+}

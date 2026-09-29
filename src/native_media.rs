@@ -652,3 +652,52 @@ pub fn is_aac_source(path: &std::path::Path) -> std::io::Result<bool> {
         Err(error) => Err(error),
     }
 }
+
+/// AAC stream geometry from owned container/configuration parsers. This does not
+/// decode packets and therefore does not certify the rest of the bitstream.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AacSourceInfo {
+    /// Zero-based container stream order, not MP4 track ID / Matroska track number.
+    pub stream_index: usize,
+    pub sample_rate: u32,
+    pub channels: u16,
+}
+
+pub fn aac_source_info(source: &Path) -> Result<AacSourceInfo> {
+    use std::io::{BufReader, Read, Seek, SeekFrom};
+    let mut input = BufReader::new(std::fs::File::open(source)?);
+    let mut prefix = [0; 8];
+    input.read_exact(&mut prefix)?;
+    input.seek(SeekFrom::Start(0))?;
+    let (stream_index, asc, declared) = if &prefix[4..8] == b"ftyp" {
+        let reader = crate::container::mp4::Mp4Reader::open(input, Default::default())?;
+        let tracks: Vec<_> = reader.tracks().iter().enumerate()
+            .filter(|(_, t)| t.handler == *b"soun").collect();
+        if tracks.len() != 1 || tracks[0].1.codec != *b"mp4a" {
+            return Err(crate::invalid("expected one AAC audio track"));
+        }
+        let (index, track) = tracks[0];
+        (index, crate::codec::config::aac_specific_config(&track.configuration)?.to_vec(),
+            (u64::from(track.sample_rate), u64::from(track.channels)))
+    } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
+        let reader = crate::container::webm::WebmReader::open(input, Default::default())?;
+        let tracks: Vec<_> = reader.tracks.iter().enumerate()
+            .filter(|(_, t)| t.kind == 2).collect();
+        if tracks.len() != 1 || tracks[0].1.codec != "A_AAC" {
+            return Err(crate::invalid("expected one AAC audio track"));
+        }
+        let (index, track) = tracks[0];
+        (index, track.codec_private.clone(), (track.sample_rate, track.channels))
+    } else {
+        let reader = crate::container::adts::StreamReader::open(input)?;
+        let header = reader.configuration();
+        (0, header.asc.to_vec(), (u64::from(header.sample_rate), u64::from(header.channels)))
+    };
+    let decoder = crate::codec::aac_native::NativeAacDecoder::new(&asc)?;
+    let sample_rate = decoder.sample_rate();
+    let channels = u16::from(decoder.channels());
+    if declared != (u64::from(sample_rate), u64::from(channels)) {
+        return Err(crate::invalid("AAC container geometry disagrees with AudioSpecificConfig"));
+    }
+    Ok(AacSourceInfo { stream_index, sample_rate, channels })
+}

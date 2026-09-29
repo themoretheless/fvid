@@ -1215,3 +1215,11 @@ than ignoring those options or falling back to FFmpeg. Multiple audio tracks and
 unsupported AAC configurations remain subject to the native decoder's checks.
 Other audio codecs still use the legacy public adapter; this migration does not
 yet remove the `media` feature's FFmpeg link dependency.
+
+`media::plan_decode_audio` and `media plan decode-audio` also use owned AAC
+container/configuration inspection. The plan reports native channel conversion,
+gain and windowed-sinc resampling in execution order, rather than describing a
+libswresample filter graph. Unsupported request options are rejected consistently
+with export. Planning checks stream geometry/configuration, but does not decode
+packets or certify timeline validity; those remain execution checks. The public
+`native_media::aac_source_info` metadata API itself needs no `media` feature.
