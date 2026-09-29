@@ -1721,3 +1721,31 @@ routing and an explicit ignored FFmpeg reference test (`FVID_REFERENCE_FFMPEG`
 plus `--include-ignored`). FFmpeg is only the test oracle. Combinations with
 filters that have not yet been migrated still use the existing legacy media
 pipeline; this does not remove the complete `media` feature's libav dependency.
+
+### Owned multi-track Matroska packet writer (2026-09-29)
+
+`container::matroska_write::{PacketWriter, TrackSpec, Encoding}` writes AVC,
+HEVC and AAC tracks with codec configuration, dimensions/audio geometry,
+track names and languages. Callers supply packets in decode order and their
+nonnegative presentation timestamps and durations in nanoseconds. Separate
+per-packet clusters retain out-of-order B-frame PTS without rounding to a
+millisecond clock. BlockDuration is explicit; dependent frames use the
+Matroska-specified ReferenceBlock=0 marker for an unknown reference graph.
+Payload bytes are written directly, and no packet index is accumulated.
+Packet/write errors poison the writer; finishing rejects failed or empty
+tracks. The caller remains responsible for atomic publication.
+
+The existing native ADTS remux and concatenation routes now share this writer.
+Tests interleave AVC, HEVC Main and Main10 packets with AAC and read back every
+payload, PTS, keyframe flag and codec configuration. The opt-in independent
+FFmpeg test decodes each resulting file and compares all video pixels and AAC
+PCM against the source. FFmpeg remains reference-only in these tests.
+
+This is the encoded-packet layer, not yet a general MP4-to-Matroska command:
+MP4 edit lists, colour/HDR/rotation, other metadata and gapless presentation
+still need a high-level mapping. Native Matroska video playback also currently
+selects VP9/AV1 only; AVC/HEVC dispatch is still required. Existing MP4-to-MKV
+media operations therefore retain their legacy implementation for now.
+
+Format references: https://www.matroska.org/technical/codec_specs.html and
+https://www.matroska.org/technical/elements.html#ReferenceBlock .
