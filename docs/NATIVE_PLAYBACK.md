@@ -1436,3 +1436,33 @@ permissions, source changes after planning and publication can still fail at
 execution. The public `media::plan_trim_pcm` and `media::plan_trim` wrappers use
 the owned plans for WAVE as well; other input containers remain on the legacy
 adapter.
+
+### Owned WAVE sample conversion and audio export (2026-09-29)
+
+`media decode-audio INPUT.wav OUTPUT.f32le|OUTPUT.wav` and its plan now use
+owned RIFF inspection and PCM conversion. They share the existing AAC export
+pipeline for volume, supported channel rematrixing, windowed-sinc resampling,
+progress/cancellation and atomic publication. The general API is
+`native_export::export_audio_pcm_selected`; AAC-specific entrypoints remain
+AAC-only. Public `media::decode_audio*` and `media::plan_decode_audio` route WAVE
+to the same native implementation.
+
+U8, S16/S24/S32 little-endian and IEEE F32/F64 input convert to interleaved
+float32. Signed integers scale by their storage full scale; U8 is offset by
+128. F64 rounds to F32. NaN/Inf, overflow on narrowing and nonzero padding bits
+below an extensible header's declared valid bits fail without publication.
+The strict RIFF chunk restrictions documented for trimming still apply.
+
+Mono/stereo can use an unspecified mask; larger layouts require an explicit
+supported mask in the shared FL FR FC [LFE] BC/BL/BR order (up to six channels).
+Unknown, side-surround and ambiguous unlabelled multichannel layouts are refused,
+not reassigned silently. Trimming remains byte-preserving and does not impose
+these decode/rematrix restrictions.
+
+Decode intervals use sample starts in [from,to), rounding up to the input sample
+grid; unlike exact `trim-pcm`, they need not fall on that grid. WAVE seeks directly
+to the retained samples, so it has no predictive pre-roll. Progress and
+`decoded_frames` count aligned read blocks of at most 64 KiB. Plans reject
+sub-microsecond CLI boundaries instead of truncating them to the API's microsecond
+representation. Decode execution can accept nanosecond boundaries through its
+Duration-based API and CLI.

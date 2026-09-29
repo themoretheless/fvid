@@ -162,7 +162,7 @@ pub fn decode_video_transformed(source: &std::path::Path, transform: DecodeTrans
         height: stats.height, pixel_format: stats.pixel_format, decode_errors: stats.decode_errors })
 }
 
-/// Export AAC through the owned decoder and PCM writer.
+/// Export AAC or packed WAVE PCM through the owned audio pipeline.
 /// Other codecs retain the legacy adapter until their migration is complete.
 pub fn decode_audio(
     source: &std::path::Path,
@@ -183,7 +183,7 @@ pub fn decode_audio_interval(
     }, options)
 }
 
-/// AAC exports use native float PCM, including source edit-list trimming.
+/// AAC and WAVE exports use native float PCM, including source edit-list trimming.
 /// Explicit options without a native implementation are rejected, never ignored.
 pub fn decode_audio_transformed(
     source: &std::path::Path,
@@ -191,7 +191,7 @@ pub fn decode_audio_transformed(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    if !crate::native_media::is_aac_source(source).map_err(|e| e.to_string())? {
+    if !crate::native_media::is_aac_source(source).map_err(|e| e.to_string())? && !crate::native_pcm::is_wave(source).map_err(|e|e.to_string())? {
         return fvid_media::decode_audio_transformed(source, destination, transform, options);
     }
     validate_native_copy_options(options, true)?;
@@ -206,7 +206,7 @@ pub fn decode_audio_transformed(
         .map_err(|_| "invalid channel count".to_owned())).transpose()?;
     let sample_rate = transform.sample_rate.map(|n| u32::try_from(n)
         .map_err(|_| "invalid sample rate".to_owned())).transpose()?;
-    let stats = crate::native_export::export_aac_pcm_selected(
+    let stats = crate::native_export::export_audio_pcm_selected(
         source, destination, interval, transform.volume.unwrap_or(1.0),
         channels, sample_rate, options.streams.first().copied(), options.cancel.as_ref(), options.progress.as_ref(),
     ).map_err(|e| e.to_string())?;
@@ -237,14 +237,14 @@ fn validate_native_copy_options(options: &CopyOptions, audio_selection: bool) ->
     Ok(())
 }
 
-/// Plan AAC decoding using owned container metadata and decoder configuration.
+/// Plan AAC or WAVE decoding using owned metadata and decoder configuration.
 /// Packet contents and timeline consistency are checked during execution.
 pub fn plan_decode_audio(
     source: &std::path::Path,
     transform: &AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
-    if !crate::native_media::is_aac_source(source).map_err(|e| e.to_string())? {
+    if !crate::native_media::is_aac_source(source).map_err(|e| e.to_string())? && !crate::native_pcm::is_wave(source).map_err(|e|e.to_string())? {
         return fvid_media::plan_decode_audio(source, transform, options);
     }
     validate_native_copy_options(options, true)?;

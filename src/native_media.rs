@@ -126,7 +126,7 @@ fn planar_format(w: usize, h: usize, cw: usize, ch: usize) -> Result<String> {
     .into())
 }
 
-/// Shared packet-work reporting for native AAC container paths.
+/// Shared block/packet-work reporting for native audio container paths.
 pub(crate) struct DecodeProgress<'a> {
     cancel: Option<&'a crate::media_control::CancelFlag>,
     hook: Option<&'a crate::media_control::ProgressHook>,
@@ -147,15 +147,15 @@ impl<'a> DecodeProgress<'a> {
     pub(crate) fn emit(&self, done: bool) {
         if let Some(hook) = self.hook { hook.emit(crate::media_control::ProgressEvent { done, ..self.event }); }
     }
-    fn packet(&mut self, bytes: usize) -> Result<()> {
-        self.event.packets = self.event.packets.checked_add(1).ok_or_else(|| invalid("AAC packet count overflow"))?;
-        self.event.payload_bytes = self.event.payload_bytes.checked_add(bytes as u64).ok_or_else(|| invalid("AAC byte count overflow"))?;
+    pub(crate) fn packet(&mut self, bytes: usize) -> Result<()> {
+        self.event.packets = self.event.packets.checked_add(1).ok_or_else(|| invalid("audio packet count overflow"))?;
+        self.event.payload_bytes = self.event.payload_bytes.checked_add(bytes as u64).ok_or_else(|| invalid("audio byte count overflow"))?;
         if self.event.packets % 256 == 0 { self.emit(false); }
         self.check()
     }
 }
 
-/// Result of owned AAC-LC decoding to interleaved little-endian float PCM.
+/// Result of owned audio decoding to interleaved little-endian float PCM.
 #[derive(Debug, PartialEq, Eq)]
 pub struct AudioDecodeStats {
     pub sample_frames: u64,

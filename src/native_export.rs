@@ -339,6 +339,36 @@ pub fn export_aac_pcm_selected(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
+    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,false)
+}
+
+/// Export owned AAC or packed RIFF/WAVE PCM through the shared PCM pipeline.
+pub fn export_audio_pcm_selected(
+    source: &Path,
+    destination: &Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    volume: f64,
+    channels: Option<u16>,
+    sample_rate: Option<u32>,
+    selected: Option<usize>,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::native_media::AudioDecodeStats> {
+    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,true)
+}
+
+fn export_pcm_selected(
+    source: &Path,
+    destination: &Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    volume: f64,
+    channels: Option<u16>,
+    sample_rate: Option<u32>,
+    selected: Option<usize>,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+    allow_wave:bool,
+) -> Result<crate::native_media::AudioDecodeStats> {
     let mut control = crate::native_media::DecodeProgress::new(cancel, progress)?;
     if sample_rate.is_some_and(|rate| !(8000..=384000).contains(&rate)) {
         return Err(invalid("sample rate must be within 8000..=384000"));
@@ -350,18 +380,23 @@ pub fn export_aac_pcm_selected(
     let wav = match destination.extension().and_then(|s| s.to_str()) {
         Some("wav") => true,
         Some("f32le") => false,
-        _ => return Err(invalid("native AAC PCM output requires .f32le or .wav extension")),
+        _ => return Err(invalid("native PCM output requires .f32le or .wav extension")),
     };
     let mut input = BufReader::new(File::open(source)?);
     let mut prefix = [0; 8];
     input.read_exact(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;
-    let (mp4, matroska, adts) = if &prefix[4..8] == b"ftyp" {
-        (Some(crate::container::mp4::Mp4Reader::open(input, Default::default())?), None, None)
+    let (mp4, matroska, adts, wave) = if allow_wave && matches!(&prefix[..4],b"RIFF"|b"RF64"|b"RIFX") {
+        if selected.is_some_and(|n|n!=0) {return Err(invalid("WAVE has only stream 0"));}
+        let info=crate::native_pcm::inspect(&mut input,cancel)?;
+        info.validate_decode()?;
+        (None,None,None,Some((input,info)))
+    } else if &prefix[4..8] == b"ftyp" {
+        (Some(crate::container::mp4::Mp4Reader::open(input, Default::default())?), None, None,None)
     } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        (None, Some(crate::container::webm::WebmReader::open(input, Default::default())?), None)
+        (None, Some(crate::container::webm::WebmReader::open(input, Default::default())?), None,None)
     } else {
-        (None, None, Some(crate::container::adts::StreamReader::open(input)?))
+        (None, None, Some(crate::container::adts::StreamReader::open(input)?),None)
     };
     let (input_rate, input_channels) = if let Some(reader) = &mp4 {
         let index = crate::native_media::mp4_aac_index(reader, selected)?;
@@ -372,6 +407,8 @@ pub fn export_aac_pcm_selected(
         let index = crate::native_media::matroska_aac_index(reader, selected)?;
         let decoder = crate::codec::aac_native::NativeAacDecoder::new(&reader.tracks[index].codec_private)?;
         (decoder.sample_rate(), u16::from(decoder.channels()))
+    } else if let Some((_,info))=&wave {
+        (info.sample_rate,info.channels)
     } else {
         if selected.is_some_and(|index| index != 0) { return Err(invalid("ADTS has only stream 0")); }
         let config = adts.as_ref().ok_or_else(|| invalid("missing ADTS reader"))?.configuration();
@@ -380,7 +417,7 @@ pub fn export_aac_pcm_selected(
     let output_rate = sample_rate.unwrap_or(input_rate);
     let output_channels = channels.unwrap_or(input_channels);
     if output_channels != input_channels && !matches!(output_channels, 1 | 2) {
-        return Err(invalid("native AAC channel conversion supports mono or stereo output"));
+        return Err(invalid("native audio channel conversion supports mono or stereo output"));
     }
     let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
     let (temporary, file) = (0..100).find_map(|_| {
@@ -399,6 +436,8 @@ pub fn export_aac_pcm_selected(
         crate::native_media::decode_mp4_aac_reader_controlled(reader, &mut pcm, interval, selected, &mut control)?
     } else if let Some(reader) = matroska {
         crate::native_media::decode_matroska_aac_reader_controlled(reader, &mut pcm, interval, selected, &mut control)?
+    } else if let Some((reader,info))=wave {
+        crate::native_pcm::decode_reader(reader,info,&mut pcm,interval,&mut control)?
     } else {
         crate::native_media::decode_adts_aac_reader_controlled(adts.ok_or_else(|| invalid("missing ADTS reader"))?, &mut pcm, interval, &mut control)?
     };

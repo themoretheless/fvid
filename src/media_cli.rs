@@ -4,7 +4,7 @@ use std::path::PathBuf;
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.first().map(String::as_str) == Some("plan")
         && args.get(1).map(String::as_str) == Some("decode-audio") && args.len() >= 3
-        && fvid::native_media::is_aac_source(std::path::Path::new(&args[2]))?
+        && (fvid::native_media::is_aac_source(std::path::Path::new(&args[2]))? || fvid::native_pcm::is_wave(std::path::Path::new(&args[2]))?)
     {
         let mut transform = fvid::native_plan::AudioDecodeTransform::default();
         let mut selected = None;
@@ -20,6 +20,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                     let slot = if option == "--from" { &mut from } else { &mut to };
                     if slot.is_some() { return Err("duplicate interval boundary".into()); }
                     let time = decode_time(options.next().ok_or("missing interval boundary")?)?;
+                    if time.subsec_nanos()%1000!=0 {return Err("audio plan boundary must be representable in microseconds".into());}
                     *slot = Some(i64::try_from(time.as_micros()).map_err(|_| "interval exceeds microsecond range")?);
                 }
                 "--rate" | "--sample-rate" => {
@@ -34,7 +35,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                     if transform.volume.is_some() { return Err("duplicate volume option".into()); }
                     transform.volume = Some(options.next().ok_or("missing volume")?.parse()?);
                 }
-                _ => return Err(format!("unsupported native AAC plan option: {option}").into()),
+                _ => return Err(format!("unsupported native audio plan option: {option}").into()),
             }
         }
         transform.interval = match (from,to) {
@@ -88,7 +89,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.first().map(String::as_str) == Some("decode-audio") && args.len() >= 3
         && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("f32le" | "wav"))
         && args[3..].iter().all(|arg| !arg.starts_with('-') || matches!(arg.as_str(), "--from" | "--to" | "--quiet" | "--progress" | "--streams" | "--volume" | "--channels" | "--sample-rate" | "--rate"))
-        && fvid::native_media::is_aac_source(std::path::Path::new(&args[1]))?
+        && (fvid::native_media::is_aac_source(std::path::Path::new(&args[1]))? || fvid::native_pcm::is_wave(std::path::Path::new(&args[1]))?)
     {
         let mut parse_args = vec!["decode".to_owned(), args[1].clone()];
         let mut volume = None;
@@ -118,7 +119,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         let progress = report_progress.then(|| fvid::media_control::ProgressHook::new(|event| {
             eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}", event.packets, event.payload_bytes, event.done);
         }));
-        let stats = fvid::native_export::export_aac_pcm_selected(
+        let stats = fvid::native_export::export_audio_pcm_selected(
             std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), interval, volume.unwrap_or(1.0), channels, sample_rate, selected, None, progress.as_ref(),
         )?;
         if !quiet {

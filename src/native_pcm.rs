@@ -1,4 +1,4 @@
-//! Sample-exact, streaming RIFF/WAVE PCM trimming with no decoder or foreign muxer.
+//! Owned streaming RIFF/WAVE PCM inspection, sample slicing and float conversion.
 use crate::{
     Result, invalid,
     media_control::{CancelFlag, ProgressEvent, ProgressHook},
@@ -25,6 +25,9 @@ pub struct WaveInfo {
     pub channels: u16,
     pub bits_per_sample: u16,
     pub float: bool,
+    pub valid_bits: u16,
+    pub channel_mask: u32,
+    data_offset: u64,
     pub sample_frames: u64,
     block: u16,
     data_bytes: u32,
@@ -91,7 +94,7 @@ fn chunk<R: Read + Seek>(input: &mut R, at: u64, end: u64) -> Result<([u8; 4], u
     }
     Ok((head[..4].try_into().unwrap(), size, next))
 }
-fn format(bytes: &[u8]) -> Result<(u32, u16, u16, bool, u16)> {
+fn format(bytes: &[u8]) -> Result<(u32, u16, u16, bool, u16, u16, u32)> {
     if !matches!(bytes.len(), 16 | 18 | 40) {
         return Err(invalid("unsupported WAVE format extension"));
     }
@@ -99,6 +102,7 @@ fn format(bytes: &[u8]) -> Result<(u32, u16, u16, bool, u16)> {
     let u32at = |n| u32::from_le_bytes(bytes[n..n + 4].try_into().unwrap());
     let (mut tag, channels, rate, byte_rate, block, bits) =
         (u16at(0), u16at(2), u32at(4), u32at(8), u16at(12), u16at(14));
+    let (mut valid_bits, mut channel_mask) = (bits, 0);
     if tag == 0xfffe {
         if bytes.len() != 40
             || u16at(16) != 22
@@ -113,6 +117,8 @@ fn format(bytes: &[u8]) -> Result<(u32, u16, u16, bool, u16)> {
         tag = sub as u16;
         let valid = u16at(18);
         let mask = u32at(20);
+        valid_bits = valid;
+        channel_mask = mask;
         if valid == 0
             || valid > bits
             || (tag == 3 && valid != bits)
@@ -135,7 +141,15 @@ fn format(bytes: &[u8]) -> Result<(u32, u16, u16, bool, u16)> {
     {
         return Err(invalid("inconsistent WAVE sample geometry"));
     }
-    Ok((rate, channels, bits, tag == 3, block))
+    Ok((
+        rate,
+        channels,
+        bits,
+        tag == 3,
+        block,
+        valid_bits,
+        channel_mask,
+    ))
 }
 
 /// Strict RIFF bounds; only metadata safe to retain unchanged is admitted.
@@ -157,6 +171,7 @@ pub fn inspect<R: Read + Seek>(input: &mut R, cancel: Option<&CancelFlag>) -> Re
     }
     let (mut fmt, mut data, mut fact) = (None, None, None);
     let mut at = 12;
+    let mut data_offset = 0;
     while at < end {
         check(cancel)?;
         let (tag, size, next) = chunk(input, at, end)?;
@@ -170,6 +185,7 @@ pub fn inspect<R: Read + Seek>(input: &mut R, cancel: Option<&CancelFlag>) -> Re
                 fmt = Some(format(&bytes[..size as usize])?);
             }
             b"data" => {
+                data_offset = at + 8;
                 if data.replace(size).is_some() {
                     return Err(invalid("multiple WAVE data chunks are not implemented"));
                 }
@@ -204,7 +220,8 @@ pub fn inspect<R: Read + Seek>(input: &mut R, cancel: Option<&CancelFlag>) -> Re
         }
         at = next;
     }
-    let (rate, channels, bits, float, block) = fmt.ok_or_else(|| invalid("missing WAVE format"))?;
+    let (rate, channels, bits, float, block, valid_bits, channel_mask) =
+        fmt.ok_or_else(|| invalid("missing WAVE format"))?;
     let data_bytes = data.ok_or_else(|| invalid("missing WAVE data"))?;
     if data_bytes % u32::from(block) != 0 {
         return Err(invalid("partial WAVE sample frame"));
@@ -219,6 +236,9 @@ pub fn inspect<R: Read + Seek>(input: &mut R, cancel: Option<&CancelFlag>) -> Re
         bits_per_sample: bits,
         float,
         sample_frames: frames,
+        valid_bits,
+        channel_mask,
+        data_offset,
         block,
         data_bytes,
         end,
@@ -351,4 +371,118 @@ pub fn trim_wave(
     std::fs::hard_link(&temporary.0, destination)?;
     emit(&stats, true);
     Ok(stats)
+}
+
+impl WaveInfo {
+    pub(crate) fn decode_interval(
+        &self,
+        interval: Option<(std::time::Duration, std::time::Duration)>,
+    ) -> Result<std::ops::Range<u64>> {
+        if interval.is_some_and(|(a, b)| a >= b) {
+            return Err(invalid("audio interval requires from < to"));
+        }
+        let boundary = |t: std::time::Duration| -> Result<u64> {
+            let n = t
+                .as_nanos()
+                .checked_mul(u128::from(self.sample_rate))
+                .ok_or_else(|| invalid("PCM interval overflow"))?
+                .div_ceil(1_000_000_000);
+            Ok(n.min(u128::from(self.sample_frames)) as u64)
+        };
+        let (first, last) = match interval {
+            Some((a, b)) => (boundary(a)?, boundary(b)?),
+            None => (0, self.sample_frames),
+        };
+        if last <= first {
+            return Err(invalid("no PCM samples in selected interval"));
+        }
+        Ok(first..last)
+    }
+    /// The existing owned rematrixer uses FL FR FC [LFE] back-surround order.
+    /// Do not silently assign a layout to an unlabelled multichannel WAV.
+    pub(crate) fn validate_decode(&self) -> Result<()> {
+        let expected = match self.channels {
+            1 => 4,
+            2 => 3,
+            3 => 7,
+            4 => 0x107,
+            5 => 0x37,
+            6 => 0x3f,
+            _ => return Err(invalid("native PCM decoding supports 1..=6 channels")),
+        };
+        if !(self.channel_mask == expected || (self.channels <= 2 && self.channel_mask == 0)) {
+            return Err(invalid(
+                "native PCM decoding requires a supported explicit channel layout",
+            ));
+        }
+        if self.sample_rate > i32::MAX as u32 {
+            return Err(invalid("PCM sample rate exceeds media schema range"));
+        }
+        Ok(())
+    }
+}
+
+/// Read selected PCM sample starts in [from,to), rounding up to the sample grid.
+/// PCM needs no decoder pre-roll; retained interleaved frames are converted in
+/// bounded blocks. Floating NaN/Inf and nonzero integer padding bits are errors.
+pub(crate) fn decode_reader<R: Read + Seek, W: Write>(
+    mut input: R,
+    info: WaveInfo,
+    output: &mut W,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    control: &mut crate::native_media::DecodeProgress<'_>,
+) -> Result<crate::native_media::AudioDecodeStats> {
+    info.validate_decode()?;
+    let range = info.decode_interval(interval)?;
+    let (first, last) = (range.start, range.end);
+    input.seek(SeekFrom::Start(
+        info.data_offset + first * u64::from(info.block),
+    ))?;
+    let mut buffer = [0u8; 65536];
+    let capacity = buffer.len() / usize::from(info.block) * usize::from(info.block);
+    let mut remaining = (last - first) * u64::from(info.block);
+    let sample_bytes = usize::from(info.bits_per_sample / 8);
+    let mut blocks = 0;
+    while remaining != 0 {
+        control.check()?;
+        let n = remaining.min(capacity as u64) as usize;
+        input.read_exact(&mut buffer[..n])?;
+        for bytes in buffer[..n].chunks_exact(sample_bytes) {
+            let value = if info.float {
+                if sample_bytes == 4 {
+                    f32::from_le_bytes(bytes.try_into().unwrap())
+                } else {
+                    f64::from_le_bytes(bytes.try_into().unwrap()) as f32
+                }
+            } else {
+                let mut packed = [0u8; 4];
+                packed[..sample_bytes].copy_from_slice(bytes);
+                let raw = u32::from_le_bytes(packed);
+                let padding = info.bits_per_sample - info.valid_bits;
+                if padding != 0 && raw & ((1u32 << padding) - 1) != 0 {
+                    return Err(invalid("nonzero PCM padding bits"));
+                }
+                if sample_bytes == 1 {
+                    (f32::from(bytes[0]) - 128.0) / 128.0
+                } else {
+                    let shift = 32 - u32::from(info.bits_per_sample);
+                    let signed = ((raw << shift) as i32) >> shift;
+                    (f64::from(signed) / (1u64 << (info.bits_per_sample - 1)) as f64) as f32
+                }
+            };
+            if !value.is_finite() {
+                return Err(invalid("non-finite PCM sample"));
+            }
+            output.write_all(&value.to_le_bytes())?;
+        }
+        remaining -= n as u64;
+        blocks += 1;
+        control.packet(n)?;
+    }
+    Ok(crate::native_media::AudioDecodeStats {
+        sample_frames: last - first,
+        decoded_frames: blocks,
+        sample_rate: info.sample_rate,
+        channels: info.channels,
+    })
 }
