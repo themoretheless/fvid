@@ -13,6 +13,11 @@ def main():
     subprocess.run([
         "cargo", "build", "--locked", "--offline", "--manifest-path", str(FFI / "Cargo.toml")
     ], check=True)
+    subprocess.run([
+        "cargo", "build", "--locked", "--offline", "--no-default-features",
+        "--manifest-path", str(ROOT / "Cargo.toml"), "--target-dir", str(ROOT / "target"),
+        "--example", "decode_native_rgb"
+    ], check=True)
     cache = ROOT / "target/camera-swift-cache"
     cache.mkdir(parents=True, exist_ok=True)
     common = [
@@ -43,7 +48,18 @@ def main():
             subprocess.run(common + [str(PLATFORM / "CameraHost" / s) for s in sources]
                            + [str(PLATFORM / "Tests" / (name + ".swift")), "-o", str(output)], check=True)
             subprocess.run([str(output)] + [str(ROOT / f) for f in fixtures], check=True)
-    print(f"All {len(cases)} camera bridge suites passed; installed CMIO delivery is not tested.")
+        # Compare the FFI BGRA/seek path against a direct software RGB decode.
+        # This verifies transport and frame selection; codec conformance has its
+        # own independent saved references. No FFmpeg/VideoToolbox is used here.
+        for index, fixture in enumerate(["video.mp4", "hevc/main-ipb.mp4", "hevc/main10-ipb.mp4"]):
+            source = ROOT / "tests/fixtures" / fixture
+            rgb = Path(directory) / f"reference-{index}.rgb"
+            times = Path(directory) / f"reference-{index}.json"
+            subprocess.run([str(ROOT / "target/debug/examples/decode_native_rgb"),
+                            str(source), str(rgb), str(times)], check=True)
+            subprocess.run([str(Path(directory) / "NativeVideoSourceTests"),
+                            str(source), str(rgb), str(times)], check=True)
+    print(f"All {len(cases)} camera bridge suites and 3 AVC/HEVC pixel comparisons passed; installed CMIO delivery is not tested.")
 
 
 if __name__ == "__main__":

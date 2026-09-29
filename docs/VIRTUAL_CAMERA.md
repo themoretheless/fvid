@@ -305,3 +305,19 @@ rejection; all eight Swift/Rust bridge suites pass with diagnostic propagation
 and success-clearing checks. The host still requires a valid signing identity
 and macOS extension activation for installed third-party camera delivery; no
 valid signing identity was available during this verification.
+
+### Compressed-frame bridge comparison (2026-09-29)
+
+The regular `scripts/test_macos_camera_bridge.py` run now also compares AVC,
+HEVC Main and HEVC Main10 source frames through the Swift/Rust boundary. A direct
+owned software decode produces RGB and exact presentation timestamps; the Swift
+source is asked for first/next/middle/last frames and then rewound, and its BGRA
+bytes must match the corresponding RGB with channel swizzle and opaque alpha.
+This avoids an assumed 25 fps cadence and covers 10-bit-to-RGB delivery.
+
+All eight bridge suites plus three compressed-source comparisons passed. These
+comparisons validate transport, pixel packing and frame selection against direct
+software decoding; they do not replace the independent codec conformance tests
+or prove delivery from an installed CMIO extension to another application.
+The RGB fixture helper accepts optional `TIMESTAMPS.json` output and explicitly
+uses software decoding even when built with hardware-related features.
