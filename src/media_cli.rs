@@ -127,37 +127,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         }
         return Ok(());
     }
-    if args.first().map(String::as_str)==Some("trim-pcm") && args.len()>=3
-        && fvid::native_pcm::is_wave(std::path::Path::new(&args[1]))? {
-        let (mut from,mut to,mut selected)=(None,None,None);
-        let (mut quiet,mut report)=(false,false);
-        let mut args_iter=args[3..].iter();
-        while let Some(arg)=args_iter.next() {
-            match arg.as_str() {
-                "--from"|"--to" => {
-                    let slot=if arg=="--from" {&mut from} else {&mut to};
-                    if slot.is_some() {return Err("duplicate PCM interval boundary".into());}
-                    let time=decode_time(args_iter.next().ok_or("missing PCM interval boundary")?)?;
-                    if time.subsec_nanos()%1000!=0 {return Err("PCM boundary must be representable in microseconds".into());}
-                    *slot=Some(i64::try_from(time.as_micros()).map_err(|_|"PCM interval overflow")?);
-                }
-                "--streams" => {
-                    if selected.is_some() {return Err("duplicate streams option".into());}
-                    selected=Some(args_iter.next().ok_or("missing stream index")?.parse::<usize>()?);
-                }
-                "--quiet"=>quiet=true,"--progress"=>report=true,
-                _=>return Err(format!("unsupported native PCM trim option: {arg}").into()),
-            }
-        }
-        if selected.is_some_and(|n|n!=0) {return Err("WAVE has only stream 0".into());}
-        let progress=report.then(||fvid::media_control::ProgressHook::new(|e| {
-            eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",e.packets,e.payload_bytes,e.done);
-        }));
-        let stats=fvid::native_pcm::trim_wave(std::path::Path::new(&args[1]),std::path::Path::new(&args[2]),
-            from.ok_or("--from required")?,to.ok_or("--to required")?,None,progress.as_ref())?;
-        if !quiet {println!("{{\"packets\":{},\"sample_frames\":{},\"payload_bytes\":{},\"fvid_payload_copies\":{}}}",stats.packets,stats.sample_frames,stats.payload_bytes,stats.fvid_payload_copies);}
-        return Ok(());
-    }
+    if try_wave_trim(args)? { return Ok(()); }
     if args.first().map(String::as_str) == Some("export-y4m") {
         if args.len() < 3 { return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m [--crop X:Y:W:H] [--hflip] [--vflip] [--transpose MODE] [--pad W:H:X:Y] [--scale W:H] [--from SECONDS --to SECONDS]".into()); }
         let mut geometry_args=vec!["decode".to_owned()];
@@ -205,6 +175,108 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         Err("this media operation still requires cargo build --release --features media and FFmpeg development libraries; plain media decode INPUT is available without them".into())
     }
 }
+
+/// Shared native CLI routing for PCM trim and its read-only plan.
+fn try_wave_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let plan = args.first().map(String::as_str) == Some("plan");
+    let command_index = usize::from(plan);
+    let Some(command) = args.get(command_index).map(String::as_str) else {
+        return Ok(false);
+    };
+    if !matches!(command, "trim" | "trim-pcm") {
+        return Ok(false);
+    }
+    let source_index = command_index + 1;
+    let option_start = source_index + if plan { 1 } else { 2 };
+    if args.len() < option_start
+        || !fvid::native_pcm::is_wave(std::path::Path::new(&args[source_index]))?
+    {
+        return Ok(false);
+    }
+    let (mut from, mut to, mut selected) = (None, None, None);
+    let (mut quiet, mut report) = (false, false);
+    let mut args_iter = args[option_start..].iter();
+    while let Some(arg) = args_iter.next() {
+        match arg.as_str() {
+            "--from" | "--to" => {
+                let slot = if arg == "--from" { &mut from } else { &mut to };
+                if slot.is_some() {
+                    return Err("duplicate PCM interval boundary".into());
+                }
+                let time = decode_time(args_iter.next().ok_or("missing PCM interval boundary")?)?;
+                if time.subsec_nanos() % 1000 != 0 {
+                    return Err("PCM boundary must be representable in microseconds".into());
+                }
+                *slot = Some(i64::try_from(time.as_micros()).map_err(|_| "PCM interval overflow")?);
+            }
+            "--streams" => {
+                if selected.is_some() {
+                    return Err("duplicate streams option".into());
+                }
+                selected = Some(
+                    args_iter
+                        .next()
+                        .ok_or("missing stream index")?
+                        .parse::<usize>()?,
+                );
+            }
+            "--quiet" => quiet = true,
+            "--progress" => report = true,
+            _ => return Err(format!("unsupported native PCM trim option: {arg}").into()),
+        }
+    }
+    if selected.is_some_and(|n| n != 0) {
+        return Err("WAVE has only stream 0".into());
+    }
+    let (from, to) = (from.ok_or("--from required")?, to.ok_or("--to required")?);
+    if plan {
+        if report {
+            return Err("progress applies to PCM trim execution, not planning".into());
+        }
+        let mut result = fvid::native_plan::trim_pcm(
+            std::path::Path::new(&args[source_index]),
+            from,
+            to,
+            selected,
+        )?;
+        result.command = command.to_owned();
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&result)?);
+        }
+        return Ok(true);
+    }
+    let progress = report.then(|| {
+        fvid::media_control::ProgressHook::new(|e| {
+            eprintln!(
+                "{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",
+                e.packets, e.payload_bytes, e.done
+            );
+        })
+    });
+    let stats = fvid::native_pcm::trim_wave(
+        std::path::Path::new(&args[source_index]),
+        std::path::Path::new(&args[source_index + 1]),
+        from,
+        to,
+        None,
+        progress.as_ref(),
+    )?;
+    if !quiet {
+        if command == "trim" {
+            println!(
+                "{}",
+                serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":1,"backend":"fvid","fvid_payload_copies":stats.fvid_payload_copies})
+            );
+        } else {
+            println!(
+                "{}",
+                serde_json::json!({"packets":stats.packets,"sample_frames":stats.sample_frames,"payload_bytes":stats.payload_bytes,"fvid_payload_copies":stats.fvid_payload_copies})
+            );
+        }
+    }
+    Ok(true)
+}
+
 // Strip only the native geometry options. The remaining parser still rejects
 // extra paths and returns unknown filters to the existing full media parser.
 fn geometry_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_geometry::VideoGeometry), Box<dyn std::error::Error>> {
@@ -1766,7 +1838,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                     (Some(start), Some(end)) => (start, end),
                     _ => return Err("plan trim requires both --from and --to".into()),
                 };
-                fvid_media::plan_trim(&plan_paths[0], start, end, &options)?
+                fvid::media::plan_trim(&plan_paths[0], start, end, &options)?
             }
             Some("trim-pcm") => {
                 if plan_paths.len() != 1 || geometry {
@@ -1779,7 +1851,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                     (Some(start), Some(end)) => (start, end),
                     _ => return Err("plan trim-pcm requires both --from and --to".into()),
                 };
-                fvid_media::plan_trim_pcm(&plan_paths[0], start, end, &options)?
+                fvid::media::plan_trim_pcm(&plan_paths[0], start, end, &options)?
             }
             Some("concat") => {
                 if plan_paths.len() < 2 || from.is_some() || to.is_some() || geometry {
@@ -2992,7 +3064,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         "remux" if paths.len() == 2 && from.is_none() && to.is_none() => {
             fvid::media::remux(&paths[0], &paths[1], &options)?
         }
-        "trim" if paths.len() == 2 => fvid_media::trim(
+        "trim" if paths.len() == 2 => fvid::media::trim(
             &paths[0],
             &paths[1],
             from.ok_or("--from required")?,

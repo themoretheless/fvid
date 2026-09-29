@@ -1420,3 +1420,19 @@ not a fabricated source packet index; `fvid_payload_copies=0` counts additional
 payload clones, excluding file I/O. Publication is non-overwriting and atomic
 via a same-directory hard link; failed/cancelled work removes its temporary file.
 The final progress event is emitted only after publication succeeds.
+
+The general `media trim` command now also routes PCM WAVE through the owned
+sample slicer. It reports the regular copy-statistics schema (`backend: fvid`,
+one segment), while `trim-pcm` retains its sample-count schema. Output data and
+metadata are otherwise identical for the same interval.
+
+`media plan trim-pcm INPUT.wav --from ... --to ...` and `media plan trim ...`
+are available without the legacy media feature. They use the same strict RIFF
+inspection and exact sample-range calculation as execution, including EOF
+clipping and rejection of empty/fractional-sample intervals. Plans state the
+stored PCM codec, retained frame/byte counts, metadata handling and publication
+contract, but do not create output or read the entire sample payload. Output
+permissions, source changes after planning and publication can still fail at
+execution. The public `media::plan_trim_pcm` and `media::plan_trim` wrappers use
+the owned plans for WAVE as well; other input containers remain on the legacy
+adapter.

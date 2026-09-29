@@ -260,3 +260,136 @@ fn headless_cli_and_media_api_select_native_wave_path() {
     assert!(!result.status.success());
     assert!(!bad.exists());
 }
+
+#[test]
+fn plans_and_both_trim_commands_share_exact_sample_ranges() {
+    let dir = dir();
+    let source = dir.0.join("source.wav");
+    let original = wave(24, 2, false, true, 32);
+    std::fs::write(&source, &original).unwrap();
+    for command in ["trim-pcm", "trim"] {
+        let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "plan", command])
+            .arg(&source)
+            .args(["--from", "0.000125", "--to", "0.01", "--streams", "0"])
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let json: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        assert_eq!(json["command"], command);
+        assert_eq!(json["streams"][0]["codec"], "pcm_s24le");
+        assert!(
+            json["steps"][0]["detail"]
+                .as_str()
+                .unwrap()
+                .contains("[1, 32)")
+        );
+        assert!(
+            json["steps"][0]["detail"]
+                .as_str()
+                .unwrap()
+                .contains("31 retained frames, 186 PCM bytes")
+        );
+        let mut native = fvid::native_plan::trim_pcm(&source, 125, 10000, Some(0)).unwrap();
+        native.command = command.to_owned();
+        assert_eq!(json, serde_json::to_value(native).unwrap());
+        #[cfg(feature = "media")]
+        {
+            let plan = if command == "trim" {
+                fvid::media::plan_trim(&source, 125, 10000, &Default::default())
+            } else {
+                fvid::media::plan_trim_pcm(&source, 125, 10000, &Default::default())
+            }
+            .unwrap();
+            assert_eq!(json, serde_json::to_value(plan).unwrap());
+        }
+        assert_eq!(
+            std::fs::read_dir(&dir.0).unwrap().count(),
+            1,
+            "planning must not create files"
+        );
+    }
+    let mut outputs = Vec::new();
+    for command in ["trim-pcm", "trim"] {
+        let dest = dir.0.join(format!("{command}.wav"));
+        let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", command])
+            .arg(&source)
+            .arg(&dest)
+            .args(["--from", "0.000125", "--to", "0.01"])
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let json: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        assert_eq!(json["payload_bytes"], 186);
+        if command == "trim" {
+            assert_eq!(json["backend"], "fvid");
+            assert_eq!(json["segments"], 1);
+        }
+        outputs.push(std::fs::read(&dest).unwrap());
+    }
+    assert_eq!(outputs[0], outputs[1]);
+    assert_eq!(std::fs::read(&source).unwrap(), original);
+    #[cfg(feature = "media")]
+    {
+        let dest = dir.0.join("api-trim.wav");
+        let stats = fvid::media::trim(&source, &dest, 125, 10000, &Default::default()).unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert_eq!(std::fs::read(&dest).unwrap(), outputs[0]);
+    }
+}
+
+#[test]
+fn plan_and_execution_reject_the_same_bad_intervals_and_structures() {
+    let dir = dir();
+    let source = dir.0.join("source.wav");
+    let dest = dir.0.join("out.wav");
+    for bytes in [wave(32, 2, true, true, 32), {
+        let mut b = wave(16, 1, false, false, 32);
+        b[12..16].copy_from_slice(b"cue ");
+        b
+    }] {
+        std::fs::write(&source, bytes).unwrap();
+        for (from, to) in [
+            (0, 125),
+            (0, 1),
+            (125, 126),
+            (-1, 125),
+            (0, 0),
+            (5000, 6000),
+        ] {
+            let plan = fvid::native_plan::trim_pcm(&source, from, to, None);
+            let execution = trim_wave(&source, &dest, from, to, None, None);
+            assert_eq!(plan.is_ok(), execution.is_ok(), "[{from},{to})");
+            if execution.is_ok() {
+                std::fs::remove_file(&dest).unwrap();
+            }
+        }
+    }
+    std::fs::write(&source, wave(32, 2, true, true, 32)).unwrap();
+    let plan = fvid::native_plan::trim_pcm(&source, 0, 125, None).unwrap();
+    assert_eq!(plan.streams[0].codec, "pcm_f32le");
+    assert!(fvid::native_plan::trim_pcm(&source, 0, 125, Some(1)).is_err());
+    for options in [
+        vec!["--from", "0", "--to", "0.001", "--streams", "1"],
+        vec!["--from", "0.0000001", "--to", "0.001"],
+        vec!["--from", "0", "--to", "0.001", "--progress"],
+    ] {
+        let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "plan", "trim-pcm"])
+            .arg(&source)
+            .args(options)
+            .output()
+            .unwrap();
+        assert!(!result.status.success());
+    }
+    assert_eq!(std::fs::read_dir(&dir.0).unwrap().count(), 1);
+}

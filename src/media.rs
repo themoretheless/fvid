@@ -303,3 +303,51 @@ pub fn trim_pcm(source:&std::path::Path,destination:&std::path::Path,from:i64,to
     let stats=crate::native_pcm::trim_wave(source,destination,from,to,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())?;
     Ok(PcmTrimStats{packets:stats.packets,sample_frames:stats.sample_frames,payload_bytes:stats.payload_bytes,fvid_payload_copies:stats.fvid_payload_copies})
 }
+
+/// Plan owned RIFF PCM slicing; other containers retain the legacy adapter.
+pub fn plan_trim_pcm(
+    source: &std::path::Path,
+    from: i64,
+    to: i64,
+    options: &CopyOptions,
+) -> Result<MediaPlan> {
+    if !crate::native_pcm::is_wave(source).map_err(|e| e.to_string())? {
+        return fvid_media::plan_trim_pcm(source, from, to, options);
+    }
+    validate_native_copy_options(options, true)?;
+    crate::native_plan::trim_pcm(source, from, to, options.streams.first().copied())
+}
+
+/// General trim of a PCM WAVE file shares the exact native sample-slicing path.
+pub fn trim(
+    source: &std::path::Path,
+    destination: &std::path::Path,
+    from: i64,
+    to: i64,
+    options: &CopyOptions,
+) -> Result<CopyStats> {
+    if !crate::native_pcm::is_wave(source).map_err(|e| e.to_string())? {
+        return fvid_media::trim(source, destination, from, to, options);
+    }
+    let stats = trim_pcm(source, destination, from, to, options)?;
+    Ok(CopyStats {
+        packets: stats.packets,
+        payload_bytes: stats.payload_bytes,
+        segments: 1,
+        backend: "fvid",
+        fvid_payload_copies: stats.fvid_payload_copies,
+    })
+}
+pub fn plan_trim(
+    source: &std::path::Path,
+    from: i64,
+    to: i64,
+    options: &CopyOptions,
+) -> Result<MediaPlan> {
+    if !crate::native_pcm::is_wave(source).map_err(|e| e.to_string())? {
+        return fvid_media::plan_trim(source, from, to, options);
+    }
+    let mut plan = plan_trim_pcm(source, from, to, options)?;
+    plan.command = "trim".into();
+    Ok(plan)
+}

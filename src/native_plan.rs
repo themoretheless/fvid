@@ -87,3 +87,32 @@ pub fn decode_audio_selected(
         ],
     })
 }
+
+/// Metadata-only plan for exact RIFF/WAVE PCM slicing. The same parser and
+/// sample-boundary calculation are used by `native_pcm::trim_wave`.
+pub fn trim_pcm(
+    source: &std::path::Path,
+    from: i64,
+    to: i64,
+    selected: Option<usize>,
+) -> Result<MediaPlan> {
+    if selected.is_some_and(|n| n != 0) {
+        return Err("WAVE has only stream 0".into());
+    }
+    let mut input = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let info = crate::native_pcm::inspect(&mut input, None).map_err(|e| e.to_string())?;
+    let range = info.interval(from, to).map_err(|e| e.to_string())?;
+    let frames = range.end - range.start;
+    Ok(MediaPlan {
+        command:"trim-pcm".into(),input:source.to_path_buf(),inputs:vec![source.to_path_buf()],
+        streams:vec![PlanStream{index:0,media_type:"audio".into(),codec:info.codec(),disposition:"trim_pcm".into()}],
+        steps:vec![
+            PlanStep{action:"interval".into(),detail:format!("exact sample range [{}, {}) at {} Hz; {frames} retained frames, {} PCM bytes; requested [{from}, {to}) µs, clipped at EOF",range.start,range.end,info.sample_rate,frames*u64::from(info.frame_bytes()))},
+            PlanStep{action:"trim".into(),detail:format!("FVid RIFF reader copies unchanged {}-bit samples in {} channels through aligned blocks of at most 64 KiB; no decoder",info.bits_per_sample,info.channels)},
+            PlanStep{action:"metadata".into(),detail:"preserve fmt, INFO, JUNK and PAD chunks; rewrite RIFF/data lengths and fact sample count; reject unsupported timed metadata".into()},
+            PlanStep{action:"write".into(),detail:"publish .wav atomically without overwriting an existing path; errors and cancellation remove the temporary output".into()},
+        ],graph:None,
+        notes:vec!["backend: fvid; no external demuxer, decoder or muxer".into(),
+            "metadata-only plan: RIFF geometry and interval are validated; payload reading, output permissions and publication are checked during execution".into()],
+    })
+}

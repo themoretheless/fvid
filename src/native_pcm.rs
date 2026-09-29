@@ -31,6 +31,34 @@ pub struct WaveInfo {
     end: u64,
 }
 
+impl WaveInfo {
+    /// Stored sample representation; trimming never converts these bytes.
+    pub fn codec(&self) -> String {
+        if self.float {
+            format!("pcm_f{}le", self.bits_per_sample)
+        } else if self.bits_per_sample == 8 {
+            "pcm_u8".into()
+        } else {
+            format!("pcm_s{}le", self.bits_per_sample)
+        }
+    }
+    pub fn frame_bytes(&self) -> u16 {
+        self.block
+    }
+    /// Exact half-open sample range, clipped at EOF. Shared by plans and writes.
+    pub fn interval(&self, from: i64, to: i64) -> Result<std::ops::Range<u64>> {
+        if from < 0 || to <= from {
+            return Err(invalid("PCM interval requires 0 <= from < to"));
+        }
+        let first = boundary(from, self.sample_rate)?.min(self.sample_frames);
+        let last = boundary(to, self.sample_rate)?.min(self.sample_frames);
+        if last <= first {
+            return Err(invalid("no PCM samples in selected interval"));
+        }
+        Ok(first..last)
+    }
+}
+
 pub fn is_wave(path: &Path) -> std::io::Result<bool> {
     let mut file = File::open(path)?;
     let mut prefix = [0; 12];
@@ -231,11 +259,8 @@ pub fn trim_wave(
     check(cancel)?;
     let mut input = File::open(source)?;
     let info = inspect(&mut input, cancel)?;
-    let first = boundary(from, info.sample_rate)?.min(info.sample_frames);
-    let last = boundary(to, info.sample_rate)?.min(info.sample_frames);
-    if last <= first {
-        return Err(invalid("no PCM samples in selected interval"));
-    }
+    let range = info.interval(from, to)?;
+    let (first, last) = (range.start, range.end);
     let bytes = (last - first) * u64::from(info.block);
     let new_end = info.end - u64::from(info.data_bytes) - u64::from(info.data_bytes & 1)
         + bytes
