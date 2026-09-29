@@ -1497,3 +1497,22 @@ and configuration. Execution revalidates the source and applies writer limits.
 Unsupported MP4 sample entries cannot yet be described by this planner, even
 when the opaque relocation writer could retain them. Plans do not decode media
 and never claim that a destination is writable or that publication has occurred.
+
+### Owned PCM WAVE concatenation (2026-09-29)
+
+`fvid media concat OUTPUT.wav INPUT.wav INPUT.wav ...` and
+`fvid media plan concat INPUT.wav INPUT.wav ...` use the owned RIFF path, including
+in builds without `media`. The public `media::concat` and `media::plan_concat`
+route WAVE through the same implementation. `--streams 0`, `--quiet`, and
+execution `--progress` are supported. Other custom policies remain explicit
+errors on the owned path.
+
+Between 2 and 256 inputs must have identical sample rate, channel count, integer
+or float storage, valid-bit depth and channel mask. Samples are concatenated
+byte-for-byte, without decoding, resampling or a whole-file PCM allocation.
+One aligned 64 KiB buffer copies data; input handles remain open after validation.
+The first file supplies format and safe metadata. Later metadata is not merged.
+RIFF/data/fact lengths are recomputed, including odd data padding. Total size is
+validated before output creation; RF64-sized output is rejected. Cancellation,
+I/O failure and incompatible input leave no published output, and existing
+outputs are never overwritten. The writer is shared with sample-exact WAVE trim.

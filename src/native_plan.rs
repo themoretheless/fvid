@@ -163,3 +163,15 @@ pub fn remux(source: &std::path::Path) -> Result<Option<MediaPlan>> {
             "input structure scanned without writing an output; execution revalidates the current source".into()],
     }))
 }
+
+/// Plan sample-preserving WAVE concatenation using the execution validator.
+pub fn concat_wave(sources: &[std::path::PathBuf]) -> Result<MediaPlan> {
+    let (info,frames) = crate::native_pcm::concat_info(sources).map_err(|e|e.to_string())?;
+    Ok(MediaPlan {
+        command: "concat".into(), input: sources[0].clone(), inputs: sources.to_vec(),
+        streams: vec![PlanStream {index:0,media_type:"audio".into(),codec:info.codec(),disposition:"copy".into()}],
+        steps: vec![PlanStep {action:"copy".into(),detail:format!("append {frames} PCM sample frames at {} Hz without conversion",info.sample_rate)},
+            PlanStep {action:"publish".into(),detail:"rewrite RIFF/data/fact lengths; sync and publish without overwriting".into()}],
+        graph:None,notes:vec!["backend: fvid; no external demuxer or codec".into(),"retain first input metadata; all PCM formats and channel masks must match".into()],
+    })
+}

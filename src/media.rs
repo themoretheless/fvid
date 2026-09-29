@@ -359,3 +359,23 @@ pub fn plan_remux(source: &std::path::Path, options: &CopyOptions) -> Result<Med
         None => fvid_media::plan_remux(source, options),
     }
 }
+
+/// Concatenate compatible packed WAVE PCM through the owned streaming writer.
+pub fn concat(sources: &[std::path::PathBuf], destination: &std::path::Path, options: &CopyOptions) -> Result<CopyStats> {
+    if !sources.first().map(|p|crate::native_pcm::is_wave(p)).transpose().map_err(|e|e.to_string())?.unwrap_or(false) {
+        return fvid_media::concat(sources,destination,options);
+    }
+    validate_native_copy_options(options,true)?;
+    if options.streams.first().is_some_and(|&s|s!=0) {return Err("WAVE has only stream 0".into());}
+    let stats=crate::native_pcm::concat_wave(sources,destination,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())?;
+    Ok(CopyStats {packets:stats.packets,payload_bytes:stats.payload_bytes,segments:sources.len(),backend:"fvid",fvid_payload_copies:0})
+}
+
+pub fn plan_concat(sources: &[std::path::PathBuf], options: &CopyOptions) -> Result<MediaPlan> {
+    if !sources.first().map(|p|crate::native_pcm::is_wave(p)).transpose().map_err(|e|e.to_string())?.unwrap_or(false) {
+        return fvid_media::plan_concat(sources,options);
+    }
+    validate_native_copy_options(options,true)?;
+    if options.streams.first().is_some_and(|&s|s!=0) {return Err("WAVE has only stream 0".into());}
+    crate::native_plan::concat_wave(sources)
+}

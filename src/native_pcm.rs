@@ -285,6 +285,41 @@ pub fn trim_wave(
     let new_end = info.end - u64::from(info.data_bytes) - u64::from(info.data_bytes & 1)
         + bytes
         + (bytes & 1);
+    write_wave(
+        input.try_clone()?,
+        info,
+        destination,
+        new_end,
+        last - first,
+        &mut [(
+            input,
+            info.data_offset + first * u64::from(info.block),
+            bytes,
+        )],
+        cancel,
+        progress,
+    )
+}
+
+fn write_wave(
+    mut input: File,
+    info: WaveInfo,
+    destination: &Path,
+    new_end: u64,
+    frames: u64,
+    segments: &mut [(File, u64, u64)],
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+) -> Result<PcmTrimStats> {
+    let bytes = frames * u64::from(info.block);
+    if bytes > u64::from(u32::MAX)
+        || new_end - 8 > u64::from(u32::MAX)
+        || frames > u64::from(u32::MAX)
+    {
+        return Err(invalid(
+            "concatenated WAVE exceeds RIFF size or sample count range",
+        ));
+    }
     let directory = destination
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -305,7 +340,7 @@ pub fn trim_wave(
         .ok_or_else(|| invalid("cannot reserve WAVE output"))??;
     let mut stats = PcmTrimStats {
         packets: 0,
-        sample_frames: last - first,
+        sample_frames: frames,
         payload_bytes: 0,
         fvid_payload_copies: 0,
     };
@@ -331,25 +366,27 @@ pub fn trim_wave(
         output.write_all(&tag)?;
         if &tag == b"data" {
             output.write_all(&(bytes as u32).to_le_bytes())?;
-            input.seek(SeekFrom::Start(at + 8 + first * u64::from(info.block)))?;
-            let mut remaining = bytes;
             let capacity = buffer.len() / usize::from(info.block) * usize::from(info.block);
-            while remaining != 0 {
-                check(cancel)?;
-                let n = remaining.min(capacity as u64) as usize;
-                input.read_exact(&mut buffer[..n])?;
-                output.write_all(&buffer[..n])?;
-                remaining -= n as u64;
-                stats.packets += 1;
-                stats.payload_bytes += n as u64;
-                emit(&stats, false);
+            for (source, offset, length) in segments.iter_mut() {
+                source.seek(SeekFrom::Start(*offset))?;
+                let mut remaining = *length;
+                while remaining != 0 {
+                    check(cancel)?;
+                    let n = remaining.min(capacity as u64) as usize;
+                    source.read_exact(&mut buffer[..n])?;
+                    output.write_all(&buffer[..n])?;
+                    remaining -= n as u64;
+                    stats.packets += 1;
+                    stats.payload_bytes += n as u64;
+                    emit(&stats, false);
+                }
             }
             if bytes & 1 != 0 {
                 output.write_all(&[0])?;
             }
         } else if &tag == b"fact" {
             output.write_all(&size.to_le_bytes())?;
-            output.write_all(&((last - first) as u32).to_le_bytes())?;
+            output.write_all(&(frames as u32).to_le_bytes())?;
         } else {
             output.write_all(&size.to_le_bytes())?;
             let mut remaining = u64::from(size) + u64::from(size & 1);
@@ -485,4 +522,96 @@ pub(crate) fn decode_reader<R: Read + Seek, W: Write>(
         sample_rate: info.sample_rate,
         channels: info.channels,
     })
+}
+
+fn concat_inputs(
+    sources: &[PathBuf],
+    cancel: Option<&CancelFlag>,
+) -> Result<(WaveInfo, u64, Vec<(File, u64, u64)>)> {
+    if !(2..=256).contains(&sources.len()) {
+        return Err(invalid("concat requires 2..=256 inputs"));
+    }
+    let mut template: Option<WaveInfo> = None;
+    let mut segments = Vec::with_capacity(sources.len());
+    let mut frames = 0u64;
+    for source in sources {
+        check(cancel)?;
+        let mut input = File::open(source)?;
+        let info = inspect(&mut input, cancel)?;
+        if let Some(first) = template {
+            if (
+                first.sample_rate,
+                first.channels,
+                first.bits_per_sample,
+                first.float,
+                first.valid_bits,
+                first.channel_mask,
+            ) != (
+                info.sample_rate,
+                info.channels,
+                info.bits_per_sample,
+                info.float,
+                info.valid_bits,
+                info.channel_mask,
+            ) {
+                return Err(invalid(
+                    "WAVE concat requires identical PCM formats and channel masks",
+                ));
+            }
+        } else {
+            template = Some(info);
+        }
+        frames = frames
+            .checked_add(info.sample_frames)
+            .ok_or_else(|| invalid("WAVE sample count overflow"))?;
+        segments.push((input, info.data_offset, u64::from(info.data_bytes)));
+    }
+    let info = template.ok_or_else(|| invalid("missing WAVE input"))?;
+    let bytes = frames
+        .checked_mul(u64::from(info.block))
+        .ok_or_else(|| invalid("WAVE payload size overflow"))?;
+    let end = info.end - u64::from(info.data_bytes) - u64::from(info.data_bytes & 1)
+        + bytes
+        + (bytes & 1);
+    if bytes > u64::from(u32::MAX) || frames > u64::from(u32::MAX) || end - 8 > u64::from(u32::MAX)
+    {
+        return Err(invalid(
+            "concatenated WAVE exceeds RIFF size or sample count range",
+        ));
+    }
+    Ok((info, frames, segments))
+}
+
+/// Validate all input headers and total RIFF size, without decoding samples.
+pub fn concat_info(sources: &[PathBuf]) -> Result<(WaveInfo, u64)> {
+    let (info, frames, _) = concat_inputs(sources, None)?;
+    Ok((info, frames))
+}
+
+/// Append raw PCM frames with one aligned 64 KiB buffer. Retain the first input's
+/// format and safe metadata; recompute RIFF/data/fact lengths. Never overwrite.
+pub fn concat_wave(
+    sources: &[PathBuf],
+    destination: &Path,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+) -> Result<PcmTrimStats> {
+    if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
+        return Err(invalid("native WAVE concat output requires .wav"));
+    }
+    let (info, frames, mut segments) = concat_inputs(sources, cancel)?;
+    let bytes = frames * u64::from(info.block);
+    let end = info.end - u64::from(info.data_bytes) - u64::from(info.data_bytes & 1)
+        + bytes
+        + (bytes & 1);
+    write_wave(
+        segments[0].0.try_clone()?,
+        info,
+        destination,
+        end,
+        frames,
+        &mut segments,
+        cancel,
+        progress,
+    )
 }

@@ -425,3 +425,168 @@ fn wave_probe_uses_sample_clock_and_owned_dispatch() {
     );
     assert!(fvid::native_probe::probe_as(&path, Some("wav")).is_err());
 }
+
+#[test]
+fn wave_concat_preserves_samples_and_matches_cli_plan_and_api() {
+    let d = dir();
+    for (bits, float) in [
+        (8, false),
+        (16, false),
+        (24, false),
+        (32, false),
+        (32, true),
+        (64, true),
+    ] {
+        let size = usize::from(bits / 8);
+        let sources = vec![
+            d.0.join(format!("{bits}-{float}-a.wav")),
+            d.0.join(format!("{bits}-{float}-b.wav")),
+        ];
+        let a = vec![0x11; 3 * size];
+        let b = vec![0x22; 4 * size];
+        std::fs::write(&sources[0], wave(bits, 1, float, None, &a)).unwrap();
+        std::fs::write(&sources[1], wave(bits, 1, float, None, &b)).unwrap();
+        let expected = wave(bits, 1, float, None, &[a, b].concat());
+        let dest = d.0.join(format!("{bits}-{float}-out.wav"));
+        let stats = fvid::native_pcm::concat_wave(&sources, &dest, None, None).unwrap();
+        assert_eq!(stats.sample_frames, 7);
+        assert_eq!(stats.payload_bytes, 7 * size as u64);
+        assert_eq!(std::fs::read(&dest).unwrap(), expected);
+        assert!(fvid::native_pcm::concat_wave(&sources, &dest, None, None).is_err());
+        assert_eq!(std::fs::read(&dest).unwrap(), expected);
+        let cli_dest = d.0.join(format!("{bits}-{float}-cli.wav"));
+        let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "concat"])
+            .arg(&cli_dest)
+            .args(&sources)
+            .args(["--streams", "0", "--progress"])
+            .output()
+            .unwrap();
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        assert_eq!(std::fs::read(&cli_dest).unwrap(), expected);
+        let plan = fvid::native_plan::concat_wave(&sources).unwrap();
+        let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "plan", "concat"])
+            .args(&sources)
+            .output()
+            .unwrap();
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        assert_eq!(
+            serde_json::from_slice::<serde_json::Value>(&run.stdout).unwrap(),
+            serde_json::to_value(&plan).unwrap()
+        );
+        #[cfg(feature = "media")]
+        {
+            let api_dest = d.0.join(format!("{bits}-{float}-api.wav"));
+            let stats = fvid::media::concat(&sources, &api_dest, &Default::default()).unwrap();
+            assert_eq!(stats.backend, "fvid");
+            assert_eq!(stats.segments, 2);
+            assert_eq!(std::fs::read(api_dest).unwrap(), expected);
+            assert_eq!(
+                fvid::media::plan_concat(&sources, &Default::default()).unwrap(),
+                plan
+            );
+        }
+    }
+}
+
+#[test]
+fn wave_concat_rejects_mismatch_and_cancels_without_publishing() {
+    let d = dir();
+    let sources = vec![d.0.join("a.wav"), d.0.join("b.wav")];
+    let dest = d.0.join("result.wav");
+    std::fs::write(&sources[0], wave(16, 2, false, None, &vec![1; 80000])).unwrap();
+    for bytes in [
+        wave(8, 2, false, None, &[0; 4]),
+        wave(16, 1, false, None, &[0; 4]),
+        wave(16, 2, false, Some((15, 3)), &[0; 4]),
+        b"broken".to_vec(),
+    ] {
+        std::fs::write(&sources[1], bytes).unwrap();
+        assert!(fvid::native_pcm::concat_wave(&sources, &dest, None, None).is_err());
+        assert!(fvid::native_plan::concat_wave(&sources).is_err());
+        assert!(!dest.exists());
+    }
+    std::fs::copy(&sources[0], &sources[1]).unwrap();
+    let flag = fvid::media_control::CancelFlag::default();
+    let stop = flag.clone();
+    let hook = fvid::media_control::ProgressHook::new(move |event| {
+        assert!(!event.done);
+        if event.payload_bytes > 0 {
+            stop.cancel();
+        }
+    });
+    assert!(fvid::native_pcm::concat_wave(&sources, &dest, Some(&flag), Some(&hook)).is_err());
+    assert!(!dest.exists());
+    assert_eq!(std::fs::read_dir(&d.0).unwrap().count(), 2);
+    assert!(fvid::native_pcm::concat_wave(&sources[..1], &dest, None, None).is_err());
+    // Repeated inputs are allowed and are read through separate file handles.
+    let repeated = vec![sources[0].clone(), sources[0].clone()];
+    assert_eq!(
+        fvid::native_pcm::concat_wave(&repeated, &dest, None, None)
+            .unwrap()
+            .sample_frames,
+        40000
+    );
+}
+
+#[test]
+fn wave_concat_rewrites_fact_and_keeps_first_metadata_after_data() {
+    fn tagged(data: &[u8], tag: &[u8]) -> Vec<u8> {
+        let mut bytes = wave(8, 1, false, None, data);
+        bytes.extend(b"fact");
+        bytes.extend(4u32.to_le_bytes());
+        bytes.extend((data.len() as u32).to_le_bytes());
+        bytes.extend(b"LIST");
+        bytes.extend((4 + tag.len() as u32).to_le_bytes());
+        bytes.extend(b"INFO");
+        bytes.extend(tag);
+        if tag.len() % 2 != 0 {
+            bytes.push(0);
+        }
+        let size = (bytes.len() - 8) as u32;
+        bytes[4..8].copy_from_slice(&size.to_le_bytes());
+        bytes
+    }
+    let d = dir();
+    let sources = vec![d.0.join("a.wav"), d.0.join("b.wav")];
+    let dest = d.0.join("out.wav");
+    let tag = b"INAM\x04\0\0\0One\0";
+    std::fs::write(&sources[0], tagged(&[1, 2, 3], tag)).unwrap();
+    std::fs::write(&sources[1], tagged(&[4, 5, 6, 7], b"INAM\x04\0\0\0Two\0")).unwrap();
+    fvid::native_pcm::concat_wave(&sources, &dest, None, None).unwrap();
+    assert_eq!(
+        std::fs::read(dest).unwrap(),
+        tagged(&[1, 2, 3, 4, 5, 6, 7], tag)
+    );
+}
+
+#[test]
+fn wave_concat_rejects_riff_overflow_before_copying_payload() {
+    use std::io::{Seek, SeekFrom, Write};
+    let d = dir();
+    let sources = vec![d.0.join("a.wav"), d.0.join("b.wav")];
+    for path in &sources {
+        let mut header = wave(8, 1, false, None, &[]);
+        let payload = 0x80000000u32;
+        header[4..8].copy_from_slice(&(payload + 36).to_le_bytes());
+        header[40..44].copy_from_slice(&payload.to_le_bytes());
+        let mut f = std::fs::File::create(path).unwrap();
+        f.write_all(&header).unwrap();
+        f.seek(SeekFrom::Start(u64::from(payload) + 43)).unwrap();
+        f.write_all(&[0]).unwrap();
+    }
+    let error = fvid::native_plan::concat_wave(&sources).unwrap_err();
+    assert!(error.contains("RIFF size"), "{error}");
+    let dest = d.0.join("out.wav");
+    assert!(fvid::native_pcm::concat_wave(&sources, &dest, None, None).is_err());
+    assert!(!dest.exists());
+}

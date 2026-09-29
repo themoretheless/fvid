@@ -140,6 +140,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         }
         return Ok(());
     }
+    if try_wave_concat(args)? { return Ok(()); }
     if try_wave_trim(args)? { return Ok(()); }
     if args.first().map(String::as_str) == Some("export-y4m") {
         if args.len() < 3 { return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m [--crop X:Y:W:H] [--hflip] [--vflip] [--transpose MODE] [--pad W:H:X:Y] [--scale W:H] [--from SECONDS --to SECONDS]".into()); }
@@ -1873,7 +1874,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                             .into(),
                     );
                 }
-                fvid_media::plan_concat(&plan_paths, &options)?
+                fvid::media::plan_concat(&plan_paths, &options)?
             }
             Some("remux") => {
                 if plan_paths.len() != 1 || from.is_some() || to.is_some() || geometry {
@@ -3085,10 +3086,42 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             &options,
         )?,
         "concat" if paths.len() >= 3 && from.is_none() && to.is_none() => {
-            fvid_media::concat(&paths[1..], &paths[0], &options)?
+            fvid::media::concat(&paths[1..], &paths[0], &options)?
         }
         _ => return Err(help.into()),
     };
     emit_json(quiet, serde_json::to_string_pretty(&stats)?);
     Ok(())
+}
+
+fn try_wave_concat(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let plan = args.first().map(String::as_str)==Some("plan");
+    let start = usize::from(plan);
+    if args.get(start).map(String::as_str)!=Some("concat") {return Ok(false);}
+    let first = start + if plan {1} else {2};
+    let Some(source) = args.get(first) else {return Ok(false);};
+    if !fvid::native_pcm::is_wave(std::path::Path::new(source))? {return Ok(false);}
+    let mut paths=Vec::new();
+    let mut quiet=false;
+    let mut progress=false;
+    let mut options=args[first..].iter();
+    while let Some(arg)=options.next() {
+        match arg.as_str() {
+            "--quiet"=>quiet=true,
+            "--progress" if !plan=>progress=true,
+            "--streams"=>{if options.next().map(String::as_str)!=Some("0") {return Err("WAVE has only stream 0".into());}},
+            _ if arg.starts_with('-')=>return Err(format!("unsupported native WAVE concat option: {arg}").into()),
+            _=>paths.push(std::path::PathBuf::from(arg)),
+        }
+    }
+    if plan {
+        println!("{}",serde_json::to_string_pretty(&fvid::native_plan::concat_wave(&paths)?)?);
+    } else {
+        let hook=progress.then(||fvid::media_control::ProgressHook::new(|event|{
+            eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",event.packets,event.payload_bytes,event.done);
+        }));
+        let stats=fvid::native_pcm::concat_wave(&paths,std::path::Path::new(&args[start+1]),None,hook.as_ref())?;
+        if !quiet {println!("{{\"packets\":{},\"sample_frames\":{},\"payload_bytes\":{},\"segments\":{},\"backend\":\"fvid\",\"fvid_payload_copies\":0}}",stats.packets,stats.sample_frames,stats.payload_bytes,paths.len());}
+    }
+    Ok(true)
 }
