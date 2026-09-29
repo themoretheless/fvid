@@ -1200,3 +1200,18 @@ empty MP4 edits. Progress is sampled every 256 decoded packets and before
 publication. The final `done=true` event follows WAV header finalization, flush,
 sync and publication. Cancellation does not interrupt an in-flight filesystem
 read or container indexing; it is observed at the next decoder control check.
+
+Public `media::decode_audio`, `decode_audio_interval`, and
+`decode_audio_transformed` now route AAC in ADTS, MP4, and Matroska through the
+same owned decoder and atomic PCM exporter as the native CLI. They support
+`.f32le`/`.wav`, microsecond intervals, volume, mono/stereo conversion, sample-rate
+conversion, progress, and cooperative cancellation. Returned PCM is interleaved
+float (`sample_format = "flt"`); no planar interleave copy is required. MP4 edits
+and Matroska trim metadata follow the native presentation timeline.
+
+AAC requests with explicit stream selection, nondefault packet limits, other
+resource limits, or metadata mutations currently return an explicit error rather
+than ignoring those options or falling back to FFmpeg. Multiple audio tracks and
+unsupported AAC configurations remain subject to the native decoder's checks.
+Other audio codecs still use the legacy public adapter; this migration does not
+yet remove the `media` feature's FFmpeg link dependency.
