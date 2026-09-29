@@ -310,9 +310,9 @@ still pending.
 from AudioSpecificConfig sample rate, including explicit-rate intervals, and
 supplies limits to the owned ICS parser. Numeric tables retain their Symphonia
 0.6.1 MPL-2.0 notice in `aac_band_tables.rs`. Tests check indexed rates, interval
-boundaries, complete/aligned band coverage and ASC-to-ICS validation. 960/120
-band tables are still pending and are rejected explicitly, even though the
-transform/synthesis components already support those sizes.
+boundaries, complete/aligned band coverage and ASC-to-ICS validation. The
+960/120 tables are now derived by retaining the lower boundaries and ending at
+the shorter transform size; packet-level reference checks are described below.
 
 `codec::aac_channel::ChannelData` now joins global gain, ICS, sections,
 scalefactors, pulse syntax and spectral decoding into a transactional individual
@@ -546,3 +546,20 @@ Owned MP4 AAC parsing/writing now supports v2 sound descriptions. Real 88200
 and 96000 Hz fixtures preserve packets and decoded PCM. Invalid floating-point
 rates, fractional rates and invalid channel counts are rejected. High-rate output
 uses the qt compatible brand rather than claiming version-0 ISO sample entries.
+
+## AAC-LC 960-sample frames
+
+NativeAacDecoder now accepts frameLengthFlag=1 (960 samples with 120-sample
+short transforms). Band geometry covers all 13 indexed sampling rates and the
+existing explicit-rate intervals. Long/short spectral parsing, sine/KBD window
+transitions, overlap state and output length use the ASC-selected frame size.
+No external decoder is used. ADTS does not signal this ASC flag; these fixtures
+use Matroska CodecPrivate and MP4 esds.
+
+Independent PCM checks cover synthetic mono 8/48/96 kHz streams with all bands
+active, varying band gains/signs, grouped eight-short windows and long-start /
+long-stop transitions. Peak error is below 1e-6 against saved FFmpeg references.
+Tests also cover sample-exact interval extraction, MP4 vs Matroska PCM equality, CLI
+WAV export and playback adapter reset. This is not a full AAC conformance claim;
+7.1/PCE, HE-AAC/SBR, ER and unsupported coding tools remain separate work.
+Reproduction details: `tests/fixtures/audio/aac-960.md`.

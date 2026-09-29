@@ -11,10 +11,8 @@ impl BandTables {
         if config.object_type != 2 {
             return Err(unsupported("band tables require AAC-LC"));
         }
-        if config.frame_samples != 1024 {
-            return Err(unsupported(
-                "960-sample AAC band tables are not implemented",
-            ));
+        if !matches!(config.frame_samples, 960 | 1024) {
+            return Err(unsupported("AAC band tables require 960 or 1024 samples"));
         }
         if config.sample_rate == 0 {
             return Err(invalid("zero AAC sample rate"));
@@ -29,6 +27,19 @@ impl BandTables {
             18783..=27712 => (&SWB_OFFSET_24K_LONG, &SWB_OFFSET_24K_SHORT),
             9391..=18782 => (&SWB_OFFSET_16K_LONG, &SWB_OFFSET_16K_SHORT),
             _ => (&SWB_OFFSET_8K_LONG, &SWB_OFFSET_8K_SHORT),
+        };
+        let (long, short): (&[usize], &[usize]) = if config.frame_samples == 960 {
+            match config.sample_rate {
+                75132.. => (&SWB_960_96K, &SWB_120_64K),
+                55426..=75131 => (&SWB_960_64K, &SWB_120_64K),
+                37566..=55425 => (&SWB_960_48K, &SWB_120_48K),
+                27713..=37565 => (&SWB_960_32K, &SWB_120_48K),
+                18783..=27712 => (&SWB_960_24K, &SWB_120_24K),
+                9391..=18782 => (&SWB_960_16K, &SWB_120_16K),
+                _ => (&SWB_960_8K, &SWB_120_8K),
+            }
+        } else {
+            (long, short)
         };
         Ok(Self { long, short })
     }
@@ -123,8 +134,40 @@ mod tests {
         }
         assert!(BandTables::for_config(&config(0)).is_err());
         let mut c = config(48000);
-        c.frame_samples = 960;
+        c.frame_samples = 512;
         assert!(BandTables::for_config(&c).is_err());
+    }
+    #[test]
+    fn short_frame_geometry_covers_all_indexed_rates() {
+        for (rate, bands) in [
+            (96000, 40),
+            (88200, 40),
+            (64000, 46),
+            (48000, 49),
+            (44100, 49),
+            (32000, 49),
+            (24000, 46),
+            (22050, 46),
+            (16000, 42),
+            (12000, 42),
+            (11025, 42),
+            (8000, 40),
+            (7350, 40),
+        ] {
+            let mut c = config(rate);
+            c.frame_samples = 960;
+            let tables = BandTables::for_config(&c).unwrap();
+            assert_eq!(tables.long.len() - 1, bands);
+            for (offsets, end) in [(tables.long, 960), (tables.short, 120)] {
+                assert_eq!(offsets[0], 0);
+                assert_eq!(*offsets.last().unwrap(), end);
+                assert!(
+                    offsets
+                        .windows(2)
+                        .all(|p| p[0] < p[1] && (p[1] - p[0]) % 4 == 0)
+                );
+            }
+        }
     }
     #[test]
     fn asc_drives_ics_band_limit() {

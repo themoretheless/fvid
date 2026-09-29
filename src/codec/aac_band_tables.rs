@@ -53,3 +53,29 @@ pub(super) const SWB_OFFSET_96K_LONG: [usize; 41 + 1] = [
     0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 64, 72, 80, 88, 96, 108, 120, 132,
     144, 156, 172, 188, 212, 240, 276, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1024,
 ];
+// The 960/120 geometry retains lower boundaries and ends at the shorter
+// transform size. Derived from the existing normative 1024/128 tables.
+const fn shorten<const N: usize>(source: &[usize], end: usize) -> [usize; N] {
+    let mut result = [0; N];
+    let mut index = 0;
+    while index + 1 < N {
+        assert!(source[index] < end);
+        result[index] = source[index];
+        index += 1;
+    }
+    assert!(source[index] >= end);
+    result[index] = end;
+    result
+}
+pub(super) const SWB_960_96K: [usize; 41] = shorten(&SWB_OFFSET_96K_LONG, 960);
+pub(super) const SWB_960_64K: [usize; 47] = shorten(&SWB_OFFSET_64K_LONG, 960);
+pub(super) const SWB_960_48K: [usize; 50] = shorten(&SWB_OFFSET_48K_LONG, 960);
+pub(super) const SWB_960_32K: [usize; 50] = shorten(&SWB_OFFSET_32K_LONG, 960);
+pub(super) const SWB_960_24K: [usize; 47] = shorten(&SWB_OFFSET_24K_LONG, 960);
+pub(super) const SWB_960_16K: [usize; 43] = shorten(&SWB_OFFSET_16K_LONG, 960);
+pub(super) const SWB_960_8K: [usize; 41] = shorten(&SWB_OFFSET_8K_LONG, 960);
+pub(super) const SWB_120_64K: [usize; 13] = shorten(&SWB_OFFSET_64K_SHORT, 120);
+pub(super) const SWB_120_48K: [usize; 15] = shorten(&SWB_OFFSET_48K_SHORT, 120);
+pub(super) const SWB_120_24K: [usize; 16] = shorten(&SWB_OFFSET_24K_SHORT, 120);
+pub(super) const SWB_120_16K: [usize; 16] = shorten(&SWB_OFFSET_16K_SHORT, 120);
+pub(super) const SWB_120_8K: [usize; 16] = shorten(&SWB_OFFSET_8K_SHORT, 120);
