@@ -55,6 +55,8 @@ pub struct Track {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Chapter {
     pub start_ns: u64,
+    /// Explicit exclusive end in Matroska ticks (nanoseconds), when present.
+    pub end_ns: Option<u64>,
     /// The first `ChapterDisplay` string, empty when the atom names no title.
     pub title: String,
 }
@@ -133,7 +135,7 @@ pub struct WebmReader<R> {
     /// Whether `Info` has been read, which is what makes a scale final and a
     /// track nameable: blocks before it are not indexed for a first picture.
     info_seen: bool,
-    chapter_runs: Vec<(u64, String)>,
+    chapter_runs: Vec<(u64, Option<u64>, String)>,
     block_title: String,
     /// How many EBML elements the walk has made, counted over the whole file so
     /// the limit means the same thing whether the index grew in one pass or ten.
@@ -749,35 +751,13 @@ impl<R: Read + Seek> WebmReader<R> {
             }
             None => None,
         };
-        // Chapter times ride in `TimestampScale` units like every other
-        // timestamp of the file.
-        // Chapter times state their units badly: the specification puts them in
-        // `TimestampScale` steps, which is how `mkvmerge` writes them, while
-        // `ffmpeg` writes them in nanoseconds under the same 1 ms scale. A
-        // chapter cannot start after the file ends, so a declared length tells
-        // the two readings apart; without one the specification wins.
-        let overruns = self.duration_ns.is_some_and(|duration| {
-            let last = self
-                .chapter_runs
-                .iter()
-                .map(|(start, _)| *start)
-                .max()
-                .unwrap_or(0);
-            last.checked_mul(self.scale)
-                .is_none_or(|spaced| spaced > duration)
-                && last <= duration
-        });
-        let factor = if overruns { 1 } else { self.scale };
-        let mut chapters: Vec<Chapter> = self
-            .chapter_runs
-            .iter()
-            .filter_map(|(start, title)| {
-                start.checked_mul(factor).map(|start_ns| Chapter {
-                    start_ns,
-                    title: title.clone(),
-                })
-            })
-            .collect();
+        // ChapterTimeStart/End are Matroska ticks (nanoseconds), independent
+        // of Segment TimestampScale: https://www.matroska.org/technical/elements.html
+        let mut chapters: Vec<Chapter> = self.chapter_runs.iter()
+            .filter(|(start, end, _)| end.is_none_or(|end| end >= *start))
+            .map(|(start, end, title)| Chapter {
+                start_ns: *start, end_ns: *end, title: title.clone(),
+            }).collect();
         chapters.sort_by_key(|chapter| chapter.start_ns);
         self.chapters = chapters;
         // A file that wrote its name in both places wrote it in the tags, which
@@ -954,7 +934,7 @@ fn read_chapters<R: Read + Seek>(
     e: Element,
     count: &mut usize,
     max: usize,
-    out: &mut Vec<(u64, String)>,
+    out: &mut Vec<(u64, Option<u64>, String)>,
 ) {
     // A master may carry no chapters at all rather than a bad one, so an
     // unknown-sized parent or a truncated list simply yields nothing.
@@ -979,10 +959,12 @@ fn read_chapters<R: Read + Seek>(
                 return;
             };
             let mut start = None;
+            let mut end = None;
             let mut title = String::new();
             for field in entries {
                 match field.id {
                     0x91 => start = uint(r, field).ok(),
+                    0x92 => end = uint(r, field).ok(),
                     // A chapter may be displayed in several languages; what the
                     // file leads with is what a player has to show.
                     0x80 if title.is_empty() => {
@@ -1002,7 +984,7 @@ fn read_chapters<R: Read + Seek>(
                     _ => {}
                 }
             }
-            out.push((start.unwrap_or_default(), title));
+            if let Some(start) = start { out.push((start, end, title)); }
         }
     }
 }
@@ -1381,11 +1363,10 @@ mod tests {
         atom(&[0x45, 0xb9], &atom(&[0xb6], atoms))
     }
     #[test]
-    fn a_chapter_time_in_the_stated_scale_reaches_the_player_as_nanoseconds() {
+    fn chapter_times_are_nanoseconds_independent_of_segment_scale() {
         let mut file = fixture(false);
-        // Times in the default 1 ms scale, so a value of 100 is 100 ms. The
-        // file declares no length, which leaves the stated scale the only
-        // reading there is.
+        // Even with default 1 ms Segment ticks and no declared duration,
+        // chapter values 100 and 250 remain nanoseconds, never milliseconds.
         file.extend(atom(
             &[0x10, 0x43, 0xa7, 0x70],
             &[
@@ -1406,9 +1387,11 @@ mod tests {
         let shown: Vec<(u64, &str)> = reader
             .chapters
             .iter()
-            .map(|c| (c.start_ns / 1_000_000, c.title.as_str()))
+            .map(|c| (c.start_ns, c.title.as_str()))
             .collect();
         assert_eq!(shown, [(100, ""), (250, "Ok")]);
+        assert_eq!(reader.chapters[0].end_ns, None);
+        assert_eq!(reader.chapters[1].end_ns, Some(400));
     }
     #[test]
     fn a_chapter_list_that_cannot_be_walked_leaves_the_file_playable() {

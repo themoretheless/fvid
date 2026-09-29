@@ -1271,3 +1271,18 @@ duration. Unknown bitrate, codec profile/level and pixel format are not guessed;
 frame rate is `[0,1]` until independently determined. This container inspection
 is not bitstream validation, and does not yet expose arbitrary unrecognized tags,
 codec delay or stream disposition flags. Matroska public probe is still legacy.
+
+Matroska/WebM public, CLI and MCP probe now uses the owned bounded EBML index,
+including tags and chapters appearing after clusters. Track timestamps are exposed
+in nanoseconds, with `CodecDelay` subtracted from the first block PTS; this can
+show a negative pre-roll origin before decoded delay trimming. Segment duration
+is reported when declared; per-track duration and measured average frame rate
+remain unknown rather than being estimated from incomplete packet lengths.
+
+Chapter start/end are Matroska ticks (nanoseconds), independent of
+`TimestampScale`, per https://www.matroska.org/technical/elements.html. The previous
+scale-guessing heuristic was removed. Explicit `ChapterTimeEnd` is retained;
+otherwise probe infers an end from the next chapter or Segment duration. Missing
+starts and reversed chapter intervals are excluded. Normalized supported tags,
+stream language/title and codec-private byte counts are exposed; arbitrary tags,
+stream dispositions and decoded codec properties still require more work.

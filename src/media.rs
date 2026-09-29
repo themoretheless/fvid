@@ -188,7 +188,7 @@ pub fn remux(
         segments: 1, backend: "fvid", fvid_payload_copies: 0 })
 }
 
-/// Native ADTS and MP4 inspection; other container descriptions remain on the legacy
+/// Native ADTS, MP4 and Matroska inspection; other container descriptions remain on the legacy
 /// adapter until their metadata/timing contracts have been migrated.
 pub fn probe(source: &std::path::Path) -> Result<MediaInfo> { probe_as(source, None) }
 
@@ -197,11 +197,17 @@ pub fn probe_as(source: &std::path::Path, format: Option<&str>) -> Result<MediaI
     if matches!(format, Some("mov" | "mp4" | "m4a")) {
         return crate::media_probe::mp4(source);
     }
+    if matches!(format, Some("matroska" | "webm")) {
+        return crate::media_probe::matroska(source);
+    }
     if format.is_none() {
         let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
         let mut signature = [0; 8];
-        if file.read_exact(&mut signature).is_ok() && &signature[4..] == b"ftyp" {
-            return crate::media_probe::mp4(source);
+        if file.read_exact(&mut signature).is_ok() {
+            if &signature[4..] == b"ftyp" { return crate::media_probe::mp4(source); }
+            if signature.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
+                return crate::media_probe::matroska(source);
+            }
         }
     }
     if format.is_some_and(|format| format != "aac") {
