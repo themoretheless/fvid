@@ -1940,17 +1940,24 @@ combined AVC/HEVC/AAC sources and independently checks every video frame and
 all audible samples on each audio track. A separate unit test covers reordered
 variable-rate presentation intervals.
 
-### Spatial gradient primitives (2026-09-29)
+### Owned spatial gradients (2026-09-29)
 
 `native_pixels::Gradient` provides owned Sobel, Prewitt, Roberts, Kirsch and
 Scharr processing on `GeometryFrame`, with literal `planes`, `scale` and
-`delta` options. `PixelFilters::from_request` constructs the ordered pixel
-pipeline; these gradient primitives are not yet connected to the decode CLI
-or the public media dispatch. Existing adapter routing remains unchanged.
+`delta` options. Native decode, the shared media request API and the headless
+CLI (`media decode INPUT --sobel 'planes=1:scale=0.125'`) now use these
+operators after geometry and negate, in the fixed order listed above.
+The compatibility wrapper `decode_video_filtered` remains available.
 
 `tests/native_gradients.rs` validates masks, constant output, degenerate
-geometry and rejection without mutation. Its explicit reference-only test
-compares all five operators against FFmpeg for YUV444 8/10/16-bit frames,
-including border pixels and scaled luma-only output (30 comparisons).
-FFmpeg is not a runtime dependency of these primitives. RGB and subsampled
-formats are implemented but not covered by this reference corpus.
+geometry, rejection without mutation, native API/CLI routing and HEVC Main10
+depth preservation. Its explicit reference-only test compares all five
+operators against FFmpeg for YUV444/YUV422/YUV420 8/10/16-bit frames, including
+border pixels and scaled luma-only output (90 comparisons). FFmpeg is not a
+runtime dependency of this owned path. RGB is implemented but not covered by
+this reference corpus.
+
+Option expressions such as `scale=PI` and combinations with filters not yet
+migrated still use the existing adapter when the `media` feature is enabled;
+the headless build rejects them. Aggregate `media` is therefore not yet
+FFmpeg-independent.

@@ -185,10 +185,10 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         println!("{{\"backend\":\"fvid\",\"video_frames\":{frames}}}");
         return Ok(());
     }
-    let (pixel_args, negate) = negate_decode_args(args)?;
+    let (pixel_args, filters) = pixel_decode_args(args)?;
     let (decode_args, geometry) = geometry_decode_args(&pixel_args)?;
     if let Some((path, quiet, interval)) = plain_decode(&decode_args)? {
-        let stats = fvid::native_media::decode_video_filtered(std::path::Path::new(path), interval, &geometry, negate)?;
+        let stats = fvid::native_media::decode_video_pipeline(std::path::Path::new(path), interval, &geometry, &filters)?;
         if !quiet {
             // These strings are internal backend/pixel-format names; paths and
             // other user input are never interpolated into this JSON document.
@@ -314,19 +314,44 @@ fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Er
     Ok(true)
 }
 
-fn negate_decode_args(args: &[String]) -> Result<(Vec<String>, Option<fvid::native_pixels::Negate>), Box<dyn std::error::Error>> {
-    if args.first().map(String::as_str) != Some("decode") { return Ok((args.to_vec(), None)); }
+fn pixel_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_pixels::PixelFilters), Box<dyn std::error::Error>> {
+    use fvid::native_pixels::{Gradient, GradientKind, Negate, PixelFilters};
+    let mut filters = PixelFilters::default();
+    if args.first().map(String::as_str) != Some("decode") { return Ok((args.to_vec(), filters)); }
     let mut result = vec![args[0].clone()];
-    let mut negate = None;
     let mut args = args[1..].iter();
+    let mut seen = std::collections::BTreeSet::new();
     while let Some(arg) = args.next() {
         if arg == "--" { result.push(arg.clone()); result.extend(args.cloned()); break; }
         if arg == "--negate" {
-            if negate.is_some() { return Err("duplicate negate".into()); }
-            negate = Some(fvid::native_pixels::Negate::parse(args.next().ok_or("missing negate args")?)?);
-        } else { result.push(arg.clone()); }
+            if filters.negate.is_some() { return Err("duplicate negate".into()); }
+            filters.negate = Some(Negate::parse(args.next().ok_or("missing negate args")?)?);
+            continue;
+        }
+        let kind = match arg.as_str() {
+            "--sobel" => GradientKind::Sobel,
+            "--prewitt" => GradientKind::Prewitt,
+            "--roberts" => GradientKind::Roberts,
+            "--kirsch" => GradientKind::Kirsch,
+            "--scharr" => GradientKind::Scharr,
+            _ => { result.push(arg.clone()); continue; }
+        };
+        if !seen.insert(kind) { return Err(format!("duplicate {}", kind.name()).into()); }
+        let value = args.next().ok_or_else(|| format!("missing {} args", kind.name()))?;
+        match Gradient::parse(kind, value) {
+            Ok(filter) => filters.gradients.push(filter),
+            Err(error) => {
+                // Preserve the existing adapter's expression syntax until it
+                // has an owned evaluator. Original args reach the full parser.
+                #[cfg(feature = "media")]
+                { let _ = error; result.push(arg.clone()); result.push(value.clone()); }
+                #[cfg(not(feature = "media"))]
+                { return Err(error.into()); }
+            }
+        }
     }
-    Ok((result, negate))
+    filters.gradients.sort_by_key(|filter| filter.kind());
+    Ok((result, filters))
 }
 
 // Strip only the native geometry options. The remaining parser still rejects
