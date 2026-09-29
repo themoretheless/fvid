@@ -188,12 +188,22 @@ pub fn remux(
         segments: 1, backend: "fvid", fvid_payload_copies: 0 })
 }
 
-/// Native ADTS inspection; other container descriptions remain on the legacy
+/// Native ADTS and MP4 inspection; other container descriptions remain on the legacy
 /// adapter until their metadata/timing contracts have been migrated.
 pub fn probe(source: &std::path::Path) -> Result<MediaInfo> { probe_as(source, None) }
 
 pub fn probe_as(source: &std::path::Path, format: Option<&str>) -> Result<MediaInfo> {
     use std::io::{BufReader, Read, Seek, SeekFrom};
+    if matches!(format, Some("mov" | "mp4" | "m4a")) {
+        return crate::media_probe::mp4(source);
+    }
+    if format.is_none() {
+        let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+        let mut signature = [0; 8];
+        if file.read_exact(&mut signature).is_ok() && &signature[4..] == b"ftyp" {
+            return crate::media_probe::mp4(source);
+        }
+    }
     if format.is_some_and(|format| format != "aac") {
         return fvid_media::probe_as(source, format);
     }

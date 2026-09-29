@@ -108,3 +108,6 @@ pub(crate) use y4m::line;
 pub mod virtual_camera;
 
 mod pcm_resample;
+
+#[cfg(feature = "media")]
+mod media_probe;

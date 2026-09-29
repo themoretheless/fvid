@@ -1256,3 +1256,18 @@ does not decode raw AAC payloads. Unknown bitrate/sample-format fields remain
 unset rather than guessed. MP4/Matroska public probe still uses the legacy adapter
 pending migration of its metadata and chapter contract. The headless
 `native_media::inspect_adts` API is available without the `media` feature.
+
+Public/CLI/MCP MP4 probe now uses the owned MP4 index for AVC, HEVC, AAC and other
+sample entries understood by that index, including fragmented files. It exposes
+track geometry, codec names, configuration byte counts, language/title, recognized
+file tags and `chpl` chapters. QuickTime chapter-text samples are retained as opaque
+data tracks so their stream positions are preserved. Unsupported sample entries
+return an explicit error instead of silently dropping streams or invoking FFmpeg.
+
+Probe durations follow declared edit-list presentation lengths where present;
+otherwise they use track duration. Conversion to integer clock ticks/microseconds
+rounds down. Chapter end times are inferred from the next chapter or presentation
+duration. Unknown bitrate, codec profile/level and pixel format are not guessed;
+frame rate is `[0,1]` until independently determined. This container inspection
+is not bitstream validation, and does not yet expose arbitrary unrecognized tags,
+codec delay or stream disposition flags. Matroska public probe is still legacy.

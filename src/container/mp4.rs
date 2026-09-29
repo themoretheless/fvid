@@ -1148,6 +1148,9 @@ fn parse_track(
         // drawn, none of which this player asks; the samples are the lines
         // themselves, so the entry is the whole description here too.
         (b"sbtl" | b"text" | b"subt", b"tx3g") => (entry.data.len(), None),
+        // QuickTime chapter text is an opaque data track. Index its packets so
+        // inspection preserves stream order; this does not claim a text decoder.
+        (b"text", b"text") => (entry.data.len(), None),
         // The entry was read right through and says what it codes; there is only
         // no arm here for that coding, which is a gap of a different kind from a
         // box this reader could not parse.
