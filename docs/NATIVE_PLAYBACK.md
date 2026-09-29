@@ -1828,3 +1828,26 @@ An independently created rotated VP9 file covers the 8-bit Planar8 export path;
 its chroma classification now uses coded plane dimensions instead of the
 rotated display dimensions. MP4 edit-list mapping for high-level remux remains
 outstanding.
+
+### AAC edit boundaries during owned Matroska packet export
+
+`container::matroska_write::write_mp4_aac` copies a selected MP4 AAC-LC track
+without decoding or a foreign muxer. It retains the packets needed for decoder
+pre-roll, writes the audible start as `CodecDelay`, and trims the last decoded
+frame with positive `DiscardPadding`. Both 1024- and 960-sample AAC frames are
+supported; fractional movie-clock end boundaries round up to the next audio
+sample, matching the owned MP4 PCM export. Track title, language and ASC survive.
+
+This is a track-level primitive, not the general `media remux` route: the caller
+still owns file tags, chapters and selection of other tracks. It accepts no edit
+or one contiguous media edit. Empty/repeated edits, discontinuous packet clocks,
+unrepresentable times and inconsistent audio geometry fail explicitly. The
+existing PCM export continues to support repeated edits and inserted silence.
+Cancellation checks run during index validation and packet writing; partial
+output must be discarded by the publisher, and this primitive never reports
+`done=true` before publication.
+
+`native_matroska_mux` compares decoded PCM and original packets for edited AAC
+and 960-sample frames, checks rejected edits and cancellation, and has an opt-in
+`FVID_REFERENCE_FFMPEG` oracle test for independent priming/tail trimming. FFmpeg
+is used only by that reference test, never by the export implementation.

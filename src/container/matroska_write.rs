@@ -644,3 +644,159 @@ fn write_aac_packets<W: Write + Seek>(
     check()?;
     Ok(event)
 }
+
+/// Copy one MP4 AAC track into Matroska, retaining decoder pre-roll and the
+/// audible boundaries of a single media edit. This is a track-level operation:
+/// file tags, chapters and other tracks belong to the caller's remux policy.
+/// Empty/repeated edits require timeline reconstruction and are rejected here.
+/// The caller must discard partial output on failure.
+pub fn write_mp4_aac<R: Read + Seek, W: Write + Seek>(
+    input: &mut super::mp4::Mp4Reader<R>,
+    track_index: usize,
+    output: &mut W,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+) -> Result<ProgressEvent> {
+    let check = || {
+        if cancel.is_some_and(|c| c.is_cancelled()) {
+            Err(invalid("media operation cancelled"))
+        } else {
+            Ok(())
+        }
+    };
+    check()?;
+    let track = input
+        .tracks()
+        .get(track_index)
+        .ok_or_else(|| invalid("MP4 AAC track index out of range"))?
+        .clone();
+    if track.handler != *b"soun" || track.codec != *b"mp4a" {
+        return Err(invalid("MP4 track is not AAC"));
+    }
+    let asc = crate::codec::config::aac_specific_config(&track.configuration)?;
+    let config = crate::codec::config::AacConfig::parse(asc)?;
+    if track.timescale == 0
+        || track.sample_rate != config.sample_rate
+        || track.channels != u16::from(config.channels)
+    {
+        return Err(invalid("MP4 AAC clock or geometry mismatch"));
+    }
+    let rate = u128::from(config.sample_rate);
+    let position = |ticks: u64| -> Result<u64> {
+        let n = u128::from(ticks) * rate;
+        let d = u128::from(track.timescale);
+        if n % d != 0 {
+            return Err(invalid("AAC time is not sample aligned"));
+        }
+        u64::try_from(n / d).map_err(|_| invalid("AAC sample position overflow"))
+    };
+    let media_end = position(track.duration)?;
+    let (start, end) = match track.edits.as_slice() {
+        [] => (0, media_end),
+        [edit] if edit.media_time >= 0 && input.movie_timescale() != 0 => {
+            let start = position(edit.media_time as u64)?;
+            let length = u64::try_from(
+                (u128::from(edit.duration) * rate).div_ceil(u128::from(input.movie_timescale())),
+            )
+            .map_err(|_| invalid("AAC edit duration overflow"))?;
+            (
+                start,
+                start
+                    .checked_add(length)
+                    .ok_or_else(|| invalid("AAC edit endpoint overflow"))?,
+            )
+        }
+        _ => {
+            return Err(invalid(
+                "AAC packet remux requires one contiguous media edit",
+            ));
+        }
+    };
+    if start >= end || end > media_end {
+        return Err(invalid("AAC edit exceeds media samples"));
+    }
+    let frame = u64::from(config.frame_samples);
+    let count =
+        usize::try_from(end.div_ceil(frame)).map_err(|_| invalid("AAC packet count overflow"))?;
+    if count > track.samples.len() {
+        return Err(invalid("AAC edit exceeds packet index"));
+    }
+    // Validate before producing a header. The AAC frame clock, rather than a
+    // shortened final stts duration, determines the actual decoded frame size.
+    for i in 0..track.samples.len() {
+        check()?;
+        let sample = track
+            .samples
+            .get(i)
+            .ok_or_else(|| invalid("missing AAC sample"))?;
+        let expected = (i as u64)
+            .checked_mul(frame)
+            .ok_or_else(|| invalid("AAC timeline overflow"))?;
+        let duration = position(u64::from(sample.duration))?;
+        if sample.pts < 0
+            || sample.pts as u64 != sample.dts
+            || position(sample.dts)? != expected
+            || duration == 0
+            || duration > frame
+            || (i + 1 != track.samples.len() && duration != frame)
+        {
+            return Err(invalid(
+                "AAC packet remux requires a contiguous frame clock",
+            ));
+        }
+        if i + 1 == track.samples.len() && expected.checked_add(duration) != Some(media_end) {
+            return Err(invalid("AAC media duration disagrees with packet timeline"));
+        }
+    }
+    let ns = |samples: u64| -> Result<u64> {
+        u64::try_from((u128::from(samples) * 1_000_000_000 + rate / 2) / rate)
+            .map_err(|_| invalid("AAC nanosecond timestamp overflow"))
+    };
+    let delay = ns(start)?;
+    let coded_end = (count as u64)
+        .checked_mul(frame)
+        .ok_or_else(|| invalid("AAC timeline overflow"))?;
+    let padding =
+        i64::try_from(ns(coded_end - end)?).map_err(|_| invalid("AAC padding overflow"))?;
+    let mut writer = PacketWriter::new_with_options(
+        output,
+        &[TrackSpec {
+            encoding: Encoding::Aac {
+                configuration: asc,
+                sample_rate: config.sample_rate,
+                channels: track.channels,
+            },
+            name: &track.name,
+            language: &track.language,
+        }],
+        &[TrackOptions {
+            codec_delay_ns: delay,
+            ..Default::default()
+        }],
+    )?;
+    if let Some(h) = progress {
+        h.emit(writer.event());
+    }
+    let mut packet = Vec::new();
+    for i in 0..count {
+        check()?;
+        input.read_packet(track_index, i, &mut packet)?;
+        let begin = ns(i as u64 * frame)?;
+        let finish = ns((i as u64 + 1) * frame)?;
+        writer.write_packet_with_padding(
+            0,
+            begin,
+            finish - begin,
+            true,
+            &packet,
+            if i + 1 == count { padding } else { 0 },
+        )?;
+        if let Some(h) = progress {
+            h.emit(writer.event());
+        }
+    }
+    check()?;
+    let event = writer.finish()?;
+    check()?;
+    Ok(event)
+}

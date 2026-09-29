@@ -358,3 +358,127 @@ fn excessive_padding_poisoning_and_delay_overflow_are_rejected() {
         assert!(writer.finish().is_err());
     }
 }
+
+#[test]
+fn mp4_aac_edits_and_960_sample_frames_survive_packet_remux() {
+    for name in ["aac-native-edit.m4a", "aac-960-48000.m4a"] {
+        let bytes = std::fs::read(fixture(name)).unwrap();
+        let mut input =
+            fvid::container::mp4::Mp4Reader::open(std::io::Cursor::new(&bytes), Default::default())
+                .unwrap();
+        let index = input
+            .tracks()
+            .iter()
+            .position(|t| t.codec == *b"mp4a")
+            .unwrap();
+        let mut out = std::io::Cursor::new(Vec::new());
+        let stats = matroska_write::write_mp4_aac(&mut input, index, &mut out, None, None).unwrap();
+        assert!(!stats.done);
+        let mut expected = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(&bytes, &mut expected).unwrap();
+        let mut actual = Vec::new();
+        fvid::native_media::decode_matroska_aac_pcm_interval(out.get_ref(), &mut actual, None)
+            .unwrap();
+        assert_eq!(actual.len(), expected.len(), "{name}");
+        assert!(actual == expected, "PCM differs for {name}");
+        let mut container =
+            webm::WebmReader::open(std::io::Cursor::new(out.get_ref()), Default::default())
+                .unwrap();
+        container.scan_all().unwrap();
+        assert_eq!(container.packets.len() as u64, stats.packets);
+        for i in 0..container.packets.len() {
+            let mut packet = Vec::new();
+            input.read_packet(index, i, &mut packet).unwrap();
+            assert_eq!(container.read_packet(i).unwrap(), packet);
+        }
+    }
+}
+
+#[test]
+#[ignore = "requires FVID_REFERENCE_FFMPEG"]
+fn independent_decoder_reads_mp4_aac_edit_boundaries() {
+    let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
+    let d = dir("mp4-edit-reference");
+    let bytes = std::fs::read(fixture("aac-native-edit.m4a")).unwrap();
+    let mut input =
+        fvid::container::mp4::Mp4Reader::open(std::io::Cursor::new(&bytes), Default::default())
+            .unwrap();
+    let index = input
+        .tracks()
+        .iter()
+        .position(|t| t.codec == *b"mp4a")
+        .unwrap();
+    let mut out = std::io::Cursor::new(Vec::new());
+    matroska_write::write_mp4_aac(&mut input, index, &mut out, None, None).unwrap();
+    let destination = d.0.join("edited.mka");
+    std::fs::write(&destination, out.into_inner()).unwrap();
+    let decode = |path: &Path| {
+        let run = std::process::Command::new(&ffmpeg)
+            .args(["-v", "error", "-i"])
+            .arg(path)
+            .args([
+                "-map",
+                "0:a:0",
+                "-f",
+                "f32le",
+                "-c:a",
+                "pcm_f32le",
+                "pipe:1",
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        run.stdout
+    };
+    let source_pcm = decode(&fixture("aac-native-edit.m4a"));
+    let output_pcm = decode(&destination);
+    let mut owned = Vec::new();
+    let stats = fvid::native_media::decode_mp4_aac_pcm(&bytes, &mut owned).unwrap();
+    let length = stats.sample_frames as usize * 4;
+    assert_eq!(output_pcm.len(), length);
+    assert!(source_pcm.len() >= length);
+    assert!(output_pcm == source_pcm[..length], "reference PCM differs");
+}
+
+#[test]
+fn mp4_aac_invalid_edits_and_cancellation_never_report_completion() {
+    let original = std::fs::read(fixture("aac-native-edit.m4a")).unwrap();
+    let elst = original.windows(4).position(|v| v == b"elst").unwrap();
+    for media_time in [-1i32, 100_000] {
+        let mut bytes = original.clone();
+        bytes[elst + 16..elst + 20].copy_from_slice(&media_time.to_be_bytes());
+        let mut input =
+            fvid::container::mp4::Mp4Reader::open(std::io::Cursor::new(bytes), Default::default())
+                .unwrap();
+        let mut out = std::io::Cursor::new(Vec::new());
+        assert!(matroska_write::write_mp4_aac(&mut input, 0, &mut out, None, None).is_err());
+        assert!(out.get_ref().is_empty());
+    }
+    let mut input =
+        fvid::container::mp4::Mp4Reader::open(std::io::Cursor::new(original), Default::default())
+            .unwrap();
+    let mut out = std::io::Cursor::new(Vec::new());
+    assert!(matroska_write::write_mp4_aac(&mut input, usize::MAX, &mut out, None, None).is_err());
+    assert!(out.get_ref().is_empty());
+    let cancel = fvid::media_control::CancelFlag::default();
+    let stop = cancel.clone();
+    let hook = fvid::media_control::ProgressHook::new(move |event| {
+        assert!(!event.done);
+        if event.packets == 1 {
+            stop.cancel();
+        }
+    });
+    let error = matroska_write::write_mp4_aac(&mut input, 0, &mut out, Some(&cancel), Some(&hook))
+        .unwrap_err();
+    assert!(error.to_string().contains("cancelled"));
+    assert!(!out.get_ref().is_empty(), "cancel after first packet");
+    let mut untouched = std::io::Cursor::new(Vec::new());
+    assert!(
+        matroska_write::write_mp4_aac(&mut input, 0, &mut untouched, Some(&cancel), None).is_err()
+    );
+    assert!(untouched.get_ref().is_empty());
+}
