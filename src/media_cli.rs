@@ -97,6 +97,12 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         let progress = (args.len() == 4).then(|| fvid::media_control::ProgressHook::new(|event| {
             eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}", event.packets, event.payload_bytes, event.done);
         }));
+        if prefix[..4] == [0x1a,0x45,0xdf,0xa3]
+            && matches!(std::path::Path::new(&args[2]).extension().and_then(|s|s.to_str()),Some("mkv"|"mka")) {
+            let stats=fvid::native_export::remux_matroska(std::path::Path::new(&args[1]),std::path::Path::new(&args[2]),None,progress.as_ref())?;
+            println!("{}",serde_json::json!({"backend":"fvid","packets":stats.packets,"payload_bytes":stats.payload_bytes,"remux":"matroska-preserve"}));
+            return Ok(());
+        }
         if fvid::container::adts::header(&prefix).is_some() {
             let packets = fvid::native_export::remux_adts_aac_controlled(
                 std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), None, progress.as_ref(),

@@ -855,3 +855,45 @@ pub fn transcode_mp4_ffv1_transformed(source:&Path,destination:&Path,
     if let Some(hook)=progress{hook.emit(crate::media_control::ProgressEvent{done:true,..event});}
     Ok(stats)
 }
+
+
+/// Recognize the EBML signature; the copy operation validates the Matroska document.
+pub fn is_matroska_source(source: &Path) -> Result<bool> {
+    use std::io::Read;
+    let mut input=File::open(source)?;
+    let mut signature=[0;4];
+    match input.read_exact(&mut signature) {
+        Ok(())=>Ok(signature==[0x1a,0x45,0xdf,0xa3]),
+        Err(e) if e.kind()==std::io::ErrorKind::UnexpectedEof=>Ok(false),
+        Err(e)=>Err(e.into()),
+    }
+}
+
+/// Identity Matroska remux: retain every track, metadata element and payload.
+pub fn remux_matroska(source: &Path, destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::media_control::ProgressEvent> {
+    let audio_only=match destination.extension().and_then(|s|s.to_str()) {
+        Some("mkv")=>false, Some("mka")=>true,
+        _=>return Err(invalid("native Matroska copy output requires .mkv or .mka")),
+    };
+    if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
+    let mut input=BufReader::new(File::open(source)?);
+    let directory=destination.parent().filter(|p|!p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+    let (temporary,file)=(0..100).find_map(|_| {
+        let path=directory.join(format!(".fvid-matroska-copy-{}-{}.tmp",std::process::id(),NEXT.fetch_add(1,Ordering::Relaxed)));
+        match OpenOptions::new().write(true).create_new(true).open(&path) {
+            Ok(file)=>Some(Ok((Temporary(path),file))),
+            Err(e) if e.kind()==std::io::ErrorKind::AlreadyExists=>None,
+            Err(e)=>Some(Err(e)),
+        }
+    }).ok_or_else(||invalid("cannot reserve Matroska copy output"))??;
+    let mut output=BufWriter::new(file);
+    let event=crate::container::matroska_copy::copy(&mut input,&mut output,audio_only,cancel,progress)?;
+    output.flush()?;output.get_ref().sync_all()?;drop(output);
+    if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
+    std::fs::hard_link(&temporary.0,destination)?;
+    let event=crate::media_control::ProgressEvent {done:true,..event};
+    if let Some(hook)=progress {hook.emit(event);}
+    Ok(event)
+}

@@ -2172,3 +2172,15 @@ was also checked in the desktop UI.
 This standalone player's absence of FFmpeg does not imply that the aggregate
 `media` feature is migrated. Legacy `fvid-media` routes and signed virtual-camera
 installation/validation remain separate unfinished requirements.
+
+### Matroska identity copy
+
+`fvid media remux INPUT.mkv OUTPUT.mkv` (also WebM input and audio-only
+`.mka` output) uses the owned Matroska index and copies the validated container
+byte for byte. It preserves all tracks, timestamps, lacing, attachments and
+unknown metadata without decoding or rebuilding indexes. Output publication
+never overwrites an existing file; cancellation removes the temporary output.
+`--progress` reports completed packet payloads and completion after publication.
+Stream selection and metadata edits remain on the legacy media adapter.
+`tests/native_matroska_copy.rs` covers exact bytes, packet accounting, publication,
+cancellation, invalid input, audio-only validation, CLI and media API dispatch.

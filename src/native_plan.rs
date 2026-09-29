@@ -141,9 +141,13 @@ pub fn remux(source: &std::path::Path) -> Result<Option<MediaPlan>> {
     }
     let mp4 = count == 8 && &signature[4..8] == b"ftyp";
     let adts = crate::container::adts::header(&signature[..count]).is_some();
-    if !mp4 && !adts { return Ok(None); }
+    let matroska=count>=4 && signature[..4]==[0x1a,0x45,0xdf,0xa3];
+    if !mp4 && !adts && !matroska { return Ok(None); }
     input.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
-    let detail = if mp4 {
+    let detail = if matroska {
+        crate::container::matroska_copy::inspect(&mut input,false,None).map_err(|e|e.to_string())?;
+        "FVid identity Matroska copy; retain all EBML bytes including attachments and unknown metadata"
+    } else if mp4 {
         crate::container::mp4_relocate::fast_start(&mut input, &mut std::io::sink()).map_err(|e| e.to_string())?;
         "FVid MP4 fast-start relocation; initialized fragmented MP4 is copied unchanged"
     } else {
@@ -159,7 +163,7 @@ pub fn remux(source: &std::path::Path) -> Result<Option<MediaPlan>> {
             PlanStep { action: "publish".into(), detail: "flush and sync temporary output, then publish without overwriting".into() }],
         graph: None,
         notes: vec!["backend: fvid; no decode/encode or external demuxer".into(),
-            if adts {"owned ADTS output: .mp4/.m4a or .mka/.mkv; all packets retained".into()} else {"owned MP4 output requires .mp4 or .m4a; all streams retained".into()},
+            if matroska {"owned Matroska output: .mkv, or .mka for audio-only input; no stream or metadata edits".into()} else if adts {"owned ADTS output: .mp4/.m4a or .mka/.mkv; all packets retained".into()} else {"owned MP4 output requires .mp4 or .m4a; all streams retained".into()},
             "input structure scanned without writing an output; execution revalidates the current source".into()],
     }))
 }

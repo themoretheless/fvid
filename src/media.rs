@@ -134,14 +134,18 @@ pub fn remux(
     let adts = crate::container::adts::header(&prefix).is_some();
     let mp4 = &prefix[4..8] == b"ftyp";
     let matroska = matches!(destination.extension().and_then(|s|s.to_str()),Some("mka"|"mkv"));
+    let matroska_copy = matroska && prefix[..4] == [0x1a,0x45,0xdf,0xa3];
+    if matroska_copy && validate_native_copy_options(options,false).is_err() {return fvid_media::remux(source,destination,options);}
     let mp4_matroska = mp4 && matroska && crate::native_export::is_native_mp4_matroska(source).map_err(|e| e.to_string())?;
-    if !adts && !mp4_matroska && (matroska || !mp4) { return fvid_media::remux(source, destination, options); }
+    if !adts && !mp4_matroska && !matroska_copy && (matroska || !mp4) { return fvid_media::remux(source, destination, options); }
     // Preserve unmigrated metadata mutations/stream options on the legacy path.
     if mp4_matroska && validate_native_copy_options(options, false).is_err() {
         return fvid_media::remux(source, destination, options);
     }
     validate_native_copy_options(options, false)?;
-    let stats = if mp4_matroska {
+    let stats = if matroska_copy {
+        crate::native_export::remux_matroska(source,destination,options.cancel.as_ref(),options.progress.as_ref())
+    } else if mp4_matroska {
         crate::native_export::remux_mp4_matroska(source, destination,
             options.cancel.as_ref(), options.progress.as_ref())
     } else if adts {
@@ -240,6 +244,7 @@ pub fn plan_trim(
 
 /// Plan owned ADTS/MP4 remuxing with the same option restrictions as execution.
 pub fn plan_remux(source: &std::path::Path, options: &CopyOptions) -> Result<MediaPlan> {
+    if validate_native_copy_options(options,false).is_err() && crate::native_export::is_matroska_source(source).map_err(|e|e.to_string())? {return fvid_media::plan_remux(source,options); }
     match crate::native_plan::remux(source)? {
         Some(plan) => { validate_native_copy_options(options, false)?; Ok(plan) }
         None => fvid_media::plan_remux(source, options),

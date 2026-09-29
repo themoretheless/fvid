@@ -6,6 +6,7 @@ pub mod mp4_relocate;
 pub mod mp4_write;
 pub mod mp4_matroska;
 pub mod matroska_write;
+pub mod matroska_copy;
 pub mod ogg;
 pub mod smf;
 pub mod webm;
