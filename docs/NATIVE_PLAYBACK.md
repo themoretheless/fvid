@@ -1297,3 +1297,12 @@ errors do not trigger fallback; `try_probe_as` returns `None` only for an unknow
 format. Unmigrated containers require the legacy feature. Other legacy operations
 still keep `media` itself dependent on FFmpeg; independent probe is one completed
 part of that migration, not a claim about the entire feature.
+
+AAC planning is now available without the legacy feature as
+`native_plan::decode_audio` and `fvid media plan decode-audio INPUT` with
+`--from`/`--to`, `--rate`/`--sample-rate`, `--channels` and `--volume`.
+`AudioDecodeTransform` and `MediaPlan` are shared backend-independent types;
+the existing `media` API reexports them and delegates AAC plans to this path.
+The native CLI rejects unsupported or duplicate options and emits the same JSON
+as the library plan. This is metadata/configuration planning, not packet decoding;
+execution still validates packet contents and timing.

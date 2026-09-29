@@ -2,6 +2,45 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str) == Some("plan")
+        && args.get(1).map(String::as_str) == Some("decode-audio") && args.len() >= 3
+        && fvid::native_media::is_aac_source(std::path::Path::new(&args[2]))?
+    {
+        let mut transform = fvid::native_plan::AudioDecodeTransform::default();
+        let (mut from, mut to) = (None, None);
+        let mut options = args[3..].iter();
+        while let Some(option) = options.next() {
+            match option.as_str() {
+                "--from" | "--to" => {
+                    let slot = if option == "--from" { &mut from } else { &mut to };
+                    if slot.is_some() { return Err("duplicate interval boundary".into()); }
+                    let time = decode_time(options.next().ok_or("missing interval boundary")?)?;
+                    *slot = Some(i64::try_from(time.as_micros()).map_err(|_| "interval exceeds microsecond range")?);
+                }
+                "--rate" | "--sample-rate" => {
+                    if transform.sample_rate.is_some() { return Err("duplicate sample-rate option".into()); }
+                    transform.sample_rate = Some(options.next().ok_or("missing sample rate")?.parse()?);
+                }
+                "--channels" => {
+                    if transform.channels.is_some() { return Err("duplicate channels option".into()); }
+                    transform.channels = Some(options.next().ok_or("missing channels")?.parse()?);
+                }
+                "--volume" => {
+                    if transform.volume.is_some() { return Err("duplicate volume option".into()); }
+                    transform.volume = Some(options.next().ok_or("missing volume")?.parse()?);
+                }
+                _ => return Err(format!("unsupported native AAC plan option: {option}").into()),
+            }
+        }
+        transform.interval = match (from,to) {
+            (None,None) => None,
+            (Some(from),Some(to)) => Some((from,to)),
+            _ => return Err("plan interval requires both --from and --to".into()),
+        };
+        let plan = fvid::native_plan::decode_audio(std::path::Path::new(&args[2]), &transform)?;
+        println!("{}", serde_json::to_string_pretty(&plan)?);
+        return Ok(());
+    }
     if args.first().map(String::as_str) == Some("probe") {
         let hint = match args.len() {
             2 => None,

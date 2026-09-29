@@ -2,33 +2,7 @@
 use super::*;
 use serde::Serialize;
 
-#[derive(Serialize, Clone, Debug, PartialEq)]
-pub struct PlanStep {
-    pub action: String,
-    pub detail: String,
-}
-
-#[derive(Serialize, Clone, Debug, PartialEq)]
-pub struct PlanStream {
-    pub index: usize,
-    pub media_type: String,
-    pub codec: String,
-    pub disposition: String,
-}
-
-#[derive(Serialize, Clone, Debug, PartialEq)]
-pub struct MediaPlan {
-    pub command: String,
-    /// Primary / first input (kept for remux and lossless plans).
-    pub input: PathBuf,
-    /// All inputs (trim: one; concat: N≥2).
-    pub inputs: Vec<PathBuf>,
-    pub streams: Vec<PlanStream>,
-    pub steps: Vec<PlanStep>,
-    /// FFmpeg-equivalent primary video filter chain (`-vf`), when materializing.
-    pub graph: Option<String>,
-    pub notes: Vec<String>,
-}
+pub use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
 
 fn stream_plans(input: &Input, selected: &[usize]) -> Result<Vec<PlanStream>> {
     let mut out = Vec::with_capacity(selected.len());

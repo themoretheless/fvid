@@ -44,3 +44,45 @@ pub struct MediaInfo {
     pub chapters: Vec<ChapterInfo>,
     pub streams: Vec<StreamInfo>,
 }
+
+#[derive(Serialize, Clone, Debug, PartialEq)]
+pub struct PlanStep {
+    pub action: String,
+    pub detail: String,
+}
+
+#[derive(Serialize, Clone, Debug, PartialEq)]
+pub struct PlanStream {
+    pub index: usize,
+    pub media_type: String,
+    pub codec: String,
+    pub disposition: String,
+}
+
+#[derive(Serialize, Clone, Debug, PartialEq)]
+pub struct MediaPlan {
+    pub command: String,
+    /// Primary / first input (kept for remux and lossless plans).
+    pub input: PathBuf,
+    /// All inputs (trim: one; concat: N≥2).
+    pub inputs: Vec<PathBuf>,
+    pub streams: Vec<PlanStream>,
+    pub steps: Vec<PlanStep>,
+    /// FFmpeg-equivalent primary video filter chain (`-vf`), when materializing.
+    pub graph: Option<String>,
+    pub notes: Vec<String>,
+}
+
+#[derive(Clone, Copy, Debug, Default)]
+pub struct AudioDecodeTransform {
+    /// Half-open presentation interval in microseconds from the first decoded sample.
+    pub interval: Option<(i64, i64)>,
+    /// Target sample rate; `None` keeps the decoded rate.
+    pub sample_rate: Option<i32>,
+    /// Target channel count; `None` keeps the decoded layout. Supported rematrix
+    /// layouts depend on the selected execution backend.
+    pub channels: Option<i32>,
+    /// Linear gain on decoded float PCM. Native execution applies it after
+    /// channel conversion and before resampling; consult the operation plan.
+    pub volume: Option<f64>,
+}

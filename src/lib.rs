@@ -111,3 +111,5 @@ mod pcm_resample;
 
 #[path = "media_probe.rs"]
 pub mod native_probe;
+
+pub mod native_plan;

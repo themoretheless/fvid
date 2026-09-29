@@ -15,19 +15,7 @@ pub struct AudioDecodeStats {
     pub decode_errors: u64,
 }
 
-#[derive(Clone, Copy, Debug, Default)]
-pub struct AudioDecodeTransform {
-    /// Half-open presentation interval in microseconds from the first decoded sample.
-    pub interval: Option<(i64, i64)>,
-    /// Target sample rate; `None` keeps the decoded rate. Fair-pairs FFmpeg `-ar RATE`.
-    pub sample_rate: Option<i32>,
-    /// Target channel count; `None` keeps the decoded layout. Fair-pairs FFmpeg `-ac N`
-    /// (default layout for N via libswresample rematrix).
-    pub channels: Option<i32>,
-    /// Linear gain applied after decode/resample. Fair-pairs FFmpeg `-af volume=GAIN`
-    /// on float PCM (flt/fltp/dbl/dblp).
-    pub volume: Option<f64>,
-}
+pub use fvid_media_info::AudioDecodeTransform;
 
 fn validate_sample_rate(rate: i32) -> Result<()> {
     if !(8_000..=384_000).contains(&rate) {
