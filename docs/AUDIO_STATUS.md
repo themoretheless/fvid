@@ -563,3 +563,29 @@ Tests also cover sample-exact interval extraction, MP4 vs Matroska PCM equality,
 WAV export and playback adapter reset. This is not a full AAC conformance claim;
 7.1/PCE, HE-AAC/SBR, ER and unsupported coding tools remain separate work.
 Reproduction details: `tests/fixtures/audio/aac-960.md`.
+
+## Owned AAC fast IMDCT (2026-09-29)
+
+AAC synthesis now uses an owned radix-2 FFT chirp convolution for DCT-IV, followed
+by IMDCT symmetry expansion. All four sizes (120, 128, 960, 1024) run in
+O(N log N). Immutable transform tables are shared across transactional decoder
+clones; synthesis reuses complex scratch for both long and short windows without
+per-block allocation. The public convenience `Imdct::inverse` allocates scratch;
+`inverse_with_scratch` is the allocation-free entry point used in playback.
+
+Direct cosine-basis, dense-spectrum, overlap/window-transition and saved PCM
+reference tests passed: 56 AAC unit tests plus 22 native PCM export tests. A local
+release microbenchmark, run after builds/tests completed, measured median times:
+
+| Coefficients | FFT | Previous recurrence | Ratio |
+|---|---:|---:|---:|
+| 120 | 2.29 us | 26.45 us | 11.57x |
+| 128 | 2.32 us | 31.59 us | 13.64x |
+| 960 | 22.77 us | 2752.02 us | 120.86x |
+| 1024 | 22.98 us | 3115.42 us | 135.58x |
+
+Reproduce with `cargo run --release --locked --no-default-features --example
+aac_imdct_bench`. This compares transform kernels only, not total player throughput
+or virtual-camera delivery. Peak difference from the previous recurrence was
+1.41e-13 for the benchmark spectrum; independent basis tests use a 1e-10 bound.
+No external FFT/codec dependency or FFmpeg execution is used.

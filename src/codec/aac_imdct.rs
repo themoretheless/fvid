@@ -1,54 +1,146 @@
-//! Owned inverse MDCT kernel for the AAC synthesis work in progress.
-//! This is not a packet decoder and is not yet wired into AAC playback.
-//! Windowed normalization: 2/N; windowing and overlap-add belong to the caller.
-//! Mathematical basis: Shao and Johnson, https://arxiv.org/abs/0708.4399, section VII.
+//! Owned inverse MDCT via a chirp convolution and radix-2 FFT.
+//! Windowed normalization is 2/N; windowing and overlap-add belong to the caller.
 use crate::{Result, invalid};
-use std::f64::consts::PI;
-
+use std::{f64::consts::PI, sync::Arc};
+type Complex = [f64; 2];
+fn mul(a: Complex, b: Complex) -> Complex {
+    [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]]
+}
+fn phase(angle: f64) -> Complex {
+    let (sin, cos) = angle.sin_cos();
+    [cos, sin]
+}
+struct Tables {
+    coefficients: usize,
+    chirp: Vec<Complex>,
+    kernel: Vec<Complex>,
+    roots: Vec<Complex>,
+    reverse: Vec<usize>,
+}
 #[derive(Clone)]
 pub struct Imdct {
-    coefficients: usize,
-    recurrence: Vec<[f64; 3]>,
+    tables: Arc<Tables>,
 }
 impl Imdct {
-    /// AAC-LC long/short transforms; 960/120 support the alternate frame length.
+    /// AAC-LC long/short transforms, including the alternate 960/120 geometry.
     pub fn new(coefficients: usize) -> Result<Self> {
         if !matches!(coefficients, 120 | 128 | 960 | 1024) {
             return Err(invalid("unsupported AAC IMDCT length"));
         }
-        let recurrence = (0..2 * coefficients)
-            .map(|sample| {
-                let phase =
-                    PI / coefficients as f64 * (sample as f64 + 0.5 + coefficients as f64 / 2.0);
-                [(phase * 0.5).cos(), (phase * 1.5).cos(), 2.0 * phase.cos()]
-            })
+        let size = (2 * coefficients - 1).next_power_of_two();
+        let roots = (0..size / 2)
+            .map(|k| phase(-2.0 * PI * k as f64 / size as f64))
             .collect();
-        Ok(Self {
+        let reverse = (0..size)
+            .map(|k| k.reverse_bits() >> (usize::BITS - size.trailing_zeros()))
+            .collect();
+        let chirp = (0..coefficients)
+            .map(|k| phase(PI / (2 * coefficients) as f64 * (k as f64 + 0.5).powi(2)))
+            .collect();
+        let mut tables = Tables {
             coefficients,
-            recurrence,
+            chirp,
+            kernel: vec![[0.0; 2]; size],
+            roots,
+            reverse,
+        };
+        let mut kernel = vec![[0.0; 2]; size];
+        for k in 0..coefficients {
+            kernel[k] = phase(-PI / (2 * coefficients) as f64 * (k * k) as f64);
+            if k != 0 {
+                kernel[size - k] = kernel[k];
+            }
+        }
+        tables.fft(&mut kernel, false);
+        tables.kernel = kernel;
+        Ok(Self {
+            tables: Arc::new(tables),
         })
     }
-    /// Reuses the plan and caller's output. The cosine recurrence avoids
-    /// trigonometric evaluation inside the coefficient loop. Complexity remains
-    /// quadratic; fast-transform optimization and AAC window switching are pending.
+    /// Number of complex scratch cells needed by `inverse_with_scratch`.
+    pub fn scratch_len(&self) -> usize {
+        self.tables.kernel.len()
+    }
+    /// Convenience entry point. Synthesis uses caller-owned scratch instead.
     pub fn inverse(&self, spectrum: &[f32], output: &mut [f64]) -> Result<()> {
-        if spectrum.len() != self.coefficients
-            || output.len() != self.coefficients * 2
+        self.inverse_with_scratch(spectrum, output, &mut vec![[0.0; 2]; self.scratch_len()])
+    }
+    /// O(N log N), no allocation. Invalid input leaves output unchanged.
+    pub fn inverse_with_scratch(
+        &self,
+        spectrum: &[f32],
+        output: &mut [f64],
+        scratch: &mut [Complex],
+    ) -> Result<()> {
+        let t = &self.tables;
+        let n = t.coefficients;
+        if spectrum.len() != n
+            || output.len() != 2 * n
+            || scratch.len() != self.scratch_len()
             || spectrum.iter().any(|x| !x.is_finite())
         {
             return Err(invalid("invalid AAC IMDCT input"));
         }
-        for (sample, &[first, second, factor]) in output.iter_mut().zip(&self.recurrence) {
-            let mut previous = first;
-            let mut current = second;
-            let mut sum = f64::from(spectrum[0]) * first;
-            for &coefficient in &spectrum[1..] {
-                sum += f64::from(coefficient) * current;
-                (previous, current) = (current, factor * current - previous);
-            }
-            *sample = sum * (2.0 / self.coefficients as f64);
+        scratch.fill([0.0; 2]);
+        // (k+.5)(m+.5) = ((k+.5)^2+(m+.5)^2-(k-m)^2)/2.
+        // Thus DCT-IV is the real part of this chirp convolution.
+        for k in 0..n {
+            scratch[k] = mul([f64::from(spectrum[k]), 0.0], t.chirp[k]);
+        }
+        t.fft(scratch, false);
+        for (value, kernel) in scratch.iter_mut().zip(&t.kernel) {
+            *value = mul(*value, *kernel);
+        }
+        t.fft(scratch, true);
+        for k in 0..n {
+            scratch[k] = mul(scratch[k], t.chirp[k]);
+        }
+        // Extend DCT-IV by its odd/even symmetries to the shifted 2N IMDCT.
+        for (sample, value) in output.iter_mut().enumerate() {
+            let j = sample + n / 2;
+            let (index, sign) = if j < n {
+                (j, 1.0)
+            } else if j < 2 * n {
+                (2 * n - 1 - j, -1.0)
+            } else {
+                (j - 2 * n, -1.0)
+            };
+            *value = scratch[index][0] * sign * (2.0 / n as f64);
         }
         Ok(())
+    }
+}
+impl Tables {
+    fn fft(&self, data: &mut [Complex], inverse: bool) {
+        let n = data.len();
+        for (i, &j) in self.reverse.iter().enumerate() {
+            if i < j {
+                data.swap(i, j);
+            }
+        }
+        let mut width = 2;
+        while width <= n {
+            let half = width / 2;
+            for block in data.chunks_exact_mut(width) {
+                for j in 0..half {
+                    let mut root = self.roots[j * (n / width)];
+                    if inverse {
+                        root[1] = -root[1];
+                    }
+                    let a = block[j];
+                    let b = mul(block[j + half], root);
+                    block[j] = [a[0] + b[0], a[1] + b[1]];
+                    block[j + half] = [a[0] - b[0], a[1] - b[1]];
+                }
+            }
+            width *= 2;
+        }
+        if inverse {
+            for value in data {
+                value[0] /= n as f64;
+                value[1] /= n as f64;
+            }
+        }
     }
 }
 
@@ -77,6 +169,47 @@ mod tests {
                     );
                 }
             }
+        }
+    }
+    #[test]
+    fn dense_spectra_match_direct_basis_with_reused_scratch() {
+        for n in [120, 128, 960, 1024] {
+            let plan = Imdct::new(n).unwrap();
+            let mut scratch = vec![[999.0; 2]; plan.scratch_len()];
+            let mut output = vec![0.0; 2 * n];
+            let spectrum: Vec<f32> = (0..n)
+                .map(|i| ((i as f64 * 0.137).sin() + (i as f64 * 0.021).cos()) as f32)
+                .collect();
+            plan.inverse_with_scratch(&spectrum, &mut output, &mut scratch)
+                .unwrap();
+            for (sample, &actual) in output.iter().enumerate() {
+                let expected = spectrum
+                    .iter()
+                    .enumerate()
+                    .map(|(k, &x)| {
+                        f64::from(x)
+                            * (PI / n as f64
+                                * (sample as f64 + 0.5 + n as f64 / 2.0)
+                                * (k as f64 + 0.5))
+                                .cos()
+                    })
+                    .sum::<f64>()
+                    * 2.0
+                    / n as f64;
+                assert!(
+                    (actual - expected).abs() < 1e-10,
+                    "n={n} sample={sample}: {actual} vs {expected}"
+                );
+            }
+            plan.inverse_with_scratch(&vec![0.0; n], &mut output, &mut scratch)
+                .unwrap();
+            assert!(output.iter().all(|&x| x == 0.0));
+            output.fill(123.0);
+            assert!(
+                plan.inverse_with_scratch(&spectrum, &mut output, &mut scratch[..1])
+                    .is_err()
+            );
+            assert!(output.iter().all(|&x| x == 123.0));
         }
     }
     #[test]

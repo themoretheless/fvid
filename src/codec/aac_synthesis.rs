@@ -57,6 +57,7 @@ pub struct LongSineSynthesis {
     short_transform: Imdct,
     short_window: Vec<f64>,
     short_scratch: Vec<f64>,
+    transform_scratch: Vec<[f64; 2]>,
     transform: Imdct,
     window: Vec<f64>,
     scratch: Vec<f64>,
@@ -77,6 +78,7 @@ impl LongSineSynthesis {
                 .map(|i| (PI / (frame_samples / 4) as f64 * (i as f64 + 0.5)).sin())
                 .collect(),
             short_scratch: vec![0.0; frame_samples / 4],
+            transform_scratch: vec![[0.0; 2]; (2 * frame_samples - 1).next_power_of_two()],
             window: (0..2 * frame_samples)
                 .map(|i| (PI / (2 * frame_samples) as f64 * (i as f64 + 0.5)).sin())
                 .collect(),
@@ -138,8 +140,11 @@ impl LongSineSynthesis {
         if sequence == WindowSequence::EightShort {
             self.scratch.fill(0.0);
             for (block, coefficients) in spectrum.chunks_exact(short).enumerate() {
-                self.short_transform
-                    .inverse(coefficients, &mut self.short_scratch)?;
+                self.short_transform.inverse_with_scratch(
+                    coefficients,
+                    &mut self.short_scratch,
+                    &mut self.transform_scratch[..self.short_transform.scratch_len()],
+                )?;
                 for i in 0..2 * short {
                     self.scratch[offset + block * short + i] += self.short_scratch[i]
                         * if block == 0 && i < short {
@@ -150,7 +155,11 @@ impl LongSineSynthesis {
                 }
             }
         } else {
-            self.transform.inverse(spectrum, &mut self.scratch)?;
+            self.transform.inverse_with_scratch(
+                spectrum,
+                &mut self.scratch,
+                &mut self.transform_scratch,
+            )?;
             for i in 0..2 * n {
                 let weight = match sequence {
                     WindowSequence::LongStart if i >= n => {
