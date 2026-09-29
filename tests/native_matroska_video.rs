@@ -387,3 +387,302 @@ fn failed_output_cannot_be_finalized_or_reused() {
     assert!(writer.write_packet(0, 1, 1, true, &[1]).is_err());
     assert!(writer.finish().is_err());
 }
+
+fn video_with_decode_only_edges(name: &str, hidden: bool) -> Vec<u8> {
+    use fvid::container::matroska_write::PacketOptions;
+    let mut source = mp4::Mp4Reader::open(
+        std::fs::File::open(fixture(name)).unwrap(),
+        Default::default(),
+    )
+    .unwrap();
+    let index = source
+        .tracks()
+        .iter()
+        .position(|t| t.handler == *b"vide")
+        .unwrap();
+    let track = source.tracks()[index].clone();
+    let mut times: Vec<_> = (0..track.samples.len())
+        .map(|i| track.samples.get(i).unwrap().pts)
+        .collect();
+    times.sort();
+    assert!(times.len() > 5);
+    let begin = times[2];
+    let end = times[times.len() - 2];
+    let encoding = match &track.codec {
+        b"avc1" | b"avc3" => Encoding::Avc {
+            configuration: &track.configuration,
+            width: track.width.into(),
+            height: track.height.into(),
+        },
+        _ => Encoding::Hevc {
+            configuration: &track.configuration,
+            width: track.width.into(),
+            height: track.height.into(),
+        },
+    };
+    let mut output = Cursor::new(Vec::new());
+    let mut writer = PacketWriter::new(
+        &mut output,
+        &[TrackSpec {
+            encoding,
+            name: "",
+            language: "und",
+        }],
+    )
+    .unwrap();
+    let mut packet = Vec::new();
+    for i in 0..track.samples.len() {
+        let sample = track.samples.get(i).unwrap();
+        source.read_packet(index, i, &mut packet).unwrap();
+        let start = sample.pts as u64 * 1_000_000_000 / u64::from(track.timescale);
+        let finish = (sample.pts as u64 + u64::from(sample.duration)) * 1_000_000_000
+            / u64::from(track.timescale);
+        writer
+            .write_packet_with_options(
+                0,
+                start,
+                finish - start,
+                sample.sync,
+                &packet,
+                PacketOptions {
+                    invisible: hidden && (sample.pts < begin || sample.pts >= end),
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+    }
+    writer.finish().unwrap();
+    output.into_inner()
+}
+
+#[test]
+fn invisible_avc_hevc_reference_frames_decode_without_presentation() {
+    use fvid::{native_geometry::VideoGeometry, playback_native::NativeReader};
+    use std::time::Duration;
+    for name in ["video.mp4", "hevc/main-ipb.mp4", "hevc/main10-ipb.mp4"] {
+        let mut full = NativeReader::software(
+            Cursor::new(video_with_decode_only_edges(name, false)),
+            usize::MAX,
+        )
+        .unwrap();
+        let mut frames = Vec::new();
+        let mut intervals = Vec::new();
+        while let Some(frame) = full.read_frame_raw().unwrap() {
+            let [w, h] = full.dimensions();
+            frames.push(VideoGeometry::default().apply(&frame, w, h).unwrap().data);
+            intervals.push(full.frame_interval().unwrap());
+        }
+        let data = video_with_decode_only_edges(name, true);
+        let mut demux = webm::WebmReader::open(Cursor::new(&data), Default::default()).unwrap();
+        demux.scan_all().unwrap();
+        assert_eq!(demux.packets.iter().filter(|p| p.invisible).count(), 4);
+        assert!(demux.packets[0].keyframe && demux.packets[0].invisible);
+        let mut reader = NativeReader::software(Cursor::new(data.clone()), usize::MAX).unwrap();
+        let expected_duration = intervals[intervals.len() - 3].1 - intervals[2].0;
+        assert_eq!(reader.duration().unwrap().as_nanos(), expected_duration);
+        let mut shown = Vec::new();
+        while let Some(frame) = reader.read_frame_raw().unwrap() {
+            let [w, h] = reader.dimensions();
+            shown.push(VideoGeometry::default().apply(&frame, w, h).unwrap().data);
+        }
+        assert!(
+            shown == frames[2..frames.len() - 2],
+            "{name}: reference reconstruction"
+        );
+        for i in [0, shown.len() / 2, shown.len() - 1, 0] {
+            let target = Duration::from_nanos((intervals[i + 2].0 - intervals[2].0) as u64);
+            let frame = reader.seek_raw(target).unwrap().unwrap();
+            let [w, h] = reader.dimensions();
+            assert!(
+                VideoGeometry::default().apply(&frame, w, h).unwrap().data == shown[i],
+                "{name}: seek {i}"
+            );
+        }
+        reader.rewind().unwrap();
+        assert!(reader.read_frame_raw().unwrap().is_some());
+        // A malformed decode-only reference must still fail; skipping its bytes
+        // would silently lose reference state needed by subsequent pictures.
+        let first = demux.packets[0].offset as usize;
+        let mut broken = data;
+        broken[first..first + 4].copy_from_slice(&u32::MAX.to_be_bytes());
+        let mut reader = NativeReader::software(Cursor::new(broken), usize::MAX).unwrap();
+        assert!(reader.read_frame_raw().is_err());
+    }
+}
+
+#[test]
+#[ignore = "requires FVID_REFERENCE_FFMPEG"]
+fn owned_invisible_reconstruction_matches_independent_pixels() {
+    let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
+    let directory = std::env::temp_dir().join(format!("fvid-invisible-{}", std::process::id()));
+    std::fs::create_dir(&directory).unwrap();
+    struct Clean(PathBuf);
+    impl Drop for Clean {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _clean = Clean(directory.clone());
+    for name in ["video.mp4", "hevc/main-ipb.mp4", "hevc/main10-ipb.mp4"] {
+        let decode = |hidden| {
+            let path = directory.join(if hidden { "hidden.mkv" } else { "full.mkv" });
+            std::fs::write(&path, video_with_decode_only_edges(name, hidden)).unwrap();
+            let output = std::process::Command::new(&ffmpeg)
+                .args(["-v", "error", "-i"])
+                .arg(path)
+                .args([
+                    "-map",
+                    "0:v:0",
+                    "-fps_mode",
+                    "passthrough",
+                    "-f",
+                    "rawvideo",
+                    "-pix_fmt",
+                    if name.contains("main10") {
+                        "yuv420p10le"
+                    } else {
+                        "yuv420p"
+                    },
+                    "pipe:1",
+                ])
+                .output()
+                .unwrap();
+            assert!(
+                output.status.success(),
+                "{}",
+                String::from_utf8_lossy(&output.stderr)
+            );
+            output.stdout
+        };
+        let full = decode(false);
+        // FFmpeg 9.0.2 ignores the container's invisible bit. Use its full
+        // decoded picture sequence as the independent pixel oracle instead.
+        let mut reader = fvid::playback_native::NativeReader::software(
+            Cursor::new(video_with_decode_only_edges(name, true)),
+            usize::MAX,
+        )
+        .unwrap();
+        let mut hidden = Vec::new();
+        while let Some(frame) = reader.read_frame_raw().unwrap() {
+            let [w, h] = reader.dimensions();
+            hidden.extend(
+                fvid::native_geometry::VideoGeometry::default()
+                    .apply(&frame, w, h)
+                    .unwrap()
+                    .data,
+            );
+        }
+        let source = mp4::Mp4Reader::open(
+            std::fs::File::open(fixture(name)).unwrap(),
+            Default::default(),
+        )
+        .unwrap();
+        let video = source
+            .tracks()
+            .iter()
+            .find(|t| t.handler == *b"vide")
+            .unwrap();
+        let frame_bytes = full.len() / video.samples.len();
+        assert_eq!(full.len() % video.samples.len(), 0);
+        assert!(
+            hidden == full[2 * frame_bytes..full.len() - 2 * frame_bytes],
+            "{name}: independent reference pixels: full={}, hidden={}, frame={frame_bytes}",
+            full.len(),
+            hidden.len()
+        );
+    }
+}
+
+#[test]
+fn invisible_simple_blocks_preserve_vp9_and_av1_references() {
+    use fvid::{native_geometry::VideoGeometry, playback_native::NativeReader};
+    use std::time::Duration;
+    for name in ["vp9/motion.webm", "av1/random-access.webm"] {
+        let bytes = std::fs::read(fixture(name)).unwrap();
+        let mut reader = NativeReader::software(Cursor::new(&bytes), usize::MAX).unwrap();
+        let mut pictures = Vec::new();
+        while let Some(frame) = reader.read_frame_raw().unwrap() {
+            let [w, h] = reader.dimensions();
+            pictures.push(VideoGeometry::default().apply(&frame, w, h).unwrap().data);
+        }
+        let mut demux = webm::WebmReader::open(Cursor::new(&bytes), Default::default()).unwrap();
+        demux.scan_all().unwrap();
+        let track = demux.tracks.iter().find(|t| t.kind == 1).unwrap().number;
+        let packets: Vec<_> = demux.packets.iter().filter(|p| p.track == track).collect();
+        assert_eq!(
+            pictures.len(),
+            packets.len(),
+            "fixture must have one visible frame per packet"
+        );
+        let mut hidden = bytes.clone();
+        // The flags byte immediately precedes the un-laced payload, regardless
+        // of track VINT width. Preserve all other key/discard flags.
+        hidden[packets[0].offset as usize - 1] |= 0x08;
+        hidden[packets.last().unwrap().offset as usize - 1] |= 0x08;
+        let mut reader = NativeReader::software(Cursor::new(&hidden), usize::MAX).unwrap();
+        let frame = reader.seek_raw(Duration::ZERO).unwrap().unwrap();
+        let [w, h] = reader.dimensions();
+        assert!(
+            VideoGeometry::default().apply(&frame, w, h).unwrap().data == pictures[1],
+            "{name}: initial seek"
+        );
+        reader.rewind().unwrap();
+        let mut shown = Vec::new();
+        while let Some(frame) = reader.read_frame_raw().unwrap() {
+            let [w, h] = reader.dimensions();
+            shown.push(VideoGeometry::default().apply(&frame, w, h).unwrap().data);
+        }
+        assert!(
+            shown == pictures[1..pictures.len() - 1],
+            "{name}: decode-only references"
+        );
+    }
+}
+
+#[test]
+fn exclusively_decode_only_output_cannot_be_finalized() {
+    let source = mp4::Mp4Reader::open(
+        std::fs::File::open(fixture("video.mp4")).unwrap(),
+        Default::default(),
+    )
+    .unwrap();
+    let track = source
+        .tracks()
+        .iter()
+        .find(|t| t.handler == *b"vide")
+        .unwrap();
+    let mut output = Cursor::new(Vec::new());
+    let mut writer = PacketWriter::new(
+        &mut output,
+        &[TrackSpec {
+            encoding: Encoding::Avc {
+                configuration: &track.configuration,
+                width: track.width.into(),
+                height: track.height.into(),
+            },
+            name: "",
+            language: "und",
+        }],
+    )
+    .unwrap();
+    writer
+        .write_packet_with_options(
+            0,
+            0,
+            40_000_000,
+            true,
+            &[1],
+            fvid::container::matroska_write::PacketOptions {
+                invisible: true,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    assert!(
+        writer
+            .finish()
+            .unwrap_err()
+            .to_string()
+            .contains("no presentation duration")
+    );
+}

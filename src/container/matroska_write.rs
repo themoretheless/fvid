@@ -125,6 +125,14 @@ fn file_metadata(value: &FileMetadata) -> Result<Vec<u8>> {
     Ok(out)
 }
 
+/// Per-block presentation controls. Invisible video blocks still establish
+/// decoder references but do not extend the presentation duration.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct PacketOptions {
+    pub discard_padding_ns: i64,
+    pub invisible: bool,
+}
+
 /// Packet storage is unchanged: length-prefixed AVC/HEVC NAL units or raw AAC.
 pub enum Encoding<'a> {
     Avc {
@@ -552,17 +560,32 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         payload: &[u8],
         discard_padding_ns: i64,
     ) -> Result<()> {
-        if self.failed {
-            return Err(invalid("Matroska writer failed"));
-        }
-        let result = self.packet(
+        self.write_packet_with_options(
             track,
             pts_ns,
             duration_ns,
             sync,
             payload,
-            discard_padding_ns,
-        );
+            PacketOptions {
+                discard_padding_ns,
+                invisible: false,
+            },
+        )
+    }
+    /// Write a packet with explicit decode-only or padding controls.
+    pub fn write_packet_with_options(
+        &mut self,
+        track: usize,
+        pts_ns: u64,
+        duration_ns: u64,
+        sync: bool,
+        payload: &[u8],
+        options: PacketOptions,
+    ) -> Result<()> {
+        if self.failed {
+            return Err(invalid("Matroska writer failed"));
+        }
+        let result = self.packet(track, pts_ns, duration_ns, sync, payload, options);
         self.failed = result.is_err();
         result
     }
@@ -573,8 +596,9 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         duration_ns: u64,
         sync: bool,
         payload: &[u8],
-        discard_padding_ns: i64,
+        options: PacketOptions,
     ) -> Result<()> {
+        let discard_padding_ns = options.discard_padding_ns;
         if track >= self.written.len() || duration_ns == 0 || payload.is_empty() {
             return Err(invalid("invalid Matroska packet"));
         }
@@ -621,8 +645,12 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         self.output.write_all(&timestamp)?;
         head(self.output, 0xa0, group)?;
         head(self.output, 0xa1, block)?;
-        self.output
-            .write_all(&[0x80 | (track as u8 + 1), 0, 0, 0])?;
+        self.output.write_all(&[
+            0x80 | (track as u8 + 1),
+            0,
+            0,
+            if options.invisible { 0x08 } else { 0 },
+        ])?;
         self.output.write_all(payload)?;
         self.output.write_all(&duration)?;
         self.output.write_all(&reference)?;
@@ -631,7 +659,9 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         let presented_end = end
             .saturating_sub(self.delays[track])
             .saturating_sub(discard_padding_ns.max(0) as u64);
-        self.end_ns = self.end_ns.max(presented_end);
+        if !options.invisible {
+            self.end_ns = self.end_ns.max(presented_end);
+        }
         self.event.packets = packets;
         self.event.payload_bytes = bytes;
         Ok(())
@@ -641,6 +671,9 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
     pub fn finish(self) -> Result<ProgressEvent> {
         if self.failed || self.written.iter().any(|v| !v) {
             return Err(invalid("incomplete Matroska tracks"));
+        }
+        if self.end_ns == 0 {
+            return Err(invalid("Matroska has no presentation duration"));
         }
         let end = self.output.stream_position()?;
         let length = end - self.segment_size - 8;

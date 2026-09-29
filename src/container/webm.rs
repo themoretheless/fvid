@@ -67,6 +67,8 @@ pub struct Packet {
     pub track: u64,
     pub pts_ns: i64,
     pub keyframe: bool,
+    /// Decode to establish references, but do not display the resulting frame.
+    pub invisible: bool,
     pub offset: u64,
     pub size: usize,
     /// DiscardPadding in nanoseconds: positive trims end, negative trims start.
@@ -1064,6 +1066,7 @@ fn read_block<R: Read + Seek>(
         track,
         pts_ns: i64::try_from(pts).map_err(|_| invalid("WebM timestamp overflow"))?,
         keyframe: if simple { h[2] & 0x80 != 0 } else { key },
+        invisible: h[2] & 0x08 != 0,
         offset,
         size,
         discard_padding_ns: 0,

@@ -154,7 +154,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 .map_err(|_| invalid("cannot allocate Matroska reorder index"))?;
             let mut minimum = i64::MAX;
             for packet in demux.packets.iter().rev() {
-                if packet.track == track {
+                if packet.track == track && !packet.invisible {
                     minimum = minimum.min(packet.pts_ns);
                 }
                 future.push(minimum);
@@ -164,14 +164,14 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 let last = demux
                     .packets
                     .iter()
-                    .filter(|p| p.track == track)
+                    .filter(|p| p.track == track && !p.invisible)
                     .map(|p| p.pts_ns)
                     .max();
                 if let Some(last) = last {
                     let previous = demux
                         .packets
                         .iter()
-                        .filter(|p| p.track == track && p.pts_ns < last)
+                        .filter(|p| p.track == track && !p.invisible && p.pts_ns < last)
                         .map(|p| p.pts_ns)
                         .max();
                     default_duration = previous.and_then(|previous| {
@@ -356,7 +356,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             .demux
             .packets
             .iter()
-            .filter(|p| p.track == self.track)
+            .filter(|p| p.track == self.track && !p.invisible)
             .map(|p| p.pts_ns);
         let first = timestamps.next()?;
         let origin = self.origin();
@@ -409,7 +409,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             self.demux
                 .packets
                 .iter()
-                .find(|p| p.track == self.track)
+                .find(|p| p.track == self.track && !p.invisible)
                 .map_or(0, |p| p.pts_ns)
         })
     }
@@ -420,6 +420,16 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     /// rather than the last one it meets; a target in front of every keyframe
     /// restarts the track at its first block.
     pub fn seek_to_sync(&mut self, target_ns: i64) -> Result<i64> {
+        // A lazy index can initially contain only decode-only pre-roll. Find
+        // the first displayed timestamp before pinning the seek origin.
+        while self.base.is_none()
+            && !self
+                .demux
+                .packets
+                .iter()
+                .any(|p| p.track == self.track && !p.invisible)
+            && self.demux.scan_more()?
+        {}
         let origin = self.origin();
         let target = target_ns.saturating_add(origin);
         // A jump needs the blocks behind its target as well as the ones in
@@ -610,7 +620,9 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                     }
                 }
             }
-            if visible.is_some() {
+            // Invisible blocks are still fully decoded: later frames may
+            // reference them. Only their presentation is suppressed.
+            if visible.is_some() && !self.demux.packets[index].invisible {
                 return Ok(visible);
             }
         }

@@ -1879,3 +1879,30 @@ The CLI/API integration test preserves PCM, tags and chapters together and
 checks cancellation, existing-output protection and rejection of multiple
 tracks. An opt-in independent ffprobe test checks all tag fields and exact
 chapter boundaries; ffprobe canonically reports `PART_NUMBER` as `track`.
+
+### Matroska decode-only video blocks
+
+`webm::Packet::invisible` retains the INV flag from both Block and SimpleBlock.
+The video reader decodes these packets normally to establish references, but
+excludes their pictures from presentation, the reorder watermark, inferred
+frame duration and presentation origin. A seek before initial playback indexes
+past decode-only pre-roll before choosing the visible origin; invisible sync
+packets remain eligible decode entry points. Invalid hidden NAL data is still
+an error, rather than being skipped along with the picture.
+
+`PacketWriter::write_packet_with_options` writes this flag through
+`PacketOptions::invisible`. Such blocks count toward packet/byte progress but do
+not extend the declared presentation duration. Existing write methods retain
+visible-block behavior. This supports video edit pre-roll without discarding
+reference pictures; full MP4 video edit-list remux is not connected yet.
+
+Tests cover AVC, HEVC Main/Main10 with B frames, VP9 and AV1, including initial
+seek, rewind, exact displayed pixels and malformed hidden references. The
+independent reference test compares FVid's retained pictures against the
+corresponding part of FFmpeg's complete decoded sequence. FFmpeg 9.0.2 on this
+host ignores INV and emits the hidden pictures too, so it cannot serve as an
+oracle for the visibility decision. That behavior was measured separately;
+it is not claimed as successful interoperability for edited video.
+
+The flag's decode-without-display meaning and bit position follow the
+[Matroska block specification](https://www.matroska.org/technical/notes.html#block-structure).
