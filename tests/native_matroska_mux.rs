@@ -57,7 +57,8 @@ fn packets_configuration_nanosecond_clock_and_pcm_survive_matroska() {
         }
         let (mut before, mut after) = (Vec::new(), Vec::new());
         fvid::native_media::decode_aac_pcm(&data, &mut before, &Default::default()).unwrap();
-        fvid::native_media::decode_matroska_aac_pcm_interval(output.get_ref(), &mut after, None).unwrap();
+        fvid::native_media::decode_matroska_aac_pcm_interval(output.get_ref(), &mut after, None)
+            .unwrap();
         assert!(before == after, "PCM differs for {name}");
         let dest = d.0.join(format!("{name}.mka"));
         let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
@@ -134,4 +135,113 @@ fn writer_errors_cancel_and_publication_never_leave_outputs() {
         )
         .is_err()
     );
+}
+
+#[test]
+fn matroska_concat_joins_independent_segments_with_contiguous_clock() {
+    let d = dir("concat");
+    for name in [
+        "aac-mono-44k.aac",
+        "aac-stereo.aac",
+        "aac-51-active.aac",
+        "aac-96k.aac",
+        "aac-88k.aac",
+    ] {
+        let original = std::fs::read(fixture(name)).unwrap();
+        let split = adts::header(&original).unwrap().frame_bytes;
+        let a = d.0.join(format!("{name}-a.aac"));
+        let b = d.0.join(format!("{name}-b.aac"));
+        std::fs::write(&a, &original[..split]).unwrap();
+        std::fs::write(&b, &original[split..]).unwrap();
+        let sources = vec![a, b];
+        let output = d.0.join(format!("{name}.mka"));
+        let stats = fvid::native_export::concat_adts_aac(&sources, &output, None, None).unwrap();
+        let bytes = std::fs::read(&output).unwrap();
+        let source = adts::Aac::parse(&original, &Default::default()).unwrap();
+        assert_eq!(stats.packets, source.packets() as u64);
+        assert!(stats.done);
+        let mut reader =
+            webm::WebmReader::open(std::io::Cursor::new(&bytes), Default::default()).unwrap();
+        reader.scan_all().unwrap();
+        assert_eq!(reader.packets.len(), source.packets());
+        for i in 0..source.packets() {
+            assert_eq!(reader.read_packet(i).unwrap(), source.packet(i));
+            assert_eq!(
+                reader.packets[i].pts_ns,
+                (i as u128 * 1024 * 1000000000 / u128::from(source.sample_rate)) as i64
+            );
+        }
+        let (mut before, mut after) = (Vec::new(), Vec::new());
+        fvid::native_media::decode_aac_pcm(&original, &mut before, &Default::default()).unwrap();
+        fvid::native_media::decode_matroska_aac_pcm_interval(&bytes, &mut after, None).unwrap();
+        assert!(before == after, "PCM mismatch for {name}");
+        let cli = d.0.join(format!("cli-{name}.mkv"));
+        let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "concat"])
+            .arg(&cli)
+            .args(&sources)
+            .arg("--progress")
+            .output()
+            .unwrap();
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        assert_eq!(std::fs::read(cli).unwrap(), bytes);
+        #[cfg(feature = "media")]
+        {
+            let api = d.0.join(format!("api-{name}.mka"));
+            let stats = fvid::media::concat(&sources, &api, &Default::default()).unwrap();
+            assert_eq!(stats.backend, "fvid");
+            assert_eq!(stats.segments, 2);
+            assert_eq!(std::fs::read(api).unwrap(), bytes);
+        }
+        assert!(fvid::native_export::concat_adts_aac(&sources, &output, None, None).is_err());
+        assert_eq!(std::fs::read(output).unwrap(), bytes);
+    }
+}
+
+#[test]
+fn sequence_failure_is_terminal_and_matroska_concat_discards_partial_output() {
+    let d = dir("concat-errors");
+    let data = std::fs::read(fixture("aac-mono-44k.aac")).unwrap();
+    let split = adts::header(&data).unwrap().frame_bytes;
+    let a = d.0.join("a.aac");
+    let b = d.0.join("b.aac");
+    let out = d.0.join("out.mka");
+    std::fs::write(&a, &data[..split - 1]).unwrap();
+    std::fs::write(&b, &data[split..]).unwrap();
+    let mut sequence = adts::SequenceReader::new(vec![
+        adts::StreamReader::open(&data[..split - 1]).unwrap(),
+        adts::StreamReader::open(&data[split..]).unwrap(),
+    ])
+    .unwrap();
+    assert!(sequence.next_packet().is_err());
+    assert!(
+        sequence
+            .next_packet()
+            .unwrap_err()
+            .to_string()
+            .contains("sequence failed")
+    );
+    let sources = vec![a.clone(), b.clone()];
+    assert!(fvid::native_export::concat_adts_aac(&sources, &out, None, None).is_err());
+    assert_eq!(std::fs::read_dir(&d.0).unwrap().count(), 2);
+    std::fs::write(&a, &data[..split]).unwrap();
+    let flag = fvid::media_control::CancelFlag::default();
+    let stop = flag.clone();
+    let hook = fvid::media_control::ProgressHook::new(move |e| {
+        assert!(!e.done);
+        if e.packets > 0 {
+            stop.cancel();
+        }
+    });
+    assert!(
+        fvid::native_export::concat_adts_aac(&sources, &out, Some(&flag), Some(&hook)).is_err()
+    );
+    assert_eq!(std::fs::read_dir(&d.0).unwrap().count(), 2);
+    std::fs::copy(fixture("aac-stereo.aac"), &b).unwrap();
+    assert!(fvid::native_export::concat_adts_aac(&sources, &out, None, None).is_err());
+    assert!(!out.exists());
 }

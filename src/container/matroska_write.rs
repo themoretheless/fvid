@@ -42,6 +42,39 @@ pub fn write_adts<R: Read, W: Write + Seek>(
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
 ) -> Result<ProgressEvent> {
+    write_aac_packets(
+        input.configuration(),
+        || input.next_packet(),
+        output,
+        cancel,
+        progress,
+    )
+}
+
+/// Append compatible ADTS segments to one Matroska track without decoding.
+pub fn concat_adts<R: Read, W: Write + Seek>(
+    readers: Vec<super::adts::StreamReader<R>>,
+    output: &mut W,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+) -> Result<ProgressEvent> {
+    let mut sequence = super::adts::SequenceReader::new(readers)?;
+    write_aac_packets(
+        sequence.configuration(),
+        || sequence.next_packet(),
+        output,
+        cancel,
+        progress,
+    )
+}
+
+fn write_aac_packets<W: Write + Seek>(
+    config: super::adts::Header,
+    mut next_packet: impl FnMut() -> Result<Option<Vec<u8>>>,
+    output: &mut W,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+) -> Result<ProgressEvent> {
     let check = || {
         if cancel.is_some_and(|c| c.is_cancelled()) {
             Err(invalid("media operation cancelled"))
@@ -53,7 +86,6 @@ pub fn write_adts<R: Read, W: Write + Seek>(
     if output.stream_position()? != 0 {
         return Err(invalid("Matroska output must start at zero"));
     }
-    let config = input.configuration();
     let samples = u64::from(crate::codec::config::AacConfig::parse(&config.asc)?.frame_samples);
     let ebml = [
         uint(0x4286, 1)?,
@@ -120,7 +152,7 @@ pub fn write_adts<R: Read, W: Write + Seek>(
     }
     loop {
         check()?;
-        let Some(packet) = input.next_packet()? else {
+        let Some(packet) = next_packet()? else {
             break;
         };
         let next = event

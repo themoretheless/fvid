@@ -188,23 +188,8 @@ pub fn concat_adts_readers<R: std::io::Read, W: Write + std::io::Seek>(
     readers: Vec<super::adts::StreamReader<R>>, output: &mut W,
     cancel: Option<&fvid_control::CancelFlag>, progress: Option<&fvid_control::ProgressHook>,
 ) -> Result<fvid_control::ProgressEvent> {
-    if !(2..=256).contains(&readers.len()) {return Err(invalid("concat requires 2..=256 inputs"));}
-    let config = readers[0].configuration();
-    for reader in &readers {
-        let other = reader.configuration();
-        if (config.asc,config.channels,config.sample_rate) != (other.asc,other.channels,other.sample_rate) {
-            return Err(invalid("ADTS concat requires identical AAC configurations"));
-        }
-    }
-    let mut readers = readers.into_iter();
-    let mut current = readers.next();
-    write_aac_packets(config, || {
-        loop {
-            let Some(reader) = current.as_mut() else {return Ok(None);};
-            if let Some(packet) = reader.next_packet()? {return Ok(Some(packet));}
-            current = readers.next();
-        }
-    }, output, cancel, progress)
+    let mut sequence=super::adts::SequenceReader::new(readers)?;
+    write_aac_packets(sequence.configuration(), || sequence.next_packet(), output, cancel, progress)
 }
 
 fn write_aac_packets<W: Write + std::io::Seek>(

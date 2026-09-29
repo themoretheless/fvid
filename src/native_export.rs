@@ -649,13 +649,13 @@ pub fn is_adts_source(source: &Path) -> Result<bool> {
     }
 }
 
-/// Copy ADTS segments into a single MP4 track without decoding. Encoder
+/// Copy ADTS segments into one MP4 or Matroska track without decoding. Encoder
 /// priming/padding is retained; this is packet concatenation, not gapless editing.
 pub fn concat_adts_aac(sources: &[std::path::PathBuf], destination: &Path,
     cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::media_control::ProgressEvent> {
     if !(2..=256).contains(&sources.len()) {return Err(invalid("concat requires 2..=256 inputs"));}
-    if !matches!(destination.extension().and_then(|s|s.to_str()),Some("mp4"|"m4a")) {return Err(invalid("native ADTS concat output requires .mp4 or .m4a"));}
+    if !matches!(destination.extension().and_then(|s|s.to_str()),Some("mp4"|"m4a"|"mka"|"mkv")) {return Err(invalid("native ADTS concat output requires .mp4/.m4a or .mka/.mkv"));}
     let mut readers=Vec::with_capacity(sources.len());
     for source in sources {
         if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
@@ -677,8 +677,9 @@ fn publish_adts_readers(mut readers: Vec<crate::container::adts::StreamReader<Bu
         }
     }).ok_or_else(|| invalid("cannot reserve MP4 output"))??;
     let mut output = BufWriter::new(file);
-    let event = if readers.len()==1 && matches!(destination.extension().and_then(|s|s.to_str()),Some("mka"|"mkv")) {
-        crate::container::matroska_write::write_adts(readers.remove(0), &mut output, cancel, progress)?
+    let event = if matches!(destination.extension().and_then(|s|s.to_str()),Some("mka"|"mkv")) {
+        if readers.len()==1 {crate::container::matroska_write::write_adts(readers.remove(0), &mut output, cancel, progress)?}
+        else {crate::container::matroska_write::concat_adts(readers, &mut output, cancel, progress)?}
     } else if readers.len()==1 {
         crate::container::mp4_write::write_adts_aac_reader_controlled(readers.remove(0), &mut output, cancel, progress)?
     } else {

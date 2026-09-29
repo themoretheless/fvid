@@ -362,3 +362,39 @@ impl<R: std::io::Read> StreamReader<R> {
         Ok(Some(remaining))
     }
 }
+
+/// A sequence of independently framed ADTS inputs with identical AAC setup.
+/// EOF advances to the next reader; a malformed/truncated segment poisons the
+/// sequence instead of taking any bytes from another input to complete a frame.
+pub struct SequenceReader<R> {
+    remaining: std::vec::IntoIter<StreamReader<R>>,
+    current: Option<StreamReader<R>>,
+    configuration: Header,
+    failed: bool,
+}
+impl<R:std::io::Read> SequenceReader<R> {
+    pub fn new(readers: Vec<StreamReader<R>>) -> Result<Self> {
+        if !(2..=256).contains(&readers.len()) {return Err(invalid("concat requires 2..=256 inputs"));}
+        let configuration=readers[0].configuration();
+        for reader in &readers {
+            let other=reader.configuration();
+            if (configuration.asc,configuration.channels,configuration.sample_rate)!=(other.asc,other.channels,other.sample_rate) {
+                return Err(invalid("ADTS concat requires identical AAC configurations"));
+            }
+        }
+        let mut remaining=readers.into_iter();let current=remaining.next();
+        Ok(Self {remaining,current,configuration,failed:false})
+    }
+    pub fn configuration(&self)->Header {self.configuration}
+    pub fn next_packet(&mut self)->Result<Option<Vec<u8>>> {
+        if self.failed {return Err(invalid("ADTS sequence failed"));}
+        loop {
+            let Some(reader)=self.current.as_mut() else {return Ok(None);};
+            match reader.next_packet() {
+                Ok(Some(packet))=>return Ok(Some(packet)),
+                Ok(None)=>self.current=self.remaining.next(),
+                Err(error)=>{self.failed=true;return Err(error);},
+            }
+        }
+    }
+}

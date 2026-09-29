@@ -195,9 +195,9 @@ pub fn concat_adts(sources: &[std::path::PathBuf]) -> Result<MediaPlan> {
     Ok(MediaPlan {
         command:"concat".into(),input:sources[0].clone(),inputs:sources.to_vec(),
         streams:vec![PlanStream {index:0,media_type:"audio".into(),codec:"aac".into(),disposition:"copy".into()}],
-        steps:vec![PlanStep {action:"copy".into(),detail:format!("append {packets} AAC packets into one MP4 track without decoding")},
-            PlanStep {action:"publish".into(),detail:"write sample tables; sync and publish without overwriting".into()}],
-        graph:None,notes:vec!["backend: fvid; output requires .mp4 or .m4a".into(),
+        steps:vec![PlanStep {action:"copy".into(),detail:format!("append {packets} AAC packets into one MP4 or Matroska track without decoding")},
+            PlanStep {action:"publish".into(),detail:"write container timing/index; sync and publish without overwriting".into()}],
+        graph:None,notes:vec!["backend: fvid; output requires .mp4/.m4a or .mka/.mkv".into(),
             "ADTS encoder priming and padding remain in every segment; no gapless trimming".into()],
     })
 }

@@ -1641,3 +1641,24 @@ roundtrips, timestamps, CLI/API parity, truncation, cancellation and overwrite
 protection. Independent FFmpeg reference-only decoding of all five generated
 Matroska files was byte-identical to FFmpeg decoding their ADTS sources. This is
 container interoperability evidence, not a claim of new AAC codec conformance.
+
+### Owned AAC Matroska concatenation (2026-09-29)
+
+`concat OUTPUT.mka INPUT.aac INPUT.aac ...` (also `.mkv`) now uses the same native
+Matroska muxer through both CLI and `media::concat`. The public
+`concat_adts_aac` exporter selects MP4 or Matroska by output extension. Encoded
+packets are appended without decoding, with continuous sample-clock timestamps;
+encoder priming/padding remains in every segment, as in native MP4 concatenation.
+
+Both writers share `adts::SequenceReader`, which validates matching AAC setup
+and advances only at a clean per-file EOF. A framing error makes the sequence
+permanently failed. It never completes a truncated packet with bytes from the
+next input. Plans list both output container families; the existing common plan
+still enforces the MP4 sample-index limit, while Matroska execution itself needs
+no accumulated packet index. No Cues or seeking index are written yet.
+
+Tests split five AAC fixtures into distinct packet sequences, join them, and
+compare every encoded packet, nanosecond timestamp and decoded PCM against the
+original. CLI/API results, malformed boundaries, mismatched configuration,
+cancellation, terminal reader failure and overwrite protection are covered;
+existing MP4 concatenation/remux regressions pass with the shared reader.
