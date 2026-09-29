@@ -244,3 +244,18 @@ pub fn trim_aac(source: &std::path::Path, from: i64, to: i64, selected: Option<u
     plan.notes.push("only explicitly selected audio is exported; source presentation edits and decoder pre-roll apply".into());
     Ok(plan)
 }
+
+/// Metadata-only plan for decoded, constant-rate video concatenation to Y4M.
+pub fn concat_y4m(sources: &[std::path::PathBuf], selected: Option<usize>) -> Result<MediaPlan> {
+    if !(2..=256).contains(&sources.len()) {return Err("concat requires 2..=256 inputs".into());}
+    for source in sources {crate::native_export::validate_concat_video(source,selected).map_err(|e|e.to_string())?;}
+    Ok(MediaPlan {
+        command:"concat".into(),input:sources[0].clone(),inputs:sources.to_vec(),
+        streams:vec![PlanStream {index:selected.unwrap_or(0),media_type:"video".into(),codec:"rawvideo".into(),disposition:"decode".into()}],
+        steps:vec![PlanStep {action:"decode".into(),detail:"decode each source independently through FVid and append presentation frames".into()},
+            PlanStep {action:"write".into(),detail:"require matching frame rate, geometry, bit depth, chroma, range and pixel aspect; publish Y4M without overwriting".into()}],
+        graph:None,notes:vec!["backend: fvid; output .y4m only, no external codecs".into(),
+            "metadata-only plan; exact frame timing and decoded layout are validated during execution".into(),
+            "timestamps restart at zero in each segment and become contiguous in output; audio is not exported".into()],
+    })
+}

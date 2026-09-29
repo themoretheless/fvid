@@ -372,6 +372,11 @@ pub fn plan_remux(source: &std::path::Path, options: &CopyOptions) -> Result<Med
 
 /// Concatenate compatible packed WAVE PCM through the owned streaming writer.
 pub fn concat(sources: &[std::path::PathBuf], destination: &std::path::Path, options: &CopyOptions) -> Result<CopyStats> {
+    if destination.extension().and_then(|s|s.to_str())==Some("y4m") {
+        validate_native_copy_options(options,true)?;
+        let stats=crate::native_export::concat_y4m(sources,destination,options.streams.first().copied(),options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())?;
+        return Ok(CopyStats {packets:stats.packets,payload_bytes:stats.payload_bytes,segments:sources.len(),backend:"fvid",fvid_payload_copies:0});
+    }
     if sources.first().map(|p|crate::native_export::is_adts_source(p)).transpose().map_err(|e|e.to_string())?.unwrap_or(false) {
         validate_native_copy_options(options,true)?;
         if options.streams.first().is_some_and(|&s|s!=0) {return Err("ADTS has only stream 0".into());}
@@ -399,4 +404,10 @@ pub fn plan_concat(sources: &[std::path::PathBuf], options: &CopyOptions) -> Res
     validate_native_copy_options(options,true)?;
     if options.streams.first().is_some_and(|&s|s!=0) {return Err("WAVE has only stream 0".into());}
     crate::native_plan::concat_wave(sources)
+}
+
+/// Plan decoded video concatenation with an explicit Y4M output contract.
+pub fn plan_concat_y4m(sources: &[std::path::PathBuf], options: &CopyOptions) -> Result<MediaPlan> {
+    validate_native_copy_options(options,true)?;
+    crate::native_plan::concat_y4m(sources,options.streams.first().copied())
 }

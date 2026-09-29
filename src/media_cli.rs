@@ -140,6 +140,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         }
         return Ok(());
     }
+    if try_video_concat(args)? {return Ok(());}
     if try_native_audio_concat(args)? { return Ok(()); }
     if try_native_audio_trim(args)? { return Ok(()); }
     if args.first().map(String::as_str) == Some("export-y4m") {
@@ -3133,6 +3134,33 @@ fn try_native_audio_concat(args: &[String]) -> Result<bool, Box<dyn std::error::
         }
         let stats=fvid::native_pcm::concat_wave(&paths,std::path::Path::new(&args[start+1]),None,hook.as_ref())?;
         if !quiet {println!("{{\"packets\":{},\"sample_frames\":{},\"payload_bytes\":{},\"segments\":{},\"backend\":\"fvid\",\"fvid_payload_copies\":0}}",stats.packets,stats.sample_frames,stats.payload_bytes,paths.len());}
+    }
+    Ok(true)
+}
+
+fn try_video_concat(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let plan=args.first().map(String::as_str)==Some("plan");
+    let command=usize::from(plan);
+    if args.get(command).map(String::as_str)!=Some("concat") {return Ok(false);}
+    let matches=if plan {args.windows(2).any(|s|s[0]=="--output-format" && s[1]=="y4m")} else {args.get(command+1).is_some_and(|p|std::path::Path::new(p).extension().and_then(|s|s.to_str())==Some("y4m"))};
+    if !matches {return Ok(false);}
+    let mut paths=Vec::new();let mut selected=None;let mut quiet=false;let mut report=false;
+    let mut items=args[command+if plan {1} else {2}..].iter();
+    while let Some(arg)=items.next() {
+        match arg.as_str() {
+            "--output-format" if plan=>{if items.next().map(String::as_str)!=Some("y4m") {return Err("expected y4m output format".into());}},
+            "--streams"=>{if selected.is_some() {return Err("duplicate streams option".into());}selected=Some(items.next().ok_or("missing stream")?.parse::<usize>()?);},
+            "--quiet"=>quiet=true,
+            "--progress" if !plan=>report=true,
+            _ if arg.starts_with('-')=>return Err(format!("unsupported native video concat option: {arg}").into()),
+            _=>paths.push(std::path::PathBuf::from(arg)),
+        }
+    }
+    if plan {println!("{}",serde_json::to_string_pretty(&fvid::native_plan::concat_y4m(&paths,selected)?)?);}
+    else {
+        let hook=report.then(||fvid::media_control::ProgressHook::new(|e|eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",e.packets,e.payload_bytes,e.done)));
+        let stats=fvid::native_export::concat_y4m(&paths,std::path::Path::new(&args[command+1]),selected,None,hook.as_ref())?;
+        if !quiet {println!("{}",serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":paths.len(),"backend":"fvid","fvid_payload_copies":0}));}
     }
     Ok(true)
 }

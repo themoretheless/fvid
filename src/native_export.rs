@@ -47,10 +47,48 @@ pub fn export_y4m_transformed(
     interval: Option<(std::time::Duration, std::time::Duration)>,
     geometry: &crate::native_geometry::VideoGeometry,
 ) -> Result<u64> {
+    Ok(export_y4m_sources(&[source.to_owned()],destination,interval,geometry,None,None)?.packets)
+}
+
+/// Decode compatible video segments in order into one constant-rate Y4M stream.
+/// Each source gets a fresh decoder; only raw presentation frames are appended.
+pub fn concat_y4m(sources: &[PathBuf], destination: &Path, selected: Option<usize>,
+    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::media_control::ProgressEvent> {
+    if !(2..=256).contains(&sources.len()) {return Err(invalid("concat requires 2..=256 inputs"));}
+    if destination.extension().and_then(|s|s.to_str())!=Some("y4m") {return Err(invalid("native video concat output requires .y4m"));}
+    for source in sources {
+        if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
+        validate_concat_video(source,selected)?;
+    }
+    export_y4m_sources(sources,destination,None,&Default::default(),cancel,progress)
+}
+
+pub(crate) fn validate_concat_video(source: &Path, selected: Option<usize>) -> Result<()> {
+    use std::io::Read;
+    let mut file=File::open(source)?;
+    let mut prefix=[0;9];file.read_exact(&mut prefix)?;
+    if &prefix==b"YUV4MPEG2" {
+        if selected.is_some_and(|i|i!=0) {return Err(invalid("Y4M has only stream 0"));}
+        return Ok(());
+    }
+    let info=crate::native_probe::probe(source).map_err(|e|invalid(&e))?;
+    let videos:Vec<_>=info.streams.iter().filter(|s|s.media_type=="video").collect();
+    if videos.len()!=1 {return Err(invalid("native video concat requires exactly one video track per input"));}
+    if selected.is_some_and(|i|i!=videos[0].index) || (selected.is_none() && info.streams.len()!=1) {
+        return Err(invalid("video-only concat requires explicit selection when other tracks exist"));
+    }
+    Ok(())
+}
+
+fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
+    interval: Option<(std::time::Duration,std::time::Duration)>, geometry: &crate::native_geometry::VideoGeometry,
+    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::media_control::ProgressEvent> {
+    let mut control=crate::native_media::DecodeProgress::new(cancel,progress)?;
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("export interval requires from < to"));
     }
-    let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
     let directory = destination
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -70,9 +108,15 @@ pub fn export_y4m_transformed(
         })
         .ok_or_else(|| invalid("cannot reserve Y4M output"))??;
     let mut output = BufWriter::new(file);
-    let mut previous: Option<(u128, u128, u128)> = None;
+    let mut output_rate: Option<(u128,u128)> = None;
     let mut layout = None;
     let mut count = 0;
+    let mut payload_bytes=0u64;
+    for source in sources {
+    control.check()?;
+    let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
+    let segment_start=count;
+    let mut previous: Option<(u128, u128, u128)> = None;
     while let Some(frame) = reader.read_frame_raw()? {
         let (start, end, scale) = reader
             .frame_interval()
@@ -99,6 +143,12 @@ pub fn export_y4m_transformed(
                 ));
             }
         }
+        control.check()?;
+        if let Some((first_duration,first_scale))=output_rate {
+            if product(duration,first_scale)?!=product(first_duration,u128::from(scale))? {
+                return Err(invalid("Y4M concat requires identical frame rates"));
+            }
+        } else {output_rate=Some((duration,u128::from(scale)));}
         previous = Some((end, duration, u128::from(scale)));
         let [width, height] = reader.dimensions();
         let rotation = reader.rotation();
@@ -210,7 +260,16 @@ pub fn export_y4m_transformed(
                 _ => unreachable!(),
             }
         }
+        let cw=if chroma=="444" {width} else {width.div_ceil(2)};
+        let ch=if chroma=="420" {height.div_ceil(2)} else {height};
+        let bytes=width.checked_mul(height).and_then(|n|cw.checked_mul(ch).and_then(|c|c.checked_mul(2)).and_then(|c|n.checked_add(c))).and_then(|n|n.checked_mul(if depth==8 {1} else {2})).ok_or_else(||invalid("Y4M payload count overflow"))?;
+        payload_bytes=payload_bytes.checked_add(bytes as u64).ok_or_else(||invalid("Y4M payload count overflow"))?;
+        control.packet(bytes)?;
         count += 1;
+        if count % 256 != 0 {control.emit(false);}
+        control.check()?;
+    }
+    if count==segment_start {return Err(invalid("input has no decoded video frames"));}
     }
     if count == 0 {
         return Err(invalid("input has no decoded video frames"));
@@ -220,8 +279,10 @@ pub fn export_y4m_transformed(
     drop(output);
     // Both paths share a directory. Unlike rename, hard_link cannot clobber a
     // destination created concurrently; unsupported filesystems return an error.
+    control.check()?;
     std::fs::hard_link(&temporary.0, destination)?;
-    Ok(count)
+    control.emit(true);
+    Ok(crate::media_control::ProgressEvent {packets:count,payload_bytes,done:true})
 }
 fn transformed_aspect(
     aspect: (u32, u32),

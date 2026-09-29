@@ -1570,3 +1570,29 @@ fail. Plans describe PCM WAVE output; compressed MP4/MKV trim destinations still
 need their remaining native writer migration. Float samples from the selected
 MP4/Matroska tracks are checked against saved independent PCM references, and
 single-track edit/960-sample fixtures exercise the existing decoder timeline.
+
+### Owned decoded video concatenation (2026-09-29)
+
+`fvid media concat OUTPUT.y4m INPUT INPUT ...` decodes 2..=256 video segments with
+FVid software codecs and writes one Y4M stream, without foreign codecs or muxers.
+Each input has its own decoder state; frames append in presentation order.
+`media::concat` selects this implementation for `.y4m` output. Planning is explicit:
+`fvid media plan concat INPUT INPUT ... --output-format y4m`, or
+`native_plan::concat_y4m` / `media::plan_concat_y4m`.
+
+Inputs must contain exactly one video track. If additional tracks exist, an
+explicit `--streams INDEX` selects video and acknowledges video-only output;
+wrong/multiple selections fail. Raw Y4M uses stream 0. Within every segment,
+frame timing must be constant and contiguous. All segments must match frame rate,
+displayed geometry, pixel aspect, chroma layout, bit depth and full/limited range.
+Incompatible, empty or undecodable segments fail without publishing output.
+Input timestamp origins are rebased by appending frames, without frame-rate
+conversion. Container display rotation applies through the existing export path.
+
+Cancellation is checked between frames; progress counts decoded output frames
+and planar payload bytes. Only a completed, synced file is published, without
+overwriting. Header and FRAME marker bytes are excluded from payload counts.
+The output preserves raw planes, not compressed packets; no audio is exported.
+The existing Y4M export format restrictions remain, including unsupported chroma
+layouts. Tests compare concatenated AVC, HEVC Main and Main10 planes against
+individual native exports and exercise incompatible rates/ranges and cancellation.
