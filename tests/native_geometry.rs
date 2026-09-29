@@ -23,6 +23,7 @@ fn sample_plane_crop_flip_and_resize_have_exact_pixels() {
         horizontal_flip: true,
         vertical_flip: true,
         scale: Some([4, 2]),
+        ..Default::default()
     }
     .apply(&frame, 4, 4)
     .unwrap();
@@ -88,6 +89,7 @@ fn main10_crop_preserves_reference_samples_without_rgb_roundtrip() {
             horizontal_flip: true,
             vertical_flip: true,
             scale: None,
+            ..Default::default()
         }
         .apply(&frame, w, h)
         .unwrap();
@@ -168,4 +170,241 @@ fn native_geometry_api_and_cli_use_owned_decoder() {
         assert_eq!(stats.pixel_format, "yuv420p10le");
         assert_eq!((stats.width, stats.height), (16, 8));
     }
+}
+
+#[test]
+fn all_quarter_turns_match_reference_and_main10_padding_is_neutral() {
+    use fvid::{
+        codec::avc_picture::IntraPicture, native_geometry::Transpose, playback_native::AvcColour,
+    };
+    let frame = RawFrame::Avc {
+        picture: std::sync::Arc::new(IntraPicture {
+            coded_width: 8,
+            coded_height: 4,
+            crop: [0; 4],
+            bit_depth: 10,
+            y: (0..32).map(|i| 64 + 13 * i).collect(),
+            cb: (0..8).map(|i| 500 + 7 * i).collect(),
+            cr: (0..8).map(|i| 600 - 9 * i).collect(),
+        }),
+        colour: AvcColour::default(),
+    };
+    for (mode, reference) in [
+        (
+            Transpose::Clock,
+            include_bytes!("fixtures/geometry/clock.yuv").as_slice(),
+        ),
+        (
+            Transpose::CClock,
+            include_bytes!("fixtures/geometry/cclock.yuv").as_slice(),
+        ),
+        (
+            Transpose::ClockFlip,
+            include_bytes!("fixtures/geometry/clock_flip.yuv").as_slice(),
+        ),
+        (
+            Transpose::CClockFlip,
+            include_bytes!("fixtures/geometry/cclock_flip.yuv").as_slice(),
+        ),
+    ] {
+        let geometry = VideoGeometry {
+            transpose: Some(mode),
+            pad: Some([8, 12, 2, 2]),
+            ..Default::default()
+        };
+        let out = geometry.apply(&frame, 8, 4).unwrap();
+        assert_eq!((out.width, out.height), (8, 12));
+        let mut inside = Vec::new();
+        let mut offset = 0;
+        for (pw, ph, bx, by, iw, ih, black) in [
+            (8, 12, 2, 2, 4, 8, 64u16),
+            (4, 6, 1, 1, 2, 4, 512),
+            (4, 6, 1, 1, 2, 4, 512),
+        ] {
+            for y in 0..ph {
+                for x in 0..pw {
+                    let at = offset + (y * pw + x) * 2;
+                    let bytes = &out.data[at..at + 2];
+                    if (bx..bx + iw).contains(&x) && (by..by + ih).contains(&y) {
+                        inside.extend_from_slice(bytes);
+                    } else {
+                        assert_eq!(bytes, black.to_le_bytes(), "{mode:?} padding at {x},{y}");
+                    }
+                }
+            }
+            offset += pw * ph * 2;
+        }
+        assert_eq!(inside, reference, "{mode:?}");
+    }
+}
+
+#[test]
+fn full_range_padding_and_operation_order_keep_black_and_neutral_chroma() {
+    use fvid::{
+        native_geometry::Transpose,
+        playback_native::{AvcColour, Planar8},
+    };
+    let frame = RawFrame::Planar8(std::sync::Arc::new(Planar8 {
+        width: 4,
+        height: 4,
+        chroma_width: 2,
+        chroma_height: 2,
+        y: (0..16).collect(),
+        cb: vec![40, 41, 42, 43],
+        cr: vec![80, 81, 82, 83],
+        colour: AvcColour {
+            full: true,
+            ..Default::default()
+        },
+    }));
+    let geometry = VideoGeometry {
+        crop: Some([2, 0, 2, 4]),
+        horizontal_flip: true,
+        vertical_flip: false,
+        transpose: Some(Transpose::Clock),
+        pad: Some([8, 4, 2, 2]),
+        scale: Some([4, 2]),
+    };
+    let out = geometry.apply(&frame, 4, 4).unwrap();
+    // crop -> horizontal flip -> clockwise turn -> black canvas -> centre sampling.
+    assert_eq!(out.data, [0, 0, 0, 0, 0, 10, 2, 0, 43, 128, 83, 128]);
+    for pad in [
+        [2, 2, 0, 0],
+        [8, 8, 1, 0],
+        [8, 8, 0, 1],
+        [8, 8, usize::MAX, 0],
+    ] {
+        assert!(
+            VideoGeometry {
+                pad: Some(pad),
+                ..Default::default()
+            }
+            .apply(&frame, 4, 4)
+            .is_err()
+        );
+    }
+    assert!(Transpose::parse("invalid").is_err());
+}
+
+#[test]
+fn transpose_padding_cli_runs_without_media_feature() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/hevc/main10-ipb.mp4");
+    let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args([
+            "media",
+            "decode",
+            path.to_str().unwrap(),
+            "--crop",
+            "0:0:32:16",
+            "--transpose",
+            "clock",
+            "--pad",
+            "24:40:4:4",
+            "--scale",
+            "12:20",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let json: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(json["backend"], "fvid");
+    assert_eq!(json["width"], 12);
+    assert_eq!(json["height"], 20);
+    assert_eq!(json["pixel_format"], "yuv420p10le");
+    assert_eq!(json["video_frames"], 17);
+    #[cfg(feature = "media")]
+    {
+        let stats = fvid::media::decode_video_transformed(
+            &path,
+            fvid::media::DecodeTransform {
+                crop: Some(fvid::media::CropRect {
+                    x: 0,
+                    y: 0,
+                    width: 32,
+                    height: 16,
+                }),
+                transpose: Some(fvid::media::TransposeMode::Clock),
+                pad: Some(fvid::media::PadRect {
+                    width: 24,
+                    height: 40,
+                    x: 4,
+                    y: 4,
+                }),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert_eq!((stats.width, stats.height), (24, 40));
+    }
+}
+
+#[test]
+fn quarter_turn_swaps_422_chroma_axes_without_resampling() {
+    use fvid::{
+        native_geometry::Transpose,
+        playback_native::{AvcColour, Planar8},
+    };
+    let frame = RawFrame::Planar8(std::sync::Arc::new(Planar8 {
+        width: 4,
+        height: 2,
+        chroma_width: 2,
+        chroma_height: 2,
+        y: vec![0, 1, 2, 3, 4, 5, 6, 7],
+        cb: vec![10, 11, 12, 13],
+        cr: vec![20, 21, 22, 23],
+        colour: AvcColour::default(),
+    }));
+    let out = VideoGeometry {
+        transpose: Some(Transpose::Clock),
+        ..Default::default()
+    }
+    .apply(&frame, 4, 2)
+    .unwrap();
+    assert_eq!(
+        (out.width, out.height, out.subsampling),
+        (2, 4, Some([1, 2]))
+    );
+    assert_eq!(
+        out.data,
+        [4, 0, 5, 1, 6, 2, 7, 3, 12, 10, 13, 11, 22, 20, 23, 21]
+    );
+}
+
+#[test]
+fn decoded_statistics_name_the_transposed_422_layout() {
+    use fvid::native_geometry::Transpose;
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/geometry/422.y4m");
+    let stats = fvid::native_media::decode_video_transformed(
+        &path,
+        None,
+        &VideoGeometry {
+            transpose: Some(Transpose::Clock),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    assert_eq!((stats.width, stats.height, stats.video_frames), (2, 4, 1));
+    assert_eq!(stats.pixel_format, "yuv440p");
+}
+
+#[test]
+fn rgb_padding_is_zero_without_splitting_colour_triplets() {
+    use fvid::native_geometry::Transpose;
+    let out = VideoGeometry {
+        transpose: Some(Transpose::Clock),
+        pad: Some([3, 4, 1, 1]),
+        ..Default::default()
+    }
+    .apply(&RawFrame::Rgb(vec![1, 2, 3, 4, 5, 6]), 2, 1)
+    .unwrap();
+    assert_eq!((out.width, out.height, out.subsampling), (3, 4, None));
+    let mut expected = vec![0; 36];
+    expected[12..15].copy_from_slice(&[1, 2, 3]);
+    expected[21..24].copy_from_slice(&[4, 5, 6]);
+    assert_eq!(out.data, expected);
 }

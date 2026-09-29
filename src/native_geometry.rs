@@ -1,7 +1,37 @@
-//! Owned crop, flip and nearest-neighbour resize of decoded sample planes.
+//! Owned crop, flip, quarter-turn, padding and nearest resize of sample planes.
 //! No RGB conversion: high-bit-depth samples keep their original bytes.
 use crate::{Result, invalid, playback_native::RawFrame};
 use std::borrow::Cow;
+
+/// Quarter-turn direction, optionally reflected vertically after the turn.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Transpose {
+    Clock,
+    CClock,
+    ClockFlip,
+    CClockFlip,
+}
+impl Transpose {
+    pub fn parse(value: &str) -> Result<Self> {
+        match value {
+            "clock" => Ok(Self::Clock),
+            "cclock" => Ok(Self::CClock),
+            "clock_flip" => Ok(Self::ClockFlip),
+            "cclock_flip" => Ok(Self::CClockFlip),
+            _ => Err(invalid(
+                "transpose must be clock, cclock, clock_flip, or cclock_flip",
+            )),
+        }
+    }
+    fn source(self, x: usize, y: usize, w: usize, h: usize) -> (usize, usize) {
+        match self {
+            Self::Clock => (y, h - 1 - x),
+            Self::CClock => (w - 1 - y, x),
+            Self::ClockFlip => (w - 1 - y, h - 1 - x),
+            Self::CClockFlip => (y, x),
+        }
+    }
+}
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct VideoGeometry {
@@ -10,22 +40,35 @@ pub struct VideoGeometry {
     pub horizontal_flip: bool,
     pub vertical_flip: bool,
     pub scale: Option<[usize; 2]>,
+    pub transpose: Option<Transpose>,
+    /// Canvas width, height, x, y after transpose and before scale.
+    /// Padding is black in the source range, with neutral chroma.
+    pub pad: Option<[usize; 4]>,
 }
 
 #[derive(Debug)]
 pub struct GeometryFrame {
     pub width: usize,
     pub height: usize,
-    /// Packed RGB or packed Y, Cb, Cr, matching the source pixel format.
+    /// Horizontal/vertical luma samples per chroma sample; None for RGB.
+    /// A quarter-turn swaps the axes (4:2:2 becomes 4:4:0).
+    pub subsampling: Option<[usize; 2]>,
+    /// Packed RGB or packed Y, Cb, Cr. Sample depth is unchanged;
+    /// chroma axes follow `subsampling`.
     pub data: Vec<u8>,
 }
 
 impl VideoGeometry {
     pub fn is_identity(&self) -> bool {
-        self.crop.is_none() && self.scale.is_none() && !self.horizontal_flip && !self.vertical_flip
+        self.crop.is_none()
+            && self.scale.is_none()
+            && self.transpose.is_none()
+            && self.pad.is_none()
+            && !self.horizontal_flip
+            && !self.vertical_flip
     }
 
-    /// Crop, reflect, then resize, in that order. Nearest sampling maps output
+    /// Crop, reflect, transpose, pad, then resize, in that order. Nearest sampling maps output
     /// pixel centres to the containing input pixel; ties choose the higher index.
     pub fn apply(&self, frame: &RawFrame, width: usize, height: usize) -> Result<GeometryFrame> {
         if width == 0 || height == 0 {
@@ -117,7 +160,23 @@ impl VideoGeometry {
             }
         };
         let [x, y, w, h] = self.crop.unwrap_or([0, 0, width, height]);
-        let [ow, oh] = self.scale.unwrap_or([w, h]);
+        let (tw, th) = if self.transpose.is_some() {
+            (h, w)
+        } else {
+            (w, h)
+        };
+        let [canvas_w, canvas_h, pad_x, pad_y] = self.pad.unwrap_or([tw, th, 0, 0]);
+        if pad_x.checked_add(tw).is_none_or(|n| n > canvas_w)
+            || pad_y.checked_add(th).is_none_or(|n| n > canvas_h)
+        {
+            return Err(invalid("pad must contain the transformed picture"));
+        }
+        let (out_sx, out_sy) = if self.transpose.is_some() {
+            (sy, sx)
+        } else {
+            (sx, sy)
+        };
+        let [ow, oh] = self.scale.unwrap_or([canvas_w, canvas_h]);
         if w == 0
             || h == 0
             || ow == 0
@@ -127,7 +186,16 @@ impl VideoGeometry {
         {
             return Err(invalid("crop or scale lies outside video geometry"));
         }
-        if x % sx != 0 || y % sy != 0 || w % sx != 0 || h % sy != 0 || ow % sx != 0 || oh % sy != 0
+        if x % sx != 0
+            || y % sy != 0
+            || w % sx != 0
+            || h % sy != 0
+            || ow % out_sx != 0
+            || oh % out_sy != 0
+            || canvas_w % out_sx != 0
+            || canvas_h % out_sy != 0
+            || pad_x % out_sx != 0
+            || pad_y % out_sy != 0
         {
             return Err(invalid("video geometry must align with chroma samples"));
         }
@@ -138,7 +206,14 @@ impl VideoGeometry {
         };
         let mut result = Vec::new();
         let mut offset: usize = 0;
-        for (dx, dy) in shapes {
+        let (depth, full) = match frame {
+            RawFrame::Avc { picture, colour } => (picture.bit_depth, colour.full),
+            RawFrame::Planar8(p) => (8, p.colour.full),
+            // The legacy untagged Y4M variant represents limited-range samples.
+            RawFrame::Yuv { .. } => (8, false),
+            RawFrame::Rgb(_) => (8, true),
+        };
+        for (plane, (dx, dy)) in shapes.into_iter().enumerate() {
             let pw = width.div_ceil(dx);
             let ph = height.div_ceil(dy);
             let size = pw
@@ -151,7 +226,12 @@ impl VideoGeometry {
             let input = data
                 .get(offset..end)
                 .ok_or_else(|| invalid("truncated sample plane"))?;
-            let (cw, ch, dw, dh) = (w / dx, h / dy, ow / dx, oh / dy);
+            let (odx, ody) = if self.transpose.is_some() {
+                (dy, dx)
+            } else {
+                (dx, dy)
+            };
+            let (cw, ch, dw, dh) = (w / dx, h / dy, ow / odx, oh / ody);
             let out_size = dw
                 .checked_mul(dh)
                 .and_then(|n| n.checked_mul(bytes))
@@ -159,13 +239,40 @@ impl VideoGeometry {
             result
                 .try_reserve(out_size)
                 .map_err(|_| invalid("cannot allocate transformed frame"))?;
+            let black: u16 = if rgb {
+                0
+            } else if plane != 0 {
+                128u16 << (depth - 8)
+            } else if full {
+                0
+            } else {
+                16u16 << (depth - 8)
+            };
+            let fill = if rgb {
+                [0, 0, 0]
+            } else {
+                let b = black.to_le_bytes();
+                [b[0], b[1], 0]
+            };
             for row in 0..dh {
-                let mut iy = centre(row, ch, dh);
-                if self.vertical_flip {
-                    iy = ch - 1 - iy;
-                }
+                let py = centre(row, canvas_h / ody, dh);
                 for col in 0..dw {
-                    let mut ix = centre(col, cw, dw);
+                    let px = centre(col, canvas_w / odx, dw);
+                    if px < pad_x / odx
+                        || py < pad_y / ody
+                        || px - pad_x / odx >= tw / odx
+                        || py - pad_y / ody >= th / ody
+                    {
+                        result.extend_from_slice(&fill[..bytes]);
+                        continue;
+                    }
+                    let (tx, ty) = (px - pad_x / odx, py - pad_y / ody);
+                    let (mut ix, mut iy) = self
+                        .transpose
+                        .map_or((tx, ty), |mode| mode.source(tx, ty, cw, ch));
+                    if self.vertical_flip {
+                        iy = ch - 1 - iy;
+                    }
                     if self.horizontal_flip {
                         ix = cw - 1 - ix;
                     }
@@ -181,6 +288,7 @@ impl VideoGeometry {
         Ok(GeometryFrame {
             width: ow,
             height: oh,
+            subsampling: (!rgb).then_some([out_sx, out_sy]),
             data: result,
         })
     }

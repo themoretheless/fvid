@@ -1362,3 +1362,16 @@ saved reference YUV, independently of the owned decoded output.
 Legacy filter combinations, format overrides and other unmigrated media
 operations still use the old adapter: the full `media` feature is not yet
 FFmpeg-independent. Native geometry does not change that outstanding requirement.
+
+Native geometry also accepts `--transpose clock|cclock|clock_flip|cclock_flip`
+and `--pad W:H:X:Y`, through the headless CLI and the compatibility media API.
+The order is crop, flips, transpose, pad, nearest resize. A quarter-turn swaps
+chroma axes: planar 4:2:2 becomes 4:4:0 without resampling, and decode statistics
+report `yuv440p`. `GeometryFrame::subsampling` exposes the new layout.
+
+Black padding uses RGB zero, full-range Y zero or limited-range Y `16 << (depth-8)`,
+and neutral chroma `128 << (depth-8)`. In particular 10-bit chroma padding is
+512, not the 514 produced by FFmpeg 9.0.2's black colour conversion. The four
+quarter-turn reference fixtures compare every interior sample byte with FFmpeg;
+padding has separate exact range/depth assertions. See
+`tests/fixtures/geometry/README.md` for the generator commands and hashes.

@@ -189,10 +189,17 @@ fn geometry_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_ge
                 if geometry.vertical_flip { return Err("duplicate vflip".into()); }
                 geometry.vertical_flip = true;
             }
-            "--crop" | "--scale" => {
+            "--transpose" => {
+                if geometry.transpose.is_some() { return Err("duplicate transpose".into()); }
+                geometry.transpose = Some(fvid::native_geometry::Transpose::parse(args.next().ok_or("missing transpose mode")?)?);
+            }
+            "--crop" | "--scale" | "--pad" => {
                 let fields = args.next().ok_or("missing geometry value")?.split(':')
                     .map(str::parse::<usize>).collect::<Result<Vec<_>, _>>()?;
-                if arg == "--crop" {
+                if arg == "--pad" {
+                    if geometry.pad.is_some() { return Err("duplicate pad".into()); }
+                    geometry.pad = Some(fields.try_into().map_err(|_| "pad requires WIDTH:HEIGHT:X:Y")?);
+                } else if arg == "--crop" {
                     if geometry.crop.is_some() { return Err("duplicate crop".into()); }
                     geometry.crop = Some(fields.try_into().map_err(|_| "crop requires X:Y:WIDTH:HEIGHT")?);
                 } else {

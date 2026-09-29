@@ -33,9 +33,9 @@ pub fn decode_video_transformed(source: &std::path::Path, transform: DecodeTrans
         horizontal_flip: _,
         scale: _,
         epx: None,
-        transpose: None,
+        transpose: _,
         rotate: None,
-        pad: None,
+        pad: _,
         burn_subs: None,
         overlay: None,
         yadif: None,
@@ -153,6 +153,8 @@ pub fn decode_video_transformed(source: &std::path::Path, transform: DecodeTrans
         horizontal_flip: transform.horizontal_flip,
         vertical_flip: transform.vertical_flip,
         scale: transform.scale.map(|r| [r.width as usize, r.height as usize]),
+        transpose: transform.transpose.map(|r| crate::native_geometry::Transpose::parse(r.as_str())).transpose().map_err(|e| e.to_string())?,
+        pad: transform.pad.map(|r| [r.width as usize, r.height as usize, r.x as usize, r.y as usize]),
     };
     let stats = crate::native_media::decode_video_transformed(source, interval, &geometry).map_err(|e| e.to_string())?;
     Ok(DecodeStats { backend: stats.backend, video_frames: stats.video_frames, width: stats.width,

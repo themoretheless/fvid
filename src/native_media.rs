@@ -92,6 +92,13 @@ pub fn decode_video_transformed(
             let output = geometry.apply(&frame, width, height)?;
             stats.width = u32::try_from(output.width).map_err(|_| invalid("video width overflow"))?;
             stats.height = u32::try_from(output.height).map_err(|_| invalid("video height overflow"))?;
+            if geometry.transpose.is_some() {
+                stats.pixel_format = match stats.pixel_format.as_str() {
+                    "yuv422p" => "yuv440p".into(),
+                    "yuv440p" => "yuv422p".into(),
+                    _ => stats.pixel_format,
+                };
+            }
             std::hint::black_box(output);
         }
         stats.video_frames = stats
@@ -107,6 +114,8 @@ pub fn decode_video_transformed(
 fn planar_format(w: usize, h: usize, cw: usize, ch: usize) -> Result<String> {
     Ok(if cw == w && ch == h {
         "yuv444p"
+    } else if cw == w && ch == h.div_ceil(2) {
+        "yuv440p"
     } else if cw == w.div_ceil(2) && ch == h {
         "yuv422p"
     } else if cw == w.div_ceil(2) && ch == h.div_ceil(2) {
