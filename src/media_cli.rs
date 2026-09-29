@@ -2,14 +2,18 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
-    if args.first().map(String::as_str)==Some("transcode-lossless") && args.len()>=3
-        && args[3..].iter().all(|s|matches!(s.as_str(),"--quiet"|"--progress"))
-        && fvid::native_lossless::eligible(std::path::Path::new(&args[1]))? {
-        let hook=args[3..].iter().any(|s|s=="--progress").then(||fvid::media_control::ProgressHook::new(|event| {
-            eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
-        }));
-        let stats=fvid::native_export::transcode_mp4_ffv1(std::path::Path::new(&args[1]),std::path::Path::new(&args[2]),None,hook.as_ref())?;
-        if !args[3..].iter().any(|s|s=="--quiet"){println!("{}",serde_json::to_string(&stats)?);}return Ok(());
+    if args.first().map(String::as_str)==Some("transcode-lossless") && args.len()>=3 {
+        let mut owned=args.to_vec();owned[0]="decode".into();
+        let (pixel_args,filters)=pixel_decode_args(&owned)?;
+        let (remaining,geometry)=geometry_decode_args(&pixel_args)?;
+        if remaining.len()>=3 && remaining[3..].iter().all(|s|matches!(s.as_str(),"--quiet"|"--progress"))
+            && fvid::native_lossless::eligible(std::path::Path::new(&remaining[1]))? {
+            let hook=remaining[3..].iter().any(|s|s=="--progress").then(||fvid::media_control::ProgressHook::new(|event| {
+                eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
+            }));
+            let stats=fvid::native_export::transcode_mp4_ffv1_transformed(std::path::Path::new(&remaining[1]),std::path::Path::new(&remaining[2]),&geometry,&filters,None,hook.as_ref())?;
+            if !remaining[3..].iter().any(|s|s=="--quiet"){println!("{}",serde_json::to_string(&stats)?);}return Ok(());
+        }
     }
 
     if args.first().map(String::as_str) == Some("plan")

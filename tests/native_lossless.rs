@@ -350,3 +350,273 @@ fn edited_hevc_window_encodes_only_presented_pictures() {
         }
     }
 }
+
+fn spatial_request() -> fvid::media_info::LosslessTransform {
+    use fvid::media_info::{CropRect, LosslessTransform, PadRect, ScaleSize, TransposeMode};
+    LosslessTransform {
+        crop: Some(CropRect {
+            x: 0,
+            y: 0,
+            width: 8,
+            height: 8,
+        }),
+        horizontal_flip: true,
+        vertical_flip: true,
+        transpose: Some(TransposeMode::Clock),
+        pad: Some(PadRect {
+            width: 16,
+            height: 12,
+            x: 2,
+            y: 2,
+        }),
+        scale: Some(ScaleSize {
+            width: 12,
+            height: 8,
+        }),
+        negate: Some("1".into()),
+        sobel: Some("planes=1:scale=0.125".into()),
+        dilation: Some("coordinates=170:threshold0=3:threshold1=0:threshold2=0".into()),
+        ..Default::default()
+    }
+}
+#[test]
+fn spatial_export_cli_api_metadata_and_failures() {
+    let dir = directory("spatial");
+    let source = fixture("audio/two-audio.mp4");
+    let request = spatial_request();
+    assert!(fvid::native_lossless::supports(&request));
+    assert!(!fvid::native_lossless::identity(&request));
+    let (geometry, filters) = fvid::native_lossless::configuration(&request).unwrap();
+    let output = dir.0.join("spatial.mkv");
+    let stats = fvid::native_export::transcode_mp4_ffv1_transformed(
+        &source, &output, &geometry, &filters, None, None,
+    )
+    .unwrap();
+    assert!(stats.horizontal_flip && stats.vertical_flip);
+    assert_eq!(stats.fvid_crop_payload_copies, stats.video_frames);
+    let bytes = std::fs::read(&output).unwrap();
+    let mut reader = webm::WebmReader::open(Cursor::new(&bytes), Default::default()).unwrap();
+    reader.scan_all().unwrap();
+    assert_eq!(reader.tracks.len(), 3);
+    assert_eq!(reader.tracks[0].visible(), (12, 8));
+    assert_eq!(reader.tracks[0].rotation, 0);
+    assert_eq!(reader.tracks[0].pixel_aspect(), (8, 9));
+    let cli = dir.0.join("cli.mkv");
+    let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "transcode-lossless"])
+        .arg(&source)
+        .arg(&cli)
+        .args([
+            "--crop",
+            "0:0:8:8",
+            "--hflip",
+            "--vflip",
+            "--transpose",
+            "clock",
+            "--pad",
+            "16:12:2:2",
+            "--scale",
+            "12:8",
+            "--negate",
+            "1",
+            "--sobel",
+            "planes=1:scale=0.125",
+            "--dilation",
+            "coordinates=170:threshold0=3:threshold1=0:threshold2=0",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert_eq!(std::fs::read(cli).unwrap(), bytes);
+    #[cfg(feature = "media")]
+    {
+        let api = dir.0.join("api.mkv");
+        let stats =
+            fvid::media::transcode_lossless(&source, &api, request.clone(), &Default::default())
+                .unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert_eq!(std::fs::read(api).unwrap(), bytes);
+    }
+    let invalid = dir.0.join("invalid.mkv");
+    let bad = fvid::native_geometry::VideoGeometry {
+        crop: Some([10000, 0, 8, 8]),
+        ..Default::default()
+    };
+    assert!(
+        fvid::native_export::transcode_mp4_ffv1_transformed(
+            &source, &invalid, &bad, &filters, None, None
+        )
+        .is_err()
+    );
+    assert!(!invalid.exists());
+    let unsupported = fvid::media_info::LosslessTransform {
+        gblur: Some("1".into()),
+        ..Default::default()
+    };
+    assert!(!fvid::native_lossless::supports(&unsupported));
+    let original = dir.0.join("original.mkv");
+    fvid::native_export::transcode_mp4_ffv1(&source, &original, None, None).unwrap();
+    let mut unchanged = webm::WebmReader::open(
+        Cursor::new(std::fs::read(original).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    unchanged.scan_all().unwrap();
+    for track in [2, 3] {
+        let original = unchanged
+            .packets
+            .iter()
+            .enumerate()
+            .filter(|(_, p)| p.track == track)
+            .map(|(i, p)| (i, p.pts_ns, p.duration_ns, p.discard_padding_ns))
+            .collect::<Vec<_>>();
+        let changed = reader
+            .packets
+            .iter()
+            .enumerate()
+            .filter(|(_, p)| p.track == track)
+            .map(|(i, p)| (i, p.pts_ns, p.duration_ns, p.discard_padding_ns))
+            .collect::<Vec<_>>();
+        assert_eq!(original.len(), changed.len());
+        for ((a, ap, ad, at), (b, bp, bd, bt)) in original.into_iter().zip(changed) {
+            assert_eq!((ap, ad, at), (bp, bd, bt));
+            assert_eq!(
+                unchanged.read_packet(a).unwrap(),
+                reader.read_packet(b).unwrap()
+            );
+        }
+    }
+}
+
+#[test]
+#[ignore = "requires FVID_REFERENCE_FFMPEG"]
+fn independent_pixels_match_spatial_transforms_and_rotation() {
+    use std::process::Command;
+    let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
+    let dir = directory("spatial-reference");
+    let mut failures = Vec::new();
+    for (index, name) in [
+        "video.mp4",
+        "hevc/main-ipb.mp4",
+        "hevc/main10-ipb.mp4",
+        "display/par-2x1.mp4",
+    ]
+    .iter()
+    .enumerate()
+    {
+        let mut bytes = std::fs::read(fixture(name)).unwrap();
+        if index == 3 {
+            let matrix = bytes.windows(4).position(|w| w == b"tkhd").unwrap() + 44;
+            for (offset, value) in [0, 4, 12, 16].into_iter().zip([0i32, 65536, -65536, 0]) {
+                bytes[matrix + offset..matrix + offset + 4].copy_from_slice(&value.to_be_bytes());
+            }
+        }
+        let source = dir.0.join(format!("source{index}.mp4"));
+        std::fs::write(&source, bytes).unwrap();
+        for mode in 0..8 {
+            let request = match mode {
+                0 => spatial_request(),
+                1 => fvid::media_info::LosslessTransform {
+                    horizontal_flip: true,
+                    ..Default::default()
+                },
+                2 => fvid::media_info::LosslessTransform {
+                    erosion: Some("coordinates=1".into()),
+                    ..Default::default()
+                },
+                _ => {
+                    let mut r = spatial_request();
+                    r.negate = None;
+                    r.sobel = None;
+                    r.dilation = None;
+                    if mode >= 4 {
+                        r.scale = None;
+                    }
+                    if mode >= 5 {
+                        r.pad = None;
+                    }
+                    if mode >= 6 {
+                        r.transpose = None;
+                    }
+                    if mode >= 7 {
+                        r.horizontal_flip = false;
+                        r.vertical_flip = false;
+                    }
+                    r
+                }
+            };
+            let filter = match mode {
+                0 => {
+                    "crop=8:8:0:0,hflip,vflip,transpose=clock,pad=16:12:2:2,scale=12:8:flags=neighbor,negate,sobel=planes=1:scale=0.125,dilation=coordinates=170:threshold0=3:threshold1=0:threshold2=0"
+                }
+                1 => "hflip",
+                2 => "erosion=coordinates=1",
+                3 => {
+                    "crop=8:8:0:0,hflip,vflip,transpose=clock,pad=16:12:2:2,scale=12:8:flags=neighbor"
+                }
+                4 => "crop=8:8:0:0,hflip,vflip,transpose=clock,pad=16:12:2:2",
+                5 => "crop=8:8:0:0,hflip,vflip,transpose=clock",
+                6 => "crop=8:8:0:0,hflip,vflip",
+                _ => "crop=8:8:0:0",
+            };
+            let (geometry, filters) = fvid::native_lossless::configuration(&request).unwrap();
+            let dest = dir.0.join(format!("output{index}-{mode}.mkv"));
+            fvid::native_export::transcode_mp4_ffv1_transformed(
+                &source, &dest, &geometry, &filters, None, None,
+            )
+            .unwrap();
+            let decode = |path: &Path, vf: Option<&str>| {
+                let mut command = Command::new(&ffmpeg);
+                command
+                    .args(["-v", "error", "-i"])
+                    .arg(path)
+                    .args(["-map", "0:v:0"]);
+                if let Some(vf) = vf {
+                    command.args(["-vf", vf]);
+                }
+                let out = command
+                    .args([
+                        "-fps_mode",
+                        "passthrough",
+                        "-f",
+                        "rawvideo",
+                        "-pix_fmt",
+                        if name.contains("main10") {
+                            "yuv420p10le"
+                        } else {
+                            "yuv420p"
+                        },
+                        "pipe:1",
+                    ])
+                    .output()
+                    .unwrap();
+                assert!(
+                    out.status.success(),
+                    "{}",
+                    String::from_utf8_lossy(&out.stderr)
+                );
+                out.stdout
+            };
+            let expected = decode(&source, Some(filter));
+            let actual = decode(&dest, None);
+            assert_eq!(expected.len(), actual.len(), "{name} mode {mode}");
+            if let Some(i) = expected.iter().zip(&actual).position(|(a, b)| a != b) {
+                failures.push(format!(
+                    "{name} mode {mode} byte {i}: ref={} own={}",
+                    expected[i], actual[i]
+                ));
+            }
+            let reader = webm::WebmReader::open(
+                Cursor::new(std::fs::read(&dest).unwrap()),
+                Default::default(),
+            )
+            .unwrap();
+            assert_eq!(reader.tracks[0].rotation, 0);
+        }
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n"));
+}

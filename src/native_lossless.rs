@@ -47,6 +47,25 @@ pub fn write_mp4<W: Write + Seek>(
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
 ) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
+    write_mp4_transformed(
+        source,
+        output,
+        &Default::default(),
+        &Default::default(),
+        cancel,
+        progress,
+    )
+}
+
+/// Apply owned geometry/pixel operations while retaining every AAC companion.
+pub fn write_mp4_transformed<W: Write + Seek>(
+    source: &Path,
+    output: &mut W,
+    geometry: &crate::native_geometry::VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
     check(cancel)?;
     let mut input = Mp4Reader::open(BufReader::new(File::open(source)?), Default::default())?;
     if !mp4_matroska::eligible(&input)
@@ -67,6 +86,34 @@ pub fn write_mp4<W: Write + Seek>(
         .iter()
         .map(|t| mp4_matroska::plan(t, input.movie_timescale(), cancel))
         .collect::<Result<Vec<_>>>()?;
+    let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
+    let first = reader
+        .read_frame_raw()?
+        .ok_or_else(|| invalid("input has no decoded video frames"))?;
+    check(cancel)?;
+    let bake_rotation = !geometry.is_identity() || !filters.is_empty();
+    let prepare = |frame: &RawFrame, display: [usize; 2]| -> Result<_> {
+        let (w, h, depth) = match frame {
+            RawFrame::Avc { picture, .. } => {
+                let (w, h) = picture.dimensions();
+                (w, h, picture.bit_depth)
+            }
+            RawFrame::Planar8(p) => (p.width, p.height, 8),
+            _ => return Err(invalid("unexpected FFV1 input picture type")),
+        };
+        let mut samples = if bake_rotation {
+            geometry.apply_display_media(frame, display[0], display[1], tracks[video].rotation)?
+        } else {
+            geometry.apply(frame, w, h)?
+        };
+        filters.apply(&mut samples, depth)?;
+        Ok(samples)
+    };
+    let first_samples = prepare(&first, reader.dimensions())?;
+    let output_dimensions = (first_samples.width, first_samples.height);
+    let output_layout = first_samples.subsampling;
+    let mut prepared_first = Some(first_samples);
+    let mut first_frame = Some(first);
     let specs = tracks
         .iter()
         .enumerate()
@@ -74,8 +121,10 @@ pub fn write_mp4<W: Write + Seek>(
             Ok(TrackSpec {
                 encoding: if index == video {
                     Encoding::Ffv1V1 {
-                        width: t.width.into(),
-                        height: t.height.into(),
+                        width: u32::try_from(output_dimensions.0)
+                            .map_err(|_| invalid("FFV1 output width overflow"))?,
+                        height: u32::try_from(output_dimensions.1)
+                            .map_err(|_| invalid("FFV1 output height overflow"))?,
                     }
                 } else {
                     Encoding::Aac {
@@ -89,8 +138,21 @@ pub fn write_mp4<W: Write + Seek>(
             })
         })
         .collect::<Result<Vec<_>>>()?;
-    let options = plans.iter().map(|p| p.options.clone()).collect::<Vec<_>>();
-    let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
+    let mut options = plans.iter().map(|p| p.options.clone()).collect::<Vec<_>>();
+    if bake_rotation {
+        options[video].rotation = 0;
+        let [width, height] = reader.dimensions();
+        options[video]
+            .video
+            .as_mut()
+            .ok_or_else(|| invalid("missing video metadata"))?
+            .pixel_aspect = crate::native_export::transformed_aspect(
+            reader.pixel_aspect(),
+            width,
+            height,
+            geometry,
+        )?;
+    }
     let mut writer =
         PacketWriter::new_with_metadata(output, &specs, &options, &FileMetadata::from_mp4(&input))?;
     if let Some(hook) = progress {
@@ -117,13 +179,17 @@ pub fn write_mp4<W: Write + Seek>(
         pixel_format: String::new(),
         encoder: "ffv1".into(),
         fvid_crop_payload_copies: 0,
-        vertical_flip: false,
-        horizontal_flip: false,
+        vertical_flip: geometry.vertical_flip,
+        horizontal_flip: geometry.horizontal_flip,
     };
     let mut depth = None;
     loop {
         check(cancel)?;
-        let frame = reader.read_frame_raw()?;
+        let frame = if let Some(first) = first_frame.take() {
+            Some(first)
+        } else {
+            reader.read_frame_raw()?
+        };
         let time = if frame.is_some() {
             let (start, end, scale) = reader
                 .frame_interval()
@@ -190,11 +256,23 @@ pub fn write_mp4<W: Write + Seek>(
             return Err(invalid("FFV1 stream geometry or depth changed"));
         }
         depth = Some(bit_depth);
-        let samples = crate::native_geometry::VideoGeometry::default().apply(&frame, w, h)?;
+        let samples = if let Some(samples) = prepared_first.take() {
+            samples
+        } else {
+            prepare(&frame, reader.dimensions())?
+        };
+        if (samples.width, samples.height) != output_dimensions
+            || samples.subsampling != output_layout
+        {
+            return Err(invalid("FFV1 transformed geometry changed"));
+        }
         let packet = crate::codec::ffv1_encoder::encode(&samples, bit_depth)?;
         check(cancel)?;
         let (pts, duration) = time.unwrap();
         writer.write_packet(video, pts, duration, true, &packet)?;
+        if geometry.crop.is_some() {
+            stats.fvid_crop_payload_copies += 1;
+        }
         stats.video_frames += 1;
         stats.decoded_frames += 1;
         stats.video_packets += 1;
@@ -202,6 +280,7 @@ pub fn write_mp4<W: Write + Seek>(
             Some([2, 2]) => "yuv420p",
             Some([2, 1]) => "yuv422p",
             Some([1, 1]) => "yuv444p",
+            Some([1, 2]) => "yuv440p",
             _ => return Err(invalid("unexpected FFV1 input subsampling")),
         };
         stats.pixel_format = if bit_depth == 8 {
@@ -221,19 +300,26 @@ pub fn write_mp4<W: Write + Seek>(
     Ok((stats, event))
 }
 
-/// Exhaustive admission for the currently migrated identity transform.
+/// Whether the supported request leaves samples and display geometry unchanged.
 pub fn identity(transform: &crate::media_info::LosslessTransform) -> bool {
+    supports(transform)
+        && configuration(transform)
+            .is_ok_and(|(geometry, filters)| geometry.is_identity() && filters.is_empty())
+}
+
+/// Admission for currently owned spatial transformations.
+pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
     matches!(
         transform,
         crate::media_info::LosslessTransform {
-            crop: None,
-            vertical_flip: false,
-            horizontal_flip: false,
-            scale: None,
+            crop: _,
+            vertical_flip: _,
+            horizontal_flip: _,
+            scale: _,
             epx: None,
-            transpose: None,
+            transpose: _,
             rotate: None,
-            pad: None,
+            pad: _,
             burn_subs: None,
             overlay: None,
             xfade: None,
@@ -249,13 +335,13 @@ pub fn identity(transform: &crate::media_info::LosslessTransform) -> bool {
             hue: None,
             avgblur: None,
             boxblur: None,
-            negate: None,
+            negate: _,
             edgedetect: None,
-            sobel: None,
-            prewitt: None,
-            roberts: None,
-            kirsch: None,
-            scharr: None,
+            sobel: _,
+            prewitt: _,
+            roberts: _,
+            kirsch: _,
+            scharr: _,
             atadenoise: None,
             owdenoise: None,
             vaguedenoiser: None,
@@ -288,8 +374,8 @@ pub fn identity(transform: &crate::media_info::LosslessTransform) -> bool {
             removegrain: None,
             yaepblur: None,
             vibrance: None,
-            dilation: None,
-            erosion: None,
+            dilation: _,
+            erosion: _,
             colorize: None,
             exposure: None,
             chromashift: None,
@@ -336,11 +422,55 @@ pub fn identity(transform: &crate::media_info::LosslessTransform) -> bool {
             minterpolate: None,
             fps: None,
             colorspace: None,
-            zscale: None,
+            zscale: _,
             tonemap: None,
             pix_fmt: None,
             interval: None,
             seek: false,
         }
-    )
+    ) && configuration(transform).is_ok()
+}
+
+/// Convert shared lossless options to the owned spatial pipeline.
+pub fn configuration(
+    transform: &crate::media_info::LosslessTransform,
+) -> Result<(
+    crate::native_geometry::VideoGeometry,
+    crate::native_pixels::PixelFilters,
+)> {
+    let geometry = crate::native_geometry::VideoGeometry {
+        crop: transform.crop.map(|r| [r.x, r.y, r.width, r.height]),
+        horizontal_flip: transform.horizontal_flip,
+        vertical_flip: transform.vertical_flip,
+        scale: transform
+            .scale
+            .map(|r| [r.width as usize, r.height as usize]),
+        transpose: transform
+            .transpose
+            .map(|r| crate::native_geometry::Transpose::parse(r.as_str()))
+            .transpose()?,
+        pad: transform.pad.map(|r| {
+            [
+                r.width as usize,
+                r.height as usize,
+                r.x as usize,
+                r.y as usize,
+            ]
+        }),
+    };
+    let request = crate::media_info::DecodeTransform {
+        negate: transform.negate.clone(),
+        sobel: transform.sobel.clone(),
+        prewitt: transform.prewitt.clone(),
+        roberts: transform.roberts.clone(),
+        kirsch: transform.kirsch.clone(),
+        scharr: transform.scharr.clone(),
+        dilation: transform.dilation.clone(),
+        erosion: transform.erosion.clone(),
+        ..Default::default()
+    };
+    Ok((
+        geometry,
+        crate::native_pixels::PixelFilters::from_request(&request)?,
+    ))
 }

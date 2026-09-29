@@ -408,3 +408,26 @@ fn rgb_padding_is_zero_without_splitting_colour_triplets() {
     expected[21..24].copy_from_slice(&[4, 5, 6]);
     assert_eq!(out.data, expected);
 }
+
+#[test]
+fn media_sampling_preserves_the_native_contract_separately() {
+    let input = RawFrame::Rgb((0..16u8).flat_map(|x| [x, x, x]).collect());
+    let geometry = VideoGeometry {
+        scale: Some([12, 1]),
+        ..Default::default()
+    };
+    let media = geometry.apply_media(&input, 16, 1).unwrap();
+    let native = geometry.apply(&input, 16, 1).unwrap();
+    assert_eq!(
+        media.data.chunks_exact(3).map(|p| p[0]).collect::<Vec<_>>(),
+        [0, 1, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15]
+    );
+    assert_eq!(
+        native
+            .data
+            .chunks_exact(3)
+            .map(|p| p[0])
+            .collect::<Vec<_>>(),
+        [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15]
+    );
+}

@@ -270,7 +270,7 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
     control.emit(true);
     Ok(crate::media_control::ProgressEvent {packets:count,payload_bytes,done:true})
 }
-fn transformed_aspect(
+pub(crate) fn transformed_aspect(
     aspect: (u32, u32),
     width: usize,
     height: usize,
@@ -821,6 +821,14 @@ fn remux_mp4_matroska_inner(source: &Path, destination: &Path,
 /// Decode MP4 video to owned FFV1 and copy all supported AAC companions.
 /// Destination is atomically published only after successful flush and sync.
 pub fn transcode_mp4_ffv1(source:&Path,destination:&Path,cancel:Option<&crate::media_control::CancelFlag>,progress:Option<&crate::media_control::ProgressHook>)->Result<crate::media_info::LosslessStats> {
+    transcode_mp4_ffv1_transformed(source,destination,&Default::default(),&Default::default(),cancel,progress)
+}
+
+/// Spatial FFV1 export with the same atomic publication guarantees.
+pub fn transcode_mp4_ffv1_transformed(source:&Path,destination:&Path,
+    geometry:&crate::native_geometry::VideoGeometry,filters:&crate::native_pixels::PixelFilters,
+    cancel:Option<&crate::media_control::CancelFlag>,progress:Option<&crate::media_control::ProgressHook>,
+)->Result<crate::media_info::LosslessStats> {
     if destination.extension().and_then(|s|s.to_str())!=Some("mkv"){return Err(invalid("lossless export requires FFV1 in .mkv"));}
     if cancel.is_some_and(|c|c.is_cancelled()){return Err(invalid("media operation cancelled"));}
     let directory=destination.parent().filter(|p|!p.as_os_str().is_empty()).unwrap_or(Path::new("."));
@@ -829,7 +837,7 @@ pub fn transcode_mp4_ffv1(source:&Path,destination:&Path,cancel:Option<&crate::m
         match OpenOptions::new().write(true).create_new(true).open(&path){Ok(file)=>Some(Ok((Temporary(path),file))),Err(error) if error.kind()==std::io::ErrorKind::AlreadyExists=>None,Err(error)=>Some(Err(error))}
     }).ok_or_else(||invalid("cannot reserve FFV1 output"))??;
     let mut output=BufWriter::new(file);
-    let (stats,event)=crate::native_lossless::write_mp4(source,&mut output,cancel,progress)?;
+    let (stats,event)=crate::native_lossless::write_mp4_transformed(source,&mut output,geometry,filters,cancel,progress)?;
     output.flush()?;output.get_ref().sync_all()?;drop(output);
     if cancel.is_some_and(|c|c.is_cancelled()){return Err(invalid("media operation cancelled"));}
     std::fs::hard_link(&temporary.0,destination)?;

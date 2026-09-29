@@ -2024,14 +2024,14 @@ of source timing or full lossless-export migration.
 
 `media transcode-lossless INPUT.mp4 OUTPUT.mkv [--progress] [--quiet]` and
 `media::transcode_lossless` now use the owned decoder, FFV1 encoder and
-Matroska writer for an identity request with one AVC/HEVC video track and
+Matroska writer for a supported spatial request with one AVC/HEVC video track and
 zero or more AAC tracks. All represented tracks must be supported. The
 existing MP4 remux planner supplies copied AAC packet timing, CodecDelay,
 DiscardPadding, track names/languages, pixel aspect, rotation, colour/HDR,
 file tags and chapters. The new FFV1 packets use the native decoder's exact
 presentation intervals rounded independently to nanoseconds, so variable
-cadence and contiguous edit boundaries are retained. Video pixels remain
-in coded orientation, with rotation represented in metadata.
+cadence and contiguous edit boundaries are retained. Without spatial changes,
+video pixels remain in coded orientation, with rotation represented in metadata.
 
 `native_lossless::write_mp4` is the streaming primitive;
 `native_export::transcode_mp4_ffv1` adds temporary-file cleanup, flush/sync,
@@ -2046,7 +2046,40 @@ The explicit FFmpeg oracle verifies all video samples and the exact audible
 AAC interval after encoder delay and tail trimming. Its fixture preparation
 and independent decode are reference-only; production does not invoke it.
 
-Nonidentity transforms, custom selection/budgets/metadata mutations, other
+Transforms beyond the owned spatial set, custom selection/budgets/metadata mutations, other
 containers/codecs, multiple video tracks and complex edit schedules retain
 the existing adapter path. Native FFV1 playback/decoding is still absent.
 This closes one real lossless-export path, not aggregate `media` independence.
+
+
+### Spatial transformations in owned FFV1 export (2026-09-29)
+
+The owned MP4 FFV1 path also handles crop, hflip/vflip, four transpose modes,
+black pad, nearest scale, negate, Sobel/Prewitt/Roberts/Kirsch/Scharr and
+dilation/erosion. Shared `LosslessTransform` admission is exhaustive: other
+fields keep the request on the existing adapter path. Literal pixel options
+use owned parsers; legacy expressions remain outside this slice.
+
+`write_mp4_transformed` and `transcode_mp4_ffv1_transformed` accept the native
+geometry and pixel pipeline. API and CLI preserve operation order independent
+of flag order. For any nonidentity spatial request, display rotation is baked
+before user operations, output rotation becomes zero, and pixel aspect is
+updated for crop/transpose/pad/resize. AAC packets, priming/tail metadata,
+chapters and timestamps follow the existing unchanged packet path. The first
+transformed frame determines output geometry before the Matroska header;
+subsequent geometry/depth changes are rejected. Crop currently materializes
+one packed output per frame and reports it in `fvid_crop_payload_copies`.
+
+The `VideoGeometry::apply_media` / `apply_display_media` entrypoints reproduce
+the legacy media convention using owned arithmetic: rounded 16.16 point
+sampling and normalized pad colours (10-bit limited chroma 514). The existing
+`apply` / `apply_display` and Y4M paths retain their documented exact-centre
+sampling and neutral chroma 512. No external scaling or drawing library is
+called by either convention.
+
+The reference test in `tests/native_lossless.rs` compares 32 complete
+transformation chains/stages on AVC, HEVC Main/Main10 and rotated anamorphic
+MP4 against independent FFmpeg decode/filter results. Additional tests cover
+API/CLI byte identity, retained AAC packets/timing, aspect/rotation metadata,
+invalid crop cleanup, and both sampling conventions. Full `media` dependency
+removal and native decoding of exported FFV1 remain outstanding.

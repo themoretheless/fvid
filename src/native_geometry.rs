@@ -71,6 +71,25 @@ impl VideoGeometry {
     /// Crop, reflect, transpose, pad, then resize, in that order. Nearest sampling maps output
     /// pixel centres to the containing input pixel; ties choose the higher index.
     pub fn apply(&self, frame: &RawFrame, width: usize, height: usize) -> Result<GeometryFrame> {
+        self.apply_with_sampling(frame, width, height, false)
+    }
+    /// Point sampling and pad colour compatible with the existing media adapter.
+    /// Native `apply` retains its exact-centre and neutral-chroma contract.
+    pub fn apply_media(
+        &self,
+        frame: &RawFrame,
+        width: usize,
+        height: usize,
+    ) -> Result<GeometryFrame> {
+        self.apply_with_sampling(frame, width, height, true)
+    }
+    fn apply_with_sampling(
+        &self,
+        frame: &RawFrame,
+        width: usize,
+        height: usize,
+        media: bool,
+    ) -> Result<GeometryFrame> {
         if width == 0 || height == 0 {
             return Err(invalid("empty video geometry"));
         }
@@ -167,6 +186,7 @@ impl VideoGeometry {
             (!rgb).then_some([sx, sy]),
             depth,
             full,
+            media,
         )
     }
 
@@ -180,8 +200,28 @@ impl VideoGeometry {
         height: usize,
         rotation: u16,
     ) -> Result<GeometryFrame> {
+        self.apply_display_with_sampling(frame, width, height, rotation, false)
+    }
+    /// Display orientation followed by the media-compatible spatial convention.
+    pub fn apply_display_media(
+        &self,
+        frame: &RawFrame,
+        width: usize,
+        height: usize,
+        rotation: u16,
+    ) -> Result<GeometryFrame> {
+        self.apply_display_with_sampling(frame, width, height, rotation, true)
+    }
+    fn apply_display_with_sampling(
+        &self,
+        frame: &RawFrame,
+        width: usize,
+        height: usize,
+        rotation: u16,
+        media: bool,
+    ) -> Result<GeometryFrame> {
         if rotation == 0 {
-            return self.apply(frame, width, height);
+            return self.apply_with_sampling(frame, width, height, media);
         }
         let display = match rotation {
             90 => Self {
@@ -204,7 +244,7 @@ impl VideoGeometry {
         } else {
             (height, width)
         };
-        let normalized = display.apply(frame, w, h)?;
+        let normalized = display.apply_with_sampling(frame, w, h, media)?;
         let (depth, full) = match frame {
             RawFrame::Avc { picture, colour } => (picture.bit_depth, colour.full),
             RawFrame::Planar8(p) => (8, p.colour.full),
@@ -221,6 +261,7 @@ impl VideoGeometry {
             normalized.subsampling,
             depth,
             full,
+            media,
         )
     }
 
@@ -233,6 +274,7 @@ impl VideoGeometry {
         subsampling: Option<[usize; 2]>,
         depth: u8,
         full: bool,
+        media: bool,
     ) -> Result<GeometryFrame> {
         let rgb = subsampling.is_none();
         let [sx, sy] = subsampling.unwrap_or([1, 1]);
@@ -318,6 +360,9 @@ impl VideoGeometry {
                 .map_err(|_| invalid("cannot allocate transformed frame"))?;
             let black: u16 = if rgb {
                 0
+            } else if media && !full {
+                let code = if plane == 0 { 16u32 } else { 128 };
+                ((code * ((1u32 << depth) - 1) + 127) / 255) as u16
             } else if plane != 0 {
                 128u16 << (depth - 8)
             } else if full {
@@ -332,9 +377,9 @@ impl VideoGeometry {
                 [b[0], b[1], 0]
             };
             for row in 0..dh {
-                let py = centre(row, canvas_h / ody, dh);
+                let py = sample_index(row, canvas_h / ody, dh, media);
                 for col in 0..dw {
-                    let px = centre(col, canvas_w / odx, dw);
+                    let px = sample_index(col, canvas_w / odx, dw, media);
                     if px < pad_x / odx
                         || py < pad_y / ody
                         || px - pad_x / odx >= tw / odx
@@ -373,4 +418,12 @@ impl VideoGeometry {
 
 fn centre(index: usize, input: usize, output: usize) -> usize {
     (((index as u128 * 2 + 1) * input as u128) / (output as u128 * 2)) as usize
+}
+
+fn sample_index(index: usize, input: usize, output: usize, media: bool) -> usize {
+    if !media {
+        return centre(index, input, output);
+    }
+    let increment = (((input as u128) << 16) + (output as u128 / 2)) / output as u128;
+    (((index as u128 * increment + increment / 2) >> 16) as usize).min(input - 1)
 }
