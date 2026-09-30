@@ -10,6 +10,7 @@
 //! it. The copier stays a span of the item ahead of the reader rather than
 //! copying everything, so the disk it uses is the buffer, not the library.
 use std::{
+    collections::BTreeMap,
     fs::{self, File, OpenOptions},
     io::{self, Read, Seek, SeekFrom, Write},
     path::{Path, PathBuf},
@@ -154,11 +155,13 @@ pub fn source_rate(path: &Path, probe: u64) -> Option<f64> {
 struct Window {
     /// The item offset of the first byte the spool file can answer for.
     base: u64,
-    /// One past the last byte written, so every offset below it is on disk.
+    /// Upper bound of cached bytes; there may be gaps between blocks.
     end: u64,
     /// Where the reader stands, so the copier runs ahead of playback rather
     /// than ahead of nothing.
     read_at: u64,
+    play_at: Option<u64>,
+    blocks: BTreeMap<u64, (u64, u64)>, // source offset -> (disk slot, byte count)
 }
 
 struct Shared {
@@ -170,11 +173,7 @@ struct Shared {
     /// much room the copier has filled, this says how much of it is still
     /// unbitten.
     slack: Arc<AtomicU64>,
-    /// Where the window sits in the item, as the two edges of `[base, end)`, so
-    /// a watcher can draw the local copy where it belongs on the file rather
-    /// than as a pile of bytes. The pair is published together under the
-    /// window's lock but read one at a time, which can show an edge a block
-    /// stale for a frame; it can never show a byte the spool does not have.
+    /// Bounding offsets for compatibility; exact coverage comes from `ranges`.
     from: Arc<AtomicU64>,
     to: Arc<AtomicU64>,
     /// The copier has stopped: end of file, an unmet read, or shutdown.
@@ -189,33 +188,33 @@ struct Shared {
     /// oldest block is given up to the newest one that overwrites it.
     slots: u64,
     stop: AtomicBool,
+    terminated: AtomicBool,
     window: Mutex<Window>,
     wake: Condvar,
 }
 
 impl Shared {
-    /// Where a block of the item lives in the ring.
-    fn slot(&self, at: u64) -> u64 {
-        (at / CHUNK % self.slots) * CHUNK
-    }
-
-    /// Where the window stands, for a reader that has to know what is on disk.
-    fn span(&self) -> (u64, u64) {
-        let window = self.window.lock().unwrap_or_else(|p| p.into_inner());
-        (window.base, window.end)
-    }
-
     /// Publishes where the window stands for the watchers, from the window the
     /// caller already holds locked: a mirror taken outside the lock can be out
     /// of date by the time it lands, and a preroll would wait on a lead that
     /// has already been bitten.
     fn mirror(&self, window: &Window) {
-        self.held
-            .store(window.end.saturating_sub(window.base), Ordering::Release);
-        self.slack.store(
-            lead_ahead(window.read_at, window.base, window.end),
-            Ordering::Release,
-        );
+        let held = window.blocks.values().map(|(_, bytes)| bytes).sum();
+        self.held.store(held, Ordering::Release);
+        let position = window.play_at.unwrap_or(window.read_at);
+        let mut end = position;
+        loop {
+            let at = end / CHUNK * CHUNK;
+            let Some((_, bytes)) = window.blocks.get(&at) else {
+                break;
+            };
+            let next = at + bytes;
+            if next <= end {
+                break;
+            }
+            end = next;
+        }
+        self.slack.store(end - position, Ordering::Release);
         self.from.store(window.base, Ordering::Release);
         self.to.store(window.end, Ordering::Release);
     }
@@ -242,10 +241,9 @@ impl Shared {
 /// the `Spool` itself is moved into the decoder's reader and out of reach.
 #[derive(Clone)]
 pub struct SpoolHandle {
+    shared: Arc<Shared>,
     held: Arc<AtomicU64>,
     slack: Arc<AtomicU64>,
-    from: Arc<AtomicU64>,
-    to: Arc<AtomicU64>,
     finished: Arc<AtomicBool>,
 }
 
@@ -264,15 +262,36 @@ impl SpoolHandle {
         self.slack.load(Ordering::Acquire)
     }
 
-    /// Where the local copy sits in the item, as `[from, to)` offsets: the
-    /// window has a place as well as a size, because it follows the reader and
-    /// leaves the bytes behind it on the mount again. A bar drawn from this says
-    /// which stretch of the file answers without asking the source.
+    /// Bounding offsets only. Use `ranges()` to avoid inventing cached gaps.
     pub fn covered(&self) -> (u64, u64) {
-        (
-            self.from.load(Ordering::Acquire),
-            self.to.load(Ordering::Acquire),
-        )
+        let window = self.shared.window.lock().unwrap_or_else(|p| p.into_inner());
+        (window.base, window.end)
+    }
+
+    /// Anchor prefetch to media playback, independently of metadata seeks.
+    pub fn prioritize(&self, offset: u64) {
+        let mut window = self.shared.window.lock().unwrap_or_else(|p| p.into_inner());
+        window.play_at = Some(offset);
+        self.shared.finished.store(
+            self.shared.terminated.load(Ordering::Acquire),
+            Ordering::Release,
+        );
+        self.shared.mirror(&window);
+        self.shared.wake.notify_all();
+    }
+
+    /// Exact cached byte ranges, including disjoint future sections.
+    pub fn ranges(&self) -> Vec<(u64, u64)> {
+        let window = self.shared.window.lock().unwrap_or_else(|p| p.into_inner());
+        let mut ranges: Vec<(u64, u64)> = Vec::new();
+        for (&at, &(_, bytes)) in &window.blocks {
+            if let Some(last) = ranges.last_mut().filter(|last| last.1 == at) {
+                last.1 += bytes;
+            } else {
+                ranges.push((at, at + bytes));
+            }
+        }
+        ranges
     }
 
     /// Whether the copier has stopped, so a wait for a lead this source cannot
@@ -340,10 +359,13 @@ impl Spool {
             claim: AtomicU64::new(u64::MAX),
             slots,
             stop: AtomicBool::new(false),
+            terminated: AtomicBool::new(false),
             window: Mutex::new(Window {
                 base: 0,
                 end: 0,
                 read_at: 0,
+                play_at: None,
+                blocks: BTreeMap::new(),
             }),
             wake: Condvar::new(),
         });
@@ -378,10 +400,9 @@ impl Spool {
     /// What a caller watches while this reader is busy with the item.
     pub fn handle(&self) -> SpoolHandle {
         SpoolHandle {
+            shared: self.shared.clone(),
             held: self.shared.held.clone(),
             slack: self.shared.slack.clone(),
-            from: self.shared.from.clone(),
-            to: self.shared.to.clone(),
             finished: self.shared.finished.clone(),
         }
     }
@@ -408,81 +429,79 @@ impl Spool {
 /// the reader and following the reader when it moves further away than that.
 fn copy(mut source: File, spool: &mut File, size: u64, lead: u64, shared: &Arc<Shared>) {
     let mut buffer = vec![0u8; CHUNK_BYTES];
-    loop {
-        if shared.stop.load(Ordering::Relaxed) {
-            break;
-        }
-        // Claim the next offset under the same lock that says what is on disk,
-        // so a committed offset always has its bytes behind it.
+    while !shared.stop.load(Ordering::Relaxed) {
         let at = {
-            let mut window = shared.window.lock().unwrap_or_else(|p| p.into_inner());
-            let read_at = window.read_at;
-            if read_at >= window.end.saturating_add(lead)
-                || read_at.saturating_add(lead) < window.base
-            {
-                // The reader has moved further from the window than a lead's
-                // worth of gap, in either direction. The bytes it left behind
-                // are not going to be watched again soon, and pulling them would
-                // download the whole item to reach a byte the reader is already
-                // asking for - and pay twice, since the reader is taking those
-                // bytes from the source itself meanwhile.
-                let base = (read_at / CHUNK) * CHUNK;
-                window.base = base;
-                window.end = base;
-                shared.mirror(&window);
-            }
-            window.end
-        };
-        if at >= size {
-            break;
-        }
-        // A window that has run its lead is full: wait for the reader to make
-        // room rather than filling the disk behind it.
-        let room = {
             let window = shared.window.lock().unwrap_or_else(|p| p.into_inner());
-            window.end.saturating_sub(window.read_at) < lead
+            let position = window.play_at.unwrap_or(window.read_at);
+            let mut at = position / CHUNK * CHUNK;
+            let limit = position.saturating_add(lead).min(size);
+            while at < limit && window.blocks.contains_key(&at) {
+                at += CHUNK;
+            }
+            (at < limit).then_some(at)
         };
-        if !room {
-            shared.pause(Duration::from_millis(100));
+        let Some(at) = at else {
+            // EOF is an idle state, not termination: an index read at the tail
+            // must not prevent the copier serving playback back at the start.
+            let window = shared.window.lock().unwrap_or_else(|p| p.into_inner());
+            shared.finished.store(
+                window.play_at.unwrap_or(window.read_at) >= size || window.end >= size,
+                Ordering::Release,
+            );
+            drop(window);
+            shared.pause(Duration::from_millis(20));
             continue;
-        }
-        // Say which block is in flight before fetching it: a reader standing in
-        // the same block waits for it rather than pulling it a second time.
+        };
+        shared.finished.store(false, Ordering::Release);
         shared.claim.store(at, Ordering::Release);
-        if source.seek(SeekFrom::Start(at)).is_err() {
-            break;
-        }
-        // A block is copied whole before it is laid down: the ring is made of
-        // blocks, and a short one would leave everything after it out of
-        // position. Only the end of the item is allowed to be a short block.
-        let wanted = CHUNK.min(size.saturating_sub(at));
-        let bytes = wanted as usize;
-        if source.read_exact(&mut buffer[..bytes]).is_err() {
-            break;
-        }
-        if spool
-            .seek(SeekFrom::Start(shared.slot(at)))
-            .and_then(|_| spool.write_all(&buffer[..bytes]))
+        let bytes = CHUNK.min(size - at);
+        if source
+            .seek(SeekFrom::Start(at))
+            .and_then(|_| source.read_exact(&mut buffer[..bytes as usize]))
             .is_err()
         {
             break;
         }
         let mut window = shared.window.lock().unwrap_or_else(|p| p.into_inner());
-        window.end = at.saturating_add(wanted);
-        // The window is the disk this spool costs, so its back edge follows its
-        // front: what the reader has passed is not watched again, and a lead that
-        // only ever extends forward is a copy of the whole item. Nothing is
-        // released by it - the file is a ring of the window's size, and a slot is
-        // given up by the block that overwrites it.
-        window.base = window.end.saturating_sub(lead + CHUNK);
+        // Allocate a free slot; when full, evict played blocks before any data
+        // ahead. Among future blocks keep the closest ones to playback.
+        let slot = if window.blocks.len() < (lead.div_ceil(CHUNK) + 1) as usize {
+            (0..shared.slots)
+                .find(|slot| !window.blocks.values().any(|(used, _)| used == slot))
+                .unwrap()
+        } else {
+            let victim = window
+                .blocks
+                .keys()
+                .copied()
+                .find(|offset| {
+                    offset.saturating_add(CHUNK) <= window.play_at.unwrap_or(window.read_at)
+                })
+                .unwrap_or_else(|| *window.blocks.keys().next_back().unwrap());
+            window.blocks.remove(&victim).unwrap().0
+        };
+        if spool
+            .seek(SeekFrom::Start(slot * CHUNK))
+            .and_then(|_| spool.write_all(&buffer[..bytes as usize]))
+            .is_err()
+        {
+            break;
+        }
+        window.blocks.insert(at, (slot, bytes));
+        window.base = *window.blocks.keys().next().unwrap();
+        window.end = window
+            .blocks
+            .iter()
+            .next_back()
+            .map(|(at, (_, bytes))| at + bytes)
+            .unwrap();
         shared.mirror(&window);
-        shared.wake.notify_all();
-        // The block has landed, so nothing is in flight for it: a stale claim
-        // would park a reader that has already outrun it.
         shared.claim.store(u64::MAX, Ordering::Release);
+        shared.wake.notify_all();
     }
+    shared.claim.store(u64::MAX, Ordering::Release);
+    shared.terminated.store(true, Ordering::Release);
     shared.finished.store(true, Ordering::Release);
-    let _window = shared.window.lock().unwrap_or_else(|p| p.into_inner());
     shared.wake.notify_all();
 }
 
@@ -498,7 +517,13 @@ impl Read for Spool {
             && !self.exhausted()
         {
             let until = Instant::now() + CHUNK_WAIT;
-            while self.shared.span().1 <= self.position
+            while !self
+                .shared
+                .window
+                .lock()
+                .unwrap_or_else(|p| p.into_inner())
+                .blocks
+                .contains_key(&(self.position / CHUNK * CHUNK))
                 && Instant::now() < until
                 && !self.exhausted()
             {
@@ -509,32 +534,21 @@ impl Read for Spool {
         // back as the window moves forward, and what it has not handed over yet
         // must not go missing under a read standing in the middle of it.
         let mut window = self.shared.window.lock().unwrap_or_else(|p| p.into_inner());
-        if self.position >= window.base && self.position < window.end {
-            let want = (window.end - self.position).min(out.len() as u64) as usize;
-            // The window is read a block at a time because the ring it lives in
-            // wraps: the newest bytes can sit below the oldest ones in the file.
-            let mut done = 0usize;
-            while done < want {
-                let at = self.position + done as u64;
-                let inside = (at % CHUNK) as usize;
-                let take = (CHUNK_BYTES - inside).min(want - done);
-                self.spool
-                    .seek(SeekFrom::Start(self.shared.slot(at) + inside as u64))?;
-                let read = self.spool.read(&mut out[done..done + take])?;
-                if read == 0 {
-                    break;
+        let block = self.position / CHUNK * CHUNK;
+        if let Some(&(slot, bytes)) = window.blocks.get(&block) {
+            let inside = self.position - block;
+            if inside < bytes {
+                let take = (bytes - inside).min(out.len() as u64) as usize;
+                self.spool.seek(SeekFrom::Start(slot * CHUNK + inside))?;
+                let done = self.spool.read(&mut out[..take])?;
+                if done > 0 {
+                    self.position += done as u64;
+                    window.read_at = self.position;
+                    self.shared.mirror(&window);
+                    self.shared.wake.notify_all();
+                    return Ok(done);
                 }
-                done += read;
             }
-            if done > 0 {
-                self.position += done as u64;
-                window.read_at = self.position;
-                self.shared.mirror(&window);
-                self.shared.wake.notify_all();
-                return Ok(done);
-            }
-            // A local read that answers nothing while the copier still has the
-            // byte to give is not the end of the item, so the source is asked.
         }
         drop(window);
         if self.staged == 0 || self.staged_at != self.position {
@@ -571,6 +585,10 @@ impl Seek for Spool {
         };
         self.position = base;
         self.staged = 0;
+        self.shared.finished.store(
+            self.shared.terminated.load(Ordering::Acquire),
+            Ordering::Release,
+        );
         self.shared.arrive(base);
         Ok(base)
     }
@@ -612,8 +630,12 @@ fn temporary(path: &Path, size: u64) -> PathBuf {
         })
         .unwrap_or_default();
     std::env::temp_dir().join(format!(
-        "fvid-spool-{}-{name}-{size}.bin",
-        std::process::id()
+        "fvid-spool-{}-{}-{name}-{size}.bin",
+        std::process::id(),
+        {
+            static NEXT: AtomicU64 = AtomicU64::new(0);
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        }
     ))
 }
 

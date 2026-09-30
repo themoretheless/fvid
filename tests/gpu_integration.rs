@@ -93,3 +93,81 @@ fn explicit_cpu_path_preserves_payload_and_reports_backend() {
     );
     assert!(String::from_utf8_lossy(&result.stderr).contains("backend=cpu"));
 }
+
+#[test]
+fn shader_request_rejects_cpu_and_invalid_source_without_publication() {
+    let directory = Directory::new();
+    let input = directory.0.join("input.y4m");
+    let output = directory.0.join("output.y4m");
+    let shader = directory.0.join("effect.wgsl");
+    fs::write(
+        &input,
+        b"YUV4MPEG2 W2 H2 F1:1 Ip C420jpeg\nFRAME\n\x01\x02\x03\x04\x05\x06",
+    )
+    .unwrap();
+    for source in ["not wgsl", include_str!("../shaders/negate.wgsl")] {
+        fs::write(&shader, source).unwrap();
+        let result = Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .arg(&input)
+            .arg(&output)
+            .args(["--backend", "cpu", "--shader"])
+            .arg(&shader)
+            .output()
+            .unwrap();
+        assert!(!result.status.success());
+        assert!(!output.exists());
+        assert_eq!(fs::read_dir(&directory.0).unwrap().count(), 2);
+    }
+}
+
+#[cfg(feature = "gpu")]
+#[test]
+#[ignore = "requires a physical GPU; set FVID_SHADER_BACKEND"]
+fn cli_shader_chain_executes_without_intermediate_transfers() {
+    let backend =
+        std::env::var("FVID_SHADER_BACKEND").expect("explicit physical GPU backend required");
+    assert!(["metal", "vulkan", "dx12", "gl"].contains(&backend.as_str()));
+    let directory = Directory::new();
+    let input = directory.0.join("input.y4m");
+    let output = directory.0.join("output.y4m");
+    fs::write(
+        &input,
+        b"YUV4MPEG2 W2 H2 F1:1 Ip C420jpeg\nFRAME\n\x0a\x1e\x50\xb4\x80\x80",
+    )
+    .unwrap();
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let result = Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .arg(&input)
+        .arg(&output)
+        .args(["--backend", &backend, "--hflip", "--shader"])
+        .arg(root.join("shaders/negate.wgsl"))
+        .args(["--then", "--shader"])
+        .arg(root.join("shaders/boxblur.wgsl"))
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let actual = fs::read(output).unwrap();
+    let negated = [225u32, 245, 75, 175];
+    let mut expected = vec![];
+    for y in 0isize..2 {
+        for x in 0isize..2 {
+            let mut sum = 0;
+            for dy in -1..=1 {
+                for dx in -1..=1 {
+                    sum += negated[((y + dy).clamp(0, 1) * 2 + (x + dx).clamp(0, 1)) as usize];
+                }
+            }
+            expected.push((sum / 9) as u8);
+        }
+    }
+    expected.extend([128, 128]);
+    assert_eq!(&actual[actual.len() - 6..], expected);
+    let diagnostics = String::from_utf8_lossy(&result.stderr);
+    assert!(diagnostics.contains("uploads=1 downloads=1"));
+    assert!(diagnostics.contains("filter_passes=2"));
+    assert!(diagnostics.contains(&format!("backend={backend}")));
+}

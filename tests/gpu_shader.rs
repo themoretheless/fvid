@@ -9,8 +9,8 @@ const ENTRY_POINTS: [(ShaderStage, &str); 2] = [
     (ShaderStage::Fragment, "fragment"),
 ];
 
-fn shader() -> (Module, ModuleInfo) {
-    let module = naga::front::wgsl::parse_str(SOURCE).expect("WGSL must parse");
+fn shader(source: &str) -> (Module, ModuleInfo) {
+    let module = naga::front::wgsl::parse_str(source).expect("WGSL must parse");
     let info = Validator::new(ValidationFlags::all(), Capabilities::empty())
         .validate(&module)
         .expect("shader must validate without optional capabilities");
@@ -26,7 +26,7 @@ fn binding(index: u32) -> ResourceBinding {
 
 #[test]
 fn shader_needs_no_compute_or_storage_resources() {
-    let (module, _) = shader();
+    let (module, _) = shader(SOURCE);
     assert_eq!(module.entry_points.len(), ENTRY_POINTS.len());
     for (stage, name) in ENTRY_POINTS {
         assert!(
@@ -58,8 +58,8 @@ fn shader_needs_no_compute_or_storage_resources() {
     }
 }
 
-fn check_glsl(version: glsl::Version) {
-    let (module, info) = shader();
+fn check_glsl(version: glsl::Version, source: &str) {
+    let (module, info) = shader(source);
     let options = glsl::Options {
         version,
         binding_map: [(binding(0), 0), (binding(1), 1)].into(),
@@ -90,17 +90,21 @@ fn check_glsl(version: glsl::Version) {
 
 #[test]
 fn translates_vertex_and_fragment_to_desktop_glsl_330() {
-    check_glsl(glsl::Version::Desktop(330));
+    check_glsl(glsl::Version::Desktop(330), SOURCE);
 }
 
 #[test]
 fn translates_vertex_and_fragment_to_gles_300() {
-    check_glsl(glsl::Version::new_gles(300));
+    check_glsl(glsl::Version::new_gles(300), SOURCE);
 }
 
 #[test]
 fn translates_vertex_and_fragment_to_hlsl_51() {
-    let (module, info) = shader();
+    check_hlsl(SOURCE);
+}
+
+fn check_hlsl(source: &str) {
+    let (module, info) = shader(source);
     let options = hlsl::Options {
         shader_model: hlsl::ShaderModel::V5_1,
         fake_missing_bindings: false,
@@ -141,7 +145,11 @@ fn translates_vertex_and_fragment_to_hlsl_51() {
 
 #[test]
 fn translates_vertex_and_fragment_to_spirv_10() {
-    let (module, info) = shader();
+    check_spirv(SOURCE);
+}
+
+fn check_spirv(source: &str) {
+    let (module, info) = shader(source);
     let options = spv::Options {
         lang_version: (1, 0),
         fake_missing_bindings: false,
@@ -179,7 +187,11 @@ fn translates_vertex_and_fragment_to_spirv_10() {
 
 #[test]
 fn translates_vertex_and_fragment_to_metal_12() {
-    let (module, info) = shader();
+    check_metal(SOURCE);
+}
+
+fn check_metal(source: &str) {
+    let (module, info) = shader(source);
     let resources = msl::EntryPointResources {
         resources: [
             (
@@ -220,5 +232,22 @@ fn translates_vertex_and_fragment_to_metal_12() {
             .as_ref()
             .unwrap_or_else(|e| panic!("MSL {name} binding translation failed: {e:?}"));
         assert!(source.contains(translated_name));
+    }
+}
+
+#[cfg(feature = "gpu")]
+#[test]
+fn programmable_filters_translate_to_every_shader_backend() {
+    for source in [
+        include_str!("../shaders/negate.wgsl"),
+        include_str!("../shaders/boxblur.wgsl"),
+    ] {
+        let shader = fvid::resident::ByteShader::new(source).unwrap();
+        let source = shader.compiled_source();
+        check_glsl(glsl::Version::Desktop(330), source);
+        check_glsl(glsl::Version::new_gles(300), source);
+        check_hlsl(source);
+        check_spirv(source);
+        check_metal(source);
     }
 }
