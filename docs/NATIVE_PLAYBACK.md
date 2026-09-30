@@ -2686,3 +2686,10 @@ weights in stream order. JSON includes backend, sample frames, measured blocks,
 integrated LUFS (null for silence/short input) and weights. LRA/true-peak fields
 are absent because this command does not measure them yet. Legacy loudnorm
 and library measurement APIs remain available pending their migration.
+
+Owned loudness reports now include `sample_peak_dbfs`, measured from unweighted
+input PCM across all channels (including LFE). Zero/empty input returns null;
+short input can report sample peak without a complete loudness window. Values
+above full scale remain positive dBFS rather than clipping the input. This is
+a sample peak, not an interpolated true peak. Independent file comparisons
+cover PCM, ALAC and AAC; unit tests verify LFE, overload and rejected-input state.

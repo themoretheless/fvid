@@ -8,11 +8,14 @@ pub struct IntegratedLoudness {
     pub measured_blocks: u64,
     /// None for silence or streams shorter than a complete 400 ms window.
     pub integrated_lufs: Option<f64>,
+    /// Unweighted peak across all input channels; None for silence/empty input.
+    pub sample_peak_dbfs: Option<f64>,
 }
 /// Explicit channel energy weights avoid guessing layout from channel count.
 /// Use 1 for front channels, 1.41 for surrounds, 0 for LFE.
 /// Relative gating uses 0.01 LU histogram bins, bounding storage by level range.
 pub struct LoudnessMeter {
+    sample_peak: f64,
     filter: KWeighting,
     weights: Vec<f64>,
     ring: Vec<f64>,
@@ -36,6 +39,7 @@ impl LoudnessMeter {
         }
         let filter = KWeighting::new(sample_rate, weights.len())?;
         Ok(Self {
+            sample_peak: 0.0,
             filter,
             weights: weights.to_vec(),
             ring: vec![0.0; sample_rate as usize * 2 / 5],
@@ -58,6 +62,9 @@ impl LoudnessMeter {
             .ok_or("loudness sample count overflow")?;
         let mut scratch = [0.0; 64];
         for frame in pcm.chunks_exact(self.weights.len()) {
+            for sample in frame {
+                self.sample_peak = self.sample_peak.max(sample.abs());
+            }
             let samples = &mut scratch[..frame.len()];
             samples.copy_from_slice(frame);
             self.filter.process(samples)?;
@@ -105,6 +112,7 @@ impl LoudnessMeter {
             }
         }
         IntegratedLoudness {
+            sample_peak_dbfs: (self.sample_peak > 0.0).then(|| 20.0 * self.sample_peak.log10()),
             sample_frames: self.frames,
             measured_blocks: self.blocks,
             integrated_lufs: (gated_count > 0)
@@ -115,6 +123,18 @@ impl LoudnessMeter {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn peak_is_unweighted_and_rejected_input_does_not_change_it() {
+        let mut meter = LoudnessMeter::new(48000, &[1.0, 0.0]).unwrap();
+        assert!(meter.report().sample_peak_dbfs.is_none());
+        meter.push(&[0.25, -0.5]).unwrap();
+        assert!((meter.report().sample_peak_dbfs.unwrap() + 6.020599913279624).abs() < 1e-12);
+        assert!(meter.push(&[1.0, f64::NAN]).is_err());
+        assert!((meter.report().sample_peak_dbfs.unwrap() + 6.020599913279624).abs() < 1e-12);
+        assert!(meter.report().integrated_lufs.is_none());
+        meter.push(&[0.0, 2.0]).unwrap();
+        assert!((meter.report().sample_peak_dbfs.unwrap() - 6.020599913279624).abs() < 1e-12);
+    }
     #[test]
     fn silence_short_stream_chunking_and_layout_weights() {
         let mut silent = LoudnessMeter::new(48000, &[1.0]).unwrap();
@@ -399,7 +419,7 @@ mod file_tests {
             let result = Command::new(&binary)
                 .args(["-hide_banner", "-nostats", "-i"])
                 .arg(&source)
-                .args(["-af", "ebur128", "-f", "null", "-"])
+                .args(["-af", "ebur128=peak=sample", "-f", "null", "-"])
                 .output()
                 .unwrap();
             assert!(result.status.success());
@@ -417,6 +437,21 @@ mod file_tests {
             assert!(
                 (actual.integrated_lufs.unwrap() - expected).abs() < 0.11,
                 "{codec}/{ext}: {actual:?} vs {expected}"
+            );
+            let expected_peak: f64 = log
+                .lines()
+                .rev()
+                .find_map(|line| {
+                    line.trim()
+                        .strip_prefix("Peak:")
+                        .and_then(|s| s.split_whitespace().next())
+                        .and_then(|s| s.parse().ok())
+                })
+                .unwrap();
+            assert!(
+                (actual.sample_peak_dbfs.unwrap() - expected_peak).abs() < 0.11,
+                "{codec}/{ext} peak: {:?} vs {expected_peak}",
+                actual.sample_peak_dbfs
             );
         }
     }

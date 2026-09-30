@@ -50,7 +50,10 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
     assert_eq!(json["sample_frames"], 96000);
     let api = fvid::native_pcm::measure_loudness_file(&source, None, &[1.0], None).unwrap();
     assert_eq!(json["integrated_lufs"].as_f64(), api.integrated_lufs);
-    assert!(run(&["--quiet"]).stdout.is_empty());
+    assert_eq!(json["sample_peak_dbfs"].as_f64(), api.sample_peak_dbfs);
+    let quiet = run(&["--quiet"]);
+    assert!(quiet.status.success());
+    assert!(quiet.stdout.is_empty());
     for options in [
         &["--streams", "1"][..],
         &["--channel-weights", "1,1"][..],
