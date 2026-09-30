@@ -153,4 +153,4 @@ pub struct LosslessStats {
 }
 
 mod audio_mix;
-pub use audio_mix::{MixDuration, MixAudioOptions, MixAudioStats};
+pub use audio_mix::{MixDuration, MixAudioOptions, MixAudioStats, MergeAudioStats};

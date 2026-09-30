@@ -2,7 +2,7 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
-    if native_mix(args)? { return Ok(()); }
+    if native_mix(args)? || native_merge(args)? { return Ok(()); }
     if args.first().map(String::as_str)==Some("transcode-lossless") && args.len()>=3 {
         let mut owned=args.to_vec();owned[0]="decode".into();
         let (pixel_args,filters)=pixel_decode_args(&owned)?;
@@ -2119,7 +2119,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 if plan_paths.len() != 2 || geometry {
                     return Err("plan merge-audio requires INPUT INPUT".into());
                 }
-                fvid_media::plan_merge_audio(&plan_paths)?
+                fvid::media::plan_merge_audio(&plan_paths)?
             }
             Some("decode-audio") => {
                 if plan_paths.len() != 1 || geometry {
@@ -3222,7 +3222,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
     if command == "merge-audio" && paths.len() == 3 {
-        let stats = fvid_media::merge_audio(&paths[1..], &paths[0])?;
+        let stats = fvid::media::merge_audio(&paths[1..], &paths[0])?;
         emit_json(quiet, serde_json::to_string_pretty(&stats)?);
         return Ok(());
     }
@@ -3400,6 +3400,48 @@ fn native_mix(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
         }
     } else {
         let stats = fvid::native_audio_mix::mix_audio(sources, &paths[0], &options)?;
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&stats)?);
+        }
+    }
+    Ok(true)
+}
+
+fn native_merge(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let planning = args.first().map(String::as_str) == Some("plan");
+    let at = usize::from(planning);
+    if args.get(at).map(String::as_str) != Some("merge-audio") {
+        return Ok(false);
+    }
+    let mut paths = Vec::<std::path::PathBuf>::new();
+    let mut quiet = false;
+    let mut iter = args[at + 1..].iter();
+    while let Some(arg) = iter.next() {
+        match arg.as_str() {
+            "--quiet" => quiet = true,
+            "--" => {
+                paths.extend(iter.map(std::path::PathBuf::from));
+                break;
+            }
+            s if s.starts_with('-') => return Ok(false),
+            _ => paths.push(arg.into()),
+        }
+    }
+    let start = usize::from(!planning);
+    if paths.len() != start + 2 {
+        return Err("merge-audio requires exactly two inputs".into());
+    }
+    let sources = &paths[start..];
+    if !fvid::native_audio_mix::eligible(sources)? {
+        return Ok(false);
+    }
+    if planning {
+        let plan = fvid::native_audio_mix::plan_merge(sources)?;
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&plan)?);
+        }
+    } else {
+        let stats = fvid::native_audio_mix::merge_audio(sources, &paths[0])?;
         if !quiet {
             println!("{}", serde_json::to_string_pretty(&stats)?);
         }

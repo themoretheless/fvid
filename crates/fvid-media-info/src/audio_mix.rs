@@ -52,3 +52,13 @@ pub struct MixAudioStats {
     pub normalize: bool,
     pub weights: Vec<f32>,
 }
+
+#[derive(Serialize, Debug)]
+pub struct MergeAudioStats {
+    pub backend: &'static str,
+    pub sample_frames: u64,
+    pub sample_rate: i32,
+    pub channels: i32,
+    pub sample_format: String,
+    pub inputs: usize,
+}

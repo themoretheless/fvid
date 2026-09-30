@@ -331,3 +331,22 @@ pub fn plan_mix_audio(
         fvid_media::plan_mix_audio(sources, options)
     }
 }
+
+/// Merge channel vectors through owned AAC/WAVE decoders.
+pub fn merge_audio(
+    sources: &[std::path::PathBuf],
+    destination: &std::path::Path,
+) -> Result<MergeAudioStats> {
+    if crate::native_audio_mix::eligible(sources).map_err(|e| e.to_string())? {
+        crate::native_audio_mix::merge_audio(sources, destination).map_err(|e| e.to_string())
+    } else {
+        fvid_media::merge_audio(sources, destination)
+    }
+}
+pub fn plan_merge_audio(sources: &[std::path::PathBuf]) -> Result<MediaPlan> {
+    if crate::native_audio_mix::eligible(sources).map_err(|e| e.to_string())? {
+        crate::native_audio_mix::plan_merge(sources).map_err(|e| e.to_string())
+    } else {
+        fvid_media::plan_merge_audio(sources)
+    }
+}

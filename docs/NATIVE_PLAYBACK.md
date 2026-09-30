@@ -2282,3 +2282,29 @@ outside [-1,1], block tails, differing input lengths, geometry and invalid
 sample failures, no-overwrite publication, cleanup, mixed AAC/WAVE CLI/API
 execution, and the native plan. The optional FFmpeg reference compares
 three-input float PCM output byte-for-byte with `amix`.
+
+### Owned audio channel merge
+
+`media merge-audio OUTPUT.wav INPUT INPUT` and its plan now use the same
+owned AAC/WAVE decoder spools without requiring the legacy `media` feature.
+`media::merge_audio` and `media::plan_merge_audio` select this implementation
+for supported sources, retaining the adapter for other input contracts.
+The two inputs must have equal sample rates; the output ends with the shorter
+input. Sample vectors are concatenated in input order, without weighting,
+resampling, speaker-position remapping or conversion of decoded float samples.
+
+The output preserves the previous API's IEEE float format-3 WAV representation
+without a speaker mask. This matters for unlike channel layouts: the existing
+API concatenates vectors and does not implement `amerge`'s speaker-based
+reordering for disjoint layouts. Supported AAC/WAVE input layouts can produce
+up to twelve output channels. Source layout validation remains unchanged.
+The writer retains the 64-channel contract limit for future decoder coverage.
+Scratch files are shared with the mix path; merging reads 4096-frame blocks,
+syncs its output and publishes it without overwriting existing files.
+
+Tests cover mono/stereo combinations in both orders, labelled 5.1 + 5.1,
+shortest duration, block tails, invalid input cleanup, and AAC in ADTS/Matroska/
+MP4 including edit-list and 960-sample frames. With `media`, the complete WAV
+bytes are compared against the previous API for five channel combinations.
+The optional external `amerge` oracle covers overlapping stereo layouts,
+where its channel order agrees with this API.

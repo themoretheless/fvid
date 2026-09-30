@@ -39,6 +39,33 @@ fn wave(path: &Path, samples: &[f32], rate: u32, channels: u16) {
     }
     std::fs::write(path, out).unwrap();
 }
+fn labelled_wave(path: &Path, samples: &[f32], rate: u32, channels: u16) {
+    wave(path, samples, rate, channels);
+    if channels <= 2 {
+        return;
+    }
+    let mut bytes = std::fs::read(path).unwrap();
+    let mask: u32 = match channels {
+        3 => 7,
+        4 => 0x107,
+        5 => 0x37,
+        6 => 0x3f,
+        _ => 0,
+    };
+    bytes[16..20].copy_from_slice(&40u32.to_le_bytes());
+    bytes[20..22].copy_from_slice(&0xfffeu16.to_le_bytes());
+    let mut extra = Vec::new();
+    extra.extend_from_slice(&22u16.to_le_bytes());
+    extra.extend_from_slice(&32u16.to_le_bytes());
+    extra.extend_from_slice(&mask.to_le_bytes());
+    extra.extend_from_slice(&[
+        3, 0, 0, 0, 0, 0, 0x10, 0, 0x80, 0, 0, 0xaa, 0, 0x38, 0x9b, 0x71,
+    ]);
+    bytes.splice(36..36, extra);
+    let len = (bytes.len() - 8) as u32;
+    bytes[4..8].copy_from_slice(&len.to_le_bytes());
+    std::fs::write(path, bytes).unwrap();
+}
 fn pcm(path: &Path) -> Vec<u8> {
     let bytes = std::fs::read(path).unwrap();
     let mut at = 12;
@@ -225,4 +252,185 @@ fn unsupported_wave_geometry_keeps_legacy_admission() {
     let p = d.0.join("eight.wav");
     wave(&p, &[0.0; 80], 48000, 8);
     assert!(!native_audio_mix::eligible(&[p.clone(), p]).unwrap());
+}
+
+#[test]
+fn merge_channel_order_shortest_and_legacy_wav_contract() {
+    let d = dir();
+    for (left, right) in [(1u16, 1u16), (1, 2), (2, 1), (2, 2), (6, 6)] {
+        let a = d.0.join(format!("a-{left}-{right}.wav"));
+        let b = d.0.join(format!("b-{left}-{right}.wav"));
+        let x: Vec<f32> = (0..9003 * usize::from(left))
+            .map(|i| (i % 997) as f32 / 128.0 - 3.0)
+            .collect();
+        let y: Vec<f32> = (0..5001 * usize::from(right))
+            .map(|i| (i % 457) as f32 / 256.0 + 0.125)
+            .collect();
+        labelled_wave(&a, &x, 48000, left);
+        labelled_wave(&b, &y, 48000, right);
+        let sources = vec![a, b];
+        let destination = d.0.join(format!("out-{left}-{right}.wav"));
+        let stats = native_audio_mix::merge_audio(&sources, &destination).unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert_eq!(stats.channels, i32::from(left + right));
+        assert_eq!(stats.sample_frames, 5001);
+        let mut expected = Vec::new();
+        for i in 0..5001 {
+            for &s in &x[i * usize::from(left)..(i + 1) * usize::from(left)] {
+                expected.extend_from_slice(&s.to_le_bytes());
+            }
+            for &s in &y[i * usize::from(right)..(i + 1) * usize::from(right)] {
+                expected.extend_from_slice(&s.to_le_bytes());
+            }
+        }
+        assert_eq!(pcm(&destination), expected);
+        let before = std::fs::read(&destination).unwrap();
+        assert_eq!(&before[20..22], &3u16.to_le_bytes());
+        assert_eq!(before.len(), 44 + expected.len());
+        assert!(native_audio_mix::merge_audio(&sources, &destination).is_err());
+        assert_eq!(std::fs::read(&destination).unwrap(), before);
+        #[cfg(feature = "media")]
+        {
+            let legacy = d.0.join(format!("legacy-{left}-{right}.wav"));
+            fvid_media::merge_audio(&sources, &legacy).unwrap();
+            assert_eq!(std::fs::read(&legacy).unwrap(), before);
+            let api = d.0.join(format!("api-{left}-{right}.wav"));
+            let stats = fvid::media::merge_audio(&sources, &api).unwrap();
+            assert_eq!(stats.backend, "fvid");
+            assert_eq!(std::fs::read(api).unwrap(), before);
+            assert!(
+                fvid::media::plan_merge_audio(&sources)
+                    .unwrap()
+                    .graph
+                    .is_none()
+            );
+        }
+    }
+}
+
+#[test]
+fn merge_aac_cli_and_failure_cleanup() {
+    let d = dir();
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/audio/aac-stereo.aac");
+    let baseline = d.0.join("baseline.wav");
+    let decoded = fvid::native_export::export_audio_pcm_selected(
+        &source, &baseline, None, 1.0, None, None, None, None, None,
+    )
+    .unwrap();
+    let bytes = pcm(&baseline);
+    let stride = usize::from(decoded.channels) * 4;
+    let expected: Vec<u8> = bytes
+        .chunks_exact(stride)
+        .flat_map(|frame| frame.iter().chain(frame.iter()).copied())
+        .collect();
+    let destination = d.0.join("merged.wav");
+    let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "merge-audio"])
+        .arg(&destination)
+        .arg(&source)
+        .arg(&baseline)
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    assert_eq!(pcm(&destination), expected);
+    let stats: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    assert_eq!(stats["backend"], "fvid");
+    let plan = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "merge-audio"])
+        .arg(&source)
+        .arg(&baseline)
+        .output()
+        .unwrap();
+    assert!(
+        plan.status.success(),
+        "{}",
+        String::from_utf8_lossy(&plan.stderr)
+    );
+    let plan: serde_json::Value = serde_json::from_slice(&plan.stdout).unwrap();
+    assert_eq!(plan["command"], "merge-audio");
+    assert!(plan["graph"].is_null());
+    let invalid = d.0.join("invalid.wav");
+    wave(&invalid, &[0.0; 20], 8000, 1);
+    assert!(native_audio_mix::plan_merge(&[baseline.clone(), invalid.clone()]).is_err());
+    wave(&invalid, &[f32::NAN; 20], decoded.sample_rate, 1);
+    let bad = d.0.join("bad.wav");
+    assert!(native_audio_mix::merge_audio(&[baseline.clone(), invalid], &bad).is_err());
+    assert!(!bad.exists());
+    assert!(native_audio_mix::merge_audio(&[baseline], &bad).is_err());
+    assert!(!std::fs::read_dir(&d.0).unwrap().any(|p| {
+        p.unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with(".fvid-")
+    }));
+}
+
+#[test]
+#[ignore = "requires FVID_REFERENCE_FFMPEG"]
+fn reference_amerge_overlapping_layouts_matches_channel_concatenation() {
+    let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
+    let d = dir();
+    let (sources, _) = fixtures(&d);
+    let sources = &sources[..2];
+    let destination = d.0.join("merged.wav");
+    native_audio_mix::merge_audio(sources, &destination).unwrap();
+    let result = std::process::Command::new(ffmpeg)
+        .args(["-v", "error", "-i"])
+        .arg(&sources[0])
+        .arg("-i")
+        .arg(&sources[1])
+        .args([
+            "-filter_complex",
+            "amerge=inputs=2",
+            "-f",
+            "f32le",
+            "pipe:1",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    assert_eq!(pcm(&destination), result.stdout);
+}
+
+#[test]
+fn merge_preserves_aac_container_edits_and_rejects_ambiguous_selection() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/audio");
+    let d = dir();
+    for name in [
+        "aac-stereo.aac",
+        "aac-stereo.mka",
+        "aac-native-edit.m4a",
+        "aac-960-48000.m4a",
+    ] {
+        let source = root.join(name);
+        let baseline = d.0.join(format!("{name}.wav"));
+        let decoded = fvid::native_export::export_audio_pcm_selected(
+            &source, &baseline, None, 1.0, None, None, None, None, None,
+        )
+        .unwrap();
+        let bytes = pcm(&baseline);
+        let stride = usize::from(decoded.channels) * 4;
+        let expected: Vec<u8> = bytes
+            .chunks_exact(stride)
+            .flat_map(|frame| frame.iter().chain(frame.iter()).copied())
+            .collect();
+        let output = d.0.join(format!("{name}-merged.wav"));
+        let sources = vec![source, baseline];
+        assert!(native_audio_mix::eligible(&sources).unwrap());
+        let stats = native_audio_mix::merge_audio(&sources, &output).unwrap();
+        assert_eq!(stats.sample_frames, decoded.sample_frames);
+        assert_eq!(pcm(&output), expected, "{name}");
+    }
+    for name in ["two-audio.mp4", "two-audio.mka"] {
+        let p = root.join(name);
+        assert!(!native_audio_mix::eligible(&[p.clone(), p]).unwrap());
+    }
 }

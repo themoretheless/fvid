@@ -3,7 +3,6 @@ use super::audio::AudioDecodeStats;
 use super::lossless::{Codec, Frame};
 use super::wav::write_wav_f32le;
 use super::*;
-use serde::Serialize;
 use std::path::{Path, PathBuf};
 
 pub use fvid_media_info::{MixDuration, MixAudioOptions, MixAudioStats};
@@ -117,15 +116,7 @@ fn expand_weights(inputs: usize, weights: &[f32]) -> Result<Vec<f32>> {
     Ok(out)
 }
 
-#[derive(Serialize, Debug)]
-pub struct MergeAudioStats {
-    pub backend: &'static str,
-    pub sample_frames: u64,
-    pub sample_rate: i32,
-    pub channels: i32,
-    pub sample_format: String,
-    pub inputs: usize,
-}
+pub use fvid_media_info::MergeAudioStats;
 
 /// Channel-merge exactly two float PCM inputs (FFmpeg `amerge=inputs=2`).
 /// Same sample rate required; duration is shortest. Output channel count is the sum.
