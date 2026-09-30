@@ -39,7 +39,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             println!("{}",serde_json::to_string_pretty(&serde_json::json!({
                 "backend":"fvid", "sample_frames":stats.sample_frames,
                 "measured_blocks":stats.measured_blocks, "integrated_lufs":stats.integrated_lufs,
-                "channel_weights":weights, "sample_peak_dbfs":stats.sample_peak_dbfs
+                "channel_weights":weights, "sample_peak_dbfs":stats.sample_peak_dbfs, "range_lu":stats.range_lu
             }))?);
         }
         return Ok(());

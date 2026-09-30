@@ -47,6 +47,7 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
     );
     let json: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
     assert_eq!(json["backend"], "fvid");
+    assert!(json["range_lu"].is_null());
     assert_eq!(json["sample_frames"], 96000);
     let api = fvid::native_pcm::measure_loudness_file(&source, None, &[1.0], None).unwrap();
     assert_eq!(json["integrated_lufs"].as_f64(), api.integrated_lufs);

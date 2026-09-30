@@ -2693,3 +2693,10 @@ short input can report sample peak without a complete loudness window. Values
 above full scale remain positive dBFS rather than clipping the input. This is
 a sample peak, not an interpolated true peak. Independent file comparisons
 cover PCM, ALAC and AAC; unit tests verify LFE, overload and rejected-input state.
+
+Owned loudness analysis now reports `range_lu` from complete three-second
+short-term windows at 100 ms steps. It applies the -70 LUFS absolute gate,
+a relative gate 20 LU below the mean retained short-term energy, and the
+10th/95th percentiles of the gated 0.01 LU histogram. Silence/short input
+returns null. An 18-second changing-level signal is checked against ebur128
+at 44.1/48/96 kHz with 0.2 LU tolerance. True peak remains unimplemented.
