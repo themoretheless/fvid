@@ -1,12 +1,13 @@
 //! Video presentation on the GPU: the decoded Y, Cb and Cr planes are uploaded
-//! as 8-bit textures and converted to RGB in a fragment shader (Metal on
+//! as byte textures (R8 for 8-bit, RG8 for little-endian wider samples) and
+//! converted to RGB at source precision in a fragment shader (Metal on
 //! macOS through wgpu), so no CPU pass touches the pixels after decoding. The
 //! shader holds the colour decision too when the grade is one lookup: the table
 //! the CPU baked rides as a texture — the 3D grid of nodes, or the three byte
 //! tables for a plan that keeps its channels apart — and every sample reads its
 //! codes out of that same table.
 use crate::color::{Grade, Interpolation, Lut3d, ShaderLook};
-use crate::playback_native::Planar8;
+use crate::playback_native::{AvcColour, PackedPlanar, Planar8};
 use eframe::{egui_wgpu, wgpu};
 use std::sync::Arc;
 
@@ -19,7 +20,7 @@ struct Params {
     kr: f32,
     kb: f32,
     srgb: f32,
-    _pad: f32,
+    sample_scale: f32,
     // The part of the planes a crop keeps, as texture coordinates: the corner
     // it starts at, then the corner it ends at. The whole picture is (0,0)-(1,1).
     window: vec4<f32>,
@@ -36,6 +37,9 @@ struct Params {
     // bound at 6. `grid.w` turns the lookup off, so a frame with nothing to
     // grade pays nothing for either binding.
     grid: vec4<f32>,
+    look: vec4<f32>,
+    look_min: vec4<f32>,
+    look_max: vec4<f32>,
 };
 @group(0) @binding(0) var plane_y: texture_2d<f32>;
 @group(0) @binding(1) var plane_cb: texture_2d<f32>;
@@ -48,6 +52,7 @@ struct Params {
 // A plan that maps each channel on its own is three byte tables, not a grid, and
 // that is what the CPU paints from. Texel `code` of this one row holds the three
 // tables' answers for a channel coded `code`, each in its own component.
+@group(0) @binding(7) var look_grid: texture_3d<f32>;
 @group(0) @binding(6) var grade_tables: texture_2d<f32>;
 
 struct VertexOut {
@@ -67,7 +72,8 @@ fn vs(@builtin(vertex_index) index: u32) -> VertexOut {
     // The quad spans the rect it is drawn into, so the crop is a span of
     // texture coordinates rather than a change of where the quad lands.
     let t = vec2((p.x + 1.0) * 0.5, (1.0 - p.y) * 0.5);
-    out.uv = mix(params.window.xy, params.window.zw, t);
+    let uv = mix(params.window.xy, params.window.zw, t);
+    out.uv = uv;
     return out;
 }
 
@@ -77,8 +83,8 @@ fn to_linear(c: vec3<f32>) -> vec3<f32> {
     return select(high, low, c <= vec3(0.04045));
 }
 
-fn grid_node(at: vec3<i32>) -> vec3<f32> {
-    return textureLoad(grade_grid, at, 0).rgb;
+fn grid_node(grid: texture_3d<f32>, at: vec3<i32>) -> vec3<f32> {
+    return textureLoad(grid, at, 0).rgb;
 }
 
 /// The component axis `i` names. A vector cannot be indexed by a runtime value,
@@ -147,29 +153,33 @@ fn table_read(rgb: vec3<f32>) -> vec3<f32> {
 /// node, a box blend of eight, and a walk of four nodes along the ordered
 /// offsets.
 fn grade_read(rgb: vec3<f32>) -> vec3<f32> {
-    if params.grid.z > 0.5 {
-        return table_read(rgb);
-    }
-    let last = vec3<i32>(i32(params.grid.x) - 1);
+    if params.grid.z > 0.5 { return table_read(rgb); }
+    let converted = read_grid(rgb, grade_grid, params.grid);
+    if params.look.w < 0.5 { return converted; }
+    let normalized = clamp((converted - params.look_min.xyz) / max(params.look_max.xyz - params.look_min.xyz, vec3(0.000001)), vec3(0.0), vec3(1.0));
+    return read_grid(normalized, look_grid, params.look);
+}
+fn read_grid(rgb: vec3<f32>, grid: texture_3d<f32>, options: vec4<f32>) -> vec3<f32> {
+    let last = vec3<i32>(i32(options.x) - 1);
     let p = rgb * vec3(f32(last.x));
     let origin = vec3<i32>(floor(p));
     let offsets = p - vec3<f32>(origin);
-    if params.grid.y < 0.5 {
+    if options.y < 0.5 {
         let near = select(vec3<i32>(0), vec3<i32>(1), offsets > vec3(0.5));
-        return grid_node(min(origin + near, last));
+        return grid_node(grid, min(origin + near, last));
     }
-    if params.grid.y < 1.5 {
+    if options.y < 1.5 {
         let r1 = min(origin + vec3(1, 0, 0), last);
         let g1 = min(origin + vec3(0, 1, 0), last);
         let b1 = min(origin + vec3(0, 0, 1), last);
-        let c000 = grid_node(origin);
-        let c100 = grid_node(r1);
-        let c010 = grid_node(g1);
-        let c110 = grid_node(min(origin + vec3(1, 1, 0), last));
-        let c001 = grid_node(b1);
-        let c101 = grid_node(min(r1 + vec3(0, 0, 1), last));
-        let c011 = grid_node(min(g1 + vec3(0, 0, 1), last));
-        let c111 = grid_node(min(r1 + vec3(0, 1, 1), last));
+        let c000 = grid_node(grid, origin);
+        let c100 = grid_node(grid, r1);
+        let c010 = grid_node(grid, g1);
+        let c110 = grid_node(grid, min(origin + vec3(1, 1, 0), last));
+        let c001 = grid_node(grid, b1);
+        let c101 = grid_node(grid, min(r1 + vec3(0, 0, 1), last));
+        let c011 = grid_node(grid, min(g1 + vec3(0, 0, 1), last));
+        let c111 = grid_node(grid, min(r1 + vec3(0, 1, 1), last));
         let x00 = mix(c000, c100, vec3(offsets.x));
         let x10 = mix(c010, c110, vec3(offsets.x));
         let x01 = mix(c001, c101, vec3(offsets.x));
@@ -187,10 +197,10 @@ fn grade_read(rgb: vec3<f32>) -> vec3<f32> {
     let b = 3 - a - c;
     let e1 = along_axis(a);
     let e2 = e1 + along_axis(b);
-    let n0 = grid_node(origin);
-    let n1 = grid_node(min(origin + e1, last));
-    let n2 = grid_node(min(origin + e2, last));
-    let n3 = grid_node(min(origin + vec3(1, 1, 1), last));
+    let n0 = grid_node(grid, origin);
+    let n1 = grid_node(grid, min(origin + e1, last));
+    let n2 = grid_node(grid, min(origin + e2, last));
+    let n3 = grid_node(grid, min(origin + vec3(1, 1, 1), last));
     let sa = axis_of(offsets, a);
     let sb = axis_of(offsets, b);
     let sc = axis_of(offsets, c);
@@ -225,6 +235,52 @@ fn adjust_codes(rgb: vec3<f32>) -> vec3<f32> {
     return shown / vec3(255.0);
 }
 
+// Plane sampling returns source codes scaled into eight-bit code units.
+// Integer reconstruction before interpolation preserves source low bits.
+fn stored(sampled: vec4<f32>) -> f32 { return sampled.r; }
+fn decoded_texel(sampled: vec4<f32>) -> vec4<f32> {
+    if params.adjust_b.z > 1.5 {
+        // Recover exact MSB-aligned integer codes before interpolation.
+        return round(sampled * (65535.0 / 64.0)) * 0.25;
+    }
+    return vec4<f32>(dot(round(sampled.rg * 255.0), vec2(1.0, 256.0)) * params.sample_scale, 0.0, 0.0, 0.0);
+}
+
+fn source_uv(uv: vec2<f32>) -> vec2<f32> {
+    if params.adjust_b.w == 1.0 { return vec2(uv.y, 1.0 - uv.x); }
+    if params.adjust_b.w == 2.0 { return vec2(1.0 - uv.x, 1.0 - uv.y); }
+    if params.adjust_b.w == 3.0 { return vec2(1.0 - uv.y, uv.x); }
+    return uv;
+}
+fn source_texel(plane: texture_2d<f32>, p: vec2<i32>) -> vec4<f32> {
+    let size = vec2<i32>(textureDimensions(plane, 0));
+    var point = p;
+    if params.adjust_b.w == 1.0 { point = vec2(p.y, size.y - 1 - p.x); }
+    if params.adjust_b.w == 2.0 { point = size - vec2(1) - p; }
+    if params.adjust_b.w == 3.0 { point = vec2(size.x - 1 - p.y, p.x); }
+    return decoded_texel(textureLoad(plane, point, 0));
+}
+
+// Wide stored samples must interpolate in float32. Hardware filtering of
+// split low/high-byte channels can round each component independently and
+// amplify that error at byte boundaries. Native P010 uses this same rule.
+fn sample_plane(plane: texture_2d<f32>, uv: vec2<f32>) -> vec4<f32> {
+    if params.sample_scale == 0.0 && params.adjust_b.z < 1.5 {
+        return textureSample(plane, plane_sampler, source_uv(uv)) * 255.0;
+    }
+    var size = vec2<i32>(textureDimensions(plane, 0));
+    if params.adjust_b.w == 1.0 || params.adjust_b.w == 3.0 { size = size.yx; }
+    let position = uv * vec2<f32>(size) - vec2<f32>(0.5);
+    let base = vec2<i32>(floor(position));
+    let fraction = fract(position);
+    let last = size - vec2<i32>(1);
+    let a = source_texel(plane, clamp(base, vec2<i32>(0), last));
+    let b = source_texel(plane, clamp(base + vec2<i32>(1, 0), vec2<i32>(0), last));
+    let c = source_texel(plane, clamp(base + vec2<i32>(0, 1), vec2<i32>(0), last));
+    let d = source_texel(plane, clamp(base + vec2<i32>(1, 1), vec2<i32>(0), last));
+    return mix(mix(a, b, fraction.x), mix(c, d, fraction.x), fraction.y);
+}
+
 @fragment
 fn fs(in: VertexOut) -> @location(0) vec4<f32> {
     let graded = params.grid.w > 0.5;
@@ -237,10 +293,15 @@ fn fs(in: VertexOut) -> @location(0) vec4<f32> {
     // leaves, which is the only picture a brightness slider can promise to
     // brighten. That order is what the CPU route has always drawn, so the two
     // agree by construction rather than by approximation.
-    var y_stored = textureSample(plane_y, plane_sampler, in.uv).r * 255.0;
-    var cb_c = textureSample(plane_cb, plane_sampler, in.uv).r * 255.0 - params.c_offset;
-    var cr_c = textureSample(plane_cr, plane_sampler, in.uv).r * 255.0 - params.c_offset;
-    if !graded {
+    var y_stored = stored(sample_plane(plane_y, in.uv));
+    var cb_c = stored(sample_plane(plane_cb, in.uv)) - params.c_offset;
+    var cr_c = stored(sample_plane(plane_cr, in.uv)) - params.c_offset;
+    if params.adjust_b.z > 0.5 {
+        let uv = sample_plane(plane_cb, in.uv);
+        cb_c = uv.r - params.c_offset;
+        cr_c = uv.g - params.c_offset;
+    }
+    if !graded && params.adjust_b.y > 0.5 {
         let luma = clamp(params.adjust_a.x * y_stored + params.adjust_a.y, 0.0, 255.0);
         y_stored = pow(luma / 255.0, params.adjust_a.z) * 255.0;
         let cb_turned = params.adjust_a.w * cb_c + params.adjust_b.x * cr_c;
@@ -287,6 +348,8 @@ pub struct VideoGpu {
     uniform: wgpu::Buffer,
     srgb: bool,
     planes: Option<Planes>,
+    surface_mode: f32,
+    rotation: u16,
     /// The grade the shader reads, which travels with the bind group below.
     grid: Grid,
     bind_group: Option<wgpu::BindGroup>,
@@ -304,6 +367,7 @@ pub struct VideoGpu {
 struct Planes {
     size: [usize; 2],
     chroma: [usize; 2],
+    depth: u8,
     textures: [wgpu::Texture; 3],
     views: [wgpu::TextureView; 3],
 }
@@ -326,6 +390,10 @@ struct Grid {
     view: wgpu::TextureView,
     /// The byte tables' one row of 256 texels. Fixed in size, so it is made once
     /// and only ever rewritten, and the bind group that holds it stays good.
+    look_texture: wgpu::Texture,
+    look_view: wgpu::TextureView,
+    look_size: usize,
+    look_params: [f32; 12],
     table_texture: wgpu::Texture,
     table_view: wgpu::TextureView,
     /// Edge length the grid texture was made for, and a count of how often one
@@ -354,6 +422,128 @@ fn grid_mode(interpolation: Interpolation) -> f32 {
     }
 }
 
+/// A display-code RGB shader applied after colour management and adjustment,
+/// before the framebuffer's sRGB conversion. Implement
+/// `fn process_color(rgb: vec3<f32>, uv: vec2<f32>) -> vec3<f32>`.
+#[derive(Clone, Debug)]
+pub struct ColorShader {
+    compiled: String,
+}
+impl ColorShader {
+    pub fn new(source: &str) -> crate::Result<Self> {
+        if source.len() > 64 * 1024 {
+            return Err(crate::invalid("shader source exceeds 64 KiB"));
+        }
+        let compiled = format!("{}\n{}", SHADER.replace(
+            "    if params.srgb > 0.5 {",
+            "    rgb = clamp(process_color(rgb, in.uv), vec3(0.0), vec3(1.0));\n    if params.srgb > 0.5 {"
+        ), source);
+        let module = naga::front::wgsl::parse_str(&compiled)
+            .map_err(|error| crate::Error::Invalid(error.emit_to_string(&compiled)))?;
+        naga::valid::Validator::new(
+            naga::valid::ValidationFlags::all(),
+            naga::valid::Capabilities::empty(),
+        )
+        .validate(&module)
+        .map_err(|error| crate::Error::Invalid(error.emit_to_string(&compiled)))?;
+        if module.entry_points.len() != 2 || module.global_variables.len() != 8 {
+            return Err(crate::invalid(
+                "display shader must only add functions and constants",
+            ));
+        }
+        Ok(Self { compiled })
+    }
+    pub fn compiled_source(&self) -> &str {
+        &self.compiled
+    }
+}
+
+/// Explicit GPU renderer selection. Software adapters are excluded and the
+/// requested API/device cannot silently fall back to another API or the CPU.
+pub fn configuration(
+    backend: crate::Backend,
+    ordinal: usize,
+) -> crate::Result<egui_wgpu::WgpuConfiguration> {
+    use crate::Backend;
+    let backends = match backend {
+        Backend::Auto => wgpu::Backends::PRIMARY | wgpu::Backends::GL,
+        Backend::Metal => wgpu::Backends::METAL,
+        Backend::Vulkan => wgpu::Backends::VULKAN,
+        Backend::Dx12 => wgpu::Backends::DX12,
+        Backend::Gl => wgpu::Backends::GL,
+        _ => {
+            return Err(crate::invalid(
+                "player renderer requires auto, metal, vulkan, dx12 or gl; CUDA is a processing/codec backend",
+            ));
+        }
+    };
+    if backend == Backend::Auto && ordinal != 0 {
+        return Err(crate::invalid(
+            "--device requires an explicit player backend when not zero",
+        ));
+    }
+    let mut setup = egui_wgpu::WgpuSetupCreateNew::without_display_handle();
+    setup.instance_descriptor.backends = backends;
+    #[cfg(target_os = "macos")]
+    {
+        let descriptor = Arc::clone(&setup.device_descriptor);
+        setup.device_descriptor = Arc::new(move |adapter| {
+            let mut descriptor = descriptor(adapter);
+            if adapter.get_info().backend == wgpu::Backend::Metal {
+                descriptor.required_features |=
+                    adapter.features() & wgpu::Features::TEXTURE_FORMAT_16BIT_NORM;
+            }
+            descriptor
+        });
+    }
+    setup.native_adapter_selector = Some(Arc::new(move |adapters, surface| {
+        let mut available: Vec<_> = adapters
+            .iter()
+            .filter(|adapter| {
+                adapter.get_info().device_type != wgpu::DeviceType::Cpu
+                    && surface.is_none_or(|surface| adapter.is_surface_supported(surface))
+            })
+            .collect();
+        available.sort_by_key(|adapter| {
+            let info = adapter.get_info();
+            (info.name, info.vendor, info.device)
+        });
+        available
+            .get(ordinal)
+            .map(|adapter| (*adapter).clone())
+            .ok_or_else(|| {
+                format!("player backend {backend} hardware device {ordinal} unavailable")
+            })
+    }));
+    Ok(egui_wgpu::WgpuConfiguration {
+        wgpu_setup: egui_wgpu::WgpuSetup::CreateNew(setup),
+        ..Default::default()
+    })
+}
+
+pub fn install_with_shader(
+    state: &egui_wgpu::RenderState,
+    shader: Option<&ColorShader>,
+) -> crate::Result<()> {
+    let validation = state.device.push_error_scope(wgpu::ErrorFilter::Validation);
+    let internal = state.device.push_error_scope(wgpu::ErrorFilter::Internal);
+    let oom = state
+        .device
+        .push_error_scope(wgpu::ErrorFilter::OutOfMemory);
+    let gpu = build_with_source(
+        &state.device,
+        state.target_format,
+        shader.map_or(SHADER, ColorShader::compiled_source),
+    );
+    for scope in [oom, internal, validation] {
+        if let Some(error) = pollster::block_on(scope.pop()) {
+            return Err(crate::Error::Gpu(error.to_string()));
+        }
+    }
+    state.renderer.write().callback_resources.insert(gpu);
+    Ok(())
+}
+
 /// Create the pipeline once and register it with the renderer.
 pub fn install(state: &egui_wgpu::RenderState) {
     let gpu = build(&state.device, state.target_format);
@@ -367,9 +557,16 @@ pub fn install(state: &egui_wgpu::RenderState) {
 /// can be read back and set against `planar8_to_rgb`, the conversion the player
 /// falls back to as soon as a frame has to be graded.
 fn build(device: &wgpu::Device, target_format: wgpu::TextureFormat) -> VideoGpu {
+    build_with_source(device, target_format, SHADER)
+}
+fn build_with_source(
+    device: &wgpu::Device,
+    target_format: wgpu::TextureFormat,
+    source: &str,
+) -> VideoGpu {
     let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: Some("fvid video"),
-        source: wgpu::ShaderSource::Wgsl(SHADER.into()),
+        source: wgpu::ShaderSource::Wgsl(source.into()),
     });
     let texture = |binding| wgpu::BindGroupLayoutEntry {
         binding,
@@ -428,6 +625,16 @@ fn build(device: &wgpu::Device, target_format: wgpu::TextureFormat) -> VideoGpu 
                 },
                 count: None,
             },
+            wgpu::BindGroupLayoutEntry {
+                binding: 7,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Texture {
+                    sample_type: wgpu::TextureSampleType::Float { filterable: false },
+                    view_dimension: wgpu::TextureViewDimension::D3,
+                    multisampled: false,
+                },
+                count: None,
+            },
         ],
     });
     let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -473,9 +680,9 @@ fn build(device: &wgpu::Device, target_format: wgpu::TextureFormat) -> VideoGpu 
     let uniform = device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("fvid video params"),
         // The colour conversion's scalars padded to a vec4, then the crop
-        // window, the two setting vectors and the grade's grid: 96 bytes laid
+        // window, picture settings, both LUTs and authored domain: 144 bytes laid
         // out as the shader's Params declares.
-        size: 96,
+        size: 144,
         usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         mapped_at_creation: false,
     });
@@ -486,6 +693,8 @@ fn build(device: &wgpu::Device, target_format: wgpu::TextureFormat) -> VideoGpu 
         uniform,
         srgb: target_format.is_srgb(),
         planes: None,
+        surface_mode: 0.0,
+        rotation: 0,
         grid: Grid::empty(device),
         bind_group: None,
         bound: None,
@@ -512,10 +721,15 @@ impl Grid {
     fn empty(device: &wgpu::Device) -> Self {
         let (texture, view) = make_grid(device, 2);
         let (table_texture, table_view) = make_tables(device);
+        let (look_texture, look_view) = make_grid(device, 2);
         Self {
             source: None,
             texture,
             view,
+            look_texture,
+            look_view,
+            look_size: 2,
+            look_params: [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0],
             table_texture,
             table_view,
             size: 2,
@@ -533,7 +747,45 @@ impl Grid {
         if self.holds(grade) {
             return;
         }
-        let look = grade.and_then(|grade| grade.shader_look());
+        let look = grade.and_then(|grade| grade.shader_look()).or_else(|| {
+            grade.and_then(|g| match g.shader_stages() {
+                crate::color::ShaderStages::Chain {
+                    conversion: crate::color::Lut::Three(cube),
+                    look: Some(crate::color::Lut::Three(_)),
+                } => Some(ShaderLook::Grid(cube.clone())),
+                _ => None,
+            })
+        });
+        let second = grade.and_then(|g| match g.shader_stages() {
+            crate::color::ShaderStages::Chain {
+                look: Some(crate::color::Lut::Three(cube)),
+                ..
+            } => Some(cube),
+            _ => None,
+        });
+        self.look_params = [2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0];
+        if let Some(cube) = second {
+            if cube.size != self.look_size {
+                (self.look_texture, self.look_view) = make_grid(device, cube.size);
+                self.look_size = cube.size;
+                self.epoch += 1;
+            }
+            upload_grid(queue, &self.look_texture, cube.size, &cube.data);
+            self.look_params = [
+                cube.size as f32,
+                grid_mode(grade.unwrap().interpolation()),
+                0.0,
+                1.0,
+                cube.domain_min[0],
+                cube.domain_min[1],
+                cube.domain_min[2],
+                0.0,
+                cube.domain_max[0],
+                cube.domain_max[1],
+                cube.domain_max[2],
+                0.0,
+            ];
+        }
         let grid = match &look {
             Some(ShaderLook::Grid(cube)) => Some(cube),
             _ => None,
@@ -548,41 +800,7 @@ impl Grid {
         }
         let nodes: Vec<[f32; 3]> =
             grid.map_or_else(|| Lut3d::identity(2).data, |cube| cube.data.clone());
-        // One `rgba32float` texel per node, in the table's own order: red
-        // fastest, so the node (r, g, b) lands at texel (r, g, b), which is how
-        // the shader indexes it. `write_texture` copies through a staging buffer
-        // whose rows are 256-byte aligned, so a node row is padded out to that.
-        const TEXEL: usize = 4 * std::mem::size_of::<f32>();
-        let packed = size * TEXEL;
-        let row = packed.next_multiple_of(256);
-        let mut bytes = vec![0u8; row * size * size];
-        for (index, node) in nodes.iter().enumerate() {
-            let from = index * TEXEL;
-            let to = (from / packed) * row + from % packed;
-            for (channel, value) in [node[0], node[1], node[2], 1.0].iter().enumerate() {
-                let at = to + channel * std::mem::size_of::<f32>();
-                bytes[at..at + 4].copy_from_slice(&value.to_le_bytes());
-            }
-        }
-        queue.write_texture(
-            wgpu::TexelCopyTextureInfo {
-                texture: &self.texture,
-                mip_level: 0,
-                origin: wgpu::Origin3d::ZERO,
-                aspect: wgpu::TextureAspect::All,
-            },
-            &bytes,
-            wgpu::TexelCopyBufferLayout {
-                offset: 0,
-                bytes_per_row: Some(row as u32),
-                rows_per_image: Some(size as u32),
-            },
-            wgpu::Extent3d {
-                width: size as u32,
-                height: size as u32,
-                depth_or_array_layers: size as u32,
-            },
-        );
+        upload_grid(queue, &self.texture, size, &nodes);
         if let Some(ShaderLook::Tables(tables)) = &look {
             // One texel per input code, holding each channel's own answer in its
             // own component, so the shader reads the exact bytes `paint` writes.
@@ -628,6 +846,44 @@ impl Grid {
     }
 }
 
+fn upload_grid(queue: &wgpu::Queue, texture: &wgpu::Texture, size: usize, nodes: &[[f32; 3]]) {
+    // One `rgba32float` texel per node, in the table's own order: red
+    // fastest, so the node (r, g, b) lands at texel (r, g, b), which is how
+    // the shader indexes it. `write_texture` copies through a staging buffer
+    // whose rows are 256-byte aligned, so a node row is padded out to that.
+    const TEXEL: usize = 4 * std::mem::size_of::<f32>();
+    let packed = size * TEXEL;
+    let row = packed.next_multiple_of(256);
+    let mut bytes = vec![0u8; row * size * size];
+    for (index, node) in nodes.iter().enumerate() {
+        let from = index * TEXEL;
+        let to = (from / packed) * row + from % packed;
+        for (channel, value) in [node[0], node[1], node[2], 1.0].iter().enumerate() {
+            let at = to + channel * std::mem::size_of::<f32>();
+            bytes[at..at + 4].copy_from_slice(&value.to_le_bytes());
+        }
+    }
+    queue.write_texture(
+        wgpu::TexelCopyTextureInfo {
+            texture: texture,
+            mip_level: 0,
+            origin: wgpu::Origin3d::ZERO,
+            aspect: wgpu::TextureAspect::All,
+        },
+        &bytes,
+        wgpu::TexelCopyBufferLayout {
+            offset: 0,
+            bytes_per_row: Some(row as u32),
+            rows_per_image: Some(size as u32),
+        },
+        wgpu::Extent3d {
+            width: size as u32,
+            height: size as u32,
+            depth_or_array_layers: size as u32,
+        },
+    );
+}
+
 /// A 3D texture with one `rgba32float` texel per node of a `size`³ grid.
 fn make_grid(device: &wgpu::Device, size: usize) -> (wgpu::Texture, wgpu::TextureView) {
     let texture = device.create_texture(&wgpu::TextureDescriptor {
@@ -670,6 +926,14 @@ fn make_tables(device: &wgpu::Device) -> (wgpu::Texture, wgpu::TextureView) {
     (texture, view)
 }
 
+struct FramePlanes<'a> {
+    data: [&'a [u8]; 3],
+    size: [usize; 2],
+    chroma: [usize; 2],
+    depth: u8,
+    colour: AvcColour,
+}
+
 impl VideoGpu {
     #[allow(clippy::too_many_arguments)]
     fn upload(
@@ -682,7 +946,71 @@ impl VideoGpu {
         adjust: [f32; 5],
         grade: Option<&Arc<Grade>>,
     ) {
-        if self.serial == serial
+        self.upload_planes(
+            device,
+            queue,
+            FramePlanes {
+                data: [&frame.y, &frame.cb, &frame.cr],
+                size: [frame.width, frame.height],
+                chroma: [frame.chroma_width, frame.chroma_height],
+                depth: 8,
+                colour: frame.colour,
+            },
+            serial,
+            window,
+            adjust,
+            grade,
+        );
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn upload_packed(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        frame: &PackedPlanar,
+        serial: u64,
+        window: [f32; 4],
+        adjust: [f32; 5],
+        grade: Option<&Arc<Grade>>,
+    ) -> crate::Result<()> {
+        let data = frame.plane_data()?;
+        let [sx, sy] = frame
+            .frame
+            .subsampling
+            .expect("validated planar subsampling");
+        self.upload_planes(
+            device,
+            queue,
+            FramePlanes {
+                data,
+                size: [frame.frame.width, frame.frame.height],
+                chroma: [
+                    frame.frame.width.div_ceil(sx),
+                    frame.frame.height.div_ceil(sy),
+                ],
+                depth: frame.depth,
+                colour: frame.colour,
+            },
+            serial,
+            window,
+            adjust,
+            grade,
+        );
+        Ok(())
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn upload_planes(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        frame: FramePlanes<'_>,
+        serial: u64,
+        window: [f32; 4],
+        adjust: [f32; 5],
+        grade: Option<&Arc<Grade>>,
+    ) {
+        if self.surface_mode == 0.0
+            && self.serial == serial
             && self.window == window
             && self.adjust == adjust
             && self.grid.holds(grade)
@@ -692,16 +1020,128 @@ impl VideoGpu {
         self.serial = serial;
         self.window = window;
         self.adjust = adjust;
-        let size = [frame.width, frame.height];
-        let chroma = [frame.chroma_width, frame.chroma_height];
-        if self
-            .planes
-            .as_ref()
-            .is_none_or(|p| p.size != size || p.chroma != chroma)
-        {
-            self.planes = Some(self.create_planes(device, size, chroma));
+        let size = frame.size;
+        let chroma = frame.chroma;
+        let bytes_per_sample = if frame.depth == 8 { 1 } else { 2 };
+        if self.planes.as_ref().is_none_or(|p| {
+            p.size != size
+                || p.chroma != chroma
+                || p.depth != frame.depth
+                || self.surface_mode != 0.0
+        }) {
+            self.planes = Some(self.create_planes(device, size, chroma, frame.depth));
+            self.bound = None;
         }
+        self.surface_mode = 0.0;
+        self.rotation = 0;
         self.grid.set(device, queue, grade);
+        self.bind_planes(device, size, chroma);
+        let planes = self.planes.as_ref().unwrap();
+        for (index, (data, [w, h])) in [
+            (frame.data[0], size),
+            (frame.data[1], chroma),
+            (frame.data[2], chroma),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            queue.write_texture(
+                wgpu::TexelCopyTextureInfo {
+                    texture: &planes.textures[index],
+                    mip_level: 0,
+                    origin: wgpu::Origin3d::ZERO,
+                    aspect: wgpu::TextureAspect::All,
+                },
+                data,
+                wgpu::TexelCopyBufferLayout {
+                    offset: 0,
+                    bytes_per_row: Some(w as u32 * bytes_per_sample),
+                    rows_per_image: Some(h as u32),
+                },
+                wgpu::Extent3d {
+                    width: w as u32,
+                    height: h as u32,
+                    depth_or_array_layers: 1,
+                },
+            );
+        }
+        self.write_params(queue, frame.depth, frame.colour, window, adjust);
+    }
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    #[allow(clippy::too_many_arguments)]
+    #[cfg(test)]
+    fn import_surface(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        frame: &fvid_vt::Surface,
+        colour: AvcColour,
+        serial: u64,
+        window: [f32; 4],
+        adjust: [f32; 5],
+        grade: Option<&Arc<Grade>>,
+    ) -> crate::Result<()> {
+        self.import_surface_rotated(
+            device, queue, frame, colour, serial, window, adjust, grade, 0,
+        )
+    }
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    #[allow(clippy::too_many_arguments)]
+    fn import_surface_rotated(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        frame: &fvid_vt::Surface,
+        mut colour: AvcColour,
+        serial: u64,
+        window: [f32; 4],
+        adjust: [f32; 5],
+        grade: Option<&Arc<Grade>>,
+        rotation: u16,
+    ) -> crate::Result<()> {
+        if ![0, 90, 180, 270].contains(&rotation) {
+            return Err(crate::invalid("invalid surface rotation"));
+        }
+        if self.surface_mode != 0.0
+            && self.rotation == rotation
+            && self.serial == serial
+            && self.window == window
+            && self.adjust == adjust
+            && self.grid.holds(grade)
+        {
+            return Ok(());
+        }
+        if self.surface_mode == 0.0 || self.serial != serial {
+            let imported = frame
+                .import_metal(device)
+                .map_err(|e| crate::Error::Gpu(e.to_string()))?;
+            let textures = [imported.y, imported.uv.clone(), imported.uv];
+            let views = std::array::from_fn(|i| textures[i].create_view(&Default::default()));
+            self.planes = Some(Planes {
+                size: [frame.width(), frame.height()],
+                chroma: [frame.width().div_ceil(2), frame.height().div_ceil(2)],
+                depth: frame.depth(),
+                textures,
+                views,
+            });
+            self.bound = None;
+        }
+        self.rotation = rotation;
+        self.surface_mode = if frame.depth() == 8 { 1.0 } else { 2.0 };
+        self.serial = serial;
+        self.window = window;
+        self.adjust = adjust;
+        self.grid.set(device, queue, grade);
+        self.bind_planes(
+            device,
+            [frame.width(), frame.height()],
+            [frame.width().div_ceil(2), frame.height().div_ceil(2)],
+        );
+        colour.full = frame.full_range();
+        self.write_params(queue, frame.depth(), colour, window, adjust);
+        Ok(())
+    }
+    fn bind_planes(&mut self, device: &wgpu::Device, size: [usize; 2], chroma: [usize; 2]) {
         let bound = (size, chroma, self.grid.epoch);
         if self.bound != Some(bound) {
             let planes = self.planes.as_ref().unwrap();
@@ -739,38 +1179,28 @@ impl VideoGpu {
                         binding: 6,
                         resource: wgpu::BindingResource::TextureView(&grid.table_view),
                     },
+                    wgpu::BindGroupEntry {
+                        binding: 7,
+                        resource: wgpu::BindingResource::TextureView(&grid.look_view),
+                    },
                 ],
             }));
             self.bound = Some(bound);
         }
-        let planes = self.planes.as_ref().unwrap();
-        for (index, (data, [w, h])) in [(&frame.y, size), (&frame.cb, chroma), (&frame.cr, chroma)]
-            .into_iter()
-            .enumerate()
-        {
-            queue.write_texture(
-                wgpu::TexelCopyTextureInfo {
-                    texture: &planes.textures[index],
-                    mip_level: 0,
-                    origin: wgpu::Origin3d::ZERO,
-                    aspect: wgpu::TextureAspect::All,
-                },
-                data,
-                wgpu::TexelCopyBufferLayout {
-                    offset: 0,
-                    bytes_per_row: Some(w as u32),
-                    rows_per_image: Some(h as u32),
-                },
-                wgpu::Extent3d {
-                    width: w as u32,
-                    height: h as u32,
-                    depth_or_array_layers: 1,
-                },
-            );
-        }
+    }
+    fn write_params(
+        &self,
+        queue: &wgpu::Queue,
+        depth: u8,
+        colour: AvcColour,
+        window: [f32; 4],
+        adjust: [f32; 5],
+    ) {
         // Limited range maps 16..235 (luma) and 16..240 (chroma) onto 0..1.
-        let (y_offset, y_range, c_range) = if frame.colour.full {
-            (0.0, 255.0, 255.0)
+        let scale = (1u32 << (depth - 8)) as f32;
+        let full_range = ((1u32 << depth) - 1) as f32 / scale;
+        let (y_offset, y_range, c_range) = if colour.full {
+            (0.0, full_range, full_range)
         } else {
             (16.0, 219.0, 224.0)
         };
@@ -788,10 +1218,10 @@ impl VideoGpu {
             1.0 / y_range,
             128.0,
             1.0 / c_range,
-            frame.colour.kr as f32,
-            frame.colour.kb as f32,
+            colour.kr as f32,
+            colour.kb as f32,
             if self.srgb { 1.0 } else { 0.0 },
-            0.0,
+            if depth > 8 { 1.0 / scale } else { 0.0 },
             window[0],
             window[1],
             window[2],
@@ -802,17 +1232,27 @@ impl VideoGpu {
             adjust[3],
             adjust[4],
             f32::from(adjust != IDENTITY_ADJUST),
-            0.0,
-            0.0,
+            self.surface_mode,
+            f32::from(self.rotation / 90),
             self.grid.params[0],
             self.grid.params[1],
             self.grid.params[2],
             self.grid.params[3],
         ];
-        let bytes: Vec<u8> = params.iter().flat_map(|v| v.to_le_bytes()).collect();
+        let bytes: Vec<u8> = params
+            .iter()
+            .chain(self.grid.look_params.iter())
+            .flat_map(|v| v.to_le_bytes())
+            .collect();
         queue.write_buffer(&self.uniform, 0, &bytes);
     }
-    fn create_planes(&self, device: &wgpu::Device, size: [usize; 2], chroma: [usize; 2]) -> Planes {
+    fn create_planes(
+        &self,
+        device: &wgpu::Device,
+        size: [usize; 2],
+        chroma: [usize; 2],
+        depth: u8,
+    ) -> Planes {
         let make = |label: &str, [w, h]: [usize; 2]| {
             device.create_texture(&wgpu::TextureDescriptor {
                 label: Some(label),
@@ -824,7 +1264,11 @@ impl VideoGpu {
                 mip_level_count: 1,
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
-                format: wgpu::TextureFormat::R8Unorm,
+                format: if depth == 8 {
+                    wgpu::TextureFormat::R8Unorm
+                } else {
+                    wgpu::TextureFormat::Rg8Unorm
+                },
                 usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
                 view_formats: &[],
             })
@@ -840,6 +1284,7 @@ impl VideoGpu {
             textures[2].create_view(&wgpu::TextureViewDescriptor::default()),
         ];
         Planes {
+            depth,
             size,
             chroma,
             textures,
@@ -901,6 +1346,112 @@ impl egui_wgpu::CallbackTrait for VideoCallback {
     }
 }
 
+/// Paint source-precision planar samples using the same pipeline and colour tables.
+pub struct PackedVideoCallback {
+    pub frame: Arc<PackedPlanar>,
+    pub serial: u64,
+    pub window: [f32; 4],
+    pub adjust: [f32; 5],
+    pub grade: Option<Arc<Grade>>,
+}
+impl egui_wgpu::CallbackTrait for PackedVideoCallback {
+    fn prepare(
+        &self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        _screen: &egui_wgpu::ScreenDescriptor,
+        _encoder: &mut wgpu::CommandEncoder,
+        resources: &mut egui_wgpu::CallbackResources,
+    ) -> Vec<wgpu::CommandBuffer> {
+        if let Some(gpu) = resources.get_mut::<VideoGpu>() {
+            if let Err(error) = gpu.upload_packed(
+                device,
+                queue,
+                &self.frame,
+                self.serial,
+                self.window,
+                self.adjust,
+                self.grade.as_ref(),
+            ) {
+                gpu.bind_group = None;
+                eprintln!("{error}");
+            }
+        }
+        Vec::new()
+    }
+    fn paint(
+        &self,
+        _info: eframe::egui::PaintCallbackInfo,
+        pass: &mut wgpu::RenderPass<'static>,
+        resources: &egui_wgpu::CallbackResources,
+    ) {
+        if let Some(gpu) = resources.get::<VideoGpu>() {
+            if let Some(bind_group) = &gpu.bind_group {
+                pass.set_pipeline(&gpu.pipeline);
+                pass.set_bind_group(0, bind_group, &[]);
+                pass.draw(0..6, 0..1);
+            }
+        }
+    }
+}
+
+/// Render a retained decoder surface directly, keeping pixels on the GPU.
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+pub struct SurfaceVideoCallback {
+    pub frame: fvid_vt::Surface,
+    pub rotation: u16,
+    pub colour: AvcColour,
+    pub serial: u64,
+    pub window: [f32; 4],
+    pub adjust: [f32; 5],
+    pub grade: Option<Arc<Grade>>,
+}
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+impl egui_wgpu::CallbackTrait for SurfaceVideoCallback {
+    fn prepare(
+        &self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        _screen: &egui_wgpu::ScreenDescriptor,
+        _encoder: &mut wgpu::CommandEncoder,
+        resources: &mut egui_wgpu::CallbackResources,
+    ) -> Vec<wgpu::CommandBuffer> {
+        if let Some(gpu) = resources.get_mut::<VideoGpu>() {
+            if let Err(error) = gpu.import_surface_rotated(
+                device,
+                queue,
+                &self.frame,
+                self.colour,
+                self.serial,
+                self.window,
+                self.adjust,
+                self.grade.as_ref(),
+                self.rotation,
+            ) {
+                gpu.bind_group = None;
+                gpu.bound = None;
+                gpu.serial = u64::MAX;
+                eprintln!("{error}");
+            }
+        }
+        Vec::new()
+    }
+    fn paint(
+        &self,
+        _info: eframe::egui::PaintCallbackInfo,
+        pass: &mut wgpu::RenderPass<'static>,
+        resources: &egui_wgpu::CallbackResources,
+    ) {
+        if let Some(gpu) = resources.get::<VideoGpu>() {
+            if let Some(bind_group) = &gpu.bind_group {
+                pass.set_pipeline(&gpu.pipeline);
+                pass.set_bind_group(0, bind_group, &[]);
+                pass.draw(0..6, 0..1);
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -932,11 +1483,376 @@ mod tests {
             .update(module.to_ctx())
             .expect("every shader type must have a layout");
         assert_eq!(
-            layouter[params].size, 96,
-            "Params must match the 96-byte uniform the upload writes"
+            layouter[params].size, 144,
+            "Params must match the 144-byte uniform the upload writes"
         );
     }
 
+    #[test]
+    fn display_shader_validates_and_rejects_extra_resources() {
+        ColorShader::new(include_str!("../shaders/grayscale.wgsl")).unwrap();
+        assert!(
+            ColorShader::new("fn process_color(rgb: vec3<f32>) -> vec3<f32> { return rgb; }")
+                .is_err()
+        );
+        assert!(ColorShader::new("var<private> extra: f32; fn process_color(rgb: vec3<f32>, uv: vec2<f32>) -> vec3<f32> { return rgb; }").is_err());
+        assert!(ColorShader::new(&" ".repeat(65537)).is_err());
+        for backend in [crate::Backend::Cpu, crate::Backend::Cuda] {
+            assert!(configuration(backend, 0).is_err());
+        }
+        assert!(configuration(crate::Backend::Auto, 1).is_err());
+    }
+
+    #[test]
+    #[ignore = "requires a physical GPU; failure to initialize is a failure"]
+    fn display_shader_executes_after_colour_conversion() {
+        let (device, queue) = headless().expect("physical GPU required");
+        assert_ne!(device.adapter_info().device_type, wgpu::DeviceType::Cpu);
+        let picture = frame(|_, _| 96, |_, _| 192);
+        let baseline = painted(&device, &queue, &picture, None);
+        let shader = ColorShader::new(include_str!("../shaders/grayscale.wgsl")).unwrap();
+        let mut gpu = build_with_source(
+            &device,
+            wgpu::TextureFormat::Rgba8Unorm,
+            shader.compiled_source(),
+        );
+        let shown = show(&device, &queue, &mut gpu, &picture, None, IDENTITY_ADJUST);
+        for (source, output) in baseline.chunks_exact(4).zip(shown.chunks_exact(4)) {
+            let expected = (f32::from(source[0]) * 0.2126
+                + f32::from(source[1]) * 0.7152
+                + f32::from(source[2]) * 0.0722)
+                .round() as i32;
+            for channel in &output[..3] {
+                assert!((i32::from(*channel) - expected).abs() <= 1);
+            }
+            assert_eq!(output[0], output[1]);
+            assert_eq!(output[1], output[2]);
+            assert_eq!(output[3], 255);
+        }
+    }
+
+    #[test]
+    #[ignore = "requires a physical GPU; source precision must be tested by readback"]
+    fn source_precision_planes_use_gpu_conversion_and_display_shader() {
+        let (device, queue) = headless().expect("physical GPU required");
+        assert_ne!(device.adapter_info().device_type, wgpu::DeviceType::Cpu);
+        let mut gpu = build(&device, wgpu::TextureFormat::Rgba8Unorm);
+        let grade = Arc::new(slog3(33, Interpolation::Tetrahedral));
+        let mut serial = 1;
+        for depth in [8, 10, 12, 16, 8] {
+            for subsampling in [[2, 2], [2, 1], [1, 1], [1, 2]] {
+                for full in [false, true] {
+                    let (width, height) = (9usize, 7usize);
+                    let scale = 1u32 << (depth - 8);
+                    let luma = width * height;
+                    let chroma = width.div_ceil(subsampling[0]) * height.div_ceil(subsampling[1]);
+                    let mut data = Vec::new();
+                    for i in 0..luma + chroma * 2 {
+                        let value = if i < luma {
+                            (16 + (i * 37) % 220) as u32 * scale + scale - 1
+                        } else {
+                            128 * scale
+                        };
+                        if depth == 8 {
+                            data.push(value as u8);
+                        } else {
+                            data.extend((value as u16).to_le_bytes());
+                        }
+                    }
+                    let frame = PackedPlanar::new(
+                        crate::native_geometry::GeometryFrame {
+                            width,
+                            height,
+                            subsampling: Some(subsampling),
+                            data,
+                        },
+                        depth,
+                        AvcColour {
+                            kr: 0.2126,
+                            kb: 0.0722,
+                            full,
+                        },
+                    )
+                    .unwrap();
+                    let mut cpu = Vec::new();
+                    frame.to_rgb(&mut cpu, width * height * 3).unwrap();
+                    gpu.upload_packed(
+                        &device,
+                        &queue,
+                        &frame,
+                        serial,
+                        [0.0, 0.0, 1.0, 1.0],
+                        IDENTITY_ADJUST,
+                        None,
+                    )
+                    .unwrap();
+                    serial += 1;
+                    let shown = read_picture(&device, &queue, &gpu, width, height);
+                    assert!(
+                        worst_between(&shown, &cpu).into_iter().all(|v| v <= 1),
+                        "depth {depth} {subsampling:?} full={full}"
+                    );
+                    if depth > 8 {
+                        let narrowed = frame.to_planar8(width * height * 3).unwrap();
+                        let mut quantized = Vec::new();
+                        crate::playback_native::planar8_to_rgb(
+                            &narrowed,
+                            &mut quantized,
+                            width * height * 3,
+                        )
+                        .unwrap();
+                        assert!(
+                            cpu.iter().zip(&quantized).any(|(a, b)| a != b),
+                            "test must distinguish source precision from 8-bit narrowing"
+                        );
+                        assert!(
+                            shown
+                                .chunks_exact(4)
+                                .zip(quantized.chunks_exact(3))
+                                .any(|(a, b)| a[..3] != *b),
+                            "GPU must preserve source low bits"
+                        );
+                    }
+                    gpu.upload_packed(
+                        &device,
+                        &queue,
+                        &frame,
+                        serial,
+                        [0.0, 0.0, 1.0, 1.0],
+                        IDENTITY_ADJUST,
+                        Some(&grade),
+                    )
+                    .unwrap();
+                    serial += 1;
+                    let graded = read_picture(&device, &queue, &gpu, width, height);
+                    grade.apply(&mut cpu);
+                    assert!(
+                        worst_between(&graded, &cpu).into_iter().all(|v| v <= 2),
+                        "graded depth {depth}"
+                    );
+                    let shader = ColorShader::new("fn process_color(rgb: vec3<f32>, uv: vec2<f32>) -> vec3<f32> { return vec3(0.2,0.4,0.6); }").unwrap();
+                    let mut custom = build_with_source(
+                        &device,
+                        wgpu::TextureFormat::Rgba8Unorm,
+                        shader.compiled_source(),
+                    );
+                    custom
+                        .upload_packed(
+                            &device,
+                            &queue,
+                            &frame,
+                            serial,
+                            [0.0, 0.0, 1.0, 1.0],
+                            IDENTITY_ADJUST,
+                            Some(&grade),
+                        )
+                        .unwrap();
+                    let pixels = read_picture(&device, &queue, &custom, width, height);
+                    assert!(
+                        pixels
+                            .chunks_exact(4)
+                            .all(|pixel| pixel == [51, 102, 153, 255])
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    #[ignore = "requires physical VideoToolbox and Metal"]
+    fn hardware_surfaces_render_with_colour_and_custom_shader() {
+        use crate::codec::config::{AvcConfig, HevcConfig};
+        use crate::container::mp4::{Limits, Mp4Reader};
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+            backends: wgpu::Backends::METAL,
+            ..wgpu::InstanceDescriptor::new_without_display_handle()
+        });
+        let adapter = pollster::block_on(instance.request_adapter(&Default::default())).unwrap();
+        assert_ne!(adapter.get_info().device_type, wgpu::DeviceType::Cpu);
+        let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
+            required_features: wgpu::Features::TEXTURE_FORMAT_16BIT_NORM,
+            ..Default::default()
+        }))
+        .unwrap();
+        let mut gpu = build(&device, wgpu::TextureFormat::Rgba8Unorm);
+        let shader = ColorShader::new("fn process_color(rgb: vec3<f32>, uv: vec2<f32>) -> vec3<f32> { return vec3<f32>(0.2, 0.4, 0.6); }").unwrap();
+        let mut custom = build_with_source(
+            &device,
+            wgpu::TextureFormat::Rgba8Unorm,
+            shader.compiled_source(),
+        );
+        let grade = Arc::new(Grade::new(
+            bt709(),
+            &HdrMetadata::default(),
+            Settings {
+                log: Some(Log::SLog3),
+                size: 33,
+                interpolation: Interpolation::Tetrahedral,
+                ..Settings::video(DisplayTarget::sdr(100.0))
+            },
+            Some(Lut::Three(Lut3d::from_fn(17, |rgb| {
+                [rgb[0] * rgb[0], rgb[1], 1.0 - rgb[2]]
+            }))),
+        ));
+        assert!(grade.is_gpu_grade());
+        let mut serial = 0;
+        for bytes in [
+            include_bytes!("../tests/fixtures/display/par-2x1.mp4").as_slice(),
+            include_bytes!("../tests/fixtures/hevc/main-ipb.mp4").as_slice(),
+            include_bytes!("../tests/fixtures/hevc/main10-ipb.mp4").as_slice(),
+        ] {
+            let mut reader =
+                Mp4Reader::open(std::io::Cursor::new(bytes), Limits::default()).unwrap();
+            let track = reader
+                .tracks()
+                .iter()
+                .position(|t| t.handler == *b"vide")
+                .unwrap();
+            let config = reader.tracks()[track].configuration.clone();
+            let count = reader.tracks()[track].samples.len();
+            let mut session = if reader.tracks()[track].codec == *b"avc1" {
+                let config = AvcConfig::parse(&config).unwrap();
+                fvid_vt::Session::new_avc_surface(
+                    &config.sps,
+                    &config.pps,
+                    config.length_size,
+                    false,
+                )
+                .unwrap()
+            } else {
+                let config = HevcConfig::parse(&config).unwrap();
+                let sets = |kind| {
+                    config
+                        .arrays
+                        .iter()
+                        .filter(|a| a.nal_type == kind)
+                        .flat_map(|a| a.units.iter().copied())
+                        .collect::<Vec<_>>()
+                };
+                fvid_vt::Session::new_hevc_surface(
+                    &sets(32),
+                    &sets(33),
+                    &sets(34),
+                    config.length_size,
+                    config.bit_depth_luma,
+                    false,
+                )
+                .unwrap()
+            };
+            let mut packet = Vec::new();
+            let mut frames = 0;
+            for index in 0..count {
+                reader.read_packet(track, index, &mut packet).unwrap();
+                let Some(surface) = session.decode_surface(&packet).unwrap() else {
+                    continue;
+                };
+                let planes = surface.download().unwrap();
+                let colour = AvcColour {
+                    kr: 0.2126,
+                    kb: 0.0722,
+                    full: planes.full_range,
+                };
+                let mut data = planes.y;
+                data.extend(planes.cb);
+                data.extend(planes.cr);
+                let packed = PackedPlanar::new(
+                    crate::native_geometry::GeometryFrame {
+                        width: planes.width,
+                        height: planes.height,
+                        subsampling: Some([2, 2]),
+                        data,
+                    },
+                    planes.depth,
+                    colour,
+                )
+                .unwrap();
+                for rotation in [0, 90, 180, 270] {
+                    let turned = packed.rotated(rotation).unwrap();
+                    for grade in [None, Some(&grade)] {
+                        for window in [[0.0, 0.0, 1.0, 1.0], [0.1, 0.2, 0.8, 0.9]] {
+                            for adjust in [IDENTITY_ADJUST, [1.1, 2.0, 0.9, 0.8, 0.1]] {
+                                serial += 1;
+                                gpu.upload_packed(
+                                    &device, &queue, &turned, serial, window, adjust, grade,
+                                )
+                                .unwrap();
+                                let reference = read_picture(
+                                    &device,
+                                    &queue,
+                                    &gpu,
+                                    turned.frame.width,
+                                    turned.frame.height,
+                                );
+                                // Same serial intentionally exercises changing storage layout.
+                                gpu.import_surface_rotated(
+                                    &device, &queue, &surface, colour, serial, window, adjust,
+                                    grade, rotation,
+                                )
+                                .unwrap();
+                                let shown = read_picture(
+                                    &device,
+                                    &queue,
+                                    &gpu,
+                                    turned.frame.width,
+                                    turned.frame.height,
+                                );
+                                assert!(
+                                    shown
+                                        .iter()
+                                        .zip(&reference)
+                                        .all(|(a, b)| a.abs_diff(*b) <= 1),
+                                    "native surface conversion differs: depth {}, frame {index}, rotation {rotation}, crop {window:?}, adjust {adjust:?}, graded {}, max {}",
+                                    planes.depth,
+                                    grade.is_some(),
+                                    shown
+                                        .iter()
+                                        .zip(&reference)
+                                        .map(|(a, b)| a.abs_diff(*b))
+                                        .max()
+                                        .unwrap()
+                                );
+                                gpu.upload_packed(
+                                    &device, &queue, &turned, serial, window, adjust, grade,
+                                )
+                                .unwrap();
+                                assert_eq!(
+                                    read_picture(
+                                        &device,
+                                        &queue,
+                                        &gpu,
+                                        turned.frame.width,
+                                        turned.frame.height
+                                    ),
+                                    reference
+                                );
+                            }
+                        }
+                    }
+                }
+                serial += 1;
+                custom
+                    .import_surface(
+                        &device,
+                        &queue,
+                        &surface,
+                        colour,
+                        serial,
+                        [0.0, 0.0, 1.0, 1.0],
+                        IDENTITY_ADJUST,
+                        None,
+                    )
+                    .unwrap();
+                assert!(
+                    read_picture(&device, &queue, &custom, planes.width, planes.height)
+                        .chunks_exact(4)
+                        .all(|p| p == [51, 102, 153, 255])
+                );
+                frames += 1;
+            }
+            assert!(frames >= 10);
+        }
+    }
     /// A device with no window, so a test can own the texture it paints into.
     /// A machine that reports no adapter has nothing here to measure against.
     fn headless() -> Option<(wgpu::Device, wgpu::Queue)> {
@@ -993,6 +1909,15 @@ mod tests {
     ) -> Vec<u8> {
         let (width, height) = (frame.width, frame.height);
         gpu.upload(device, queue, frame, 0, [0.0, 0.0, 1.0, 1.0], adjust, grade);
+        read_picture(device, queue, gpu, width, height)
+    }
+    fn read_picture(
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        gpu: &VideoGpu,
+        width: usize,
+        height: usize,
+    ) -> Vec<u8> {
         let target = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("fvid test picture"),
             size: wgpu::Extent3d {
@@ -1467,51 +2392,46 @@ mod tests {
         }
     }
 
-    /// A grade the shader cannot carry is left entirely to the CPU: the texture
-    /// it would need is two tables read one after the other, and the second is
-    /// not in the binding. So the grid stays switched off, and a frame handed to
-    /// the shader with such a grade on it is drawn exactly as an ungraded one
-    /// would be — which is the other half of the contract, since the caller who
-    /// keeps a plane picture with a chained grade would otherwise be showing it
-    /// with one of its two steps missing rather than both of them done.
     #[test]
-    fn a_grade_the_shader_cannot_carry_leaves_the_picture_as_it_is() {
-        let Some((device, queue)) = headless() else {
-            eprintln!("no GPU adapter: the shader has nothing to be compared with");
-            return;
-        };
-        let mut settings = Settings::video(DisplayTarget::sdr(100.0));
-        settings.size = 17;
-        let chained = Arc::new(Grade::new(
-            bt709(),
-            &HdrMetadata::default(),
-            settings,
-            Some(Lut::Three(Lut3d::from_fn(17, |rgb| {
-                [
-                    rgb[0] * rgb[0],
-                    (rgb[1] * 0.8 + 0.1).clamp(0.0, 1.0),
-                    1.0 - rgb[2],
-                ]
-            }))),
-        ));
-        assert_eq!(
-            chained.shader_look(),
-            None,
-            "a chained grade is not one table"
-        );
-        let frame = frame(|_, _| 128, |_, _| 128);
-        let with = painted(&device, &queue, &frame, Some(&chained));
-        let without = painted(&device, &queue, &frame, None);
-        assert_eq!(with, without, "the shader graded what it was told to skip");
-        // And the grade really is not the identity, so the test above cannot
-        // pass because there was nothing to skip.
-        let mut plain = Vec::new();
-        crate::playback_native::planar8_to_rgb(&frame, &mut plain, 64 * 64 * 3).expect("converted");
-        assert_ne!(
-            cpu_graded(&frame, &chained),
-            plain,
-            "a grade that changes no pixel proves nothing here"
-        );
+    #[ignore = "requires a physical GPU for sequential LUT qualification"]
+    fn sequential_3d_grading_preserves_authored_domains() {
+        let (device, queue) = headless().expect("physical GPU required");
+        assert_ne!(device.adapter_info().device_type, wgpu::DeviceType::Cpu);
+        let frame = frame(|_, _| 128, |i, _| (16 + i % 220) as u8);
+        for interpolation in Interpolation::ALL {
+            for size in [5, 17] {
+                let mut settings = Settings::video(DisplayTarget::sdr(100.0));
+                settings.size = 17;
+                settings.interpolation = interpolation;
+                settings.log = Some(Log::SLog3);
+                let mut look = Lut3d::from_fn(size, |rgb| {
+                    [rgb[0] * rgb[0], rgb[1] * 1.2 - 0.1, 1.0 - rgb[2]]
+                });
+                look.domain_min = [-0.2, 0.1, -0.5];
+                look.domain_max = [1.2, 0.9, 1.5];
+                let grade = Arc::new(Grade::new(
+                    bt709(),
+                    &HdrMetadata::default(),
+                    settings,
+                    Some(Lut::Three(look)),
+                ));
+                assert!(grade.is_gpu_grade());
+                assert!(grade.shader_look().is_none());
+                let plain = painted(&device, &queue, &frame, None);
+                let mut expected: Vec<u8> = plain
+                    .chunks_exact(4)
+                    .flat_map(|p| p[..3].iter().copied())
+                    .collect();
+                grade.apply(&mut expected);
+                let shown = painted(&device, &queue, &frame, Some(&grade));
+                let worst = worst_between(&shown, &expected);
+                assert!(
+                    worst.iter().all(|&v| v <= 1),
+                    "{interpolation:?}, {size}: {worst:?}"
+                );
+                assert_ne!(shown, plain);
+            }
+        }
     }
 
     /// The bytes the CPU route leaves for the window when a picture is graded

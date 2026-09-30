@@ -12,13 +12,13 @@ pub mod primaries;
 pub mod tonemap;
 pub mod transfer;
 
-pub use grade::{Grade, Settings, ShaderLook};
+pub use grade::{Grade, Settings, ShaderLook, ShaderStages};
 pub use hdr::{
-    mdcv_payload, ColourDescription, HdrMetadata, MasteringDisplay, CLLI_PAYLOAD_LEN,
-    MDCV_PAYLOAD_LEN, SEI_CLLI, SEI_MDCV,
+    CLLI_PAYLOAD_LEN, ColourDescription, HdrMetadata, MDCV_PAYLOAD_LEN, MasteringDisplay, SEI_CLLI,
+    SEI_MDCV, mdcv_payload,
 };
 pub use log::{Codes, Log};
 pub use lut::{CubePlan, Interpolation, Lut, Lut1d, Lut3d};
-pub use primaries::{apply, rgb_to_rgb, Chromaticity, MatrixCoeff, Primaries, YuvMatrix};
-pub use tonemap::{curve, tone_map_rgb, ContentLight, DisplayTarget, ToneMap};
-pub use transfer::{hlg_ootf_rgb, hlg_system_gamma, Transfer};
+pub use primaries::{Chromaticity, MatrixCoeff, Primaries, YuvMatrix, apply, rgb_to_rgb};
+pub use tonemap::{ContentLight, DisplayTarget, ToneMap, curve, tone_map_rgb};
+pub use transfer::{Transfer, hlg_ootf_rgb, hlg_system_gamma};

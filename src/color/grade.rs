@@ -251,9 +251,31 @@ impl Grade {
     /// what lets a plane picture keep its planes and still be graded. Says the
     /// same as [`shader_look`](Self::shader_look) without copying a table.
     pub fn is_shader_look(&self) -> bool {
-        self.shader_look().is_some()
+        matches!((&self.cube, &self.tables), (Lut::Three(_), Some(_)))
+            || matches!((&self.cube, &self.tables), (Lut::Three(_), None)) && self.lut.is_none()
     }
 
+    /// Borrow the exact GPU grading stages without cloning or rebaking nodes.
+    /// A chained look is read after conversion at full float precision, before
+    /// output clamping; each LUT retains its authored input domain and size.
+    pub fn shader_stages(&self) -> ShaderStages<'_> {
+        match &self.tables {
+            Some(tables) => ShaderStages::Tables(tables),
+            None => ShaderStages::Chain {
+                conversion: &self.cube,
+                look: self.lut.as_ref(),
+            },
+        }
+    }
+
+    /// Whether the renderer can bind the exact conversion and optional 3D look.
+    pub fn is_gpu_grade(&self) -> bool {
+        self.is_shader_look()
+            || matches!(
+                (&self.cube, &self.lut),
+                (Lut::Three(_), Some(Lut::Three(_)))
+            )
+    }
     /// True when applying this grade could not change a pixel: the grid is its
     /// own input and no LUT follows it. A caller skips the lookup on this.
     pub fn is_identity(&self) -> bool {
@@ -313,6 +335,19 @@ impl Grade {
             }
         }
     }
+}
+
+/// Borrowed resources for exact single or sequential GPU lookup. This describes
+/// shader resources; ShaderLook describes the compact single-lookup form.
+#[derive(Clone, Copy, Debug)]
+pub enum ShaderStages<'a> {
+    /// Already folded output-code tables, identical to the CPU fast path.
+    Tables(&'a [Vec<u8>; 3]),
+    /// Preserve both original LUTs rather than approximating their composition.
+    Chain {
+        conversion: &'a Lut,
+        look: Option<&'a Lut>,
+    },
 }
 
 /// The table a fragment shader binds for a grade that is one lookup: whichever
@@ -1291,6 +1326,45 @@ mod tests {
                     "{interp:?} at a {size} grid: the codes one composed read is off by"
                 );
             }
+        }
+    }
+    #[test]
+    fn shader_stages_borrow_original_domains_and_preserve_intermediate_headroom() {
+        let mut grade = Grade::new(bt709(), &HdrMetadata::default(), Settings::default(), None);
+        let conversion = Lut3d::from_fn(2, |rgb| rgb.map(|v| 2.0 * v - 0.5));
+        let mut look = Lut3d::identity(9);
+        look.domain_min = [-0.5; 3];
+        look.domain_max = [1.5; 3];
+        grade.cube = Lut::Three(conversion);
+        grade.lut = Some(Lut::Three(look));
+        grade.tables = None;
+        let ShaderStages::Chain {
+            conversion,
+            look: Some(look),
+        } = grade.shader_stages()
+        else {
+            panic!("expected sequential stages");
+        };
+        assert!(std::ptr::eq(conversion, &grade.cube));
+        assert!(std::ptr::eq(look, grade.lut.as_ref().unwrap()));
+        for interpolation in Interpolation::ALL {
+            grade.interpolation = interpolation;
+            let ShaderStages::Chain {
+                conversion,
+                look: Some(look),
+            } = grade.shader_stages()
+            else {
+                unreachable!()
+            };
+            let intermediate = conversion.sample([1.0; 3], interpolation);
+            assert_eq!(intermediate, [1.5; 3]);
+            assert_eq!(look.sample(intermediate, interpolation), [1.0; 3]);
+            assert_eq!(grade.rgb([1.0; 3]), [1.0; 3]);
+            assert_ne!(
+                look.sample([1.0; 3], interpolation),
+                [1.0; 3],
+                "clamping between stages changes the authored look"
+            );
         }
     }
 }

@@ -112,7 +112,6 @@ impl Layout {
 pub(crate) struct GpuProcessor {
     device: wgpu::Device,
     queue: wgpu::Queue,
-    pipeline: wgpu::RenderPipeline,
     frames: Vec<wgpu::Texture>,
     stages: Vec<Stage>,
     upload: wgpu::Buffer,
@@ -130,6 +129,7 @@ pub(crate) struct GpuProcessor {
     map_receiver: mpsc::Receiver<std::result::Result<(), wgpu::BufferAsyncError>>,
 }
 struct Stage {
+    pipeline: wgpu::RenderPipeline,
     bindings: wgpu::BindGroup,
     output_view: wgpu::TextureView,
 }
@@ -143,6 +143,24 @@ impl GpuProcessor {
         ordinal: usize,
         memory_limit: usize,
     ) -> Result<Self> {
+        Self::new_shader_chain(
+            plans,
+            &vec![None; plans.len()],
+            backend,
+            ordinal,
+            memory_limit,
+        )
+    }
+    pub(crate) fn new_shader_chain(
+        plans: &[&Plan],
+        shaders: &[Option<&crate::resident::ByteShader>],
+        backend: Backend,
+        ordinal: usize,
+        memory_limit: usize,
+    ) -> Result<Self> {
+        if plans.len() != shaders.len() {
+            return Err(gpu_error("shader count must match stage count"));
+        }
         let plan = plans
             .first()
             .ok_or_else(|| gpu_error("GPU chain cannot be empty"))?;
@@ -287,6 +305,12 @@ impl GpuProcessor {
                 },
             ],
         });
+        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("fvid pipeline"),
+            bind_group_layouts: &[Some(&layout)],
+            immediate_size: 0,
+        });
+        let mut pipelines = std::collections::HashMap::<&str, wgpu::RenderPipeline>::new();
         let mut stages = Vec::with_capacity(plans.len());
         for (index, plan) in plans.iter().enumerate() {
             let mut params = plan.gpu_params()?;
@@ -314,45 +338,50 @@ impl GpuProcessor {
                     },
                 ],
             });
+            let source = shaders[index].map_or(include_str!("transform.wgsl"), |shader| {
+                shader.compiled_source()
+            });
+            let pipeline = pipelines
+                .entry(source)
+                .or_insert_with(|| {
+                    let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+                        label: Some("fvid byte shader"),
+                        source: wgpu::ShaderSource::Wgsl(source.into()),
+                    });
+                    let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                        label: Some("fvid crop/reflect"),
+                        layout: Some(&pipeline_layout),
+                        vertex: wgpu::VertexState {
+                            module: &shader,
+                            entry_point: Some("vertex"),
+                            compilation_options: Default::default(),
+                            buffers: &[],
+                        },
+                        primitive: Default::default(),
+                        depth_stencil: None,
+                        multisample: Default::default(),
+                        fragment: Some(wgpu::FragmentState {
+                            module: &shader,
+                            entry_point: Some("fragment"),
+                            compilation_options: Default::default(),
+                            targets: &[Some(wgpu::ColorTargetState {
+                                format,
+                                blend: None,
+                                write_mask: wgpu::ColorWrites::ALL,
+                            })],
+                        }),
+                        multiview_mask: None,
+                        cache: None,
+                    });
+                    pipeline
+                })
+                .clone();
             stages.push(Stage {
+                pipeline,
                 bindings,
                 output_view,
             });
         }
-        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("fvid byte gather"),
-            source: wgpu::ShaderSource::Wgsl(include_str!("transform.wgsl").into()),
-        });
-        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("fvid pipeline"),
-            bind_group_layouts: &[Some(&layout)],
-            immediate_size: 0,
-        });
-        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("fvid crop/reflect"),
-            layout: Some(&pipeline_layout),
-            vertex: wgpu::VertexState {
-                module: &shader,
-                entry_point: Some("vertex"),
-                compilation_options: Default::default(),
-                buffers: &[],
-            },
-            primitive: Default::default(),
-            depth_stencil: None,
-            multisample: Default::default(),
-            fragment: Some(wgpu::FragmentState {
-                module: &shader,
-                entry_point: Some("fragment"),
-                compilation_options: Default::default(),
-                targets: &[Some(wgpu::ColorTargetState {
-                    format,
-                    blend: None,
-                    write_mask: wgpu::ColorWrites::ALL,
-                })],
-            }),
-            multiview_mask: None,
-            cache: None,
-        });
         if let Some(error) = [
             pollster::block_on(validation.pop()),
             pollster::block_on(internal.pop()),
@@ -373,7 +402,6 @@ impl GpuProcessor {
             map_receiver,
             device,
             queue,
-            pipeline,
             frames,
             stages,
             upload,
@@ -491,7 +519,7 @@ impl GpuProcessor {
                 occlusion_query_set: None,
                 multiview_mask: None,
             });
-            pass.set_pipeline(&self.pipeline);
+            pass.set_pipeline(&stage.pipeline);
             pass.set_bind_group(0, &stage.bindings, &[]);
             pass.draw(0..3, 0..1);
         }

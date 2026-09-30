@@ -1,0 +1,10 @@
+{
+  "name": "Mint",
+  "style": "diagram",
+  "text": "#e6fff4",
+  "played": "#68efbc",
+  "buffer": "#c7ffe9",
+  "swap": "#80ae9e",
+  "track": "#718079",
+  "panel": "#202b26"
+}

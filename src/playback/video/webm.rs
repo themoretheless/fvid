@@ -377,6 +377,29 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     }
     /// Timeline length relative to the first displayed video frame. When a
     /// streaming file omits Duration, estimate its tail from indexed packet PTS.
+    pub fn cache_packet_count(&self) -> usize { self.demux.packets.len() }
+
+    pub fn cache_packets(&self) -> Vec<(u64, u64, Duration, Duration)> {
+        let origin = self.origin();
+        let mut packets: Vec<_> = self.demux.packets.iter()
+            .filter(|p| p.track == self.track && !p.invisible).collect();
+        packets.sort_unstable_by_key(|p| p.pts_ns);
+        packets.iter().enumerate().filter_map(|(index, p)| {
+            let start = p.pts_ns.checked_sub(origin)?;
+            // SimpleBlocks commonly omit duration. The next presentation PTS
+            // defines the displayed interval, including variable frame rates.
+            let end = if let Some(duration) = p.duration_ns {
+                start.checked_add(i64::try_from(duration).ok()?)?
+            } else if let Some(next) = packets.get(index + 1) {
+                next.pts_ns.checked_sub(origin)?
+            } else {
+                start.checked_add(self.frame_period().as_nanos() as i64)?
+            };
+            (end > 0).then(|| (p.offset, p.offset.saturating_add(p.size as u64),
+                Duration::from_nanos(start.max(0) as u64), Duration::from_nanos(end as u64)))
+        }).collect()
+    }
+
     pub fn duration(&self) -> Option<Duration> {
         let mut timestamps = self
             .demux
@@ -1035,6 +1058,25 @@ mod tests {
         assert!(reader.read_frame().unwrap());
         assert_eq!(reader.rgb(), first);
     }
+    #[test]
+    fn cached_simpleblocks_follow_variable_presentation_intervals() {
+        use super::*;
+        let input = include_bytes!("../../../tests/fixtures/vp9/motion.webm");
+        let mut reader = WebmVideoReader::open(Cursor::new(input), 16 << 20).unwrap();
+        reader.demux.scan_all().unwrap();
+        let mut time = 0;
+        for (index, packet) in reader.demux.packets.iter_mut().filter(|p| p.track == reader.track && !p.invisible).enumerate() {
+            packet.pts_ns = time;
+            packet.duration_ns = None;
+            time += if index % 2 == 0 { 33_000_000 } else { 67_000_000 };
+        }
+        let packets = reader.cache_packets();
+        assert!(packets.len() > 2);
+        for pair in packets.windows(2) { assert_eq!(pair[0].3, pair[1].2); }
+        assert_eq!(packets[0].3 - packets[0].2, Duration::from_millis(33));
+        assert_eq!(packets[1].3 - packets[1].2, Duration::from_millis(67));
+    }
+
     #[test]
     fn duration_and_progress_use_video_origin_and_index_fallback() {
         use super::*;

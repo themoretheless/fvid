@@ -2,6 +2,14 @@
 
 Реализовано GPU-исполнение существующих Y4M-операций: crop, hflip, vflip и их объединённого прохода. Методы работают с 8-bit planar YUV420/422/444. Это слой обработки кадров; кодирование/декодирование H.264/HEVC/AV1, NVENC, VideoToolbox и VAAPI сюда ещё не входят.
 
+## Пользовательские шейдеры
+
+`--shader FILE.wgsl` добавляет программируемый planar-byte фильтр к GPU-этапу;
+`--then` соединяет несколько таких этапов без промежуточного readback.
+Плеер принимает отдельный RGB display shader, а также явный выбор GPU API
+через `--backend` и адаптера через `--device`. Контракты функций, примеры и
+проверки: [SHADERS.md](SHADERS.md).
+
 ## API и платформы
 
 | Backend | Реализация | Целевая платформа | Установленный факт |
@@ -34,7 +42,7 @@ cargo build --release
 
 На Apple OpenGL-путь wgpu требует **ANGLE/EGL** и feature `angle`; это не обёртка над системным legacy OpenGL. Vulkan на Apple требует **MoltenVK** и feature `vulkan-portability`. Одного Cargo feature недостаточно без доступного runtime. Эти библиотеки автоматически не устанавливаются.
 
-CUDA подключает драйвер и NVRTC динамически; SDK не требуется при сборке Rust. Во время работы нужны NVIDIA GPU, совместимый драйвер и **CUDA 13 NVRTC** (`nvrtc64_130_0.dll` / `libnvrtc.so.13`) в пути загрузчика. На Windows добавьте `CUDA\v13.*\bin` в `PATH`. Ошибки отсутствующего runtime, несовместимой версии compiler/driver и неизвестного device возвращаются пользователю. [Детали CUDA](../crates/fvid-cuda/README.md).
+CUDA подключает драйвер и NVRTC динамически; SDK не требуется при сборке Rust. Во время работы нужны NVIDIA GPU и совместимый драйвер. Для встроенного multi-arch PTX NVRTC не требуется; **CUDA 13 NVRTC** (`nvrtc64_130_0.dll` / `libnvrtc.so.13`) нужен для fallback-компиляции, когда встроенный PTX не подходит. На Windows добавьте `CUDA\v13.*\bin` в `PATH`. Ошибки отсутствующего runtime, несовместимой версии compiler/driver и неизвестного device возвращаются пользователю. [Детали CUDA](../crates/fvid-cuda/README.md).
 
 В Rust API старый `process` сохраняет CPU-семантику. Явный выбор:
 
@@ -59,7 +67,7 @@ Device, queue, pipeline, bindings, input/output textures и upload/readback buff
 
 **CUDA:** input/output/parameter device buffers and pinned host staging are reused. A process-wide pool keeps one `CudaContext` and loaded PTX modules per device ordinal (warm for MCP / repeated jobs in-process; one-shot CLI still pays driver/context once). One CUDA stream orders pinned→device upload → kernel → device→pinned download; synchronize completes work before returning. Each kernel thread writes its output byte. Unsafe is limited to the adapter (driver probes, pinned alloc, kernel launch); the root crate still forbids unsafe.
 
-Y4M streaming API возвращает CPU-байты после каждого обработанного кадра. Новый `GpuPipeline` и CLI `--then` удерживают промежуточные кадры между отдельными фильтрами на GPU; в Rust API финальный download явный и необязательный. [Контракт resident-цепочки и проверки](GPU_RESIDENT.md). Аппаратный decode→filter→encode без readback, совместное использование поверхностей с внешним кодеком и перекрытие нескольких кадров ещё не реализованы.
+Y4M streaming API возвращает CPU-байты после каждого обработанного кадра. Новый `GpuPipeline` и CLI `--then` удерживают промежуточные кадры между отдельными фильтрами на GPU; в Rust API финальный download явный и необязательный. [Контракт resident-цепочки и проверки](GPU_RESIDENT.md). Resident API пока не импортирует поверхности декодера. Отдельный `media hw-filter` с feature `media-cuda` реализует NVDEC→CUDA NV12 crop/flip→NVENC без host frame copies; это не общий shader/codec граф. CUDA streaming использует два слота для перекрытия кадров. Metal decode→shader→encode без копирования поверхностей через CPU ещё не соединён.
 
 ## Память и завершение
 

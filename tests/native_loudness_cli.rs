@@ -10,6 +10,8 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
             let _ = std::fs::remove_file(self.0.with_extension("limited.wav"));
             let _ = std::fs::remove_file(self.0.with_extension("cli.wav"));
             let _ = std::fs::remove_file(self.0.with_extension("media.wav"));
+            let _ = std::fs::remove_file(self.0.with_extension("controlled.wav"));
+            let _ = std::fs::remove_file(self.0.with_extension("cancelled.wav"));
         }
     }
     let _cleanup = Cleanup(source.clone());
@@ -182,6 +184,59 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
         fvid::native_pcm::measure_loudness_file(&normalized, None, &[1.0], None).unwrap();
     assert!((measured.integrated_lufs.unwrap() + 20.0).abs() < 0.02);
     let bytes = std::fs::read(&normalized).unwrap();
+    let controlled = source.with_extension("controlled.wav");
+    let events = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+    let captured = events.clone();
+    let hook = fvid::native_pcm::NormalizationProgressHook::new(move |event| {
+        captured.lock().unwrap().push(event)
+    });
+    fvid::native_pcm::normalize_loudness_file_controlled(
+        &source,
+        &controlled,
+        None,
+        &[1.0],
+        target,
+        None,
+        Some(&hook),
+    )
+    .unwrap();
+    assert_eq!(std::fs::read(&controlled).unwrap(), bytes);
+    let events = events.lock().unwrap();
+    assert_eq!(events.iter().filter(|event| event.done).count(), 1);
+    assert_eq!(
+        events.iter().filter(|event| event.phase_complete).count(),
+        2
+    );
+    assert_eq!(
+        events.first().unwrap().phase,
+        fvid::native_pcm::NormalizationPhase::Measure
+    );
+    assert_eq!(
+        events.last().unwrap().phase,
+        fvid::native_pcm::NormalizationPhase::Export
+    );
+    assert!(events.last().unwrap().done);
+    drop(events);
+    let cancelled = fvid::media_control::CancelFlag::new();
+    let signal = cancelled.clone();
+    let hook = fvid::native_pcm::NormalizationProgressHook::new(move |event| {
+        if event.phase == fvid::native_pcm::NormalizationPhase::Export && !event.done {
+            signal.cancel();
+        }
+    });
+    let output = source.with_extension("cancelled.wav");
+    assert!(fvid::native_pcm::normalize_loudness_file_controlled(
+        &source,
+        &output,
+        None,
+        &[1.0],
+        target,
+        Some(&cancelled),
+        Some(&hook)
+    )
+    .is_err());
+    assert!(!output.exists());
+
     #[cfg(feature = "media")]
     {
         let output = source.with_extension("media.wav");
@@ -276,7 +331,13 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
         assert!(!normalize(options).status.success());
         assert!(!cli.exists());
     }
-    let result = normalize(&["--target-lufs", "-20", "--sample-peak-dbfs", "0"]);
+    let result = normalize(&[
+        "--target-lufs",
+        "-20",
+        "--sample-peak-dbfs",
+        "0",
+        "--progress",
+    ]);
     assert!(
         result.status.success(),
         "{}",
@@ -286,6 +347,17 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
     let stats: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
     assert_eq!(stats["backend"], "fvid");
     assert_eq!(stats["peak_limited"], false);
+    let events: Vec<serde_json::Value> = String::from_utf8(result.stderr)
+        .unwrap()
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    assert_eq!(
+        events.iter().filter(|event| event["done"] == true).count(),
+        1
+    );
+    assert_eq!(events.first().unwrap()["phase"], "measure");
+    assert_eq!(events.last().unwrap()["phase"], "export");
     assert!(!normalize(&[]).status.success());
     let limited = source.with_extension("limited.wav");
     let target = fvid::native_pcm::NormalizeTarget {
