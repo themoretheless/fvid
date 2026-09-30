@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-const SRT: &str = "1\r\n00:00:00,123 --> 00:00:01,234\r\n<b>Hello</b>\r\nworld\r\n\r\n2\r\n00:00:00,500 --> 00:00:02,000\r\nПривет, мир\r\n";
+const SRT: &str = "1\r\n00:00:00,123 --> 00:00:01,234\r\n<b>Hello</b>\r\nworld\r\n\r\n2\r\n00:00:00,500 --> 00:00:02,000\r\nПривет, мир &amp; &#x41;\r\n";
 #[test]
 fn srt_convert_cli_and_api_use_owned_ass_muxer_atomically() {
     let directory =
@@ -119,7 +119,7 @@ fn independent_decoder_preserves_srt_cue_times_text_and_style() {
     let text = String::from_utf8(result.stdout).unwrap();
     assert!(text.contains("00:00:00,123 --> 00:00:01,234"), "{text}");
     assert!(text.contains("<b>Hello</b>\nworld"), "{text}");
-    assert!(text.contains("Привет, мир"), "{text}");
+    assert!(text.contains("Привет, мир & A"), "{text}");
 }
 
 #[test]
@@ -192,7 +192,7 @@ fn matroska_subrip_selection_uses_owned_conversion_and_preserves_cues() {
         let text = String::from_utf8(decoded.stdout).unwrap();
         assert!(text.contains("00:00:00,123 --> 00:00:01,234"), "{text}");
         assert!(text.contains("<b>Hello</b>\nworld"), "{text}");
-        assert!(text.contains("Привет, мир"), "{text}");
+        assert!(text.contains("Привет, мир & A"), "{text}");
         let cli = directory.join(format!("cli-{label}.mkv"));
         let mut command = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"));
         command

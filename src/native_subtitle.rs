@@ -55,13 +55,44 @@ fn timestamp(value: &str) -> Result<u64> {
         .ok_or_else(|| invalid("SRT timestamp overflow"))
 }
 fn ass_text(text: &str) -> Option<String> {
-    if text.contains(['{', '}', '\\', '&', '\0']) {
+    if text.contains(['{', '}', '\\', '\0']) {
         return None;
     }
     let mut output = String::new();
     let mut rest = text;
     while !rest.is_empty() {
-        if rest.starts_with('<') {
+        if rest.starts_with('&') {
+            let Some(end) = rest.find(';').filter(|end| *end <= 16) else {
+                output.push('&');
+                rest = &rest[1..];
+                continue;
+            };
+            let entity = &rest[1..end];
+            let ch = match entity {
+                "amp" => '&',
+                "lt" => '<',
+                "gt" => '>',
+                "quot" => '"',
+                "apos" => '\'',
+                "nbsp" => '\u{a0}',
+                _ => {
+                    let number = if let Some(hex) = entity
+                        .strip_prefix("#x")
+                        .or_else(|| entity.strip_prefix("#X"))
+                    {
+                        u32::from_str_radix(hex, 16).ok()?
+                    } else {
+                        entity.strip_prefix('#')?.parse::<u32>().ok()?
+                    };
+                    char::from_u32(number)?
+                }
+            };
+            if matches!(ch, '{' | '}' | '\\') || ch.is_control() {
+                return None;
+            }
+            output.push(ch);
+            rest = &rest[end + 1..];
+        } else if rest.starts_with('<') {
             let end = rest.find('>')?;
             let tag = rest[..=end].to_ascii_lowercase();
             output.push_str(match tag.as_str() {
@@ -289,4 +320,20 @@ fn publish(
         packets_out: event.packets,
         payload_bytes: event.payload_bytes,
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ass_text;
+    #[test]
+    fn entities_are_literal_text_not_ass_or_html_commands() {
+        assert_eq!(
+            ass_text("A&amp;B &lt;i&gt; &#x41;&#66; &quot;x&quot; &apos;y&apos; &nbsp;"),
+            Some("A&B <i> AB \"x\" 'y' \u{a0}".into())
+        );
+        assert_eq!(ass_text("H&M"), Some("H&M".into()));
+        for text in ["&#123;", "&#92;", "&#0;", "&#xD800;", "&unknown;"] {
+            assert!(ass_text(text).is_none(), "{text}");
+        }
+    }
 }

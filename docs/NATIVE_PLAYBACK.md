@@ -2598,3 +2598,10 @@ streams, non-subtitle selection, invalid timestamps and chapters fail before
 publication. Unsupported subtitle codecs, markup or unstated cue durations
 retain the adapter. Independent fixtures with two SubRip tracks check default
 and explicit selection through headless CLI and media API against decoded SRT.
+
+Owned SubRip text conversion decodes `amp`, `lt`, `gt`, `quot`, `apos`, `nbsp`
+and decimal/hexadecimal Unicode entities as literal text. Decoded angle brackets
+are not interpreted as markup; entity codes for ASS braces, backslashes, control
+characters or invalid Unicode remain unsupported before publication. Ordinary
+literal ampersands no longer force the legacy adapter. Independent conversion
+tests cover named/numeric entities in standalone SRT and Matroska tracks.
