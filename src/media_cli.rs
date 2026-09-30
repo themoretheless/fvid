@@ -2,6 +2,26 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str)==Some("plan") && args.get(1).map(String::as_str)==Some("loudness") {
+        let source=std::path::Path::new(args.get(2).ok_or("plan loudness requires INPUT")?);
+        let (mut selected,mut weights)=(None,None);
+        let mut options=args[3..].iter();
+        while let Some(option)=options.next() {
+            match option.as_str() {
+                "--streams"=>{
+                    if selected.is_some() {return Err("duplicate stream index".into());}
+                    selected=Some(options.next().ok_or("missing stream index")?.parse::<usize>()?);
+                }
+                "--channel-weights"=>{
+                    if weights.is_some() {return Err("duplicate channel weights".into());}
+                    weights=Some(options.next().ok_or("missing channel weights")?.split(',').map(str::parse).collect::<Result<Vec<f64>,_>>()?);
+                }
+                _=>return Err(format!("unsupported owned loudness plan option: {option}").into()),
+            }
+        }
+        println!("{}",serde_json::to_string_pretty(&fvid::native_plan::loudness(source,selected,weights.as_deref())?)?);
+        return Ok(());
+    }
     if args.first().map(String::as_str) == Some("normalize-loudness") {
         if args.len()==2 && matches!(args[1].as_str(),"--help"|"-h") {
             println!("fvid media normalize-loudness INPUT OUTPUT.wav [--target-lufs -16] [--sample-peak-dbfs -1.5] [--streams INDEX] [--channel-weights W,...] [--quiet]\nConstant gain preserves dynamics; the ceiling is sample peak, not true peak.");
@@ -2172,7 +2192,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 if plan_paths.len() != 1 || geometry {
                     return Err("plan loudness requires INPUT without video transform flags".into());
                 }
-                fvid_media::plan_loudness(&plan_paths[0], &options)?
+                fvid::media::plan_loudness(&plan_paths[0], &options)?
             }
             Some("loudnorm") => {
                 if plan_paths.len() != 1 || geometry {

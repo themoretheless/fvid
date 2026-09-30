@@ -334,3 +334,27 @@ pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_inf
     Ok(MediaPlan {command:"transcode-lossless".into(),input:source.to_path_buf(),inputs:vec![source.to_path_buf()],streams,steps,graph:None,
         notes:vec!["backend: fvid; no external demuxer, decoder, encoder or muxer".into(),"metadata-only plan: frame geometry, filter plane compatibility and payload correctness are validated during execution".into()]})
 }
+
+/// Plan owned loudness measurement without decoding or claiming true peak.
+pub fn loudness(source: &std::path::Path, selected: Option<usize>, weights: Option<&[f64]>) -> Result<MediaPlan> {
+    let mut plan=decode_audio_selected(source,&Default::default(),selected)?;
+    let defaults;
+    let weights=match weights {
+        Some(weights)=>weights,
+        None=>{defaults=crate::native_pcm::loudness_channel_weights(source,selected).map_err(|e|e.to_string())?;&defaults},
+    };
+    let (rate,channels)=if crate::native_pcm::is_wave(source).map_err(|e|e.to_string())? {
+        let info=crate::native_pcm::inspect(&mut std::fs::File::open(source).map_err(|e|e.to_string())?,None).map_err(|e|e.to_string())?;
+        (info.sample_rate,info.channels)
+    } else {
+        let info=crate::native_media::audio_source_info_selected(source,selected).map_err(|e|e.to_string())?;
+        (info.sample_rate,info.channels)
+    };
+    if weights.len()!=usize::from(channels) {return Err("channel weights must match selected audio stream".into());}
+    crate::native_pcm::LoudnessMeter::new(rate,weights)?;
+    plan.command="loudness".into();
+    plan.steps.retain(|step|step.action!="write");
+    plan.steps.push(PlanStep {action:"analyze".into(),detail:format!("owned K-weighting, gated integrated LUFS, 3-second LRA and unweighted sample peak; channel energy weights {weights:?}")});
+    plan.notes.push("Silence and incomplete windows return null measurements; true peak is not measured".into());
+    Ok(plan)
+}

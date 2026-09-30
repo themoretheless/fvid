@@ -2730,3 +2730,10 @@ and do not expose an unmeasured true peak. Stream selection and cancellation
 are retained; unsupported budgets, metadata mutations and progress hooks are
 rejected. The underlying legacy adapter remains for other operations, so this
 change removes measurement calls rather than all `media` feature linkage.
+
+`fvid media plan loudness INPUT [--streams INDEX] [--channel-weights W,...]`
+and `media::plan_loudness` now produce owned metadata plans. They validate
+stream selection, channel weights and supported rates before analysis, describe
+LUFS/LRA/sample peak, and include no write step or libavfilter graph. Packet
+contents are checked only during execution. CLI and API plans match in both
+headless and media builds; no true-peak capability is implied.

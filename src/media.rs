@@ -400,3 +400,10 @@ pub fn measure_loudness_with_weights(source: &std::path::Path, options: &CopyOpt
     if options.progress.is_some() {return Err("owned loudness progress hooks are not yet implemented".into());}
     crate::native_pcm::measure_loudness_file(source,options.streams.first().copied(),weights,options.cancel.as_ref()).map_err(|e|e.to_string())
 }
+
+/// Owned metadata-only loudness plan; no libavfilter graph is created.
+pub fn plan_loudness(source: &std::path::Path, options: &CopyOptions) -> Result<MediaPlan> {
+    validate_native_copy_options(options,true)?;
+    if options.progress.is_some() {return Err("owned loudness progress hooks are not yet implemented".into());}
+    crate::native_plan::loudness(source,options.streams.first().copied(),None)
+}

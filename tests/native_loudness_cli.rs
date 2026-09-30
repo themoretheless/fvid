@@ -78,6 +78,31 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
     ] {
         assert!(!run(options).status.success(), "{options:?}");
     }
+    let result = Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "loudness"])
+        .arg(&source)
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let plan: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    assert_eq!(plan["command"], "loudness");
+    assert!(plan["graph"].is_null());
+    assert!(!plan["steps"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|step| step["action"] == "write"));
+    assert_eq!(plan["streams"][0]["index"], 0);
+    #[cfg(feature = "media")]
+    assert_eq!(
+        serde_json::to_value(fvid::media::plan_loudness(&source, &Default::default()).unwrap())
+            .unwrap(),
+        plan
+    );
     let normalized = source.with_extension("normalized.wav");
     let target = fvid::native_pcm::NormalizeTarget {
         integrated_lufs: -20.0,
