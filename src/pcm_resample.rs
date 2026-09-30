@@ -11,13 +11,13 @@ pub(crate) struct Resampler<W> {
     channels: usize,
     radius: i64,
     cutoff: f64,
-    queue: VecDeque<[f32; 6]>,
+    queue: VecDeque<[f32; 64]>,
     base: u64,
     count: u64,
     emitted: u64,
-    first: [f32; 6],
-    last: [f32; 6],
-    frame: [f32; 6],
+    first: [f32; 64],
+    last: [f32; 64],
+    frame: [f32; 64],
     filled: usize,
 }
 impl<W: Write> Resampler<W> {
@@ -27,7 +27,7 @@ impl<W: Write> Resampler<W> {
         output_rate: u32,
         channels: u16,
     ) -> io::Result<Self> {
-        if input_rate == 0 || output_rate == 0 || !(1..=6).contains(&channels) {
+        if input_rate == 0 || output_rate == 0 || !(1..=64).contains(&channels) {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
                 "invalid resampler geometry",
@@ -45,9 +45,9 @@ impl<W: Write> Resampler<W> {
             base: 0,
             count: 0,
             emitted: 0,
-            first: [0.0; 6],
-            last: [0.0; 6],
-            frame: [0.0; 6],
+            first: [0.0; 64],
+            last: [0.0; 64],
+            frame: [0.0; 64],
             filled: 0,
         })
     }
@@ -63,7 +63,7 @@ impl<W: Write> Resampler<W> {
             }
             let fraction =
                 (position % u128::from(self.output_rate)) as f64 / f64::from(self.output_rate);
-            let mut sum = [0.0f64; 6];
+            let mut sum = [0.0f64; 64];
             let mut normalization = 0.0;
             for offset in -self.radius..=self.radius {
                 let distance = offset as f64 - fraction;

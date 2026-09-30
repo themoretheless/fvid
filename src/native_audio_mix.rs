@@ -120,7 +120,22 @@ pub fn mix_audio(
         sample_rate: rate,
         channels,
     };
-    let header = crate::native_export::float_wav_header(&stats)?;
+    let masks = sources
+        .iter()
+        .map(|source| -> Result<u32> {
+            if crate::native_pcm::is_wave(source)? {
+                Ok(crate::native_pcm::inspect(&mut File::open(source)?, None)?.channel_mask)
+            } else {
+                crate::native_export::default_pcm_mask(channels)
+            }
+        })
+        .collect::<Result<Vec<_>>>()?;
+    let mask = if masks.iter().all(|m| *m == masks[0]) {
+        masks[0]
+    } else {
+        0
+    };
+    let header = crate::native_export::float_wav_header_with_mask(&stats, mask)?;
     let output_path = scratch.0.join("mix.wav");
     let mut output = BufWriter::new(
         OpenOptions::new()

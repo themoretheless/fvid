@@ -249,8 +249,8 @@ fn reference_amix_matches_float_pcm() {
 #[test]
 fn unsupported_wave_geometry_keeps_legacy_admission() {
     let d = dir();
-    let p = d.0.join("eight.wav");
-    wave(&p, &[0.0; 80], 48000, 8);
+    let p = d.0.join("sixty-five.wav");
+    wave(&p, &[0.0; 130], 48000, 65);
     assert!(!native_audio_mix::eligible(&[p.clone(), p]).unwrap());
 }
 
@@ -433,4 +433,34 @@ fn merge_preserves_aac_container_edits_and_rejects_ambiguous_selection() {
         let p = root.join(name);
         assert!(!native_audio_mix::eligible(&[p.clone(), p]).unwrap());
     }
+}
+
+#[test]
+fn merged_unlabelled_channels_roundtrip_and_mix_without_layout_inference() {
+    let d = dir();
+    let channels = 32u16;
+    let frames = 4193;
+    let data: Vec<f32> = (0..frames * usize::from(channels))
+        .map(|i| (i % 127) as f32 / 64.0 - 0.75)
+        .collect();
+    let a = d.0.join("a.wav");
+    wave(&a, &data, 48000, channels);
+    let sources = vec![a.clone(), a];
+    assert!(native_audio_mix::eligible(&sources).unwrap());
+    let merged = d.0.join("merged.wav");
+    let stats = native_audio_mix::merge_audio(&sources, &merged).unwrap();
+    assert_eq!(stats.channels, 64);
+    let decoded = d.0.join("decoded.f32le");
+    fvid::native_export::export_audio_pcm_selected(
+        &merged, &decoded, None, 1.0, None, None, None, None, None,
+    )
+    .unwrap();
+    assert_eq!(std::fs::read(decoded).unwrap(), pcm(&merged));
+    let mixed = d.0.join("mixed.wav");
+    let sources = vec![merged.clone(), merged.clone()];
+    let stats = native_audio_mix::mix_audio(&sources, &mixed, &Default::default()).unwrap();
+    assert_eq!(stats.channels, 64);
+    assert_eq!(pcm(&mixed), pcm(&merged));
+    let info = fvid::native_pcm::inspect(&mut std::fs::File::open(&mixed).unwrap(), None).unwrap();
+    assert_eq!(info.channel_mask, 0);
 }

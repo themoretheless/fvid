@@ -177,7 +177,7 @@ fn fractional_interval_gain_rematrix_and_resampling_use_shared_pipeline() {
     assert_eq!(values(&round), expected);
 }
 #[test]
-fn padding_nonfinite_and_ambiguous_layouts_fail_without_publication() {
+fn padding_and_nonfinite_samples_fail_without_publication() {
     let dir = dir();
     let source = dir.0.join("input.wav");
     let dest = dir.0.join("out.f32le");
@@ -185,8 +185,6 @@ fn padding_nonfinite_and_ambiguous_layouts_fail_without_publication() {
         wave(32, 1, true, None, &f32::NAN.to_le_bytes()),
         wave(64, 1, true, None, &1e300f64.to_le_bytes()),
         wave(24, 1, false, Some((20, 4)), &[1, 0, 0]),
-        wave(16, 4, false, None, &[0; 8]),
-        wave(16, 4, false, Some((16, 0x33)), &[0; 8]),
     ] {
         std::fs::write(&source, bytes).unwrap();
         assert!(export(&source, &dest, None, 1., None, None, None, None, None).is_err());
@@ -589,4 +587,109 @@ fn wave_concat_rejects_riff_overflow_before_copying_payload() {
     let dest = d.0.join("out.wav");
     assert!(fvid::native_pcm::concat_wave(&sources, &dest, None, None).is_err());
     assert!(!dest.exists());
+}
+
+#[test]
+fn multichannel_identity_preserves_mask_and_rematrix_needs_known_layout() {
+    let d = dir();
+    for (channels, mask) in [
+        (4u16, 0u32),
+        (4, 0x33),
+        (8, 0x63f),
+        (12, 0),
+        (32, u32::MAX),
+        (64, 0),
+    ] {
+        let samples: Vec<f32> = (0..137 * usize::from(channels))
+            .map(|i| ((i * 29) % 257) as f32 / 128.0 - 1.0)
+            .collect();
+        let bytes: Vec<u8> = samples.iter().flat_map(|v| v.to_le_bytes()).collect();
+        let source = d.0.join(format!("{channels}-{mask}.wav"));
+        std::fs::write(&source, wave(32, channels, true, Some((32, mask)), &bytes)).unwrap();
+        let dest = d.0.join(format!("{channels}-{mask}-out.wav"));
+        let stats = export(&source, &dest, None, 0.5, None, None, None, None, None).unwrap();
+        assert_eq!(stats.channels, channels);
+        assert_eq!(stats.sample_frames, 137);
+        let info =
+            fvid::native_pcm::inspect(&mut std::fs::File::open(&dest).unwrap(), None).unwrap();
+        assert_eq!(info.channel_mask, mask);
+        let raw = d.0.join(format!("{channels}-{mask}.f32le"));
+        export(&dest, &raw, None, 1.0, None, None, None, None, None).unwrap();
+        assert_eq!(
+            values(&raw),
+            samples.iter().map(|v| v * 0.5).collect::<Vec<_>>()
+        );
+        let plan = fvid::native_plan::decode_audio(&source, &Default::default()).unwrap();
+        assert_eq!(plan.command, "decode-audio");
+        let bad = d.0.join(format!("{channels}-{mask}-bad.wav"));
+        assert!(export(&source, &bad, None, 1.0, Some(2), None, None, None, None).is_err());
+        assert!(!bad.exists());
+        let request = fvid::media_info::AudioDecodeTransform {
+            channels: Some(2),
+            ..Default::default()
+        };
+        assert!(fvid::native_plan::decode_audio(&source, &request).is_err());
+        #[cfg(feature = "media")]
+        {
+            let api = d.0.join(format!("{channels}-{mask}-api.f32le"));
+            fvid::media::decode_audio(&source, &api, &Default::default()).unwrap();
+            assert_eq!(std::fs::read(api).unwrap(), bytes);
+        }
+    }
+}
+
+#[test]
+fn wide_resampling_matches_independent_mono_channels() {
+    let d = dir();
+    let channels = 64usize;
+    let count = 113usize;
+    let samples: Vec<f32> = (0..count)
+        .flat_map(|f| (0..channels).map(move |c| ((f * (c + 1) + c * 7) % 101) as f32 / 64.0 - 0.5))
+        .collect();
+    let data: Vec<u8> = samples.iter().flat_map(|v| v.to_le_bytes()).collect();
+    let source = d.0.join("wide.wav");
+    std::fs::write(&source, wave(32, channels as u16, true, None, &data)).unwrap();
+    let destination = d.0.join("wide.f32le");
+    let stats = export(
+        &source,
+        &destination,
+        None,
+        1.0,
+        None,
+        Some(11025),
+        None,
+        None,
+        None,
+    )
+    .unwrap();
+    assert_eq!(stats.channels, 64);
+    let actual = values(&destination);
+    for c in 0..channels {
+        let data: Vec<u8> = (0..count)
+            .flat_map(|f| samples[f * channels + c].to_le_bytes())
+            .collect();
+        let source = d.0.join(format!("mono-{c}.wav"));
+        std::fs::write(&source, wave(32, 1, true, None, &data)).unwrap();
+        let destination = d.0.join(format!("mono-{c}.f32le"));
+        let mono = export(
+            &source,
+            &destination,
+            None,
+            1.0,
+            None,
+            Some(11025),
+            None,
+            None,
+            None,
+        )
+        .unwrap();
+        assert_eq!(mono.sample_frames, stats.sample_frames);
+        assert_eq!(
+            values(&destination),
+            actual
+                .chunks_exact(channels)
+                .map(|frame| frame[c])
+                .collect::<Vec<_>>()
+        );
+    }
 }

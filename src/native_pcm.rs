@@ -428,9 +428,19 @@ impl WaveInfo {
         }
         Ok(first..last)
     }
-    /// The existing owned rematrixer uses FL FR FC [LFE] back-surround order.
-    /// Do not silently assign a layout to an unlabelled multichannel WAV.
+    /// Converting samples independently preserves interleaving without knowing
+    /// speaker positions. Rematrixing has a separate layout requirement.
     pub(crate) fn validate_decode(&self) -> Result<()> {
+        if !(1..=64).contains(&self.channels) {
+            return Err(invalid("native PCM decoding supports 1..=64 channels"));
+        }
+        if self.sample_rate > i32::MAX as u32 {
+            return Err(invalid("PCM sample rate exceeds media schema range"));
+        }
+        Ok(())
+    }
+    pub(crate) fn validate_rematrix(&self) -> Result<()> {
+        self.validate_decode()?;
         let expected = match self.channels {
             1 => 4,
             2 => 3,
@@ -438,15 +448,16 @@ impl WaveInfo {
             4 => 0x107,
             5 => 0x37,
             6 => 0x3f,
-            _ => return Err(invalid("native PCM decoding supports 1..=6 channels")),
+            _ => {
+                return Err(invalid(
+                    "native PCM rematrixing supports 1..=6 input channels",
+                ));
+            }
         };
         if !(self.channel_mask == expected || (self.channels <= 2 && self.channel_mask == 0)) {
             return Err(invalid(
-                "native PCM decoding requires a supported explicit channel layout",
+                "native PCM rematrixing requires a supported explicit channel layout",
             ));
-        }
-        if self.sample_rate > i32::MAX as u32 {
-            return Err(invalid("PCM sample rate exceeds media schema range"));
         }
         Ok(())
     }

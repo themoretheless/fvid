@@ -2296,9 +2296,8 @@ resampling, speaker-position remapping or conversion of decoded float samples.
 The output preserves the previous API's IEEE float format-3 WAV representation
 without a speaker mask. This matters for unlike channel layouts: the existing
 API concatenates vectors and does not implement `amerge`'s speaker-based
-reordering for disjoint layouts. Supported AAC/WAVE input layouts can produce
-up to twelve output channels. Source layout validation remains unchanged.
-The writer retains the 64-channel contract limit for future decoder coverage.
+reordering for disjoint layouts. Supported AAC/WAVE inputs can produce up to 64 output channels. Channel
+conversion and layout-preservation rules are described below.
 Scratch files are shared with the mix path; merging reads 4096-frame blocks,
 syncs its output and publishes it without overwriting existing files.
 
@@ -2308,3 +2307,23 @@ MP4 including edit-list and 960-sample frames. With `media`, the complete WAV
 bytes are compared against the previous API for five channel combinations.
 The optional external `amerge` oracle covers overlapping stereo layouts,
 where its channel order agrees with this API.
+
+### Multichannel PCM without layout inference
+
+Owned WAVE sample conversion, gain and resampling now support 1–64 interleaved
+channels. Operations that keep the channel count preserve the source channel
+mask, including mask zero for unlabelled vectors and valid noncanonical masks.
+They do not require a speaker-position interpretation. The existing mono/stereo
+rematrix path still requires a supported explicit 1–6-channel source layout
+(mono/stereo defaults remain accepted); plans and execution both enforce this.
+
+This extends the owned mixing and merging paths to wide WAVE sources. A
+32 + 32-channel merge is accepted, and its unlabelled 64-channel result can be
+decoded and mixed again by the owned pipeline. Merge output is still capped at
+64 channels. Mixing preserves a common input channel mask; differing masks
+produce an unlabelled output instead of inventing speaker positions.
+
+Tests verify masks and exact PCM for 4, 8, 12, 32 and 64 channels, including
+unlabelled and noncanonical layouts. A 64-channel resampling result is compared
+channel-by-channel to independently resampled mono streams. Unknown-layout
+rematrix requests fail before publication; identity/gain requests succeed.

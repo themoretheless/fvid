@@ -41,6 +41,7 @@ pub fn decode_audio_selected(
         let mut file=std::fs::File::open(source).map_err(|e|e.to_string())?;
         let info=crate::native_pcm::inspect(&mut file,None).map_err(|e|e.to_string())?;
         info.validate_decode().map_err(|e|e.to_string())?;
+        if transform.channels.is_some_and(|n| n != i32::from(info.channels)) { info.validate_rematrix().map_err(|e|e.to_string())?; }
         info.decode_interval(transform.interval.map(|(a,b)|(std::time::Duration::from_micros(a as u64),std::time::Duration::from_micros(b as u64)))).map_err(|e|e.to_string())?;
         (0,info.sample_rate,info.channels,info.codec(),"FVid packed WAVE PCM conversion to interleaved float32".to_owned())
     } else {
