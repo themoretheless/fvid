@@ -28,16 +28,12 @@ pub struct Mp4AudioReader<R> {
     packet: Vec<u8>,
 }
 
-/// Audio fourccs this player has a decoder for: AAC in an `mp4a` entry, the
-/// uncompressed QuickTime PCM tags whose byte order is already settled by the
-/// tag itself, the three ADPCM tags the container reads a block length for, Apple
-/// Lossless in its own entry, and Apple's two MACE codings, whose sample entries state
-/// nothing beyond the geometry every audio entry carries: their block is the coding's
-/// own, so the fourcc names them and no atom is read for a length. The four PCM
-/// spellings `in24`, `in32`, `l16` and `raw` are left out because they state their
-/// width or endianness in child atoms this reader does not resolve.
-const CODECS: [[u8; 4]; 12] = [
+/// Audio fourccs decoded by the player, including the owned PCM endian mapping.
+const CODECS: [[u8; 4]; 15] = [
     *b"mp4a",
+    *b"raw ",
+    *b"in24",
+    *b"in32",
     *b"sowt",
     *b"twos",
     *b"fl32",

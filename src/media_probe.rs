@@ -101,6 +101,7 @@ pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
             b"vp09" => "vp9".into(),
             b"av01" => "av1".into(),
             b"text" => "bin_data".into(),
+            b"raw " => "pcm_u8".into(),
             b"tx3g" => "mov_text".into(),
             b"ac-3" => "ac3".into(),
             b"ec-3" => "eac3".into(),

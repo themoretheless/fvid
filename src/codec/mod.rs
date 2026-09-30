@@ -257,6 +257,7 @@ pub fn make_audio_decoder(
         // what a track that says nothing holds.
         "A_PCM/INT/LIT" | "A_PCM/INT/BIG" if bits_per_sample == 8 => Box::new(
             pcm_decoder::PcmDecoder::new(pcm_decoder::PcmFormat::Unsigned8, sample_rate, channels)?),
+        "raw " => Box::new(pcm_decoder::PcmDecoder::new(pcm_decoder::PcmFormat::Unsigned8,sample_rate,channels)?),
         "in24" | "in32" => Box::new(pcm_decoder::PcmDecoder::int(
             if codec=="in24" {24} else {32}, extra_data.first()!=Some(&1), sample_rate, channels)?),
         "sowt" | "A_PCM/INT/LIT" => Box::new(pcm_decoder::PcmDecoder::int(

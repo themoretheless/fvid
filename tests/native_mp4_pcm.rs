@@ -133,6 +133,7 @@ fn quicktime_integer_and_float_endian_metadata_matches_reference() {
     let source =
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/audio/pcm-tags.mov");
     for codec in [
+        "pcm_u8",
         "pcm_s24le",
         "pcm_s24be",
         "pcm_s32le",

@@ -765,7 +765,7 @@ fn read_tags(udta: Option<&[u8]>) -> FileTags {
 }
 
 fn is_pcm(codec: &[u8; 4]) -> bool {
-    matches!(codec, b"sowt" | b"twos" | b"fl32" | b"fl64" | b"in24" | b"in32")
+    matches!(codec, b"sowt" | b"twos" | b"fl32" | b"fl64" | b"in24" | b"in32" | b"raw ")
 }
 
 /// The ADPCM tags QuickTime writes, each spelling its coding in the entry's own

@@ -15,6 +15,18 @@ impl PacketPcmDecoder {
             b"mp4a" => Ok(Self::Aac(crate::codec::aac_native::NativeAacDecoder::new(
                 crate::codec::config::aac_specific_config(&track.configuration)?,
             )?)),
+            b"raw " => {
+                if track.bit_depth != 8 || !(1..=64).contains(&track.channels) {
+                    return Err(invalid(
+                        "QuickTime raw PCM requires 8 bits and 1..64 channels",
+                    ));
+                }
+                Ok(Self::Pcm(crate::codec::pcm_decoder::PcmDecoder::new(
+                    crate::codec::pcm_decoder::PcmFormat::Unsigned8,
+                    track.sample_rate,
+                    track.channels,
+                )?))
+            }
             b"alac" => Self::alac(&track.configuration, track.sample_rate, track.channels),
             b"sowt" | b"twos" | b"fl32" | b"fl64" | b"in24" | b"in32" => {
                 if !(1..=64).contains(&track.channels) {
