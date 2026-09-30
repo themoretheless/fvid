@@ -958,7 +958,7 @@ pub fn is_alac_source(path: &Path) -> Result<bool> {
 /// Packed WAVE is detected separately by native_pcm::is_wave.
 pub fn is_owned_audio_source(path: &Path) -> Result<bool> {
     if is_aac_source(path)? { return Ok(true); }
-    Ok(is_alac_source(path)? && audio_source_info_selected(path, None).is_ok())
+    Ok((is_alac_source(path)? || crate::native_export::is_matroska_source(path)?) && audio_source_info_selected(path, None).is_ok())
 }
 
 pub(crate) fn mp4_audio_index<R: std::io::Read + std::io::Seek>(
@@ -990,14 +990,14 @@ pub fn audio_source_info_selected(
     source: &Path,
     selected: Option<usize>,
 ) -> Result<AudioSourceInfo> {
-    if is_alac_source(source)? {
+    if is_alac_source(source)? || crate::native_export::is_matroska_source(source)? {
         use std::io::{Read,Seek,SeekFrom};
         let mut input=File::open(source)?;let mut prefix=[0;4];input.read_exact(&mut prefix)?;input.seek(SeekFrom::Start(0))?;
         if prefix==[0x1a,0x45,0xdf,0xa3] {
             let reader=crate::container::webm::WebmReader::open(BufReader::new(input),Default::default())?;
             let index=matroska_audio_index(&reader,selected)?;let track=&reader.tracks[index];let decoder=crate::native_audio_decoder::PacketPcmDecoder::from_matroska(track)?;
             if track.sample_rate!=u64::from(decoder.sample_rate()) || track.channels!=u64::from(decoder.channels()) {return Err(invalid("Matroska audio geometry disagrees with configuration"));}
-            return Ok(AudioSourceInfo {stream_index:index,sample_rate:decoder.sample_rate(),channels:decoder.channels(),codec:if track.codec=="A_ALAC" {"alac"} else {"aac"}});
+            return Ok(AudioSourceInfo {stream_index:index,sample_rate:decoder.sample_rate(),channels:decoder.channels(),codec:match track.codec.as_str() {"A_ALAC"=>"alac","A_PCM/INT/LIT"|"A_PCM/INT/BIG" if track.bit_depth==8=>"pcm_u8","A_PCM/INT/LIT"=>"pcm_sle","A_PCM/INT/BIG"=>"pcm_sbe","A_PCM/FLOAT/IEEE"=>"pcm_fle",_=>"aac"}});
         }
         let reader = crate::container::mp4::Mp4Reader::open(
             BufReader::new(File::open(source)?),
@@ -1032,6 +1032,6 @@ pub fn audio_source_info_selected(
 
 pub(crate) fn matroska_audio_index<R:std::io::Read+std::io::Seek>(reader:&crate::container::webm::WebmReader<R>,selected:Option<usize>)->Result<usize> {
     let index=audio_index(reader.tracks.iter().map(|t|t.kind==2),selected)?;
-    if !matches!(reader.tracks[index].codec.as_str(),"A_AAC"|"A_ALAC") {return Err(invalid("selected Matroska audio stream is neither AAC nor ALAC"));}
+    if !matches!(reader.tracks[index].codec.as_str(),"A_AAC"|"A_ALAC"|"A_PCM/INT/LIT"|"A_PCM/INT/BIG"|"A_PCM/FLOAT/IEEE") {return Err(invalid("selected Matroska audio stream is not supported by the owned export"));}
     Ok(index)
 }

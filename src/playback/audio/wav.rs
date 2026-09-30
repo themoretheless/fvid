@@ -238,6 +238,7 @@ impl Pcm {
     /// in the setup block.
     pub fn codec(&self) -> &'static str {
         match self.coding {
+            Coding::Pcm(PcmFormat::Unsigned8) => "A_PCM/INT/LIT",
             Coding::Pcm(PcmFormat::Float { .. }) => "A_PCM/FLOAT/IEEE",
             Coding::Pcm(PcmFormat::Int {
                 big_endian: false, ..

@@ -13,6 +13,8 @@ use crate::{Result, invalid};
 /// How the bytes of one sample are laid out.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PcmFormat {
+    /// Unsigned 8-bit integer PCM, as specified by Matroska.
+    Unsigned8,
     /// Signed integer of `bits` bits per sample, packed with no padding.
     Int { bits: u8, big_endian: bool },
     /// IEEE float of 32 or 64 bits, little-endian.
@@ -22,6 +24,7 @@ pub enum PcmFormat {
 impl PcmFormat {
     pub fn bits(self) -> u8 {
         match self {
+            Self::Unsigned8 => 8,
             Self::Int { bits, .. } | Self::Float { bits } => bits,
         }
     }
@@ -32,10 +35,11 @@ impl PcmFormat {
     }
 
     /// Widths this decoder reads. 8-bit integers are taken as signed, which is
-    /// what both containers' integer tags mean; the unsigned QuickTime variants
+    /// what QuickTime signed tags mean; the unsigned QuickTime variants
     /// name themselves differently and stay refused rather than playing noise.
     fn supported(self) -> bool {
         match self {
+            Self::Unsigned8 => true,
             Self::Int { bits, .. } => matches!(bits, 8 | 16 | 24 | 32),
             Self::Float { bits } => matches!(bits, 32 | 64),
         }
@@ -44,6 +48,7 @@ impl PcmFormat {
     /// One sample widened into -1.0..=1.0.
     fn sample_f32(self, bytes: &[u8]) -> f32 {
         match self {
+            Self::Unsigned8 => (f32::from(bytes[0]) - 128.0) / 128.0,
             Self::Int { bits, big_endian } => {
                 sign_extended(bytes, big_endian) as f32 / (1i64 << (i64::from(bits) - 1)) as f32
             }
@@ -84,7 +89,7 @@ impl PcmDecoder {
             return Err(invalid(&format!(
                 "unsupported {} PCM at {} bits",
                 match format {
-                    PcmFormat::Int { .. } => "integer",
+                    PcmFormat::Unsigned8 | PcmFormat::Int { .. } => "integer",
                     PcmFormat::Float { .. } => "float",
                 },
                 format.bits()
@@ -120,10 +125,24 @@ impl PcmDecoder {
         let frames = data.len() / frame;
         let mut out = Vec::with_capacity(frames * usize::from(self.channels) * 4);
         out.extend(
-            data.chunks_exact(self.format.sample_bytes())
+            data[..frames * frame].chunks_exact(self.format.sample_bytes())
                 .flat_map(|sample| self.format.sample_f32(sample).to_le_bytes()),
         );
         out
+    }
+
+    /// Strict packet conversion for container export: reject incomplete frames.
+    pub(crate) fn decode_pcm(&self, data: &[u8]) -> Result<Vec<f32>> {
+        let frame = self.format.sample_bytes() * usize::from(self.channels);
+        if !data.len().is_multiple_of(frame) {
+            return Err(invalid("PCM packet ends in an incomplete channel frame"));
+        }
+        let samples: Vec<f32> = data.chunks_exact(self.format.sample_bytes())
+            .map(|s| self.format.sample_f32(s)).collect();
+        if samples.iter().any(|s| !s.is_finite()) {
+            return Err(invalid("PCM packet contains non-finite samples"));
+        }
+        Ok(samples)
     }
 
     pub fn spec(&self) -> AudioSpec {
@@ -354,9 +373,12 @@ mod tests {
     /// to reach the layout its own partner supplies, and `fl32`/`fl64` settle the
     /// width in the name so that an entry stating something else cannot misread
     /// the stream.
+    #[cfg(feature = "player")]
     #[test]
     fn every_container_name_reaches_its_own_layout() {
         for (codec, bits, bytes, expected) in [
+            ("A_PCM/INT/LIT", 8u16, &[0x40][..], -0.5),
+            ("A_PCM/INT/BIG", 8, &[0xc0], 0.5),
             ("sowt", 16u16, &[0x00, 0x80][..], -1.0),
             ("A_PCM/INT/LIT", 16, &[0x00, 0x80], -1.0),
             ("twos", 16, &[0x80, 0x00], -1.0),

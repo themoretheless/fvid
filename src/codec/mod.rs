@@ -169,7 +169,6 @@ pub mod gsm_decoder;
 pub mod mace_decoder;
 #[cfg(feature = "player")]
 pub mod midi_decoder;
-#[cfg(feature = "player")]
 pub mod pcm_decoder;
 #[cfg(feature = "player")]
 pub mod symphonia_decoder;
@@ -256,6 +255,8 @@ pub fn make_audio_decoder(
         // fourcc per byte order and Matroska in the codec ID, with the width in
         // the sample entry or `BitDepth` - 0 there falls back to 16-bit, which is
         // what a track that says nothing holds.
+        "A_PCM/INT/LIT" | "A_PCM/INT/BIG" if bits_per_sample == 8 => Box::new(
+            pcm_decoder::PcmDecoder::new(pcm_decoder::PcmFormat::Unsigned8, sample_rate, channels)?),
         "sowt" | "A_PCM/INT/LIT" => Box::new(pcm_decoder::PcmDecoder::int(
             bits_per_sample,
             false,

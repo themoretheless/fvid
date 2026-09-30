@@ -2350,3 +2350,20 @@ tones, noise and silence) byte-for-byte with the optional independent decoder.
 It also checks exact interval/gain/downmix results, CLI/API/plans, mix/merge,
 explicit stream selection, cancellation, no-overwrite and failure publication.
 Existing AAC timeline/edit-list regression tests exercise the shared scheduler.
+
+### Owned Matroska PCM export
+
+Matroska integer PCM (`A_PCM/INT/LIT`, `A_PCM/INT/BIG`) and IEEE float PCM
+now use the existing owned container sample timeline and FVid PCM decoder for
+`decode-audio`, plans, public media API, mix and merge. Supported widths are
+8/16/24/32-bit integers and 32/64-bit floats, with 1–64 channels preserved
+when no rematrix is requested. Matroska 8-bit integer PCM is unsigned;
+QuickTime signed PCM retains its signed interpretation. BitDepth must be
+explicit and supported. Partial channel frames and non-finite float samples
+fail before output publication. Unsupported formats keep their existing adapter.
+
+`tests/native_matroska_pcm.rs` checks exact samples, interval selection, gain,
+API/plans, mix/merge and failure publication across widths and byte orders.
+Setting `FVID_REFERENCE_FFMPEG` additionally compares each generated container
+with the independent reference decoder. This extends native coverage; it does
+not remove the remaining `media` FFmpeg dependency.
