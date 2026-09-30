@@ -2744,3 +2744,11 @@ describes analysis, peak-limited constant gain, a second decode pass and atomic
 float WAVE publication. Target validation is shared with execution. The
 `native_plan::normalize_loudness` and `media::plan_normalize_loudness` APIs
 provide the same metadata-only plan; actual gain is determined by decoding.
+
+Normalization tests now cover WAVE, ALAC/MP4 and AAC in MP4/Matroska/ADTS.
+The gain/export oracle applies independent float volume to the same owned
+decoded PCM, separating normalization from decoder conformance. The generated
+2-second 48 kHz sine AAC fixture is not sample-identical to FFmpeg: observed
+maximum residual is 0.000462234 in MP4 and 0.000648367 in Matroska/ADTS, with
+RMS residual about 0.0000125–0.0000159. These observations do not establish AAC
+conformance; decoder differences need a separate investigation.

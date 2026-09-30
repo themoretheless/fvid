@@ -469,6 +469,79 @@ mod file_tests {
             );
             let actual = super::measure_file(&source, None, &[1.0], None).unwrap();
             assert!(actual.sample_frames >= 96000);
+            let normalized = dir.join(format!("{index}-normalized.wav"));
+            let target = crate::native_pcm::NormalizeTarget {
+                integrated_lufs: -20.0,
+                sample_peak_dbfs: -1.5,
+            };
+            let report = crate::native_pcm::normalize_loudness_file(
+                &source,
+                &normalized,
+                None,
+                &[1.0],
+                target,
+                None,
+            )
+            .unwrap();
+            assert!(!report.peak_limited);
+            let decode = |path: &std::path::Path, gain: Option<f64>| {
+                let mut command = Command::new(&binary);
+                command.args(["-v", "error"]);
+                if path.extension().and_then(|s| s.to_str()) == Some("f32le") {
+                    command.args(["-f", "f32le", "-ar", "48000", "-ac", "1"]);
+                }
+                command.arg("-i").arg(path);
+                if let Some(gain) = gain {
+                    command.args(["-af", &format!("volume={gain}:precision=float")]);
+                }
+                let result = command.args(["-f", "f32le", "-"]).output().unwrap();
+                assert!(
+                    result.status.success(),
+                    "{}",
+                    String::from_utf8_lossy(&result.stderr)
+                );
+                result.stdout
+            };
+            let output = decode(&normalized, None);
+            let baseline = dir.join(format!("{index}-decoded.f32le"));
+            crate::native_export::export_audio_pcm_selected(
+                &source, &baseline, None, 1.0, None, None, None, None, None,
+            )
+            .unwrap();
+            let reference = decode(&baseline, Some(10f64.powf(report.gain_db / 20.0)));
+            if *codec == "aac" {
+                let foreign = decode(&source, None);
+                let owned = std::fs::read(&baseline).unwrap();
+                assert_eq!(owned.len(), foreign.len());
+                let mut maximum = 0f64;
+                let mut squared = 0f64;
+                for (a, b) in owned.chunks_exact(4).zip(foreign.chunks_exact(4)) {
+                    let difference = f64::from(
+                        f32::from_le_bytes(a.try_into().unwrap())
+                            - f32::from_le_bytes(b.try_into().unwrap()),
+                    );
+                    maximum = maximum.max(difference.abs());
+                    squared += difference * difference;
+                }
+                eprintln!(
+                    "AAC/{ext} decoder residual: max={maximum}, rms={}",
+                    (squared / (owned.len() / 4) as f64).sqrt()
+                );
+            }
+            assert_eq!(output.len(), reference.len(), "{codec}/{ext} sample count");
+            for (i, (actual, expected)) in output
+                .chunks_exact(4)
+                .zip(reference.chunks_exact(4))
+                .enumerate()
+            {
+                let actual = f32::from_le_bytes(actual.try_into().unwrap());
+                let expected = f32::from_le_bytes(expected.try_into().unwrap());
+                assert!(
+                    (actual - expected).abs() < 1e-7,
+                    "{codec}/{ext} sample {i}: {actual} != {expected}"
+                );
+            }
+
             assert!(super::measure_file(&source, None, &[1.0, 1.0], None).is_err());
             let cancel = crate::media_control::CancelFlag::default();
             cancel.cancel();
