@@ -2669,3 +2669,12 @@ finite loudness. Rates must be divisible by ten and within 8–384 kHz.
 Independent ebur128 comparisons cover 44.1/48/96 kHz with silence and changing
 levels (0.11 LU tolerance for rounded reference summaries). This PCM API does
 not yet replace file-level loudness commands; LRA and true peak remain pending.
+
+`native_pcm::measure_loudness_file(path, stream, weights, cancel)` analyzes
+owned WAVE, MP4 ALAC/PCM/AAC, Matroska ALAC/PCM/AAC and ADTS input directly.
+The decoder writes float PCM into a frame-sized meter sink, without exporting
+a temporary file or buffering the complete audio. Explicit stream selection
+and cancellation follow the owned decoder timeline. Independent tests cover
+WAVE, ALAC/MP4 and AAC in MP4/Matroska/ADTS, plus cancellation and weight-count
+validation. The result contains integrated LUFS and sample/block counts; it
+does not claim LRA or true-peak measurements.
