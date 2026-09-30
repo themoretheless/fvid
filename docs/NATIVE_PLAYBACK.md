@@ -2761,3 +2761,15 @@ This establishes deterministic reconstruction for these generated fixtures,
 not full AAC profile conformance or identical stochastic PNS samples. Owned
 noise synthesis remains tested separately for spectral energy, reset and
 correlated-generator state. No production reference decoder is introduced.
+
+2026-10-01 camera signing check: a valid development identity became available.
+The certificate display name suffix differed from its actual code-signature
+TeamIdentifier; the camera builder now rejects such mismatches. The corrected
+team bundle passed strict/deep signature verification and was copied to
+`/Applications/FVid Camera.app`. LaunchServices rejected launch (RBS code 5,
+underlying POSIX 163), so activation/consumer delivery is still unverified.
+No provisioning profiles were found in the standard local directories.
+The builder accepts paired `--host-profile`/`--extension-profile`, validates
+profile team, application identifier and expiry before creating the bundle,
+and embeds profiles before signing. Profile-backed launch remains untested
+until suitable profiles are available; no security protections were disabled.

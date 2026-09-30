@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Build (but never install) the FVid camera app and embedded system extension."""
 import argparse
+import fnmatch
+import datetime
 import pathlib
 import plistlib
 import re
@@ -11,6 +13,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 p = argparse.ArgumentParser(description=__doc__)
 p.add_argument('--output', type=pathlib.Path, required=True, help='New .app path; existing paths are rejected')
 p.add_argument('--team-id', help='Apple development team ID, required for signing')
+p.add_argument('--host-profile', type=pathlib.Path, help='Host provisioning profile to embed')
+p.add_argument('--extension-profile', type=pathlib.Path, help='Camera extension provisioning profile to embed')
 p.add_argument('--sign', help='Explicit codesign identity; omitted builds an unsigned development bundle')
 args = p.parse_args()
 if args.output.suffix != '.app':
@@ -19,11 +23,30 @@ if args.team_id and not re.fullmatch(r'[A-Z0-9]{10}', args.team_id):
     p.error('--team-id must contain ten uppercase letters/digits')
 if args.sign and not args.team_id:
     p.error('--sign requires --team-id')
+profiles = []
+if args.host_profile or args.extension_profile:
+    if not args.sign or not args.host_profile or not args.extension_profile:
+        p.error('provisioning requires --sign and both --host-profile/--extension-profile')
+    for profile, identifier in ((args.host_profile, 'org.fvid.camera'),
+                                (args.extension_profile, 'org.fvid.camera.extension')):
+        decoded = subprocess.run(['security', 'cms', '-D', '-i', str(profile)],
+                                 capture_output=True, check=True)
+        data = plistlib.loads(decoded.stdout)
+        entitlements = data.get('Entitlements', {})
+        application = entitlements.get('com.apple.application-identifier', entitlements.get('application-identifier', ''))
+        if args.team_id not in data.get('TeamIdentifier', []) or not fnmatch.fnmatchcase(args.team_id + '.' + identifier, application):
+            p.error('provisioning profile team/application does not match ' + identifier)
+        expiry = data.get('ExpirationDate')
+        if expiry is None or expiry.replace(tzinfo=datetime.timezone.utc) <= datetime.datetime.now(datetime.timezone.utc):
+            p.error('provisioning profile is expired or missing expiration: ' + identifier)
+        profiles.append(profile)
 app = args.output.resolve()
 app.mkdir(parents=True, exist_ok=False)
 ext = app / 'Contents/Library/SystemExtensions/org.fvid.camera.extension.systemextension'
 for bundle in (app, ext):
     (bundle / 'Contents/MacOS').mkdir(parents=True, exist_ok=True)
+for bundle, profile in zip((app, ext), profiles):
+    shutil.copyfile(profile, bundle / 'Contents/embedded.provisionprofile')
 platform = ROOT / 'platform/macos'
 shutil.copyfile(platform / 'CameraHost/Info.plist', app / 'Contents/Info.plist')
 # Unsigned bundles are compile/structure artifacts only; LOCAL is not a signing team.
@@ -59,4 +82,10 @@ if args.sign:
         subprocess.run(['codesign', '--force', '--options', 'runtime', '--sign', args.sign,
                         '--entitlements', str(entitlements), str(bundle)], check=True)
         subprocess.run(['codesign', '--verify', '--strict', str(bundle)], check=True)
+        signature = subprocess.run(['codesign', '-d', '-v', str(bundle)],
+                                   capture_output=True, text=True, check=True)
+        team = re.search(r'^TeamIdentifier=(.+)$', signature.stderr, re.MULTILINE)
+        if team is None or team.group(1) != args.team_id:
+            raise RuntimeError('Signing identity TeamIdentifier does not match --team-id; '
+                               'bundle is not ready for activation')
 print(f'Built {app}; ' + ('signed, not installed or notarized' if args.sign else 'unsigned: not installable'))
