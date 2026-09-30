@@ -134,6 +134,7 @@ pub struct PacketOptions {
 }
 
 /// Encoded packet storage is passed through without rewriting codec payloads.
+#[derive(Clone, Copy)]
 pub enum Encoding<'a> {
     /// ASS header in CodecPrivate; each packet is one Matroska ASS event.
     Ass { configuration: &'a [u8] },

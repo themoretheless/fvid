@@ -1,4 +1,4 @@
-//! Owned planar Y4M and single-video VP9/AV1 Matroska to FFV1 export.
+//! Owned planar Y4M and VP9/AV1 Matroska to FFV1 with AAC packet retention.
 use crate::container::matroska_write::{
     Encoding, PacketWriter, TrackOptions, TrackSpec, VideoMetadata,
 };
@@ -29,15 +29,23 @@ pub fn eligible(source: &Path) -> Result<bool> {
         if !crate::native_export::is_matroska_source(source)? {
             return Ok(false);
         }
-        let input = crate::container::webm::WebmReader::open(
+        let mut input = crate::container::webm::WebmReader::open(
             BufReader::new(File::open(source)?),
             Default::default(),
         )?;
-        return Ok(input.tracks.len() == 1
-            && input.tracks[0].kind == 1
-            && matches!(input.tracks[0].codec.as_str(), "V_VP9" | "V_AV1")
-            && input.tracks[0].crop == [0; 4]
-            && input.tracks[0].rotation == 0);
+        input.scan_all()?;
+        let videos: Vec<_> = input.tracks.iter().filter(|t| t.kind == 1).collect();
+        return Ok(videos.len() == 1
+            && matches!(videos[0].codec.as_str(), "V_VP9" | "V_AV1")
+            && videos[0].crop == [0; 4]
+            && videos[0].rotation == 0
+            && input.tracks.iter().all(|t| {
+                t.kind == 1
+                    || (t.kind == 2
+                        && t.codec == "A_AAC"
+                        && crate::codec::config::AacConfig::parse(&t.codec_private).is_ok())
+            })
+            && input.packets.iter().all(|p| p.pts_ns >= 0));
     }
     let mut input = BufReader::new(File::open(source)?);
     let mut line = Vec::new();
@@ -81,6 +89,20 @@ pub fn write<W: Write + Seek>(
     if let Some(input) = webm.as_mut() {
         input.scan_all()?;
     }
+    let video_index = webm
+        .as_ref()
+        .and_then(|r| r.tracks.iter().position(|t| t.kind == 1))
+        .unwrap_or(0);
+    let video_origin = webm
+        .as_ref()
+        .and_then(|r| {
+            r.packets
+                .iter()
+                .filter(|p| p.track == r.tracks[video_index].number && !p.invisible)
+                .map(|p| p.pts_ns)
+                .min()
+        })
+        .unwrap_or(0) as u64;
     let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
     let first = reader
         .read_frame_raw()?
@@ -108,15 +130,44 @@ pub fn write<W: Write + Seek>(
     }
     let first = prepare(&first)?;
     let shape = (first.width, first.height, first.subsampling);
-    let specs = [TrackSpec {
-        encoding: Encoding::Ffv1V1 {
-            width: u32::try_from(first.width).map_err(|_| invalid("FFV1 width overflow"))?,
-            height: u32::try_from(first.height).map_err(|_| invalid("FFV1 height overflow"))?,
-        },
-        name: webm.as_ref().map_or("", |r| r.tracks[0].name.as_str()),
-        language: webm.as_ref().map_or("", |r| r.tracks[0].language.as_str()),
-    }];
-    let default_duration_ns = match webm.as_ref().map(|r| r.tracks[0].default_duration_ns) {
+    let encoding = Encoding::Ffv1V1 {
+        width: u32::try_from(first.width).map_err(|_| invalid("FFV1 width overflow"))?,
+        height: u32::try_from(first.height).map_err(|_| invalid("FFV1 height overflow"))?,
+    };
+    let specs = if let Some(input) = webm.as_ref() {
+        input
+            .tracks
+            .iter()
+            .enumerate()
+            .map(|(index, track)| -> Result<_> {
+                Ok(TrackSpec {
+                    encoding: if index == video_index {
+                        encoding
+                    } else {
+                        Encoding::Aac {
+                            configuration: &track.codec_private,
+                            sample_rate: u32::try_from(track.sample_rate)
+                                .map_err(|_| invalid("AAC rate overflow"))?,
+                            channels: u16::try_from(track.channels)
+                                .map_err(|_| invalid("AAC channels overflow"))?,
+                        }
+                    },
+                    name: &track.name,
+                    language: &track.language,
+                })
+            })
+            .collect::<Result<Vec<_>>>()?
+    } else {
+        vec![TrackSpec {
+            encoding,
+            name: "",
+            language: "",
+        }]
+    };
+    let default_duration_ns = match webm
+        .as_ref()
+        .map(|r| r.tracks[video_index].default_duration_ns)
+    {
         Some(duration) if duration != 0 => duration,
         _ => {
             let (start, end, scale) = reader
@@ -134,7 +185,7 @@ pub fn write<W: Write + Seek>(
             .map_err(|_| invalid("planar frame duration overflow"))?
         }
     };
-    let options = [TrackOptions {
+    let video_options = TrackOptions {
         default_duration_ns,
         video: Some(VideoMetadata {
             pixel_aspect: crate::native_export::transformed_aspect(
@@ -148,7 +199,27 @@ pub fn write<W: Write + Seek>(
             ..Default::default()
         }),
         ..Default::default()
-    }];
+    };
+    let options = if let Some(input) = webm.as_ref() {
+        input
+            .tracks
+            .iter()
+            .enumerate()
+            .map(|(index, track)| {
+                if index == video_index {
+                    video_options
+                } else {
+                    TrackOptions {
+                        codec_delay_ns: track.codec_delay_ns,
+                        default_duration_ns: track.default_duration_ns,
+                        ..Default::default()
+                    }
+                }
+            })
+            .collect::<Vec<_>>()
+    } else {
+        vec![video_options]
+    };
     let metadata = webm
         .as_ref()
         .map(|r| crate::container::matroska_write::FileMetadata {
@@ -183,6 +254,65 @@ pub fn write<W: Write + Seek>(
     if let Some(hook) = progress {
         hook.emit(writer.event());
     }
+    let mut audio = Vec::new();
+    if let Some(input) = webm.as_ref() {
+        for (packet_index, packet) in input.packets.iter().enumerate() {
+            let index = input
+                .tracks
+                .iter()
+                .position(|t| t.number == packet.track)
+                .ok_or_else(|| invalid("unknown Matroska packet track"))?;
+            if index == video_index {
+                continue;
+            }
+            let track = &input.tracks[index];
+            let config = crate::codec::config::AacConfig::parse(&track.codec_private)?;
+            let duration = packet.duration_ns.unwrap_or(
+                u64::from(config.frame_samples) * 1_000_000_000 / u64::from(config.sample_rate),
+            );
+            audio.push((
+                packet.pts_ns as u64,
+                packet_index,
+                index,
+                duration,
+                packet.keyframe,
+                packet.discard_padding_ns,
+                packet.invisible,
+            ));
+        }
+    }
+    audio.sort_by_key(|p| (p.0, p.1));
+    let mut copied = 0;
+    let mut copy_audio = |until: u64,
+                          writer: &mut PacketWriter<'_, W>,
+                          stats: &mut crate::media_info::LosslessStats|
+     -> Result<()> {
+        while copied < audio.len() && audio[copied].0 <= until {
+            check(cancel)?;
+            let (pts, packet, index, duration, sync, padding, invisible) = audio[copied];
+            let payload = webm
+                .as_mut()
+                .ok_or_else(|| invalid("missing audio source"))?
+                .read_packet(packet)?;
+            writer.write_packet_with_options(
+                index,
+                pts,
+                duration,
+                sync,
+                &payload,
+                crate::container::matroska_write::PacketOptions {
+                    discard_padding_ns: padding,
+                    invisible,
+                },
+            )?;
+            stats.copied_packets += 1;
+            copied += 1;
+            if let Some(hook) = progress {
+                hook.emit(writer.event());
+            }
+        }
+        Ok(())
+    };
     let mut next = Some(first);
     while let Some(samples) = next.take() {
         check(cancel)?;
@@ -203,13 +333,21 @@ pub fn write<W: Write + Seek>(
             )
             .map_err(|_| invalid("Y4M timestamp overflow"))
         };
-        let (start, end) = (ns(start)?, ns(end)?);
+        let (start, end) = (
+            ns(start)?
+                .checked_add(video_origin)
+                .ok_or_else(|| invalid("video timestamp overflow"))?,
+            ns(end)?
+                .checked_add(video_origin)
+                .ok_or_else(|| invalid("video timestamp overflow"))?,
+        );
         if end <= start {
             return Err(invalid("Y4M frame duration below one nanosecond"));
         }
         let packet = crate::codec::ffv1_encoder::encode(&samples, depth)?;
         check(cancel)?;
-        writer.write_packet(0, start, end - start, true, &packet)?;
+        copy_audio(start, &mut writer, &mut stats)?;
+        writer.write_packet(video_index, start, end - start, true, &packet)?;
         stats.video_frames += 1;
         stats.decoded_frames += 1;
         stats.video_packets += 1;
@@ -220,6 +358,8 @@ pub fn write<W: Write + Seek>(
         check(cancel)?;
         next = reader.read_frame_raw()?.as_ref().map(prepare).transpose()?;
     }
+    check(cancel)?;
+    copy_audio(u64::MAX, &mut writer, &mut stats)?;
     check(cancel)?;
     Ok((stats, writer.finish()?))
 }

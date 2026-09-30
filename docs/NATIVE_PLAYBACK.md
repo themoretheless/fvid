@@ -2832,7 +2832,8 @@ requests, while other encoder workflows still use the legacy adapter.
 ### Owned VP9/AV1 lossless transcode
 
 The planar FFV1 exporter also accepts Matroska/WebM containing exactly one
-VP9 or AV1 video track, without stored crop or rotation. Companion tracks and
+VP9 or AV1 video track and any AAC companion tracks, without stored crop or
+rotation. Other companion codecs, negative stored packet timestamps and
 stored display transforms retain their existing routing. Original frame
 intervals, sample precision, track name/language, pixel aspect, colour/HDR,
 file tags and chapters are retained. Atomic publication and cancellation
@@ -2859,3 +2860,12 @@ The WebM/FFV1 test checks the hint and exact frame intervals, including a
 single-frame fixture decoded by the independent reference without an explicit
 passthrough frame-rate override. A missing nominal hint previously let that
 reference choose a billion-frame-per-second clock and drop the only frame.
+
+AAC companion packets are copied without decoding or encoding while the video
+is transcoded. Track order is retained, even when audio precedes the video.
+Packet PTS, codec private data, codec delay, discard padding and invisible
+flags are passed to the owned muxer. An absent AAC packet duration is derived
+from its parsed frame-sample count and sample rate. Video keeps its original
+absolute presentation origin so interleaving does not shift audio relative to
+video. The independent test covers two AAC companions around one VP9 track,
+packet identity, timestamps and equal independently decoded float PCM.
