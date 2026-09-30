@@ -836,7 +836,7 @@ pub fn transcode_mp4_ffv1(source:&Path,destination:&Path,cancel:Option<&crate::m
 }
 
 /// Spatial FFV1 export with the same atomic publication guarantees.
-pub fn transcode_mp4_ffv1_transformed(source:&Path,destination:&Path,
+pub fn transcode_ffv1_transformed(source:&Path,destination:&Path,
     geometry:&crate::native_geometry::VideoGeometry,filters:&crate::native_pixels::PixelFilters,
     cancel:Option<&crate::media_control::CancelFlag>,progress:Option<&crate::media_control::ProgressHook>,
 )->Result<crate::media_info::LosslessStats> {
@@ -848,7 +848,9 @@ pub fn transcode_mp4_ffv1_transformed(source:&Path,destination:&Path,
         match OpenOptions::new().write(true).create_new(true).open(&path){Ok(file)=>Some(Ok((Temporary(path),file))),Err(error) if error.kind()==std::io::ErrorKind::AlreadyExists=>None,Err(error)=>Some(Err(error))}
     }).ok_or_else(||invalid("cannot reserve FFV1 output"))??;
     let mut output=BufWriter::new(file);
-    let (stats,event)=crate::native_lossless::write_mp4_transformed(source,&mut output,geometry,filters,cancel,progress)?;
+    let (stats,event)=if crate::native_lossless_y4m::is_source(source)? {
+        crate::native_lossless_y4m::write(source,&mut output,geometry,filters,cancel,progress)?
+    } else { crate::native_lossless::write_mp4_transformed(source,&mut output,geometry,filters,cancel,progress)? };
     output.flush()?;output.get_ref().sync_all()?;drop(output);
     if cancel.is_some_and(|c|c.is_cancelled()){return Err(invalid("media operation cancelled"));}
     std::fs::hard_link(&temporary.0,destination)?;
@@ -897,3 +899,6 @@ pub fn remux_matroska(source: &Path, destination: &Path,
     if let Some(hook)=progress {hook.emit(event);}
     Ok(event)
 }
+
+/// Compatibility name retained for callers of the original MP4-only exporter.
+pub use transcode_ffv1_transformed as transcode_mp4_ffv1_transformed;

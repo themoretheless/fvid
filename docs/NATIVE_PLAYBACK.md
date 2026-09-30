@@ -2203,3 +2203,15 @@ exports, rotation, CLI/API dispatch and unchanged AAC companion packets.
 Reference command: `FVID_REFERENCE_FFMPEG=/opt/homebrew/bin/ffmpeg cargo test
 --locked --offline --no-default-features --test native_chromashift --test
 native_lossless -- --include-ignored`. FFmpeg is used only by these opt-in tests.
+
+### Owned Y4M to FFV1 export
+
+`media transcode-lossless INPUT.y4m OUTPUT.mkv` and the media API now use the
+owned FFV1 encoder and Matroska writer for supported 8-bit planar Y4M inputs
+(420, 422, 444), including the existing spatial filters. No audio streams are
+implied by this video-only source format. Rational frame timing, pixel aspect
+and full/limited range are retained; transformed aspect follows geometry.
+Truncation and cancellation prevent publication, and existing outputs are never
+overwritten. `tests/native_y4m_ffv1.rs` verifies sample bytes, nanosecond timing,
+CLI/API dispatch and failure cleanup; its optional reference test decodes the
+result with FFmpeg solely as an independent oracle.

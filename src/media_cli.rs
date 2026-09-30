@@ -11,7 +11,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             let hook=remaining[3..].iter().any(|s|s=="--progress").then(||fvid::media_control::ProgressHook::new(|event| {
                 eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
             }));
-            let stats=fvid::native_export::transcode_mp4_ffv1_transformed(std::path::Path::new(&remaining[1]),std::path::Path::new(&remaining[2]),&geometry,&filters,None,hook.as_ref())?;
+            let stats=fvid::native_export::transcode_ffv1_transformed(std::path::Path::new(&remaining[1]),std::path::Path::new(&remaining[2]),&geometry,&filters,None,hook.as_ref())?;
             if !remaining[3..].iter().any(|s|s=="--quiet"){println!("{}",serde_json::to_string(&stats)?);}return Ok(());
         }
     }
@@ -346,7 +346,7 @@ fn pixel_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_pixel
         if arg == "--" { result.push(arg.clone()); result.extend(args.cloned()); break; }
         if arg == "--chromashift" {
             let value = args.next().ok_or("missing chromashift args")?;
-            // Only admit the already-owned AVC/HEVC route here. Other input
+            // Only admit the already-owned Y4M and AVC/HEVC routes here. Other input
             // formats retain the full parser and adapter until their migration.
             let eligible = match result.get(1) {
                 Some(path) => fvid::native_lossless::eligible(std::path::Path::new(path))?,

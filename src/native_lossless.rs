@@ -26,6 +26,7 @@ fn check(cancel: Option<&CancelFlag>) -> Result<()> {
 }
 /// All tracks must be represented; no unsupported stream may disappear.
 pub fn eligible(source: &Path) -> Result<bool> {
+    if crate::native_lossless_y4m::eligible(source)? { return Ok(true); }
     let mut input = File::open(source)?;
     let mut prefix = [0; 8];
     if input.read(&mut prefix)? != 8 || &prefix[4..] != b"ftyp" {

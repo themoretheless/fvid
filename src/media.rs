@@ -300,11 +300,11 @@ pub fn plan_trim_y4m(source: &std::path::Path, from: i64, to: i64, options: &Cop
     crate::native_plan::trim_y4m(source,from,to,options.streams.first().copied())
 }
 
-/// Owned spatial FFV1 export for MP4 video, retaining all supported AAC tracks.
+/// Owned spatial FFV1 export for Y4M and MP4 video, retaining all supported AAC tracks.
 pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,transform:LosslessTransform,options:&CopyOptions)->Result<LosslessStats> {
     if crate::native_lossless::supports(&transform) && validate_native_copy_options(options,false).is_ok() && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
         let (geometry,filters)=crate::native_lossless::configuration(&transform).map_err(|e|e.to_string())?;
-        return crate::native_export::transcode_mp4_ffv1_transformed(source,destination,&geometry,&filters,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string());
+        return crate::native_export::transcode_ffv1_transformed(source,destination,&geometry,&filters,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string());
     }
     fvid_media::transcode_lossless(source,destination,transform,options)
 }
