@@ -16,7 +16,7 @@ impl PacketPcmDecoder {
                 crate::codec::config::aac_specific_config(&track.configuration)?,
             )?)),
             b"alac" => Self::alac(&track.configuration, track.sample_rate, track.channels),
-            b"sowt" | b"twos" | b"fl32" | b"fl64" => {
+            b"sowt" | b"twos" | b"fl32" | b"fl64" | b"in24" | b"in32" => {
                 if !(1..=64).contains(&track.channels) {
                     return Err(invalid("PCM channels must be 1..64"));
                 }
@@ -26,14 +26,18 @@ impl PacketPcmDecoder {
                     _ => crate::codec::pcm_decoder::PcmFormat::Int {
                         bits: u8::try_from(track.bit_depth)
                             .map_err(|_| invalid("PCM bit depth overflow"))?,
-                        big_endian: track.codec == *b"twos",
+                        big_endian: track.codec == *b"twos"
+                            || (matches!(&track.codec, b"in24" | b"in32")
+                                && track.configuration.first() != Some(&1)),
                     },
                 };
-                Ok(Self::Pcm(crate::codec::pcm_decoder::PcmDecoder::new(
+                let mut decoder = crate::codec::pcm_decoder::PcmDecoder::new(
                     format,
                     track.sample_rate,
                     track.channels,
-                )?))
+                )?;
+                decoder.set_float_big_endian(track.configuration.first() != Some(&1));
+                Ok(Self::Pcm(decoder))
             }
             _ => Err(invalid(
                 "selected MP4 audio codec is not owned by the export path",

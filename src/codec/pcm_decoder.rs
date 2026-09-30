@@ -79,6 +79,7 @@ fn sign_extended(bytes: &[u8], big_endian: bool) -> i32 {
 /// PCM decoder: converts container bytes into f32 packets.
 pub struct PcmDecoder {
     format: PcmFormat,
+    float_big_endian: bool,
     sample_rate: u32,
     channels: u16,
 }
@@ -100,9 +101,22 @@ impl PcmDecoder {
         }
         Ok(Self {
             format,
+            float_big_endian: false,
             sample_rate,
             channels,
         })
+    }
+
+    pub(crate) fn set_float_big_endian(&mut self, big: bool) { self.float_big_endian=big; }
+    fn sample(&self, bytes:&[u8]) -> f32 {
+        if self.float_big_endian {
+            match self.format {
+                PcmFormat::Float {bits:32} => return f32::from_be_bytes(bytes.try_into().unwrap()),
+                PcmFormat::Float {bits:64} => return f64::from_be_bytes(bytes.try_into().unwrap()) as f32,
+                _=>{},
+            }
+        }
+        self.format.sample_f32(bytes)
     }
 
     /// Integer PCM named by width and byte order, as the containers describe it.
@@ -126,7 +140,7 @@ impl PcmDecoder {
         let mut out = Vec::with_capacity(frames * usize::from(self.channels) * 4);
         out.extend(
             data[..frames * frame].chunks_exact(self.format.sample_bytes())
-                .flat_map(|sample| self.format.sample_f32(sample).to_le_bytes()),
+                .flat_map(|sample| self.sample(sample).to_le_bytes()),
         );
         out
     }
@@ -138,7 +152,7 @@ impl PcmDecoder {
             return Err(invalid("PCM packet ends in an incomplete channel frame"));
         }
         let samples: Vec<f32> = data.chunks_exact(self.format.sample_bytes())
-            .map(|s| self.format.sample_f32(s)).collect();
+            .map(|s| self.sample(s)).collect();
         if samples.iter().any(|s| !s.is_finite()) {
             return Err(invalid("PCM packet contains non-finite samples"));
         }

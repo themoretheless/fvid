@@ -984,7 +984,7 @@ pub(crate) fn mp4_audio_index<R: std::io::Read + std::io::Seek>(
         reader.tracks().iter().map(|t| t.handler == *b"soun"),
         selected,
     )?;
-    if !matches!(&reader.tracks()[index].codec, b"mp4a" | b"alac" | b"sowt" | b"twos" | b"fl32" | b"fl64") {
+    if !matches!(&reader.tracks()[index].codec, b"mp4a" | b"alac" | b"sowt" | b"twos" | b"fl32" | b"fl64" | b"in24" | b"in32") {
         return Err(invalid("selected MP4 audio codec is not supported by the owned export"));
     }
     Ok(index)
@@ -1023,7 +1023,7 @@ pub fn audio_source_info_selected(
             stream_index: index,
             sample_rate: decoder.sample_rate(),
             channels: decoder.channels(),
-            codec: match &track.codec { b"alac"=>"alac",b"sowt"=>"pcm_sle",b"twos"=>"pcm_sbe",b"fl32"|b"fl64"=>"pcm_fle",_=>"aac" },
+            codec: match &track.codec { b"alac"=>"alac",b"sowt"=>"pcm_sle",b"twos"=>"pcm_sbe",b"in24"|b"in32"=>if track.configuration.first()==Some(&1) {"pcm_sle"} else {"pcm_sbe"},b"fl32"|b"fl64"=>"pcm_fle",_=>"aac" },
         })
     } else {
         let info = aac_source_info_selected(source, selected)?;

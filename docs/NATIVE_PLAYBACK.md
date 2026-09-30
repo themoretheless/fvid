@@ -2396,3 +2396,16 @@ from saved MOV fixtures using the independent muxer, then verifies FVid exports
 byte-for-byte against its decoder, sample-exact intervals/gain, API and plans.
 The muxer is test-only; FVid's export uses its own parser and PCM conversion.
 The remaining `media` migration is still incomplete.
+
+### QuickTime PCM byte order and integer-width tags
+
+The MP4 reader now reads `enda` directly or inside `wave` for `fl32`, `fl64`,
+`in24` and `in32`, preserving the endian flag for both the native exporter and
+player decoder factory. Missing `enda` uses big endian; values other than 0/1
+fail. Integer-width tags provide 24/32 bits instead of the legacy sample-size
+field. The strict PCM conversion and legacy packet conversion share the same
+sample interpretation, while Matroska IEEE floats remain little endian.
+
+The optional MP4 PCM oracle checks all eight 24/32-bit integer and 32/64-bit
+float MOV variants in both byte orders. These are generated only for independent
+testing; runtime demuxing and sample conversion remain owned by FVid.

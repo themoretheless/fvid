@@ -765,7 +765,7 @@ fn read_tags(udta: Option<&[u8]>) -> FileTags {
 }
 
 fn is_pcm(codec: &[u8; 4]) -> bool {
-    matches!(codec, b"sowt" | b"twos" | b"fl32" | b"fl64")
+    matches!(codec, b"sowt" | b"twos" | b"fl32" | b"fl64" | b"in24" | b"in32")
 }
 
 /// The ADPCM tags QuickTime writes, each spelling its coding in the entry's own
@@ -1079,13 +1079,24 @@ fn parse_track(
             }
         }
         // Uncompressed PCM, as QuickTime writes it for a screen recording: the
-        // fourcc states the byte order and `sample_size` the depth, so the entry
-        // is the whole description and no configuration atom follows. The other
-        // PCM spellings (`in24`, `l16`, `raw `) state their width or signedness
-        // in child atoms the reader does not resolve, so they are skipped.
+        // Integer tags sowt/twos state byte order directly. Float and in24/in32
+        // entries use enda, usually nested in wave; absent enda defaults to big
+        // endian. Preserve its normalized flag for both export and playback.
         (b"soun", codec) if is_pcm(codec) => {
             if !audio_entry(entry.data, &mut result)? {
                 return Ok(None);
+            }
+            if matches!(codec, b"in24" | b"in32" | b"fl32" | b"fl64") {
+                let at = usize::from(u16be(entry.data, 8)? != 0) * 16 + 28;
+                let children = atoms(entry.data.get(at..).ok_or_else(|| invalid("short PCM description"))?)?;
+                let enda = if let Some(wave) = optional(&children,b"wave")? {
+                    optional(&atoms(wave)?,b"enda")?
+                } else { optional(&children,b"enda")? };
+                let little = match enda {Some(data) => u16be(data,0)?, None => 0};
+                if little > 1 {return Err(invalid("invalid PCM enda byte order"));}
+                result.configuration = vec![little as u8];
+                if codec == b"in24" {result.bit_depth=24;}
+                if codec == b"in32" {result.bit_depth=32;}
             }
             (entry.data.len(), None)
         }

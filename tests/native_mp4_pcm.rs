@@ -21,7 +21,10 @@ fn mp4_pcm_tracks_export_intervals_and_match_reference() {
         )
         .unwrap();
         for (index, track) in reader.tracks().iter().enumerate() {
-            if !matches!(&track.codec, b"sowt" | b"twos" | b"fl32" | b"fl64") {
+            if !matches!(
+                &track.codec,
+                b"sowt" | b"twos" | b"fl32" | b"fl64" | b"in24" | b"in32"
+            ) {
                 continue;
             }
             count += 1;
@@ -119,4 +122,49 @@ fn mp4_pcm_tracks_export_intervals_and_match_reference() {
         }
     }
     assert!(count >= 4, "exercise all indexed PCM tracks");
+}
+
+#[test]
+#[ignore = "requires FVID_REFERENCE_FFMPEG"]
+fn quicktime_integer_and_float_endian_metadata_matches_reference() {
+    let binary = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
+    let directory = std::env::temp_dir().join(format!("fvid-enda-{}", std::process::id()));
+    std::fs::create_dir_all(&directory).unwrap();
+    let source =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/audio/pcm-tags.mov");
+    for codec in [
+        "pcm_s24le",
+        "pcm_s24be",
+        "pcm_s32le",
+        "pcm_s32be",
+        "pcm_f32le",
+        "pcm_f32be",
+        "pcm_f64le",
+        "pcm_f64be",
+    ] {
+        let input = directory.join(format!("{codec}.mov"));
+        let result = std::process::Command::new(&binary)
+            .args(["-v", "error", "-i"])
+            .arg(&source)
+            .args(["-map", "0:0", "-c:a", codec])
+            .arg(&input)
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let output = directory.join(format!("{codec}.f32le"));
+        export(&input, &output, None, 1.0, None, None, None, None, None).unwrap();
+        let reference = std::process::Command::new(&binary)
+            .args(["-v", "error", "-i"])
+            .arg(&input)
+            .args(["-f", "f32le", "-"])
+            .output()
+            .unwrap();
+        assert!(reference.status.success());
+        assert_eq!(std::fs::read(output).unwrap(), reference.stdout, "{codec}");
+    }
+    std::fs::remove_dir_all(directory).unwrap();
 }

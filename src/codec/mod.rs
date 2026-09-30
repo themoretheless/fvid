@@ -257,6 +257,8 @@ pub fn make_audio_decoder(
         // what a track that says nothing holds.
         "A_PCM/INT/LIT" | "A_PCM/INT/BIG" if bits_per_sample == 8 => Box::new(
             pcm_decoder::PcmDecoder::new(pcm_decoder::PcmFormat::Unsigned8, sample_rate, channels)?),
+        "in24" | "in32" => Box::new(pcm_decoder::PcmDecoder::int(
+            if codec=="in24" {24} else {32}, extra_data.first()!=Some(&1), sample_rate, channels)?),
         "sowt" | "A_PCM/INT/LIT" => Box::new(pcm_decoder::PcmDecoder::int(
             bits_per_sample,
             false,
@@ -289,7 +291,8 @@ pub fn make_audio_decoder(
             sample_rate,
             channels,
         )?),
-        "fl32" | "fl64" | "A_PCM/FLOAT/IEEE" => Box::new(pcm_decoder::PcmDecoder::float(
+        "fl32" | "fl64" | "A_PCM/FLOAT/IEEE" => {
+            let mut decoder = pcm_decoder::PcmDecoder::float(
             match codec {
                 "fl32" => 32,
                 "fl64" => 64,
@@ -297,7 +300,10 @@ pub fn make_audio_decoder(
             },
             sample_rate,
             channels,
-        )?),
+        )?;
+            decoder.set_float_big_endian(codec!="A_PCM/FLOAT/IEEE" && extra_data.first()==Some(&0));
+            Box::new(decoder)
+        },
         // ADPCM as a QuickTime container names it: the `ms\0\xNN` tags carry the
         // WAVE format tag in the last byte (2 for Microsoft's coding, 0x11 for
         // IMA's in a WAV-shaped block) and `ima4` is Apple's own. All three state
