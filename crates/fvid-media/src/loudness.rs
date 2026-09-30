@@ -1,7 +1,6 @@
 //! Measure loudness via libavfilter `ebur128` and apply `loudnorm`.
 use super::lossless::{Codec, Frame};
 use super::*;
-use serde::Serialize;
 use serde_json::Value;
 use std::path::Path;
 use std::ptr;
@@ -9,63 +8,8 @@ use std::sync::Mutex;
 
 const AGAIN: i32 = -libc::EAGAIN;
 
-#[derive(Serialize, Debug, Clone)]
-pub struct LoudnessStats {
-    pub backend: &'static str,
-    pub sample_frames: u64,
-    pub sample_rate: i32,
-    pub channels: i32,
-    /// Integrated loudness (LUFS).
-    pub integrated_lufs: f64,
-    /// Loudness range (LU).
-    pub range_lu: f64,
-    pub lra_low_lufs: f64,
-    pub lra_high_lufs: f64,
-    /// True peak (dBFS); requires ebur128 peak=true.
-    pub true_peak_dbfs: f64,
-    pub sample_peak_dbfs: f64,
-}
-
-#[derive(Serialize, Debug, Clone)]
-pub struct LoudnormStats {
-    pub backend: &'static str,
-    pub sample_frames: u64,
-    pub sample_rate: i32,
-    pub channels: i32,
-    /// Filter args after defaults applied (FFmpeg `-af loudnorm=`).
-    pub args: String,
-    /// True when a measure pass supplied `measured_*` + `linear=true`.
-    #[serde(skip_serializing_if = "std::ops::Not::not")]
-    pub dual_pass: bool,
-}
-
-/// Default FFmpeg `loudnorm` targets (I/TP/LRA).
-pub const DEFAULT_LOUDNORM_ARGS: &str = "I=-16:TP=-1.5:LRA=11";
-
-pub fn validate_loudnorm_args(args: &str) -> Result<()> {
-    if args.is_empty() {
-        return Ok(());
-    }
-    if !args
-        .bytes()
-        .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
-    {
-        return Err(
-            "loudnorm args must match [A-Za-z0-9=.:_-] (FFmpeg loudnorm= key/value list)".into(),
-        );
-    }
-    Ok(())
-}
-
-fn resolve_loudnorm_args(args: Option<&str>) -> Result<String> {
-    match args {
-        None | Some("") => Ok(DEFAULT_LOUDNORM_ARGS.into()),
-        Some(value) => {
-            validate_loudnorm_args(value)?;
-            Ok(value.to_owned())
-        }
-    }
-}
+pub use fvid_media_info::{LoudnessStats, LoudnormStats, DEFAULT_LOUDNORM_ARGS, validate_loudnorm_args};
+use fvid_media_info::resolve_loudnorm_args;
 
 struct EburGraph {
     graph: *mut AVFilterGraph,

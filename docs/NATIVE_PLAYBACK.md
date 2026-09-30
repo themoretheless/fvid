@@ -2644,3 +2644,9 @@ FFmpeg linkage from the `media` feature.
 media description crate. `native_subtitle::try_convert_with_options` accepts
 them with no `media` feature, retaining explicit stream selection and rejecting
 unknown codec names. The legacy API re-exports the same types.
+
+Loudness result structures and loudnorm argument defaults/character validation
+now reside in `fvid-media-info`. Legacy measurement and normalization re-use
+these contracts, preserving the existing API and explicit argument strings.
+This is contract migration only: LUFS/true-peak measurement and loudnorm DSP
+still run through libavfilter until the owned PCM implementation is ready.

@@ -1,0 +1,82 @@
+//! Backend-independent loudness results and argument compatibility.
+use serde::Serialize;
+
+#[derive(Serialize, Debug, Clone)]
+pub struct LoudnessStats {
+    pub backend: &'static str,
+    pub sample_frames: u64,
+    pub sample_rate: i32,
+    pub channels: i32,
+    /// Integrated loudness (LUFS).
+    pub integrated_lufs: f64,
+    /// Loudness range (LU).
+    pub range_lu: f64,
+    pub lra_low_lufs: f64,
+    pub lra_high_lufs: f64,
+    /// True peak (dBFS); requires ebur128 peak=true.
+    pub true_peak_dbfs: f64,
+    pub sample_peak_dbfs: f64,
+}
+
+#[derive(Serialize, Debug, Clone)]
+pub struct LoudnormStats {
+    pub backend: &'static str,
+    pub sample_frames: u64,
+    pub sample_rate: i32,
+    pub channels: i32,
+    /// Filter args after defaults applied (FFmpeg `-af loudnorm=`).
+    pub args: String,
+    /// True when a measure pass supplied `measured_*` + `linear=true`.
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub dual_pass: bool,
+}
+
+/// Default FFmpeg `loudnorm` targets (I/TP/LRA).
+pub const DEFAULT_LOUDNORM_ARGS: &str = "I=-16:TP=-1.5:LRA=11";
+
+pub fn validate_loudnorm_args(args: &str) -> std::result::Result<(), String> {
+    if args.is_empty() {
+        return Ok(());
+    }
+    if !args
+        .bytes()
+        .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'=' | b':' | b'-' | b'_' | b'.'))
+    {
+        return Err(
+            "loudnorm args must match [A-Za-z0-9=.:_-] (FFmpeg loudnorm= key/value list)".into(),
+        );
+    }
+    Ok(())
+}
+
+pub fn resolve_loudnorm_args(args: Option<&str>) -> std::result::Result<String, String> {
+    match args {
+        None | Some("") => Ok(DEFAULT_LOUDNORM_ARGS.into()),
+        Some(value) => {
+            validate_loudnorm_args(value)?;
+            Ok(value.to_owned())
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn argument_defaults_and_safe_filter_values() {
+        for value in [None, Some("")] {
+            assert_eq!(resolve_loudnorm_args(value).unwrap(), DEFAULT_LOUDNORM_ARGS);
+        }
+        let explicit = "I=-23:TP=-2:LRA=7:linear=true:measured_I=-24.25";
+        assert_eq!(resolve_loudnorm_args(Some(explicit)).unwrap(), explicit);
+        for invalid in [
+            "I=-16,volume=2",
+            "I=-16;anull",
+            "I=-16[output]",
+            "I=-16\n",
+            "I=−16",
+        ] {
+            assert!(validate_loudnorm_args(invalid).is_err(), "{invalid}");
+        }
+    }
+}

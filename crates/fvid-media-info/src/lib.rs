@@ -206,3 +206,6 @@ pub struct SubtitleConvertOptions {
     pub streams: Vec<usize>,
     pub codec: SubtitleCodec,
 }
+
+mod loudness;
+pub use loudness::{LoudnessStats, LoudnormStats, DEFAULT_LOUDNORM_ARGS, validate_loudnorm_args, resolve_loudnorm_args};
