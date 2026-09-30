@@ -2605,3 +2605,7 @@ are not interpreted as markup; entity codes for ASS braces, backslashes, control
 characters or invalid Unicode remain unsupported before publication. Ordinary
 literal ampersands no longer force the legacy adapter. Independent conversion
 tests cover named/numeric entities in standalone SRT and Matroska tracks.
+
+Owned standalone SRT parsing accepts UTF-8 BOM, LF/CRLF/CR line endings and
+whitespace-only cue separators. Integration tests verify these representations
+produce identical ASS Matroska bytes without changing cue text or timing.

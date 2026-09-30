@@ -35,6 +35,19 @@ fn srt_convert_cli_and_api_use_owned_ass_muxer_atomically() {
     );
     assert_eq!(reader.packets.len(), 2);
     let expected = std::fs::read(&output).unwrap();
+    for (name, text) in [
+        ("spaces", SRT.replace("\r\n\r\n", "\r\n \t\r\n")),
+        ("carriage", SRT.replace("\r\n", "\r")),
+        ("bom", format!("\u{feff}{SRT}")),
+    ] {
+        let variant = directory.join(format!("{name}.srt"));
+        let converted = directory.join(format!("{name}.mkv"));
+        std::fs::write(&variant, text).unwrap();
+        fvid::native_subtitle::try_convert_srt(&variant, &converted, &[])
+            .unwrap()
+            .unwrap();
+        assert_eq!(std::fs::read(converted).unwrap(), expected, "{name}");
+    }
     assert!(fvid::native_subtitle::try_convert_srt(&input, &output, &[]).is_err());
     assert_eq!(std::fs::read(&output).unwrap(), expected);
     let cli = directory.join("cli.mkv");

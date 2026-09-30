@@ -230,7 +230,15 @@ pub fn try_convert_srt(
     let Ok(text) = std::str::from_utf8(&bytes) else {
         return Ok(None);
     };
-    let text = text.trim_start_matches('\u{feff}').replace("\r\n", "\n");
+    let normalized = text
+        .trim_start_matches('\u{feff}')
+        .replace("\r\n", "\n")
+        .replace('\r', "\n");
+    let text = normalized
+        .lines()
+        .map(|line| if line.trim().is_empty() { "" } else { line })
+        .collect::<Vec<_>>()
+        .join("\n");
     let mut cues = Vec::new();
     for block in text.split("\n\n").filter(|b| !b.trim().is_empty()) {
         let mut lines = block.trim_matches('\n').lines();
