@@ -92,3 +92,38 @@ pub struct PcmLoudnessStats {
     /// Gated short-term 10th-to-95th percentile range; None without valid 3 s windows.
     pub range_lu: Option<f64>,
 }
+
+#[derive(Debug, Clone, Copy, serde::Serialize)]
+pub struct NormalizeTarget {
+    pub integrated_lufs: f64,
+    /// Sample-peak ceiling, not an interpolated true-peak ceiling.
+    pub sample_peak_dbfs: f64,
+}
+impl Default for NormalizeTarget {
+    fn default() -> Self {
+        Self {
+            integrated_lufs: -16.0,
+            sample_peak_dbfs: -1.5,
+        }
+    }
+}
+#[derive(Debug, serde::Serialize)]
+pub struct NormalizeReport {
+    pub source: PcmLoudnessStats,
+    pub gain_db: f64,
+    pub peak_limited: bool,
+    pub sample_frames: u64,
+}
+
+impl NormalizeTarget {
+    pub fn validate(self) -> std::result::Result<(), String> {
+        if !self.integrated_lufs.is_finite()
+            || !(-70.0..=0.0).contains(&self.integrated_lufs)
+            || !self.sample_peak_dbfs.is_finite()
+            || !(-70.0..=0.0).contains(&self.sample_peak_dbfs)
+        {
+            return Err("normalization targets must be finite and within -70..=0 dB".into());
+        }
+        Ok(())
+    }
+}

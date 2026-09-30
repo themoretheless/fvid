@@ -2791,3 +2791,12 @@ before completion. `fvid media loudness INPUT --progress` writes progress JSON
 to stderr while retaining the measurement result on stdout. Metadata plans
 do not execute progress hooks. CLI/API completion and callback cancellation
 are covered in headless and media builds.
+
+The public `media::normalize_loudness` accepts shared typed `NormalizeTarget`,
+optional explicit channel weights and operation controls, and returns the
+serializable `NormalizeReport`. Both contracts live in `fvid-media-info` with
+no codec dependency. The operation calls owned measurement and WAVE export;
+CLI/native/public API output equality and no-overwrite behavior are tested.
+Single-pass progress hooks are explicitly rejected for this two-pass operation
+until phase-aware reporting is implemented; cancellation remains supported.
+Legacy dynamic loudnorm remains separate and is not represented by this API.

@@ -414,3 +414,18 @@ pub fn plan_normalize_loudness(source: &std::path::Path, options: &CopyOptions,
     if options.progress.is_some() {return Err("owned loudness progress hooks are not yet implemented".into());}
     crate::native_plan::normalize_loudness(source,options.streams.first().copied(),weights,target)
 }
+
+/// Constant-gain normalization with typed FVid targets, owned codecs and WAVE output.
+pub fn normalize_loudness(source: &std::path::Path, destination: &std::path::Path,
+    options: &CopyOptions, weights: Option<&[f64]>, target: crate::media_info::NormalizeTarget) -> Result<crate::media_info::NormalizeReport> {
+    validate_native_copy_options(options,true)?;
+    target.validate()?;
+    if options.cancel.as_ref().is_some_and(|flag|flag.is_cancelled()) {return Err("operation cancelled".into());}
+    if options.progress.is_some() {return Err("two-pass normalization requires phase-aware progress, not a single-pass hook".into());}
+    let defaults;
+    let weights=match weights {
+        Some(weights)=>weights,
+        None=>{defaults=crate::native_pcm::loudness_channel_weights(source,options.streams.first().copied()).map_err(|e|e.to_string())?;&defaults},
+    };
+    crate::native_pcm::normalize_loudness_file(source,destination,options.streams.first().copied(),weights,target,options.cancel.as_ref()).map_err(|e|e.to_string())
+}

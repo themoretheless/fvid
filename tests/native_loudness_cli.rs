@@ -9,6 +9,7 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
             let _ = std::fs::remove_file(self.0.with_extension("normalized.wav"));
             let _ = std::fs::remove_file(self.0.with_extension("limited.wav"));
             let _ = std::fs::remove_file(self.0.with_extension("cli.wav"));
+            let _ = std::fs::remove_file(self.0.with_extension("media.wav"));
         }
     }
     let _cleanup = Cleanup(source.clone());
@@ -181,6 +182,29 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
         fvid::native_pcm::measure_loudness_file(&normalized, None, &[1.0], None).unwrap();
     assert!((measured.integrated_lufs.unwrap() + 20.0).abs() < 0.02);
     let bytes = std::fs::read(&normalized).unwrap();
+    #[cfg(feature = "media")]
+    {
+        let output = source.with_extension("media.wav");
+        let result =
+            fvid::media::normalize_loudness(&source, &output, &Default::default(), None, target)
+                .unwrap();
+        assert_eq!(std::fs::read(&output).unwrap(), bytes);
+        assert_eq!(result.gain_db, report.gain_db);
+        assert_eq!(result.peak_limited, report.peak_limited);
+        assert_eq!(
+            serde_json::to_value(&result).unwrap()["sample_frames"],
+            96000
+        );
+        assert!(fvid::media::normalize_loudness(
+            &source,
+            &output,
+            &Default::default(),
+            None,
+            target
+        )
+        .is_err());
+    }
+
     assert!(fvid::native_pcm::normalize_loudness_file(
         &source,
         &normalized,
