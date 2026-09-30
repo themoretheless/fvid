@@ -204,3 +204,113 @@ fn multiple_alac_tracks_require_explicit_selection_and_stay_native() {
         );
     }
 }
+
+#[test]
+#[ignore = "requires FVID_REFERENCE_FFMPEG to mux mixed audio tracks"]
+fn selected_codec_controls_trim_in_mixed_aac_alac_container() {
+    let binary = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+    let dir = std::env::temp_dir().join(format!("fvid-mixed-trim-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    struct Cleanup(PathBuf);
+    impl Drop for Cleanup {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _cleanup = Cleanup(dir.clone());
+    for extension in ["m4a", "mka"] {
+        let source = dir.join(format!("mixed.{extension}"));
+        let result = std::process::Command::new(&binary)
+            .args(["-v", "error", "-i"])
+            .arg(root.join("alac/stereo-24.m4a"))
+            .arg("-i")
+            .arg(root.join("audio/aac-native-edit.m4a"))
+            .args(["-map", "0:a:0", "-map", "1:a:0", "-c", "copy"])
+            .arg(&source)
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        for (index, codec) in [(0, "alac"), (1, "aac")] {
+            let expected = dir.join(format!("{extension}-{index}-expected.wav"));
+            fvid::native_export::export_audio_pcm_selected(
+                &source,
+                &expected,
+                Some((
+                    std::time::Duration::from_micros(1000),
+                    std::time::Duration::from_micros(5000),
+                )),
+                1.0,
+                None,
+                None,
+                Some(index),
+                None,
+                None,
+            )
+            .unwrap();
+            let output = dir.join(format!("{extension}-{index}.wav"));
+            fvid::native_export::trim_audio_wave(
+                &source,
+                &output,
+                1000,
+                5000,
+                Some(index),
+                None,
+                None,
+            )
+            .unwrap();
+            assert_eq!(
+                std::fs::read(&output).unwrap(),
+                std::fs::read(&expected).unwrap()
+            );
+            let plan = fvid::native_plan::trim_audio(&source, 1000, 5000, Some(index)).unwrap();
+            assert_eq!(plan.streams[0].codec, codec);
+            let cli = dir.join(format!("cli-{extension}-{index}.wav"));
+            let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+                .args(["media", "trim"])
+                .arg(&source)
+                .arg(&cli)
+                .args([
+                    "--from",
+                    "0.001",
+                    "--to",
+                    "0.005",
+                    "--streams",
+                    &index.to_string(),
+                ])
+                .output()
+                .unwrap();
+            assert!(
+                result.status.success(),
+                "{}",
+                String::from_utf8_lossy(&result.stderr)
+            );
+            assert_eq!(
+                std::fs::read(cli).unwrap(),
+                std::fs::read(&expected).unwrap()
+            );
+            #[cfg(feature = "media")]
+            {
+                let api = dir.join(format!("api-{extension}-{index}.wav"));
+                let options = fvid::media::CopyOptions {
+                    streams: vec![index],
+                    ..Default::default()
+                };
+                assert_eq!(
+                    fvid::media::trim(&source, &api, 1000, 5000, &options)
+                        .unwrap()
+                        .backend,
+                    "fvid"
+                );
+                assert_eq!(
+                    std::fs::read(api).unwrap(),
+                    std::fs::read(&expected).unwrap()
+                );
+            }
+        }
+    }
+}

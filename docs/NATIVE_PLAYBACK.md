@@ -2561,3 +2561,8 @@ Default audio decode admission remains unchanged; trim independently requires
 mux two ALAC tracks into MP4 and Matroska with the independent test muxer, then
 verify CLI/API selection stays on backend `fvid`, both duplicate tracks produce
 identical WAVE bytes, and implicit track omission fails before publication.
+
+For mixed AAC/ALAC/PCM containers, trim dispatch uses the selected stream's
+codec rather than the presence of any AAC track. Mixed AAC+ALAC MP4 and Matroska
+fixtures verify each explicit selection through native export, plans, CLI and
+media API against the selected interval decoder output.

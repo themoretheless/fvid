@@ -991,6 +991,13 @@ pub fn is_owned_audio_trim_source(path: &Path) -> Result<bool> {
         && audio_source_info_selected(path, Some(stream.index)).is_ok()))
 }
 
+pub(crate) fn is_aac_trim_source(path: &Path, selected: Option<usize>) -> Result<bool> {
+    match selected {
+        Some(index) => Ok(audio_source_info_selected(path, Some(index))?.codec == "aac"),
+        None => Ok(is_aac_source(path)?),
+    }
+}
+
 pub(crate) fn mp4_audio_index<R: std::io::Read + std::io::Seek>(
     reader: &crate::container::mp4::Mp4Reader<R>,
     selected: Option<usize>,

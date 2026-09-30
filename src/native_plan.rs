@@ -250,7 +250,7 @@ pub fn audio_trim_selection(source: &std::path::Path, selected: Option<usize>) -
 }
 
 pub fn trim_audio(source: &std::path::Path, from: i64, to: i64, selected: Option<usize>) -> Result<MediaPlan> {
-    if crate::native_media::is_aac_source(source).map_err(|e| e.to_string())? {
+    if crate::native_media::is_aac_trim_source(source, selected).map_err(|e| e.to_string())? {
         return trim_aac(source, from, to, selected);
     }
     let index = audio_trim_selection(source, selected)?;
