@@ -88,7 +88,7 @@ fn srt_convert_cli_and_api_use_owned_ass_muxer_atomically() {
     }
     std::fs::write(
         &input,
-        "1\n00:00:00,000 --> 00:00:01,000\n<font color=red>text</font>",
+        "1\n00:00:00,000 --> 00:00:01,000\n<font color=not-a-color>text</font>",
     )
     .unwrap();
     assert!(fvid::native_subtitle::try_convert_srt(&input, &bad, &[])
@@ -283,10 +283,31 @@ fn font_attributes_match_independent_subrip_conversion() {
             "face=\"Courier New\"",
             "size=\"18\"",
             "size=18",
+            "color=red",
+            "color=green",
+            "color=blue",
+            "color=white",
+            "color=black",
+            "color=silver",
+            "color=gray",
+            "color=maroon",
+            "color=purple",
+            "color=fuchsia",
+            "color=lime",
+            "color=olive",
+            "color=yellow",
+            "color=navy",
+            "color=teal",
+            "color=aqua",
         ]
         .iter()
         .enumerate()
         {
+            // Named colors use a distinct outer color to compare serialized styles
+            // without redundant same-color tags emitted by the reference.
+            if nested.starts_with("color=") && !nested.contains('#') && *color != "12AbEf" {
+                continue;
+            }
             let source = directory.join(format!("{index}-{nested_index}.srt"));
             std::fs::write(&source,format!("1\n00:00:00,100 --> 00:00:01,000\nBefore <font color=\"#{color}\" face=\"Georgia\" size=\"24\">colored <b>bold</b> <font {nested}>nested</font> restored</font> after\n")).unwrap();
             let output = source.with_extension("mkv");

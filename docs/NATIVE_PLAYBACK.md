@@ -2629,3 +2629,7 @@ conversion for six colors, combined face/size/color and nested color changes.
 Rendered equivalence is not verified: the available reference build lacks
 the subtitle rendering filter. Other attributes and color syntaxes retain
 the adapter.
+
+The owned SubRip parser also accepts the sixteen standard HTML color names
+(case insensitive). Independent decoded-SRT comparisons cover each name with
+nested restoration. Unknown names continue through the existing adapter.

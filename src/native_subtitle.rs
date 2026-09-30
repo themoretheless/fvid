@@ -1,6 +1,6 @@
 //! Owned SubRip text conversion and atomic ASS Matroska publication.
 use crate::container::matroska_write::{Encoding, PacketWriter, TrackSpec};
-use crate::{Result, invalid};
+use crate::{invalid, Result};
 use std::{
     fs::{File, OpenOptions},
     io::{Read, Write},
@@ -90,7 +90,26 @@ fn font_attributes(tag: &str, inherited: &Font) -> Option<Font> {
         }
         match key.as_str() {
             "color" => {
-                let c = value.strip_prefix('#')?;
+                let named = match value.to_ascii_lowercase().as_str() {
+                    "black" => "000000",
+                    "silver" => "c0c0c0",
+                    "gray" => "808080",
+                    "white" => "ffffff",
+                    "maroon" => "800000",
+                    "red" => "ff0000",
+                    "purple" => "800080",
+                    "fuchsia" => "ff00ff",
+                    "green" => "008000",
+                    "lime" => "00ff00",
+                    "olive" => "808000",
+                    "yellow" => "ffff00",
+                    "navy" => "000080",
+                    "blue" => "0000ff",
+                    "teal" => "008080",
+                    "aqua" => "00ffff",
+                    _ => "",
+                };
+                let c = value.strip_prefix('#').unwrap_or(named);
                 if c.len() != 6 || !c.bytes().all(|b| b.is_ascii_hexdigit()) {
                     return None;
                 }
