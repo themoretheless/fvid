@@ -2460,3 +2460,17 @@ morphology, chromashift. Y4M uses its admitted rawvideo stream directly rather
 than requiring the general media probe to support that format. A regression
 checks the exact filter sequence and executes the same requests on Y4M, MP4
 video, and MP4 with two companion audio tracks.
+
+### Owned Y4M probe
+
+The general native/media probe recognizes progressive 8-bit Y4M 420/422/444
+by contents or the `yuv4mpegpipe`/`y4m` format override. It counts FRAME markers
+and skips pixel payload by checked file offsets, returning rawvideo dimensions,
+frame count, frame rate/time base and exact rational duration. Tagged frame
+markers are supported. Truncated frames, invalid rates and duplicate F tokens
+fail; missing F leaves rate/duration unknown. Unsupported interlaced/high-bit
+profiles retain the adapter before native parsing is selected. No pixel decoder
+or FFmpeg is needed for the admitted probe path.
+
+`native_y4m_probe` tests three layouts at 30000:1001, native/public API agreement,
+format override, malformed/truncated input and unsupported-profile admission.
