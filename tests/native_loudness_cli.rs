@@ -103,6 +103,70 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
             .unwrap(),
         plan
     );
+    let progress = run(&["--progress"]);
+    assert!(progress.status.success());
+    assert_eq!(
+        serde_json::from_slice::<serde_json::Value>(&progress.stdout).unwrap(),
+        json
+    );
+    let progress: Vec<serde_json::Value> = String::from_utf8(progress.stderr)
+        .unwrap()
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    assert_eq!(
+        progress
+            .iter()
+            .filter(|event| event["done"] == true)
+            .count(),
+        1
+    );
+    assert_eq!(progress.last().unwrap()["done"], true);
+    let events = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+    let captured = events.clone();
+    let hook =
+        fvid::media_control::ProgressHook::new(move |event| captured.lock().unwrap().push(event));
+    let controlled = fvid::native_pcm::measure_loudness_file_controlled(
+        &source,
+        None,
+        &[1.0],
+        None,
+        Some(&hook),
+    )
+    .unwrap();
+    assert_eq!(controlled.integrated_lufs, api.integrated_lufs);
+    let captured = events.lock().unwrap();
+    assert_eq!(captured.iter().filter(|event| event.done).count(), 1);
+    assert!(captured.last().unwrap().done);
+    assert!(captured.last().unwrap().payload_bytes > 0);
+    assert!(captured
+        .windows(2)
+        .all(|events| events[0].packets <= events[1].packets
+            && events[0].payload_bytes <= events[1].payload_bytes));
+    drop(captured);
+    let cancelled = fvid::media_control::CancelFlag::new();
+    let signal = cancelled.clone();
+    let hook = fvid::media_control::ProgressHook::new(move |event| {
+        if event.payload_bytes > 0 {
+            signal.cancel();
+        }
+    });
+    assert!(fvid::native_pcm::measure_loudness_file_controlled(
+        &source,
+        None,
+        &[1.0],
+        Some(&cancelled),
+        Some(&hook)
+    )
+    .is_err());
+    #[cfg(feature = "media")]
+    {
+        let options = fvid::media::CopyOptions {
+            progress: Some(fvid::media_control::ProgressHook::new(|_| {})),
+            ..Default::default()
+        };
+        assert!(fvid::media::measure_loudness(&source, &options).is_ok());
+    }
     let normalized = source.with_extension("normalized.wav");
     let target = fvid::native_pcm::NormalizeTarget {
         integrated_lufs: -20.0,

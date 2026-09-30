@@ -307,9 +307,20 @@ pub fn measure_file(
     weights: &[f64],
     cancel: Option<&crate::media_control::CancelFlag>,
 ) -> crate::Result<IntegratedLoudness> {
+    measure_file_controlled(source, selected, weights, cancel, None)
+}
+
+/// Stream packet/byte progress and honor cancellation before a final done event.
+pub fn measure_file_controlled(
+    source: &std::path::Path,
+    selected: Option<usize>,
+    weights: &[f64],
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+) -> crate::Result<IntegratedLoudness> {
     use crate::{invalid, native_media};
     use std::io::{BufReader, Read, Seek, SeekFrom, Write};
-    let mut control = native_media::DecodeProgress::new(cancel, None)?;
+    let mut control = native_media::DecodeProgress::new(cancel, progress)?;
     let mut input = BufReader::new(std::fs::File::open(source)?);
     let mut prefix = [0u8; 8];
     input.read_exact(&mut prefix)?;
@@ -418,6 +429,9 @@ pub fn measure_file(
     if sink.byte_count != 0 || sink.channel != 0 || stats.sample_frames != sink.meter.frames {
         return Err(invalid("incomplete or inconsistent loudness PCM stream"));
     }
+    control.emit(false);
+    control.check()?;
+    control.emit(true);
     Ok(sink.meter.report())
 }
 

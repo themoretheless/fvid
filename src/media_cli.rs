@@ -78,6 +78,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         let mut selected = None;
         let mut weights = None;
         let mut quiet = false;
+        let mut progress = false;
         let mut options = args[2..].iter();
         while let Some(option) = options.next() {
             match option.as_str() {
@@ -90,11 +91,15 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                     weights = Some(options.next().ok_or("missing channel weights")?.split(',').map(str::parse).collect::<Result<Vec<f64>,_>>()?);
                 }
                 "--quiet" => quiet = true,
+                "--progress" => progress = true,
                 _ => return Err(format!("unsupported owned loudness option: {option}").into()),
             }
         }
         let weights = owned_loudness_weights(source,selected,weights)?;
-        let stats = fvid::native_pcm::measure_loudness_file(source,selected,&weights,None)?;
+        let hook=progress.then(||fvid::media_control::ProgressHook::new(|event| {
+            eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
+        }));
+        let stats = fvid::native_pcm::measure_loudness_file_controlled(source,selected,&weights,None,hook.as_ref())?;
         if !quiet {
             println!("{}",serde_json::to_string_pretty(&serde_json::json!({
                 "backend":"fvid", "sample_frames":stats.sample_frames,

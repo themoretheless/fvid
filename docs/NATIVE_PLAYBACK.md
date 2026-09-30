@@ -2782,3 +2782,12 @@ cover legacy prefixes, wildcard resolution, wrong team/bundle, expiry and
 missing installation authorization. The AMFI log contains provisioning errors
 with private process names; it does not conclusively attribute launch failure
 to FVid. No valid local profiles are available yet for a profile-backed launch.
+
+Owned loudness execution now accepts shared progress hooks through
+`measure_loudness_file_controlled` and the public media API. Events report
+monotonic decoded packet/block counts and input payload bytes, with exactly
+one final done event on success. Cancellation is checked after callbacks and
+before completion. `fvid media loudness INPUT --progress` writes progress JSON
+to stderr while retaining the measurement result on stdout. Metadata plans
+do not execute progress hooks. CLI/API completion and callback cancellation
+are covered in headless and media builds.

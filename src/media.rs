@@ -397,8 +397,7 @@ pub fn measure_loudness(source: &std::path::Path, options: &CopyOptions) -> Resu
 /// Explicit energy weights for multichannel layouts; no implicit channel remapping.
 pub fn measure_loudness_with_weights(source: &std::path::Path, options: &CopyOptions, weights: &[f64]) -> Result<crate::native_pcm::IntegratedLoudness> {
     validate_native_copy_options(options,true)?;
-    if options.progress.is_some() {return Err("owned loudness progress hooks are not yet implemented".into());}
-    crate::native_pcm::measure_loudness_file(source,options.streams.first().copied(),weights,options.cancel.as_ref()).map_err(|e|e.to_string())
+    crate::native_pcm::measure_loudness_file_controlled(source,options.streams.first().copied(),weights,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())
 }
 
 /// Owned metadata-only loudness plan; no libavfilter graph is created.
