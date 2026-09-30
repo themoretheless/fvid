@@ -2658,3 +2658,14 @@ Tests cover five sample rates and an independent 48 kHz biquad output oracle.
 This stage does not yet calculate gating, LUFS, LRA or true peak, and does not
 replace the legacy loudness command. Coefficient reference:
 https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/f_ebur128.c
+
+`native_pcm::LoudnessMeter` now calculates integrated loudness from interleaved
+f64 PCM using owned K-weighting, 400 ms windows, 100 ms steps, -70 LUFS
+absolute gating and a -10 LU relative gate. Channel weights are explicit;
+no layout is inferred from channel count. A 0.01 LU histogram retains count
+and energy sum per level bin, avoiding duration-proportional window storage.
+Silence and streams shorter than 400 ms return `None`, rather than fabricated
+finite loudness. Rates must be divisible by ten and within 8–384 kHz.
+Independent ebur128 comparisons cover 44.1/48/96 kHz with silence and changing
+levels (0.11 LU tolerance for rounded reference summaries). This PCM API does
+not yet replace file-level loudness commands; LRA and true peak remain pending.

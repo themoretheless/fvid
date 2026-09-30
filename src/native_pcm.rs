@@ -1,4 +1,6 @@
 //! Owned streaming RIFF/WAVE PCM inspection, sample slicing and float conversion.
+mod loudness;
+pub use loudness::{IntegratedLoudness, LoudnessMeter};
 mod k_weight;
 pub use k_weight::KWeighting;
 use crate::{
