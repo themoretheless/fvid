@@ -348,6 +348,14 @@ pub fn decode_mp4_aac_reader<R: std::io::Read + std::io::Seek>(
 }
 
 pub(crate) fn decode_mp4_aac_reader_controlled<R: std::io::Read + std::io::Seek>(
+    reader: crate::container::mp4::Mp4Reader<R>, output:&mut impl std::io::Write,
+    interval:Option<(Duration,Duration)>, selected:Option<usize>, control:&mut DecodeProgress<'_>,
+) -> Result<AudioDecodeStats> {
+    mp4_aac_index(&reader,selected)?;
+    decode_mp4_audio_reader_controlled(reader,output,interval,selected,control)
+}
+
+pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::Seek>(
     mut reader: crate::container::mp4::Mp4Reader<R>,
     output: &mut impl std::io::Write,
     interval: Option<(Duration, Duration)>,
@@ -358,27 +366,23 @@ pub(crate) fn decode_mp4_aac_reader_controlled<R: std::io::Read + std::io::Seek>
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("audio interval requires from < to"));
     }
-    let index = mp4_aac_index(&reader, selected)?;
+    let index = mp4_audio_index(&reader, selected)?;
     let track = reader.tracks()[index].clone();
-    if track.codec != *b"mp4a" {
-        return Err(invalid("MP4 audio track is not AAC"));
-    }
-    let asc = crate::codec::config::aac_specific_config(&track.configuration)?;
-    let mut decoder = crate::codec::aac_native::NativeAacDecoder::new(asc)?;
+    let mut decoder = crate::native_audio_decoder::Mp4PcmDecoder::new(&track)?;
     let rate = decoder.sample_rate();
-    let channels = u16::from(decoder.channels());
+    let channels = decoder.channels();
     if track.timescale == 0 || track.sample_rate != rate || track.channels != channels {
         return Err(invalid(
-            "MP4 AAC export requires valid clock and matching audio geometry",
+            "MP4 audio export requires valid clock and matching audio geometry",
         ));
     }
     let sample_position = |ticks: u64| -> Result<u64> {
         let numerator = u128::from(ticks) * u128::from(rate);
         let denominator = u128::from(track.timescale);
         if numerator % denominator != 0 {
-            return Err(invalid("MP4 AAC timestamp is not aligned to a sample"));
+            return Err(invalid("MP4 audio timestamp is not aligned to a sample"));
         }
-        u64::try_from(numerator / denominator).map_err(|_| invalid("AAC sample position overflow"))
+        u64::try_from(numerator / denominator).map_err(|_| invalid("audio sample position overflow"))
     };
     // Quantize cumulative movie boundaries, not each duration independently:
     // otherwise many fractional edits would accumulate rounding drift.
@@ -396,16 +400,16 @@ pub(crate) fn decode_mp4_aac_reader_controlled<R: std::io::Read + std::io::Seek>
         for edit in &track.edits {
             movie_ticks = movie_ticks
                 .checked_add(u128::from(edit.duration))
-                .ok_or_else(|| invalid("AAC edit timeline overflow"))?;
+                .ok_or_else(|| invalid("audio edit timeline overflow"))?;
             let end = movie_ticks
                 .checked_mul(u128::from(rate))
-                .ok_or_else(|| invalid("AAC edit timeline overflow"))?
+                .ok_or_else(|| invalid("audio edit timeline overflow"))?
                 .div_ceil(scale);
-            let end = u64::try_from(end).map_err(|_| invalid("AAC edit timeline overflow"))?;
+            let end = u64::try_from(end).map_err(|_| invalid("audio edit timeline overflow"))?;
             let source = match edit.media_time {
                 -1 => None,
                 value if value >= 0 => Some(sample_position(value as u64)?),
-                _ => return Err(invalid("invalid AAC media edit time")),
+                _ => return Err(invalid("invalid audio media edit time")),
             };
             segments.push((timeline, end, source));
             timeline = end;
@@ -445,7 +449,7 @@ pub(crate) fn decode_mp4_aac_reader_controlled<R: std::io::Read + std::io::Seek>
             let zeros = [0u8; 4096];
             let mut bytes = length
                 .checked_mul(u64::from(channels) * 4)
-                .ok_or_else(|| invalid("AAC silence size overflow"))?;
+                .ok_or_else(|| invalid("audio silence size overflow"))?;
             while bytes != 0 {
                 control.check()?;
                 let count = bytes.min(zeros.len() as u64) as usize;
@@ -457,10 +461,10 @@ pub(crate) fn decode_mp4_aac_reader_controlled<R: std::io::Read + std::io::Seek>
         };
         let from = source
             .checked_add(begin - segment_start)
-            .ok_or_else(|| invalid("AAC source edit overflow"))?;
+            .ok_or_else(|| invalid("audio source edit overflow"))?;
         let to = from
             .checked_add(length)
-            .ok_or_else(|| invalid("AAC source edit overflow"))?;
+            .ok_or_else(|| invalid("audio source edit overflow"))?;
         decoder.reset();
         let mut written = 0u64;
         let mut expected = None;
@@ -469,13 +473,13 @@ pub(crate) fn decode_mp4_aac_reader_controlled<R: std::io::Read + std::io::Seek>
             let sample = track
                 .samples
                 .get(sample_index)
-                .ok_or_else(|| invalid("missing AAC sample"))?;
+                .ok_or_else(|| invalid("missing audio sample"))?;
             let start = sample_position(
-                u64::try_from(sample.pts).map_err(|_| invalid("negative AAC timestamp"))?,
+                u64::try_from(sample.pts).map_err(|_| invalid("negative audio timestamp"))?,
             )?;
             let duration = sample_position(u64::from(sample.duration))?;
             if expected.is_some_and(|value| value != start) {
-                return Err(invalid("non-contiguous MP4 AAC timeline"));
+                return Err(invalid("non-contiguous MP4 audio timeline"));
             }
             if start >= to {
                 break;
@@ -485,17 +489,17 @@ pub(crate) fn decode_mp4_aac_reader_controlled<R: std::io::Read + std::io::Seek>
             let frames = (samples.len() / usize::from(channels)) as u64;
             if duration == 0 || duration > frames {
                 return Err(invalid(
-                    "MP4 AAC packet duration disagrees with decoded samples",
+                    "MP4 audio packet duration disagrees with decoded samples",
                 ));
             }
             // A short final sample duration explicitly excludes encoder padding.
             if duration < frames && sample_index + 1 != track.samples.len() {
-                return Err(invalid("short interior MP4 AAC packet"));
+                return Err(invalid("short interior MP4 audio packet"));
             }
             expected = Some(
                 start
                     .checked_add(frames)
-                    .ok_or_else(|| invalid("AAC timestamp overflow"))?,
+                    .ok_or_else(|| invalid("audio timestamp overflow"))?,
             );
             let first = from.saturating_sub(start).min(duration) as usize;
             let last = to.saturating_sub(start).min(duration) as usize;
@@ -509,12 +513,12 @@ pub(crate) fn decode_mp4_aac_reader_controlled<R: std::io::Read + std::io::Seek>
             control.packet(packet.len())?;
         }
         if written != length {
-            return Err(invalid("AAC edit extends outside available samples"));
+            return Err(invalid("audio edit extends outside available samples"));
         }
         stats.sample_frames += written;
     }
     if stats.sample_frames == 0 {
-        return Err(invalid("MP4 AAC edit contains no samples"));
+        return Err(invalid("MP4 audio edit contains no samples"));
     }
     Ok(stats)
 }
@@ -760,7 +764,7 @@ fn audio_index(kinds: impl Iterator<Item=bool>, selected: Option<usize>) -> Resu
         if indices.contains(&index) { return Ok(index); }
         return Err(invalid("selected stream is absent or is not audio"));
     }
-    if indices.len() != 1 { return Err(invalid("native AAC export requires exactly one audio track or an explicit stream index")); }
+    if indices.len() != 1 { return Err(invalid("native audio export requires exactly one audio track or an explicit stream index")); }
     Ok(indices[0])
 }
 pub(crate) fn mp4_aac_index<R: std::io::Read + std::io::Seek>(reader: &crate::container::mp4::Mp4Reader<R>, selected: Option<usize>) -> Result<usize> {
@@ -915,4 +919,94 @@ pub fn decode_video_request(source: &Path, transform: &DecodeTransform) -> Resul
     };
     let filters = crate::native_pixels::PixelFilters::from_request(transform)?;
     decode_video_pipeline(source, interval, &geometry, &filters)
+}
+
+/// Detect ALAC in MP4 by container contents, independent of filename suffix.
+pub fn is_alac_source(path: &Path) -> Result<bool> {
+    use std::io::{Read, Seek, SeekFrom};
+    let mut input = File::open(path)?;
+    let mut prefix = [0; 8];
+    match input.read_exact(&mut prefix) {
+        Ok(()) => {}
+        Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(false),
+        Err(e) => return Err(e.into()),
+    }
+    if &prefix[4..] != b"ftyp" {
+        return Ok(false);
+    }
+    input.seek(SeekFrom::Start(0))?;
+    let reader = crate::container::mp4::Mp4Reader::open(BufReader::new(input), Default::default())?;
+    Ok(reader
+        .tracks()
+        .iter()
+        .any(|t| t.handler == *b"soun" && t.codec == *b"alac"))
+}
+
+/// Admission for compressed sources with an owned export implementation.
+/// Unsupported ALAC layouts and ambiguous default selection retain the adapter.
+/// Packed WAVE is detected separately by native_pcm::is_wave.
+pub fn is_owned_audio_source(path: &Path) -> Result<bool> {
+    if is_aac_source(path)? { return Ok(true); }
+    Ok(is_alac_source(path)? && audio_source_info_selected(path, None).is_ok())
+}
+
+pub(crate) fn mp4_audio_index<R: std::io::Read + std::io::Seek>(
+    reader: &crate::container::mp4::Mp4Reader<R>,
+    selected: Option<usize>,
+) -> Result<usize> {
+    if selected.is_some() && !reader.refused().is_empty() {
+        return Err(invalid(
+            "cannot select an MP4 stream while some sample entries are unindexed",
+        ));
+    }
+    let index = audio_index(
+        reader.tracks().iter().map(|t| t.handler == *b"soun"),
+        selected,
+    )?;
+    if !matches!(&reader.tracks()[index].codec, b"mp4a" | b"alac") {
+        return Err(invalid("selected MP4 audio stream is neither AAC nor ALAC"));
+    }
+    Ok(index)
+}
+
+pub struct AudioSourceInfo {
+    pub stream_index: usize,
+    pub sample_rate: u32,
+    pub channels: u16,
+    pub codec: &'static str,
+}
+pub fn audio_source_info_selected(
+    source: &Path,
+    selected: Option<usize>,
+) -> Result<AudioSourceInfo> {
+    if is_alac_source(source)? {
+        let reader = crate::container::mp4::Mp4Reader::open(
+            BufReader::new(File::open(source)?),
+            Default::default(),
+        )?;
+        let index = mp4_audio_index(&reader, selected)?;
+        let track = &reader.tracks()[index];
+        let decoder = crate::native_audio_decoder::Mp4PcmDecoder::new(track)?;
+        if track.sample_rate != decoder.sample_rate() || track.channels != decoder.channels() {
+            return Err(invalid("MP4 container and decoder geometry disagree"));
+        }
+        Ok(AudioSourceInfo {
+            stream_index: index,
+            sample_rate: decoder.sample_rate(),
+            channels: decoder.channels(),
+            codec: if track.codec == *b"alac" {
+                "alac"
+            } else {
+                "aac"
+            },
+        })
+    } else {
+        let info = aac_source_info_selected(source, selected)?;
+        Ok(AudioSourceInfo {
+            stream_index: info.stream_index,
+            sample_rate: info.sample_rate,
+            channels: info.channels,
+            codec: "aac",
+        })
+    }
 }

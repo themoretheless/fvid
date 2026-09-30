@@ -2327,3 +2327,25 @@ Tests verify masks and exact PCM for 4, 8, 12, 32 and 64 channels, including
 unlabelled and noncanonical layouts. A 64-channel resampling result is compared
 channel-by-channel to independently resampled mono streams. Unknown-layout
 rematrix requests fail before publication; identity/gain requests succeed.
+
+### Owned MP4 ALAC audio export
+
+The existing FVid ALAC decoder is now available without the `player` feature
+and shares the owned MP4 audio timeline with AAC. `media decode-audio`, its
+plan and public media API can export supported mono/stereo ALAC MP4 inputs
+to float PCM/WAV, including interval selection, gain, mono/stereo conversion
+and resampling. The mix/merge paths accept these inputs as well. Compressed
+packets are read individually from the MP4 sample index; the complete media
+payload is not loaded into memory. The packet-to-PCM adapter validates ALAC
+cookie rate/channel geometry before output publication.
+
+The AAC-specific export functions still reject non-AAC tracks. Unsupported
+ALAC profiles/layouts and ambiguous default ALAC audio selection retain the
+legacy adapter. Matroska ALAC is not yet admitted by this export path; player
+support is unchanged. This does not remove the remaining `media` dependency.
+
+`tests/native_alac_media.rs` compares seven MP4 fixtures (mono/stereo, 16/24-bit,
+tones, noise and silence) byte-for-byte with the optional independent decoder.
+It also checks exact interval/gain/downmix results, CLI/API/plans, mix/merge,
+explicit stream selection, cancellation, no-overwrite and failure publication.
+Existing AAC timeline/edit-list regression tests exercise the shared scheduler.

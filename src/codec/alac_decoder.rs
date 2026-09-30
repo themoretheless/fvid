@@ -128,6 +128,12 @@ pub struct AlacDecoder {
 }
 
 impl AlacDecoder {
+    pub(crate) fn decode_pcm(&mut self, data:&[u8]) -> Result<Vec<f32>> {
+        let mut samples=Vec::new();
+        self.frame(data,&mut samples)?;
+        Ok(samples)
+    }
+
     /// Open for a stream of `channels` channels at this rate. `configuration` is
     /// the cookie's fields; a track that carries no setup data states no geometry
     /// and cannot be read.
@@ -689,7 +695,7 @@ impl<'a> Bits<'a> {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "player"))]
 mod tests {
     use super::{
         AlacDecoder, Bits, COOKIE_CHANNELS, COOKIE_FIELDS, FRAME_LENGTH, FULL_SCALE, Params,

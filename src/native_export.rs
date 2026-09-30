@@ -400,7 +400,7 @@ pub fn export_aac_pcm_selected(
     export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,false)
 }
 
-/// Export owned AAC or packed RIFF/WAVE PCM through the shared PCM pipeline.
+/// Export owned AAC, MP4 ALAC or packed RIFF/WAVE PCM through the shared PCM pipeline.
 pub fn export_audio_pcm_selected(
     source: &Path,
     destination: &Path,
@@ -457,10 +457,9 @@ fn export_pcm_selected(
         (None, None, Some(crate::container::adts::StreamReader::open(input)?),None)
     };
     let (input_rate, input_channels) = if let Some(reader) = &mp4 {
-        let index = crate::native_media::mp4_aac_index(reader, selected)?;
-        let asc = crate::codec::config::aac_specific_config(&reader.tracks()[index].configuration)?;
-        let decoder = crate::codec::aac_native::NativeAacDecoder::new(asc)?;
-        (decoder.sample_rate(), u16::from(decoder.channels()))
+        let index = if allow_wave {crate::native_media::mp4_audio_index(reader,selected)?} else {crate::native_media::mp4_aac_index(reader,selected)?};
+        let decoder=crate::native_audio_decoder::Mp4PcmDecoder::new(&reader.tracks()[index])?;
+        (decoder.sample_rate(),decoder.channels())
     } else if let Some(reader) = &matroska {
         let index = crate::native_media::matroska_aac_index(reader, selected)?;
         let decoder = crate::codec::aac_native::NativeAacDecoder::new(&reader.tracks[index].codec_private)?;
@@ -499,7 +498,7 @@ fn export_pcm_selected(
     let mut resampler = crate::pcm_resample::Resampler::new(&mut output, input_rate, output_rate, output_channels)?;
     let mut pcm = PcmGain { output: &mut resampler, gain: volume as f32, input_channels, output_channels, frame: [0.0; 6], filled: 0 };
     let mut stats = if let Some(reader) = mp4 {
-        crate::native_media::decode_mp4_aac_reader_controlled(reader, &mut pcm, interval, selected, &mut control)?
+        crate::native_media::decode_mp4_audio_reader_controlled(reader, &mut pcm, interval, selected, &mut control)?
     } else if let Some(reader) = matroska {
         crate::native_media::decode_matroska_aac_reader_controlled(reader, &mut pcm, interval, selected, &mut control)?
     } else if let Some((reader,info))=wave {

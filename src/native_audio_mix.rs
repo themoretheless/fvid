@@ -24,10 +24,10 @@ pub fn eligible(sources: &[PathBuf]) -> Result<bool> {
             {
                 return Ok(false);
             }
-        } else if crate::native_media::is_aac_source(source)? {
+        } else if crate::native_media::is_owned_audio_source(source)? {
             // Retain the adapter for unsupported profiles and ambiguous audio
             // selection until the owned mix API can represent those requests.
-            if crate::native_media::aac_source_info(source).is_err() {
+            if crate::native_media::audio_source_info_selected(source, None).is_err() {
                 return Ok(false);
             }
         } else {
@@ -70,7 +70,7 @@ pub fn plan(
             let info = crate::native_pcm::inspect(&mut input, None)?;
             (info.sample_rate, info.channels)
         } else {
-            let info = crate::native_media::aac_source_info(source)?;
+            let info = crate::native_media::audio_source_info_selected(source, None)?;
             (info.sample_rate, info.channels)
         };
         if geometry.is_some_and(|g| g != shape) {
@@ -249,7 +249,7 @@ fn merge_geometry(sources: &[PathBuf]) -> Result<(u32, u16)> {
             let info = crate::native_pcm::inspect(&mut input, None)?;
             (info.sample_rate, info.channels)
         } else {
-            let info = crate::native_media::aac_source_info(source)?;
+            let info = crate::native_media::audio_source_info_selected(source, None)?;
             (info.sample_rate, info.channels)
         };
         if rate.is_some_and(|r| r != input_rate) {

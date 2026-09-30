@@ -47,7 +47,7 @@ pub fn decode_audio_interval(
     }, options)
 }
 
-/// AAC and WAVE exports use native float PCM, including source edit-list trimming.
+/// AAC, MP4 ALAC and WAVE exports use native float PCM, including source edit-list trimming.
 /// Explicit options without a native implementation are rejected, never ignored.
 pub fn decode_audio_transformed(
     source: &std::path::Path,
@@ -55,7 +55,7 @@ pub fn decode_audio_transformed(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    if !crate::native_media::is_aac_source(source).map_err(|e| e.to_string())? && !crate::native_pcm::is_wave(source).map_err(|e|e.to_string())? {
+    if !crate::native_media::is_owned_audio_source(source).map_err(|e| e.to_string())? && !crate::native_pcm::is_wave(source).map_err(|e|e.to_string())? {
         return fvid_media::decode_audio_transformed(source, destination, transform, options);
     }
     validate_native_copy_options(options, true)?;
@@ -108,7 +108,7 @@ pub fn plan_decode_audio(
     transform: &AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
-    if !crate::native_media::is_aac_source(source).map_err(|e| e.to_string())? && !crate::native_pcm::is_wave(source).map_err(|e|e.to_string())? {
+    if !crate::native_media::is_owned_audio_source(source).map_err(|e| e.to_string())? && !crate::native_pcm::is_wave(source).map_err(|e|e.to_string())? {
         return fvid_media::plan_decode_audio(source, transform, options);
     }
     validate_native_copy_options(options, true)?;

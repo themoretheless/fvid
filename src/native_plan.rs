@@ -45,8 +45,8 @@ pub fn decode_audio_selected(
         info.decode_interval(transform.interval.map(|(a,b)|(std::time::Duration::from_micros(a as u64),std::time::Duration::from_micros(b as u64)))).map_err(|e|e.to_string())?;
         (0,info.sample_rate,info.channels,info.codec(),"FVid packed WAVE PCM conversion to interleaved float32".to_owned())
     } else {
-        let info=crate::native_media::aac_source_info_selected(source,selected).map_err(|e|e.to_string())?;
-        (info.stream_index,info.sample_rate,info.channels,"aac".into(),"FVid owned AAC-LC decoder to interleaved float PCM".into())
+        let info=crate::native_media::audio_source_info_selected(source,selected).map_err(|e|e.to_string())?;
+        (info.stream_index,info.sample_rate,info.channels,info.codec.into(),format!("FVid owned {} decoder to interleaved float PCM",if info.codec=="aac" {"AAC-LC"} else {"ALAC"}))
     };
     let channels = transform.channels.unwrap_or(i32::from(input_channels));
     if channels != i32::from(input_channels) && !matches!(channels, 1 | 2) {

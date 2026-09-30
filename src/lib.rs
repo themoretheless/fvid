@@ -3,7 +3,6 @@ pub use fvid_control as media_control;
 pub use fvid_media_info as media_info;
 #[cfg(feature = "airbug")]
 pub mod airbug_runtime;
-#[cfg(feature = "player")]
 pub mod audio;
 #[cfg(feature = "player")]
 pub mod audio_thread;
@@ -127,3 +126,5 @@ pub mod native_avgblur;
 pub mod native_boxblur;
 
 pub mod native_audio_mix;
+
+mod native_audio_decoder;

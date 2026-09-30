@@ -158,7 +158,6 @@ pub mod eac3_decoder;
 pub mod adpcm_ct_decoder;
 #[cfg(feature = "player")]
 pub mod adpcm_decoder;
-#[cfg(feature = "player")]
 pub mod alac_decoder;
 #[cfg(feature = "player")]
 pub mod g722_decoder;
