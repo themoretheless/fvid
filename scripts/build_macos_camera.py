@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Build (but never install) the FVid camera app and embedded system extension."""
 import argparse
-import fnmatch
-import datetime
+from camera_signing import validated_entitlements
 import pathlib
 import plistlib
 import re
@@ -32,20 +31,17 @@ if args.host_profile or args.extension_profile:
         decoded = subprocess.run(['security', 'cms', '-D', '-i', str(profile)],
                                  capture_output=True, check=True)
         data = plistlib.loads(decoded.stdout)
-        entitlements = data.get('Entitlements', {})
-        application = entitlements.get('com.apple.application-identifier', entitlements.get('application-identifier', ''))
-        if args.team_id not in data.get('TeamIdentifier', []) or not fnmatch.fnmatchcase(args.team_id + '.' + identifier, application):
-            p.error('provisioning profile team/application does not match ' + identifier)
-        expiry = data.get('ExpirationDate')
-        if expiry is None or expiry.replace(tzinfo=datetime.timezone.utc) <= datetime.datetime.now(datetime.timezone.utc):
-            p.error('provisioning profile is expired or missing expiration: ' + identifier)
-        profiles.append(profile)
+        try:
+            entitlements = validated_entitlements(data, args.team_id, identifier)
+        except ValueError as error:
+            p.error(str(error))
+        profiles.append((profile, entitlements, identifier))
 app = args.output.resolve()
 app.mkdir(parents=True, exist_ok=False)
 ext = app / 'Contents/Library/SystemExtensions/org.fvid.camera.extension.systemextension'
 for bundle in (app, ext):
     (bundle / 'Contents/MacOS').mkdir(parents=True, exist_ok=True)
-for bundle, profile in zip((app, ext), profiles):
+for bundle, (profile, _, _) in zip((app, ext), profiles):
     shutil.copyfile(profile, bundle / 'Contents/embedded.provisionprofile')
 platform = ROOT / 'platform/macos'
 shutil.copyfile(platform / 'CameraHost/Info.plist', app / 'Contents/Info.plist')
@@ -79,8 +75,20 @@ for bundle in (app, ext):
 if args.sign:
     for bundle, entitlements in ((ext, platform / 'CameraExtension/CameraExtension.entitlements'),
                                  (app, platform / 'CameraHost/CameraHost.entitlements')):
+        signing_entitlements = entitlements
+        if profiles:
+            _, authorized, identifier = profiles[0 if bundle == app else 1]
+            with entitlements.open('rb') as stream:
+                values = plistlib.load(stream)
+            for key in ('com.apple.application-identifier', 'application-identifier',
+                        'com.apple.developer.team-identifier'):
+                if key in authorized:
+                    values[key] = authorized[key]
+            signing_entitlements = cache / ('host-signing.plist' if bundle == app else 'extension-signing.plist')
+            with signing_entitlements.open('wb') as stream:
+                plistlib.dump(values, stream)
         subprocess.run(['codesign', '--force', '--options', 'runtime', '--sign', args.sign,
-                        '--entitlements', str(entitlements), str(bundle)], check=True)
+                        '--entitlements', str(signing_entitlements), str(bundle)], check=True)
         subprocess.run(['codesign', '--verify', '--strict', str(bundle)], check=True)
         signature = subprocess.run(['codesign', '-d', '-v', str(bundle)],
                                    capture_output=True, text=True, check=True)

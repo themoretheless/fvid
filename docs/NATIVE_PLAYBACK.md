@@ -2773,3 +2773,12 @@ The builder accepts paired `--host-profile`/`--extension-profile`, validates
 profile team, application identifier and expiry before creating the bundle,
 and embeds profiles before signing. Profile-backed launch remains untested
 until suitable profiles are available; no security protections were disabled.
+
+Camera profile validation now treats `ApplicationIdentifierPrefix` separately
+from TeamIdentifier, resolves wildcard authorization to the concrete bundle ID,
+and carries authorized application/team entitlements into the signature. Host
+profiles must authorize system-extension installation. Pure validation tests
+cover legacy prefixes, wildcard resolution, wrong team/bundle, expiry and
+missing installation authorization. The AMFI log contains provisioning errors
+with private process names; it does not conclusively attribute launch failure
+to FVid. No valid local profiles are available yet for a profile-backed launch.
