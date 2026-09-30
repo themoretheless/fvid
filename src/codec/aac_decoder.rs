@@ -94,7 +94,7 @@ impl crate::audio::AudioDecode for AacDecoder {
 mod tests {
     use super::*;
     fn decoder() -> AacDecoder {
-        let esds = crate::playback_aac::esds_for(&[0x12, 0x10]).unwrap();
+        let esds = crate::container::adts::esds_for(&[0x12, 0x10]).unwrap();
         AacDecoder::new(&esds, 44_100, 2).unwrap()
     }
     #[test]
@@ -117,7 +117,7 @@ mod tests {
     }
     #[test]
     fn container_and_aac_config_must_describe_the_same_pcm() {
-        let esds = crate::playback_aac::esds_for(&[0x12, 0x10]).unwrap();
+        let esds = crate::container::adts::esds_for(&[0x12, 0x10]).unwrap();
         for (rate, channels) in [(48_000, 2), (44_100, 1), (0, 2), (44_100, 0)] {
             let error = AacDecoder::new(&esds, rate, channels).err().unwrap();
             assert!(error.to_string().contains("disagrees with container"));

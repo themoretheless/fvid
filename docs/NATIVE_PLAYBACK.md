@@ -2609,3 +2609,9 @@ tests cover named/numeric entities in standalone SRT and Matroska tracks.
 Owned standalone SRT parsing accepts UTF-8 BOM, LF/CRLF/CR line endings and
 whitespace-only cue separators. Integration tests verify these representations
 produce identical ASS Matroska bytes without changing cue text or timing.
+
+The owned AAC playback packet adapter (`codec::aac_decoder::AacDecoder`) is now
+available in headless builds. It uses the native decoder and shared audio packet
+traits without the `player` dependency set. Adapter tests use the owned ADTS
+configuration writer directly; reset/error, timestamp overflow and container
+configuration checks run with `--no-default-features`.

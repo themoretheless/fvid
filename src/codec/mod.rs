@@ -148,7 +148,6 @@ pub mod av1_intra;
 
 mod av1_filter;
 
-#[cfg(feature = "player")]
 pub mod aac_decoder;
 #[cfg(feature = "player")]
 pub mod ac3_decoder;
