@@ -2566,3 +2566,13 @@ For mixed AAC/ALAC/PCM containers, trim dispatch uses the selected stream's
 codec rather than the presence of any AAC track. Mixed AAC+ALAC MP4 and Matroska
 fixtures verify each explicit selection through native export, plans, CLI and
 media API against the selected interval decoder output.
+
+### Owned ASS Matroska track writing
+
+The native Matroska packet writer accepts `Encoding::Ass` with a UTF-8 ASS
+header in CodecPrivate, TrackType 17 and `S_TEXT/ASS`. Each event retains its
+packet timestamp and duration; callers supply Matroska ASS event payloads.
+Invalid headers and video metadata/codec delay on subtitle tracks fail before
+writing the container header. Independent tests decode two events with multiline
+and Unicode text to SRT and verify exact cue times. This is muxer support;
+`convert-subtitles` still requires its remaining native conversion integration.

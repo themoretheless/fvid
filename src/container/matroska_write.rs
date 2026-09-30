@@ -135,6 +135,8 @@ pub struct PacketOptions {
 
 /// Encoded packet storage is passed through without rewriting codec payloads.
 pub enum Encoding<'a> {
+    /// ASS header in CodecPrivate; each packet is one Matroska ASS event.
+    Ass { configuration: &'a [u8] },
     /// FFV1 v1 packets contain their configuration in every keyframe.
     Ffv1V1 { width: u32, height: u32 },
     Avc {
@@ -208,6 +210,17 @@ fn track_entry(
     }
     use crate::codec::config::{AacConfig, AvcConfig, HevcConfig};
     let (id, config, kind, geometry) = match spec.encoding {
+        Encoding::Ass { configuration } => {
+            if metadata.is_some() || rotation != 0 || delay != 0 {
+                return Err(invalid("video metadata or codec delay supplied for ASS track"));
+            }
+            let header = std::str::from_utf8(configuration).map_err(|_| invalid("ASS header is not UTF-8"))?;
+            if !header.contains("[Script Info]") || !header.contains("[V4+ Styles]")
+                || !header.contains("ScriptType: v4.00+") || header.contains('\0') {
+                return Err(invalid("invalid ASS codec header"));
+            }
+            ("S_TEXT/ASS", configuration, 17, Vec::new())
+        }
         Encoding::Ffv1V1 { width, height } => (
             "V_FFV1", &[][..], 1, video(width, height, metadata, rotation)?,
         ),
