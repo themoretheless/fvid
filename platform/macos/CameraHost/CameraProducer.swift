@@ -66,6 +66,14 @@ final class CameraProducer {
     /// Returns false for backpressure. Success transfers one retained sample to CMIO.
     func enqueue(_ sample: CMSampleBuffer) throws -> Bool {
         guard running else { throw ProducerError.notRunning }
+        try Self.validate(sample, format: format, after: lastTimestamp)
+        let time = CMSampleBufferGetPresentationTimeStamp(sample)
+        if !Self.enqueueRetained(sample, into: buffers) { return false }
+        lastTimestamp = time
+        return true
+    }
+    /// Shared admission check; testable without an installed CMIO device.
+    static func validate(_ sample: CMSampleBuffer, format: CMFormatDescription, after lastTimestamp: CMTime?) throws {
         guard CMSampleBufferIsValid(sample), CMSampleBufferDataIsReady(sample),
               let image = CMSampleBufferGetImageBuffer(sample),
               CVPixelBufferGetPixelFormatType(image) == kCVPixelFormatType_32BGRA else { throw ProducerError.invalidFrame }
@@ -75,9 +83,6 @@ final class CameraProducer {
         let time = CMSampleBufferGetPresentationTimeStamp(sample)
         guard time.isNumeric, time.value >= 0,
               lastTimestamp.map({ CMTimeCompare(time, $0) > 0 }) ?? true else { throw ProducerError.invalidFrame }
-        if !Self.enqueueRetained(sample, into: buffers) { return false }
-        lastTimestamp = time
-        return true
     }
     // CMSimpleQueue itself does not retain/release its opaque elements.
     static func enqueueRetained(_ sample: CMSampleBuffer, into queue: CMSimpleQueue) -> Bool {

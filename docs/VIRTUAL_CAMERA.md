@@ -321,3 +321,9 @@ software decoding; they do not replace the independent codec conformance tests
 or prove delivery from an installed CMIO extension to another application.
 The RGB fixture helper accepts optional `TIMESTAMPS.json` output and explicitly
 uses software decoding even when built with hardware-related features.
+
+The producer admission check is shared with an install-free test. It rejects
+invalidated or unready samples, non-BGRA pixels, mismatched dimensions,
+invalid/indefinite/negative timestamps and timestamps at or before the previous
+accepted frame. Queue capacity and retained sample transfer are checked
+separately; backpressure does not advance the accepted timestamp.
