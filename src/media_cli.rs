@@ -344,6 +344,22 @@ fn pixel_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_pixel
     let mut seen_morphology = std::collections::BTreeSet::new();
     while let Some(arg) = args.next() {
         if arg == "--" { result.push(arg.clone()); result.extend(args.cloned()); break; }
+        if arg == "--avgblur" {
+            let value = args.next().ok_or("missing avgblur args")?;
+            let eligible = match result.get(1) {
+                Some(path) => fvid::native_lossless::eligible(std::path::Path::new(path))?,
+                None => false,
+            };
+            if eligible {
+                if filters.avgblur.is_some() { return Err("duplicate avgblur".into()); }
+                if let Ok(filter) = fvid::native_avgblur::AverageBlur::parse(value) {
+                    filters.avgblur = Some(filter);
+                    continue;
+                }
+            }
+            result.push(arg.clone()); result.push(value.clone());
+            continue;
+        }
         if arg == "--chromashift" {
             let value = args.next().ok_or("missing chromashift args")?;
             // Only admit the already-owned Y4M and AVC/HEVC routes here. Other input

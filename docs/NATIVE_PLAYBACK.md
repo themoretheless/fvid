@@ -2215,3 +2215,24 @@ Truncation and cancellation prevent publication, and existing outputs are never
 overwritten. `tests/native_y4m_ffv1.rs` verifies sample bytes, nanosecond timing,
 CLI/API dispatch and failure cleanup; its optional reference test decodes the
 result with FFmpeg solely as an independent oracle.
+
+### Owned average blur
+
+`media decode` and `media transcode-lossless` now accept owned `--avgblur`
+for the native Y4M and AVC/HEVC MP4 routes. The same implementation serves
+`DecodeTransform::avgblur` and `LosslessTransform::avgblur`. It runs after
+geometry and before negate, gradients, morphology and chroma shift.
+
+The integer options are `sizeX:planes:sizeY` (defaults `1:15:0`), or named
+`sizeX=2:sizeY=3:planes=7`. Zero sizeY inherits sizeX; radii are capped at half
+the chroma dimensions for media compatibility. Planar YUV 8–16-bit samples
+use replicated borders, an integer box sum, and truncating division. Work
+is linear in plane area after initialization, with one output frame and a
+row of column sums; there is no radius-squared loop per output sample.
+
+`tests/native_avgblur.rs` compares six chroma layouts, 8–16-bit depths,
+plane masks and radius limits against the optional external reference.
+The Y4M FFV1 suite additionally compares the complete geometry/blur/negate/
+chroma-shift export chain, decoded by the independent reference, pixel for
+pixel. Reference FFmpeg remains test-only for this path; the general
+`media` feature still retains its legacy dependency for unmigrated operations.

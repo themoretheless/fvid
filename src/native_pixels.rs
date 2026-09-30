@@ -277,9 +277,10 @@ impl Gradient {
 }
 
 /// Native filter order matches the public media request, independent of CLI
-/// flag order: inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, dilation, erosion, chroma shift.
+/// flag order: average blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, dilation, erosion, chroma shift.
 #[derive(Default)]
 pub struct PixelFilters {
+    pub avgblur: Option<crate::native_avgblur::AverageBlur>,
     pub negate: Option<Negate>,
     pub chromashift: Option<crate::native_chromashift::ChromaShift>,
     pub gradients: Vec<Gradient>,
@@ -288,6 +289,11 @@ pub struct PixelFilters {
 impl PixelFilters {
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
         let mut result = Self {
+            avgblur: request
+                .avgblur
+                .as_deref()
+                .map(crate::native_avgblur::AverageBlur::parse)
+                .transpose()?,
             negate: request.negate.as_deref().map(Negate::parse).transpose()?,
             chromashift: request
                 .chromashift
@@ -320,12 +326,16 @@ impl PixelFilters {
         Ok(result)
     }
     pub fn is_empty(&self) -> bool {
-        self.chromashift.is_none()
+        self.avgblur.is_none()
+            && self.chromashift.is_none()
             && self.negate.is_none()
             && self.gradients.is_empty()
             && self.morphology.is_empty()
     }
     pub fn apply(&self, frame: &mut GeometryFrame, depth: u8) -> Result<()> {
+        if let Some(filter) = self.avgblur {
+            filter.apply(frame, depth)?;
+        }
         if let Some(negate) = self.negate {
             negate.apply(frame, depth)?;
         }

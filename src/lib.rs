@@ -121,3 +121,5 @@ mod pcm_resample;
 pub mod native_probe;
 
 pub mod native_plan;
+
+pub mod native_avgblur;

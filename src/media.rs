@@ -20,7 +20,7 @@ pub fn decode_video_interval(
 /// operations retain their existing adapter until their native migration.
 pub fn decode_video_transformed(source: &std::path::Path, transform: DecodeTransform) -> Result<DecodeStats> {
     if !crate::native_media::supports_video_request(&transform)
-        || (transform.chromashift.is_some() && !crate::native_lossless::eligible(source).map_err(|e|e.to_string())?) {
+        || ((transform.chromashift.is_some() || transform.avgblur.is_some()) && !crate::native_lossless::eligible(source).map_err(|e|e.to_string())?) {
         return fvid_media::decode_video_transformed(source, transform);
     }
     crate::native_media::decode_video_request(source, &transform).map_err(|e|e.to_string())

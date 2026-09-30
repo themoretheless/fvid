@@ -80,6 +80,7 @@ fn cli_api_filters_and_failure_publication() {
     std::fs::write(&src, &data).unwrap();
     let request = fvid::media_info::LosslessTransform {
         horizontal_flip: true,
+        avgblur: Some("sizeX=2:sizeY=1".into()),
         chromashift: Some("cbh=1:edge=wrap".into()),
         ..Default::default()
     };
@@ -91,7 +92,13 @@ fn cli_api_filters_and_failure_publication() {
         .args(["media", "transcode-lossless"])
         .arg(&src)
         .arg(&output)
-        .args(["--hflip", "--chromashift", "cbh=1:edge=wrap"])
+        .args([
+            "--hflip",
+            "--avgblur",
+            "sizeX=2:sizeY=1",
+            "--chromashift",
+            "cbh=1:edge=wrap",
+        ])
         .output()
         .unwrap();
     assert!(
@@ -183,6 +190,50 @@ fn independent_decoder_reads_own_export_without_pixel_changes() {
             String::from_utf8_lossy(&out.stderr)
         );
         assert_eq!(out.stdout, frames.concat());
+        let request = fvid::media_info::LosslessTransform {
+            horizontal_flip: true,
+            avgblur: Some("sizeX=2:sizeY=1".into()),
+            negate: Some("0".into()),
+            chromashift: Some("cbh=1:edge=wrap".into()),
+            ..Default::default()
+        };
+        let (geometry, filters) = fvid::native_lossless::configuration(&request).unwrap();
+        let filtered = d.0.join(format!("{layout}-filtered.mkv"));
+        fvid::native_export::transcode_ffv1_transformed(
+            &src, &filtered, &geometry, &filters, None, None,
+        )
+        .unwrap();
+        let expected = std::process::Command::new(&ffmpeg)
+            .args(["-v", "error", "-i"])
+            .arg(&src)
+            .args([
+                "-vf",
+                "hflip,avgblur=sizeX=2:sizeY=1,negate,chromashift=cbh=1:edge=wrap",
+                "-f",
+                "rawvideo",
+                "-pix_fmt",
+                format,
+                "pipe:1",
+            ])
+            .output()
+            .unwrap();
+        let actual = std::process::Command::new(&ffmpeg)
+            .args(["-v", "error", "-i"])
+            .arg(&filtered)
+            .args(["-f", "rawvideo", "-pix_fmt", format, "pipe:1"])
+            .output()
+            .unwrap();
+        assert!(
+            expected.status.success(),
+            "{}",
+            String::from_utf8_lossy(&expected.stderr)
+        );
+        assert!(
+            actual.status.success(),
+            "{}",
+            String::from_utf8_lossy(&actual.stderr)
+        );
+        assert_eq!(actual.stdout, expected.stdout, "filtered {layout}");
     }
 }
 
