@@ -277,9 +277,10 @@ impl Gradient {
 }
 
 /// Native filter order matches the public media request, independent of CLI
-/// flag order: average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, dilation, erosion, chroma shift.
+/// flag order: average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, pixelize, dilation, erosion, chroma shift.
 #[derive(Default)]
 pub struct PixelFilters {
+    pub pixelize: Option<crate::native_pixelize::Pixelize>,
     pub boxblur: Option<crate::native_boxblur::BoxBlur>,
     pub avgblur: Option<crate::native_avgblur::AverageBlur>,
     pub negate: Option<Negate>,
@@ -290,6 +291,7 @@ pub struct PixelFilters {
 impl PixelFilters {
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
         let mut result = Self {
+            pixelize: request.pixelize.as_deref().map(crate::native_pixelize::Pixelize::parse).transpose()?,
             boxblur: request
                 .boxblur
                 .as_deref()
@@ -332,7 +334,8 @@ impl PixelFilters {
         Ok(result)
     }
     pub fn is_empty(&self) -> bool {
-        self.boxblur.is_none()
+        self.pixelize.is_none()
+            && self.boxblur.is_none()
             && self.avgblur.is_none()
             && self.chromashift.is_none()
             && self.negate.is_none()
@@ -352,6 +355,7 @@ impl PixelFilters {
         for filter in &self.gradients {
             filter.apply(frame, depth)?;
         }
+        if let Some(filter)=self.pixelize {filter.apply(frame,depth)?;}
         for filter in &self.morphology {
             filter.apply(frame, depth)?;
         }

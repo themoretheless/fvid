@@ -2505,3 +2505,18 @@ and signed-microsecond contract. Both full and headless CLI paths use it; no
 float rounding is introduced. Boundary tests include the maximum signed
 microsecond value and overflow by one microsecond. This removes a helper-level
 legacy dependency; the full media crate still links FFmpeg for remaining work.
+
+### Owned pixelize
+
+`pixelize` now reduces and fills planar YUV blocks using owned integer code:
+average (truncated division), minimum or maximum. It supports 8–16-bit samples,
+width/height 1–1024, plane masks and positional/named aliases. Block dimensions
+are aligned to chroma subsampling; partial edge blocks use their actual extent.
+Storage and sample depth are validated before mutation; processing is in place
+with constant scratch storage. RGB and unsupported requests retain the adapter.
+
+The filter runs after gradients and before morphology in native decode and
+lossless export, with CLI/API/plan support. Independent FFmpeg pixel comparisons
+cover 65 combinations across six YUV layouts and supported depths. API/CLI
+routing is checked on AVC, HEVC Main10, VP9 10-bit and AV1, and the lossless
+plan/execution regression includes pixelize in a combined filter chain.

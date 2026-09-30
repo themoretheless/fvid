@@ -361,6 +361,15 @@ fn pixel_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_pixel
             result.push(arg.clone()); result.push(value.clone());
             continue;
         }
+        if arg == "--pixelize" {
+            let value=args.next().ok_or("missing pixelize args")?;
+            let eligible=match result.get(1) {Some(path)=>fvid::native_lossless::eligible(std::path::Path::new(path))?,None=>false};
+            if eligible {
+                if filters.pixelize.is_some() {return Err("duplicate pixelize".into());}
+                if let Ok(filter)=fvid::native_pixelize::Pixelize::parse(value) {filters.pixelize=Some(filter);continue;}
+            }
+            result.push(arg.clone());result.push(value.clone());continue;
+        }
         if arg == "--avgblur" {
             let value = args.next().ok_or("missing avgblur args")?;
             let eligible = match result.get(1) {

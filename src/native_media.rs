@@ -859,7 +859,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         deband: None,
         gradfun: None,
         lenscorrection: None,
-        pixelize: None,
+        pixelize: _,
         removegrain: None,
         yaepblur: None,
         vibrance: None,

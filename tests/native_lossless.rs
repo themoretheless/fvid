@@ -774,6 +774,7 @@ fn owned_lossless_plans_show_filter_order_and_y4m_without_audio() {
         boxblur: Some("1:1".into()),
         negate: Some("".into()),
         sobel: Some("planes=1".into()),
+        pixelize: Some("3:5:avg:7".into()),
         dilation: Some("coordinates=170".into()),
         chromashift: Some("cbh=1".into()),
         ..Default::default()
@@ -793,6 +794,7 @@ fn owned_lossless_plans_show_filter_order_and_y4m_without_audio() {
                 "FVid boxblur=1:1",
                 "FVid negate=",
                 "FVid sobel=planes=1",
+                "FVid pixelize=3:5:avg:7",
                 "FVid dilation=coordinates=170",
                 "FVid chromashift=cbh=1"
             ]
