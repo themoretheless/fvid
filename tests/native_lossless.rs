@@ -693,6 +693,39 @@ fn crop_convenience_api_uses_owned_codec_and_exact_planes() {
         )
         .unwrap();
         assert_eq!(explicit_plan, plan);
+        let cli = directory.0.join(format!("cli-explicit-{index}.mkv"));
+        let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "transcode"])
+            .arg(&source)
+            .arg(&cli)
+            .args(["--encoder", "ffv1", "--crop", "0:0:8:8"])
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let json: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        assert_eq!(json["backend"], "fvid");
+        assert_eq!(
+            std::fs::read(&cli).unwrap(),
+            std::fs::read(&output).unwrap()
+        );
+        let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "plan", "transcode-lossless"])
+            .arg(&source)
+            .args(["--crop", "0:0:8:8"])
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let cli_plan: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        assert_eq!(cli_plan, serde_json::to_value(&plan).unwrap());
+
         let mut original = NativeReader::software(
             std::io::BufReader::new(std::fs::File::open(&source).unwrap()),
             usize::MAX,

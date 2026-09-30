@@ -2490,3 +2490,9 @@ Other encoders, custom codec options and unsupported requests retain their
 original `transcode` implementation. No foreign retry occurs after native
 execution is selected. The API regression compares complete Matroska outputs
 against the owned crop API for AVC, HEVC Main and Main10, then verifies pixels.
+
+The full media CLI parser now sends explicit transcode and lossless planning
+through the same FVid dispatcher as the public API, rather than calling the
+legacy crate directly. CLI regressions compare complete FFV1 outputs and JSON
+plans with the API for AVC, HEVC Main and Main10 crop requests. Unsupported
+encoders/options retain the dispatcher’s original fallback behavior.

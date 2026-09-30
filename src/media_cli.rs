@@ -2038,7 +2038,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 if plan_paths.len() != 1 {
                     return Err("plan transcode-lossless requires a single INPUT".into());
                 }
-                fvid_media::plan_transcode_lossless(&plan_paths[0], &transform, &options, None)?
+                fvid::media::plan_transcode_lossless(&plan_paths[0], &transform, &options, None)?
             }
             Some("overlay") => {
                 if plan_paths.len() != 1 || transform.overlay.is_none() {
@@ -2159,7 +2159,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 if idle {
                     fvid::media::plan_remux(&plan_paths[0], &options)?
                 } else {
-                    fvid_media::plan_transcode_lossless(&plan_paths[0], &transform, &options, None)?
+                    fvid::media::plan_transcode_lossless(&plan_paths[0], &transform, &options, None)?
                 }
             }
             Some(_) => unreachable!(),
@@ -2862,7 +2862,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             seek,
         };
         let stats = if command == "transcode" {
-            fvid_media::transcode(
+            fvid::media::transcode(
                 &paths[0],
                 &paths[1],
                 transform,
