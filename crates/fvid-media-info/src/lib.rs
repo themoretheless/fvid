@@ -209,3 +209,6 @@ pub struct SubtitleConvertOptions {
 
 mod loudness;
 pub use loudness::{NormalizeTarget, NormalizeReport, PcmLoudnessStats, LoudnessStats, LoudnormStats, DEFAULT_LOUDNORM_ARGS, validate_loudnorm_args, resolve_loudnorm_args};
+
+mod encoder;
+pub use encoder::EncoderSettings;

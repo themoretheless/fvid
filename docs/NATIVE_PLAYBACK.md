@@ -2818,3 +2818,13 @@ operation; callers use the explicit phase-aware hook instead.
 The integration test verifies equal PCM output through the original,
 controlled and public media APIs, export cancellation without output, and
 output existence when the public API emits its final `done` event.
+
+### Encoder request contract
+
+`media_info::EncoderSettings` owns encoder names and ordered key/value options
+without linking a codec adapter. `media::EncoderSettings` remains the same
+reexported type. Its `validate()` checks the existing 64-option, 256-byte key
+and 8192-byte value limits and rejects embedded NUL before backend allocation.
+Duplicates and option order are preserved. The contract does not imply an
+encoder is implemented; owned execution currently handles eligible FFV1
+requests, while other encoder workflows still use the legacy adapter.

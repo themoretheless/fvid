@@ -5126,13 +5126,7 @@ pub fn transcode_lossless(
         },
     )
 }
-/// Explicit encoder selection; quality is determined by encoder options, not by
-/// the LosslessTransform geometry descriptor. No automatic pixel conversion.
-#[derive(Clone, Debug)]
-pub struct EncoderSettings {
-    pub name: String,
-    pub options: Vec<(String, String)>,
-}
+pub use fvid_media_info::EncoderSettings;
 struct CodecOptions(*mut AVDictionary);
 impl Drop for CodecOptions {
     fn drop(&mut self) {
@@ -5149,15 +5143,10 @@ pub fn transcode(
     options: &CopyOptions,
     settings: &EncoderSettings,
 ) -> Result<LosslessStats> {
-    if settings.options.len() > 64 {
-        return Err("too many encoder options".into());
-    }
+    settings.validate()?;
     let encoder_name = cstring(&settings.name)?;
     let mut codec_options = CodecOptions(ptr::null_mut());
     for (key, value) in &settings.options {
-        if key.is_empty() || key.len() > 256 || value.len() > 8192 {
-            return Err("invalid encoder option size".into());
-        }
         let key = cstring(key)?;
         let value = cstring(value)?;
         // SAFETY: Dictionary owns copies of the valid NUL-terminated strings.
