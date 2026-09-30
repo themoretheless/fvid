@@ -2828,3 +2828,20 @@ and 8192-byte value limits and rejects embedded NUL before backend allocation.
 Duplicates and option order are preserved. The contract does not imply an
 encoder is implemented; owned execution currently handles eligible FFV1
 requests, while other encoder workflows still use the legacy adapter.
+
+### Owned VP9/AV1 lossless transcode
+
+The planar FFV1 exporter also accepts Matroska/WebM containing exactly one
+VP9 or AV1 video track, without stored crop or rotation. Companion tracks and
+stored display transforms retain their existing routing. Original frame
+intervals, sample precision, track name/language, pixel aspect, colour/HDR,
+file tags and chapters are retained. Atomic publication and cancellation
+use the existing FFV1 export contract.
+
+`NativeReader::read_frame_raw` retains VP9/AV1 samples above eight bits in
+`RawFrame::Planar`; it no longer discards low bits through the player’s
+8-bit plane conversion. GPU-oriented `read_planes` remains a separate path.
+Five fixtures cover VP9 8/10/12-bit and AV1. Tests compare owned input/output
+planes and clocks, and optionally independent FFmpeg-decoded output at the
+original sample depth when `FVID_REFERENCE_FFMPEG` is set. This is fixture
+coverage, not full codec conformance or complete removal of the legacy adapter.

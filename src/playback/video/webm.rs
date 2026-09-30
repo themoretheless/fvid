@@ -899,6 +899,31 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                     picture: picture.clone(),
                     colour: *colour,
                 },
+                Picture::Vp9(_) | Picture::Av1(_) if current.depth > 8 => {
+                    let planes=match &current.decoded {
+                        Picture::Vp9(d)=>d.picture.planes.each_ref().map(|p|(p.samples.as_slice(),p.width)),
+                        Picture::Av1(d)=>d.picture.planes.each_ref().map(|p|(p.samples.as_slice(),p.width)),
+                        _=>unreachable!(),
+                    };
+                    let [w,h]=current.size.map(|n|n as usize);
+                    let cw=w.div_ceil(2);let ch=h.div_ceil(2);
+                    let bytes=w.checked_mul(h).and_then(|n|cw.checked_mul(ch).and_then(|c|c.checked_mul(2)).and_then(|c|n.checked_add(c))).and_then(|n|n.checked_mul(2))
+                        .filter(|&n|n<=self.rgb_budget).ok_or_else(||invalid("packed WebM planes exceed budget"))?;
+                    let mut data=Vec::with_capacity(bytes);
+                    for (index,(samples,stride)) in planes.into_iter().enumerate() {
+                        let (width,height)=if index==0 {(w,h)}else{(cw,ch)};
+                        for row in 0..height {for col in 0..width {
+                            let value=if index!=0 && current.monochrome {1u16<<(current.depth-1)}else {
+                                *samples.get(row*stride+col).ok_or_else(||invalid("incomplete WebM sample plane"))?
+                            };
+                            data.extend_from_slice(&value.to_le_bytes());
+                        }}
+                    }
+                    let (kr,kb)=match current.color_space {0|1|3=>(0.299,0.114),2=>(0.2126,0.0722),4=>(0.212,0.087),5=>(0.2627,0.0593),_=>return Err(invalid("unsupported native RGB colour configuration"))};
+                    crate::playback_native::RawFrame::Planar(Arc::new(PackedPlanar::new(
+                        crate::native_geometry::GeometryFrame{width:w,height:h,subsampling:Some([2,2]),data},current.depth,
+                        AvcColour{kr,kb,full:current.full_range})?))
+                },
                 _ => crate::playback_native::RawFrame::Planar8(Arc::new(
                     self.current_planes(&current)?,
                 )),

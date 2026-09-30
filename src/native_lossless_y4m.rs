@@ -1,4 +1,4 @@
-//! Owned uncompressed Y4M to FFV1/Matroska export.
+//! Owned planar Y4M and single-video VP9/AV1 Matroska to FFV1 export.
 use crate::container::matroska_write::{
     Encoding, PacketWriter, TrackOptions, TrackSpec, VideoMetadata,
 };
@@ -26,7 +26,18 @@ pub fn is_source(source: &Path) -> Result<bool> {
 /// Admission preserves the legacy path for Y4M profiles not owned yet.
 pub fn eligible(source: &Path) -> Result<bool> {
     if !is_source(source)? {
-        return Ok(false);
+        if !crate::native_export::is_matroska_source(source)? {
+            return Ok(false);
+        }
+        let input = crate::container::webm::WebmReader::open(
+            BufReader::new(File::open(source)?),
+            Default::default(),
+        )?;
+        return Ok(input.tracks.len() == 1
+            && input.tracks[0].kind == 1
+            && matches!(input.tracks[0].codec.as_str(), "V_VP9" | "V_AV1")
+            && input.tracks[0].crop == [0; 4]
+            && input.tracks[0].rotation == 0);
     }
     let mut input = BufReader::new(File::open(source)?);
     let mut line = Vec::new();
@@ -56,22 +67,41 @@ pub fn write<W: Write + Seek>(
     progress: Option<&ProgressHook>,
 ) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
     check(cancel)?;
-    if !is_source(source)? {
-        return Err(invalid("expected Y4M source"));
+    if !eligible(source)? {
+        return Err(invalid("unsupported owned planar lossless source"));
+    }
+    let mut webm = if is_source(source)? {
+        None
+    } else {
+        Some(crate::container::webm::WebmReader::open(
+            BufReader::new(File::open(source)?),
+            Default::default(),
+        )?)
+    };
+    if let Some(input) = webm.as_mut() {
+        input.scan_all()?;
     }
     let mut reader = NativeReader::software(BufReader::new(File::open(source)?), usize::MAX)?;
-    let [w, h] = reader.dimensions();
-    let prepare = |frame: &RawFrame| -> Result<_> {
-        if !matches!(frame, RawFrame::Planar8(_) | RawFrame::Yuv { .. }) {
-            return Err(invalid("expected Y4M sample planes"));
-        }
-        let mut samples = geometry.apply_display_media(frame, w, h, 0)?;
-        filters.apply(&mut samples, 8)?;
-        Ok(samples)
-    };
     let first = reader
         .read_frame_raw()?
         .ok_or_else(|| invalid("input has no video frames"))?;
+    let [w, h] = reader.dimensions();
+    let depth_of = |frame: &RawFrame| -> Result<u8> {
+        match frame {
+            RawFrame::Planar(p) => Ok(p.depth),
+            RawFrame::Planar8(_) | RawFrame::Yuv { .. } => Ok(8),
+            _ => Err(invalid("expected planar sample planes")),
+        }
+    };
+    let depth = depth_of(&first)?;
+    let prepare = |frame: &RawFrame| -> Result<_> {
+        if depth_of(frame)? != depth {
+            return Err(invalid("frame sample depth changed"));
+        }
+        let mut samples = geometry.apply_display_media(frame, w, h, 0)?;
+        filters.apply(&mut samples, depth)?;
+        Ok(samples)
+    };
     let mut colour = reader.colour();
     if let RawFrame::Planar8(ref p) = first {
         colour.full_range = p.colour.full;
@@ -83,8 +113,8 @@ pub fn write<W: Write + Seek>(
             width: u32::try_from(first.width).map_err(|_| invalid("FFV1 width overflow"))?,
             height: u32::try_from(first.height).map_err(|_| invalid("FFV1 height overflow"))?,
         },
-        name: "",
-        language: "",
+        name: webm.as_ref().map_or("", |r| r.tracks[0].name.as_str()),
+        language: webm.as_ref().map_or("", |r| r.tracks[0].language.as_str()),
     }];
     let options = [TrackOptions {
         video: Some(VideoMetadata {
@@ -95,11 +125,19 @@ pub fn write<W: Write + Seek>(
                 geometry,
             )?,
             colour: Some(colour),
+            hdr: reader.hdr(),
             ..Default::default()
         }),
         ..Default::default()
     }];
-    let mut writer = PacketWriter::new_with_options(output, &specs, &options)?;
+    let metadata = webm
+        .as_ref()
+        .map(|r| crate::container::matroska_write::FileMetadata {
+            tags: r.tags.clone(),
+            chapters: r.chapters.clone(),
+        })
+        .unwrap_or_default();
+    let mut writer = PacketWriter::new_with_metadata(output, &specs, &options, &metadata)?;
     let mut stats = crate::media_info::LosslessStats {
         backend: "fvid",
         video_frames: 0,
@@ -120,6 +158,9 @@ pub fn write<W: Write + Seek>(
         vertical_flip: geometry.vertical_flip,
         horizontal_flip: geometry.horizontal_flip,
     };
+    if depth != 8 {
+        stats.pixel_format = format!("{}{depth}le", stats.pixel_format);
+    }
     if let Some(hook) = progress {
         hook.emit(writer.event());
     }
@@ -147,7 +188,7 @@ pub fn write<W: Write + Seek>(
         if end <= start {
             return Err(invalid("Y4M frame duration below one nanosecond"));
         }
-        let packet = crate::codec::ffv1_encoder::encode(&samples, 8)?;
+        let packet = crate::codec::ffv1_encoder::encode(&samples, depth)?;
         check(cancel)?;
         writer.write_packet(0, start, end - start, true, &packet)?;
         stats.video_frames += 1;

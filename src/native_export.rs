@@ -915,7 +915,7 @@ pub fn transcode_ffv1_transformed(source:&Path,destination:&Path,
         match OpenOptions::new().write(true).create_new(true).open(&path){Ok(file)=>Some(Ok((Temporary(path),file))),Err(error) if error.kind()==std::io::ErrorKind::AlreadyExists=>None,Err(error)=>Some(Err(error))}
     }).ok_or_else(||invalid("cannot reserve FFV1 output"))??;
     let mut output=BufWriter::new(file);
-    let (stats,event)=if crate::native_lossless_y4m::is_source(source)? {
+    let (stats,event)=if crate::native_lossless_y4m::eligible(source)? {
         crate::native_lossless_y4m::write(source,&mut output,geometry,filters,cancel,progress)?
     } else { crate::native_lossless::write_mp4_transformed(source,&mut output,geometry,filters,cancel,progress)? };
     output.flush()?;output.get_ref().sync_all()?;drop(output);
