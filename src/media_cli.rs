@@ -2,6 +2,8 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    let normalization_plan=args.first().map(String::as_str)==Some("plan") && args.get(1).map(String::as_str)==Some("normalize-loudness");
+    let args=if normalization_plan {&args[1..]} else {args};
     if args.first().map(String::as_str)==Some("plan") && args.get(1).map(String::as_str)==Some("loudness") {
         let source=std::path::Path::new(args.get(2).ok_or("plan loudness requires INPUT")?);
         let (mut selected,mut weights)=(None,None);
@@ -57,6 +59,12 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             integrated_lufs:target_lufs.unwrap_or(defaults.integrated_lufs),
             sample_peak_dbfs:ceiling.unwrap_or(defaults.sample_peak_dbfs),
         };
+        if normalization_plan {
+            if destination.extension().and_then(|s|s.to_str())!=Some("wav") {return Err("normalization requires OUTPUT.wav".into());}
+            let plan=fvid::native_plan::normalize_loudness(source,selected,Some(&weights),target)?;
+            if !quiet {println!("{}",serde_json::to_string_pretty(&plan)?);}
+            return Ok(());
+        }
         let report=fvid::native_pcm::normalize_loudness_file(source,destination,selected,&weights,target,None)?;
         if !quiet {println!("{}",serde_json::to_string_pretty(&serde_json::json!({
             "backend":"fvid", "sample_frames":report.sample_frames, "gain_db":report.gain_db,

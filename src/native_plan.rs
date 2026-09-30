@@ -358,3 +358,15 @@ pub fn loudness(source: &std::path::Path, selected: Option<usize>, weights: Opti
     plan.notes.push("Silence and incomplete windows return null measurements; true peak is not measured".into());
     Ok(plan)
 }
+
+/// Metadata-only two-pass constant-gain normalization plan.
+pub fn normalize_loudness(source: &std::path::Path, selected: Option<usize>, weights: Option<&[f64]>, target: crate::native_pcm::NormalizeTarget) -> Result<MediaPlan> {
+    target.validate()?;
+    let mut plan=loudness(source,selected,weights)?;
+    plan.command="normalize-loudness".into();
+    plan.steps.push(PlanStep {action:"gain".into(),detail:format!("constant gain to {} LUFS, limited by sample-peak ceiling {} dBFS; reject gain above 64",target.integrated_lufs,target.sample_peak_dbfs)});
+    plan.steps.push(PlanStep {action:"decode".into(),detail:"second owned decode pass, preserving rate, channels and dynamics".into()});
+    plan.steps.push(PlanStep {action:"write".into(),detail:"atomic float WAVE publication; reject existing destination".into()});
+    plan.notes.push("Gain is computed during execution; silent/short input fails; peak limiting may prevent reaching the LUFS target; no true-peak ceiling".into());
+    Ok(plan)
+}

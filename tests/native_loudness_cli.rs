@@ -128,6 +128,48 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
     .is_err());
     assert_eq!(std::fs::read(&normalized).unwrap(), bytes);
     let cli = source.with_extension("cli.wav");
+    let plan_result = Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "normalize-loudness"])
+        .arg(&source)
+        .arg(&cli)
+        .args(["--target-lufs", "-20", "--sample-peak-dbfs", "0"])
+        .output()
+        .unwrap();
+    assert!(
+        plan_result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&plan_result.stderr)
+    );
+    assert!(!cli.exists());
+    let plan: serde_json::Value = serde_json::from_slice(&plan_result.stdout).unwrap();
+    assert_eq!(plan["command"], "normalize-loudness");
+    let api_plan =
+        fvid::native_plan::normalize_loudness(&source, None, Some(&[1.0]), target).unwrap();
+    assert_eq!(plan, serde_json::to_value(api_plan).unwrap());
+    assert!(fvid::native_plan::normalize_loudness(
+        &source,
+        None,
+        None,
+        fvid::native_pcm::NormalizeTarget {
+            integrated_lufs: f64::NAN,
+            sample_peak_dbfs: 0.0
+        }
+    )
+    .is_err());
+    #[cfg(feature = "media")]
+    assert_eq!(
+        plan,
+        serde_json::to_value(
+            fvid::media::plan_normalize_loudness(
+                &source,
+                &Default::default(),
+                Some(&[1.0]),
+                target
+            )
+            .unwrap()
+        )
+        .unwrap()
+    );
     let normalize = |options: &[&str]| {
         Command::new(env!("CARGO_BIN_EXE_fvid"))
             .args(["media", "normalize-loudness"])

@@ -34,15 +34,7 @@ pub fn normalize_file(
     target: NormalizeTarget,
     cancel: Option<&crate::media_control::CancelFlag>,
 ) -> Result<NormalizeReport> {
-    if !target.integrated_lufs.is_finite()
-        || !(-70.0..=0.0).contains(&target.integrated_lufs)
-        || !target.sample_peak_dbfs.is_finite()
-        || !(-70.0..=0.0).contains(&target.sample_peak_dbfs)
-    {
-        return Err(invalid(
-            "normalization targets must be finite and within -70..=0 dB",
-        ));
-    }
+    target.validate().map_err(|e| invalid(&e))?;
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
         return Err(invalid("owned loudness normalization requires WAVE output"));
     }
@@ -84,4 +76,17 @@ pub fn normalize_file(
         peak_limited: ceiling < desired,
         sample_frames: stats.sample_frames,
     })
+}
+
+impl NormalizeTarget {
+    pub fn validate(self) -> std::result::Result<(), String> {
+        if !self.integrated_lufs.is_finite()
+            || !(-70.0..=0.0).contains(&self.integrated_lufs)
+            || !self.sample_peak_dbfs.is_finite()
+            || !(-70.0..=0.0).contains(&self.sample_peak_dbfs)
+        {
+            return Err("normalization targets must be finite and within -70..=0 dB".into());
+        }
+        Ok(())
+    }
 }

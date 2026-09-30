@@ -2737,3 +2737,10 @@ stream selection, channel weights and supported rates before analysis, describe
 LUFS/LRA/sample peak, and include no write step or libavfilter graph. Packet
 contents are checked only during execution. CLI and API plans match in both
 headless and media builds; no true-peak capability is implied.
+
+`fvid media plan normalize-loudness INPUT OUTPUT.wav` accepts the same target,
+stream and weight options as execution and creates no output. The owned plan
+describes analysis, peak-limited constant gain, a second decode pass and atomic
+float WAVE publication. Target validation is shared with execution. The
+`native_plan::normalize_loudness` and `media::plan_normalize_loudness` APIs
+provide the same metadata-only plan; actual gain is determined by decoding.
