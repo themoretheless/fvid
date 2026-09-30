@@ -1,4 +1,6 @@
 //! Owned streaming RIFF/WAVE PCM inspection, sample slicing and float conversion.
+mod k_weight;
+pub use k_weight::KWeighting;
 use crate::{
     Result, invalid,
     media_control::{CancelFlag, ProgressEvent, ProgressHook},

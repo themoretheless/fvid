@@ -2650,3 +2650,11 @@ now reside in `fvid-media-info`. Legacy measurement and normalization re-use
 these contracts, preserving the existing API and explicit argument strings.
 This is contract migration only: LUFS/true-peak measurement and loudnorm DSP
 still run through libavfilter until the owned PCM implementation is ready.
+
+`native_pcm::KWeighting` provides owned streaming two-stage weighting for
+future loudness analysis. It preserves channel separation and packet-boundary
+state, validates complete finite frames before mutation, and supports 8–384 kHz.
+Tests cover five sample rates and an independent 48 kHz biquad output oracle.
+This stage does not yet calculate gating, LUFS, LRA or true peak, and does not
+replace the legacy loudness command. Coefficient reference:
+https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/f_ebur128.c
