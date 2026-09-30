@@ -86,6 +86,88 @@ fn ass_text(text: &str) -> Option<String> {
     }
     Some(output)
 }
+
+pub fn try_convert(
+    source: &Path,
+    destination: &Path,
+    streams: &[usize],
+) -> Result<Option<SubtitleStats>> {
+    if !crate::native_export::is_matroska_source(source)? {
+        return try_convert_srt(source, destination, streams);
+    }
+    let mut reader = crate::container::webm::WebmReader::open(
+        std::io::BufReader::new(File::open(source)?),
+        Default::default(),
+    )?;
+    reader.scan_all()?;
+    if !reader.chapters.is_empty() {
+        return Err(invalid("convert-subtitles with chapters is not qualified"));
+    }
+    let index = match streams {
+        [] => reader
+            .tracks
+            .iter()
+            .position(|track| track.kind == 17)
+            .ok_or_else(|| invalid("input has no subtitle stream"))?,
+        [index] => *index,
+        _ => {
+            return Err(invalid(
+                "convert-subtitles requires exactly one selected subtitle stream",
+            ));
+        }
+    };
+    let track = reader
+        .tracks
+        .get(index)
+        .ok_or_else(|| invalid("subtitle stream index is out of range"))?;
+    if track.kind != 17 {
+        return Err(invalid("selected stream is not a subtitle"));
+    }
+    if track.codec != "S_TEXT/UTF8" {
+        return Ok(None);
+    }
+    if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
+        return Err(invalid("convert-subtitles requires Matroska (.mkv) output"));
+    }
+    let (number, name, language) = (track.number, track.name.clone(), track.language.clone());
+    let mut cues = Vec::new();
+    let mut bytes = 0usize;
+    for i in 0..reader.packets.len() {
+        let packet = &reader.packets[i];
+        if packet.track != number {
+            continue;
+        }
+        let start = u64::try_from(packet.pts_ns)
+            .map_err(|_| invalid("subtitle requires nonnegative timestamps"))?;
+        let Some(duration) = packet.duration_ns.filter(|d| *d > 0) else {
+            return Ok(None);
+        };
+        let end = start
+            .checked_add(duration)
+            .filter(|end| *end <= i64::MAX as u64)
+            .ok_or_else(|| invalid("subtitle timestamp overflow"))?;
+        bytes = bytes
+            .checked_add(packet.size)
+            .ok_or_else(|| invalid("subtitle size overflow"))?;
+        if bytes > 64 << 20 {
+            return Err(invalid("subtitle metadata exceeds 64 MiB"));
+        }
+        let data = reader.read_packet(i)?;
+        let text =
+            std::str::from_utf8(&data).map_err(|_| invalid("Matroska SubRip is not UTF-8"))?;
+        let Some(text) = ass_text(&text.replace("\r\n", "\n")) else {
+            return Ok(None);
+        };
+        if text.is_empty() {
+            return Err(invalid("empty subtitle cue"));
+        }
+        cues.push((start, end, text));
+    }
+    if cues.is_empty() {
+        return Err(invalid("selected subtitle stream has no cues"));
+    }
+    publish(cues, destination, &name, &language)
+}
 /// `None` preserves the adapter for unsupported text encodings or markup.
 /// Recognized invalid timing never publishes a partial output.
 pub fn try_convert_srt(
@@ -151,6 +233,15 @@ pub fn try_convert_srt(
     if cues.is_empty() {
         return Err(invalid("SRT has no cues"));
     }
+    publish(cues, destination, "", "und")
+}
+
+fn publish(
+    cues: Vec<(u64, u64, String)>,
+    destination: &Path,
+    name: &str,
+    language: &str,
+) -> Result<Option<SubtitleStats>> {
     let directory = destination
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -178,8 +269,8 @@ pub fn try_convert_srt(
             encoding: Encoding::Ass {
                 configuration: HEADER,
             },
-            name: "",
-            language: "und",
+            name,
+            language,
         }],
     )?;
     for (index, (start, end, text)) in cues.iter().enumerate() {

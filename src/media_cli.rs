@@ -14,7 +14,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             }
         }
         if supported {
-            if let Some(stats)=fvid::native_subtitle::try_convert_srt(std::path::Path::new(&args[1]),std::path::Path::new(&args[2]),&streams)? {
+            if let Some(stats)=fvid::native_subtitle::try_convert(std::path::Path::new(&args[1]),std::path::Path::new(&args[2]),&streams)? {
                 if !quiet {println!("{}",serde_json::to_string_pretty(&stats)?);}return Ok(());
             }
         }

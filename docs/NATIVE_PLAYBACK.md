@@ -2589,3 +2589,12 @@ an existing path; temporary files are cleaned on failure. Input text is limited
 to 64 MiB. Unsupported encodings/markup and container subtitle input retain the
 legacy conversion adapter until their migration. Independent decoder tests
 check cue times, Unicode, line breaks and bold text.
+
+Matroska `S_TEXT/UTF8` SubRip tracks with explicit positive cue durations also
+use owned conversion. Empty selection chooses the first subtitle stream;
+`--streams N` selects the zero-based container track. Name/language, overlapping
+cue times, Unicode and supported markup survive ASS export. Multiple selected
+streams, non-subtitle selection, invalid timestamps and chapters fail before
+publication. Unsupported subtitle codecs, markup or unstated cue durations
+retain the adapter. Independent fixtures with two SubRip tracks check default
+and explicit selection through headless CLI and media API against decoded SRT.
