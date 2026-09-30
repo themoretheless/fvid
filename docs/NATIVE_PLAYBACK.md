@@ -2520,3 +2520,10 @@ lossless export, with CLI/API/plan support. Independent FFmpeg pixel comparisons
 cover 65 combinations across six YUV layouts and supported depths. API/CLI
 routing is checked on AVC, HEVC Main10, VP9 10-bit and AV1, and the lossless
 plan/execution regression includes pixelize in a combined filter chain.
+
+Pixelize is additionally covered by the independent lossless chain oracle:
+crop/flips/transpose/pad/scale, negate, Sobel, pixelize, dilation and chromashift
+produce identical decoded planes on AVC, HEVC Main/Main10 and rotated display
+metadata sources. Malformed plane storage or out-of-range samples fail without
+mutation. A truncated Y4M after one valid frame leaves no published Matroska or
+stranded temporary output when pixelize is selected.

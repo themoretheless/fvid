@@ -149,3 +149,49 @@ fn decoder_api_and_cli_use_owned_pixelize() {
         assert_eq!(stats["video_frames"], expected.video_frames);
     }
 }
+
+#[test]
+fn malformed_planes_fail_before_mutation() {
+    for data in [vec![0; 11], [vec![0; 10], vec![0xff, 0xff]].concat()] {
+        let mut frame = GeometryFrame {
+            width: 2,
+            height: 1,
+            subsampling: Some([1, 1]),
+            data,
+        };
+        let before = frame.data.clone();
+        assert!(Pixelize::parse("").unwrap().apply(&mut frame, 10).is_err());
+        assert_eq!(frame.data, before);
+    }
+}
+
+#[cfg(feature = "media")]
+#[test]
+fn truncated_source_does_not_publish_pixelized_output() {
+    let directory =
+        std::env::temp_dir().join(format!("fvid-pixelize-failure-{}", std::process::id()));
+    std::fs::create_dir_all(&directory).unwrap();
+    struct Clean(std::path::PathBuf);
+    impl Drop for Clean {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _clean = Clean(directory.clone());
+    let input = directory.join("input.y4m");
+    let output = directory.join("output.mkv");
+    let mut data = b"YUV4MPEG2 W4 H2 F25:1 Ip C420jpeg\nFRAME\n".to_vec();
+    data.extend(vec![128; 12]);
+    data.extend(b"FRAME\n");
+    data.extend(vec![128; 11]);
+    std::fs::write(&input, data).unwrap();
+    let transform = fvid::media::LosslessTransform {
+        pixelize: Some("3:5:min:7".into()),
+        ..Default::default()
+    };
+    assert!(
+        fvid::media::transcode_lossless(&input, &output, transform, &Default::default()).is_err()
+    );
+    assert!(!output.exists());
+    assert_eq!(std::fs::read_dir(directory).unwrap().count(), 1);
+}

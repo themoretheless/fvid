@@ -520,9 +520,14 @@ fn independent_pixels_match_spatial_transforms_and_rotation() {
         }
         let source = dir.0.join(format!("source{index}.mp4"));
         std::fs::write(&source, bytes).unwrap();
-        for mode in 0..8 {
+        for mode in 0..9 {
             let request = match mode {
                 0 => spatial_request(),
+                8 => {
+                    let mut request = spatial_request();
+                    request.pixelize = Some("3:5:max:7".into());
+                    request
+                }
                 1 => fvid::media_info::LosslessTransform {
                     horizontal_flip: true,
                     ..Default::default()
@@ -554,6 +559,9 @@ fn independent_pixels_match_spatial_transforms_and_rotation() {
                 }
             };
             let filter = match mode {
+                8 => {
+                    "crop=8:8:0:0,hflip,vflip,transpose=clock,pad=16:12:2:2,scale=12:8:flags=neighbor,negate,sobel=planes=1:scale=0.125,pixelize=3:5:max:7,dilation=coordinates=170:threshold0=3:threshold1=0:threshold2=0,chromashift=cbh=1:cbv=-2:crh=-3:crv=2:edge=wrap"
+                }
                 0 => {
                     "crop=8:8:0:0,hflip,vflip,transpose=clock,pad=16:12:2:2,scale=12:8:flags=neighbor,negate,sobel=planes=1:scale=0.125,dilation=coordinates=170:threshold0=3:threshold1=0:threshold2=0,chromashift=cbh=1:cbv=-2:crh=-3:crv=2:edge=wrap"
                 }
