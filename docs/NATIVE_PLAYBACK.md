@@ -2633,3 +2633,9 @@ the adapter.
 The owned SubRip parser also accepts the sixteen standard HTML color names
 (case insensitive). Independent decoded-SRT comparisons cover each name with
 nested restoration. Unknown names continue through the existing adapter.
+
+Backend capability inventories and subtitle conversion results are shared
+through `fvid-media-info`, without codec or demuxer linkage. The legacy adapter
+re-exports these types for API compatibility. The inventory operation itself
+still queries the legacy backend; moving its result type does not remove
+FFmpeg linkage from the `media` feature.

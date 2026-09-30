@@ -1,7 +1,6 @@
 //! Decode text subtitles and re-encode to another text codec (no burn-in).
 use super::*;
 use lossless::{Codec, LosslessStats, LosslessTransform, OverlaySpec, Parameters};
-use serde::Serialize;
 use std::path::Path;
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -32,15 +31,7 @@ pub struct SubtitleConvertOptions {
     pub codec: SubtitleCodec,
 }
 
-#[derive(Serialize, Debug)]
-pub struct SubtitleConvertStats {
-    pub backend: &'static str,
-    pub encoder: String,
-    pub cues: u64,
-    pub packets_in: u64,
-    pub packets_out: u64,
-    pub payload_bytes: u64,
-}
+pub use fvid_media_info::NativeSubtitleStats as SubtitleConvertStats;
 
 struct Subtitle(AVSubtitle);
 impl Default for Subtitle {

@@ -301,7 +301,6 @@ pub use play::{
 };
 #[cfg(feature = "player")]
 pub use play::{audio_output_devices, play, play_paths};
-use serde::Serialize;
 use std::{
     collections::BTreeMap,
     ffi::{CStr, CString},
@@ -690,15 +689,7 @@ fn describe(path: &Path, input: &Input) -> Result<MediaInfo> {
         })
     }
 }
-#[derive(Serialize)]
-pub struct Capabilities {
-    pub library_version: String,
-    pub demuxers: Vec<String>,
-    pub muxers: Vec<String>,
-    pub decoders: Vec<String>,
-    pub encoders: Vec<String>,
-    pub filters: Vec<String>,
-}
+pub use fvid_media_info::Capabilities;
 pub fn capabilities() -> Capabilities {
     // SAFETY: Iterators use library-owned static descriptors, each with its own opaque cursor.
     unsafe {

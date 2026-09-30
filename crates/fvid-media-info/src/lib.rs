@@ -158,7 +158,7 @@ pub use audio_mix::{MixDuration, MixAudioOptions, MixAudioStats, MergeAudioStats
 mod time;
 pub use time::parse_time;
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, Debug)]
 pub struct NativeSubtitleStats {
     pub backend: &'static str,
     pub encoder: String,
@@ -166,4 +166,15 @@ pub struct NativeSubtitleStats {
     pub packets_in: u64,
     pub packets_out: u64,
     pub payload_bytes: u64,
+}
+
+/// Backend inventory; this does not establish tested workflow coverage.
+#[derive(Serialize)]
+pub struct Capabilities {
+    pub library_version: String,
+    pub demuxers: Vec<String>,
+    pub muxers: Vec<String>,
+    pub decoders: Vec<String>,
+    pub encoders: Vec<String>,
+    pub filters: Vec<String>,
 }

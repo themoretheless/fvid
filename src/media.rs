@@ -6,8 +6,7 @@ pub use crate::native_export::{export_y4m, export_y4m_interval, export_y4m_trans
 pub fn convert_subtitles(source: &std::path::Path, destination: &std::path::Path,
     options: &SubtitleConvertOptions) -> Result<SubtitleConvertStats> {
     if let Some(stats) = crate::native_subtitle::try_convert(source, destination, &options.streams).map_err(|e|e.to_string())? {
-        return Ok(SubtitleConvertStats {backend:stats.backend,encoder:stats.encoder,cues:stats.cues,
-            packets_in:stats.packets_in,packets_out:stats.packets_out,payload_bytes:stats.payload_bytes});
+        return Ok(stats);
     }
     fvid_media::convert_subtitles(source,destination,options)
 }
