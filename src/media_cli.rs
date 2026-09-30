@@ -2,6 +2,49 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str) == Some("normalize-loudness") {
+        if args.len()==2 && matches!(args[1].as_str(),"--help"|"-h") {
+            println!("fvid media normalize-loudness INPUT OUTPUT.wav [--target-lufs -16] [--sample-peak-dbfs -1.5] [--streams INDEX] [--channel-weights W,...] [--quiet]\nConstant gain preserves dynamics; the ceiling is sample peak, not true peak.");
+            return Ok(());
+        }
+        let source = std::path::Path::new(args.get(1).ok_or("normalize-loudness requires INPUT OUTPUT.wav")?);
+        let destination = std::path::Path::new(args.get(2).ok_or("normalize-loudness requires OUTPUT.wav")?);
+        let (mut selected, mut weights, mut target_lufs, mut ceiling) = (None,None,None,None);
+        let mut quiet=false;
+        let mut options=args[3..].iter();
+        while let Some(option)=options.next() {
+            match option.as_str() {
+                "--streams" => {
+                    if selected.is_some() {return Err("duplicate stream index".into());}
+                    selected=Some(options.next().ok_or("missing stream index")?.parse::<usize>()?);
+                }
+                "--channel-weights" => {
+                    if weights.is_some() {return Err("duplicate channel weights".into());}
+                    weights=Some(options.next().ok_or("missing channel weights")?.split(',').map(str::parse).collect::<Result<Vec<f64>,_>>()?);
+                }
+                "--target-lufs" | "--sample-peak-dbfs" => {
+                    let slot=if option=="--target-lufs" {&mut target_lufs} else {&mut ceiling};
+                    if slot.is_some() {return Err(format!("duplicate option: {option}").into());}
+                    *slot=Some(options.next().ok_or("missing normalization target")?.parse::<f64>()?);
+                }
+                "--quiet"=>quiet=true,
+                _=>return Err(format!("unsupported normalization option: {option}").into()),
+            }
+        }
+        let weights=owned_loudness_weights(source,selected,weights)?;
+        let defaults=fvid::native_pcm::NormalizeTarget::default();
+        let target=fvid::native_pcm::NormalizeTarget {
+            integrated_lufs:target_lufs.unwrap_or(defaults.integrated_lufs),
+            sample_peak_dbfs:ceiling.unwrap_or(defaults.sample_peak_dbfs),
+        };
+        let report=fvid::native_pcm::normalize_loudness_file(source,destination,selected,&weights,target,None)?;
+        if !quiet {println!("{}",serde_json::to_string_pretty(&serde_json::json!({
+            "backend":"fvid", "sample_frames":report.sample_frames, "gain_db":report.gain_db,
+            "peak_limited":report.peak_limited, "source_integrated_lufs":report.source.integrated_lufs,
+            "target_lufs":target.integrated_lufs,"sample_peak_ceiling_dbfs":target.sample_peak_dbfs
+        }))?);}
+        return Ok(());
+    }
     if args.first().map(String::as_str) == Some("loudness") {
         let source = std::path::Path::new(args.get(1).ok_or("loudness requires INPUT")?);
         let mut selected = None;
@@ -22,18 +65,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 _ => return Err(format!("unsupported owned loudness option: {option}").into()),
             }
         }
-        let weights = match weights {
-            Some(weights) => weights,
-            None => {
-                let channels = if fvid::native_pcm::is_wave(source)? {
-                    fvid::native_pcm::inspect(&mut std::fs::File::open(source)?,None)?.channels
-                } else { fvid::native_media::audio_source_info_selected(source,selected)?.channels };
-                match channels {
-                    1 | 2 => vec![1.0;usize::from(channels)],
-                    _ => return Err("multichannel loudness requires explicit --channel-weights in stream channel order (front=1, surround=1.41, LFE=0)".into()),
-                }
-            }
-        };
+        let weights = owned_loudness_weights(source,selected,weights)?;
         let stats = fvid::native_pcm::measure_loudness_file(source,selected,&weights,None)?;
         if !quiet {
             println!("{}",serde_json::to_string_pretty(&serde_json::json!({
@@ -3504,4 +3536,20 @@ fn native_merge(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
         }
     }
     Ok(true)
+}
+
+fn owned_loudness_weights(source: &std::path::Path, selected: Option<usize>, weights: Option<Vec<f64>>) -> Result<Vec<f64>,Box<dyn std::error::Error>> {
+    let weights = match weights {
+            Some(weights) => weights,
+            None => {
+                let channels = if fvid::native_pcm::is_wave(source)? {
+                    fvid::native_pcm::inspect(&mut std::fs::File::open(source)?,None)?.channels
+                } else { fvid::native_media::audio_source_info_selected(source,selected)?.channels };
+                match channels {
+                    1 | 2 => vec![1.0;usize::from(channels)],
+                    _ => return Err("multichannel loudness requires explicit --channel-weights in stream channel order (front=1, surround=1.41, LFE=0)".into()),
+                }
+            }
+        };
+    Ok(weights)
 }

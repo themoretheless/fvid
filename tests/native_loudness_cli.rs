@@ -8,6 +8,7 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
             let _ = std::fs::remove_file(&self.0);
             let _ = std::fs::remove_file(self.0.with_extension("normalized.wav"));
             let _ = std::fs::remove_file(self.0.with_extension("limited.wav"));
+            let _ = std::fs::remove_file(self.0.with_extension("cli.wav"));
         }
     }
     let _cleanup = Cleanup(source.clone());
@@ -90,6 +91,36 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
     )
     .is_err());
     assert_eq!(std::fs::read(&normalized).unwrap(), bytes);
+    let cli = source.with_extension("cli.wav");
+    let normalize = |options: &[&str]| {
+        Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "normalize-loudness"])
+            .arg(&source)
+            .arg(&cli)
+            .args(options)
+            .output()
+            .unwrap()
+    };
+    for options in [
+        &["--target-lufs", "NaN"][..],
+        &["--target-lufs", "1"][..],
+        &["--target-lufs", "-20", "--target-lufs", "-18"][..],
+        &["--unknown"][..],
+    ] {
+        assert!(!normalize(options).status.success());
+        assert!(!cli.exists());
+    }
+    let result = normalize(&["--target-lufs", "-20", "--sample-peak-dbfs", "0"]);
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    assert_eq!(std::fs::read(&cli).unwrap(), bytes);
+    let stats: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    assert_eq!(stats["backend"], "fvid");
+    assert_eq!(stats["peak_limited"], false);
+    assert!(!normalize(&[]).status.success());
     let limited = source.with_extension("limited.wav");
     let target = fvid::native_pcm::NormalizeTarget {
         integrated_lufs: 0.0,

@@ -2712,3 +2712,12 @@ atomic no-overwrite publication. File size/mtime are checked between passes;
 concurrent mutation during export is not prevented. This is not dynamic
 loudnorm and does not guarantee an intersample/true-peak ceiling. Tests measure
 the exported result at the target LUFS and at the limiting sample peak.
+
+CLI normalization is available without the `media` feature:
+`fvid media normalize-loudness INPUT OUTPUT.wav --target-lufs -16
+--sample-peak-dbfs -1.5`. Optional `--streams`, `--channel-weights` and `--quiet`
+follow owned loudness analysis. `--help` describes the sample-peak limitation.
+The JSON report includes applied gain and whether the peak ceiling limited it.
+The command is independently named because its constant-gain/sample-peak
+contract differs from dynamic loudnorm. CLI/API outputs are byte-identical
+in the integration fixture, and invalid options create no destination.
