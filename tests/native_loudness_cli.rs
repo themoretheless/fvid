@@ -6,6 +6,8 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
     impl Drop for Cleanup {
         fn drop(&mut self) {
             let _ = std::fs::remove_file(&self.0);
+            let _ = std::fs::remove_file(self.0.with_extension("normalized.wav"));
+            let _ = std::fs::remove_file(self.0.with_extension("limited.wav"));
         }
     }
     let _cleanup = Cleanup(source.clone());
@@ -64,6 +66,42 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
     ] {
         assert!(!run(options).status.success(), "{options:?}");
     }
+    let normalized = source.with_extension("normalized.wav");
+    let target = fvid::native_pcm::NormalizeTarget {
+        integrated_lufs: -20.0,
+        sample_peak_dbfs: 0.0,
+    };
+    let report =
+        fvid::native_pcm::normalize_loudness_file(&source, &normalized, None, &[1.0], target, None)
+            .unwrap();
+    assert!(!report.peak_limited);
+    assert_eq!(report.sample_frames, 96000);
+    let measured =
+        fvid::native_pcm::measure_loudness_file(&normalized, None, &[1.0], None).unwrap();
+    assert!((measured.integrated_lufs.unwrap() + 20.0).abs() < 0.02);
+    let bytes = std::fs::read(&normalized).unwrap();
+    assert!(fvid::native_pcm::normalize_loudness_file(
+        &source,
+        &normalized,
+        None,
+        &[1.0],
+        target,
+        None
+    )
+    .is_err());
+    assert_eq!(std::fs::read(&normalized).unwrap(), bytes);
+    let limited = source.with_extension("limited.wav");
+    let target = fvid::native_pcm::NormalizeTarget {
+        integrated_lufs: 0.0,
+        sample_peak_dbfs: -30.0,
+    };
+    let report =
+        fvid::native_pcm::normalize_loudness_file(&source, &limited, None, &[1.0], target, None)
+            .unwrap();
+    assert!(report.peak_limited);
+    let measured = fvid::native_pcm::measure_loudness_file(&limited, None, &[1.0], None).unwrap();
+    assert!((measured.sample_peak_dbfs.unwrap() + 30.0).abs() < 0.001);
+    assert!(measured.integrated_lufs.unwrap() < -30.0);
     let result = run(&["--streams", "0", "--channel-weights", "1"]);
     assert!(result.status.success());
     assert_eq!(

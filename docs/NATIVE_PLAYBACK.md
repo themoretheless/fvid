@@ -2700,3 +2700,15 @@ a relative gate 20 LU below the mean retained short-term energy, and the
 10th/95th percentiles of the gated 0.01 LU histogram. Silence/short input
 returns null. An 18-second changing-level signal is checked against ebur128
 at 44.1/48/96 kHz with 0.2 LU tolerance. True peak remains unimplemented.
+
+`native_pcm::normalize_loudness_file` performs owned constant-gain normalization
+to float WAVE. `NormalizeTarget` sets integrated LUFS and a sample-peak ceiling
+(default -16 LUFS/-1.5 dBFS). The smaller of loudness gain and peak-headroom gain
+is applied; `peak_limited` indicates when the loudness target cannot be reached
+without exceeding the sample-peak ceiling. Rate, channels and dynamics are
+preserved. Silence/short input, invalid targets and gains above 64 are rejected.
+Measurement and export use owned streaming decoders, with cancellation and
+atomic no-overwrite publication. File size/mtime are checked between passes;
+concurrent mutation during export is not prevented. This is not dynamic
+loudnorm and does not guarantee an intersample/true-peak ceiling. Tests measure
+the exported result at the target LUFS and at the limiting sample peak.
