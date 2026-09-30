@@ -243,7 +243,7 @@ fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Er
     let source_index = command_index + 1;
     let option_start = source_index + if plan { 1 } else { 2 };
     if args.len() < option_start {return Ok(false);}
-    let owned_audio=command=="trim" && fvid::native_media::is_owned_audio_source(std::path::Path::new(&args[source_index]))?
+    let owned_audio=command=="trim" && fvid::native_media::is_owned_audio_trim_source(std::path::Path::new(&args[source_index]))?
         && (plan || std::path::Path::new(&args[source_index+1]).extension().and_then(|s|s.to_str())==Some("wav"));
     if !owned_audio && !fvid::native_pcm::is_wave(std::path::Path::new(&args[source_index]))? {return Ok(false);}
     let (mut from, mut to, mut selected) = (None, None, None);

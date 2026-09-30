@@ -207,7 +207,7 @@ pub fn trim(
         let stats=crate::native_export::trim_y4m(source,destination,from,to,options.streams.first().copied(),options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())?;
         return Ok(CopyStats {packets:stats.packets,payload_bytes:stats.payload_bytes,segments:1,backend:"fvid",fvid_payload_copies:0});
     }
-    if crate::native_media::is_owned_audio_source(source).map_err(|e|e.to_string())?
+    if crate::native_media::is_owned_audio_trim_source(source).map_err(|e|e.to_string())?
         && destination.extension().and_then(|s|s.to_str())==Some("wav") {
         validate_native_copy_options(options,true)?;
         let stats=crate::native_export::trim_audio_wave(source,destination,from,to,options.streams.first().copied(),options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())?;
@@ -231,7 +231,7 @@ pub fn plan_trim(
     to: i64,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
-    if crate::native_media::is_owned_audio_source(source).map_err(|e|e.to_string())? {
+    if crate::native_media::is_owned_audio_trim_source(source).map_err(|e|e.to_string())? {
         validate_native_copy_options(options,true)?;
         return crate::native_plan::trim_audio(source,from,to,options.streams.first().copied());
     }

@@ -2554,3 +2554,10 @@ selected audio stream; invalid selection, cancellation and existing outputs
 fail without publication. Packed WAVE trimming retains its existing byte-copy
 path. Compressed output formats and unsupported codecs retain the remaining
 legacy adapter; full `media` independence is not yet complete.
+
+Trim admission also recognizes containers with multiple owned ALAC/PCM tracks.
+Default audio decode admission remains unchanged; trim independently requires
+`--streams N` when any additional stream exists. Optional integration fixtures
+mux two ALAC tracks into MP4 and Matroska with the independent test muxer, then
+verify CLI/API selection stays on backend `fvid`, both duplicate tracks produce
+identical WAVE bytes, and implicit track omission fails before publication.

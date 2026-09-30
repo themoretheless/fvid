@@ -981,6 +981,16 @@ pub fn is_owned_audio_source(path: &Path) -> Result<bool> {
     Ok((is_mp4_audio_container(path)? || crate::native_export::is_matroska_source(path)?) && audio_source_info_selected(path, None).is_ok())
 }
 
+/// Trim can select one supported audio track even when default decoding is
+/// ambiguous. Execution still requires explicit selection if other streams exist.
+pub fn is_owned_audio_trim_source(path: &Path) -> Result<bool> {
+    if is_owned_audio_source(path)? { return Ok(true); }
+    if !is_mp4_audio_container(path)? && !crate::native_export::is_matroska_source(path)? { return Ok(false); }
+    let info = crate::native_probe::probe(path).map_err(|e| invalid(&e))?;
+    Ok(info.streams.iter().any(|stream| stream.media_type == "audio"
+        && audio_source_info_selected(path, Some(stream.index)).is_ok()))
+}
+
 pub(crate) fn mp4_audio_index<R: std::io::Read + std::io::Seek>(
     reader: &crate::container::mp4::Mp4Reader<R>,
     selected: Option<usize>,
