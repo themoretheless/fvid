@@ -3111,7 +3111,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         return Err("--rate/--channels/--volume require decode-audio".into());
     }
     if command == "loudness" && paths.len() == 1 {
-        let stats = fvid_media::measure_loudness(&paths[0], &options)?;
+        let stats = fvid::media::measure_loudness(&paths[0], &options)?;
         emit_json(quiet, serde_json::to_string_pretty(&stats)?);
         return Ok(());
     }
@@ -3539,17 +3539,8 @@ fn native_merge(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
 }
 
 fn owned_loudness_weights(source: &std::path::Path, selected: Option<usize>, weights: Option<Vec<f64>>) -> Result<Vec<f64>,Box<dyn std::error::Error>> {
-    let weights = match weights {
-            Some(weights) => weights,
-            None => {
-                let channels = if fvid::native_pcm::is_wave(source)? {
-                    fvid::native_pcm::inspect(&mut std::fs::File::open(source)?,None)?.channels
-                } else { fvid::native_media::audio_source_info_selected(source,selected)?.channels };
-                match channels {
-                    1 | 2 => vec![1.0;usize::from(channels)],
-                    _ => return Err("multichannel loudness requires explicit --channel-weights in stream channel order (front=1, surround=1.41, LFE=0)".into()),
-                }
-            }
-        };
-    Ok(weights)
+    match weights {
+        Some(weights)=>Ok(weights),
+        None=>Ok(fvid::native_pcm::loudness_channel_weights(source,selected)?),
+    }
 }

@@ -2,17 +2,7 @@
 use super::KWeighting;
 use std::collections::BTreeMap;
 
-#[derive(Debug, Clone, Copy)]
-pub struct IntegratedLoudness {
-    pub sample_frames: u64,
-    pub measured_blocks: u64,
-    /// None for silence or streams shorter than a complete 400 ms window.
-    pub integrated_lufs: Option<f64>,
-    /// Unweighted peak across all input channels; None for silence/empty input.
-    pub sample_peak_dbfs: Option<f64>,
-    /// Gated short-term 10th-to-95th percentile range; None without valid 3 s windows.
-    pub range_lu: Option<f64>,
-}
+pub use crate::media_info::PcmLoudnessStats as IntegratedLoudness;
 /// Explicit channel energy weights avoid guessing layout from channel count.
 /// Use 1 for front channels, 1.41 for surrounds, 0 for LFE.
 /// Relative gating uses 0.01 LU histogram bins, bounding storage by level range.
@@ -521,5 +511,27 @@ mod file_tests {
                 actual.sample_peak_dbfs
             );
         }
+    }
+}
+
+/// Unit energy weights for conventional mono/stereo input. Multichannel callers
+/// must supply explicit layout weights to `measure_loudness_file`.
+pub fn default_weights(
+    source: &std::path::Path,
+    selected: Option<usize>,
+) -> crate::Result<Vec<f64>> {
+    let channels = if super::is_wave(source)? {
+        if selected.is_some_and(|index| index != 0) {
+            return Err(crate::invalid("WAVE has only stream 0"));
+        }
+        super::inspect(&mut std::fs::File::open(source)?, None)?.channels
+    } else {
+        crate::native_media::audio_source_info_selected(source, selected)?.channels
+    };
+    match channels {
+        1 | 2 => Ok(vec![1.0; usize::from(channels)]),
+        _ => Err(crate::invalid(
+            "multichannel loudness requires explicit channel weights in stream order",
+        )),
     }
 }

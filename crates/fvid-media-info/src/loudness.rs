@@ -80,3 +80,15 @@ mod tests {
         }
     }
 }
+
+#[derive(Debug, Clone, Copy, serde::Serialize)]
+pub struct PcmLoudnessStats {
+    pub sample_frames: u64,
+    pub measured_blocks: u64,
+    /// None for silence or streams shorter than a complete 400 ms window.
+    pub integrated_lufs: Option<f64>,
+    /// Unweighted peak across all input channels; None for silence/empty input.
+    pub sample_peak_dbfs: Option<f64>,
+    /// Gated short-term 10th-to-95th percentile range; None without valid 3 s windows.
+    pub range_lu: Option<f64>,
+}

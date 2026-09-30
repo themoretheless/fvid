@@ -2721,3 +2721,12 @@ The JSON report includes applied gain and whether the peak ceiling limited it.
 The command is independently named because its constant-gain/sample-peak
 contract differs from dynamic loudnorm. CLI/API outputs are byte-identical
 in the integration fixture, and invalid options create no destination.
+
+The public root `media::measure_loudness` now uses the owned meter and returns
+`PcmLoudnessStats` (also available as `native_pcm::IntegratedLoudness`).
+`media::measure_loudness_with_weights` accepts explicit multichannel weights.
+These results serialize optional LUFS/LRA/sample peak as null when unavailable,
+and do not expose an unmeasured true peak. Stream selection and cancellation
+are retained; unsupported budgets, metadata mutations and progress hooks are
+rejected. The underlying legacy adapter remains for other operations, so this
+change removes measurement calls rather than all `media` feature linkage.

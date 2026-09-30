@@ -54,6 +54,17 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
     assert_eq!(json["sample_frames"], 96000);
     let api = fvid::native_pcm::measure_loudness_file(&source, None, &[1.0], None).unwrap();
     assert_eq!(json["integrated_lufs"].as_f64(), api.integrated_lufs);
+    #[cfg(feature = "media")]
+    {
+        let result = fvid::media::measure_loudness(&source, &Default::default()).unwrap();
+        assert_eq!(result.integrated_lufs, api.integrated_lufs);
+        assert_eq!(result.sample_peak_dbfs, api.sample_peak_dbfs);
+        let result =
+            fvid::media::measure_loudness_with_weights(&source, &Default::default(), &[1.0])
+                .unwrap();
+        assert_eq!(result.integrated_lufs, api.integrated_lufs);
+    }
+
     assert_eq!(json["sample_peak_dbfs"].as_f64(), api.sample_peak_dbfs);
     let quiet = run(&["--quiet"]);
     assert!(quiet.status.success());

@@ -387,3 +387,16 @@ pub fn plan_merge_audio(sources: &[std::path::PathBuf]) -> Result<MediaPlan> {
         fvid_media::plan_merge_audio(sources)
     }
 }
+
+/// Owned integrated loudness, LRA and sample peak. True peak is not inferred.
+pub fn measure_loudness(source: &std::path::Path, options: &CopyOptions) -> Result<crate::native_pcm::IntegratedLoudness> {
+    validate_native_copy_options(options, true)?;
+    let weights=crate::native_pcm::loudness_channel_weights(source,options.streams.first().copied()).map_err(|e|e.to_string())?;
+    measure_loudness_with_weights(source,options,&weights)
+}
+/// Explicit energy weights for multichannel layouts; no implicit channel remapping.
+pub fn measure_loudness_with_weights(source: &std::path::Path, options: &CopyOptions, weights: &[f64]) -> Result<crate::native_pcm::IntegratedLoudness> {
+    validate_native_copy_options(options,true)?;
+    if options.progress.is_some() {return Err("owned loudness progress hooks are not yet implemented".into());}
+    crate::native_pcm::measure_loudness_file(source,options.streams.first().copied(),weights,options.cancel.as_ref()).map_err(|e|e.to_string())
+}
