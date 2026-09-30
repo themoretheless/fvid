@@ -368,7 +368,7 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
     }
     let index = mp4_audio_index(&reader, selected)?;
     let track = reader.tracks()[index].clone();
-    let mut decoder = crate::native_audio_decoder::Mp4PcmDecoder::new(&track)?;
+    let mut decoder = crate::native_audio_decoder::PacketPcmDecoder::new(&track)?;
     let rate = decoder.sample_rate();
     let channels = decoder.channels();
     if track.timescale == 0 || track.sample_rate != rate || track.channels != channels {
@@ -549,7 +549,15 @@ pub fn decode_matroska_aac_reader<R: std::io::Read + std::io::Seek>(
     decode_matroska_aac_reader_controlled(reader, output, interval, None, &mut control)
 }
 
-pub(crate) fn decode_matroska_aac_reader_controlled<R: std::io::Read + std::io::Seek>(
+pub(crate) fn decode_matroska_aac_reader_controlled<R:std::io::Read+std::io::Seek>(
+    reader:crate::container::webm::WebmReader<R>,output:&mut impl std::io::Write,
+    interval:Option<(Duration,Duration)>,selected:Option<usize>,control:&mut DecodeProgress<'_>,
+)->Result<AudioDecodeStats> {
+    matroska_aac_index(&reader,selected)?;
+    decode_matroska_audio_reader_controlled(reader,output,interval,selected,control)
+}
+
+pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io::Seek>(
     mut reader: crate::container::webm::WebmReader<R>,
     output: &mut impl std::io::Write,
     interval: Option<(Duration, Duration)>,
@@ -561,22 +569,22 @@ pub(crate) fn decode_matroska_aac_reader_controlled<R: std::io::Read + std::io::
         return Err(invalid("audio interval requires from < to"));
     }
     reader.scan_all()?;
-    let index = matroska_aac_index(&reader, selected)?;
+    let index = matroska_audio_index(&reader, selected)?;
     let track = reader.tracks[index].clone();
-    let mut decoder = crate::codec::aac_native::NativeAacDecoder::new(&track.codec_private)?;
+    let mut decoder = crate::native_audio_decoder::PacketPcmDecoder::from_matroska(&track)?;
     let rate = decoder.sample_rate();
-    let channels = u16::from(decoder.channels());
+    let channels = decoder.channels();
     if track.sample_rate != u64::from(rate) || track.channels != u64::from(channels) {
         return Err(invalid(
-            "Matroska AAC geometry disagrees with configuration",
+            "Matroska audio geometry disagrees with configuration",
         ));
     }
     let boundary = |ns: u128| -> Result<u64> {
         let samples = ns
             .checked_mul(u128::from(rate))
-            .ok_or_else(|| invalid("AAC time overflow"))?
+            .ok_or_else(|| invalid("audio time overflow"))?
             .div_ceil(1_000_000_000);
-        u64::try_from(samples).map_err(|_| invalid("AAC sample position overflow"))
+        u64::try_from(samples).map_err(|_| invalid("audio sample position overflow"))
     };
     let (from, to) = match interval {
         Some((from, to)) => (boundary(from.as_nanos())?, boundary(to.as_nanos())?),
@@ -586,7 +594,7 @@ pub(crate) fn decode_matroska_aac_reader_controlled<R: std::io::Read + std::io::
     // the nearest sample for this metadata; user interval boundaries still ceil.
     let trim_samples = |ns: u64| -> Result<u64> {
         u64::try_from((u128::from(ns) * u128::from(rate) + 500_000_000) / 1_000_000_000)
-            .map_err(|_| invalid("AAC trim length overflow"))
+            .map_err(|_| invalid("audio trim length overflow"))
     };
     let mut delay = trim_samples(track.codec_delay_ns)?;
     let mut decoded = 0u64;
@@ -612,17 +620,17 @@ pub(crate) fn decode_matroska_aac_reader_controlled<R: std::io::Read + std::io::
         let exact = i128::from(decoded) * 1_000_000_000;
         let precision = i128::from(reader.timestamp_scale_ns()) * i128::from(rate);
         if (timestamp - exact).abs() > precision {
-            return Err(invalid("non-contiguous Matroska AAC timestamps"));
+            return Err(invalid("non-contiguous Matroska audio timestamps"));
         }
         let encoded = reader.read_packet(index)?;
         let samples = decoder.decode(&encoded)?;
         let frames = (samples.len() / usize::from(channels)) as u64;
         decoded = decoded
             .checked_add(frames)
-            .ok_or_else(|| invalid("AAC sample count overflow"))?;
+            .ok_or_else(|| invalid("audio sample count overflow"))?;
         let padding = trim_samples(packet.discard_padding_ns.unsigned_abs())?;
         if padding > frames {
-            return Err(invalid("Matroska discard padding exceeds AAC packet"));
+            return Err(invalid("Matroska discard padding exceeds audio packet"));
         }
         let head = if packet.discard_padding_ns < 0 {
             padding
@@ -639,7 +647,7 @@ pub(crate) fn decode_matroska_aac_reader_controlled<R: std::io::Read + std::io::
         let first = head.max(skip_delay);
         let end = frames - tail;
         if first > end {
-            return Err(invalid("Matroska AAC trimming overlaps"));
+            return Err(invalid("Matroska audio trimming overlaps"));
         }
         let available = end - first;
         let begin = from.saturating_sub(position).min(available);
@@ -654,7 +662,7 @@ pub(crate) fn decode_matroska_aac_reader_controlled<R: std::io::Read + std::io::
         position += available;
     }
     if stats.sample_frames == 0 {
-        return Err(invalid("Matroska AAC interval contains no samples"));
+        return Err(invalid("Matroska audio interval contains no samples"));
     }
     Ok(stats)
 }
@@ -921,7 +929,7 @@ pub fn decode_video_request(source: &Path, transform: &DecodeTransform) -> Resul
     decode_video_pipeline(source, interval, &geometry, &filters)
 }
 
-/// Detect ALAC in MP4 by container contents, independent of filename suffix.
+/// Detect ALAC in MP4 or Matroska by container contents, independent of filename suffix.
 pub fn is_alac_source(path: &Path) -> Result<bool> {
     use std::io::{Read, Seek, SeekFrom};
     let mut input = File::open(path)?;
@@ -931,9 +939,12 @@ pub fn is_alac_source(path: &Path) -> Result<bool> {
         Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(false),
         Err(e) => return Err(e.into()),
     }
-    if &prefix[4..] != b"ftyp" {
-        return Ok(false);
+    if prefix.starts_with(&[0x1a,0x45,0xdf,0xa3]) {
+        input.seek(SeekFrom::Start(0))?;
+        let reader=crate::container::webm::WebmReader::open(BufReader::new(input),Default::default())?;
+        return Ok(reader.tracks.iter().any(|t|t.kind==2 && t.codec=="A_ALAC"));
     }
+    if &prefix[4..] != b"ftyp" {return Ok(false);}
     input.seek(SeekFrom::Start(0))?;
     let reader = crate::container::mp4::Mp4Reader::open(BufReader::new(input), Default::default())?;
     Ok(reader
@@ -980,13 +991,21 @@ pub fn audio_source_info_selected(
     selected: Option<usize>,
 ) -> Result<AudioSourceInfo> {
     if is_alac_source(source)? {
+        use std::io::{Read,Seek,SeekFrom};
+        let mut input=File::open(source)?;let mut prefix=[0;4];input.read_exact(&mut prefix)?;input.seek(SeekFrom::Start(0))?;
+        if prefix==[0x1a,0x45,0xdf,0xa3] {
+            let reader=crate::container::webm::WebmReader::open(BufReader::new(input),Default::default())?;
+            let index=matroska_audio_index(&reader,selected)?;let track=&reader.tracks[index];let decoder=crate::native_audio_decoder::PacketPcmDecoder::from_matroska(track)?;
+            if track.sample_rate!=u64::from(decoder.sample_rate()) || track.channels!=u64::from(decoder.channels()) {return Err(invalid("Matroska audio geometry disagrees with configuration"));}
+            return Ok(AudioSourceInfo {stream_index:index,sample_rate:decoder.sample_rate(),channels:decoder.channels(),codec:if track.codec=="A_ALAC" {"alac"} else {"aac"}});
+        }
         let reader = crate::container::mp4::Mp4Reader::open(
             BufReader::new(File::open(source)?),
             Default::default(),
         )?;
         let index = mp4_audio_index(&reader, selected)?;
         let track = &reader.tracks()[index];
-        let decoder = crate::native_audio_decoder::Mp4PcmDecoder::new(track)?;
+        let decoder = crate::native_audio_decoder::PacketPcmDecoder::new(track)?;
         if track.sample_rate != decoder.sample_rate() || track.channels != decoder.channels() {
             return Err(invalid("MP4 container and decoder geometry disagree"));
         }
@@ -1009,4 +1028,10 @@ pub fn audio_source_info_selected(
             codec: "aac",
         })
     }
+}
+
+pub(crate) fn matroska_audio_index<R:std::io::Read+std::io::Seek>(reader:&crate::container::webm::WebmReader<R>,selected:Option<usize>)->Result<usize> {
+    let index=audio_index(reader.tracks.iter().map(|t|t.kind==2),selected)?;
+    if !matches!(reader.tracks[index].codec.as_str(),"A_AAC"|"A_ALAC") {return Err(invalid("selected Matroska audio stream is neither AAC nor ALAC"));}
+    Ok(index)
 }

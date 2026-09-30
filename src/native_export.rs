@@ -458,12 +458,12 @@ fn export_pcm_selected(
     };
     let (input_rate, input_channels) = if let Some(reader) = &mp4 {
         let index = if allow_wave {crate::native_media::mp4_audio_index(reader,selected)?} else {crate::native_media::mp4_aac_index(reader,selected)?};
-        let decoder=crate::native_audio_decoder::Mp4PcmDecoder::new(&reader.tracks()[index])?;
+        let decoder=crate::native_audio_decoder::PacketPcmDecoder::new(&reader.tracks()[index])?;
         (decoder.sample_rate(),decoder.channels())
     } else if let Some(reader) = &matroska {
-        let index = crate::native_media::matroska_aac_index(reader, selected)?;
-        let decoder = crate::codec::aac_native::NativeAacDecoder::new(&reader.tracks[index].codec_private)?;
-        (decoder.sample_rate(), u16::from(decoder.channels()))
+        let index = if allow_wave {crate::native_media::matroska_audio_index(reader,selected)?} else {crate::native_media::matroska_aac_index(reader,selected)?};
+        let decoder=crate::native_audio_decoder::PacketPcmDecoder::from_matroska(&reader.tracks[index])?;
+        (decoder.sample_rate(),decoder.channels())
     } else if let Some((_,info))=&wave {
         (info.sample_rate,info.channels)
     } else {
@@ -500,7 +500,7 @@ fn export_pcm_selected(
     let mut stats = if let Some(reader) = mp4 {
         crate::native_media::decode_mp4_audio_reader_controlled(reader, &mut pcm, interval, selected, &mut control)?
     } else if let Some(reader) = matroska {
-        crate::native_media::decode_matroska_aac_reader_controlled(reader, &mut pcm, interval, selected, &mut control)?
+        crate::native_media::decode_matroska_audio_reader_controlled(reader, &mut pcm, interval, selected, &mut control)?
     } else if let Some((reader,info))=wave {
         crate::native_pcm::decode_reader(reader,info,&mut pcm,interval,&mut control)?
     } else {

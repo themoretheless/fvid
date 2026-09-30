@@ -2341,7 +2341,8 @@ cookie rate/channel geometry before output publication.
 
 The AAC-specific export functions still reject non-AAC tracks. Unsupported
 ALAC profiles/layouts and ambiguous default ALAC audio selection retain the
-legacy adapter. Matroska ALAC is not yet admitted by this export path; player
+legacy adapter. Matroska ALAC now uses the same owned packet decoder and
+sample timeline, including interval selection and container trimming. Player
 support is unchanged. This does not remove the remaining `media` dependency.
 
 `tests/native_alac_media.rs` compares seven MP4 fixtures (mono/stereo, 16/24-bit,
