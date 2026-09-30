@@ -2845,3 +2845,17 @@ Five fixtures cover VP9 8/10/12-bit and AV1. Tests compare owned input/output
 planes and clocks, and optionally independent FFmpeg-decoded output at the
 original sample depth when `FVID_REFERENCE_FFMPEG` is set. This is fixture
 coverage, not full codec conformance or complete removal of the legacy adapter.
+
+### Nominal duration in owned Matroska output
+
+`TrackOptions.default_duration_ns` writes Matroska `DefaultDuration` when
+nonzero. This is a nominal hint; explicit packet durations and variable frame
+intervals remain unchanged. Planar FFV1 export preserves a WebM track's
+existing hint or uses its first displayed interval when the source omits it.
+Y4M uses its frame clock. MP4 conversion writes a hint only when all planned
+video packet durations are equal. Audio codec delay remains independent.
+
+The WebM/FFV1 test checks the hint and exact frame intervals, including a
+single-frame fixture decoded by the independent reference without an explicit
+passthrough frame-rate override. A missing nominal hint previously let that
+reference choose a billion-frame-per-second clock and drop the only frame.

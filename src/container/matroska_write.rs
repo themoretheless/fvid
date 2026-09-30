@@ -190,6 +190,9 @@ impl Default for VideoMetadata {
 /// Per-track container options. Rotation is clockwise in display space.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct TrackOptions {
+    /// Nominal frame/block duration in nanoseconds; zero omits the hint.
+    /// Individual BlockDuration values remain authoritative for variable timing.
+    pub default_duration_ns: u64,
     pub video: Option<VideoMetadata>,
     /// Rectangular rotations supported by the native player: 0, 90, 180, 270.
     pub rotation: u16,
@@ -293,6 +296,9 @@ fn track_entry(
     .concat();
     if delay != 0 {
         data.extend(uint(0x56aa, delay)?);
+    }
+    if let Some(duration)=options.map(|o|o.default_duration_ns).filter(|&n|n!=0) {
+        data.extend(uint(0x23e383,duration)?);
     }
     if !spec.name.is_empty() {
         data.extend(element(0x536e, spec.name.as_bytes())?);
@@ -472,6 +478,7 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
                 video: *video,
                 rotation: 0,
                 codec_delay_ns: 0,
+                default_duration_ns: 0,
             })
             .collect();
         Self::new_with_options(output, tracks, &options)

@@ -184,9 +184,13 @@ pub(crate) fn plan(track: &Track, movie_scale: u32, cancel: Option<&CancelFlag>)
         track.pixel_aspect
     };
     let colour = track.colour;
+    let default_duration_ns=if track.handler==*b"vide" {
+        packets.first().map(|p|p.duration).filter(|&d|d>0 && packets.iter().all(|p|p.duration==d)).unwrap_or(0)
+    }else{0};
     Ok(TrackPlan {
         packets,
         options: TrackOptions {
+            default_duration_ns,
             rotation: track.rotation,
             video: Some(VideoMetadata {
                 pixel_aspect: aspect,

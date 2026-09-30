@@ -59,6 +59,13 @@ fn vp9_av1_frames_and_clock_survive_owned_ffv1_export() {
             Default::default(),
         )
         .unwrap();
+        assert!(b.tracks[0].default_duration_ns > 0);
+        if a.tracks[0].default_duration_ns != 0 {
+            assert_eq!(
+                a.tracks[0].default_duration_ns,
+                b.tracks[0].default_duration_ns
+            );
+        }
         assert_eq!(a.tracks[0].name, b.tracks[0].name);
         assert_eq!(a.tracks[0].language, b.tracks[0].language);
         assert_eq!(a.tracks[0].pixel_aspect(), b.tracks[0].pixel_aspect());
@@ -107,10 +114,14 @@ fn vp9_av1_frames_and_clock_survive_owned_ffv1_export() {
                 );
                 result.stdout
             };
-            let a=decode(&source);let b=decode(&output);
-            assert_eq!(a.len(),b.len(),"independent decoder length: {name}");
-            let mismatch=a.iter().zip(&b).position(|(a,b)|a!=b);
-            assert!(mismatch.is_none(),"independent decoder mismatch: {name} byte {mismatch:?}");
+            let a = decode(&source);
+            let b = decode(&output);
+            assert_eq!(a.len(), b.len(), "independent decoder length: {name}");
+            let mismatch = a.iter().zip(&b).position(|(a, b)| a != b);
+            assert!(
+                mismatch.is_none(),
+                "independent decoder mismatch: {name} byte {mismatch:?}"
+            );
         }
         std::fs::remove_file(output).unwrap();
     }

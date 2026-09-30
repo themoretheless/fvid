@@ -116,7 +116,26 @@ pub fn write<W: Write + Seek>(
         name: webm.as_ref().map_or("", |r| r.tracks[0].name.as_str()),
         language: webm.as_ref().map_or("", |r| r.tracks[0].language.as_str()),
     }];
+    let default_duration_ns = match webm.as_ref().map(|r| r.tracks[0].default_duration_ns) {
+        Some(duration) if duration != 0 => duration,
+        _ => {
+            let (start, end, scale) = reader
+                .frame_interval()
+                .ok_or_else(|| invalid("missing planar frame clock"))?;
+            if scale == 0 {
+                return Err(invalid("zero planar frame clock"));
+            }
+            u64::try_from(
+                end.checked_sub(start)
+                    .and_then(|n| n.checked_mul(1_000_000_000))
+                    .ok_or_else(|| invalid("planar frame duration overflow"))?
+                    / u128::from(scale),
+            )
+            .map_err(|_| invalid("planar frame duration overflow"))?
+        }
+    };
     let options = [TrackOptions {
+        default_duration_ns,
         video: Some(VideoMetadata {
             pixel_aspect: crate::native_export::transformed_aspect(
                 reader.pixel_aspect(),
