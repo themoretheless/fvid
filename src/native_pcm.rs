@@ -1,6 +1,6 @@
 //! Owned streaming RIFF/WAVE PCM inspection, sample slicing and float conversion.
 mod normalize;
-pub use normalize::{NormalizeTarget, NormalizeReport, normalize_file as normalize_loudness_file};
+pub use normalize::{NormalizationPhase, NormalizationProgress, NormalizationProgressHook, normalize_file_controlled as normalize_loudness_file_controlled, NormalizeTarget, NormalizeReport, normalize_file as normalize_loudness_file};
 mod loudness;
 pub use loudness::{IntegratedLoudness, LoudnessMeter, default_weights as loudness_channel_weights, measure_file_controlled as measure_loudness_file_controlled, measure_file as measure_loudness_file};
 mod k_weight;

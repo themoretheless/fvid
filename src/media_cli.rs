@@ -26,13 +26,13 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     }
     if args.first().map(String::as_str) == Some("normalize-loudness") {
         if args.len()==2 && matches!(args[1].as_str(),"--help"|"-h") {
-            println!("fvid media normalize-loudness INPUT OUTPUT.wav [--target-lufs -16] [--sample-peak-dbfs -1.5] [--streams INDEX] [--channel-weights W,...] [--quiet]\nConstant gain preserves dynamics; the ceiling is sample peak, not true peak.");
+            println!("fvid media normalize-loudness INPUT OUTPUT.wav [--target-lufs -16] [--sample-peak-dbfs -1.5] [--streams INDEX] [--channel-weights W,...] [--quiet] [--progress]\nConstant gain preserves dynamics; the ceiling is sample peak, not true peak.");
             return Ok(());
         }
         let source = std::path::Path::new(args.get(1).ok_or("normalize-loudness requires INPUT OUTPUT.wav")?);
         let destination = std::path::Path::new(args.get(2).ok_or("normalize-loudness requires OUTPUT.wav")?);
         let (mut selected, mut weights, mut target_lufs, mut ceiling) = (None,None,None,None);
-        let mut quiet=false;
+        let mut quiet=false;let mut progress=false;
         let mut options=args[3..].iter();
         while let Some(option)=options.next() {
             match option.as_str() {
@@ -50,6 +50,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                     *slot=Some(options.next().ok_or("missing normalization target")?.parse::<f64>()?);
                 }
                 "--quiet"=>quiet=true,
+                "--progress"=>progress=true,
                 _=>return Err(format!("unsupported normalization option: {option}").into()),
             }
         }
@@ -65,7 +66,10 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             if !quiet {println!("{}",serde_json::to_string_pretty(&plan)?);}
             return Ok(());
         }
-        let report=fvid::native_pcm::normalize_loudness_file(source,destination,selected,&weights,target,None)?;
+        let hook=progress.then(||fvid::native_pcm::NormalizationProgressHook::new(|event| {
+            eprintln!("{}",serde_json::json!({"phase":event.phase.as_str(),"packets":event.packets,"payload_bytes":event.payload_bytes,"phase_complete":event.phase_complete,"done":event.done}));
+        }));
+        let report=fvid::native_pcm::normalize_loudness_file_controlled(source,destination,selected,&weights,target,None,hook.as_ref())?;
         if !quiet {println!("{}",serde_json::to_string_pretty(&serde_json::json!({
             "backend":"fvid", "sample_frames":report.sample_frames, "gain_db":report.gain_db,
             "peak_limited":report.peak_limited, "source_integrated_lufs":report.source.integrated_lufs,

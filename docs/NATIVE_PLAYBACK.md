@@ -2800,3 +2800,21 @@ CLI/native/public API output equality and no-overwrite behavior are tested.
 Single-pass progress hooks are explicitly rejected for this two-pass operation
 until phase-aware reporting is implemented; cancellation remains supported.
 Legacy dynamic loudnorm remains separate and is not represented by this API.
+
+### Phase-aware owned normalization progress
+
+`native_pcm::normalize_loudness_file_controlled` and
+`media::normalize_loudness_controlled` accept a `NormalizationProgressHook`.
+Events identify `measure` or `export`, with phase-local packet and payload-byte
+counts. `phase_complete` marks each pass; `done` marks only successful atomic
+WAVE publication. Cancellation during either pass returns an error and does
+not publish an output. These counters do not represent a time percentage.
+
+`fvid media normalize-loudness INPUT OUTPUT.wav --progress` writes the same
+phase events as JSON lines to stderr, leaving the result JSON on stdout.
+The existing single-pass `CopyOptions.progress` remains rejected for this
+operation; callers use the explicit phase-aware hook instead.
+
+The integration test verifies equal PCM output through the original,
+controlled and public media APIs, export cancellation without output, and
+output existence when the public API emits its final `done` event.
