@@ -81,6 +81,7 @@ fn cli_api_filters_and_failure_publication() {
     let request = fvid::media_info::LosslessTransform {
         horizontal_flip: true,
         avgblur: Some("sizeX=2:sizeY=1".into()),
+        boxblur: Some("1:2:1:1".into()),
         chromashift: Some("cbh=1:edge=wrap".into()),
         ..Default::default()
     };
@@ -96,6 +97,8 @@ fn cli_api_filters_and_failure_publication() {
             "--hflip",
             "--avgblur",
             "sizeX=2:sizeY=1",
+            "--boxblur",
+            "1:2:1:1",
             "--chromashift",
             "cbh=1:edge=wrap",
         ])
@@ -193,6 +196,7 @@ fn independent_decoder_reads_own_export_without_pixel_changes() {
         let request = fvid::media_info::LosslessTransform {
             horizontal_flip: true,
             avgblur: Some("sizeX=2:sizeY=1".into()),
+            boxblur: Some("1:2:1:1".into()),
             negate: Some("0".into()),
             chromashift: Some("cbh=1:edge=wrap".into()),
             ..Default::default()
@@ -208,7 +212,7 @@ fn independent_decoder_reads_own_export_without_pixel_changes() {
             .arg(&src)
             .args([
                 "-vf",
-                "hflip,avgblur=sizeX=2:sizeY=1,negate,chromashift=cbh=1:edge=wrap",
+                "hflip,avgblur=sizeX=2:sizeY=1,boxblur=1:2:1:1,negate,chromashift=cbh=1:edge=wrap",
                 "-f",
                 "rawvideo",
                 "-pix_fmt",

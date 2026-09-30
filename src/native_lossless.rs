@@ -310,6 +310,7 @@ pub fn identity(transform: &crate::media_info::LosslessTransform) -> bool {
 
 /// Admission for currently owned spatial transformations.
 pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
+    if transform.boxblur.as_deref().is_some_and(|args| crate::native_boxblur::BoxBlur::parse(args).is_err()) { return false; }
     matches!(
         transform,
         crate::media_info::LosslessTransform {
@@ -335,7 +336,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             unsharp: None,
             hue: None,
             avgblur: _,
-            boxblur: None,
+            boxblur: _,
             negate: _,
             edgedetect: None,
             sobel: _,
@@ -460,6 +461,7 @@ pub fn configuration(
         }),
     };
     let request = crate::media_info::DecodeTransform {
+        boxblur: transform.boxblur.clone(),
         avgblur: transform.avgblur.clone(),
         negate: transform.negate.clone(),
         sobel: transform.sobel.clone(),

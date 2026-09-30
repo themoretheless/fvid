@@ -778,6 +778,7 @@ pub(crate) fn matroska_aac_index<R: std::io::Read + std::io::Seek>(reader: &crat
 /// Whether all requested operations have an owned implementation.
 /// Exhaustive matching forces new request fields to receive an explicit policy.
 pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
+    if transform.boxblur.as_deref().is_some_and(|args| crate::native_boxblur::BoxBlur::parse(args).is_err()) { return false; }
     matches!(transform, DecodeTransform {
         crop: _,
         vertical_flip: _,
@@ -800,7 +801,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         unsharp: None,
         hue: None,
         avgblur: _,
-        boxblur: None,
+        boxblur: _,
         negate: _,
         edgedetect: None,
         sobel: _,

@@ -2236,3 +2236,24 @@ The Y4M FFV1 suite additionally compares the complete geometry/blur/negate/
 chroma-shift export chain, decoded by the independent reference, pixel for
 pixel. Reference FFmpeg remains test-only for this path; the general
 `media` feature still retains its legacy dependency for unmigrated operations.
+
+### Owned box blur
+
+The same native decode and FFV1 routes now implement integer `boxblur` options:
+`luma_radius:luma_power:chroma_radius:chroma_power:alpha_radius:alpha_power`,
+including the long option names and aliases `lr`, `lp`, `cr`, `cp`, `ar`, `ap`.
+Luma defaults to radius 2 and power 2. Omitted chroma/alpha values inherit luma;
+`-1` powers also inherit. Alpha parameters are validated, but these packed YUV
+frames have no alpha plane. Radius expressions retain the existing adapter.
+
+The owned implementation reflects border samples, performs all horizontal
+passes before vertical passes, and quantizes each pass using the media filter's
+16-bit reciprocal rounding. It supports planar YUV 8–16-bit storage and validates
+all plane sizes, sample values and radii before mutation. Scratch is two sample
+lines plus one output frame; each pass takes linear work in the plane size.
+
+The optional reference test in `tests/native_boxblur.rs` covers six chroma
+layouts, available 8–16-bit formats, independent luma/chroma radii and powers,
+and disabled planes. Small impulse tests fix reflected-edge and repeated-pass
+results explicitly. The export suite verifies the complete hflip/avgblur/
+boxblur/negate/chromashift chain through independently decoded FFV1 output.
