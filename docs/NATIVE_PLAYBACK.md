@@ -2468,9 +2468,15 @@ by contents or the `yuv4mpegpipe`/`y4m` format override. It counts FRAME markers
 and skips pixel payload by checked file offsets, returning rawvideo dimensions,
 frame count, frame rate/time base and exact rational duration. Tagged frame
 markers are supported. Truncated frames, invalid rates and duplicate F tokens
-fail; missing F leaves rate/duration unknown. Unsupported interlaced/high-bit
+fail; missing F uses the legacy-compatible 25 fps default. Unsupported interlaced/high-bit
 profiles retain the adapter before native parsing is selected. No pixel decoder
 or FFmpeg is needed for the admitted probe path.
 
 `native_y4m_probe` tests three layouts at 30000:1001, native/public API agreement,
 format override, malformed/truncated input and unsupported-profile admission.
+
+Y4M probe frame rates are reduced to their canonical rational representation,
+and overall duration rounds to the nearest microsecond like the previous probe.
+An optional independent ffprobe regression covers 15 combinations of missing,
+integer and fractional rates with one, three and seven frames. Set
+`FVID_REFERENCE_FFPROBE` to run it; reference tools remain test-only.

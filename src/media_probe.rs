@@ -367,6 +367,9 @@ fn y4m(source: &Path) -> Result<MediaInfo> {
             rate=Some([n,d]);
         }
     }
+    let [n,d]=rate.unwrap_or([25,1]);
+    let mut a=n;let mut b=d;while b!=0 {let r=a%b;a=b;b=r;}
+    let rate=Some([n/a,d/a]);
     let mut frames=0i64;
     while crate::line(&mut input,&mut line).map_err(|e|e.to_string())? {
         if line!=b"FRAME\n" && !line.starts_with(b"FRAME ") {return Err("expected Y4M FRAME marker".into());}
@@ -375,7 +378,7 @@ fn y4m(source: &Path) -> Result<MediaInfo> {
         input.seek(SeekFrom::Start(end)).map_err(|e|e.to_string())?;
         frames=frames.checked_add(1).ok_or("Y4M frame count overflow")?;
     }
-    let duration_us=rate.map(|[n,d]|i64::try_from(i128::from(frames)*i128::from(d)*1_000_000/i128::from(n)).map_err(|_|"Y4M duration overflow".to_string())).transpose()?;
+    let duration_us=rate.map(|[n,d]|i64::try_from((i128::from(frames)*i128::from(d)*1_000_000+i128::from(n)/2)/i128::from(n)).map_err(|_|"Y4M duration overflow".to_string())).transpose()?;
     Ok(MediaInfo {path:source.to_path_buf(),format:"yuv4mpegpipe".into(),start_us:Some(0),duration_us,bit_rate:None,metadata:Default::default(),chapters:vec![],streams:vec![StreamInfo {
         index:0,media_type:"video".into(),codec:"rawvideo".into(),time_base:rate.map_or([0,1],|[n,d]|[d,n]),start:Some(0),duration:rate.map(|_|frames),bit_rate:None,average_frame_rate:rate.unwrap_or([0,1]),profile:None,level:None,disposition:0,metadata:Default::default(),width:i32::try_from(header.width).map_err(|_|"Y4M width exceeds API range")?,height:i32::try_from(header.height).map_err(|_|"Y4M height exceeds API range")?,pixel_format:-1,sample_rate:0,channels:0,video_delay:0,extradata_bytes:0,
     }]})
