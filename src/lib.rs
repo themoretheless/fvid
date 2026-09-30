@@ -84,6 +84,7 @@ pub mod native_lossless;
 pub mod native_lossless_y4m;
 pub mod native_morphology;
 pub mod native_export;
+pub mod native_subtitle;
 pub mod publish;
 pub mod resident;
 #[cfg(feature = "player")]

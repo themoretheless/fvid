@@ -157,3 +157,13 @@ pub use audio_mix::{MixDuration, MixAudioOptions, MixAudioStats, MergeAudioStats
 
 mod time;
 pub use time::parse_time;
+
+#[derive(serde::Serialize)]
+pub struct NativeSubtitleStats {
+    pub backend: &'static str,
+    pub encoder: String,
+    pub cues: u64,
+    pub packets_in: u64,
+    pub packets_out: u64,
+    pub payload_bytes: u64,
+}

@@ -2575,4 +2575,17 @@ packet timestamp and duration; callers supply Matroska ASS event payloads.
 Invalid headers and video metadata/codec delay on subtitle tracks fail before
 writing the container header. Independent tests decode two events with multiline
 and Unicode text to SRT and verify exact cue times. This is muxer support;
-`convert-subtitles` still requires its remaining native conversion integration.
+container-embedded subtitle conversion still requires its native integration.
+
+### Owned UTF-8 SubRip to ASS conversion
+
+`media convert-subtitles INPUT.srt OUTPUT.mkv [--codec ass] [--streams 0]`
+now works through the owned parser and ASS Matroska muxer, including headless
+builds. It preserves millisecond timestamps, overlapping cues, Unicode and
+multiline text, and translates basic bold/italic/underline tags to ASS overrides.
+Invalid timing, overflow, empty cues or invalid stream selection fail before
+publication. Output is flushed/synced and linked atomically without replacing
+an existing path; temporary files are cleaned on failure. Input text is limited
+to 64 MiB. Unsupported encodings/markup and container subtitle input retain the
+legacy conversion adapter until their migration. Independent decoder tests
+check cue times, Unicode, line breaks and bold text.

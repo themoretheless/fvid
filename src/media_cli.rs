@@ -2,6 +2,23 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str)==Some("convert-subtitles") && args.len()>=3 {
+        let mut streams=Vec::new();let mut quiet=false;let mut supported=true;
+        let mut options=args[3..].iter();
+        while let Some(option)=options.next() {
+            match option.as_str() {
+                "--quiet"=>quiet=true,
+                "--codec"=>{ if options.next().map(String::as_str)!=Some("ass") {supported=false;} },
+                "--streams"=>{streams=options.next().ok_or("missing subtitle stream")?.split(',').map(str::parse).collect::<std::result::Result<Vec<usize>,_>>()?;},
+                _=>supported=false,
+            }
+        }
+        if supported {
+            if let Some(stats)=fvid::native_subtitle::try_convert_srt(std::path::Path::new(&args[1]),std::path::Path::new(&args[2]),&streams)? {
+                if !quiet {println!("{}",serde_json::to_string_pretty(&stats)?);}return Ok(());
+            }
+        }
+    }
     if native_mix(args)? || native_merge(args)? { return Ok(()); }
     if args.first().map(String::as_str)==Some("transcode-lossless") && args.len()>=3 {
         let mut owned=args.to_vec();owned[0]="decode".into();
@@ -3146,7 +3163,7 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         return Err("--loudnorm-args/--dual-pass require loudnorm".into());
     }
     if command == "convert-subtitles" && paths.len() == 2 {
-        let stats = fvid_media::convert_subtitles(
+        let stats = fvid::media::convert_subtitles(
             &paths[0],
             &paths[1],
             &fvid_media::SubtitleConvertOptions {
