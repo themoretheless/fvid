@@ -510,19 +510,8 @@ fn plain_decode(args: &[String]) -> Result<Option<DecodeRequest<'_>>, Box<dyn st
     Ok(path.map(|path| (path, quiet, interval)))
 }
 fn decode_time(text: &str) -> Result<std::time::Duration, Box<dyn std::error::Error>> {
-    let (whole, fraction) = text.split_once('.').unwrap_or((text, ""));
-    if whole.is_empty() || !whole.bytes().all(|b| b.is_ascii_digit())
-        || fraction.len() > 6 || !fraction.bytes().all(|b| b.is_ascii_digit()) {
-        return Err("time must be nonnegative decimal seconds with at most 6 fractional digits".into());
-    }
-    let whole: u64 = whole.parse()?;
-    let digits = fraction.len();
-    let fraction: u64 = if fraction.is_empty() { 0 } else { fraction.parse()? };
-    let micros = whole.checked_mul(1_000_000)
-        .and_then(|v| v.checked_add(fraction * 10u64.pow(6 - digits as u32)));
-    // Match the existing media API's signed microsecond range.
-    let micros = micros.filter(|v| *v <= i64::MAX as u64).ok_or("time overflow")?;
-    Ok(std::time::Duration::from_micros(micros))
+    let micros=fvid::media_info::parse_time(text)?;
+    Ok(std::time::Duration::from_micros(micros as u64))
 }
 
 #[cfg(feature = "media")]
@@ -1549,13 +1538,13 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             }
             "--xfade-duration" => {
                 i += 1;
-                xfade_duration = Some(fvid_media::parse_time(
+                xfade_duration = Some(fvid::media_info::parse_time(
                     args.get(i).ok_or("missing xfade duration")?,
                 )?);
             }
             "--xfade-offset" => {
                 i += 1;
-                xfade_offset = Some(fvid_media::parse_time(
+                xfade_offset = Some(fvid::media_info::parse_time(
                     args.get(i).ok_or("missing xfade offset")?,
                 )?);
             }
@@ -1688,11 +1677,11 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             }
             "--from" => {
                 i += 1;
-                from = Some(fvid_media::parse_time(args.get(i).ok_or("missing start")?)?);
+                from = Some(fvid::media_info::parse_time(args.get(i).ok_or("missing start")?)?);
             }
             "--to" => {
                 i += 1;
-                to = Some(fvid_media::parse_time(args.get(i).ok_or("missing end")?)?);
+                to = Some(fvid::media_info::parse_time(args.get(i).ok_or("missing end")?)?);
             }
             value if value.starts_with("--") => {
                 return Err(format!("unknown media option: {value}").into());

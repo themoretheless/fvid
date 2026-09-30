@@ -2496,3 +2496,12 @@ through the same FVid dispatcher as the public API, rather than calling the
 legacy crate directly. CLI regressions compare complete FFV1 outputs and JSON
 plans with the API for AVC, HEVC Main and Main10 crop requests. Unsupported
 encoders/options retain the dispatcher’s original fallback behavior.
+
+### Shared exact time parsing
+
+Decimal-second parsing now lives in `fvid-media-info` without a codec/demuxer
+backend. The legacy media API reexports the same function, preserving its name
+and signed-microsecond contract. Both full and headless CLI paths use it; no
+float rounding is introduced. Boundary tests include the maximum signed
+microsecond value and overflow by one microsecond. This removes a helper-level
+legacy dependency; the full media crate still links FFmpeg for remaining work.

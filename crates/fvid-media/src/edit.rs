@@ -1,30 +1,6 @@
 //! Strict stream-copy editing. Reject unsupported boundaries rather than silently reencode.
 use super::*;
 
-/// Decimal seconds, parsed exactly into microseconds (no floating-point rounding).
-pub fn parse_time(text: &str) -> Result<i64> {
-    let (whole, fraction) = text.split_once('.').unwrap_or((text, ""));
-    if whole.is_empty()
-        || !whole.bytes().all(|b| b.is_ascii_digit())
-        || fraction.len() > 6
-        || !fraction.bytes().all(|b| b.is_ascii_digit())
-    {
-        return Err(
-            "time must be nonnegative decimal seconds with at most 6 fractional digits".into(),
-        );
-    }
-    let whole = whole.parse::<i64>().map_err(|_| "time overflow")?;
-    let fraction = if fraction.is_empty() {
-        0
-    } else {
-        fraction.parse::<i64>().map_err(|_| "invalid fraction")?
-            * 10i64.pow(6 - fraction.len() as u32)
-    };
-    whole
-        .checked_mul(1_000_000)
-        .and_then(|v| v.checked_add(fraction))
-        .ok_or_else(|| "time overflow".into())
-}
 fn ticks(us: i64, tb: AVRational) -> Result<i64> {
     if tb.num <= 0 || tb.den <= 0 {
         return Err("invalid time base".into());
