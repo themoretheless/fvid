@@ -33,12 +33,46 @@ fn quicktime_without_file_type_atom_uses_owned_probe_and_audio_export() {
         assert_eq!(info.streams, baseline.streams);
         assert_eq!(info.duration_us, baseline.duration_us);
         assert!(fvid::native_media::is_owned_audio_source(&input).unwrap());
+        let plan = fvid::native_plan::remux(&input).unwrap().unwrap();
+        assert!(plan.notes.iter().any(|note| note.contains("backend: fvid")));
+        let cli = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "plan", "remux"])
+            .arg(&input)
+            .output()
+            .unwrap();
+        assert!(
+            cli.status.success(),
+            "{}",
+            String::from_utf8_lossy(&cli.stderr)
+        );
         let output = input.with_extension("f32le");
         fvid::native_export::export_audio_pcm_selected(
             &input, &output, None, 1.0, None, None, None, None, None,
         )
         .unwrap();
         assert_eq!(std::fs::read(output).unwrap(), expected);
+        for extension in ["mp4", "mka"] {
+            let remuxed = input.with_extension(format!("cli.{extension}"));
+            let cli = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+                .args(["media", "remux"])
+                .arg(&input)
+                .arg(&remuxed)
+                .output()
+                .unwrap();
+            assert!(
+                cli.status.success(),
+                "{}",
+                String::from_utf8_lossy(&cli.stderr)
+            );
+            let result: serde_json::Value = serde_json::from_slice(&cli.stdout).unwrap();
+            assert_eq!(result["backend"], "fvid");
+            let decoded = input.with_extension(format!("cli.{extension}.f32le"));
+            fvid::native_export::export_audio_pcm_selected(
+                &remuxed, &decoded, None, 1.0, None, None, None, None, None,
+            )
+            .unwrap();
+            assert_eq!(std::fs::read(decoded).unwrap(), expected);
+        }
         #[cfg(feature = "media")]
         {
             let info = fvid::media::probe(&input).unwrap();
@@ -46,6 +80,17 @@ fn quicktime_without_file_type_atom_uses_owned_probe_and_audio_export() {
             let output = input.with_extension("api.f32le");
             fvid::media::decode_audio(&input, &output, &Default::default()).unwrap();
             assert_eq!(std::fs::read(output).unwrap(), expected);
+            for extension in ["mp4", "mka"] {
+                let remuxed = input.with_extension(extension);
+                let stats = fvid::media::remux(&input, &remuxed, &Default::default()).unwrap();
+                assert_eq!(stats.backend, "fvid");
+                let decoded = input.with_extension(format!("{extension}.f32le"));
+                fvid::media::decode_audio(&remuxed, &decoded, &Default::default()).unwrap();
+                assert_eq!(std::fs::read(decoded).unwrap(), expected, "{extension}");
+                let published = std::fs::read(&remuxed).unwrap();
+                assert!(fvid::media::remux(&input, &remuxed, &Default::default()).is_err());
+                assert_eq!(std::fs::read(&remuxed).unwrap(), published);
+            }
         }
     }
 }

@@ -140,7 +140,7 @@ pub fn remux(source: &std::path::Path) -> Result<Option<MediaPlan>> {
         if n == 0 { break; }
         count += n;
     }
-    let mp4 = count == 8 && &signature[4..8] == b"ftyp";
+    let mp4 = crate::container::mp4::recognizes_prefix(&signature[..count]);
     let adts = crate::container::adts::header(&signature[..count]).is_some();
     let matroska=count>=4 && signature[..4]==[0x1a,0x45,0xdf,0xa3];
     if !mp4 && !adts && !matroska { return Ok(None); }

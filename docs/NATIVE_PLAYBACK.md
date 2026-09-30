@@ -2408,6 +2408,9 @@ select the owned MP4 reader. Recognition does not validate the file; malformed
 recognized atoms still fail in the parser. Integration checks replace the
 file-type atom with legal opaque opening atoms without changing sample offsets,
 then compare metadata and exported AAC PCM through native and media APIs.
+The same fixtures exercise native remux plans and headless CLI remux into MP4
+and Matroska, comparing decoded sample bytes after publication. Media API
+remux also checks both outputs and preserves an existing destination on error.
 
 The MP4 reader now reads `enda` directly or inside `wave` for `fl32`, `fl64`,
 `in24` and `in32`, preserving the endian flag for both the native exporter and
