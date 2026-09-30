@@ -2425,3 +2425,17 @@ WebM fixtures, including VP9 10/12-bit sources. Existing independent filter
 pixel oracles cover filter arithmetic; this new test covers API routing.
 This removes foreign decode from these supported requests, while other media
 operations still depend on the legacy adapter.
+
+### Lossless crop convenience API uses the owned path
+
+`media::crop_lossless` now constructs the equivalent crop transform and calls
+FVid's `media::transcode_lossless` dispatcher instead of the legacy reexport.
+Eligible MP4/Y4M requests therefore use the same owned demuxer, spatial pipeline,
+FFV1 encoder and Matroska publisher as the general transform API. Unsupported
+sources/options preserve the existing legacy behavior through that dispatcher.
+
+The convenience API regression checks every decoded FFV1 frame against the
+native crop result on AVC, HEVC Main and Main10 fixtures. Existing lossless tests
+also check companion audio, metadata, interval edits, cancellation and atomic
+publication. This closes another foreign-code entrypoint for supported sources;
+full media dependency removal and installed virtual-camera proof remain open.

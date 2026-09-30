@@ -624,3 +624,57 @@ fn independent_pixels_match_spatial_transforms_and_rotation() {
     }
     assert!(failures.is_empty(), "{}", failures.join("\n"));
 }
+
+#[cfg(feature = "media")]
+#[test]
+fn crop_convenience_api_uses_owned_codec_and_exact_planes() {
+    use fvid::native_geometry::VideoGeometry;
+    let directory = directory("crop-api");
+    for (index, name) in ["video.mp4", "hevc/main-ipb.mp4", "hevc/main10-ipb.mp4"]
+        .iter()
+        .enumerate()
+    {
+        let source = fixture(name);
+        let output = directory.0.join(format!("{index}.mkv"));
+        let crop = fvid::media::CropRect {
+            x: 0,
+            y: 0,
+            width: 8,
+            height: 8,
+        };
+        let stats =
+            fvid::media::crop_lossless(&source, &output, crop, &Default::default()).unwrap();
+        assert_eq!(stats.backend, "fvid");
+        let mut original = NativeReader::software(
+            std::io::BufReader::new(std::fs::File::open(&source).unwrap()),
+            usize::MAX,
+        )
+        .unwrap();
+        let mut decoded = NativeReader::software(
+            std::io::BufReader::new(std::fs::File::open(&output).unwrap()),
+            usize::MAX,
+        )
+        .unwrap();
+        let geometry = VideoGeometry {
+            crop: Some([0, 0, 8, 8]),
+            ..Default::default()
+        };
+        let mut count = 0;
+        while let Some(frame) = original.read_frame_raw().unwrap() {
+            let [w, h] = original.dimensions();
+            let expected = geometry
+                .apply_display(&frame, w, h, original.rotation())
+                .unwrap();
+            let frame = decoded.read_frame_raw().unwrap().unwrap();
+            let [w, h] = decoded.dimensions();
+            let actual = VideoGeometry::default()
+                .apply_display(&frame, w, h, decoded.rotation())
+                .unwrap();
+            assert_eq!(actual.data, expected.data, "{name} frame {count}");
+            assert_eq!((actual.width, actual.height), (8, 8));
+            count += 1;
+        }
+        assert!(decoded.read_frame_raw().unwrap().is_none());
+        assert_eq!(stats.video_frames, count);
+    }
+}

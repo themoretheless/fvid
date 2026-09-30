@@ -300,6 +300,12 @@ pub fn plan_trim_y4m(source: &std::path::Path, from: i64, to: i64, options: &Cop
     crate::native_plan::trim_y4m(source,from,to,options.streams.first().copied())
 }
 
+/// Crop through the same owned FFV1 path as general lossless transforms.
+pub fn crop_lossless(source: &std::path::Path, destination: &std::path::Path,
+    crop: CropRect, options: &CopyOptions) -> Result<LosslessStats> {
+    transcode_lossless(source,destination,LosslessTransform {crop:Some(crop),..Default::default()},options)
+}
+
 /// Owned spatial FFV1 export for Y4M and MP4 video, retaining all supported AAC tracks.
 pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,transform:LosslessTransform,options:&CopyOptions)->Result<LosslessStats> {
     if crate::native_lossless::supports(&transform) && validate_native_copy_options(options,false).is_ok() && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
