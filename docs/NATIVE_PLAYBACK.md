@@ -2381,3 +2381,18 @@ This verifies in-process decode and transport, not installed CMIO delivery or
 60 fps throughput. CoreVideo pool tests require normal macOS access outside a
 restricted filesystem/process sandbox. A signed, activated extension and a
 second application consuming the camera remain required for installation proof.
+
+### Owned MP4/QuickTime PCM export
+
+Indexed `sowt`, `twos`, `fl32` and `fl64` audio tracks now share the owned MP4
+sample/edit timeline with AAC and ALAC. The general `decode-audio` CLI, plan,
+media API, mix and merge admission recognize these PCM sources. QuickTime
+integer PCM remains signed, including 8-bit samples; float width comes from
+the sample-entry codec. Unsupported sample entries and ambiguous/unindexed
+stream selection retain existing safeguards and adapters.
+
+The optional `native_mp4_pcm` integration test isolates four supported tracks
+from saved MOV fixtures using the independent muxer, then verifies FVid exports
+byte-for-byte against its decoder, sample-exact intervals/gain, API and plans.
+The muxer is test-only; FVid's export uses its own parser and PCM conversion.
+The remaining `media` migration is still incomplete.

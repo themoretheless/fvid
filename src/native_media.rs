@@ -953,12 +953,22 @@ pub fn is_alac_source(path: &Path) -> Result<bool> {
         .any(|t| t.handler == *b"soun" && t.codec == *b"alac"))
 }
 
+fn is_mp4_audio_container(path: &Path) -> Result<bool> {
+    use std::io::Read;
+    let mut prefix = [0;8];
+    match File::open(path)?.read_exact(&mut prefix) {
+        Ok(()) => Ok(&prefix[4..] == b"ftyp"),
+        Err(e) if e.kind()==std::io::ErrorKind::UnexpectedEof => Ok(false),
+        Err(e) => Err(e.into()),
+    }
+}
+
 /// Admission for compressed sources with an owned export implementation.
 /// Unsupported ALAC layouts and ambiguous default selection retain the adapter.
 /// Packed WAVE is detected separately by native_pcm::is_wave.
 pub fn is_owned_audio_source(path: &Path) -> Result<bool> {
     if is_aac_source(path)? { return Ok(true); }
-    Ok((is_alac_source(path)? || crate::native_export::is_matroska_source(path)?) && audio_source_info_selected(path, None).is_ok())
+    Ok((is_mp4_audio_container(path)? || crate::native_export::is_matroska_source(path)?) && audio_source_info_selected(path, None).is_ok())
 }
 
 pub(crate) fn mp4_audio_index<R: std::io::Read + std::io::Seek>(
@@ -974,8 +984,8 @@ pub(crate) fn mp4_audio_index<R: std::io::Read + std::io::Seek>(
         reader.tracks().iter().map(|t| t.handler == *b"soun"),
         selected,
     )?;
-    if !matches!(&reader.tracks()[index].codec, b"mp4a" | b"alac") {
-        return Err(invalid("selected MP4 audio stream is neither AAC nor ALAC"));
+    if !matches!(&reader.tracks()[index].codec, b"mp4a" | b"alac" | b"sowt" | b"twos" | b"fl32" | b"fl64") {
+        return Err(invalid("selected MP4 audio codec is not supported by the owned export"));
     }
     Ok(index)
 }
@@ -990,7 +1000,7 @@ pub fn audio_source_info_selected(
     source: &Path,
     selected: Option<usize>,
 ) -> Result<AudioSourceInfo> {
-    if is_alac_source(source)? || crate::native_export::is_matroska_source(source)? {
+    if is_mp4_audio_container(source)? || crate::native_export::is_matroska_source(source)? {
         use std::io::{Read,Seek,SeekFrom};
         let mut input=File::open(source)?;let mut prefix=[0;4];input.read_exact(&mut prefix)?;input.seek(SeekFrom::Start(0))?;
         if prefix==[0x1a,0x45,0xdf,0xa3] {
@@ -1013,11 +1023,7 @@ pub fn audio_source_info_selected(
             stream_index: index,
             sample_rate: decoder.sample_rate(),
             channels: decoder.channels(),
-            codec: if track.codec == *b"alac" {
-                "alac"
-            } else {
-                "aac"
-            },
+            codec: match &track.codec { b"alac"=>"alac",b"sowt"=>"pcm_sle",b"twos"=>"pcm_sbe",b"fl32"|b"fl64"=>"pcm_fle",_=>"aac" },
         })
     } else {
         let info = aac_source_info_selected(source, selected)?;
