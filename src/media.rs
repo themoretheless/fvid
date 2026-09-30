@@ -315,10 +315,22 @@ pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,t
     fvid_media::transcode_lossless(source,destination,transform,options)
 }
 
+/// Explicit FFV1 requests without codec overrides share the owned exporter.
+pub fn transcode(source: &std::path::Path, destination: &std::path::Path,
+    transform: LosslessTransform, options: &CopyOptions, settings: &EncoderSettings) -> Result<LosslessStats> {
+    if settings.name=="ffv1" && settings.options.is_empty()
+        && crate::native_lossless::supports(&transform)
+        && validate_native_copy_options(options,false).is_ok()
+        && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
+        return transcode_lossless(source,destination,transform,options);
+    }
+    fvid_media::transcode(source,destination,transform,options,settings)
+}
+
 /// Plan eligible FFV1 exports without opening the legacy demuxer.
 pub fn plan_transcode_lossless(source: &std::path::Path, transform: &LosslessTransform,
     options: &CopyOptions, encoder: Option<&str>) -> Result<MediaPlan> {
-    if encoder.is_none() && crate::native_lossless::supports(transform)
+    if matches!(encoder,None|Some("ffv1")) && crate::native_lossless::supports(transform)
         && validate_native_copy_options(options,false).is_ok()
         && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
         return crate::native_plan::transcode_lossless(source,transform);

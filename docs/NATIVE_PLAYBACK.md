@@ -2446,7 +2446,7 @@ full media dependency removal and installed virtual-camera proof remain open.
 metadata for requests admitted by the owned lossless executor. It describes
 video decode, companion AAC packet copying, requested geometry/filter stages,
 FFV1 v1 coding and Matroska atomic publication, with no libavfilter graph.
-Explicit encoder overrides and unsupported requests retain the prior planner.
+Encoder overrides other than `ffv1` and unsupported requests retain the prior planner.
 The planner validates native admission and filter syntax; sample-plane geometry
 and payload correctness remain execution checks, stated in the returned notes.
 
@@ -2480,3 +2480,13 @@ and overall duration rounds to the nearest microsecond like the previous probe.
 An optional independent ffprobe regression covers 15 combinations of missing,
 integer and fractional rates with one, three and seven frames. Set
 `FVID_REFERENCE_FFPROBE` to run it; reference tools remain test-only.
+
+### Explicit FFV1 transcode API
+
+`media::transcode` with encoder `ffv1` and no codec options now uses the owned
+lossless exporter when source, transform and copy options meet that exporter's
+admission. Explicit FFV1 planning uses the same native plan as the default.
+Other encoders, custom codec options and unsupported requests retain their
+original `transcode` implementation. No foreign retry occurs after native
+execution is selected. The API regression compares complete Matroska outputs
+against the owned crop API for AVC, HEVC Main and Main10, then verifies pixels.

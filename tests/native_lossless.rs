@@ -667,6 +667,32 @@ fn crop_convenience_api_uses_owned_codec_and_exact_planes() {
         let stats =
             fvid::media::crop_lossless(&source, &output, crop, &Default::default()).unwrap();
         assert_eq!(stats.backend, "fvid");
+        let explicit = directory.0.join(format!("explicit-{index}.mkv"));
+        let settings = fvid::media::EncoderSettings {
+            name: "ffv1".into(),
+            options: vec![],
+        };
+        let explicit_stats = fvid::media::transcode(
+            &source,
+            &explicit,
+            transform.clone(),
+            &Default::default(),
+            &settings,
+        )
+        .unwrap();
+        assert_eq!(explicit_stats.backend, "fvid");
+        assert_eq!(
+            std::fs::read(&explicit).unwrap(),
+            std::fs::read(&output).unwrap()
+        );
+        let explicit_plan = fvid::media::plan_transcode_lossless(
+            &source,
+            &transform,
+            &Default::default(),
+            Some("ffv1"),
+        )
+        .unwrap();
+        assert_eq!(explicit_plan, plan);
         let mut original = NativeReader::software(
             std::io::BufReader::new(std::fs::File::open(&source).unwrap()),
             usize::MAX,
