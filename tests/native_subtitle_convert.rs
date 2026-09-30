@@ -266,7 +266,7 @@ fn matroska_subrip_selection_uses_owned_conversion_and_preserves_cues() {
 
 #[test]
 #[ignore = "requires FVID_REFERENCE_FFMPEG"]
-fn hexadecimal_font_colors_match_independent_subrip_conversion() {
+fn font_attributes_match_independent_subrip_conversion() {
     let binary = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
     let directory =
         std::env::temp_dir().join(format!("fvid-subtitle-colors-{}", std::process::id()));
@@ -283,7 +283,7 @@ fn hexadecimal_font_colors_match_independent_subrip_conversion() {
         .enumerate()
     {
         let source = directory.join(format!("{index}.srt"));
-        std::fs::write(&source,format!("1\n00:00:00,100 --> 00:00:01,000\nBefore <font color=\"#{color}\">colored <b>bold</b> <font color=\"#345678\">nested</font> restored</font> after\n")).unwrap();
+        std::fs::write(&source,format!("1\n00:00:00,100 --> 00:00:01,000\nBefore <font color=\"#{color}\" face=\"Georgia\" size=\"24\">colored <b>bold</b> <font color=\"#345678\">nested</font> restored</font> after\n")).unwrap();
         let output = source.with_extension("mkv");
         fvid::native_subtitle::try_convert_srt(&source, &output, &[])
             .unwrap()

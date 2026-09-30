@@ -54,12 +54,90 @@ fn timestamp(value: &str) -> Result<u64> {
         .filter(|n| *n <= i64::MAX as u64)
         .ok_or_else(|| invalid("SRT timestamp overflow"))
 }
+
+#[derive(Clone, Default)]
+struct Font {
+    color: Option<String>,
+    face: Option<String>,
+    size: Option<u32>,
+}
+fn font_attributes(tag: &str, inherited: &Font) -> Option<Font> {
+    let mut font = inherited.clone();
+    let mut rest = tag.get(5..tag.len() - 1)?.trim();
+    if rest.is_empty() {
+        return None;
+    }
+    let mut seen = Vec::new();
+    while !rest.is_empty() {
+        let equal = rest.find('=')?;
+        let key = rest[..equal].trim().to_ascii_lowercase();
+        if seen.contains(&key) {
+            return None;
+        }
+        seen.push(key.clone());
+        rest = rest[equal + 1..].trim_start();
+        let value;
+        if rest.starts_with(char::from(39)) || rest.starts_with('"') {
+            let quote = rest.chars().next()?;
+            rest = &rest[1..];
+            let end = rest.find(quote)?;
+            value = &rest[..end];
+            rest = &rest[end + 1..];
+        } else {
+            let end = rest.find(char::is_whitespace).unwrap_or(rest.len());
+            value = &rest[..end];
+            rest = &rest[end..];
+        }
+        match key.as_str() {
+            "color" => {
+                let c = value.strip_prefix('#')?;
+                if c.len() != 6 || !c.bytes().all(|b| b.is_ascii_hexdigit()) {
+                    return None;
+                }
+                font.color = Some(format!("&H{}{}{}&", &c[4..6], &c[2..4], &c[..2]));
+            }
+            "size" => {
+                let size = value.parse::<u32>().ok()?;
+                if !(1..=4096).contains(&size) {
+                    return None;
+                }
+                font.size = Some(size);
+            }
+            "face" => {
+                if value.is_empty()
+                    || value.contains(['{', '}', '\\', '&'])
+                    || value.chars().any(char::is_control)
+                {
+                    return None;
+                }
+                font.face = Some(value.into());
+            }
+            _ => return None,
+        }
+        rest = rest.trim_start();
+    }
+    Some(font)
+}
+fn font_changes(old: &Font, new: &Font, output: &mut String) {
+    if old.color != new.color {
+        output.push_str(&format!("{{\\c{}}}", new.color.as_deref().unwrap_or("")));
+    }
+    if old.face != new.face {
+        output.push_str(&format!("{{\\fn{}}}", new.face.as_deref().unwrap_or("")));
+    }
+    if old.size != new.size {
+        output.push_str(&format!(
+            "{{\\fs{}}}",
+            new.size.map_or(String::new(), |n| n.to_string())
+        ));
+    }
+}
 fn ass_text(text: &str) -> Option<String> {
     if text.contains(['{', '}', '\\', '\0']) {
         return None;
     }
     let mut output = String::new();
-    let mut colors: Vec<String> = Vec::new();
+    let mut fonts: Vec<Font> = Vec::new();
     let mut rest = text;
     while !rest.is_empty() {
         if rest.starts_with('&') {
@@ -96,23 +174,18 @@ fn ass_text(text: &str) -> Option<String> {
         } else if rest.starts_with('<') {
             let end = rest.find('>')?;
             let tag = rest[..=end].to_ascii_lowercase();
-            if let Some(color) = tag
-                .strip_prefix("<font color=\"#")
-                .and_then(|s| s.strip_suffix("\">"))
-            {
-                if color.len() != 6 || !color.bytes().all(|b| b.is_ascii_hexdigit()) {
-                    return None;
-                }
-                let override_text =
-                    format!("{{\\c&H{}{}{}&}}", &color[4..6], &color[2..4], &color[..2]);
-                output.push_str(&override_text);
-                colors.push(override_text);
+            if tag.starts_with("<font ") {
+                let old = fonts.last().cloned().unwrap_or_default();
+                let new = font_attributes(&rest[..=end], &old)?;
+                font_changes(&old, &new, &mut output);
+                fonts.push(new);
                 rest = &rest[end + 1..];
                 continue;
             }
             if tag == "</font>" {
-                colors.pop()?;
-                output.push_str(colors.last().map_or("{\\c}", String::as_str));
+                let old = fonts.pop()?;
+                let new = fonts.last().cloned().unwrap_or_default();
+                font_changes(&old, &new, &mut output);
                 rest = &rest[end + 1..];
                 continue;
             }

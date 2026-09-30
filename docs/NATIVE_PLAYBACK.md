@@ -2621,9 +2621,11 @@ tracks. Tests verify default subtitle selection, explicit container index 2,
 video-index rejection, a single subtitle output track and selected-packet
 counters, with independent decoded text/times and CLI/API output equality.
 
-Double-quoted hexadecimal SRT font colors (`<font color="#RRGGBB">`) now map
-to ASS primary-color overrides. Nested color tags restore the previous color;
-closing the outer tag restores the default style color. Independent tests
-compare decoded SRT against the reference SubRip conversion for six colors,
-mixed-case hex digits, nested colors and combined bold/color text. Other font
-attributes or color syntaxes retain the adapter until implemented.
+SRT font attributes `color="#RRGGBB"`, `face` and positive integer `size`
+now map to ASS overrides. Attributes accept single/double quotes or unquoted
+values. Nested tags inherit and restore font attributes; closing the outer
+tag restores defaults. Independent tests compare decoded SRT with reference
+conversion for six colors, combined face/size/color and nested color changes.
+Rendered equivalence is not verified: the available reference build lacks
+the subtitle rendering filter. Other attributes and color syntaxes retain
+the adapter.
