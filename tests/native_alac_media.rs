@@ -264,23 +264,151 @@ fn matroska_alac_uses_owned_timeline() {
     let bytes = std::fs::read(&full).unwrap();
     if let Some(binary) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
         let result = std::process::Command::new(binary)
-            .args(["-v", "error", "-i"]).arg(&source)
-            .args(["-f", "f32le", "-"]).output().unwrap();
+            .args(["-v", "error", "-i"])
+            .arg(&source)
+            .args(["-f", "f32le", "-"])
+            .output()
+            .unwrap();
         assert!(result.status.success());
         assert_eq!(bytes, result.stdout);
     }
     let window = d.0.join("window.f32le");
     let from = Duration::from_millis(10);
     let to = Duration::from_millis(50);
-    export(&source, &window, Some((from,to)), 1.0, None, None, Some(0), None, None).unwrap();
-    let start = (from.as_nanos()*u128::from(stats.sample_rate)).div_ceil(1_000_000_000) as usize;
-    let end = (to.as_nanos()*u128::from(stats.sample_rate)).div_ceil(1_000_000_000) as usize;
-    let stride = usize::from(stats.channels)*4;
-    assert_eq!(std::fs::read(window).unwrap(), bytes[start*stride..end*stride]);
+    export(
+        &source,
+        &window,
+        Some((from, to)),
+        1.0,
+        None,
+        None,
+        Some(0),
+        None,
+        None,
+    )
+    .unwrap();
+    let start = (from.as_nanos() * u128::from(stats.sample_rate)).div_ceil(1_000_000_000) as usize;
+    let end = (to.as_nanos() * u128::from(stats.sample_rate)).div_ceil(1_000_000_000) as usize;
+    let stride = usize::from(stats.channels) * 4;
+    assert_eq!(
+        std::fs::read(window).unwrap(),
+        bytes[start * stride..end * stride]
+    );
     #[cfg(feature = "media")]
     {
         let output = d.0.join("api.f32le");
         fvid::media::decode_audio(&source, &output, &Default::default()).unwrap();
         assert_eq!(std::fs::read(output).unwrap(), bytes);
+    }
+}
+
+#[test]
+fn matroska_alac_delay_and_signed_padding_are_sample_exact() {
+    fn element(id: &[u8], body: &[u8]) -> Vec<u8> {
+        let size = (body.len() as u32 | 0x1000_0000).to_be_bytes();
+        [id, &size, body].concat()
+    }
+    let d = dir();
+    let source = fixture("stereo-24.mka");
+    let mut reader = fvid::container::webm::WebmReader::open(
+        std::io::BufReader::new(std::fs::File::open(&source).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    reader.scan_all().unwrap();
+    let track = reader.tracks[0].clone();
+    let rate = track.sample_rate;
+    let channels = track.channels as usize;
+    let first = reader.read_packet(0).unwrap();
+    let second = reader.read_packet(1).unwrap();
+    let mut decoder = fvid::codec::alac_decoder::AlacDecoder::new(
+        &track.codec_private,
+        rate as u32,
+        channels as u16,
+    )
+    .unwrap();
+    use fvid::audio::AudioDecode;
+    let a = decoder.decode_encoded(&first, 0, 0).unwrap().unwrap().data;
+    let b = decoder.decode_encoded(&second, 0, 0).unwrap().unwrap().data;
+    let first_frames = a.len() / (channels * 4);
+    let frames = first_frames + b.len() / (channels * 4);
+    let whole = [a, b].concat();
+    let header = element(
+        &[0x1a, 0x45, 0xdf, 0xa3],
+        &element(&[0x42, 0x82], b"matroska"),
+    );
+    let info = element(
+        &[0x15, 0x49, 0xa9, 0x66],
+        &element(&[0x2a, 0xd7, 0xb1], &1_000_000u32.to_be_bytes()),
+    );
+    let audio = element(
+        &[0xe1],
+        &[
+            element(&[0xb5], &(rate as f64).to_be_bytes()),
+            element(&[0x9f], &[channels as u8]),
+        ]
+        .concat(),
+    );
+    let delay = 100 * 1_000_000_000u64 / rate;
+    let entry = element(
+        &[0xae],
+        &[
+            element(&[0xd7], &[1]),
+            element(&[0x83], &[2]),
+            element(&[0x86], b"A_ALAC"),
+            element(&[0x63, 0xa2], &track.codec_private),
+            element(&[0x56, 0xaa], &delay.to_be_bytes()),
+            audio,
+        ]
+        .concat(),
+    );
+    let tracks = element(&[0x16, 0x54, 0xae, 0x6b], &entry);
+    for sign in [1i64, -1] {
+        let padding = sign * (50 * 1_000_000_000u64 / rate) as i64;
+        let timestamp = (first_frames as u64 * 1000 / rate) as i16;
+        let block_header = [&[0x81][..], &timestamp.to_be_bytes(), &[0][..]].concat();
+        let cluster = element(
+            &[0x1f, 0x43, 0xb6, 0x75],
+            &[
+                element(&[0xe7], &[0]),
+                element(&[0xa3], &[&[0x81, 0, 0, 0x80][..], &first].concat()),
+                element(
+                    &[0xa0],
+                    &[
+                        element(&[0xa1], &[block_header, second.clone()].concat()),
+                        element(&[0x75, 0xa2], &padding.to_be_bytes()),
+                    ]
+                    .concat(),
+                ),
+            ]
+            .concat(),
+        );
+        let input = d.0.join(format!("trim-{sign}.mka"));
+        std::fs::write(
+            &input,
+            [
+                header.clone(),
+                element(
+                    &[0x18, 0x53, 0x80, 0x67],
+                    &[info.clone(), tracks.clone(), cluster].concat(),
+                ),
+            ]
+            .concat(),
+        )
+        .unwrap();
+        let output = d.0.join(format!("trim-{sign}.f32le"));
+        let stats = export(&input, &output, None, 1.0, None, None, None, None, None).unwrap();
+        let stride = channels * 4;
+        let expected = if sign > 0 {
+            whole[100 * stride..(frames - 50) * stride].to_vec()
+        } else {
+            [
+                &whole[100 * stride..first_frames * stride],
+                &whole[(first_frames + 50) * stride..],
+            ]
+            .concat()
+        };
+        assert_eq!(stats.sample_frames, (frames - 150) as u64);
+        assert_eq!(std::fs::read(output).unwrap(), expected);
     }
 }
