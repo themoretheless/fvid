@@ -263,3 +263,45 @@ fn matroska_subrip_selection_uses_owned_conversion_and_preserves_cues() {
     assert!(fvid::native_subtitle::try_convert(&source, &bad, &[0, 1]).is_err());
     assert!(!bad.exists());
 }
+
+#[test]
+#[ignore = "requires FVID_REFERENCE_FFMPEG"]
+fn hexadecimal_font_colors_match_independent_subrip_conversion() {
+    let binary = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
+    let directory =
+        std::env::temp_dir().join(format!("fvid-subtitle-colors-{}", std::process::id()));
+    std::fs::create_dir_all(&directory).unwrap();
+    struct Cleanup(PathBuf);
+    impl Drop for Cleanup {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _cleanup = Cleanup(directory.clone());
+    for (index, color) in ["ff0000", "00ff00", "0000ff", "12AbEf", "ffffff", "000000"]
+        .iter()
+        .enumerate()
+    {
+        let source = directory.join(format!("{index}.srt"));
+        std::fs::write(&source,format!("1\n00:00:00,100 --> 00:00:01,000\nBefore <font color=\"#{color}\">colored <b>bold</b> <font color=\"#345678\">nested</font> restored</font> after\n")).unwrap();
+        let output = source.with_extension("mkv");
+        fvid::native_subtitle::try_convert_srt(&source, &output, &[])
+            .unwrap()
+            .unwrap();
+        let decode = |path: &std::path::Path| {
+            let result = std::process::Command::new(&binary)
+                .args(["-v", "error", "-i"])
+                .arg(path)
+                .args(["-map", "0:s:0", "-f", "srt", "-"])
+                .output()
+                .unwrap();
+            assert!(
+                result.status.success(),
+                "{}",
+                String::from_utf8_lossy(&result.stderr)
+            );
+            String::from_utf8(result.stdout).unwrap()
+        };
+        assert_eq!(decode(&output), decode(&source), "{color}");
+    }
+}

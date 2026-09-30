@@ -59,6 +59,7 @@ fn ass_text(text: &str) -> Option<String> {
         return None;
     }
     let mut output = String::new();
+    let mut colors: Vec<String> = Vec::new();
     let mut rest = text;
     while !rest.is_empty() {
         if rest.starts_with('&') {
@@ -95,6 +96,26 @@ fn ass_text(text: &str) -> Option<String> {
         } else if rest.starts_with('<') {
             let end = rest.find('>')?;
             let tag = rest[..=end].to_ascii_lowercase();
+            if let Some(color) = tag
+                .strip_prefix("<font color=\"#")
+                .and_then(|s| s.strip_suffix("\">"))
+            {
+                if color.len() != 6 || !color.bytes().all(|b| b.is_ascii_hexdigit()) {
+                    return None;
+                }
+                let override_text =
+                    format!("{{\\c&H{}{}{}&}}", &color[4..6], &color[2..4], &color[..2]);
+                output.push_str(&override_text);
+                colors.push(override_text);
+                rest = &rest[end + 1..];
+                continue;
+            }
+            if tag == "</font>" {
+                colors.pop()?;
+                output.push_str(colors.last().map_or("{\\c}", String::as_str));
+                rest = &rest[end + 1..];
+                continue;
+            }
             output.push_str(match tag.as_str() {
                 "<b>" => "{\\b1}",
                 "</b>" => "{\\b0}",
