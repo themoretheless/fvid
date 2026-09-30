@@ -2,6 +2,48 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str) == Some("loudness") {
+        let source = std::path::Path::new(args.get(1).ok_or("loudness requires INPUT")?);
+        let mut selected = None;
+        let mut weights = None;
+        let mut quiet = false;
+        let mut options = args[2..].iter();
+        while let Some(option) = options.next() {
+            match option.as_str() {
+                "--streams" => {
+                    if selected.is_some() { return Err("duplicate streams option".into()); }
+                    selected = Some(options.next().ok_or("missing audio stream index")?.parse::<usize>()?);
+                }
+                "--channel-weights" => {
+                    if weights.is_some() { return Err("duplicate channel weights".into()); }
+                    weights = Some(options.next().ok_or("missing channel weights")?.split(',').map(str::parse).collect::<Result<Vec<f64>,_>>()?);
+                }
+                "--quiet" => quiet = true,
+                _ => return Err(format!("unsupported owned loudness option: {option}").into()),
+            }
+        }
+        let weights = match weights {
+            Some(weights) => weights,
+            None => {
+                let channels = if fvid::native_pcm::is_wave(source)? {
+                    fvid::native_pcm::inspect(&mut std::fs::File::open(source)?,None)?.channels
+                } else { fvid::native_media::audio_source_info_selected(source,selected)?.channels };
+                match channels {
+                    1 | 2 => vec![1.0;usize::from(channels)],
+                    _ => return Err("multichannel loudness requires explicit --channel-weights in stream channel order (front=1, surround=1.41, LFE=0)".into()),
+                }
+            }
+        };
+        let stats = fvid::native_pcm::measure_loudness_file(source,selected,&weights,None)?;
+        if !quiet {
+            println!("{}",serde_json::to_string_pretty(&serde_json::json!({
+                "backend":"fvid", "sample_frames":stats.sample_frames,
+                "measured_blocks":stats.measured_blocks, "integrated_lufs":stats.integrated_lufs,
+                "channel_weights":weights
+            }))?);
+        }
+        return Ok(());
+    }
     if args.first().map(String::as_str)==Some("convert-subtitles") && args.len()>=3 {
         let mut streams=Vec::new();let mut quiet=false;let mut supported=true;
         let mut options=args[3..].iter();

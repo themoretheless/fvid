@@ -2678,3 +2678,11 @@ and cancellation follow the owned decoder timeline. Independent tests cover
 WAVE, ALAC/MP4 and AAC in MP4/Matroska/ADTS, plus cancellation and weight-count
 validation. The result contains integrated LUFS and sample/block counts; it
 does not claim LRA or true-peak measurements.
+
+The CLI `fvid media loudness INPUT [--streams INDEX] [--channel-weights W,...]
+[--quiet]` now uses owned file measurement, including builds without `media`.
+Mono/stereo defaults to unit weights. Multichannel sources require explicit
+weights in stream order. JSON includes backend, sample frames, measured blocks,
+integrated LUFS (null for silence/short input) and weights. LRA/true-peak fields
+are absent because this command does not measure them yet. Legacy loudnorm
+and library measurement APIs remain available pending their migration.
