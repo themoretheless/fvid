@@ -681,7 +681,7 @@ pub fn is_aac_source(path: &std::path::Path) -> std::io::Result<bool> {
                 .map_err(std::io::Error::other)?;
             Ok(reader.tracks.iter().any(|track| track.kind == 2 && track.codec == "A_AAC"))
         }
-        Ok(()) if &prefix[4..8] == b"ftyp" => {
+        Ok(()) if crate::container::mp4::recognizes_prefix(&prefix) => {
             use std::io::{Seek, SeekFrom};
             file.seek(SeekFrom::Start(0))?;
             let reader = crate::container::mp4::Mp4Reader::open(file, Default::default())
@@ -715,7 +715,7 @@ pub fn aac_source_info_selected(source: &Path, selected: Option<usize>) -> Resul
     let mut prefix = [0; 8];
     input.read_exact(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;
-    let (stream_index, asc, declared) = if &prefix[4..8] == b"ftyp" {
+    let (stream_index, asc, declared) = if crate::container::mp4::recognizes_prefix(&prefix) {
         let reader = crate::container::mp4::Mp4Reader::open(input, Default::default())?;
         let index = mp4_aac_index(&reader, selected)?;
         let track = &reader.tracks()[index];
@@ -954,7 +954,7 @@ pub fn is_alac_source(path: &Path) -> Result<bool> {
         let reader=crate::container::webm::WebmReader::open(BufReader::new(input),Default::default())?;
         return Ok(reader.tracks.iter().any(|t|t.kind==2 && t.codec=="A_ALAC"));
     }
-    if &prefix[4..] != b"ftyp" {return Ok(false);}
+    if !crate::container::mp4::recognizes_prefix(&prefix) {return Ok(false);}
     input.seek(SeekFrom::Start(0))?;
     let reader = crate::container::mp4::Mp4Reader::open(BufReader::new(input), Default::default())?;
     Ok(reader
@@ -967,7 +967,7 @@ fn is_mp4_audio_container(path: &Path) -> Result<bool> {
     use std::io::Read;
     let mut prefix = [0;8];
     match File::open(path)?.read_exact(&mut prefix) {
-        Ok(()) => Ok(&prefix[4..] == b"ftyp"),
+        Ok(()) => Ok(crate::container::mp4::recognizes_prefix(&prefix)),
         Err(e) if e.kind()==std::io::ErrorKind::UnexpectedEof => Ok(false),
         Err(e) => Err(e.into()),
     }

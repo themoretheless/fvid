@@ -189,11 +189,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
         }
         // Dispatch only recognizable ISO BMFF/QuickTime box headers. A file
         // with another signature must not be diagnosed as a corrupt MP4.
-        if length < 8
-            || !matches!(
-                &prefix[4..8],
-                b"ftyp" | b"styp" | b"moov" | b"mdat" | b"free" | b"skip" | b"wide" | b"uuid"
-            )
+        if !crate::container::mp4::recognizes_prefix(&prefix[..length.min(prefix.len())])
         {
             return Err(invalid(
                 "unrecognized video format; supported containers: MP4/MOV, WebM/Matroska and Y4M",

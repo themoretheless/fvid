@@ -449,7 +449,7 @@ fn export_pcm_selected(
         let info=crate::native_pcm::inspect(&mut input,cancel)?;
         info.validate_decode()?;
         (None,None,None,Some((input,info)))
-    } else if &prefix[4..8] == b"ftyp" {
+    } else if crate::container::mp4::recognizes_prefix(&prefix) {
         (Some(crate::container::mp4::Mp4Reader::open(input, Default::default())?), None, None,None)
     } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
         (None, Some(crate::container::webm::WebmReader::open(input, Default::default())?), None,None)

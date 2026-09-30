@@ -2401,6 +2401,14 @@ The remaining `media` migration is still incomplete.
 
 ### QuickTime PCM byte order and integer-width tags
 
+Owned probe, audio admission/export, remux and lossless admission now use the
+same opening-atom recognition as the native player. Older QuickTime sources
+need no `ftyp`: `moov`, `mdat`, `wide`, `free`, `skip`, `uuid` and `styp` also
+select the owned MP4 reader. Recognition does not validate the file; malformed
+recognized atoms still fail in the parser. Integration checks replace the
+file-type atom with legal opaque opening atoms without changing sample offsets,
+then compare metadata and exported AAC PCM through native and media APIs.
+
 The MP4 reader now reads `enda` directly or inside `wave` for `fl32`, `fl64`,
 `in24` and `in32`, preserving the endian flag for both the native exporter and
 player decoder factory. Missing `enda` uses big endian; values other than 0/1

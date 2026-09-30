@@ -7,6 +7,14 @@ use crate::{container::FileTags, invalid, unsupported, Result};
 use std::io::{Read, Seek, SeekFrom};
 use std::ops::Range;
 
+/// Recognize an ISO BMFF/QuickTime opening atom. Older MOV files need no `ftyp`.
+/// This only selects the parser; box extents and track contents are validated
+/// by `Mp4Reader`, including malformed recognized inputs.
+pub fn recognizes_prefix(prefix: &[u8]) -> bool {
+    prefix.len() >= 8
+        && matches!(&prefix[4..8], b"ftyp" | b"styp" | b"moov" | b"mdat" | b"wide" | b"free" | b"skip" | b"uuid")
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct Limits {
     pub metadata_bytes: usize,

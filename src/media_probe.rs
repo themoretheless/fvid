@@ -422,7 +422,7 @@ pub fn try_probe_as(source: &Path, format: Option<&str>) -> Result<Option<MediaI
             && matches!(&signature[..4], b"RIFF" | b"RIFX" | b"RF64") {
             return wave(source).map(Some);
         }
-        if count >= 8 && &signature[4..8] == b"ftyp" {
+        if crate::container::mp4::recognizes_prefix(&signature[..count]) {
             return mp4(source).map(Some);
         }
         if signature[..count].starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {

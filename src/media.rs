@@ -133,7 +133,7 @@ pub fn remux(
     let mut prefix = [0; 8];
     input.read_exact(&mut prefix).map_err(|e| e.to_string())?;
     let adts = crate::container::adts::header(&prefix).is_some();
-    let mp4 = &prefix[4..8] == b"ftyp";
+    let mp4 = crate::container::mp4::recognizes_prefix(&prefix);
     let matroska = matches!(destination.extension().and_then(|s|s.to_str()),Some("mka"|"mkv"));
     let matroska_copy = matroska && prefix[..4] == [0x1a,0x45,0xdf,0xa3];
     if matroska_copy && validate_native_copy_options(options,false).is_err() {return fvid_media::remux(source,destination,options);}
