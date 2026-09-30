@@ -2752,3 +2752,12 @@ decoded PCM, separating normalization from decoder conformance. The generated
 maximum residual is 0.000462234 in MP4 and 0.000648367 in Matroska/ADTS, with
 RMS residual about 0.0000125–0.0000159. These observations do not establish AAC
 conformance; decoder differences need a separate investigation.
+
+Controlled AAC checks localize the preceding sine-fixture residual to the
+noise-synthesis path: re-encoding with `aac_pns=0` gives maximum PCM error below
+6e-8 against the independent decoder for 44.1/48/96 kHz mono and 48 kHz stereo,
+with equal sample counts. The committed oracle enforces max <1e-6 and RMS <1e-7.
+This establishes deterministic reconstruction for these generated fixtures,
+not full AAC profile conformance or identical stochastic PNS samples. Owned
+noise synthesis remains tested separately for spectral energy, reset and
+correlated-generator state. No production reference decoder is introduced.
