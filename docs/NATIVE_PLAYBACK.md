@@ -2615,3 +2615,8 @@ available in headless builds. It uses the native decoder and shared audio packet
 traits without the `player` dependency set. Adapter tests use the owned ADTS
 configuration writer directly; reset/error, timestamp overflow and container
 configuration checks run with `--no-default-features`.
+
+Mixed-container conversion coverage includes AVC video before two SubRip
+tracks. Tests verify default subtitle selection, explicit container index 2,
+video-index rejection, a single subtitle output track and selected-packet
+counters, with independent decoded text/times and CLI/API output equality.

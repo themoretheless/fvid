@@ -153,12 +153,16 @@ fn matroska_subrip_selection_uses_owned_conversion_and_preserves_cues() {
     let source = directory.join("source.mkv");
     let mux = std::process::Command::new(&binary)
         .args(["-v", "error", "-i"])
+        .arg(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4"))
+        .arg("-i")
         .arg(&input)
         .args([
             "-map",
-            "0:s:0",
+            "0:v:0",
             "-map",
-            "0:s:0",
+            "1:s:0",
+            "-map",
+            "1:s:0",
             "-c",
             "copy",
             "-metadata:s:s:0",
@@ -180,19 +184,28 @@ fn matroska_subrip_selection_uses_owned_conversion_and_preserves_cues() {
     );
     for (label, streams, name, language) in [
         ("default", vec![], "First", "eng"),
-        ("second", vec![1], "Second", "fra"),
+        ("second", vec![2], "Second", "fra"),
     ] {
         let output = directory.join(format!("{label}.mkv"));
         let stats = fvid::native_subtitle::try_convert(&source, &output, &streams)
             .unwrap()
             .unwrap();
-        assert_eq!((stats.backend, stats.cues), ("fvid", 2));
+        assert_eq!(
+            (
+                stats.backend,
+                stats.cues,
+                stats.packets_in,
+                stats.packets_out
+            ),
+            ("fvid", 2, 2, 2)
+        );
         let mut reader = fvid::container::webm::WebmReader::open(
             std::fs::File::open(&output).unwrap(),
             Default::default(),
         )
         .unwrap();
         reader.scan_all().unwrap();
+        assert_eq!(reader.tracks.len(), 1);
         assert_eq!(reader.tracks[0].name, name);
         assert_eq!(reader.tracks[0].language, language);
         let decoded = std::process::Command::new(&binary)
@@ -213,7 +226,7 @@ fn matroska_subrip_selection_uses_owned_conversion_and_preserves_cues() {
             .arg(&source)
             .arg(&cli);
         if !streams.is_empty() {
-            command.args(["--streams", "1"]);
+            command.args(["--streams", "2"]);
         }
         let result = command.output().unwrap();
         assert!(
@@ -239,6 +252,13 @@ fn matroska_subrip_selection_uses_owned_conversion_and_preserves_cues() {
         }
     }
     let bad = directory.join("bad.mkv");
+    assert!(
+        fvid::native_subtitle::try_convert(&source, &bad, &[0])
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("not a subtitle")
+    );
     assert!(fvid::native_subtitle::try_convert(&source, &bad, &[9]).is_err());
     assert!(fvid::native_subtitle::try_convert(&source, &bad, &[0, 1]).is_err());
     assert!(!bad.exists());
