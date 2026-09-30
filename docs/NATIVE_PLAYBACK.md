@@ -2439,3 +2439,17 @@ native crop result on AVC, HEVC Main and Main10 fixtures. Existing lossless test
 also check companion audio, metadata, interval edits, cancellation and atomic
 publication. This closes another foreign-code entrypoint for supported sources;
 full media dependency removal and installed virtual-camera proof remain open.
+
+### Owned lossless planning
+
+`media::plan_transcode_lossless` with the default encoder now uses native source
+metadata for requests admitted by the owned lossless executor. It describes
+video decode, companion AAC packet copying, requested geometry/filter stages,
+FFV1 v1 coding and Matroska atomic publication, with no libavfilter graph.
+Explicit encoder overrides and unsupported requests retain the prior planner.
+The planner validates native admission and filter syntax; sample-plane geometry
+and payload correctness remain execution checks, stated in the returned notes.
+
+The lossless API regression verifies this native plan for AVC, HEVC Main and
+Main10 crop requests and then verifies every decoded output frame. Remaining
+foreign media operations and installed camera verification are still open.

@@ -642,6 +642,28 @@ fn crop_convenience_api_uses_owned_codec_and_exact_planes() {
             width: 8,
             height: 8,
         };
+        let transform = fvid::media::LosslessTransform {
+            crop: Some(crop),
+            ..Default::default()
+        };
+        let plan =
+            fvid::media::plan_transcode_lossless(&source, &transform, &Default::default(), None)
+                .unwrap();
+        assert!(plan.graph.is_none());
+        assert!(plan.notes.iter().any(|n| n.contains("backend: fvid")));
+        assert!(plan.steps.iter().any(|s| s.action == "geometry"));
+        assert!(
+            plan.steps
+                .iter()
+                .any(|s| s.action == "encode" && s.detail.contains("FFV1"))
+        );
+        assert_eq!(
+            plan.streams
+                .iter()
+                .filter(|s| s.disposition == "primary_video")
+                .count(),
+            1
+        );
         let stats =
             fvid::media::crop_lossless(&source, &output, crop, &Default::default()).unwrap();
         assert_eq!(stats.backend, "fvid");

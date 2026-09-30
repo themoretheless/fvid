@@ -315,6 +315,17 @@ pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,t
     fvid_media::transcode_lossless(source,destination,transform,options)
 }
 
+/// Plan eligible FFV1 exports without opening the legacy demuxer.
+pub fn plan_transcode_lossless(source: &std::path::Path, transform: &LosslessTransform,
+    options: &CopyOptions, encoder: Option<&str>) -> Result<MediaPlan> {
+    if encoder.is_none() && crate::native_lossless::supports(transform)
+        && validate_native_copy_options(options,false).is_ok()
+        && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
+        return crate::native_plan::transcode_lossless(source,transform);
+    }
+    fvid_media::plan_transcode_lossless(source,transform,options,encoder)
+}
+
 /// Mix AAC/WAVE sources through owned decoders and a bounded-memory PCM mixer.
 pub fn mix_audio(
     sources: &[std::path::PathBuf],
