@@ -794,6 +794,21 @@ pub fn trim_adts_wave(source: &Path, destination: &Path, from: i64, to: i64,
 
 /// Decode a selected AAC presentation interval from ADTS, MP4 or Matroska to WAVE.
 /// Multiple container tracks require explicit selection to avoid silent loss.
+pub fn trim_audio_wave(source: &Path, destination: &Path, from: i64, to: i64, selected: Option<usize>,
+    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::native_media::AudioDecodeStats> {
+    if crate::native_media::is_aac_source(source)? {
+        return trim_aac_wave(source, destination, from, to, selected, cancel, progress);
+    }
+    if from < 0 || to <= from { return Err(invalid("trim requires 0 <= from < to")); }
+    if destination.extension().and_then(|s|s.to_str()) != Some("wav") { return Err(invalid("native audio trim output requires .wav")); }
+    if cancel.is_some_and(|c|c.is_cancelled()) { return Err(invalid("media operation cancelled")); }
+    let index = crate::native_plan::audio_trim_selection(source, selected).map_err(|e|invalid(&e))?;
+    export_audio_pcm_selected(source, destination,
+        Some((std::time::Duration::from_micros(from as u64), std::time::Duration::from_micros(to as u64))),
+        1.0, None, None, Some(index), cancel, progress)
+}
+
 pub fn trim_aac_wave(source: &Path, destination: &Path, from: i64, to: i64, selected: Option<usize>,
     cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {

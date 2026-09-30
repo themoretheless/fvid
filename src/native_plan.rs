@@ -238,6 +238,30 @@ pub(crate) fn aac_trim_selection(source: &std::path::Path, selected: Option<usiz
 }
 
 /// Plan AAC interval export using source edits and trim metadata.
+pub fn audio_trim_selection(source: &std::path::Path, selected: Option<usize>) -> Result<usize> {
+    let info = crate::native_probe::probe(source)?;
+    let index = match selected {
+        Some(index) => index,
+        None if info.streams.len() == 1 => info.streams[0].index,
+        None => return Err("audio-to-WAVE trim requires an explicit audio stream when other tracks exist".into()),
+    };
+    crate::native_media::audio_source_info_selected(source, Some(index)).map_err(|e| e.to_string())?;
+    Ok(index)
+}
+
+pub fn trim_audio(source: &std::path::Path, from: i64, to: i64, selected: Option<usize>) -> Result<MediaPlan> {
+    if crate::native_media::is_aac_source(source).map_err(|e| e.to_string())? {
+        return trim_aac(source, from, to, selected);
+    }
+    let index = audio_trim_selection(source, selected)?;
+    let mut plan = decode_audio_selected(source, &AudioDecodeTransform {
+        interval: Some((from, to)), ..Default::default()
+    }, Some(index))?;
+    plan.command = "trim".into();
+    plan.steps.last_mut().ok_or("missing write step")?.detail = "publish selected audio as float32 PCM .wav without overwriting".into();
+    Ok(plan)
+}
+
 pub fn trim_aac(source: &std::path::Path, from: i64, to: i64, selected: Option<usize>) -> Result<MediaPlan> {
     let index=aac_trim_selection(source,selected)?;
     if crate::native_export::is_adts_source(source).map_err(|e|e.to_string())? {

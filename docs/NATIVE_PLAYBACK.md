@@ -2543,3 +2543,14 @@ produce identical decoded planes on AVC, HEVC Main/Main10 and rotated display
 metadata sources. Malformed plane storage or out-of-range samples fail without
 mutation. A truncated Y4M after one valid frame leaves no published Matroska or
 stranded temporary output when pixelize is selected.
+
+### Owned ALAC/PCM interval trim to WAVE
+
+`media trim INPUT OUTPUT.wav --from ... --to ...` and its plan/API now use
+owned ALAC and MP4/Matroska PCM decoding in addition to AAC. Selection uses
+presentation edits and Matroska trim metadata, then rounds interval endpoints
+up to the source sample grid. Files with additional streams require an explicit
+selected audio stream; invalid selection, cancellation and existing outputs
+fail without publication. Packed WAVE trimming retains its existing byte-copy
+path. Compressed output formats and unsupported codecs retain the remaining
+legacy adapter; full `media` independence is not yet complete.
