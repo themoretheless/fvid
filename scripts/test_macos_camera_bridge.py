@@ -51,7 +51,10 @@ def main():
         # Compare the FFI BGRA/seek path against a direct software RGB decode.
         # This verifies transport and frame selection; codec conformance has its
         # own independent saved references. No FFmpeg/VideoToolbox is used here.
-        for index, fixture in enumerate(["video.mp4", "hevc/main-ipb.mp4", "hevc/main10-ipb.mp4"]):
+        fixtures = ["video.mp4", "hevc/main-ipb.mp4", "hevc/main10-ipb.mp4",
+                    "vp9/adaptive.webm", "vp9/odd10.webm", "vp9/lossless12.webm",
+                    "av1/ramp.webm", "av1/tiles.webm", "av1/random-access.webm"]
+        for index, fixture in enumerate(fixtures):
             source = ROOT / "tests/fixtures" / fixture
             rgb = Path(directory) / f"reference-{index}.rgb"
             times = Path(directory) / f"reference-{index}.json"
@@ -59,7 +62,7 @@ def main():
                             str(source), str(rgb), str(times)], check=True)
             subprocess.run([str(Path(directory) / "NativeVideoSourceTests"),
                             str(source), str(rgb), str(times)], check=True)
-    print(f"All {len(cases)} camera bridge suites and 3 AVC/HEVC pixel comparisons passed; installed CMIO delivery is not tested.")
+    print(f"All {len(cases)} camera bridge suites and {len(fixtures)} AVC/HEVC/VP9/AV1 pixel comparisons passed; installed CMIO delivery is not tested.")
 
 
 if __name__ == "__main__":

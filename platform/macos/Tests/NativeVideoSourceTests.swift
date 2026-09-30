@@ -32,14 +32,14 @@ import Foundation
             let expectedRGB = try Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[2]))
             let frameSize = compressed.width * compressed.height * 3
             let frameCount = expectedRGB.count / frameSize
-            precondition(frameCount >= 11 && expectedRGB.count % frameSize == 0)
+            precondition(frameCount > 0 && expectedRGB.count % frameSize == 0)
             let timestamps: [UInt64]
             if CommandLine.arguments.count == 4 {
                 timestamps = try JSONDecoder().decode([UInt64].self,
                     from: Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[3])))
                 precondition(timestamps.count == frameCount)
             } else { timestamps = (0..<frameCount).map { UInt64($0) * 40_000_000 } }
-            for (sequence, frameIndex) in [0,1,10,frameCount-1,0].enumerated() {
+            for (sequence, frameIndex) in [0,min(1,frameCount-1),frameCount/2,frameCount-1,0].enumerated() {
                 let frame = try compressed.frame(mediaTime: timestamps[frameIndex],
                     hostTime: UInt64(sequence+1), sequence: UInt64(sequence))
                 let rgb = expectedRGB.subdata(in: frameIndex*frameSize..<(frameIndex+1)*frameSize)
@@ -49,7 +49,7 @@ import Foundation
                 }
                 precondition(frame == expected)
             }
-            print("Swift/Rust MP4 bridge: first/next/middle/last/rewind frames match software RGB exactly")
+            print("Swift/Rust native video bridge: first/next/middle/last/rewind frames match software RGB exactly")
         }
         print("Swift/Rust camera bridge: BGRA, seek, EOF, timestamp errors and failed-handle rejection passed")
     }

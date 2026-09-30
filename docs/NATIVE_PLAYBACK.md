@@ -2367,3 +2367,17 @@ API/plans, mix/merge and failure publication across widths and byte orders.
 Setting `FVID_REFERENCE_FFMPEG` additionally compares each generated container
 with the independent reference decoder. This extends native coverage; it does
 not remove the remaining `media` FFmpeg dependency.
+
+### Camera bridge coverage across native video codecs
+
+`scripts/test_macos_camera_bridge.py` now compares nine source fixtures across
+AVC, HEVC Main/Main10, VP9 8/10/12-bit and AV1 WebM against direct FVid software
+RGB decoding. The Swift/Rust bridge must produce identical BGRA for the first,
+next, middle and last frames and after rewinding; short clips use valid sample
+indices. These checks also run all eight clock, producer, pipeline, pool, sink,
+repeat and display-aspect suites. No FFmpeg is used by this runner.
+
+This verifies in-process decode and transport, not installed CMIO delivery or
+60 fps throughput. CoreVideo pool tests require normal macOS access outside a
+restricted filesystem/process sandbox. A signed, activated extension and a
+second application consuming the camera remain required for installation proof.
