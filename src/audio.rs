@@ -596,7 +596,7 @@ const CODEC_ENTRIES: &[CodecEntry] = &[
     CodecEntry { 
         tags: &[
             "A_PCM/INT/LIT", "A_PCM/INT/BIG", "A_PCM/FLOAT/IEEE",
-            "sowt", "twos", "fl32", "fl64",
+            "sowt", "twos", "fl32", "fl64", "in24", "in32", "raw ",
         ], 
         name: "PCM", 
     },

@@ -844,15 +844,17 @@ Release-сборка обязательна для практического и
   кодом и называет шесть каналов и собранный для них `esds`, но symphonia отвечает на такую
   конфигурацию `aac too complex` — отказ приходит со стороны декодера, а не обхода кадров.
   MP3 и FLAC в MP4 тоже не читаются: там плеер
-  принимает `mp4a`, `alac`, `ac-3`, четыре PCM-тега, три ADPCM и оба MACE.
+  принимает `mp4a`, `alac`, `ac-3`, семь PCM-тегов, три ADPCM и оба MACE.
   Несжатый PCM читает собственный декодер `src/codec/pcm_decoder.rs`, всегда
-  выдающий interleaved f32: в MP4/MOV это `sowt`, `twos`, `fl32`, `fl64`, в
+  выдающий interleaved f32: в MP4/MOV это `sowt`, `twos`, `fl32`, `fl64`,
+  `in24`, `in32`, `raw `, в
   Matroska — `A_PCM/INT/LIT`, `A_PCM/INT/BIG` и `A_PCM/FLOAT/IEEE`. Порядок байт
   назван самим тегом, ширину семпла MP4 берёт из `sample_size` звукового описания,
   Matroska — из `BitDepth`; у `fl32` и `fl64` ширина следует тегу, потому что
-  писатели оставляют в `sample_size` устаревшее 16. `in24`, `in32`, `l16` и `raw `
-  пропущены: их ширину или знаковое состояние описывают дочерние атомы
-  (`wave`/`frma`/`enda`), которые демувер не разбирает. Индекс PCM-дорожки в MP4
+  писатели оставляют в `sample_size` устаревшее 16. Для `in24`/`in32` ширина
+  следует тегу; `enda`, в том числе внутри `wave`, задаёт порядок байт.
+  `raw ` содержит unsigned 8-bit PCM; `l16` пока не поддерживается.
+  Индекс PCM-дорожки в MP4
   держит одну запись на чанк, а не на кадр звука: `stsz` и `stts` объявляют один
   размер и одну длительность для всех кадров, поэтому 5 минут 44,1-килогерцового
   стерео — это 13 230 000 кадров при 51 записи индекса вместо 529 МБ построчного.
@@ -2406,8 +2408,11 @@ fail. Integer-width tags provide 24/32 bits instead of the legacy sample-size
 field. The strict PCM conversion and legacy packet conversion share the same
 sample interpretation, while Matroska IEEE floats remain little endian.
 
-The optional MP4 PCM oracle checks all eight 24/32-bit integer and 32/64-bit
-float MOV variants in both byte orders. These are generated only for independent
+The optional MP4 PCM oracle checks unsigned 8-bit `raw ` and all eight
+24/32-bit integer and 32/64-bit float MOV variants in both byte orders.
+With the `player` feature it also reads every packet through `Mp4AudioReader`
+and the player decoder factory and compares the resulting PCM bytes to the
+independent decoder. These are generated only for independent
 testing; runtime demuxing and sample conversion remain owned by FVid.
 
 ### Native plane-filter admission outside MP4/Y4M

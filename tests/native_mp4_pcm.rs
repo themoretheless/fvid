@@ -166,6 +166,37 @@ fn quicktime_integer_and_float_endian_metadata_matches_reference() {
             .unwrap();
         assert!(reference.status.success());
         assert_eq!(std::fs::read(output).unwrap(), reference.stdout, "{codec}");
+        #[cfg(feature = "player")]
+        {
+            use fvid::audio::AudioStream;
+            let mut reader = fvid::playback_mp4_audio::Mp4AudioReader::open(
+                std::fs::File::open(&input).unwrap(),
+                fvid::container::mp4::Limits::default(),
+            )
+            .unwrap();
+            let mut decoder = fvid::codec::make_audio_decoder(
+                reader.codec(),
+                reader.extra_data(),
+                reader.sample_rate(),
+                reader.channels(),
+                reader.bits_per_sample(),
+            )
+            .unwrap();
+            let mut pcm = Vec::new();
+            while let Some(packet) = reader.next_packet().unwrap() {
+                if let Some(decoded) = decoder
+                    .decode_encoded(
+                        &packet.data,
+                        packet.pts.max(0) as u64,
+                        packet.duration.max(0) as u64,
+                    )
+                    .unwrap()
+                {
+                    pcm.extend_from_slice(&decoded.data);
+                }
+            }
+            assert_eq!(pcm, reference.stdout, "player {codec}");
+        }
     }
     std::fs::remove_dir_all(directory).unwrap();
 }
