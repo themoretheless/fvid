@@ -125,3 +125,5 @@ pub mod native_plan;
 pub mod native_avgblur;
 
 pub mod native_boxblur;
+
+pub mod native_audio_mix;

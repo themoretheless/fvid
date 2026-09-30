@@ -308,3 +308,26 @@ pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,t
     }
     fvid_media::transcode_lossless(source,destination,transform,options)
 }
+
+/// Mix AAC/WAVE sources through owned decoders and a bounded-memory PCM mixer.
+pub fn mix_audio(
+    sources: &[std::path::PathBuf],
+    destination: &std::path::Path,
+    options: &MixAudioOptions,
+) -> Result<MixAudioStats> {
+    if crate::native_audio_mix::eligible(sources).map_err(|e| e.to_string())? {
+        crate::native_audio_mix::mix_audio(sources, destination, options).map_err(|e| e.to_string())
+    } else {
+        fvid_media::mix_audio(sources, destination, options)
+    }
+}
+pub fn plan_mix_audio(
+    sources: &[std::path::PathBuf],
+    options: &MixAudioOptions,
+) -> Result<MediaPlan> {
+    if crate::native_audio_mix::eligible(sources).map_err(|e| e.to_string())? {
+        crate::native_audio_mix::plan(sources, options).map_err(|e| e.to_string())
+    } else {
+        fvid_media::plan_mix_audio(sources, options)
+    }
+}

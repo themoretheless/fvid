@@ -2257,3 +2257,28 @@ layouts, available 8–16-bit formats, independent luma/chroma radii and powers,
 and disabled planes. Small impulse tests fix reflected-edge and repeated-pass
 results explicitly. The export suite verifies the complete hflip/avgblur/
 boxblur/negate/chromashift chain through independently decoded FFV1 output.
+
+### Owned audio mixing
+
+`media mix-audio OUTPUT.wav INPUT INPUT...` and `media plan mix-audio` now
+work without the legacy `media` feature for supported AAC (ADTS, MP4,
+Matroska) and packed PCM WAVE inputs. The public `media::mix_audio` and
+`media::plan_mix_audio` APIs select the same path. Unsupported formats,
+profiles and ambiguous default audio-track selection retain the adapter.
+The existing `MixAudioOptions`, `MixAudioStats` and `MixDuration` types now
+live in the backend-independent media-info crate and remain re-exported.
+
+The contract remains 2–16 inputs with matching sample rate/channel count,
+shortest duration, nonnegative finite weights, repeat-last weight expansion,
+and optional weight-sum normalization. AAC edit-list/discard handling is
+provided by the existing owned decoder. Each input is decoded to a temporary
+PCM spool; mixing reads blocks of 4096 sample frames, so its working PCM
+memory does not grow with duration. Temporary disk usage covers all decoded
+inputs plus the output. Spools are removed on success or failure. The final
+float WAV is synced and published without replacing existing files.
+
+`tests/native_audio_mix.rs` checks weights and normalization, PCM values
+outside [-1,1], block tails, differing input lengths, geometry and invalid
+sample failures, no-overwrite publication, cleanup, mixed AAC/WAVE CLI/API
+execution, and the native plan. The optional FFmpeg reference compares
+three-input float PCM output byte-for-byte with `amix`.

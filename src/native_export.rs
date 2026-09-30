@@ -519,7 +519,7 @@ fn export_pcm_selected(
     Ok(stats)
 }
 
-fn float_wav_header(stats: &crate::native_media::AudioDecodeStats) -> Result<Vec<u8>> {
+pub(crate) fn float_wav_header(stats: &crate::native_media::AudioDecodeStats) -> Result<Vec<u8>> {
     let mask: u32 = match stats.channels {
         1 => 0x4, 2 => 0x3, 3 => 0x7, 4 => 0x107, 5 => 0x37, 6 => 0x3f,
         _ => return Err(invalid("unsupported WAV channel layout")),

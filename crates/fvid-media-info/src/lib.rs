@@ -151,3 +151,6 @@ pub struct LosslessStats {
     pub vertical_flip: bool,
     pub horizontal_flip: bool,
 }
+
+mod audio_mix;
+pub use audio_mix::{MixDuration, MixAudioOptions, MixAudioStats};
