@@ -2639,3 +2639,8 @@ through `fvid-media-info`, without codec or demuxer linkage. The legacy adapter
 re-exports these types for API compatibility. The inventory operation itself
 still queries the legacy backend; moving its result type does not remove
 FFmpeg linkage from the `media` feature.
+
+`SubtitleCodec` and `SubtitleConvertOptions` also belong to the independent
+media description crate. `native_subtitle::try_convert_with_options` accepts
+them with no `media` feature, retaining explicit stream selection and rejecting
+unknown codec names. The legacy API re-exports the same types.

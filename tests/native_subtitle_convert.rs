@@ -15,7 +15,12 @@ fn srt_convert_cli_and_api_use_owned_ass_muxer_atomically() {
     let input = directory.join("input.srt");
     std::fs::write(&input, SRT).unwrap();
     let output = directory.join("native.mkv");
-    let stats = fvid::native_subtitle::try_convert_srt(&input, &output, &[])
+    assert!(fvid::media_info::SubtitleCodec::parse("unknown").is_err());
+    let options = fvid::media_info::SubtitleConvertOptions {
+        streams: vec![0],
+        codec: fvid::media_info::SubtitleCodec::parse("ass").unwrap(),
+    };
+    let stats = fvid::native_subtitle::try_convert_with_options(&input, &output, &options)
         .unwrap()
         .unwrap();
     assert_eq!(

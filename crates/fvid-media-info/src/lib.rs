@@ -178,3 +178,31 @@ pub struct Capabilities {
     pub encoders: Vec<String>,
     pub filters: Vec<String>,
 }
+
+#[derive(Clone, Copy, Debug, Default)]
+pub enum SubtitleCodec {
+    #[default]
+    Ass,
+}
+
+impl SubtitleCodec {
+    pub fn parse(name: &str) -> std::result::Result<Self, String> {
+        match name {
+            "ass" => Ok(Self::Ass),
+            _ => Err(format!("unsupported subtitle codec: {name}; v1 supports ass").into()),
+        }
+    }
+
+    pub fn encoder_name(self) -> &'static str {
+        match self {
+            Self::Ass => "ass",
+        }
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct SubtitleConvertOptions {
+    /// Empty selects the first subtitle stream.
+    pub streams: Vec<usize>,
+    pub codec: SubtitleCodec,
+}

@@ -3,33 +3,7 @@ use super::*;
 use lossless::{Codec, LosslessStats, LosslessTransform, OverlaySpec, Parameters};
 use std::path::Path;
 
-#[derive(Clone, Copy, Debug, Default)]
-pub enum SubtitleCodec {
-    #[default]
-    Ass,
-}
-
-impl SubtitleCodec {
-    pub fn parse(name: &str) -> Result<Self> {
-        match name {
-            "ass" => Ok(Self::Ass),
-            _ => Err(format!("unsupported subtitle codec: {name}; v1 supports ass").into()),
-        }
-    }
-
-    fn encoder_name(self) -> &'static str {
-        match self {
-            Self::Ass => "ass",
-        }
-    }
-}
-
-#[derive(Clone, Debug, Default)]
-pub struct SubtitleConvertOptions {
-    /// Empty selects the first subtitle stream.
-    pub streams: Vec<usize>,
-    pub codec: SubtitleCodec,
-}
+pub use fvid_media_info::{SubtitleCodec, SubtitleConvertOptions};
 
 pub use fvid_media_info::NativeSubtitleStats as SubtitleConvertStats;
 

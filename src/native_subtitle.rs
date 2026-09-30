@@ -458,3 +458,15 @@ mod tests {
         }
     }
 }
+
+/// Convert supported subtitle sources with backend-independent operation options.
+/// Unsupported profiles return `None` before creating the destination.
+pub fn try_convert_with_options(
+    source: &Path,
+    destination: &Path,
+    options: &crate::media_info::SubtitleConvertOptions,
+) -> Result<Option<SubtitleStats>> {
+    match options.codec {
+        crate::media_info::SubtitleCodec::Ass => try_convert(source, destination, &options.streams),
+    }
+}
