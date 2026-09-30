@@ -789,6 +789,16 @@ pub(crate) fn matroska_aac_index<R: std::io::Read + std::io::Seek>(reader: &crat
 
 /// Whether all requested operations have an owned implementation.
 /// Exhaustive matching forces new request fields to receive an explicit policy.
+/// Admit plane filters only when the native reader actually supplies YUV.
+/// The first frame is inspected here; execution still validates the whole stream.
+/// Unsupported native formats retain the adapter before execution begins.
+pub(crate) fn supports_plane_filter_source(source: &Path) -> Result<bool> {
+    if crate::native_lossless::eligible(source)? { return Ok(true); }
+    let input = BufReader::new(File::open(source)?);
+    let Ok(mut reader) = NativeReader::software(input, usize::MAX) else { return Ok(false); };
+    Ok(matches!(reader.read_frame_raw(), Ok(Some(frame)) if !matches!(frame, RawFrame::Rgb(_))))
+}
+
 pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
     if transform.boxblur.as_deref().is_some_and(|args| crate::native_boxblur::BoxBlur::parse(args).is_err()) { return false; }
     matches!(transform, DecodeTransform {

@@ -2409,3 +2409,19 @@ sample interpretation, while Matroska IEEE floats remain little endian.
 The optional MP4 PCM oracle checks all eight 24/32-bit integer and 32/64-bit
 float MOV variants in both byte orders. These are generated only for independent
 testing; runtime demuxing and sample conversion remain owned by FVid.
+
+### Native plane-filter admission outside MP4/Y4M
+
+The media decode API no longer restricts owned average blur, integer box blur
+and chroma shifts to inputs eligible for the MP4/Y4M lossless muxer. Other
+native sources are admitted when their first decoded frame supplies YUV planes.
+RGB, unsupported sources and unsupported filter expressions keep their existing
+adapter. Admission inspects one frame before execution for those other sources;
+execution independently validates and decodes the complete requested interval.
+
+The `native_plane_filter_sources` test verifies the owned backend, frame count,
+geometry and pixel format for each filter and their combination on six VP9/AV1
+WebM fixtures, including VP9 10/12-bit sources. Existing independent filter
+pixel oracles cover filter arithmetic; this new test covers API routing.
+This removes foreign decode from these supported requests, while other media
+operations still depend on the legacy adapter.
