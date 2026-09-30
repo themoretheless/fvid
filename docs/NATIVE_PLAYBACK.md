@@ -2453,3 +2453,10 @@ and payload correctness remain execution checks, stated in the returned notes.
 The lossless API regression verifies this native plan for AVC, HEVC Main and
 Main10 crop requests and then verifies every decoded output frame. Remaining
 foreign media operations and installed camera verification are still open.
+
+Native lossless plans now list each requested sample-plane filter and its
+arguments in actual execution order: avgblur, boxblur, negate, gradients,
+morphology, chromashift. Y4M uses its admitted rawvideo stream directly rather
+than requiring the general media probe to support that format. A regression
+checks the exact filter sequence and executes the same requests on Y4M, MP4
+video, and MP4 with two companion audio tracks.

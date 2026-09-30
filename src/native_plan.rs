@@ -286,14 +286,25 @@ pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_inf
         return Err("request is not supported by the owned lossless planner".into());
     }
     let (geometry,filters)=crate::native_lossless::configuration(transform).map_err(|e|e.to_string())?;
-    let info=crate::native_probe::probe(source)?;
-    let streams=info.streams.iter().map(|stream| PlanStream {
-        index:stream.index,media_type:stream.media_type.clone(),codec:stream.codec.clone(),
-        disposition:if stream.media_type=="video" {"primary_video"} else {"copy"}.into(),
-    }).collect();
+    let streams=if crate::native_lossless_y4m::is_source(source).map_err(|e|e.to_string())? {
+        vec![PlanStream {index:0,media_type:"video".into(),codec:"rawvideo".into(),disposition:"primary_video".into()}]
+    } else {
+        let info=crate::native_probe::probe(source)?;
+        info.streams.iter().map(|stream| PlanStream {
+            index:stream.index,media_type:stream.media_type.clone(),codec:stream.codec.clone(),
+            disposition:if stream.media_type=="video" {"primary_video"} else {"copy"}.into(),
+        }).collect()
+    };
     let mut steps=vec![PlanStep{action:"decode".into(),detail:"FVid owned demuxer and video decoder; retain companion AAC packets without audio re-encoding".into()}];
     if !geometry.is_identity() {steps.push(PlanStep{action:"geometry".into(),detail:format!("crop {:?}; horizontal flip {}; vertical flip {}; transpose {:?}; pad {:?}; scale {:?}; normalize stored rotation first",geometry.crop,geometry.horizontal_flip,geometry.vertical_flip,geometry.transpose,geometry.pad,geometry.scale)});}
-    if !filters.is_empty() {steps.push(PlanStep{action:"filter".into(),detail:"apply requested FVid sample-plane filters in native pipeline order, preserving source precision".into()});}
+    if !filters.is_empty() {
+        for (name,args) in [("avgblur",&transform.avgblur),("boxblur",&transform.boxblur),
+            ("negate",&transform.negate),("sobel",&transform.sobel),("prewitt",&transform.prewitt),
+            ("roberts",&transform.roberts),("kirsch",&transform.kirsch),("scharr",&transform.scharr),
+            ("dilation",&transform.dilation),("erosion",&transform.erosion),("chromashift",&transform.chromashift)] {
+            if let Some(args)=args {steps.push(PlanStep{action:"filter".into(),detail:format!("FVid {name}={args}; operate on sample planes at source precision")});}
+        }
+    }
     steps.push(PlanStep{action:"encode".into(),detail:"FVid lossless FFV1 v1 range encoder; retain video timing and display metadata".into()});
     steps.push(PlanStep{action:"write".into(),detail:"FVid Matroska muxer; atomic publication without overwrite; cancellation removes temporary output".into()});
     Ok(MediaPlan {command:"transcode-lossless".into(),input:source.to_path_buf(),inputs:vec![source.to_path_buf()],streams,steps,graph:None,

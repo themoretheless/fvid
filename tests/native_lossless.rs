@@ -700,3 +700,59 @@ fn crop_convenience_api_uses_owned_codec_and_exact_planes() {
         assert_eq!(stats.video_frames, count);
     }
 }
+
+#[cfg(feature = "media")]
+#[test]
+fn owned_lossless_plans_show_filter_order_and_y4m_without_audio() {
+    use fvid::media::{LosslessTransform, plan_transcode_lossless};
+    let d = directory("plans");
+    let y4m = d.0.join("input.y4m");
+    let mut bytes = b"YUV4MPEG2 W16 H16 F25:1 Ip C420jpeg\nFRAME\n".to_vec();
+    bytes.extend(vec![128; 384]);
+    std::fs::write(&y4m, bytes).unwrap();
+    let request = LosslessTransform {
+        avgblur: Some("1:7:1".into()),
+        boxblur: Some("1:1".into()),
+        negate: Some("".into()),
+        sobel: Some("planes=1".into()),
+        dilation: Some("coordinates=170".into()),
+        chromashift: Some("cbh=1".into()),
+        ..Default::default()
+    };
+    for source in [y4m, fixture("video.mp4"), fixture("audio/two-audio.mp4")] {
+        let plan = plan_transcode_lossless(&source, &request, &Default::default(), None).unwrap();
+        let details: Vec<_> = plan
+            .steps
+            .iter()
+            .filter(|s| s.action == "filter")
+            .map(|s| s.detail.split(';').next().unwrap())
+            .collect();
+        assert_eq!(
+            details,
+            vec![
+                "FVid avgblur=1:7:1",
+                "FVid boxblur=1:1",
+                "FVid negate=",
+                "FVid sobel=planes=1",
+                "FVid dilation=coordinates=170",
+                "FVid chromashift=cbh=1"
+            ]
+        );
+        assert!(plan.graph.is_none());
+        assert!(
+            plan.streams
+                .iter()
+                .filter(|s| s.media_type == "audio")
+                .all(|s| s.disposition == "copy")
+        );
+        let output = d.0.join(format!(
+            "{}.mkv",
+            source.file_name().unwrap().to_string_lossy()
+        ));
+        let stats =
+            fvid::media::transcode_lossless(&source, &output, request.clone(), &Default::default())
+                .unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert!(stats.video_frames > 0);
+    }
+}
