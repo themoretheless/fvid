@@ -91,11 +91,9 @@ fn srt_convert_cli_and_api_use_owned_ass_muxer_atomically() {
         "1\n00:00:00,000 --> 00:00:01,000\n<font color=red>text</font>",
     )
     .unwrap();
-    assert!(
-        fvid::native_subtitle::try_convert_srt(&input, &bad, &[])
-            .unwrap()
-            .is_none()
-    );
+    assert!(fvid::native_subtitle::try_convert_srt(&input, &bad, &[])
+        .unwrap()
+        .is_none());
     assert!(!bad.exists());
     assert!(!std::fs::read_dir(&directory).unwrap().any(|entry| {
         entry
@@ -252,13 +250,11 @@ fn matroska_subrip_selection_uses_owned_conversion_and_preserves_cues() {
         }
     }
     let bad = directory.join("bad.mkv");
-    assert!(
-        fvid::native_subtitle::try_convert(&source, &bad, &[0])
-            .err()
-            .unwrap()
-            .to_string()
-            .contains("not a subtitle")
-    );
+    assert!(fvid::native_subtitle::try_convert(&source, &bad, &[0])
+        .err()
+        .unwrap()
+        .to_string()
+        .contains("not a subtitle"));
     assert!(fvid::native_subtitle::try_convert(&source, &bad, &[9]).is_err());
     assert!(fvid::native_subtitle::try_convert(&source, &bad, &[0, 1]).is_err());
     assert!(!bad.exists());
@@ -282,26 +278,36 @@ fn font_attributes_match_independent_subrip_conversion() {
         .iter()
         .enumerate()
     {
-        let source = directory.join(format!("{index}.srt"));
-        std::fs::write(&source,format!("1\n00:00:00,100 --> 00:00:01,000\nBefore <font color=\"#{color}\" face=\"Georgia\" size=\"24\">colored <b>bold</b> <font color=\"#345678\">nested</font> restored</font> after\n")).unwrap();
-        let output = source.with_extension("mkv");
-        fvid::native_subtitle::try_convert_srt(&source, &output, &[])
-            .unwrap()
-            .unwrap();
-        let decode = |path: &std::path::Path| {
-            let result = std::process::Command::new(&binary)
-                .args(["-v", "error", "-i"])
-                .arg(path)
-                .args(["-map", "0:s:0", "-f", "srt", "-"])
-                .output()
+        for (nested_index, nested) in [
+            "color=\"#345678\"",
+            "face=\"Courier New\"",
+            "size=\"18\"",
+            "size=18",
+        ]
+        .iter()
+        .enumerate()
+        {
+            let source = directory.join(format!("{index}-{nested_index}.srt"));
+            std::fs::write(&source,format!("1\n00:00:00,100 --> 00:00:01,000\nBefore <font color=\"#{color}\" face=\"Georgia\" size=\"24\">colored <b>bold</b> <font {nested}>nested</font> restored</font> after\n")).unwrap();
+            let output = source.with_extension("mkv");
+            fvid::native_subtitle::try_convert_srt(&source, &output, &[])
+                .unwrap()
                 .unwrap();
-            assert!(
-                result.status.success(),
-                "{}",
-                String::from_utf8_lossy(&result.stderr)
-            );
-            String::from_utf8(result.stdout).unwrap()
-        };
-        assert_eq!(decode(&output), decode(&source), "{color}");
+            let decode = |path: &std::path::Path| {
+                let result = std::process::Command::new(&binary)
+                    .args(["-v", "error", "-i"])
+                    .arg(path)
+                    .args(["-map", "0:s:0", "-f", "srt", "-"])
+                    .output()
+                    .unwrap();
+                assert!(
+                    result.status.success(),
+                    "{}",
+                    String::from_utf8_lossy(&result.stderr)
+                );
+                String::from_utf8(result.stdout).unwrap()
+            };
+            assert_eq!(decode(&output), decode(&source), "{color}: {nested}");
+        }
     }
 }
