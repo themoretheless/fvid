@@ -132,3 +132,47 @@ fn independent_reference_all_yuv_layouts_and_depths() {
         }
     }
 }
+
+#[test]
+fn decode_cli_and_api_preserve_native_backend_and_intervals() {
+    use fvid::media_info::DecodeTransform;
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+    for name in ["video.mp4", "hevc/main10-ipb.mp4"] {
+        let path = root.join(name);
+        let request = DecodeTransform {
+            chromashift: Some("cbh=2:crv=-1:edge=wrap".into()),
+            interval: Some((0, 100000)),
+            ..Default::default()
+        };
+        let direct = fvid::native_media::decode_video_request(&path, &request).unwrap();
+        assert_eq!(direct.backend, "fvid");
+        assert!(direct.video_frames > 0);
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "decode"])
+            .arg(&path)
+            .args([
+                "--chromashift",
+                "cbh=2:crv=-1:edge=wrap",
+                "--from",
+                "0",
+                "--to",
+                "0.1",
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        let value: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+        assert_eq!(value["backend"], "fvid");
+        assert_eq!(value["video_frames"], direct.video_frames);
+        #[cfg(feature = "media")]
+        {
+            let actual = fvid::media::decode_video_transformed(&path, request).unwrap();
+            assert_eq!(actual.backend, "fvid");
+            assert_eq!(actual.video_frames, direct.video_frames);
+        }
+    }
+}

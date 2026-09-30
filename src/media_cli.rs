@@ -4,20 +4,7 @@ use std::path::PathBuf;
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.first().map(String::as_str)==Some("transcode-lossless") && args.len()>=3 {
         let mut owned=args.to_vec();owned[0]="decode".into();
-        let mut chromashift = None;
-        let mut i = 3;
-        while i < owned.len() {
-            if owned[i] == "--" { break; }
-            if owned[i] != "--chromashift" { i += 1; continue; }
-            if chromashift.is_some() { return Err("duplicate chromashift".into()); }
-            let value = owned.get(i + 1).ok_or("missing chromashift args")?;
-            match fvid::native_chromashift::ChromaShift::parse(value) {
-                Ok(filter) => { chromashift = Some(filter); owned.drain(i..i + 2); }
-                Err(_) => { i += 2; }
-            }
-        }
-        let (pixel_args,mut filters)=pixel_decode_args(&owned)?;
-        filters.chromashift = chromashift;
+        let (pixel_args,filters)=pixel_decode_args(&owned)?;
         let (remaining,geometry)=geometry_decode_args(&pixel_args)?;
         if remaining.len()>=3 && remaining[3..].iter().all(|s|matches!(s.as_str(),"--quiet"|"--progress"))
             && fvid::native_lossless::eligible(std::path::Path::new(&remaining[1]))? {
@@ -357,6 +344,24 @@ fn pixel_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_pixel
     let mut seen_morphology = std::collections::BTreeSet::new();
     while let Some(arg) = args.next() {
         if arg == "--" { result.push(arg.clone()); result.extend(args.cloned()); break; }
+        if arg == "--chromashift" {
+            let value = args.next().ok_or("missing chromashift args")?;
+            // Only admit the already-owned AVC/HEVC route here. Other input
+            // formats retain the full parser and adapter until their migration.
+            let eligible = match result.get(1) {
+                Some(path) => fvid::native_lossless::eligible(std::path::Path::new(path))?,
+                None => false,
+            };
+            if eligible {
+                if filters.chromashift.is_some() { return Err("duplicate chromashift".into()); }
+                if let Ok(filter) = fvid::native_chromashift::ChromaShift::parse(value) {
+                    filters.chromashift = Some(filter);
+                    continue;
+                }
+            }
+            result.push(arg.clone()); result.push(value.clone());
+            continue;
+        }
         if arg == "--negate" {
             if filters.negate.is_some() { return Err("duplicate negate".into()); }
             filters.negate = Some(Negate::parse(args.next().ok_or("missing negate args")?)?);

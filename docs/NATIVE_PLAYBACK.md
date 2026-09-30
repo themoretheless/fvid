@@ -2192,7 +2192,11 @@ and `LosslessTransform.chromashift`. Integer `cbh:cbv:crh:crv:edge` options
 shift Cb and Cr in their own sample coordinates, preserving luma and bit depth.
 Edges support `smear`/`0` and `wrap`/`1`; shifts range from -255 to 255.
 The operation follows morphology in the existing spatial filter order.
-This does not migrate the separate general decode filter route or RGB conversion.
+The same owned filter is available through `native_media::decode_video_request`.
+The general `media decode` CLI and `media::decode_video_transformed` now select it
+for eligible MP4 AVC/HEVC inputs, including presentation intervals. Other input
+formats and nonliteral filter options retain the legacy route; RGB conversion
+is not part of this migration.
 Independent reference tests cover 92 format/option combinations (six YUV
 subsamplings, supported depths from 8 to 16), plus complete transformed lossless
 exports, rotation, CLI/API dispatch and unchanged AAC companion packets.
