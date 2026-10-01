@@ -398,3 +398,27 @@ fn native_resample_cli_keeps_duration_and_sets_output_geometry() {
     }
     std::fs::remove_dir_all(dir).unwrap();
 }
+
+#[test]
+fn repeated_nonzero_range_reuses_checkpoint_with_exact_pcm() {
+    let original=include_bytes!("fixtures/playback-errors/aac-no-edit.m4a");
+    let edited=include_bytes!("fixtures/playback-errors/aac-gap-repeat-offset.m4a");
+    let mut continuous=Vec::new();
+    fvid::native_media::decode_mp4_aac_pcm(original,&mut continuous).unwrap();
+    let mut actual=Vec::new();
+    let stats=fvid::native_media::decode_mp4_aac_pcm(edited,&mut actual).unwrap();
+    let mut expected=vec![0;960*2*4];
+    expected.extend_from_slice(&continuous[4800*2*4..9600*2*4]);
+    expected.extend_from_slice(&continuous[4800*2*4..9600*2*4]);
+    assert_eq!(actual,expected);
+    assert_eq!(stats.sample_frames,10560);
+    // Each range ends in source packet 9. The second starts at packet 4,
+    // restoring its overlap/noise rather than decoding packets 0..4 again.
+    assert_eq!(stats.decoded_frames,16);
+    let mut partial=Vec::new();
+    let stats=fvid::native_media::decode_mp4_aac_pcm_interval(edited,&mut partial,
+        Some((std::time::Duration::from_millis(130),std::time::Duration::from_millis(200)))).unwrap();
+    assert_eq!(partial,&expected[6240*2*4..9600*2*4]);
+    assert_eq!(stats.sample_frames,3360);
+
+}

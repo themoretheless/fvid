@@ -436,6 +436,9 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
         channels,
     };
     let mut packet = Vec::new();
+    // One source-boundary checkpoint bounds retained state regardless of the
+    // number of edits. The stream and configuration never change in this call.
+    let mut checkpoint: Option<(usize,u64,Option<u64>,crate::codec::aac_native::AacCheckpoint)> = None;
     for segment in segments {
         let segment_start = segment.presentation.start;
         let segment_end = segment.presentation.end;
@@ -467,9 +470,14 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
             .checked_add(length)
             .ok_or_else(|| invalid("audio source edit overflow"))?;
         decoder.reset();
+        let mut first_sample=0;
+        let mut expected=None;
+        if let (Some((index,start,previous,state)),crate::native_audio_decoder::PacketPcmDecoder::Aac(aac))=(&checkpoint,&mut decoder) {
+            if *start<=from {aac.restore(state)?;first_sample=*index;expected=*previous;}
+        }
+        let mut captured=false;
         let mut written = 0u64;
-        let mut expected = None;
-        for sample_index in 0..track.samples.len() {
+        for sample_index in first_sample..track.samples.len() {
             control.check()?;
             let sample = track
                 .samples
@@ -484,6 +492,12 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
             }
             if start >= to {
                 break;
+            }
+            if !captured && start.checked_add(duration).ok_or_else(||invalid("audio timestamp overflow"))?>from {
+                if let crate::native_audio_decoder::PacketPcmDecoder::Aac(aac)=&decoder {
+                    checkpoint=Some((sample_index,start,expected,aac.checkpoint()));
+                }
+                captured=true;
             }
             reader.read_packet(index, sample_index, &mut packet)?;
             let samples = decoder.decode(&packet)?;

@@ -1752,3 +1752,16 @@ resets and restores, then compares every resulting float bit with continuous
 PCM. Incompatible-config restoration is also checked for no mutation.
 All seven native AAC tests passed. This is decoder support for seek acceleration;
 no player seek-cache integration or accelerated seek latency is claimed yet.
+
+### Repeated AAC export ranges reuse exact decoder state
+
+MP4 audio export keeps one AAC packet-boundary checkpoint near the selected
+source range. Later ranges at or after that boundary restore overlap/noise and
+resume at its packet index; earlier ranges reset and preroll normally. The
+checkpoint also retains the expected next source timestamp, preserving the
+contiguity check. State is local to one source/track and retained memory does
+not grow with the edit count. Non-AAC packet decoders keep their existing path.
+The nonzero-start synthetic gap/repeat fixture produces identical continuous
+PCM slices while requiring 16 decoded packets instead of 20. All 15 AAC export
+tests and both player gap/repeat seek/rewind regressions passed. This accelerates
+repeated export ranges; player seek still awaits its own checkpoint integration.
