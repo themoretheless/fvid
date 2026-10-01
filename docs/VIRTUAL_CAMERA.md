@@ -4,6 +4,30 @@ Required behavior: select a video file and expose its decoded frames as a
 camera input in other applications. File decoding remains in FVid, without
 FFmpeg. Physical camera capture is outside this request.
 
+## Current verification (2026-10-01)
+
+The Rust source, C boundary, Swift playback session, CMIO source/sink and host
+bundle are implemented. The camera bridge regression runner currently passes
+8 Swift suites and 9 AVC/HEVC/VP9/AV1 pixel comparisons, including seek, EOF,
+repeat, crop/aspect conversion, timestamps and bounded queues/pools.
+The runner rejects `fvid-media`/FFmpeg packages in the FFI dependency graph and
+FFmpeg dynamic libraries in every generated Swift test executable.
+
+`/Applications/FVid Camera.app` is signed with a valid Apple Development
+identity, TeamIdentifier `U6J9E8HK4D`; strict deep codesign verification passes.
+Its host executable has no FFmpeg linkage. `systemextensionsctl list` contains
+no FVid extension. Launch through `open` still fails with
+`RBSRequestErrorDomain Code=5` and underlying POSIX code `163` (job spawn
+failure). No provisioning profiles were found in the standard user profile
+directories. This evidence does not establish the cause of the launch failure.
+Installed activation, camera visibility and frame delivery in a separate
+application remain unverified. The root `media` feature still links the legacy
+FFmpeg adapter; camera-only independence does not satisfy that broader goal.
+
+The sections below record implementation history. Their earlier statements
+about missing components, developer identities and test counts describe those
+stages, rather than the current state above.
+
 ## macOS implementation boundary
 
 Use a Core Media I/O camera system extension, embedded in a host application.

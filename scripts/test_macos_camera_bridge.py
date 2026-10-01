@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Run all native camera bridge suites; no extension installation."""
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 
@@ -9,7 +10,29 @@ PLATFORM = ROOT / "platform/macos"
 FFI = ROOT / "crates/fvid-camera-ffi"
 
 
+def verify_native_dependencies():
+    tree = subprocess.check_output([
+        "cargo", "tree", "--locked", "--offline", "--manifest-path",
+        str(FFI / "Cargo.toml"), "-e", "normal", "--prefix", "none",
+    ], text=True)
+    forbidden = [line for line in tree.splitlines()
+                 if line.split() and (line.split()[0] == "fvid-media"
+                 or line.split()[0].startswith(("ffmpeg", "libav")))]
+    if forbidden:
+        raise RuntimeError("Camera dependency graph contains foreign media: " + "; ".join(forbidden))
+
+
+def verify_native_linkage(executable):
+    linked = subprocess.check_output(["otool", "-L", str(executable)], text=True)
+    dependencies = linked.splitlines()[1:]
+    forbidden = [line.strip() for line in dependencies
+                 if re.search(r"/(?:libavcodec|libavformat|libavutil|libavfilter|libswscale|libswresample|libavdevice)(?:[.\s]|$)", line)]
+    if forbidden:
+        raise RuntimeError("Camera executable links FFmpeg: " + "; ".join(forbidden))
+
+
 def main():
+    verify_native_dependencies()
     subprocess.run([
         "cargo", "build", "--locked", "--offline", "--manifest-path", str(FFI / "Cargo.toml")
     ], check=True)
@@ -47,6 +70,7 @@ def main():
             output = Path(directory) / name
             subprocess.run(common + [str(PLATFORM / "CameraHost" / s) for s in sources]
                            + [str(PLATFORM / "Tests" / (name + ".swift")), "-o", str(output)], check=True)
+            verify_native_linkage(output)
             subprocess.run([str(output)] + [str(ROOT / f) for f in fixtures], check=True)
         # Compare the FFI BGRA/seek path against a direct software RGB decode.
         # This verifies transport and frame selection; codec conformance has its
@@ -62,7 +86,7 @@ def main():
                             str(source), str(rgb), str(times)], check=True)
             subprocess.run([str(Path(directory) / "NativeVideoSourceTests"),
                             str(source), str(rgb), str(times)], check=True)
-    print(f"All {len(cases)} camera bridge suites and {len(fixtures)} AVC/HEVC/VP9/AV1 pixel comparisons passed; installed CMIO delivery is not tested.")
+    print(f"All {len(cases)} camera bridge suites and {len(fixtures)} AVC/HEVC/VP9/AV1 pixel comparisons passed; dependency and executable linkage checks exclude FFmpeg; installed CMIO delivery is not tested.")
 
 
 if __name__ == "__main__":
