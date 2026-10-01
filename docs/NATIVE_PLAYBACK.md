@@ -3092,3 +3092,10 @@ PCM container decode, cancellation, publication and the compressed-copy path.
 destination. Headless `plan concat --output-format mka` rejects video tracks
 just as execution does. PCM concat plans identify the input audio stream and
 its `decode_to_pcm` disposition instead of reporting an empty stream list.
+
+Owned constant-gain `normalize-loudness` also accepts `.mka`/`.mkv` float
+PCM output. Measurement, sample-peak ceiling, gain calculation and the two
+progress phases are shared with WAVE output. Tests compare gain reports and
+normalized samples exactly through both containers, including the headless
+CLI. This remains constant-gain, sample-peak-limited normalization; dynamic
+loudnorm and true-peak limiting are separate remaining operations.

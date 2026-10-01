@@ -12,6 +12,7 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
             let _ = std::fs::remove_file(self.0.with_extension("media.wav"));
             let _ = std::fs::remove_file(self.0.with_extension("controlled.wav"));
             let _ = std::fs::remove_file(self.0.with_extension("cancelled.wav"));
+            for ext in ["normalized.mka", "normalized.f32le", "matroska.f32le", "cli.mka"] {let _ = std::fs::remove_file(self.0.with_extension(ext));}
         }
     }
     let _cleanup = Cleanup(source.clone());
@@ -180,6 +181,44 @@ fn loudness_cli_uses_owned_file_meter_and_rejects_invalid_options() {
             .unwrap();
     assert!(!report.peak_limited);
     assert_eq!(report.sample_frames, 96000);
+    let matroska = source.with_extension("normalized.mka");
+    let mka_report =
+        fvid::native_pcm::normalize_loudness_file(&source, &matroska, None, &[1.0], target, None)
+            .unwrap();
+    assert_eq!(mka_report.gain_db, report.gain_db);
+    assert_eq!(mka_report.sample_frames, report.sample_frames);
+    let mut outputs = Vec::new();
+    for (input, ext) in [
+        (&normalized, "normalized.f32le"),
+        (&matroska, "matroska.f32le"),
+    ] {
+        let raw = source.with_extension(ext);
+        fvid::native_export::export_audio_pcm_selected(
+            input, &raw, None, 1.0, None, None, None, None, None,
+        )
+        .unwrap();
+        outputs.push(std::fs::read(raw).unwrap());
+    }
+    assert_eq!(outputs[0], outputs[1]);
+    let cli = source.with_extension("cli.mka");
+    let result = Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "normalize-loudness"])
+        .arg(&source)
+        .arg(&cli)
+        .args(["--target-lufs", "-20", "--sample-peak-dbfs", "0"])
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    assert_eq!(
+        std::fs::read(cli).unwrap(),
+        std::fs::read(matroska).unwrap()
+    );
+
+
     let measured =
         fvid::native_pcm::measure_loudness_file(&normalized, None, &[1.0], None).unwrap();
     assert!((measured.integrated_lufs.unwrap() + 20.0).abs() < 0.02);

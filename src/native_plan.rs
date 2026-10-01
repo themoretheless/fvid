@@ -366,7 +366,7 @@ pub fn normalize_loudness(source: &std::path::Path, selected: Option<usize>, wei
     plan.command="normalize-loudness".into();
     plan.steps.push(PlanStep {action:"gain".into(),detail:format!("constant gain to {} LUFS, limited by sample-peak ceiling {} dBFS; reject gain above 64",target.integrated_lufs,target.sample_peak_dbfs)});
     plan.steps.push(PlanStep {action:"decode".into(),detail:"second owned decode pass, preserving rate, channels and dynamics".into()});
-    plan.steps.push(PlanStep {action:"write".into(),detail:"atomic float WAVE publication; reject existing destination".into()});
+    plan.steps.push(PlanStep {action:"write".into(),detail:"atomic float WAVE or Matroska PCM publication; reject existing destination".into()});
     plan.notes.push("Gain is computed during execution; silent/short input fails; peak limiting may prevent reaching the LUFS target; no true-peak ceiling".into());
     Ok(plan)
 }

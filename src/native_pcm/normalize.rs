@@ -68,8 +68,8 @@ pub fn normalize_file_controlled(
     progress: Option<&NormalizationProgressHook>,
 ) -> Result<NormalizeReport> {
     target.validate().map_err(|e| invalid(&e))?;
-    if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
-        return Err(invalid("owned loudness normalization requires WAVE output"));
+    if !matches!(destination.extension().and_then(|s| s.to_str()),Some("wav" | "mka" | "mkv")) {
+        return Err(invalid("owned loudness normalization requires .wav, .mka or .mkv output"));
     }
     let before = std::fs::metadata(source)?;
     let measure_hook = progress.map(|hook| hook.for_phase(NormalizationPhase::Measure));

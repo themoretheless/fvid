@@ -66,7 +66,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             sample_peak_dbfs:ceiling.unwrap_or(defaults.sample_peak_dbfs),
         };
         if normalization_plan {
-            if destination.extension().and_then(|s|s.to_str())!=Some("wav") {return Err("normalization requires OUTPUT.wav".into());}
+            if !matches!(destination.extension().and_then(|s|s.to_str()),Some("wav" | "mka" | "mkv")) {return Err("normalization requires OUTPUT.wav, OUTPUT.mka or OUTPUT.mkv".into());}
             let plan=fvid::native_plan::normalize_loudness(source,selected,Some(&weights),target)?;
             if !quiet {println!("{}",serde_json::to_string_pretty(&plan)?);}
             return Ok(());
