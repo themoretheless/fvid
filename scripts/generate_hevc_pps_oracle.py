@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 """Regenerate the synthetic PPS-update oracle; not used by ordinary tests."""
 from pathlib import Path
+import argparse
 import subprocess
 import tempfile
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--hm-decoder', type=Path, required=True)
+args = parser.parse_args()
 
 root = Path(__file__).resolve().parents[1]
 fixtures = root / 'tests/fixtures/playback-errors'
@@ -32,8 +37,8 @@ with tempfile.TemporaryDirectory(prefix='fvid-pps-oracle-') as temp:
     source = Path(temp) / 'update.hevc'
     output = Path(temp) / 'update.yuv'
     source.write_bytes(annex_b)
-    subprocess.run(['ffmpeg', '-v', 'error', '-i', str(source), '-frames:v', '1',
-                    '-pix_fmt', 'yuv420p', '-f', 'rawvideo', str(output)], check=True)
+    subprocess.run([str(args.hm_decoder), '-b', str(source), '-o', str(output),
+                    '--OutputBitDepth=8', '--OutputBitDepthC=8', '--SEIDecodedPictureHash=0'], check=True)
     actual = output.read_bytes()
     expected = (fixtures / 'hevc-multislice-main.yuv').read_bytes()[:128 * 128 * 3 // 2]
     assert actual == expected, 'PPS update changed the intra picture'
