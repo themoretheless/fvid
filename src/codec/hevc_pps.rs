@@ -61,6 +61,7 @@ pub struct Pps {
     pub initial_qp: i32,
     pub constrained_intra: bool,
     pub transform_skip: bool,
+    pub transform_skip_max_log2: u8,
     pub cu_qp_delta_depth: Option<u8>,
     pub chroma_qp_offsets: [i8; 2],
     pub slice_chroma_qp_offsets: bool,
@@ -159,8 +160,22 @@ impl Pps {
         let lists_modification = b.bit()?;
         let parallel_merge_log2 = ue(b, u32::from(sps.coding_block_log2[1] - 2))? as u8 + 2;
         let slice_header_extension = b.bit()?;
+        let mut transform_skip_max_log2 = 2;
         if b.bit()? {
-            return Err(invalid("HEVC PPS extensions are not implemented"));
+            let range = b.bit()?;
+            if b.read(7)? != 0 {
+                return Err(invalid("HEVC multilayer/3D/SCC/unknown PPS extensions are not implemented"));
+            }
+            if range {
+                if transform_skip {
+                    transform_skip_max_log2 = ue(b, u32::from(sps.transform_block_log2[1] - 2))? as u8 + 2;
+                }
+                if b.bit()? || b.bit()? {
+                    return Err(invalid("HEVC cross-component prediction/chroma QP lists are not implemented"));
+                }
+                ue(b, 0)?;
+                ue(b, 0)?;
+            }
         }
         b.finish_rbsp()?;
         Ok(Self {
@@ -175,6 +190,7 @@ impl Pps {
             initial_qp,
             constrained_intra,
             transform_skip,
+            transform_skip_max_log2,
             cu_qp_delta_depth,
             chroma_qp_offsets,
             slice_chroma_qp_offsets,

@@ -316,3 +316,67 @@ fn explicit_rdpcm_matches_inter_oracles() {
     check_pair!("hevc-rext-explicit-rdpcm-10-skip", 10, false);
     check_pair!("hevc-rext-explicit-rdpcm-10-bypass", 10, true);
 }
+
+#[test]
+fn large_transform_skip_matches_oracle() {
+    compare(
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-8-skip-enabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-8-skip-enabled.yuv"),
+        8, false, false, Some(false), false, false, false,
+    );
+    compare(
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-8-skip-disabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-8-skip-disabled.yuv"),
+        8, false, false, Some(false), false, false, false,
+    );
+    compare(
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-10-skip-enabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-10-skip-enabled.yuv"),
+        10, false, false, Some(false), false, false, false,
+    );
+    compare(
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-10-skip-disabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip8-10-skip-disabled.yuv"),
+        10, false, false, Some(false), false, false, false,
+    );
+    compare(
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-8-skip-enabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-8-skip-enabled.yuv"),
+        8, false, false, Some(false), false, false, false,
+    );
+    compare(
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-8-skip-disabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-8-skip-disabled.yuv"),
+        8, false, false, Some(false), false, false, false,
+    );
+    compare(
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-10-skip-enabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-10-skip-enabled.yuv"),
+        10, false, false, Some(false), false, false, false,
+    );
+    compare(
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-10-skip-disabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip16-10-skip-disabled.yuv"),
+        10, false, false, Some(false), false, false, false,
+    );
+    compare(
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-8-skip-enabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-8-skip-enabled.yuv"),
+        8, false, false, Some(false), false, false, false,
+    );
+    compare(
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-8-skip-disabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-8-skip-disabled.yuv"),
+        8, false, false, Some(false), false, false, false,
+    );
+    compare(
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-10-skip-enabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-10-skip-enabled.yuv"),
+        10, false, false, Some(false), false, false, false,
+    );
+    compare(
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-10-skip-disabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-skip32-10-skip-disabled.yuv"),
+        10, false, false, Some(false), false, false, false,
+    );
+}

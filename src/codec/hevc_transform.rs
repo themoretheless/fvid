@@ -47,9 +47,9 @@ pub fn reconstruct(
             "invalid HEVC coefficient block or quantization parameters",
         ));
     }
-    if matches!(transform, Transform::Dst4 | Transform::Skip) && side != 4 {
+    if transform == Transform::Dst4 && side != 4 {
         return Err(invalid(
-            "Main/Main10 DST and transform skip require 4x4 blocks",
+            "HEVC DST requires 4x4 blocks",
         ));
     }
     out.resize(side * side, 0);
@@ -65,12 +65,13 @@ pub fn reconstruct(
             scratch[index] = 0;
             continue;
         }
-        let factor = i64::from(scaling.factor(
-            usize::from(log2_size - 2),
-            matrix_id,
-            index % side,
-            index / side,
-        )?);
+        let factor = if transform == Transform::Skip && side > 4 {
+            16
+        } else {
+            i64::from(scaling.factor(
+                usize::from(log2_size - 2), matrix_id, index % side, index / side,
+            )?)
+        };
         let product = (i64::from(coefficient) * factor * level_scale) << (qp / 6);
         scratch[index] = ((product + (1 << (shift - 1))) >> shift).clamp(-32768, 32767) as i32;
     }
@@ -453,7 +454,15 @@ mod tests {
             )
             .is_err()
         );
-        for mode in [Transform::Dst4, Transform::Skip] {
+        for log in 3..=5 {
+            let coefficients = vec![16; 1 << (2 * log)];
+            for depth in [8, 10] {
+                reconstruct(&coefficients, log, depth, 0, Transform::Skip,
+                    &ScalingLists::default(), 0, &mut scratch, &mut out).unwrap();
+                assert!(out.iter().all(|&value| value == 10));
+            }
+        }
+        for mode in [Transform::Dst4] {
             assert!(
                 reconstruct(&[0; 64], 3, 8, 0, mode, &flat, 0, &mut scratch, &mut out).is_err()
             );

@@ -824,6 +824,7 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                         self.sps.transform_skip_context,
                         self.sps.implicit_rdpcm,
                         self.sps.explicit_rdpcm,
+                        self.pps.transform_skip_max_log2,
                     )?)
                 } else {
                     None
@@ -1336,6 +1337,7 @@ impl Decoder<'_> {
                         self.sps.transform_skip_context,
                         self.sps.implicit_rdpcm,
                         self.sps.explicit_rdpcm,
+                        self.pps.transform_skip_max_log2,
                     )?;
                     let origin = if c == 0 { u.origin } else { u.chroma_origin };
                     if self.jobs.is_some() {

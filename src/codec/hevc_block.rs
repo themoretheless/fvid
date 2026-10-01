@@ -65,7 +65,7 @@ pub(crate) fn read_with_rotation(
     c: Config,
     rotation_enabled: bool,
 ) -> Result<Coefficients> {
-    read_with_tools(b, c, rotation_enabled, false, false, false)
+    read_with_tools(b, c, rotation_enabled, false, false, false, 2)
 }
 pub(crate) fn read_with_tools(
     b: &mut impl ResidualBins,
@@ -74,14 +74,18 @@ pub(crate) fn read_with_tools(
     context_enabled: bool,
     rdpcm_enabled: bool,
     explicit_rdpcm_enabled: bool,
+    max_skip_log2: u8,
 ) -> Result<Coefficients> {
     let scan = c.scan()?;
+    if !(2..=5).contains(&max_skip_log2) {
+        return Err(invalid("invalid HEVC transform skip limit"));
+    }
     if !(8..=10).contains(&c.bit_depth) || c.qp > 51 + 6 * (c.bit_depth - 8) {
         return Err(invalid("invalid HEVC block depth or QP"));
     }
     let skip = !c.transquant_bypass
         && c.transform_skip_enabled
-        && c.log2_size == 2
+        && c.log2_size <= max_skip_log2
         && b.decision(Syntax::TransformSkip, usize::from(c.component != 0))?;
     let mut rdpcm = c.intra_mode.filter(|&mode| {
         rdpcm_enabled && (skip || c.transquant_bypass) && matches!(mode, 10 | 26)
@@ -230,6 +234,29 @@ mod tests {
         }
     }
     #[test]
+    fn large_skip_reads_flag_and_reconstructs_impulse() {
+        for log in 3..=5 {
+            let mut c = config();
+            c.log2_size = log;
+            let last = 3 * usize::from(log - 2) + usize::from((log - 1) >> 2);
+            let mut b = Bins(VecDeque::from([
+                (Some(Syntax::TransformSkip), 0, true),
+                (Some(Syntax::LastX), last, false),
+                (Some(Syntax::LastY), last, false),
+                (Some(Syntax::Greater1), 1, true),
+                (Some(Syntax::Greater2), 0, false),
+                (None, 0, true),
+            ]));
+            let mut scratch = Vec::new();
+            let mut out = Vec::new();
+            read_with_tools(&mut b, c, false, false, false, false, log).unwrap()
+                .reconstruct(&ScalingLists::default(), &mut scratch, &mut out).unwrap();
+            assert_eq!(out[0], -1);
+            assert!(out[1..].iter().all(|&v| v == 0));
+            assert!(b.0.is_empty());
+        }
+    }
+    #[test]
     fn rotation_of_skipped_and_bypassed_intra_impulses_leaves_inter_unchanged() {
         for bypass in [false, true] {
             for intra in [false, true] {
@@ -278,7 +305,7 @@ mod tests {
                 ]);
                 let mut scratch = Vec::new();
                 let mut out = Vec::new();
-                read_with_tools(&mut b, c, false, false, true, false)
+                read_with_tools(&mut b, c, false, false, true, false, 2)
                     .unwrap()
                     .reconstruct(&ScalingLists::flat(), &mut scratch, &mut out)
                     .unwrap();
@@ -320,7 +347,7 @@ mod tests {
                     ]);
                     let mut scratch = Vec::new();
                     let mut out = Vec::new();
-                    read_with_tools(&mut b, c, false, false, false, true)
+                    read_with_tools(&mut b, c, false, false, false, true, 2)
                         .unwrap()
                         .reconstruct(&ScalingLists::flat(), &mut scratch, &mut out)
                         .unwrap();
