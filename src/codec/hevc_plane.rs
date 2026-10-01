@@ -107,7 +107,7 @@ impl Plane {
             .checked_mul(height)
             .filter(|&n| n > 0 && n <= budget / 3)
             .ok_or_else(|| invalid("HEVC plane exceeds memory budget"))?;
-        if !(8..=10).contains(&depth) {
+        if !(8..=12).contains(&depth) {
             return Err(invalid("unsupported HEVC plane depth"));
         }
         Ok(Self {
@@ -323,7 +323,7 @@ mod tests {
             -32,
             42,
         ];
-        for depth in [8, 10] {
+        for depth in [8, 10, 12] {
             let prediction = 1u16 << (depth - 1);
             let expected: Vec<u16> = residual
                 .iter()

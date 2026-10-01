@@ -80,7 +80,7 @@ pub(crate) fn read_with_tools(
     if !(2..=5).contains(&max_skip_log2) {
         return Err(invalid("invalid HEVC transform skip limit"));
     }
-    if !(8..=10).contains(&c.bit_depth) || c.qp > 51 + 6 * (c.bit_depth - 8) {
+    if !(8..=12).contains(&c.bit_depth) || c.qp > 51 + 6 * (c.bit_depth - 8) {
         return Err(invalid("invalid HEVC block depth or QP"));
     }
     let skip = !c.transquant_bypass

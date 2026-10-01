@@ -78,7 +78,8 @@ def main():
         # own independent saved references. No FFmpeg/VideoToolbox is used here.
         fixtures = ["video.mp4", "hevc/main-ipb.mp4", "hevc/main10-ipb.mp4",
                     "vp9/adaptive.webm", "vp9/odd10.webm", "vp9/lossless12.webm",
-                    "av1/ramp.webm", "av1/tiles.webm", "av1/random-access.webm"]
+                    "av1/ramp.webm", "av1/tiles.webm", "av1/random-access.webm",
+                    "playback-errors/hevc-rext-context-12-skip-enabled-filters.mp4"]
         for index, fixture in enumerate(fixtures):
             source = ROOT / "tests/fixtures" / fixture
             rgb = Path(directory) / f"reference-{index}.rgb"

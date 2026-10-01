@@ -17,7 +17,7 @@ pub fn luma_thresholds(
     offsets_div2: [i8; 2],
     depth: u8,
 ) -> Result<[i32; 2]> {
-    if !(8..=10).contains(&depth)
+    if !(8..=12).contains(&depth)
         || strength > 2
         || offsets_div2.iter().any(|v| !(-6..=6).contains(v))
     {
@@ -49,9 +49,9 @@ pub fn luma_decision(
     depth: u8,
 ) -> Result<LumaFilter> {
     let [beta, tc] = thresholds;
-    if !(8..=10).contains(&depth)
-        || !(0..=256).contains(&beta)
-        || !(0..=96).contains(&tc)
+    if !(8..=12).contains(&depth)
+        || !(0..=1024).contains(&beta)
+        || !(0..=384).contains(&tc)
         || lines
             .iter()
             .flatten()
@@ -93,7 +93,7 @@ pub fn luma_sample(
     filter: LumaFilter,
     enabled: [bool; 2],
 ) -> Result<[[u16; 4]; 2]> {
-    if !(8..=10).contains(&depth) || !(0..=96).contains(&tc) {
+    if !(8..=12).contains(&depth) || !(0..=384).contains(&tc) {
         return Err(invalid("invalid HEVC luma filter parameters"));
     }
     let max = (1i32 << depth) - 1;
@@ -153,7 +153,7 @@ pub fn chroma_tc(
     tc_offset_div2: i8,
     depths: [u8; 2],
 ) -> Result<i32> {
-    if depths.iter().any(|d| !(8..=10).contains(d))
+    if depths.iter().any(|d| !(8..=12).contains(d))
         || !(-12..=12).contains(&pps_offset)
         || !(-6..=6).contains(&tc_offset_div2)
     {
@@ -183,7 +183,7 @@ pub fn chroma_sample(
     depth: u8,
     enabled: [bool; 2],
 ) -> Result<[u16; 2]> {
-    if !(8..=10).contains(&depth) || !(0..=96).contains(&tc) {
+    if !(8..=12).contains(&depth) || !(0..=384).contains(&tc) {
         return Err(invalid("invalid HEVC chroma threshold"));
     }
     let max = (1i32 << depth) - 1;
@@ -211,6 +211,9 @@ mod tests {
     use super::*;
     #[test]
     fn luma_thresholds_scale_and_decisions_use_both_endpoint_lines() {
+        let thresholds = luma_thresholds([51, 51], 2, [6, 6], 12).unwrap();
+        assert_eq!(thresholds, [1024, 384]);
+        assert!(luma_decision([[[0; 4]; 2]; 2], thresholds, 12).is_ok());
         assert_eq!(luma_thresholds([30, 30], 2, [0, 0], 8).unwrap(), [22, 3]);
         assert_eq!(luma_thresholds([51, 51], 2, [6, 6], 10).unwrap(), [256, 96]);
         assert_eq!(luma_thresholds([30, 30], 0, [0, 0], 8).unwrap(), [0, 0]);

@@ -77,7 +77,7 @@ pub fn decode(
         || !(2..=min_cb.min(5)).contains(&min_tb)
         || !(min_tb..=max_cb.min(5)).contains(&max_tb)
         || sps.transform_hierarchy_depth[1] > max_cb - min_tb
-        || sps.depth.iter().any(|d| !(8..=10).contains(d))
+        || sps.depth.iter().any(|d| !(8..=12).contains(d))
         || sps.id != pps.sps_id
         || pps.id != slice.pps_id
     {
@@ -421,7 +421,7 @@ pub fn decode_slices(
             || !(2..=min_cb.min(5)).contains(&min_tb)
             || !(min_tb..=max_cb.min(5)).contains(&max_tb)
             || sps.transform_hierarchy_depth[1] > max_cb - min_tb
-            || sps.depth.iter().any(|d| !(8..=10).contains(d))
+            || sps.depth.iter().any(|d| !(8..=12).contains(d))
             || sps.id != pps.sps_id
             || pps.id != slice.pps_id
         {

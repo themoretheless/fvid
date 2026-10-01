@@ -34,7 +34,7 @@ pub fn reconstruct(
     scratch: &mut Vec<i32>,
     out: &mut Vec<i32>,
 ) -> Result<()> {
-    if !(2..=5).contains(&log2_size) || !(8..=10).contains(&bit_depth) {
+    if !(2..=5).contains(&log2_size) || !(8..=12).contains(&bit_depth) {
         return Err(invalid("unsupported HEVC transform geometry or bit depth"));
     }
     let side = 1usize << log2_size;
@@ -209,7 +209,7 @@ mod tests {
     fn dc_scaling_depth_sizes_and_signed_rounding() {
         let flat = ScalingLists::flat();
         for log in 2..=5 {
-            for depth in [8, 10] {
+            for depth in [8, 10, 12] {
                 for (value, expected) in [(64, 10), (-64, -10)] {
                     let mut block = vec![0; 1 << (2 * log)];
                     block[0] = value << (log - 2);
@@ -297,7 +297,7 @@ mod tests {
         }
         let flat = ScalingLists::flat();
         let mut state = 719u32;
-        for depth in [8, 10] {
+        for depth in [8, 10, 12] {
             for qp in 0..=51 + 6 * (depth - 8) {
                 let mut block = [0i32; 16];
                 for value in &mut block {
@@ -406,7 +406,7 @@ mod tests {
             (0, 8, 0, 0),
             (6, 8, 0, 0),
             (2, 7, 0, 0),
-            (2, 11, 0, 0),
+            (2, 13, 0, 0),
             (2, 8, 52, 0),
             (2, 10, 64, 0),
             (2, 8, 0, 6),
@@ -456,10 +456,11 @@ mod tests {
         );
         for log in 3..=5 {
             let coefficients = vec![16; 1 << (2 * log)];
-            for depth in [8, 10] {
+            for depth in [8, 10, 12] {
                 reconstruct(&coefficients, log, depth, 0, Transform::Skip,
                     &ScalingLists::default(), 0, &mut scratch, &mut out).unwrap();
-                assert!(out.iter().all(|&value| value == 10));
+                let expected = if depth == 12 && log == 5 { 12 } else { 10 };
+                assert!(out.iter().all(|&value| value == expected));
             }
         }
         for mode in [Transform::Dst4] {

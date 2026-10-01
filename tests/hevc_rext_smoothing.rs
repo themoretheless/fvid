@@ -426,3 +426,66 @@ fn high_precision_weighted_prediction_matches_oracle() {
         include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-disabled.yuv"),
         10, false, false, Some(false), false, false, false);
 }
+
+#[test]
+fn twelve_bit_420_matches_oracle() {
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled.yuv"),
+        12, false, false, Some(false), true, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled.yuv"),
+        12, false, false, Some(false), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled.yuv"),
+        12, false, false, Some(true), true, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled.yuv"),
+        12, false, false, Some(true), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters.yuv"),
+        12, false, false, Some(false), true, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters.yuv"),
+        12, false, false, Some(false), false, false, false);
+    assert_lowdelay_inter(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-enabled.mp4"));
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-enabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-enabled.yuv"),
+        12, false, false, Some(false), false, false, true);
+    assert_lowdelay_inter(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-disabled.mp4"));
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-disabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-skip-disabled.yuv"),
+        12, false, false, Some(false), false, false, false);
+    assert_lowdelay_inter(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-enabled.mp4"));
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-enabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-enabled.yuv"),
+        12, false, false, Some(true), false, false, true);
+    assert_lowdelay_inter(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-disabled.mp4"));
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-disabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-explicit-rdpcm-12-bypass-disabled.yuv"),
+        12, false, false, Some(true), false, false, false);
+}
+
+#[test]
+fn twelve_bit_bypass_with_filters_retains_explicit_refusal() {
+    for source in [
+        &include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters.mp4")[..],
+        &include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters.mp4")[..],
+    ] {
+        let mut input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
+        let mut decoder = HevcDecoder::from_configuration(&input.tracks()[0].configuration, 16 << 20).unwrap();
+        let mut packet = Vec::new();
+        input.read_packet(0, 0, &mut packet).unwrap();
+        let error = decoder.decode_packet(&packet).err().unwrap();
+        assert!(error.to_string().contains("unsupported HEVC picture tools"));
+    }
+}
+
+#[test]
+fn twelve_bit_high_qp_filters_match_oracle() {
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters-qp51.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters-qp51.yuv"),
+        12, false, false, Some(false), true, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-qp51.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-qp51.yuv"),
+        12, false, false, Some(false), false, false, false);
+}

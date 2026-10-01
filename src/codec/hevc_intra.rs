@@ -82,7 +82,7 @@ impl References {
         top: &[Option<u16>],
         left: &[Option<u16>],
     ) -> Result<Self> {
-        if !(2..=5).contains(&log2_size) || !(8..=10).contains(&bit_depth) {
+        if !(2..=5).contains(&log2_size) || !(8..=12).contains(&bit_depth) {
             return Err(invalid("unsupported HEVC intra size or bit depth"));
         }
         let side = 1usize << log2_size;
@@ -357,7 +357,7 @@ mod tests {
     #[test]
     fn all_modes_sizes_components_preserve_constant_and_missing_edges() {
         for log in 2..=5 {
-            for depth in [8, 10] {
+            for depth in [8, 10, 12] {
                 let edges = vec![None; 2 << log];
                 let r = References::new(log, depth, None, &edges, &edges).unwrap();
                 for mode in 0..=34 {
@@ -472,7 +472,7 @@ mod tests {
     #[test]
     fn invalid_references_and_modes_are_rejected() {
         assert!(References::new(1, 8, None, &[], &[]).is_err());
-        assert!(References::new(2, 11, None, &[None; 8], &[None; 8]).is_err());
+        assert!(References::new(2, 13, None, &[None; 8], &[None; 8]).is_err());
         assert!(References::new(2, 8, None, &[None; 7], &[None; 8]).is_err());
         assert!(References::new(2, 8, Some(256), &[None; 8], &[None; 8]).is_err());
         let r = References::new(2, 8, None, &[None; 8], &[None; 8]).unwrap();

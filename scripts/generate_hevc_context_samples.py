@@ -13,6 +13,10 @@ parser.add_argument('--rdpcm', action='store_true', help='generate implicit RDPC
 parser.add_argument('--explicit', action='store_true', help='generate explicit RDPCM in low-delay P pictures')
 parser.add_argument('--large-skip', type=int, choices=(3, 4, 5), help='maximum skip block log2 size')
 parser.add_argument('--high-precision', action='store_true', help='high precision weighted prediction')
+parser.add_argument('--depth', type=int, choices=(8, 10, 12), help='generate one bit depth')
+parser.add_argument('--filters', action='store_true', help='enable SAO and deblocking')
+parser.add_argument('--qp', type=int, default=24, choices=range(0, 52))
+parser.add_argument('--mode', choices=('skip', 'bypass'))
 args = parser.parse_args()
 if sum((args.rdpcm, args.explicit, args.large_skip is not None, args.high_precision)) > 1:
     parser.error('--rdpcm, --explicit, --large-skip and --high-precision are mutually exclusive')
@@ -31,8 +35,8 @@ with tempfile.TemporaryDirectory(prefix='fvid-hevc-context-') as directory:
         config.write_text(args.hm_config.read_text() + '\nIntraPeriod : -1\nGOPSize : 1\n'
                           'DecodingRefreshType : 2\n'
                           'Frame1 : P 1 0 0.0 0.0 0 0 1.0 0 0 0 1 1 -1 0\n')
-    for depth in (8, 10):
-        pix = 'yuv420p' if depth == 8 else 'yuv420p10le'
+    for depth in ((args.depth,) if args.depth else (8, 10)):
+        pix = 'yuv420p' if depth == 8 else f'yuv420p{depth}le'
         source = tmp / 'source.yuv'
         ff('-f', 'lavfi', '-i', 'testsrc2=size=64x64:rate=25', '-frames:v', 3,
            '-pix_fmt', pix, '-f', 'rawvideo', source)
@@ -46,10 +50,14 @@ with tempfile.TemporaryDirectory(prefix='fvid-hevc-context-') as directory:
                             value = (48 + plane * 12 + (x + y) % 48 + 40 * frame) * scale + frame
                             raw.extend(bytes([value]) if depth == 8 else value.to_bytes(2, 'little'))
             source.write_bytes(raw)
-        for mode in (('skip',) if args.large_skip or args.high_precision else ('skip', 'bypass')):
+        for mode in ((args.mode,) if args.mode else (('skip',) if args.large_skip or args.high_precision else ('skip', 'bypass'))):
             for context in (False, True):
                 tool = 'high-precision' if args.high_precision else f'skip{1 << args.large_skip}' if args.large_skip else ('explicit-rdpcm' if args.explicit else ('rdpcm' if args.rdpcm else 'context'))
                 stem = f'hevc-rext-{tool}-{depth}-{mode}-' + ('enabled' if context else 'disabled')
+                if args.filters:
+                    stem += '-filters'
+                if args.qp != 24:
+                    stem += f'-qp{args.qp}'
                 stream, recon = tmp / 'stream.hevc', tmp / 'recon.yuv'
                 options = [str(args.hm_encoder), '-c', str(config), '-i', str(source),
                            '-b', str(stream), '-o', str(recon), '-wdt', '64', '-hgt', '64',
@@ -60,8 +68,8 @@ with tempfile.TemporaryDirectory(prefix='fvid-hevc-context-') as directory:
                            f'--TransformSkipLog2MaxSize={args.large_skip if args.large_skip and context else 2}', f'--ImplicitResidualDPCM={int(context and args.rdpcm)}',
                            f'--ExplicitResidualDPCM={int(context and args.explicit)}', '--ResidualRotation=0',
                            '--GolombRiceParameterAdaptation=0', f'--HighPrecisionPredictionWeighting={int(context and args.high_precision)}',
-                           '--CrossComponentPrediction=0', '--SAO=0', '--LoopFilterDisable=1',
-                           '--QP=24', f'--SingleSignificanceMapContext={int(context and not args.rdpcm and not args.explicit and not args.large_skip and not args.high_precision)}',
+                           '--CrossComponentPrediction=0', f'--SAO={int(args.filters)}', f'--LoopFilterDisable={int(not args.filters)}',
+                           f'--QP={args.qp}', f'--SingleSignificanceMapContext={int(context and not args.rdpcm and not args.explicit and not args.large_skip and not args.high_precision)}',
                            f'--TransquantBypassEnable={int(mode == "bypass")}',
                            f'--CUTransquantBypassFlagForce={int(mode == "bypass")}']
                 if args.high_precision:
@@ -81,7 +89,7 @@ with tempfile.TemporaryDirectory(prefix='fvid-hevc-context-') as directory:
                 if args.rdpcm and mode == 'bypass' and context:
                     assert oracle == source.read_bytes(), 'forced bypass is not lossless'
                     print(f'{stem}: FFmpeg differs in {sum(a != b for a, b in zip(oracle, ff_output.read_bytes()))} oracle bytes')
-                elif args.high_precision and context and depth == 10:
+                elif (args.high_precision and context and depth == 10) or (depth == 12 and args.filters and args.qp == 51):
                     print(f'{stem}: FFmpeg differs in {sum(a != b for a, b in zip(oracle, ff_output.read_bytes()))} oracle bytes')
                 else:
                     assert oracle == ff_output.read_bytes(), 'HM and FFmpeg differ'

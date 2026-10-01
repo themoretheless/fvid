@@ -602,7 +602,7 @@ mod tests {
 
     #[test]
     fn separable_prediction_matches_scalar_at_all_phases_and_borders() {
-        for depth in [8, 10] {
+        for depth in [8, 10, 12] {
             let mut picture = Picture {
                 dimensions: [32, 32],
                 crop: [0; 4],

@@ -2,7 +2,7 @@
 use super::{hevc_cabac::Syntax, hevc_residual::ResidualBins};
 use crate::{Result, invalid};
 fn offset(depth: u8) -> Result<i32> {
-    if !(8..=10).contains(&depth) {
+    if !(8..=12).contains(&depth) {
         return Err(invalid("unsupported HEVC QP bit depth"));
     }
     Ok(6 * i32::from(depth - 8))
@@ -134,7 +134,7 @@ mod tests {
     }
     #[test]
     fn every_delta_and_asymmetric_limits() {
-        for depth in [8, 10] {
+        for depth in [8, 10, 12] {
             let limit = 26 + 3 * i32::from(depth - 8);
             for delta in -limit..limit {
                 let mut b = encoded(delta);

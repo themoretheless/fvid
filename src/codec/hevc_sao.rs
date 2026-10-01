@@ -43,14 +43,14 @@ impl Sao {
     /// PCM/transquant filter exclusions must be handled by the picture caller.
     #[inline]
     pub fn apply(self, sample: u16, neighbours: Option<[u16; 2]>, depth: u8) -> Result<u16> {
-        if !(8..=10).contains(&depth) {
+        if !(8..=12).contains(&depth) {
             return Err(invalid("unsupported SAO bit depth"));
         }
         let max = (1i32 << depth) - 1;
         if i32::from(sample) > max || neighbours.into_iter().flatten().any(|v| i32::from(v) > max) {
             return Err(invalid("SAO input sample exceeds bit depth"));
         }
-        let limit = (1i16 << (depth - 5)) - 1;
+        let limit = (1i16 << (depth - 5).min(5)) - 1;
         let offset = match self {
             Self::Off => 0,
             Self::Band { position, offsets } => {
@@ -104,7 +104,7 @@ pub fn read_ctu(
     left: Option<&CtuSao>,
     up: Option<&CtuSao>,
 ) -> Result<CtuSao> {
-    if depths.iter().any(|d| !(8..=10).contains(d)) {
+    if depths.iter().any(|d| !(8..=12).contains(d)) {
         return Err(invalid("unsupported HEVC SAO bit depth"));
     }
     if enabled == [false, false] {
@@ -138,7 +138,7 @@ pub fn read_ctu(
         if kind == 0 {
             continue;
         }
-        let limit = (1i16 << (depths[depth_index] - 5)) - 1;
+        let limit = (1i16 << (depths[depth_index] - 5).min(5)) - 1;
         let mut offsets = [0i16; 4];
         for value in &mut offsets {
             while *value < limit && b.bypass()? {
@@ -209,7 +209,7 @@ mod tests {
             position: 31,
             offsets: [7, -7, 2, -2],
         };
-        for depth in [8, 10] {
+        for depth in [8, 10, 12] {
             let step = 1u16 << (depth - 5);
             assert_eq!(mode.apply(0, None, depth).unwrap(), 0);
             assert_eq!(mode.apply(step, None, depth).unwrap(), step + 2);
