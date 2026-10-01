@@ -123,6 +123,11 @@ impl<W: Write> Resampler<W> {
         Ok(self.emitted)
     }
 }
+/// Drain produced PCM without disturbing the filter history or rational clock.
+impl Resampler<Vec<u8>> {
+    pub fn take_output(&mut self) -> Vec<u8> { std::mem::take(&mut self.output) }
+}
+
 impl<W: Write> Write for Resampler<W> {
     fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
         if bytes.len() % 4 != 0 {

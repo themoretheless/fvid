@@ -99,6 +99,8 @@ pub(crate) unsafe fn apply_volume(frame: *mut AVFrame, gain: f64) -> Result<()> 
 }
 
 struct Resampler {
+    owned: Option<crate::owned_resample::Resampler<Vec<u8>>>,
+    input_rate: i32,
     swr: *mut SwrContext,
     out_rate: i32,
     out_format: AVSampleFormat,
@@ -145,11 +147,23 @@ impl Resampler {
             }
             let mut swr = ptr::null_mut();
             let mut built = Self {
+                owned: None,
+                input_rate: f.sample_rate,
                 swr: ptr::null_mut(),
                 out_rate,
                 out_format,
                 ch_layout,
             };
+            if out_channels == f.ch_layout.nb_channels
+                && matches!(f.format, AVSampleFormat_AV_SAMPLE_FMT_FLT | AVSampleFormat_AV_SAMPLE_FMT_FLTP)
+            {
+                built.owned = Some(crate::owned_resample::Resampler::new(
+                    Vec::new(), u32::try_from(f.sample_rate).map_err(|_| "invalid input rate")?,
+                    u32::try_from(out_rate).map_err(|_| "invalid output rate")?,
+                    u16::try_from(out_channels).map_err(|_| "invalid channel count")?,
+                ).map_err(|e| e.to_string())?);
+                return Ok(built);
+            }
             check(
                 swr_alloc_set_opts2(
                     &mut swr,
@@ -174,6 +188,44 @@ impl Resampler {
     unsafe fn convert(&mut self, dst: *mut AVFrame, src: *const AVFrame) -> Result<i32> {
         unsafe {
             av_frame_unref(dst);
+            if let Some(owned) = &mut self.owned {
+                use std::io::Write;
+                let channels = self.ch_layout.nb_channels as usize;
+                if src.is_null() {
+                    owned.finish().map_err(|e| e.to_string())?;
+                } else {
+                    let input = &*src;
+                    if input.sample_rate != self.input_rate || input.ch_layout.nb_channels != channels as i32
+                        || input.nb_samples < 0 || input.extended_data.is_null()
+                        || !matches!(input.format, AVSampleFormat_AV_SAMPLE_FMT_FLT | AVSampleFormat_AV_SAMPLE_FMT_FLTP)
+                    { return Err("owned resampler input format changed".into()); }
+                    let planar = input.format == AVSampleFormat_AV_SAMPLE_FMT_FLTP;
+                    let mut bytes = Vec::with_capacity(input.nb_samples as usize * channels * 4);
+                    for sample in 0..input.nb_samples as usize {
+                        for channel in 0..channels {
+                            let plane = *input.extended_data.add(if planar { channel } else { 0 });
+                            if plane.is_null() { return Err("missing resampler PCM plane".into()); }
+                            let index = if planar { sample } else { sample * channels + channel };
+                            let value = ptr::read_unaligned(plane.cast::<f32>().add(index));
+                            bytes.extend_from_slice(&value.to_le_bytes());
+                        }
+                    }
+                    owned.write_all(&bytes).map_err(|e| e.to_string())?;
+                }
+                let bytes = owned.take_output();
+                let count = i32::try_from(bytes.len() / (channels * 4)).map_err(|_| "resampled audio size overflow")?;
+                if count == 0 { return Ok(0); }
+                (*dst).format = AVSampleFormat_AV_SAMPLE_FMT_FLT;
+                (*dst).sample_rate = self.out_rate;
+                (*dst).nb_samples = count;
+                check(av_channel_layout_copy(&mut (*dst).ch_layout, &self.ch_layout), "copy owned resample layout")?;
+                check(av_frame_get_buffer(dst, 0), "allocate owned resample output")?;
+                // Store native-endian AVFrame floats from the owned little-endian PCM stream.
+                for (index, sample) in bytes.chunks_exact(4).enumerate() {
+                    ptr::write_unaligned((*dst).data[0].cast::<f32>().add(index), f32::from_le_bytes(sample.try_into().unwrap()));
+                }
+                return Ok(count);
+            }
             let out_samples = if src.is_null() {
                 let delay = swr_get_delay(self.swr, i64::from(self.out_rate));
                 if delay <= 0 {
@@ -1138,6 +1190,51 @@ mod tests {
             av_buffer_unref(&mut reused);
             av_buffer_unref(&mut second);
             av_buffer_unref(&mut grown);
+        }
+    }
+}
+
+#[cfg(test)]
+mod owned_rate_tests {
+    use super::*;
+    #[test]
+    fn float_rate_adapter_uses_owned_filter_for_packed_and_planar_pcm() {
+        use std::io::Write;
+        for planar in [false, true] {
+            let pcm: Vec<f32> = (0..997).flat_map(|i| [(i as f32 * 0.07).sin(), -0.25]).collect();
+            let mut reference = crate::owned_resample::Resampler::new(Vec::new(), 48000, 16000, 2).unwrap();
+            reference.write_all(&pcm.iter().flat_map(|s| s.to_le_bytes()).collect::<Vec<_>>()).unwrap();
+            reference.finish().unwrap();
+            let expected = reference.take_output();
+            let input = Frame::new().unwrap();
+            let output = Frame::new().unwrap();
+            // SAFETY: RAII owns both frames; libav allocates the checked 997x2 float buffers.
+            unsafe {
+                (*input.0).format = if planar { AVSampleFormat_AV_SAMPLE_FMT_FLTP } else { AVSampleFormat_AV_SAMPLE_FMT_FLT };
+                (*input.0).sample_rate = 48000;
+                (*input.0).nb_samples = 997;
+                av_channel_layout_default(&mut (*input.0).ch_layout, 2);
+                check(av_frame_get_buffer(input.0, 0), "test input").unwrap();
+                for sample in 0..997 {
+                    for channel in 0..2 {
+                        let plane = *(*input.0).extended_data.add(if planar { channel } else { 0 });
+                        ptr::write_unaligned(plane.cast::<f32>().add(if planar {sample} else {sample * 2 + channel}), pcm[sample * 2 + channel]);
+                    }
+                }
+                let mut adapter = Resampler::open(input.0, 16000, 2).unwrap();
+                assert!(adapter.owned.is_some());
+                assert!(adapter.swr.is_null());
+                let mut actual = Vec::new();
+                for source in [input.0 as *const AVFrame, ptr::null()] {
+                    let count = adapter.convert(output.0, source).unwrap();
+                    for i in 0..count as usize * 2 {
+                        actual.extend_from_slice(&ptr::read_unaligned((*output.0).data[0].cast::<f32>().add(i)).to_le_bytes());
+                    }
+                }
+                assert_eq!(actual, expected);
+                assert_eq!(actual.len(), 333 * 2 * 4);
+                assert_eq!(adapter.convert(output.0, ptr::null()).unwrap(), 0);
+            }
         }
     }
 }
