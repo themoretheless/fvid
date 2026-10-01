@@ -178,3 +178,59 @@ fn temporal_multislice_seek_rebuilds_reference_storage_after_eof() {
         assert_eq!(pixels(&actual), *expected);
     }
 }
+
+#[test]
+fn dependent_segments_match_hm_and_independent_decoder() {
+    let source = include_bytes!("fixtures/playback-errors/hevc-dependent-main.mp4");
+    let mut input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
+    let track = input.tracks()[0].clone();
+    let decoder = HevcDecoder::from_configuration(&track.configuration, 16 << 20).unwrap();
+    assert!(decoder.parameters().1.dependent_slices);
+    let mut packet = Vec::new();
+    for index in 0..track.samples.len() {
+        input.read_packet(0, index, &mut packet).unwrap();
+        let headers = decoder.slice_headers(&packet).unwrap();
+        assert_eq!(headers.len(), 2);
+        assert!(!headers[0].dependent && headers[1].dependent);
+        assert_eq!(headers[0].qp, headers[1].qp);
+    }
+    compare_multislice(
+        source,
+        include_bytes!("fixtures/playback-errors/hevc-dependent-main.yuv"),
+        8,
+    );
+}
+
+#[test]
+fn dependent_wpp_segments_cross_rows_and_match_both_oracles() {
+    let source = include_bytes!("fixtures/playback-errors/hevc-dependent-wpp.mp4");
+    let mut input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
+    let track = input.tracks()[0].clone();
+    let decoder = HevcDecoder::from_configuration(&track.configuration, 16 << 20).unwrap();
+    assert!(decoder.parameters().1.entropy_sync);
+    let mut packet = Vec::new();
+    for index in 0..track.samples.len() {
+        input.read_packet(0, index, &mut packet).unwrap();
+        let headers = decoder.slice_headers(&packet).unwrap();
+        assert_eq!(headers.len(), 4);
+        assert!(headers.iter().skip(1).all(|h| h.dependent));
+        assert_eq!(
+            headers.iter().map(|h| h.address).collect::<Vec<_>>(),
+            vec![0, 1, 2, 3]
+        );
+    }
+    compare_multislice(
+        source,
+        include_bytes!("fixtures/playback-errors/hevc-dependent-wpp.yuv"),
+        8,
+    );
+}
+
+#[test]
+fn dependent_inter_segments_match_saved_reference() {
+    compare_multislice(
+        include_bytes!("fixtures/playback-errors/hevc-dependent-inter.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-dependent-inter.yuv"),
+        8,
+    );
+}

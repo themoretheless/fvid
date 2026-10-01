@@ -488,6 +488,8 @@ pub fn decode_slices(
         .checked_mul(rows)
         .ok_or_else(|| invalid("HEVC CTU grid overflow"))?;
     let mut sao = Vec::with_capacity(total as usize);
+    let mut previous_contexts = None;
+    let mut saved = None;
     for (index, slice) in slices.iter().enumerate() {
         let begin = slice.address;
         let end = slices.get(index + 1).map_or(total, |s| s.address);
@@ -496,10 +498,13 @@ pub fn decode_slices(
         }
         decoder.slice = slice;
         decoder.lists = &slice_lists[index];
-        decoder.slice_start = begin;
-        decoder.qp = slice.qp;
-        decoder.qp_prediction = slice.qp;
-        decoder.qp_coded = false;
+        if !slice.dependent {
+            decoder.slice_start = begin;
+            decoder.qp = slice.qp;
+            decoder.qp_prediction = slice.qp;
+            decoder.qp_coded = false;
+            saved = None;
+        }
         decoder.chroma_offsets = slice.chroma_qp_offsets.map(i32::from);
         let expected = if pps.entropy_sync {
             (end - 1) / columns - begin / columns + 1
@@ -517,7 +522,20 @@ pub fn decode_slices(
             slice.qp,
         )?;
         let initial = bins.contexts()?;
-        let mut saved = None;
+        if slice.dependent {
+            let contexts = if pps.entropy_sync && begin % columns == 0 {
+                saved.as_ref().unwrap_or(&initial)
+            } else {
+                previous_contexts
+                    .as_ref()
+                    .ok_or_else(|| invalid("HEVC dependent segment has no preceding CABAC state"))?
+            };
+            bins = HevcCabac::from_contexts(
+                &slice.rbsp[slice.entropy_substreams[0].clone()],
+                0,
+                contexts,
+            )?;
+        }
         for address in begin..end {
             let row = address / columns;
             let col = address % columns;
@@ -530,7 +548,7 @@ pub fn decode_slices(
                 )?;
                 decoder.qp = slice.qp;
             }
-            let available = |other: u32| other >= begin;
+            let available = |other: u32| other >= decoder.slice_start;
             let parameters = hevc_sao::read_ctu(
                 &mut bins,
                 slice.sao,
@@ -568,6 +586,7 @@ pub fn decode_slices(
                 return Err(invalid("missing HEVC end-of-substream bit"));
             }
         }
+        previous_contexts = Some(bins.contexts()?);
     }
     if !decoder.planes.iter().all(Plane::complete) {
         return Err(invalid("incomplete HEVC multi-slice picture"));
@@ -590,6 +609,7 @@ pub fn decode_slices(
     }
     decoder.lists = &canonical;
     deblock_slices(&mut decoder, slices)?;
+    let owners = independent_owners(slices);
     for (component, plane) in decoder.planes.iter_mut().enumerate() {
         let parameters: Vec<_> = sao.iter().map(|p| p[component]).collect();
         let shift = usize::from(component != 0);
@@ -604,7 +624,7 @@ pub fn decode_slices(
             |a, b| {
                 let ia = owner(a);
                 let ib = owner(b);
-                ia == ib || slices[ia.max(ib)].loop_filter_across_slices
+                owners[ia] == owners[ib] || slices[ia.max(ib)].loop_filter_across_slices
             },
         )?;
     }
@@ -953,8 +973,22 @@ fn reconstruct_row(
 fn deblock(decoder: &mut Decoder<'_>, slice: &SliceHeader) -> Result<()> {
     deblock_slices(decoder, std::slice::from_ref(slice))
 }
+fn independent_owners(slices: &[SliceHeader]) -> Vec<usize> {
+    let mut owner = 0;
+    slices
+        .iter()
+        .enumerate()
+        .map(|(index, slice)| {
+            if !slice.dependent {
+                owner = index;
+            }
+            owner
+        })
+        .collect()
+}
 fn deblock_slices(decoder: &mut Decoder<'_>, slices: &[SliceHeader]) -> Result<()> {
     use super::hevc_deblock as d;
+    let owners = independent_owners(slices);
     let [width, height] = decoder.sps.dimensions.map(|v| v as usize);
     // Complete vertical filtering precedes horizontal filtering.
     for direction in 0..2 {
@@ -981,7 +1015,7 @@ fn deblock_slices(decoder: &mut Decoder<'_>, slices: &[SliceHeader]) -> Result<(
                 };
                 let slice = &slices[q_owner];
                 if slice.deblocking.disabled
-                    || (p_owner != q_owner
+                    || (owners[p_owner] != owners[q_owner]
                         && !slices[p_owner.max(q_owner)].loop_filter_across_slices)
                 {
                     continue;

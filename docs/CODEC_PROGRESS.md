@@ -42,8 +42,10 @@ mix сохраняет PCE mask 0xff для ADTS/MP4/Matroska; тест двух
   Slice-local motion indices переводятся по POC в общую таблицу перед
   deblocking и публикацией DPB; перестановки/пересечения проверены unit test.
   Независимый encoded oracle с различающимися slice reference lists ещё нужен.
-  Dependent segments и изменённые in-band
-  SPS/PPS пока отклоняются. Идентичные повторённые parameter sets принимаются.
+  Dependent segments наследуют header, CABAC и QP state; WPP переносит
+  контексты второго CTU строки. HM-generated intra/inter streams с segment
+  boundaries внутри строки и между строками совпадают с HM и FFmpeg raw
+  reconstruction. Изменённые in-band SPS/PPS пока отклоняются. Идентичные повторённые parameter sets принимаются.
 - `src/codec/aac_native.rs`: декодер AAC-LC поддерживает стандартные 1–6 каналов,
   configurations 7 (7.1 wide), 11 (6.1 back), 12 (7.1) и однозначные горизонтальные PCE layouts. Восьмиканальный PCE в MP4 проверен
   по каждому динамику с независимым PCM-эталоном; собственные CLI/API WAV

@@ -161,7 +161,7 @@ checks truncations. Native Main/Main10 reconstruction is byte-equal to the
 saved YUV oracles, including rewind; partial pictures are never published.
 The Main10 fixture uses the same commands with yuv420p10le for encoding and
 reference output and `hevc-multislice-main10` filenames. Both contain I/B/P
-pictures. Dependent slice inheritance remains unimplemented. Reference-index remapping
+pictures. Dependent slice inheritance is verified by the HM fixtures below. Reference-index remapping
 is tested with reordered/overlapping POC maps, but these encoded fixtures do
 not establish differing per-slice reference-list behavior; the comparison does not prove unrestricted HEVC conformance.
 
@@ -177,4 +177,28 @@ The owned decoder matches the saved oracle byte for byte over two passes.
 Header checks require temporal MVP and multiple active references; sync seek
 rebuilds references after EOF and reproduces frames 10, 4, 17, 0 and 13 from
 sequential decoding. This does not establish differing reference-list order
-between slices or dependent-segment inheritance.
+between slices.
+
+Dependent segments: `hevc-dependent-main`, `hevc-dependent-wpp` and
+`hevc-dependent-inter` under `../playback-errors`. Synthetic testsrc2 input,
+reference HM encoder/decoder at commit 382e0a040c7f0189670c4aad9716d45db977b319
+from https://github.com/listenlink/HM . The temporary compiler makefile only
+replaces -Werror with -Wno-error for current Clang; codec source is unchanged.
+Build with `make -C build/linux -j4 release`. HM is an offline oracle,
+not a production dependency. Generation (paths abbreviated):
+
+```sh
+ffmpeg -v error -f lavfi -i 'testsrc2=size=128x128:rate=30:duration=0.1' -pix_fmt yuv420p -f rawvideo input.yuv
+TAppEncoderStatic -c cfg/encoder_intra_main.cfg -i input.yuv -b dependent-main.hevc -o hm.yuv -wdt 128 -hgt 128 -f 3 -fr 30 --SliceSegmentMode=1 --SliceSegmentArgument=2 --WaveFrontSynchro=0
+ffmpeg -v error -r 30 -i dependent-main.hevc -c copy hevc-dependent-main.mp4
+ffmpeg -v error -i dependent-main.hevc -pix_fmt yuv420p -fps_mode passthrough -f rawvideo hevc-dependent-main.yuv
+```
+
+WPP variant: segment argument 1 and WaveFrontSynchro 1, producing four segments
+at addresses 0,1,2,3. Inter variant: eight input frames (duration 0.2666667),
+`cfg/encoder_lowdelay_main.cfg`, eight encoded frames, segment argument 1,
+WPP 1. Save the raw HEVC decode as its YUV reference: MP4 timing/edit handling
+can omit its leading presentation frame; reconstruction tests compare all
+eight coded pictures. `TAppDecoderStatic -b dependent-inter.hevc -o hm.yuv`
+and FFmpeg raw decode are byte-identical. Production tests read saved bytes
+and never execute HM/FFmpeg. Ordinary independent-segment tests remain enabled.

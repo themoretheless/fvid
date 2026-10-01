@@ -20,6 +20,8 @@ pub struct Weights {
 }
 #[derive(Clone, Debug)]
 pub struct SliceHeader {
+    /// Dependent segment inherits syntax/context from the preceding slice.
+    pub dependent: bool,
     pub nal: NalHeader,
     pub slice_type: SliceType,
     pub poc_lsb: u32,
@@ -87,6 +89,68 @@ impl SliceHeader {
             return Err(invalid("expected temporal-zero HEVC IDR slice"));
         }
         Ok(header)
+    }
+    /// Read a dependent segment using an already validated preceding header.
+    pub fn parse_with_previous(
+        nal: &[u8],
+        sps: &Sps,
+        pps: &Pps,
+        budget: usize,
+        previous: Option<&Self>,
+    ) -> Result<Self> {
+        if !pps.dependent_slices || nal.get(2).is_none_or(|byte| byte & 0x80 != 0) {
+            return Self::parse(nal, sps, pps, budget);
+        }
+        let payload = NalRbsp::parse(nal, budget)?;
+        let b = &mut BitReader::new(&payload.bytes);
+        let first = b.bit()?;
+        let no_output = payload.header.is_irap() && b.bit()?;
+        let id = ue(b, 63)? as u8;
+        if first || !pps.dependent_slices {
+            return Self::parse(nal, sps, pps, budget);
+        }
+        if !b.bit()? {
+            return Self::parse(nal, sps, pps, budget);
+        }
+        let previous =
+            previous.ok_or_else(|| invalid("HEVC dependent segment has no preceding header"))?;
+        payload.header.require_base_layer()?;
+        if id != pps.id
+            || pps.sps_id != sps.id
+            || id != previous.pps_id
+            || payload.header.unit_type != previous.nal.unit_type
+            || payload.header.temporal_id != previous.nal.temporal_id
+            || no_output != previous.no_output_of_prior_pictures
+        {
+            return Err(invalid(
+                "HEVC dependent segment disagrees with preceding header",
+            ));
+        }
+        let side = 1u64 << sps.coding_block_log2[1];
+        let count = u64::from(sps.dimensions[0])
+            .div_ceil(side)
+            .checked_mul(u64::from(sps.dimensions[1]).div_ceil(side))
+            .filter(|&n| n > 0 && n <= u64::from(u32::MAX))
+            .ok_or_else(|| invalid("HEVC CTU address space exceeds supported range"))?
+            as u32;
+        let address = b.read((32 - (count - 1).leading_zeros()) as u8)?;
+        if address <= previous.address || address >= count {
+            return Err(invalid("HEVC dependent segment address out of range"));
+        }
+        let (entry_point_offsets, extension, entropy_byte_offset, entropy_substreams) =
+            entropy_tail(nal, &payload.bytes, b, pps, count, budget)?;
+        let mut result = previous.clone();
+        result.dependent = true;
+        result.first = false;
+        result.address = address;
+        result.nal = payload.header;
+        result.no_output_of_prior_pictures = no_output;
+        result.entry_point_offsets = entry_point_offsets;
+        result.extension = extension;
+        result.entropy_byte_offset = entropy_byte_offset;
+        result.entropy_substreams = entropy_substreams;
+        result.rbsp = payload.bytes;
+        Ok(result)
     }
     pub fn parse(nal: &[u8], sps: &Sps, pps: &Pps, budget: usize) -> Result<Self> {
         let payload = NalRbsp::parse(nal, budget)?;
@@ -330,100 +394,10 @@ impl SliceHeader {
             } else {
                 pps.loop_filter_across_slices
             };
-        let mut entry_point_offsets = Vec::new();
-        if pps.tiles.is_some() || pps.entropy_sync {
-            let entries = ue(b, count - 1)? as usize;
-            if entries
-                .checked_mul(24)
-                .and_then(|n| n.checked_add(payload.bytes.len()))
-                .is_none_or(|n| n > budget)
-            {
-                return Err(invalid("HEVC entry-point metadata exceeds budget"));
-            }
-            if entries > 0 {
-                let width = ue(b, 31)? as u8 + 1;
-                entry_point_offsets
-                    .try_reserve_exact(entries)
-                    .map_err(|_| invalid("cannot allocate HEVC entry points"))?;
-                for _ in 0..entries {
-                    entry_point_offsets.push(u64::from(b.read(width)?) + 1);
-                }
-            }
-        }
-        let mut extension = Vec::new();
-        if pps.slice_header_extension {
-            let length = ue(b, 256)? as usize;
-            for _ in 0..length {
-                extension.push(b.read(8)? as u8);
-            }
-        }
-        if !b.bit()? {
-            return Err(invalid("missing HEVC header alignment bit"));
-        }
-        while b.position() % 8 != 0 {
-            if b.bit()? {
-                return Err(invalid("nonzero HEVC header alignment padding"));
-            }
-        }
-        let entropy_byte_offset = b.position() / 8;
-        if b.remaining() < 8 {
-            return Err(invalid("missing HEVC entropy payload"));
-        }
-        // Entry-point offsets count emulation-prevention bytes, whereas CABAC
-        // consumes RBSP. Map boundaries before dropping the escaped input.
-        let escaped = &nal[2..];
-        let mut zeros = 0;
-        let mut rbsp_position = 0;
-        let mut next_boundary = None;
-        let mut entry = 0;
-        let mut start = entropy_byte_offset;
-        let mut entropy_substreams = Vec::with_capacity(entry_point_offsets.len() + 1);
-        for (i, &byte) in escaped.iter().enumerate() {
-            let escape = zeros == 2 && byte == 3;
-            if !escape
-                && rbsp_position == entropy_byte_offset
-                && next_boundary.is_none()
-                && entry == 0
-            {
-                if let Some(&length) = entry_point_offsets.first() {
-                    next_boundary = Some(
-                        i.checked_add(
-                            usize::try_from(length)
-                                .map_err(|_| invalid("HEVC entry point overflow"))?,
-                        )
-                        .ok_or_else(|| invalid("HEVC entry point overflow"))?,
-                    );
-                }
-            }
-            if next_boundary == Some(i) {
-                if escape || rbsp_position <= start {
-                    return Err(invalid("HEVC entry point is inside an escape or empty"));
-                }
-                entropy_substreams.push(start..rbsp_position);
-                start = rbsp_position;
-                entry += 1;
-                next_boundary = entry_point_offsets
-                    .get(entry)
-                    .map(|&length| {
-                        usize::try_from(length)
-                            .ok()
-                            .and_then(|length| i.checked_add(length))
-                            .ok_or_else(|| invalid("HEVC entry point overflow"))
-                    })
-                    .transpose()?;
-            }
-            if escape {
-                zeros = 0;
-            } else {
-                zeros = if byte == 0 { zeros + 1 } else { 0 };
-                rbsp_position += 1;
-            }
-        }
-        if entry != entry_point_offsets.len() {
-            return Err(invalid("HEVC entry point exceeds entropy payload"));
-        }
-        entropy_substreams.push(start..payload.bytes.len());
+        let (entry_point_offsets, extension, entropy_byte_offset, entropy_substreams) =
+            entropy_tail(nal, &payload.bytes, b, pps, count, budget)?;
         Ok(Self {
+            dependent: false,
             nal: payload.header,
             slice_type,
             poc_lsb,
@@ -455,6 +429,112 @@ impl SliceHeader {
             entropy_substreams,
         })
     }
+}
+type EntropyTail = (Vec<u64>, Vec<u8>, usize, Vec<std::ops::Range<usize>>);
+fn entropy_tail(
+    nal: &[u8],
+    rbsp: &[u8],
+    b: &mut BitReader<'_>,
+    pps: &Pps,
+    count: u32,
+    budget: usize,
+) -> Result<EntropyTail> {
+    let mut entry_point_offsets = Vec::new();
+    if pps.tiles.is_some() || pps.entropy_sync {
+        let entries = ue(b, count - 1)? as usize;
+        if entries
+            .checked_mul(24)
+            .and_then(|n| n.checked_add(rbsp.len()))
+            .is_none_or(|n| n > budget)
+        {
+            return Err(invalid("HEVC entry-point metadata exceeds budget"));
+        }
+        if entries > 0 {
+            let width = ue(b, 31)? as u8 + 1;
+            entry_point_offsets
+                .try_reserve_exact(entries)
+                .map_err(|_| invalid("cannot allocate HEVC entry points"))?;
+            for _ in 0..entries {
+                entry_point_offsets.push(u64::from(b.read(width)?) + 1);
+            }
+        }
+    }
+    let mut extension = Vec::new();
+    if pps.slice_header_extension {
+        let length = ue(b, 256)? as usize;
+        for _ in 0..length {
+            extension.push(b.read(8)? as u8);
+        }
+    }
+    if !b.bit()? {
+        return Err(invalid("missing HEVC header alignment bit"));
+    }
+    while b.position() % 8 != 0 {
+        if b.bit()? {
+            return Err(invalid("nonzero HEVC header alignment padding"));
+        }
+    }
+    let entropy_byte_offset = b.position() / 8;
+    if b.remaining() < 8 {
+        return Err(invalid("missing HEVC entropy payload"));
+    }
+    // Entry-point offsets count emulation-prevention bytes, whereas CABAC
+    // consumes RBSP. Map boundaries before dropping the escaped input.
+    let escaped = &nal[2..];
+    let mut zeros = 0;
+    let mut rbsp_position = 0;
+    let mut next_boundary = None;
+    let mut entry = 0;
+    let mut start = entropy_byte_offset;
+    let mut entropy_substreams = Vec::with_capacity(entry_point_offsets.len() + 1);
+    for (i, &byte) in escaped.iter().enumerate() {
+        let escape = zeros == 2 && byte == 3;
+        if !escape && rbsp_position == entropy_byte_offset && next_boundary.is_none() && entry == 0
+        {
+            if let Some(&length) = entry_point_offsets.first() {
+                next_boundary = Some(
+                    i.checked_add(
+                        usize::try_from(length)
+                            .map_err(|_| invalid("HEVC entry point overflow"))?,
+                    )
+                    .ok_or_else(|| invalid("HEVC entry point overflow"))?,
+                );
+            }
+        }
+        if next_boundary == Some(i) {
+            if escape || rbsp_position <= start {
+                return Err(invalid("HEVC entry point is inside an escape or empty"));
+            }
+            entropy_substreams.push(start..rbsp_position);
+            start = rbsp_position;
+            entry += 1;
+            next_boundary = entry_point_offsets
+                .get(entry)
+                .map(|&length| {
+                    usize::try_from(length)
+                        .ok()
+                        .and_then(|length| i.checked_add(length))
+                        .ok_or_else(|| invalid("HEVC entry point overflow"))
+                })
+                .transpose()?;
+        }
+        if escape {
+            zeros = 0;
+        } else {
+            zeros = if byte == 0 { zeros + 1 } else { 0 };
+            rbsp_position += 1;
+        }
+    }
+    if entry != entry_point_offsets.len() {
+        return Err(invalid("HEVC entry point exceeds entropy payload"));
+    }
+    entropy_substreams.push(start..rbsp.len());
+    Ok((
+        entry_point_offsets,
+        extension,
+        entropy_byte_offset,
+        entropy_substreams,
+    ))
 }
 #[cfg(test)]
 mod tests {

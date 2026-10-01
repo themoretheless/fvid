@@ -136,7 +136,8 @@ impl HevcDecoder {
                 .iter()
                 .find(|(_, p)| p.id == id)
                 .ok_or_else(|| invalid("HEVC slice references unknown PPS"))?;
-            let header = SliceHeader::parse(nal, sps, pps, self.budget)?;
+            let header =
+                SliceHeader::parse_with_previous(nal, sps, pps, self.budget, headers.last())?;
             if header.nal.temporal_id as usize >= sps.ordering.len() {
                 return Err(invalid("HEVC slice exceeds SPS temporal layers"));
             }
