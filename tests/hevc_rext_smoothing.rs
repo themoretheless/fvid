@@ -538,3 +538,37 @@ fn mixed_bypass_with_filters_matches_oracle() {
         include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24.yuv"),
         12, false, false, Some(true), false, false, false);
 }
+
+fn assert_two_filtered_slices(source: &[u8]) {
+    let mut input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
+    let decoder = HevcDecoder::from_configuration(&input.tracks()[0].configuration, 16 << 20).unwrap();
+    assert!(decoder.parameters().1.transquant_bypass);
+    for index in 0..3 {
+        let mut packet = Vec::new();
+        input.read_packet(0, index, &mut packet).unwrap();
+        let headers = decoder.slice_headers(&packet).unwrap();
+        assert_eq!(headers.len(), 2);
+        assert_eq!((headers[0].address, headers[1].address), (0, 2));
+        assert!(headers.iter().all(|h| !h.deblocking.disabled && h.sao != [false; 2]));
+    }
+}
+
+#[test]
+fn multislice_bypass_with_filters_matches_oracle() {
+    assert_two_filtered_slices(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters-slices2.mp4"));
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters-slices2.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters-slices2.yuv"),
+        12, false, false, Some(true), true, false, false);
+    assert_two_filtered_slices(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters-slices2.mp4"));
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters-slices2.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters-slices2.yuv"),
+        12, false, false, Some(true), false, false, false);
+    assert_two_filtered_slices(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-mixed-filters-qp-24-slices2.mp4"));
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-mixed-filters-qp-24-slices2.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-mixed-filters-qp-24-slices2.yuv"),
+        12, false, false, Some(true), true, false, false);
+    assert_two_filtered_slices(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24-slices2.mp4"));
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24-slices2.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24-slices2.yuv"),
+        12, false, false, Some(true), false, false, false);
+}

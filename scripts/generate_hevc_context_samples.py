@@ -20,6 +20,7 @@ parser.add_argument('--qp', type=int, default=24, choices=range(-48, 52))
 parser.add_argument('--mode', choices=('skip', 'bypass'))
 parser.add_argument('--sao-scale', type=int, choices=(0, 1, 2), default=0)
 parser.add_argument('--mixed-bypass', action='store_true', help='allow CU-by-CU bypass decisions')
+parser.add_argument('--slice-ctus', type=int, choices=(1, 2), help='independent slices containing this many CTUs')
 args = parser.parse_args()
 if sum((args.rdpcm, args.explicit, args.large_skip is not None, args.high_precision)) > 1:
     parser.error('--rdpcm, --explicit, --large-skip and --high-precision are mutually exclusive')
@@ -75,6 +76,8 @@ with tempfile.TemporaryDirectory(prefix='fvid-hevc-context-') as directory:
                     stem += f'-sao{args.sao_scale}'
                 if args.qp != 24:
                     stem += f'-qp{args.qp}'
+                if args.slice_ctus:
+                    stem += f'-slices{args.slice_ctus}'
                 stream, recon = tmp / 'stream.hevc', tmp / 'recon.yuv'
                 options = [str(args.hm_encoder), '-c', str(config), '-i', str(source),
                            '-b', str(stream), '-o', str(recon), '-wdt', '64', '-hgt', '64',
@@ -89,6 +92,8 @@ with tempfile.TemporaryDirectory(prefix='fvid-hevc-context-') as directory:
                            f'--QP={args.qp}', f'--SingleSignificanceMapContext={int(context and not args.rdpcm and not args.explicit and not args.large_skip and not args.high_precision)}',
                            f'--TransquantBypassEnable={int(mode == "bypass")}',
                            f'--CUTransquantBypassFlagForce={int(mode == "bypass" and not args.mixed_bypass)}']
+                if args.slice_ctus:
+                    options.extend(['--SliceMode=1', f'--SliceArgument={args.slice_ctus}'])
                 if args.sao_scale:
                     options.extend([f'--SaoLumaOffsetBitShift={args.sao_scale}', f'--SaoChromaOffsetBitShift={args.sao_scale}'])
                 if args.high_precision:

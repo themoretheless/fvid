@@ -47,3 +47,10 @@ Offsets retain a 31-unit coded magnitude limit and are shifted by the PPS
 scale before storage and application. Merged CTUs reuse the already scaled
 values. The syntax unit test covers scale 0/1/2, signed maximum offsets,
 clipping, merge without double scaling and out-of-range scale refusal.
+
+`--slice-ctus 2` emits two independent slices per 64x64 picture. The
+`multislice_bypass_with_filters_matches_oracle` test accepts both forced bypass
+and the adaptive noisy/flat input, with contexts enabled/disabled. It checks
+that each of the three pictures actually contains two slices (addresses 0, 2),
+SAO and deblocking are enabled, and every reconstructed sample matches HM
+through reset and playback rewind. Saved oracles also agree with FFmpeg.
