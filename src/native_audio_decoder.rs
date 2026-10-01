@@ -115,6 +115,9 @@ impl PacketPcmDecoder {
             Self::Alac { channels, .. } => *channels,
         }
     }
+    pub(crate) fn channel_mask(&self) -> Option<u32> {
+        match self {Self::Aac(decoder)=>Some(decoder.channel_mask()),_=>None}
+    }
     pub(crate) fn reset(&mut self) {
         if let Self::Aac(d) = self {
             d.reset();

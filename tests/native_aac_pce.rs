@@ -43,7 +43,7 @@ fn parses_independently_encoded_eight_channel_pce_and_all_truncations() {
 }
 
 #[test]
-fn asc_preserves_program_without_claiming_standard_layout_decode() {
+fn asc_preserves_program_and_reports_explicit_channel_count() {
     use fvid::{codec::config::AacConfig, container::mp4::Mp4Reader};
     let reader = Mp4Reader::open(
         std::io::Cursor::new(include_bytes!("fixtures/audio/aac-pce-wide8.m4a")),
@@ -55,7 +55,7 @@ fn asc_preserves_program_without_claiming_standard_layout_decode() {
     let (config, program) = AacConfig::parse_with_program(asc).unwrap();
     assert_eq!((config.sample_rate, config.channels), (48000, 8));
     assert_eq!(program.unwrap().channels(), 8);
-    assert!(AacConfig::parse(asc).is_err());
+    assert_eq!(AacConfig::parse(asc).unwrap().channels, 8);
 }
 
 #[test]
@@ -112,5 +112,55 @@ fn tagged_eight_channel_decode_matches_independent_pcm_per_speaker() {
             "channel {ch}: {rms}, {}",
             peak[ch]
         );
+    }
+}
+
+#[test]
+fn owned_cli_exports_pce_with_priming_and_explicit_wav_speakers() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let source = root.join("tests/fixtures/audio/aac-pce-wide8.m4a");
+    let directory = std::env::temp_dir().join(format!("fvid-pce-export-{}", std::process::id()));
+    std::fs::create_dir(&directory).unwrap();
+    struct Cleanup(std::path::PathBuf);
+    impl Drop for Cleanup {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _cleanup = Cleanup(directory.clone());
+    let output = directory.join("output.wav");
+    let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "decode-audio"])
+        .arg(&source)
+        .arg(&output)
+        .output()
+        .unwrap();
+    assert!(
+        run.status.success(),
+        "{}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    let wave = fvid::native_pcm::inspect(&mut std::fs::File::open(&output).unwrap(), None).unwrap();
+    assert_eq!((wave.channels, wave.channel_mask), (8, 0xff));
+    let raw = directory.join("output.f32le");
+    fvid::native_export::export_audio_pcm_selected(
+        &source, &raw, None, 1.0, None, None, None, None, None,
+    )
+    .unwrap();
+    let pcm = std::fs::read(raw).unwrap();
+    let reference = include_bytes!("fixtures/audio/aac-pce-wide8-export-reference.f32le");
+    assert_eq!(pcm.len(), reference.len());
+    for (a, b) in pcm.chunks_exact(4).zip(reference.chunks_exact(4)) {
+        let delta = (f32::from_le_bytes(a.try_into().unwrap())
+            - f32::from_le_bytes(b.try_into().unwrap()))
+        .abs();
+        assert!(delta < 1e-6, "PCM error {delta}");
+    }
+    #[cfg(feature = "media")]
+    {
+        let api = directory.join("api.wav");
+        let stats = fvid::media::decode_audio(&source, &api, &Default::default()).unwrap();
+        assert_eq!(stats.channels, 8);
+        assert_eq!(std::fs::read(api).unwrap(), std::fs::read(&output).unwrap());
     }
 }

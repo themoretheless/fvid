@@ -12,8 +12,8 @@ ffmpeg -v error -f lavfi -i 'aevalsrc=0.06*sin(2*PI*300*t)|0.06*sin(2*PI*400*t)|
 
 The ADTS fixture tests raw_data_block PCE syntax. The MP4 fixture tests the PCE
 embedded in AudioSpecificConfig, including alignment and trailing SBR signaling.
-These parser tests do not yet establish PCM decoding of PCE layouts. The legacy
-standard-layout ASC entrypoint still rejects a PCE rather than dropping its tags.
+The metadata ASC entrypoint reports the explicit channel count; packet decoding
+uses parse_with_program to retain tags and speaker positions.
 
 Packet decoding reference (ignore edit-list priming, retain container packet durations):
 
@@ -26,4 +26,14 @@ ffmpeg -v error -ignore_editlist 1 -i aac-pce-wide8.m4a -f f32le aac-pce-wide8-m
 peak error < 1e-6. The last packet's shorter duration accounts for reference
 suffix trimming; initial synthesis samples are compared without a guessed
 offset. Reset and malformed-PCE state preservation are covered. This does not
-yet establish ADTS channel_configuration=0 ingestion or public export routing.
+yet establish ADTS channel_configuration=0 ingestion.
+
+Edited MP4 export reference:
+
+```sh
+ffmpeg -v error -i aac-pce-wide8.m4a -f f32le aac-pce-wide8-export-reference.f32le
+```
+
+Owned CLI and public media API exports retain all eight channels with WAVE mask
+0xff (FL FR FC LFE BL BR FLC FRC), apply priming/edit scheduling, and compare
+complete PCM samples with this independent edited reference (peak < 1e-6).

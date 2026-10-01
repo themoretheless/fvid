@@ -23,9 +23,12 @@ conformance H.264/H.265/AAC и не покрывает все инструмен
 
 - `src/codec/hevc_decoder.rs`: multi-slice access units и изменённые in-band
   SPS/PPS пока отклоняются. Идентичные повторённые parameter sets принимаются.
-- `src/codec/aac_native.rs`: декодер AAC-LC поддерживает 1–6 каналов;
-  8-канальная конфигурация, которую умеет прочитать ASC parser, ещё не декодируется.
-  PCE и неподдержанные fill-extension tools также отклоняются.
+- `src/codec/aac_native.rs`: декодер AAC-LC поддерживает стандартные 1–6 каналов
+  и однозначные горизонтальные PCE layouts. Восьмиканальный PCE в MP4 проверен
+  по каждому динамику с независимым PCM-эталоном; собственные CLI/API WAV
+  exports сохраняют mask 0xff и учитывают priming/edit list. Стандартная
+  конфигурация 7 без PCE, ADTS configuration=0, coupling/height PCE layouts и
+  неподдержанные fill-extension tools ещё не подключены к полному пути.
 - `src/codec/config.rs`: принимается AAC-LC object type 2; это не HE-AAC/SBR.
 - `Cargo.toml`: native core и camera FFI работают без `fvid-media`, однако
   optional feature `media` по-прежнему включает legacy FFmpeg adapter.

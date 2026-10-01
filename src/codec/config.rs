@@ -320,10 +320,9 @@ fn audio_object_type(b: &mut BitReader<'_>) -> Result<u32> {
     if n == 31 { Ok(32 + b.read(6)?) } else { Ok(n) }
 }
 impl AacConfig {
-    /// Parse AAC-LC initialization for the standard channel configurations.
+    /// Parse AAC-LC metadata, including the count from an explicit program.
     pub fn parse(data: &[u8]) -> Result<Self> {
-        let (config, program) = Self::parse_with_program(data)?;
-        if program.is_some() { return Err(invalid("AAC PCE requires tagged channel decoding")); }
+        let (config, _) = Self::parse_with_program(data)?;
         Ok(config)
     }
     /// Preserve an explicit tagged program rather than guessing a layout from its count.

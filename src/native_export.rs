@@ -461,20 +461,20 @@ fn export_pcm_selected(
     } else {
         (None, None, Some(crate::container::adts::StreamReader::open(input)?),None)
     };
-    let (input_rate, input_channels) = if let Some(reader) = &mp4 {
+    let (input_rate, input_channels, native_mask) = if let Some(reader) = &mp4 {
         let index = if allow_wave {crate::native_media::mp4_audio_index(reader,selected)?} else {crate::native_media::mp4_aac_index(reader,selected)?};
         let decoder=crate::native_audio_decoder::PacketPcmDecoder::new(&reader.tracks()[index])?;
-        (decoder.sample_rate(),decoder.channels())
+        (decoder.sample_rate(),decoder.channels(),decoder.channel_mask())
     } else if let Some(reader) = &matroska {
         let index = if allow_wave {crate::native_media::matroska_audio_index(reader,selected)?} else {crate::native_media::matroska_aac_index(reader,selected)?};
         let decoder=crate::native_audio_decoder::PacketPcmDecoder::from_matroska(&reader.tracks[index])?;
-        (decoder.sample_rate(),decoder.channels())
+        (decoder.sample_rate(),decoder.channels(),decoder.channel_mask())
     } else if let Some((_,info))=&wave {
-        (info.sample_rate,info.channels)
+        (info.sample_rate,info.channels,Some(info.channel_mask))
     } else {
         if selected.is_some_and(|index| index != 0) { return Err(invalid("ADTS has only stream 0")); }
         let config = adts.as_ref().ok_or_else(|| invalid("missing ADTS reader"))?.configuration();
-        (config.sample_rate, config.channels)
+        (config.sample_rate, config.channels,None)
     };
     let unknown_pcm_layout = if let Some(reader)=&matroska {
         let index=crate::native_media::matroska_audio_index(reader,selected)?;
@@ -488,11 +488,13 @@ fn export_pcm_selected(
     if output_channels != input_channels {
         if unknown_pcm_layout {return Err(invalid("PCM channel conversion requires a known speaker layout"));}
         if input_channels > 6 { return Err(invalid("native audio rematrixing supports 1..=6 input channels")); }
+        if native_mask.is_some_and(|mask| default_pcm_mask(input_channels).is_ok_and(|standard|mask!=standard)) {return Err(invalid("native audio rematrixing requires a supported speaker layout"));}
         if let Some((_, info)) = &wave { info.validate_rematrix()?; }
     }
     let output_mask = match &wave {
         _ if unknown_pcm_layout && output_channels == input_channels => 0,
         Some((_, info)) if output_channels == input_channels => info.channel_mask,
+        _ if output_channels == input_channels && native_mask.is_some() => native_mask.unwrap(),
         _ => default_pcm_mask(output_channels)?,
     };
     let directory = destination.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or(Path::new("."));
