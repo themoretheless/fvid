@@ -102,3 +102,25 @@ fn native_plan_describes_the_actual_export_pipeline_and_rejects_unsupported_opti
     assert_eq!(json["streams"][0]["disposition"], "decode");
     assert!(json["notes"][0].as_str().unwrap().contains("backend: fvid"));
 }
+
+#[test]
+fn explicit_alac_track_selection_uses_owned_plan_and_decoder() {
+    let dir = Directory::new("selected-alac");
+    let source = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/alac-two-tracks.m4a");
+    assert!(media::plan_decode_audio(&source, &Default::default(), &Default::default()).unwrap_err().contains("explicit"));
+    let absent = dir.0.join("ambiguous.wav");
+    assert!(media::decode_audio(&source, &absent, &Default::default()).unwrap_err().contains("explicit"));
+    assert!(!absent.exists());
+    for index in [0, 1] {
+        let options = CopyOptions { streams: vec![index], ..Default::default() };
+        let plan = media::plan_decode_audio(&source, &Default::default(), &options).unwrap();
+        assert_eq!(plan.streams[0].index, index);
+        assert_eq!(plan.streams[0].codec, "alac");
+        let expected = dir.0.join(format!("expected-{index}.wav"));
+        let actual = dir.0.join(format!("actual-{index}.wav"));
+        fvid::native_export::export_audio_pcm_selected(&source, &expected, None, 1.0, None, None, Some(index), None, None).unwrap();
+        let decoded = media::decode_audio(&source, &actual, &options).unwrap();
+        assert!(decoded.sample_frames > 0);
+        assert_eq!(std::fs::read(actual).unwrap(), std::fs::read(expected).unwrap());
+    }
+}

@@ -1455,3 +1455,12 @@ Both ten-bit streams also pass the software NativeReader-to-camera BGRA bridge
 with exact pixel preservation, timestamps and backward seek. This checks the
 bridge, not macOS extension registration. DPCM/DC tile-boundary arithmetic has
 separate unit tests.
+
+### Explicit audio selection through the public decode API
+
+The media decode and planning entrypoints now admit containers with multiple
+owned ALAC/AAC tracks before resolving the explicit selection. Previously a
+multi-ALAC source fell into the legacy adapter despite an explicit supported
+track. A saved synthetic two-track ALAC MP4 verifies both selections against
+the owned PCM exporter and checks that omitted selection fails without creating
+an output. Fixture generation is separate from ordinary test execution.
