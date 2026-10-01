@@ -2940,3 +2940,17 @@ system. The decoder's raw frame contract remains the complete coded picture;
 plain decode statistics continue to describe that raw frame. Regression tests
 check exact RGB pixels for rotation/crop/flip and visible output dimensions
 from the cropped Matroska fixture without enabling the legacy media feature.
+
+### Owned Matroska identity-copy packet limit
+
+`media::remux` and `media::plan_remux` accept a custom `CopyOptions.max_packet_bytes`
+for identity Matroska copies without selecting the legacy adapter. The owned
+index rejects an encoded media packet above the limit before any container
+bytes are copied. Successful copies retain every original EBML byte and publish
+atomically; failure removes the temporary output and never emits completion.
+`native_export::remux_matroska_with_packet_limit` and
+`matroska_copy::copy_with_packet_limit` expose the same behavior without the
+legacy media feature. Existing entrypoints keep the 64 MiB default. This is a
+per-packet admission bound, not a total-memory or RSS limit. Other custom options
+(stream selection, packet-count limits, metadata mutation or process budgets)
+still retain their previous routing.

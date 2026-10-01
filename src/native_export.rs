@@ -942,6 +942,14 @@ pub fn is_matroska_source(source: &Path) -> Result<bool> {
 pub fn remux_matroska(source: &Path, destination: &Path,
     cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::media_control::ProgressEvent> {
+    remux_matroska_with_packet_limit(source, destination, cancel, progress, 64 << 20)
+}
+
+/// Identity Matroska remux with an encoded packet byte limit.
+pub fn remux_matroska_with_packet_limit(source: &Path, destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
+    packet_bytes: usize,
+) -> Result<crate::media_control::ProgressEvent> {
     let audio_only=match destination.extension().and_then(|s|s.to_str()) {
         Some("mkv")=>false, Some("mka")=>true,
         _=>return Err(invalid("native Matroska copy output requires .mkv or .mka")),
@@ -958,7 +966,7 @@ pub fn remux_matroska(source: &Path, destination: &Path,
         }
     }).ok_or_else(||invalid("cannot reserve Matroska copy output"))??;
     let mut output=BufWriter::new(file);
-    let event=crate::container::matroska_copy::copy(&mut input,&mut output,audio_only,cancel,progress)?;
+    let event=crate::container::matroska_copy::copy_with_packet_limit(&mut input,&mut output,audio_only,cancel,progress,packet_bytes)?;
     output.flush()?;output.get_ref().sync_all()?;drop(output);
     if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
     std::fs::hard_link(&temporary.0,destination)?;

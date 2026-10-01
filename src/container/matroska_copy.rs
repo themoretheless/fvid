@@ -18,12 +18,18 @@ pub(crate) fn inspect<R: Read + Seek>(
     audio_only: bool,
     cancel: Option<&CancelFlag>,
 ) -> Result<Vec<(u64, usize)>> {
+    inspect_with_packet_limit(input, audio_only, cancel, 64 << 20)
+}
+pub(crate) fn inspect_with_packet_limit<R: Read + Seek>(
+    input: &mut R, audio_only: bool, cancel: Option<&CancelFlag>, packet_bytes: usize,
+) -> Result<Vec<(u64, usize)>> {
+    if packet_bytes == 0 { return Err(invalid("packet byte limit must be positive")); }
     check(cancel)?;
     input.seek(SeekFrom::Start(0))?;
     let mut reader = WebmReader::open(
         input,
         Limits {
-            packet_bytes: 64 << 20,
+            packet_bytes,
             ..Default::default()
         },
     )?;
@@ -68,6 +74,14 @@ pub fn copy<R: Read + Seek, W: Write>(
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
 ) -> Result<ProgressEvent> {
+    copy_with_packet_limit(input, output, audio_only, cancel, progress, 64 << 20)
+}
+
+/// Identity copy with a caller-selected maximum encoded packet size.
+pub fn copy_with_packet_limit<R: Read + Seek, W: Write>(
+    input: &mut R, output: &mut W, audio_only: bool,
+    cancel: Option<&CancelFlag>, progress: Option<&ProgressHook>, packet_bytes: usize,
+) -> Result<ProgressEvent> {
     check(cancel)?;
     let mut event = ProgressEvent {
         packets: 0,
@@ -77,7 +91,7 @@ pub fn copy<R: Read + Seek, W: Write>(
     if let Some(hook) = progress {
         hook.emit(event);
     }
-    let packets = inspect(input, audio_only, cancel)?;
+    let packets = inspect_with_packet_limit(input, audio_only, cancel, packet_bytes)?;
     let length = input.seek(SeekFrom::End(0))?;
     if packets.last().is_some_and(|(end, _)| *end > length) {
         return Err(invalid("Matroska packet exceeds source length"));

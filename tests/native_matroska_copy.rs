@@ -137,3 +137,62 @@ fn media_api_uses_owned_path() {
     assert_eq!(stats.backend, "fvid");
     assert_eq!(std::fs::read(source).unwrap(), std::fs::read(dest).unwrap());
 }
+
+#[test]
+fn custom_packet_limit_is_checked_before_any_container_bytes_are_written() {
+    let bytes = std::fs::read(fixture("av1/random-access.webm")).unwrap();
+    let mut reader = webm::WebmReader::open(Cursor::new(&bytes), Default::default()).unwrap();
+    reader.scan_all().unwrap();
+    let largest = reader.packets.iter().map(|p| p.size).max().unwrap();
+    for limit in [0, largest - 1, largest, largest + 1] {
+        let mut output = Vec::new();
+        let result = matroska_copy::copy_with_packet_limit(
+            &mut Cursor::new(&bytes), &mut output, false, None, None, limit);
+        if limit < largest {
+            assert!(result.is_err());
+            assert!(output.is_empty());
+        } else {
+            assert!(result.is_ok());
+            assert_eq!(output, bytes);
+        }
+    }
+}
+
+#[cfg(feature = "media")]
+#[test]
+fn public_remux_and_plan_own_custom_packet_budget_and_failure_publication() {
+    let d = dir("packet-limit");
+    let source = fixture("av1/random-access.webm");
+    let bytes = std::fs::read(&source).unwrap();
+    let mut reader = webm::WebmReader::open(Cursor::new(&bytes), Default::default()).unwrap();
+    reader.scan_all().unwrap();
+    let largest = reader.packets.iter().map(|p| p.size).max().unwrap();
+    for limit in [largest - 1, largest] {
+        let dest = d.0.join(format!("copy-{limit}.mkv"));
+        let events = Arc::new(Mutex::new(Vec::new()));
+        let captured = events.clone();
+        let published = dest.clone();
+        let options = fvid::media::CopyOptions {
+            max_packet_bytes: limit,
+            progress: Some(ProgressHook::new(move |event| {
+                if event.done { assert!(published.exists()); }
+                captured.lock().unwrap().push(event);
+            })),
+            ..Default::default()
+        };
+        let plan = fvid::media::plan_remux(&source, &options);
+        let result = fvid::media::remux(&source, &dest, &options);
+        if limit < largest {
+            assert!(plan.unwrap_err().contains("packet exceeds budget"));
+            assert!(result.unwrap_err().contains("packet exceeds budget"));
+            assert!(!dest.exists());
+            assert!(events.lock().unwrap().iter().all(|event| !event.done));
+            assert_eq!(std::fs::read_dir(&d.0).unwrap().count(), 0);
+        } else {
+            assert!(plan.unwrap().steps.iter().any(|step| step.action == "budget"));
+            assert_eq!(result.unwrap().backend, "fvid");
+            assert_eq!(std::fs::read(dest).unwrap(), bytes);
+            assert_eq!(events.lock().unwrap().iter().filter(|event| event.done).count(), 1);
+        }
+    }
+}

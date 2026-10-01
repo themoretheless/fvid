@@ -109,6 +109,13 @@ fn validate_native_copy_options(options: &CopyOptions, audio_selection: bool) ->
     Ok(())
 }
 
+fn validate_matroska_copy_options(options: &CopyOptions) -> Result<()> {
+    if options.max_packet_bytes == 0 { return Err("packet byte limit must be positive".into()); }
+    let mut remaining = options.clone();
+    remaining.max_packet_bytes = CopyOptions::default().max_packet_bytes;
+    validate_native_copy_options(&remaining, false)
+}
+
 /// Plan AAC or WAVE decoding using owned metadata and decoder configuration.
 /// Packet contents and timeline consistency are checked during execution.
 pub fn plan_decode_audio(
@@ -144,16 +151,16 @@ pub fn remux(
     let mp4 = crate::container::mp4::recognizes_prefix(&prefix);
     let matroska = matches!(destination.extension().and_then(|s|s.to_str()),Some("mka"|"mkv"));
     let matroska_copy = matroska && prefix[..4] == [0x1a,0x45,0xdf,0xa3];
-    if matroska_copy && validate_native_copy_options(options,false).is_err() {return fvid_media::remux(source,destination,options);}
+    if matroska_copy && validate_matroska_copy_options(options).is_err() {return fvid_media::remux(source,destination,options);}
     let mp4_matroska = mp4 && matroska && crate::native_export::is_native_mp4_matroska(source).map_err(|e| e.to_string())?;
     if !adts && !mp4_matroska && !matroska_copy && (matroska || !mp4) { return fvid_media::remux(source, destination, options); }
     // Preserve unmigrated metadata mutations/stream options on the legacy path.
     if mp4_matroska && validate_native_copy_options(options, false).is_err() {
         return fvid_media::remux(source, destination, options);
     }
-    validate_native_copy_options(options, false)?;
+    if matroska_copy { validate_matroska_copy_options(options)?; } else { validate_native_copy_options(options, false)?; }
     let stats = if matroska_copy {
-        crate::native_export::remux_matroska(source,destination,options.cancel.as_ref(),options.progress.as_ref())
+        crate::native_export::remux_matroska_with_packet_limit(source,destination,options.cancel.as_ref(),options.progress.as_ref(),options.max_packet_bytes)
     } else if mp4_matroska {
         crate::native_export::remux_mp4_matroska(source, destination,
             options.cancel.as_ref(), options.progress.as_ref())
@@ -253,7 +260,14 @@ pub fn plan_trim(
 
 /// Plan owned ADTS/MP4 remuxing with the same option restrictions as execution.
 pub fn plan_remux(source: &std::path::Path, options: &CopyOptions) -> Result<MediaPlan> {
-    if validate_native_copy_options(options,false).is_err() && crate::native_export::is_matroska_source(source).map_err(|e|e.to_string())? {return fvid_media::plan_remux(source,options); }
+    if crate::native_export::is_matroska_source(source).map_err(|e|e.to_string())? {
+        if validate_matroska_copy_options(options).is_err() {return fvid_media::plan_remux(source,options);}
+        let mut input = std::io::BufReader::new(std::fs::File::open(source).map_err(|e|e.to_string())?);
+        crate::container::matroska_copy::inspect_with_packet_limit(&mut input, false, options.cancel.as_ref(), options.max_packet_bytes).map_err(|e|e.to_string())?;
+        let mut plan = crate::native_plan::remux(source)?.ok_or("missing Matroska remux plan")?;
+        plan.steps.push(PlanStep { action: "budget".into(), detail: format!("FVid maximum encoded packet size: {} bytes", options.max_packet_bytes) });
+        return Ok(plan);
+    }
     match crate::native_plan::remux(source)? {
         Some(plan) => { validate_native_copy_options(options, false)?; Ok(plan) }
         None => fvid_media::plan_remux(source, options),
