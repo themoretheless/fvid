@@ -189,8 +189,8 @@ pub fn concat_adts(sources: &[std::path::PathBuf]) -> Result<MediaPlan> {
     for source in sources {
         let file=std::fs::File::open(source).map_err(|e|e.to_string())?;
         let mut reader=crate::container::adts::StreamReader::open(std::io::BufReader::new(file)).map_err(|e|e.to_string())?;
-        let config=reader.configuration().asc;
-        if asc.is_some_and(|v|v!=config) {return Err("ADTS concat requires identical AAC configurations".into());}
+        let config=reader.audio_specific_config().to_vec();
+        if asc.as_ref().is_some_and(|v|v!=&config) {return Err("ADTS concat requires identical AAC configurations".into());}
         asc=Some(config);
         while reader.next_packet().map_err(|e|e.to_string())?.is_some() {
             packets+=1;

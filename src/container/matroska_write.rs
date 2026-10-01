@@ -778,8 +778,10 @@ pub fn write_adts<R: Read, W: Write + Seek>(
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
 ) -> Result<ProgressEvent> {
+    let asc = input.audio_specific_config().to_vec();
     write_aac_packets(
         input.configuration(),
+        &asc,
         || input.next_packet(),
         output,
         cancel,
@@ -795,8 +797,10 @@ pub fn concat_adts<R: Read, W: Write + Seek>(
     progress: Option<&ProgressHook>,
 ) -> Result<ProgressEvent> {
     let mut sequence = super::adts::SequenceReader::new(readers)?;
+    let asc = sequence.audio_specific_config().to_vec();
     write_aac_packets(
         sequence.configuration(),
+        &asc,
         || sequence.next_packet(),
         output,
         cancel,
@@ -806,15 +810,16 @@ pub fn concat_adts<R: Read, W: Write + Seek>(
 
 fn write_aac_packets<W: Write + Seek>(
     config: super::adts::Header,
+    asc: &[u8],
     mut next_packet: impl FnMut() -> Result<Option<Vec<u8>>>,
     output: &mut W,
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
 ) -> Result<ProgressEvent> {
-    let samples = u64::from(crate::codec::config::AacConfig::parse(&config.asc)?.frame_samples);
+    let samples = u64::from(crate::codec::config::AacConfig::parse(asc)?.frame_samples);
     let spec = TrackSpec {
         encoding: Encoding::Aac {
-            configuration: &config.asc,
+            configuration: asc,
             sample_rate: config.sample_rate,
             channels: config.channels.into(),
         },

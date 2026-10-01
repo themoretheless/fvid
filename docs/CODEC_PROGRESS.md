@@ -31,7 +31,8 @@ conformance H.264/H.265/AAC и не покрывает все инструмен
   неподдержанные fill-extension tools ещё не подключены к полному пути.
 - ADTS configuration=0 декодируется, если PCE открывает первый пакет.
   Потоковый и индексируемый пути совпадают с независимым восьмиканальным
-  PCM-эталоном; CLI/API WAV сохраняют mask 0xff. PCE remux ещё не подключён.
+  PCM-эталоном; CLI/API WAV сохраняют mask 0xff. Matroska remux/concat
+  сохраняют PCE и PCM; MP4 PCE remux ещё не подключён.
 - `src/codec/config.rs`: принимается AAC-LC object type 2; это не HE-AAC/SBR.
 - `Cargo.toml`: native core и camera FFI работают без `fvid-media`, однако
   optional feature `media` по-прежнему включает legacy FFmpeg adapter.
@@ -66,9 +67,6 @@ profiles Apple; текущие доказательства и команда с
   64 tracks, пакет 32 MiB. Это лимиты отдельных структур, не RSS.
 - `src/codec/bits.rs`: собственный MSB bit reader, unsigned/signed
   exponential-Golomb, RBSP unescape и проверка trailing bits.
-- ADTS configuration=0 декодируется, если PCE открывает первый пакет.
-  Потоковый и индексируемый пути совпадают с независимым восьмиканальным
-  PCM-эталоном; CLI/API WAV сохраняют mask 0xff. PCE remux ещё не подключён.
 - `src/codec/config.rs`: собственные avcC/hvcC parsers с проверкой
   длины, reserved bits и типов parameter-set NAL; borrowed iterator
   length-prefixed NAL units; esds descriptor reader и AAC-LC

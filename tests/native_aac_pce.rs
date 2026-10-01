@@ -242,3 +242,79 @@ fn pce_comment_uses_multibyte_descriptor_lengths_without_losing_layout() {
     let (_, parsed) = fvid::codec::config::AacConfig::parse_with_program(&asc).unwrap();
     assert_eq!(parsed.unwrap(), program);
 }
+
+#[test]
+fn adts_pce_matroska_remux_and_concat_preserve_owned_pcm() {
+    use fvid::container::{adts::StreamReader, matroska_write};
+    let source = include_bytes!("fixtures/audio/aac-pce-wide8.aac").as_slice();
+    let mut expected = Vec::new();
+    fvid::native_media::decode_adts_aac_reader(
+        StreamReader::open(source).unwrap(),
+        &mut expected,
+        None,
+    )
+    .unwrap();
+    for segments in [1, 2] {
+        let mut output = std::io::Cursor::new(Vec::new());
+        if segments == 1 {
+            matroska_write::write_adts(
+                StreamReader::open(source).unwrap(),
+                &mut output,
+                None,
+                None,
+            )
+            .unwrap();
+        } else {
+            matroska_write::concat_adts(
+                vec![
+                    StreamReader::open(source).unwrap(),
+                    StreamReader::open(source).unwrap(),
+                ],
+                &mut output,
+                None,
+                None,
+            )
+            .unwrap();
+        }
+        let mut actual = Vec::new();
+        fvid::native_media::decode_matroska_aac_pcm_interval(output.get_ref(), &mut actual, None)
+            .unwrap();
+        let indexed = fvid::container::adts::Aac::parse(source, &Default::default()).unwrap();
+        let mut decoder =
+            fvid::codec::aac_native::NativeAacDecoder::new(&indexed.configuration).unwrap();
+        let mut continuous = Vec::new();
+        for _ in 0..segments {
+            for packet in 0..indexed.packets() {
+                for sample in decoder.decode(indexed.packet(packet)).unwrap() {
+                    continuous.extend_from_slice(&sample.to_le_bytes());
+                }
+            }
+        }
+        assert_eq!(actual, continuous);
+        if segments == 1 {
+            assert_eq!(actual, expected);
+        }
+        assert_eq!(actual.len(), expected.len() * segments);
+    }
+}
+
+#[test]
+fn adts_concat_plan_compares_complete_program_configuration() {
+    let directory = std::env::temp_dir().join(format!("fvid-pce-plan-{}", std::process::id()));
+    std::fs::create_dir_all(&directory).unwrap();
+    let first = directory.join("first.aac");
+    let second = directory.join("second.aac");
+    let source = include_bytes!("fixtures/audio/aac-pce-wide8.aac");
+    std::fs::write(&first, source).unwrap();
+    std::fs::write(&second, source).unwrap();
+    assert!(fvid::native_plan::concat_adts(&[first.clone(), second.clone()]).is_ok());
+    let mut changed = source.to_vec();
+    changed[7] ^= 2; // PCE element_instance_tag, fixed ADTS header unchanged.
+    std::fs::write(&second, changed).unwrap();
+    assert!(
+        fvid::native_plan::concat_adts(&[first, second])
+            .unwrap_err()
+            .contains("identical AAC configurations")
+    );
+    std::fs::remove_dir_all(directory).unwrap();
+}
