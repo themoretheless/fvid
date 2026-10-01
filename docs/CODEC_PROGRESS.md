@@ -3,6 +3,45 @@
 Цель: собственные H.264, H.265 и AAC в FVid; production-модуль `media`
 не зависит от FFmpeg. Цель пока **не достигнута**.
 
+## Актуальная проверка 2026-10-01
+
+Проверены текущие исходники и выполнена команда без feature `media`:
+
+```sh
+cargo test --locked --offline --no-default-features \
+  --test avc_residual --test hevc_playback --test native_aac_960 \
+  --test native_aac_media --test native_aac_selection --test native_aac_streaming
+```
+
+Все 33 теста прошли: 1 AVC residual, 9 HEVC playback, 2 AAC 960,
+14 AAC media, 1 AAC selection, 6 AAC streaming. HEVC сравнивается с сохранёнными
+независимыми YUV-эталонами Main/Main10 и weighted temporal prediction;
+AAC 960 — с сохранёнными PCM-эталонами. Эта команда не доказывает полную
+conformance H.264/H.265/AAC и не покрывает все инструменты их профилей.
+
+Текущие явные границы собственного декодирования:
+
+- `src/codec/hevc_decoder.rs`: multi-slice access units и изменённые in-band
+  SPS/PPS пока отклоняются. Идентичные повторённые parameter sets принимаются.
+- `src/codec/aac_native.rs`: декодер AAC-LC поддерживает 1–6 каналов;
+  8-канальная конфигурация, которую умеет прочитать ASC parser, ещё не декодируется.
+  PCE и неподдержанные fill-extension tools также отклоняются.
+- `src/codec/config.rs`: принимается AAC-LC object type 2; это не HE-AAC/SBR.
+- `Cargo.toml`: native core и camera FFI работают без `fvid-media`, однако
+  optional feature `media` по-прежнему включает legacy FFmpeg adapter.
+  Независимость camera-only сборки не доказывает независимость всех операций.
+
+Camera bridge отдельно прошёл 9 Swift-наборов и 9 сравнений AVC/HEVC/VP9/AV1
+с прямым software decode, с проверкой dependency graph и линковки без FFmpeg.
+Сравнение двух путей FVid проверяет мост и выбор кадра, а не независимую
+codec conformance. Установка камеры блокируется реальными provisioning
+profiles Apple; текущие доказательства и команда сборки описаны в
+[VIRTUAL_CAMERA.md](VIRTUAL_CAMERA.md).
+
+Разделы ниже — история реализации. Формулировки «ещё не разбирается» или
+«пока только syntax» относятся к указанному этапу и не заменяют текущий код
+и тесты.
+
 ## Выполнено
 
 - `src/container/mp4.rs`: собственный индексируемый MP4-demux для
