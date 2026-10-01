@@ -7,7 +7,7 @@ use fvid::{
     container::mp4::Mp4Reader,
 };
 use std::io::Cursor;
-fn compare(file: &[u8], oracle: &[u8], cabac: bool) {
+fn compare(file: &[u8], oracle: &[u8], cabac: bool, depth: u8) {
     let mut source = Mp4Reader::open(Cursor::new(file), Default::default()).unwrap();
     let configuration = source.tracks()[0].configuration.clone();
     let config = AvcConfig::parse(&configuration).unwrap();
@@ -17,6 +17,8 @@ fn compare(file: &[u8], oracle: &[u8], cabac: bool) {
     assert!(sps.transform_bypass);
     assert_eq!(pps.cabac, cabac);
     assert_eq!(sps.chroma_format, 1);
+    assert_eq!(sps.bit_depth_luma, depth);
+    assert_eq!(sps.bit_depth_chroma, depth);
     let mut kinds = [false; 3];
     let mut directional_intra = false;
     let mut packet = Vec::new();
@@ -28,7 +30,7 @@ fn compare(file: &[u8], oracle: &[u8], cabac: bool) {
             .find(|n| matches!(n[0] & 31, 1 | 5))
             .unwrap();
         let header = SliceHeader::parse(nal, &sps, &pps).unwrap();
-        assert_eq!(header.slice_qp, 0);
+        assert_eq!(i32::from(header.slice_qp) + 6 * i32::from(depth - 8), 0);
         if header.slice_type == SliceType::I {
             let mut cavlc = if pps.cabac {
                 None
@@ -55,7 +57,7 @@ fn compare(file: &[u8], oracle: &[u8], cabac: bool) {
                     arithmetic.as_mut().unwrap().read_macroblock().unwrap()
                 };
                 let Some(block) = block else { break };
-                assert_eq!(block.qp, 0);
+                assert_eq!(i32::from(block.qp) + 6 * i32::from(depth - 8), 0);
                 use fvid::codec::avc_macroblock::IntraLuma;
                 directional_intra |= match block.luma {
                     IntraLuma::Blocks4(modes) => {
@@ -99,15 +101,19 @@ fn compare(file: &[u8], oracle: &[u8], cabac: bool) {
         let mut actual = Vec::new();
         let mut frames = 0;
         while let Some(frame) = reader.read_frame().unwrap() {
-            actual.extend(
-                frame
-                    .picture
-                    .y
-                    .iter()
-                    .chain(&frame.picture.cb)
-                    .chain(&frame.picture.cr)
-                    .map(|v| *v as u8),
-            );
+            for sample in frame
+                .picture
+                .y
+                .iter()
+                .chain(&frame.picture.cb)
+                .chain(&frame.picture.cr)
+            {
+                if depth == 8 {
+                    actual.push(*sample as u8);
+                } else {
+                    actual.extend_from_slice(&sample.to_le_bytes());
+                }
+            }
             frames += 1;
         }
         assert_eq!(frames, 8);
@@ -122,6 +128,7 @@ fn lossless_cabac_matches_original_samples_and_rewind() {
         include_bytes!("fixtures/playback-errors/avc-bypass-lossless.mp4"),
         include_bytes!("fixtures/playback-errors/avc-bypass-lossless.yuv"),
         true,
+        8,
     );
 }
 #[test]
@@ -130,5 +137,16 @@ fn lossless_cavlc_matches_original_samples_and_rewind() {
         include_bytes!("fixtures/playback-errors/avc-bypass-cavlc.mp4"),
         include_bytes!("fixtures/playback-errors/avc-bypass-cavlc.yuv"),
         false,
+        8,
+    );
+}
+
+#[test]
+fn lossless_ten_bit_matches_original_samples_and_rewind() {
+    compare(
+        include_bytes!("fixtures/playback-errors/avc-bypass-main10.mp4"),
+        include_bytes!("fixtures/playback-errors/avc-bypass-main10.yuv"),
+        true,
+        10,
     );
 }

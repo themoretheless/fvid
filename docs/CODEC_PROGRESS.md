@@ -39,7 +39,9 @@ mix сохраняет PCE mask 0xff для ADTS/MP4/Matroska; тест двух
   camera bridge проходят смену размера и перемотку. Scaling matrices 4x4/8x8 подключены к intra/inter reconstruction с правилами
   наследования SPS/PPS; JVT/custom I/P/B совпадают с YUV-эталонами. Multiple
   slices и другие неподключённые инструменты ещё ограничены. Transform bypass
-  при QP-prime 0 подключён; CABAC/CAVLC lossless I/P совпадают с исходным YUV.
+  при QP-prime 0 подключён; 8-bit CABAC/CAVLC и 10-bit CABAC lossless I/P
+  совпадают с исходным YUV, включая rewind. 10-bit CAVLC и lossless B
+  этими фикстурами не проверены.
 - `src/codec/hevc_decoder.rs`: независимые multi-slice headers разбираются
   через `slice_headers`, с проверкой общей picture identity и порядка CTU.
   Независимые slices восстанавливаются в общие planes с WPP, CABAC reset,
