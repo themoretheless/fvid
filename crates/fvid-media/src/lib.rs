@@ -25,3 +25,5 @@ pub mod owned_pcm_layout;
 pub mod owned_wav_file;
 
 pub mod owned_resample_f64;
+
+pub mod owned_pcm_gain_f64;

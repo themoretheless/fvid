@@ -173,7 +173,7 @@ impl Resampler {
                 ).map_err(|e| e.to_string())?);
                 return Ok(built);
             }
-            if out_channels == f.ch_layout.nb_channels
+            if owned_layout
                 && matches!(f.format, AVSampleFormat_AV_SAMPLE_FMT_DBL | AVSampleFormat_AV_SAMPLE_FMT_DBLP)
             {
                 built.owned_f64 = Some(crate::owned_resample_f64::Resampler::new(
@@ -270,7 +270,10 @@ impl Resampler {
                             bytes.extend_from_slice(&value.to_le_bytes());
                         }
                     }
-                    owned.write_all(&bytes).map_err(|e| e.to_string())?;
+                    let mut rematrix = crate::owned_pcm_gain_f64::PcmGain::new(
+                        &mut *owned, 1.0, self.input_channels as u16, channels as u16)?;
+                    rematrix.write_all(&bytes).map_err(|e| e.to_string())?;
+                    if !rematrix.frame_complete() { return Err("incomplete resampler input frame".into()); }
                 }
                 let bytes = owned.take_output();
                 let count = i32::try_from(bytes.len() / (channels * 8)).map_err(|_| "resampled audio size overflow")?;
@@ -1306,10 +1309,11 @@ mod owned_double_rate_tests {
     #[test]
     fn double_rate_adapter_uses_owned_filter_for_packed_and_planar_pcm() {
         use std::io::Write;
-        for (planar, input_channels, output_channels) in [(false, 2, 2), (true, 2, 2)] {
+        for (planar, input_channels, output_channels) in [(false, 2, 2), (true, 2, 2), (false, 2, 1), (true, 2, 1), (false, 6, 2), (true, 6, 2)] {
             let pcm: Vec<f64> = (0..997).flat_map(|i| [(i as f64 * 0.07).sin(), -0.25, 0.5, 1.0, 0.1, 0.2].into_iter().take(input_channels as usize)).collect();
             let mut reference = crate::owned_resample_f64::Resampler::new(Vec::new(), 48000, 16000, output_channels).unwrap();
-            reference.write_all(&pcm.iter().flat_map(|s| s.to_le_bytes()).collect::<Vec<_>>()).unwrap();
+            crate::owned_pcm_gain_f64::PcmGain::new(&mut reference, 1.0, input_channels, output_channels).unwrap()
+                .write_all(&pcm.iter().flat_map(|s| s.to_le_bytes()).collect::<Vec<_>>()).unwrap();
             reference.finish().unwrap();
             let expected = reference.take_output();
             let input = Frame::new().unwrap();
