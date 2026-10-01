@@ -54,8 +54,16 @@ pub(crate) struct Coefficients {
     config: Config,
     transform: Transform,
     values: Vec<i32>,
+    rotate: bool,
 }
 pub(crate) fn read(b: &mut impl ResidualBins, c: Config) -> Result<Coefficients> {
+    read_with_rotation(b, c, false)
+}
+pub(crate) fn read_with_rotation(
+    b: &mut impl ResidualBins,
+    c: Config,
+    rotation_enabled: bool,
+) -> Result<Coefficients> {
     let scan = c.scan()?;
     if !(8..=10).contains(&c.bit_depth) || c.qp > 51 + 6 * (c.bit_depth - 8) {
         return Err(invalid("invalid HEVC block depth or QP"));
@@ -84,6 +92,10 @@ pub(crate) fn read(b: &mut impl ResidualBins, c: Config) -> Result<Coefficients>
         config: c,
         transform,
         values: coefficients,
+        rotate: rotation_enabled
+            && c.log2_size == 2
+            && c.intra_mode.is_some()
+            && matches!(transform, Transform::Skip | Transform::Bypass),
     })
 }
 impl Coefficients {
@@ -105,7 +117,13 @@ impl Coefficients {
             matrix,
             scratch,
             out,
-        )
+        )?;
+        // H.265 8.6.2: rotate scaled skip samples, or unscaled bypass samples.
+        // Ordinary inverse DCT/DST and inter blocks are unaffected.
+        if self.rotate {
+            out.reverse();
+        }
+        Ok(())
     }
 }
 
@@ -168,6 +186,35 @@ mod tests {
             assert_eq!(out[0], if bypass { -2 } else { -1 });
             assert!(out[1..].iter().all(|&v| v == 0));
             assert!(b.0.is_empty());
+        }
+    }
+    #[test]
+    fn rotation_of_skipped_and_bypassed_intra_impulses_leaves_inter_unchanged() {
+        for bypass in [false, true] {
+            for intra in [false, true] {
+                let mut c = config();
+                c.transquant_bypass = bypass;
+                c.intra_mode = intra.then_some(0);
+                let mut b = Bins(VecDeque::new());
+                if !bypass {
+                    b.0.push_back((Some(Syntax::TransformSkip), 0, true));
+                }
+                b.0.extend([
+                    (Some(Syntax::LastX), 0, false),
+                    (Some(Syntax::LastY), 0, false),
+                    (Some(Syntax::Greater1), 1, true),
+                    (Some(Syntax::Greater2), 0, false),
+                    (None, 0, true),
+                ]);
+                let mut scratch = Vec::new();
+                let mut out = Vec::new();
+                read_with_rotation(&mut b, c, true).unwrap()
+                    .reconstruct(&ScalingLists::flat(), &mut scratch, &mut out).unwrap();
+                let mut expected = vec![0; 16];
+                expected[if intra { 15 } else { 0 }] = if bypass { -2 } else { -1 };
+                assert_eq!(out, expected);
+                assert!(b.0.is_empty());
+            }
         }
     }
     #[test]

@@ -10,8 +10,9 @@ The normative syntax and prediction rules are H.265 clauses 7.3.2.2.2 and
 8.4.4.2.1:
 [ITU-T H.265](https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-202407-I%21%21PDF-E&lang=e&type=items).
 
-This is one RExt tool, not complete format-range-extension profile support.
-Transform-skip rotation/context changes, implicit/explicit RDPCM, extended
+This and [residual rotation](HEVC_REXT_ROTATION.md) are implemented RExt tools,
+not complete format-range-extension profile support. Transform-skip context
+changes, implicit/explicit RDPCM, extended
 precision, high-precision offsets, persistent Rice adaptation and CABAC bypass
 alignment remain explicitly refused when signalled. Other extensions are also
 refused. Existing chroma-format and picture-tool restrictions remain.

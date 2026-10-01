@@ -4,7 +4,14 @@ use fvid::{
 };
 use std::io::Cursor;
 
-fn compare(source: &[u8], oracle: &[u8], depth: u8, disabled: bool) {
+fn compare(
+    source: &[u8],
+    oracle: &[u8],
+    depth: u8,
+    disabled: bool,
+    rotation: bool,
+    bypass: Option<bool>,
+) {
     let mut input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
     let configuration = input.tracks()[0].configuration.clone();
     let parsed = HevcConfig::parse(&configuration).unwrap();
@@ -18,7 +25,12 @@ fn compare(source: &[u8], oracle: &[u8], depth: u8, disabled: bool) {
     assert_eq!(sps.profile.profile.unwrap().idc, 4);
     assert_eq!(sps.depth, [depth; 2]);
     assert_eq!(sps.intra_smoothing_disabled, disabled);
+    assert_eq!(sps.transform_skip_rotation, rotation);
     let mut decoder = HevcDecoder::from_configuration(&configuration, 16 << 20).unwrap();
+    if let Some(bypass) = bypass {
+        assert_eq!(decoder.parameters().1.transquant_bypass, bypass);
+        assert!(decoder.parameters().1.transform_skip);
+    }
     let count = input.tracks()[0].samples.len();
     assert_eq!(count, 3);
     for _ in 0..2 {
@@ -93,7 +105,7 @@ fn rext_intra_reference_filtering_matches_oracles_and_reset() {
             true,
         ),
     ] {
-        compare(source, oracle, depth, disabled);
+        compare(source, oracle, depth, disabled, false, None);
     }
     assert_ne!(
         include_bytes!("fixtures/playback-errors/hevc-rext-smoothing-8-enabled.yuv"),
@@ -123,7 +135,7 @@ fn unsupported_range_tools_are_not_silently_ignored() {
         .rev()
         .find(|&i| rbsp[i / 8] & (1 << (7 - i % 8)) != 0)
         .unwrap();
-    for flag in (0..9).filter(|&i| i != 5) {
+    for flag in (0..9).filter(|&i| i != 0 && i != 5) {
         let mut bytes = rbsp.clone();
         let bit = stop - 9 + flag;
         bytes[bit / 8] |= 1 << (7 - bit % 8);
@@ -144,4 +156,40 @@ fn unsupported_range_tools_are_not_silently_ignored() {
                 .contains("remaining HEVC SPS range-extension tools")
         );
     }
+}
+
+#[test]
+fn rext_transform_skip_rotation_matches_oracle() {
+    macro_rules! check {
+        ($stem:literal, $depth:literal, $rotation:literal, $bypass:literal) => {
+            compare(
+                include_bytes!(concat!("fixtures/playback-errors/", $stem, ".mp4")),
+                include_bytes!(concat!("fixtures/playback-errors/", $stem, ".yuv")),
+                $depth,
+                false,
+                $rotation,
+                Some($bypass),
+            );
+        };
+    }
+    check!("hevc-rext-rotation-8-skip-disabled", 8, false, false);
+    check!("hevc-rext-rotation-8-skip-enabled", 8, true, false);
+    check!("hevc-rext-rotation-8-bypass-disabled", 8, false, true);
+    check!("hevc-rext-rotation-8-bypass-enabled", 8, true, true);
+    check!("hevc-rext-rotation-10-skip-disabled", 10, false, false);
+    check!("hevc-rext-rotation-10-skip-enabled", 10, true, false);
+    check!("hevc-rext-rotation-10-bypass-disabled", 10, false, true);
+    check!("hevc-rext-rotation-10-bypass-enabled", 10, true, true);
+    macro_rules! differs {
+        ($base:literal) => {
+            assert_ne!(
+                include_bytes!(concat!("fixtures/playback-errors/", $base, "-disabled.yuv")),
+                include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.yuv")),
+            );
+        };
+    }
+    differs!("hevc-rext-rotation-8-skip");
+    differs!("hevc-rext-rotation-8-bypass");
+    differs!("hevc-rext-rotation-10-skip");
+    differs!("hevc-rext-rotation-10-bypass");
 }
