@@ -37,16 +37,17 @@ fn native_plan_rejects_invalid_requests_before_execution() {
     }
 }
 
-#[test]
-fn selected_alac_cli_decodes_and_plans_without_ffmpeg_backend() {
-    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/alac-two-tracks.m4a");
-    let directory = std::env::temp_dir().join(format!("fvid-selected-alac-cli-{}", std::process::id()));
+fn selected_audio_cli(file: &str, codec: &str) {
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors").join(file);
+    let directory = std::env::temp_dir().join(format!("fvid-selected-{codec}-cli-{}", std::process::id()));
     std::fs::create_dir(&directory).unwrap();
     struct Cleanup(PathBuf);
     impl Drop for Cleanup { fn drop(&mut self) { let _ = std::fs::remove_dir_all(&self.0); } }
     let _cleanup = Cleanup(directory.clone());
     for index in [0,1] {
         let plan = fvid::native_plan::decode_audio_selected(&source, &Default::default(), Some(index)).unwrap();
+        assert_eq!(plan.streams[0].index,index);
+        assert_eq!(plan.streams[0].codec,codec);
         let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
             .args(["media","plan","decode-audio"]).arg(&source).args(["--streams",&index.to_string()]).output().unwrap();
         assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
@@ -59,4 +60,27 @@ fn selected_alac_cli_decodes_and_plans_without_ffmpeg_backend() {
         fvid::native_export::export_audio_pcm_selected(&source,&expected,None,1.0,None,None,Some(index),None,None).unwrap();
         assert_eq!(std::fs::read(output).unwrap(),std::fs::read(expected).unwrap());
     }
+}
+
+#[test]
+fn selected_alac_cli_decodes_and_plans_without_ffmpeg_backend() {
+    selected_audio_cli("alac-two-tracks.m4a", "alac");
+}
+#[test]
+fn selected_aac_cli_decodes_and_plans_without_ffmpeg_backend() {
+    selected_audio_cli("aac-two-tracks.m4a", "aac");
+}
+
+#[test]
+fn rounded_interior_aac_duration_is_reproduced_before_acceptance() {
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/aac-rounded-two-tracks.m4a");
+    let mut reader = fvid::container::mp4::Mp4Reader::open(std::io::BufReader::new(std::fs::File::open(&source).unwrap()),Default::default()).unwrap();
+    assert!((0..reader.tracks()[1].samples.len()).any(|i| reader.tracks()[1].samples.get(i).unwrap().duration == 1016));
+    // This is a refusal regression, not proof that irregular AAC timing is supported.
+    let mut packet = Vec::new();
+    reader.read_packet(1,1,&mut packet).unwrap();
+    let output = std::env::temp_dir().join(format!("fvid-rounded-aac-{}.wav",std::process::id()));
+    let error = fvid::native_export::export_audio_pcm_selected(&source,&output,None,1.0,None,None,Some(1),None,None).unwrap_err();
+    assert!(error.to_string().contains("short interior MP4 audio packet"),"{error}");
+    assert!(!output.exists());
 }
