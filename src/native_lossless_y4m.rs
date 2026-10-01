@@ -1,4 +1,4 @@
-//! Owned planar Y4M and VP9/AV1 Matroska to FFV1 with AAC/Opus packet retention.
+//! Owned planar Y4M and AVC/HEVC/VP9/AV1/FFV1 Matroska to FFV1 with audio retention.
 use crate::container::matroska_write::{
     Encoding, PacketWriter, TrackOptions, TrackSpec, VideoMetadata,
 };
@@ -36,7 +36,10 @@ pub fn eligible(source: &Path) -> Result<bool> {
         input.scan_all()?;
         let videos: Vec<_> = input.tracks.iter().filter(|t| t.kind == 1).collect();
         return Ok(videos.len() == 1
-            && matches!(videos[0].codec.as_str(), "V_VP9" | "V_AV1")
+            && matches!(
+                videos[0].codec.as_str(),
+                "V_VP9" | "V_AV1" | "V_MPEG4/ISO/AVC" | "V_MPEGH/ISO/HEVC" | "V_FFV1"
+            )
             && videos[0].crop == [0; 4]
             && videos[0].rotation == 0
             && input.tracks.iter().all(|t| {
@@ -121,6 +124,7 @@ pub fn write<W: Write + Seek>(
     let depth_of = |frame: &RawFrame| -> Result<u8> {
         match frame {
             RawFrame::Planar(p) => Ok(p.depth),
+            RawFrame::Avc { picture, .. } => Ok(picture.bit_depth),
             RawFrame::Planar8(_) | RawFrame::Yuv { .. } => Ok(8),
             _ => Err(invalid("expected planar sample planes")),
         }
@@ -254,7 +258,10 @@ pub fn write<W: Write + Seek>(
             Some([2, 2]) => "yuv420p",
             Some([2, 1]) => "yuv422p",
             Some([1, 1]) => "yuv444p",
-            _ => return Err(invalid("unsupported Y4M chroma layout")),
+            Some([1, 2]) => "yuv440p",
+            Some([4, 1]) => "yuv411p",
+            Some([4, 4]) => "yuv410p",
+            _ => return Err(invalid("unsupported planar FFV1 chroma layout")),
         }
         .into(),
         encoder: "ffv1".into(),

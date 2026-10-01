@@ -1,6 +1,94 @@
 use std::{fs::File, io::BufReader, path::Path};
 
 #[test]
+fn ffv1_transcode_preserves_all_encoder_plane_layouts() {
+    use fvid::container::matroska_write::{Encoding, PacketWriter, TrackSpec};
+    let dir = std::env::temp_dir().join(format!("fvid-transcode-layouts-{}", std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    struct Cleanup(std::path::PathBuf);
+    impl Drop for Cleanup {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _cleanup = Cleanup(dir.clone());
+    for depth in [8, 10] {
+        for (sx, sy, name) in [
+            (2, 2, "yuv420p"),
+            (2, 1, "yuv422p"),
+            (1, 1, "yuv444p"),
+            (1, 2, "yuv440p"),
+            (4, 1, "yuv411p"),
+            (4, 4, "yuv410p"),
+        ] {
+            let source = dir.join(format!("source-{sx}-{sy}-{depth}.mkv"));
+            let output = dir.join(format!("out-{sx}-{sy}-{depth}.mkv"));
+            let samples = 16 * 16 + 2 * (16 / sx) * (16 / sy);
+            let mut data = Vec::new();
+            for index in 0..samples {
+                let value = ((index * 37) % ((1 << depth) - 1)) as u16;
+                if depth == 8 {
+                    data.push(value as u8);
+                } else {
+                    data.extend(value.to_le_bytes());
+                }
+            }
+            let frame = fvid::native_geometry::GeometryFrame {
+                width: 16,
+                height: 16,
+                subsampling: Some([sx, sy]),
+                data,
+            };
+            let payload = fvid::codec::ffv1_encoder::encode(&frame, depth).unwrap();
+            let mut container = std::io::Cursor::new(Vec::new());
+            let specs = [TrackSpec {
+                encoding: Encoding::Ffv1V1 {
+                    width: 16,
+                    height: 16,
+                },
+                name: "",
+                language: "",
+            }];
+            let mut writer = PacketWriter::new(&mut container, &specs).unwrap();
+            writer
+                .write_packet(0, 0, 40_000_000, true, &payload)
+                .unwrap();
+            writer.finish().unwrap();
+            std::fs::write(&source, container.into_inner()).unwrap();
+            let stats = fvid::native_export::transcode_ffv1_transformed(
+                &source,
+                &output,
+                &Default::default(),
+                &Default::default(),
+                None,
+                None,
+            )
+            .unwrap();
+            assert_eq!(
+                stats.pixel_format,
+                if depth == 8 {
+                    name.to_string()
+                } else {
+                    format!("{name}{depth}le")
+                }
+            );
+            let mut decoded = fvid::playback_native::NativeReader::software(
+                BufReader::new(File::open(output).unwrap()),
+                usize::MAX,
+            )
+            .unwrap();
+            let fvid::playback_native::RawFrame::Planar(decoded) =
+                decoded.read_frame_raw().unwrap().unwrap()
+            else {
+                panic!("missing source-depth planes");
+            };
+            assert_eq!(decoded.depth, depth);
+            assert_eq!(decoded.frame.data, frame.data);
+        }
+    }
+}
+
+#[test]
 fn vp9_av1_frames_and_clock_survive_owned_ffv1_export() {
     for name in [
         "vp9/adaptive.webm",
@@ -144,24 +232,46 @@ fn admission_keeps_audio_and_display_transforms_on_existing_path() {
 #[test]
 #[ignore = "requires FVID_REFERENCE_FFMPEG"]
 fn aac_companions_keep_payloads_timestamps_and_decoded_samples() {
-    companions_oracle(None);
+    companions_oracle("vp9/adaptive.webm", None);
 }
 
 #[test]
 #[ignore = "requires FVID_REFERENCE_FFMPEG"]
 fn opus_and_aac_companions_keep_timing_priming_and_samples() {
     for duration in ["5", "20", "60"] {
-        companions_oracle(Some(duration));
+        companions_oracle("vp9/adaptive.webm", Some(duration));
     }
 }
 
-fn companions_oracle(opus_frame: Option<&str>) {
+#[test]
+#[ignore = "requires FVID_REFERENCE_FFMPEG"]
+fn avc_hevc_matroska_transcode_owns_video_and_retains_audio() {
+    for video in [
+        "video.mp4",
+        "hevc/main-ipb.mp4",
+        "hevc/main10-ipb.mp4",
+        "hevc/hdr10.mp4",
+    ] {
+        companions_oracle(video, Some("20"));
+    }
+}
+
+#[test]
+#[ignore = "requires FVID_REFERENCE_FFMPEG"]
+fn ffv1_matroska_transcode_retains_precision_and_audio() {
+    for video in ["owned-ffv1/video.mp4", "owned-ffv1/hevc/main10-ipb.mp4"] {
+        companions_oracle(video, None);
+    }
+}
+
+fn companions_oracle(video: &str, opus_frame: Option<&str>) {
     let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
     let dir = std::env::temp_dir().join(format!(
-        "fvid-webm-aac-{}-{}",
+        "fvid-webm-aac-{}-{}-{}",
         std::process::id(),
-        opus_frame.unwrap_or("aac")
+        opus_frame.unwrap_or("aac"),
+        video.replace('/', "-")
     ));
     std::fs::create_dir(&dir).unwrap();
     struct Cleanup(std::path::PathBuf);
@@ -173,10 +283,25 @@ fn companions_oracle(opus_frame: Option<&str>) {
     let _cleanup = Cleanup(dir.clone());
     let source = dir.join("source.mkv");
     let output = dir.join("output.mkv");
+    let input_video = if let Some(original) = video.strip_prefix("owned-ffv1/") {
+        let own = dir.join("video-input.mkv");
+        fvid::native_export::transcode_ffv1_transformed(
+            &root.join(original),
+            &own,
+            &Default::default(),
+            &Default::default(),
+            None,
+            None,
+        )
+        .unwrap();
+        own
+    } else {
+        root.join(video)
+    };
     let mut command = std::process::Command::new(&ffmpeg);
     command
         .args(["-v", "error", "-i"])
-        .arg(root.join("vp9/adaptive.webm"))
+        .arg(&input_video)
         .arg("-i")
         .arg(root.join("audio/aac-mono-44k.aac"))
         .args([
@@ -288,6 +413,37 @@ fn companions_oracle(opus_frame: Option<&str>) {
         };
         assert_eq!(decode(&source), decode(&output));
     }
+    let video_decode = |path: &Path| {
+        let result = std::process::Command::new(&ffmpeg)
+            .args(["-v", "error", "-i"])
+            .arg(path)
+            .args([
+                "-map",
+                "0:v:0",
+                "-fps_mode",
+                "passthrough",
+                "-pix_fmt",
+                stats.pixel_format.as_str(),
+                "-f",
+                "rawvideo",
+                "-",
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        result.stdout
+    };
+    let a = video_decode(&source);
+    let b = video_decode(&output);
+    assert_eq!(a.len(), b.len(), "{video}");
+    assert!(
+        a.iter().zip(&b).all(|(a, b)| a == b),
+        "independent video mismatch: {video}"
+    );
     assert_eq!(stats.copied_packets, copied);
     let cancel = fvid::media_control::CancelFlag::new();
     let signal = cancel.clone();

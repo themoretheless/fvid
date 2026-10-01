@@ -2829,10 +2829,10 @@ Duplicates and option order are preserved. The contract does not imply an
 encoder is implemented; owned execution currently handles eligible FFV1
 requests, while other encoder workflows still use the legacy adapter.
 
-### Owned VP9/AV1 lossless transcode
+### Owned Matroska video lossless transcode
 
 The planar FFV1 exporter also accepts Matroska/WebM containing exactly one
-VP9 or AV1 video track and AAC or mono/stereo Opus companion tracks, without stored crop or
+AVC, HEVC, VP9, AV1 or FFV1 video track and AAC or mono/stereo Opus companion tracks, without stored crop or
 rotation. Other companion codecs, negative stored packet timestamps and
 stored display transforms retain their existing routing. Original frame
 intervals, sample precision, track name/language, pixel aspect, colour/HDR,
@@ -2888,3 +2888,12 @@ families and negative stored packet PTS still retain existing routing.
 References: https://www.rfc-editor.org/rfc/rfc6716#section-3,
 https://www.rfc-editor.org/rfc/rfc7845#section-5.1,
 https://www.matroska.org/technical/codec_specs.html#a_opus.
+
+AVC/HEVC and FFV1 Matroska input use the same owned lossless path, including
+HEVC Main10/HDR and 10-bit FFV1. AVC/HEVC raw pictures retain their declared
+sample depth when geometry is materialized. Independent tests compare decoded
+video bytes at the output's sample depth and AAC/Opus PCM across transcode,
+with audio before and after video in track order. The FFV1 inputs used by
+these tests are first created by the owned exporter. Planar pixel-format
+reporting covers 4:2:0, 4:2:2, 4:4:4, 4:4:0, 4:1:1 and 4:1:0, matching the
+owned FFV1 encoder's accepted subsampling layouts.
