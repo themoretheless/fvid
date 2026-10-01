@@ -46,10 +46,49 @@ impl MotionField {
         references: [&[u64]; 2],
         memory_limit: usize,
     ) -> Result<super::avc_reference_motion::ReferenceMotionField> {
-        use super::avc_reference_motion::{ReferenceMotion, ReferenceMotionField};
         if references.iter().any(|list| list.len() > 32) {
             return Err(invalid("invalid snapshot reference list"));
         }
+        let mut slice = None;
+        self.snapshot_resolved(memory_limit, |id| {
+            if slice.is_some_and(|previous| previous != id) {
+                return Err(invalid("motion snapshot needs one slice reference mapping"));
+            }
+            slice = Some(id);
+            Ok(references)
+        })
+    }
+    /// Resolve each slice's local list indices into persistent picture identities.
+    /// The mapping must cover every decoded slice exactly once.
+    pub fn snapshot_slices(
+        &self,
+        mappings: &[(u32, [&[u64]; 2])],
+        memory_limit: usize,
+    ) -> Result<super::avc_reference_motion::ReferenceMotionField> {
+        if mappings.len() > self.cells.len() / 16 {
+            return Err(invalid("too many slice reference mappings"));
+        }
+        let mut lists = std::collections::BTreeMap::new();
+        for &(id, references) in mappings {
+            if references.iter().any(|list| list.len() > 32)
+                || lists.insert(id, references).is_some()
+            {
+                return Err(invalid("invalid or duplicate slice reference mapping"));
+            }
+        }
+        self.snapshot_resolved(memory_limit, |id| {
+            lists
+                .get(&id)
+                .copied()
+                .ok_or_else(|| invalid("missing slice reference mapping"))
+        })
+    }
+    fn snapshot_resolved<'a>(
+        &self,
+        memory_limit: usize,
+        mut resolve: impl FnMut(u32) -> Result<[&'a [u64]; 2]>,
+    ) -> Result<super::avc_reference_motion::ReferenceMotionField> {
+        use super::avc_reference_motion::{ReferenceMotion, ReferenceMotionField};
         let bytes = ReferenceMotionField::storage_bytes(self.width * 4, self.height * 4)?;
         if bytes > memory_limit {
             return Err(invalid("reference motion snapshot exceeds budget"));
@@ -58,13 +97,12 @@ impl MotionField {
         output
             .try_reserve_exact(self.cells.len())
             .map_err(|_| invalid("reference motion allocation failed"))?;
-        let mut slice = None;
         for cell in &self.cells {
             let cell = cell.ok_or_else(|| invalid("cannot snapshot incomplete motion field"))?;
-            if slice.is_some_and(|previous| previous != cell.slice) {
-                return Err(invalid("motion snapshot needs one slice reference mapping"));
+            let references = resolve(cell.slice)?;
+            if references.iter().any(|list| list.len() > 32) {
+                return Err(invalid("invalid snapshot reference list"));
             }
-            slice = Some(cell.slice);
             let mut stored = [None; 2];
             for list in 0..2 {
                 stored[list] = match cell.lists[list] {
@@ -395,5 +433,46 @@ mod macroblock_tests {
                 vector: [0, 0]
             }));
         assert_eq!(field.decode_p_skip([16, 0], 0).unwrap(), [0, 0]);
+    }
+}
+
+#[cfg(test)]
+mod slice_snapshot_tests {
+    use super::*;
+    #[test]
+    fn independent_slice_lists_resolve_the_same_index_to_different_pictures() {
+        let mut field = MotionField::new(32, 16, 65536).unwrap();
+        for (x, id) in [(0, 7), (16, 11)] {
+            field
+                .store(
+                    [x, 0],
+                    [16, 16],
+                    id,
+                    [
+                        Neighbour::Inter {
+                            reference: 0,
+                            vector: [4, -2],
+                        },
+                        Neighbour::NoPrediction,
+                    ],
+                )
+                .unwrap();
+        }
+        let mappings = [
+            (7, [&[100u64][..], &[][..]]),
+            (11, [&[200u64][..], &[][..]]),
+        ];
+        let saved = field.snapshot_slices(&mappings, 65536).unwrap();
+        assert_eq!(saved.at([0, 0]).unwrap()[0].unwrap().picture_id, 100);
+        assert_eq!(saved.at([16, 0]).unwrap()[0].unwrap().picture_id, 200);
+        assert_eq!(saved.at([16, 0]).unwrap()[0].unwrap().vector, [4, -2]);
+        assert!(field.snapshot_slices(&mappings[..1], 65536).is_err());
+        assert!(
+            field
+                .snapshot_slices(&[mappings[0], mappings[0]], 65536)
+                .is_err()
+        );
+        assert!(field.snapshot_slices(&mappings, 1).is_err());
+        assert!(field.snapshot([&[100], &[]], 65536).is_err());
     }
 }

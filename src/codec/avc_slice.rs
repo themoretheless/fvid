@@ -13,13 +13,13 @@ pub enum SliceType {
     Sp,
     Si,
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum RefModification {
     Subtract(u32),
     Add(u32),
     LongTerm(u32),
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum MemoryOperation {
     ForgetShort(u32),
     ForgetLong(u32),

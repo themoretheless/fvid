@@ -130,7 +130,7 @@ pub(super) fn intra_plane(
     height: usize,
     qps: &[i32],
     depth: u8,
-    offsets: [i32; 2],
+    headers: &[&super::avc_slice::SliceHeader],
     chroma: bool,
     eight: &[u8],
 ) -> crate::Result<()> {
@@ -140,6 +140,14 @@ pub(super) fn intra_plane(
         || height % size != 0
         || qps.len() != width / size * (height / size)
         || eight.len() != qps.len()
+        || headers.is_empty()
+        || headers[0].first_mb != 0
+        || headers
+            .windows(2)
+            .any(|pair| pair[0].first_mb >= pair[1].first_mb)
+        || headers
+            .iter()
+            .any(|h| h.first_mb as usize >= qps.len() || h.disable_deblocking_filter_idc > 2)
     {
         return Err(crate::invalid("invalid intra deblocking metadata"));
     }
@@ -149,10 +157,12 @@ pub(super) fn intra_plane(
         .try_reserve_exact(qps.len())
         .map_err(|_| crate::invalid("cannot allocate deblocking grid"))?;
     for (index, &qp) in qps.iter().enumerate() {
+        let slice = headers.partition_point(|h| h.first_mb as usize <= index) - 1;
+        let header = headers[slice];
         let mut block = MacroblockEdges {
             strengths: [[[3; 4]; 4]; 2],
             qp: [[qp; 4]; 2],
-            offsets,
+            offsets: [header.alpha_offset, header.beta_offset],
             transform8: eight[index] != 0,
         };
         for direction in 0..2 {
@@ -168,7 +178,13 @@ pub(super) fn intra_plane(
             };
             if let Some(n) = neighbour {
                 block.qp[direction][0] = (qp + qps[n] + 1) >> 1;
+                if header.disable_deblocking_filter_idc == 2 && n < header.first_mb as usize {
+                    block.strengths[direction][0] = [0; 4];
+                }
             }
+        }
+        if header.disable_deblocking_filter_idc == 1 {
+            block.strengths = [[[0; 4]; 4]; 2];
         }
         blocks.push(block);
     }
@@ -344,5 +360,90 @@ mod traversal_tests {
                 assert_eq!(plane[at], 120 - delta);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod slice_boundary_tests {
+    use super::*;
+    #[test]
+    fn intra_filter_respects_slice_boundary_and_disabled_slice() {
+        use crate::{
+            codec::{
+                avc::{Pps, Sps},
+                avc_slice::SliceHeader,
+                config::{AvcConfig, NalUnits},
+            },
+            container::mp4::Mp4Reader,
+        };
+        let mut reader = Mp4Reader::open(
+            std::io::Cursor::new(include_bytes!(
+                "../../tests/fixtures/playback-errors/avc-multislice-ipb.mp4"
+            )),
+            Default::default(),
+        )
+        .unwrap();
+        let config = reader.tracks()[0].configuration.clone();
+        let avc = AvcConfig::parse(&config).unwrap();
+        let sps = Sps::parse(avc.sps[0]).unwrap();
+        let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+        let mut packet = Vec::new();
+        reader.read_packet(0, 0, &mut packet).unwrap();
+        let mut headers: Vec<_> = NalUnits::new(&packet, avc.length_size)
+            .unwrap()
+            .map(|n| n.unwrap())
+            .filter(|n| matches!(n[0] & 31, 1 | 5))
+            .map(|n| SliceHeader::parse(n, &sps, &pps).unwrap())
+            .collect();
+        headers[1].first_mb = 1;
+        for h in &mut headers {
+            h.disable_deblocking_filter_idc = 0;
+            h.alpha_offset = 0;
+            h.beta_offset = 0;
+        }
+        let input: Vec<_> = (0..512)
+            .map(|i| if i % 32 < 16 { 100 } else { 104 })
+            .collect();
+        let mut enabled = input.clone();
+        intra_plane(
+            &mut enabled,
+            32,
+            16,
+            &[40, 40],
+            8,
+            &[&headers[0], &headers[1]],
+            false,
+            &[0, 0],
+        )
+        .unwrap();
+        assert_ne!(enabled, input);
+        headers[1].disable_deblocking_filter_idc = 2;
+        let mut boundary_disabled = input.clone();
+        intra_plane(
+            &mut boundary_disabled,
+            32,
+            16,
+            &[40, 40],
+            8,
+            &[&headers[0], &headers[1]],
+            false,
+            &[0, 0],
+        )
+        .unwrap();
+        assert_eq!(boundary_disabled, input);
+        headers[1].disable_deblocking_filter_idc = 1;
+        let mut slice_disabled = input.clone();
+        intra_plane(
+            &mut slice_disabled,
+            32,
+            16,
+            &[40, 40],
+            8,
+            &[&headers[0], &headers[1]],
+            false,
+            &[0, 0],
+        )
+        .unwrap();
+        assert_eq!(slice_disabled, input);
     }
 }

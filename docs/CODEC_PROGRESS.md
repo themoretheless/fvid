@@ -1596,12 +1596,61 @@ and text are preserved. Duplicate/missing fields and Text in a nonfinal position
 retain the legacy path before publication. A reordered synthetic cue verifies
 layer, actor/style/margins, text overrides and exact timing.
 
-### AVC multi-slice implementation baseline
+### AVC raster-ordered multi-slice reconstruction
 
-A saved eight-frame 128x96 CABAC I/P/B stream contains exactly two slices per
-access unit, with distinct first-macroblock addresses. It reproduces the native
-`multiple AVC slices per access unit` refusal for all packets after reset.
-`tests/avc_multislice.rs` separates this refusal regression from the ignored
-acceptance gate comparing all YUV samples and rewind against the saved independent
-decode. The fixture and generator are synthetic; no private input is included.
-This establishes the missing feature, not multi-slice AVC support.
+The saved eight-frame 128x96 CABAC I/P/B stream contains two slices per access
+unit. Native reconstruction now decodes every frame and matches all saved YUV
+samples exactly, including rewind. The acceptance gate in `tests/avc_multislice.rs`
+is enabled. Preparation checks picture identity, reference marking and ordered
+macroblock ranges before POC/DPB changes. Entropy contexts and neighbour
+availability restart per slice, while planes and motion storage belong to the
+whole picture. Intra deblocking uses each slice's settings and boundary policy.
+
+Inter reconstruction resolves L0/L1 separately for each slice through the DPB,
+including its own co-located B-direct reference. Motion snapshots use each
+slice's stable picture identities. Spatial/temporal selection is slice-local,
+tested with distinct retained vectors in one picture. A two-slice P-skip test
+selects different reference pictures, verifies both output halves and retained
+identities. A hand-authored three-frame AVC stream now exercises different encoded L0
+list modifications: its two P-slices select different short-term pictures.
+All planar samples match a saved independent decode, including rewind. FMO/ASO and mixed slice types
+remain unsupported. Fixtures are synthetic; ordinary tests require neither
+FFmpeg nor network.
+
+The multi-slice oracle matrix also covers CAVLC 8-bit and CABAC/CAVLC 10-bit
+4:2:0 I/P/B streams: eight frames each, exact planar YUV and rewind. The native
+camera bridge regression publishes all eight frames for three cycles, then seeks
+back, checking BGRA pixels and preserved camera tick metadata. This does not
+prove OS camera registration, which still needs valid provisioning profiles.
+
+A four-frame hand-authored Main-profile temporal-direct fixture exposes an
+unstable independent oracle when co-located slices use different local L0
+mappings. FFmpeg's default threading yields B luma halves (180,130), while
+`-threads 1` yields (130,80). Native yields (180,80), matching the explicitly
+constructed samples from H.264 8.4.1.2.3's per-co-located-macroblock reference
+identity mapping. Tests preserve both external outputs and verify all native
+samples against the constructed expected picture. JM 19.0 from the official HHI archive independently produced all four
+frames matching native output exactly. The acceptance gate now compares the
+saved JM YUV and is enabled; both conflicting FFmpeg outputs remain fixtures
+for an oracle-instability regression. VideoToolbox
+initialisation failed, so the attempted hardware oracle was a software fallback
+and is not separate evidence. Oracle generation uses raw AVC with passthrough
+frame timing, since synthetic MP4 timestamps otherwise drop/duplicate frames.
+Specification: https://hlevkin.com/hlevkin/Standards/H.264-201602-LatestStandards.pdf
+Implementation investigated: https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavcodec/h264_direct.c
+
+JM archive: https://iphome.hhi.de/suehring/tml/download/jm19.0.zip
+SHA256: `5a87ec1b112423748897fb771f249ac6b7cc8a50c3b56350275857346eed9e1f`.
+Built only the reference decoder with `make -j4 CC=clang` in its `ldecod`
+directory. Generation can reproduce the saved JM output with
+`python3 scripts/generate_avc_slice_lists_sample.py --temporal-direct --jm-decoder /path/to/JM/bin/ldecod.exe`.
+JM is used only to create the test oracle and is not linked into FVid.
+
+Validation of the current shared checkout after the multi-slice implementation:
+core library 660 passed / 3 ignored; player library 1191 passed / 24 ignored;
+multi-slice integration 9 passed / 0 ignored. Existing bypass/scaling/parameter
+fixtures also passed (12 tests). Checks used `--locked --offline
+--no-default-features`; player tests additionally used `--features player`.
+This checkout also contains concurrent playback edits, so these totals are not
+an isolated release audit. The player normal dependency tree contains
+`fvid-media-info` but no `fvid-media`, FFmpeg or libav dependency.

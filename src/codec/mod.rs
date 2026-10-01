@@ -5,6 +5,7 @@ pub mod bits;
 pub mod config;
 
 pub mod avc;
+pub mod avc_access_unit;
 
 pub mod avc_transform;
 

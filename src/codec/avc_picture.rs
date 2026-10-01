@@ -99,8 +99,27 @@ pub fn decode_intra_picture(
     pps: &Pps,
     memory_limit: usize,
 ) -> Result<IntraPicture> {
+    decode_intra_slices(&[header], sps, pps, memory_limit)
+}
+/// Reconstruct raster-ordered intra slices into shared planes, with independent
+/// entropy and prediction availability for each slice.
+pub fn decode_intra_slices(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    memory_limit: usize,
+) -> Result<IntraPicture> {
+    let header = *headers
+        .first()
+        .ok_or_else(|| invalid("missing intra slices"))?;
     if header.first_mb != 0 {
-        return Err(invalid("intra picture currently requires one full slice"));
+        return Err(invalid("intra picture must begin at zero"));
+    }
+    if headers
+        .iter()
+        .any(|slice| slice.slice_type != super::avc_slice::SliceType::I)
+    {
+        return Err(invalid("intra reconstruction requires I slices"));
     }
     if sps.bit_depth_luma != sps.bit_depth_chroma {
         return Err(invalid("mixed component bit depths are not yet supported"));
@@ -126,23 +145,6 @@ pub fn decode_intra_picture(
     if bytes > memory_limit {
         return Err(invalid("decoded picture exceeds memory budget"));
     }
-    let mut cavlc = if pps.cabac {
-        None
-    } else {
-        Some(IntraCavlcReader::new(header, sps, pps, 65536)?)
-    };
-    let mut cabac = if pps.cabac {
-        Some(super::avc_cabac_macroblock::IntraCabacReader::new(
-            header, sps, pps, 65536,
-        )?)
-    } else {
-        None
-    };
-    let mut read_macroblock = || match (&mut cavlc, &mut cabac) {
-        (Some(reader), _) => reader.read_macroblock(),
-        (_, Some(reader)) => reader.read_macroblock(),
-        _ => unreachable!(),
-    };
     let alloc = |count: usize| -> Result<Vec<u16>> {
         let mut v = Vec::new();
         v.try_reserve_exact(count)
@@ -163,34 +165,65 @@ pub fn decode_intra_picture(
     let mut eight = crate::buffer(count)?;
     let mut qps = [vec![0; count], vec![0; count], vec![0; count]];
     let mut seen = 0;
-    while let Some(mb) = read_macroblock()? {
-        qps[0][mb.address as usize] = mb.qp;
-        for component in 0..2 {
-            let offset = if component == 0 {
-                pps.chroma_qp_offset
-            } else {
-                pps.second_chroma_qp_offset
-            };
-            qps[component + 1][mb.address as usize] =
-                i32::from(chroma_qp(mb.qp, offset, sps.bit_depth_chroma))
-                    - 6 * (i32::from(sps.bit_depth_chroma) - 8);
+    for (slice_index, header) in headers.iter().enumerate() {
+        if header.first_mb as usize != seen {
+            return Err(invalid("intra slice coverage gap or overlap"));
         }
-        eight[mb.address as usize] = u8::from(matches!(mb.luma, IntraLuma::Blocks8 { .. }));
-        reconstruct_macroblock(&mut picture, &mb, sps, pps, &scaling, &mut ready)?;
-        seen += 1;
+        let end = headers
+            .get(slice_index + 1)
+            .map_or(count, |next| next.first_mb as usize);
+        ready.fill(0);
+        let mut cavlc = if pps.cabac {
+            None
+        } else {
+            Some(IntraCavlcReader::new(header, sps, pps, 65536)?)
+        };
+        let mut cabac = if pps.cabac {
+            Some(super::avc_cabac_macroblock::IntraCabacReader::new(
+                header, sps, pps, 65536,
+            )?)
+        } else {
+            None
+        };
+        let mut read_macroblock = || match (&mut cavlc, &mut cabac) {
+            (Some(reader), _) => reader.read_macroblock(),
+            (_, Some(reader)) => reader.read_macroblock(),
+            _ => unreachable!(),
+        };
+        while let Some(mb) = read_macroblock()? {
+            if mb.address as usize != seen || seen >= end {
+                return Err(invalid("intra slice exceeds assigned macroblock range"));
+            }
+            qps[0][mb.address as usize] = mb.qp;
+            for component in 0..2 {
+                let offset = if component == 0 {
+                    pps.chroma_qp_offset
+                } else {
+                    pps.second_chroma_qp_offset
+                };
+                qps[component + 1][mb.address as usize] =
+                    i32::from(chroma_qp(mb.qp, offset, sps.bit_depth_chroma))
+                        - 6 * (i32::from(sps.bit_depth_chroma) - 8);
+            }
+            eight[mb.address as usize] = u8::from(matches!(mb.luma, IntraLuma::Blocks8 { .. }));
+            reconstruct_macroblock(&mut picture, &mb, sps, pps, &scaling, &mut ready)?;
+            seen += 1;
+        }
+        if seen != end {
+            return Err(invalid("incomplete intra slice"));
+        }
     }
     if seen != count {
-        return Err(invalid("incomplete single-slice intra picture"));
+        return Err(invalid("incomplete intra picture"));
     }
-    if header.disable_deblocking_filter_idc != 1 {
-        let offsets = [header.alpha_offset, header.beta_offset];
+    {
         super::avc_deblock::intra_plane(
             &mut picture.y,
             w,
             h,
             &qps[0],
             sps.bit_depth_luma,
-            offsets,
+            headers,
             false,
             &eight,
         )?;
@@ -200,7 +233,7 @@ pub fn decode_intra_picture(
             h / 2,
             &qps[1],
             sps.bit_depth_chroma,
-            offsets,
+            headers,
             true,
             &eight,
         )?;
@@ -210,7 +243,7 @@ pub fn decode_intra_picture(
             h / 2,
             &qps[2],
             sps.bit_depth_chroma,
-            offsets,
+            headers,
             true,
             &eight,
         )?;

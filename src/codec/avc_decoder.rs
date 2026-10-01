@@ -4,8 +4,8 @@
 use super::{
     avc::{Pps, Sps},
     avc_dpb::ReferenceBuffer,
-    avc_inter_picture::decode_inter_picture_with_motion,
-    avc_picture::{IntraPicture, decode_intra_picture},
+    avc_inter_picture::decode_inter_resolved_slices_with_motion,
+    avc_picture::{IntraPicture, decode_intra_slices},
     avc_poc::PocDecoder,
     avc_reference_motion::ReferenceMotionField,
     avc_slice::{MemoryOperation, SliceHeader, SliceType},
@@ -217,11 +217,7 @@ impl AvcDecoder {
             let nal = nal?;
             match nal[0] & 31 {
                 1 | 5 => {
-                    if coded.replace(nal).is_some() {
-                        return Err(invalid(
-                            "multiple AVC slices per access unit are not implemented",
-                        ));
-                    }
+                    coded.get_or_insert(nal);
                 }
                 6 | 7 | 8 | 9 | 12 => {}
                 _ => return Err(invalid("unsupported in-band AVC NAL")),
@@ -237,7 +233,12 @@ impl AvcDecoder {
             .iter()
             .find(|(_, p)| p.id == id)
             .ok_or_else(|| invalid("unknown AVC PPS"))?;
-        let header = SliceHeader::parse(nal, sps, pps)?;
+        let slices =
+            super::avc_access_unit::prepare(packet, self.length_size, sps, pps, self.budget)?;
+        let header = &slices
+            .first()
+            .ok_or_else(|| invalid("missing AVC slice"))?
+            .header;
         if !matches!(
             header.slice_type,
             SliceType::I | SliceType::P | SliceType::B
@@ -291,66 +292,99 @@ impl AvcDecoder {
             .dpb
             .as_mut()
             .ok_or_else(|| invalid("AVC stream must begin with IDR"))?;
-        let lists = buffer.lists(&header, order.before_marking.picture())?;
-        let mut refs = [Vec::new(), Vec::new()];
-        for (list, ids) in [&lists.l0, &lists.l1].into_iter().enumerate() {
-            for id in ids {
-                refs[list].push(
-                    buffer
-                        .get(*id)
-                        .map(|reference| reference.picture.as_ref())
-                        .ok_or_else(|| invalid("missing decoded AVC reference"))?,
-                );
-            }
-        }
-        let entries = buffer.references();
-        let mut metadata = [Vec::new(), Vec::new()];
-        for (list, ids) in [&lists.l0, &lists.l1].into_iter().enumerate() {
-            for id in ids {
-                metadata[list].push(
-                    *entries
-                        .iter()
-                        .find(|entry| entry.id == *id)
-                        .ok_or_else(|| invalid("missing AVC reference metadata"))?,
-                );
-            }
-        }
-        let direct = if header.slice_type == SliceType::B {
-            let first = lists
-                .l1
-                .first()
-                .ok_or_else(|| invalid("B picture has no L1 reference"))?;
-            Some(super::avc_direct::DirectPrediction {
-                spatial: header.direct_spatial_mv_pred,
-                inference8: sps.direct_8x8_inference,
-                current_poc: order.before_marking.picture(),
-                list0: &metadata[0],
-                list1: &metadata[1],
-                colocated: buffer.get(*first).and_then(|r| r.motion.as_ref()),
-            })
-        } else {
-            None
-        };
         let (picture, motion) = match header.slice_type {
             SliceType::I => (
-                decode_intra_picture(&header, sps, pps, scratch_budget)?,
+                decode_intra_slices(
+                    &slices.iter().map(|slice| &slice.header).collect::<Vec<_>>(),
+                    sps,
+                    pps,
+                    scratch_budget,
+                )?,
                 None,
             ),
             SliceType::P | SliceType::B => {
+                let lists = slices
+                    .iter()
+                    .map(|slice| buffer.lists(&slice.header, order.before_marking.picture()))
+                    .collect::<Result<Vec<_>>>()?;
+                let entries = buffer.references();
+                let mut refs_by_slice = Vec::with_capacity(slices.len());
+                let mut metadata_by_slice = Vec::with_capacity(slices.len());
+                for lists in &lists {
+                    let mut refs = [Vec::new(), Vec::new()];
+                    let mut metadata = [Vec::new(), Vec::new()];
+                    for (list, ids) in [&lists.l0, &lists.l1].into_iter().enumerate() {
+                        for id in ids {
+                            refs[list].push(
+                                buffer
+                                    .get(*id)
+                                    .map(|r| r.picture.as_ref())
+                                    .ok_or_else(|| invalid("missing decoded AVC reference"))?,
+                            );
+                            metadata[list].push(
+                                *entries
+                                    .iter()
+                                    .find(|r| r.id == *id)
+                                    .ok_or_else(|| invalid("missing AVC reference metadata"))?,
+                            );
+                        }
+                    }
+                    refs_by_slice.push(refs);
+                    metadata_by_slice.push(metadata);
+                }
+                let direct_by_slice = slices
+                    .iter()
+                    .zip(&lists)
+                    .zip(&metadata_by_slice)
+                    .map(|((slice, lists), metadata)| {
+                        if slice.header.slice_type != SliceType::B {
+                            return Ok(None);
+                        }
+                        let first = lists
+                            .l1
+                            .first()
+                            .ok_or_else(|| invalid("B slice has no L1 reference"))?;
+                        Ok(Some(super::avc_direct::DirectPrediction {
+                            spatial: slice.header.direct_spatial_mv_pred,
+                            inference8: sps.direct_8x8_inference,
+                            current_poc: order.before_marking.picture(),
+                            list0: &metadata[0],
+                            list1: &metadata[1],
+                            colocated: buffer.get(*first).and_then(|r| r.motion.as_ref()),
+                        }))
+                    })
+                    .collect::<Result<Vec<_>>>()?;
                 let retain = header.nal_ref_idc != 0;
                 let reconstruction_budget = scratch_budget
                     .checked_sub(if retain { motion_bytes } else { 0 })
                     .ok_or_else(|| invalid("AVC motion snapshot exceeds decoder budget"))?;
-                let (picture, working) = decode_inter_picture_with_motion(
-                    &header,
+                let (picture, working) = decode_inter_resolved_slices_with_motion(
+                    &slices.iter().map(|s| &s.header).collect::<Vec<_>>(),
                     sps,
                     pps,
-                    [&refs[0], &refs[1]],
-                    direct.as_ref(),
+                    &refs_by_slice
+                        .iter()
+                        .map(|refs| [refs[0].as_slice(), refs[1].as_slice()])
+                        .collect::<Vec<_>>(),
+                    &direct_by_slice
+                        .iter()
+                        .map(Option::as_ref)
+                        .collect::<Vec<_>>(),
                     reconstruction_budget,
                 )?;
                 let motion = if retain {
-                    Some(working.snapshot([&lists.l0, &lists.l1], motion_bytes)?)
+                    Some(
+                        working.snapshot_slices(
+                            &lists
+                                .iter()
+                                .enumerate()
+                                .map(|(i, lists)| {
+                                    (i as u32, [lists.l0.as_slice(), lists.l1.as_slice()])
+                                })
+                                .collect::<Vec<_>>(),
+                            motion_bytes,
+                        )?,
+                    )
                 } else {
                     None
                 };
@@ -503,7 +537,7 @@ mod tests {
     #[test]
     fn rejects_multiple_slices_before_changing_picture_state_and_bounds_references() {
         let idr = &[0x65, 0x88, 0x84, 0x3a, 0x27, 0x80];
-        let mut decoder = AvcDecoder::new(&configuration(), 1).unwrap();
+        let mut decoder = AvcDecoder::new(&configuration(), packet(&[idr, idr]).len()).unwrap();
         assert!(decoder.decode(&packet(&[idr, idr])).is_err());
         assert!(decoder.active_sps.is_none());
         decoder.reset();
