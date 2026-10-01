@@ -266,6 +266,20 @@ impl Worker {
             }
         };
 
+        let frontier = if self.stream.codec() == "mp4a" {
+            let stride = usize::from(self.stream.channels()) * 4;
+            let rate = self.stream.sample_rate();
+            if stride == 0 || rate == 0 || !decoded.data.len().is_multiple_of(stride) {
+                self.ended = true;
+                return (Some(AudioEvent::Error("invalid decoded AAC PCM geometry".into())),Duration::ZERO);
+            }
+            let frames = decoded.data.len()/stride;
+            let nanos = frames as u128 * 1_000_000_000/u128::from(rate);
+            decoded.presentation_time().saturating_add(Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX)))
+        } else {
+            self.stream.time_of(packet.pts.max(0).saturating_add(packet.duration.max(0)))
+        };
+
         if let Err(e) = self.backend.push(decoded) {
             self.ended = true;
             return (
@@ -281,9 +295,6 @@ impl Worker {
             *pos = device_pos;
         }
 
-        let frontier = self
-            .stream
-            .time_of(packet.pts.max(0).saturating_add(packet.duration.max(0)));
         (None, pacing(frontier, device_pos))
     }
 
@@ -781,7 +792,17 @@ mod matroska_aac_seek_tests {
         let (_,commands) = sync_channel(1);
         let (events,_) = sync_channel(1);
         let mut worker = Worker { stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
-        for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
+        let mut final_pace = Duration::ZERO;
+        for _ in 0..48 {
+            let (event,pace) = worker.decode_next();
+            assert!(event.is_none());
+            final_pace = pace;
+        }
+        let packets = captured.lock().unwrap();
+        let last = packets.last().unwrap();
+        let expected_end = last.presentation_time()+Duration::from_nanos(21_333_333);
+        assert_eq!(final_pace,expected_end.saturating_sub(LEAD));
+        drop(packets);
         let expected:Vec<(u64,Vec<u8>)> = captured.lock().unwrap().iter().map(|p| { assert_eq!(p.timebase_den,1_000_000_000); (p.pts,p.data.clone()) }).collect();
         captured.lock().unwrap().clear();
         worker.handle(Command::Seek(50_000_000));

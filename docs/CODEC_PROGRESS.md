@@ -1548,3 +1548,9 @@ timestamps instead of interpreting them with the AAC sample-rate clock. A real
 worker test compares the post-seek packet timestamps and PCM with continuous
 decoding of the saved synthetic stereo Matroska fixture. This does not change
 other Matroska codecs or implement codec-delay/discard-padding scheduling.
+
+AAC playback pacing now uses the end of the actual decoded/presented float PCM
+(timestamp plus sample count/rate), including packet-tail and edit trimming.
+This avoids treating Matroska's unspecified packet duration as a zero-length
+AAC frame. The worker regression checks the final 48 kHz frame adds exactly
+21.333333 ms to the queue frontier. Other codecs retain their existing pacing.
