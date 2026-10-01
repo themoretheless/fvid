@@ -12,3 +12,5 @@ impl std::fmt::Display for Error {
 impl std::error::Error for Error {}
 pub type Result<T> = std::result::Result<T,Error>;
 fn invalid(message:&str)->Error {Error(message.into())}
+mod aac_band_tables;
+pub mod aac_bands;
