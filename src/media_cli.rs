@@ -310,6 +310,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         }
         return Ok(());
     }
+    if try_owned_overlay(args)? {return Ok(());}
     if try_video_trim(args)? {return Ok(());}
     if try_mp4_matroska_concat(args)? {return Ok(());}
     if try_video_concat(args)? {return Ok(());}
@@ -3613,6 +3614,52 @@ fn try_mp4_matroska_concat(args: &[String]) -> Result<bool, Box<dyn std::error::
         }));
         let Some(stats) = fvid::native_export::try_concat_mp4_matroska(&paths,std::path::Path::new(&args[command+1]),None,hook.as_ref())? else { return Ok(false); };
         if !quiet { println!("{}",serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":paths.len(),"backend":"fvid","fvid_payload_copies":0})); }
+    }
+    Ok(true)
+}
+
+fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
+    let planning=args.first().map(String::as_str)==Some("plan");
+    let command=usize::from(planning);
+    if args.get(command).map(String::as_str)!=Some("overlay") {return Ok(false);}
+    let mut paths=Vec::<std::path::PathBuf>::new();let mut foreground=None;
+    let (mut x,mut y)=(0i64,0i64);let (mut quiet,mut report)=(false,false);
+    let mut items=args[command+1..].iter();
+    while let Some(item)=items.next() {
+        match item.as_str() {
+            "--overlay-x"=>x=items.next().ok_or("missing overlay-x")?.parse()?,
+            "--overlay-y"=>y=items.next().ok_or("missing overlay-y")?.parse()?,
+            "--overlay"=>foreground=Some(std::path::PathBuf::from(items.next().ok_or("missing overlay path")?)),
+            "--quiet"=>quiet=true,
+            "--progress" if !planning=>report=true,
+            "--"=>{paths.extend(items.map(std::path::PathBuf::from));break;},
+            _ if item.starts_with('-')=>return Ok(false),
+            _=>paths.push(item.into()),
+        }
+    }
+    let (source,overlay,destination)=if planning {
+        match (paths.as_slice(),foreground.as_deref()) {
+            ([source,overlay],None)=>(source.as_path(),overlay.as_path(),None),
+            ([source],Some(overlay))=>(source.as_path(),overlay,None),
+            _=>return Err("plan overlay requires MAIN FOREGROUND or MAIN --overlay FOREGROUND".into()),
+        }
+    } else {
+        match (paths.as_slice(),foreground.as_deref()) {
+            ([source,overlay,destination],None)=>(source.as_path(),overlay.as_path(),Some(destination.as_path())),
+            ([source,destination],Some(overlay))=>(source.as_path(),overlay,Some(destination.as_path())),
+            _=>return Err("overlay requires MAIN FOREGROUND OUTPUT.mkv".into()),
+        }
+    };
+    if !fvid::native_export::overlay_eligible(source)? {return Ok(false);}
+    if planning {
+        let plan=fvid::native_plan::overlay(source,overlay,x,y)?;
+        if !quiet {println!("{}",serde_json::to_string_pretty(&plan)?);}
+    } else {
+        let hook=report.then(||fvid::media_control::ProgressHook::new(|event|{
+            eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
+        }));
+        let stats=fvid::native_export::overlay_video(source,overlay,destination.unwrap(),x,y,None,hook.as_ref())?;
+        if !quiet {println!("{}",serde_json::to_string_pretty(&stats)?);}
     }
     Ok(true)
 }

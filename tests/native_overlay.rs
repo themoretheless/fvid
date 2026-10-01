@@ -74,6 +74,47 @@ fn overlay_exports_avc_hevc_main10_exact_samples_with_atomic_publication() {
         assert_eq!(samples(&output), expected);
         assert_eq!(done.load(std::sync::atomic::Ordering::Relaxed), 1);
         let bytes = std::fs::read(&output).unwrap();
+        let cli = d.0.join(format!("cli-{i}.mkv"));
+        let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "overlay"])
+            .arg(&source)
+            .arg(&source)
+            .arg(&cli)
+            .arg("--progress")
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let cli_stats: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        assert_eq!(cli_stats["backend"], "fvid");
+        assert_eq!(std::fs::read(cli).unwrap(), bytes);
+        let events: Vec<serde_json::Value> = String::from_utf8(result.stderr)
+            .unwrap()
+            .lines()
+            .map(|l| serde_json::from_str(l).unwrap())
+            .collect();
+        assert_eq!(events.iter().filter(|e| e["done"] == true).count(), 1);
+        assert_eq!(events.last().unwrap()["done"], true);
+        let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "plan", "overlay"])
+            .arg(&source)
+            .arg("--overlay")
+            .arg(&source)
+            .output()
+            .unwrap();
+        assert!(result.status.success());
+        let plan: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        assert!(
+            plan["steps"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|s| s["action"] == "overlay")
+        );
+
         if name.contains("two-audio") {
             assert!(stats.copied_packets > 0);
             let mut input = fvid::container::mp4::Mp4Reader::open(

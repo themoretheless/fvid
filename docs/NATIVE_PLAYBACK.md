@@ -3153,3 +3153,20 @@ publication never overwrites a destination. Tests cover AVC/HEVC Main/Main10
 sample round trips, independent FFV1 decode, publication/cancellation, and
 foreground cadence/EOF selection. This does not yet migrate every overlay
 profile or the full `media` feature away from FFmpeg.
+
+
+The owned overlay workflow is also available in the headless CLI:
+
+```sh
+cargo run --locked --offline --no-default-features -- media overlay MAIN.mp4 FOREGROUND.mp4 OUTPUT.mkv --overlay-x 0 --overlay-y 0 --progress
+cargo run --locked --offline --no-default-features -- media plan overlay MAIN.mp4 --overlay FOREGROUND.mp4
+```
+
+Planning also accepts positional `MAIN FOREGROUND`; execution accepts
+`MAIN OUTPUT.mkv --overlay FOREGROUND`. Quiet suppresses JSON stdout.
+Progress emits JSON stderr and exactly one completion after publication.
+Unsupported options/main formats retain the previous dispatch. CLI tests
+compare output byte for byte with the native API for AVC, HEVC Main/Main10
+and a main input with two copied AAC tracks. The tested headless executable
+links only libSystem and its normal dependency graph excludes fvid-media.
+This evidence applies to that build, not the still-dependent `media` feature.
