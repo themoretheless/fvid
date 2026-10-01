@@ -37,9 +37,9 @@ impl ProgramConfig {
     }
     /// Canonical WAVE speaker order for unambiguous horizontal PCE layouts.
     pub fn pcm_layout(&self) -> Result<(u32, Vec<usize>)> {
-        if !self.coupling.is_empty() || self.comment.first() == Some(&0xac) {
+        if self.coupling.iter().any(|(independent,_)|!*independent) || self.comment.first() == Some(&0xac) {
             return Err(invalid(
-                "AAC PCE coupling or height layout is not implemented",
+                "AAC PCE dependent coupling or height layout is not implemented",
             ));
         }
         let mut speakers = Vec::new();

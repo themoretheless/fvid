@@ -1869,3 +1869,29 @@ PCM packet tails/timestamps, then reproduce all initial packets on backward seek
 to zero. Both container acceptance checks passed, along with all 15 audio worker
 regressions. Cold and evicted regions still use source-start preroll; persistent
 checkpoint storage is not implemented.
+
+### Owned AAC independent coupling (after IMDCT)
+
+AAC-LC CCE parsing now supports independent coupling declared in PCE, tagged
+SCE/CPE targets, shared/left/right/separate channel selection and scalar gains.
+CCE spectral tools run in raw-element order to preserve noise history; TNS and
+independent synthesis have retained tag-local overlap/window state. Coupling is
+added to target PCM after synthesis. Reset/checkpoints include CCE synthesis
+state. All state commits remain after validation of the entire packet and all
+coupling targets; absent target/tag/configuration changes are explicit errors.
+Dependent coupling before/after TNS and height layouts remain unsupported.
+
+Hand-authored six-packet fixtures cover silent mono SCE receiving nonzero CCE,
+and stereo CPE with separate left/right gains (right 2^(-4/8)). Saved independent
+FFmpeg PCM is only an oracle, with peak acceptance tolerance 1e-7; all reset and
+checkpoint replay samples are bit-identical to continuous owned decode. The
+previous PCE implementation was run against this fixture and reproduced the
+specific `AAC PCE coupling or height layout is not implemented` refusal. A third
+synthetic missing-target fixture tests late failure rollback of overlap/noise.
+Generation: `generate_aac_coupling_sample.py`, `--stereo`, `--missing-target`.
+Ordinary tests do not invoke FFmpeg. Reference syntax/application ordering was
+checked against the primary decoder source (not linked or used as fallback):
+https://ffmpeg.org/doxygen/2.7/libavcodec_2aacdec_8c_source.html
+Validation: 51 AAC unit tests, 15 export tests, 2 AAC/960 tests and both coupling
+acceptance/rollback tests passed. Further dependent, short-window/960 coupling
+and additional target selection fixtures remain to be added.
