@@ -1739,3 +1739,16 @@ latency tails exceed a frame budget. These measurements do not prove smooth
 60 fps playback; render/presentation instrumentation and queue behavior still
 need verification. Small committed VP9/HEVC fixtures also ran successfully,
 but their throughput is not representative of this target resolution.
+
+### Exact native AAC packet-boundary checkpoints
+
+The owned AAC decoder can save and restore opaque packet-boundary checkpoints,
+including all channel overlap/window state, perceptual-noise state, configured
+PCE/layout and ASC. Restoration rejects incompatible configurations before any
+state mutation. The caller must bind checkpoints to its source/packet cursor;
+a matching codec configuration alone does not identify a stream. A regression
+captures state after three packets, decodes the remaining synthetic AAC fixture,
+resets and restores, then compares every resulting float bit with continuous
+PCM. Incompatible-config restoration is also checked for no mutation.
+All seven native AAC tests passed. This is decoder support for seek acceleration;
+no player seek-cache integration or accelerated seek latency is claimed yet.

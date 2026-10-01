@@ -14,6 +14,18 @@ pub struct NativeAacDecoder {
     mapping: Vec<usize>,
     channel_mask: u32,
 }
+/// Opaque complete packet-boundary state. Configuration and layout are retained
+/// to reject restoring into a decoder with another configuration. The caller
+/// must associate checkpoints with the corresponding stream and packet cursor.
+#[derive(Clone)]
+pub struct AacCheckpoint {
+    config: AacConfig,
+    program: Option<super::aac_pce::ProgramConfig>,
+    synthesis: Vec<LongSineSynthesis>,
+    noise: NoiseState,
+    mapping: Vec<usize>,
+    channel_mask: u32,
+}
 impl NativeAacDecoder {
     pub fn new(asc: &[u8]) -> Result<Self> {
         let (config, program) = AacConfig::parse_with_program(asc)?;
@@ -71,6 +83,20 @@ impl NativeAacDecoder {
     }
     pub fn channel_mask(&self) -> u32 {
         self.channel_mask
+    }
+    /// Save overlap/window and perceptual-noise history after a complete packet.
+    pub fn checkpoint(&self) -> AacCheckpoint {
+        AacCheckpoint {config:self.config.clone(),program:self.program.clone(),
+            synthesis:self.synthesis.clone(),noise:self.noise.clone(),
+            mapping:self.mapping.clone(),channel_mask:self.channel_mask}
+    }
+    /// Restore without changing the decoder if configuration/layout differs.
+    pub fn restore(&mut self, state:&AacCheckpoint) -> Result<()> {
+        if self.config!=state.config || self.program!=state.program || self.mapping!=state.mapping || self.channel_mask!=state.channel_mask {
+            return Err(invalid("AAC checkpoint configuration mismatch"));
+        }
+        self.synthesis=state.synthesis.clone();self.noise=state.noise.clone();
+        Ok(())
     }
     pub fn reset(&mut self) {
         for synth in &mut self.synthesis {
@@ -201,6 +227,23 @@ mod tests {
             at += n;
         }
         packets
+    }
+    #[test]
+    fn checkpoint_restores_exact_continuous_pcm_and_rejects_other_config() {
+        let packets=packets();assert!(packets.len()>4);
+        let mut decoder=NativeAacDecoder::new(&[0x11,0x90]).unwrap();
+        for packet in &packets[..3] {decoder.decode(packet).unwrap();}
+        let state=decoder.checkpoint();
+        let tail:Vec<_>=packets[3..].iter().map(|p|decoder.decode(p).unwrap()).collect();
+        decoder.reset();decoder.restore(&state).unwrap();
+        for (packet,expected) in packets[3..].iter().zip(&tail) {
+            let actual=decoder.decode(packet).unwrap();
+            assert_eq!(actual.iter().map(|v|v.to_bits()).collect::<Vec<_>>(),expected.iter().map(|v|v.to_bits()).collect::<Vec<_>>());
+        }
+        let mut other=NativeAacDecoder::new(&[0x12,0x10]).unwrap();
+        assert!(other.restore(&state).is_err());
+        let mut untouched=NativeAacDecoder::new(&[0x12,0x10]).unwrap();
+        assert_eq!(other.decode(packets[0]).unwrap(),untouched.decode(packets[0]).unwrap());
     }
     #[test]
     fn public_decoder_matches_saved_pcm_and_reset() {

@@ -308,7 +308,7 @@ pub fn aac_specific_config(esds: &[u8]) -> Result<&[u8]> {
 const AAC_RATES: [u32; 13] = [
     96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350,
 ];
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AacConfig {
     /// MPEG-4 channel_configuration, zero for an explicit PCE.
     pub channel_configuration: u8,
