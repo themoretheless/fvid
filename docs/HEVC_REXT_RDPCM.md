@@ -52,5 +52,5 @@ require neither HM, FFmpeg nor network access.
 Before the fix, the enabled fixture specifically reproduced
 `remaining HEVC SPS range-extension tools are not implemented`. The obsolete
 refusal expectation was removed and acceptance now requires decoded samples.
-Explicit RDPCM, other RExt tools and other incomplete codec profiles remain
-outside the implemented support.
+[Explicit RDPCM](HEVC_REXT_EXPLICIT_RDPCM.md) is also implemented. Other RExt
+tools and incomplete codec profiles remain outside the implemented support.

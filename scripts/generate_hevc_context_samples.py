@@ -10,7 +10,10 @@ parser.add_argument('--hm-encoder', type=Path, required=True)
 parser.add_argument('--hm-decoder', type=Path, required=True)
 parser.add_argument('--hm-config', type=Path, required=True)
 parser.add_argument('--rdpcm', action='store_true', help='generate implicit RDPCM instead of context fixtures')
+parser.add_argument('--explicit', action='store_true', help='generate explicit RDPCM in low-delay P pictures')
 args = parser.parse_args()
+if args.rdpcm and args.explicit:
+    parser.error('--rdpcm and --explicit are mutually exclusive')
 fixtures = Path(__file__).resolve().parents[1] / 'tests/fixtures/playback-errors'
 
 
@@ -20,6 +23,12 @@ def ff(*args):
 
 with tempfile.TemporaryDirectory(prefix='fvid-hevc-context-') as directory:
     tmp = Path(directory)
+    config = args.hm_config
+    if args.explicit:
+        config = tmp / 'lowdelay.cfg'
+        config.write_text(args.hm_config.read_text() + '\nIntraPeriod : -1\nGOPSize : 1\n'
+                          'DecodingRefreshType : 2\n'
+                          'Frame1 : P 1 0 0.0 0.0 0 0 1.0 0 0 0 1 1 -1 0\n')
     for depth in (8, 10):
         pix = 'yuv420p' if depth == 8 else 'yuv420p10le'
         source = tmp / 'source.yuv'
@@ -27,20 +36,20 @@ with tempfile.TemporaryDirectory(prefix='fvid-hevc-context-') as directory:
            '-pix_fmt', pix, '-f', 'rawvideo', source)
         for mode in ('skip', 'bypass'):
             for context in (False, True):
-                tool = 'rdpcm' if args.rdpcm else 'context'
+                tool = 'explicit-rdpcm' if args.explicit else ('rdpcm' if args.rdpcm else 'context')
                 stem = f'hevc-rext-{tool}-{depth}-{mode}-' + ('enabled' if context else 'disabled')
                 stream, recon = tmp / 'stream.hevc', tmp / 'recon.yuv'
-                options = [str(args.hm_encoder), '-c', str(args.hm_config), '-i', str(source),
+                options = [str(args.hm_encoder), '-c', str(config), '-i', str(source),
                            '-b', str(stream), '-o', str(recon), '-wdt', '64', '-hgt', '64',
                            '-fr', '25', '-f', '3', f'--InputBitDepth={depth}',
                            f'--InternalBitDepth={depth}', '--InputChromaFormat=420',
                            '--MaxCUWidth=32', '--MaxCUHeight=32', '--MaxPartitionDepth=3',
                            '--QuadtreeTULog2MaxSize=2', '--TransformSkip=1',
                            '--TransformSkipLog2MaxSize=2', f'--ImplicitResidualDPCM={int(context and args.rdpcm)}',
-                           '--ExplicitResidualDPCM=0', '--ResidualRotation=0',
+                           f'--ExplicitResidualDPCM={int(context and args.explicit)}', '--ResidualRotation=0',
                            '--GolombRiceParameterAdaptation=0', '--HighPrecisionPredictionWeighting=0',
                            '--CrossComponentPrediction=0', '--SAO=0', '--LoopFilterDisable=1',
-                           '--QP=24', f'--SingleSignificanceMapContext={int(context and not args.rdpcm)}',
+                           '--QP=24', f'--SingleSignificanceMapContext={int(context and not args.rdpcm and not args.explicit)}',
                            f'--TransquantBypassEnable={int(mode == "bypass")}',
                            f'--CUTransquantBypassFlagForce={int(mode == "bypass")}']
                 subprocess.run(options, check=True)

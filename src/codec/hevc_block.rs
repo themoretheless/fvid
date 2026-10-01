@@ -65,7 +65,7 @@ pub(crate) fn read_with_rotation(
     c: Config,
     rotation_enabled: bool,
 ) -> Result<Coefficients> {
-    read_with_tools(b, c, rotation_enabled, false, false)
+    read_with_tools(b, c, rotation_enabled, false, false, false)
 }
 pub(crate) fn read_with_tools(
     b: &mut impl ResidualBins,
@@ -73,6 +73,7 @@ pub(crate) fn read_with_tools(
     rotation_enabled: bool,
     context_enabled: bool,
     rdpcm_enabled: bool,
+    explicit_rdpcm_enabled: bool,
 ) -> Result<Coefficients> {
     let scan = c.scan()?;
     if !(8..=10).contains(&c.bit_depth) || c.qp > 51 + 6 * (c.bit_depth - 8) {
@@ -82,9 +83,18 @@ pub(crate) fn read_with_tools(
         && c.transform_skip_enabled
         && c.log2_size == 2
         && b.decision(Syntax::TransformSkip, usize::from(c.component != 0))?;
-    let rdpcm = c.intra_mode.filter(|&mode| {
+    let mut rdpcm = c.intra_mode.filter(|&mode| {
         rdpcm_enabled && (skip || c.transquant_bypass) && matches!(mode, 10 | 26)
     });
+    if c.intra_mode.is_none() && explicit_rdpcm_enabled && (skip || c.transquant_bypass)
+        && b.decision(Syntax::ExplicitRdpcmFlag, usize::from(c.component != 0))?
+    {
+        rdpcm = Some(if b.decision(Syntax::ExplicitRdpcmDirection, usize::from(c.component != 0))? {
+            26
+        } else {
+            10
+        });
+    }
     let coefficients = hevc_residual::read_block_with_skip_context(
         b,
         c.log2_size,
@@ -268,7 +278,7 @@ mod tests {
                 ]);
                 let mut scratch = Vec::new();
                 let mut out = Vec::new();
-                read_with_tools(&mut b, c, false, false, true)
+                read_with_tools(&mut b, c, false, false, true, false)
                     .unwrap()
                     .reconstruct(&ScalingLists::flat(), &mut scratch, &mut out)
                     .unwrap();
@@ -280,6 +290,52 @@ mod tests {
                 };
                 assert_eq!(out, expected);
                 assert!(b.0.is_empty());
+            }
+        }
+    }
+    #[test]
+    fn explicit_rdpcm_flags_precede_coefficients_and_select_luma_chroma_contexts() {
+        for component in 0..3 {
+            for bypass in [false, true] {
+                for direction in [None, Some(false), Some(true)] {
+                    let mut c = config();
+                    c.component = component;
+                    c.intra_mode = None;
+                    c.transquant_bypass = bypass;
+                    let chroma = usize::from(component != 0);
+                    let mut b = Bins(VecDeque::new());
+                    if !bypass {
+                        b.0.push_back((Some(Syntax::TransformSkip), chroma, true));
+                    }
+                    b.0.push_back((Some(Syntax::ExplicitRdpcmFlag), chroma, direction.is_some()));
+                    if let Some(vertical) = direction {
+                        b.0.push_back((Some(Syntax::ExplicitRdpcmDirection), chroma, vertical));
+                    }
+                    b.0.extend([
+                        (Some(Syntax::LastX), chroma * 15, false),
+                        (Some(Syntax::LastY), chroma * 15, false),
+                        (Some(Syntax::Greater1), chroma * 16 + 1, true),
+                        (Some(Syntax::Greater2), chroma * 4, false),
+                        (None, 0, true),
+                    ]);
+                    let mut scratch = Vec::new();
+                    let mut out = Vec::new();
+                    read_with_tools(&mut b, c, false, false, false, true)
+                        .unwrap()
+                        .reconstruct(&ScalingLists::flat(), &mut scratch, &mut out)
+                        .unwrap();
+                    let value = if bypass { -2 } else { -1 };
+                    let mut expected = vec![0; 16];
+                    for index in match direction {
+                        None => vec![0],
+                        Some(false) => vec![0, 1, 2, 3],
+                        Some(true) => vec![0, 4, 8, 12],
+                    } {
+                        expected[index] = value;
+                    }
+                    assert_eq!(out, expected);
+                    assert!(b.0.is_empty());
+                }
             }
         }
     }

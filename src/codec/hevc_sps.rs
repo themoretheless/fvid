@@ -53,6 +53,7 @@ pub struct Sps {
     pub transform_skip_rotation: bool,
     pub transform_skip_context: bool,
     pub implicit_rdpcm: bool,
+    pub explicit_rdpcm: bool,
     pub vui: Option<Vui>,
 }
 impl Sps {
@@ -180,6 +181,7 @@ impl Sps {
         let mut transform_skip_rotation = false;
         let mut transform_skip_context = false;
         let mut implicit_rdpcm = false;
+        let mut explicit_rdpcm = false;
         if b.bit()? {
             let range = b.bit()?;
             if b.read(7)? != 0 {
@@ -190,7 +192,7 @@ impl Sps {
             if range {
                 let flags = b.read(9)?;
                 // 7.3.2.2.2: the sixth of nine flags disables reference filtering.
-                if flags & !((1 << 8) | (1 << 7) | (1 << 6) | (1 << 3)) != 0 {
+                if flags & !((1 << 8) | (1 << 7) | (1 << 6) | (1 << 5) | (1 << 3)) != 0 {
                     return Err(invalid(
                         "remaining HEVC SPS range-extension tools are not implemented",
                     ));
@@ -199,6 +201,7 @@ impl Sps {
                 transform_skip_rotation = flags & (1 << 8) != 0;
                 transform_skip_context = flags & (1 << 7) != 0;
                 implicit_rdpcm = flags & (1 << 6) != 0;
+                explicit_rdpcm = flags & (1 << 5) != 0;
             }
         }
         b.finish_rbsp()?;
@@ -231,6 +234,7 @@ impl Sps {
             transform_skip_rotation,
             transform_skip_context,
             implicit_rdpcm,
+            explicit_rdpcm,
             vui,
         })
     }

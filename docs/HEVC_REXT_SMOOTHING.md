@@ -12,8 +12,9 @@ The normative syntax and prediction rules are H.265 clauses 7.3.2.2.2 and
 
 This, [residual rotation](HEVC_REXT_ROTATION.md) and
 [significance contexts](HEVC_REXT_CONTEXT.md), and
-[implicit RDPCM](HEVC_REXT_RDPCM.md) are implemented RExt tools, not complete
-format-range-extension profile support. Explicit RDPCM, extended
+[implicit RDPCM](HEVC_REXT_RDPCM.md) and
+[explicit RDPCM](HEVC_REXT_EXPLICIT_RDPCM.md) are implemented RExt tools, not
+complete format-range-extension profile support. Extended
 precision, high-precision offsets, persistent Rice adaptation and CABAC bypass
 alignment remain explicitly refused when signalled. Other extensions are also
 refused. Existing chroma-format and picture-tool restrictions remain.

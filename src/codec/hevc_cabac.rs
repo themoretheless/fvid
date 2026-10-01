@@ -38,6 +38,8 @@ pub enum Syntax {
     Mvp,
     Mvd0,
     Mvd1,
+    ExplicitRdpcmFlag,
+    ExplicitRdpcmDirection,
 }
 fn values(syntax: Syntax, init: usize) -> Result<Vec<u8>> {
     use super::hevc_cabac_tables::*;
@@ -96,6 +98,8 @@ fn values(syntax: Syntax, init: usize) -> Result<Vec<u8>> {
             }
         }
         Syntax::Mvd1 if init != 0 => &[198],
+        // H.265 tables 9-32/33: luma/chroma entries for P and B all use 139.
+        Syntax::ExplicitRdpcmFlag | Syntax::ExplicitRdpcmDirection if init != 0 => &[139, 139],
         Syntax::SaoMerge => &[153],
         Syntax::SaoType => [&[200][..], &[185][..], &[160][..]][init],
         Syntax::SplitCu => [
@@ -175,7 +179,7 @@ impl std::ops::Index<usize> for Bank {
 /// SAO type) while keeping the arithmetic state in the existing CABAC engine.
 pub struct HevcCabac<'a> {
     arithmetic: Cabac<'a>,
-    contexts: [Bank; 28],
+    contexts: [Bank; 30],
     failed: bool,
 }
 fn index(s: Syntax) -> usize {
@@ -208,11 +212,13 @@ fn index(s: Syntax) -> usize {
         Syntax::Mvp => 25,
         Syntax::Mvd0 => 26,
         Syntax::Mvd1 => 27,
+        Syntax::ExplicitRdpcmFlag => 28,
+        Syntax::ExplicitRdpcmDirection => 29,
     }
 }
 /// Probability states transferred at the second CTU of a WPP row.
 #[derive(Clone, Copy)]
-pub struct Contexts([Bank; 28]);
+pub struct Contexts([Bank; 30]);
 impl<'a> HevcCabac<'a> {
     pub fn new(
         rbsp: &'a [u8],
@@ -229,7 +235,7 @@ impl<'a> HevcCabac<'a> {
             (SliceType::P, false) | (SliceType::B, true) => 1,
             _ => 2,
         };
-        let mut contexts = [Bank::empty(); 28];
+        let mut contexts = [Bank::empty(); 30];
         for s in [
             Syntax::SaoMerge,
             Syntax::SaoType,
@@ -259,6 +265,8 @@ impl<'a> HevcCabac<'a> {
             Syntax::Mvp,
             Syntax::Mvd0,
             Syntax::Mvd1,
+            Syntax::ExplicitRdpcmFlag,
+            Syntax::ExplicitRdpcmDirection,
         ] {
             if let Ok(entries) = values(s, init) {
                 contexts[index(s)] = Bank::initialized(&entries, qp)?;

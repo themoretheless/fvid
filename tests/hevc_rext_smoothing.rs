@@ -13,6 +13,7 @@ fn compare(
     bypass: Option<bool>,
     context: bool,
     rdpcm: bool,
+    explicit: bool,
 ) {
     let mut input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
     let configuration = input.tracks()[0].configuration.clone();
@@ -30,6 +31,7 @@ fn compare(
     assert_eq!(sps.transform_skip_rotation, rotation);
     assert_eq!(sps.transform_skip_context, context);
     assert_eq!(sps.implicit_rdpcm, rdpcm);
+    assert_eq!(sps.explicit_rdpcm, explicit);
     let mut decoder = HevcDecoder::from_configuration(&configuration, 16 << 20).unwrap();
     if let Some(bypass) = bypass {
         assert_eq!(decoder.parameters().1.transquant_bypass, bypass);
@@ -109,7 +111,9 @@ fn rext_intra_reference_filtering_matches_oracles_and_reset() {
             true,
         ),
     ] {
-        compare(source, oracle, depth, disabled, false, None, false, false);
+        compare(
+            source, oracle, depth, disabled, false, None, false, false, false,
+        );
     }
     assert_ne!(
         include_bytes!("fixtures/playback-errors/hevc-rext-smoothing-8-enabled.yuv"),
@@ -139,7 +143,7 @@ fn unsupported_range_tools_are_not_silently_ignored() {
         .rev()
         .find(|&i| rbsp[i / 8] & (1 << (7 - i % 8)) != 0)
         .unwrap();
-    for flag in (0..9).filter(|&i| i != 0 && i != 1 && i != 2 && i != 5) {
+    for flag in (0..9).filter(|&i| i != 0 && i != 1 && i != 2 && i != 3 && i != 5) {
         let mut bytes = rbsp.clone();
         let bit = stop - 9 + flag;
         bytes[bit / 8] |= 1 << (7 - bit % 8);
@@ -173,6 +177,7 @@ fn rext_transform_skip_rotation_matches_oracle() {
                 false,
                 $rotation,
                 Some($bypass),
+                false,
                 false,
                 false,
             );
@@ -229,7 +234,7 @@ fn rext_significance_contexts_match_oracle() {
                 (&include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.mp4"))[..],
                  &include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.yuv"))[..], true),
             ] {
-                compare(source, oracle, $depth, false, false, Some($bypass), enabled, false);
+                compare(source, oracle, $depth, false, false, Some($bypass), enabled, false, false);
             }
             // Context selection changes actual VCL coding, not merely SPS bytes.
             assert_ne!(
@@ -254,7 +259,7 @@ fn implicit_rdpcm_matches_oracles() {
                 (&include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.mp4"))[..],
                  &include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.yuv"))[..], true),
             ] {
-                compare(source, oracle, $depth, false, false, Some($bypass), false, enabled);
+                compare(source, oracle, $depth, false, false, Some($bypass), false, enabled, false);
             }
             assert_ne!(
                 coded_units(include_bytes!(concat!("fixtures/playback-errors/", $base, "-disabled.mp4"))),
@@ -266,4 +271,48 @@ fn implicit_rdpcm_matches_oracles() {
     check_pair!("hevc-rext-rdpcm-8-bypass", 8, true);
     check_pair!("hevc-rext-rdpcm-10-skip", 10, false);
     check_pair!("hevc-rext-rdpcm-10-bypass", 10, true);
+}
+
+fn assert_lowdelay_inter(source: &[u8]) {
+    use fvid::codec::hevc_cabac::SliceType;
+    let mut input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
+    let configuration = input.tracks()[0].configuration.clone();
+    let decoder = HevcDecoder::from_configuration(&configuration, 16 << 20).unwrap();
+    for index in 0..3 {
+        let mut packet = Vec::new();
+        input.read_packet(0, index, &mut packet).unwrap();
+        let headers = decoder.slice_headers(&packet).unwrap();
+        assert!(!headers.is_empty());
+        let expected = if index == 0 {
+            SliceType::I
+        } else {
+            SliceType::P
+        };
+        assert!(headers.iter().all(|header| header.slice_type == expected));
+    }
+}
+
+#[test]
+fn explicit_rdpcm_matches_inter_oracles() {
+    macro_rules! check_pair {
+        ($base:literal, $depth:literal, $bypass:literal) => {
+            for (source, oracle, enabled) in [
+                (&include_bytes!(concat!("fixtures/playback-errors/", $base, "-disabled.mp4"))[..],
+                 &include_bytes!(concat!("fixtures/playback-errors/", $base, "-disabled.yuv"))[..], false),
+                (&include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.mp4"))[..],
+                 &include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.yuv"))[..], true),
+            ] {
+                assert_lowdelay_inter(source);
+                compare(source, oracle, $depth, false, false, Some($bypass), false, false, enabled);
+            }
+            assert_ne!(
+                coded_units(include_bytes!(concat!("fixtures/playback-errors/", $base, "-disabled.mp4"))),
+                coded_units(include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.mp4"))),
+            );
+        };
+    }
+    check_pair!("hevc-rext-explicit-rdpcm-8-skip", 8, false);
+    check_pair!("hevc-rext-explicit-rdpcm-8-bypass", 8, true);
+    check_pair!("hevc-rext-explicit-rdpcm-10-skip", 10, false);
+    check_pair!("hevc-rext-explicit-rdpcm-10-bypass", 10, true);
 }
