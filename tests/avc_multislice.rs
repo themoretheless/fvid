@@ -459,6 +459,8 @@ fn mixed_slice_types_match_jm_and_rewind() {
         (include_bytes!("fixtures/playback-errors/avc-mixed-bp.mp4").as_slice(),include_bytes!("fixtures/playback-errors/avc-mixed-bp-jm.yuv").as_slice()),
         (include_bytes!("fixtures/playback-errors/avc-mixed-ip.mp4").as_slice(),include_bytes!("fixtures/playback-errors/avc-mixed-ip-jm.yuv").as_slice()),
         (include_bytes!("fixtures/playback-errors/avc-mixed-pi.mp4").as_slice(),include_bytes!("fixtures/playback-errors/avc-mixed-pi-jm.yuv").as_slice()),
+        (include_bytes!("fixtures/playback-errors/avc-mixed-ib.mp4").as_slice(),include_bytes!("fixtures/playback-errors/avc-mixed-ib-jm.yuv").as_slice()),
+        (include_bytes!("fixtures/playback-errors/avc-mixed-bi.mp4").as_slice(),include_bytes!("fixtures/playback-errors/avc-mixed-bi-jm.yuv").as_slice()),
     ] {
     let mut packets=Mp4Reader::open(Cursor::new(data),Default::default()).unwrap();
     let avc=AvcConfig::parse(&packets.tracks()[0].configuration).unwrap();

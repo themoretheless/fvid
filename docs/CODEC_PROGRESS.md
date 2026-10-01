@@ -1708,3 +1708,11 @@ are `--mixed-ip` and `--mixed-pi`; these fixtures use monotonically increasing
 POC to avoid the mux oracle's inferred timestamp mismatch for reordered I/P.
 The synthetic examples cover CAVLC PCM I blocks; additional CABAC mixed-slice
 oracle coverage, I/B combinations and FMO/ASO remain to be completed.
+
+Mixed I/B and B/I coverage now exercises the same shared reconstruction with
+an I PCM slice and a temporal-direct B slice. Both four-frame CAVLC fixtures
+match JM 19 for every plane byte before and after rewind. Generate using
+`--mixed-ib` / `--mixed-bi` plus the optional independent JM decoder argument.
+These are acceptance tests (no refusal or ignored expectation). They extend
+the six mixed-type raster-order fixtures; CABAC mixed-type oracle coverage
+still remains outstanding.

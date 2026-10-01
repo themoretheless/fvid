@@ -3,8 +3,9 @@
 from pathlib import Path
 import subprocess
 import sys
-mixed_intra = "--mixed-ip" in sys.argv or "--mixed-pi" in sys.argv
-mixed_pi = "--mixed-pi" in sys.argv
+mixed_ib = "--mixed-ib" in sys.argv or "--mixed-bi" in sys.argv
+mixed_intra = "--mixed-ip" in sys.argv or "--mixed-pi" in sys.argv or mixed_ib
+mixed_pi = "--mixed-pi" in sys.argv or "--mixed-bi" in sys.argv
 mixed_pb = "--mixed-pb" in sys.argv or "--mixed-bp" in sys.argv
 mixed_bp = "--mixed-bp" in sys.argv
 temporal = "--temporal-direct" in sys.argv or mixed_pb or mixed_intra
@@ -72,8 +73,12 @@ if temporal:
     for first in [0,1]:
         if mixed_intra:
             intra = first==(1 if mixed_pi else 0)
-            b=Bits();b.ue(first);b.ue(2 if intra else 0);b.ue(0);b.bits(3,4);b.bits(12,4)
-            if not intra: b.bits(0,1);b.bits(0,1)
+            b=Bits();b.ue(first);b.ue(2 if intra else (1 if mixed_ib else 0));b.ue(0);b.bits(3,4);b.bits(12,4)
+            if not intra:
+                if mixed_ib:
+                    b.bits(0,1);b.bits(1,1);b.ue(1);b.ue(0)
+                    b.bits(0,1);b.bits(0,1)
+                else: b.bits(0,1);b.bits(0,1)
             b.se(0);b.ue(1)
             if intra: b.ue(25);b.pcm(100)
             else: b.ue(1)
@@ -92,7 +97,7 @@ if temporal:
         b.se(0);b.ue(1);b.ue(1) # QP, disable filter, skip one MB
         stream+=nal(0x01,b.finish())
 root=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors'
-name=('avc-mixed-pi' if mixed_pi else 'avc-mixed-ip') if mixed_intra else ('avc-mixed-bp' if mixed_bp else 'avc-mixed-pb') if mixed_pb else ('avc-slice-lists-temporal' if temporal else 'avc-slice-lists')
+name=('avc-mixed-bi' if mixed_pi else 'avc-mixed-ib') if mixed_ib else ('avc-mixed-pi' if mixed_pi else 'avc-mixed-ip') if mixed_intra else ('avc-mixed-bp' if mixed_bp else 'avc-mixed-pb') if mixed_pb else ('avc-slice-lists-temporal' if temporal else 'avc-slice-lists')
 raw=root/(name+'.h264');raw.write_bytes(stream)
 video=root/(name+'.mp4');oracle=root/(name+'.yuv')
 subprocess.run(['ffmpeg','-v','error','-framerate','30','-i',str(raw),'-c:v','copy','-an','-y',str(video)],check=True)
