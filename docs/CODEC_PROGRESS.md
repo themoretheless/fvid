@@ -1373,3 +1373,14 @@ to the picture, then reset/repeat; late SPS and non-random-access transitions ar
 rejected with reset recovery. This verifies native decoder sequence transitions,
 not arbitrary non-IRAP SPS changes, unsupported profiles, or MP4 display timing
 across a changing sample description.
+
+### Stable camera output across HEVC source-size changes
+
+`NativeCameraSource` now fits cropped RGB directly into the existing fixed BGRA
+publication buffer when source dimensions or pixel aspect change. The output
+format and its initial sample aspect stay fixed; borders are opaque black. This
+uses no extra frame allocation. Unchanged geometry retains the original direct
+crop/copy path. A six-frame synthetic HEVC MP4 verifies 128x128 -> 96x64 -> backward
+seek, exact fitted pixels, timestamps, crop and anamorphic output. This is native
+file-to-camera buffer proof; activation/delivery from the installed macOS camera
+extension remains unverified pending valid provisioning profiles.

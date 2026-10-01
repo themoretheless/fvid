@@ -233,6 +233,46 @@ impl LatestFrame {
         state.tick = Some(tick);
         Ok(())
     }
+    /// Fit cropped RGB into the fixed camera buffer without allocating another frame.
+    /// Aspect ratios describe source and destination samples, so the camera's
+    /// negotiated format remains stable when the file changes size or aspect.
+    pub fn publish_rgb_fitted_aspect(
+        &self, tick: CameraTick, rgb: &[u8], source: [usize; 2],
+        insets: [u32; 4], source_aspect: [u32; 2], target_aspect: [u32; 2],
+    ) -> Result<()> {
+        let visible = visible_dimensions(source, insets)?;
+        if source_aspect.contains(&0) || target_aspect.contains(&0)
+            || source.into_iter().chain(self.dimensions()).any(|n| n == 0 || n > 4096)
+            || source[0].checked_mul(source[1]).and_then(|n| n.checked_mul(3)) != Some(rgb.len())
+        { return Err(invalid("invalid camera RGB scaling geometry")); }
+        if visible == self.dimensions() && source_aspect == target_aspect {
+            return self.publish_rgb_cropped(tick, rgb, source, insets);
+        }
+        let display_w = visible[0] as u128 * u128::from(source_aspect[0]) * u128::from(target_aspect[1]);
+        let display_h = visible[1] as u128 * u128::from(source_aspect[1]) * u128::from(target_aspect[0]);
+        let (w, h) = if display_w * self.height as u128 > display_h * self.width as u128 {
+            (self.width, (display_h * self.width as u128 / display_w).max(1) as usize)
+        } else {
+            ((display_w * self.height as u128 / display_h).max(1) as usize, self.height)
+        };
+        let mut state = self.state.lock().map_err(|_| invalid("virtual-camera frame lock poisoned"))?;
+        if state.closed { return Err(invalid("virtual-camera producer is closed")); }
+        if state.tick.is_some_and(|last| tick.sequence <= last.sequence || tick.host_time_ns <= last.host_time_ns) {
+            return Err(invalid("virtual-camera frame timestamp is not increasing"));
+        }
+        for pixel in state.bgra.chunks_exact_mut(4) { pixel.copy_from_slice(&[0,0,0,255]); }
+        let (left, top) = ((self.width - w) / 2, (self.height - h) / 2);
+        for y in 0..h {
+            for x in 0..w {
+                let src = (((y * visible[1] / h) + insets[1] as usize) * source[0]
+                    + x * visible[0] / w + insets[0] as usize) * 3;
+                let dst = ((top + y) * self.width + left + x) * 4;
+                state.bgra[dst..dst+4].copy_from_slice(&[rgb[src+2],rgb[src+1],rgb[src],255]);
+            }
+        }
+        state.tick = Some(tick);
+        Ok(())
+    }
     /// Copy the latest frame if newer than `after_sequence`. None requests an
     /// initial snapshot. No frame (or no change) leaves the destination untouched.
     pub fn copy_latest(
@@ -336,16 +376,19 @@ impl<R: std::io::BufRead + std::io::Seek> Y4mCameraSource<R> {
 }
 
 /// File source for owned native video formats, driven by camera media time.
-/// Publishes the visible display area after stored crop and rotation.
+/// Fits the visible display area after crop and rotation into the fixed camera
+/// format, preserving display aspect across source resolution changes.
 /// Backward seeks replay from the beginning; EOF holds the final decoded frame.
 /// This produces BGRA frames, not an installed OS camera device.
 pub struct NativeCameraSource<R> {
     reader: crate::playback_native::NativeReader<R>,
     eof: bool,
+    target_aspect: [u32; 2],
 }
 impl<R: std::io::BufRead + std::io::Seek> NativeCameraSource<R> {
     pub fn new(reader: crate::playback_native::NativeReader<R>) -> Self {
-        Self { reader, eof: false }
+        let (num, den) = reader.pixel_aspect();
+        Self { reader, eof: false, target_aspect: [num, den] }
     }
     pub fn publish(&mut self, tick: CameraTick, destination: &LatestFrame) -> Result<bool> {
         if let Some((start, _, scale)) = self.reader.frame_interval() {
@@ -367,8 +410,9 @@ impl<R: std::io::BufRead + std::io::Seek> NativeCameraSource<R> {
         if self.reader.frame_interval().is_none() {
             return Ok(false);
         }
-        destination.publish_rgb_cropped(tick, self.reader.rgb(),
-            self.reader.dimensions(), self.reader.insets())?;
+        let (num, den) = self.reader.pixel_aspect();
+        destination.publish_rgb_fitted_aspect(tick, self.reader.rgb(),
+            self.reader.dimensions(), self.reader.insets(), [num, den], self.target_aspect)?;
         Ok(true)
     }
 }

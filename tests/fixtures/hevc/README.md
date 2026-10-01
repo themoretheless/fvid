@@ -229,3 +229,18 @@ Generation commands, run in `tests/fixtures/hevc`:
 ffmpeg -v error -f lavfi -i 'testsrc2=size=96x64:rate=30:duration=0.1' -c:v libx265 -pix_fmt yuv420p -x265-params 'pools=1:frame-threads=1:ctu=32:bframes=0:log-level=error' -an ../playback-errors/hevc-sps-resize.mp4
 ffmpeg -v error -i ../playback-errors/hevc-sps-resize.mp4 -pix_fmt yuv420p -f rawvideo ../playback-errors/hevc-sps-resize.yuv
 ```
+
+### Camera source resolution change
+
+`../playback-errors/hevc-camera-resize.mp4` is a six-frame synthetic `hev1`
+stream: three 128x128 I/P/P pictures followed by three 96x64 I/P/P pictures,
+with repeated in-band parameter sets at the second sequence. Regenerate with
+`python3 scripts/generate_camera_resize_sample.py` from the repository root.
+The script uses only test patterns and the synthetic resize fixture above.
+
+`tests/virtual_camera_resize.rs` verifies the specific source-size transition,
+fixed-size camera BGRA output, aspect-preserving letterboxing, increasing camera
+timestamps, and backward seek to the original size. It compares bridge output
+against separately converted native frames and the existing BGRA fit operation;
+this verifies camera integration, not an independent codec oracle or installed
+cross-process OS camera delivery.
