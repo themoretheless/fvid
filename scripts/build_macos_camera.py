@@ -23,6 +23,9 @@ if args.team_id and not re.fullmatch(r'[A-Z0-9]{10}', args.team_id):
     p.error('--team-id must contain ten uppercase letters/digits')
 if args.sign and not args.team_id:
     p.error('--sign requires --team-id')
+if args.sign and not (args.host_profile and args.extension_profile):
+    p.error('signed camera bundles require both --host-profile and --extension-profile; '
+            'codesign verification alone does not authorize launch. Omit --sign for a compile-only bundle')
 profiles = []
 if args.host_profile or args.extension_profile:
     if not args.sign or not args.host_profile or not args.extension_profile:

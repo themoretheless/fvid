@@ -16,13 +16,22 @@ FFmpeg dynamic libraries in every generated Swift test executable.
 `/Applications/FVid Camera.app` is signed with a valid Apple Development
 identity, TeamIdentifier `U6J9E8HK4D`; strict deep codesign verification passes.
 Its host executable has no FFmpeg linkage. `systemextensionsctl list` contains
-no FVid extension. Launch through `open` still fails with
-`RBSRequestErrorDomain Code=5` and underlying POSIX code `163` (job spawn
-failure). No provisioning profiles were found in the standard user profile
-directories. This evidence does not establish the cause of the launch failure.
-Installed activation, camera visibility and frame delivery in a separate
-application remain unverified. The root `media` feature still links the legacy
-FFmpeg adapter; camera-only independence does not satisfy that broader goal.
+no FVid extension. Launch through `open` fails with `RBSRequestErrorDomain
+Code=5` and underlying POSIX code `163`. A direct executable launch also exits
+with status 137. The macOS unified log now establishes the signing blocker:
+`taskgated-helper` reports no eligible provisioning profiles for
+`org.fvid.camera`, and `amfid` rejects the host with error -413,
+`No matching profile found`. Strict codesign verification does not establish
+profile authorization or launchability.
+
+The builder now rejects signed builds without both host and extension profiles
+before creating the output bundle. Unsigned builds remain available for
+compilation and bridge testing. Supply real profiles for this team, bundle IDs,
+signing certificate and Mac; then build and install through the standard
+system-extension activation flow. Installed activation, camera visibility and
+frame delivery in a separate application remain unverified. The root `media`
+feature still links the legacy FFmpeg adapter; camera-only independence does
+not establish project-wide independence.
 
 The sections below record implementation history. Their earlier statements
 about missing components, developer identities and test counts describe those
@@ -118,7 +127,9 @@ extension metadata and validates both plists. Existing output is never deleted.
 
 Unsigned output is for compilation and package inspection only; it uses a
 LOCAL Mach-service prefix and cannot establish installability. To request
-signing, explicitly supply `--team-id TEAMID --sign IDENTITY`. The script signs
+signing, explicitly supply `--team-id TEAMID --sign IDENTITY` and both
+`--host-profile HOST.provisionprofile --extension-profile EXTENSION.provisionprofile`.
+The script validates profile authorization before building and signs
 inside-out and runs codesign verification, but does not install, notarize or
 claim activation success. The signing path and entitlement sufficiency have
 not been validated against an actual developer identity/provisioning setup.

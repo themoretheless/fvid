@@ -1,6 +1,10 @@
 import datetime
 import unittest
 import hashlib
+import pathlib
+import subprocess
+import sys
+import tempfile
 from camera_signing import validated_entitlements, signing_fingerprint, validate_signing_authorization
 
 class Profiles(unittest.TestCase):
@@ -57,5 +61,20 @@ class SigningAuthorization(unittest.TestCase):
         validate_signing_authorization(profile, hashlib.sha1(cert).hexdigest(), None)
         with self.assertRaises(ValueError):
             validate_signing_authorization(profile, 'A' * 40, None)
+
+class BuildPreflight(unittest.TestCase):
+    def test_unprovisioned_signing_is_rejected_before_creating_bundle(self):
+        script = pathlib.Path(__file__).with_name('build_macos_camera.py')
+        with tempfile.TemporaryDirectory() as directory:
+            output = pathlib.Path(directory) / 'Camera.app'
+            for profiles in [[], ['--host-profile', 'host.provisionprofile'],
+                             ['--extension-profile', 'extension.provisionprofile']]:
+                result = subprocess.run([sys.executable, str(script), '--output', str(output),
+                                         '--team-id', 'TEAM123456', '--sign', 'A' * 40, *profiles],
+                                        capture_output=True, text=True)
+                with self.subTest(profiles=profiles):
+                    self.assertEqual(result.returncode, 2)
+                    self.assertIn('signed camera bundles require both', result.stderr)
+                    self.assertFalse(output.exists())
 
 if __name__=='__main__': unittest.main()
