@@ -116,6 +116,41 @@ impl HevcDecoder {
     pub fn hdr(&self) -> HdrMetadata {
         self.hdr
     }
+    /// Parse all independent slices in one picture without changing reference
+    /// state. Reconstruction can use these ranges without reparsing headers.
+    pub fn slice_headers(&self, packet: &[u8]) -> Result<Vec<SliceHeader>> {
+        if packet.len() > self.budget { return Err(invalid("HEVC access unit exceeds decode budget")); }
+        let mut headers: Vec<SliceHeader> = Vec::new();
+        for nal in NalUnits::new(packet, self.length)? {
+            let nal = nal?;
+            let kind = NalHeader::parse(nal)?;
+            kind.require_base_layer()?;
+            if !kind.is_vcl() {continue;}
+            let id = SliceHeader::parameter_set_id(nal)?;
+            let (sps, pps) = self.pairs.iter().find(|(_, p)| p.id == id)
+                .ok_or_else(|| invalid("HEVC slice references unknown PPS"))?;
+            let header = SliceHeader::parse(nal, sps, pps, self.budget)?;
+            if header.nal.temporal_id as usize >= sps.ordering.len() {
+                return Err(invalid("HEVC slice exceeds SPS temporal layers"));
+            }
+            if let Some(first) = headers.first() {
+                let previous = headers.last().unwrap();
+                if header.first || header.address <= previous.address {
+                    return Err(invalid("HEVC slice addresses must increase within one picture"));
+                }
+                if header.pps_id != first.pps_id || header.poc_lsb != first.poc_lsb
+                    || header.nal.unit_type != first.nal.unit_type
+                    || header.nal.temporal_id != first.nal.temporal_id
+                    || header.picture_output != first.picture_output {
+                    return Err(invalid("HEVC slices disagree on picture identity"));
+                }
+            } else if !header.first || header.address != 0 {
+                return Err(invalid("HEVC access unit must begin with the first slice"));
+            }
+            headers.push(header);
+        }
+        Ok(headers)
+    }
     pub fn decode_packet(&mut self, packet: &[u8]) -> Result<Option<Decoded>> {
         if self.failed {
             return Err(invalid("HEVC decoder requires reset after error"));

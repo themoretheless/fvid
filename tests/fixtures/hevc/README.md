@@ -146,3 +146,17 @@ grade compresses from the authored 1 000 cd/m² rather than the 100-nit panel's
 fallback.
 
 
+
+`../playback-errors/hevc-multislice-main.mp4` is a three-picture 128x128 Main stream with two
+independent slices per picture (CTU addresses 0 and 8). Generated with:
+
+```sh
+ffmpeg -v error -f lavfi -i 'testsrc2=size=128x128:rate=30:duration=0.1' -c:v libx265 -pix_fmt yuv420p -x265-params 'pools=1:frame-threads=1:ctu=32:slices=2:log-level=error' -an ../playback-errors/hevc-multislice-main.mp4
+ffmpeg -v error -i ../playback-errors/hevc-multislice-main.mp4 -pix_fmt yuv420p -f rawvideo ../playback-errors/hevc-multislice-main.yuv
+```
+
+`hevc_multislice` verifies owned independent-slice header collection, picture
+identity and monotonic CTU addresses, rejects duplicated picture starts and
+checks truncations for panic-free metadata parsing. It does not yet compare
+native reconstruction with the saved YUV oracle: the picture decoder still
+requires one slice. Dependent slice header inheritance remains unimplemented.
