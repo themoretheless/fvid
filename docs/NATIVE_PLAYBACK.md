@@ -3107,3 +3107,17 @@ Mono/stereo rematrixing of such inputs requires a known layout and is rejected
 before publication; unchanged channel vectors, gain and rate conversion remain
 supported. A regression covers four channels formed by merging two stereo
 inputs, exact sample preservation and failed-rematrix cleanup.
+
+
+### Owned opaque plane compositor
+
+`native_pixels::overlay_opaque` replaces covered samples directly in matching
+packed RGB24 or planar YUV frames. It preserves 8..=16-bit planar sample bytes,
+clips negative/offscreen placements and handles odd chroma plane dimensions.
+Subsampled placements must align with chroma samples. Both complete buffers
+are validated before mutation; invalid geometry/storage/sample values leave
+the destination unchanged. Inputs must already share colour encoding, range,
+depth and sampling. This primitive performs no alpha blending, colour
+conversion or temporal scheduling. The legacy public video overlay workflow
+still needs migration to this compositor with owned demux/decode/mux and
+companion-track retention; adding the primitive does not remove that fallback.
