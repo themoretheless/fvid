@@ -124,7 +124,7 @@ pub fn overlay_eligible(main: &Path) -> Result<bool> {
 }
 /// Composite a single foreground video; retain all supported main audio companions.
 /// File origins align to the first presented frame, EOF repeats the last frame.
-/// Matching colour encoding/depth/sampling is required; no implicit conversion.
+/// Matching colour encoding/range/sampling is required; sample depth is converted.
 pub fn overlay_video(
     main: &Path,
     foreground: &Path,
@@ -200,6 +200,7 @@ pub fn overlay_video_transformed(
             "overlay inputs require matching display pixel aspect and HDR metadata",
         ));
     }
+    let full_range = source.colour.full_range;
     drop(main_reader);
     let directory = destination
         .parent()
@@ -228,10 +229,15 @@ pub fn overlay_video_transformed(
         last = Some(pts);
         let base = *origin.get_or_insert(pts);
         let picture = source.at(pts - base, cancel)?;
-        if depth != picture.depth {
-            return Err(invalid("overlay input sample depths differ"));
-        }
-        crate::native_pixels::overlay_opaque(frame, &picture.planes, depth, x, y)
+        crate::native_pixels::overlay_opaque_depth(
+            frame,
+            &picture.planes,
+            depth,
+            picture.depth,
+            full_range,
+            x,
+            y,
+        )
     };
     let mut output = BufWriter::new(file);
     let (stats, event) = if crate::native_lossless_y4m::eligible(main)? {

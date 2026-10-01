@@ -281,8 +281,9 @@ impl<R: BufRead + Seek> NativeReader<R> {
     /// selects replaces that one.
     pub fn colour(&self) -> ColourDescription {
         match self {
-            Self::Y4m(_) => ColourDescription {
+            Self::Y4m(r) => ColourDescription {
                 matrix: MatrixCoeff::Bt601.code(),
+                full_range: r.full_range(),
                 ..Default::default()
             },
             Self::Webm(r) => r.colour().filled_with(r.bitstream_colour()),

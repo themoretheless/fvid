@@ -78,17 +78,33 @@ pub fn overlay_opaque(
     x: i64,
     y: i64,
 ) -> Result<()> {
+    overlay_opaque_depth(destination, foreground, depth, depth, false, x, y)
+}
+
+/// Composite matching colour/range/sampling with integer depth conversion.
+/// Limited-range codes scale by powers of two (rounded when reducing depth).
+/// Full-range luma scales its endpoints; chroma also preserves its neutral centre.
+/// Only covered samples are converted; no intermediate picture is allocated.
+pub fn overlay_opaque_depth(
+    destination: &mut GeometryFrame,
+    foreground: &GeometryFrame,
+    destination_depth: u8,
+    foreground_depth: u8,
+    full_range: bool,
+    x: i64,
+    y: i64,
+) -> Result<()> {
     if destination.subsampling != foreground.subsampling {
         return Err(invalid("overlay requires matching chroma sampling"));
     }
-    let target = planes(destination, depth)?;
-    let source = planes(foreground, depth)?;
+    let target = planes(destination, destination_depth)?;
+    let source = planes(foreground, foreground_depth)?;
     if let Some([sx, sy]) = destination.subsampling {
         if x % i64::try_from(sx).unwrap() != 0 || y % i64::try_from(sy).unwrap() != 0 {
             return Err(invalid("overlay placement must align with chroma samples"));
         }
     }
-    for (dst, src) in target.iter().zip(source) {
+    for (plane, (dst, src)) in target.iter().zip(source).enumerate() {
         let px = i128::from(x) / dst.sx as i128;
         let py = i128::from(y) / dst.sy as i128;
         let left = px.max(0);
@@ -104,15 +120,122 @@ pub fn overlay_opaque(
         for row in top..bottom {
             let to = dst.offset + (row as usize * dst.width + dx) * dst.bytes;
             let from = src.offset + ((row - py) as usize * src.width + sx) * src.bytes;
-            destination.data[to..to + count].copy_from_slice(&foreground.data[from..from + count]);
+            if destination_depth == foreground_depth {
+                destination.data[to..to + count]
+                    .copy_from_slice(&foreground.data[from..from + count]);
+            } else {
+                for column in 0..(right - left) as usize {
+                    let input = from + column * src.bytes;
+                    let value = if src.bytes == 1 {
+                        u32::from(foreground.data[input])
+                    } else {
+                        u32::from(u16::from_le_bytes([
+                            foreground.data[input],
+                            foreground.data[input + 1],
+                        ]))
+                    };
+                    let value = convert_sample(
+                        value,
+                        foreground_depth,
+                        destination_depth,
+                        full_range,
+                        plane != 0,
+                    );
+                    let output = to + column * dst.bytes;
+                    if dst.bytes == 1 {
+                        destination.data[output] = value as u8;
+                    } else {
+                        destination.data[output..output + 2]
+                            .copy_from_slice(&(value as u16).to_le_bytes());
+                    }
+                }
+            }
         }
     }
     Ok(())
 }
 
+fn convert_sample(value: u32, source: u8, target: u8, full: bool, chroma: bool) -> u32 {
+    let maximum = (1u32 << target) - 1;
+    if !full {
+        return if target >= source {
+            value << (target - source)
+        } else {
+            ((value + (1 << (source - target - 1))) >> (source - target)).min(maximum)
+        };
+    }
+    let scale = |v: u32, from: u32, to: u32| (v * to + from / 2) / from;
+    if chroma {
+        let from = 1u32 << (source - 1);
+        let to = 1u32 << (target - 1);
+        if value <= from {
+            scale(value, from, to)
+        } else {
+            to + scale(value - from, from - 1, to - 1)
+        }
+    } else {
+        scale(value, (1u32 << source) - 1, maximum)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn precision_conversion_preserves_range_endpoints_and_neutral_chroma() {
+        for target in [10, 12, 16] {
+            let shift = target - 8;
+            for value in [0, 16, 128, 235, 255] {
+                assert_eq!(
+                    convert_sample(value, 8, target, false, false),
+                    value << shift
+                );
+                assert_eq!(
+                    convert_sample(value << shift, target, 8, false, false),
+                    value
+                );
+            }
+            let max = (1u32 << target) - 1;
+            assert_eq!(convert_sample(255, 8, target, true, false), max);
+            assert_eq!(
+                convert_sample(128, 8, target, true, true),
+                1 << (target - 1)
+            );
+            assert_eq!(convert_sample(255, 8, target, true, true), max);
+            assert_eq!(convert_sample(max, target, 8, false, false), 255);
+        }
+        assert_eq!(convert_sample(512, 10, 8, true, true), 128);
+        assert_eq!(convert_sample(66, 10, 8, false, false), 17);
+    }
+    #[test]
+    fn mixed_depth_clipping_and_invalid_source_are_atomic() {
+        let mut dst = GeometryFrame {
+            width: 4,
+            height: 2,
+            subsampling: Some([2, 2]),
+            data: vec![0; 24],
+        };
+        let src = GeometryFrame {
+            width: 2,
+            height: 2,
+            subsampling: Some([2, 2]),
+            data: vec![16, 17, 18, 19, 128, 255],
+        };
+        overlay_opaque_depth(&mut dst, &src, 10, 8, false, 2, 0).unwrap();
+        let expected: [u16; 12] = [0, 0, 64, 68, 0, 0, 72, 76, 0, 512, 0, 1020];
+        assert_eq!(
+            dst.data,
+            expected
+                .into_iter()
+                .flat_map(u16::to_le_bytes)
+                .collect::<Vec<_>>()
+        );
+        let saved = dst.data.clone();
+        let mut broken = src;
+        broken.data.pop();
+        assert!(overlay_opaque_depth(&mut dst, &broken, 10, 8, false, 2, 0).is_err());
+        assert_eq!(dst.data, saved);
+    }
     #[test]
     fn rgb_negative_offsets_clip_exact_pixels() {
         let mut dst = GeometryFrame {

@@ -519,3 +519,67 @@ fn filter_flag_permutations_match_media_transform_order() {
         }
     }
 }
+
+#[test]
+fn mixed_depth_overlay_converts_codes_and_preserves_main_precision() {
+    let d = dir("mixed-depth");
+    for full in [false, true] {
+        let range = if full { "FULL" } else { "LIMITED" };
+        let main = d.0.join(format!("main-{full}.mkv"));
+        let foreground = d.0.join(format!("foreground-{full}.y4m"));
+        let output = d.0.join(format!("output-{full}.mkv"));
+        let mut bytes =
+            format!("YUV4MPEG2 W2 H2 F25:1 Ip A1:1 C420 XCOLORRANGE={range}\nFRAME\n").into_bytes();
+        bytes.extend([0, 16, 235, 255, 128, 255]);
+        std::fs::write(&foreground, bytes).unwrap();
+        let mut reader =
+            NativeReader::software(BufReader::new(File::open(&foreground).unwrap()), usize::MAX)
+                .unwrap();
+        reader.read_frame_raw().unwrap().unwrap();
+        let colour = reader.colour();
+        let frame = fvid::native_geometry::GeometryFrame {
+            width: 2,
+            height: 2,
+            subsampling: Some([2, 2]),
+            data: vec![0; 12],
+        };
+        let packet = fvid::codec::ffv1_encoder::encode(&frame, 10).unwrap();
+        use fvid::container::matroska_write::{Encoding, PacketWriter, TrackSpec, VideoMetadata};
+        let mut file = File::create(&main).unwrap();
+        let mut mux = PacketWriter::new_with_video_metadata(
+            &mut file,
+            &[TrackSpec {
+                encoding: Encoding::Ffv1V1 {
+                    width: 2,
+                    height: 2,
+                },
+                name: "main",
+                language: "und",
+            }],
+            &[Some(VideoMetadata {
+                colour: Some(colour),
+                ..Default::default()
+            })],
+        )
+        .unwrap();
+        mux.write_packet(0, 0, 40_000_000, true, &packet).unwrap();
+        mux.finish().unwrap();
+        drop(file);
+
+        native_export::overlay_video(&main, &foreground, &output, 0, 0, None, None).unwrap();
+        let expected: [u16; 6] = if full {
+            [0, 64, 943, 1023, 512, 1023]
+        } else {
+            [0, 64, 940, 1020, 512, 1020]
+        };
+        assert_eq!(
+            samples(&output),
+            vec![
+                expected
+                    .into_iter()
+                    .flat_map(u16::to_le_bytes)
+                    .collect::<Vec<_>>()
+            ]
+        );
+    }
+}

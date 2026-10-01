@@ -428,5 +428,5 @@ pub fn overlay(source:&std::path::Path,foreground:&std::path::Path,x:i64,y:i64)-
             PlanStep {action:"overlay".into(),detail:format!("opaque sample-plane overlay at {x},{y}; align first presentation origins; retain latest foreground at each main PTS; hold foreground EOF")},
             PlanStep {action:"encode".into(),detail:"owned lossless FFV1 at main sample depth; preserve main timing and supported AAC/Opus packets".into()},
             PlanStep {action:"write".into(),detail:"owned Matroska .mkv; atomic no-overwrite publication".into()}],
-        notes:vec!["backend: fvid; no external decoder, encoder or muxer".into(),"matching sample depth, colour encoding/range and sampling required; chroma placement must align; validated while decoding".into(),"foreground audio is not part of the overlay; main supported companion tracks are retained".into()]})
+        notes:vec!["backend: fvid; no external decoder, encoder or muxer".into(),"sample depth converted to main precision; matching colour encoding/range and sampling required; chroma placement must align; validated while decoding".into(),"foreground audio is not part of the overlay; main supported companion tracks are retained".into()]})
 }

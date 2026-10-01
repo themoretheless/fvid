@@ -1,7 +1,7 @@
 //! Owned pointwise operations on packed decoded sample planes.
 use crate::{Result, invalid, native_geometry::GeometryFrame};
 mod overlay;
-pub use overlay::overlay_opaque;
+pub use overlay::{overlay_opaque, overlay_opaque_depth};
 
 /// Invert every colour sample. The legacy `1` option includes alpha; native
 /// RGB24 and YUV frames have no alpha, so both modes produce the same pixels.
