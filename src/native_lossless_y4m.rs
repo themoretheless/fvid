@@ -41,7 +41,6 @@ pub fn eligible(source: &Path) -> Result<bool> {
                 "V_VP9" | "V_AV1" | "V_MPEG4/ISO/AVC" | "V_MPEGH/ISO/HEVC" | "V_FFV1"
             )
             && videos[0].crop == [0; 4]
-            && videos[0].rotation == 0
             && input.tracks.iter().all(|t| {
                 t.kind == 1
                     || (t.kind == 2
@@ -121,6 +120,14 @@ pub fn write<W: Write + Seek>(
         .read_frame_raw()?
         .ok_or_else(|| invalid("input has no video frames"))?;
     let [w, h] = reader.dimensions();
+    let rotation = reader.rotation();
+    let bake_rotation = !geometry.is_identity() || !filters.is_empty();
+    let (coded_w, coded_h) = if matches!(rotation, 90 | 270) {
+        (h, w)
+    } else {
+        (w, h)
+    };
+
     let depth_of = |frame: &RawFrame| -> Result<u8> {
         match frame {
             RawFrame::Planar(p) => Ok(p.depth),
@@ -134,7 +141,11 @@ pub fn write<W: Write + Seek>(
         if depth_of(frame)? != depth {
             return Err(invalid("frame sample depth changed"));
         }
-        let mut samples = geometry.apply_display_media(frame, w, h, 0)?;
+        let mut samples = if bake_rotation {
+            geometry.apply_display_media(frame, w, h, rotation)?
+        } else {
+            geometry.apply(frame, coded_w, coded_h)?
+        };
         filters.apply(&mut samples, depth)?;
         Ok(samples)
     };
@@ -204,14 +215,19 @@ pub fn write<W: Write + Seek>(
         }
     };
     let video_options = TrackOptions {
+        rotation: if bake_rotation { 0 } else { rotation },
         default_duration_ns,
         video: Some(VideoMetadata {
-            pixel_aspect: crate::native_export::transformed_aspect(
-                reader.pixel_aspect(),
-                w,
-                h,
-                geometry,
-            )?,
+            pixel_aspect: if bake_rotation {
+                crate::native_export::transformed_aspect(reader.pixel_aspect(), w, h, geometry)?
+            } else {
+                let aspect = reader.pixel_aspect();
+                if matches!(rotation, 90 | 270) {
+                    (aspect.1, aspect.0)
+                } else {
+                    aspect
+                }
+            },
             colour: Some(colour),
             hdr: reader.hdr(),
             ..Default::default()

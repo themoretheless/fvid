@@ -2832,9 +2832,8 @@ requests, while other encoder workflows still use the legacy adapter.
 ### Owned Matroska video lossless transcode
 
 The planar FFV1 exporter also accepts Matroska/WebM containing exactly one
-AVC, HEVC, VP9, AV1 or FFV1 video track and AAC or mono/stereo Opus companion tracks, without stored crop or
-rotation. Other companion codecs, negative stored packet timestamps and
-stored display transforms retain their existing routing. Original frame
+AVC, HEVC, VP9, AV1 or FFV1 video track and AAC or mono/stereo Opus companion tracks, without stored crop. Other companion codecs, negative
+stored packet timestamps and stored crop retain their existing routing. Original frame
 intervals, sample precision, track name/language, pixel aspect, colour/HDR,
 file tags and chapters are retained. Atomic publication and cancellation
 use the existing FFV1 export contract.
@@ -2910,3 +2909,19 @@ A listed component does not establish every codec profile, option or combined
 workflow: consult owned operation plans and codec coverage documentation.
 This change removes the legacy inventory call; it does not yet remove other
 adapter calls or FFmpeg linkage from the overall `media` feature.
+
+### Matroska stored rotation in owned FFV1 export
+
+Identity export keeps coded planes and the source's rectangular rotation
+metadata. When geometry or sample-plane filters are requested, the stored
+rotation is applied first, followed by the requested operation, and output
+rotation is zero. Pixel aspect follows coded orientation for identity export
+and display orientation for materialized geometry. This mirrors the owned
+MP4 path; a rotated picture is not rotated a second time by the player.
+Stored crop still retains its previous routing.
+
+The rotated VP9 fixture checks unchanged coded planes, rotation metadata,
+clock and independently decoded video. Additional public media API tests
+exercise crop with horizontal flip and negate, compare output dimensions and
+sample planes, require zero output rotation and compare all decoded frames
+with independent FFmpeg results.
