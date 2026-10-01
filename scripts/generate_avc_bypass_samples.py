@@ -10,7 +10,7 @@ with tempfile.TemporaryDirectory(prefix='fvid-avc-bypass-') as temp:
     pattern = 'testsrc2=size=64x64:rate=30:duration=0.2666667'
     subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i',pattern,'-frames:v','8',
         '-pix_fmt','yuv420p','-f','rawvideo',str(original)],check=True)
-    for name, coder, pixel in [('lossless','1','yuv420p'),('cavlc','0','yuv420p'),('main10','1','yuv420p10le')]:
+    for name, coder, pixel in [('lossless','1','yuv420p'),('cavlc','0','yuv420p'),('main10','1','yuv420p10le'),('cavlc10','0','yuv420p10le')]:
         subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i',pattern,'-frames:v','8',
             '-pix_fmt',pixel,'-f','rawvideo','-y',str(original)],check=True)
         video = fixtures / f'avc-bypass-{name}.mp4'

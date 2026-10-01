@@ -57,8 +57,12 @@ fn compare(file: &[u8], oracle: &[u8], cabac: bool, depth: u8) {
                     arithmetic.as_mut().unwrap().read_macroblock().unwrap()
                 };
                 let Some(block) = block else { break };
-                assert_eq!(i32::from(block.qp) + 6 * i32::from(depth - 8), 0);
                 use fvid::codec::avc_macroblock::IntraLuma;
+                if matches!(block.luma, IntraLuma::Pcm { .. }) {
+                    assert_eq!(block.qp, 0);
+                } else {
+                    assert_eq!(block.qp + 6 * i32::from(depth - 8), 0);
+                }
                 directional_intra |= match block.luma {
                     IntraLuma::Blocks4(modes) => {
                         modes.iter().any(|m| (*m as u8) < 2)
@@ -149,4 +153,57 @@ fn lossless_ten_bit_matches_original_samples_and_rewind() {
         true,
         10,
     );
+}
+
+#[test]
+fn lossless_ten_bit_cavlc_matches_original_samples_and_rewind() {
+    compare(
+        include_bytes!("fixtures/playback-errors/avc-bypass-cavlc10.mp4"),
+        include_bytes!("fixtures/playback-errors/avc-bypass-cavlc10.yuv"),
+        false,
+        10,
+    );
+}
+
+#[test]
+fn ten_bit_lossless_camera_bridge_preserves_native_pixels_and_backward_seek() {
+    use fvid::{
+        playback_native::NativeReader,
+        virtual_camera::{CameraTick, LatestFrame, NativeCameraSource},
+    };
+    for file in [
+        include_bytes!("fixtures/playback-errors/avc-bypass-main10.mp4").as_slice(),
+        include_bytes!("fixtures/playback-errors/avc-bypass-cavlc10.mp4").as_slice(),
+    ] {
+        let mut reader = NativeReader::software(Cursor::new(file), 16 << 20).unwrap();
+        let mut expected = Vec::new();
+        while reader.read_frame().unwrap() {
+            assert_eq!(reader.dimensions(), [64, 64]);
+            let (start, _, scale) = reader.frame_interval().unwrap();
+            let position = (start * 1_000_000_000).div_ceil(u128::from(scale)) as u64;
+            let pixels: Vec<u8> = reader
+                .rgb()
+                .chunks_exact(3)
+                .flat_map(|p| [p[2], p[1], p[0], 255])
+                .collect();
+            expected.push((position, pixels));
+        }
+        assert_eq!(expected.len(), 8);
+        let mut source =
+            NativeCameraSource::new(NativeReader::software(Cursor::new(file), 16 << 20).unwrap());
+        let output = LatestFrame::new(64, 64, 64 * 64 * 4).unwrap();
+        let mut pixels = vec![0; 64 * 64 * 4];
+        for (sequence, (position, reference)) in
+            expected.iter().chain(expected.iter().take(1)).enumerate()
+        {
+            let tick = CameraTick {
+                sequence: sequence as u64,
+                host_time_ns: sequence as u64 + 1,
+                media_time_ns: *position,
+            };
+            assert!(source.publish(tick, &output).unwrap());
+            assert_eq!(output.copy_latest(None, &mut pixels).unwrap(), Some(tick));
+            assert_eq!(&pixels, reference);
+        }
+    }
 }

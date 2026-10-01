@@ -39,9 +39,8 @@ mix сохраняет PCE mask 0xff для ADTS/MP4/Matroska; тест двух
   camera bridge проходят смену размера и перемотку. Scaling matrices 4x4/8x8 подключены к intra/inter reconstruction с правилами
   наследования SPS/PPS; JVT/custom I/P/B совпадают с YUV-эталонами. Multiple
   slices и другие неподключённые инструменты ещё ограничены. Transform bypass
-  при QP-prime 0 подключён; 8-bit CABAC/CAVLC и 10-bit CABAC lossless I/P
-  совпадают с исходным YUV, включая rewind. 10-bit CAVLC и lossless B
-  этими фикстурами не проверены.
+  при QP-prime 0 подключён; 8/10-bit CABAC/CAVLC lossless I/P
+  совпадают с исходным YUV, включая rewind. Lossless B этими фикстурами не проверены.
 - `src/codec/hevc_decoder.rs`: независимые multi-slice headers разбираются
   через `slice_headers`, с проверкой общей picture identity и порядка CTU.
   Независимые slices восстанавливаются в общие planes с WPP, CABAC reset,
@@ -1447,9 +1446,12 @@ QP still follows the ordinary scaling/transform path. Checked accumulation rejec
 numeric overflow. The avcC parser now accepts the profile-244 extension used by
 the independently encoded 4:2:0 lossless files. This does not add 4:4:4 reconstruction.
 
-Two synthetic eight-frame QP-0 streams exercise CABAC and CAVLC, directional
+Four synthetic eight-frame QP-prime-0 streams exercise 8/10-bit CABAC and CAVLC, directional
 intra residuals and I/P reconstruction. Their saved independent-decoder output
 matches the original synthetic YUV exactly; native decoding matches all samples
 twice with rewind. The x264 reference encoder disables B pictures in lossless
-mode, so encoded lossless B and high-bit-depth lossless conformance are not proven
-by these fixtures. DPCM/DC tile-boundary arithmetic has separate unit tests.
+mode, so encoded lossless B conformance is not proven by these fixtures.
+Both ten-bit streams also pass the software NativeReader-to-camera BGRA bridge
+with exact pixel preservation, timestamps and backward seek. This checks the
+bridge, not macOS extension registration. DPCM/DC tile-boundary arithmetic has
+separate unit tests.
