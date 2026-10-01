@@ -15,6 +15,7 @@ pub struct Weight {
 }
 #[derive(Clone, Debug)]
 pub struct Weights {
+    pub high_precision_offsets: bool,
     pub denominators: [u8; 2],
     pub lists: [Vec<Weight>; 2],
 }
@@ -316,6 +317,7 @@ impl SliceHeader {
                     return Err(invalid("HEVC chroma weight denominator out of range"));
                 }
                 let mut table = Weights {
+                    high_precision_offsets: sps.high_precision_offsets,
                     denominators: [luma, chroma_denom as u8],
                     lists: [Vec::new(), Vec::new()],
                 };
@@ -344,15 +346,17 @@ impl SliceHeader {
                         };
                         if luma_flags[i] {
                             weight.values[0] += se(b, -128, 127)? as i16;
-                            weight.offsets[0] = se(b, -128, 127)? as i16;
+                            let half = 1i32 << if sps.high_precision_offsets { sps.depth[0] - 1 } else { 7 };
+                            weight.offsets[0] = se(b, -half, half - 1)? as i16;
                         }
                         if chroma_flags[i] {
                             for c in 1..3 {
                                 weight.values[c] += se(b, -128, 127)? as i16;
-                                let delta = se(b, -512, 511)?;
-                                weight.offsets[c] = (delta + 128
-                                    - ((128 * i32::from(weight.values[c])) >> chroma_denom))
-                                    .clamp(-128, 127)
+                                let half = 1i32 << if sps.high_precision_offsets { sps.depth[1] - 1 } else { 7 };
+                                let delta = se(b, -4 * half, 4 * half - 1)?;
+                                weight.offsets[c] = (delta + half
+                                    - ((half * i32::from(weight.values[c])) >> chroma_denom))
+                                    .clamp(-half, half - 1)
                                     as i16;
                             }
                         }

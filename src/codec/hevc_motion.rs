@@ -506,7 +506,14 @@ pub fn predict(
                     .ok_or_else(|| invalid("HEVC reference index out of range"))?,
                 v.mv,
                 weight.map_or(1, |w| i32::from(w.values[component])),
-                weight.map_or(0, |w| i32::from(w.offsets[component]) << (depth - 8)),
+                weight.map_or(0, |w| {
+                    let offset_shift = if weights.is_some_and(|w| w.high_precision_offsets) {
+                        0
+                    } else {
+                        depth - 8
+                    };
+                    i32::from(w.offsets[component]) << offset_shift
+                }),
             ));
             count += 1;
         }

@@ -55,7 +55,9 @@ fn compare(
                 }
             }
         }
-        assert_eq!(actual, oracle);
+        assert_eq!(actual.len(), oracle.len());
+        assert!(actual == oracle, "depth {depth}, first mismatch {:?}",
+            actual.iter().zip(oracle).position(|(a, b)| a != b));
         decoder.reset();
     }
     let mut reader =
@@ -78,7 +80,9 @@ fn compare(
             frames += 1;
         }
         assert_eq!(frames, 3);
-        assert_eq!(actual, oracle);
+        assert_eq!(actual.len(), oracle.len());
+        assert!(actual == oracle, "depth {depth}, first mismatch {:?}",
+            actual.iter().zip(oracle).position(|(a, b)| a != b));
         reader.rewind();
     }
 }
@@ -143,7 +147,7 @@ fn unsupported_range_tools_are_not_silently_ignored() {
         .rev()
         .find(|&i| rbsp[i / 8] & (1 << (7 - i % 8)) != 0)
         .unwrap();
-    for flag in (0..9).filter(|&i| i != 0 && i != 1 && i != 2 && i != 3 && i != 5) {
+    for flag in (0..9).filter(|&i| i != 0 && i != 1 && i != 2 && i != 3 && i != 5 && i != 6) {
         let mut bytes = rbsp.clone();
         let bit = stop - 9 + flag;
         bytes[bit / 8] |= 1 << (7 - bit % 8);
@@ -379,4 +383,46 @@ fn large_transform_skip_matches_oracle() {
         include_bytes!("fixtures/playback-errors/hevc-rext-skip32-10-skip-disabled.yuv"),
         10, false, false, Some(false), false, false, false,
     );
+}
+
+fn assert_high_precision_weights(source: &[u8], enabled: bool) {
+    let mut input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
+    let decoder = HevcDecoder::from_configuration(&input.tracks()[0].configuration, 16 << 20).unwrap();
+    assert_eq!(decoder.parameters().0.high_precision_offsets, enabled);
+    let mut nonzero = false;
+    let mut wide = false;
+    for index in 1..3 {
+        let mut packet = Vec::new();
+        input.read_packet(0, index, &mut packet).unwrap();
+        for header in decoder.slice_headers(&packet).unwrap() {
+            let weights = header.weights.unwrap();
+            assert_eq!(weights.high_precision_offsets, enabled);
+            wide |= weights.lists.iter().flatten().any(|w| w.offsets.iter().any(|&v| !(-128..=127).contains(&v)));
+            nonzero |= weights.lists.iter().flatten().any(|w| w.offsets.iter().any(|&v| v != 0));
+        }
+    }
+    assert!(nonzero, "fixture must exercise weighted offsets");
+    if enabled && decoder.parameters().0.depth[0] == 10 {
+        assert!(wide, "10-bit fixture must exercise offsets outside 8-bit bounds");
+    }
+}
+
+#[test]
+fn high_precision_weighted_prediction_matches_oracle() {
+    assert_high_precision_weights(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-enabled.mp4"), true);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-enabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-enabled.yuv"),
+        8, false, false, Some(false), false, false, false);
+    assert_high_precision_weights(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-disabled.mp4"), false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-disabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-8-skip-disabled.yuv"),
+        8, false, false, Some(false), false, false, false);
+    assert_high_precision_weights(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-enabled.mp4"), true);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-enabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-enabled.yuv"),
+        10, false, false, Some(false), false, false, false);
+    assert_high_precision_weights(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-disabled.mp4"), false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-disabled.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-high-precision-10-skip-disabled.yuv"),
+        10, false, false, Some(false), false, false, false);
 }
