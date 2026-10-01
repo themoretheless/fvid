@@ -14,3 +14,4 @@ pub mod owned_shuffleplanes;
 
 pub mod owned_k_weight;
 pub mod owned_loudness;
+pub mod owned_normalize;
