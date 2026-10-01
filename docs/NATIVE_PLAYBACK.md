@@ -3070,3 +3070,20 @@ records the channel count without inventing speaker positions. Both operations
 still use temporary decoded PCM spools and require disk space proportional to
 input duration. Existing destinations are never replaced, and failed muxing
 removes the temporary output with the operation's scratch directory.
+
+
+### Owned sample-domain audio concat
+
+For `.mka`/`.mkv` concat, compatible compressed MP4 packets remain the first
+choice. When packet-copy admission is unavailable, 2..=256 owned single-audio
+inputs with matching sample rate and channel count can be concatenated as
+float32 PCM. Each input is decoded independently, preserving its audible
+edit/priming interval, then its samples are appended to one rational sample
+clock. This supports mixed owned audio containers without FFmpeg, through
+`native_audio_mix::concat_audio`, public `media::concat` and headless CLI concat.
+It does not resample, infer speaker positions, retain tags/chapters, or silently
+omit video/other tracks. Temporary storage holds one decoded segment at a time.
+Cancellation removes the scratch directory; existing output is never replaced.
+Progress reports segment completion; final completion follows publication.
+Tests compare mixed edited AAC/WAVE joins byte for byte and verify independent
+PCM container decode, cancellation, publication and the compressed-copy path.

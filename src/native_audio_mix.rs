@@ -1,4 +1,6 @@
 //! Owned AAC/WAVE decoding and blockwise weighted float PCM mixing.
+mod concat;
+pub use concat::{concat_audio, eligible as concat_eligible};
 pub use crate::media_info::{MixAudioOptions, MixAudioStats, MixDuration};
 use crate::{Result, invalid};
 use std::{

@@ -1001,13 +1001,19 @@ pub fn remux_matroska_with_packet_limit(source: &Path, destination: &Path,
 pub use transcode_ffv1_transformed as transcode_mp4_ffv1_transformed;
 
 
-/// Concatenate compatible compressed MP4 inputs using the owned Matroska muxer.
+/// Concatenate compressed MP4 packets, or decode compatible single audio inputs
+/// independently into PCM Matroska when packet-copy admission is unavailable.
 /// None retains the caller's routing for unsupported sources or destinations.
 pub fn try_concat_mp4_matroska(sources: &[PathBuf], destination: &Path,
     cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<Option<crate::media_control::ProgressEvent>> {
     if !matches!(destination.extension().and_then(|s|s.to_str()),Some("mkv"|"mka")) { return Ok(None); }
-    let Some(mut segments) = crate::container::mp4_concat::open(sources,cancel)? else { return Ok(None); };
+    let Some(mut segments) = crate::container::mp4_concat::open(sources,cancel)? else {
+        if !crate::native_audio_mix::concat_eligible(sources)? {return Ok(None);}
+        let stats=crate::native_audio_mix::concat_audio(sources,destination,cancel,progress)?;
+        return Ok(Some(crate::media_control::ProgressEvent {packets:stats.decoded_frames,
+            payload_bytes:stats.sample_frames*u64::from(stats.channels)*4,done:true}));
+    };
     if destination.extension().and_then(|s|s.to_str()) == Some("mka") && crate::native_probe::probe(&sources[0])
         .map_err(|e|invalid(&e))?.streams.iter().any(|s|s.media_type != "audio") {
         return Err(invalid(".mka concat output requires audio-only input"));

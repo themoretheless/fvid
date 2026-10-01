@@ -374,7 +374,14 @@ pub fn normalize_loudness(source: &std::path::Path, selected: Option<usize>, wei
 
 /// Validate compressed concat compatibility and describe the owned Matroska route.
 pub fn concat_mp4_matroska(sources: &[std::path::PathBuf]) -> Result<Option<MediaPlan>> {
-    if crate::container::mp4_concat::open(sources,None).map_err(|e|e.to_string())?.is_none() { return Ok(None); }
+    if crate::container::mp4_concat::open(sources,None).map_err(|e|e.to_string())?.is_none() {
+        if !crate::native_audio_mix::concat_eligible(sources).map_err(|e|e.to_string())? {return Ok(None);}
+        return Ok(Some(MediaPlan {command:"concat".into(),input:sources[0].clone(),inputs:sources.to_vec(),streams:vec![],graph:None,
+            steps:vec![PlanStep {action:"decode".into(),detail:"decode each single audio source independently through owned codecs, retaining its audible samples".into()},
+                PlanStep {action:"concat".into(),detail:"append float32 samples without resampling or channel remapping".into()},
+                PlanStep {action:"write".into(),detail:"owned PCM Matroska .mka/.mkv, atomic publication without overwrite".into()}],
+            notes:vec!["backend: fvid; matching sample rates and channel counts required".into(),"decoded PCM output; tags, chapters and compressed packets are not retained; one segment of temporary disk space required".into()]}));
+    }
     let info=crate::native_probe::probe(&sources[0])?;
     Ok(Some(MediaPlan {command:"concat".into(),input:sources[0].clone(),inputs:sources.to_vec(),
         streams:info.streams.into_iter().map(|s|PlanStream {index:s.index,media_type:s.media_type,codec:s.codec,disposition:"copy".into()}).collect(),
