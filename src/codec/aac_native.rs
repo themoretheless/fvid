@@ -18,8 +18,8 @@ impl NativeAacDecoder {
     pub fn new(asc: &[u8]) -> Result<Self> {
         let (config, program) = AacConfig::parse_with_program(asc)?;
         BandTables::for_config(&config)?;
-        if program.is_none() && !(1..=6).contains(&config.channels) {
-            return Err(unsupported("owned AAC layout above 5.1 is not implemented"));
+        if program.is_none() && !matches!(config.channels, 1..=6 | 8) {
+            return Err(unsupported("unsupported owned AAC channel layout"));
         }
         let (channel_mask, mapping) = if let Some(program) = &program {
             program.pcm_layout()?
@@ -31,10 +31,17 @@ impl NativeAacDecoder {
                 4 => &[2, 0, 1, 3],
                 5 => &[2, 0, 1, 3, 4],
                 6 => &[2, 0, 1, 4, 5, 3],
+                // Configuration 7: center, inner-front pair, outer-front pair,
+                // back pair, LFE; PCM uses ascending WAVE speaker bits.
+                8 => &[2, 6, 7, 0, 1, 4, 5, 3],
                 _ => unreachable!(),
             };
             (
-                crate::native_export::default_pcm_mask(u16::from(config.channels))?,
+                if config.channels == 8 {
+                    0xff
+                } else {
+                    crate::native_export::default_pcm_mask(u16::from(config.channels))?
+                },
                 mapping.to_vec(),
             )
         };
@@ -78,6 +85,7 @@ impl NativeAacDecoder {
             4 => &[0, 1, 0],
             5 => &[0, 1, 1],
             6 => &[0, 1, 1, 3],
+            8 => &[0, 1, 1, 1, 3],
             _ => &[],
         };
         let mut element_index = 0;

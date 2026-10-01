@@ -46,3 +46,19 @@ The reader requires PCE at the beginning of the first raw packet.
 Owned MP4 indexed/streaming remux and MP4/Matroska concatenation retain the
 complete ASC and every raw packet. Decoded output equals continuous owned
 packet synthesis byte for byte, including state at segment boundaries.
+
+`aac-config7-wide8.aac` derives from the independently encoded PCE fixture:
+the 21-byte aligned PCE at the start of the first raw block is removed;
+every ADTS header is rewritten with channel_configuration=7 and the first
+frame length adjusted. All encoded audio element payloads are unchanged.
+This is the standard 7.1 wide layout, not the common nonstandard 7.1 mapping.
+
+```sh
+ffmpeg -v error -strict strict -i aac-config7-wide8.aac -f f32le aac-config7-wide8-reference.f32le
+```
+
+Owned decode matches every reference sample within 1e-6 and MP4 remux
+produces byte-identical owned PCM. WAVE speaker mask is 0xff.
+Channel layout semantics verified against the primary reference tables:
+https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavcodec/aac/aacdec_tab.c
+https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavcodec/aac/aacdec.c

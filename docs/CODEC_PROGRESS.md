@@ -23,11 +23,11 @@ conformance H.264/H.265/AAC и не покрывает все инструмен
 
 - `src/codec/hevc_decoder.rs`: multi-slice access units и изменённые in-band
   SPS/PPS пока отклоняются. Идентичные повторённые parameter sets принимаются.
-- `src/codec/aac_native.rs`: декодер AAC-LC поддерживает стандартные 1–6 каналов
-  и однозначные горизонтальные PCE layouts. Восьмиканальный PCE в MP4 проверен
+- `src/codec/aac_native.rs`: декодер AAC-LC поддерживает стандартные 1–6 каналов,
+  configuration 7 (8 каналов, 7.1 wide) и однозначные горизонтальные PCE layouts. Восьмиканальный PCE в MP4 проверен
   по каждому динамику с независимым PCM-эталоном; собственные CLI/API WAV
-  exports сохраняют mask 0xff и учитывают priming/edit list. Стандартная
-  конфигурация 7 без PCE, coupling/height PCE layouts и
+  exports сохраняют mask 0xff и учитывают priming/edit list. Configuration 7
+  проверена со strict независимым PCM-эталоном; coupling/height PCE layouts и
   неподдержанные fill-extension tools ещё не подключены к полному пути.
 - ADTS configuration=0 декодируется, если PCE открывает первый пакет.
   Потоковый и индексируемый пути совпадают с независимым восьмиканальным

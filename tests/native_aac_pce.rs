@@ -376,3 +376,55 @@ fn adts_pce_mp4_writers_preserve_packets_layout_and_continuous_pcm() {
         assert_eq!(actual, expected);
     }
 }
+
+#[test]
+fn standard_configuration_seven_matches_strict_independent_wide_pcm() {
+    let source = include_bytes!("fixtures/audio/aac-config7-wide8.aac");
+    let reference = include_bytes!("fixtures/audio/aac-config7-wide8-reference.f32le");
+    let indexed = fvid::container::adts::Aac::parse(source, &Default::default()).unwrap();
+    assert_eq!(indexed.channels, 8);
+    let decoder = fvid::codec::aac_native::NativeAacDecoder::new(&indexed.configuration).unwrap();
+    assert_eq!(decoder.channel_mask(), 0xff);
+    let mut actual = Vec::new();
+    fvid::native_media::decode_aac_pcm(source, &mut actual, &Default::default()).unwrap();
+    assert_eq!(actual.len(), reference.len());
+    for (a, b) in actual.chunks_exact(4).zip(reference.chunks_exact(4)) {
+        assert!(
+            (f32::from_le_bytes(a.try_into().unwrap()) - f32::from_le_bytes(b.try_into().unwrap()))
+                .abs()
+                < 1e-6
+        );
+    }
+    let mut output = Vec::new();
+    fvid::container::mp4_write::write_adts_aac(source, &mut output).unwrap();
+    let mut remuxed = Vec::new();
+    fvid::native_media::decode_mp4_aac_pcm(&output, &mut remuxed).unwrap();
+    assert_eq!(actual, remuxed);
+    let mut streamed = Vec::new();
+    fvid::native_media::decode_adts_aac_reader(
+        fvid::container::adts::StreamReader::open(source.as_slice()).unwrap(),
+        &mut streamed,
+        None,
+    )
+    .unwrap();
+    assert_eq!(streamed, actual);
+    let directory = std::env::temp_dir().join(format!("fvid-config7-wav-{}", std::process::id()));
+    std::fs::create_dir_all(&directory).unwrap();
+    let input = directory.join("input.aac");
+    let output = directory.join("output.wav");
+    std::fs::write(&input, source).unwrap();
+    let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "decode-audio"])
+        .arg(&input)
+        .arg(&output)
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let wav = fvid::native_pcm::inspect(&mut std::fs::File::open(output).unwrap(), None).unwrap();
+    assert_eq!((wav.channels, wav.channel_mask), (8, 0xff));
+    std::fs::remove_dir_all(directory).unwrap();
+}
