@@ -100,3 +100,64 @@ fn changed_pps_after_slices_is_rejected_without_publishing_a_picture() {
     decoder.reset();
     assert!(decoder.decode_packet(&packet).unwrap().is_some());
 }
+
+#[test]
+fn parameter_only_packet_persists_until_picture_and_matches_saved_oracle() {
+    let mut source = Mp4Reader::open(
+        Cursor::new(include_bytes!(
+            "fixtures/playback-errors/hevc-multislice-main.mp4"
+        )),
+        Default::default(),
+    )
+    .unwrap();
+    let config = source.tracks()[0].configuration.clone();
+    let updated = include_bytes!("fixtures/playback-errors/hevc-pps-update.packet");
+    let length = u32::from_be_bytes(updated[..4].try_into().unwrap()) as usize;
+    let mut decoder = HevcDecoder::from_configuration(&config, 16 << 20).unwrap();
+    let original = decoder.parameters().1.constrained_intra;
+    assert!(
+        decoder
+            .decode_packet(&updated[..length + 4])
+            .unwrap()
+            .is_none()
+    );
+    assert_ne!(decoder.parameters().1.constrained_intra, original);
+    let mut packet = Vec::new();
+    source.read_packet(0, 0, &mut packet).unwrap();
+    let picture = decoder.decode_packet(&packet).unwrap().unwrap().picture;
+    let bytes: Vec<u8> = picture
+        .planes
+        .iter()
+        .flat_map(|p| p.samples().iter().map(|v| *v as u8))
+        .collect();
+    assert_eq!(
+        bytes,
+        include_bytes!("fixtures/playback-errors/hevc-pps-update.yuv")
+    );
+    assert_ne!(decoder.parameters().1.constrained_intra, original);
+}
+
+#[test]
+fn truncated_pps_updates_preserve_parameters_and_require_reset() {
+    let source = Mp4Reader::open(
+        Cursor::new(include_bytes!(
+            "fixtures/playback-errors/hevc-multislice-main.mp4"
+        )),
+        Default::default(),
+    )
+    .unwrap();
+    let config = &source.tracks()[0].configuration;
+    let update = include_bytes!("fixtures/playback-errors/hevc-pps-update.packet");
+    let length = u32::from_be_bytes(update[..4].try_into().unwrap()) as usize;
+    for cut in 1..length {
+        let mut truncated = (cut as u32).to_be_bytes().to_vec();
+        truncated.extend_from_slice(&update[4..4 + cut]);
+        let mut decoder = HevcDecoder::from_configuration(config, 16 << 20).unwrap();
+        let original = decoder.parameters().1.clone();
+        assert!(decoder.decode_packet(&truncated).is_err(), "cut {cut}");
+        assert_eq!(decoder.parameters().1, &original);
+        assert!(decoder.decode_packet(update).is_err());
+        decoder.reset();
+        assert!(decoder.decode_packet(update).unwrap().is_some());
+    }
+}

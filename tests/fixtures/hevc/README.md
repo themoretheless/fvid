@@ -202,3 +202,17 @@ can omit its leading presentation frame; reconstruction tests compare all
 eight coded pictures. `TAppDecoderStatic -b dependent-inter.hevc -o hm.yuv`
 and FFmpeg raw decode are byte-identical. Production tests read saved bytes
 and never execute HM/FFmpeg. Ordinary independent-segment tests remain enabled.
+
+### In-band PPS update oracle
+
+`../playback-errors/hevc-pps-update.packet` is the first synthetic
+`hevc-multislice-main.mp4` access unit prefixed with a PPS that toggles
+`constrained_intra_pred_flag`. Its construction is reproduced and asserted in
+`tests/hevc_parameter_updates.rs`. The picture is intra, so the changed restriction
+on inter-coded neighbours does not change its samples.
+
+Run `python3 scripts/generate_hevc_pps_oracle.py` from the repository root to
+regenerate `hevc-pps-update.yuv`. The generator converts configuration NALs and
+the length-prefixed packet to Annex B, decodes one picture with FFmpeg as an
+independent reference, and requires equality with the original saved first frame.
+Ordinary tests read the saved oracle; they never invoke FFmpeg or the generator.

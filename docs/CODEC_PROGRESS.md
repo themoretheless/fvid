@@ -1350,3 +1350,9 @@ prediction on the first intra picture from `hevc-multislice-main.mp4`; the regre
 reconstructs the mutation using the PPS syntax and compares all decoded planes
 to the original picture. This proves the update/reset path, not arbitrary SPS
 changes or every PPS tool combination. Tests require no external decoder.
+
+PPS-update verification now includes a saved independent-decoder YUV oracle:
+all 24,576 bytes match the unchanged intra picture. Tests also cover a parameter-only
+packet followed by its picture, persistent PPS state, and every truncated PPS
+prefix with unchanged parameters and reset recovery. The regeneration helper is
+`scripts/generate_hevc_pps_oracle.py`, used only for reference fixture generation.
