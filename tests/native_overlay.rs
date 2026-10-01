@@ -379,6 +379,43 @@ fn combined_geometry_overlay_and_negate_apply_in_the_documented_order() {
         // Full foreground replacement cancels the flipped main; negate must
         // subsequently affect every foreground sample.
         assert_eq!(samples(&output), expected);
+        let cli = d.0.join(format!("cli-{i}.mkv"));
+        let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "transcode-lossless"])
+            .arg(&source)
+            .arg(&cli)
+            .arg("--overlay")
+            .arg(&source)
+            .args(["--hflip", "--negate", "1"])
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        assert_eq!(std::fs::read(cli).unwrap(), std::fs::read(&output).unwrap());
+        let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "plan", "transcode-lossless"])
+            .arg(&source)
+            .arg("--overlay")
+            .arg(&source)
+            .args(["--hflip", "--negate", "1"])
+            .output()
+            .unwrap();
+        assert!(result.status.success());
+        let planned: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        let actions: Vec<_> = planned["steps"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|s| s["action"].as_str().unwrap())
+            .collect();
+        assert_eq!(
+            actions,
+            ["decode", "geometry", "overlay", "filter", "encode", "write"]
+        );
+
         let transform = fvid::media_info::LosslessTransform {
             horizontal_flip: true,
             negate: Some("1".into()),

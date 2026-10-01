@@ -3625,6 +3625,7 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
     if !matches!(operation,Some("overlay"|"transcode-lossless"|"transcode")) {return Ok(false);}
     let mut paths=Vec::<std::path::PathBuf>::new();let mut foreground=None;
     let (mut x,mut y)=(0i64,0i64);let (mut quiet,mut report)=(false,false);
+    let mut processing=Vec::<String>::new();
     let mut items=args[command+1..].iter();
     while let Some(item)=items.next() {
         match item.as_str() {
@@ -3633,6 +3634,10 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
             "--overlay"=>foreground=Some(std::path::PathBuf::from(items.next().ok_or("missing overlay path")?)),
             "--encoder" if operation==Some("transcode")=> {
                 if items.next().map(String::as_str)!=Some("ffv1") {return Ok(false);}
+            },
+            "--hflip"|"--vflip"=>processing.push(item.clone()),
+            "--crop"|"--scale"|"--pad"|"--transpose"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"=> {
+                processing.push(item.clone());processing.push(items.next().ok_or("missing overlay processing value")?.clone());
             },
             "--quiet"=>quiet=true,
             "--progress" if !planning=>report=true,
@@ -3656,15 +3661,24 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
         }
     };
     if !fvid::native_export::overlay_eligible(source)? {return Ok(false);}
+    let mut filter_args=vec!["decode".to_owned(),source.to_string_lossy().into_owned()];filter_args.extend(processing.clone());
+    let (filter_args,geometry)=geometry_decode_args(&filter_args)?;
+    let (remaining,filters)=pixel_decode_args(&filter_args)?;
+    if remaining.len()!=2 {return Ok(false);}
     if planning {
         let mut plan=fvid::native_plan::overlay(source,overlay,x,y)?;
+        let mut index=1;
+        if !geometry.is_identity() {
+            plan.steps.insert(index,fvid::media_info::PlanStep {action:"geometry".into(),detail:format!("main crop {:?}, hflip {}, vflip {}, transpose {:?}, pad {:?}, scale {:?}",geometry.crop,geometry.horizontal_flip,geometry.vertical_flip,geometry.transpose,geometry.pad,geometry.scale)});index+=1;
+        }
+        if !filters.is_empty() {plan.steps.insert(index+1,fvid::media_info::PlanStep {action:"filter".into(),detail:format!("owned pixel filters after compositing; request {}",processing.join(" "))});}
         if operation!=Some("overlay") {plan.command="transcode-lossless".into();}
         if !quiet {println!("{}",serde_json::to_string_pretty(&plan)?);}
     } else {
         let hook=report.then(||fvid::media_control::ProgressHook::new(|event|{
             eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
         }));
-        let stats=fvid::native_export::overlay_video(source,overlay,destination.unwrap(),x,y,None,hook.as_ref())?;
+        let stats=fvid::native_export::overlay_video_transformed(source,overlay,destination.unwrap(),x,y,None,hook.as_ref(),&geometry,&filters)?;
         if !quiet {println!("{}",serde_json::to_string_pretty(&stats)?);}
     }
     Ok(true)

@@ -3206,3 +3206,14 @@ existing behavior. Tests use full-frame replacement over a flipped main, then
 negate all samples, including 10-bit VP9, to distinguish this order from
 filtering only the main before compositing. Headless combined-option parsing
 still needs integration; plain-overlay CLI admission remains unchanged.
+
+
+Headless overlay/transcode commands now accept the owned geometry flags
+`--crop`, `--hflip`, `--vflip`, `--transpose`, `--pad`, `--scale`, and the
+currently owned pixel-filter flags (negate, average/box blur, pixelize,
+chromashift, gradients and morphology). They reuse the existing native decode
+parsers, then call the transformed overlay exporter. Plans place main geometry
+before overlay and pixel filtering after it. A headless regression compares
+`--overlay --hflip --negate 1` byte for byte with the API on AVC and 10-bit VP9.
+Unknown options retain the previous dispatch. This replaces the earlier
+plain-overlay-only headless admission; unmigrated filters still require work.
