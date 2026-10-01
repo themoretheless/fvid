@@ -40,7 +40,6 @@ pub fn eligible(source: &Path) -> Result<bool> {
                 videos[0].codec.as_str(),
                 "V_VP9" | "V_AV1" | "V_MPEG4/ISO/AVC" | "V_MPEGH/ISO/HEVC" | "V_FFV1"
             )
-            && videos[0].crop == [0; 4]
             && input.tracks.iter().all(|t| {
                 t.kind == 1
                     || (t.kind == 2
@@ -128,6 +127,31 @@ pub fn write<W: Write + Seek>(
         (w, h)
     };
 
+    let crop = webm
+        .as_ref()
+        .map(|r| r.tracks[video_index].crop)
+        .unwrap_or([0; 4]);
+    let crop = crop
+        .map(usize::try_from)
+        .into_iter()
+        .collect::<std::result::Result<Vec<_>, _>>()
+        .map_err(|_| invalid("stored crop overflow"))?;
+    let crop: [usize; 4] = crop.try_into().unwrap();
+    let visible_w = coded_w
+        .checked_sub(crop[0])
+        .and_then(|n| n.checked_sub(crop[2]))
+        .filter(|&n| n > 0)
+        .ok_or_else(|| invalid("stored crop removes picture width"))?;
+    let visible_h = coded_h
+        .checked_sub(crop[1])
+        .and_then(|n| n.checked_sub(crop[3]))
+        .filter(|&n| n > 0)
+        .ok_or_else(|| invalid("stored crop removes picture height"))?;
+    let (display_w, display_h) = if matches!(rotation, 90 | 270) {
+        (visible_h, visible_w)
+    } else {
+        (visible_w, visible_h)
+    };
     let depth_of = |frame: &RawFrame| -> Result<u8> {
         match frame {
             RawFrame::Planar(p) => Ok(p.depth),
@@ -141,7 +165,23 @@ pub fn write<W: Write + Seek>(
         if depth_of(frame)? != depth {
             return Err(invalid("frame sample depth changed"));
         }
-        let mut samples = if bake_rotation {
+        let mut samples = if bake_rotation && crop != [0; 4] {
+            let clipped = VideoGeometry {
+                crop: Some([crop[0], crop[1], visible_w, visible_h]),
+                ..Default::default()
+            }
+            .apply_media(frame, coded_w, coded_h)?;
+            let colour = match frame {
+                RawFrame::Avc { colour, .. } => *colour,
+                RawFrame::Planar(p) => p.colour,
+                RawFrame::Planar8(p) => p.colour,
+                _ => Default::default(),
+            };
+            let clipped = RawFrame::Planar(std::sync::Arc::new(
+                crate::playback_native::PackedPlanar::new(clipped, depth, colour)?,
+            ));
+            geometry.apply_display_media(&clipped, display_w, display_h, rotation)?
+        } else if bake_rotation {
             geometry.apply_display_media(frame, w, h, rotation)?
         } else {
             geometry.apply(frame, coded_w, coded_h)?
@@ -218,8 +258,23 @@ pub fn write<W: Write + Seek>(
         rotation: if bake_rotation { 0 } else { rotation },
         default_duration_ns,
         video: Some(VideoMetadata {
+            crop: if bake_rotation {
+                [0; 4]
+            } else {
+                crop.map(u32::try_from)
+                    .into_iter()
+                    .collect::<std::result::Result<Vec<_>, _>>()
+                    .map_err(|_| invalid("stored crop metadata overflow"))?
+                    .try_into()
+                    .unwrap()
+            },
             pixel_aspect: if bake_rotation {
-                crate::native_export::transformed_aspect(reader.pixel_aspect(), w, h, geometry)?
+                crate::native_export::transformed_aspect(
+                    reader.pixel_aspect(),
+                    display_w,
+                    display_h,
+                    geometry,
+                )?
             } else {
                 let aspect = reader.pixel_aspect();
                 if matches!(rotation, 90 | 270) {

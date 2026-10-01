@@ -602,8 +602,8 @@ impl<R: Read + Seek> WebmReader<R> {
                                     // A crop that leaves no picture is a file
                                     // making a statement it cannot keep; the
                                     // whole picture is shown.
-                                    if crop[0] + crop[2] < track.width
-                                        && crop[1] + crop[3] < track.height
+                                    if crop[0].checked_add(crop[2]).is_some_and(|n|n<track.width)
+                                        && crop[1].checked_add(crop[3]).is_some_and(|n|n<track.height)
                                     {
                                         track.crop = crop;
                                     }
@@ -1502,6 +1502,19 @@ mod tests {
             WebmReader::open(Cursor::new(file), Limits::default()).expect("built file opens");
         assert!(reader.chapters.is_empty());
         assert!(!reader.packets.is_empty());
+    }
+    #[test]
+    fn overflowing_crop_borders_keep_the_whole_picture() {
+        for crop in [[u64::MAX,0,1,0],[0,u64::MAX,0,1],[u64::MAX,0,u64::MAX,0],[16,0,0,0],[2,2,2,2]] {
+            let video=[atom(&[0xb0],&[16]),atom(&[0xba],&[16]),
+                atom(&[0x54,0xcc],&crop[0].to_be_bytes()),atom(&[0x54,0xbb],&crop[1].to_be_bytes()),
+                atom(&[0x54,0xdd],&crop[2].to_be_bytes()),atom(&[0x54,0xaa],&crop[3].to_be_bytes())].concat();
+            let body=[atom(&[0xd7],&[1]),atom(&[0x83],&[1]),atom(&[0x86],b"V_VP9"),atom(&[0xe0],&video)].concat();
+            let file=[atom(&[0x1a,0x45,0xdf,0xa3],&atom(&[0x42,0x82],b"webm")),
+                vec![0x18,0x53,0x80,0x67,0xff],atom(&[0x16,0x54,0xae,0x6b],&atom(&[0xae],&body))].concat();
+            let reader=WebmReader::open(Cursor::new(file),Limits::default()).unwrap();
+            assert_eq!(reader.tracks[0].crop,if crop==[2,2,2,2] {crop}else{[0;4]});
+        }
     }
     /// What a track is called and which language it speaks are each written in
     /// two spellings: the element in use now and, in files muxed before it, the

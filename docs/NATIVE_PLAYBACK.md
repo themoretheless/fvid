@@ -2832,8 +2832,8 @@ requests, while other encoder workflows still use the legacy adapter.
 ### Owned Matroska video lossless transcode
 
 The planar FFV1 exporter also accepts Matroska/WebM containing exactly one
-AVC, HEVC, VP9, AV1 or FFV1 video track and AAC or mono/stereo Opus companion tracks, without stored crop. Other companion codecs, negative
-stored packet timestamps and stored crop retain their existing routing. Original frame
+AVC, HEVC, VP9, AV1 or FFV1 video track and AAC or mono/stereo Opus companion tracks. Other companion codecs and negative
+stored packet timestamps retain their existing routing. Original frame
 intervals, sample precision, track name/language, pixel aspect, colour/HDR,
 file tags and chapters are retained. Atomic publication and cancellation
 use the existing FFV1 export contract.
@@ -2918,7 +2918,13 @@ rotation is applied first, followed by the requested operation, and output
 rotation is zero. Pixel aspect follows coded orientation for identity export
 and display orientation for materialized geometry. This mirrors the owned
 MP4 path; a rotated picture is not rotated a second time by the player.
-Stored crop still retains its previous routing.
+Stored crop is retained as metadata for identity export. Materialized export
+applies stored crop, then stored rotation, then the requested operation.
+Output crop borders and rotation are zero. Original sample precision is
+preserved throughout; a 10-bit FFV1 regression checks crop plus rotation and
+negate against explicit crop/transpose/negate in the reference decoder.
+Invalid or overflowing crop borders are treated as an uncropped picture by
+the owned Matroska parser.
 
 The rotated VP9 fixture checks unchanged coded planes, rotation metadata,
 clock and independently decoded video. Additional public media API tests

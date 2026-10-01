@@ -91,6 +91,7 @@ fn ffv1_transcode_preserves_all_encoder_plane_layouts() {
 #[test]
 fn vp9_av1_frames_and_clock_survive_owned_ffv1_export() {
     for name in [
+        "display/crops.mkv",
         "display/vp9-rot90.mkv",
         "vp9/adaptive.webm",
         "av1/ramp.webm",
@@ -156,6 +157,7 @@ fn vp9_av1_frames_and_clock_survive_owned_ffv1_export() {
             );
         }
         assert_eq!(a.tracks[0].rotation, b.tracks[0].rotation);
+        assert_eq!(a.tracks[0].crop, b.tracks[0].crop);
         assert_eq!(a.tracks[0].name, b.tracks[0].name);
         assert_eq!(a.tracks[0].language, b.tracks[0].language);
         assert_eq!(a.tracks[0].pixel_aspect(), b.tracks[0].pixel_aspect());
@@ -223,8 +225,8 @@ fn vp9_av1_frames_and_clock_survive_owned_ffv1_export() {
 }
 
 #[test]
-fn admission_keeps_unsupported_audio_and_stored_crop_on_existing_path() {
-    for name in ["audio/vorbis-stereo.webm", "display/crops.mkv"] {
+fn admission_keeps_unsupported_audio_on_existing_path() {
+    for name in ["audio/vorbis-stereo.webm"] {
         let source = Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("tests/fixtures")
             .join(name);
@@ -348,6 +350,131 @@ fn rotated_source_geometry_and_filter_bake_orientation_once() {
             let b = decode(&output, None);
             assert_eq!(a.len(), b.len());
             assert!(a.iter().zip(&b).all(|(a, b)| a == b));
+        }
+    }
+}
+
+#[test]
+fn stored_crop_then_rotation_then_filter_preserves_ten_bit_samples() {
+    use fvid::{
+        container::matroska_write::{
+            Encoding, PacketWriter, TrackOptions, TrackSpec, VideoMetadata,
+        },
+        native_geometry::{GeometryFrame, VideoGeometry},
+    };
+    let dir = std::env::temp_dir().join(format!("fvid-crop-rotate-{}", std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    struct Cleanup(std::path::PathBuf);
+    impl Drop for Cleanup {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _cleanup = Cleanup(dir.clone());
+    let (w, h) = (20usize, 18usize);
+    let mut data = Vec::new();
+    for n in 0..w * h + 2 * w.div_ceil(2) * h.div_ceil(2) {
+        data.extend(((n * 37 % 1024) as u16).to_le_bytes());
+    }
+    let frame = GeometryFrame {
+        width: w,
+        height: h,
+        subsampling: Some([2, 2]),
+        data,
+    };
+    let packet = fvid::codec::ffv1_encoder::encode(&frame, 10).unwrap();
+    let mut bytes = std::io::Cursor::new(Vec::new());
+    let spec = [TrackSpec {
+        encoding: Encoding::Ffv1V1 {
+            width: w as u32,
+            height: h as u32,
+        },
+        name: "cropped",
+        language: "und",
+    }];
+    let options = [TrackOptions {
+        rotation: 90,
+        video: Some(VideoMetadata {
+            crop: [2, 2, 4, 4],
+            ..Default::default()
+        }),
+        ..Default::default()
+    }];
+    let mut writer = PacketWriter::new_with_options(&mut bytes, &spec, &options).unwrap();
+    writer
+        .write_packet(0, 0, 40_000_000, true, &packet)
+        .unwrap();
+    writer.finish().unwrap();
+    let source = dir.join("source.mkv");
+    std::fs::write(&source, bytes.into_inner()).unwrap();
+    for filtered in [false, true] {
+        let output = dir.join(format!("out-{filtered}.mkv"));
+        let filters = fvid::native_pixels::PixelFilters {
+            negate: filtered.then_some(fvid::native_pixels::Negate),
+            ..Default::default()
+        };
+        let stats = fvid::native_export::transcode_ffv1_transformed(
+            &source,
+            &output,
+            &VideoGeometry::default(),
+            &filters,
+            None,
+            None,
+        )
+        .unwrap();
+        let mut decoded = fvid::playback_native::NativeReader::software(
+            BufReader::new(File::open(&output).unwrap()),
+            usize::MAX,
+        )
+        .unwrap();
+        let raw = decoded.read_frame_raw().unwrap().unwrap();
+        let fvid::playback_native::RawFrame::Planar(decoded_frame) = raw else {
+            panic!("missing original precision");
+        };
+        if !filtered {
+            assert_eq!(decoded_frame.frame.data, frame.data);
+            assert_eq!(decoded.rotation(), 90);
+            let metadata = fvid::container::webm::WebmReader::open(
+                BufReader::new(File::open(&output).unwrap()),
+                Default::default(),
+            )
+            .unwrap();
+            assert_eq!(metadata.tracks[0].crop, [2, 2, 4, 4]);
+        } else {
+            assert_eq!(decoded.rotation(), 0);
+            assert_eq!(decoded.insets(), [0; 4]);
+            assert_eq!(decoded.dimensions(), [12, 14]);
+            if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
+                let result = std::process::Command::new(ffmpeg)
+                    .args(["-v", "error", "-noautorotate", "-i"])
+                    .arg(&source)
+                    .args([
+                        "-vf",
+                        "crop=14:12:2:2,transpose=clock,negate",
+                        "-fps_mode",
+                        "passthrough",
+                        "-pix_fmt",
+                        stats.pixel_format.as_str(),
+                        "-f",
+                        "rawvideo",
+                        "-",
+                    ])
+                    .output()
+                    .unwrap();
+                assert!(
+                    result.status.success(),
+                    "{}",
+                    String::from_utf8_lossy(&result.stderr)
+                );
+                assert_eq!(result.stdout.len(), decoded_frame.frame.data.len());
+                assert!(
+                    result
+                        .stdout
+                        .iter()
+                        .zip(&decoded_frame.frame.data)
+                        .all(|(a, b)| a == b)
+                );
+            }
         }
     }
 }
