@@ -62,6 +62,7 @@ pub struct Pps {
     pub constrained_intra: bool,
     pub transform_skip: bool,
     pub transform_skip_max_log2: u8,
+    pub sao_offset_scale: [u8; 2],
     pub cu_qp_delta_depth: Option<u8>,
     pub chroma_qp_offsets: [i8; 2],
     pub slice_chroma_qp_offsets: bool,
@@ -161,6 +162,7 @@ impl Pps {
         let parallel_merge_log2 = ue(b, u32::from(sps.coding_block_log2[1] - 2))? as u8 + 2;
         let slice_header_extension = b.bit()?;
         let mut transform_skip_max_log2 = 2;
+        let mut sao_offset_scale = [0; 2];
         if b.bit()? {
             let range = b.bit()?;
             if b.read(7)? != 0 {
@@ -173,8 +175,9 @@ impl Pps {
                 if b.bit()? || b.bit()? {
                     return Err(invalid("HEVC cross-component prediction/chroma QP lists are not implemented"));
                 }
-                ue(b, 0)?;
-                ue(b, 0)?;
+                for component in 0..2 {
+                    sao_offset_scale[component] = ue(b, u32::from(sps.depth[component].saturating_sub(10)))? as u8;
+                }
             }
         }
         b.finish_rbsp()?;
@@ -191,6 +194,7 @@ impl Pps {
             constrained_intra,
             transform_skip,
             transform_skip_max_log2,
+            sao_offset_scale,
             cu_qp_delta_depth,
             chroma_qp_offsets,
             slice_chroma_qp_offsets,

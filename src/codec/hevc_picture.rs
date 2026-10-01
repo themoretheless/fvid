@@ -245,10 +245,11 @@ pub fn decode(
                 }
                 for col in 0..columns {
                     let index = sao.len();
-                    let parameters = hevc_sao::read_ctu(
+                    let parameters = hevc_sao::read_ctu_with_scale(
                         &mut bins,
                         slice.sao,
                         sps.depth,
+                        pps.sao_offset_scale,
                         if col > 0 { sao.get(index - 1) } else { None },
                         if row > 0 {
                             sao.get(index - columns as usize)
@@ -549,10 +550,11 @@ pub fn decode_slices(
                 decoder.qp = slice.qp;
             }
             let available = |other: u32| other >= decoder.slice_start;
-            let parameters = hevc_sao::read_ctu(
+            let parameters = hevc_sao::read_ctu_with_scale(
                 &mut bins,
                 slice.sao,
                 sps.depth,
+                pps.sao_offset_scale,
                 if col > 0 && available(address - 1) {
                     sao.get(address as usize - 1)
                 } else {

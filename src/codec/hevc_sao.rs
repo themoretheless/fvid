@@ -50,7 +50,7 @@ impl Sao {
         if i32::from(sample) > max || neighbours.into_iter().flatten().any(|v| i32::from(v) > max) {
             return Err(invalid("SAO input sample exceeds bit depth"));
         }
-        let limit = (1i16 << (depth - 5).min(5)) - 1;
+        let limit = ((1i16 << (depth - 5).min(5)) - 1) << depth.saturating_sub(10);
         let offset = match self {
             Self::Off => 0,
             Self::Band { position, offsets } => {
@@ -104,6 +104,20 @@ pub fn read_ctu(
     left: Option<&CtuSao>,
     up: Option<&CtuSao>,
 ) -> Result<CtuSao> {
+    read_ctu_with_scale(b, enabled, depths, [0; 2], left, up)
+}
+/// Scale decoded SAO offsets using the active PPS before storing or merging.
+pub fn read_ctu_with_scale(
+    b: &mut impl ResidualBins,
+    enabled: [bool; 2],
+    depths: [u8; 2],
+    scales: [u8; 2],
+    left: Option<&CtuSao>,
+    up: Option<&CtuSao>,
+) -> Result<CtuSao> {
+    if scales.iter().zip(depths).any(|(&scale, depth)| scale > depth.saturating_sub(10)) {
+        return Err(invalid("invalid HEVC SAO offset scale"));
+    }
     if depths.iter().any(|d| !(8..=12).contains(d)) {
         return Err(invalid("unsupported HEVC SAO bit depth"));
     }
@@ -166,6 +180,12 @@ pub fn read_ctu(
                 offsets,
             }
         };
+        match &mut output[component] {
+            Sao::Band { offsets, .. } | Sao::Edge { offsets, .. } => {
+                for value in offsets { *value <<= scales[depth_index]; }
+            }
+            Sao::Off => {}
+        }
     }
     Ok(output)
 }
@@ -337,6 +357,47 @@ mod tests {
                 }
             ]
         );
+        assert!(b.0.is_empty());
+    }
+    #[test]
+    fn scaled_offsets_preserve_signs_and_merge_without_rescaling() {
+        for scale in 0..=2 {
+            let mut b = Script(VecDeque::from([
+                Bin::C(Syntax::SaoType, true), Bin::B(false),
+            ]));
+            for value in [31, 0, 1, 0] {
+                for _ in 0..value { b.0.push_back(Bin::B(true)); }
+                if value < 31 { b.0.push_back(Bin::B(false)); }
+            }
+            b.0.extend([Bin::B(true), Bin::B(false)]);
+            for _ in 0..5 { b.0.push_back(Bin::B(true)); }
+            let expected = [Sao::Band { position: 31, offsets: [-31 << scale, 0, 1 << scale, 0] }, Sao::Off, Sao::Off];
+            let actual = read_ctu_with_scale(&mut b, [true, false], [12, 12], [scale, 0], None, None).unwrap();
+            assert_eq!(actual, expected);
+            assert_eq!(actual[0].apply(4095, None, 12).unwrap(), 4095 - (31 << scale));
+            assert!(b.0.is_empty());
+            let mut merge = Script(VecDeque::from([Bin::C(Syntax::SaoMerge, true)]));
+            assert_eq!(read_ctu_with_scale(&mut merge, [true, false], [12, 12], [scale, 0], Some(&actual), None).unwrap(), actual);
+            assert!(merge.0.is_empty());
+        }
+        assert!(read_ctu_with_scale(&mut Script(VecDeque::new()), [true, false], [12, 12], [3, 0], None, None).is_err());
+    }
+    #[test]
+    fn chroma_uses_its_own_scale_for_both_components() {
+        let mut b = Script(VecDeque::from([
+            Bin::C(Syntax::SaoType, true), Bin::B(false),
+        ]));
+        for _ in 0..2 {
+            for value in [31, 0, 1, 0] {
+                for _ in 0..value { b.0.push_back(Bin::B(true)); }
+                if value < 31 { b.0.push_back(Bin::B(false)); }
+            }
+            b.0.extend([Bin::B(true), Bin::B(false)]);
+            for _ in 0..5 { b.0.push_back(Bin::B(true)); }
+        }
+        let chroma = Sao::Band { position: 31, offsets: [-62, 0, 2, 0] };
+        assert_eq!(read_ctu_with_scale(&mut b, [false, true], [12, 12], [2, 1], None, None).unwrap(),
+            [Sao::Off, chroma, chroma]);
         assert!(b.0.is_empty());
     }
     #[test]

@@ -489,3 +489,35 @@ fn twelve_bit_high_qp_filters_match_oracle() {
         include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-qp51.yuv"),
         12, false, false, Some(false), false, false, false);
 }
+
+fn assert_scaled_sao(source: &[u8]) {
+    use fvid::codec::hevc_sao::Sao;
+    let mut input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
+    let mut decoder = HevcDecoder::from_configuration(&input.tracks()[0].configuration, 16 << 20).unwrap();
+    assert_eq!(decoder.parameters().1.sao_offset_scale, [2, 2]);
+    let mut nonzero = false;
+    for index in 0..3 {
+        let mut packet = Vec::new();
+        input.read_packet(0, index, &mut packet).unwrap();
+        let frame = decoder.decode_packet(&packet).unwrap().unwrap();
+        for mode in frame.picture.sao.iter().flatten() {
+            if let Sao::Band { offsets, .. } | Sao::Edge { offsets, .. } = mode {
+                assert!(offsets.iter().all(|v| v % 4 == 0));
+                nonzero |= offsets.iter().any(|&v| v != 0);
+            }
+        }
+    }
+    assert!(nonzero, "fixture must exercise actual scaled SAO offsets");
+}
+
+#[test]
+fn twelve_bit_scaled_sao_matches_oracle() {
+    assert_scaled_sao(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters-sao2.mp4"));
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters-sao2.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-enabled-filters-sao2.yuv"),
+        12, false, false, Some(false), true, false, false);
+    assert_scaled_sao(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-sao2.mp4"));
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-sao2.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-sao2.yuv"),
+        12, false, false, Some(false), false, false, false);
+}
