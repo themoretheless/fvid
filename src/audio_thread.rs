@@ -687,3 +687,55 @@ mod no_edit_seek_tests {
         assert!(actual==expected[2040*8..],"un-edited seek PCM differs from continuous decode");
     }
 }
+
+#[cfg(test)]
+mod preroll_control_tests {
+    use super::*;
+    use std::sync::atomic::{AtomicUsize,Ordering};
+    struct Decoder {
+        inner:Box<dyn AudioDecode>,
+        commands:SyncSender<Command>,
+        calls:Arc<AtomicUsize>,
+    }
+    impl AudioDecode for Decoder {
+        fn decode_encoded(&mut self,data:&[u8],pts:u64,duration:u64)->crate::Result<Option<crate::audio::AudioPacket>> {
+            let result = self.inner.decode_encoded(data,pts,duration);
+            if self.calls.fetch_add(1,Ordering::SeqCst)==0 { self.commands.send(Command::Pause).unwrap(); }
+            result
+        }
+        fn reset(&mut self){self.inner.reset();}
+    }
+    struct Backend(std::sync::mpsc::Sender<()>);
+    impl AudioBackend for Backend {
+        fn start(&mut self,_:crate::audio::AudioSpec)->Result<(),crate::audio::AudioError>{Ok(())}
+        fn push(&mut self,_:crate::audio::AudioPacket)->Result<(),crate::audio::AudioError>{panic!("preroll reached device")}
+        fn position(&self)->Duration{Duration::ZERO}
+        fn flush(&mut self,_:Duration)->Result<(),crate::audio::AudioError>{Ok(())}
+        fn pause(&mut self)->Result<(),crate::audio::AudioError>{self.0.send(()).unwrap();Ok(())}
+        fn resume(&mut self)->Result<(),crate::audio::AudioError>{Ok(())}
+        fn stop(&mut self)->Result<(),crate::audio::AudioError>{Ok(())}
+    }
+    #[test]
+    fn pause_and_stop_interrupt_preroll_between_access_units() {
+        let file = include_bytes!("../tests/fixtures/playback-errors/aac-no-edit.m4a").as_slice();
+        let mut stream = crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(file),Default::default()).unwrap();
+        stream.seek_to(34000);
+        let inner = crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
+        let calls = Arc::new(AtomicUsize::new(0));
+        let (command_tx,commands) = sync_channel(16);
+        let (events,_event_rx) = sync_channel(16);
+        let (paused_tx,paused_rx) = std::sync::mpsc::channel();
+        let worker_commands = command_tx.clone();
+        let worker_calls = calls.clone();
+        let thread = std::thread::spawn(move || {
+            let worker = Worker { stream:Box::new(stream),decoder:Box::new(Decoder { inner,commands:worker_commands,calls:worker_calls }),backend:Box::new(Backend(paused_tx)),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+            worker.run();
+        });
+        let paused = paused_rx.recv_timeout(Duration::from_secs(5));
+        let count = calls.load(Ordering::SeqCst);
+        command_tx.send(Command::Stop).unwrap();
+        thread.join().unwrap();
+        assert!(paused.is_ok(),"worker did not handle pause during preroll");
+        assert_eq!(count,1,"worker decoded beyond the pause command");
+    }
+}

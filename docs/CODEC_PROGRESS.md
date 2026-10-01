@@ -1524,3 +1524,9 @@ performance task. Raw `Mp4AudioReader::seek` retains its packet-cursor behavior;
 the player-facing `AudioStream::seek_to` performs the preroll. Complex edit lists and non-MP4 AAC containers are not covered by this path.
 MP4 AAC without edit lists now uses the same suppressed preroll and has a
 separate continuous-PCM seek regression (`aac-no-edit.m4a`).
+
+A threaded preroll-control regression sends Pause from the first access-unit
+decode, confirms that no second packet is decoded and no preroll PCM reaches
+the backend, then sends Stop and joins the worker. Existing per-packet command
+draining provides this interruption boundary; this is not a throughput or
+maximum-latency benchmark.
