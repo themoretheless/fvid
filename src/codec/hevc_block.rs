@@ -55,6 +55,7 @@ pub(crate) struct Coefficients {
     transform: Transform,
     values: Vec<i32>,
     rotate: bool,
+    rdpcm: Option<u8>,
 }
 pub(crate) fn read(b: &mut impl ResidualBins, c: Config) -> Result<Coefficients> {
     read_with_rotation(b, c, false)
@@ -64,13 +65,14 @@ pub(crate) fn read_with_rotation(
     c: Config,
     rotation_enabled: bool,
 ) -> Result<Coefficients> {
-    read_with_tools(b, c, rotation_enabled, false)
+    read_with_tools(b, c, rotation_enabled, false, false)
 }
 pub(crate) fn read_with_tools(
     b: &mut impl ResidualBins,
     c: Config,
     rotation_enabled: bool,
     context_enabled: bool,
+    rdpcm_enabled: bool,
 ) -> Result<Coefficients> {
     let scan = c.scan()?;
     if !(8..=10).contains(&c.bit_depth) || c.qp > 51 + 6 * (c.bit_depth - 8) {
@@ -80,12 +82,15 @@ pub(crate) fn read_with_tools(
         && c.transform_skip_enabled
         && c.log2_size == 2
         && b.decision(Syntax::TransformSkip, usize::from(c.component != 0))?;
+    let rdpcm = c.intra_mode.filter(|&mode| {
+        rdpcm_enabled && (skip || c.transquant_bypass) && matches!(mode, 10 | 26)
+    });
     let coefficients = hevc_residual::read_block_with_skip_context(
         b,
         c.log2_size,
         c.component != 0,
         scan,
-        c.sign_hiding && !c.transquant_bypass,
+        c.sign_hiding && !c.transquant_bypass && rdpcm.is_none(),
         context_enabled && (skip || c.transquant_bypass),
     )?;
     let transform = if c.transquant_bypass {
@@ -99,6 +104,7 @@ pub(crate) fn read_with_tools(
     };
     Ok(Coefficients {
         config: c,
+        rdpcm,
         transform,
         values: coefficients,
         rotate: rotation_enabled
@@ -131,6 +137,22 @@ impl Coefficients {
         // Ordinary inverse DCT/DST and inter blocks are unaffected.
         if self.rotate {
             out.reverse();
+        }
+        if let Some(mode) = self.rdpcm {
+            let n = 1usize << c.log2_size;
+            for y in 0..n {
+                for x in 0..n {
+                    let previous = if mode == 10 {
+                        (x > 0).then(|| y * n + x - 1)
+                    } else {
+                        (y > 0).then(|| (y - 1) * n + x)
+                    };
+                    if let Some(previous) = previous {
+                        out[y * n + x] = out[y * n + x].checked_add(out[previous])
+                            .ok_or_else(|| invalid("HEVC RDPCM residual overflow"))?;
+                    }
+                }
+            }
         }
         Ok(())
     }
@@ -221,6 +243,41 @@ mod tests {
                     .reconstruct(&ScalingLists::flat(), &mut scratch, &mut out).unwrap();
                 let mut expected = vec![0; 16];
                 expected[if intra { 15 } else { 0 }] = if bypass { -2 } else { -1 };
+                assert_eq!(out, expected);
+                assert!(b.0.is_empty());
+            }
+        }
+    }
+    #[test]
+    fn implicit_rdpcm_accumulates_horizontal_and_vertical_residual_impulses() {
+        for mode in [10, 26] {
+            for bypass in [false, true] {
+                let mut c = config();
+                c.intra_mode = Some(mode);
+                c.transquant_bypass = bypass;
+                let mut b = Bins(VecDeque::new());
+                if !bypass {
+                    b.0.push_back((Some(Syntax::TransformSkip), 0, true));
+                }
+                b.0.extend([
+                    (Some(Syntax::LastX), 0, false),
+                    (Some(Syntax::LastY), 0, false),
+                    (Some(Syntax::Greater1), 1, true),
+                    (Some(Syntax::Greater2), 0, false),
+                    (None, 0, true),
+                ]);
+                let mut scratch = Vec::new();
+                let mut out = Vec::new();
+                read_with_tools(&mut b, c, false, false, true)
+                    .unwrap()
+                    .reconstruct(&ScalingLists::flat(), &mut scratch, &mut out)
+                    .unwrap();
+                let value = if bypass { -2 } else { -1 };
+                let expected = if mode == 10 {
+                    vec![value, value, value, value, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                } else {
+                    vec![value, 0, 0, 0, value, 0, 0, 0, value, 0, 0, 0, value, 0, 0, 0]
+                };
                 assert_eq!(out, expected);
                 assert!(b.0.is_empty());
             }

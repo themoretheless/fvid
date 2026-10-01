@@ -189,6 +189,19 @@ impl References {
         filter_references: bool,
         output: &mut [u16],
     ) -> Result<()> {
+        self.predict_with_filters(
+            mode, chroma, strong_smoothing, filter_references, true, output,
+        )
+    }
+    pub fn predict_with_filters(
+        &self,
+        mode: u8,
+        chroma: bool,
+        strong_smoothing: bool,
+        filter_references: bool,
+        filter_boundary: bool,
+        output: &mut [u16],
+    ) -> Result<()> {
         if mode > 34 {
             return Err(invalid("invalid HEVC intra prediction mode"));
         }
@@ -272,7 +285,7 @@ impl References {
                     output[y * n + x] = value as u16;
                 }
             }
-            if !chroma && n < 32 && matches!(mode, 10 | 26) {
+            if filter_boundary && !chroma && n < 32 && matches!(mode, 10 | 26) {
                 for i in 0..n {
                     let value =
                         (main[0] + ((secondary[i] - corner) >> 1)).clamp(0, (1 << self.depth) - 1);

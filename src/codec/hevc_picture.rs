@@ -822,6 +822,7 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                         b, c,
                         self.sps.transform_skip_rotation,
                         self.sps.transform_skip_context,
+                        self.sps.implicit_rdpcm,
                     )?)
                 } else {
                     None
@@ -837,6 +838,7 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                         origin: origin.map(|v| v as usize),
                         log: c.log2_size,
                         mode: c.intra_mode.unwrap(),
+                        filter_boundary: !(self.sps.implicit_rdpcm && bypass),
                         residual,
                     });
                 } else {
@@ -852,13 +854,14 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                     } else {
                         self.residual_scratch.clear();
                     }
-                    self.planes[component].reconstruct_intra_with_reference_filtering(
+                    self.planes[component].reconstruct_intra_with_filters(
                         origin.map(|v| v as usize),
                         c.log2_size,
                         c.intra_mode.unwrap(),
                         component != 0,
                         self.sps.strong_intra_smoothing,
                         !self.sps.intra_smoothing_disabled,
+                        !(self.sps.implicit_rdpcm && bypass),
                         &self.residual_scratch,
                         &mut self.pred_scratch,
                         |x, y| {
@@ -900,6 +903,7 @@ enum Reconstruction {
         log: u8,
         mode: u8,
         residual: Option<hevc_block::Coefficients>,
+        filter_boundary: bool,
     },
     Residual {
         component: usize,
@@ -944,19 +948,21 @@ fn reconstruct_row(
                 log,
                 mode,
                 residual,
+                filter_boundary,
             } => {
                 if let Some(block) = residual {
                     block.reconstruct(scaling, transform_scratch, residual_scratch)?;
                 } else {
                     residual_scratch.clear();
                 }
-                planes[component].reconstruct_intra_with_reference_filtering(
+                planes[component].reconstruct_intra_with_filters(
                     origin,
                     log,
                     mode,
                     component != 0,
                     sps.strong_intra_smoothing,
                     !sps.intra_smoothing_disabled,
+                    filter_boundary,
                     residual_scratch,
                     pred_scratch,
                     |_, _| true,
@@ -1327,6 +1333,7 @@ impl Decoder<'_> {
                         b, config,
                         self.sps.transform_skip_rotation,
                         self.sps.transform_skip_context,
+                        self.sps.implicit_rdpcm,
                     )?;
                     let origin = if c == 0 { u.origin } else { u.chroma_origin };
                     if self.jobs.is_some() {

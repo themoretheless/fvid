@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--hm-encoder', type=Path, required=True)
 parser.add_argument('--hm-decoder', type=Path, required=True)
 parser.add_argument('--hm-config', type=Path, required=True)
+parser.add_argument('--rdpcm', action='store_true', help='generate implicit RDPCM instead of context fixtures')
 args = parser.parse_args()
 fixtures = Path(__file__).resolve().parents[1] / 'tests/fixtures/playback-errors'
 
@@ -26,7 +27,8 @@ with tempfile.TemporaryDirectory(prefix='fvid-hevc-context-') as directory:
            '-pix_fmt', pix, '-f', 'rawvideo', source)
         for mode in ('skip', 'bypass'):
             for context in (False, True):
-                stem = f'hevc-rext-context-{depth}-{mode}-' + ('enabled' if context else 'disabled')
+                tool = 'rdpcm' if args.rdpcm else 'context'
+                stem = f'hevc-rext-{tool}-{depth}-{mode}-' + ('enabled' if context else 'disabled')
                 stream, recon = tmp / 'stream.hevc', tmp / 'recon.yuv'
                 options = [str(args.hm_encoder), '-c', str(args.hm_config), '-i', str(source),
                            '-b', str(stream), '-o', str(recon), '-wdt', '64', '-hgt', '64',
@@ -34,11 +36,11 @@ with tempfile.TemporaryDirectory(prefix='fvid-hevc-context-') as directory:
                            f'--InternalBitDepth={depth}', '--InputChromaFormat=420',
                            '--MaxCUWidth=32', '--MaxCUHeight=32', '--MaxPartitionDepth=3',
                            '--QuadtreeTULog2MaxSize=2', '--TransformSkip=1',
-                           '--TransformSkipLog2MaxSize=2', '--ImplicitResidualDPCM=0',
+                           '--TransformSkipLog2MaxSize=2', f'--ImplicitResidualDPCM={int(context and args.rdpcm)}',
                            '--ExplicitResidualDPCM=0', '--ResidualRotation=0',
                            '--GolombRiceParameterAdaptation=0', '--HighPrecisionPredictionWeighting=0',
                            '--CrossComponentPrediction=0', '--SAO=0', '--LoopFilterDisable=1',
-                           '--QP=24', f'--SingleSignificanceMapContext={int(context)}',
+                           '--QP=24', f'--SingleSignificanceMapContext={int(context and not args.rdpcm)}',
                            f'--TransquantBypassEnable={int(mode == "bypass")}',
                            f'--CUTransquantBypassFlagForce={int(mode == "bypass")}']
                 subprocess.run(options, check=True)
@@ -49,6 +51,11 @@ with tempfile.TemporaryDirectory(prefix='fvid-hevc-context-') as directory:
                 subprocess.run([str(args.hm_decoder), '-b', str(stream), '-o', str(hm_output),
                                 f'--OutputBitDepth={depth}', f'--OutputBitDepthC={depth}'], check=True)
                 oracle = hm_output.read_bytes()
-                assert oracle == recon.read_bytes() == ff_output.read_bytes()
+                assert oracle == recon.read_bytes(), 'HM reconstruction and decoder differ'
+                if args.rdpcm and mode == 'bypass' and context:
+                    assert oracle == source.read_bytes(), 'forced bypass is not lossless'
+                    print(f'{stem}: FFmpeg differs in {sum(a != b for a, b in zip(oracle, ff_output.read_bytes()))} oracle bytes')
+                else:
+                    assert oracle == ff_output.read_bytes(), 'HM and FFmpeg differ'
                 assert len(oracle) == 3 * 64 * 64 * 3 // 2 * (1 if depth == 8 else 2)
                 (fixtures / (stem + '.yuv')).write_bytes(oracle)
