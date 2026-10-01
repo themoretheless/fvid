@@ -36,3 +36,27 @@ fn native_plan_rejects_invalid_requests_before_execution() {
         assert!(!run.status.success()); assert!(run.stdout.is_empty()); assert!(!run.stderr.is_empty());
     }
 }
+
+#[test]
+fn selected_alac_cli_decodes_and_plans_without_ffmpeg_backend() {
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/alac-two-tracks.m4a");
+    let directory = std::env::temp_dir().join(format!("fvid-selected-alac-cli-{}", std::process::id()));
+    std::fs::create_dir(&directory).unwrap();
+    struct Cleanup(PathBuf);
+    impl Drop for Cleanup { fn drop(&mut self) { let _ = std::fs::remove_dir_all(&self.0); } }
+    let _cleanup = Cleanup(directory.clone());
+    for index in [0,1] {
+        let plan = fvid::native_plan::decode_audio_selected(&source, &Default::default(), Some(index)).unwrap();
+        let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media","plan","decode-audio"]).arg(&source).args(["--streams",&index.to_string()]).output().unwrap();
+        assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
+        assert_eq!(serde_json::from_slice::<serde_json::Value>(&run.stdout).unwrap(), serde_json::to_value(plan).unwrap());
+        let output = directory.join(format!("selected-{index}.wav"));
+        let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media","decode-audio"]).arg(&source).arg(&output).args(["--streams",&index.to_string()]).output().unwrap();
+        assert!(run.status.success(), "{}", String::from_utf8_lossy(&run.stderr));
+        let expected = directory.join(format!("expected-{index}.wav"));
+        fvid::native_export::export_audio_pcm_selected(&source,&expected,None,1.0,None,None,Some(index),None,None).unwrap();
+        assert_eq!(std::fs::read(output).unwrap(),std::fs::read(expected).unwrap());
+    }
+}

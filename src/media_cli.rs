@@ -311,7 +311,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.first().map(String::as_str) == Some("plan")
         && args.get(1).map(String::as_str) == Some("decode-audio")
         && args.len() >= 3
-        && (fvid::native_media::is_owned_audio_source(std::path::Path::new(&args[2]))?
+        && (fvid::native_media::is_owned_audio_trim_source(std::path::Path::new(&args[2]))?
             || fvid::native_pcm::is_wave(std::path::Path::new(&args[2]))?)
     {
         let mut transform = fvid::native_plan::AudioDecodeTransform::default();
@@ -531,7 +531,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                         | "--rate"
                 )
         })
-        && (fvid::native_media::is_owned_audio_source(std::path::Path::new(&args[1]))?
+        && (fvid::native_media::is_owned_audio_trim_source(std::path::Path::new(&args[1]))?
             || fvid::native_pcm::is_wave(std::path::Path::new(&args[1]))?)
     {
         let mut parse_args = vec!["decode".to_owned(), args[1].clone()];

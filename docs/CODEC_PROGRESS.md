@@ -1464,3 +1464,7 @@ multi-ALAC source fell into the legacy adapter despite an explicit supported
 track. A saved synthetic two-track ALAC MP4 verifies both selections against
 the owned PCM exporter and checks that omitted selection fails without creating
 an output. Fixture generation is separate from ordinary test execution.
+
+The CLI uses the same multi-track admission for `media decode-audio` and its
+plan command. Both ALAC selections produce the owned plan and byte-identical
+WAV output in builds with and without the optional legacy `media` feature.
