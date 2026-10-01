@@ -45,7 +45,7 @@ mix сохраняет PCE mask 0xff для ADTS/MP4/Matroska; тест двух
   Dependent segments наследуют header, CABAC и QP state; WPP переносит
   контексты второго CTU строки. HM-generated intra/inter streams с segment
   boundaries внутри строки и между строками совпадают с HM и FFmpeg raw
-  reconstruction. Изменённые in-band SPS/PPS пока отклоняются. Идентичные повторённые parameter sets принимаются.
+  reconstruction. Изменённые in-band PPS принимаются перед slices при известном SPS; reset возвращает исходную конфигурацию. Изменённые SPS пока отклоняются. Идентичные повторённые parameter sets принимаются.
 - `src/codec/aac_native.rs`: декодер AAC-LC поддерживает стандартные 1–6 каналов,
   configurations 7 (7.1 wide), 11 (6.1 back), 12 (7.1) и однозначные горизонтальные PCE layouts. Восьмиканальный PCE в MP4 проверен
   по каждому динамику с независимым PCM-эталоном; собственные CLI/API WAV
@@ -1339,3 +1339,14 @@ segmentation and the other documented VP9 limits remain separate limitations.
 Final validation: 282 tests pass without default features; the release player
 build completes without warnings. The full local recording's native/oracle YUV
 SHA-256 is `a970e17cfb55c313e4eb4ded062677854409b0ef06e5aa0c208ade5a8fe778f2`.
+
+### In-band HEVC PPS updates
+
+The decoder accepts a validated PPS replacement/addition before picture slices,
+using an already known SPS. A changed PPS after slices is rejected before picture
+publication. Reset restores configuration-record parameter sets. A saved synthetic
+length-prefixed access unit (`hevc-pps-update.packet`) changes constrained intra
+prediction on the first intra picture from `hevc-multislice-main.mp4`; the regression
+reconstructs the mutation using the PPS syntax and compares all decoded planes
+to the original picture. This proves the update/reset path, not arbitrary SPS
+changes or every PPS tool combination. Tests require no external decoder.

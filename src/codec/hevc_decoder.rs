@@ -19,6 +19,7 @@ pub struct Decoded {
 }
 pub struct HevcDecoder {
     pairs: Vec<(Sps, Pps)>,
+    initial_pairs: Vec<(Sps, Pps)>,
     references: Vec<Reference>,
     previous_poc: Option<i32>,
     suppress_rasl: bool,
@@ -79,6 +80,7 @@ impl HevcDecoder {
             }
         }
         Ok(Self {
+            initial_pairs: pairs.clone(),
             pairs,
             references: Vec::new(),
             previous_poc: None,
@@ -99,6 +101,7 @@ impl HevcDecoder {
         (s, p)
     }
     pub fn reset(&mut self) {
+        self.pairs.clone_from(&self.initial_pairs);
         self.references.clear();
         self.previous_poc = None;
         self.suppress_rasl = false;
@@ -116,12 +119,48 @@ impl HevcDecoder {
     pub fn hdr(&self) -> HdrMetadata {
         self.hdr
     }
-    /// Parse all independent slices in one picture without changing reference
-    /// state. Reconstruction can use these ranges without reparsing headers.
+    // Validate parameter updates before committing them to decoder state.
+    fn updated_pairs(&self, packet: &[u8]) -> Result<Option<Vec<(Sps, Pps)>>> {
+        if packet.len() > self.budget {
+            return Err(invalid("HEVC access unit exceeds decode budget"));
+        }
+        let mut updated: Option<Vec<(Sps, Pps)>> = None;
+        let mut seen_slice = false;
+        for nal in NalUnits::new(packet, self.length)? {
+            let nal = nal?;
+            let header = NalHeader::parse(nal)?;
+            header.require_base_layer()?;
+            seen_slice |= header.is_vcl();
+            if header.unit_type != 34 {
+                continue;
+            }
+            let pairs = updated.as_ref().unwrap_or(&self.pairs);
+            let pair = pairs
+                .iter()
+                .find_map(|(s, _)| Pps::parse(nal, s, self.budget).ok().map(|p| (s.clone(), p)))
+                .ok_or_else(|| invalid("HEVC in-band PPS has no valid SPS"))?;
+            if pairs.iter().any(|(s, p)| *s == pair.0 && *p == pair.1) {
+                continue;
+            }
+            if seen_slice {
+                return Err(invalid("HEVC changed PPS follows picture slices"));
+            }
+            let pairs = updated.get_or_insert_with(|| self.pairs.clone());
+            if let Some(existing) = pairs.iter_mut().find(|(_, p)| p.id == pair.1.id) {
+                *existing = pair;
+            } else {
+                pairs.push(pair);
+            }
+        }
+        Ok(updated)
+    }
+    /// Parse all slices, including prefix PPS updates, without changing state.
     pub fn slice_headers(&self, packet: &[u8]) -> Result<Vec<SliceHeader>> {
         if packet.len() > self.budget {
             return Err(invalid("HEVC access unit exceeds decode budget"));
         }
+        let updated = self.updated_pairs(packet)?;
+        let pairs = updated.as_ref().unwrap_or(&self.pairs);
         let mut headers: Vec<SliceHeader> = Vec::new();
         for nal in NalUnits::new(packet, self.length)? {
             let nal = nal?;
@@ -131,8 +170,7 @@ impl HevcDecoder {
                 continue;
             }
             let id = SliceHeader::parameter_set_id(nal)?;
-            let (sps, pps) = self
-                .pairs
+            let (sps, pps) = pairs
                 .iter()
                 .find(|(_, p)| p.id == id)
                 .ok_or_else(|| invalid("HEVC slice references unknown PPS"))?;
@@ -172,6 +210,9 @@ impl HevcDecoder {
         result
     }
     fn decode(&mut self, packet: &[u8]) -> Result<Option<Decoded>> {
+        if let Some(pairs) = self.updated_pairs(packet)? {
+            self.pairs = pairs;
+        }
         let headers = self.slice_headers(packet)?;
         let mut slice = None;
         for nal in NalUnits::new(packet, self.length)? {
@@ -191,14 +232,6 @@ impl HevcDecoder {
                         .any(|(s, _)| Sps::parse(nal, self.budget).is_ok_and(|new| new == *s))
                 {
                     return Err(invalid("HEVC in-band SPS change is not implemented"));
-                }
-                if header.unit_type == 34
-                    && !self
-                        .pairs
-                        .iter()
-                        .any(|(s, p)| Pps::parse(nal, s, self.budget).is_ok_and(|new| new == *p))
-                {
-                    return Err(invalid("HEVC in-band PPS change is not implemented"));
                 }
             } else if hevc_sei::is_sei_unit(header.unit_type) {
                 // An SEI this module cannot walk costs the guidance, never the
