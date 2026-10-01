@@ -395,3 +395,59 @@ fn temporal_direct_ffmpeg_oracle_depends_on_threading() {
     assert_eq!(actual, specified);
     assert_ne!(actual.as_slice(), oracle.as_slice());
 }
+
+#[test]
+fn damaged_last_slice_requires_reset_and_restarts_with_identical_pictures() {
+    let mut packets = Mp4Reader::open(Cursor::new(VIDEO), Default::default()).unwrap();
+    let config = packets.tracks()[0].configuration.clone();
+    let avc = AvcConfig::parse(&config).unwrap();
+    let sps = Sps::parse(avc.sps[0]).unwrap();
+    let pps = Pps::parse(avc.pps[0], &sps).unwrap();
+    let mut packet = Vec::new();
+    let mut saved = Vec::new();
+    for index in 0..packets.tracks()[0].samples.len() {
+        packets.read_packet(0, index, &mut packet).unwrap();
+        saved.push(packet.clone());
+    }
+    let nals: Vec<_> = NalUnits::new(&saved[1], avc.length_size)
+        .unwrap()
+        .map(|n| n.unwrap())
+        .collect();
+    let last = nals
+        .iter()
+        .rposition(|n| matches!(n[0] & 31, 1 | 5))
+        .unwrap();
+    let shortened = &nals[last][..nals[last].len() / 2];
+    // Header validation must pass: this test exercises entropy/reconstruction,
+    // rather than failing only at the container's NAL length framing.
+    SliceHeader::parse(shortened, &sps, &pps).unwrap();
+    let mut damaged = Vec::new();
+    for (index, nal) in nals.iter().enumerate() {
+        let nal = if index == last { shortened } else { nal };
+        damaged
+            .extend_from_slice(&(nal.len() as u32).to_be_bytes()[4 - avc.length_size as usize..]);
+        damaged.extend_from_slice(nal);
+    }
+    let mut decoder = AvcDecoder::new(&config, 16 << 20).unwrap();
+    assert!(decoder.decode_order(&saved[0]).unwrap().is_some());
+    let error = decoder.decode_order(&damaged).unwrap_err().to_string();
+    assert!(!error.contains("slice header"), "{error}");
+    assert!(
+        decoder
+            .decode_order(&saved[1])
+            .unwrap_err()
+            .to_string()
+            .contains("requires reset")
+    );
+    decoder.reset();
+    let mut fresh = AvcDecoder::new(&config, 16 << 20).unwrap();
+    for packet in &saved {
+        let restarted = decoder.decode_order(packet).unwrap().unwrap();
+        let reference = fresh.decode_order(packet).unwrap().unwrap();
+        let mut actual = Vec::new();
+        let mut expected = Vec::new();
+        restarted.write_planar(&mut actual).unwrap();
+        reference.write_planar(&mut expected).unwrap();
+        assert_eq!(actual, expected);
+    }
+}
