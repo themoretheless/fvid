@@ -2832,7 +2832,7 @@ requests, while other encoder workflows still use the legacy adapter.
 ### Owned VP9/AV1 lossless transcode
 
 The planar FFV1 exporter also accepts Matroska/WebM containing exactly one
-VP9 or AV1 video track and any AAC companion tracks, without stored crop or
+VP9 or AV1 video track and AAC or mono/stereo Opus companion tracks, without stored crop or
 rotation. Other companion codecs, negative stored packet timestamps and
 stored display transforms retain their existing routing. Original frame
 intervals, sample precision, track name/language, pixel aspect, colour/HDR,
@@ -2869,3 +2869,22 @@ from its parsed frame-sample count and sample rate. Video keeps its original
 absolute presentation origin so interleaving does not shift audio relative to
 video. The independent test covers two AAC companions around one VP9 track,
 packet identity, timestamps and equal independently decoded float PCM.
+
+### Opus packet retention during video transcode
+
+Owned VP9/AV1-to-FFV1 export can retain Opus companions with version-1
+`OpusHead`, mapping family zero and a nonzero declared input rate. The owned
+transport parser checks frame packing and packet duration using RFC 6716;
+it does not implement an Opus sample decoder. `CodecPrivate`, packet payloads,
+PTS, codec delay and discard padding are preserved. The muxer writes the
+Matroska recommended 80 ms seek preroll and requires the codec delay to match
+header pre-skip. For Opus, full packet duration comes from TOC framing, since
+a last block may state only the audible duration remaining after padding.
+
+Independent fixtures combine Opus and AAC around a VP9 track and cover
+5/20/60 ms Opus packets. Before/after independently decoded PCM, packet
+identity, timestamps, delay and cancellation are checked. Other mapping
+families and negative stored packet PTS still retain existing routing.
+References: https://www.rfc-editor.org/rfc/rfc6716#section-3,
+https://www.rfc-editor.org/rfc/rfc7845#section-5.1,
+https://www.matroska.org/technical/codec_specs.html#a_opus.

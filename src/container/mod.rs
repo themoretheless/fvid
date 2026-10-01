@@ -8,6 +8,7 @@ pub mod mp4_matroska;
 pub mod matroska_write;
 pub mod matroska_copy;
 pub mod ogg;
+pub mod opus_packet;
 pub mod smf;
 pub mod webm;
 pub mod xm;

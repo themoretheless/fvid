@@ -136,6 +136,7 @@ pub struct PacketOptions {
 /// Encoded packet storage is passed through without rewriting codec payloads.
 #[derive(Clone, Copy)]
 pub enum Encoding<'a> {
+    Opus { configuration: &'a [u8] },
     /// ASS header in CodecPrivate; each packet is one Matroska ASS event.
     Ass { configuration: &'a [u8] },
     /// FFV1 v1 packets contain their configuration in every keyframe.
@@ -254,6 +255,16 @@ fn track_entry(
                 video(width, height, metadata, rotation)?,
             )
         }
+        Encoding::Opus { configuration } => {
+            if metadata.is_some() || rotation!=0 {return Err(invalid("video metadata supplied for Opus track"));}
+            let channels=super::opus_packet::header_channels(configuration)?;
+            if delay!=super::opus_packet::pre_skip_ns(configuration)? {return Err(invalid("Opus codec delay differs from pre-skip"));}
+            let sample_rate=u32::from_le_bytes(configuration[12..16].try_into().unwrap());
+            if sample_rate==0 {return Err(invalid("owned Matroska Opus output requires a nonzero input sample rate"));}
+            ("A_OPUS",configuration,2,element(0xe1,&[
+                element(0xb5,&f64::from(sample_rate).to_be_bytes())?,uint(0x9f,u64::from(channels))?
+            ].concat())?)
+        },
         Encoding::Aac {
             configuration,
             sample_rate,
@@ -300,6 +311,10 @@ fn track_entry(
     }
     if let Some(duration)=options.map(|o|o.default_duration_ns).filter(|&n|n!=0) {
         data.extend(uint(0x23e383,duration)?);
+    }
+    if matches!(spec.encoding,Encoding::Opus{..}) {
+        if delay==0 {data.extend(uint(0x56aa,0)?);}
+        data.extend(uint(0x56bb,80_000_000)?);
     }
     if !spec.name.is_empty() {
         data.extend(element(0x536e, spec.name.as_bytes())?);

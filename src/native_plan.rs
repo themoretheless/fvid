@@ -319,7 +319,7 @@ pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_inf
             disposition:if stream.media_type=="video" {"primary_video"} else {"copy"}.into(),
         }).collect()
     };
-    let mut steps=vec![PlanStep{action:"decode".into(),detail:"FVid owned demuxer and video decoder; retain companion AAC packets without audio re-encoding".into()}];
+    let mut steps=vec![PlanStep{action:"decode".into(),detail:"FVid owned demuxer and video decoder; retain supported companion audio packets without audio re-encoding".into()}];
     if !geometry.is_identity() {steps.push(PlanStep{action:"geometry".into(),detail:format!("crop {:?}; horizontal flip {}; vertical flip {}; transpose {:?}; pad {:?}; scale {:?}; normalize stored rotation first",geometry.crop,geometry.horizontal_flip,geometry.vertical_flip,geometry.transpose,geometry.pad,geometry.scale)});}
     if !filters.is_empty() {
         for (name,args) in [("avgblur",&transform.avgblur),("boxblur",&transform.boxblur),

@@ -1,4 +1,4 @@
-//! Owned planar Y4M and VP9/AV1 Matroska to FFV1 with AAC packet retention.
+//! Owned planar Y4M and VP9/AV1 Matroska to FFV1 with AAC/Opus packet retention.
 use crate::container::matroska_write::{
     Encoding, PacketWriter, TrackOptions, TrackSpec, VideoMetadata,
 };
@@ -42,8 +42,18 @@ pub fn eligible(source: &Path) -> Result<bool> {
             && input.tracks.iter().all(|t| {
                 t.kind == 1
                     || (t.kind == 2
-                        && t.codec == "A_AAC"
-                        && crate::codec::config::AacConfig::parse(&t.codec_private).is_ok())
+                        && ((t.codec == "A_AAC"
+                            && crate::codec::config::AacConfig::parse(&t.codec_private).is_ok())
+                            || (t.codec == "A_OPUS"
+                                && crate::container::opus_packet::header_channels(
+                                    &t.codec_private,
+                                )
+                                .is_ok_and(|c| u64::from(c) == t.channels)
+                                && crate::container::opus_packet::pre_skip_ns(&t.codec_private)
+                                    .is_ok_and(|delay| delay == t.codec_delay_ns)
+                                && u32::from_le_bytes(
+                                    t.codec_private[12..16].try_into().unwrap(),
+                                ) != 0)))
             })
             && input.packets.iter().all(|p| p.pts_ns >= 0));
     }
@@ -143,6 +153,10 @@ pub fn write<W: Write + Seek>(
                 Ok(TrackSpec {
                     encoding: if index == video_index {
                         encoding
+                    } else if track.codec == "A_OPUS" {
+                        Encoding::Opus {
+                            configuration: &track.codec_private,
+                        }
                     } else {
                         Encoding::Aac {
                             configuration: &track.codec_private,
@@ -255,8 +269,9 @@ pub fn write<W: Write + Seek>(
         hook.emit(writer.event());
     }
     let mut audio = Vec::new();
-    if let Some(input) = webm.as_ref() {
-        for (packet_index, packet) in input.packets.iter().enumerate() {
+    if let Some(input) = webm.as_mut() {
+        for packet_index in 0..input.packets.len() {
+            let packet = input.packets[packet_index].clone();
             let index = input
                 .tracks
                 .iter()
@@ -265,11 +280,20 @@ pub fn write<W: Write + Seek>(
             if index == video_index {
                 continue;
             }
-            let track = &input.tracks[index];
-            let config = crate::codec::config::AacConfig::parse(&track.codec_private)?;
-            let duration = packet.duration_ns.unwrap_or(
-                u64::from(config.frame_samples) * 1_000_000_000 / u64::from(config.sample_rate),
-            );
+            let track = input.tracks[index].clone();
+            let inferred = if track.codec == "A_OPUS" {
+                crate::container::opus_packet::duration_ns(&input.read_packet(packet_index)?)?
+            } else {
+                let config = crate::codec::config::AacConfig::parse(&track.codec_private)?;
+                u64::from(config.frame_samples) * 1_000_000_000 / u64::from(config.sample_rate)
+            };
+            // Opus BlockDuration may describe the audible tail after padding;
+            // the muxer needs the full coded packet span before applying padding.
+            let duration = if track.codec == "A_OPUS" {
+                inferred
+            } else {
+                packet.duration_ns.unwrap_or(inferred)
+            };
             audio.push((
                 packet.pts_ns as u64,
                 packet_index,

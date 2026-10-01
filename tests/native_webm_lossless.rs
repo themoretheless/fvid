@@ -144,9 +144,25 @@ fn admission_keeps_audio_and_display_transforms_on_existing_path() {
 #[test]
 #[ignore = "requires FVID_REFERENCE_FFMPEG"]
 fn aac_companions_keep_payloads_timestamps_and_decoded_samples() {
+    companions_oracle(None);
+}
+
+#[test]
+#[ignore = "requires FVID_REFERENCE_FFMPEG"]
+fn opus_and_aac_companions_keep_timing_priming_and_samples() {
+    for duration in ["5", "20", "60"] {
+        companions_oracle(Some(duration));
+    }
+}
+
+fn companions_oracle(opus_frame: Option<&str>) {
     let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
-    let dir = std::env::temp_dir().join(format!("fvid-webm-aac-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!(
+        "fvid-webm-aac-{}-{}",
+        std::process::id(),
+        opus_frame.unwrap_or("aac")
+    ));
     std::fs::create_dir(&dir).unwrap();
     struct Cleanup(std::path::PathBuf);
     impl Drop for Cleanup {
@@ -157,7 +173,8 @@ fn aac_companions_keep_payloads_timestamps_and_decoded_samples() {
     let _cleanup = Cleanup(dir.clone());
     let source = dir.join("source.mkv");
     let output = dir.join("output.mkv");
-    let result = std::process::Command::new(&ffmpeg)
+    let mut command = std::process::Command::new(&ffmpeg);
+    command
         .args(["-v", "error", "-i"])
         .arg(root.join("vp9/adaptive.webm"))
         .arg("-i")
@@ -173,10 +190,11 @@ fn aac_companions_keep_payloads_timestamps_and_decoded_samples() {
             "copy",
             "-avoid_negative_ts",
             "make_zero",
-        ])
-        .arg(&source)
-        .output()
-        .unwrap();
+        ]);
+    if let Some(duration) = opus_frame {
+        command.args(["-c:a:0", "libopus", "-frame_duration:a:0", duration]);
+    }
+    let result = command.arg(&source).output().unwrap();
     assert!(
         result.status.success(),
         "{}",
