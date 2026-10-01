@@ -9,3 +9,5 @@ pub use fvid_control::{CancelFlag, CopyOptions, ProgressEvent, ProgressHook};
 
 pub mod owned_wav;
 pub mod owned_aac;
+
+pub mod owned_shuffleplanes;

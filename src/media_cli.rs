@@ -849,6 +849,11 @@ fn pixel_decode_args(
             result.extend(args.cloned());
             break;
         }
+        if arg == "--shuffleplanes" {
+            if filters.shuffleplanes.is_some() {return Err("duplicate shuffleplanes".into());}
+            filters.shuffleplanes=Some(fvid::native_shuffleplanes::ShufflePlanes::parse(args.next().ok_or("missing shuffleplanes args")?)?);
+            continue;
+        }
         if arg == "--boxblur" {
             let value = args.next().ok_or("missing boxblur args")?;
             let eligible = match result.get(1) {
@@ -4330,7 +4335,7 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
                 if items.next().map(String::as_str)!=Some("ffv1") {return Ok(false);}
             },
             "--hflip"|"--vflip"=>processing.push(item.clone()),
-            "--crop"|"--scale"|"--pad"|"--transpose"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"=> {
+            "--crop"|"--scale"|"--pad"|"--transpose"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"=> {
                 processing.push(item.clone());processing.push(items.next().ok_or("missing overlay processing value")?.clone());
             },
             "--from"|"--to" if operation==Some("decode")=> {

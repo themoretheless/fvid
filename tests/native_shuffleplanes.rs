@@ -1,0 +1,183 @@
+use fvid::{
+    native_geometry::{GeometryFrame, VideoGeometry},
+    native_shuffleplanes::{ShufflePlanes, apply},
+    playback_native::NativeReader,
+};
+use std::{io::Cursor, path::Path};
+const CASES: [(&str, &[u8], &[u8], u8, &str); 4] = [
+    (
+        "shuffleplanes-444-8",
+        include_bytes!("fixtures/playback-errors/shuffleplanes-444-8.mkv"),
+        include_bytes!("fixtures/playback-errors/shuffleplanes-444-8.yuv"),
+        8,
+        "1:2:0:0",
+    ),
+    (
+        "shuffleplanes-420-10",
+        include_bytes!("fixtures/playback-errors/shuffleplanes-420-10.mkv"),
+        include_bytes!("fixtures/playback-errors/shuffleplanes-420-10.yuv"),
+        10,
+        "0:2:1:0",
+    ),
+    (
+        "shuffleplanes-420-10-promote",
+        include_bytes!("fixtures/playback-errors/shuffleplanes-420-10-promote.mkv"),
+        include_bytes!("fixtures/playback-errors/shuffleplanes-420-10-promote.yuv"),
+        10,
+        "1:2:0:0",
+    ),
+    (
+        "shuffleplanes-444-16",
+        include_bytes!("fixtures/playback-errors/shuffleplanes-444-16.mkv"),
+        include_bytes!("fixtures/playback-errors/shuffleplanes-444-16.yuv"),
+        16,
+        "2:2:0:0",
+    ),
+];
+#[test]
+fn owned_plane_shuffle_matches_saved_oracles_at_source_precision() {
+    for (_, input, expected, depth, args) in CASES {
+        let mut reader = NativeReader::software(Cursor::new(input), usize::MAX).unwrap();
+        let mut output = Vec::new();
+        while let Some(raw) = reader.read_frame_raw().unwrap() {
+            let [w, h] = reader.dimensions();
+            let mut frame = VideoGeometry::default().apply(&raw, w, h).unwrap();
+            apply(ShufflePlanes::parse(args).unwrap(), &mut frame, depth).unwrap();
+            output.extend(frame.data);
+        }
+        assert_eq!(output, expected);
+    }
+    let mut rgb = GeometryFrame {
+        width: 8,
+        height: 16,
+        subsampling: None,
+        data: include_bytes!("fixtures/playback-errors/shuffleplanes-rgb.rgb").to_vec(),
+    };
+    apply(ShufflePlanes::parse("1:2:0:0").unwrap(), &mut rgb, 8).unwrap();
+    assert_eq!(
+        rgb.data,
+        include_bytes!("fixtures/playback-errors/shuffleplanes-rgb-reference.rgb")
+    );
+}
+#[test]
+fn shared_decode_and_cli_execute_shuffle_without_legacy_backend() {
+    for (name, _, _, _, args) in CASES {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join(format!("tests/fixtures/playback-errors/{name}.mkv"));
+        let request = fvid::media_info::DecodeTransform {
+            shuffleplanes: Some(args.into()),
+            ..Default::default()
+        };
+        let stats = fvid::native_media::decode_video_request(&path, &request).unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert_eq!(stats.video_frames, 2);
+        let command = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "decode"])
+            .arg(&path)
+            .args(["--shuffleplanes", args])
+            .output()
+            .unwrap();
+        assert!(
+            command.status.success(),
+            "{}",
+            String::from_utf8_lossy(&command.stderr)
+        );
+        assert_eq!(
+            serde_json::from_slice::<serde_json::Value>(&command.stdout).unwrap()["backend"],
+            "fvid"
+        );
+        #[cfg(feature = "media")]
+        assert_eq!(
+            fvid::media::decode_video_transformed(&path, request)
+                .unwrap()
+                .backend,
+            "fvid"
+        );
+    }
+}
+#[test]
+fn lossless_export_preserves_shuffled_plane_bytes_and_plans_owned_filter() {
+    let dir = std::env::temp_dir().join(format!("fvid-shuffleplanes-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    struct Cleanup(std::path::PathBuf);
+    impl Drop for Cleanup {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _cleanup = Cleanup(dir.clone());
+    for (name, _, expected, _, args) in CASES {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join(format!("tests/fixtures/playback-errors/{name}.mkv"));
+        let request = fvid::media_info::LosslessTransform {
+            shuffleplanes: Some(args.into()),
+            ..Default::default()
+        };
+        assert!(fvid::native_lossless::supports(&request));
+        let plan = fvid::native_plan::transcode_lossless(&source, &request).unwrap();
+        assert!(
+            plan.steps
+                .iter()
+                .any(|step| step.detail.contains("FVid shuffleplanes="))
+        );
+        let (geometry, filters) = fvid::native_lossless::configuration(&request).unwrap();
+        let destination = dir.join(format!("{name}.mkv"));
+        fvid::native_export::transcode_ffv1_transformed(
+            &source,
+            &destination,
+            &geometry,
+            &filters,
+            None,
+            None,
+        )
+        .unwrap();
+        let mut reader = NativeReader::software(
+            std::io::BufReader::new(std::fs::File::open(destination).unwrap()),
+            usize::MAX,
+        )
+        .unwrap();
+        let mut actual = Vec::new();
+        while let Some(raw) = reader.read_frame_raw().unwrap() {
+            let [w, h] = reader.dimensions();
+            actual.extend(VideoGeometry::default().apply(&raw, w, h).unwrap().data);
+        }
+        assert_eq!(actual, expected);
+    }
+}
+#[test]
+fn absent_planes_and_invalid_storage_are_explicit_atomic_refusals() {
+    for args in ["3:1:2", "4:1:2", "map4=0", "0:1:2:3:0", "map0=no"] {
+        assert!(ShufflePlanes::parse(args).is_err(), "{args}");
+    }
+    let mut frame = GeometryFrame {
+        width: 2,
+        height: 2,
+        subsampling: Some([2, 2]),
+        data: vec![1, 2, 3, 4, 5, 6],
+    };
+    apply(ShufflePlanes::parse("1:2:0:0").unwrap(), &mut frame, 8).unwrap();
+    assert_eq!(frame.subsampling, Some([1, 1]));
+    assert_eq!(frame.data, vec![5, 5, 5, 5, 6, 6, 6, 6, 1, 2, 3, 4]);
+    frame.data.pop();
+    let original = frame.data.clone();
+    assert!(apply(ShufflePlanes::parse("0:2:1:0").unwrap(), &mut frame, 8).is_err());
+    assert_eq!(frame.data, original);
+}
+
+#[test]
+fn high_depth_y4m_refusal_reproduces_the_specific_reader_gap() {
+    for data in [
+        include_bytes!("fixtures/playback-errors/shuffleplanes-420-10.y4m").as_slice(),
+        include_bytes!("fixtures/playback-errors/shuffleplanes-444-16.y4m").as_slice(),
+    ] {
+        let error = NativeReader::software(Cursor::new(data), usize::MAX)
+            .err()
+            .expect("high-depth Y4M is still unsupported");
+        assert!(
+            error
+                .to_string()
+                .contains("supported pixel formats: 8-bit 420, 422, 444"),
+            "{error}"
+        );
+    }
+}

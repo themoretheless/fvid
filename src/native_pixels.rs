@@ -279,7 +279,7 @@ impl Gradient {
 }
 
 /// Native filter order matches the public media request, independent of CLI
-/// flag order: average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, pixelize, dilation, erosion, chroma shift.
+/// flag order: average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, pixelize, dilation, erosion, chroma shift, plane shuffle.
 #[derive(Default)]
 pub struct PixelFilters {
     pub pixelize: Option<crate::native_pixelize::Pixelize>,
@@ -289,6 +289,7 @@ pub struct PixelFilters {
     pub chromashift: Option<crate::native_chromashift::ChromaShift>,
     pub gradients: Vec<Gradient>,
     pub morphology: Vec<crate::native_morphology::Morphology>,
+    pub shuffleplanes: Option<crate::native_shuffleplanes::ShufflePlanes>,
 }
 impl PixelFilters {
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
@@ -312,6 +313,7 @@ impl PixelFilters {
                 .transpose()?,
             gradients: Vec::new(),
             morphology: Vec::new(),
+            shuffleplanes: request.shuffleplanes.as_deref().map(crate::native_shuffleplanes::ShufflePlanes::parse).transpose().map_err(|e|invalid(&e))?,
         };
         for (kind, args) in [
             (GradientKind::Sobel, &request.sobel),
@@ -350,6 +352,7 @@ impl PixelFilters {
             && self.negate.is_none()
             && self.gradients.is_empty()
             && self.morphology.is_empty()
+            && self.shuffleplanes.is_none()
     }
     pub fn apply(&self, frame: &mut GeometryFrame, depth: u8) -> Result<()> {
         if let Some(filter) = self.avgblur {
@@ -371,6 +374,7 @@ impl PixelFilters {
         if let Some(filter) = self.chromashift {
             filter.apply(frame, depth)?;
         }
+        if let Some(filter)=self.shuffleplanes {crate::native_shuffleplanes::apply(filter,frame,depth)?;}
         Ok(())
     }
 }

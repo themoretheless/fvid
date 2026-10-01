@@ -51,6 +51,7 @@ pub fn inventory() -> Capabilities {
             "roberts",
             "scale",
             "scharr",
+            "shuffleplanes",
             "sobel",
             "transpose",
             "vflip",

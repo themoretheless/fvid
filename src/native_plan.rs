@@ -335,7 +335,7 @@ pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_inf
         for (name,args) in [("avgblur",&transform.avgblur),("boxblur",&transform.boxblur),
             ("negate",&transform.negate),("sobel",&transform.sobel),("prewitt",&transform.prewitt),
             ("roberts",&transform.roberts),("kirsch",&transform.kirsch),("scharr",&transform.scharr),
-            ("pixelize",&transform.pixelize),("dilation",&transform.dilation),("erosion",&transform.erosion),("chromashift",&transform.chromashift)] {
+            ("pixelize",&transform.pixelize),("dilation",&transform.dilation),("erosion",&transform.erosion),("chromashift",&transform.chromashift),("shuffleplanes",&transform.shuffleplanes)] {
             if let Some(args)=args {steps.push(PlanStep{action:"filter".into(),detail:format!("FVid {name}={args}; operate on sample planes at source precision")});}
         }
     }

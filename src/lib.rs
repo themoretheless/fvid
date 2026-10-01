@@ -133,3 +133,5 @@ pub mod native_boxblur;
 pub mod native_audio_mix;
 
 mod native_audio_decoder;
+
+pub mod native_shuffleplanes;
