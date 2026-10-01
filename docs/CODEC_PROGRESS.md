@@ -1908,3 +1908,21 @@ Validation: 10 media-layer tests without default features, 3 TNS parser tests,
 19 AAC export/960/coupling integration tests, player compilation and native
 dependency checks for headless/player/camera bridge passed without FFmpeg.
 The full AAC unit suite before relocating the impulse test also passed (51).
+
+### AAC independent coupling target and short-window coverage
+
+Hand-authored stereo fixtures now cover CPE ch_select 0 (shared), 1 (right),
+2 (left), and the existing 3 (separate gains). All saved PCM oracles match
+within peak error 1e-7; routing assertions additionally require exactly zero
+PCM in the unselected channel and identical channels for shared gain.
+A separate six-packet stereo fixture follows LongStart, four EightShort
+frames (one eight-window group), then LongStop. It verifies coupling spectral
+ordering, overlap history and checkpoint/reset replay against saved PCM.
+These are acceptance tests of the existing independent coupling path, not
+new support for dependent coupling or SBR.
+
+Generate with `scripts/generate_aac_coupling_sample.py --stereo --selection
+shared|right|left` or `--stereo --short`. Oracle generation uses FFmpeg;
+ordinary tests read checked-in bytes only. Existing mono/stereo/missing-target
+fixtures regenerate byte-identically. All three coupling tests passed across
+six oracle fixtures, including bit-exact checkpoint tails and full reset replay.

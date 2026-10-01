@@ -15,6 +15,34 @@ fn independent_coupling_matches_saved_pcm_reset_and_checkpoint() {
                 .as_slice(),
             2,
         ),
+        (
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-shared.aac")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-shared.f32le")
+                .as_slice(),
+            2,
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-right.aac")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-right.f32le")
+                .as_slice(),
+            2,
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-left.aac")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-left.f32le")
+                .as_slice(),
+            2,
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-short.aac")
+                .as_slice(),
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-short.f32le")
+                .as_slice(),
+            2,
+        ),
     ] {
         let mut reader = StreamReader::open(Cursor::new(data)).unwrap();
         let mut decoder = NativeAacDecoder::new(reader.audio_specific_config()).unwrap();
@@ -84,4 +112,52 @@ fn absent_coupling_target_does_not_mutate_overlap_or_noise() {
             .contains("coupling target is absent")
     );
     assert_eq!(decoder.decode(&second).unwrap(), expected);
+}
+
+#[test]
+fn independent_cpe_selection_routes_only_to_selected_channels() {
+    for (data, selection) in [
+        (
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-shared.aac")
+                .as_slice(),
+            0,
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-right.aac")
+                .as_slice(),
+            1,
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-left.aac")
+                .as_slice(),
+            2,
+        ),
+    ] {
+        let mut reader = StreamReader::open(Cursor::new(data)).unwrap();
+        let mut decoder = NativeAacDecoder::new(reader.audio_specific_config()).unwrap();
+        let mut peak = [0f32; 2];
+        while let Some(packet) = reader.next_packet().unwrap() {
+            let pcm = decoder.decode(&packet).unwrap();
+            for pair in pcm.chunks_exact(2) {
+                for channel in 0..2 {
+                    peak[channel] = peak[channel].max(pair[channel].abs());
+                }
+                if selection == 0 {
+                    assert_eq!(pair[0], pair[1], "shared gain must produce equal channels");
+                }
+                if selection == 1 {
+                    assert_eq!(pair[0], 0.0, "right selection must leave left silent");
+                }
+                if selection == 2 {
+                    assert_eq!(pair[1], 0.0, "left selection must leave right silent");
+                }
+            }
+        }
+        if selection != 1 {
+            assert!(peak[0] > 0.00001);
+        }
+        if selection != 2 {
+            assert!(peak[1] > 0.00001);
+        }
+    }
 }
