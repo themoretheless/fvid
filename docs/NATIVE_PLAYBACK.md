@@ -2931,3 +2931,12 @@ clock and independently decoded video. Additional public media API tests
 exercise crop with horizontal flip and negate, compare output dimensions and
 sample planes, require zero output rotation and compare all decoded frames
 with independent FFmpeg results.
+
+### Stored crop during transformed decode
+
+Owned transformed decode now applies container crop in display coordinates
+before requested geometry. Rotation maps stored borders into that coordinate
+system. The decoder's raw frame contract remains the complete coded picture;
+plain decode statistics continue to describe that raw frame. Regression tests
+check exact RGB pixels for rotation/crop/flip and visible output dimensions
+from the cropped Matroska fixture without enabling the legacy media feature.

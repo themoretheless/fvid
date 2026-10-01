@@ -224,6 +224,33 @@ impl VideoGeometry {
     ) -> Result<GeometryFrame> {
         self.apply_display_with_sampling(frame, width, height, rotation, true)
     }
+    /// Container crop borders are already expressed in display orientation.
+    /// Apply them before user geometry, retaining original sample precision.
+    pub fn apply_cropped_display(
+        &self, frame: &RawFrame, width: usize, height: usize,
+        rotation: u16, insets: [u32; 4],
+    ) -> Result<GeometryFrame> {
+        if insets == [0; 4] {
+            return self.apply_display(frame, width, height, rotation);
+        }
+        let [left, top, right, bottom] = insets.map(|n| n as usize);
+        let visible_w = width.checked_sub(left).and_then(|n| n.checked_sub(right))
+            .filter(|&n| n > 0).ok_or_else(|| invalid("stored crop removes picture width"))?;
+        let visible_h = height.checked_sub(top).and_then(|n| n.checked_sub(bottom))
+            .filter(|&n| n > 0).ok_or_else(|| invalid("stored crop removes picture height"))?;
+        let normalized = Self::default().apply_display(frame, width, height, rotation)?;
+        let (depth, full) = match frame {
+            RawFrame::Avc { picture, colour } => (picture.bit_depth, colour.full),
+            RawFrame::Planar8(p) => (8, p.colour.full),
+            RawFrame::Planar(p) => (p.depth, p.colour.full),
+            RawFrame::Rgb(_) => (8, true),
+            RawFrame::Yuv { .. } => (8, false),
+        };
+        let clipped = Self { crop: Some([left, top, visible_w, visible_h]), ..Default::default() }
+            .apply_samples(&normalized.data, width, height, normalized.subsampling, depth, full, false)?;
+        self.apply_samples(&clipped.data, visible_w, visible_h, clipped.subsampling, depth, full, false)
+    }
+
     fn apply_display_with_sampling(
         &self,
         frame: &RawFrame,

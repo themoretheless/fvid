@@ -103,7 +103,7 @@ pub fn decode_video_pipeline(
             RawFrame::Yuv { sx, sy, .. } => planar_format(width, height, width / sx, height / sy)?,
         };
         if !geometry.is_identity() || !filters.is_empty() {
-            let mut output = geometry.apply_display(&frame, width, height, reader.rotation())?;
+            let mut output = geometry.apply_cropped_display(&frame, width, height, reader.rotation(), reader.insets())?;
             stats.width = u32::try_from(output.width).map_err(|_| invalid("video width overflow"))?;
             stats.height = u32::try_from(output.height).map_err(|_| invalid("video height overflow"))?;
             if geometry.transpose.is_some() {

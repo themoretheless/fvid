@@ -431,3 +431,28 @@ fn media_sampling_preserves_the_native_contract_separately() {
         [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15]
     );
 }
+
+#[test]
+fn stored_crop_is_applied_before_user_geometry_in_display_coordinates() {
+    let frame = RawFrame::Rgb((0..18).collect()); // 3x2 distinct RGB pixels
+    let geometry = VideoGeometry { horizontal_flip: true, ..Default::default() };
+    let out = geometry.apply_cropped_display(&frame, 2, 3, 90, [0, 1, 0, 0]).unwrap();
+    assert_eq!((out.width, out.height), (2, 2));
+    // Clockwise rows: [9,0], [12,3], [15,6]; discard first then flip.
+    assert_eq!(out.data, [3,4,5,12,13,14,6,7,8,15,16,17]);
+    assert!(geometry.apply_cropped_display(&frame, 2, 3, 90, [2,0,0,0]).is_err());
+}
+
+#[test]
+fn transformed_decode_uses_the_stored_visible_area() {
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/display/crops.mkv");
+    let mut reader = NativeReader::software(std::io::BufReader::new(std::fs::File::open(&source).unwrap()), usize::MAX).unwrap();
+    reader.read_frame_raw().unwrap().unwrap();
+    let [w,h] = reader.dimensions();
+    let [l,t,r,b] = reader.insets();
+    assert_ne!([l,t,r,b], [0;4]);
+    let stats = fvid::native_media::decode_video_transformed(&source, None,
+        &VideoGeometry { horizontal_flip: true, ..Default::default() }).unwrap();
+    assert_eq!((stats.width as usize, stats.height as usize), (w-(l+r) as usize,h-(t+b) as usize));
+    assert!(stats.video_frames > 0);
+}
