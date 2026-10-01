@@ -19,3 +19,5 @@ pub mod owned_normalize;
 pub mod owned_pcm_gain;
 
 pub mod owned_resample;
+
+pub mod owned_pcm_layout;
