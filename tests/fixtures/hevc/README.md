@@ -164,3 +164,17 @@ reference output and `hevc-multislice-main10` filenames. Both contain I/B/P
 pictures. Dependent slice inheritance remains unimplemented. Reference-index remapping
 is tested with reordered/overlapping POC maps, but these encoded fixtures do
 not establish differing per-slice reference-list behavior; the comparison does not prove unrestricted HEVC conformance.
+
+`../playback-errors/hevc-multislice-temporal.mp4` extends coverage to 18 frames,
+temporal MVP, multiple active references and B-frame reordering:
+
+```sh
+ffmpeg -v error -f lavfi -i 'testsrc2=size=128x128:rate=30:duration=0.6' -c:v libx265 -pix_fmt yuv420p -x265-params 'pools=1:frame-threads=1:ctu=32:slices=2:ref=4:bframes=3:keyint=30:log-level=error' -an ../playback-errors/hevc-multislice-temporal.mp4
+ffmpeg -v error -i ../playback-errors/hevc-multislice-temporal.mp4 -pix_fmt yuv420p -f rawvideo ../playback-errors/hevc-multislice-temporal.yuv
+```
+
+The owned decoder matches the saved oracle byte for byte over two passes.
+Header checks require temporal MVP and multiple active references; sync seek
+rebuilds references after EOF and reproduces frames 10, 4, 17, 0 and 13 from
+sequential decoding. This does not establish differing reference-list order
+between slices or dependent-segment inheritance.

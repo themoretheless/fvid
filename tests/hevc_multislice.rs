@@ -61,7 +61,10 @@ fn compare_multislice(source: &[u8], reference: &[u8], depth: u8) {
             }
             frames += 1;
         }
-        assert_eq!(frames, 3);
+        assert_eq!(
+            frames,
+            reference.len() / (128 * 128 * 3 / 2 * if depth == 8 { 1 } else { 2 })
+        );
         let mismatches: Vec<_> = actual
             .iter()
             .zip(reference)
@@ -112,4 +115,66 @@ fn incomplete_multislice_picture_is_never_published_and_reset_recovers() {
     assert!(decoder.decode_packet(&packet).is_err());
     decoder.reset();
     assert!(decoder.decode_packet(&packet).unwrap().is_some());
+}
+
+#[test]
+fn multislice_temporal_stream_matches_reference_across_reference_storage() {
+    compare_multislice(
+        include_bytes!("fixtures/playback-errors/hevc-multislice-temporal.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-multislice-temporal.yuv"),
+        8,
+    );
+    let mut input = Mp4Reader::open(
+        Cursor::new(include_bytes!(
+            "fixtures/playback-errors/hevc-multislice-temporal.mp4"
+        )),
+        Default::default(),
+    )
+    .unwrap();
+    let track = input.tracks()[0].clone();
+    let decoder = HevcDecoder::from_configuration(&track.configuration, 16 << 20).unwrap();
+    let mut packet = Vec::new();
+    let mut temporal = false;
+    let mut multiple_references = false;
+    for index in 0..track.samples.len() {
+        input.read_packet(0, index, &mut packet).unwrap();
+        for header in decoder.slice_headers(&packet).unwrap() {
+            temporal |= header.temporal_mvp;
+            multiple_references |= header.references.iter().any(|&count| count > 1);
+        }
+    }
+    assert!(temporal && multiple_references);
+}
+
+#[test]
+fn temporal_multislice_seek_rebuilds_reference_storage_after_eof() {
+    let source = include_bytes!("fixtures/playback-errors/hevc-multislice-temporal.mp4");
+    let mut reader =
+        fvid::playback_mp4::Mp4VideoReader::open(Cursor::new(source), Default::default(), 16 << 20)
+            .unwrap();
+    let pixels = |frame: &fvid::playback_mp4::VideoFrame| {
+        [
+            frame.picture.y.as_slice(),
+            frame.picture.cb.as_slice(),
+            frame.picture.cr.as_slice(),
+        ]
+        .concat()
+    };
+    let mut frames = Vec::new();
+    while let Some(frame) = reader.read_frame().unwrap() {
+        frames.push((frame.presentation_time.ticks, pixels(&frame)));
+    }
+    assert_eq!(frames.len(), 18);
+    for index in [10, 4, 17, 0, 13] {
+        let (target, expected) = &frames[index];
+        reader.seek_to_sync(*target);
+        let actual = loop {
+            let frame = reader.read_frame().unwrap().expect("seek target exists");
+            if frame.presentation_time.ticks >= *target {
+                break frame;
+            }
+        };
+        assert_eq!(actual.presentation_time.ticks, *target);
+        assert_eq!(pixels(&actual), *expected);
+    }
 }

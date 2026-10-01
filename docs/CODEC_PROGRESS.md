@@ -37,6 +37,8 @@ mix сохраняет PCE mask 0xff для ADTS/MP4/Matroska; тест двух
   Независимые slices восстанавливаются в общие planes с WPP, CABAC reset,
   slice-aware prediction/deblocking/SAO. Main/Main10 I/P/B сравниваются
   побайтно с независимыми YUV-эталонами, включая rewind и усечения.
+  Поток из 18 кадров покрывает temporal MVP, несколько active references,
+  B reorder и восстановление DPB после seek назад/вперёд после EOF.
   Slice-local motion indices переводятся по POC в общую таблицу перед
   deblocking и публикацией DPB; перестановки/пересечения проверены unit test.
   Независимый encoded oracle с различающимися slice reference lists ещё нужен.
