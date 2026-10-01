@@ -35,6 +35,65 @@ impl ProgramConfig {
             .map(|e| if e.pair { 2 } else { 1 })
             .sum()
     }
+    /// Canonical WAVE speaker order for unambiguous horizontal PCE layouts.
+    pub fn pcm_layout(&self) -> Result<(u32, Vec<usize>)> {
+        if !self.coupling.is_empty() || self.comment.first() == Some(&0xac) {
+            return Err(invalid(
+                "AAC PCE coupling or height layout is not implemented",
+            ));
+        }
+        let mut speakers = Vec::new();
+        for position in [
+            Position::Front,
+            Position::Side,
+            Position::Back,
+            Position::Lfe,
+        ] {
+            let elements: Vec<_> = self
+                .elements
+                .iter()
+                .filter(|e| e.position == position)
+                .collect();
+            let count: usize = elements.iter().map(|e| if e.pair { 2 } else { 1 }).sum();
+            let group: &[u8] = match (position, count) {
+                (_, 0) => &[],
+                (Position::Front, 1) => &[2],
+                (Position::Front, 2) => &[0, 1],
+                (Position::Front, 3) => &[2, 0, 1],
+                (Position::Front, 5) => &[2, 6, 7, 0, 1],
+                (Position::Side, 2) => &[9, 10],
+                (Position::Back, 1) => &[8],
+                (Position::Back, 2) => &[4, 5],
+                (Position::Back, 3) => &[8, 4, 5],
+                (Position::Lfe, 1) => &[3],
+                _ => return Err(invalid("ambiguous AAC PCE speaker layout")),
+            };
+            let expected_pairs: &[bool] = match count {
+                0 => &[],
+                1 => &[false],
+                2 => &[true],
+                3 => &[false, true],
+                5 => &[false, true, true],
+                _ => unreachable!(),
+            };
+            if elements
+                .iter()
+                .map(|e| e.pair)
+                .ne(expected_pairs.iter().copied())
+            {
+                return Err(invalid(
+                    "AAC PCE element grouping does not identify speakers",
+                ));
+            }
+            speakers.extend_from_slice(group);
+        }
+        let mask = speakers.iter().fold(0u32, |m, s| m | (1 << s));
+        let mapping = speakers
+            .iter()
+            .map(|s| (mask & ((1 << s) - 1)).count_ones() as usize)
+            .collect();
+        Ok((mask, mapping))
+    }
     /// Includes element_instance_tag, but not the raw_data_block element ID.
     /// Alignment is relative to the caller's containing payload start.
     /// On malformed input, the caller's bit position remains unchanged.

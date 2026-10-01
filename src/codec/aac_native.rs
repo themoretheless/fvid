@@ -10,14 +10,34 @@ pub struct NativeAacDecoder {
     config: AacConfig,
     synthesis: Vec<LongSineSynthesis>,
     noise: NoiseState,
+    program: Option<super::aac_pce::ProgramConfig>,
+    mapping: Vec<usize>,
+    channel_mask: u32,
 }
 impl NativeAacDecoder {
     pub fn new(asc: &[u8]) -> Result<Self> {
-        let config = AacConfig::parse(asc)?;
+        let (config, program) = AacConfig::parse_with_program(asc)?;
         BandTables::for_config(&config)?;
-        if !(1..=6).contains(&config.channels) {
+        if program.is_none() && !(1..=6).contains(&config.channels) {
             return Err(unsupported("owned AAC layout above 5.1 is not implemented"));
         }
+        let (channel_mask, mapping) = if let Some(program) = &program {
+            program.pcm_layout()?
+        } else {
+            let mapping: &[usize] = match config.channels {
+                1 => &[0],
+                2 => &[0, 1],
+                3 => &[2, 0, 1],
+                4 => &[2, 0, 1, 3],
+                5 => &[2, 0, 1, 3, 4],
+                6 => &[2, 0, 1, 4, 5, 3],
+                _ => unreachable!(),
+            };
+            (
+                crate::native_export::default_pcm_mask(u16::from(config.channels))?,
+                mapping.to_vec(),
+            )
+        };
         let synthesis = (0..config.channels)
             .map(|_| LongSineSynthesis::new(config.frame_samples as usize))
             .collect::<Result<Vec<_>>>()?;
@@ -25,6 +45,9 @@ impl NativeAacDecoder {
             config,
             synthesis,
             noise: NoiseState::default(),
+            program,
+            mapping,
+            channel_mask,
         })
     }
     pub fn sample_rate(&self) -> u32 {
@@ -32,6 +55,9 @@ impl NativeAacDecoder {
     }
     pub fn channels(&self) -> u8 {
         self.config.channels
+    }
+    pub fn channel_mask(&self) -> u32 {
+        self.channel_mask
     }
     pub fn reset(&mut self) {
         for synth in &mut self.synthesis {
@@ -52,20 +78,39 @@ impl NativeAacDecoder {
             4 => &[0, 1, 0],
             5 => &[0, 1, 1],
             6 => &[0, 1, 1, 3],
-            _ => unreachable!(),
+            _ => &[],
         };
         let mut element_index = 0;
         let mut tags = std::collections::HashSet::new();
         loop {
             let element = bits.read(3)?;
+            let mut target_offset = channels.len();
             if matches!(element, 0 | 1 | 3) {
-                if elements.get(element_index) != Some(&element) {
+                if self.program.is_none() && elements.get(element_index) != Some(&element) {
                     return Err(unsupported(
                         "AAC element order differs from standard layout",
                     ));
                 }
                 element_index += 1;
                 let tag = bits.read(4)?;
+                if let Some(program) = &self.program {
+                    let mut offset = 0;
+                    let mut found = None;
+                    for configured in &program.elements {
+                        let kind = if configured.position == super::aac_pce::Position::Lfe {
+                            3
+                        } else {
+                            u32::from(configured.pair)
+                        };
+                        if kind == element && u32::from(configured.tag) == tag {
+                            found = Some(offset);
+                            break;
+                        }
+                        offset += if configured.pair { 2 } else { 1 };
+                    }
+                    target_offset =
+                        found.ok_or_else(|| invalid("AAC element is absent from PCE"))?;
+                }
                 if !tags.insert((element, tag)) {
                     return Err(invalid("duplicate AAC element tag"));
                 }
@@ -75,15 +120,15 @@ impl NativeAacDecoder {
                     let channel = ChannelData::read(&mut bits, &self.config)?;
                     let spectrum = channel.spectrum_with_noise(&self.config, &mut noise)?;
                     let spectrum = channel.apply_tns(&self.config, spectrum)?;
-                    channels.push((channel.info, spectrum));
+                    channels.push((channel.info, spectrum, self.mapping[target_offset]));
                 }
                 1 => {
                     let pair = ChannelPair::read(&mut bits, &self.config)?;
                     let (left, right) = pair.spectra_with_noise(&self.config, &mut noise)?;
                     let left = pair.left.apply_tns(&self.config, left)?;
                     let right = pair.right.apply_tns(&self.config, right)?;
-                    channels.push((pair.left.info, left));
-                    channels.push((pair.right.info, right));
+                    channels.push((pair.left.info, left, self.mapping[target_offset]));
+                    channels.push((pair.right.info, right, self.mapping[target_offset + 1]));
                 }
                 4 => {
                     bits.read(4)?;
@@ -96,6 +141,19 @@ impl NativeAacDecoder {
                         bits.skip((8 - bits.position() % 8) % 8)?;
                     }
                     bits.skip(count * 8)?;
+                }
+                5 => {
+                    let program = super::aac_pce::ProgramConfig::read(&mut bits, 0)?;
+                    let expected = self.program.as_ref().ok_or_else(|| {
+                        unsupported("in-band PCE needs an explicit configured program")
+                    })?;
+                    if program.elements != expected.elements
+                        || program.sample_rate != expected.sample_rate
+                        || program.object_type != expected.object_type
+                        || program.pcm_layout()?.0 != self.channel_mask
+                    {
+                        return Err(invalid("AAC in-band PCE changed the configured layout"));
+                    }
                 }
                 6 => {
                     let mut count = bits.read(4)? as usize;
@@ -126,21 +184,10 @@ impl NativeAacDecoder {
         let mut synthesis = self.synthesis.clone();
         let mut output = vec![0.0; n * channels.len()];
         let mut pcm = vec![0.0; n];
-        for (index, (info, spectrum)) in channels.iter().enumerate() {
-            synthesis[index].synthesize_pcm(info.sequence, info.shape, spectrum, &mut pcm)?;
+        for (info, spectrum, target) in &channels {
+            synthesis[*target].synthesize_pcm(info.sequence, info.shape, spectrum, &mut pcm)?;
             for i in 0..n {
-                // AAC syntax: center, front pair, surrounds, LFE. PCM:
-                // front L/R, center, LFE (if present), rear/surround channels.
-                let mapping: &[usize] = match channels.len() {
-                    1 => &[0],
-                    2 => &[0, 1],
-                    3 => &[2, 0, 1],
-                    4 => &[2, 0, 1, 3],
-                    5 => &[2, 0, 1, 3, 4],
-                    6 => &[2, 0, 1, 4, 5, 3],
-                    _ => unreachable!(),
-                };
-                output[i * channels.len() + mapping[index]] = pcm[i] as f32;
+                output[i * channels.len() + target] = pcm[i] as f32;
             }
         }
         self.synthesis = synthesis;

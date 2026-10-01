@@ -14,3 +14,16 @@ The ADTS fixture tests raw_data_block PCE syntax. The MP4 fixture tests the PCE
 embedded in AudioSpecificConfig, including alignment and trailing SBR signaling.
 These parser tests do not yet establish PCM decoding of PCE layouts. The legacy
 standard-layout ASC entrypoint still rejects a PCE rather than dropping its tags.
+
+Packet decoding reference (ignore edit-list priming, retain container packet durations):
+
+```sh
+ffmpeg -v error -ignore_editlist 1 -i aac-pce-wide8.m4a -f f32le aac-pce-wide8-mp4-reference.f32le
+```
+
+`NativeAacDecoder` now resolves the configured PCE tags and reconstructs all
+8 channels. Each PCM speaker is compared independently with RMS < 1e-7 and
+peak error < 1e-6. The last packet's shorter duration accounts for reference
+suffix trimming; initial synthesis samples are compared without a guessed
+offset. Reset and malformed-PCE state preservation are covered. This does not
+yet establish ADTS channel_configuration=0 ingestion or public export routing.
