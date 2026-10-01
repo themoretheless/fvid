@@ -83,7 +83,7 @@ pub fn decode_audio_selected(
     steps.push(PlanStep {
         action: "write".into(),
         detail:
-            "atomic float32 PCM export to .f32le or .wav; never overwrite an existing destination"
+            "atomic float32 PCM export to .f32le, .wav, .mka or .mkv; never overwrite an existing destination"
                 .into(),
     });
     Ok(MediaPlan {

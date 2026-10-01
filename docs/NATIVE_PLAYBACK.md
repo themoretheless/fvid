@@ -3034,3 +3034,24 @@ An independently encoded AAC tone without PNS checks both independent decoding
 and owned PCM against repeated source PCM at the join, within 1e-6 sample error.
 This is a focused AAC regression, not evidence of complete AAC conformance or
 FFmpeg removal from every media workflow.
+
+
+### Owned float PCM Matroska output
+
+The native audio export API and headless `media decode-audio` command accept
+`.mka` and `.mkv` as well as `.wav` and `.f32le`. Matroska output uses
+`A_PCM/FLOAT/IEEE`, little-endian float32 interleaved samples, and explicit
+sample rate, channel count and 32-bit depth. Interval selection, gain,
+mono/stereo conversion and sample-rate conversion run through the shared owned
+PCM pipeline before muxing. Packets contain at most 1024 sample frames;
+timestamps and durations derive from the cumulative rational sample clock.
+This path does not invoke FFmpeg. It exports a single audio stream and does
+not retain input tags, chapters or compressed codec payloads.
+
+The packet writer rejects incomplete sample frames, non-finite float samples,
+and durations inconsistent with sample counts. Export reserves a temporary
+file, removes it on failure or cancellation, and publishes without replacing
+an existing destination. Progress completion follows publication.
+Tests compare owned decode before and after muxing byte for byte, including
+edited AAC, ALAC, multichannel audio and transformed 44.1 kHz mono intervals.
+An optional FFmpeg reference decode checks float PCM container compatibility.

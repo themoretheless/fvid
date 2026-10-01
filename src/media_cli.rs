@@ -269,7 +269,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         }
     }
     if args.first().map(String::as_str) == Some("decode-audio") && args.len() >= 3
-        && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("f32le" | "wav"))
+        && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("f32le" | "wav" | "mka" | "mkv"))
         && args[3..].iter().all(|arg| !arg.starts_with('-') || matches!(arg.as_str(), "--from" | "--to" | "--quiet" | "--progress" | "--streams" | "--volume" | "--channels" | "--sample-rate" | "--rate"))
         && (fvid::native_media::is_owned_audio_source(std::path::Path::new(&args[1]))? || fvid::native_pcm::is_wave(std::path::Path::new(&args[1]))?)
     {
