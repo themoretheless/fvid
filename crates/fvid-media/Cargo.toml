@@ -31,3 +31,8 @@ bindgen = { version = "0.72.1", optional = true }
 [[bench]]
 name = "ffmpeg_audio_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_time_reference"
+harness = false
+required-features = ["legacy-ffmpeg"]

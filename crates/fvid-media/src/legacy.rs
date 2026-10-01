@@ -457,14 +457,11 @@ impl Input {
                 if chapter.time_base.num <= 0 || chapter.time_base.den <= 0 || chapter.start < 0 {
                     continue;
                 }
-                let absolute = av_rescale_q(
+                let absolute = crate::owned_time::rescale_nearest(
                     chapter.start,
-                    chapter.time_base,
-                    AVRational {
-                        num: 1,
-                        den: 1_000_000,
-                    },
-                );
+                    crate::owned_time::TimeBase { numerator: chapter.time_base.num as u32, denominator: chapter.time_base.den as u32 },
+                    crate::owned_time::TimeBase { numerator: 1, denominator: 1_000_000 },
+                ).unwrap_or(i64::MIN);
                 starts.push(absolute.saturating_sub(origin_us).max(0));
             }
             starts.sort_unstable();
@@ -1039,7 +1036,13 @@ impl Output {
                     if !matches!((*packet.0).dts, i64::MIN | i64::MAX) { (*packet.0).dts = dts; }
                     if (*packet.0).duration > 0 { (*packet.0).duration = duration; }
                 } else {
-                    av_packet_rescale_ts(packet.0, time_base, target);
+                    if time_base.num <= 0 || time_base.den <= 0 || target.num <= 0 || target.den <= 0 { return Err("invalid mux time base".into()); }
+                    let source = crate::owned_time::TimeBase { numerator: time_base.num as u32, denominator: time_base.den as u32 };
+                    let target = crate::owned_time::TimeBase { numerator: target.num as u32, denominator: target.den as u32 };
+                    let [pts, dts, duration] = crate::owned_time::packet_nearest((*packet.0).pts, (*packet.0).dts, (*packet.0).duration, source, target)?;
+                    (*packet.0).pts = pts;
+                    (*packet.0).dts = dts;
+                    (*packet.0).duration = duration;
                 }
             }
             (*packet.0).stream_index = index as i32;
