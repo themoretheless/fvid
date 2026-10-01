@@ -1768,7 +1768,7 @@ def main():
     capabilities=native('capabilities')
     report=dict(created_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),status='passed',checks=checks,
                 capability_counts={k:len(v)for k,v in capabilities.items()if isinstance(v,list)},
-                capability_note='Inventory of linked library; not proof of implemented or tested Fvid workflows.',
+                capability_note='Inventory of owned FVid components; not proof of all profiles or workflows.',
                 library_version=capabilities['library_version'],binary_sha256=hashlib.sha256(BINARY.read_bytes()).hexdigest(),
                 source_sha256={str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in [*ROOT.joinpath('src').rglob('*.rs'),*ROOT.joinpath('crates/fvid-media/src').rglob('*.rs'),ROOT/'crates/fvid-media/build.rs',ROOT/'Cargo.toml',ROOT/'Cargo.lock',ROOT/'crates/fvid-media/Cargo.toml',pathlib.Path(__file__)]})
     (ROOT/'benchmarks/media-validation.json').write_text(json.dumps(report,indent=2)+'\n')

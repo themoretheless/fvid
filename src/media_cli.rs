@@ -2,6 +2,11 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str)==Some("capabilities") {
+        if args.len()!=1 {return Err("capabilities accepts no arguments".into());}
+        println!("{}",serde_json::to_string_pretty(&fvid::native_capabilities::inventory())?);
+        return Ok(());
+    }
     let normalization_plan=args.first().map(String::as_str)==Some("plan") && args.get(1).map(String::as_str)==Some("normalize-loudness");
     let args=if normalization_plan {&args[1..]} else {args};
     if args.first().map(String::as_str)==Some("plan") && args.get(1).map(String::as_str)==Some("loudness") {
@@ -947,16 +952,6 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         {
             return Err("play requires cargo build --features media,player".into());
         }
-    }
-    if command == "capabilities" {
-        if args.len() != 1 {
-            return Err(help.into());
-        }
-        println!(
-            "{}",
-            serde_json::to_string_pretty(&fvid_media::capabilities())?
-        );
-        return Ok(());
     }
     if command == "probe" {
         // A file whose bytes carry no signature names no demuxer, so the caller has to: the

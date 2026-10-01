@@ -438,3 +438,8 @@ pub fn normalize_loudness_controlled(source: &std::path::Path, destination: &std
     };
     crate::native_pcm::normalize_loudness_file_controlled(source,destination,options.streams.first().copied(),weights,target,options.cancel.as_ref(),progress).map_err(|e|e.to_string())
 }
+
+/// Owned component inventory; consult operation plans for profile/workflow support.
+pub fn capabilities() -> Capabilities {
+    crate::native_capabilities::inventory()
+}

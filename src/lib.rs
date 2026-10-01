@@ -76,6 +76,7 @@ pub mod player_gpu;
 #[cfg(feature = "media")]
 pub mod media;
 pub mod native_media;
+pub mod native_capabilities;
 pub mod native_pcm;
 pub mod native_geometry;
 pub mod native_chromashift;

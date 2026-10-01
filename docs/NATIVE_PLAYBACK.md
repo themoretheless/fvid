@@ -2636,9 +2636,9 @@ nested restoration. Unknown names continue through the existing adapter.
 
 Backend capability inventories and subtitle conversion results are shared
 through `fvid-media-info`, without codec or demuxer linkage. The legacy adapter
-re-exports these types for API compatibility. The inventory operation itself
-still queries the legacy backend; moving its result type does not remove
-FFmpeg linkage from the `media` feature.
+re-exports these types for API compatibility. The public inventory operation uses owned component names and never queries
+the legacy backend. Other operations still retain FFmpeg linkage through the
+`media` feature.
 
 `SubtitleCodec` and `SubtitleConvertOptions` also belong to the independent
 media description crate. `native_subtitle::try_convert_with_options` accepts
@@ -2897,3 +2897,16 @@ with audio before and after video in track order. The FFV1 inputs used by
 these tests are first created by the owned exporter. Planar pixel-format
 reporting covers 4:2:0, 4:2:2, 4:4:4, 4:4:0, 4:1:1 and 4:1:0, matching the
 owned FFV1 encoder's accepted subsampling layouts.
+
+### Owned capabilities API and CLI
+
+`native_capabilities::inventory()`, `media::capabilities()` and
+`fvid media capabilities` report the same deterministic owned component
+inventory. The CLI works with no default features and no `media` feature.
+The existing JSON shape is retained; `library_version` identifies FVid.
+The MCP endpoint also uses this inventory. Opus packet transport is not
+listed as an audio decoder, and foreign encoders/filters are not advertised.
+A listed component does not establish every codec profile, option or combined
+workflow: consult owned operation plans and codec coverage documentation.
+This change removes the legacy inventory call; it does not yet remove other
+adapter calls or FFmpeg linkage from the overall `media` feature.

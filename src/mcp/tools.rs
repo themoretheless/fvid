@@ -237,7 +237,7 @@ pub(super) fn execute(
     }
     if name == "fvid_capabilities" {
         return Ok(
-            json!({"library":media::capabilities(),"note":"Library inventory, not tested workflow coverage","tools":DEFINITIONS.iter().map(|d| d.0).collect::<Vec<_>>() }),
+            json!({"library":media::capabilities(),"note":"Owned component inventory, not tested workflow coverage","tools":DEFINITIONS.iter().map(|d| d.0).collect::<Vec<_>>() }),
         );
     }
     if name == "fvid_devices" {
@@ -553,4 +553,16 @@ fn y4m(input: &std::path::Path, output: &std::path::Path, args: &Args) -> Result
     Ok(
         json!({"frames":stats.frames,"input_bytes":stats.input_bytes,"output_bytes":stats.output_bytes,"backend":stats.backend.to_string(),"device":stats.device_name,"controlled_memory_bytes":stats.controlled_memory_bytes,"transfers":transfers}),
     )
+}
+
+#[cfg(test)]
+mod owned_inventory_tests {
+    use super::*;
+    #[test]
+    fn capabilities_tool_reports_owned_inventory() {
+        let server=Server::new(env!("CARGO_MANIFEST_DIR")).unwrap();
+        let result=execute(&server,"fvid_capabilities",Map::new()).unwrap();
+        assert_eq!(result["library"],serde_json::to_value(crate::native_capabilities::inventory()).unwrap());
+        assert_eq!(result["note"],"Owned component inventory, not tested workflow coverage");
+    }
 }
