@@ -381,5 +381,5 @@ pub fn concat_mp4_matroska(sources: &[std::path::PathBuf]) -> Result<Option<Medi
         steps:vec![PlanStep {action:"copy".into(),detail:"FVid AVC/HEVC/AAC packet copy; preserve decode order and shift each segment by its presented duration".into()},
             PlanStep {action:"mux".into(),detail:"FVid Matroska muxer; retain first-input track/file metadata and offset all input chapters".into()},
             PlanStep {action:"publish".into(),detail:"Atomic publication without overwriting; completion only after publication".into()}],graph:None,
-        notes:vec!["backend: fvid; output .mkv or audio-only .mka".into(),"Per-segment AAC priming is not yet admitted on this path".into()]}))
+        notes:vec!["backend: fvid; output .mkv or audio-only .mka".into(),"AAC priming is retained through global CodecDelay and per-segment signed DiscardPadding".into()]}))
 }

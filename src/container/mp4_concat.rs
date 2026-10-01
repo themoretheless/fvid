@@ -39,8 +39,7 @@ pub struct Segment<R> {
     offset: u64,
     duration: u64,
 }
-/// Admission validates all inputs before creating output. Primed AAC requires
-/// per-segment priming transport and retains its existing route until implemented.
+/// Admission validates all inputs and per-segment trim transport before output.
 pub fn open(
     sources: &[PathBuf],
     cancel: Option<&CancelFlag>,
@@ -85,14 +84,11 @@ pub fn open(
         {
             return Ok(None);
         }
-        let plans = reader
+        let mut plans = reader
             .tracks()
             .iter()
             .map(|t| mp4_matroska::plan(t, reader.movie_timescale(), cancel))
             .collect::<Result<Vec<_>>>()?;
-        if plans.iter().any(|p| p.options.codec_delay_ns != 0) {
-            return Ok(None);
-        }
         let mut duration = 0;
         for p in &plans {
             for packet in &p.packets {
@@ -105,12 +101,22 @@ pub fn open(
                     .ok_or_else(|| invalid("concat interval overflow"))?;
                 let end = end
                     .checked_sub(packet.options.discard_padding_ns.max(0) as u64)
-                    .ok_or_else(|| invalid("concat padding exceeds interval"))?;
+                    .ok_or_else(|| invalid("concat padding exceeds interval"))?
+                    .saturating_sub(p.options.codec_delay_ns);
                 duration = duration.max(end);
             }
         }
         if duration == 0 {
             return Err(invalid("concat segment has no presented media"));
+        }
+        for (track, plan) in plans.iter_mut().enumerate() {
+            let local_delay = plan.options.codec_delay_ns;
+            let global_delay = segments.first().map_or(local_delay, |first| {
+                first.plans[track].options.codec_delay_ns
+            });
+            if !transport_priming(plan, offset, global_delay, segments.is_empty())? {
+                return Ok(None);
+            }
         }
         let next = offset
             .checked_add(duration)
@@ -126,6 +132,35 @@ pub fn open(
     }
     Ok(Some(segments))
 }
+fn transport_priming(
+    plan: &mut TrackPlan,
+    offset: u64,
+    global_delay: u64,
+    first: bool,
+) -> Result<bool> {
+    let local_delay = plan.options.codec_delay_ns;
+    for packet in &mut plan.packets {
+        let pts = i128::from(offset) + i128::from(packet.pts) + i128::from(global_delay)
+            - i128::from(local_delay);
+        if !(0..=i128::from(i64::MAX)).contains(&pts) {
+            return Ok(false);
+        }
+        if !first {
+            let head = local_delay.saturating_sub(packet.pts).min(packet.duration);
+            if head > 0 {
+                // One signed DiscardPadding cannot represent both ends of a
+                // single partially retained packet. Retain existing routing.
+                if packet.options.discard_padding_ns > 0 {
+                    return Ok(false);
+                }
+                packet.options.discard_padding_ns =
+                    -i64::try_from(head).map_err(|_| invalid("concat priming overflow"))?;
+            }
+        }
+    }
+    Ok(true)
+}
+
 /// Copy payloads unchanged, preserving per-track decode order and edited PTS.
 /// Caller owns atomic publication and final completion notification.
 pub fn write<R: Read + Seek, W: Write + Seek>(
@@ -179,10 +214,13 @@ pub fn write<R: Read + Seek, W: Write + Seek>(
             check(cancel)?;
             let packet = &segment.plans[track].packets[index];
             segment.reader.read_packet(track, index, &mut payload)?;
-            let pts = segment
-                .offset
-                .checked_add(packet.pts)
-                .ok_or_else(|| invalid("concat packet timestamp overflow"))?;
+            let pts = u64::try_from(
+                i128::from(segment.offset)
+                    + i128::from(packet.pts)
+                    + i128::from(options[track].codec_delay_ns)
+                    - i128::from(segment.plans[track].options.codec_delay_ns),
+            )
+            .map_err(|_| invalid("concat packet timestamp overflow"))?;
             let sync = segment.reader.tracks()[track]
                 .samples
                 .get(index)
@@ -208,4 +246,57 @@ pub fn write<R: Read + Seek, W: Write + Seek>(
     let event = writer.finish()?;
     check(cancel)?;
     Ok(event)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::{
+        matroska_write::{PacketOptions, TrackOptions},
+        mp4_matroska::PacketTime,
+    };
+    use super::*;
+    fn plan(delay: u64, count: u64, tail: i64) -> TrackPlan {
+        TrackPlan {
+            options: TrackOptions {
+                codec_delay_ns: delay,
+                ..Default::default()
+            },
+            packets: (0..count)
+                .map(|i| PacketTime {
+                    pts: i * 100,
+                    duration: 100,
+                    dts: i128::from(i * 100),
+                    options: PacketOptions {
+                        discard_padding_ns: if i + 1 == count { tail } else { 0 },
+                        ..Default::default()
+                    },
+                })
+                .collect(),
+        }
+    }
+    #[test]
+    fn delay_spanning_multiple_packets_becomes_per_packet_head_padding() {
+        let mut value = plan(250, 4, 20);
+        assert!(transport_priming(&mut value, 1000, 250, false).unwrap());
+        assert_eq!(
+            value
+                .packets
+                .iter()
+                .map(|p| p.options.discard_padding_ns)
+                .collect::<Vec<_>>(),
+            [-100, -100, -50, 20]
+        );
+        assert_eq!(value.options.codec_delay_ns, 250);
+    }
+    #[test]
+    fn a_second_packet_trimmed_at_both_ends_retains_existing_routing() {
+        let mut value = plan(25, 1, 30);
+        assert!(!transport_priming(&mut value, 100, 25, false).unwrap());
+        assert!(transport_priming(&mut value, 0, 25, true).unwrap());
+        assert_eq!(value.packets[0].options.discard_padding_ns, 30);
+    }
+    #[test]
+    fn unrepresentable_negative_packet_time_is_not_admitted() {
+        assert!(!transport_priming(&mut plan(250, 4, 0), 100, 0, false).unwrap());
+    }
 }

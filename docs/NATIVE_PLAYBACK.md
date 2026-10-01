@@ -2958,7 +2958,7 @@ still retain their previous routing.
 ### Owned compressed MP4 concat into Matroska
 
 `media::concat` and `media::plan_concat` use the owned MP4/Matroska route for
-compatible AVC, HEVC and unprimed AAC inputs with default copy options.
+compatible AVC, HEVC and AAC inputs with representable priming and default copy options.
 `native_export::try_concat_mp4_matroska` provides the operation without the
 legacy `media` feature. It admits 2..=256 sources with matching track order,
 codec configuration, geometry, audio layout and display metadata. Each video
@@ -2970,8 +2970,8 @@ input; all input chapters are shifted to their segment offsets.
 
 Output is `.mkv`, or `.mka` for audio-only input. Source compatibility is checked
 before output reservation; export uses the existing atomic no-overwrite contract
-and cancellation/completion hooks. Incompatible sources, AAC with per-segment
-codec delay, other destinations and unmigrated copy options retain their previous
+and cancellation/completion hooks. Incompatible sources, unrepresentable per-packet
+trimming, other destinations and unmigrated copy options retain their previous
 routing. This is compressed stream concat, with one continuous decoder state;
 it does not promise the PCM from restarting an AAC decoder at every segment.
 
@@ -2979,7 +2979,7 @@ Tests check AVC, HEVC and Main10 decoded samples, packet identities and interval
 shifts, mixed AVC/AAC track offsets, AAC against the same concatenated ADTS coded
 sequence, and cancellation/no-overwrite publication. Independent FFmpeg checks
 compare video sample bytes and the complete AAC PCM sequence. Whole-feature
-FFmpeg independence and general per-segment priming remain unfinished.
+FFmpeg independence remains unfinished.
 
 The CLI also dispatches compressed concat before the legacy feature gate:
 
@@ -3011,7 +3011,26 @@ Independent FFmpeg verification uses timestamp compensation with zero minimum
 compensation threshold so even the 0.5 ms fixture gap is represented. Existing
 AAC, audio API/plan, WAVE, MP4 remux/concat and lossless Matroska regressions also
 pass. This supplies the presentation timeline needed for per-segment AAC priming;
-compressed concat admission still retains the previous route for nonzero AAC
-codec delay pending its transport implementation. Metadata semantics follow
+compressed concat now transports representable per-segment AAC priming as
+described below. Metadata semantics follow
 [Matroska DiscardPadding](https://www.matroska.org/technical/elements.html#DiscardPadding)
 and [CodecDelay timestamp rules](https://www.matroska.org/technical/notes.html).
+
+### AAC priming during compressed concat
+
+The first input's CodecDelay remains the output track delay. Subsequent segment
+packet times compensate for their own delay and the output delay, so audible
+samples begin at the segment offset. Negative DiscardPadding removes each
+subsequent segment's priming from its prefix packets; a delay spanning several
+packets is split across them. Existing positive tail padding is preserved and
+segment offsets use audible duration rather than including priming. Payloads
+are never rewritten.
+
+A subsequent single packet requiring both head and tail trimming, or a prefix
+whose timestamp cannot be represented by the owned muxer, retains its previous
+routing. Tests cover multi-packet delay transport and these admission limits.
+The edited AAC fixture checks unchanged payloads and doubled audible length.
+An independently encoded AAC tone without PNS checks both independent decoding
+and owned PCM against repeated source PCM at the join, within 1e-6 sample error.
+This is a focused AAC regression, not evidence of complete AAC conformance or
+FFmpeg removal from every media workflow.
