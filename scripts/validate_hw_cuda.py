@@ -1,26 +1,64 @@
 #!/usr/bin/env python3
-"""Smoke NVDEC → fvid-cuda NV12 filter → NVENC on NVIDIA Windows/Linux."""
+"""Qualify CUDA shaders and native NV12/P010 plus NVDEC → filter → NVENC."""
+import atexit
 import argparse
 import datetime
 import hashlib
 import json
 import pathlib
+import os
 import subprocess
 import tempfile
 from common import ROOT, prepend_cuda_bin, release_binary
+from cuda_qualification import qualify_native_tests
 
 prepend_cuda_bin()
 parser = argparse.ArgumentParser()
 parser.add_argument("--binary", default=str(release_binary()))
-binary = pathlib.Path(parser.parse_args().binary).resolve()
+parser.add_argument("--report", default=str(ROOT / "benchmarks/hw-validation.json"))
+args = parser.parse_args()
+binary = pathlib.Path(args.binary).resolve()
 checks = []
+report = {
+    "created_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest() if binary.is_file() else None,
+    "checks": checks,
+    "status": "failed",
+}
+
+
+def save_report():
+    destination = pathlib.Path(args.report).resolve()
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=destination.parent, delete=False) as handle:
+        json.dump(report, handle, indent=2)
+        handle.write("\n")
+        temporary = handle.name
+    os.replace(temporary, destination)
+
+
+atexit.register(save_report)
 
 
 def run(cmd):
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT)
+    except OSError as error:
+        report["error"] = f"{cmd}: {error}"
+        raise
     if result.returncode:
+        report["error"] = f"{cmd}\n{result.stdout[-4096:]}\n{result.stderr[-4096:]}"
         raise RuntimeError(f"{cmd}\n{result.stderr}")
     return result
+
+
+report["nvidia"] = run(["nvidia-smi", "--query-gpu=name,driver_version", "--format=csv,noheader"]).stdout.strip()
+try:
+    report["native_tests"] = qualify_native_tests(ROOT, run)
+except RuntimeError as error:
+    report["error"] = str(error)
+    raise
+checks.append("physical CUDA point/sampling, NV12/P010, stream lifetime and NVENC tests")
 
 
 with tempfile.TemporaryDirectory(prefix="fvid-hw-") as temp:
@@ -87,6 +125,7 @@ with tempfile.TemporaryDirectory(prefix="fvid-hw-") as temp:
         ])
         assert frame_md5(actual) == frame_md5(expected)
         assert stats["video_frames"] == 25
+        assert stats["host_frame_copies"] == 0
         checks.append(f"{name} decoded frames match FFmpeg")
     fused_reference = root / "ffmpeg-fused.mp4"
     run([
@@ -131,11 +170,31 @@ with tempfile.TemporaryDirectory(prefix="fvid-hw-") as temp:
     ])
     assert decode_stats["video_frames"] == 25
     checks.append("decode-only frame count matches FFmpeg")
+    main10 = ROOT / "tests/fixtures/hevc/main10-ipb.mp4"
+    main10_output = root / "main10-shader.mkv"
+    shader_stats = json.loads(run([
+        str(binary), "media", "hw-filter", str(main10), str(main10_output),
+        "--crop", "0:0:64:64", "--hflip", "--vflip",
+        "--cuda-sampling-shader", str(ROOT / "shaders/boxblur.cu"),
+    ]).stdout)
+    def video_probe(path):
+        return json.loads(run([
+            "ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0",
+            "-show_entries", "stream=codec_name,pix_fmt,width,height,nb_read_frames",
+            "-of", "json", str(path),
+        ]).stdout)["streams"][0]
+    source_probe = video_probe(main10)
+    shader_probe = video_probe(main10_output)
+    assert shader_stats["encoder"] == "hevc_nvenc"
+    assert shader_stats["filter"] == "cuda-sampling-shader"
+    assert shader_stats["host_frame_copies"] == 0
+    assert shader_stats["video_frames"] == int(source_probe["nb_read_frames"])
+    assert shader_stats["device_filter_passes"] == shader_stats["video_frames"]
+    assert shader_probe["codec_name"] == "hevc"
+    assert shader_probe["pix_fmt"] == "yuv420p10le"
+    assert (shader_probe["width"], shader_probe["height"]) == (64, 64)
+    assert shader_probe["nb_read_frames"] == source_probe["nb_read_frames"]
+    report["main10_cli"] = {"stats": shader_stats, "probe": shader_probe}
+    checks.append("provided CLI binary executes P010 sampling shader and encodes decodable HEVC Main10")
 
-report = {
-    "created_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-    "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
-    "checks": checks,
-    "status": "passed",
-}
-(ROOT / "benchmarks/hw-validation.json").write_text(json.dumps(report, indent=2) + "\n")
+report["status"] = "passed"

@@ -15,11 +15,11 @@ unsafe_code = "forbid"
 
 [features]
 default = ["gpu", "cuda"]
-player = ["dep:eframe", "dep:rfd", "dep:fvid-platform", "dep:cpal", "dep:symphonia", "videotoolbox", "fvid-media?/player"]
-# Hardware H.264 decoding through Apple VideoToolbox; a no-op off macOS.
+player = ["dep:pollster", "dep:naga", "dep:eframe", "dep:rfd", "dep:fvid-platform", "dep:cpal", "dep:symphonia", "videotoolbox", "fvid-vt?/metal", "fvid-media?/player"]
+# Hardware decode and H.264/HEVC encode through VideoToolbox; a no-op off macOS.
 videotoolbox = ["dep:fvid-vt"]
 cuda = ["dep:fvid-cuda"]
-gpu = ["dep:wgpu", "dep:pollster"]
+gpu = ["dep:wgpu", "dep:pollster", "dep:naga"]
 mcp = ["media", "dep:rmcp", "dep:tokio", "dep:axum", "dep:serde"]
 media = ["dep:fvid-media"]
 # Native media + CUDA NVDEC/NVENC vertical slice (pulls fvid-media/cuda-hw).
@@ -40,6 +40,7 @@ cpal = { version = "0.15", optional = true }
 symphonia = { version = "0.6", optional = true, features = ["adpcm", "vorbis", "mp3", "mp2", "flac", "isomp4"] }
 wgpu = { version = "=30.0.1", optional = true, default-features = false, features = ["std", "parking_lot", "metal", "vulkan", "dx12", "gles", "wgsl"] }
 pollster = { version = "0.4", optional = true }
+naga = { version = "=30.0.1", optional = true, features = ["wgsl-in"] }
 
 fvid-cuda = { path = "crates/fvid-cuda", optional = true }
 fvid-media = { path = "crates/fvid-media", optional = true }

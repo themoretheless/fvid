@@ -18,3 +18,26 @@ pub struct TransferStats {
 mod pipeline;
 #[cfg(any(feature = "gpu", feature = "cuda"))]
 pub use pipeline::{GpuPipeline, ResidentFrame, UploadedFrame};
+
+#[cfg(feature = "gpu")]
+mod shader;
+#[cfg(feature = "gpu")]
+pub use shader::ByteShader;
+
+/// A transform followed by an optional programmable planar-byte filter.
+#[derive(Clone, Debug, Default)]
+pub struct GpuStage {
+    pub transform: crate::Transform,
+    #[cfg(feature = "gpu")]
+    pub shader: Option<ByteShader>,
+    #[cfg(feature = "cuda")]
+    pub cuda_shader: Option<fvid_cuda::ByteShader>,
+}
+impl From<crate::Transform> for GpuStage {
+    fn from(transform: crate::Transform) -> Self {
+        Self {
+            transform,
+            ..Default::default()
+        }
+    }
+}

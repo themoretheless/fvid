@@ -4,10 +4,20 @@
 //! # Windows: put CUDA bin\x64 on PATH (nvrtc64_130_0.dll)
 //! cargo run -p fvid-cuda --example emit_ptx --release
 //! ```
+#[cfg(any(target_os = "linux", target_os = "windows"))]
 use cudarc::nvrtc::{CompileOptions, compile_ptx_with_opts};
+#[cfg(any(target_os = "linux", target_os = "windows"))]
 use std::fs;
+#[cfg(any(target_os = "linux", target_os = "windows"))]
 use std::path::PathBuf;
 
+#[cfg(not(any(target_os = "linux", target_os = "windows")))]
+fn main() {
+    eprintln!("PTX generation requires Linux or Windows with NVIDIA NVRTC installed");
+    std::process::exit(1);
+}
+
+#[cfg(any(target_os = "linux", target_os = "windows"))]
 fn main() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let out = root.join("ptx");

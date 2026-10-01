@@ -5,6 +5,9 @@
 //! button in the middle while paused, and a thin progress line with round
 //! controls along the bottom. Controls fade out while the video plays and
 //! the pointer rests; any movement brings them back.
+#[path = "player_skin.rs"]
+mod player_skin;
+
 use crate::color::{
     Chromaticity, ColourDescription, CubePlan, DisplayTarget, Grade, HdrMetadata, Interpolation,
     Log, Lut, MasteringDisplay, MatrixCoeff, Primaries, Settings, ToneMap, Transfer,
@@ -175,6 +178,10 @@ impl Grading {
 /// What `fvid play` was asked for: the inputs to queue, and how the first of
 /// them starts, stops and runs at.
 struct PlayArgs {
+    gpu_backend: crate::Backend,
+    gpu_device: usize,
+    shader: Option<crate::player_gpu::ColorShader>,
+    skin: player_skin::Skin,
     paths: Vec<PathBuf>,
     start: Option<Duration>,
     stop: Option<Duration>,
@@ -222,6 +229,10 @@ struct PlayArgs {
 /// Read the options `fvid play` answers, in either `--flag VALUE` or
 /// `--flag=VALUE` form. Everything that is not an option joins the queue.
 fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
+    let mut gpu_backend = crate::Backend::Auto;
+    let mut gpu_device = 0;
+    let mut shader = None;
+    let mut skin = player_skin::Skin::default();
     let mut paths = Vec::new();
     let mut start = None;
     let mut stop = None;
@@ -251,6 +262,28 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         };
         index += 1;
         match flag {
+            "--backend" => {
+                gpu_backend = option_value(args, &mut index, flag, inline)?.parse()?;
+                if matches!(gpu_backend, crate::Backend::Cpu | crate::Backend::Cuda) {
+                    return Err(crate::invalid("player renderer requires auto, metal, vulkan, dx12 or gl"));
+                }
+            }
+            "--device" => {
+                gpu_device = option_value(args, &mut index, flag, inline)?.parse()
+                    .map_err(|_| crate::invalid("invalid player GPU device"))?;
+            }
+            "--shader" => {
+                use std::io::Read;
+                if shader.is_some() { return Err(crate::invalid("only one display shader is supported")); }
+                let path = option_value(args, &mut index, flag, inline)?;
+                let mut source = String::new();
+                File::open(path)?.take(64 * 1024 + 1).read_to_string(&mut source)?;
+                shader = Some(crate::player_gpu::ColorShader::new(&source)?);
+            }
+            "--skin" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                skin = player_skin::Skin::load(&value)?;
+            }
             "--start-time" => {
                 let value = option_value(args, &mut index, flag, inline)?;
                 start = Some(parse_clock(&value)?);
@@ -387,7 +420,14 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
     {
         return Err(crate::invalid("--stop-time is before --start-time"));
     }
+    if gpu_backend == crate::Backend::Auto && gpu_device != 0 {
+        return Err(crate::invalid("--device requires an explicit player backend when not zero"));
+    }
     Ok(PlayArgs {
+        gpu_backend,
+        gpu_device,
+        shader,
+        skin,
         paths,
         start,
         stop,
@@ -851,6 +891,9 @@ fn read_lut(path: &str) -> crate::Result<Lut> {
 
 pub fn run(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
     let parsed = parse_play_args(&args)?;
+    crate::playback_spool::reserve_startup_buffer();
+    let gpu_configuration = crate::player_gpu::configuration(parsed.gpu_backend, parsed.gpu_device)?;
+    let shader = parsed.shader;
     let mut app = Player {
         queue: expand_inputs(&parsed.paths),
         bounds: PlayBounds {
@@ -874,6 +917,7 @@ pub fn run(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
         aspect: parsed.aspect,
         adjust: parsed.adjust,
         grading: parsed.grading,
+        skin: parsed.skin,
         ..Default::default()
     };
     if app.shuffle {
@@ -882,10 +926,9 @@ pub fn run(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
         // draw rather than the second item.
         app.start_shuffle();
     }
-    if let Some(path) = app.queue.first().cloned() {
-        app.open(path)?;
-    }
     let options = eframe::NativeOptions {
+        renderer: eframe::Renderer::Wgpu,
+        wgpu_options: gpu_configuration,
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([1280.0, 800.0])
             .with_min_inner_size([480.0, 320.0])
@@ -902,8 +945,15 @@ pub fn run(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
         options,
         Box::new(move |cc| {
             if let Some(state) = cc.wgpu_render_state.as_ref() {
-                crate::player_gpu::install(state);
+                crate::player_gpu::install_with_shader(state, shader.as_ref())?;
+                #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                { app.shared_surfaces = state.device.adapter_info().backend == eframe::wgpu::Backend::Metal
+                    && state.device.features().contains(eframe::wgpu::Features::TEXTURE_FORMAT_16BIT_NORM); }
+            } else {
+                return Err("GPU renderer was not initialized".into());
             }
+            app.asynchronous_open = true;
+            if let Some(path) = app.queue.first().cloned() { app.try_open(path); }
             Ok(Box::new(app))
         }),
     )
@@ -919,15 +969,8 @@ const FRAME: Color32 = Color32::from_rgb(0x1a, 0x1a, 0x1d);
 const TEXT: Color32 = Color32::from_rgb(0xee, 0xeb, 0xe4);
 const MUTED: Color32 = Color32::from_rgb(0xa8, 0xa4, 0x9b);
 const DIM: Color32 = Color32::from_rgb(0x7a, 0x77, 0x70);
-/// The part of the item already on local disk, as a faint cut of the played
-/// bar's own colour: the same bytes the picture is made of, held back a step.
-const COVER: Color32 = Color32::from_rgba_premultiplied(242, 107, 29, 38);
-const ACCENT: Color32 = Color32::from_rgb(0xf2, 0x6b, 0x1d);
 const ERROR: Color32 = Color32::from_rgb(0xf0, 0x7a, 0x6a);
-/// The unplayed part of the progress line.
-const TRACK: Color32 = Color32::from_rgba_premultiplied(43, 42, 41, 46);
-/// The dark backing of the control panel, the key messages and the scrub tip.
-const PANEL: Color32 = Color32::from_rgba_premultiplied(6, 6, 6, 128);
+/// The dark backing of buttons.
 const CHIP: Color32 = Color32::from_rgba_premultiplied(6, 6, 6, 158);
 const CHIP_STRONG: Color32 = Color32::from_rgba_premultiplied(19, 19, 18, 20);
 /// Corner of the control panel and the key messages.
@@ -1095,6 +1138,17 @@ fn paced_period(period: Duration, milli: u32) -> Duration {
         return period;
     }
     Duration::try_from_secs_f64(period.as_secs_f64() * 1_000.0 / f64::from(milli)).unwrap_or(period)
+}
+
+/// Keep the presentation clock running across a late repaint. Resetting it
+/// to the repaint time turns missed refreshes into permanent slow motion.
+fn next_frame_deadline(
+    deadline: Instant,
+    period: Duration,
+    now: Instant,
+    stepping: bool,
+) -> Instant {
+    if stepping { now } else { deadline + period }
 }
 
 /// The control line for a volume change, muted or not.
@@ -1413,11 +1467,86 @@ struct ChapterMark {
 enum Pick {
     /// A file to play, appended to the queue.
     Item,
+    Folder,
     /// A file of cues to caption the item on screen.
     Subtitles,
 }
 
+struct OpenedItem {
+    cache_packets: Vec<(u64, u64, Duration, Duration)>,
+    playback: Option<Playback>,
+    audio: Option<crate::audio_thread::AudioPlayback>,
+    audio_ended: bool,
+    duration: Option<Duration>,
+    seekable: bool,
+    hardware: bool,
+    video_codec: &'static str,
+    bytes: Option<u64>,
+    dimensions: [usize; 2],
+    pixel_aspect: (u32, u32),
+    container_insets: [u32; 4],
+    period: Duration,
+    signal: ColourDescription,
+    hdr: HdrMetadata,
+    grade_line: Option<String>,
+    spool: Option<SpoolHandle>,
+    spool_wait: Option<Instant>,
+    opened: Option<PathBuf>,
+    audio_tracks: Vec<crate::audio::AudioTrack>,
+    audio_track: usize,
+    sound_codec: String,
+    cues: Vec<Cue>,
+    subtitle_name: String,
+    subtitle_sources: Vec<SubtitleSource>,
+    subtitle_source: usize,
+    chapters: Vec<ChapterMark>,
+    file_tags: FileTags,
+    name: String,
+    error: Option<String>,
+    paused: bool,
+    step: u32,
+    ended: bool,
+    stop_time: Option<Duration>,
+    buffering: bool,
+}
+
+enum OpenProgress {
+    Buffer(Arc<std::sync::atomic::AtomicUsize>),
+    Spool(Option<SpoolHandle>),
+    Ready(crate::Result<OpenedItem>),
+}
+
+type PreparedSource = std::io::Result<(crate::playback_spool::Source, Option<SpoolHandle>)>;
+
+struct NextFile {
+    path: PathBuf,
+    source: std::sync::mpsc::Receiver<PreparedSource>,
+    cancelled: Arc<std::sync::atomic::AtomicBool>,
+}
+
+fn prepare_source(path: &Path, cancelled: &std::sync::atomic::AtomicBool) -> PreparedSource {
+    if let Some(source) = crate::playback_spool::Source::in_memory_cancellable(path, None, cancelled)? {
+        return Ok((source, None));
+    }
+    if cancelled.load(std::sync::atomic::Ordering::Acquire) { return Err(std::io::ErrorKind::Interrupted.into()); }
+    // Large files get a bounded local lead even on a fast source.
+    let spool = crate::playback_spool::Spool::adaptive(path)?;
+    let handle = spool.handle();
+    handle.prioritize(0);
+    Ok((crate::playback_spool::Source::Spooled(spool), Some(handle)))
+}
+
 struct Player {
+    next_file: Option<NextFile>,
+    cache_pressure: bool,
+    memory_check: Option<Instant>,
+    prepared_source: Option<std::sync::mpsc::Receiver<PreparedSource>>,
+    cache_packets: Vec<(u64, u64, Duration, Duration)>,
+    loading_buffer: Option<Arc<std::sync::atomic::AtomicUsize>>,
+    asynchronous_open: bool,
+    opening: Option<std::sync::mpsc::Receiver<OpenProgress>>,
+    open_progress: Option<std::sync::mpsc::Sender<OpenProgress>>,
+    skin: player_skin::Skin,
     /// The decoding thread for the open file.
     playback: Option<Playback>,
     /// Audio playback thread for A/V sync (when audio track is present).
@@ -1459,7 +1588,7 @@ struct Player {
     /// texture was built from, so a slider moved while that same frame stands
     /// on screen can rebuild it. The GPU path keeps no copy: its bundle rides
     /// the uniform, and a repaint picks it up the way it picks up a crop.
-    rgb_frame: Option<(Vec<u8>, [usize; 2], [f32; 5])>,
+    rgb_frame: Option<(Arc<Vec<u8>>, [usize; 2])>,
     /// Geometry, period and timeline interval of the frame on screen.
     dimensions: [usize; 2],
     /// How much wider a coded pixel of the item on screen is than it is tall,
@@ -1497,6 +1626,7 @@ struct Player {
     interval: Option<(u128, u128, u32)>,
     /// The next decoded frame, waiting for its presentation deadline.
     queued: Option<Frame>,
+    deferred_event: Option<Event>,
     buffering: bool,
     /// The local copy of a source too slow to stream its own item, and when the
     /// wait for its lead started. Nothing while the source keeps up.
@@ -1507,6 +1637,11 @@ struct Player {
     /// Frame on screen when it is drawn by the GPU shader (planar), with the
     /// grade it still owes and that shader reads.
     video: Option<(Arc<Planar8>, u64, Option<Arc<Grade>>)>,
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    video_surface: Option<(crate::playback_thread::SurfacePixels, u64)>,
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    shared_surfaces: bool,
+    video_packed: Option<(Arc<crate::playback_native::PackedPlanar>, u64, Option<Arc<Grade>>)>,
     /// Frame on screen when it arrived as packed RGB (Y4M, WebM).
     texture: Option<egui::TextureHandle>,
     /// The frame last shown, in whichever layout it came. The snapshot key
@@ -1616,6 +1751,7 @@ struct Player {
 impl Default for Player {
     fn default() -> Self {
         Self {
+            skin: player_skin::Skin::default(),
             playback: None,
             audio: None,
             audio_ended: false,
@@ -1644,12 +1780,27 @@ impl Default for Player {
             period: Duration::ZERO,
             interval: None,
             queued: None,
+            deferred_event: None,
+            next_file: None,
+            cache_pressure: false,
+            memory_check: None,
+            prepared_source: None,
+            cache_packets: Vec::new(),
+            loading_buffer: None,
+            asynchronous_open: false,
+            opening: None,
+            open_progress: None,
             buffering: true,
             spool: None,
             spool_wait: None,
             seek_preview: false,
             seek_target: None,
             video: None,
+            video_packed: None,
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            video_surface: None,
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            shared_surfaces: false,
             texture: None,
             presented: None,
             name: String::new(),
@@ -1707,25 +1858,36 @@ impl Player {
         // A cloud drive answers in bursts no frame clock can wait inside, so
         // the source is measured before it is read: what cannot keep up with
         // its own item is copied to local disk while it plays.
-        let (source, spool) = crate::playback_spool::Source::open(
+        let prepared = self.prepared_source.take().and_then(|receiver| receiver.recv().ok());
+        let used_prefetch = prepared.as_ref().is_some_and(Result::is_ok);
+        let (source, spool) = if let Some(Ok(source)) = prepared {
+            source
+        } else if let Some(source) = crate::playback_spool::Source::in_memory(&path, None)? {
+            (source, None)
+        } else { crate::playback_spool::Source::open(
             &path,
             crate::playback_spool::SPOOL_UNDER,
             crate::playback_spool::SPOOL_LEAD,
-        )?;
+        )? };
         self.spool_wait = spool.is_some().then(Instant::now);
         self.spool = spool;
+        if let Some(progress) = &self.open_progress {
+            let _ = progress.send(OpenProgress::Spool(self.spool.clone()));
+        }
         let video = NativeReader::without_memory_limit(BufReader::with_capacity(
             crate::playback_spool::READ_AHEAD,
             source,
         ))
         .and_then(|mut reader| {
-            if reader.read_frame()? {
-                Ok(reader)
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            if self.shared_surfaces { reader.enable_shared_surfaces()?; }
+            if let Some(first) = reader.read_frame_raw()? {
+                Ok((reader, first))
             } else {
                 Err(crate::invalid("video has no frames"))
             }
         });
-        let mut reader = match video {
+        let (mut reader, mut first_frame) = match video {
             Ok(reader) => reader,
             // A file with nothing to show can still be all sound, and a listener
             // with only ears still wants it played. The reason the picture
@@ -1742,12 +1904,31 @@ impl Player {
                 return Err(video);
             }
         };
+        // Duration becomes known after demuxing. Large short clips also qualify.
+        if !used_prefetch && file_size(&path).is_some_and(|size| size >= 256 << 20) {
+            if let Some(source) = crate::playback_spool::Source::in_memory(&path, reader.duration())? {
+                let mut cached = NativeReader::without_memory_limit(BufReader::with_capacity(
+                    crate::playback_spool::READ_AHEAD, source,
+                ))?;
+                #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                if self.shared_surfaces { cached.enable_shared_surfaces()?; }
+                first_frame = cached.read_frame_raw()?.ok_or_else(|| crate::invalid("video has no frames"))?;
+                reader = cached;
+                self.spool = None;
+                self.spool_wait = None;
+                if let Some(progress) = &self.open_progress {
+                    let _ = progress.send(OpenProgress::Spool(None));
+                }
+            }
+        }
         // `--start-time` and `--stop-time` belong to the first item of the queue.
         let bounds = std::mem::take(&mut self.bounds);
         if let Some(start) = bounds.start {
-            reader.seek(start)?;
+            first_frame = reader.seek_raw(start)?.ok_or_else(|| crate::invalid("start-time has no video frame"))?;
         }
         self.stop_time = bounds.stop;
+        self.cache_packets = reader.cache_packets();
+        self.prioritize_swap(bounds.start.unwrap_or(Duration::ZERO));
         self.duration = reader.duration();
         self.report_duration(&path);
         self.seekable = reader.seekable();
@@ -1764,6 +1945,7 @@ impl Player {
         self.audio = None;
         self.audio_ended = false;
         self.queued = None;
+        self.deferred_event = None;
         self.buffering = true;
         self.seek_preview = false;
         self.seek_target = None;
@@ -1783,7 +1965,10 @@ impl Player {
         });
         self.signal = signal;
         self.hdr = hdr;
-        self.playback = Some(Playback::start(reader, grade));
+        self.playback = Some(Playback::start_from_frame(reader, first_frame, grade));
+        if let Some(progress) = &self.open_progress {
+            let _ = progress.send(OpenProgress::Buffer(self.playback.as_ref().unwrap().buffer_counter()));
+        }
         // The picture of the item before this one is no longer on screen.
         self.presented = None;
         // Try to start audio playback if the file has an audio track.
@@ -1794,6 +1979,11 @@ impl Player {
         self.audio_track = 0;
         self.sound_codec = String::new();
         self.open_item_audio(&path);
+        // A nonzero start must anchor both clocks before the preroll releases
+        // audio; otherwise the picture waits for sound to catch up from zero.
+        if let (Some(start), Some(audio)) = (bounds.start, &mut self.audio) {
+            audio.seek(start);
+        }
         self.apply_audio_controls();
         self.load_subtitles(&path);
         let facts = container_facts(&path);
@@ -1829,11 +2019,15 @@ impl Player {
         self.seekable = false;
         self.audio_ended = false;
         self.queued = None;
+        self.deferred_event = None;
         self.buffering = false;
         self.seek_preview = false;
         self.seek_target = None;
         self.presented = None;
         self.video = None;
+        self.video_packed = None;
+                        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                        { self.video_surface = None; }
         self.texture = None;
         self.rgb_frame = None;
         self.interval = None;
@@ -2104,35 +2298,6 @@ impl Player {
         self.effects = !self.effects;
     }
 
-    /// Rebuild the RGB texture when the settings bundle has changed while the
-    /// same frame stood on screen — a slider moved over a paused picture, say.
-    /// The GPU path needs no such work: its bundle rides the uniform, and the
-    /// repaint a slider already causes picks it up the way it picks up a crop.
-    fn refresh_rgb_texture(&mut self) {
-        let scalars = adjust_scalars(&self.adjust);
-        let Some(texture) = self.texture.as_mut() else {
-            return;
-        };
-        let Some((raw, dimensions, applied)) = self.rgb_frame.as_mut() else {
-            return;
-        };
-        if *applied == scalars {
-            return;
-        }
-        let mut adjusted = Vec::new();
-        let pixels = if scalars == ADJUST_IDENTITY {
-            raw.as_slice()
-        } else {
-            adjust_rgb(raw, &mut adjusted, &scalars);
-            &adjusted
-        };
-        texture.set(
-            egui::ColorImage::from_rgb(*dimensions, pixels),
-            egui::TextureOptions::LINEAR,
-        );
-        *applied = scalars;
-    }
-
     /// Gather the subtitle sources of a file: a SubRip, WebVTT or ASS file
     /// sitting next to the video, the way VLC loads a sidecar without being
     /// told, then the plain-text tracks the container itself carries. The first
@@ -2285,6 +2450,20 @@ impl Player {
             .as_ref()
             .ok_or_else(|| crate::invalid("nothing has been shown yet"))?;
         match &frame.pixels {
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            Pixels::Surface(surface) => {
+                let packed = crate::playback_native::surface_to_packed(&surface.surface, surface.colour)?.rotated(surface.rotation)?;
+                let mut rgb = Vec::new();
+                packed.to_rgb(&mut rgb, frame.dimensions[0] * frame.dimensions[1] * 3)?;
+                if let Some(grade) = &surface.grade { grade.apply(&mut rgb); }
+                crate::snapshot::png(frame.dimensions[0], frame.dimensions[1], &rgb)
+            },
+            Pixels::Packed(planes, grade) => {
+                let mut rgb = Vec::new();
+                planes.to_rgb(&mut rgb, planes.frame.width * planes.frame.height * 3)?;
+                if let Some(grade) = grade { grade.apply(&mut rgb); }
+                crate::snapshot::png(planes.frame.width, planes.frame.height, &rgb)
+            }
             Pixels::Planar(planes, grade) => {
                 let mut rgb = Vec::new();
                 crate::playback_native::planar8_to_rgb(
@@ -2424,8 +2603,55 @@ impl Player {
 
     /// Replace the queue with `paths`, open the first of them, and remember
     /// where in the list the picture came from.
+    fn clear_prefetch(&mut self) {
+        if let Some(next) = self.next_file.take() {
+            next.cancelled.store(true, std::sync::atomic::Ordering::Release);
+            // Dropping a completed spool can join its copier.
+            std::thread::spawn(move || drop(next));
+        }
+    }
+
+    fn prefetch_next(&mut self) {
+        if self.memory_check.is_none_or(|at| at.elapsed() >= Duration::from_secs(2)) {
+            self.memory_check = Some(Instant::now());
+            self.cache_pressure = crate::playback_spool::available_memory().is_some_and(|bytes| bytes < 768 << 20);
+            if self.cache_pressure {
+                self.clear_prefetch();
+                crate::playback_spool::release_startup_buffer();
+            }
+        }
+        if self.cache_pressure { return; }
+        if self.opening.is_some() || !self.item_open() || self.ended {
+            return;
+        }
+        let target = if self.repeat == Repeat::One {
+            Some(self.index)
+        } else if self.shuffle {
+            self.upcoming.last().copied().or_else(|| {
+                if self.repeat != Repeat::All || self.queue.is_empty() { return None; }
+                let mut seed = self.shuffle_seed;
+                deal_cycle(self.queue.len(), self.index, &mut seed).pop().or(Some(self.index))
+            })
+        } else {
+            advance(self.index, self.queue.len(), self.repeat)
+        };
+        let path = target.and_then(|index| self.queue.get(index)).cloned();
+        if self.next_file.as_ref().map(|next| &next.path) == path.as_ref() {
+            return;
+        }
+        self.clear_prefetch();
+        let Some(path) = path else { return; };
+        let (send, source) = std::sync::mpsc::channel();
+        let cancelled = Arc::new(std::sync::atomic::AtomicBool::new(false));
+        self.next_file = Some(NextFile { path: path.clone(), source, cancelled: cancelled.clone() });
+        std::thread::spawn(move || {
+            let _ = send.send(prepare_source(&path, &cancelled));
+        });
+    }
+
     fn open_queue(&mut self, paths: Vec<PathBuf>) {
-        self.queue = paths;
+        self.clear_prefetch();
+        self.queue = expand_inputs(&paths);
         self.index = 0;
         if self.shuffle {
             // The old cycle belonged to the old list; a shuffled player gets
@@ -2558,6 +2784,15 @@ impl Player {
     }
 
     fn try_open(&mut self, path: PathBuf) -> bool {
+        if self.next_file.as_ref().is_some_and(|next| next.path == path) {
+            self.prepared_source = self.next_file.take().map(|next| next.source);
+        } else {
+            self.clear_prefetch();
+        }
+        if self.asynchronous_open {
+            self.begin_open(path);
+            return true;
+        }
         match self.open(path.clone()) {
             Ok(()) => true,
             Err(error) => {
@@ -2565,6 +2800,231 @@ impl Player {
                 eprintln!("{message}");
                 self.error = Some(message);
                 false
+            }
+        }
+    }
+
+    fn prioritize_swap(&self, time: Duration) {
+        if let Some(spool) = &self.spool {
+            if let Some(packet) = self
+                .cache_packets
+                .iter()
+                .filter(|packet| packet.2 <= time)
+                .max_by_key(|packet| packet.2)
+            {
+                spool.prioritize(packet.0);
+            }
+        }
+    }
+
+    fn swap_ranges(&self) -> Vec<[f32; 2]> {
+        let (Some(spool), Some(total)) = (&self.spool, self.duration) else {
+            return Vec::new();
+        };
+        if total.is_zero() {
+            return Vec::new();
+        }
+        cached_time_ranges(&self.cache_packets, &spool.ranges(), total)
+    }
+
+    fn begin_open(&mut self, path: PathBuf) {
+        let prepared_source = self.prepared_source.take();
+        let (send, receive) = std::sync::mpsc::channel();
+        let (
+            grading,
+            bounds,
+            no_audio,
+            preferred_audio,
+            preferred_subtitle,
+            subtitle_file,
+            start_paused,
+            volume_milli,
+            muted,
+            rate_milli,
+        ) = (
+            self.grading.clone(),
+            std::mem::take(&mut self.bounds),
+            self.no_audio,
+            self.preferred_audio,
+            self.preferred_subtitle,
+            self.subtitle_file.clone(),
+            self.start_paused,
+            self.volume_milli,
+            self.muted,
+            self.rate_milli,
+        );
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        let shared_surfaces = self.shared_surfaces;
+        let old_video = self.playback.take();
+        let old_audio = self.audio.take();
+        let old_open = self.opening.take();
+        // Joining a reader blocked on a cloud mount belongs off the UI thread.
+        std::thread::spawn(move || {
+            drop(old_video);
+            drop(old_audio);
+            drop(old_open);
+        });
+        self.opening = Some(receive);
+        self.loading_buffer = None;
+        self.spool = None;
+        self.cache_packets.clear();
+        self.duration = None;
+        self.opened = None;
+        self.seekable = false;
+        self.file_tags = FileTags::default();
+        self.chapters.clear();
+        self.cues.clear();
+        self.presented = None;
+        self.video = None;
+        self.video_packed = None;
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        {
+            self.video_surface = None;
+        }
+
+        self.texture = None;
+        self.rgb_frame = None;
+        self.queued = None;
+        self.deferred_event = None;
+        self.seek_target = None;
+        self.seek_preview = false;
+        self.loop_a = None;
+        self.loop_b = None;
+        self.buffering = true;
+        self.ended = false;
+        self.error = None;
+        self.name = path
+            .file_name()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .into_owned();
+        self.activity = Instant::now();
+        std::thread::spawn(move || {
+            let mut prepared = Player {
+                grading,
+                bounds,
+                no_audio,
+                preferred_audio,
+                preferred_subtitle,
+                subtitle_file,
+                start_paused,
+                volume_milli,
+                muted,
+                rate_milli,
+                prepared_source,
+                open_progress: Some(send.clone()),
+                ..Default::default()
+            };
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            {
+                prepared.shared_surfaces = shared_surfaces;
+            }
+            let result = prepared.open(path).map(|()| OpenedItem {
+                cache_packets: prepared.cache_packets,
+                playback: prepared.playback,
+                audio: prepared.audio,
+                audio_ended: prepared.audio_ended,
+                duration: prepared.duration,
+                seekable: prepared.seekable,
+                hardware: prepared.hardware,
+                video_codec: prepared.video_codec,
+                bytes: prepared.bytes,
+                dimensions: prepared.dimensions,
+                pixel_aspect: prepared.pixel_aspect,
+                container_insets: prepared.container_insets,
+                period: prepared.period,
+                signal: prepared.signal,
+                hdr: prepared.hdr,
+                grade_line: prepared.grade_line,
+                spool: prepared.spool,
+                spool_wait: prepared.spool_wait,
+                opened: prepared.opened,
+                audio_tracks: prepared.audio_tracks,
+                audio_track: prepared.audio_track,
+                sound_codec: prepared.sound_codec,
+                cues: prepared.cues,
+                subtitle_name: prepared.subtitle_name,
+                subtitle_sources: prepared.subtitle_sources,
+                subtitle_source: prepared.subtitle_source,
+                chapters: prepared.chapters,
+                file_tags: prepared.file_tags,
+                name: prepared.name,
+                error: prepared.error,
+                paused: prepared.paused,
+                step: prepared.step,
+                ended: prepared.ended,
+                stop_time: prepared.stop_time,
+                buffering: prepared.buffering,
+            });
+            let _ = send.send(OpenProgress::Ready(result));
+        });
+    }
+
+    fn poll_open(&mut self, ctx: &egui::Context) {
+        loop {
+            let Some(receiver) = &self.opening else {
+                return;
+            };
+            let Ok(progress) = receiver.try_recv() else {
+                ctx.request_repaint_after(Duration::from_millis(16));
+                return;
+            };
+            match progress {
+                OpenProgress::Spool(spool) => self.spool = spool,
+                OpenProgress::Buffer(counter) => self.loading_buffer = Some(counter),
+                OpenProgress::Ready(result) => {
+                    self.opening = None;
+                    self.loading_buffer = None;
+                    match result {
+                        Ok(mut ready) => {
+                            std::mem::swap(&mut self.cache_packets, &mut ready.cache_packets);
+                            std::mem::swap(&mut self.playback, &mut ready.playback);
+                            std::mem::swap(&mut self.audio, &mut ready.audio);
+                            std::mem::swap(&mut self.audio_ended, &mut ready.audio_ended);
+                            std::mem::swap(&mut self.duration, &mut ready.duration);
+                            std::mem::swap(&mut self.seekable, &mut ready.seekable);
+                            std::mem::swap(&mut self.hardware, &mut ready.hardware);
+                            std::mem::swap(&mut self.video_codec, &mut ready.video_codec);
+                            std::mem::swap(&mut self.bytes, &mut ready.bytes);
+                            std::mem::swap(&mut self.dimensions, &mut ready.dimensions);
+                            std::mem::swap(&mut self.pixel_aspect, &mut ready.pixel_aspect);
+                            std::mem::swap(&mut self.container_insets, &mut ready.container_insets);
+                            std::mem::swap(&mut self.period, &mut ready.period);
+                            std::mem::swap(&mut self.signal, &mut ready.signal);
+                            std::mem::swap(&mut self.hdr, &mut ready.hdr);
+                            std::mem::swap(&mut self.grade_line, &mut ready.grade_line);
+                            std::mem::swap(&mut self.spool, &mut ready.spool);
+                            std::mem::swap(&mut self.spool_wait, &mut ready.spool_wait);
+                            std::mem::swap(&mut self.opened, &mut ready.opened);
+                            std::mem::swap(&mut self.audio_tracks, &mut ready.audio_tracks);
+                            std::mem::swap(&mut self.audio_track, &mut ready.audio_track);
+                            std::mem::swap(&mut self.sound_codec, &mut ready.sound_codec);
+                            std::mem::swap(&mut self.cues, &mut ready.cues);
+                            std::mem::swap(&mut self.subtitle_name, &mut ready.subtitle_name);
+                            std::mem::swap(&mut self.subtitle_sources, &mut ready.subtitle_sources);
+                            std::mem::swap(&mut self.subtitle_source, &mut ready.subtitle_source);
+                            std::mem::swap(&mut self.chapters, &mut ready.chapters);
+                            std::mem::swap(&mut self.file_tags, &mut ready.file_tags);
+                            std::mem::swap(&mut self.name, &mut ready.name);
+                            std::mem::swap(&mut self.error, &mut ready.error);
+                            std::mem::swap(&mut self.paused, &mut ready.paused);
+                            std::mem::swap(&mut self.step, &mut ready.step);
+                            std::mem::swap(&mut self.ended, &mut ready.ended);
+                            std::mem::swap(&mut self.stop_time, &mut ready.stop_time);
+                            std::mem::swap(&mut self.buffering, &mut ready.buffering);
+                            self.interval = None;
+                            self.deadline = Instant::now();
+                            self.apply_audio_controls();
+                            // Dispose of unused worker state off the drawing thread.
+                            std::thread::spawn(move || drop(ready));
+                        }
+                        Err(error) => {
+                            self.error = Some(error.to_string());
+                            self.buffering = false;
+                        }
+                    }
+                    return;
+                }
             }
         }
     }
@@ -2582,6 +3042,7 @@ impl Player {
         let dialog = rfd::AsyncFileDialog::new();
         let dialog = match what {
             Pick::Item => dialog
+                .add_filter("Playlists", &["m3u", "m3u8", "pls"])
                 .add_filter("Media", &["y4m", "mp4", "mov", "m4a", "webm", "mkv", "mka"])
                 .add_filter(
                     "Audio",
@@ -2590,11 +3051,16 @@ impl Player {
                         "ogg", "mid", "xm",
                     ],
                 ),
+            Pick::Folder => dialog,
             Pick::Subtitles => {
                 dialog.add_filter("Subtitles", &["srt", "vtt", "ass", "ssa", "smi", "smil"])
             }
         };
-        self.dialog = Some((what, Box::pin(dialog.pick_file())));
+        self.dialog = Some((what, if what == Pick::Folder {
+            Box::pin(dialog.pick_folder())
+        } else {
+            Box::pin(dialog.pick_file())
+        }));
     }
 
     /// Ask for a file to caption the item on screen with. An item that is not
@@ -2619,7 +3085,7 @@ impl Player {
             if let Some(handle) = handle {
                 let path = handle.path().to_path_buf();
                 match what {
-                    Pick::Item => self.open_queue(vec![path]),
+                    Pick::Item | Pick::Folder => self.open_queue(vec![path]),
                     Pick::Subtitles => self.add_subtitle_file(path),
                 }
             }
@@ -2692,6 +3158,7 @@ impl Player {
         }
         self.audio_ended = false;
         self.queued = None;
+        self.deferred_event = None;
         self.buffering = true;
         self.seek_preview = false;
         self.seek_target = None;
@@ -2730,12 +3197,14 @@ impl Player {
             audio.seek(target);
         }
         self.audio_ended = false;
+        self.prioritize_swap(target);
         // The placeholder position stands in until the decoder hands over the
         // frame at the other end of the seek; an audio thread answers at once.
         if self.playback.is_some() {
             self.seek_target = Some(target);
             self.seek_preview = true;
             self.queued = None;
+            self.deferred_event = None;
             self.buffering = true;
         }
         self.ended = false;
@@ -2875,6 +3344,12 @@ impl Player {
                 }
             }
         }
+        // Failed workers cannot answer a future Seek or advance their clock.
+        // Remove that handle so seeking does not re-enable a permanently stopped
+        // audio gate. Keep a healthy EOF handle: it can still seek and resume.
+        if failure.is_some() {
+            self.audio = None;
+        }
         // For an item that is only sound the track running out is the item
         // running out, so the queue carries on as it does after a last frame.
         if (ran_out || failure.is_some()) && self.playback.is_none() && !self.ended {
@@ -2930,6 +3405,10 @@ impl Player {
 
     /// Take decoded frames from the thread and show the one whose time has come.
     fn present(&mut self, ctx: &egui::Context) {
+        if let Some(packets) = self.playback.as_ref().and_then(|playback| playback.cache_packets_if_changed(self.cache_packets.len())) {
+            self.cache_packets = packets;
+        }
+        if let Some(time) = self.seek_target.or_else(|| self.timeline().0) { self.prioritize_swap(time); }
         self.poll_audio();
         if self.playback.is_none() {
             self.tick_sound(ctx);
@@ -2945,7 +3424,7 @@ impl Player {
         let generation = playback.generation();
         let mut ran_out = false;
         while self.queued.is_none() {
-            match playback.poll() {
+            match self.deferred_event.take().or_else(|| playback.poll()) {
                 Some(Event::Frame(frame)) if frame.generation < generation => continue,
                 Some(Event::Frame(frame)) => self.queued = Some(frame),
                 Some(Event::Ended(at)) => {
@@ -2993,47 +3472,88 @@ impl Player {
                 audio.play();
             }
         }
+        // Replace expired pictures with newer decoded ones before uploading.
+        // Keep the last available picture when the decoder is starved, and
+        // bound the drain so a long stall cannot monopolize the UI thread.
+        if !stepping && !self.seek_preview && !self.paused {
+            for _ in 0..64 {
+                let Some(frame) = &self.queued else { break };
+                let period = paced_period(frame.period, self.rate_milli);
+                let expired = if let (Some(audio), Some((pts, scale))) = (&self.audio, frame.pts) {
+                    if !self.audio_ended && scale != 0 {
+                        let end = pts as f64 / f64::from(scale) + frame.period.as_secs_f64();
+                        delayed_clock(audio.position(), self.audio_delay_ms).as_secs_f64() >= end
+                    } else {
+                        now >= self.deadline + period
+                    }
+                } else {
+                    now >= self.deadline + period
+                };
+                if !expired {
+                    break;
+                }
+                match self.playback.as_ref().unwrap().poll() {
+                    Some(Event::Frame(next)) if next.generation < generation => continue,
+                    Some(Event::Frame(next)) => {
+                        self.queued = Some(next);
+                        self.deadline += period;
+                    }
+                    Some(event) => {
+                        // Keep EOF/errors until the final queued picture was shown.
+                        self.deferred_event = Some(event);
+                        break;
+                    }
+                    None => break,
+                }
+            }
+        }
         if self.queued.is_some() {
             // Clock and vsync jitter must not postpone a ready frame by an
             // entire refresh. The media clock still advances by the exact PTS interval.
             let tolerance = (self.period / 8).min(Duration::from_millis(1));
             let frame = self.queued.as_ref().unwrap();
-            let time_ready = stepping || now + tolerance >= self.deadline;
+            // A live device clock already paces frames by their PTS. Applying
+            // the wall-clock deadline too can keep moving that deadline ahead
+            // forever while expired pictures are drained after startup/seek.
+            let time_ready = stepping
+                || (self.audio.is_some() && !self.audio_ended)
+                || now + tolerance >= self.deadline;
             let av_ready = self.frame_ready_for_sync(frame);
             if time_ready && av_ready {
                 let frame = self.queued.take().unwrap();
                 self.seek_preview = false;
                 self.seek_target = None;
                 match &frame.pixels {
+                    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                    Pixels::Surface(surface) => {
+                        self.video_packed = None; self.video = None; self.texture = None; self.rgb_frame = None;
+                        self.video_surface = Some((surface.clone(), frame.serial));
+                    },
+                    Pixels::Packed(planes, grade) => {
+                        self.video_packed = Some((planes.clone(), frame.serial, grade.clone()));
+                        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                        { self.video_surface = None; }
+                        self.video = None;
+                        self.texture = None;
+                        self.rgb_frame = None;
+                    }
                     Pixels::Planar(planes, grade) => {
                         self.video = Some((planes.clone(), frame.serial, grade.clone()));
+                        self.video_packed = None;
+                        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                        { self.video_surface = None; }
                         self.texture = None;
                         self.rgb_frame = None;
                     }
                     Pixels::Rgb(rgb) => {
-                        // The bundle is applied on the way in, and the frame is
-                        // kept as the reader wrote it so a slider moved over it
-                        // can rebuild what stands on screen.
-                        let scalars = adjust_scalars(&self.adjust);
-                        let mut adjusted = Vec::new();
-                        let pixels = if scalars == ADJUST_IDENTITY {
-                            rgb.as_slice()
-                        } else {
-                            adjust_rgb(rgb, &mut adjusted, &scalars);
-                            &adjusted
-                        };
-                        let image = egui::ColorImage::from_rgb(frame.dimensions, pixels);
-                        if let Some(texture) = &mut self.texture {
-                            texture.set(image, egui::TextureOptions::LINEAR);
-                        } else {
-                            self.texture = Some(ctx.load_texture(
-                                "video",
-                                image,
-                                egui::TextureOptions::LINEAR,
-                            ));
-                        }
-                        self.rgb_frame = Some((rgb.clone(), frame.dimensions, scalars));
+                        // Keep immutable display codes; picture settings and
+                        // custom effects run in the GPU callback on redraw.
+                        self.texture = None;
+                        self.rgb_frame = Some((Arc::new(rgb.clone()), frame.dimensions));
                         self.video = None;
+                        self.video_packed = None;
+                        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                        { self.video_surface = None; }
                     }
                 }
                 if let Some((start, count)) = &mut self.presentation_stats {
@@ -3044,12 +3564,19 @@ impl Player {
                     *count += 1;
                     if *count == 301 {
                         eprintln!(
-                            "player presentation: 300 intervals in {:?}, {:.2} fps, visible={:?}, focused={:?}, starved_polls={}",
+                            "player presentation: 300 intervals in {:?}, {:.2} fps, visible={:?}, focused={:?}, starved_polls={}, video_seconds={:?}, audio_seconds={:?}",
                             start.elapsed(),
                             300.0 / start.elapsed().as_secs_f64(),
                             ctx.input(|i| i.viewport().visible()),
                             ctx.input(|i| i.viewport().focused),
-                            self.starved_polls
+                            self.starved_polls,
+                            frame
+                                .pts
+                                .filter(|(_, scale)| *scale != 0)
+                                .map(|(pts, scale)| pts as f64 / f64::from(scale)),
+                            self.audio
+                                .as_ref()
+                                .map(|audio| audio.position().as_secs_f64())
                         );
                         self.starved_polls = 0;
                         *count = 1;
@@ -3059,16 +3586,11 @@ impl Player {
                 self.dimensions = frame.dimensions;
                 self.period = frame.period;
                 self.interval = frame.interval;
-                // Keep the cadence while the decoder keeps up; when it falls
-                // behind, or a single frame was asked for, show what arrived
-                // instead of piling up debt.
+                // Advance the clock even after a late repaint; the next poll
+                // discards expired pictures instead of slowing the timeline.
                 let period = paced_period(frame.period, self.rate_milli);
                 self.presented = Some(frame);
-                self.deadline = if stepping || self.deadline + period < now {
-                    now
-                } else {
-                    self.deadline + period
-                };
+                self.deadline = next_frame_deadline(self.deadline, period, now, stepping);
                 if stepping {
                     self.step -= 1;
                     if self.step == 0 {
@@ -3379,6 +3901,36 @@ fn spool_text(ahead: u64, bytes: u64, total: Duration) -> String {
 /// it follows the reader and hands the bytes behind it back to the mount - so
 /// both edges move, and the line has to show where the copy sits and not just
 /// how much of it there is. An item of no stated size has no share to draw.
+fn cached_time_ranges(
+    packets: &[(u64, u64, Duration, Duration)],
+    bytes: &[(u64, u64)],
+    total: Duration,
+) -> Vec<[f32; 2]> {
+    let mut intervals: Vec<_> = packets
+        .iter()
+        .filter(|(start, end, _, _)| bytes.iter().any(|(a, b)| a <= start && end <= b))
+        .map(|(_, _, start, end)| (*start, *end))
+        .collect();
+    intervals.sort_unstable();
+    let mut merged: Vec<(Duration, Duration)> = Vec::new();
+    for (start, end) in intervals {
+        if let Some(last) = merged.last_mut().filter(|last| start <= last.1.saturating_add(Duration::from_micros(1))) {
+            last.1 = last.1.max(end);
+        } else {
+            merged.push((start, end));
+        }
+    }
+    merged
+        .into_iter()
+        .map(|(start, end)| {
+            [
+                (start.as_secs_f32() / total.as_secs_f32()).clamp(0.0, 1.0),
+                (end.as_secs_f32() / total.as_secs_f32()).clamp(0.0, 1.0),
+            ]
+        })
+        .collect()
+}
+
 fn covered_span(covered: (u64, u64), total: u64) -> [f32; 2] {
     if total == 0 {
         return [0.0, 0.0];
@@ -3428,9 +3980,13 @@ type AudioAttempt = fn(&Path, usize) -> Option<Box<dyn crate::audio::AudioStream
 /// picture, so its audio track is the one most often asked for.
 fn mp4_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
     let file = File::open(path).ok()?;
-    crate::playback_mp4_audio::Mp4AudioReader::<std::io::BufReader<File>>::open_at(BufReader::new(file), crate::container::mp4::Limits::default(), nth)
-        .ok()
-        .map(boxed_stream)
+    crate::playback_mp4_audio::Mp4AudioReader::<std::io::BufReader<File>>::open_at(
+        BufReader::new(file),
+        crate::container::mp4::Limits::default(),
+        nth,
+    )
+    .ok()
+    .map(boxed_stream)
 }
 
 /// A Matroska file names its tracks with the same dispatch tags the
@@ -3438,9 +3994,13 @@ fn mp4_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Aud
 /// picture's reader order does.
 fn webm_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
     let file = File::open(path).ok()?;
-    crate::playback_webm_audio::WebmAudioReader::<std::io::BufReader<File>>::open_at(BufReader::new(file), crate::container::webm::Limits::default(), nth)
-        .ok()
-        .map(boxed_stream)
+    crate::playback_webm_audio::WebmAudioReader::<std::io::BufReader<File>>::open_at(
+        BufReader::new(file),
+        crate::container::webm::Limits::default(),
+        nth,
+    )
+    .ok()
+    .map(boxed_stream)
 }
 
 /// An AVI file keeps one program's audio in a stream of its own among the
@@ -3449,9 +4009,13 @@ fn webm_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Au
 /// Microsoft-spelled ADPCM blocks are the ones this build decodes.
 fn avi_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
     let file = File::open(path).ok()?;
-    crate::playback_avi_audio::AviAudioReader::open_at::<std::io::BufReader<File>>(BufReader::new(file), crate::container::avi::Limits::default(), nth)
-        .ok()
-        .map(boxed_stream)
+    crate::playback_avi_audio::AviAudioReader::open_at::<std::io::BufReader<File>>(
+        BufReader::new(file),
+        crate::container::avi::Limits::default(),
+        nth,
+    )
+    .ok()
+    .map(boxed_stream)
 }
 
 /// A MIDI performance is one track of its own, so the second and later
@@ -3461,9 +4025,12 @@ fn smf_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Aud
         return None;
     }
     let file = File::open(path).ok()?;
-    crate::playback_smf::SmfAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::container::smf::Limits::default())
-        .ok()
-        .map(boxed_stream)
+    crate::playback_smf::SmfAudioReader::open::<std::io::BufReader<File>>(
+        BufReader::new(file),
+        crate::container::smf::Limits::default(),
+    )
+    .ok()
+    .map(boxed_stream)
 }
 
 /// A module is one performance too, and one track of it: every channel is
@@ -3473,9 +4040,12 @@ fn xm_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Audi
         return None;
     }
     let file = File::open(path).ok()?;
-    crate::playback_xm::XmAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::container::xm::Limits::default())
-        .ok()
-        .map(boxed_stream)
+    crate::playback_xm::XmAudioReader::open::<std::io::BufReader<File>>(
+        BufReader::new(file),
+        crate::container::xm::Limits::default(),
+    )
+    .ok()
+    .map(boxed_stream)
 }
 
 /// An Ogg file names its codec in the first bytes of its first packet
@@ -3486,9 +4056,12 @@ fn ogg_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Aud
         return None;
     }
     let file = File::open(path).ok()?;
-    crate::playback_ogg_audio::OggAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::container::ogg::Limits::default())
-        .ok()
-        .map(boxed_stream)
+    crate::playback_ogg_audio::OggAudioReader::open::<std::io::BufReader<File>>(
+        BufReader::new(file),
+        crate::container::ogg::Limits::default(),
+    )
+    .ok()
+    .map(boxed_stream)
 }
 
 /// A Wave file holds one run of samples, so as with the two performances
@@ -3498,9 +4071,12 @@ fn wav_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Aud
         return None;
     }
     let file = File::open(path).ok()?;
-    crate::playback_wav::WavAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_wav::Limits::default())
-        .ok()
-        .map(boxed_stream)
+    crate::playback_wav::WavAudioReader::open::<std::io::BufReader<File>>(
+        BufReader::new(file),
+        crate::playback_wav::Limits::default(),
+    )
+    .ok()
+    .map(boxed_stream)
 }
 
 /// An AIFF file holds one run too, with its geometry stated once and in
@@ -3510,9 +4086,12 @@ fn aiff_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Au
         return None;
     }
     let file = File::open(path).ok()?;
-    crate::playback_aiff::AiffAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_aiff::Limits::default())
-        .ok()
-        .map(boxed_stream)
+    crate::playback_aiff::AiffAudioReader::open::<std::io::BufReader<File>>(
+        BufReader::new(file),
+        crate::playback_aiff::Limits::default(),
+    )
+    .ok()
+    .map(boxed_stream)
 }
 
 /// A Sun `.snd` header states only a geometry too, and reads even its
@@ -3522,9 +4101,12 @@ fn au_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Audi
         return None;
     }
     let file = File::open(path).ok()?;
-    crate::playback_au::AuAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_au::Limits::default())
-        .ok()
-        .map(boxed_stream)
+    crate::playback_au::AuAudioReader::open::<std::io::BufReader<File>>(
+        BufReader::new(file),
+        crate::playback_au::Limits::default(),
+    )
+    .ok()
+    .map(boxed_stream)
 }
 
 /// A `.flac` file names itself with `fLaC` and states its geometry once,
@@ -3535,9 +4117,12 @@ fn flac_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Au
         return None;
     }
     let file = File::open(path).ok()?;
-    crate::playback_flac::FlacAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_flac::Limits::default())
-        .ok()
-        .map(boxed_stream)
+    crate::playback_flac::FlacAudioReader::open::<std::io::BufReader<File>>(
+        BufReader::new(file),
+        crate::playback_flac::Limits::default(),
+    )
+    .ok()
+    .map(boxed_stream)
 }
 
 /// A bare MPEG audio file states nothing before its frames at all, so it
@@ -3548,9 +4133,12 @@ fn mp3_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Aud
         return None;
     }
     let file = File::open(path).ok()?;
-    crate::playback_mp3::Mp3AudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_mp3::Limits::default())
-        .ok()
-        .map(boxed_stream)
+    crate::playback_mp3::Mp3AudioReader::open::<std::io::BufReader<File>>(
+        BufReader::new(file),
+        crate::playback_mp3::Limits::default(),
+    )
+    .ok()
+    .map(boxed_stream)
 }
 
 /// A bare Dolby Digital file states its geometry in every frame too, but
@@ -3562,9 +4150,12 @@ fn ac3_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Aud
         return None;
     }
     let file = File::open(path).ok()?;
-    crate::playback_ac3::Ac3AudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_ac3::Limits::default())
-        .ok()
-        .map(boxed_stream)
+    crate::playback_ac3::Ac3AudioReader::open::<std::io::BufReader<File>>(
+        BufReader::new(file),
+        crate::playback_ac3::Limits::default(),
+    )
+    .ok()
+    .map(boxed_stream)
 }
 
 /// An ADTS file names its geometry in its frame headers as the two
@@ -3577,9 +4168,12 @@ fn adts_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Au
         return None;
     }
     let file = File::open(path).ok()?;
-    crate::playback_aac::AacAudioReader::open::<std::io::BufReader<File>>(BufReader::new(file), crate::playback_aac::Limits::default())
-        .ok()
-        .map(boxed_stream)
+    crate::playback_aac::AacAudioReader::open::<std::io::BufReader<File>>(
+        BufReader::new(file),
+        crate::playback_aac::Limits::default(),
+    )
+    .ok()
+    .map(boxed_stream)
 }
 
 /// Hand a reader to the player's one stream slot: every reader already
@@ -3915,16 +4509,31 @@ fn playlist_osd(index: usize, len: usize) -> String {
 /// path, including one that does not exist, which the caller reports on open. A
 /// list with nothing usable in it is handed back untouched so opening it says
 /// why rather than leaving the window blank.
+fn playable_path(path: &Path) -> bool {
+    matches!(path.extension().and_then(|ext| ext.to_str()).map(str::to_ascii_lowercase).as_deref(),
+        Some("y4m" | "mp4" | "mov" | "m4v" | "m4a" | "webm" | "mkv" | "mka" |
+            "mp3" | "mp2" | "flac" | "aac" | "ac3" | "wav" | "aif" | "aiff" |
+            "au" | "snd" | "ogg" | "mid" | "xm"))
+}
+
 fn expand_inputs(inputs: &[PathBuf]) -> Vec<PathBuf> {
     let mut out = Vec::with_capacity(inputs.len());
     for input in inputs {
+        if input.is_dir() {
+            let mut files: Vec<PathBuf> = std::fs::read_dir(input).into_iter().flatten()
+                .filter_map(Result::ok).map(|entry| entry.path())
+                .filter(|path| path.is_file() && playable_path(path)).collect();
+            files.sort_by(|a, b| a.file_name().cmp(&b.file_name()));
+            out.extend(files);
+            continue;
+        }
         let listing = matches!(
             input
                 .extension()
                 .and_then(|e| e.to_str())
                 .map(|e| e.to_ascii_lowercase())
                 .as_deref(),
-            Some("m3u") | Some("pls")
+            Some("m3u") | Some("m3u8") | Some("pls")
         );
         match listing {
             true => {
@@ -3950,7 +4559,7 @@ fn expand_inputs(inputs: &[PathBuf]) -> Vec<PathBuf> {
 fn parse_playlist(text: &str, base: &Path) -> Vec<PathBuf> {
     let mut out = Vec::new();
     for line in text.lines() {
-        let line = line.trim();
+        let line = line.trim().trim_start_matches('\u{feff}');
         let entry = match line.split_once('=') {
             Some((key, value)) => {
                 if key
@@ -4421,8 +5030,15 @@ fn controls_pressed(ctx: &egui::Context) -> Vec<Control> {
     out
 }
 
+/// Space belongs to playback, even when a chrome button retains keyboard focus.
+fn play_pause_pressed(ctx: &egui::Context) -> bool {
+    ctx.input_mut(|input| input.consume_key(egui::Modifiers::NONE, egui::Key::Space))
+}
+
 impl eframe::App for Player {
     fn logic(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
+        self.poll_open(ctx);
+        self.prefetch_next();
         let fullscreen = ctx.input(|i| i.viewport().fullscreen.unwrap_or(false));
         if ctx.input(|i| i.key_pressed(egui::Key::Escape)) {
             if fullscreen {
@@ -4431,21 +5047,20 @@ impl eframe::App for Player {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
         }
-        if ctx.input(|i| i.key_pressed(egui::Key::Space)) {
+        if play_pause_pressed(ctx) {
             self.toggle_pause();
         }
         if ctx.input(|i| i.key_pressed(egui::Key::F)) {
             ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(!fullscreen));
         }
         if ctx.input(|i| i.key_pressed(egui::Key::O) && i.modifiers.command) {
-            self.pick_file(Pick::Item);
+            self.pick_file(if ctx.input(|i| i.modifiers.shift) { Pick::Folder } else { Pick::Item });
         }
         for control in controls_pressed(ctx) {
             self.apply(control);
         }
         // A settings dialog left open over a paused frame moves sliders, and a
         // moved slider has to reach the picture the same way a moved crop does.
-        self.refresh_rgb_texture();
         // One mouse notch is one VLC volume step; smaller trackpad ticks are
         // ignored rather than accumulated into a slide.
         if let Some(delta) = ctx.input(|i| Some(i.smooth_scroll_delta.y))
@@ -4502,6 +5117,8 @@ impl eframe::App for Player {
         panel.show(ui, |ui| {
             let frame = ui.max_rect();
             let painter = ui.painter().with_clip_rect(frame);
+            let (skin_text, skin_accent, skin_panel) =
+                (self.skin.text, self.skin.played, self.skin.panel);
             painter.rect_filled(frame, CornerRadius::ZERO, FRAME);
 
             // The picture, cropped to VLC's shape, drawn at the shape VLC's
@@ -4534,6 +5151,27 @@ impl eframe::App for Player {
                         grade: grade.clone(),
                     },
                 ));
+            } else if let Some((planes, serial, grade)) = &self.video_packed {
+                let source = Vec2::new(planes.frame.width as f32, planes.frame.height as f32);
+                let insets = shown_insets(source, self.container_insets, self.pixel_aspect, self.crop);
+                let size = shown_size(cropped_size(source, insets), self.pixel_aspect, self.aspect, frame.size());
+                let rect = video_rect(frame, size, self.zoom_milli, self.pan);
+                ui.painter().add(egui_wgpu::Callback::new_paint_callback(rect,
+                    crate::player_gpu::PackedVideoCallback {
+                        frame: planes.clone(), serial: *serial, window: uv_window(source, insets),
+                        adjust: adjust_scalars(&self.adjust), grade: grade.clone(),
+                    },
+                ));
+            } else if let Some((rgb, dimensions)) = &self.rgb_frame {
+                let source = Vec2::new(dimensions[0] as f32, dimensions[1] as f32);
+                let insets = shown_insets(source, self.container_insets, self.pixel_aspect, self.crop);
+                let size = shown_size(cropped_size(source, insets), self.pixel_aspect, self.aspect, frame.size());
+                let rect = video_rect(frame, size, self.zoom_milli, self.pan);
+                ui.painter().add(egui_wgpu::Callback::new_paint_callback(rect,
+                    crate::player_gpu::RgbVideoCallback {
+                        frame: rgb.clone(), size: *dimensions, window: uv_window(source, insets),
+                        adjust: adjust_scalars(&self.adjust),
+                    }));
             } else if let Some(texture) = &self.texture {
                 let source = texture.size_vec2();
                 let insets =
@@ -4554,6 +5192,29 @@ impl eframe::App for Player {
                 );
             }
 
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            if let Some((surface, serial)) = &self.video_surface {
+                let (w, h) = (surface.surface.width(), surface.surface.height());
+                let source = if surface.rotation == 90 || surface.rotation == 270 { Vec2::new(h as f32, w as f32) } else { Vec2::new(w as f32, h as f32) };
+                let insets = shown_insets(source, self.container_insets, self.pixel_aspect, self.crop);
+                let size = shown_size(cropped_size(source, insets), self.pixel_aspect, self.aspect, frame.size());
+                let rect = video_rect(frame, size, self.zoom_milli, self.pan);
+                ui.painter().add(egui_wgpu::Callback::new_paint_callback(rect,
+                    crate::player_gpu::SurfaceVideoCallback {
+                        frame: surface.surface.clone(), rotation: surface.rotation, colour: surface.colour, serial: *serial,
+                        window: uv_window(source, insets), adjust: adjust_scalars(&self.adjust), grade: surface.grade.clone(),
+                    }));
+            }
+
+            if self.opening.is_some() || (self.playback.is_some() && self.buffering && self.presented.is_none() && self.error.is_none()) {
+                ctx.request_repaint_after(Duration::from_millis(16));
+                ui.put(Rect::from_center_size(frame.center() - Vec2::new(0.0, 52.0), Vec2::splat(24.0)), egui::Spinner::new());
+                painter.text(frame.center(), Align2::CENTER_CENTER,
+                    format!("Загрузка {}\nБуфер: {} кадров · Swap: {:.1} МБ", self.name,
+                        self.playback.as_ref().map_or_else(|| self.loading_buffer.as_ref().map_or(0, |counter| counter.load(std::sync::atomic::Ordering::Relaxed)), |playback| playback.filled()),
+                        self.spool.as_ref().map_or(0.0, |spool| spool.copied() as f64 / 1048576.0)),
+                    FontId::proportional(18.0), TEXT);
+            }
             // An item that is only sound has no picture to show, so the stage
             // says what it is instead of looking like a failure.
             if self.playback.is_none() && self.item_open() {
@@ -4632,7 +5293,10 @@ impl eframe::App for Player {
             }
 
             // Centre: one large play button while idle.
-            if !self.item_open() || self.paused || self.ended {
+            if self.opening.is_none()
+                && !(self.playback.is_some() && self.buffering && self.presented.is_none())
+                && (!self.item_open() || self.paused || self.ended)
+            {
                 let center = frame.center();
                 let size = 88.0_f32.min(frame.height() * 0.4);
                 let clicked = round_button(ui, "big-play", center, size, CHIP, |p, c, color| {
@@ -4661,7 +5325,7 @@ impl eframe::App for Player {
                 painter.rect_stroke(
                     frame.shrink(12.0),
                     CornerRadius::same(20),
-                    Stroke::new(2.0, ACCENT),
+                    Stroke::new(2.0, skin_accent),
                     egui::StrokeKind::Inside,
                 );
             }
@@ -4705,7 +5369,7 @@ impl eframe::App for Player {
                 && since.elapsed() < OSD_AFTER
             {
                 let galley =
-                    painter.layout_no_wrap(message.clone(), FontId::proportional(15.0), TEXT);
+                    painter.layout_no_wrap(message.clone(), FontId::proportional(15.0), skin_text);
                 let size = galley.size() + Vec2::new(32.0, 20.0);
                 let right = if visible {
                     frame.right() - pad - BUTTON - 12.0
@@ -4714,8 +5378,8 @@ impl eframe::App for Player {
                 };
                 let backing =
                     Rect::from_min_size(Pos2::new(right - size.x, frame.top() + 24.0), size);
-                painter.rect_filled(backing, CornerRadius::same(10), PANEL);
-                painter.galley(backing.min + Vec2::new(16.0, 10.0), galley, TEXT);
+                painter.rect_filled(backing, CornerRadius::same(10), skin_panel);
+                painter.galley(backing.min + Vec2::new(16.0, 10.0), galley, skin_text);
             }
 
             if !visible {
@@ -4732,7 +5396,7 @@ impl eframe::App for Player {
                     Align2::LEFT_TOP,
                     &self.name,
                     FontId::proportional(17.0),
-                    TEXT,
+                    skin_text,
                 );
                 painter.text(
                     Pos2::new(top.x, top.y + 24.0),
@@ -4747,7 +5411,7 @@ impl eframe::App for Player {
                     Align2::LEFT_TOP,
                     "FVid",
                     FontId::proportional(17.0),
-                    TEXT,
+                    skin_text,
                 );
             }
             if let Some(error) = &self.error {
@@ -4770,9 +5434,30 @@ impl eframe::App for Player {
                         Align2::LEFT_TOP,
                         line,
                         font.clone(),
-                        TEXT,
+                        skin_text,
                     );
                 }
+            }
+            let skin_at = Pos2::new(frame.right() - pad - BUTTON - 110.0, frame.top() + 36.0);
+            let skin_rect = Rect::from_min_size(skin_at, Vec2::new(100.0, 28.0));
+            let skin_button = ui.interact(skin_rect, ui.id().with("skin"), Sense::click());
+            painter.rect_filled(skin_rect, 5.0, self.skin.panel);
+            painter.text(
+                skin_rect.center(),
+                Align2::CENTER_CENTER,
+                format!("◐ {}", self.skin.name),
+                FontId::monospace(13.0),
+                self.skin.text,
+            );
+            if skin_button
+                .on_hover_text("Switch skin: Diagram / Classic")
+                .clicked()
+            {
+                self.skin = if self.skin.diagram {
+                    player_skin::Skin::classic()
+                } else {
+                    player_skin::Skin::diagram()
+                };
             }
             let close_at = Pos2::new(
                 frame.right() - pad - BUTTON / 2.0,
@@ -4792,7 +5477,7 @@ impl eframe::App for Player {
             // them and the control row, on a backing the picture shows through.
             let panel_bottom = frame.bottom() - 20.0;
             let row_y = panel_bottom - 8.0 - BUTTON / 2.0;
-            let bar_y = row_y - BUTTON / 2.0 - 12.0;
+            let bar_y = row_y - BUTTON / 2.0 - if self.skin.diagram { 34.0 } else { 12.0 };
             let clock_y = bar_y - 18.0;
             let panel = Rect::from_min_max(
                 Pos2::new(frame.left() + pad, clock_y - 22.0),
@@ -4801,7 +5486,7 @@ impl eframe::App for Player {
             // The panel takes the pointer itself, so a click between its
             // buttons does not fall through to the picture and pause it.
             ui.interact(panel, ui.id().with("panel"), Sense::click());
-            painter.rect_filled(panel, CornerRadius::same(PANEL_RADIUS), PANEL);
+            painter.rect_filled(panel, CornerRadius::same(PANEL_RADIUS), self.skin.panel);
             let hit = Rect::from_min_max(
                 Pos2::new(panel.left() + 22.0, bar_y - 12.0),
                 Pos2::new(panel.right() - 22.0, bar_y + 12.0),
@@ -4862,38 +5547,61 @@ impl eframe::App for Player {
                     fraction = Some(scrub);
                 }
             }
-            let thick = if hover.is_some() { 8.0 } else { 4.0 };
+            let thick = if self.skin.diagram {
+                20.0
+            } else if hover.is_some() {
+                8.0
+            } else {
+                4.0
+            };
             let bar = Rect::from_min_max(
                 Pos2::new(hit.left(), bar_y - thick / 2.0),
                 Pos2::new(hit.right(), bar_y + thick / 2.0),
             );
-            let round = CornerRadius::same((thick / 2.0) as u8);
-            painter.rect_filled(bar, round, TRACK);
+            let round = if self.skin.diagram {
+                CornerRadius::ZERO
+            } else {
+                CornerRadius::same((thick / 2.0) as u8)
+            };
+            if self.skin.diagram {
+                painter.line_segment(
+                    [bar.left_center(), bar.right_center()],
+                    Stroke::new(1.0, self.skin.track),
+                );
+            } else {
+                painter.rect_filled(bar, round, self.skin.track);
+            }
             // What the swap file covers: the stretch of the item that answers
             // without asking the source, drawn under the pictures already in
             // hand so the two read as one growing load with the nearer,
             // brighter part inside the further one.
-            if let (Some(spool), Some(bytes)) = (&self.spool, self.bytes) {
-                let [near, far] = covered_span(spool.covered(), bytes);
+            let swap_ranges = self.swap_ranges();
+            for [near, far] in &swap_ranges {
                 let left = bar.left() + bar.width() * near;
                 let right = bar.left() + bar.width() * far;
                 if right > left {
-                    painter.rect_filled(
-                        Rect::from_min_max(Pos2::new(left, bar.min.y), Pos2::new(right, bar.max.y)),
-                        CornerRadius::same(2),
-                        COVER,
-                    );
+                    let span = Rect::from_min_max(Pos2::new(left, bar.min.y), Pos2::new(right, bar.max.y));
+                    if self.skin.diagram { player_skin::pattern(&painter, span, self.skin.swap, false); }
+                    else { painter.rect_filled(span, CornerRadius::ZERO, self.skin.swap); }
                 }
             }
             if let (Some(played), Some(loaded)) = (played, loaded) {
                 let from = bar.left() + bar.width() * played;
-                let to = bar.left() + bar.width() * loaded;
+                let actual_to = bar.left() + bar.width() * loaded;
+                let to = if !self.skin.diagram && actual_to > from {
+                    // Keep a tiny queue visible past the 7 px playhead. The
+                    // timeline fraction itself remains exact for seeking.
+                    actual_to.max(from + 16.0).min(bar.right())
+                } else { actual_to };
                 if to > from {
-                    painter.rect_filled(
-                        Rect::from_min_max(Pos2::new(from, bar.min.y), Pos2::new(to, bar.max.y)),
-                        CornerRadius::same(2),
-                        DIM,
-                    );
+                    let span =
+                        Rect::from_min_max(Pos2::new(from, bar.min.y), Pos2::new(to, bar.max.y));
+                    if self.skin.diagram {
+                        painter.rect_filled(span, 0.0, self.skin.panel);
+                        player_skin::pattern(&painter, span, self.skin.buffer, true);
+                    } else {
+                        painter.rect_filled(span, CornerRadius::same(2), self.skin.buffer);
+                    }
                 }
             }
             if let Some(fraction) = fraction {
@@ -4901,7 +5609,7 @@ impl eframe::App for Player {
                 painter.rect_filled(
                     Rect::from_min_max(bar.min, Pos2::new(x, bar.max.y)),
                     round,
-                    ACCENT,
+                    self.skin.played,
                 );
             }
             // Chapter starts cut the line, the way the canvas marks them.
@@ -4921,12 +5629,79 @@ impl eframe::App for Player {
                     }
                 }
             }
-            if let Some(fraction) = fraction {
+            if let Some(fraction) = fraction.filter(|_| !self.skin.diagram) {
                 painter.circle_filled(
                     Pos2::new(bar.left() + bar.width() * fraction, bar_y),
                     7.0,
-                    TEXT,
+                    skin_text,
                 );
+            }
+            if self.skin.diagram {
+                let played_end = fraction.unwrap_or(0.0);
+                let buffer_end = loaded.unwrap_or(played_end).max(played_end);
+                let covered = swap_ranges.iter().find(|range| range[1] >= buffer_end).copied();
+                let [swap_start, swap_end] = covered.map_or([buffer_end, buffer_end], |span| {
+                    [span[0].max(buffer_end), span[1].max(buffer_end)]
+                });
+                let regions = [
+                    (0.0, played_end, "проиграно"),
+                    (played_end, buffer_end, "буфер"),
+                    (buffer_end, swap_start, "ещё не загружено"),
+                    (swap_start, swap_end, "swap"),
+                    (swap_end, 1.0, "ещё не загружено"),
+                ];
+                for (region_index, (near, far, label)) in regions.into_iter().enumerate() {
+                    if total.is_none() || far <= near {
+                        continue;
+                    }
+                    let left = bar.left() + bar.width() * near;
+                    let right = bar.left() + bar.width() * far;
+                    let galley = painter.layout_no_wrap(
+                        label.into(),
+                        FontId::monospace(11.0),
+                        self.skin.text,
+                    );
+                    if right - left >= galley.size().x + 4.0 {
+                        painter.galley(
+                            Pos2::new((left + right - galley.size().x) / 2.0, bar.bottom() + 5.0),
+                            galley,
+                            self.skin.text,
+                        );
+                    }
+                    let area = Rect::from_min_max(
+                        Pos2::new(left, bar.top()),
+                        Pos2::new(right.max(left + 3.0), bar.bottom()),
+                    );
+                    ui.interact(
+                        area,
+                        ui.id().with(("skin-region", region_index)),
+                        Sense::hover(),
+                    )
+                    .on_hover_text(label);
+                }
+                // Keep endpoint labels apart when the real buffer spans only a few pixels.
+                let mut last_clock_x = bar.left();
+                for at in [played_end, buffer_end, swap_start, swap_end, 1.0] {
+                    let x = bar.left() + bar.width() * at;
+                    painter.line_segment(
+                        [Pos2::new(x, bar.top()), Pos2::new(x, bar.bottom())],
+                        Stroke::new(1.0, self.skin.text),
+                    );
+                    if at < 1.0 && x - last_clock_x > 60.0 && bar.right() - x > 60.0 {
+                        if let Some(total) = total {
+                            painter.text(
+                                Pos2::new(x, clock_y),
+                                Align2::CENTER_CENTER,
+                                clock(Duration::from_millis(
+                                    (total.as_secs_f64() * f64::from(at) * 1000.0).round() as u64,
+                                )),
+                                FontId::monospace(13.0),
+                                self.skin.text,
+                            );
+                            last_clock_x = x;
+                        }
+                    }
+                }
             }
             // The tip over the panel: the moment under the pointer and the
             // chapter it falls in.
@@ -4938,13 +5713,13 @@ impl eframe::App for Player {
                 {
                     label = format!("{label} \u{b7} {title}");
                 }
-                let galley = painter.layout_no_wrap(label, FontId::monospace(13.0), TEXT);
+                let galley = painter.layout_no_wrap(label, FontId::monospace(13.0), skin_text);
                 let size = galley.size() + Vec2::new(16.0, 8.0);
                 let x = (bar.left() + bar.width() * hover - size.x / 2.0)
                     .clamp(frame.left() + 8.0, frame.right() - 8.0 - size.x);
                 let tip = Rect::from_min_size(Pos2::new(x, panel.top() - 8.0 - size.y), size);
-                painter.rect_filled(tip, CornerRadius::same(6), PANEL);
-                painter.galley(tip.min + Vec2::new(8.0, 4.0), galley, TEXT);
+                painter.rect_filled(tip, CornerRadius::same(6), skin_panel);
+                painter.galley(tip.min + Vec2::new(8.0, 4.0), galley, skin_text);
             }
             // Clocks over the two ends of the line; the right one flips between
             // the whole length and what is left of it.
@@ -4955,7 +5730,7 @@ impl eframe::App for Player {
                     Align2::LEFT_CENTER,
                     clock(elapsed),
                     font.clone(),
-                    TEXT,
+                    skin_text,
                 );
                 if let Some(total) = total {
                     let shown = painter.text(
@@ -5028,7 +5803,7 @@ impl eframe::App for Player {
                         Align2::LEFT_CENTER,
                         title,
                         FontId::proportional(13.0),
-                        TEXT,
+                        skin_text,
                     );
                 }
             }
@@ -5051,7 +5826,7 @@ impl eframe::App for Player {
             let label = "Open…";
             let font = FontId::proportional(13.0);
             let width = painter
-                .layout_no_wrap(label.to_owned(), font.clone(), TEXT)
+                .layout_no_wrap(label.to_owned(), font.clone(), skin_text)
                 .size()
                 .x
                 + 24.0;
@@ -5063,17 +5838,33 @@ impl eframe::App for Player {
             if open.hovered() {
                 painter.rect_filled(open_rect, CornerRadius::same(22), CHIP_STRONG);
             }
-            painter.text(open_rect.center(), Align2::CENTER_CENTER, label, font, TEXT);
+            painter.text(
+                open_rect.center(),
+                Align2::CENTER_CENTER,
+                label,
+                font,
+                skin_text,
+            );
             if open.clicked() {
                 self.pick_file(Pick::Item);
             }
+            open.context_menu(|ui| {
+                if ui.button("Open file or playlist…").clicked() {
+                    self.pick_file(Pick::Item);
+                    ui.close();
+                }
+                if ui.button("Open folder…").clicked() {
+                    self.pick_file(Pick::Folder);
+                    ui.close();
+                }
+            });
             // A rate other than the recorded one stays in sight in the accent,
             // and a click on it goes back to 1x, as the `\` key does.
             if self.rate_milli != 1_000 {
                 let font = FontId::monospace(14.0);
                 let label = rate_osd(self.rate_milli);
                 let width = painter
-                    .layout_no_wrap(label.clone(), font.clone(), ACCENT)
+                    .layout_no_wrap(label.clone(), font.clone(), skin_accent)
                     .size()
                     .x
                     + 24.0;
@@ -5090,7 +5881,7 @@ impl eframe::App for Player {
                     Align2::CENTER_CENTER,
                     label,
                     font,
-                    ACCENT,
+                    skin_accent,
                 );
                 if rate.clicked() {
                     self.set_rate(1_000);
@@ -5108,14 +5899,13 @@ mod tests {
         PlayArgs, PlayBounds, Player, Pos2, RATES, Rect, Repeat, SubtitleSource, VOLUME_MAX, Vec2,
         adjust_luma, adjust_rgb, adjust_scalars, advance, aspect_label, aspect_osd, aspect_step,
         bitrate_text, buffer_text, buffered_fraction, byte_size, chapter_ahead, chapter_at,
-        colour_line, container_facts, covered_span, crop_insets, crop_label, crop_osd,
-        crop_step, cropped_size,
-        cycle_repeat, deal_cycle, delay_step, delayed_clock, display_size, end_clock,
+        colour_line, container_facts, covered_span, crop_insets, crop_label, crop_osd, crop_step,
+        cropped_size, cycle_repeat, deal_cycle, delay_step, delayed_clock, display_size, end_clock,
         expand_inputs, file_size, fps_text, grade_text, jump_size, light_line, loop_press,
-        loop_rewind, paced_period, parse_clock, parse_play_args, playlist_osd, position_from_digit,
-        rate_fine, rate_osd, rate_step, repeat_osd, retreat, shown_insets, shown_size,
-        snapshot_name, sound_codec, spool_text, subtitles, track_step, uv_window, video_rect,
-        volume_osd, volume_step, zoom_osd, zoom_step,
+        loop_rewind, next_frame_deadline, paced_period, parse_clock, parse_play_args, playlist_osd,
+        position_from_digit, rate_fine, rate_osd, rate_step, repeat_osd, retreat, shown_insets,
+        shown_size, snapshot_name, sound_codec, spool_text, subtitles, track_step, uv_window,
+        video_rect, volume_osd, volume_step, zoom_osd, zoom_step,
     };
     use super::{Event, NativeReader, Playback};
     use crate::color::{
@@ -5189,6 +5979,21 @@ mod tests {
         assert_eq!(paced_period(frame, 1_000), frame);
         assert_eq!(paced_period(frame, 2_000), Duration::from_millis(20));
         assert_eq!(paced_period(frame, 500), Duration::from_millis(80));
+    }
+
+    #[test]
+    fn late_repaints_do_not_slow_the_media_clock() {
+        let start = Instant::now();
+        let period = Duration::from_nanos(16_666_667);
+        let mut deadline = start;
+        // 60 fps media shown by a window repainting at 30 Hz: the clock
+        // must stay behind until expired frames are discarded, not drift.
+        for n in 1..=60 {
+            deadline = next_frame_deadline(deadline, period, start + period * (n * 2), false);
+        }
+        assert_eq!(deadline, start + period * 60);
+        let now = start + Duration::from_secs(10);
+        assert_eq!(next_frame_deadline(deadline, period, now, true), now);
     }
 
     #[test]
@@ -6879,6 +7684,71 @@ mod tests {
         std::fs::remove_dir_all(&directory).unwrap();
     }
 
+    #[test]
+    fn folders_expand_in_name_order_and_ignore_unrelated_files() {
+        let directory = scratch("fvid-folder-queue", &["b.mp4", "a.Y4M", "notes.txt"]);
+        std::fs::create_dir(directory.join("subfolder.mp4")).unwrap();
+        assert_eq!(expand_inputs(&[directory.clone()]), [directory.join("a.Y4M"), directory.join("b.mp4")]);
+        let list = directory.join("queue.m3u8");
+        std::fs::write(&list, "\u{feff}#EXTM3U\nb.mp4\na.Y4M\n").unwrap();
+        assert_eq!(expand_inputs(&[list]), [directory.join("b.mp4"), directory.join("a.Y4M")]);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn next_file_is_cached_during_current_playback_and_reused_at_eof() {
+        let directory = scratch("fvid-prefetch-next", &[]);
+        let first = directory.join("a.y4m");
+        let second = directory.join("b.y4m");
+        std::fs::write(&first, y4m(100)).unwrap();
+        std::fs::write(&second, y4m(2)).unwrap();
+        let mut player = Player { no_audio: true, ..Default::default() };
+        player.open_queue(vec![first.clone(), second.clone()]);
+        player.prefetch_next();
+        assert_eq!(player.opened.as_ref(), Some(&first));
+        assert!(player.playback.is_some());
+        let next = player.next_file.take().unwrap();
+        let cached = next.source.recv_timeout(Duration::from_secs(5)).unwrap().unwrap();
+        assert!(matches!(&cached.0, crate::playback_spool::Source::Memory(_)));
+        let (send, source) = std::sync::mpsc::channel();
+        send.send(Ok(cached)).unwrap();
+        player.next_file = Some(super::NextFile { path: second.clone(), source, cancelled: Arc::new(std::sync::atomic::AtomicBool::new(false)) });
+        std::fs::remove_file(&second).unwrap();
+        player.continue_queue();
+        assert_eq!(player.index, 1);
+        assert_eq!(player.opened.as_ref(), Some(&second));
+        assert!(player.error.is_none(), "{:?}", player.error);
+        drop(player);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn prefetch_tracks_shuffle_and_queue_replacement() {
+        let directory = scratch("fvid-prefetch-shuffle", &[]);
+        let paths: Vec<_> = ["a.y4m", "b.y4m", "c.y4m"].iter().map(|name| directory.join(name)).collect();
+        for path in &paths { std::fs::write(path, y4m(2)).unwrap(); }
+        let mut player = Player { no_audio: true, ..Default::default() };
+        player.open_queue(paths.clone());
+        player.shuffle = true;
+        player.upcoming = vec![1, 2];
+        player.prefetch_next();
+        assert_eq!(player.next_file.as_ref().unwrap().path, paths[2]);
+        player.upcoming.clear();
+        player.repeat = super::Repeat::All;
+        player.prefetch_next();
+        let predicted = player.next_file.as_ref().unwrap().path.clone();
+        let target = player.shuffle_forward().unwrap();
+        assert_eq!(predicted, paths[target]);
+        player.repeat = super::Repeat::Off;
+        let cancelled = player.next_file.as_ref().unwrap().cancelled.clone();
+        player.open_queue(vec![paths[1].clone()]);
+        assert!(cancelled.load(std::sync::atomic::Ordering::Acquire));
+        player.prefetch_next();
+        assert!(player.next_file.is_none());
+        drop(player);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
     /// Two frames of 2×2 4:2:0: the smallest thing the reader accepts.
     fn y4m(frames: usize) -> Vec<u8> {
         let mut bytes = b"YUV4MPEG2 W2 H2 F25:1 Ip C420jpeg\n".to_vec();
@@ -6887,6 +7757,40 @@ mod tests {
             bytes.extend_from_slice(&[0u8; 6]);
         }
         bytes
+    }
+
+    #[test]
+    fn a_late_window_catches_up_and_preserves_the_final_picture() {
+        let mut reader = NativeReader::without_memory_limit(std::io::Cursor::new(y4m(4))).unwrap();
+        assert!(reader.read_frame().unwrap());
+        let playback = Playback::start(reader, None);
+        let until = Instant::now() + Duration::from_secs(5);
+        while playback.filled() < 4 {
+            assert!(Instant::now() < until, "decoder did not fill the queue");
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        let mut player = Player {
+            playback: Some(playback),
+            buffering: false,
+            deadline: Instant::now() - Duration::from_secs(1),
+            period: Duration::from_millis(40),
+            ..Default::default()
+        };
+        let ctx = eframe::egui::Context::default();
+        player.present(&ctx);
+        let final_serial = player
+            .presented
+            .as_ref()
+            .expect("final picture was shown")
+            .serial;
+        assert!(final_serial >= 3, "late pictures were not discarded");
+        // EOF may arrive after the pictures; it must still complete the queue.
+        while !player.ended {
+            assert!(Instant::now() < until, "EOF was lost during catch-up");
+            player.present(&ctx);
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        assert_eq!(player.presented.as_ref().unwrap().serial, final_serial);
     }
 
     /// Reaching the end of an item is what moves the list on; the last item of
@@ -7457,6 +8361,18 @@ mod tests {
         }
         fn rgb(pixels: &Pixels, budget: usize) -> Vec<u8> {
             match pixels {
+                #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                Pixels::Surface(surface) => {
+                    let p = crate::playback_native::surface_to_packed(&surface.surface, surface.colour).unwrap().rotated(surface.rotation).unwrap();
+                    let mut rgb = Vec::new(); p.to_rgb(&mut rgb, budget).unwrap();
+                    if let Some(grade) = &surface.grade { grade.apply(&mut rgb); } rgb
+                },
+                Pixels::Packed(planes, grade) => {
+                    let mut rgb = Vec::new();
+                    planes.to_rgb(&mut rgb, budget).unwrap();
+                    if let Some(grade) = grade { grade.apply(&mut rgb); }
+                    rgb
+                }
                 Pixels::Rgb(rgb) => rgb.clone(),
                 Pixels::Planar(planes, grade) => {
                     let mut rgb = Vec::new();
@@ -7666,6 +8582,275 @@ mod tests {
         assert!(parse_clock("abc").is_err());
     }
 
+    #[test]
+    fn swap_uses_packet_timestamps_and_does_not_colour_container_headers() {
+        let packets = vec![
+            (900, 1000, Duration::ZERO, Duration::from_secs(1)),
+            (100, 200, Duration::from_secs(1), Duration::from_secs(2)),
+            (300, 400, Duration::from_secs(4), Duration::from_secs(5)),
+        ];
+        let ranges = super::cached_time_ranges(
+            &packets,
+            &[(900, 1100), (300, 400)],
+            Duration::from_secs(10),
+        );
+        assert_eq!(ranges, vec![[0.0, 0.1], [0.4, 0.5]]);
+        assert!(
+            super::cached_time_ranges(&packets, &[(1000, 1100)], Duration::from_secs(10))
+                .is_empty()
+        );
+    }
+
+    #[test]
+    fn neighbouring_cached_frames_form_one_solid_strip() {
+        let packets = vec![(0, 10, Duration::ZERO, Duration::from_nanos(33_333_333)),
+            (10, 20, Duration::from_nanos(33_333_334), Duration::from_nanos(66_666_667))];
+        let ranges = super::cached_time_ranges(&packets, &[(0, 20)], Duration::from_secs(1));
+        assert_eq!(ranges.len(), 1);
+        assert_eq!(ranges[0][0], 0.0);
+        assert!(ranges[0][1] > 0.066);
+    }
+
+    #[test]
+    fn background_open_returns_immediately_and_can_be_superseded() {
+        let directory = scratch("fvid-background-open", &[]);
+        let path = directory.join("clip.mp4");
+        std::fs::write(
+            &path,
+            include_bytes!("../tests/fixtures/audio/two-audio.mp4"),
+        )
+        .unwrap();
+        let mut player = Player {
+            asynchronous_open: true,
+            no_audio: true,
+            ..Default::default()
+        };
+        player.try_open(directory.join("missing.mp4"));
+        player.try_open(path.clone());
+        assert!(player.opening.is_some());
+        assert!(player.playback.is_none());
+        let ctx = eframe::egui::Context::default();
+        let until = Instant::now() + Duration::from_secs(5);
+        while player.opening.is_some() {
+            assert!(Instant::now() < until);
+            player.poll_open(&ctx);
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        assert!(player.error.is_none(), "{:?}", player.error);
+        assert_eq!(player.opened, Some(path));
+        assert!(player.playback.is_some());
+        assert!(!player.cache_packets.is_empty());
+        drop(player);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn background_reopen_replaces_a_full_decoder_queue() {
+        let directory = scratch("fvid-background-reopen", &[]);
+        let path = directory.join("clip.y4m");
+        std::fs::write(&path, y4m(120)).unwrap();
+        let mut player = Player {
+            asynchronous_open: true,
+            no_audio: true,
+            ..Default::default()
+        };
+        let ctx = eframe::egui::Context::default();
+        for _ in 0..3 {
+            player.open_queue(vec![path.clone()]);
+            let until = Instant::now() + Duration::from_secs(5);
+            while player.opening.is_some() {
+                assert!(Instant::now() < until, "reopen did not complete");
+                player.poll_open(&ctx);
+                std::thread::sleep(Duration::from_millis(1));
+            }
+            assert!(player.error.is_none(), "{:?}", player.error);
+            let playback = player.playback.as_ref().unwrap();
+            while playback.filled() < playback.depth() {
+                assert!(Instant::now() < until, "decoder queue did not fill");
+                std::thread::sleep(Duration::from_millis(1));
+            }
+            assert_eq!(player.opened.as_ref(), Some(&path));
+        }
+        drop(player);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn a_live_audio_clock_presents_seek_preview_without_waiting_for_wall_clock() {
+        let directory = scratch("fvid-audio-clock-seek", &[]);
+        let path = directory.join("clip.mp4");
+        let fixture = include_bytes!("../tests/fixtures/audio/two-audio.mp4");
+        std::fs::write(&path, fixture).unwrap();
+        let mut player = Player {
+            queue: vec![path],
+            no_audio: true,
+            ..Default::default()
+        };
+        player.play_index(0);
+        let stream = crate::playback_mp4_audio::Mp4AudioReader::open(
+            std::io::Cursor::new(fixture.to_vec()),
+            crate::container::mp4::Limits::default(),
+        )
+        .unwrap();
+        player.audio = Some(crate::audio_thread::AudioPlayback::start(
+            Box::new(stream),
+            || Box::new(crate::audio::NullBackend::default()),
+        ));
+        player.seek_time(Duration::from_millis(500));
+        player.buffering = false;
+        player.deadline = Instant::now() + Duration::from_secs(10);
+        let until = Instant::now() + Duration::from_secs(2);
+        let ctx = eframe::egui::Context::default();
+        while player.seek_preview {
+            assert!(
+                Instant::now() < until,
+                "wall-clock gate blocked an audio-ready frame"
+            );
+            let mut output = ctx.run_ui(Default::default(), |ui| player.present(ui.ctx()));
+            output.textures_delta.clear();
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        assert!(player.presented.is_some());
+        assert!(!player.audio_ended);
+        assert!(!player.paused);
+        drop(player);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn seeking_after_audio_failure_keeps_video_playing() {
+        struct BrokenAudio;
+        impl crate::audio::AudioStream for BrokenAudio {
+            fn codec(&self) -> &str {
+                "mp4a"
+            }
+            fn timescale(&self) -> u32 {
+                44100
+            }
+            fn sample_rate(&self) -> u32 {
+                44100
+            }
+            fn channels(&self) -> u16 {
+                2
+            }
+            fn extra_data(&self) -> &[u8] {
+                &[]
+            }
+            fn audio_tracks(&self) -> Vec<crate::audio::AudioTrack> {
+                Vec::new()
+            }
+            fn next_packet(&mut self) -> crate::Result<Option<crate::audio::EncodedPacket>> {
+                Ok(None)
+            }
+            fn rewind(&mut self) {}
+            fn seek_to(&mut self, pts: i64) -> i64 {
+                pts
+            }
+        }
+        let directory = scratch("fvid-seek-failed-audio", &[]);
+        let path = directory.join("clip.mp4");
+        std::fs::write(
+            &path,
+            include_bytes!("../tests/fixtures/audio/two-audio.mp4"),
+        )
+        .unwrap();
+        let mut player = Player {
+            queue: vec![path],
+            no_audio: true,
+            ..Default::default()
+        };
+        player.play_index(0);
+        assert!(player.error.is_none(), "{:?}", player.error);
+        player.audio = Some(crate::audio_thread::AudioPlayback::start(
+            Box::new(BrokenAudio),
+            || Box::new(crate::audio::NullBackend::default()),
+        ));
+        let until = Instant::now() + Duration::from_secs(5);
+        while !player.audio_ended {
+            assert!(Instant::now() < until, "audio failure was not delivered");
+            player.poll_audio();
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        assert!(
+            player.audio.is_none(),
+            "failed worker must not survive to gate the next seek"
+        );
+        let ctx = eframe::egui::Context::default();
+        for target in [Duration::from_millis(500), Duration::from_millis(1000)] {
+            player.seek_time(target);
+            let generation = player.playback.as_ref().unwrap().generation();
+            let until = Instant::now() + Duration::from_secs(5);
+            while player.seek_preview {
+                assert!(Instant::now() < until, "seek stalled after audio failure");
+                assert!(player.error.is_none(), "{:?}", player.error);
+                let mut output = ctx.run_ui(Default::default(), |ui| player.present(ui.ctx()));
+                output.textures_delta.clear();
+                std::thread::sleep(Duration::from_millis(1));
+            }
+            assert!(!player.paused);
+            assert!(!player.ended);
+            assert_eq!(player.presented.as_ref().unwrap().generation, generation);
+            assert!(player.timeline().0.unwrap() >= target);
+            while player.timeline().0.unwrap() < target + Duration::from_millis(150) {
+                assert!(Instant::now() < until, "video froze after the seek preview");
+                let mut output = ctx.run_ui(Default::default(), |ui| player.present(ui.ctx()));
+                output.textures_delta.clear();
+                std::thread::sleep(Duration::from_millis(1));
+            }
+        }
+        drop(player);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn space_pauses_without_activating_the_focused_skin_button() {
+        use eframe::egui::{self, Event, Key, Modifiers, RawInput, Sense};
+        let ctx = egui::Context::default();
+        let button = |ui: &mut egui::Ui| {
+            ui.interact(
+                egui::Rect::from_min_size(egui::Pos2::ZERO, egui::Vec2::splat(100.0)),
+                ui.id().with("skin"),
+                Sense::click(),
+            )
+        };
+        let mut output = ctx.run_ui(RawInput::default(), |ui| {
+            button(ui).request_focus();
+        });
+        output.textures_delta.clear();
+        let input = |key| RawInput {
+            events: vec![Event::Key {
+                key,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: Modifiers::NONE,
+            }],
+            ..Default::default()
+        };
+        let mut output = ctx.run_ui(input(Key::Space), |ui| {
+            assert!(super::play_pause_pressed(ui.ctx()));
+            assert!(!button(ui).clicked(), "Space must not switch the skin");
+        });
+        output.textures_delta.clear();
+        let mut output = ctx.run_ui(input(Key::Enter), |ui| {
+            assert!(!super::play_pause_pressed(ui.ctx()));
+            assert!(
+                button(ui).clicked(),
+                "Enter still activates the focused skin button"
+            );
+        });
+        output.textures_delta.clear();
+    }
+
+    #[test]
+    fn skin_options_reach_the_player() {
+        assert!(play_args(&["--skin=diagram"]).unwrap().skin.diagram);
+        assert!(!play_args(&["--skin", "classic"]).unwrap().skin.diagram);
+        assert!(play_args(&["--skin"]).is_err());
+        assert!(!Player::default().skin.diagram);
+        assert!(!play_args(&[]).unwrap().skin.diagram);
+    }
+
     /// The loaded span is a share of the item, so it is the same length on
     /// screen whatever the frame rate, and it never runs past the end or back
     /// before the picture.
@@ -7804,6 +8989,8 @@ mod tests {
         // The start bound is spent on this open, the stop bound waits for the picture.
         assert_eq!(player.bounds, PlayBounds::default());
         assert_eq!(player.stop_time, Some(seconds(1_500)));
+        assert_eq!(player.audio.as_ref().unwrap().generation(), 1,
+            "the initial audio cursor must follow the video's start bound");
 
         // Before the picture has a position there is nothing to compare to.
         player.check_stop();
@@ -9470,4 +10657,76 @@ LUT_3D_SIZE 2
             "HLG → BT.709 · BT.2020 → BT.709 · clip · 100 cd/m² · 33³ tetrahedral"
         );
     }
+}
+
+#[cfg(test)]
+mod gpu_option_tests {
+    use super::*;
+    #[test]
+    fn rgb_presentation_keeps_codes_without_a_second_cpu_texture() {
+        let path = std::env::temp_dir().join(format!("fvid-rgb-presentation-{}.y4m", std::process::id()));
+        let mut bytes = b"YUV4MPEG2 W2 H2 F25:1 Ip A1:1 C444\nFRAME\n".to_vec();
+        bytes.extend_from_slice(&[128; 12]);
+        std::fs::write(&path, bytes).unwrap();
+        let mut player = Player { no_audio: true, ..Default::default() };
+        player.open(path.clone()).unwrap();
+        let codes = vec![30, 80, 200, 50, 90, 180, 70, 100, 160, 90, 110, 140];
+        player.queued = Some(crate::playback_thread::Frame {
+            pixels: Pixels::Rgb(codes.clone()), dimensions: [2,2],
+            period: Duration::from_millis(40), interval: None, pts: None,
+            generation: player.playback.as_ref().unwrap().generation(), serial: 100,
+        });
+        player.step = 1;
+        player.present(&egui::Context::default());
+        assert!(player.texture.is_none());
+        assert_eq!(player.rgb_frame.as_ref().unwrap().0.as_slice(), codes);
+        assert!(player.picture().unwrap().starts_with(b"\x89PNG\r\n\x1a\n"));
+        drop(player);
+        std::fs::remove_file(path).unwrap();
+    }
+    #[test]
+    fn player_gpu_selection_is_explicit() {
+        let args: Vec<_> = ["--backend=metal", "--device", "2", "clip.mp4"].into_iter().map(str::to_owned).collect();
+        let parsed = parse_play_args(&args).unwrap();
+        assert_eq!(parsed.gpu_backend, crate::Backend::Metal);
+        assert_eq!(parsed.gpu_device, 2);
+        for flags in [["--backend", "cuda"], ["--backend", "cpu"], ["--device", "1"]] {
+            let args: Vec<_> = flags.into_iter().map(str::to_owned).collect();
+            assert!(parse_play_args(&args).is_err());
+        }
+        let args: Vec<_> = ["--shader", concat!(env!("CARGO_MANIFEST_DIR"), "/shaders/grayscale.wgsl"), "clip.mp4"].into_iter().map(str::to_owned).collect();
+        assert!(parse_play_args(&args).unwrap().shader.is_some());
+    }
+    #[test]
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    #[ignore = "requires physical VideoToolbox decoding"]
+    fn metal_player_presents_shared_main10_and_can_snapshot_it() {
+        let mut player = Player { shared_surfaces: true, no_audio: true, start_paused: true, ..Default::default() };
+        player.begin_open(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/hevc/main10-ipb.mp4"));
+        let ctx = egui::Context::default();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        while player.video_surface.is_none() {
+            assert!(Instant::now() < deadline, "shared picture never reached presentation");
+            player.poll_open(&ctx);
+            player.present(&ctx);
+            assert!(player.error.is_none(), "{:?}", player.error);
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        assert!(player.video.is_none()); assert!(player.video_packed.is_none()); assert!(player.texture.is_none());
+        assert!(player.hardware);
+        let (surface, _) = player.video_surface.as_ref().unwrap();
+        assert_eq!(surface.surface.depth(), 10);
+        assert!(matches!(player.presented.as_ref().unwrap().pixels, Pixels::Surface(_)));
+        assert!(player.picture().unwrap().starts_with(b"\x89PNG\r\n\x1a\n"));
+        assert!(player.paused);
+        assert_eq!(player.step, 0);
+        assert_eq!(player.presented.as_ref().unwrap().pts.map(|(pts, _)| pts), Some(0));
+        let serial = player.presented.as_ref().unwrap().serial;
+        for _ in 0..10 {
+            player.present(&ctx);
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        assert_eq!(player.presented.as_ref().unwrap().serial, serial);
+    }
+
 }

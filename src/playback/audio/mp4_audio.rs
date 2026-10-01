@@ -425,7 +425,7 @@ mod tests {
     ///   -c:a:2 pcm_f32le -c:a:3 pcm_s24be tests/fixtures/audio/pcm-tags.mov
     /// ```
     ///
-    /// Each of the three tags this player reads has to reach the decoder as its
+    /// Each of the four tags this player reads has to reach the decoder as its
     /// own layout, because a byte order or width guessed wrongly still yields
     /// 2400 frames of plausible-looking noise. The same 0.75-amplitude sine in all
     /// of them is what says the samples came out at the right scale and sign — and
@@ -435,11 +435,15 @@ mod tests {
     fn each_pcm_tag_is_read_at_its_own_width_and_order() {
         const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/pcm-tags.mov");
         let listing = Mp4AudioReader::open(Cursor::new(FIXTURE), Limits::default()).expect("PCM");
-        // `in24` is not among them, and the list stops at three.
-        assert_eq!(listing.audio_tracks().len(), 3);
-        assert!(Mp4AudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 3).is_err());
+        assert_eq!(listing.audio_tracks().len(), 4);
+        assert!(Mp4AudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 4).is_err());
 
-        for (nth, codec, stated) in [(0, "sowt", 16u16), (1, "twos", 16), (2, "fl32", 16)] {
+        for (nth, codec, stated) in [
+            (0, "sowt", 16u16),
+            (1, "twos", 16),
+            (2, "fl32", 16),
+            (3, "in24", 24),
+        ] {
             let mut stream = Mp4AudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), nth)
                 .unwrap_or_else(|error| panic!("track {nth}: {error}"));
             assert_eq!(stream.codec(), codec);

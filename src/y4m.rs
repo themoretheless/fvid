@@ -1,5 +1,7 @@
 //! Y4M input validation, transform planning, and bounded streaming execution.
-use crate::{Backend, ExecutionOptions, FrameView, Result, backend, buffer, invalid, resident};
+#[cfg(any(feature = "gpu", feature = "cuda"))]
+use crate::resident;
+use crate::{Backend, ExecutionOptions, FrameView, Result, backend, buffer, invalid};
 use std::io::{BufRead, Write};
 
 const MAX_LINE: usize = 4096;
@@ -451,9 +453,26 @@ pub fn process_with_options<R: BufRead, W: Write>(
 /// only at Y4M input/output boundaries. Each transform sees the preceding output.
 #[cfg(any(feature = "gpu", feature = "cuda"))]
 pub fn process_gpu_chain<R: BufRead, W: Write>(
+    reader: R,
+    writer: W,
+    transforms: &[Transform],
+    memory_limit: usize,
+    options: ExecutionOptions,
+) -> Result<(Stats, resident::TransferStats)> {
+    let stages: Vec<_> = transforms
+        .iter()
+        .copied()
+        .map(resident::GpuStage::from)
+        .collect();
+    process_gpu_stages(reader, writer, &stages, memory_limit, options)
+}
+
+/// Programmable GPU stages with one upload/download per frame.
+#[cfg(any(feature = "gpu", feature = "cuda"))]
+pub fn process_gpu_stages<R: BufRead, W: Write>(
     mut reader: R,
     mut writer: W,
-    transforms: &[Transform],
+    stages: &[resident::GpuStage],
     memory_limit: usize,
     options: ExecutionOptions,
 ) -> Result<(Stats, resident::TransferStats)> {
@@ -462,7 +481,7 @@ pub fn process_gpu_chain<R: BufRead, W: Write>(
         return Err(invalid("empty input"));
     }
     let header = Header::parse(&marker)?;
-    let mut pipeline = resident::GpuPipeline::new(&header, transforms, options, memory_limit)?;
+    let mut pipeline = resident::GpuPipeline::with_stages(&header, stages, options, memory_limit)?;
     let mut input = buffer(pipeline.input_len())?;
     let mut output = buffer(pipeline.output_len())?;
     let out = pipeline.output_header();

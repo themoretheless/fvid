@@ -1,12 +1,12 @@
 //! 1D and 3D colour lookup tables: `.cube` / `.3dl` / `.dat` / `.spi1d` /
 //! `.spi3d`, parsing and sampling.
 
-use crate::color::log::Log;
-use crate::color::primaries::{apply, rgb_to_rgb, Primaries};
-use crate::color::tonemap::{compress_gamut, tone_map_rgb, ContentLight, DisplayTarget, ToneMap};
-use crate::color::transfer::{hlg_ootf_rgb, hlg_system_gamma, Transfer};
-use crate::invalid;
 use crate::Result;
+use crate::color::log::Log;
+use crate::color::primaries::{Primaries, apply, rgb_to_rgb};
+use crate::color::tonemap::{ContentLight, DisplayTarget, ToneMap, compress_gamut, tone_map_rgb};
+use crate::color::transfer::{Transfer, hlg_ootf_rgb, hlg_system_gamma};
+use crate::invalid;
 
 /// How to interpolate between grid nodes.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]

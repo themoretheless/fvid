@@ -4,8 +4,8 @@ use crate::color::{
     primaries::MatrixCoeff,
 };
 use crate::{
-    codec::avc_picture::IntraPicture, container::mp4::Limits, invalid, playback::Y4mReader,
-    playback_mp4::Mp4VideoReader, Result,
+    Result, codec::avc_picture::IntraPicture, container::mp4::Limits, invalid, playback::Y4mReader,
+    playback_mp4::Mp4VideoReader,
 };
 use std::{
     io::{BufRead, Read, Seek, SeekFrom},
@@ -150,6 +150,13 @@ impl<R: BufRead + Seek> NativeReader<R> {
         Self::new(reader, usize::MAX)
     }
 
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    pub fn enable_shared_surfaces(&mut self) -> Result<bool> {
+        match self {
+            Self::Avc { source, .. } => source.enable_shared_surfaces(),
+            _ => Ok(false),
+        }
+    }
     pub fn new(reader: R, budget: usize) -> Result<Self> {
         Self::with_hardware(reader, budget, true)
     }
@@ -189,8 +196,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
         }
         // Dispatch only recognizable ISO BMFF/QuickTime box headers. A file
         // with another signature must not be diagnosed as a corrupt MP4.
-        if !crate::container::mp4::recognizes_prefix(&prefix[..length.min(prefix.len())])
-        {
+        if !crate::container::mp4::recognizes_prefix(&prefix[..length.min(prefix.len())]) {
             return Err(invalid(
                 "unrecognized video format; supported containers: MP4/MOV, WebM/Matroska and Y4M",
             ));
@@ -399,6 +405,31 @@ impl<R: BufRead + Seek> NativeReader<R> {
     /// Total playable length when the container declares one (MP4 track
     /// duration, clipped by its edit window, or the WebM timeline). Y4M
     /// streams carry no up-front length, so they report `None`.
+    pub fn cache_packet_count(&self) -> usize {
+        match self { Self::Avc { source, .. } => source.track().samples.expanded().map_or(0, |samples| samples.len()),
+            Self::Webm(reader) => reader.cache_packet_count(), Self::Y4m(_) => 0 }
+    }
+
+    /// Indexed packet bytes and their presentation intervals. Container headers
+    /// never become video time merely because they are cached near EOF.
+    pub fn cache_packets(&self) -> Vec<(u64, u64, Duration, Duration)> {
+        match self {
+            Self::Avc { source, media_start, .. } => {
+                let track = source.track();
+                if track.timescale == 0 { return Vec::new(); }
+                track.samples.expanded().unwrap_or(&[]).iter().filter_map(|sample| {
+                    let start = sample.pts.checked_sub(*media_start)?;
+                    let end = start.checked_add(i64::from(sample.duration))?;
+                    if end <= 0 { return None; }
+                    let time = |ticks: i64| Duration::from_secs_f64(ticks.max(0) as f64 / track.timescale as f64);
+                    Some((sample.offset, sample.offset.saturating_add(u64::from(sample.size)), time(start), time(end)))
+                }).collect()
+            }
+            Self::Webm(reader) => reader.cache_packets(),
+            Self::Y4m(_) => Vec::new(),
+        }
+    }
+
     pub fn duration(&self) -> Option<Duration> {
         match self {
             Self::Y4m(_) => None,
@@ -691,6 +722,10 @@ impl<R: BufRead + Seek> NativeReader<R> {
             .checked_add(frame.duration.ticks)
             .ok_or_else(|| invalid("video timestamp overflow"))?;
         *frames += 1;
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        if let Some(surface) = frame.surface {
+            return Ok(Some(RawFrame::Surface { surface, colour }));
+        }
         Ok(Some(match frame.planes8 {
             Some(planes) if frame.picture.bit_depth == 8 => RawFrame::Planar8(planes),
             _ => RawFrame::Avc {
@@ -831,13 +866,21 @@ pub fn yuv_to_rgb(
     sy: usize,
     out: &mut Vec<u8>,
 ) {
-    yuv_to_rgb_range(data, luma_len, chroma_len, width, height, sx, sy, false, out)
+    yuv_to_rgb_range(
+        data, luma_len, chroma_len, width, height, sx, sy, false, out,
+    )
 }
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn yuv_to_rgb_range(
-    data: &[u8], luma_len: usize, chroma_len: usize,
-    width: usize, height: usize, sx: usize, sy: usize,
-    full: bool, out: &mut Vec<u8>,
+    data: &[u8],
+    luma_len: usize,
+    chroma_len: usize,
+    width: usize,
+    height: usize,
+    sx: usize,
+    sy: usize,
+    full: bool,
+    out: &mut Vec<u8>,
 ) {
     let len = width * height * 3;
     if out.len() != len {
@@ -855,7 +898,9 @@ pub(crate) fn yuv_to_rgb_range(
                 let u = f64::from(u);
                 let v = f64::from(v);
                 pixel[0] = (y + 1.402 * v).round().clamp(0.0, 255.0) as u8;
-                pixel[1] = (y - (0.114 * 1.772 * u + 0.299 * 1.402 * v) / 0.587).round().clamp(0.0, 255.0) as u8;
+                pixel[1] = (y - (0.114 * 1.772 * u + 0.299 * 1.402 * v) / 0.587)
+                    .round()
+                    .clamp(0.0, 255.0) as u8;
                 pixel[2] = (y + 1.772 * u).round().clamp(0.0, 255.0) as u8;
                 continue;
             }
@@ -867,6 +912,11 @@ pub(crate) fn yuv_to_rgb_range(
 }
 /// A decoded frame before RGB conversion.
 pub enum RawFrame {
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    Surface {
+        surface: fvid_vt::Surface,
+        colour: AvcColour,
+    },
     Rgb(Vec<u8>),
     Avc {
         picture: Arc<IntraPicture>,
@@ -892,6 +942,10 @@ impl RawFrame {
     pub fn into_rgb(self, budget: usize) -> Result<Vec<u8>> {
         let mut rgb = Vec::new();
         match self {
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            RawFrame::Surface { surface, colour } => {
+                surface_to_packed(&surface, colour)?.to_rgb(&mut rgb, budget)?
+            }
             RawFrame::Rgb(rgb) => return Ok(rgb),
             RawFrame::Avc { picture, colour } => avc_to_rgb(&picture, colour, &mut rgb, budget)?,
             RawFrame::Planar8(planes) => planar8_to_rgb(&planes, &mut rgb, budget)?,
@@ -908,6 +962,30 @@ impl RawFrame {
         }
         Ok(rgb)
     }
+}
+/// Explicit CPU fallback/export of a shared decoder surface.
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+pub fn surface_to_packed(
+    surface: &fvid_vt::Surface,
+    mut colour: AvcColour,
+) -> Result<PackedPlanar> {
+    let planes = surface
+        .download()
+        .map_err(|error| invalid(&error.to_string()))?;
+    colour.full = planes.full_range;
+    let mut data = planes.y;
+    data.extend(planes.cb);
+    data.extend(planes.cr);
+    PackedPlanar::new(
+        crate::native_geometry::GeometryFrame {
+            width: planes.width,
+            height: planes.height,
+            subsampling: Some([2, 2]),
+            data,
+        },
+        planes.depth,
+        colour,
+    )
 }
 /// Convert the cropped 4:2:0 picture to packed 8-bit RGB into `rgb`, which is
 /// resized when the picture size changes.
@@ -946,6 +1024,10 @@ fn fill_rgb(
     dimensions: [usize; 2],
 ) -> Result<()> {
     match raw {
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        RawFrame::Surface { surface, colour } => {
+            surface_to_packed(&surface, colour)?.to_rgb(rgb, budget)?
+        }
         RawFrame::Avc { picture, colour } => avc_to_rgb(&picture, colour, rgb, budget)?,
         RawFrame::Planar8(planes) => planar8_to_rgb(&planes, rgb, budget)?,
         RawFrame::Planar(p) => p.to_rgb(rgb, budget)?,
@@ -1328,11 +1410,15 @@ mod tests {
                 .pixel_aspect()
         };
         assert_eq!(
-            aspect(include_bytes!("../../../tests/fixtures/display/par-2x1.mp4")),
+            aspect(include_bytes!(
+                "../../../tests/fixtures/display/par-2x1.mp4"
+            )),
             (2, 1)
         );
         assert_eq!(
-            aspect(include_bytes!("../../../tests/fixtures/display/par-2x1.webm")),
+            aspect(include_bytes!(
+                "../../../tests/fixtures/display/par-2x1.webm"
+            )),
             (2, 1)
         );
         // Nothing stated is square pixels, which is what the overwhelming
