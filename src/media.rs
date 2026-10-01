@@ -1,6 +1,19 @@
 //! Media API migration: plain video decode and AAC PCM export use FVid's native pipeline.
 //! Remaining exports still use the legacy adapter and retain its dependencies.
 pub use fvid_media::*;
+// Public operation contracts belong to FVid, independently of legacy execution.
+pub use crate::media_info::{
+    AudioDecodeStats, AudioDecodeTransform, Capabilities, ChapterInfo, CopyStats,
+    CropRect, DecodeStats, DecodeTransform, EncoderSettings, LosslessStats,
+    LosslessTransform, LoudnessStats, LoudnormStats, MediaInfo, MediaPlan,
+    MergeAudioStats, MixAudioOptions, MixAudioStats, MixDuration, OverlaySpec,
+    PadRect, PcmTrimStats, PlanStep, PlanStream, RotateAngle, ScaleSize, StreamInfo,
+    SubtitleCodec, SubtitleConvertOptions, TransposeMode, XfadeSpec, parse_time,
+    DEFAULT_LOUDNORM_ARGS, validate_loudnorm_args,
+};
+pub use crate::media_info::NativeSubtitleStats as SubtitleConvertStats;
+pub use crate::media_control::{CancelFlag, CopyOptions, ProgressEvent, ProgressHook};
+pub type Result<T> = std::result::Result<T, String>;
 pub use crate::native_export::{export_y4m, export_y4m_interval, export_y4m_transformed};
 
 pub fn convert_subtitles(source: &std::path::Path, destination: &std::path::Path,
