@@ -80,6 +80,21 @@ fn coupling_matches_saved_pcm_reset_and_checkpoint() {
             include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-short-after-tns.f32le").as_slice(),
             2,
         ),
+        (
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-after-tns-band-gain-signed-multiband.aac").as_slice(),
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-after-tns-band-gain-signed-multiband.f32le").as_slice(),
+            2,
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-short-after-tns-band-gain-signed-multiband.aac").as_slice(),
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-short-after-tns-band-gain-signed-multiband.f32le").as_slice(),
+            2,
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-short-after-tns-band-gain-signed-multiband-groups.aac").as_slice(),
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-short-after-tns-band-gain-signed-multiband-groups.f32le").as_slice(),
+            2,
+        ),
     ] {
         let mut reader = StreamReader::open(Cursor::new(data)).unwrap();
         let mut decoder = NativeAacDecoder::new(reader.audio_specific_config()).unwrap();
@@ -252,5 +267,42 @@ fn dependent_tns_fixtures_distinguish_coupling_stages() {
             difference > 0.00001,
             "active target TNS must distinguish coupling stages: {difference}"
         );
+    }
+}
+
+#[test]
+fn multiband_fixture_accumulates_signed_gains_and_skips_zero_bands() {
+    use fvid::codec::{
+        aac_coupling::Coupling, aac_pair::ChannelPair, aac_pce::ProgramConfig, bits::BitReader,
+        config::AacConfig,
+    };
+    for data in [
+        include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-after-tns-band-gain-signed-multiband.aac").as_slice(),
+        include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-short-after-tns-band-gain-signed-multiband.aac").as_slice(),
+        include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-short-after-tns-band-gain-signed-multiband-groups.aac").as_slice(),
+    ] {
+        let mut reader=StreamReader::open(Cursor::new(data)).unwrap();
+        let config=AacConfig::parse(reader.audio_specific_config()).unwrap();
+        while let Some(packet)=reader.next_packet().unwrap() {
+            let mut bits=BitReader::new(&packet);
+            assert_eq!(bits.read(3).unwrap(), 5);
+            ProgramConfig::read(&mut bits, 0).unwrap();
+            assert_eq!(bits.read(3).unwrap(), 1);
+            assert_eq!(bits.read(4).unwrap(), 0);
+            ChannelPair::read(&mut bits, &config).unwrap();
+            assert_eq!(bits.read(3).unwrap(), 2);
+            let cce=Coupling::read(&mut bits, &config).unwrap();
+            assert_eq!(cce.point,1);
+            let groups=cce.channel.info.group_lengths.len();
+            assert_eq!(cce.channel.codebooks, vec![vec![1,0,1];groups]);
+            assert_eq!(cce.targets[0].bands, vec![vec![1.0,0.0,1.0];groups]);
+            let mut expected=vec![vec![-2f32.powf(-0.25),0.0,2f32.powf(-0.125)]];
+            if groups == 2 {
+                assert_eq!(cce.channel.info.group_lengths,vec![4,4]);
+                expected.push(vec![2f32.powf(-0.125),0.0,-2f32.powf(-0.125)]);
+            }
+            assert_eq!(cce.targets[1].bands,expected);
+            assert_eq!(bits.read(3).unwrap(),7);
+        }
     }
 }

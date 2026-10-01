@@ -114,24 +114,13 @@ impl Coupling {
             } else {
                 tables.long
             };
-        let size = *offsets.last().unwrap();
-        if source.len() != config.frame_samples as usize || destination.len() != source.len() {
-            return Err(invalid("AAC coupling spectral geometry mismatch"));
-        }
-        let mut first = 0;
-        for (group, &length) in self.channel.info.group_lengths.iter().enumerate() {
-            for (band, &gain) in target.bands[group].iter().enumerate() {
-                for window in first..first + length as usize {
-                    for bin in window * size + offsets[band]..window * size + offsets[band + 1] {
-                        destination[bin] += source[bin] * gain;
-                        if !destination[bin].is_finite() {
-                            return Err(invalid("AAC coupling spectral overflow"));
-                        }
-                    }
-                }
-            }
-            first += length as usize;
-        }
-        Ok(())
+        fvid_media::owned_aac::aac_coupling::mix_spectrum(
+            source,
+            destination,
+            offsets,
+            &self.channel.info.group_lengths,
+            &target.bands,
+        )
+        .map_err(crate::Error::from)
     }
 }

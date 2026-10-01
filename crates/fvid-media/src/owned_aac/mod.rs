@@ -1,6 +1,7 @@
 //! Owned AAC synthesis and transforms. No foreign decoder or libav dependency.
 #![forbid(unsafe_code)]
 pub mod aac_imdct;
+pub mod aac_coupling;
 pub mod aac_synthesis;
 pub mod aac_tns;
 #[derive(Debug)]
