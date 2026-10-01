@@ -25,9 +25,17 @@ pub struct DecodedReferencePicture {
 /// The budget covers decoded reference storage and picture reconstruction;
 /// input/configuration bytes and output Arcs retained by callers are excluded.
 /// After an error, call `reset` before decoding another access unit.
+#[derive(Clone)]
+struct Parameters {
+    sets: Vec<Sps>,
+    pps_nals: Vec<(u32, Vec<u8>)>,
+    pairs: Vec<(Sps, Pps)>,
+}
 pub struct AvcDecoder {
     length_size: u8,
-    pairs: Vec<(Sps, Pps)>,
+    params: Parameters,
+    initial_params: Parameters,
+    decoded_sps: Option<Sps>,
     budget: usize,
     poc: PocDecoder,
     dpb: Option<ReferenceBuffer<DecodedReferencePicture>>,
@@ -51,6 +59,7 @@ impl AvcDecoder {
             }
         }
         let mut pairs = Vec::new();
+        let mut pps_nals = Vec::new();
         for nal in config.pps {
             let pair = sets
                 .iter()
@@ -59,14 +68,22 @@ impl AvcDecoder {
             if pairs.iter().any(|(_, p): &(Sps, Pps)| p.id == pair.1.id) {
                 return Err(invalid("duplicate AVC parameter set ID"));
             }
+            pps_nals.push((pair.1.id, nal.to_vec()));
             pairs.push(pair);
         }
         if pairs.is_empty() {
             return Err(invalid("AVC configuration has no parameter sets"));
         }
+        let params = Parameters {
+            sets,
+            pps_nals,
+            pairs,
+        };
         Ok(Self {
             length_size: config.length_size,
-            pairs,
+            initial_params: params.clone(),
+            params,
+            decoded_sps: None,
             budget,
             poc: PocDecoder::new(),
             dpb: None,
@@ -78,7 +95,8 @@ impl AvcDecoder {
         })
     }
     pub fn active_vui(&self) -> Option<&super::avc::Vui> {
-        self.pairs
+        self.params
+            .pairs
             .iter()
             .find(|(s, _)| Some(s.id) == self.active_sps)
             .and_then(|(s, _)| s.vui.as_ref())
@@ -89,10 +107,12 @@ impl AvcDecoder {
     /// pictures before that is here, and a reader that grades the first picture
     /// asks at that moment.
     pub fn recorded_vui(&self) -> Option<&super::avc::Vui> {
-        self.pairs.first().and_then(|(s, _)| s.vui.as_ref())
+        self.params.pairs.first().and_then(|(s, _)| s.vui.as_ref())
     }
     /// Drops reference pictures and requires the next coded picture to be IDR.
     pub fn reset(&mut self) {
+        self.params.clone_from(&self.initial_params);
+        self.decoded_sps = None;
         self.poc = PocDecoder::new();
         self.dpb = None;
         self.active_sps = None;
@@ -119,11 +139,79 @@ impl AvcDecoder {
         self.failed = result.is_err();
         result
     }
+    fn updated_parameters(&self, packet: &[u8]) -> Result<Option<Parameters>> {
+        let mut updated: Option<Parameters> = None;
+        let mut seen_slice = false;
+        for nal in NalUnits::new(packet, self.length_size)? {
+            let nal = nal?;
+            let kind = nal[0] & 31;
+            seen_slice |= matches!(kind, 1 | 5);
+            let params = updated.as_ref().unwrap_or(&self.params);
+            match kind {
+                7 => {
+                    let new = Sps::parse(nal)?;
+                    if params.sets.iter().any(|s| *s == new) {
+                        continue;
+                    }
+                    if seen_slice {
+                        return Err(invalid("AVC changed SPS follows picture slices"));
+                    }
+                    let params = updated.get_or_insert_with(|| self.params.clone());
+                    if let Some(old) = params.sets.iter_mut().find(|s| s.id == new.id) {
+                        *old = new;
+                    } else {
+                        params.sets.push(new);
+                    }
+                }
+                8 => {
+                    let new = params
+                        .sets
+                        .iter()
+                        .find_map(|s| Pps::parse(nal, s).ok())
+                        .ok_or_else(|| invalid("AVC in-band PPS has no valid SPS"))?;
+                    if params
+                        .pps_nals
+                        .iter()
+                        .any(|(id, bytes)| *id == new.id && bytes == nal)
+                    {
+                        continue;
+                    }
+                    if seen_slice {
+                        return Err(invalid("AVC changed PPS follows picture slices"));
+                    }
+                    let params = updated.get_or_insert_with(|| self.params.clone());
+                    if let Some(old) = params.pps_nals.iter_mut().find(|(id, _)| *id == new.id) {
+                        old.1 = nal.to_vec();
+                    } else {
+                        params.pps_nals.push((new.id, nal.to_vec()));
+                    }
+                }
+                _ => {}
+            }
+        }
+        if let Some(params) = &mut updated {
+            params.pairs = params
+                .pps_nals
+                .iter()
+                .map(|(_, nal)| {
+                    params
+                        .sets
+                        .iter()
+                        .find_map(|s| Pps::parse(nal, s).ok().map(|p| (s.clone(), p)))
+                        .ok_or_else(|| invalid("AVC updated PPS has no valid SPS"))
+                })
+                .collect::<Result<_>>()?;
+        }
+        Ok(updated)
+    }
     fn decode_inner(
         &mut self,
         packet: &[u8],
         allow_reordering: bool,
     ) -> Result<Option<Arc<IntraPicture>>> {
+        if let Some(params) = self.updated_parameters(packet)? {
+            self.params = params;
+        }
         let mut coded = None;
         for nal in NalUnits::new(packet, self.length_size)? {
             let nal = nal?;
@@ -135,7 +223,7 @@ impl AvcDecoder {
                         ));
                     }
                 }
-                6 | 9 | 12 => {}
+                6 | 7 | 8 | 9 | 12 => {}
                 _ => return Err(invalid("unsupported in-band AVC NAL")),
             }
         }
@@ -144,6 +232,7 @@ impl AvcDecoder {
         };
         let id = SliceHeader::parameter_set_id(nal)?;
         let (sps, pps) = self
+            .params
             .pairs
             .iter()
             .find(|(_, p)| p.id == id)
@@ -155,7 +244,9 @@ impl AvcDecoder {
         ) {
             return Err(invalid("AVC picture type is not implemented"));
         }
-        if !header.idr && self.active_sps != Some(sps.id) {
+        if !header.idr
+            && (self.active_sps != Some(sps.id) || self.decoded_sps.as_ref() != Some(sps))
+        {
             return Err(invalid("AVC stream/configuration change requires IDR"));
         }
         if !header.idr
@@ -185,6 +276,7 @@ impl AvcDecoder {
                 sps.max_num_ref_frames,
             )?);
             self.active_sps = Some(sps.id);
+            self.decoded_sps = Some(sps.clone());
             self.last_poc = None;
             self.previous_reference = None;
         }

@@ -15,12 +15,12 @@ pub enum PictureOrder {
     },
     DecodeOrder,
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ScalingList {
     Default,
     Explicit(Vec<u8>),
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Hrd {
     pub bit_rate_scale: u8,
     pub cpb_size_scale: u8,
@@ -30,7 +30,7 @@ pub struct Hrd {
     pub output_delay_bits: u8,
     pub time_offset_bits: u8,
 }
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Vui {
     pub aspect_ratio: Option<(u16, u16)>,
     pub overscan_appropriate: Option<bool>,
@@ -44,7 +44,7 @@ pub struct Vui {
     pub pic_struct_present: bool,
     pub restriction: Option<BitstreamRestriction>,
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BitstreamRestriction {
     pub motion_vectors_over_boundaries: bool,
     pub max_bytes_per_pic_denom: u32,
@@ -54,7 +54,7 @@ pub struct BitstreamRestriction {
     pub max_num_reorder_frames: u32,
     pub max_dec_frame_buffering: u32,
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Sps {
     pub profile: u8,
     pub constraints: u8,
@@ -450,7 +450,7 @@ mod tests {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SliceGroups {
     Single,
     Interleaved(Vec<u32>),
@@ -466,7 +466,7 @@ pub enum SliceGroups {
         map: Vec<u8>,
     },
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Pps {
     pub id: u32,
     pub sps_id: u32,

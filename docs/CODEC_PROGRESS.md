@@ -32,6 +32,12 @@ mix сохраняет PCE mask 0xff для ADTS/MP4/Matroska; тест двух
 
 Текущие явные границы собственного декодирования:
 
+- `src/codec/avc_decoder.rs`: повторённые и обновлённые in-band SPS/PPS
+  принимаются до slices, включая `avc3`; смена SPS требует IDR и нового DPB.
+  Reset возвращает исходную конфигурацию. Main/CABAC I/P/P поток со сменой
+  64x64 -> 96x64 совпадает с независимым YUV-эталоном; native playback и
+  camera bridge проходят смену размера и перемотку. Multiple slices, custom
+  scaling matrices и другие неподключённые инструменты ещё ограничены.
 - `src/codec/hevc_decoder.rs`: независимые multi-slice headers разбираются
   через `slice_headers`, с проверкой общей picture identity и порядка CTU.
   Независимые slices восстанавливаются в общие planes с WPP, CABAC reset,
@@ -1398,3 +1404,16 @@ source and native output matched byte-for-byte (two cues, including alignment,
 line break and comma-containing text). FFmpeg was used only as this reference.
 Other subtitle codecs, non-UTF8 text and remaining media operations still retain
 legacy paths; this change does not establish whole-feature FFmpeg independence.
+
+### AVC in-band sequence and picture parameter updates
+
+The native AVC decoder accepts repeated SPS/PPS, validates replacements before
+installation, and retains encoded PPS records to rebuild geometry against updated
+SPS records. Parameter-only access units persist until the following picture.
+A changed decoded SPS requires IDR even when the SPS ID is reused; IDR rebuilds
+reference storage and POC handling. Reset restores original parameter records.
+The synthetic avc3 regression exercises CABAC I/P/P reconstruction before and
+after a resolution change, exact saved independent YUV, native RGB playback,
+camera fixed-format output and rewind. Late parameter changes and non-IDR
+sequence switches fail without publishing a picture and recover after reset.
+This does not add AVC multiple-slice reconstruction or custom scaling matrices.

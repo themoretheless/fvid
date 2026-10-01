@@ -39,3 +39,17 @@ No light is stated for this file, in a box or in the bitstream, and the reader's
 `hdr()` stays empty at open and after every picture — HLG material as an encoder
 really writes it. So the grade is HLG → BT.709 clipped to the panel's own peak,
 the same shape `../hevc/hlg.mp4` pins.
+
+### In-band AVC parameter sets and resolution changes
+
+`../playback-errors/avc-inband-resize.mp4` is a six-frame Main/CABAC `avc3`
+stream with repeated SPS/PPS and an IDR change from 64x64 to 96x64. Each
+sequence has three I/P/P frames. Regenerate from synthetic test patterns with
+`python3 scripts/generate_avc_parameter_sample.py` from the repository root.
+The two sequences are independently decoded at their native dimensions before
+concatenating the saved YUV reference, avoiding an implicit resize in a reference
+filter graph. Ordinary tests use saved bytes and never invoke the generator.
+
+`tests/avc_parameter_updates.rs` verifies every decoded sample, parameter-only
+packets, invalid non-IDR/late transitions, reset, software native playback, and
+fixed-size camera output across the change and backward seek.
