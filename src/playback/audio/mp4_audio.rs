@@ -251,16 +251,16 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         let track = self.track();
         // Single media edits cover encoder priming and padding. Complex edit
         // sequences require replay/silence scheduling beyond this packet hook.
-        if track.codec != *b"mp4a" || track.edits.len() != 1 || track.edits[0].media_time < 0 {
+        if track.codec != *b"mp4a" || track.edits.len() > 1 || track.edits.first().is_some_and(|e| e.media_time < 0) {
             return Ok(Some(packet));
         }
-        let edit = &track.edits[0];
         let rate = u128::from(track.sample_rate);
         let scale = u128::from(track.timescale);
         let movie_scale = u128::from(self.demuxer.movie_timescale());
         if scale == 0 || movie_scale == 0 { return Err(invalid("zero MP4 audio presentation clock")); }
-        let media_start = (edit.media_time as u128 * rate).div_ceil(scale);
-        let length = (u128::from(edit.duration) * rate).div_ceil(movie_scale);
+        let (media_start, length) = if let Some(edit) = track.edits.first() {
+            ((edit.media_time as u128 * rate).div_ceil(scale), (u128::from(edit.duration) * rate).div_ceil(movie_scale))
+        } else { (0, (u128::from(track.duration) * rate).div_ceil(scale)) };
         let media_end = media_start.checked_add(length).ok_or_else(|| invalid("MP4 audio edit overflow"))?;
         let source_start = i128::from(source_pts) * i128::from(track.sample_rate) / i128::from(track.timescale);
         let stride = usize::from(track.channels).checked_mul(4).filter(|n| *n != 0).ok_or_else(|| invalid("invalid AAC PCM stride"))?;
@@ -314,7 +314,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     fn seek_to(&mut self, pts: i64) -> i64 {
         let track = self.track();
         let shift = if track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
-        let preroll = track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0;
+        let preroll = track.codec == *b"mp4a" && (track.edits.is_empty() || (track.edits.len() == 1 && track.edits[0].media_time >= 0));
         let landed = Mp4AudioReader::seek(self, pts.saturating_add(shift));
         if preroll {
             // Restore all decoder overlap/history before exposing the landed

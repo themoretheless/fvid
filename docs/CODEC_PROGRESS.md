@@ -1521,5 +1521,6 @@ beginning and suppresses preroll PCM until the landed packet. Captured PCM after
 a 50 ms seek and subsequent backward seek matches continuous decoding exactly.
 This currently takes linear decode work; bounded state checkpoints remain a
 performance task. Raw `Mp4AudioReader::seek` retains its packet-cursor behavior;
-the player-facing `AudioStream::seek_to` performs the preroll. Complex edit lists
-and AAC containers without the single-range edit are not covered by this path.
+the player-facing `AudioStream::seek_to` performs the preroll. Complex edit lists and non-MP4 AAC containers are not covered by this path.
+MP4 AAC without edit lists now uses the same suppressed preroll and has a
+separate continuous-PCM seek regression (`aac-no-edit.m4a`).
