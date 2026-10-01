@@ -510,7 +510,7 @@ fn export_pcm_selected(
     if wav { output.write_all(&[0; 80])?; }
     let mut sink = pcm_matroska::Output::new(&mut output, matroska_output, output_rate, output_channels)?;
     let mut resampler = crate::pcm_resample::Resampler::new(&mut sink, input_rate, output_rate, output_channels)?;
-    let mut pcm = PcmGain { output: &mut resampler, gain: volume as f32, input_channels, output_channels, frame: [0.0; 6], filled: 0 };
+    let mut pcm = fvid_media::owned_pcm_gain::PcmGain::new(&mut resampler, volume, input_channels, output_channels).map_err(|e| invalid(&e))?;
     let mut stats = if let Some(reader) = mp4 {
         crate::native_media::decode_mp4_audio_reader_controlled(reader, &mut pcm, interval, selected, &mut control)?
     } else if let Some(reader) = matroska {
@@ -522,7 +522,7 @@ fn export_pcm_selected(
     };
     control.emit(false);
     control.check()?;
-    if pcm.filled != 0 { return Err(invalid("incomplete decoded audio frame")); }
+    if !pcm.frame_complete() { return Err(invalid("incomplete decoded audio frame")); }
     stats.channels = output_channels;
     stats.sample_frames = resampler.finish()?;
     stats.sample_rate = output_rate;
@@ -548,97 +548,6 @@ pub(crate) fn default_pcm_mask(channels:u16)->Result<u32> {
 }
 pub(crate) fn float_wav_header_with_mask(stats:&crate::native_media::AudioDecodeStats,mask:u32)->Result<Vec<u8>> {
     fvid_media::owned_wav::float_wav_header_with_mask(stats.sample_rate,stats.channels,stats.sample_frames,mask).map_err(|e|invalid(&e))
-}
-
-// Native decoder writes may split channel frames, but always contain whole samples.
-struct PcmGain<'a, W> {
-    output: &'a mut W,
-    gain: f32,
-    input_channels: u16,
-    output_channels: u16,
-    frame: [f32; 6],
-    filled: usize,
-}
-impl<W: Write> Write for PcmGain<'_, W> {
-    fn write(&mut self, data: &[u8]) -> std::io::Result<usize> {
-        if data.len() % 4 != 0 {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::InvalidData,
-                "unaligned PCM write",
-            ));
-        }
-        if self.input_channels == self.output_channels {
-            for bytes in data.chunks_exact(4) {
-                let value = f32::from_le_bytes(bytes.try_into().unwrap()) * self.gain;
-                if !value.is_finite() {
-                    return Err(std::io::Error::new(
-                        std::io::ErrorKind::InvalidData,
-                        "PCM gain overflow",
-                    ));
-                }
-                self.output.write_all(&value.to_le_bytes())?;
-                self.filled = (self.filled + 1) % usize::from(self.input_channels);
-            }
-            return Ok(data.len());
-        }
-        for bytes in data.chunks_exact(4) {
-            self.frame[self.filled] = f32::from_le_bytes(bytes.try_into().unwrap());
-            self.filled += 1;
-            if self.filled != usize::from(self.input_channels) {
-                continue;
-            }
-            let frame = &self.frame;
-            let mut mixed = [0.0; 6];
-            // Standard decoded order: FL FR FC [LFE] BL BR or BC.
-            // LFE is omitted. Centre/surround contributions use -3 dB.
-            let k = std::f32::consts::FRAC_1_SQRT_2;
-            let (mut left, mut right) = if self.input_channels == 1 {
-                (frame[0], frame[0])
-            } else {
-                (frame[0], frame[1])
-            };
-            if self.input_channels >= 3 {
-                left += k * frame[2];
-                right += k * frame[2];
-            }
-            match self.input_channels {
-                4 => {
-                    left += k * frame[3];
-                    right += k * frame[3];
-                }
-                5 => {
-                    left += k * frame[3];
-                    right += k * frame[4];
-                }
-                6 => {
-                    left += k * frame[4];
-                    right += k * frame[5];
-                }
-                _ => {}
-            }
-            if self.output_channels == 1 {
-                mixed[0] = (left + right) * 0.5;
-            } else {
-                mixed[0] = left;
-                mixed[1] = right;
-            }
-            for sample in &mixed[..usize::from(self.output_channels)] {
-                let value = sample * self.gain;
-                if !value.is_finite() {
-                    return Err(std::io::Error::new(
-                        std::io::ErrorKind::InvalidData,
-                        "PCM gain overflow",
-                    ));
-                }
-                self.output.write_all(&value.to_le_bytes())?;
-            }
-            self.filled = 0;
-        }
-        Ok(data.len())
-    }
-    fn flush(&mut self) -> std::io::Result<()> {
-        self.output.flush()
-    }
 }
 
 /// Lossless ADTS packet remux with atomic no-overwrite publication.
