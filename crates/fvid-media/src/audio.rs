@@ -98,9 +98,20 @@ pub(crate) unsafe fn apply_volume(frame: *mut AVFrame, gain: f64) -> Result<()> 
     }
 }
 
+fn integer_format(format: i32) -> Option<crate::owned_pcm_integer::Format> {
+    use crate::owned_pcm_integer::Format;
+    match format {
+        AVSampleFormat_AV_SAMPLE_FMT_U8 | AVSampleFormat_AV_SAMPLE_FMT_U8P => Some(Format::U8),
+        AVSampleFormat_AV_SAMPLE_FMT_S16 | AVSampleFormat_AV_SAMPLE_FMT_S16P => Some(Format::I16),
+        AVSampleFormat_AV_SAMPLE_FMT_S32 | AVSampleFormat_AV_SAMPLE_FMT_S32P => Some(Format::I32),
+        _ => None,
+    }
+}
+
 struct Resampler {
     owned: Option<crate::owned_resample::Resampler<Vec<u8>>>,
     owned_f64: Option<crate::owned_resample_f64::Resampler<Vec<u8>>>,
+    input_format: i32,
     input_rate: i32,
     input_channels: i32,
     swr: *mut SwrContext,
@@ -151,6 +162,7 @@ impl Resampler {
             let mut built = Self {
                 owned: None,
                 owned_f64: None,
+                input_format: f.format,
                 input_rate: f.sample_rate,
                 input_channels: f.ch_layout.nb_channels,
                 swr: ptr::null_mut(),
@@ -174,7 +186,7 @@ impl Resampler {
                 return Ok(built);
             }
             if owned_layout
-                && matches!(f.format, AVSampleFormat_AV_SAMPLE_FMT_DBL | AVSampleFormat_AV_SAMPLE_FMT_DBLP)
+                && (matches!(f.format, AVSampleFormat_AV_SAMPLE_FMT_DBL | AVSampleFormat_AV_SAMPLE_FMT_DBLP) || integer_format(f.format).is_some())
             {
                 built.owned_f64 = Some(crate::owned_resample_f64::Resampler::new(
                     Vec::new(), u32::try_from(f.sample_rate).map_err(|_| "invalid input rate")?,
@@ -257,16 +269,21 @@ impl Resampler {
                     let input = &*src;
                     if input.sample_rate != self.input_rate || input.ch_layout.nb_channels != self.input_channels
                         || input.nb_samples < 0 || input.extended_data.is_null()
-                        || !matches!(input.format, AVSampleFormat_AV_SAMPLE_FMT_DBL | AVSampleFormat_AV_SAMPLE_FMT_DBLP)
+                        || input.format != self.input_format
                     { return Err("owned resampler input format changed".into()); }
-                    let planar = input.format == AVSampleFormat_AV_SAMPLE_FMT_DBLP;
+                    let planar = matches!(input.format, AVSampleFormat_AV_SAMPLE_FMT_DBLP | AVSampleFormat_AV_SAMPLE_FMT_U8P | AVSampleFormat_AV_SAMPLE_FMT_S16P | AVSampleFormat_AV_SAMPLE_FMT_S32P);
                     let mut bytes = Vec::with_capacity(input.nb_samples as usize * self.input_channels as usize * 8);
                     for sample in 0..input.nb_samples as usize {
                         for channel in 0..self.input_channels as usize {
                             let plane = *input.extended_data.add(if planar { channel } else { 0 });
                             if plane.is_null() { return Err("missing resampler PCM plane".into()); }
                             let index = if planar { sample } else { sample * self.input_channels as usize + channel };
-                            let value = ptr::read_unaligned(plane.cast::<f64>().add(index));
+                            let value = match integer_format(input.format) {
+                                Some(crate::owned_pcm_integer::Format::U8) => (f64::from(*plane.add(index)) - 128.) / 128.,
+                                Some(crate::owned_pcm_integer::Format::I16) => f64::from(ptr::read_unaligned(plane.cast::<i16>().add(index))) / 32768.,
+                                Some(crate::owned_pcm_integer::Format::I32) => f64::from(ptr::read_unaligned(plane.cast::<i32>().add(index))) / 2147483648.,
+                                None => ptr::read_unaligned(plane.cast::<f64>().add(index)),
+                            };
                             bytes.extend_from_slice(&value.to_le_bytes());
                         }
                     }
@@ -278,14 +295,23 @@ impl Resampler {
                 let bytes = owned.take_output();
                 let count = i32::try_from(bytes.len() / (channels * 8)).map_err(|_| "resampled audio size overflow")?;
                 if count == 0 { return Ok(0); }
-                (*dst).format = AVSampleFormat_AV_SAMPLE_FMT_DBL;
+                (*dst).format = self.out_format;
                 (*dst).sample_rate = self.out_rate;
                 (*dst).nb_samples = count;
                 check(av_channel_layout_copy(&mut (*dst).ch_layout, &self.ch_layout), "copy owned resample layout")?;
                 check(av_frame_get_buffer(dst, 0), "allocate owned resample output")?;
                 // Store native-endian AVFrame floats from the owned little-endian PCM stream.
                 for (index, sample) in bytes.chunks_exact(8).enumerate() {
-                    ptr::write_unaligned((*dst).data[0].cast::<f64>().add(index), f64::from_le_bytes(sample.try_into().unwrap()));
+                    let value = f64::from_le_bytes(sample.try_into().unwrap());
+                    if let Some(format) = integer_format(self.out_format) {
+                        let mut encoded = [0u8; 4];
+                        format.encode(value, &mut encoded[..format.bytes()])?;
+                        match format {
+                            crate::owned_pcm_integer::Format::U8 => *(*dst).data[0].add(index) = encoded[0],
+                            crate::owned_pcm_integer::Format::I16 => ptr::write_unaligned((*dst).data[0].cast::<i16>().add(index), i16::from_le_bytes(encoded[..2].try_into().unwrap())),
+                            crate::owned_pcm_integer::Format::I32 => ptr::write_unaligned((*dst).data[0].cast::<i32>().add(index), i32::from_le_bytes(encoded)),
+                        }
+                    } else { ptr::write_unaligned((*dst).data[0].cast::<f64>().add(index), value); }
                 }
                 return Ok(count);
             }
@@ -1344,6 +1370,74 @@ mod owned_double_rate_tests {
                 assert_eq!(actual, expected);
                 assert_eq!(actual.len(), 333 * output_channels as usize * 8);
                 assert_eq!(adapter.convert(output.0, ptr::null()).unwrap(), 0);
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod owned_integer_tests {
+    use super::*;
+    #[test]
+    fn packed_and_planar_integer_rate_conversion_uses_owned_dsp() {
+        use std::io::Write;
+        for (packed, planar_format, format) in [
+            (AVSampleFormat_AV_SAMPLE_FMT_U8, AVSampleFormat_AV_SAMPLE_FMT_U8P, crate::owned_pcm_integer::Format::U8),
+            (AVSampleFormat_AV_SAMPLE_FMT_S16, AVSampleFormat_AV_SAMPLE_FMT_S16P, crate::owned_pcm_integer::Format::I16),
+            (AVSampleFormat_AV_SAMPLE_FMT_S32, AVSampleFormat_AV_SAMPLE_FMT_S32P, crate::owned_pcm_integer::Format::I32),
+        ] {
+            for planar in [false, true] {
+                let input = Frame::new().unwrap();
+                let output = Frame::new().unwrap();
+                let mut reference = crate::owned_resample_f64::Resampler::new(Vec::new(), 48000, 16000, 2).unwrap();
+                // SAFETY: Frames own correctly allocated 997x2 integer buffers.
+                unsafe {
+                    (*input.0).format = if planar { planar_format } else { packed };
+                    (*input.0).sample_rate = 48000;
+                    (*input.0).nb_samples = 997;
+                    av_channel_layout_default(&mut (*input.0).ch_layout, 2);
+                    check(av_frame_get_buffer(input.0, 0), "integer test input").unwrap();
+                    for sample in 0..997 {
+                        for channel in 0..2 {
+                            let value = if channel == 0 { (sample as f64 * 0.07).sin() * 0.8 } else { -0.25 };
+                            let mut encoded = [0; 4];
+                            format.encode(value, &mut encoded[..format.bytes()]).unwrap();
+                            let normalized = format.decode(&encoded[..format.bytes()]).unwrap();
+                            reference.write_all(&normalized.to_le_bytes()).unwrap();
+                            let plane = *(*input.0).extended_data.add(if planar { channel } else { 0 });
+                            let index = if planar { sample } else { sample * 2 + channel };
+                            match format {
+                                crate::owned_pcm_integer::Format::U8 => *plane.add(index) = encoded[0],
+                                crate::owned_pcm_integer::Format::I16 => ptr::write_unaligned(plane.cast::<i16>().add(index), i16::from_le_bytes(encoded[..2].try_into().unwrap())),
+                                crate::owned_pcm_integer::Format::I32 => ptr::write_unaligned(plane.cast::<i32>().add(index), i32::from_le_bytes(encoded)),
+                            }
+                        }
+                    }
+                    reference.finish().unwrap();
+                    let mut expected = Vec::new();
+                    for value in reference.take_output().chunks_exact(8) {
+                        let mut encoded = vec![0; format.bytes()];
+                        format.encode(f64::from_le_bytes(value.try_into().unwrap()), &mut encoded).unwrap();
+                        expected.extend(encoded);
+                    }
+                    let mut adapter = Resampler::open(input.0, 16000, 2).unwrap();
+                    assert!(adapter.swr.is_null());
+                    assert!(adapter.owned_f64.is_some());
+                    let mut actual = Vec::new();
+                    for source in [input.0 as *const AVFrame, ptr::null()] {
+                        let count = adapter.convert(output.0, source).unwrap();
+                        assert!(count == 0 || (*output.0).format == packed);
+                        for index in 0..count as usize * 2 {
+                            match format {
+                                crate::owned_pcm_integer::Format::U8 => actual.push(*(*output.0).data[0].add(index)),
+                                crate::owned_pcm_integer::Format::I16 => actual.extend_from_slice(&ptr::read_unaligned((*output.0).data[0].cast::<i16>().add(index)).to_le_bytes()),
+                                crate::owned_pcm_integer::Format::I32 => actual.extend_from_slice(&ptr::read_unaligned((*output.0).data[0].cast::<i32>().add(index)).to_le_bytes()),
+                            }
+                        }
+                    }
+                    assert_eq!(actual, expected);
+                    assert_eq!(actual.len(), 333 * 2 * format.bytes());
+                }
             }
         }
     }
