@@ -2,6 +2,7 @@
 #![forbid(unsafe_code)]
 pub mod aac_imdct;
 pub mod aac_synthesis;
+pub mod aac_tns;
 #[derive(Debug)]
 pub struct Error(pub String);
 impl std::fmt::Display for Error {

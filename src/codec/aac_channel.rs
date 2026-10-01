@@ -141,7 +141,7 @@ impl ChannelData {
             let offsets = if short { tables.short } else { tables.long };
             let limit =
                 BandTables::tns_limit(config.sample_rate, short).min(self.info.max_sfb as usize);
-            tns.filter(&spectrum, offsets, limit)
+            tns.filter(&spectrum, offsets, limit).map_err(crate::Error::from)
         } else {
             Ok(spectrum)
         }
@@ -170,7 +170,7 @@ impl ChannelData {
             None
         };
         let tns = if cursor.bit()? {
-            Some(super::aac_tns::TnsData::read(&mut cursor, info.sequence)?)
+            Some(super::aac_tns::read(&mut cursor, info.sequence)?)
         } else {
             None
         };

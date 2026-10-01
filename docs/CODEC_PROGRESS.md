@@ -1895,3 +1895,16 @@ https://ffmpeg.org/doxygen/2.7/libavcodec_2aacdec_8c_source.html
 Validation: 51 AAC unit tests, 15 export tests, 2 AAC/960 tests and both coupling
 acceptance/rollback tests passed. Further dependent, short-window/960 coupling
 and additional target selection fixtures remain to be added.
+
+### AAC TNS ownership in fvid-media
+
+The TNS spectral filter and its band-clipping/direction impulse test now live
+in `fvid-media::owned_aac::aac_tns`, alongside IMDCT and window synthesis.
+The root crate retains side-information parsing and converts media-layer errors
+at the decoder boundary. Spectral filtering is unchanged; this migration adds
+no codec capability and keeps `fvid-media` as the owned media layer.
+
+Validation: 10 media-layer tests without default features, 3 TNS parser tests,
+19 AAC export/960/coupling integration tests, player compilation and native
+dependency checks for headless/player/camera bridge passed without FFmpeg.
+The full AAC unit suite before relocating the impulse test also passed (51).
