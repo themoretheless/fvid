@@ -318,3 +318,61 @@ fn adts_concat_plan_compares_complete_program_configuration() {
     );
     std::fs::remove_dir_all(directory).unwrap();
 }
+
+#[test]
+fn adts_pce_mp4_writers_preserve_packets_layout_and_continuous_pcm() {
+    use fvid::container::{adts, mp4::Mp4Reader, mp4_write};
+    let source = include_bytes!("fixtures/audio/aac-pce-wide8.aac").as_slice();
+    let indexed = adts::Aac::parse(source, &Default::default()).unwrap();
+    for mode in 0..3 {
+        let mut output = std::io::Cursor::new(Vec::new());
+        let segments = if mode == 2 { 2 } else { 1 };
+        match mode {
+            0 => {
+                mp4_write::write_adts_aac(source, &mut output).unwrap();
+            }
+            1 => {
+                mp4_write::write_adts_aac_reader(
+                    adts::StreamReader::open(source).unwrap(),
+                    &mut output,
+                )
+                .unwrap();
+            }
+            _ => {
+                mp4_write::concat_adts_readers(
+                    vec![
+                        adts::StreamReader::open(source).unwrap(),
+                        adts::StreamReader::open(source).unwrap(),
+                    ],
+                    &mut output,
+                    None,
+                    None,
+                )
+                .unwrap();
+            }
+        }
+        let mut reader =
+            Mp4Reader::open(std::io::Cursor::new(output.get_ref()), Default::default()).unwrap();
+        let track = &reader.tracks()[0];
+        assert_eq!(track.channels, 8);
+        assert_eq!(
+            fvid::codec::config::aac_specific_config(&track.configuration).unwrap(),
+            indexed.configuration
+        );
+        assert_eq!(track.samples.len(), indexed.packets() * segments);
+        let mut packet = Vec::new();
+        let mut expected = Vec::new();
+        let mut decoder =
+            fvid::codec::aac_native::NativeAacDecoder::new(&indexed.configuration).unwrap();
+        for index in 0..indexed.packets() * segments {
+            reader.read_packet(0, index, &mut packet).unwrap();
+            assert_eq!(packet, indexed.packet(index % indexed.packets()));
+            for sample in decoder.decode(&packet).unwrap() {
+                expected.extend_from_slice(&sample.to_le_bytes());
+            }
+        }
+        let mut actual = Vec::new();
+        fvid::native_media::decode_mp4_aac_pcm(output.get_ref(), &mut actual).unwrap();
+        assert_eq!(actual, expected);
+    }
+}

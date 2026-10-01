@@ -265,6 +265,15 @@ impl Aac {
 /// the bitrates are left at zero, which is what a variable-rate stream states
 /// and what the decoder ignores.
 pub fn esds_for(asc: &[u8]) -> Option<Vec<u8>> {
+    esds_descriptor(asc, false)
+}
+
+/// MP4 ES descriptor with terminal predefined SL configuration.
+pub(crate) fn esds_for_mp4(asc: &[u8]) -> Option<Vec<u8>> {
+    esds_descriptor(asc, true)
+}
+
+fn esds_descriptor(asc: &[u8], sl_config: bool) -> Option<Vec<u8>> {
     if !(2..=4096).contains(&asc.len()) {return None;}
     fn descriptor(tag: u8, payload: &[u8]) -> Vec<u8> {
         let mut groups=vec![(payload.len() & 127) as u8];
@@ -276,6 +285,7 @@ pub fn esds_for(asc: &[u8]) -> Option<Vec<u8>> {
     let mut decoder=vec![0x40,0x15,0,0,0,0,0,0,0,0,0,0,0];
     decoder.extend(descriptor(5,asc));
     let mut stream=vec![0,1,0];stream.extend(descriptor(4,&decoder));
+    if sl_config {stream.extend(descriptor(6, &[2]));}
     let mut output=vec![0;4];output.extend(descriptor(3,&stream));Some(output)
 }
 
@@ -394,6 +404,29 @@ impl<R:std::io::Read> SequenceReader<R> {
                 Ok(None)=>self.current=self.remaining.next(),
                 Err(error)=>{self.failed=true;return Err(error);},
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod mp4_descriptor_tests {
+    #[test]
+    fn sl_configuration_is_inside_multibyte_es_descriptor() {
+        for width in [2, 107, 108, 127, 128, 255, 4096] {
+            let mut asc = vec![0; width];
+            asc[..2].copy_from_slice(&[0x11, 0x90]);
+            let descriptor = super::esds_for_mp4(&asc).unwrap();
+            assert_eq!(crate::codec::config::aac_specific_config(&descriptor).unwrap(), asc);
+            let mut length = 0usize;
+            let mut cursor = 5;
+            loop {
+                let byte = descriptor[cursor];
+                cursor += 1;
+                length = (length << 7) | usize::from(byte & 127);
+                if byte & 128 == 0 {break;}
+            }
+            assert_eq!(cursor + length, descriptor.len());
+            assert_eq!(&descriptor[descriptor.len()-3..], &[6, 1, 2]);
         }
     }
 }

@@ -25,8 +25,8 @@ ffmpeg -v error -ignore_editlist 1 -i aac-pce-wide8.m4a -f f32le aac-pce-wide8-m
 8 channels. Each PCM speaker is compared independently with RMS < 1e-7 and
 peak error < 1e-6. The last packet's shorter duration accounts for reference
 suffix trimming; initial synthesis samples are compared without a guessed
-offset. Reset and malformed-PCE state preservation are covered. This does not
-yet establish ADTS channel_configuration=0 ingestion.
+offset. Reset and malformed-PCE state preservation are covered.
+ADTS channel_configuration=0 ingestion is verified below.
 
 Edited MP4 export reference:
 
@@ -42,3 +42,7 @@ ADTS PCM reference: `aac-pce-wide8-adts-reference.f32le`, generated with
 `ffmpeg -v error -i aac-pce-wide8.aac -f f32le aac-pce-wide8-adts-reference.f32le`.
 Streaming and indexed owned decoding match every channel within 1e-6.
 The reader requires PCE at the beginning of the first raw packet.
+
+Owned MP4 indexed/streaming remux and MP4/Matroska concatenation retain the
+complete ASC and every raw packet. Decoded output equals continuous owned
+packet synthesis byte for byte, including state at segment boundaries.

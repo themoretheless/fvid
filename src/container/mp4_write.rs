@@ -36,7 +36,8 @@ pub fn write_adts_aac(data: &[u8], output: &mut impl Write) -> Result<u64> {
             "ADTS remux requires complete frames without unrepresented leading or trailing data",
         ));
     }
-    let config = super::adts::header(data).ok_or_else(|| invalid("invalid ADTS header"))?;
+    let mut config = super::adts::header(data).ok_or_else(|| invalid("invalid ADTS header"))?;
+    config.channels = stream.channels;
     let ftyp = file_type(config.sample_rate)?;
     let sizes: Vec<_> = (0..stream.packets())
         .map(|i| stream.packet(i).len() as u32)
@@ -45,6 +46,7 @@ pub fn write_adts_aac(data: &[u8], output: &mut impl Write) -> Result<u64> {
     let mdat_size = u32::try_from(payload + 8).map_err(|_| invalid("MP4 mdat size overflow"))?;
     let moov = movie(
         config,
+        &stream.configuration,
         stream.samples_per_frame,
         &sizes,
         ftyp.len() as u64 + 8,
@@ -72,6 +74,7 @@ fn file_type(rate: u32) -> Result<Vec<u8>> {
 
 fn movie(
     config: super::adts::Header,
+    asc: &[u8],
     samples_per_frame: u32,
     sizes: &[u32],
     offset: u64,
@@ -124,10 +127,8 @@ fn movie(
         put(&mut entry, 60, samples_per_frame);
     }
     // Add the terminal SLConfigDescriptor required by the ES descriptor.
-    let mut esds =
-        super::adts::esds_for(&config.asc).ok_or_else(|| invalid("invalid AAC descriptor"))?;
-    esds[5] += 3;
-    esds.extend_from_slice(&[6, 1, 2]);
+    let esds =
+        super::adts::esds_for_mp4(asc).ok_or_else(|| invalid("invalid AAC descriptor"))?;
     entry.extend(atom(b"esds", &esds)?);
     let stsd = table(b"stsd", 1, &atom(b"mp4a", &entry)?)?;
     let stts = table(
@@ -179,7 +180,8 @@ pub fn write_adts_aac_reader_controlled<R: std::io::Read, W: Write + std::io::Se
     progress: Option<&fvid_control::ProgressHook>,
 ) -> Result<fvid_control::ProgressEvent> {
     let config = reader.configuration();
-    write_aac_packets(config, || reader.next_packet(), output, cancel, progress)
+    let asc = reader.audio_specific_config().to_vec();
+    write_aac_packets(config, &asc, || reader.next_packet(), output, cancel, progress)
 }
 
 /// Concatenate independently framed ADTS streams; a truncated input cannot
@@ -189,11 +191,13 @@ pub fn concat_adts_readers<R: std::io::Read, W: Write + std::io::Seek>(
     cancel: Option<&fvid_control::CancelFlag>, progress: Option<&fvid_control::ProgressHook>,
 ) -> Result<fvid_control::ProgressEvent> {
     let mut sequence=super::adts::SequenceReader::new(readers)?;
-    write_aac_packets(sequence.configuration(), || sequence.next_packet(), output, cancel, progress)
+    let asc = sequence.audio_specific_config().to_vec();
+    write_aac_packets(sequence.configuration(), &asc, || sequence.next_packet(), output, cancel, progress)
 }
 
 fn write_aac_packets<W: Write + std::io::Seek>(
     config: super::adts::Header,
+    asc: &[u8],
     mut next_packet: impl FnMut() -> Result<Option<Vec<u8>>>, output: &mut W,
     cancel: Option<&fvid_control::CancelFlag>, progress: Option<&fvid_control::ProgressHook>,
 ) -> Result<fvid_control::ProgressEvent> {
@@ -217,7 +221,7 @@ fn write_aac_packets<W: Write + std::io::Seek>(
     if output.stream_position()? != 0 {
         return Err(invalid("MP4 output must start at byte zero"));
     }
-    let samples = u32::from(crate::codec::config::AacConfig::parse(&config.asc)?.frame_samples);
+    let samples = u32::from(crate::codec::config::AacConfig::parse(asc)?.frame_samples);
     output.write_all(&file_type(config.sample_rate)?)?;
     let mdat = output.stream_position()?;
     output.write_all(&1u32.to_be_bytes())?;
@@ -251,7 +255,7 @@ fn write_aac_packets<W: Write + std::io::Seek>(
     let length = end
         .checked_sub(mdat)
         .ok_or_else(|| invalid("MP4 output position moved backwards"))?;
-    let moov = movie(config, samples, &sizes, offset)?;
+    let moov = movie(config, asc, samples, &sizes, offset)?;
     output.seek(SeekFrom::Start(mdat + 8))?;
     output.write_all(&length.to_be_bytes())?;
     output.seek(SeekFrom::Start(end))?;
