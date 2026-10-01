@@ -402,8 +402,11 @@ impl<R: std::io::BufRead + std::io::Seek> NativeCameraSource<R> {
     }
     /// Choose whether end of file holds the last frame or repeats the file.
     pub fn with_end_behavior(mut self, behavior: CameraEndBehavior) -> Self {
-        self.end_behavior = behavior;
+        self.set_end_behavior(behavior);
         self
+    }
+    pub fn set_end_behavior(&mut self, behavior: CameraEndBehavior) {
+        self.end_behavior = behavior;
     }
     fn select(&mut self, media_time_ns: u64) -> Result<()> {
         if let Some((start, _, scale)) = self.reader.frame_interval() {

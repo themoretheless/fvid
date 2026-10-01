@@ -1477,3 +1477,10 @@ behavior remains available. Source selection wraps while published camera ticks
 retain their original sequence, host and media timestamps. Tests cover exact
 Y4M boundaries and skips, plus all eight 10-bit AVC frames across three cycles.
 This is the portable frame bridge; macOS camera registration remains separate.
+
+The C boundary exposes `int32_t fvid_camera_set_loop(CameraSource *handle,
+uint32_t enabled)` (0 = Hold, 1 = Loop). Existing open/frame/close signatures
+remain unchanged. Calls on a handle must be serialized. Invalid values return
+-1 with the thread-local diagnostic and leave the handle usable. The FFI test
+checks enable/disable/re-enable on the saved 10-bit AVC source and compares
+first-frame pixels at repeated EOF boundaries.

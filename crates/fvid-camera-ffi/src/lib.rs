@@ -1,7 +1,7 @@
 //! C boundary for the macOS host. Unsafe code is isolated from the FVid library.
 use fvid::{
     playback_native::NativeReader,
-    virtual_camera::{CameraTick, LatestFrame, NativeCameraSource},
+    virtual_camera::{CameraEndBehavior, CameraTick, LatestFrame, NativeCameraSource},
 };
 use std::{
     fs::File,
@@ -114,6 +114,27 @@ pub unsafe extern "C" fn fvid_camera_size(handle: *const CameraSource) -> Camera
         height: height as u32,
     }
 }
+/// Set EOF policy: 0 holds the last frame, 1 repeats the file.
+/// Returns 1 on success, -1 on invalid input or a failed handle. Invalid policy
+/// values leave the source unchanged and do not poison it.
+/// # Safety
+/// `handle` must be null or a live, exclusively borrowed source handle.
+/// Calls for the same handle must be serialized, including close.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn fvid_camera_set_loop(handle: *mut CameraSource, enabled: u32) -> i32 {
+    set_error("");
+    if handle.is_null() { set_error("null camera handle"); return -1; }
+    let behavior = match enabled {
+        0 => CameraEndBehavior::Hold,
+        1 => CameraEndBehavior::Loop,
+        _ => { set_error("camera loop policy must be 0 or 1"); return -1; }
+    };
+    let source = unsafe { &mut *handle };
+    if source.failed { set_error("camera source failed; close and reopen it"); return -1; }
+    source.source.set_end_behavior(behavior);
+    1
+}
+
 /// Copies tightly packed BGRA for a media position. Returns 1 on success and -1 on error. An error poisons the handle: close and reopen it.
 /// Host timestamp and sequence must increase even when media time seeks back.
 /// # Safety
@@ -398,5 +419,36 @@ mod crop_tests {
                 if media_ns == 0 { assert_eq!(output, expected); }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod loop_tests {
+    use super::*;
+    #[test]
+    fn c_loop_switch_is_reversible_and_invalid_values_preserve_source() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/playback-errors/avc-bypass-main10.mp4");
+        let name = path.to_str().unwrap();
+        let handle = unsafe { fvid_camera_open(name.as_ptr(),name.len(),16<<20) };
+        assert!(!handle.is_null());
+        struct Close(*mut CameraSource);
+        impl Drop for Close { fn drop(&mut self) { unsafe { fvid_camera_close(self.0) }; } }
+        let _close = Close(handle);
+        let mut first = vec![0;64*64*4];
+        let mut current = first.clone();
+        assert_eq!(unsafe { fvid_camera_frame(handle,0,1,0,first.as_mut_ptr(),first.len()) },1);
+        assert_eq!(unsafe { fvid_camera_set_loop(handle,1) },1);
+        assert_eq!(unsafe { fvid_camera_set_loop(handle,2) },-1);
+        // The fixture contains eight 30-fps frames, ending at 266666667 ns.
+        let duration = 266_666_667;
+        assert_eq!(unsafe { fvid_camera_frame(handle,duration,2,1,current.as_mut_ptr(),current.len()) },1);
+        assert_eq!(current,first);
+        assert_eq!(unsafe { fvid_camera_set_loop(handle,0) },1);
+        assert_eq!(unsafe { fvid_camera_frame(handle,duration,3,2,current.as_mut_ptr(),current.len()) },1);
+        assert_ne!(current,first);
+        assert_eq!(unsafe { fvid_camera_set_loop(handle,1) },1);
+        assert_eq!(unsafe { fvid_camera_frame(handle,2*duration,4,3,current.as_mut_ptr(),current.len()) },1);
+        assert_eq!(current,first);
+        assert_eq!(unsafe { fvid_camera_set_loop(std::ptr::null_mut(),1) },-1);
     }
 }
