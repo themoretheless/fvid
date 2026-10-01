@@ -11,3 +11,6 @@ pub mod owned_wav;
 pub mod owned_aac;
 
 pub mod owned_shuffleplanes;
+
+pub mod owned_k_weight;
+pub mod owned_loudness;

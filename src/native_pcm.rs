@@ -3,8 +3,7 @@ mod normalize;
 pub use normalize::{NormalizationPhase, NormalizationProgress, NormalizationProgressHook, normalize_file_controlled as normalize_loudness_file_controlled, NormalizeTarget, NormalizeReport, normalize_file as normalize_loudness_file};
 mod loudness;
 pub use loudness::{IntegratedLoudness, LoudnessMeter, default_weights as loudness_channel_weights, measure_file_controlled as measure_loudness_file_controlled, measure_file as measure_loudness_file};
-mod k_weight;
-pub use k_weight::KWeighting;
+pub use fvid_media::owned_k_weight::KWeighting;
 use crate::{
     Result, invalid,
     media_control::{CancelFlag, ProgressEvent, ProgressHook},
