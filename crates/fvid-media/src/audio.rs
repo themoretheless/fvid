@@ -109,6 +109,7 @@ fn integer_format(format: i32) -> Option<crate::owned_pcm_integer::Format> {
 }
 
 struct Resampler {
+    owned_identity: bool,
     owned: Option<crate::owned_resample::Resampler<Vec<u8>>>,
     owned_f64: Option<crate::owned_resample_f64::Resampler<Vec<u8>>>,
     input_format: i32,
@@ -160,6 +161,7 @@ impl Resampler {
             }
             let mut swr = ptr::null_mut();
             let mut built = Self {
+                owned_identity: false,
                 owned: None,
                 owned_f64: None,
                 input_format: f.format,
@@ -170,6 +172,13 @@ impl Resampler {
                 out_format,
                 ch_layout,
             };
+            if out_rate == f.sample_rate && out_channels == f.ch_layout.nb_channels
+                && matches!(f.format, AVSampleFormat_AV_SAMPLE_FMT_S64 | AVSampleFormat_AV_SAMPLE_FMT_S64P)
+            {
+                if f.sample_rate <= 0 || !(1..=64).contains(&out_channels) { return Err("invalid S64 PCM geometry".into()); }
+                built.owned_identity = true;
+                return Ok(built);
+            }
             let owned_layout = out_channels == f.ch_layout.nb_channels
                 || (matches!(out_channels, 1 | 2) && (1..=6).contains(&f.ch_layout.nb_channels)
                     && f.ch_layout.order == AVChannelOrder_AV_CHANNEL_ORDER_NATIVE
@@ -219,6 +228,31 @@ impl Resampler {
     unsafe fn convert(&mut self, dst: *mut AVFrame, src: *const AVFrame) -> Result<i32> {
         unsafe {
             av_frame_unref(dst);
+            if self.owned_identity {
+                if src.is_null() { return Ok(0); }
+                let input = &*src;
+                if input.sample_rate != self.input_rate || input.ch_layout.nb_channels != self.input_channels
+                    || input.format != self.input_format || input.nb_samples < 0 || input.extended_data.is_null()
+                { return Err("owned identity PCM format changed".into()); }
+                if input.nb_samples == 0 { return Ok(0); }
+                (*dst).format = self.out_format;
+                (*dst).sample_rate = self.out_rate;
+                (*dst).nb_samples = input.nb_samples;
+                check(av_channel_layout_copy(&mut (*dst).ch_layout, &self.ch_layout), "copy identity PCM layout")?;
+                check(av_frame_get_buffer(dst, 0), "allocate identity PCM output")?;
+                let channels = self.input_channels as usize;
+                let samples = input.nb_samples as usize;
+                if input.format == AVSampleFormat_AV_SAMPLE_FMT_S64P {
+                    let planes: Vec<_> = (0..channels).map(|channel| *input.extended_data.add(channel) as *const u8).collect();
+                    if planes.iter().any(|p| p.is_null()) { return Err("missing identity PCM plane".into()); }
+                    crate::owned_pcm_layout::interleave(&planes, (*dst).data[0], samples, 8);
+                } else {
+                    let source = *input.extended_data;
+                    if source.is_null() { return Err("missing identity PCM data".into()); }
+                    ptr::copy_nonoverlapping(source, (*dst).data[0], samples.checked_mul(channels).and_then(|n| n.checked_mul(8)).ok_or("PCM identity size overflow")?);
+                }
+                return Ok(input.nb_samples);
+            }
             if let Some(owned) = &mut self.owned {
                 use std::io::Write;
                 let channels = self.ch_layout.nb_channels as usize;
@@ -1438,6 +1472,39 @@ mod owned_integer_tests {
                     assert_eq!(actual, expected);
                     assert_eq!(actual.len(), 333 * 2 * format.bytes());
                 }
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod owned_s64_identity_tests {
+    use super::*;
+    #[test]
+    fn s64_identity_preserves_all_bits_in_packed_and_planar_frames() {
+        let values = [i64::MIN, i64::MIN + 1, -1, 0, 1, i64::MAX - 1, i64::MAX, 0x123456789abcdef];
+        for planar in [false, true] {
+            let input = Frame::new().unwrap();
+            let output = Frame::new().unwrap();
+            // SAFETY: RAII frames own eight valid samples and two channels.
+            unsafe {
+                (*input.0).format = if planar { AVSampleFormat_AV_SAMPLE_FMT_S64P } else { AVSampleFormat_AV_SAMPLE_FMT_S64 };
+                (*input.0).sample_rate = 48000;
+                (*input.0).nb_samples = 4;
+                av_channel_layout_default(&mut (*input.0).ch_layout, 2);
+                check(av_frame_get_buffer(input.0, 0), "S64 test input").unwrap();
+                for (index, &value) in values.iter().enumerate() {
+                    let plane = *(*input.0).extended_data.add(if planar {index % 2} else {0});
+                    ptr::write_unaligned(plane.cast::<i64>().add(if planar {index / 2} else {index}), value);
+                }
+                let mut adapter = Resampler::open(input.0, 48000, 2).unwrap();
+                assert!(adapter.owned_identity);
+                assert!(adapter.swr.is_null());
+                assert_eq!(adapter.convert(output.0, input.0).unwrap(), 4);
+                for (index, expected) in values.iter().enumerate() {
+                    assert_eq!(ptr::read_unaligned((*output.0).data[0].cast::<i64>().add(index)), *expected);
+                }
+                assert_eq!(adapter.convert(output.0, ptr::null()).unwrap(), 0);
             }
         }
     }
