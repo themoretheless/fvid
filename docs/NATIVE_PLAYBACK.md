@@ -3217,3 +3217,10 @@ before overlay and pixel filtering after it. A headless regression compares
 `--overlay --hflip --negate 1` byte for byte with the API on AVC and 10-bit VP9.
 Unknown options retain the previous dispatch. This replaces the earlier
 plain-overlay-only headless admission; unmigrated filters still require work.
+
+Overlay CLI canonicalizes gradient and morphology option order to match
+media transform requests (Sobel, Prewitt, Roberts, Kirsch, Scharr; dilation
+before erosion). Permuting option flags does not change the transform.
+The explicit native `PixelFilters` vector API retains caller-selected order
+unless `canonicalize_option_order` is requested. Integration tests compare
+forward/reversed CLI flag lists with the native exporter and public media API.

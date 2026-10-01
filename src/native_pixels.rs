@@ -335,6 +335,13 @@ impl PixelFilters {
         }
         Ok(result)
     }
+    /// Match the fixed option order used by media transform requests.
+    /// Explicit callers can otherwise keep their vector pipeline order.
+    pub fn canonicalize_option_order(&mut self) {
+        self.gradients.sort_by_key(|filter|filter.kind);
+        self.morphology.sort_by_key(|filter|filter.kind());
+    }
+
     pub fn is_empty(&self) -> bool {
         self.pixelize.is_none()
             && self.boxblur.is_none()

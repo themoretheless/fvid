@@ -445,3 +445,77 @@ fn combined_geometry_overlay_and_negate_apply_in_the_documented_order() {
         }
     }
 }
+
+#[test]
+fn filter_flag_permutations_match_media_transform_order() {
+    let d = dir("order");
+    let source = fixture("video.mp4");
+    for (i, (spatial, flags)) in [
+        (
+            fvid::media_info::LosslessTransform {
+                sobel: Some("1:1:0".into()),
+                prewitt: Some("1:1:0".into()),
+                ..Default::default()
+            },
+            vec![("--sobel", "1:1:0"), ("--prewitt", "1:1:0")],
+        ),
+        (
+            fvid::media_info::LosslessTransform {
+                dilation: Some("".into()),
+                erosion: Some("".into()),
+                ..Default::default()
+            },
+            vec![("--dilation", ""), ("--erosion", "")],
+        ),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let (geometry, filters) = fvid::native_lossless::configuration(&spatial).unwrap();
+        let output = d.0.join(format!("reference-{i}.mkv"));
+        native_export::overlay_video_transformed(
+            &source, &source, &output, 0, 0, None, None, &geometry, &filters,
+        )
+        .unwrap();
+        let expected = std::fs::read(output).unwrap();
+        for reversed in [false, true] {
+            let out = d.0.join(format!("cli-{i}-{reversed}.mkv"));
+            let mut options = flags.clone();
+            if reversed {
+                options.reverse();
+            }
+            let mut cmd = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"));
+            cmd.args(["media", "transcode-lossless"])
+                .arg(&source)
+                .arg(&out)
+                .arg("--overlay")
+                .arg(&source);
+            for (flag, value) in options {
+                cmd.args([flag, value]);
+            }
+            let result = cmd.output().unwrap();
+            assert!(
+                result.status.success(),
+                "{}",
+                String::from_utf8_lossy(&result.stderr)
+            );
+            assert_eq!(
+                std::fs::read(out).unwrap(),
+                expected,
+                "filter order {i}, reversed={reversed}"
+            );
+        }
+        #[cfg(feature = "media")]
+        {
+            let mut transform = spatial;
+            transform.overlay = Some(fvid::media_info::OverlaySpec {
+                path: source.clone(),
+                x: 0,
+                y: 0,
+            });
+            let out = d.0.join(format!("api-{i}.mkv"));
+            fvid::media::transcode_lossless(&source, &out, transform, &Default::default()).unwrap();
+            assert_eq!(std::fs::read(out).unwrap(), expected);
+        }
+    }
+}

@@ -3663,7 +3663,8 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
     if !fvid::native_export::overlay_eligible(source)? {return Ok(false);}
     let mut filter_args=vec!["decode".to_owned(),source.to_string_lossy().into_owned()];filter_args.extend(processing.clone());
     let (filter_args,geometry)=geometry_decode_args(&filter_args)?;
-    let (remaining,filters)=pixel_decode_args(&filter_args)?;
+    let (remaining,mut filters)=pixel_decode_args(&filter_args)?;
+    filters.canonicalize_option_order();
     if remaining.len()!=2 {return Ok(false);}
     if planning {
         let mut plan=fvid::native_plan::overlay(source,overlay,x,y)?;
@@ -3671,7 +3672,7 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
         if !geometry.is_identity() {
             plan.steps.insert(index,fvid::media_info::PlanStep {action:"geometry".into(),detail:format!("main crop {:?}, hflip {}, vflip {}, transpose {:?}, pad {:?}, scale {:?}",geometry.crop,geometry.horizontal_flip,geometry.vertical_flip,geometry.transpose,geometry.pad,geometry.scale)});index+=1;
         }
-        if !filters.is_empty() {plan.steps.insert(index+1,fvid::media_info::PlanStep {action:"filter".into(),detail:format!("owned pixel filters after compositing; request {}",processing.join(" "))});}
+        if !filters.is_empty() {plan.steps.insert(index+1,fvid::media_info::PlanStep {action:"filter".into(),detail:format!("owned pixel filters in media option order after compositing; request {}",processing.join(" "))});}
         if operation!=Some("overlay") {plan.command="transcode-lossless".into();}
         if !quiet {println!("{}",serde_json::to_string_pretty(&plan)?);}
     } else {
