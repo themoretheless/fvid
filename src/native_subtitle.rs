@@ -1,6 +1,6 @@
-//! Owned SubRip text conversion and atomic ASS Matroska publication.
+//! Owned SubRip conversion, ASS track preservation, and atomic Matroska publication.
 use crate::container::matroska_write::{Encoding, PacketWriter, TrackSpec};
-use crate::{invalid, Result};
+use crate::{Result, invalid};
 use std::{
     fs::{File, OpenOptions},
     io::{Read, Write},
@@ -267,6 +267,49 @@ pub fn try_convert(
     if track.kind != 17 {
         return Err(invalid("selected stream is not a subtitle"));
     }
+    if track.codec == "S_TEXT/ASS" {
+        if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
+            return Err(invalid("convert-subtitles requires Matroska (.mkv) output"));
+        }
+        let (number, name, language, configuration) = (
+            track.number,
+            track.name.clone(),
+            track.language.clone(),
+            track.codec_private.clone(),
+        );
+        let mut events = Vec::new();
+        let mut bytes = 0usize;
+        for i in 0..reader.packets.len() {
+            let packet = &reader.packets[i];
+            if packet.track != number {
+                continue;
+            }
+            let start = u64::try_from(packet.pts_ns)
+                .map_err(|_| invalid("subtitle requires nonnegative timestamps"))?;
+            let Some(duration) = packet.duration_ns.filter(|d| *d > 0) else {
+                return Ok(None);
+            };
+            let end = start
+                .checked_add(duration)
+                .filter(|end| *end <= i64::MAX as u64)
+                .ok_or_else(|| invalid("subtitle timestamp overflow"))?;
+            bytes = bytes
+                .checked_add(packet.size)
+                .filter(|n| *n <= 64 << 20)
+                .ok_or_else(|| invalid("subtitle metadata exceeds 64 MiB"))?;
+            let payload = reader.read_packet(i)?;
+            let text =
+                std::str::from_utf8(&payload).map_err(|_| invalid("Matroska ASS is not UTF-8"))?;
+            if text.is_empty() || text.contains('\0') || text.splitn(9, ',').count() != 9 {
+                return Err(invalid("invalid Matroska ASS event"));
+            }
+            events.push((start, end, payload));
+        }
+        if events.is_empty() {
+            return Err(invalid("selected subtitle stream has no cues"));
+        }
+        return publish_events(events, destination, &name, &language, &configuration);
+    }
     if track.codec != "S_TEXT/UTF8" {
         return Ok(None);
     }
@@ -394,6 +437,27 @@ fn publish(
     name: &str,
     language: &str,
 ) -> Result<Option<SubtitleStats>> {
+    let events = cues
+        .into_iter()
+        .enumerate()
+        .map(|(index, (start, end, text))| {
+            (
+                start,
+                end,
+                format!("{index},0,Default,,0,0,0,,{text}").into_bytes(),
+            )
+        })
+        .collect();
+    publish_events(events, destination, name, language, HEADER)
+}
+
+fn publish_events(
+    events: Vec<(u64, u64, Vec<u8>)>,
+    destination: &Path,
+    name: &str,
+    language: &str,
+    configuration: &[u8],
+) -> Result<Option<SubtitleStats>> {
     let directory = destination
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -418,16 +482,13 @@ fn publish(
     let mut writer = PacketWriter::new(
         &mut file,
         &[TrackSpec {
-            encoding: Encoding::Ass {
-                configuration: HEADER,
-            },
+            encoding: Encoding::Ass { configuration },
             name,
             language,
         }],
     )?;
-    for (index, (start, end, text)) in cues.iter().enumerate() {
-        let payload = format!("{index},0,Default,,0,0,0,,{text}");
-        writer.write_packet(0, *start, end - start, true, payload.as_bytes())?;
+    for (start, end, payload) in &events {
+        writer.write_packet(0, *start, end - start, true, payload)?;
     }
     let event = writer.finish()?;
     file.flush()?;
@@ -436,8 +497,8 @@ fn publish(
     Ok(Some(SubtitleStats {
         backend: "fvid",
         encoder: "ass".into(),
-        cues: cues.len() as u64,
-        packets_in: cues.len() as u64,
+        cues: events.len() as u64,
+        packets_in: events.len() as u64,
         packets_out: event.packets,
         payload_bytes: event.payload_bytes,
     }))

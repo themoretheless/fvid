@@ -1384,3 +1384,17 @@ crop/copy path. A six-frame synthetic HEVC MP4 verifies 128x128 -> 96x64 -> back
 seek, exact fitted pixels, timestamps, crop and anamorphic output. This is native
 file-to-camera buffer proof; activation/delivery from the installed macOS camera
 extension remains unverified pending valid provisioning profiles.
+
+### Owned ASS subtitle conversion path
+
+`convert-subtitles` now handles a selected `S_TEXT/ASS` Matroska track through the
+owned reader and writer, retaining CodecPrivate styling, complete event bytes,
+PTS/duration, name and language. Publication remains atomic and refuses an
+existing destination. Ordinary no-default-features tests exercise default and
+explicit selection through CLI, compare every selected packet and the header,
+and verify destination preservation. The same checks pass through the public
+`media` API with that feature enabled. Independent FFmpeg ASS extraction of the
+source and native output matched byte-for-byte (two cues, including alignment,
+line break and comma-containing text). FFmpeg was used only as this reference.
+Other subtitle codecs, non-UTF8 text and remaining media operations still retain
+legacy paths; this change does not establish whole-feature FFmpeg independence.

@@ -96,9 +96,11 @@ fn srt_convert_cli_and_api_use_owned_ass_muxer_atomically() {
         "1\n00:00:00,000 --> 00:00:01,000\n<font color=not-a-color>text</font>",
     )
     .unwrap();
-    assert!(fvid::native_subtitle::try_convert_srt(&input, &bad, &[])
-        .unwrap()
-        .is_none());
+    assert!(
+        fvid::native_subtitle::try_convert_srt(&input, &bad, &[])
+            .unwrap()
+            .is_none()
+    );
     assert!(!bad.exists());
     assert!(!std::fs::read_dir(&directory).unwrap().any(|entry| {
         entry
@@ -255,11 +257,13 @@ fn matroska_subrip_selection_uses_owned_conversion_and_preserves_cues() {
         }
     }
     let bad = directory.join("bad.mkv");
-    assert!(fvid::native_subtitle::try_convert(&source, &bad, &[0])
-        .err()
-        .unwrap()
-        .to_string()
-        .contains("not a subtitle"));
+    assert!(
+        fvid::native_subtitle::try_convert(&source, &bad, &[0])
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("not a subtitle")
+    );
     assert!(fvid::native_subtitle::try_convert(&source, &bad, &[9]).is_err());
     assert!(fvid::native_subtitle::try_convert(&source, &bad, &[0, 1]).is_err());
     assert!(!bad.exists());
@@ -334,6 +338,106 @@ fn font_attributes_match_independent_subrip_conversion() {
                 String::from_utf8(result.stdout).unwrap()
             };
             assert_eq!(decode(&output), decode(&source), "{color}: {nested}");
+        }
+    }
+}
+
+#[test]
+fn matroska_ass_conversion_preserves_header_styling_packets_and_timing() {
+    let source =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/subtitles/ass-track.mkv");
+    let directory =
+        std::env::temp_dir().join(format!("fvid-owned-ass-copy-{}", std::process::id()));
+    std::fs::create_dir_all(&directory).unwrap();
+    struct Cleanup(PathBuf);
+    impl Drop for Cleanup {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _cleanup = Cleanup(directory.clone());
+    let mut input = fvid::container::webm::WebmReader::open(
+        std::fs::File::open(&source).unwrap(),
+        Default::default(),
+    )
+    .unwrap();
+    input.scan_all().unwrap();
+    let index = input
+        .tracks
+        .iter()
+        .position(|t| t.codec == "S_TEXT/ASS")
+        .unwrap();
+    let track = input.tracks[index].clone();
+    let mut expected = Vec::new();
+    for i in 0..input.packets.len() {
+        let packet = &input.packets[i];
+        if packet.track == track.number {
+            let (pts, duration) = (packet.pts_ns, packet.duration_ns);
+            expected.push((pts, duration, input.read_packet(i).unwrap()));
+        }
+    }
+    assert!(!expected.is_empty());
+    for (label, selection) in [("default", vec![]), ("selected", vec![index])] {
+        let output = directory.join(format!("{label}.mkv"));
+        let stats = fvid::native_subtitle::try_convert(&source, &output, &selection)
+            .unwrap()
+            .unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert_eq!(stats.cues, expected.len() as u64);
+        let mut result = fvid::container::webm::WebmReader::open(
+            std::fs::File::open(&output).unwrap(),
+            Default::default(),
+        )
+        .unwrap();
+        result.scan_all().unwrap();
+        assert_eq!(result.tracks.len(), 1);
+        assert_eq!(result.tracks[0].codec_private, track.codec_private);
+        assert_eq!(result.tracks[0].name, track.name);
+        assert_eq!(result.tracks[0].language, track.language);
+        assert_eq!(result.packets.len(), expected.len());
+        for (i, (pts, duration, payload)) in expected.iter().enumerate() {
+            assert_eq!(
+                (result.packets[i].pts_ns, result.packets[i].duration_ns),
+                (*pts, *duration)
+            );
+            assert_eq!(result.read_packet(i).unwrap(), *payload);
+        }
+        let original = std::fs::read(&output).unwrap();
+        assert!(fvid::native_subtitle::try_convert(&source, &output, &selection).is_err());
+        assert_eq!(std::fs::read(&output).unwrap(), original);
+        let cli = directory.join(format!("cli-{label}.mkv"));
+        let mut command = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"));
+        command
+            .args(["media", "convert-subtitles"])
+            .arg(&source)
+            .arg(&cli);
+        if !selection.is_empty() {
+            command.arg("--streams").arg(index.to_string());
+        }
+        let result = command.output().unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        assert_eq!(std::fs::read(cli).unwrap(), original);
+        #[cfg(feature = "media")]
+        {
+            let api = directory.join(format!("api-{label}.mkv"));
+            assert_eq!(
+                fvid::media::convert_subtitles(
+                    &source,
+                    &api,
+                    &fvid::media_info::SubtitleConvertOptions {
+                        streams: selection,
+                        ..Default::default()
+                    }
+                )
+                .unwrap()
+                .backend,
+                "fvid"
+            );
+            assert_eq!(std::fs::read(api).unwrap(), original);
         }
     }
 }
