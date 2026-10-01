@@ -37,22 +37,19 @@ pub(super) fn classify_interval_audio(parameters: &AVCodecParameters) -> Result<
     )
 }
 
+fn packed_pcm_bytes(codec: AVCodecID) -> Option<usize> {
+    Some(match codec {
+        AVCodecID_AV_CODEC_ID_PCM_U8 | AVCodecID_AV_CODEC_ID_PCM_S8 => 1,
+        AVCodecID_AV_CODEC_ID_PCM_S16LE | AVCodecID_AV_CODEC_ID_PCM_S16BE => 2,
+        AVCodecID_AV_CODEC_ID_PCM_S24LE | AVCodecID_AV_CODEC_ID_PCM_S24BE => 3,
+        AVCodecID_AV_CODEC_ID_PCM_S32LE | AVCodecID_AV_CODEC_ID_PCM_S32BE
+        | AVCodecID_AV_CODEC_ID_PCM_F32LE | AVCodecID_AV_CODEC_ID_PCM_F32BE => 4,
+        AVCodecID_AV_CODEC_ID_PCM_F64LE | AVCodecID_AV_CODEC_ID_PCM_F64BE => 8,
+        _ => return None,
+    })
+}
 fn is_packed_pcm(parameters: &AVCodecParameters) -> bool {
-    [
-        AVCodecID_AV_CODEC_ID_PCM_S16LE,
-        AVCodecID_AV_CODEC_ID_PCM_S16BE,
-        AVCodecID_AV_CODEC_ID_PCM_S24LE,
-        AVCodecID_AV_CODEC_ID_PCM_S24BE,
-        AVCodecID_AV_CODEC_ID_PCM_S32LE,
-        AVCodecID_AV_CODEC_ID_PCM_S32BE,
-        AVCodecID_AV_CODEC_ID_PCM_F32LE,
-        AVCodecID_AV_CODEC_ID_PCM_F32BE,
-        AVCodecID_AV_CODEC_ID_PCM_F64LE,
-        AVCodecID_AV_CODEC_ID_PCM_F64BE,
-        AVCodecID_AV_CODEC_ID_PCM_U8,
-        AVCodecID_AV_CODEC_ID_PCM_S8,
-    ]
-    .contains(&parameters.codec_id)
+    packed_pcm_bytes(parameters.codec_id).is_some()
 }
 
 pub(super) fn validate(parameters: &AVCodecParameters) -> Result<usize> {
@@ -64,9 +61,7 @@ pub(super) fn validate(parameters: &AVCodecParameters) -> Result<usize> {
     {
         return Err("lossless interval audio requires packed PCM without padding; compressed audio trimming is not implemented".into());
     }
-    // SAFETY: Pure library lookup with a known PCM codec identifier.
-    let bits = unsafe { av_get_bits_per_sample(parameters.codec_id) };
-    let bytes = usize::try_from(bits / 8).map_err(|_| "invalid PCM sample size")?;
+    let bytes = packed_pcm_bytes(parameters.codec_id).ok_or("invalid PCM sample size")?;
     bytes
         .checked_mul(parameters.ch_layout.nb_channels as usize)
         .filter(|&v| v != 0)
@@ -214,4 +209,33 @@ pub fn trim_pcm(
     }
     output.finish()?;
     Ok(stats)
+}
+
+#[cfg(test)]
+mod geometry_tests {
+    use super::*;
+    #[test]
+    fn packed_codec_sizes_cover_both_endian_orders_and_reject_compression() {
+        for (codecs, bytes) in [
+            ([AVCodecID_AV_CODEC_ID_PCM_U8, AVCodecID_AV_CODEC_ID_PCM_S8], 1),
+            ([AVCodecID_AV_CODEC_ID_PCM_S16LE, AVCodecID_AV_CODEC_ID_PCM_S16BE], 2),
+            ([AVCodecID_AV_CODEC_ID_PCM_S24LE, AVCodecID_AV_CODEC_ID_PCM_S24BE], 3),
+            ([AVCodecID_AV_CODEC_ID_PCM_S32LE, AVCodecID_AV_CODEC_ID_PCM_S32BE], 4),
+            ([AVCodecID_AV_CODEC_ID_PCM_F32LE, AVCodecID_AV_CODEC_ID_PCM_F32BE], 4),
+            ([AVCodecID_AV_CODEC_ID_PCM_F64LE, AVCodecID_AV_CODEC_ID_PCM_F64BE], 8),
+        ] {
+            for codec in codecs {
+                // SAFETY: Metadata has no owned pointers; validate only reads scalar fields.
+                let mut parameters: AVCodecParameters = unsafe { std::mem::zeroed() };
+                parameters.codec_id = codec;
+                parameters.sample_rate = 48000;
+                parameters.ch_layout.nb_channels = 6;
+                assert_eq!(validate(&parameters).unwrap(), bytes * 6);
+                parameters.initial_padding = 1;
+                assert!(validate(&parameters).is_err());
+            }
+        }
+        assert_eq!(packed_pcm_bytes(AVCodecID_AV_CODEC_ID_AAC), None);
+        assert_eq!(packed_pcm_bytes(AVCodecID_AV_CODEC_ID_NONE), None);
+    }
 }
