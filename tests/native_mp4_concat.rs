@@ -349,3 +349,23 @@ fn per_segment_aac_priming_retains_existing_route() {
             .is_none()
     );
 }
+
+#[test]
+fn cli_concat_runs_owned_without_the_media_feature() {
+    let d=dir("cli");let source=fixture("hevc/main10-ipb.mp4");let output=d.0.join("out.mkv");
+    let plan=std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media","plan","concat"]).arg(&source).arg(&source).output().unwrap();
+    assert!(plan.status.success(),"{}",String::from_utf8_lossy(&plan.stderr));
+    let json:serde_json::Value=serde_json::from_slice(&plan.stdout).unwrap();
+    assert!(json["notes"].as_array().unwrap().iter().any(|v|v.as_str().unwrap().contains("backend: fvid")));
+    let result=std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media","concat"]).arg(&output).arg(&source).arg(&source).arg("--progress").output().unwrap();
+    assert!(result.status.success(),"{}",String::from_utf8_lossy(&result.stderr));
+    let stats:serde_json::Value=serde_json::from_slice(&result.stdout).unwrap();
+    assert_eq!(stats["backend"],"fvid");assert_eq!(stats["segments"],2);
+    let events=String::from_utf8(result.stderr).unwrap();
+    let completed=events.lines().filter_map(|line|serde_json::from_str::<serde_json::Value>(line).ok())
+        .filter(|value|value["done"]==true).count();
+    assert_eq!(completed,1);
+    let expected=pixels(&source);assert_eq!(pixels(&output),[expected.clone(),expected].concat());
+}

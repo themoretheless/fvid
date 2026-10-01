@@ -311,6 +311,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
     if try_video_trim(args)? {return Ok(());}
+    if try_mp4_matroska_concat(args)? {return Ok(());}
     if try_video_concat(args)? {return Ok(());}
     if try_native_audio_concat(args)? { return Ok(()); }
     if try_native_audio_trim(args)? { return Ok(()); }
@@ -3575,4 +3576,41 @@ fn owned_loudness_weights(source: &std::path::Path, selected: Option<usize>, wei
         Some(weights)=>Ok(weights),
         None=>Ok(fvid::native_pcm::loudness_channel_weights(source,selected)?),
     }
+}
+
+
+fn try_mp4_matroska_concat(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let plan = args.first().map(String::as_str) == Some("plan");
+    let command = usize::from(plan);
+    if args.get(command).map(String::as_str) != Some("concat") { return Ok(false); }
+    let first = command + if plan { 1 } else { 2 };
+    if args.len() < first + 2 { return Ok(false); }
+    if !plan && !args.get(command + 1).is_some_and(|p| matches!(std::path::Path::new(p).extension().and_then(|s|s.to_str()),Some("mkv"|"mka"))) { return Ok(false); }
+    let mut paths = Vec::new();
+    let mut quiet = false;
+    let mut progress = false;
+    let mut items = args[first..].iter();
+    while let Some(arg) = items.next() {
+        match arg.as_str() {
+            "--quiet" => quiet = true,
+            "--progress" if !plan => progress = true,
+            "--output-format" if plan => {
+                if !matches!(items.next().map(String::as_str),Some("matroska"|"mkv"|"mka")) { return Ok(false); }
+            },
+            _ if arg.starts_with('-') => return Ok(false),
+            _ => paths.push(std::path::PathBuf::from(arg)),
+        }
+    }
+    if paths.len() < 2 { return Ok(false); }
+    if plan {
+        let Some(result) = fvid::native_plan::concat_mp4_matroska(&paths)? else { return Ok(false); };
+        println!("{}",serde_json::to_string_pretty(&result)?);
+    } else {
+        let hook = progress.then(||fvid::media_control::ProgressHook::new(|event| {
+            eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
+        }));
+        let Some(stats) = fvid::native_export::try_concat_mp4_matroska(&paths,std::path::Path::new(&args[command+1]),None,hook.as_ref())? else { return Ok(false); };
+        if !quiet { println!("{}",serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":paths.len(),"backend":"fvid","fvid_payload_copies":0})); }
+    }
+    Ok(true)
 }

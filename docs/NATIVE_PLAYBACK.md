@@ -2980,3 +2980,17 @@ shifts, mixed AVC/AAC track offsets, AAC against the same concatenated ADTS code
 sequence, and cancellation/no-overwrite publication. Independent FFmpeg checks
 compare video sample bytes and the complete AAC PCM sequence. Whole-feature
 FFmpeg independence and general per-segment priming remain unfinished.
+
+The CLI also dispatches compressed concat before the legacy feature gate:
+
+```sh
+cargo run --no-default-features -- media concat joined.mkv first.mp4 second.mp4 --progress
+cargo run --no-default-features -- media plan concat first.mp4 second.mp4
+```
+
+Stats remain JSON on stdout; progress JSON is written to stderr and completion
+is emitted once after publication. Unknown options and unsupported admissions
+retain existing dispatch. The no-default-feature CLI regression compares all
+Main10 output frames against the repeated source frames. The corresponding
+local binary linked only libSystem; that linkage result applies to this build,
+not to the still-unmigrated overall `media` feature.
