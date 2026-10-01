@@ -3178,3 +3178,19 @@ Y4M sample planes. Stored crop/rotation is materialized before compositing;
 output display metadata is updated by the same muxer. Regression tests cover
 VP9 odd 10-bit dimensions, 12-bit planes, AV1, rotated Matroska and Y4M 4:2:2,
 with exact independently decoded FFV1 samples and headless CLI/API equality.
+
+
+Plain overlay transformations also select the owned exporter through
+`media::transcode_lossless`, `media::transcode` with default FFV1 settings,
+and `media::plan_transcode_lossless`. Headless commands accept:
+
+```sh
+fvid media transcode-lossless MAIN OUTPUT.mkv --overlay FOREGROUND
+fvid media transcode MAIN OUTPUT.mkv --encoder ffv1 --overlay FOREGROUND
+fvid media plan transcode-lossless MAIN --overlay FOREGROUND
+```
+
+These produce the same bytes as the dedicated owned overlay command. The
+current admission is a plain overlay with default copy/codec options; other
+combined filters retain the previous execution path pending their integration.
+The tests check API and CLI dispatch, exact output equality and the plan command.

@@ -3621,7 +3621,8 @@ fn try_mp4_matroska_concat(args: &[String]) -> Result<bool, Box<dyn std::error::
 fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
     let planning=args.first().map(String::as_str)==Some("plan");
     let command=usize::from(planning);
-    if args.get(command).map(String::as_str)!=Some("overlay") {return Ok(false);}
+    let operation=args.get(command).map(String::as_str);
+    if !matches!(operation,Some("overlay"|"transcode-lossless"|"transcode")) {return Ok(false);}
     let mut paths=Vec::<std::path::PathBuf>::new();let mut foreground=None;
     let (mut x,mut y)=(0i64,0i64);let (mut quiet,mut report)=(false,false);
     let mut items=args[command+1..].iter();
@@ -3630,6 +3631,9 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
             "--overlay-x"=>x=items.next().ok_or("missing overlay-x")?.parse()?,
             "--overlay-y"=>y=items.next().ok_or("missing overlay-y")?.parse()?,
             "--overlay"=>foreground=Some(std::path::PathBuf::from(items.next().ok_or("missing overlay path")?)),
+            "--encoder" if operation==Some("transcode")=> {
+                if items.next().map(String::as_str)!=Some("ffv1") {return Ok(false);}
+            },
             "--quiet"=>quiet=true,
             "--progress" if !planning=>report=true,
             "--"=>{paths.extend(items.map(std::path::PathBuf::from));break;},
@@ -3637,6 +3641,7 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
             _=>paths.push(item.into()),
         }
     }
+    if operation!=Some("overlay") && foreground.is_none() {return Ok(false);}
     let (source,overlay,destination)=if planning {
         match (paths.as_slice(),foreground.as_deref()) {
             ([source,overlay],None)=>(source.as_path(),overlay.as_path(),None),
@@ -3652,7 +3657,8 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
     };
     if !fvid::native_export::overlay_eligible(source)? {return Ok(false);}
     if planning {
-        let plan=fvid::native_plan::overlay(source,overlay,x,y)?;
+        let mut plan=fvid::native_plan::overlay(source,overlay,x,y)?;
+        if operation!=Some("overlay") {plan.command="transcode-lossless".into();}
         if !quiet {println!("{}",serde_json::to_string_pretty(&plan)?);}
     } else {
         let hook=report.then(||fvid::media_control::ProgressHook::new(|event|{

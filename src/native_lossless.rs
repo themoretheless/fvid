@@ -324,6 +324,13 @@ pub fn identity(transform: &crate::media_info::LosslessTransform) -> bool {
             .is_ok_and(|(geometry, filters)| geometry.is_identity() && filters.is_empty())
 }
 
+/// A plain overlay request can share the dedicated owned compositor.
+pub fn overlay_only(transform:&crate::media_info::LosslessTransform)->Option<&crate::media_info::OverlaySpec> {
+    let spec=transform.overlay.as_ref()?;
+    let mut remaining=transform.clone();remaining.overlay=None;
+    identity(&remaining).then_some(spec)
+}
+
 /// Admission for currently owned spatial transformations.
 pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
     if transform.boxblur.as_deref().is_some_and(|args| crate::native_boxblur::BoxBlur::parse(args).is_err()) { return false; }

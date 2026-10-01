@@ -264,3 +264,86 @@ fn matroska_vp9_av1_high_depth_and_y4m_overlay_preserve_samples() {
         }
     }
 }
+
+#[test]
+fn overlay_transform_uses_owned_lossless_export_plan_and_headless_commands() {
+    let d = dir("transform");
+    let source = fixture("video.mp4");
+    let reference = d.0.join("reference.mkv");
+    native_export::overlay_video(&source, &source, &reference, 0, 0, None, None).unwrap();
+    let expected = std::fs::read(reference).unwrap();
+    let transform = fvid::media_info::LosslessTransform {
+        overlay: Some(fvid::media_info::OverlaySpec {
+            path: source.clone(),
+            x: 0,
+            y: 0,
+        }),
+        ..Default::default()
+    };
+    assert!(fvid::native_lossless::overlay_only(&transform).is_some());
+    let filtered = fvid::media_info::LosslessTransform {
+        negate: Some("1".into()),
+        ..transform.clone()
+    };
+    assert!(fvid::native_lossless::overlay_only(&filtered).is_none());
+    for command in ["transcode-lossless", "transcode"] {
+        let output = d.0.join(format!("{command}.mkv"));
+        let mut cmd = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"));
+        cmd.args(["media", command])
+            .arg(&source)
+            .arg(&output)
+            .arg("--overlay")
+            .arg(&source);
+        if command == "transcode" {
+            cmd.args(["--encoder", "ffv1"]);
+        }
+        let result = cmd.output().unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let stats: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        assert_eq!(stats["backend"], "fvid");
+        assert_eq!(std::fs::read(output).unwrap(), expected);
+    }
+    let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "transcode-lossless"])
+        .arg(&source)
+        .arg("--overlay")
+        .arg(&source)
+        .output()
+        .unwrap();
+    assert!(result.status.success());
+    let plan: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    assert_eq!(plan["command"], "transcode-lossless");
+    #[cfg(feature = "media")]
+    {
+        let options = Default::default();
+        let a = d.0.join("api.mkv");
+        assert_eq!(
+            fvid::media::transcode_lossless(&source, &a, transform.clone(), &options)
+                .unwrap()
+                .backend,
+            "fvid"
+        );
+        assert_eq!(std::fs::read(a).unwrap(), expected);
+        let b = d.0.join("explicit.mkv");
+        let encoder = fvid::media_info::EncoderSettings {
+            name: "ffv1".into(),
+            options: vec![],
+        };
+        assert_eq!(
+            fvid::media::transcode(&source, &b, transform.clone(), &options, &encoder)
+                .unwrap()
+                .backend,
+            "fvid"
+        );
+        assert_eq!(std::fs::read(b).unwrap(), expected);
+        let plan =
+            fvid::media::plan_transcode_lossless(&source, &transform, &options, Some("ffv1"))
+                .unwrap();
+        assert_eq!(plan.command, "transcode-lossless");
+        assert!(plan.steps.iter().any(|s| s.action == "overlay"));
+    }
+}

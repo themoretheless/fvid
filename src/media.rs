@@ -366,6 +366,11 @@ pub fn crop_lossless(source: &std::path::Path, destination: &std::path::Path,
 
 /// Owned spatial FFV1 export for Y4M and MP4 video, retaining all supported AAC tracks.
 pub fn transcode_lossless(source:&std::path::Path,destination:&std::path::Path,transform:LosslessTransform,options:&CopyOptions)->Result<LosslessStats> {
+    if let Some(spec)=crate::native_lossless::overlay_only(&transform) {
+        if validate_native_copy_options(options,false).is_ok() && crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {
+            return overlay_video(source,&spec.path,destination,spec.x,spec.y,options);
+        }
+    }
     if crate::native_lossless::supports(&transform) && validate_native_copy_options(options,false).is_ok() && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
         let (geometry,filters)=crate::native_lossless::configuration(&transform).map_err(|e|e.to_string())?;
         return crate::native_export::transcode_ffv1_transformed(source,destination,&geometry,&filters,options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string());
@@ -378,7 +383,7 @@ pub fn transcode(source: &std::path::Path, destination: &std::path::Path,
     transform: LosslessTransform, options: &CopyOptions, settings: &EncoderSettings) -> Result<LosslessStats> {
     settings.validate()?;
     if settings.name=="ffv1" && settings.options.is_empty()
-        && crate::native_lossless::supports(&transform)
+        && (crate::native_lossless::supports(&transform) || crate::native_lossless::overlay_only(&transform).is_some())
         && validate_native_copy_options(options,false).is_ok()
         && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
         return transcode_lossless(source,destination,transform,options);
@@ -389,6 +394,14 @@ pub fn transcode(source: &std::path::Path, destination: &std::path::Path,
 /// Plan eligible FFV1 exports without opening the legacy demuxer.
 pub fn plan_transcode_lossless(source: &std::path::Path, transform: &LosslessTransform,
     options: &CopyOptions, encoder: Option<&str>) -> Result<MediaPlan> {
+    if matches!(encoder,None|Some("ffv1")) && validate_native_copy_options(options,false).is_ok() {
+        if let Some(spec)=crate::native_lossless::overlay_only(transform) {
+            if crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {
+                let mut plan=crate::native_plan::overlay(source,&spec.path,i64::from(spec.x),i64::from(spec.y))?;
+                plan.command="transcode-lossless".into();return Ok(plan);
+            }
+        }
+    }
     if matches!(encoder,None|Some("ffv1")) && crate::native_lossless::supports(transform)
         && validate_native_copy_options(options,false).is_ok()
         && crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
