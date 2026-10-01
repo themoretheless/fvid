@@ -2,84 +2,169 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
-    if args.first().map(String::as_str)==Some("capabilities") {
-        if args.len()!=1 {return Err("capabilities accepts no arguments".into());}
-        println!("{}",serde_json::to_string_pretty(&fvid::native_capabilities::inventory())?);
+    if args.first().map(String::as_str) == Some("capabilities") {
+        if args.len() != 1 {
+            return Err("capabilities accepts no arguments".into());
+        }
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&fvid::native_capabilities::inventory())?
+        );
         return Ok(());
     }
-    let normalization_plan=args.first().map(String::as_str)==Some("plan") && args.get(1).map(String::as_str)==Some("normalize-loudness");
-    let args=if normalization_plan {&args[1..]} else {args};
-    if args.first().map(String::as_str)==Some("plan") && args.get(1).map(String::as_str)==Some("loudness") {
-        let source=std::path::Path::new(args.get(2).ok_or("plan loudness requires INPUT")?);
-        let (mut selected,mut weights)=(None,None);
-        let mut options=args[3..].iter();
-        while let Some(option)=options.next() {
+    let normalization_plan = args.first().map(String::as_str) == Some("plan")
+        && args.get(1).map(String::as_str) == Some("normalize-loudness");
+    let args = if normalization_plan { &args[1..] } else { args };
+    if args.first().map(String::as_str) == Some("plan")
+        && args.get(1).map(String::as_str) == Some("loudness")
+    {
+        let source = std::path::Path::new(args.get(2).ok_or("plan loudness requires INPUT")?);
+        let (mut selected, mut weights) = (None, None);
+        let mut options = args[3..].iter();
+        while let Some(option) = options.next() {
             match option.as_str() {
-                "--streams"=>{
-                    if selected.is_some() {return Err("duplicate stream index".into());}
-                    selected=Some(options.next().ok_or("missing stream index")?.parse::<usize>()?);
+                "--streams" => {
+                    if selected.is_some() {
+                        return Err("duplicate stream index".into());
+                    }
+                    selected = Some(
+                        options
+                            .next()
+                            .ok_or("missing stream index")?
+                            .parse::<usize>()?,
+                    );
                 }
-                "--channel-weights"=>{
-                    if weights.is_some() {return Err("duplicate channel weights".into());}
-                    weights=Some(options.next().ok_or("missing channel weights")?.split(',').map(str::parse).collect::<Result<Vec<f64>,_>>()?);
+                "--channel-weights" => {
+                    if weights.is_some() {
+                        return Err("duplicate channel weights".into());
+                    }
+                    weights = Some(
+                        options
+                            .next()
+                            .ok_or("missing channel weights")?
+                            .split(',')
+                            .map(str::parse)
+                            .collect::<Result<Vec<f64>, _>>()?,
+                    );
                 }
-                _=>return Err(format!("unsupported owned loudness plan option: {option}").into()),
+                _ => return Err(format!("unsupported owned loudness plan option: {option}").into()),
             }
         }
-        println!("{}",serde_json::to_string_pretty(&fvid::native_plan::loudness(source,selected,weights.as_deref())?)?);
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&fvid::native_plan::loudness(
+                source,
+                selected,
+                weights.as_deref()
+            )?)?
+        );
         return Ok(());
     }
     if args.first().map(String::as_str) == Some("normalize-loudness") {
-        if args.len()==2 && matches!(args[1].as_str(),"--help"|"-h") {
-            println!("fvid media normalize-loudness INPUT OUTPUT.wav [--target-lufs -16] [--sample-peak-dbfs -1.5] [--streams INDEX] [--channel-weights W,...] [--quiet] [--progress]\nConstant gain preserves dynamics; the ceiling is sample peak, not true peak.");
+        if args.len() == 2 && matches!(args[1].as_str(), "--help" | "-h") {
+            println!(
+                "fvid media normalize-loudness INPUT OUTPUT.wav [--target-lufs -16] [--sample-peak-dbfs -1.5] [--streams INDEX] [--channel-weights W,...] [--quiet] [--progress]\nConstant gain preserves dynamics; the ceiling is sample peak, not true peak."
+            );
             return Ok(());
         }
-        let source = std::path::Path::new(args.get(1).ok_or("normalize-loudness requires INPUT OUTPUT.wav")?);
-        let destination = std::path::Path::new(args.get(2).ok_or("normalize-loudness requires OUTPUT.wav")?);
-        let (mut selected, mut weights, mut target_lufs, mut ceiling) = (None,None,None,None);
-        let mut quiet=false;let mut progress=false;
-        let mut options=args[3..].iter();
-        while let Some(option)=options.next() {
+        let source = std::path::Path::new(
+            args.get(1)
+                .ok_or("normalize-loudness requires INPUT OUTPUT.wav")?,
+        );
+        let destination = std::path::Path::new(
+            args.get(2)
+                .ok_or("normalize-loudness requires OUTPUT.wav")?,
+        );
+        let (mut selected, mut weights, mut target_lufs, mut ceiling) = (None, None, None, None);
+        let mut quiet = false;
+        let mut progress = false;
+        let mut options = args[3..].iter();
+        while let Some(option) = options.next() {
             match option.as_str() {
                 "--streams" => {
-                    if selected.is_some() {return Err("duplicate stream index".into());}
-                    selected=Some(options.next().ok_or("missing stream index")?.parse::<usize>()?);
+                    if selected.is_some() {
+                        return Err("duplicate stream index".into());
+                    }
+                    selected = Some(
+                        options
+                            .next()
+                            .ok_or("missing stream index")?
+                            .parse::<usize>()?,
+                    );
                 }
                 "--channel-weights" => {
-                    if weights.is_some() {return Err("duplicate channel weights".into());}
-                    weights=Some(options.next().ok_or("missing channel weights")?.split(',').map(str::parse).collect::<Result<Vec<f64>,_>>()?);
+                    if weights.is_some() {
+                        return Err("duplicate channel weights".into());
+                    }
+                    weights = Some(
+                        options
+                            .next()
+                            .ok_or("missing channel weights")?
+                            .split(',')
+                            .map(str::parse)
+                            .collect::<Result<Vec<f64>, _>>()?,
+                    );
                 }
                 "--target-lufs" | "--sample-peak-dbfs" => {
-                    let slot=if option=="--target-lufs" {&mut target_lufs} else {&mut ceiling};
-                    if slot.is_some() {return Err(format!("duplicate option: {option}").into());}
-                    *slot=Some(options.next().ok_or("missing normalization target")?.parse::<f64>()?);
+                    let slot = if option == "--target-lufs" {
+                        &mut target_lufs
+                    } else {
+                        &mut ceiling
+                    };
+                    if slot.is_some() {
+                        return Err(format!("duplicate option: {option}").into());
+                    }
+                    *slot = Some(
+                        options
+                            .next()
+                            .ok_or("missing normalization target")?
+                            .parse::<f64>()?,
+                    );
                 }
-                "--quiet"=>quiet=true,
-                "--progress"=>progress=true,
-                _=>return Err(format!("unsupported normalization option: {option}").into()),
+                "--quiet" => quiet = true,
+                "--progress" => progress = true,
+                _ => return Err(format!("unsupported normalization option: {option}").into()),
             }
         }
-        let weights=owned_loudness_weights(source,selected,weights)?;
-        let defaults=fvid::native_pcm::NormalizeTarget::default();
-        let target=fvid::native_pcm::NormalizeTarget {
-            integrated_lufs:target_lufs.unwrap_or(defaults.integrated_lufs),
-            sample_peak_dbfs:ceiling.unwrap_or(defaults.sample_peak_dbfs),
+        let weights = owned_loudness_weights(source, selected, weights)?;
+        let defaults = fvid::native_pcm::NormalizeTarget::default();
+        let target = fvid::native_pcm::NormalizeTarget {
+            integrated_lufs: target_lufs.unwrap_or(defaults.integrated_lufs),
+            sample_peak_dbfs: ceiling.unwrap_or(defaults.sample_peak_dbfs),
         };
         if normalization_plan {
-            if destination.extension().and_then(|s|s.to_str())!=Some("wav") {return Err("normalization requires OUTPUT.wav".into());}
-            let plan=fvid::native_plan::normalize_loudness(source,selected,Some(&weights),target)?;
-            if !quiet {println!("{}",serde_json::to_string_pretty(&plan)?);}
+            if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
+                return Err("normalization requires OUTPUT.wav".into());
+            }
+            let plan =
+                fvid::native_plan::normalize_loudness(source, selected, Some(&weights), target)?;
+            if !quiet {
+                println!("{}", serde_json::to_string_pretty(&plan)?);
+            }
             return Ok(());
         }
         let hook=progress.then(||fvid::native_pcm::NormalizationProgressHook::new(|event| {
             eprintln!("{}",serde_json::json!({"phase":event.phase.as_str(),"packets":event.packets,"payload_bytes":event.payload_bytes,"phase_complete":event.phase_complete,"done":event.done}));
         }));
-        let report=fvid::native_pcm::normalize_loudness_file_controlled(source,destination,selected,&weights,target,None,hook.as_ref())?;
-        if !quiet {println!("{}",serde_json::to_string_pretty(&serde_json::json!({
-            "backend":"fvid", "sample_frames":report.sample_frames, "gain_db":report.gain_db,
-            "peak_limited":report.peak_limited, "source_integrated_lufs":report.source.integrated_lufs,
-            "target_lufs":target.integrated_lufs,"sample_peak_ceiling_dbfs":target.sample_peak_dbfs
-        }))?);}
+        let report = fvid::native_pcm::normalize_loudness_file_controlled(
+            source,
+            destination,
+            selected,
+            &weights,
+            target,
+            None,
+            hook.as_ref(),
+        )?;
+        if !quiet {
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&serde_json::json!({
+                    "backend":"fvid", "sample_frames":report.sample_frames, "gain_db":report.gain_db,
+                    "peak_limited":report.peak_limited, "source_integrated_lufs":report.source.integrated_lufs,
+                    "target_lufs":target.integrated_lufs,"sample_peak_ceiling_dbfs":target.sample_peak_dbfs
+                }))?
+            );
+        }
         return Ok(());
     }
     if args.first().map(String::as_str) == Some("loudness") {
@@ -92,66 +177,129 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         while let Some(option) = options.next() {
             match option.as_str() {
                 "--streams" => {
-                    if selected.is_some() { return Err("duplicate streams option".into()); }
-                    selected = Some(options.next().ok_or("missing audio stream index")?.parse::<usize>()?);
+                    if selected.is_some() {
+                        return Err("duplicate streams option".into());
+                    }
+                    selected = Some(
+                        options
+                            .next()
+                            .ok_or("missing audio stream index")?
+                            .parse::<usize>()?,
+                    );
                 }
                 "--channel-weights" => {
-                    if weights.is_some() { return Err("duplicate channel weights".into()); }
-                    weights = Some(options.next().ok_or("missing channel weights")?.split(',').map(str::parse).collect::<Result<Vec<f64>,_>>()?);
+                    if weights.is_some() {
+                        return Err("duplicate channel weights".into());
+                    }
+                    weights = Some(
+                        options
+                            .next()
+                            .ok_or("missing channel weights")?
+                            .split(',')
+                            .map(str::parse)
+                            .collect::<Result<Vec<f64>, _>>()?,
+                    );
                 }
                 "--quiet" => quiet = true,
                 "--progress" => progress = true,
                 _ => return Err(format!("unsupported owned loudness option: {option}").into()),
             }
         }
-        let weights = owned_loudness_weights(source,selected,weights)?;
+        let weights = owned_loudness_weights(source, selected, weights)?;
         let hook=progress.then(||fvid::media_control::ProgressHook::new(|event| {
             eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
         }));
-        let stats = fvid::native_pcm::measure_loudness_file_controlled(source,selected,&weights,None,hook.as_ref())?;
+        let stats = fvid::native_pcm::measure_loudness_file_controlled(
+            source,
+            selected,
+            &weights,
+            None,
+            hook.as_ref(),
+        )?;
         if !quiet {
-            println!("{}",serde_json::to_string_pretty(&serde_json::json!({
-                "backend":"fvid", "sample_frames":stats.sample_frames,
-                "measured_blocks":stats.measured_blocks, "integrated_lufs":stats.integrated_lufs,
-                "channel_weights":weights, "sample_peak_dbfs":stats.sample_peak_dbfs, "range_lu":stats.range_lu
-            }))?);
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&serde_json::json!({
+                    "backend":"fvid", "sample_frames":stats.sample_frames,
+                    "measured_blocks":stats.measured_blocks, "integrated_lufs":stats.integrated_lufs,
+                    "channel_weights":weights, "sample_peak_dbfs":stats.sample_peak_dbfs, "range_lu":stats.range_lu
+                }))?
+            );
         }
         return Ok(());
     }
-    if args.first().map(String::as_str)==Some("convert-subtitles") && args.len()>=3 {
-        let mut streams=Vec::new();let mut quiet=false;let mut supported=true;
-        let mut options=args[3..].iter();
-        while let Some(option)=options.next() {
+    if args.first().map(String::as_str) == Some("convert-subtitles") && args.len() >= 3 {
+        let mut streams = Vec::new();
+        let mut quiet = false;
+        let mut supported = true;
+        let mut options = args[3..].iter();
+        while let Some(option) = options.next() {
             match option.as_str() {
-                "--quiet"=>quiet=true,
-                "--codec"=>{ if options.next().map(String::as_str)!=Some("ass") {supported=false;} },
-                "--streams"=>{streams=options.next().ok_or("missing subtitle stream")?.split(',').map(str::parse).collect::<std::result::Result<Vec<usize>,_>>()?;},
-                _=>supported=false,
+                "--quiet" => quiet = true,
+                "--codec" => {
+                    if options.next().map(String::as_str) != Some("ass") {
+                        supported = false;
+                    }
+                }
+                "--streams" => {
+                    streams = options
+                        .next()
+                        .ok_or("missing subtitle stream")?
+                        .split(',')
+                        .map(str::parse)
+                        .collect::<std::result::Result<Vec<usize>, _>>()?;
+                }
+                _ => supported = false,
             }
         }
         if supported {
-            if let Some(stats)=fvid::native_subtitle::try_convert(std::path::Path::new(&args[1]),std::path::Path::new(&args[2]),&streams)? {
-                if !quiet {println!("{}",serde_json::to_string_pretty(&stats)?);}return Ok(());
+            if let Some(stats) = fvid::native_subtitle::try_convert(
+                std::path::Path::new(&args[1]),
+                std::path::Path::new(&args[2]),
+                &streams,
+            )? {
+                if !quiet {
+                    println!("{}", serde_json::to_string_pretty(&stats)?);
+                }
+                return Ok(());
             }
         }
     }
-    if native_mix(args)? || native_merge(args)? { return Ok(()); }
-    if args.first().map(String::as_str)==Some("transcode-lossless") && args.len()>=3 {
-        let mut owned=args.to_vec();owned[0]="decode".into();
-        let (pixel_args,filters)=pixel_decode_args(&owned)?;
-        let (remaining,geometry)=geometry_decode_args(&pixel_args)?;
-        if remaining.len()>=3 && remaining[3..].iter().all(|s|matches!(s.as_str(),"--quiet"|"--progress"))
-            && fvid::native_lossless::eligible(std::path::Path::new(&remaining[1]))? {
+    if native_mix(args)? || native_merge(args)? {
+        return Ok(());
+    }
+    if args.first().map(String::as_str) == Some("transcode-lossless") && args.len() >= 3 {
+        let mut owned = args.to_vec();
+        owned[0] = "decode".into();
+        let (pixel_args, filters) = pixel_decode_args(&owned)?;
+        let (remaining, geometry) = geometry_decode_args(&pixel_args)?;
+        if remaining.len() >= 3
+            && remaining[3..]
+                .iter()
+                .all(|s| matches!(s.as_str(), "--quiet" | "--progress"))
+            && fvid::native_lossless::eligible(std::path::Path::new(&remaining[1]))?
+        {
             let hook=remaining[3..].iter().any(|s|s=="--progress").then(||fvid::media_control::ProgressHook::new(|event| {
                 eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
             }));
-            let stats=fvid::native_export::transcode_ffv1_transformed(std::path::Path::new(&remaining[1]),std::path::Path::new(&remaining[2]),&geometry,&filters,None,hook.as_ref())?;
-            if !remaining[3..].iter().any(|s|s=="--quiet"){println!("{}",serde_json::to_string(&stats)?);}return Ok(());
+            let stats = fvid::native_export::transcode_ffv1_transformed(
+                std::path::Path::new(&remaining[1]),
+                std::path::Path::new(&remaining[2]),
+                &geometry,
+                &filters,
+                None,
+                hook.as_ref(),
+            )?;
+            if !remaining[3..].iter().any(|s| s == "--quiet") {
+                println!("{}", serde_json::to_string(&stats)?);
+            }
+            return Ok(());
         }
     }
 
     if args.first().map(String::as_str) == Some("plan")
-        && args.get(1).map(String::as_str) == Some("remux") && args.len() >= 3
+        && args.get(1).map(String::as_str) == Some("remux")
+        && args.len() >= 3
     {
         if let Some(plan) = fvid::native_plan::remux(std::path::Path::new(&args[2]))? {
             if args[3..].iter().any(|s| s != "--quiet") {
@@ -163,8 +311,10 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     if args.first().map(String::as_str) == Some("plan")
-        && args.get(1).map(String::as_str) == Some("decode-audio") && args.len() >= 3
-        && (fvid::native_media::is_owned_audio_source(std::path::Path::new(&args[2]))? || fvid::native_pcm::is_wave(std::path::Path::new(&args[2]))?)
+        && args.get(1).map(String::as_str) == Some("decode-audio")
+        && args.len() >= 3
+        && (fvid::native_media::is_owned_audio_source(std::path::Path::new(&args[2]))?
+            || fvid::native_pcm::is_wave(std::path::Path::new(&args[2]))?)
     {
         let mut transform = fvid::native_plan::AudioDecodeTransform::default();
         let mut selected = None;
@@ -173,37 +323,68 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         while let Some(option) = options.next() {
             match option.as_str() {
                 "--streams" => {
-                    if selected.is_some() { return Err("duplicate streams option".into()); }
-                    selected = Some(options.next().ok_or("missing stream index")?.parse::<usize>()?);
+                    if selected.is_some() {
+                        return Err("duplicate streams option".into());
+                    }
+                    selected = Some(
+                        options
+                            .next()
+                            .ok_or("missing stream index")?
+                            .parse::<usize>()?,
+                    );
                 }
                 "--from" | "--to" => {
-                    let slot = if option == "--from" { &mut from } else { &mut to };
-                    if slot.is_some() { return Err("duplicate interval boundary".into()); }
+                    let slot = if option == "--from" {
+                        &mut from
+                    } else {
+                        &mut to
+                    };
+                    if slot.is_some() {
+                        return Err("duplicate interval boundary".into());
+                    }
                     let time = decode_time(options.next().ok_or("missing interval boundary")?)?;
-                    if time.subsec_nanos()%1000!=0 {return Err("audio plan boundary must be representable in microseconds".into());}
-                    *slot = Some(i64::try_from(time.as_micros()).map_err(|_| "interval exceeds microsecond range")?);
+                    if time.subsec_nanos() % 1000 != 0 {
+                        return Err(
+                            "audio plan boundary must be representable in microseconds".into()
+                        );
+                    }
+                    *slot = Some(
+                        i64::try_from(time.as_micros())
+                            .map_err(|_| "interval exceeds microsecond range")?,
+                    );
                 }
                 "--rate" | "--sample-rate" => {
-                    if transform.sample_rate.is_some() { return Err("duplicate sample-rate option".into()); }
-                    transform.sample_rate = Some(options.next().ok_or("missing sample rate")?.parse()?);
+                    if transform.sample_rate.is_some() {
+                        return Err("duplicate sample-rate option".into());
+                    }
+                    transform.sample_rate =
+                        Some(options.next().ok_or("missing sample rate")?.parse()?);
                 }
                 "--channels" => {
-                    if transform.channels.is_some() { return Err("duplicate channels option".into()); }
+                    if transform.channels.is_some() {
+                        return Err("duplicate channels option".into());
+                    }
                     transform.channels = Some(options.next().ok_or("missing channels")?.parse()?);
                 }
                 "--volume" => {
-                    if transform.volume.is_some() { return Err("duplicate volume option".into()); }
+                    if transform.volume.is_some() {
+                        return Err("duplicate volume option".into());
+                    }
                     transform.volume = Some(options.next().ok_or("missing volume")?.parse()?);
                 }
                 _ => return Err(format!("unsupported native audio plan option: {option}").into()),
             }
         }
-        transform.interval = match (from,to) {
-            (None,None) => None,
-            (Some(from),Some(to)) => Some((from,to)),
+        transform.interval = match (from, to) {
+            (None, None) => None,
+            (Some(from), Some(to)) => Some((from, to)),
             _ => return Err("plan interval requires both --from and --to".into()),
         };
-        let plan = fvid::native_plan::decode_audio_selected(std::path::Path::new(&args[2]), &transform, selected)?;
+        let plan = fvid::native_plan::decode_audio_selected(
+            std::path::Path::new(&args[2]),
+            &transform,
+            selected,
+        )?;
         println!("{}", serde_json::to_string_pretty(&plan)?);
         return Ok(());
     }
@@ -213,7 +394,8 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             4 if args[2] == "--input-format" => Some(args[3].as_str()),
             _ => return Err("usage: fvid media probe INPUT [--input-format FORMAT]".into()),
         };
-        if let Some(info) = fvid::native_probe::try_probe_as(std::path::Path::new(&args[1]), hint)? {
+        if let Some(info) = fvid::native_probe::try_probe_as(std::path::Path::new(&args[1]), hint)?
+        {
             println!("{}", serde_json::to_string_pretty(&info)?);
             return Ok(());
         }
@@ -222,56 +404,137 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     }
     if args.first().map(String::as_str) == Some("remux")
         && (args.len() == 3 || (args.len() == 4 && args[3] == "--progress"))
-        && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("mp4" | "m4a" | "mka" | "mkv"))
+        && matches!(
+            std::path::Path::new(&args[2])
+                .extension()
+                .and_then(|s| s.to_str()),
+            Some("mp4" | "m4a" | "mka" | "mkv")
+        )
     {
         use std::io::Read;
         let mut prefix = [0; 8];
         let mut source = std::fs::File::open(&args[1])?;
         source.read_exact(&mut prefix)?;
-        let progress = (args.len() == 4).then(|| fvid::media_control::ProgressHook::new(|event| {
-            eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}", event.packets, event.payload_bytes, event.done);
-        }));
-        if prefix[..4] == [0x1a,0x45,0xdf,0xa3]
-            && matches!(std::path::Path::new(&args[2]).extension().and_then(|s|s.to_str()),Some("mkv"|"mka")) {
-            let stats=fvid::native_export::remux_matroska(std::path::Path::new(&args[1]),std::path::Path::new(&args[2]),None,progress.as_ref())?;
-            println!("{}",serde_json::json!({"backend":"fvid","packets":stats.packets,"payload_bytes":stats.payload_bytes,"remux":"matroska-preserve"}));
+        let progress = (args.len() == 4).then(|| {
+            fvid::media_control::ProgressHook::new(|event| {
+                eprintln!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",
+                    event.packets, event.payload_bytes, event.done
+                );
+            })
+        });
+        if prefix[..4] == [0x1a, 0x45, 0xdf, 0xa3]
+            && matches!(
+                std::path::Path::new(&args[2])
+                    .extension()
+                    .and_then(|s| s.to_str()),
+                Some("mkv" | "mka")
+            )
+        {
+            let stats = fvid::native_export::remux_matroska(
+                std::path::Path::new(&args[1]),
+                std::path::Path::new(&args[2]),
+                None,
+                progress.as_ref(),
+            )?;
+            println!(
+                "{}",
+                serde_json::json!({"backend":"fvid","packets":stats.packets,"payload_bytes":stats.payload_bytes,"remux":"matroska-preserve"})
+            );
             return Ok(());
         }
         if fvid::container::adts::header(&prefix).is_some() {
             let packets = fvid::native_export::remux_adts_aac_controlled(
-                std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), None, progress.as_ref(),
+                std::path::Path::new(&args[1]),
+                std::path::Path::new(&args[2]),
+                None,
+                progress.as_ref(),
             )?;
             println!("{{\"backend\":\"fvid\",\"audio_packets\":{packets}}}");
             return Ok(());
         }
         if fvid::container::mp4::recognizes_prefix(&prefix)
-            && matches!(std::path::Path::new(&args[2]).extension().and_then(|s|s.to_str()),Some("mka"|"mkv"))
-            && fvid::native_export::is_single_track_mp4_aac(std::path::Path::new(&args[1]))? {
+            && matches!(
+                std::path::Path::new(&args[2])
+                    .extension()
+                    .and_then(|s| s.to_str()),
+                Some("mka" | "mkv")
+            )
+            && fvid::native_export::is_single_track_mp4_aac(std::path::Path::new(&args[1]))?
+        {
             let stats = fvid::native_export::remux_mp4_aac_matroska(
-                std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), None, progress.as_ref())?;
-            println!("{{\"backend\":\"fvid\",\"audio_packets\":{}}}", stats.packets);
+                std::path::Path::new(&args[1]),
+                std::path::Path::new(&args[2]),
+                None,
+                progress.as_ref(),
+            )?;
+            println!(
+                "{{\"backend\":\"fvid\",\"audio_packets\":{}}}",
+                stats.packets
+            );
             return Ok(());
         }
         if fvid::container::mp4::recognizes_prefix(&prefix)
-            && matches!(std::path::Path::new(&args[2]).extension().and_then(|s|s.to_str()),Some("mka"|"mkv"))
-            && fvid::native_export::is_native_mp4_matroska(std::path::Path::new(&args[1]))? {
+            && matches!(
+                std::path::Path::new(&args[2])
+                    .extension()
+                    .and_then(|s| s.to_str()),
+                Some("mka" | "mkv")
+            )
+            && fvid::native_export::is_native_mp4_matroska(std::path::Path::new(&args[1]))?
+        {
             let stats = fvid::native_export::remux_mp4_matroska(
-                std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), None, progress.as_ref())?;
+                std::path::Path::new(&args[1]),
+                std::path::Path::new(&args[2]),
+                None,
+                progress.as_ref(),
+            )?;
             println!("{{\"backend\":\"fvid\",\"packets\":{}}}", stats.packets);
             return Ok(());
         }
-        if fvid::container::mp4::recognizes_prefix(&prefix) && matches!(std::path::Path::new(&args[2]).extension().and_then(|s|s.to_str()),Some("mp4"|"m4a")) {
+        if fvid::container::mp4::recognizes_prefix(&prefix)
+            && matches!(
+                std::path::Path::new(&args[2])
+                    .extension()
+                    .and_then(|s| s.to_str()),
+                Some("mp4" | "m4a")
+            )
+        {
             fvid::native_export::remux_mp4_controlled(
-                std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), None, progress.as_ref(),
+                std::path::Path::new(&args[1]),
+                std::path::Path::new(&args[2]),
+                None,
+                progress.as_ref(),
             )?;
             println!("{{\"backend\":\"fvid\",\"remux\":\"mp4-faststart\"}}");
             return Ok(());
         }
     }
-    if args.first().map(String::as_str) == Some("decode-audio") && args.len() >= 3
-        && matches!(std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()), Some("f32le" | "wav"))
-        && args[3..].iter().all(|arg| !arg.starts_with('-') || matches!(arg.as_str(), "--from" | "--to" | "--quiet" | "--progress" | "--streams" | "--volume" | "--channels" | "--sample-rate" | "--rate"))
-        && (fvid::native_media::is_owned_audio_source(std::path::Path::new(&args[1]))? || fvid::native_pcm::is_wave(std::path::Path::new(&args[1]))?)
+    if args.first().map(String::as_str) == Some("decode-audio")
+        && args.len() >= 3
+        && matches!(
+            std::path::Path::new(&args[2])
+                .extension()
+                .and_then(|s| s.to_str()),
+            Some("f32le" | "wav" | "mka" | "mkv")
+        )
+        && args[3..].iter().all(|arg| {
+            !arg.starts_with('-')
+                || matches!(
+                    arg.as_str(),
+                    "--from"
+                        | "--to"
+                        | "--quiet"
+                        | "--progress"
+                        | "--streams"
+                        | "--volume"
+                        | "--channels"
+                        | "--sample-rate"
+                        | "--rate"
+                )
+        })
+        && (fvid::native_media::is_owned_audio_source(std::path::Path::new(&args[1]))?
+            || fvid::native_pcm::is_wave(std::path::Path::new(&args[1]))?)
     {
         let mut parse_args = vec!["decode".to_owned(), args[1].clone()];
         let mut volume = None;
@@ -282,44 +545,92 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         let mut options = args[3..].iter();
         while let Some(option) = options.next() {
             if option == "--streams" {
-                if selected.is_some() { return Err("duplicate streams option".into()); }
-                selected = Some(options.next().ok_or("missing stream index")?.parse::<usize>()?);
+                if selected.is_some() {
+                    return Err("duplicate streams option".into());
+                }
+                selected = Some(
+                    options
+                        .next()
+                        .ok_or("missing stream index")?
+                        .parse::<usize>()?,
+                );
             } else if option == "--progress" {
                 report_progress = true;
             } else if option == "--volume" {
-                if volume.is_some() { return Err("duplicate volume option".into()); }
+                if volume.is_some() {
+                    return Err("duplicate volume option".into());
+                }
                 volume = Some(options.next().ok_or("missing volume")?.parse::<f64>()?);
             } else if option == "--channels" {
-                if channels.is_some() { return Err("duplicate channels option".into()); }
+                if channels.is_some() {
+                    return Err("duplicate channels option".into());
+                }
                 channels = Some(options.next().ok_or("missing channels")?.parse::<u16>()?);
             } else if option == "--sample-rate" || option == "--rate" {
-                if sample_rate.is_some() { return Err("duplicate sample-rate option".into()); }
-                sample_rate = Some(options.next().ok_or("missing sample-rate")?.parse::<u32>()?);
-            } else { parse_args.push(option.clone()); }
+                if sample_rate.is_some() {
+                    return Err("duplicate sample-rate option".into());
+                }
+                sample_rate = Some(
+                    options
+                        .next()
+                        .ok_or("missing sample-rate")?
+                        .parse::<u32>()?,
+                );
+            } else {
+                parse_args.push(option.clone());
+            }
         }
-        let (_, quiet, interval) = plain_decode(&parse_args)?.ok_or("invalid native audio arguments")?;
-        let progress = report_progress.then(|| fvid::media_control::ProgressHook::new(|event| {
-            eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}", event.packets, event.payload_bytes, event.done);
-        }));
+        let (_, quiet, interval) =
+            plain_decode(&parse_args)?.ok_or("invalid native audio arguments")?;
+        let progress = report_progress.then(|| {
+            fvid::media_control::ProgressHook::new(|event| {
+                eprintln!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",
+                    event.packets, event.payload_bytes, event.done
+                );
+            })
+        });
         let stats = fvid::native_export::export_audio_pcm_selected(
-            std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), interval, volume.unwrap_or(1.0), channels, sample_rate, selected, None, progress.as_ref(),
+            std::path::Path::new(&args[1]),
+            std::path::Path::new(&args[2]),
+            interval,
+            volume.unwrap_or(1.0),
+            channels,
+            sample_rate,
+            selected,
+            None,
+            progress.as_ref(),
         )?;
         if !quiet {
-            println!("{{\"backend\":\"fvid\",\"sample_frames\":{},\"decoded_frames\":{},\"sample_rate\":{},\"channels\":{},\"sample_format\":\"f32le\",\"decode_errors\":0}}",
-                stats.sample_frames, stats.decoded_frames, stats.sample_rate, stats.channels);
+            println!(
+                "{{\"backend\":\"fvid\",\"sample_frames\":{},\"decoded_frames\":{},\"sample_rate\":{},\"channels\":{},\"sample_format\":\"f32le\",\"decode_errors\":0}}",
+                stats.sample_frames, stats.decoded_frames, stats.sample_rate, stats.channels
+            );
         }
         return Ok(());
     }
-    if try_video_trim(args)? {return Ok(());}
-    if try_mp4_matroska_concat(args)? {return Ok(());}
-    if try_video_concat(args)? {return Ok(());}
-    if try_native_audio_concat(args)? { return Ok(()); }
-    if try_native_audio_trim(args)? { return Ok(()); }
+    if try_video_trim(args)? {
+        return Ok(());
+    }
+    if try_mp4_matroska_concat(args)? {
+        return Ok(());
+    }
+    if try_video_concat(args)? {
+        return Ok(());
+    }
+    if try_native_audio_concat(args)? {
+        return Ok(());
+    }
+    if try_native_audio_trim(args)? {
+        return Ok(());
+    }
     if args.first().map(String::as_str) == Some("export-y4m") {
-        if args.len() < 3 { return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m [--crop X:Y:W:H] [--hflip] [--vflip] [--transpose MODE] [--pad W:H:X:Y] [--scale W:H] [--from SECONDS --to SECONDS]".into()); }
-        let mut geometry_args=vec!["decode".to_owned()];
+        if args.len() < 3 {
+            return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m [--crop X:Y:W:H] [--hflip] [--vflip] [--transpose MODE] [--pad W:H:X:Y] [--scale W:H] [--from SECONDS --to SECONDS]".into());
+        }
+        let mut geometry_args = vec!["decode".to_owned()];
         geometry_args.extend_from_slice(&args[3..]);
-        let (geometry_args, geometry)=geometry_decode_args(&geometry_args)?;
+        let (geometry_args, geometry) = geometry_decode_args(&geometry_args)?;
         let (mut from, mut to) = (None, None);
         let mut options = geometry_args[1..].iter();
         while let Some(option) = options.next() {
@@ -328,28 +639,48 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 "--to" => &mut to,
                 _ => return Err(format!("unknown export option: {option}").into()),
             };
-            if slot.is_some() { return Err("duplicate export boundary".into()); }
-            *slot = Some(decode_time(options.next().ok_or("missing export boundary")?)?);
+            if slot.is_some() {
+                return Err("duplicate export boundary".into());
+            }
+            *slot = Some(decode_time(
+                options.next().ok_or("missing export boundary")?,
+            )?);
         }
         let interval = match (from, to) {
             (None, None) => None,
             (Some(from), Some(to)) if from < to => Some((from, to)),
             _ => return Err("export interval requires both --from and --to with from < to".into()),
         };
-        let frames = fvid::native_export::export_y4m_transformed(std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), interval, &geometry)?;
+        let frames = fvid::native_export::export_y4m_transformed(
+            std::path::Path::new(&args[1]),
+            std::path::Path::new(&args[2]),
+            interval,
+            &geometry,
+        )?;
         println!("{{\"backend\":\"fvid\",\"video_frames\":{frames}}}");
         return Ok(());
     }
     let (pixel_args, filters) = pixel_decode_args(args)?;
     let (decode_args, geometry) = geometry_decode_args(&pixel_args)?;
     if let Some((path, quiet, interval)) = plain_decode(&decode_args)? {
-        let stats = fvid::native_media::decode_video_pipeline(std::path::Path::new(path), interval, &geometry, &filters)?;
+        let stats = fvid::native_media::decode_video_pipeline(
+            std::path::Path::new(path),
+            interval,
+            &geometry,
+            &filters,
+        )?;
         if !quiet {
             // These strings are internal backend/pixel-format names; paths and
             // other user input are never interpolated into this JSON document.
-            println!("{{\"backend\":\"{}\",\"video_frames\":{},\"width\":{},\"height\":{},\"pixel_format\":\"{}\",\"decode_errors\":{}}}",
-                stats.backend, stats.video_frames, stats.width, stats.height,
-                stats.pixel_format, stats.decode_errors);
+            println!(
+                "{{\"backend\":\"{}\",\"video_frames\":{},\"width\":{},\"height\":{},\"pixel_format\":\"{}\",\"decode_errors\":{}}}",
+                stats.backend,
+                stats.video_frames,
+                stats.width,
+                stats.height,
+                stats.pixel_format,
+                stats.decode_errors
+            );
         }
         return Ok(());
     }
@@ -376,10 +707,21 @@ fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Er
     }
     let source_index = command_index + 1;
     let option_start = source_index + if plan { 1 } else { 2 };
-    if args.len() < option_start {return Ok(false);}
-    let owned_audio=command=="trim" && fvid::native_media::is_owned_audio_trim_source(std::path::Path::new(&args[source_index]))?
-        && (plan || std::path::Path::new(&args[source_index+1]).extension().and_then(|s|s.to_str())==Some("wav"));
-    if !owned_audio && !fvid::native_pcm::is_wave(std::path::Path::new(&args[source_index]))? {return Ok(false);}
+    if args.len() < option_start {
+        return Ok(false);
+    }
+    let owned_audio = command == "trim"
+        && fvid::native_media::is_owned_audio_trim_source(std::path::Path::new(
+            &args[source_index],
+        ))?
+        && (plan
+            || std::path::Path::new(&args[source_index + 1])
+                .extension()
+                .and_then(|s| s.to_str())
+                == Some("wav"));
+    if !owned_audio && !fvid::native_pcm::is_wave(std::path::Path::new(&args[source_index]))? {
+        return Ok(false);
+    }
     let (mut from, mut to, mut selected) = (None, None, None);
     let (mut quiet, mut report) = (false, false);
     let mut args_iter = args[option_start..].iter();
@@ -420,12 +762,21 @@ fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Er
         if report {
             return Err("progress applies to PCM trim execution, not planning".into());
         }
-        let mut result = if owned_audio {fvid::native_plan::trim_audio(std::path::Path::new(&args[source_index]),from,to,selected)?} else {fvid::native_plan::trim_pcm(
-            std::path::Path::new(&args[source_index]),
-            from,
-            to,
-            selected,
-        )?};
+        let mut result = if owned_audio {
+            fvid::native_plan::trim_audio(
+                std::path::Path::new(&args[source_index]),
+                from,
+                to,
+                selected,
+            )?
+        } else {
+            fvid::native_plan::trim_pcm(
+                std::path::Path::new(&args[source_index]),
+                from,
+                to,
+                selected,
+            )?
+        };
         result.command = command.to_owned();
         if !quiet {
             println!("{}", serde_json::to_string_pretty(&result)?);
@@ -441,8 +792,21 @@ fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Er
         })
     });
     if owned_audio {
-        let stats=fvid::native_export::trim_audio_wave(std::path::Path::new(&args[source_index]),std::path::Path::new(&args[source_index+1]),from,to,selected,None,progress.as_ref())?;
-        if !quiet {println!("{}",serde_json::json!({"packets":stats.decoded_frames,"sample_frames":stats.sample_frames,"payload_bytes":stats.sample_frames*u64::from(stats.channels)*4,"segments":1,"backend":"fvid","fvid_payload_copies":0}));}
+        let stats = fvid::native_export::trim_audio_wave(
+            std::path::Path::new(&args[source_index]),
+            std::path::Path::new(&args[source_index + 1]),
+            from,
+            to,
+            selected,
+            None,
+            progress.as_ref(),
+        )?;
+        if !quiet {
+            println!(
+                "{}",
+                serde_json::json!({"packets":stats.decoded_frames,"sample_frames":stats.sample_frames,"payload_bytes":stats.sample_frames*u64::from(stats.channels)*4,"segments":1,"backend":"fvid","fvid_payload_copies":0})
+            );
+        }
         return Ok(true);
     }
     let stats = fvid::native_pcm::trim_wave(
@@ -469,16 +833,24 @@ fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Er
     Ok(true)
 }
 
-fn pixel_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_pixels::PixelFilters), Box<dyn std::error::Error>> {
+fn pixel_decode_args(
+    args: &[String],
+) -> Result<(Vec<String>, fvid::native_pixels::PixelFilters), Box<dyn std::error::Error>> {
     use fvid::native_pixels::{Gradient, GradientKind, Negate, PixelFilters};
     let mut filters = PixelFilters::default();
-    if args.first().map(String::as_str) != Some("decode") { return Ok((args.to_vec(), filters)); }
+    if args.first().map(String::as_str) != Some("decode") {
+        return Ok((args.to_vec(), filters));
+    }
     let mut result = vec![args[0].clone()];
     let mut args = args[1..].iter();
     let mut seen = std::collections::BTreeSet::new();
     let mut seen_morphology = std::collections::BTreeSet::new();
     while let Some(arg) = args.next() {
-        if arg == "--" { result.push(arg.clone()); result.extend(args.cloned()); break; }
+        if arg == "--" {
+            result.push(arg.clone());
+            result.extend(args.cloned());
+            break;
+        }
         if arg == "--boxblur" {
             let value = args.next().ok_or("missing boxblur args")?;
             let eligible = match result.get(1) {
@@ -486,23 +858,36 @@ fn pixel_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_pixel
                 None => false,
             };
             if eligible {
-                if filters.boxblur.is_some() { return Err("duplicate boxblur".into()); }
+                if filters.boxblur.is_some() {
+                    return Err("duplicate boxblur".into());
+                }
                 if let Ok(filter) = fvid::native_boxblur::BoxBlur::parse(value) {
                     filters.boxblur = Some(filter);
                     continue;
                 }
             }
-            result.push(arg.clone()); result.push(value.clone());
+            result.push(arg.clone());
+            result.push(value.clone());
             continue;
         }
         if arg == "--pixelize" {
-            let value=args.next().ok_or("missing pixelize args")?;
-            let eligible=match result.get(1) {Some(path)=>fvid::native_lossless::eligible(std::path::Path::new(path))?,None=>false};
+            let value = args.next().ok_or("missing pixelize args")?;
+            let eligible = match result.get(1) {
+                Some(path) => fvid::native_lossless::eligible(std::path::Path::new(path))?,
+                None => false,
+            };
             if eligible {
-                if filters.pixelize.is_some() {return Err("duplicate pixelize".into());}
-                if let Ok(filter)=fvid::native_pixelize::Pixelize::parse(value) {filters.pixelize=Some(filter);continue;}
+                if filters.pixelize.is_some() {
+                    return Err("duplicate pixelize".into());
+                }
+                if let Ok(filter) = fvid::native_pixelize::Pixelize::parse(value) {
+                    filters.pixelize = Some(filter);
+                    continue;
+                }
             }
-            result.push(arg.clone());result.push(value.clone());continue;
+            result.push(arg.clone());
+            result.push(value.clone());
+            continue;
         }
         if arg == "--avgblur" {
             let value = args.next().ok_or("missing avgblur args")?;
@@ -511,13 +896,16 @@ fn pixel_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_pixel
                 None => false,
             };
             if eligible {
-                if filters.avgblur.is_some() { return Err("duplicate avgblur".into()); }
+                if filters.avgblur.is_some() {
+                    return Err("duplicate avgblur".into());
+                }
                 if let Ok(filter) = fvid::native_avgblur::AverageBlur::parse(value) {
                     filters.avgblur = Some(filter);
                     continue;
                 }
             }
-            result.push(arg.clone()); result.push(value.clone());
+            result.push(arg.clone());
+            result.push(value.clone());
             continue;
         }
         if arg == "--chromashift" {
@@ -529,32 +917,51 @@ fn pixel_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_pixel
                 None => false,
             };
             if eligible {
-                if filters.chromashift.is_some() { return Err("duplicate chromashift".into()); }
+                if filters.chromashift.is_some() {
+                    return Err("duplicate chromashift".into());
+                }
                 if let Ok(filter) = fvid::native_chromashift::ChromaShift::parse(value) {
                     filters.chromashift = Some(filter);
                     continue;
                 }
             }
-            result.push(arg.clone()); result.push(value.clone());
+            result.push(arg.clone());
+            result.push(value.clone());
             continue;
         }
         if arg == "--negate" {
-            if filters.negate.is_some() { return Err("duplicate negate".into()); }
+            if filters.negate.is_some() {
+                return Err("duplicate negate".into());
+            }
             filters.negate = Some(Negate::parse(args.next().ok_or("missing negate args")?)?);
             continue;
         }
         if matches!(arg.as_str(), "--dilation" | "--erosion") {
             use fvid::native_morphology::{Morphology, MorphologyKind};
-            let kind = if arg == "--dilation" { MorphologyKind::Dilation } else { MorphologyKind::Erosion };
-            if !seen_morphology.insert(kind) { return Err(format!("duplicate {}", kind.name()).into()); }
-            let value = args.next().ok_or_else(|| format!("missing {} args", kind.name()))?;
+            let kind = if arg == "--dilation" {
+                MorphologyKind::Dilation
+            } else {
+                MorphologyKind::Erosion
+            };
+            if !seen_morphology.insert(kind) {
+                return Err(format!("duplicate {}", kind.name()).into());
+            }
+            let value = args
+                .next()
+                .ok_or_else(|| format!("missing {} args", kind.name()))?;
             match Morphology::parse(kind, value) {
                 Ok(filter) => filters.morphology.push(filter),
                 Err(error) => {
                     #[cfg(feature = "media")]
-                    { let _ = error; result.push(arg.clone()); result.push(value.clone()); }
+                    {
+                        let _ = error;
+                        result.push(arg.clone());
+                        result.push(value.clone());
+                    }
                     #[cfg(not(feature = "media"))]
-                    { return Err(error.into()); }
+                    {
+                        return Err(error.into());
+                    }
                 }
             }
             continue;
@@ -565,19 +972,32 @@ fn pixel_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_pixel
             "--roberts" => GradientKind::Roberts,
             "--kirsch" => GradientKind::Kirsch,
             "--scharr" => GradientKind::Scharr,
-            _ => { result.push(arg.clone()); continue; }
+            _ => {
+                result.push(arg.clone());
+                continue;
+            }
         };
-        if !seen.insert(kind) { return Err(format!("duplicate {}", kind.name()).into()); }
-        let value = args.next().ok_or_else(|| format!("missing {} args", kind.name()))?;
+        if !seen.insert(kind) {
+            return Err(format!("duplicate {}", kind.name()).into());
+        }
+        let value = args
+            .next()
+            .ok_or_else(|| format!("missing {} args", kind.name()))?;
         match Gradient::parse(kind, value) {
             Ok(filter) => filters.gradients.push(filter),
             Err(error) => {
                 // Preserve the existing adapter's expression syntax until it
                 // has an owned evaluator. Original args reach the full parser.
                 #[cfg(feature = "media")]
-                { let _ = error; result.push(arg.clone()); result.push(value.clone()); }
+                {
+                    let _ = error;
+                    result.push(arg.clone());
+                    result.push(value.clone());
+                }
                 #[cfg(not(feature = "media"))]
-                { return Err(error.into()); }
+                {
+                    return Err(error.into());
+                }
             }
         }
     }
@@ -588,38 +1008,76 @@ fn pixel_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_pixel
 
 // Strip only the native geometry options. The remaining parser still rejects
 // extra paths and returns unknown filters to the existing full media parser.
-fn geometry_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_geometry::VideoGeometry), Box<dyn std::error::Error>> {
+fn geometry_decode_args(
+    args: &[String],
+) -> Result<(Vec<String>, fvid::native_geometry::VideoGeometry), Box<dyn std::error::Error>> {
     let mut geometry = fvid::native_geometry::VideoGeometry::default();
-    if args.first().map(String::as_str) != Some("decode") { return Ok((args.to_vec(), geometry)); }
+    if args.first().map(String::as_str) != Some("decode") {
+        return Ok((args.to_vec(), geometry));
+    }
     let mut result = vec![args[0].clone()];
     let mut args = args[1..].iter();
     while let Some(arg) = args.next() {
         match arg.as_str() {
-            "--" => { result.push(arg.clone()); result.extend(args.cloned()); break; }
+            "--" => {
+                result.push(arg.clone());
+                result.extend(args.cloned());
+                break;
+            }
             "--hflip" => {
-                if geometry.horizontal_flip { return Err("duplicate hflip".into()); }
+                if geometry.horizontal_flip {
+                    return Err("duplicate hflip".into());
+                }
                 geometry.horizontal_flip = true;
             }
             "--vflip" => {
-                if geometry.vertical_flip { return Err("duplicate vflip".into()); }
+                if geometry.vertical_flip {
+                    return Err("duplicate vflip".into());
+                }
                 geometry.vertical_flip = true;
             }
             "--transpose" => {
-                if geometry.transpose.is_some() { return Err("duplicate transpose".into()); }
-                geometry.transpose = Some(fvid::native_geometry::Transpose::parse(args.next().ok_or("missing transpose mode")?)?);
+                if geometry.transpose.is_some() {
+                    return Err("duplicate transpose".into());
+                }
+                geometry.transpose = Some(fvid::native_geometry::Transpose::parse(
+                    args.next().ok_or("missing transpose mode")?,
+                )?);
             }
             "--crop" | "--scale" | "--pad" => {
-                let fields = args.next().ok_or("missing geometry value")?.split(':')
-                    .map(str::parse::<usize>).collect::<Result<Vec<_>, _>>()?;
+                let fields = args
+                    .next()
+                    .ok_or("missing geometry value")?
+                    .split(':')
+                    .map(str::parse::<usize>)
+                    .collect::<Result<Vec<_>, _>>()?;
                 if arg == "--pad" {
-                    if geometry.pad.is_some() { return Err("duplicate pad".into()); }
-                    geometry.pad = Some(fields.try_into().map_err(|_| "pad requires WIDTH:HEIGHT:X:Y")?);
+                    if geometry.pad.is_some() {
+                        return Err("duplicate pad".into());
+                    }
+                    geometry.pad = Some(
+                        fields
+                            .try_into()
+                            .map_err(|_| "pad requires WIDTH:HEIGHT:X:Y")?,
+                    );
                 } else if arg == "--crop" {
-                    if geometry.crop.is_some() { return Err("duplicate crop".into()); }
-                    geometry.crop = Some(fields.try_into().map_err(|_| "crop requires X:Y:WIDTH:HEIGHT")?);
+                    if geometry.crop.is_some() {
+                        return Err("duplicate crop".into());
+                    }
+                    geometry.crop = Some(
+                        fields
+                            .try_into()
+                            .map_err(|_| "crop requires X:Y:WIDTH:HEIGHT")?,
+                    );
                 } else {
-                    if geometry.scale.is_some() { return Err("duplicate scale".into()); }
-                    geometry.scale = Some(fields.try_into().map_err(|_| "scale requires WIDTH:HEIGHT")?);
+                    if geometry.scale.is_some() {
+                        return Err("duplicate scale".into());
+                    }
+                    geometry.scale = Some(
+                        fields
+                            .try_into()
+                            .map_err(|_| "scale requires WIDTH:HEIGHT")?,
+                    );
                 }
             }
             _ => result.push(arg.clone()),
@@ -627,23 +1085,37 @@ fn geometry_decode_args(args: &[String]) -> Result<(Vec<String>, fvid::native_ge
     }
     Ok((result, geometry))
 }
-type DecodeRequest<'a> = (&'a str, bool, Option<(std::time::Duration, std::time::Duration)>);
+type DecodeRequest<'a> = (
+    &'a str,
+    bool,
+    Option<(std::time::Duration, std::time::Duration)>,
+);
 // Unknown transformation options belong to the full parser, never ignore them.
 fn plain_decode(args: &[String]) -> Result<Option<DecodeRequest<'_>>, Box<dyn std::error::Error>> {
-    if args.first().map(String::as_str) != Some("decode") { return Ok(None); }
+    if args.first().map(String::as_str) != Some("decode") {
+        return Ok(None);
+    }
     let (mut path, mut quiet, mut positional) = (None, false, false);
     let (mut from, mut to) = (None, None);
     let mut args = args[1..].iter();
     while let Some(arg) = args.next() {
-        if !positional && arg == "--" { positional = true; }
-        else if !positional && arg == "--quiet" { quiet = true; }
-        else if !positional && (arg == "--from" || arg == "--to") {
+        if !positional && arg == "--" {
+            positional = true;
+        } else if !positional && arg == "--quiet" {
+            quiet = true;
+        } else if !positional && (arg == "--from" || arg == "--to") {
             let value = args.next().ok_or("missing decode interval boundary")?;
             let time = decode_time(value)?;
-            if arg == "--from" { from = Some(time); } else { to = Some(time); }
+            if arg == "--from" {
+                from = Some(time);
+            } else {
+                to = Some(time);
+            }
+        } else if !positional && arg.starts_with('-') {
+            return Ok(None);
+        } else if path.replace(arg.as_str()).is_some() {
+            return Ok(None);
         }
-        else if !positional && arg.starts_with('-') { return Ok(None); }
-        else if path.replace(arg.as_str()).is_some() { return Ok(None); }
     }
     let interval = match (from, to) {
         (None, None) => None,
@@ -653,7 +1125,7 @@ fn plain_decode(args: &[String]) -> Result<Option<DecodeRequest<'_>>, Box<dyn st
     Ok(path.map(|path| (path, quiet, interval)))
 }
 fn decode_time(text: &str) -> Result<std::time::Duration, Box<dyn std::error::Error>> {
-    let micros=fvid::media_info::parse_time(text)?;
+    let micros = fvid::media_info::parse_time(text)?;
     Ok(std::time::Duration::from_micros(micros as u64))
 }
 
@@ -1108,6 +1580,8 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     let mut encoder_options = Vec::new();
     let mut subtitle_codec = fvid_media::SubtitleCodec::Ass;
     let mut device = 0usize;
+    let mut cuda_shader = None;
+    let mut cuda_shader_sampling = false;
     let mut device_set = false;
     let mut quiet = false;
     let mut progress = false;
@@ -1145,6 +1619,26 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 device_set = true;
             }
             "--seek" => seek = true,
+            "--cuda-shader" | "--cuda-sampling-shader" => {
+                cuda_shader_sampling = args[i] == "--cuda-sampling-shader";
+                if command != "hw-filter" {
+                    return Err("--cuda-shader requires hw-filter".into());
+                }
+                if cuda_shader.is_some() {
+                    return Err("one CUDA shader per hw-filter invocation".into());
+                }
+                i += 1;
+                let path = args.get(i).ok_or("missing CUDA shader path")?;
+                use std::io::Read;
+                let mut source = String::new();
+                std::fs::File::open(path)?
+                    .take(65537)
+                    .read_to_string(&mut source)?;
+                if source.trim().is_empty() || source.len() > 65536 || source.contains('\0') {
+                    return Err("CUDA shader must contain 1..=65536 bytes without NUL".into());
+                }
+                cuda_shader = Some(std::sync::Arc::<str>::from(source));
+            }
             "--hflip" => horizontal_flip = true,
             "--vflip" => vertical_flip = true,
             "--crop" => {
@@ -1810,11 +2304,15 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             }
             "--from" => {
                 i += 1;
-                from = Some(fvid::media_info::parse_time(args.get(i).ok_or("missing start")?)?);
+                from = Some(fvid::media_info::parse_time(
+                    args.get(i).ok_or("missing start")?,
+                )?);
             }
             "--to" => {
                 i += 1;
-                to = Some(fvid::media_info::parse_time(args.get(i).ok_or("missing end")?)?);
+                to = Some(fvid::media_info::parse_time(
+                    args.get(i).ok_or("missing end")?,
+                )?);
             }
             value if value.starts_with("--") => {
                 return Err(format!("unknown media option: {value}").into());
@@ -2281,7 +2779,12 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 if idle {
                     fvid::media::plan_remux(&plan_paths[0], &options)?
                 } else {
-                    fvid::media::plan_transcode_lossless(&plan_paths[0], &transform, &options, None)?
+                    fvid::media::plan_transcode_lossless(
+                        &plan_paths[0],
+                        &transform,
+                        &options,
+                        None,
+                    )?
                 }
             }
             Some(_) => unreachable!(),
@@ -2307,6 +2810,8 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 &paths[0],
                 &paths[1],
                 &fvid_media::HwFilterOptions {
+                    shader: cuda_shader,
+                    shader_sampling: cuda_shader_sampling,
                     crop,
                     horizontal_flip,
                     vertical_flip,
@@ -3369,100 +3874,251 @@ fn run_native(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn try_native_audio_concat(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
-    let plan = args.first().map(String::as_str)==Some("plan");
+    let plan = args.first().map(String::as_str) == Some("plan");
     let start = usize::from(plan);
-    if args.get(start).map(String::as_str)!=Some("concat") {return Ok(false);}
-    let first = start + if plan {1} else {2};
-    let Some(source) = args.get(first) else {return Ok(false);};
-    let adts=fvid::native_export::is_adts_source(std::path::Path::new(source))?;
-    if !adts && !fvid::native_pcm::is_wave(std::path::Path::new(source))? {return Ok(false);}
-    let mut paths=Vec::new();
-    let mut quiet=false;
-    let mut progress=false;
-    let mut options=args[first..].iter();
-    while let Some(arg)=options.next() {
+    if args.get(start).map(String::as_str) != Some("concat") {
+        return Ok(false);
+    }
+    let first = start + if plan { 1 } else { 2 };
+    let Some(source) = args.get(first) else {
+        return Ok(false);
+    };
+    let adts = fvid::native_export::is_adts_source(std::path::Path::new(source))?;
+    if !adts && !fvid::native_pcm::is_wave(std::path::Path::new(source))? {
+        return Ok(false);
+    }
+    let mut paths = Vec::new();
+    let mut quiet = false;
+    let mut progress = false;
+    let mut options = args[first..].iter();
+    while let Some(arg) = options.next() {
         match arg.as_str() {
-            "--quiet"=>quiet=true,
-            "--progress" if !plan=>progress=true,
-            "--streams"=>{if options.next().map(String::as_str)!=Some("0") {return Err("audio input has only stream 0".into());}},
-            _ if arg.starts_with('-')=>return Err(format!("unsupported native audio concat option: {arg}").into()),
-            _=>paths.push(std::path::PathBuf::from(arg)),
+            "--quiet" => quiet = true,
+            "--progress" if !plan => progress = true,
+            "--streams" => {
+                if options.next().map(String::as_str) != Some("0") {
+                    return Err("audio input has only stream 0".into());
+                }
+            }
+            _ if arg.starts_with('-') => {
+                return Err(format!("unsupported native audio concat option: {arg}").into());
+            }
+            _ => paths.push(std::path::PathBuf::from(arg)),
         }
     }
     if plan {
-        let plan=if adts {fvid::native_plan::concat_adts(&paths)?} else {fvid::native_plan::concat_wave(&paths)?};
-        println!("{}",serde_json::to_string_pretty(&plan)?);
+        let plan = if adts {
+            fvid::native_plan::concat_adts(&paths)?
+        } else {
+            fvid::native_plan::concat_wave(&paths)?
+        };
+        println!("{}", serde_json::to_string_pretty(&plan)?);
     } else {
-        let hook=progress.then(||fvid::media_control::ProgressHook::new(|event|{
-            eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",event.packets,event.payload_bytes,event.done);
-        }));
+        let hook = progress.then(|| {
+            fvid::media_control::ProgressHook::new(|event| {
+                eprintln!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",
+                    event.packets, event.payload_bytes, event.done
+                );
+            })
+        });
         if adts {
-            let stats=fvid::native_export::concat_adts_aac(&paths,std::path::Path::new(&args[start+1]),None,hook.as_ref())?;
-            if !quiet {println!("{{\"packets\":{},\"payload_bytes\":{},\"segments\":{},\"backend\":\"fvid\",\"fvid_payload_copies\":0}}",stats.packets,stats.payload_bytes,paths.len());}
+            let stats = fvid::native_export::concat_adts_aac(
+                &paths,
+                std::path::Path::new(&args[start + 1]),
+                None,
+                hook.as_ref(),
+            )?;
+            if !quiet {
+                println!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"segments\":{},\"backend\":\"fvid\",\"fvid_payload_copies\":0}}",
+                    stats.packets,
+                    stats.payload_bytes,
+                    paths.len()
+                );
+            }
             return Ok(true);
         }
-        let stats=fvid::native_pcm::concat_wave(&paths,std::path::Path::new(&args[start+1]),None,hook.as_ref())?;
-        if !quiet {println!("{{\"packets\":{},\"sample_frames\":{},\"payload_bytes\":{},\"segments\":{},\"backend\":\"fvid\",\"fvid_payload_copies\":0}}",stats.packets,stats.sample_frames,stats.payload_bytes,paths.len());}
+        let stats = fvid::native_pcm::concat_wave(
+            &paths,
+            std::path::Path::new(&args[start + 1]),
+            None,
+            hook.as_ref(),
+        )?;
+        if !quiet {
+            println!(
+                "{{\"packets\":{},\"sample_frames\":{},\"payload_bytes\":{},\"segments\":{},\"backend\":\"fvid\",\"fvid_payload_copies\":0}}",
+                stats.packets,
+                stats.sample_frames,
+                stats.payload_bytes,
+                paths.len()
+            );
+        }
     }
     Ok(true)
 }
 
 fn try_video_concat(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
-    let plan=args.first().map(String::as_str)==Some("plan");
-    let command=usize::from(plan);
-    if args.get(command).map(String::as_str)!=Some("concat") {return Ok(false);}
-    let matches=if plan {args.windows(2).any(|s|s[0]=="--output-format" && s[1]=="y4m")} else {args.get(command+1).is_some_and(|p|std::path::Path::new(p).extension().and_then(|s|s.to_str())==Some("y4m"))};
-    if !matches {return Ok(false);}
-    let mut paths=Vec::new();let mut selected=None;let mut quiet=false;let mut report=false;
-    let mut items=args[command+if plan {1} else {2}..].iter();
-    while let Some(arg)=items.next() {
+    let plan = args.first().map(String::as_str) == Some("plan");
+    let command = usize::from(plan);
+    if args.get(command).map(String::as_str) != Some("concat") {
+        return Ok(false);
+    }
+    let matches = if plan {
+        args.windows(2)
+            .any(|s| s[0] == "--output-format" && s[1] == "y4m")
+    } else {
+        args.get(command + 1).is_some_and(|p| {
+            std::path::Path::new(p).extension().and_then(|s| s.to_str()) == Some("y4m")
+        })
+    };
+    if !matches {
+        return Ok(false);
+    }
+    let mut paths = Vec::new();
+    let mut selected = None;
+    let mut quiet = false;
+    let mut report = false;
+    let mut items = args[command + if plan { 1 } else { 2 }..].iter();
+    while let Some(arg) = items.next() {
         match arg.as_str() {
-            "--output-format" if plan=>{if items.next().map(String::as_str)!=Some("y4m") {return Err("expected y4m output format".into());}},
-            "--streams"=>{if selected.is_some() {return Err("duplicate streams option".into());}selected=Some(items.next().ok_or("missing stream")?.parse::<usize>()?);},
-            "--quiet"=>quiet=true,
-            "--progress" if !plan=>report=true,
-            _ if arg.starts_with('-')=>return Err(format!("unsupported native video concat option: {arg}").into()),
-            _=>paths.push(std::path::PathBuf::from(arg)),
+            "--output-format" if plan => {
+                if items.next().map(String::as_str) != Some("y4m") {
+                    return Err("expected y4m output format".into());
+                }
+            }
+            "--streams" => {
+                if selected.is_some() {
+                    return Err("duplicate streams option".into());
+                }
+                selected = Some(items.next().ok_or("missing stream")?.parse::<usize>()?);
+            }
+            "--quiet" => quiet = true,
+            "--progress" if !plan => report = true,
+            _ if arg.starts_with('-') => {
+                return Err(format!("unsupported native video concat option: {arg}").into());
+            }
+            _ => paths.push(std::path::PathBuf::from(arg)),
         }
     }
-    if plan {println!("{}",serde_json::to_string_pretty(&fvid::native_plan::concat_y4m(&paths,selected)?)?);}
-    else {
-        let hook=report.then(||fvid::media_control::ProgressHook::new(|e|eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",e.packets,e.payload_bytes,e.done)));
-        let stats=fvid::native_export::concat_y4m(&paths,std::path::Path::new(&args[command+1]),selected,None,hook.as_ref())?;
-        if !quiet {println!("{}",serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":paths.len(),"backend":"fvid","fvid_payload_copies":0}));}
+    if plan {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&fvid::native_plan::concat_y4m(&paths, selected)?)?
+        );
+    } else {
+        let hook = report.then(|| {
+            fvid::media_control::ProgressHook::new(|e| {
+                eprintln!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",
+                    e.packets, e.payload_bytes, e.done
+                )
+            })
+        });
+        let stats = fvid::native_export::concat_y4m(
+            &paths,
+            std::path::Path::new(&args[command + 1]),
+            selected,
+            None,
+            hook.as_ref(),
+        )?;
+        if !quiet {
+            println!(
+                "{}",
+                serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":paths.len(),"backend":"fvid","fvid_payload_copies":0})
+            );
+        }
     }
     Ok(true)
 }
 
 fn try_video_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
-    let plan=args.first().map(String::as_str)==Some("plan");let command=usize::from(plan);
-    if args.get(command).map(String::as_str)!=Some("trim") {return Ok(false);}
-    let matches=if plan {args.windows(2).any(|s|s[0]=="--output-format" && s[1]=="y4m")} else {args.get(command+2).is_some_and(|p|std::path::Path::new(p).extension().and_then(|s|s.to_str())==Some("y4m"))};
-    if !matches {return Ok(false);}
-    let source=args.get(command+1).ok_or("missing input")?;
-    let (mut from,mut to,mut selected)=(None,None,None);let mut quiet=false;let mut report=false;
-    let mut items=args[command+if plan {2} else {3}..].iter();
-    while let Some(arg)=items.next() {
+    let plan = args.first().map(String::as_str) == Some("plan");
+    let command = usize::from(plan);
+    if args.get(command).map(String::as_str) != Some("trim") {
+        return Ok(false);
+    }
+    let matches = if plan {
+        args.windows(2)
+            .any(|s| s[0] == "--output-format" && s[1] == "y4m")
+    } else {
+        args.get(command + 2).is_some_and(|p| {
+            std::path::Path::new(p).extension().and_then(|s| s.to_str()) == Some("y4m")
+        })
+    };
+    if !matches {
+        return Ok(false);
+    }
+    let source = args.get(command + 1).ok_or("missing input")?;
+    let (mut from, mut to, mut selected) = (None, None, None);
+    let mut quiet = false;
+    let mut report = false;
+    let mut items = args[command + if plan { 2 } else { 3 }..].iter();
+    while let Some(arg) = items.next() {
         match arg.as_str() {
-            "--output-format" if plan=>{if items.next().map(String::as_str)!=Some("y4m") {return Err("expected y4m output format".into());}},
-            "--from"|"--to"=>{
-                let slot=if arg=="--from" {&mut from} else {&mut to};if slot.is_some() {return Err("duplicate trim boundary".into());}
-                let value=decode_time(items.next().ok_or("missing trim boundary")?)?;
-                if value.subsec_nanos()%1000!=0 {return Err("trim boundary must be representable in microseconds".into());}
-                *slot=Some(i64::try_from(value.as_micros()).map_err(|_|"trim boundary overflow")?);
-            },
-            "--streams"=>{if selected.is_some() {return Err("duplicate streams option".into());}selected=Some(items.next().ok_or("missing stream")?.parse::<usize>()?);},
-            "--quiet"=>quiet=true,
-            "--progress" if !plan=>report=true,
-            _=>return Err(format!("unsupported native video trim option: {arg}").into()),
+            "--output-format" if plan => {
+                if items.next().map(String::as_str) != Some("y4m") {
+                    return Err("expected y4m output format".into());
+                }
+            }
+            "--from" | "--to" => {
+                let slot = if arg == "--from" { &mut from } else { &mut to };
+                if slot.is_some() {
+                    return Err("duplicate trim boundary".into());
+                }
+                let value = decode_time(items.next().ok_or("missing trim boundary")?)?;
+                if value.subsec_nanos() % 1000 != 0 {
+                    return Err("trim boundary must be representable in microseconds".into());
+                }
+                *slot =
+                    Some(i64::try_from(value.as_micros()).map_err(|_| "trim boundary overflow")?);
+            }
+            "--streams" => {
+                if selected.is_some() {
+                    return Err("duplicate streams option".into());
+                }
+                selected = Some(items.next().ok_or("missing stream")?.parse::<usize>()?);
+            }
+            "--quiet" => quiet = true,
+            "--progress" if !plan => report = true,
+            _ => return Err(format!("unsupported native video trim option: {arg}").into()),
         }
     }
-    let (from,to)=(from.ok_or("--from required")?,to.ok_or("--to required")?);
-    if plan {println!("{}",serde_json::to_string_pretty(&fvid::native_plan::trim_y4m(std::path::Path::new(source),from,to,selected)?)?);}
-    else {
-        let hook=report.then(||fvid::media_control::ProgressHook::new(|e|eprintln!("{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",e.packets,e.payload_bytes,e.done)));
-        let stats=fvid::native_export::trim_y4m(std::path::Path::new(source),std::path::Path::new(&args[command+2]),from,to,selected,None,hook.as_ref())?;
-        if !quiet {println!("{}",serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":1,"backend":"fvid","fvid_payload_copies":0}));}
+    let (from, to) = (from.ok_or("--from required")?, to.ok_or("--to required")?);
+    if plan {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&fvid::native_plan::trim_y4m(
+                std::path::Path::new(source),
+                from,
+                to,
+                selected
+            )?)?
+        );
+    } else {
+        let hook = report.then(|| {
+            fvid::media_control::ProgressHook::new(|e| {
+                eprintln!(
+                    "{{\"packets\":{},\"payload_bytes\":{},\"done\":{}}}",
+                    e.packets, e.payload_bytes, e.done
+                )
+            })
+        });
+        let stats = fvid::native_export::trim_y4m(
+            std::path::Path::new(source),
+            std::path::Path::new(&args[command + 2]),
+            from,
+            to,
+            selected,
+            None,
+            hook.as_ref(),
+        )?;
+        if !quiet {
+            println!(
+                "{}",
+                serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":1,"backend":"fvid","fvid_payload_copies":0})
+            );
+        }
     }
     Ok(true)
 }
@@ -3571,21 +4227,39 @@ fn native_merge(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
     Ok(true)
 }
 
-fn owned_loudness_weights(source: &std::path::Path, selected: Option<usize>, weights: Option<Vec<f64>>) -> Result<Vec<f64>,Box<dyn std::error::Error>> {
+fn owned_loudness_weights(
+    source: &std::path::Path,
+    selected: Option<usize>,
+    weights: Option<Vec<f64>>,
+) -> Result<Vec<f64>, Box<dyn std::error::Error>> {
     match weights {
-        Some(weights)=>Ok(weights),
-        None=>Ok(fvid::native_pcm::loudness_channel_weights(source,selected)?),
+        Some(weights) => Ok(weights),
+        None => Ok(fvid::native_pcm::loudness_channel_weights(
+            source, selected,
+        )?),
     }
 }
-
 
 fn try_mp4_matroska_concat(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
     let plan = args.first().map(String::as_str) == Some("plan");
     let command = usize::from(plan);
-    if args.get(command).map(String::as_str) != Some("concat") { return Ok(false); }
+    if args.get(command).map(String::as_str) != Some("concat") {
+        return Ok(false);
+    }
     let first = command + if plan { 1 } else { 2 };
-    if args.len() < first + 2 { return Ok(false); }
-    if !plan && !args.get(command + 1).is_some_and(|p| matches!(std::path::Path::new(p).extension().and_then(|s|s.to_str()),Some("mkv"|"mka"))) { return Ok(false); }
+    if args.len() < first + 2 {
+        return Ok(false);
+    }
+    if !plan
+        && !args.get(command + 1).is_some_and(|p| {
+            matches!(
+                std::path::Path::new(p).extension().and_then(|s| s.to_str()),
+                Some("mkv" | "mka")
+            )
+        })
+    {
+        return Ok(false);
+    }
     let mut paths = Vec::new();
     let mut quiet = false;
     let mut progress = false;
@@ -3595,22 +4269,44 @@ fn try_mp4_matroska_concat(args: &[String]) -> Result<bool, Box<dyn std::error::
             "--quiet" => quiet = true,
             "--progress" if !plan => progress = true,
             "--output-format" if plan => {
-                if !matches!(items.next().map(String::as_str),Some("matroska"|"mkv"|"mka")) { return Ok(false); }
-            },
+                if !matches!(
+                    items.next().map(String::as_str),
+                    Some("matroska" | "mkv" | "mka")
+                ) {
+                    return Ok(false);
+                }
+            }
             _ if arg.starts_with('-') => return Ok(false),
             _ => paths.push(std::path::PathBuf::from(arg)),
         }
     }
-    if paths.len() < 2 { return Ok(false); }
+    if paths.len() < 2 {
+        return Ok(false);
+    }
     if plan {
-        let Some(result) = fvid::native_plan::concat_mp4_matroska(&paths)? else { return Ok(false); };
-        println!("{}",serde_json::to_string_pretty(&result)?);
+        let Some(result) = fvid::native_plan::concat_mp4_matroska(&paths)? else {
+            return Ok(false);
+        };
+        println!("{}", serde_json::to_string_pretty(&result)?);
     } else {
         let hook = progress.then(||fvid::media_control::ProgressHook::new(|event| {
             eprintln!("{}",serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
         }));
-        let Some(stats) = fvid::native_export::try_concat_mp4_matroska(&paths,std::path::Path::new(&args[command+1]),None,hook.as_ref())? else { return Ok(false); };
-        if !quiet { println!("{}",serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":paths.len(),"backend":"fvid","fvid_payload_copies":0})); }
+        let Some(stats) = fvid::native_export::try_concat_mp4_matroska(
+            &paths,
+            std::path::Path::new(&args[command + 1]),
+            None,
+            hook.as_ref(),
+        )?
+        else {
+            return Ok(false);
+        };
+        if !quiet {
+            println!(
+                "{}",
+                serde_json::json!({"packets":stats.packets,"payload_bytes":stats.payload_bytes,"segments":paths.len(),"backend":"fvid","fvid_payload_copies":0})
+            );
+        }
     }
     Ok(true)
 }

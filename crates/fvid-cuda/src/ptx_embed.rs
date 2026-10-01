@@ -49,7 +49,12 @@ fn load_module(context: &Arc<CudaContext>, ptx: Ptx) -> Result<Arc<CudaModule>, 
         .map_err(|err| format!("CUDA kernel loading failed: {err}"))
 }
 
-fn compile_source(source: &str, name: &str, major: i32, minor: i32) -> Result<Ptx, String> {
+pub(crate) fn compile_source(
+    source: &str,
+    name: &str,
+    major: i32,
+    minor: i32,
+) -> Result<Ptx, String> {
     // SAFETY: probes fixed NVRTC library names only.
     if !unsafe { cudarc::nvrtc::sys::is_culib_present() } {
         return Err(
@@ -135,6 +140,42 @@ fn load_data_ptx(ptx: &Ptx) -> Result<cuda::CUmodule, String> {
     // SAFETY: null-terminated PTX text; context bound by caller.
     unsafe { cuda_result::module::load_data(c_src.as_ptr() as *const _) }
         .map_err(|err| format!("CUDA NV12 module load failed: {err}"))
+}
+
+pub(crate) fn load_nv12_shader(
+    context: &Arc<CudaContext>,
+    major: i32,
+    minor: i32,
+    shader: &crate::ByteShader,
+) -> Result<Arc<Nv12Module>, String> {
+    let source = shader.nv12_source()?;
+    load_surface_source(context, major, minor, &source)
+}
+
+pub(crate) fn load_surface_source(
+    context: &Arc<CudaContext>,
+    major: i32,
+    minor: i32,
+    source: &str,
+) -> Result<Arc<Nv12Module>, String> {
+    let ptx = compile_source(source, "fvid_surface_shader.cu", major, minor)?;
+    context.bind_to_thread().map_err(|e| e.to_string())?;
+    let cu_module = load_data_ptx(&ptx)?;
+    let name = CString::new("fvid_nv12_transform").expect("static name");
+    // SAFETY: module was loaded on the bound context; static symbol names the generated kernel.
+    let function = unsafe { cuda_result::module::get_function(cu_module, name) };
+    match function {
+        Ok(cu_function) => Ok(Arc::new(Nv12Module {
+            context: Arc::clone(context),
+            cu_module,
+            cu_function,
+        })),
+        Err(error) => {
+            // SAFETY: this unpublished module is uniquely owned after failed symbol lookup.
+            let _ = unsafe { cuda_result::module::unload(cu_module) };
+            Err(format!("NV12 shader function loading failed: {error}"))
+        }
+    }
 }
 
 pub(crate) fn load_nv12(

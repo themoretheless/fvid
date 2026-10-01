@@ -290,7 +290,10 @@ pub fn aac_specific_config(esds: &[u8]) -> Result<&[u8]> {
         decoder_seen = true;
         let mut dc = Bytes::new(data);
         let header = dc.take(13)?;
-        if header[0] != 0x40 || header[1] >> 2 != 5 || header[1] & 1 != 1 {
+        // Some MP4 writers clear the reserved low bit (0x14 instead of
+        // 0x15). It does not change the object or audio stream type; ASC
+        // validation below still determines the supported AAC configuration.
+        if header[0] != 0x40 || header[1] >> 2 != 5 {
             return Err(invalid("not MPEG-4 audio decoder configuration"));
         }
         while dc.at < dc.data.len() {
@@ -458,6 +461,27 @@ mod tests {
             assert!(AacConfig::parse(bytes).is_err());
         }
     }
+    #[test]
+    fn esds_accepts_audio_with_a_cleared_reserved_bit() {
+        let esds = [
+            0, 0, 0, 0, 3, 0x80, 0x80, 0x80, 0x22, 0, 0, 0,
+            4, 0x80, 0x80, 0x80, 0x14, 0x40, 0x14, 0, 0x18, 0,
+            0, 0, 0xfa, 0, 0, 0, 0xfa, 0, 5, 0x80, 0x80, 0x80, 2, 0x12, 0x10,
+            6, 0x80, 0x80, 0x80, 1, 2,
+        ];
+        assert_eq!(aac_specific_config(&esds).unwrap(), &[0x12, 0x10]);
+        crate::codec::aac_decoder::AacDecoder::new(&esds, 44100, 2).unwrap();
+        let mut invalid = esds;
+        invalid[18] = 0x10; // Visual stream type, even with an otherwise valid ASC.
+        assert!(aac_specific_config(&invalid).is_err());
+        invalid = esds;
+        invalid[17] = 0x6b; // MPEG-1 Audio, not AAC.
+        assert!(aac_specific_config(&invalid).is_err());
+        for end in 0..esds.len() {
+            assert!(aac_specific_config(&esds[..end]).is_err());
+        }
+    }
+
     #[test]
     fn esds_extracts_only_nested_decoder_specific_data() {
         let dc = [

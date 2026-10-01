@@ -1,4 +1,5 @@
-﻿//! Device-resident NV12 crop / hflip / vflip (device-to-device; no host frame copies).
+//! Device-resident NV12 crop / hflip / vflip (device-to-device; no host frame copies).
+#[cfg(any(target_os = "linux", target_os = "windows"))]
 use std::sync::Arc;
 
 #[derive(Clone, Copy, Debug)]
@@ -11,6 +12,114 @@ pub struct Nv12View {
     pub pitch_uv: u32,
     pub width: u32,
     pub height: u32,
+}
+
+/// Pitched P010 surface: byte pitches, 10-bit codes in bits 15..6 of each word.
+#[derive(Clone, Copy, Debug)]
+pub struct P010View {
+    pub y: u64,
+    pub uv: u64,
+    pub pitch_y: u32,
+    pub pitch_uv: u32,
+    pub width: u32,
+    pub height: u32,
+}
+
+/// Device-resident P010 crop/reflections and optional trusted component shader.
+/// Shader inputs and sampler results are 10-bit codes; output keeps the low ten
+/// bits and stores them MSB-aligned. Geometry uses pixels and pitches use bytes.
+pub struct P010Processor {
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    inner: native_nv12::Processor,
+}
+
+impl P010Processor {
+    pub fn device_name(&self) -> &str {
+        #[cfg(any(target_os = "linux", target_os = "windows"))]
+        {
+            self.inner.device_name()
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+        {
+            "CUDA unavailable"
+        }
+    }
+    pub fn new(ordinal: usize) -> Result<Self, String> {
+        Self::create(ordinal, None)
+    }
+    pub fn with_shader(ordinal: usize, shader: &crate::ByteShader) -> Result<Self, String> {
+        Self::create(ordinal, Some(shader))
+    }
+    fn create(ordinal: usize, shader: Option<&crate::ByteShader>) -> Result<Self, String> {
+        if ordinal > i32::MAX as usize {
+            return Err("CUDA device ordinal exceeds the driver index range".into());
+        }
+        #[cfg(any(target_os = "linux", target_os = "windows"))]
+        {
+            let source =
+                shader.map_or_else(|| include_str!("p010.cu").to_owned(), |s| s.p010_source());
+            native_nv12::Processor::with_source(ordinal, &source).map(|inner| Self { inner })
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+        {
+            let _ = shader;
+            Err(crate::unsupported())
+        }
+    }
+    pub fn follow_stream(&mut self, stream: u64) {
+        #[cfg(any(target_os = "linux", target_os = "windows"))]
+        self.inner.follow_stream(stream);
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+        let _ = stream;
+    }
+    /// Valid, disjoint surfaces on the selected device; even crop/output geometry.
+    pub fn apply(&mut self, src: P010View, dst: P010View, t: Nv12Transform) -> Result<(), String> {
+        validate_p010_views(src, dst, t)?;
+        #[cfg(any(target_os = "linux", target_os = "windows"))]
+        {
+            let pixels = |v: P010View| Nv12View {
+                y: v.y,
+                uv: v.uv,
+                pitch_y: v.pitch_y,
+                pitch_uv: v.pitch_uv,
+                width: v.width,
+                height: v.height,
+            };
+            self.inner.apply(pixels(src), pixels(dst), t)
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+        {
+            Err(crate::unsupported())
+        }
+    }
+}
+
+fn validate_p010_views(src: P010View, dst: P010View, t: Nv12Transform) -> Result<(), String> {
+    let as_bytes = |v: P010View| -> Result<Nv12View, String> {
+        if (v.y | v.uv | u64::from(v.pitch_y) | u64::from(v.pitch_uv)) & 1 != 0 {
+            return Err("P010 pointers and byte pitches must be word-aligned".into());
+        }
+        Ok(Nv12View {
+            y: v.y,
+            uv: v.uv,
+            pitch_y: v.pitch_y,
+            pitch_uv: v.pitch_uv,
+            width: v.width.checked_mul(2).ok_or("P010 row size overflow")?,
+            height: v.height,
+        })
+    };
+    if t.crop_x % 2 != 0 || t.out_width % 2 != 0 {
+        return Err("P010 crop and size must be even for 4:2:0".into());
+    }
+    let byte_t = Nv12Transform {
+        crop_x: t.crop_x.checked_mul(2).ok_or("P010 crop overflow")?,
+        out_width: t
+            .out_width
+            .checked_mul(2)
+            .ok_or("P010 output row overflow")?,
+        ..t
+    };
+    validate_views(as_bytes(src)?, as_bytes(dst)?, byte_t)
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -31,6 +140,23 @@ pub struct Nv12Processor {
 }
 
 impl Nv12Processor {
+    /// Compile a trusted CUDA C byte shader over native pitched NV12 surfaces.
+    /// Luma/U/V use plane indices 0/1/2 and coordinates in each output plane.
+    /// Sampling shaders read the current component through FvidSampler.
+    pub fn with_shader(ordinal: usize, shader: &crate::ByteShader) -> Result<Self, String> {
+        if ordinal > i32::MAX as usize {
+            return Err("CUDA device ordinal exceeds the driver index range".into());
+        }
+        #[cfg(any(target_os = "linux", target_os = "windows"))]
+        {
+            native_nv12::Processor::with_shader(ordinal, shader).map(|inner| Self { inner })
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+        {
+            let _ = shader;
+            Err(crate::unsupported())
+        }
+    }
     pub fn new(ordinal: usize) -> Result<Self, String> {
         if ordinal > i32::MAX as usize {
             return Err("CUDA device ordinal exceeds the driver index range".into());
@@ -69,7 +195,7 @@ impl Nv12Processor {
         }
     }
 
-    /// `src`/`dst` must be valid CUDA device surfaces on this device. Crop and size
+    /// `src`/`dst` must be valid, nonoverlapping CUDA device surfaces on this device. Crop and size
     /// must be even. Host full-frame copies are not performed.
     pub fn apply(
         &mut self,
@@ -144,6 +270,34 @@ fn validate_views(src: Nv12View, dst: Nv12View, t: Nv12Transform) -> Result<(), 
     if src.y == 0 || src.uv == 0 || dst.y == 0 || dst.uv == 0 {
         return Err("NV12 device pointers must be non-null".into());
     }
+    // The shipped kernel and embedded PTX use 32-bit byte offsets. Validate
+    // the full view, not only the crop, before either kernel or driver copy.
+    let mut ranges = Vec::with_capacity(4);
+    for view in [src, dst] {
+        for (pointer, pitch, rows) in [
+            (view.y, view.pitch_y, view.height),
+            (view.uv, view.pitch_uv, view.height.div_ceil(2)),
+        ] {
+            let last = rows
+                .checked_sub(1)
+                .and_then(|row| row.checked_mul(pitch))
+                .and_then(|offset| offset.checked_add(view.width.saturating_sub(1)))
+                .ok_or("NV12 plane exceeds 32-bit kernel address range")?;
+            let end = pointer
+                .checked_add(u64::from(last))
+                .ok_or("NV12 device pointer range overflow")?;
+            ranges.push((pointer, end));
+        }
+    }
+    // Inclusive footprints include row padding between the first/last pixels.
+    // Device copies and shader neighborhood reads require disjoint planes.
+    for i in 0..ranges.len() {
+        for j in i + 1..ranges.len() {
+            if ranges[i].0 <= ranges[j].1 && ranges[j].0 <= ranges[i].1 {
+                return Err("NV12 source and destination planes must not overlap".into());
+            }
+        }
+    }
     Ok(())
 }
 
@@ -158,6 +312,7 @@ mod native_nv12 {
         device: Arc<SharedDevice>,
         /// Loaded on first flip; crop-only never pays PTX. Keeps module alive.
         nv12: Option<Arc<crate::ptx_embed::Nv12Module>>,
+        shader: bool,
         cu_function: Option<cuda::CUfunction>,
         /// Allocation stream (cudarc-managed).
         stream: Arc<CudaStream>,
@@ -261,6 +416,18 @@ mod native_nv12 {
     }
 
     impl Processor {
+        pub(super) fn with_source(ordinal: usize, source: &str) -> Result<Self, String> {
+            let mut processor = Self::new(ordinal)?;
+            let device = &processor.device;
+            processor.nv12 = Some(crate::ptx_embed::load_surface_source(
+                &device.context,
+                device.major,
+                device.minor,
+                source,
+            )?);
+            processor.shader = true;
+            Ok(processor)
+        }
         pub(super) fn new(ordinal: usize) -> Result<Self, String> {
             let device = device_pool::shared(ordinal)?;
             let stream = device.context.default_stream();
@@ -269,6 +436,7 @@ mod native_nv12 {
             Ok(Self {
                 device,
                 nv12: None,
+                shader: false,
                 cu_function: None,
                 stream,
                 launch,
@@ -285,6 +453,23 @@ mod native_nv12 {
         pub(super) fn follow_stream(&mut self, stream: u64) {
             // NVENC submits on FFmpeg's stream; we record an event so it waits for our work.
             self.follow = Some(stream as cuda::CUstream);
+        }
+
+        pub(super) fn with_shader(
+            ordinal: usize,
+            shader: &crate::ByteShader,
+        ) -> Result<Self, String> {
+            shader.nv12_source()?;
+            let mut processor = Self::new(ordinal)?;
+            let device = &processor.device;
+            processor.nv12 = Some(crate::ptx_embed::load_nv12_shader(
+                &device.context,
+                device.major,
+                device.minor,
+                shader,
+            )?);
+            processor.shader = true;
+            Ok(processor)
         }
 
         pub(super) fn device_name(&self) -> &str {
@@ -314,7 +499,10 @@ mod native_nv12 {
             if self.cu_function.is_some() {
                 return Ok(());
             }
-            let nv12 = self.device.nv12_module_arc()?;
+            let nv12 = match &self.nv12 {
+                Some(module) => Arc::clone(module),
+                None => self.device.nv12_module_arc()?,
+            };
             let cu_function = nv12.cu_function;
             let params = self
                 .stream
@@ -388,7 +576,7 @@ mod native_nv12 {
             self.launch = stream;
 
             // Crop-only (no flips): single DtoD per plane — no kernel / no PTX.
-            if !t.hflip && !t.vflip {
+            if !t.hflip && !t.vflip && !self.shader {
                 let src_y = (src.y as CUdeviceptr).wrapping_add(
                     (t.crop_y as usize * src.pitch_y as usize + t.crop_x as usize) as u64,
                 );
@@ -480,6 +668,198 @@ mod native_nv12 {
         }
     }
 
+    #[cfg(test)]
+    mod shader_tests {
+        use super::*;
+        #[test]
+        #[ignore = "requires NVIDIA GPU, driver and CUDA 13 NVRTC"]
+        fn native_p010_sampling_shader_preserves_pitches_and_matches_cpu() {
+            let shader =
+                crate::ByteShader::with_sampling(include_str!("../../../shaders/boxblur.cu"))
+                    .unwrap();
+            let mut processor = Processor::with_source(0, &shader.p010_source()).unwrap();
+            let stream = processor.stream.clone();
+            let y: Vec<u16> = (0..96)
+                .map(|i| ((((i * 17) % 1024) << 6) | 37) as u16)
+                .collect();
+            let uv: Vec<u16> = (0..48)
+                .map(|i| ((((i * 11) % 1024) << 6) | 19) as u16)
+                .collect();
+            let input_y = stream.clone_htod(&y).unwrap();
+            let input_uv = stream.clone_htod(&uv).unwrap();
+            for hflip in [false, true] {
+                for vflip in [false, true] {
+                    let output_y = stream.alloc_zeros::<u16>(24).unwrap();
+                    let output_uv = stream.alloc_zeros::<u16>(12).unwrap();
+                    let pointer = |buffer: &CudaSlice<u16>| {
+                        let (pointer, guard) = buffer.device_ptr(&stream);
+                        drop(guard);
+                        pointer
+                    };
+                    let src = Nv12View {
+                        y: pointer(&input_y),
+                        uv: pointer(&input_uv),
+                        pitch_y: 24,
+                        pitch_uv: 24,
+                        width: 8,
+                        height: 8,
+                    };
+                    let dst = Nv12View {
+                        y: pointer(&output_y),
+                        uv: pointer(&output_uv),
+                        pitch_y: 12,
+                        pitch_uv: 12,
+                        width: 4,
+                        height: 4,
+                    };
+                    let transform = Nv12Transform {
+                        crop_x: 2,
+                        crop_y: 2,
+                        out_width: 4,
+                        out_height: 4,
+                        hflip,
+                        vflip,
+                    };
+                    validate_views(src, dst, transform).unwrap();
+                    processor.apply(src, dst, transform).unwrap();
+                    let mut actual_y = vec![0; 24];
+                    let mut actual_uv = vec![0; 12];
+                    stream.memcpy_dtoh(&output_y, &mut actual_y).unwrap();
+                    stream.memcpy_dtoh(&output_uv, &mut actual_uv).unwrap();
+                    stream.synchronize().unwrap();
+                    let mut cropped = [0u16; 16];
+                    for row in 0..4 {
+                        for col in 0..4 {
+                            let sx = if hflip { 3 - col } else { col };
+                            let sy = if vflip { 3 - row } else { row };
+                            cropped[row * 4 + col] = y[(sy + 2) * 12 + sx + 2] >> 6;
+                        }
+                    }
+                    let mut expected_y = vec![0; 24];
+                    for row in 0..4i32 {
+                        for col in 0..4i32 {
+                            let mut total = 0u32;
+                            for dy in -1..=1 {
+                                for dx in -1..=1 {
+                                    total += u32::from(
+                                        cropped[(row + dy).clamp(0, 3) as usize * 4
+                                            + (col + dx).clamp(0, 3) as usize],
+                                    );
+                                }
+                            }
+                            expected_y[row as usize * 6 + col as usize] = ((total / 9) << 6) as u16;
+                        }
+                    }
+                    let mut expected_uv = vec![0; 12];
+                    for row in 0..2 {
+                        for col in 0..2 {
+                            for component in 0..2 {
+                                let sx = if hflip { 1 - col } else { col };
+                                let sy = if vflip { 1 - row } else { row };
+                                expected_uv[row * 6 + col * 2 + component] =
+                                    uv[(sy + 1) * 12 + (sx + 1) * 2 + component] & !63;
+                            }
+                        }
+                    }
+                    assert_eq!(actual_y, expected_y, "hflip={hflip}, vflip={vflip}");
+                    assert_eq!(actual_uv, expected_uv, "hflip={hflip}, vflip={vflip}");
+                }
+            }
+        }
+
+        #[test]
+        #[ignore = "requires NVIDIA GPU, driver and CUDA 13 NVRTC"]
+        fn native_nv12_sampling_shader_preserves_pitches_and_matches_cpu() {
+            let shader =
+                crate::ByteShader::with_sampling(include_str!("../../../shaders/boxblur.cu"))
+                    .unwrap();
+            let mut processor = Processor::with_shader(0, &shader).unwrap();
+            let stream = processor.stream.clone();
+            let y: Vec<u8> = (0..96).map(|i| ((i * 17) % 251) as u8).collect();
+            let uv: Vec<u8> = (0..48).map(|i| ((i * 11) % 251) as u8).collect();
+            let input_y = stream.clone_htod(&y).unwrap();
+            let input_uv = stream.clone_htod(&uv).unwrap();
+            for hflip in [false, true] {
+                for vflip in [false, true] {
+                    let output_y = stream.alloc_zeros::<u8>(24).unwrap();
+                    let output_uv = stream.alloc_zeros::<u8>(12).unwrap();
+                    let pointer = |buffer: &CudaSlice<u8>| {
+                        let (pointer, guard) = buffer.device_ptr(&stream);
+                        drop(guard);
+                        pointer
+                    };
+                    let src = Nv12View {
+                        y: pointer(&input_y),
+                        uv: pointer(&input_uv),
+                        pitch_y: 12,
+                        pitch_uv: 12,
+                        width: 8,
+                        height: 8,
+                    };
+                    let dst = Nv12View {
+                        y: pointer(&output_y),
+                        uv: pointer(&output_uv),
+                        pitch_y: 6,
+                        pitch_uv: 6,
+                        width: 4,
+                        height: 4,
+                    };
+                    let transform = Nv12Transform {
+                        crop_x: 2,
+                        crop_y: 2,
+                        out_width: 4,
+                        out_height: 4,
+                        hflip,
+                        vflip,
+                    };
+                    validate_views(src, dst, transform).unwrap();
+                    processor.apply(src, dst, transform).unwrap();
+                    let mut actual_y = vec![0; 24];
+                    let mut actual_uv = vec![0; 12];
+                    stream.memcpy_dtoh(&output_y, &mut actual_y).unwrap();
+                    stream.memcpy_dtoh(&output_uv, &mut actual_uv).unwrap();
+                    stream.synchronize().unwrap();
+                    let mut cropped = [0u8; 16];
+                    for row in 0..4 {
+                        for col in 0..4 {
+                            let sx = if hflip { 3 - col } else { col };
+                            let sy = if vflip { 3 - row } else { row };
+                            cropped[row * 4 + col] = y[(sy + 2) * 12 + sx + 2];
+                        }
+                    }
+                    let mut expected_y = vec![0; 24];
+                    for row in 0..4i32 {
+                        for col in 0..4i32 {
+                            let mut total = 0u32;
+                            for dy in -1..=1 {
+                                for dx in -1..=1 {
+                                    total += u32::from(
+                                        cropped[(row + dy).clamp(0, 3) as usize * 4
+                                            + (col + dx).clamp(0, 3) as usize],
+                                    );
+                                }
+                            }
+                            expected_y[row as usize * 6 + col as usize] = (total / 9) as u8;
+                        }
+                    }
+                    let mut expected_uv = vec![0; 12];
+                    for row in 0..2 {
+                        for col in 0..2 {
+                            for component in 0..2 {
+                                let sx = if hflip { 1 - col } else { col };
+                                let sy = if vflip { 1 - row } else { row };
+                                expected_uv[row * 6 + col * 2 + component] =
+                                    uv[(sy + 1) * 12 + (sx + 1) * 2 + component];
+                            }
+                        }
+                    }
+                    assert_eq!(actual_y, expected_y, "hflip={hflip}, vflip={vflip}");
+                    assert_eq!(actual_uv, expected_uv, "hflip={hflip}, vflip={vflip}");
+                }
+            }
+        }
+    }
+
     impl Drop for Processor {
         fn drop(&mut self) {
             if let Some(event) = self.order_event.take() {
@@ -495,20 +875,133 @@ mod native_nv12 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn p010_admission_checks_byte_footprints_and_alignment() {
+        let src = P010View {
+            y: 4096,
+            uv: 8192,
+            pitch_y: 128,
+            pitch_uv: 128,
+            width: 64,
+            height: 24,
+        };
+        let dst = P010View {
+            y: 16384,
+            uv: 24576,
+            ..src
+        };
+        let t = Nv12Transform {
+            out_width: 64,
+            out_height: 24,
+            ..Default::default()
+        };
+        assert!(validate_p010_views(src, dst, t).is_ok());
+        for invalid in [
+            P010View { y: 4097, ..src },
+            P010View {
+                pitch_uv: 127,
+                ..src
+            },
+            P010View { pitch_y: 64, ..src },
+            P010View {
+                width: u32::MAX,
+                ..src
+            },
+            P010View {
+                y: u64::MAX - 1,
+                ..src
+            },
+        ] {
+            assert!(validate_p010_views(invalid, dst, t).is_err());
+        }
+        assert!(validate_p010_views(src, src, t).is_err());
+        assert!(
+            validate_p010_views(
+                src,
+                dst,
+                Nv12Transform {
+                    crop_x: 1,
+                    out_width: 32,
+                    ..t
+                }
+            )
+            .is_err()
+        );
+    }
+    #[test]
+    fn rejects_kernel_offset_and_device_address_overflow_before_launch() {
+        let view = Nv12View {
+            y: 4096,
+            uv: 8192,
+            pitch_y: 64,
+            pitch_uv: 64,
+            width: 64,
+            height: 48,
+        };
+        let t = Nv12Transform {
+            out_width: 64,
+            out_height: 48,
+            ..Default::default()
+        };
+        for invalid in [
+            Nv12View {
+                pitch_y: u32::MAX,
+                ..view
+            },
+            Nv12View {
+                pitch_uv: u32::MAX,
+                ..view
+            },
+            Nv12View {
+                y: u64::MAX,
+                ..view
+            },
+            Nv12View {
+                uv: u64::MAX,
+                ..view
+            },
+        ] {
+            assert!(validate_views(invalid, view, t).is_err());
+            assert!(validate_views(view, invalid, t).is_err());
+        }
+        let destination = Nv12View {
+            y: 16384,
+            uv: 24576,
+            ..view
+        };
+        assert!(validate_views(view, destination, t).is_ok());
+        assert!(
+            validate_views(view, view, t)
+                .unwrap_err()
+                .contains("overlap")
+        );
+        for (y, uv) in [
+            (view.y + 1, 24576),
+            (view.uv + 1, 24576),
+            (16384, view.y),
+            (16384, 16385),
+        ] {
+            assert!(
+                validate_views(view, Nv12View { y, uv, ..view }, t)
+                    .unwrap_err()
+                    .contains("overlap")
+            );
+        }
+    }
 
     #[test]
     fn rejects_odd_crop() {
         let src = Nv12View {
-            y: 1,
-            uv: 2,
+            y: 4096,
+            uv: 8192,
             pitch_y: 64,
             pitch_uv: 64,
             width: 64,
             height: 48,
         };
         let dst = Nv12View {
-            y: 3,
-            uv: 4,
+            y: 16384,
+            uv: 24576,
             pitch_y: 32,
             pitch_uv: 32,
             width: 32,

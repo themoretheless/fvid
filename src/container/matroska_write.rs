@@ -136,6 +136,8 @@ pub struct PacketOptions {
 /// Encoded packet storage is passed through without rewriting codec payloads.
 #[derive(Clone, Copy)]
 pub enum Encoding<'a> {
+    /// Interleaved finite IEEE-754 float32 samples in little-endian order.
+    PcmFloat32 { sample_rate: u32, channels: u16 },
     Opus { configuration: &'a [u8] },
     /// ASS header in CodecPrivate; each packet is one Matroska ASS event.
     Ass { configuration: &'a [u8] },
@@ -255,6 +257,18 @@ fn track_entry(
                 video(width, height, metadata, rotation)?,
             )
         }
+        Encoding::PcmFloat32 { sample_rate, channels } => {
+            if sample_rate == 0 || !(1..=64).contains(&channels) {
+                return Err(invalid("invalid Matroska PCM geometry"));
+            }
+            if metadata.is_some() || rotation != 0 {
+                return Err(invalid("video metadata supplied for PCM track"));
+            }
+            ("A_PCM/FLOAT/IEEE", &[][..], 2, element(0xe1, &[
+                element(0xb5, &f64::from(sample_rate).to_be_bytes())?,
+                uint(0x9f, u64::from(channels))?, uint(0x6264, 32)?,
+            ].concat())?)
+        },
         Encoding::Opus { configuration } => {
             if metadata.is_some() || rotation!=0 {return Err(invalid("video metadata supplied for Opus track"));}
             let channels=super::opus_packet::header_channels(configuration)?;
@@ -467,6 +481,7 @@ pub struct PacketWriter<'a, W> {
     duration_offset: u64,
     written: Vec<bool>,
     delays: Vec<u64>,
+    pcm: Vec<Option<(u32, u16)>>,
     end_ns: u64,
     event: ProgressEvent,
     failed: bool,
@@ -565,6 +580,10 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
             delays: (0..tracks.len())
                 .map(|i| options.get(i).map_or(0, |o| o.codec_delay_ns))
                 .collect(),
+            pcm: tracks.iter().map(|t|match t.encoding {
+                Encoding::PcmFloat32 {sample_rate,channels} => Some((sample_rate,channels)),
+                _ => None,
+            }).collect(),
             end_ns: 0,
             event: ProgressEvent {
                 packets: 0,
@@ -576,6 +595,12 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
     }
     pub fn event(&self) -> ProgressEvent {
         self.event
+    }
+    /// Flush pending container bytes without finalizing or publishing output.
+    pub fn flush(&mut self) -> Result<()> {
+        if self.failed {return Err(invalid("Matroska writer failed"));}
+        if let Err(error) = self.output.flush() {self.failed=true;return Err(error.into());}
+        Ok(())
     }
 
     /// `track` is zero-based. Durations/PTS are in nanoseconds. The sync flag
@@ -642,6 +667,19 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         let discard_padding_ns = options.discard_padding_ns;
         if track >= self.written.len() || duration_ns == 0 || payload.is_empty() {
             return Err(invalid("invalid Matroska packet"));
+        }
+        if let Some((rate, channels)) = self.pcm[track] {
+            let frame_bytes = usize::from(channels) * 4;
+            if payload.len() % frame_bytes != 0 || options.invisible || !sync
+                || payload.chunks_exact(4).any(|p|!f32::from_le_bytes(p.try_into().unwrap()).is_finite()) {
+                return Err(invalid("invalid Matroska float PCM packet"));
+            }
+            let frames = (payload.len() / frame_bytes) as u128;
+            let span = frames * 1_000_000_000;
+            if u128::from(duration_ns) < span / u128::from(rate)
+                || u128::from(duration_ns) > span.div_ceil(u128::from(rate)) {
+                return Err(invalid("Matroska PCM duration disagrees with sample count"));
+            }
         }
         if discard_padding_ns.unsigned_abs() > duration_ns {
             return Err(invalid("Matroska padding exceeds packet duration"));

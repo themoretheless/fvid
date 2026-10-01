@@ -33,6 +33,8 @@ pub struct VideoFrame {
     pub picture: Arc<IntraPicture>,
     /// Hardware decoder output as packed 8-bit planes, when in use.
     pub planes8: Option<Arc<crate::playback_native::Planar8>>,
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    pub surface: Option<fvid_vt::Surface>,
     pub presentation_time: MediaTime,
     pub duration: MediaTime,
     pub sample_index: usize,
@@ -50,6 +52,7 @@ pub struct VideoFrame {
 struct Hardware {
     session: fvid_vt::Session,
     colour: crate::playback_native::AvcColour,
+    shared: bool,
 }
 
 enum Decoder {
@@ -74,6 +77,8 @@ pub struct Mp4VideoReader<R> {
     decoder: Decoder,
     #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
     hardware: Option<Hardware>,
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    decoded_surface: Option<fvid_vt::Surface>,
     track_index: usize,
     sample_index: usize,
     packet: Vec<u8>,
@@ -102,7 +107,12 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
     pub fn open_software(reader: R, limits: Limits, decoder_budget: usize) -> Result<Self> {
         Self::open_with_hardware(reader, limits, decoder_budget, false)
     }
-    fn open_with_hardware(reader: R, limits: Limits, decoder_budget: usize, allow_hardware: bool) -> Result<Self> {
+    fn open_with_hardware(
+        reader: R,
+        limits: Limits,
+        decoder_budget: usize,
+        allow_hardware: bool,
+    ) -> Result<Self> {
         let demuxer = Mp4Reader::open(reader, limits)?;
         let index = demuxer
             .tracks()
@@ -125,7 +135,10 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         Self::from_demuxer_with_hardware(demuxer, index, decoder_budget, true)
     }
     fn from_demuxer_with_hardware(
-        demuxer: Mp4Reader<R>, index: usize, decoder_budget: usize, allow_hardware: bool,
+        demuxer: Mp4Reader<R>,
+        index: usize,
+        decoder_budget: usize,
+        allow_hardware: bool,
     ) -> Result<Self> {
         let _ = allow_hardware;
         let track = demuxer
@@ -190,6 +203,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 track.width as u64,
                 track.height as u64,
                 work_budget,
+                false,
             )
         };
         let mut source = Self {
@@ -197,6 +211,8 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             decoder,
             #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
             hardware,
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            decoded_surface: None,
             track_index: index,
             sample_index: 0,
             packet: Vec::new(),
@@ -309,10 +325,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 })
                 .unwrap_or_default(),
             Decoder::Av1(d) => {
-                let seed = self
-                    .open_signal
-                    .map(|(seed, _)| seed)
-                    .unwrap_or_default();
+                let seed = self.open_signal.map(|(seed, _)| seed).unwrap_or_default();
                 d.color()
                     .map(crate::codec::av1_sequence::Color::signal)
                     .unwrap_or_default()
@@ -337,10 +350,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         match &self.decoder {
             Decoder::Hevc(d) => d.hdr(),
             Decoder::Av1(d) => {
-                let seed = self
-                    .open_signal
-                    .map(|(_, seed)| seed)
-                    .unwrap_or_default();
+                let seed = self.open_signal.map(|(_, seed)| seed).unwrap_or_default();
                 let mut hdr = d.hdr();
                 hdr.merge(seed);
                 hdr
@@ -359,6 +369,35 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             false
         }
     }
+    /// Enable shared decoder surfaces before reading the first frame. Software
+    /// readers remain software; unsupported codecs keep their existing output.
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    pub fn enable_shared_surfaces(&mut self) -> Result<bool> {
+        if self.sample_index != 0 || !self.pending.is_empty() {
+            return Err(invalid(
+                "shared surfaces must be configured before decoding",
+            ));
+        }
+        if self.hardware.is_none()
+            || !matches!(&self.track().codec, b"avc1" | b"avc3" | b"hvc1" | b"hev1")
+        {
+            return Ok(false);
+        }
+        let track = self.track();
+        let hardware = open_hardware(
+            &track.codec,
+            &track.configuration,
+            u64::from(track.width),
+            u64::from(track.height),
+            self.queue_budget,
+            true,
+        );
+        let Some(hardware) = hardware else {
+            return Ok(false);
+        };
+        self.hardware = Some(hardware);
+        Ok(true)
+    }
     /// Decode the packet in `self.packet` with whichever decoder is active.
     /// Hardware frames come back as 8-bit planes plus a geometry-only picture.
     #[allow(clippy::type_complexity)]
@@ -372,13 +411,33 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
     > {
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
         if let Some(hardware) = &mut self.hardware {
+            if hardware.shared {
+                let surface = hardware
+                    .session
+                    .decode_surface(&self.packet)
+                    .map_err(|error| invalid(&error.to_string()))?;
+                return Ok(surface.map(|surface| {
+                    let (w, h) = (surface.width(), surface.height());
+                    let picture = IntraPicture {
+                        coded_width: w + w % 2,
+                        coded_height: h + h % 2,
+                        crop: [0, w % 2, 0, h % 2],
+                        bit_depth: surface.depth(),
+                        y: Vec::new(),
+                        cb: Vec::new(),
+                        cr: Vec::new(),
+                    };
+                    self.decoded_surface = Some(surface);
+                    (Arc::new(picture), None)
+                }));
+            }
             let planes = hardware
                 .session
                 .decode(&self.packet)
                 .map_err(|error| invalid(&error.to_string()))?;
             return Ok(planes.map(|planes| {
                 let (picture, planes8) = hardware_frame(planes, hardware.colour);
-                (Arc::new(picture), Some(Arc::new(planes8)))
+                (Arc::new(picture), planes8.map(Arc::new))
             }));
         }
         match &mut self.decoder {
@@ -591,6 +650,8 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 let frame = VideoFrame {
                     picture,
                     planes8,
+                    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                    surface: self.decoded_surface.take(),
                     presentation_time: MediaTime {
                         ticks: sample.pts,
                         timescale: self.track().timescale,
@@ -628,22 +689,32 @@ fn open_hardware(
     width: u64,
     height: u64,
     budget: usize,
+    shared: bool,
 ) -> Option<Hardware> {
     match codec {
-        b"hvc1" | b"hev1" => open_hardware_hevc(configuration, budget),
-        b"avc1" | b"avc3" => open_hardware_avc(configuration),
+        b"hvc1" | b"hev1" => open_hardware_hevc(configuration, budget, shared),
+        b"avc1" | b"avc3" => open_hardware_avc(configuration, shared),
         b"vp09" => open_hardware_vp9(configuration, width, height),
         b"av01" => open_hardware_av1(configuration, width, height),
         _ => None,
     }
 }
 #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-fn open_hardware_avc(configuration: &[u8]) -> Option<Hardware> {
+fn open_hardware_avc(configuration: &[u8], shared: bool) -> Option<Hardware> {
     let config = crate::codec::config::AvcConfig::parse(configuration).ok()?;
     let sps = crate::codec::avc::Sps::parse(config.sps.first()?).ok()?;
     let colour = crate::playback_native::AvcColour::from_vui(sps.vui.as_ref()).ok()?;
-    match fvid_vt::Session::new(&config.sps, &config.pps, config.length_size) {
-        Ok(session) => Some(Hardware { session, colour }),
+    let session = if shared {
+        fvid_vt::Session::new_avc_surface(&config.sps, &config.pps, config.length_size, colour.full)
+    } else {
+        fvid_vt::Session::new(&config.sps, &config.pps, config.length_size)
+    };
+    match session {
+        Ok(session) => Some(Hardware {
+            session,
+            colour,
+            shared,
+        }),
         Err(error) => {
             eprintln!("{error}; using the software decoder");
             None
@@ -651,7 +722,7 @@ fn open_hardware_avc(configuration: &[u8]) -> Option<Hardware> {
     }
 }
 #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-fn open_hardware_hevc(configuration: &[u8], budget: usize) -> Option<Hardware> {
+fn open_hardware_hevc(configuration: &[u8], budget: usize, shared: bool) -> Option<Hardware> {
     use crate::codec::config::HevcConfig;
     let config = HevcConfig::parse(configuration).ok()?;
     let mut vps = Vec::new();
@@ -670,8 +741,24 @@ fn open_hardware_hevc(configuration: &[u8], budget: usize) -> Option<Hardware> {
     }
     let sps_parsed = crate::codec::hevc_sps::Sps::parse(sps.first()?, budget).ok()?;
     let colour = crate::playback_native::AvcColour::from_hevc_vui(sps_parsed.vui.as_ref()).ok()?;
-    match fvid_vt::Session::new_hevc(&vps, &sps, &pps, config.length_size) {
-        Ok(session) => Some(Hardware { session, colour }),
+    let constructor = if shared {
+        fvid_vt::Session::new_hevc_surface
+    } else {
+        fvid_vt::Session::new_hevc_with_depth
+    };
+    match constructor(
+        &vps,
+        &sps,
+        &pps,
+        config.length_size,
+        sps_parsed.depth[0],
+        colour.full,
+    ) {
+        Ok(session) => Some(Hardware {
+            session,
+            colour,
+            shared,
+        }),
         Err(error) => {
             eprintln!("{error}; using the software HEVC decoder");
             None
@@ -682,7 +769,11 @@ fn open_hardware_hevc(configuration: &[u8], budget: usize) -> Option<Hardware> {
 fn open_hardware_vp9(configuration: &[u8], width: u64, height: u64) -> Option<Hardware> {
     let colour = crate::playback_native::AvcColour::default();
     match fvid_vt::Session::new_vp9(configuration, width as u32, height as u32) {
-        Ok(session) => Some(Hardware { session, colour }),
+        Ok(session) => Some(Hardware {
+            session,
+            colour,
+            shared: false,
+        }),
         Err(error) => {
             eprintln!("{error}; using the software VP9 decoder");
             None
@@ -693,22 +784,67 @@ fn open_hardware_vp9(configuration: &[u8], width: u64, height: u64) -> Option<Ha
 fn open_hardware_av1(configuration: &[u8], width: u64, height: u64) -> Option<Hardware> {
     let colour = crate::playback_native::AvcColour::default();
     match fvid_vt::Session::new_av1(configuration, width as u32, height as u32) {
-        Ok(session) => Some(Hardware { session, colour }),
+        Ok(session) => Some(Hardware {
+            session,
+            colour,
+            shared: false,
+        }),
         Err(error) => {
             eprintln!("{error}; using the software AV1 decoder");
             None
         }
     }
 }
-/// Wrap the hardware decoder's packed 8-bit planes without copying them: the
-/// planes move into a `Planar8`, and a geometry-only picture (empty sample
-/// vectors, even coded size, odd edges cropped) carries the dimensions.
+/// Keep hardware output at its decoded precision: 8-bit bytes move into
+/// `Planar8`; Main10 words retain low bits in a coded picture that the player's
+/// source-depth path packs for GPU upload. A geometry-only picture accompanies
+/// 8-bit planes, while Main10 owns samples and crops any padded odd border.
 #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
 fn hardware_frame(
     planes: fvid_vt::Planes,
     colour: crate::playback_native::AvcColour,
-) -> (IntraPicture, crate::playback_native::Planar8) {
+) -> (IntraPicture, Option<crate::playback_native::Planar8>) {
     let (w, h) = (planes.width, planes.height);
+    let mut colour = colour;
+    colour.full = planes.full_range;
+    if planes.depth > 8 {
+        let words = |bytes: Vec<u8>| {
+            bytes
+                .chunks_exact(2)
+                .map(|v| u16::from_le_bytes([v[0], v[1]]))
+                .collect()
+        };
+        let mut y: Vec<u16> = words(planes.y);
+        // IntraPicture uses even coded geometry. Pad the last luma row/column
+        // for odd visible sizes; the crop removes that padding before upload.
+        if w % 2 != 0 {
+            y = y
+                .chunks_exact(w)
+                .flat_map(|row| {
+                    row.iter()
+                        .copied()
+                        .chain(std::iter::once(*row.last().unwrap()))
+                })
+                .collect();
+        }
+        if h % 2 != 0 {
+            let last = y[y.len() - (w + w % 2)..].to_vec();
+            y.extend(last);
+        }
+        return (
+            IntraPicture {
+                coded_width: w + w % 2,
+                coded_height: h + h % 2,
+                crop: [0, w % 2, 0, h % 2],
+                bit_depth: planes.depth,
+                y,
+                cb: words(planes.cb),
+                cr: words(planes.cr),
+            },
+            None,
+        );
+    }
+
     let picture = IntraPicture {
         coded_width: w + w % 2,
         coded_height: h + h % 2,
@@ -728,7 +864,7 @@ fn hardware_frame(
         cr: planes.cr,
         colour,
     };
-    (picture, planar)
+    (picture, Some(planar))
 }
 
 fn presentation_duration(pts: i64, next: Option<i64>, final_duration: i64) -> Result<i64> {
@@ -745,6 +881,13 @@ fn presentation_duration(pts: i64, next: Option<i64>, final_duration: i64) -> Re
 }
 
 fn frame_storage(frame: &VideoFrame) -> Result<usize> {
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    let surface_bytes = frame
+        .surface
+        .as_ref()
+        .map_or(0, fvid_vt::Surface::storage_bytes);
+    #[cfg(not(all(target_os = "macos", feature = "videotoolbox")))]
+    let surface_bytes = 0usize;
     let planes8 = frame
         .planes8
         .as_ref()
@@ -757,6 +900,7 @@ fn frame_storage(frame: &VideoFrame) -> Result<usize> {
         .and_then(|n| n.checked_add(frame.picture.cr.len()))
         .and_then(|n| n.checked_mul(2))
         .and_then(|n| n.checked_add(planes8))
+        .and_then(|n| n.checked_add(surface_bytes))
         .and_then(|n| n.checked_add(std::mem::size_of::<VideoFrame>()))
         .ok_or_else(|| invalid("MP4 output frame size overflow"))
 }

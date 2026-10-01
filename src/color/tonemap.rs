@@ -237,7 +237,7 @@ pub fn compress_gamut(rgb: [f32; 3], primaries: Primaries) -> [f32; 3] {
 mod tests {
     use super::*;
     use crate::color::primaries::rgb_to_rgb;
-    use crate::color::{apply, Transfer};
+    use crate::color::{Transfer, apply};
 
     fn close(a: f32, b: f32, eps: f32) -> bool {
         (a - b).abs() <= eps

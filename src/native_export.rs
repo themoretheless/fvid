@@ -1,4 +1,5 @@
 //! Native planar Y4M export. No foreign decoder, encoder or muxer is used.
+mod pcm_matroska;
 use crate::{
     Result, invalid,
     playback_native::{NativeReader, RawFrame},
@@ -435,10 +436,11 @@ fn export_pcm_selected(
         return Err(invalid("volume must be a finite linear gain within 0..=64"));
     }
     use std::io::{Read, Seek, SeekFrom};
-    let wav = match destination.extension().and_then(|s| s.to_str()) {
-        Some("wav") => true,
-        Some("f32le") => false,
-        _ => return Err(invalid("native PCM output requires .f32le or .wav extension")),
+    let (wav, matroska_output) = match destination.extension().and_then(|s| s.to_str()) {
+        Some("wav") => (true, false),
+        Some("f32le") => (false, false),
+        Some("mka" | "mkv") => (false, true),
+        _ => return Err(invalid("native PCM output requires .f32le, .wav, .mka or .mkv extension")),
     };
     let mut input = BufReader::new(File::open(source)?);
     let mut prefix = [0; 8];
@@ -495,7 +497,8 @@ fn export_pcm_selected(
     }).ok_or_else(|| invalid("cannot reserve PCM output"))??;
     let mut output = BufWriter::new(file);
     if wav { output.write_all(&[0; 80])?; }
-    let mut resampler = crate::pcm_resample::Resampler::new(&mut output, input_rate, output_rate, output_channels)?;
+    let mut sink = pcm_matroska::Output::new(&mut output, matroska_output, output_rate, output_channels)?;
+    let mut resampler = crate::pcm_resample::Resampler::new(&mut sink, input_rate, output_rate, output_channels)?;
     let mut pcm = PcmGain { output: &mut resampler, gain: volume as f32, input_channels, output_channels, frame: [0.0; 6], filled: 0 };
     let mut stats = if let Some(reader) = mp4 {
         crate::native_media::decode_mp4_audio_reader_controlled(reader, &mut pcm, interval, selected, &mut control)?
@@ -512,6 +515,9 @@ fn export_pcm_selected(
     stats.channels = output_channels;
     stats.sample_frames = resampler.finish()?;
     stats.sample_rate = output_rate;
+    if let Some(frames) = sink.finish()? {
+        if frames != stats.sample_frames {return Err(invalid("PCM muxed sample count mismatch"));}
+    }
     if wav {
         let header = float_wav_header_with_mask(&stats, output_mask)?;
         output.seek(SeekFrom::Start(0))?;

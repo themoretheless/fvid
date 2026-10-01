@@ -1,25 +1,42 @@
-use fvid::{Crop, ExecutionOptions, Transform};
+use fvid::{Crop, ExecutionOptions};
 mod media_cli;
+#[cfg(all(target_os = "macos", feature = "player"))]
+mod shader_export_cli;
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, BufReader, BufWriter, IsTerminal, Write};
 use std::path::{Path, PathBuf};
 
-const HELP: &str = "fvid INPUT.y4m OUTPUT.y4m [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--memory-mib N] [--backend cpu|auto|metal|vulkan|dx12|gl|cuda] [--device N]\nUse - for stdin/stdout. Output files must not exist. Only progressive 8-bit planar YUV 420/422/444 is supported.\nCrop is applied before reflections. Default backend: cpu. Frame/staging-buffer budget: 256 MiB. Use --list-devices to inspect GPU adapters. --then starts the next resident GPU stage (requires an explicit GPU backend); coordinates are relative to the previous stage output.\nOpen the FVid player: fvid play [OPTIONS] [INPUT...] where INPUT is Y4M, MP4/AVC or WebM/Matroska VP9/AV1 video, or an .m3u/.pls list of them; several inputs queue up (requires --features player). Options apply to the first input: --start-time and --stop-time take seconds or HH:MM:SS(.mmm), --rate a speed from 0.25 to 4. The rest hold for the whole session: --start-paused leaves each item waiting for the play key, --no-audio keeps it silent, and --audio-track N and --subtitle-track N start every item on the Nth track it lists, counted from 1. --volume N sets the level in VLC's 0-200 percent, --mute starts silent, --loop and --repeat decide what follows the last item, --audio-delay and --subtitle-delay shift those clocks in milliseconds, and --sub-file FILE reads subtitles from the named file before the one guessed from the video's name. --zoom F magnifies the picture by F, within the 0.25 to 10 VLC allows, and --crop RATIO cuts it to a shape VLC lists (16:9, or 185:100 for its cinema ratios; none leaves it whole), and --aspect RATIO forces the shape that picture is drawn at (default keeps the file's own shape, fill takes the window's). --brightness, --gamma, --saturation, --contrast and --hue start the session with VLC's picture settings on, at the given values and VLC's slider bounds (brightness and contrast 0 to 2, saturation 0 to 3, gamma 0.01 to 10, hue -180 to 180 degrees). --log CURVE reads the coded values as camera log rather than the curve the file states (slog1, slog2, slog3, clog, clog2, clog3, vlog, logc, logc4, applelog), --gamut NAME reads those bytes in the working gamut it names rather than the one the file or the curve gives (rec709, rec2020, dci-p3, s-gamut3.cine, awg4 and the rest by their labels), --display PANEL grades for the screen it names (sdr[:nits] for a desktop panel, whose white is 100 cd/m² unless told, pq[:nits] or hlg[:nits] for BT.2100 codes over BT.2020 at 1 000 by default, hdr being another spelling of pq), --tonemap CURVE compresses highlights with one of linear, gamma, clip, reinhard, hable or mobius, and --lut FILE applies a .cube, .3dl, .dat, .spi1d or .spi3d look after them, --grid N bakes the conversion on the cube edge it names (2 to 128 nodes, 33 by default), and --interp MODE joins the nodes of that cube and of the look's grid by nearest, trilinear or tetrahedral (tetrahedral by default); these hold for the session and each item is graded from the colour signal it states for itself, while BT.2100 material is compressed for the screen even when none of them is named. Space pauses, F toggles fullscreen, arrows seek (Shift 10 s, Alt 1 min, Ctrl/Cmd 5 min), Ctrl/Cmd+Up/Down or the wheel set volume, M mutes, = and - step the rate, \\ returns to 1x, E steps one frame (Shift back), T toggles subtitles, Ctrl/Cmd+T asks for a file to caption the item on screen with, G/H delay them, Alt+Up/Down and Alt+=/- move and size them, N/P walk the list, R cycles repeat, L marks the A-B loop points (press again to clear), J/K shift the audio delay, A (Shift+A back) walks the file's audio tracks, B (Shift+B back) its subtitle tracks, `[` and `]` its chapters, Shift+S writes the picture on screen out as a PNG beside the file, z and Z step it along VLC's zoom menu (drag a magnified picture to see the part outside the window), c and C walk VLC's crop shapes (the walk comes back to the whole picture), v and V walk VLC's aspect-ratio shapes (that walk returns the file's own shape), i opens the panel saying what the item is and closes it again, Ctrl/Cmd+E opens and closes VLC's dialog of picture settings (brightness, gamma, saturation, contrast and tone over the shown picture), Esc quits. A .srt/.vtt/.ass/.ssa/.smi file named after the video beside it is loaded automatically. Native codecs and audio; general AVC tools are still in development.";
+const HELP: &str = "fvid INPUT.y4m OUTPUT.y4m [--crop X:Y:WIDTH:HEIGHT] [--hflip] [--vflip] [--memory-mib N] [--backend cpu|auto|metal|vulkan|dx12|gl|cuda] [--device N] [--shader FILE.wgsl] [--cuda-shader FILE.cu] [--cuda-sampling-shader FILE.cu]\nUse - for stdin/stdout. Output files must not exist. Only progressive 8-bit planar YUV 420/422/444 is supported.\nCrop is applied before reflections. Default backend: cpu. Frame/staging-buffer budget: 256 MiB. Use --list-devices to inspect GPU adapters. --shader applies a WGSL planar filter after the stage transform (metal/vulkan/dx12/gl). --cuda-shader applies a trusted CUDA C point shader (requires cuda backend and CUDA 13 NVRTC). --cuda-sampling-shader adds neighborhood reads through a fifth FvidSampler argument. --then starts the next resident GPU stage (requires an explicit GPU backend); coordinates are relative to the previous stage output.\nOpen the FVid player: fvid play [OPTIONS] [INPUT...] where INPUT is Y4M, MP4/AVC or WebM/Matroska VP9/AV1 video, or an .m3u/.pls list of them; several inputs queue up (requires --features player). Use --skin diagram|classic|FILE.json to choose the player skin. Player --backend auto|metal|vulkan|dx12|gl and --device N select the GPU renderer; --shader FILE.wgsl applies a display RGB shader. Options apply to the first input: --start-time and --stop-time take seconds or HH:MM:SS(.mmm), --rate a speed from 0.25 to 4. The rest hold for the whole session: --start-paused leaves each item waiting for the play key, --no-audio keeps it silent, and --audio-track N and --subtitle-track N start every item on the Nth track it lists, counted from 1. --volume N sets the level in VLC's 0-200 percent, --mute starts silent, --loop and --repeat decide what follows the last item, --audio-delay and --subtitle-delay shift those clocks in milliseconds, and --sub-file FILE reads subtitles from the named file before the one guessed from the video's name. --zoom F magnifies the picture by F, within the 0.25 to 10 VLC allows, and --crop RATIO cuts it to a shape VLC lists (16:9, or 185:100 for its cinema ratios; none leaves it whole), and --aspect RATIO forces the shape that picture is drawn at (default keeps the file's own shape, fill takes the window's). --brightness, --gamma, --saturation, --contrast and --hue start the session with VLC's picture settings on, at the given values and VLC's slider bounds (brightness and contrast 0 to 2, saturation 0 to 3, gamma 0.01 to 10, hue -180 to 180 degrees). --log CURVE reads the coded values as camera log rather than the curve the file states (slog1, slog2, slog3, clog, clog2, clog3, vlog, logc, logc4, applelog), --gamut NAME reads those bytes in the working gamut it names rather than the one the file or the curve gives (rec709, rec2020, dci-p3, s-gamut3.cine, awg4 and the rest by their labels), --display PANEL grades for the screen it names (sdr[:nits] for a desktop panel, whose white is 100 cd/m² unless told, pq[:nits] or hlg[:nits] for BT.2100 codes over BT.2020 at 1 000 by default, hdr being another spelling of pq), --tonemap CURVE compresses highlights with one of linear, gamma, clip, reinhard, hable or mobius, and --lut FILE applies a .cube, .3dl, .dat, .spi1d or .spi3d look after them, --grid N bakes the conversion on the cube edge it names (2 to 128 nodes, 33 by default), and --interp MODE joins the nodes of that cube and of the look's grid by nearest, trilinear or tetrahedral (tetrahedral by default); these hold for the session and each item is graded from the colour signal it states for itself, while BT.2100 material is compressed for the screen even when none of them is named. Space pauses, F toggles fullscreen, arrows seek (Shift 10 s, Alt 1 min, Ctrl/Cmd 5 min), Ctrl/Cmd+Up/Down or the wheel set volume, M mutes, = and - step the rate, \\ returns to 1x, E steps one frame (Shift back), T toggles subtitles, Ctrl/Cmd+T asks for a file to caption the item on screen with, G/H delay them, Alt+Up/Down and Alt+=/- move and size them, N/P walk the list, R cycles repeat, L marks the A-B loop points (press again to clear), J/K shift the audio delay, A (Shift+A back) walks the file's audio tracks, B (Shift+B back) its subtitle tracks, `[` and `]` its chapters, Shift+S writes the picture on screen out as a PNG beside the file, z and Z step it along VLC's zoom menu (drag a magnified picture to see the part outside the window), c and C walk VLC's crop shapes (the walk comes back to the whole picture), v and V walk VLC's aspect-ratio shapes (that walk returns the file's own shape), i opens the panel saying what the item is and closes it again, Ctrl/Cmd+E opens and closes VLC's dialog of picture settings (brightness, gamma, saturation, contrast and tone over the shown picture), Esc quits. A .srt/.vtt/.ass/.ssa/.smi file named after the video beside it is loaded automatically. Native codecs and audio; general AVC tools are still in development.";
 struct Temporary(PathBuf);
+fn has_shader(stage: &fvid::resident::GpuStage) -> bool {
+    #[cfg(feature = "cuda")]
+    if stage.cuda_shader.is_some() {
+        return true;
+    }
+    #[cfg(feature = "gpu")]
+    {
+        stage.shader.is_some()
+    }
+    #[cfg(not(feature = "gpu"))]
+    {
+        let _ = stage;
+        false
+    }
+}
+
 fn process_selected<R: io::BufRead, W: Write>(
     reader: R,
     writer: W,
-    transforms: &[Transform],
+    stages: &[fvid::resident::GpuStage],
     memory: usize,
     options: ExecutionOptions,
 ) -> fvid::Result<fvid::Stats> {
-    if transforms.len() == 1 {
-        return fvid::process_with_options(reader, writer, transforms[0], memory, options);
+    if stages.len() == 1 && !has_shader(&stages[0]) {
+        return fvid::process_with_options(reader, writer, stages[0].transform, memory, options);
     }
     #[cfg(any(feature = "gpu", feature = "cuda"))]
     {
-        let (stats, transfers) =
-            fvid::process_gpu_chain(reader, writer, transforms, memory, options)?;
+        let (stats, transfers) = fvid::process_gpu_stages(reader, writer, stages, memory, options)?;
         eprintln!(
             "uploads={} downloads={} upload_bytes={} download_bytes={} filter_passes={}",
             transfers.uploads,
@@ -42,6 +59,12 @@ impl Drop for Temporary {
 }
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.first().is_some_and(|a| a == "shader-export") {
+        #[cfg(all(target_os = "macos", feature = "player"))]
+        return shader_export_cli::run(&args[1..]);
+        #[cfg(not(all(target_os = "macos", feature = "player")))]
+        return Err("shader-export currently requires macOS and --features player".into());
+    }
     if args.first().is_some_and(|a| a == "mcp") {
         #[cfg(feature = "mcp")]
         return fvid::mcp::run(&args[1..]);
@@ -63,6 +86,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     }
     if args.first().is_some_and(|a| a == "--help" || a == "-h") {
         println!("{HELP}");
+        println!("Hardware shader export: fvid shader-export --help (macOS, --features player).");
         return Ok(());
     }
     if args.first().is_some_and(|a| a == "--list-devices") {
@@ -86,7 +110,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     if args.len() < 2 {
         return Err(HELP.into());
     }
-    let mut transform = Transform::default();
+    let mut stage = fvid::resident::GpuStage::default();
     let mut transforms = Vec::new();
     let mut options = ExecutionOptions::default();
     let mut backend_explicit = false;
@@ -98,10 +122,58 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 if transforms.len() >= 255 {
                     return Err("at most 256 GPU stages are supported".into());
                 }
-                transforms.push(std::mem::take(&mut transform));
+                transforms.push(std::mem::take(&mut stage));
             }
-            "--hflip" => transform.horizontal = true,
-            "--vflip" => transform.vertical = true,
+            "--shader" => {
+                i += 1;
+                let path = args.get(i).ok_or("missing shader path")?;
+                #[cfg(feature = "gpu")]
+                {
+                    use std::io::Read;
+                    if has_shader(&stage) {
+                        return Err("one shader per stage; use --then for another pass".into());
+                    }
+                    let mut source = String::new();
+                    File::open(path)?
+                        .take(64 * 1024 + 1)
+                        .read_to_string(&mut source)?;
+                    stage.shader = Some(fvid::resident::ByteShader::new(&source)?);
+                }
+                #[cfg(not(feature = "gpu"))]
+                {
+                    let _ = path;
+                    return Err("--shader requires the gpu feature".into());
+                }
+            }
+            "--cuda-shader" | "--cuda-sampling-shader" => {
+                #[cfg(feature = "cuda")]
+                let sampling = args[i] == "--cuda-sampling-shader";
+                i += 1;
+                let path = args.get(i).ok_or("missing CUDA shader path")?;
+                #[cfg(feature = "cuda")]
+                {
+                    use std::io::Read;
+                    if has_shader(&stage) {
+                        return Err("one shader per stage; use --then for another pass".into());
+                    }
+                    let mut source = String::new();
+                    File::open(path)?
+                        .take(64 * 1024 + 1)
+                        .read_to_string(&mut source)?;
+                    stage.cuda_shader = Some(if sampling {
+                        fvid_cuda::ByteShader::with_sampling(source)?
+                    } else {
+                        fvid_cuda::ByteShader::new(source)?
+                    });
+                }
+                #[cfg(not(feature = "cuda"))]
+                {
+                    let _ = path;
+                    return Err("--cuda-shader requires the cuda feature".into());
+                }
+            }
+            "--hflip" => stage.transform.horizontal = true,
+            "--vflip" => stage.transform.vertical = true,
             "--crop" => {
                 i += 1;
                 let values = args
@@ -113,7 +185,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 if values.len() != 4 {
                     return Err("crop must be X:Y:WIDTH:HEIGHT".into());
                 }
-                transform.crop = Some(Crop {
+                stage.transform.crop = Some(Crop {
                     x: values[0],
                     y: values[1],
                     width: values[2],
@@ -142,7 +214,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         }
         i += 1;
     }
-    transforms.push(transform);
+    transforms.push(stage);
     let input: Box<dyn io::Read> = if args[0] == "-" {
         Box::new(io::stdin())
     } else {

@@ -34,8 +34,9 @@ fn depth_stays_inside_its_memory_budget() {
     assert_eq!(queue_depth(Duration::from_millis(20), rgb(1920, 1080)), 10);
     // 4K would cost 237 MiB at that depth, so the budget narrows it to 47.
     assert_eq!(queue_depth(Duration::from_millis(20), rgb(3840, 2160)), 2);
-    // However large the picture, the window is never left with nothing to show.
-    assert_eq!(queue_depth(Duration::from_millis(20), rgb(16384, 16384)), 2);
+    // Oversized frames narrow the queue to one slot; admission separately
+    // rejects a frame whose own payload exceeds the budget.
+    assert_eq!(queue_depth(Duration::from_millis(20), rgb(16384, 16384)), 1);
 }
 
 /// A picture that reports no size cannot overdraw the budget, so only the clock bounds it.
@@ -215,6 +216,29 @@ fn first_frame(player: &mut Playback) -> Frame {
 fn packed(pixels: Pixels, budget: usize) -> Vec<u8> {
     match pixels {
         Pixels::Rgb(rgb) => rgb,
+        Pixels::Packed(planes, grade) => {
+            let mut rgb = Vec::new();
+            planes
+                .to_rgb(&mut rgb, budget)
+                .expect("source-depth conversion");
+            if let Some(grade) = grade {
+                grade.apply(&mut rgb);
+            }
+            rgb
+        }
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        Pixels::Surface(frame) => {
+            let planes = fvid::playback_native::surface_to_packed(&frame.surface, frame.colour)
+                .unwrap()
+                .rotated(frame.rotation)
+                .unwrap();
+            let mut rgb = Vec::new();
+            planes.to_rgb(&mut rgb, budget).unwrap();
+            if let Some(grade) = frame.grade {
+                grade.apply(&mut rgb);
+            }
+            rgb
+        }
         Pixels::Planar(planes, grade) => {
             let mut rgb = Vec::new();
             planar8_to_rgb(&planes, &mut rgb, budget).expect("converted");
@@ -369,19 +393,20 @@ fn a_grade_the_shader_cannot_carry_is_applied_on_the_thread() {
         "the riding grade is not one lookup"
     );
 
-    // A grid after the plan is two lookups and has to be applied here, on the
-    // converted picture — held to the bytes of the same walk, because a route
-    // that quietly dropped the second lookup would still hand over RGB.
+    // The renderer now carries conversion plus an authored look as two stages.
+    // Verify both stages against CPU pixels while preserving subsequent planes.
     let mut plain = Playback::start(y4m(), None);
     let mut shown = Playback::start(y4m(), Some(owed.clone()));
     for frame in 0..3 {
         let mut want = packed(first_frame(&mut plain).pixels, budget);
         owed.apply(&mut want);
         let after = first_frame(&mut shown);
-        assert!(
-            matches!(after.pixels, Pixels::Rgb(_)),
-            "frame {frame}: a grade the shader refused left the picture as planes"
-        );
+        if frame > 0 {
+            let Pixels::Planar(_, grade) = &after.pixels else {
+                panic!("frame {frame}: a GPU-compatible chain lost its planes");
+            };
+            assert!(grade.as_ref().is_some_and(|g| g.is_gpu_grade()));
+        }
         assert_eq!(
             packed(after.pixels, budget),
             want,
@@ -476,7 +501,7 @@ fn a_real_hdr10_picture_is_tone_mapped_by_the_thread_that_shows_it() {
         let untouched = first_frame(&mut plain);
         if frame > 0 {
             assert!(
-                matches!(untouched.pixels, Pixels::Planar(..)),
+                matches!(untouched.pixels, Pixels::Planar(..) | Pixels::Packed(..)),
                 "an ungraded picture was made to lose its planes"
             );
         }
@@ -488,9 +513,16 @@ fn a_real_hdr10_picture_is_tone_mapped_by_the_thread_that_shows_it() {
         // picture and planes with the grid riding on them after that.
         match &graded.pixels {
             Pixels::Rgb(_) => {}
-            Pixels::Planar(_, grade) => assert!(
-                grade.as_ref().is_some_and(|grade| grade.is_shader_look()),
+            Pixels::Planar(_, grade) | Pixels::Packed(_, grade) => assert!(
+                grade.as_ref().is_some_and(|grade| grade.is_gpu_grade()),
                 "a plane picture went to the shader with no table on it"
+            ),
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            Pixels::Surface(frame) => assert!(
+                frame
+                    .grade
+                    .as_ref()
+                    .is_some_and(|grade| grade.is_gpu_grade())
             ),
         }
         let graded = packed(graded.pixels, budget);

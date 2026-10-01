@@ -1,8 +1,10 @@
-//! CUDA decode → fvid-cuda NV12 filter → NVENC encode (device-resident vertical slice).
+//! CUDA decode → fvid-cuda NV12/P010 filter → NVENC encode.
 #![cfg(feature = "cuda-hw")]
 
 use super::*;
-use fvid_cuda::{Nv12Processor, Nv12Transform, Nv12View, copy_crop_on_stream};
+use fvid_cuda::{
+    Nv12Processor, Nv12Transform, Nv12View, P010Processor, P010View, copy_crop_on_stream,
+};
 use lossless::{Codec, CropRect, Frame, Parameters};
 use serde::Serialize;
 use std::path::Path;
@@ -14,6 +16,131 @@ const AGAIN: i32 = -libc::EAGAIN;
 const OUT_POOL: usize = 8;
 /// Extra NVDEC surfaces retained while NVENC owns passthrough inputs.
 const EXTRA_HW_FRAMES: i32 = 16;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum SurfaceLayout {
+    Nv12,
+    P010,
+}
+
+fn full_frame_crop(crop: CropRect, width: usize, height: usize) -> bool {
+    crop.x == 0 && crop.y == 0 && crop.width == width && crop.height == height
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum FilterRoute {
+    Passthrough,
+    DeviceCopy,
+    DeviceFilter,
+}
+
+fn filter_route(
+    layout: SurfaceLayout,
+    crop: CropRect,
+    width: usize,
+    height: usize,
+    options: &HwFilterOptions,
+) -> FilterRoute {
+    if options.shader.is_none()
+        && !options.horizontal_flip
+        && !options.vertical_flip
+        && !options.host_bounce
+    {
+        if full_frame_crop(crop, width, height) {
+            return FilterRoute::Passthrough;
+        }
+        if layout == SurfaceLayout::Nv12 {
+            return FilterRoute::DeviceCopy;
+        }
+    }
+    FilterRoute::DeviceFilter
+}
+
+impl SurfaceLayout {
+    fn from_decoded_format(format: i32) -> Result<Self> {
+        match format {
+            AVPixelFormat_AV_PIX_FMT_NV12
+            | AVPixelFormat_AV_PIX_FMT_YUV420P
+            | AVPixelFormat_AV_PIX_FMT_YUVJ420P => Ok(Self::Nv12),
+            AVPixelFormat_AV_PIX_FMT_P010LE | AVPixelFormat_AV_PIX_FMT_YUV420P10LE => {
+                Ok(Self::P010)
+            }
+            _ => Err("CUDA hw-filter requires known 8-bit or 10-bit 4:2:0 video".into()),
+        }
+    }
+    fn format(self) -> i32 {
+        match self {
+            Self::Nv12 => AVPixelFormat_AV_PIX_FMT_NV12,
+            Self::P010 => AVPixelFormat_AV_PIX_FMT_P010LE,
+        }
+    }
+    fn encoder(self) -> &'static str {
+        match self {
+            Self::Nv12 => "h264_nvenc",
+            Self::P010 => "hevc_nvenc",
+        }
+    }
+}
+
+enum SurfaceProcessor {
+    Nv12(Nv12Processor),
+    P010(P010Processor),
+}
+impl SurfaceProcessor {
+    fn new(
+        layout: SurfaceLayout,
+        ordinal: usize,
+        shader: Option<&fvid_cuda::ByteShader>,
+    ) -> Result<Self> {
+        match layout {
+            SurfaceLayout::Nv12 => shader
+                .map_or_else(
+                    || Nv12Processor::new(ordinal),
+                    |s| Nv12Processor::with_shader(ordinal, s),
+                )
+                .map(Self::Nv12)
+                .map_err(Into::into),
+            SurfaceLayout::P010 => shader
+                .map_or_else(
+                    || P010Processor::new(ordinal),
+                    |s| P010Processor::with_shader(ordinal, s),
+                )
+                .map(Self::P010)
+                .map_err(Into::into),
+        }
+    }
+    fn device_name(&self) -> &str {
+        match self {
+            Self::Nv12(p) => p.device_name(),
+            Self::P010(p) => p.device_name(),
+        }
+    }
+    fn follow_stream(&mut self, stream: u64) {
+        match self {
+            Self::Nv12(p) => p.follow_stream(stream),
+            Self::P010(p) => p.follow_stream(stream),
+        }
+    }
+    fn apply(
+        &mut self,
+        src: Nv12View,
+        dst: Nv12View,
+        t: Nv12Transform,
+    ) -> std::result::Result<(), String> {
+        let p010 = |v: Nv12View| P010View {
+            y: v.y,
+            uv: v.uv,
+            pitch_y: v.pitch_y,
+            pitch_uv: v.pitch_uv,
+            width: v.width,
+            height: v.height,
+        };
+        match self {
+            Self::Nv12(p) => p.apply(src, dst, t),
+            Self::P010(p) => p.apply(p010(src), p010(dst), t),
+        }
+    }
+}
 /// Wall-time gate targets multi-NVENC GPUs. Below this duration the extra
 /// session startup and concat exceed the encode savings.
 const PARALLEL_MIN_DURATION_US: i64 = 20_000_000;
@@ -31,8 +158,12 @@ fn gcd_i128(mut a: i128, mut b: i128) -> i128 {
     a.abs().max(1)
 }
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct HwFilterOptions {
+    /// Trusted CUDA C shader over native NV12/P010 Y/U/V component codes.
+    pub shader: Option<std::sync::Arc<str>>,
+    /// Supply the fifth FvidSampler argument for neighborhood reads.
+    pub shader_sampling: bool,
     pub crop: Option<CropRect>,
     pub horizontal_flip: bool,
     pub vertical_flip: bool,
@@ -51,6 +182,8 @@ pub struct HwFilterOptions {
 
 #[derive(Serialize, Debug)]
 pub struct HwFilterStats {
+    /// Selected filter implementation, independent of backend/encoder identity.
+    pub filter: &'static str,
     pub backend: &'static str,
     pub device: String,
     pub video_frames: u64,
@@ -206,16 +339,32 @@ fn open_nvenc(
     time_base: AVRational,
     framerate: AVRational,
     frames_ctx: *mut AVBufferRef,
+    layout: SurfaceLayout,
+    source_parameters: *const AVCodecParameters,
 ) -> Result<Codec> {
-    let encoder = unsafe { avcodec_find_encoder_by_name(c"h264_nvenc".as_ptr()) };
+    let name = match layout {
+        SurfaceLayout::Nv12 => c"h264_nvenc",
+        SurfaceLayout::P010 => c"hevc_nvenc",
+    };
+    let encoder = unsafe { avcodec_find_encoder_by_name(name.as_ptr()) };
     if encoder.is_null() {
-        return Err("h264_nvenc encoder is unavailable in this FFmpeg build".into());
+        return Err(format!(
+            "{} encoder is unavailable in this FFmpeg build",
+            layout.encoder()
+        )
+        .into());
     }
     let codec = Codec(unsafe { avcodec_alloc_context3(encoder) });
     if codec.0.is_null() {
         return Err("NVENC context allocation failed".into());
     }
     unsafe {
+        (*codec.0).color_range = (*source_parameters).color_range;
+        (*codec.0).color_primaries = (*source_parameters).color_primaries;
+        (*codec.0).color_trc = (*source_parameters).color_trc;
+        (*codec.0).colorspace = (*source_parameters).color_space;
+        (*codec.0).chroma_sample_location = (*source_parameters).chroma_location;
+        (*codec.0).sample_aspect_ratio = (*source_parameters).sample_aspect_ratio;
         (*codec.0).width = width;
         (*codec.0).height = height;
         (*codec.0).time_base = time_base;
@@ -235,17 +384,248 @@ fn open_nvenc(
     unsafe {
         av_dict_set(&mut opts, c"preset".as_ptr(), c"p1".as_ptr(), 0);
         av_dict_set(&mut opts, c"bf".as_ptr(), c"0".as_ptr(), 0);
+        if layout == SurfaceLayout::P010 {
+            av_dict_set(&mut opts, c"profile".as_ptr(), c"main10".as_ptr(), 0);
+        }
     }
     let open = unsafe { avcodec_open2(codec.0, encoder, &mut opts) };
     unsafe {
         av_dict_free(&mut opts);
     }
-    check(open, "open h264_nvenc")?;
+    check(open, "open NVENC")?;
     Ok(codec)
 }
 
-fn nv12_view(frame: *mut AVFrame) -> Result<Nv12View> {
-    // SAFETY: Caller holds a CUDA AVFrame; data[] hold CUdeviceptr values for NV12.
+#[cfg(test)]
+fn validate_nv12_frame(frame: *mut AVFrame) -> Result<()> {
+    validate_surface_frame(frame, SurfaceLayout::Nv12)
+}
+
+fn validate_surface_frame(frame: *mut AVFrame, layout: SurfaceLayout) -> Result<()> {
+    // The CUDA pixel format describes residency, not component layout.
+    unsafe {
+        if frame.is_null() || (*frame).format != AVPixelFormat_AV_PIX_FMT_CUDA {
+            return Err("decoded frame is not AV_PIX_FMT_CUDA".into());
+        }
+        let frames = (*frame).hw_frames_ctx;
+        if frames.is_null() || (*frames).data.is_null() {
+            return Err("CUDA frame is missing its hardware format context".into());
+        }
+        let context = (*frames).data.cast::<AVHWFramesContext>();
+        if (*context).sw_format != layout.format() {
+            return Err(
+                "CUDA decoded surface layout differs from the selected NV12/P010 pipeline".into(),
+            );
+        }
+        if (*frame).data[0].is_null() || (*frame).data[1].is_null() {
+            return Err("CUDA surface is missing component device pointers".into());
+        }
+        if layout == SurfaceLayout::P010
+            && (((*frame).data[0] as usize
+                | (*frame).data[1] as usize
+                | (*frame).linesize[0] as usize
+                | (*frame).linesize[1] as usize)
+                & 1
+                != 0)
+        {
+            return Err("P010 device pointers and pitches must be word-aligned".into());
+        }
+        let row_bytes = (*frame)
+            .width
+            .checked_mul(if layout == SurfaceLayout::P010 { 2 } else { 1 })
+            .ok_or("CUDA surface row size overflow")?;
+        if (*frame).width <= 0
+            || (*frame).height <= 0
+            || (*frame).linesize[0] < row_bytes
+            || (*frame).linesize[1] < row_bytes
+        {
+            return Err("CUDA surface has invalid geometry or pitches".into());
+        }
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod layout_tests {
+    use super::*;
+
+    #[test]
+    #[ignore = "requires NVIDIA NVDEC/NVENC"]
+    fn vertical_reflection_copies_host_frames_only_when_explicitly_requested() {
+        let source =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/hevc/main-ipb.mp4");
+        for host_bounce in [false, true] {
+            let nonce = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos();
+            let destination =
+                std::env::temp_dir().join(format!("fvid-vflip-{}-{nonce}.mkv", std::process::id()));
+            let options = HwFilterOptions {
+                vertical_flip: true,
+                host_bounce,
+                ..Default::default()
+            };
+            let stats = hw_filter_session(&source, &destination, &options).unwrap();
+            assert!(stats.video_frames > 0);
+            assert_eq!(stats.device_filter_passes, stats.video_frames);
+            assert_eq!(
+                stats.host_frame_copies,
+                if host_bounce {
+                    stats.video_frames * 2
+                } else {
+                    0
+                }
+            );
+            assert_eq!(stats.host_bounce, host_bounce);
+            assert_eq!(stats.filter, "cuda-crop-flip");
+            std::fs::remove_file(destination).unwrap();
+        }
+    }
+
+    #[test]
+    fn both_depths_keep_full_frame_vertical_reflection_on_device() {
+        let crop = CropRect {
+            x: 0,
+            y: 0,
+            width: 64,
+            height: 48,
+        };
+        for layout in [SurfaceLayout::Nv12, SurfaceLayout::P010] {
+            let options = HwFilterOptions {
+                vertical_flip: true,
+                ..Default::default()
+            };
+            assert_eq!(
+                filter_route(layout, crop, 64, 48, &options),
+                FilterRoute::DeviceFilter
+            );
+            assert_eq!(
+                filter_route(layout, crop, 64, 48, &HwFilterOptions::default()),
+                FilterRoute::Passthrough
+            );
+            let bounced = HwFilterOptions {
+                host_bounce: true,
+                ..Default::default()
+            };
+            assert_eq!(
+                filter_route(layout, crop, 64, 48, &bounced),
+                FilterRoute::DeviceFilter
+            );
+        }
+    }
+
+    #[test]
+    #[ignore = "requires NVIDIA NVDEC/NVENC and CUDA NVRTC"]
+    fn main10_filter_encodes_hevc_without_host_frame_copies() {
+        let source =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/hevc/main10-ipb.mp4");
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let destination =
+            std::env::temp_dir().join(format!("fvid-main10-{}-{nonce}.mkv", std::process::id()));
+        let options = HwFilterOptions {
+            horizontal_flip: true,
+            shader: Some(std::sync::Arc::from(include_str!(
+                "../../../shaders/boxblur.cu"
+            ))),
+            shader_sampling: true,
+            ..Default::default()
+        };
+        let stats = hw_filter_session(&source, &destination, &options).unwrap();
+        assert_eq!(stats.encoder, "hevc_nvenc");
+        assert_eq!(stats.host_frame_copies, 0);
+        assert!(stats.video_frames > 0);
+        assert_eq!(stats.device_filter_passes, stats.video_frames);
+        let encoded = Input::open(&destination).unwrap();
+        let video = encoded
+            .streams()
+            .iter()
+            .find(|&&s| unsafe { (*(*s).codecpar).codec_type == AVMediaType_AVMEDIA_TYPE_VIDEO })
+            .unwrap();
+        unsafe {
+            assert_eq!((*(**video).codecpar).codec_id, AVCodecID_AV_CODEC_ID_HEVC);
+            assert_eq!(
+                SurfaceLayout::from_decoded_format((*(**video).codecpar).format).unwrap(),
+                SurfaceLayout::P010
+            );
+        }
+        drop(encoded);
+        std::fs::remove_file(destination).unwrap();
+    }
+
+    #[test]
+    fn origin_crop_with_smaller_size_requires_filtering() {
+        let crop = CropRect {
+            x: 0,
+            y: 0,
+            width: 32,
+            height: 24,
+        };
+        assert!(!full_frame_crop(crop, 64, 48));
+        assert!(full_frame_crop(crop, 32, 24));
+        assert!(!full_frame_crop(CropRect { x: 2, ..crop }, 32, 24));
+    }
+
+    #[test]
+    fn probed_main10_selects_p010_and_hevc_nvenc() {
+        let path =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/hevc/main10-ipb.mp4");
+        let input = Input::open(&path).unwrap();
+        let video = input
+            .streams()
+            .iter()
+            .find(|&&s| unsafe { (*(*s).codecpar).codec_type == AVMediaType_AVMEDIA_TYPE_VIDEO })
+            .unwrap();
+        let layout =
+            SurfaceLayout::from_decoded_format(unsafe { (*(**video).codecpar).format }).unwrap();
+        assert_eq!(layout, SurfaceLayout::P010);
+        assert_eq!(layout.encoder(), "hevc_nvenc");
+        assert_eq!(
+            SurfaceLayout::from_decoded_format(AVPixelFormat_AV_PIX_FMT_YUV420P).unwrap(),
+            SurfaceLayout::Nv12
+        );
+        assert!(SurfaceLayout::from_decoded_format(AVPixelFormat_AV_PIX_FMT_YUV444P10LE).is_err());
+        assert!(SurfaceLayout::from_decoded_format(-1).is_err());
+    }
+
+    #[test]
+    fn cuda_residency_does_not_imply_nv12_layout() {
+        unsafe {
+            let mut context: AVHWFramesContext = std::mem::zeroed();
+            let mut buffer: AVBufferRef = std::mem::zeroed();
+            let mut frame: AVFrame = std::mem::zeroed();
+            frame.format = AVPixelFormat_AV_PIX_FMT_CUDA;
+            frame.width = 8;
+            frame.height = 8;
+            frame.linesize[0] = 16;
+            frame.linesize[1] = 16;
+            frame.data[0] = 4096usize as *mut u8;
+            frame.data[1] = 8192usize as *mut u8;
+            assert!(validate_nv12_frame(&mut frame).is_err());
+            buffer.data = (&mut context as *mut AVHWFramesContext).cast();
+            frame.hw_frames_ctx = &mut buffer;
+            context.sw_format = AVPixelFormat_AV_PIX_FMT_P010LE;
+            assert!(validate_nv12_frame(&mut frame).is_err());
+            assert!(validate_surface_frame(&mut frame, SurfaceLayout::P010).is_ok());
+            frame.linesize[1] = 8;
+            assert!(validate_surface_frame(&mut frame, SurfaceLayout::P010).is_err());
+            frame.linesize[1] = 16;
+            context.sw_format = AVPixelFormat_AV_PIX_FMT_NV12;
+            assert!(validate_nv12_frame(&mut frame).is_ok());
+            frame.linesize[1] = -16;
+            assert!(validate_nv12_frame(&mut frame).is_err());
+            frame.linesize[1] = 7;
+            assert!(validate_nv12_frame(&mut frame).is_err());
+        }
+    }
+}
+
+fn surface_view(frame: *mut AVFrame, layout: SurfaceLayout) -> Result<Nv12View> {
+    validate_surface_frame(frame, layout)?;
+    // SAFETY: Caller holds a CUDA AVFrame with the validated component layout.
     unsafe {
         if (*frame).format != AVPixelFormat_AV_PIX_FMT_CUDA {
             return Err("decoded frame is not AV_PIX_FMT_CUDA".into());
@@ -253,7 +633,7 @@ fn nv12_view(frame: *mut AVFrame) -> Result<Nv12View> {
         let y = (*frame).data[0] as usize as u64;
         let uv = (*frame).data[1] as usize as u64;
         if y == 0 || uv == 0 {
-            return Err("CUDA frame missing NV12 device pointers".into());
+            return Err("CUDA frame missing component device pointers".into());
         }
         Ok(Nv12View {
             y,
@@ -276,18 +656,6 @@ fn alloc_cuda_frame(frames_ctx: *mut AVBufferRef) -> Result<Frame> {
     Ok(frame)
 }
 
-fn alloc_sw_nv12(width: i32, height: i32) -> Result<Frame> {
-    let frame = Frame::new()?;
-    unsafe {
-        (*frame.0).format = AVPixelFormat_AV_PIX_FMT_NV12;
-        (*frame.0).width = width;
-        (*frame.0).height = height;
-        check(av_frame_get_buffer(frame.0, 32), "alloc host NV12 frame")?;
-    }
-    Ok(frame)
-}
-
-/// FFmpeg `hwupload_cuda`: copy a software frame into a CUDA `AVFrame`.
 pub fn hw_upload(dst_cuda: *mut AVFrame, src_host: *const AVFrame) -> Result<()> {
     if dst_cuda.is_null() || src_host.is_null() {
         return Err("hw_upload requires non-null frames".into());
@@ -309,15 +677,14 @@ pub fn hw_download(dst_host: *mut AVFrame, src_cuda: *const AVFrame) -> Result<(
     )
 }
 
-/// H.264 CUDA decode → optional host bounce → fvid-cuda NV12 crop/flip → h264_nvenc.
+/// CUDA decode → native NV12/P010 crop/flip/shader → H.264 or HEVC Main10 NVENC.
 ///
 /// Default: device-resident (`host_frame_copies=0`), FFmpeg NVDEC + NVENC.
 /// `--host-bounce`: insert `hwdownload`+`hwupload_cuda` before the filter.
 ///
 /// Encode-heavy timelines (≥20s of work) fan out across multiple NVENC
-/// sessions and concat the closed segments. Soft full-frame vflip stays
-/// single-session (host view path already beats FFmpeg). Short pixel-oracle
-/// clips remain single-session.
+/// sessions and concat the closed segments. Short pixel-oracle clips remain
+/// single-session.
 pub fn hw_filter(
     source: &Path,
     destination: &Path,
@@ -326,16 +693,10 @@ pub fn hw_filter(
     if destination.exists() {
         return Err("output already exists".into());
     }
-    // Soft full-frame vflip is already faster than FFmpeg's host bounce as a
-    // single session; parallelizing it only adds startup/concat tax.
-    // Fused crop+hflip+vflip regresses under multi-session NVDEC contention;
-    // keep the single device-resident pass and rely on longer fair-pair work.
-    let soft_vflip_only = options.vertical_flip
-        && !options.horizontal_flip
-        && options.crop.is_none()
-        && !options.host_bounce;
+    // Keep fused reflections single-session until multi-session NVDEC
+    // contention has been qualified for this path.
     let fused = options.crop.is_some() && options.horizontal_flip && options.vertical_flip;
-    if !soft_vflip_only
+    if options.shader.is_none()
         && !fused
         && !options.host_bounce
         && let Some(stats) = hw_filter_parallel(source, destination, options)?
@@ -464,12 +825,13 @@ fn hw_filter_parallel(
         )));
     }
     let source = source.to_path_buf();
-    let options = *options;
+    let options = options.clone();
     let result = thread::scope(|scope| -> Result<HwFilterStats> {
         let mut handles = Vec::with_capacity(sessions);
         for (part, (from, to)) in parts.iter().zip(ranges.iter().copied()) {
             let source = source.clone();
             let part = part.clone();
+            let options = options.clone();
             handles.push(scope.spawn(move || {
                 let mut session = options;
                 session.interval = Some((from, to));
@@ -509,16 +871,41 @@ fn hw_filter_session(
     if destination.exists() {
         return Err("output already exists".into());
     }
-    let device = make_cuda_device(
-        options.device,
-        options.horizontal_flip || options.share_primary_context,
-    )?;
-    let mut input = Input::open_fast(source)?;
+    if options.shader_sampling && options.shader.is_none() {
+        return Err("sampling shader mode requires shader source".into());
+    }
+    let shader = options
+        .shader
+        .as_ref()
+        .map(|source| {
+            if options.shader_sampling {
+                fvid_cuda::ByteShader::with_sampling(source.as_ref())
+            } else {
+                fvid_cuda::ByteShader::new(source.as_ref())
+            }
+        })
+        .transpose()?;
+    let mut input = Input::open(source)?;
     let video = input
         .streams()
         .iter()
         .position(|&s| unsafe { (*(*s).codecpar).codec_type == AVMediaType_AVMEDIA_TYPE_VIDEO })
         .ok_or("input has no video stream")?;
+    let layout = SurfaceLayout::from_decoded_format(unsafe {
+        (*(*input.streams()[video]).codecpar).format
+    })?;
+    if layout == SurfaceLayout::P010 && options.host_bounce {
+        return Err("P010 host-bounce is unsupported; use the device-resident filter".into());
+    }
+    let device = make_cuda_device(
+        options.device,
+        layout == SurfaceLayout::P010
+            || options.shader.is_some()
+            || options.horizontal_flip
+            || options.vertical_flip
+            || options.host_bounce
+            || options.share_primary_context,
+    )?;
     let tb = unsafe { (*input.streams()[video]).time_base };
     let framerate = unsafe { (*input.streams()[video]).avg_frame_rate };
     let interval = if let Some((from, to)) = options.interval {
@@ -558,7 +945,7 @@ fn hw_filter_session(
         unsafe {
             let ctx = (*frames_ctx).data as *mut AVHWFramesContext;
             (*ctx).format = AVPixelFormat_AV_PIX_FMT_CUDA;
-            (*ctx).sw_format = AVPixelFormat_AV_PIX_FMT_NV12;
+            (*ctx).sw_format = layout.format();
             (*ctx).width = (*decoder.0).width;
             (*ctx).height = (*decoder.0).height;
             (*ctx).initial_pool_size = OUT_POOL as i32;
@@ -588,25 +975,15 @@ fn hw_filter_session(
             )
         }
     };
-    let identity = !options.horizontal_flip
-        && !options.vertical_flip
-        && crop.x == 0
-        && crop.y == 0
-        && crop.width == out_w as usize
-        && crop.height == out_h as usize
-        && !options.host_bounce;
-    // Full-frame vflip only: FFmpeg does hwdownload+vflip(view)+hwupload — match that
-    // (kernel path loses because software vflip is free after download; host-hflip
-    // is not free, so hflip stays on the device kernel).
-    let soft_vflip = options.vertical_flip
-        && !options.horizontal_flip
-        && crop.x == 0
-        && crop.y == 0
-        && crop.width == out_w as usize
-        && crop.height == out_h as usize
-        && !options.host_bounce;
-    let direct_crop =
-        !identity && !options.horizontal_flip && !options.vertical_flip && !options.host_bounce;
+    let route = filter_route(
+        layout,
+        crop,
+        unsafe { (*decoder.0).width as usize },
+        unsafe { (*decoder.0).height as usize },
+        options,
+    );
+    let identity = route == FilterRoute::Passthrough;
+    let direct_crop = route == FilterRoute::DeviceCopy;
     // Identity/copy: NVENC on decoder surfaces — no filter, no second frame pool, no PTX.
     // Filtered: separate encoder pool + Nv12Processor (DtoD / kernel on FFmpeg stream).
     let enc_frames_owned: Option<HwDevice>;
@@ -625,7 +1002,7 @@ fn hw_filter_session(
         unsafe {
             let ctx = (*enc_frames).data as *mut AVHWFramesContext;
             (*ctx).format = AVPixelFormat_AV_PIX_FMT_CUDA;
-            (*ctx).sw_format = AVPixelFormat_AV_PIX_FMT_NV12;
+            (*ctx).sw_format = layout.format();
             (*ctx).width = out_w;
             (*ctx).height = out_h;
             (*ctx).initial_pool_size = OUT_POOL as i32;
@@ -634,7 +1011,15 @@ fn hw_filter_session(
         enc_frames_ptr = enc_frames;
         enc_frames_owned = Some(HwDevice(enc_frames));
     }
-    let encoder = open_nvenc(out_w, out_h, tb, framerate, enc_frames_ptr)?;
+    let encoder = open_nvenc(
+        out_w,
+        out_h,
+        tb,
+        framerate,
+        enc_frames_ptr,
+        layout,
+        unsafe { (*input.streams()[video]).codecpar },
+    )?;
     let parameters = Parameters(unsafe { avcodec_parameters_alloc() });
     if parameters.0.is_null() {
         return Err("NVENC parameter allocation failed".into());
@@ -653,11 +1038,10 @@ fn hw_filter_session(
 
     let cuda_stream = ffmpeg_cuda_stream(&device)? as u64;
     let cuda_context = ffmpeg_cuda_context(&device)? as u64;
-    let mut filter = if identity || soft_vflip || direct_crop {
+    let mut filter = if identity || direct_crop {
         None
     } else {
-        let mut proc =
-            Nv12Processor::new(options.device).map_err(|e| format!("CUDA NV12 processor: {e}"))?;
+        let mut proc = SurfaceProcessor::new(layout, options.device, shader.as_ref())?;
         proc.follow_stream(cuda_stream);
         Some(proc)
     };
@@ -687,25 +1071,35 @@ fn hw_filter_session(
     };
     let mut out_pool_i = 0usize;
     let mut in_flight: usize = 0;
-    let mut soft_host: Option<Frame> = if soft_vflip {
-        Some(alloc_sw_nv12(out_w, out_h)?)
+    // Diagnostic bounce is explicit; ordinary filters never allocate host pixels.
+    let mut bounce = if options.host_bounce {
+        Some((Frame::new()?, alloc_cuda_frame(frames_ctx)?))
     } else {
         None
     };
     let device_name = if let Some(filter) = filter.as_ref() {
         filter.device_name().to_owned()
-    } else if soft_vflip {
-        "CUDA NVENC host-vflip".into()
     } else if direct_crop {
         "CUDA NVENC direct-crop".into()
     } else {
         "CUDA NVENC passthrough".into()
     };
     let mut stats = HwFilterStats {
+        filter: if options.shader.is_some() {
+            if options.shader_sampling {
+                "cuda-sampling-shader"
+            } else {
+                "cuda-point-shader"
+            }
+        } else if identity {
+            "passthrough"
+        } else if direct_crop {
+            "device-crop-copy"
+        } else {
+            "cuda-crop-flip"
+        },
         backend: if identity {
             "cuda-nvdec-nvenc-passthrough"
-        } else if soft_vflip {
-            "cuda-nvdec-host-vflip-nvenc"
         } else {
             "cuda-nvdec-nvenc"
         },
@@ -715,8 +1109,8 @@ fn hw_filter_session(
         height: out_h as u32,
         host_frame_copies: 0,
         device_filter_passes: 0,
-        encoder: "h264_nvenc",
-        host_bounce: options.host_bounce || soft_vflip,
+        encoder: layout.encoder(),
+        host_bounce: options.host_bounce,
     };
 
     let drain_available = |encoder: &Codec,
@@ -765,6 +1159,7 @@ fn hw_filter_session(
     };
 
     let mut handle_decoded = |dec: *mut AVFrame| -> Result<bool> {
+        validate_surface_frame(dec, layout)?;
         let pts_out = unsafe {
             if (*dec).pts == NOPTS {
                 (*dec).pts = (*dec).best_effort_timestamp;
@@ -797,67 +1192,19 @@ fn hw_filter_session(
             )?;
             return Ok(false);
         }
-        if soft_vflip {
-            let host = soft_host.as_mut().expect("soft_vflip host frame");
+        let source_frame = if let Some((host, device)) = &mut bounce {
             unsafe {
                 av_frame_unref(host.0);
             }
             hw_download(host.0, dec)?;
             stats.host_frame_copies += 1;
-            unsafe {
-                (*host.0).width = out_w;
-                (*host.0).height = out_h;
-            }
-            unsafe { crate::lossless::flip_view(host.0)? };
-            let pool = out_pool.as_mut().expect("soft_vflip has out_pool");
-            let enc_ctx = enc_frames_owned
-                .as_ref()
-                .map(|h| h.0)
-                .unwrap_or(enc_frames_ptr);
-            let mut tries = 0usize;
-            while tries < OUT_POOL {
-                let slot = &mut pool[out_pool_i];
-                out_pool_i = (out_pool_i + 1) % OUT_POOL;
-                unsafe {
-                    if (*slot.0).data[0].is_null() {
-                        if av_hwframe_get_buffer(enc_ctx, slot.0, 0) < 0 {
-                            tries += 1;
-                            continue;
-                        }
-                    } else if av_frame_is_writable(slot.0) == 0 {
-                        // NVENC commonly releases this surface while packets are
-                        // drained. Recheck and retain its CUDA allocation rather
-                        // than unref/get_buffer on every pool rotation.
-                        drain_available(
-                            &encoder,
-                            &mut output,
-                            &mut enc_packet,
-                            &mut stats,
-                            &mut in_flight,
-                        )?;
-                        if av_frame_is_writable(slot.0) == 0 {
-                            tries += 1;
-                            continue;
-                        }
-                    }
-                    (*slot.0).pts = pts_out.unwrap_or((*dec).pts);
-                    (*slot.0).duration = (*dec).duration;
-                }
-                hw_upload(slot.0, host.0)?;
-                stats.host_frame_copies += 1;
-                send_frame(
-                    &encoder,
-                    slot.0,
-                    &mut output,
-                    &mut enc_packet,
-                    &mut stats,
-                    &mut in_flight,
-                )?;
-                return Ok(false);
-            }
-            return Err("CUDA output frame pool exhausted".into());
-        }
-        let src = nv12_view(dec)?;
+            hw_upload(device.0, host.0)?;
+            stats.host_frame_copies += 1;
+            device.0
+        } else {
+            dec
+        };
+        let src = surface_view(source_frame, layout)?;
         if crop.x + crop.width > src.width as usize || crop.y + crop.height > src.height as usize {
             return Err("crop exceeds decoded CUDA frame".into());
         }
@@ -893,7 +1240,7 @@ fn hw_filter_session(
                 (*slot.0).pts = pts_out.unwrap_or((*dec).pts);
                 (*slot.0).duration = (*dec).duration;
             }
-            let dst = nv12_view(slot.0)?;
+            let dst = surface_view(slot.0, layout)?;
             if direct_crop {
                 copy_crop_on_stream(src, dst, transform, cuda_context, cuda_stream)
                     .map_err(|e| format!("NV12 direct crop: {e}"))?;

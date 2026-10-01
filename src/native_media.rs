@@ -93,6 +93,10 @@ pub fn decode_video_pipeline(
         stats.width = u32::try_from(width).map_err(|_| invalid("video width overflow"))?;
         stats.height = u32::try_from(height).map_err(|_| invalid("video height overflow"))?;
         stats.pixel_format = match &frame {
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            RawFrame::Surface { surface, .. } => match surface.depth() {
+                8 => "nv12".into(), _ => "p010le".into(),
+            },
             RawFrame::Rgb(_) => "rgb24".into(),
             RawFrame::Planar(p) => p.pixel_format()?,
             RawFrame::Avc { picture, .. } => match picture.bit_depth {

@@ -160,7 +160,7 @@ impl HevcDecoder {
                     self.hdr.merge(hdr);
                 }
             } else if !matches!(header.unit_type, 35..=40) {
-                return Err(invalid("unsupported HEVC NAL type"));
+                return Err(invalid(&format!("unsupported HEVC NAL type {}", header.unit_type)));
             }
         }
         let Some(nal) = slice else { return Ok(None) };
