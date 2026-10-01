@@ -1595,3 +1595,13 @@ Matroska packet order and normalizes the Events Format header accordingly; style
 and text are preserved. Duplicate/missing fields and Text in a nonfinal position
 retain the legacy path before publication. A reordered synthetic cue verifies
 layer, actor/style/margins, text overrides and exact timing.
+
+### AVC multi-slice implementation baseline
+
+A saved eight-frame 128x96 CABAC I/P/B stream contains exactly two slices per
+access unit, with distinct first-macroblock addresses. It reproduces the native
+`multiple AVC slices per access unit` refusal for all packets after reset.
+`tests/avc_multislice.rs` separates this refusal regression from the ignored
+acceptance gate comparing all YUV samples and rewind against the saved independent
+decode. The fixture and generator are synthetic; no private input is included.
+This establishes the missing feature, not multi-slice AVC support.
