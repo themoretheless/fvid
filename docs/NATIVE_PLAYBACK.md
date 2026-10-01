@@ -3055,3 +3055,8 @@ an existing destination. Progress completion follows publication.
 Tests compare owned decode before and after muxing byte for byte, including
 edited AAC, ALAC, multichannel audio and transformed 44.1 kHz mono intervals.
 An optional FFmpeg reference decode checks float PCM container compatibility.
+
+`native_export::trim_audio_pcm`, public `media::trim` and headless `media trim`
+also accept these float PCM destinations for owned audio inputs. They retain
+sample-exact interval selection and publish only complete outputs. WAVE trim
+entry points retain their existing WAVE-only contract.

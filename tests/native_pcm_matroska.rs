@@ -257,3 +257,51 @@ fn transformed_pcm_preserves_resampled_interval_exactly() {
     assert_eq!(c.sample_rate, 44100);
     assert_eq!(std::fs::read(raw).unwrap(), std::fs::read(decoded).unwrap());
 }
+
+#[test]
+fn trim_pcm_matroska_matches_selected_source_samples() {
+    let d = dir("trim");
+    let source = fixture("audio/aac-native-edit.m4a");
+    let raw = d.0.join("trim.f32le");
+    let muxed = d.0.join("trim.mka");
+    let decoded = d.0.join("decoded.f32le");
+    let a =
+        native_export::trim_audio_pcm(&source, &raw, 10000, 70000, Some(0), None, None).unwrap();
+    let b =
+        native_export::trim_audio_pcm(&source, &muxed, 10000, 70000, Some(0), None, None).unwrap();
+    let c = export(&muxed, &decoded);
+    assert_eq!(a.sample_frames, b.sample_frames);
+    assert_eq!(b.sample_frames, c.sample_frames);
+    assert_eq!(std::fs::read(raw).unwrap(), std::fs::read(decoded).unwrap());
+    #[cfg(feature = "media")]
+    {
+        let public = d.0.join("public.mkv");
+        let options = fvid::media::CopyOptions::default();
+        let stats = fvid::media::trim(&source, &public, 10000, 70000, &options).unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert_eq!(
+            std::fs::read(public).unwrap(),
+            std::fs::read(&muxed).unwrap()
+        );
+    }
+    let cli = d.0.join("cli.mka");
+    let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "trim"])
+        .arg(&source)
+        .arg(&cli)
+        .args(["--from", "0.01", "--to", "0.07"])
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    assert_eq!(std::fs::read(cli).unwrap(), std::fs::read(&muxed).unwrap());
+    let invalid = d.0.join("invalid.mka");
+    assert!(
+        native_export::trim_audio_pcm(&source, &invalid, 70000, 10000, Some(0), None, None)
+            .is_err()
+    );
+    assert!(!invalid.exists());
+}

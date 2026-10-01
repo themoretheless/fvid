@@ -223,9 +223,9 @@ pub fn trim(
         return Ok(CopyStats {packets:stats.packets,payload_bytes:stats.payload_bytes,segments:1,backend:"fvid",fvid_payload_copies:0});
     }
     if crate::native_media::is_owned_audio_trim_source(source).map_err(|e|e.to_string())?
-        && destination.extension().and_then(|s|s.to_str())==Some("wav") {
+        && matches!(destination.extension().and_then(|s|s.to_str()),Some("wav" | "f32le" | "mka" | "mkv")) {
         validate_native_copy_options(options,true)?;
-        let stats=crate::native_export::trim_audio_wave(source,destination,from,to,options.streams.first().copied(),options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())?;
+        let stats=crate::native_export::trim_audio_pcm(source,destination,from,to,options.streams.first().copied(),options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string())?;
         return Ok(CopyStats {packets:stats.decoded_frames,payload_bytes:stats.sample_frames*u64::from(stats.channels)*4,segments:1,backend:"fvid",fvid_payload_copies:0});
     }
     if !crate::native_pcm::is_wave(source).map_err(|e| e.to_string())? {

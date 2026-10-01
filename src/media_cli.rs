@@ -378,7 +378,7 @@ fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Er
     let option_start = source_index + if plan { 1 } else { 2 };
     if args.len() < option_start {return Ok(false);}
     let owned_audio=command=="trim" && fvid::native_media::is_owned_audio_trim_source(std::path::Path::new(&args[source_index]))?
-        && (plan || std::path::Path::new(&args[source_index+1]).extension().and_then(|s|s.to_str())==Some("wav"));
+        && (plan || matches!(std::path::Path::new(&args[source_index+1]).extension().and_then(|s|s.to_str()), Some("wav" | "f32le" | "mka" | "mkv")));
     if !owned_audio && !fvid::native_pcm::is_wave(std::path::Path::new(&args[source_index]))? {return Ok(false);}
     let (mut from, mut to, mut selected) = (None, None, None);
     let (mut quiet, mut report) = (false, false);
@@ -441,7 +441,7 @@ fn try_native_audio_trim(args: &[String]) -> Result<bool, Box<dyn std::error::Er
         })
     });
     if owned_audio {
-        let stats=fvid::native_export::trim_audio_wave(std::path::Path::new(&args[source_index]),std::path::Path::new(&args[source_index+1]),from,to,selected,None,progress.as_ref())?;
+        let stats=fvid::native_export::trim_audio_pcm(std::path::Path::new(&args[source_index]),std::path::Path::new(&args[source_index+1]),from,to,selected,None,progress.as_ref())?;
         if !quiet {println!("{}",serde_json::json!({"packets":stats.decoded_frames,"sample_frames":stats.sample_frames,"payload_bytes":stats.sample_frames*u64::from(stats.channels)*4,"segments":1,"backend":"fvid","fvid_payload_copies":0}));}
         return Ok(true);
     }

@@ -798,6 +798,22 @@ pub fn trim_adts_wave(source: &Path, destination: &Path, from: i64, to: i64,
     export_aac_pcm_selected(source,destination,Some((std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64))),1.0,None,None,None,cancel,progress)
 }
 
+/// Decode a selected owned audio interval to float PCM, WAVE or Matroska.
+/// Bounds select sample starts in [from, to), in microseconds.
+pub fn trim_audio_pcm(source: &Path, destination: &Path, from: i64, to: i64, selected: Option<usize>,
+    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::native_media::AudioDecodeStats> {
+    if destination.extension().and_then(|s|s.to_str()) == Some("wav") {
+        return trim_audio_wave(source,destination,from,to,selected,cancel,progress);
+    }
+    if from < 0 || to <= from {return Err(invalid("trim requires 0 <= from < to"));}
+    if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
+    let index=crate::native_plan::audio_trim_selection(source,selected).map_err(|e|invalid(&e))?;
+    export_audio_pcm_selected(source,destination,
+        Some((std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64))),
+        1.0,None,None,Some(index),cancel,progress)
+}
+
 /// Decode a selected owned audio presentation interval to WAVE.
 /// Multiple container tracks require explicit selection to avoid silent loss.
 pub fn trim_audio_wave(source: &Path, destination: &Path, from: i64, to: i64, selected: Option<usize>,
