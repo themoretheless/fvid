@@ -71,7 +71,11 @@ impl Header {
                         "420" | "420jpeg" | "420mpeg2" | "420paldv" => PixelFormat::Yuv420,
                         "422" => PixelFormat::Yuv422,
                         "444" => PixelFormat::Yuv444,
-                        _ => return Err(invalid("supported pixel formats: 8-bit 420, 422, 444")),
+                        _ => {
+                            let (layout,depth)=value.split_once('p').ok_or_else(||invalid("unsupported Y4M pixel format"))?;
+                            if !matches!(depth,"9"|"10"|"12"|"14"|"16") {return Err(invalid("unsupported Y4M sample depth"));}
+                            match layout {"420"=>PixelFormat::Yuv420,"422"=>PixelFormat::Yuv422,"444"=>PixelFormat::Yuv444,_=>return Err(invalid("unsupported Y4M chroma layout"))}
+                        },
                     });
                 }
                 b'I' if value != "p" && value != "?" => {
@@ -88,6 +92,9 @@ impl Header {
         };
         header.frame_len()?;
         Ok(header)
+    }
+    pub fn depth(&self)->u8 {
+        self.tokens.iter().find_map(|t| t.strip_prefix('C').and_then(|v|v.split_once('p')).and_then(|(_,d)|d.parse().ok())).unwrap_or(8)
     }
     pub fn frame_len(&self) -> Result<usize> {
         let (sx, sy) = self.format.subsampling();
@@ -107,6 +114,7 @@ impl Header {
                 .checked_mul(2)
                 .ok_or_else(|| invalid("dimensions overflow"))?,
         )
+        .and_then(|n|n.checked_mul(if self.depth()==8 {1} else {2}))
         .ok_or_else(|| invalid("dimensions overflow"))
     }
     fn encode(&self, width: usize, height: usize) -> String {
@@ -169,6 +177,7 @@ impl Plan {
     }
     /// `memory_limit` bounds the combined input and output frame payloads.
     pub fn new(header: &Header, transform: Transform, memory_limit: usize) -> Result<Self> {
+        if header.depth()!=8 {return Err(invalid("byte transform pipeline requires 8-bit Y4M; use owned sample-plane geometry for high depth"));}
         let c = transform.crop.unwrap_or(Crop {
             x: 0,
             y: 0,

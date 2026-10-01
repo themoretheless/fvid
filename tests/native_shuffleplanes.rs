@@ -62,8 +62,13 @@ fn owned_plane_shuffle_matches_saved_oracles_at_source_precision() {
 #[test]
 fn shared_decode_and_cli_execute_shuffle_without_legacy_backend() {
     for (name, _, _, _, args) in CASES {
+        for extension in ["mkv","y4m"] {
         let path = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join(format!("tests/fixtures/playback-errors/{name}.mkv"));
+            .join(format!("tests/fixtures/playback-errors/{name}.{extension}"));
+        if extension == "y4m" {
+            let info=fvid::native_probe::try_probe_as(&path,None).unwrap().expect("Y4M probe must remain owned");
+            assert_eq!(info.duration_us,Some(80000));assert_eq!(info.streams[0].duration,Some(2));
+        }
         let request = fvid::media_info::DecodeTransform {
             shuffleplanes: Some(args.into()),
             ..Default::default()
@@ -93,6 +98,7 @@ fn shared_decode_and_cli_execute_shuffle_without_legacy_backend() {
                 .backend,
             "fvid"
         );
+        }
     }
 }
 #[test]
@@ -107,8 +113,9 @@ fn lossless_export_preserves_shuffled_plane_bytes_and_plans_owned_filter() {
     }
     let _cleanup = Cleanup(dir.clone());
     for (name, _, expected, _, args) in CASES {
+        for extension in ["mkv","y4m"] {
         let source = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join(format!("tests/fixtures/playback-errors/{name}.mkv"));
+            .join(format!("tests/fixtures/playback-errors/{name}.{extension}"));
         let request = fvid::media_info::LosslessTransform {
             shuffleplanes: Some(args.into()),
             ..Default::default()
@@ -121,7 +128,7 @@ fn lossless_export_preserves_shuffled_plane_bytes_and_plans_owned_filter() {
                 .any(|step| step.detail.contains("FVid shuffleplanes="))
         );
         let (geometry, filters) = fvid::native_lossless::configuration(&request).unwrap();
-        let destination = dir.join(format!("{name}.mkv"));
+        let destination = dir.join(format!("{name}-{extension}.mkv"));
         fvid::native_export::transcode_ffv1_transformed(
             &source,
             &destination,
@@ -142,6 +149,7 @@ fn lossless_export_preserves_shuffled_plane_bytes_and_plans_owned_filter() {
             actual.extend(VideoGeometry::default().apply(&raw, w, h).unwrap().data);
         }
         assert_eq!(actual, expected);
+        }
     }
 }
 #[test]
@@ -165,19 +173,36 @@ fn absent_planes_and_invalid_storage_are_explicit_atomic_refusals() {
 }
 
 #[test]
-fn high_depth_y4m_refusal_reproduces_the_specific_reader_gap() {
-    for data in [
-        include_bytes!("fixtures/playback-errors/shuffleplanes-420-10.y4m").as_slice(),
-        include_bytes!("fixtures/playback-errors/shuffleplanes-444-16.y4m").as_slice(),
-    ] {
-        let error = NativeReader::software(Cursor::new(data), usize::MAX)
-            .err()
-            .expect("high-depth Y4M is still unsupported");
-        assert!(
-            error
-                .to_string()
-                .contains("supported pixel formats: 8-bit 420, 422, 444"),
-            "{error}"
-        );
+fn high_depth_y4m_accepts_exact_samples_and_rewind() {
+    for (data,depth) in [(include_bytes!("fixtures/playback-errors/shuffleplanes-420-10.y4m").as_slice(),10),(include_bytes!("fixtures/playback-errors/shuffleplanes-444-16.y4m").as_slice(),16)] {
+        let mut reader=NativeReader::software(Cursor::new(data),usize::MAX).unwrap();
+        let mut frames=Vec::new();
+        while let Some(raw)=reader.read_frame_raw().unwrap() {
+            match &raw {fvid::playback_native::RawFrame::Planar(p)=>assert_eq!(p.depth,depth),_=>panic!("high depth must retain planar samples")}
+            let [w,h]=reader.dimensions();frames.push(VideoGeometry::default().apply(&raw,w,h).unwrap().data);
+        }
+        assert_eq!(frames.len(),2);
+        let mut offset=data.iter().position(|&b|b==b'\n').unwrap()+1;
+        for frame in &frames {assert_eq!(&data[offset..offset+6],b"FRAME\n");offset+=6;assert_eq!(&data[offset..offset+frame.len()],frame);offset+=frame.len();}
+        reader.rewind().unwrap();
+        let raw=reader.read_frame_raw().unwrap().unwrap();let [w,h]=reader.dimensions();assert_eq!(VideoGeometry::default().apply(&raw,w,h).unwrap().data,frames[0]);
+        reader.rewind().unwrap();assert!(reader.read_frame().unwrap());assert_eq!(reader.rgb().len(),8*8*3);
+    }
+}
+
+#[test]
+fn declared_y4m_depths_and_layouts_keep_full_width_samples() {
+    for depth in [9u8,10,12,14,16] {
+        for (layout,sx,sy) in [("420",2,2),("422",2,1),("444",1,1)] {
+            let header=format!("YUV4MPEG2 W4 H2 F25:1 Ip C{layout}p{depth}\n");
+            let maximum=((1u32<<depth)-1) as u16;
+            let samples:Vec<_>=(0..8+2*(4/sx)*(2/sy)).map(|i|if i%2==0 {maximum} else {i as u16}).flat_map(u16::to_le_bytes).collect();
+            let mut data=header.as_bytes().to_vec();data.extend_from_slice(b"FRAME\n");data.extend_from_slice(&samples);
+            let parsed=fvid::Header::parse(header.as_bytes()).unwrap();assert_eq!(parsed.depth(),depth);assert_eq!(parsed.frame_len().unwrap(),samples.len());
+            assert!(fvid::Plan::new(&parsed,Default::default(),usize::MAX).unwrap_err().to_string().contains("byte transform pipeline requires 8-bit"));
+            let mut reader=NativeReader::software(Cursor::new(data),usize::MAX).unwrap();
+            let raw=reader.read_frame_raw().unwrap().unwrap();assert_eq!(VideoGeometry::default().apply(&raw,4,2).unwrap().data,samples);
+            assert!(reader.read_frame_raw().unwrap().is_none());
+        }
     }
 }

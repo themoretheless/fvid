@@ -4,7 +4,7 @@ use crate::{Header, Result, buffer, invalid, line};
 use std::io::{BufRead, Seek, SeekFrom};
 use std::time::Duration;
 
-/// Streaming 8-bit planar Y4M playback, using BT.601 limited or full-range colour.
+/// Streaming 8/9/10/12/14/16-bit planar Y4M playback, using BT.601 limited or full-range colour.
 /// Frame storage is reused; the budget covers the YUV and RGB buffers only.
 pub struct Y4mReader<R> {
     reader: R,
@@ -147,6 +147,9 @@ impl<R: BufRead + Seek> Y4mReader<R> {
         if !self.read_frame_raw()? {
             return Ok(false);
         }
+        if self.depth()!=8 {
+            let packed=self.packed()?;let budget=self.rgb.len();packed.to_rgb(&mut self.rgb,budget)?;return Ok(true);
+        }
         let (sx, sy) = self.header.format.subsampling();
         let luma_len = self.header.width * self.header.height;
         let chroma_len = luma_len / sx / sy;
@@ -174,6 +177,13 @@ impl<R: BufRead + Seek> Y4mReader<R> {
         self.reader.read_exact(&mut self.yuv)?;
         self.frames_read += 1;
         Ok(true)
+    }
+    pub fn depth(&self)->u8 {self.header.depth()}
+    pub fn packed(&self)->Result<crate::playback_native::PackedPlanar> {
+        let (sx,sy)=self.subsampling();
+        crate::playback_native::PackedPlanar::new(crate::native_geometry::GeometryFrame {
+            width:self.width(),height:self.height(),subsampling:Some([sx,sy]),data:self.yuv.clone(),
+        },self.depth(),crate::playback_native::AvcColour {kr:0.299,kb:0.114,full:self.full_range()})
     }
     pub fn subsampling(&self) -> (usize, usize) {
         self.header.format.subsampling()

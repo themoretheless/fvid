@@ -28,13 +28,20 @@ sampling. The reference filter specification/source is available at
 https://ffmpeg.org/ffmpeg-filters.html#shuffleplanes and
 https://www.ffmpeg.org/doxygen/8.0/vf__shuffleplanes_8c_source.html .
 
-Five tests pass both without default features and with `media`: exact oracle
-bytes, shared API/CLI decode, owned plans and FFV1 decode after export, atomic
-invalid-storage refusals, and a specific high-depth Y4M refusal. Native
-headless/player/camera dependency checks contain no FFmpeg adapter.
+The original high-depth Y4M refusal fixtures now have enabled acceptance:
+reading preserves 10/16-bit sample bytes, rewind is exact and RGB preview works.
+The same filter and FFV1 export cases run directly from Y4M and from Matroska.
+An additional synthetic sample test checks all declared 9/10/12/14/16-bit
+420/422/444 reader profiles and byte-size calculations. The old byte transform
+API explicitly rejects high-depth input; use the owned sample-plane geometry
+pipeline for those transforms.
 
-The high-depth Y4M fixtures reproduce the existing reader's `supported pixel
-formats: 8-bit 420, 422, 444` limitation. That test is a refusal reproduction,
-not acceptance of high-depth Y4M. The high-depth shuffle acceptance cases use
-owned FFV1/Matroska decoding. Remaining legacy media operations, high-depth
-Y4M reading and codec gaps are not declared finished by this change.
+The preceding commit's refusal test reproduced the specific `supported pixel
+formats: 8-bit 420, 422, 444` gap; it was replaced with acceptance in the fix.
+Remaining legacy media operations and codec gaps are not declared finished.
+
+Validation of the Y4M extension: six regression tests without default features
+passed; the core library suite passed 652 tests with three ignored.
+The same six regression tests passed with `media`, and the player builds.
+High-depth Y4M also stays on the owned probe path; fixture timing assertions
+confirm two frames and 80,000 microseconds without legacy demuxing.

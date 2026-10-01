@@ -343,7 +343,8 @@ fn try_y4m(source: &Path) -> Result<Option<MediaInfo>> {
     let mut header=Vec::new();crate::line(&mut input,&mut header).map_err(|e|e.to_string())?;
     let text=std::str::from_utf8(&header).map_err(|_|"Y4M header is not UTF-8")?;
     for token in text.split_whitespace().skip(1) {
-        if token.starts_with('C') && !matches!(token,"C420"|"C420jpeg"|"C420mpeg2"|"C420paldv"|"C422"|"C444") {return Ok(None);}
+        if token.starts_with('C') && !matches!(token,"C420"|"C420jpeg"|"C420mpeg2"|"C420paldv"|"C422"|"C444")
+            && !token.strip_prefix('C').and_then(|v|v.split_once('p')).is_some_and(|(layout,depth)|matches!(layout,"420"|"422"|"444") && matches!(depth,"9"|"10"|"12"|"14"|"16")) {return Ok(None);}
         if token.starts_with('I') && !matches!(token,"Ip"|"I?") {return Ok(None);}
     }
     y4m(source).map(Some)

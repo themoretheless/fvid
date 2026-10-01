@@ -608,6 +608,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
     pub fn read_frame_raw(&mut self) -> Result<Option<RawFrame>> {
         match self {
             Self::Y4m(reader) => Ok(if reader.read_frame_raw()? {
+                if reader.depth()!=8 {return Ok(Some(RawFrame::Planar(Arc::new(reader.packed()?))));}
                 let (sx, sy) = reader.subsampling();
                 let width = reader.width();
                 let height = reader.height();
