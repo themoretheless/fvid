@@ -361,7 +361,7 @@ pub fn try_convert(
 /// `None` preserves the adapter for unsupported text encodings or markup.
 /// Recognized invalid timing never publishes a partial output.
 /// Preserve standalone UTF-8 ASS scripts and dialogue fields in Matroska.
-/// Noncanonical event formats retain the legacy path before publication.
+/// Complete event formats may reorder fields; Text must be last.
 pub fn try_convert_ass(
     source: &Path,
     destination: &Path,
@@ -393,7 +393,7 @@ pub fn try_convert_ass(
     let mut configuration = String::new();
     let mut events = Vec::new();
     let mut in_events = false;
-    let mut format = false;
+    let mut format: Option<[usize; 10]> = None;
     let canonical = "layer,start,end,style,name,marginl,marginr,marginv,effect,text";
     let ass_time = |value: &str| -> Result<u64> {
         let (clock, fraction) = value
@@ -409,39 +409,41 @@ pub fn try_convert_ass(
         let trimmed = line.trim();
         if trimmed.starts_with('[') {
             in_events = trimmed.eq_ignore_ascii_case("[Events]");
-            format = false;
+            format = None;
         }
         if in_events {
             if let Some(value) = trimmed.strip_prefix("Format:") {
-                format = value
-                    .split(',')
-                    .map(|s| s.trim().to_ascii_lowercase())
-                    .collect::<Vec<_>>()
-                    .join(",")
-                    == canonical;
-                if !format {
-                    return Ok(None);
+                let declared: Vec<_> = value.split(',').map(|s| s.trim().to_ascii_lowercase()).collect();
+                let names: Vec<_> = canonical.split(',').collect();
+                if declared.len()!=10 || declared.last().map(String::as_str)!=Some("text") { return Ok(None); }
+                let mut order = [0;10];
+                for (index,name) in names.iter().enumerate() {
+                    if declared.iter().filter(|s|s.as_str()==*name).count()!=1 { return Ok(None); }
+                    order[index] = declared.iter().position(|s|s==name).unwrap();
+                }
+                format = Some(order);
+                if order.iter().enumerate().any(|(i,at)|i!=*at) {
+                    configuration.push_str("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n");
+                    continue;
                 }
             }
             if let Some(value) = line.trim_start().strip_prefix("Dialogue:") {
-                if !format {
-                    return Ok(None);
-                }
+                let Some(order) = format else { return Ok(None); };
                 let fields: Vec<_> = value.trim_start().splitn(10, ',').collect();
                 if fields.len() != 10 {
                     return Err(invalid("invalid ASS dialogue fields"));
                 }
-                let layer = fields[0]
+                let layer = fields[order[0]]
                     .trim()
                     .parse::<i32>()
                     .map_err(|_| invalid("invalid ASS layer"))?;
-                let start = ass_time(fields[1])?;
-                let end = ass_time(fields[2])?;
+                let start = ass_time(fields[order[1]])?;
+                let end = ass_time(fields[order[2]])?;
                 if start >= end {
                     return Err(invalid("ASS dialogue requires start before end"));
                 }
                 let payload =
-                    format!("{},{layer},{}", events.len(), fields[3..].join(",")).into_bytes();
+                    format!("{},{layer},{}", events.len(), order[3..].iter().map(|at|fields[*at]).collect::<Vec<_>>().join(",")).into_bytes();
                 events.push((start, end, payload));
                 continue;
             }

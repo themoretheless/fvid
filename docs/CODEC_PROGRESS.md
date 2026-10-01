@@ -1588,3 +1588,10 @@ start time. Tests cover overlapping/nonchronological cues, header and payload
 bytes, CLI/API equality, existing-output protection and invalid timing with no
 output. Noncanonical Events layouts and non-UTF8 files retain the legacy adapter
 before publication; SSA and arbitrary field layouts are not covered here.
+
+ASS Events declarations may now reorder the ten supported field names, with
+Text last so commas remain unambiguous. The parser maps each field to canonical
+Matroska packet order and normalizes the Events Format header accordingly; styles
+and text are preserved. Duplicate/missing fields and Text in a nonfinal position
+retain the legacy path before publication. A reordered synthetic cue verifies
+layer, actor/style/margins, text overrides and exact timing.

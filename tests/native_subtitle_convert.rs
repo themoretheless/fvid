@@ -479,3 +479,21 @@ fn standalone_ass_preserves_styles_dialogue_fields_and_timestamps() {
     assert!(fvid::native_subtitle::try_convert(&source,&invalid,&[]).is_err());
     assert!(!invalid.exists());
 }
+
+#[test]
+fn reordered_ass_fields_map_to_matroska_packet_order() {
+    let dir = std::env::temp_dir().join(format!("fvid-ass-order-{}",std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    struct Cleanup(PathBuf);
+    impl Drop for Cleanup { fn drop(&mut self){let _=std::fs::remove_dir_all(&self.0);} }
+    let _cleanup=Cleanup(dir.clone());
+    let source=dir.join("order.ass");
+    let output=dir.join("order.mkv");
+    std::fs::write(&source,"[Script Info]\nScriptType: v4.00+\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize\nStyle: Fancy,Arial,24\n[Events]\nFormat: Start, End, Name, Style, MarginV, Layer, MarginR, MarginL, Effect, Text\nDialogue: 0:00:00.10,0:00:01.20,Actor,Fancy,30,2,20,10,,{\\i1}Text, comma\n").unwrap();
+    assert_eq!(fvid::native_subtitle::try_convert(&source,&output,&[]).unwrap().unwrap().cues,1);
+    let mut reader=fvid::container::webm::WebmReader::open(std::fs::File::open(&output).unwrap(),Default::default()).unwrap();
+    reader.scan_all().unwrap();
+    assert_eq!(reader.read_packet(0).unwrap(),b"0,2,Fancy,Actor,10,20,30,,{\\i1}Text, comma");
+    assert_eq!(reader.packets[0].pts_ns,100_000_000);
+    assert!(std::str::from_utf8(&reader.tracks[0].codec_private).unwrap().contains("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"));
+}
