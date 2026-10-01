@@ -132,7 +132,7 @@ fn rext_intra_reference_filtering_matches_oracles_and_reset() {
 #[test]
 fn unsupported_range_tools_are_not_silently_ignored() {
     use fvid::codec::hevc_nal::NalRbsp;
-    let source = include_bytes!("fixtures/playback-errors/hevc-rext-smoothing-8-enabled.mp4");
+    let source = include_bytes!("fixtures/playback-errors/hevc-rext-smoothing-8-disabled.mp4");
     let input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
     let configuration = input.tracks()[0].configuration.clone();
     let parsed = HevcConfig::parse(&configuration).unwrap();

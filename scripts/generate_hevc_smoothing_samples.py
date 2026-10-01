@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-"""Synthetic RExt intra-reference filtering oracles; generation only needs FFmpeg."""
-from pathlib import Path
+"""Synthetic HEVC RExt smoothing/rotation fixtures, generated without FFmpeg."""
 import argparse
-import re
+from pathlib import Path
 import subprocess
 import tempfile
-
-ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / 'tests/fixtures/playback-errors'
-
+import re
+from hevc_fixture_mp4 import mux
 
 def unescape(data):
     return data.replace(b'\x00\x00\x03', b'\x00\x00')
@@ -48,55 +45,53 @@ def rewrite(nal, disabled, rotation=False):
     return nal[:2] + escape(data)
 
 
-def run(*args):
-    subprocess.run(['ffmpeg', '-v', 'error', '-y', *map(str, args)], check=True)
-
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--rotation', action='store_true', help='generate skip/bypass rotation fixtures')
-parser.add_argument('--hm-decoder', type=Path, help='HM 18 decoder required for rotation bypass oracles')
+parser.add_argument('--rotation', action='store_true')
+parser.add_argument('--hm-encoder', type=Path, required=True)
+parser.add_argument('--hm-decoder', type=Path, required=True)
+parser.add_argument('--hm-config', type=Path, required=True)
+parser.add_argument('--output', type=Path, default=Path(__file__).resolve().parents[1] / 'tests/fixtures/playback-errors')
 args = parser.parse_args()
-if args.rotation and args.hm_decoder is None:
-    parser.error('--rotation requires --hm-decoder for independent bypass verification')
-
-with tempfile.TemporaryDirectory(prefix='fvid-hevc-smoothing-') as temporary:
-    tmp = Path(temporary)
+args.output.mkdir(parents=True, exist_ok=True)
+with tempfile.TemporaryDirectory(prefix='fvid-hevc-smoothing-') as directory:
+    tmp = Path(directory)
     for depth in (8, 10):
+        source = tmp / 'source.yuv'
+        raw = bytearray()
+        for frame in range(3):
+            for plane, side in enumerate((64, 32, 32)):
+                for y in range(side):
+                    for x in range(side):
+                        value = (24 + plane * 19 + (x * 3 + y * 5 + frame * 17) % 112 + ((x // 8 + y // 8) % 2) * 64) << (depth - 8)
+                        raw.extend(bytes([value]) if depth == 8 else value.to_bytes(2, 'little'))
+        source.write_bytes(raw)
         for mode in (('skip', 'bypass') if args.rotation else ('smoothing',)):
-            pix = 'yuv420p' if depth == 8 else 'yuv420p10le'
-            raw = tmp / 'source.hevc'
-            options = 'log-level=error:pools=none:frame-threads=1:ctu=32:wpp=0:aq-mode=0:qp=24:no-sao=1:no-deblock=1:keyint=1'
-            if args.rotation:
-                options += ':tskip=1:max-tu-size=4'
-                if mode == 'bypass':
-                    options += ':lossless=1'
-            run('-f', 'lavfi', '-i', 'testsrc2=size=64x64:rate=25', '-frames:v', 3,
-                '-pix_fmt', pix, '-c:v', 'libx265', '-x265-params', options,
-                '-f', 'hevc', raw)
-            units = [nal for nal in re.split(b'\x00\x00\x00?\x01', raw.read_bytes()) if nal]
             references = []
+            results = []
             for switched in (False, True):
-                if args.rotation:
-                    name = f'hevc-rext-rotation-{depth}-{mode}-' + ('enabled' if switched else 'disabled')
-                else:
-                    name = f'hevc-rext-smoothing-{depth}-' + ('disabled' if switched else 'enabled')
-                stream = tmp / 'updated.hevc'
-                stream.write_bytes(b''.join(b'\x00\x00\x00\x01' + rewrite(nal, switched, args.rotation) for nal in units))
-                run('-r', 25, '-i', stream, '-c:v', 'copy', '-tag:v', 'hvc1', OUT / (name + '.mp4'))
-                run('-i', stream, '-pix_fmt', pix, '-f', 'rawvideo', OUT / (name + '.yuv'))
-                if args.rotation:
-                    ff_reference = (OUT / (name + '.yuv')).read_bytes()
-                    hm_output = tmp / 'hm.yuv'
-                    subprocess.run([str(args.hm_decoder), '-b', str(stream), '-o', str(hm_output),
-                                    f'--OutputBitDepth={depth}', f'--OutputBitDepthC={depth}',
-                                    '--SEIDecodedPictureHash=0'], check=True)
-                    reference = hm_output.read_bytes()
-                    if mode == 'skip' or not switched:
-                        assert reference == ff_reference, 'HM and FFmpeg differ outside rotated bypass'
-                    elif reference == ff_reference:
-                        raise AssertionError('bypass fixture does not distinguish reference decoders')
-                    (OUT / (name + '.yuv')).write_bytes(reference)
-                reference = (OUT / (name + '.yuv')).read_bytes()
+                name = (f'hevc-rext-rotation-{depth}-{mode}-' + ('enabled' if switched else 'disabled')) if args.rotation else (f'hevc-rext-smoothing-{depth}-' + ('disabled' if switched else 'enabled'))
+                stream, recon, decoded = tmp / 'stream.hevc', tmp / 'recon.yuv', tmp / 'decoded.yuv'
+                subprocess.run([str(args.hm_encoder), '-c', str(args.hm_config), '-i', str(source), '-b', str(stream), '-o', str(recon),
+                    '-wdt', '64', '-hgt', '64', '-fr', '25', '-f', '3', f'--InputBitDepth={depth}', f'--InternalBitDepth={depth}',
+                    '--InputChromaFormat=420', '--MaxCUWidth=32', '--MaxCUHeight=32', '--MaxPartitionDepth=3',
+                    f'--QuadtreeTULog2MaxSize={2 if args.rotation else 4}', f'--TransformSkip={int(args.rotation)}',
+                    '--ResidualRotation=0', f'--IntraReferenceSmoothing={int(not switched or args.rotation)}',
+                    '--ImplicitResidualDPCM=0', '--ExplicitResidualDPCM=0', '--GolombRiceParameterAdaptation=0',
+                    '--SingleSignificanceMapContext=0', '--HighPrecisionPredictionWeighting=0', '--CrossComponentPrediction=0',
+                    '--SAO=0', '--LoopFilterDisable=1', '--QP=24', f'--TransquantBypassEnable={int(mode == "bypass")}',
+                    f'--CUTransquantBypassFlagForce={int(mode == "bypass")}'], check=True)
+                if args.rotation and switched:
+                    units = [nal for nal in re.split(b'\x00\x00\x00?\x01', stream.read_bytes()) if nal]
+                    stream.write_bytes(b''.join(b'\x00\x00\x00\x01' + rewrite(nal, True, True) for nal in units))
+                subprocess.run([str(args.hm_decoder), '-b', str(stream), '-o', str(decoded), f'--OutputBitDepth={depth}', f'--OutputBitDepthC={depth}'], check=True)
+                reference = decoded.read_bytes()
+                if not (args.rotation and switched):
+                    assert reference == recon.read_bytes(), 'HM reconstruction and decoding differ'
                 assert len(reference) == 3 * 64 * 64 * 3 // 2 * (1 if depth == 8 else 2)
                 references.append(reference)
-            assert references[0] != references[1], 'fixture does not exercise the selected RExt tool'
+                results.append((name, mux(stream.read_bytes(), depth), reference))
+            assert references[0] != references[1], 'source does not exercise selected tool'
+            for name, mp4, reference in results:
+                (args.output / (name + '.mp4')).write_bytes(mp4)
+                (args.output / (name + '.yuv')).write_bytes(reference)
