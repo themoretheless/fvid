@@ -239,7 +239,7 @@ fn decode_to_packed_f32(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
             check(code, "receive audio frame")?;
             unsafe {
                 let f = &*frame.0;
-                let packed = av_get_packed_sample_fmt(f.format);
+                let packed = super::pcm_format_adapter::packed(f.format);
                 if packed != AVSampleFormat_AV_SAMPLE_FMT_FLT {
                     av_frame_unref(frame.0);
                     return Err(
@@ -274,7 +274,7 @@ fn decode_to_packed_f32(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
                     }
                 }
                 let active = stats.as_mut().unwrap();
-                if av_sample_fmt_is_planar(f.format) != 0 && channels > 1 {
+                if super::pcm_format_adapter::planar(f.format) && channels > 1 {
                     let mut planes = [ptr::null(); 64];
                     for (channel, plane) in planes[..channels].iter_mut().enumerate() {
                         let base = *f.extended_data.add(channel);

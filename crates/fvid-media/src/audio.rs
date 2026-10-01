@@ -43,7 +43,7 @@ pub(crate) unsafe fn apply_volume(frame: *mut AVFrame, gain: f64) -> Result<()> 
         if channels == 0 || samples == 0 || f.extended_data.is_null() {
             return Err("invalid audio frame for volume".into());
         }
-        let planar = av_sample_fmt_is_planar(f.format) != 0;
+        let planar = super::pcm_format_adapter::planar(f.format);
         let fmt = f.format;
         if fmt == AVSampleFormat_AV_SAMPLE_FMT_FLT || fmt == AVSampleFormat_AV_SAMPLE_FMT_FLTP {
             let gain = gain as f32;
@@ -138,7 +138,7 @@ impl Resampler {
     unsafe fn open(frame: *const AVFrame, out_rate: i32, out_channels: i32) -> Result<Self> {
         unsafe {
             let f = &*frame;
-            let out_format = av_get_packed_sample_fmt(f.format);
+            let out_format = super::pcm_format_adapter::packed(f.format);
             if out_format < 0 {
                 return Err("unsupported decoded audio format for resample".into());
             }
@@ -444,7 +444,7 @@ impl AudioSink {
         // guarded before fallible calls and copied by Output before their release.
         unsafe {
             let f = &*frame.0;
-            let format = av_get_packed_sample_fmt(f.format);
+            let format = super::pcm_format_adapter::packed(f.format);
             let ids = [
                 AVCodecID_AV_CODEC_ID_PCM_U8,
                 AVCodecID_AV_CODEC_ID_PCM_S16LE,
@@ -470,7 +470,7 @@ impl AudioSink {
             p.codec_id = codec;
             p.format = format;
             p.sample_rate = f.sample_rate;
-            p.bits_per_coded_sample = av_get_bytes_per_sample(format) * 8;
+            p.bits_per_coded_sample = super::pcm_format_adapter::bytes(format) * 8;
             p.bits_per_raw_sample = p.bits_per_coded_sample;
             p.block_align = p.bits_per_coded_sample / 8 * f.ch_layout.nb_channels;
             p.bit_rate = i64::from(p.sample_rate) * i64::from(p.block_align) * 8;
@@ -483,7 +483,7 @@ impl AudioSink {
                 decoded_frames: 0,
                 sample_rate: f.sample_rate,
                 channels: f.ch_layout.nb_channels,
-                sample_format: string(av_get_sample_fmt_name(format)),
+                sample_format: super::pcm_format_adapter::name(format),
                 planar_interleave_bytes: 0,
                 decode_errors: 0,
             };
@@ -534,14 +534,14 @@ impl AudioSink {
         unsafe {
             let f = &*frame.0;
             let channels = self.stats.channels as usize;
-            if av_get_packed_sample_fmt(f.format) != self.format
+            if super::pcm_format_adapter::packed(f.format) != self.format
                 || f.sample_rate != self.stats.sample_rate
                 || av_channel_layout_compare(&f.ch_layout, &(*self.parameters.0).ch_layout) != 0
                 || f.nb_samples <= 0
             {
                 return Err("dynamic audio format/rate/layout is not supported".into());
             }
-            let bytes = av_get_bytes_per_sample(self.format) as usize;
+            let bytes = super::pcm_format_adapter::bytes(self.format) as usize;
             let frame_count = f.nb_samples as usize;
             if count == 0
                 || offset
@@ -561,7 +561,7 @@ impl AudioSink {
             if let Some(pcm) = self.wav_pcm.as_mut() {
                 let start = pcm.len();
                 pcm.resize(start + size, 0);
-                if av_sample_fmt_is_planar(f.format) != 0 && channels > 1 {
+                if super::pcm_format_adapter::planar(f.format) && channels > 1 {
                     if (f.linesize[0].max(0) as usize) < frame_count * bytes {
                         return Err("short planar audio buffer".into());
                     }
@@ -596,7 +596,7 @@ impl AudioSink {
                 return Ok(());
             }
             av_packet_unref(packet.0);
-            if av_sample_fmt_is_planar(f.format) != 0 && channels > 1 {
+            if super::pcm_format_adapter::planar(f.format) && channels > 1 {
                 if (f.linesize[0].max(0) as usize) < frame_count * bytes {
                     return Err("short planar audio buffer".into());
                 }
@@ -1039,7 +1039,7 @@ pub(super) fn pcm_parameters_for_interval_decode(
         p.codec_id = codec;
         p.format = format;
         p.sample_rate = codecpar.sample_rate;
-        p.bits_per_coded_sample = av_get_bytes_per_sample(format) * 8;
+        p.bits_per_coded_sample = super::pcm_format_adapter::bytes(format) * 8;
         p.bits_per_raw_sample = p.bits_per_coded_sample;
         p.block_align = p.bits_per_coded_sample / 8 * codecpar.ch_layout.nb_channels;
         p.bit_rate = i64::from(p.sample_rate) * i64::from(p.block_align) * 8;
@@ -1075,7 +1075,7 @@ pub(super) fn write_interval_pcm_frame(
         if f.nb_samples <= 0 || f.sample_rate <= 0 {
             return Err("invalid decoded audio frame geometry".into());
         }
-        let packed = av_get_packed_sample_fmt(f.format);
+        let packed = super::pcm_format_adapter::packed(f.format);
         if packed != expected_format {
             return Err("decoded audio format does not match interval PCM override".into());
         }
@@ -1108,14 +1108,14 @@ pub(super) fn write_interval_pcm_frame(
             .map_err(|_| "audio sample count overflow")?;
         unsafe {
             let f = &*frame.0;
-            let bytes = av_get_bytes_per_sample(packed) as usize;
+            let bytes = super::pcm_format_adapter::bytes(packed) as usize;
             let size = count
                 .checked_mul(channels)
                 .and_then(|n| n.checked_mul(bytes))
                 .filter(|&n| n <= max_packet_bytes && n <= i32::MAX as usize)
                 .ok_or("decoded audio block exceeds packet budget")?;
             av_packet_unref(packet.0);
-            if av_sample_fmt_is_planar(f.format) != 0 && channels > 1 {
+            if super::pcm_format_adapter::planar(f.format) && channels > 1 {
                 if (f.linesize[0].max(0) as usize) < frame_count as usize * bytes {
                     return Err("short planar audio buffer".into());
                 }

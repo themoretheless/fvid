@@ -25,6 +25,7 @@ pub use plan::{
 };
 mod audio;
 mod audio_layout;
+mod pcm_format_adapter;
 mod audio_mix;
 mod decode;
 mod filter;

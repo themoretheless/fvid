@@ -29,3 +29,5 @@ pub mod owned_resample_f64;
 pub mod owned_pcm_gain_f64;
 
 pub mod owned_pcm_integer;
+
+pub mod owned_pcm_format;

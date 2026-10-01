@@ -63,7 +63,7 @@ impl EburGraph {
                 sink: ptr::null_mut(),
             };
             let layout = describe_layout(&frame.ch_layout)?;
-            let sample_fmt = string(av_get_sample_fmt_name(frame.format));
+            let sample_fmt = super::pcm_format_adapter::name(frame.format);
             let mut time_base = frame.time_base;
             if time_base.num <= 0 || time_base.den <= 0 {
                 time_base = AVRational {
@@ -181,7 +181,7 @@ impl LoudnormGraph {
                 sink: ptr::null_mut(),
             };
             let layout = describe_layout(&frame.ch_layout)?;
-            let sample_fmt = string(av_get_sample_fmt_name(frame.format));
+            let sample_fmt = super::pcm_format_adapter::name(frame.format);
             let mut time_base = frame.time_base;
             if time_base.num <= 0 || time_base.den <= 0 {
                 time_base = AVRational {
