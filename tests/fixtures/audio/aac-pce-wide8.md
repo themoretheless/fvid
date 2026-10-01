@@ -64,3 +64,6 @@ produces byte-identical owned PCM. WAVE speaker mask is 0xff.
 Channel layout semantics verified against the primary reference tables:
 https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavcodec/aac/aacdec_tab.c
 https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavcodec/aac/aacdec.c
+
+Preceding FIL tests cover lengths 0, 1, 14, 15 and 269 bytes, fill/fill-data
+extensions, exact PCM, every first-frame truncation, and SBR rejection.

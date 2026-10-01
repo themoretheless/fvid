@@ -152,20 +152,7 @@ impl NativeAacDecoder {
                         return Err(invalid("AAC in-band PCE changed the configured layout"));
                     }
                 }
-                6 => {
-                    let mut count = bits.read(4)? as usize;
-                    if count == 15 {
-                        count += bits.read(8)? as usize;
-                        count -= 1;
-                    }
-                    if count > 0 {
-                        let extension = bits.read(4)?;
-                        if !matches!(extension, 0 | 1) {
-                            return Err(unsupported("AAC fill extension tool is not implemented"));
-                        }
-                        bits.skip(count * 8 - 4)?;
-                    }
-                }
+                6 => super::aac_pce::skip_fill(&mut bits)?,
                 7 => break,
                 _ => return Err(unsupported("AAC raw-data-block element is not implemented")),
             }

@@ -467,3 +467,70 @@ fn adts_pce_after_aligned_data_stream_preserves_pcm_and_checks_truncation() {
         }
     }
 }
+
+#[test]
+fn adts_program_after_fill_elements_retains_audio_and_rejects_tools() {
+    use fvid::container::adts::StreamReader;
+    let source = include_bytes!("fixtures/audio/aac-pce-wide8.aac");
+    let mut expected = Vec::new();
+    fvid::native_media::decode_aac_pcm(source, &mut expected, &Default::default()).unwrap();
+    for count in [0usize, 1, 14, 15, 269] {
+        let mut bits = Vec::new();
+        let mut field = |value: usize, width: usize| {
+            for bit in (0..width).rev() {
+                bits.push((value >> bit) & 1 != 0);
+            }
+        };
+        // Eight FIL elements make the prefix byte aligned; the original PCE
+        // alignment and audio payload are retained verbatim.
+        for _ in 0..8 {
+            field(6, 3);
+            field(count.min(15), 4);
+            if count >= 15 {
+                field(count - 14, 8);
+            }
+            for index in 0..count {
+                field(if count == 14 && index == 0 { 0x10 } else { 0 }, 8);
+            }
+        }
+        let prefix: Vec<u8> = bits
+            .chunks_exact(8)
+            .map(|byte| byte.iter().fold(0, |value, bit| value * 2 + u8::from(*bit)))
+            .collect();
+        assert_eq!(bits.len() % 8, 0);
+        let old_size = ((source[3] as usize & 3) << 11)
+            | ((source[4] as usize) << 3)
+            | (source[5] as usize >> 5);
+        let size = old_size + prefix.len();
+        let mut altered = source[..7].to_vec();
+        altered[3] = (altered[3] & 252) | (size >> 11) as u8;
+        altered[4] = (size >> 3) as u8;
+        altered[5] = (altered[5] & 31) | ((size & 7) << 5) as u8;
+        altered.extend(prefix);
+        altered.extend_from_slice(&source[7..]);
+        let mut actual = Vec::new();
+        fvid::native_media::decode_adts_aac_reader(
+            StreamReader::open(altered.as_slice()).unwrap(),
+            &mut actual,
+            None,
+        )
+        .unwrap();
+        assert_eq!(actual, expected);
+        for cut in 7..size {
+            assert!(StreamReader::open(&altered[..cut]).is_err());
+        }
+        if count != 0 {
+            let payload_bit = if count >= 15 { 15 } else { 7 };
+            // Change the first extension to SBR (13), which must not be skipped.
+            for (offset, set) in [true, true, false, true].into_iter().enumerate() {
+                let bit = 56 + payload_bit + offset;
+                if set {
+                    altered[bit / 8] |= 1 << (7 - bit % 8);
+                } else {
+                    altered[bit / 8] &= !(1 << (7 - bit % 8));
+                }
+            }
+            assert!(StreamReader::open(altered.as_slice()).is_err());
+        }
+    }
+}

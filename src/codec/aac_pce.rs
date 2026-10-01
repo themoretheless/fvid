@@ -306,3 +306,25 @@ pub(crate) fn skip_data_stream(bits: &mut super::bits::BitReader<'_>) -> crate::
     *bits = input;
     Ok(())
 }
+
+/// Skip supported fill/fill-data extensions after ID_FIL without committing a
+/// partial read. Other extensions carry codec tools and cannot be discarded.
+pub(crate) fn skip_fill(bits: &mut super::bits::BitReader<'_>) -> crate::Result<()> {
+    let mut input = bits.clone();
+    let mut count = input.read(4)? as usize;
+    if count == 15 {
+        count += input.read(8)? as usize;
+        count -= 1;
+    }
+    if count != 0 {
+        let extension = input.read(4)?;
+        if !matches!(extension, 0 | 1) {
+            return Err(crate::unsupported(
+                "AAC fill extension tool is not implemented",
+            ));
+        }
+        input.skip(count * 8 - 4)?;
+    }
+    *bits = input;
+    Ok(())
+}

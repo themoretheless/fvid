@@ -103,6 +103,7 @@ fn packet_configuration(header: Header, packet: &[u8]) -> Result<Vec<u8>> {
         match bits.read(3)? {
             4 => crate::codec::aac_pce::skip_data_stream(&mut bits)?,
             5 => break,
+            6 => crate::codec::aac_pce::skip_fill(&mut bits)?,
             _ => return Err(invalid("ADTS explicit layout requires PCE before audio in the first packet")),
         }
     }
