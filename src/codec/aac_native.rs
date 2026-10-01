@@ -64,7 +64,7 @@ impl NativeAacDecoder {
             )
         };
         let synthesis = (0..config.channels)
-            .map(|_| LongSineSynthesis::new(config.frame_samples as usize))
+            .map(|_| LongSineSynthesis::new(config.frame_samples as usize).map_err(crate::Error::from))
             .collect::<Result<Vec<_>>>()?;
         Ok(Self {
             config,

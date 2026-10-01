@@ -8,3 +8,4 @@ pub use fvid_media_info::*;
 pub use fvid_control::{CancelFlag, CopyOptions, ProgressEvent, ProgressHook};
 
 pub mod owned_wav;
+pub mod owned_aac;

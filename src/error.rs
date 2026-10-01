@@ -35,3 +35,7 @@ pub(crate) fn invalid(s: &str) -> Error {
 pub(crate) fn unsupported(s: &str) -> Error {
     Error::Unsupported(s.into())
 }
+
+impl From<fvid_media::owned_aac::Error> for Error {
+    fn from(error:fvid_media::owned_aac::Error)->Self {Self::Invalid(error.0)}
+}

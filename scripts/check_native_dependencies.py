@@ -15,12 +15,20 @@ def dependencies(manifest, features, target, offline):
     if offline:
         command.append("--offline")
     output = subprocess.check_output(command, cwd=ROOT, text=True)
-    return {line.split()[0] for line in output.splitlines() if line.strip()}
+    packages = {line.split()[0] for line in output.splitlines() if line.strip()}
+    legacy = False
+    if "fvid-media" in packages:
+        feature_command = command.copy()
+        feature_command[feature_command.index("--edges") + 1] = "features"
+        feature_command.extend(["--invert", "fvid-media"])
+        activated = subprocess.check_output(feature_command, cwd=ROOT, text=True)
+        legacy = 'fvid-media feature "legacy-ffmpeg"' in activated
+    return packages, legacy
 
 
 def forbidden(packages):
     return sorted(package for package in packages
-                  if package in {"fvid-media", "rusty_ffmpeg", "ffmpeg"}
+                  if package in {"rusty_ffmpeg", "ffmpeg"}
                   or package.startswith("ffmpeg-"))
 
 
@@ -41,10 +49,12 @@ def main():
     ]
     for name, manifest, features in cases:
         try:
-            packages = dependencies(manifest, features, target, args.offline)
+            packages, legacy = dependencies(manifest, features, target, args.offline)
         except subprocess.CalledProcessError as error:
             raise SystemExit(f"{name}: dependency graph could not be verified (cargo exit {error.returncode})") from error
         found = forbidden(packages)
+        if legacy:
+            found.append("fvid-media/legacy-ffmpeg")
         if found:
             raise SystemExit(f"{name}: FFmpeg dependency reached native graph: {', '.join(found)}")
         print(f"{name} ({target}): {len(packages)} build packages; no FFmpeg adapter", flush=True)

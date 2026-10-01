@@ -1799,3 +1799,20 @@ production path while continuing incremental backend replacement.
 Validation: all 15 native AAC/WAVE integration tests passed, root player and
 legacy-media checks passed. The player's bindgen dependency is from CoreAudio,
 not the media backend. Remaining root-native implementations still await transfer.
+
+### AAC synthesis and IMDCT moved into fvid-media
+
+Owned AAC long/short sine/KBD windows, overlap state and the chirp/FFT IMDCT now
+live in `fvid_media::owned_aac` (unsafe code forbidden). Root codec module paths
+re-export this implementation; packet parsing calls it directly, with typed
+media-layer validation errors converted into FVid's existing invalid errors.
+The algorithms and mathematical regressions moved intact, without copying or
+foreign decoder linkage. Nine transform/window tests passed in standalone media
+without default features; seven full native AAC tests and 17 AAC export/960-frame
+integration tests passed. Combined player + legacy media check passed.
+Linux/Windows CI explicitly runs the standalone owned-media tests so dependency
+unit tests are not lost from root-only `cargo test` coverage.
+The native dependency guard now examines activated media features rather than
+rejecting the project crate's name. Headless/player/camera graphs passed, and a
+positive legacy-media check proved `legacy-ffmpeg` detection. Camera bridge lock
+metadata was updated offline for the new native media dependency.
