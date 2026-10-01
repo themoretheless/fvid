@@ -207,6 +207,33 @@ pub(crate) fn plan(track: &Track, movie_scale: u32, cancel: Option<&CancelFlag>)
     })
 }
 
+pub(crate) fn spec(track: &Track) -> Result<TrackSpec<'_>> {
+    let encoding = match &track.codec {
+        b"avc1" | b"avc3" => Encoding::Avc {
+            configuration: &track.configuration,
+            width: track.width.into(),
+            height: track.height.into(),
+        },
+        b"hvc1" | b"hev1" => Encoding::Hevc {
+            configuration: &track.configuration,
+            width: track.width.into(),
+            height: track.height.into(),
+        },
+        b"mp4a" => Encoding::Aac {
+            configuration: crate::codec::config::aac_specific_config(&track.configuration)?,
+            sample_rate: track.sample_rate,
+            channels: track.channels,
+        },
+        _ => return Err(invalid("unsupported MP4 Matroska track")),
+    };
+    Ok(TrackSpec {
+        encoding,
+        name: &track.name,
+        language: &track.language,
+    })
+}
+
+
 /// Remux every represented track. Payloads are copied unchanged, ordered by
 /// edited DTS with per-track decode order retained. Timing/index memory is
 /// separate from the one reusable packet buffer. Caller owns atomic publication.
@@ -227,34 +254,7 @@ pub fn write<R: Read + Seek, W: Write + Seek>(
         .iter()
         .map(|t| plan(t, input.movie_timescale(), cancel))
         .collect::<Result<_>>()?;
-    let specs: Vec<_> = tracks
-        .iter()
-        .map(|track| -> Result<_> {
-            let encoding = match &track.codec {
-                b"avc1" | b"avc3" => Encoding::Avc {
-                    configuration: &track.configuration,
-                    width: track.width.into(),
-                    height: track.height.into(),
-                },
-                b"hvc1" | b"hev1" => Encoding::Hevc {
-                    configuration: &track.configuration,
-                    width: track.width.into(),
-                    height: track.height.into(),
-                },
-                b"mp4a" => Encoding::Aac {
-                    configuration: crate::codec::config::aac_specific_config(&track.configuration)?,
-                    sample_rate: track.sample_rate,
-                    channels: track.channels,
-                },
-                _ => return Err(invalid("unsupported MP4 Matroska track")),
-            };
-            Ok(TrackSpec {
-                encoding,
-                name: &track.name,
-                language: &track.language,
-            })
-        })
-        .collect::<Result<_>>()?;
+    let specs: Vec<_> = tracks.iter().map(spec).collect::<Result<_>>()?;
     let options: Vec<_> = plans.iter().map(|p| p.options.clone()).collect();
     let mut writer =
         PacketWriter::new_with_metadata(output, &specs, &options, &FileMetadata::from_mp4(input))?;

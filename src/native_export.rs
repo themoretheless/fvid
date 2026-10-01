@@ -977,3 +977,34 @@ pub fn remux_matroska_with_packet_limit(source: &Path, destination: &Path,
 
 /// Compatibility name retained for callers of the original MP4-only exporter.
 pub use transcode_ffv1_transformed as transcode_mp4_ffv1_transformed;
+
+
+/// Concatenate compatible compressed MP4 inputs using the owned Matroska muxer.
+/// None retains the caller's routing for unsupported sources or destinations.
+pub fn try_concat_mp4_matroska(sources: &[PathBuf], destination: &Path,
+    cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<Option<crate::media_control::ProgressEvent>> {
+    if !matches!(destination.extension().and_then(|s|s.to_str()),Some("mkv"|"mka")) { return Ok(None); }
+    let Some(mut segments) = crate::container::mp4_concat::open(sources,cancel)? else { return Ok(None); };
+    if destination.extension().and_then(|s|s.to_str()) == Some("mka") && crate::native_probe::probe(&sources[0])
+        .map_err(|e|invalid(&e))?.streams.iter().any(|s|s.media_type != "audio") {
+        return Err(invalid(".mka concat output requires audio-only input"));
+    }
+    let directory=destination.parent().filter(|p|!p.as_os_str().is_empty()).unwrap_or(Path::new("."));
+    let (temporary,file)=(0..100).find_map(|_| {
+        let path=directory.join(format!(".fvid-mp4-concat-{}-{}.tmp",std::process::id(),NEXT.fetch_add(1,Ordering::Relaxed)));
+        match OpenOptions::new().write(true).create_new(true).open(&path) {
+            Ok(file)=>Some(Ok((Temporary(path),file))),
+            Err(e) if e.kind()==std::io::ErrorKind::AlreadyExists=>None,
+            Err(e)=>Some(Err(e)),
+        }
+    }).ok_or_else(||invalid("cannot reserve concat output"))??;
+    let mut output=BufWriter::new(file);
+    let event=crate::container::mp4_concat::write(&mut segments,&mut output,cancel,progress)?;
+    output.flush()?;output.get_ref().sync_all()?;drop(output);
+    if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
+    std::fs::hard_link(&temporary.0,destination)?;
+    let event=crate::media_control::ProgressEvent {done:true,..event};
+    if let Some(hook)=progress {hook.emit(event);}
+    Ok(Some(event))
+}

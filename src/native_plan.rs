@@ -370,3 +370,16 @@ pub fn normalize_loudness(source: &std::path::Path, selected: Option<usize>, wei
     plan.notes.push("Gain is computed during execution; silent/short input fails; peak limiting may prevent reaching the LUFS target; no true-peak ceiling".into());
     Ok(plan)
 }
+
+
+/// Validate compressed concat compatibility and describe the owned Matroska route.
+pub fn concat_mp4_matroska(sources: &[std::path::PathBuf]) -> Result<Option<MediaPlan>> {
+    if crate::container::mp4_concat::open(sources,None).map_err(|e|e.to_string())?.is_none() { return Ok(None); }
+    let info=crate::native_probe::probe(&sources[0])?;
+    Ok(Some(MediaPlan {command:"concat".into(),input:sources[0].clone(),inputs:sources.to_vec(),
+        streams:info.streams.into_iter().map(|s|PlanStream {index:s.index,media_type:s.media_type,codec:s.codec,disposition:"copy".into()}).collect(),
+        steps:vec![PlanStep {action:"copy".into(),detail:"FVid AVC/HEVC/AAC packet copy; preserve decode order and shift each segment by its presented duration".into()},
+            PlanStep {action:"mux".into(),detail:"FVid Matroska muxer; retain first-input track/file metadata and offset all input chapters".into()},
+            PlanStep {action:"publish".into(),detail:"Atomic publication without overwriting; completion only after publication".into()}],graph:None,
+        notes:vec!["backend: fvid; output .mkv or audio-only .mka".into(),"Per-segment AAC priming is not yet admitted on this path".into()]}))
+}

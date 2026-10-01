@@ -2954,3 +2954,29 @@ legacy media feature. Existing entrypoints keep the 64 MiB default. This is a
 per-packet admission bound, not a total-memory or RSS limit. Other custom options
 (stream selection, packet-count limits, metadata mutation or process budgets)
 still retain their previous routing.
+
+### Owned compressed MP4 concat into Matroska
+
+`media::concat` and `media::plan_concat` use the owned MP4/Matroska route for
+compatible AVC, HEVC and unprimed AAC inputs with default copy options.
+`native_export::try_concat_mp4_matroska` provides the operation without the
+legacy `media` feature. It admits 2..=256 sources with matching track order,
+codec configuration, geometry, audio layout and display metadata. Each video
+source must start at a random-access packet. Each segment is interleaved by
+edited DTS, retains its original decode order, and shifts packet PTS by the
+maximum presented endpoint of preceding segments. All source tracks survive;
+compressed payloads are unchanged. File and track tags come from the first
+input; all input chapters are shifted to their segment offsets.
+
+Output is `.mkv`, or `.mka` for audio-only input. Source compatibility is checked
+before output reservation; export uses the existing atomic no-overwrite contract
+and cancellation/completion hooks. Incompatible sources, AAC with per-segment
+codec delay, other destinations and unmigrated copy options retain their previous
+routing. This is compressed stream concat, with one continuous decoder state;
+it does not promise the PCM from restarting an AAC decoder at every segment.
+
+Tests check AVC, HEVC and Main10 decoded samples, packet identities and interval
+shifts, mixed AVC/AAC track offsets, AAC against the same concatenated ADTS coded
+sequence, and cancellation/no-overwrite publication. Independent FFmpeg checks
+compare video sample bytes and the complete AAC PCM sequence. Whole-feature
+FFmpeg independence and general per-segment priming remain unfinished.
