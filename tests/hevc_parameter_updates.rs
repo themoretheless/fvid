@@ -161,3 +161,162 @@ fn truncated_pps_updates_preserve_parameters_and_require_reset() {
         assert!(decoder.decode_packet(update).unwrap().is_some());
     }
 }
+
+#[test]
+fn sps_resize_at_random_access_rebuilds_parameters_and_reference_storage() {
+    let mut old = Mp4Reader::open(
+        Cursor::new(include_bytes!(
+            "fixtures/playback-errors/hevc-multislice-main.mp4"
+        )),
+        Default::default(),
+    )
+    .unwrap();
+    let old_config = old.tracks()[0].configuration.clone();
+    let mut new = Mp4Reader::open(
+        Cursor::new(include_bytes!(
+            "fixtures/playback-errors/hevc-sps-resize.mp4"
+        )),
+        Default::default(),
+    )
+    .unwrap();
+    let new_config = new.tracks()[0].configuration.clone();
+    let prefix = parameter_prefix(&new_config);
+    let mut decoder = HevcDecoder::from_configuration(&old_config, 16 << 20).unwrap();
+    for _ in 0..2 {
+        let mut packet = Vec::new();
+        for index in 0..old.tracks()[0].samples.len() {
+            old.read_packet(0, index, &mut packet).unwrap();
+            let picture = decoder.decode_packet(&packet).unwrap().unwrap().picture;
+            assert_eq!(picture.dimensions, [128, 128]);
+        }
+        // Parameter-only updates must persist until the following random-access picture.
+        assert!(decoder.decode_packet(&prefix).unwrap().is_none());
+        let mut actual = Vec::new();
+        for index in 0..new.tracks()[0].samples.len() {
+            new.read_packet(0, index, &mut packet).unwrap();
+            let picture = decoder.decode_packet(&packet).unwrap().unwrap().picture;
+            assert_eq!(picture.dimensions, [96, 64]);
+            actual.extend(
+                picture
+                    .planes
+                    .iter()
+                    .flat_map(|p| p.samples().iter().map(|v| *v as u8)),
+            );
+        }
+        assert_eq!(
+            actual,
+            include_bytes!("fixtures/playback-errors/hevc-sps-resize.yuv")
+        );
+        decoder.reset();
+    }
+}
+
+fn parameter_prefix(config: &[u8]) -> Vec<u8> {
+    let parsed = HevcConfig::parse(config).unwrap();
+    let mut prefix = Vec::new();
+    for array in &parsed.arrays {
+        if matches!(array.nal_type, 32..=34) {
+            for nal in &array.units {
+                prefix.extend_from_slice(&(nal.len() as u32).to_be_bytes());
+                prefix.extend_from_slice(nal);
+            }
+        }
+    }
+    prefix
+}
+
+#[test]
+fn sps_resize_prefix_in_picture_packet_matches_oracle() {
+    let old = Mp4Reader::open(
+        Cursor::new(include_bytes!(
+            "fixtures/playback-errors/hevc-multislice-main.mp4"
+        )),
+        Default::default(),
+    )
+    .unwrap();
+    let mut new = Mp4Reader::open(
+        Cursor::new(include_bytes!(
+            "fixtures/playback-errors/hevc-sps-resize.mp4"
+        )),
+        Default::default(),
+    )
+    .unwrap();
+    let mut decoder =
+        HevcDecoder::from_configuration(&old.tracks()[0].configuration, 16 << 20).unwrap();
+    let prefix = parameter_prefix(&new.tracks()[0].configuration);
+    let mut actual = Vec::new();
+    let mut packet = Vec::new();
+    for index in 0..new.tracks()[0].samples.len() {
+        new.read_packet(0, index, &mut packet).unwrap();
+        let input = if index == 0 {
+            [prefix.as_slice(), &packet].concat()
+        } else {
+            packet.clone()
+        };
+        assert_eq!(decoder.slice_headers(&input).unwrap().len(), 1);
+        let picture = decoder.decode_packet(&input).unwrap().unwrap().picture;
+        actual.extend(
+            picture
+                .planes
+                .iter()
+                .flat_map(|p| p.samples().iter().map(|v| *v as u8)),
+        );
+    }
+    assert_eq!(
+        actual,
+        include_bytes!("fixtures/playback-errors/hevc-sps-resize.yuv")
+    );
+}
+
+#[test]
+fn sps_change_without_random_access_or_after_slices_is_rejected() {
+    let mut old = Mp4Reader::open(
+        Cursor::new(include_bytes!(
+            "fixtures/playback-errors/hevc-multislice-main.mp4"
+        )),
+        Default::default(),
+    )
+    .unwrap();
+    let mut new = Mp4Reader::open(
+        Cursor::new(include_bytes!(
+            "fixtures/playback-errors/hevc-sps-resize.mp4"
+        )),
+        Default::default(),
+    )
+    .unwrap();
+    let config = &old.tracks()[0].configuration.clone();
+    let prefix = parameter_prefix(&new.tracks()[0].configuration);
+    let mut first = Vec::new();
+    old.read_packet(0, 0, &mut first).unwrap();
+    let mut inter = Vec::new();
+    new.read_packet(0, 1, &mut inter).unwrap();
+    for (input, expected) in [
+        (
+            [first.as_slice(), &prefix].concat(),
+            "HEVC changed SPS follows picture slices",
+        ),
+        (
+            [prefix.as_slice(), &inter].concat(),
+            "HEVC SPS change requires a random-access picture",
+        ),
+    ] {
+        let mut decoder = HevcDecoder::from_configuration(config, 16 << 20).unwrap();
+        decoder.decode_packet(&first).unwrap().unwrap();
+        let error = match decoder.decode_packet(&input) {
+            Err(error) => error,
+            Ok(_) => panic!("invalid transition accepted"),
+        };
+        assert!(error.to_string().contains(expected), "{error}");
+        assert!(decoder.decode_packet(&first).is_err());
+        decoder.reset();
+        assert_eq!(
+            decoder
+                .decode_packet(&first)
+                .unwrap()
+                .unwrap()
+                .picture
+                .dimensions,
+            [128, 128]
+        );
+    }
+}

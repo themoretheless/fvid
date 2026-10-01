@@ -17,9 +17,16 @@ pub struct Decoded {
     pub poc: i32,
     pub output: bool,
 }
-pub struct HevcDecoder {
+#[derive(Clone)]
+struct ParameterSets {
+    sets: Vec<Sps>,
+    pps_nals: Vec<(u8, Vec<u8>)>,
     pairs: Vec<(Sps, Pps)>,
-    initial_pairs: Vec<(Sps, Pps)>,
+}
+pub struct HevcDecoder {
+    params: ParameterSets,
+    initial_params: ParameterSets,
+    decoded_sps: Option<Sps>,
     references: Vec<Reference>,
     previous_poc: Option<i32>,
     suppress_rasl: bool,
@@ -46,6 +53,7 @@ impl HevcDecoder {
             }
         }
         let mut pairs = Vec::new();
+        let mut pps_nals = Vec::new();
         for array in &config.arrays {
             if array.nal_type == 34 {
                 for nal in &array.units {
@@ -56,6 +64,7 @@ impl HevcDecoder {
                     if pairs.iter().any(|(_, p): &(Sps, Pps)| p.id == pair.1.id) {
                         return Err(invalid("duplicate HEVC PPS"));
                     }
+                    pps_nals.push((pair.1.id, nal.to_vec()));
                     pairs.push(pair);
                 }
             }
@@ -79,9 +88,15 @@ impl HevcDecoder {
                 }
             }
         }
-        Ok(Self {
-            initial_pairs: pairs.clone(),
+        let params = ParameterSets {
+            sets,
+            pps_nals,
             pairs,
+        };
+        Ok(Self {
+            initial_params: params.clone(),
+            params,
+            decoded_sps: None,
             references: Vec::new(),
             previous_poc: None,
             suppress_rasl: false,
@@ -96,12 +111,13 @@ impl HevcDecoder {
     pub fn parameters(&self) -> (&Sps, &Pps) {
         let (s, p) = self
             .active_pps
-            .and_then(|id| self.pairs.iter().find(|(_, p)| p.id == id))
-            .unwrap_or(&self.pairs[0]);
+            .and_then(|id| self.params.pairs.iter().find(|(_, p)| p.id == id))
+            .unwrap_or(&self.params.pairs[0]);
         (s, p)
     }
     pub fn reset(&mut self) {
-        self.pairs.clone_from(&self.initial_pairs);
+        self.params.clone_from(&self.initial_params);
+        self.decoded_sps = None;
         self.references.clear();
         self.previous_poc = None;
         self.suppress_rasl = false;
@@ -120,37 +136,72 @@ impl HevcDecoder {
         self.hdr
     }
     // Validate parameter updates before committing them to decoder state.
-    fn updated_pairs(&self, packet: &[u8]) -> Result<Option<Vec<(Sps, Pps)>>> {
+    fn updated_pairs(&self, packet: &[u8]) -> Result<Option<ParameterSets>> {
         if packet.len() > self.budget {
             return Err(invalid("HEVC access unit exceeds decode budget"));
         }
-        let mut updated: Option<Vec<(Sps, Pps)>> = None;
+        let mut updated: Option<ParameterSets> = None;
         let mut seen_slice = false;
         for nal in NalUnits::new(packet, self.length)? {
             let nal = nal?;
             let header = NalHeader::parse(nal)?;
             header.require_base_layer()?;
             seen_slice |= header.is_vcl();
-            if header.unit_type != 34 {
-                continue;
+            let params = updated.as_ref().unwrap_or(&self.params);
+            match header.unit_type {
+                33 => {
+                    let new = Sps::parse(nal, self.budget)?;
+                    if params.sets.iter().any(|s| *s == new) {
+                        continue;
+                    }
+                    if seen_slice {
+                        return Err(invalid("HEVC changed SPS follows picture slices"));
+                    }
+                    let params = updated.get_or_insert_with(|| self.params.clone());
+                    if let Some(old) = params.sets.iter_mut().find(|s| s.id == new.id) {
+                        *old = new;
+                    } else {
+                        params.sets.push(new);
+                    }
+                }
+                34 => {
+                    let pps = params
+                        .sets
+                        .iter()
+                        .find_map(|s| Pps::parse(nal, s, self.budget).ok())
+                        .ok_or_else(|| invalid("HEVC in-band PPS has no valid SPS"))?;
+                    if params
+                        .pps_nals
+                        .iter()
+                        .any(|(id, bytes)| *id == pps.id && bytes == nal)
+                    {
+                        continue;
+                    }
+                    if seen_slice {
+                        return Err(invalid("HEVC changed PPS follows picture slices"));
+                    }
+                    let params = updated.get_or_insert_with(|| self.params.clone());
+                    if let Some(old) = params.pps_nals.iter_mut().find(|(id, _)| *id == pps.id) {
+                        old.1 = nal.to_vec();
+                    } else {
+                        params.pps_nals.push((pps.id, nal.to_vec()));
+                    }
+                }
+                _ => {}
             }
-            let pairs = updated.as_ref().unwrap_or(&self.pairs);
-            let pair = pairs
+        }
+        if let Some(params) = &mut updated {
+            params.pairs = params
+                .pps_nals
                 .iter()
-                .find_map(|(s, _)| Pps::parse(nal, s, self.budget).ok().map(|p| (s.clone(), p)))
-                .ok_or_else(|| invalid("HEVC in-band PPS has no valid SPS"))?;
-            if pairs.iter().any(|(s, p)| *s == pair.0 && *p == pair.1) {
-                continue;
-            }
-            if seen_slice {
-                return Err(invalid("HEVC changed PPS follows picture slices"));
-            }
-            let pairs = updated.get_or_insert_with(|| self.pairs.clone());
-            if let Some(existing) = pairs.iter_mut().find(|(_, p)| p.id == pair.1.id) {
-                *existing = pair;
-            } else {
-                pairs.push(pair);
-            }
+                .map(|(_, nal)| {
+                    params
+                        .sets
+                        .iter()
+                        .find_map(|s| Pps::parse(nal, s, self.budget).ok().map(|p| (s.clone(), p)))
+                        .ok_or_else(|| invalid("HEVC updated PPS has no valid SPS"))
+                })
+                .collect::<Result<_>>()?;
         }
         Ok(updated)
     }
@@ -160,7 +211,7 @@ impl HevcDecoder {
             return Err(invalid("HEVC access unit exceeds decode budget"));
         }
         let updated = self.updated_pairs(packet)?;
-        let pairs = updated.as_ref().unwrap_or(&self.pairs);
+        let pairs = &updated.as_ref().unwrap_or(&self.params).pairs;
         let mut headers: Vec<SliceHeader> = Vec::new();
         for nal in NalUnits::new(packet, self.length)? {
             let nal = nal?;
@@ -210,8 +261,8 @@ impl HevcDecoder {
         result
     }
     fn decode(&mut self, packet: &[u8]) -> Result<Option<Decoded>> {
-        if let Some(pairs) = self.updated_pairs(packet)? {
-            self.pairs = pairs;
+        if let Some(params) = self.updated_pairs(packet)? {
+            self.params = params;
         }
         let headers = self.slice_headers(packet)?;
         let mut slice = None;
@@ -224,15 +275,7 @@ impl HevcDecoder {
                     slice = Some(nal);
                 }
             } else if matches!(header.unit_type, 32..=34) {
-                // Configuration changes must never reuse stale reference geometry.
-                if header.unit_type == 33
-                    && !self
-                        .pairs
-                        .iter()
-                        .any(|(s, _)| Sps::parse(nal, self.budget).is_ok_and(|new| new == *s))
-                {
-                    return Err(invalid("HEVC in-band SPS change is not implemented"));
-                }
+                // Parameter sets were validated before parsing slices.
             } else if hevc_sei::is_sei_unit(header.unit_type) {
                 // An SEI this module cannot walk costs the guidance, never the
                 // picture it travels with.
@@ -249,6 +292,7 @@ impl HevcDecoder {
         let Some(nal) = slice else { return Ok(None) };
         let id = SliceHeader::parameter_set_id(nal)?;
         let (sps, pps) = self
+            .params
             .pairs
             .iter()
             .find(|(_, p)| p.id == id)
@@ -256,6 +300,21 @@ impl HevcDecoder {
         let header = &headers[0];
         if header.nal.temporal_id as usize >= sps.ordering.len() {
             return Err(invalid("HEVC slice exceeds SPS temporal layers"));
+        }
+        if self
+            .decoded_sps
+            .as_ref()
+            .is_some_and(|previous| previous != sps)
+        {
+            if !header.nal.is_irap() {
+                return Err(invalid("HEVC SPS change requires a random-access picture"));
+            }
+            self.references.clear();
+            self.previous_poc = None;
+            self.suppress_rasl = false;
+        }
+        if self.decoded_sps.as_ref() != Some(sps) {
+            self.decoded_sps = Some(sps.clone());
         }
         if header.nal.is_irap() {
             self.suppress_rasl = self.previous_poc.is_none()

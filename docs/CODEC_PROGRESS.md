@@ -45,7 +45,7 @@ mix сохраняет PCE mask 0xff для ADTS/MP4/Matroska; тест двух
   Dependent segments наследуют header, CABAC и QP state; WPP переносит
   контексты второго CTU строки. HM-generated intra/inter streams с segment
   boundaries внутри строки и между строками совпадают с HM и FFmpeg raw
-  reconstruction. Изменённые in-band PPS принимаются перед slices при известном SPS; reset возвращает исходную конфигурацию. Изменённые SPS пока отклоняются. Идентичные повторённые parameter sets принимаются.
+  reconstruction. Изменённые in-band PPS принимаются перед slices при известном SPS; reset возвращает исходную конфигурацию. Изменённые SPS принимаются перед slices; переход к другому SPS требует random-access picture и очищает старые references. Идентичные повторённые parameter sets принимаются.
 - `src/codec/aac_native.rs`: декодер AAC-LC поддерживает стандартные 1–6 каналов,
   configurations 7 (7.1 wide), 11 (6.1 back), 12 (7.1) и однозначные горизонтальные PCE layouts. Восьмиканальный PCE в MP4 проверен
   по каждому динамику с независимым PCM-эталоном; собственные CLI/API WAV
@@ -1356,3 +1356,20 @@ all 24,576 bytes match the unchanged intra picture. Tests also cover a parameter
 packet followed by its picture, persistent PPS state, and every truncated PPS
 prefix with unchanged parameters and reset recovery. The regeneration helper is
 `scripts/generate_hevc_pps_oracle.py`, used only for reference fixture generation.
+
+### HEVC in-band SPS sequence changes
+
+The decoder now keeps SPS records and original PPS NALs independently, so a
+validated in-band SPS replacement/addition can rebuild PPS-derived geometry.
+Updates are validated before installation, and changed parameter sets after
+slices are refused. Switching the decoded SPS requires a random-access picture;
+it clears reference storage and POC history before reconstruction. Reset restores
+the original configuration-record SPS/PPS, including their encoded PPS records.
+
+A synthetic 128x128 I/B/P sequence populates references before switching to a
+96x64 I/P/P sequence. All three new pictures match the saved independent YUV
+oracle. Tests cover both a separate parameter-only packet and parameters prefixed
+to the picture, then reset/repeat; late SPS and non-random-access transitions are
+rejected with reset recovery. This verifies native decoder sequence transitions,
+not arbitrary non-IRAP SPS changes, unsupported profiles, or MP4 display timing
+across a changing sample description.

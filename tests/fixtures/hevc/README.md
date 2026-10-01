@@ -216,3 +216,16 @@ regenerate `hevc-pps-update.yuv`. The generator converts configuration NALs and
 the length-prefixed packet to Annex B, decodes one picture with FFmpeg as an
 independent reference, and requires equality with the original saved first frame.
 Ordinary tests read the saved oracle; they never invoke FFmpeg or the generator.
+
+### SPS resolution-change sequence
+
+`../playback-errors/hevc-sps-resize.mp4` contains three synthetic 96x64
+Main-profile I/P/P pictures. `tests/hevc_parameter_updates.rs` feeds its parameter
+sets and packets to the decoder after the existing 128x128 I/B/P fixture, compares
+all samples to the saved YUV output, and restores the original configuration.
+Generation commands, run in `tests/fixtures/hevc`:
+
+```sh
+ffmpeg -v error -f lavfi -i 'testsrc2=size=96x64:rate=30:duration=0.1' -c:v libx265 -pix_fmt yuv420p -x265-params 'pools=1:frame-threads=1:ctu=32:bframes=0:log-level=error' -an ../playback-errors/hevc-sps-resize.mp4
+ffmpeg -v error -i ../playback-errors/hevc-sps-resize.mp4 -pix_fmt yuv420p -f rawvideo ../playback-errors/hevc-sps-resize.yuv
+```
