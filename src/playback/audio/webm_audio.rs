@@ -87,6 +87,7 @@ pub struct WebmAudioReader<R> {
     demuxer: WebmReader<R>,
     track_number: u64,
     packet_index: usize,
+    presentation_floor: Option<i64>,
     /// The setup bytes the decoder asks for, in the layout it reads.
     extra_data: Vec<u8>,
     /// The name the decoder dispatch answers: the container's own tag for every
@@ -156,6 +157,7 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             demuxer,
             track_number,
             packet_index: 0,
+            presentation_floor: None,
             extra_data,
             codec_tag,
         })
@@ -200,6 +202,7 @@ impl<R: Read + Seek> WebmAudioReader<R> {
     /// Restart from the first packet.
     pub fn rewind(&mut self) {
         self.packet_index = 0;
+        self.presentation_floor = None;
     }
 
     /// Seek to the packet with the greatest PTS at or before `pts_ns`.
@@ -827,6 +830,22 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
-        WebmAudioReader::seek(self, pts)
+        let landed = WebmAudioReader::seek(self, pts);
+        if self.codec_tag == "mp4a" {
+            self.rewind();
+            self.presentation_floor = Some(landed);
+        }
+        landed
+    }
+
+    fn present_decoded(&self, mut packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
+        if self.codec_tag == "mp4a" {
+            if self.presentation_floor.is_some_and(|floor| source_pts < floor) { return Ok(None); }
+            // AAC decoder timestamps use a sample clock; Matroska supplies ns.
+            packet.pts = source_pts.max(0) as u64;
+            packet.timebase_num = 1;
+            packet.timebase_den = TIMESCALE_NS;
+        }
+        Ok(Some(packet))
     }
 }

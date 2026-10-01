@@ -767,3 +767,33 @@ mod adts_seek_tests {
         }
     }
 }
+
+#[cfg(test)]
+mod matroska_aac_seek_tests {
+    use super::*;
+    use super::presentation_window_tests::Capture;
+    #[test]
+    fn matroska_aac_seek_preserves_pcm_and_nanosecond_timestamps() {
+        let file = include_bytes!("../tests/fixtures/audio/aac-stereo.mka").as_slice();
+        let stream = crate::playback_webm_audio::WebmAudioReader::open(std::io::Cursor::new(file),Default::default()).unwrap();
+        let decoder = crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
+        let captured = Arc::new(Mutex::new(Vec::new()));
+        let (_,commands) = sync_channel(1);
+        let (events,_) = sync_channel(1);
+        let mut worker = Worker { stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
+        let expected:Vec<(u64,Vec<u8>)> = captured.lock().unwrap().iter().map(|p| { assert_eq!(p.timebase_den,1_000_000_000); (p.pts,p.data.clone()) }).collect();
+        captured.lock().unwrap().clear();
+        worker.handle(Command::Seek(50_000_000));
+        for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
+        let packets = captured.lock().unwrap();
+        assert!((25_000_000..=50_000_000).contains(&packets[0].pts));
+        let index = expected.iter().position(|(pts,_)| *pts==packets[0].pts).unwrap();
+        assert_eq!(packets.len(),expected.len()-index);
+        for (actual,(pts,data)) in packets.iter().zip(&expected[index..]) {
+            assert_eq!(actual.pts,*pts);
+            assert_eq!(actual.timebase_den,1_000_000_000);
+            assert!(actual.data==*data,"Matroska seek PCM differs from continuous decode");
+        }
+    }
+}

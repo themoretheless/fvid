@@ -1539,3 +1539,12 @@ frame. A worker regression compares mono AAC output after forward/backward seeks
 with continuous decoding byte-for-byte. This currently requires linear decode
 work, as in MP4; checkpoints are not yet implemented. Seeking returns the landed
 timestamp, while subsequent encoded packets include decoder-only preroll.
+
+### Matroska AAC playback seek and clock
+
+The AAC Matroska playback adapter primes decoder state from the start after seek
+and suppresses preceding PCM. Its presentation hook restores nanosecond packet
+timestamps instead of interpreting them with the AAC sample-rate clock. A real
+worker test compares the post-seek packet timestamps and PCM with continuous
+decoding of the saved synthetic stereo Matroska fixture. This does not change
+other Matroska codecs or implement codec-delay/discard-padding scheduling.
