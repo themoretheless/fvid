@@ -3130,3 +3130,26 @@ rejected. The caller still owns atomic publication. Tests run the opaque
 compositor through AVC and HEVC Main/Main10 encoding and decoding, compare
 exact sample planes and PTS, and propagate processor errors. Two-source
 frame scheduling and the public overlay workflow remain to be connected.
+
+
+### Owned two-source opaque overlay
+
+`native_export::overlay_video` and public `media::overlay_video` now use the
+owned compositor for supported AVC/HEVC MP4 main inputs with default copy
+options. The main FFV1/Matroska export retains supported AAC companion packets,
+track/file metadata and main PTS. Foreground decoding uses the owned native
+reader, materializes stored crop/rotation and keeps two selected picture
+buffers. First presented origins align; the most recent foreground picture at
+each main PTS is selected, with last-frame hold after EOF. Foreground audio is
+not part of the overlay operation.
+
+Inputs must share sample depth, sampling, colour encoding/range, display pixel
+aspect and HDR metadata. Placement is literal and chroma-aligned; no implicit
+colour conversion, alpha blend, expression evaluation or resampling occurs.
+Other main formats/options retain legacy routing pending their migration.
+`native_plan::overlay` describes this owned path and its execution checks.
+Output requires `.mkv`; temporary output is removed on error/cancellation and
+publication never overwrites a destination. Tests cover AVC/HEVC Main/Main10
+sample round trips, independent FFV1 decode, publication/cancellation, and
+foreground cadence/EOF selection. This does not yet migrate every overlay
+profile or the full `media` feature away from FFmpeg.

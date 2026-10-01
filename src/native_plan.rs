@@ -405,3 +405,18 @@ pub fn concat_mp4_matroska(sources: &[std::path::PathBuf]) -> Result<Option<Medi
             PlanStep {action:"publish".into(),detail:"Atomic publication without overwriting; completion only after publication".into()}],graph:None,
         notes:vec!["backend: fvid; output .mkv or audio-only .mka".into(),"AAC priming is retained through global CodecDelay and per-segment signed DiscardPadding".into()]}))
 }
+
+/// Describe owned opaque overlay while retaining the main input's AAC tracks.
+pub fn overlay(source:&std::path::Path,foreground:&std::path::Path,x:i64,y:i64)->Result<MediaPlan> {
+    if !crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? {return Err("owned overlay requires AVC/HEVC MP4 main input".into());}
+    let info=crate::native_probe::probe(source)?;let second=crate::native_probe::probe(foreground)?;
+    if second.streams.iter().filter(|s|s.media_type=="video").count()!=1 {return Err("foreground requires exactly one video track".into());}
+    Ok(MediaPlan {command:"overlay".into(),input:source.to_owned(),inputs:vec![source.to_owned(),foreground.to_owned()],
+        streams:info.streams.into_iter().map(|s|PlanStream {index:s.index,media_type:s.media_type.clone(),codec:s.codec,
+            disposition:if s.media_type=="video" {"decode_overlay"}else{"copy"}.into()}).collect(),graph:None,
+        steps:vec![PlanStep {action:"decode".into(),detail:"owned AVC/HEVC main and owned foreground software decoders; normalize stored display transforms".into()},
+            PlanStep {action:"overlay".into(),detail:format!("opaque sample-plane overlay at {x},{y}; align first presentation origins; retain latest foreground at each main PTS; hold foreground EOF")},
+            PlanStep {action:"encode".into(),detail:"owned lossless FFV1 at main sample depth; preserve main timing and AAC packets".into()},
+            PlanStep {action:"write".into(),detail:"owned Matroska .mkv; atomic no-overwrite publication".into()}],
+        notes:vec!["backend: fvid; no external decoder, encoder or muxer".into(),"matching sample depth, colour encoding/range and sampling required; chroma placement must align; validated while decoding".into(),"foreground audio is not part of the overlay; main supported companion tracks are retained".into()]})
+}

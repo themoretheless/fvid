@@ -16,6 +16,21 @@ pub use crate::media_control::{CancelFlag, CopyOptions, ProgressEvent, ProgressH
 pub type Result<T> = std::result::Result<T, String>;
 pub use crate::native_export::{export_y4m, export_y4m_interval, export_y4m_transformed};
 
+pub fn plan_overlay(source:&std::path::Path,overlay:&std::path::Path,x:i32,y:i32,options:&CopyOptions)->Result<MediaPlan> {
+    if crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? && validate_native_copy_options(options,false).is_ok() {
+        return crate::native_plan::overlay(source,overlay,i64::from(x),i64::from(y));
+    }
+    fvid_media::plan_overlay(source,overlay,x,y,options)
+}
+
+/// Owned opaque overlay for compatible MP4 main inputs; retains main audio.
+pub fn overlay_video(source:&std::path::Path,overlay:&std::path::Path,destination:&std::path::Path,x:i32,y:i32,options:&CopyOptions)->Result<LosslessStats> {
+    if crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? && validate_native_copy_options(options,false).is_ok() {
+        return crate::native_export::overlay_video(source,overlay,destination,i64::from(x),i64::from(y),options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string());
+    }
+    fvid_media::overlay_video(source,overlay,destination,x,y,options)
+}
+
 pub fn convert_subtitles(source: &std::path::Path, destination: &std::path::Path,
     options: &SubtitleConvertOptions) -> Result<SubtitleConvertStats> {
     if let Some(stats) = crate::native_subtitle::try_convert_with_options(source, destination, options).map_err(|e|e.to_string())? {
