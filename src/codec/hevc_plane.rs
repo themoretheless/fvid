@@ -13,6 +13,14 @@ impl Plane {
     /// Neighbours always come from the unchanged input plane. Extra workspace
     /// is two bytes per sample and is accounted for by the picture decoder.
     pub fn apply_sao(&mut self, log2_ctu: u8, parameters: &[super::hevc_sao::Sao]) -> Result<()> {
+        self.apply_sao_with_boundaries(log2_ctu, parameters, |_, _| true)
+    }
+    pub(crate) fn apply_sao_with_boundaries(
+        &mut self,
+        log2_ctu: u8,
+        parameters: &[super::hevc_sao::Sao],
+        mut available: impl FnMut([usize; 2], [usize; 2]) -> bool,
+    ) -> Result<()> {
         if !(3..=6).contains(&log2_ctu) || !self.complete() {
             return Err(invalid("invalid SAO plane state"));
         }
@@ -69,6 +77,16 @@ impl Plane {
                     let db = delta(b);
                     for y in y0..y1 {
                         for x in x0..x1 {
+                            let neighbour = |v: [i32; 2]| {
+                                [
+                                    x.checked_add_signed(v[0] as isize).unwrap(),
+                                    y.checked_add_signed(v[1] as isize).unwrap(),
+                                ]
+                            };
+                            if !available([x, y], neighbour(a)) || !available([x, y], neighbour(b))
+                            {
+                                continue;
+                            }
                             let k = y * self.width + x;
                             let value = i32::from(self.samples[k]);
                             let a = i32::from(self.samples[k.checked_add_signed(da).unwrap()]);
@@ -402,6 +420,40 @@ mod tests {
         for row in p.samples().chunks_exact(8) {
             assert_eq!(&row[..4], &[1023; 4]);
             assert_eq!(&row[4..], &[512; 4]);
+        }
+    }
+}
+
+#[cfg(test)]
+mod slice_filter_tests {
+    #[test]
+    fn sao_edge_neighbours_obey_independent_slice_boundaries() {
+        use super::{super::hevc_sao::Sao, Plane};
+        let samples: Vec<u16> = (0..16)
+            .flat_map(|y| vec![if y % 2 == 0 { 200 } else { 100 }; 16])
+            .collect();
+        let mut plane = Plane::new(16, 16, 8, 768).unwrap();
+        plane.samples = samples.clone();
+        plane.ready.fill(true);
+        let sao = Sao::Edge {
+            class: 1,
+            offsets: [1, 2, -1, -2],
+        };
+        plane
+            .apply_sao_with_boundaries(3, &[sao; 4], |a, b| a[1] / 8 == b[1] / 8)
+            .unwrap();
+        for y in 0..16 {
+            for x in 0..16 {
+                let neighbours = if y == 0 || y == 7 || y == 8 || y == 15 {
+                    None
+                } else {
+                    Some([samples[(y - 1) * 16 + x], samples[(y + 1) * 16 + x]])
+                };
+                assert_eq!(
+                    plane.samples[y * 16 + x],
+                    sao.apply(samples[y * 16 + x], neighbours, 8).unwrap()
+                );
+            }
         }
     }
 }

@@ -157,6 +157,9 @@ ffmpeg -v error -i ../playback-errors/hevc-multislice-main.mp4 -pix_fmt yuv420p 
 
 `hevc_multislice` verifies owned independent-slice header collection, picture
 identity and monotonic CTU addresses, rejects duplicated picture starts and
-checks truncations for panic-free metadata parsing. It does not yet compare
-native reconstruction with the saved YUV oracle: the picture decoder still
-requires one slice. Dependent slice header inheritance remains unimplemented.
+checks truncations. Native Main/Main10 reconstruction is byte-equal to the
+saved YUV oracles, including rewind; partial pictures are never published.
+The Main10 fixture uses the same commands with yuv420p10le for encoding and
+reference output and `hevc-multislice-main10` filenames. Both contain I/B/P
+pictures. Dependent slice inheritance and per-slice reference remapping remain
+unimplemented; the comparison does not prove unrestricted HEVC conformance.

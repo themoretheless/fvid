@@ -1,4 +1,4 @@
-//! Native single-slice HEVC I/P/B reconstruction with WPP and in-loop filters.
+//! Native HEVC I/P/B reconstruction with independent slices, WPP and in-loop filters.
 use super::{
     hevc_block,
     hevc_cabac::{HevcCabac, SliceType, Syntax},
@@ -112,6 +112,7 @@ pub fn decode(
         slice,
         poc,
         lists,
+        slice_start: 0,
         qp: slice.qp,
         chroma_offsets,
         qp_coded: false,
@@ -337,6 +338,276 @@ pub fn decode(
         sao,
     })
 }
+
+/// Reconstruct independent slice segments into one shared picture.
+pub fn decode_slices(
+    sps: &Sps,
+    pps: &Pps,
+    slices: &[SliceHeader],
+    poc: i32,
+    lists: &[[Vec<Reference>; 2]],
+    budget: usize,
+) -> Result<Picture> {
+    if slices.len() != lists.len() {
+        return Err(invalid("HEVC slice reference count mismatch"));
+    }
+    if slices.len() == 1 {
+        return decode(sps, pps, &slices[0], poc, &lists[0], budget);
+    }
+    let slice = slices
+        .first()
+        .ok_or_else(|| invalid("empty HEVC slice set"))?;
+    if lists.len() != slices.len() {
+        return Err(invalid("HEVC slice reference count mismatch"));
+    }
+    let first_lists = &lists[0];
+    // Motion grids currently retain one reference-index mapping per picture.
+    if lists.iter().any(|l| {
+        (0..2).any(|i| {
+            l[i].iter()
+                .map(|r| r.poc)
+                .ne(first_lists[i].iter().map(|r| r.poc))
+        })
+    }) {
+        return Err(invalid(
+            "HEVC per-slice reference remapping is not implemented",
+        ));
+    }
+    if sps.chroma_format != 1
+        || sps.separate_colour_plane
+        || sps.pcm.is_some()
+        || pps.tiles.is_some()
+        || pps.transquant_bypass
+        || sps.depth[0] != sps.depth[1]
+    {
+        return Err(invalid("unsupported HEVC multi-slice picture tools"));
+    }
+    for (index, slice) in slices.iter().enumerate() {
+        if slice.first != (index == 0)
+            || (index == 0 && slice.address != 0)
+            || slice.nal.layer_id != 0
+        {
+            return Err(invalid("invalid HEVC slice partition start"));
+        }
+        if slice
+            .entropy_substreams
+            .iter()
+            .any(|r| r.start >= r.end || r.end > slice.rbsp.len())
+        {
+            return Err(invalid("invalid HEVC entropy substream bounds"));
+        }
+        let reference_lists = &lists[index];
+        if slice.slice_type != SliceType::I && !(1..=5).contains(&slice.max_merge_candidates) {
+            return Err(invalid("invalid HEVC merge candidate count"));
+        }
+        if sps.depth[0] != sps.depth[1] {
+            return Err(invalid("HEVC mixed component bit depths are not supported"));
+        }
+        for list in 0..2 {
+            if reference_lists[list].len() != slice.references[list] as usize {
+                return Err(invalid("HEVC reference-list length mismatch"));
+            }
+            for r in &reference_lists[list] {
+                if r.picture.dimensions != sps.dimensions || r.picture.depth != sps.depth {
+                    return Err(invalid("HEVC reference geometry mismatch"));
+                }
+            }
+        }
+        let [min_cb, max_cb] = sps.coding_block_log2;
+        let [min_tb, max_tb] = sps.transform_block_log2;
+        if !(4..=6).contains(&max_cb)
+            || !(3..=max_cb).contains(&min_cb)
+            || !(2..=min_cb.min(5)).contains(&min_tb)
+            || !(min_tb..=max_cb.min(5)).contains(&max_tb)
+            || sps.transform_hierarchy_depth[1] > max_cb - min_tb
+            || sps.depth.iter().any(|d| !(8..=10).contains(d))
+            || sps.id != pps.sps_id
+            || pps.id != slice.pps_id
+        {
+            return Err(invalid("invalid HEVC picture parameters"));
+        }
+        let [w, h] = sps.dimensions;
+        if w == 0
+            || h == 0
+            || w % (1 << min_cb) != 0
+            || h % (1 << min_cb) != 0
+            || u64::from(sps.crop[0]) + u64::from(sps.crop[1]) >= u64::from(w)
+            || u64::from(sps.crop[2]) + u64::from(sps.crop[3]) >= u64::from(h)
+        {
+            return Err(invalid("invalid HEVC picture dimensions or crop"));
+        }
+        let count = (w as usize)
+            .checked_mul(h as usize)
+            .ok_or_else(|| invalid("HEVC picture size overflow"))?;
+        let required = count
+            .checked_mul(24)
+            .and_then(|n| n.checked_add(65536))
+            .ok_or_else(|| invalid("HEVC picture budget overflow"))?;
+        if required > budget {
+            return Err(invalid("HEVC picture exceeds decode budget"));
+        }
+    }
+    let [min_cb, max_cb] = sps.coding_block_log2;
+    let [w, h] = sps.dimensions;
+    let count = w as usize * h as usize;
+    let lists = first_lists;
+    let chroma_offsets = slice.chroma_qp_offsets.map(i32::from);
+    hevc_qp::components(slice.qp, sps.depth, chroma_offsets)?;
+
+    let mut decoder = Decoder {
+        sps,
+        pps,
+        slice,
+        poc,
+        lists,
+        slice_start: 0,
+        qp: slice.qp,
+        chroma_offsets,
+        qp_coded: false,
+        qp_prediction: slice.qp,
+        qp_grid: vec![slice.qp; count / 64],
+        edges: vec![[0; 2]; count / 16],
+        cells: vec![Cell::default(); count / 16],
+        jobs: None,
+        reconstruction: Vec::new(),
+        scratch: Vec::new(),
+        pred_scratch: Vec::new(),
+        transform_scratch: Vec::new(),
+        residual_scratch: Vec::new(),
+        planes: [
+            Plane::new(w as usize, h as usize, sps.depth[0], count * 3)?,
+            Plane::new(w as usize / 2, h as usize / 2, sps.depth[1], count * 3 / 4)?,
+            Plane::new(w as usize / 2, h as usize / 2, sps.depth[1], count * 3 / 4)?,
+        ],
+    };
+    let side = 1u32 << max_cb;
+    let columns = w.div_ceil(side);
+    let rows = h.div_ceil(side);
+    let total = columns
+        .checked_mul(rows)
+        .ok_or_else(|| invalid("HEVC CTU grid overflow"))?;
+    let mut sao = Vec::with_capacity(total as usize);
+    for (index, slice) in slices.iter().enumerate() {
+        let begin = slice.address;
+        let end = slices.get(index + 1).map_or(total, |s| s.address);
+        if begin != sao.len() as u32 || begin >= end || end > total || slice.pps_id != pps.id {
+            return Err(invalid("HEVC slices do not partition the picture"));
+        }
+        decoder.slice = slice;
+        decoder.slice_start = begin;
+        decoder.qp = slice.qp;
+        decoder.qp_prediction = slice.qp;
+        decoder.qp_coded = false;
+        decoder.chroma_offsets = slice.chroma_qp_offsets.map(i32::from);
+        let expected = if pps.entropy_sync {
+            (end - 1) / columns - begin / columns + 1
+        } else {
+            1
+        };
+        if slice.entropy_substreams.len() != expected as usize {
+            return Err(invalid("HEVC slice WPP substream count mismatch"));
+        }
+        let mut bins = HevcCabac::new(
+            &slice.rbsp[slice.entropy_substreams[0].clone()],
+            0,
+            slice.slice_type,
+            slice.cabac_init,
+            slice.qp,
+        )?;
+        let initial = bins.contexts()?;
+        let mut saved = None;
+        for address in begin..end {
+            let row = address / columns;
+            let col = address % columns;
+            if pps.entropy_sync && col == 0 && address != begin {
+                let substream = (row - begin / columns) as usize;
+                bins = HevcCabac::from_contexts(
+                    &slice.rbsp[slice.entropy_substreams[substream].clone()],
+                    0,
+                    saved.as_ref().unwrap_or(&initial),
+                )?;
+                decoder.qp = slice.qp;
+            }
+            let available = |other: u32| other >= begin;
+            let parameters = hevc_sao::read_ctu(
+                &mut bins,
+                slice.sao,
+                sps.depth,
+                if col > 0 && available(address - 1) {
+                    sao.get(address as usize - 1)
+                } else {
+                    None
+                },
+                if row > 0 && available(address - columns) {
+                    sao.get((address - columns) as usize)
+                } else {
+                    None
+                },
+            )?;
+            sao.push(parameters);
+            hevc_tree::read_ctu(
+                &mut bins,
+                &mut decoder,
+                [w, h],
+                [col * side, row * side],
+                max_cb,
+                min_cb,
+            )?;
+            if pps.entropy_sync && col == 1 {
+                saved = Some(bins.contexts()?);
+            }
+            let last = address + 1 == end;
+            if bins.terminate()? != last {
+                return Err(invalid(
+                    "HEVC slice termination does not match segment extent",
+                ));
+            }
+            if pps.entropy_sync && col + 1 == columns && !last && !bins.terminate()? {
+                return Err(invalid("missing HEVC end-of-substream bit"));
+            }
+        }
+    }
+    if !decoder.planes.iter().all(Plane::complete) {
+        return Err(invalid("incomplete HEVC multi-slice picture"));
+    }
+    deblock_slices(&mut decoder, slices)?;
+    for (component, plane) in decoder.planes.iter_mut().enumerate() {
+        let parameters: Vec<_> = sao.iter().map(|p| p[component]).collect();
+        let shift = usize::from(component != 0);
+        let owner = |p: [usize; 2]| {
+            let address = ((p[1] << shift) / side as usize) * columns as usize
+                + (p[0] << shift) / side as usize;
+            slices.partition_point(|s| s.address as usize <= address) - 1
+        };
+        plane.apply_sao_with_boundaries(
+            max_cb - u8::from(component != 0),
+            &parameters,
+            |a, b| {
+                let ia = owner(a);
+                let ib = owner(b);
+                ia == ib || slices[ia.max(ib)].loop_filter_across_slices
+            },
+        )?;
+    }
+    let mut motion = Vec::new();
+    if slices.iter().any(|s| s.slice_type != SliceType::I) {
+        for y in (0..h).step_by(16) {
+            for x in (0..w).step_by(16) {
+                motion
+                    .push(decoder.cells[y as usize / 4 * (w as usize / 4) + x as usize / 4].motion);
+            }
+        }
+    }
+    Ok(Picture {
+        motion,
+        reference_pocs: std::array::from_fn(|l| lists[l].iter().map(|r| r.poc).collect()),
+        dimensions: [w, h],
+        crop: sps.crop,
+        depth: sps.depth,
+        planes: decoder.planes,
+        sao,
+    })
+}
 #[derive(Clone, Copy, Default)]
 struct Cell {
     ready: bool,
@@ -353,6 +624,7 @@ struct Decoder<'a> {
     slice: &'a SliceHeader,
     poc: i32,
     lists: &'a [Vec<Reference>; 2],
+    slice_start: u32,
     qp: i32,
     chroma_offsets: [i32; 2],
     qp_coded: bool,
@@ -546,10 +818,17 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                         &self.residual_scratch,
                         &mut self.pred_scratch,
                         |x, y| {
+                            let shift = usize::from(component != 0);
+                            let side = 1usize << self.sps.coding_block_log2[1];
+                            let address = (y << shift) / side
+                                * (self.sps.dimensions[0] as usize).div_ceil(side)
+                                + (x << shift) / side;
+                            if address < self.slice_start as usize {
+                                return false;
+                            }
                             if !self.pps.constrained_intra {
                                 return true;
                             }
-                            let shift = usize::from(component != 0);
                             self.cells[((y << shift) / 4) * (self.sps.dimensions[0] as usize / 4)
                                 + (x << shift) / 4]
                                 .intra
@@ -653,6 +932,9 @@ fn reconstruct_row(
 }
 
 fn deblock(decoder: &mut Decoder<'_>, slice: &SliceHeader) -> Result<()> {
+    deblock_slices(decoder, std::slice::from_ref(slice))
+}
+fn deblock_slices(decoder: &mut Decoder<'_>, slices: &[SliceHeader]) -> Result<()> {
     use super::hevc_deblock as d;
     let [width, height] = decoder.sps.dimensions.map(|v| v as usize);
     // Complete vertical filtering precedes horizontal filtering.
@@ -666,6 +948,25 @@ fn deblock(decoder: &mut Decoder<'_>, slice: &SliceHeader) -> Result<()> {
                 {
                     continue;
                 }
+                let side = 1usize << decoder.sps.coding_block_log2[1];
+                let owner = |x: usize, y: usize| {
+                    slices.partition_point(|s| {
+                        s.address as usize <= y / side * width.div_ceil(side) + x / side
+                    }) - 1
+                };
+                let q_owner = owner(x, y);
+                let p_owner = if direction == 0 {
+                    owner(x - 1, y)
+                } else {
+                    owner(x, y - 1)
+                };
+                let slice = &slices[q_owner];
+                if slice.deblocking.disabled
+                    || (p_owner != q_owner
+                        && !slices[p_owner.max(q_owner)].loop_filter_across_slices)
+                {
+                    continue;
+                }
                 let q = decoder.qp_grid[y / 8 * (width / 8) + x / 8];
                 let p = if direction == 0 {
                     decoder.qp_grid[y / 8 * (width / 8) + (x - 1) / 8]
@@ -673,7 +974,7 @@ fn deblock(decoder: &mut Decoder<'_>, slice: &SliceHeader) -> Result<()> {
                     decoder.qp_grid[(y - 1) / 8 * (width / 8) + x / 8]
                 };
                 let a = decoder
-                    .cell(
+                    .cell_raw(
                         if direction == 0 {
                             x as i32 - 1
                         } else {
@@ -686,7 +987,7 @@ fn deblock(decoder: &mut Decoder<'_>, slice: &SliceHeader) -> Result<()> {
                         },
                     )
                     .unwrap();
-                let b = decoder.cell(x as i32, y as i32).unwrap();
+                let b = decoder.cell_raw(x as i32, y as i32).unwrap();
                 let strength = if a.intra || b.intra {
                     2
                 } else if decoder.edges[y / 4 * (width / 4) + x / 4][direction] & 2 != 0
@@ -791,6 +1092,16 @@ fn deblock(decoder: &mut Decoder<'_>, slice: &SliceHeader) -> Result<()> {
 
 impl Decoder<'_> {
     fn cell(&self, x: i32, y: i32) -> Option<Cell> {
+        if x >= 0 && y >= 0 {
+            let side = 1u32 << self.sps.coding_block_log2[1];
+            let columns = self.sps.dimensions[0].div_ceil(side);
+            if y as u32 / side * columns + (x as u32 / side) < self.slice_start {
+                return None;
+            }
+        }
+        self.cell_raw(x, y)
+    }
+    fn cell_raw(&self, x: i32, y: i32) -> Option<Cell> {
         let [w, h] = self.sps.dimensions;
         if x < 0 || y < 0 || x as u32 >= w || y as u32 >= h {
             None
