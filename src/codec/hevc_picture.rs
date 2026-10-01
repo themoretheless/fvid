@@ -345,33 +345,34 @@ pub fn decode_slices(
     pps: &Pps,
     slices: &[SliceHeader],
     poc: i32,
-    lists: &[[Vec<Reference>; 2]],
+    slice_lists: &[[Vec<Reference>; 2]],
     budget: usize,
 ) -> Result<Picture> {
-    if slices.len() != lists.len() {
+    if slices.len() != slice_lists.len() {
         return Err(invalid("HEVC slice reference count mismatch"));
     }
     if slices.len() == 1 {
-        return decode(sps, pps, &slices[0], poc, &lists[0], budget);
+        return decode(sps, pps, &slices[0], poc, &slice_lists[0], budget);
     }
     let slice = slices
         .first()
         .ok_or_else(|| invalid("empty HEVC slice set"))?;
-    if lists.len() != slices.len() {
+    if slice_lists.len() != slices.len() {
         return Err(invalid("HEVC slice reference count mismatch"));
     }
-    let first_lists = &lists[0];
-    // Motion grids currently retain one reference-index mapping per picture.
-    if lists.iter().any(|l| {
-        (0..2).any(|i| {
-            l[i].iter()
-                .map(|r| r.poc)
-                .ne(first_lists[i].iter().map(|r| r.poc))
-        })
-    }) {
-        return Err(invalid(
-            "HEVC per-slice reference remapping is not implemented",
-        ));
+    let first_lists = &slice_lists[0];
+    let mut canonical: [Vec<Reference>; 2] = [Vec::new(), Vec::new()];
+    for lists in slice_lists {
+        for list in 0..2 {
+            for reference in &lists[list] {
+                if !canonical[list].iter().any(|r| r.poc == reference.poc) {
+                    if canonical[list].len() == 256 {
+                        return Err(invalid("HEVC picture reference map exceeds index range"));
+                    }
+                    canonical[list].push(reference.clone());
+                }
+            }
+        }
     }
     if sps.chroma_format != 1
         || sps.separate_colour_plane
@@ -396,7 +397,7 @@ pub fn decode_slices(
         {
             return Err(invalid("invalid HEVC entropy substream bounds"));
         }
-        let reference_lists = &lists[index];
+        let reference_lists = &slice_lists[index];
         if slice.slice_type != SliceType::I && !(1..=5).contains(&slice.max_merge_candidates) {
             return Err(invalid("invalid HEVC merge candidate count"));
         }
@@ -494,6 +495,7 @@ pub fn decode_slices(
             return Err(invalid("HEVC slices do not partition the picture"));
         }
         decoder.slice = slice;
+        decoder.lists = &slice_lists[index];
         decoder.slice_start = begin;
         decoder.qp = slice.qp;
         decoder.qp_prediction = slice.qp;
@@ -570,6 +572,23 @@ pub fn decode_slices(
     if !decoder.planes.iter().all(Plane::complete) {
         return Err(invalid("incomplete HEVC multi-slice picture"));
     }
+    let canonical_pocs: [Vec<i32>; 2] =
+        std::array::from_fn(|l| canonical[l].iter().map(|r| r.poc).collect());
+    let slice_pocs: Vec<[Vec<i32>; 2]> = slice_lists
+        .iter()
+        .map(|lists| std::array::from_fn(|l| lists[l].iter().map(|r| r.poc).collect()))
+        .collect();
+    for y in (0..h).step_by(4) {
+        for x in (0..w).step_by(4) {
+            let address = y / side * columns + x / side;
+            let owner = slices.partition_point(|s| s.address <= address) - 1;
+            let source_pocs = &slice_pocs[owner];
+            let cell = &mut decoder.cells[y as usize / 4 * (w as usize / 4) + x as usize / 4];
+            cell.motion =
+                super::hevc_motion::remap_references(cell.motion, source_pocs, &canonical_pocs)?;
+        }
+    }
+    decoder.lists = &canonical;
     deblock_slices(&mut decoder, slices)?;
     for (component, plane) in decoder.planes.iter_mut().enumerate() {
         let parameters: Vec<_> = sao.iter().map(|p| p[component]).collect();
@@ -600,7 +619,7 @@ pub fn decode_slices(
     }
     Ok(Picture {
         motion,
-        reference_pocs: std::array::from_fn(|l| lists[l].iter().map(|r| r.poc).collect()),
+        reference_pocs: canonical_pocs,
         dimensions: [w, h],
         crop: sps.crop,
         depth: sps.depth,

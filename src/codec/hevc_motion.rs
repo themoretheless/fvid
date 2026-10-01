@@ -17,6 +17,28 @@ pub struct Vector {
     pub mv: [i16; 2],
 }
 pub type Motion = [Option<Vector>; 2];
+/// Preserve the referenced POC when publishing slice-local motion indices in a
+/// picture-wide map used by deblocking and later temporal prediction.
+pub(crate) fn remap_references(
+    mut motion: Motion,
+    source: &[Vec<i32>; 2],
+    target: &[Vec<i32>; 2],
+) -> Result<Motion> {
+    for list in 0..2 {
+        if let Some(vector) = &mut motion[list] {
+            let poc = source[list]
+                .get(vector.reference as usize)
+                .ok_or_else(|| invalid("HEVC slice motion reference is out of range"))?;
+            let index = target[list]
+                .iter()
+                .position(|v| v == poc)
+                .ok_or_else(|| invalid("HEVC motion POC is absent from picture map"))?;
+            vector.reference = u8::try_from(index)
+                .map_err(|_| invalid("HEVC motion reference map exceeds index range"))?;
+        }
+    }
+    Ok(motion)
+}
 pub struct Spatial<'a> {
     pub rect: [u32; 4],
     pub cu: [u32; 3],
@@ -677,5 +699,42 @@ mod tests {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod reference_remap_tests {
+    #[test]
+    fn reordered_and_overlapping_slice_lists_preserve_poc_and_vector() {
+        use super::{Vector, remap_references};
+        let source = [vec![12, 8], vec![20, 16]];
+        let target = [vec![8, 4, 12], vec![16, 20, 24]];
+        let motion = [
+            Some(Vector {
+                reference: 0,
+                mv: [17, -3],
+            }),
+            Some(Vector {
+                reference: 1,
+                mv: [-7, 11],
+            }),
+        ];
+        let remapped = remap_references(motion, &source, &target).unwrap();
+        assert_eq!(
+            remapped[0].unwrap(),
+            Vector {
+                reference: 2,
+                mv: [17, -3]
+            }
+        );
+        assert_eq!(
+            remapped[1].unwrap(),
+            Vector {
+                reference: 0,
+                mv: [-7, 11]
+            }
+        );
+        assert!(remap_references(motion, &[vec![], vec![]], &target).is_err());
+        assert!(remap_references(motion, &source, &[vec![8], vec![16]]).is_err());
     }
 }

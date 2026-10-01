@@ -161,5 +161,6 @@ checks truncations. Native Main/Main10 reconstruction is byte-equal to the
 saved YUV oracles, including rewind; partial pictures are never published.
 The Main10 fixture uses the same commands with yuv420p10le for encoding and
 reference output and `hevc-multislice-main10` filenames. Both contain I/B/P
-pictures. Dependent slice inheritance and per-slice reference remapping remain
-unimplemented; the comparison does not prove unrestricted HEVC conformance.
+pictures. Dependent slice inheritance remains unimplemented. Reference-index remapping
+is tested with reordered/overlapping POC maps, but these encoded fixtures do
+not establish differing per-slice reference-list behavior; the comparison does not prove unrestricted HEVC conformance.

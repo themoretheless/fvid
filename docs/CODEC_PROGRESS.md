@@ -37,7 +37,10 @@ mix сохраняет PCE mask 0xff для ADTS/MP4/Matroska; тест двух
   Независимые slices восстанавливаются в общие planes с WPP, CABAC reset,
   slice-aware prediction/deblocking/SAO. Main/Main10 I/P/B сравниваются
   побайтно с независимыми YUV-эталонами, включая rewind и усечения.
-  Dependent segments, per-slice reference remapping и изменённые in-band
+  Slice-local motion indices переводятся по POC в общую таблицу перед
+  deblocking и публикацией DPB; перестановки/пересечения проверены unit test.
+  Независимый encoded oracle с различающимися slice reference lists ещё нужен.
+  Dependent segments и изменённые in-band
   SPS/PPS пока отклоняются. Идентичные повторённые parameter sets принимаются.
 - `src/codec/aac_native.rs`: декодер AAC-LC поддерживает стандартные 1–6 каналов,
   configurations 7 (7.1 wide), 11 (6.1 back), 12 (7.1) и однозначные горизонтальные PCE layouts. Восьмиканальный PCE в MP4 проверен
