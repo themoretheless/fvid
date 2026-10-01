@@ -94,6 +94,14 @@ impl VideoGeometry {
             return Err(invalid("empty video geometry"));
         }
         let (data, sx, sy, rgb) = match frame {
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            RawFrame::Surface { surface, colour } => {
+                let p = crate::playback_native::surface_to_packed(surface, *colour)?;
+                if (p.frame.width, p.frame.height) != (width, height) {
+                    return Err(invalid("inconsistent surface dimensions"));
+                }
+                (Cow::Owned(p.frame.data), 2, 2, false)
+            }
             RawFrame::Rgb(data) => (Cow::Borrowed(data.as_slice()), 1, 1, true),
             RawFrame::Avc { picture, .. } => {
                 let [left, right, top, bottom] = picture.crop;
@@ -184,6 +192,8 @@ impl VideoGeometry {
             }
         };
         let (depth, full) = match frame {
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            RawFrame::Surface { surface, .. } => (surface.depth(), surface.full_range()),
             RawFrame::Avc { picture, colour } => (picture.bit_depth, colour.full),
             RawFrame::Planar8(p) => (8, p.colour.full),
             RawFrame::Planar(p) => (p.depth, p.colour.full),
@@ -258,6 +268,8 @@ impl VideoGeometry {
         };
         let normalized = display.apply_with_sampling(frame, w, h, media)?;
         let (depth, full) = match frame {
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            RawFrame::Surface { surface, .. } => (surface.depth(), surface.full_range()),
             RawFrame::Avc { picture, colour } => (picture.bit_depth, colour.full),
             RawFrame::Planar8(p) => (8, p.colour.full),
             RawFrame::Planar(p) => (p.depth, p.colour.full),

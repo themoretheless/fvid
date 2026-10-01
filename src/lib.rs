@@ -77,6 +77,8 @@ pub mod player_gpu;
 pub mod media;
 pub mod native_media;
 pub mod native_capabilities;
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+pub mod hardware_export;
 pub mod native_pcm;
 pub mod native_geometry;
 pub mod native_chromashift;
@@ -111,7 +113,7 @@ pub use backend::{Backend, ExecutionOptions};
 pub mod y4m;
 pub use y4m::{Crop, Header, PixelFormat, Plan, Stats, Transform, process, process_with_options};
 #[cfg(any(feature = "gpu", feature = "cuda"))]
-pub use y4m::process_gpu_chain;
+pub use y4m::{process_gpu_chain, process_gpu_stages};
 pub(crate) use y4m::line;
 
 pub mod virtual_camera;

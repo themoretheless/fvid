@@ -475,23 +475,17 @@ fn the_lead_is_filled_by_the_copier_and_eaten_by_the_reader() {
         "the copier never came back over the item it was given"
     );
     assert_eq!(handle.ahead(), 0, "the item is read out; the lead is not");
-    // Where the settled window sits is the second question from how much of it
-    // there is. Two endings are legitimate here and the reads cannot tell them
-    // apart from each other: the copier either walked the last blocks down, which
-    // leaves the back edge a lead's worth inside the item, or it found the reader
-    // further away than a lead and cut the window to where the reader stood, which
-    // leaves it empty at the end. Both say the same thing about the front edge and
-    // about the far one, and both keep the edges and the published size agreeing.
-    let (near, far) = handle.covered();
+    // The copier may be outrun by a local source. EOF need not download
+    // consumed bytes merely to extend a bounding rectangle to the file end.
+    let ranges = handle.ranges();
     assert!(
-        near > 0,
-        "the window never followed the reader off the front, it read [{near}, {far})"
+        ranges
+            .iter()
+            .all(|&(start, end)| start < end && end <= 8 << 20)
     );
-    assert_eq!(far, 8 << 20, "the copy stopped short of the end it read to");
     assert_eq!(
-        far - near,
-        handle.copied(),
-        "the window's own edges and its published size disagree"
+        ranges.iter().map(|&(start, end)| end - start).sum::<u64>(),
+        handle.copied()
     );
     assert_eq!(got.len(), 8 << 20);
     drop(source);
@@ -524,4 +518,77 @@ fn a_short_item_is_read_as_it_is_however_slow_its_probe_looks() {
     assert!(handle.is_some(), "a spooled source has no handle");
     drop(source);
     let _ = fs::remove_dir_all(big.parent().unwrap());
+}
+
+fn wait_for_range(handle: &fvid::playback_spool::SpoolHandle, start: u64, end: u64) {
+    let until = Instant::now() + Duration::from_secs(5);
+    while !handle.ranges().iter().any(|&(a, b)| a <= start && b >= end) {
+        assert!(
+            Instant::now() < until,
+            "cache never covered [{start}, {end}): {:?}",
+            handle.ranges()
+        );
+        std::thread::sleep(Duration::from_millis(2));
+    }
+}
+
+#[test]
+fn reaching_the_tail_does_not_stop_prefetch_after_a_rewind() {
+    let path = item("tail-rewind", 16 << 20);
+    let mut source = spooled(&path, 2 << 20);
+    let handle = source.handle();
+    source.seek(SeekFrom::Start(15 << 20)).unwrap();
+    wait_for_range(&handle, 15 << 20, 16 << 20);
+    source.seek(SeekFrom::Start(0)).unwrap();
+    wait_for_range(&handle, 0, 2 << 20);
+    let mut bytes = vec![0; 4096];
+    source.read_exact(&mut bytes).unwrap();
+    assert_eq!(bytes, fs::read(&path).unwrap()[..4096]);
+    drop(source);
+    fs::remove_dir_all(path.parent().unwrap()).unwrap();
+}
+
+#[test]
+fn rewinding_fills_the_gap_and_keeps_already_cached_future_bytes() {
+    let path = item("keep-future", 16 << 20);
+    let mut source = spooled(&path, 4 << 20);
+    let handle = source.handle();
+    source.seek(SeekFrom::Start(4 << 20)).unwrap();
+    wait_for_range(&handle, 4 << 20, 8 << 20);
+    source.seek(SeekFrom::Start(3 << 20)).unwrap();
+    wait_for_range(&handle, 3 << 20, 8 << 20);
+    assert!(handle.ahead() >= 4 << 20);
+    drop(source);
+    fs::remove_dir_all(path.parent().unwrap()).unwrap();
+}
+
+#[test]
+fn metadata_seek_cannot_move_prefetch_away_from_playback() {
+    let path = item("playback-anchor", 16 << 20);
+    let mut source = spooled(&path, 2 << 20);
+    let handle = source.handle();
+    handle.prioritize(0);
+    source.seek(SeekFrom::Start(15 << 20)).unwrap();
+    let mut tail = [0; 4096];
+    source.read_exact(&mut tail).unwrap();
+    wait_for_range(&handle, 0, 2 << 20);
+    assert!(handle.ahead() >= 2 << 20);
+    handle.prioritize(8 << 20);
+    wait_for_range(&handle, 8 << 20, 10 << 20);
+    drop(source);
+    fs::remove_dir_all(path.parent().unwrap()).unwrap();
+}
+
+#[test]
+fn overlapping_opens_of_one_file_have_independent_temporary_storage() {
+    let path = item("two-opens", 4 << 20);
+    let first = spooled(&path, 1 << 20);
+    let mut second = spooled(&path, 1 << 20);
+    wait_for_range(&second.handle(), 0, 1 << 20);
+    drop(first);
+    let mut bytes = vec![0; 1 << 20];
+    second.read_exact(&mut bytes).unwrap();
+    assert_eq!(bytes, fs::read(&path).unwrap()[..1 << 20]);
+    drop(second);
+    fs::remove_dir_all(path.parent().unwrap()).unwrap();
 }
