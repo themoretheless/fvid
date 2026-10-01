@@ -731,6 +731,15 @@ mod tests {
 }
 
 impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
+    fn preroll_target(&self)->Option<i64> {
+        (self.codec_tag=="mp4a").then(||self.presentation_floor.unwrap_or(0))
+    }
+    fn resume_preroll(&mut self,pts:i64)->bool {
+        if self.preroll_target().is_none_or(|target|pts>target) {return false;}
+        let Some(index)=self.demuxer.packets.iter().position(|p|p.track==self.track_number && p.pts_ns==pts) else {return false;};
+        self.packet_index=index;true
+    }
+
     fn codec(&self) -> &str {
         &self.codec_tag
     }

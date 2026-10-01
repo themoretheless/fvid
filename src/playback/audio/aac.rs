@@ -37,6 +37,14 @@ impl AacAudioReader {
 }
 
 impl AudioStream for AacAudioReader {
+    fn preroll_target(&self)->Option<i64> {i64::try_from(self.presentation_floor).ok()}
+    fn resume_preroll(&mut self,pts:i64)->bool {
+        if pts<0 || pts as u64>self.presentation_floor {return false;}
+        let index=self.aac.frames.partition_point(|f|f.pts<pts as u64);
+        if self.aac.frames.get(index).is_none_or(|f|f.pts!=pts as u64) {return false;}
+        self.packet=index;true
+    }
+
     fn codec(&self) -> &str {
         TAG
     }

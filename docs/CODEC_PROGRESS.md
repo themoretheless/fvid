@@ -1854,3 +1854,18 @@ nonzero source range seek and rewind tests remain acceptance tests. Full core
 These totals exclude nine transform/synthesis tests moved into standalone
 fvid-media CI. ADTS/Matroska checkpoint-aware cursor support remains pending;
 no cold-seek acceleration or external-file latency claim is made here.
+
+### AAC checkpoint seek covers ADTS and Matroska
+
+ADTS opts into the worker cache with exact indexed sample timestamps. Matroska
+AAC opts in with exact track packet/nanosecond timestamps; other Matroska codecs
+retain their existing seek path. Resuming does not erase the presentation floor.
+Two new short synthetic fixtures remux the committed two-second AAC/video test
+source into ADTS and Matroska, using a separate generation script
+`generate_aac_seek_checkpoint_samples.py` (FFmpeg copy-only oracle/remux tool).
+No source from private files or test-time FFmpeg is involved. Warm seek to 1.7 s
+must decode fewer than 75% of initial encoded steps, produce identical complete
+PCM packet tails/timestamps, then reproduce all initial packets on backward seek
+to zero. Both container acceptance checks passed, along with all 15 audio worker
+regressions. Cold and evicted regions still use source-start preroll; persistent
+checkpoint storage is not implemented.

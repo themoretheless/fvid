@@ -950,6 +950,31 @@ mod mp4_edit_scheduler_tests {
 mod checkpoint_seek_tests {
     use super::*;
     #[test]
+    fn warmed_adts_and_matroska_seek_restore_exact_pcm_tails() {
+        let adts=crate::playback_aac::AacAudioReader::open(std::io::Cursor::new(include_bytes!("../tests/fixtures/playback-errors/aac-seek-checkpoints.aac")),Default::default()).unwrap();
+        let mka=crate::playback_webm_audio::WebmAudioReader::open(std::io::Cursor::new(include_bytes!("../tests/fixtures/playback-errors/aac-seek-checkpoints.mka")),Default::default()).unwrap();
+        for stream in [Box::new(adts) as Box<dyn AudioStream>,Box::new(mka)] {
+            let scale=stream.timescale();
+            let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
+            let packets=Arc::new(Mutex::new(Vec::new()));let(_,commands)=sync_channel(1);let(events,_)=sync_channel(1);
+            let mut worker=Worker {checkpoints:Vec::new(),stream,decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            fn finish(w:&mut Worker)->usize {
+                for n in 0..300 {match w.decode_next().0 {Some(AudioEvent::Ended(_))=>return n,Some(AudioEvent::Error(e))=>panic!("{e}"),_=>{}}}
+                panic!("audio did not end");
+            }
+            let full=finish(&mut worker);assert!(worker.checkpoints.len()>=2);
+            let expected:Vec<_>=packets.lock().unwrap().iter().map(|p|(p.pts,p.data.clone())).collect();
+            packets.lock().unwrap().clear();worker.handle(Command::Seek(i64::from(scale)*17/10));
+            let steps=finish(&mut worker);assert!(steps<full*3/4,"preroll was not skipped: {steps}/{full}");
+            let actual=packets.lock().unwrap();let start=expected.iter().position(|(pts,_)|*pts==actual[0].pts).unwrap();
+            assert_eq!(actual.len(),expected.len()-start);
+            for (p,(pts,data)) in actual.iter().zip(&expected[start..]) {assert_eq!(p.pts,*pts);assert!(p.data==*data);}
+            drop(actual);packets.lock().unwrap().clear();worker.handle(Command::Seek(0));finish(&mut worker);
+            let actual=packets.lock().unwrap();assert_eq!(actual.len(),expected.len());
+            for(p,(pts,data))in actual.iter().zip(&expected) {assert_eq!(p.pts,*pts);assert!(p.data==*data);}
+        }
+    }
+    #[test]
     fn warmed_aac_seek_skips_source_prefix_without_changing_pcm() {
         let data=include_bytes!("../tests/fixtures/audio/two-audio.mp4").as_slice();
         let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(data),Default::default()).unwrap();
