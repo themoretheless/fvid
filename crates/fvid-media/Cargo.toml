@@ -18,7 +18,7 @@ eframe = { version = "0.36", optional = true }
 rfd = { version = "0.17.2", optional = true }
 
 [features]
-default = ["legacy-ffmpeg"]
+default = []
 legacy-ffmpeg = ["dep:bindgen"]
 cuda-hw = ["legacy-ffmpeg", "dep:fvid-cuda"]
 # Windowed playback: pulls the egui/eframe window, cpal audio output, and the
