@@ -1515,3 +1515,11 @@ The AAC single-edit seek regression verifies that a 50 ms presentation request
 lands at source tick 3064 and anchors the device at 42.833333 ms. `seek_to`
 returns source ticks for `time_of` to translate once; subtracting the priming
 offset in both places caused an incorrect device anchor and is fixed.
+
+For single-range MP4 AAC edits, playback seek rebuilds decoder state from the
+beginning and suppresses preroll PCM until the landed packet. Captured PCM after
+a 50 ms seek and subsequent backward seek matches continuous decoding exactly.
+This currently takes linear decode work; bounded state checkpoints remain a
+performance task. Raw `Mp4AudioReader::seek` retains its packet-cursor behavior;
+the player-facing `AudioStream::seek_to` performs the preroll. Complex edit lists
+and AAC containers without the single-range edit are not covered by this path.

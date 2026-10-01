@@ -628,7 +628,7 @@ mod presentation_window_tests {
         let mut worker = Worker { stream:Box::new(stream),decoder,backend:Box::new(Capture(counts.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
         for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
         let packets = counts.lock().unwrap();
-        let counts:Vec<usize> = packets.iter().map(|p| p.data.len()/8).collect();
+        let sizes:Vec<usize> = packets.iter().map(|p| p.data.len()/8).collect();
         assert_eq!(packets[0].pts,0);
         let actual:Vec<u8> = packets.iter().flat_map(|p|p.data.iter().copied()).collect();
         let mut expected = Vec::new();
@@ -636,11 +636,28 @@ mod presentation_window_tests {
         let mut control = crate::native_media::DecodeProgress::new(None,None).unwrap();
         crate::native_media::decode_mp4_audio_reader_controlled(demuxer,&mut expected,None,Some(1),&mut control).unwrap();
         assert!(actual==expected,"playback and export presentation samples differ");
-        assert_eq!(counts.len(),48);
-        assert_eq!(counts.iter().sum::<usize>(),48008);
-        assert_eq!(counts[0],16);
-        assert_eq!(counts[1],1016);
-        assert_eq!(counts[47],896);
-        assert!(counts[2..47].iter().all(|n| *n==1024));
+        assert_eq!(sizes.len(),48);
+        assert_eq!(sizes.iter().sum::<usize>(),48008);
+        assert_eq!(sizes[0],16);
+        assert_eq!(sizes[1],1016);
+        assert_eq!(sizes[47],896);
+        assert!(sizes[2..47].iter().all(|n| *n==1024));
+        drop(packets);
+        // A seek must rebuild decoder state while suppressing preroll output.
+        counts.lock().unwrap().clear();
+        worker.handle(Command::Seek(2400));
+        for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
+        let packets = counts.lock().unwrap();
+        assert_eq!(packets[0].pts,2056);
+        let actual:Vec<u8> = packets.iter().flat_map(|p|p.data.iter().copied()).collect();
+        assert!(actual==expected[2056*8..],"seek PCM differs from continuous decode");
+        drop(packets);
+        counts.lock().unwrap().clear();
+        worker.handle(Command::Seek(0));
+        for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
+        let packets = counts.lock().unwrap();
+        let actual:Vec<u8> = packets.iter().flat_map(|p|p.data.iter().copied()).collect();
+        assert!(actual==expected,"backward seek PCM differs from initial decode");
+
     }
 }

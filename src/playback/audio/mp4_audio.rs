@@ -25,6 +25,7 @@ pub struct Mp4AudioReader<R> {
     demuxer: Mp4Reader<R>,
     track_index: usize,
     sample_index: usize,
+    presentation_floor: i64,
     packet: Vec<u8>,
 }
 
@@ -134,6 +135,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             demuxer,
             track_index: index,
             sample_index: 0,
+            presentation_floor: 0,
             packet: Vec::new(),
         })
     }
@@ -173,6 +175,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     pub fn rewind(&mut self) {
         self.demuxer.invalidate_position();
         self.sample_index = 0;
+        self.presentation_floor = 0;
         self.packet.clear();
     }
 
@@ -263,7 +266,8 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         let stride = usize::from(track.channels).checked_mul(4).filter(|n| *n != 0).ok_or_else(|| invalid("invalid AAC PCM stride"))?;
         if !packet.data.len().is_multiple_of(stride) { return Err(invalid("unaligned AAC PCM buffer")); }
         let frames = packet.data.len()/stride;
-        let first = (i128::try_from(media_start).map_err(|_| invalid("audio edit clock overflow"))?-source_start).clamp(0,frames as i128) as usize;
+        let floor = (self.presentation_floor.max(0) as u128 * rate).div_ceil(scale).max(media_start);
+        let first = (i128::try_from(floor).map_err(|_| invalid("audio edit clock overflow"))?-source_start).clamp(0,frames as i128) as usize;
         let last = (i128::try_from(media_end).map_err(|_| invalid("audio edit clock overflow"))?-source_start).clamp(0,frames as i128) as usize;
         if first >= last { return Ok(None); }
         packet.data.copy_within(first*stride..last*stride,0);
@@ -310,7 +314,15 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     fn seek_to(&mut self, pts: i64) -> i64 {
         let track = self.track();
         let shift = if track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
-        Mp4AudioReader::seek(self, pts.saturating_add(shift))
+        let preroll = track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0;
+        let landed = Mp4AudioReader::seek(self, pts.saturating_add(shift));
+        if preroll {
+            // Restore all decoder overlap/history before exposing the landed
+            // packet. Preroll PCM is discarded by present_decoded.
+            self.rewind();
+            self.presentation_floor = landed;
+        }
+        landed
     }
 }
 
@@ -689,7 +701,7 @@ mod edit_seek_tests {
         assert_eq!(landed,3064);
         assert_eq!(stream.time_of(landed),std::time::Duration::from_nanos(42_833_333));
         let packet = stream.next_packet().unwrap().unwrap();
-        assert_eq!(packet.pts,landed);
+        assert_eq!(packet.pts,0); // seek primes the decoder from the beginning
         assert_eq!(stream.seek_to(0),0);
         assert_eq!(stream.time_of(0),std::time::Duration::ZERO);
     }
