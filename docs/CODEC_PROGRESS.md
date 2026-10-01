@@ -1785,3 +1785,17 @@ Validation: standalone `fvid-media --no-default-features` check passed with
 FFmpeg or libav. Root `--no-default-features --features media` check also passed,
 confirming compatibility of the retained legacy API. Production `media` still
 links libav through its default backend; no overall independence is claimed.
+
+### Owned WAVE headers now live in fvid-media
+
+The existing sample-preserving WAVE extensible f32 header and default speaker
+mask implementation moved into public `fvid_media::owned_wav`. Root audio export
+now delegates to this media-layer implementation; no duplicate algorithm or
+legacy muxer is used. The root depends on `fvid-media` with default features off;
+its `media` feature explicitly enables `legacy-ffmpeg`. Player enables only the
+media UI feature, which no longer implicitly selects libav (combined media +
+player still supplies the prior legacy UI). This keeps the crate in the native
+production path while continuing incremental backend replacement.
+Validation: all 15 native AAC/WAVE integration tests passed, root player and
+legacy-media checks passed. The player's bindgen dependency is from CoreAudio,
+not the media backend. Remaining root-native implementations still await transfer.

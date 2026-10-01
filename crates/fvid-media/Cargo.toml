@@ -23,7 +23,7 @@ legacy-ffmpeg = ["dep:bindgen"]
 cuda-hw = ["legacy-ffmpeg", "dep:fvid-cuda"]
 # Windowed playback: pulls the egui/eframe window, cpal audio output, and the
 # rfd file dialogs. Off, the crate is a pure decode/edit library.
-player = ["legacy-ffmpeg", "dep:eframe", "dep:rfd", "dep:cpal"]
+player = [ "dep:eframe", "dep:rfd", "dep:cpal"]
 
 [build-dependencies]
 bindgen = { version = "0.72.1", optional = true }

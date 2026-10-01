@@ -15,13 +15,13 @@ unsafe_code = "forbid"
 
 [features]
 default = ["gpu", "cuda"]
-player = ["dep:pollster", "dep:naga", "dep:eframe", "dep:rfd", "dep:fvid-platform", "dep:cpal", "dep:symphonia", "videotoolbox", "fvid-vt?/metal", "fvid-media?/player"]
+player = ["dep:pollster", "dep:naga", "dep:eframe", "dep:rfd", "dep:fvid-platform", "dep:cpal", "dep:symphonia", "videotoolbox", "fvid-vt?/metal", "fvid-media/player"]
 # Hardware decode and H.264/HEVC encode through VideoToolbox; a no-op off macOS.
 videotoolbox = ["dep:fvid-vt"]
 cuda = ["dep:fvid-cuda"]
 gpu = ["dep:wgpu", "dep:pollster", "dep:naga"]
 mcp = ["media", "dep:rmcp", "dep:tokio", "dep:axum", "dep:serde"]
-media = ["dep:fvid-media"]
+media = ["fvid-media/legacy-ffmpeg"]
 # Native media + CUDA NVDEC/NVENC vertical slice (pulls fvid-media/cuda-hw).
 media-cuda = ["media", "cuda", "fvid-media/cuda-hw"]
 # Local airbug toolkit from themoretheless/airbug@release (err + OTLP).
@@ -43,7 +43,7 @@ pollster = { version = "0.4", optional = true }
 naga = { version = "=30.0.1", optional = true, features = ["wgsl-in"] }
 
 fvid-cuda = { path = "crates/fvid-cuda", optional = true }
-fvid-media = { path = "crates/fvid-media", optional = true }
+fvid-media = { path = "crates/fvid-media", default-features = false }
 fvid-cpu = { path = "crates/fvid-cpu" }
 serde_json = "1"
 

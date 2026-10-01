@@ -6,3 +6,5 @@ include!("legacy.rs");
 pub use fvid_media_info::*;
 #[cfg(not(feature = "legacy-ffmpeg"))]
 pub use fvid_control::{CancelFlag, CopyOptions, ProgressEvent, ProgressHook};
+
+pub mod owned_wav;
