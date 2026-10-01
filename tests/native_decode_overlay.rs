@@ -26,29 +26,79 @@ fn owned_decode_composites_with_geometry_filters_and_intervals() {
             let api = fvid::media::decode_video_transformed(&source, request.clone()).unwrap();
             assert_eq!(api.backend, "fvid");
             assert_eq!(api.video_frames, stats.video_frames);
-            let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
-                .arg("media")
-                .arg("decode")
-                .arg(&source)
-                .arg("--overlay")
-                .arg(&source)
-                .arg("--hflip")
-                .arg("--negate")
-                .arg("1")
-                .output()
-                .unwrap();
-            assert!(
-                run.status.success(),
-                "{}",
-                String::from_utf8_lossy(&run.stderr)
-            );
-            let json: serde_json::Value = serde_json::from_slice(&run.stdout).unwrap();
-            assert_eq!(json["backend"], "fvid");
         }
+        let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .arg("media")
+            .arg("decode")
+            .arg(&source)
+            .arg("--overlay")
+            .arg(&source)
+            .arg("--hflip")
+            .arg("--negate")
+            .arg("1")
+            .output()
+            .unwrap();
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        let json: serde_json::Value = serde_json::from_slice(&run.stdout).unwrap();
+        assert_eq!(json["backend"], "fvid");
         let mut interval = request;
         interval.interval = Some((0, 1_000_000));
         let stats = fvid::native_media::decode_video_request(&source, &interval).unwrap();
         assert!(stats.video_frames > 0 && stats.video_frames <= plain.video_frames);
+        let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "decode"])
+            .arg(&source)
+            .arg("--overlay")
+            .arg(&source)
+            .args(["--from", "0", "--to", "1", "--hflip", "--negate", "1"])
+            .output()
+            .unwrap();
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        let json: serde_json::Value = serde_json::from_slice(&run.stdout).unwrap();
+        assert_eq!(json["video_frames"], stats.video_frames);
+        let plan = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "plan", "decode"])
+            .arg(&source)
+            .arg("--overlay")
+            .arg(&source)
+            .args(["--hflip", "--negate", "1"])
+            .output()
+            .unwrap();
+        assert!(
+            plan.status.success(),
+            "{}",
+            String::from_utf8_lossy(&plan.stderr)
+        );
+        let json: serde_json::Value = serde_json::from_slice(&plan.stdout).unwrap();
+        assert_eq!(json["command"], "decode");
+        let actions: Vec<_> = json["steps"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|s| s["action"].as_str().unwrap())
+            .collect();
+        assert_eq!(
+            actions,
+            ["decode", "geometry", "overlay", "filter", "discard"]
+        );
+        let quiet = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "decode"])
+            .arg(&source)
+            .arg("--overlay")
+            .arg(&source)
+            .arg("--quiet")
+            .output()
+            .unwrap();
+        assert!(quiet.status.success());
+        assert!(quiet.stdout.is_empty());
         let mut invalid = interval;
         invalid.overlay.as_mut().unwrap().x = 1;
         assert!(fvid::native_media::decode_video_request(&source, &invalid).is_err());

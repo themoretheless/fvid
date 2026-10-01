@@ -52,7 +52,9 @@ pub fn decode_video_pipeline(
 ) -> Result<DecodeStats> {
     decode_video_pipeline_overlay(source, interval, geometry, filters, None)
 }
-fn decode_video_pipeline_overlay(
+/// Decode geometry, timed foreground compositing, then ordered pixel filters.
+/// The interval selects main presentation starts without resetting either file origin.
+pub fn decode_video_pipeline_overlay(
     source: &Path,
     interval: Option<(Duration, Duration)>,
     geometry: &crate::native_geometry::VideoGeometry,

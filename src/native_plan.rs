@@ -430,3 +430,25 @@ pub fn overlay(source:&std::path::Path,foreground:&std::path::Path,x:i64,y:i64)-
             PlanStep {action:"write".into(),detail:"owned Matroska .mkv; atomic no-overwrite publication".into()}],
         notes:vec!["backend: fvid; no external decoder, encoder or muxer".into(),"sample depth converted to main precision; matching colour encoding/range and sampling required; chroma placement must align; validated while decoding".into(),"foreground audio is not part of the overlay; main supported companion tracks are retained".into()]})
 }
+
+/// Read-only plan for owned geometry, timed overlay and pixel-filter decoding.
+/// Frame-dependent compatibility is validated by execution, not by probe alone.
+pub fn decode_overlay(source: &std::path::Path, foreground: &std::path::Path, x: i64, y: i64) -> Result<MediaPlan> {
+    let info = crate::native_probe::probe(source)?;
+    let second = crate::native_probe::probe(foreground)?;
+    if !info.streams.iter().any(|s| s.media_type == "video")
+        || second.streams.iter().filter(|s| s.media_type == "video").count() != 1 {
+        return Err("decode overlay requires main video and exactly one foreground video track".into());
+    }
+    Ok(MediaPlan {
+        command: "decode".into(), input: source.to_owned(), inputs: vec![source.to_owned(), foreground.to_owned()],
+        streams: info.streams.into_iter().map(|s| PlanStream { index: s.index, media_type: s.media_type.clone(), codec: s.codec,
+            disposition: if s.media_type == "video" { "decode_overlay" } else { "discard" }.into() }).collect(),
+        steps: vec![
+            PlanStep { action: "decode".into(), detail: "owned main and foreground software decoders; materialize stored display transforms".into() },
+            PlanStep { action: "overlay".into(), detail: format!("opaque overlay at {x},{y}; align first presentation origins before interval selection; hold latest foreground and repeat at EOF") },
+            PlanStep { action: "discard".into(), detail: "discard processed video samples; report main frame count and output geometry".into() },
+        ], graph: None,
+        notes: vec!["backend: fvid; no external decoder, filter or muxer".into(), "depth converted to main precision; colour/range, sampling, display aspect and HDR compatibility validated during decoding".into()],
+    })
+}

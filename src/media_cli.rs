@@ -3622,7 +3622,8 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
     let planning=args.first().map(String::as_str)==Some("plan");
     let command=usize::from(planning);
     let operation=args.get(command).map(String::as_str);
-    if !matches!(operation,Some("overlay"|"transcode-lossless"|"transcode")) {return Ok(false);}
+    if !matches!(operation,Some("overlay"|"transcode-lossless"|"transcode"|"decode")) {return Ok(false);}
+    let (mut from,mut to)=(None,None);
     let mut paths=Vec::<std::path::PathBuf>::new();let mut foreground=None;
     let (mut x,mut y)=(0i64,0i64);let (mut quiet,mut report)=(false,false);
     let mut processing=Vec::<String>::new();
@@ -3639,6 +3640,11 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
             "--crop"|"--scale"|"--pad"|"--transpose"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"=> {
                 processing.push(item.clone());processing.push(items.next().ok_or("missing overlay processing value")?.clone());
             },
+            "--from"|"--to" if operation==Some("decode")=> {
+                let slot=if item=="--from" {&mut from} else {&mut to};
+                if slot.is_some() {return Err("duplicate decode boundary".into());}
+                *slot=Some(decode_time(items.next().ok_or("missing decode boundary")?)?);
+            },
             "--quiet"=>quiet=true,
             "--progress" if !planning=>report=true,
             "--"=>{paths.extend(items.map(std::path::PathBuf::from));break;},
@@ -3647,6 +3653,35 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
         }
     }
     if operation!=Some("overlay") && foreground.is_none() {return Ok(false);}
+    if operation==Some("decode") {
+        if report {return Ok(false);}
+        let ([source],Some(overlay))=(paths.as_slice(),foreground.as_deref()) else {return Err("decode overlay requires MAIN --overlay FOREGROUND".into());};
+        let mut filter_args=vec!["decode".to_owned(),source.to_string_lossy().into_owned()];filter_args.extend(processing);
+        let (filter_args,geometry)=geometry_decode_args(&filter_args)?;
+        let (remaining,mut filters)=pixel_decode_args(&filter_args)?;
+        filters.canonicalize_option_order();
+        if remaining.len()!=2 {return Ok(false);}
+        let interval=match (from,to) {
+            (None,None)=>None,
+            (Some(from),Some(to)) if from<to=>Some((from,to)),
+            _=>return Err("decode interval requires both --from and --to with from < to".into()),
+        };
+        let spec=fvid::media_info::OverlaySpec {path:overlay.to_owned(),x:i32::try_from(x)?,y:i32::try_from(y)?};
+        if planning {
+            let mut plan=fvid::native_plan::decode_overlay(source,overlay,x,y)?;
+            let mut index=1;
+            if !geometry.is_identity() {
+                plan.steps.insert(index,fvid::media_info::PlanStep {action:"geometry".into(),detail:format!("main crop {:?}, hflip {}, vflip {}, transpose {:?}, pad {:?}, scale {:?}",geometry.crop,geometry.horizontal_flip,geometry.vertical_flip,geometry.transpose,geometry.pad,geometry.scale)});index+=1;
+            }
+            if !filters.is_empty() {plan.steps.insert(index+1,fvid::media_info::PlanStep {action:"filter".into(),detail:"owned pixel filters in media option order after compositing".into()});}
+            if let Some((from,to))=interval {plan.notes.push(format!("count presentation starts in [{from:?}, {to:?}); origins remain file-relative"));}
+            if !quiet {println!("{}",serde_json::to_string_pretty(&plan)?);}
+        } else {
+            let stats=fvid::native_media::decode_video_pipeline_overlay(source,interval,&geometry,&filters,Some(&spec))?;
+            if !quiet {println!("{}",serde_json::to_string_pretty(&stats)?);}
+        }
+        return Ok(true);
+    }
     let (source,overlay,destination)=if planning {
         match (paths.as_slice(),foreground.as_deref()) {
             ([source,overlay],None)=>(source.as_path(),overlay.as_path(),None),
