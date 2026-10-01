@@ -207,3 +207,45 @@ fn ten_bit_lossless_camera_bridge_preserves_native_pixels_and_backward_seek() {
         }
     }
 }
+
+#[test]
+fn compressed_lossless_camera_loops_all_frames() {
+    use fvid::{
+        playback_native::NativeReader,
+        virtual_camera::{CameraEndBehavior, CameraTick, LatestFrame, NativeCameraSource},
+    };
+    let file = include_bytes!("fixtures/playback-errors/avc-bypass-main10.mp4").as_slice();
+    let mut reader = NativeReader::software(Cursor::new(file), 16 << 20).unwrap();
+    let mut expected = Vec::new();
+    let mut duration = 0;
+    while reader.read_frame().unwrap() {
+        let (start, end, scale) = reader.frame_interval().unwrap();
+        duration = (end * 1_000_000_000).div_ceil(u128::from(scale)) as u64;
+        expected.push((
+            (start * 1_000_000_000).div_ceil(u128::from(scale)) as u64,
+            reader
+                .rgb()
+                .chunks_exact(3)
+                .flat_map(|p| [p[2], p[1], p[0], 255])
+                .collect::<Vec<_>>(),
+        ));
+    }
+    let mut source =
+        NativeCameraSource::new(NativeReader::software(Cursor::new(file), 16 << 20).unwrap())
+            .with_end_behavior(CameraEndBehavior::Loop);
+    let output = LatestFrame::new(64, 64, 64 * 64 * 4).unwrap();
+    let mut pixels = vec![0; 64 * 64 * 4];
+    for cycle in 0..3 {
+        for (index, (position, reference)) in expected.iter().enumerate() {
+            let sequence = cycle * expected.len() + index;
+            let tick = CameraTick {
+                sequence: sequence as u64,
+                host_time_ns: sequence as u64 + 1,
+                media_time_ns: *position + cycle as u64 * duration,
+            };
+            assert!(source.publish(tick, &output).unwrap());
+            assert_eq!(output.copy_latest(None, &mut pixels).unwrap(), Some(tick));
+            assert_eq!(&pixels, reference);
+        }
+    }
+}

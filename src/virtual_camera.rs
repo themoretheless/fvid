@@ -375,36 +375,70 @@ impl<R: std::io::BufRead + std::io::Seek> Y4mCameraSource<R> {
     }
 }
 
+/// End-of-file policy for a native camera source.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum CameraEndBehavior {
+    #[default]
+    Hold,
+    Loop,
+}
+
 /// File source for owned native video formats, driven by camera media time.
 /// Fits the visible display area after crop and rotation into the fixed camera
 /// format, preserving display aspect across source resolution changes.
-/// Backward seeks replay from the beginning; EOF holds the final decoded frame.
+/// Backward seeks replay from the beginning; EOF holds the final frame by default; an explicit loop policy repeats the file.
 /// This produces BGRA frames, not an installed OS camera device.
 pub struct NativeCameraSource<R> {
     reader: crate::playback_native::NativeReader<R>,
     eof: bool,
     target_aspect: [u32; 2],
+    end_behavior: CameraEndBehavior,
+    duration_ns: Option<u64>,
 }
 impl<R: std::io::BufRead + std::io::Seek> NativeCameraSource<R> {
     pub fn new(reader: crate::playback_native::NativeReader<R>) -> Self {
         let (num, den) = reader.pixel_aspect();
-        Self { reader, eof: false, target_aspect: [num, den] }
+        Self { reader, eof: false, target_aspect: [num, den], end_behavior: CameraEndBehavior::Hold, duration_ns: None }
     }
-    pub fn publish(&mut self, tick: CameraTick, destination: &LatestFrame) -> Result<bool> {
+    /// Choose whether end of file holds the last frame or repeats the file.
+    pub fn with_end_behavior(mut self, behavior: CameraEndBehavior) -> Self {
+        self.end_behavior = behavior;
+        self
+    }
+    fn select(&mut self, media_time_ns: u64) -> Result<()> {
         if let Some((start, _, scale)) = self.reader.frame_interval() {
-            if u128::from(tick.media_time_ns) * u128::from(scale) < start * 1_000_000_000 {
+            if u128::from(media_time_ns) * u128::from(scale) < start * 1_000_000_000 {
                 self.reader.rewind()?;
                 self.eof = false;
             }
         }
         while !self.eof {
             if let Some((_, end, scale)) = self.reader.frame_interval() {
-                if u128::from(tick.media_time_ns) * u128::from(scale) < end * 1_000_000_000 {
+                if u128::from(media_time_ns) * u128::from(scale) < end * 1_000_000_000 {
                     break;
                 }
             }
             if !self.reader.read_frame()? {
                 self.eof = true;
+            }
+        }
+        Ok(())
+    }
+    pub fn publish(&mut self, tick: CameraTick, destination: &LatestFrame) -> Result<bool> {
+        let looping = self.end_behavior == CameraEndBehavior::Loop;
+        let time = if looping {
+            self.duration_ns.map_or(tick.media_time_ns, |duration| tick.media_time_ns % duration)
+        } else { tick.media_time_ns };
+        self.select(time)?;
+        if self.eof && looping && self.duration_ns.is_none() {
+            if let Some((_, end, scale)) = self.reader.frame_interval() {
+                let duration = (end * 1_000_000_000).div_ceil(u128::from(scale));
+                let duration = u64::try_from(duration).map_err(|_| invalid("camera source duration exceeds nanosecond clock"))?;
+                if duration == 0 { return Err(invalid("camera loop requires a positive duration")); }
+                self.duration_ns = Some(duration);
+                self.reader.rewind()?;
+                self.eof = false;
+                self.select(tick.media_time_ns % duration)?;
             }
         }
         if self.reader.frame_interval().is_none() {
@@ -579,5 +613,25 @@ mod crop_tests {
         let mut unchanged = [0;16];
         output.copy_latest(None, &mut unchanged).unwrap();
         assert_eq!(unchanged, actual);
+    }
+}
+
+#[cfg(test)]
+mod loop_tests {
+    use super::*;
+    #[test]
+    fn loops_at_eof_and_preserves_original_camera_clock() {
+        let mut file = b"YUV4MPEG2 W2 H2 F25:1 Ip C420jpeg\n".to_vec();
+        for y in [16,235] { file.extend_from_slice(b"FRAME\n"); file.extend_from_slice(&[y,y,y,y,128,128]); }
+        let reader = crate::playback::Y4mReader::new(std::io::Cursor::new(file),18).unwrap();
+        let mut source = NativeCameraSource::new(crate::playback_native::NativeReader::Y4m(reader)).with_end_behavior(CameraEndBehavior::Loop);
+        let output = LatestFrame::new(2,2,16).unwrap();
+        let mut pixels = [0;16];
+        for (sequence,(media,expected)) in [(0,0),(40_000_000,255),(80_000_000,0),(120_000_000,255),(400_000_000,0),(440_000_000,255),(0,0)].into_iter().enumerate() {
+            let tick = CameraTick { sequence:sequence as u64, host_time_ns:sequence as u64+1, media_time_ns:media };
+            assert!(source.publish(tick,&output).unwrap());
+            assert_eq!(output.copy_latest(None,&mut pixels).unwrap(),Some(tick));
+            assert_eq!(&pixels[..4],&[expected,expected,expected,255]);
+        }
     }
 }

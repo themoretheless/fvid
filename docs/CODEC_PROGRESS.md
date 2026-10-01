@@ -1468,3 +1468,12 @@ an output. Fixture generation is separate from ordinary test execution.
 The CLI uses the same multi-track admission for `media decode-audio` and its
 plan command. Both ALAC selections produce the owned plan and byte-identical
 WAV output in builds with and without the optional legacy `media` feature.
+
+### Native camera file repetition
+
+`NativeCameraSource::with_end_behavior(CameraEndBehavior::Loop)` repeats the
+native source after discovering its presentation end at EOF. Default `Hold`
+behavior remains available. Source selection wraps while published camera ticks
+retain their original sequence, host and media timestamps. Tests cover exact
+Y4M boundaries and skips, plus all eight 10-bit AVC frames across three cycles.
+This is the portable frame bridge; macOS camera registration remains separate.
