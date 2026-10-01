@@ -84,7 +84,17 @@ pub fn write<W: Write + Seek>(
     filters: &PixelFilters,
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
-) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
+ ) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
+    write_processed(source,output,geometry,filters,cancel,progress,None)
+}
+
+/// Process display-oriented sample planes before owned FFV1 encoding.
+/// Retain source timing, metadata and supported AAC/Opus companion tracks.
+pub fn write_processed<W: Write + Seek>(
+    source:&Path,output:&mut W,geometry:&VideoGeometry,filters:&PixelFilters,
+    cancel:Option<&CancelFlag>,progress:Option<&ProgressHook>,
+    mut processor:Option<&mut dyn FnMut(&mut crate::native_geometry::GeometryFrame,u8,u64)->Result<()>>,
+)->Result<(crate::media_info::LosslessStats,ProgressEvent)> {
     check(cancel)?;
     if !eligible(source)? {
         return Err(invalid("unsupported owned planar lossless source"));
@@ -120,7 +130,7 @@ pub fn write<W: Write + Seek>(
         .ok_or_else(|| invalid("input has no video frames"))?;
     let [w, h] = reader.dimensions();
     let rotation = reader.rotation();
-    let bake_rotation = !geometry.is_identity() || !filters.is_empty();
+    let bake_rotation = processor.is_some() || !geometry.is_identity() || !filters.is_empty();
     let (coded_w, coded_h) = if matches!(rotation, 90 | 270) {
         (h, w)
     } else {
@@ -416,7 +426,7 @@ pub fn write<W: Write + Seek>(
         Ok(())
     };
     let mut next = Some(first);
-    while let Some(samples) = next.take() {
+    while let Some(mut samples) = next.take() {
         check(cancel)?;
         if (samples.width, samples.height, samples.subsampling) != shape {
             return Err(invalid("Y4M frame geometry changed"));
@@ -445,6 +455,10 @@ pub fn write<W: Write + Seek>(
         );
         if end <= start {
             return Err(invalid("Y4M frame duration below one nanosecond"));
+        }
+        if let Some(process)=processor.as_deref_mut() {
+            process(&mut samples,depth,start)?;
+            if (samples.width,samples.height,samples.subsampling)!=shape {return Err(invalid("processed frame geometry changed"));}
         }
         let packet = crate::codec::ffv1_encoder::encode(&samples, depth)?;
         check(cancel)?;

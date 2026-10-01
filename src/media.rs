@@ -23,7 +23,7 @@ pub fn plan_overlay(source:&std::path::Path,overlay:&std::path::Path,x:i32,y:i32
     fvid_media::plan_overlay(source,overlay,x,y,options)
 }
 
-/// Owned opaque overlay for compatible MP4 main inputs; retains main audio.
+/// Owned opaque overlay for compatible main inputs; retains supported main audio.
 pub fn overlay_video(source:&std::path::Path,overlay:&std::path::Path,destination:&std::path::Path,x:i32,y:i32,options:&CopyOptions)->Result<LosslessStats> {
     if crate::native_export::overlay_eligible(source).map_err(|e|e.to_string())? && validate_native_copy_options(options,false).is_ok() {
         return crate::native_export::overlay_video(source,overlay,destination,i64::from(x),i64::from(y),options.cancel.as_ref(),options.progress.as_ref()).map_err(|e|e.to_string());

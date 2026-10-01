@@ -3135,7 +3135,7 @@ frame scheduling and the public overlay workflow remain to be connected.
 ### Owned two-source opaque overlay
 
 `native_export::overlay_video` and public `media::overlay_video` now use the
-owned compositor for supported AVC/HEVC MP4 main inputs with default copy
+owned compositor for supported AVC/HEVC MP4, Matroska/WebM or Y4M main inputs with default copy
 options. The main FFV1/Matroska export retains supported AAC companion packets,
 track/file metadata and main PTS. Foreground decoding uses the owned native
 reader, materializes stored crop/rotation and keeps two selected picture
@@ -3170,3 +3170,11 @@ compare output byte for byte with the native API for AVC, HEVC Main/Main10
 and a main input with two copied AAC tracks. The tested headless executable
 links only libSystem and its normal dependency graph excludes fvid-media.
 This evidence applies to that build, not the still-dependent `media` feature.
+
+Overlay now dispatches Matroska/WebM and Y4M main inputs through the existing
+owned planar FFV1 muxer with a frame processor. This includes supported
+AVC/HEVC/VP9/AV1/FFV1 Matroska video and retained AAC/Opus companions, plus
+Y4M sample planes. Stored crop/rotation is materialized before compositing;
+output display metadata is updated by the same muxer. Regression tests cover
+VP9 odd 10-bit dimensions, 12-bit planes, AV1, rotated Matroska and Y4M 4:2:2,
+with exact independently decoded FFV1 samples and headless CLI/API equality.

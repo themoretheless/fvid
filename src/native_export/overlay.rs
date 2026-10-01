@@ -107,8 +107,11 @@ impl Source {
     }
 }
 
-/// Owned MP4 AVC/HEVC main admission. Other main formats retain legacy routing.
+/// Owned lossless main admission; other main formats retain legacy routing.
 pub fn overlay_eligible(main: &Path) -> Result<bool> {
+    if crate::native_lossless_y4m::eligible(main)? {
+        return Ok(true);
+    }
     let mut input = File::open(main)?;
     let mut prefix = [0; 8];
     if input.read(&mut prefix)? != 8 {
@@ -119,7 +122,7 @@ pub fn overlay_eligible(main: &Path) -> Result<bool> {
             && crate::native_lossless::eligible(main)?,
     )
 }
-/// Composite a single foreground video; retain all supported main AAC companions.
+/// Composite a single foreground video; retain all supported main audio companions.
 /// File origins align to the first presented frame, EOF repeats the last frame.
 /// Matching colour encoding/depth/sampling is required; no implicit conversion.
 pub fn overlay_video(
@@ -139,7 +142,7 @@ pub fn overlay_video(
     }
     if !overlay_eligible(main)? {
         return Err(invalid(
-            "owned overlay requires supported AVC/HEVC MP4 main input",
+            "owned overlay requires a supported owned lossless main input",
         ));
     }
     if destination.try_exists()? {
@@ -206,15 +209,27 @@ pub fn overlay_video(
         crate::native_pixels::overlay_opaque(frame, &picture.planes, depth, x, y)
     };
     let mut output = BufWriter::new(file);
-    let (stats, event) = crate::native_lossless::write_mp4_processed(
-        main,
-        &mut output,
-        &Default::default(),
-        &Default::default(),
-        cancel,
-        progress,
-        Some(&mut processor),
-    )?;
+    let (stats, event) = if crate::native_lossless_y4m::eligible(main)? {
+        crate::native_lossless_y4m::write_processed(
+            main,
+            &mut output,
+            &Default::default(),
+            &Default::default(),
+            cancel,
+            progress,
+            Some(&mut processor),
+        )?
+    } else {
+        crate::native_lossless::write_mp4_processed(
+            main,
+            &mut output,
+            &Default::default(),
+            &Default::default(),
+            cancel,
+            progress,
+            Some(&mut processor),
+        )?
+    };
     output.flush()?;
     output.get_ref().sync_all()?;
     drop(output);

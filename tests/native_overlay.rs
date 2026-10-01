@@ -33,7 +33,7 @@ fn samples(path: &Path) -> Vec<Vec<u8>> {
         let [w, h] = reader.dimensions();
         result.push(
             VideoGeometry::default()
-                .apply_display(&frame, w, h, reader.rotation())
+                .apply_cropped_display(&frame, w, h, reader.rotation(), reader.insets())
                 .unwrap()
                 .data,
         );
@@ -117,6 +117,13 @@ fn overlay_exports_avc_hevc_main10_exact_samples_with_atomic_publication() {
 
         if name.contains("two-audio") {
             assert!(stats.copied_packets > 0);
+            let second = d.0.join("matroska-aac-overlay.mkv");
+            let copied =
+                native_export::overlay_video(&output, &output, &second, 0, 0, None, None).unwrap();
+            assert_eq!(copied.copied_packets, stats.copied_packets);
+            assert_eq!(samples(&second), expected);
+            let bytes = std::fs::read(second).unwrap();
+
             let mut input = fvid::container::mp4::Mp4Reader::open(
                 BufReader::new(File::open(&source).unwrap()),
                 Default::default(),
@@ -196,4 +203,64 @@ fn cancellation_and_unaligned_chroma_leave_no_destination_or_temporaries() {
     assert!(native_export::overlay_video(&source, &source, &output, 1, 0, None, None).is_err());
     assert!(!output.exists());
     assert_eq!(std::fs::read_dir(&d.0).unwrap().count(), 0);
+}
+
+#[test]
+fn matroska_vp9_av1_high_depth_and_y4m_overlay_preserve_samples() {
+    let d = dir("webm");
+    for (i, name) in [
+        "vp9/adaptive.webm",
+        "vp9/odd10.webm",
+        "vp9/lossless12.webm",
+        "av1/ramp.webm",
+        "av1/tiles.webm",
+        "display/vp9-rot90.mkv",
+        "geometry/422.y4m",
+    ]
+    .iter()
+    .enumerate()
+    {
+        let source = fixture(name);
+        let output = d.0.join(format!("{i}.mkv"));
+        assert!(native_export::overlay_eligible(&source).unwrap());
+        let expected = samples(&source);
+        let stats =
+            native_export::overlay_video(&source, &source, &output, 0, 0, None, None).unwrap();
+        assert_eq!(stats.video_frames, expected.len() as u64);
+        assert_eq!(samples(&output), expected, "{name}");
+        let cli = d.0.join(format!("cli-{i}.mkv"));
+        let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "overlay"])
+            .arg(&source)
+            .arg(&source)
+            .arg(&cli)
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        assert_eq!(std::fs::read(cli).unwrap(), std::fs::read(&output).unwrap());
+
+        if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
+            let pixel = if name.contains("lossless12") {
+                "yuv420p12le"
+            } else if name.contains("odd10") {
+                "yuv420p10le"
+            } else if name.contains("422") {
+                "yuv422p"
+            } else {
+                "yuv420p"
+            };
+            let result = std::process::Command::new(ffmpeg)
+                .args(["-v", "error", "-i"])
+                .arg(&output)
+                .args(["-f", "rawvideo", "-pix_fmt", pixel, "-"])
+                .output()
+                .unwrap();
+            assert!(result.status.success());
+            assert_eq!(result.stdout, expected.concat(), "{name}");
+        }
+    }
 }
