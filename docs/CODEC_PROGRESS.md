@@ -1716,3 +1716,26 @@ match JM 19 for every plane byte before and after rewind. Generate using
 These are acceptance tests (no refusal or ignored expectation). They extend
 the six mixed-type raster-order fixtures; CABAC mixed-type oracle coverage
 still remains outstanding.
+
+### Native decode latency baseline (2026-10-01)
+
+`cargo build --locked --offline --release --no-default-features --example
+native_decode_bench` adds a no-output reader benchmark. Invocation is
+`native_decode_bench INPUT raw|rgb [FRAME_LIMIT] [software|auto]`. It reports
+frame timing percentiles and the count exceeding 16.67 ms; raw mode hands back
+the owned decoded frame, RGB includes CPU conversion. Neither mode measures GPU
+render, device presentation pacing or end-to-end camera delivery.
+
+On Apple M4 Max, a user-provided 886x1920 HEVC file (no media content committed),
+two sequential 600-frame software runs measured:
+
+| Mode | Throughput fps | p50 ms | p95 ms | p99 ms | Frames >16.67 ms |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Raw decode | 107.56 | 4.74 | 36.30 | 50.22 | 153/600 |
+| Decode + CPU RGB | 105.83 | 5.36 | 33.97 | 46.99 | 152/600 |
+
+The reader has enough average throughput for 60 fps on this sample, but decode
+latency tails exceed a frame budget. These measurements do not prove smooth
+60 fps playback; render/presentation instrumentation and queue behavior still
+need verification. Small committed VP9/HEVC fixtures also ran successfully,
+but their throughput is not representative of this target resolution.
