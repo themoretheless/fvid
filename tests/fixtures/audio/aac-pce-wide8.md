@@ -41,7 +41,9 @@ complete PCM samples with this independent edited reference (peak < 1e-6).
 ADTS PCM reference: `aac-pce-wide8-adts-reference.f32le`, generated with
 `ffmpeg -v error -i aac-pce-wide8.aac -f f32le aac-pce-wide8-adts-reference.f32le`.
 Streaming and indexed owned decoding match every channel within 1e-6.
-The reader requires PCE at the beginning of the first raw packet.
+The reader requires PCE before audio in the first raw packet; preceding
+data_stream_elements are accepted. Tests insert aligned DSE payloads of
+0, 7, 255 and 510 bytes and verify byte-identical PCM and every truncation.
 
 Owned MP4 indexed/streaming remux and MP4/Matroska concatenation retain the
 complete ASC and every raw packet. Decoded output equals continuous owned

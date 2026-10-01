@@ -428,3 +428,42 @@ fn standard_configuration_seven_matches_strict_independent_wide_pcm() {
     assert_eq!((wav.channels, wav.channel_mask), (8, 0xff));
     std::fs::remove_dir_all(directory).unwrap();
 }
+
+#[test]
+fn adts_pce_after_aligned_data_stream_preserves_pcm_and_checks_truncation() {
+    use fvid::container::adts::{Aac, StreamReader};
+    let source = include_bytes!("fixtures/audio/aac-pce-wide8.aac");
+    let mut expected = Vec::new();
+    fvid::native_media::decode_aac_pcm(source, &mut expected, &Default::default()).unwrap();
+    for count in [0usize, 7, 255, 510] {
+        // ID_DSE=4, tag=0, data_byte_align_flag=1, then count bytes.
+        let mut prefix = vec![0x81, count.min(255) as u8];
+        if count >= 255 {
+            prefix.push((count - 255) as u8);
+        }
+        prefix.extend(vec![0x55; count]);
+        let old_size = ((source[3] as usize & 3) << 11)
+            | ((source[4] as usize) << 3)
+            | (source[5] as usize >> 5);
+        let size = old_size + prefix.len();
+        let mut altered = source[..7].to_vec();
+        altered[3] = (altered[3] & 252) | (size >> 11) as u8;
+        altered[4] = (size >> 3) as u8;
+        altered[5] = (altered[5] & 31) | ((size & 7) << 5) as u8;
+        altered.extend(prefix);
+        altered.extend_from_slice(&source[7..]);
+        let mut actual = Vec::new();
+        fvid::native_media::decode_adts_aac_reader(
+            StreamReader::open(altered.as_slice()).unwrap(),
+            &mut actual,
+            None,
+        )
+        .unwrap();
+        assert_eq!(actual, expected);
+        let indexed = Aac::parse(&altered, &Default::default()).unwrap();
+        assert_eq!(indexed.channels, 8);
+        for cut in 7..size {
+            assert!(StreamReader::open(&altered[..cut]).is_err());
+        }
+    }
+}

@@ -138,18 +138,7 @@ impl NativeAacDecoder {
                     channels.push((pair.left.info, left, self.mapping[target_offset]));
                     channels.push((pair.right.info, right, self.mapping[target_offset + 1]));
                 }
-                4 => {
-                    bits.read(4)?;
-                    let align = bits.bit()?;
-                    let mut count = bits.read(8)? as usize;
-                    if count == 255 {
-                        count += bits.read(8)? as usize;
-                    }
-                    if align {
-                        bits.skip((8 - bits.position() % 8) % 8)?;
-                    }
-                    bits.skip(count * 8)?;
-                }
+                4 => super::aac_pce::skip_data_stream(&mut bits)?,
                 5 => {
                     let program = super::aac_pce::ProgramConfig::read(&mut bits, 0)?;
                     let expected = self.program.as_ref().ok_or_else(|| {

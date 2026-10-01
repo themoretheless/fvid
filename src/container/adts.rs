@@ -99,7 +99,13 @@ pub fn header(bytes: &[u8]) -> Option<Header> {
 fn packet_configuration(header: Header, packet: &[u8]) -> Result<Vec<u8>> {
     if header.channels!=0 {return Ok(header.asc.to_vec());}
     let mut bits=crate::codec::bits::BitReader::new(packet);
-    if bits.read(3)?!=5 {return Err(invalid("ADTS explicit layout requires PCE at the start of the first packet"));}
+    loop {
+        match bits.read(3)? {
+            4 => crate::codec::aac_pce::skip_data_stream(&mut bits)?,
+            5 => break,
+            _ => return Err(invalid("ADTS explicit layout requires PCE before audio in the first packet")),
+        }
+    }
     let program=crate::codec::aac_pce::ProgramConfig::read(&mut bits,0)?;
     if program.sample_rate!=header.sample_rate || program.object_type!=2 || header.asc[0]>>3!=2 {return Err(invalid("ADTS PCE disagrees with frame coding or rate"));}
     program.audio_specific_config()

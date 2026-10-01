@@ -29,7 +29,8 @@ conformance H.264/H.265/AAC и не покрывает все инструмен
   exports сохраняют mask 0xff и учитывают priming/edit list. Configuration 7
   проверена со strict независимым PCM-эталоном; coupling/height PCE layouts и
   неподдержанные fill-extension tools ещё не подключены к полному пути.
-- ADTS configuration=0 декодируется, если PCE открывает первый пакет.
+- ADTS configuration=0 декодируется, если PCE предшествует аудио в первом
+  пакете; перед PCE допускаются DSE с обычной и расширенной длиной.
   Потоковый и индексируемый пути совпадают с независимым восьмиканальным
   PCM-эталоном; CLI/API WAV сохраняют mask 0xff. Matroska и MP4 remux/concat
   сохраняют полную PCE-конфигурацию, пакеты и PCM; MP4 ES descriptor

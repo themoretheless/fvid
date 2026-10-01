@@ -288,3 +288,21 @@ impl ProgramConfig {
         Ok(result)
     }
 }
+
+/// Skip a data_stream_element after its three-bit element ID.
+/// Parsing is transactional and byte alignment is relative to the raw block.
+pub(crate) fn skip_data_stream(bits: &mut super::bits::BitReader<'_>) -> crate::Result<()> {
+    let mut input = bits.clone();
+    input.read(4)?;
+    let align = input.bit()?;
+    let mut count = input.read(8)? as usize;
+    if count == 255 {
+        count += input.read(8)? as usize;
+    }
+    if align {
+        input.skip((8 - input.position() % 8) % 8)?;
+    }
+    input.skip(count * 8)?;
+    *bits = input;
+    Ok(())
+}
