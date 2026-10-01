@@ -69,7 +69,7 @@ final class CameraSink: NSObject, CMIOExtensionStreamSource {
         guard running, !pending, let client else { return }
         pending = true
         let requestGeneration = generation
-        stream.consumeSampleBuffer(from: client) { [weak self] sample, sequence, _, _, error in
+        stream.consumeSampleBuffer(from: client) { [weak self] sample, sequence, discontinuity, _, error in
             guard let self else { return }
             self.queue.async {
                 self.pending = false
@@ -80,7 +80,7 @@ final class CameraSink: NSObject, CMIOExtensionStreamSource {
                     let now = CMClockGetTime(CMClockGetHostTimeClock())
                     let ns = CMTimeConvertScale(now, timescale: 1_000_000_000, method: .default).value
                     guard ns >= 0 else { throw CameraError.invalidFrame }
-                    if try self.output.submit(bgra: bytes, hostTime: UInt64(ns)) {
+                    if try self.output.submit(bgra: bytes, hostTime: UInt64(ns), discontinuity: discontinuity) {
                         self.stream.notifyScheduledOutputChanged(CMIOExtensionScheduledOutput(
                             sequenceNumber: sequence, hostTimeInNanoseconds: UInt64(ns)))
                     }

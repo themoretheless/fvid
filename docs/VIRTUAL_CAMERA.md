@@ -8,10 +8,17 @@ FFmpeg. Physical camera capture is outside this request.
 
 The Rust source, C boundary, Swift playback session, CMIO source/sink and host
 bundle are implemented. The camera bridge regression runner currently passes
-8 Swift suites and 9 AVC/HEVC/VP9/AV1 pixel comparisons, including seek, EOF,
+9 Swift suites and 9 AVC/HEVC/VP9/AV1 pixel comparisons, including seek, EOF,
 repeat, crop/aspect conversion, timestamps and bounded queues/pools.
 The runner rejects `fvid-media`/FFmpeg packages in the FFI dependency graph and
 FFmpeg dynamic libraries in every generated Swift test executable.
+The source stream propagates CMIO ingress discontinuity flags, marks the next
+accepted frame after pool exhaustion as dropped-sample discontinuity, and marks
+resumption from zero consumers as a time discontinuity without resetting host
+timestamps. A recording sender test covers multiple consumer start/stop calls,
+three held buffers, 96 rejected frames, pool reuse and monotonic reconnection.
+This tests the stream state in process; installed cross-process delivery remains
+separate acceptance work.
 
 `/Applications/FVid Camera.app` is signed with a valid Apple Development
 identity, TeamIdentifier `U6J9E8HK4D`; strict deep codesign verification passes.

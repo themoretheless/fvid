@@ -15,8 +15,12 @@ final class CameraStream: NSObject, CMIOExtensionStreamSource {
     private let pixelPool: PixelPool
     private var clients = 0
     private var lastTime: UInt64?
+    private var pendingDiscontinuity: CMIOExtensionStream.DiscontinuityFlags = []
+    private let onSend: ((CMSampleBuffer, CMIOExtensionStream.DiscontinuityFlags, UInt64) -> Void)?
 
-    init(width: Int, height: Int, fps: Int32) throws {
+    init(width: Int, height: Int, fps: Int32,
+         onSend: ((CMSampleBuffer, CMIOExtensionStream.DiscontinuityFlags, UInt64) -> Void)? = nil) throws {
+        self.onSend = onSend
         guard width > 0, height > 0, width <= 4096, height <= 4096, fps > 0, fps <= 240 else {
             throw CameraError.invalidFormat
         }
@@ -48,16 +52,24 @@ final class CameraStream: NSObject, CMIOExtensionStreamSource {
         if let value = properties.frameDuration, CMTimeCompare(value, duration) != 0 { throw CameraError.invalidFormat }
     }
     func authorizedToStartStream(for client: CMIOExtensionClient) -> Bool { true }
-    func startStream() throws { clients += 1 }
+    func startStream() throws {
+        if clients == 0 { pendingDiscontinuity.insert(.time) }
+        clients += 1
+    }
     func stopStream() throws { clients = max(0, clients - 1) }
 
     // Input hostTime must use CMClockGetHostTimeClock's nanosecond epoch.
     // No file timestamps or process-relative Instant values may be passed here.
-    func submit(bgra: Data, hostTime: UInt64) throws -> Bool {
+    func submit(bgra: Data, hostTime: UInt64,
+                discontinuity: CMIOExtensionStream.DiscontinuityFlags = []) throws -> Bool {
         guard bgra.count == width * height * 4, hostTime <= UInt64(Int64.max),
               lastTime.map({ hostTime > $0 }) ?? true else { throw CameraError.invalidFrame }
         guard clients > 0 else { return false }
-        guard let image = try pixelPool.acquire() else { return false }
+        pendingDiscontinuity.formUnion(discontinuity)
+        guard let image = try pixelPool.acquire() else {
+            pendingDiscontinuity.insert(.sampleDropped)
+            return false
+        }
         guard CVPixelBufferLockBaseAddress(image, []) == kCVReturnSuccess else { throw CameraError.invalidFrame }
         guard let base = CVPixelBufferGetBaseAddress(image) else {
             CVPixelBufferUnlockBaseAddress(image, [])
@@ -76,7 +88,9 @@ final class CameraStream: NSObject, CMIOExtensionStreamSource {
         let sampleStatus = CMSampleBufferCreateReadyWithImageBuffer(allocator: kCFAllocatorDefault,
             imageBuffer: image, formatDescription: videoDescription, sampleTiming: &timing, sampleBufferOut: &sample)
         guard sampleStatus == noErr, let sample else { throw CameraError.media(sampleStatus) }
-        stream.send(sample, discontinuity: [], hostTimeInNanoseconds: hostTime)
+        if let onSend { onSend(sample, pendingDiscontinuity, hostTime) }
+        else { stream.send(sample, discontinuity: pendingDiscontinuity, hostTimeInNanoseconds: hostTime) }
+        pendingDiscontinuity = []
         lastTime = hostTime
         return true
     }

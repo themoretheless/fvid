@@ -64,6 +64,7 @@ def main():
         ("CameraProducerTests", ["CameraProducer.swift"], []),
         ("PixelPoolTests", extension_sources, []),
         ("CameraSinkTests", extension_sources, []),
+        ("CameraStreamTests", extension_sources, []),
     ]
     with tempfile.TemporaryDirectory(prefix="fvid-camera-bridge-") as directory:
         for name, sources, fixtures in cases:
