@@ -64,6 +64,14 @@ pub(crate) fn read_with_rotation(
     c: Config,
     rotation_enabled: bool,
 ) -> Result<Coefficients> {
+    read_with_tools(b, c, rotation_enabled, false)
+}
+pub(crate) fn read_with_tools(
+    b: &mut impl ResidualBins,
+    c: Config,
+    rotation_enabled: bool,
+    context_enabled: bool,
+) -> Result<Coefficients> {
     let scan = c.scan()?;
     if !(8..=10).contains(&c.bit_depth) || c.qp > 51 + 6 * (c.bit_depth - 8) {
         return Err(invalid("invalid HEVC block depth or QP"));
@@ -72,12 +80,13 @@ pub(crate) fn read_with_rotation(
         && c.transform_skip_enabled
         && c.log2_size == 2
         && b.decision(Syntax::TransformSkip, usize::from(c.component != 0))?;
-    let coefficients = hevc_residual::read_block(
+    let coefficients = hevc_residual::read_block_with_skip_context(
         b,
         c.log2_size,
         c.component != 0,
         scan,
         c.sign_hiding && !c.transquant_bypass,
+        context_enabled && (skip || c.transquant_bypass),
     )?;
     let transform = if c.transquant_bypass {
         Transform::Bypass

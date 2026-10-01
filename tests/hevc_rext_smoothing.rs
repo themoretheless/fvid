@@ -11,6 +11,7 @@ fn compare(
     disabled: bool,
     rotation: bool,
     bypass: Option<bool>,
+    context: bool,
 ) {
     let mut input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
     let configuration = input.tracks()[0].configuration.clone();
@@ -26,6 +27,7 @@ fn compare(
     assert_eq!(sps.depth, [depth; 2]);
     assert_eq!(sps.intra_smoothing_disabled, disabled);
     assert_eq!(sps.transform_skip_rotation, rotation);
+    assert_eq!(sps.transform_skip_context, context);
     let mut decoder = HevcDecoder::from_configuration(&configuration, 16 << 20).unwrap();
     if let Some(bypass) = bypass {
         assert_eq!(decoder.parameters().1.transquant_bypass, bypass);
@@ -105,7 +107,7 @@ fn rext_intra_reference_filtering_matches_oracles_and_reset() {
             true,
         ),
     ] {
-        compare(source, oracle, depth, disabled, false, None);
+        compare(source, oracle, depth, disabled, false, None, false);
     }
     assert_ne!(
         include_bytes!("fixtures/playback-errors/hevc-rext-smoothing-8-enabled.yuv"),
@@ -135,7 +137,7 @@ fn unsupported_range_tools_are_not_silently_ignored() {
         .rev()
         .find(|&i| rbsp[i / 8] & (1 << (7 - i % 8)) != 0)
         .unwrap();
-    for flag in (0..9).filter(|&i| i != 0 && i != 5) {
+    for flag in (0..9).filter(|&i| i != 0 && i != 1 && i != 5) {
         let mut bytes = rbsp.clone();
         let bit = stop - 9 + flag;
         bytes[bit / 8] |= 1 << (7 - bit % 8);
@@ -169,6 +171,7 @@ fn rext_transform_skip_rotation_matches_oracle() {
                 false,
                 $rotation,
                 Some($bypass),
+                false,
             );
         };
     }
@@ -192,4 +195,48 @@ fn rext_transform_skip_rotation_matches_oracle() {
     differs!("hevc-rext-rotation-8-bypass");
     differs!("hevc-rext-rotation-10-skip");
     differs!("hevc-rext-rotation-10-bypass");
+}
+
+fn coded_units(source: &[u8]) -> Vec<Vec<u8>> {
+    use fvid::codec::config::NalUnits;
+    let mut input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
+    let configuration = input.tracks()[0].configuration.clone();
+    let size = HevcConfig::parse(&configuration).unwrap().length_size;
+    let mut coded = Vec::new();
+    for index in 0..input.tracks()[0].samples.len() {
+        let mut packet = Vec::new();
+        input.read_packet(0, index, &mut packet).unwrap();
+        for nal in NalUnits::new(&packet, size).unwrap() {
+            let nal = nal.unwrap();
+            if ((nal[0] >> 1) & 63) < 32 {
+                coded.push(nal.to_vec());
+            }
+        }
+    }
+    coded
+}
+
+#[test]
+fn rext_significance_contexts_match_oracle() {
+    macro_rules! check_pair {
+        ($base:literal, $depth:literal, $bypass:literal) => {
+            for (source, oracle, enabled) in [
+                (&include_bytes!(concat!("fixtures/playback-errors/", $base, "-disabled.mp4"))[..],
+                 &include_bytes!(concat!("fixtures/playback-errors/", $base, "-disabled.yuv"))[..], false),
+                (&include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.mp4"))[..],
+                 &include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.yuv"))[..], true),
+            ] {
+                compare(source, oracle, $depth, false, false, Some($bypass), enabled);
+            }
+            // Context selection changes actual VCL coding, not merely SPS bytes.
+            assert_ne!(
+                coded_units(include_bytes!(concat!("fixtures/playback-errors/", $base, "-disabled.mp4"))),
+                coded_units(include_bytes!(concat!("fixtures/playback-errors/", $base, "-enabled.mp4"))),
+            );
+        };
+    }
+    check_pair!("hevc-rext-context-8-skip", 8, false);
+    check_pair!("hevc-rext-context-8-bypass", 8, true);
+    check_pair!("hevc-rext-context-10-skip", 10, false);
+    check_pair!("hevc-rext-context-10-bypass", 10, true);
 }

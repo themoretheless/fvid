@@ -818,8 +818,10 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                     sign_hiding: self.pps.sign_data_hiding,
                 };
                 let residual = if u.coded[component] {
-                    Some(hevc_block::read_with_rotation(
-                        b, c, self.sps.transform_skip_rotation,
+                    Some(hevc_block::read_with_tools(
+                        b, c,
+                        self.sps.transform_skip_rotation,
+                        self.sps.transform_skip_context,
                     )?)
                 } else {
                     None
@@ -1321,8 +1323,10 @@ impl Decoder<'_> {
                         transquant_bypass: bypass,
                         sign_hiding: self.pps.sign_data_hiding,
                     };
-                    let residual = hevc_block::read_with_rotation(
-                        b, config, self.sps.transform_skip_rotation,
+                    let residual = hevc_block::read_with_tools(
+                        b, config,
+                        self.sps.transform_skip_rotation,
+                        self.sps.transform_skip_context,
                     )?;
                     let origin = if c == 0 { u.origin } else { u.chroma_origin };
                     if self.jobs.is_some() {

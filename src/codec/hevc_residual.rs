@@ -178,6 +178,17 @@ pub fn read_block(
     scan: Scan,
     hide_sign: bool,
 ) -> Result<Vec<i32>> {
+    read_block_with_skip_context(b, log2_size, chroma, scan, hide_sign, false)
+}
+/// RExt significance-context override for actual transform-skip/bypass blocks.
+pub fn read_block_with_skip_context(
+    b: &mut impl ResidualBins,
+    log2_size: u8,
+    chroma: bool,
+    scan: Scan,
+    hide_sign: bool,
+    skip_context: bool,
+) -> Result<Vec<i32>> {
     let last = last_position(b, log2_size, chroma, scan)?;
     let side = 1usize << log2_size;
     let group_side = side / 4;
@@ -231,7 +242,7 @@ pub fn read_block(
                         scan,
                         [gx * 4 + x, gy * 4 + y],
                         &coded,
-                        false,
+                        skip_context,
                     )?,
                 )?
             };
@@ -408,6 +419,7 @@ pub fn significance_context(
 mod tests {
     use super::*;
     use std::collections::VecDeque;
+    #[derive(Clone)]
     enum Bin {
         Context(Syntax, usize, bool),
         Bypass(bool),
@@ -545,12 +557,24 @@ mod tests {
             Bin::Context(Syntax::Greater2, 1, false),
             Bin::Bypass(false),
         ]);
-        let block = read_block(&mut bins, 3, false, Scan::Diagonal, true).unwrap();
-        assert_eq!(block[4 * 8 + 4], 4);
-        assert_eq!(block[4 * 8], -3);
-        assert_eq!(block[0], 2);
-        assert_eq!(block.iter().filter(|&&v| v != 0).count(), 3);
-        assert!(bins.0.is_empty());
+        for skip_context in [false, true] {
+            let mut script = Script(bins.0.clone());
+            if skip_context {
+                for bin in &mut script.0 {
+                    if let Bin::Context(Syntax::SignificantCoefficient, context, _) = bin {
+                        *context = 42;
+                    }
+                }
+            }
+            let block = read_block_with_skip_context(
+                &mut script, 3, false, Scan::Diagonal, true, skip_context,
+            ).unwrap();
+            assert_eq!(block[4 * 8 + 4], 4);
+            assert_eq!(block[4 * 8], -3);
+            assert_eq!(block[0], 2);
+            assert_eq!(block.iter().filter(|&&v| v != 0).count(), 3);
+            assert!(script.0.is_empty());
+        }
     }
     #[test]
     fn rice_remainders_cross_prefix_escape_and_integer_boundaries() {
