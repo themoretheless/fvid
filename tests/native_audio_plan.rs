@@ -72,15 +72,37 @@ fn selected_aac_cli_decodes_and_plans_without_ffmpeg_backend() {
 }
 
 #[test]
-fn rounded_interior_aac_duration_is_reproduced_before_acceptance() {
+fn rounded_interior_aac_duration_exports_exact_presentation_windows() {
     let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/aac-rounded-two-tracks.m4a");
     let mut reader = fvid::container::mp4::Mp4Reader::open(std::io::BufReader::new(std::fs::File::open(&source).unwrap()),Default::default()).unwrap();
     assert!((0..reader.tracks()[1].samples.len()).any(|i| reader.tracks()[1].samples.get(i).unwrap().duration == 1016));
-    // This is a refusal regression, not proof that irregular AAC timing is supported.
+    let config = reader.tracks()[1].configuration.clone();
+    let mut decoder = fvid::codec::aac_native::NativeAacDecoder::new(fvid::codec::config::aac_specific_config(&config).unwrap()).unwrap();
+    let mut expected = Vec::new();
     let mut packet = Vec::new();
-    reader.read_packet(1,1,&mut packet).unwrap();
-    let output = std::env::temp_dir().join(format!("fvid-rounded-aac-{}.wav",std::process::id()));
-    let error = fvid::native_export::export_audio_pcm_selected(&source,&output,None,1.0,None,None,Some(1),None,None).unwrap_err();
-    assert!(error.to_string().contains("short interior MP4 audio packet"),"{error}");
-    assert!(!output.exists());
+    for index in 0..48 {
+        reader.read_packet(1,index,&mut packet).unwrap();
+        let samples = decoder.decode(&packet).unwrap();
+        assert_eq!(samples.len(),2048);
+        let retained = match index { 1 => 1016, 47 => 912, _ => 1024 };
+        expected.extend_from_slice(&samples[..retained*2]);
+    }
+    // The edit removes 1008 priming samples from this synthetic source.
+    let expected = &expected[1008*2..];
+    // The movie edit ends at 48008 output samples, clipping 16 final samples.
+    let expected: Vec<u8> = expected[..48008*2].iter().flat_map(|sample| sample.to_le_bytes()).collect();
+    let output = std::env::temp_dir().join(format!("fvid-rounded-aac-{}.f32le",std::process::id()));
+    let stats = fvid::native_export::export_audio_pcm_selected(&source,&output,None,1.0,None,None,Some(1),None,None).unwrap();
+    assert_eq!(stats.sample_frames,48008);
+    let actual = std::fs::read(&output).unwrap();
+    assert_eq!(actual.len(),expected.len());
+    let maximum = actual.chunks_exact(4).zip(expected.chunks_exact(4)).map(|(a,b)| (f32::from_le_bytes(a.try_into().unwrap())-f32::from_le_bytes(b.try_into().unwrap())).abs()).fold(0.0f32,f32::max);
+    assert!(maximum < 1e-6,"PCM difference {maximum}");
+    std::fs::remove_file(&output).unwrap();
+    fvid::native_export::export_audio_pcm_selected(&source,&output,Some((std::time::Duration::from_millis(10),std::time::Duration::from_millis(30))),1.0,None,None,Some(1),None,None).unwrap();
+    let actual = std::fs::read(&output).unwrap();
+    assert_eq!(actual.len(),960*8);
+    let maximum = actual.chunks_exact(4).zip(expected[480*8..1440*8].chunks_exact(4)).map(|(a,b)| (f32::from_le_bytes(a.try_into().unwrap())-f32::from_le_bytes(b.try_into().unwrap())).abs()).fold(0.0f32,f32::max);
+    assert!(maximum < 1e-6,"interval PCM difference {maximum}");
+    std::fs::remove_file(output).unwrap();
 }

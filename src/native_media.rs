@@ -516,13 +516,12 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
                     "MP4 audio packet duration disagrees with decoded samples",
                 ));
             }
-            // A short final sample duration explicitly excludes encoder padding.
-            if duration < frames && sample_index + 1 != track.samples.len() {
-                return Err(invalid("short interior MP4 audio packet"));
-            }
+            // The container assigns a presentation window to every packet.
+            // Short windows trim decoded padding even in the interior; decoder
+            // overlap state still consumes the complete compressed packet.
             expected = Some(
                 start
-                    .checked_add(frames)
+                    .checked_add(duration)
                     .ok_or_else(|| invalid("audio timestamp overflow"))?,
             );
             let first = from.saturating_sub(start).min(duration) as usize;
