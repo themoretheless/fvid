@@ -1505,5 +1505,8 @@ windows in decoded sample frames. MP4 AAC derives this from duration, rate and
 timescale, rejecting zero or non-aligned windows. The playback worker consumes
 complete compressed packets before trimming PCM tails; other stream types leave
 the limit unspecified. A real worker with a capture backend verifies all 48
-synthetic packets: 1016 samples in packet 1, 912 in the final packet, and 1024
-elsewhere. This does not implement MP4 audio edit-list rendering in the player.
+synthetic packets: 1016 samples in packet 1 and 1024 in ordinary packets. After the
+single media edit, the first packet contributes 16 samples and the last 896,
+for 48008 total. Captured playback PCM matches the native export exactly.
+The first timestamp is zero; duration, pacing and seek use the edit origin. Single-range AAC media edits now trim priming/padding before device delivery;
+complex multi-range and empty edits still require separate scheduling.

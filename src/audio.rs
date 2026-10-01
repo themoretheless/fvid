@@ -546,6 +546,11 @@ pub trait AudioStream: Send {
     fn packet_sample_limit(&self, _duration: u64) -> crate::Result<Option<usize>> {
         Ok(None)
     }
+    /// Apply container presentation edits after decoding and packet-tail trimming.
+    /// `None` consumes preroll without handing samples to the device.
+    fn present_decoded(&self, packet: AudioPacket, _source_pts: i64) -> crate::Result<Option<AudioPacket>> {
+        Ok(Some(packet))
+    }
     /// Codec setup data, already in the form the decoder expects.
     fn extra_data(&self) -> &[u8];
     /// Every audio track of this container the player can decode, in container

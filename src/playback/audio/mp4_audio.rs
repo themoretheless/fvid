@@ -216,10 +216,21 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
 
     fn duration(&self) -> Option<std::time::Duration> {
         let track = self.track();
+        if track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 && self.demuxer.movie_timescale() != 0 {
+            let nanos = u128::from(track.edits[0].duration)*1_000_000_000/u128::from(self.demuxer.movie_timescale());
+            return Some(std::time::Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX)));
+        }
         (track.timescale > 0 && track.duration > 0).then(|| {
             let nanos = u128::from(track.duration) * 1_000_000_000 / u128::from(track.timescale);
             std::time::Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX))
         })
+    }
+
+    fn time_of(&self, pts: i64) -> std::time::Duration {
+        let track = self.track();
+        let shift = if track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
+        if track.timescale == 0 { return std::time::Duration::ZERO; }
+        std::time::Duration::from_secs_f64(pts.saturating_sub(shift).max(0) as f64/f64::from(track.timescale))
     }
 
     fn packet_sample_limit(&self, duration: u64) -> Result<Option<usize>> {
@@ -231,6 +242,36 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             return Err(invalid("MP4 AAC packet duration is not sample aligned"));
         }
         Ok(Some(usize::try_from(samples / scale).map_err(|_| invalid("MP4 AAC sample window overflow"))?))
+    }
+
+    fn present_decoded(&self, mut packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
+        let track = self.track();
+        // Single media edits cover encoder priming and padding. Complex edit
+        // sequences require replay/silence scheduling beyond this packet hook.
+        if track.codec != *b"mp4a" || track.edits.len() != 1 || track.edits[0].media_time < 0 {
+            return Ok(Some(packet));
+        }
+        let edit = &track.edits[0];
+        let rate = u128::from(track.sample_rate);
+        let scale = u128::from(track.timescale);
+        let movie_scale = u128::from(self.demuxer.movie_timescale());
+        if scale == 0 || movie_scale == 0 { return Err(invalid("zero MP4 audio presentation clock")); }
+        let media_start = (edit.media_time as u128 * rate).div_ceil(scale);
+        let length = (u128::from(edit.duration) * rate).div_ceil(movie_scale);
+        let media_end = media_start.checked_add(length).ok_or_else(|| invalid("MP4 audio edit overflow"))?;
+        let source_start = i128::from(source_pts) * i128::from(track.sample_rate) / i128::from(track.timescale);
+        let stride = usize::from(track.channels).checked_mul(4).filter(|n| *n != 0).ok_or_else(|| invalid("invalid AAC PCM stride"))?;
+        if !packet.data.len().is_multiple_of(stride) { return Err(invalid("unaligned AAC PCM buffer")); }
+        let frames = packet.data.len()/stride;
+        let first = (i128::try_from(media_start).map_err(|_| invalid("audio edit clock overflow"))?-source_start).clamp(0,frames as i128) as usize;
+        let last = (i128::try_from(media_end).map_err(|_| invalid("audio edit clock overflow"))?-source_start).clamp(0,frames as i128) as usize;
+        if first >= last { return Ok(None); }
+        packet.data.copy_within(first*stride..last*stride,0);
+        packet.data.truncate((last-first)*stride);
+        packet.pts = u64::try_from(source_start+first as i128-media_start as i128).map_err(|_| invalid("negative audio presentation time"))?;
+        packet.timebase_num = 1;
+        packet.timebase_den = track.sample_rate;
+        Ok(Some(packet))
     }
 
     fn extra_data(&self) -> &[u8] {
@@ -267,7 +308,9 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
-        Mp4AudioReader::seek(self, pts)
+        let track = self.track();
+        let shift = if track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
+        Mp4AudioReader::seek(self, pts.saturating_add(shift)).saturating_sub(shift).max(0)
     }
 }
 
@@ -491,13 +534,12 @@ mod tests {
     /// The total a listener with no picture is shown. Each track states its own
     /// duration in its own timescale, so the two tracks of the fixture count the
     /// same sound in 48000 and 32000 ticks; the half second of PCM counts in
-    /// samples. The AAC totals run a touch past the audible two seconds because
-    /// the muxer writes its priming and padding into the track duration, which is
-    /// what a timeline needs to be long enough to play to silence.
+    /// samples. AAC single-edit duration excludes encoder priming/padding and
+    /// reports the two audible seconds in the presentation timeline.
     #[test]
     fn each_track_states_its_own_length() {
         const TWO: &[u8] = include_bytes!("../../../tests/fixtures/audio/two-audio.mp4");
-        for (nth, total) in [(0, 2_021_333_333_u64), (1, 2_032_000_000)] {
+        for (nth, total) in [(0, 2_000_000_000_u64), (1, 2_000_000_000)] {
             let stream = Mp4AudioReader::open_at(Cursor::new(TWO), Limits::default(), nth).unwrap();
             assert_eq!(
                 stream.duration(),

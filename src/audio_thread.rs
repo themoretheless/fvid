@@ -257,6 +257,15 @@ impl Worker {
             }
         }
 
+        let decoded = match self.stream.present_decoded(decoded, packet.pts) {
+            Ok(Some(packet)) => packet,
+            Ok(None) => return (None,Duration::ZERO),
+            Err(error) => {
+                self.ended = true;
+                return (Some(AudioEvent::Error(error.to_string())),Duration::ZERO);
+            }
+        };
+
         if let Err(e) = self.backend.push(decoded) {
             self.ended = true;
             return (
@@ -599,10 +608,10 @@ mod tests {
 #[cfg(test)]
 mod presentation_window_tests {
     use super::*;
-    struct Capture(Arc<Mutex<Vec<usize>>>);
+    struct Capture(Arc<Mutex<Vec<crate::audio::AudioPacket>>>);
     impl AudioBackend for Capture {
         fn start(&mut self, _:crate::audio::AudioSpec)->Result<(),crate::audio::AudioError>{Ok(())}
-        fn push(&mut self, packet:crate::audio::AudioPacket)->Result<(),crate::audio::AudioError>{self.0.lock().unwrap().push(packet.data.len()/8);Ok(())}
+        fn push(&mut self, packet:crate::audio::AudioPacket)->Result<(),crate::audio::AudioError>{self.0.lock().unwrap().push(packet);Ok(())}
         fn position(&self)->Duration{Duration::ZERO}
         fn flush(&mut self,_:Duration)->Result<(),crate::audio::AudioError>{Ok(())}
         fn pause(&mut self)->Result<(),crate::audio::AudioError>{Ok(())}
@@ -618,11 +627,20 @@ mod presentation_window_tests {
         let (events,_) = sync_channel(1);
         let mut worker = Worker { stream:Box::new(stream),decoder,backend:Box::new(Capture(counts.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
         for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
-        let counts = counts.lock().unwrap();
+        let packets = counts.lock().unwrap();
+        let counts:Vec<usize> = packets.iter().map(|p| p.data.len()/8).collect();
+        assert_eq!(packets[0].pts,0);
+        let actual:Vec<u8> = packets.iter().flat_map(|p|p.data.iter().copied()).collect();
+        let mut expected = Vec::new();
+        let demuxer = crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(include_bytes!("../tests/fixtures/playback-errors/aac-rounded-two-tracks.m4a").as_slice()),Default::default()).unwrap();
+        let mut control = crate::native_media::DecodeProgress::new(None,None).unwrap();
+        crate::native_media::decode_mp4_audio_reader_controlled(demuxer,&mut expected,None,Some(1),&mut control).unwrap();
+        assert!(actual==expected,"playback and export presentation samples differ");
         assert_eq!(counts.len(),48);
-        assert_eq!(counts[0],1024);
+        assert_eq!(counts.iter().sum::<usize>(),48008);
+        assert_eq!(counts[0],16);
         assert_eq!(counts[1],1016);
-        assert_eq!(counts[47],912);
+        assert_eq!(counts[47],896);
         assert!(counts[2..47].iter().all(|n| *n==1024));
     }
 }
