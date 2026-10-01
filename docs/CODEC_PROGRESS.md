@@ -1879,7 +1879,8 @@ independent synthesis have retained tag-local overlap/window state. Coupling is
 added to target PCM after synthesis. Reset/checkpoints include CCE synthesis
 state. All state commits remain after validation of the entire packet and all
 coupling targets; absent target/tag/configuration changes are explicit errors.
-Dependent coupling before/after TNS and height layouts remain unsupported.
+At this stage dependent coupling before/after TNS and height layouts remained
+unsupported; see the dependent-coupling update below.
 
 Hand-authored six-packet fixtures cover silent mono SCE receiving nonzero CCE,
 and stereo CPE with separate left/right gains (right 2^(-4/8)). Saved independent
@@ -1926,3 +1927,30 @@ shared|right|left` or `--stereo --short`. Oracle generation uses FFmpeg;
 ordinary tests read checked-in bytes only. Existing mono/stereo/missing-target
 fixtures regenerate byte-identically. All three coupling tests passed across
 six oracle fixtures, including bit-exact checkpoint tails and full reset replay.
+
+### Owned AAC-LC dependent spectral coupling
+
+CCE parsing now accepts before-TNS and between-TNS/IMDCT coupling points,
+common gains and differential per-band gains (including signed gains). The
+CCE spectrum is reconstructed and TNS-filtered in raw element order; targets
+retain their side information until all elements are validated. Dependent
+mixing is applied to the target spectrum before or after its TNS as declared,
+then normal channel synthesis runs. Dependent CCE does not create an IMDCT
+overlap state. Missing targets, window-sequence mismatch and nonfinite gains
+reject the packet without committing noise or overlap history.
+
+Synthetic stereo fixtures cover both points with active target TNS, long and
+eight-short windows, common L/R gains and a negative differential band gain.
+Saved PCM tolerance is 1e-7. The before/after oracle difference exceeds 1e-5,
+so the fixtures exercise the mixing stage rather than an inactive TNS path.
+A missing-target dependent fixture checks rollback after a warmed decoder.
+The previous PCE implementation reproduces exactly the dependent-coupling
+refusal on the new fixture; ordinary tests enable acceptance with this fix.
+Generate with `generate_aac_coupling_sample.py --stereo --point before-tns`
+or `after-tns`, optionally `--short` or `--band-gain --signed-gain`.
+FFmpeg is used only to save generation-time oracle PCM.
+Height layouts, HE-AAC/SBR and broader coupling combinations remain unfinished.
+Validation: 51 AAC unit tests, 4 coupling acceptance/rollback/fixture-quality
+tests, 15 AAC export tests and 2 AAC/960 tests passed; player compilation
+and native headless/player/camera dependency checks passed. Thirteen existing
+coupling fixture/oracle files regenerate byte-identically.

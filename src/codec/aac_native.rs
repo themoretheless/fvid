@@ -166,20 +166,17 @@ impl NativeAacDecoder {
                 0 | 3 => {
                     let channel = ChannelData::read(&mut bits, &self.config)?;
                     let spectrum = channel.spectrum_with_noise(&self.config, &mut noise)?;
-                    let spectrum = channel.apply_tns(&self.config, spectrum)?;
-                    channels.push((channel.info, spectrum, self.mapping[target_offset]));
+                    channels.push((channel, spectrum, self.mapping[target_offset]));
                 }
                 1 => {
                     let pair = ChannelPair::read(&mut bits, &self.config)?;
                     let (left, right) = pair.spectra_with_noise(&self.config, &mut noise)?;
-                    let left = pair.left.apply_tns(&self.config, left)?;
-                    let right = pair.right.apply_tns(&self.config, right)?;
-                    channels.push((pair.left.info, left, self.mapping[target_offset]));
-                    channels.push((pair.right.info, right, self.mapping[target_offset + 1]));
+                    channels.push((pair.left, left, self.mapping[target_offset]));
+                    channels.push((pair.right, right, self.mapping[target_offset + 1]));
                 }
                 2 => {
                     let coupling=super::aac_coupling::Coupling::read(&mut bits,&self.config)?;
-                    if self.program.as_ref().is_none_or(|p|!p.coupling.contains(&(true,coupling.tag))) {return Err(invalid("AAC coupling is absent from configured PCE"));}
+                    if self.program.as_ref().is_none_or(|p|!p.coupling.contains(&(coupling.point == 3,coupling.tag))) {return Err(invalid("AAC coupling is absent from configured PCE"));}
                     if !tags.insert((2,u32::from(coupling.tag))) {return Err(invalid("duplicate AAC coupling tag"));}
                     let spectrum=coupling.channel.spectrum_with_noise(&self.config,&mut noise)?;
                     let spectrum=coupling.channel.apply_tns(&self.config,spectrum)?;
@@ -210,19 +207,39 @@ impl NativeAacDecoder {
         if bits.remaining() > 7 {
             return Err(invalid("trailing bytes after AAC END"));
         }
+        for point in [0, 1] {
+            if point == 1 {
+                for (channel, spectrum, _) in &mut channels {
+                    *spectrum = channel.apply_tns(&self.config, std::mem::take(spectrum))?;
+                }
+            }
+            for (coupling, source) in &couplings {
+                if coupling.point != point {continue;}
+                for target in &coupling.targets {
+                    let (_, _, offset) = decoded_elements.iter().find(|(kind,tag,_)| *kind == u32::from(target.pair) && *tag == u32::from(target.tag)).ok_or_else(||invalid("AAC coupling target is absent"))?;
+                    let mapped = self.mapping[*offset + target.channel as usize];
+                    let (channel, destination, _) = channels.iter_mut().find(|(_,_,index)| *index == mapped).ok_or_else(||invalid("AAC coupling target is absent"))?;
+                    if channel.info.sequence != coupling.channel.info.sequence {
+                        return Err(invalid("AAC coupling target window sequence mismatch"));
+                    }
+                    coupling.mix_spectrum(target, &self.config, source, destination)?;
+                }
+            }
+        }
         // byte_alignment bits have no audio payload.
         let n = self.config.frame_samples as usize;
         let mut synthesis = self.synthesis.clone();
         let mut output = vec![0.0; n * channels.len()];
         let mut pcm = vec![0.0; n];
-        for (info, spectrum, target) in &channels {
-            synthesis[*target].synthesize_pcm(info.sequence, info.shape, spectrum, &mut pcm)?;
+        for (channel, spectrum, target) in &channels {
+            synthesis[*target].synthesize_pcm(channel.info.sequence, channel.info.shape, spectrum, &mut pcm)?;
             for i in 0..n {
                 output[i * channels.len() + target] = pcm[i] as f32;
             }
         }
         let mut coupling_synthesis=self.coupling_synthesis.clone();
         for (coupling,spectrum) in couplings {
+            if coupling.point != 3 {continue;}
             let state=&mut coupling_synthesis[coupling.tag as usize];
             if state.is_none() {*state=Some(LongSineSynthesis::new(n)?);}
             state.as_mut().unwrap().synthesize_pcm(coupling.channel.info.sequence,coupling.channel.info.shape,&spectrum,&mut pcm)?;

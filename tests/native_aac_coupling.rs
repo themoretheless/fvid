@@ -1,7 +1,7 @@
 use fvid::{codec::aac_native::NativeAacDecoder, container::adts::StreamReader};
 use std::io::Cursor;
 #[test]
-fn independent_coupling_matches_saved_pcm_reset_and_checkpoint() {
+fn coupling_matches_saved_pcm_reset_and_checkpoint() {
     for (data, expected, channels) in [
         (
             include_bytes!("fixtures/playback-errors/aac-independent-coupling.aac").as_slice(),
@@ -43,6 +43,43 @@ fn independent_coupling_matches_saved_pcm_reset_and_checkpoint() {
                 .as_slice(),
             2,
         ),
+        (
+            include_bytes!(
+                "fixtures/playback-errors/aac-independent-coupling-stereo-before-tns.aac"
+            )
+            .as_slice(),
+            include_bytes!(
+                "fixtures/playback-errors/aac-independent-coupling-stereo-before-tns.f32le"
+            )
+            .as_slice(),
+            2,
+        ),
+        (
+            include_bytes!(
+                "fixtures/playback-errors/aac-independent-coupling-stereo-after-tns.aac"
+            )
+            .as_slice(),
+            include_bytes!(
+                "fixtures/playback-errors/aac-independent-coupling-stereo-after-tns.f32le"
+            )
+            .as_slice(),
+            2,
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-after-tns-band-gain-signed.aac").as_slice(),
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-after-tns-band-gain-signed.f32le").as_slice(),
+            2,
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-short-before-tns.aac").as_slice(),
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-short-before-tns.f32le").as_slice(),
+            2,
+        ),
+        (
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-short-after-tns.aac").as_slice(),
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-stereo-short-after-tns.f32le").as_slice(),
+            2,
+        ),
     ] {
         let mut reader = StreamReader::open(Cursor::new(data)).unwrap();
         let mut decoder = NativeAacDecoder::new(reader.audio_specific_config()).unwrap();
@@ -71,7 +108,7 @@ fn independent_coupling_matches_saved_pcm_reset_and_checkpoint() {
         }
         assert!(
             peak < 0.0000001,
-            "independent coupling PCM oracle mismatch: {peak}"
+            "coupling PCM oracle mismatch: {peak}"
         );
         decoder.reset();
         decoder.restore(&state.unwrap()).unwrap();
@@ -91,27 +128,42 @@ fn independent_coupling_matches_saved_pcm_reset_and_checkpoint() {
 
 #[test]
 fn absent_coupling_target_does_not_mutate_overlap_or_noise() {
-    let good = include_bytes!("fixtures/playback-errors/aac-independent-coupling.aac");
-    let bad =
-        include_bytes!("fixtures/playback-errors/aac-independent-coupling-missing-target.aac");
-    let mut reader = StreamReader::open(Cursor::new(good)).unwrap();
-    let mut decoder = NativeAacDecoder::new(reader.audio_specific_config()).unwrap();
-    let first = reader.next_packet().unwrap().unwrap();
-    let second = reader.next_packet().unwrap().unwrap();
-    decoder.decode(&first).unwrap();
-    let state = decoder.checkpoint();
-    let expected = decoder.decode(&second).unwrap();
-    decoder.restore(&state).unwrap();
-    let mut invalid = StreamReader::open(Cursor::new(bad)).unwrap();
-    let packet = invalid.next_packet().unwrap().unwrap();
-    assert!(
-        decoder
-            .decode(&packet)
-            .unwrap_err()
-            .to_string()
-            .contains("coupling target is absent")
-    );
-    assert_eq!(decoder.decode(&second).unwrap(), expected);
+    for (good, bad) in [
+        (
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling.aac").as_slice(),
+            include_bytes!("fixtures/playback-errors/aac-independent-coupling-missing-target.aac")
+                .as_slice(),
+        ),
+        (
+            include_bytes!(
+                "fixtures/playback-errors/aac-independent-coupling-stereo-before-tns.aac"
+            )
+            .as_slice(),
+            include_bytes!(
+                "fixtures/playback-errors/aac-independent-coupling-missing-target-before-tns.aac"
+            )
+            .as_slice(),
+        ),
+    ] {
+        let mut reader = StreamReader::open(Cursor::new(good)).unwrap();
+        let mut decoder = NativeAacDecoder::new(reader.audio_specific_config()).unwrap();
+        let first = reader.next_packet().unwrap().unwrap();
+        let second = reader.next_packet().unwrap().unwrap();
+        decoder.decode(&first).unwrap();
+        let state = decoder.checkpoint();
+        let expected = decoder.decode(&second).unwrap();
+        decoder.restore(&state).unwrap();
+        let mut invalid = StreamReader::open(Cursor::new(bad)).unwrap();
+        let packet = invalid.next_packet().unwrap().unwrap();
+        assert!(
+            decoder
+                .decode(&packet)
+                .unwrap_err()
+                .to_string()
+                .contains("coupling target is absent")
+        );
+        assert_eq!(decoder.decode(&second).unwrap(), expected);
+    }
 }
 
 #[test]
@@ -159,5 +211,46 @@ fn independent_cpe_selection_routes_only_to_selected_channels() {
         if selection != 2 {
             assert!(peak[1] > 0.00001);
         }
+    }
+}
+
+#[test]
+fn dependent_tns_fixtures_distinguish_coupling_stages() {
+    for (before, after) in [
+        (
+            include_bytes!(
+                "fixtures/playback-errors/aac-independent-coupling-stereo-before-tns.f32le"
+            )
+            .as_slice(),
+            include_bytes!(
+                "fixtures/playback-errors/aac-independent-coupling-stereo-after-tns.f32le"
+            )
+            .as_slice(),
+        ),
+        (
+            include_bytes!(
+                "fixtures/playback-errors/aac-independent-coupling-stereo-short-before-tns.f32le"
+            )
+            .as_slice(),
+            include_bytes!(
+                "fixtures/playback-errors/aac-independent-coupling-stereo-short-after-tns.f32le"
+            )
+            .as_slice(),
+        ),
+    ] {
+        assert_eq!(before.len(), after.len());
+        let difference = before
+            .chunks_exact(4)
+            .zip(after.chunks_exact(4))
+            .map(|(a, b)| {
+                (f32::from_le_bytes(a.try_into().unwrap())
+                    - f32::from_le_bytes(b.try_into().unwrap()))
+                .abs()
+            })
+            .fold(0f32, f32::max);
+        assert!(
+            difference > 0.00001,
+            "active target TNS must distinguish coupling stages: {difference}"
+        );
     }
 }
