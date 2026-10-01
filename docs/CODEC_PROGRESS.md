@@ -1576,3 +1576,15 @@ verify the tested checkout, not an isolated clean release tree.
 profiles. The portable camera bridge is tested; OS registration and cross-process
 camera delivery remain unverified. The optional legacy `media` feature still
 contains unmigrated FFmpeg operations and is outside the no-libav build claim.
+
+### Standalone ASS conversion through owned APIs
+
+UTF-8 `.ass` files with the canonical Events field format now convert to
+Matroska through the owned parser/writer in both CLI and media API. Script/style
+header lines, layer, style/name/margins/effect, comma-containing text and override
+commands are preserved. Dialogue start/end centiseconds become packet timing;
+read-order numbers preserve original script order while packets are sorted by
+start time. Tests cover overlapping/nonchronological cues, header and payload
+bytes, CLI/API equality, existing-output protection and invalid timing with no
+output. Noncanonical Events layouts and non-UTF8 files retain the legacy adapter
+before publication; SSA and arbitrary field layouts are not covered here.

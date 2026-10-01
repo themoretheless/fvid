@@ -237,6 +237,9 @@ pub fn try_convert(
     streams: &[usize],
 ) -> Result<Option<SubtitleStats>> {
     if !crate::native_export::is_matroska_source(source)? {
+        if source.extension().and_then(|s|s.to_str()).is_some_and(|s|s.eq_ignore_ascii_case("ass")) {
+            return try_convert_ass(source,destination,streams);
+        }
         return try_convert_srt(source, destination, streams);
     }
     let mut reader = crate::container::webm::WebmReader::open(
@@ -357,6 +360,102 @@ pub fn try_convert(
 }
 /// `None` preserves the adapter for unsupported text encodings or markup.
 /// Recognized invalid timing never publishes a partial output.
+/// Preserve standalone UTF-8 ASS scripts and dialogue fields in Matroska.
+/// Noncanonical event formats retain the legacy path before publication.
+pub fn try_convert_ass(
+    source: &Path,
+    destination: &Path,
+    streams: &[usize],
+) -> Result<Option<SubtitleStats>> {
+    if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
+        return Err(invalid("ASS conversion requires Matroska (.mkv) output"));
+    }
+    if !streams.is_empty() && streams != [0] {
+        return Err(invalid("ASS has only subtitle stream 0"));
+    }
+    let mut bytes = Vec::new();
+    File::open(source)?
+        .take((64 << 20) + 1)
+        .read_to_end(&mut bytes)?;
+    if bytes.len() > 64 << 20 {
+        return Err(invalid("ASS metadata exceeds 64 MiB"));
+    }
+    let Ok(text) = std::str::from_utf8(&bytes) else {
+        return Ok(None);
+    };
+    let normalized = text
+        .trim_start_matches('\u{feff}')
+        .replace("\r\n", "\n")
+        .replace('\r', "\n");
+    if normalized.contains('\0') {
+        return Err(invalid("NUL in ASS script"));
+    }
+    let mut configuration = String::new();
+    let mut events = Vec::new();
+    let mut in_events = false;
+    let mut format = false;
+    let canonical = "layer,start,end,style,name,marginl,marginr,marginv,effect,text";
+    let ass_time = |value: &str| -> Result<u64> {
+        let (clock, fraction) = value
+            .trim()
+            .rsplit_once('.')
+            .ok_or_else(|| invalid("invalid ASS timestamp"))?;
+        if fraction.len() != 2 {
+            return Err(invalid("ASS timestamp requires centiseconds"));
+        }
+        timestamp(&format!("{clock},{fraction}0"))
+    };
+    for line in normalized.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with('[') {
+            in_events = trimmed.eq_ignore_ascii_case("[Events]");
+            format = false;
+        }
+        if in_events {
+            if let Some(value) = trimmed.strip_prefix("Format:") {
+                format = value
+                    .split(',')
+                    .map(|s| s.trim().to_ascii_lowercase())
+                    .collect::<Vec<_>>()
+                    .join(",")
+                    == canonical;
+                if !format {
+                    return Ok(None);
+                }
+            }
+            if let Some(value) = line.trim_start().strip_prefix("Dialogue:") {
+                if !format {
+                    return Ok(None);
+                }
+                let fields: Vec<_> = value.trim_start().splitn(10, ',').collect();
+                if fields.len() != 10 {
+                    return Err(invalid("invalid ASS dialogue fields"));
+                }
+                let layer = fields[0]
+                    .trim()
+                    .parse::<i32>()
+                    .map_err(|_| invalid("invalid ASS layer"))?;
+                let start = ass_time(fields[1])?;
+                let end = ass_time(fields[2])?;
+                if start >= end {
+                    return Err(invalid("ASS dialogue requires start before end"));
+                }
+                let payload =
+                    format!("{},{layer},{}", events.len(), fields[3..].join(",")).into_bytes();
+                events.push((start, end, payload));
+                continue;
+            }
+        }
+        configuration.push_str(line);
+        configuration.push('\n');
+    }
+    if events.is_empty() {
+        return Err(invalid("ASS script has no dialogue cues"));
+    }
+    events.sort_by_key(|event| event.0);
+    publish_events(events, destination, "", "", configuration.as_bytes())
+}
+
 pub fn try_convert_srt(
     source: &Path,
     destination: &Path,
