@@ -312,6 +312,8 @@ const AAC_RATES: [u32; 13] = [
 ];
 #[derive(Debug, PartialEq, Eq)]
 pub struct AacConfig {
+    /// MPEG-4 channel_configuration, zero for an explicit PCE.
+    pub channel_configuration: u8,
     pub object_type: u32,
     pub sample_rate: u32,
     pub channels: u8,
@@ -350,7 +352,8 @@ impl AacConfig {
         let mut channels = match config {
             0 => 0,
             1..=6 => config as u8,
-            7 => 8,
+            7 | 12 => 8,
+            11 => 7,
             _ => return Err(invalid("unsupported AAC channel configuration")),
         };
         let frame_samples = if b.bit()? { 960 } else { 1024 };
@@ -385,6 +388,7 @@ impl AacConfig {
             }
         }
         Ok((Self {
+            channel_configuration: config as u8,
             object_type,
             sample_rate,
             channels,

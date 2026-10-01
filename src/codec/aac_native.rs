@@ -18,13 +18,13 @@ impl NativeAacDecoder {
     pub fn new(asc: &[u8]) -> Result<Self> {
         let (config, program) = AacConfig::parse_with_program(asc)?;
         BandTables::for_config(&config)?;
-        if program.is_none() && !matches!(config.channels, 1..=6 | 8) {
+        if program.is_none() && !matches!(config.channels, 1..=8) {
             return Err(unsupported("unsupported owned AAC channel layout"));
         }
         let (channel_mask, mapping) = if let Some(program) = &program {
             program.pcm_layout()?
         } else {
-            let mapping: &[usize] = match config.channels {
+            let mapping: &[usize] = match config.channel_configuration {
                 1 => &[0],
                 2 => &[0, 1],
                 3 => &[2, 0, 1],
@@ -33,12 +33,18 @@ impl NativeAacDecoder {
                 6 => &[2, 0, 1, 4, 5, 3],
                 // Configuration 7: center, inner-front pair, outer-front pair,
                 // back pair, LFE; PCM uses ascending WAVE speaker bits.
-                8 => &[2, 6, 7, 0, 1, 4, 5, 3],
+                7 => &[2, 6, 7, 0, 1, 4, 5, 3],
+                11 => &[2, 0, 1, 4, 5, 6, 3],
+                12 => &[2, 0, 1, 6, 7, 4, 5, 3],
                 _ => unreachable!(),
             };
             (
-                if config.channels == 8 {
+                if config.channel_configuration == 7 {
                     0xff
+                } else if config.channel_configuration == 11 {
+                    0x13f
+                } else if config.channel_configuration == 12 {
+                    0x63f
                 } else {
                     crate::native_export::default_pcm_mask(u16::from(config.channels))?
                 },
@@ -78,14 +84,15 @@ impl NativeAacDecoder {
         let mut bits = BitReader::new(packet);
         let mut noise = self.noise.clone();
         let mut channels = Vec::new();
-        let elements: &[u32] = match self.config.channels {
+        let elements: &[u32] = match self.config.channel_configuration {
             1 => &[0],
             2 => &[1],
             3 => &[0, 1],
             4 => &[0, 1, 0],
             5 => &[0, 1, 1],
             6 => &[0, 1, 1, 3],
-            8 => &[0, 1, 1, 1, 3],
+            7 | 12 => &[0, 1, 1, 1, 3],
+            11 => &[0, 1, 1, 0, 3],
             _ => &[],
         };
         let mut element_index = 0;

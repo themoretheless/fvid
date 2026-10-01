@@ -69,6 +69,7 @@ mod tests {
     use super::*;
     fn config(rate: u32) -> AacConfig {
         AacConfig {
+            channel_configuration: 2,
             object_type: 2,
             sample_rate: rate,
             channels: 2,

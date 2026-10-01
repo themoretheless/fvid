@@ -67,3 +67,18 @@ https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavcodec/aac/aacdec.c
 
 Preceding FIL tests cover lengths 0, 1, 14, 15 and 269 bytes, fill/fill-data
 extensions, exact PCM, every first-frame truncation, and SBR rejection.
+
+Indexed configurations 11/12 fixtures: `aac-config11-61.m4a` and
+`aac-config12-71.m4a`, independently encoded using the distinct-tone source
+above with seven/eight channels and `c=6.1(back)` / `c=7.1`, AAC 448k/512k,
+PNS disabled. The encoder writes configuration 11/12 respectively.
+References generated with:
+
+```sh
+ffmpeg -v error -ignore_editlist 1 -i aac-config11-61.m4a -f f32le aac-config11-61-reference.f32le
+ffmpeg -v error -ignore_editlist 1 -i aac-config12-71.m4a -f f32le aac-config12-71-reference.f32le
+```
+
+Native raw packet synthesis matches each sample within 1e-6. Reference final
+packet duration trims its suffix; no guessed priming offset is used.
+WAV exports retain masks 0x13f / 0x63f, while configuration 7 remains 0xff.

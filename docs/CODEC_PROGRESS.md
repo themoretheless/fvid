@@ -35,7 +35,7 @@ mix сохраняет PCE mask 0xff для ADTS/MP4/Matroska; тест двух
 - `src/codec/hevc_decoder.rs`: multi-slice access units и изменённые in-band
   SPS/PPS пока отклоняются. Идентичные повторённые parameter sets принимаются.
 - `src/codec/aac_native.rs`: декодер AAC-LC поддерживает стандартные 1–6 каналов,
-  configuration 7 (8 каналов, 7.1 wide) и однозначные горизонтальные PCE layouts. Восьмиканальный PCE в MP4 проверен
+  configurations 7 (7.1 wide), 11 (6.1 back), 12 (7.1) и однозначные горизонтальные PCE layouts. Восьмиканальный PCE в MP4 проверен
   по каждому динамику с независимым PCM-эталоном; собственные CLI/API WAV
   exports сохраняют mask 0xff и учитывают priming/edit list. Configuration 7
   проверена со strict независимым PCM-эталоном; coupling/height PCE layouts и

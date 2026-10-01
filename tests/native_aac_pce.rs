@@ -534,3 +534,70 @@ fn adts_program_after_fill_elements_retains_audio_and_rejects_tools() {
         }
     }
 }
+
+#[test]
+fn indexed_61_and_71_layouts_match_independent_pcm_per_speaker() {
+    for (source, reference, configuration, mask, channels) in [
+        (
+            include_bytes!("fixtures/audio/aac-config11-61.m4a").as_slice(),
+            include_bytes!("fixtures/audio/aac-config11-61-reference.f32le").as_slice(),
+            11,
+            0x13f,
+            7,
+        ),
+        (
+            include_bytes!("fixtures/audio/aac-config12-71.m4a").as_slice(),
+            include_bytes!("fixtures/audio/aac-config12-71-reference.f32le").as_slice(),
+            12,
+            0x63f,
+            8,
+        ),
+    ] {
+        let directory = std::env::temp_dir().join(format!(
+            "fvid-layout-{configuration}-{}",
+            std::process::id()
+        ));
+        std::fs::create_dir_all(&directory).unwrap();
+        let input = directory.join("input.m4a");
+        let output = directory.join("output.wav");
+        std::fs::write(&input, source).unwrap();
+        fvid::native_export::export_audio_pcm_selected(
+            &input, &output, None, 1.0, None, None, None, None, None,
+        )
+        .unwrap();
+        let info =
+            fvid::native_pcm::inspect(&mut std::fs::File::open(output).unwrap(), None).unwrap();
+        assert_eq!(
+            (info.channels, info.channel_mask),
+            (u16::from(channels), mask)
+        );
+        std::fs::remove_dir_all(directory).unwrap();
+        let mut reader =
+            fvid::container::mp4::Mp4Reader::open(std::io::Cursor::new(source), Default::default())
+                .unwrap();
+        let track = reader.tracks()[0].clone();
+        let asc = fvid::codec::config::aac_specific_config(&track.configuration).unwrap();
+        let config = fvid::codec::config::AacConfig::parse(asc).unwrap();
+        assert_eq!(
+            (config.channel_configuration, config.channels),
+            (configuration, channels)
+        );
+        let mut decoder = fvid::codec::aac_native::NativeAacDecoder::new(asc).unwrap();
+        assert_eq!(decoder.channel_mask(), mask);
+        let mut actual = Vec::new();
+        let mut packet = Vec::new();
+        for index in 0..track.samples.len() {
+            reader.read_packet(0, index, &mut packet).unwrap();
+            actual.extend(decoder.decode(&packet).unwrap());
+        }
+        // The reference retains the last MP4 packet's shorter duration.
+        let last = track.samples.get(track.samples.len() - 1).unwrap();
+        assert_eq!(
+            actual.len() * 4 - reference.len(),
+            (1024 - last.duration as usize) * usize::from(channels) * 4
+        );
+        for (a, b) in actual.iter().zip(reference.chunks_exact(4)) {
+            assert!((*a - f32::from_le_bytes(b.try_into().unwrap())).abs() < 1e-6);
+        }
+    }
+}
