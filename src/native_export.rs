@@ -1,5 +1,5 @@
 //! Native planar Y4M export. No foreign decoder, encoder or muxer is used.
-mod pcm_matroska;
+pub(crate) mod pcm_matroska;
 use crate::{
     Result, invalid,
     playback_native::{NativeReader, RawFrame},

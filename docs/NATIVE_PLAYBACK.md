@@ -3060,3 +3060,13 @@ An optional FFmpeg reference decode checks float PCM container compatibility.
 also accept these float PCM destinations for owned audio inputs. They retain
 sample-exact interval selection and publish only complete outputs. WAVE trim
 entry points retain their existing WAVE-only contract.
+
+
+Owned `mix-audio` and `merge-audio` also publish float PCM Matroska (`.mka` or
+`.mkv`). They share the bounded packet sink with audio decode/trim, keeping
+shortest-input duration, mixing weights and input-order channel concatenation.
+The existing WAVE outputs retain their channel-mask behavior; Matroska output
+records the channel count without inventing speaker positions. Both operations
+still use temporary decoded PCM spools and require disk space proportional to
+input duration. Existing destinations are never replaced, and failed muxing
+removes the temporary output with the operation's scratch directory.

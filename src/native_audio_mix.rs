@@ -85,7 +85,7 @@ pub fn plan(
         steps:vec![
             crate::media_info::PlanStep {action:"decode".into(),detail:"FVid AAC/WAVE decoders to temporary float PCM spools".into()},
             crate::media_info::PlanStep {action:"mix".into(),detail:format!("FVid weighted float mixing; shortest duration; normalize={}",options.normalize)},
-            crate::media_info::PlanStep {action:"write".into(),detail:"atomic float32 WAV publication without overwriting an existing destination".into()},
+            crate::media_info::PlanStep {action:"write".into(),detail:"atomic float32 WAVE or Matroska publication without overwriting an existing destination".into()},
         ],notes:vec!["PCM spools bound mixing memory independently of input duration; temporary disk space is required".into()],
     })
 }
@@ -96,9 +96,11 @@ pub fn mix_audio(
     options: &MixAudioOptions,
 ) -> Result<MixAudioStats> {
     let weights = weights(sources.len(), options)?;
-    if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
-        return Err(invalid("mix-audio requires a .wav output"));
-    }
+    let matroska = match destination.extension().and_then(|s|s.to_str()) {
+        Some("wav") => false,
+        Some("mka" | "mkv") => true,
+        _ => return Err(invalid("mix-audio requires .wav, .mka or .mkv output")),
+    };
     if destination.try_exists()? {
         return Err(invalid("mix-audio destination already exists"));
     }
@@ -135,7 +137,7 @@ pub fn mix_audio(
     } else {
         0
     };
-    let header = crate::native_export::float_wav_header_with_mask(&stats, mask)?;
+    let header = if matroska {Vec::new()} else {crate::native_export::float_wav_header_with_mask(&stats, mask)?};
     let output_path = scratch.0.join("mix.wav");
     let mut output = BufWriter::new(
         OpenOptions::new()
@@ -144,6 +146,7 @@ pub fn mix_audio(
             .open(&output_path)?,
     );
     output.write_all(&header)?;
+    let mut sink=crate::native_export::pcm_matroska::Output::new(&mut output,matroska,rate,channels)?;
     let total: f32 = weights.iter().sum();
     let scales: Vec<f32> = weights
         .iter()
@@ -172,9 +175,10 @@ pub fn mix_audio(
         {
             bytes.copy_from_slice(&sample.to_le_bytes());
         }
-        output.write_all(&encoded[..count * 4])?;
+        sink.write_all(&encoded[..count * 4])?;
         remaining -= count as u64 / u64::from(channels);
     }
+    if sink.finish()?.is_some_and(|count|count!=frames) {return Err(invalid("PCM muxed sample count mismatch"));}
     output.flush()?;
     output.get_ref().sync_all()?;
     drop(output);
@@ -273,7 +277,7 @@ pub fn plan_merge(sources: &[PathBuf]) -> Result<crate::media_info::MediaPlan> {
         steps:vec![
             crate::media_info::PlanStep {action:"decode".into(),detail:"FVid AAC/WAVE decoders to temporary float PCM spools".into()},
             crate::media_info::PlanStep {action:"merge".into(),detail:format!("concatenate input channel vectors at {rate} Hz into {channels} channels, shortest duration")},
-            crate::media_info::PlanStep {action:"write".into(),detail:"atomic float32 WAV publication without replacing existing files".into()},
+            crate::media_info::PlanStep {action:"write".into(),detail:"atomic float32 WAVE or Matroska publication without replacing existing files".into()},
         ],notes:vec!["Channel order is first input then second input, preserving the existing merge-audio API contract".into(),"PCM spools require temporary disk space; mixing memory is bounded independently of duration".into()],
     })
 }
@@ -285,9 +289,11 @@ pub fn merge_audio(
     destination: &Path,
 ) -> Result<crate::media_info::MergeAudioStats> {
     let (rate, channels) = merge_geometry(sources)?;
-    if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
-        return Err(invalid("merge-audio requires a .wav output"));
-    }
+    let matroska = match destination.extension().and_then(|s|s.to_str()) {
+        Some("wav") => false,
+        Some("mka" | "mkv") => true,
+        _ => return Err(invalid("merge-audio requires .wav, .mka or .mkv output")),
+    };
     if destination.try_exists()? {
         return Err(invalid("merge-audio destination already exists"));
     }
@@ -303,7 +309,7 @@ pub fn merge_audio(
         return Err(invalid("decoded merge-audio geometry changed"));
     }
     let frames = descriptions.iter().map(|s| s.sample_frames).min().unwrap();
-    let header = merged_wav_header(rate, channels, frames)?;
+    let header = if matroska {Vec::new()} else {merged_wav_header(rate, channels, frames)?};
     let output_path = scratch.0.join("merge.wav");
     let mut output = BufWriter::new(
         OpenOptions::new()
@@ -312,6 +318,7 @@ pub fn merge_audio(
             .open(&output_path)?,
     );
     output.write_all(&header)?;
+    let mut sink=crate::native_export::pcm_matroska::Output::new(&mut output,matroska,rate,channels)?;
     let mut buffers = descriptions
         .iter()
         .map(|s| vec![0u8; 4096 * usize::from(s.channels) * 4])
@@ -328,11 +335,12 @@ pub fn merge_audio(
         }
         for frame in 0..count {
             for (buffer, stride) in buffers.iter().zip(&strides) {
-                output.write_all(&buffer[frame * stride..(frame + 1) * stride])?;
+                sink.write_all(&buffer[frame * stride..(frame + 1) * stride])?;
             }
         }
         remaining -= count as u64;
     }
+    if sink.finish()?.is_some_and(|count|count!=frames) {return Err(invalid("PCM muxed sample count mismatch"));}
     output.flush()?;
     output.get_ref().sync_all()?;
     drop(output);

@@ -464,3 +464,90 @@ fn merged_unlabelled_channels_roundtrip_and_mix_without_layout_inference() {
     let info = fvid::native_pcm::inspect(&mut std::fs::File::open(&mixed).unwrap(), None).unwrap();
     assert_eq!(info.channel_mask, 0);
 }
+
+#[test]
+fn mix_and_merge_matroska_match_wave_samples_and_channel_order() {
+    let d = dir();
+    let a = d.0.join("a.wav");
+    let b = d.0.join("b.wav");
+    let first: Vec<f32> = (0..9003)
+        .flat_map(|i| [i as f32 / 20000.0, -(i as f32) / 30000.0])
+        .collect();
+    let second: Vec<f32> = (0..9011)
+        .flat_map(|i| [-(i as f32) / 25000.0, i as f32 / 40000.0])
+        .collect();
+    wave(&a, &first, 44100, 2);
+    wave(&b, &second, 44100, 2);
+    let sources = vec![a, b];
+    for merge in [false, true] {
+        let name = if merge { "merge" } else { "mix" };
+        let wav = d.0.join(format!("{name}.wav"));
+        let mka = d.0.join(format!("{name}.mka"));
+        let raw = d.0.join(format!("{name}.f32le"));
+        if merge {
+            native_audio_mix::merge_audio(&sources, &wav).unwrap();
+            native_audio_mix::merge_audio(&sources, &mka).unwrap();
+        } else {
+            native_audio_mix::mix_audio(&sources, &wav, &MixAudioOptions::default()).unwrap();
+            native_audio_mix::mix_audio(&sources, &mka, &MixAudioOptions::default()).unwrap();
+        }
+        let stats = fvid::native_export::export_audio_pcm_selected(
+            &mka, &raw, None, 1.0, None, None, None, None, None,
+        )
+        .unwrap();
+        assert_eq!(stats.sample_frames, 9003);
+        assert_eq!(stats.sample_rate, 44100);
+        assert_eq!(stats.channels, if merge { 4 } else { 2 });
+        assert_eq!(pcm(&wav), std::fs::read(raw).unwrap());
+        let bytes = std::fs::read(&mka).unwrap();
+        let cli = d.0.join(format!("cli-{name}.mka"));
+        let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", if merge { "merge-audio" } else { "mix-audio" }])
+            .arg(&cli)
+            .args(&sources)
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let stats: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        assert_eq!(stats["backend"], "fvid");
+        assert_eq!(std::fs::read(cli).unwrap(), bytes);
+        if merge {
+            assert!(native_audio_mix::merge_audio(&sources, &mka).is_err());
+        } else {
+            assert!(
+                native_audio_mix::mix_audio(&sources, &mka, &MixAudioOptions::default()).is_err()
+            );
+        }
+        assert_eq!(std::fs::read(&mka).unwrap(), bytes);
+        #[cfg(feature = "media")]
+        {
+            let public = d.0.join(format!("public-{name}.mkv"));
+            if merge {
+                assert_eq!(
+                    fvid::media::merge_audio(&sources, &public).unwrap().backend,
+                    "fvid"
+                );
+            } else {
+                assert_eq!(
+                    fvid::media::mix_audio(&sources, &public, &MixAudioOptions::default())
+                        .unwrap()
+                        .backend,
+                    "fvid"
+                );
+            }
+            assert_eq!(std::fs::read(public).unwrap(), bytes);
+        }
+    }
+    assert_eq!(
+        std::fs::read_dir(&d.0)
+            .unwrap()
+            .filter_map(Result::ok)
+            .filter(|e| e.file_name().to_string_lossy().starts_with(".fvid"))
+            .count(),
+        0
+    );
+}

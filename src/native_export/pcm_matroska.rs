@@ -6,19 +6,19 @@ use crate::{
 };
 use std::io::{self, Seek, Write};
 
-pub(super) enum Output<'a, W> {
+pub(crate) enum Output<'a, W> {
     Raw(&'a mut W),
     Matroska(Sink<'a, W>),
 }
 impl<'a, W: Write + Seek> Output<'a, W> {
-    pub(super) fn new(output: &'a mut W, matroska: bool, rate: u32, channels: u16) -> Result<Self> {
+    pub(crate) fn new(output: &'a mut W, matroska: bool, rate: u32, channels: u16) -> Result<Self> {
         if matroska {
             Ok(Self::Matroska(Sink::new(output, rate, channels)?))
         } else {
             Ok(Self::Raw(output))
         }
     }
-    pub(super) fn finish(self) -> Result<Option<u64>> {
+    pub(crate) fn finish(self) -> Result<Option<u64>> {
         match self {
             Self::Raw(_) => Ok(None),
             Self::Matroska(sink) => sink.finish().map(Some),
@@ -39,7 +39,7 @@ impl<W: Write + Seek> Write for Output<'_, W> {
         }
     }
 }
-pub(super) struct Sink<'a, W> {
+pub(crate) struct Sink<'a, W> {
     writer: PacketWriter<'a, W>,
     rate: u32,
     frame_bytes: usize,
