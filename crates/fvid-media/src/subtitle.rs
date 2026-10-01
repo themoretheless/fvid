@@ -186,14 +186,14 @@ pub fn convert_subtitles(
                 (*packet.0).pts
             } else if subtitle.0.pts != NOPTS {
                 // AVSubtitle.pts is in AV_TIME_BASE.
-                av_rescale_q(
+                super::rescale_owned(
                     subtitle.0.pts,
                     AVRational {
                         num: 1,
                         den: AV_TIME_BASE as i32,
                     },
                     src_tb,
-                )
+                )?
             } else {
                 avsubtitle_free(&mut subtitle.0);
                 return Err("subtitle cue requires timestamps".into());
@@ -204,15 +204,15 @@ pub fn convert_subtitles(
                 let start = i64::from(subtitle.0.start_display_time);
                 let end = i64::from(subtitle.0.end_display_time);
                 if end > start {
-                    av_rescale_q(end - start, AVRational { num: 1, den: 1000 }, src_tb)
+                    super::rescale_owned(end - start, AVRational { num: 1, den: 1000 }, src_tb)?
                 } else {
                     0
                 }
             };
             // Encode into encoder time base for the mux override.
-            (*encoded.0).pts = av_rescale_q(pts, src_tb, time_base);
+            (*encoded.0).pts = super::rescale_owned(pts, src_tb, time_base)?;
             (*encoded.0).dts = (*encoded.0).pts;
-            (*encoded.0).duration = av_rescale_q(duration, src_tb, time_base);
+            (*encoded.0).duration = super::rescale_owned(duration, src_tb, time_base)?;
             (*encoded.0).flags |= AV_PKT_FLAG_KEY as i32;
         }
         payload_bytes += size as u64;

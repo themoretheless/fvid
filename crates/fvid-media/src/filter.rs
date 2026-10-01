@@ -7383,7 +7383,7 @@ pub(crate) unsafe fn xfade_frame(
             filter_tb
         };
         if s.pts != NOPTS && (src_tb.num != filter_tb.num || src_tb.den != filter_tb.den) {
-            (*src).pts = av_rescale_q(s.pts, src_tb, filter_tb);
+            (*src).pts = super::rescale_owned(s.pts, src_tb, filter_tb)?;
         }
         (*src).time_base = filter_tb;
         check(

@@ -337,6 +337,14 @@ fn publish_file(temporary: &Path, destination: &Path) -> Result<()> {
         }),
     }
 }
+fn rescale_owned(value: i64, source: AVRational, target: AVRational) -> Result<i64> {
+    if source.num <= 0 || source.den <= 0 || target.num <= 0 || target.den <= 0 {
+        return Err("invalid timestamp time base".into());
+    }
+    crate::owned_time::rescale_nearest(value,
+        crate::owned_time::TimeBase { numerator: source.num as u32, denominator: source.den as u32 },
+        crate::owned_time::TimeBase { numerator: target.num as u32, denominator: target.den as u32 })
+}
 fn check(code: i32, operation: &str) -> Result<()> {
     if code >= 0 {
         return Ok(());

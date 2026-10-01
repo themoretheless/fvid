@@ -340,7 +340,7 @@ impl VideoPump {
                 filter_tb
             };
             if f.pts != NOPTS && (src_tb.num != filter_tb.num || src_tb.den != filter_tb.den) {
-                f.pts = av_rescale_q(f.pts, src_tb, filter_tb);
+                f.pts = super::rescale_owned(f.pts, src_tb, filter_tb)?;
             }
             f.time_base = filter_tb;
             check(

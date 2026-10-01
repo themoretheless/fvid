@@ -10683,16 +10683,9 @@ fn timestamp_us(ticks: i64, time_base: AVRational, origin_us: i64) -> Option<i64
     if ticks == NOPTS || time_base.num <= 0 || time_base.den <= 0 {
         return None;
     }
-    let absolute = unsafe {
-        av_rescale_q(
-            ticks,
-            time_base,
-            AVRational {
-                num: 1,
-                den: 1_000_000,
-            },
-        )
-    };
+    let absolute = super::rescale_owned(
+        ticks, time_base, AVRational { num: 1, den: 1_000_000 },
+    ).ok()?;
     Some(absolute.saturating_sub(origin_us))
 }
 
