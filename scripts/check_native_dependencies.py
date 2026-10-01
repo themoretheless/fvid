@@ -29,7 +29,7 @@ def dependencies(manifest, features, target, offline):
 def forbidden(packages):
     return sorted(package for package in packages
                   if package in {"rusty_ffmpeg", "ffmpeg"}
-                  or package.startswith("ffmpeg-"))
+                  or package.startswith(("ffmpeg-", "libav")))
 
 
 def main():

@@ -4,6 +4,7 @@ from pathlib import Path
 import re
 import subprocess
 import tempfile
+from check_native_dependencies import dependencies, forbidden
 
 ROOT = Path(__file__).resolve().parents[1]
 PLATFORM = ROOT / "platform/macos"
@@ -11,15 +12,14 @@ FFI = ROOT / "crates/fvid-camera-ffi"
 
 
 def verify_native_dependencies():
-    tree = subprocess.check_output([
-        "cargo", "tree", "--locked", "--offline", "--manifest-path",
-        str(FFI / "Cargo.toml"), "-e", "normal", "--prefix", "none",
-    ], text=True)
-    forbidden = [line for line in tree.splitlines()
-                 if line.split() and (line.split()[0] == "fvid-media"
-                 or line.split()[0].startswith(("ffmpeg", "libav")))]
-    if forbidden:
-        raise RuntimeError("Camera dependency graph contains foreign media: " + "; ".join(forbidden))
+    version = subprocess.check_output(["rustc", "-vV"], text=True)
+    target = next(line.removeprefix("host: ") for line in version.splitlines()
+                  if line.startswith("host: "))
+    packages, legacy = dependencies(FFI / "Cargo.toml", [], target, offline=True)
+    foreign = forbidden(packages)
+    if legacy or foreign:
+        raise RuntimeError("Camera dependency graph activates FFmpeg: "
+                           + "; ".join(foreign + (["fvid-media/legacy-ffmpeg"] if legacy else [])))
 
 
 def verify_native_linkage(executable):
