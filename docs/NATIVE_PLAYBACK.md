@@ -2994,3 +2994,24 @@ retain existing dispatch. The no-default-feature CLI regression compares all
 Main10 output frames against the repeated source frames. The corresponding
 local binary linked only libSystem; that linkage result applies to this build,
 not to the still-unmigrated overall `media` feature.
+
+### Owned Matroska audio presentation intervals
+
+Owned audio export now places each decoded packet on its presentation sample
+clock after CodecDelay and signed DiscardPadding. Overlapping coded intervals
+are accepted when head/tail trimming makes their audible intervals contiguous.
+Actual gaps are exported as silence with bounded scratch storage; user interval
+selection includes that silence. Audible overlaps beyond the container clock's
+rounding precision fail atomically. Coarse Matroska clocks retain their stated
+precision, including rounding just before sample zero after codec delay.
+
+Synthetic PCM packets check exact samples across trimmed boundaries, silence
+gaps and interval selection, plus no publication for untrimmed overlap.
+Independent FFmpeg verification uses timestamp compensation with zero minimum
+compensation threshold so even the 0.5 ms fixture gap is represented. Existing
+AAC, audio API/plan, WAVE, MP4 remux/concat and lossless Matroska regressions also
+pass. This supplies the presentation timeline needed for per-segment AAC priming;
+compressed concat admission still retains the previous route for nonzero AAC
+codec delay pending its transport implementation. Metadata semantics follow
+[Matroska DiscardPadding](https://www.matroska.org/technical/elements.html#DiscardPadding)
+and [CodecDelay timestamp rules](https://www.matroska.org/technical/notes.html).
