@@ -37,3 +37,8 @@ ffmpeg -v error -i aac-pce-wide8.m4a -f f32le aac-pce-wide8-export-reference.f32
 Owned CLI and public media API exports retain all eight channels with WAVE mask
 0xff (FL FR FC LFE BL BR FLC FRC), apply priming/edit scheduling, and compare
 complete PCM samples with this independent edited reference (peak < 1e-6).
+
+ADTS PCM reference: `aac-pce-wide8-adts-reference.f32le`, generated with
+`ffmpeg -v error -i aac-pce-wide8.aac -f f32le aac-pce-wide8-adts-reference.f32le`.
+Streaming and indexed owned decoding match every channel within 1e-6.
+The reader requires PCE at the beginning of the first raw packet.

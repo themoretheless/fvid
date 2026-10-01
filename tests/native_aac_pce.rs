@@ -164,3 +164,81 @@ fn owned_cli_exports_pce_with_priming_and_explicit_wav_speakers() {
         assert_eq!(std::fs::read(api).unwrap(), std::fs::read(&output).unwrap());
     }
 }
+
+#[test]
+fn adts_pce_stream_and_indexed_decode_preserve_all_samples_and_wav_layout() {
+    use fvid::container::adts::{Aac, Limits, StreamReader};
+    let input = include_bytes!("fixtures/audio/aac-pce-wide8.aac");
+    let reference = include_bytes!("fixtures/audio/aac-pce-wide8-adts-reference.f32le");
+    let indexed = Aac::parse(input, &Limits::default()).unwrap();
+    assert_eq!(indexed.channels, 8);
+    let reader = StreamReader::open(std::io::Cursor::new(input)).unwrap();
+    assert_eq!(reader.configuration().channels, 8);
+    let mut sequential = Vec::new();
+    fvid::native_media::decode_adts_aac_reader(reader, &mut sequential, None).unwrap();
+    let mut buffered = Vec::new();
+    fvid::native_media::decode_aac_pcm(input, &mut buffered, &Limits::default()).unwrap();
+    assert_eq!(buffered, sequential);
+    assert_eq!(sequential.len(), reference.len());
+    for (a, b) in sequential.chunks_exact(4).zip(reference.chunks_exact(4)) {
+        let delta = (f32::from_le_bytes(a.try_into().unwrap())
+            - f32::from_le_bytes(b.try_into().unwrap()))
+        .abs();
+        assert!(delta < 1e-6);
+    }
+    for cut in 7..indexed.frames[0].size {
+        assert!(
+            StreamReader::open(std::io::Cursor::new(&input[..cut])).is_err(),
+            "first frame cut {cut}"
+        );
+    }
+    let directory = std::env::temp_dir().join(format!("fvid-adts-pce-{}", std::process::id()));
+    std::fs::create_dir(&directory).unwrap();
+    struct Cleanup(std::path::PathBuf);
+    impl Drop for Cleanup {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _cleanup = Cleanup(directory.clone());
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/audio/aac-pce-wide8.aac");
+    let output = directory.join("output.wav");
+    let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "decode-audio"])
+        .arg(&source)
+        .arg(&output)
+        .output()
+        .unwrap();
+    assert!(
+        run.status.success(),
+        "{}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    let wave = fvid::native_pcm::inspect(&mut std::fs::File::open(&output).unwrap(), None).unwrap();
+    assert_eq!((wave.channels, wave.channel_mask), (8, 0xff));
+    #[cfg(feature = "media")]
+    {
+        let api = directory.join("api.wav");
+        fvid::media::decode_audio(&source, &api, &Default::default()).unwrap();
+        assert_eq!(std::fs::read(api).unwrap(), std::fs::read(output).unwrap());
+    }
+}
+
+#[test]
+fn pce_comment_uses_multibyte_descriptor_lengths_without_losing_layout() {
+    let input = include_bytes!("fixtures/audio/aac-pce-wide8.aac");
+    let mut bits = BitReader::new(&input[7..]);
+    assert_eq!(bits.read(3).unwrap(), 5);
+    let mut program = ProgramConfig::read(&mut bits, 0).unwrap();
+    program.comment = vec![42; 255];
+    let asc = program.audio_specific_config().unwrap();
+    assert!(asc.len() > 127);
+    let esds = fvid::container::adts::esds_for(&asc).unwrap();
+    assert_eq!(
+        fvid::codec::config::aac_specific_config(&esds).unwrap(),
+        asc
+    );
+    let (_, parsed) = fvid::codec::config::AacConfig::parse_with_program(&asc).unwrap();
+    assert_eq!(parsed.unwrap(), program);
+}

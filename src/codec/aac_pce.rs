@@ -94,6 +94,104 @@ impl ProgramConfig {
             .collect();
         Ok((mask, mapping))
     }
+    /// Serialize AAC-LC initialization with this explicit program.
+    pub fn audio_specific_config(&self) -> Result<Vec<u8>> {
+        if self.elements.len() > 48
+            || self.associated_data.len() > 7
+            || self.coupling.len() > 15
+            || self.comment.len() > 255
+            || self.tag > 15
+            || self.elements.iter().any(|e| e.tag > 15)
+        {
+            return Err(invalid("PCE fields exceed their syntax limits"));
+        }
+        let rates = [
+            96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350,
+        ];
+        let index = rates
+            .iter()
+            .position(|r| *r == self.sample_rate)
+            .ok_or_else(|| invalid("PCE sample rate has no index"))?;
+        if self.object_type != 2 {
+            return Err(invalid("PCE initialization requires AAC-LC"));
+        }
+        let mut fields = Vec::<bool>::new();
+        let put = |fields: &mut Vec<bool>, value: u32, count: u8| {
+            for shift in (0..count).rev() {
+                fields.push(value & (1 << shift) != 0);
+            }
+        };
+        put(&mut fields, 2, 5);
+        put(&mut fields, index as u32, 4);
+        put(&mut fields, 0, 4);
+        put(&mut fields, 0, 3);
+        put(&mut fields, u32::from(self.tag), 4);
+        put(&mut fields, 1, 2);
+        put(&mut fields, index as u32, 4);
+        for (position, width) in [
+            (Position::Front, 4),
+            (Position::Side, 4),
+            (Position::Back, 4),
+            (Position::Lfe, 2),
+        ] {
+            put(
+                &mut fields,
+                self.elements
+                    .iter()
+                    .filter(|e| e.position == position)
+                    .count() as u32,
+                width,
+            );
+        }
+        put(&mut fields, self.associated_data.len() as u32, 3);
+        put(&mut fields, self.coupling.len() as u32, 4);
+        for tag in [self.mono_mixdown, self.stereo_mixdown] {
+            put(&mut fields, u32::from(tag.is_some()), 1);
+            if let Some(tag) = tag {
+                put(&mut fields, u32::from(tag), 4);
+            }
+        }
+        put(&mut fields, u32::from(self.matrix_mixdown.is_some()), 1);
+        if let Some((index, pseudo)) = self.matrix_mixdown {
+            put(&mut fields, u32::from(index), 2);
+            put(&mut fields, u32::from(pseudo), 1);
+        }
+        for e in &self.elements {
+            if e.position != Position::Lfe {
+                put(&mut fields, u32::from(e.pair), 1);
+            }
+            put(&mut fields, u32::from(e.tag), 4);
+        }
+        for tag in &self.associated_data {
+            put(&mut fields, u32::from(*tag), 4);
+        }
+        for (independent, tag) in &self.coupling {
+            put(&mut fields, u32::from(*independent), 1);
+            put(&mut fields, u32::from(*tag), 4);
+        }
+        while fields.len() % 8 != 0 {
+            fields.push(false);
+        }
+        put(&mut fields, self.comment.len() as u32, 8);
+        for b in &self.comment {
+            put(&mut fields, u32::from(*b), 8);
+        }
+        let output: Vec<u8> = fields
+            .chunks(8)
+            .map(|chunk| {
+                chunk
+                    .iter()
+                    .fold(0u8, |byte, bit| (byte << 1) | u8::from(*bit))
+            })
+            .collect();
+        let (config, program) = super::config::AacConfig::parse_with_program(&output)?;
+        if config.channels as usize != self.channels() || program.as_ref() != Some(self) {
+            return Err(invalid(
+                "PCE fields cannot be represented in initialization",
+            ));
+        }
+        Ok(output)
+    }
     /// Includes element_instance_tag, but not the raw_data_block element ID.
     /// Alignment is relative to the caller's containing payload start.
     /// On malformed input, the caller's bit position remains unchanged.

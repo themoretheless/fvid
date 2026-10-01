@@ -474,7 +474,7 @@ fn export_pcm_selected(
     } else {
         if selected.is_some_and(|index| index != 0) { return Err(invalid("ADTS has only stream 0")); }
         let config = adts.as_ref().ok_or_else(|| invalid("missing ADTS reader"))?.configuration();
-        (config.sample_rate, config.channels,None)
+        (config.sample_rate, config.channels,Some(crate::codec::aac_native::NativeAacDecoder::new(adts.as_ref().unwrap().audio_specific_config())?.channel_mask()))
     };
     let unknown_pcm_layout = if let Some(reader)=&matroska {
         let index=crate::native_media::matroska_audio_index(reader,selected)?;

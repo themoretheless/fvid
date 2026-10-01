@@ -242,7 +242,7 @@ pub fn decode_aac_pcm_interval(
         Some((from, to)) => (boundary(from)?, boundary(to)?),
         None => (0, u64::MAX),
     };
-    let mut decoder = crate::codec::aac_native::NativeAacDecoder::new(&stream.frames[0].asc)?;
+    let mut decoder = crate::codec::aac_native::NativeAacDecoder::new(&stream.configuration)?;
     let mut stats = AudioDecodeStats {
         sample_frames: 0,
         decoded_frames: 0,
@@ -308,7 +308,7 @@ pub(crate) fn decode_adts_aac_reader_controlled<R: std::io::Read>(
         Some((from, to)) => (boundary(from)?, boundary(to)?),
         None => (0, u64::MAX),
     };
-    let mut decoder = crate::codec::aac_native::NativeAacDecoder::new(&config.asc)?;
+    let mut decoder = crate::codec::aac_native::NativeAacDecoder::new(reader.audio_specific_config())?;
     let mut stats = AudioDecodeStats { sample_frames: 0, decoded_frames: 0,
         sample_rate: config.sample_rate, channels: config.channels };
     let channels = usize::from(config.channels);
@@ -779,7 +779,7 @@ pub fn aac_source_info_selected(source: &Path, selected: Option<usize>) -> Resul
         if selected.is_some_and(|index| index != 0) { return Err(invalid("ADTS has only stream 0")); }
         let reader = crate::container::adts::StreamReader::open(input)?;
         let header = reader.configuration();
-        (0, header.asc.to_vec(), (u64::from(header.sample_rate), u64::from(header.channels)))
+        (0, reader.audio_specific_config().to_vec(), (u64::from(header.sample_rate), u64::from(header.channels)))
     };
     let decoder = crate::codec::aac_native::NativeAacDecoder::new(&asc)?;
     let sample_rate = decoder.sample_rate();
@@ -803,8 +803,7 @@ pub struct AdtsInfo {
 }
 pub fn inspect_adts<R: std::io::Read>(source: R) -> Result<AdtsInfo> {
     let mut reader = crate::container::adts::StreamReader::open(source)?;
-    let header = reader.configuration();
-    let config = crate::codec::config::AacConfig::parse(&header.asc)?;
+    let config = crate::codec::config::AacConfig::parse(reader.audio_specific_config())?;
     let mut info = AdtsInfo { packets: 0, payload_bytes: 0, sample_frames: 0,
         sample_rate: config.sample_rate, channels: u16::from(config.channels) };
     while let Some(packet) = reader.next_packet()? {

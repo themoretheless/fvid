@@ -44,6 +44,7 @@ pub struct Header {
     pub header_bytes: usize,
     /// Total frame length, header and CRC included, as the frame states it.
     pub frame_bytes: usize,
+    /// Fixed-header setup; configuration=0 needs the PCE-aware reader accessor.
     /// The two-byte AudioSpecificConfig this frame's coding, rate and layout
     /// spell, which is what the decoder's setup block carries.
     pub asc: [u8; 2],
@@ -52,9 +53,7 @@ pub struct Header {
 /// Read just the fixed header of the ADTS frame that starts at `bytes`.
 ///
 /// `None` for a run of bytes no ADTS frame can start with: a missing syncword or
-/// layer, a reserved rate index, a channel config of zero (which means the
-/// layout is carried in a program config element inside the audio, where this
-/// reader does not look), a frame length that does not reach past the header it
+/// layer, a reserved rate index, a frame length that does not reach past the header it
 /// is stored in, or a frame holding several raw blocks.
 pub fn header(bytes: &[u8]) -> Option<Header> {
     let b = bytes.get(..7)?;
@@ -81,9 +80,6 @@ pub fn header(bytes: &[u8]) -> Option<Header> {
         return None;
     }
     let &sample_rate = FREQUENCIES.get(usize::from(frequency))?;
-    if channels == 0 {
-        return None;
-    }
     // The AudioSpecificConfig spells the coding in five bits rather than two, so
     // the low-bit form has to be written out for the common objects and the
     // frame's own rate index and layout follow it in the same widths.
@@ -93,11 +89,20 @@ pub fn header(bytes: &[u8]) -> Option<Header> {
     ];
     Some(Header {
         sample_rate,
-        channels,
+        channels: if channels == 7 {8} else {channels},
         header_bytes,
         frame_bytes,
         asc,
     })
+}
+
+fn packet_configuration(header: Header, packet: &[u8]) -> Result<Vec<u8>> {
+    if header.channels!=0 {return Ok(header.asc.to_vec());}
+    let mut bits=crate::codec::bits::BitReader::new(packet);
+    if bits.read(3)?!=5 {return Err(invalid("ADTS explicit layout requires PCE at the start of the first packet"));}
+    let program=crate::codec::aac_pce::ProgramConfig::read(&mut bits,0)?;
+    if program.sample_rate!=header.sample_rate || program.object_type!=2 || header.asc[0]>>3!=2 {return Err(invalid("ADTS PCE disagrees with frame coding or rate"));}
+    program.audio_specific_config()
 }
 
 /// One frame of the stream: where it sits in the file, how long it is, and the
@@ -124,6 +129,7 @@ pub struct Aac {
     /// Samples one frame holds, read out of the setup block rather than assumed.
     pub samples_per_frame: u32,
     pub frames: Vec<Frame>,
+    pub configuration: Vec<u8>,
     data: Vec<u8>,
 }
 
@@ -178,8 +184,9 @@ impl Aac {
         // The setup block is one record for the stream, so the coding the first
         // frame states is checked against the repository's own AAC config
         // parser: it is what names AAC-LC as the only object this build decodes.
-        let config = AacConfig::parse(&first.asc)?;
-        if config.sample_rate != first.sample_rate || u16::from(config.channels) != first.channels {
+        let configuration=packet_configuration(first,&bytes[starts[0]+first.header_bytes..starts[0]+first.frame_bytes])?;
+        let config = AacConfig::parse(&configuration)?;
+        if config.sample_rate != first.sample_rate || first.channels!=0 && u16::from(config.channels) != first.channels {
             return Err(invalid(
                 "the frame header and the AudioSpecificConfig disagree",
             ));
@@ -212,9 +219,10 @@ impl Aac {
         }
         Ok(Self {
             sample_rate: first.sample_rate,
-            channels: first.channels,
+            channels: u16::from(config.channels),
             samples_per_frame: u32::from(config.frame_samples),
             frames,
+            configuration,
             data: bytes.to_vec(),
         })
     }
@@ -244,7 +252,7 @@ impl Aac {
     /// two-byte AudioSpecificConfig inside the descriptors the MP4 sample entry
     /// would have carried.
     pub fn extra_data(&self) -> Vec<u8> {
-        esds_for(&self.frames[0].asc).expect("an ADTS frame header is always two bytes")
+        esds_for(&self.configuration).expect("validated ADTS initialization is representable")
     }
 }
 
@@ -257,44 +265,18 @@ impl Aac {
 /// the bitrates are left at zero, which is what a variable-rate stream states
 /// and what the decoder ignores.
 pub fn esds_for(asc: &[u8]) -> Option<Vec<u8>> {
-    let width = asc.len();
-    // Two bytes is the shortest config that names an object type, a rate and a
-    // channel layout. Past 107 the outermost descriptor's own length no longer
-    // fits the single byte every writer here uses for it, and no real
-    // AudioSpecificConfig comes close: the fields 14496-3 defines sum to 17.
-    if width < 2 || width > 107 {
-        return None;
+    if !(2..=4096).contains(&asc.len()) {return None;}
+    fn descriptor(tag: u8, payload: &[u8]) -> Vec<u8> {
+        let mut groups=vec![(payload.len() & 127) as u8];
+        let mut length=payload.len() >> 7;
+        while length!=0 {groups.push((length & 127) as u8 | 128);length>>=7;}
+        groups.reverse();
+        let mut bytes=vec![tag];bytes.extend(groups);bytes.extend_from_slice(payload);bytes
     }
-    let mut out = vec![
-        0,
-        0,
-        0,
-        0, // version and flags of the box itself
-        3,
-        (20 + width) as u8, // ES descriptor: the three bytes below and the record after them
-        0,
-        1, // ES_ID, the same for every track of a file that names none
-        0, // no stream name, no URL, no opaque data follows
-        4,
-        (15 + width) as u8, // DecoderConfigDescriptor: its header and the record after it
-        0x40,               // MPEG-4 audio
-        0x15,               // stream type 5 for audio, with no upstream and no backward config
-        0,
-        0,
-        0, // buffer size, in 16-bit units
-        0,
-        0,
-        0,
-        0, // maximum bitrate
-        0,
-        0,
-        0,
-        0, // average bitrate
-        5,
-        width as u8, // DecSpecificInfo, holding the config itself
-    ];
-    out.extend_from_slice(asc);
-    Some(out)
+    let mut decoder=vec![0x40,0x15,0,0,0,0,0,0,0,0,0,0,0];
+    decoder.extend(descriptor(5,asc));
+    let mut stream=vec![0,1,0];stream.extend(descriptor(4,&decoder));
+    let mut output=vec![0;4];output.extend(descriptor(3,&stream));Some(output)
 }
 
 /// Sequential ADTS reader. Retains at most one frame (ADTS length is 13 bits),
@@ -304,14 +286,24 @@ pub struct StreamReader<R> {
     source: R,
     configuration: Header,
     first: Option<Header>,
+    pending: Option<Vec<u8>>,
+    asc: Vec<u8>,
     finished: bool,
 }
 impl<R: std::io::Read> StreamReader<R> {
     pub fn open(mut source: R) -> Result<Self> {
         let mut bytes = [0; 7];
         source.read_exact(&mut bytes)?;
-        let configuration = header(&bytes).ok_or_else(|| invalid("invalid ADTS header"))?;
-        let config = AacConfig::parse(&configuration.asc)?;
+        let mut configuration = header(&bytes).ok_or_else(|| invalid("invalid ADTS header"))?;
+        let mut pending=None;
+        let asc=if configuration.channels==0 {
+            let mut packet=vec![0;configuration.frame_bytes-7];source.read_exact(&mut packet)?;
+            if configuration.header_bytes==9 {packet.drain(..2);}
+            let asc=packet_configuration(configuration,&packet)?;
+            pending=Some(packet);asc
+        } else {configuration.asc.to_vec()};
+        let config = AacConfig::parse(&asc)?;
+        if configuration.channels==0 {configuration.channels=u16::from(config.channels);}
         if config.sample_rate != configuration.sample_rate
             || u16::from(config.channels) != configuration.channels
         {
@@ -320,7 +312,8 @@ impl<R: std::io::Read> StreamReader<R> {
         Ok(Self {
             source,
             configuration,
-            first: Some(configuration),
+            first: if pending.is_some() {None} else {Some(configuration)},
+            pending, asc,
             finished: false,
         })
     }
@@ -329,12 +322,15 @@ impl<R: std::io::Read> StreamReader<R> {
         self.configuration
     }
 
+    pub fn audio_specific_config(&self) -> &[u8] {&self.asc}
+
     /// Return the raw AAC block, excluding ADTS header/CRC. An error terminates
     /// this reader; callers must not publish partially decoded output as success.
     pub fn next_packet(&mut self) -> Result<Option<Vec<u8>>> {
         if self.finished {
             return Ok(None);
         }
+        if let Some(packet)=self.pending.take() {return Ok(Some(packet));}
         self.finished = true;
         let next = if let Some(header) = self.first.take() {
             header
@@ -370,22 +366,25 @@ pub struct SequenceReader<R> {
     remaining: std::vec::IntoIter<StreamReader<R>>,
     current: Option<StreamReader<R>>,
     configuration: Header,
+    asc: Vec<u8>,
     failed: bool,
 }
 impl<R:std::io::Read> SequenceReader<R> {
     pub fn new(readers: Vec<StreamReader<R>>) -> Result<Self> {
         if !(2..=256).contains(&readers.len()) {return Err(invalid("concat requires 2..=256 inputs"));}
         let configuration=readers[0].configuration();
+        let asc=readers[0].audio_specific_config().to_vec();
         for reader in &readers {
             let other=reader.configuration();
-            if (configuration.asc,configuration.channels,configuration.sample_rate)!=(other.asc,other.channels,other.sample_rate) {
+            if reader.audio_specific_config()!=asc || (configuration.asc,configuration.channels,configuration.sample_rate)!=(other.asc,other.channels,other.sample_rate) {
                 return Err(invalid("ADTS concat requires identical AAC configurations"));
             }
         }
         let mut remaining=readers.into_iter();let current=remaining.next();
-        Ok(Self {remaining,current,configuration,failed:false})
+        Ok(Self {remaining,current,configuration,asc,failed:false})
     }
     pub fn configuration(&self)->Header {self.configuration}
+    pub fn audio_specific_config(&self)->&[u8] {&self.asc}
     pub fn next_packet(&mut self)->Result<Option<Vec<u8>>> {
         if self.failed {return Err(invalid("ADTS sequence failed"));}
         loop {
