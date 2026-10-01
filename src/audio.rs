@@ -522,6 +522,13 @@ impl AudioTrack {
 /// Container-side audio source: stream metadata plus a cursor over encoded
 /// packets that can be rewound and seeked. Implemented per container so the
 /// decode thread stays independent of both the demultiplexer and the codec.
+/// Container presentation scheduling without routing silence through a codec.
+pub enum AudioStep {
+    Encoded(EncodedPacket),
+    Pcm(AudioPacket),
+    ResetDecoder,
+}
+
 pub trait AudioStream: Send {
     /// Codec tag, e.g. `mp4a` or `A_VORBIS`.
     fn codec(&self) -> &str;
@@ -559,6 +566,11 @@ pub trait AudioStream: Send {
     fn audio_tracks(&self) -> Vec<AudioTrack>;
     /// Next encoded packet, or `None` at end of stream.
     fn next_packet(&mut self) -> crate::Result<Option<EncodedPacket>>;
+    /// One bounded scheduling step. Reset keeps the device queue and presentation
+    /// clock intact while rebuilding codec history for a repeated media range.
+    fn next_step(&mut self) -> crate::Result<Option<AudioStep>> {
+        self.next_packet().map(|packet|packet.map(AudioStep::Encoded))
+    }
     fn rewind(&mut self);
     /// Move the cursor to the last packet at or before `pts` and report the
     /// timestamp actually landed on.

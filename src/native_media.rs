@@ -408,37 +408,11 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
         }
         u64::try_from(numerator / denominator).map_err(|_| invalid("audio sample position overflow"))
     };
-    // Quantize cumulative movie boundaries, not each duration independently:
-    // otherwise many fractional edits would accumulate rounding drift.
-    let mut segments = Vec::new();
-    let mut timeline = 0u64;
-    if track.edits.is_empty() {
-        timeline = sample_position(track.duration)?;
-        segments.push((0, timeline, Some(0)));
-    } else {
-        let scale = u128::from(reader.movie_timescale());
-        if scale == 0 {
-            return Err(invalid("zero MP4 movie clock"));
-        }
-        let mut movie_ticks = 0u128;
-        for edit in &track.edits {
-            movie_ticks = movie_ticks
-                .checked_add(u128::from(edit.duration))
-                .ok_or_else(|| invalid("audio edit timeline overflow"))?;
-            let end = movie_ticks
-                .checked_mul(u128::from(rate))
-                .ok_or_else(|| invalid("audio edit timeline overflow"))?
-                .div_ceil(scale);
-            let end = u64::try_from(end).map_err(|_| invalid("audio edit timeline overflow"))?;
-            let source = match edit.media_time {
-                -1 => None,
-                value if value >= 0 => Some(sample_position(value as u64)?),
-                _ => return Err(invalid("invalid audio media edit time")),
-            };
-            segments.push((timeline, end, source));
-            timeline = end;
-        }
-    }
+    let presentation = crate::container::audio_timeline::AudioTimeline::new(
+        &track.edits, track.duration, track.timescale, reader.movie_timescale(), rate,
+    )?;
+    let timeline = presentation.sample_frames;
+    let segments = presentation.segments;
     let (from, to) = if let Some((begin, end)) = interval {
         let boundary = |time: Duration| -> Result<u64> {
             let value = time
@@ -462,7 +436,10 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
         channels,
     };
     let mut packet = Vec::new();
-    for (segment_start, segment_end, source) in segments {
+    for segment in segments {
+        let segment_start = segment.presentation.start;
+        let segment_end = segment.presentation.end;
+        let source = segment.source_start;
         let begin = from.max(segment_start);
         let end = to.min(segment_end);
         if begin >= end {

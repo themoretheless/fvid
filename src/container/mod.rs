@@ -1,5 +1,6 @@
 //! FVid-owned container readers. No external demultiplexer or codec backend.
 pub mod adts;
+pub mod audio_timeline;
 pub mod avi;
 pub mod mp4;
 pub mod mp4_relocate;

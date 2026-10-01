@@ -212,7 +212,7 @@ impl Worker {
     /// Decode and queue one packet, reporting a terminal event if the stream
     /// ended or failed and how long to wait before feeding the next one.
     fn decode_next(&mut self) -> (Option<AudioEvent>, Duration) {
-        let packet = match self.stream.next_packet() {
+        let step = match self.stream.next_step() {
             Ok(Some(p)) => p,
             Ok(None) => {
                 self.ended = true;
@@ -224,6 +224,13 @@ impl Worker {
             }
         };
 
+        let (decoded, source_end) = match step {
+            crate::audio::AudioStep::ResetDecoder => {
+                self.decoder.reset();
+                return (None,Duration::ZERO);
+            }
+            crate::audio::AudioStep::Pcm(packet) => (packet,None),
+            crate::audio::AudioStep::Encoded(packet) => {
         let mut decoded = match self.decoder.decode_encoded(
             &packet.data,
             packet.pts.max(0) as u64,
@@ -266,7 +273,10 @@ impl Worker {
             }
         };
 
-        let frontier = if self.stream.codec() == "mp4a" {
+                (decoded,Some(packet.pts.max(0).saturating_add(packet.duration.max(0))))
+            }
+        };
+        let frontier = if self.stream.codec() == "mp4a" || source_end.is_none() {
             let stride = usize::from(self.stream.channels()) * 4;
             let rate = self.stream.sample_rate();
             if stride == 0 || rate == 0 || !decoded.data.len().is_multiple_of(stride) {
@@ -277,7 +287,7 @@ impl Worker {
             let nanos = frames as u128 * 1_000_000_000/u128::from(rate);
             decoded.presentation_time().saturating_add(Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX)))
         } else {
-            self.stream.time_of(packet.pts.max(0).saturating_add(packet.duration.max(0)))
+            self.stream.time_of(source_end.unwrap())
         };
 
         if let Err(e) = self.backend.push(decoded) {
@@ -816,5 +826,101 @@ mod matroska_aac_seek_tests {
             assert_eq!(actual.timebase_den,1_000_000_000);
             assert!(actual.data==*data,"Matroska seek PCM differs from continuous decode");
         }
+    }
+}
+
+#[cfg(test)]
+mod scheduling_step_tests {
+    use super::*;
+    use crate::audio::EncodedPacket;
+    struct Steps(std::collections::VecDeque<crate::audio::AudioStep>);
+    impl AudioStream for Steps {
+        fn codec(&self)->&str {"mp4a"}
+        fn timescale(&self)->u32 {48000}
+        fn sample_rate(&self)->u32 {48000}
+        fn channels(&self)->u16 {2}
+        fn extra_data(&self)->&[u8] {&[]}
+        fn audio_tracks(&self)->Vec<crate::audio::AudioTrack> {Vec::new()}
+        fn next_packet(&mut self)->crate::Result<Option<EncodedPacket>> {panic!("scheduled PCM must not enter encoded packet path")}
+        fn next_step(&mut self)->crate::Result<Option<crate::audio::AudioStep>> {Ok(self.0.pop_front())}
+        fn rewind(&mut self) {}
+        fn seek_to(&mut self,pts:i64)->i64 {pts}
+    }
+    struct Decoder(Arc<Mutex<usize>>);
+    impl crate::audio::AudioDecode for Decoder {
+        fn decode_encoded(&mut self,_:&[u8],_:u64,_:u64)->crate::Result<Option<crate::audio::AudioPacket>> {panic!("silence must bypass codec")}
+        fn reset(&mut self) {*self.0.lock().unwrap()+=1;}
+    }
+    #[test]
+    fn silence_and_reset_preserve_queued_pcm_and_timestamps() {
+        use crate::audio::{AudioPacket,AudioStep};
+        let pcm=|pts| AudioStep::Pcm(AudioPacket {data:vec![0;960*8],pts,timebase_num:1,timebase_den:48000});
+        let steps=Steps([pcm(0),AudioStep::ResetDecoder,pcm(960)].into());
+        let counts=Arc::new(Mutex::new(Vec::new()));let resets=Arc::new(Mutex::new(0));
+        let (_,commands)=sync_channel(1);let(events,_)=sync_channel(1);
+        let mut worker=Worker {stream:Box::new(steps),decoder:Box::new(Decoder(resets.clone())),backend:Box::new(super::presentation_window_tests::Capture(counts.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+        assert!(worker.decode_next().0.is_none());
+        let (event,pace)=worker.decode_next();assert!(event.is_none());assert_eq!(pace,Duration::ZERO);
+        assert_eq!(*resets.lock().unwrap(),1);
+        assert!(worker.decode_next().0.is_none());
+        let packets=counts.lock().unwrap();assert_eq!(packets.len(),2);assert_eq!(packets[0].pts,0);assert_eq!(packets[1].pts,960);
+    }
+}
+
+#[cfg(test)]
+mod mp4_edit_scheduler_tests {
+    use super::*;
+    #[test]
+    fn gap_and_repeat_playback_matches_owned_pcm_export() {
+        exercise(include_bytes!("../tests/fixtures/playback-errors/aac-gap-repeat.m4a"));
+    }
+    #[test]
+    fn nonzero_media_range_repeats_restore_aac_overlap_before_seek() {
+        let edited=include_bytes!("../tests/fixtures/playback-errors/aac-gap-repeat-offset.m4a");
+        let mut continuous=Vec::new();
+        crate::native_media::decode_mp4_aac_pcm(include_bytes!("../tests/fixtures/playback-errors/aac-no-edit.m4a"),&mut continuous).unwrap();
+        let mut expected=vec![0;960*8];
+        expected.extend_from_slice(&continuous[4800*8..9600*8]);
+        expected.extend_from_slice(&continuous[4800*8..9600*8]);
+        let mut rendered=Vec::new();crate::native_media::decode_mp4_aac_pcm(edited,&mut rendered).unwrap();
+        assert!(rendered==expected,"nonzero edits must select the correct source samples after overlap preroll");
+        exercise(edited);
+    }
+    fn exercise(data:&'static [u8]) {
+        let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(data),Default::default()).unwrap();
+        let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
+        let packets=Arc::new(Mutex::new(Vec::new()));let(_,commands)=sync_channel(1);let(events,_)=sync_channel(1);
+        let mut worker=Worker {stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+        for _ in 0..200 {
+            let(event,_)=worker.decode_next();
+            if let Some(event)=event {assert!(matches!(event,AudioEvent::Ended(_)),"unexpected playback error");break;}
+        }
+        assert!(worker.ended);
+        let rendered=packets.lock().unwrap();let mut cursor=0;
+        for packet in rendered.iter() {assert_eq!(packet.pts,cursor);cursor+=(packet.data.len()/8) as u64;}
+        assert_eq!(cursor,10560);
+        let actual:Vec<_>=rendered.iter().flat_map(|p|p.data.iter().copied()).collect();
+        let mut expected=Vec::new();crate::native_media::decode_mp4_aac_pcm(data,&mut expected).unwrap();
+        assert!(actual==expected,"AAC edited playback differs from PCM export");
+        drop(rendered);
+        for request in [480usize,5760,7000,2000,0,10560] {
+            packets.lock().unwrap().clear();
+            worker.handle(Command::Seek(request as i64));
+            assert_eq!(*worker.position.lock().unwrap(),Duration::from_nanos(request as u64*1_000_000_000/48000));
+            for _ in 0..200 {
+                let(event,_)=worker.decode_next();
+                if let Some(event)=event {assert!(matches!(event,AudioEvent::Ended(_)),"edited AAC seek failed");break;}
+            }
+            assert!(worker.ended);
+            let rendered=packets.lock().unwrap();
+            if request<10560 {assert_eq!(rendered[0].pts,request as u64);}
+            let tail:Vec<_>=rendered.iter().flat_map(|p|p.data.iter().copied()).collect();
+            assert!(tail==expected[request*8..],"PCM after seek to sample {request} differs from continuous playback");
+        }
+        packets.lock().unwrap().clear();
+        worker.handle(Command::Rewind);
+        for _ in 0..200 {if worker.decode_next().0.is_some() {break;}}
+        let replay:Vec<_>=packets.lock().unwrap().iter().flat_map(|p|p.data.iter().copied()).collect();
+        assert!(replay==expected,"AAC edit rewind differs from continuous playback");
     }
 }

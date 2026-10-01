@@ -1654,3 +1654,27 @@ fixtures also passed (12 tests). Checks used `--locked --offline
 This checkout also contains concurrent playback edits, so these totals are not
 an isolated release audit. The player normal dependency tree contains
 `fvid-media-info` but no `fvid-media`, FFmpeg or libav dependency.
+
+### MP4 AAC multi-range playback scheduling
+
+The playback worker now accepts bounded encoded, ready-PCM and decoder-reset
+steps. Complex AAC edits use the same cumulative sample timeline as PCM export:
+empty edits emit silence in at most 1024-frame blocks; each media range resets
+codec history and replays suppressed preroll before output. Presentation seek
+locates the requested range (including repeated ranges and gaps), resets codec
+state and trims output to the requested sample. A synthetic 220 ms gap/repeat
+fixture matches all PCM bytes from owned export, then matches continuous tails
+after six seeks (gap, range start, interior ranges, backwards and EOF), plus
+rewind. Timestamp conversion uses integer nanoseconds, avoiding a floating-point
+1 ns anchor discrepancy. Focused verification: 13 worker and 10 MP4 audio tests
+passed. Seeking/repeating still decodes linearly from source start; no AAC state
+checkpoint optimization is claimed. Integration checks passed: core 661 tests (3 ignored), player 1196 tests
+(24 ignored), with zero failures. These totals cover this concurrent checkout;
+the AAC commit excludes unrelated video playback changes.
+
+The AAC edit scheduler also has a nonzero-media-start fixture: each repeated
+100 ms range starts at source sample 4800 after 20 ms of silence. Its PCM is
+verified against samples 4800..9600 from a separately decoded continuous
+no-edit source, then playback/seek/rewind are compared against that output.
+This checks actual overlap preroll and source selection rather than only
+agreement between two consumers of the same edit evaluator.
