@@ -105,6 +105,7 @@ pub fn write_mp4_processed<W: Write + Seek>(
         .read_frame_raw()?
         .ok_or_else(|| invalid("input has no decoded video frames"))?;
     check(cancel)?;
+    let processed = processor.is_some();
     let bake_rotation = processor.is_some() || !geometry.is_identity() || !filters.is_empty();
     let prepare = |frame: &RawFrame, display: [usize; 2]| -> Result<_> {
         let (w, h, depth) = match frame {
@@ -120,7 +121,7 @@ pub fn write_mp4_processed<W: Write + Seek>(
         } else {
             geometry.apply(frame, w, h)?
         };
-        filters.apply(&mut samples, depth)?;
+        if !processed {filters.apply(&mut samples, depth)?;}
         Ok(samples)
     };
     let first_samples = prepare(&first, reader.dimensions())?;
@@ -283,6 +284,7 @@ pub fn write_mp4_processed<W: Write + Seek>(
         {
             return Err(invalid("FFV1 transformed geometry changed"));
         }
+        if processed {filters.apply(&mut samples,bit_depth)?;}
         let packet = crate::codec::ffv1_encoder::encode(&samples, bit_depth)?;
         check(cancel)?;
         let (pts, duration) = time.unwrap();
@@ -322,6 +324,12 @@ pub fn identity(transform: &crate::media_info::LosslessTransform) -> bool {
     supports(transform)
         && configuration(transform)
             .is_ok_and(|(geometry, filters)| geometry.is_identity() && filters.is_empty())
+}
+
+/// An overlay plus independently supported spatial/pixel transforms.
+pub fn supports_overlay(transform:&crate::media_info::LosslessTransform)->bool {
+    if transform.overlay.is_none() {return false;}
+    let mut remaining=transform.clone();remaining.overlay=None;supports(&remaining)
 }
 
 /// A plain overlay request can share the dedicated owned compositor.

@@ -3194,3 +3194,15 @@ These produce the same bytes as the dedicated owned overlay command. The
 current admission is a plain overlay with default copy/codec options; other
 combined filters retain the previous execution path pending their integration.
 The tests check API and CLI dispatch, exact output equality and the plan command.
+
+
+The owned API also admits overlay combined with the currently supported spatial
+geometry and pixel filters. `native_export::overlay_video_transformed` and
+`media::transcode_lossless` apply main geometry first, compose the foreground,
+then apply pixel filters to the whole composited picture. The owned transcode
+plan records the same order. Frame-processor callbacks in both lossless muxers
+now run after geometry and before pixel filtering; ordinary exports retain
+existing behavior. Tests use full-frame replacement over a flipped main, then
+negate all samples, including 10-bit VP9, to distinguish this order from
+filtering only the main before compositing. Headless combined-option parsing
+still needs integration; plain-overlay CLI admission remains unchanged.

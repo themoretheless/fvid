@@ -306,6 +306,16 @@ pub fn trim_y4m(source: &std::path::Path, from: i64, to: i64, selected: Option<u
 
 /// Metadata-only plan for the same admission used by owned lossless export.
 pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_info::LosslessTransform) -> Result<MediaPlan> {
+    if crate::native_lossless::supports_overlay(transform) {
+        let spec=transform.overlay.as_ref().unwrap();let mut remaining=transform.clone();remaining.overlay=None;
+        let spatial=transcode_lossless(source,&remaining)?;
+        let mut plan=overlay(source,&spec.path,i64::from(spec.x),i64::from(spec.y))?;
+        let mut index=1;
+        for step in spatial.steps.iter().filter(|s|s.action=="geometry") {plan.steps.insert(index,step.clone());index+=1;}
+        index+=1;
+        for step in spatial.steps.iter().filter(|s|s.action=="filter") {plan.steps.insert(index,step.clone());index+=1;}
+        plan.command="transcode-lossless".into();return Ok(plan);
+    }
     if !crate::native_lossless::supports(transform) || !crate::native_lossless::eligible(source).map_err(|e|e.to_string())? {
         return Err("request is not supported by the owned lossless planner".into());
     }

@@ -347,3 +347,64 @@ fn overlay_transform_uses_owned_lossless_export_plan_and_headless_commands() {
         assert!(plan.steps.iter().any(|s| s.action == "overlay"));
     }
 }
+
+#[test]
+fn combined_geometry_overlay_and_negate_apply_in_the_documented_order() {
+    let d = dir("filters");
+    for (i, name) in ["video.mp4", "vp9/odd10.webm"].iter().enumerate() {
+        let source = fixture(name);
+        let expected = samples(&source)
+            .into_iter()
+            .map(|data| {
+                if name.contains("odd10") {
+                    data.chunks_exact(2)
+                        .flat_map(|p| (1023 - u16::from_le_bytes([p[0], p[1]])).to_le_bytes())
+                        .collect::<Vec<_>>()
+                } else {
+                    data.into_iter().map(|v| 255 - v).collect()
+                }
+            })
+            .collect::<Vec<_>>();
+        let geometry = fvid::native_geometry::VideoGeometry {
+            horizontal_flip: true,
+            ..Default::default()
+        };
+        let mut filters = fvid::native_pixels::PixelFilters::default();
+        filters.negate = Some(fvid::native_pixels::Negate);
+        let output = d.0.join(format!("{i}.mkv"));
+        native_export::overlay_video_transformed(
+            &source, &source, &output, 0, 0, None, None, &geometry, &filters,
+        )
+        .unwrap();
+        // Full foreground replacement cancels the flipped main; negate must
+        // subsequently affect every foreground sample.
+        assert_eq!(samples(&output), expected);
+        let transform = fvid::media_info::LosslessTransform {
+            horizontal_flip: true,
+            negate: Some("1".into()),
+            overlay: Some(fvid::media_info::OverlaySpec {
+                path: source.clone(),
+                x: 0,
+                y: 0,
+            }),
+            ..Default::default()
+        };
+        assert!(fvid::native_lossless::supports_overlay(&transform));
+        let plan = fvid::native_plan::transcode_lossless(&source, &transform).unwrap();
+        let actions: Vec<_> = plan.steps.iter().map(|s| s.action.as_str()).collect();
+        assert_eq!(
+            actions,
+            ["decode", "geometry", "overlay", "filter", "encode", "write"]
+        );
+        #[cfg(feature = "media")]
+        {
+            let public = d.0.join(format!("public-{i}.mkv"));
+            fvid::media::transcode_lossless(&source, &public, transform, &Default::default())
+                .unwrap();
+            assert_eq!(
+                std::fs::read(public).unwrap(),
+                std::fs::read(output).unwrap()
+            );
+        }
+    }
+}

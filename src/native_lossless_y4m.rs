@@ -130,6 +130,7 @@ pub fn write_processed<W: Write + Seek>(
         .ok_or_else(|| invalid("input has no video frames"))?;
     let [w, h] = reader.dimensions();
     let rotation = reader.rotation();
+    let processed = processor.is_some();
     let bake_rotation = processor.is_some() || !geometry.is_identity() || !filters.is_empty();
     let (coded_w, coded_h) = if matches!(rotation, 90 | 270) {
         (h, w)
@@ -196,7 +197,7 @@ pub fn write_processed<W: Write + Seek>(
         } else {
             geometry.apply(frame, coded_w, coded_h)?
         };
-        filters.apply(&mut samples, depth)?;
+        if !processed {filters.apply(&mut samples, depth)?;}
         Ok(samples)
     };
     let mut colour = reader.colour();
@@ -460,6 +461,7 @@ pub fn write_processed<W: Write + Seek>(
             process(&mut samples,depth,start)?;
             if (samples.width,samples.height,samples.subsampling)!=shape {return Err(invalid("processed frame geometry changed"));}
         }
+        if processed {filters.apply(&mut samples,depth)?;}
         let packet = crate::codec::ffv1_encoder::encode(&samples, depth)?;
         check(cancel)?;
         copy_audio(start, &mut writer, &mut stats)?;

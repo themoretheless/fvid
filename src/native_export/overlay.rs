@@ -134,6 +134,31 @@ pub fn overlay_video(
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
 ) -> Result<crate::media_info::LosslessStats> {
+    overlay_video_transformed(
+        main,
+        foreground,
+        destination,
+        x,
+        y,
+        cancel,
+        progress,
+        &Default::default(),
+        &Default::default(),
+    )
+}
+
+/// Geometry precedes compositing; supported pixel filters follow compositing.
+pub fn overlay_video_transformed(
+    main: &Path,
+    foreground: &Path,
+    destination: &Path,
+    x: i64,
+    y: i64,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+    geometry: &VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
+) -> Result<crate::media_info::LosslessStats> {
     if destination.extension().and_then(|s| s.to_str()) != Some("mkv") {
         return Err(invalid("owned overlay output requires .mkv"));
     }
@@ -213,8 +238,8 @@ pub fn overlay_video(
         crate::native_lossless_y4m::write_processed(
             main,
             &mut output,
-            &Default::default(),
-            &Default::default(),
+            geometry,
+            filters,
             cancel,
             progress,
             Some(&mut processor),
@@ -223,8 +248,8 @@ pub fn overlay_video(
         crate::native_lossless::write_mp4_processed(
             main,
             &mut output,
-            &Default::default(),
-            &Default::default(),
+            geometry,
+            filters,
             cancel,
             progress,
             Some(&mut processor),
