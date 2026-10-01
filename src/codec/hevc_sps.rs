@@ -48,6 +48,8 @@ pub struct Sps {
     pub long_term: Vec<(u16, bool)>,
     pub temporal_mvp: bool,
     pub strong_intra_smoothing: bool,
+    /// Range-extension switch for both weak and strong reference filtering.
+    pub intra_smoothing_disabled: bool,
     pub vui: Option<Vui>,
 }
 impl Sps {
@@ -171,8 +173,24 @@ impl Sps {
         } else {
             None
         };
+        let mut intra_smoothing_disabled = false;
         if b.bit()? {
-            return Err(invalid("HEVC SPS extensions are not implemented"));
+            let range = b.bit()?;
+            if b.read(7)? != 0 {
+                return Err(invalid(
+                    "HEVC multilayer/3D/SCC/unknown SPS extensions are not implemented",
+                ));
+            }
+            if range {
+                let flags = b.read(9)?;
+                // 7.3.2.2.2: the sixth of nine flags disables reference filtering.
+                if flags & !(1 << 3) != 0 {
+                    return Err(invalid(
+                        "remaining HEVC SPS range-extension tools are not implemented",
+                    ));
+                }
+                intra_smoothing_disabled = flags & (1 << 3) != 0;
+            }
         }
         b.finish_rbsp()?;
         Ok(Self {
@@ -200,6 +218,7 @@ impl Sps {
             long_term,
             temporal_mvp,
             strong_intra_smoothing,
+            intra_smoothing_disabled,
             vui,
         })
     }

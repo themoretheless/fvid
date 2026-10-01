@@ -195,6 +195,23 @@ impl Plane {
         pred_scratch: &mut Vec<u16>,
         available: impl Fn(usize, usize) -> bool,
     ) -> Result<()> {
+        self.reconstruct_intra_with_reference_filtering(
+            origin, log, mode, chroma, strong, true, residual, pred_scratch, available,
+        )
+    }
+
+    pub fn reconstruct_intra_with_reference_filtering(
+        &mut self,
+        origin: [usize; 2],
+        log: u8,
+        mode: u8,
+        chroma: bool,
+        strong: bool,
+        filter_references: bool,
+        residual: &[i32],
+        pred_scratch: &mut Vec<u16>,
+        available: impl Fn(usize, usize) -> bool,
+    ) -> Result<()> {
         if !(2..=5).contains(&log) {
             return Err(invalid("invalid HEVC plane block size"));
         }
@@ -242,7 +259,9 @@ impl Plane {
             &left,
         )?;
         pred_scratch.resize(n * n, 0);
-        references.predict(mode, chroma, strong, pred_scratch)?;
+        references.predict_with_reference_filtering(
+            mode, chroma, strong, filter_references, pred_scratch,
+        )?;
         let max = (1i32 << self.depth) - 1;
         for yy in 0..n {
             let start = (y + yy) * self.width + x;

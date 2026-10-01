@@ -176,6 +176,19 @@ impl References {
         strong_smoothing: bool,
         output: &mut [u16],
     ) -> Result<()> {
+        self.predict_with_reference_filtering(mode, chroma, strong_smoothing, true, output)
+    }
+
+    /// The RExt smoothing switch controls reference filtering independently of
+    /// chroma boundary correction and the strong-filter selection.
+    pub fn predict_with_reference_filtering(
+        &self,
+        mode: u8,
+        chroma: bool,
+        strong_smoothing: bool,
+        filter_references: bool,
+        output: &mut [u16],
+    ) -> Result<()> {
         if mode > 34 {
             return Err(invalid("invalid HEVC intra prediction mode"));
         }
@@ -184,7 +197,11 @@ impl References {
             return Err(invalid("output buffer too small for HEVC intra prediction"));
         }
         let output = &mut output[..n * n];
-        let (corner, top, left) = self.filtered(mode, chroma, strong_smoothing);
+        let (corner, top, left) = if filter_references {
+            self.filtered(mode, chroma, strong_smoothing)
+        } else {
+            (self.corner, self.top.clone(), self.left.clone())
+        };
         output.fill(0);
         if mode == 0 {
             for y in 0..n {

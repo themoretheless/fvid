@@ -848,12 +848,13 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                     } else {
                         self.residual_scratch.clear();
                     }
-                    self.planes[component].reconstruct_intra(
+                    self.planes[component].reconstruct_intra_with_reference_filtering(
                         origin.map(|v| v as usize),
                         c.log2_size,
                         c.intra_mode.unwrap(),
                         component != 0,
                         self.sps.strong_intra_smoothing,
+                        !self.sps.intra_smoothing_disabled,
                         &self.residual_scratch,
                         &mut self.pred_scratch,
                         |x, y| {
@@ -945,12 +946,13 @@ fn reconstruct_row(
                 } else {
                     residual_scratch.clear();
                 }
-                planes[component].reconstruct_intra(
+                planes[component].reconstruct_intra_with_reference_filtering(
                     origin,
                     log,
                     mode,
                     component != 0,
                     sps.strong_intra_smoothing,
+                    !sps.intra_smoothing_disabled,
                     residual_scratch,
                     pred_scratch,
                     |_, _| true,
