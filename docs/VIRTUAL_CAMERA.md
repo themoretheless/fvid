@@ -340,3 +340,19 @@ invalidated or unready samples, non-BGRA pixels, mismatched dimensions,
 invalid/indefinite/negative timestamps and timestamps at or before the previous
 accepted frame. Queue capacity and retained sample transfer are checked
 separately; backpressure does not advance the accepted timestamp.
+
+## Container crop at the camera boundary
+
+Camera publication now clips container-stored crop borders after the native
+reader's display rotation. The C ABI reports visible dimensions; its BGRA
+buffer contains only that picture. RGB-to-BGRA conversion clips directly into
+the existing fixed-size destination buffer without a second frame allocation.
+Pixel aspect is retained for the existing fit/letterbox stage. Plain native
+reader RGB remains the full display-oriented frame, so playback and raw decode
+contracts are unchanged. A source that changes visible dimensions is rejected
+rather than silently resizing the fixed camera source format.
+
+Regression tests compare exact BGRA bytes to independently sliced native RGB
+for cropped Matroska and rotated VP9, including EOF and rewind, and verify
+malformed crop/buffer requests leave published pixels intact. These tests prove
+source/ABI behavior; they do not establish installed CMIO consumer delivery.

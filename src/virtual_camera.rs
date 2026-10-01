@@ -148,6 +148,16 @@ mod tests {
     }
 }
 
+/// Visible dimensions after container display-oriented crop borders.
+pub fn visible_dimensions(source: [usize; 2], insets: [u32; 4]) -> Result<[usize; 2]> {
+    let [left, top, right, bottom] = insets.map(|n| n as usize);
+    let width = source[0].checked_sub(left).and_then(|n| n.checked_sub(right))
+        .filter(|&n| n > 0).ok_or_else(|| invalid("camera crop removes picture width"))?;
+    let height = source[1].checked_sub(top).and_then(|n| n.checked_sub(bottom))
+        .filter(|&n| n > 0).ok_or_else(|| invalid("camera crop removes picture height"))?;
+    Ok([width, height])
+}
+
 /// One fixed-size BGRA frame shared by a producer and a camera transport.
 /// Wrap in Arc to share. Storage is allocated once and never grows; snapshots
 /// copy into caller-owned memory so consumers cannot retain internal buffers.
@@ -188,7 +198,15 @@ impl LatestFrame {
     /// Accept tightly packed RGB from the FVid decoder. Camera format stays BGRA.
     /// A newer publication overwrites the previous one even if it was never read.
     pub fn publish_rgb(&self, tick: CameraTick, rgb: &[u8]) -> Result<()> {
-        if rgb.len() != self.width * self.height * 3 {
+        self.publish_rgb_cropped(tick, rgb, self.dimensions(), [0; 4])
+    }
+    /// Crop display-oriented RGB directly into the fixed BGRA publication buffer.
+    pub fn publish_rgb_cropped(&self, tick: CameraTick, rgb: &[u8],
+        source: [usize; 2], insets: [u32; 4]) -> Result<()> {
+        if visible_dimensions(source, insets)? != self.dimensions() {
+            return Err(invalid("camera visible source and output dimensions differ"));
+        }
+        if source[0].checked_mul(source[1]).and_then(|n| n.checked_mul(3)) != Some(rgb.len()) {
             return Err(invalid("virtual-camera RGB frame size mismatch"));
         }
         let mut state = self
@@ -203,8 +221,14 @@ impl LatestFrame {
         }) {
             return Err(invalid("virtual-camera frame timestamp is not increasing"));
         }
-        for (pixel, bgra) in rgb.chunks_exact(3).zip(state.bgra.chunks_exact_mut(4)) {
-            bgra.copy_from_slice(&[pixel[2], pixel[1], pixel[0], 255]);
+        let [left, top, _, _] = insets.map(|n| n as usize);
+        for y in 0..self.height {
+            let offset = ((y + top) * source[0] + left) * 3;
+            let row = &rgb[offset..offset + self.width * 3];
+            let out = &mut state.bgra[y * self.width * 4..(y + 1) * self.width * 4];
+            for (pixel, bgra) in row.chunks_exact(3).zip(out.chunks_exact_mut(4)) {
+                bgra.copy_from_slice(&[pixel[2], pixel[1], pixel[0], 255]);
+            }
         }
         state.tick = Some(tick);
         Ok(())
@@ -311,7 +335,8 @@ impl<R: std::io::BufRead + std::io::Seek> Y4mCameraSource<R> {
     }
 }
 
-/// File source for both Y4M and supported MP4/AVC, driven by camera media time.
+/// File source for owned native video formats, driven by camera media time.
+/// Publishes the visible display area after stored crop and rotation.
 /// Backward seeks replay from the beginning; EOF holds the final decoded frame.
 /// This produces BGRA frames, not an installed OS camera device.
 pub struct NativeCameraSource<R> {
@@ -342,10 +367,8 @@ impl<R: std::io::BufRead + std::io::Seek> NativeCameraSource<R> {
         if self.reader.frame_interval().is_none() {
             return Ok(false);
         }
-        if self.reader.dimensions() != destination.dimensions() {
-            return Err(invalid("camera source and output dimensions differ"));
-        }
-        destination.publish_rgb(tick, self.reader.rgb())?;
+        destination.publish_rgb_cropped(tick, self.reader.rgb(),
+            self.reader.dimensions(), self.reader.insets())?;
         Ok(true)
     }
 }
@@ -490,5 +513,27 @@ mod fit_tests {
         }
         assert!(fit_bgra(&input, [0, 1], &mut output, [4, 4]).is_err());
         assert!(fit_bgra(&input, [usize::MAX, 1], &mut output, [4, 4]).is_err());
+    }
+}
+
+#[cfg(test)]
+mod crop_tests {
+    use super::*;
+    #[test]
+    fn crop_copies_exact_rgb_pixels_without_a_second_frame_buffer() {
+        let output = LatestFrame::new(2, 2, 16).unwrap();
+        let rgb: Vec<u8> = (0..48).collect();
+        let tick = CameraTick { sequence: 0, host_time_ns: 1, media_time_ns: 0 };
+        output.publish_rgb_cropped(tick, &rgb, [4,4], [1,1,1,1]).unwrap();
+        let mut actual = [0;16];
+        output.copy_latest(None, &mut actual).unwrap().unwrap();
+        assert_eq!(actual, [17,16,15,255,20,19,18,255,29,28,27,255,32,31,30,255]);
+        assert!(output.publish_rgb_cropped(tick, &rgb[..47], [4,4], [1,1,1,1]).is_err());
+        assert!(output.publish_rgb_cropped(tick, &rgb, [4,4], [0,0,0,0]).is_err());
+        assert!(visible_dimensions([4,4],[4,0,0,0]).is_err());
+        assert!(visible_dimensions([4,4],[u32::MAX,0,u32::MAX,0]).is_err());
+        let mut unchanged = [0;16];
+        output.copy_latest(None, &mut unchanged).unwrap();
+        assert_eq!(unchanged, actual);
     }
 }

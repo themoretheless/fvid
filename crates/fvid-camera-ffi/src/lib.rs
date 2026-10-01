@@ -58,7 +58,8 @@ pub struct CameraSize {
     pub height: u32,
 }
 
-/// Opens a UTF-8 path and reads the first frame to determine the output size.
+/// Opens a UTF-8 path and reads the first frame to determine the visible output size.
+/// Container crop and rotation are reflected in size and subsequent BGRA frames.
 /// Returns null on error; budget covers decoder/RGB storage. A separate BGRA
 /// buffer is capped at 64 MiB. No OS camera is installed or opened here.
 /// # Safety
@@ -82,7 +83,8 @@ pub unsafe extern "C" fn fvid_camera_open(
         if !reader.read_frame().map_err(|error| error.to_string())? {
             return Err("camera source contains no video frames".into());
         }
-        let [width, height] = reader.dimensions();
+        let [width, height] = fvid::virtual_camera::visible_dimensions(reader.dimensions(), reader.insets())
+            .map_err(|error| error.to_string())?;
         let latest = LatestFrame::new(width, height, 64 << 20).map_err(|error| error.to_string())?;
         let (num, den) = reader.pixel_aspect();
         let duration_ns = reader.duration().and_then(|d| u64::try_from(d.as_nanos()).ok()).unwrap_or(0);
@@ -360,5 +362,41 @@ mod diagnostic_tests {
         assert_eq!(result,-1); assert!(message().contains("handle"));
         let result = unsafe { fvid_camera_fit(std::ptr::null(),0,CameraSize::default(),std::ptr::null_mut(),0,CameraSize::default()) };
         assert_eq!(result,-1); assert!(message().contains("buffer"));
+    }
+}
+
+#[cfg(test)]
+mod crop_tests {
+    use super::*;
+    #[test]
+    fn cropped_and_rotated_files_expose_visible_bgra_and_rewind_pixels() {
+        for fixture in ["display/crops.mkv", "display/vp9-rot90.mkv"] {
+            let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures").join(fixture);
+            let name = path.to_str().unwrap();
+            let mut reader = NativeReader::software(BufReader::new(File::open(&path).unwrap()), usize::MAX).unwrap();
+            assert!(reader.read_frame().unwrap());
+            let [w,h] = reader.dimensions();
+            let [l,t,r,b] = reader.insets().map(|n| n as usize);
+            let visible = [w-l-r,h-t-b];
+            let mut expected = Vec::new();
+            for y in t..h-b {
+                for x in l..w-r {
+                    let pixel = &reader.rgb()[(y*w+x)*3..(y*w+x)*3+3];
+                    expected.extend_from_slice(&[pixel[2],pixel[1],pixel[0],255]);
+                }
+            }
+            let handle = unsafe { fvid_camera_open(name.as_ptr(), name.len(), 256 << 20) };
+            assert!(!handle.is_null());
+            struct Close(*mut CameraSource);
+            impl Drop for Close { fn drop(&mut self) { unsafe { fvid_camera_close(self.0) }; } }
+            let _close = Close(handle);
+            let size = unsafe { fvid_camera_size(handle) };
+            assert_eq!([size.width as usize,size.height as usize],visible);
+            let mut output = vec![0;expected.len()];
+            for (sequence, media_ns) in [0,1_000_000_000_000,0].into_iter().enumerate() {
+                assert_eq!(unsafe { fvid_camera_frame(handle,media_ns,sequence as u64+1,sequence as u64,output.as_mut_ptr(),output.len()) },1);
+                if media_ns == 0 { assert_eq!(output, expected); }
+            }
+        }
     }
 }
