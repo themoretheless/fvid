@@ -102,9 +102,6 @@ pub fn decode_intra_picture(
     if header.first_mb != 0 {
         return Err(invalid("intra picture currently requires one full slice"));
     }
-    if sps.transform_bypass {
-        return Err(invalid("transform bypass is not yet supported"));
-    }
     if sps.bit_depth_luma != sps.bit_depth_chroma {
         return Err(invalid("mixed component bit depths are not yet supported"));
     }
@@ -378,6 +375,7 @@ pub(super) fn reconstruct_macroblock(
         mb.address as usize / (w / 16),
     );
     let qp = (mb.qp + 6 * (i32::from(sps.bit_depth_luma) - 8)) as u8;
+    let bypass = sps.transform_bypass && qp == 0;
     match &mb.luma {
         IntraLuma::Blocks8 { modes, levels } => {
             for block in 0..4 {
@@ -398,12 +396,20 @@ pub(super) fn reconstruct_macroblock(
                     c,
                     sps.bit_depth_luma,
                 )?;
-                let residual = super::avc_transform8::residual_8x8(
-                    &levels[block],
-                    qp,
-                    sps.bit_depth_luma,
-                    &scaling.eight[0],
-                )?;
+                let residual = if bypass {
+                    super::avc_bypass::residual(
+                        &levels[block],
+                        8,
+                        super::avc_bypass::luma_direction(modes[block] as u8),
+                    )?
+                } else {
+                    super::avc_transform8::residual_8x8(
+                        &levels[block],
+                        qp,
+                        sps.bit_depth_luma,
+                        &scaling.eight[0],
+                    )?
+                };
                 let reconstructed =
                     super::avc_transform8::reconstruct_8x8(&pred, &residual, sps.bit_depth_luma)?;
                 put(&mut picture.y, w, x, y, 8, &reconstructed);
@@ -420,6 +426,7 @@ pub(super) fn reconstruct_macroblock(
             put(&mut picture.cr, w / 2, mx * 8, my * 8, 8, cr);
         }
         IntraLuma::Block16(mode) => {
+            let direction = super::avc_bypass::luma_direction(*mode);
             let (t, l, c) = available_edges::<16>(&picture.y, w, mx * 16, my * 16, ready, 1);
             let mode = match mode {
                 0 => Intra16Mode::Vertical,
@@ -429,14 +436,21 @@ pub(super) fn reconstruct_macroblock(
                 _ => return Err(invalid("invalid Intra16 mode")),
             };
             let prediction = intra16(mode, t.as_ref(), l.as_ref(), c, sps.bit_depth_luma)?;
-            let block = reconstruct_intra16(
-                &prediction,
-                &mb.luma_dc,
-                &mb.luma_levels,
-                qp,
-                sps.bit_depth_luma,
-                &scaling.four[0],
-            )?;
+            let block = if bypass {
+                let levels =
+                    super::avc_bypass::blocks4::<256>(&mb.luma_levels, Some(&mb.luma_dc), 16)?;
+                let residual = super::avc_bypass::residual(&levels, 16, direction)?;
+                super::avc_transform::reconstruct(&prediction, &residual, sps.bit_depth_luma)?
+            } else {
+                reconstruct_intra16(
+                    &prediction,
+                    &mb.luma_dc,
+                    &mb.luma_levels,
+                    qp,
+                    sps.bit_depth_luma,
+                    &scaling.four[0],
+                )?
+            };
             put(&mut picture.y, w, mx * 16, my * 16, 16, &block);
         }
         IntraLuma::Blocks4(modes) => {
@@ -464,13 +478,21 @@ pub(super) fn reconstruct_macroblock(
                     c,
                     sps.bit_depth_luma,
                 )?;
-                let residual = residual_4x4(
-                    &mb.luma_levels[by * 4 + bx],
-                    qp,
-                    sps.bit_depth_luma,
-                    &scaling.four[0],
-                    None,
-                )?;
+                let residual = if bypass {
+                    super::avc_bypass::residual(
+                        &mb.luma_levels[by * 4 + bx],
+                        4,
+                        super::avc_bypass::luma_direction(modes[by * 4 + bx] as u8),
+                    )?
+                } else {
+                    residual_4x4(
+                        &mb.luma_levels[by * 4 + bx],
+                        qp,
+                        sps.bit_depth_luma,
+                        &scaling.four[0],
+                        None,
+                    )?
+                };
                 let block = reconstruct_4x4(&pred, &residual, sps.bit_depth_luma)?;
                 put(&mut picture.y, w, x, y, 4, &block);
                 ready[(y / 4) * (w / 4) + x / 4] = 1;
@@ -495,6 +517,21 @@ pub(super) fn reconstruct_macroblock(
                 c,
                 sps.bit_depth_chroma,
             )?;
+            if bypass {
+                use super::avc_bypass::{Direction, blocks4, residual};
+                let direction = match mb.chroma_mode {
+                    super::avc_intra::ChromaMode::Horizontal => Direction::Horizontal,
+                    super::avc_intra::ChromaMode::Vertical => Direction::Vertical,
+                    _ => Direction::None,
+                };
+                let levels =
+                    blocks4::<64>(&mb.chroma_ac[component], Some(&mb.chroma_dc[component]), 8)?;
+                let decoded = residual(&levels, 8, direction)?;
+                let block =
+                    super::avc_transform::reconstruct(&prediction, &decoded, sps.bit_depth_chroma)?;
+                put(plane, stride, x, y, 8, &block);
+                continue;
+            }
             let offset = if component == 0 {
                 pps.chroma_qp_offset
             } else {

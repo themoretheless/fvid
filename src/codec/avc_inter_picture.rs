@@ -31,6 +31,7 @@ struct InterJob {
     coefficients: Option<Box<InterCoefficients>>,
     eight: bool,
     qps: [u8; 3],
+    bypass: bool,
 }
 /// Decode-order record replayed by pass B (see below).
 enum Order {
@@ -59,18 +60,23 @@ fn reconstruct_inter_job(
         job.weights.as_deref(),
     )?;
     let prediction = if let Some(c) = &job.coefficients {
-        prediction.reconstruct_inter(
-            if job.eight {
-                InterLumaResidual::Blocks8(&c.luma8)
-            } else {
-                InterLumaResidual::Blocks4(&c.luma4)
-            },
-            &c.chroma_dc,
-            &c.chroma_ac,
-            job.qps,
-            &[scaling.four[3], scaling.four[4], scaling.four[5]],
-            &scaling.eight[1],
-        )?
+        let luma = if job.eight {
+            InterLumaResidual::Blocks8(&c.luma8)
+        } else {
+            InterLumaResidual::Blocks4(&c.luma4)
+        };
+        if job.bypass {
+            prediction.reconstruct_inter_bypass(luma, &c.chroma_dc, &c.chroma_ac)?
+        } else {
+            prediction.reconstruct_inter(
+                luma,
+                &c.chroma_dc,
+                &c.chroma_ac,
+                job.qps,
+                &[scaling.four[3], scaling.four[4], scaling.four[5]],
+                &scaling.eight[1],
+            )?
+        }
     } else {
         prediction
     };
@@ -127,7 +133,6 @@ pub fn decode_inter_picture_with_motion(
         || sps.chroma_format != 1
         || sps.separate_colour_plane
         || sps.bit_depth_luma != sps.bit_depth_chroma
-        || sps.transform_bypass
         || !matches!(pps.slice_groups, SliceGroups::Single)
         || header.redundant_pic_cnt != 0
     {
@@ -563,6 +568,7 @@ pub fn decode_inter_picture_with_motion(
                             weights,
                             coefficients,
                             eight,
+                            bypass: sps.transform_bypass && qps[0] == 0,
                             qps,
                         });
                     seen += 1;

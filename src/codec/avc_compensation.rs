@@ -211,6 +211,42 @@ pub enum InterLumaResidual<'a> {
     Blocks8(&'a [[i32; 64]; 4]),
 }
 impl Prediction420 {
+    /// Lossless inter residuals bypass scaling and transforms without intra DPCM.
+    pub fn reconstruct_inter_bypass(
+        mut self,
+        luma: InterLumaResidual<'_>,
+        chroma_dc: &[[i32; 4]; 2],
+        chroma_ac: &[[[i32; 16]; 4]; 2],
+    ) -> Result<Self> {
+        if self.dimensions() != (16, 16) {
+            return Err(invalid("inter bypass requires a full macroblock"));
+        }
+        let residual = match luma {
+            InterLumaResidual::Blocks4(blocks) => {
+                super::avc_bypass::blocks4::<256>(blocks, None, 16)?
+            }
+            InterLumaResidual::Blocks8(blocks) => {
+                let mut plane = [0; 256];
+                for (block, levels) in blocks.iter().enumerate() {
+                    let (x, y) = (block % 2 * 8, block / 2 * 8);
+                    for i in 0..64 {
+                        plane[(y + i / 8) * 16 + x + i % 8] = levels[i];
+                    }
+                }
+                plane
+            }
+        };
+        self.y = super::avc_transform::reconstruct(&self.y, &residual, self.depth)?;
+        for (component, plane) in [&mut self.cb, &mut self.cr].into_iter().enumerate() {
+            let residual = super::avc_bypass::blocks4::<64>(
+                &chroma_ac[component],
+                Some(&chroma_dc[component]),
+                8,
+            )?;
+            *plane = super::avc_transform::reconstruct(plane, &residual, self.depth)?;
+        }
+        Ok(self)
+    }
     /// Reconstruct a complete inter macroblock before deblocking. QPs include
     /// the bit-depth offset; the caller derives component QPs from slice QP.
     /// Scaling lists must already have SPS/PPS fallback rules applied.

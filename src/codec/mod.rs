@@ -438,3 +438,5 @@ pub mod ffv1_encoder;
 pub mod ffv1_decoder;
 
 pub mod avc_scaling;
+
+pub mod avc_bypass;

@@ -38,7 +38,8 @@ mix сохраняет PCE mask 0xff для ADTS/MP4/Matroska; тест двух
   64x64 -> 96x64 совпадает с независимым YUV-эталоном; native playback и
   camera bridge проходят смену размера и перемотку. Scaling matrices 4x4/8x8 подключены к intra/inter reconstruction с правилами
   наследования SPS/PPS; JVT/custom I/P/B совпадают с YUV-эталонами. Multiple
-  slices, transform bypass и другие неподключённые инструменты ещё ограничены.
+  slices и другие неподключённые инструменты ещё ограничены. Transform bypass
+  при QP-prime 0 подключён; CABAC/CAVLC lossless I/P совпадают с исходным YUV.
 - `src/codec/hevc_decoder.rs`: независимые multi-slice headers разбираются
   через `slice_headers`, с проверкой общей picture identity и порядка CTU.
   Независимые slices восстанавливаются в общие planes с WPP, CABAC reset,
@@ -1433,3 +1434,20 @@ custom fixture explicitly exercises nonzero intra 8x8 residuals. Resolver tests
 cover scan order, standard defaults, SPS/PPS inheritance and invalid weights;
 encoded SPS fallback variants and other chroma profiles remain outside this proof.
 Reference encoders/decoders run only during fixture generation.
+
+### AVC lossless transform bypass
+
+Connected SPS transform-bypass signaling to reconstruction when luma QP-prime is
+zero. Intra 4x4/8x8, full Intra16 and chroma residuals use unscaled coefficients;
+horizontal/vertical intra modes accumulate residual DPCM across the complete
+prediction block. Inter residuals bypass transforms without intra DPCM. Nonzero
+QP still follows the ordinary scaling/transform path. Checked accumulation rejects
+numeric overflow. The avcC parser now accepts the profile-244 extension used by
+the independently encoded 4:2:0 lossless files. This does not add 4:4:4 reconstruction.
+
+Two synthetic eight-frame QP-0 streams exercise CABAC and CAVLC, directional
+intra residuals and I/P reconstruction. Their saved independent-decoder output
+matches the original synthetic YUV exactly; native decoding matches all samples
+twice with rewind. The x264 reference encoder disables B pictures in lossless
+mode, so encoded lossless B and high-bit-depth lossless conformance are not proven
+by these fixtures. DPCM/DC tile-boundary arithmetic has separate unit tests.

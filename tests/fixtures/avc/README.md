@@ -68,3 +68,19 @@ intra residual is actually present. The JVT fixture proves its decoded stream,
 not that every advertised transform is used. Separate tests check raster scan,
 flat/default differences, SPS fallback A, PPS fallback B and malformed lists.
 Ordinary tests never invoke FFmpeg or the generation script.
+
+### Lossless transform bypass
+
+`../playback-errors/avc-bypass-lossless.mp4` (CABAC) and
+`avc-bypass-cavlc.mp4` each contain eight synthetic 64x64 yuv420p I/P pictures
+at QP 0. The encoder labels them High 4:4:4 Predictive (profile 244), but their
+SPS explicitly states 4:2:0. Regenerate with
+`python3 scripts/generate_avc_bypass_samples.py` from the repository root.
+The generator independently decodes both and requires exact equality with the
+original synthetic YUV before saving references. x264 disables B pictures in
+this lossless mode; these fixtures therefore do not prove lossless B decoding.
+
+`tests/avc_bypass.rs` verifies CABAC/CAVLC, profile extension parsing, QP 0,
+nonzero directional intra residuals (DPCM), every output sample, and rewind.
+Unit tests verify checked DPCM accumulation and joining DC/AC across 4x4 tile
+boundaries. Ordinary tests never run the generator or reference decoder.

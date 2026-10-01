@@ -82,15 +82,13 @@ impl<'a> AvcConfig<'a> {
         let pps = avc_sets(&mut b, count, 8)?;
         let mut sps_extensions = Vec::new();
         if b.at != data.len() {
-            if !matches!(profile, 100 | 110 | 122 | 144) {
+            if !matches!(profile, 100 | 110 | 122 | 144 | 244) {
                 return Err(invalid("unexpected AVC profile extension"));
             }
-            let chroma = b.byte()?;
-            let luma = b.byte()?;
-            let chroma_depth = b.byte()?;
-            if chroma & 0xfc != 0xfc || luma & 0xf8 != 0xf8 || chroma_depth & 0xf8 != 0xf8 {
-                return Err(invalid("invalid AVC extension reserved bits"));
-            }
+            // Some writers mis-state reserved bits (and format hints) here.
+            // Decoders derive chroma/depth from SPS, not these redundant hints.
+            // Still require the entire extension and validate each NAL/length.
+            b.take(3)?;
             let count = b.byte()? as usize;
             sps_extensions = avc_sets(&mut b, count, 13)?;
         }
@@ -331,7 +329,9 @@ impl AacConfig {
         Ok(config)
     }
     /// Preserve an explicit tagged program rather than guessing a layout from its count.
-    pub fn parse_with_program(data: &[u8]) -> Result<(Self, Option<super::aac_pce::ProgramConfig>)> {
+    pub fn parse_with_program(
+        data: &[u8],
+    ) -> Result<(Self, Option<super::aac_pce::ProgramConfig>)> {
         let mut b = BitReader::new(data);
         let object_type = audio_object_type(&mut b)?;
         let index = b.read(4)? as usize;
@@ -372,7 +372,9 @@ impl AacConfig {
             }
             channels = program.channels() as u8;
             Some(program)
-        } else { None };
+        } else {
+            None
+        };
         // Explicitly consume the common backward-compatible SBR sync extension.
         if b.remaining() >= 16 {
             if b.read(11)? != 0x2b7 {
@@ -387,14 +389,17 @@ impl AacConfig {
                 return Err(invalid("nonzero AAC trailing bits"));
             }
         }
-        Ok((Self {
-            channel_configuration: config as u8,
-            object_type,
-            sample_rate,
-            channels,
-            frame_samples,
-            core_coder_delay,
-        }, program))
+        Ok((
+            Self {
+                channel_configuration: config as u8,
+                object_type,
+                sample_rate,
+                channels,
+                frame_samples,
+                core_coder_delay,
+            },
+            program,
+        ))
     }
 }
 
@@ -482,10 +487,9 @@ mod tests {
     #[test]
     fn esds_accepts_audio_with_a_cleared_reserved_bit() {
         let esds = [
-            0, 0, 0, 0, 3, 0x80, 0x80, 0x80, 0x22, 0, 0, 0,
-            4, 0x80, 0x80, 0x80, 0x14, 0x40, 0x14, 0, 0x18, 0,
-            0, 0, 0xfa, 0, 0, 0, 0xfa, 0, 5, 0x80, 0x80, 0x80, 2, 0x12, 0x10,
-            6, 0x80, 0x80, 0x80, 1, 2,
+            0, 0, 0, 0, 3, 0x80, 0x80, 0x80, 0x22, 0, 0, 0, 4, 0x80, 0x80, 0x80, 0x14, 0x40, 0x14,
+            0, 0x18, 0, 0, 0, 0xfa, 0, 0, 0, 0xfa, 0, 5, 0x80, 0x80, 0x80, 2, 0x12, 0x10, 6, 0x80,
+            0x80, 0x80, 1, 2,
         ];
         assert_eq!(aac_specific_config(&esds).unwrap(), &[0x12, 0x10]);
         crate::codec::aac_decoder::AacDecoder::new(&esds, 44100, 2).unwrap();
