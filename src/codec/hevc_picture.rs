@@ -47,7 +47,6 @@ pub fn decode(
         || sps.separate_colour_plane
         || sps.pcm.is_some()
         || pps.tiles.is_some()
-        || ((slice.sao != [false, false] || !slice.deblocking.disabled) && pps.transquant_bypass)
         || !slice.first
         || slice.address != 0
         || slice.nal.layer_id != 0
@@ -315,7 +314,12 @@ pub fn decode(
     if slice.sao != [false, false] {
         for (component, plane) in decoder.planes.iter_mut().enumerate() {
             let parameters: Vec<_> = sao.iter().map(|p| p[component]).collect();
-            plane.apply_sao(max_cb - u8::from(component != 0), &parameters)?;
+            let shift = usize::from(component != 0);
+            let cells = &decoder.cells;
+            let stride = sps.dimensions[0] as usize / 4;
+            plane.apply_sao_with_exclusions(max_cb - u8::from(component != 0), &parameters,
+                |_, _| true,
+                |p| pps.transquant_bypass && cells[((p[1] << shift) / 4) * stride + (p[0] << shift) / 4].bypass)?;
         }
     }
     let motion = if slice.slice_type == SliceType::I {
@@ -379,7 +383,6 @@ pub fn decode_slices(
         || sps.separate_colour_plane
         || sps.pcm.is_some()
         || pps.tiles.is_some()
-        || pps.transquant_bypass
         || sps.depth[0] != sps.depth[1]
     {
         return Err(invalid("unsupported HEVC multi-slice picture tools"));
@@ -620,7 +623,7 @@ pub fn decode_slices(
                 + (p[0] << shift) / side as usize;
             slices.partition_point(|s| s.address as usize <= address) - 1
         };
-        plane.apply_sao_with_boundaries(
+        plane.apply_sao_with_exclusions(
             max_cb - u8::from(component != 0),
             &parameters,
             |a, b| {
@@ -628,6 +631,8 @@ pub fn decode_slices(
                 let ib = owner(b);
                 owners[ia] == owners[ib] || slices[ia.max(ib)].loop_filter_across_slices
             },
+            |p| pps.transquant_bypass && decoder.cells[((p[1] << shift) / 4) * (sps.dimensions[0] as usize / 4)
+                + (p[0] << shift) / 4].bypass,
         )?;
     }
     let mut motion = Vec::new();
@@ -658,6 +663,7 @@ struct Cell {
     mode: u8,
     motion: Motion,
     cbf: bool,
+    bypass: bool,
 }
 struct Decoder<'a> {
     sps: &'a Sps,
@@ -766,6 +772,7 @@ impl<'a> Visitor<HevcCabac<'a>> for Decoder<'_> {
                 for x in p.x as usize / 4..(p.x as usize + (1 << p.log2_size)) / 4 {
                     self.cells[y * stride + x] = Cell {
                         ready: true,
+                        bypass,
                         depth: n.depth,
                         intra: true,
                         mode: derived,
@@ -1057,6 +1064,7 @@ fn deblock_slices(decoder: &mut Decoder<'_>, slices: &[SliceHeader]) -> Result<(
                     )
                     .unwrap();
                 let b = decoder.cell_raw(x as i32, y as i32).unwrap();
+                let filter_enabled = [!a.bypass, !b.bypass];
                 let strength = if a.intra || b.intra {
                     2
                 } else if decoder.edges[y / 4 * (width / 4) + x / 4][direction] & 2 != 0
@@ -1107,7 +1115,7 @@ fn deblock_slices(decoder: &mut Decoder<'_>, slices: &[SliceHeader]) -> Result<(
                     tc,
                     decoder.sps.depth[0],
                     batch_filter,
-                    [[true; 2]; 4],
+                    [filter_enabled; 4],
                 );
                 for l in 0..4 {
                     for s in 0..2 {
@@ -1147,7 +1155,7 @@ fn deblock_slices(decoder: &mut Decoder<'_>, slices: &[SliceHeader]) -> Result<(
                             let a = [plane[index(0, 0)], plane[index(0, 1)]];
                             let b = [plane[index(1, 0)], plane[index(1, 1)]];
                             let output =
-                                d::chroma_sample(a, b, tc, decoder.sps.depth[1], [true; 2])?;
+                                d::chroma_sample(a, b, tc, decoder.sps.depth[1], filter_enabled)?;
                             plane[index(0, 0)] = output[0];
                             plane[index(1, 0)] = output[1];
                         }
@@ -1263,6 +1271,7 @@ impl Decoder<'_> {
                 for xx in x..x + w {
                     self.cells[yy * stride + xx] = Cell {
                         ready: true,
+                        bypass,
                         depth: n.depth,
                         skip,
                         motion,

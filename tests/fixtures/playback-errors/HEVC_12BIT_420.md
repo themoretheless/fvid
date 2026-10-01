@@ -15,9 +15,18 @@ contexts, filtered non-bypass pictures and inter RDPCM, comparing every sample
 through decoder reset and MP4 playback rewind. Before the fix the first 12-bit
 picture failed with `invalid HEVC picture parameters`.
 
-The separate bypass-with-filters test is an explicit refusal, not acceptance:
-that pre-existing tool combination still fails with `unsupported HEVC picture
-tools`. Its paired synthetic streams/oracles are retained for the eventual fix.
+`lossless_bypass_with_filters_matches_oracle` now accepts bypass with
+SAO/deblocking at 8/10/12 bits. The old 12-bit refusal expectation is replaced
+by sample-exact acceptance after decoder reset and playback rewind. Per-CU
+bypass flags protect samples from SAO and each side of deblocking independently.
+Ordinary samples still use protected samples as SAO edge neighbours.
+
+`--mode bypass --mixed-bypass --filters --qp -24 --depth 12` generates the
+mixed-mode pair for `mixed_bypass_with_filters_matches_oracle`. Its deterministic
+source combines a flat half-plane with seeded noise. A temporary decoder probe
+verified both bypass and ordinary CUs occur (936 bypass / 24 ordinary observations
+across the test reset/rewind repetitions); the probe is not part of production code.
+
 `--mode skip --filters --qp 51` generates a separate maximum-QP pair.
 `twelve_bit_high_qp_filters_match_oracle` reproduced `invalid HEVC edge
 decision input` with the old 256-unit beta bound and accepts the corrected

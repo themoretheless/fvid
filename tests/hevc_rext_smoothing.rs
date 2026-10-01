@@ -466,18 +466,25 @@ fn twelve_bit_420_matches_oracle() {
 }
 
 #[test]
-fn twelve_bit_bypass_with_filters_retains_explicit_refusal() {
-    for source in [
-        &include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters.mp4")[..],
-        &include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters.mp4")[..],
-    ] {
-        let mut input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
-        let mut decoder = HevcDecoder::from_configuration(&input.tracks()[0].configuration, 16 << 20).unwrap();
-        let mut packet = Vec::new();
-        input.read_packet(0, 0, &mut packet).unwrap();
-        let error = decoder.decode_packet(&packet).err().unwrap();
-        assert!(error.to_string().contains("unsupported HEVC picture tools"));
-    }
+fn lossless_bypass_with_filters_matches_oracle() {
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-filters.yuv"),
+        12, false, false, Some(true), true, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-filters.yuv"),
+        12, false, false, Some(true), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-8-bypass-enabled-filters.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-8-bypass-enabled-filters.yuv"),
+        8, false, false, Some(true), true, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-8-bypass-disabled-filters.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-8-bypass-disabled-filters.yuv"),
+        8, false, false, Some(true), false, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-10-bypass-enabled-filters.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-10-bypass-enabled-filters.yuv"),
+        10, false, false, Some(true), true, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-10-bypass-disabled-filters.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-10-bypass-disabled-filters.yuv"),
+        10, false, false, Some(true), false, false, false);
 }
 
 #[test]
@@ -520,4 +527,14 @@ fn twelve_bit_scaled_sao_matches_oracle() {
     compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-sao2.mp4"),
         include_bytes!("fixtures/playback-errors/hevc-rext-context-12-skip-disabled-filters-sao2.yuv"),
         12, false, false, Some(false), false, false, false);
+}
+
+#[test]
+fn mixed_bypass_with_filters_matches_oracle() {
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-mixed-filters-qp-24.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-enabled-mixed-filters-qp-24.yuv"),
+        12, false, false, Some(true), true, false, false);
+    compare(include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24.mp4"),
+        include_bytes!("fixtures/playback-errors/hevc-rext-context-12-bypass-disabled-mixed-filters-qp-24.yuv"),
+        12, false, false, Some(true), false, false, false);
 }

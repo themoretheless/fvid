@@ -19,7 +19,16 @@ impl Plane {
         &mut self,
         log2_ctu: u8,
         parameters: &[super::hevc_sao::Sao],
+        available: impl FnMut([usize; 2], [usize; 2]) -> bool,
+    ) -> Result<()> {
+        self.apply_sao_with_exclusions(log2_ctu, parameters, available, |_| false)
+    }
+    pub(crate) fn apply_sao_with_exclusions(
+        &mut self,
+        log2_ctu: u8,
+        parameters: &[super::hevc_sao::Sao],
         mut available: impl FnMut([usize; 2], [usize; 2]) -> bool,
+        mut excluded: impl FnMut([usize; 2]) -> bool,
     ) -> Result<()> {
         if !(3..=6).contains(&log2_ctu) || !self.complete() {
             return Err(invalid("invalid SAO plane state"));
@@ -51,6 +60,7 @@ impl Plane {
                     }
                     for y in y0..y1 {
                         for x in x0..x1 {
+                            if excluded([x, y]) { continue; }
                             let k = y * self.width + x;
                             let value = self.samples[k];
                             output[k] = (i32::from(value)
@@ -77,6 +87,7 @@ impl Plane {
                     let db = delta(b);
                     for y in y0..y1 {
                         for x in x0..x1 {
+                            if excluded([x, y]) { continue; }
                             let neighbour = |v: [i32; 2]| {
                                 [
                                     x.checked_add_signed(v[0] as isize).unwrap(),
@@ -303,6 +314,20 @@ impl Plane {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn sao_preserves_protected_samples_but_uses_them_as_neighbours() {
+        use super::super::hevc_sao::Sao;
+        let samples: Vec<u16> = (0..64).map(|i| if i % 2 == 0 { 10 } else { 20 }).collect();
+        for (mode, expected) in [
+            (Sao::Edge { class: 0, offsets: [7, 0, 0, -7] }, [10, 20, 10, 20, 17, 13, 17, 20]),
+            (Sao::Band { position: 1, offsets: [2, 0, 0, 0] }, [10, 20, 10, 20, 12, 20, 12, 20]),
+        ] {
+            let mut plane = Plane::new(8, 8, 8, 4096).unwrap();
+            plane.reconstruct_inter([0, 0, 8, 8], &samples).unwrap();
+            plane.apply_sao_with_exclusions(3, &[mode], |_, _| true, |p| p[0] < 4).unwrap();
+            for row in plane.samples().chunks_exact(8) { assert_eq!(row, expected); }
+        }
+    }
     #[test]
     fn residual_addition_matches_wide_clipping_at_integer_limits() {
         let residual = [

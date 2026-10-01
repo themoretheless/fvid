@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 import subprocess
 import tempfile
+import random
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--hm-encoder', type=Path, required=True)
@@ -15,9 +16,10 @@ parser.add_argument('--large-skip', type=int, choices=(3, 4, 5), help='maximum s
 parser.add_argument('--high-precision', action='store_true', help='high precision weighted prediction')
 parser.add_argument('--depth', type=int, choices=(8, 10, 12), help='generate one bit depth')
 parser.add_argument('--filters', action='store_true', help='enable SAO and deblocking')
-parser.add_argument('--qp', type=int, default=24, choices=range(0, 52))
+parser.add_argument('--qp', type=int, default=24, choices=range(-48, 52))
 parser.add_argument('--mode', choices=('skip', 'bypass'))
 parser.add_argument('--sao-scale', type=int, choices=(0, 1, 2), default=0)
+parser.add_argument('--mixed-bypass', action='store_true', help='allow CU-by-CU bypass decisions')
 args = parser.parse_args()
 if sum((args.rdpcm, args.explicit, args.large_skip is not None, args.high_precision)) > 1:
     parser.error('--rdpcm, --explicit, --large-skip and --high-precision are mutually exclusive')
@@ -51,10 +53,22 @@ with tempfile.TemporaryDirectory(prefix='fvid-hevc-context-') as directory:
                             value = (48 + plane * 12 + (x + y) % 48 + 40 * frame) * scale + frame
                             raw.extend(bytes([value]) if depth == 8 else value.to_bytes(2, 'little'))
             source.write_bytes(raw)
+        if args.mixed_bypass:
+            rng = random.Random(20261002)
+            raw = bytearray()
+            for frame in range(3):
+                for side in (64, 32, 32):
+                    for y in range(side):
+                        for x in range(side):
+                            value = (80 << (depth - 8)) if x < side // 2 else rng.randrange(1 << depth)
+                            raw.extend(bytes([value]) if depth == 8 else value.to_bytes(2, 'little'))
+            source.write_bytes(raw)
         for mode in ((args.mode,) if args.mode else (('skip',) if args.large_skip or args.high_precision else ('skip', 'bypass'))):
             for context in (False, True):
                 tool = 'high-precision' if args.high_precision else f'skip{1 << args.large_skip}' if args.large_skip else ('explicit-rdpcm' if args.explicit else ('rdpcm' if args.rdpcm else 'context'))
                 stem = f'hevc-rext-{tool}-{depth}-{mode}-' + ('enabled' if context else 'disabled')
+                if args.mixed_bypass:
+                    stem += '-mixed'
                 if args.filters:
                     stem += '-filters'
                 if args.sao_scale:
@@ -74,7 +88,7 @@ with tempfile.TemporaryDirectory(prefix='fvid-hevc-context-') as directory:
                            '--CrossComponentPrediction=0', f'--SAO={int(args.filters)}', f'--LoopFilterDisable={int(not args.filters)}',
                            f'--QP={args.qp}', f'--SingleSignificanceMapContext={int(context and not args.rdpcm and not args.explicit and not args.large_skip and not args.high_precision)}',
                            f'--TransquantBypassEnable={int(mode == "bypass")}',
-                           f'--CUTransquantBypassFlagForce={int(mode == "bypass")}']
+                           f'--CUTransquantBypassFlagForce={int(mode == "bypass" and not args.mixed_bypass)}']
                 if args.sao_scale:
                     options.extend([f'--SaoLumaOffsetBitShift={args.sao_scale}', f'--SaoChromaOffsetBitShift={args.sao_scale}'])
                 if args.high_precision:
