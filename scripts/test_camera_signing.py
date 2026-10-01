@@ -1,6 +1,7 @@
 import datetime
 import unittest
-from camera_signing import validated_entitlements
+import hashlib
+from camera_signing import validated_entitlements, signing_fingerprint, validate_signing_authorization
 
 class Profiles(unittest.TestCase):
     def profile(self):
@@ -25,5 +26,36 @@ class Profiles(unittest.TestCase):
             if change=='entitlement_team':value['Entitlements']['com.apple.developer.team-identifier']='OTHERTEAM1'
             with self.subTest(change=change),self.assertRaises(ValueError):
                 validated_entitlements(value,'TEAM123456','org.fvid.camera')
+
+class SigningAuthorization(unittest.TestCase):
+    def test_exact_identity_resolution_rejects_ambiguous_names(self):
+        a, b = 'A' * 40, 'B' * 40
+        listing = f'  1) {a} "Apple Development: Example"\n  2) {b} "Apple Development: Example"\n'
+        self.assertEqual(signing_fingerprint(a.lower(), listing), a)
+        for name in ['Apple Development: Example', 'Example', '-', 'C' * 40]:
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                signing_fingerprint(name, listing)
+
+    def test_certificate_and_device_are_both_required(self):
+        cert = b'certificate DER fixture'
+        fingerprint = hashlib.sha1(cert).hexdigest()
+        profile = {'DeveloperCertificates': [cert], 'ProvisionedDevices': ['LOCAL-UDID']}
+        validate_signing_authorization(profile, fingerprint, 'local-udid')
+        for modified, digest, device in [
+            ({**profile, 'DeveloperCertificates': []}, fingerprint, 'LOCAL-UDID'),
+            (profile, 'A' * 40, 'LOCAL-UDID'),
+            (profile, fingerprint, 'HARDWARE-UUID'),
+            (profile, fingerprint, None),
+            ({'DeveloperCertificates': [cert]}, fingerprint, 'LOCAL-UDID'),
+        ]:
+            with self.subTest(profile=modified, device=device), self.assertRaises(ValueError):
+                validate_signing_authorization(modified, digest, device)
+
+    def test_all_devices_still_requires_authorized_certificate(self):
+        cert = b'certificate DER fixture'
+        profile = {'DeveloperCertificates': [cert], 'ProvisionsAllDevices': True}
+        validate_signing_authorization(profile, hashlib.sha1(cert).hexdigest(), None)
+        with self.assertRaises(ValueError):
+            validate_signing_authorization(profile, 'A' * 40, None)
 
 if __name__=='__main__': unittest.main()

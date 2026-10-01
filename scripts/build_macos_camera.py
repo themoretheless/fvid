@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Build (but never install) the FVid camera app and embedded system extension."""
 import argparse
-from camera_signing import validated_entitlements
+import json
+from camera_signing import validated_entitlements, signing_fingerprint, validate_signing_authorization
 import pathlib
 import plistlib
 import re
@@ -26,6 +27,18 @@ profiles = []
 if args.host_profile or args.extension_profile:
     if not args.sign or not args.host_profile or not args.extension_profile:
         p.error('provisioning requires --sign and both --host-profile/--extension-profile')
+    listing = subprocess.run(['security', 'find-identity', '-v', '-p', 'codesigning'],
+                             capture_output=True, text=True, check=True).stdout
+    try:
+        fingerprint = signing_fingerprint(args.sign, listing)
+    except ValueError as error:
+        p.error(str(error))
+    hardware = subprocess.run(['system_profiler', 'SPHardwareDataType', '-json'],
+                              capture_output=True, check=True)
+    overview = json.loads(hardware.stdout)['SPHardwareDataType'][0]
+    # Apple silicon registration uses Provisioning UDID, not Hardware UUID.
+    device_id = overview.get('provisioning_UDID') or overview.get('platform_UUID')
+    args.sign = fingerprint
     for profile, identifier in ((args.host_profile, 'org.fvid.camera'),
                                 (args.extension_profile, 'org.fvid.camera.extension')):
         decoded = subprocess.run(['security', 'cms', '-D', '-i', str(profile)],
@@ -33,6 +46,7 @@ if args.host_profile or args.extension_profile:
         data = plistlib.loads(decoded.stdout)
         try:
             entitlements = validated_entitlements(data, args.team_id, identifier)
+            validate_signing_authorization(data, fingerprint, device_id)
         except ValueError as error:
             p.error(str(error))
         profiles.append((profile, entitlements, identifier))

@@ -1,6 +1,8 @@
 """Validate camera provisioning authorization before embedding or signing."""
 import datetime
 import fnmatch
+import hashlib
+import re
 
 
 def validated_entitlements(data, team, identifier, now=None):
@@ -24,3 +26,27 @@ def validated_entitlements(data, team, identifier, now=None):
         if key in authorized:
             authorized[key] = matches[0]
     return authorized
+
+
+def signing_fingerprint(identity, listing):
+    """Resolve exactly one valid code signing identity to its certificate SHA-1."""
+    identities = re.findall(r'^\s*\d+\) ([0-9A-Fa-f]{40}) "([^"\n]+)"', listing, re.MULTILINE)
+    matches = {digest.upper() for digest, name in identities
+               if identity.upper() == digest.upper() or identity == name}
+    if len(matches) != 1:
+        raise ValueError('signing identity must match exactly one valid certificate; use its SHA-1')
+    return matches.pop()
+
+
+def validate_signing_authorization(data, fingerprint, device_id):
+    """Check the profile certificate and local device allowlists before building."""
+    certificates = data.get('DeveloperCertificates', [])
+    if not any(isinstance(cert, bytes) and hashlib.sha1(cert).hexdigest().upper() == fingerprint.upper()
+               for cert in certificates):
+        raise ValueError('provisioning profile does not authorize the signing certificate')
+    if data.get('ProvisionsAllDevices') is True:
+        return
+    devices = data.get('ProvisionedDevices', [])
+    if not device_id or not any(isinstance(device, str) and device.upper() == device_id.upper()
+                                for device in devices):
+        raise ValueError('provisioning profile does not authorize this Mac provisioning UDID')

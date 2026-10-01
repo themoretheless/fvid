@@ -99,6 +99,19 @@ inside-out and runs codesign verification, but does not install, notarize or
 claim activation success. The signing path and entitlement sufficiency have
 not been validated against an actual developer identity/provisioning setup.
 
+When supplying `--host-profile` and `--extension-profile`, both profiles must
+permit the team, concrete bundle identifier, signing certificate and local Mac.
+The build resolves an exact valid keychain identity to its SHA-1 fingerprint
+before creating the output bundle. Ambiguous identity names are rejected.
+`DeveloperCertificates` must include that certificate. Profiles restricted to
+registered devices must include this Mac's Provisioning UDID (Hardware UUID is
+only the fallback on Macs without a separate provisioning identifier).
+`ProvisionsAllDevices` bypasses only the device check, never the certificate check.
+These checks have unit coverage and identity resolution was checked against the
+local keychain. A real profile-backed launch and camera consumer delivery remain
+unverified. See [Apple's device registration guidance](https://developer.apple.com/help/account/devices/register-a-single-device)
+and [provisioning profile anatomy](https://developer.apple.com/documentation/technotes/tn3125-inside-code-signing-provisioning-profiles).
+
 ## Native compressed file source
 
 `NativeCameraSource` now accepts `NativeReader`, including the supported
