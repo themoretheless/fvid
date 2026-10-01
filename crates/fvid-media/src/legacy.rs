@@ -1024,25 +1024,25 @@ impl Output {
             let stream = *(*self.context).streams.add(index);
             let target = (*stream).time_base;
             let same_time_base = time_base.num == target.num && time_base.den == target.den;
-            if self.strict_timing && !same_time_base {
-                if time_base.num <= 0 || time_base.den <= 0 || target.num <= 0 || target.den <= 0 {
-                    return Err("invalid mux time base".into());
-                }
-                let denominator = i128::from(time_base.den) * i128::from(target.num);
-                for value in [(*packet.0).pts, (*packet.0).dts, (*packet.0).duration] {
-                    let numerator =
-                        i128::from(value) * i128::from(time_base.num) * i128::from(target.den);
-                    if numerator % denominator != 0 {
-                        return Err("output container cannot represent exact packet timing".into());
+            if !same_time_base {
+                if self.strict_timing {
+                    if time_base.num <= 0 || time_base.den <= 0 || target.num <= 0 || target.den <= 0 {
+                        return Err("invalid mux time base".into());
                     }
-                    i64::try_from(numerator / denominator)
-                        .map_err(|_| "rescaled timestamp overflow")?;
+                    let source = crate::owned_time::TimeBase { numerator: time_base.num as u32, denominator: time_base.den as u32 };
+                    let target = crate::owned_time::TimeBase { numerator: target.num as u32, denominator: target.den as u32 };
+                    // Compute all fields before mutation: a failed exact conversion leaves timing intact.
+                    let pts = crate::owned_time::rescale_exact((*packet.0).pts, source, target)?;
+                    let dts = crate::owned_time::rescale_exact((*packet.0).dts, source, target)?;
+                    let duration = crate::owned_time::rescale_exact((*packet.0).duration, source, target)?;
+                    if !matches!((*packet.0).pts, i64::MIN | i64::MAX) { (*packet.0).pts = pts; }
+                    if !matches!((*packet.0).dts, i64::MIN | i64::MAX) { (*packet.0).dts = dts; }
+                    if (*packet.0).duration > 0 { (*packet.0).duration = duration; }
+                } else {
+                    av_packet_rescale_ts(packet.0, time_base, target);
                 }
             }
             (*packet.0).stream_index = index as i32;
-            if !same_time_base {
-                av_packet_rescale_ts(packet.0, time_base, target);
-            }
             (*packet.0).pos = -1;
             let code = if self.interleave {
                 av_interleaved_write_frame(self.context, packet.0)

@@ -31,3 +31,5 @@ pub mod owned_pcm_gain_f64;
 pub mod owned_pcm_integer;
 
 pub mod owned_pcm_format;
+
+pub mod owned_time;
