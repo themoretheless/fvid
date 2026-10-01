@@ -1554,3 +1554,25 @@ AAC playback pacing now uses the end of the actual decoded/presented float PCM
 This avoids treating Matroska's unspecified packet duration as a zero-length
 AAC frame. The worker regression checks the final 48 kHz frame adds exactly
 21.333333 ms to the queue frontier. Other codecs retain their existing pacing.
+
+### 2026-10-01 verification after AAC playback timeline work
+
+At commit `3a8b4d4`, the current checkout passed:
+
+- `cargo test --locked --offline --no-default-features --lib`: 656 passed, 3 ignored.
+- `cargo test --locked --offline --no-default-features --features player --lib`: 1187 passed, 24 ignored.
+- `cargo build --locked --offline --no-default-features --features player --bin fvid`.
+
+The normal dependency tree for this player configuration contains no `fvid-media`
+or FFmpeg/libav dependency; `otool -L target/debug/fvid` shows no libav linkage.
+macOS VideoToolbox/Metal frameworks remain linked for platform playback paths;
+this linkage check does not prove that every codec stream is software-supported.
+The tests above include software codec fixtures but omit ignored reference tests.
+Other concurrent checkout edits were present during these runs, so these totals
+verify the tested checkout, not an isolated clean release tree.
+
+`systemextensionsctl list` still does not list FVid. The installed
+`/Applications/FVid Camera.app` and its extension contain no embedded provisioning
+profiles. The portable camera bridge is tested; OS registration and cross-process
+camera delivery remain unverified. The optional legacy `media` feature still
+contains unmigrated FFmpeg operations and is outside the no-libav build claim.
