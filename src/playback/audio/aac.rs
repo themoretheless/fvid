@@ -10,6 +10,7 @@ pub struct AacAudioReader {
     aac: Aac,
     extra_data: Vec<u8>,
     packet: usize,
+    presentation_floor: u64,
 }
 
 impl AacAudioReader {
@@ -25,6 +26,7 @@ impl AacAudioReader {
             aac,
             extra_data,
             packet: 0,
+            presentation_floor: 0,
         })
     }
 
@@ -86,6 +88,11 @@ impl AudioStream for AacAudioReader {
 
     fn rewind(&mut self) {
         self.packet = 0;
+        self.presentation_floor = 0;
+    }
+
+    fn present_decoded(&self, packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
+        if source_pts < 0 || (source_pts as u64) < self.presentation_floor { Ok(None) } else { Ok(Some(packet)) }
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
@@ -95,8 +102,9 @@ impl AudioStream for AacAudioReader {
             .frames
             .partition_point(|at| at.pts <= target)
             .saturating_sub(1);
-        self.packet = index;
-        self.aac.frames[index].pts as i64
+        self.presentation_floor = self.aac.frames[index].pts;
+        self.packet = 0;
+        self.presentation_floor as i64
     }
 }
 
@@ -362,9 +370,8 @@ mod tests {
             "past the end is the last"
         );
         let packet = reader.next_packet().expect("packet").expect("frame");
-        assert_eq!(packet.pts, 12 * 1024);
-        // The last frame of the file, from past its seven header bytes on.
-        assert_eq!(packet.data, &STEREO[4034 + 7..]);
+        assert_eq!(packet.pts, 0, "seek consumes decoder preroll first");
+        assert_eq!(packet.data, reader.aac.packet(0));
         assert_eq!(packet.duration, 1024);
         reader.rewind();
         assert_eq!(reader.seek_to(-5), 0, "a negative sample is the start");
@@ -425,7 +432,7 @@ mod tests {
         let mut pce = STEREO[293..293 + 14].to_vec();
         pce[2] &= !1;
         pce[3] &= 0x3F;
-        assert_eq!(header(&pce), None, "a PCE layout is not read here");
+        assert_eq!(header(&pce).expect("PCE configuration is admitted").channels, 0, "layout is deferred to the PCE in the access unit");
         // Rate indexes 13, 14 and 15 are reserved in this header, unlike the
         // AudioSpecificConfig, which spells a 24-bit rate for 15.
         let mut reserved = STEREO[293..293 + 14].to_vec();

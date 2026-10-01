@@ -739,3 +739,31 @@ mod preroll_control_tests {
         assert_eq!(count,1,"worker decoded beyond the pause command");
     }
 }
+
+#[cfg(test)]
+mod adts_seek_tests {
+    use super::*;
+    use super::presentation_window_tests::Capture;
+    #[test]
+    fn adts_seek_and_rewind_preserve_continuous_decoder_samples() {
+        let file = include_bytes!("../tests/fixtures/audio/aac-mono-44k.aac").as_slice();
+        let stream = crate::playback_aac::AacAudioReader::open(std::io::Cursor::new(file),Default::default()).unwrap();
+        let frames = stream.aac().frames.len();
+        let decoder = crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
+        let captured = Arc::new(Mutex::new(Vec::new()));
+        let (_,commands) = sync_channel(1);
+        let (events,_) = sync_channel(1);
+        let mut worker = Worker { stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        for _ in 0..frames { assert!(worker.decode_next().0.is_none()); }
+        let expected:Vec<u8> = captured.lock().unwrap().iter().flat_map(|p|p.data.iter().copied()).collect();
+        for (request,landed) in [(3000,2048),(0,0)] {
+            captured.lock().unwrap().clear();
+            worker.handle(Command::Seek(request));
+            for _ in 0..frames { assert!(worker.decode_next().0.is_none()); }
+            let packets = captured.lock().unwrap();
+            assert_eq!(packets[0].pts,landed);
+            let actual:Vec<u8> = packets.iter().flat_map(|p|p.data.iter().copied()).collect();
+            assert!(actual==expected[landed as usize*4..],"ADTS seek changed decoded PCM");
+        }
+    }
+}

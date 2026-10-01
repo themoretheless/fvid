@@ -1530,3 +1530,12 @@ decode, confirms that no second packet is decoded and no preroll PCM reaches
 the backend, then sends Stop and joins the worker. Existing per-packet command
 draining provides this interruption boundary; this is not a throughput or
 maximum-latency benchmark.
+
+### ADTS AAC playback seek
+
+The ADTS playback reader now primes decoder state from the beginning after seek,
+using its exact frame timestamps to suppress all preroll PCM before the landed
+frame. A worker regression compares mono AAC output after forward/backward seeks
+with continuous decoding byte-for-byte. This currently requires linear decode
+work, as in MP4; checkpoints are not yet implemented. Seeking returns the landed
+timestamp, while subsequent encoded packets include decoder-only preroll.
