@@ -101,6 +101,7 @@ pub(crate) unsafe fn apply_volume(frame: *mut AVFrame, gain: f64) -> Result<()> 
 struct Resampler {
     owned: Option<crate::owned_resample::Resampler<Vec<u8>>>,
     input_rate: i32,
+    input_channels: i32,
     swr: *mut SwrContext,
     out_rate: i32,
     out_format: AVSampleFormat,
@@ -149,12 +150,18 @@ impl Resampler {
             let mut built = Self {
                 owned: None,
                 input_rate: f.sample_rate,
+                input_channels: f.ch_layout.nb_channels,
                 swr: ptr::null_mut(),
                 out_rate,
                 out_format,
                 ch_layout,
             };
-            if out_channels == f.ch_layout.nb_channels
+            let owned_layout = out_channels == f.ch_layout.nb_channels
+                || (matches!(out_channels, 1 | 2) && (1..=6).contains(&f.ch_layout.nb_channels)
+                    && f.ch_layout.order == AVChannelOrder_AV_CHANNEL_ORDER_NATIVE
+                    && crate::owned_wav::default_pcm_mask(f.ch_layout.nb_channels as u16)
+                        .is_ok_and(|mask| u64::from(mask) == f.ch_layout.u.mask));
+            if owned_layout
                 && matches!(f.format, AVSampleFormat_AV_SAMPLE_FMT_FLT | AVSampleFormat_AV_SAMPLE_FMT_FLTP)
             {
                 built.owned = Some(crate::owned_resample::Resampler::new(
@@ -195,22 +202,25 @@ impl Resampler {
                     owned.finish().map_err(|e| e.to_string())?;
                 } else {
                     let input = &*src;
-                    if input.sample_rate != self.input_rate || input.ch_layout.nb_channels != channels as i32
+                    if input.sample_rate != self.input_rate || input.ch_layout.nb_channels != self.input_channels
                         || input.nb_samples < 0 || input.extended_data.is_null()
                         || !matches!(input.format, AVSampleFormat_AV_SAMPLE_FMT_FLT | AVSampleFormat_AV_SAMPLE_FMT_FLTP)
                     { return Err("owned resampler input format changed".into()); }
                     let planar = input.format == AVSampleFormat_AV_SAMPLE_FMT_FLTP;
-                    let mut bytes = Vec::with_capacity(input.nb_samples as usize * channels * 4);
+                    let mut bytes = Vec::with_capacity(input.nb_samples as usize * self.input_channels as usize * 4);
                     for sample in 0..input.nb_samples as usize {
-                        for channel in 0..channels {
+                        for channel in 0..self.input_channels as usize {
                             let plane = *input.extended_data.add(if planar { channel } else { 0 });
                             if plane.is_null() { return Err("missing resampler PCM plane".into()); }
-                            let index = if planar { sample } else { sample * channels + channel };
+                            let index = if planar { sample } else { sample * self.input_channels as usize + channel };
                             let value = ptr::read_unaligned(plane.cast::<f32>().add(index));
                             bytes.extend_from_slice(&value.to_le_bytes());
                         }
                     }
-                    owned.write_all(&bytes).map_err(|e| e.to_string())?;
+                    let mut rematrix = crate::owned_pcm_gain::PcmGain::new(
+                        &mut *owned, 1.0, self.input_channels as u16, channels as u16)?;
+                    rematrix.write_all(&bytes).map_err(|e| e.to_string())?;
+                    if !rematrix.frame_complete() { return Err("incomplete resampler input frame".into()); }
                 }
                 let bytes = owned.take_output();
                 let count = i32::try_from(bytes.len() / (channels * 4)).map_err(|_| "resampled audio size overflow")?;
@@ -1200,10 +1210,11 @@ mod owned_rate_tests {
     #[test]
     fn float_rate_adapter_uses_owned_filter_for_packed_and_planar_pcm() {
         use std::io::Write;
-        for planar in [false, true] {
-            let pcm: Vec<f32> = (0..997).flat_map(|i| [(i as f32 * 0.07).sin(), -0.25]).collect();
-            let mut reference = crate::owned_resample::Resampler::new(Vec::new(), 48000, 16000, 2).unwrap();
-            reference.write_all(&pcm.iter().flat_map(|s| s.to_le_bytes()).collect::<Vec<_>>()).unwrap();
+        for (planar, input_channels, output_channels) in [(false, 2, 2), (true, 2, 2), (false, 2, 1), (true, 2, 1), (false, 6, 2), (true, 6, 2)] {
+            let pcm: Vec<f32> = (0..997).flat_map(|i| [(i as f32 * 0.07).sin(), -0.25, 0.5, 1.0, 0.1, 0.2].into_iter().take(input_channels as usize)).collect();
+            let mut reference = crate::owned_resample::Resampler::new(Vec::new(), 48000, 16000, output_channels).unwrap();
+            crate::owned_pcm_gain::PcmGain::new(&mut reference, 1.0, input_channels, output_channels).unwrap()
+                .write_all(&pcm.iter().flat_map(|s| s.to_le_bytes()).collect::<Vec<_>>()).unwrap();
             reference.finish().unwrap();
             let expected = reference.take_output();
             let input = Frame::new().unwrap();
@@ -1213,26 +1224,26 @@ mod owned_rate_tests {
                 (*input.0).format = if planar { AVSampleFormat_AV_SAMPLE_FMT_FLTP } else { AVSampleFormat_AV_SAMPLE_FMT_FLT };
                 (*input.0).sample_rate = 48000;
                 (*input.0).nb_samples = 997;
-                av_channel_layout_default(&mut (*input.0).ch_layout, 2);
+                av_channel_layout_default(&mut (*input.0).ch_layout, i32::from(input_channels));
                 check(av_frame_get_buffer(input.0, 0), "test input").unwrap();
                 for sample in 0..997 {
-                    for channel in 0..2 {
+                    for channel in 0..input_channels as usize {
                         let plane = *(*input.0).extended_data.add(if planar { channel } else { 0 });
-                        ptr::write_unaligned(plane.cast::<f32>().add(if planar {sample} else {sample * 2 + channel}), pcm[sample * 2 + channel]);
+                        ptr::write_unaligned(plane.cast::<f32>().add(if planar {sample} else {sample * input_channels as usize + channel}), pcm[sample * input_channels as usize + channel]);
                     }
                 }
-                let mut adapter = Resampler::open(input.0, 16000, 2).unwrap();
+                let mut adapter = Resampler::open(input.0, 16000, i32::from(output_channels)).unwrap();
                 assert!(adapter.owned.is_some());
                 assert!(adapter.swr.is_null());
                 let mut actual = Vec::new();
                 for source in [input.0 as *const AVFrame, ptr::null()] {
                     let count = adapter.convert(output.0, source).unwrap();
-                    for i in 0..count as usize * 2 {
+                    for i in 0..count as usize * output_channels as usize {
                         actual.extend_from_slice(&ptr::read_unaligned((*output.0).data[0].cast::<f32>().add(i)).to_le_bytes());
                     }
                 }
                 assert_eq!(actual, expected);
-                assert_eq!(actual.len(), 333 * 2 * 4);
+                assert_eq!(actual.len(), 333 * output_channels as usize * 4);
                 assert_eq!(adapter.convert(output.0, ptr::null()).unwrap(), 0);
             }
         }
