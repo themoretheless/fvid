@@ -36,8 +36,9 @@ mix сохраняет PCE mask 0xff для ADTS/MP4/Matroska; тест двух
   принимаются до slices, включая `avc3`; смена SPS требует IDR и нового DPB.
   Reset возвращает исходную конфигурацию. Main/CABAC I/P/P поток со сменой
   64x64 -> 96x64 совпадает с независимым YUV-эталоном; native playback и
-  camera bridge проходят смену размера и перемотку. Multiple slices, custom
-  scaling matrices и другие неподключённые инструменты ещё ограничены.
+  camera bridge проходят смену размера и перемотку. Scaling matrices 4x4/8x8 подключены к intra/inter reconstruction с правилами
+  наследования SPS/PPS; JVT/custom I/P/B совпадают с YUV-эталонами. Multiple
+  slices, transform bypass и другие неподключённые инструменты ещё ограничены.
 - `src/codec/hevc_decoder.rs`: независимые multi-slice headers разбираются
   через `slice_headers`, с проверкой общей picture identity и порядка CTU.
   Независимые slices восстанавливаются в общие planes с WPP, CABAC reset,
@@ -1417,3 +1418,18 @@ after a resolution change, exact saved independent YUV, native RGB playback,
 camera fixed-format output and rewind. Late parameter changes and non-IDR
 sequence switches fail without publishing a picture and recover after reset.
 This does not add AVC multiple-slice reconstruction or custom scaling matrices.
+
+### AVC custom scaling matrix reconstruction
+
+Added an owned raster matrix resolver with normative 4x4/8x8 defaults and SPS/PPS
+fallback rules A/B. Matrices are resolved once per picture and shared with row
+workers. Intra luma 4x4/8x8/DC, chroma DC/AC, mixed intra blocks in inter pictures,
+and P/B residual reconstruction now use their resolved component matrices.
+Flat streams retain their previous weights; transform bypass remains unsupported.
+
+Two eight-frame synthetic High/CABAC I/P/B streams with JVT and nonuniform custom
+weights match every saved independent-decoder YUV byte, including rewind. The
+custom fixture explicitly exercises nonzero intra 8x8 residuals. Resolver tests
+cover scan order, standard defaults, SPS/PPS inheritance and invalid weights;
+encoded SPS fallback variants and other chroma profiles remain outside this proof.
+Reference encoders/decoders run only during fixture generation.

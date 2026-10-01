@@ -102,14 +102,13 @@ pub fn decode_intra_picture(
     if header.first_mb != 0 {
         return Err(invalid("intra picture currently requires one full slice"));
     }
-    if sps.scaling_lists.is_some() || pps.scaling_lists.is_some() || sps.transform_bypass {
-        return Err(invalid(
-            "custom scaling matrices and transform bypass are not yet supported",
-        ));
+    if sps.transform_bypass {
+        return Err(invalid("transform bypass is not yet supported"));
     }
     if sps.bit_depth_luma != sps.bit_depth_chroma {
         return Err(invalid("mixed component bit depths are not yet supported"));
     }
+    let scaling = super::avc_scaling::ScalingMatrices::new(sps, pps)?;
     let (w, h) = sps.coded_dimensions();
     let (w, h) = (w as usize, h as usize);
     let pixels = w
@@ -180,7 +179,7 @@ pub fn decode_intra_picture(
                     - 6 * (i32::from(sps.bit_depth_chroma) - 8);
         }
         eight[mb.address as usize] = u8::from(matches!(mb.luma, IntraLuma::Blocks8 { .. }));
-        reconstruct_macroblock(&mut picture, &mb, sps, pps, &mut ready)?;
+        reconstruct_macroblock(&mut picture, &mb, sps, pps, &scaling, &mut ready)?;
         seen += 1;
     }
     if seen != count {
@@ -296,7 +295,15 @@ mod tests {
                         ready[y * 8 + x] = 0;
                     }
                 }
-                reconstruct_macroblock(&mut picture, &mb, &sps, &pps, &mut ready).unwrap();
+                reconstruct_macroblock(
+                    &mut picture,
+                    &mb,
+                    &sps,
+                    &pps,
+                    &crate::codec::avc_scaling::ScalingMatrices::new(&sps, &pps).unwrap(),
+                    &mut ready,
+                )
+                .unwrap();
                 for y in 16..32 {
                     assert!(
                         picture.y[y * 32 + 16..y * 32 + 32]
@@ -355,13 +362,14 @@ fn available_edges<const N: usize>(
     )
 }
 
-/// Shared flat-scaling intra reconstruction for a complete progressive picture.
+/// Shared scaling-aware intra reconstruction for a complete progressive picture.
 /// Caller provides valid raster macroblock geometry and availability grid.
 pub(super) fn reconstruct_macroblock(
     picture: &mut IntraPicture,
     mb: &super::avc_macroblock::IntraMacroblock,
     sps: &Sps,
     pps: &Pps,
+    scaling: &super::avc_scaling::ScalingMatrices,
     ready: &mut [u8],
 ) -> Result<()> {
     let (w, h) = (picture.coded_width, picture.coded_height);
@@ -394,7 +402,7 @@ pub(super) fn reconstruct_macroblock(
                     &levels[block],
                     qp,
                     sps.bit_depth_luma,
-                    &[16; 64],
+                    &scaling.eight[0],
                 )?;
                 let reconstructed =
                     super::avc_transform8::reconstruct_8x8(&pred, &residual, sps.bit_depth_luma)?;
@@ -427,7 +435,7 @@ pub(super) fn reconstruct_macroblock(
                 &mb.luma_levels,
                 qp,
                 sps.bit_depth_luma,
-                &[16; 16],
+                &scaling.four[0],
             )?;
             put(&mut picture.y, w, mx * 16, my * 16, 16, &block);
         }
@@ -460,7 +468,7 @@ pub(super) fn reconstruct_macroblock(
                     &mb.luma_levels[by * 4 + bx],
                     qp,
                     sps.bit_depth_luma,
-                    &[16; 16],
+                    &scaling.four[0],
                     None,
                 )?;
                 let block = reconstruct_4x4(&pred, &residual, sps.bit_depth_luma)?;
@@ -493,7 +501,12 @@ pub(super) fn reconstruct_macroblock(
                 pps.second_chroma_qp_offset
             };
             let qp = chroma_qp(mb.qp, offset, sps.bit_depth_chroma);
-            let dc = chroma_dc_2x2(&mb.chroma_dc[component], qp, sps.bit_depth_chroma, 16)?;
+            let dc = chroma_dc_2x2(
+                &mb.chroma_dc[component],
+                qp,
+                sps.bit_depth_chroma,
+                scaling.four[component + 1][0],
+            )?;
             for block in 0..4 {
                 let bx = (block % 2) * 4;
                 let by = (block / 2) * 4;
@@ -502,7 +515,7 @@ pub(super) fn reconstruct_macroblock(
                     &mb.chroma_ac[component][block],
                     qp,
                     sps.bit_depth_chroma,
-                    &[16; 16],
+                    &scaling.four[component + 1],
                     Some(dc[block]),
                 )?;
                 let reconstructed = reconstruct_4x4(&pred, &residual, sps.bit_depth_chroma)?;

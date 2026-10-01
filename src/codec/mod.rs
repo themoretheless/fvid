@@ -436,3 +436,5 @@ pub mod aac_tns;
 
 pub mod ffv1_encoder;
 pub mod ffv1_decoder;
+
+pub mod avc_scaling;

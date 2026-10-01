@@ -1,4 +1,4 @@
-//! Single-slice progressive CAVLC/CABAC P/B-picture reconstruction, flat scaling lists.
+//! Single-slice progressive CAVLC/CABAC P/B-picture reconstruction, resolved scaling lists.
 use super::{
     avc::{Pps, SliceGroups, Sps},
     avc_boundary::{BlockEdge, DecodedBlockEdges, MotionReference},
@@ -43,6 +43,7 @@ enum Order {
 fn reconstruct_inter_job(
     job: InterJob,
     depth: u8,
+    scaling: &super::avc_scaling::ScalingMatrices,
     refs: &[Vec<&Reference420<'_>>; 2],
     w: usize,
     y: &mut [u16],
@@ -67,8 +68,8 @@ fn reconstruct_inter_job(
             &c.chroma_dc,
             &c.chroma_ac,
             job.qps,
-            &[[16; 16]; 3],
-            &[16; 64],
+            &[scaling.four[3], scaling.four[4], scaling.four[5]],
+            &scaling.eight[1],
         )?
     } else {
         prediction
@@ -127,13 +128,12 @@ pub fn decode_inter_picture_with_motion(
         || sps.separate_colour_plane
         || sps.bit_depth_luma != sps.bit_depth_chroma
         || sps.transform_bypass
-        || sps.scaling_lists.is_some()
-        || pps.scaling_lists.is_some()
         || !matches!(pps.slice_groups, SliceGroups::Single)
         || header.redundant_pic_cnt != 0
     {
         return Err(invalid("unsupported inter-picture reconstruction tools"));
     }
+    let scaling = super::avc_scaling::ScalingMatrices::new(sps, pps)?;
     let explicit_weights = if is_b {
         pps.weighted_bipred == 1
     } else {
@@ -276,6 +276,7 @@ pub fn decode_inter_picture_with_motion(
             .max(1);
         let depth = sps.bit_depth_luma;
         let refs = &refs;
+        let scaling = &scaling;
         let results: Vec<Result<()>> = std::thread::scope(|scope| {
             let handles: Vec<_> = (0..threads)
                 .map(|_| {
@@ -300,7 +301,7 @@ pub fn decode_inter_picture_with_motion(
                             let mut band = bands[row].lock().unwrap_or_else(|e| e.into_inner());
                             let (y, cb, cr, jobs) = &mut *band;
                             for job in jobs.drain(..) {
-                                reconstruct_inter_job(job, depth, refs, w, y, cb, cr)?;
+                                reconstruct_inter_job(job, depth, scaling, refs, w, y, cb, cr)?;
                             }
                             drop(band);
                             let current = edge_rows[row].lock().unwrap_or_else(|e| e.into_inner());
@@ -611,7 +612,9 @@ pub fn decode_inter_picture_with_motion(
                 }
             }
             Order::Intra(block) => {
-                super::avc_picture::reconstruct_macroblock(&mut out, &block, sps, pps, &mut ready)?;
+                super::avc_picture::reconstruct_macroblock(
+                    &mut out, &block, sps, pps, &scaling, &mut ready,
+                )?;
             }
         }
     }

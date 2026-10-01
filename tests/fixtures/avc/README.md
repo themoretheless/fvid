@@ -53,3 +53,18 @@ filter graph. Ordinary tests use saved bytes and never invoke the generator.
 `tests/avc_parameter_updates.rs` verifies every decoded sample, parameter-only
 packets, invalid non-IDR/late transitions, reset, software native playback, and
 fixed-size camera output across the change and backward seek.
+
+### Scaling matrices
+
+`../playback-errors/avc-scaling-jvt.mp4` and `avc-scaling-custom.mp4` each
+contain eight synthetic 64x64 High/CABAC I/P/B pictures. Their `.yuv` files are
+saved independent-decoder outputs. Regenerate both with
+`python3 scripts/generate_avc_scaling_samples.py` from the repository root.
+The script records all encoder parameters and deterministic custom weights.
+
+`tests/avc_scaling.rs` requires non-flat 4x4 and 8x8 matrices and compares every
+sample twice with rewind. The custom fixture additionally proves a nonzero 8x8
+intra residual is actually present. The JVT fixture proves its decoded stream,
+not that every advertised transform is used. Separate tests check raster scan,
+flat/default differences, SPS fallback A, PPS fallback B and malformed lists.
+Ordinary tests never invoke FFmpeg or the generation script.

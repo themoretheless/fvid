@@ -119,6 +119,7 @@ mod tests {
             &mb,
             &sps,
             &pps,
+            &crate::codec::avc_scaling::ScalingMatrices::new(&sps, &pps).unwrap(),
             &mut [0; 16],
         )
         .unwrap();
