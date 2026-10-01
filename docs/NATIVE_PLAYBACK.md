@@ -3121,3 +3121,12 @@ depth and sampling. This primitive performs no alpha blending, colour
 conversion or temporal scheduling. The legacy public video overlay workflow
 still needs migration to this compositor with owned demux/decode/mux and
 companion-track retention; adding the primitive does not remove that fallback.
+
+`native_lossless::write_mp4_processed` connects an owned frame processor to
+the AVC/HEVC-to-FFV1 writer while retaining main-input AAC packets, metadata
+and video PTS. The processor receives display-oriented sample planes, depth
+and nanosecond PTS before encoding; changed output dimensions/sampling are
+rejected. The caller still owns atomic publication. Tests run the opaque
+compositor through AVC and HEVC Main/Main10 encoding and decoding, compare
+exact sample planes and PTS, and propagate processor errors. Two-source
+frame scheduling and the public overlay workflow remain to be connected.

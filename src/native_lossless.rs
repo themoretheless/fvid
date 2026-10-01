@@ -66,6 +66,19 @@ pub fn write_mp4_transformed<W: Write + Seek>(
     filters: &crate::native_pixels::PixelFilters,
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
+ ) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
+    write_mp4_processed(source,output,geometry,filters,cancel,progress,None)
+}
+
+/// Run an owned frame processor before FFV1 encoding, retaining timing and AAC.
+/// Processor input has stored rotation materialized; dimensions/sampling must
+/// remain unchanged. Publication remains the caller's responsibility.
+pub fn write_mp4_processed<W: Write + Seek>(
+    source: &Path, output: &mut W,
+    geometry: &crate::native_geometry::VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
+    cancel: Option<&CancelFlag>, progress: Option<&ProgressHook>,
+    mut processor: Option<&mut dyn FnMut(&mut crate::native_geometry::GeometryFrame,u8,u64)->Result<()>>,
 ) -> Result<(crate::media_info::LosslessStats, ProgressEvent)> {
     check(cancel)?;
     let mut input = Mp4Reader::open(BufReader::new(File::open(source)?), Default::default())?;
@@ -92,7 +105,7 @@ pub fn write_mp4_transformed<W: Write + Seek>(
         .read_frame_raw()?
         .ok_or_else(|| invalid("input has no decoded video frames"))?;
     check(cancel)?;
-    let bake_rotation = !geometry.is_identity() || !filters.is_empty();
+    let bake_rotation = processor.is_some() || !geometry.is_identity() || !filters.is_empty();
     let prepare = |frame: &RawFrame, display: [usize; 2]| -> Result<_> {
         let (w, h, depth) = match frame {
             RawFrame::Avc { picture, .. } => {
@@ -257,11 +270,14 @@ pub fn write_mp4_transformed<W: Write + Seek>(
             return Err(invalid("FFV1 stream geometry or depth changed"));
         }
         depth = Some(bit_depth);
-        let samples = if let Some(samples) = prepared_first.take() {
+        let mut samples = if let Some(samples) = prepared_first.take() {
             samples
         } else {
             prepare(&frame, reader.dimensions())?
         };
+        if let Some(process) = processor.as_deref_mut() {
+            process(&mut samples,bit_depth,time.unwrap().0)?;
+        }
         if (samples.width, samples.height) != output_dimensions
             || samples.subsampling != output_layout
         {
