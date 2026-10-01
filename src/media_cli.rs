@@ -3589,13 +3589,15 @@ fn try_mp4_matroska_concat(args: &[String]) -> Result<bool, Box<dyn std::error::
     let mut paths = Vec::new();
     let mut quiet = false;
     let mut progress = false;
+    let mut output_format = "mkv";
     let mut items = args[first..].iter();
     while let Some(arg) = items.next() {
         match arg.as_str() {
             "--quiet" => quiet = true,
             "--progress" if !plan => progress = true,
             "--output-format" if plan => {
-                if !matches!(items.next().map(String::as_str),Some("matroska"|"mkv"|"mka")) { return Ok(false); }
+                output_format=items.next().map(String::as_str).ok_or("missing concat output format")?;
+                if !matches!(Some(output_format),Some("matroska"|"mkv"|"mka")) { return Ok(false); }
             },
             _ if arg.starts_with('-') => return Ok(false),
             _ => paths.push(std::path::PathBuf::from(arg)),
@@ -3603,7 +3605,7 @@ fn try_mp4_matroska_concat(args: &[String]) -> Result<bool, Box<dyn std::error::
     }
     if paths.len() < 2 { return Ok(false); }
     if plan {
-        let Some(result) = fvid::native_plan::concat_mp4_matroska(&paths)? else { return Ok(false); };
+        let Some(result) = fvid::native_plan::concat_matroska_to(&paths,std::path::Path::new(if output_format=="mka" {"output.mka"} else {"output.mkv"}))? else { return Ok(false); };
         println!("{}",serde_json::to_string_pretty(&result)?);
     } else {
         let hook = progress.then(||fvid::media_control::ProgressHook::new(|event| {

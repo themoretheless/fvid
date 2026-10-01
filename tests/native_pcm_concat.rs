@@ -56,6 +56,18 @@ fn independent_aac_edits_and_mixed_containers_concatenate_exact_samples() {
         .unwrap()
         .unwrap();
     assert!(plan.steps.iter().any(|s| s.action == "decode"));
+    assert_eq!(plan.streams.len(), 1);
+    assert_eq!(plan.streams[0].disposition, "decode_to_pcm");
+    assert!(
+        fvid::native_plan::concat_matroska_to(&sources, &output)
+            .unwrap()
+            .is_some()
+    );
+    assert!(
+        fvid::native_plan::concat_matroska_to(&sources, &d.0.join("out.mp4"))
+            .unwrap()
+            .is_none()
+    );
     let original = std::fs::read(raw).unwrap();
     assert_eq!(std::fs::read(decoded).unwrap(), original.repeat(3));
     assert_eq!(
@@ -122,5 +134,20 @@ fn incompatible_geometry_and_video_tracks_are_not_silently_omitted() {
     ];
     assert!(!native_audio_mix::concat_eligible(&sources).unwrap());
     let video = fixture("short/avc-baseline.mp4");
+    let inputs = vec![video.clone(), video.clone()];
+    assert!(fvid::native_plan::concat_matroska_to(&inputs, Path::new("video.mka")).is_err());
+    let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "concat"])
+        .args(&inputs)
+        .args(["--output-format", "mka"])
+        .output()
+        .unwrap();
+    assert!(!result.status.success());
+    assert!(String::from_utf8_lossy(&result.stderr).contains("audio-only"));
+    assert!(
+        fvid::native_plan::concat_matroska_to(&inputs, Path::new("video.mkv"))
+            .unwrap()
+            .is_some()
+    );
     assert!(!native_audio_mix::concat_eligible(&[video.clone(), video]).unwrap());
 }

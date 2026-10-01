@@ -373,10 +373,25 @@ pub fn normalize_loudness(source: &std::path::Path, selected: Option<usize>, wei
 
 
 /// Validate compressed concat compatibility and describe the owned Matroska route.
+/// Plan Matroska concat for a concrete destination, including audio-only admission.
+pub fn concat_matroska_to(sources: &[std::path::PathBuf], destination: &std::path::Path) -> Result<Option<MediaPlan>> {
+    let audio_only=match destination.extension().and_then(|s|s.to_str()) {
+        Some("mka")=>true,Some("mkv")=>false,_=>return Ok(None),
+    };
+    let Some(plan)=concat_mp4_matroska(sources)? else {return Ok(None);};
+    if audio_only && crate::native_probe::probe(&sources[0])?.streams.iter().any(|s|s.media_type!="audio") {
+        return Err(".mka concat output requires audio-only input".into());
+    }
+    Ok(Some(plan))
+}
+
 pub fn concat_mp4_matroska(sources: &[std::path::PathBuf]) -> Result<Option<MediaPlan>> {
     if crate::container::mp4_concat::open(sources,None).map_err(|e|e.to_string())?.is_none() {
         if !crate::native_audio_mix::concat_eligible(sources).map_err(|e|e.to_string())? {return Ok(None);}
-        return Ok(Some(MediaPlan {command:"concat".into(),input:sources[0].clone(),inputs:sources.to_vec(),streams:vec![],graph:None,
+        return Ok(Some(MediaPlan {command:"concat".into(),input:sources[0].clone(),inputs:sources.to_vec(),
+            streams:crate::native_probe::probe(&sources[0])?.streams.into_iter().map(|s|PlanStream {
+                index:s.index,media_type:s.media_type,codec:s.codec,disposition:"decode_to_pcm".into(),
+            }).collect(),graph:None,
             steps:vec![PlanStep {action:"decode".into(),detail:"decode each single audio source independently through owned codecs, retaining its audible samples".into()},
                 PlanStep {action:"concat".into(),detail:"append float32 samples without resampling or channel remapping".into()},
                 PlanStep {action:"write".into(),detail:"owned PCM Matroska .mka/.mkv, atomic publication without overwrite".into()}],

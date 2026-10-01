@@ -3087,3 +3087,8 @@ Cancellation removes the scratch directory; existing output is never replaced.
 Progress reports segment completion; final completion follows publication.
 Tests compare mixed edited AAC/WAVE joins byte for byte and verify independent
 PCM container decode, cancellation, publication and the compressed-copy path.
+
+`native_plan::concat_matroska_to` validates a concrete `.mka`/`.mkv`
+destination. Headless `plan concat --output-format mka` rejects video tracks
+just as execution does. PCM concat plans identify the input audio stream and
+its `decode_to_pcm` disposition instead of reporting an empty stream list.
