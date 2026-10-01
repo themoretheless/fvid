@@ -3099,3 +3099,11 @@ progress phases are shared with WAVE output. Tests compare gain reports and
 normalized samples exactly through both containers, including the headless
 CLI. This remains constant-gain, sample-peak-limited normalization; dynamic
 loudnorm and true-peak limiting are separate remaining operations.
+
+Multichannel Matroska PCM carries a channel count without an explicit speaker
+layout in the owned path. Converting it to WAVE preserves an unknown channel
+mask (zero), rather than deriving speaker assignments from channel count.
+Mono/stereo rematrixing of such inputs requires a known layout and is rejected
+before publication; unchanged channel vectors, gain and rate conversion remain
+supported. A regression covers four channels formed by merging two stereo
+inputs, exact sample preservation and failed-rematrix cleanup.

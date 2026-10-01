@@ -473,16 +473,22 @@ fn export_pcm_selected(
         let config = adts.as_ref().ok_or_else(|| invalid("missing ADTS reader"))?.configuration();
         (config.sample_rate, config.channels)
     };
+    let unknown_pcm_layout = if let Some(reader)=&matroska {
+        let index=crate::native_media::matroska_audio_index(reader,selected)?;
+        reader.tracks[index].codec.starts_with("A_PCM/") && input_channels>2
+    } else {false};
     let output_rate = sample_rate.unwrap_or(input_rate);
     let output_channels = channels.unwrap_or(input_channels);
     if output_channels != input_channels && !matches!(output_channels, 1 | 2) {
         return Err(invalid("native audio channel conversion supports mono or stereo output"));
     }
     if output_channels != input_channels {
+        if unknown_pcm_layout {return Err(invalid("PCM channel conversion requires a known speaker layout"));}
         if input_channels > 6 { return Err(invalid("native audio rematrixing supports 1..=6 input channels")); }
         if let Some((_, info)) = &wave { info.validate_rematrix()?; }
     }
     let output_mask = match &wave {
+        _ if unknown_pcm_layout && output_channels == input_channels => 0,
         Some((_, info)) if output_channels == input_channels => info.channel_mask,
         _ => default_pcm_mask(output_channels)?,
     };

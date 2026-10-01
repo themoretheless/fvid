@@ -499,6 +499,15 @@ fn mix_and_merge_matroska_match_wave_samples_and_channel_order() {
         assert_eq!(stats.sample_rate, 44100);
         assert_eq!(stats.channels, if merge { 4 } else { 2 });
         assert_eq!(pcm(&wav), std::fs::read(raw).unwrap());
+        if merge {
+            let unknown=d.0.join("unknown-layout.wav");
+            fvid::native_export::export_audio_pcm_selected(&mka,&unknown,None,1.0,None,None,None,None,None).unwrap();
+            let info=fvid::native_pcm::inspect(&mut std::fs::File::open(&unknown).unwrap(),None).unwrap();
+            assert_eq!(info.channels,4);assert_eq!(info.channel_mask,0);assert_eq!(pcm(&unknown),pcm(&wav));
+            let remixed=d.0.join("unsafe-remix.wav");
+            assert!(fvid::native_export::export_audio_pcm_selected(&mka,&remixed,None,1.0,Some(2),None,None,None,None).is_err());assert!(!remixed.exists());
+        }
+
         let bytes = std::fs::read(&mka).unwrap();
         let cli = d.0.join(format!("cli-{name}.mka"));
         let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
