@@ -168,10 +168,10 @@ pub fn decode(
             ];
             let planes = std::mem::replace(&mut decoder.planes, placeholders);
             decoder.jobs = Some(sender);
-            let num_workers = std::thread::available_parallelism()
-                .map_or(1, |n| n.get())
-                .min(rows as usize)
-                .max(1);
+            // Reconstruction owns shared sample planes and waits for every
+            // preceding row. More consumers cannot run concurrently; one worker
+            // overlaps reconstruction with parsing without per-row wake-up races.
+            let num_workers = 1;
             let completed =
                 std::sync::Arc::new((std::sync::Mutex::new(0usize), std::sync::Condvar::new()));
             let receiver = std::sync::Arc::new(std::sync::Mutex::new(receiver));

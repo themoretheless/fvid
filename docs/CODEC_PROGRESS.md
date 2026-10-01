@@ -1816,3 +1816,21 @@ The native dependency guard now examines activated media features rather than
 rejecting the project crate's name. Headless/player/camera graphs passed, and a
 positive legacy-media check proved `legacy-ffmpeg` detection. Camera bridge lock
 metadata was updated offline for the new native media dependency.
+
+### HEVC reconstruction avoids redundant serialized workers
+
+HEVC row workers wait for every preceding row and hold a shared sample-plane
+mutex while reconstructing. Multiple consumers therefore cannot reconstruct
+concurrently. A single reconstruction worker still overlaps with the parser,
+while avoiding many per-picture threads and row notification contention. No
+prediction, transforms, filtering or decoded-byte algorithm was changed.
+All 25 HEVC playback/multislice/parameter-update integration tests passed,
+including saved independent planes, resets and malformed input handling.
+
+The same M4 Max / 886x1920 target / first 600 software frames measured after this
+change (sequential raw and CPU RGB runs): raw 153.41 fps, p50 2.65 ms, p95 25.05 ms,
+p99 35.55 ms, 122/600 frames over 16.67 ms; CPU RGB 139.83 fps, p50 3.33 ms,
+p95 25.53 ms, p99 37.53 ms, 136/600 over budget. Earlier measurements were
+107.56/105.83 fps and p95 36.30/33.97 ms. These are local observations in a shared
+machine environment, not a fully isolated A/B benchmark or proof of smooth
+60 fps GPU presentation. Latency tails/render/queue verification remain pending.
