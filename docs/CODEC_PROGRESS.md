@@ -1510,3 +1510,8 @@ single media edit, the first packet contributes 16 samples and the last 896,
 for 48008 total. Captured playback PCM matches the native export exactly.
 The first timestamp is zero; duration, pacing and seek use the edit origin. Single-range AAC media edits now trim priming/padding before device delivery;
 complex multi-range and empty edits still require separate scheduling.
+
+The AAC single-edit seek regression verifies that a 50 ms presentation request
+lands at source tick 3064 and anchors the device at 42.833333 ms. `seek_to`
+returns source ticks for `time_of` to translate once; subtracting the priming
+offset in both places caused an incorrect device anchor and is fixed.

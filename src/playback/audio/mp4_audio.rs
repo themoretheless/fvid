@@ -310,7 +310,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     fn seek_to(&mut self, pts: i64) -> i64 {
         let track = self.track();
         let shift = if track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
-        Mp4AudioReader::seek(self, pts.saturating_add(shift)).saturating_sub(shift).max(0)
+        Mp4AudioReader::seek(self, pts.saturating_add(shift))
     }
 }
 
@@ -674,5 +674,23 @@ mod tests {
                 "1 ch 44100 Hz",
             ]
         );
+    }
+}
+
+#[cfg(all(test, feature = "player"))]
+mod edit_seek_tests {
+    use super::*;
+    use crate::audio::AudioStream;
+    #[test]
+    fn seek_anchor_applies_priming_offset_once() {
+        let file = include_bytes!("../../../tests/fixtures/playback-errors/aac-rounded-two-tracks.m4a").as_slice();
+        let mut stream = Mp4AudioReader::open_at(std::io::Cursor::new(file),Default::default(),1).unwrap();
+        let landed = stream.seek_to(2400);
+        assert_eq!(landed,3064);
+        assert_eq!(stream.time_of(landed),std::time::Duration::from_nanos(42_833_333));
+        let packet = stream.next_packet().unwrap().unwrap();
+        assert_eq!(packet.pts,landed);
+        assert_eq!(stream.seek_to(0),0);
+        assert_eq!(stream.time_of(0),std::time::Duration::ZERO);
     }
 }
