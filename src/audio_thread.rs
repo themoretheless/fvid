@@ -224,7 +224,7 @@ impl Worker {
             }
         };
 
-        let decoded = match self.decoder.decode_encoded(
+        let mut decoded = match self.decoder.decode_encoded(
             &packet.data,
             packet.pts.max(0) as u64,
             packet.duration.max(0) as u64,
@@ -238,6 +238,24 @@ impl Worker {
                 return (Some(AudioEvent::Error(e.to_string())), Duration::ZERO);
             }
         };
+
+        match self.stream.packet_sample_limit(packet.duration.max(0) as u64) {
+            Ok(Some(frames)) => {
+                let bytes = frames.checked_mul(usize::from(self.stream.channels())).and_then(|n| n.checked_mul(4));
+                match bytes {
+                    Some(bytes) if bytes <= decoded.data.len() => decoded.data.truncate(bytes),
+                    _ => {
+                        self.ended = true;
+                        return (Some(AudioEvent::Error("audio presentation window exceeds decoded PCM".into())), Duration::ZERO);
+                    }
+                }
+            }
+            Ok(None) => {},
+            Err(error) => {
+                self.ended = true;
+                return (Some(AudioEvent::Error(error.to_string())), Duration::ZERO);
+            }
+        }
 
         if let Err(e) = self.backend.push(decoded) {
             self.ended = true;
@@ -575,5 +593,36 @@ mod tests {
 
         playback.rewind();
         assert!(wait(&playback, || playback.position() == Duration::ZERO));
+    }
+}
+
+#[cfg(test)]
+mod presentation_window_tests {
+    use super::*;
+    struct Capture(Arc<Mutex<Vec<usize>>>);
+    impl AudioBackend for Capture {
+        fn start(&mut self, _:crate::audio::AudioSpec)->Result<(),crate::audio::AudioError>{Ok(())}
+        fn push(&mut self, packet:crate::audio::AudioPacket)->Result<(),crate::audio::AudioError>{self.0.lock().unwrap().push(packet.data.len()/8);Ok(())}
+        fn position(&self)->Duration{Duration::ZERO}
+        fn flush(&mut self,_:Duration)->Result<(),crate::audio::AudioError>{Ok(())}
+        fn pause(&mut self)->Result<(),crate::audio::AudioError>{Ok(())}
+        fn resume(&mut self)->Result<(),crate::audio::AudioError>{Ok(())}
+        fn stop(&mut self)->Result<(),crate::audio::AudioError>{Ok(())}
+    }
+    #[test]
+    fn worker_queues_container_window_after_consuming_complete_aac_packet() {
+        let stream = crate::playback_mp4_audio::Mp4AudioReader::open_at(std::io::Cursor::new(include_bytes!("../tests/fixtures/playback-errors/aac-rounded-two-tracks.m4a").as_slice()),Default::default(),1).unwrap();
+        let decoder = crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
+        let counts = Arc::new(Mutex::new(Vec::new()));
+        let (_,commands) = sync_channel(1);
+        let (events,_) = sync_channel(1);
+        let mut worker = Worker { stream:Box::new(stream),decoder,backend:Box::new(Capture(counts.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
+        let counts = counts.lock().unwrap();
+        assert_eq!(counts.len(),48);
+        assert_eq!(counts[0],1024);
+        assert_eq!(counts[1],1016);
+        assert_eq!(counts[47],912);
+        assert!(counts[2..47].iter().all(|n| *n==1024));
     }
 }

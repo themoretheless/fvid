@@ -540,6 +540,12 @@ pub trait AudioStream: Send {
     fn duration(&self) -> Option<Duration> {
         None
     }
+    /// Optional exact decoded sample window for a container packet. The decoder
+    /// must consume the whole access unit before the player trims its PCM tail.
+    /// Containers with approximate durations leave this unspecified.
+    fn packet_sample_limit(&self, _duration: u64) -> crate::Result<Option<usize>> {
+        Ok(None)
+    }
     /// Codec setup data, already in the form the decoder expects.
     fn extra_data(&self) -> &[u8];
     /// Every audio track of this container the player can decode, in container

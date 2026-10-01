@@ -222,6 +222,17 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         })
     }
 
+    fn packet_sample_limit(&self, duration: u64) -> Result<Option<usize>> {
+        if self.track().codec != *b"mp4a" { return Ok(None); }
+        let rate = u128::from(self.track().sample_rate);
+        let scale = u128::from(self.track().timescale);
+        let samples = u128::from(duration) * rate;
+        if scale == 0 || samples == 0 || samples % scale != 0 {
+            return Err(invalid("MP4 AAC packet duration is not sample aligned"));
+        }
+        Ok(Some(usize::try_from(samples / scale).map_err(|_| invalid("MP4 AAC sample window overflow"))?))
+    }
+
     fn extra_data(&self) -> &[u8] {
         &self.track().configuration
     }
