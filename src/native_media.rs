@@ -50,6 +50,16 @@ pub fn decode_video_pipeline(
     geometry: &crate::native_geometry::VideoGeometry,
     filters: &crate::native_pixels::PixelFilters,
 ) -> Result<DecodeStats> {
+    decode_video_pipeline_overlay(source, interval, geometry, filters, None)
+}
+fn decode_video_pipeline_overlay(
+    source: &Path,
+    interval: Option<(Duration, Duration)>,
+    geometry: &crate::native_geometry::VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
+    overlay: Option<&crate::media_info::OverlaySpec>,
+) -> Result<DecodeStats> {
+    let mut compositor = overlay.map(|spec| crate::native_export::TimedOverlay::new(&spec.path, i64::from(spec.x), i64::from(spec.y))).transpose()?;
     if interval.is_some_and(|(from, to)| from >= to) {
         return Err(invalid("decode interval requires from < to"));
     }
@@ -67,6 +77,13 @@ pub fn decode_video_pipeline(
         decode_errors: 0,
     };
     while let Some(frame) = reader.read_frame_raw()? {
+        let overlay_pts = if let Some(compositor) = compositor.as_mut() {
+            let (start, _, scale) = reader.frame_interval().ok_or_else(|| invalid("overlay frame has no timing"))?;
+            if scale == 0 {return Err(invalid("overlay clock is zero"));}
+            let pts = u64::try_from(start.checked_mul(1_000_000_000).ok_or_else(|| invalid("overlay timestamp overflow"))? / u128::from(scale)).map_err(|_| invalid("overlay timestamp overflow"))?;
+            compositor.validate_main(&reader, pts)?;
+            Some(pts)
+        } else { None };
         if let Some((from, to)) = interval {
             let (start, _, scale) = reader
                 .frame_interval()
@@ -102,7 +119,7 @@ pub fn decode_video_pipeline(
             RawFrame::Planar8(p) => planar_format(p.width, p.height, p.chroma_width, p.chroma_height)?,
             RawFrame::Yuv { sx, sy, .. } => planar_format(width, height, width / sx, height / sy)?,
         };
-        if !geometry.is_identity() || !filters.is_empty() {
+        if !geometry.is_identity() || !filters.is_empty() || compositor.is_some() {
             let mut output = geometry.apply_cropped_display(&frame, width, height, reader.rotation(), reader.insets())?;
             stats.width = u32::try_from(output.width).map_err(|_| invalid("video width overflow"))?;
             stats.height = u32::try_from(output.height).map_err(|_| invalid("video height overflow"))?;
@@ -118,6 +135,7 @@ pub fn decode_video_pipeline(
                 RawFrame::Planar(p) => p.depth,
                 _ => 8,
             };
+            if let Some(compositor) = compositor.as_mut() { compositor.apply(&mut output, depth, overlay_pts.unwrap(), None)?; }
             filters.apply(&mut output, depth)?;
             std::hint::black_box(output);
         }
@@ -836,7 +854,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         rotate: None,
         pad: _,
         burn_subs: None,
-        overlay: None,
+        overlay: _,
         yadif: None,
         bwdif: None,
         w3fdif: None,
@@ -961,7 +979,7 @@ pub fn decode_video_request(source: &Path, transform: &DecodeTransform) -> Resul
         pad: transform.pad.map(|r| [r.width as usize, r.height as usize, r.x as usize, r.y as usize]),
     };
     let filters = crate::native_pixels::PixelFilters::from_request(transform)?;
-    decode_video_pipeline(source, interval, &geometry, &filters)
+    decode_video_pipeline_overlay(source, interval, &geometry, &filters, transform.overlay.as_ref())
 }
 
 /// Detect ALAC in MP4 or Matroska by container contents, independent of filename suffix.

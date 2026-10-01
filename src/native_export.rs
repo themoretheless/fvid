@@ -1,6 +1,7 @@
 //! Native planar Y4M export. No foreign decoder, encoder or muxer is used.
 pub(crate) mod pcm_matroska;
 mod overlay;
+pub(crate) use overlay::TimedOverlay;
 pub use overlay::{overlay_video, overlay_eligible, overlay_video_transformed};
 use crate::{
     Result, invalid,

@@ -107,6 +107,77 @@ impl Source {
     }
 }
 
+/// Shared timed compositor for decode and export; source origins stay file-relative.
+pub(crate) struct TimedOverlay {
+    source: Source,
+    x: i64,
+    y: i64,
+    origin: Option<u64>,
+}
+impl TimedOverlay {
+    pub(crate) fn new(path: &Path, x: i64, y: i64) -> Result<Self> {
+        Ok(Self {
+            source: Source::open(path)?,
+            x,
+            y,
+            origin: None,
+        })
+    }
+    pub(crate) fn validate_main(
+        &mut self,
+        reader: &NativeReader<BufReader<File>>,
+        pts: u64,
+    ) -> Result<()> {
+        if reader.colour() != self.source.colour {
+            return Err(invalid(
+                "overlay inputs require matching colour encoding and range",
+            ));
+        }
+        let aspect = |reader: &NativeReader<BufReader<File>>| {
+            let (n, d) = reader.pixel_aspect();
+            if matches!(reader.rotation(), 90 | 270) {
+                (d, n)
+            } else {
+                (n, d)
+            }
+        };
+        let (mn, md) = aspect(reader);
+        let (fn_, fd) = aspect(&self.source.reader);
+        if u64::from(mn) * u64::from(fd) != u64::from(fn_) * u64::from(md)
+            || reader.hdr() != self.source.reader.hdr()
+        {
+            return Err(invalid(
+                "overlay inputs require matching display pixel aspect and HDR metadata",
+            ));
+        }
+        self.origin.get_or_insert(pts);
+        Ok(())
+    }
+    pub(crate) fn apply(
+        &mut self,
+        frame: &mut GeometryFrame,
+        depth: u8,
+        pts: u64,
+        cancel: Option<&CancelFlag>,
+    ) -> Result<()> {
+        let base = *self.origin.get_or_insert(pts);
+        let elapsed = pts
+            .checked_sub(base)
+            .ok_or_else(|| invalid("overlay main timestamp precedes origin"))?;
+        let full_range = self.source.colour.full_range;
+        let picture = self.source.at(elapsed, cancel)?;
+        crate::native_pixels::overlay_opaque_depth(
+            frame,
+            &picture.planes,
+            depth,
+            picture.depth,
+            full_range,
+            self.x,
+            self.y,
+        )
+    }
+}
+
 /// Owned lossless main admission; other main formats retain legacy routing.
 pub fn overlay_eligible(main: &Path) -> Result<bool> {
     if crate::native_lossless_y4m::eligible(main)? {
@@ -173,34 +244,25 @@ pub fn overlay_video_transformed(
     if destination.try_exists()? {
         return Err(invalid("overlay destination already exists"));
     }
-    let mut source = Source::open(foreground)?;
+    let mut compositor = TimedOverlay::new(foreground, x, y)?;
     let mut main_reader = NativeReader::software(BufReader::new(File::open(main)?), usize::MAX)?;
     main_reader
         .read_frame_raw()?
         .ok_or_else(|| invalid("main input has no frames"))?;
-    if main_reader.colour() != source.colour {
-        return Err(invalid(
-            "overlay inputs require matching colour encoding and range",
-        ));
+    let (start, _, scale) = main_reader
+        .frame_interval()
+        .ok_or_else(|| invalid("main frame has no timing"))?;
+    if scale == 0 {
+        return Err(invalid("overlay clock is zero"));
     }
-    let aspect = |reader: &NativeReader<BufReader<File>>| {
-        let (n, d) = reader.pixel_aspect();
-        if matches!(reader.rotation(), 90 | 270) {
-            (d, n)
-        } else {
-            (n, d)
-        }
-    };
-    let (mn, md) = aspect(&main_reader);
-    let (fn_, fd) = aspect(&source.reader);
-    if u64::from(mn) * u64::from(fd) != u64::from(fn_) * u64::from(md)
-        || main_reader.hdr() != source.reader.hdr()
-    {
-        return Err(invalid(
-            "overlay inputs require matching display pixel aspect and HDR metadata",
-        ));
-    }
-    let full_range = source.colour.full_range;
+    let pts = u64::try_from(
+        start
+            .checked_mul(1_000_000_000)
+            .ok_or_else(|| invalid("overlay timestamp overflow"))?
+            / u128::from(scale),
+    )
+    .map_err(|_| invalid("overlay timestamp overflow"))?;
+    compositor.validate_main(&main_reader, pts)?;
     drop(main_reader);
     let directory = destination
         .parent()
@@ -220,24 +282,13 @@ pub fn overlay_video_transformed(
             }
         })
         .ok_or_else(|| invalid("cannot reserve overlay output"))??;
-    let mut origin = None;
     let mut last = None;
     let mut processor = |frame: &mut GeometryFrame, depth: u8, pts: u64| {
         if last.is_some_and(|p| pts <= p) {
             return Err(invalid("main overlay timestamps must increase"));
         }
         last = Some(pts);
-        let base = *origin.get_or_insert(pts);
-        let picture = source.at(pts - base, cancel)?;
-        crate::native_pixels::overlay_opaque_depth(
-            frame,
-            &picture.planes,
-            depth,
-            picture.depth,
-            full_range,
-            x,
-            y,
-        )
+        compositor.apply(frame, depth, pts, cancel)
     };
     let mut output = BufWriter::new(file);
     let (stats, event) = if crate::native_lossless_y4m::eligible(main)? {
@@ -298,6 +349,20 @@ mod tests {
         }
         std::fs::write(&path, bytes).unwrap();
         let mut source = Source::open(&path).unwrap();
+        let mut compositor = TimedOverlay::new(&path, 0, 0).unwrap();
+        // An interval beginning one second into the file must not restart foreground.
+        compositor.origin = Some(500_000_000);
+        let mut target = GeometryFrame {
+            width: 2,
+            height: 2,
+            subsampling: Some([2, 2]),
+            data: vec![0; 6],
+        };
+        compositor
+            .apply(&mut target, 8, 1_500_000_000, None)
+            .unwrap();
+        assert_eq!(target.data, [128, 128, 128, 128, 128, 128]);
+
         for (time, value) in [
             (0, 16),
             (499_999_999, 16),
