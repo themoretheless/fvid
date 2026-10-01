@@ -76,6 +76,14 @@ impl AacDecoder {
 }
 
 impl crate::audio::AudioDecode for AacDecoder {
+    fn checkpoint(&self)->Option<crate::audio::AudioCheckpoint> {
+        (!self.failed).then(||crate::audio::AudioCheckpoint::Aac(self.decoder.checkpoint()))
+    }
+    fn restore(&mut self,state:&crate::audio::AudioCheckpoint)->crate::Result<()> {
+        let crate::audio::AudioCheckpoint::Aac(state)=state;
+        self.decoder.restore(state)?;self.failed=false;Ok(())
+    }
+
     fn decode_encoded(
         &mut self,
         data: &[u8],

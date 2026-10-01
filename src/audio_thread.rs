@@ -105,7 +105,7 @@ impl AudioPlayback {
 
                 let _ = event_tx.send(AudioEvent::Started);
 
-                Worker {
+                Worker { checkpoints:Vec::new(),
                     stream,
                     decoder,
                     backend,
@@ -197,6 +197,7 @@ impl Drop for AudioPlayback {
 }
 
 struct Worker {
+    checkpoints:Vec<(i64,crate::audio::AudioCheckpoint)>,
     stream: Box<dyn AudioStream>,
     decoder: Box<dyn AudioDecode>,
     backend: Box<dyn AudioBackend>,
@@ -209,6 +210,13 @@ struct Worker {
 }
 
 impl Worker {
+    fn restore_preroll(&mut self)->crate::Result<()> {
+        let Some(target)=self.stream.preroll_target() else {return Ok(());};
+        let Some((pts,state))=self.checkpoints.iter().filter(|(p,_)|*p<=target).max_by_key(|(p,_)|*p) else {return Ok(());};
+        if self.stream.resume_preroll(*pts) {self.decoder.restore(state)?;}
+        Ok(())
+    }
+
     /// Decode and queue one packet, reporting a terminal event if the stream
     /// ended or failed and how long to wait before feeding the next one.
     fn decode_next(&mut self) -> (Option<AudioEvent>, Duration) {
@@ -227,10 +235,21 @@ impl Worker {
         let (decoded, source_end) = match step {
             crate::audio::AudioStep::ResetDecoder => {
                 self.decoder.reset();
+                if let Err(e)=self.restore_preroll() {self.ended=true;return (Some(AudioEvent::Error(e.to_string())),Duration::ZERO);}
                 return (None,Duration::ZERO);
             }
             crate::audio::AudioStep::Pcm(packet) => (packet,None),
             crate::audio::AudioStep::Encoded(packet) => {
+                if self.stream.preroll_target().is_some() && self.stream.timescale()!=0 {
+                    let bucket=packet.pts/i64::from(self.stream.timescale());
+                    if !self.checkpoints.iter().any(|(p,_)|*p/i64::from(self.stream.timescale())==bucket) {
+                        if let Some(state)=self.decoder.checkpoint() {
+                            if self.checkpoints.len()==32 {self.checkpoints.remove(0);}
+                            self.checkpoints.push((packet.pts,state));
+                        }
+                    }
+                }
+
         let mut decoded = match self.decoder.decode_encoded(
             &packet.data,
             packet.pts.max(0) as u64,
@@ -351,6 +370,8 @@ impl Worker {
                 self.ended = false;
                 let result_pts = self.stream.seek_to(pts);
                 self.decoder.reset();
+                if let Err(e)=self.restore_preroll() {self.ended=true;let _=self.events.send(AudioEvent::Error(e.to_string()));}
+
                 // Anchor the clock at the sample actually landed on, which can
                 // precede the requested point; the backend advances from there.
                 let anchor = self.stream.time_of(result_pts);
@@ -646,7 +667,7 @@ mod presentation_window_tests {
         let counts = Arc::new(Mutex::new(Vec::new()));
         let (_,commands) = sync_channel(1);
         let (events,_) = sync_channel(1);
-        let mut worker = Worker { stream:Box::new(stream),decoder,backend:Box::new(Capture(counts.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        let mut worker = Worker { checkpoints:Vec::new(), stream:Box::new(stream),decoder,backend:Box::new(Capture(counts.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
         for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
         let packets = counts.lock().unwrap();
         let sizes:Vec<usize> = packets.iter().map(|p| p.data.len()/8).collect();
@@ -696,7 +717,7 @@ mod no_edit_seek_tests {
         let captured = Arc::new(Mutex::new(Vec::new()));
         let (_,commands) = sync_channel(1);
         let (events,_) = sync_channel(1);
-        let mut worker = Worker { stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        let mut worker = Worker { checkpoints:Vec::new(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
         for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
         let expected:Vec<u8> = captured.lock().unwrap().iter().flat_map(|p|p.data.iter().copied()).collect();
         captured.lock().unwrap().clear();
@@ -749,7 +770,7 @@ mod preroll_control_tests {
         let worker_commands = command_tx.clone();
         let worker_calls = calls.clone();
         let thread = std::thread::spawn(move || {
-            let worker = Worker { stream:Box::new(stream),decoder:Box::new(Decoder { inner,commands:worker_commands,calls:worker_calls }),backend:Box::new(Backend(paused_tx)),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+            let worker = Worker { checkpoints:Vec::new(), stream:Box::new(stream),decoder:Box::new(Decoder { inner,commands:worker_commands,calls:worker_calls }),backend:Box::new(Backend(paused_tx)),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
             worker.run();
         });
         let paused = paused_rx.recv_timeout(Duration::from_secs(5));
@@ -774,7 +795,7 @@ mod adts_seek_tests {
         let captured = Arc::new(Mutex::new(Vec::new()));
         let (_,commands) = sync_channel(1);
         let (events,_) = sync_channel(1);
-        let mut worker = Worker { stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        let mut worker = Worker { checkpoints:Vec::new(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
         for _ in 0..frames { assert!(worker.decode_next().0.is_none()); }
         let expected:Vec<u8> = captured.lock().unwrap().iter().flat_map(|p|p.data.iter().copied()).collect();
         for (request,landed) in [(3000,2048),(0,0)] {
@@ -801,7 +822,7 @@ mod matroska_aac_seek_tests {
         let captured = Arc::new(Mutex::new(Vec::new()));
         let (_,commands) = sync_channel(1);
         let (events,_) = sync_channel(1);
-        let mut worker = Worker { stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        let mut worker = Worker { checkpoints:Vec::new(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
         let mut final_pace = Duration::ZERO;
         for _ in 0..48 {
             let (event,pace) = worker.decode_next();
@@ -858,7 +879,7 @@ mod scheduling_step_tests {
         let steps=Steps([pcm(0),AudioStep::ResetDecoder,pcm(960)].into());
         let counts=Arc::new(Mutex::new(Vec::new()));let resets=Arc::new(Mutex::new(0));
         let (_,commands)=sync_channel(1);let(events,_)=sync_channel(1);
-        let mut worker=Worker {stream:Box::new(steps),decoder:Box::new(Decoder(resets.clone())),backend:Box::new(super::presentation_window_tests::Capture(counts.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+        let mut worker=Worker { checkpoints:Vec::new(),stream:Box::new(steps),decoder:Box::new(Decoder(resets.clone())),backend:Box::new(super::presentation_window_tests::Capture(counts.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
         assert!(worker.decode_next().0.is_none());
         let (event,pace)=worker.decode_next();assert!(event.is_none());assert_eq!(pace,Duration::ZERO);
         assert_eq!(*resets.lock().unwrap(),1);
@@ -890,7 +911,7 @@ mod mp4_edit_scheduler_tests {
         let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(data),Default::default()).unwrap();
         let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
         let packets=Arc::new(Mutex::new(Vec::new()));let(_,commands)=sync_channel(1);let(events,_)=sync_channel(1);
-        let mut worker=Worker {stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+        let mut worker=Worker { checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
         for _ in 0..200 {
             let(event,_)=worker.decode_next();
             if let Some(event)=event {assert!(matches!(event,AudioEvent::Ended(_)),"unexpected playback error");break;}
@@ -922,5 +943,43 @@ mod mp4_edit_scheduler_tests {
         for _ in 0..200 {if worker.decode_next().0.is_some() {break;}}
         let replay:Vec<_>=packets.lock().unwrap().iter().flat_map(|p|p.data.iter().copied()).collect();
         assert!(replay==expected,"AAC edit rewind differs from continuous playback");
+    }
+}
+
+#[cfg(test)]
+mod checkpoint_seek_tests {
+    use super::*;
+    #[test]
+    fn warmed_aac_seek_skips_source_prefix_without_changing_pcm() {
+        let data=include_bytes!("../tests/fixtures/audio/two-audio.mp4").as_slice();
+        let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(data),Default::default()).unwrap();
+        let scale=stream.timescale();let channels=usize::from(stream.channels());
+        let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
+        let packets=Arc::new(Mutex::new(Vec::new()));let (_,commands)=sync_channel(1);let(events,_)=sync_channel(1);
+        let mut worker=Worker {checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+        fn finish(worker:&mut Worker)->usize {
+            for count in 0..300 {
+                match worker.decode_next().0 {
+                    Some(AudioEvent::Ended(_))=>return count,
+                    Some(AudioEvent::Error(e))=>panic!("{e}"),
+                    _=>{}
+                }
+            }
+            panic!("audio did not finish");
+        }
+        let full_steps=finish(&mut worker);
+        assert!(worker.checkpoints.len()>=2,"fixture must cross checkpoint buckets");
+        let expected:Vec<_>=packets.lock().unwrap().iter().flat_map(|p|p.data.iter().copied()).collect();
+        packets.lock().unwrap().clear();
+        worker.handle(Command::Seek(i64::from(scale)*17/10));
+        let seek_steps=finish(&mut worker);
+        assert!(seek_steps<full_steps*3/4,"checkpoint did not skip preroll: {seek_steps}/{full_steps}");
+        eprintln!("AAC warm seek packet steps: {seek_steps}; full decode steps: {full_steps}");
+        let captured=packets.lock().unwrap();let start=captured[0].pts as usize;
+        let actual:Vec<_>=captured.iter().flat_map(|p|p.data.iter().copied()).collect();
+        assert!(actual==expected[start*channels*4..],"checkpoint seek changed PCM");drop(captured);
+        packets.lock().unwrap().clear();worker.handle(Command::Seek(0));finish(&mut worker);
+        let actual:Vec<_>=packets.lock().unwrap().iter().flat_map(|p|p.data.iter().copied()).collect();
+        assert!(actual==expected,"backward checkpoint seek changed PCM");
     }
 }

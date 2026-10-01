@@ -530,6 +530,11 @@ pub enum AudioStep {
 }
 
 pub trait AudioStream: Send {
+    /// Source timestamp required for the current seek/range preroll.
+    fn preroll_target(&self)->Option<i64> {None}
+    /// Continue at an exact encoded packet boundary, retaining presentation trim.
+    fn resume_preroll(&mut self,_:i64)->bool {false}
+
     /// Codec tag, e.g. `mp4a` or `A_VORBIS`.
     fn codec(&self) -> &str;
     /// Ticks per second used by packet timestamps.
@@ -587,7 +592,11 @@ pub trait AudioStream: Send {
 }
 
 /// Decoder half of the audio pipeline: turn encoded packets into PCM.
+pub enum AudioCheckpoint { Aac(crate::codec::aac_native::AacCheckpoint) }
 pub trait AudioDecode: Send {
+    fn checkpoint(&self)->Option<AudioCheckpoint> {None}
+    fn restore(&mut self,_:&AudioCheckpoint)->crate::Result<()> {Err(crate::invalid("audio checkpoint is unsupported"))}
+
     /// Decode one access unit. `Ok(None)` means the decoder consumed the packet
     /// without producing output, so the caller should feed it another one.
     fn decode_encoded(

@@ -228,6 +228,20 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         self.track().bit_depth
     }
 
+    fn preroll_target(&self)->Option<i64> {
+        if self.track().codec!=*b"mp4a" {return None;}
+        if let Some(t)=&self.timeline {
+            let (_,source)=t.locate(self.edit_cursor.get())?;
+            let ticks=u128::from(source?)*u128::from(self.track().timescale)/u128::from(self.track().sample_rate);
+            i64::try_from(ticks).ok()
+        } else {Some(self.presentation_floor)}
+    }
+    fn resume_preroll(&mut self,pts:i64)->bool {
+        if self.preroll_target().is_none_or(|target|pts>target) {return false;}
+        let index=self.track().samples.at_or_before(pts);
+        if self.track().samples.get(index).is_none_or(|s|s.pts!=pts) {return false;}
+        self.sample_index=index;true
+    }
     fn duration(&self) -> Option<std::time::Duration> {
         let track = self.track();
         if track.codec == *b"mp4a" && !track.edits.is_empty() && self.demuxer.movie_timescale() != 0 {

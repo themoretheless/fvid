@@ -1834,3 +1834,23 @@ p95 25.53 ms, p99 37.53 ms, 136/600 over budget. Earlier measurements were
 107.56/105.83 fps and p95 36.30/33.97 ms. These are local observations in a shared
 machine environment, not a fully isolated A/B benchmark or proof of smooth
 60 fps GPU presentation. Latency tails/render/queue verification remain pending.
+
+### MP4 AAC player seek restores packet-boundary checkpoints
+
+The audio worker now retains up to 32 opaque decoder states, one per source-clock
+second. Streams opt in with a source preroll target and exact packet-boundary
+resume; other codecs/containers keep their existing behavior. MP4 AAC opts in
+for ordinary edits and complex gap/repeated-range timelines. Seek/reset restores
+the nearest earlier retained state and packet cursor while preserving the
+presentation floor; complex range-reset steps repeat this restoration after
+selecting the new segment. Cache is scoped to the worker's fixed stream and
+retains no PCM. Uncached/evicted earlier regions still preroll from source start.
+
+A synthetic two-second AAC/video fixture verifies warm seek to 1.7 seconds:
+48 encoded steps versus 95 for full decoding, identical float-PCM tail, then
+identical complete PCM on backwards seek to zero. Existing silence/repeat/
+nonzero source range seek and rewind tests remain acceptance tests. Full core
+653 passed (3 ignored), full player 1189 passed (24 ignored), no failures.
+These totals exclude nine transform/synthesis tests moved into standalone
+fvid-media CI. ADTS/Matroska checkpoint-aware cursor support remains pending;
+no cold-seek acceleration or external-file latency claim is made here.
