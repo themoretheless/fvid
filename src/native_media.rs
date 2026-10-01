@@ -747,6 +747,8 @@ pub fn is_aac_source(path: &std::path::Path) -> std::io::Result<bool> {
 /// decode packets and therefore does not certify the rest of the bitstream.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AacSourceInfo {
+    /// Canonical WAVE speaker bits from AAC configuration.
+    pub channel_mask: u32,
     /// Zero-based container stream order, not MP4 track ID / Matroska track number.
     pub stream_index: usize,
     pub sample_rate: u32,
@@ -787,7 +789,7 @@ pub fn aac_source_info_selected(source: &Path, selected: Option<usize>) -> Resul
     if declared != (u64::from(sample_rate), u64::from(channels)) {
         return Err(crate::invalid("AAC container geometry disagrees with AudioSpecificConfig"));
     }
-    Ok(AacSourceInfo { stream_index, sample_rate, channels })
+    Ok(AacSourceInfo { stream_index, sample_rate, channels, channel_mask: decoder.channel_mask() })
 }
 
 /// Exact ADTS packet/sample counts from a sequential owned parser. Encoder
@@ -1066,6 +1068,8 @@ pub(crate) fn mp4_audio_index<R: std::io::Read + std::io::Seek>(
 }
 
 pub struct AudioSourceInfo {
+    /// None when the codec/container does not describe speaker positions.
+    pub channel_mask: Option<u32>,
     pub stream_index: usize,
     pub sample_rate: u32,
     pub channels: u16,
@@ -1082,7 +1086,7 @@ pub fn audio_source_info_selected(
             let reader=crate::container::webm::WebmReader::open(BufReader::new(input),Default::default())?;
             let index=matroska_audio_index(&reader,selected)?;let track=&reader.tracks[index];let decoder=crate::native_audio_decoder::PacketPcmDecoder::from_matroska(track)?;
             if track.sample_rate!=u64::from(decoder.sample_rate()) || track.channels!=u64::from(decoder.channels()) {return Err(invalid("Matroska audio geometry disagrees with configuration"));}
-            return Ok(AudioSourceInfo {stream_index:index,sample_rate:decoder.sample_rate(),channels:decoder.channels(),codec:match track.codec.as_str() {"A_ALAC"=>"alac","A_PCM/INT/LIT"|"A_PCM/INT/BIG" if track.bit_depth==8=>"pcm_u8","A_PCM/INT/LIT"=>"pcm_sle","A_PCM/INT/BIG"=>"pcm_sbe","A_PCM/FLOAT/IEEE"=>"pcm_fle",_=>"aac"}});
+            return Ok(AudioSourceInfo {channel_mask:decoder.channel_mask(),stream_index:index,sample_rate:decoder.sample_rate(),channels:decoder.channels(),codec:match track.codec.as_str() {"A_ALAC"=>"alac","A_PCM/INT/LIT"|"A_PCM/INT/BIG" if track.bit_depth==8=>"pcm_u8","A_PCM/INT/LIT"=>"pcm_sle","A_PCM/INT/BIG"=>"pcm_sbe","A_PCM/FLOAT/IEEE"=>"pcm_fle",_=>"aac"}});
         }
         let reader = crate::container::mp4::Mp4Reader::open(
             BufReader::new(File::open(source)?),
@@ -1095,6 +1099,7 @@ pub fn audio_source_info_selected(
             return Err(invalid("MP4 container and decoder geometry disagree"));
         }
         Ok(AudioSourceInfo {
+            channel_mask: decoder.channel_mask(),
             stream_index: index,
             sample_rate: decoder.sample_rate(),
             channels: decoder.channels(),
@@ -1103,6 +1108,7 @@ pub fn audio_source_info_selected(
     } else {
         let info = aac_source_info_selected(source, selected)?;
         Ok(AudioSourceInfo {
+            channel_mask: Some(info.channel_mask),
             stream_index: info.stream_index,
             sample_rate: info.sample_rate,
             channels: info.channels,

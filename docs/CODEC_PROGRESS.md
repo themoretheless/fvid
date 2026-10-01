@@ -19,6 +19,17 @@ cargo test --locked --offline --no-default-features \
 AAC 960 — с сохранёнными PCM-эталонами. Эта команда не доказывает полную
 conformance H.264/H.265/AAC и не покрывает все инструменты их профилей.
 
+Проверка миграции API: `src/media.rs` ещё содержит вызовы `fvid_media`
+для неподдержанных вариантов remux/trim/concat, transcode, subtitle и
+video filters; `src/media_cli.rs` использует legacy `play_paths` и hardware
+filter/decode. `media = ["dep:fvid-media"]` по-прежнему связывает публичную
+feature с адаптером. Для завершения требуется миграция этих операций с
+сохранением поведения, а не удаление fallback или замена на ошибки.
+
+AAC source metadata теперь содержит фактическую маску декодера. Собственный
+mix сохраняет PCE mask 0xff для ADTS/MP4/Matroska; тест двух одинаковых
+источников совпадает с одиночным WAV export побайтно, включая header.
+
 Текущие явные границы собственного декодирования:
 
 - `src/codec/hevc_decoder.rs`: multi-slice access units и изменённые in-band

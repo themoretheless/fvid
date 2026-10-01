@@ -130,7 +130,8 @@ pub fn mix_audio(
             if crate::native_pcm::is_wave(source)? {
                 Ok(crate::native_pcm::inspect(&mut File::open(source)?, None)?.channel_mask)
             } else {
-                crate::native_export::default_pcm_mask(channels)
+                let info = crate::native_media::audio_source_info_selected(source, None)?;
+                Ok(info.channel_mask.unwrap_or(crate::native_export::default_pcm_mask(channels)?))
             }
         })
         .collect::<Result<Vec<_>>>()?;

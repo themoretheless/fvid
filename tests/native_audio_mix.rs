@@ -560,3 +560,50 @@ fn mix_and_merge_matroska_match_wave_samples_and_channel_order() {
         0
     );
 }
+
+#[test]
+fn explicit_aac_speaker_layout_survives_mix() {
+    let d = dir();
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/audio");
+    let matroska = d.0.join("input.mka");
+    let mut muxed = std::io::Cursor::new(Vec::new());
+    fvid::container::matroska_write::write_adts(
+        fvid::container::adts::StreamReader::open(
+            include_bytes!("fixtures/audio/aac-pce-wide8.aac").as_slice(),
+        )
+        .unwrap(),
+        &mut muxed,
+        None,
+        None,
+    )
+    .unwrap();
+    std::fs::write(&matroska, muxed.into_inner()).unwrap();
+    for (index, source) in [
+        root.join("aac-pce-wide8.aac"),
+        root.join("aac-pce-wide8.m4a"),
+        matroska,
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let output = d.0.join(format!("pce-{index}.wav"));
+        native_audio_mix::mix_audio(
+            &[source.clone(), source.clone()],
+            &output,
+            &MixAudioOptions::default(),
+        )
+        .unwrap();
+        let info =
+            fvid::native_pcm::inspect(&mut std::fs::File::open(&output).unwrap(), None).unwrap();
+        assert_eq!((info.channels, info.channel_mask), (8, 0xff));
+        let single = d.0.join(format!("single-{index}.wav"));
+        fvid::native_export::export_audio_pcm_selected(
+            &source, &single, None, 1.0, None, None, None, None, None,
+        )
+        .unwrap();
+        assert_eq!(
+            std::fs::read(output).unwrap(),
+            std::fs::read(single).unwrap()
+        );
+    }
+}
