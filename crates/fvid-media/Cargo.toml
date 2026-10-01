@@ -27,3 +27,7 @@ player = [ "dep:eframe", "dep:rfd", "dep:cpal"]
 
 [build-dependencies]
 bindgen = { version = "0.72.1", optional = true }
+
+[[bench]]
+name = "ffmpeg_audio_reference"
+harness = false
