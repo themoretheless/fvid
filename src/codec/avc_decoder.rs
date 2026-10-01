@@ -293,7 +293,7 @@ impl AvcDecoder {
             .as_mut()
             .ok_or_else(|| invalid("AVC stream must begin with IDR"))?;
         let (picture, motion) = match header.slice_type {
-            SliceType::I => (
+            SliceType::I if slices.iter().all(|s|s.header.slice_type==SliceType::I) => (
                 decode_intra_slices(
                     &slices.iter().map(|slice| &slice.header).collect::<Vec<_>>(),
                     sps,
@@ -302,7 +302,7 @@ impl AvcDecoder {
                 )?,
                 None,
             ),
-            SliceType::P | SliceType::B => {
+            SliceType::I | SliceType::P | SliceType::B => {
                 let lists = slices
                     .iter()
                     .map(|slice| buffer.lists(&slice.header, order.before_marking.picture()))

@@ -178,7 +178,7 @@ pub fn decode_inter_resolved_slices_with_motion(
     if headers.len() != references_by_slice.len()
         || headers.len() != direct_by_slice.len()
         || headers.iter().any(|h| {
-            !matches!(h.slice_type, SliceType::P | SliceType::B)
+            !matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::B)
                 || h.field_pic
                 || h.redundant_pic_cnt != 0
                 || h.disable_deblocking_filter_idc > 2
@@ -186,7 +186,7 @@ pub fn decode_inter_resolved_slices_with_motion(
     {
         return Err(invalid("invalid resolved inter slice contexts"));
     }
-    if !matches!(header.slice_type, SliceType::P | SliceType::B)
+    if !matches!(header.slice_type, SliceType::I | SliceType::P | SliceType::B)
         || header.first_mb != 0
         || header.disable_deblocking_filter_idc > 2
         || header.field_pic
@@ -225,13 +225,13 @@ pub fn decode_inter_resolved_slices_with_motion(
             return Err(invalid("B-slice direct metadata is missing"));
         }
         let lengths = [
-            header.refs_l0 as usize,
+            if header.slice_type==SliceType::I {0} else {header.refs_l0 as usize},
             if is_b { header.refs_l1 as usize } else { 0 },
         ];
         for list in 0..2 {
             if references[list].len() != lengths[list]
                 || lengths[list] > 32
-                || (list == 0 || is_b) && lengths[list] == 0
+                || (list == 0 || is_b) && header.slice_type!=SliceType::I && lengths[list] == 0
             {
                 return Err(invalid("inter-picture reference count mismatch"));
             }
@@ -375,9 +375,9 @@ pub fn decode_inter_resolved_slices_with_motion(
                 for (slice_index, header) in headers.iter().enumerate() {
                     let slice_id = slice_index as u32;
                     let is_b = header.slice_type == SliceType::B;
-                    let explicit_weights = if is_b { pps.weighted_bipred == 1 } else { pps.weighted_pred };
+                    let explicit_weights = if is_b { pps.weighted_bipred == 1 } else { header.slice_type==SliceType::P && pps.weighted_pred };
                     let lengths = [
-                        header.refs_l0 as usize,
+                        if header.slice_type==SliceType::I {0} else {header.refs_l0 as usize},
                         if is_b { header.refs_l1 as usize } else { 0 },
                     ];
                     let references = references_by_slice[slice_index];
@@ -411,12 +411,12 @@ pub fn decode_inter_resolved_slices_with_motion(
                         return Err(invalid("inter slice weight table is incomplete"));
                     }
                     order.push(Order::SliceBegin);
-                    let mut cavlc = if pps.cabac {
+                    let mut cavlc = if pps.cabac || header.slice_type==SliceType::I {
                         None
                     } else {
                         Some(InterCavlcSlice::new_mixed(header, sps, pps, count * 4096)?)
                     };
-                    let mut cabac = if pps.cabac {
+                    let mut cabac = if pps.cabac && header.slice_type!=SliceType::I {
                         Some(super::avc_cabac_slice::InterCabacSlice::new(
                             header,
                             sps,
@@ -427,9 +427,17 @@ pub fn decode_inter_resolved_slices_with_motion(
                         None
                     };
 
-                    while let Some(mb) = match (&mut cabac, &mut cavlc) {
-                        (Some(reader), _) => reader.read_macroblock()?,
-                        (_, Some(reader)) => reader.read_macroblock()?,
+                    let mut intra_cavlc = if !pps.cabac && header.slice_type==SliceType::I {
+                        Some(super::avc_macroblock::IntraCavlcReader::new(header,sps,pps,count*4096)?)
+                    } else {None};
+                    let mut intra_cabac = if pps.cabac && header.slice_type==SliceType::I {
+                        Some(super::avc_cabac_macroblock::IntraCabacReader::new(header,sps,pps,count*4096)?)
+                    } else {None};
+                    while let Some(mb) = match (&mut cabac, &mut cavlc, &mut intra_cabac, &mut intra_cavlc) {
+                        (Some(reader), _, _, _) => reader.read_macroblock()?,
+                        (_, Some(reader), _, _) => reader.read_macroblock()?,
+                        (_, _, Some(reader), _) => reader.read_macroblock()?.map(|b|InterMacroblock::Intra(Box::new(b))),
+                        (_, _, _, Some(reader)) => reader.read_macroblock()?.map(|b|InterMacroblock::Intra(Box::new(b))),
                         _ => return Err(invalid("missing AVC entropy reader")),
                     } {
                         if let InterMacroblock::Intra(block) = mb {

@@ -1694,3 +1694,17 @@ production. Both saved JM outputs SHA256:
 `ce18deee9aa42806a99282f54887fbf72b236164190ca60f7a5c65ecced07ada`.
 Mixed I/inter slices, FMO/ASO and additional chroma/profiles remain incomplete.
 Verification: 11 integration and 13 AVC inter unit tests passed.
+
+### Mixed AVC I/P slice reconstruction
+
+Access units whose first slice is I now select intra-only reconstruction only
+when every slice is I. Mixed I/P pictures use shared inter reconstruction, with
+independent existing I CAVLC/CABAC entropy readers and empty reference lists for
+I slices. Their intra blocks retain slice-local availability, motion identity
+and deblocking metadata. Synthetic I/P and P/I streams reproduce the previous
+`intra reconstruction requires I slices` / resolved-context refusal and now
+match every JM 19 YUV byte twice through playback/rewind. The generator options
+are `--mixed-ip` and `--mixed-pi`; these fixtures use monotonically increasing
+POC to avoid the mux oracle's inferred timestamp mismatch for reordered I/P.
+The synthetic examples cover CAVLC PCM I blocks; additional CABAC mixed-slice
+oracle coverage, I/B combinations and FMO/ASO remain to be completed.
