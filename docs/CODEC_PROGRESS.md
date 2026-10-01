@@ -1765,3 +1765,23 @@ The nonzero-start synthetic gap/repeat fixture produces identical continuous
 PCM slices while requiring 16 decoded packets instead of 20. All 15 AAC export
 tests and both player gap/repeat seek/rewind regressions passed. This accelerates
 repeated export ranges; player seek still awaits its own checkpoint integration.
+
+### Keep fvid-media; isolate its temporary libav backend
+
+`fvid-media` remains the project's media layer. The migration removes FFmpeg
+execution/linkage, not this crate. Its previous implementation is retained
+unchanged in `src/legacy.rs`, enabled by the explicit `legacy-ffmpeg` feature.
+That feature is currently default to preserve all existing callers and editing
+operations; player/cuda-hw explicitly select it while their migration continues.
+The build script and optional bindgen dependency run only with this feature.
+Without default features, the same crate exports FVid-owned media/control
+contracts and builds without any FFmpeg header/library discovery. This is an
+incremental dependency boundary, not completion of native operation migration.
+Owned codec/filter/export implementations still reside in the root crate and
+must move behind the media layer without introducing a dependency cycle.
+
+Validation: standalone `fvid-media --no-default-features` check passed with
+`FVID_FFMPEG_PREFIX=/nonexistent`; normal/build dependency tree has no bindgen,
+FFmpeg or libav. Root `--no-default-features --features media` check also passed,
+confirming compatibility of the retained legacy API. Production `media` still
+links libav through its default backend; no overall independence is claimed.

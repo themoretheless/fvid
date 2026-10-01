@@ -3,7 +3,7 @@ name = "fvid-media"
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
-description = "Optional native libavformat adapter with checked editing contracts"
+description = "FVid media operations with an optional legacy libav backend"
 
 [dependencies]
 fvid-media-info = { path = "../fvid-media-info" }
@@ -18,11 +18,12 @@ eframe = { version = "0.36", optional = true }
 rfd = { version = "0.17.2", optional = true }
 
 [features]
-default = []
-cuda-hw = ["dep:fvid-cuda"]
+default = ["legacy-ffmpeg"]
+legacy-ffmpeg = ["dep:bindgen"]
+cuda-hw = ["legacy-ffmpeg", "dep:fvid-cuda"]
 # Windowed playback: pulls the egui/eframe window, cpal audio output, and the
 # rfd file dialogs. Off, the crate is a pure decode/edit library.
-player = ["dep:eframe", "dep:rfd", "dep:cpal"]
+player = ["legacy-ffmpeg", "dep:eframe", "dep:rfd", "dep:cpal"]
 
 [build-dependencies]
-bindgen = "0.72.1"
+bindgen = { version = "0.72.1", optional = true }

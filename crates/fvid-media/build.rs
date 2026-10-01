@@ -1,6 +1,13 @@
+#[cfg(feature = "legacy-ffmpeg")]
 use std::{env, path::PathBuf};
 
 fn main() {
+    #[cfg(feature = "legacy-ffmpeg")]
+    build_legacy();
+}
+
+#[cfg(feature = "legacy-ffmpeg")]
+fn build_legacy() {
     println!("cargo:rerun-if-env-changed=FVID_FFMPEG_PREFIX");
     println!("cargo:rerun-if-env-changed=LIBCLANG_PATH");
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
