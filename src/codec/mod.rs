@@ -430,6 +430,7 @@ pub mod aac_pair;
 pub mod aac_noise;
 
 pub mod aac_native;
+pub mod aac_pce;
 
 pub mod aac_tns;
 

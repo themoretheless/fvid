@@ -320,8 +320,14 @@ fn audio_object_type(b: &mut BitReader<'_>) -> Result<u32> {
     if n == 31 { Ok(32 + b.read(6)?) } else { Ok(n) }
 }
 impl AacConfig {
-    /// Parse GA AAC-LC initialization. HE-AAC, PCE and ER tools need separate decoders.
+    /// Parse AAC-LC initialization for the standard channel configurations.
     pub fn parse(data: &[u8]) -> Result<Self> {
+        let (config, program) = Self::parse_with_program(data)?;
+        if program.is_some() { return Err(invalid("AAC PCE requires tagged channel decoding")); }
+        Ok(config)
+    }
+    /// Preserve an explicit tagged program rather than guessing a layout from its count.
+    pub fn parse_with_program(data: &[u8]) -> Result<(Self, Option<super::aac_pce::ProgramConfig>)> {
         let mut b = BitReader::new(data);
         let object_type = audio_object_type(&mut b)?;
         let index = b.read(4)? as usize;
@@ -339,7 +345,8 @@ impl AacConfig {
         if object_type != 2 {
             return Err(invalid("only AAC-LC configuration is implemented"));
         }
-        let channels = match config {
+        let mut channels = match config {
+            0 => 0,
             1..=6 => config as u8,
             7 => 8,
             _ => return Err(invalid("unsupported AAC channel configuration")),
@@ -353,6 +360,14 @@ impl AacConfig {
         if b.bit()? {
             return Err(invalid("AAC extension flag is not yet supported"));
         }
+        let program = if config == 0 {
+            let program = super::aac_pce::ProgramConfig::read(&mut b, 0)?;
+            if u32::from(program.object_type) != object_type || program.sample_rate != sample_rate {
+                return Err(invalid("AAC PCE disagrees with AudioSpecificConfig"));
+            }
+            channels = program.channels() as u8;
+            Some(program)
+        } else { None };
         // Explicitly consume the common backward-compatible SBR sync extension.
         if b.remaining() >= 16 {
             if b.read(11)? != 0x2b7 {
@@ -367,13 +382,13 @@ impl AacConfig {
                 return Err(invalid("nonzero AAC trailing bits"));
             }
         }
-        Ok(Self {
+        Ok((Self {
             object_type,
             sample_rate,
             channels,
             frame_samples,
             core_coder_delay,
-        })
+        }, program))
     }
 }
 
