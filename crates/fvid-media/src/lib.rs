@@ -17,3 +17,5 @@ pub mod owned_loudness;
 pub mod owned_normalize;
 
 pub mod owned_pcm_gain;
+
+pub mod owned_resample;

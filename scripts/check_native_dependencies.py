@@ -43,6 +43,7 @@ def main():
         target = next(line.removeprefix("host: ") for line in version.splitlines()
                       if line.startswith("host: "))
     cases = [
+        ("owned media library", ROOT / "crates/fvid-media/Cargo.toml", []),
         ("headless", ROOT / "Cargo.toml", ["--no-default-features"]),
         ("player", ROOT / "Cargo.toml", ["--no-default-features", "--features", "player"]),
         ("camera bridge", ROOT / "crates/fvid-camera-ffi/Cargo.toml", []),
