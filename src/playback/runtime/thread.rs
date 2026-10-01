@@ -42,17 +42,17 @@ const QUEUE_BYTES: usize = 64 << 20;
 /// How much the window needs is a span of time, and what the item costs is a
 /// span of bytes, so depth is taken from those and not from a count.
 pub fn queue_depth(period: Duration, frame_bytes: usize) -> usize {
-    if period.is_zero() {
-        return QUEUE_MAX;
-    }
-    let frames = LEAD
-        .as_nanos()
-        .div_ceil(period.as_nanos().max(1))
-        .clamp(QUEUE_MIN as u128, QUEUE_MAX as u128) as usize;
+    let frames = if period.is_zero() {
+        QUEUE_MAX
+    } else {
+        LEAD.as_nanos()
+            .div_ceil(period.as_nanos())
+            .clamp(QUEUE_MIN as u128, QUEUE_MAX as u128) as usize
+    };
     if frame_bytes == 0 {
         return frames;
     }
-    frames.min(QUEUE_BYTES / frame_bytes).max(QUEUE_MIN)
+    frames.min((QUEUE_BYTES / frame_bytes).max(1))
 }
 
 /// Fill the queue's span of presentation before starting/restarting the clock,
@@ -63,8 +63,23 @@ pub fn startup_buffer(period: Duration) -> Duration {
 }
 
 /// Picture data as the window draws it: packed RGB through an egui texture,
-/// or 8-bit planes converted to RGB by the GPU shader.
+/// or source-depth planes converted to RGB by the GPU shader.
+#[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+#[derive(Clone)]
+pub struct SurfacePixels {
+    pub surface: fvid_vt::Surface,
+    pub rotation: u16,
+    pub colour: crate::playback_native::AvcColour,
+    pub grade: Option<Arc<Grade>>,
+}
 pub enum Pixels {
+    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+    Surface(SurfacePixels),
+    /// Original 8..16-bit encoded planes; colour conversion remains on the GPU.
+    Packed(
+        Arc<crate::playback_native::PackedPlanar>,
+        Option<Arc<Grade>>,
+    ),
     Rgb(Vec<u8>),
     /// 8-bit planes, and the grade they still owe the window. A plane picture
     /// only keeps its planes when that grade is one table the fragment shader
@@ -128,8 +143,7 @@ enum Stage {
 /// they are shown in. A plane picture whose grade is a single table does not
 /// have to become packed RGB for it: the fragment shader reads that table, so
 /// the planes travel with it and are named by the `Planar` arm's second half.
-/// Anything the shader cannot carry — a second grid after the conversion, or
-/// nothing at all — is applied here, and a grade that turns out to be its own
+/// Anything the shader cannot carry is applied here, and a grade that turns out to be its own
 /// input leaves the picture untouched, which is what a caller asking for the
 /// panel's own curve gets.
 fn into_pixels(
@@ -139,17 +153,43 @@ fn into_pixels(
     grade: Option<&Arc<Grade>>,
 ) -> crate::Result<Pixels> {
     let pixels = match raw {
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        RawFrame::Surface { surface, colour } => {
+            if surface.storage_bytes() > budget.min(QUEUE_BYTES) {
+                return Err(crate::invalid("surface exceeds presentation budget"));
+            }
+            if ![0, 90, 180, 270].contains(&rotation) {
+                return Err(crate::invalid("invalid surface rotation"));
+            }
+            if grade.is_none_or(|g| g.is_identity() || g.is_gpu_grade()) {
+                return Ok(Pixels::Surface(SurfacePixels {
+                    surface,
+                    rotation,
+                    colour,
+                    grade: grade.filter(|g| !g.is_identity()).cloned(),
+                }));
+            }
+            Pixels::Packed(
+                Arc::new(crate::playback_native::surface_to_packed(&surface, colour)?),
+                None,
+            )
+        }
         RawFrame::Rgb(rgb) => Pixels::Rgb(rgb),
         RawFrame::Planar(p) => {
-            let mut rgb = Vec::new();
-            p.to_rgb(&mut rgb, budget)?;
-            if rotation != 0 {
-                rgb = crate::playback_native::rotate_plane(
-                    &rgb, p.frame.width, p.frame.height, rotation, 3,
-                );
+            p.validate()?;
+            if p.frame.data.len() > budget {
+                return Err(crate::invalid(
+                    "source-depth frame exceeds presentation budget",
+                ));
             }
-            Pixels::Rgb(rgb)
+            Pixels::Packed(p, None)
         }
+        RawFrame::Avc { picture, colour } if picture.bit_depth > 8 => Pixels::Packed(
+            Arc::new(crate::playback_native::PackedPlanar::from_picture(
+                &picture, colour, budget,
+            )?),
+            None,
+        ),
         RawFrame::Avc { picture, colour } => {
             Pixels::Planar(Arc::new(avc_to_planar8(&picture, colour)), None)
         }
@@ -175,12 +215,26 @@ fn into_pixels(
         (Pixels::Planar(planes, None), rotation) if rotation != 0 => {
             Pixels::Planar(Arc::new(rotate_planar8(&planes, rotation)), None)
         }
+        (Pixels::Packed(planes, None), rotation) if rotation != 0 => {
+            Pixels::Packed(Arc::new(planes.rotated(rotation)?), None)
+        }
         (pixels, _) => pixels,
     };
     let Some(grade) = grade.filter(|grade| !grade.is_identity()) else {
         return Ok(pixels);
     };
     match pixels {
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        Pixels::Surface(_) => unreachable!("surface path returns before CPU grading"),
+        Pixels::Packed(planes, _) if grade.is_gpu_grade() => {
+            Ok(Pixels::Packed(planes, Some(Arc::clone(grade))))
+        }
+        Pixels::Packed(planes, _) => {
+            let mut rgb = Vec::new();
+            planes.to_rgb(&mut rgb, budget)?;
+            grade.apply(&mut rgb);
+            Ok(Pixels::Rgb(rgb))
+        }
         Pixels::Rgb(mut rgb) => {
             grade.apply(&mut rgb);
             Ok(Pixels::Rgb(rgb))
@@ -188,7 +242,7 @@ fn into_pixels(
         // One table the shader can bind is one table the planes can travel to it
         // with, and the window's own draw reads it there. Measured in
         // `player_gpu`, the two routes then land on the same bytes.
-        Pixels::Planar(planes, _) if grade.is_shader_look() => {
+        Pixels::Planar(planes, _) if grade.is_gpu_grade() => {
             Ok(Pixels::Planar(planes, Some(Arc::clone(grade))))
         }
         Pixels::Planar(planes, _) => {
@@ -201,7 +255,10 @@ fn into_pixels(
 }
 
 /// Handle to the decoding threads; dropping it stops them.
+type CachePackets = Arc<std::sync::RwLock<Vec<(u64, u64, Duration, Duration)>>>;
+
 pub struct Playback {
+    cache_packets: CachePackets,
     commands: SyncSender<Command>,
     events: Receiver<Event>,
     /// How many pictures the event queue can hold; `filled` is measured against it.
@@ -225,12 +282,32 @@ impl Playback {
         reader: NativeReader<R>,
         grade: Option<Grade>,
     ) -> Self {
+        Self::start_impl(reader, grade, None)
+    }
+    /// Start with a decoded raw first frame, preserving hardware surfaces.
+    pub fn start_from_frame<R: BufRead + Seek + Send + 'static>(
+        reader: NativeReader<R>,
+        first: RawFrame,
+        grade: Option<Grade>,
+    ) -> Self {
+        Self::start_impl(reader, grade, Some(first))
+    }
+    fn start_impl<R: BufRead + Seek + Send + 'static>(
+        reader: NativeReader<R>,
+        grade: Option<Grade>,
+        first: Option<RawFrame>,
+    ) -> Self {
+        let cache_packets = Arc::new(std::sync::RwLock::new(reader.cache_packets()));
+        let worker_packets = cache_packets.clone();
         let budget = reader.rgb_budget();
         let [width, height] = reader.dimensions();
-        let depth = queue_depth(
-            reader.frame_period(),
-            width.saturating_mul(height).saturating_mul(3),
-        );
+        #[allow(unused_mut)]
+        let mut frame_bytes = width.saturating_mul(height).saturating_mul(6);
+        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+        if let Some(RawFrame::Surface { surface, .. }) = &first {
+            frame_bytes = frame_bytes.max(surface.storage_bytes());
+        }
+        let depth = queue_depth(reader.frame_period(), frame_bytes);
         let (commands, command_rx) = sync_channel(16);
         let (stage_tx, stage_rx) = sync_channel::<Stage>(1);
         let (event_tx, events) = sync_channel(depth);
@@ -241,7 +318,7 @@ impl Playback {
             .spawn(move || {
                 #[cfg(feature = "player")]
                 fvid_platform::prioritize_playback_thread();
-                Worker::new(reader, command_rx, stage_tx).run()
+                Worker::new(reader, command_rx, stage_tx, first, worker_packets).run()
             })
             .expect("spawn decoder thread");
         let stage_ready = commands.clone();
@@ -295,6 +372,7 @@ impl Playback {
             })
             .expect("spawn converter thread");
         Self {
+            cache_packets,
             commands,
             events,
             depth,
@@ -304,6 +382,14 @@ impl Playback {
             converter: Some(converter),
         }
     }
+    pub fn cache_packets_if_changed(
+        &self,
+        known: usize,
+    ) -> Option<Vec<(u64, u64, Duration, Duration)>> {
+        let packets = self.cache_packets.read().unwrap_or_else(|p| p.into_inner());
+        (packets.len() != known).then(|| packets.clone())
+    }
+
     /// How many pictures the queue can hold for this item.
     pub fn depth(&self) -> usize {
         self.depth
@@ -314,6 +400,10 @@ impl Playback {
     ///
     /// A converter held at a full channel has already counted the picture it is
     /// trying to place, so the reading is kept inside the depth it is drawn against.
+    pub fn buffer_counter(&self) -> Arc<AtomicUsize> {
+        self.filled.clone()
+    }
+
     pub fn filled(&self) -> usize {
         self.filled.load(Ordering::Relaxed).min(self.depth)
     }
@@ -369,6 +459,8 @@ impl Drop for Playback {
 }
 
 struct Worker<R> {
+    cache_packets: CachePackets,
+    indexed_count: usize,
     reader: NativeReader<R>,
     commands: Receiver<Command>,
     stages: SyncSender<Stage>,
@@ -383,8 +475,13 @@ impl<R: BufRead + Seek> Worker<R> {
         reader: NativeReader<R>,
         commands: Receiver<Command>,
         stages: SyncSender<Stage>,
+        first: Option<RawFrame>,
+        cache_packets: CachePackets,
     ) -> Self {
+        let indexed_count = reader.cache_packet_count();
         let mut worker = Self {
+            cache_packets,
+            indexed_count,
             reader,
             commands,
             stages,
@@ -394,10 +491,18 @@ impl<R: BufRead + Seek> Worker<R> {
             pending: None,
         };
         // The reader already holds its first frame converted.
-        worker.pending = Some(worker.stage(RawFrame::Rgb(worker.reader.rgb().to_vec())));
+        worker.pending = Some(
+            worker.stage(first.unwrap_or_else(|| RawFrame::Rgb(worker.reader.rgb().to_vec()))),
+        );
         worker
     }
     fn stage(&self, raw: RawFrame) -> Stage {
+        if self.reader.cache_packet_count() != self.indexed_count {
+            *self
+                .cache_packets
+                .write()
+                .unwrap_or_else(|p| p.into_inner()) = self.reader.cache_packets();
+        }
         Stage::Raw {
             raw,
             dimensions: self.reader.dimensions(),
@@ -410,7 +515,11 @@ impl<R: BufRead + Seek> Worker<R> {
     }
     fn decode_next(&mut self) -> Stage {
         match self.reader.read_frame_raw() {
-            Ok(Some(raw)) => self.stage(raw),
+            Ok(Some(raw)) => {
+                let stage = self.stage(raw);
+                self.indexed_count = self.reader.cache_packet_count();
+                stage
+            }
             Ok(None) => {
                 self.ended = true;
                 Stage::Event(Event::Ended(self.generation))
@@ -498,5 +607,97 @@ impl<R: BufRead + Seek> Worker<R> {
                 Err(_) => return,
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod precision_tests {
+    use super::*;
+    #[test]
+    fn source_precision_queue_honours_byte_budget_even_at_large_frames() {
+        let bytes = 3840usize * 2160 * 6;
+        for period in [
+            Duration::ZERO,
+            Duration::from_millis(8),
+            Duration::from_millis(33),
+        ] {
+            let depth = queue_depth(period, bytes);
+            assert_eq!(depth, 1);
+            assert!(depth * bytes <= QUEUE_BYTES);
+        }
+        assert_eq!(queue_depth(Duration::from_millis(33), 3840 * 2160 * 3), 2);
+    }
+    #[test]
+    fn playback_keeps_source_precision_and_rotation_for_gpu() {
+        use crate::playback_native::{AvcColour, PackedPlanar};
+        let colour = AvcColour {
+            kr: 0.2126,
+            kb: 0.0722,
+            full: false,
+        };
+        for depth in [10, 12, 16] {
+            let scale = 1u16 << (depth - 8);
+            let mut data = Vec::new();
+            for value in [
+                17 * scale + 1,
+                18 * scale + 2,
+                19 * scale + 3,
+                20 * scale + 1,
+                128 * scale + 1,
+                128 * scale + 2,
+            ] {
+                data.extend(value.to_le_bytes());
+            }
+            let frame = Arc::new(
+                PackedPlanar::new(
+                    crate::native_geometry::GeometryFrame {
+                        width: 2,
+                        height: 2,
+                        subsampling: Some([2, 2]),
+                        data,
+                    },
+                    depth,
+                    colour,
+                )
+                .unwrap(),
+            );
+            let output = into_pixels(RawFrame::Planar(frame.clone()), 0, 1024, None).unwrap();
+            let Pixels::Packed(preserved, None) = output else {
+                panic!("precision was converted on CPU");
+            };
+            assert!(Arc::ptr_eq(&frame, &preserved));
+            let output = into_pixels(RawFrame::Planar(frame.clone()), 90, 1024, None).unwrap();
+            let Pixels::Packed(rotated, None) = output else {
+                panic!("rotation narrowed samples");
+            };
+            assert_eq!(rotated.depth, depth);
+            let expected =
+                crate::playback_native::rotate_plane(&frame.frame.data[..8], 2, 2, 90, 2);
+            assert_eq!(&rotated.frame.data[..8], expected);
+            assert_eq!(&rotated.frame.data[8..], &frame.frame.data[8..]);
+        }
+    }
+    #[test]
+    fn decoded_main10_picture_reaches_gpu_without_narrowing() {
+        let mut reader = NativeReader::software(
+            std::io::Cursor::new(include_bytes!(
+                "../../../tests/fixtures/hevc/main10-ipb.mp4"
+            )),
+            64 * 1024 * 1024,
+        )
+        .unwrap();
+        let raw = reader.read_frame_raw().unwrap().unwrap();
+        let pixels = into_pixels(raw, 0, 64 * 1024 * 1024, None).unwrap();
+        let Pixels::Packed(picture, _) = pixels else {
+            panic!("Main10 must stay planar at source precision");
+        };
+        assert_eq!(picture.depth, 10);
+        assert!(
+            picture
+                .frame
+                .data
+                .chunks_exact(2)
+                .any(|sample| u16::from_le_bytes([sample[0], sample[1]]) & 3 != 0)
+        );
     }
 }

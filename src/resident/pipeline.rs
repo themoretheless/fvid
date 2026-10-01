@@ -1,4 +1,4 @@
-use super::TransferStats;
+use super::{GpuStage, TransferStats};
 use crate::{Backend, Error, ExecutionOptions, Header, Plan, Result, Transform};
 
 /// One device, one queue/stream, preallocated frames and immutable filter plans.
@@ -35,17 +35,38 @@ impl GpuPipeline {
         options: ExecutionOptions,
         memory_limit: usize,
     ) -> Result<Self> {
-        if transforms.is_empty() || transforms.len() > 256 {
+        let stages: Vec<_> = transforms.iter().copied().map(GpuStage::from).collect();
+        Self::with_stages(header, &stages, options, memory_limit)
+    }
+    pub fn with_stages(
+        header: &Header,
+        stages: &[GpuStage],
+        options: ExecutionOptions,
+        memory_limit: usize,
+    ) -> Result<Self> {
+        if stages.is_empty() || stages.len() > 256 {
             return Err(fail("resident chain must contain 1..=256 transforms"));
         }
         if matches!(options.backend, Backend::Cpu | Backend::Auto) {
             return Err(fail("resident pipeline requires an explicit GPU backend"));
         }
+        #[cfg(feature = "gpu")]
+        if options.backend == Backend::Cuda && stages.iter().any(|stage| stage.shader.is_some()) {
+            return Err(fail(
+                "WGSL shaders require metal, vulkan, dx12 or gl; CUDA does not execute WGSL",
+            ));
+        }
+        #[cfg(feature = "cuda")]
+        if options.backend != Backend::Cuda
+            && stages.iter().any(|stage| stage.cuda_shader.is_some())
+        {
+            return Err(fail("CUDA C shaders require the cuda backend"));
+        }
         let input_len = header.frame_len()?;
         let mut current = header.clone();
-        let mut plans = Vec::with_capacity(transforms.len());
-        for transform in transforms {
-            let plan = Plan::new(&current, *transform, usize::MAX)?;
+        let mut plans = Vec::with_capacity(stages.len());
+        for stage in stages {
+            let plan = Plan::new(&current, stage.transform, usize::MAX)?;
             current.width = plan.width;
             current.height = plan.height;
             plans.push(plan);
@@ -60,8 +81,16 @@ impl GpuPipeline {
                         .map(Plan::gpu_params)
                         .collect::<Result<Vec<_>>>()?;
                     Engine::Cuda(Box::new(
-                        fvid_cuda::CudaPipeline::new(&params, options.device, memory_limit)
-                            .map_err(Error::Gpu)?,
+                        fvid_cuda::CudaPipeline::with_shaders(
+                            &params,
+                            &stages
+                                .iter()
+                                .map(|stage| stage.cuda_shader.as_ref())
+                                .collect::<Vec<_>>(),
+                            options.device,
+                            memory_limit,
+                        )
+                        .map_err(Error::Gpu)?,
                     ))
                 }
                 #[cfg(not(feature = "cuda"))]
@@ -71,8 +100,12 @@ impl GpuPipeline {
                 #[cfg(feature = "gpu")]
                 {
                     let plans: Vec<_> = plans.iter().collect();
-                    Engine::Wgpu(Box::new(crate::gpu::GpuProcessor::new_chain(
+                    Engine::Wgpu(Box::new(crate::gpu::GpuProcessor::new_shader_chain(
                         &plans,
+                        &stages
+                            .iter()
+                            .map(|stage| stage.shader.as_ref())
+                            .collect::<Vec<_>>(),
                         options.backend,
                         options.device,
                         memory_limit,

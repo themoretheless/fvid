@@ -2,7 +2,7 @@
 name = "fvid-vt"
 version = "0.1.0"
 edition = "2024"
-description = "Hardware H.264 decoding through Apple VideoToolbox (macOS)"
+description = "Hardware video decoding and H.264/HEVC encoding through Apple VideoToolbox (macOS)"
 license = "MIT"
 publish = false
 
@@ -10,3 +10,14 @@ publish = false
 # Raw C bindings to VideoToolbox, CoreMedia and CoreVideo; kept out of the
 # root fvid crate (unsafe forbid).
 unsafe_code = "allow"
+
+[features]
+metal = ["dep:wgpu", "dep:objc2", "dep:objc2-metal"]
+
+[target.'cfg(target_os = "macos")'.dependencies]
+wgpu = { version = "=30.0.1", optional = true, default-features = false, features = ["std", "metal"] }
+objc2 = { version = "0.6.4", optional = true }
+objc2-metal = { version = "0.3.2", optional = true }
+
+[dev-dependencies]
+pollster = "0.4"

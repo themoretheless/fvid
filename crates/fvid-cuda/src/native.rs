@@ -371,6 +371,7 @@ enum Phase {
 }
 pub(super) struct Pipeline {
     first: Processor,
+    kernels: Vec<CudaFunction>,
     stages: Vec<ResidentStage>,
     phase: Phase,
     pub(super) bytes: usize,
@@ -378,8 +379,44 @@ pub(super) struct Pipeline {
 }
 impl Pipeline {
     pub(super) fn new(plans: &[[u32; 32]], ordinal: usize, bytes: usize) -> Result<Self, String> {
+        Self::with_shaders(plans, &vec![None; plans.len()], ordinal, bytes)
+    }
+    pub(super) fn with_shaders(
+        plans: &[[u32; 32]],
+        shaders: &[Option<&crate::ByteShader>],
+        ordinal: usize,
+        bytes: usize,
+    ) -> Result<Self, String> {
         let p = plans[0];
         let first = Processor::new(p[26] as usize, p[27] as usize, p, ordinal)?;
+        let device = &first._device;
+        // Parameters carry geometry, so identical generated source can share
+        // one module across stages with different dimensions/crop/flip plans.
+        let mut compiled = std::collections::HashMap::<String, CudaFunction>::new();
+        let kernels = shaders
+            .iter()
+            .map(|shader| match shader {
+                None => Ok(first.kernel.clone()),
+                Some(shader) => {
+                    let source = shader.kernel_source();
+                    if let Some(kernel) = compiled.get(&source) {
+                        return Ok(kernel.clone());
+                    }
+                    let ptx = crate::ptx_embed::compile_source(
+                        &source,
+                        "fvid-byte-shader.cu",
+                        device.major,
+                        device.minor,
+                    )?;
+                    let module = device.context.load_module(ptx).map_err(|e| e.to_string())?;
+                    let kernel = module
+                        .load_function("fvid_transform")
+                        .map_err(|e| e.to_string())?;
+                    compiled.insert(source, kernel.clone());
+                    Ok(kernel)
+                }
+            })
+            .collect::<Result<Vec<_>, String>>()?;
         let mut stages = Vec::with_capacity(plans.len() - 1);
         let stream = first.slots[0].stream.clone();
         for p in &plans[1..] {
@@ -392,6 +429,7 @@ impl Pipeline {
         stream.synchronize().map_err(|e| e.to_string())?;
         Ok(Self {
             first,
+            kernels,
             stages,
             phase: Phase::Empty,
             bytes,
@@ -448,7 +486,7 @@ impl Pipeline {
         let stream = self.first.slots[0].stream.clone();
         launch_resident(
             &stream,
-            &self.first.kernel,
+            &self.kernels[0],
             &self.first.slots[0].input,
             &mut self.first.slots[0].output,
             &self.first.params,
@@ -461,7 +499,7 @@ impl Pipeline {
             let stage = &mut following[0];
             launch_resident(
                 &stream,
-                &self.first.kernel,
+                &self.kernels[i + 1],
                 input,
                 &mut stage.output,
                 &stage.params,

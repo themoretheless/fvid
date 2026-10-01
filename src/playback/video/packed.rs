@@ -24,6 +24,10 @@ impl PackedPlanar {
     }
     fn layout(&self) -> Result<(usize, usize, usize, usize, usize)> {
         let f = &self.frame;
+        let AvcColour { kr, kb, .. } = self.colour;
+        if !kr.is_finite() || !kb.is_finite() || kr < 0.0 || kb < 0.0 || kr + kb >= 1.0 {
+            return Err(invalid("invalid planar colour matrix"));
+        }
         let [sx, sy] = f
             .subsampling
             .ok_or_else(|| invalid("planar frame needs chroma geometry"))?;
@@ -73,6 +77,117 @@ impl PackedPlanar {
         } else {
             u16::from_le_bytes([self.frame.data[at], self.frame.data[at + 1]])
         }
+    }
+    /// Borrow the three encoded planes without narrowing samples or converting colour.
+    pub(crate) fn plane_data(&self) -> Result<[&[u8]; 3]> {
+        let (_, _, luma, chroma, bytes) = self.layout()?;
+        let y_end = luma * bytes;
+        let cb_end = y_end + chroma * bytes;
+        Ok([
+            &self.frame.data[..y_end],
+            &self.frame.data[y_end..cb_end],
+            &self.frame.data[cb_end..],
+        ])
+    }
+    /// Preserve coded sample precision while removing the AVC/HEVC coded borders.
+    pub(crate) fn from_picture(
+        p: &crate::codec::avc_picture::IntraPicture,
+        colour: AvcColour,
+        budget: usize,
+    ) -> Result<Self> {
+        let [left, right, top, bottom] = p.crop;
+        if left % 2 != 0 || top % 2 != 0 || p.coded_width % 2 != 0 || p.coded_height % 2 != 0 {
+            return Err(invalid("unaligned coded planar crop"));
+        }
+        let width = p
+            .coded_width
+            .checked_sub(
+                left.checked_add(right)
+                    .ok_or_else(|| invalid("crop overflow"))?,
+            )
+            .filter(|&v| v != 0)
+            .ok_or_else(|| invalid("invalid coded crop"))?;
+        let height = p
+            .coded_height
+            .checked_sub(
+                top.checked_add(bottom)
+                    .ok_or_else(|| invalid("crop overflow"))?,
+            )
+            .filter(|&v| v != 0)
+            .ok_or_else(|| invalid("invalid coded crop"))?;
+        let cw = width.div_ceil(2);
+        let ch = height.div_ceil(2);
+        let length = width
+            .checked_mul(height)
+            .and_then(|n| {
+                cw.checked_mul(ch)
+                    .and_then(|c| c.checked_mul(2))
+                    .and_then(|c| n.checked_add(c))
+            })
+            .and_then(|n| n.checked_mul(2))
+            .filter(|&n| n <= budget)
+            .ok_or_else(|| invalid("packed picture exceeds budget"))?;
+        let mut data = Vec::new();
+        data.try_reserve_exact(length)
+            .map_err(|error| invalid(&error.to_string()))?;
+        for (plane, stride, x, y, w, h) in [
+            (&p.y, p.coded_width, left, top, width, height),
+            (&p.cb, p.coded_width / 2, left / 2, top / 2, cw, ch),
+            (&p.cr, p.coded_width / 2, left / 2, top / 2, cw, ch),
+        ] {
+            for row in 0..h {
+                let start = (y + row)
+                    .checked_mul(stride)
+                    .and_then(|n| n.checked_add(x))
+                    .ok_or_else(|| invalid("plane offset overflow"))?;
+                let samples = plane
+                    .get(
+                        start
+                            ..start
+                                .checked_add(w)
+                                .ok_or_else(|| invalid("plane size overflow"))?,
+                    )
+                    .ok_or_else(|| invalid("truncated coded plane"))?;
+                data.extend(samples.iter().flat_map(|v| v.to_le_bytes()));
+            }
+        }
+        Self::new(
+            GeometryFrame {
+                width,
+                height,
+                subsampling: Some([2, 2]),
+                data,
+            },
+            p.bit_depth,
+            colour,
+        )
+    }
+    /// Rotate source-depth planes by a clockwise quarter turn without narrowing.
+    pub fn rotated(&self, rotation: u16) -> Result<Self> {
+        if ![0, 90, 180, 270].contains(&rotation) {
+            return Err(invalid("invalid planar rotation"));
+        }
+        let (sx, sy, _, _, bytes) = self.layout()?;
+        let data = self.plane_data()?;
+        let w = self.frame.width;
+        let h = self.frame.height;
+        let cw = w.div_ceil(sx);
+        let ch = h.div_ceil(sy);
+        let quarter = matches!(rotation, 90 | 270);
+        let mut output = Vec::with_capacity(self.frame.data.len());
+        for (data, width, height) in [(data[0], w, h), (data[1], cw, ch), (data[2], cw, ch)] {
+            output.extend(super::rotate_plane(data, width, height, rotation, bytes));
+        }
+        Self::new(
+            GeometryFrame {
+                width: if quarter { h } else { w },
+                height: if quarter { w } else { h },
+                subsampling: Some(if quarter { [sy, sx] } else { [sx, sy] }),
+                data: output,
+            },
+            self.depth,
+            self.colour,
+        )
     }
     /// Explicit 8-bit presentation conversion; raw/export callers keep `frame`.
     pub fn to_planar8(&self, budget: usize) -> Result<Planar8> {

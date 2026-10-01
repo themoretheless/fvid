@@ -19,6 +19,69 @@ pub fn is_sei_unit(unit_type: u8) -> bool {
     matches!(unit_type, NAL_UNIT_PREFIX_SEI | NAL_UNIT_SUFFIX_SEI)
 }
 
+/// Encode explicitly supplied output HDR metadata as a base-layer prefix SEI
+/// NAL, including RBSP trailing bits and emulation-prevention bytes.
+pub fn output_hdr_nal(hdr: &HdrMetadata) -> Result<Vec<u8>> {
+    let mut rbsp = Vec::new();
+    if let Some(display) = hdr.mastering {
+        if display.min_luminance > display.max_luminance {
+            return Err(invalid(
+                "output mastering minimum exceeds maximum luminance",
+            ));
+        }
+        let points = [display.red, display.green, display.blue, display.white];
+        if points.iter().any(|p| {
+            !p.x.is_finite()
+                || !p.y.is_finite()
+                || !(0.0..=1.0).contains(&p.x)
+                || !(0.0..=1.0).contains(&p.y)
+        }) || [display.max_luminance, display.min_luminance]
+            .iter()
+            .any(|v| !v.is_finite() || *v < 0.0 || f64::from(*v) * 10000.0 > f64::from(u32::MAX))
+        {
+            return Err(invalid(
+                "output mastering display exceeds SEI representation",
+            ));
+        }
+        let payload = crate::color::hdr::mdcv_payload(&display);
+        if crate::color::hdr::MasteringDisplay::from_payload(&payload).is_none() {
+            return Err(invalid("invalid output mastering display"));
+        }
+        rbsp.extend_from_slice(&[SEI_MDCV, payload.len() as u8]);
+        rbsp.extend_from_slice(&payload);
+    }
+    let light = [hdr.light.max_cll, hdr.light.max_fall];
+    if light
+        .iter()
+        .any(|v| !v.is_finite() || *v < 0.0 || *v > 65535.0 || v.fract() != 0.0)
+    {
+        return Err(invalid(
+            "output content light levels must be integer nits in 0..65535",
+        ));
+    }
+    if light != [0.0, 0.0] {
+        rbsp.extend_from_slice(&[SEI_CLLI, 4]);
+        for value in light {
+            rbsp.extend_from_slice(&(value as u16).to_be_bytes());
+        }
+    }
+    if rbsp.is_empty() {
+        return Ok(Vec::new());
+    }
+    rbsp.push(0x80);
+    let mut nal = vec![NAL_UNIT_PREFIX_SEI << 1, 1];
+    let mut zeros = 0;
+    for byte in rbsp {
+        if zeros == 2 && byte <= 3 {
+            nal.push(3);
+            zeros = 0;
+        }
+        nal.push(byte);
+        zeros = if byte == 0 { zeros + 1 } else { 0 };
+    }
+    Ok(nal)
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Message<'a> {
     pub payload_type: u32,
@@ -104,6 +167,45 @@ pub fn hdr_from_nal(nal: &[u8], budget: usize) -> Result<Option<HdrMetadata>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn output_metadata_roundtrips_escaped_rbsp_and_rejects_invalid_light() {
+        let hdr = HdrMetadata {
+            mastering: Some(
+                crate::color::hdr::MasteringDisplay::from_corners(
+                    (0.68, 0.32),
+                    (0.265, 0.69),
+                    (0.15, 0.06),
+                    (0.3127, 0.329),
+                    1000.0,
+                    0.005,
+                )
+                .unwrap(),
+            ),
+            light: crate::color::tonemap::ContentLight {
+                max_cll: 1000.0,
+                max_fall: 400.0,
+            },
+        };
+        let nal = output_hdr_nal(&hdr).unwrap();
+        assert!(nal.windows(3).any(|p| p == [0, 0, 3]));
+        let decoded = hdr_from_nal(&nal, 4096).unwrap().unwrap();
+        assert_eq!(decoded.light, hdr.light);
+        assert_eq!(
+            crate::color::hdr::mdcv_payload(&decoded.mastering.unwrap()),
+            crate::color::hdr::mdcv_payload(&hdr.mastering.unwrap())
+        );
+        assert!(output_hdr_nal(&HdrMetadata::default()).unwrap().is_empty());
+        for value in [f32::NAN, f32::INFINITY, -1.0, 65536.0, 1.5] {
+            let bad = HdrMetadata {
+                light: crate::color::tonemap::ContentLight {
+                    max_cll: value,
+                    max_fall: 0.0,
+                },
+                ..Default::default()
+            };
+            assert!(output_hdr_nal(&bad).is_err());
+        }
+    }
 
     /// An SEI NAL header plus the messages written after it.
     fn sei(messages: &[u8]) -> Vec<u8> {
@@ -290,9 +392,11 @@ mod tests {
             NalRbsp::parse(&nal, 1 << 20).unwrap().header.unit_type
         ));
         // A VPS NAL states no picture metadata.
-        assert!(hdr_from_nal(&hex("40010c01ffff0220"), 1 << 20)
-            .unwrap()
-            .is_none());
+        assert!(
+            hdr_from_nal(&hex("40010c01ffff0220"), 1 << 20)
+                .unwrap()
+                .is_none()
+        );
         // The same payload under a header that names a non-base layer.
         let mut multilayer = nal;
         multilayer[0] |= 1;

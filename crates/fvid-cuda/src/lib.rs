@@ -14,9 +14,13 @@ mod host_pinned;
 mod native;
 mod nv12;
 mod pipeline;
+mod shader;
+pub use shader::ByteShader;
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 mod ptx_embed;
-pub use nv12::{Nv12Processor, Nv12Transform, Nv12View, copy_crop_on_stream};
+pub use nv12::{
+    Nv12Processor, Nv12Transform, Nv12View, P010Processor, P010View, copy_crop_on_stream,
+};
 pub use pipeline::{CudaPipeline, TransferStats};
 
 /// A validated transform with buffers reused across frames of the same size.
