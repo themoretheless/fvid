@@ -451,3 +451,31 @@ fn damaged_last_slice_requires_reset_and_restarts_with_identical_pictures() {
         assert_eq!(actual, expected);
     }
 }
+
+#[test]
+fn mixed_p_b_slices_match_jm_and_rewind() {
+    for (data, expected) in [
+        (include_bytes!("fixtures/playback-errors/avc-mixed-pb.mp4").as_slice(),include_bytes!("fixtures/playback-errors/avc-mixed-pb-jm.yuv").as_slice()),
+        (include_bytes!("fixtures/playback-errors/avc-mixed-bp.mp4").as_slice(),include_bytes!("fixtures/playback-errors/avc-mixed-bp-jm.yuv").as_slice()),
+    ] {
+    let mut packets=Mp4Reader::open(Cursor::new(data),Default::default()).unwrap();
+    let avc=AvcConfig::parse(&packets.tracks()[0].configuration).unwrap();
+    let sps=Sps::parse(avc.sps[0]).unwrap();let pps=Pps::parse(avc.pps[0],&sps).unwrap();
+    let length_size=avc.length_size;
+    let mut last=Vec::new();packets.read_packet(0,3,&mut last).unwrap();
+    let slices=fvid::codec::avc_access_unit::prepare(&last,length_size,&sps,&pps,16<<20).unwrap();
+    assert_eq!(slices.len(),2);
+    assert_ne!(slices[0].header.slice_type,slices[1].header.slice_type);
+    assert!(slices.iter().all(|s|matches!(s.header.slice_type,SliceType::P|SliceType::B)));
+    let mut reader=fvid::playback_mp4::Mp4VideoReader::open(Cursor::new(data),Default::default(),16<<20).unwrap();
+    for _ in 0..2 {
+        let mut actual=Vec::new();let mut frames=0;
+        while let Some(frame)=reader.read_frame().unwrap() {
+            frame.picture.write_planar(&mut actual).unwrap();frames+=1;
+        }
+        assert_eq!(frames,4);
+        assert_eq!(actual.as_slice(),expected);
+        reader.rewind();
+    }
+}
+}

@@ -178,7 +178,7 @@ pub fn decode_inter_resolved_slices_with_motion(
     if headers.len() != references_by_slice.len()
         || headers.len() != direct_by_slice.len()
         || headers.iter().any(|h| {
-            h.slice_type != header.slice_type
+            !matches!(h.slice_type, SliceType::P | SliceType::B)
                 || h.field_pic
                 || h.redundant_pic_cnt != 0
                 || h.disable_deblocking_filter_idc > 2
@@ -186,8 +186,6 @@ pub fn decode_inter_resolved_slices_with_motion(
     {
         return Err(invalid("invalid resolved inter slice contexts"));
     }
-    let direct = direct_by_slice[0];
-    let is_b = header.slice_type == SliceType::B;
     if !matches!(header.slice_type, SliceType::P | SliceType::B)
         || header.first_mb != 0
         || header.disable_deblocking_filter_idc > 2
@@ -202,23 +200,6 @@ pub fn decode_inter_resolved_slices_with_motion(
         return Err(invalid("unsupported inter-picture reconstruction tools"));
     }
     let scaling = super::avc_scaling::ScalingMatrices::new(sps, pps)?;
-    let explicit_weights = if is_b {
-        pps.weighted_bipred == 1
-    } else {
-        pps.weighted_pred
-    };
-    if is_b && direct.is_none() {
-        return Err(invalid("B-picture direct metadata is missing"));
-    }
-    if explicit_weights
-        && header.weights.as_ref().is_none_or(|w| {
-            w.l0.len() != header.refs_l0 as usize || (is_b && w.l1.len() != header.refs_l1 as usize)
-        })
-    {
-        return Err(invalid(
-            "inter-picture weight table is missing or incomplete",
-        ));
-    }
     let (width, height) = sps.coded_dimensions();
     let (w, h) = (width as usize, height as usize);
     let pixels = w
@@ -239,6 +220,7 @@ pub fn decode_inter_resolved_slices_with_motion(
     for ((header, references), direct) in
         headers.iter().zip(references_by_slice).zip(direct_by_slice)
     {
+        let is_b = header.slice_type == SliceType::B;
         if is_b && direct.is_none() {
             return Err(invalid("B-slice direct metadata is missing"));
         }
@@ -392,6 +374,8 @@ pub fn decode_inter_resolved_slices_with_motion(
                 let mut seen = 0;
                 for (slice_index, header) in headers.iter().enumerate() {
                     let slice_id = slice_index as u32;
+                    let is_b = header.slice_type == SliceType::B;
+                    let explicit_weights = if is_b { pps.weighted_bipred == 1 } else { pps.weighted_pred };
                     let lengths = [
                         header.refs_l0 as usize,
                         if is_b { header.refs_l1 as usize } else { 0 },

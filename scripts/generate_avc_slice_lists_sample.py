@@ -3,7 +3,9 @@
 from pathlib import Path
 import subprocess
 import sys
-temporal = "--temporal-direct" in sys.argv
+mixed_pb = "--mixed-pb" in sys.argv or "--mixed-bp" in sys.argv
+mixed_bp = "--mixed-bp" in sys.argv
+temporal = "--temporal-direct" in sys.argv or mixed_pb
 
 class Bits:
     def __init__(self): self.data = []
@@ -66,6 +68,12 @@ for first in [0,1]:
     stream+=nal(0x41,b.finish())
 if temporal:
     for first in [0,1]:
+        if mixed_pb and first==(1 if mixed_bp else 0):
+            b=Bits();b.ue(first);b.ue(0);b.ue(0);b.bits(3,4);b.bits(6,4)
+            b.bits(0,1);b.bits(0,1) # default L0, no modifications
+            b.se(0);b.ue(1);b.ue(1)
+            stream+=nal(0x01,b.finish())
+            continue
         b=Bits();b.ue(first);b.ue(1);b.ue(0);b.bits(3,4);b.bits(6,4)
         b.bits(0,1) # temporal direct
         b.bits(1,1);b.ue(1);b.ue(0) # two L0 references, one L1
@@ -73,7 +81,7 @@ if temporal:
         b.se(0);b.ue(1);b.ue(1) # QP, disable filter, skip one MB
         stream+=nal(0x01,b.finish())
 root=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors'
-name='avc-slice-lists-temporal' if temporal else 'avc-slice-lists'
+name=('avc-mixed-bp' if mixed_bp else 'avc-mixed-pb') if mixed_pb else ('avc-slice-lists-temporal' if temporal else 'avc-slice-lists')
 raw=root/(name+'.h264');raw.write_bytes(stream)
 video=root/(name+'.mp4');oracle=root/(name+'.yuv')
 subprocess.run(['ffmpeg','-v','error','-framerate','30','-i',str(raw),'-c:v','copy','-an','-y',str(video)],check=True)

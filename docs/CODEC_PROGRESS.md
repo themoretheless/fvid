@@ -1678,3 +1678,19 @@ verified against samples 4800..9600 from a separately decoded continuous
 no-edit source, then playback/seek/rewind are compared against that output.
 This checks actual overlap preroll and source selection rather than only
 agreement between two consumers of the same edit evaluator.
+
+### Mixed AVC P/B slice types in one picture
+
+Resolved inter reconstruction now selects P/B reference counts, direct prediction
+and weighted prediction per slice instead of inheriting the first slice's type.
+Two short hand-authored 32x16 streams cover P/B and B/P raster order. Both fail
+before this change with `invalid resolved inter slice contexts`; acceptance
+checks confirm the last access unit actually contains both types, compare every
+YUV byte for all four pictures with independent JM 19 output, and repeat after
+rewind. Generation uses `generate_avc_slice_lists_sample.py --mixed-pb` or
+`--mixed-bp`, optionally `--jm-decoder /path/to/JM/bin/ldecod.exe` (the same
+verified JM archive described above). Neither FFmpeg nor JM is used by tests or
+production. Both saved JM outputs SHA256:
+`ce18deee9aa42806a99282f54887fbf72b236164190ca60f7a5c65ecced07ada`.
+Mixed I/inter slices, FMO/ASO and additional chroma/profiles remain incomplete.
+Verification: 11 integration and 13 AVC inter unit tests passed.
