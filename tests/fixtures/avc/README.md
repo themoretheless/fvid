@@ -79,12 +79,21 @@ Ordinary tests never invoke FFmpeg or the generation script.
 `avc-bypass-cavlc.mp4` each contain eight synthetic 64x64 yuv420p I/P pictures
 at QP 0. The encoder labels them High 4:4:4 Predictive (profile 244), but their
 SPS explicitly states 4:2:0. Regenerate with
-`python3 scripts/generate_avc_bypass_samples.py` from the repository root.
-The generator independently decodes both and requires exact equality with the
-original synthetic YUV before saving references. x264 disables B pictures in
+`python3 scripts/generate_avc_bypass_samples.py --jm-decoder /path/to/ldecod.exe
+--jm-config /path/to/JM/bin/decoder.cfg` from the repository root.
+The generator creates integer YUV patterns (including nonzero low bits at
+10-bit depth), uses x264 CLI plus the owned fixture muxer, and independently
+decodes all four variants with JM. It requires exact equality with original
+YUV before saving references and never invokes FFmpeg. x264 disables B pictures in
 this lossless mode; these fixtures therefore do not prove lossless B decoding.
 
 `tests/avc_bypass.rs` verifies CABAC/CAVLC, profile extension parsing, QP 0,
 nonzero directional intra residuals (DPCM), every output sample, and rewind.
 Unit tests verify checked DPCM accumulation and joining DC/AC across 4x4 tile
 boundaries. Ordinary tests never run the generator or reference decoder.
+
+The regenerated CABAC fixtures also reproduce the former `nonzero CABAC PCM
+alignment bit` refusal in inter pictures: leftover arithmetic flush bits were
+incorrectly treated as raw zero padding. The enabled playback/camera tests now
+accept these streams and require exact pixels through rewind. A focused CABAC
+unit test covers nonzero flush bits, PCM sample boundaries and arithmetic restart.

@@ -65,11 +65,10 @@ impl<'a> AvcCabac<'a> {
         }
         let mut bits = super::bits::BitReader::new(self.rbsp);
         bits.skip(self.bit_position())?;
-        while !bits.position().is_multiple_of(8) {
-            if bits.bit()? {
-                return Err(invalid("nonzero CABAC PCM alignment bit"));
-            }
-        }
+        // CABAC has already selected its terminal interval. The remaining
+        // bits of that arithmetic flush byte are not raw PCM alignment syntax
+        // (unlike CAVLC); PCM starts at the next byte, as in the JM decoder.
+        bits.skip((8 - bits.position() % 8) % 8)?;
         let mut y = [0; 256];
         let mut cb = [0; 64];
         let mut cr = [0; 64];
@@ -368,5 +367,26 @@ mod tests {
             0
         );
         assert!(trace.0.is_empty());
+    }
+    #[test]
+    fn pcm_discards_arithmetic_flush_bits_and_restarts_cabac() {
+        // Initial 9-bit offset 509 selects the terminal interval. The seven
+        // remaining bits are all one: the former PCM zero-bit check refused it.
+        let mut rbsp = vec![0xfe, 0xff];
+        let samples: Vec<u8> = (0..384).map(|i| ((i * 17 + 31) % 256) as u8).collect();
+        rbsp.extend_from_slice(&samples);
+        rbsp.extend_from_slice(&[0, 0]); // restart arithmetic offset 0
+        let mut decoder = AvcCabac::new(&rbsp, 0, SliceType::I, 0, 0).unwrap();
+        assert!(decoder.terminate().unwrap());
+        assert_eq!(decoder.bit_position(), 9);
+        let block = decoder.pcm(8, 8).unwrap();
+        let super::super::avc_macroblock::IntraLuma::Pcm { y, cb, cr } = block else {
+            panic!("PCM expected")
+        };
+        let actual: Vec<u8> = y.into_iter().chain(cb).chain(cr).map(|v| v as u8).collect();
+        assert_eq!(actual, samples);
+        assert_eq!(decoder.bit_position(), (2 + 384) * 8 + 9);
+        assert!(!decoder.terminate().unwrap());
+        assert!(decoder.pcm(8, 8).is_err());
     }
 }
