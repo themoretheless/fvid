@@ -26,12 +26,31 @@ fn mp4_average_rate(durations: impl Iterator<Item = Option<u32>>, scale: u32) ->
     }
 }
 
+fn mp4_payload_rate(samples: impl Iterator<Item = Option<(u32, u32)>>, scale: u32) -> Option<i64> {
+    if scale == 0 {
+        return None;
+    }
+    let mut bytes = 0u128;
+    let mut ticks = 0u128;
+    for sample in samples {
+        let (size, duration) = sample?;
+        if duration == 0 {
+            return None;
+        }
+        bytes = bytes.checked_add(u128::from(size))?;
+        ticks = ticks.checked_add(u128::from(duration))?;
+    }
+    if ticks == 0 {
+        return None;
+    }
+    i64::try_from(bytes.checked_mul(8)?.checked_mul(u128::from(scale))? / ticks).ok()
+}
+
 pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
-    let reader = Mp4ProbeReader::open(
-        BufReader::new(File::open(path).map_err(|e| e.to_string())?),
-        Default::default(),
-    )
-    .map_err(|e| e.to_string())?;
+    let file = File::open(path).map_err(|e| e.to_string())?;
+    let file_bytes = file.metadata().map_err(|e| e.to_string())?.len();
+    let reader = Mp4ProbeReader::open(BufReader::new(file), Default::default())
+        .map_err(|e| e.to_string())?;
     // The reader keeps unsupported sample entries separately, without their
     // original stream positions. Do not return an incomplete/reindexed inventory.
     if !reader.refused().is_empty() {
@@ -120,7 +139,11 @@ pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
             time_base: [1, scale],
             start,
             duration: Some(duration),
-            bit_rate: None,
+            bit_rate: mp4_payload_rate(
+                (0..track.samples.len())
+                    .map(|i| track.samples.get(i).map(|s| (s.size, s.duration))),
+                track.timescale,
+            ),
             average_frame_rate: if track.handler == *b"vide" {
                 mp4_average_rate(
                     (0..track.samples.len()).map(|i| track.samples.get(i).map(|s| s.duration)),
@@ -171,7 +194,11 @@ pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
         format: "mov,mp4,m4a,3gp,3g2,mj2".into(),
         start_us,
         duration_us,
-        bit_rate: None,
+        bit_rate: duration_us
+            .filter(|&duration| duration > 0)
+            .and_then(|duration| {
+                i64::try_from(u128::from(file_bytes) * 8 * 1_000_000 / duration as u128).ok()
+            }),
         metadata: tags(reader.tags()),
         chapters,
         streams,
@@ -199,5 +226,33 @@ mod average_rate_tests {
         assert_eq!(mp4_average_rate([Some(0)].into_iter(), 90000), [0, 1]);
         assert_eq!(mp4_average_rate([Some(1)].into_iter(), 0), [0, 1]);
         assert_eq!(mp4_average_rate([Some(1)].into_iter(), u32::MAX), [0, 1]);
+    }
+}
+
+#[cfg(test)]
+mod payload_rate_tests {
+    use super::mp4_payload_rate;
+    #[test]
+    fn uses_payload_bytes_and_total_source_clock() {
+        assert_eq!(
+            mp4_payload_rate([Some((264, 128)); 4].into_iter(), 48000),
+            Some(792000)
+        );
+        assert_eq!(
+            mp4_payload_rate([Some((1, 2)), Some((2, 3)), Some((3, 1))].into_iter(), 6),
+            Some(48)
+        );
+        assert_eq!(mp4_payload_rate([Some((0, 1))].into_iter(), 6), Some(0));
+    }
+    #[test]
+    fn unknown_clock_and_overflow_remain_unknown() {
+        assert_eq!(mp4_payload_rate([].into_iter(), 48000), None);
+        assert_eq!(mp4_payload_rate([None].into_iter(), 48000), None);
+        assert_eq!(mp4_payload_rate([Some((1, 0))].into_iter(), 48000), None);
+        assert_eq!(mp4_payload_rate([Some((1, 1))].into_iter(), 0), None);
+        assert_eq!(
+            mp4_payload_rate([Some((u32::MAX, 1))].into_iter(), u32::MAX),
+            None
+        );
     }
 }
