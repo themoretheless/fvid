@@ -1,0 +1,439 @@
+//! Explicit MP4 concat video and AAC reference comparisons.
+use fvid::{
+    container::{mp4, webm},
+    media_control::{CancelFlag, ProgressHook},
+    native_export,
+    native_geometry::VideoGeometry,
+    playback_native::NativeReader,
+};
+use std::{
+    fs::File,
+    io::BufReader,
+    path::{Path, PathBuf},
+    sync::{Arc, Mutex},
+};
+struct Dir(PathBuf);
+impl Drop for Dir {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.0);
+    }
+}
+fn dir(name: &str) -> Dir {
+    let p = std::env::temp_dir().join(format!("fvid-mp4-concat-{name}-{}", std::process::id()));
+    std::fs::create_dir(&p).unwrap();
+    Dir(p)
+}
+fn fixture(name: &str) -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures")
+        .join(name)
+}
+fn pixels(path: &Path) -> Vec<Vec<u8>> {
+    let mut reader =
+        NativeReader::software(BufReader::new(File::open(path).unwrap()), usize::MAX).unwrap();
+    let mut frames = Vec::new();
+    while let Some(frame) = reader.read_frame_raw().unwrap() {
+        let [w, h] = reader.dimensions();
+        frames.push(
+            VideoGeometry::default()
+                .apply_display(&frame, w, h, reader.rotation())
+                .unwrap()
+                .data,
+        );
+    }
+    frames
+}
+fn avc_hevc_payloads_and_decoded_frames_repeat_with_contiguous_clock() {
+    let d = dir("video");
+    for (index, name) in ["video.mp4", "hevc/main-ipb.mp4", "hevc/main10-ipb.mp4"]
+        .iter()
+        .enumerate()
+    {
+        let source = fixture(name);
+        let output = d.0.join(format!("video-{index}.mkv"));
+        let inputs = vec![source.clone(), source.clone()];
+        let event = native_export::try_concat_mp4_matroska(&inputs, &output, None, None)
+            .unwrap()
+            .expect("owned concat admission");
+        assert!(event.done);
+        let expected = pixels(&source);
+        let actual = pixels(&output);
+        assert_eq!(
+            actual,
+            expected
+                .iter()
+                .chain(expected.iter())
+                .cloned()
+                .collect::<Vec<_>>()
+        );
+        let mut mp4 = mp4::Mp4Reader::open(
+            BufReader::new(File::open(&source).unwrap()),
+            Default::default(),
+        )
+        .unwrap();
+        let mut mkv = webm::WebmReader::open(
+            BufReader::new(File::open(&output).unwrap()),
+            Default::default(),
+        )
+        .unwrap();
+        mkv.scan_all().unwrap();
+        assert_eq!(mkv.tracks.len(), mp4.tracks().len());
+        let mut payload = Vec::new();
+        for track in 0..mp4.tracks().len() {
+            let packets = mkv
+                .packets
+                .iter()
+                .enumerate()
+                .filter(|(_, p)| p.track == mkv.tracks[track].number)
+                .map(|(i, p)| (i, p.pts_ns, p.duration_ns.unwrap(), p.invisible))
+                .collect::<Vec<_>>();
+            assert_eq!(packets.len() % 2, 0);
+            let half = packets.len() / 2;
+            let span = packets[..half]
+                .iter()
+                .filter(|p| !p.3)
+                .map(|p| p.1 + p.2 as i64)
+                .max()
+                .unwrap();
+            for i in 0..half {
+                mp4.read_packet(track, i, &mut payload).unwrap();
+                assert_eq!(mkv.read_packet(packets[i].0).unwrap(), payload);
+                assert_eq!(mkv.read_packet(packets[i + half].0).unwrap(), payload);
+                assert_eq!(packets[i + half].1 - packets[i].1, span);
+                assert_eq!(packets[i + half].2, packets[i].2);
+            }
+        }
+        if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
+            let decode = |path: &Path| {
+                let value = std::process::Command::new(&ffmpeg)
+                    .args(["-v", "error", "-i"])
+                    .arg(path)
+                    .args([
+                        "-an",
+                        "-fps_mode",
+                        "passthrough",
+                        "-pix_fmt",
+                        if index == 2 { "yuv420p10le" } else { "yuv420p" },
+                        "-f",
+                        "rawvideo",
+                        "-",
+                    ])
+                    .output()
+                    .unwrap();
+                assert!(
+                    value.status.success(),
+                    "{}",
+                    String::from_utf8_lossy(&value.stderr)
+                );
+                value.stdout
+            };
+            let original = decode(&source);
+            assert!(!original.is_empty());
+            assert_eq!(
+                decode(&output),
+                [original.as_slice(), original.as_slice()].concat()
+            );
+        }
+    }
+}
+
+fn zero_delay_aac_matches_the_concatenated_coded_sequence() {
+    let d = dir("aac");
+    let source = d.0.join("source.m4a");
+    native_export::remux_adts_aac(&fixture("audio/aac-stereo.aac"), &source).unwrap();
+    let output = d.0.join("concat.mka");
+    assert!(
+        native_export::try_concat_mp4_matroska(
+            &[source.clone(), source.clone()],
+            &output,
+            None,
+            None
+        )
+        .unwrap()
+        .is_some()
+    );
+    let raw = std::fs::read(fixture("audio/aac-stereo.aac")).unwrap();
+    let reference = d.0.join("sequence.aac");
+    std::fs::write(&reference, [raw.as_slice(), raw.as_slice()].concat()).unwrap();
+    let expected = d.0.join("expected.wav");
+    let combined = d.0.join("combined.wav");
+    native_export::export_aac_pcm(&reference, &expected).unwrap();
+    native_export::export_aac_pcm(&output, &combined).unwrap();
+    let a = std::fs::read(expected).unwrap();
+    let b = std::fs::read(combined).unwrap();
+    assert_eq!(a.len(), b.len());
+    assert!(a == b, "coded-sequence PCM mismatch");
+    if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
+        let decode = |path: &Path| {
+            let result = std::process::Command::new(&ffmpeg)
+                .args(["-v", "error", "-i"])
+                .arg(path)
+                .args(["-vn", "-f", "f32le", "-"])
+                .output()
+                .unwrap();
+            assert!(result.status.success());
+            result.stdout
+        };
+        let independent = decode(&reference);
+        let actual = decode(&output);
+        assert!(!independent.is_empty());
+        assert_eq!(independent.len(), actual.len());
+        assert!(
+            independent == actual,
+            "independent coded-sequence PCM mismatch"
+        );
+    }
+}
+
+fn mixed_avc_aac_tracks_copy_every_packet_at_the_same_segment_offset() {
+    let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").expect("reference tool");
+    let d = dir("mixed");
+    let source = d.0.join("mixed.mp4");
+    let output = d.0.join("mixed.mkv");
+    let mux = std::process::Command::new(ffmpeg)
+        .args(["-v", "error", "-i"])
+        .arg(fixture("video.mp4"))
+        .arg("-i")
+        .arg(fixture("audio/aac-stereo.aac"))
+        .args([
+            "-map",
+            "0:v:0",
+            "-map",
+            "1:a:0",
+            "-c",
+            "copy",
+            "-use_editlist",
+            "0",
+            "-avoid_negative_ts",
+            "disabled",
+        ])
+        .arg(&source)
+        .output()
+        .unwrap();
+    assert!(
+        mux.status.success(),
+        "{}",
+        String::from_utf8_lossy(&mux.stderr)
+    );
+    assert!(
+        native_export::try_concat_mp4_matroska(
+            &[source.clone(), source.clone()],
+            &output,
+            None,
+            None
+        )
+        .unwrap()
+        .is_some()
+    );
+    let mut input = mp4::Mp4Reader::open(
+        BufReader::new(File::open(&source).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    let mut result = webm::WebmReader::open(
+        BufReader::new(File::open(&output).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    result.scan_all().unwrap();
+    assert_eq!(result.tracks.len(), 2);
+    let mut expected_offset = None;
+    let mut payload = Vec::new();
+    for track in 0..2 {
+        let packets = result
+            .packets
+            .iter()
+            .enumerate()
+            .filter(|(_, p)| p.track == result.tracks[track].number)
+            .map(|(i, p)| {
+                (
+                    i,
+                    p.pts_ns,
+                    p.duration_ns,
+                    p.discard_padding_ns,
+                    p.invisible,
+                )
+            })
+            .collect::<Vec<_>>();
+        let half = packets.len() / 2;
+        assert_eq!(half, input.tracks()[track].samples.len());
+        for i in 0..half {
+            input.read_packet(track, i, &mut payload).unwrap();
+            assert!(result.read_packet(packets[i].0).unwrap() == payload);
+            assert!(result.read_packet(packets[i + half].0).unwrap() == payload);
+            let shift = packets[i + half].1 - packets[i].1;
+            assert!(shift > 0);
+            if let Some(expected) = expected_offset {
+                assert_eq!(shift, expected);
+            } else {
+                expected_offset = Some(shift);
+            }
+            assert_eq!(
+                (packets[i].2, packets[i].3, packets[i].4),
+                (
+                    packets[i + half].2,
+                    packets[i + half].3,
+                    packets[i + half].4
+                )
+            );
+        }
+    }
+}
+
+fn per_segment_aac_priming_is_transported_without_rewriting_packets() {
+    let d = dir("primed");
+    let source = fixture("audio/aac-native-edit.m4a");
+    let out = d.0.join("out.mka");
+    let stats =
+        native_export::try_concat_mp4_matroska(&[source.clone(), source.clone()], &out, None, None)
+            .unwrap()
+            .expect("primed AAC admission");
+    assert!(stats.done);
+    let mut mkv = webm::WebmReader::open(
+        BufReader::new(File::open(&out).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    mkv.scan_all().unwrap();
+    assert!(mkv.tracks[0].codec_delay_ns > 0);
+    assert!(mkv.packets.iter().any(|p| p.discard_padding_ns < 0));
+    let mut original = mp4::Mp4Reader::open(
+        BufReader::new(File::open(&source).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    let half = mkv.packets.len() / 2;
+    let mut data = Vec::new();
+    for index in 0..half {
+        original.read_packet(0, index, &mut data).unwrap();
+        assert!(mkv.read_packet(index).unwrap() == data);
+        assert!(mkv.read_packet(index + half).unwrap() == data);
+    }
+    let pcm = d.0.join("combined.wav");
+    let first = d.0.join("first.wav");
+    let expected = native_export::export_aac_pcm(&source, &first).unwrap();
+    let actual = native_export::export_aac_pcm(&out, &pcm).unwrap();
+    assert_eq!(actual.sample_frames, expected.sample_frames * 2);
+    if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
+        let decode = |path: &Path| {
+            let result = std::process::Command::new(&ffmpeg)
+                .args(["-v", "error", "-i"])
+                .arg(path)
+                .args(["-vn", "-f", "f32le", "-"])
+                .output()
+                .unwrap();
+            assert!(
+                result.status.success(),
+                "{}",
+                String::from_utf8_lossy(&result.stderr)
+            );
+            result.stdout
+        };
+        let one = decode(&source);
+        let combined = decode(&out);
+        assert!(!one.is_empty());
+        assert_eq!(combined.len(), one.len() * 2);
+    }
+}
+
+fn primed_aac_without_pns_preserves_independently_decoded_pcm_at_the_join() {
+    let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").expect("reference tool");
+    let d = dir("primed-oracle");
+    let source = d.0.join("tone.m4a");
+    let output = d.0.join("joined.mka");
+    let encode = std::process::Command::new(&ffmpeg)
+        .args([
+            "-v",
+            "error",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=frequency=997:sample_rate=48000:duration=0.16",
+            "-c:a",
+            "aac",
+            "-aac_pns",
+            "0",
+        ])
+        .arg(&source)
+        .output()
+        .unwrap();
+    assert!(
+        encode.status.success(),
+        "{}",
+        String::from_utf8_lossy(&encode.stderr)
+    );
+    assert!(
+        native_export::try_concat_mp4_matroska(
+            &[source.clone(), source.clone()],
+            &output,
+            None,
+            None
+        )
+        .unwrap()
+        .is_some()
+    );
+    let decode = |path: &Path| {
+        let result = std::process::Command::new(&ffmpeg)
+            .args(["-v", "error", "-i"])
+            .arg(path)
+            .args(["-f", "f32le", "-"])
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        result.stdout
+    };
+    let original = decode(&source);
+    let actual = decode(&output);
+    assert!(!original.is_empty());
+    assert_eq!(actual.len(), original.len() * 2);
+    let reference = [original.as_slice(), original.as_slice()].concat();
+    let difference = actual
+        .chunks_exact(4)
+        .zip(reference.chunks_exact(4))
+        .map(|(a, b)| {
+            (f32::from_le_bytes(a.try_into().unwrap()) - f32::from_le_bytes(b.try_into().unwrap()))
+                .abs()
+        })
+        .fold(0f32, f32::max);
+    assert!(
+        difference < 1e-6,
+        "independent PCM max difference {difference}"
+    );
+    let pcm = d.0.join("owned.wav");
+    let stats = native_export::export_aac_pcm(&output, &pcm).unwrap();
+    let bytes = std::fs::read(pcm).unwrap();
+    let mut at = 12;
+    while &bytes[at..at + 4] != b"data" {
+        let n = u32::from_le_bytes(bytes[at + 4..at + 8].try_into().unwrap()) as usize;
+        at += 8 + n + n % 2;
+    }
+    let length = u32::from_le_bytes(bytes[at + 4..at + 8].try_into().unwrap()) as usize;
+    let samples = &bytes[at + 8..at + 8 + length];
+    assert_eq!(samples.len(), reference.len());
+    assert_eq!(stats.sample_frames as usize * 4, samples.len());
+    let difference = samples
+        .chunks_exact(4)
+        .zip(reference.chunks_exact(4))
+        .map(|(a, b)| {
+            (f32::from_le_bytes(a.try_into().unwrap()) - f32::from_le_bytes(b.try_into().unwrap()))
+                .abs()
+        })
+        .fold(0f32, f32::max);
+    assert!(
+        difference < 1e-6,
+        "owned vs independent PCM max difference {difference}"
+    );
+}
+fn main() {
+    std::env::var_os("FVID_REFERENCE_FFMPEG").expect("Set FVID_REFERENCE_FFMPEG for this explicit reference benchmark");
+    avc_hevc_payloads_and_decoded_frames_repeat_with_contiguous_clock();
+    zero_delay_aac_matches_the_concatenated_coded_sequence();
+    mixed_avc_aac_tracks_copy_every_packet_at_the_same_segment_offset();
+    per_segment_aac_priming_is_transported_without_rewriting_packets();
+    primed_aac_without_pns_preserves_independently_decoded_pcm_at_the_join();
+    println!("MP4 concat video and AAC reference comparisons passed");
+}

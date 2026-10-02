@@ -552,3 +552,5 @@ External ALAC MP4 fixture and Matroska PCM comparisons run only in `ffmpeg_alac_
 Synthetic Y4M 420/422/444 external FFV1 pixel and filter-chain comparisons run only in `ffmpeg_y4m_lossless_reference`. Ordinary Y4M lossless tests retain native pixel, clock, aspect, CLI/API, filter and publication checks without FFmpeg.
 
 External MP4 lossless-export video/copied-audio and spatial-transform comparisons run only in `ffmpeg_lossless_export_reference`. Ordinary lossless tests retain owned frame, timing, metadata, CLI/API, crop, plan and publication checks without invoking FFmpeg.
+
+External MP4 concat AVC/HEVC video, AAC zero-delay/priming, mixed-track and independently generated no-PNS comparisons run only in `ffmpeg_mp4_concat_reference`. Ordinary concat tests retain native payload/frame/clock, PCM, CLI/API/plan and publication checks without FFmpeg.

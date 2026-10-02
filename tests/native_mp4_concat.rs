@@ -103,37 +103,7 @@ fn avc_hevc_payloads_and_decoded_frames_repeat_with_contiguous_clock() {
                 assert_eq!(packets[i + half].2, packets[i].2);
             }
         }
-        if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
-            let decode = |path: &Path| {
-                let value = std::process::Command::new(&ffmpeg)
-                    .args(["-v", "error", "-i"])
-                    .arg(path)
-                    .args([
-                        "-an",
-                        "-fps_mode",
-                        "passthrough",
-                        "-pix_fmt",
-                        if index == 2 { "yuv420p10le" } else { "yuv420p" },
-                        "-f",
-                        "rawvideo",
-                        "-",
-                    ])
-                    .output()
-                    .unwrap();
-                assert!(
-                    value.status.success(),
-                    "{}",
-                    String::from_utf8_lossy(&value.stderr)
-                );
-                value.stdout
-            };
-            let original = decode(&source);
-            assert!(!original.is_empty());
-            assert_eq!(
-                decode(&output),
-                [original.as_slice(), original.as_slice()].concat()
-            );
-        }
+
     }
 }
 #[test]
@@ -163,26 +133,7 @@ fn zero_delay_aac_matches_the_concatenated_coded_sequence() {
     let b = std::fs::read(combined).unwrap();
     assert_eq!(a.len(), b.len());
     assert!(a == b, "coded-sequence PCM mismatch");
-    if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
-        let decode = |path: &Path| {
-            let result = std::process::Command::new(&ffmpeg)
-                .args(["-v", "error", "-i"])
-                .arg(path)
-                .args(["-vn", "-f", "f32le", "-"])
-                .output()
-                .unwrap();
-            assert!(result.status.success());
-            result.stdout
-        };
-        let independent = decode(&reference);
-        let actual = decode(&output);
-        assert!(!independent.is_empty());
-        assert_eq!(independent.len(), actual.len());
-        assert!(
-            independent == actual,
-            "independent coded-sequence PCM mismatch"
-        );
-    }
+
 }
 #[test]
 fn cancellation_no_overwrite_and_incompatible_inputs_preserve_publication() {
@@ -243,102 +194,7 @@ fn public_concat_and_plan_select_owned_matroska_workflow() {
     assert_eq!(stats.segments, 2);
 }
 
-#[test]
-#[ignore = "requires FVID_REFERENCE_FFMPEG"]
-fn mixed_avc_aac_tracks_copy_every_packet_at_the_same_segment_offset() {
-    let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").expect("reference tool");
-    let d = dir("mixed");
-    let source = d.0.join("mixed.mp4");
-    let output = d.0.join("mixed.mkv");
-    let mux = std::process::Command::new(ffmpeg)
-        .args(["-v", "error", "-i"])
-        .arg(fixture("video.mp4"))
-        .arg("-i")
-        .arg(fixture("audio/aac-stereo.aac"))
-        .args([
-            "-map",
-            "0:v:0",
-            "-map",
-            "1:a:0",
-            "-c",
-            "copy",
-            "-use_editlist",
-            "0",
-            "-avoid_negative_ts",
-            "disabled",
-        ])
-        .arg(&source)
-        .output()
-        .unwrap();
-    assert!(
-        mux.status.success(),
-        "{}",
-        String::from_utf8_lossy(&mux.stderr)
-    );
-    assert!(
-        native_export::try_concat_mp4_matroska(
-            &[source.clone(), source.clone()],
-            &output,
-            None,
-            None
-        )
-        .unwrap()
-        .is_some()
-    );
-    let mut input = mp4::Mp4Reader::open(
-        BufReader::new(File::open(&source).unwrap()),
-        Default::default(),
-    )
-    .unwrap();
-    let mut result = webm::WebmReader::open(
-        BufReader::new(File::open(&output).unwrap()),
-        Default::default(),
-    )
-    .unwrap();
-    result.scan_all().unwrap();
-    assert_eq!(result.tracks.len(), 2);
-    let mut expected_offset = None;
-    let mut payload = Vec::new();
-    for track in 0..2 {
-        let packets = result
-            .packets
-            .iter()
-            .enumerate()
-            .filter(|(_, p)| p.track == result.tracks[track].number)
-            .map(|(i, p)| {
-                (
-                    i,
-                    p.pts_ns,
-                    p.duration_ns,
-                    p.discard_padding_ns,
-                    p.invisible,
-                )
-            })
-            .collect::<Vec<_>>();
-        let half = packets.len() / 2;
-        assert_eq!(half, input.tracks()[track].samples.len());
-        for i in 0..half {
-            input.read_packet(track, i, &mut payload).unwrap();
-            assert!(result.read_packet(packets[i].0).unwrap() == payload);
-            assert!(result.read_packet(packets[i + half].0).unwrap() == payload);
-            let shift = packets[i + half].1 - packets[i].1;
-            assert!(shift > 0);
-            if let Some(expected) = expected_offset {
-                assert_eq!(shift, expected);
-            } else {
-                expected_offset = Some(shift);
-            }
-            assert_eq!(
-                (packets[i].2, packets[i].3, packets[i].4),
-                (
-                    packets[i + half].2,
-                    packets[i + half].3,
-                    packets[i + half].4
-                )
-            );
-        }
-    }
-}
+
 
 #[test]
 fn per_segment_aac_priming_is_transported_without_rewriting_packets() {
@@ -375,26 +231,7 @@ fn per_segment_aac_priming_is_transported_without_rewriting_packets() {
     let expected = native_export::export_aac_pcm(&source, &first).unwrap();
     let actual = native_export::export_aac_pcm(&out, &pcm).unwrap();
     assert_eq!(actual.sample_frames, expected.sample_frames * 2);
-    if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
-        let decode = |path: &Path| {
-            let result = std::process::Command::new(&ffmpeg)
-                .args(["-v", "error", "-i"])
-                .arg(path)
-                .args(["-vn", "-f", "f32le", "-"])
-                .output()
-                .unwrap();
-            assert!(
-                result.status.success(),
-                "{}",
-                String::from_utf8_lossy(&result.stderr)
-            );
-            result.stdout
-        };
-        let one = decode(&source);
-        let combined = decode(&out);
-        assert!(!one.is_empty());
-        assert_eq!(combined.len(), one.len() * 2);
-    }
+
 }
 
 #[test]
@@ -446,99 +283,4 @@ fn cli_concat_runs_owned_without_the_media_feature() {
     assert_eq!(completed, 1);
     let expected = pixels(&source);
     assert_eq!(pixels(&output), [expected.clone(), expected].concat());
-}
-
-#[test]
-#[ignore = "requires FVID_REFERENCE_FFMPEG"]
-fn primed_aac_without_pns_preserves_independently_decoded_pcm_at_the_join() {
-    let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").expect("reference tool");
-    let d = dir("primed-oracle");
-    let source = d.0.join("tone.m4a");
-    let output = d.0.join("joined.mka");
-    let encode = std::process::Command::new(&ffmpeg)
-        .args([
-            "-v",
-            "error",
-            "-f",
-            "lavfi",
-            "-i",
-            "sine=frequency=997:sample_rate=48000:duration=0.16",
-            "-c:a",
-            "aac",
-            "-aac_pns",
-            "0",
-        ])
-        .arg(&source)
-        .output()
-        .unwrap();
-    assert!(
-        encode.status.success(),
-        "{}",
-        String::from_utf8_lossy(&encode.stderr)
-    );
-    assert!(
-        native_export::try_concat_mp4_matroska(
-            &[source.clone(), source.clone()],
-            &output,
-            None,
-            None
-        )
-        .unwrap()
-        .is_some()
-    );
-    let decode = |path: &Path| {
-        let result = std::process::Command::new(&ffmpeg)
-            .args(["-v", "error", "-i"])
-            .arg(path)
-            .args(["-f", "f32le", "-"])
-            .output()
-            .unwrap();
-        assert!(
-            result.status.success(),
-            "{}",
-            String::from_utf8_lossy(&result.stderr)
-        );
-        result.stdout
-    };
-    let original = decode(&source);
-    let actual = decode(&output);
-    assert!(!original.is_empty());
-    assert_eq!(actual.len(), original.len() * 2);
-    let reference = [original.as_slice(), original.as_slice()].concat();
-    let difference = actual
-        .chunks_exact(4)
-        .zip(reference.chunks_exact(4))
-        .map(|(a, b)| {
-            (f32::from_le_bytes(a.try_into().unwrap()) - f32::from_le_bytes(b.try_into().unwrap()))
-                .abs()
-        })
-        .fold(0f32, f32::max);
-    assert!(
-        difference < 1e-6,
-        "independent PCM max difference {difference}"
-    );
-    let pcm = d.0.join("owned.wav");
-    let stats = native_export::export_aac_pcm(&output, &pcm).unwrap();
-    let bytes = std::fs::read(pcm).unwrap();
-    let mut at = 12;
-    while &bytes[at..at + 4] != b"data" {
-        let n = u32::from_le_bytes(bytes[at + 4..at + 8].try_into().unwrap()) as usize;
-        at += 8 + n + n % 2;
-    }
-    let length = u32::from_le_bytes(bytes[at + 4..at + 8].try_into().unwrap()) as usize;
-    let samples = &bytes[at + 8..at + 8 + length];
-    assert_eq!(samples.len(), reference.len());
-    assert_eq!(stats.sample_frames as usize * 4, samples.len());
-    let difference = samples
-        .chunks_exact(4)
-        .zip(reference.chunks_exact(4))
-        .map(|(a, b)| {
-            (f32::from_le_bytes(a.try_into().unwrap()) - f32::from_le_bytes(b.try_into().unwrap()))
-                .abs()
-        })
-        .fold(0f32, f32::max);
-    assert!(
-        difference < 1e-6,
-        "owned vs independent PCM max difference {difference}"
-    );
 }
