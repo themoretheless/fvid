@@ -95,6 +95,57 @@ fn owned_matroska_pcm_formats_intervals_and_failures() {
         assert_eq!(stats.sample_frames, 3);
         let baseline: Vec<u8> = expected.iter().flat_map(|s| s.to_le_bytes()).collect();
 
+        let encoded = std::fs::read(&source).unwrap();
+        let mut owned = Vec::new();
+        let own_stats = fvid_media::owned_matroska_pcm::decode_matroska_pcm(
+            std::io::Cursor::new(&encoded),
+            &mut owned,
+            None,
+            &Default::default(),
+        )
+        .unwrap();
+        assert_eq!(owned, baseline);
+        assert_eq!(
+            (
+                own_stats.sample_frames,
+                own_stats.decoded_frames,
+                own_stats.sample_rate,
+                own_stats.channels
+            ),
+            (3, 1, 48000, 2)
+        );
+        let interval = Some((
+            std::time::Duration::from_micros(21),
+            std::time::Duration::from_micros(60),
+        ));
+        let mut own_window = Vec::new();
+        fvid_media::owned_matroska_pcm::decode_matroska_pcm(
+            std::io::Cursor::new(&encoded),
+            &mut own_window,
+            interval,
+            &fvid_control::CopyOptions {
+                streams: vec![0],
+                max_packets: Some(1),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(own_window, baseline[16..]);
+        let mut refused = Vec::new();
+        assert!(fvid_media::owned_matroska_pcm::decode_matroska_pcm(
+            std::io::Cursor::new(&encoded),
+            &mut refused,
+            None,
+            &fvid_control::CopyOptions {
+                max_controlled_bytes: Some(1024),
+                ..Default::default()
+            }
+        )
+        .unwrap_err()
+        .to_string()
+        .contains("allocation admission"));
+        assert!(refused.is_empty());
+
         let plan =
             fvid::native_plan::decode_audio_selected(&source, &Default::default(), None).unwrap();
         assert!(plan.steps[0].detail.contains("PCM"));
@@ -166,6 +217,17 @@ fn owned_matroska_pcm_formats_intervals_and_failures() {
             std::fs::write(&source, container(codec, bits, &raw[..raw.len() - 1])).unwrap();
             assert!(export(&source, &window, None, 1.0, None, None, None, None, None).is_err());
             assert!(!window.exists());
+            let mut own_failed = Vec::new();
+            assert!(fvid_media::owned_matroska_pcm::decode_matroska_pcm(
+                std::io::Cursor::new(std::fs::read(&source).unwrap()),
+                &mut own_failed,
+                None,
+                &Default::default()
+            )
+            .unwrap_err()
+            .to_string()
+            .contains("incomplete channel frame"));
+            assert!(own_failed.is_empty());
         }
     }
     let source = d.0.join("nan.mka");
@@ -181,4 +243,68 @@ fn owned_matroska_pcm_formats_intervals_and_failures() {
     let output = d.0.join("nan.f32le");
     assert!(export(&source, &output, None, 1.0, None, None, None, None, None).is_err());
     assert!(!output.exists());
+}
+
+#[test]
+fn library_pcm_packet_float_endianness_and_strict_samples_match_frontend() {
+    for bits in [32, 64] {
+        let mut front = fvid::codec::pcm_decoder::PcmDecoder::new(
+            fvid::codec::pcm_decoder::PcmFormat::Float { bits },
+            48000,
+            1,
+        )
+        .unwrap();
+        let mut own = fvid_media::owned_pcm_decoder::PcmDecoder::new(
+            fvid_media::owned_pcm_decoder::PcmFormat::Float { bits },
+            48000,
+            1,
+        )
+        .unwrap();
+        own.set_float_big_endian(true);
+        let data: Vec<u8> = [-1.0f64, 0.25, 0.75]
+            .iter()
+            .flat_map(|&s| {
+                if bits == 32 {
+                    (s as f32).to_be_bytes().to_vec()
+                } else {
+                    s.to_be_bytes().to_vec()
+                }
+            })
+            .collect();
+        use fvid::audio::AudioDecode;
+        let little: Vec<u8> = [-1.0f64, 0.25, 0.75]
+            .iter()
+            .flat_map(|&s| {
+                if bits == 32 {
+                    (s as f32).to_le_bytes().to_vec()
+                } else {
+                    s.to_le_bytes().to_vec()
+                }
+            })
+            .collect();
+        let packet = front.decode_encoded(&little, 7, 0).unwrap().unwrap();
+        let own_bytes: Vec<u8> = own
+            .decode_pcm(&data)
+            .unwrap()
+            .iter()
+            .flat_map(|s| s.to_le_bytes())
+            .collect();
+        assert_eq!(packet.data, own_bytes);
+        assert_eq!((own.sample_rate(), own.channels()), (48000, 1));
+        assert!(own
+            .decode_pcm(&data[..data.len() - 1])
+            .unwrap_err()
+            .to_string()
+            .contains("incomplete channel frame"));
+        let nan = if bits == 32 {
+            f32::NAN.to_be_bytes().to_vec()
+        } else {
+            f64::NAN.to_be_bytes().to_vec()
+        };
+        assert!(own
+            .decode_pcm(&nan)
+            .unwrap_err()
+            .to_string()
+            .contains("non-finite"));
+    }
 }

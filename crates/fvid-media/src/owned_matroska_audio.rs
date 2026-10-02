@@ -1,4 +1,4 @@
-//! Owned Matroska AAC/ALAC presentation timeline to caller-owned float32 PCM.
+//! Owned Matroska AAC/ALAC/PCM presentation timeline to caller-owned float32 PCM.
 pub use crate::owned_aac::stream::AudioDecodeStats;
 use crate::owned_webm::WebmReader as MatroskaTimelineReader;
 use fvid_control::{CopyOptions, ProgressEvent};
@@ -34,17 +34,26 @@ impl From<crate::owned_aac::Error> for Error {
         Self(e.to_string())
     }
 }
+impl From<crate::owned_pcm_decoder::Error> for Error {
+    fn from(e: crate::owned_pcm_decoder::Error) -> Self {
+        Self(e.to_string())
+    }
+}
 type Result<T> = std::result::Result<T, Error>;
 fn invalid(message: &str) -> Error {
     Error(message.into())
 }
 enum MatroskaTimelineDecoder {
+    Pcm(crate::owned_pcm_decoder::PcmDecoder),
     Alac(crate::owned_alac::AlacDecoder),
     Aac(crate::owned_aac::NativeAacDecoder),
 }
 impl MatroskaTimelineDecoder {
     fn from_matroska(track: &crate::owned_webm::Track) -> Result<Self> {
         match track.codec.as_str() {
+            "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" => Ok(Self::Pcm(
+                crate::owned_pcm_decoder::PcmDecoder::from_matroska(track)?,
+            )),
             "A_ALAC" => Ok(Self::Alac(crate::owned_alac::AlacDecoder::from_matroska(
                 track,
             )?)),
@@ -58,18 +67,21 @@ impl MatroskaTimelineDecoder {
     }
     fn sample_rate(&self) -> u32 {
         match self {
+            Self::Pcm(d) => d.sample_rate(),
             Self::Alac(d) => d.sample_rate(),
             Self::Aac(d) => d.sample_rate(),
         }
     }
     fn channels(&self) -> u16 {
         match self {
+            Self::Pcm(d) => d.channels(),
             Self::Alac(d) => d.channels(),
             Self::Aac(d) => u16::from(d.channels()),
         }
     }
     fn decode(&mut self, data: &[u8]) -> Result<Vec<f32>> {
         match self {
+            Self::Pcm(d) => Ok(d.decode_pcm(data)?),
             Self::Alac(d) => Ok(d.decode_pcm(data)?),
             Self::Aac(d) => Ok(d.decode(data)?),
         }
@@ -184,7 +196,14 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
         },
     )?;
     let index = matroska_audio_index(&reader, selected)?;
-    if reader.tracks[index].codec != codec {
+    if if codec == "PCM" {
+        !matches!(
+            reader.tracks[index].codec.as_str(),
+            "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE"
+        )
+    } else {
+        reader.tracks[index].codec != codec
+    } {
         return Err(invalid(
             "selected Matroska audio stream has a different codec",
         ));

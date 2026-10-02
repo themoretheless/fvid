@@ -159,3 +159,6 @@ mod owned_matroska_alac_export;
 mod owned_matroska_audio;
 pub mod owned_matroska_aac;
 mod owned_matroska_aac_export;
+
+pub mod owned_pcm_decoder;
+pub mod owned_matroska_pcm;
