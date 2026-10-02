@@ -135,3 +135,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_matroska_metadata_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_matroska_video_reference"
+harness = false

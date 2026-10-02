@@ -457,3 +457,11 @@ limit as execution in both feature modes. It counts raw AAC packets/payload,
 describes the AAC track and Matroska clock without output or execution progress.
 The synthetic file test checks successful summary, matching too-small AAC payload
 budget refusals in plan/execution and refusal of a truncated final packet.
+
+### Explicit Matroska video reference benchmark
+
+The two ignored external video/AAC and invisible-reference comparisons moved
+unchanged to `cargo bench --bench ffmpeg_matroska_video_reference`. Only this
+explicit benchmark requires FVID_REFERENCE_FFMPEG. The ordinary native Matroska
+video suite retains its eight owned playback/seek/reference/poisoning checks and
+no longer has external-tool tests or ignored reference comparisons.
