@@ -44,3 +44,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_wave_loudness_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_linear_loudnorm_reference"
+harness = false

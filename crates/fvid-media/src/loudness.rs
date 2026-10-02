@@ -463,6 +463,9 @@ pub fn apply_loudnorm(
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
     let loudnorm_args = resolve_loudnorm_args(args)?;
+    if crate::owned_loudnorm::supports(source, destination, &loudnorm_args, options) {
+        return crate::owned_loudnorm::apply_loudnorm(source, destination, Some(&loudnorm_args), options);
+    }
     let mut input = Input::open_fast(source)?;
     let index = select_audio_index(&input, options, "loudnorm")?;
     let decoder = open_audio_decoder(&input, index)?;
