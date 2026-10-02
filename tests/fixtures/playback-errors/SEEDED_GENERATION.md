@@ -99,3 +99,10 @@ Padding, crop, reflections, transpose and resize are fused into the reused outpu
 buffer. Tests compare 144 compositions with media sample-plane geometry, check
 known full/limited fill samples at 8/10/16 bits, invalid canvases and public decode
 metadata. No external codec or fixture generator runs during these tests.
+
+Negate, average blur and box blur external comparisons now live exclusively in
+explicit root benchmarks: `ffmpeg_negate_reference`, `ffmpeg_avgblur_reference`
+and `ffmpeg_boxblur_reference` (harness=false). Set FVID_REFERENCE_FFMPEG and run
+cargo bench for the chosen target. They preserve the existing synthetic input,
+layout/depth and option matrices. Ordinary native filter tests keep known-pixel,
+parameter/storage, CLI/backend and interval checks without external executables.

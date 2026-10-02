@@ -95,3 +95,15 @@ harness = false
 [[bench]]
 name = "ffmpeg_camera_pixels"
 harness = false
+
+[[bench]]
+name = "ffmpeg_negate_reference"
+harness = false
+
+[[bench]]
+name = "ffmpeg_avgblur_reference"
+harness = false
+
+[[bench]]
+name = "ffmpeg_boxblur_reference"
+harness = false
