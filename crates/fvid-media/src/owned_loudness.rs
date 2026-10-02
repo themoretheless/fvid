@@ -53,12 +53,18 @@ impl LoudnessMeter {
             energies: BTreeMap::new(),
         })
     }
-    /// Enable the Annex 2 four-phase estimator for 48 kHz PCM. Other sample
-    /// rates need their own oversampling policy before this metric is enabled.
+    /// Enable the Annex 2 four-phase estimator for standard PCM rates
+    /// from 48 kHz upward (at least 192 kHz reconstructed grid).
     /// The default constructor retains its existing sample-peak-only cost.
     pub fn new_with_true_peak(sample_rate: u32, weights: &[f64]) -> Result<Self, String> {
-        if sample_rate != 48000 {
-            return Err("four-phase loudness true peak currently requires 48000 Hz".into());
+        if !matches!(
+            sample_rate,
+            48000 | 88200 | 96000 | 176400 | 192000 | 352800 | 384000
+        ) {
+            return Err(
+                "four-phase loudness true peak requires a qualified standard rate >= 48000 Hz"
+                    .into(),
+            );
         }
         let mut meter = Self::new(sample_rate, weights)?;
         meter.true_peak = Some(crate::owned_true_peak::TruePeakMeter::new(weights.len())?);

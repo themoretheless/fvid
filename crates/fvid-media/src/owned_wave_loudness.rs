@@ -1,4 +1,4 @@
-//! Streaming 48 kHz WAVE loudness and true peak, with owned PCM decoding.
+//! Streaming WAVE loudness and true peak, with owned PCM decoding.
 use fvid_control::{CopyOptions, ProgressEvent};
 use fvid_media_info::{LoudnessStats, MediaPlan, PlanStep, PlanStream};
 use std::{
@@ -7,6 +7,12 @@ use std::{
     path::Path,
 };
 type Result<T> = std::result::Result<T, String>;
+fn qualified_rate(rate: u32) -> bool {
+    matches!(
+        rate,
+        48000 | 88200 | 96000 | 176400 | 192000 | 352800 | 384000
+    )
+}
 fn policies(options: &CopyOptions) -> bool {
     (options.streams.is_empty() || options.streams == [0])
         && options.metadata_set.is_empty()
@@ -46,7 +52,7 @@ pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
     policies(options)
         && File::open(source).is_ok_and(|mut file| {
             crate::owned_wave_inspect::inspect(&mut file, None)
-                .is_ok_and(|info| info.sample_rate == 48000 && weights(&info).is_ok())
+                .is_ok_and(|info| qualified_rate(info.sample_rate) && weights(&info).is_ok())
         })
 }
 struct Input {
@@ -64,8 +70,11 @@ fn preflight(source: &Path, options: &CopyOptions) -> Result<Input> {
     let mut file = File::open(source).map_err(|e| e.to_string())?;
     let info = crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
         .map_err(|e| e.to_string())?;
-    if info.sample_rate != 48000 {
-        return Err("owned WAVE true-peak measurement currently requires 48000 Hz".into());
+    if !qualified_rate(info.sample_rate) {
+        return Err(
+            "owned WAVE true-peak measurement requires a qualified standard rate >= 48000 Hz"
+                .into(),
+        );
     }
     let weights = weights(&info)?;
     let frame = usize::from(info.block);
@@ -83,20 +92,22 @@ fn preflight(source: &Path, options: &CopyOptions) -> Result<Input> {
         return Err("loudness requires at least one audio frame".into());
     }
     let frames = size / frame;
-    let integrated_blocks = if frames < 19200 {
+    let rate = info.sample_rate as usize;
+    let hop = rate / 10;
+    let integrated_blocks = if frames < rate * 2 / 5 {
         0
     } else {
-        1 + (frames - 19200) / 4800
+        1 + (frames - rate * 2 / 5) / hop
     };
-    let short_blocks = if frames < 144000 {
+    let short_blocks = if frames < rate * 3 {
         0
     } else {
-        1 + (frames - 144000) / 4800
+        1 + (frames - rate * 3) / hop
     };
     // Every observed block could occupy a distinct histogram bin. 512 bytes
     // per bin conservatively includes tree nodes and report percentile scratch.
     // Ring storage is 3 s + 400 ms of energy; PCM buffers hold one block only.
-    let estimated = 163200u128 * 8
+    let estimated = (rate * 3 + rate * 2 / 5) as u128 * 8
         + capacity as u128
         + (capacity / frame) as u128 * u128::from(info.channels) * 8
         + u128::from(info.channels) * 168
@@ -125,8 +136,10 @@ fn preflight(source: &Path, options: &CopyOptions) -> Result<Input> {
 /// from another implementation's interpolation filter; bit equivalence is not promised.
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
     let mut input = preflight(source, options)?;
-    let mut meter =
-        crate::owned_loudness::LoudnessMeter::new_with_true_peak(48000, &input.weights)?;
+    let mut meter = crate::owned_loudness::LoudnessMeter::new_with_true_peak(
+        input.info.sample_rate,
+        &input.weights,
+    )?;
     let mut event = ProgressEvent {
         packets: 0,
         payload_bytes: 0,
@@ -189,7 +202,7 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
     let result = LoudnessStats {
         backend: "owned streaming WAVE loudness",
         sample_frames: report.sample_frames,
-        sample_rate: 48000,
+        sample_rate: input.info.sample_rate as i32,
         channels: i32::from(input.info.channels),
         integrated_lufs: report.integrated_lufs.unwrap_or(-70.),
         range_lu: report.range_lu.unwrap_or(0.),
@@ -207,7 +220,7 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
 pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
     let input = preflight(source, options)?;
     Ok(MediaPlan{command:"loudness".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:0,media_type:"audio".into(),codec:input.info.codec(),disposition:"analyze".into()}],
-        steps:vec![PlanStep{action:"read".into(),detail:format!("read {} PCM bytes at 48000 Hz in aligned blocks of at most {} bytes",input.size,input.capacity)},
+        steps:vec![PlanStep{action:"read".into(),detail:format!("read {} PCM bytes at {} Hz in aligned blocks of at most {} bytes",input.size,input.info.sample_rate,input.capacity)},
         PlanStep{action:"analyze".into(),detail:"owned K-weighting, integrated loudness gating, loudness-range percentiles and four-phase true-peak FIR; no output file".into()}],graph:None,
         notes:vec!["backend: owned WAVE; no external decoder or filter".into(),"metadata-only plan; PCM numeric validity and signal measurements are checked during execution".into()]})
 }
@@ -393,5 +406,39 @@ mod tests {
         };
         crate::plan_loudness(&source, &options).unwrap();
         assert_eq!(std::fs::read_dir(&files.0).unwrap().count(), 1);
+    }
+    #[test]
+    fn standard_rates_keep_original_clock_and_chunk_independent_peaks() {
+        let files = files("rates");
+        for rate in [48000, 88200, 96000, 176400, 192000, 352800, 384000] {
+            let path = files.0.join(format!("{rate}.wav"));
+            let pcm: Vec<f64> = (0..rate * 2 / 5)
+                .map(|i| if i % 4 < 2 { 0.25 } else { -0.25 })
+                .collect();
+            crate::owned_wav_file::write_wav_f64le(&path, rate as i32, 1, &pcm).unwrap();
+            assert!(supports(&path, &CopyOptions::default()));
+            let whole = crate::measure_loudness(&path, &CopyOptions::default()).unwrap();
+            let split = crate::measure_loudness(
+                &path,
+                &CopyOptions {
+                    max_packet_bytes: 97 * 8,
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            assert_eq!(whole.sample_frames, pcm.len() as u64);
+            assert_eq!(whole.sample_rate, rate as i32);
+            assert!(whole.integrated_lufs.is_finite() && whole.integrated_lufs > -70.);
+            assert!(whole.true_peak_dbfs - whole.sample_peak_dbfs > 2.9);
+            assert_eq!(whole.integrated_lufs, split.integrated_lufs);
+            assert_eq!(whole.true_peak_dbfs, split.true_peak_dbfs);
+            assert!(
+                crate::plan_loudness(&path, &CopyOptions::default())
+                    .unwrap()
+                    .steps[0]
+                    .detail
+                    .contains(&format!("{rate} Hz"))
+            );
+        }
     }
 }

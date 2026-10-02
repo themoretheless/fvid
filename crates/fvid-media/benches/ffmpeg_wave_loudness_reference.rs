@@ -6,36 +6,43 @@ fn main() {
     let dir = std::env::temp_dir().join(format!("fvid-loudness-bench-{}", std::process::id()));
     std::fs::create_dir(&dir).unwrap();
     let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap_or_else(|| "ffmpeg".into());
-    for (name, channels, frequency, smooth) in [
-        ("mono", 1, 1000., true),
-        ("stereo", 2, 12000., true),
-        ("stereo-transient", 2, 12000., false),
+    for (name, channels, frequency, smooth, rate) in [
+        ("mono", 1, 1000., true, 48000),
+        ("stereo", 2, 12000., true, 48000),
+        ("stereo-transient", 2, 12000., false, 48000),
+        ("88200", 1, 22050., true, 88200),
+        ("96000", 1, 24000., true, 96000),
+        ("176400", 1, 44100., true, 176400),
+        ("192000", 1, 1000., true, 192000),
+        ("352800", 1, 1000., true, 352800),
+        ("384000", 1, 1000., true, 384000),
+        ("192000-quarter-rate-diagnostic", 1, 48000., true, 192000),
     ] {
         let path = dir.join(format!("{name}.wav"));
-        let pcm: Vec<f64> = (0..48000 * 12)
+        let pcm: Vec<f64> = (0..rate * 12)
             .flat_map(|i| {
-                let transition = ((i as f64 - (48000. * 6. - 64.)) / 128.).clamp(0., 1.);
+                let transition = ((i as f64 - (rate as f64 * 6. - 64.)) / 128.).clamp(0., 1.);
                 let gain = if smooth {
                     0.2 - 0.16 * transition
-                } else if i < 48000 * 6 {
+                } else if i < rate * 6 {
                     0.2
                 } else {
                     0.04
                 };
                 let fade = if smooth {
-                    (i.min(48000 * 12 - 1 - i) as f64 / 64.).min(1.)
+                    (i.min(rate * 12 - 1 - i) as f64 / 64.).min(1.)
                 } else {
                     1.
                 };
                 let sample = gain
                     * fade
-                    * (std::f64::consts::TAU * frequency * i as f64 / 48000.
+                    * (std::f64::consts::TAU * frequency * i as f64 / rate as f64
                         + std::f64::consts::FRAC_PI_4)
                         .sin();
                 (0..channels).map(move |ch| if ch == 0 { sample } else { -sample })
             })
             .collect();
-        write_wav_f64le(&path, 48000, channels, &pcm).unwrap();
+        write_wav_f64le(&path, rate, channels, &pcm).unwrap();
         let owned = measure_loudness(&path, &CopyOptions::default()).unwrap();
         let output = Command::new(&ffmpeg)
             .args(["-nostdin", "-v", "info", "-i"])
@@ -83,8 +90,10 @@ fn main() {
         ] {
             // The owned Annex-2 FIR and the reference resampler have different
             // transient responses. Retain that case as a diagnostic, rather
-            // than claiming identical true peak or widening its acceptance.
-            if key != "true" || smooth {
+            // than claiming identical true peak or widening its acceptance. At
+            // 192 kHz the reference uses the original grid: keep a quarter-rate
+            // diagnostic where the owned estimator still detects a hidden peak.
+            if key != "true" || (smooth && !name.ends_with("diagnostic")) {
                 assert!(
                     (value - expected).abs() < tolerance,
                     "{name}/{key}: own {value}, reference {expected}"
@@ -92,8 +101,8 @@ fn main() {
             }
             println!("{name}/{key}: own {value:.4}, reference {expected:.1}");
         }
-        assert_eq!(owned.sample_frames, 48000 * 12);
-        assert_eq!(owned.sample_rate, 48000);
+        assert_eq!(owned.sample_frames, (rate * 12) as u64);
+        assert_eq!(owned.sample_rate, rate);
         assert_eq!(owned.channels, channels);
     }
     std::fs::remove_dir_all(dir).unwrap();
