@@ -14,3 +14,12 @@ pub type Result<T> = std::result::Result<T,Error>;
 fn invalid(message:&str)->Error {Error(message.into())}
 mod aac_band_tables;
 pub mod aac_bands;
+
+pub mod bits;
+pub mod aac_pce;
+pub mod config;
+pub mod adts;
+fn unsupported(message: &str) -> Error { Error(message.into()) }
+impl From<std::io::Error> for Error {
+    fn from(error: std::io::Error) -> Self { Self(error.to_string()) }
+}

@@ -377,7 +377,7 @@ pub fn probe_as(source: &Path, format: Option<&str>) -> Result<MediaInfo> {
 /// `None` means no owned parser recognizes the requested format/signature.
 /// A recognized but malformed source returns an error, never `None`.
 pub fn try_probe_as(source: &Path, format: Option<&str>) -> Result<Option<MediaInfo>> {
-    use std::io::{Read, Seek, SeekFrom};
+    use std::io::Read;
     match format {
         Some("mov" | "mp4" | "m4a") => return mp4(source).map(Some),
         Some("matroska" | "webm") => return matroska(source).map(Some),
@@ -414,41 +414,5 @@ pub fn try_probe_as(source: &Path, format: Option<&str>) -> Result<Option<MediaI
             return Ok(None);
         }
     }
-    input.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
-    let info = crate::native_media::inspect_adts(input).map_err(|e| e.to_string())?;
-    let duration =
-        i64::try_from(info.sample_frames).map_err(|_| "AAC duration exceeds API range")?;
-    let duration_us =
-        i64::try_from(u128::from(info.sample_frames) * 1_000_000 / u128::from(info.sample_rate))
-            .map_err(|_| "AAC duration exceeds API range")?;
-    Ok(Some(MediaInfo {
-        path: source.to_path_buf(),
-        format: "aac".into(),
-        start_us: Some(0),
-        duration_us: Some(duration_us),
-        bit_rate: None,
-        metadata: Default::default(),
-        chapters: vec![],
-        streams: vec![StreamInfo {
-            index: 0,
-            media_type: "audio".into(),
-            codec: "aac".into(),
-            time_base: [1, info.sample_rate as i32],
-            start: Some(0),
-            duration: Some(duration),
-            bit_rate: None,
-            average_frame_rate: [0, 1],
-            profile: Some("LC".into()),
-            level: None,
-            disposition: 0,
-            metadata: Default::default(),
-            width: 0,
-            height: 0,
-            pixel_format: -1,
-            sample_rate: info.sample_rate as i32,
-            channels: i32::from(info.channels),
-            video_delay: 0,
-            extradata_bytes: 2,
-        }],
-    }))
+    fvid_media::owned_probe::probe_adts(source).map(Some)
 }

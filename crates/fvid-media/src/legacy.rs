@@ -650,6 +650,11 @@ pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo> {
             return Ok(info);
         }
     }
+    if format.is_none_or(|name| name == "aac") {
+        if let Ok(info) = crate::owned_probe::probe_adts(path) {
+            return Ok(info);
+        }
+    }
     let input = Input::open_hinted(path, true, format)?;
     describe(path, &input)
 }

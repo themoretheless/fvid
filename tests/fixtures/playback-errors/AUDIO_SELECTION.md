@@ -70,3 +70,14 @@ CLI/API snapshots agree on stream selection, dual-pass analysis, output report
 measurement and native graph ownership. The truncated-tail ADTS fixture still
 produces a metadata-only plan; this does not assert unbounded decode acceptance.
 Invalid target ranges/keys and print modes are rejected by the execution parser.
+
+The ADTS framing implementation, checked bit reader, AAC AudioSpecificConfig
+and PCE syntax now reside in `fvid-media::owned_aac`. Frontend compatibility
+modules include those same sources so existing error contracts and decoder
+interfaces remain intact. No second ADTS/PCE parsing algorithm is maintained.
+The library's public `probe`/`probe_as(..., Some("aac"))` are available without
+legacy dependencies, and the native frontend delegates its ADTS description
+to that implementation. Probing counts bounded packets without PCM decoding.
+Library acceptance compares streaming/indexed packets on committed synthetic
+mono, stereo, 5.1, 96 kHz and PCE wide8 fixtures; the incomplete ADTS tail is
+still refused by the owned probe. AAC-LC is the currently owned ADTS profile.

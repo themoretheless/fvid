@@ -13,16 +13,75 @@ pub fn probe(path: &Path) -> Result<MediaInfo, String> {
     probe_as(path, None)
 }
 
-/// Inspect owned RIFF/WAVE PCM, optionally requiring the WAVE format explicitly.
+/// Inspect owned RIFF/WAVE PCM or AAC-LC ADTS, optionally requiring a format.
 /// Format hints never override the signature or bypass container validation.
 pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> {
-    if format.is_some_and(|name| name != "wav") {
-        return Err("format has no owned media-library probe yet".into());
+    match format {
+        Some("wav") => return probe_wave(path).map_err(|e| e.to_string()),
+        Some("aac") => return probe_adts(path),
+        Some(_) => return Err("format has no owned media-library probe yet".into()),
+        None => {}
     }
-    if format.is_none() && !crate::owned_wave_inspect::is_wave(path).map_err(|e| e.to_string())? {
-        return Err("container has no owned media-library probe yet".into());
+    if crate::owned_wave_inspect::is_wave(path).map_err(|e| e.to_string())? {
+        return probe_wave(path).map_err(|e| e.to_string());
     }
-    probe_wave(path).map_err(|e| e.to_string())
+    let mut prefix = [0; 7];
+    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    match file.read_exact(&mut prefix) {
+        Ok(()) if crate::owned_aac::adts::header(&prefix).is_some() => probe_adts(path),
+        Ok(()) => Err("container has no owned media-library probe yet".into()),
+        Err(error) if error.kind() == std::io::ErrorKind::UnexpectedEof => {
+            Err("container has no owned media-library probe yet".into())
+        }
+        Err(error) => Err(error.to_string()),
+    }
+}
+
+/// Count AAC-LC ADTS packets using owned framing, without decoding PCM.
+/// The streaming reader retains only one bounded ADTS packet at a time.
+pub fn probe_adts(path: &Path) -> Result<MediaInfo, String> {
+    let file = File::open(path).map_err(|e| e.to_string())?;
+    let mut reader = crate::owned_aac::adts::StreamReader::open(std::io::BufReader::new(file))
+        .map_err(|e| e.to_string())?;
+    let config = reader.configuration();
+    let mut frames = 0u64;
+    while reader.next_packet().map_err(|e| e.to_string())?.is_some() {
+        frames = frames.checked_add(1024).ok_or("AAC duration overflow")?;
+    }
+    let duration = i64::try_from(frames).map_err(|_| "AAC duration exceeds API range")?;
+    let duration_us =
+        i64::try_from(u128::from(frames) * 1_000_000 / u128::from(config.sample_rate))
+            .map_err(|_| "AAC duration exceeds API range")?;
+    Ok(MediaInfo {
+        path: path.into(),
+        format: "aac".into(),
+        start_us: Some(0),
+        duration_us: Some(duration_us),
+        bit_rate: None,
+        metadata: BTreeMap::new(),
+        chapters: Vec::new(),
+        streams: vec![StreamInfo {
+            index: 0,
+            media_type: "audio".into(),
+            codec: "aac".into(),
+            time_base: [1, config.sample_rate as i32],
+            start: Some(0),
+            duration: Some(duration),
+            bit_rate: None,
+            average_frame_rate: [0, 1],
+            profile: Some("LC".into()),
+            level: None,
+            disposition: 0,
+            metadata: BTreeMap::new(),
+            width: 0,
+            height: 0,
+            pixel_format: -1,
+            sample_rate: config.sample_rate as i32,
+            channels: i32::from(config.channels),
+            video_delay: 0,
+            extradata_bytes: 2,
+        }],
+    })
 }
 
 /// Inspect supported uncompressed RIFF/WAVE without loading its sample payload.
@@ -124,6 +183,63 @@ pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn public_adts_probe_and_reader_use_owned_synthetic_packets() {
+        let fixtures =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures");
+        for name in [
+            "aac-mono-44k.aac",
+            "aac-stereo.aac",
+            "aac-51-active.aac",
+            "aac-96k.aac",
+            "aac-pce-wide8.aac",
+        ] {
+            let source = fixtures.join("audio").join(name);
+            let bytes = std::fs::read(&source).unwrap();
+            let indexed = crate::owned_aac::adts::Aac::parse(&bytes, &Default::default()).unwrap();
+            let mut streamed =
+                crate::owned_aac::adts::StreamReader::open(bytes.as_slice()).unwrap();
+            assert_eq!(
+                streamed.audio_specific_config(),
+                indexed.configuration.as_slice()
+            );
+            for index in 0..indexed.packets() {
+                assert_eq!(
+                    streamed.next_packet().unwrap().unwrap(),
+                    indexed.packet(index)
+                );
+            }
+            assert!(streamed.next_packet().unwrap().is_none());
+            let expected = super::probe_adts(&source).unwrap();
+            assert_eq!(expected.streams[0].duration, Some(indexed.samples() as i64));
+            for actual in [
+                crate::probe(&source).unwrap(),
+                crate::probe_as(&source, Some("aac")).unwrap(),
+            ] {
+                assert_eq!(
+                    serde_json::to_value(actual).unwrap(),
+                    serde_json::to_value(&expected).unwrap()
+                );
+            }
+        }
+        let truncated = fixtures.join("playback-errors/aac-packet-prefix.aac");
+        assert!(
+            super::probe_adts(&truncated)
+                .unwrap_err()
+                .contains("fill whole buffer")
+        );
+        let mono = fixtures.join("audio/aac-mono-44k.aac");
+        let info = super::probe_adts(&mono).unwrap();
+        assert_eq!(
+            (
+                info.streams[0].duration,
+                info.streams[0].channels,
+                info.streams[0].sample_rate
+            ),
+            (Some(7168), 1, 44100)
+        );
+    }
+
     #[test]
     fn public_probe_preserves_integer_storage_and_valid_bits() {
         let dir = std::env::temp_dir().join(format!("fvid-probe-precision-{}", std::process::id()));
