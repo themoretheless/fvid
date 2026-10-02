@@ -260,6 +260,9 @@ pub fn trim(
     if from_us < 0 || to_us <= from_us {
         return Err("trim requires 0 <= from < to".into());
     }
+    if crate::owned_wave_remux::supports(source, destination, options) {
+        return crate::owned_wave_remux::trim(source, destination, from_us, to_us, options);
+    }
     match edit(
         &[source.to_path_buf()],
         destination,

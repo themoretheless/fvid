@@ -28,6 +28,42 @@ pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions)
 /// Packet limits count frame-aligned I/O blocks, at most 4096 sample frames.
 /// No samples are decoded, resampled or requantized, including non-finite floats.
 pub fn remux(source: &Path, destination: &Path, options: &CopyOptions) -> Result<CopyStats> {
+    copy_wave(source, destination, None, options).map(|(stats, _)| stats)
+}
+/// Sample-exact half-open interval; fractional sample boundaries are refused.
+pub fn trim_pcm(
+    source: &Path,
+    destination: &Path,
+    from: i64,
+    to: i64,
+    options: &CopyOptions,
+) -> Result<fvid_media_info::PcmTrimStats> {
+    let (stats, sample_frames) = copy_wave(source, destination, Some((from, to)), options)?;
+    Ok(fvid_media_info::PcmTrimStats {
+        packets: stats.packets,
+        sample_frames,
+        payload_bytes: stats.payload_bytes,
+        fvid_payload_copies: stats.fvid_payload_copies,
+    })
+}
+pub fn trim(
+    source: &Path,
+    destination: &Path,
+    from: i64,
+    to: i64,
+    options: &CopyOptions,
+) -> Result<CopyStats> {
+    copy_wave(source, destination, Some((from, to)), options).map(|(stats, _)| stats)
+}
+fn copy_wave(
+    source: &Path,
+    destination: &Path,
+    interval: Option<(i64, i64)>,
+    options: &CopyOptions,
+) -> Result<(CopyStats, u64)> {
+    if interval.is_some_and(|(from, to)| from < 0 || to <= from) {
+        return Err("PCM interval requires 0 <= from < to".into());
+    }
     if !policies(options) {
         return Err(
             "owned WAVE remux does not implement requested stream/metadata policies".into(),
@@ -71,13 +107,28 @@ pub fn remux(source: &Path, destination: &Path, options: &CopyOptions) -> Result
     if capacity == 0 {
         return Err("PCM packet limit cannot hold one sample frame".into());
     }
-    let size = u128::from(info.data_bytes).min(
+    let boundary = |time: i64| -> Result<u64> {
+        let numerator = time as u128 * u128::from(info.sample_rate);
+        if numerator % 1_000_000 != 0 {
+            return Err("PCM time boundary is not exactly representable".into());
+        }
+        Ok((numerator / 1_000_000).min(u128::from(info.sample_frames)) as u64)
+    };
+    let (first, last) = match interval {
+        Some((from, to)) => (boundary(from)?, boundary(to)?),
+        None => (0, info.sample_frames),
+    };
+    if interval.is_some() && last <= first {
+        return Err("no PCM samples in selected interval".into());
+    }
+    let available = (last - first) * u64::from(info.block);
+    let size = u128::from(available).min(
         options
             .max_packets
             .map(|n| u128::from(n) * capacity as u128)
-            .unwrap_or(u128::from(info.data_bytes)),
+            .unwrap_or(u128::from(available)),
     ) as u32;
-    if size == 0 && info.data_bytes != 0 {
+    if size == 0 && available != 0 {
         return Err("no WAVE samples selected".into());
     }
     let metadata_bytes =
@@ -194,7 +245,9 @@ pub fn remux(source: &Path, destination: &Path, options: &CopyOptions) -> Result
             .and_then(|_| output.write_all(&size.to_le_bytes()))
             .map_err(|e| e.to_string())?;
         input
-            .seek(SeekFrom::Start(info.data_offset))
+            .seek(SeekFrom::Start(
+                info.data_offset + first * u64::from(info.block),
+            ))
             .map_err(|e| e.to_string())?;
         let mut buffer = vec![0; capacity];
         let mut remaining = size as usize;
@@ -229,13 +282,16 @@ pub fn remux(source: &Path, destination: &Path, options: &CopyOptions) -> Result
         done: true,
         ..event
     });
-    Ok(CopyStats {
-        packets: event.packets,
-        payload_bytes: event.payload_bytes,
-        segments: 1,
-        backend: "owned streaming WAVE remux",
-        fvid_payload_copies: event.packets,
-    })
+    Ok((
+        CopyStats {
+            packets: event.packets,
+            payload_bytes: event.payload_bytes,
+            segments: 1,
+            backend: "owned streaming WAVE remux",
+            fvid_payload_copies: event.packets,
+        },
+        u64::from(size) / u64::from(info.block),
+    ))
 }
 
 #[cfg(test)]
@@ -332,6 +388,82 @@ mod tests {
         let stats = crate::remux(&empty, &empty_copy, &CopyOptions::default()).unwrap();
         assert_eq!(stats.packets, 0);
         assert_eq!(payload(&empty_copy).0.sample_frames, 0);
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+    #[test]
+    fn public_trim_is_sample_exact_and_keeps_all_pcm_storage_widths() {
+        let dir = std::env::temp_dir().join(format!("fvid-wave-trim-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        for (bits, float) in [
+            (8u16, false),
+            (16, false),
+            (24, false),
+            (32, false),
+            (32, true),
+            (64, true),
+        ] {
+            let source = dir.join(format!("source-{bits}-{float}.wav"));
+            if float && bits == 32 {
+                let samples: Vec<_> = (0..400).map(|i| f32::from_bits(i * 73111)).collect();
+                crate::owned_wav_file::write_wav_f32le(&source, 48000, 1, &samples).unwrap();
+            } else if float {
+                let samples: Vec<_> = (0..400).map(|i| f64::from_bits(i * 73111)).collect();
+                crate::owned_wav_file::write_wav_f64le(&source, 48000, 1, &samples).unwrap();
+            } else {
+                let width = usize::from(bits / 8);
+                let raw: Vec<u8> = (0..400 * width).map(|i| (i * 73 + 17) as u8).collect();
+                crate::owned_wav_file::write_wav_integer_le(&source, 48000, 1, bits, &raw, 4)
+                    .unwrap();
+            }
+            let (_, raw) = payload(&source);
+            let width = usize::from(bits / 8);
+            let output = dir.join(format!("trim-{bits}-{float}.wav"));
+            let stats =
+                crate::trim_pcm(&source, &output, 1000, 2500, &CopyOptions::default()).unwrap();
+            assert_eq!(stats.sample_frames, 72);
+            assert_eq!(stats.payload_bytes, 72 * width as u64);
+            let (info, actual) = payload(&output);
+            assert_eq!(info.sample_frames, 72);
+            assert_eq!(info.bits_per_sample, bits);
+            assert_eq!(info.float, float);
+            assert_eq!(actual, raw[48 * width..120 * width]);
+            let output = dir.join(format!("general-{bits}-{float}.wav"));
+            let stats = crate::trim(
+                &source,
+                &output,
+                1000,
+                2500,
+                &CopyOptions {
+                    max_packet_bytes: 3 * width,
+                    max_packets: Some(2),
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            assert_eq!(stats.packets, 2);
+            assert_eq!(stats.payload_bytes, 6 * width as u64);
+            assert_eq!(payload(&output).1, raw[48 * width..54 * width]);
+            let output = dir.join(format!("clip-{bits}-{float}.wav"));
+            let stats =
+                crate::trim_pcm(&source, &output, 2500, 10000, &CopyOptions::default()).unwrap();
+            assert_eq!(stats.sample_frames, 280);
+            assert_eq!(payload(&output).1, raw[120 * width..]);
+            let output = dir.join(format!("fractional-{bits}-{float}.wav"));
+            assert!(
+                crate::trim_pcm(&source, &output, 1, 2500, &CopyOptions::default())
+                    .unwrap_err()
+                    .contains("not exactly representable")
+            );
+            assert!(!output.exists());
+            let output = dir.join(format!("empty-{bits}-{float}.wav"));
+            assert!(
+                crate::trim_pcm(&source, &output, 10000, 20000, &CopyOptions::default())
+                    .unwrap_err()
+                    .contains("no PCM samples")
+            );
+            assert!(!output.exists());
+        }
         std::fs::remove_dir_all(dir).unwrap();
     }
     #[test]

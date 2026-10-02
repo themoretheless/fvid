@@ -172,6 +172,9 @@ pub fn trim_pcm(
     if from < 0 || to <= from {
         return Err("PCM interval requires 0 <= from < to".into());
     }
+    if crate::owned_wave_remux::supports(source, destination, options) {
+        return crate::owned_wave_remux::trim_pcm(source, destination, from, to, options);
+    }
     let mut input = Input::open(source)?;
     let selected = selection(&input, options)?;
     for &index in &selected {
