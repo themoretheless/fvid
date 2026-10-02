@@ -46,6 +46,26 @@ fn synthetic_adts_file_remux_preserves_packets_and_publishes_atomically() {
     assert_eq!(stats.backend, "owned Matroska");
     assert_eq!((stats.packets, stats.payload_bytes), (2, 4));
     assert!(events.lock().unwrap().last().unwrap().done);
+    let selected = dir.join("selected.mka");
+    let selected_options = fvid_control::CopyOptions {
+        streams: vec![0],
+        ..Default::default()
+    };
+    assert_eq!(
+        fvid_media::plan_remux(&source, &selected_options)
+            .unwrap()
+            .streams
+            .len(),
+        1
+    );
+    let selected_stats = fvid_media::remux(&source, &selected, &selected_options).unwrap();
+    assert_eq!(selected_stats.backend, "owned Matroska");
+    assert_eq!(
+        std::fs::read(&selected).unwrap(),
+        std::fs::read(&destination).unwrap()
+    );
+    std::fs::remove_file(selected).unwrap();
+
     let bytes = std::fs::read(&destination).unwrap();
     let mut reader =
         fvid_media::owned_webm::WebmReader::open(Cursor::new(bytes.clone()), Default::default())
@@ -129,6 +149,35 @@ fn synthetic_adts_concat_cli_copies_aac_instead_of_decoding_pcm() {
         std::fs::read(&expected).unwrap()
     );
     assert!(fvid_media::concat(&sources, &library, &Default::default()).is_err());
+    let selected = dir.join("selected.mka");
+    let selected_options = fvid_control::CopyOptions {
+        streams: vec![0],
+        ..Default::default()
+    };
+    assert_eq!(
+        fvid_media::plan_concat(&sources, &selected_options)
+            .unwrap()
+            .streams
+            .len(),
+        1
+    );
+    let stats = fvid_media::concat(&sources, &selected, &selected_options).unwrap();
+    assert_eq!(stats.backend, "owned Matroska");
+    assert_eq!(
+        std::fs::read(&selected).unwrap(),
+        std::fs::read(&library).unwrap()
+    );
+    for indices in [vec![1], vec![0, 0]] {
+        let unsupported = fvid_control::CopyOptions {
+            streams: indices,
+            ..Default::default()
+        };
+        assert!(
+            fvid_media::owned_concat::concat(&sources, &dir.join("invalid.mka"), &unsupported)
+                .is_err()
+        );
+    }
+
     let incompatible = dir.join("different-rate.aac");
     let mut altered = std::fs::read(&sources[1]).unwrap();
     altered[2] = (altered[2] & 0xc3) | (3 << 2);

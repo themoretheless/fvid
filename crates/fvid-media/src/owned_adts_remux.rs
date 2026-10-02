@@ -7,7 +7,8 @@ use std::{
     path::Path,
 };
 pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
-    if !crate::owned_matroska_remux::policies(options)
+    if !(options.streams.is_empty() || options.streams == [0])
+        || !crate::owned_matroska_remux::unedited_policies(options)
         || !matches!(
             destination.extension().and_then(|s| s.to_str()),
             Some("mkv" | "mka")

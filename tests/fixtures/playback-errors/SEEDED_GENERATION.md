@@ -517,3 +517,11 @@ It shares file/packet admission with execution and walks the complete compatible
 sequence without output or execution progress. The synthetic concat control
 checks all input paths, packet summary and identical configuration refusal in
 plan/execution. Existing WAVE planning remains available through owned dispatch.
+
+Explicit ADTS stream selection `[0]` now qualifies for owned remux, concat and
+both plans, since ADTS exposes exactly one audio stream. Synthetic controls
+compare complete selected/unselected output and assert owned backend dispatch.
+Other indices and duplicate selection remain outside owned ADTS admission.
+Matroska identity copy still requires all original tracks; its selection policy
+is unchanged. Unknown metadata edits and memory/count/RSS policies still retain
+legacy routing where enabled and require later implementation.
