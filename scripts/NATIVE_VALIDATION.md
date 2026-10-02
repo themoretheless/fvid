@@ -338,3 +338,24 @@ empty test PATH. The owned library test binary had no direct libav/swscale/
 swresample linkage. Legacy/player compilation, the supported native dependency
 and source policies, and diff checks passed. The final regression also passed
 after ensuring that the output reader closes before fixture cleanup.
+
+
+Owned overlay comparison-clock regression
+-----------------------------------------
+
+Exact rational flooring selected secondary frames [0,0,1,2,3,4] for nearly
+identical rates 2147483646/2147483645 and 2147483647/2147483646. The committed
+synthetic acceptance test failed specifically at primary frame one before the
+fix. The owned scheduler now compares rounded presentation times on a shared
+rational clock (denominator below 500000), falling back to microseconds.
+It consumes one equal-tick event per primary frame, including the synthetic
+1 GHz / 2 GHz tie case. Full pixel acceptance expects [0,1,2,3,4,5] for both
+pairs; explicit capped FFmpeg reference comparisons produced these sequences.
+Primary presentation timestamps, intervals and termination remain unchanged.
+
+Four new fixtures come from generate_y4m_overlay_fixtures.py without FFmpeg;
+the three previous fixtures retain their original bytes. All 141 owned unit
+tests passed, including execution with no external-program PATH. Native source
+and dependency guards passed for the library, headless, player and camera
+bridge. This closes a temporal compatibility gap in the owned overlay route;
+production media/CUDA still require migration away from legacy-ffmpeg.

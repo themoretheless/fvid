@@ -10,6 +10,32 @@ use std::{
 };
 type Result<T> = std::result::Result<T, String>;
 
+// Keep the established overlay comparison-clock contract without a backend.
+// Exact common ticks are used below the denominator cap; otherwise use microseconds.
+fn comparison_clock(main: [i32; 2], secondary: [i32; 2]) -> [u64; 2] {
+    fn gcd(mut a: u64, mut b: u64) -> u64 {
+        while b != 0 {
+            (a, b) = (b, a % b);
+        }
+        a
+    }
+    let denominator =
+        main[0] as u64 / gcd(main[0] as u64, secondary[0] as u64) * secondary[0] as u64;
+    if denominator < 500_000 {
+        [gcd(main[1] as u64, secondary[1] as u64), denominator]
+    } else {
+        [1, 1_000_000]
+    }
+}
+fn comparison_pts(index: u64, rate: [i32; 2], clock: [u64; 2]) -> Result<u128> {
+    let numerator = u128::from(index)
+        .checked_mul(rate[1] as u128)
+        .and_then(|n| n.checked_mul(u128::from(clock[1])))
+        .ok_or("overlay comparison timestamp overflow")?;
+    let denominator = rate[0] as u128 * u128::from(clock[0]);
+    Ok(numerator / denominator + u128::from(numerator % denominator >= denominator.div_ceil(2)))
+}
+
 pub(crate) struct OverlayReader {
     input: BufReader<File>,
     header: Header,
@@ -17,6 +43,8 @@ pub(crate) struct OverlayReader {
     next: u64,
     eof: bool,
     main_rate: [i32; 2],
+    secondary_rate: [i32; 2],
+    clock: [u64; 2],
     x: i32,
     y: i32,
 }
@@ -46,7 +74,9 @@ impl OverlayReader {
         if spec.x % 2 != 0 || spec.y % 2 != 0 {
             return Err("overlay placement must align with chroma samples".into());
         }
-        header.frame_rate()?;
+        let main_rate = main.frame_rate()?;
+        let secondary_rate = header.frame_rate()?;
+        let clock = comparison_clock(main_rate, secondary_rate);
         Ok(Self {
             frame: GeometryFrame {
                 width: header.width,
@@ -54,7 +84,9 @@ impl OverlayReader {
                 subsampling: Some([2, 2]),
                 data: Vec::new(),
             },
-            main_rate: main.frame_rate()?,
+            main_rate,
+            secondary_rate,
+            clock,
             input,
             header,
             next: 0,
@@ -64,12 +96,13 @@ impl OverlayReader {
         })
     }
     pub(crate) fn apply(&mut self, output: &Header, frame: &mut Vec<u8>, index: u64) -> Result<()> {
-        let [n, d] = self.header.frame_rate()?;
-        let target = u128::from(index) * self.main_rate[1] as u128 * n as u128
-            / (self.main_rate[0] as u128 * d as u128);
-        let target = u64::try_from(target).map_err(|_| "overlay frame clock overflow")?;
+        let primary_pts = comparison_pts(index, self.main_rate, self.clock)?;
         let mut marker = Vec::new();
-        while !self.eof && self.next <= target {
+        while !self.eof {
+            let secondary_pts = comparison_pts(self.next, self.secondary_rate, self.clock)?;
+            if secondary_pts > primary_pts {
+                break;
+            }
             if !line(&mut self.input, &mut marker)? {
                 self.eof = true;
                 break;
@@ -92,6 +125,11 @@ impl OverlayReader {
                 .next
                 .checked_add(1)
                 .ok_or("overlay frame count overflow")?;
+            // Consume one equal-timestamp event, rather than all future events
+            // which happen to round to the same tick.
+            if secondary_pts == primary_pts {
+                break;
+            }
         }
         // EOF before the first secondary frame leaves the primary unchanged.
         // After at least one frame, the existing repeat-last behavior applies.
@@ -266,6 +304,48 @@ mod tests {
         drop(reader);
         std::fs::remove_file(output).unwrap();
     }
+    #[test]
+    fn nearly_equal_rates_choose_frames_on_the_shared_comparison_clock() {
+        for (primary, secondary) in [
+            (
+                "overlay-near-clock-primary.y4m",
+                "overlay-near-clock-secondary.y4m",
+            ),
+            (
+                "overlay-tied-clock-primary.y4m",
+                "overlay-tied-clock-secondary.y4m",
+            ),
+        ] {
+            let request = DecodeTransform {
+                overlay: Some(OverlaySpec {
+                    path: fixtures().join(secondary),
+                    x: 2,
+                    y: 2,
+                }),
+                ..Default::default()
+            };
+            let mut seen = Vec::new();
+            let stats = crate::owned_y4m_decode::visit_reader_transformed(
+                Cursor::new(std::fs::read(fixtures().join(primary)).unwrap()),
+                &request,
+                |_, pixels, _, _| {
+                    let index = pixels[0] - 10;
+                    let mut expected = vec![10 + index; 16];
+                    for position in [10, 11, 14, 15] {
+                        expected[position] = 100 + index;
+                    }
+                    expected.extend([128; 8]);
+                    assert_eq!(pixels, expected, "comparison clock: {primary}");
+                    seen.push(index);
+                    Ok(())
+                },
+            )
+            .unwrap();
+            assert_eq!(seen, [0, 1, 2, 3, 4, 5]);
+            assert_eq!(stats.video_frames, 6);
+        }
+    }
+
     #[test]
     fn unsupported_colour_conversion_keeps_legacy_route() {
         let source = fixtures().join("overlay-primary-clock.y4m");
