@@ -8,7 +8,7 @@ use std::{
     sync::atomic::{AtomicU64, Ordering},
 };
 static NEXT: AtomicU64 = AtomicU64::new(0);
-fn policies(o: &CopyOptions) -> bool {
+pub(crate) fn policies(o: &CopyOptions) -> bool {
     o.streams.is_empty()
         && o.metadata_set.is_empty()
         && o.metadata_delete.is_empty()
@@ -70,6 +70,34 @@ pub fn remux(
         options.max_packet_bytes,
     )
     .map_err(|e| e.to_string())?;
+    publish(destination, options, |output| {
+        crate::owned_matroska_copy::copy_with_packet_limit(
+            &mut input,
+            output,
+            audio_only,
+            options.cancel.as_ref(),
+            options.progress.as_ref(),
+            options.max_packet_bytes,
+        )
+        .map_err(|e| e.to_string())
+    })
+}
+pub(crate) fn publish(
+    destination: &Path,
+    options: &CopyOptions,
+    write: impl FnOnce(&mut File) -> Result<fvid_control::ProgressEvent, String>,
+) -> Result<CopyStats, String> {
+    if std::fs::symlink_metadata(destination).is_ok() {
+        return Err("output already exists".into());
+    }
+    let check = || {
+        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+            Err("media operation cancelled".to_string())
+        } else {
+            Ok(())
+        }
+    };
+    check()?;
     let parent = destination
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -93,15 +121,7 @@ pub fn remux(
             Err(e) => return Err(e.to_string()),
         }
     };
-    let mut event = crate::owned_matroska_copy::copy_with_packet_limit(
-        &mut input,
-        &mut output,
-        audio_only,
-        options.cancel.as_ref(),
-        options.progress.as_ref(),
-        options.max_packet_bytes,
-    )
-    .map_err(|e| e.to_string())?;
+    let mut event = write(&mut output)?;
     output.flush().map_err(|e| e.to_string())?;
     output.sync_all().map_err(|e| e.to_string())?;
     check()?;

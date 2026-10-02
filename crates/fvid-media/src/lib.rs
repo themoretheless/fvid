@@ -133,3 +133,5 @@ pub mod owned_matroska_remux;
 pub mod owned_remux;
 
 pub mod owned_remux_plan;
+
+pub mod owned_adts_remux;

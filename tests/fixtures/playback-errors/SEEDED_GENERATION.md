@@ -440,3 +440,14 @@ and nanosecond AAC clock; five existing channel/rate fixtures compare complete
 library/frontend container bytes and native decoded PCM. This streaming API
 leaves atomic file publication and final completion to the caller; it does not
 provide a new codec profile or close aggregate AAC allocation budgeting.
+
+### Library ADTS file remux
+
+The public remux API now selects owned strict ADTS-to-Matroska export for .mka
+or .mkv and unedited all-track requests in both feature modes. It shares atomic
+publication with Matroska identity copy. A synthetic two-packet ADTS file checks
+raw AAC payload, nanosecond timestamps, completion after publication, refusal
+to overwrite, cancellation during copy and cleanup after a truncated packet.
+No codec is invoked by this packet-copy test. Selection, metadata editing and
+aggregate memory/count/RSS policies remain outside this adapter's admission.
+ADTS planning is not yet routed to the owned file adapter.

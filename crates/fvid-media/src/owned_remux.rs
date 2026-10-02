@@ -5,6 +5,9 @@ pub fn remux(
     destination: &Path,
     options: &fvid_control::CopyOptions,
 ) -> Result<fvid_media_info::CopyStats, String> {
+    if crate::owned_adts_remux::supports(source, destination, options) {
+        return crate::owned_adts_remux::remux(source, destination, options);
+    }
     if crate::owned_matroska_remux::supports(source, destination, options) {
         crate::owned_matroska_remux::remux(source, destination, options)
     } else {
