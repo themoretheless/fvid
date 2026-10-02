@@ -485,3 +485,18 @@ A_AAC. All-ADTS input now reaches AAC packet-copy, preserving exact container
 bytes against the specialized export API. Mixed input keeps its prior fallback.
 The earlier five-fixture concat regression now passes; the separate
 codec-delay/padding PCM mismatch remains unresolved.
+
+### Leading negative AAC DiscardPadding regression
+
+The checked-in synthetic mono-silence ADTS segment also builds a two-block
+Matroska control with 128 leading and 256 trailing discarded samples. Before
+fixing the export decoder's origin it produced 1792 instead of 1664 samples:
+leading discarded data was reinserted as silence. The acceptance test now checks
+1664 samples. Only the first block's head padding beyond codec-delay trimming
+rebases the presentation origin; subsequent timestamp gaps remain intact.
+All native mux tests are now active and pass, including the old padding PCM
+oracle. Existing gap/interval/overlap tests verify retained timeline behavior.
+The explicit `ffmpeg_matroska_padding_reference` benchmark compares sample counts
+for codec delay and negative head padding against an external decoder; ordinary
+tests do not require it. Specification: Matroska DiscardPadding element,
+https://www.matroska.org/technical/elements.html#DiscardPadding.

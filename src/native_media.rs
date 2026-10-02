@@ -589,6 +589,7 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
     };
     let total_delay = trim_samples(track.codec_delay_ns)?;
     let mut delay = total_delay;
+    let mut leading_padding = 0u64;
     let mut position = 0u64;
     let mut origin = None;
     let mut stats = AudioDecodeStats {
@@ -632,6 +633,11 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
         let skip_delay = delay.min(frames);
         delay -= skip_delay;
         let first = head.max(skip_delay);
+        if stats.decoded_frames == 0 {
+            // Leading discarded samples establish the presentation origin;
+            // reinserting them as a timestamp gap would undo DiscardPadding.
+            leading_padding = head.saturating_sub(skip_delay);
+        }
         let end = frames - tail;
         if first > end {
             return Err(invalid("Matroska audio trimming overlaps"));
@@ -640,7 +646,7 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
         stats.decoded_frames += 1;
         control.packet(encoded.len())?;
         if available == 0 { continue; }
-        let audible_start = timestamp + i128::from(first);
+        let audible_start = timestamp + i128::from(first) - i128::from(leading_padding);
         let audible_start = if audible_start < 0 && audible_start.unsigned_abs() <= u128::from(precision) {
             0
         } else {

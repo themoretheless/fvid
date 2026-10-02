@@ -125,3 +125,50 @@ fn synthetic_adts_concat_cli_copies_aac_instead_of_decoding_pcm() {
     assert_eq!(reader.packets.len(), 2);
     assert_eq!(bytes, std::fs::read(&expected).unwrap());
 }
+#[test]
+fn synthetic_leading_aac_padding_does_not_return_as_silence() {
+    use fvid::container::matroska_write::{Encoding, PacketWriter, TrackOptions, TrackSpec};
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/adts-concat-a.aac");
+    let data = std::fs::read(path).unwrap();
+    let mut source = fvid::container::adts::StreamReader::open(data.as_slice()).unwrap();
+    let config = source.configuration();
+    let asc = source.audio_specific_config().to_vec();
+    let payload = source.next_packet().unwrap().unwrap();
+    let ns = |n: u64| (n * 1_000_000_000 + 22050) / 44100;
+    let mut output = Cursor::new(Vec::new());
+    let mut writer = PacketWriter::new_with_options(
+        &mut output,
+        &[TrackSpec {
+            encoding: Encoding::Aac {
+                configuration: &asc,
+                sample_rate: config.sample_rate,
+                channels: config.channels.into(),
+            },
+            name: "",
+            language: "",
+        }],
+        &[TrackOptions::default()],
+    )
+    .unwrap();
+    writer
+        .write_packet_with_padding(0, 0, ns(1024), true, &payload, -(ns(128) as i64))
+        .unwrap();
+    writer
+        .write_packet_with_padding(
+            0,
+            ns(1024),
+            ns(2048) - ns(1024),
+            true,
+            &payload,
+            ns(256) as i64,
+        )
+        .unwrap();
+    writer.finish().unwrap();
+    let mut pcm = Vec::new();
+    let stats =
+        fvid::native_media::decode_matroska_aac_pcm_interval(output.get_ref(), &mut pcm, None)
+            .unwrap();
+    assert_eq!(stats.sample_frames, 2048 - 128 - 256);
+    assert_eq!(pcm.len(), (2048 - 128 - 256) * 4);
+}
