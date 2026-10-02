@@ -326,3 +326,10 @@ admission retains unsupported key/stream-tag operations on their existing path;
 this is not an assertion that all metadata policies or source formats migrated.
 The parser's first-value `FileTags::insert` semantics remain unchanged; explicit
 editing uses the separate `set` method.
+
+External Matroska rotation/Y4M, HDR/MP4 colour and file tags/chapters comparisons
+now live in `benches/ffmpeg_matroska_metadata_reference.rs`, invoked explicitly
+through `cargo bench` with both `FVID_REFERENCE_FFMPEG` and
+`FVID_REFERENCE_FFPROBE`. All three original comparison bodies are retained.
+Ordinary `native_matroska_metadata` tests use owned readers/writers and
+synthetic controls only; no ignored external-tool comparisons remain there.
