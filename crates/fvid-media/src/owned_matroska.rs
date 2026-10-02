@@ -445,3 +445,15 @@ mod adts_mux_tests {
 }
 
 include!("owned_hdr_payload_impl.rs");
+
+impl From<crate::owned_mp4::Error> for Error {
+    fn from(e: crate::owned_mp4::Error) -> Self { Self(e.to_string()) }
+}
+use crate::owned_mp4::Track as Mp4AacTrack;
+use crate::owned_codec_config::aac_specific_config;
+include!("owned_mp4_aac_plan_impl.rs");
+impl FileMetadata {
+    pub fn from_mp4<R: Read + Seek>(input: &crate::owned_mp4::Mp4Reader<R>) -> Self {
+        Self { tags: input.tags().clone(), chapters: input.chapters().iter().map(|c| Chapter { start_ns: c.start_ns, end_ns: None, title: c.title.clone() }).collect() }
+    }
+}

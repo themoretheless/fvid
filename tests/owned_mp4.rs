@@ -148,3 +148,124 @@ fn library_mp4_enforces_metadata_and_packet_limits_before_allocating_payload() {
         .contains("index out of range"));
     assert_eq!(actual, [17, 23]);
 }
+
+#[test]
+fn owned_mp4_matroska_mux_and_publication_match_frontend_bytes() {
+    let dir = std::env::temp_dir().join(format!("fvid-library-mp4-remux-{}", std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    struct Clean(std::path::PathBuf);
+    impl Drop for Clean {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _clean = Clean(dir.clone());
+    for name in [
+        "video.mp4",
+        "audio.mp4",
+        "hevc/main-ipb.mp4",
+        "hevc/hdr10.mp4",
+        "short/avc-bframes.mp4",
+    ] {
+        let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures")
+            .join(name);
+        let bytes = std::fs::read(&source).unwrap();
+        let mut front =
+            fvid::container::mp4::Mp4Reader::open(Cursor::new(&bytes), Default::default()).unwrap();
+        let mut expected = Cursor::new(Vec::new());
+        let front_event =
+            fvid::container::mp4_matroska::write(&mut front, &mut expected, None, None).unwrap();
+        let mut own =
+            fvid_media::owned_mp4::Mp4Reader::open(Cursor::new(&bytes), Default::default())
+                .unwrap();
+        let mut actual = Cursor::new(Vec::new());
+        let own_event =
+            fvid_media::owned_mp4_matroska::write(&mut own, &mut actual, None, None).unwrap();
+        assert_eq!(own_event, front_event);
+        assert_eq!(
+            actual.get_ref(),
+            expected.get_ref(),
+            "{name}: packet mux bytes"
+        );
+        let output = dir.join(format!(
+            "{}.{}",
+            name.replace('/', "-"),
+            if name == "audio.mp4" { "mka" } else { "mkv" }
+        ));
+        let options = fvid_control::CopyOptions {
+            progress: Some(fvid_control::ProgressHook::new(|_| {
+                panic!("read-only plan emitted progress")
+            })),
+            ..Default::default()
+        };
+        let plan = fvid_media::plan_remux(&source, &options).unwrap();
+        assert!(plan
+            .notes
+            .iter()
+            .any(|note| note.contains("owned MP4/Matroska")));
+        assert!(plan.steps.iter().any(|step| step
+            .detail
+            .contains(&format!("{} compressed packets", own_event.packets))));
+        assert!(!output.exists());
+        let stats = fvid_media::remux(&source, &output, &Default::default()).unwrap();
+        assert_eq!(stats.backend, "owned Matroska");
+        assert_eq!(
+            (stats.packets, stats.payload_bytes),
+            (own_event.packets, own_event.payload_bytes)
+        );
+        assert_eq!(std::fs::read(&output).unwrap(), expected.into_inner());
+        assert!(
+            fvid_media::owned_mp4_remux::remux(&source, &output, &Default::default())
+                .unwrap_err()
+                .contains("already exists")
+        );
+    }
+}
+
+#[test]
+fn library_mp4_remux_cancellation_and_packet_cap_leave_no_partial_file() {
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4");
+    let dir = std::env::temp_dir().join(format!("fvid-mp4-remux-controls-{}", std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    struct Clean(std::path::PathBuf);
+    impl Drop for Clean {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _clean = Clean(dir.clone());
+    let output = dir.join("cancelled.mkv");
+    let cancel = fvid_control::CancelFlag::default();
+    let captured = cancel.clone();
+    let options = fvid_control::CopyOptions {
+        cancel: Some(cancel),
+        progress: Some(fvid_control::ProgressHook::new(move |event| {
+            assert!(!event.done);
+            if event.packets > 0 {
+                captured.cancel();
+            }
+        })),
+        ..Default::default()
+    };
+    assert!(
+        fvid_media::owned_mp4_remux::remux(&source, &output, &options)
+            .unwrap_err()
+            .contains("cancelled")
+    );
+    assert!(!output.exists());
+    assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 0);
+    let capped = dir.join("capped.mkv");
+    assert!(fvid_media::owned_mp4_remux::remux(
+        &source,
+        &capped,
+        &fvid_control::CopyOptions {
+            max_packet_bytes: 1,
+            ..Default::default()
+        }
+    )
+    .unwrap_err()
+    .contains("packet exceeds budget"));
+    assert!(!capped.exists());
+    assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 0);
+}

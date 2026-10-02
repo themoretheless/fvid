@@ -1219,6 +1219,9 @@ fn validate_packet(
     Ok((index as usize, size as usize))
 }
 pub fn remux(source: &Path, destination: &Path, options: &CopyOptions) -> Result<CopyStats> {
+    if crate::owned_mp4_remux::supports(source, destination, options) {
+        return crate::owned_mp4_remux::remux(source, destination, options);
+    }
     if crate::owned_adts_remux::supports(source, destination, options) {
         return crate::owned_adts_remux::remux(source, destination, options);
     }
