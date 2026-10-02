@@ -535,7 +535,7 @@ fn export_pcm_selected(
     if output_channels != input_channels {
         if unknown_pcm_layout {return Err(invalid("PCM channel conversion requires a known speaker layout"));}
         if input_channels > 6 { return Err(invalid("native audio rematrixing supports 1..=6 input channels")); }
-        if native_mask.is_some_and(|mask| default_pcm_mask(input_channels).is_ok_and(|standard|mask!=standard)) {return Err(invalid("native audio rematrixing requires a supported speaker layout"));}
+        if native_mask.is_some_and(|mask| (mask != 0 || input_channels > 2) && default_pcm_mask(input_channels).is_ok_and(|standard|mask!=standard)) {return Err(invalid("native audio rematrixing requires a supported speaker layout"));}
         if let Some((_, info)) = &wave { info.validate_rematrix()?; }
     }
     let output_mask = match &wave {

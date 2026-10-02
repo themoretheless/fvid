@@ -19,10 +19,28 @@ def generate(output):
     data += b'LIST' + struct.pack('<I', len(payload)) + payload
     data[4:8] = struct.pack('<I', len(data) - 8)
     audio.write_bytes(data)
+    with wave.open(str(output / 'wave-rematrix-implicit.wav'), 'wb') as writer:
+        writer.setparams((2, 2, 48000, 4800, 'NONE', 'not compressed'))
+        writer.writeframes(struct.pack('<hh', 4096, 12288) * 4800)
     video = bytearray(b'YUV4MPEG2 W16 H16 F30:1 Ip C420jpeg\n')
     for value in (32, 96, 160):
         video += b'FRAME\n' + bytes([value]) * 256 + bytes([128]) * 128
     (output / 'wave-probe-info.y4m').write_bytes(video)
+    (output / 'wave-rematrix-implicit.y4m').write_bytes(video)
+
+    # Reuse only committed synthetic AAC packets; omit the deliberately
+    # truncated fourth header in the existing packet-limit reproducer.
+    fixtures = Path(__file__).resolve().parent.parent / 'tests/fixtures/playback-errors'
+    encoded = (fixtures / 'aac-packet-prefix.aac').read_bytes()
+    cursor = 0
+    for _ in range(3):
+        header = encoded[cursor:cursor + 7]
+        assert len(header) == 7 and header[0] == 0xff and header[1] & 0xf6 == 0xf0
+        size = ((header[3] & 3) << 11) | (header[4] << 3) | (header[5] >> 5)
+        assert size >= 7 and cursor + size <= len(encoded)
+        cursor += size
+    (output / 'aac-concat-route.aac').write_bytes(encoded[:cursor])
+    (output / 'aac-concat-route.y4m').write_bytes((fixtures / 'aac-packet-prefix.y4m').read_bytes())
 
 
 if __name__ == '__main__':

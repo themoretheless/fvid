@@ -335,6 +335,14 @@ pub fn plan_concat(sources: &[std::path::PathBuf], options: &CopyOptions) -> Res
         if options.streams.first().is_some_and(|&s|s!=0) {return Err("ADTS has only stream 0".into());}
         return crate::native_plan::concat_adts(sources);
     }
+    let all_wave = sources.iter().try_fold(!sources.is_empty(), |all, source| {
+        crate::native_pcm::is_wave(source).map(|wave| all && wave).map_err(|e| e.to_string())
+    })?;
+    if all_wave {
+        validate_native_copy_options(options,true)?;
+        if options.streams.first().is_some_and(|&s|s!=0) {return Err("WAVE has only stream 0".into());}
+        return crate::native_plan::concat_wave(sources);
+    }
     if validate_native_copy_options(options,false).is_ok() {
         if let Some(plan)=crate::native_plan::concat_mp4_matroska(sources)? { return Ok(plan); }
     }

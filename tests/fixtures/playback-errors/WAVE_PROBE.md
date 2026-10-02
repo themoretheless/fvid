@@ -16,3 +16,28 @@ parser, including its container bit rate and audio frame-rate fields.
 Library tests additionally cover PCM8/16/24/32, 24 valid bits in 32-bit storage,
 float32, stereo speaker masks, and explicit WAVE format hints. No test invokes
 FFmpeg or a fixture generator.
+
+## Owned route selection regressions
+
+`wave-rematrix-implicit.wav` contains 4800 stereo PCM16 frames at 48 kHz,
+with left 4096/right 12288 and a conventional WAVE format without an explicit
+speaker mask. Its paired Y4M video has the same 0.1 second duration. The
+previous generic layout check refused this input before WAVE's valid implicit
+mono/stereo check could run. The acceptance test requires 4800 mono float32
+samples equal to 0.25; unknown multichannel layouts remain rejected.
+
+The INFO fixture also reproduces `media plan concat a.wav b.wav` being routed
+to PCM Matroska decoding while the corresponding WAVE command copies its
+samples and metadata. The acceptance test requires the default plan to equal
+the WAVE copy plan; explicit `--output-format mkv/mka` must retain the owned
+Matroska decode/write plan. Both regressions were run against the previous
+implementation and failed for these specific reasons, then passed with the fix.
+
+The same route selection issue affected homogeneous ADTS/AAC concatenation.
+`aac-concat-route.aac` retains the first three complete packets from the
+committed synthetic `aac-packet-prefix.aac`, dropping its incomplete tail;
+`aac-concat-route.y4m` reuses the corresponding three-frame synthetic video.
+Generation reads only those committed fixtures and never invokes a codec.
+Separate ADTS and WAVE acceptance tests check packet/PCM copy plans in the CLI
+and (when enabled) public media API; mixed-container PCM concat continues to
+use its decoded route. Explicit Matroska plans remain available in both cases.

@@ -4275,12 +4275,14 @@ fn try_mp4_matroska_concat(args: &[String]) -> Result<bool, Box<dyn std::error::
     let mut quiet = false;
     let mut progress = false;
     let mut output_format = "mkv";
+    let mut explicit_output_format = false;
     let mut items = args[first..].iter();
     while let Some(arg) = items.next() {
         match arg.as_str() {
             "--quiet" => quiet = true,
             "--progress" if !plan => progress = true,
             "--output-format" if plan => {
+                explicit_output_format = true;
                 output_format=items.next().map(String::as_str).ok_or("missing concat output format")?;
                 if !matches!(
                     Some(output_format),
@@ -4295,6 +4297,19 @@ fn try_mp4_matroska_concat(args: &[String]) -> Result<bool, Box<dyn std::error::
     }
     if paths.len() < 2 {
         return Ok(false);
+    }
+    if plan && !explicit_output_format {
+        let mut all_wave = true;
+        let mut all_adts = true;
+        for source in &paths {
+            all_wave &= fvid::native_pcm::is_wave(source)?;
+            all_adts &= fvid::native_export::is_adts_source(source)?;
+        }
+        if all_wave || all_adts {
+            // Let homogeneous WAVE/ADTS use the same copy plan as their
+            // default execution route rather than a decoded PCM plan.
+            return Ok(false);
+        }
     }
     if plan {
         let Some(result) = fvid::native_plan::concat_matroska_to(&paths,std::path::Path::new(if output_format=="mka" {"output.mka"} else {"output.mkv"}))? else {
