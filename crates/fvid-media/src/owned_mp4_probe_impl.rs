@@ -1,3 +1,31 @@
+// Source-clock average: edits and presentation gaps do not change source cadence.
+fn mp4_average_rate(durations: impl Iterator<Item = Option<u32>>, scale: u32) -> [i32; 2] {
+    if scale == 0 {
+        return [0, 1];
+    }
+    let mut count = 0u128;
+    let mut total = 0u128;
+    for duration in durations {
+        let Some(duration) = duration.filter(|&n| n != 0) else {
+            return [0, 1];
+        };
+        count += 1;
+        total += u128::from(duration);
+    }
+    if count == 0 {
+        return [0, 1];
+    }
+    let numerator = count * u128::from(scale);
+    let (mut a, mut b) = (numerator, total);
+    while b != 0 {
+        (a, b) = (b, a % b);
+    }
+    match (i32::try_from(numerator / a), i32::try_from(total / a)) {
+        (Ok(n), Ok(d)) => [n, d],
+        _ => [0, 1],
+    }
+}
+
 pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
     let reader = Mp4ProbeReader::open(
         BufReader::new(File::open(path).map_err(|e| e.to_string())?),
@@ -93,7 +121,14 @@ pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
             start,
             duration: Some(duration),
             bit_rate: None,
-            average_frame_rate: [0, 1],
+            average_frame_rate: if track.handler == *b"vide" {
+                mp4_average_rate(
+                    (0..track.samples.len()).map(|i| track.samples.get(i).map(|s| s.duration)),
+                    track.timescale,
+                )
+            } else {
+                [0, 1]
+            },
             profile: None,
             level: None,
             disposition: 0,
@@ -141,4 +176,28 @@ pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
         chapters,
         streams,
     })
+}
+
+#[cfg(test)]
+mod average_rate_tests {
+    use super::mp4_average_rate;
+    #[test]
+    fn average_uses_total_clock_and_exact_reduced_ratio() {
+        assert_eq!(
+            mp4_average_rate([Some(3003); 3].into_iter(), 90000),
+            [30000, 1001]
+        );
+        assert_eq!(
+            mp4_average_rate([Some(2), Some(3), Some(1)].into_iter(), 6),
+            [3, 1]
+        );
+    }
+    #[test]
+    fn unknown_or_unrepresentable_timing_is_not_guessed() {
+        assert_eq!(mp4_average_rate([].into_iter(), 90000), [0, 1]);
+        assert_eq!(mp4_average_rate([None].into_iter(), 90000), [0, 1]);
+        assert_eq!(mp4_average_rate([Some(0)].into_iter(), 90000), [0, 1]);
+        assert_eq!(mp4_average_rate([Some(1)].into_iter(), 0), [0, 1]);
+        assert_eq!(mp4_average_rate([Some(1)].into_iter(), u32::MAX), [0, 1]);
+    }
 }

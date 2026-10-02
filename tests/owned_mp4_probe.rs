@@ -29,6 +29,12 @@ fn library_mp4_probe_matches_frontend_container_metadata() {
             serde_json::to_value(fvid_media::probe(&source).unwrap()).unwrap(),
             serde_json::to_value(&own).unwrap()
         );
+        if name == "short/avc-bframes.mp4" {
+            assert_eq!(own.streams[0].average_frame_rate, [12, 1]);
+        }
+        for stream in own.streams.iter().filter(|s| s.media_type == "audio") {
+            assert_eq!(stream.average_frame_rate, [0, 1]);
+        }
         let hint = fvid_media::owned_probe::probe_as(&source, Some("mp4")).unwrap();
         let direct = fvid_media::owned_mp4_probe::probe_mp4(&source).unwrap();
         assert_eq!(
