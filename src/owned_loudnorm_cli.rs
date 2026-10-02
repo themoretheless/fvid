@@ -3,7 +3,7 @@ use std::path::Path;
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.len() == 2 && matches!(args[1].as_str(), "--help" | "-h") {
         println!(
-            "fvid media loudnorm INPUT OUTPUT.wav [--loudnorm-args I=-16:TP=-1.5:LRA=11] [--dual-pass] [--streams 0] [--quiet] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N]"
+            "fvid media loudnorm INPUT OUTPUT.wav [--loudnorm-args I=-16:TP=-1.5:LRA=11] [--dual-pass] [--streams 0] [--quiet] [--progress] [--max-packet-bytes N] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N]"
         );
         return Ok(());
     }
@@ -31,6 +31,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                     .map(str::parse)
                     .collect::<Result<_, _>>()?
             }
+            "--max-packet-bytes" => options.max_packet_bytes = value(&mut flags, flag)?.parse()?,
             "--max-packets" => options.max_packets = Some(value(&mut flags, flag)?.parse()?),
             "--max-memory-mib" => {
                 options.max_controlled_bytes =

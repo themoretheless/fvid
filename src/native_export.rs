@@ -401,7 +401,7 @@ pub fn export_aac_pcm_selected(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,false,None)
+    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,false,None,None)
 }
 
 /// Export owned AAC, MP4 ALAC or packed RIFF/WAVE PCM through the shared PCM pipeline.
@@ -416,7 +416,7 @@ pub fn export_audio_pcm_selected(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,true,None)
+    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,true,None,None)
 }
 
 /// Export selected owned audio while checking process RSS before decoding and
@@ -429,7 +429,21 @@ pub fn export_audio_pcm_selected_with_rss_limit(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    export_pcm_selected(source, destination, None, 1., None, None, selected, cancel, progress, true, max_rss_bytes)
+    export_pcm_selected(source, destination, None, 1., None, None, selected, cancel, progress, true, max_rss_bytes, None)
+}
+
+/// Export selected owned audio with encoded-payload and process RSS limits.
+/// Payload limits are enforced by each container reader before packet allocation.
+pub fn export_audio_pcm_selected_with_limits(
+    source: &Path,
+    destination: &Path,
+    selected: Option<usize>,
+    max_packet_bytes: usize,
+    max_rss_bytes: Option<u64>,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::native_media::AudioDecodeStats> {
+    export_pcm_selected(source, destination, None, 1., None, None, selected, cancel, progress, true, max_rss_bytes, Some(max_packet_bytes))
 }
 
 fn export_pcm_selected(
@@ -444,6 +458,7 @@ fn export_pcm_selected(
     progress: Option<&crate::media_control::ProgressHook>,
     allow_wave:bool,
     max_rss_bytes: Option<u64>,
+    max_packet_bytes: Option<usize>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
     let mut control = crate::native_media::DecodeProgress::new_with_rss_limit(cancel, progress, max_rss_bytes)?;
     if sample_rate.is_some_and(|rate| !(8000..=384000).contains(&rate)) {
@@ -469,11 +484,15 @@ fn export_pcm_selected(
         info.validate_decode()?;
         (None,None,None,Some((input,info)))
     } else if crate::container::mp4::recognizes_prefix(&prefix) {
-        (Some(crate::container::mp4::Mp4Reader::open(input, Default::default())?), None, None,None)
+        let mut limits = crate::container::mp4::Limits::default();
+        if let Some(maximum) = max_packet_bytes { limits.packet_bytes = limits.packet_bytes.min(maximum); }
+        (Some(crate::container::mp4::Mp4Reader::open(input, limits)?), None, None,None)
     } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
-        (None, Some(crate::container::webm::WebmReader::open(input, Default::default())?), None,None)
+        let mut reader = crate::container::webm::WebmReader::open(input, Default::default())?;
+        if let Some(maximum) = max_packet_bytes { reader.restrict_packet_bytes(maximum); }
+        (None, Some(reader), None,None)
     } else {
-        (None, None, Some(crate::container::adts::StreamReader::open(input)?),None)
+        (None, None, Some(crate::container::adts::StreamReader::open_with_packet_limit(input, max_packet_bytes.unwrap_or(usize::MAX))?),None)
     };
     let (input_rate, input_channels, native_mask) = if let Some(reader) = &mp4 {
         let index = if allow_wave {crate::native_media::mp4_audio_index(reader,selected)?} else {crate::native_media::mp4_aac_index(reader,selected)?};

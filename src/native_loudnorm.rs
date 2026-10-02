@@ -42,7 +42,7 @@ impl Spool {
 
 /// Route owned WAVE directly, or owned compressed audio through a temporary
 /// decoded WAVE. `None` leaves other formats/policies to the caller during
-/// migration. Compressed packet/allocation admission policies still need a decoder bridge;
+/// migration. Compressed packet-count/allocation admission policies still need a decoder bridge;
 /// they are never silently treated as WAVE packet policies.
 pub fn try_apply(
     source: &Path,
@@ -72,13 +72,23 @@ pub fn try_apply(
     }
     if options.max_packets.is_some()
         || options.max_controlled_bytes.is_some()
-        || options.max_packet_bytes != CopyOptions::default().max_packet_bytes
         || !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty()
         || !options.stream_metadata_set.is_empty()
         || !options.stream_metadata_delete.is_empty()
     {
         return Ok(None);
+    }
+    // PCE bootstrap can read the first ADTS payload during metadata inspection.
+    // Check its declared size before any such preflight allocation.
+    if crate::native_export::is_adts_source(source)? {
+        use std::io::Read;
+        let mut prefix = [0; 7];
+        std::fs::File::open(source)?.read_exact(&mut prefix)?;
+        let header = crate::container::adts::header(&prefix).ok_or("invalid ADTS header")?;
+        if header.frame_bytes - header.header_bytes > options.max_packet_bytes {
+            return Err("ADTS packet exceeds budget".into());
+        }
     }
     if !crate::native_media::is_owned_audio_trim_source(source)? {
         return Ok(None);
@@ -127,16 +137,18 @@ pub fn try_apply(
             hook.emit(event);
         })
     });
-    crate::native_export::export_audio_pcm_selected_with_rss_limit(
+    crate::native_export::export_audio_pcm_selected_with_limits(
         source,
         &wave,
         Some(selected),
+        options.max_packet_bytes,
         options.max_rss_bytes,
         options.cancel.as_ref(),
         decode_hook.as_ref(),
     )?;
     let mut normalization_options = options.clone();
     normalization_options.streams = vec![0];
+    normalization_options.max_packet_bytes = CopyOptions::default().max_packet_bytes;
     normalization_options.progress = options.progress.as_ref().map(|hook| {
         let hook = hook.clone();
         let prefix_packets = packets.load(Ordering::Relaxed);

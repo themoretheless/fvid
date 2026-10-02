@@ -296,6 +296,13 @@ fn esds_descriptor(asc: &[u8], sl_config: bool) -> Option<Vec<u8>> {
     let mut output=vec![0;4];output.extend(descriptor(3,&stream));Some(output)
 }
 
+fn check_packet_limit(header: Header, max: usize) -> Result<()> {
+    if header.frame_bytes - header.header_bytes > max {
+        return Err(invalid("ADTS packet exceeds budget"));
+    }
+    Ok(())
+}
+
 /// Sequential ADTS reader. Retains at most one frame (ADTS length is 13 bits),
 /// with no file-size or packet-count allocation. Input starts at an ADTS header;
 /// unlike the recovery-oriented slice parser, truncated tails are errors.
@@ -306,12 +313,20 @@ pub struct StreamReader<R> {
     pending: Option<Vec<u8>>,
     asc: Vec<u8>,
     finished: bool,
+    max_packet_bytes: usize,
 }
 impl<R: std::io::Read> StreamReader<R> {
-    pub fn open(mut source: R) -> Result<Self> {
+    pub fn open(source: R) -> Result<Self> {
+        Self::open_with_packet_limit(source, usize::MAX)
+    }
+
+    /// Bound raw AAC payload before allocating it, including PCE bootstrap.
+    /// ADTS headers and an optional two-byte CRC are framing, not payload.
+    pub fn open_with_packet_limit(mut source: R, max_packet_bytes: usize) -> Result<Self> {
         let mut bytes = [0; 7];
         source.read_exact(&mut bytes)?;
         let mut configuration = header(&bytes).ok_or_else(|| invalid("invalid ADTS header"))?;
+        check_packet_limit(configuration, max_packet_bytes)?;
         let mut pending=None;
         let asc=if configuration.channels==0 {
             let mut packet=vec![0;configuration.frame_bytes-7];source.read_exact(&mut packet)?;
@@ -332,6 +347,7 @@ impl<R: std::io::Read> StreamReader<R> {
             first: if pending.is_some() {None} else {Some(configuration)},
             pending, asc,
             finished: false,
+            max_packet_bytes,
         })
     }
 
@@ -366,6 +382,7 @@ impl<R: std::io::Read> StreamReader<R> {
         {
             return Err(invalid("ADTS configuration changes between frames"));
         }
+        check_packet_limit(next, self.max_packet_bytes)?;
         let mut remaining = vec![0; next.frame_bytes - 7];
         self.source.read_exact(&mut remaining)?;
         if next.header_bytes == 9 {

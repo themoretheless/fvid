@@ -36,5 +36,13 @@ The compressed normalizer also honors `max_rss_bytes` during decoding and
 normalization. Acceptance uses a sufficient RSS limit and preserves identical
 PCM; a one-byte limit refuses before decoding or publishing a destination.
 The platform RSS contract is shared with the owned media budget helper (macOS
-reports the process high-water mark). Packet and allocation admission policies
+reports the process high-water mark). Packet-count and allocation admission policies
 are a separate migration task.
+
+`max_packet_bytes` bounds encoded AAC/ALAC payload before allocation in ADTS,
+MP4 and Matroska. CLI acceptance passes a sufficient custom bound and compares
+identical output bytes. A one-byte bound refuses each container without output
+or a completion event. `native_audio_packet_limits` verifies that ADTS PCE
+bootstrap refuses before reading payload, a sufficient bound initializes the
+synthetic eight-channel PCE, and subsequent ADTS frames remain bounded. Codec
+metadata and ADTS header/CRC bytes are not counted as encoded media payload.

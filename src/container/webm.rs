@@ -136,6 +136,7 @@ pub struct WebmReader<R> {
     /// whole segment and the older `Title` of the information block.
     pub tags: FileTags,
     limits: Limits,
+    read_packet_bytes: usize,
     /// Where the walk of the Segment's children stands. Blocks are indexed a
     /// cluster at a time, so the first picture does not wait for the whole file.
     at: u64,
@@ -434,6 +435,7 @@ impl<R: Read + Seek> WebmReader<R> {
             chapters: Vec::new(),
             tags: FileTags::default(),
             limits,
+            read_packet_bytes: limits.packet_bytes,
             segment_end: segment.end.unwrap_or(file_end),
             at: segment.data,
             scale: 1_000_000u64,
@@ -481,6 +483,7 @@ impl<R: Read + Seek> WebmReader<R> {
             tail_ns,
             duration_ns: _,
             chapters: _,
+            read_packet_bytes: _,
         } = self;
         let indexed = packets.len();
         while *at < *segment_end {
@@ -849,12 +852,17 @@ impl<R: Read + Seek> WebmReader<R> {
     pub fn fully_indexed(&self) -> bool {
         self.scanned
     }
+    /// Tighten encoded payload reads without treating codec metadata as packets.
+    pub fn restrict_packet_bytes(&mut self, maximum: usize) {
+        self.read_packet_bytes = self.read_packet_bytes.min(maximum);
+    }
+
     pub fn read_packet(&mut self, index: usize) -> Result<Vec<u8>> {
         let p = self
             .packets
             .get(index)
             .ok_or_else(|| invalid("WebM packet index out of bounds"))?;
-        if p.size > self.limits.packet_bytes {
+        if p.size > self.read_packet_bytes {
             return Err(invalid("WebM packet exceeds budget"));
         }
         // Blocks are read in the order the walk found them, which is the order

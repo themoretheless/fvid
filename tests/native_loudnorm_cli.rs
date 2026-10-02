@@ -182,6 +182,8 @@ fn compressed_audio_normalization_matches_owned_pcm_with_edits_and_selection() {
                 "--progress",
                 "--max-rss-mib",
                 "8192",
+                "--max-packet-bytes",
+                "65536",
                 "--streams",
                 &selected.to_string(),
             ])
@@ -258,4 +260,37 @@ fn compressed_rss_limit_refuses_before_decode_or_publication() {
         fvid::native_loudnorm::try_apply(&source, &output, None, true, &options).unwrap_err();
     assert!(error.to_string().contains("rss budget exceeded"), "{error}");
     assert!(!output.exists());
+}
+
+#[test]
+fn compressed_packet_limit_refuses_without_publication_in_each_container() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    for (index, name) in [
+        "audio/aac-mono-44k.aac",
+        "audio/aac-native-edit.m4a",
+        "audio/aac-stereo.mka",
+        "playback-errors/alac-two-tracks.m4a",
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let source = root.join("tests/fixtures").join(name);
+        let output = std::env::temp_dir().join(format!(
+            "fvid-packet-refusal-{}-{index}.wav",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_file(&output);
+        let options = fvid_media::CopyOptions {
+            max_packet_bytes: 1,
+            progress: Some(fvid_media::ProgressHook::new(|event| assert!(!event.done))),
+            ..Default::default()
+        };
+        let error =
+            fvid::native_loudnorm::try_apply(&source, &output, None, true, &options).unwrap_err();
+        assert!(
+            error.to_string().contains("packet exceeds budget"),
+            "{name}: {error}"
+        );
+        assert!(!output.exists());
+    }
 }
