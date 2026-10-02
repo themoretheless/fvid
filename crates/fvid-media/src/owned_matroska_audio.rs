@@ -40,7 +40,7 @@ impl From<crate::owned_pcm_decoder::Error> for Error {
     }
 }
 type Result<T> = std::result::Result<T, Error>;
-fn invalid(message: &str) -> Error {
+pub(crate) fn invalid(message: &str) -> Error {
     Error(message.into())
 }
 enum MatroskaTimelineDecoder {
@@ -49,6 +49,7 @@ enum MatroskaTimelineDecoder {
     Aac(crate::owned_aac::NativeAacDecoder),
 }
 impl MatroskaTimelineDecoder {
+    const SAMPLE_BYTES: usize = 4;
     fn from_matroska(track: &crate::owned_webm::Track) -> Result<Self> {
         match track.codec.as_str() {
             "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" => Ok(Self::Pcm(
@@ -87,12 +88,12 @@ impl MatroskaTimelineDecoder {
         }
     }
 }
-struct DecodeProgress<'a> {
-    options: &'a CopyOptions,
-    event: ProgressEvent,
+pub(crate) struct DecodeProgress<'a> {
+    pub(crate) options: &'a CopyOptions,
+    pub(crate) event: ProgressEvent,
 }
 impl DecodeProgress<'_> {
-    fn check(&self) -> Result<()> {
+    pub(crate) fn check(&self) -> Result<()> {
         if self
             .options
             .cancel
@@ -103,12 +104,12 @@ impl DecodeProgress<'_> {
         }
         crate::owned_budget::check_rss_budget(self.options).map_err(Error)
     }
-    fn packet_limit_reached(&self) -> bool {
+    pub(crate) fn packet_limit_reached(&self) -> bool {
         self.options
             .max_packets
             .is_some_and(|max| self.event.packets >= max)
     }
-    fn packet(&mut self, bytes: usize) -> Result<()> {
+    pub(crate) fn packet(&mut self, bytes: usize) -> Result<()> {
         self.event.packets = self
             .event
             .packets
@@ -125,7 +126,7 @@ impl DecodeProgress<'_> {
         self.check()
     }
 }
-fn matroska_audio_index<R: Read + Seek>(
+pub(crate) fn matroska_audio_index<R: Read + Seek>(
     reader: &MatroskaTimelineReader<R>,
     selected: Option<usize>,
 ) -> Result<usize> {

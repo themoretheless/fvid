@@ -113,7 +113,7 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
             if gap_end > gap_begin {
                 let mut frames = gap_end - gap_begin;
                 let zero = [0u8; 4096];
-                let frame_bytes = usize::from(channels) * 4;
+                let frame_bytes = usize::from(channels) * MatroskaTimelineDecoder::SAMPLE_BYTES;
                 let chunk_frames = zero.len() / frame_bytes;
                 while frames > 0 {
                     control.check()?;

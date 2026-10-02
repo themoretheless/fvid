@@ -147,4 +147,25 @@ impl PcmDecoder {
         Ok(samples)
     }
 
+    /// Preserve all stored integer bits and IEEE float64 precision in normalized f64.
+    pub fn decode_pcm_f64(&self, data: &[u8]) -> Result<Vec<f64>> {
+        let frame = self.format.sample_bytes() * usize::from(self.channels);
+        if !data.len().is_multiple_of(frame) {
+            return Err(invalid("PCM packet ends in an incomplete channel frame"));
+        }
+        let samples: Vec<f64> = data.chunks_exact(self.format.sample_bytes()).map(|bytes| {
+            match self.format {
+                PcmFormat::Unsigned8 => (f64::from(bytes[0]) - 128.0) / 128.0,
+                PcmFormat::Int { bits, big_endian } => f64::from(sign_extended(bytes, big_endian)) / (1u64 << (bits - 1)) as f64,
+                PcmFormat::Float { bits: 32 } => f64::from(if self.float_big_endian { f32::from_be_bytes(bytes.try_into().unwrap()) } else { f32::from_le_bytes(bytes.try_into().unwrap()) }),
+                PcmFormat::Float { bits: 64 } => if self.float_big_endian { f64::from_be_bytes(bytes.try_into().unwrap()) } else { f64::from_le_bytes(bytes.try_into().unwrap()) },
+                PcmFormat::Float { .. } => unreachable!(),
+            }
+        }).collect();
+        if samples.iter().any(|s| !s.is_finite()) {
+            return Err(invalid("PCM packet contains non-finite samples"));
+        }
+        Ok(samples)
+    }
+
 }

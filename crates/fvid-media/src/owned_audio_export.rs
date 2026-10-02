@@ -15,6 +15,9 @@ pub(crate) fn supports(
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") || !simple_options(options) {
         return false;
     }
+    if crate::owned_matroska_pcm_export::recognizes(source, options).unwrap_or(false) {
+        return crate::owned_matroska_pcm_export::supports(source, transform, options);
+    }
     if crate::owned_matroska_aac_export::recognizes(source, options).unwrap_or(false) {
         return crate::owned_matroska_aac_export::supports(source, transform, options);
     }
@@ -117,6 +120,9 @@ pub fn decode_audio_transformed(
         return Err("owned WAVE export requires .wav output".into());
     }
     let gain = validate_request(transform, options)?;
+    if crate::owned_matroska_pcm_export::recognizes(source, options)? {
+        return crate::owned_matroska_pcm_export::apply(source, destination, transform, options);
+    }
     if crate::owned_matroska_aac_export::recognizes(source, options)? {
         return crate::owned_matroska_aac_export::apply(source, destination, transform, options);
     }

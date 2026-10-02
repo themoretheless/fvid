@@ -100,6 +100,40 @@ fn render(
         .collect::<Vec<_>>();
     assert_eq!(stats.sample_frames, samples.len() as u64);
 
+    let mut precise = Vec::new();
+    let own = fvid_media::owned_matroska_pcm::decode_matroska_pcm_f64(
+        std::io::Cursor::new(std::fs::read(&input).unwrap()),
+        &mut precise,
+        interval,
+        &Default::default(),
+    )
+    .unwrap();
+    let expected: Vec<u8> = samples
+        .iter()
+        .flat_map(|s| f64::from(*s).to_le_bytes())
+        .collect();
+    assert_eq!(precise, expected);
+    assert_eq!(own.sample_frames, stats.sample_frames);
+    let library_output = d.0.join("owned.wav");
+    fvid_media::owned_audio_export::decode_audio_transformed(
+        &input,
+        &library_output,
+        fvid_media_info::AudioDecodeTransform {
+            interval: interval.map(|(from, to)| (from.as_micros() as i64, to.as_micros() as i64)),
+            ..Default::default()
+        },
+        &Default::default(),
+    )
+    .unwrap();
+    let wave = std::fs::read(library_output).unwrap();
+    let info =
+        fvid_media::owned_wave_inspect::inspect(&mut std::io::Cursor::new(&wave), None).unwrap();
+    assert_eq!(info.bits_per_sample, 64);
+    assert_eq!(
+        &wave[info.data_offset as usize..info.data_offset as usize + info.data_bytes as usize],
+        expected
+    );
+
     samples
 }
 fn values(values: &[i16]) -> Vec<f32> {
@@ -148,12 +182,20 @@ fn untrimmed_overlap_fails_without_publication() {
     let result = fvid::native_export::export_audio_pcm_selected(
         &input, &output, None, 1.0, None, None, None, None, None,
     );
-    assert!(
-        result
-            .unwrap_err()
-            .to_string()
-            .contains("overlapping presented")
-    );
+    assert!(result
+        .unwrap_err()
+        .to_string()
+        .contains("overlapping presented"));
     assert!(!output.exists());
+
+    let owned_output = d.0.join("owned-overlap.wav");
+    assert!(fvid_media::owned_audio_export::decode_audio(
+        &input,
+        &owned_output,
+        &Default::default()
+    )
+    .unwrap_err()
+    .contains("overlapping presented"));
+    assert!(!owned_output.exists());
     assert_eq!(std::fs::read_dir(&d.0).unwrap().count(), 1);
 }

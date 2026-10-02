@@ -308,3 +308,148 @@ fn library_pcm_packet_float_endianness_and_strict_samples_match_frontend() {
             .contains("non-finite"));
     }
 }
+
+#[test]
+fn synthetic_pcm32_and_float64_export_retains_precision_through_shared_timeline() {
+    let dir = Dir(std::env::temp_dir().join(format!("fvid-pcm-precision-{}", std::process::id())));
+    std::fs::create_dir(&dir.0).unwrap();
+    for (name, expected) in [
+        (
+            "pcm32-precision-little.mka",
+            [
+                2147483647.0,
+                -2147483647.0,
+                16777217.0,
+                -16777217.0,
+                1.0,
+                -1.0,
+            ]
+            .map(|v| v / 2147483648.0),
+        ),
+        (
+            "pcm32-precision-big.mka",
+            [
+                2147483647.0,
+                -2147483647.0,
+                16777217.0,
+                -16777217.0,
+                1.0,
+                -1.0,
+            ]
+            .map(|v| v / 2147483648.0),
+        ),
+        (
+            "pcm64-precision.mka",
+            [
+                0.12345678901234567,
+                -0.9876543210987654,
+                1.0000000000000002,
+                -1.0000000000000002,
+                1e-100,
+                -1e-100,
+            ],
+        ),
+    ] {
+        let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors")
+            .join(name);
+        let encoded = std::fs::read(&source).unwrap();
+        assert!(expected.iter().any(|&v| v != v as f32 as f64));
+        let baseline: Vec<u8> = expected.iter().flat_map(|v| v.to_le_bytes()).collect();
+        let mut precise = Vec::new();
+        let stats = fvid_media::owned_matroska_pcm::decode_matroska_pcm_f64(
+            std::io::Cursor::new(&encoded),
+            &mut precise,
+            None,
+            &Default::default(),
+        )
+        .unwrap();
+        assert_eq!(
+            (
+                stats.sample_frames,
+                stats.decoded_frames,
+                stats.channels,
+                stats.sample_rate
+            ),
+            (3, 1, 2, 48000)
+        );
+        assert_eq!(precise, baseline);
+        let mut old = Vec::new();
+        fvid_media::owned_matroska_pcm::decode_matroska_pcm(
+            std::io::Cursor::new(&encoded),
+            &mut old,
+            None,
+            &Default::default(),
+        )
+        .unwrap();
+        let widened: Vec<u8> = old
+            .chunks_exact(4)
+            .flat_map(|b| f64::from(f32::from_le_bytes(b.try_into().unwrap())).to_le_bytes())
+            .collect();
+        assert_ne!(widened, baseline, "fixture must detect an f32 intermediate");
+        let destination = dir.0.join(format!("{name}.wav"));
+        let written = fvid_media::decode_audio(&source, &destination, &Default::default()).unwrap();
+        assert_eq!((written.sample_frames, written.decoded_frames), (3, 1));
+        let wave = std::fs::read(&destination).unwrap();
+        let info = fvid_media::owned_wave_inspect::inspect(&mut std::io::Cursor::new(&wave), None)
+            .unwrap();
+        assert!(info.float);
+        assert_eq!(info.bits_per_sample, 64);
+        assert_eq!(
+            &wave[info.data_offset as usize..info.data_offset as usize + info.data_bytes as usize],
+            baseline
+        );
+        let wave_source = dir.0.join(format!("{name}-reference.wav"));
+        fvid_media::owned_wav_file::write_wav_f64le(&wave_source, 48000, 2, &expected).unwrap();
+        let direct = dir.0.join(format!("{name}-dsp.wav"));
+        let reference = dir.0.join(format!("{name}-dsp-reference.wav"));
+        let transform = fvid_media_info::AudioDecodeTransform {
+            volume: Some(0.25),
+            channels: Some(1),
+            sample_rate: Some(44100),
+            ..Default::default()
+        };
+        fvid_media::owned_audio_export::decode_audio_transformed(
+            &wave_source,
+            &reference,
+            transform,
+            &Default::default(),
+        )
+        .unwrap();
+        fvid_media::decode_audio_transformed(&source, &direct, transform, &Default::default())
+            .unwrap();
+        assert_eq!(
+            std::fs::read(direct).unwrap(),
+            std::fs::read(reference).unwrap(),
+            "{name}: full f64 DSP pipeline differs from exact WAVE source"
+        );
+        let trimmed = dir.0.join(format!("{name}-trim.wav"));
+        fvid_media::owned_audio_export::decode_audio_transformed(
+            &source,
+            &trimmed,
+            fvid_media_info::AudioDecodeTransform {
+                interval: Some((21, 60)),
+                volume: Some(0.5),
+                ..Default::default()
+            },
+            &fvid_control::CopyOptions {
+                streams: vec![0],
+                max_packets: Some(1),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let wave = std::fs::read(&trimmed).unwrap();
+        let info = fvid_media::owned_wave_inspect::inspect(&mut std::io::Cursor::new(&wave), None)
+            .unwrap();
+        assert_eq!(info.sample_frames, 1);
+        let window: Vec<u8> = expected[4..]
+            .iter()
+            .flat_map(|v| (v * 0.5).to_le_bytes())
+            .collect();
+        assert_eq!(
+            &wave[info.data_offset as usize..info.data_offset as usize + info.data_bytes as usize],
+            window
+        );
+    }
+}

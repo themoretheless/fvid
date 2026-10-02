@@ -6,8 +6,8 @@ use std::{
     io::{BufReader, BufWriter, Seek, SeekFrom, Write},
     path::{Path, PathBuf},
     sync::{
-        Arc, Mutex,
         atomic::{AtomicU64, Ordering},
+        Arc, Mutex,
     },
 };
 type Result<T> = std::result::Result<T, String>;
@@ -240,11 +240,21 @@ pub(crate) fn spool_decoded(
     options: &CopyOptions,
     decode: impl FnOnce(&mut PcmSpool, &CopyOptions) -> Result<crate::owned_aac::AdtsPcmStats>,
 ) -> Result<DecodedSpool> {
+    spool_decoded_with_precision(rate, channels, mask, 32, options, decode)
+}
+pub(crate) fn spool_decoded_with_precision(
+    rate: u32,
+    channels: u16,
+    mask: u32,
+    bits: u16,
+    options: &CopyOptions,
+    decode: impl FnOnce(&mut PcmSpool, &CopyOptions) -> Result<crate::owned_aac::AdtsPcmStats>,
+) -> Result<DecodedSpool> {
     let spool = Spool::create()?;
     let wave = spool.0.join("decoded.wav");
     let mut file = File::create(&wave).map_err(|e| e.to_string())?;
-    file.write_all(&crate::owned_wav::float_wav_header_with_mask(
-        rate, channels, 0, mask,
+    file.write_all(&crate::owned_wav::float_wav_header_with_precision(
+        rate, channels, 0, mask, bits,
     )?)
     .map_err(|e| e.to_string())?;
     let mut writer = PcmSpool {
@@ -271,8 +281,13 @@ pub(crate) fn spool_decoded(
     }));
     let decoded = decode(&mut writer, &decode_options)?;
     writer.flush().map_err(|e| e.to_string())?;
-    let header =
-        crate::owned_wav::float_wav_header_with_mask(rate, channels, decoded.sample_frames, mask)?;
+    let header = crate::owned_wav::float_wav_header_with_precision(
+        rate,
+        channels,
+        decoded.sample_frames,
+        mask,
+        bits,
+    )?;
     writer
         .output
         .seek(SeekFrom::Start(0))

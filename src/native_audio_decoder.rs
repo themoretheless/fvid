@@ -10,6 +10,7 @@ pub(crate) enum PacketPcmDecoder {
     },
 }
 impl PacketPcmDecoder {
+    pub(crate) const SAMPLE_BYTES: usize = 4;
     pub(crate) fn new(track: &Track) -> Result<Self> {
         match &track.codec {
             b"mp4a" => Ok(Self::Aac(crate::codec::aac_native::NativeAacDecoder::new(
