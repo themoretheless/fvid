@@ -38,3 +38,7 @@ pub mod owned_wave_inspect;
 pub mod owned_probe;
 
 pub mod owned_pcm_channels;
+
+pub mod owned_audio_mix;
+#[cfg(not(feature = "legacy-ffmpeg"))]
+pub use owned_audio_mix::{mix_audio, merge_audio};
