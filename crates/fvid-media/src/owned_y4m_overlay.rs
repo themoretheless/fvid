@@ -71,9 +71,6 @@ impl OverlayReader {
         if main.full_range()? != header.full_range()? {
             return Err("overlay requires matching colour range".into());
         }
-        if spec.x % 2 != 0 || spec.y % 2 != 0 {
-            return Err("overlay placement must align with chroma samples".into());
-        }
         let main_rate = main.frame_rate()?;
         let secondary_rate = header.frame_rate()?;
         let clock = comparison_clock(main_rate, secondary_rate);
@@ -91,8 +88,10 @@ impl OverlayReader {
             header,
             next: 0,
             eof: false,
-            x: spec.x,
-            y: spec.y,
+            // The public scheduled overlay rounds placement down to chroma
+            // boundaries. Keep the low-level compositor's alignment contract.
+            x: spec.x & !1,
+            y: spec.y & !1,
         })
     }
     pub(crate) fn apply(&mut self, output: &Header, frame: &mut Vec<u8>, index: u64) -> Result<()> {
@@ -347,14 +346,73 @@ mod tests {
     }
 
     #[test]
+    fn unaligned_placement_rounds_down_and_clips_without_fallback() {
+        let source = fixtures().join("overlay-unaligned-primary.y4m");
+        let secondary = fixtures().join("overlay-unaligned-secondary.y4m");
+        for (x, y, positions, chroma) in [
+            (1, 1, vec![0, 1, 4, 5], Some(0)),
+            (3, 1, vec![2, 3, 6, 7], Some(1)),
+            (1, 3, vec![8, 9, 12, 13], Some(2)),
+            (3, 3, vec![10, 11, 14, 15], Some(3)),
+            (-1, -1, vec![], None),
+            (-3, 1, vec![], None),
+            (i32::MAX, 1, vec![], None),
+            (i32::MIN, 1, vec![], None),
+        ] {
+            let transform = DecodeTransform {
+                overlay: Some(OverlaySpec {
+                    path: secondary.clone(),
+                    x,
+                    y,
+                }),
+                ..Default::default()
+            };
+            assert!(crate::owned_y4m_decode::supports_transformed(
+                &source, &transform
+            ));
+            let mut count = 0;
+            let stats = crate::owned_y4m_decode::visit_reader_transformed(
+                Cursor::new(std::fs::read(&source).unwrap()),
+                &transform,
+                |_, pixels, pts, duration| {
+                    assert_eq!(duration, 250_000_000);
+                    assert_eq!(pts, count * duration);
+                    let mut expected = vec![10 + count as u8; 16];
+                    expected.extend([128; 8]);
+                    let (luma, u, v) = if count < 2 {
+                        (50, 80, 160)
+                    } else {
+                        (100, 90, 170)
+                    };
+                    for &position in &positions {
+                        expected[position] = luma;
+                    }
+                    if let Some(position) = chroma {
+                        expected[16 + position] = u;
+                        expected[20 + position] = v;
+                    }
+                    assert_eq!(pixels, expected, "placement {x},{y}, frame {count}");
+                    count += 1;
+                    Ok(())
+                },
+            )
+            .unwrap();
+            assert_eq!(stats.video_frames, 6);
+            assert_eq!(count, 6);
+        }
+        let options = crate::CopyOptions::default();
+        let plan = crate::plan_overlay(&source, &secondary, 1, 1, &options).unwrap();
+        assert!(plan.notes[0].starts_with("backend: owned"));
+        let output =
+            std::env::temp_dir().join(format!("fvid-unaligned-overlay-{}.mkv", std::process::id()));
+        let stats = crate::overlay_video(&source, &secondary, &output, 1, 1, &options).unwrap();
+        assert_eq!((stats.backend, stats.video_frames), ("fvid", 6));
+        std::fs::remove_file(output).unwrap();
+    }
+    #[test]
     fn unsupported_colour_conversion_keeps_legacy_route() {
         let source = fixtures().join("overlay-primary-clock.y4m");
         let mut transform = transform();
-        transform.overlay.as_mut().unwrap().x = 1;
-        assert!(!crate::owned_y4m_decode::supports_transformed(
-            &source, &transform
-        ));
-        transform.overlay.as_mut().unwrap().x = 2;
         transform.overlay.as_mut().unwrap().path = fixtures().join("shuffleplanes-444-8.y4m");
         assert!(!crate::owned_y4m_decode::supports_transformed(
             &source, &transform

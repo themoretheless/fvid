@@ -359,3 +359,28 @@ tests passed, including execution with no external-program PATH. Native source
 and dependency guards passed for the library, headless, player and camera
 bridge. This closes a temporal compatibility gap in the owned overlay route;
 production media/CUDA still require migration away from legacy-ffmpeg.
+
+
+Owned scheduled overlay placement
+---------------------------------
+
+Odd integer overlay coordinates previously failed owned route admission with
+"overlay placement must align with chroma samples" and required the legacy
+backend. The dedicated synthetic unaligned primary/secondary Y4M fixtures
+now exercise floor-to-even placement in the scheduled reader. For example
+(1,1) places at (0,0); (-1,-1) places at (-2,-2) and is entirely clipped for a
+2x2 foreground. The low-level compositor still requires aligned coordinates.
+Its validation and mutation contract are unchanged.
+
+The acceptance failed before the fix specifically at owned admission, then
+passed for eight placements including both signed i32 extremes. It checks
+all pixels and timestamps across six frames, repeat-last scheduling, owned
+public planning and public export. Explicit FFmpeg reference comparisons
+matched all 48 frames byte-for-byte against these acceptance expectations.
+The two new fixtures are generated without FFmpeg or private media; all
+previously committed overlay fixture bytes remained unchanged.
+
+All 142 owned unit tests passed with an empty external-program PATH and no
+libav linkage. Legacy/player compilation and native dependency/source guards
+passed. Other overlay colour conversions and remaining production backend
+operations still need migration; no feature was detached to hide them.

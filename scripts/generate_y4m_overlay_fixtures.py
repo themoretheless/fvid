@@ -24,3 +24,7 @@ for name, w, h, rate, count, base in [
     for index in range(count):
         data.extend(b"FRAME\n" + bytes([base + index]) * (w * h) + bytes([128]) * (w * h // 2))
     (root / name).write_bytes(data)
+
+# Dedicated reproducer for legacy-compatible chroma placement rounding.
+(root / "overlay-unaligned-primary.y4m").write_bytes(main)
+(root / "overlay-unaligned-secondary.y4m").write_bytes(foreground)
