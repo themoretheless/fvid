@@ -37,8 +37,14 @@ fn simple_options(options: &CopyOptions) -> bool {
         && options.max_packets.is_none()
         && options.max_controlled_bytes.is_none()
         && options.max_rss_bytes.is_none()
-        && options.metadata_set.is_empty()
-        && options.metadata_delete.is_empty()
+        && options
+            .metadata_set
+            .iter()
+            .all(|(key, _)| crate::owned_wave_metadata::tag_for_key(key).is_ok())
+        && options
+            .metadata_delete
+            .iter()
+            .all(|key| crate::owned_wave_metadata::tag_for_key(key).is_ok())
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
 }
@@ -132,7 +138,10 @@ pub fn decode_audio_transformed(
             return Err("owned rematrix requires a standard explicit speaker layout".into());
         }
     }
-    let (output_mask, info_chunks) = if input.sample_format == "dbl" {
+    let (output_mask, info_chunks) = if input.sample_format == "dbl"
+        || !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty()
+    {
         let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
         let info = crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
             .map_err(|e| e.to_string())?;
@@ -148,6 +157,11 @@ pub fn decode_audio_transformed(
     } else {
         (0, Vec::new())
     };
+    let info_chunks = crate::owned_wave_metadata::edit_info_chunks(
+        &info_chunks,
+        &options.metadata_delete,
+        &options.metadata_set,
+    )?;
     let width = if input.sample_format == "dbl" { 8 } else { 4 };
     let bytes = if width == 8 {
         let mut resampler = crate::owned_resample_f64::Resampler::new(
@@ -249,11 +263,13 @@ pub fn decode_audio_transformed(
         if samples.iter().any(|s| !s.is_finite()) {
             return Err("PCM gain overflow".into());
         }
-        crate::owned_wav_file::write_wav_f32le_checked(
+        crate::owned_wav_file::write_wav_f32le_with_side_data_checked(
             destination,
             rate,
             channels,
             &samples,
+            output_mask,
+            &info_chunks,
             check,
         )?;
     }
@@ -615,6 +631,85 @@ mod side_data_tests {
                     chunks
                 );
             }
+        }
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod metadata_tests {
+    use super::*;
+    #[test]
+    fn public_float_wave_export_edits_tags_without_changing_pcm_or_losing_opaque_info() {
+        let dir =
+            std::env::temp_dir().join(format!("fvid-wave-metadata-export-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir(&dir).unwrap();
+        let initial = crate::owned_wave_metadata::edit_info_chunks(
+            &[],
+            &[],
+            &[
+                ("title".into(), "old".into()),
+                ("artist".into(), "artist".into()),
+                ("QWER".into(), "opaque".into()),
+            ],
+        )
+        .unwrap();
+        for bits in [32, 64] {
+            let source = dir.join(format!("source-{bits}.wav"));
+            let output = dir.join(format!("output-{bits}.wav"));
+            if bits == 32 {
+                crate::owned_wav_file::write_wav_f32le_with_side_data_checked(
+                    &source,
+                    48000,
+                    2,
+                    &[0.25, -0.5, 0.5, 0.75],
+                    0,
+                    &initial,
+                    || Ok(()),
+                )
+                .unwrap();
+            } else {
+                crate::owned_wav_file::write_wav_f64le_with_side_data_checked(
+                    &source,
+                    48000,
+                    2,
+                    &[0.25, -0.5, 0.5, 0.75],
+                    0,
+                    &initial,
+                    || Ok(()),
+                )
+                .unwrap();
+            }
+            let options = CopyOptions {
+                metadata_delete: vec!["artist".into(), "title".into()],
+                metadata_set: vec![
+                    ("title".into(), "Новый".into()),
+                    ("comment".into(), "comment".into()),
+                ],
+                ..Default::default()
+            };
+            assert!(supports(&source, &output, Default::default(), &options));
+            crate::decode_audio(&source, &output, &options).unwrap();
+            let info = crate::owned_probe::probe_wave(&output).unwrap();
+            assert_eq!(info.metadata["title"], "Новый");
+            assert_eq!(info.metadata["comment"], "comment");
+            assert_eq!(info.metadata["QWER"], "opaque");
+            assert!(!info.metadata.contains_key("artist"));
+            let (_, before) =
+                crate::owned_audio_mix::read_float_wave_controlled(&source, None, None, |_| Ok(()))
+                    .unwrap();
+            let (_, after) =
+                crate::owned_audio_mix::read_float_wave_controlled(&output, None, None, |_| Ok(()))
+                    .unwrap();
+            assert_eq!(before, after);
+            let invalid = dir.join(format!("invalid-{bits}.wav"));
+            let options = CopyOptions {
+                metadata_set: vec![("title".into(), "bad\0value".into())],
+                ..Default::default()
+            };
+            assert!(decode_audio(&source, &invalid, &options).is_err());
+            assert!(!invalid.exists());
         }
         std::fs::remove_dir_all(dir).unwrap();
     }

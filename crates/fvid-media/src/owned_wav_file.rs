@@ -58,6 +58,26 @@ pub(crate) fn write_wav_f64le_checked<F: FnMut() -> Result<()>>(
         check,
     )
 }
+pub(crate) fn write_wav_f32le_with_side_data_checked<F: FnMut() -> Result<()>>(
+    destination: &Path,
+    sample_rate: i32,
+    channels: i32,
+    samples: &[f32],
+    mask: u32,
+    info_chunks: &[u8],
+    check: F,
+) -> Result<()> {
+    write_float_wave::<4, _>(
+        destination,
+        sample_rate,
+        channels,
+        samples.len(),
+        samples.iter().map(|s| s.to_le_bytes()),
+        mask,
+        info_chunks,
+        check,
+    )
+}
 pub(crate) fn write_wav_f64le_with_side_data_checked<F: FnMut() -> Result<()>>(
     destination: &Path,
     sample_rate: i32,
