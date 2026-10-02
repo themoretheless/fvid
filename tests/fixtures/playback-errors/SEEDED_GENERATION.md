@@ -546,3 +546,5 @@ The mixed MP4/WAVE PCM concat external sample comparison runs in `ffmpeg_pcm_con
 QuickTime PCM isolation/endian external comparisons and synthetic Matroska PCM external sample comparisons run only in `ffmpeg_pcm_formats_reference`. The ordinary synthetic Matroska test retains format, interval, mix, merge, plan and failure checks without FFmpeg. QuickTime external fixture isolation remains benchmark-only; this move does not add native MOV fixture generation.
 
 The synthetic Matroska PCM signed-padding and gap external presentation-clock comparisons run in `ffmpeg_audio_timeline_reference`. Ordinary timeline tests retain exact padding/gap/interval sample checks and overlap publication refusal without FFmpeg.
+
+External ALAC MP4 fixture and Matroska PCM comparisons run only in `ffmpeg_alac_reference`. Ordinary ALAC tests retain owned decoding, intervals, gain, mixing, damaged input and signed-padding checks without invoking FFmpeg.

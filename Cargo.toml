@@ -167,3 +167,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_audio_timeline_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_alac_reference"
+harness = false
