@@ -548,3 +548,5 @@ QuickTime PCM isolation/endian external comparisons and synthetic Matroska PCM e
 The synthetic Matroska PCM signed-padding and gap external presentation-clock comparisons run in `ffmpeg_audio_timeline_reference`. Ordinary timeline tests retain exact padding/gap/interval sample checks and overlap publication refusal without FFmpeg.
 
 External ALAC MP4 fixture and Matroska PCM comparisons run only in `ffmpeg_alac_reference`. Ordinary ALAC tests retain owned decoding, intervals, gain, mixing, damaged input and signed-padding checks without invoking FFmpeg.
+
+Synthetic Y4M 420/422/444 external FFV1 pixel and filter-chain comparisons run only in `ffmpeg_y4m_lossless_reference`. Ordinary Y4M lossless tests retain native pixel, clock, aspect, CLI/API, filter and publication checks without FFmpeg.
