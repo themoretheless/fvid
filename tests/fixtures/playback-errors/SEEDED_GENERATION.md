@@ -473,3 +473,15 @@ owned checks and no external-tool reference test. Two pre-existing native mux
 failures (concat CLI container bytes and codec-delay/padding PCM) remain active
 and unresolved; selected validation excludes them explicitly, not as proof of
 the entire suite passing.
+
+### ADTS concat dispatch regression
+
+`python3 scripts/generate_adts_concat_fixture.py` writes two tiny synthetic
+AAC-LC mono-silence ADTS segments using only bit fields and Python. Ordinary
+tests consume the checked-in bytes. Before the dispatch fix, the generic
+Matroska concat fallback intercepted ADTS and CLI output became PCM; the
+synthetic acceptance test specifically observed A_PCM/FLOAT/IEEE instead of
+A_AAC. All-ADTS input now reaches AAC packet-copy, preserving exact container
+bytes against the specialized export API. Mixed input keeps its prior fallback.
+The earlier five-fixture concat regression now passes; the separate
+codec-delay/padding PCM mismatch remains unresolved.

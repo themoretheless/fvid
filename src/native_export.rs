@@ -944,6 +944,10 @@ pub fn try_concat_mp4_matroska(sources: &[PathBuf], destination: &Path,
     cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<Option<crate::media_control::ProgressEvent>> {
     if !matches!(destination.extension().and_then(|s|s.to_str()),Some("mkv"|"mka")) { return Ok(None); }
+    // Keep ADTS on its packet-copy route instead of the decoded PCM fallback.
+    if !sources.is_empty() && sources.iter().all(|source| is_adts_source(source).unwrap_or(false)) {
+        return Ok(None);
+    }
     let Some(mut segments) = crate::container::mp4_concat::open(sources,cancel)? else {
         if !crate::native_audio_mix::concat_eligible(sources)? {return Ok(None);}
         let stats=crate::native_audio_mix::concat_audio(sources,destination,cancel,progress)?;

@@ -82,3 +82,46 @@ fn synthetic_adts_file_remux_preserves_packets_and_publishes_atomically() {
     std::fs::remove_file(destination).unwrap();
     std::fs::remove_dir(dir).unwrap();
 }
+#[test]
+fn synthetic_adts_concat_cli_copies_aac_instead_of_decoding_pcm() {
+    let fixture =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let sources = vec![
+        fixture.join("adts-concat-a.aac"),
+        fixture.join("adts-concat-b.aac"),
+    ];
+    let dir =
+        std::env::temp_dir().join(format!("fvid-adts-concat-dispatch-{}", std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    struct Clean(std::path::PathBuf);
+    impl Drop for Clean {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _clean = Clean(dir.clone());
+    let expected = dir.join("expected.mka");
+    let actual = dir.join("actual.mkv");
+    fvid::native_export::concat_adts_aac(&sources, &expected, None, None).unwrap();
+    let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "concat"])
+        .arg(&actual)
+        .args(&sources)
+        .output()
+        .unwrap();
+    assert!(
+        run.status.success(),
+        "{}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    let bytes = std::fs::read(&actual).unwrap();
+    let mut reader =
+        fvid_media::owned_webm::WebmReader::open(Cursor::new(&bytes), Default::default()).unwrap();
+    assert_eq!(
+        reader.tracks[0].codec, "A_AAC",
+        "ADTS concat must preserve encoded AAC"
+    );
+    reader.scan_all().unwrap();
+    assert_eq!(reader.packets.len(), 2);
+    assert_eq!(bytes, std::fs::read(&expected).unwrap());
+}
