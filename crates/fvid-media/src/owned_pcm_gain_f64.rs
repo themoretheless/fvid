@@ -1,4 +1,4 @@
-//! Owned streaming float PCM gain and standard mono/stereo rematrixing.
+//! Owned streaming float PCM gain and standard channel rematrixing.
 use std::io::Write;
 // Native decoder writes may split channel frames, but always contain whole samples.
 pub struct PcmGain<'a, W> {
@@ -74,7 +74,16 @@ impl<W: Write> Write for PcmGain<'_, W> {
                 }
                 _ => {}
             }
-            if self.output_channels == 1 {
+            if self.output_channels > 2 {
+                // Mono occupies FC; stereo retains FL/FR. Additional speakers
+                // receive silence rather than synthetic surround or bass.
+                if self.input_channels == 1 {
+                    mixed[2] = frame[0];
+                } else {
+                    mixed[0] = frame[0];
+                    mixed[1] = frame[1];
+                }
+            } else if self.output_channels == 1 {
                 mixed[0] = (left + right) * 0.5;
             } else {
                 mixed[0] = left;
@@ -112,7 +121,8 @@ impl<'a, W: Write> PcmGain<'a, W> {
         if input_channels == 0
             || output_channels == 0
             || (input_channels != output_channels
-                && (input_channels > 8 || !matches!(output_channels, 1 | 2)))
+                && !(matches!(input_channels, 1 | 2) && output_channels <= 8)
+                && !(input_channels <= 8 && matches!(output_channels, 1 | 2)))
         {
             return Err("unsupported PCM channel conversion".into());
         }
@@ -163,7 +173,7 @@ mod tests {
             (65., 2, 2),
             (1., 0, 1),
             (1., 9, 2),
-            (1., 2, 3),
+            (1., 2, 9),
         ] {
             assert!(PcmGain::new(&mut bytes, gain, input, output).is_err());
         }
@@ -222,6 +232,36 @@ mod surround_tests {
                         assert_eq!(actual, expected);
                     }
                 }
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod upmix_tests {
+    use super::*;
+    #[test]
+    fn mono_uses_center_and_stereo_uses_front_without_inventing_surround() {
+        for inputs in [1u16, 2] {
+            for outputs in 3u16..=8 {
+                let mut bytes = Vec::new();
+                let mut gain = PcmGain::new(&mut bytes, 0.5, inputs, outputs).unwrap();
+                for sample in [0.25f64, -0.75].into_iter().take(inputs as usize) {
+                    gain.write_all(&sample.to_le_bytes()).unwrap();
+                }
+                assert!(gain.frame_complete());
+                let actual: Vec<_> = bytes
+                    .chunks_exact(8)
+                    .map(|b| f64::from_le_bytes(b.try_into().unwrap()))
+                    .collect();
+                let mut expected = vec![0.; outputs as usize];
+                if inputs == 1 {
+                    expected[2] = 0.125;
+                } else {
+                    expected[0] = 0.125;
+                    expected[1] = -0.375;
+                }
+                assert_eq!(actual, expected);
             }
         }
     }
