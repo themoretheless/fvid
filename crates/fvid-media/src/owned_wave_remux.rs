@@ -55,8 +55,40 @@ pub fn trim(
 ) -> Result<CopyStats> {
     copy_wave(source, destination, Some((from, to)), options).map(|(stats, _)| stats)
 }
+/// Concatenate compatible PCM WAVE streams without decoding or seam rounding.
+/// Metadata and fmt parameters come from the first input; packet limits span
+/// every segment, including partial blocks at input boundaries.
+pub fn concat(
+    sources: &[std::path::PathBuf],
+    destination: &Path,
+    options: &CopyOptions,
+) -> Result<CopyStats> {
+    if !(2..=256).contains(&sources.len()) {
+        return Err("concat requires 2..=256 inputs".into());
+    }
+    let paths: Vec<_> = sources.iter().map(|p| p.as_path()).collect();
+    copy_waves(&paths, destination, None, options).map(|(stats, _)| stats)
+}
+pub(crate) fn supports_concat(
+    sources: &[std::path::PathBuf],
+    destination: &Path,
+    options: &CopyOptions,
+) -> bool {
+    (2..=256).contains(&sources.len())
+        && sources
+            .iter()
+            .all(|source| supports(source, destination, options))
+}
 fn copy_wave(
     source: &Path,
+    destination: &Path,
+    interval: Option<(i64, i64)>,
+    options: &CopyOptions,
+) -> Result<(CopyStats, u64)> {
+    copy_waves(&[source], destination, interval, options)
+}
+fn copy_waves(
+    sources: &[&Path],
     destination: &Path,
     interval: Option<(i64, i64)>,
     options: &CopyOptions,
@@ -99,6 +131,7 @@ fn copy_wave(
     };
     emit(event);
     check()?;
+    let source = sources[0];
     let mut input = std::fs::File::open(source).map_err(|e| e.to_string())?;
     let info = crate::owned_wave_inspect::inspect(&mut input, options.cancel.as_ref())
         .map_err(|e| e.to_string())?;
@@ -121,14 +154,57 @@ fn copy_wave(
     if interval.is_some() && last <= first {
         return Err("no PCM samples in selected interval".into());
     }
-    let available = (last - first) * u64::from(info.block);
-    let size = u128::from(available).min(
-        options
-            .max_packets
-            .map(|n| u128::from(n) * capacity as u128)
-            .unwrap_or(u128::from(available)),
-    ) as u32;
-    if size == 0 && available != 0 {
+    // Retain only small stream descriptors; input file handles are opened one
+    // at a time so 256 inputs do not exhaust the process descriptor limit.
+    type Segment<'a> = (&'a Path, crate::owned_wave_inspect::WaveInfo, u64, u32);
+    let geometry_bytes = sources
+        .len()
+        .checked_mul(std::mem::size_of::<Segment>() + std::mem::size_of::<&Path>())
+        .ok_or("WAVE segment geometry overflow")?;
+    if options
+        .max_controlled_bytes
+        .is_some_and(|max| geometry_bytes + capacity + 16384 > max)
+    {
+        return Err("controlled memory budget exceeded before WAVE geometry allocation".into());
+    }
+    let mut segments: Vec<Segment> = Vec::with_capacity(sources.len());
+    let mut packets_left = options.max_packets.unwrap_or(u64::MAX);
+    let mut total = 0u64;
+    for (index, path) in sources.iter().enumerate() {
+        check()?;
+        let current = if index == 0 {
+            info
+        } else {
+            let mut file = std::fs::File::open(path).map_err(|e| e.to_string())?;
+            crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
+                .map_err(|e| e.to_string())?
+        };
+        if current.sample_rate != info.sample_rate
+            || current.channels != info.channels
+            || current.bits_per_sample != info.bits_per_sample
+            || current.valid_bits != info.valid_bits
+            || current.float != info.float
+            || current.channel_mask != info.channel_mask
+            || current.block != info.block
+        {
+            return Err("concat WAVE inputs have incompatible PCM formats/layouts".into());
+        }
+        let begin = if index == 0 { first } else { 0 };
+        let end = if index == 0 {
+            last
+        } else {
+            current.sample_frames
+        };
+        let available = (end - begin) * u64::from(info.block);
+        let bytes = (u128::from(available)).min(u128::from(packets_left) * capacity as u128) as u32;
+        packets_left -= u64::from(bytes).div_ceil(capacity as u64);
+        total = total
+            .checked_add(u64::from(bytes))
+            .ok_or("WAVE concat size overflow")?;
+        segments.push((path, current, begin, bytes));
+    }
+    let size = u32::try_from(total).map_err(|_| "WAVE concat exceeds RIFF size limit")?;
+    if size == 0 && segments.iter().any(|(_, info, _, _)| info.data_bytes != 0) {
         return Err("no WAVE samples selected".into());
     }
     let metadata_bytes =
@@ -144,6 +220,7 @@ fn copy_wave(
         .and_then(|n| n.checked_add(12))
         .and_then(|n| n.checked_mul(8))
         .and_then(|n| n.checked_add(capacity))
+        .and_then(|n| n.checked_add(geometry_bytes))
         .and_then(|n| n.checked_add(16384))
         .ok_or("WAVE memory estimate overflow")?;
     if options
@@ -244,25 +321,38 @@ fn copy_wave(
             .write_all(b"data")
             .and_then(|_| output.write_all(&size.to_le_bytes()))
             .map_err(|e| e.to_string())?;
-        input
-            .seek(SeekFrom::Start(
-                info.data_offset + first * u64::from(info.block),
-            ))
-            .map_err(|e| e.to_string())?;
         let mut buffer = vec![0; capacity];
-        let mut remaining = size as usize;
-        while remaining > 0 {
+        for (index, (path, info, first, bytes)) in segments.iter().enumerate() {
             check()?;
-            let count = remaining.min(capacity);
+            if *bytes == 0 {
+                continue;
+            }
+            let mut next;
+            let input = if index == 0 {
+                &mut input
+            } else {
+                next = std::fs::File::open(path).map_err(|e| e.to_string())?;
+                &mut next
+            };
             input
-                .read_exact(&mut buffer[..count])
-                .and_then(|_| output.write_all(&buffer[..count]))
+                .seek(SeekFrom::Start(
+                    info.data_offset + first * u64::from(info.block),
+                ))
                 .map_err(|e| e.to_string())?;
-            remaining -= count;
-            event.packets += 1;
-            event.payload_bytes += count as u64;
-            emit(event);
-            check()?;
+            let mut remaining = *bytes as usize;
+            while remaining > 0 {
+                check()?;
+                let count = remaining.min(capacity);
+                input
+                    .read_exact(&mut buffer[..count])
+                    .and_then(|_| output.write_all(&buffer[..count]))
+                    .map_err(|e| e.to_string())?;
+                remaining -= count;
+                event.packets += 1;
+                event.payload_bytes += count as u64;
+                emit(event);
+                check()?;
+            }
         }
         if size % 2 != 0 {
             output.write_all(&[0]).map_err(|e| e.to_string())?;
@@ -286,8 +376,14 @@ fn copy_wave(
         CopyStats {
             packets: event.packets,
             payload_bytes: event.payload_bytes,
-            segments: 1,
-            backend: "owned streaming WAVE remux",
+            segments: sources.len(),
+            backend: if sources.len() > 1 {
+                "owned streaming WAVE concat"
+            } else if interval.is_some() {
+                "owned streaming WAVE trim"
+            } else {
+                "owned streaming WAVE remux"
+            },
             fvid_payload_copies: event.packets,
         },
         u64::from(size) / u64::from(info.block),
@@ -388,6 +484,178 @@ mod tests {
         let stats = crate::remux(&empty, &empty_copy, &CopyOptions::default()).unwrap();
         assert_eq!(stats.packets, 0);
         assert_eq!(payload(&empty_copy).0.sample_frames, 0);
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+    #[test]
+    fn public_concat_preserves_pcm_seams_padding_and_global_packet_limits() {
+        let dir = std::env::temp_dir().join(format!("fvid-wave-concat-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        for (bits, float) in [
+            (8u16, false),
+            (16, false),
+            (24, false),
+            (32, false),
+            (32, true),
+            (64, true),
+        ] {
+            let width = usize::from(bits / 8);
+            let mut sources = Vec::new();
+            let mut pieces = Vec::new();
+            for (index, frames) in [5usize, 7, 3].into_iter().enumerate() {
+                let source = dir.join(format!("source-{bits}-{float}-{index}.wav"));
+                if float && bits == 32 {
+                    let samples: Vec<_> = (0..frames)
+                        .map(|i| f32::from_bits(0x7fc00000 + index as u32 * 117 + i as u32))
+                        .collect();
+                    crate::owned_wav_file::write_wav_f32le(&source, 48000, 1, &samples).unwrap();
+                } else if float {
+                    let samples: Vec<_> = (0..frames)
+                        .map(|i| f64::from_bits(0x7ff8000000000000 + index as u64 * 117 + i as u64))
+                        .collect();
+                    crate::owned_wav_file::write_wav_f64le(&source, 48000, 1, &samples).unwrap();
+                } else {
+                    let raw: Vec<u8> = (0..frames * width)
+                        .map(|i| (i * 73 + index * 47 + 17) as u8)
+                        .collect();
+                    crate::owned_wav_file::write_wav_integer_le(&source, 48000, 1, bits, &raw, 4)
+                        .unwrap();
+                }
+                pieces.push(payload(&source).1);
+                sources.push(source);
+            }
+            let first = dir.join(format!("tagged-{bits}-{float}.wav"));
+            crate::remux(
+                &sources[0],
+                &first,
+                &CopyOptions {
+                    metadata_set: vec![("title".into(), "first segment".into())],
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            sources[0] = first;
+            let output = dir.join(format!("concat-{bits}-{float}.wav"));
+            assert!(supports_concat(&sources, &output, &CopyOptions::default()));
+            let stats = crate::concat(&sources, &output, &CopyOptions::default()).unwrap();
+            let (info, actual) = payload(&output);
+            assert_eq!(info.sample_frames, 15);
+            assert_eq!(info.bits_per_sample, bits);
+            assert_eq!(info.float, float);
+            assert_eq!(actual, pieces.concat());
+            assert_eq!(stats.segments, 3);
+            assert_eq!(stats.backend, "owned streaming WAVE concat");
+            assert_eq!(stats.payload_bytes, 15 * width as u64);
+            assert_eq!(
+                crate::owned_probe::probe_wave(&output)
+                    .unwrap()
+                    .metadata
+                    .get("title")
+                    .map(String::as_str),
+                Some("first segment")
+            );
+            let output = dir.join(format!("limited-{bits}-{float}.wav"));
+            let stats = crate::concat(
+                &sources,
+                &output,
+                &CopyOptions {
+                    max_packet_bytes: 4 * width,
+                    max_packets: Some(3),
+                    metadata_set: vec![("title".into(), "joined".into())],
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            // Five-frame first input consumes two blocks; the remaining block
+            // starts at the second input, with no padding byte inserted.
+            assert_eq!(stats.packets, 3);
+            let mut expected = pieces[0].clone();
+            expected.extend_from_slice(&pieces[1][..4 * width]);
+            assert_eq!(payload(&output).1, expected);
+            assert_eq!(payload(&output).0.sample_frames, 9);
+            assert_eq!(
+                crate::owned_probe::probe_wave(&output)
+                    .unwrap()
+                    .metadata
+                    .get("title")
+                    .map(String::as_str),
+                Some("joined")
+            );
+            let output = dir.join(format!("incompatible-{bits}-{float}.wav"));
+            let other = dir.join(format!("other-{bits}-{float}.wav"));
+            crate::owned_wav_file::write_wav_integer_le(&other, 44100, 1, 16, &[1, 2], 4).unwrap();
+            assert!(crate::concat(
+                &[sources[0].clone(), other],
+                &output,
+                &CopyOptions::default()
+            )
+            .unwrap_err()
+            .contains("incompatible PCM"));
+            assert!(!output.exists());
+        }
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+    #[test]
+    fn concat_opens_inputs_sequentially_and_cancellation_never_publishes() {
+        let dir =
+            std::env::temp_dir().join(format!("fvid-wave-concat-control-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let source = dir.join("source.wav");
+        crate::owned_wav_file::write_wav_integer_le(&source, 48000, 1, 8, &[1, 2, 3, 4, 5], 0)
+            .unwrap();
+        let sources = vec![source.clone(); 256];
+        let output = dir.join("many.wav");
+        let stats = crate::concat(
+            &sources,
+            &output,
+            &CopyOptions {
+                max_controlled_bytes: Some(64 * 1024),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(stats.segments, 256);
+        assert_eq!(stats.packets, 256);
+        assert_eq!(payload(&output).1, [1, 2, 3, 4, 5].repeat(256));
+        let flag = fvid_control::CancelFlag::default();
+        let cancel = flag.clone();
+        let output = dir.join("cancelled.wav");
+        assert!(crate::concat(
+            &sources[..3],
+            &output,
+            &CopyOptions {
+                max_packet_bytes: 4,
+                cancel: Some(flag),
+                progress: Some(fvid_control::ProgressHook::new(move |event| {
+                    assert!(!event.done);
+                    if event.packets == 2 {
+                        cancel.cancel();
+                    }
+                })),
+                ..Default::default()
+            }
+        )
+        .unwrap_err()
+        .contains("cancelled"));
+        assert!(!output.exists());
+        assert!(std::fs::read_dir(&dir).unwrap().all(|e| !e
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with(".fvid-wave-remux")));
+        let output = dir.join("budget.wav");
+        assert!(crate::concat(
+            &sources,
+            &output,
+            &CopyOptions {
+                max_controlled_bytes: Some(1),
+                ..Default::default()
+            }
+        )
+        .unwrap_err()
+        .contains("controlled memory"));
+        assert!(!output.exists());
         std::fs::remove_dir_all(dir).unwrap();
     }
     #[test]

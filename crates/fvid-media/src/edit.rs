@@ -295,6 +295,9 @@ pub fn concat(sources: &[PathBuf], destination: &Path, options: &CopyOptions) ->
     if sources.len() < 2 || sources.len() > 256 {
         return Err("concat requires 2..=256 inputs".into());
     }
+    if crate::owned_wave_remux::supports_concat(sources, destination, options) {
+        return crate::owned_wave_remux::concat(sources, destination, options);
+    }
     edit(sources, destination, None, options, false)
 }
 fn edit(
