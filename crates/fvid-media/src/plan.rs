@@ -2011,6 +2011,9 @@ fn video_graph(transform: &LosslessTransform) -> Option<String> {
 
 /// Plan a remux without opening an output.
 pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
+    if crate::owned_wave_plan::supports(source, options) {
+        return crate::owned_wave_plan::plan_remux(source, options);
+    }
     let input = Input::open_fast(source)?;
     let selected = selection(&input, options)?;
     let streams = stream_plans(&input, &selected)?;
@@ -3326,6 +3329,9 @@ pub fn plan_trim(
     if from_us < 0 || to_us <= from_us {
         return Err("plan trim requires 0 <= from < to".into());
     }
+    if crate::owned_wave_plan::supports(source, options) {
+        return crate::owned_wave_plan::plan_trim(source, from_us, to_us, options);
+    }
     let input = Input::open_fast(source)?;
     let selected = selection(&input, options)?;
     if selected.is_empty() {
@@ -3392,6 +3398,9 @@ pub fn plan_trim_pcm(
     if from_us < 0 || to_us <= from_us {
         return Err("plan trim-pcm requires 0 <= from < to".into());
     }
+    if crate::owned_wave_plan::supports(source, options) {
+        return crate::owned_wave_plan::plan_trim_pcm(source, from_us, to_us, options);
+    }
     let input = Input::open_fast(source)?;
     let selected = selection(&input, options)?;
     if selected.is_empty() {
@@ -3447,6 +3456,12 @@ pub fn plan_trim_pcm(
 pub fn plan_concat(sources: &[PathBuf], options: &CopyOptions) -> Result<MediaPlan> {
     if sources.len() < 2 || sources.len() > 256 {
         return Err("plan concat requires 2..=256 inputs".into());
+    }
+    if sources
+        .iter()
+        .all(|source| crate::owned_wave_plan::supports(source, options))
+    {
+        return crate::owned_wave_plan::plan_concat(sources, options);
     }
     let first = Input::open_fast(&sources[0])?;
     let selected = selection(&first, options)?;

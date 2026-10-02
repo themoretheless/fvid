@@ -24,6 +24,19 @@ pub struct WaveInfo {
     pub end: u64,
 }
 
+impl WaveInfo {
+    /// Codec name for the stored PCM precision; no decoded-width conversion.
+    pub fn codec(&self) -> String {
+        if self.float {
+            format!("pcm_f{}le", self.bits_per_sample)
+        } else if self.bits_per_sample == 8 {
+            "pcm_u8".into()
+        } else {
+            format!("pcm_s{}le", self.bits_per_sample)
+        }
+    }
+}
+
 pub fn is_wave(path: &Path) -> std::io::Result<bool> {
     let mut file = File::open(path)?;
     let mut prefix = [0; 12];

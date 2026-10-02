@@ -70,13 +70,7 @@ pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
         }
         at += 8 + u64::from(size) + u64::from(size & 1);
     }
-    let codec = if wave.float {
-        format!("pcm_f{}le", wave.bits_per_sample)
-    } else if wave.bits_per_sample == 8 {
-        "pcm_u8".into()
-    } else {
-        format!("pcm_s{}le", wave.bits_per_sample)
-    };
+    let codec = wave.codec();
     let bit_rate = i64::from(wave.sample_rate) * i64::from(wave.block) * 8;
     Ok(MediaInfo {
         path: path.into(),

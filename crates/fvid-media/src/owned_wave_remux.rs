@@ -67,7 +67,7 @@ pub fn concat(
         return Err("concat requires 2..=256 inputs".into());
     }
     let paths: Vec<_> = sources.iter().map(|p| p.as_path()).collect();
-    copy_waves(&paths, destination, None, options).map(|(stats, _)| stats)
+    copy_waves(&paths, Some(destination), None, options).map(|(stats, _, _)| stats)
 }
 pub(crate) fn supports_concat(
     sources: &[std::path::PathBuf],
@@ -85,14 +85,25 @@ fn copy_wave(
     interval: Option<(i64, i64)>,
     options: &CopyOptions,
 ) -> Result<(CopyStats, u64)> {
-    copy_waves(&[source], destination, interval, options)
+    copy_waves(&[source], Some(destination), interval, options)
+        .map(|(stats, frames, _)| (stats, frames))
+}
+pub(crate) fn inspect_copy(
+    sources: &[&Path],
+    interval: Option<(i64, i64)>,
+    options: &CopyOptions,
+) -> Result<(CopyStats, u64, crate::owned_wave_inspect::WaveInfo)> {
+    if !(1..=256).contains(&sources.len()) {
+        return Err("WAVE plan requires 1..=256 inputs".into());
+    }
+    copy_waves(sources, None, interval, options)
 }
 fn copy_waves(
     sources: &[&Path],
-    destination: &Path,
+    destination: Option<&Path>,
     interval: Option<(i64, i64)>,
     options: &CopyOptions,
-) -> Result<(CopyStats, u64)> {
+) -> Result<(CopyStats, u64, crate::owned_wave_inspect::WaveInfo)> {
     if interval.is_some_and(|(from, to)| from < 0 || to <= from) {
         return Err("PCM interval requires 0 <= from < to".into());
     }
@@ -101,7 +112,7 @@ fn copy_waves(
             "owned WAVE remux does not implement requested stream/metadata policies".into(),
         );
     }
-    if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
+    if destination.is_some_and(|path| path.extension().and_then(|s| s.to_str()) != Some("wav")) {
         return Err("owned WAVE remux requires .wav output".into());
     }
     if options.metadata_set.len() + options.metadata_delete.len() > 64
@@ -116,12 +127,14 @@ fn copy_waves(
         crate::owned_budget::check_rss_budget(options)
     };
     let emit = |event| {
-        if let Some(hook) = &options.progress {
-            hook.emit(event);
+        if destination.is_some() {
+            if let Some(hook) = &options.progress {
+                hook.emit(event);
+            }
         }
     };
     check()?;
-    if destination.symlink_metadata().is_ok() {
+    if destination.is_some_and(|path| path.symlink_metadata().is_ok()) {
         return Err("output already exists".into());
     }
     let mut event = ProgressEvent {
@@ -279,6 +292,24 @@ fn copy_waves(
         + u64::from(size % 2)
         + metadata.len() as u64;
     let riff = u32::try_from(riff).map_err(|_| "WAVE exceeds RIFF size limit")?;
+    if destination.is_none() {
+        let packets = segments
+            .iter()
+            .map(|(_, _, _, bytes)| u64::from(*bytes).div_ceil(capacity as u64))
+            .sum();
+        return Ok((
+            CopyStats {
+                packets,
+                payload_bytes: u64::from(size),
+                segments: sources.len(),
+                backend: "owned WAVE metadata plan",
+                fvid_payload_copies: 0,
+            },
+            u64::from(size) / u64::from(info.block),
+            info,
+        ));
+    }
+    let destination = destination.unwrap();
     let directory = destination
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -387,6 +418,7 @@ fn copy_waves(
             fvid_payload_copies: event.packets,
         },
         u64::from(size) / u64::from(info.block),
+        info,
     ))
 }
 
