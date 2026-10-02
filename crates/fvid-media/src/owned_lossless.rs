@@ -194,3 +194,18 @@ pub fn crop_lossless(
         options,
     )
 }
+
+/// Explicit FFV1 encoding through the owned lossless pipeline.
+pub fn transcode(
+    source: &Path,
+    destination: &Path,
+    transform: LosslessTransform,
+    options: &CopyOptions,
+    settings: &fvid_media_info::EncoderSettings,
+) -> Result<LosslessStats, String> {
+    settings.validate()?;
+    if settings.name != "ffv1" || !settings.options.is_empty() {
+        return Err("owned transcode does not yet implement requested encoder/settings".into());
+    }
+    transcode_lossless(source, destination, transform, options)
+}

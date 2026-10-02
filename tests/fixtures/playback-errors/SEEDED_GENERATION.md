@@ -333,3 +333,10 @@ through `cargo bench` with both `FVID_REFERENCE_FFMPEG` and
 `FVID_REFERENCE_FFPROBE`. All three original comparison bodies are retained.
 Ordinary `native_matroska_metadata` tests use owned readers/writers and
 synthetic controls only; no ignored external-tool comparisons remain there.
+
+Explicit `transcode` with encoder `ffv1` and no encoder options now uses the
+owned path for admitted Y4M transforms/policies and is available without the
+legacy feature. Its public API regression compares the entire result with
+owned `transcode_lossless`. Explicit unsupported encoder settings (such as
+level 3) are refused by the owned adapter, while legacy admission retains those
+requests on their previous backend; no encoder option is silently ignored.

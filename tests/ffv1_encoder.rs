@@ -651,6 +651,41 @@ fn public_lossless_api_uses_owned_y4m_export_and_enforces_packet_policy() {
     )
     .unwrap();
     assert_eq!(std::fs::read(&output).unwrap(), expected.into_inner());
+    let explicit = directory.join("explicit.mkv");
+    let settings = fvid_media::EncoderSettings {
+        name: "ffv1".into(),
+        options: vec![],
+    };
+    let explicit_stats = fvid_media::transcode(
+        &source,
+        &explicit,
+        transform.clone(),
+        &Default::default(),
+        &settings,
+    )
+    .unwrap();
+    assert_eq!(explicit_stats.backend, "fvid");
+    assert_eq!(
+        std::fs::read(&explicit).unwrap(),
+        std::fs::read(&output).unwrap()
+    );
+    let unsupported = fvid_media::EncoderSettings {
+        name: "ffv1".into(),
+        options: vec![("level".into(), "3".into())],
+    };
+    let refused = directory.join("unsupported.mkv");
+    assert!(
+        fvid_media::owned_lossless::transcode(
+            &source,
+            &refused,
+            transform.clone(),
+            &Default::default(),
+            &unsupported
+        )
+        .unwrap_err()
+        .contains("encoder/settings")
+    );
+    assert!(!refused.exists());
     let limited = directory.join("limited.mkv");
     let options = fvid_media::CopyOptions {
         max_packet_bytes: 1,
