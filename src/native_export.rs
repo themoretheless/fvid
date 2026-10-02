@@ -401,7 +401,7 @@ pub fn export_aac_pcm_selected(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,false)
+    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,false,None)
 }
 
 /// Export owned AAC, MP4 ALAC or packed RIFF/WAVE PCM through the shared PCM pipeline.
@@ -416,7 +416,20 @@ pub fn export_audio_pcm_selected(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,true)
+    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,true,None)
+}
+
+/// Export selected owned audio while checking process RSS before decoding and
+/// between packets. This limit also covers decoder work during WAVE spooling.
+pub fn export_audio_pcm_selected_with_rss_limit(
+    source: &Path,
+    destination: &Path,
+    selected: Option<usize>,
+    max_rss_bytes: Option<u64>,
+    cancel: Option<&crate::media_control::CancelFlag>,
+    progress: Option<&crate::media_control::ProgressHook>,
+) -> Result<crate::native_media::AudioDecodeStats> {
+    export_pcm_selected(source, destination, None, 1., None, None, selected, cancel, progress, true, max_rss_bytes)
 }
 
 fn export_pcm_selected(
@@ -430,8 +443,9 @@ fn export_pcm_selected(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
     allow_wave:bool,
+    max_rss_bytes: Option<u64>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    let mut control = crate::native_media::DecodeProgress::new(cancel, progress)?;
+    let mut control = crate::native_media::DecodeProgress::new_with_rss_limit(cancel, progress, max_rss_bytes)?;
     if sample_rate.is_some_and(|rate| !(8000..=384000).contains(&rate)) {
         return Err(invalid("sample rate must be within 8000..=384000"));
     }

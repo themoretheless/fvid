@@ -174,11 +174,15 @@ fn planar_format(w: usize, h: usize, cw: usize, ch: usize) -> Result<String> {
 pub(crate) struct DecodeProgress<'a> {
     cancel: Option<&'a crate::media_control::CancelFlag>,
     hook: Option<&'a crate::media_control::ProgressHook>,
+    max_rss_bytes: Option<u64>,
     event: crate::media_control::ProgressEvent,
 }
 impl<'a> DecodeProgress<'a> {
     pub(crate) fn new(cancel: Option<&'a crate::media_control::CancelFlag>, hook: Option<&'a crate::media_control::ProgressHook>) -> Result<Self> {
-        let state = Self { cancel, hook, event: crate::media_control::ProgressEvent { packets: 0, payload_bytes: 0, done: false } };
+        Self::new_with_rss_limit(cancel, hook, None)
+    }
+    pub(crate) fn new_with_rss_limit(cancel: Option<&'a crate::media_control::CancelFlag>, hook: Option<&'a crate::media_control::ProgressHook>, max_rss_bytes: Option<u64>) -> Result<Self> {
+        let state = Self { cancel, hook, max_rss_bytes, event: crate::media_control::ProgressEvent { packets: 0, payload_bytes: 0, done: false } };
         state.check()?;
         state.emit(false);
         state.check()?;
@@ -186,6 +190,10 @@ impl<'a> DecodeProgress<'a> {
     }
     pub(crate) fn check(&self) -> Result<()> {
         if self.cancel.is_some_and(|flag| flag.is_cancelled()) { return Err(invalid("media operation cancelled")); }
+        if self.max_rss_bytes.is_some() {
+            let options = fvid_media::CopyOptions { max_rss_bytes: self.max_rss_bytes, ..Default::default() };
+            fvid_media::owned_budget::check_rss_budget(&options).map_err(|e| invalid(&e))?;
+        }
         Ok(())
     }
     pub(crate) fn emit(&self, done: bool) {

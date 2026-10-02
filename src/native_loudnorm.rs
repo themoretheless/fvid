@@ -42,7 +42,7 @@ impl Spool {
 
 /// Route owned WAVE directly, or owned compressed audio through a temporary
 /// decoded WAVE. `None` leaves other formats/policies to the caller during
-/// migration. Compressed packet/resource policies still need a decoder bridge;
+/// migration. Compressed packet/allocation admission policies still need a decoder bridge;
 /// they are never silently treated as WAVE packet policies.
 pub fn try_apply(
     source: &Path,
@@ -72,7 +72,6 @@ pub fn try_apply(
     }
     if options.max_packets.is_some()
         || options.max_controlled_bytes.is_some()
-        || options.max_rss_bytes.is_some()
         || options.max_packet_bytes != CopyOptions::default().max_packet_bytes
         || !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty()
@@ -128,14 +127,11 @@ pub fn try_apply(
             hook.emit(event);
         })
     });
-    crate::native_export::export_audio_pcm_selected(
+    crate::native_export::export_audio_pcm_selected_with_rss_limit(
         source,
         &wave,
-        None,
-        1.,
-        None,
-        None,
         Some(selected),
+        options.max_rss_bytes,
         options.cancel.as_ref(),
         decode_hook.as_ref(),
     )?;

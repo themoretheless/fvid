@@ -180,6 +180,8 @@ fn compressed_audio_normalization_matches_owned_pcm_with_edits_and_selection() {
             .args([
                 "--dual-pass",
                 "--progress",
+                "--max-rss-mib",
+                "8192",
                 "--streams",
                 &selected.to_string(),
             ])
@@ -239,5 +241,21 @@ fn cancellation_after_compressed_decode_never_publishes_normalization() {
         ..Default::default()
     };
     assert!(fvid::native_loudnorm::try_apply(&source, &output, None, true, &options).is_err());
+    assert!(!output.exists());
+}
+
+#[test]
+fn compressed_rss_limit_refuses_before_decode_or_publication() {
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/audio/aac-mono-44k.aac");
+    let output = std::env::temp_dir().join(format!("fvid-loudnorm-rss-{}.wav", std::process::id()));
+    let _ = std::fs::remove_file(&output);
+    let options = fvid_media::CopyOptions {
+        max_rss_bytes: Some(1),
+        ..Default::default()
+    };
+    let error =
+        fvid::native_loudnorm::try_apply(&source, &output, None, true, &options).unwrap_err();
+    assert!(error.to_string().contains("rss budget exceeded"), "{error}");
     assert!(!output.exists());
 }

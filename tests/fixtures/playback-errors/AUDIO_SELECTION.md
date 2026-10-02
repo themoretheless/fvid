@@ -31,3 +31,10 @@ compares output bytes with an independently exported WAVE passed to the owned
 normalizer, verifies cumulative phase progress and tests cancellation before
 normalization publication. The same command is checked with and without the
 legacy feature; the headless build cannot link or fall back to libav.
+
+The compressed normalizer also honors `max_rss_bytes` during decoding and
+normalization. Acceptance uses a sufficient RSS limit and preserves identical
+PCM; a one-byte limit refuses before decoding or publishing a destination.
+The platform RSS contract is shared with the owned media budget helper (macOS
+reports the process high-water mark). Packet and allocation admission policies
+are a separate migration task.
