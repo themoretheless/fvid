@@ -97,3 +97,19 @@ wide8 and TNS fixtures. Existing tool/invalid-packet tests remain enabled in
 the frontend and compile those same implementations. No test runs FFmpeg.
 This moves the AAC-LC decoder ownership; remaining profiles/tools and legacy
 container/export operations are separate migration work.
+
+The library also exposes `owned_aac::decode_adts_pcm` for sequential reads into
+caller-owned interleaved float32 PCM. Its packet/preroll/interval loop is shared
+with the frontend, preserving nanosecond interval-to-sample rounding and
+stopping before the next header at a packet/range limit. The existing three
+complete AAC packets plus truncated fourth header and paired Y4M fixture verify
+full-source refusal versus exact-prefix acceptance. Additional tests exercise
+three-byte short reads, mono/stereo/5.1/PCE/TNS parity, cancellation, failed
+writers, and PCE payload admission before bootstrap.
+
+Raw-stream progress never reports destination publication: the caller owns
+flush/commit and must discard partial output after an error. Packet byte/count,
+cancellation and RSS controls are supported. Aggregate allocation admission
+and metadata mutation are explicitly refused by this API pending the file
+export/DSP integration; no option is silently treated as implemented. Existing
+frontend controls remain unchanged.

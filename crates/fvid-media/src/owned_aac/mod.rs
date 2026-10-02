@@ -1,4 +1,4 @@
-//! Owned AAC synthesis and transforms. No foreign decoder or libav dependency.
+//! Owned AAC-LC framing, decoding and transforms. No foreign decoder or libav.
 #![forbid(unsafe_code)]
 pub mod aac_coupling;
 pub mod aac_imdct;
@@ -63,3 +63,6 @@ mod aac_huffman_tables;
 pub use aac_native::{AacCheckpoint, NativeAacDecoder};
 #[cfg(test)]
 mod decoder_tests;
+
+pub mod stream;
+pub use stream::{decode_adts_pcm, AudioDecodeStats as AdtsPcmStats};
