@@ -451,3 +451,9 @@ to overwrite, cancellation during copy and cleanup after a truncated packet.
 No codec is invoked by this packet-copy test. Selection, metadata editing and
 aggregate memory/count/RSS policies remain outside this adapter's admission.
 ADTS planning is not yet routed to the owned file adapter.
+
+ADTS remux planning now uses the same owned streaming packet reader and byte
+limit as execution in both feature modes. It counts raw AAC packets/payload,
+describes the AAC track and Matroska clock without output or execution progress.
+The synthetic file test checks successful summary, matching too-small AAC payload
+budget refusals in plan/execution and refusal of a truncated final packet.

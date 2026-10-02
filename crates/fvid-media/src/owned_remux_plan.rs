@@ -3,9 +3,13 @@ use fvid_control::CopyOptions;
 use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
 use std::{fs::File, path::Path};
 pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
-    crate::owned_matroska_remux::supports(source, Path::new("planned.mkv"), options)
+    crate::owned_adts_remux::supports(source, Path::new("planned.mka"), options)
+        || crate::owned_matroska_remux::supports(source, Path::new("planned.mkv"), options)
 }
 pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<MediaPlan, String> {
+    if crate::owned_adts_remux::supports(source, Path::new("planned.mka"), options) {
+        return crate::owned_adts_remux::plan_remux(source, options);
+    }
     if !supports(source, options) {
         return crate::owned_wave_plan::plan_remux(source, options);
     }
