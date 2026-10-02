@@ -1,5 +1,5 @@
+use fvid_media::owned_ffv1_encoder as ffv1_encoder;
 use fvid::{
-    codec::ffv1_encoder,
     container::matroska_write::{Encoding, PacketWriter, TrackSpec},
     native_geometry::GeometryFrame,
 };

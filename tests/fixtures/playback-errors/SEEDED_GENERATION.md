@@ -202,3 +202,10 @@ Quarter-turn 4:1:0 retains symmetric subsampling. Quarter-turn 4:1:1 requires a
 separate pixel-format conversion and is explicitly refused by the owned route;
 legacy admission retains that operation during migration rather than mislabeling
 its output. Other supported transforms can use the native raw path.
+
+FFV1 v1 all-intra range encoding is now library-owned, sharing its implementation
+with frontend exports. Encoder integration tests call the public library API,
+then mux/decode synthetic integer patterns to check losslessness across supported
+sample depths and chroma layouts. Existing export tests retain frontend coverage.
+This exposes the codec without libav; complete library file export/container
+migration remains separate work and is not implied by the kernel move.

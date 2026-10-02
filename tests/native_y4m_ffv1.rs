@@ -245,13 +245,11 @@ fn independent_decoder_reads_own_export_without_pixel_changes() {
 fn unsupported_y4m_profiles_do_not_take_over_the_legacy_route() {
     let d = dir("admission");
     let p = d.0.join("in.y4m");
-    for header in [
-        "C420p10 Ip F25:1",
-        "C420mpeg2 Ip F25:1",
-        "C420paldv Ip F25:1",
-        "C420jpeg It F25:1",
-        "C444 Ip",
-    ] {
+    for header in ["C420p10 Ip F25:1"] {
+        std::fs::write(&p, format!("YUV4MPEG2 W8 H6 {header}\n")).unwrap();
+        assert!(fvid::native_lossless::eligible(&p).unwrap(), "{header}");
+    }
+    for header in ["C420mpeg2 Ip F25:1", "C420paldv Ip F25:1", "C420jpeg It F25:1", "C444 Ip"] {
         std::fs::write(&p, format!("YUV4MPEG2 W8 H6 {header}\n")).unwrap();
         assert!(!fvid::native_lossless::eligible(&p).unwrap(), "{header}");
     }
