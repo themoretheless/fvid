@@ -451,3 +451,70 @@ fn mp4_audio_plan_uses_owned_metadata_without_decoding_or_callbacks() {
     .unwrap_err();
     assert!(error.contains("aggregate allocation admission"));
 }
+
+#[test]
+fn explicit_mp4_audio_selection_keeps_source_index_in_plan_and_export() {
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/alac-select-second.m4a");
+    let bytes = std::fs::read(&source).unwrap();
+    let reader =
+        fvid_media::owned_mp4::Mp4Reader::open(Cursor::new(&bytes), Default::default()).unwrap();
+    let index = reader
+        .tracks()
+        .iter()
+        .rposition(|t| t.handler == *b"soun")
+        .unwrap();
+    assert!(index > 0, "fixture must exercise a nonzero source stream");
+    let options = fvid_control::CopyOptions {
+        streams: vec![index],
+        ..Default::default()
+    };
+    let plan = fvid_media::plan_decode_audio(&source, &Default::default(), &options).unwrap();
+    assert_eq!(plan.streams[0].index, index);
+    assert!(plan.notes.iter().any(|n| n.contains("backend: owned")));
+    let mut expected = Vec::new();
+    let stats = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+        Cursor::new(&bytes),
+        &mut expected,
+        None,
+        &options,
+    )
+    .unwrap();
+    assert_eq!(stats.sample_frames, 512);
+    assert!(
+        expected.iter().all(|&b| b == 0),
+        "second track must be silent"
+    );
+    let mut first = Vec::new();
+    fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+        Cursor::new(&bytes),
+        &mut first,
+        None,
+        &fvid_control::CopyOptions {
+            streams: vec![0],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    assert_ne!(
+        first, expected,
+        "fixture must distinguish the two selected tracks"
+    );
+    let output =
+        std::env::temp_dir().join(format!("fvid-mp4-selection-{}.wav", std::process::id()));
+    struct Clean(std::path::PathBuf);
+    impl Drop for Clean {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_file(&self.0);
+        }
+    }
+    let _clean = Clean(output.clone());
+    let written = fvid_media::decode_audio(&source, &output, &options).unwrap();
+    assert_eq!(written.sample_frames, stats.sample_frames);
+    let bytes = std::fs::read(&output).unwrap();
+    let info = fvid_media::owned_wave_inspect::inspect(&mut Cursor::new(&bytes), None).unwrap();
+    assert_eq!(
+        &bytes[info.data_offset as usize..info.data_offset as usize + info.data_bytes as usize],
+        expected
+    );
+}

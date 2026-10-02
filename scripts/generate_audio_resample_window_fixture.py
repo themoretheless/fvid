@@ -54,6 +54,15 @@ def generate():
     ROOT.mkdir(parents=True,exist_ok=True)
     (ROOT/'alac-resample-window.m4a').write_bytes(mp4)
     (ROOT/'alac-resample-window.mka').write_bytes(mka)
+    silent_packets = [packet([0]*128) for _ in range(4)]
+    second_stbl = stbl.replace(atom(b'stco',word(0,1,len(ftyp)+8)),
+        atom(b'stco',word(0,1,len(ftyp)+8+sum(map(len,packets)))))
+    second_tkhd = bytearray(tkhd)
+    second_tkhd[12:16] = word(2)
+    two_tracks = atom(b'trak',atom(b'tkhd',tkhd)+mdia)+atom(b'trak',atom(b'tkhd',second_tkhd)+mdia.replace(stbl,second_stbl))
+    two_audio = ftyp+atom(b'mdat',b''.join(packets+silent_packets))+atom(b'moov',atom(b'mvhd',mvhd)+two_tracks)
+    (ROOT/'alac-select-second.m4a').write_bytes(two_audio)
+
     precise = [v/32768.0+(i%5)*1e-10 for i,v in enumerate(values)]
     audio64 = ebml('e1',ebml('b5',struct.pack('>d',48000))+ebml('9f',b'\x01')+ebml('6264',b'\x40'))
     track64 = ebml('ae',ebml('d7',b'\x01')+ebml('83',b'\x02')+ebml('86',b'A_PCM/FLOAT/IEEE')+audio64)

@@ -12,7 +12,9 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    if destination.extension().and_then(|s| s.to_str()) != Some("wav") || !simple_options(options) {
+    if destination.extension().and_then(|s| s.to_str()) != Some("wav")
+        || !single_audio_options(options)
+    {
         return false;
     }
     if crate::owned_mp4_audio_export::recognizes(source, options).unwrap_or(false) {
@@ -28,7 +30,11 @@ pub(crate) fn supports(
         return crate::owned_matroska_alac_export::supports(source, transform, options);
     }
     if crate::owned_adts_export::recognizes(source).unwrap_or(false) {
-        return crate::owned_adts_export::supports(source, transform, options);
+        return simple_options(options)
+            && crate::owned_adts_export::supports(source, transform, options);
+    }
+    if !simple_options(options) {
+        return false;
     }
     let Ok(mut file) = std::fs::File::open(source) else {
         return false;
@@ -47,7 +53,10 @@ pub(crate) fn supports(
     })
 }
 pub(crate) fn simple_options(options: &CopyOptions) -> bool {
-    (options.streams.is_empty() || options.streams == [0])
+    (options.streams.is_empty() || options.streams == [0]) && single_audio_options(options)
+}
+pub(crate) fn single_audio_options(options: &CopyOptions) -> bool {
+    options.streams.len() <= 1
         && options
             .metadata_set
             .iter()
@@ -63,7 +72,7 @@ pub(crate) fn validate_request(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<f64> {
-    if !simple_options(options) {
+    if !single_audio_options(options) {
         return Err(
             "owned audio export does not yet implement these control/metadata policies".into(),
         );
@@ -114,7 +123,7 @@ pub fn decode_audio_transformed(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    if !simple_options(options) {
+    if !single_audio_options(options) {
         return Err(
             "owned audio export does not yet implement these control/metadata policies".into(),
         );
@@ -136,7 +145,13 @@ pub fn decode_audio_transformed(
         return crate::owned_matroska_alac_export::apply(source, destination, transform, options);
     }
     if crate::owned_adts_export::recognizes(source)? {
+        if !simple_options(options) {
+            return Err("ADTS has only stream 0".into());
+        }
         return crate::owned_adts_export::apply(source, destination, transform, options);
+    }
+    if !simple_options(options) {
+        return Err("WAVE has only stream 0".into());
     }
     let check = || {
         if options

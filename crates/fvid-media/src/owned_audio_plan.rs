@@ -35,6 +35,9 @@ pub fn plan_decode_audio(
         stream_index = index;
         (rate, channels, mask, codec, "float32".to_owned())
     } else if adts {
+        if !crate::owned_audio_export::simple_options(options) {
+            return Err("ADTS has only stream 0".into());
+        }
         if options.max_controlled_bytes.is_some() {
             return Err("ADTS file allocation admission is not yet implemented".into());
         }
@@ -54,6 +57,9 @@ pub fn plan_decode_audio(
             "float32".to_owned(),
         )
     } else {
+        if !crate::owned_audio_export::simple_options(options) {
+            return Err("WAVE has only stream 0".into());
+        }
         let mut file = File::open(source).map_err(|e| e.to_string())?;
         let info = crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
             .map_err(|e| e.to_string())?;
