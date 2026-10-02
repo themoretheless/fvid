@@ -238,13 +238,39 @@ pub fn write_limited<R: Read + Seek, W: Write + Seek>(
     progress: Option<&ProgressHook>,
     max_packets: Option<u64>,
 ) -> Result<ProgressEvent> {
+    write_selected(input, output, cancel, progress, max_packets, &[])
+}
+
+pub(crate) fn selection(count: usize, requested: &[usize]) -> Result<Vec<usize>> {
+    if count == 0 { return Err(invalid("MP4 has no streams")); }
+    if requested.is_empty() { return Ok((0..count).collect()); }
+    let mut selected = Vec::new();
+    for &index in requested {
+        if index >= count || selected.contains(&index) {
+            return Err(invalid("invalid or duplicate MP4 stream index"));
+        }
+        selected.push(index);
+    }
+    Ok(selected)
+}
+
+/// Preserve requested output track order while copying a global source-DTS prefix.
+pub fn write_selected<R: Read + Seek, W: Write + Seek>(
+    input: &mut Mp4Reader<R>,
+    output: &mut W,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+    max_packets: Option<u64>,
+    requested: &[usize],
+) -> Result<ProgressEvent> {
     check(cancel)?;
     if !eligible(input) {
         return Err(invalid(
             "MP4 Matroska remux requires AVC/HEVC/AAC tracks with contiguous media edits",
         ));
     }
-    let tracks = input.tracks().to_vec();
+    let selected = selection(input.tracks().len(), requested)?;
+    let tracks: Vec<_> = selected.iter().map(|&index| input.tracks()[index].clone()).collect();
     let plans: Vec<_> = tracks
         .iter()
         .map(|t| plan(t, input.movie_timescale(), cancel))
@@ -259,17 +285,17 @@ pub fn write_limited<R: Read + Seek, W: Write + Seek>(
     let mut queue = BinaryHeap::new();
     for (track, plan) in plans.iter().enumerate() {
         if let Some(first) = plan.packets.first() {
-            queue.push(Reverse((first.dts, track, 0usize)));
+            queue.push(Reverse((first.dts, selected[track], track, 0usize)));
         }
     }
     let mut payload = Vec::new();
-    while let Some(Reverse((_, track, index))) = queue.pop() {
+    while let Some(Reverse((_, source_track, track, index))) = queue.pop() {
         check(cancel)?;
         if max_packets.is_some_and(|limit| writer.event().packets >= limit) {
             break;
         }
         let packet = &plans[track].packets[index];
-        input.read_packet(track, index, &mut payload)?;
+        input.read_packet(source_track, index, &mut payload)?;
         let sync = tracks[track]
             .samples
             .get(index)
@@ -287,7 +313,7 @@ pub fn write_limited<R: Read + Seek, W: Write + Seek>(
             hook.emit(writer.event());
         }
         if let Some(next) = plans[track].packets.get(index + 1) {
-            queue.push(Reverse((next.dts, track, index + 1)));
+            queue.push(Reverse((next.dts, source_track, track, index + 1)));
         }
     }
     check(cancel)?;
