@@ -59,8 +59,12 @@ fixed-size camera output across the change and backward seek.
 `../playback-errors/avc-scaling-jvt.mp4` and `avc-scaling-custom.mp4` each
 contain eight synthetic 64x64 High/CABAC I/P/B pictures. Their `.yuv` files are
 saved independent-decoder outputs. Regenerate both with
-`python3 scripts/generate_avc_scaling_samples.py` from the repository root.
-The script records all encoder parameters and deterministic custom weights.
+`python3 scripts/generate_avc_scaling_samples.py --jm-decoder /path/to/ldecod.exe
+--jm-config /path/to/JM/bin/decoder.cfg` from the repository root.
+The script creates integer YUV patterns, encodes with the standalone x264 CLI,
+preserves B-frame PTS using the owned fixture-only Matroska reader/MP4 muxer,
+and records independent JM-decoder YUV. It uses no FFmpeg. x264 and JM are
+needed only for regeneration; ordinary tests require neither tool.
 
 `tests/avc_scaling.rs` requires non-flat 4x4 and 8x8 matrices and compares every
 sample twice with rewind. The custom fixture additionally proves a nonzero 8x8

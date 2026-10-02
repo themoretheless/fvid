@@ -9,6 +9,21 @@ use fvid::{
 use std::io::Cursor;
 fn compare(file: &[u8], oracle: &[u8], require_eight: bool) {
     let mut source = Mp4Reader::open(Cursor::new(file), Default::default()).unwrap();
+    let samples = &source.tracks()[0].samples;
+    assert_eq!(samples.len(), 8);
+    let presentation: Vec<_> = (0..8).map(|i| samples.get(i).unwrap().pts).collect();
+    assert!(
+        presentation.windows(2).any(|pair| pair[1] < pair[0]),
+        "fixture must retain B-frame reordering"
+    );
+    for i in 0..8 {
+        let sample = samples.get(i).unwrap();
+        assert_eq!(sample.dts, i as u64);
+        assert_eq!(sample.duration, 1);
+    }
+    let mut sorted = presentation;
+    sorted.sort();
+    assert_eq!(sorted, (0..8).collect::<Vec<_>>());
     let configuration = source.tracks()[0].configuration.clone();
     let config = AvcConfig::parse(&configuration).unwrap();
     let sps = Sps::parse(config.sps[0]).unwrap();
