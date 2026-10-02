@@ -78,20 +78,7 @@ fn pcm_mux_round_trips_aac_edits_alac_and_multichannel_samples_exactly() {
             );
         }
         assert_eq!(frames, u128::from(written.sample_frames));
-        if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
-            let result = std::process::Command::new(ffmpeg)
-                .args(["-v", "error", "-i"])
-                .arg(&muxed)
-                .args(["-f", "f32le", "-"])
-                .output()
-                .unwrap();
-            assert!(
-                result.status.success(),
-                "{}",
-                String::from_utf8_lossy(&result.stderr)
-            );
-            assert!(result.stdout == raw, "independent PCM differs: {name}");
-        }
+
     }
 }
 #[test]

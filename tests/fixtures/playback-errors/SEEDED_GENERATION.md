@@ -536,3 +536,5 @@ The two ASS mux and four owned subtitle conversion tests remain ordinary tests
 with no external invocation or ignored reference comparisons. The benchmark's
 external SubRip mux is a reference workflow, not a fixture-generation dependency
 for ordinary tests.
+
+PCM Matroska AAC edits, ALAC and multichannel external sample comparisons run only in the explicit `ffmpeg_pcm_matroska_reference` benchmark. Ordinary PCM mux tests retain native sample, packet and timestamp checks without invoking FFmpeg.
