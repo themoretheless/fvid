@@ -164,3 +164,5 @@ pub mod owned_pcm_decoder;
 pub mod owned_matroska_pcm;
 
 mod owned_matroska_pcm_export;
+
+pub mod owned_mp4;

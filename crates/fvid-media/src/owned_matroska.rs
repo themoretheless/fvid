@@ -443,3 +443,5 @@ mod adts_mux_tests {
         assert_eq!(reader.read_packet(1).unwrap(), [0xe0]);
     }
 }
+
+include!("owned_hdr_payload_impl.rs");
