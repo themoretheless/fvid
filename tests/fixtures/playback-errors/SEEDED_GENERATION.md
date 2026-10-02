@@ -430,3 +430,13 @@ output or emitting execution progress, describes every track and retains all
 container metadata/attachments. Synthetic tests check the packet/payload summary
 and refusal of a too-small packet budget. Because the plan API has no destination,
 .mka audio-only qualification and publication remain execution checks.
+
+### Library ADTS/AAC Matroska mux and concatenation
+
+Strict streaming ADTS muxing and compatible-segment concatenation now share the
+frontend implementation with the library. Only import names and error conversion
+change. A synthetic two-segment ADTS control checks unchanged raw packet payload
+and nanosecond AAC clock; five existing channel/rate fixtures compare complete
+library/frontend container bytes and native decoded PCM. This streaming API
+leaves atomic file publication and final completion to the caller; it does not
+provide a new codec profile or close aggregate AAC allocation budgeting.

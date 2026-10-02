@@ -37,6 +37,15 @@ fn packets_configuration_nanosecond_clock_and_pcm_survive_matroska() {
             None,
         )
         .unwrap();
+        let mut library_output = std::io::Cursor::new(Vec::new());
+        let library_event = fvid_media::owned_matroska::write_adts(
+            fvid_media::owned_aac::adts::StreamReader::open(data.as_slice()).unwrap(),
+            &mut library_output, None, None,
+        ).unwrap();
+        assert_eq!(library_output.get_ref(), output.get_ref());
+        assert_eq!(library_event.packets, event.packets);
+        assert_eq!(library_event.payload_bytes, event.payload_bytes);
+        assert!(!library_event.done);
         assert!(!event.done);
         assert_eq!(event.packets, source.packets() as u64);
         let mut reader =

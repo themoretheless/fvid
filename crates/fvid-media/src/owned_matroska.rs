@@ -1,7 +1,7 @@
 //! Owned streaming Matroska packet muxing. The shared writer is also used by
 //! the frontend; callers discard partial output on error and own publication.
-use fvid_control::ProgressEvent;
-use std::io::{Seek, SeekFrom, Write};
+use fvid_control::{ProgressEvent, CancelFlag, ProgressHook};
+use std::io::{Read, Seek, SeekFrom, Write};
 #[derive(Debug)]
 pub struct Error(pub String);
 impl std::fmt::Display for Error {
@@ -419,4 +419,27 @@ include!("owned_matroska_tracks_impl.rs");
 include!("owned_matroska_constructors_impl.rs");
 fn video(width: u32, height: u32, metadata: Option<&VideoMetadata>, rotation: u16) -> Result<Vec<u8>> {
     video_element(width, height, metadata, rotation)
+}
+
+use crate::owned_aac::adts;
+include!("owned_matroska_adts_impl.rs");
+#[cfg(test)]
+mod adts_mux_tests {
+    use super::*;
+    #[test]
+    fn synthetic_adts_segments_keep_nanosecond_clock_and_payload() {
+        let data = [0xff, 0xf1, 0x50, 0x80, 1, 0x1f, 0xfc, 0xe0];
+        let sources = (0..2).map(|_| adts::StreamReader::open(data.as_slice()).unwrap()).collect();
+        let mut output = std::io::Cursor::new(Vec::new());
+        let event = concat_adts(sources, &mut output, None, None).unwrap();
+        assert_eq!(event.packets, 2);
+        assert!(!event.done);
+        let mut reader = crate::owned_webm::WebmReader::open(output, Default::default()).unwrap();
+        reader.scan_all().unwrap();
+        assert_eq!(reader.tracks[0].sample_rate, 44100);
+        assert_eq!(reader.tracks[0].channels, 2);
+        assert_eq!(reader.packets[1].pts_ns, 1024 * 1_000_000_000 / 44100);
+        assert_eq!(reader.read_packet(0).unwrap(), [0xe0]);
+        assert_eq!(reader.read_packet(1).unwrap(), [0xe0]);
+    }
 }
