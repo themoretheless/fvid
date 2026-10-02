@@ -94,16 +94,17 @@ def annexb(config, frames):
     return b''.join(b'\x00\x00\x00\x01'+nal for nal in nals)
 
 
-def mux(config, frames, width=64, height=64, rate=30):
+def mux(config, frames, width=64, height=64, rate=30, *, inband_parameters=False):
     entry = bytearray(78)
     entry[6:8] = struct.pack('>H', 1)
     entry[24:28] = struct.pack('>HH', width, height)
     entry[28:36] = ints(72 << 16, 72 << 16)
     entry[40:42] = struct.pack('>H', 1)
     entry[74:78] = struct.pack('>HH', 24, 65535)
-    ftyp = box(b'ftyp', b'isom\x00\x00\x00\x00isomiso6avc1')
+    codec = b'avc3' if inband_parameters else b'avc1'
+    ftyp = box(b'ftyp', b'isom\x00\x00\x00\x00isomiso6' + codec)
     count = len(frames)
-    stbl = table(b'stsd', 1, box(b'avc1', bytes(entry)+box(b'avcC', config)))
+    stbl = table(b'stsd', 1, box(codec, bytes(entry)+box(b'avcC', config)))
     stbl += table(b'stts', 1, ints(count, 1))
     stbl += box(b'ctts', ints(1 << 24, count) + b''.join(struct.pack('>Ii', 1, pts-i) for i, (pts, _, _) in enumerate(frames)))
     stbl += table(b'stsc', 1, ints(1, count, 1))

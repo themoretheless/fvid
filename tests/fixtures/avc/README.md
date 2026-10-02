@@ -46,8 +46,11 @@ the same shape `../hevc/hlg.mp4` pins.
 `../playback-errors/avc-inband-resize.mp4` is a six-frame Main/CABAC `avc3`
 stream with repeated SPS/PPS and an IDR change from 64x64 to 96x64. Each
 sequence has three I/P/P frames. Regenerate from synthetic test patterns with
-`python3 scripts/generate_avc_parameter_sample.py` from the repository root.
-The two sequences are independently decoded at their native dimensions before
+`python3 scripts/generate_avc_parameter_sample.py --jm-decoder /path/to/ldecod.exe
+--jm-config /path/to/JM/bin/decoder.cfg` from the repository root.
+The generator creates its own integer YUV patterns, uses x264 CLI and the owned
+`avc3` fixture muxer, and never invokes FFmpeg. JM independently decodes both
+sequences at their native dimensions before
 concatenating the saved YUV reference, avoiding an implicit resize in a reference
 filter graph. Ordinary tests use saved bytes and never invoke the generator.
 
