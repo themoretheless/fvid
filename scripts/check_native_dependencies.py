@@ -3,6 +3,7 @@
 import argparse
 from pathlib import Path
 import subprocess
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -32,6 +33,30 @@ def forbidden(packages):
                   or package.startswith(("ffmpeg-", "libav")))
 
 
+def external_test_calls(source):
+    """Detect known external reference hooks and literal tool launches.
+
+    This source gate complements the dependency graph audit; it does not claim
+    to resolve arbitrary computed subprocess paths. Saved oracle bytes and
+    comments describing their provenance remain valid ordinary test inputs.
+    """
+    patterns = [
+        r'\b(?:var_os|var|option_env!|env!)\s*\(\s*"[^"]*(?:FFMPEG|FFPROBE)[^"]*"',
+        r'\bCommand\s*::\s*new\s*\(\s*"(?:[^"\n]*/)?(?:ffmpeg|ffprobe)(?:\.exe)?"',
+    ]
+    return sorted({source.count("\n", 0, match.start()) + 1
+                   for pattern in patterns for match in re.finditer(pattern, source)})
+
+
+def audit_ordinary_tests(root):
+    failures = []
+    paths = sorted((root / "tests").rglob("*.rs"))
+    for path in paths:
+        for line in external_test_calls(path.read_text()):
+            failures.append(f"{path.relative_to(root)}:{line}: external FFmpeg test hook; move reference execution to an explicit benchmark")
+    return paths, failures
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--offline", action="store_true")
@@ -56,7 +81,9 @@ def main():
             ("production CUDA", ROOT / "Cargo.toml", ["--no-default-features", "--features", "media-cuda"]),
             ("media library CUDA", ROOT / "crates/fvid-media/Cargo.toml", ["--no-default-features", "--features", "cuda-hw"]),
         ])
-    failures = []
+    test_paths, failures = audit_ordinary_tests(ROOT)
+    if not failures:
+        print(f"ordinary tests: {len(test_paths)} Rust files; no known external FFmpeg test calls", flush=True)
     for name, manifest, features in cases:
         try:
             packages, legacy = dependencies(manifest, features, target, args.offline)
