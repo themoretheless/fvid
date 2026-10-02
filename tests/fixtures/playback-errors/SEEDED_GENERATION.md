@@ -144,3 +144,11 @@ DecodeStats reports the resulting pixel format even for an empty interval. Tests
 cover all 243 mapping/layout/depth combinations, frontend pipeline agreement,
 independent known promotion pixels and public dispatch. Existing committed
 shuffleplane synthetic controls continue to validate the underlying kernel.
+
+The five owned gradient kernels (Sobel, Prewitt, Roberts, Kirsch, Scharr) now live
+in fvid-media and are shared with the frontend. The Y4M decoder executes them
+after negate and before pixelize/chroma/shuffle, in public option order. Tests
+compare 54 depth/layout/compositions, including the five-filter chain, against
+the frontend pipeline and exercise each public decoder option. Existing gradient
+tests retain independent known-pixel, rounding and atomic-storage checks. Numeric
+literal options are admitted; unsupported expressions retain explicit refusal.

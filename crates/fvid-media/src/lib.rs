@@ -92,3 +92,5 @@ pub mod owned_boxblur;
 
 pub mod owned_pixelize;
 pub mod owned_chromashift;
+
+pub mod owned_gradient;

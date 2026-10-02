@@ -938,3 +938,93 @@ fn y4m_plane_shuffle_preserves_or_promotes_chroma_and_matches_frontend() {
     assert_eq!(stats.pixel_format, "yuv444p");
     assert_eq!(stats.backend, "owned Y4M planar decode");
 }
+
+#[test]
+fn owned_y4m_gradients_match_frontend_and_preserve_filter_order() {
+    for layout in ["420", "422", "444"] {
+        for depth in [8u8, 10, 16] {
+            let chroma = if depth == 8 {
+                layout.into()
+            } else {
+                format!("{layout}p{depth}")
+            };
+            let header = fvid_media::owned_y4m::Header::parse(
+                format!("YUV4MPEG2 W8 H6 F30:1 C{chroma}\n").as_bytes(),
+            )
+            .unwrap();
+            let step = if depth == 8 { 1 } else { 2 };
+            let input: Vec<u8> = (0..header.frame_len().unwrap() / step)
+                .flat_map(|i| {
+                    let v = (i * 173 % (1usize << depth)) as u16;
+                    if step == 1 {
+                        vec![v as u8]
+                    } else {
+                        v.to_le_bytes().to_vec()
+                    }
+                })
+                .collect();
+            for op in 0..6 {
+                let args = Some("planes=7:scale=0.5:delta=2".into());
+                let mut t = DecodeTransform {
+                    negate: Some("".into()),
+                    pixelize: Some("2:2".into()),
+                    horizontal_flip: true,
+                    ..Default::default()
+                };
+                match op {
+                    0 => t.sobel = args,
+                    1 => t.prewitt = args,
+                    2 => t.roberts = args,
+                    3 => t.kirsch = args,
+                    4 => t.scharr = args,
+                    _ => {
+                        t.sobel = args.clone();
+                        t.prewitt = args.clone();
+                        t.roberts = args.clone();
+                        t.kirsch = args.clone();
+                        t.scharr = args;
+                    }
+                }
+                let actual =
+                    fvid_media::owned_y4m_decode::transform_frame_requested(&header, &input, &t)
+                        .unwrap();
+                let data = fvid_media::owned_y4m_decode::transform_frame(
+                    &header, &input, None, true, false,
+                )
+                .unwrap();
+                let sub = match layout {
+                    "420" => [2, 2],
+                    "422" => [2, 1],
+                    _ => [1, 1],
+                };
+                let mut expected = fvid::native_geometry::GeometryFrame {
+                    width: 8,
+                    height: 6,
+                    subsampling: Some(sub),
+                    data,
+                };
+                fvid::native_pixels::PixelFilters::from_request(&t)
+                    .unwrap()
+                    .apply(&mut expected, depth)
+                    .unwrap();
+                assert_eq!(actual, expected.data, "{chroma} {op}");
+            }
+        }
+    }
+    let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/wave-probe-info.y4m");
+    for op in 0..5 {
+        let mut t = DecodeTransform::default();
+        let args = Some("".into());
+        match op {
+            0 => t.sobel = args,
+            1 => t.prewitt = args,
+            2 => t.roberts = args,
+            3 => t.kirsch = args,
+            _ => t.scharr = args,
+        }
+        let stats = fvid_media::decode_video_transformed(&source, t).unwrap();
+        assert_eq!(stats.backend, "owned Y4M planar decode");
+        assert_eq!(stats.video_frames, 3);
+    }
+}

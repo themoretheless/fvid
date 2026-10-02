@@ -30,7 +30,10 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 fn supported_request(transform: &DecodeTransform) -> bool {
-    transform
+    gradients(transform).into_iter().all(|(kind, args)| {
+        args.as_deref()
+            .is_none_or(|a| crate::owned_gradient::Gradient::parse(kind, a).is_ok())
+    }) && transform
         .shuffleplanes
         .as_deref()
         .is_none_or(|a| crate::owned_shuffleplanes::ShufflePlanes::parse(a).is_ok())
@@ -70,6 +73,11 @@ fn supported_request(transform: &DecodeTransform) -> bool {
                 pixelize: transform.pixelize.clone(),
                 chromashift: transform.chromashift.clone(),
                 shuffleplanes: transform.shuffleplanes.clone(),
+                sobel: transform.sobel.clone(),
+                prewitt: transform.prewitt.clone(),
+                roberts: transform.roberts.clone(),
+                kirsch: transform.kirsch.clone(),
+                scharr: transform.scharr.clone(),
                 horizontal_flip: transform.horizontal_flip,
                 vertical_flip: transform.vertical_flip,
                 interval: transform.interval,
@@ -188,6 +196,16 @@ pub fn transform_frame_requested(
     apply_pixel_filters(header, transform, &mut output)?;
     Ok(output)
 }
+fn gradients(t: &DecodeTransform) -> [(crate::owned_gradient::GradientKind, &Option<String>); 5] {
+    use crate::owned_gradient::GradientKind::*;
+    [
+        (Sobel, &t.sobel),
+        (Prewitt, &t.prewitt),
+        (Roberts, &t.roberts),
+        (Kirsch, &t.kirsch),
+        (Scharr, &t.scharr),
+    ]
+}
 fn apply_pixel_filters(
     header: &Header,
     transform: &DecodeTransform,
@@ -198,6 +216,7 @@ fn apply_pixel_filters(
         || transform.pixelize.is_some()
         || transform.chromashift.is_some()
         || transform.shuffleplanes.is_some()
+        || gradients(transform).iter().any(|(_, a)| a.is_some())
     {
         let (crop, _) = crop_geometry(header, transform.crop)?;
         let (width, height, _) = output_geometry(
@@ -229,6 +248,12 @@ fn apply_pixel_filters(
             }
             if let Some(args) = transform.negate.as_deref() {
                 crate::owned_negate::Negate::parse(args)?.apply(&mut frame.data, header.depth())?;
+            }
+            for (kind, args) in gradients(transform) {
+                if let Some(args) = args.as_deref() {
+                    crate::owned_gradient::Gradient::parse(kind, args)?
+                        .apply(&mut frame, header.depth())?;
+                }
             }
             if let Some(args) = transform.pixelize.as_deref() {
                 crate::owned_pixelize::Pixelize::parse(args)?.apply(&mut frame, header.depth())?;
@@ -425,7 +450,8 @@ pub fn decode_reader_transformed(
         || transform.boxblur.is_some()
         || transform.pixelize.is_some()
         || transform.chromashift.is_some()
-        || transform.shuffleplanes.is_some();
+        || transform.shuffleplanes.is_some()
+        || gradients(transform).iter().any(|(_, a)| a.is_some());
     let mut input = Vec::new();
     if geometry {
         input
