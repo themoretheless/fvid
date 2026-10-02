@@ -245,3 +245,10 @@ destination during progress, and truncation of the second frame: no overwrite,
 no partial published file and no remaining temporary output. These checks never
 invoke fixture generation or FFmpeg. The specialized video-only API does not
 claim general legacy lossless API parity or Y4M colour/file metadata mapping.
+
+The FFV1 external encoder/decoder comparisons now live exclusively in
+`benches/ffmpeg_ffv1_reference.rs`, invoked explicitly through `cargo bench`
+with `FVID_REFERENCE_FFMPEG`. This retains all depth/layout, independent
+context/non-keyframe and AVC/HEVC-to-FFV1 reference cases. Ordinary FFV1 tests
+use only owned code and committed synthetic fixtures; they contain no ignored
+FFmpeg cases or external codec process invocation.
