@@ -110,3 +110,5 @@ pub use owned_lossless::{crop_lossless, transcode, transcode_lossless};
 pub mod owned_file_tags;
 
 pub mod owned_ffv1_decoder;
+
+pub mod owned_ebml;

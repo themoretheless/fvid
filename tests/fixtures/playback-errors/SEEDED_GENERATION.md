@@ -349,3 +349,13 @@ native playback tests retain frontend coverage. The explicit FFV1 benchmark
 retains independent coded contexts/non-keyframes and encoder/decoder references.
 No decoding algorithm changed in this ownership move; FFV1 versions/tools not
 supported previously are not claimed supported by relocating the core.
+
+### Library EBML framing ownership
+
+The native Matroska reader and `fvid-media::owned_ebml` now include the same
+bounded EBML framing and scalar implementation. This is an ownership change,
+not a complete library Matroska demuxer: track parsing and indexing remain in
+the native reader. In-memory synthetic controls cover offsets, element/value
+limits, malformed and truncated headers, parent bounds and unknown sizes.
+Existing native Matroska metadata/video tests verify reader compatibility;
+ordinary checks use neither FFmpeg nor network access.
