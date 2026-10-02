@@ -20,13 +20,17 @@ pub fn concat(
     if !supports(sources, destination, options) {
         return crate::owned_wave_remux::concat(sources, destination, options);
     }
+    if options.max_packets == Some(0) {
+        return Err("Matroska AAC output requires at least one packet".into());
+    }
     let readers = open_readers(sources, options)?;
     let mut stats = crate::owned_matroska_remux::publish(destination, options, |output| {
-        crate::owned_matroska::concat_adts(
+        crate::owned_matroska::concat_adts_limited(
             readers,
             output,
             options.cancel.as_ref(),
             options.progress.as_ref(),
+            options.max_packets,
         )
         .map_err(|e| e.to_string())
     })?;
@@ -58,7 +62,7 @@ fn open_readers(
     Ok(readers)
 }
 
-/// Validate the complete compatible sequence without output or execution progress.
+/// Validate the selected compatible packet prefix without output or execution progress.
 pub fn plan_concat(
     sources: &[PathBuf],
     options: &CopyOptions,
@@ -66,6 +70,9 @@ pub fn plan_concat(
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
     if !supports(sources, Path::new("planned.mka"), options) {
         return crate::owned_wave_plan::plan_concat(sources, options);
+    }
+    if options.max_packets == Some(0) {
+        return Err("Matroska AAC output requires at least one packet".into());
     }
     let mut sequence = crate::owned_aac::adts::SequenceReader::new(open_readers(sources, options)?)
         .map_err(|e| e.to_string())?;
@@ -75,6 +82,9 @@ pub fn plan_concat(
     loop {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             return Err("media operation cancelled".into());
+        }
+        if options.max_packets.is_some_and(|limit| packets >= limit) {
+            break;
         }
         let Some(packet) = sequence.next_packet().map_err(|e| e.to_string())? else {
             break;

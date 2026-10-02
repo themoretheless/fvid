@@ -2,10 +2,21 @@
 /// block timestamp overflow at a 1 ns clock. No cue table/index is accumulated.
 /// Caller must discard partial output after error and publish only on success.
 pub fn write_adts<R: Read, W: Write + Seek>(
+    input: adts::StreamReader<R>,
+    output: &mut W,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+) -> Result<ProgressEvent> {
+    write_adts_limited(input, output, cancel, progress, None)
+}
+
+/// Copy at most the requested total packet count; do not read past the limit.
+pub fn write_adts_limited<R: Read, W: Write + Seek>(
     mut input: adts::StreamReader<R>,
     output: &mut W,
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
+    max_packets: Option<u64>,
 ) -> Result<ProgressEvent> {
     let asc = input.audio_specific_config().to_vec();
     write_aac_packets(
@@ -15,6 +26,7 @@ pub fn write_adts<R: Read, W: Write + Seek>(
         output,
         cancel,
         progress,
+        max_packets,
     )
 }
 
@@ -25,6 +37,17 @@ pub fn concat_adts<R: Read, W: Write + Seek>(
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
 ) -> Result<ProgressEvent> {
+    concat_adts_limited(readers, output, cancel, progress, None)
+}
+
+/// Apply one packet limit across all compatible segments.
+pub fn concat_adts_limited<R: Read, W: Write + Seek>(
+    readers: Vec<adts::StreamReader<R>>,
+    output: &mut W,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+    max_packets: Option<u64>,
+) -> Result<ProgressEvent> {
     let mut sequence = adts::SequenceReader::new(readers)?;
     let asc = sequence.audio_specific_config().to_vec();
     write_aac_packets(
@@ -34,6 +57,7 @@ pub fn concat_adts<R: Read, W: Write + Seek>(
         output,
         cancel,
         progress,
+        max_packets,
     )
 }
 
@@ -44,6 +68,7 @@ fn write_aac_packets<W: Write + Seek>(
     output: &mut W,
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
+    max_packets: Option<u64>,
 ) -> Result<ProgressEvent> {
     let samples = u64::from(AacConfig::parse(asc)?.frame_samples);
     let spec = TrackSpec {
@@ -76,6 +101,9 @@ fn write_aac_packets<W: Write + Seek>(
     }
     loop {
         check()?;
+        if max_packets.is_some_and(|limit| writer.event().packets >= limit) {
+            break;
+        }
         let Some(packet) = next_packet()? else {
             break;
         };

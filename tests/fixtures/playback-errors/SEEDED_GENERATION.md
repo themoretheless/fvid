@@ -538,3 +538,5 @@ external SubRip mux is a reference workflow, not a fixture-generation dependency
 for ordinary tests.
 
 PCM Matroska AAC edits, ALAC and multichannel external sample comparisons run only in the explicit `ffmpeg_pcm_matroska_reference` benchmark. Ordinary PCM mux tests retain native sample, packet and timestamp checks without invoking FFmpeg.
+
+The synthetic `adts-concat-a.aac` and `adts-concat-b.aac` fixtures also cover owned library packet limits: remux/concat plans and execution agree for limits 1, 2 and above EOF; concat uses a global limit; zero refuses without publication. An in-memory truncated ADTS tail verifies that a selected prefix does not consume later packets, while an unlimited plan rejects the same tail.

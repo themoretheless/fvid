@@ -29,6 +29,9 @@ pub fn remux(
     if !supports(source, destination, options) {
         return Err("request is not an owned ADTS Matroska remux".into());
     }
+    if options.max_packets == Some(0) {
+        return Err("Matroska AAC output requires at least one packet".into());
+    }
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
@@ -42,11 +45,12 @@ pub fn remux(
     )
     .map_err(|e| e.to_string())?;
     crate::owned_matroska_remux::publish(destination, options, |output| {
-        crate::owned_matroska::write_adts(
+        crate::owned_matroska::write_adts_limited(
             reader,
             output,
             options.cancel.as_ref(),
             options.progress.as_ref(),
+            options.max_packets,
         )
         .map_err(|e| e.to_string())
     })
@@ -59,6 +63,9 @@ pub fn plan_remux(
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
     if !supports(source, Path::new("planned.mka"), options) {
         return Err("request is not an owned ADTS Matroska remux".into());
+    }
+    if options.max_packets == Some(0) {
+        return Err("Matroska AAC output requires at least one packet".into());
     }
     let check = || {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
@@ -82,6 +89,9 @@ pub fn plan_remux(
     let mut bytes = 0u64;
     loop {
         check()?;
+        if options.max_packets.is_some_and(|limit| packets >= limit) {
+            break;
+        }
         let Some(packet) = reader.next_packet().map_err(|e| e.to_string())? else {
             break;
         };

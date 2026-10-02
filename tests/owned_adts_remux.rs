@@ -273,3 +273,94 @@ fn synthetic_leading_aac_padding_does_not_return_as_silence() {
     assert_eq!(stats.sample_frames, 2048 - 128 - 256);
     assert_eq!(pcm.len(), (2048 - 128 - 256) * 4);
 }
+
+#[test]
+fn synthetic_adts_packet_limit_is_global_and_plan_matches_execution() {
+    let fixtures =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let sources = vec![
+        fixtures.join("adts-concat-a.aac"),
+        fixtures.join("adts-concat-b.aac"),
+    ];
+    let dir = std::env::temp_dir().join(format!("fvid-adts-packet-limit-{}", std::process::id()));
+    std::fs::create_dir(&dir).unwrap();
+    struct Clean(std::path::PathBuf);
+    impl Drop for Clean {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _clean = Clean(dir.clone());
+    for limit in [1, 2, 3] {
+        let options = fvid_control::CopyOptions {
+            max_packets: Some(limit),
+            ..Default::default()
+        };
+        for concat in [false, true] {
+            let output = dir.join(format!("{concat}-{limit}.mka"));
+            let plan = if concat {
+                fvid_media::plan_concat(&sources, &options)
+            } else {
+                fvid_media::plan_remux(&sources[0], &options)
+            }
+            .unwrap();
+            let expected = limit.min(if concat { 2 } else { 1 });
+            assert!(plan.steps.iter().any(|step| {
+                step.detail
+                    .contains(&format!("copy {expected} unchanged AAC packets"))
+            }));
+            assert!(!output.exists());
+            let stats = if concat {
+                fvid_media::concat(&sources, &output, &options)
+            } else {
+                fvid_media::remux(&sources[0], &output, &options)
+            }
+            .unwrap();
+            assert_eq!(stats.backend, "owned Matroska");
+            assert_eq!(stats.packets, expected);
+            let mut reader = fvid_media::owned_webm::WebmReader::open(
+                Cursor::new(std::fs::read(&output).unwrap()),
+                Default::default(),
+            )
+            .unwrap();
+            reader.scan_all().unwrap();
+            assert_eq!(reader.packets.len() as u64, expected);
+            assert_eq!(reader.tracks[0].codec, "A_AAC");
+        }
+    }
+    let zero = fvid_control::CopyOptions {
+        max_packets: Some(0),
+        ..Default::default()
+    };
+    assert!(
+        fvid_media::plan_remux(&sources[0], &zero)
+            .unwrap_err()
+            .contains("at least one packet")
+    );
+    assert!(
+        fvid_media::plan_concat(&sources, &zero)
+            .unwrap_err()
+            .contains("at least one packet")
+    );
+    let empty = dir.join("empty.mka");
+    assert!(fvid_media::remux(&sources[0], &empty, &zero).is_err());
+    assert!(fvid_media::concat(&sources, &empty, &zero).is_err());
+    assert!(!empty.exists());
+    // A malformed tail after the requested prefix must never be consumed.
+    let source = dir.join("truncated.aac");
+    let mut bytes = std::fs::read(&sources[0]).unwrap();
+    bytes.extend_from_slice(&[0xff, 0xf1]);
+    std::fs::write(&source, bytes).unwrap();
+    let options = fvid_control::CopyOptions {
+        max_packets: Some(1),
+        ..Default::default()
+    };
+    fvid_media::plan_remux(&source, &options).unwrap();
+    assert_eq!(
+        fvid_media::remux(&source, &dir.join("prefix.mka"), &options)
+            .unwrap()
+            .packets,
+        1
+    );
+    assert!(fvid_media::plan_remux(&source, &Default::default()).is_err());
+}

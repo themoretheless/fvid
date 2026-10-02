@@ -9,14 +9,13 @@ use std::{
 };
 static NEXT: AtomicU64 = AtomicU64::new(0);
 pub(crate) fn policies(o: &CopyOptions) -> bool {
-    o.streams.is_empty() && unedited_policies(o)
+    o.streams.is_empty() && o.max_packets.is_none() && unedited_policies(o)
 }
 pub(crate) fn unedited_policies(o: &CopyOptions) -> bool {
     o.metadata_set.is_empty()
         && o.metadata_delete.is_empty()
         && o.stream_metadata_set.is_empty()
         && o.stream_metadata_delete.is_empty()
-        && o.max_packets.is_none()
         && o.max_controlled_bytes.is_none()
         && o.max_rss_bytes.is_none()
         && o.max_packet_bytes > 0
