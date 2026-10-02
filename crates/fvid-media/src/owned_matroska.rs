@@ -62,12 +62,25 @@ pub fn write_y4m_ffv1<W: Write + Seek>(
     output: &mut W,
     transform: &fvid_media_info::DecodeTransform,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
+    write_y4m_ffv1_controlled(source, output, transform, None, None)
+}
+
+/// Writer-level cancellation/progress. Completion is owned by file publication.
+pub fn write_y4m_ffv1_controlled<W: Write + Seek>(
+    source: impl std::io::BufRead,
+    output: &mut W,
+    transform: &fvid_media_info::DecodeTransform,
+    cancel: Option<&fvid_control::CancelFlag>,
+    progress: Option<&fvid_control::ProgressHook>,
+) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
+    check(cancel)?;
     let mut output = Some(output);
     let mut writer = None;
     let stats = crate::owned_ffv1_encoder::encode_y4m(
         source,
         transform,
         |header, packet, pts, duration| {
+            check(cancel).map_err(|e| e.to_string())?;
             if writer.is_none() {
                 let width = u32::try_from(header.width).map_err(|_| "Matroska width overflow")?;
                 let height =
@@ -77,16 +90,102 @@ pub fn write_y4m_ffv1<W: Write + Seek>(
                         .map_err(|e| e.to_string())?,
                 );
             }
+            let writer = writer.as_mut().unwrap();
             writer
-                .as_mut()
-                .unwrap()
                 .write_packet(0, pts, duration, true, packet)
-                .map_err(|e| e.to_string())
+                .map_err(|e| e.to_string())?;
+            if let Some(hook) = progress {
+                hook.emit(writer.event());
+            }
+            check(cancel).map_err(|e| e.to_string())
         },
     )
     .map_err(Error)?;
     let event = writer
         .ok_or_else(|| invalid("Matroska has no selected frames"))?
         .finish()?;
+    Ok((stats, event))
+}
+
+fn check(cancel: Option<&fvid_control::CancelFlag>) -> Result<()> {
+    if cancel.is_some_and(fvid_control::CancelFlag::is_cancelled) {
+        Err(invalid("media operation cancelled"))
+    } else {
+        Ok(())
+    }
+}
+
+struct Temporary(std::path::PathBuf);
+impl Drop for Temporary {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_file(&self.0);
+    }
+}
+
+/// Export owned progressive Y4M transforms to FFV1 in `.mkv`. No overwrite:
+/// a same-directory temporary file is synced, then linked atomically. Failure
+/// or cancellation removes the temporary; done is emitted only after linking.
+/// This video-only API declares coded geometry without importing Y4M tags.
+pub fn export_y4m_ffv1(
+    source: &std::path::Path,
+    destination: &std::path::Path,
+    transform: &fvid_media_info::DecodeTransform,
+    cancel: Option<&fvid_control::CancelFlag>,
+    progress: Option<&fvid_control::ProgressHook>,
+) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
+    check(cancel)?;
+    if destination
+        .extension()
+        .and_then(|e| e.to_str())
+        .is_none_or(|e| !e.eq_ignore_ascii_case("mkv"))
+    {
+        return Err(invalid("owned FFV1 export requires .mkv"));
+    }
+    if destination.symlink_metadata().is_ok() {
+        return Err(invalid("output already exists"));
+    }
+    let input = std::io::BufReader::new(std::fs::File::open(source)?);
+    let directory = destination
+        .parent()
+        .filter(|p| !p.as_os_str().is_empty())
+        .unwrap_or(std::path::Path::new("."));
+    static SERIAL: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+    let mut reserved = None;
+    for _ in 0..100 {
+        let serial = SERIAL.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let path = directory.join(format!(
+            ".fvid-matroska-{}-{serial}.tmp",
+            std::process::id()
+        ));
+        let mut options = std::fs::OpenOptions::new();
+        options.write(true).create_new(true);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+            options.mode(0o600);
+        }
+        match options.open(&path) {
+            Ok(file) => {
+                reserved = Some((Temporary(path), file));
+                break;
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+            Err(error) => return Err(error.into()),
+        }
+    }
+    let (temporary, mut file) =
+        reserved.ok_or_else(|| invalid("cannot reserve Matroska output"))?;
+    let (stats, mut event) =
+        write_y4m_ffv1_controlled(input, &mut file, transform, cancel, progress)?;
+    file.flush()?;
+    file.sync_all()?;
+    drop(file);
+    check(cancel)?;
+    std::fs::hard_link(&temporary.0, destination)?;
+    drop(temporary);
+    event.done = true;
+    if let Some(hook) = progress {
+        hook.emit(event);
+    }
     Ok((stats, event))
 }

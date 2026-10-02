@@ -235,3 +235,13 @@ exact decoded planes and source timestamps. Empty/truncated input and sticky
 packet failures have refusal tests. No private media or external generator is
 used. This introduces writer-level FFV1 export; general codec admission, colour/
 file metadata mapping and atomic file publication remain separate migrations.
+
+Atomic library FFV1 file export uses the committed two-frame synthetic
+`y4m-vertical-chroma-10.y4m`, generated separately by
+`scripts/generate_y4m440_fixture.py`. Its acceptance test decodes all published
+10-bit samples and checks completion only after the destination exists. It also
+checks pre-cancel, cancellation after the first packet, an independently created
+destination during progress, and truncation of the second frame: no overwrite,
+no partial published file and no remaining temporary output. These checks never
+invoke fixture generation or FFmpeg. The specialized video-only API does not
+claim general legacy lossless API parity or Y4M colour/file metadata mapping.

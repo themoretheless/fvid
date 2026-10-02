@@ -630,3 +630,113 @@ fn library_matroska_rejects_partial_streams_and_keeps_failure_sticky() {
     );
     assert!(output.get_ref().is_empty());
 }
+
+#[test]
+fn library_file_export_publishes_after_sync_and_cleans_cancel_errors_and_races() {
+    use fvid_control::{CancelFlag, ProgressHook};
+    use fvid_media::owned_matroska::export_y4m_ffv1;
+    use std::sync::{
+        Arc,
+        atomic::{AtomicUsize, Ordering},
+    };
+    struct Directory(std::path::PathBuf);
+    impl Drop for Directory {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let directory =
+        Directory(std::env::temp_dir().join(format!("fvid-library-mkv-{}", std::process::id())));
+    std::fs::create_dir(&directory.0).unwrap();
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/y4m-vertical-chroma-10.y4m");
+    let destination = directory.0.join("output.mkv");
+    let published = destination.clone();
+    let progress_count = Arc::new(AtomicUsize::new(0));
+    let count = progress_count.clone();
+    let hook = ProgressHook::new(move |event| {
+        assert_eq!(published.exists(), event.done);
+        assert!(event.packets > 0);
+        count.fetch_add(1, Ordering::Relaxed);
+    });
+    let (stats, event) = export_y4m_ffv1(
+        &source,
+        &destination,
+        &Default::default(),
+        None,
+        Some(&hook),
+    )
+    .unwrap();
+    assert_eq!((stats.width, stats.height, stats.video_frames), (4, 2, 2));
+    assert_eq!(event.packets, 2);
+    assert!(event.done);
+    assert_eq!(progress_count.load(Ordering::Relaxed), 3);
+    let bytes = std::fs::read(&destination).unwrap();
+    let mut reader =
+        fvid::container::webm::WebmReader::open(Cursor::new(&bytes), Default::default()).unwrap();
+    reader.scan_all().unwrap();
+    let mut decoder = fvid::codec::ffv1_decoder::Decoder::new(4, 2, 1 << 20).unwrap();
+    for frame in 0..2 {
+        let packet = reader.read_packet(frame).unwrap();
+        let decoded = decoder.decode(&packet).unwrap();
+        let expected: Vec<_> = (0..16)
+            .flat_map(|i| (i * 17u16 + frame as u16 * 31).to_le_bytes())
+            .collect();
+        assert_eq!(decoded.frame.data, expected);
+        assert_eq!(decoded.frame.subsampling, Some([1, 2]));
+        assert_eq!(decoded.depth, 10);
+    }
+    assert!(export_y4m_ffv1(&source, &destination, &Default::default(), None, None).is_err());
+    assert_eq!(std::fs::read(&destination).unwrap(), bytes);
+    for before in [true, false] {
+        let output = directory.0.join(format!("cancel-{before}.mkv"));
+        let cancel = CancelFlag::new();
+        if before {
+            cancel.cancel();
+        }
+        let stop = cancel.clone();
+        let hook = ProgressHook::new(move |event| {
+            assert!(!event.done);
+            stop.cancel();
+        });
+        let error = export_y4m_ffv1(
+            &source,
+            &output,
+            &Default::default(),
+            Some(&cancel),
+            Some(&hook),
+        )
+        .unwrap_err();
+        assert!(error.to_string().contains("cancelled"));
+        assert!(!output.exists());
+    }
+    let race = directory.0.join("race.mkv");
+    let other = race.clone();
+    let hook = ProgressHook::new(move |event| {
+        assert!(!event.done);
+        if event.packets == 1 {
+            std::fs::write(&other, b"other publisher").unwrap();
+        }
+    });
+    assert!(export_y4m_ffv1(&source, &race, &Default::default(), None, Some(&hook)).is_err());
+    assert_eq!(std::fs::read(&race).unwrap(), b"other publisher");
+    let damaged = directory.0.join("truncated.y4m");
+    let mut input = std::fs::read(&source).unwrap();
+    input.pop();
+    std::fs::write(&damaged, input).unwrap();
+    let output = directory.0.join("truncated.mkv");
+    assert!(
+        export_y4m_ffv1(&damaged, &output, &Default::default(), None, None)
+            .unwrap_err()
+            .to_string()
+            .contains("truncated")
+    );
+    assert!(!output.exists());
+    assert!(std::fs::read_dir(&directory.0).unwrap().all(|entry| {
+        !entry
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with(".fvid-matroska-")
+    }));
+}
