@@ -203,3 +203,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_webm_audio_companions_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_audio_trim_selection_reference"
+harness = false

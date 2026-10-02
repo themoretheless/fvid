@@ -564,3 +564,5 @@ The external AAC no-PNS encoding/reconstruction comparison runs only in `ffmpeg_
 External WebM lossless VP9/AV1 pixels, rotation/filter and ten-bit crop/rotation comparisons run in `ffmpeg_webm_lossless_pixels_reference`. Their ordinary tests retain native frame, clock, geometry and metadata checks; audio-companion external comparisons remain separately pending migration.
 
 External WebM AAC/Opus companion payload/timing/priming/PCM comparisons for VP9, AVC, HEVC and FFV1 video run only in `ffmpeg_webm_audio_companions_reference`. Their external synthetic audio generation is benchmark-only. The ordinary WebM lossless test file no longer calls FFmpeg or contains external ignored tests.
+
+External multi-ALAC and mixed AAC/ALAC trim fixture construction and selection/CLI/API checks run only in `ffmpeg_audio_trim_selection_reference`. Ordinary ALAC/Matroska PCM trim checks retain sample-exact intervals and publication controls without FFmpeg.
