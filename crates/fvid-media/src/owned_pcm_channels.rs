@@ -47,9 +47,28 @@ pub fn default_layout(channels: u16) -> Option<DefaultLayout> {
     })
 }
 
+/// Describe a default layout without assigning speakers to unknown channel counts.
+pub fn default_layout_name(channels: i32) -> String {
+    match u16::try_from(channels).ok().and_then(default_layout) {
+        Some(layout) => layout.name.into(),
+        None => format!("{channels} channels"),
+    }
+}
+
 #[cfg(test)]
 mod default_tests {
     use super::*;
+    #[test]
+    fn unknown_counts_remain_unspecified_in_descriptions() {
+        for channels in [i32::MIN, -1, 0, 9, 11, 65536, i32::MAX] {
+            assert_eq!(
+                default_layout_name(channels),
+                format!("{channels} channels")
+            );
+        }
+        assert_eq!(default_layout_name(3), "2.1");
+        assert_eq!(default_layout_name(16), "9.1.6");
+    }
     #[test]
     fn unspecified_three_channels_retain_lfe_without_changing_explicit_surround() {
         let layout = default_layout(3).unwrap();

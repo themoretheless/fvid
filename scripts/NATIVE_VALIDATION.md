@@ -178,3 +178,18 @@ An explicit libavutil reference check verified all 42 enum mappings and names,
 routes. The legacy backend compiled successfully. Source comparison verified
 that the four operation files changed only their name lookups and unnecessary
 unsafe wrappers; their pixel-processing and scheduling bodies were retained.
+
+## Owned default channel layouts
+
+Default channel initialization and audio-plan default layout descriptions no
+longer call libavutil. The owned table preserves thirteen named layouts,
+including the unspecified-three-channel default 2.1; explicit PCM rematrixing
+retains its separate 3.0 mask. Other channel counts preserve an unspecified
+layout and an `N channels` description. This does not remove other legacy
+channel-layout operations or the production backend dependency.
+
+An explicit local libavutil reference comparison matched all initializer fields
+and descriptions for 70 counts (1 through 64 plus zero, negatives and large
+integer bounds). The owned library passed 135 tests, and the legacy/player
+configuration compiled. These checks cover utility migration, not full codec
+or backend equivalence.

@@ -3867,35 +3867,7 @@ pub fn plan_mix_audio(sources: &[PathBuf], options: &crate::MixAudioOptions) -> 
 }
 
 fn default_layout_name(channels: i32) -> Result<String> {
-    if let Some(layout) = u16::try_from(channels).ok().and_then(crate::owned_pcm_channels::default_layout) {
-        return Ok(layout.name.into());
-    }
-    // SAFETY: default layout for N is built and described into a UTF-8 buffer.
-    unsafe {
-        let mut layout = AVChannelLayout {
-            order: 0,
-            nb_channels: 0,
-            u: std::mem::zeroed(),
-            opaque: ptr::null_mut(),
-        };
-        channel_layout_default_owned(&mut layout, channels);
-        if layout.nb_channels != channels {
-            av_channel_layout_uninit(&mut layout);
-            return Err("failed to build default channel layout".into());
-        }
-        let mut buf = [0i8; 64];
-        let written = av_channel_layout_describe(&layout, buf.as_mut_ptr(), buf.len());
-        av_channel_layout_uninit(&mut layout);
-        if written < 0 {
-            return Err("channel layout describe failed".into());
-        }
-        let bytes = buf
-            .iter()
-            .take_while(|&&b| b != 0)
-            .map(|&b| b as u8)
-            .collect::<Vec<_>>();
-        String::from_utf8(bytes).map_err(|_| "channel layout is not UTF-8".into())
-    }
+    Ok(crate::owned_pcm_channels::default_layout_name(channels))
 }
 
 /// Build the FFmpeg-equivalent `-af` chain for decode-audio transforms.
