@@ -525,3 +525,14 @@ Other indices and duplicate selection remain outside owned ADTS admission.
 Matroska identity copy still requires all original tracks; its selection policy
 is unchanged. Unknown metadata edits and memory/count/RSS policies still retain
 legacy routing where enabled and require later implementation.
+
+### Explicit subtitle reference benchmark
+
+Four ignored external ASS/SRT/SubRip comparisons moved unchanged to
+`cargo bench --bench ffmpeg_subtitle_reference`: ASS mux cue times/Unicode,
+SRT text/style conversion, selection of externally muxed SubRip tracks and
+font attributes. This explicit benchmark alone requires FVID_REFERENCE_FFMPEG.
+The two ASS mux and four owned subtitle conversion tests remain ordinary tests
+with no external invocation or ignored reference comparisons. The benchmark's
+external SubRip mux is a reference workflow, not a fixture-generation dependency
+for ordinary tests.

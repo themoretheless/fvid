@@ -147,3 +147,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_matroska_padding_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_subtitle_reference"
+harness = false

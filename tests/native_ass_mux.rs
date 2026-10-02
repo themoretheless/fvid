@@ -72,27 +72,3 @@ fn invalid_ass_header_fails_before_writing() {
         assert!(output.into_inner().is_empty());
     }
 }
-#[test]
-#[ignore = "requires FVID_REFERENCE_FFMPEG"]
-fn independent_decoder_reads_owned_ass_track() {
-    let binary = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
-    let path = std::env::temp_dir().join(format!("fvid-ass-{}.mkv", std::process::id()));
-    std::fs::write(&path, encoded()).unwrap();
-    let result = std::process::Command::new(binary)
-        .args(["-v", "error", "-i"])
-        .arg(&path)
-        .args(["-map", "0:s:0", "-f", "srt", "-"])
-        .output()
-        .unwrap();
-    std::fs::remove_file(path).unwrap();
-    assert!(
-        result.status.success(),
-        "{}",
-        String::from_utf8_lossy(&result.stderr)
-    );
-    let text = String::from_utf8(result.stdout).unwrap();
-    assert!(text.contains("00:00:00,100 --> 00:00:01,000"), "{text}");
-    assert!(text.contains("00:00:02,000 --> 00:00:02,500"), "{text}");
-    assert!(text.contains("Hello\nworld"), "{text}");
-    assert!(text.contains("Привет, мир"), "{text}");
-}
