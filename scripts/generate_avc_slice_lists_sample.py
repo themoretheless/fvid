@@ -1,8 +1,20 @@
 #!/usr/bin/env python3
-"""Hand-authored synthetic AVC slices; FFmpeg only muxes and saves oracle YUV."""
+"""Hand-authored synthetic AVC slices; owned MP4 muxing and independent JM YUV."""
 from pathlib import Path
 import subprocess
 import sys
+import argparse
+import re
+import tempfile
+from avc_fixture_mp4 import mux, ints
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--jm-decoder", type=Path, required=True)
+parser.add_argument("--jm-config", type=Path, required=True)
+parser.add_argument("--output", type=Path, default=Path(__file__).resolve().parents[1]/"tests/fixtures/playback-errors")
+for flag in ["mixed-ib", "mixed-bi", "mixed-ip", "mixed-pi", "mixed-pb", "mixed-bp", "temporal-direct"]:
+    parser.add_argument("--"+flag, action="store_true")
+args = parser.parse_args()
 mixed_ib = "--mixed-ib" in sys.argv or "--mixed-bi" in sys.argv
 mixed_intra = "--mixed-ip" in sys.argv or "--mixed-pi" in sys.argv or mixed_ib
 mixed_pi = "--mixed-pi" in sys.argv or "--mixed-bi" in sys.argv
@@ -96,19 +108,34 @@ if temporal:
         b.bits(0,1);b.bits(0,1) # no list modifications
         b.se(0);b.ue(1);b.ue(1) # QP, disable filter, skip one MB
         stream+=nal(0x01,b.finish())
-root=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors'
+root=args.output
+root.mkdir(parents=True, exist_ok=True)
 name=('avc-mixed-bi' if mixed_pi else 'avc-mixed-ib') if mixed_ib else ('avc-mixed-pi' if mixed_pi else 'avc-mixed-ip') if mixed_intra else ('avc-mixed-bp' if mixed_bp else 'avc-mixed-pb') if mixed_pb else ('avc-slice-lists-temporal' if temporal else 'avc-slice-lists')
 raw=root/(name+'.h264');raw.write_bytes(stream)
 video=root/(name+'.mp4');oracle=root/(name+'.yuv')
-subprocess.run(['ffmpeg','-v','error','-framerate','30','-i',str(raw),'-c:v','copy','-an','-y',str(video)],check=True)
-subprocess.run(['ffmpeg','-v','error','-i',str(raw if temporal else video),'-fps_mode','passthrough','-pix_fmt','yuv420p','-f','rawvideo','-y',str(oracle)],check=True)
-
-if temporal:
-    subprocess.run(['ffmpeg','-v','error','-threads','1','-i',str(raw),'-fps_mode','passthrough','-pix_fmt','yuv420p','-f','rawvideo','-y',str(root/(name+'-single-thread.yuv'))],check=True)
-
-# Optional independent reference decode; this executable is never a runtime dependency.
-if temporal and '--jm-decoder' in sys.argv:
-    executable = Path(sys.argv[sys.argv.index('--jm-decoder')+1]).resolve()
-    subprocess.run([str(executable), '-d', str(executable.parent/'decoder.cfg'),
-        '-p', 'InputFile='+str(raw.resolve()), '-p', 'OutputFile='+str((root/(name+'-jm.yuv')).resolve())],
-        cwd=executable.parent, check=True)
+# The hand-authored fixture has one SPS/PPS, and each picture starts at MB 0.
+units = [nal for nal in re.split(b'\x00\x00\x00?\x01',stream) if nal]
+sps = next(n for n in units if n[0]&31 == 7)
+pps = next(n for n in units if n[0]&31 == 8)
+config = bytes([1])+sps[1:4]+bytes([0xff,0xe1])+len(sps).to_bytes(2,'big')+sps+bytes([1])+len(pps).to_bytes(2,'big')+pps
+packets, current = [], bytearray()
+for unit in units:
+    if unit[0]&31 not in [1,5]: continue
+    if unit[1]&0x80 and current:
+        packets.append(bytes(current));current=bytearray()
+    current += ints(len(unit))+unit
+packets.append(bytes(current))
+assert len(packets)==(4 if temporal else 3)
+# POC 0/4/8/6 reorders the temporal-direct picture; intra mixtures use POC 12.
+presentation = [0,1,3,2] if temporal and not mixed_intra else list(range(len(packets)))
+frames = [(pts,i == 0,packet) for i,(pts,packet) in enumerate(zip(presentation,packets))]
+video.write_bytes(mux(config,frames,32,16))
+with tempfile.TemporaryDirectory(prefix='fvid-slice-lists-jm-') as directory:
+    decoded=Path(directory)/'decoded.yuv'
+    subprocess.run([str(args.jm_decoder.resolve()), '-d', str(args.jm_config.resolve()),
+        '-p','InputFile='+str(raw.resolve()),'-p','OutputFile='+str(decoded),
+        '-p','FileFormat=0','-p','RefFile=nonexistent.yuv'],cwd=directory,check=True)
+    reference=decoded.read_bytes()
+    assert len(reference)==len(packets)*32*16*3//2
+    # Preserve established JM filenames for temporal/mixed acceptance tests.
+    (root/(name+('-jm.yuv' if temporal else '.yuv'))).write_bytes(reference)

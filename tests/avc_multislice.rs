@@ -364,9 +364,8 @@ fn temporal_direct_maps_colocated_slice_local_indices_by_picture_identity() {
 }
 
 #[test]
-fn temporal_direct_ffmpeg_oracle_depends_on_threading() {
+fn temporal_direct_matches_analytic_picture_identity() {
     let video = include_bytes!("fixtures/playback-errors/avc-slice-lists-temporal.mp4");
-    let oracle = include_bytes!("fixtures/playback-errors/avc-slice-lists-temporal.yuv");
     let mut reader =
         fvid::playback_mp4::Mp4VideoReader::open(Cursor::new(video), Default::default(), 16 << 20)
             .unwrap();
@@ -374,14 +373,6 @@ fn temporal_direct_ffmpeg_oracle_depends_on_threading() {
     while let Some(frame) = reader.read_frame().unwrap() {
         frame.picture.write_planar(&mut actual).unwrap();
     }
-    assert_eq!(actual.len(), oracle.len());
-    assert_eq!(actual[2 * 768 + 16], 80);
-    assert_eq!(oracle[2 * 768 + 16], 130);
-    let single =
-        include_bytes!("fixtures/playback-errors/avc-slice-lists-temporal-single-thread.yuv");
-    assert_eq!(single[2 * 768], 130);
-    assert_eq!(single[2 * 768 + 16], 80);
-    assert_ne!(single.as_slice(), oracle.as_slice());
     // H.264 8.4.1.2.3 maps the picture referenced by the co-located MB,
     // not a picture selected by another slice's local reference index.
     let mut specified = Vec::new();
@@ -393,7 +384,6 @@ fn temporal_direct_ffmpeg_oracle_depends_on_threading() {
         specified.extend_from_slice(&[128; 256]);
     }
     assert_eq!(actual, specified);
-    assert_ne!(actual.as_slice(), oracle.as_slice());
 }
 
 #[test]

@@ -117,3 +117,21 @@ It never invokes FFmpeg. Reference tools are needed only for regeneration.
 `tests/avc_multislice.rs` checks slice counts and macroblock boundaries,
 I/P/B presence, exact YUV through rewind, camera integration and recovery
 after a damaged final slice. Generation remains separate from ordinary tests.
+
+### Hand-authored reference lists and temporal direct
+
+`generate_avc_slice_lists_sample.py` writes short 32x16 CAVLC streams from
+explicit SPS/PPS and slice bits. The default tests reference-list modification;
+`--temporal-direct` exercises co-located picture identity, and `--mixed-ip`,
+`--mixed-pi`, `--mixed-ib`, `--mixed-bi`, `--mixed-pb`, `--mixed-bp` exercise
+different slice types within one picture. Regenerate each mode with
+`python3 scripts/generate_avc_slice_lists_sample.py [mode] --jm-decoder
+/path/to/ldecod.exe --jm-config /path/to/JM/bin/decoder.cfg`.
+The owned fixture muxer preserves the specified presentation order; JM writes
+the independent YUV reference. No generator or ordinary test invokes FFmpeg.
+
+The temporal-direct acceptance tests compare native pixels to both JM and a
+hand-derived two-region picture. FFmpeg threading differences are diagnostic
+only: run `python3 scripts/benchmark_avc_temporal_direct.py` explicitly to
+measure both modes and count differences from JM. The benchmark invokes FFmpeg
+at execution time; no FFmpeg-derived temporal-direct oracle is required by tests.
