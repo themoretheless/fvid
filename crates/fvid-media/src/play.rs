@@ -15910,7 +15910,7 @@ struct PlayResampler {
 impl Drop for PlayResampler {
     fn drop(&mut self) {
         unsafe {
-            av_channel_layout_uninit(&mut self.layout);
+            channel_layout_uninit_owned(&mut self.layout);
             if !self.swr.is_null() {
                 swr_free(&mut self.swr);
             }
@@ -16053,7 +16053,7 @@ impl PlayResampler {
             (*dst.0).sample_rate = self.rate;
             (*dst.0).nb_samples = out_samples as i32;
             check(
-                av_channel_layout_copy(&mut (*dst.0).ch_layout, &self.layout),
+                channel_layout_copy_owned(&mut (*dst.0).ch_layout, &self.layout),
                 "copy playback layout",
             )?;
             check(av_frame_get_buffer(dst.0, 0), "allocate playback audio")?;

@@ -425,6 +425,30 @@ unsafe fn channel_layout_channel_owned(layout: &AVChannelLayout, index: u32) -> 
         crate::owned_pcm_channels::mask_channel_at(layout.u.mask, speaker_index)
     }
 }
+/// # Safety
+/// The layout must be initialized; a custom map must belong to the backend allocator.
+unsafe fn channel_layout_uninit_owned(layout: *mut AVChannelLayout) {
+    unsafe {
+        if (*layout).order == AVChannelOrder_AV_CHANNEL_ORDER_CUSTOM {
+            av_channel_layout_uninit(layout);
+        } else {
+            layout.write(std::mem::zeroed());
+        }
+    }
+}
+/// # Safety
+/// Both layouts must be initialized. Source and destination must not alias.
+unsafe fn channel_layout_copy_owned(destination: *mut AVChannelLayout, source: *const AVChannelLayout) -> i32 {
+    unsafe {
+        if (*source).order == AVChannelOrder_AV_CHANNEL_ORDER_CUSTOM {
+            return av_channel_layout_copy(destination, source);
+        }
+        channel_layout_uninit_owned(destination);
+        // Non-custom layouts own no heap map. Preserve the opaque user pointer.
+        std::ptr::copy_nonoverlapping(source, destination, 1);
+        0
+    }
+}
 fn owned_pixel_format_from_legacy(format: AVPixelFormat) -> Option<crate::owned_pixel_format::PixelFormat> {
     use crate::owned_pixel_format::PixelFormat;
     match format {

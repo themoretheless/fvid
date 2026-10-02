@@ -125,7 +125,7 @@ pub(super) struct Resampler {
 impl Drop for Resampler {
     fn drop(&mut self) {
         unsafe {
-            av_channel_layout_uninit(&mut self.ch_layout);
+            channel_layout_uninit_owned(&mut self.ch_layout);
             if !self.swr.is_null() {
                 swr_free(&mut self.swr);
             }
@@ -157,7 +157,7 @@ impl Resampler {
             };
             if out_channels == f.ch_layout.nb_channels {
                 check(
-                    av_channel_layout_copy(&mut ch_layout, &f.ch_layout),
+                    channel_layout_copy_owned(&mut ch_layout, &f.ch_layout),
                     "copy resampler channel layout",
                 )?;
             } else {
@@ -246,7 +246,7 @@ impl Resampler {
                 (*dst).format = self.out_format;
                 (*dst).sample_rate = self.out_rate;
                 (*dst).nb_samples = input.nb_samples;
-                check(av_channel_layout_copy(&mut (*dst).ch_layout, &self.ch_layout), "copy identity PCM layout")?;
+                check(channel_layout_copy_owned(&mut (*dst).ch_layout, &self.ch_layout), "copy identity PCM layout")?;
                 check(av_frame_get_buffer(dst, 0), "allocate identity PCM output")?;
                 let channels = self.input_channels as usize;
                 let samples = input.nb_samples as usize;
@@ -294,7 +294,7 @@ impl Resampler {
                 (*dst).format = AVSampleFormat_AV_SAMPLE_FMT_FLT;
                 (*dst).sample_rate = self.out_rate;
                 (*dst).nb_samples = count;
-                check(av_channel_layout_copy(&mut (*dst).ch_layout, &self.ch_layout), "copy owned resample layout")?;
+                check(channel_layout_copy_owned(&mut (*dst).ch_layout, &self.ch_layout), "copy owned resample layout")?;
                 check(av_frame_get_buffer(dst, 0), "allocate owned resample output")?;
                 // Store native-endian AVFrame floats from the owned little-endian PCM stream.
                 for (index, sample) in bytes.chunks_exact(4).enumerate() {
@@ -341,7 +341,7 @@ impl Resampler {
                 (*dst).format = self.out_format;
                 (*dst).sample_rate = self.out_rate;
                 (*dst).nb_samples = count;
-                check(av_channel_layout_copy(&mut (*dst).ch_layout, &self.ch_layout), "copy owned resample layout")?;
+                check(channel_layout_copy_owned(&mut (*dst).ch_layout, &self.ch_layout), "copy owned resample layout")?;
                 check(av_frame_get_buffer(dst, 0), "allocate owned resample output")?;
                 // Store native-endian AVFrame floats from the owned little-endian PCM stream.
                 for (index, sample) in bytes.chunks_exact(8).enumerate() {
@@ -380,7 +380,7 @@ impl Resampler {
             (*dst).sample_rate = self.out_rate;
             (*dst).nb_samples = out_samples as i32;
             check(
-                av_channel_layout_copy(&mut (*dst).ch_layout, &self.ch_layout),
+                channel_layout_copy_owned(&mut (*dst).ch_layout, &self.ch_layout),
                 "copy resample layout",
             )?;
             check(
@@ -483,7 +483,7 @@ impl AudioSink {
             p.block_align = p.bits_per_coded_sample / 8 * f.ch_layout.nb_channels;
             p.bit_rate = i64::from(p.sample_rate) * i64::from(p.block_align) * 8;
             check(
-                av_channel_layout_copy(&mut p.ch_layout, &f.ch_layout),
+                channel_layout_copy_owned(&mut p.ch_layout, &f.ch_layout),
                 "copy audio layout",
             )?;
             let stats = AudioDecodeStats {
@@ -1055,7 +1055,7 @@ pub(super) fn pcm_parameters_for_interval_decode(
         p.block_align = p.bits_per_coded_sample / 8 * codecpar.ch_layout.nb_channels;
         p.bit_rate = i64::from(p.sample_rate) * i64::from(p.block_align) * 8;
         check(
-            av_channel_layout_copy(&mut p.ch_layout, &codecpar.ch_layout),
+            channel_layout_copy_owned(&mut p.ch_layout, &codecpar.ch_layout),
             "copy audio layout",
         )?;
         let tb = AVRational {

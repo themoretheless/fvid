@@ -220,3 +220,17 @@ against the upstream channel-layout API implementation:
 https://github.com/FFmpeg/FFmpeg/blob/master/libavutil/channel_layout.c
 Other layout copying, ownership and description operations remain separate
 migration work; production libav dependencies are not yet eliminated.
+
+## Owned inline-layout copying and reset
+
+Ten audio/player copy and cleanup call sites now use FVid adapters. Native,
+unspecified and ambisonic layouts require no allocated map: copying preserves
+all fields, including the opaque user pointer, and reset clears the structure.
+A destination custom map is released before replacement. Custom map cloning
+and release retain backend allocation compatibility; this is not full channel
+map ownership migration and does not remove the production backend dependency.
+
+An explicit libavutil reference verified 484 source/destination combinations
+across the 22 layouts used above, including custom-to-inline replacement,
+map identifiers, names, opaque fields, and repeated cleanup. All results
+matched. The legacy/player configuration compiled and diff checks passed.
