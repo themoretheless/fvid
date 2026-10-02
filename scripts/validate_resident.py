@@ -94,7 +94,7 @@ def main():
                   cases=records, failure_check=failure, resident_api_test=api_test)
     target = pathlib.Path(args.report)
     target.write_text(json.dumps(report, indent=2) + '\n')
-    print(f'{len(records)} resident CLI cases match CPU and FFmpeg; atomic failure passed; report={target}')
+    print(f'{len(records)} resident CLI cases match CPU and independent Python oracle; atomic failure passed; report={target}')
 
 
 if __name__ == '__main__':

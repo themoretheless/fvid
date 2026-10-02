@@ -31,4 +31,5 @@ jobs:
       - name: Guard native graphs and ordinary tests against FFmpeg
         run: |
           python3 scripts/test_native_dependency_policy.py
+          python3 scripts/test_gpu_reference_policy.py
           python3 scripts/check_native_dependencies.py --offline
