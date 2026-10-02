@@ -94,20 +94,7 @@ fn owned_matroska_pcm_formats_intervals_and_failures() {
         let stats = export(&source, &output, None, 1.0, None, None, None, None, None).unwrap();
         assert_eq!(stats.sample_frames, 3);
         let baseline: Vec<u8> = expected.iter().flat_map(|s| s.to_le_bytes()).collect();
-        if let Some(binary) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
-            let result = std::process::Command::new(binary)
-                .args(["-v", "error", "-i"])
-                .arg(&source)
-                .args(["-f", "f32le", "-"])
-                .output()
-                .unwrap();
-            assert!(
-                result.status.success(),
-                "{}",
-                String::from_utf8_lossy(&result.stderr)
-            );
-            assert_eq!(result.stdout, baseline, "{codec} {bits}");
-        }
+
         let plan =
             fvid::native_plan::decode_audio_selected(&source, &Default::default(), None).unwrap();
         assert!(plan.steps[0].detail.contains("PCM"));

@@ -542,3 +542,5 @@ PCM Matroska AAC edits, ALAC and multichannel external sample comparisons run on
 The synthetic `adts-concat-a.aac` and `adts-concat-b.aac` fixtures also cover owned library packet limits: remux/concat plans and execution agree for limits 1, 2 and above EOF; concat uses a global limit; zero refuses without publication. An in-memory truncated ADTS tail verifies that a selected prefix does not consume later packets, while an unlimited plan rejects the same tail.
 
 The mixed MP4/WAVE PCM concat external sample comparison runs in `ffmpeg_pcm_concat_reference`; ordinary concat tests retain native sample equality, CLI/API byte equality, plans and publication controls without invoking FFmpeg.
+
+QuickTime PCM isolation/endian external comparisons and synthetic Matroska PCM external sample comparisons run only in `ffmpeg_pcm_formats_reference`. The ordinary synthetic Matroska test retains format, interval, mix, merge, plan and failure checks without FFmpeg. QuickTime external fixture isolation remains benchmark-only; this move does not add native MOV fixture generation.
