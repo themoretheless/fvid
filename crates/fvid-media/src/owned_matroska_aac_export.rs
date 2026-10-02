@@ -32,14 +32,7 @@ fn decode_options(options: &CopyOptions) -> CopyOptions {
     options.stream_metadata_delete.clear();
     options
 }
-fn prefix(transform: AudioDecodeTransform) -> Option<(std::time::Duration, std::time::Duration)> {
-    transform.interval.map(|(_, to)| {
-        (
-            std::time::Duration::ZERO,
-            std::time::Duration::from_micros(to as u64),
-        )
-    })
-}
+use crate::owned_adts_export::decoded_prefix as prefix;
 pub(crate) fn supports(
     source: &Path,
     transform: AudioDecodeTransform,
@@ -48,6 +41,9 @@ pub(crate) fn supports(
     if options.max_controlled_bytes.is_some() {
         return false;
     }
+    let Ok((rate, _, mask)) = geometry(source, options) else {
+        return false;
+    };
     let mut probe = decode_options(options);
     probe.progress = None;
     let result = crate::owned_matroska_aac::decode_matroska_aac_pcm(
@@ -56,13 +52,10 @@ pub(crate) fn supports(
             Err(_) => return false,
         },
         &mut std::io::sink(),
-        prefix(transform),
+        prefix(transform, rate),
         &probe,
     );
     result.is_ok_and(|stats| {
-        let Ok((_, _, mask)) = geometry(source, options) else {
-            return false;
-        };
         transform.channels.is_none_or(|channels| {
             channels == i32::from(stats.channels)
                 || (((stats.channels <= 2 && (1..=8).contains(&channels))
@@ -98,7 +91,7 @@ pub(crate) fn apply(
             crate::owned_matroska_aac::decode_matroska_aac_pcm(
                 BufReader::new(File::open(source).map_err(|e| e.to_string())?),
                 writer,
-                prefix(transform),
+                prefix(transform, rate),
                 &decode_options(options),
             )
             .map_err(|e| e.to_string())

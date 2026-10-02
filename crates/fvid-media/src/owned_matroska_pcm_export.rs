@@ -36,14 +36,7 @@ fn decode_options(options: &CopyOptions) -> CopyOptions {
     options.stream_metadata_delete.clear();
     options
 }
-fn prefix(transform: AudioDecodeTransform) -> Option<(std::time::Duration, std::time::Duration)> {
-    transform.interval.map(|(_, to)| {
-        (
-            std::time::Duration::ZERO,
-            std::time::Duration::from_micros(to as u64),
-        )
-    })
-}
+use crate::owned_adts_export::decoded_prefix as prefix;
 pub(crate) fn supports(
     source: &Path,
     transform: AudioDecodeTransform,
@@ -52,6 +45,9 @@ pub(crate) fn supports(
     if options.max_controlled_bytes.is_some() {
         return false;
     }
+    let Ok((rate, _)) = geometry(source, options) else {
+        return false;
+    };
     let mut probe = decode_options(options);
     probe.progress = None;
     let result = crate::owned_matroska_pcm::decode_matroska_pcm_f64(
@@ -60,7 +56,7 @@ pub(crate) fn supports(
             Err(_) => return false,
         },
         &mut std::io::sink(),
-        prefix(transform),
+        prefix(transform, rate),
         &probe,
     );
     result.is_ok_and(|stats| {
@@ -87,6 +83,27 @@ pub(crate) fn apply(
         return Err("media operation cancelled".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
+    let (rate, channels) = geometry(source, options)?;
+    let spool = crate::owned_adts_export::spool_decoded_with_precision(
+        rate,
+        channels,
+        crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
+        64,
+        options,
+        |writer, options| {
+            crate::owned_matroska_pcm::decode_matroska_pcm_f64(
+                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+                writer,
+                prefix(transform, rate),
+                &decode_options(options),
+            )
+            .map_err(|e| e.to_string())
+        },
+    )?;
+    crate::owned_adts_export::export_spool(spool, destination, transform, options)
+}
+
+fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
     let reader = crate::owned_webm::WebmReader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         Default::default(),
@@ -115,23 +132,5 @@ pub(crate) fn apply(
     let decoder =
         crate::owned_pcm_decoder::PcmDecoder::from_matroska(track).map_err(|e| e.to_string())?;
     let (rate, channels) = (decoder.sample_rate(), decoder.channels());
-    drop(reader);
-    drop(decoder);
-    let spool = crate::owned_adts_export::spool_decoded_with_precision(
-        rate,
-        channels,
-        crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
-        64,
-        options,
-        |writer, options| {
-            crate::owned_matroska_pcm::decode_matroska_pcm_f64(
-                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-                writer,
-                prefix(transform),
-                &decode_options(options),
-            )
-            .map_err(|e| e.to_string())
-        },
-    )?;
-    crate::owned_adts_export::export_spool(spool, destination, transform, options)
+    Ok((rate, channels))
 }

@@ -34,7 +34,7 @@ impl<W: Write> Resampler<W> {
             input_rate,
             output_rate,
             channels: channels as usize,
-            radius: (32.0 / ratio).ceil() as i64,
+            radius: crate::owned_resample::input_radius(input_rate, output_rate) as i64,
             cutoff: 0.94 * ratio,
             queue: VecDeque::new(),
             base: 0,

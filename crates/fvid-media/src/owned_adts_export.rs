@@ -66,12 +66,7 @@ pub(crate) fn supports(
         probe.metadata_delete.clear();
         probe.stream_metadata_set.clear();
         probe.stream_metadata_delete.clear();
-        let prefix = transform.interval.map(|(_, to)| {
-            (
-                std::time::Duration::ZERO,
-                std::time::Duration::from_micros(to as u64),
-            )
-        });
+        let prefix = decoded_prefix(transform, config.sample_rate);
         crate::owned_aac::decode_adts_pcm(
             BufReader::new(File::open(source).map_err(|e| e.to_string())?),
             &mut std::io::sink(),
@@ -83,6 +78,32 @@ pub(crate) fn supports(
     };
     qualify().is_ok()
 }
+fn resample_lookahead(input_rate: u32, output_rate: Option<i32>) -> std::time::Duration {
+    let Some(output_rate) = output_rate
+        .and_then(|r| u32::try_from(r).ok())
+        .filter(|&r| r > 0 && r != input_rate)
+    else {
+        return std::time::Duration::ZERO;
+    };
+    let frames = crate::owned_resample::input_radius(input_rate, output_rate);
+    let nanos = (u128::from(frames) * 1_000_000_000).div_ceil(u128::from(input_rate));
+    std::time::Duration::from_nanos(nanos as u64)
+}
+/// Retain origin/preroll and the actual sinc radius beyond the selected end.
+/// The final WAVE stage still applies the requested output-clock window.
+pub(crate) fn decoded_prefix(
+    transform: AudioDecodeTransform,
+    input_rate: u32,
+) -> Option<(std::time::Duration, std::time::Duration)> {
+    transform.interval.map(|(_, to)| {
+        (
+            std::time::Duration::ZERO,
+            std::time::Duration::from_micros(to as u64)
+                + resample_lookahead(input_rate, transform.sample_rate),
+        )
+    })
+}
+
 struct Spool(PathBuf);
 impl Spool {
     fn create() -> Result<Self> {
@@ -155,7 +176,7 @@ pub(crate) fn apply(
             std::time::Duration::from_micros(to as u64),
         )
     });
-    let spool = decode_to_wave(source, prefix, options)?;
+    let spool = decode_to_wave_with_rate(source, prefix, transform.sample_rate, options)?;
     export_spool(spool, destination, transform, options)
 }
 
@@ -199,6 +220,14 @@ pub(crate) fn decode_to_wave(
     interval: Option<(std::time::Duration, std::time::Duration)>,
     options: &CopyOptions,
 ) -> Result<DecodedSpool> {
+    decode_to_wave_with_rate(source, interval, None, options)
+}
+fn decode_to_wave_with_rate(
+    source: &Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    output_rate: Option<i32>,
+    options: &CopyOptions,
+) -> Result<DecodedSpool> {
     if options.max_controlled_bytes.is_some() {
         return Err("ADTS file allocation admission is not yet implemented".into());
     }
@@ -212,6 +241,12 @@ pub(crate) fn decode_to_wave(
     )
     .map_err(|e| e.to_string())?;
     let config = reader.configuration();
+    let interval = interval.map(|(from, to)| {
+        (
+            from,
+            to + resample_lookahead(config.sample_rate, output_rate),
+        )
+    });
     let mask = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
         .map_err(|e| e.to_string())?
         .channel_mask();

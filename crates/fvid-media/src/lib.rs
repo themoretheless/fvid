@@ -169,3 +169,8 @@ pub mod owned_mp4;
 
 pub mod owned_mp4_matroska;
 pub mod owned_mp4_remux;
+
+pub mod owned_mp4_audio_schedule;
+pub mod owned_mp4_audio;
+
+mod owned_mp4_audio_export;

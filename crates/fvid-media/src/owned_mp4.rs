@@ -20,7 +20,7 @@ impl From<std::io::Error> for Error {
     }
 }
 pub type Result<T> = std::result::Result<T, Error>;
-fn invalid(message: &str) -> Error {
+pub(crate) fn invalid(message: &str) -> Error {
     Error(message.into())
 }
 fn unsupported(message: &str) -> Error {

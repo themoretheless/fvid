@@ -4,6 +4,11 @@ use std::{
     io::{self, Write},
 };
 
+pub(crate) fn input_radius(input_rate: u32, output_rate: u32) -> u64 {
+    let ratio = (f64::from(output_rate) / f64::from(input_rate)).min(1.0);
+    (32.0 / ratio).ceil() as u64
+}
+
 pub struct Resampler<W> {
     output: W,
     input_rate: u32,
@@ -34,7 +39,7 @@ impl<W: Write> Resampler<W> {
             input_rate,
             output_rate,
             channels: channels as usize,
-            radius: (32.0 / ratio).ceil() as i64,
+            radius: input_radius(input_rate, output_rate) as i64,
             cutoff: 0.94 * ratio,
             queue: VecDeque::new(),
             base: 0,
