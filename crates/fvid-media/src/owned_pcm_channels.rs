@@ -65,9 +65,56 @@ pub fn layouts_equal(
     a_channels == b_channels && a_mask == b_mask
 }
 
+/// Speaker identifier at a position in an ascending speaker mask.
+pub fn mask_channel_at(mut mask: u64, index: u32) -> Option<i32> {
+    for _ in 0..index {
+        if mask == 0 {
+            return None;
+        }
+        mask &= mask - 1;
+    }
+    (mask != 0).then(|| mask.trailing_zeros() as i32)
+}
+
+/// Compare ordered identifiers without allocating a temporary channel map.
+pub fn ordered_channels_equal(
+    channels: i32,
+    mut a: impl FnMut(u32) -> Option<i32>,
+    mut b: impl FnMut(u32) -> Option<i32>,
+) -> bool {
+    (0..channels.max(0) as u32).all(|index| a(index) == b(index))
+}
+
 #[cfg(test)]
 mod default_tests {
     use super::*;
+    #[test]
+    fn custom_order_matches_speakers_but_reordering_remains_distinct() {
+        let native = |index| mask_channel_at(0xb, index);
+        let custom = [0, 1, 3];
+        assert!(ordered_channels_equal(3, native, |i| custom
+            .get(i as usize)
+            .copied()));
+        let reordered = [1, 0, 3];
+        assert!(!ordered_channels_equal(3, native, |i| reordered
+            .get(i as usize)
+            .copied()));
+        assert_eq!(mask_channel_at(1 << 63, 0), Some(63));
+        assert_eq!(mask_channel_at(1 << 63, 1), None);
+        assert_eq!(mask_channel_at(0, 0), None);
+        let ambisonic = [0x400, 0x401, 0x402, 0x403, 0, 1];
+        assert!(ordered_channels_equal(
+            6,
+            |i| ambisonic.get(i as usize).copied(),
+            |i| {
+                if i < 4 {
+                    Some(0x400 + i as i32)
+                } else {
+                    mask_channel_at(3, i - 4)
+                }
+            }
+        ));
+    }
     #[test]
     fn layout_identity_preserves_speaker_assignment_and_unspecified_order() {
         assert!(layouts_equal(2, Some(3), 2, Some(3)));

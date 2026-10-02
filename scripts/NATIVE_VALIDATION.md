@@ -201,3 +201,22 @@ match a native mask. Custom and ambisonic layouts retain the legacy comparison.
 An explicit libavutil reference checked 3,600 pairs spanning both migrated
 orders, channel-count boundaries and distinct masks; all results matched.
 The owned library passed 136 tests and legacy/player compilation passed.
+
+## Complete owned channel-layout comparison
+
+The comparison adapter now handles custom channel maps and ambisonic component
+ordering as well as native masks and unspecified layouts, without any
+`av_channel_layout_compare` fallback. Cross-representation equality compares
+ordered channel identifiers; custom display names do not affect equality.
+The implementation borrows existing maps and allocates no temporary map.
+The adapter requires initialized valid layouts, including a readable custom map.
+
+An explicit local libavutil reference checked all 484 ordered pairs of 22
+layouts: masks, unspecified counts, named/reordered/duplicate/custom channels,
+unknown and unused channels, and ambisonic components with and without stereo
+extras. All comparisons matched. The owned library passed 137 tests; the
+legacy/player configuration compiled. The comparison behavior was checked
+against the upstream channel-layout API implementation:
+https://github.com/FFmpeg/FFmpeg/blob/master/libavutil/channel_layout.c
+Other layout copying, ownership and description operations remain separate
+migration work; production libav dependencies are not yet eliminated.

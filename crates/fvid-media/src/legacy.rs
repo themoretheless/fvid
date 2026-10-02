@@ -387,23 +387,42 @@ unsafe fn channel_layout_default_owned(layout: *mut AVChannelLayout, channels: i
 /// Both pointers must refer to valid initialized channel layouts.
 unsafe fn channel_layout_compare_owned(a: *const AVChannelLayout, b: *const AVChannelLayout) -> i32 {
     unsafe {
-        let a_layout = &*a;
-        let b_layout = &*b;
-        let mask = |layout: &AVChannelLayout| {
-            if layout.order == AVChannelOrder_AV_CHANNEL_ORDER_UNSPEC {
-                Some(None)
-            } else if layout.order == AVChannelOrder_AV_CHANNEL_ORDER_NATIVE {
-                Some(Some(layout.u.mask))
-            } else {
-                None
-            }
-        };
-        match (mask(a_layout), mask(b_layout)) {
-            (Some(a_mask), Some(b_mask)) => i32::from(!crate::owned_pcm_channels::layouts_equal(
-                a_layout.nb_channels, a_mask, b_layout.nb_channels, b_mask,
-            )),
-            _ => av_channel_layout_compare(a, b),
+        let a = &*a;
+        let b = &*b;
+        if a.nb_channels != b.nb_channels { return 1; }
+        let a_unspecified = a.order == AVChannelOrder_AV_CHANNEL_ORDER_UNSPEC;
+        let b_unspecified = b.order == AVChannelOrder_AV_CHANNEL_ORDER_UNSPEC;
+        if a_unspecified || b_unspecified { return i32::from(a_unspecified != b_unspecified); }
+        if a.order == b.order && (a.order == AVChannelOrder_AV_CHANNEL_ORDER_NATIVE
+            || a.order == AVChannelOrder_AV_CHANNEL_ORDER_AMBISONIC) {
+            return i32::from(a.u.mask != b.u.mask);
         }
+        i32::from(!crate::owned_pcm_channels::ordered_channels_equal(
+            a.nb_channels, |index| channel_layout_channel_owned(a, index),
+            |index| channel_layout_channel_owned(b, index),
+        ))
+    }
+}
+/// # Safety
+/// A custom layout must have a readable map covering its declared channels.
+unsafe fn channel_layout_channel_owned(layout: &AVChannelLayout, index: u32) -> Option<i32> {
+    unsafe {
+        if index >= layout.nb_channels.max(0) as u32 { return None; }
+        if layout.order == AVChannelOrder_AV_CHANNEL_ORDER_CUSTOM {
+            let id = (*layout.u.map.add(index as usize)).id;
+            return (id != AVChannel_AV_CHAN_NONE).then_some(id);
+        }
+        let mut speaker_index = index;
+        if layout.order == AVChannelOrder_AV_CHANNEL_ORDER_AMBISONIC {
+            let components = layout.nb_channels - layout.u.mask.count_ones() as i32;
+            if (index as i32) < components {
+                return Some(AVChannel_AV_CHAN_AMBISONIC_BASE + index as i32);
+            }
+            speaker_index = index - components.max(0) as u32;
+        } else if layout.order != AVChannelOrder_AV_CHANNEL_ORDER_NATIVE {
+            return None;
+        }
+        crate::owned_pcm_channels::mask_channel_at(layout.u.mask, speaker_index)
     }
 }
 fn owned_pixel_format_from_legacy(format: AVPixelFormat) -> Option<crate::owned_pixel_format::PixelFormat> {
