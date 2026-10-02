@@ -13,17 +13,23 @@ pub fn probe(path: &Path) -> Result<MediaInfo, String> {
     probe_as(path, None)
 }
 
-/// Inspect owned RIFF/WAVE PCM or AAC-LC ADTS, optionally requiring a format.
+/// Inspect owned RIFF/WAVE PCM, AAC-LC ADTS or Y4M, optionally requiring a format.
 /// Format hints never override the signature or bypass container validation.
 pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> {
     match format {
         Some("wav") => return probe_wave(path).map_err(|e| e.to_string()),
         Some("aac") => return probe_adts(path),
+        Some("y4m" | "yuv4mpegpipe") => return crate::owned_y4m_probe::probe_y4m(path),
         Some(_) => return Err("format has no owned media-library probe yet".into()),
         None => {}
     }
     if crate::owned_wave_inspect::is_wave(path).map_err(|e| e.to_string())? {
         return probe_wave(path).map_err(|e| e.to_string());
+    }
+    let mut signature = [0; 9];
+    let mut signature_file = File::open(path).map_err(|e| e.to_string())?;
+    if signature_file.read_exact(&mut signature).is_ok() && &signature == b"YUV4MPEG2" {
+        return crate::owned_y4m_probe::probe_y4m(path);
     }
     let mut prefix = [0; 7];
     let mut file = File::open(path).map_err(|e| e.to_string())?;

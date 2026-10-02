@@ -23,3 +23,16 @@ Cargo acceptance tests consume existing fixtures and never run the generator.
 The prior FFmpeg/libopus-based generator was replaced; reference provenance is
 retained here rather than presenting reference PCM as independently computed
 by FVid. Other fixture generators/validation workflows remain separate work.
+
+The Y4M header grammar, bounded line reader and container probe are now owned by
+`fvid-media::owned_y4m` / `owned_y4m_probe`. Frontend compatibility uses the same
+parser source body and delegates metadata inspection; it does not introduce a
+second independent grammar. Public library probing selects the owned route for
+progressive 8-bit and 9/10/12/14/16-bit 420/422/444. Legacy-enabled probing retains
+its prior backend for unsupported chroma/interlace modes.
+
+`tests/native_y4m_library_probe.rs` checks 13 chroma/depth forms, frontend/library
+metadata equality, reduced fractional frame rates, tagged frame markers, bounded
+header lines and truncated payloads. Synthetic frame payloads are constructed in
+the test itself; no private media, external codec or fixture generator is used.
+Core Y4M processing and root/domain API compatibility tests remain enabled.
