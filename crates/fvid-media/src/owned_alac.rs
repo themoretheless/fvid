@@ -24,6 +24,10 @@ impl AlacDecoder {
             .map_err(|_| invalid("ALAC sample rate exceeds decoder geometry"))?;
         let channels = u16::try_from(track.channels)
             .map_err(|_| invalid("ALAC channel count exceeds decoder geometry"))?;
+        if track.codec_private.len() < 24
+            || u32::from_be_bytes(track.codec_private[20..24].try_into().unwrap()) != rate {
+            return Err(invalid("ALAC cookie and track sample rates disagree"));
+        }
         Self::new(&track.codec_private, rate, channels)
     }
 }

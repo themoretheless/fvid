@@ -57,3 +57,22 @@ fn library_matroska_alac_packets_match_frontend_without_container_adapter() {
         assert!(fvid_media::owned_alac::AlacDecoder::from_matroska(&invalid).is_err());
     }
 }
+
+#[test]
+fn synthetic_matroska_alac_cookie_rate_must_match_track_geometry() {
+    let fixtures = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors");
+    let control = fvid_media::owned_webm::WebmReader::open(
+        std::fs::File::open(fixtures.join("alac-control.mka")).unwrap(), Default::default()).unwrap();
+    let mut decoder = fvid_media::owned_alac::AlacDecoder::from_matroska(&control.tracks[0]).unwrap();
+    let mut control = control;
+    control.scan_all().unwrap();
+    assert_eq!(decoder.decode_pcm(&control.read_packet(0).unwrap()).unwrap(), vec![1.0 / 32768.0]);
+    let mismatch = fvid_media::owned_webm::WebmReader::open(
+        std::fs::File::open(fixtures.join("alac-rate-mismatch.mka")).unwrap(), Default::default()).unwrap();
+    let error = match fvid_media::owned_alac::AlacDecoder::from_matroska(&mismatch.tracks[0]) {
+        Ok(_) => panic!("accepted ALAC cookie/track sample-rate mismatch"),
+        Err(error) => error,
+    };
+    assert!(error.to_string().contains("sample rates disagree"));
+}
