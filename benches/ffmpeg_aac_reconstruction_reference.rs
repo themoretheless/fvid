@@ -1,7 +1,5 @@
 //! Separate deterministic AAC reconstruction from stochastic noise synthesis.
 use std::process::Command;
-#[test]
-#[ignore = "requires FVID_REFERENCE_FFMPEG"]
 fn non_noise_aac_reconstruction_matches_independent_decoder() {
     let binary = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
     let directory =
@@ -78,4 +76,10 @@ fn non_noise_aac_reconstruction_matches_independent_decoder() {
             "{rate}/{channels}: max={maximum}, rms={rms}"
         );
     }
+}
+
+fn main() {
+    std::env::var_os("FVID_REFERENCE_FFMPEG").expect("Set FVID_REFERENCE_FFMPEG for this explicit reference benchmark");
+    non_noise_aac_reconstruction_matches_independent_decoder();
+    println!("AAC no-PNS reconstruction reference comparisons passed");
 }

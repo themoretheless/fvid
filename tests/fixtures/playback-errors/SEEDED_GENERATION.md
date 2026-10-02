@@ -558,3 +558,5 @@ External MP4 concat AVC/HEVC video, AAC zero-delay/priming, mixed-track and inde
 External combined MP4-to-Matroska video/audio remux comparisons run only in `ffmpeg_mp4_remux_reference`. Ordinary remux tests retain owned frame/edit/metadata, dependencies/window, CLI/API/publication and rejection checks without FFmpeg.
 
 External synthetic PCM amix normalization/weights and overlapping-layout amerge comparisons run only in `ffmpeg_audio_mix_reference`. Ordinary audio mix tests retain sample/channel order, AAC edits, CLI/API/plans and publication controls without FFmpeg.
+
+The external AAC no-PNS encoding/reconstruction comparison runs only in `ffmpeg_aac_reconstruction_reference`. Its four rate/channel cases and numeric tolerances are preserved; ordinary AAC library/media tests continue using checked-in or synthetic inputs without external generation.

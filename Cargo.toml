@@ -191,3 +191,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_audio_mix_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_aac_reconstruction_reference"
+harness = false
