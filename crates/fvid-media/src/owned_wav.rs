@@ -20,10 +20,23 @@ pub fn float_wav_header_with_mask(
     sample_frames: u64,
     mask: u32,
 ) -> Result<Vec<u8>, String> {
+    float_wav_header_with_precision(sample_rate, channels, sample_frames, mask, 32)
+}
+/// Extensible IEEE float header with an explicit stored precision.
+pub fn float_wav_header_with_precision(
+    sample_rate: u32,
+    channels: u16,
+    sample_frames: u64,
+    mask: u32,
+    bits: u16,
+) -> Result<Vec<u8>, String> {
+    if !matches!(bits, 32 | 64) {
+        return Err(error("unsupported float WAVE precision"));
+    }
     if !(1..=64).contains(&channels) || (mask != 0 && mask.count_ones() != u32::from(channels)) {
         return Err(error("invalid WAV channel mask"));
     }
-    let align = channels * 4;
+    let align = channels * (bits / 8);
     let bytes = sample_frames
         .checked_mul(u64::from(align))
         .and_then(|n| u32::try_from(n).ok())
@@ -42,9 +55,9 @@ pub fn float_wav_header_with_mask(
     header.extend_from_slice(&sample_rate.to_le_bytes());
     header.extend_from_slice(&rate.to_le_bytes());
     header.extend_from_slice(&align.to_le_bytes());
-    header.extend_from_slice(&32u16.to_le_bytes());
+    header.extend_from_slice(&bits.to_le_bytes());
     header.extend_from_slice(&22u16.to_le_bytes());
-    header.extend_from_slice(&32u16.to_le_bytes());
+    header.extend_from_slice(&bits.to_le_bytes());
     header.extend_from_slice(&mask.to_le_bytes());
     header.extend_from_slice(&[
         3, 0, 0, 0, 0, 0, 0x10, 0, 0x80, 0, 0, 0xaa, 0, 0x38, 0x9b, 0x71,

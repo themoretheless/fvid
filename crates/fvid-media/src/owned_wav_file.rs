@@ -26,6 +26,8 @@ pub(crate) fn write_wav_f32le_checked<F: FnMut() -> Result<()>>(
         channels,
         samples.len(),
         samples.iter().map(|sample| sample.to_le_bytes()),
+        0,
+        &[],
         check,
     )
 }
@@ -51,6 +53,28 @@ pub(crate) fn write_wav_f64le_checked<F: FnMut() -> Result<()>>(
         channels,
         samples.len(),
         samples.iter().map(|sample| sample.to_le_bytes()),
+        0,
+        &[],
+        check,
+    )
+}
+pub(crate) fn write_wav_f64le_with_side_data_checked<F: FnMut() -> Result<()>>(
+    destination: &Path,
+    sample_rate: i32,
+    channels: i32,
+    samples: &[f64],
+    mask: u32,
+    info_chunks: &[u8],
+    check: F,
+) -> Result<()> {
+    write_float_wave::<8, _>(
+        destination,
+        sample_rate,
+        channels,
+        samples.len(),
+        samples.iter().map(|s| s.to_le_bytes()),
+        mask,
+        info_chunks,
         check,
     )
 }
@@ -60,6 +84,8 @@ fn write_float_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
     channels: i32,
     count: usize,
     samples: impl Iterator<Item = [u8; WIDTH]>,
+    mask: u32,
+    info_chunks: &[u8],
     mut check: F,
 ) -> Result<()> {
     check()?;
@@ -75,7 +101,15 @@ fn write_float_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
     let data_bytes = (count as u64)
         .checked_mul(WIDTH as u64)
         .ok_or("wav data size overflow")?;
-    let riff_size = data_bytes.checked_add(36).ok_or("wav riff size overflow")?;
+    if mask != 0 && mask.count_ones() != channels as u32 {
+        return Err("invalid WAV channel mask".into());
+    }
+    let extensible = mask != 0 || (WIDTH == 8 && channels > 2);
+    let header_bytes = if extensible { 80u64 } else { 44 };
+    let riff_size = data_bytes
+        .checked_add(header_bytes - 8)
+        .and_then(|n| n.checked_add(info_chunks.len() as u64))
+        .ok_or("wav riff size overflow")?;
     if riff_size > u32::MAX as u64 || data_bytes > u32::MAX as u64 {
         return Err("wav payload exceeds 4 GiB".into());
     }
@@ -126,6 +160,18 @@ fn write_float_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
         header[34..36].copy_from_slice(&((WIDTH * 8) as u16).to_le_bytes());
         header[36..40].copy_from_slice(b"data");
         header[40..44].copy_from_slice(&(data_bytes as u32).to_le_bytes());
+        let mut header = if extensible {
+            crate::owned_wav::float_wav_header_with_precision(
+                sample_rate as u32,
+                channels as u16,
+                count as u64 / channels as u64,
+                mask,
+                (WIDTH * 8) as u16,
+            )?
+        } else {
+            header.to_vec()
+        };
+        header[4..8].copy_from_slice(&(riff_size as u32).to_le_bytes());
         file.write_all(&header).map_err(|e| e.to_string())?;
         let mut output = std::io::BufWriter::new(file);
         for (index, sample) in samples.enumerate() {
@@ -134,6 +180,8 @@ fn write_float_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
             }
             output.write_all(&sample).map_err(|e| e.to_string())?;
         }
+        check()?;
+        output.write_all(info_chunks).map_err(|e| e.to_string())?;
         output.flush().map_err(|e| e.to_string())?;
         Ok(())
     })();

@@ -28,18 +28,7 @@ pub(crate) fn supports(
             || (info.channels <= 2 && info.channel_mask == 0)
             || crate::owned_pcm_channels::standard_mask(info.channels)
                 .is_some_and(|mask| mask == u64::from(info.channel_mask));
-        // The legacy double WAV muxer also retains tags and explicit surround
-        // masks. Keep those cases there until the owned writer retains them.
-        let precision = info.bits_per_sample == 32
-            || (info.bits_per_sample == 64
-                && info.channels <= 2
-                && channels <= 2
-                && (info.channel_mask == 0
-                    || crate::owned_pcm_channels::standard_mask(info.channels)
-                        .is_some_and(|mask| mask == u64::from(info.channel_mask)))
-                && crate::owned_probe::probe_wave(source)
-                    .is_ok_and(|info| info.metadata.is_empty()));
-        info.float && precision && conversion && layout
+        info.float && matches!(info.bits_per_sample, 32 | 64) && conversion && layout
     })
 }
 fn simple_options(options: &CopyOptions) -> bool {
@@ -143,6 +132,22 @@ pub fn decode_audio_transformed(
             return Err("owned rematrix requires a standard explicit speaker layout".into());
         }
     }
+    let (output_mask, info_chunks) = if input.sample_format == "dbl" {
+        let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+        let info = crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
+            .map_err(|e| e.to_string())?;
+        let mask = if channels == input.channels {
+            info.channel_mask
+        } else {
+            crate::owned_pcm_channels::standard_mask(channels as u16).unwrap_or(0) as u32
+        };
+        let chunks =
+            crate::owned_wave_inspect::info_chunks(&mut file, &info, options.cancel.as_ref())
+                .map_err(|e| e.to_string())?;
+        (mask, chunks)
+    } else {
+        (0, Vec::new())
+    };
     let width = if input.sample_format == "dbl" { 8 } else { 4 };
     let bytes = if width == 8 {
         let mut resampler = crate::owned_resample_f64::Resampler::new(
@@ -227,11 +232,13 @@ pub fn decode_audio_transformed(
         if samples.iter().any(|s| !s.is_finite()) {
             return Err("PCM gain overflow".into());
         }
-        crate::owned_wav_file::write_wav_f64le_checked(
+        crate::owned_wav_file::write_wav_f64le_with_side_data_checked(
             destination,
             rate,
             channels,
             &samples,
+            output_mask,
+            &info_chunks,
             check,
         )?;
     } else {
@@ -518,12 +525,97 @@ mod double_tests {
             crate::owned_probe::probe_wave(&source).unwrap().metadata["title"],
             "title"
         );
-        assert!(!supports(
+        assert!(supports(
             &source,
             &output,
             Default::default(),
             &CopyOptions::default()
         ));
+        let tagged = dir.join("tagged.wav");
+        crate::decode_audio(&source, &tagged, &CopyOptions::default()).unwrap();
+        assert_eq!(
+            crate::owned_probe::probe_wave(&tagged).unwrap().metadata["title"],
+            "title"
+        );
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod side_data_tests {
+    use super::*;
+    #[test]
+    fn double_surround_identity_retains_explicit_masks_and_raw_info_chunks() {
+        let dir =
+            std::env::temp_dir().join(format!("fvid-double-wave-side-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir(&dir).unwrap();
+        let mut chunks = Vec::new();
+        chunks.extend_from_slice(b"LIST");
+        chunks.extend_from_slice(&30u32.to_le_bytes());
+        chunks.extend_from_slice(b"INFOINAM");
+        chunks.extend_from_slice(&6u32.to_le_bytes());
+        chunks.extend_from_slice(b"title\0");
+        chunks.extend_from_slice(b"QWER");
+        chunks.extend_from_slice(&3u32.to_le_bytes());
+        chunks.extend_from_slice(b"abc");
+        chunks.push(0xee);
+        for (channels, mask) in [(6, 0x3f), (6, 0x60f), (7, 0x70f), (8, 0x63f)] {
+            let source = dir.join(format!("source-{channels}-{mask}.wav"));
+            let output = dir.join(format!("output-{channels}-{mask}.wav"));
+            let pcm: Vec<f64> = (0..97 * channels).map(|i| i as f64 / 997.0).collect();
+            crate::owned_wav_file::write_wav_f64le_with_side_data_checked(
+                &source,
+                48000,
+                channels,
+                &pcm,
+                mask,
+                &chunks,
+                || Ok(()),
+            )
+            .unwrap();
+            assert!(supports(
+                &source,
+                &output,
+                Default::default(),
+                &CopyOptions::default()
+            ));
+            crate::decode_audio(&source, &output, &CopyOptions::default()).unwrap();
+            assert_eq!(
+                std::fs::read(&source).unwrap(),
+                std::fs::read(&output).unwrap()
+            );
+            let mut file = std::fs::File::open(&output).unwrap();
+            let info = crate::owned_wave_inspect::inspect(&mut file, None).unwrap();
+            assert_eq!(info.channel_mask, mask);
+            assert_eq!(info.bits_per_sample, 64);
+            assert_eq!(info.sample_frames, 97);
+            assert_eq!(
+                crate::owned_wave_inspect::info_chunks(&mut file, &info, None).unwrap(),
+                chunks
+            );
+            let description = crate::owned_probe::probe_wave(&output).unwrap();
+            assert_eq!(description.metadata["title"], "title");
+            assert_eq!(description.metadata["QWER"], "abc");
+            if mask == 0x3f || channels >= 7 {
+                let mono = dir.join(format!("mono-{channels}.wav"));
+                let transform = AudioDecodeTransform {
+                    channels: Some(1),
+                    sample_rate: Some(16000),
+                    ..Default::default()
+                };
+                crate::decode_audio_transformed(&source, &mono, transform, &CopyOptions::default())
+                    .unwrap();
+                let mut file = std::fs::File::open(&mono).unwrap();
+                let info = crate::owned_wave_inspect::inspect(&mut file, None).unwrap();
+                assert_eq!(info.channel_mask, 4);
+                assert_eq!(info.sample_frames, 33);
+                assert_eq!(
+                    crate::owned_wave_inspect::info_chunks(&mut file, &info, None).unwrap(),
+                    chunks
+                );
+            }
+        }
         std::fs::remove_dir_all(dir).unwrap();
     }
 }

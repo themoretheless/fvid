@@ -206,3 +206,34 @@ pub fn inspect<R: Read + Seek>(input: &mut R, cancel: Option<&CancelFlag>) -> Re
         end,
     })
 }
+
+/// Retain non-timed INFO lists exactly, including unknown entries and padding.
+/// The caller must supply the inspection result for this reader.
+pub fn info_chunks<R: Read + Seek>(
+    input: &mut R,
+    info: &WaveInfo,
+    cancel: Option<&CancelFlag>,
+) -> Result<Vec<u8>> {
+    let mut output = Vec::new();
+    let mut at = 12;
+    while at < info.end {
+        check(cancel)?;
+        let (tag, size, next) = chunk(input, at, info.end)?;
+        if &tag == b"LIST" {
+            let total = usize::try_from(next - at)
+                .map_err(|_| invalid("WAVE metadata exceeds address space"))?;
+            output
+                .try_reserve_exact(total)
+                .map_err(|_| invalid("cannot allocate WAVE metadata"))?;
+            let first = output.len();
+            output.resize(first + total, 0);
+            input.seek(SeekFrom::Start(at))?;
+            input.read_exact(&mut output[first..])?;
+            if size < 4 || &output[first + 8..first + 12] != b"INFO" {
+                return Err(invalid("WAVE metadata is not an INFO list"));
+            }
+        }
+        at = next;
+    }
+    Ok(output)
+}
