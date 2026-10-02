@@ -146,7 +146,23 @@ fn preflight(source: &Path, options: &CopyOptions) -> Result<Input> {
 /// True peak uses the owned Annex-2 FIR at >=48 kHz and sinc FIR below. Transient peaks may differ
 /// from another implementation's interpolation filter; bit equivalence is not promised.
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
+    Ok(measure_for_normalization(source, false, options)?.stats)
+}
+pub(crate) struct NormalizationMeasurement {
+    pub stats: LoudnessStats,
+    pub integrated_lufs: Option<f64>,
+    pub relative_thresh: f64,
+    pub weights: Vec<f64>,
+}
+pub(crate) fn measure_for_normalization(
+    source: &Path,
+    dual_mono: bool,
+    options: &CopyOptions,
+) -> Result<NormalizationMeasurement> {
     let mut input = preflight(source, options)?;
+    if dual_mono && input.info.channels == 1 {
+        input.weights[0] *= 2.;
+    }
     let mut meter = crate::owned_loudness::LoudnessMeter::new_with_true_peak(
         input.info.sample_rate,
         &input.weights,
@@ -226,7 +242,12 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
         done: true,
         ..event
     });
-    Ok(result)
+    Ok(NormalizationMeasurement {
+        stats: result,
+        integrated_lufs: report.integrated_lufs,
+        relative_thresh: meter.relative_gate_lufs(),
+        weights: input.weights,
+    })
 }
 pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
     let input = preflight(source, options)?;

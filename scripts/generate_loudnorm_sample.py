@@ -40,6 +40,17 @@ def generate(output):
         stream.setparams((1, 2, 192000, 576000, 'NONE', 'not compressed'))
         stream.writeframes(pcm)
     (output / 'loudnorm-feedback.y4m').write_bytes(video)
+    pcm = bytearray()
+    for sample in range(48000 * 8):
+        gain = 0.03 if sample < 48000 * 4 else 0.06
+        pcm += struct.pack('<h', round(gain * 32768 * math.sin(math.tau * 1000 * sample / 48000)))
+    with wave.open(str(output / 'loudnorm-dual.wav'), 'wb') as stream:
+        stream.setparams((1, 2, 48000, 48000 * 8, 'NONE', 'not compressed'))
+        stream.writeframes(pcm)
+    video = bytearray(b'YUV4MPEG2 W16 H16 F30:1 Ip A1:1 C420jpeg\n')
+    for frame in range(240):
+        video += b'FRAME\n' + bytes([32 if frame < 120 else 192]) * 256 + bytes([128]) * 128
+    (output / 'loudnorm-dual.y4m').write_bytes(video)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)

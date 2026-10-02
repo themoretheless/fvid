@@ -74,3 +74,65 @@ fn loudnorm_cli_exports_long_wave_and_reports_prefix_progress_without_legacy() {
     assert!(String::from_utf8_lossy(&result.stderr).contains("duplicate loudnorm option"));
     std::fs::remove_dir_all(dir).unwrap();
 }
+
+#[test]
+fn dual_pass_uses_owned_measurement_and_prints_one_final_report() {
+    let dir = std::env::temp_dir().join(format!("fvid-dual-cli-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let fixture = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/loudnorm-dual.wav");
+    let output = dir.join("dual.wav");
+    let result = Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "loudnorm"])
+        .arg(&fixture)
+        .arg(&output)
+        .args([
+            "--dual-pass",
+            "--progress",
+            "--loudnorm-args",
+            "I=-16:TP=-1.5:LRA=11:print_format=json",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let stats: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    assert_eq!(stats["backend"], "fvid linear loudnorm");
+    assert_eq!(stats["dual_pass"], true);
+    assert_eq!(stats["sample_rate"], 48000);
+    assert_eq!(stats["sample_frames"], 384000);
+    let messages: Vec<serde_json::Value> = String::from_utf8(result.stderr)
+        .unwrap()
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    let reports: Vec<_> = messages
+        .iter()
+        .filter(|m| m.get("normalization_type").is_some())
+        .collect();
+    assert_eq!(reports.len(), 1);
+    let report = reports[0];
+    assert_eq!(report["normalization_type"], "linear");
+    let number = |key: &str| report[key].as_str().unwrap().parse::<f64>().unwrap();
+    assert!(number("input_lra") > 0.);
+    assert!((number("output_i") + 16.).abs() < 0.1);
+    assert!(number("output_tp") <= -1.49);
+    let events: Vec<_> = messages
+        .iter()
+        .filter(|m| m.get("done").is_some())
+        .collect();
+    assert_eq!(events.iter().filter(|m| m["done"] == true).count(), 1);
+    assert_eq!(messages.last().unwrap()["done"], true);
+    for pair in events.windows(2) {
+        assert!(pair[0]["packets"].as_u64().unwrap() <= pair[1]["packets"].as_u64().unwrap());
+        assert!(
+            pair[0]["payload_bytes"].as_u64().unwrap()
+                <= pair[1]["payload_bytes"].as_u64().unwrap()
+        );
+    }
+    assert!(output.exists());
+    std::fs::remove_dir_all(dir).unwrap();
+}

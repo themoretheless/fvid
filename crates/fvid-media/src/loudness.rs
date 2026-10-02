@@ -780,6 +780,9 @@ pub fn apply_loudnorm_dual(
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
     let base = resolve_loudnorm_args(args)?;
+    if crate::owned_loudnorm::supports_dual(source, destination, &base, options) {
+        return crate::owned_loudnorm::apply_loudnorm_dual(source, destination, Some(&base), options);
+    }
     let measured = measure_loudnorm_values(source, &base, options)?;
     let pass2 = dual_pass_args(&base, &measured);
     let mut stats = apply_loudnorm(source, destination, Some(&pass2), options)?;

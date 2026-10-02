@@ -4,16 +4,24 @@ use fvid_control::{CopyOptions, ProgressEvent};
 use fvid_media_info::{LoudnormStats, resolve_loudnorm_args};
 use std::path::Path;
 type Result<T> = std::result::Result<T, String>;
+mod report;
+use report::{measure_phase, output_report, print_report, report_memory};
 
 /// Return a gain only when the requested parameters select linear processing.
 /// Offset is a dynamic-mode parameter: linear gain is target I minus measured I.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Print {
+    None,
+    Json,
+    Summary,
+}
 struct Parameters {
     target_i: f64,
     target_tp: f64,
     target_lra: f64,
     offset: f64,
     dual_mono: bool,
-    print: bool,
+    print: Print,
     gain: Option<f64>,
 }
 #[cfg(test)]
@@ -26,7 +34,7 @@ fn parse(args: &str) -> Result<Parameters> {
     let mut offset = 0.;
     let mut linear = true;
     let mut dual_mono = false;
-    let mut print = false;
+    let mut print = Print::None;
     for argument in args.split(':') {
         let (key, value) = argument
             .split_once('=')
@@ -49,7 +57,11 @@ fn parse(args: &str) -> Result<Parameters> {
                 return Err("invalid loudnorm print format".into());
             }
             // Printing measurements needs its own report and remains outside this path.
-            print = value != "none";
+            print = match value {
+                "json" => Print::Json,
+                "summary" => Print::Summary,
+                _ => Print::None,
+            };
             continue;
         }
         let number: f64 = value.parse().map_err(|_| "invalid loudnorm number")?;
@@ -84,7 +96,6 @@ fn parse(args: &str) -> Result<Parameters> {
         dual_mono,
         print,
         gain: (linear
-            && !print
             && measured_i != 0.
             && measured_tp != 99.
             && measured_lra != 0.
@@ -112,7 +123,7 @@ pub(crate) fn supports(
     policies(options)
         && destination.extension().and_then(|s| s.to_str()) == Some("wav")
         && parse(args).is_ok_and(|params| {
-            !params.print
+            (params.print == Print::None || crate::owned_wave_loudness::supports(source, options))
                 && std::fs::File::open(source).is_ok_and(|mut file| {
                     crate::owned_wave_inspect::inspect(&mut file, None)
                         .is_ok_and(|info| params.gain.is_some() || dynamic_input(&info))
@@ -128,11 +139,80 @@ pub fn apply_loudnorm(
 ) -> Result<LoudnormStats> {
     let args = resolve_loudnorm_args(args)?;
     let params = parse(&args)?;
-    if params.print {
-        return Err("owned loudnorm measurement printing is not yet implemented".into());
+    if params.print != Print::None {
+        let (measurement, export_options) = measure_phase(source, params.dual_mono, options)?;
+        return apply_resolved(
+            source,
+            destination,
+            args,
+            params,
+            &export_options,
+            Some(&measurement),
+        );
     }
+    apply_resolved(source, destination, args, params, options, None)
+}
+/// Measure with the owned meter, then select a linear gain when the measured
+/// range/true peak permit it; otherwise use the owned dynamic controller.
+pub fn apply_loudnorm_dual(
+    source: &Path,
+    destination: &Path,
+    args: Option<&str>,
+    options: &CopyOptions,
+) -> Result<LoudnormStats> {
+    let base = resolve_loudnorm_args(args)?;
+    let original = parse(&base)?;
+    let (measurement, export_options) = measure_phase(source, original.dual_mono, options)?;
+    let clean = base
+        .split(':')
+        .filter(|item| !item.starts_with("print_format="))
+        .collect::<Vec<_>>()
+        .join(":");
+    let measured_i = measurement.integrated_lufs.unwrap_or(-70.).clamp(-99., 0.);
+    let measured_tp = measurement.stats.true_peak_dbfs.clamp(-99., 99.);
+    let mut pass2 = format!(
+        "{clean}:measured_I={measured_i}:measured_TP={measured_tp}:measured_LRA={}:measured_thresh={}:linear=true",
+        measurement.stats.range_lu.clamp(0., 99.),
+        measurement.relative_thresh.clamp(-99., 0.)
+    );
+    match original.print {
+        Print::Json => pass2.push_str(":print_format=json"),
+        Print::Summary => pass2.push_str(":print_format=summary"),
+        Print::None => {}
+    }
+    let params = parse(&pass2)?;
+    let mut stats = apply_resolved(
+        source,
+        destination,
+        pass2,
+        params,
+        &export_options,
+        Some(&measurement),
+    )?;
+    stats.dual_pass = true;
+    Ok(stats)
+}
+#[cfg(feature = "legacy-ffmpeg")]
+pub(crate) fn supports_dual(
+    source: &Path,
+    destination: &Path,
+    args: &str,
+    options: &CopyOptions,
+) -> bool {
+    destination.extension().and_then(|s| s.to_str()) == Some("wav")
+        && parse(args).is_ok()
+        && crate::owned_wave_loudness::supports(source, options)
+}
+fn apply_resolved(
+    source: &Path,
+    destination: &Path,
+    args: String,
+    params: Parameters,
+    options: &CopyOptions,
+    measurement: Option<&crate::owned_wave_loudness::NormalizationMeasurement>,
+) -> Result<LoudnormStats> {
     if params.gain.is_none() {
-        return apply_dynamic(source, destination, args, params, options);
+        return apply_dynamic(source, destination, args, params, options, measurement);
     }
     let gain = params.gain.unwrap();
     if !policies(options) || destination.extension().and_then(|s| s.to_str()) != Some("wav") {
@@ -172,8 +252,19 @@ pub fn apply_loudnorm(
             let output = (size / width)
                 .checked_mul(4)
                 .ok_or("loudnorm output size overflow")?;
+            let report_bytes = if params.print == Print::None {
+                0
+            } else {
+                usize::try_from(report_memory(
+                    info.sample_rate,
+                    (size / usize::from(info.block)) as u64,
+                    info.channels,
+                ))
+                .map_err(|_| "loudnorm report memory overflow")?
+            };
             let estimate = size
                 .checked_add(output)
+                .and_then(|n| n.checked_add(report_bytes))
                 .ok_or("loudnorm memory size overflow")?;
             if options
                 .max_controlled_bytes
@@ -219,6 +310,13 @@ pub fn apply_loudnorm(
         }
     }
     drop(bytes);
+    let report = output_report(
+        &output,
+        input.sample_rate as u32,
+        &params,
+        measurement,
+        &check,
+    )?;
     crate::owned_wav_file::write_wav_f32le_with_side_data_checked(
         destination,
         input.sample_rate,
@@ -228,6 +326,9 @@ pub fn apply_loudnorm(
         &[],
         check,
     )?;
+    if let Some(report) = report {
+        print_report(params.print, report, params.target_i, "linear");
+    }
     event.done = true;
     if let Some(hook) = &options.progress {
         hook.emit(event);
@@ -268,6 +369,7 @@ fn apply_dynamic(
     args: String,
     params: Parameters,
     options: &CopyOptions,
+    measurement: Option<&crate::owned_wave_loudness::NormalizationMeasurement>,
 ) -> Result<LoudnormStats> {
     use std::io::Write;
     if !policies(options) || destination.extension().and_then(|s| s.to_str()) != Some("wav") {
@@ -433,6 +535,7 @@ fn apply_dynamic(
         output
     };
     drop(data);
+    let report = output_report(&output, 192000, &params, measurement, &check)?;
     crate::owned_wav_file::write_wav_f32le_with_side_data_checked(
         destination,
         192000,
@@ -442,6 +545,18 @@ fn apply_dynamic(
         &[],
         check,
     )?;
+    if let Some(report) = report {
+        print_report(
+            params.print,
+            report,
+            params.target_i,
+            if frames >= 576000 {
+                "dynamic"
+            } else {
+                "linear"
+            },
+        );
+    }
     event.done = true;
     if let Some(hook) = &options.progress {
         hook.emit(event);
@@ -464,6 +579,42 @@ fn apply_dynamic(
 mod tests {
     use super::*;
     const ARGS: &str = "I=-16:TP=-1.5:LRA=11:measured_I=-22:measured_TP=-12:measured_LRA=2:measured_thresh=-32:linear=true";
+    #[test]
+    fn dual_measurement_cancel_does_not_publish_or_signal_completion() {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/loudnorm-dual.wav");
+        let dest =
+            std::env::temp_dir().join(format!("fvid-dual-cancel-{}.wav", std::process::id()));
+        let _ = std::fs::remove_file(&dest);
+        let cancel = fvid_control::CancelFlag::default();
+        let hook_cancel = cancel.clone();
+        let options = CopyOptions {
+            cancel: Some(cancel),
+            progress: Some(fvid_control::ProgressHook::new(move |event| {
+                assert!(!event.done, "measurement must not finish the export");
+                if event.payload_bytes >= 384000 * 2 {
+                    hook_cancel.cancel();
+                }
+            })),
+            ..CopyOptions::default()
+        };
+        assert!(apply_loudnorm_dual(&source, &dest, None, &options).is_err());
+        assert!(!dest.exists());
+    }
+
+    #[test]
+    fn dual_zero_lra_uses_dynamic_fallback_without_ffmpeg() {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/loudnorm-dynamic.wav");
+        let dest =
+            std::env::temp_dir().join(format!("fvid-dual-dynamic-{}.wav", std::process::id()));
+        let stats = apply_loudnorm_dual(&source, &dest, None, &CopyOptions::default()).unwrap();
+        assert!(stats.dual_pass);
+        assert_eq!(stats.backend, "fvid dynamic loudnorm");
+        assert_eq!(stats.sample_frames, 576000);
+        std::fs::remove_file(dest).unwrap();
+    }
+
     #[test]
     fn feedback_fixture_recovers_loudness_between_isolated_peaks() {
         let fixtures =

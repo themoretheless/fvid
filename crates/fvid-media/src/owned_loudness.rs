@@ -217,9 +217,32 @@ impl LoudnessMeter {
         }
         (kept > 0).then(|| -0.691 + 10. * (energy / kept as f64).log10())
     }
+    /// Relative gate from the absolute-gated block energies, before the final
+    /// relative-gate selection. It is not integrated loudness minus ten when
+    /// quieter blocks have been discarded by that second gate.
+    pub(crate) fn relative_gate_lufs(&self) -> f64 {
+        let count: u64 = self.energies.values().map(|entry| entry.0).sum();
+        let energy: f64 = self.energies.values().map(|entry| entry.1).sum();
+        if count == 0 {
+            -70.
+        } else {
+            -0.691 + 10. * (energy / count as f64).log10() - 10.
+        }
+    }
 }
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn normalization_threshold_uses_absolute_gated_energy() {
+        let mut meter = super::LoudnessMeter::new(48000, &[1.]).unwrap();
+        meter.energies.insert(-20, (1, 0.01));
+        meter.energies.insert(-50, (9, 0.00009));
+        let expected = -0.691 + 10. * (0.01009f64 / 10.).log10() - 10.;
+        assert!((meter.relative_gate_lufs() - expected).abs() < 1e-12);
+        let final_i = meter.report().integrated_lufs.unwrap();
+        assert!((meter.relative_gate_lufs() - (final_i - 10.)).abs() > 9.);
+    }
+
     use super::*;
     #[test]
     fn peak_is_unweighted_and_rejected_input_does_not_change_it() {
