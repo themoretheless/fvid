@@ -844,3 +844,97 @@ fn pixelize_and_chroma_shift_compositions_use_shared_library_kernels() {
         assert_eq!(stats.video_frames, 3);
     }
 }
+
+#[test]
+fn y4m_plane_shuffle_preserves_or_promotes_chroma_and_matches_frontend() {
+    for layout in ["420", "422", "444"] {
+        for depth in [8u8, 10, 16] {
+            let chroma = if depth == 8 {
+                layout.into()
+            } else {
+                format!("{layout}p{depth}")
+            };
+            let text = format!("YUV4MPEG2 W8 H6 F30:1 C{chroma}\n");
+            let header = fvid_media::owned_y4m::Header::parse(text.as_bytes()).unwrap();
+            let step = if depth == 8 { 1 } else { 2 };
+            let pixels: Vec<u8> = (0..header.frame_len().unwrap() / step)
+                .flat_map(|i| {
+                    let v = (i * 113 % (1usize << depth)) as u16;
+                    if step == 1 {
+                        vec![v as u8]
+                    } else {
+                        v.to_le_bytes().to_vec()
+                    }
+                })
+                .collect();
+            let source = [text.as_bytes(), b"FRAME\n", &pixels].concat();
+            for a in 0..3 {
+                for b in 0..3 {
+                    for c in 0..3 {
+                        let t = DecodeTransform {
+                            shuffleplanes: Some(format!("{a}:{b}:{c}")),
+                            negate: Some("".into()),
+                            horizontal_flip: true,
+                            ..Default::default()
+                        };
+                        let actual = fvid_media::owned_y4m_decode::transform_frame_requested(
+                            &header, &pixels, &t,
+                        )
+                        .unwrap();
+                        let data = fvid_media::owned_y4m_decode::transform_frame(
+                            &header, &pixels, None, true, false,
+                        )
+                        .unwrap();
+                        let subsampling = match layout {
+                            "420" => [2, 2],
+                            "422" => [2, 1],
+                            _ => [1, 1],
+                        };
+                        let mut expected = fvid::native_geometry::GeometryFrame {
+                            width: 8,
+                            height: 6,
+                            subsampling: Some(subsampling),
+                            data,
+                        };
+                        fvid::native_pixels::PixelFilters::from_request(&t)
+                            .unwrap()
+                            .apply(&mut expected, depth)
+                            .unwrap();
+                        assert_eq!(actual, expected.data, "{chroma} {a}:{b}:{c}");
+                        let stats = fvid_media::owned_y4m_decode::decode_reader_transformed(
+                            Cursor::new(&source),
+                            &t,
+                        )
+                        .unwrap();
+                        let output_layout = if layout == "444" || a != 0 || b == 0 || c == 0 {
+                            "444"
+                        } else {
+                            layout
+                        };
+                        let format = if depth == 8 {
+                            format!("yuv{output_layout}p")
+                        } else {
+                            format!("yuv{output_layout}p{depth}le")
+                        };
+                        assert_eq!(stats.pixel_format, format);
+                    }
+                }
+            }
+        }
+    }
+    let header = fvid_media::owned_y4m::Header::parse(b"YUV4MPEG2 W2 H2 C420\n").unwrap();
+    let t = DecodeTransform {
+        shuffleplanes: Some("1:0:2".into()),
+        ..Default::default()
+    };
+    assert_eq!(
+        fvid_media::owned_y4m_decode::transform_frame_requested(&header, &[1, 2, 3, 4, 5, 6], &t)
+            .unwrap(),
+        vec![5, 5, 5, 5, 1, 2, 3, 4, 6, 6, 6, 6]
+    );
+    let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/wave-probe-info.y4m");
+    let stats = fvid_media::decode_video_transformed(&source, t).unwrap();
+    assert_eq!(stats.pixel_format, "yuv444p");
+    assert_eq!(stats.backend, "owned Y4M planar decode");
+}

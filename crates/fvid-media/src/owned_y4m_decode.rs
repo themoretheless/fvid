@@ -31,9 +31,13 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
 }
 fn supported_request(transform: &DecodeTransform) -> bool {
     transform
-        .pixelize
+        .shuffleplanes
         .as_deref()
-        .is_none_or(|a| crate::owned_pixelize::Pixelize::parse(a).is_ok())
+        .is_none_or(|a| crate::owned_shuffleplanes::ShufflePlanes::parse(a).is_ok())
+        && transform
+            .pixelize
+            .as_deref()
+            .is_none_or(|a| crate::owned_pixelize::Pixelize::parse(a).is_ok())
         && transform
             .chromashift
             .as_deref()
@@ -65,6 +69,7 @@ fn supported_request(transform: &DecodeTransform) -> bool {
                 boxblur: transform.boxblur.clone(),
                 pixelize: transform.pixelize.clone(),
                 chromashift: transform.chromashift.clone(),
+                shuffleplanes: transform.shuffleplanes.clone(),
                 horizontal_flip: transform.horizontal_flip,
                 vertical_flip: transform.vertical_flip,
                 interval: transform.interval,
@@ -192,6 +197,7 @@ fn apply_pixel_filters(
         || transform.boxblur.is_some()
         || transform.pixelize.is_some()
         || transform.chromashift.is_some()
+        || transform.shuffleplanes.is_some()
     {
         let (crop, _) = crop_geometry(header, transform.crop)?;
         let (width, height, _) = output_geometry(
@@ -230,6 +236,17 @@ fn apply_pixel_filters(
             if let Some(args) = transform.chromashift.as_deref() {
                 crate::owned_chromashift::ChromaShift::parse(args)?
                     .apply(&mut frame, header.depth())?;
+            }
+            if let Some(args) = transform.shuffleplanes.as_deref() {
+                frame.subsampling = Some(
+                    crate::owned_shuffleplanes::ShufflePlanes::parse(args)?.apply_yuv(
+                        &mut frame.data,
+                        width,
+                        height,
+                        subsampling,
+                        header.depth(),
+                    )?,
+                );
             }
             Ok(())
         })();
@@ -407,7 +424,8 @@ pub fn decode_reader_transformed(
         || transform.avgblur.is_some()
         || transform.boxblur.is_some()
         || transform.pixelize.is_some()
-        || transform.chromashift.is_some();
+        || transform.chromashift.is_some()
+        || transform.shuffleplanes.is_some();
     let mut input = Vec::new();
     if geometry {
         input
@@ -474,7 +492,14 @@ pub fn decode_reader_transformed(
         }
         index = index.checked_add(1).ok_or("Y4M frame count overflow")?;
     }
+    let promote = transform
+        .shuffleplanes
+        .as_deref()
+        .map(crate::owned_shuffleplanes::ShufflePlanes::parse)
+        .transpose()?
+        .is_some_and(|f| f.mapping[0] != 0 || f.mapping[1] == 0 || f.mapping[2] == 0);
     let layout = match header.format {
+        _ if promote => "444",
         PixelFormat::Yuv420 => "420",
         PixelFormat::Yuv422 if transform.transpose.is_some() => "440",
         PixelFormat::Yuv422 => "422",

@@ -136,3 +136,11 @@ with FVID_REFERENCE_FFMPEG. All 65 pixelize and 92 chromashift reference cases
 retain their synthetic input, layout/depth and option matrices. Ordinary tests
 retain known-pixel/edge expectations and decoder/CLI/invalid-storage checks
 without an external executable, including when explicitly running ignored tests.
+
+Owned Y4M decode now admits shuffleplanes and runs the existing library kernel
+last in the pixel filter pipeline. Cross-size mappings point-expand to 4:4:4;
+compatible chroma mappings retain original sampling (including transposed axes).
+DecodeStats reports the resulting pixel format even for an empty interval. Tests
+cover all 243 mapping/layout/depth combinations, frontend pipeline agreement,
+independent known promotion pixels and public dispatch. Existing committed
+shuffleplane synthetic controls continue to validate the underlying kernel.
