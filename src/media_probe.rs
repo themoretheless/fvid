@@ -1,5 +1,6 @@
 //! Container-only descriptions, without opening an external demuxer/decoder.
 pub use fvid_media_info::{ChapterInfo, MediaInfo, StreamInfo};
+pub use fvid_media::owned_webm_probe::declared_video_frame_rate;
 type Result<T> = std::result::Result<T, String>;
 use std::{collections::BTreeMap, fs::File, io::BufReader, path::Path};
 

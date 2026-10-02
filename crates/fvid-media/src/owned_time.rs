@@ -196,3 +196,35 @@ mod capacity_tests {
         assert!(rescale_ceil(i64::MAX, target, source).is_err());
     }
 }
+
+/// Exact frame-rate metadata from a declared duration in nanoseconds.
+/// Missing durations or rates outside the public signed-rational range stay unknown.
+pub fn frame_rate_from_duration_ns(duration: u64) -> [i32; 2] {
+    if duration == 0 {
+        return [0, 1];
+    }
+    let (mut a, mut b) = (1_000_000_000u64, duration);
+    while b != 0 {
+        (a, b) = (b, a % b);
+    }
+    match (
+        i32::try_from(1_000_000_000 / a),
+        i32::try_from(duration / a),
+    ) {
+        (Ok(n), Ok(d)) => [n, d],
+        _ => [0, 1],
+    }
+}
+#[cfg(test)]
+mod frame_rate_tests {
+    use super::frame_rate_from_duration_ns as rate;
+    #[test]
+    fn declared_duration_is_reduced_without_rounding_to_a_nominal_rate() {
+        assert_eq!(rate(0), [0, 1]);
+        assert_eq!(rate(40_000_000), [25, 1]);
+        assert_eq!(rate(16_666_667), [1_000_000_000, 16_666_667]);
+        assert_eq!(rate(10_000_000_000), [1, 10]);
+        assert_eq!(rate(4_000_000_001), [0, 1]);
+        assert_eq!(rate(u64::MAX), [0, 1]);
+    }
+}

@@ -234,3 +234,31 @@ An explicit libavutil reference verified 484 source/destination combinations
 across the 22 layouts used above, including custom-to-inline replacement,
 map identifiers, names, opaque fields, and repeated cleanup. All results
 matched. The legacy/player configuration compiled and diff checks passed.
+
+## Owned Matroska declared frame-rate query
+
+`owned_webm_probe::declared_video_frame_rate`, also exposed through the native
+probe entry point, reads a selected video track's declared cadence without
+libav or codec inference. It reduces 1,000,000,000 / DefaultDuration exactly;
+non-video tracks, missing durations and unrepresentable signed rational rates
+return no declared rate. Invalid stream indices are errors.
+
+DefaultDuration is a nominal per-frame duration in nanoseconds, independent
+of TimestampScale. It is not a measured average: existing average_frame_rate
+metadata deliberately remains unchanged. See RFC 9559 section 5.1.4.1.13:
+https://datatracker.ietf.org/doc/html/rfc9559#section-5.1.4.1.13
+
+The 215-byte `matroska-default-duration-60fps.mkv` is two own-encoded FFV1
+monochrome frames with 16,666,667 ns declared duration and millisecond-rounded
+block timestamps. Its separate generator uses Rust/Python, with no FFmpeg or
+network. All sixteen generator outputs regenerate byte-for-byte; the previous
+fifteen artifacts remain unchanged. Acceptance checks cover exact declared
+rate, unchanged average semantics, invalid index, audio exclusion, and decoding
+both frames. This query does not switch the production legacy probe wholesale;
+its remaining metadata parity and backend dependency still require migration.
+
+Validation: 138 owned library tests and all ten native Matroska-probe/FFV1
+integration tests passed with an empty test PATH. The library binary's direct
+Mach-O dependencies contain no libav, swscale or swresample. Legacy/player
+compilation passed. The source/fixture/validator policy and four supported
+native dependency graphs passed; these graphs exclude production legacy media.

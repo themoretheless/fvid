@@ -166,3 +166,23 @@ mod tests {
         std::fs::remove_file(path).unwrap();
     }
 }
+
+/// Read a Matroska video's declared nominal cadence, separately from measured average FPS.
+/// `DefaultDuration` is in nanoseconds, independent of the segment timestamp scale.
+/// Missing durations and non-video streams return `None`; stream indices follow probe order.
+pub fn declared_video_frame_rate(path: &Path, stream: usize) -> Result<Option<[i32; 2]>, String> {
+    let reader = WebmReader::open(
+        BufReader::new(File::open(path).map_err(|e| e.to_string())?),
+        Limits::default(),
+    )
+    .map_err(|e| e.to_string())?;
+    let track = reader
+        .tracks
+        .get(stream)
+        .ok_or("Matroska stream index out of range")?;
+    if track.kind != 1 {
+        return Ok(None);
+    }
+    let rate = crate::owned_time::frame_rate_from_duration_ns(track.default_duration_ns);
+    Ok((rate != [0, 1]).then_some(rate))
+}

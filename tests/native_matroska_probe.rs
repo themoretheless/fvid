@@ -84,3 +84,33 @@ fn chapters_tags_and_cli_are_preserved() {
     assert_eq!(json["chapters"].as_array().unwrap().len(), 3);
     assert!(fvid::native_probe::probe_as(&fixture("video.mp4"), Some("matroska")).is_err());
 }
+
+#[test]
+fn declared_sixty_fps_is_separate_from_measured_average_and_quantized_pts() {
+    let source = fixture("playback-errors/matroska-default-duration-60fps.mkv");
+    let info = fvid::native_probe::probe(&source).unwrap();
+    assert_eq!(info.streams[0].average_frame_rate, [0, 1]);
+    assert_eq!(
+        fvid::native_probe::declared_video_frame_rate(&source, 0).unwrap(),
+        Some([1_000_000_000, 16_666_667])
+    );
+    assert!(fvid::native_probe::declared_video_frame_rate(&source, 1).is_err());
+    assert_eq!(
+        fvid::native_probe::declared_video_frame_rate(&fixture("audio/aac-stereo.mka"), 0).unwrap(),
+        None
+    );
+    let bytes = std::fs::read(&source).unwrap();
+    let mut reader =
+        fvid::playback_native::NativeReader::software(std::io::Cursor::new(bytes), 1 << 20)
+            .unwrap();
+    for _ in 0..2 {
+        assert!(reader.read_frame().unwrap());
+        assert_eq!(reader.rgb().len(), 4 * 3 * 3);
+    }
+    assert!(!reader.read_frame().unwrap());
+    let hinted = fvid::native_probe::probe_as(&source, Some("matroska")).unwrap();
+    assert_eq!(
+        hinted.streams[0].average_frame_rate,
+        info.streams[0].average_frame_rate
+    );
+}
