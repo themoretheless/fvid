@@ -3867,6 +3867,9 @@ pub fn plan_mix_audio(sources: &[PathBuf], options: &crate::MixAudioOptions) -> 
 }
 
 fn default_layout_name(channels: i32) -> Result<String> {
+    if let Some(layout) = u16::try_from(channels).ok().and_then(crate::owned_pcm_channels::default_layout) {
+        return Ok(layout.name.into());
+    }
     // SAFETY: default layout for N is built and described into a UTF-8 buffer.
     unsafe {
         let mut layout = AVChannelLayout {
@@ -3875,7 +3878,7 @@ fn default_layout_name(channels: i32) -> Result<String> {
             u: std::mem::zeroed(),
             opaque: ptr::null_mut(),
         };
-        av_channel_layout_default(&mut layout, channels);
+        channel_layout_default_owned(&mut layout, channels);
         if layout.nb_channels != channels {
             av_channel_layout_uninit(&mut layout);
             return Err("failed to build default channel layout".into());

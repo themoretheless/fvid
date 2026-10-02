@@ -364,6 +364,25 @@ fn check(code: i32, operation: &str) -> Result<()> {
     let detail = unsafe { CStr::from_ptr(buffer.as_ptr()) }.to_string_lossy();
     Err(format!("{operation}: {detail} ({code})"))
 }
+/// # Safety
+/// `layout` must point to a writable, uninitialized channel layout, following
+/// the existing backend initializer contract. No allocation is made for native masks.
+unsafe fn channel_layout_default_owned(layout: *mut AVChannelLayout, channels: i32) {
+    let description = u16::try_from(channels).ok().and_then(crate::owned_pcm_channels::default_layout);
+    // Unknown channel counts preserve an unspecified layout, without guessing speakers.
+    unsafe {
+        layout.write(AVChannelLayout {
+            order: if description.is_some() {
+                AVChannelOrder_AV_CHANNEL_ORDER_NATIVE
+            } else {
+                AVChannelOrder_AV_CHANNEL_ORDER_UNSPEC
+            },
+            nb_channels: channels,
+            u: AVChannelLayout__bindgen_ty_1 { mask: description.map_or(0, |layout| layout.mask) },
+            opaque: std::ptr::null_mut(),
+        });
+    }
+}
 fn owned_pixel_format_from_legacy(format: AVPixelFormat) -> Option<crate::owned_pixel_format::PixelFormat> {
     use crate::owned_pixel_format::PixelFormat;
     match format {

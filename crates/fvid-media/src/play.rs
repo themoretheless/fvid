@@ -15926,7 +15926,7 @@ impl PlayResampler {
             }
             let source = &*frame;
             let mut layout = std::mem::zeroed();
-            av_channel_layout_default(&mut layout, channels);
+            channel_layout_default_owned(&mut layout, channels);
             if layout.nb_channels != channels {
                 return Err("failed to build playback channel layout".into());
             }
@@ -16095,7 +16095,7 @@ mod owned_playback_audio_tests {
                 (*input.0).format = if planar { AVSampleFormat_AV_SAMPLE_FMT_FLTP } else { AVSampleFormat_AV_SAMPLE_FMT_FLT };
                 (*input.0).sample_rate = 48000;
                 (*input.0).nb_samples = 997;
-                av_channel_layout_default(&mut (*input.0).ch_layout, i32::from(input_channels));
+                channel_layout_default_owned(&mut (*input.0).ch_layout, i32::from(input_channels));
                 check(av_frame_get_buffer(input.0, 0), "playback test input").unwrap();
                 for sample in 0..997 {
                     for channel in 0..input_channels as usize {
@@ -16134,7 +16134,7 @@ mod owned_double_playback_tests {
                 (*input.0).format = if planar { AVSampleFormat_AV_SAMPLE_FMT_DBLP } else { AVSampleFormat_AV_SAMPLE_FMT_DBL };
                 (*input.0).sample_rate = 48000;
                 (*input.0).nb_samples = 997;
-                av_channel_layout_default(&mut (*input.0).ch_layout, i32::from(input_channels));
+                channel_layout_default_owned(&mut (*input.0).ch_layout, i32::from(input_channels));
                 check(av_frame_get_buffer(input.0, 0), "playback test input").unwrap();
                 for sample in 0..997 {
                     for channel in 0..input_channels as usize {
@@ -16176,7 +16176,7 @@ mod owned_integer_playback_tests {
                     (*input.0).format = if planar {planar_format} else {packed};
                     (*input.0).sample_rate = 48000;
                     (*input.0).nb_samples = 997;
-                    av_channel_layout_default(&mut (*input.0).ch_layout,input_channels);
+                    channel_layout_default_owned(&mut (*input.0).ch_layout,input_channels);
                     check(av_frame_get_buffer(input.0,0),"integer playback test input").unwrap();
                     for sample in 0..997 {
                         for channel in 0..input_channels as usize {
@@ -16226,7 +16226,7 @@ mod owned_s64_playback_tests {
                 (*input.0).format = if planar {AVSampleFormat_AV_SAMPLE_FMT_S64P} else {AVSampleFormat_AV_SAMPLE_FMT_S64};
                 (*input.0).sample_rate = 48000;
                 (*input.0).nb_samples = 997;
-                av_channel_layout_default(&mut (*input.0).ch_layout,input_channels);
+                channel_layout_default_owned(&mut (*input.0).ch_layout,input_channels);
                 check(av_frame_get_buffer(input.0,0),"S64 playback test input").unwrap();
                 for sample in 0..997 {
                     for channel in 0..input_channels as usize {

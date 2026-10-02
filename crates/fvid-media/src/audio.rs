@@ -161,7 +161,7 @@ impl Resampler {
                     "copy resampler channel layout",
                 )?;
             } else {
-                av_channel_layout_default(&mut ch_layout, out_channels);
+                channel_layout_default_owned(&mut ch_layout, out_channels);
                 if ch_layout.nb_channels != out_channels {
                     return Err("failed to build default channel layout".into());
                 }
@@ -1348,7 +1348,7 @@ mod owned_rate_tests {
                 (*input.0).format = if planar { AVSampleFormat_AV_SAMPLE_FMT_FLTP } else { AVSampleFormat_AV_SAMPLE_FMT_FLT };
                 (*input.0).sample_rate = 48000;
                 (*input.0).nb_samples = 997;
-                av_channel_layout_default(&mut (*input.0).ch_layout, i32::from(input_channels));
+                channel_layout_default_owned(&mut (*input.0).ch_layout, i32::from(input_channels));
                 check(av_frame_get_buffer(input.0, 0), "test input").unwrap();
                 for sample in 0..997 {
                     for channel in 0..input_channels as usize {
@@ -1394,7 +1394,7 @@ mod owned_double_rate_tests {
                 (*input.0).format = if planar { AVSampleFormat_AV_SAMPLE_FMT_DBLP } else { AVSampleFormat_AV_SAMPLE_FMT_DBL };
                 (*input.0).sample_rate = 48000;
                 (*input.0).nb_samples = 997;
-                av_channel_layout_default(&mut (*input.0).ch_layout, i32::from(input_channels));
+                channel_layout_default_owned(&mut (*input.0).ch_layout, i32::from(input_channels));
                 check(av_frame_get_buffer(input.0, 0), "test input").unwrap();
                 for sample in 0..997 {
                     for channel in 0..input_channels as usize {
@@ -1441,7 +1441,7 @@ mod owned_integer_tests {
                     (*input.0).format = if planar { planar_format } else { packed };
                     (*input.0).sample_rate = 48000;
                     (*input.0).nb_samples = 997;
-                    av_channel_layout_default(&mut (*input.0).ch_layout, 2);
+                    channel_layout_default_owned(&mut (*input.0).ch_layout, 2);
                     check(av_frame_get_buffer(input.0, 0), "integer test input").unwrap();
                     for sample in 0..997 {
                         for channel in 0..2 {
@@ -1505,7 +1505,7 @@ mod owned_s64_identity_tests {
                 (*input.0).format = if planar { AVSampleFormat_AV_SAMPLE_FMT_S64P } else { AVSampleFormat_AV_SAMPLE_FMT_S64 };
                 (*input.0).sample_rate = 48000;
                 (*input.0).nb_samples = 4;
-                av_channel_layout_default(&mut (*input.0).ch_layout, 2);
+                channel_layout_default_owned(&mut (*input.0).ch_layout, 2);
                 check(av_frame_get_buffer(input.0, 0), "S64 test input").unwrap();
                 for (index, &value) in values.iter().enumerate() {
                     let plane = *(*input.0).extended_data.add(if planar {index % 2} else {0});
@@ -1537,7 +1537,7 @@ mod owned_s64_transform_tests {
                 (*input.0).format = if planar { AVSampleFormat_AV_SAMPLE_FMT_S64P } else { AVSampleFormat_AV_SAMPLE_FMT_S64 };
                 (*input.0).sample_rate = 48000;
                 (*input.0).nb_samples = 997;
-                av_channel_layout_default(&mut (*input.0).ch_layout, 2);
+                channel_layout_default_owned(&mut (*input.0).ch_layout, 2);
                 check(av_frame_get_buffer(input.0, 0), "S64 transform input").unwrap();
                 for sample in 0..997 {
                     for channel in 0..2 {
