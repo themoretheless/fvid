@@ -34,7 +34,6 @@ pub(crate) fn supports(
 fn simple_options(options: &CopyOptions) -> bool {
     (options.streams.is_empty() || options.streams == [0])
         && options.max_controlled_bytes.is_none()
-        && options.max_rss_bytes.is_none()
         && options
             .metadata_set
             .iter()
@@ -93,7 +92,7 @@ pub fn decode_audio_transformed(
         {
             Err("media operation cancelled".to_owned())
         } else {
-            Ok(())
+            crate::owned_budget::check_rss_budget(options)
         }
     };
     let mut event = fvid_control::ProgressEvent {
@@ -796,6 +795,42 @@ mod limit_tests {
                 assert!(crate::decode_audio(&source, &invalid, &options).is_err());
                 assert!(!invalid.exists());
             }
+        }
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod rss_tests {
+    use super::*;
+    #[test]
+    fn public_wave_export_checks_requested_process_limit_without_legacy_admission() {
+        let dir = std::env::temp_dir().join(format!("fvid-wave-rss-export-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir(&dir).unwrap();
+        let source = dir.join("source.wav");
+        let absent = dir.join("absent.wav");
+        crate::owned_wav_file::write_wav_f32le(&source, 48000, 2, &[0.25; 16]).unwrap();
+        let options = CopyOptions {
+            max_rss_bytes: Some(0),
+            ..Default::default()
+        };
+        assert!(supports(&source, &absent, Default::default(), &options));
+        let error = crate::decode_audio(&source, &absent, &options).unwrap_err();
+        assert!(error.contains("rss"));
+        assert!(!absent.exists());
+        if crate::owned_budget::process_rss_bytes().is_some() {
+            let output = dir.join("output.wav");
+            let options = CopyOptions {
+                max_rss_bytes: Some(u64::MAX),
+                ..Default::default()
+            };
+            assert!(supports(&source, &output, Default::default(), &options));
+            crate::decode_audio(&source, &output, &options).unwrap();
+            assert_eq!(
+                std::fs::read(&source).unwrap(),
+                std::fs::read(&output).unwrap()
+            );
         }
         std::fs::remove_dir_all(dir).unwrap();
     }
