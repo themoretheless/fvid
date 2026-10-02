@@ -294,3 +294,144 @@ fn compressed_packet_limit_refuses_without_publication_in_each_container() {
         assert!(!output.exists());
     }
 }
+
+#[test]
+fn encoded_packet_prefix_preserves_presentation_and_is_not_a_pcm_block_limit() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let dir = std::env::temp_dir().join(format!("fvid-encoded-prefix-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    // Expected frame counts include MP4 priming, rounded windows and repeated
+    // ranges. Decoder preroll and repeated packet work count toward the limit.
+    for (index, (name, selected, packets, frames)) in [
+        ("audio/aac-mono-44k.aac", 0, 3, 3072),
+        ("audio/aac-native-edit.m4a", 0, 3, 2048),
+        ("audio/aac-stereo.mka", 0, 3, 2048),
+        ("playback-errors/aac-rounded-two-tracks.m4a", 1, 3, 2056),
+        ("playback-errors/alac-two-tracks.m4a", 1, 2, 8192),
+        ("playback-errors/aac-gap-repeat-offset.m4a", 0, 6, 2296),
+        ("playback-errors/aac-gap-repeat-offset.m4a", 0, 12, 7096),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let source = root.join("tests/fixtures").join(name);
+        let full = dir.join(format!("full-{index}.wav"));
+        let prefix = dir.join(format!("prefix-{index}.wav"));
+        let expected = dir.join(format!("expected-{index}.wav"));
+        let output = dir.join(format!("output-{index}.wav"));
+        let decoded = fvid::native_export::export_audio_pcm_selected(
+            &source,
+            &full,
+            None,
+            1.,
+            None,
+            None,
+            Some(selected),
+            None,
+            None,
+        )
+        .unwrap();
+        let mut file = std::fs::File::open(&full).unwrap();
+        let info = fvid_media::owned_wave_inspect::inspect(&mut file, None).unwrap();
+        let bytes = std::fs::read(&full).unwrap();
+        let payload_bytes = frames * usize::from(decoded.channels) * 4;
+        let offset = info.data_offset as usize;
+        let mut clipped = bytes[..offset + payload_bytes].to_vec();
+        let riff_size = (clipped.len() - 8) as u32;
+        clipped[4..8].copy_from_slice(&riff_size.to_le_bytes());
+        clipped[offset - 4..offset].copy_from_slice(&(payload_bytes as u32).to_le_bytes());
+        let mut at = 12;
+        while at < offset - 8 {
+            let size = u32::from_le_bytes(clipped[at + 4..at + 8].try_into().unwrap()) as usize;
+            if &clipped[at..at + 4] == b"fact" {
+                clipped[at + 8..at + 12].copy_from_slice(&(frames as u32).to_le_bytes());
+            }
+            at += 8 + size + (size & 1);
+        }
+        std::fs::write(&prefix, clipped).unwrap();
+        let expected_stats = fvid_media::owned_loudnorm::apply_loudnorm_dual(
+            &prefix,
+            &expected,
+            None,
+            &Default::default(),
+        )
+        .unwrap();
+        let result = Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "loudnorm"])
+            .arg(&source)
+            .arg(&output)
+            .args([
+                "--dual-pass",
+                "--max-packet-bytes",
+                if name.contains("alac") {
+                    "65536"
+                } else {
+                    "1024"
+                },
+                "--max-packets",
+                &packets.to_string(),
+                "--streams",
+                &selected.to_string(),
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{name}: {}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let stats: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        assert_eq!(stats["backend"], expected_stats.backend);
+        assert_eq!(
+            stats["sample_frames"], expected_stats.sample_frames,
+            "{name}"
+        );
+        let actual = std::fs::read(output).unwrap();
+        let expected = std::fs::read(expected).unwrap();
+        assert!(
+            actual == expected,
+            "{name}: first byte difference {:?}; lengths {} vs {}",
+            actual.iter().zip(&expected).position(|(a, b)| a != b),
+            actual.len(),
+            expected.len()
+        );
+    }
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn synthetic_prefix_stops_before_truncated_tail_and_zero_count_never_publishes() {
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    let source = root.join("aac-packet-prefix.aac");
+    let video = root.join("aac-packet-prefix.y4m");
+    assert_eq!(
+        fvid::native_media::decode_video(&video)
+            .unwrap()
+            .video_frames,
+        3
+    );
+    let output = std::env::temp_dir().join(format!("fvid-short-prefix-{}.wav", std::process::id()));
+    let _ = std::fs::remove_file(&output);
+    let error =
+        fvid::native_loudnorm::try_apply(&source, &output, None, false, &Default::default())
+            .unwrap_err();
+    assert!(error.to_string().contains("fill whole buffer"), "{error}");
+    assert!(!output.exists());
+    let options = fvid_media::CopyOptions {
+        max_packets: Some(0),
+        ..Default::default()
+    };
+    assert!(fvid::native_loudnorm::try_apply(&source, &output, None, false, &options).is_err());
+    assert!(!output.exists());
+    let options = fvid_media::CopyOptions {
+        max_packets: Some(3),
+        ..Default::default()
+    };
+    let stats = fvid::native_loudnorm::try_apply(&source, &output, None, false, &options)
+        .unwrap()
+        .unwrap();
+    assert_eq!(stats.backend, "fvid short loudnorm");
+    assert_eq!(stats.sample_frames, (3072u64 * 192000).div_ceil(44100));
+    std::fs::remove_file(output).unwrap();
+}

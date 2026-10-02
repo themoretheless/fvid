@@ -401,7 +401,7 @@ pub fn export_aac_pcm_selected(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,false,None,None)
+    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,false,None,None,None)
 }
 
 /// Export owned AAC, MP4 ALAC or packed RIFF/WAVE PCM through the shared PCM pipeline.
@@ -416,7 +416,7 @@ pub fn export_audio_pcm_selected(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,true,None,None)
+    export_pcm_selected(source,destination,interval,volume,channels,sample_rate,selected,cancel,progress,true,None,None,None)
 }
 
 /// Export selected owned audio while checking process RSS before decoding and
@@ -429,7 +429,7 @@ pub fn export_audio_pcm_selected_with_rss_limit(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    export_pcm_selected(source, destination, None, 1., None, None, selected, cancel, progress, true, max_rss_bytes, None)
+    export_pcm_selected(source, destination, None, 1., None, None, selected, cancel, progress, true, max_rss_bytes, None, None)
 }
 
 /// Export selected owned audio with encoded-payload and process RSS limits.
@@ -443,7 +443,20 @@ pub fn export_audio_pcm_selected_with_limits(
     cancel: Option<&crate::media_control::CancelFlag>,
     progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    export_pcm_selected(source, destination, None, 1., None, None, selected, cancel, progress, true, max_rss_bytes, Some(max_packet_bytes))
+    export_pcm_selected(source, destination, None, 1., None, None, selected, cancel, progress, true, max_rss_bytes, Some(max_packet_bytes), None)
+}
+
+/// Internal compressed-audio spooling controls. Unmigrated admission/metadata
+/// policies are qualified by the caller before entering this bridge.
+pub(crate) fn export_audio_pcm_selected_with_controls(
+    source: &Path,
+    destination: &Path,
+    selected: Option<usize>,
+    options: &fvid_media::CopyOptions,
+) -> Result<crate::native_media::AudioDecodeStats> {
+    export_pcm_selected(source, destination, None, 1., None, None, selected,
+        options.cancel.as_ref(), options.progress.as_ref(), true, options.max_rss_bytes,
+        Some(options.max_packet_bytes), options.max_packets)
 }
 
 fn export_pcm_selected(
@@ -459,8 +472,9 @@ fn export_pcm_selected(
     allow_wave:bool,
     max_rss_bytes: Option<u64>,
     max_packet_bytes: Option<usize>,
+    max_packets: Option<u64>,
 ) -> Result<crate::native_media::AudioDecodeStats> {
-    let mut control = crate::native_media::DecodeProgress::new_with_rss_limit(cancel, progress, max_rss_bytes)?;
+    let mut control = crate::native_media::DecodeProgress::new_with_limits(cancel, progress, max_rss_bytes, max_packets)?;
     if sample_rate.is_some_and(|rate| !(8000..=384000).contains(&rate)) {
         return Err(invalid("sample rate must be within 8000..=384000"));
     }

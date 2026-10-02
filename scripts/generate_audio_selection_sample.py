@@ -165,6 +165,20 @@ def main():
         'aac-two-tracks.m4a': mux([mono, short_stereo], [(7168, 0), (7200, 1024)]),
         'aac-no-edit.m4a': mux([stereo], [None]),
     }
+    def adts_header(payload_size):
+        size = payload_size + 7
+        if size > 8191:
+            raise ValueError('synthetic ADTS frame too large')
+        return bytes([0xff, 0xf1, 0x50, 0x40 | (size >> 11), (size >> 3) & 255,
+                      ((size & 7) << 5) | 31, 0xfc])
+    # Three valid packets, followed by an incomplete fourth header. A three-
+    # packet prefix must not read that tail; an unbounded decode must refuse it.
+    packets = mono[2]
+    fixtures['aac-packet-prefix.aac'] = b''.join(adts_header(len(p)) + p for p in packets[:3]) + adts_header(len(packets[3]))[:6]
+    video = b'YUV4MPEG2 W16 H16 F44100:1024 Ip A1:1 C420jpeg\n'
+    for value in (32, 96, 160):
+        video += b'FRAME\n' + bytes([value]) * 256 + bytes([128]) * 128
+    fixtures['aac-packet-prefix.y4m'] = video
     for name, data in fixtures.items():
         (OUTPUT / name).write_bytes(data)
         print(name, len(data))

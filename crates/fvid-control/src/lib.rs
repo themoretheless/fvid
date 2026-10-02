@@ -54,7 +54,9 @@ pub struct CopyOptions {
     /// Empty selects every stream; otherwise indices are preserved in this order.
     pub streams: Vec<usize>,
     pub max_packet_bytes: usize,
-    /// Optional hard stop after this many muxed packets (native budget slice).
+    /// Optional hard stop after this many operation-specific packets.
+    /// A decoder counts selected compressed packets, including preroll; a muxer
+    /// counts copied packets. Multi-phase adapters apply the limit to input work.
     pub max_packets: Option<u64>,
     /// Optional admission limit on estimated decoder DPB + Fvid scratch bytes.
     /// Not a promise of peak process RSS.

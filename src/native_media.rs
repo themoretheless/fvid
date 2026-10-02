@@ -175,6 +175,7 @@ pub(crate) struct DecodeProgress<'a> {
     cancel: Option<&'a crate::media_control::CancelFlag>,
     hook: Option<&'a crate::media_control::ProgressHook>,
     max_rss_bytes: Option<u64>,
+    max_packets: Option<u64>,
     event: crate::media_control::ProgressEvent,
 }
 impl<'a> DecodeProgress<'a> {
@@ -182,7 +183,10 @@ impl<'a> DecodeProgress<'a> {
         Self::new_with_rss_limit(cancel, hook, None)
     }
     pub(crate) fn new_with_rss_limit(cancel: Option<&'a crate::media_control::CancelFlag>, hook: Option<&'a crate::media_control::ProgressHook>, max_rss_bytes: Option<u64>) -> Result<Self> {
-        let state = Self { cancel, hook, max_rss_bytes, event: crate::media_control::ProgressEvent { packets: 0, payload_bytes: 0, done: false } };
+        Self::new_with_limits(cancel, hook, max_rss_bytes, None)
+    }
+    pub(crate) fn new_with_limits(cancel: Option<&'a crate::media_control::CancelFlag>, hook: Option<&'a crate::media_control::ProgressHook>, max_rss_bytes: Option<u64>, max_packets: Option<u64>) -> Result<Self> {
+        let state = Self { cancel, hook, max_rss_bytes, max_packets, event: crate::media_control::ProgressEvent { packets: 0, payload_bytes: 0, done: false } };
         state.check()?;
         state.emit(false);
         state.check()?;
@@ -195,6 +199,9 @@ impl<'a> DecodeProgress<'a> {
             fvid_media::owned_budget::check_rss_budget(&options).map_err(|e| invalid(&e))?;
         }
         Ok(())
+    }
+    pub(crate) fn packet_limit_reached(&self) -> bool {
+        self.max_packets.is_some_and(|maximum| self.event.packets >= maximum)
     }
     pub(crate) fn emit(&self, done: bool) {
         if let Some(hook) = self.hook { hook.emit(crate::media_control::ProgressEvent { done, ..self.event }); }
@@ -323,6 +330,7 @@ pub(crate) fn decode_adts_aac_reader_controlled<R: std::io::Read>(
     let mut position = 0u64;
     while position < to {
         control.check()?;
+        if control.packet_limit_reached() { break; }
         let Some(packet) = reader.next_packet()? else { break; };
         let samples = decoder.decode(&packet)?;
         let frames = (samples.len() / channels) as u64;
@@ -448,6 +456,8 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
     // number of edits. The stream and configuration never change in this call.
     let mut checkpoint: Option<(usize,u64,Option<u64>,crate::codec::aac_native::AacCheckpoint)> = None;
     for segment in segments {
+        control.check()?;
+        if control.packet_limit_reached() { break; }
         let segment_start = segment.presentation.start;
         let segment_end = segment.presentation.end;
         let source = segment.source_start;
@@ -487,6 +497,7 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
         let mut written = 0u64;
         for sample_index in first_sample..track.samples.len() {
             control.check()?;
+            if control.packet_limit_reached() { break; }
             let sample = track
                 .samples
                 .get(sample_index)
@@ -534,7 +545,7 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
             stats.decoded_frames += 1;
             control.packet(packet.len())?;
         }
-        if written != length {
+        if written != length && !control.packet_limit_reached() {
             return Err(invalid("audio edit extends outside available samples"));
         }
         stats.sample_frames += written;
@@ -630,6 +641,7 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
     };
     for index in 0..reader.packets.len() {
         control.check()?;
+        if control.packet_limit_reached() { break; }
         let packet = reader.packets[index].clone();
         if packet.track != track.number {
             continue;

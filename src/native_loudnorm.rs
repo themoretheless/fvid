@@ -42,8 +42,8 @@ impl Spool {
 
 /// Route owned WAVE directly, or owned compressed audio through a temporary
 /// decoded WAVE. `None` leaves other formats/policies to the caller during
-/// migration. Compressed packet-count/allocation admission policies still need a decoder bridge;
-/// they are never silently treated as WAVE packet policies.
+/// migration. Compressed allocation admission still needs a decoder bridge;
+/// Remaining policies are never silently treated as WAVE packet policies.
 pub fn try_apply(
     source: &Path,
     destination: &Path,
@@ -70,8 +70,7 @@ pub fn try_apply(
         }
         return Ok(None);
     }
-    if options.max_packets.is_some()
-        || options.max_controlled_bytes.is_some()
+    if options.max_controlled_bytes.is_some()
         || !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty()
         || !options.stream_metadata_set.is_empty()
@@ -81,7 +80,8 @@ pub fn try_apply(
     }
     // PCE bootstrap can read the first ADTS payload during metadata inspection.
     // Check its declared size before any such preflight allocation.
-    if crate::native_export::is_adts_source(source)? {
+    let adts_source = crate::native_export::is_adts_source(source)?;
+    if adts_source {
         use std::io::Read;
         let mut prefix = [0; 7];
         std::fs::File::open(source)?.read_exact(&mut prefix)?;
@@ -106,6 +106,7 @@ pub fn try_apply(
     // choosing the first container stream when video precedes audio.
     let selected = match options.streams.first() {
         Some(&index) => index,
+        None if adts_source => 0,
         None => {
             crate::native_probe::probe(source)
                 .map_err(|e| crate::invalid(&e))?
@@ -137,17 +138,17 @@ pub fn try_apply(
             hook.emit(event);
         })
     });
-    crate::native_export::export_audio_pcm_selected_with_limits(
+    let mut decode_options = options.clone();
+    decode_options.progress = decode_hook;
+    crate::native_export::export_audio_pcm_selected_with_controls(
         source,
         &wave,
         Some(selected),
-        options.max_packet_bytes,
-        options.max_rss_bytes,
-        options.cancel.as_ref(),
-        decode_hook.as_ref(),
+        &decode_options,
     )?;
     let mut normalization_options = options.clone();
     normalization_options.streams = vec![0];
+    normalization_options.max_packets = None;
     normalization_options.max_packet_bytes = CopyOptions::default().max_packet_bytes;
     normalization_options.progress = options.progress.as_ref().map(|hook| {
         let hook = hook.clone();
