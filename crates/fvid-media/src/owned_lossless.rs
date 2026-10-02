@@ -209,3 +209,138 @@ pub fn transcode(
     }
     transcode_lossless(source, destination, transform, options)
 }
+
+/// Plan the same owned Y4M-to-FFV1 execution admitted by the export API.
+/// Unsupported requests are refused rather than advertised as executable.
+pub fn plan_transcode_lossless(
+    source: &Path,
+    transform: &LosslessTransform,
+    options: &CopyOptions,
+    encoder: Option<&str>,
+) -> Result<fvid_media_info::MediaPlan, String> {
+    use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
+    if encoder.is_some_and(|name| name != "ffv1") || !supports(source, transform, options) {
+        return Err("request has no owned lossless export plan".into());
+    }
+    metadata(options)?;
+    let info = crate::owned_y4m_probe::probe_y4m(source)?;
+    let mut steps = vec![PlanStep {
+        action: "decode".into(),
+        detail: "read progressive Y4M planar frames with the owned parser".into(),
+    }];
+    if let Some((from, to)) = transform.interval {
+        if from < 0 || to <= from {
+            return Err("lossless interval requires 0 <= from < to".into());
+        }
+        let mut input =
+            std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
+        let mut bytes = Vec::new();
+        crate::owned_y4m::line(&mut input, &mut bytes)?;
+        let header = crate::owned_y4m::Header::parse(&bytes)?;
+        let [n, d] = header.frame_rate()?;
+        if [from, to]
+            .into_iter()
+            .any(|time| time as u128 * n as u128 % (d as u128 * 1_000_000) != 0)
+        {
+            return Err("interval boundary is not exact in video time base".into());
+        }
+        steps.push(PlanStep {
+            action: "interval".into(),
+            detail: format!("presentation window [{from},{to}) µs"),
+        });
+    }
+    if *transform != LosslessTransform::default() {
+        steps.push(PlanStep {
+            action: "filter".into(),
+            detail: "apply requested geometry and pixel transforms in the owned frame pipeline"
+                .into(),
+        });
+    }
+    steps.push(PlanStep {
+        action: "encode".into(),
+        detail: "encode FFV1 with the owned encoder".into(),
+    });
+    steps.push(PlanStep {
+        action: "mux".into(),
+        detail: "write Matroska with the owned muxer".into(),
+    });
+    Ok(MediaPlan {
+        command: "transcode-lossless".into(), input: source.into(), inputs: vec![source.into()],
+        streams: info.streams.into_iter().map(|stream| PlanStream {
+            index: stream.index, media_type: stream.media_type, codec: stream.codec, disposition: "primary_video".into(),
+        }).collect(),
+        steps, graph: None,
+        notes: vec!["backend: owned Y4M/FFV1/Matroska; no external demuxer, filter graph or encoder".into(),
+            "destination must support the owned Matroska export; packet, cancellation and publication checks also run during execution".into()],
+    })
+}
+
+#[cfg(test)]
+mod plan_tests {
+    use super::*;
+    fn source() -> std::path::PathBuf {
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/shuffleplanes-444-8.y4m")
+    }
+    #[test]
+    fn owned_plan_matches_executed_filter_export() {
+        let source = source();
+        let transform = LosslessTransform {
+            negate: Some("".into()),
+            ..Default::default()
+        };
+        let options = CopyOptions::default();
+        let plan = plan_transcode_lossless(&source, &transform, &options, Some("ffv1")).unwrap();
+        assert_eq!(plan.streams.len(), 1);
+        assert_eq!(plan.streams[0].disposition, "primary_video");
+        assert_eq!(
+            plan.steps
+                .iter()
+                .map(|step| step.action.as_str())
+                .collect::<Vec<_>>(),
+            ["decode", "filter", "encode", "mux"]
+        );
+        assert!(plan.notes[0].starts_with("backend: owned"));
+        let directory =
+            std::env::temp_dir().join(format!("fvid-owned-lossless-plan-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        let output = directory.join("filtered.mkv");
+        let stats = transcode_lossless(&source, &output, transform.clone(), &options).unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert_eq!(stats.encoder, "ffv1");
+        assert!(stats.video_frames > 0);
+        let info = crate::owned_webm_probe::probe_webm(&output).unwrap();
+        assert_eq!(info.streams[0].codec, "ffv1");
+        #[cfg(feature = "legacy-ffmpeg")]
+        {
+            let public =
+                crate::plan_transcode_lossless(&source, &transform, &options, Some("ffv1"))
+                    .unwrap();
+            assert_eq!(public.steps, plan.steps);
+            assert_eq!(public.notes, plan.notes);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+    #[test]
+    fn plan_refuses_unsupported_execution_and_inexact_interval() {
+        let source = source();
+        let options = CopyOptions::default();
+        assert!(
+            plan_transcode_lossless(&source, &Default::default(), &options, Some("h264")).is_err()
+        );
+        let inexact = LosslessTransform {
+            interval: Some((1, 40_000)),
+            ..Default::default()
+        };
+        assert!(
+            plan_transcode_lossless(&source, &inexact, &options, None)
+                .unwrap_err()
+                .contains("not exact")
+        );
+        let unsupported = LosslessTransform {
+            gblur: Some("sigma=1".into()),
+            ..Default::default()
+        };
+        assert!(plan_transcode_lossless(&source, &unsupported, &options, None).is_err());
+    }
+}

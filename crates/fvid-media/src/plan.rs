@@ -2044,6 +2044,14 @@ pub fn plan_transcode_lossless(
     options: &CopyOptions,
     encoder: Option<&str>,
 ) -> Result<MediaPlan> {
+    if encoder.is_none_or(|name| name == "ffv1")
+        && crate::owned_lossless::supports(source, transform, options)
+    {
+        let mut plan =
+            crate::owned_lossless::plan_transcode_lossless(source, transform, options, encoder)?;
+        plan.graph = video_graph(transform);
+        return Ok(plan);
+    }
     let input = Input::open(source)?;
     let selected = selection(&input, options)?;
     let videos: Vec<_> = selected
