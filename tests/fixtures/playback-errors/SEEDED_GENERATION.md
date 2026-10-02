@@ -272,3 +272,13 @@ and colour-range tags are refused before writing output. The native converter's
 BT.601 matrix assumption is retained; primaries, transfer and HDR are not
 inferred from Y4M. General file tags and unsupported extensions remain outside
 this mapping.
+
+The existing library `transcode_lossless` API now dispatches qualified Y4M
+geometry/filter exports through owned FFV1/Matroska code. Without the legacy
+feature the same API is exported directly. Structural admission checks every
+transform field, so unsupported options are never silently dropped; unsupported
+legacy requests retain their previous backend during migration. Intervals/seek,
+metadata editing and allocation/RSS budgets are not qualified by this adapter.
+The public API regression uses the committed synthetic aspect/range fixture,
+checks complete output against owned writer bytes, and verifies that a one-byte
+encoded-packet limit refuses publication and cleans the temporary output.

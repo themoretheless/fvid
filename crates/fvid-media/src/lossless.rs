@@ -4965,6 +4965,9 @@ pub fn transcode_lossless(
     transform: LosslessTransform,
     options: &CopyOptions,
 ) -> Result<LosslessStats> {
+    if crate::owned_lossless::supports(source, &transform, options) {
+        return crate::owned_lossless::transcode_lossless(source, destination, transform, options);
+    }
     if destination.extension().and_then(|v| v.to_str()) != Some("mkv") {
         return Err("lossless export requires FFV1 in .mkv".into());
     }

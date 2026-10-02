@@ -612,3 +612,73 @@ fn y4m_metadata_survives_export_and_geometry_without_float_rounding() {
         assert!(output.get_ref().is_empty());
     }
 }
+
+#[test]
+fn public_lossless_api_uses_owned_y4m_export_and_enforces_packet_policy() {
+    let directory =
+        std::env::temp_dir().join(format!("fvid-owned-lossless-api-{}", std::process::id()));
+    std::fs::create_dir(&directory).unwrap();
+    struct Clean(std::path::PathBuf);
+    impl Drop for Clean {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _clean = Clean(directory.clone());
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/y4m-aspect-full-10.y4m");
+    let transform = fvid_media::LosslessTransform {
+        transpose: Some(fvid_media::TransposeMode::Clock),
+        negate: Some("".into()),
+        ..Default::default()
+    };
+    let output = directory.join("api.mkv");
+    let stats =
+        fvid_media::transcode_lossless(&source, &output, transform.clone(), &Default::default())
+            .unwrap();
+    assert_eq!(stats.backend, "fvid");
+    assert_eq!(stats.video_frames, 2);
+    assert_eq!(stats.pixel_format, "yuv422p10le");
+    let mut expected = Cursor::new(Vec::new());
+    fvid_media::owned_matroska::write_y4m_ffv1(
+        Cursor::new(std::fs::read(&source).unwrap()),
+        &mut expected,
+        &fvid_media::DecodeTransform {
+            transpose: transform.transpose,
+            negate: transform.negate.clone(),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    assert_eq!(std::fs::read(&output).unwrap(), expected.into_inner());
+    let limited = directory.join("limited.mkv");
+    let options = fvid_media::CopyOptions {
+        max_packet_bytes: 1,
+        ..Default::default()
+    };
+    assert!(
+        fvid_media::transcode_lossless(&source, &limited, transform, &options)
+            .unwrap_err()
+            .contains("byte limit")
+    );
+    assert!(!limited.exists());
+    assert!(std::fs::read_dir(&directory).unwrap().all(|entry| {
+        !entry
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with(".fvid-matroska-")
+    }));
+    assert!(
+        fvid_media::owned_lossless::transcode_lossless(
+            &source,
+            &limited,
+            fvid_media::LosslessTransform {
+                hue: Some("h=90".into()),
+                ..Default::default()
+            },
+            &Default::default()
+        )
+        .is_err()
+    );
+}

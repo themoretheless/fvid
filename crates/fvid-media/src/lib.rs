@@ -102,3 +102,7 @@ pub mod owned_overlay;
 pub mod owned_ffv1_encoder;
 
 pub mod owned_matroska;
+
+pub mod owned_lossless;
+#[cfg(not(feature = "legacy-ffmpeg"))]
+pub use owned_lossless::transcode_lossless;

@@ -133,7 +133,7 @@ pub struct OverlaySpec {
     pub y: i32,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct XfadeSpec {
     pub path: PathBuf,
     pub transition: String,
@@ -144,7 +144,7 @@ pub struct XfadeSpec {
     pub fps_den: i32,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct LosslessTransform {
     pub crop: Option<CropRect>,
     pub vertical_flip: bool,

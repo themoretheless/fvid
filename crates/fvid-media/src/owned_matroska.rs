@@ -131,6 +131,16 @@ pub fn write_y4m_ffv1_controlled<W: Write + Seek>(
     cancel: Option<&fvid_control::CancelFlag>,
     progress: Option<&fvid_control::ProgressHook>,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
+    write_y4m_ffv1_policy(source, output, transform, cancel, progress, usize::MAX)
+}
+fn write_y4m_ffv1_policy<W: Write + Seek>(
+    source: impl std::io::BufRead,
+    output: &mut W,
+    transform: &fvid_media_info::DecodeTransform,
+    cancel: Option<&fvid_control::CancelFlag>,
+    progress: Option<&fvid_control::ProgressHook>,
+    max_packet_bytes: usize,
+) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
     check(cancel)?;
     let mut output = Some(output);
     let mut writer = None;
@@ -139,6 +149,9 @@ pub fn write_y4m_ffv1_controlled<W: Write + Seek>(
         transform,
         |header, packet, pts, duration| {
             check(cancel).map_err(|e| e.to_string())?;
+            if packet.len() > max_packet_bytes {
+                return Err("encoded FFV1 packet exceeds byte limit".into());
+            }
             if writer.is_none() {
                 let width = u32::try_from(header.width).map_err(|_| "Matroska width overflow")?;
                 let height =
@@ -208,6 +221,16 @@ pub fn export_y4m_ffv1(
     cancel: Option<&fvid_control::CancelFlag>,
     progress: Option<&fvid_control::ProgressHook>,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
+    export_y4m_ffv1_policy(source, destination, transform, cancel, progress, usize::MAX)
+}
+pub(crate) fn export_y4m_ffv1_policy(
+    source: &std::path::Path,
+    destination: &std::path::Path,
+    transform: &fvid_media_info::DecodeTransform,
+    cancel: Option<&fvid_control::CancelFlag>,
+    progress: Option<&fvid_control::ProgressHook>,
+    max_packet_bytes: usize,
+) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
     check(cancel)?;
     if destination
         .extension()
@@ -250,8 +273,14 @@ pub fn export_y4m_ffv1(
     }
     let (temporary, mut file) =
         reserved.ok_or_else(|| invalid("cannot reserve Matroska output"))?;
-    let (stats, mut event) =
-        write_y4m_ffv1_controlled(input, &mut file, transform, cancel, progress)?;
+    let (stats, mut event) = write_y4m_ffv1_policy(
+        input,
+        &mut file,
+        transform,
+        cancel,
+        progress,
+        max_packet_bytes,
+    )?;
     file.flush()?;
     file.sync_all()?;
     drop(file);
