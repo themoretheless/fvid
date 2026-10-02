@@ -199,3 +199,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_webm_lossless_pixels_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_webm_audio_companions_reference"
+harness = false

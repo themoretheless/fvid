@@ -562,3 +562,5 @@ External synthetic PCM amix normalization/weights and overlapping-layout amerge 
 The external AAC no-PNS encoding/reconstruction comparison runs only in `ffmpeg_aac_reconstruction_reference`. Its four rate/channel cases and numeric tolerances are preserved; ordinary AAC library/media tests continue using checked-in or synthetic inputs without external generation.
 
 External WebM lossless VP9/AV1 pixels, rotation/filter and ten-bit crop/rotation comparisons run in `ffmpeg_webm_lossless_pixels_reference`. Their ordinary tests retain native frame, clock, geometry and metadata checks; audio-companion external comparisons remain separately pending migration.
+
+External WebM AAC/Opus companion payload/timing/priming/PCM comparisons for VP9, AVC, HEVC and FFV1 video run only in `ffmpeg_webm_audio_companions_reference`. Their external synthetic audio generation is benchmark-only. The ordinary WebM lossless test file no longer calls FFmpeg or contains external ignored tests.
