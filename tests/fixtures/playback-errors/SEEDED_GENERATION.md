@@ -75,3 +75,10 @@ frontend media geometry, plus an independent known-pixel matrix and the public
 library dispatcher. Invalid dimensions are explicit failures. These tests invoke
 neither FFmpeg nor the network; other unsupported transforms remain migration
 work rather than being silently dropped.
+
+Y4M probe's independent ffprobe comparison is exclusively an explicit benchmark:
+`FVID_REFERENCE_FFPROBE=/path/to/ffprobe cargo bench --manifest-path
+crates/fvid-media/Cargo.toml --bench ffmpeg_y4m_probe_reference --offline`.
+It creates its own tiny synthetic Y4M inputs at runtime and removes them on exit.
+Ordinary `native_y4m_probe` tests validate the same 15 frequency/frame-count
+combinations using exact integer timestamp expectations without external tools.
