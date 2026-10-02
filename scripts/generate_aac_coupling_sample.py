@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Hand-authored AAC-LC CCE; FFmpeg only generates PCM oracle."""
+"""Hand-authored AAC-LC CCE and independent direct-cosine PCM oracle."""
 from pathlib import Path
-import argparse, re, subprocess
+import argparse, re, subprocess, sys
+from aac_coupling_oracle import pcm
 parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--all', action='store_true', help='regenerate all 16 established cases with exact parameters')
 parser.add_argument('--stereo', action='store_true')
 parser.add_argument('--missing-target', action='store_true')
 parser.add_argument('--short', action='store_true')
@@ -13,6 +15,17 @@ parser.add_argument('--signed-gain', action='store_true')
 parser.add_argument('--point', choices=['independent','before-tns','after-tns'], default='independent')
 parser.add_argument('--selection', choices=['shared', 'right', 'left', 'separate'], default='separate')
 args=parser.parse_args()
+if args.all:
+    cases=[[],['--missing-target']]
+    cases += [['--stereo']] + [['--stereo','--selection',selection] for selection in ['shared','right','left']]
+    cases += [['--stereo','--short']]
+    cases += [['--stereo',*short,'--point',point] for short in [[],['--short']] for point in ['before-tns','after-tns']]
+    gain=['--stereo','--point','after-tns','--band-gain','--signed-gain']
+    cases += [gain, gain+['--multiband'], gain+['--short','--multiband'], gain+['--short','--multiband','--split-groups']]
+    cases += [['--stereo','--missing-target','--point','before-tns']]
+    for case in cases:
+        subprocess.run([sys.executable,str(Path(__file__).resolve()),*case],check=True)
+    sys.exit(0)
 stereo=args.stereo
 missing=args.missing_target
 independent=args.point == 'independent'
@@ -85,4 +98,4 @@ for frame in range(6):
     payload=int(bits,2).to_bytes(len(bits)//8,'big');n=len(payload)+7
     output+=bytes([255,241,76,(n>>11),(n>>3)&255,((n&7)<<5)|31,252])+payload
 path=root/('tests/fixtures/playback-errors/aac-independent-coupling'+('-missing-target' if missing else '-stereo'+('' if selection == 3 else '-'+args.selection) if stereo else '')+('-short' if args.short else '')+('' if independent else '-'+args.point)+('-band-gain' if args.band_gain else '')+('-signed' if args.signed_gain else '')+('-multiband' if args.multiband else '')+('-groups' if args.split_groups else '')+'.aac');path.write_bytes(output)
-if not missing: subprocess.run(['ffmpeg','-v','error','-i',str(path),'-f','f32le','-c:a','pcm_f32le','-y',str(path.with_suffix('.f32le'))],check=True)
+if not missing: path.with_suffix('.f32le').write_bytes(pcm(args))
