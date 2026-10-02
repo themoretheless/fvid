@@ -764,3 +764,83 @@ fn library_blur_composition_preserves_frontend_order_and_public_dispatch() {
         assert_eq!(stats.video_frames, 3);
     }
 }
+
+#[test]
+fn pixelize_and_chroma_shift_compositions_use_shared_library_kernels() {
+    for layout in ["420", "422", "444"] {
+        for depth in [8u8, 10, 16] {
+            let chroma = if depth == 8 {
+                layout.into()
+            } else {
+                format!("{layout}p{depth}")
+            };
+            let header = fvid_media::owned_y4m::Header::parse(
+                format!("YUV4MPEG2 W8 H6 F30:1 C{chroma}\n").as_bytes(),
+            )
+            .unwrap();
+            let step = if depth == 8 { 1 } else { 2 };
+            let input: Vec<u8> = (0..header.frame_len().unwrap() / step)
+                .flat_map(|i| {
+                    let v = (i * 131 % (1usize << depth)) as u16;
+                    if step == 1 {
+                        vec![v as u8]
+                    } else {
+                        v.to_le_bytes().to_vec()
+                    }
+                })
+                .collect();
+            for (pixelize, shift) in [
+                (Some("2:3"), None),
+                (None, Some("cbh=1:crv=-1:edge=wrap")),
+                (Some("2:2"), Some("cbh=-2:crv=1")),
+            ] {
+                let t = DecodeTransform {
+                    pixelize: pixelize.map(str::to_owned),
+                    chromashift: shift.map(str::to_owned),
+                    negate: Some("".into()),
+                    horizontal_flip: true,
+                    ..Default::default()
+                };
+                let actual =
+                    fvid_media::owned_y4m_decode::transform_frame_requested(&header, &input, &t)
+                        .unwrap();
+                let pixels = fvid_media::owned_y4m_decode::transform_frame(
+                    &header, &input, None, true, false,
+                )
+                .unwrap();
+                let subsampling = match layout {
+                    "420" => [2, 2],
+                    "422" => [2, 1],
+                    _ => [1, 1],
+                };
+                let mut expected = fvid::native_geometry::GeometryFrame {
+                    width: 8,
+                    height: 6,
+                    subsampling: Some(subsampling),
+                    data: pixels,
+                };
+                fvid::native_pixels::PixelFilters::from_request(&t)
+                    .unwrap()
+                    .apply(&mut expected, depth)
+                    .unwrap();
+                assert_eq!(actual, expected.data, "{chroma} {pixelize:?} {shift:?}");
+            }
+        }
+    }
+    let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/wave-probe-info.y4m");
+    for t in [
+        DecodeTransform {
+            pixelize: Some("2:2".into()),
+            ..Default::default()
+        },
+        DecodeTransform {
+            chromashift: Some("cbh=1".into()),
+            ..Default::default()
+        },
+    ] {
+        let stats = fvid_media::decode_video_transformed(&source, t).unwrap();
+        assert_eq!(stats.backend, "owned Y4M planar decode");
+        assert_eq!(stats.video_frames, 3);
+    }
+}

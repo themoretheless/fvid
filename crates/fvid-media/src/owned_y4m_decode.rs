@@ -31,9 +31,17 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
 }
 fn supported_request(transform: &DecodeTransform) -> bool {
     transform
-        .avgblur
+        .pixelize
         .as_deref()
-        .is_none_or(|args| crate::owned_avgblur::AverageBlur::parse(args).is_ok())
+        .is_none_or(|a| crate::owned_pixelize::Pixelize::parse(a).is_ok())
+        && transform
+            .chromashift
+            .as_deref()
+            .is_none_or(|a| crate::owned_chromashift::ChromaShift::parse(a).is_ok())
+        && transform
+            .avgblur
+            .as_deref()
+            .is_none_or(|args| crate::owned_avgblur::AverageBlur::parse(args).is_ok())
         && transform
             .boxblur
             .as_deref()
@@ -55,6 +63,8 @@ fn supported_request(transform: &DecodeTransform) -> bool {
                 negate: transform.negate.clone(),
                 avgblur: transform.avgblur.clone(),
                 boxblur: transform.boxblur.clone(),
+                pixelize: transform.pixelize.clone(),
+                chromashift: transform.chromashift.clone(),
                 horizontal_flip: transform.horizontal_flip,
                 vertical_flip: transform.vertical_flip,
                 interval: transform.interval,
@@ -178,7 +188,11 @@ fn apply_pixel_filters(
     transform: &DecodeTransform,
     output: &mut Vec<u8>,
 ) -> Result<()> {
-    if transform.avgblur.is_some() || transform.boxblur.is_some() {
+    if transform.avgblur.is_some()
+        || transform.boxblur.is_some()
+        || transform.pixelize.is_some()
+        || transform.chromashift.is_some()
+    {
         let (crop, _) = crop_geometry(header, transform.crop)?;
         let (width, height, _) = output_geometry(
             header,
@@ -207,10 +221,20 @@ fn apply_pixel_filters(
             if let Some(args) = transform.boxblur.as_deref() {
                 crate::owned_boxblur::BoxBlur::parse(args)?.apply(&mut frame, header.depth())?;
             }
+            if let Some(args) = transform.negate.as_deref() {
+                crate::owned_negate::Negate::parse(args)?.apply(&mut frame.data, header.depth())?;
+            }
+            if let Some(args) = transform.pixelize.as_deref() {
+                crate::owned_pixelize::Pixelize::parse(args)?.apply(&mut frame, header.depth())?;
+            }
+            if let Some(args) = transform.chromashift.as_deref() {
+                crate::owned_chromashift::ChromaShift::parse(args)?
+                    .apply(&mut frame, header.depth())?;
+            }
             Ok(())
         })();
         *output = frame.data;
-        result?;
+        return result;
     }
     if let Some(args) = transform.negate.as_deref() {
         crate::owned_negate::Negate::parse(args)?.apply(output, header.depth())?;
@@ -381,7 +405,9 @@ pub fn decode_reader_transformed(
         || transform.pad.is_some()
         || transform.negate.is_some()
         || transform.avgblur.is_some()
-        || transform.boxblur.is_some();
+        || transform.boxblur.is_some()
+        || transform.pixelize.is_some()
+        || transform.chromashift.is_some();
     let mut input = Vec::new();
     if geometry {
         input

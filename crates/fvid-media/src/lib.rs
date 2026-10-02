@@ -89,3 +89,6 @@ pub mod owned_negate;
 pub mod owned_frame;
 pub mod owned_avgblur;
 pub mod owned_boxblur;
+
+pub mod owned_pixelize;
+pub mod owned_chromashift;

@@ -122,3 +122,10 @@ The integration suite checks nine depth/filter compositions and public dispatch;
 existing standalone filter tests retain independent known-pixel and direct-sum
 expectations, invalid-storage atomicity, parameter validation and CLI intervals.
 Explicit reference benchmarks preserve their complete external comparison matrix.
+
+Pixelize and chromashift implementations are likewise library-owned and included
+by the frontend, preserving its error API. The owned Y4M path applies negate,
+pixelize, then chromashift after geometry, matching the existing pixel pipeline.
+Twenty-seven depth/layout/filter compositions and public dispatch checks cover
+integration. Existing standalone known-pixel, boundary and invalid-storage tests
+continue to exercise the shared kernels; expressions are not silently admitted.
