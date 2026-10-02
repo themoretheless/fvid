@@ -227,6 +227,17 @@ pub fn write<R: Read + Seek, W: Write + Seek>(
     cancel: Option<&CancelFlag>,
     progress: Option<&ProgressHook>,
 ) -> Result<ProgressEvent> {
+    write_limited(input, output, cancel, progress, None)
+}
+
+/// Copy at most a global DTS-interleaved packet prefix; no payload is read past it.
+pub fn write_limited<R: Read + Seek, W: Write + Seek>(
+    input: &mut Mp4Reader<R>,
+    output: &mut W,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+    max_packets: Option<u64>,
+) -> Result<ProgressEvent> {
     check(cancel)?;
     if !eligible(input) {
         return Err(invalid(
@@ -254,6 +265,9 @@ pub fn write<R: Read + Seek, W: Write + Seek>(
     let mut payload = Vec::new();
     while let Some(Reverse((_, track, index))) = queue.pop() {
         check(cancel)?;
+        if max_packets.is_some_and(|limit| writer.event().packets >= limit) {
+            break;
+        }
         let packet = &plans[track].packets[index];
         input.read_packet(track, index, &mut payload)?;
         let sync = tracks[track]
@@ -277,7 +291,7 @@ pub fn write<R: Read + Seek, W: Write + Seek>(
         }
     }
     check(cancel)?;
-    let event = writer.finish()?;
+    let event = if max_packets.is_some() { writer.finish_prefix()? } else { writer.finish()? };
     check(cancel)?;
     Ok(event)
 }

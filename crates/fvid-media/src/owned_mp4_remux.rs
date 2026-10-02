@@ -24,7 +24,7 @@ fn open(
     .map_err(|e| e.to_string())
 }
 pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
-    if !crate::owned_matroska_remux::policies(options)
+    if !(options.streams.is_empty() && crate::owned_matroska_remux::unedited_policies(options))
         || !matches!(
             destination.extension().and_then(|s| s.to_str()),
             Some("mkv" | "mka")
@@ -68,11 +68,12 @@ pub fn remux(
     }
     let mut reader = open(source, options)?;
     crate::owned_matroska_remux::publish(destination, options, |output| {
-        crate::owned_mp4_matroska::write(
+        crate::owned_mp4_matroska::write_limited(
             &mut reader,
             output,
             options.cancel.as_ref(),
             options.progress.as_ref(),
+            options.max_packets,
         )
         .map_err(|e| e.to_string())
     })
@@ -90,21 +91,26 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<fvid_media_inf
     let reader = open(source, options)?;
     let mut packets = 0u64;
     let mut payload = 0u64;
-    for track in reader.tracks() {
-        let plan = crate::owned_mp4_matroska::plan(
-            track,
-            reader.movie_timescale(),
-            options.cancel.as_ref(),
-        )
-        .map_err(|e| e.to_string())?;
-        packets = packets
-            .checked_add(plan.packets.len() as u64)
-            .ok_or("MP4 packet count overflow")?;
-        for index in 0..plan.packets.len() {
-            let sample = track.samples.get(index).ok_or("missing MP4 sample")?;
-            payload = payload
-                .checked_add(u64::from(sample.size))
-                .ok_or("MP4 byte count overflow")?;
+    let plans = reader.tracks().iter().map(|track| {
+        crate::owned_mp4_matroska::plan(track, reader.movie_timescale(), options.cancel.as_ref())
+            .map_err(|e| e.to_string())
+    }).collect::<Result<Vec<_>>>()?;
+    let mut queue = std::collections::BinaryHeap::new();
+    for (track, plan) in plans.iter().enumerate() {
+        if let Some(first) = plan.packets.first() {
+            queue.push(std::cmp::Reverse((first.dts, track, 0usize)));
+        }
+    }
+    while let Some(std::cmp::Reverse((_, track, index))) = queue.pop() {
+        if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+            return Err("media operation cancelled".into());
+        }
+        if options.max_packets.is_some_and(|limit| packets >= limit) { break; }
+        let sample = reader.tracks()[track].samples.get(index).ok_or("missing MP4 sample")?;
+        packets = packets.checked_add(1).ok_or("MP4 packet count overflow")?;
+        payload = payload.checked_add(u64::from(sample.size)).ok_or("MP4 byte count overflow")?;
+        if let Some(next) = plans[track].packets.get(index + 1) {
+            queue.push(std::cmp::Reverse((next.dts, track, index + 1)));
         }
     }
     Ok(MediaPlan {
@@ -120,6 +126,6 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<fvid_media_inf
             PlanStep { action: "metadata".into(), detail: "retain track names/languages, file tags/chapters and video colour/HDR/display metadata".into() },
             PlanStep { action: "publish".into(), detail: "publish complete output without overwriting; remove temporary file on error or cancellation".into() },
         ], graph: None,
-        notes: vec!["backend: owned MP4/Matroska; no external demuxer or muxer".into(), "destination must be .mkv or audio-only .mka; publication and packet payload reads are verified during execution".into(), "all supported tracks copied; stream/tag edits, packet-count caps and aggregate/RSS policies remain unsupported".into()],
+        notes: vec!["backend: owned MP4/Matroska; no external demuxer or muxer".into(), "destination must be .mkv or audio-only .mka; publication and packet payload reads are verified during execution".into(), "all supported tracks represented; optional global packet cap retains a DTS-interleaved prefix; stream/tag edits and aggregate/RSS policies remain unsupported".into()],
     })
 }

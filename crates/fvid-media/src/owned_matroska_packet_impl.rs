@@ -234,10 +234,18 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
     /// Patch finite segment size and presentation duration. `done` remains false:
     /// the caller owns flushing, syncing and atomic publication.
     pub fn finish(self) -> Result<ProgressEvent> {
-        if self.failed || self.written.iter().any(|v| !v) {
+        self.finish_inner(false)
+    }
+    /// Finalize an intentionally bounded prefix, retaining declared empty tracks.
+    /// Failed writes still prevent finalization; a prefix with no presented duration omits Duration.
+    pub fn finish_prefix(self) -> Result<ProgressEvent> {
+        self.finish_inner(true)
+    }
+    fn finish_inner(self, prefix: bool) -> Result<ProgressEvent> {
+        if self.failed || (!prefix && self.written.iter().any(|v| !v)) {
             return Err(invalid("incomplete Matroska tracks"));
         }
-        if self.end_ns == 0 {
+        if !prefix && self.end_ns == 0 {
             return Err(invalid("Matroska has no presentation duration"));
         }
         let end = self.output.stream_position()?;
@@ -248,8 +256,14 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         self.output.seek(SeekFrom::Start(self.segment_size))?;
         self.output
             .write_all(&(length | (1u64 << 56)).to_be_bytes())?;
-        self.output.seek(SeekFrom::Start(self.duration_offset))?;
-        self.output.write_all(&(self.end_ns as f64).to_be_bytes())?;
+        if self.end_ns == 0 {
+            // Replace the complete 11-byte Duration element with equally sized Void.
+            self.output.seek(SeekFrom::Start(self.duration_offset - 3))?;
+            self.output.write_all(&[0xec, 0x89, 0, 0, 0, 0, 0, 0, 0, 0, 0])?;
+        } else {
+            self.output.seek(SeekFrom::Start(self.duration_offset))?;
+            self.output.write_all(&(self.end_ns as f64).to_be_bytes())?;
+        }
         self.output.seek(SeekFrom::Start(end))?;
         Ok(self.event)
     }
