@@ -15896,6 +15896,10 @@ impl Scaler {
 }
 
 struct PlayResampler {
+    owned_s64: Option<crate::owned_resample_f64::Resampler<Vec<u8>>>,
+    input_rate: i32,
+    input_channels: i32,
+    input_format: i32,
     owned: Option<crate::audio::Resampler>,
     swr: *mut SwrContext,
     layout: AVChannelLayout,
@@ -15928,6 +15932,10 @@ impl PlayResampler {
             }
             let mut swr = ptr::null_mut();
             let mut built = Self {
+                owned_s64: None,
+                input_rate: source.sample_rate,
+                input_channels: source.ch_layout.nb_channels,
+                input_format: source.format,
                 owned: None,
                 swr: ptr::null_mut(),
                 layout,
@@ -15938,6 +15946,14 @@ impl PlayResampler {
                 && built.layout.order == AVChannelOrder_AV_CHANNEL_ORDER_NATIVE
                 && (source.ch_layout.u.mask == built.layout.u.mask
                     || (matches!(channels, 1 | 2) && source.ch_layout.nb_channels <= 6));
+            let s64_layout = matching_layout && (channels == source.ch_layout.nb_channels
+                || crate::owned_wav::default_pcm_mask(source.ch_layout.nb_channels as u16).is_ok_and(|mask| u64::from(mask) == source.ch_layout.u.mask));
+            if s64_layout && matches!(source.format, AVSampleFormat_AV_SAMPLE_FMT_S64 | AVSampleFormat_AV_SAMPLE_FMT_S64P) {
+                built.owned_s64 = Some(crate::owned_resample_f64::Resampler::new(
+                    Vec::new(), u32::try_from(source.sample_rate).map_err(|_| "invalid S64 playback rate")?,
+                    rate as u32, channels as u16).map_err(|e| e.to_string())?);
+                return Ok(built);
+            }
             if matching_layout && matches!(source.format, AVSampleFormat_AV_SAMPLE_FMT_FLT | AVSampleFormat_AV_SAMPLE_FMT_FLTP | AVSampleFormat_AV_SAMPLE_FMT_DBL | AVSampleFormat_AV_SAMPLE_FMT_DBLP | AVSampleFormat_AV_SAMPLE_FMT_U8 | AVSampleFormat_AV_SAMPLE_FMT_U8P | AVSampleFormat_AV_SAMPLE_FMT_S16 | AVSampleFormat_AV_SAMPLE_FMT_S16P | AVSampleFormat_AV_SAMPLE_FMT_S32 | AVSampleFormat_AV_SAMPLE_FMT_S32P) {
                 let mut owned = crate::audio::Resampler::open(frame, rate, channels)?;
                 if owned.owns_float_pipeline() {
@@ -15976,6 +15992,31 @@ impl PlayResampler {
 
     fn convert_inner(&mut self, frame: *const AVFrame) -> Result<Vec<f32>> {
         unsafe {
+            if let Some(owned) = &mut self.owned_s64 {
+                use std::io::Write;
+                if frame.is_null() {
+                    owned.finish().map_err(|e| e.to_string())?;
+                } else {
+                    let source = &*frame;
+                    if source.sample_rate != self.input_rate || source.ch_layout.nb_channels != self.input_channels
+                        || source.format != self.input_format || source.nb_samples < 0 || source.extended_data.is_null()
+                    { return Err("S64 playback input format changed".into()); }
+                    let planar = source.format == AVSampleFormat_AV_SAMPLE_FMT_S64P;
+                    let mut pcm = Vec::new();
+                    for sample in 0..source.nb_samples as usize {
+                        for channel in 0..self.input_channels as usize {
+                            let plane = *source.extended_data.add(if planar {channel} else {0});
+                            if plane.is_null() { return Err("missing S64 playback plane".into()); }
+                            let index = if planar {sample} else {sample * self.input_channels as usize + channel};
+                            let normalized = ptr::read_unaligned(plane.cast::<i64>().add(index)) as f64 / 9223372036854775808.;
+                            pcm.extend_from_slice(&normalized.to_le_bytes());
+                        }
+                    }
+                    crate::owned_pcm_gain_f64::PcmGain::new(&mut *owned,1.0,self.input_channels as u16,self.channels as u16)?
+                        .write_all(&pcm).map_err(|e| e.to_string())?;
+                }
+                return Ok(owned.take_output().chunks_exact(8).map(|b| f64::from_le_bytes(b.try_into().unwrap()) as f32).collect());
+            }
             let dst = Frame::new()?;
             if let Some(owned) = &mut self.owned {
                 let frames = owned.convert(dst.0, frame)?;
@@ -16163,6 +16204,48 @@ mod owned_integer_playback_tests {
                     assert_eq!(actual,expected);
                     assert_eq!(actual.len(),333 * output_channels as usize);
                 }
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod owned_s64_playback_tests {
+    use super::*;
+    #[test]
+    fn s64_playback_resamples_and_rematrices_without_swresample() {
+        use std::io::Write;
+        let values = [i64::MIN,i64::MIN+1,-1,0,1,i64::MAX-1,i64::MAX,0x123456789abcdef];
+        for (planar,input_channels,output_channels) in [(false,2,2),(true,2,2),(false,6,2),(true,6,2)] {
+            let input = Frame::new().unwrap();
+            let mut normalized = Vec::new();
+            // SAFETY: RAII frame owns checked 997xN S64 planes.
+            unsafe {
+                (*input.0).format = if planar {AVSampleFormat_AV_SAMPLE_FMT_S64P} else {AVSampleFormat_AV_SAMPLE_FMT_S64};
+                (*input.0).sample_rate = 48000;
+                (*input.0).nb_samples = 997;
+                av_channel_layout_default(&mut (*input.0).ch_layout,input_channels);
+                check(av_frame_get_buffer(input.0,0),"S64 playback test input").unwrap();
+                for sample in 0..997 {
+                    for channel in 0..input_channels as usize {
+                        let value = values[(sample + channel) % values.len()];
+                        normalized.extend_from_slice(&(value as f64 / 9223372036854775808.).to_le_bytes());
+                        let plane = *(*input.0).extended_data.add(if planar {channel} else {0});
+                        ptr::write_unaligned(plane.cast::<i64>().add(if planar {sample} else {sample * input_channels as usize + channel}),value);
+                    }
+                }
+                let mut reference = crate::owned_resample_f64::Resampler::new(Vec::new(),48000,16000,output_channels as u16).unwrap();
+                crate::owned_pcm_gain_f64::PcmGain::new(&mut reference,1.0,input_channels as u16,output_channels as u16).unwrap().write_all(&normalized).unwrap();
+                reference.finish().unwrap();
+                let expected: Vec<f32> = reference.take_output().chunks_exact(8).map(|b| f64::from_le_bytes(b.try_into().unwrap()) as f32).collect();
+                let mut adapter = PlayResampler::open(input.0,16000,output_channels).unwrap();
+                assert!(adapter.owned_s64.is_some());
+                assert!(adapter.swr.is_null());
+                let mut actual = adapter.convert(input.0).unwrap();
+                actual.extend(adapter.flush().unwrap());
+                assert_eq!(actual,expected);
+                assert_eq!(actual.len(),333 * output_channels as usize);
+                assert!(adapter.flush().unwrap().is_empty());
             }
         }
     }
