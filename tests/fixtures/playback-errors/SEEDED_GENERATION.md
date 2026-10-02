@@ -173,3 +173,10 @@ It checks every graph and reports all failures together. This gate currently
 fails because all three activate legacy-ffmpeg; the default native graph check
 alone is not evidence of complete production independence. The production gate
 must pass after those implementations/features have been migrated.
+
+The opaque overlay sample kernel is library-owned and shared with frontend
+playback/filter code. Its library tests preserve mixed-depth range conversion,
+RGB and chroma clipping, and invalid-source atomicity with known synthetic pixel
+matrices. This exposes the compositor without libav; file-based overlay decode,
+timing and frame scheduling still require a separate library migration and are
+not claimed by the Y4M owned request admission.

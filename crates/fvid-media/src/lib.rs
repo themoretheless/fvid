@@ -96,3 +96,5 @@ pub mod owned_chromashift;
 pub mod owned_gradient;
 
 pub mod owned_morphology;
+
+pub mod owned_overlay;
