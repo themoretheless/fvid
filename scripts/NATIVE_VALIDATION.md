@@ -48,7 +48,7 @@ cannot qualify it. Policy tests simulate subprocess/benchmark dispatch and
 check that failed or empty test execution replaces stale successful reports.
 They are not evidence of codec or CLI conformance.
 
-The dependency policy also audits the four declared native validator sources for
+The dependency policy also audits five native validators and the reference-sample entrypoint for
 known literal external launches/environment hooks, failing on missing or malformed
 source. Explicit reference benchmark modules remain allowed. This complements
 the dispatch tests; it does not resolve arbitrary computed executable paths.
@@ -60,6 +60,33 @@ the full external corpus was not run in that invocation. The separate production
 dependency audit still refuses `media`, `media-cuda` and `cuda-hw` because they
 activate `legacy-ffmpeg`. Passing native tests does not close that boundary.
 
-`validate_klite_coverage.py` still requires external FFmpeg tools. Its codec/filter/
-reference coverage has not been removed or relabeled as migrated. Production legacy media
-operations and AAC aggregate allocation admission also remain separate work.
+`validate_klite_coverage.py` now uses the same complete native Rust test/dependency
+checks by default and writes `native-klite-validation.json`. It neither imports
+the external oracle nor measures the supplied `--binary` in this mode; its report
+explicitly says that it is not a K-Lite row census. `--help` is import-safe too.
+`--benchmark-reference` runs the preserved full corpus in
+`benchmark_klite_reference.py`, with every codec row, fixture/oracle comparison,
+native/player/MCP surface, accounting and prose gate retained. Existing binary,
+probe and Markdown options are forwarded in reference mode. That mode writes the
+separate `klite-coverage.json`; failures replace stale success atomically, current
+partial rows remain visible, and completion requires a successful reference exit
+with a nonempty matching row report. Matrix/probe options are refused in native
+mode instead of silently rewriting reference documentation.
+The dispatch tests simulate those control paths; they do not constitute a new
+K-Lite codec measurement. `fetch_klite_samples.py` is also import/help-safe and
+requires `--benchmark-reference` before preparing any external samples. Its
+unchanged download, integrity, codec-probe and prefix-generation computation
+lives in `benchmark_fetch_klite_samples.py`; force/verbose/auto/add options and
+the incomplete-pin failure exit code are preserved. Ordinary synthetic fixture
+generation remains separate from this explicit benchmark preparation.
+Production legacy media operations and AAC aggregate allocation admission remain
+separate work. Native test success does not establish complete K-Lite codec parity.
+
+Local ordinary K-Lite validation on 2026-10-03 executed 123 owned-library and
+1,234 frontend tests successfully, with one frontend test ignored. A deliberately
+nonexistent supplied CLI was not used; all reference/CLI-completion flags were
+false. A fresh source/dependency audit passed for all six entrypoints and four
+native build graphs. The production audit still failed all three legacy media/
+CUDA graphs. The external K-Lite corpus was not executed in this verification;
+its computational source was compared against the original, with only CLI
+entrypoint, description and generated-command provenance adaptations allowed.

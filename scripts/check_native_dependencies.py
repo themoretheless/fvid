@@ -102,7 +102,7 @@ def audit_fixture_generators(root):
     return paths, failures
 
 
-NATIVE_VALIDATORS = ("validate_gpu.py", "validate_resident.py", "validate_hw_cuda.py", "validate_media.py")
+NATIVE_VALIDATORS = ("validate_gpu.py", "validate_resident.py", "validate_hw_cuda.py", "validate_media.py", "validate_klite_coverage.py", "fetch_klite_samples.py")
 
 
 def audit_native_validators(root):

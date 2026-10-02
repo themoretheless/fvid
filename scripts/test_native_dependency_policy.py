@@ -68,7 +68,7 @@ class NativeValidatorPolicy(unittest.TestCase):
             root = self.root(folder)
             (root / "scripts/benchmark_media_reference.py").write_text('subprocess.run(["ffmpeg"])')
             paths, failures = audit_native_validators(root)
-            self.assertEqual(len(paths), 4)
+            self.assertEqual(len(paths), 6)
             self.assertEqual(failures, [])
 
     def test_external_validator_launch_is_rejected_with_file_and_line(self):

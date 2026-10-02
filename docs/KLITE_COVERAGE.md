@@ -6,10 +6,16 @@
 
 ## Как измеряется
 
+Обычный `python3 scripts/validate_klite_coverage.py` запускает нативные Rust-тесты
+и проверку зависимостей без внешнего oracle. Отчёт —
+`benchmarks/native-klite-validation.json`; это не новый замер строк матрицы ниже
+и не проверка переданного `--binary`. Полный сохранённый эталонный набор находится
+в `scripts/benchmark_klite_reference.py` и запускается явным флагом:
+
 ```
-python3 scripts/fetch_klite_samples.py --auto   # пинные референс-сэмплы -> benchmarks/data/klite
+python3 scripts/fetch_klite_samples.py --benchmark-reference --auto   # пинные референс-сэмплы -> benchmarks/data/klite
 python3 scripts/fetch_klite_pack_components.py   # состав пака по изданиям -> benchmarks/klite-pack-components.json
-python3 scripts/validate_klite_coverage.py --binary target-media/release/fvid
+python3 scripts/validate_klite_coverage.py --benchmark-reference --binary target-media/release/fvid
 ```
 
 1. Фикстура генерируется локальным FFmpeg-энкодером (5 видеокадров / 0.2 с аудио).
@@ -23,7 +29,7 @@ python3 scripts/validate_klite_coverage.py --binary target-media/release/fvid
    иначе строка проверяла бы обработку повреждений, а не декодирование. Для аудио целость
    контейнера не требуется (этот путь переживает битый вход намеренно), но из файла хоть что-то
    должно читаться: кандидат отбирается числом кадров, которое из него вытаскивает CLI. Локальный файл подключается через
-   `scripts/fetch_klite_samples.py --add ROW URL_или_ЛОКАЛЬНЫЙ_ПУТЬ`. Расхождение хэша роняет
+   `scripts/fetch_klite_samples.py --benchmark-reference --add ROW URL_или_ЛОКАЛЬНЫЙ_ПУТЬ`. Расхождение хэша роняет
    гейт, поэтому подмена образца замечается сразу. Бюджет фикстуры — 8 МБ; для `mtv`, `dav` и
    `dsd` сделано исключение (`BUDGETS`), потому что иначе их ни переупаковать, ни обрезать, а
    `icod` и `nclc` закреплены первыми пятью кадрами больших эталонов (`CUTS`). Если цель строки —
@@ -42,7 +48,7 @@ python3 scripts/validate_klite_coverage.py --binary target-media/release/fvid
    локальной фикстуры; `fails`/`container-gap`/`missing` — пробел fvid. Последние четыре
    (кроме `needs-sample` и `absent-in-build`) роняют гейт.
 6. Раздел «Матрица» ниже перегенерируется из тех же чисел:
-   `python3 scripts/validate_klite_coverage.py --markdown docs/KLITE_COVERAGE.md`.
+   `python3 scripts/validate_klite_coverage.py --benchmark-reference --markdown docs/KLITE_COVERAGE.md`.
 7. Итог — `benchmarks/klite-coverage.json`; скрипт выходит с кодом 1 при любой строке
    `fails`/`container-gap`/`missing`/`no-fixture`, при `copy_strictness: leaked`, при строке
    таблицы возможностей K-Lite, которой нет в матрице (`ability.uncovered`), и при строке,
@@ -322,7 +328,7 @@ LAV, а Bass Audio Source; в `ffmpeg -formats` этой тройки нет, к
 FFmpeg [`ffmpeg-formats.html`](https://ffmpeg.org/ffmpeg-formats.html), а закреплённый `breeze.mid`
 не открывает даже `ffprobe`. Из тройки `cda` остаётся единственной, кому не хватает и внешнего
 демуксера, и закреплённого файла; её так и ищут —
-`python3 scripts/fetch_klite_samples.py --add ROW ПУТЬ_или_URL`.
+`python3 scripts/fetch_klite_samples.py --benchmark-reference --add ROW ПУТЬ_или_URL`.
 
 **Ещё 2<!--rows_own_pipeline:строка:строки:строк--> строки из этих шести доказаны своим кодом, а
 не FFmpeg.**
@@ -945,7 +951,7 @@ exponent 11 exceeds`, `exponent 15 is out of the range`, `framing marker`, `Vorb
 
 ## Матрица
 
-Сгенерировано `scripts/validate_klite_coverage.py`; числа берутся из
+Сгенерировано `scripts/validate_klite_coverage.py --benchmark-reference`; числа берутся из
 `benchmarks/klite-coverage.json`, руками не правятся.
 
 - 224 строки: **218 покрыто доказательно**, ждут внешнего сэмпла 0, вне сборки FFmpeg 6, падает 0.
