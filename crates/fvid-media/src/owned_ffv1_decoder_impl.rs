@@ -73,6 +73,7 @@ impl<'a> Range<'a> {
 }
 struct State {
     depth: u8,
+    has_chroma: bool,
     shifts: [u8; 2],
     tables: [[i32; 256]; 5],
     transitions: [u8; 256],
@@ -143,9 +144,7 @@ impl Decoder {
         if !(8..=16).contains(&depth) {
             return Err(unsupported("unsupported FFV1 sample depth"));
         }
-        if !r.bit(&mut h[0])? {
-            return Err(unsupported("FFV1 monochrome decoding is not implemented"));
-        }
+        let has_chroma = r.bit(&mut h[0])?;
         let sx = r.integer(&mut h, false)?;
         let sy = r.integer(&mut h, false)?;
         if sx > 4 || sy > 4 {
@@ -192,6 +191,7 @@ impl Decoder {
         }
         Ok(State {
             depth: depth as u8,
+            has_chroma,
             shifts: [sx as u8, sy as u8],
             tables,
             transitions,
@@ -209,8 +209,16 @@ impl Decoder {
             old.ok_or_else(|| invalid("FFV1 frame requires a preceding keyframe"))?
         };
         r.transitions = state.transitions;
-        let sx = 1usize << state.shifts[0];
-        let sy = 1usize << state.shifts[1];
+        let sx = if state.has_chroma {
+            1usize << state.shifts[0]
+        } else {
+            1
+        };
+        let sy = if state.has_chroma {
+            1usize << state.shifts[1]
+        } else {
+            1
+        };
         let cw = self.width.div_ceil(sx);
         let ch = self.height.div_ceil(sy);
         let samples = self
@@ -234,7 +242,7 @@ impl Decoder {
         }
         let mut data = buffer(len)?;
         let mut offset = 0;
-        for plane in 0..3 {
+        for plane in 0..if state.has_chroma { 3 } else { 1 } {
             let (w, h) = if plane == 0 {
                 (self.width, self.height)
             } else {
@@ -305,6 +313,14 @@ impl Decoder {
             offset += w * h * bytes;
         }
         let depth = state.depth;
+        if !state.has_chroma {
+            // Keep the public decoded-frame contract planar Y/Cb/Cr. The gray
+            // luma is unchanged; synthesized full-resolution chroma is neutral.
+            let neutral = (1u16 << (depth - 1)).to_le_bytes();
+            for sample in data[offset..].chunks_exact_mut(bytes) {
+                sample.copy_from_slice(&neutral[..bytes]);
+            }
+        }
         self.state = Some(state);
         Ok(Decoded {
             frame: GeometryFrame {

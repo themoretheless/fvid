@@ -349,3 +349,40 @@ fn packed_geometry_transforms_high_depth_without_narrowing() {
     assert_eq!(transformed.data, expected);
     assert_eq!(transformed.subsampling, Some([2, 2]));
 }
+
+#[test]
+fn monochrome_fixture_playback_preserves_luma_depth_timing_and_seek() {
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+    for depth in [8, 10, 16] {
+        let bytes = std::fs::read(root.join(format!("ffv1-gray-{depth}.mkv"))).unwrap();
+        let mut reader = NativeReader::software(Cursor::new(bytes), 1 << 20).unwrap();
+        for index in 0..2 {
+            let RawFrame::Planar(decoded) = reader.read_frame_raw().unwrap().unwrap() else {
+                panic!("planar monochrome output required");
+            };
+            let expected =
+                std::fs::read(root.join(format!("ffv1-gray-{depth}-{index}.gray"))).unwrap();
+            assert_eq!(decoded.depth, depth);
+            assert_eq!(decoded.frame.subsampling, Some([1, 1]));
+            assert_eq!(&decoded.frame.data[..expected.len()], expected);
+            assert_eq!(
+                reader.frame_interval(),
+                Some((index * 40_000_000, (index + 1) * 40_000_000, 1_000_000_000))
+            );
+        }
+        assert!(reader.read_frame_raw().unwrap().is_none());
+        reader.rewind().unwrap();
+        assert!(reader.read_frame().unwrap());
+        let first = reader.rgb().to_vec();
+        assert_eq!(first.len(), 4 * 3 * 3);
+        for pixel in first.chunks_exact(3) {
+            assert_eq!(pixel[0], pixel[1]);
+            assert_eq!(pixel[1], pixel[2]);
+        }
+        reader.seek(Duration::from_millis(45)).unwrap();
+        assert_eq!(reader.frame_interval().unwrap().0, 40_000_000);
+        reader.seek(Duration::ZERO).unwrap();
+        assert_eq!(reader.rgb(), first);
+    }
+}

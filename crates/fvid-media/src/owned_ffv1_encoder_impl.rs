@@ -1,4 +1,3 @@
-
 struct RangeWriter {
     low: u32,
     range: u32,
@@ -92,9 +91,35 @@ pub fn encode(frame: &GeometryFrame, depth: u8) -> Result<Vec<u8>> {
     if !(8..=16).contains(&depth) || frame.width == 0 || frame.height == 0 {
         return Err(invalid("unsupported FFV1 depth or empty geometry"));
     }
-    let [sx, sy] = frame
+    let subsampling = frame
         .subsampling
         .ok_or_else(|| invalid("FFV1 RGB encoding is not implemented"))?;
+    encode_planes(
+        frame.width,
+        frame.height,
+        &frame.data,
+        depth,
+        subsampling,
+        true,
+    )
+}
+
+/// Encode a self-contained monochrome keyframe without inventing chroma samples.
+/// Samples above eight bits are stored in little-endian u16 words.
+pub fn encode_gray(width: usize, height: usize, samples: &[u8], depth: u8) -> Result<Vec<u8>> {
+    encode_planes(width, height, samples, depth, [1, 1], false)
+}
+fn encode_planes(
+    width: usize,
+    height: usize,
+    data: &[u8],
+    depth: u8,
+    [sx, sy]: [usize; 2],
+    has_chroma: bool,
+) -> Result<Vec<u8>> {
+    if !(8..=16).contains(&depth) || width == 0 || height == 0 {
+        return Err(invalid("unsupported FFV1 depth or empty geometry"));
+    }
     if !matches!(
         (sx, sy),
         (1, 1) | (2, 1) | (2, 2) | (1, 2) | (4, 1) | (4, 4)
@@ -102,24 +127,27 @@ pub fn encode(frame: &GeometryFrame, depth: u8) -> Result<Vec<u8>> {
         return Err(invalid("unsupported FFV1 chroma subsampling"));
     }
     let bytes = if depth == 8 { 1 } else { 2 };
-    let cw = frame.width.div_ceil(sx);
-    let ch = frame.height.div_ceil(sy);
+    let cw = width.div_ceil(sx);
+    let ch = height.div_ceil(sy);
     let size = |w: usize, h: usize| {
         w.checked_mul(h)
             .and_then(|n| n.checked_mul(bytes))
             .ok_or_else(|| invalid("FFV1 plane size overflow"))
     };
-    let luma = size(frame.width, frame.height)?;
+    let luma = size(width, height)?;
     let chroma = size(cw, ch)?;
-    let expected = chroma
-        .checked_mul(2)
-        .and_then(|n| luma.checked_add(n))
-        .ok_or_else(|| invalid("FFV1 storage overflow"))?;
+    let expected = if has_chroma {
+        chroma
+            .checked_mul(2)
+            .and_then(|n| luma.checked_add(n))
+            .ok_or_else(|| invalid("FFV1 storage overflow"))?
+    } else {
+        luma
+    };
     let maximum = (1u32 << depth) - 1;
-    if frame.data.len() != expected
+    if data.len() != expected
         || (bytes == 2
-            && frame
-                .data
+            && data
                 .chunks_exact(2)
                 .any(|b| u32::from(u16::from_le_bytes([b[0], b[1]])) > maximum))
     {
@@ -131,7 +159,7 @@ pub fn encode(frame: &GeometryFrame, depth: u8) -> Result<Vec<u8>> {
     for value in [1, 1, 0, i32::from(depth)] {
         coder.integer(&mut header, value, false)?;
     }
-    coder.bit(&mut header[0], true)?;
+    coder.bit(&mut header[0], has_chroma)?;
     coder.integer(&mut header, sx.trailing_zeros() as i32, false)?;
     coder.integer(&mut header, sy.trailing_zeros() as i32, false)?;
     coder.bit(&mut header[0], false)?;
@@ -141,13 +169,13 @@ pub fn encode(frame: &GeometryFrame, depth: u8) -> Result<Vec<u8>> {
     }
     let mut states = [[128; 32]; 2];
     let mut offset = 0;
-    for plane in 0..3 {
+    for plane in 0..if has_chroma { 3 } else { 1 } {
         let (w, h, len) = if plane == 0 {
-            (frame.width, frame.height, luma)
+            (width, height, luma)
         } else {
             (cw, ch, chroma)
         };
-        let samples = &frame.data[offset..offset + len];
+        let samples = &data[offset..offset + len];
         let read = |x: usize, y: usize| -> i32 {
             let at = (y * w + x) * bytes;
             let value = if bytes == 1 {
