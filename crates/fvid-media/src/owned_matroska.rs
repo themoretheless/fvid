@@ -22,21 +22,74 @@ fn invalid(message: &str) -> Error {
 include!("owned_matroska_ebml_impl.rs");
 include!("owned_matroska_packet_impl.rs");
 
+/// Container colour codes, independent of a decoder or colour converter.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ColourDescription {
+    pub primaries: u8,
+    pub transfer: u8,
+    pub matrix: u8,
+    pub full_range: bool,
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Chromaticity {
+    pub x: f64,
+    pub y: f64,
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct ContentLight {
+    pub max_cll: f32,
+    pub max_fall: f32,
+}
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct MasteringDisplay {
+    pub red: Chromaticity,
+    pub green: Chromaticity,
+    pub blue: Chromaticity,
+    pub white: Chromaticity,
+    pub max_luminance: f32,
+    pub min_luminance: f32,
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct HdrMetadata {
+    pub mastering: Option<MasteringDisplay>,
+    pub light: ContentLight,
+}
+/// Crop in coded pixels and exact pixel aspect, with optional colour/HDR tags.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct VideoMetadata {
+    pub crop: [u32; 4],
+    pub pixel_aspect: (u32, u32),
+    pub colour: Option<ColourDescription>,
+    pub hdr: HdrMetadata,
+}
+impl Default for VideoMetadata {
+    fn default() -> Self {
+        Self {
+            crop: [0; 4],
+            pixel_aspect: (1, 1),
+            colour: None,
+            hdr: Default::default(),
+        }
+    }
+}
+include!("owned_matroska_video_impl.rs");
+
 impl<'a, W: Write + Seek> PacketWriter<'a, W> {
     /// Open one FFV1 v1 video track. Codec configuration lives in its keyframes.
     /// This constructor declares coded geometry without colour/rotation tags.
     pub fn new_ffv1(output: &'a mut W, width: u32, height: u32) -> Result<Self> {
-        if width == 0 || height == 0 {
-            return Err(invalid("empty Matroska video dimensions"));
-        }
-        let geometry = element(
-            0xe0,
-            &[
-                uint(0xb0, u64::from(width))?,
-                uint(0xba, u64::from(height))?,
-            ]
-            .concat(),
-        )?;
+        Self::new_ffv1_with_metadata(output, width, height, None, 0, 0)
+    }
+    /// Validate colour/HDR, crop, exact aspect and rotation before output.
+    pub fn new_ffv1_with_metadata(
+        output: &'a mut W,
+        width: u32,
+        height: u32,
+        metadata: Option<&VideoMetadata>,
+        rotation: u16,
+        default_duration_ns: u64,
+    ) -> Result<Self> {
+        let geometry = video_element(width, height, metadata, rotation)?;
         let entries = element(
             0xae,
             &[
@@ -46,6 +99,11 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
                 uint(0x9c, 0)?,
                 element(0x86, b"V_FFV1")?,
                 geometry,
+                if default_duration_ns == 0 {
+                    Vec::new()
+                } else {
+                    uint(0x23e383, default_duration_ns)?
+                },
                 element(0x22b59c, b"und")?,
             ]
             .concat(),

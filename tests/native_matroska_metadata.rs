@@ -703,3 +703,126 @@ fn independent_probe_reads_file_tags_and_chapters() {
     assert_eq!(chapters[1]["end"], 20_000_002);
     assert_eq!(chapters[1]["tags"]["title"], "Середина");
 }
+
+#[test]
+fn library_ffv1_metadata_matches_frontend_bytes_and_refuses_invalid_tags() {
+    use fvid_media::owned_matroska as owned;
+    let root = metadata();
+    let master = root.hdr.mastering.unwrap();
+    let mut meta = owned::VideoMetadata {
+        crop: root.crop,
+        pixel_aspect: root.pixel_aspect,
+        colour: Some(owned::ColourDescription {
+            matrix: 9,
+            transfer: 16,
+            primaries: 9,
+            full_range: false,
+        }),
+        hdr: owned::HdrMetadata {
+            light: owned::ContentLight {
+                max_cll: 1200.0,
+                max_fall: 400.0,
+            },
+            mastering: Some(owned::MasteringDisplay {
+                red: owned::Chromaticity {
+                    x: master.red.x,
+                    y: master.red.y,
+                },
+                green: owned::Chromaticity {
+                    x: master.green.x,
+                    y: master.green.y,
+                },
+                blue: owned::Chromaticity {
+                    x: master.blue.x,
+                    y: master.blue.y,
+                },
+                white: owned::Chromaticity {
+                    x: master.white.x,
+                    y: master.white.y,
+                },
+                max_luminance: 1000.0,
+                min_luminance: 0.005,
+            }),
+        },
+    };
+    let samples = fvid::native_geometry::GeometryFrame {
+        width: 8,
+        height: 8,
+        subsampling: Some([2, 2]),
+        data: vec![0; 96],
+    };
+    let packet = fvid_media::owned_ffv1_encoder::encode(&samples, 8).unwrap();
+    for angle in [0, 90, 180, 270] {
+        let mut expected = Cursor::new(Vec::new());
+        let mut writer = PacketWriter::new_with_options(
+            &mut expected,
+            &[TrackSpec {
+                encoding: Encoding::Ffv1V1 {
+                    width: 8,
+                    height: 8,
+                },
+                name: "",
+                language: "und",
+            }],
+            &[fvid::container::matroska_write::TrackOptions {
+                video: Some(root),
+                rotation: angle,
+                default_duration_ns: 40_000_000,
+                ..Default::default()
+            }],
+        )
+        .unwrap();
+        writer
+            .write_packet(0, 0, 40_000_000, true, &packet)
+            .unwrap();
+        writer.finish().unwrap();
+        let mut output = Cursor::new(Vec::new());
+        let mut writer = owned::PacketWriter::new_ffv1_with_metadata(
+            &mut output,
+            8,
+            8,
+            Some(&meta),
+            angle,
+            40_000_000,
+        )
+        .unwrap();
+        writer
+            .write_packet(0, 0, 40_000_000, true, &packet)
+            .unwrap();
+        writer.finish().unwrap();
+        assert_eq!(output.get_ref(), expected.get_ref());
+        let reader =
+            webm::WebmReader::open(Cursor::new(output.into_inner()), Default::default()).unwrap();
+        let track = &reader.tracks[0];
+        assert_eq!(track.crop, [2; 4]);
+        assert_eq!(track.pixel_aspect(), (16, 15));
+        assert_eq!(track.colour, root.colour.unwrap());
+        assert_eq!(track.hdr, root.hdr);
+    }
+    for case in 0..5 {
+        let mut invalid = meta;
+        let angle = if case == 0 { 45 } else { 0 };
+        match case {
+            1 => invalid.crop = [8, 0, 0, 0],
+            2 => invalid.pixel_aspect = (0, 1),
+            3 => invalid.hdr.light.max_cll = 0.5,
+            4 => invalid.hdr.mastering.as_mut().unwrap().red.x = f64::NAN,
+            _ => {}
+        }
+        let mut output = Cursor::new(Vec::new());
+        assert!(
+            owned::PacketWriter::new_ffv1_with_metadata(
+                &mut output,
+                8,
+                8,
+                Some(&invalid),
+                angle,
+                0
+            )
+            .is_err()
+        );
+        assert!(output.get_ref().is_empty());
+    }
+    meta.colour.as_mut().unwrap().full_range = true;
+    assert!(owned::video_element(8, 8, Some(&meta), 0).is_ok());
+}

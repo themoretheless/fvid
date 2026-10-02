@@ -252,3 +252,13 @@ with `FVID_REFERENCE_FFMPEG`. This retains all depth/layout, independent
 context/non-keyframe and AVC/HEVC-to-FFV1 reference cases. Ordinary FFV1 tests
 use only owned code and committed synthetic fixtures; they contain no ignored
 FFmpeg cases or external codec process invocation.
+
+Owned Matroska video metadata serialization now validates and writes crop,
+exact pixel aspect, colour codes/range, mastering display, content light and
+rectangular rotation. The frontend delegates to that library serializer.
+`library_ffv1_metadata_matches_frontend_bytes_and_refuses_invalid_tags` creates
+one wholly synthetic FFV1 frame, compares complete container bytes for all four
+rotations and parses colour/HDR/crop/aspect back. Invalid rotation, empty crop,
+zero aspect, fractional content light and NaN chromaticity are refused before
+any output bytes. Y4M tag mapping and general file metadata are still separate
+work; the plain Y4M export does not acquire those mappings merely from this API.
