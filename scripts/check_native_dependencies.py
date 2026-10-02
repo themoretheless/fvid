@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Reject FFmpeg adapters in supported native build graphs (not legacy media)."""
 import argparse
+import ast
 from pathlib import Path
 import subprocess
 import re
@@ -57,6 +58,50 @@ def audit_ordinary_tests(root):
     return paths, failures
 
 
+def external_python_calls(source):
+    """Known literal launches/environment hooks, not computed-path resolution.
+
+    Parse code rather than comments, docstrings or saved-oracle filenames.
+    """
+    tree = ast.parse(source)
+    lines = set()
+    launches = {"run", "call", "check_call", "check_output", "Popen", "execute", "invoke", "success"}
+    def literal(node):
+        return node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else None
+    def tool(value):
+        return value is not None and re.fullmatch(r"(?:[^\n]*/)?(?:ffmpeg|ffprobe)(?:\.exe)?", value, re.I)
+    def environment(value):
+        return value is not None and any(name in value.upper() for name in ("FFMPEG", "FFPROBE"))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and node.args:
+            name = node.func.attr if isinstance(node.func, ast.Attribute) else getattr(node.func, "id", "")
+            first = node.args[0]
+            command = first.elts[0] if isinstance(first, (ast.List, ast.Tuple)) and first.elts else first
+            if name in launches and tool(literal(command)):
+                lines.add(node.lineno)
+            if name in {"getenv", "var", "var_os"} and environment(literal(first)):
+                lines.add(node.lineno)
+            if isinstance(node.func, ast.Attribute) and node.func.attr == "get" and isinstance(node.func.value, ast.Attribute) and node.func.value.attr == "environ" and environment(literal(first)):
+                lines.add(node.lineno)
+            if name == "which" and tool(literal(first)):
+                lines.add(node.lineno)
+        if isinstance(node, ast.Subscript) and isinstance(node.value, ast.Attribute) and node.value.attr == "environ" and environment(literal(node.slice)):
+            lines.add(node.lineno)
+    return sorted(lines)
+
+
+def audit_fixture_generators(root):
+    paths = sorted((root / "scripts").glob("generate*.py"))
+    failures = []
+    for path in paths:
+        try:
+            for line in external_python_calls(path.read_text()):
+                failures.append(f"{path.relative_to(root)}:{line}: external FFmpeg fixture hook; use owned generation or an explicit reference benchmark")
+        except SyntaxError as error:
+            failures.append(f"{path.relative_to(root)}:{error.lineno}: generator source could not be audited: {error.msg}")
+    return paths, failures
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--offline", action="store_true")
@@ -84,6 +129,10 @@ def main():
     test_paths, failures = audit_ordinary_tests(ROOT)
     if not failures:
         print(f"ordinary tests: {len(test_paths)} Rust files; no known external FFmpeg test calls", flush=True)
+    generator_paths, generator_failures = audit_fixture_generators(ROOT)
+    failures.extend(generator_failures)
+    if not generator_failures:
+        print(f"fixture generators: {len(generator_paths)} Python files; no known external FFmpeg calls", flush=True)
     for name, manifest, features in cases:
         try:
             packages, legacy = dependencies(manifest, features, target, args.offline)
