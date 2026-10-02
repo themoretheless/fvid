@@ -22,7 +22,21 @@ Metal exercised eight chains and its ignored hardware API acceptance test.
 The first headless release binary could not exercise Metal and was rebuilt
 with `--no-default-features --features gpu` before those hardware results.
 
-Remaining FFmpeg-dependent validation programs include `validate_media.py`,
-`validate_hw_cuda.py` and `validate_klite_coverage.py`. Their codec/filter/reference
-coverage has not been removed or relabeled as migrated. Production legacy media
+`validate_hw_cuda.py` runs the seven required named physical CUDA/NVENC Cargo
+tests without launching or importing an external FFmpeg comparison. Add
+`--benchmark-reference` to preserve the full supplied-CLI comparisons, including
+crop/reflections, frame hashes, cut timing, decode count and P010/Main10 shader
+export. That unchanged comparison body lives in `benchmark_hw_cuda_reference.py`.
+Reports distinguish Cargo qualification from completed CLI/reference checks;
+the performance gate requires all named reference comparisons and matching
+binary hash, accepting historical full-reference snapshots but refusing new
+Cargo-only reports. Dispatch/report tests use simulated results and do not
+constitute physical NVIDIA proof. On this Mac the actual ordinary validator
+records failure because `nvidia-smi` is unavailable. The current `cuda-hw` Cargo
+suite still links its legacy libav adapter: removing external commands here
+does not prove a FFmpeg-free production CUDA dependency graph.
+
+Remaining FFmpeg-dependent validation programs include `validate_media.py`
+and `validate_klite_coverage.py`. Their codec/filter/reference coverage has not
+been removed or relabeled as migrated. Production legacy media
 operations and AAC aggregate allocation admission also remain separate work.

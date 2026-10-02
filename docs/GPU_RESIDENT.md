@@ -88,7 +88,7 @@ python3 scripts/validate_resident.py --backend metal
 
 ```sh
 ./target/release/fvid media hw-filter input.mp4 output.mp4 --crop 16:16:320:180 --hflip --vflip
-python scripts/validate_hw_cuda.py
+python scripts/validate_hw_cuda.py --benchmark-reference
 ```
 
 Путь: FFmpeg CUDA hwaccel decode (NV12 device surfaces) → `fvid-cuda` NV12 crop/hflip/vflip (device-to-device) → `h264_nvenc`. Статистика сообщает `host_frame_copies=0` на happy path. Это не полный codec graph и не замена software lossless path.

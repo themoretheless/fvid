@@ -541,13 +541,18 @@ The borrowed stream must outlive the processor. The ignored NVIDIA lifetime
 test queues changed and cached parameters on a separate stream, drops the
 processor before downloading, and compares every output component with CPU.
 `python scripts/validate_hw_cuda.py --binary PATH_TO_FVID --report REPORT.json`
-now requires seven named physical CUDA/NVENC tests, then exercises the supplied
-CLI binary including P010 sampling shader → decodable HEVC Main10. Empty test
-selections cannot pass. The report includes GPU/driver information and the
-binary SHA-256; failure writes a failed report instead of leaving an earlier
-success record. Seven host tests verify the selection guards. On the current
-Mac the actual validator stops at missing `nvidia-smi` and writes `failed`;
-this is not NVIDIA qualification.
+requires seven named physical CUDA/NVENC Cargo tests without executing external
+FFmpeg commands. Add `--benchmark-reference` to exercise the supplied CLI binary
+and the retained FFmpeg comparisons, including P010 sampling shader → decodable
+HEVC Main10. Empty test selections cannot pass. The report includes GPU/driver
+information and the binary SHA-256, and explicitly identifies completed CLI
+reference checks; Cargo-only success does not qualify the performance gate.
+Failure writes a failed report instead of leaving an earlier success record.
+The hardware Cargo suites still include the existing libav media adapter;
+this script change does not remove that production dependency. Host policy
+tests simulate dispatch and report failures and are not NVIDIA qualification.
+On the current Mac the actual validator stops at missing `nvidia-smi` and writes
+`failed`; physical NVIDIA checks and external comparisons were not run here.
 The native NV12 sampler and generated blur kernel pass a host C++ reference
 check over pitched planes, crop, all reflections, separate U/V reads and extreme
 signed coordinates. This checks address/algorithm behavior, not CUDA execution.

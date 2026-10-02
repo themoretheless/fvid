@@ -2,6 +2,7 @@
 """Randomized, interleaved strict gate for native CUDA media fair pairs."""
 import argparse,datetime,hashlib,json,pathlib,random,statistics,subprocess,tempfile,time
 from common import ROOT,prepend_cuda_bin,release_binary
+from cuda_qualification import require_cli_reference_report
 
 prepend_cuda_bin()
 parser=argparse.ArgumentParser()
@@ -14,12 +15,12 @@ binary=pathlib.Path(args.binary).resolve()
 if args.runs<3:parser.error('runs >= 3 required')
 validation_path=ROOT/'benchmarks/hw-validation.json'
 if not validation_path.is_file():
-    raise SystemExit('run scripts/validate_hw_cuda.py successfully before the GPU gate')
+    raise SystemExit('run scripts/validate_hw_cuda.py --benchmark-reference successfully before the GPU gate')
 validation=json.loads(validation_path.read_text())
-if validation.get('status')!='passed' or len(validation.get('checks',[]))<7:
-    raise SystemExit('CUDA validation report is incomplete; rerun validate_hw_cuda.py')
-if hashlib.sha256(binary.read_bytes()).hexdigest()!=validation.get('binary_sha256'):
-    raise SystemExit('CUDA validation report does not match --binary; rerun validate_hw_cuda.py')
+try:
+    require_cli_reference_report(validation, hashlib.sha256(binary.read_bytes()).hexdigest())
+except RuntimeError as error:
+    raise SystemExit(str(error)) from error
 
 def run(command,stdout=subprocess.DEVNULL):
     result=subprocess.run([str(v)for v in command],stdout=stdout,stderr=subprocess.PIPE,timeout=180)

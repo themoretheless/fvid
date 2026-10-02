@@ -28,3 +28,27 @@ def qualify_native_tests(root, run):
         passed = require_executed_tests(result.stdout, len(required), required)
         results.append({"suite": selector, "passed": passed, "required_tests": required})
     return results
+
+
+def require_cli_reference_report(report, binary_sha256):
+    """The performance gate needs CLI/reference evidence, not Cargo-only success.
+
+    Historical reports predate scope flags and are accepted only with all seven
+    named comparisons, preserving their existing validation evidence.
+    """
+    required = {
+        "crop decoded frames match FFmpeg",
+        "copy decoded frames match FFmpeg",
+        "hflip decoded frames match FFmpeg",
+        "vflip decoded frames match FFmpeg",
+        "fused decoded frames match FFmpeg",
+        "cut interval timeline and decoded frames match FFmpeg",
+        "decode-only frame count matches FFmpeg",
+    }
+    if report.get("status") != "passed" or not required.issubset(report.get("checks", [])):
+        raise RuntimeError("CUDA CLI reference report is incomplete; rerun validate_hw_cuda.py --benchmark-reference")
+    flags = ("reference_requested", "reference_completed", "provided_cli_checks_completed")
+    if any(flag in report for flag in flags) and not all(report.get(flag) is True for flag in flags):
+        raise RuntimeError("CUDA report does not prove completed CLI reference checks; rerun validate_hw_cuda.py --benchmark-reference")
+    if report.get("binary_sha256") != binary_sha256:
+        raise RuntimeError("CUDA validation report does not match --binary; rerun validate_hw_cuda.py --benchmark-reference")
