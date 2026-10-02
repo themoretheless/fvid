@@ -1209,6 +1209,9 @@ fn validate_packet(
     Ok((index as usize, size as usize))
 }
 pub fn remux(source: &Path, destination: &Path, options: &CopyOptions) -> Result<CopyStats> {
+    if crate::owned_wave_remux::supports(source, destination, options) {
+        return crate::owned_wave_remux::remux(source, destination, options);
+    }
     remux_input(Input::open_fast(source)?, destination, options)
 }
 fn remux_input(mut input: Input, destination: &Path, options: &CopyOptions) -> Result<CopyStats> {
