@@ -218,35 +218,6 @@ fn aac_wave_cli_plan_and_api_use_owned_pipeline() {
     }
 }
 #[test]
-#[ignore = "requires FVID_REFERENCE_FFMPEG"]
-fn reference_amix_matches_float_pcm() {
-    let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
-    let d = dir();
-    let (sources, _) = fixtures(&d);
-    for normalize in [false, true] {
-        let options = MixAudioOptions {
-            normalize,
-            weights: vec![0.25, 0.75],
-            ..Default::default()
-        };
-        let dest = d.0.join(format!("{normalize}.wav"));
-        native_audio_mix::mix_audio(&sources, &dest, &options).unwrap();
-        let mut command = std::process::Command::new(&ffmpeg);
-        command.args(["-v", "error"]);
-        for source in &sources {
-            command.arg("-i").arg(source);
-        }
-        let result=command.args(["-filter_complex",&format!("amix=inputs=3:duration=shortest:dropout_transition=0:normalize={}:weights=0.25 0.75",u8::from(normalize)),"-f","f32le","pipe:1"]).output().unwrap();
-        assert!(
-            result.status.success(),
-            "{}",
-            String::from_utf8_lossy(&result.stderr)
-        );
-        assert_eq!(pcm(&dest), result.stdout, "normalize={normalize}");
-    }
-}
-
-#[test]
 fn unsupported_wave_geometry_keeps_legacy_admission() {
     let d = dir();
     let p = d.0.join("sixty-five.wav");
@@ -367,37 +338,6 @@ fn merge_aac_cli_and_failure_cleanup() {
             .to_string_lossy()
             .starts_with(".fvid-")
     }));
-}
-
-#[test]
-#[ignore = "requires FVID_REFERENCE_FFMPEG"]
-fn reference_amerge_overlapping_layouts_matches_channel_concatenation() {
-    let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
-    let d = dir();
-    let (sources, _) = fixtures(&d);
-    let sources = &sources[..2];
-    let destination = d.0.join("merged.wav");
-    native_audio_mix::merge_audio(sources, &destination).unwrap();
-    let result = std::process::Command::new(ffmpeg)
-        .args(["-v", "error", "-i"])
-        .arg(&sources[0])
-        .arg("-i")
-        .arg(&sources[1])
-        .args([
-            "-filter_complex",
-            "amerge=inputs=2",
-            "-f",
-            "f32le",
-            "pipe:1",
-        ])
-        .output()
-        .unwrap();
-    assert!(
-        result.status.success(),
-        "{}",
-        String::from_utf8_lossy(&result.stderr)
-    );
-    assert_eq!(pcm(&destination), result.stdout);
 }
 
 #[test]

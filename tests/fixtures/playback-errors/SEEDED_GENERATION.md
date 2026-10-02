@@ -556,3 +556,5 @@ External MP4 lossless-export video/copied-audio and spatial-transform comparison
 External MP4 concat AVC/HEVC video, AAC zero-delay/priming, mixed-track and independently generated no-PNS comparisons run only in `ffmpeg_mp4_concat_reference`. Ordinary concat tests retain native payload/frame/clock, PCM, CLI/API/plan and publication checks without FFmpeg.
 
 External combined MP4-to-Matroska video/audio remux comparisons run only in `ffmpeg_mp4_remux_reference`. Ordinary remux tests retain owned frame/edit/metadata, dependencies/window, CLI/API/publication and rejection checks without FFmpeg.
+
+External synthetic PCM amix normalization/weights and overlapping-layout amerge comparisons run only in `ffmpeg_audio_mix_reference`. Ordinary audio mix tests retain sample/channel order, AAC edits, CLI/API/plans and publication controls without FFmpeg.
