@@ -112,7 +112,7 @@ impl RotateAngle {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct CropRect {
     pub x: usize,
     pub y: usize,
@@ -120,13 +120,13 @@ pub struct CropRect {
     pub height: usize,
 }
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct ScaleSize {
     pub width: u32,
     pub height: u32,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct OverlaySpec {
     pub path: PathBuf,
     pub x: i32,
@@ -375,7 +375,7 @@ pub struct LosslessTransform {
     /// Use demuxer seeking before decoding; requires an interval.
     pub seek: bool,
 }
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DecodeTransform {
     pub crop: Option<CropRect>,
     pub vertical_flip: bool,

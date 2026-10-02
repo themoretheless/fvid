@@ -82,6 +82,9 @@ pub fn decode_video(source: &Path) -> Result<DecodeStats> {
 }
 
 pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Result<DecodeStats> {
+    if crate::owned_y4m_decode::supports_transformed(source, &transform) {
+        return crate::owned_y4m_decode::decode_video_transformed(source, transform);
+    }
     let mut input = Input::open_fast_hinted(source, transform.input_format.as_deref())?;
     let video = input
         .streams()

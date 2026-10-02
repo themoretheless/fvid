@@ -45,4 +45,22 @@ The frame-rate parser is shared with owned probing, including positive rational
 validation, reduction and the existing omitted-rate default. Public integration
 tests require the owned backend for all 13 chroma/depth variants and additionally
 exercise three-byte reads and truncated-tail refusal on the synthetic WAVE-probe
-Y4M control. Transformed video decode and other containers remain migration work.
+Y4M control. Additional video transforms and other containers remain migration work.
+
+The library's Y4M decode-and-discard now implements crop, horizontal/vertical
+reflection and a half-open presentation interval. Each sample plane is processed
+without RGB conversion; 10/16-bit horizontal reflection preserves sample byte
+order. Input/output buffers are reused between transformed frames. Identity and
+interval-only reads retain bounded 8 KiB scratch rather than full frame buffers.
+Interval selection uses the original rational frame clock and stops before the
+first unrequested header, so an unrequested damaged tail is not consumed.
+
+`tests/native_y4m_library_transform.rs` compares 72 chroma/depth/crop/reflection
+combinations with frontend CPU (8-bit) and sample-plane geometry (10/16-bit).
+Known 8/16-bit pixel matrices independently check all three planes. The existing
+three-frame synthetic WAVE-probe Y4M checks exact interval boundaries, cropped
+output metadata, full-source refusal versus limited-range tail acceptance, and
+explicit rejection of unsupported owned options. Legacy dispatch retains those
+other options rather than silently ignoring them. Derived structural equality
+on transformation requests makes future non-default options reject this route
+until their implementation is added. No FFmpeg or network is invoked by tests.
