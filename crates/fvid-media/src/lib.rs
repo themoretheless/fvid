@@ -100,3 +100,5 @@ pub mod owned_morphology;
 pub mod owned_overlay;
 
 pub mod owned_ffv1_encoder;
+
+pub mod owned_matroska;

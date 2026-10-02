@@ -3,35 +3,7 @@
 use crate::{Result, invalid};
 use fvid_control::{CancelFlag, ProgressEvent, ProgressHook};
 use std::io::{Read, Seek, SeekFrom, Write};
-fn size(value: u64) -> Result<Vec<u8>> {
-    for width in 1..=8 {
-        if value < (1u64 << (7 * width)) - 1 {
-            let encoded = (value | (1u64 << (7 * width))).to_be_bytes();
-            return Ok(encoded[8 - width..].to_vec());
-        }
-    }
-    Err(invalid("Matroska element exceeds size range"))
-}
-fn head(output: &mut impl Write, id: u32, length: u64) -> Result<()> {
-    let bytes = id.to_be_bytes();
-    let start = bytes
-        .iter()
-        .position(|&b| b != 0)
-        .ok_or_else(|| invalid("zero EBML ID"))?;
-    output.write_all(&bytes[start..])?;
-    output.write_all(&size(length)?)?;
-    Ok(())
-}
-fn element(id: u32, data: &[u8]) -> Result<Vec<u8>> {
-    let mut out = Vec::new();
-    head(&mut out, id, data.len() as u64)?;
-    out.extend_from_slice(data);
-    Ok(out)
-}
-fn uint(id: u32, value: u64) -> Result<Vec<u8>> {
-    let b = value.to_be_bytes();
-    element(id, &b[b.iter().position(|&v| v != 0).unwrap_or(7)..])
-}
+include!("../../crates/fvid-media/src/owned_matroska_ebml_impl.rs");
 
 /// File-level metadata. Chapter timestamps are nanoseconds on the presentation
 /// timeline; editions are flat and unordered. No implicit chapter ends are added.
@@ -123,14 +95,6 @@ fn file_metadata(value: &FileMetadata) -> Result<Vec<u8>> {
         out.extend(element(0x1043a770, &element(0x45b9, &atoms)?)?);
     }
     Ok(out)
-}
-
-/// Per-block presentation controls. Invisible video blocks still establish
-/// decoder references but do not extend the presentation duration.
-#[derive(Clone, Copy, Debug, Default)]
-pub struct PacketOptions {
-    pub discard_padding_ns: i64,
-    pub invisible: bool,
 }
 
 /// Encoded packet storage is passed through without rewriting codec payloads.
@@ -471,21 +435,8 @@ fn video(
     element(0xe0, &data)
 }
 
-/// Streaming packet writer. Feed each track in decode order, interleaving tracks
-/// at the call site. PTS can move backwards for B-frames; each packet has its own
-/// nanosecond-clock cluster, avoiding signed 16-bit block timestamp overflow.
-/// No payload copies or accumulated packet index. Discard output on any error.
-pub struct PacketWriter<'a, W> {
-    output: &'a mut W,
-    segment_size: u64,
-    duration_offset: u64,
-    written: Vec<bool>,
-    delays: Vec<u64>,
-    pcm: Vec<Option<(u32, u16)>>,
-    end_ns: u64,
-    event: ProgressEvent,
-    failed: bool,
-}
+include!("../../crates/fvid-media/src/owned_matroska_packet_impl.rs");
+
 impl<'a, W: Write + Seek> PacketWriter<'a, W> {
     pub fn new(output: &'a mut W, tracks: &[TrackSpec<'_>]) -> Result<Self> {
         Self::new_with_video_metadata(output, tracks, &[])
@@ -541,231 +492,14 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         for (index, track) in tracks.iter().enumerate() {
             entries.extend(track_entry(track, index as u64 + 1, options.get(index))?);
         }
-        if output.stream_position()? != 0 {
-            return Err(invalid("Matroska output must start at zero"));
-        }
-        let ebml = [
-            uint(0x4286, 1)?,
-            uint(0x42f7, 1)?,
-            uint(0x42f2, 4)?,
-            uint(0x42f3, 8)?,
-            element(0x4282, b"matroska")?,
-            uint(0x4287, 4)?,
-            uint(0x4285, 2)?,
-        ]
-        .concat();
-        output.write_all(&element(0x1a45dfa3, &ebml)?)?;
-        output.write_all(&0x18538067u32.to_be_bytes())?;
-        let segment_size = output.stream_position()?;
-        output.write_all(&[1, 255, 255, 255, 255, 255, 255, 255])?;
-        let info = element(
-            0x1549a966,
-            &[
-                uint(0x2ad7b1, 1)?,
-                element(0x4d80, b"FVid")?,
-                element(0x5741, b"FVid")?,
-                element(0x4489, &0f64.to_be_bytes())?,
-            ]
-            .concat(),
-        )?;
-        let duration_offset = output.stream_position()? + info.len() as u64 - 8;
-        output.write_all(&info)?;
-        output.write_all(&element(0x1654ae6b, &entries)?)?;
-        output.write_all(&file_elements)?;
-        Ok(Self {
-            output,
-            segment_size,
-            duration_offset,
-            written: vec![false; tracks.len()],
-            delays: (0..tracks.len())
-                .map(|i| options.get(i).map_or(0, |o| o.codec_delay_ns))
-                .collect(),
-            pcm: tracks.iter().map(|t|match t.encoding {
-                Encoding::PcmFloat32 {sample_rate,channels} => Some((sample_rate,channels)),
-                _ => None,
-            }).collect(),
-            end_ns: 0,
-            event: ProgressEvent {
-                packets: 0,
-                payload_bytes: 0,
-                done: false,
-            },
-            failed: false,
-        })
-    }
-    pub fn event(&self) -> ProgressEvent {
-        self.event
-    }
-    /// Flush pending container bytes without finalizing or publishing output.
-    pub fn flush(&mut self) -> Result<()> {
-        if self.failed {return Err(invalid("Matroska writer failed"));}
-        if let Err(error) = self.output.flush() {self.failed=true;return Err(error.into());}
-        Ok(())
-    }
-
-    /// `track` is zero-based. Durations/PTS are in nanoseconds. The sync flag
-    /// states independent decodability, not whether PTS follows the last packet.
-    pub fn write_packet(
-        &mut self,
-        track: usize,
-        pts_ns: u64,
-        duration_ns: u64,
-        sync: bool,
-        payload: &[u8],
-    ) -> Result<()> {
-        self.write_packet_with_padding(track, pts_ns, duration_ns, sync, payload, 0)
-    }
-    /// Positive padding discards the end; negative padding discards the start.
-    /// Nanoseconds are independent of the segment timestamp scale.
-    pub fn write_packet_with_padding(
-        &mut self,
-        track: usize,
-        pts_ns: u64,
-        duration_ns: u64,
-        sync: bool,
-        payload: &[u8],
-        discard_padding_ns: i64,
-    ) -> Result<()> {
-        self.write_packet_with_options(
-            track,
-            pts_ns,
-            duration_ns,
-            sync,
-            payload,
-            PacketOptions {
-                discard_padding_ns,
-                invisible: false,
-            },
-        )
-    }
-    /// Write a packet with explicit decode-only or padding controls.
-    pub fn write_packet_with_options(
-        &mut self,
-        track: usize,
-        pts_ns: u64,
-        duration_ns: u64,
-        sync: bool,
-        payload: &[u8],
-        options: PacketOptions,
-    ) -> Result<()> {
-        if self.failed {
-            return Err(invalid("Matroska writer failed"));
-        }
-        let result = self.packet(track, pts_ns, duration_ns, sync, payload, options);
-        self.failed = result.is_err();
-        result
-    }
-    fn packet(
-        &mut self,
-        track: usize,
-        pts_ns: u64,
-        duration_ns: u64,
-        sync: bool,
-        payload: &[u8],
-        options: PacketOptions,
-    ) -> Result<()> {
-        let discard_padding_ns = options.discard_padding_ns;
-        if track >= self.written.len() || duration_ns == 0 || payload.is_empty() {
-            return Err(invalid("invalid Matroska packet"));
-        }
-        if let Some((rate, channels)) = self.pcm[track] {
-            let frame_bytes = usize::from(channels) * 4;
-            if payload.len() % frame_bytes != 0 || options.invisible || !sync
-                || payload.chunks_exact(4).any(|p|!f32::from_le_bytes(p.try_into().unwrap()).is_finite()) {
-                return Err(invalid("invalid Matroska float PCM packet"));
-            }
-            let frames = (payload.len() / frame_bytes) as u128;
-            let span = frames * 1_000_000_000;
-            if u128::from(duration_ns) < span / u128::from(rate)
-                || u128::from(duration_ns) > span.div_ceil(u128::from(rate)) {
-                return Err(invalid("Matroska PCM duration disagrees with sample count"));
-            }
-        }
-        if discard_padding_ns.unsigned_abs() > duration_ns {
-            return Err(invalid("Matroska padding exceeds packet duration"));
-        }
-        let end = pts_ns
-            .checked_add(duration_ns)
-            .filter(|v| *v <= i64::MAX as u64)
-            .ok_or_else(|| invalid("Matroska timestamp overflow"))?;
-        let packets = self
-            .event
-            .packets
-            .checked_add(1)
-            .ok_or_else(|| invalid("packet count overflow"))?;
-        let bytes = self
-            .event
-            .payload_bytes
-            .checked_add(payload.len() as u64)
-            .ok_or_else(|| invalid("payload count overflow"))?;
-        let timestamp = uint(0xe7, pts_ns)?;
-        let duration = uint(0x9b, duration_ns)?;
-        // ReferenceBlock=0 is the specified marker for dependent blocks whose
-        // precise reference graph is unknown to the container-only writer.
-        let reference = if sync {
-            Vec::new()
-        } else {
-            element(0xfb, &[0])?
-        };
-        let padding = if discard_padding_ns == 0 {
-            Vec::new()
-        } else {
-            element(0x75a2, &discard_padding_ns.to_be_bytes())?
-        };
-        let block = 4 + payload.len() as u64;
-        let group = 1
-            + size(block)?.len() as u64
-            + block
-            + duration.len() as u64
-            + reference.len() as u64
-            + padding.len() as u64;
-        let cluster = timestamp.len() as u64 + 1 + size(group)?.len() as u64 + group;
-        head(self.output, 0x1f43b675, cluster)?;
-        self.output.write_all(&timestamp)?;
-        head(self.output, 0xa0, group)?;
-        head(self.output, 0xa1, block)?;
-        self.output.write_all(&[
-            0x80 | (track as u8 + 1),
-            0,
-            0,
-            if options.invisible { 0x08 } else { 0 },
-        ])?;
-        self.output.write_all(payload)?;
-        self.output.write_all(&duration)?;
-        self.output.write_all(&reference)?;
-        self.output.write_all(&padding)?;
-        self.written[track] = true;
-        let presented_end = end
-            .saturating_sub(self.delays[track])
-            .saturating_sub(discard_padding_ns.max(0) as u64);
-        if !options.invisible {
-            self.end_ns = self.end_ns.max(presented_end);
-        }
-        self.event.packets = packets;
-        self.event.payload_bytes = bytes;
-        Ok(())
-    }
-    /// Patch finite segment size and presentation duration. `done` remains false:
-    /// the caller owns flushing, syncing and atomic publication.
-    pub fn finish(self) -> Result<ProgressEvent> {
-        if self.failed || self.written.iter().any(|v| !v) {
-            return Err(invalid("incomplete Matroska tracks"));
-        }
-        if self.end_ns == 0 {
-            return Err(invalid("Matroska has no presentation duration"));
-        }
-        let end = self.output.stream_position()?;
-        let length = end - self.segment_size - 8;
-        if length >= (1u64 << 56) - 1 {
-            return Err(invalid("Matroska segment exceeds size range"));
-        }
-        self.output.seek(SeekFrom::Start(self.segment_size))?;
-        self.output
-            .write_all(&(length | (1u64 << 56)).to_be_bytes())?;
-        self.output.seek(SeekFrom::Start(self.duration_offset))?;
-        self.output.write_all(&(self.end_ns as f64).to_be_bytes())?;
-        self.output.seek(SeekFrom::Start(end))?;
-        Ok(self.event)
+        let delays = (0..tracks.len())
+            .map(|i| options.get(i).map_or(0, |o| o.codec_delay_ns))
+            .collect();
+        let pcm = tracks.iter().map(|t| match t.encoding {
+            Encoding::PcmFloat32 { sample_rate, channels } => Some((sample_rate, channels)),
+            _ => None,
+        }).collect();
+        Self::new_prepared(output, &entries, &file_elements, delays, pcm)
     }
 }
 

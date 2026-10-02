@@ -226,3 +226,12 @@ sink-error propagation and a truncated-payload refusal before packet delivery.
 Generation uses integer patterns, the owned encoder and decoder only. This API
 emits packets to a caller-owned sink; it does not claim a completed library
 Matroska/file-export migration or removal of the legacy backend.
+
+The library's owned Matroska writer shares EBML serialization, packet validation,
+error state and finalization with the frontend writer. The synthetic FFV1 tests
+compare whole container bytes for one rationally timed packet, then export three
+Y4M frames with interval selection and transpose, parse the result and verify
+exact decoded planes and source timestamps. Empty/truncated input and sticky
+packet failures have refusal tests. No private media or external generator is
+used. This introduces writer-level FFV1 export; general codec admission, colour/
+file metadata mapping and atomic file publication remain separate migrations.

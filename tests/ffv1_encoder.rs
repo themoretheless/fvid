@@ -515,3 +515,118 @@ fn library_ffv1_stream_transposes_filters_and_stops_on_sink_error() {
     assert!(error.contains("truncated Y4M"));
     assert!(!called);
 }
+
+#[test]
+fn library_matroska_writer_matches_frontend_and_exports_filtered_y4m() {
+    use fvid::codec::ffv1_decoder::Decoder;
+    use fvid::container::webm::WebmReader;
+    let frame = image(4, 2, 2, 1, 10, 2);
+    let packet = ffv1_encoder::encode(&frame, 10).unwrap();
+    let mut original = Cursor::new(Vec::new());
+    let mut expected = PacketWriter::new(
+        &mut original,
+        &[TrackSpec {
+            encoding: Encoding::Ffv1V1 {
+                width: 4,
+                height: 2,
+            },
+            name: "",
+            language: "und",
+        }],
+    )
+    .unwrap();
+    expected
+        .write_packet(0, 666_666_666, 666_666_667, true, &packet)
+        .unwrap();
+    let expected_event = expected.finish().unwrap();
+    let mut output = Cursor::new(Vec::new());
+    let mut writer = fvid_media::owned_matroska::PacketWriter::new_ffv1(&mut output, 4, 2).unwrap();
+    writer
+        .write_packet(0, 666_666_666, 666_666_667, true, &packet)
+        .unwrap();
+    let event = writer.finish().unwrap();
+    assert_eq!(
+        (event.packets, event.payload_bytes, event.done),
+        (
+            expected_event.packets,
+            expected_event.payload_bytes,
+            expected_event.done
+        )
+    );
+    assert_eq!(output.into_inner(), original.into_inner());
+
+    let mut source = b"YUV4MPEG2 W4 H2 F3:2 Ip C422p10\n".to_vec();
+    for _ in 0..3 {
+        source.extend_from_slice(b"FRAME\n");
+        source.extend_from_slice(&frame.data);
+    }
+    let transform = fvid_media::DecodeTransform {
+        interval: Some((600_000, 1_400_000)),
+        transpose: Some(fvid_media::TransposeMode::Clock),
+        ..Default::default()
+    };
+    let mut output = Cursor::new(Vec::new());
+    let (stats, event) =
+        fvid_media::owned_matroska::write_y4m_ffv1(Cursor::new(source), &mut output, &transform)
+            .unwrap();
+    assert_eq!((stats.width, stats.height, stats.video_frames), (2, 4, 2));
+    assert_eq!(event.packets, 2);
+    assert!(!event.done);
+    let mut reader =
+        WebmReader::open(Cursor::new(output.into_inner()), Default::default()).unwrap();
+    reader.scan_all().unwrap();
+    assert_eq!(reader.tracks[0].codec, "V_FFV1");
+    assert_eq!(reader.packets.len(), 2);
+    let mut decoder = Decoder::new(2, 4, 1 << 20).unwrap();
+    let mut expected = Vec::new();
+    let mut offset = 0;
+    for (w, h) in [(4, 2), (2, 2), (2, 2)] {
+        for row in 0..w {
+            for col in 0..h {
+                let at = offset + ((h - 1 - col) * w + row) * 2;
+                expected.extend_from_slice(&frame.data[at..at + 2]);
+            }
+        }
+        offset += w * h * 2;
+    }
+    for (i, block) in reader.packets.clone().iter().enumerate() {
+        let index = i as u64 + 1;
+        assert_eq!(block.pts_ns, (index * 2_000_000_000 / 3) as i64);
+        let payload = reader.read_packet(i).unwrap();
+        let decoded = decoder.decode(&payload).unwrap();
+        assert_eq!(decoded.frame.data, expected);
+        assert_eq!(decoded.frame.subsampling, Some([1, 2]));
+    }
+}
+
+#[test]
+fn library_matroska_rejects_partial_streams_and_keeps_failure_sticky() {
+    use fvid_media::owned_matroska::{PacketWriter, write_y4m_ffv1};
+    let mut output = Cursor::new(Vec::new());
+    assert!(PacketWriter::new_ffv1(&mut output, 0, 4).is_err());
+    assert!(output.get_ref().is_empty());
+    let mut writer = PacketWriter::new_ffv1(&mut output, 4, 4).unwrap();
+    assert!(writer.write_packet(1, 0, 1, true, &[1]).is_err());
+    assert!(writer.write_packet(0, 0, 1, true, &[1]).is_err());
+    assert!(writer.finish().is_err());
+    let mut output = Cursor::new(Vec::new());
+    assert!(
+        write_y4m_ffv1(
+            Cursor::new(b"YUV4MPEG2 W4 H4 F25:1 Ip C420\n"),
+            &mut output,
+            &Default::default()
+        )
+        .is_err()
+    );
+    assert!(output.get_ref().is_empty());
+    let mut output = Cursor::new(Vec::new());
+    assert!(
+        write_y4m_ffv1(
+            Cursor::new(b"YUV4MPEG2 W4 H4 F25:1 Ip C420\nFRAME\n\0"),
+            &mut output,
+            &Default::default()
+        )
+        .is_err()
+    );
+    assert!(output.get_ref().is_empty());
+}
