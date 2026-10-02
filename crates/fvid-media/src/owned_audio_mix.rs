@@ -33,6 +33,16 @@ pub(crate) fn read_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
     source: &Path,
     bits: Option<u16>,
     cancel: Option<&fvid_control::CancelFlag>,
+    block: F,
+) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    read_float_wave_with_limits(source, bits, cancel, usize::MAX, None, block)
+}
+pub(crate) fn read_float_wave_with_limits<F: FnMut(usize) -> Result<()>>(
+    source: &Path,
+    bits: Option<u16>,
+    cancel: Option<&fvid_control::CancelFlag>,
+    max_packet_bytes: usize,
+    max_packets: Option<u64>,
     mut block: F,
 ) -> Result<(AudioDecodeStats, Vec<u8>)> {
     let check = || {
@@ -55,8 +65,20 @@ pub(crate) fn read_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
         return Err("no decoded audio samples or invalid channel count".into());
     }
     let rate = i32::try_from(info.sample_rate).map_err(|_| "invalid decoded audio rate")?;
-    let size =
+    let frame_bytes = usize::from(info.block);
+    let capacity = (4096 * frame_bytes).min(max_packet_bytes / frame_bytes * frame_bytes);
+    if capacity == 0 {
+        return Err("PCM packet limit cannot hold one sample frame".into());
+    }
+    let full_size =
         usize::try_from(info.data_bytes).map_err(|_| "WAVE PCM payload exceeds address space")?;
+    let limit = max_packets
+        .map(|packets| u128::from(packets) * capacity as u128)
+        .unwrap_or(full_size as u128);
+    let size = (full_size as u128).min(limit) as usize;
+    if size == 0 {
+        return Err("packet limit leaves no decoded audio samples".into());
+    }
     let mut pcm = Vec::new();
     pcm.try_reserve_exact(size)
         .map_err(|_| "cannot allocate WAVE PCM payload")?;
@@ -65,7 +87,6 @@ pub(crate) fn read_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
         .map_err(|e| e.to_string())?;
     let mut blocks = 0;
     let width = usize::from(info.bits_per_sample / 8);
-    let capacity = 4096 * usize::from(info.channels) * width;
     for bytes in pcm.chunks_mut(capacity) {
         check()?;
         file.read_exact(bytes).map_err(|e| e.to_string())?;
@@ -84,7 +105,7 @@ pub(crate) fn read_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
     }
     Ok((
         AudioDecodeStats {
-            sample_frames: info.sample_frames,
+            sample_frames: (size / frame_bytes) as u64,
             decoded_frames: blocks,
             sample_rate: rate,
             channels: i32::from(info.channels),

@@ -32,9 +32,7 @@ pub(crate) fn supports(
     })
 }
 fn simple_options(options: &CopyOptions) -> bool {
-    options.max_packet_bytes == CopyOptions::default().max_packet_bytes
-        && (options.streams.is_empty() || options.streams == [0])
-        && options.max_packets.is_none()
+    (options.streams.is_empty() || options.streams == [0])
         && options.max_controlled_bytes.is_none()
         && options.max_rss_bytes.is_none()
         && options
@@ -49,6 +47,8 @@ fn simple_options(options: &CopyOptions) -> bool {
         && options.stream_metadata_delete.is_empty()
 }
 /// Export float WAVE samples through the owned resampler/rematrix and WAV writer.
+/// For WAVE, packet limits apply to frame-aligned input I/O blocks (up to
+/// 4096 sample frames); `max_packets` exports the prefix read before that limit.
 pub fn decode_audio_transformed(
     source: &Path,
     destination: &Path,
@@ -106,10 +106,12 @@ pub fn decode_audio_transformed(
         hook.emit(event);
     }
     check()?;
-    let (input, pcm) = crate::owned_audio_mix::read_float_wave_controlled(
+    let (input, pcm) = crate::owned_audio_mix::read_float_wave_with_limits(
         source,
         None,
         options.cancel.as_ref(),
+        options.max_packet_bytes,
+        options.max_packets,
         |bytes| {
             event.packets = event
                 .packets
@@ -372,7 +374,7 @@ mod tests {
         );
         assert!(!absent.exists());
         let limited = CopyOptions {
-            max_packets: Some(1),
+            max_controlled_bytes: Some(1),
             ..Default::default()
         };
         assert!(!supports(&source, &absent, transform, &limited));
@@ -710,6 +712,90 @@ mod metadata_tests {
             };
             assert!(decode_audio(&source, &invalid, &options).is_err());
             assert!(!invalid.exists());
+        }
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod limit_tests {
+    use super::*;
+    use std::sync::{Arc, Mutex};
+    #[test]
+    fn packet_limits_bound_blocks_and_export_the_exact_prefix_for_both_float_widths() {
+        let dir =
+            std::env::temp_dir().join(format!("fvid-wave-limit-export-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir(&dir).unwrap();
+        for bits in [32, 64] {
+            let source = dir.join(format!("source-{bits}.wav"));
+            let output = dir.join(format!("output-{bits}.wav"));
+            if bits == 32 {
+                crate::owned_wav_file::write_wav_f32le(
+                    &source,
+                    48000,
+                    2,
+                    &(0..34).map(|i| i as f32 / 64.).collect::<Vec<_>>(),
+                )
+                .unwrap();
+            } else {
+                crate::owned_wav_file::write_wav_f64le(
+                    &source,
+                    48000,
+                    2,
+                    &(0..34).map(|i| i as f64 / 64.).collect::<Vec<_>>(),
+                )
+                .unwrap();
+            }
+            let frame_bytes = 2 * bits as usize / 8;
+            let block_limit = frame_bytes * 3 + 1;
+            let events = Arc::new(Mutex::new(Vec::new()));
+            let recorded = events.clone();
+            let options = CopyOptions {
+                max_packet_bytes: block_limit,
+                max_packets: Some(2),
+                progress: Some(fvid_control::ProgressHook::new(move |event| {
+                    recorded.lock().unwrap().push(event)
+                })),
+                ..Default::default()
+            };
+            assert!(supports(&source, &output, Default::default(), &options));
+            let stats = crate::decode_audio(&source, &output, &options).unwrap();
+            assert_eq!(stats.sample_frames, 6);
+            assert_eq!(stats.decoded_frames, 2);
+            let (_, original) =
+                crate::owned_audio_mix::read_float_wave_controlled(&source, None, None, |_| Ok(()))
+                    .unwrap();
+            let (_, actual) =
+                crate::owned_audio_mix::read_float_wave_controlled(&output, None, None, |_| Ok(()))
+                    .unwrap();
+            assert_eq!(actual, &original[..6 * frame_bytes]);
+            let events = events.lock().unwrap();
+            assert_eq!(events.last().unwrap().packets, 2);
+            assert_eq!(
+                events.last().unwrap().payload_bytes,
+                (6 * frame_bytes) as u64
+            );
+            assert!(events.last().unwrap().done);
+            let distinct: Vec<_> = events
+                .windows(2)
+                .filter(|pair| pair[0].packets != pair[1].packets)
+                .collect();
+            assert_eq!(distinct.len(), 2);
+            for pair in distinct {
+                assert!(pair[1].payload_bytes - pair[0].payload_bytes <= block_limit as u64);
+            }
+            drop(events);
+            for (limit, packets) in [(frame_bytes - 1, None), (frame_bytes, Some(0))] {
+                let invalid = dir.join(format!("invalid-{bits}-{limit}.wav"));
+                let options = CopyOptions {
+                    max_packet_bytes: limit,
+                    max_packets: packets,
+                    ..Default::default()
+                };
+                assert!(crate::decode_audio(&source, &invalid, &options).is_err());
+                assert!(!invalid.exists());
+            }
         }
         std::fs::remove_dir_all(dir).unwrap();
     }
