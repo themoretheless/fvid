@@ -1,6 +1,6 @@
 //! Owned raw planar Y4M decode-and-discard, with bounded scratch storage.
 use crate::owned_y4m::{Header, PixelFormat, line};
-use fvid_media_info::{CropRect, DecodeStats, DecodeTransform};
+use fvid_media_info::{CropRect, DecodeStats, DecodeTransform, ScaleSize};
 use std::{
     fs::File,
     io::{BufRead, BufReader},
@@ -37,6 +37,7 @@ fn supported_request(transform: &DecodeTransform) -> bool {
         && *transform
             == DecodeTransform {
                 crop: transform.crop,
+                scale: transform.scale,
                 horizontal_flip: transform.horizontal_flip,
                 vertical_flip: transform.vertical_flip,
                 interval: transform.interval,
@@ -92,6 +93,54 @@ fn crop_geometry(header: &Header, crop: Option<CropRect>) -> Result<(CropRect, u
         .ok_or("Y4M crop size overflow")?;
     Ok((crop, size))
 }
+fn output_geometry(
+    header: &Header,
+    crop: CropRect,
+    scale: Option<ScaleSize>,
+) -> Result<(usize, usize, usize)> {
+    let (w, h) = scale.map_or((crop.width, crop.height), |s| {
+        (s.width as usize, s.height as usize)
+    });
+    if scale.is_some() && (w == 0 || h == 0 || w > 8192 || h > 4320 || w % 2 != 0 || h % 2 != 0) {
+        return Err("scale must be even and within 1..=8192 x 1..=4320".into());
+    }
+    let (sx, sy) = header.format.subsampling();
+    let area = w.checked_mul(h).ok_or("Y4M scale size overflow")?;
+    let size = area
+        .checked_add(
+            (area / sx / sy)
+                .checked_mul(2)
+                .ok_or("Y4M scale size overflow")?,
+        )
+        .and_then(|n| n.checked_mul(if header.depth() == 8 { 1 } else { 2 }))
+        .ok_or("Y4M scale size overflow")?;
+    Ok((w, h, size))
+}
+fn point_sample(index: usize, input: usize, output: usize) -> usize {
+    let increment = (((input as u128) << 16) + output as u128 / 2) / output as u128;
+    (((index as u128 * increment + increment / 2) >> 16) as usize).min(input - 1)
+}
+/// Transform planar pixels using the same request subset as owned decode.
+pub fn transform_frame_requested(
+    header: &Header,
+    frame: &[u8],
+    transform: &DecodeTransform,
+) -> Result<Vec<u8>> {
+    if !supported_request(transform) {
+        return Err("owned Y4M decoder does not yet implement requested transform options".into());
+    }
+    let mut output = Vec::new();
+    transform_frame_into(
+        header,
+        frame,
+        transform.crop,
+        transform.horizontal_flip,
+        transform.vertical_flip,
+        transform.scale,
+        &mut output,
+    )?;
+    Ok(output)
+}
 /// Apply crop and reflections to each plane, keeping multibyte samples intact.
 pub fn transform_frame(
     header: &Header,
@@ -101,7 +150,7 @@ pub fn transform_frame(
     vertical: bool,
 ) -> Result<Vec<u8>> {
     let mut output = Vec::new();
-    transform_frame_into(header, frame, crop, horizontal, vertical, &mut output)?;
+    transform_frame_into(header, frame, crop, horizontal, vertical, None, &mut output)?;
     Ok(output)
 }
 fn transform_frame_into(
@@ -110,12 +159,14 @@ fn transform_frame_into(
     crop: Option<CropRect>,
     horizontal: bool,
     vertical: bool,
+    scale: Option<ScaleSize>,
     output: &mut Vec<u8>,
 ) -> Result<()> {
     if frame.len() != header.frame_len()? {
         return Err("Y4M frame size mismatch".into());
     }
-    let (crop, output_size) = crop_geometry(header, crop)?;
+    let (crop, _) = crop_geometry(header, crop)?;
+    let (ow, oh, output_size) = output_geometry(header, crop, scale)?;
     let (sx, sy) = header.format.subsampling();
     let step = if header.depth() == 8 { 1 } else { 2 };
     output.clear();
@@ -125,6 +176,25 @@ fn transform_frame_into(
     let mut offset = 0;
     for (dx, dy) in [(1, 1), (sx, sy), (sx, sy)] {
         let stride = header.width / dx * step;
+        if scale.is_some() {
+            let (iw, ih, dw, dh) = (crop.width / dx, crop.height / dy, ow / dx, oh / dy);
+            for row in 0..dh {
+                let mut y = point_sample(row, ih, dh);
+                if vertical {
+                    y = ih - 1 - y;
+                }
+                for col in 0..dw {
+                    let mut x = point_sample(col, iw, dw);
+                    if horizontal {
+                        x = iw - 1 - x;
+                    }
+                    let at = offset + (crop.y / dy + y) * stride + (crop.x / dx + x) * step;
+                    output.extend_from_slice(&frame[at..at + step]);
+                }
+            }
+            offset += stride * (header.height / dy);
+            continue;
+        }
         let row_bytes = crop.width / dx * step;
         for row in 0..crop.height / dy {
             let row = if vertical {
@@ -163,10 +233,14 @@ pub fn decode_reader_transformed(
     let header = Header::parse(&bytes)?;
     let [rate_n, rate_d] = header.frame_rate()?;
     let (crop, _) = crop_geometry(&header, transform.crop)?;
-    let width = u32::try_from(crop.width).map_err(|_| "Y4M width exceeds decode API range")?;
-    let height = u32::try_from(crop.height).map_err(|_| "Y4M height exceeds decode API range")?;
+    let (ow, oh, _) = output_geometry(&header, crop, transform.scale)?;
+    let width = u32::try_from(ow).map_err(|_| "Y4M width exceeds decode API range")?;
+    let height = u32::try_from(oh).map_err(|_| "Y4M height exceeds decode API range")?;
     let frame_bytes = header.frame_len()?;
-    let geometry = transform.crop.is_some() || transform.horizontal_flip || transform.vertical_flip;
+    let geometry = transform.crop.is_some()
+        || transform.horizontal_flip
+        || transform.vertical_flip
+        || transform.scale.is_some();
     let mut input = Vec::new();
     if geometry {
         input
@@ -221,6 +295,7 @@ pub fn decode_reader_transformed(
                     transform.crop,
                     transform.horizontal_flip,
                     transform.vertical_flip,
+                    transform.scale,
                     &mut output,
                 )?;
                 std::hint::black_box(&output);

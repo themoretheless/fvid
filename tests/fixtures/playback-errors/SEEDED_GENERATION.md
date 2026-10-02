@@ -64,3 +64,14 @@ explicit rejection of unsupported owned options. Legacy dispatch retains those
 other options rather than silently ignoring them. Derived structural equality
 on transformation requests makes future non-default options reject this route
 until their implementation is added. No FFmpeg or network is invoked by tests.
+
+Y4M decode-and-discard also owns nearest-sample scaling after crop/reflections.
+It uses the existing media path's 16.16 point-sampling clock and preserves planar
+sample depth and chroma layout. Crop and scale are fused into one output buffer;
+no RGB or intermediate cropped frame is allocated. Output dimensions retain the
+existing media API's even-size, 8192x4320 validation. The transform integration
+suite compares 108 scaling/chroma/depth/reflection combinations against the
+frontend media geometry, plus an independent known-pixel matrix and the public
+library dispatcher. Invalid dimensions are explicit failures. These tests invoke
+neither FFmpeg nor the network; other unsupported transforms remain migration
+work rather than being silently dropped.

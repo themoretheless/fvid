@@ -51,10 +51,16 @@ fn y4m_probe_counts_tagged_frames_and_rejects_truncation() {
         assert!(fvid::media::probe(&file).is_err());
     }
     let file = directory.join("unsupported");
-    for header in [
-        "YUV4MPEG2 W4 H2 F25:1 Ip C420p10\n",
-        "YUV4MPEG2 W4 H2 F25:1 It C420jpeg\n",
-    ] {
+    std::fs::write(&file, "YUV4MPEG2 W4 H2 F25:1 Ip C420p10\n").unwrap();
+    let supported = fvid::native_probe::try_probe_as(&file, None)
+        .unwrap()
+        .unwrap();
+    assert_eq!(
+        (supported.streams[0].width, supported.streams[0].height),
+        (4, 2)
+    );
+    assert_eq!(supported.duration_us, Some(0));
+    for header in ["YUV4MPEG2 W4 H2 F25:1 It C420jpeg\n"] {
         std::fs::write(&file, header).unwrap();
         assert!(
             fvid::native_probe::try_probe_as(&file, None)

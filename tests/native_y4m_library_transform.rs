@@ -169,3 +169,115 @@ fn interval_uses_exact_frame_clock_and_stops_before_unrequested_tail() {
             .contains("transform options")
     );
 }
+
+#[test]
+fn scale_pixels_match_media_sampling_with_crop_and_reflections() {
+    for layout in ["420", "422", "444"] {
+        for depth in [8u8, 10, 16] {
+            let chroma = if depth == 8 {
+                layout.into()
+            } else {
+                format!("{layout}p{depth}")
+            };
+            let text = format!("YUV4MPEG2 W8 H6 F30:1 Ip C{chroma}\n");
+            let header = fvid_media::owned_y4m::Header::parse(text.as_bytes()).unwrap();
+            let step = if depth == 8 { 1 } else { 2 };
+            let pixels: Vec<u8> = (0..header.frame_len().unwrap() / step)
+                .flat_map(|i| {
+                    let value = ((i * 37 + 123) & ((1usize << depth) - 1)) as u16;
+                    if step == 1 {
+                        vec![value as u8]
+                    } else {
+                        value.to_le_bytes().to_vec()
+                    }
+                })
+                .collect();
+            let source = [text.as_bytes(), b"FRAME\n", &pixels].concat();
+            let mut reader =
+                fvid::playback_native::NativeReader::software(Cursor::new(&source), 64 << 20)
+                    .unwrap();
+            let frame = reader.read_frame_raw().unwrap().unwrap();
+            for (w, h) in [(2, 2), (6, 4), (12, 10)] {
+                for (horizontal, vertical) in
+                    [(false, false), (true, false), (false, true), (true, true)]
+                {
+                    let transform = DecodeTransform {
+                        crop: Some(CropRect {
+                            x: 2,
+                            y: 2,
+                            width: 4,
+                            height: 2,
+                        }),
+                        horizontal_flip: horizontal,
+                        vertical_flip: vertical,
+                        scale: Some(fvid_media::ScaleSize {
+                            width: w,
+                            height: h,
+                        }),
+                        ..Default::default()
+                    };
+                    let actual = fvid_media::owned_y4m_decode::transform_frame_requested(
+                        &header, &pixels, &transform,
+                    )
+                    .unwrap();
+                    let expected = fvid::native_geometry::VideoGeometry {
+                        crop: Some([2, 2, 4, 2]),
+                        horizontal_flip: horizontal,
+                        vertical_flip: vertical,
+                        scale: Some([w as usize, h as usize]),
+                        ..Default::default()
+                    }
+                    .apply_media(&frame, 8, 6)
+                    .unwrap();
+                    assert_eq!(
+                        actual, expected.data,
+                        "{chroma} {w}x{h} {horizontal} {vertical}"
+                    );
+                    let stats = fvid_media::owned_y4m_decode::decode_reader_transformed(
+                        Cursor::new(&source),
+                        &transform,
+                    )
+                    .unwrap();
+                    assert_eq!((stats.width, stats.height, stats.video_frames), (w, h, 1));
+                }
+            }
+            for (w, h) in [(0, 2), (3, 2), (8194, 2), (2, 4322)] {
+                let transform = DecodeTransform {
+                    scale: Some(fvid_media::ScaleSize {
+                        width: w,
+                        height: h,
+                    }),
+                    ..Default::default()
+                };
+                assert!(
+                    fvid_media::owned_y4m_decode::transform_frame_requested(
+                        &header, &pixels, &transform
+                    )
+                    .is_err()
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn scale_known_samples_and_public_dispatch() {
+    let header = fvid_media::owned_y4m::Header::parse(b"YUV4MPEG2 W4 H2 C444\n").unwrap();
+    let pixels: Vec<u8> = (0..24).collect();
+    let transform = DecodeTransform {
+        scale: Some(fvid_media::ScaleSize {
+            width: 2,
+            height: 2,
+        }),
+        ..Default::default()
+    };
+    let actual =
+        fvid_media::owned_y4m_decode::transform_frame_requested(&header, &pixels, &transform)
+            .unwrap();
+    assert_eq!(actual, vec![1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23]);
+    let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/wave-probe-info.y4m");
+    let stats = fvid_media::decode_video_transformed(&source, transform).unwrap();
+    assert_eq!((stats.width, stats.height, stats.video_frames), (2, 2, 3));
+    assert_eq!(stats.backend, "owned Y4M planar decode");
+}
