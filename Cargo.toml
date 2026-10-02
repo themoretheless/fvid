@@ -91,3 +91,7 @@ required-features = ["player"]
 [[bench]]
 name = "ffmpeg_loudness_files"
 harness = false
+
+[[bench]]
+name = "ffmpeg_camera_pixels"
+harness = false

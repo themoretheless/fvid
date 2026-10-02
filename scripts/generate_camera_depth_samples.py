@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""Own high-depth Y4M patterns; FFmpeg generates reference RGB only."""
+"""Own high-depth Y4M patterns and exact rational RGB oracles; no external tools."""
 from pathlib import Path
-import subprocess
 root=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors'
 for depth,layout,sub in [(10,'420',2),(16,'444',1)]:
     name=f'camera-y4m-{depth}'
@@ -33,4 +32,3 @@ for depth,layout,sub in [(10,'420',2),(16,'444',1)]:
                     rounded(yy*255*224*1000+cb*255*219*1772,219*224*1000),
                 ])
     (root/(name+'-analytic.rgb')).write_bytes(rgb)
-    subprocess.run(['ffmpeg','-v','error','-i',str(source),'-vf','scale=in_color_matrix=bt601:in_range=tv:out_range=pc:flags=neighbor+bitexact:sws_dither=none','-f','rawvideo','-pix_fmt','rgb24','-y',str(root/(name+'.rgb'))],check=True)

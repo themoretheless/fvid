@@ -3,25 +3,23 @@ use fvid::{
     virtual_camera::{CameraEndBehavior, CameraTick, LatestFrame, NativeCameraSource},
 };
 use std::io::Cursor;
-const CASES: [(&[u8], &[u8], &[u8]); 2] = [
+const CASES: [(&[u8], &[u8]); 2] = [
     (
         include_bytes!("fixtures/playback-errors/camera-y4m-10.y4m"),
-        include_bytes!("fixtures/playback-errors/camera-y4m-10.rgb"),
         include_bytes!("fixtures/playback-errors/camera-y4m-10-analytic.rgb"),
     ),
     (
         include_bytes!("fixtures/playback-errors/camera-y4m-16.y4m"),
-        include_bytes!("fixtures/playback-errors/camera-y4m-16.rgb"),
         include_bytes!("fixtures/playback-errors/camera-y4m-16-analytic.rgb"),
     ),
 ];
 #[test]
 fn camera_high_depth_bgra_matches_rgb_reference_and_holds_or_rewinds_exactly() {
-    for (data, oracle, analytic) in CASES {
-        assert_eq!(oracle.len(), 2 * 8 * 8 * 3);
+    for (data, analytic) in CASES {
+        assert_eq!(analytic.len(), 2 * 8 * 8 * 3);
         assert_ne!(
-            &oracle[..192],
-            &oracle[192..],
+            &analytic[..192],
+            &analytic[192..],
             "fixture must distinguish both video frames"
         );
         let reader = NativeReader::software(Cursor::new(data), 16 << 20).unwrap();
@@ -51,20 +49,9 @@ fn camera_high_depth_bgra_matches_rgb_reference_and_holds_or_rewinds_exactly() {
                 destination.copy_latest(None, &mut actual).unwrap(),
                 Some(tick)
             );
-            let reference = &oracle[index * 192..(index + 1) * 192];
-            let mut peak = 0;
-            for (bgra, rgb) in actual.chunks_exact(4).zip(reference.chunks_exact(3)) {
-                assert_eq!(bgra[3], 255);
-                for channel in 0..3 {
-                    peak = peak.max(bgra[2 - channel].abs_diff(rgb[channel]));
-                }
-            }
-            assert!(
-                peak <= 3,
-                "FFmpeg integer conversion mismatch at frame {index}: {peak}"
-            );
             let reference = &analytic[index * 192..(index + 1) * 192];
             for (bgra, rgb) in actual.chunks_exact(4).zip(reference.chunks_exact(3)) {
+                assert_eq!(bgra[3], 255);
                 assert_eq!(
                     &[bgra[2], bgra[1], bgra[0]],
                     rgb,
@@ -82,7 +69,7 @@ fn camera_high_depth_bgra_matches_rgb_reference_and_holds_or_rewinds_exactly() {
 }
 #[test]
 fn camera_high_depth_loop_returns_to_the_same_bgra_frames() {
-    for (data, _, _) in CASES {
+    for (data, _) in CASES {
         let reader = NativeReader::software(Cursor::new(data), 16 << 20).unwrap();
         let mut source = NativeCameraSource::new(reader).with_end_behavior(CameraEndBehavior::Loop);
         let destination = LatestFrame::new(8, 8, 256).unwrap();
