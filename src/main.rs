@@ -1,6 +1,5 @@
 use fvid::{Crop, ExecutionOptions};
 mod media_cli;
-#[cfg(not(feature = "media"))]
 mod owned_loudnorm_cli;
 #[cfg(all(target_os = "macos", feature = "player"))]
 mod shader_export_cli;

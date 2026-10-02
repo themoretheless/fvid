@@ -1,4 +1,3 @@
-#![cfg(not(feature = "media"))]
 use std::process::Command;
 #[test]
 fn loudnorm_cli_exports_long_wave_and_reports_prefix_progress_without_legacy() {
@@ -135,4 +134,110 @@ fn dual_pass_uses_owned_measurement_and_prints_one_final_report() {
     }
     assert!(output.exists());
     std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn compressed_audio_normalization_matches_owned_pcm_with_edits_and_selection() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let dir =
+        std::env::temp_dir().join(format!("fvid-compressed-normalizer-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let cases = [
+        ("audio/aac-mono-44k.aac", 0),
+        ("audio/aac-native-edit.m4a", 0),
+        ("audio/aac-stereo.mka", 0),
+        ("playback-errors/alac-two-tracks.m4a", 1),
+        ("playback-errors/aac-rounded-two-tracks.m4a", 1),
+    ];
+    for (index, (name, selected)) in cases.into_iter().enumerate() {
+        let source = root.join("tests/fixtures").join(name);
+        let decoded = dir.join(format!("decoded-{index}.wav"));
+        let expected = dir.join(format!("expected-{index}.wav"));
+        let output = dir.join(format!("output-{index}.wav"));
+        fvid::native_export::export_audio_pcm_selected(
+            &source,
+            &decoded,
+            None,
+            1.,
+            None,
+            None,
+            Some(selected),
+            None,
+            None,
+        )
+        .unwrap();
+        let expected_stats = fvid_media::owned_loudnorm::apply_loudnorm_dual(
+            &decoded,
+            &expected,
+            None,
+            &Default::default(),
+        )
+        .unwrap();
+        let result = Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "loudnorm"])
+            .arg(&source)
+            .arg(&output)
+            .args([
+                "--dual-pass",
+                "--progress",
+                "--streams",
+                &selected.to_string(),
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{name}: {}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let stats: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        assert_eq!(stats["backend"], expected_stats.backend);
+        assert_eq!(stats["sample_frames"], expected_stats.sample_frames);
+        assert_eq!(stats["dual_pass"], true);
+        assert_eq!(
+            std::fs::read(&output).unwrap(),
+            std::fs::read(&expected).unwrap(),
+            "{name}"
+        );
+        let events: Vec<serde_json::Value> = String::from_utf8(result.stderr)
+            .unwrap()
+            .lines()
+            .map(|line| serde_json::from_str(line).unwrap())
+            .collect();
+        assert_eq!(events.iter().filter(|m| m["done"] == true).count(), 1);
+        assert_eq!(events.last().unwrap()["done"], true);
+        for pair in events.windows(2) {
+            assert!(pair[0]["packets"].as_u64().unwrap() <= pair[1]["packets"].as_u64().unwrap());
+            assert!(
+                pair[0]["payload_bytes"].as_u64().unwrap()
+                    <= pair[1]["payload_bytes"].as_u64().unwrap()
+            );
+        }
+    }
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn cancellation_after_compressed_decode_never_publishes_normalization() {
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/audio/aac-mono-44k.aac");
+    let output = std::env::temp_dir().join(format!(
+        "fvid-loudnorm-cancel-compressed-{}.wav",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_file(&output);
+    let cancel = fvid_media::CancelFlag::default();
+    let hook_cancel = cancel.clone();
+    let options = fvid_media::CopyOptions {
+        cancel: Some(cancel),
+        progress: Some(fvid_media::ProgressHook::new(move |event| {
+            assert!(!event.done);
+            if event.packets >= 7 {
+                hook_cancel.cancel();
+            }
+        })),
+        ..Default::default()
+    };
+    assert!(fvid::native_loudnorm::try_apply(&source, &output, None, true, &options).is_err());
+    assert!(!output.exists());
 }

@@ -2,7 +2,6 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
-    #[cfg(not(feature = "media"))]
     if args.first().map(String::as_str) == Some("loudnorm") {
         return crate::owned_loudnorm_cli::run(args);
     }

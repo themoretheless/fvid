@@ -113,7 +113,6 @@ fn policies(options: &CopyOptions) -> bool {
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
 }
-#[cfg(feature = "legacy-ffmpeg")]
 pub(crate) fn supports(
     source: &Path,
     destination: &Path,
@@ -129,6 +128,26 @@ pub(crate) fn supports(
                         .is_ok_and(|info| params.gain.is_some() || dynamic_input(&info))
                 })
         })
+}
+
+/// Whether this request has an owned WAVE route. Admission and cancellation
+/// remain execution checks; a false result lets migrating callers retain other
+/// formats without changing their behavior.
+pub fn supports_request(
+    source: &Path,
+    destination: &Path,
+    args: Option<&str>,
+    dual_pass: bool,
+    options: &CopyOptions,
+) -> bool {
+    let Ok(args) = resolve_loudnorm_args(args) else {
+        return false;
+    };
+    if dual_pass {
+        supports_dual(source, destination, &args, options)
+    } else {
+        supports(source, destination, &args, options)
+    }
 }
 
 pub fn apply_loudnorm(
@@ -192,7 +211,6 @@ pub fn apply_loudnorm_dual(
     stats.dual_pass = true;
     Ok(stats)
 }
-#[cfg(feature = "legacy-ffmpeg")]
 pub(crate) fn supports_dual(
     source: &Path,
     destination: &Path,

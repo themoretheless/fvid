@@ -124,6 +124,7 @@ mod pcm_resample;
 pub mod native_probe;
 
 pub mod native_plan;
+pub mod native_loudnorm;
 
 pub mod native_avgblur;
 pub mod native_pixelize;

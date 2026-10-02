@@ -1,9 +1,9 @@
-//! The existing loudnorm command for builds without the legacy media feature.
+//! The loudnorm command, preferring owned audio decoding and normalization.
 use std::path::Path;
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.len() == 2 && matches!(args[1].as_str(), "--help" | "-h") {
         println!(
-            "fvid media loudnorm INPUT.wav OUTPUT.wav [--loudnorm-args I=-16:TP=-1.5:LRA=11] [--dual-pass] [--streams 0] [--quiet] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N]"
+            "fvid media loudnorm INPUT OUTPUT.wav [--loudnorm-args I=-16:TP=-1.5:LRA=11] [--dual-pass] [--streams 0] [--quiet] [--progress] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N]"
         );
         return Ok(());
     }
@@ -56,15 +56,26 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             )
         }));
     }
-    let stats = if dual_pass {
-        fvid_media::owned_loudnorm::apply_loudnorm_dual(
-            source,
-            destination,
-            normalization,
-            &options,
-        )?
-    } else {
-        fvid_media::owned_loudnorm::apply_loudnorm(source, destination, normalization, &options)?
+    let stats = match fvid::native_loudnorm::try_apply(
+        source,
+        destination,
+        normalization,
+        dual_pass,
+        &options,
+    )? {
+        Some(stats) => stats,
+        None => {
+            #[cfg(feature = "media")]
+            {
+                if dual_pass {
+                    fvid_media::apply_loudnorm_dual(source, destination, normalization, &options)?
+                } else {
+                    fvid_media::apply_loudnorm(source, destination, normalization, &options)?
+                }
+            }
+            #[cfg(not(feature = "media"))]
+            return Err("loudnorm input or compressed-audio policy is not yet supported by the owned bridge".into());
+        }
     };
     if !quiet {
         println!("{}", serde_json::to_string_pretty(&stats)?);

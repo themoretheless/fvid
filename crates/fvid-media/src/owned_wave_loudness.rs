@@ -7,7 +7,8 @@ use std::{
     path::Path,
 };
 type Result<T> = std::result::Result<T, String>;
-fn qualified_rate(rate: u32) -> bool {
+/// Standard sample rates qualified for owned loudness and true-peak measurement.
+pub fn qualified_rate(rate: u32) -> bool {
     matches!(
         rate,
         8000 | 12000

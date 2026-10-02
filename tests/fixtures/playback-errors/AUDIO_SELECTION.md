@@ -24,3 +24,10 @@ committed files without running these generators or requiring media tools.
 regression; `native_aac_media` checks repeated nonzero ranges against a continuous
 PCM decode and verifies checkpoint reuse. The legacy-feature `native_audio_api`
 checks that selected ALAC requests use the owned backend.
+
+`native_loudnorm_cli` also normalizes selected AAC/ALAC fixtures through the
+owned compressed-audio bridge, including the rounded presentation window. It
+compares output bytes with an independently exported WAVE passed to the owned
+normalizer, verifies cumulative phase progress and tests cancellation before
+normalization publication. The same command is checked with and without the
+legacy feature; the headless build cannot link or fall back to libav.
