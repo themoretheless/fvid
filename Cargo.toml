@@ -195,3 +195,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_aac_reconstruction_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_webm_lossless_pixels_reference"
+harness = false

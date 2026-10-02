@@ -186,40 +186,7 @@ fn vp9_av1_frames_and_clock_survive_owned_ffv1_export() {
         }
         assert!(encoded.read_frame_raw().unwrap().is_none());
         assert_eq!(stats.video_frames, count);
-        if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
-            let decode = |path: &Path| {
-                let result = std::process::Command::new(&ffmpeg)
-                    .args(["-v", "error", "-i"])
-                    .arg(path)
-                    .args([
-                        "-map",
-                        "0:v:0",
-                        "-fps_mode",
-                        "passthrough",
-                        "-f",
-                        "rawvideo",
-                        "-pix_fmt",
-                        stats.pixel_format.as_str(),
-                        "-",
-                    ])
-                    .output()
-                    .unwrap();
-                assert!(
-                    result.status.success(),
-                    "{}",
-                    String::from_utf8_lossy(&result.stderr)
-                );
-                result.stdout
-            };
-            let a = decode(&source);
-            let b = decode(&output);
-            assert_eq!(a.len(), b.len(), "independent decoder length: {name}");
-            let mismatch = a.iter().zip(&b).position(|(a, b)| a != b);
-            assert!(
-                mismatch.is_none(),
-                "independent decoder mismatch: {name} byte {mismatch:?}"
-            );
-        }
+
         std::fs::remove_file(output).unwrap();
     }
 }
@@ -313,44 +280,7 @@ fn rotated_source_geometry_and_filter_bake_orientation_once() {
             .apply(&frame, expected.width, expected.height)
             .unwrap();
         assert_eq!(actual.data, expected.data);
-        if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
-            let decode = |path: &Path, vf: Option<String>| {
-                let mut command = std::process::Command::new(&ffmpeg);
-                command.args(["-v", "error", "-i"]).arg(path);
-                if let Some(vf) = vf {
-                    command.args(["-vf", &vf]);
-                }
-                let result = command
-                    .args([
-                        "-map",
-                        "0:v:0",
-                        "-fps_mode",
-                        "passthrough",
-                        "-pix_fmt",
-                        stats.pixel_format.as_str(),
-                        "-f",
-                        "rawvideo",
-                        "-",
-                    ])
-                    .output()
-                    .unwrap();
-                assert!(
-                    result.status.success(),
-                    "{}",
-                    String::from_utf8_lossy(&result.stderr)
-                );
-                result.stdout
-            };
-            let vf = if filtered {
-                "negate".into()
-            } else {
-                format!("crop={}:{}:0:0,hflip", w / 2, h / 2)
-            };
-            let a = decode(&source, Some(vf));
-            let b = decode(&output, None);
-            assert_eq!(a.len(), b.len());
-            assert!(a.iter().zip(&b).all(|(a, b)| a == b));
-        }
+
     }
 }
 
@@ -444,37 +374,7 @@ fn stored_crop_then_rotation_then_filter_preserves_ten_bit_samples() {
             assert_eq!(decoded.rotation(), 0);
             assert_eq!(decoded.insets(), [0; 4]);
             assert_eq!(decoded.dimensions(), [12, 14]);
-            if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
-                let result = std::process::Command::new(ffmpeg)
-                    .args(["-v", "error", "-noautorotate", "-i"])
-                    .arg(&source)
-                    .args([
-                        "-vf",
-                        "crop=14:12:2:2,transpose=clock,negate",
-                        "-fps_mode",
-                        "passthrough",
-                        "-pix_fmt",
-                        stats.pixel_format.as_str(),
-                        "-f",
-                        "rawvideo",
-                        "-",
-                    ])
-                    .output()
-                    .unwrap();
-                assert!(
-                    result.status.success(),
-                    "{}",
-                    String::from_utf8_lossy(&result.stderr)
-                );
-                assert_eq!(result.stdout.len(), decoded_frame.frame.data.len());
-                assert!(
-                    result
-                        .stdout
-                        .iter()
-                        .zip(&decoded_frame.frame.data)
-                        .all(|(a, b)| a == b)
-                );
-            }
+
         }
     }
 }

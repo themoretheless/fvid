@@ -560,3 +560,5 @@ External combined MP4-to-Matroska video/audio remux comparisons run only in `ffm
 External synthetic PCM amix normalization/weights and overlapping-layout amerge comparisons run only in `ffmpeg_audio_mix_reference`. Ordinary audio mix tests retain sample/channel order, AAC edits, CLI/API/plans and publication controls without FFmpeg.
 
 The external AAC no-PNS encoding/reconstruction comparison runs only in `ffmpeg_aac_reconstruction_reference`. Its four rate/channel cases and numeric tolerances are preserved; ordinary AAC library/media tests continue using checked-in or synthetic inputs without external generation.
+
+External WebM lossless VP9/AV1 pixels, rotation/filter and ten-bit crop/rotation comparisons run in `ffmpeg_webm_lossless_pixels_reference`. Their ordinary tests retain native frame, clock, geometry and metadata checks; audio-companion external comparisons remain separately pending migration.
