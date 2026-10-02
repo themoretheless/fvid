@@ -566,3 +566,5 @@ External WebM lossless VP9/AV1 pixels, rotation/filter and ten-bit crop/rotation
 External WebM AAC/Opus companion payload/timing/priming/PCM comparisons for VP9, AVC, HEVC and FFV1 video run only in `ffmpeg_webm_audio_companions_reference`. Their external synthetic audio generation is benchmark-only. The ordinary WebM lossless test file no longer calls FFmpeg or contains external ignored tests.
 
 External multi-ALAC and mixed AAC/ALAC trim fixture construction and selection/CLI/API checks run only in `ffmpeg_audio_trim_selection_reference`. Ordinary ALAC/Matroska PCM trim checks retain sample-exact intervals and publication controls without FFmpeg.
+
+The inline synthetic SRT in `tests/owned_subtitle.rs` verifies public owned-library conversion against frontend output bytes, ASS cue clock, no-overwrite and invalid stream refusal. The shared SRT/ASS conversion implementation is library-owned; no external fixture generation is needed.

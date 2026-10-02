@@ -141,3 +141,11 @@ pub mod owned_remux_plan;
 pub mod owned_adts_remux;
 
 pub mod owned_concat;
+
+pub mod owned_subtitle;
+#[cfg(not(feature = "legacy-ffmpeg"))]
+pub fn convert_subtitles(source: &std::path::Path, destination: &std::path::Path,
+    options: &fvid_media_info::SubtitleConvertOptions) -> std::result::Result<fvid_media_info::NativeSubtitleStats, String> {
+    owned_subtitle::try_convert_with_options(source, destination, options)
+        .map_err(|e| e.to_string())?.ok_or_else(|| "subtitle source is not supported by owned conversion".into())
+}

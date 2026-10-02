@@ -27,6 +27,10 @@ pub fn convert_subtitles(
     destination: &Path,
     options: &SubtitleConvertOptions,
 ) -> Result<SubtitleConvertStats> {
+    if let Some(stats) = crate::owned_subtitle::try_convert_with_options(source, destination, options)
+        .map_err(|e| e.to_string())? {
+        return Ok(stats);
+    }
     if destination.extension().and_then(|v| v.to_str()) != Some("mkv") {
         return Err("convert-subtitles requires Matroska (.mkv) output".into());
     }
