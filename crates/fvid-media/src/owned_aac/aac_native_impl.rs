@@ -62,9 +62,12 @@ impl NativeAacDecoder {
                 mapping.to_vec(),
             )
         };
-        let synthesis = (0..config.channels)
-            .map(|_| LongSineSynthesis::new(config.frame_samples as usize).map_err(Error::from))
-            .collect::<Result<Vec<_>>>()?;
+        // Clone initialized state so channels share immutable transforms/windows
+        // while every channel retains independent overlap and scratch buffers.
+        let synthesis = vec![
+            LongSineSynthesis::new(config.frame_samples as usize).map_err(Error::from)?;
+            usize::from(config.channels)
+        ];
         Ok(Self {
             config,
             synthesis,

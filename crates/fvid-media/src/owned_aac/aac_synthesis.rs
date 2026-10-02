@@ -64,6 +64,14 @@ pub struct LongSineSynthesis {
     overlap: Vec<f64>,
 }
 impl LongSineSynthesis {
+    #[cfg(test)]
+    pub(crate) fn shares_windows_with(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.kbd_long, &other.kbd_long)
+            && Arc::ptr_eq(&self.kbd_short, &other.kbd_short)
+            && Arc::ptr_eq(&self.window, &other.window)
+            && Arc::ptr_eq(&self.short_window, &other.short_window)
+    }
+
     pub fn new(frame_samples: usize) -> Result<Self> {
         if !matches!(frame_samples, 960 | 1024) {
             return Err(invalid("AAC long synthesis requires 960 or 1024 samples"));
