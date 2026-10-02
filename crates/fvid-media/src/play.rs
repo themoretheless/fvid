@@ -15938,9 +15938,10 @@ impl PlayResampler {
                 && built.layout.order == AVChannelOrder_AV_CHANNEL_ORDER_NATIVE
                 && (source.ch_layout.u.mask == built.layout.u.mask
                     || (matches!(channels, 1 | 2) && source.ch_layout.nb_channels <= 6));
-            if matching_layout && matches!(source.format, AVSampleFormat_AV_SAMPLE_FMT_FLT | AVSampleFormat_AV_SAMPLE_FMT_FLTP | AVSampleFormat_AV_SAMPLE_FMT_DBL | AVSampleFormat_AV_SAMPLE_FMT_DBLP) {
-                let owned = crate::audio::Resampler::open(frame, rate, channels)?;
+            if matching_layout && matches!(source.format, AVSampleFormat_AV_SAMPLE_FMT_FLT | AVSampleFormat_AV_SAMPLE_FMT_FLTP | AVSampleFormat_AV_SAMPLE_FMT_DBL | AVSampleFormat_AV_SAMPLE_FMT_DBLP | AVSampleFormat_AV_SAMPLE_FMT_U8 | AVSampleFormat_AV_SAMPLE_FMT_U8P | AVSampleFormat_AV_SAMPLE_FMT_S16 | AVSampleFormat_AV_SAMPLE_FMT_S16P | AVSampleFormat_AV_SAMPLE_FMT_S32 | AVSampleFormat_AV_SAMPLE_FMT_S32P) {
+                let mut owned = crate::audio::Resampler::open(frame, rate, channels)?;
                 if owned.owns_float_pipeline() {
+                    owned.float_output();
                     built.owned = Some(owned);
                     return Ok(built);
                 }
@@ -16108,6 +16109,60 @@ mod owned_double_playback_tests {
                 assert_eq!(output.len(),333 * output_channels as usize);
                 let expected: Vec<f32> = reference.take_output().chunks_exact(8).map(|b| f64::from_le_bytes(b.try_into().unwrap()) as f32).collect();
                 assert_eq!(output,expected);
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod owned_integer_playback_tests {
+    use super::*;
+    #[test]
+    fn integer_playback_filters_in_double_without_intermediate_quantization() {
+        use std::io::Write;
+        use crate::owned_pcm_integer::Format;
+        for (packed, planar_format, format) in [
+            (AVSampleFormat_AV_SAMPLE_FMT_U8, AVSampleFormat_AV_SAMPLE_FMT_U8P, Format::U8),
+            (AVSampleFormat_AV_SAMPLE_FMT_S16, AVSampleFormat_AV_SAMPLE_FMT_S16P, Format::I16),
+            (AVSampleFormat_AV_SAMPLE_FMT_S32, AVSampleFormat_AV_SAMPLE_FMT_S32P, Format::I32),
+        ] {
+            for (planar,input_channels,output_channels) in [(false,2,1),(true,2,1),(false,6,2),(true,6,2)] {
+                let input = Frame::new().unwrap();
+                let mut normalized = Vec::new();
+                // SAFETY: RAII frame owns checked 997xN integer planes.
+                unsafe {
+                    (*input.0).format = if planar {planar_format} else {packed};
+                    (*input.0).sample_rate = 48000;
+                    (*input.0).nb_samples = 997;
+                    av_channel_layout_default(&mut (*input.0).ch_layout,input_channels);
+                    check(av_frame_get_buffer(input.0,0),"integer playback test input").unwrap();
+                    for sample in 0..997 {
+                        for channel in 0..input_channels as usize {
+                            let value = [(sample as f64 * 0.07).sin() * 0.7,-0.25,0.5,1.0,0.1,0.2][channel];
+                            let mut encoded = [0u8;4];
+                            format.encode(value,&mut encoded[..format.bytes()]).unwrap();
+                            normalized.extend_from_slice(&format.decode(&encoded[..format.bytes()]).unwrap().to_le_bytes());
+                            let plane = *(*input.0).extended_data.add(if planar {channel} else {0});
+                            let index = if planar {sample} else {sample * input_channels as usize + channel};
+                            match format {
+                                Format::U8 => *plane.add(index) = encoded[0],
+                                Format::I16 => ptr::write_unaligned(plane.cast::<i16>().add(index),i16::from_le_bytes(encoded[..2].try_into().unwrap())),
+                                Format::I32 => ptr::write_unaligned(plane.cast::<i32>().add(index),i32::from_le_bytes(encoded)),
+                            }
+                        }
+                    }
+                    let mut reference = crate::owned_resample_f64::Resampler::new(Vec::new(),48000,16000,output_channels as u16).unwrap();
+                    crate::owned_pcm_gain_f64::PcmGain::new(&mut reference,1.0,input_channels as u16,output_channels as u16).unwrap().write_all(&normalized).unwrap();
+                    reference.finish().unwrap();
+                    let expected: Vec<f32> = reference.take_output().chunks_exact(8).map(|b| f64::from_le_bytes(b.try_into().unwrap()) as f32).collect();
+                    let mut adapter = PlayResampler::open(input.0,16000,output_channels).unwrap();
+                    assert!(adapter.owned.is_some());
+                    assert!(adapter.swr.is_null());
+                    let mut actual = adapter.convert(input.0).unwrap();
+                    actual.extend(adapter.flush().unwrap());
+                    assert_eq!(actual,expected);
+                    assert_eq!(actual.len(),333 * output_channels as usize);
+                }
             }
         }
     }

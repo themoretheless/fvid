@@ -134,6 +134,11 @@ impl Drop for Resampler {
 
 impl Resampler {
     pub(super) fn owns_float_pipeline(&self) -> bool { self.owned.is_some() || self.owned_f64.is_some() }
+    /// Playback consumes floating PCM; avoid re-quantizing integer source samples.
+    pub(super) fn float_output(&mut self) {
+        if self.owned_f64.is_some() { self.out_format = AVSampleFormat_AV_SAMPLE_FMT_DBL; }
+        else if self.owned.is_some() { self.out_format = AVSampleFormat_AV_SAMPLE_FMT_FLT; }
+    }
     /// Open libswresample for rate and/or channel rematrix. `out_channels == source`
     /// keeps the decoded layout; otherwise uses FFmpeg's default layout for N (`-ac N`).
     pub(super) unsafe fn open(frame: *const AVFrame, out_rate: i32, out_channels: i32) -> Result<Self> {
