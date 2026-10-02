@@ -36,3 +36,5 @@ pub mod owned_time;
 
 pub mod owned_wave_inspect;
 pub mod owned_probe;
+
+pub mod owned_pcm_channels;

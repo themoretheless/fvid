@@ -6,7 +6,7 @@ pub struct PcmGain<'a, W> {
     gain: f64,
     input_channels: u16,
     output_channels: u16,
-    frame: [f64; 6],
+    frame: [f64; 8],
     filled: usize,
 }
 impl<W: Write> Write for PcmGain<'_, W> {
@@ -38,8 +38,8 @@ impl<W: Write> Write for PcmGain<'_, W> {
                 continue;
             }
             let frame = &self.frame;
-            let mut mixed = [0.0; 6];
-            // Standard decoded order: FL FR FC [LFE] BL BR or BC.
+            let mut mixed = [0.0; 8];
+            // Standard speaker order follows owned_pcm_channels::standard_mask.
             // LFE is omitted. Centre/surround contributions use -3 dB.
             let k = std::f64::consts::FRAC_1_SQRT_2;
             let (mut left, mut right) = if self.input_channels == 1 {
@@ -63,6 +63,14 @@ impl<W: Write> Write for PcmGain<'_, W> {
                 6 => {
                     left += k * frame[4];
                     right += k * frame[5];
+                }
+                7 => {
+                    left += k * frame[4] + k * frame[5];
+                    right += k * frame[4] + k * frame[6];
+                }
+                8 => {
+                    left += k * frame[4] + k * frame[6];
+                    right += k * frame[5] + k * frame[7];
                 }
                 _ => {}
             }
@@ -104,7 +112,7 @@ impl<'a, W: Write> PcmGain<'a, W> {
         if input_channels == 0
             || output_channels == 0
             || (input_channels != output_channels
-                && (input_channels > 6 || !matches!(output_channels, 1 | 2)))
+                && (input_channels > 8 || !matches!(output_channels, 1 | 2)))
         {
             return Err("unsupported PCM channel conversion".into());
         }
@@ -113,7 +121,7 @@ impl<'a, W: Write> PcmGain<'a, W> {
             gain,
             input_channels,
             output_channels,
-            frame: [0.0; 6],
+            frame: [0.0; 8],
             filled: 0,
         })
     }
@@ -154,7 +162,7 @@ mod tests {
             (f64::NAN, 2, 2),
             (65., 2, 2),
             (1., 0, 1),
-            (1., 7, 2),
+            (1., 9, 2),
             (1., 2, 3),
         ] {
             assert!(PcmGain::new(&mut bytes, gain, input, output).is_err());
@@ -163,5 +171,58 @@ mod tests {
         let mut gain = PcmGain::new(&mut bytes, 0., 8, 8).unwrap();
         gain.write_all(&[0u8; 64]).unwrap();
         assert!(gain.frame_complete());
+    }
+}
+
+#[cfg(test)]
+mod surround_tests {
+    use super::*;
+    #[test]
+    fn each_surround_speaker_has_the_expected_stereo_and_mono_contribution() {
+        let k = std::f64::consts::FRAC_1_SQRT_2;
+        for channels in [7u16, 8] {
+            let coefficients: Vec<[f64; 2]> = if channels == 7 {
+                vec![
+                    [1., 0.],
+                    [0., 1.],
+                    [k, k],
+                    [0., 0.],
+                    [k, k],
+                    [k, 0.],
+                    [0., k],
+                ]
+            } else {
+                vec![
+                    [1., 0.],
+                    [0., 1.],
+                    [k, k],
+                    [0., 0.],
+                    [k, 0.],
+                    [0., k],
+                    [k, 0.],
+                    [0., k],
+                ]
+            };
+            for (speaker, expected) in coefficients.into_iter().enumerate() {
+                for outputs in [1, 2] {
+                    let mut bytes = Vec::new();
+                    let mut gain = PcmGain::new(&mut bytes, 1., channels, outputs).unwrap();
+                    for channel in 0..channels as usize {
+                        let value: f64 = if channel == speaker { 1. } else { 0. };
+                        gain.write_all(&value.to_le_bytes()).unwrap();
+                        assert_eq!(gain.frame_complete(), channel + 1 == channels as usize);
+                    }
+                    let actual: Vec<_> = bytes
+                        .chunks_exact(8)
+                        .map(|b| f64::from_le_bytes(b.try_into().unwrap()))
+                        .collect();
+                    if outputs == 1 {
+                        assert_eq!(actual, [(expected[0] + expected[1]) * 0.5]);
+                    } else {
+                        assert_eq!(actual, expected);
+                    }
+                }
+            }
+        }
     }
 }

@@ -187,10 +187,10 @@ impl Resampler {
                 return Ok(built);
             }
             let owned_layout = out_channels == f.ch_layout.nb_channels
-                || (matches!(out_channels, 1 | 2) && (1..=6).contains(&f.ch_layout.nb_channels)
+                || (matches!(out_channels, 1 | 2) && (1..=8).contains(&f.ch_layout.nb_channels)
                     && f.ch_layout.order == AVChannelOrder_AV_CHANNEL_ORDER_NATIVE
-                    && crate::owned_wav::default_pcm_mask(f.ch_layout.nb_channels as u16)
-                        .is_ok_and(|mask| u64::from(mask) == f.ch_layout.u.mask));
+                    && crate::owned_pcm_channels::standard_mask(f.ch_layout.nb_channels as u16)
+                        .is_some_and(|mask| mask == f.ch_layout.u.mask));
             if owned_layout
                 && matches!(f.format, AVSampleFormat_AV_SAMPLE_FMT_FLT | AVSampleFormat_AV_SAMPLE_FMT_FLTP)
             {
@@ -1330,8 +1330,8 @@ mod owned_rate_tests {
     #[test]
     fn float_rate_adapter_uses_owned_filter_for_packed_and_planar_pcm() {
         use std::io::Write;
-        for (planar, input_channels, output_channels) in [(false, 2, 2), (true, 2, 2), (false, 2, 1), (true, 2, 1), (false, 6, 2), (true, 6, 2)] {
-            let pcm: Vec<f32> = (0..997).flat_map(|i| [(i as f32 * 0.07).sin(), -0.25, 0.5, 1.0, 0.1, 0.2].into_iter().take(input_channels as usize)).collect();
+        for (planar, input_channels, output_channels) in [(false, 2, 2), (true, 2, 2), (false, 2, 1), (true, 2, 1), (false, 6, 2), (true, 6, 2), (false, 7, 2), (true, 7, 1), (false, 8, 1), (true, 8, 2)] {
+            let pcm: Vec<f32> = (0..997).flat_map(|i| [(i as f32 * 0.07).sin(), -0.25, 0.5, 1.0, 0.1, 0.2, -0.3, 0.4].into_iter().take(input_channels as usize)).collect();
             let mut reference = crate::owned_resample::Resampler::new(Vec::new(), 48000, 16000, output_channels).unwrap();
             crate::owned_pcm_gain::PcmGain::new(&mut reference, 1.0, input_channels, output_channels).unwrap()
                 .write_all(&pcm.iter().flat_map(|s| s.to_le_bytes()).collect::<Vec<_>>()).unwrap();
@@ -1376,8 +1376,8 @@ mod owned_double_rate_tests {
     #[test]
     fn double_rate_adapter_uses_owned_filter_for_packed_and_planar_pcm() {
         use std::io::Write;
-        for (planar, input_channels, output_channels) in [(false, 2, 2), (true, 2, 2), (false, 2, 1), (true, 2, 1), (false, 6, 2), (true, 6, 2)] {
-            let pcm: Vec<f64> = (0..997).flat_map(|i| [(i as f64 * 0.07).sin(), -0.25, 0.5, 1.0, 0.1, 0.2].into_iter().take(input_channels as usize)).collect();
+        for (planar, input_channels, output_channels) in [(false, 2, 2), (true, 2, 2), (false, 2, 1), (true, 2, 1), (false, 6, 2), (true, 6, 2), (false, 7, 2), (true, 7, 1), (false, 8, 1), (true, 8, 2)] {
+            let pcm: Vec<f64> = (0..997).flat_map(|i| [(i as f64 * 0.07).sin(), -0.25, 0.5, 1.0, 0.1, 0.2, -0.3, 0.4].into_iter().take(input_channels as usize)).collect();
             let mut reference = crate::owned_resample_f64::Resampler::new(Vec::new(), 48000, 16000, output_channels).unwrap();
             crate::owned_pcm_gain_f64::PcmGain::new(&mut reference, 1.0, input_channels, output_channels).unwrap()
                 .write_all(&pcm.iter().flat_map(|s| s.to_le_bytes()).collect::<Vec<_>>()).unwrap();
