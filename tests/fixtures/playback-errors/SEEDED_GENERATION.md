@@ -129,3 +129,10 @@ pixelize, then chromashift after geometry, matching the existing pixel pipeline.
 Twenty-seven depth/layout/filter compositions and public dispatch checks cover
 integration. Existing standalone known-pixel, boundary and invalid-storage tests
 continue to exercise the shared kernels; expressions are not silently admitted.
+
+External pixelize and chromashift pixel comparisons now run only through the
+explicit `ffmpeg_pixelize_reference` and `ffmpeg_chromashift_reference` benchmarks
+with FVID_REFERENCE_FFMPEG. All 65 pixelize and 92 chromashift reference cases
+retain their synthetic input, layout/depth and option matrices. Ordinary tests
+retain known-pixel/edge expectations and decoder/CLI/invalid-storage checks
+without an external executable, including when explicitly running ignored tests.

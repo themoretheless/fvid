@@ -107,3 +107,11 @@ harness = false
 [[bench]]
 name = "ffmpeg_boxblur_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_pixelize_reference"
+harness = false
+
+[[bench]]
+name = "ffmpeg_chromashift_reference"
+harness = false
