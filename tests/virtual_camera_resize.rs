@@ -15,6 +15,7 @@ fn hevc_resolution_change_keeps_camera_format_pixels_and_timeline() {
         sizes.push(dimensions);
         let (start, _, scale) = reference.frame_interval().unwrap();
         let position = (start * 1_000_000_000).div_ceil(u128::from(scale)) as u64;
+        assert_eq!(position, (expected.len() as u64 * 1_000_000_000).div_ceil(30));
         let bgra: Vec<u8> = reference
             .rgb()
             .chunks_exact(3)

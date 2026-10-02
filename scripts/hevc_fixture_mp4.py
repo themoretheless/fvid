@@ -25,13 +25,18 @@ def header(size, values, matrix_offset=None):
     return bytes(data)
 
 
-def mux(stream, depth, width=64, height=64, rate=25):
+def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False):
     units = [n for n in re.split(b'\x00\x00\x00?\x01', stream) if n]
     parameters = {kind: [] for kind in (32, 33, 34)}
-    samples, current, sync = [], [], []
+    samples, current, sync, pending = [], [], [], []
     for nal in units:
         kind = (nal[0] >> 1) & 63
         if kind in parameters:
+            if inband_parameters:
+                if current:
+                    samples.append(b''.join(current))
+                    current = []
+                pending.append(ints(len(nal)) + nal)
             if nal not in parameters[kind]:
                 parameters[kind].append(nal)
             continue
@@ -42,6 +47,8 @@ def mux(stream, depth, width=64, height=64, rate=25):
                 if current:
                     samples.append(b''.join(current))
                     current = []
+                current = pending
+                pending = []
                 if 16 <= kind <= 23:
                     sync.append(len(samples) + 1)
             elif not current:
@@ -51,8 +58,13 @@ def mux(stream, depth, width=64, height=64, rate=25):
             raise ValueError(f'unsupported NAL {kind}')
     if current:
         samples.append(b''.join(current))
-    if not samples or any(len(parameters[k]) != 1 for k in parameters):
-        raise ValueError('requires one VPS/SPS/PPS and nonempty pictures')
+    if pending:
+        raise ValueError('parameter update without a following picture')
+    if (not samples or any(not parameters[k] for k in parameters)
+            or (not inband_parameters and any(len(parameters[k]) != 1 for k in parameters))):
+        raise ValueError('requires parameter sets and pictures; hvc1 requires one VPS/SPS/PPS')
+    if inband_parameters:
+        parameters = {kind: nals[:1] for kind, nals in parameters.items()}
     # SPS begins with one byte of layer/nesting information, then the 12-byte PTL.
     sps = parameters[33][0][2:]
     sps = re.sub(b'\x00\x00\x03', b'\x00\x00', sps)
@@ -60,7 +72,7 @@ def mux(stream, depth, width=64, height=64, rate=25):
         raise ValueError('fixture muxer requires one temporal layer')
     hvcc = bytes([1]) + sps[1:13] + bytes.fromhex('f000fcfd') + bytes([0xf8 | (depth - 8)] * 2) + b'\x00\x00' + bytes([0x0f, 3])
     for kind, nals in parameters.items():
-        hvcc += bytes([0x80 | kind]) + struct.pack('>H', len(nals))
+        hvcc += bytes([(0 if inband_parameters else 0x80) | kind]) + struct.pack('>H', len(nals))
         for nal in nals:
             hvcc += struct.pack('>H', len(nal)) + nal
     entry = bytearray(78)
@@ -69,9 +81,10 @@ def mux(stream, depth, width=64, height=64, rate=25):
     entry[28:36] = ints(72 << 16, 72 << 16)
     entry[40:42] = struct.pack('>H', 1)
     entry[74:78] = struct.pack('>HH', 24, 65535)
-    ftyp = box(b'ftyp', b'isom\x00\x00\x00\x00isomiso6hvc1')
+    codec = b'hev1' if inband_parameters else b'hvc1'
+    ftyp = box(b'ftyp', b'isom\x00\x00\x00\x00isomiso6' + codec)
     count = len(samples)
-    stbl = table(b'stsd', 1, box(b'hvc1', bytes(entry) + box(b'hvcC', hvcc)))
+    stbl = table(b'stsd', 1, box(codec, bytes(entry) + box(b'hvcC', hvcc)))
     stbl += table(b'stts', 1, ints(count, 1))
     stbl += table(b'stsc', 1, ints(1, count, 1))
     stbl += box(b'stsz', ints(0, 0, count) + ints(*(len(s) for s in samples)))

@@ -235,8 +235,12 @@ ffmpeg -v error -i ../playback-errors/hevc-sps-resize.mp4 -pix_fmt yuv420p -f ra
 `../playback-errors/hevc-camera-resize.mp4` is a six-frame synthetic `hev1`
 stream: three 128x128 I/P/P pictures followed by three 96x64 I/P/P pictures,
 with repeated in-band parameter sets at the second sequence. Regenerate with
-`python3 scripts/generate_camera_resize_sample.py` from the repository root.
-The script uses only test patterns and the synthetic resize fixture above.
+`python3 scripts/generate_camera_resize_sample.py --hm-encoder /path/to/TAppEncoder
+--hm-config /path/to/HM/cfg/encoder_intra_main.cfg` from the repository root.
+The script generates both sequences from its own integer YUV patterns, uses
+HM in single-reference P mode and writes `hev1` with the owned fixture muxer.
+It requires no FFmpeg and does not read another fixture or private media.
+HM is needed only for regeneration; ordinary tests use the checked-in MP4.
 
 `tests/virtual_camera_resize.rs` verifies the specific source-size transition,
 fixed-size camera BGRA output, aspect-preserving letterboxing, increasing camera
