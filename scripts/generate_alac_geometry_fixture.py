@@ -19,3 +19,16 @@ for label, rate in [("control", 48000), ("rate-mismatch", 44100)]:
     cluster = element("1f43b675", element("e7", b"\x00") + element("a3", b"\x81\x00\x00\x80" + packet))
     data = element("1a45dfa3", element("4282", b"matroska")) + element("18538067", element("1654ae6b", track) + cluster)
     (ROOT / f"alac-{label}.mka").write_bytes(data)
+
+def raw_packet(samples):
+    bits = "000" + "0000" + "0" * 12 + "1" + "00" + "1" + f"{len(samples):032b}"
+    bits += "".join(f"{sample & 65535:016b}" for sample in samples) + "111"
+    bits += "0" * (-len(bits) % 8)
+    return int(bits, 2).to_bytes(len(bits) // 8, "big")
+audio = element("e1", element("b5", struct.pack(">d", 48000)) + element("9f", b"\x01") + element("6264", b"\x10"))
+track = element("ae", element("d7", b"\x01") + element("83", b"\x02") + element("86", b"A_ALAC") + element("63a2", cookie) + element("56aa", (20833).to_bytes(8, "big")) + audio)
+segment = element("1549a966", element("2ad7b1", b"\x01")) + element("1654ae6b", track)
+for pts, samples, padding in [(0, [1,2,3,4], -41667), (83333, [5,6,7,8], 20833), (166667, [9,10,11,12], 0)]:
+    group = element("a0", element("a1", b"\x81\x00\x00\x00" + raw_packet(samples)) + element("9b", (83333).to_bytes(8, "big")) + element("75a2", padding.to_bytes(8, "big", signed=True)))
+    segment += element("1f43b675", element("e7", pts.to_bytes(8, "big")) + group)
+(ROOT / "alac-presentation-timeline.mka").write_bytes(element("1a45dfa3", element("4282", b"matroska")) + element("18538067", segment))

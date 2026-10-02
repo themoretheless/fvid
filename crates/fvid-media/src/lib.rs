@@ -151,3 +151,5 @@ pub fn convert_subtitles(source: &std::path::Path, destination: &std::path::Path
 }
 
 pub mod owned_alac;
+
+pub mod owned_matroska_alac;
