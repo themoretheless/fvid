@@ -155,3 +155,7 @@ pub mod owned_alac;
 pub mod owned_matroska_alac;
 
 mod owned_matroska_alac_export;
+
+mod owned_matroska_audio;
+pub mod owned_matroska_aac;
+mod owned_matroska_aac_export;

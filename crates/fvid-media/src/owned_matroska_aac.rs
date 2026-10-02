@@ -1,4 +1,4 @@
-//! Owned Matroska ALAC presentation timeline to caller-owned float32 PCM.
+//! Owned Matroska AAC presentation timeline to caller-owned float32 PCM.
 pub use crate::owned_matroska_audio::{AudioDecodeStats, Error};
 use fvid_control::CopyOptions;
 use std::{
@@ -8,13 +8,13 @@ use std::{
 /// Decode delay, signed padding, gaps and ceil-rounded interval boundaries.
 /// Errors may leave partial caller-owned PCM; progress never reports publication.
 /// Aggregate allocation admission and metadata mutations remain unsupported.
-pub fn decode_matroska_alac_pcm<R: Read + Seek>(
+pub fn decode_matroska_aac_pcm<R: Read + Seek>(
     source: R,
     output: &mut impl Write,
     interval: Option<(Duration, Duration)>,
     options: &CopyOptions,
 ) -> std::result::Result<AudioDecodeStats, Error> {
     crate::owned_matroska_audio::decode_matroska_audio_pcm(
-        source, output, interval, options, "A_ALAC",
+        source, output, interval, options, "A_AAC",
     )
 }

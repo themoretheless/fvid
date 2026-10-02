@@ -1,4 +1,4 @@
-//! Matroska ALAC file export via owned presentation decoding and WAVE DSP.
+//! Matroska AAC file export via owned presentation decoding and WAVE DSP.
 use fvid_control::CopyOptions;
 use fvid_media_info::{AudioDecodeStats, AudioDecodeTransform};
 use std::{
@@ -21,7 +21,7 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
     Ok(reader.tracks.iter().enumerate().any(|(index, t)| {
         (options.streams.is_empty() || options.streams.contains(&index))
             && t.kind == 2
-            && t.codec == "A_ALAC"
+            && t.codec == "A_AAC"
     }))
 }
 fn decode_options(options: &CopyOptions) -> CopyOptions {
@@ -50,7 +50,7 @@ pub(crate) fn supports(
     }
     let mut probe = decode_options(options);
     probe.progress = None;
-    let result = crate::owned_matroska_alac::decode_matroska_alac_pcm(
+    let result = crate::owned_matroska_aac::decode_matroska_aac_pcm(
         match File::open(source) {
             Ok(f) => BufReader::new(f),
             Err(_) => return false,
@@ -60,8 +60,15 @@ pub(crate) fn supports(
         &probe,
     );
     result.is_ok_and(|stats| {
+        let Ok((_, _, mask)) = geometry(source, options) else {
+            return false;
+        };
         transform.channels.is_none_or(|channels| {
-            channels == i32::from(stats.channels) || (1..=8).contains(&channels)
+            channels == i32::from(stats.channels)
+                || (((stats.channels <= 2 && (1..=8).contains(&channels))
+                    || (stats.channels <= 8 && matches!(channels, 1 | 2)))
+                    && crate::owned_pcm_channels::standard_mask(stats.channels)
+                        .is_some_and(|standard| standard == u64::from(mask)))
         })
     })
 }
@@ -72,7 +79,7 @@ pub(crate) fn apply(
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
     if options.max_controlled_bytes.is_some() {
-        return Err("Matroska ALAC aggregate allocation admission is not yet implemented".into());
+        return Err("Matroska AAC aggregate allocation admission is not yet implemented".into());
     }
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
@@ -81,6 +88,26 @@ pub(crate) fn apply(
         return Err("media operation cancelled".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
+    let (rate, channels, mask) = geometry(source, options)?;
+    let spool = crate::owned_adts_export::spool_decoded(
+        rate,
+        channels,
+        mask,
+        options,
+        |writer, options| {
+            crate::owned_matroska_aac::decode_matroska_aac_pcm(
+                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+                writer,
+                prefix(transform),
+                &decode_options(options),
+            )
+            .map_err(|e| e.to_string())
+        },
+    )?;
+    crate::owned_adts_export::export_spool(spool, destination, transform, options)
+}
+
+fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
     let reader = crate::owned_webm::WebmReader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         Default::default(),
@@ -107,24 +134,18 @@ pub(crate) fn apply(
         .get(index)
         .ok_or("selected audio stream is absent")?;
     let decoder =
-        crate::owned_alac::AlacDecoder::from_matroska(track).map_err(|e| e.to_string())?;
-    let (rate, channels) = (decoder.sample_rate(), decoder.channels());
-    drop(reader);
-    drop(decoder);
-    let spool = crate::owned_adts_export::spool_decoded(
-        rate,
-        channels,
-        crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
-        options,
-        |writer, options| {
-            crate::owned_matroska_alac::decode_matroska_alac_pcm(
-                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-                writer,
-                prefix(transform),
-                &decode_options(options),
-            )
-            .map_err(|e| e.to_string())
-        },
-    )?;
-    crate::owned_adts_export::export_spool(spool, destination, transform, options)
+        crate::owned_aac::NativeAacDecoder::new(&track.codec_private).map_err(|e| e.to_string())?;
+    let (rate, channels, mask) = (
+        decoder.sample_rate(),
+        u16::from(decoder.channels()),
+        decoder.channel_mask(),
+    );
+    if track.kind != 2
+        || track.codec != "A_AAC"
+        || track.sample_rate != u64::from(rate)
+        || track.channels != u64::from(channels)
+    {
+        return Err("Matroska audio geometry disagrees with configuration or codec".into());
+    }
+    Ok((rate, channels, mask))
 }
