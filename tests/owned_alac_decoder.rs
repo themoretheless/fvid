@@ -27,3 +27,33 @@ fn library_alac_reconstruction_matches_frontend_for_every_fixture_packet() {
     }
     assert!(fvid_media::owned_alac::AlacDecoder::new(&[], 48000, 2).is_err());
 }
+
+#[test]
+fn library_matroska_alac_packets_match_frontend_without_container_adapter() {
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/alac/stereo-24.mka");
+    let mut reader = fvid_media::owned_webm::WebmReader::open(
+        std::fs::File::open(source).unwrap(), Default::default()).unwrap();
+    reader.scan_all().unwrap();
+    let track = reader.tracks.iter().find(|track| track.codec == "A_ALAC").unwrap().clone();
+    let mut library = fvid_media::owned_alac::AlacDecoder::from_matroska(&track).unwrap();
+    let mut frontend = fvid::codec::alac_decoder::AlacDecoder::new(
+        &track.codec_private, library.sample_rate(), library.channels()).unwrap();
+    let mut count = 0;
+    for index in 0..reader.packets.len() {
+        if reader.packets[index].track != track.number { continue; }
+        let packet = reader.read_packet(index).unwrap();
+        assert_eq!(library.decode_pcm(&packet).unwrap(), frontend.decode_pcm(&packet).unwrap());
+        count += 1;
+    }
+    assert!(count > 0);
+    for (kind, codec, rate, channels) in [
+        (1, "A_ALAC", 48000, 2), (2, "A_AAC", 48000, 2),
+        (2, "A_ALAC", u64::MAX, 2), (2, "A_ALAC", 48000, u64::MAX),
+    ] {
+        let mut invalid = track.clone();
+        invalid.kind = kind; invalid.codec = codec.into();
+        invalid.sample_rate = rate; invalid.channels = channels;
+        assert!(fvid_media::owned_alac::AlacDecoder::from_matroska(&invalid).is_err());
+    }
+}
