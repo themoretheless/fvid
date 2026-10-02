@@ -2,6 +2,11 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str) == Some("plan")
+        && args.get(1).map(String::as_str) == Some("loudnorm")
+    {
+        return crate::owned_loudnorm_cli::run_plan(&args[1..]);
+    }
     if args.first().map(String::as_str) == Some("loudnorm") {
         return crate::owned_loudnorm_cli::run(args);
     }

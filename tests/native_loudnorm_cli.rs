@@ -435,3 +435,101 @@ fn synthetic_prefix_stops_before_truncated_tail_and_zero_count_never_publishes()
     assert_eq!(stats.sample_frames, (3072u64 * 192000).div_ceil(44100));
     std::fs::remove_file(output).unwrap();
 }
+
+#[test]
+fn owned_normalizer_plans_cli_and_api_without_decoding_packet_contents() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+    for (name, selected) in [
+        ("playback-errors/loudnorm-dual.wav", 0),
+        ("playback-errors/aac-packet-prefix.aac", 0),
+        ("playback-errors/aac-rounded-two-tracks.m4a", 1),
+        ("playback-errors/alac-two-tracks.m4a", 1),
+        ("audio/aac-stereo.mka", 0),
+    ] {
+        let source = root.join(name);
+        let options = fvid_media::CopyOptions {
+            streams: vec![selected],
+            ..Default::default()
+        };
+        let expected = fvid::native_loudnorm::try_plan(
+            &source,
+            Some("I=-16:print_format=json"),
+            true,
+            &options,
+        )
+        .unwrap()
+        .unwrap();
+        let result = Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "plan", "loudnorm"])
+            .arg(&source)
+            .args([
+                "--dual-pass",
+                "--loudnorm-args",
+                "I=-16:print_format=json",
+                "--streams",
+                &selected.to_string(),
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{name}: {}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        assert_eq!(
+            serde_json::from_slice::<serde_json::Value>(&result.stdout).unwrap(),
+            serde_json::to_value(&expected).unwrap()
+        );
+        assert_eq!(expected.command, "loudnorm");
+        assert!(expected.graph.is_none());
+        assert_eq!(expected.streams[0].index, selected);
+        assert!(
+            expected
+                .steps
+                .iter()
+                .any(|step| step.action == "analyze-output")
+        );
+        assert!(
+            expected
+                .notes
+                .iter()
+                .any(|note| note.starts_with("normalization backend: fvid"))
+        );
+    }
+    // The truncated-tail fixture above proves planning reads configuration only.
+    let source = root.join("playback-errors/loudnorm-dual.wav");
+    for args in ["I=0", "bogus=1", "print_format=maybe"] {
+        assert!(
+            fvid::native_loudnorm::try_plan(&source, Some(args), false, &Default::default())
+                .is_err()
+        );
+    }
+    let report_only = fvid::native_loudnorm::try_plan(
+        &source,
+        Some("print_format=json"),
+        false,
+        &Default::default(),
+    )
+    .unwrap()
+    .unwrap();
+    assert!(
+        report_only
+            .steps
+            .iter()
+            .any(|step| step.action == "analyze")
+    );
+    let suppressed = fvid::native_loudnorm::try_plan(
+        &source,
+        Some("print_format=json:print_format=none"),
+        false,
+        &Default::default(),
+    )
+    .unwrap()
+    .unwrap();
+    assert!(
+        !suppressed
+            .steps
+            .iter()
+            .any(|step| step.action == "analyze-output")
+    );
+}

@@ -89,3 +89,59 @@ fn value<'a>(flags: &mut std::slice::Iter<'a, String>, flag: &str) -> Result<&'a
         .next()
         .ok_or_else(|| format!("missing value for {flag}"))
 }
+
+pub fn run_plan(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if args.len() == 2 && matches!(args[1].as_str(), "--help" | "-h") {
+        println!(
+            "fvid media plan loudnorm INPUT [--loudnorm-args ARGS] [--dual-pass] [--streams INDEX] [--max-packet-bytes N] [--max-packets N] [--max-memory-mib N] [--max-rss-mib N]"
+        );
+        return Ok(());
+    }
+    let source = Path::new(args.get(1).ok_or("plan loudnorm requires INPUT")?);
+    let mut normalization = None;
+    let mut dual_pass = false;
+    let mut options = fvid_media::CopyOptions::default();
+    let mut seen = std::collections::HashSet::new();
+    let mut flags = args[2..].iter();
+    while let Some(flag) = flags.next() {
+        if !seen.insert(flag.as_str()) {
+            return Err(format!("duplicate loudnorm option: {flag}").into());
+        }
+        match flag.as_str() {
+            "--loudnorm-args" => normalization = Some(value(&mut flags, flag)?.as_str()),
+            "--dual-pass" => dual_pass = true,
+            "--streams" => {
+                options.streams = value(&mut flags, flag)?
+                    .split(',')
+                    .map(str::parse)
+                    .collect::<Result<_, _>>()?
+            }
+            "--max-packet-bytes" => options.max_packet_bytes = value(&mut flags, flag)?.parse()?,
+            "--max-packets" => options.max_packets = Some(value(&mut flags, flag)?.parse()?),
+            "--max-memory-mib" => {
+                options.max_controlled_bytes =
+                    Some(fvid_media::parse_max_memory_mib(value(&mut flags, flag)?)?)
+            }
+            "--max-rss-mib" => {
+                options.max_rss_bytes =
+                    Some(fvid_media::parse_max_rss_mib(value(&mut flags, flag)?)?)
+            }
+            _ => return Err(format!("unsupported loudnorm plan option: {flag}").into()),
+        }
+    }
+    let plan = match fvid::native_loudnorm::try_plan(source, normalization, dual_pass, &options)? {
+        Some(plan) => plan,
+        None => {
+            #[cfg(feature = "media")]
+            {
+                fvid_media::plan_loudnorm(source, normalization, dual_pass, &options)?
+            }
+            #[cfg(not(feature = "media"))]
+            return Err(
+                "loudnorm input or policy is not yet supported by the owned planner".into(),
+            );
+        }
+    };
+    println!("{}", serde_json::to_string_pretty(&plan)?);
+    Ok(())
+}

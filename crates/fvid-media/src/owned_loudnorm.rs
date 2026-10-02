@@ -130,6 +130,18 @@ pub(crate) fn supports(
         })
 }
 
+/// Resolve defaults and validate the same parameter names/ranges as execution.
+pub fn validate_request(args: Option<&str>) -> Result<String> {
+    let resolved = resolve_loudnorm_args(args)?;
+    parse(&resolved)?;
+    Ok(resolved)
+}
+
+/// Whether execution measures and prints an input/output normalization report.
+pub fn report_requested(args: Option<&str>) -> Result<bool> {
+    Ok(parse(&resolve_loudnorm_args(args)?)?.print != Print::None)
+}
+
 /// Whether this request has an owned WAVE route. Admission and cancellation
 /// remain execution checks; a false result lets migrating callers retain other
 /// formats without changing their behavior.

@@ -64,3 +64,9 @@ CodecDelay yield 2048; three rounded MP4 packets after 1008-sample priming yield
 start yield 2296 frames for six decoded packets and 7096 for twelve. Preroll
 and repeated decoding count as input work; normalized WAVE chunk counts do not
 limit the output again. WAV speaker metadata is retained in the prefix oracle.
+
+Owned `plan loudnorm` describes WAVE, AAC and ALAC routes without decoding PCM.
+CLI/API snapshots agree on stream selection, dual-pass analysis, output report
+measurement and native graph ownership. The truncated-tail ADTS fixture still
+produces a metadata-only plan; this does not assert unbounded decode acceptance.
+Invalid target ranges/keys and print modes are rejected by the execution parser.
