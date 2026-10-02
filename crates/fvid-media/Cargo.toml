@@ -36,3 +36,7 @@ harness = false
 name = "ffmpeg_time_reference"
 harness = false
 required-features = ["legacy-ffmpeg"]
+
+[[bench]]
+name = "ffmpeg_true_peak_reference"
+harness = false

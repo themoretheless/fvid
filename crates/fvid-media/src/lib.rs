@@ -60,3 +60,5 @@ pub use owned_wave_remux::{concat, remux, trim, trim_pcm};
 pub mod owned_wave_plan;
 #[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_wave_plan::{plan_remux, plan_trim, plan_trim_pcm, plan_concat};
+
+pub mod owned_true_peak;

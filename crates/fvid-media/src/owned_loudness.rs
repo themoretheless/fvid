@@ -7,6 +7,7 @@ pub use fvid_media_info::PcmLoudnessStats as IntegratedLoudness;
 /// Use 1 for front channels, 1.41 for surrounds, 0 for LFE.
 /// Relative gating uses 0.01 LU histogram bins, bounding storage by level range.
 pub struct LoudnessMeter {
+    true_peak: Option<crate::owned_true_peak::TruePeakMeter>,
     short_ring: Vec<f64>,
     short_position: usize,
     short_sum: f64,
@@ -35,6 +36,7 @@ impl LoudnessMeter {
         }
         let filter = KWeighting::new(sample_rate, weights.len())?;
         Ok(Self {
+            true_peak: None,
             short_ring: vec![0.0; sample_rate as usize * 3],
             short_position: 0,
             short_sum: 0.0,
@@ -51,6 +53,26 @@ impl LoudnessMeter {
             energies: BTreeMap::new(),
         })
     }
+    /// Enable the Annex 2 four-phase estimator for 48 kHz PCM. Other sample
+    /// rates need their own oversampling policy before this metric is enabled.
+    /// The default constructor retains its existing sample-peak-only cost.
+    pub fn new_with_true_peak(sample_rate: u32, weights: &[f64]) -> Result<Self, String> {
+        if sample_rate != 48000 {
+            return Err("four-phase loudness true peak currently requires 48000 Hz".into());
+        }
+        let mut meter = Self::new(sample_rate, weights)?;
+        meter.true_peak = Some(crate::owned_true_peak::TruePeakMeter::new(weights.len())?);
+        Ok(meter)
+    }
+    /// Flush true-peak interpolation history without adding loudness frames.
+    pub fn finish(&mut self) {
+        if let Some(meter) = &mut self.true_peak {
+            meter.finish();
+        }
+    }
+    pub fn true_peak_report(&self) -> Option<crate::owned_true_peak::PeakReport> {
+        self.true_peak.as_ref().map(|meter| meter.report())
+    }
     pub fn push(&mut self, pcm: &[f64]) -> Result<(), String> {
         if pcm.len() % self.weights.len() != 0
             || pcm.iter().any(|x| !x.is_finite() || x.abs() > 1e100)
@@ -60,6 +82,9 @@ impl LoudnessMeter {
         self.frames
             .checked_add((pcm.len() / self.weights.len()) as u64)
             .ok_or("loudness sample count overflow")?;
+        if let Some(meter) = &mut self.true_peak {
+            meter.push(pcm)?;
+        }
         let mut scratch = [0.0; 64];
         for frame in pcm.chunks_exact(self.weights.len()) {
             for sample in frame {
@@ -199,5 +224,46 @@ mod tests {
         let mut lfe = LoudnessMeter::new(48000, &[0.0, 1.0]).unwrap();
         lfe.push(&pcm).unwrap();
         assert!(lfe.report().integrated_lufs.is_none());
+    }
+}
+
+#[cfg(test)]
+mod true_peak_tests {
+    use super::*;
+    #[test]
+    fn optional_true_peak_does_not_change_loudness_and_keeps_lfe_peak() {
+        let pcm: Vec<_> = (0..24000)
+            .flat_map(|i| {
+                let fade = (i.min(23999 - i) as f64 / 64.).min(1.);
+                [
+                    0.,
+                    fade * (std::f64::consts::FRAC_PI_2 * i as f64 + std::f64::consts::FRAC_PI_4)
+                        .sin(),
+                ]
+            })
+            .collect();
+        let mut basic = LoudnessMeter::new(48000, &[1., 0.]).unwrap();
+        let mut full = LoudnessMeter::new_with_true_peak(48000, &[1., 0.]).unwrap();
+        for samples in pcm.chunks(254) {
+            basic.push(samples).unwrap();
+            full.push(samples).unwrap();
+        }
+        full.finish();
+        assert!(basic.true_peak_report().is_none());
+        let before = full.report();
+        let expected = basic.report();
+        assert_eq!(before.sample_frames, expected.sample_frames);
+        assert_eq!(before.measured_blocks, expected.measured_blocks);
+        assert_eq!(before.integrated_lufs, expected.integrated_lufs);
+        assert_eq!(before.range_lu, expected.range_lu);
+        assert_eq!(before.sample_peak_dbfs, expected.sample_peak_dbfs);
+        assert!(before.integrated_lufs.is_none());
+        let peak = full.true_peak_report().unwrap();
+        assert!(peak.true_peak_dbfs.unwrap().abs() < 0.1);
+        assert_eq!(peak.sample_frames, 24000);
+        assert!(peak.finished);
+        assert!(full.push(&[1., 1.]).is_err());
+        assert_eq!(full.report().sample_frames, 24000);
+        assert!(LoudnessMeter::new_with_true_peak(44100, &[1.]).is_err());
     }
 }
