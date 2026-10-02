@@ -18,7 +18,7 @@ cargo build --release --features media
 3. В сессии: `$env:FVID_FFMPEG_PREFIX='C:\ffmpeg-shared'`; добавьте `C:\ffmpeg-shared\bin` в `PATH`.
 4. `cargo build --release --features media` (или `--features mcp`). Для NVDEC/NVENC: `--features media-cuda` и `fvid media hw-filter …`.
 
-Qualified: macOS/FFmpeg 9.0.1; Windows/FFmpeg 9.0.1 shared (BtbN n9.0.1-29). `validate_media.py` threshold ≥314. Feature `media` не входит в стандартную сборку, чтобы GPU/CPU-ядро не требовало FFmpeg.
+Qualified: macOS/FFmpeg 9.0.1; Windows/FFmpeg 9.0.1 shared (BtbN n9.0.1-29). `validate_media.py --benchmark-reference` retains the full external comparison corpus (the CPU gate requires ≥524 passing checks). Feature `media` не входит в стандартную сборку, чтобы GPU/CPU-ядро не требовало FFmpeg.
 
 ## Работающие команды
 
@@ -172,10 +172,10 @@ Decode-пути терпимы к повреждённому входу ровн
 cargo test --features media
 cargo test --manifest-path crates/fvid-media/Cargo.toml
 cargo clippy --manifest-path crates/fvid-media/Cargo.toml --all-targets -- -D warnings
-python3 scripts/validate_media.py --binary target/release/fvid
+python3 scripts/validate_media.py --benchmark-reference --binary target/release/fvid
 ```
 
-[Зафиксированные end-to-end проверки](../benchmarks/media-validation.json) включают rich probe, standalone и mapped subtitle passthrough, точные decode intervals для reordered/no-reorder потоков, сравнения packet hashes, decoded pixel/audio samples, 8/10-bit crop, neighbor scale, B-frame drain, сохранение и retiming глав, несовместимые границы и сохранение существующего output. JSON фиксирует результаты сравнений, хеш release-бинарника и исходников; временные fixtures удаляются, их генерация воспроизводима скриптом. В production нет subprocess; FFmpeg/ffprobe CLI используются в тестах как генератор и oracle.
+[Зафиксированные end-to-end проверки](../benchmarks/media-validation.json) включают rich probe, standalone и mapped subtitle passthrough, точные decode intervals для reordered/no-reorder потоков, сравнения packet hashes, decoded pixel/audio samples, 8/10-bit crop, neighbor scale, B-frame drain, сохранение и retiming глав, несовместимые границы и сохранение существующего output. JSON фиксирует результаты сравнений, хеш release-бинарника и исходников; временные fixtures удаляются, их генерация воспроизводима скриптом. В production нет subprocess; FFmpeg/ffprobe CLI используются только в явно запрошенном reference-benchmark как генератор и oracle. Полный корпус сохранён в `scripts/benchmark_media_reference.py`; обычный `validate_media.py` запускает проверку зависимостей и Rust-тесты без FFmpeg и пишет отдельный `native-media-validation.json`. Этот отчёт не квалифицирует CLI для CPU performance gate и не заменяет старые результаты сравнений.
 
 ## Источники контрактов
 
@@ -190,9 +190,9 @@ python3 scripts/validate_media.py --binary target/release/fvid
 
 `python3 scripts/benchmark_media.py` сравнивает remux, full-frame FFV1 и crop+vflip+FFV1 с FFmpeg default и one-thread. Перед замером каждого варианта сверяются все декодированные пиксели, для remux также packet hashes. [Результаты](../benchmarks/media-benchmark.json) содержат команды, каждое измерение, размеры файлов и provenance. Это CPU codec benchmark; GPU-путь здесь не измеряется.
 
-`python3 scripts/benchmark_cpu_media_gate.py --binary target-media/release/fvid` запускает общий строгий native CPU gate после `validate_media.py`. Порядок одиннадцати операций и порядок Fvid/FFmpeg внутри каждой пары перемешиваются в каждом из 21 раундов, чтобы убрать систематический thermal/order bias. [Зафиксированный результат](../benchmarks/cpu-media-gate.json) требует для каждой пары медиану строго выше +15%.
+`python3 scripts/benchmark_cpu_media_gate.py --binary target-media/release/fvid` запускает общий строгий native CPU gate после `validate_media.py --benchmark-reference`. Порядок одиннадцати операций и порядок Fvid/FFmpeg внутри каждой пары перемешиваются в каждом из 21 раундов, чтобы убрать систематический thermal/order bias. [Зафиксированный результат](../benchmarks/cpu-media-gate.json) требует для каждой пары медиану строго выше +15%.
 
-`python3 scripts/benchmark_gpu_media_gate.py --binary target-media-cuda/release/fvid` применяет randomized/interleaved протокол к семи CUDA fair pairs, считает медиану внутрипарных deltas и требует совпадающий по hash отчёт `validate_hw_cuda.py`. Encode-heavy timelines (≥20s) используют multi-session NVENC на RTX 5090; soft vflip и fused остаются single-session. [Текущий 11-round результат](../benchmarks/gpu-media-gate.json): все семь пар проходят строго >15%.
+`python3 scripts/benchmark_gpu_media_gate.py --binary target-media-cuda/release/fvid` применяет randomized/interleaved протокол к семи CUDA fair pairs, считает медиану внутрипарных deltas и требует совпадающий по hash отчёт `validate_hw_cuda.py --benchmark-reference`. Encode-heavy timelines (≥20s) используют multi-session NVENC на RTX 5090; soft vflip и fused остаются single-session. [Текущий 11-round результат](../benchmarks/gpu-media-gate.json): все семь пар проходят строго >15%.
 
 ## Lossless-обрезка внутри GOP
 

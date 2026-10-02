@@ -34,4 +34,5 @@ jobs:
           python3 scripts/test_gpu_reference_policy.py
           python3 scripts/test_cuda_qualification.py
           python3 scripts/test_hw_cuda_reference_policy.py
+          python3 scripts/test_media_reference_policy.py
           python3 scripts/check_native_dependencies.py --offline

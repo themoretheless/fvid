@@ -2,6 +2,7 @@
 """Randomized, interleaved strict gate for all native CPU media fair pairs."""
 import argparse,datetime,hashlib,json,pathlib,random,statistics,subprocess,tempfile,time
 from common import ROOT,release_binary
+from media_qualification import require_cli_reference_report
 
 parser=argparse.ArgumentParser()
 parser.add_argument('--binary',default=str(release_binary()))
@@ -22,10 +23,10 @@ def fixture(path,seconds,gop=False):
     run(command+['-an',path])
 
 validation=json.loads((ROOT/'benchmarks/media-validation.json').read_text())
-if validation.get('status')!='passed' or len(validation.get('checks',[]))<524:
-    raise SystemExit('run scripts/validate_media.py successfully before the CPU gate')
-if hashlib.sha256(binary.read_bytes()).hexdigest()!=validation.get('binary_sha256'):
-    raise SystemExit('validation report does not match --binary; rerun validate_media.py')
+try:
+    require_cli_reference_report(validation, hashlib.sha256(binary.read_bytes()).hexdigest())
+except RuntimeError as error:
+    raise SystemExit(str(error)) from error
 
 with tempfile.TemporaryDirectory(prefix='fvid-cpu-gate-')as temp:
     w=pathlib.Path(temp);short=w/'short.mp4';brief=w/'brief.mp4';decode=w/'decode.mp4';medium=w/'medium.mp4';gop=w/'gop.mp4'

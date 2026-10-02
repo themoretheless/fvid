@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Source policy controls; no Cargo, FFmpeg or network required."""
 import unittest
-from check_native_dependencies import external_test_calls, external_python_calls
+import pathlib
+import tempfile
+from check_native_dependencies import external_test_calls, external_python_calls, audit_native_validators, NATIVE_VALIDATORS
 
 
 class OrdinaryTestPolicy(unittest.TestCase):
@@ -51,6 +53,44 @@ os.environ.get("FVID_BINARY")
     def test_malformed_source_is_not_treated_as_a_passing_audit(self):
         with self.assertRaises(SyntaxError):
             external_python_calls("subprocess.run([");
+
+
+class NativeValidatorPolicy(unittest.TestCase):
+    def root(self, folder):
+        root = pathlib.Path(folder)
+        (root / "scripts").mkdir()
+        for name in NATIVE_VALIDATORS:
+            (root / "scripts" / name).write_text('subprocess.run(["cargo", "test"])')
+        return root
+
+    def test_native_registry_is_audited_without_banning_explicit_benchmarks(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = self.root(folder)
+            (root / "scripts/benchmark_media_reference.py").write_text('subprocess.run(["ffmpeg"])')
+            paths, failures = audit_native_validators(root)
+            self.assertEqual(len(paths), 4)
+            self.assertEqual(failures, [])
+
+    def test_external_validator_launch_is_rejected_with_file_and_line(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = self.root(folder)
+            (root / "scripts/validate_media.py").write_text('\nsubprocess.run(["ffprobe"])')
+            _, failures = audit_native_validators(root)
+            self.assertEqual(len(failures), 1)
+            self.assertIn("scripts/validate_media.py:2:", failures[0])
+
+    def test_missing_or_malformed_validator_is_not_passing_evidence(self):
+        for content in [None, "subprocess.run(["]:
+            with self.subTest(content=content), tempfile.TemporaryDirectory() as folder:
+                root = self.root(folder)
+                path = root / "scripts/validate_media.py"
+                if content is None:
+                    path.unlink()
+                else:
+                    path.write_text(content)
+                _, failures = audit_native_validators(root)
+                self.assertEqual(len(failures), 1)
+                self.assertIn("could not be audited", failures[0])
 
 
 if __name__ == "__main__":

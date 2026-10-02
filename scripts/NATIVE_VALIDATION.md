@@ -36,7 +36,30 @@ records failure because `nvidia-smi` is unavailable. The current `cuda-hw` Cargo
 suite still links its legacy libav adapter: removing external commands here
 does not prove a FFmpeg-free production CUDA dependency graph.
 
-Remaining FFmpeg-dependent validation programs include `validate_media.py`
-and `validate_klite_coverage.py`. Their codec/filter/reference coverage has not
-been removed or relabeled as migrated. Production legacy media
+`validate_media.py` runs the native dependency/test/generator policy guard,
+all owned media library unit tests, and the frontend headless library/integration
+tests. It writes `native-media-validation.json`; no external reference module
+is imported. Add `--benchmark-reference` for the complete existing CLI corpus
+in `benchmark_media_reference.py` and its separate `media-validation.json`.
+All reference helper/check computation is unchanged; only argument/report
+entrypoints were adapted. The CPU performance gate keeps its 524-check threshold,
+matching-binary requirement and full-reference scope; an ordinary test report
+cannot qualify it. Policy tests simulate subprocess/benchmark dispatch and
+check that failed or empty test execution replaces stale successful reports.
+They are not evidence of codec or CLI conformance.
+
+The dependency policy also audits the four declared native validator sources for
+known literal external launches/environment hooks, failing on missing or malformed
+source. Explicit reference benchmark modules remain allowed. This complements
+the dispatch tests; it does not resolve arbitrary computed executable paths.
+
+Local ordinary media validation on 2026-10-02 executed 116 owned-library and
+1,224 frontend Rust tests successfully, with one frontend test ignored. It
+recorded `reference_completed=false` and `provided_cli_checks_completed=false`;
+the full external corpus was not run in that invocation. The separate production
+dependency audit still refuses `media`, `media-cuda` and `cuda-hw` because they
+activate `legacy-ffmpeg`. Passing native tests does not close that boundary.
+
+`validate_klite_coverage.py` still requires external FFmpeg tools. Its codec/filter/
+reference coverage has not been removed or relabeled as migrated. Production legacy media
 operations and AAC aggregate allocation admission also remain separate work.

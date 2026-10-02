@@ -102,6 +102,23 @@ def audit_fixture_generators(root):
     return paths, failures
 
 
+NATIVE_VALIDATORS = ("validate_gpu.py", "validate_resident.py", "validate_hw_cuda.py", "validate_media.py")
+
+
+def audit_native_validators(root):
+    paths = [root / "scripts" / name for name in NATIVE_VALIDATORS]
+    failures = []
+    for path in paths:
+        try:
+            for line in external_python_calls(path.read_text()):
+                failures.append(f"{path.relative_to(root)}:{line}: external FFmpeg validation hook; move it to an explicit reference benchmark")
+        except SyntaxError as error:
+            failures.append(f"{path.relative_to(root)}:{error.lineno}: validator source could not be audited: {error.msg}")
+        except OSError as error:
+            failures.append(f"{path.relative_to(root)}: validator source could not be audited: {error}")
+    return paths, failures
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--offline", action="store_true")
@@ -133,6 +150,10 @@ def main():
     failures.extend(generator_failures)
     if not generator_failures:
         print(f"fixture generators: {len(generator_paths)} Python files; no known external FFmpeg calls", flush=True)
+    validator_paths, validator_failures = audit_native_validators(ROOT)
+    failures.extend(validator_failures)
+    if not validator_failures:
+        print(f"native validators: {len(validator_paths)} Python files; no known external FFmpeg calls", flush=True)
     for name, manifest, features in cases:
         try:
             packages, legacy = dependencies(manifest, features, target, args.offline)
