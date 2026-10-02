@@ -1,9 +1,64 @@
 //! Read-only operation plans for the owned WAVE, ADTS and MP4 audio writer.
 use fvid_control::CopyOptions;
 use fvid_media_info::{AudioDecodeTransform, MediaPlan, PlanStep, PlanStream};
-use std::{fs::File, io::BufReader, path::Path};
+use std::{
+    fs::File,
+    io::{BufReader, Read},
+    path::Path,
+};
 type Result<T> = std::result::Result<T, String>;
 
+fn matroska_descriptor(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<Option<(usize, u32, u16, u32, String, String)>> {
+    let mut file = File::open(source).map_err(|e| e.to_string())?;
+    let mut prefix = [0; 4];
+    if file.read_exact(&mut prefix).is_err() || prefix != [0x1a, 0x45, 0xdf, 0xa3] {
+        return Ok(None);
+    }
+    let reader = crate::owned_webm::WebmReader::open(
+        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+        Default::default(),
+    )
+    .map_err(|e| e.to_string())?;
+    let selected = options.streams.first().copied();
+    let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
+        .map_err(|e| e.to_string())?;
+    let track = &reader.tracks[index];
+    if options.max_controlled_bytes.is_some() {
+        return Err("Matroska audio aggregate allocation admission is not yet implemented".into());
+    }
+    let (rate, channels, mask, codec, precision) = match track.codec.as_str() {
+        "A_AAC" => {
+            let (rate, channels, mask) =
+                crate::owned_matroska_aac_export::geometry(source, options)?;
+            (rate, channels, mask, "aac".into(), "float32".into())
+        }
+        "A_ALAC" => {
+            let (rate, channels) = crate::owned_matroska_alac_export::geometry(source, options)?;
+            (
+                rate,
+                channels,
+                crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
+                "alac".into(),
+                "float32".into(),
+            )
+        }
+        "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" => {
+            let (rate, channels) = crate::owned_matroska_pcm_export::geometry(source, options)?;
+            (
+                rate,
+                channels,
+                crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
+                track.codec.clone(),
+                "float64".into(),
+            )
+        }
+        _ => return Err("selected Matroska audio codec is not owned by the export path".into()),
+    };
+    Ok(Some((index, rate, channels, mask, codec, precision)))
+}
 /// Legacy dispatch only adopts plans accepted by the owned metadata preflight.
 /// This does not decode packets, create a destination, or emit progress.
 pub(crate) fn supports(
@@ -25,6 +80,8 @@ pub fn plan_decode_audio(
     crate::owned_budget::check_rss_budget(options)?;
     let adts = crate::owned_adts_export::recognizes(source)?;
     let mp4 = crate::owned_mp4_audio_export::recognizes(source, options)?;
+    let matroska = matroska_descriptor(source, options)?;
+    let is_matroska = matroska.is_some();
     let mut stream_index = 0;
     let (rate, channels, mask, codec, precision) = if mp4 {
         if options.max_controlled_bytes.is_some() {
@@ -34,6 +91,9 @@ pub fn plan_decode_audio(
             crate::owned_mp4_audio_export::descriptor(source, options)?;
         stream_index = index;
         (rate, channels, mask, codec, "float32".to_owned())
+    } else if let Some((index, rate, channels, mask, codec, precision)) = matroska {
+        stream_index = index;
+        (rate, channels, mask, codec, precision)
     } else if adts {
         if !crate::owned_audio_export::simple_options(options) {
             return Err("ADTS has only stream 0".into());
@@ -100,6 +160,8 @@ pub fn plan_decode_audio(
         action: "decode".into(),
         detail: if mp4 {
             format!("owned MP4 {codec} decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float32 WAVE disk spool")
+        } else if is_matroska {
+            format!("owned Matroska {codec} decoder and presentation scheduler; preserve CodecDelay, signed padding and gaps; private {precision} WAVE disk spool")
         } else if adts {
             "owned AAC-LC decoder; retain ADTS priming and preroll; private float32 WAVE disk spool"
                 .into()
@@ -135,5 +197,5 @@ pub fn plan_decode_audio(
         });
     }
     steps.push(PlanStep{action:"write".into(),detail:format!("owned .wav writer; preserve {precision} precision; publish without overwriting; cleanup on failure")});
-    Ok(MediaPlan{command:"decode-audio".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:stream_index,media_type:"audio".into(),codec,disposition:"decode".into()}],steps,graph:None,notes:vec!["backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),"read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into(),if adts || mp4 {"packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded".into()} else {"packet limits apply to frame-aligned WAVE I/O blocks of at most 4096 sample frames".into()}]})
+    Ok(MediaPlan{command:"decode-audio".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:stream_index,media_type:"audio".into(),codec,disposition:"decode".into()}],steps,graph:None,notes:vec!["backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),"read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into(),if adts || mp4 || is_matroska {"packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded".into()} else {"packet limits apply to frame-aligned WAVE I/O blocks of at most 4096 sample frames".into()}]})
 }

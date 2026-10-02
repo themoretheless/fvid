@@ -100,7 +100,7 @@ pub(crate) fn apply(
     crate::owned_adts_export::export_spool(spool, destination, transform, options)
 }
 
-fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
+pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
     let reader = crate::owned_webm::WebmReader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         Default::default(),
