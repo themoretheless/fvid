@@ -90,3 +90,12 @@ silently relabeling the samples. The integration suite compares 288 compositions
 against existing sample-plane geometry and independently checks four known
 three-plane matrices, swapped dimensions, output chroma and public dispatch.
 Existing synthetic Y4M controls are reused; no private samples or FFmpeg are used.
+
+The owned Y4M geometry route supports black padding after transpose and before
+point scaling. Padding reads the full/limited-range header tag, uses the media
+adapter's depth-scaled black/neutral samples and retains swapped chroma axes.
+The canvas must satisfy the existing public PadRect size/alignment/bounds rules.
+Padding, crop, reflections, transpose and resize are fused into the reused output
+buffer. Tests compare 144 compositions with media sample-plane geometry, check
+known full/limited fill samples at 8/10/16 bits, invalid canvases and public decode
+metadata. No external codec or fixture generator runs during these tests.

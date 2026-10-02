@@ -1,6 +1,6 @@
 //! Owned raw planar Y4M decode-and-discard, with bounded scratch storage.
 use crate::owned_y4m::{Header, PixelFormat, line};
-use fvid_media_info::{CropRect, DecodeStats, DecodeTransform, ScaleSize, TransposeMode};
+use fvid_media_info::{CropRect, DecodeStats, DecodeTransform, PadRect, ScaleSize, TransposeMode};
 use std::{
     fs::File,
     io::{BufRead, BufReader},
@@ -39,6 +39,7 @@ fn supported_request(transform: &DecodeTransform) -> bool {
                 crop: transform.crop,
                 scale: transform.scale,
                 transpose: transform.transpose,
+                pad: transform.pad,
                 horizontal_flip: transform.horizontal_flip,
                 vertical_flip: transform.vertical_flip,
                 interval: transform.interval,
@@ -99,12 +100,20 @@ fn output_geometry(
     crop: CropRect,
     scale: Option<ScaleSize>,
     transpose: Option<TransposeMode>,
+    pad: Option<PadRect>,
 ) -> Result<(usize, usize, usize)> {
     let (cw, ch) = if transpose.is_some() {
         (crop.height, crop.width)
     } else {
         (crop.width, crop.height)
     };
+    if let Some(p) = pad {
+        p.validate(
+            u32::try_from(cw).map_err(|_| "Y4M pad input width overflow")?,
+            u32::try_from(ch).map_err(|_| "Y4M pad input height overflow")?,
+        )?;
+    }
+    let (cw, ch) = pad.map_or((cw, ch), |p| (p.width as usize, p.height as usize));
     let (w, h) = scale.map_or((cw, ch), |s| (s.width as usize, s.height as usize));
     if scale.is_some() && (w == 0 || h == 0 || w > 8192 || h > 4320 || w % 2 != 0 || h % 2 != 0) {
         return Err("scale must be even and within 1..=8192 x 1..=4320".into());
@@ -143,6 +152,7 @@ pub fn transform_frame_requested(
         transform.vertical_flip,
         transform.scale,
         transform.transpose,
+        transform.pad,
         &mut output,
     )?;
     Ok(output)
@@ -164,6 +174,7 @@ pub fn transform_frame(
         vertical,
         None,
         None,
+        None,
         &mut output,
     )?;
     Ok(output)
@@ -176,13 +187,14 @@ fn transform_frame_into(
     vertical: bool,
     scale: Option<ScaleSize>,
     transpose: Option<TransposeMode>,
+    pad: Option<PadRect>,
     output: &mut Vec<u8>,
 ) -> Result<()> {
     if frame.len() != header.frame_len()? {
         return Err("Y4M frame size mismatch".into());
     }
     let (crop, _) = crop_geometry(header, crop)?;
-    let (ow, oh, output_size) = output_geometry(header, crop, scale, transpose)?;
+    let (ow, oh, output_size) = output_geometry(header, crop, scale, transpose, pad)?;
     let (sx, sy) = header.format.subsampling();
     let step = if header.depth() == 8 { 1 } else { 2 };
     output.clear();
@@ -190,9 +202,9 @@ fn transform_frame_into(
         .try_reserve_exact(output_size)
         .map_err(|e| e.to_string())?;
     let mut offset = 0;
-    for (dx, dy) in [(1, 1), (sx, sy), (sx, sy)] {
+    for (plane, (dx, dy)) in [(1, 1), (sx, sy), (sx, sy)].into_iter().enumerate() {
         let stride = header.width / dx * step;
-        if scale.is_some() || transpose.is_some() {
+        if scale.is_some() || transpose.is_some() || pad.is_some() {
             let (odx, ody) = if transpose.is_some() {
                 (dy, dx)
             } else {
@@ -204,10 +216,35 @@ fn transform_frame_into(
             } else {
                 (iw, ih)
             };
+            let (canvas_w, canvas_h, px, py) = pad.map_or((tw, th, 0, 0), |p| {
+                (
+                    p.width as usize / odx,
+                    p.height as usize / ody,
+                    p.x as usize / odx,
+                    p.y as usize / ody,
+                )
+            });
+            let full = header.tokens.iter().any(|t| t == "XCOLORRANGE=FULL");
+            let black = if full {
+                if plane == 0 {
+                    0
+                } else {
+                    128u16 << (header.depth() - 8)
+                }
+            } else {
+                let code = if plane == 0 { 16u32 } else { 128 };
+                ((code * ((1u32 << header.depth()) - 1) + 127) / 255) as u16
+            }
+            .to_le_bytes();
             for row in 0..dh {
-                let ty = point_sample(row, th, dh);
+                let cy = point_sample(row, canvas_h, dh);
                 for col in 0..dw {
-                    let tx = point_sample(col, tw, dw);
+                    let cx = point_sample(col, canvas_w, dw);
+                    if cx < px || cy < py || cx - px >= tw || cy - py >= th {
+                        output.extend_from_slice(&black[..step]);
+                        continue;
+                    }
+                    let (tx, ty) = (cx - px, cy - py);
                     let (mut x, mut y) = match transpose {
                         None => (tx, ty),
                         Some(TransposeMode::Clock) => (ty, ih - 1 - tx),
@@ -266,7 +303,13 @@ pub fn decode_reader_transformed(
     let header = Header::parse(&bytes)?;
     let [rate_n, rate_d] = header.frame_rate()?;
     let (crop, _) = crop_geometry(&header, transform.crop)?;
-    let (ow, oh, _) = output_geometry(&header, crop, transform.scale, transform.transpose)?;
+    let (ow, oh, _) = output_geometry(
+        &header,
+        crop,
+        transform.scale,
+        transform.transpose,
+        transform.pad,
+    )?;
     let width = u32::try_from(ow).map_err(|_| "Y4M width exceeds decode API range")?;
     let height = u32::try_from(oh).map_err(|_| "Y4M height exceeds decode API range")?;
     let frame_bytes = header.frame_len()?;
@@ -274,7 +317,8 @@ pub fn decode_reader_transformed(
         || transform.horizontal_flip
         || transform.vertical_flip
         || transform.scale.is_some()
-        || transform.transpose.is_some();
+        || transform.transpose.is_some()
+        || transform.pad.is_some();
     let mut input = Vec::new();
     if geometry {
         input
@@ -331,6 +375,7 @@ pub fn decode_reader_transformed(
                     transform.vertical_flip,
                     transform.scale,
                     transform.transpose,
+                    transform.pad,
                     &mut output,
                 )?;
                 std::hint::black_box(&output);
