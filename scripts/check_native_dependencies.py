@@ -36,6 +36,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--offline", action="store_true")
     parser.add_argument("--target", help="Cargo target triple (defaults to rustc host)")
+    parser.add_argument("--production", action="store_true",
+                        help="also require production media and CUDA graphs to exclude FFmpeg")
     args = parser.parse_args()
     target = args.target
     if target is None:
@@ -48,17 +50,29 @@ def main():
         ("player", ROOT / "Cargo.toml", ["--no-default-features", "--features", "player"]),
         ("camera bridge", ROOT / "crates/fvid-camera-ffi/Cargo.toml", []),
     ]
+    if args.production:
+        cases.extend([
+            ("production media", ROOT / "Cargo.toml", ["--no-default-features", "--features", "media"]),
+            ("production CUDA", ROOT / "Cargo.toml", ["--no-default-features", "--features", "media-cuda"]),
+            ("media library CUDA", ROOT / "crates/fvid-media/Cargo.toml", ["--no-default-features", "--features", "cuda-hw"]),
+        ])
+    failures = []
     for name, manifest, features in cases:
         try:
             packages, legacy = dependencies(manifest, features, target, args.offline)
         except subprocess.CalledProcessError as error:
-            raise SystemExit(f"{name}: dependency graph could not be verified (cargo exit {error.returncode})") from error
+            failures.append(f"{name}: dependency graph could not be verified (cargo exit {error.returncode})")
+            continue
         found = forbidden(packages)
         if legacy:
             found.append("fvid-media/legacy-ffmpeg")
         if found:
-            raise SystemExit(f"{name}: FFmpeg dependency reached native graph: {', '.join(found)}")
+            failures.append(f"{name}: FFmpeg dependency reached graph: {', '.join(found)}")
+            continue
         print(f"{name} ({target}): {len(packages)} build packages; no FFmpeg adapter", flush=True)
+
+    if failures:
+        raise SystemExit("\n".join(failures))
 
 
 if __name__ == "__main__":

@@ -166,3 +166,10 @@ with cargo bench and FVID_REFERENCE_FFMPEG. Their original synthetic matrices
 retain all 90 gradient and 220 morphology comparisons (including RGB morphology).
 Ordinary tests retain masks, thresholds, rounding, atomic validation, pipeline
 order, API and CLI checks without starting FFmpeg, even under --ignored.
+
+The completion gate `python3 scripts/check_native_dependencies.py --offline
+--production` additionally audits root media, root media-cuda and library cuda-hw.
+It checks every graph and reports all failures together. This gate currently
+fails because all three activate legacy-ffmpeg; the default native graph check
+alone is not evidence of complete production independence. The production gate
+must pass after those implementations/features have been migrated.
