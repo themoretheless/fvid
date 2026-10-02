@@ -134,3 +134,65 @@ mod rounded_tests {
         assert!(rescale_nearest(i64::MAX, target, source).is_err());
     }
 }
+
+/// Rescale toward positive infinity, used for output sample-buffer capacity.
+pub fn rescale_ceil(value: i64, source: TimeBase, target: TimeBase) -> Result<i64, String> {
+    if source.numerator == 0
+        || source.denominator == 0
+        || target.numerator == 0
+        || target.denominator == 0
+    {
+        return Err("invalid time base".into());
+    }
+    let numerator =
+        i128::from(value) * i128::from(source.numerator) * i128::from(target.denominator);
+    let denominator = i128::from(source.denominator) * i128::from(target.numerator);
+    let quotient = numerator / denominator + i128::from(numerator % denominator > 0);
+    i64::try_from(quotient).map_err(|_| "rescaled timestamp overflow".into())
+}
+#[cfg(test)]
+mod capacity_tests {
+    use super::*;
+    #[test]
+    fn upward_rounding_for_signed_values_and_audio_capacity() {
+        let source = TimeBase {
+            numerator: 1,
+            denominator: 2,
+        };
+        let target = TimeBase {
+            numerator: 1,
+            denominator: 1,
+        };
+        for (value, expected) in [
+            (-5, -2),
+            (-4, -2),
+            (-3, -1),
+            (-2, -1),
+            (-1, 0),
+            (0, 0),
+            (1, 1),
+            (2, 1),
+            (3, 2),
+            (4, 2),
+            (5, 3),
+        ] {
+            assert_eq!(rescale_ceil(value, source, target).unwrap(), expected);
+        }
+        assert_eq!(
+            rescale_ceil(
+                1024,
+                TimeBase {
+                    numerator: 1,
+                    denominator: 44100
+                },
+                TimeBase {
+                    numerator: 1,
+                    denominator: 48000
+                }
+            )
+            .unwrap(),
+            1115
+        );
+        assert!(rescale_ceil(i64::MAX, target, source).is_err());
+    }
+}

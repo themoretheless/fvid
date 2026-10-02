@@ -358,12 +358,10 @@ impl Resampler {
             } else {
                 let s = &*src;
                 let delay = swr_get_delay(self.swr, i64::from(self.out_rate));
-                av_rescale_rnd(
-                    delay + i64::from(s.nb_samples),
-                    i64::from(self.out_rate),
-                    i64::from(s.sample_rate),
-                    AVRounding_AV_ROUND_UP,
-                )
+                super::rescale_capacity_owned(
+                    delay.checked_add(i64::from(s.nb_samples)).ok_or("audio capacity overflow")?,
+                    self.out_rate, s.sample_rate,
+                )?
             };
             if out_samples < 0 || out_samples > i64::from(i32::MAX) {
                 return Err("resampled audio size overflow".into());

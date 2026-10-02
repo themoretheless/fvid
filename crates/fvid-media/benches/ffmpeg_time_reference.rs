@@ -52,7 +52,37 @@ fn main() {
                 Ok(actual) => assert_eq!(actual, reference),
                 Err(_) => assert_eq!(reference, i64::MIN),
             }
-            count += 1;
+            let upper = fvid_media::owned_time::rescale_ceil(
+                value,
+                TimeBase {
+                    numerator: 1,
+                    denominator: source as u32,
+                },
+                TimeBase {
+                    numerator: 1,
+                    denominator: target as u32,
+                },
+            );
+            // SAFETY: Scalar ABI, UP rounding mode (3).
+            let reference_up = unsafe {
+                av_rescale_q_rnd(
+                    value,
+                    Rational {
+                        num: 1,
+                        den: source,
+                    },
+                    Rational {
+                        num: 1,
+                        den: target,
+                    },
+                    3,
+                )
+            };
+            match upper {
+                Ok(actual) => assert_eq!(actual, reference_up),
+                Err(_) => assert_eq!(reference_up, i64::MIN),
+            }
+            count += 2;
         }
     }
     // Packet timestamp sentinels use PASS_MINMAX rather than numeric rescaling.

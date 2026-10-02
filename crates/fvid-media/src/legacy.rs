@@ -345,6 +345,12 @@ fn rescale_owned(value: i64, source: AVRational, target: AVRational) -> Result<i
         crate::owned_time::TimeBase { numerator: source.num as u32, denominator: source.den as u32 },
         crate::owned_time::TimeBase { numerator: target.num as u32, denominator: target.den as u32 })
 }
+fn rescale_capacity_owned(value: i64, output_rate: i32, input_rate: i32) -> Result<i64> {
+    if output_rate <= 0 || input_rate <= 0 { return Err("invalid resampler rate".into()); }
+    crate::owned_time::rescale_ceil(value,
+        crate::owned_time::TimeBase {numerator:1, denominator:input_rate as u32},
+        crate::owned_time::TimeBase {numerator:1, denominator:output_rate as u32})
+}
 fn check(code: i32, operation: &str) -> Result<()> {
     if code >= 0 {
         return Ok(());
