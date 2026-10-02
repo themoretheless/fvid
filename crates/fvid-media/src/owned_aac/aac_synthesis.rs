@@ -1,7 +1,7 @@
 //! Owned AAC long/short sine and KBD synthesis. Packet decoding is separate.
 use super::aac_imdct::Imdct;
-use super::{Result, invalid};
-use std::f64::consts::PI;
+use super::{invalid, Result};
+use std::{f64::consts::PI, sync::Arc};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum WindowSequence {
@@ -51,15 +51,15 @@ fn kbd_window(n: usize, alpha: f64) -> Vec<f64> {
 
 #[derive(Clone)]
 pub struct LongSineSynthesis {
-    kbd_long: Vec<f64>,
-    kbd_short: Vec<f64>,
+    kbd_long: Arc<Vec<f64>>,
+    kbd_short: Arc<Vec<f64>>,
     previous_shape: WindowShape,
     short_transform: Imdct,
-    short_window: Vec<f64>,
+    short_window: Arc<Vec<f64>>,
     short_scratch: Vec<f64>,
     transform_scratch: Vec<[f64; 2]>,
     transform: Imdct,
-    window: Vec<f64>,
+    window: Arc<Vec<f64>>,
     scratch: Vec<f64>,
     overlap: Vec<f64>,
 }
@@ -69,19 +69,23 @@ impl LongSineSynthesis {
             return Err(invalid("AAC long synthesis requires 960 or 1024 samples"));
         }
         Ok(Self {
-            kbd_long: kbd_window(frame_samples, 4.0),
-            kbd_short: kbd_window(frame_samples / 8, 6.0),
+            kbd_long: Arc::new(kbd_window(frame_samples, 4.0)),
+            kbd_short: Arc::new(kbd_window(frame_samples / 8, 6.0)),
             previous_shape: WindowShape::Sine,
             transform: Imdct::new(frame_samples)?,
             short_transform: Imdct::new(frame_samples / 8)?,
-            short_window: (0..frame_samples / 4)
-                .map(|i| (PI / (frame_samples / 4) as f64 * (i as f64 + 0.5)).sin())
-                .collect(),
+            short_window: Arc::new(
+                (0..frame_samples / 4)
+                    .map(|i| (PI / (frame_samples / 4) as f64 * (i as f64 + 0.5)).sin())
+                    .collect(),
+            ),
             short_scratch: vec![0.0; frame_samples / 4],
             transform_scratch: vec![[0.0; 2]; (2 * frame_samples - 1).next_power_of_two()],
-            window: (0..2 * frame_samples)
-                .map(|i| (PI / (2 * frame_samples) as f64 * (i as f64 + 0.5)).sin())
-                .collect(),
+            window: Arc::new(
+                (0..2 * frame_samples)
+                    .map(|i| (PI / (2 * frame_samples) as f64 * (i as f64 + 0.5)).sin())
+                    .collect(),
+            ),
             scratch: vec![0.0; 2 * frame_samples],
             overlap: vec![0.0; frame_samples],
         })
@@ -402,16 +406,14 @@ mod tests {
             )
             .unwrap();
         output.fill(17.0);
-        assert!(
-            synth
-                .synthesize_shaped(
-                    WindowSequence::EightShort,
-                    WindowShape::Sine,
-                    &[f32::NAN; 960],
-                    &mut output
-                )
-                .is_err()
-        );
+        assert!(synth
+            .synthesize_shaped(
+                WindowSequence::EightShort,
+                WindowShape::Sine,
+                &[f32::NAN; 960],
+                &mut output
+            )
+            .is_err());
         assert_eq!(synth.previous_shape, WindowShape::Kbd);
         assert!(output.iter().all(|x| *x == 17.0));
         synth.reset();
@@ -441,5 +443,34 @@ mod tests {
         reference.synthesize(&input, &mut expected).unwrap();
         assert_eq!(output, expected);
         assert!(LongSineSynthesis::new(128).is_err());
+    }
+}
+
+#[cfg(test)]
+mod shared_window_tests {
+    use super::*;
+    #[test]
+    fn rollback_clones_share_windows_and_keep_mutable_state_independent() {
+        for n in [960, 1024] {
+            let original = LongSineSynthesis::new(n).unwrap();
+            let mut cloned = original.clone();
+            assert!(Arc::ptr_eq(&original.kbd_long, &cloned.kbd_long));
+            assert!(Arc::ptr_eq(&original.kbd_short, &cloned.kbd_short));
+            assert!(Arc::ptr_eq(&original.window, &cloned.window));
+            assert!(Arc::ptr_eq(&original.short_window, &cloned.short_window));
+            let shared_samples = original.kbd_long.len()
+                + original.kbd_short.len()
+                + original.window.len()
+                + original.short_window.len();
+            assert_eq!(shared_samples * std::mem::size_of::<f64>(), n * 36);
+            cloned.overlap[0] = 1.0;
+            cloned.scratch[0] = 2.0;
+            cloned.short_scratch[0] = 3.0;
+            cloned.transform_scratch[0] = [4.0, 5.0];
+            assert_eq!(original.overlap[0], 0.0);
+            assert_eq!(original.scratch[0], 0.0);
+            assert_eq!(original.short_scratch[0], 0.0);
+            assert_eq!(original.transform_scratch[0], [0.0, 0.0]);
+        }
     }
 }
