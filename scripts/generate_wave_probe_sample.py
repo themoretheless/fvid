@@ -42,6 +42,17 @@ def generate(output):
     (output / 'aac-concat-route.aac').write_bytes(encoded[:cursor])
     (output / 'aac-concat-route.y4m').write_bytes((fixtures / 'aac-packet-prefix.y4m').read_bytes())
 
+    # A short float32 wide-eight layout must retain its nonstandard mask.
+    samples = b''.join(struct.pack('<f', channel / 16) for _ in range(16) for channel in range(8))
+    fmt = struct.pack('<HHIIHHHHI', 0xfffe, 8, 48000, 48000 * 32, 32, 32, 22, 32, 0xff)
+    fmt += bytes.fromhex('0300000000001000800000aa00389b71')
+    payload = b'WAVEfmt ' + struct.pack('<I', 40) + fmt
+    payload += b'fact' + struct.pack('<II', 4, 16)
+    payload += b'data' + struct.pack('<I', len(samples)) + samples
+    (output / 'wave-float-wide-mask.wav').write_bytes(b'RIFF' + struct.pack('<I', len(payload)) + payload)
+    (output / 'wave-float-wide-mask.y4m').write_bytes(
+        b'YUV4MPEG2 W16 H16 F3000:1 Ip C420jpeg\nFRAME\n' + bytes([96]) * 256 + bytes([128]) * 128)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)

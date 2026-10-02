@@ -113,3 +113,16 @@ cancellation and RSS controls are supported. Aggregate allocation admission
 and metadata mutation are explicitly refused by this API pending the file
 export/DSP integration; no option is silently treated as implemented. Existing
 frontend controls remain unchanged.
+
+The owned file export now decodes ADTS AAC-LC into a private disk WAVE spool
+and uses the shared owned DSP/writer for rate, gain, channel conversion, interval
+and metadata edits. Encoded packet limits apply to AAC rather than internal PCM
+blocks; completion is reported only after publication. Tests compare file output
+with the independent decoded-WAVE pipeline, including PCE wide8 masks, and
+exercise cancellation and truncated-tail prefix acceptance.
+
+The legacy-enabled entrypoint qualifies supported packets with a read-only
+decode pass before selecting this route, adding one decode pass. Unsupported
+profiles/tools and aggregate allocation admission retain their existing legacy
+route; explicit owned export refuses aggregate admission until it is implemented.
+This does not complete removal of production FFmpeg dependencies.

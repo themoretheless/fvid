@@ -41,3 +41,12 @@ Generation reads only those committed fixtures and never invokes a codec.
 Separate ADTS and WAVE acceptance tests check packet/PCM copy plans in the CLI
 and (when enabled) public media API; mixed-container PCM concat continues to
 use its decoded route. Explicit Matroska plans remain available in both cases.
+
+## Float WAVE speaker-mask preservation
+
+`wave-float-wide-mask.wav` contains 16 synthetic float32 sample frames at 48 kHz
+with eight channels and explicit speaker mask 0xff. Its paired one-frame 16x16
+Y4M runs at 3000 fps. The same Python generator creates both. The previous
+shared DSP output dropped this explicit mask for float32 inputs: the regression
+failed specifically with mask 0 instead of 255 while retaining eight channels
+and 16 frames. The acceptance test now requires all three values to survive.

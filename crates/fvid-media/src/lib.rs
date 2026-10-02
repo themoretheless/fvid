@@ -50,6 +50,7 @@ pub mod owned_audio_mix;
 pub use owned_audio_mix::{mix_audio, merge_audio};
 
 pub mod owned_audio_export;
+mod owned_adts_export;
 #[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_audio_export::{decode_audio, decode_audio_interval, decode_audio_transformed};
 

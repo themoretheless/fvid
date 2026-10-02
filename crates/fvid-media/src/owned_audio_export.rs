@@ -1,4 +1,4 @@
-//! Owned WAVE PCM extraction and DSP, independent of libav.
+//! Owned WAVE/AAC-LC extraction and shared PCM DSP, independent of libav.
 use fvid_control::CopyOptions;
 use fvid_media_info::{AudioDecodeStats, AudioDecodeTransform};
 use std::{io::Write, path::Path};
@@ -14,6 +14,9 @@ pub(crate) fn supports(
 ) -> bool {
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") || !simple_options(options) {
         return false;
+    }
+    if crate::owned_adts_export::recognizes(source).unwrap_or(false) {
+        return crate::owned_adts_export::supports(source, transform, options);
     }
     let Ok(mut file) = std::fs::File::open(source) else {
         return false;
@@ -58,7 +61,7 @@ pub fn decode_audio_transformed(
 ) -> Result<AudioDecodeStats> {
     if !simple_options(options) {
         return Err(
-            "owned WAVE export does not yet implement these control/metadata policies".into(),
+            "owned audio export does not yet implement these control/metadata policies".into(),
         );
     }
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
@@ -95,6 +98,9 @@ pub fn decode_audio_transformed(
     let gain = transform.volume.unwrap_or(1.0);
     if !gain.is_finite() || !(0.0..=64.0).contains(&gain) {
         return Err("volume must be a finite linear gain within 0..=64".into());
+    }
+    if crate::owned_adts_export::recognizes(source)? {
+        return crate::owned_adts_export::apply(source, destination, transform, options);
     }
     let check = || {
         if options
@@ -181,7 +187,8 @@ pub fn decode_audio_transformed(
             return Err("owned rematrix requires a standard explicit speaker layout".into());
         }
     }
-    let (output_mask, info_chunks) = if integer.is_some()
+    let (output_mask, info_chunks) = if source_info.channel_mask != 0
+        || integer.is_some()
         || input.sample_format == "dbl"
         || !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty()
