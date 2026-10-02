@@ -112,3 +112,20 @@ export test calls the public overlay and plan APIs. Restoring the old admission
 condition reproduced the specific unsupported-transform refusal. An explicit
 external reference comparison matched all six synthetic frames against FFmpeg;
 ordinary tests use only owned code and committed fixture bytes.
+
+### Test executable isolation
+
+The Linux owned-library and CPU-only test steps set Cargo's target runner to
+`/usr/bin/env PATH=/fvid/no-external-programs`. Compilation keeps its normal
+PATH, while Cargo-launched Rust test executables cannot discover FFmpeg or
+other external programs through PATH. Those two steps also set
+`FVID_FFMPEG_PREFIX=/fvid/no-ffmpeg`, so enabling the legacy SDK accidentally
+cannot use the system FFmpeg installation. Default-feature and player test
+steps remain separate; this is not production legacy-backend removal.
+
+Local macOS verification on 2026-10-03 ran all 130 owned-library tests with
+an empty external-program PATH. Direct Mach-O dependency inspection listed
+only libiconv and libSystem, with no libav libraries. The equivalent Cargo
+runner plus a deliberately nonexistent FFmpeg SDK prefix also passed the three
+scheduled-overlay tests. PATH isolation is a runtime discovery check, not a
+sandbox against absolute executable paths; retain the source/dependency guard.

@@ -21,10 +21,18 @@ jobs:
         run: cargo check --locked --manifest-path crates/fvid-camera-ffi/Cargo.toml
       # The ffmpeg_compare bench needs ffmpeg on PATH, so benches are left out.
       - name: Test owned media codecs without libav
+        # Cargo/build tools keep their normal PATH; test executables cannot find external programs.
+        env:
+          CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: /usr/bin/env PATH=/fvid/no-external-programs
+          FVID_FFMPEG_PREFIX: /fvid/no-ffmpeg
         run: cargo test --locked --manifest-path crates/fvid-media/Cargo.toml --no-default-features
       - name: Test default features
         run: cargo test --lib --bins --tests
       - name: Test CPU-only
+        # Cargo/build tools keep their normal PATH; test executables cannot find external programs.
+        env:
+          CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: /usr/bin/env PATH=/fvid/no-external-programs
+          FVID_FFMPEG_PREFIX: /fvid/no-ffmpeg
         run: cargo test --no-default-features
       - name: Test player
         run: cargo test --no-default-features --features player --lib --bins --tests
