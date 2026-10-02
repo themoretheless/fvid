@@ -682,3 +682,68 @@ fn public_lossless_api_uses_owned_y4m_export_and_enforces_packet_policy() {
         .is_err()
     );
 }
+
+#[test]
+fn lossless_packet_count_limit_rejects_before_reading_extra_frame_payload() {
+    use std::sync::{
+        Arc,
+        atomic::{AtomicU64, Ordering},
+    };
+    let directory =
+        std::env::temp_dir().join(format!("fvid-owned-packet-cap-{}", std::process::id()));
+    std::fs::create_dir(&directory).unwrap();
+    struct Clean(std::path::PathBuf);
+    impl Drop for Clean {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _clean = Clean(directory.clone());
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/y4m-aspect-full-10.y4m");
+    for limit in 0..4 {
+        let destination = directory.join(format!("limit-{limit}.mkv"));
+        let packets = Arc::new(AtomicU64::new(0));
+        let count = packets.clone();
+        let published = destination.clone();
+        let options = fvid_media::CopyOptions {
+            max_packets: Some(limit),
+            progress: Some(fvid_control::ProgressHook::new(move |event| {
+                assert_eq!(published.exists(), event.done);
+                count.store(event.packets, Ordering::Relaxed);
+            })),
+            ..Default::default()
+        };
+        let result =
+            fvid_media::transcode_lossless(&source, &destination, Default::default(), &options);
+        if limit < 2 {
+            assert!(result.unwrap_err().contains("packet count exceeds limit"));
+            assert!(!destination.exists());
+        } else {
+            assert_eq!(result.unwrap().video_frames, 2);
+            assert!(destination.exists());
+        }
+        assert_eq!(packets.load(Ordering::Relaxed), limit.min(2));
+    }
+    let truncated = directory.join("truncated.y4m");
+    let mut input = std::fs::read(&source).unwrap();
+    input.pop();
+    std::fs::write(&truncated, input).unwrap();
+    let destination = directory.join("truncated.mkv");
+    let options = fvid_media::CopyOptions {
+        max_packets: Some(1),
+        ..Default::default()
+    };
+    let error =
+        fvid_media::transcode_lossless(&truncated, &destination, Default::default(), &options)
+            .unwrap_err();
+    assert!(error.contains("packet count exceeds limit"), "{error}");
+    assert!(!destination.exists());
+    assert!(std::fs::read_dir(&directory).unwrap().all(|entry| {
+        !entry
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with(".fvid-matroska-")
+    }));
+}

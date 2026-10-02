@@ -54,7 +54,6 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
 fn policy(o: &CopyOptions) -> bool {
     (o.streams.is_empty() || o.streams == [0])
         && o.max_packet_bytes != 0
-        && o.max_packets.is_none()
         && o.max_controlled_bytes.is_none()
         && o.max_rss_bytes.is_none()
         && o.metadata_set.is_empty()
@@ -103,6 +102,7 @@ pub fn transcode_lossless(
         options.cancel.as_ref(),
         options.progress.as_ref(),
         options.max_packet_bytes,
+        options.max_packets,
     )
     .map_err(|e| e.to_string())?;
     Ok(LosslessStats {

@@ -282,3 +282,11 @@ metadata editing and allocation/RSS budgets are not qualified by this adapter.
 The public API regression uses the committed synthetic aspect/range fixture,
 checks complete output against owned writer bytes, and verifies that a one-byte
 encoded-packet limit refuses publication and cleans the temporary output.
+
+Owned public lossless export now enforces `max_packets` on source Y4M frames.
+The same committed two-frame synthetic fixture checks limits zero, one, two
+and three, progress counts, publication only when the full input fits, and
+cleanup after rejection. A truncated second frame with a one-packet limit
+must report the count limit rather than a truncation error, proving rejection
+before reading/encoding that frame's payload. Ordinary decode without a limit
+retains its existing bounded streaming behavior.

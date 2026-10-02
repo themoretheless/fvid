@@ -14,12 +14,21 @@ include!("owned_ffv1_encoder_impl.rs");
 pub fn encode_y4m(
     source: impl std::io::BufRead,
     transform: &fvid_media_info::DecodeTransform,
+    sink: impl FnMut(&crate::owned_y4m::Header, &[u8], u64, u64) -> Result<()>,
+) -> Result<fvid_media_info::DecodeStats> {
+    encode_y4m_limited(source, transform, None, sink)
+}
+pub(crate) fn encode_y4m_limited(
+    source: impl std::io::BufRead,
+    transform: &fvid_media_info::DecodeTransform,
+    max_packets: Option<u64>,
     mut sink: impl FnMut(&crate::owned_y4m::Header, &[u8], u64, u64) -> Result<()>,
 ) -> Result<fvid_media_info::DecodeStats> {
-    crate::owned_y4m_decode::visit_reader_transformed(
+    crate::owned_y4m_decode::visit_reader_transformed_limited(
         source,
         transform,
-        |header, data, pts, duration| {
+        max_packets,
+        &mut |header, data, pts, duration| {
             let (sx, sy) = header.format.subsampling();
             let frame = GeometryFrame {
                 data: data.to_vec(),

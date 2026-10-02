@@ -131,7 +131,15 @@ pub fn write_y4m_ffv1_controlled<W: Write + Seek>(
     cancel: Option<&fvid_control::CancelFlag>,
     progress: Option<&fvid_control::ProgressHook>,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
-    write_y4m_ffv1_policy(source, output, transform, cancel, progress, usize::MAX)
+    write_y4m_ffv1_policy(
+        source,
+        output,
+        transform,
+        cancel,
+        progress,
+        usize::MAX,
+        None,
+    )
 }
 fn write_y4m_ffv1_policy<W: Write + Seek>(
     source: impl std::io::BufRead,
@@ -140,13 +148,15 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
     cancel: Option<&fvid_control::CancelFlag>,
     progress: Option<&fvid_control::ProgressHook>,
     max_packet_bytes: usize,
+    max_packets: Option<u64>,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
     check(cancel)?;
     let mut output = Some(output);
     let mut writer = None;
-    let stats = crate::owned_ffv1_encoder::encode_y4m(
+    let stats = crate::owned_ffv1_encoder::encode_y4m_limited(
         source,
         transform,
+        max_packets,
         |header, packet, pts, duration| {
             check(cancel).map_err(|e| e.to_string())?;
             if packet.len() > max_packet_bytes {
@@ -221,7 +231,15 @@ pub fn export_y4m_ffv1(
     cancel: Option<&fvid_control::CancelFlag>,
     progress: Option<&fvid_control::ProgressHook>,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
-    export_y4m_ffv1_policy(source, destination, transform, cancel, progress, usize::MAX)
+    export_y4m_ffv1_policy(
+        source,
+        destination,
+        transform,
+        cancel,
+        progress,
+        usize::MAX,
+        None,
+    )
 }
 pub(crate) fn export_y4m_ffv1_policy(
     source: &std::path::Path,
@@ -230,6 +248,7 @@ pub(crate) fn export_y4m_ffv1_policy(
     cancel: Option<&fvid_control::CancelFlag>,
     progress: Option<&fvid_control::ProgressHook>,
     max_packet_bytes: usize,
+    max_packets: Option<u64>,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
     check(cancel)?;
     if destination
@@ -280,6 +299,7 @@ pub(crate) fn export_y4m_ffv1_policy(
         cancel,
         progress,
         max_packet_bytes,
+        max_packets,
     )?;
     file.flush()?;
     file.sync_all()?;

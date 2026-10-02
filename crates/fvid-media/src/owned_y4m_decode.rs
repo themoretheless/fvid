@@ -450,7 +450,7 @@ pub fn decode_reader_transformed(
     source: impl BufRead,
     transform: &DecodeTransform,
 ) -> Result<DecodeStats> {
-    decode_reader_frames(source, transform, None)
+    decode_reader_frames(source, transform, None, None)
 }
 
 /// Deliver transformed planar frames without retaining the video. Timestamps
@@ -461,7 +461,16 @@ pub fn visit_reader_transformed(
     transform: &DecodeTransform,
     mut visit: impl FnMut(&Header, &[u8], u64, u64) -> Result<()>,
 ) -> Result<DecodeStats> {
-    decode_reader_frames(source, transform, Some(&mut visit))
+    visit_reader_transformed_limited(source, transform, None, &mut visit)
+}
+
+pub(crate) fn visit_reader_transformed_limited(
+    source: impl BufRead,
+    transform: &DecodeTransform,
+    max_frames: Option<u64>,
+    visit: &mut FrameVisitor<'_>,
+) -> Result<DecodeStats> {
+    decode_reader_frames(source, transform, Some(visit), max_frames)
 }
 
 type FrameVisitor<'a> = dyn FnMut(&Header, &[u8], u64, u64) -> Result<()> + 'a;
@@ -469,6 +478,7 @@ fn decode_reader_frames(
     mut source: impl BufRead,
     transform: &DecodeTransform,
     mut visit: Option<&mut FrameVisitor<'_>>,
+    max_frames: Option<u64>,
 ) -> Result<DecodeStats> {
     if !supported_request(transform) {
         return Err("owned Y4M decoder does not yet implement requested transform options".into());
@@ -587,6 +597,9 @@ fn decode_reader_frames(
         let selected = transform
             .interval
             .is_none_or(|(from, _)| clock >= from as u128 * rate_n as u128);
+        if selected && max_frames.is_some_and(|limit| frames >= limit) {
+            return Err("Y4M input packet count exceeds limit".into());
+        }
         let mut remaining = frame_bytes;
         while remaining != 0 {
             let count = remaining.min(scratch.len());
