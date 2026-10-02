@@ -3922,6 +3922,9 @@ pub fn plan_decode_audio(
             return Err("volume must be a finite linear gain within 0..=64".into());
         }
     }
+    if crate::owned_audio_plan::supports(source,transform,options) {
+        return crate::owned_audio_plan::plan_decode_audio(source,transform,options);
+    }
     let input = Input::open_fast(source)?;
     // SAFETY: Input owns a live format context.
     if unsafe { (*input.0).nb_chapters } != 0 {

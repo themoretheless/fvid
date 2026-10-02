@@ -126,3 +126,18 @@ decode pass before selecting this route, adding one decode pass. Unsupported
 profiles/tools and aggregate allocation admission retain their existing legacy
 route; explicit owned export refuses aggregate admission until it is implemented.
 This does not complete removal of production FFmpeg dependencies.
+
+`fvid_media::plan_decode_audio` now plans the owned WAVE/ADTS writer without
+libav. Execution and planning share request/metadata validation. The plan
+describes actual DSP order (rematrix, gain, resample, output interval), encoded
+AAC versus WAVE-block packet limits, private disk spooling and no-overwrite
+publication. This is metadata preflight: supported configuration does not prove
+packet tool coverage or valid audio payloads; allocation admission and source
+contents remain execution checks. No packets are decoded, destination created
+or progress emitted while planning.
+
+Public API tests compare owned/default/legacy-enabled plans, including the
+three-complete-packets plus truncated-header fixture under max_packets=3.
+Invalid intervals, rates, gains, stream selection and NUL metadata are refused.
+ADTS aggregate admission remains explicitly unsupported rather than accepted
+as a fake implemented policy. Other containers keep their existing plan route.

@@ -34,7 +34,7 @@ pub(crate) fn supports(
         conversion && layout
     })
 }
-fn simple_options(options: &CopyOptions) -> bool {
+pub(crate) fn simple_options(options: &CopyOptions) -> bool {
     (options.streams.is_empty() || options.streams == [0])
         && options
             .metadata_set
@@ -47,25 +47,14 @@ fn simple_options(options: &CopyOptions) -> bool {
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
 }
-/// Export WAVE samples through the owned resampler/rematrix and WAV writer.
-/// Integer PCM retains its decoded precision: packed 24-bit input exports as
-/// left-aligned signed 32-bit PCM. Integer DSP uses double precision and
-/// saturating ties-to-even quantization.
-/// For WAVE, packet limits apply to frame-aligned input I/O blocks (up to
-/// 4096 sample frames); `max_packets` exports the prefix read before that limit.
-pub fn decode_audio_transformed(
-    source: &Path,
-    destination: &Path,
+pub(crate) fn validate_request(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
-) -> Result<AudioDecodeStats> {
+) -> Result<f64> {
     if !simple_options(options) {
         return Err(
             "owned audio export does not yet implement these control/metadata policies".into(),
         );
-    }
-    if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
-        return Err("owned WAVE export requires .wav output".into());
     }
     if transform
         .interval
@@ -99,6 +88,29 @@ pub fn decode_audio_transformed(
     if !gain.is_finite() || !(0.0..=64.0).contains(&gain) {
         return Err("volume must be a finite linear gain within 0..=64".into());
     }
+    Ok(gain)
+}
+/// Export WAVE samples through the owned resampler/rematrix and WAV writer.
+/// Integer PCM retains its decoded precision: packed 24-bit input exports as
+/// left-aligned signed 32-bit PCM. Integer DSP uses double precision and
+/// saturating ties-to-even quantization.
+/// For WAVE, packet limits apply to frame-aligned input I/O blocks (up to
+/// 4096 sample frames); `max_packets` exports the prefix read before that limit.
+pub fn decode_audio_transformed(
+    source: &Path,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
+    if !simple_options(options) {
+        return Err(
+            "owned audio export does not yet implement these control/metadata policies".into(),
+        );
+    }
+    if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
+        return Err("owned WAVE export requires .wav output".into());
+    }
+    let gain = validate_request(transform, options)?;
     if crate::owned_adts_export::recognizes(source)? {
         return crate::owned_adts_export::apply(source, destination, transform, options);
     }
