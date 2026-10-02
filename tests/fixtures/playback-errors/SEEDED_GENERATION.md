@@ -152,3 +152,10 @@ compare 54 depth/layout/compositions, including the five-filter chain, against
 the frontend pipeline and exercise each public decoder option. Existing gradient
 tests retain independent known-pixel, rounding and atomic-storage checks. Numeric
 literal options are admitted; unsupported expressions retain explicit refusal.
+
+Dilation and erosion now share library-owned kernels with the frontend. The
+owned Y4M route applies them after pixelize and before chroma shift/shuffle, in
+canonical dilation -> erosion order. Twenty-seven depth/layout/compositions and
+both public decoder options exercise integration. Existing morphology tests
+retain known threshold/edge pixels and invalid-storage atomicity checks; ordinary
+execution requires neither FFmpeg nor regenerated fixtures.

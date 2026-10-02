@@ -30,7 +30,10 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 fn supported_request(transform: &DecodeTransform) -> bool {
-    gradients(transform).into_iter().all(|(kind, args)| {
+    morphology(transform).into_iter().all(|(kind, args)| {
+        args.as_deref()
+            .is_none_or(|a| crate::owned_morphology::Morphology::parse(kind, a).is_ok())
+    }) && gradients(transform).into_iter().all(|(kind, args)| {
         args.as_deref()
             .is_none_or(|a| crate::owned_gradient::Gradient::parse(kind, a).is_ok())
     }) && transform
@@ -78,6 +81,8 @@ fn supported_request(transform: &DecodeTransform) -> bool {
                 roberts: transform.roberts.clone(),
                 kirsch: transform.kirsch.clone(),
                 scharr: transform.scharr.clone(),
+                dilation: transform.dilation.clone(),
+                erosion: transform.erosion.clone(),
                 horizontal_flip: transform.horizontal_flip,
                 vertical_flip: transform.vertical_flip,
                 interval: transform.interval,
@@ -206,6 +211,12 @@ fn gradients(t: &DecodeTransform) -> [(crate::owned_gradient::GradientKind, &Opt
         (Scharr, &t.scharr),
     ]
 }
+fn morphology(
+    t: &DecodeTransform,
+) -> [(crate::owned_morphology::MorphologyKind, &Option<String>); 2] {
+    use crate::owned_morphology::MorphologyKind::*;
+    [(Dilation, &t.dilation), (Erosion, &t.erosion)]
+}
 fn apply_pixel_filters(
     header: &Header,
     transform: &DecodeTransform,
@@ -217,6 +228,7 @@ fn apply_pixel_filters(
         || transform.chromashift.is_some()
         || transform.shuffleplanes.is_some()
         || gradients(transform).iter().any(|(_, a)| a.is_some())
+        || morphology(transform).iter().any(|(_, a)| a.is_some())
     {
         let (crop, _) = crop_geometry(header, transform.crop)?;
         let (width, height, _) = output_geometry(
@@ -257,6 +269,12 @@ fn apply_pixel_filters(
             }
             if let Some(args) = transform.pixelize.as_deref() {
                 crate::owned_pixelize::Pixelize::parse(args)?.apply(&mut frame, header.depth())?;
+            }
+            for (kind, args) in morphology(transform) {
+                if let Some(args) = args.as_deref() {
+                    crate::owned_morphology::Morphology::parse(kind, args)?
+                        .apply(&mut frame, header.depth())?;
+                }
             }
             if let Some(args) = transform.chromashift.as_deref() {
                 crate::owned_chromashift::ChromaShift::parse(args)?
@@ -451,7 +469,8 @@ pub fn decode_reader_transformed(
         || transform.pixelize.is_some()
         || transform.chromashift.is_some()
         || transform.shuffleplanes.is_some()
-        || gradients(transform).iter().any(|(_, a)| a.is_some());
+        || gradients(transform).iter().any(|(_, a)| a.is_some())
+        || morphology(transform).iter().any(|(_, a)| a.is_some());
     let mut input = Vec::new();
     if geometry {
         input

@@ -94,3 +94,5 @@ pub mod owned_pixelize;
 pub mod owned_chromashift;
 
 pub mod owned_gradient;
+
+pub mod owned_morphology;
