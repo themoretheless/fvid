@@ -408,3 +408,15 @@ impl MasteringDisplay {
     }
 
 }
+
+impl From<crate::owned_aac::Error> for Error {
+    fn from(error: crate::owned_aac::Error) -> Self { Self(error.to_string()) }
+}
+use crate::owned_codec_config::{AacConfig, AvcConfig, HevcConfig};
+use crate::owned_opus_packet as opus_packet;
+include!("owned_matroska_track_types_impl.rs");
+include!("owned_matroska_tracks_impl.rs");
+include!("owned_matroska_constructors_impl.rs");
+fn video(width: u32, height: u32, metadata: Option<&VideoMetadata>, rotation: u16) -> Result<Vec<u8>> {
+    video_element(width, height, metadata, rotation)
+}

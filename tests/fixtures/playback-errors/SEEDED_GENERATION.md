@@ -392,3 +392,13 @@ HEVC header and bounded RBSP framing also share their unchanged implementation.
 A synthetic library API control covers empty-record refusals, AAC LC parameters
 and valid/truncated NAL lengths; existing frontend parser tests remain active.
 This transfers ownership, not support for additional codec profiles or tools.
+
+### Library multitrack Matroska muxing
+
+The library now owns the existing validated track descriptions, entry preparation
+and multitrack constructors for AVC/HEVC/AAC/FFV1/PCM/ASS/Opus. These bodies and
+Opus transport framing are shared with the frontend. Synthetic FFV1/PCM opaque
+packets verify byte-identical frontend/library output, parsed track metadata and
+payload preservation; invalid AVC setup must refuse before writing output.
+This container-only control is not a codec acceptance test. Existing native
+metadata/video regressions remain active. File remux dispatch is not yet switched.
