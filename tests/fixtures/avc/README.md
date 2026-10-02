@@ -1,7 +1,8 @@
 # Native AVC development fixtures
 
-All inputs are synthetic. No private user video is included. FFmpeg appears only
-when a fixture is built; FVid's runtime has no FFmpeg or x264 dependency.
+All inputs are synthetic. No private user video is included. Native tests use
+checked-in fixtures without FFmpeg or x264 at execution time. Fixture generators
+are being migrated away from FFmpeg; each section records its regeneration tools.
 Normative reference: ITU-T H.264 section 7.4.3 (sequence parameter set) and
 7.4.3.1 (video usability information).
 
@@ -97,3 +98,19 @@ alignment bit` refusal in inter pictures: leftover arithmetic flush bits were
 incorrectly treated as raw zero padding. The enabled playback/camera tests now
 accept these streams and require exact pixels through rewind. A focused CABAC
 unit test covers nonzero flush bits, PCM sample boundaries and arithmetic restart.
+
+### Two-slice I/P/B
+
+`../playback-errors/avc-multislice-ipb.mp4`, `avc-multislice-cavlc.mp4`,
+`avc-multislice-cabac10.mp4` and `avc-multislice-cavlc10.mp4` each contain
+eight 128x96 pictures, two slices per picture, at 30 fps. The four variants
+cover CABAC/CAVLC and 8/10-bit 4:2:0; their YUV references come from JM.
+Regenerate with `python3 scripts/generate_avc_multislice_sample.py
+--jm-decoder /path/to/ldecod.exe --jm-config /path/to/JM/bin/decoder.cfg`.
+The generator creates integer patterns, uses x264 CLI with fixed B-frame
+cadence and the owned fixture MP4 muxer, and requires B-frame PTS reordering.
+It never invokes FFmpeg. Reference tools are needed only for regeneration.
+
+`tests/avc_multislice.rs` checks slice counts and macroblock boundaries,
+I/P/B presence, exact YUV through rewind, camera integration and recovery
+after a damaged final slice. Generation remains separate from ordinary tests.
