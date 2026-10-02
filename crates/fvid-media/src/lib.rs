@@ -40,6 +40,8 @@ pub mod owned_time;
 
 pub mod owned_wave_inspect;
 pub mod owned_probe;
+#[cfg(not(feature = "legacy-ffmpeg"))]
+pub use owned_probe::{probe, probe_as};
 
 pub mod owned_pcm_channels;
 

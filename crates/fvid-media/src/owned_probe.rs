@@ -7,6 +7,24 @@ use std::{
     path::Path,
 };
 
+/// Inspect media through the owned parsers available in this library.
+/// Additional container parsers are being moved here from the native frontend.
+pub fn probe(path: &Path) -> Result<MediaInfo, String> {
+    probe_as(path, None)
+}
+
+/// Inspect owned RIFF/WAVE PCM, optionally requiring the WAVE format explicitly.
+/// Format hints never override the signature or bypass container validation.
+pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> {
+    if format.is_some_and(|name| name != "wav") {
+        return Err("format has no owned media-library probe yet".into());
+    }
+    if format.is_none() && !crate::owned_wave_inspect::is_wave(path).map_err(|e| e.to_string())? {
+        return Err("container has no owned media-library probe yet".into());
+    }
+    probe_wave(path).map_err(|e| e.to_string())
+}
+
 /// Inspect supported uncompressed RIFF/WAVE without loading its sample payload.
 pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
     let mut file = File::open(path)?;
@@ -107,6 +125,63 @@ pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
 #[cfg(test)]
 mod tests {
     #[test]
+    fn public_probe_preserves_integer_storage_and_valid_bits() {
+        let dir = std::env::temp_dir().join(format!("fvid-probe-precision-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        for bits in [8, 16, 24, 32] {
+            let path = dir.join(format!("pcm-{bits}.wav"));
+            let _ = std::fs::remove_file(&path);
+            crate::owned_wav_file::write_wav_integer_le(
+                &path,
+                44100,
+                2,
+                bits,
+                &vec![0; 441 * 2 * usize::from(bits / 8)],
+                3,
+            )
+            .unwrap();
+            if bits == 32 {
+                // Extensible PCM stores 24 valid bits in a 32-bit word.
+                let mut bytes = std::fs::read(&path).unwrap();
+                assert_eq!(&bytes[12..16], b"fmt ");
+                assert_eq!(
+                    u16::from_le_bytes(bytes[20..22].try_into().unwrap()),
+                    0xfffe
+                );
+                bytes[38..40].copy_from_slice(&24u16.to_le_bytes());
+                std::fs::write(&path, bytes).unwrap();
+            }
+            let expected = super::probe_wave(&path).unwrap();
+            assert_eq!(expected.duration_us, Some(10000));
+            assert_eq!(expected.streams[0].duration, Some(441));
+            assert_eq!(expected.streams[0].channels, 2);
+            assert_eq!(
+                expected.streams[0].bit_rate,
+                Some(44100 * 2 * i64::from(bits))
+            );
+            assert_eq!(
+                expected.streams[0].codec,
+                if bits == 8 {
+                    "pcm_u8".into()
+                } else {
+                    format!("pcm_s{bits}le")
+                }
+            );
+            for actual in [
+                crate::probe(&path).unwrap(),
+                crate::probe_as(&path, Some("wav")).unwrap(),
+            ] {
+                assert_eq!(
+                    serde_json::to_value(actual).unwrap(),
+                    serde_json::to_value(&expected).unwrap()
+                );
+            }
+            std::fs::remove_file(path).unwrap();
+        }
+        std::fs::remove_dir(dir).unwrap();
+    }
+
+    #[test]
     fn own_float_wave_probe() {
         let path =
             std::env::temp_dir().join(format!("fvid-own-wave-probe-{}.wav", std::process::id()));
@@ -133,8 +208,17 @@ mod tests {
             info.metadata.get("title").map(String::as_str),
             Some("test!")
         );
-        #[cfg(feature = "legacy-ffmpeg")]
-        assert_eq!(crate::probe(&path).unwrap().metadata, info.metadata);
+        for actual in [
+            crate::probe(&path).unwrap(),
+            crate::probe_as(&path, Some("wav")).unwrap(),
+            super::probe_as(&path, None).unwrap(),
+        ] {
+            assert_eq!(
+                serde_json::to_value(actual).unwrap(),
+                serde_json::to_value(&info).unwrap()
+            );
+        }
+        assert!(super::probe_as(&path, Some("aac")).is_err());
         std::fs::remove_file(path).unwrap();
     }
 }
