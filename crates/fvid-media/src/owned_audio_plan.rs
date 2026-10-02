@@ -1,4 +1,4 @@
-//! Read-only operation plans for the owned WAVE and ADTS audio writer.
+//! Read-only operation plans for the owned WAVE, ADTS and MP4 audio writer.
 use fvid_control::CopyOptions;
 use fvid_media_info::{AudioDecodeTransform, MediaPlan, PlanStep, PlanStream};
 use std::{fs::File, io::BufReader, path::Path};
@@ -24,7 +24,17 @@ pub fn plan_decode_audio(
     }
     crate::owned_budget::check_rss_budget(options)?;
     let adts = crate::owned_adts_export::recognizes(source)?;
-    let (rate, channels, mask, codec, precision) = if adts {
+    let mp4 = crate::owned_mp4_audio_export::recognizes(source, options)?;
+    let mut stream_index = 0;
+    let (rate, channels, mask, codec, precision) = if mp4 {
+        if options.max_controlled_bytes.is_some() {
+            return Err("MP4 audio aggregate allocation admission is not yet implemented".into());
+        }
+        let (index, rate, channels, mask, codec) =
+            crate::owned_mp4_audio_export::descriptor(source, options)?;
+        stream_index = index;
+        (rate, channels, mask, codec, "float32".to_owned())
+    } else if adts {
         if options.max_controlled_bytes.is_some() {
             return Err("ADTS file allocation admission is not yet implemented".into());
         }
@@ -82,7 +92,9 @@ pub fn plan_decode_audio(
     }
     let mut steps = vec![PlanStep {
         action: "decode".into(),
-        detail: if adts {
+        detail: if mp4 {
+            format!("owned MP4 {codec} decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float32 WAVE disk spool")
+        } else if adts {
             "owned AAC-LC decoder; retain ADTS priming and preroll; private float32 WAVE disk spool"
                 .into()
         } else {
@@ -108,7 +120,7 @@ pub fn plan_decode_audio(
         });
     }
     if let Some((from, to)) = transform.interval {
-        steps.push(PlanStep{action:"trim".into(),detail:format!("output sample window [{from},{to}) µs; ceil boundaries after resampling; ADTS prefix includes required preroll")});
+        steps.push(PlanStep{action:"trim".into(),detail:format!("output sample window [{from},{to}) µs; ceil boundaries after resampling; compressed prefix includes required preroll and resampler lookahead")});
     }
     if !options.metadata_set.is_empty() || !options.metadata_delete.is_empty() {
         steps.push(PlanStep {
@@ -117,5 +129,5 @@ pub fn plan_decode_audio(
         });
     }
     steps.push(PlanStep{action:"write".into(),detail:format!("owned .wav writer; preserve {precision} precision; publish without overwriting; cleanup on failure")});
-    Ok(MediaPlan{command:"decode-audio".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:0,media_type:"audio".into(),codec,disposition:"decode".into()}],steps,graph:None,notes:vec!["backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),"read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into(),if adts {"packet byte/count limits apply to encoded AAC, including preroll; internal PCM blocks are excluded".into()} else {"packet limits apply to frame-aligned WAVE I/O blocks of at most 4096 sample frames".into()}]})
+    Ok(MediaPlan{command:"decode-audio".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:stream_index,media_type:"audio".into(),codec,disposition:"decode".into()}],steps,graph:None,notes:vec!["backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),"read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into(),if adts || mp4 {"packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded".into()} else {"packet limits apply to frame-aligned WAVE I/O blocks of at most 4096 sample frames".into()}]})
 }

@@ -338,3 +338,116 @@ fn synthetic_mp4_audio_controls_preserve_publication() {
         "temporary outputs must be cleaned"
     );
 }
+
+#[test]
+fn mp4_audio_plan_uses_owned_metadata_without_decoding_or_callbacks() {
+    use fvid_control::{CancelFlag, CopyOptions, ProgressHook};
+    for name in [
+        "audio.mp4",
+        "alac/stereo-24.m4a",
+        "playback-errors/aac-gap-repeat.m4a",
+    ] {
+        let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures")
+            .join(name);
+        let options = CopyOptions {
+            // A metadata plan must not read any encoded packet: every fixture's
+            // packets exceed this cap, but admission is deferred to execution.
+            max_packet_bytes: 1,
+            progress: Some(ProgressHook::new(|_| panic!("planning emitted progress"))),
+            ..Default::default()
+        };
+        let transform = fvid_media_info::AudioDecodeTransform {
+            interval: Some((2000, 6000)),
+            volume: Some(0.5),
+            sample_rate: Some(16000),
+            channels: Some(1),
+        };
+        let plan = fvid_media::plan_decode_audio(&source, &transform, &options).unwrap();
+        let owned =
+            fvid_media::owned_audio_plan::plan_decode_audio(&source, &transform, &options).unwrap();
+        assert_eq!(
+            serde_json::to_value(&plan).unwrap(),
+            serde_json::to_value(&owned).unwrap()
+        );
+        assert!(plan
+            .notes
+            .iter()
+            .any(|n| n.contains("backend: owned fvid-media")));
+        let reader = fvid_media::owned_mp4::Mp4Reader::open(
+            Cursor::new(std::fs::read(&source).unwrap()),
+            Default::default(),
+        )
+        .unwrap();
+        let index = reader
+            .tracks()
+            .iter()
+            .position(|t| t.handler == *b"soun")
+            .unwrap();
+        assert_eq!(plan.streams[0].index, index);
+        assert_eq!(
+            plan.streams[0].codec,
+            if reader.tracks()[index].codec == *b"alac" {
+                "alac"
+            } else {
+                "aac"
+            }
+        );
+        assert_eq!(
+            plan.steps
+                .iter()
+                .map(|s| s.action.as_str())
+                .collect::<Vec<_>>(),
+            ["decode", "rematrix", "volume", "resample", "trim", "write"]
+                .into_iter()
+                .filter(|s| *s != "rematrix" || reader.tracks()[index].channels != 1)
+                .collect::<Vec<_>>()
+        );
+        assert!(plan.steps[0].detail.contains("presentation scheduler"));
+        assert!(plan
+            .steps
+            .iter()
+            .any(|s| s.detail.contains("resampler lookahead")));
+        let mut output = Vec::new();
+        let decode_options = CopyOptions {
+            progress: None,
+            ..options.clone()
+        };
+        let error = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+            Cursor::new(std::fs::read(&source).unwrap()),
+            &mut output,
+            None,
+            &decode_options,
+        )
+        .unwrap_err();
+        assert!(
+            error.to_string().contains("packet exceeds budget"),
+            "{name}: {error}"
+        );
+        // Presentation silence may precede the first packet; raw writers
+        // permit partial output on failure, unlike atomic file publication.
+    }
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/alac-resample-window.m4a");
+    let cancel = CancelFlag::default();
+    cancel.cancel();
+    assert!(fvid_media::owned_audio_plan::plan_decode_audio(
+        &source,
+        &Default::default(),
+        &CopyOptions {
+            cancel: Some(cancel),
+            ..Default::default()
+        }
+    )
+    .is_err());
+    let error = fvid_media::owned_audio_plan::plan_decode_audio(
+        &source,
+        &Default::default(),
+        &CopyOptions {
+            max_controlled_bytes: Some(1),
+            ..Default::default()
+        },
+    )
+    .unwrap_err();
+    assert!(error.contains("aggregate allocation admission"));
+}

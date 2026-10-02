@@ -33,7 +33,10 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
             && matches!(&t.codec, b"mp4a" | b"alac")
     }))
 }
-fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
+pub(crate) fn descriptor(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<(usize, u32, u16, u32, String)> {
     let reader = open(source, options)?;
     if !reader.refused().is_empty() {
         return Err("MP4 stream selection requires every track to be represented".into());
@@ -55,10 +58,21 @@ fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
         return Err("MP4 audio export requires valid clock and matching audio geometry".into());
     }
     Ok((
+        index,
         decoder.sample_rate(),
         decoder.channels(),
         decoder.channel_mask(),
+        if track.codec == *b"mp4a" {
+            "aac"
+        } else {
+            "alac"
+        }
+        .into(),
     ))
+}
+fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
+    let (_, rate, channels, mask, _) = descriptor(source, options)?;
+    Ok((rate, channels, mask))
 }
 use crate::owned_adts_export::decoded_prefix as prefix;
 pub(crate) fn supports(
