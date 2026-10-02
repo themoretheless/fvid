@@ -6,6 +6,29 @@ use std::{
     path::Path,
 };
 type Result<T> = std::result::Result<T, String>;
+fn policies(options: &CopyOptions) -> bool {
+    options.max_packet_bytes > 0
+        && options.max_controlled_bytes.is_none()
+        && options.max_rss_bytes.is_none()
+        && options.stream_metadata_set.is_empty()
+        && options.stream_metadata_delete.is_empty()
+        && options.metadata_set.len().saturating_add(options.metadata_delete.len()) <= 64
+        && options.metadata_set.iter().all(|(key, value)| {
+            !key.contains('\0') && !value.contains('\0')
+                && crate::owned_file_tags::FileTags::supports_key(key)
+        })
+        && options.metadata_delete.iter().all(|key| {
+            !key.contains('\0') && crate::owned_file_tags::FileTags::supports_key(key)
+        })
+}
+fn metadata<R: std::io::Read + std::io::Seek>(
+    reader: &crate::owned_mp4::Mp4Reader<R>, options: &CopyOptions,
+) -> crate::owned_matroska::FileMetadata {
+    let mut metadata = crate::owned_matroska::FileMetadata::from_mp4(reader);
+    for key in &options.metadata_delete { metadata.tags.set(key, ""); }
+    for (key, value) in &options.metadata_set { metadata.tags.set(key, value); }
+    metadata
+}
 fn open(
     source: &Path,
     options: &CopyOptions,
@@ -24,7 +47,7 @@ fn open(
     .map_err(|e| e.to_string())
 }
 pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
-    if !crate::owned_matroska_remux::unedited_policies(options)
+    if !policies(options)
         || !matches!(
             destination.extension().and_then(|s| s.to_str()),
             Some("mkv" | "mka")
@@ -58,7 +81,8 @@ pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions)
     })
 }
 /// Copy supported AVC/HEVC/AAC packets unchanged with their presentation edits.
-/// Unsupported metadata edits and aggregate/RSS policies remain explicit refusals.
+/// Known container tags may be deleted/set; track tags and aggregate/RSS policies
+/// remain outside this owned route.
 pub fn remux(
     source: &Path,
     destination: &Path,
@@ -71,14 +95,16 @@ pub fn remux(
         return Err("request is not an owned MP4 Matroska remux".into());
     }
     let mut reader = open(source, options)?;
+    let metadata = metadata(&reader, options);
     crate::owned_matroska_remux::publish(destination, options, |output| {
-        crate::owned_mp4_matroska::write_selected(
+        crate::owned_mp4_matroska::write_selected_with_metadata(
             &mut reader,
             output,
             options.cancel.as_ref(),
             options.progress.as_ref(),
             options.max_packets,
             &options.streams,
+            &metadata,
         )
         .map_err(|e| e.to_string())
     })
@@ -130,9 +156,9 @@ pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<fvid_media_inf
             PlanStep { action: "demux".into(), detail: "owned indexed MP4 reader with bounded metadata and packet payloads".into() },
             PlanStep { action: "timestamps".into(), detail: "preserve decode order; interleave edited DTS; retain B-frame presentation timing, AAC delay and signed tail padding".into() },
             PlanStep { action: "copy".into(), detail: format!("copy {packets} compressed packets, {payload} payload bytes unchanged into owned Matroska") },
-            PlanStep { action: "metadata".into(), detail: "retain track names/languages, file tags/chapters and video colour/HDR/display metadata".into() },
+            PlanStep { action: "metadata".into(), detail: format!("retain track names/languages, file tags/chapters and video colour/HDR/display metadata; delete {} and set {} container tags", options.metadata_delete.len(), options.metadata_set.len()) },
             PlanStep { action: "publish".into(), detail: "publish complete output without overwriting; remove temporary file on error or cancellation".into() },
         ], graph: None,
-        notes: vec!["backend: owned MP4/Matroska; no external demuxer or muxer".into(), "destination must be .mkv or audio-only .mka; publication and packet payload reads are verified during execution".into(), "selected original stream indexes retain requested output order; optional global packet cap retains a DTS-interleaved prefix; tag edits and aggregate/RSS policies remain unsupported".into()],
+        notes: vec!["backend: owned MP4/Matroska; no external demuxer or muxer".into(), "destination must be .mkv or audio-only .mka; publication and packet payload reads are verified during execution".into(), "selected original stream indexes retain requested output order; optional global packet cap retains a DTS-interleaved prefix; known container tags are deleted before assignments; track tag edits and aggregate/RSS policies remain unsupported".into()],
     })
 }

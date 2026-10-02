@@ -264,6 +264,21 @@ pub fn write_selected<R: Read + Seek, W: Write + Seek>(
     requested: &[usize],
 ) -> Result<ProgressEvent> {
     check(cancel)?;
+    let metadata = FileMetadata::from_mp4(input);
+    write_selected_with_metadata(input, output, cancel, progress, max_packets, requested, &metadata)
+}
+
+/// Packet copy with caller-prepared file tags and chapters.
+pub fn write_selected_with_metadata<R: Read + Seek, W: Write + Seek>(
+    input: &mut Mp4Reader<R>,
+    output: &mut W,
+    cancel: Option<&CancelFlag>,
+    progress: Option<&ProgressHook>,
+    max_packets: Option<u64>,
+    requested: &[usize],
+    metadata: &FileMetadata,
+) -> Result<ProgressEvent> {
+    check(cancel)?;
     if !eligible(input) {
         return Err(invalid(
             "MP4 Matroska remux requires AVC/HEVC/AAC tracks with contiguous media edits",
@@ -278,7 +293,7 @@ pub fn write_selected<R: Read + Seek, W: Write + Seek>(
     let specs: Vec<_> = tracks.iter().map(spec).collect::<Result<_>>()?;
     let options: Vec<_> = plans.iter().map(|p| p.options.clone()).collect();
     let mut writer =
-        PacketWriter::new_with_metadata(output, &specs, &options, &FileMetadata::from_mp4(input))?;
+        PacketWriter::new_with_metadata(output, &specs, &options, metadata)?;
     if let Some(hook) = progress {
         hook.emit(writer.event());
     }

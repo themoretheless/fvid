@@ -49,6 +49,18 @@ def main():
             body = rebuilt + box(b'trak', duplicate)
         output += box(tag, body)
     (ROOT / 'mp4-global-packet-cap.mp4').write_bytes(output)
+    # A separate authored tag-edit regression; no codec bytes are changed.
+    tagged = bytearray()
+    for tag, body in boxes(output):
+        if tag == b'moov':
+            body = b''.join(box(t, p) for t, p in boxes(body) if t != b'udta')
+            entries = b''.join(box(t, box(b'data', b'\x00\x00\x00\x01' + bytes(4) + v.encode()))
+                               for t, v in [(b'\xa9nam', 'Synthetic original title'),
+                                            (b'\xa9ART', 'Synthetic original artist'),
+                                            (b'\xa9alb', 'Synthetic retained album')])
+            body += box(b'udta', box(b'meta', bytes(4) + box(b'ilst', entries)))
+        tagged += box(tag, body)
+    (ROOT / 'mp4-container-tag-edits.mp4').write_bytes(tagged)
 
 
 if __name__ == '__main__':
