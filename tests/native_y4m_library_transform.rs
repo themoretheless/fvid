@@ -160,7 +160,7 @@ fn interval_uses_exact_frame_clock_and_stops_before_unrequested_tail() {
     );
     assert!(fvid_media::owned_y4m_decode::decode_reader(Cursor::new(&bad)).is_err());
     let unsupported = DecodeTransform {
-        negate: Some(String::new()),
+        unsharp: Some(String::new()),
         ..Default::default()
     };
     assert!(
@@ -605,4 +605,90 @@ fn pad_known_fill_and_invalid_canvas() {
     let stats = fvid_media::decode_video_transformed(&source, t).unwrap();
     assert_eq!((stats.width, stats.height, stats.video_frames), (32, 32, 3));
     assert_eq!(stats.backend, "owned Y4M planar decode");
+}
+
+#[test]
+fn owned_negate_preserves_depth_and_runs_after_geometry() {
+    for layout in ["420", "422", "444"] {
+        for depth in [8u8, 9, 10, 12, 14, 16] {
+            let chroma = if depth == 8 {
+                layout.into()
+            } else {
+                format!("{layout}p{depth}")
+            };
+            let header = fvid_media::owned_y4m::Header::parse(
+                format!("YUV4MPEG2 W4 H2 F30:1 C{chroma}\n").as_bytes(),
+            )
+            .unwrap();
+            let step = if depth == 8 { 1 } else { 2 };
+            let max = ((1u32 << depth) - 1) as u16;
+            let input: Vec<u8> = (0..header.frame_len().unwrap() / step)
+                .flat_map(|i| {
+                    let v = (i * 17 % (usize::from(max) + 1)) as u16;
+                    if step == 1 {
+                        vec![v as u8]
+                    } else {
+                        v.to_le_bytes().to_vec()
+                    }
+                })
+                .collect();
+            for args in ["", "0", "1"] {
+                let mut t = DecodeTransform {
+                    negate: Some(args.into()),
+                    horizontal_flip: true,
+                    pad: Some(fvid_media::PadRect {
+                        width: 8,
+                        height: 4,
+                        x: 2,
+                        y: 2,
+                    }),
+                    ..Default::default()
+                };
+                let actual =
+                    fvid_media::owned_y4m_decode::transform_frame_requested(&header, &input, &t)
+                        .unwrap();
+                t.negate = None;
+                let geometry =
+                    fvid_media::owned_y4m_decode::transform_frame_requested(&header, &input, &t)
+                        .unwrap();
+                let expected: Vec<u8> = geometry
+                    .chunks_exact(step)
+                    .flat_map(|b| {
+                        let v = if step == 1 {
+                            u16::from(b[0])
+                        } else {
+                            u16::from_le_bytes([b[0], b[1]])
+                        };
+                        let n = max - v;
+                        if step == 1 {
+                            vec![n as u8]
+                        } else {
+                            n.to_le_bytes().to_vec()
+                        }
+                    })
+                    .collect();
+                assert_eq!(actual, expected, "{chroma} {args}");
+            }
+        }
+    }
+    let mut malformed = vec![0, 4];
+    let before = malformed.clone();
+    assert!(
+        fvid_media::owned_negate::Negate
+            .apply(&mut malformed, 10)
+            .is_err()
+    );
+    assert_eq!(malformed, before);
+    let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/wave-probe-info.y4m");
+    let stats = fvid_media::decode_video_transformed(
+        &source,
+        DecodeTransform {
+            negate: Some("1".into()),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    assert_eq!(stats.backend, "owned Y4M planar decode");
+    assert_eq!(stats.video_frames, 3);
 }

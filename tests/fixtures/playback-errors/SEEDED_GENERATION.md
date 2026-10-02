@@ -106,3 +106,11 @@ and `ffmpeg_boxblur_reference` (harness=false). Set FVID_REFERENCE_FFMPEG and ru
 cargo bench for the chosen target. They preserve the existing synthetic input,
 layout/depth and option matrices. Ordinary native filter tests keep known-pixel,
 parameter/storage, CLI/backend and interval checks without external executables.
+
+Negate's sample-buffer implementation is owned by fvid-media and shared by the
+frontend pixel pipeline and Y4M library decoder. It runs after geometry, preserves
+8..16-bit sample maxima and validates high-depth storage before mutation. The
+Y4M integration tests cover 54 layout/depth/option combinations, geometry order,
+malformed-storage atomicity and public dispatch. Unsupported options still reject
+owned admission. The previous generic unsupported-option test now uses unsharp,
+as negate has an acceptance path rather than a refusal expectation.

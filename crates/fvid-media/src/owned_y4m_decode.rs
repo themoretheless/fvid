@@ -31,15 +31,20 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
 }
 fn supported_request(transform: &DecodeTransform) -> bool {
     transform
-        .input_format
+        .negate
         .as_deref()
-        .is_none_or(|format| matches!(format, "y4m" | "yuv4mpegpipe"))
+        .is_none_or(|args| crate::owned_negate::Negate::parse(args).is_ok())
+        && transform
+            .input_format
+            .as_deref()
+            .is_none_or(|format| matches!(format, "y4m" | "yuv4mpegpipe"))
         && *transform
             == DecodeTransform {
                 crop: transform.crop,
                 scale: transform.scale,
                 transpose: transform.transpose,
                 pad: transform.pad,
+                negate: transform.negate.clone(),
                 horizontal_flip: transform.horizontal_flip,
                 vertical_flip: transform.vertical_flip,
                 interval: transform.interval,
@@ -155,6 +160,9 @@ pub fn transform_frame_requested(
         transform.pad,
         &mut output,
     )?;
+    if let Some(args) = transform.negate.as_deref() {
+        crate::owned_negate::Negate::parse(args)?.apply(&mut output, header.depth())?;
+    }
     Ok(output)
 }
 /// Apply crop and reflections to each plane, keeping multibyte samples intact.
@@ -318,7 +326,8 @@ pub fn decode_reader_transformed(
         || transform.vertical_flip
         || transform.scale.is_some()
         || transform.transpose.is_some()
-        || transform.pad.is_some();
+        || transform.pad.is_some()
+        || transform.negate.is_some();
     let mut input = Vec::new();
     if geometry {
         input
@@ -378,6 +387,9 @@ pub fn decode_reader_transformed(
                     transform.pad,
                     &mut output,
                 )?;
+                if let Some(args) = transform.negate.as_deref() {
+                    crate::owned_negate::Negate::parse(args)?.apply(&mut output, header.depth())?;
+                }
                 std::hint::black_box(&output);
             }
             frames = frames.checked_add(1).ok_or("Y4M frame count overflow")?;
