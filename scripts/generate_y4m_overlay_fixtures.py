@@ -10,3 +10,5 @@ for y, u, v in [(50, 80, 160), (100, 90, 170)]:
     foreground.extend(b"FRAME\n" + bytes([y]) * 4 + bytes([u, v]))
 (root / "overlay-primary-clock.y4m").write_bytes(main)
 (root / "overlay-secondary-clock.y4m").write_bytes(foreground)
+
+(root / "overlay-secondary-empty.y4m").write_bytes(b"YUV4MPEG2 W2 H2 F2:1 Ip A1:1 C420jpeg\n")

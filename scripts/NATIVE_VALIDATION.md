@@ -310,3 +310,31 @@ test PATH (960 frames, PCE, coupling, decoder, streaming and file export).
 Legacy/player compilation and supported native dependency/source policy passed.
 ADTS aggregate allocation admission remains explicitly unsupported: these
 initialization measurements do not justify enabling its complete export budget.
+
+## Empty secondary overlay EOF acceptance
+
+An initialized Y4M secondary source with no frames now leaves primary frames
+unchanged instead of failing with `Y4M overlay source has no frames`. EOF after
+at least one secondary frame still repeats that frame. Header/marker/payload
+errors continue to propagate rather than being treated as an empty source.
+
+The existing synthetic six-frame primary clip plus new 38-byte
+`overlay-secondary-empty.y4m` reproduces the specific old execution error.
+The acceptance test failed on that exact error before the fix. The independent
+fixture generator writes the valid secondary header with no frames and uses no
+FFmpeg/private media; the previous two overlay artifacts remain byte-identical.
+Ordinary tests read committed fixtures without invoking the generator.
+
+An explicit FFmpeg reference overlay produced all six original primary frames
+byte-for-byte. Owned acceptance checks verify unchanged pixels for full and
+interval execution, owned public plan/export selection, six exported FFV1
+packets, their presentation timestamps and independently decoded samples.
+Other unsupported overlay colour conversions remain outside the owned route;
+this acceptance closes the empty-source compatibility gap, not every overlay
+mode or the remaining production backend dependency.
+
+Validation: 140 owned library tests and 13 native geometry tests passed with
+empty test PATH. The owned library test binary had no direct libav/swscale/
+swresample linkage. Legacy/player compilation, the supported native dependency
+and source policies, and diff checks passed. The final regression also passed
+after ensuring that the output reader closes before fixture cleanup.

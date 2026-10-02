@@ -72,9 +72,6 @@ impl OverlayReader {
         while !self.eof && self.next <= target {
             if !line(&mut self.input, &mut marker)? {
                 self.eof = true;
-                if self.next == 0 {
-                    return Err("Y4M overlay source has no frames".into());
-                }
                 break;
             }
             if marker != b"FRAME\n" && !marker.starts_with(b"FRAME ") {
@@ -95,6 +92,11 @@ impl OverlayReader {
                 .next
                 .checked_add(1)
                 .ok_or("overlay frame count overflow")?;
+        }
+        // EOF before the first secondary frame leaves the primary unchanged.
+        // After at least one frame, the existing repeat-last behavior applies.
+        if self.next == 0 {
+            return Ok(());
         }
         let (sx, sy) = output.format.subsampling();
         let mut destination = GeometryFrame {
@@ -201,6 +203,67 @@ mod tests {
         assert_eq!(stats.encoder, "ffv1");
         let info = crate::owned_webm_probe::probe_webm(&output).unwrap();
         assert_eq!(info.streams[0].codec, "ffv1");
+        std::fs::remove_file(output).unwrap();
+    }
+    #[test]
+    fn empty_overlay_passes_primary_frames_and_exports_without_fallback() {
+        let mut request = transform();
+        request.overlay.as_mut().unwrap().path = fixtures().join("overlay-secondary-empty.y4m");
+        let expected = |index: u8| [vec![10 + index; 16], vec![128; 8]].concat();
+        for interval in [None, Some((500_000, 1_250_000))] {
+            request.interval = interval;
+            let mut indices = Vec::new();
+            let stats = crate::owned_y4m_decode::visit_reader_transformed(
+                Cursor::new(include_bytes!(
+                    "../../../tests/fixtures/playback-errors/overlay-primary-clock.y4m"
+                )),
+                &request,
+                |_, pixels, pts, duration| {
+                    let index = (pts / duration) as u8;
+                    assert_eq!(pixels, expected(index));
+                    indices.push(index);
+                    Ok(())
+                },
+            )
+            .unwrap();
+            assert_eq!(
+                indices,
+                if interval.is_some() {
+                    vec![2, 3, 4]
+                } else {
+                    vec![0, 1, 2, 3, 4, 5]
+                }
+            );
+            assert_eq!(stats.video_frames, indices.len() as u64);
+        }
+        let source = fixtures().join("overlay-primary-clock.y4m");
+        let spec = request.overlay.as_ref().unwrap();
+        let output =
+            std::env::temp_dir().join(format!("fvid-empty-overlay-{}.mkv", std::process::id()));
+        let options = crate::CopyOptions::default();
+        let plan = crate::plan_overlay(&source, &spec.path, spec.x, spec.y, &options).unwrap();
+        assert!(plan.notes[0].starts_with("backend: owned"));
+        let stats =
+            crate::overlay_video(&source, &spec.path, &output, spec.x, spec.y, &options).unwrap();
+        assert_eq!(stats.backend, "fvid");
+        assert_eq!(stats.video_frames, 6);
+        let mut reader = crate::owned_webm::WebmReader::open(
+            std::io::BufReader::new(File::open(&output).unwrap()),
+            Default::default(),
+        )
+        .unwrap();
+        reader.scan_all().unwrap();
+        assert_eq!(reader.packets.len(), 6);
+        let mut decoder = crate::owned_ffv1_decoder::Decoder::new(4, 4, 1 << 20).unwrap();
+        for index in 0..6 {
+            assert_eq!(reader.packets[index].pts_ns, index as i64 * 250_000_000);
+            let packet = reader.read_packet(index).unwrap();
+            assert_eq!(
+                decoder.decode(&packet).unwrap().frame.data,
+                expected(index as u8)
+            );
+        }
+        drop(reader);
         std::fs::remove_file(output).unwrap();
     }
     #[test]
