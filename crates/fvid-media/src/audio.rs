@@ -104,6 +104,7 @@ fn integer_format(format: i32) -> Option<crate::owned_pcm_integer::Format> {
         AVSampleFormat_AV_SAMPLE_FMT_U8 | AVSampleFormat_AV_SAMPLE_FMT_U8P => Some(Format::U8),
         AVSampleFormat_AV_SAMPLE_FMT_S16 | AVSampleFormat_AV_SAMPLE_FMT_S16P => Some(Format::I16),
         AVSampleFormat_AV_SAMPLE_FMT_S32 | AVSampleFormat_AV_SAMPLE_FMT_S32P => Some(Format::I32),
+        AVSampleFormat_AV_SAMPLE_FMT_S64 | AVSampleFormat_AV_SAMPLE_FMT_S64P => Some(Format::I64),
         _ => None,
     }
 }
@@ -311,7 +312,7 @@ impl Resampler {
                         || input.nb_samples < 0 || input.extended_data.is_null()
                         || input.format != self.input_format
                     { return Err("owned resampler input format changed".into()); }
-                    let planar = matches!(input.format, AVSampleFormat_AV_SAMPLE_FMT_DBLP | AVSampleFormat_AV_SAMPLE_FMT_U8P | AVSampleFormat_AV_SAMPLE_FMT_S16P | AVSampleFormat_AV_SAMPLE_FMT_S32P);
+                    let planar = matches!(input.format, AVSampleFormat_AV_SAMPLE_FMT_DBLP | AVSampleFormat_AV_SAMPLE_FMT_U8P | AVSampleFormat_AV_SAMPLE_FMT_S16P | AVSampleFormat_AV_SAMPLE_FMT_S32P | AVSampleFormat_AV_SAMPLE_FMT_S64P);
                     let mut bytes = Vec::with_capacity(input.nb_samples as usize * self.input_channels as usize * 8);
                     for sample in 0..input.nb_samples as usize {
                         for channel in 0..self.input_channels as usize {
@@ -322,6 +323,7 @@ impl Resampler {
                                 Some(crate::owned_pcm_integer::Format::U8) => (f64::from(*plane.add(index)) - 128.) / 128.,
                                 Some(crate::owned_pcm_integer::Format::I16) => f64::from(ptr::read_unaligned(plane.cast::<i16>().add(index))) / 32768.,
                                 Some(crate::owned_pcm_integer::Format::I32) => f64::from(ptr::read_unaligned(plane.cast::<i32>().add(index))) / 2147483648.,
+                                Some(crate::owned_pcm_integer::Format::I64) => ptr::read_unaligned(plane.cast::<i64>().add(index)) as f64 / 9223372036854775808.,
                                 None => ptr::read_unaligned(plane.cast::<f64>().add(index)),
                             };
                             bytes.extend_from_slice(&value.to_le_bytes());
@@ -344,12 +346,13 @@ impl Resampler {
                 for (index, sample) in bytes.chunks_exact(8).enumerate() {
                     let value = f64::from_le_bytes(sample.try_into().unwrap());
                     if let Some(format) = integer_format(self.out_format) {
-                        let mut encoded = [0u8; 4];
+                        let mut encoded = [0u8; 8];
                         format.encode(value, &mut encoded[..format.bytes()])?;
                         match format {
                             crate::owned_pcm_integer::Format::U8 => *(*dst).data[0].add(index) = encoded[0],
                             crate::owned_pcm_integer::Format::I16 => ptr::write_unaligned((*dst).data[0].cast::<i16>().add(index), i16::from_le_bytes(encoded[..2].try_into().unwrap())),
-                            crate::owned_pcm_integer::Format::I32 => ptr::write_unaligned((*dst).data[0].cast::<i32>().add(index), i32::from_le_bytes(encoded)),
+                            crate::owned_pcm_integer::Format::I32 => ptr::write_unaligned((*dst).data[0].cast::<i32>().add(index), i32::from_le_bytes(encoded[..4].try_into().unwrap())),
+                            crate::owned_pcm_integer::Format::I64 => ptr::write_unaligned((*dst).data[0].cast::<i64>().add(index), i64::from_le_bytes(encoded)),
                         }
                     } else { ptr::write_unaligned((*dst).data[0].cast::<f64>().add(index), value); }
                 }
@@ -1423,6 +1426,7 @@ mod owned_integer_tests {
             (AVSampleFormat_AV_SAMPLE_FMT_U8, AVSampleFormat_AV_SAMPLE_FMT_U8P, crate::owned_pcm_integer::Format::U8),
             (AVSampleFormat_AV_SAMPLE_FMT_S16, AVSampleFormat_AV_SAMPLE_FMT_S16P, crate::owned_pcm_integer::Format::I16),
             (AVSampleFormat_AV_SAMPLE_FMT_S32, AVSampleFormat_AV_SAMPLE_FMT_S32P, crate::owned_pcm_integer::Format::I32),
+            (AVSampleFormat_AV_SAMPLE_FMT_S64, AVSampleFormat_AV_SAMPLE_FMT_S64P, crate::owned_pcm_integer::Format::I64),
         ] {
             for planar in [false, true] {
                 let input = Frame::new().unwrap();
@@ -1438,7 +1442,7 @@ mod owned_integer_tests {
                     for sample in 0..997 {
                         for channel in 0..2 {
                             let value = if channel == 0 { (sample as f64 * 0.07).sin() * 0.8 } else { -0.25 };
-                            let mut encoded = [0; 4];
+                            let mut encoded = [0; 8];
                             format.encode(value, &mut encoded[..format.bytes()]).unwrap();
                             let normalized = format.decode(&encoded[..format.bytes()]).unwrap();
                             reference.write_all(&normalized.to_le_bytes()).unwrap();
@@ -1447,7 +1451,8 @@ mod owned_integer_tests {
                             match format {
                                 crate::owned_pcm_integer::Format::U8 => *plane.add(index) = encoded[0],
                                 crate::owned_pcm_integer::Format::I16 => ptr::write_unaligned(plane.cast::<i16>().add(index), i16::from_le_bytes(encoded[..2].try_into().unwrap())),
-                                crate::owned_pcm_integer::Format::I32 => ptr::write_unaligned(plane.cast::<i32>().add(index), i32::from_le_bytes(encoded)),
+                                crate::owned_pcm_integer::Format::I32 => ptr::write_unaligned(plane.cast::<i32>().add(index), i32::from_le_bytes(encoded[..4].try_into().unwrap())),
+                                crate::owned_pcm_integer::Format::I64 => ptr::write_unaligned(plane.cast::<i64>().add(index), i64::from_le_bytes(encoded)),
                             }
                         }
                     }
@@ -1470,6 +1475,7 @@ mod owned_integer_tests {
                                 crate::owned_pcm_integer::Format::U8 => actual.push(*(*output.0).data[0].add(index)),
                                 crate::owned_pcm_integer::Format::I16 => actual.extend_from_slice(&ptr::read_unaligned((*output.0).data[0].cast::<i16>().add(index)).to_le_bytes()),
                                 crate::owned_pcm_integer::Format::I32 => actual.extend_from_slice(&ptr::read_unaligned((*output.0).data[0].cast::<i32>().add(index)).to_le_bytes()),
+                                crate::owned_pcm_integer::Format::I64 => actual.extend_from_slice(&ptr::read_unaligned((*output.0).data[0].cast::<i64>().add(index)).to_le_bytes()),
                             }
                         }
                     }
@@ -1508,6 +1514,48 @@ mod owned_s64_identity_tests {
                 for (index, expected) in values.iter().enumerate() {
                     assert_eq!(ptr::read_unaligned((*output.0).data[0].cast::<i64>().add(index)), *expected);
                 }
+                assert_eq!(adapter.convert(output.0, ptr::null()).unwrap(), 0);
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod owned_s64_transform_tests {
+    use super::*;
+    #[test]
+    fn s64_rate_and_stereo_to_mono_preserve_dc_and_flush_once() {
+        for planar in [false, true] {
+            let input = Frame::new().unwrap();
+            let output = Frame::new().unwrap();
+            // SAFETY: Frames own allocated S64 samples with two channels.
+            unsafe {
+                (*input.0).format = if planar { AVSampleFormat_AV_SAMPLE_FMT_S64P } else { AVSampleFormat_AV_SAMPLE_FMT_S64 };
+                (*input.0).sample_rate = 48000;
+                (*input.0).nb_samples = 997;
+                av_channel_layout_default(&mut (*input.0).ch_layout, 2);
+                check(av_frame_get_buffer(input.0, 0), "S64 transform input").unwrap();
+                for sample in 0..997 {
+                    for channel in 0..2 {
+                        let value = if channel == 0 { 1i64 << 61 } else { 3i64 << 61 };
+                        let plane = *(*input.0).extended_data.add(if planar { channel } else { 0 });
+                        let index = if planar { sample } else { sample * 2 + channel };
+                        ptr::write_unaligned(plane.cast::<i64>().add(index), value);
+                    }
+                }
+                let mut adapter = Resampler::open(input.0, 16000, 1).unwrap();
+                assert!(adapter.swr.is_null());
+                assert!(adapter.owned_f64.is_some());
+                let mut samples = 0;
+                for source in [input.0 as *const AVFrame, input.0, input.0, ptr::null()] {
+                    let count = adapter.convert(output.0, source).unwrap();
+                    samples += count;
+                    for index in 0..count as usize {
+                        let actual = ptr::read_unaligned((*output.0).data[0].cast::<i64>().add(index));
+                        assert!((actual as f64 / 9223372036854775808. - 0.5).abs() < 1e-14);
+                    }
+                }
+                assert_eq!(samples, 997);
                 assert_eq!(adapter.convert(output.0, ptr::null()).unwrap(), 0);
             }
         }

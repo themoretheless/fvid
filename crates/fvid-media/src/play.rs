@@ -16188,7 +16188,8 @@ mod owned_integer_playback_tests {
                             match format {
                                 Format::U8 => *plane.add(index) = encoded[0],
                                 Format::I16 => ptr::write_unaligned(plane.cast::<i16>().add(index),i16::from_le_bytes(encoded[..2].try_into().unwrap())),
-                                Format::I32 => ptr::write_unaligned(plane.cast::<i32>().add(index),i32::from_le_bytes(encoded)),
+                                Format::I32 => ptr::write_unaligned(plane.cast::<i32>().add(index),i32::from_le_bytes(encoded[..4].try_into().unwrap())),
+                                Format::I64 => unreachable!("S64 playback has a dedicated acceptance test"),
                             }
                         }
                     }
