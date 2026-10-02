@@ -826,3 +826,77 @@ fn library_ffv1_metadata_matches_frontend_bytes_and_refuses_invalid_tags() {
     meta.colour.as_mut().unwrap().full_range = true;
     assert!(owned::video_element(8, 8, Some(&meta), 0).is_ok());
 }
+
+#[test]
+fn library_file_tags_and_chapters_match_frontend_container_bytes() {
+    use fvid_media::owned_matroska as owned;
+    let original = file_metadata_fixture();
+    let metadata = owned::FileMetadata {
+        tags: original.tags.clone(),
+        chapters: original.chapters.clone(),
+    };
+    let samples = fvid::native_geometry::GeometryFrame {
+        width: 8,
+        height: 8,
+        subsampling: Some([2, 2]),
+        data: vec![0; 96],
+    };
+    let packet = fvid_media::owned_ffv1_encoder::encode(&samples, 8).unwrap();
+    let mut expected = Cursor::new(Vec::new());
+    let mut writer = PacketWriter::new_with_metadata(
+        &mut expected,
+        &[TrackSpec {
+            encoding: Encoding::Ffv1V1 {
+                width: 8,
+                height: 8,
+            },
+            name: "",
+            language: "und",
+        }],
+        &[],
+        &original,
+    )
+    .unwrap();
+    writer
+        .write_packet(0, 0, 30_000_003, true, &packet)
+        .unwrap();
+    writer.finish().unwrap();
+    let mut output = Cursor::new(Vec::new());
+    let mut writer =
+        owned::PacketWriter::new_ffv1_with_file_metadata(&mut output, 8, 8, None, 0, 0, &metadata)
+            .unwrap();
+    writer
+        .write_packet(0, 0, 30_000_003, true, &packet)
+        .unwrap();
+    writer.finish().unwrap();
+    assert_eq!(output.get_ref(), expected.get_ref());
+    let mut reader =
+        webm::WebmReader::open(Cursor::new(output.into_inner()), Default::default()).unwrap();
+    reader.scan_all().unwrap();
+    assert_eq!(reader.tags, original.tags);
+    assert_eq!(reader.chapters, original.chapters);
+    for case in 0..3 {
+        let mut bad = metadata.clone();
+        match case {
+            0 => bad.tags.title = "NUL\0title".into(),
+            1 => bad.chapters[0].end_ns = Some(0),
+            _ => bad.chapters[0].title = "NUL\0chapter".into(),
+        }
+        if case == 1 {
+            bad.chapters[0].start_ns = 1;
+        }
+        let mut output = Cursor::new(Vec::new());
+        assert!(
+            owned::PacketWriter::new_ffv1_with_file_metadata(&mut output, 8, 8, None, 0, 0, &bad)
+                .is_err()
+        );
+        assert!(output.get_ref().is_empty());
+    }
+    let mut tags = fvid_media::owned_file_tags::FileTags::default();
+    assert!(tags.insert("tracknumber", "3/12"));
+    assert!(tags.insert("PART_NUMBER", "4/12"));
+    assert_eq!(tags.track, "3/12");
+    assert!(tags.insert("albumartist", "Artist"));
+    assert!(!tags.insert("unknown", "value"));
+    assert!(!tags.insert("TITLE", ""));
+}

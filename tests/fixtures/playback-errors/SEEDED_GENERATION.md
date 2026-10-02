@@ -307,3 +307,12 @@ PTS zero, 40 ms duration and two consumed input frames. A one-packet budget,
 non-exact/negative/empty interval and interval beyond EOF refuse publication
 and clean temporary output. Writer-level streaming APIs retain their original
 absolute source timeline; `seek=true` remains unqualified pending real seeking.
+
+FileTags and Matroska chapter values now belong to the library and are
+re-exported through the existing frontend paths. The file metadata serializer
+is shared, preserving its validation and byte layout. The library FFV1 writer
+accepts caller-supplied file tags/chapters before emitting any output. A short
+synthetic frame compares complete container bytes with the frontend, parses
+all thirteen tag fields and Unicode chapter titles/boundaries back, and checks
+NUL/reversed-boundary refusals. This owns writer metadata; source-container
+inspection and public metadata-edit policy migration remain separate work.

@@ -106,3 +106,5 @@ pub mod owned_matroska;
 pub mod owned_lossless;
 #[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_lossless::{crop_lossless, transcode_lossless};
+
+pub mod owned_file_tags;

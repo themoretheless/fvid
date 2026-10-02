@@ -22,6 +22,23 @@ fn invalid(message: &str) -> Error {
 include!("owned_matroska_ebml_impl.rs");
 include!("owned_matroska_packet_impl.rs");
 
+/// A named point in the file a player can jump to.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Chapter {
+    pub start_ns: u64,
+    /// Explicit exclusive end in Matroska ticks (nanoseconds), when present.
+    pub end_ns: Option<u64>,
+    /// The first `ChapterDisplay` string, empty when the atom names no title.
+    pub title: String,
+}
+/// File-wide tags and flat, unordered chapters; times are nanoseconds.
+#[derive(Clone, Debug, Default)]
+pub struct FileMetadata {
+    pub tags: crate::owned_file_tags::FileTags,
+    pub chapters: Vec<Chapter>,
+}
+include!("owned_matroska_file_impl.rs");
+
 /// Container colour codes, independent of a decoder or colour converter.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct ColourDescription {
@@ -89,6 +106,27 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         rotation: u16,
         default_duration_ns: u64,
     ) -> Result<Self> {
+        Self::new_ffv1_with_file_metadata(
+            output,
+            width,
+            height,
+            metadata,
+            rotation,
+            default_duration_ns,
+            &FileMetadata::default(),
+        )
+    }
+    /// Validate file tags/chapters and video metadata before emitting any bytes.
+    pub fn new_ffv1_with_file_metadata(
+        output: &'a mut W,
+        width: u32,
+        height: u32,
+        metadata: Option<&VideoMetadata>,
+        rotation: u16,
+        default_duration_ns: u64,
+        file: &FileMetadata,
+    ) -> Result<Self> {
+        let file_elements = file_metadata(file)?;
         let geometry = video_element(width, height, metadata, rotation)?;
         let entries = element(
             0xae,
@@ -108,7 +146,7 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
             ]
             .concat(),
         )?;
-        Self::new_prepared(output, &entries, &[], vec![0], vec![None])
+        Self::new_prepared(output, &entries, &file_elements, vec![0], vec![None])
     }
 }
 

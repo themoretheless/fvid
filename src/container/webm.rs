@@ -53,15 +53,7 @@ pub struct Track {
     /// bitstream of a container-only stream carries.
     pub hdr: HdrMetadata,
 }
-/// A named point in the file a player can jump to.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Chapter {
-    pub start_ns: u64,
-    /// Explicit exclusive end in Matroska ticks (nanoseconds), when present.
-    pub end_ns: Option<u64>,
-    /// The first `ChapterDisplay` string, empty when the atom names no title.
-    pub title: String,
-}
+pub use fvid_media::owned_matroska::Chapter;
 #[derive(Clone, Debug)]
 pub struct Packet {
     pub track: u64,
