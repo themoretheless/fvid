@@ -423,3 +423,10 @@ multitrack test covers exact bytes/counts, no overwrite, pre-cancel, cancellatio
 during copy, audio-only refusal and removal of temporary files. Selection, tag
 editing, packet-count caps and memory/RSS policies remain unsupported by this
 adapter; legacy mode retains its existing route for those requests.
+
+Owned remux planning now dispatches Matroska identity requests in both feature
+modes. It validates the index and encoded packet-size limit without creating
+output or emitting execution progress, describes every track and retains all
+container metadata/attachments. Synthetic tests check the packet/payload summary
+and refusal of a too-small packet budget. Because the plan API has no destination,
+.mka audio-only qualification and publication remain execution checks.

@@ -65,6 +65,28 @@ fn library_multitrack_mux_matches_frontend_bytes() {
     let destination = dir.join("copy.mkv");
     std::fs::write(&source, actual.get_ref()).unwrap();
     let options = fvid_control::CopyOptions::default();
+    let dry = fvid_control::CopyOptions {
+        progress: Some(fvid_control::ProgressHook::new(|_| {
+            panic!("plan emitted execution progress")
+        })),
+        ..Default::default()
+    };
+    let plan = fvid_media::plan_remux(&source, &dry).unwrap();
+    assert_eq!(plan.streams.len(), 2);
+    assert_eq!(plan.streams[0].codec, "ffv1");
+    assert!(
+        plan.steps
+            .iter()
+            .any(|step| step.detail.contains("2 media packets, 195 payload bytes"))
+    );
+    assert!(!destination.exists());
+    let constrained = fvid_control::CopyOptions {
+        max_packet_bytes: 1,
+        ..Default::default()
+    };
+    assert!(fvid_media::plan_remux(&source, &constrained).is_err());
+    assert!(!destination.exists());
+
     let stats = fvid_media::remux(&source, &destination, &options).unwrap();
     assert_eq!(stats.backend, "owned Matroska");
     assert_eq!(stats.packets, 2);

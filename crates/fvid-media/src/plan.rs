@@ -2011,6 +2011,9 @@ fn video_graph(transform: &LosslessTransform) -> Option<String> {
 
 /// Plan a remux without opening an output.
 pub fn plan_remux(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
+    if crate::owned_remux_plan::supports(source, options) {
+        return crate::owned_remux_plan::plan_remux(source, options);
+    }
     if crate::owned_wave_plan::supports(source, options) {
         return crate::owned_wave_plan::plan_remux(source, options);
     }
