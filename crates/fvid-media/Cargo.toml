@@ -52,3 +52,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_short_loudnorm_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_dynamic_loudnorm_reference"
+harness = false

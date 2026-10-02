@@ -454,8 +454,9 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
     })
 }
 
-/// Apply FFmpeg-compatible `loudnorm=` and write IEEE float WAV.
-/// Fair-pairs `ffmpeg -af loudnorm=ARGS,aformat=sample_fmts=flt -c:a pcm_f32le`.
+/// Apply loudnorm targets and write IEEE float WAV. Qualified WAVE requests
+/// use the owned FVid normalizer; its dynamic controller is not bit-equivalent
+/// to libavfilter. Other formats/policies retain the temporary legacy backend.
 pub fn apply_loudnorm(
     source: &Path,
     destination: &Path,

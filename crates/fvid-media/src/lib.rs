@@ -16,6 +16,7 @@ pub mod owned_k_weight;
 pub mod owned_loudness;
 pub mod owned_normalize;
 pub mod owned_loudnorm;
+mod owned_dynamic_loudnorm;
 #[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_loudnorm::apply_loudnorm;
 

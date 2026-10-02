@@ -10,6 +10,8 @@ type Result<T> = std::result::Result<T, String>;
 struct Parameters {
     target_i: f64,
     target_tp: f64,
+    target_lra: f64,
+    offset: f64,
     dual_mono: bool,
     print: bool,
     gain: Option<f64>,
@@ -21,6 +23,7 @@ fn linear_gain(args: &str) -> Result<Option<f64>> {
 fn parse(args: &str) -> Result<Parameters> {
     let (mut target_i, mut target_tp, mut target_lra) = (-24., -2., 7.);
     let (mut measured_i, mut measured_tp, mut measured_lra, mut threshold) = (0., 99., 0., -70.);
+    let mut offset = 0.;
     let mut linear = true;
     let mut dual_mono = false;
     let mut print = false;
@@ -45,10 +48,8 @@ fn parse(args: &str) -> Result<Parameters> {
             if !matches!(value, "none" | "json" | "summary") {
                 return Err("invalid loudnorm print format".into());
             }
-            // Printing measurements needs its own meter and remains outside this path.
-            if value != "none" {
-                print = true;
-            }
+            // Printing measurements needs its own report and remains outside this path.
+            print = value != "none";
             continue;
         }
         let number: f64 = value.parse().map_err(|_| "invalid loudnorm number")?;
@@ -64,6 +65,7 @@ fn parse(args: &str) -> Result<Parameters> {
                 if !number.is_finite() || !(-99. ..=99.).contains(&number) {
                     return Err("loudnorm offset out of range".into());
                 }
+                offset = number;
                 continue;
             }
             _ => return Err(format!("unknown loudnorm option {key}")),
@@ -77,6 +79,8 @@ fn parse(args: &str) -> Result<Parameters> {
     Ok(Parameters {
         target_i,
         target_tp,
+        target_lra,
+        offset,
         dual_mono,
         print,
         gain: (linear
@@ -111,7 +115,7 @@ pub(crate) fn supports(
             !params.print
                 && std::fs::File::open(source).is_ok_and(|mut file| {
                     crate::owned_wave_inspect::inspect(&mut file, None)
-                        .is_ok_and(|info| params.gain.is_some() || short_input(&info, options))
+                        .is_ok_and(|info| params.gain.is_some() || dynamic_input(&info))
                 })
         })
 }
@@ -128,7 +132,7 @@ pub fn apply_loudnorm(
         return Err("owned loudnorm measurement printing is not yet implemented".into());
     }
     if params.gain.is_none() {
-        return apply_short(source, destination, args, params, options);
+        return apply_dynamic(source, destination, args, params, options);
     }
     let gain = params.gain.unwrap();
     if !policies(options) || destination.extension().and_then(|s| s.to_str()) != Some("wav") {
@@ -240,6 +244,10 @@ pub fn apply_loudnorm(
 
 /// The dynamic filter uses a whole-file gain for recordings below its 3 s
 /// initial window, measured after conversion to its 192 kHz processing clock.
+fn dynamic_input(info: &crate::owned_wave_inspect::WaveInfo) -> bool {
+    crate::owned_wave_loudness::weights(info).is_ok() && (8000..=384000).contains(&info.sample_rate)
+}
+#[cfg(test)]
 fn short_input(info: &crate::owned_wave_inspect::WaveInfo, options: &CopyOptions) -> bool {
     let frame = usize::from(info.block);
     let capacity = (4096 * frame).min(options.max_packet_bytes / frame * frame);
@@ -254,7 +262,7 @@ fn short_input(info: &crate::owned_wave_inspect::WaveInfo, options: &CopyOptions
         && crate::owned_wave_loudness::weights(info).is_ok()
         && (8000..=384000).contains(&info.sample_rate)
 }
-fn apply_short(
+fn apply_dynamic(
     source: &Path,
     destination: &Path,
     args: String,
@@ -293,8 +301,10 @@ fn apply_short(
         options.max_packet_bytes,
         options.max_packets,
         |_, info, size| {
-            if !short_input(info, options) {
-                return Err("owned long-form dynamic loudnorm is not yet implemented".into());
+            if !dynamic_input(info) {
+                return Err(
+                    "owned dynamic loudnorm requires a qualified rate and speaker layout".into(),
+                );
             }
             width = usize::from(info.bits_per_sample / 8);
             float = info.float;
@@ -315,7 +325,12 @@ fn apply_short(
                 + samples as u128 * 12
                 + 192000 * 34 / 10 * 8
                 + 512 * 1024
-                + 2 * frames.min(4096) as u128 * u128::from(info.channels) * 8;
+                + 2 * frames.min(4096) as u128 * u128::from(info.channels) * 8
+                + samples as u128 / u128::from(info.channels) * 8
+                // Four anchor vectors plus both meter histograms (every block
+                // may occupy a distinct bin; 512 bytes per tree node/scratch).
+                + (samples as u128 / u128::from(info.channels)).div_ceil(19200) * (40 + 1024)
+                + 19200 * u128::from(info.channels) * 8;
             if options
                 .max_controlled_bytes
                 .is_some_and(|limit| estimate > limit as u128)
@@ -379,30 +394,44 @@ fn apply_short(
         }
         meter.push(&pcm)?;
     }
-    let desired = meter
-        .histogram_integrated_lufs()
-        .map(|level| 10f64.powf((params.target_i - level) / 20.))
-        .unwrap_or(f64::INFINITY);
-    let gain = if peak == 0. {
-        1.
-    } else {
-        desired.min(10f64.powf(params.target_tp / 20.) / peak)
-    };
+    let global = meter.histogram_integrated_lufs();
     drop(meter);
-    let mut output = Vec::new();
-    output
-        .try_reserve_exact(samples)
-        .map_err(|_| "cannot allocate loudnorm output")?;
-    for block in data.chunks(8 * input.channels as usize * 4096) {
-        check()?;
-        for bytes in block.chunks_exact(8) {
-            let value = (f64::from_le_bytes(bytes.try_into().unwrap()) * gain) as f32;
-            if !value.is_finite() {
-                return Err("non-finite loudnorm output".into());
+    let output = if frames >= 576000 {
+        crate::owned_dynamic_loudnorm::process(
+            &data,
+            &weights,
+            global,
+            params.target_i,
+            params.target_lra,
+            params.target_tp,
+            params.offset,
+            &check,
+        )?
+    } else {
+        let desired = global
+            .map(|level| 10f64.powf((params.target_i - level) / 20.))
+            .unwrap_or(f64::INFINITY);
+        let gain = if peak == 0. {
+            1.
+        } else {
+            desired.min(10f64.powf(params.target_tp / 20.) / peak)
+        };
+        let mut output = Vec::new();
+        output
+            .try_reserve_exact(samples)
+            .map_err(|_| "cannot allocate loudnorm output")?;
+        for block in data.chunks(8 * input.channels as usize * 4096) {
+            check()?;
+            for bytes in block.chunks_exact(8) {
+                let value = (f64::from_le_bytes(bytes.try_into().unwrap()) * gain) as f32;
+                if !value.is_finite() {
+                    return Err("non-finite loudnorm output".into());
+                }
+                output.push(value);
             }
-            output.push(value);
         }
-    }
+        output
+    };
     drop(data);
     crate::owned_wav_file::write_wav_f32le_with_side_data_checked(
         destination,
@@ -418,7 +447,11 @@ fn apply_short(
         hook.emit(event);
     }
     Ok(LoudnormStats {
-        backend: "fvid short loudnorm",
+        backend: if frames >= 576000 {
+            "fvid dynamic loudnorm"
+        } else {
+            "fvid short loudnorm"
+        },
         sample_frames: frames,
         sample_rate: 192000,
         channels: input.channels,
@@ -431,6 +464,97 @@ fn apply_short(
 mod tests {
     use super::*;
     const ARGS: &str = "I=-16:TP=-1.5:LRA=11:measured_I=-22:measured_TP=-12:measured_LRA=2:measured_thresh=-32:linear=true";
+    #[test]
+    fn feedback_fixture_recovers_loudness_between_isolated_peaks() {
+        let fixtures =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/playback-errors");
+        let source = fixtures.join("loudnorm-feedback.wav");
+        let video = std::fs::read(fixtures.join("loudnorm-feedback.y4m")).unwrap();
+        assert_eq!(
+            video.len(),
+            b"YUV4MPEG2 W16 H16 F30:1 Ip A1:1 C420jpeg\n".len() + 90 * 390
+        );
+        let dest = std::env::temp_dir().join(format!(
+            "fvid-feedback-regression-{}.wav",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_file(&dest);
+        let stats = crate::apply_loudnorm(&source, &dest, None, &CopyOptions::default()).unwrap();
+        assert_eq!(stats.backend, "fvid dynamic loudnorm");
+        assert_eq!(stats.sample_frames, 576000);
+        let report =
+            crate::owned_wave_loudness::measure_loudness(&dest, &CopyOptions::default()).unwrap();
+        assert!(
+            (report.integrated_lufs + 16.).abs() < 0.2,
+            "{}",
+            report.integrated_lufs
+        );
+        assert!(
+            report.true_peak_dbfs <= -1.5 + 1e-5,
+            "{}",
+            report.true_peak_dbfs
+        );
+        std::fs::remove_file(dest).unwrap();
+    }
+    #[test]
+    fn long_dynamic_fixture_accepts_public_processing_at_three_seconds() {
+        let fixtures =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/playback-errors");
+        let source = fixtures.join("loudnorm-dynamic.wav");
+        let mut file = std::fs::File::open(&source).unwrap();
+        let info = crate::owned_wave_inspect::inspect(&mut file, None).unwrap();
+        assert!(!short_input(&info, &CopyOptions::default()));
+        let video = std::fs::read(fixtures.join("loudnorm-dynamic.y4m")).unwrap();
+        let header = b"YUV4MPEG2 W16 H16 F30:1 Ip A1:1 C420jpeg\n";
+        assert!(video.starts_with(header));
+        assert_eq!(video.len() - header.len(), 90 * 390);
+        let dest = std::env::temp_dir().join(format!(
+            "fvid-dynamic-regression-{}.wav",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_file(&dest);
+        let options = CopyOptions {
+            max_controlled_bytes: Some(24 * 1024 * 1024),
+            ..CopyOptions::default()
+        };
+        // Admission precedes retained PCM and DSP allocations.
+        assert!(
+            crate::apply_loudnorm(
+                &source,
+                &dest,
+                None,
+                &CopyOptions {
+                    max_controlled_bytes: Some(8),
+                    ..CopyOptions::default()
+                }
+            )
+            .is_err()
+        );
+        assert!(!dest.exists());
+        let stats = crate::apply_loudnorm(&source, &dest, None, &options).unwrap();
+        assert_eq!(stats.backend, "fvid dynamic loudnorm");
+        assert_eq!(stats.sample_frames, 576000);
+        assert_eq!(stats.sample_rate, 192000);
+        let measured =
+            crate::owned_wave_loudness::measure_loudness(&dest, &CopyOptions::default()).unwrap();
+        assert!(
+            (measured.integrated_lufs + 16.).abs() < 0.3,
+            "{}",
+            measured.integrated_lufs
+        );
+        assert!(
+            measured.true_peak_dbfs <= -1.5 + 1e-5,
+            "{}",
+            measured.true_peak_dbfs
+        );
+        let (_, bytes) = crate::owned_audio_mix::decode_float_wave(&dest).unwrap();
+        assert_eq!(bytes.len(), 576000 * 4);
+        assert!(bytes.chunks_exact(4).enumerate().all(|(i, sample)| {
+            let value = f32::from_le_bytes(sample.try_into().unwrap());
+            value.is_finite() && if i % 2 == 0 { value > 0. } else { value < 0. }
+        }));
+        std::fs::remove_file(dest).unwrap();
+    }
     #[test]
     fn histogram_fixture_accepts_expected_gain_instead_of_exact_energy_gain() {
         let fixtures =
@@ -610,6 +734,10 @@ mod tests {
     fn linear_mode_preserves_gain_rules_and_dynamic_mode_boundaries() {
         let expected = 10f64.powf(6. / 20.);
         assert_eq!(linear_gain(ARGS).unwrap(), Some(expected));
+        assert_eq!(
+            linear_gain(&format!("{ARGS}:print_format=json:print_format=none")).unwrap(),
+            Some(expected)
+        );
         assert_eq!(
             linear_gain(&format!("{ARGS}:offset=20")).unwrap(),
             Some(expected)
