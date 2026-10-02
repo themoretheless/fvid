@@ -53,21 +53,14 @@ impl LoudnessMeter {
             energies: BTreeMap::new(),
         })
     }
-    /// Enable the Annex 2 four-phase estimator for standard PCM rates
-    /// from 48 kHz upward (at least 192 kHz reconstructed grid).
+    /// Enable owned FIR true peak, interpolating to at least a 192 kHz grid.
     /// The default constructor retains its existing sample-peak-only cost.
     pub fn new_with_true_peak(sample_rate: u32, weights: &[f64]) -> Result<Self, String> {
-        if !matches!(
-            sample_rate,
-            48000 | 88200 | 96000 | 176400 | 192000 | 352800 | 384000
-        ) {
-            return Err(
-                "four-phase loudness true peak requires a qualified standard rate >= 48000 Hz"
-                    .into(),
-            );
-        }
         let mut meter = Self::new(sample_rate, weights)?;
-        meter.true_peak = Some(crate::owned_true_peak::TruePeakMeter::new(weights.len())?);
+        meter.true_peak = Some(crate::owned_true_peak::TruePeakMeter::new_for_rate(
+            sample_rate,
+            weights.len(),
+        )?);
         Ok(meter)
     }
     /// Flush true-peak interpolation history without adding loudness frames.
@@ -275,6 +268,6 @@ mod true_peak_tests {
         assert!(peak.finished);
         assert!(full.push(&[1., 1.]).is_err());
         assert_eq!(full.report().sample_frames, 24000);
-        assert!(LoudnessMeter::new_with_true_peak(44100, &[1.]).is_err());
+        assert!(LoudnessMeter::new_with_true_peak(7990, &[1.]).is_err());
     }
 }

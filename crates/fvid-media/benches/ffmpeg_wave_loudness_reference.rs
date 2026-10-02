@@ -7,6 +7,13 @@ fn main() {
     std::fs::create_dir(&dir).unwrap();
     let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap_or_else(|| "ffmpeg".into());
     for (name, channels, frequency, smooth, rate) in [
+        ("8000", 1, 2000., true, 8000),
+        ("12000", 1, 3000., true, 12000),
+        ("16000", 1, 4000., true, 16000),
+        ("22050", 1, 5512.5, true, 22050),
+        ("24000", 1, 6000., true, 24000),
+        ("32000", 1, 8000., true, 32000),
+        ("44100", 1, 11025., true, 44100),
         ("mono", 1, 1000., true, 48000),
         ("stereo", 2, 12000., true, 48000),
         ("stereo-transient", 2, 12000., false, 48000),

@@ -10,7 +10,19 @@ type Result<T> = std::result::Result<T, String>;
 fn qualified_rate(rate: u32) -> bool {
     matches!(
         rate,
-        48000 | 88200 | 96000 | 176400 | 192000 | 352800 | 384000
+        8000 | 12000
+            | 16000
+            | 22050
+            | 24000
+            | 32000
+            | 44100
+            | 48000
+            | 88200
+            | 96000
+            | 176400
+            | 192000
+            | 352800
+            | 384000
     )
 }
 fn policies(options: &CopyOptions) -> bool {
@@ -72,8 +84,7 @@ fn preflight(source: &Path, options: &CopyOptions) -> Result<Input> {
         .map_err(|e| e.to_string())?;
     if !qualified_rate(info.sample_rate) {
         return Err(
-            "owned WAVE true-peak measurement requires a qualified standard rate >= 48000 Hz"
-                .into(),
+            "owned WAVE true-peak measurement requires a qualified standard PCM rate".into(),
         );
     }
     let weights = weights(&info)?;
@@ -110,7 +121,7 @@ fn preflight(source: &Path, options: &CopyOptions) -> Result<Input> {
     let estimated = (rate * 3 + rate * 2 / 5) as u128 * 8
         + capacity as u128
         + (capacity / frame) as u128 * u128::from(info.channels) * 8
-        + u128::from(info.channels) * 168
+        + u128::from(info.channels) * 512
         + (integrated_blocks + short_blocks) as u128 * 512
         + 16384;
     if options
@@ -132,7 +143,7 @@ fn preflight(source: &Path, options: &CopyOptions) -> Result<Input> {
 }
 /// Measure stored PCM directly; no FFmpeg decoder, filter or sample-rate converter.
 /// Packet limits count aligned read blocks, and measurement includes their prefix.
-/// True peak uses the owned four-phase Annex-2 FIR. Transient peaks may differ
+/// True peak uses the owned Annex-2 FIR at >=48 kHz and sinc FIR below. Transient peaks may differ
 /// from another implementation's interpolation filter; bit equivalence is not promised.
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
     let mut input = preflight(source, options)?;
@@ -221,7 +232,7 @@ pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> 
     let input = preflight(source, options)?;
     Ok(MediaPlan{command:"loudness".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:0,media_type:"audio".into(),codec:input.info.codec(),disposition:"analyze".into()}],
         steps:vec![PlanStep{action:"read".into(),detail:format!("read {} PCM bytes at {} Hz in aligned blocks of at most {} bytes",input.size,input.info.sample_rate,input.capacity)},
-        PlanStep{action:"analyze".into(),detail:"owned K-weighting, integrated loudness gating, loudness-range percentiles and four-phase true-peak FIR; no output file".into()}],graph:None,
+        PlanStep{action:"analyze".into(),detail:"owned K-weighting, integrated loudness gating, loudness-range percentiles and owned true-peak FIR; no output file".into()}],graph:None,
         notes:vec!["backend: owned WAVE; no external decoder or filter".into(),"metadata-only plan; PCM numeric validity and signal measurements are checked during execution".into()]})
 }
 
@@ -410,7 +421,10 @@ mod tests {
     #[test]
     fn standard_rates_keep_original_clock_and_chunk_independent_peaks() {
         let files = files("rates");
-        for rate in [48000, 88200, 96000, 176400, 192000, 352800, 384000] {
+        for rate in [
+            8000, 12000, 16000, 22050, 24000, 32000, 44100, 48000, 88200, 96000, 176400, 192000,
+            352800, 384000,
+        ] {
             let path = files.0.join(format!("{rate}.wav"));
             let pcm: Vec<f64> = (0..rate * 2 / 5)
                 .map(|i| if i % 4 < 2 { 0.25 } else { -0.25 })

@@ -1,7 +1,7 @@
 //! Owned four-phase true-peak FIR from ITU-R BS.1770-5 Annex 2.
 //! https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-5-202311-I!!PDF-E.pdf
 //! The filter estimates peaks on a 4x grid. At 48 kHz this is 192 kHz;
-//! callers at other rates must choose adequate oversampling separately.
+//! `new_for_rate` selects adequate oversampling, using a sinc FIR below 48 kHz.
 //! Floating-point processing needs no intermediate 12.04 dB attenuation.
 const TAPS: usize = 12;
 // Exact coefficients, expressed as integer numerators over 8192. Rows are
@@ -32,6 +32,7 @@ pub struct PeakReport {
     pub finished: bool,
 }
 pub struct TruePeakMeter {
+    interpolator: Option<Box<Interpolator>>,
     history: Vec<[f64; TAPS]>,
     position: usize,
     frames: u64,
@@ -45,6 +46,7 @@ impl TruePeakMeter {
             return Err("true peak requires 1..=64 channels".into());
         }
         Ok(Self {
+            interpolator: None,
             history: vec![[0.; TAPS]; channels],
             position: 0,
             frames: 0,
@@ -52,6 +54,23 @@ impl TruePeakMeter {
             interpolated_peak: 0.,
             finished: false,
         })
+    }
+    /// Low-rate PCM uses an owned windowed-sinc polyphase interpolator;
+    /// the reconstructed grid is a power-of-two multiple of at least 192 kHz.
+    /// Source samples and frame counts remain in the original clock domain.
+    pub fn new_for_rate(sample_rate: u32, channels: usize) -> Result<Self, String> {
+        if !(8000..=384000).contains(&sample_rate) {
+            return Err("true peak sample rate must be in 8000..=384000 Hz".into());
+        }
+        let mut meter = Self::new(channels)?;
+        if sample_rate < 48000 {
+            let mut factor = 4;
+            while sample_rate * factor < 192000 {
+                factor *= 2;
+            }
+            meter.interpolator = Some(Box::new(Interpolator::new(channels, factor as usize)));
+        }
+        Ok(meter)
     }
     /// Process interleaved complete channel frames. Invalid chunks leave the
     /// previous readings and all filter history unchanged. No channel weighting
@@ -81,9 +100,15 @@ impl TruePeakMeter {
         Ok(())
     }
     fn filter(&mut self, frame: &[f64]) {
+        if let Some(interpolator) = &mut self.interpolator {
+            interpolator.filter(frame);
+            return;
+        }
         for (history, sample) in self.history.iter_mut().zip(frame) {
             history[self.position] = *sample;
-            for phase in COEFFICIENTS {
+        }
+        for phase in COEFFICIENTS {
+            for history in &self.history {
                 let mut value = 0.;
                 for (tap, coefficient) in phase.into_iter().enumerate() {
                     value += history[(self.position + TAPS - tap) % TAPS] * f64::from(coefficient)
@@ -94,7 +119,7 @@ impl TruePeakMeter {
         }
         self.position = (self.position + 1) % TAPS;
     }
-    /// Flush the remaining eleven zero-padded frames, retaining original frame
+    /// Flush the remaining zero-padded FIR tail, retaining original frame
     /// counts. Idempotent; accepting more PCM after finishing would split the
     /// signal with artificial silence, so push then refuses further input.
     pub fn finish(&mut self) {
@@ -102,13 +127,23 @@ impl TruePeakMeter {
             return;
         }
         let silence = [0.; 64];
-        for _ in 0..TAPS - 1 {
+        let tail = if self.interpolator.is_some() {
+            31
+        } else {
+            TAPS - 1
+        };
+        for _ in 0..tail {
             self.filter(&silence[..self.history.len()]);
         }
         self.finished = true;
     }
     pub fn report(&self) -> PeakReport {
-        let true_peak = self.sample_peak.max(self.interpolated_peak);
+        let reconstructed_peak = self
+            .interpolator
+            .as_ref()
+            .map(|m| m.peak)
+            .unwrap_or(self.interpolated_peak);
+        let true_peak = self.sample_peak.max(reconstructed_peak);
         PeakReport {
             sample_frames: self.frames,
             sample_peak: self.sample_peak,
@@ -117,6 +152,66 @@ impl TruePeakMeter {
             true_peak_dbfs: (true_peak > 0.).then(|| 20. * true_peak.log10()),
             finished: self.finished,
         }
+    }
+}
+// 32 taps per phase, symmetric Blackman window, unity DC per phase.
+// This is interpolation, not a downsampling filter: no 0.94 bandwidth loss.
+struct Interpolator {
+    coefficients: Vec<[f64; 32]>,
+    history: Vec<[f64; 32]>,
+    position: usize,
+    peak: f64,
+}
+impl Interpolator {
+    fn new(channels: usize, factor: usize) -> Self {
+        let coefficients = (0..factor)
+            .map(|phase| {
+                let fraction = phase as f64 / factor as f64;
+                let mut row = [0.; 32];
+                for (tap, weight) in row.iter_mut().enumerate() {
+                    let distance = tap as f64 - 15. + fraction;
+                    if distance.abs() >= 16. {
+                        continue;
+                    }
+                    let angle = std::f64::consts::PI * distance / 16.;
+                    let window = 0.42 + 0.5 * angle.cos() + 0.08 * (2. * angle).cos();
+                    let phase = std::f64::consts::PI * distance;
+                    let sinc = if phase.abs() < 1e-12 {
+                        1.
+                    } else {
+                        phase.sin() / phase
+                    };
+                    *weight = window * sinc;
+                }
+                let dc: f64 = row.iter().sum();
+                for value in &mut row {
+                    *value /= dc;
+                }
+                row
+            })
+            .collect();
+        Self {
+            coefficients,
+            history: vec![[0.; 32]; channels],
+            position: 0,
+            peak: 0.,
+        }
+    }
+    fn filter(&mut self, frame: &[f64]) {
+        for (history, sample) in self.history.iter_mut().zip(frame) {
+            history[self.position] = *sample;
+            for phase in &self.coefficients {
+                let value: f64 = phase
+                    .iter()
+                    .enumerate()
+                    .map(|(tap, coefficient)| {
+                        history[(self.position + 32 - tap) % 32] * coefficient
+                    })
+                    .sum();
+                self.peak = self.peak.max(value.abs());
+            }
+        }
+        self.position = (self.position + 1) % 32;
     }
 }
 #[cfg(test)]
@@ -222,5 +317,55 @@ mod tests {
         assert!(silent.report().true_peak_dbfs.is_none());
         assert!(silent.report().sample_peak_dbfs.is_none());
         assert_eq!(silent.report().sample_frames, 2);
+    }
+    #[test]
+    fn low_rate_sinc_keeps_analytic_tone_and_matches_offline_tail() {
+        let tone: Vec<f64> = (0usize..1024)
+            .map(|i| {
+                let fade = (i.min(1023 - i) as f64 / 64.).min(1.);
+                fade * (std::f64::consts::FRAC_PI_2 * i as f64 + std::f64::consts::FRAC_PI_4).sin()
+            })
+            .collect();
+        for rate in [8000, 12000, 16000, 22050, 24000, 32000, 44100] {
+            let mut whole = TruePeakMeter::new_for_rate(rate, 1).unwrap();
+            whole.push(&tone).unwrap();
+            whole.finish();
+            let report = whole.report();
+            assert!(
+                report.true_peak_dbfs.unwrap().abs() < 0.05,
+                "{rate}: {report:?}"
+            );
+            let mut split = TruePeakMeter::new_for_rate(rate, 1).unwrap();
+            for chunk in tone.chunks(7) {
+                split.push(chunk).unwrap();
+            }
+            split.finish();
+            assert_eq!(split.report(), report);
+            let capacity = split.interpolator.as_ref().unwrap().history.capacity();
+            assert_eq!(capacity, 1);
+            let source = [-1., 1., -0.5, 0.25];
+            let mut meter = TruePeakMeter::new_for_rate(rate, 1).unwrap();
+            let coefficients = &meter.interpolator.as_ref().unwrap().coefficients;
+            let mut expected = 1f64;
+            for frame in 0..source.len() + 31 {
+                for phase in coefficients {
+                    let mut value = 0.;
+                    for (tap, coefficient) in phase.iter().enumerate() {
+                        if frame >= tap && frame - tap < source.len() {
+                            value += source[frame - tap] * coefficient;
+                        }
+                    }
+                    expected = expected.max(value.abs());
+                }
+            }
+            meter.push(&source).unwrap();
+            meter.finish();
+            assert_eq!(meter.report().true_peak, expected);
+            assert_eq!(meter.report().sample_frames, 4);
+            let final_report = meter.report();
+            meter.finish();
+            assert_eq!(meter.report(), final_report);
+            assert!(meter.push(&[0.]).is_err());
+        }
     }
 }
