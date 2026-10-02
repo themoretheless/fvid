@@ -194,3 +194,11 @@ sample depth). The two-frame `y4m-vertical-chroma-10.y4m` is generated solely by
 codecs or private parameters. Acceptance checks exact transpose pixels and the
 4:4:0 -> 4:2:2 metadata transition; library/frontend probe equivalence covers
 additional 8/10/16-bit variants. Ordinary tests use the saved fixture directly.
+
+Owned raw Y4M parsing/probing/decoding also accepts 8-bit 4:1:1 and 4:1:0.
+Synthetic integer-plane tests check raw counts and known reflection pixels;
+probe equivalence covers 4:1:1. Output geometry must align with chroma axes.
+Quarter-turn 4:1:0 retains symmetric subsampling. Quarter-turn 4:1:1 requires a
+separate pixel-format conversion and is explicitly refused by the owned route;
+legacy admission retains that operation during migration rather than mislabeling
+its output. Other supported transforms can use the native raw path.

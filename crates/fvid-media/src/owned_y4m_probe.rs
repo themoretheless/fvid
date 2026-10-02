@@ -12,7 +12,7 @@ pub fn try_y4m(source: &Path) -> Result<Option<MediaInfo>> {
         if token.starts_with('C')
             && !matches!(
                 token,
-                "C420" | "C420jpeg" | "C420mpeg2" | "C420paldv" | "C422" | "C444" | "C440"
+                "C420" | "C420jpeg" | "C420mpeg2" | "C420paldv" | "C422" | "C444" | "C440" | "C411" | "C410"
             )
             && !token
                 .strip_prefix('C')

@@ -21,7 +21,7 @@ fn every_owned_chroma_and_depth_has_exact_frontend_and_library_metadata() {
     let folder = temp();
     for chroma in [
         "420", "420jpeg", "420mpeg2", "420paldv", "422", "444", "420p9", "420p10", "420p12",
-        "420p14", "420p16", "422p10", "444p16", "440", "440p10", "440p16",
+        "420p14", "420p16", "422p10", "444p16", "440", "440p10", "440p16", "411",
     ] {
         let header = format!("YUV4MPEG2 W8 H6 F60000:2002 Ip C{chroma}\n");
         let frontend = fvid::Header::parse(header.as_bytes()).unwrap();

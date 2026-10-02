@@ -91,7 +91,15 @@ fn supported_request(transform: &DecodeTransform) -> bool {
             }
 }
 pub(crate) fn supports_transformed(source: &Path, transform: &DecodeTransform) -> bool {
-    supported_request(transform) && supports(source)
+    supported_request(transform)
+        && supports(source)
+        && (transform.transpose.is_none() || header_format(source) != Some(PixelFormat::Yuv411))
+}
+fn header_format(source: &Path) -> Option<PixelFormat> {
+    let mut r = BufReader::new(File::open(source).ok()?);
+    let mut b = Vec::new();
+    line(&mut r, &mut b).ok()?;
+    Some(Header::parse(&b).ok()?.format)
 }
 pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Result<DecodeStats> {
     decode_reader_transformed(
@@ -145,6 +153,9 @@ fn output_geometry(
     transpose: Option<TransposeMode>,
     pad: Option<PadRect>,
 ) -> Result<(usize, usize, usize)> {
+    if transpose.is_some() && header.format == PixelFormat::Yuv411 {
+        return Err("owned Y4M transpose does not yet implement 4:1:1 output conversion".into());
+    }
     let (cw, ch) = if transpose.is_some() {
         (crop.height, crop.width)
     } else {
@@ -162,6 +173,14 @@ fn output_geometry(
         return Err("scale must be even and within 1..=8192 x 1..=4320".into());
     }
     let (sx, sy) = header.format.subsampling();
+    let (ox, oy) = if transpose.is_some() {
+        (sy, sx)
+    } else {
+        (sx, sy)
+    };
+    if w % ox != 0 || h % oy != 0 {
+        return Err("Y4M output must align with chroma samples".into());
+    }
     let area = w.checked_mul(h).ok_or("Y4M scale size overflow")?;
     let size = area
         .checked_add(
@@ -551,6 +570,8 @@ pub fn decode_reader_transformed(
         PixelFormat::Yuv444 => "444",
         PixelFormat::Yuv440 if transform.transpose.is_some() => "422",
         PixelFormat::Yuv440 => "440",
+        PixelFormat::Yuv411 => "411",
+        PixelFormat::Yuv410 => "410",
     };
     let pixel_format = if header.depth() == 8 {
         format!("yuv{layout}p")

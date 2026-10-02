@@ -1149,3 +1149,41 @@ fn vertical_chroma_fixture_decodes_and_transposes_back_to_422() {
         .collect();
     assert_eq!(pixels, expected);
 }
+
+#[test]
+fn quarter_chroma_raw_decode_and_plane_geometry_are_owned() {
+    for layout in ["411", "410"] {
+        let text = format!("YUV4MPEG2 W8 H4 F30:1 C{layout}\n");
+        let header = fvid_media::owned_y4m::Header::parse(text.as_bytes()).unwrap();
+        let pixels: Vec<u8> = (0..header.frame_len().unwrap())
+            .map(|i| (i * 7) as u8)
+            .collect();
+        let input = [text.as_bytes(), b"FRAME\n", &pixels].concat();
+        let stats = fvid_media::owned_y4m_decode::decode_reader(Cursor::new(&input)).unwrap();
+        assert_eq!(stats.pixel_format, format!("yuv{layout}p"));
+        assert_eq!(stats.video_frames, 1);
+        let actual =
+            fvid_media::owned_y4m_decode::transform_frame(&header, &pixels, None, true, true)
+                .unwrap();
+        let y = 32;
+        let size = (pixels.len() - y) / 2;
+        let expected: Vec<u8> = [&pixels[..y], &pixels[y..y + size], &pixels[y + size..]]
+            .into_iter()
+            .flat_map(|p| p.iter().rev().copied())
+            .collect();
+        assert_eq!(actual, expected);
+        let t = DecodeTransform {
+            transpose: Some(fvid_media::TransposeMode::Clock),
+            ..Default::default()
+        };
+        let result =
+            fvid_media::owned_y4m_decode::decode_reader_transformed(Cursor::new(&input), &t);
+        if layout == "411" {
+            assert!(result.unwrap_err().contains("4:1:1"));
+        } else {
+            let stats = result.unwrap();
+            assert_eq!((stats.width, stats.height), (4, 8));
+            assert_eq!(stats.pixel_format, "yuv410p");
+        }
+    }
+}

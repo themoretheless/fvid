@@ -6,6 +6,8 @@ pub enum PixelFormat {
     Yuv422,
     Yuv444,
     Yuv440,
+    Yuv411,
+    Yuv410,
 }
 impl PixelFormat {
     pub(crate) fn subsampling(self) -> (usize, usize) {
@@ -14,6 +16,8 @@ impl PixelFormat {
             Self::Yuv422 => (2, 1),
             Self::Yuv444 => (1, 1),
             Self::Yuv440 => (1, 2),
+            Self::Yuv411 => (4, 1),
+            Self::Yuv410 => (4, 4),
         }
     }
 }
@@ -68,6 +72,8 @@ impl Header {
                         "422" => PixelFormat::Yuv422,
                         "444" => PixelFormat::Yuv444,
                         "440" => PixelFormat::Yuv440,
+                        "411" => PixelFormat::Yuv411,
+                        "410" => PixelFormat::Yuv410,
                         _ => {
                             let (layout, depth) = value
                                 .split_once('p')
