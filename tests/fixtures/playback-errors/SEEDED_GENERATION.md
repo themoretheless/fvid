@@ -382,3 +382,13 @@ frame rates are left unknown rather than inferred by this container-only probe.
 An absent chapter end is represented as a zero-length chapter point because the
 shared ChapterInfo API requires an end. Legacy probing remains until parity is
 verified; no old metadata functionality is removed by this addition.
+
+### Library codec configuration and HEVC framing
+
+AVC/HEVC configuration records, ESDS extraction and length-prefixed NAL walking
+now share unchanged parser bodies between the frontend and `fvid-media`.
+AAC configuration continues to use the existing shared owned AAC parser.
+HEVC header and bounded RBSP framing also share their unchanged implementation.
+A synthetic library API control covers empty-record refusals, AAC LC parameters
+and valid/truncated NAL lengths; existing frontend parser tests remain active.
+This transfers ownership, not support for additional codec profiles or tools.
