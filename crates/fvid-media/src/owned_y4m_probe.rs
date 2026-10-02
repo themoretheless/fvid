@@ -12,13 +12,13 @@ pub fn try_y4m(source: &Path) -> Result<Option<MediaInfo>> {
         if token.starts_with('C')
             && !matches!(
                 token,
-                "C420" | "C420jpeg" | "C420mpeg2" | "C420paldv" | "C422" | "C444"
+                "C420" | "C420jpeg" | "C420mpeg2" | "C420paldv" | "C422" | "C444" | "C440"
             )
             && !token
                 .strip_prefix('C')
                 .and_then(|v| v.split_once('p'))
                 .is_some_and(|(layout, depth)| {
-                    matches!(layout, "420" | "422" | "444")
+                    matches!(layout, "420" | "422" | "444" | "440")
                         && matches!(depth, "9" | "10" | "12" | "14" | "16")
                 })
         {

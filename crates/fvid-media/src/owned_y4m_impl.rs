@@ -5,6 +5,7 @@ pub enum PixelFormat {
     Yuv420,
     Yuv422,
     Yuv444,
+    Yuv440,
 }
 impl PixelFormat {
     pub(crate) fn subsampling(self) -> (usize, usize) {
@@ -12,6 +13,7 @@ impl PixelFormat {
             Self::Yuv420 => (2, 2),
             Self::Yuv422 => (2, 1),
             Self::Yuv444 => (1, 1),
+            Self::Yuv440 => (1, 2),
         }
     }
 }
@@ -65,6 +67,7 @@ impl Header {
                         "420" | "420jpeg" | "420mpeg2" | "420paldv" => PixelFormat::Yuv420,
                         "422" => PixelFormat::Yuv422,
                         "444" => PixelFormat::Yuv444,
+                        "440" => PixelFormat::Yuv440,
                         _ => {
                             let (layout, depth) = value
                                 .split_once('p')
@@ -76,6 +79,7 @@ impl Header {
                                 "420" => PixelFormat::Yuv420,
                                 "422" => PixelFormat::Yuv422,
                                 "444" => PixelFormat::Yuv444,
+                                "440" => PixelFormat::Yuv440,
                                 _ => return Err(invalid("unsupported Y4M chroma layout")),
                             }
                         }

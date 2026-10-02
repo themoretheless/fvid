@@ -549,6 +549,8 @@ pub fn decode_reader_transformed(
         PixelFormat::Yuv422 if transform.transpose.is_some() => "440",
         PixelFormat::Yuv422 => "422",
         PixelFormat::Yuv444 => "444",
+        PixelFormat::Yuv440 if transform.transpose.is_some() => "422",
+        PixelFormat::Yuv440 => "440",
     };
     let pixel_format = if header.depth() == 8 {
         format!("yuv{layout}p")

@@ -187,3 +187,10 @@ All eleven AVC/HEVC/VP9/AV1/Y4M controls and their output formats are preserved.
 Ordinary overlay tests keep sample, stream/metadata, cancellation/publication,
 geometry and CLI assertions and do not launch the reference executable even
 when FVID_REFERENCE_FFMPEG is set to a nonexistent path.
+
+Owned Y4M parsing/probing/decoding accepts vertical 4:4:0 chroma (including high
+sample depth). The two-frame `y4m-vertical-chroma-10.y4m` is generated solely by
+`scripts/generate_y4m440_fixture.py` from integer sample values, without external
+codecs or private parameters. Acceptance checks exact transpose pixels and the
+4:4:0 -> 4:2:2 metadata transition; library/frontend probe equivalence covers
+additional 8/10/16-bit variants. Ordinary tests use the saved fixture directly.

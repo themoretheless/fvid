@@ -1110,3 +1110,42 @@ fn y4m_morphology_matches_frontend_and_keeps_canonical_order() {
         assert_eq!(stats.video_frames, 3);
     }
 }
+
+#[test]
+fn vertical_chroma_fixture_decodes_and_transposes_back_to_422() {
+    let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/y4m-vertical-chroma-10.y4m");
+    let info = fvid_media::probe(&source).unwrap();
+    assert_eq!(info.streams[0].duration, Some(2));
+    let plain = fvid_media::decode_video(&source).unwrap();
+    assert_eq!((plain.width, plain.height, plain.video_frames), (4, 2, 2));
+    assert_eq!(plain.pixel_format, "yuv440p10le");
+    let t = DecodeTransform {
+        transpose: Some(fvid_media::TransposeMode::Clock),
+        ..Default::default()
+    };
+    let transformed = fvid_media::decode_video_transformed(&source, t.clone()).unwrap();
+    assert_eq!(
+        (
+            transformed.width,
+            transformed.height,
+            transformed.video_frames
+        ),
+        (2, 4, 2)
+    );
+    assert_eq!(transformed.pixel_format, "yuv422p10le");
+    let bytes = std::fs::read(&source).unwrap();
+    let mut lines = bytes.splitn(3, |&b| b == b'\n');
+    let header = fvid_media::owned_y4m::Header::parse(lines.next().unwrap()).unwrap();
+    lines.next().unwrap();
+    let payload = lines.next().unwrap();
+    let pixels =
+        fvid_media::owned_y4m_decode::transform_frame_requested(&header, &payload[..32], &t)
+            .unwrap();
+    let indices = [4u16, 0, 5, 1, 6, 2, 7, 3, 8, 9, 10, 11, 12, 13, 14, 15];
+    let expected: Vec<u8> = indices
+        .into_iter()
+        .flat_map(|i| (i * 17).to_le_bytes())
+        .collect();
+    assert_eq!(pixels, expected);
+}
