@@ -160,21 +160,7 @@ fn overlay_exports_avc_hevc_main10_exact_samples_with_atomic_publication() {
 
         assert!(native_export::overlay_video(&source, &source, &output, 0, 0, None, None).is_err());
         assert_eq!(std::fs::read(&output).unwrap(), bytes);
-        if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
-            let pixel = if name.contains("main10") {
-                "yuv420p10le"
-            } else {
-                "yuv420p"
-            };
-            let result = std::process::Command::new(ffmpeg)
-                .args(["-v", "error", "-i"])
-                .arg(&output)
-                .args(["-f", "rawvideo", "-pix_fmt", pixel, "-"])
-                .output()
-                .unwrap();
-            assert!(result.status.success());
-            assert_eq!(result.stdout, expected.concat());
-        }
+
         #[cfg(feature = "media")]
         {
             let public = d.0.join(format!("public-{i}.mkv"));
@@ -242,26 +228,6 @@ fn matroska_vp9_av1_high_depth_and_y4m_overlay_preserve_samples() {
             String::from_utf8_lossy(&result.stderr)
         );
         assert_eq!(std::fs::read(cli).unwrap(), std::fs::read(&output).unwrap());
-
-        if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
-            let pixel = if name.contains("lossless12") {
-                "yuv420p12le"
-            } else if name.contains("odd10") {
-                "yuv420p10le"
-            } else if name.contains("422") {
-                "yuv422p"
-            } else {
-                "yuv420p"
-            };
-            let result = std::process::Command::new(ffmpeg)
-                .args(["-v", "error", "-i"])
-                .arg(&output)
-                .args(["-f", "rawvideo", "-pix_fmt", pixel, "-"])
-                .output()
-                .unwrap();
-            assert!(result.status.success());
-            assert_eq!(result.stdout, expected.concat(), "{name}");
-        }
     }
 }
 

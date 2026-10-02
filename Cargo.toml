@@ -123,3 +123,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_morphology_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_overlay_reference"
+harness = false

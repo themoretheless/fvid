@@ -180,3 +180,10 @@ RGB and chroma clipping, and invalid-source atomicity with known synthetic pixel
 matrices. This exposes the compositor without libav; file-based overlay decode,
 timing and frame scheduling still require a separate library migration and are
 not claimed by the Y4M owned request admission.
+
+Overlay export's conditional external decoder comparisons now run exclusively
+in `ffmpeg_overlay_reference` (explicit cargo bench with FVID_REFERENCE_FFMPEG).
+All eleven AVC/HEVC/VP9/AV1/Y4M controls and their output formats are preserved.
+Ordinary overlay tests keep sample, stream/metadata, cancellation/publication,
+geometry and CLI assertions and do not launch the reference executable even
+when FVID_REFERENCE_FFMPEG is set to a nonexistent path.
