@@ -114,3 +114,5 @@ pub mod owned_ffv1_decoder;
 pub mod owned_ebml;
 
 pub mod owned_webm;
+
+pub mod owned_webm_probe;

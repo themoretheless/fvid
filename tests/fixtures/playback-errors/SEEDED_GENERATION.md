@@ -373,3 +373,12 @@ existing colour/error types. The library API has a synthetic in-memory VP9
 packet-index control; this checks container framing, not VP9 decoding.
 The frontend reader unit and native Matroska playback regressions remain active.
 Unsupported lacing and other existing reader refusals are unchanged.
+
+The owned probe dispatcher now accepts WebM/Matroska signatures and format hints.
+A synthetic container written with the library muxer verifies tracks, packet
+start timestamps, file title and chapter boundaries. Its opaque packet is not a
+codec acceptance fixture. Codec profiles, pixel formats, stream durations and
+frame rates are left unknown rather than inferred by this container-only probe.
+An absent chapter end is represented as a zero-length chapter point because the
+shared ChapterInfo API requires an end. Legacy probing remains until parity is
+verified; no old metadata functionality is removed by this addition.
