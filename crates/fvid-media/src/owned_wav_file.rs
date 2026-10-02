@@ -10,6 +10,17 @@ pub fn write_wav_f32le(
     channels: i32,
     samples: &[f32],
 ) -> Result<()> {
+    write_wav_f32le_checked(destination, sample_rate, channels, samples, || Ok(()))
+}
+
+pub(crate) fn write_wav_f32le_checked<F: FnMut() -> Result<()>>(
+    destination: &Path,
+    sample_rate: i32,
+    channels: i32,
+    samples: &[f32],
+    mut check: F,
+) -> Result<()> {
+    check()?;
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
@@ -75,7 +86,10 @@ pub fn write_wav_f32le(
         header[40..44].copy_from_slice(&(data_bytes as u32).to_le_bytes());
         file.write_all(&header).map_err(|e| e.to_string())?;
         let mut output = std::io::BufWriter::new(file);
-        for sample in samples {
+        for (index, sample) in samples.iter().enumerate() {
+            if index % 16384 == 0 {
+                check()?;
+            }
             output
                 .write_all(&sample.to_le_bytes())
                 .map_err(|e| e.to_string())?;
@@ -86,6 +100,10 @@ pub fn write_wav_f32le(
     if let Err(err) = write {
         let _ = std::fs::remove_file(&temporary);
         return Err(err);
+    }
+    if let Err(error) = check() {
+        let _ = std::fs::remove_file(&temporary);
+        return Err(error);
     }
     // A hard link atomically refuses a concurrently created destination.
     // Never fall back to rename, which can overwrite it on Unix.

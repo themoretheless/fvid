@@ -37,8 +37,6 @@ fn simple_options(options: &CopyOptions) -> bool {
         && options.max_packets.is_none()
         && options.max_controlled_bytes.is_none()
         && options.max_rss_bytes.is_none()
-        && options.cancel.is_none()
-        && options.progress.is_none()
         && options.metadata_set.is_empty()
         && options.metadata_delete.is_empty()
         && options.stream_metadata_set.is_empty()
@@ -81,7 +79,45 @@ pub fn decode_audio_transformed(
     if !gain.is_finite() || !(0.0..=64.0).contains(&gain) {
         return Err("volume must be a finite linear gain within 0..=64".into());
     }
-    let (input, pcm) = crate::owned_audio_mix::decode_float_wave(source)?;
+    let check = || {
+        if options
+            .cancel
+            .as_ref()
+            .is_some_and(|flag| flag.is_cancelled())
+        {
+            Err("media operation cancelled".to_owned())
+        } else {
+            Ok(())
+        }
+    };
+    let mut event = fvid_control::ProgressEvent {
+        packets: 0,
+        payload_bytes: 0,
+        done: false,
+    };
+    check()?;
+    if let Some(hook) = &options.progress {
+        hook.emit(event);
+    }
+    check()?;
+    let (input, pcm) = crate::owned_audio_mix::decode_float_wave_controlled(
+        source,
+        options.cancel.as_ref(),
+        |bytes| {
+            event.packets = event
+                .packets
+                .checked_add(1)
+                .ok_or("audio packet count overflow")?;
+            event.payload_bytes = event
+                .payload_bytes
+                .checked_add(bytes as u64)
+                .ok_or("audio byte count overflow")?;
+            if let Some(hook) = &options.progress {
+                hook.emit(event);
+            }
+            check()
+        },
+    )?;
     let rate = transform.sample_rate.unwrap_or(input.sample_rate);
     let channels = transform.channels.unwrap_or(input.channels);
     if channels != input.channels {
@@ -108,11 +144,19 @@ pub fn decode_audio_transformed(
         input.channels as u16,
         channels as u16,
     )?;
-    matrix.write_all(&pcm).map_err(|e| e.to_string())?;
+    for block in pcm.chunks(4096 * input.channels as usize * 4) {
+        if let Some(hook) = &options.progress {
+            hook.emit(event);
+        }
+        check()?;
+        matrix.write_all(block).map_err(|e| e.to_string())?;
+    }
     if !matrix.frame_complete() {
         return Err("incomplete PCM channel frame".into());
     }
+    check()?;
     resampler.finish().map_err(|e| e.to_string())?;
+    check()?;
     let bytes = resampler.take_output();
     let frames = bytes.len() / (channels as usize * 4);
     let boundary = |time: i64| -> Result<usize> {
@@ -134,7 +178,17 @@ pub fn decode_audio_transformed(
     if samples.iter().any(|s| !s.is_finite()) {
         return Err("PCM gain overflow".into());
     }
-    crate::owned_wav_file::write_wav_f32le(destination, rate, channels, &samples)?;
+    check()?;
+    if let Some(hook) = &options.progress {
+        hook.emit(event);
+    }
+    crate::owned_wav_file::write_wav_f32le_checked(destination, rate, channels, &samples, check)?;
+    if let Some(hook) = &options.progress {
+        hook.emit(fvid_control::ProgressEvent {
+            done: true,
+            ..event
+        });
+    }
     Ok(AudioDecodeStats {
         sample_frames: (last - first) as u64,
         decoded_frames: input.decoded_frames,
@@ -236,5 +290,92 @@ mod tests {
         let original = std::fs::read(&output).unwrap();
         assert!(decode_audio(&source, &output, &CopyOptions::default()).is_err());
         assert_eq!(std::fs::read(output).unwrap(), original);
+    }
+}
+
+#[cfg(test)]
+mod control_tests {
+    use super::*;
+    use std::sync::{Arc, Mutex};
+    #[test]
+    fn progress_counts_source_blocks_and_cancel_never_publishes_output() {
+        let directory =
+            std::env::temp_dir().join(format!("fvid-export-controls-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&directory);
+        std::fs::create_dir(&directory).unwrap();
+        let source = directory.join("source.wav");
+        crate::owned_wav_file::write_wav_f32le(&source, 48000, 2, &vec![0.25; 8193 * 2]).unwrap();
+        let output = directory.join("output.wav");
+        let events = Arc::new(Mutex::new(Vec::new()));
+        let recorded = events.clone();
+        let published = output.clone();
+        let hook = fvid_control::ProgressHook::new(move |event| {
+            if event.done {
+                assert!(published.exists());
+            }
+            recorded.lock().unwrap().push(event);
+        });
+        let options = CopyOptions {
+            progress: Some(hook),
+            ..Default::default()
+        };
+        assert!(supports(&source, &output, Default::default(), &options));
+        let stats = crate::decode_audio(&source, &output, &options).unwrap();
+        assert_eq!(stats.sample_frames, 8193);
+        let events = events.lock().unwrap();
+        assert_eq!(events.first().unwrap().packets, 0);
+        assert_eq!(events.last().unwrap().packets, 3);
+        assert_eq!(events.last().unwrap().payload_bytes, 8193 * 2 * 4);
+        assert!(events.last().unwrap().done);
+        assert_eq!(events.iter().filter(|event| event.done).count(), 1);
+        drop(events);
+        for mode in 0..3 {
+            let flag = fvid_control::CancelFlag::new();
+            if mode == 0 {
+                flag.cancel();
+            }
+            let cancellation = flag.clone();
+            let at_end = std::sync::atomic::AtomicU64::new(0);
+            let output = directory.join(format!("cancelled-{mode}.wav"));
+            let options = CopyOptions {
+                cancel: Some(flag),
+                progress: Some(fvid_control::ProgressHook::new(move |event| {
+                    assert!(!event.done);
+                    if mode == 1 && event.packets > 0
+                        || mode == 2
+                            && event.packets == 3
+                            && at_end.fetch_add(1, std::sync::atomic::Ordering::Relaxed) == 1
+                    {
+                        cancellation.cancel();
+                    }
+                })),
+                ..Default::default()
+            };
+            assert!(supports(&source, &output, Default::default(), &options));
+            let error = crate::decode_audio(&source, &output, &options).unwrap_err();
+            assert!(error.contains("cancelled"));
+            assert!(!output.exists());
+        }
+        let output = directory.join("writer-cancelled.wav");
+        let mut checks = 0;
+        let result =
+            crate::owned_wav_file::write_wav_f32le_checked(&output, 48000, 2, &[0.25; 8], || {
+                checks += 1;
+                if checks == 2 {
+                    Err("cancelled".into())
+                } else {
+                    Ok(())
+                }
+            });
+        assert!(result.is_err());
+        assert!(!output.exists());
+        assert!(std::fs::read_dir(&directory).unwrap().all(|entry| {
+            !entry
+                .unwrap()
+                .file_name()
+                .to_string_lossy()
+                .ends_with(".tmp")
+        }));
+        std::fs::remove_dir_all(directory).unwrap();
     }
 }

@@ -19,9 +19,25 @@ pub fn merge_audio(sources: &[PathBuf], destination: &Path) -> Result<MergeAudio
 }
 
 pub(crate) fn decode_float_wave(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    decode_float_wave_controlled(source, None, |_| Ok(()))
+}
+
+pub(crate) fn decode_float_wave_controlled<F: FnMut(usize) -> Result<()>>(
+    source: &Path,
+    cancel: Option<&fvid_control::CancelFlag>,
+    mut block: F,
+) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    let check = || {
+        if cancel.is_some_and(|flag| flag.is_cancelled()) {
+            Err("media operation cancelled".to_owned())
+        } else {
+            Ok(())
+        }
+    };
+    check()?;
     use std::io::{Read, Seek, SeekFrom};
     let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
-    let info = crate::owned_wave_inspect::inspect(&mut file, None).map_err(|e| e.to_string())?;
+    let info = crate::owned_wave_inspect::inspect(&mut file, cancel).map_err(|e| e.to_string())?;
     if !info.float || info.bits_per_sample != 32 {
         return Err(
             "mix-audio requires float PCM inputs (flt); integer formats are not qualified".into(),
@@ -39,17 +55,25 @@ pub(crate) fn decode_float_wave(source: &Path) -> Result<(AudioDecodeStats, Vec<
     pcm.resize(size, 0);
     file.seek(SeekFrom::Start(info.data_offset))
         .map_err(|e| e.to_string())?;
-    file.read_exact(&mut pcm).map_err(|e| e.to_string())?;
-    if pcm
-        .chunks_exact(4)
-        .any(|bytes| !f32::from_le_bytes(bytes.try_into().unwrap()).is_finite())
-    {
-        return Err("non-finite PCM sample".into());
+    let mut blocks = 0;
+    let capacity = 4096 * usize::from(info.channels) * 4;
+    for bytes in pcm.chunks_mut(capacity) {
+        check()?;
+        file.read_exact(bytes).map_err(|e| e.to_string())?;
+        if bytes
+            .chunks_exact(4)
+            .any(|sample| !f32::from_le_bytes(sample.try_into().unwrap()).is_finite())
+        {
+            return Err("non-finite PCM sample".into());
+        }
+        blocks += 1;
+        block(bytes.len())?;
+        check()?;
     }
     Ok((
         AudioDecodeStats {
             sample_frames: info.sample_frames,
-            decoded_frames: 1,
+            decoded_frames: blocks,
             sample_rate: rate,
             channels: i32::from(info.channels),
             sample_format: "flt".into(),
