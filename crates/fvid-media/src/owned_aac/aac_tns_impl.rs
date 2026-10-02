@@ -35,9 +35,11 @@ pub fn read(bits: &mut BitReader<'_>, sequence: WindowSequence) -> Result<TnsDat
                     let base = (1u32 << (resolution - 1)) as f64;
                     let denominator = base + if signed < 0 { 0.5 } else { -0.5 };
                     let reflection = (f64::from(signed) * FRAC_PI_2 / denominator).sin();
-                    let previous = lpc.clone();
-                    for i in 0..previous.len() {
-                        lpc[i] = previous[i] + reflection * previous[previous.len() - 1 - i];
+                    let mut previous = [0.0; 12];
+                    let count = lpc.len();
+                    previous[..count].copy_from_slice(&lpc);
+                    for i in 0..count {
+                        lpc[i] = previous[i] + reflection * previous[count - 1 - i];
                     }
                     lpc.push(reflection);
                 }

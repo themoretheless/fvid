@@ -6,11 +6,29 @@ use std::{
     io::{BufReader, BufWriter, Seek, SeekFrom, Write},
     path::{Path, PathBuf},
     sync::{
-        atomic::{AtomicU64, Ordering},
         Arc, Mutex,
+        atomic::{AtomicU64, Ordering},
     },
 };
 type Result<T> = std::result::Result<T, String>;
+
+// The PCM phase cannot apply container tags. Build its policy directly rather
+// than cloning potentially unbounded tag strings and discarding them afterward.
+fn pcm_decode_options(options: &CopyOptions) -> CopyOptions {
+    CopyOptions {
+        streams: options.streams.clone(),
+        max_packet_bytes: options.max_packet_bytes,
+        max_packets: options.max_packets,
+        max_controlled_bytes: options.max_controlled_bytes,
+        max_rss_bytes: options.max_rss_bytes,
+        cancel: options.cancel.clone(),
+        progress: options.progress.clone(),
+        metadata_set: Vec::new(),
+        metadata_delete: Vec::new(),
+        stream_metadata_set: Vec::new(),
+        stream_metadata_delete: Vec::new(),
+    }
+}
 pub(crate) fn recognizes(source: &Path) -> Result<bool> {
     use std::io::Read;
     let mut file = File::open(source).map_err(|e| e.to_string())?;
@@ -60,12 +78,8 @@ pub(crate) fn supports(
             }
         }
         drop(reader);
-        let mut probe = options.clone();
+        let mut probe = pcm_decode_options(options);
         probe.progress = None;
-        probe.metadata_set.clear();
-        probe.metadata_delete.clear();
-        probe.stream_metadata_set.clear();
-        probe.stream_metadata_delete.clear();
         let prefix = decoded_prefix(transform, config.sample_rate);
         crate::owned_aac::decode_adts_pcm(
             BufReader::new(File::open(source).map_err(|e| e.to_string())?),
@@ -303,11 +317,7 @@ pub(crate) fn spool_decoded_with_precision(
     }));
     let captured = totals.clone();
     let original = options.progress.clone();
-    let mut decode_options = options.clone();
-    decode_options.metadata_set.clear();
-    decode_options.metadata_delete.clear();
-    decode_options.stream_metadata_set.clear();
-    decode_options.stream_metadata_delete.clear();
+    let mut decode_options = pcm_decode_options(options);
     decode_options.progress = Some(ProgressHook::new(move |event| {
         *captured.lock().unwrap() = event;
         if let Some(hook) = &original {

@@ -32,9 +32,7 @@ pub(crate) fn decode_adts_aac_reader_controlled<R: std::io::Read>(
         let end = position.checked_add(frames).ok_or_else(|| invalid("audio position overflow"))?;
         let first = from.saturating_sub(position).min(frames) as usize;
         let last = to.saturating_sub(position).min(frames) as usize;
-        for sample in &samples[first * channels..last.max(first) * channels] {
-            output.write_all(&sample.to_le_bytes())?;
-        }
+        write_pcm_samples(output, &samples[first * channels..last.max(first) * channels])?;
         stats.sample_frames += last.saturating_sub(first) as u64;
         stats.decoded_frames += 1;
         control.packet(packet.len())?;
@@ -42,4 +40,16 @@ pub(crate) fn decode_adts_aac_reader_controlled<R: std::io::Read>(
     }
     if stats.sample_frames == 0 { return Err(invalid("audio interval contains no samples")); }
     Ok(stats)
+}
+
+// Serialization scratch stays on the stack and does not grow with stream length.
+fn write_pcm_samples(output: &mut impl std::io::Write, samples: &[f32]) -> Result<()> {
+    let mut bytes = [0u8; 4096];
+    for chunk in samples.chunks(bytes.len() / 4) {
+        for (sample, target) in chunk.iter().zip(bytes.chunks_exact_mut(4)) {
+            target.copy_from_slice(&sample.to_le_bytes());
+        }
+        output.write_all(&bytes[..chunk.len() * 4])?;
+    }
+    Ok(())
 }

@@ -112,6 +112,37 @@ include!("stream_impl.rs");
 #[cfg(test)]
 mod tests {
     #[test]
+    fn pcm_serialization_preserves_bits_and_handles_short_writes() {
+        struct ShortWriter {
+            bytes: Vec<u8>,
+            calls: usize,
+        }
+        impl std::io::Write for ShortWriter {
+            fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+                self.calls += 1;
+                let count = bytes.len().min(777);
+                self.bytes.extend_from_slice(&bytes[..count]);
+                Ok(count)
+            }
+            fn flush(&mut self) -> std::io::Result<()> {
+                Ok(())
+            }
+        }
+        let samples: Vec<f32> = (0..2051).map(|n| f32::from_bits(n * 7919)).collect();
+        let expected: Vec<u8> = samples.iter().flat_map(|s| s.to_le_bytes()).collect();
+        let mut output = ShortWriter {
+            bytes: Vec::new(),
+            calls: 0,
+        };
+        super::write_pcm_samples(&mut output, &samples).unwrap();
+        assert_eq!(output.bytes, expected);
+        assert!(output.calls < 20);
+        let calls = output.calls;
+        super::write_pcm_samples(&mut output, &[]).unwrap();
+        assert_eq!(output.calls, calls);
+    }
+
+    #[test]
     fn standalone_stream_api_retains_exact_clock_and_packet_prefix() {
         let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures");
         let bytes = std::fs::read(root.join("playback-errors/aac-packet-prefix.aac")).unwrap();

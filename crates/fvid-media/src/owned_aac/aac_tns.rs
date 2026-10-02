@@ -16,6 +16,21 @@ impl TnsData {
     /// Apply each filter within its spectral band interval. `max_band` is
     /// min(max_sfb, sample-rate-specific TNS band limit). No caller mutation.
     pub fn filter(&self, spectrum: &[f32], offsets: &[usize], max_band: usize) -> Result<Vec<f32>> {
+        self.validate(spectrum, offsets, max_band)?;
+        self.filter_buffer(spectrum.to_vec(), offsets, max_band)
+    }
+    /// Consume a packet-local spectrum without allocating a second frame.
+    /// Failure discards the consumed buffer; borrowed input APIs remain unchanged.
+    pub fn filter_owned(
+        &self,
+        spectrum: Vec<f32>,
+        offsets: &[usize],
+        max_band: usize,
+    ) -> Result<Vec<f32>> {
+        self.validate(&spectrum, offsets, max_band)?;
+        self.filter_buffer(spectrum, offsets, max_band)
+    }
+    fn validate(&self, spectrum: &[f32], offsets: &[usize], max_band: usize) -> Result<()> {
         let size = offsets.last().copied().unwrap_or(0);
         if !matches!(spectrum.len(), 960 | 1024)
             || !matches!(self.windows.len(), 1 | 8)
@@ -27,7 +42,15 @@ impl TnsData {
         {
             return Err(invalid("invalid AAC TNS spectral geometry"));
         }
-        let mut output = spectrum.to_vec();
+        Ok(())
+    }
+    fn filter_buffer(
+        &self,
+        mut output: Vec<f32>,
+        offsets: &[usize],
+        max_band: usize,
+    ) -> Result<Vec<f32>> {
+        let size = *offsets.last().unwrap();
         for (window, filters) in self.windows.iter().enumerate() {
             let mut top = offsets.len() - 1;
             for filter in filters {
@@ -91,6 +114,49 @@ mod tests {
             assert_eq!(&output[4..8], &expected);
             assert_eq!(output[0], 9.0);
             assert_eq!(output[8], 7.0);
+            let address = input.as_ptr();
+            let capacity = input.capacity();
+            let owned = tns.filter_owned(input, &[0, 4, 8, 1024], 2).unwrap();
+            assert_eq!(owned, output);
+            assert_eq!(owned.as_ptr(), address);
+            assert_eq!(owned.capacity(), capacity);
+        }
+    }
+    #[test]
+    fn consumed_short_spectra_preserve_each_window_and_direction() {
+        for n in [960, 1024] {
+            let width = n / 8;
+            let tns = TnsData {
+                windows: (0..8)
+                    .map(|window| {
+                        vec![TnsFilter {
+                            length: 2,
+                            reverse: window % 2 == 1,
+                            lpc: vec![0.5],
+                        }]
+                    })
+                    .collect(),
+            };
+            let mut input = vec![0.0; n];
+            for window in 0..8 {
+                input[window * width + if window % 2 == 1 { 7 } else { 4 }] = 1.0;
+            }
+            let output = tns.filter_owned(input, &[0, 4, 8, width], 2).unwrap();
+            for window in 0..8 {
+                assert_eq!(
+                    &output[window * width + 4..window * width + 8],
+                    if window % 2 == 1 {
+                        &[-0.125, 0.25, -0.5, 1.0]
+                    } else {
+                        &[1.0, -0.5, 0.25, -0.125]
+                    }
+                );
+                assert!(
+                    output[window * width + 8..(window + 1) * width]
+                        .iter()
+                        .all(|&x| x == 0.0)
+                );
+            }
         }
     }
 }

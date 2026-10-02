@@ -134,7 +134,7 @@ impl ChannelData {
             let offsets = if short { tables.short } else { tables.long };
             let limit =
                 BandTables::tns_limit(config.sample_rate, short).min(self.info.max_sfb as usize);
-            tns.filter(&spectrum, offsets, limit).map_err(Error::from)
+            tns.filter_owned(spectrum, offsets, limit).map_err(Error::from)
         } else {
             Ok(spectrum)
         }
