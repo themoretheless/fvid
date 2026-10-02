@@ -1,4 +1,5 @@
 //! Owned bounded EBML framing and scalar values; shared with native Matroska.
+use crate::owned_file_tags::FileTags;
 use std::io::{Read, Seek, SeekFrom};
 #[derive(Debug)]
 pub struct Error(pub String);
@@ -18,6 +19,7 @@ fn invalid(message: &str) -> Error {
     Error(message.into())
 }
 include!("owned_ebml_impl.rs");
+include!("owned_matroska_metadata_read_impl.rs");
 impl Element {
     pub fn id(&self) -> u32 {
         self.id
@@ -55,6 +57,27 @@ impl Budget {
             failed: false,
         }
     }
+    /// Read file-wide tags using the same admission counter as framing.
+    /// Malformed optional metadata preserves the native reader's lenient policy.
+    pub fn read_file_tags(&mut self, source: &mut (impl Read + Seek), value: Element) -> FileTags {
+        let mut tags = FileTags::default();
+        if !self.failed && self.count < self.limit {
+            read_tags(source, value, &mut self.count, self.limit, &mut tags);
+        }
+        tags
+    }
+    /// Read flat chapter atoms; times remain in the reader's original units.
+    pub fn read_chapter_atoms(
+        &mut self,
+        source: &mut (impl Read + Seek),
+        value: Element,
+    ) -> Vec<(u64, Option<u64>, String)> {
+        let mut chapters = Vec::new();
+        if !self.failed && self.count < self.limit {
+            read_chapters(source, value, &mut self.count, self.limit, &mut chapters);
+        }
+        chapters
+    }
     pub fn next(&mut self, source: &mut (impl Read + Seek), parent_end: u64) -> Result<Element> {
         if self.failed || self.count >= self.limit {
             return Err(invalid("WebM element limit exceeded"));
@@ -68,6 +91,39 @@ impl Budget {
 mod tests {
     use super::*;
     use std::io::Cursor;
+    #[test]
+    fn library_reads_synthetic_file_tags_and_chapter_atoms() {
+        fn node(id: &[u8], payload: &[u8]) -> Vec<u8> {
+            assert!(payload.len() < 127);
+            [id, &[0x80 | payload.len() as u8], payload].concat()
+        }
+        let name = node(&[0x45, 0xa3], b"TITLE");
+        let value = node(&[0x44, 0x87], b"Synthetic title");
+        let simple = node(&[0x67, 0xc8], &[name, value].concat());
+        let tag = node(&[0x73, 0x73], &simple);
+        let tags = node(&[0x12, 0x54, 0xc3, 0x67], &tag);
+        let mut source = Cursor::new(tags);
+        let length = source.get_ref().len() as u64;
+        let mut budget = Budget::new(32);
+        let master = budget.next(&mut source, length).unwrap();
+        assert_eq!(
+            budget.read_file_tags(&mut source, master).title,
+            "Synthetic title"
+        );
+        let start = node(&[0x91], &[5]);
+        let end = node(&[0x92], &[9]);
+        let display = node(&[0x80], &node(&[0x85], b"Chapter"));
+        let atom = node(&[0xb6], &[start, end, display].concat());
+        let edition = node(&[0x45, 0xb9], &atom);
+        let chapters = node(&[0x10, 0x43, 0xa7, 0x70], &edition);
+        let mut source = Cursor::new(chapters);
+        let length = source.get_ref().len() as u64;
+        let master = budget.next(&mut source, length).unwrap();
+        assert_eq!(
+            budget.read_chapter_atoms(&mut source, master),
+            vec![(5, Some(9), "Chapter".into())]
+        );
+    }
     #[test]
     fn bounded_values_preserve_offsets_and_stop_before_next_header() {
         let mut source = Cursor::new([0x81, 0x82, 1, 2]);

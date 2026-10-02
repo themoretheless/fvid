@@ -359,3 +359,7 @@ the native reader. In-memory synthetic controls cover offsets, element/value
 limits, malformed and truncated headers, parent bounds and unknown sizes.
 Existing native Matroska metadata/video tests verify reader compatibility;
 ordinary checks use neither FFmpeg nor network access.
+
+The library also owns the unchanged lenient file-tag and flat chapter-atom
+reader, shared with the frontend. A synthetic in-memory Tags/Chapters control
+checks the public API; full track/index parsing still remains in the frontend.
