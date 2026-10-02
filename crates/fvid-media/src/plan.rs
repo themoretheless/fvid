@@ -3717,6 +3717,11 @@ pub fn plan_loudnorm(
     dual_pass: bool,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
+    if crate::owned_loudnorm::supports_request(
+        source, Path::new("output.wav"), args, dual_pass, options,
+    ) {
+        return crate::owned_loudnorm::plan_loudnorm(source, args, dual_pass, options);
+    }
     let resolved = match args {
         None | Some("") => crate::loudness::DEFAULT_LOUDNORM_ARGS.to_owned(),
         Some(value) => {

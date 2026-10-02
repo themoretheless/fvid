@@ -80,6 +80,12 @@ pub fn try_plan(
         ) {
             return Ok(None);
         }
+        return Ok(Some(
+            fvid_media::owned_loudnorm::plan_loudnorm(
+                source, Some(&resolved), dual_pass, options,
+            )
+            .map_err(|e| crate::invalid(&e))?,
+        ));
     } else {
         if options.max_controlled_bytes.is_some()
             || !options.metadata_set.is_empty()

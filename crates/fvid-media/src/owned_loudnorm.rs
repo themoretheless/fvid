@@ -162,6 +162,69 @@ pub fn supports_request(
     }
 }
 
+/// Metadata-only plan for the owned WAVE normalizer. Does not decode samples,
+/// measure loudness, emit progress or create output files.
+pub fn plan_loudnorm(
+    source: &Path,
+    args: Option<&str>,
+    dual_pass: bool,
+    options: &CopyOptions,
+) -> Result<fvid_media_info::MediaPlan> {
+    use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
+    let resolved = validate_request(args)?;
+    if !supports_request(
+        source,
+        Path::new("output.wav"),
+        Some(&resolved),
+        dual_pass,
+        options,
+    ) {
+        return Err("request has no owned WAVE loudnorm route".into());
+    }
+    let info = crate::owned_probe::probe_wave(source).map_err(|e| e.to_string())?;
+    let report = report_requested(Some(&resolved))?;
+    let mut steps = vec![PlanStep {
+        action: "decode".into(),
+        detail: "owned WAVE reader retaining PCM precision and speaker layout for f64 processing"
+            .into(),
+    }];
+    if dual_pass || report {
+        steps.push(PlanStep { action: "analyze".into(), detail: if dual_pass {
+            "owned K-weighting, loudness gating, LRA and true peak; select measured linear gain when range/peak margins permit"
+        } else {
+            "owned input loudness/true-peak measurement for the requested report; retain the configured normalization mode"
+        }.into() });
+    }
+    steps.push(PlanStep { action: "filter".into(), detail: format!("owned loudnorm targets {resolved}; eligible measured linear gain, otherwise owned dynamic controller and linked true-peak limiter") });
+    if report {
+        steps.push(PlanStep { action: "analyze-output".into(), detail: "owned output loudness/true-peak measurement before publication; print JSON/summary after successful publication".into() });
+    }
+    steps.push(PlanStep { action: "write".into(), detail: "float32 WAVE; linear retains source clock, dynamic uses 192 kHz; atomic publication without overwrite; report/completion only after publication".into() });
+    let mut notes = vec![
+        "normalization backend: fvid; dynamic PCM is not claimed equivalent to libavfilter".into(),
+        "measurement values, mode selection, packet contents and memory admission are execution checks".into(),
+    ];
+    if let Some(maximum) = options.max_packets {
+        notes.push(format!(
+            "read at most {maximum} original WAVE PCM blocks per pass"
+        ));
+    }
+    Ok(MediaPlan {
+        command: "loudnorm".into(),
+        input: source.into(),
+        inputs: vec![source.into()],
+        streams: vec![PlanStream {
+            index: 0,
+            media_type: "audio".into(),
+            codec: info.streams[0].codec.clone(),
+            disposition: "decode".into(),
+        }],
+        steps,
+        graph: None,
+        notes,
+    })
+}
+
 pub fn apply_loudnorm(
     source: &Path,
     destination: &Path,
@@ -607,6 +670,56 @@ fn apply_dynamic(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn public_wave_plan_uses_owned_backend_with_or_without_legacy() {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/loudnorm-dual.wav");
+        let options = CopyOptions {
+            max_packets: Some(3),
+            progress: Some(fvid_control::ProgressHook::new(|_| {
+                panic!("plan emitted progress")
+            })),
+            ..Default::default()
+        };
+        for dual in [false, true] {
+            let plan =
+                crate::plan_loudnorm(&source, Some("I=-16:print_format=json"), dual, &options)
+                    .unwrap();
+            assert!(plan.graph.is_none());
+            assert_eq!(plan.streams[0].codec, "pcm_s16le");
+            assert_eq!(
+                plan.steps
+                    .iter()
+                    .map(|s| s.action.as_str())
+                    .collect::<Vec<_>>(),
+                ["decode", "analyze", "filter", "analyze-output", "write"]
+            );
+            assert!(
+                plan.notes
+                    .iter()
+                    .any(|s| s.contains("3 original WAVE PCM blocks"))
+            );
+            let own =
+                super::plan_loudnorm(&source, Some("I=-16:print_format=json"), dual, &options)
+                    .unwrap();
+            assert_eq!(
+                serde_json::to_value(plan).unwrap(),
+                serde_json::to_value(own).unwrap()
+            );
+        }
+        let no_report = crate::plan_loudnorm(
+            &source,
+            Some("print_format=json:print_format=none"),
+            false,
+            &options,
+        )
+        .unwrap();
+        assert_eq!(no_report.steps.len(), 3);
+        for args in ["I=0", "unknown=1", "print_format=maybe"] {
+            assert!(super::plan_loudnorm(&source, Some(args), false, &options).is_err());
+        }
+    }
+
     use super::*;
     const ARGS: &str = "I=-16:TP=-1.5:LRA=11:measured_I=-22:measured_TP=-12:measured_LRA=2:measured_thresh=-32:linear=true";
     #[test]

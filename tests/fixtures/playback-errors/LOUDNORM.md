@@ -62,3 +62,10 @@ progress with one completion event. A separate regression cancels at the end
 of measurement and verifies that no destination is published. The three-second
 zero-LRA fixture verifies dynamic fallback. Tests never run the generator or
 FFmpeg.
+
+The public `fvid_media::plan_loudnorm` API also uses this fixture to verify
+owned WAVE planning with and without the legacy feature. Single/dual-pass
+plans share execution parameter validation, report selection and PCM block
+limit semantics. Planning reads metadata only, emits no progress, and describes
+the owned controller rather than a libavfilter graph. The native CLI delegates
+its WAVE plan to this same library API.

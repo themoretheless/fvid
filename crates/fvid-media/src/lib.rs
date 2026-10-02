@@ -18,7 +18,7 @@ pub mod owned_normalize;
 pub mod owned_loudnorm;
 mod owned_dynamic_loudnorm;
 #[cfg(not(feature = "legacy-ffmpeg"))]
-pub use owned_loudnorm::{apply_loudnorm, apply_loudnorm_dual};
+pub use owned_loudnorm::{apply_loudnorm, apply_loudnorm_dual, plan_loudnorm};
 
 pub mod owned_pcm_gain;
 
