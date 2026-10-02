@@ -19,6 +19,7 @@ import tempfile
 import time
 
 from common import ROOT, prepend_cuda_bin, release_binary
+from y4m_oracle import transform as reference_transform
 
 FORMATS = {"420": (2, 2, "yuv420p"), "422": (2, 1, "yuv422p"), "444": (1, 1, "yuv444p")}
 def invoke(command, **kwargs):
@@ -67,24 +68,6 @@ def make_input(path, width, height, chroma, frames):
 def options(crop, horizontal, vertical):
     args = ["--crop", ":".join(map(str, crop))] if crop else []
     return args + (["--hflip"] if horizontal else []) + (["--vflip"] if vertical else [])
-
-
-def ffmpeg_command(ffmpeg, source, chroma, crop, horizontal, vertical, one_thread=False):
-    filters = []
-    if crop:
-        x, y, width, height = crop
-        filters.append(f"crop={width}:{height}:{x}:{y}:exact=1")
-    filters += (["hflip"] if horizontal else []) + (["vflip"] if vertical else [])
-    command = [ffmpeg, "-nostdin", "-v", "error"]
-    if one_thread:
-        command += ["-filter_threads", "1", "-threads", "1"]
-    command += ["-i", str(source), "-an", "-sn"]
-    if filters:
-        command += ["-vf", ",".join(filters)]
-    command += ["-c:v", "rawvideo", "-pix_fmt", FORMATS[chroma][2]]
-    if one_thread:
-        command += ["-threads", "1"]
-    return command + ["-strict", "-1", "-f", "yuv4mpegpipe", "-"]
 
 
 def selected_backend(stderr):
@@ -159,24 +142,23 @@ def validate(args, work, report):
             for horizontal, vertical in ((False, False), (True, False), (False, True), (True, True)):
                 case = dict(chroma=chroma, input_dimensions=[width, height], crop=crop, horizontal=horizontal, vertical=vertical)
                 commands = {backend: [args.binary, str(source), "-", "--backend", backend, "--device", str(args.device if backend != "cpu" else 0)] + options(crop, horizontal, vertical) for backend in active}
-                commands["ffmpeg"] = ffmpeg_command(args.ffmpeg, source, chroma, crop, horizontal, vertical)
-                signatures, diagnostics = {}, {}
+                signatures, diagnostics = {"python_oracle": signature(reference_transform(source.read_bytes(), crop, horizontal, vertical))}, {}
                 cpu_bytes = None
                 for engine, command in commands.items():
                     result = success(command, stdout=subprocess.PIPE)
                     if engine == "cpu":
                         cpu_bytes = result.stdout
-                    elif engine != "ffmpeg" and result.stdout != cpu_bytes:
+                    elif result.stdout != cpu_bytes:
                         raise RuntimeError(f"Y4M metadata or frame bytes differ from CPU: {case}, {engine}")
                     signatures[engine] = signature(result.stdout)
                     diagnostics[engine] = result.stderr.decode(errors="replace")
-                    if engine != "ffmpeg" and selected_backend(diagnostics[engine]) != active[engine]:
+                    if selected_backend(diagnostics[engine]) != active[engine]:
                         raise RuntimeError(f"Backend changed during checks: {engine}")
                 if any(value != signatures["cpu"] for value in signatures.values()):
                     raise RuntimeError(f"Frame mismatch: {case}: {signatures}")
-                case.update(signature=signatures["cpu"], verified_engines=list(commands), diagnostics=diagnostics)
+                case.update(signature=signatures["cpu"], verified_engines=["python_oracle", *commands], diagnostics=diagnostics)
                 report["correctness"].append(case)
-        print(f"Correctness: {chroma}, 8 transform cases, engines={','.join(active)},ffmpeg", flush=True)
+        print(f"Correctness: {chroma}, 8 transform cases, engines={','.join(active)},python_oracle", flush=True)
 
     # Cross texture-row, dispatch and large-frame boundaries as well as the
     # tiny packing cases above. Benchmarks alone do not verify output bytes.
@@ -191,15 +173,15 @@ def validate(args, work, report):
         source = work / f"boundary-{width}-{height}-{chroma}.y4m"
         make_input(source, width, height, chroma, 2)
         for crop in (None, rectangle):
-            reference = None
-            case = dict(chroma=chroma, input_dimensions=[width, height], crop=crop, horizontal=True, vertical=True, verified_engines=[])
-            for engine in [*active, "ffmpeg"]:
-                command = ffmpeg_command(args.ffmpeg, source, chroma, crop, True, True) if engine == "ffmpeg" else [args.binary, str(source), "-", "--backend", engine, "--device", str(args.device if engine != "cpu" else 0)] + options(crop, True, True)
+            reference = signature(reference_transform(source.read_bytes(), crop, True, True))
+            case = dict(chroma=chroma, input_dimensions=[width, height], crop=crop, horizontal=True, vertical=True, verified_engines=["python_oracle"])
+            for engine in active:
+                command = [args.binary, str(source), "-", "--backend", engine, "--device", str(args.device if engine != "cpu" else 0)] + options(crop, True, True)
                 result = success(command, stdout=subprocess.PIPE)
                 actual_signature = signature(result.stdout)
                 if reference is not None and actual_signature != reference:
                     raise RuntimeError(f"Large-frame output mismatch: {case}, {engine}")
-                if engine != "ffmpeg" and selected_backend(result.stderr.decode(errors="replace")) != active[engine]:
+                if selected_backend(result.stderr.decode(errors="replace")) != active[engine]:
                     raise RuntimeError(f"Backend changed during large-frame checks: {engine}")
                 reference = actual_signature
                 case["verified_engines"].append(engine)
@@ -240,6 +222,7 @@ def validate(args, work, report):
 
 
 def benchmark(args, work, active, report):
+    from benchmark_gpu_reference import ffmpeg_command
     report["benchmarks"] = []
     rng = random.Random(451)
     dimensions = {"720": (1280, 720), "1080": (1920, 1080), "4k": (3840, 2160)}
@@ -300,12 +283,13 @@ def main():
     prepend_cuda_bin()
     if args.frames < 1 or args.rounds < 1 or args.device < 0:
         parser.error("frames and rounds must be positive; device must be non-negative")
-    report = dict(created_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(), platform=platform.platform(), machine=platform.machine(), binary=args.binary, binary_sha256=file_sha256(args.binary), validation_script_sha256_at_execution=file_sha256(__file__), source_sha256={str(source.relative_to(ROOT)): file_sha256(source) for source in source_files()}, ffmpeg=success([args.ffmpeg, "-version"], stdout=subprocess.PIPE).stdout.decode().splitlines()[0], rustc=success(["rustc", "--version"], stdout=subprocess.PIPE).stdout.decode().strip(), method="End-to-end CLI wall time including process startup, GPU device/pipeline initialization, file reads, upload, transform, readback and Y4M serialization to OS null sink. One warmup then seeded randomized rounds. Warm file cache. No codec or steady-state resident-GPU performance claim.", benchmark_rounds=args.rounds, status="running")
+    report = dict(validation_reference_sha256=file_sha256(ROOT / "scripts/y4m_oracle.py"), created_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(), platform=platform.platform(), machine=platform.machine(), binary=args.binary, binary_sha256=file_sha256(args.binary), validation_script_sha256_at_execution=file_sha256(__file__), source_sha256={str(source.relative_to(ROOT)): file_sha256(source) for source in source_files()}, correctness_reference="independent Python planar oracle", rustc=success(["rustc", "--version"], stdout=subprocess.PIPE).stdout.decode().strip(), method="End-to-end CLI wall time including process startup, GPU device/pipeline initialization, file reads, upload, transform, readback and Y4M serialization to OS null sink. One warmup then seeded randomized rounds. Warm file cache. No codec or steady-state resident-GPU performance claim.", benchmark_rounds=args.rounds, status="running")
     try:
         with tempfile.TemporaryDirectory(prefix="fvid-gpu-validation-") as directory:
             work = pathlib.Path(directory)
             active = validate(args, work, report)
             if args.benchmark:
+                report["ffmpeg"] = success([args.ffmpeg, "-version"], stdout=subprocess.PIPE).stdout.decode().splitlines()[0]
                 benchmark(args, work, active, report)
         report["status"] = "passed"
     except Exception as error:

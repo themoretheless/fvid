@@ -8,7 +8,8 @@ import pathlib
 import re
 import subprocess
 import tempfile
-from validate_gpu import ROOT, make_input, signature, ffmpeg_command, file_sha256
+from validate_gpu import ROOT, make_input, signature, file_sha256
+from y4m_oracle import transform as reference_transform
 from common import prepend_cuda_bin, release_binary
 
 
@@ -47,8 +48,8 @@ def main():
             gpu = execute(command)
             actual = signature(gpu.stdout)
             cpu = execute([binary, str(source), '-', '--backend', 'cpu', '--crop', crop_arg, '--hflip', '--vflip'])
-            reference = execute(ffmpeg_command('ffmpeg', source, chroma, crop, True, True))
-            assert actual == signature(cpu.stdout) == signature(reference.stdout)
+            reference = reference_transform(source.read_bytes(), crop, True, True)
+            assert actual == signature(cpu.stdout) == signature(reference)
             diagnostics = gpu.stderr.decode()
             assert f'backend={args.backend} ' in diagnostics
             stats = {key: int(value) for key, value in re.findall(r'\b(uploads|downloads|upload_bytes|download_bytes|filter_passes)=(\d+)', diagnostics)}
@@ -67,10 +68,10 @@ def main():
         first = execute([binary, str(source), '-', '--backend', 'cpu', '--hflip'])
         second = execute([binary, '-', '-', '--backend', 'cpu', '--crop', '2:2:8:6'], first.stdout)
         third = execute([binary, '-', '-', '--backend', 'cpu', '--vflip'], second.stdout)
-        reference = execute(['ffmpeg', '-nostdin', '-v', 'error', '-i', str(source),
-                             '-vf', 'hflip,crop=8:6:2:2:exact=1,vflip', '-c:v', 'rawvideo',
-                             '-pix_fmt', 'yuv420p', '-f', 'yuv4mpegpipe', '-'])
-        assert signature(gpu.stdout) == signature(third.stdout) == signature(reference.stdout)
+        reference = reference_transform(source.read_bytes(), horizontal=True)
+        reference = reference_transform(reference, (2, 2, 8, 6))
+        reference = reference_transform(reference, vertical=True)
+        assert signature(gpu.stdout) == signature(third.stdout) == signature(reference)
         records.append(dict(width=16, height=12, format='420', stages=3, order='hflip,crop,vflip',
                             input_sha256=file_sha256(source), output=signature(gpu.stdout),
                             diagnostic=gpu.stderr.decode(), command=command))
@@ -86,10 +87,10 @@ def main():
     authored = [*ROOT.joinpath('src').rglob('*.rs'), *ROOT.joinpath('src').rglob('*.wgsl'),
                 *ROOT.joinpath('crates/fvid-cuda/src').rglob('*.rs'), *ROOT.joinpath('crates/fvid-cuda/src').rglob('*.cu'),
                 ROOT/'Cargo.toml', ROOT/'Cargo.lock', ROOT/'crates/fvid-cuda/Cargo.toml',
-                ROOT/'tests/resident.rs', pathlib.Path(__file__)]
+                ROOT/'tests/resident.rs', ROOT/'scripts/y4m_oracle.py', pathlib.Path(__file__)]
     report = dict(created_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(), backend=args.backend,
                   binary_sha256=file_sha256(binary), source_sha256={str(p.relative_to(ROOT)): file_sha256(p) for p in authored},
-                  qualification='Actual GPU execution; API transfer counters, not a driver trace. No codec surface interop.',
+                  qualification='Actual GPU execution; independent Python planar reference and CPU comparison; API transfer counters, not a driver trace. No codec surface interop.',
                   cases=records, failure_check=failure, resident_api_test=api_test)
     target = pathlib.Path(args.report)
     target.write_text(json.dumps(report, indent=2) + '\n')

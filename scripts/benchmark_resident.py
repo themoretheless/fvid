@@ -13,7 +13,8 @@ import statistics
 import subprocess
 import tempfile
 import time
-from validate_gpu import ROOT, make_input, ffmpeg_command, file_sha256
+from validate_gpu import ROOT, make_input, file_sha256
+from benchmark_gpu_reference import ffmpeg_command
 
 
 def run(command, output):
