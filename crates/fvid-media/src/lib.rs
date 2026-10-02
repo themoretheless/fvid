@@ -80,5 +80,6 @@ pub mod owned_true_peak;
 
 pub mod owned_wave_loudness;
 pub mod owned_adts_loudness;
+pub mod owned_adts_loudnorm;
 #[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_wave_loudness::{measure_loudness, plan_loudness};

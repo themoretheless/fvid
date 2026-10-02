@@ -170,6 +170,9 @@ pub fn plan_loudnorm(
     dual_pass: bool,
     options: &CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan> {
+    if crate::owned_adts_export::recognizes(source)? {
+        return crate::owned_adts_loudnorm::plan_loudnorm(source, args, dual_pass, options);
+    }
     use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
     let resolved = validate_request(args)?;
     if !supports_request(
@@ -231,6 +234,9 @@ pub fn apply_loudnorm(
     args: Option<&str>,
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
+    if crate::owned_adts_export::recognizes(source)? {
+        return crate::owned_adts_loudnorm::apply(source, destination, args, false, options);
+    }
     let args = resolve_loudnorm_args(args)?;
     let params = parse(&args)?;
     if params.print != Print::None {
@@ -254,6 +260,9 @@ pub fn apply_loudnorm_dual(
     args: Option<&str>,
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
+    if crate::owned_adts_export::recognizes(source)? {
+        return crate::owned_adts_loudnorm::apply(source, destination, args, true, options);
+    }
     let base = resolve_loudnorm_args(args)?;
     let original = parse(&base)?;
     let (measurement, export_options) = measure_phase(source, original.dual_mono, options)?;

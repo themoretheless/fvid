@@ -466,6 +466,9 @@ pub fn apply_loudnorm(
     args: Option<&str>,
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
+    if crate::owned_adts_loudnorm::supports(source, destination, args, options) {
+        return crate::owned_adts_loudnorm::apply(source, destination, args, false, options);
+    }
     let loudnorm_args = resolve_loudnorm_args(args)?;
     if crate::owned_loudnorm::supports(source, destination, &loudnorm_args, options) {
         return crate::owned_loudnorm::apply_loudnorm(source, destination, Some(&loudnorm_args), options);
@@ -782,6 +785,9 @@ pub fn apply_loudnorm_dual(
     args: Option<&str>,
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
+    if crate::owned_adts_loudnorm::supports(source, destination, args, options) {
+        return crate::owned_adts_loudnorm::apply(source, destination, args, true, options);
+    }
     let base = resolve_loudnorm_args(args)?;
     if crate::owned_loudnorm::supports_dual(source, destination, &base, options) {
         return crate::owned_loudnorm::apply_loudnorm_dual(source, destination, Some(&base), options);

@@ -42,6 +42,16 @@ def generate(output):
     (output / 'aac-concat-route.aac').write_bytes(encoded[:cursor])
     (output / 'aac-concat-route.y4m').write_bytes((fixtures / 'aac-packet-prefix.y4m').read_bytes())
 
+    # Reuse only synthetic complete AAC packets; no external encoder needed.
+    # 210 packets cross the normalizer's three-second dynamic-mode boundary.
+    (output / 'aac-loudnorm-long.aac').write_bytes(encoded[:cursor] * 70)
+    rates = [96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350]
+    rate = rates[(encoded[2] >> 2) & 15]
+    video = f'YUV4MPEG2 W16 H16 F{rate}:1024 Ip C420jpeg\n'.encode()
+    video += (b'FRAME\n' + bytes([96]) * 256 + bytes([128]) * 128) * 210
+    (output / 'aac-loudnorm-long.y4m').write_bytes(video)
+
+
     # A short float32 wide-eight layout must retain its nonstandard mask.
     samples = b''.join(struct.pack('<f', channel / 16) for _ in range(16) for channel in range(8))
     fmt = struct.pack('<HHIIHHHHI', 0xfffe, 8, 48000, 48000 * 32, 32, 32, 22, 32, 0xff)

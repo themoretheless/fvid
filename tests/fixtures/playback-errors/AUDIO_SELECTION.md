@@ -160,3 +160,22 @@ remains separate: supporting AAC measurement must not qualify a WAVE-only export
 Legacy execution qualifies packet tools read-only before dispatch; unsupported
 profiles/tools retain their prior backend. Plans only inspect configuration and
 declare payload validation as an execution responsibility.
+
+ADTS AAC-LC single/dual-pass normalization is now also available directly through
+the public media library's owned normalizer. Decode uses the same private spool
+as extraction/measurement; normalization keeps the encoded packet prefix but
+clears that limit for internal WAVE passes. Progress offsets retain monotonic
+counts across decode and PCM stages, with one completion after final publication.
+Known unsupported requests retain their existing legacy dispatch; once owned
+execution starts, failures propagate without a legacy retry. Aggregate allocation
+admission and metadata edits remain unsupported for this ADTS normalizer route.
+
+`aac-loudnorm-long.aac` repeats only the three complete packets of the existing
+synthetic AAC prefix 70 times (210 frames). Its paired 16x16 Y4M has 210 frames at
+the AAC sample-rate/1024 clock, so both cover the same roughly five-second window.
+The pure-Python WAVE/probe generator produces both without an external encoder.
+This crosses the owned normalizer's three-second dynamic-mode boundary. Ordinary
+tests read the generated fixture, not the generator. Tests compare normalized
+WAVE bytes and resolved args with independently decoded WAVE in single and dual
+passes, including JSON reports, mono/stereo/PCE, encoded packet-prefix limits,
+read-only plans, truncated tail refusal and no-overwrite publication.

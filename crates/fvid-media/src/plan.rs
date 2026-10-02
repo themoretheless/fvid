@@ -3720,6 +3720,9 @@ pub fn plan_loudnorm(
     dual_pass: bool,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
+    if crate::owned_adts_loudnorm::supports_plan(source, args, options) {
+        return crate::owned_adts_loudnorm::plan_loudnorm(source, args, dual_pass, options);
+    }
     if crate::owned_loudnorm::supports_request(
         source, Path::new("output.wav"), args, dual_pass, options,
     ) {
