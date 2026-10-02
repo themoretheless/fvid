@@ -36,3 +36,13 @@ metadata equality, reduced fractional frame rates, tagged frame markers, bounded
 header lines and truncated payloads. Synthetic frame payloads are constructed in
 the test itself; no private media, external codec or fixture generator is used.
 Core Y4M processing and root/domain API compatibility tests remain enabled.
+
+`fvid_media::decode_video` now selects owned Y4M raw decode-and-discard for
+this grammar, including when legacy support is enabled. It consumes every
+sample byte through 8 KiB scratch storage, reports frame geometry/pixel format
+and rejects incomplete payloads; metadata-only seeks are not counted as decode.
+The frame-rate parser is shared with owned probing, including positive rational
+validation, reduction and the existing omitted-rate default. Public integration
+tests require the owned backend for all 13 chroma/depth variants and additionally
+exercise three-byte reads and truncated-tail refusal on the synthetic WAVE-probe
+Y4M control. Transformed video decode and other containers remain migration work.

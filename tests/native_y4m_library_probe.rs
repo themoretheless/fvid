@@ -61,6 +61,17 @@ fn every_owned_chroma_and_depth_has_exact_frontend_and_library_metadata() {
         assert_eq!(own.duration_us, Some(100100));
         assert_eq!(own.streams[0].average_frame_rate, [30000, 1001]);
         assert_eq!(own.streams[0].duration, Some(3));
+        let decoded = fvid_media::decode_video(&source).unwrap();
+        assert_eq!(
+            (
+                decoded.video_frames,
+                decoded.width,
+                decoded.height,
+                decoded.decode_errors
+            ),
+            (3, 8, 6, 0)
+        );
+        assert_eq!(decoded.backend, "owned Y4M raw decode");
         assert!(fvid_media::probe_as(&source, Some("yuv4mpegpipe")).is_ok());
     }
 }
@@ -83,4 +94,27 @@ fn shared_parser_retains_bounded_lines_and_truncated_payload_refusal() {
         let frontend = fvid::native_probe::probe(&path).unwrap_err();
         assert_eq!(owned, frontend);
     }
+}
+
+#[test]
+fn owned_y4m_decoder_accepts_short_reads_and_refuses_incomplete_payload() {
+    use std::io::{BufReader, Cursor, Read};
+    struct Short(Cursor<Vec<u8>>);
+    impl Read for Short {
+        fn read(&mut self, bytes: &mut [u8]) -> std::io::Result<usize> {
+            let count = bytes.len().min(3);
+            self.0.read(&mut bytes[..count])
+        }
+    }
+    let data = include_bytes!("fixtures/playback-errors/wave-probe-info.y4m").to_vec();
+    let full = fvid_media::owned_y4m_decode::decode_reader(BufReader::new(Short(Cursor::new(
+        data.clone(),
+    ))))
+    .unwrap();
+    assert_eq!((full.video_frames, full.width, full.height), (3, 16, 16));
+    let error = fvid_media::owned_y4m_decode::decode_reader(BufReader::new(Short(Cursor::new(
+        data[..data.len() - 1].to_vec(),
+    ))))
+    .unwrap_err();
+    assert_eq!(error, "truncated Y4M frame payload");
 }

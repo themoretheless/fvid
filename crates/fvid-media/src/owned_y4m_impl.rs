@@ -96,6 +96,39 @@ impl Header {
         header.frame_len()?;
         Ok(header)
     }
+    /// Validated, reduced frame rate; Y4M's omitted rate defaults to 25 fps.
+    pub fn frame_rate(&self) -> Result<[i32; 2]> {
+        let mut rate = None;
+        for token in &self.tokens {
+            if let Some(value) = token.strip_prefix('F') {
+                if rate.is_some() {
+                    return Err(invalid("duplicate Y4M frame rate"));
+                }
+                let (n, d) = value
+                    .split_once(':')
+                    .ok_or_else(|| invalid("invalid Y4M frame rate"))?;
+                let n = n
+                    .parse::<i32>()
+                    .map_err(|_| invalid("invalid Y4M frame rate"))?;
+                let d = d
+                    .parse::<i32>()
+                    .map_err(|_| invalid("invalid Y4M frame rate"))?;
+                if n <= 0 || d <= 0 {
+                    return Err(invalid("Y4M frame rate must be positive"));
+                }
+                rate = Some([n, d]);
+            }
+        }
+        let [n, d] = rate.unwrap_or([25, 1]);
+        let mut a = n;
+        let mut b = d;
+        while b != 0 {
+            let r = a % b;
+            a = b;
+            b = r;
+        }
+        Ok([n / a, d / a])
+    }
     pub fn depth(&self) -> u8 {
         self.tokens
             .iter()

@@ -41,30 +41,7 @@ pub fn probe_y4m(source: &Path) -> Result<MediaInfo> {
     }
     let header = crate::owned_y4m::Header::parse(&line).map_err(|e| e.to_string())?;
     let frame_bytes = header.frame_len().map_err(|e| e.to_string())? as u64;
-    let mut rate = None;
-    for token in &header.tokens {
-        if let Some(value) = token.strip_prefix('F') {
-            if rate.is_some() {
-                return Err("duplicate Y4M frame rate".into());
-            }
-            let (n, d) = value.split_once(':').ok_or("invalid Y4M frame rate")?;
-            let n = n.parse::<i32>().map_err(|_| "invalid Y4M frame rate")?;
-            let d = d.parse::<i32>().map_err(|_| "invalid Y4M frame rate")?;
-            if n <= 0 || d <= 0 {
-                return Err("Y4M frame rate must be positive".into());
-            }
-            rate = Some([n, d]);
-        }
-    }
-    let [n, d] = rate.unwrap_or([25, 1]);
-    let mut a = n;
-    let mut b = d;
-    while b != 0 {
-        let r = a % b;
-        a = b;
-        b = r;
-    }
-    let rate = Some([n / a, d / a]);
+    let rate = Some(header.frame_rate()?);
     let mut frames = 0i64;
     while crate::owned_y4m::line(&mut input, &mut line).map_err(|e| e.to_string())? {
         if line != b"FRAME\n" && !line.starts_with(b"FRAME ") {

@@ -10,6 +10,9 @@ pub use fvid_control::{CancelFlag, CopyOptions, ProgressEvent, ProgressHook};
 pub mod owned_wav;
 pub mod owned_y4m;
 pub mod owned_y4m_probe;
+pub mod owned_y4m_decode;
+#[cfg(not(feature = "legacy-ffmpeg"))]
+pub use owned_y4m_decode::decode_video;
 pub mod owned_aac;
 
 pub mod owned_shuffleplanes;

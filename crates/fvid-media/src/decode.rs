@@ -75,6 +75,9 @@ pub use fvid_media_info::DecodeTransform;
 /// Software decode of the first video stream; frames are dropped after optional
 /// crop/hflip/vflip (same view/copy contracts as lossless export).
 pub fn decode_video(source: &Path) -> Result<DecodeStats> {
+    if crate::owned_y4m_decode::supports(source) {
+        return crate::owned_y4m_decode::decode_video(source);
+    }
     decode_video_transformed(source, DecodeTransform::default())
 }
 
