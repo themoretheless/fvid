@@ -149,6 +149,54 @@ pub(crate) fn apply(
         return Err("media operation cancelled".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
+    let prefix = transform.interval.map(|(_, to)| {
+        (
+            std::time::Duration::ZERO,
+            std::time::Duration::from_micros(to as u64),
+        )
+    });
+    let spool = decode_to_wave(source, prefix, options)?;
+    let base = spool.progress;
+    let original = options.progress.clone();
+    let mut pcm_options = options.clone();
+    pcm_options.streams = vec![0];
+    pcm_options.max_packets = None;
+    pcm_options.max_packet_bytes = CopyOptions::default().max_packet_bytes;
+    pcm_options.progress = original.map(|hook| {
+        ProgressHook::new(move |mut event| {
+            event.packets += base.packets;
+            event.payload_bytes += base.payload_bytes;
+            hook.emit(event);
+        })
+    });
+    let mut result = crate::owned_audio_export::decode_audio_transformed(
+        &spool.wave,
+        destination,
+        transform,
+        &pcm_options,
+    )?;
+    result.decoded_frames = spool.stats.decoded_frames;
+    Ok(result)
+}
+
+pub(crate) struct DecodedSpool {
+    _storage: Spool,
+    pub wave: PathBuf,
+    pub stats: crate::owned_aac::AdtsPcmStats,
+    pub progress: ProgressEvent,
+}
+pub(crate) fn decode_to_wave(
+    source: &Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    options: &CopyOptions,
+) -> Result<DecodedSpool> {
+    if options.max_controlled_bytes.is_some() {
+        return Err("ADTS file allocation admission is not yet implemented".into());
+    }
+    if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+        return Err("media operation cancelled".into());
+    }
+    crate::owned_budget::check_rss_budget(options)?;
     let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         options.max_packet_bytes,
@@ -191,16 +239,10 @@ pub(crate) fn apply(
             hook.emit(event);
         }
     }));
-    let prefix = transform.interval.map(|(_, to)| {
-        (
-            std::time::Duration::ZERO,
-            std::time::Duration::from_micros(to as u64),
-        )
-    });
     let decoded = crate::owned_aac::decode_adts_pcm(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         &mut writer,
-        prefix,
+        interval,
         &decode_options,
     )
     .map_err(|e| e.to_string())?;
@@ -222,24 +264,10 @@ pub(crate) fn apply(
     writer.flush().map_err(|e| e.to_string())?;
     drop(writer);
     let base = *totals.lock().unwrap();
-    let original = options.progress.clone();
-    let mut pcm_options = options.clone();
-    pcm_options.streams = vec![0];
-    pcm_options.max_packets = None;
-    pcm_options.max_packet_bytes = CopyOptions::default().max_packet_bytes;
-    pcm_options.progress = original.map(|hook| {
-        ProgressHook::new(move |mut event| {
-            event.packets += base.packets;
-            event.payload_bytes += base.payload_bytes;
-            hook.emit(event);
-        })
-    });
-    let mut result = crate::owned_audio_export::decode_audio_transformed(
-        &wave,
-        destination,
-        transform,
-        &pcm_options,
-    )?;
-    result.decoded_frames = decoded.decoded_frames;
-    Ok(result)
+    Ok(DecodedSpool {
+        _storage: spool,
+        wave,
+        stats: decoded,
+        progress: base,
+    })
 }

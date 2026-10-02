@@ -141,3 +141,22 @@ three-complete-packets plus truncated-header fixture under max_packets=3.
 Invalid intervals, rates, gains, stream selection and NUL metadata are refused.
 ADTS aggregate admission remains explicitly unsupported rather than accepted
 as a fake implemented policy. Other containers keep their existing plan route.
+
+ADTS AAC-LC loudness measurement now uses the same owned decoder/private WAVE
+spool as file export, followed by the streaming owned loudness and true-peak
+meter. Spooling does not keep a second full PCM buffer. The temporary directory
+is private and removed on success/error. Encoded packet limits apply only to
+AAC decoding; internal PCM analysis blocks are excluded. Progress reports
+encoded packet counts and completes exactly once after analysis. Cancellation
+and RSS checks remain active during both phases. Aggregate allocation admission
+is still unsupported for ADTS; the legacy route retains that policy until its
+own implementation is complete.
+
+Library tests compare all loudness/peak fields with independently decoded WAVE
+for mono, stereo, active 5.1, PCE wide8 and the three-packet/truncated-tail fixture.
+They check encoded count semantics, short-prefix acceptance, full-source refusal,
+cancellation and metadata-only plans without progress. WAVE normalizer admission
+remains separate: supporting AAC measurement must not qualify a WAVE-only export.
+Legacy execution qualifies packet tools read-only before dispatch; unsupported
+profiles/tools retain their prior backend. Plans only inspect configuration and
+declare payload validation as an execution responsibility.
