@@ -163,3 +163,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_pcm_formats_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_audio_timeline_reference"
+harness = false

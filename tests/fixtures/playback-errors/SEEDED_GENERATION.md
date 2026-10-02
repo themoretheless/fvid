@@ -544,3 +544,5 @@ The synthetic `adts-concat-a.aac` and `adts-concat-b.aac` fixtures also cover ow
 The mixed MP4/WAVE PCM concat external sample comparison runs in `ffmpeg_pcm_concat_reference`; ordinary concat tests retain native sample equality, CLI/API byte equality, plans and publication controls without invoking FFmpeg.
 
 QuickTime PCM isolation/endian external comparisons and synthetic Matroska PCM external sample comparisons run only in `ffmpeg_pcm_formats_reference`. The ordinary synthetic Matroska test retains format, interval, mix, merge, plan and failure checks without FFmpeg. QuickTime external fixture isolation remains benchmark-only; this move does not add native MOV fixture generation.
+
+The synthetic Matroska PCM signed-padding and gap external presentation-clock comparisons run in `ffmpeg_audio_timeline_reference`. Ordinary timeline tests retain exact padding/gap/interval sample checks and overlap publication refusal without FFmpeg.

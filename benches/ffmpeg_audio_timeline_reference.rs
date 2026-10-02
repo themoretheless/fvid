@@ -1,3 +1,4 @@
+//! Explicit synthetic Matroska PCM presentation-clock comparison.
 use std::{path::PathBuf, time::Duration};
 fn atom(id: u32, data: &[u8]) -> Vec<u8> {
     let id = id.to_be_bytes();
@@ -99,13 +100,38 @@ fn render(
         .map(|p| f32::from_le_bytes(p.try_into().unwrap()))
         .collect::<Vec<_>>();
     assert_eq!(stats.sample_frames, samples.len() as u64);
-
+    if interval.is_none() {
+        if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
+            let result = std::process::Command::new(ffmpeg)
+                .args(["-v", "error", "-i"])
+                .arg(&input)
+                .args([
+                    "-af",
+                    "aresample=async=1:min_comp=0:min_hard_comp=0:max_soft_comp=0:first_pts=0",
+                    "-f",
+                    "f32le",
+                    "-",
+                ])
+                .output()
+                .unwrap();
+            assert!(
+                result.status.success(),
+                "{}",
+                String::from_utf8_lossy(&result.stderr)
+            );
+            let reference = result
+                .stdout
+                .chunks_exact(4)
+                .map(|v| f32::from_le_bytes(v.try_into().unwrap()))
+                .collect::<Vec<_>>();
+            assert_eq!(reference, samples, "independent presentation-clock PCM");
+        }
+    }
     samples
 }
 fn values(values: &[i16]) -> Vec<f32> {
     values.iter().map(|n| f32::from(*n) / 32768.0).collect()
 }
-#[test]
 fn padding_makes_overlapping_coded_intervals_contiguous_in_presentation() {
     let actual = render(
         "trim",
@@ -119,7 +145,6 @@ fn padding_makes_overlapping_coded_intervals_contiguous_in_presentation() {
     );
     assert_eq!(actual, values(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]));
 }
-#[test]
 fn presentation_gaps_are_silence_and_interval_selection_uses_that_clock() {
     let packets = [(0, [1, 2, 3, 4], 0), (1_000_000, [5, 6, 7, 8], 0)];
     assert_eq!(
@@ -135,7 +160,6 @@ fn presentation_gaps_are_silence_and_interval_selection_uses_that_clock() {
         values(&[0, 0, 0, 5, 6, 7])
     );
 }
-#[test]
 fn untrimmed_overlap_fails_without_publication() {
     let d = dir("overlap");
     let input = d.0.join("source.mka");
@@ -156,4 +180,12 @@ fn untrimmed_overlap_fails_without_publication() {
     );
     assert!(!output.exists());
     assert_eq!(std::fs::read_dir(&d.0).unwrap().count(), 1);
+}
+
+fn main() {
+    std::env::var_os("FVID_REFERENCE_FFMPEG").expect("Set FVID_REFERENCE_FFMPEG for this explicit reference benchmark");
+    padding_makes_overlapping_coded_intervals_contiguous_in_presentation();
+    presentation_gaps_are_silence_and_interval_selection_uses_that_clock();
+    untrimmed_overlap_fails_without_publication();
+    println!("Matroska padding and gap presentation-clock reference comparisons passed");
 }
