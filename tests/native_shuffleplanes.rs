@@ -35,7 +35,7 @@ const CASES: [(&str, &[u8], &[u8], u8, &str); 4] = [
     ),
 ];
 #[test]
-fn owned_plane_shuffle_matches_saved_oracles_at_source_precision() {
+fn owned_plane_shuffle_matches_analytical_oracles_at_source_precision() {
     for (_, input, expected, depth, args) in CASES {
         let mut reader = NativeReader::software(Cursor::new(input), usize::MAX).unwrap();
         let mut output = Vec::new();
