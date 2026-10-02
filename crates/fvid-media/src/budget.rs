@@ -13,43 +13,8 @@ pub(crate) fn frame_buffer_bytes(width: i32, height: i32, format: AVPixelFormat)
     if width <= 0 || height <= 0 {
         return Err("invalid frame geometry for memory estimate".into());
     }
-    let layout = match format {
-        AVPixelFormat_AV_PIX_FMT_YUV420P
-        | AVPixelFormat_AV_PIX_FMT_NV12
-        | AVPixelFormat_AV_PIX_FMT_NV21 => Some((Some((1, 1)), 1)),
-        AVPixelFormat_AV_PIX_FMT_YUV422P => Some((Some((1, 0)), 1)),
-        AVPixelFormat_AV_PIX_FMT_YUV444P => Some((Some((0, 0)), 1)),
-        AVPixelFormat_AV_PIX_FMT_GRAY8 => Some((None, 1)),
-        AVPixelFormat_AV_PIX_FMT_YUV420P10LE
-        | AVPixelFormat_AV_PIX_FMT_YUV420P10BE
-        | AVPixelFormat_AV_PIX_FMT_YUV420P12LE
-        | AVPixelFormat_AV_PIX_FMT_YUV420P12BE
-        | AVPixelFormat_AV_PIX_FMT_YUV420P16LE
-        | AVPixelFormat_AV_PIX_FMT_YUV420P16BE => Some((Some((1, 1)), 2)),
-        AVPixelFormat_AV_PIX_FMT_YUV422P10LE
-        | AVPixelFormat_AV_PIX_FMT_YUV422P10BE
-        | AVPixelFormat_AV_PIX_FMT_YUV422P12LE
-        | AVPixelFormat_AV_PIX_FMT_YUV422P12BE
-        | AVPixelFormat_AV_PIX_FMT_YUV422P16LE
-        | AVPixelFormat_AV_PIX_FMT_YUV422P16BE => Some((Some((1, 0)), 2)),
-        AVPixelFormat_AV_PIX_FMT_YUV444P10LE
-        | AVPixelFormat_AV_PIX_FMT_YUV444P10BE
-        | AVPixelFormat_AV_PIX_FMT_YUV444P12LE
-        | AVPixelFormat_AV_PIX_FMT_YUV444P12BE
-        | AVPixelFormat_AV_PIX_FMT_YUV444P16LE
-        | AVPixelFormat_AV_PIX_FMT_YUV444P16BE => Some((Some((0, 0)), 2)),
-        AVPixelFormat_AV_PIX_FMT_GRAY16LE | AVPixelFormat_AV_PIX_FMT_GRAY16BE => Some((None, 2)),
-        AVPixelFormat_AV_PIX_FMT_RGB24 | AVPixelFormat_AV_PIX_FMT_BGR24 => Some((None, 3)),
-        AVPixelFormat_AV_PIX_FMT_RGBA | AVPixelFormat_AV_PIX_FMT_BGRA => Some((None, 4)),
-        _ => None,
-    };
-    if let Some((chroma, sample_bytes)) = layout {
-        return crate::owned_frame_layout::planar_bytes(
-            width as usize,
-            height as usize,
-            chroma,
-            sample_bytes,
-        );
+    if let Some(format) = crate::owned_pixel_format_from_legacy(format) {
+        return format.frame_bytes(width as usize, height as usize);
     }
     let size = unsafe { av_image_get_buffer_size(format, width, height, 1) };
     check(size, "estimate frame buffer size")?;

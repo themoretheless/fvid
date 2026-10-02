@@ -97,6 +97,7 @@ pub mod owned_negate;
 
 pub mod owned_frame;
 pub mod owned_frame_layout;
+pub mod owned_pixel_format;
 pub mod owned_avgblur;
 pub mod owned_boxblur;
 

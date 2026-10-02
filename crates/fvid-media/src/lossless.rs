@@ -1693,7 +1693,7 @@ fn drain_decoder(
                                 let fmt = pix_fmt.ok_or(
                                     "--zscale requires --pix-fmt for format= after zscale",
                                 )?;
-                                let name = string(av_get_pix_fmt_name(fmt));
+                                let name = string(pixel_format_name_raw(fmt));
                                 if name.is_empty() {
                                     return Err("unknown zscale output pixel format".into());
                                 }
@@ -1706,7 +1706,7 @@ fn drain_decoder(
                                 let fmt = pix_fmt.ok_or(
                                     "--tonemap requires --pix-fmt for format= after tonemap",
                                 )?;
-                                let name = string(av_get_pix_fmt_name(fmt));
+                                let name = string(pixel_format_name_raw(fmt));
                                 if name.is_empty() {
                                     return Err("unknown tonemap output pixel format".into());
                                 }
@@ -1963,7 +1963,7 @@ fn drain_decoder(
                         let (out, mut format_done) = if let Some(args) = zscale {
                             let fmt = pix_fmt
                                 .ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown zscale output pixel format".into());
                             }
@@ -1975,7 +1975,7 @@ fn drain_decoder(
                         let (out, format_done) = if let Some(args) = tonemap {
                             let fmt = pix_fmt
                                 .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown tonemap output pixel format".into());
                             }
@@ -2220,7 +2220,7 @@ fn drain_decoder(
                                 let fmt = pix_fmt.ok_or(
                                     "--zscale requires --pix-fmt for format= after zscale",
                                 )?;
-                                let name = string(av_get_pix_fmt_name(fmt));
+                                let name = string(pixel_format_name_raw(fmt));
                                 if name.is_empty() {
                                     return Err("unknown zscale output pixel format".into());
                                 }
@@ -2233,7 +2233,7 @@ fn drain_decoder(
                                 let fmt = pix_fmt.ok_or(
                                     "--tonemap requires --pix-fmt for format= after tonemap",
                                 )?;
-                                let name = string(av_get_pix_fmt_name(fmt));
+                                let name = string(pixel_format_name_raw(fmt));
                                 if name.is_empty() {
                                     return Err("unknown tonemap output pixel format".into());
                                 }
@@ -2446,7 +2446,7 @@ fn drain_decoder(
                     let (out, mut format_done) = if let Some(args) = zscale {
                         let fmt = pix_fmt
                             .ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                        let name = string(av_get_pix_fmt_name(fmt));
+                        let name = string(pixel_format_name_raw(fmt));
                         if name.is_empty() {
                             return Err("unknown zscale output pixel format".into());
                         }
@@ -2458,7 +2458,7 @@ fn drain_decoder(
                     let (out, format_done) = if let Some(args) = tonemap {
                         let fmt = pix_fmt
                             .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                        let name = string(av_get_pix_fmt_name(fmt));
+                        let name = string(pixel_format_name_raw(fmt));
                         if name.is_empty() {
                             return Err("unknown tonemap output pixel format".into());
                         }
@@ -2663,7 +2663,7 @@ fn drain_decoder(
                         let (out, mut format_done) = if let Some(args) = zscale {
                             let fmt = pix_fmt
                                 .ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown zscale output pixel format".into());
                             }
@@ -2675,7 +2675,7 @@ fn drain_decoder(
                         let (out, format_done) = if let Some(args) = tonemap {
                             let fmt = pix_fmt
                                 .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown tonemap output pixel format".into());
                             }
@@ -2850,7 +2850,7 @@ fn drain_decoder(
                     let (out, mut format_done) = if let Some(args) = zscale {
                         let fmt = pix_fmt
                             .ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                        let name = string(av_get_pix_fmt_name(fmt));
+                        let name = string(pixel_format_name_raw(fmt));
                         if name.is_empty() {
                             return Err("unknown zscale output pixel format".into());
                         }
@@ -2862,7 +2862,7 @@ fn drain_decoder(
                     let (out, format_done) = if let Some(args) = tonemap {
                         let fmt = pix_fmt
                             .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                        let name = string(av_get_pix_fmt_name(fmt));
+                        let name = string(pixel_format_name_raw(fmt));
                         if name.is_empty() {
                             return Err("unknown tonemap output pixel format".into());
                         }
@@ -3028,7 +3028,7 @@ fn drain_decoder(
                     let (out, mut format_done) = if let Some(args) = zscale {
                         let fmt = pix_fmt
                             .ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                        let name = string(av_get_pix_fmt_name(fmt));
+                        let name = string(pixel_format_name_raw(fmt));
                         if name.is_empty() {
                             return Err("unknown zscale output pixel format".into());
                         }
@@ -3040,7 +3040,7 @@ fn drain_decoder(
                     let (out, format_done) = if let Some(args) = tonemap {
                         let fmt = pix_fmt
                             .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                        let name = string(av_get_pix_fmt_name(fmt));
+                        let name = string(pixel_format_name_raw(fmt));
                         if name.is_empty() {
                             return Err("unknown tonemap output pixel format".into());
                         }
@@ -3183,7 +3183,7 @@ fn drain_decoder(
                     let (out, mut format_done) = if let Some(args) = zscale {
                         let fmt = pix_fmt
                             .ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                        let name = string(av_get_pix_fmt_name(fmt));
+                        let name = string(pixel_format_name_raw(fmt));
                         if name.is_empty() {
                             return Err("unknown zscale output pixel format".into());
                         }
@@ -3195,7 +3195,7 @@ fn drain_decoder(
                     let (out, format_done) = if let Some(args) = tonemap {
                         let fmt = pix_fmt
                             .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                        let name = string(av_get_pix_fmt_name(fmt));
+                        let name = string(pixel_format_name_raw(fmt));
                         if name.is_empty() {
                             return Err("unknown tonemap output pixel format".into());
                         }
@@ -3626,7 +3626,7 @@ fn drain_decoder(
                                                                     let fmt =
                                 pix_fmt.ok_or("--zscale requires --pix-fmt for format= after zscale")?;
                                                                     let name = string(
-                                                                        av_get_pix_fmt_name(fmt),
+                                                                        pixel_format_name_raw(fmt),
                                                                     );
                                                                     if name.is_empty() {
                                                                         return Err("unknown zscale output pixel format".into());
@@ -3649,7 +3649,7 @@ fn drain_decoder(
                                                                 let fmt = pix_fmt
                                 .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
                                                                 let name = string(
-                                                                    av_get_pix_fmt_name(fmt),
+                                                                    pixel_format_name_raw(fmt),
                                                                 );
                                                                 if name.is_empty() {
                                                                     return Err("unknown tonemap output pixel format".into());
@@ -3826,7 +3826,7 @@ fn drain_decoder(
                                                     {
                                                         let fmt =
                                 pix_fmt.ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                                                        let name = string(av_get_pix_fmt_name(fmt));
+                                                        let name = string(pixel_format_name_raw(fmt));
                                                         if name.is_empty() {
                                                             return Err("unknown zscale output pixel format".into());
                                                         }
@@ -3846,7 +3846,7 @@ fn drain_decoder(
                                                     {
                                                         let fmt = pix_fmt
                                 .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                                                        let name = string(av_get_pix_fmt_name(fmt));
+                                                        let name = string(pixel_format_name_raw(fmt));
                                                         if name.is_empty() {
                                                             return Err("unknown tonemap output pixel format".into());
                                                         }
@@ -3974,7 +3974,7 @@ fn drain_decoder(
                         let (out, mut format_done) = if let Some(args) = zscale {
                             let fmt = pix_fmt
                                 .ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown zscale output pixel format".into());
                             }
@@ -3986,7 +3986,7 @@ fn drain_decoder(
                         let (out, format_done) = if let Some(args) = tonemap {
                             let fmt = pix_fmt
                                 .ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown tonemap output pixel format".into());
                             }
@@ -4065,7 +4065,7 @@ fn drain_decoder(
             };
             let (send, format_done) = if let Some(args) = zscale {
                 let fmt = pix_fmt.ok_or("--zscale requires --pix-fmt for format= after zscale")?;
-                let name = string(av_get_pix_fmt_name(fmt));
+                let name = string(pixel_format_name_raw(fmt));
                 if name.is_empty() {
                     return Err("unknown zscale output pixel format".into());
                 }
@@ -4077,7 +4077,7 @@ fn drain_decoder(
             let (send, format_done) = if let Some(args) = tonemap {
                 let fmt =
                     pix_fmt.ok_or("--tonemap requires --pix-fmt for format= after tonemap")?;
-                let name = string(av_get_pix_fmt_name(fmt));
+                let name = string(pixel_format_name_raw(fmt));
                 if name.is_empty() {
                     return Err("unknown tonemap output pixel format".into());
                 }
@@ -4364,8 +4364,8 @@ impl ConvertGraph {
         dst_format: i32,
     ) -> Result<Self> {
         unsafe {
-            let src_name = string(av_get_pix_fmt_name(src_format));
-            let dst_name = string(av_get_pix_fmt_name(dst_format));
+            let src_name = string(pixel_format_name_raw(src_format));
+            let dst_name = string(pixel_format_name_raw(dst_format));
             if src_name.is_empty() || dst_name.is_empty() {
                 return Err("unknown pixel format for conversion graph".into());
             }
@@ -5097,7 +5097,7 @@ pub fn transcode_lossless(
             }
         {
             let pixel_format = unsafe {
-                string(av_get_pix_fmt_name(
+                string(pixel_format_name_raw(
                     (*(*input.streams()[selected[0]]).codecpar).format,
                 ))
             };
@@ -5466,7 +5466,7 @@ pub fn transcode(
             encoder,
             parameters,
             enc_tb,
-            string(av_get_pix_fmt_name(encode_format)),
+            string(pixel_format_name_raw(encode_format)),
         )
     };
     if let Some((from, to)) = transform.interval {
@@ -7142,7 +7142,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -7152,7 +7152,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -7276,7 +7276,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -7286,7 +7286,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -7395,7 +7395,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -7405,7 +7405,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -7495,7 +7495,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -7505,7 +7505,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -7609,7 +7609,7 @@ pub fn transcode(
                         let mut format_done = false;
                         if let Some(ref args) = transform.zscale {
                             let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown zscale output pixel format".into());
                             }
@@ -7619,7 +7619,7 @@ pub fn transcode(
                         }
                         if let Some(ref args) = transform.tonemap {
                             let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown tonemap output pixel format".into());
                             }
@@ -7831,7 +7831,7 @@ pub fn transcode(
                     let mut format_done = false;
                     if let Some(ref args) = transform.zscale {
                         let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                        let name = string(av_get_pix_fmt_name(fmt));
+                        let name = string(pixel_format_name_raw(fmt));
                         if name.is_empty() {
                             return Err("unknown zscale output pixel format".into());
                         }
@@ -7841,7 +7841,7 @@ pub fn transcode(
                     }
                     if let Some(ref args) = transform.tonemap {
                         let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                        let name = string(av_get_pix_fmt_name(fmt));
+                        let name = string(pixel_format_name_raw(fmt));
                         if name.is_empty() {
                             return Err("unknown tonemap output pixel format".into());
                         }
@@ -8026,7 +8026,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -8036,7 +8036,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -8126,7 +8126,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -8136,7 +8136,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -8232,7 +8232,7 @@ pub fn transcode(
                     let mut format_done = false;
                     if let Some(ref args) = transform.zscale {
                         let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                        let name = string(av_get_pix_fmt_name(fmt));
+                        let name = string(pixel_format_name_raw(fmt));
                         if name.is_empty() {
                             return Err("unknown zscale output pixel format".into());
                         }
@@ -8242,7 +8242,7 @@ pub fn transcode(
                     }
                     if let Some(ref args) = transform.tonemap {
                         let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                        let name = string(av_get_pix_fmt_name(fmt));
+                        let name = string(pixel_format_name_raw(fmt));
                         if name.is_empty() {
                             return Err("unknown tonemap output pixel format".into());
                         }
@@ -8385,7 +8385,7 @@ pub fn transcode(
                     let mut format_done = false;
                     if let Some(ref args) = transform.zscale {
                         let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                        let name = string(av_get_pix_fmt_name(fmt));
+                        let name = string(pixel_format_name_raw(fmt));
                         if name.is_empty() {
                             return Err("unknown zscale output pixel format".into());
                         }
@@ -8395,7 +8395,7 @@ pub fn transcode(
                     }
                     if let Some(ref args) = transform.tonemap {
                         let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                        let name = string(av_get_pix_fmt_name(fmt));
+                        let name = string(pixel_format_name_raw(fmt));
                         if name.is_empty() {
                             return Err("unknown tonemap output pixel format".into());
                         }
@@ -8527,7 +8527,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -8537,7 +8537,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -8715,7 +8715,7 @@ pub fn transcode(
             let mut format_done = false;
             if let Some(ref args) = transform.zscale {
                 let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                let name = string(av_get_pix_fmt_name(fmt));
+                let name = string(pixel_format_name_raw(fmt));
                 if name.is_empty() {
                     return Err("unknown zscale output pixel format".into());
                 }
@@ -8725,7 +8725,7 @@ pub fn transcode(
             }
             if let Some(ref args) = transform.tonemap {
                 let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                let name = string(av_get_pix_fmt_name(fmt));
+                let name = string(pixel_format_name_raw(fmt));
                 if name.is_empty() {
                     return Err("unknown tonemap output pixel format".into());
                 }
@@ -9912,7 +9912,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -9922,7 +9922,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -10685,7 +10685,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -10695,7 +10695,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -11450,7 +11450,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -11460,7 +11460,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -12201,7 +12201,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -12211,7 +12211,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -12880,7 +12880,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -12890,7 +12890,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -13435,7 +13435,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -13445,7 +13445,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -13943,7 +13943,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -13953,7 +13953,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -14443,7 +14443,7 @@ pub fn transcode(
                 let mut format_done = false;
                 if let Some(ref args) = transform.zscale {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -14453,7 +14453,7 @@ pub fn transcode(
                 }
                 if let Some(ref args) = transform.tonemap {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }

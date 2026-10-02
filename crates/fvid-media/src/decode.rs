@@ -196,7 +196,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
             crop.height as u32,
             crop,
             if format_validated {
-                string(av_get_pix_fmt_name(format))
+                string(pixel_format_name_raw(format))
             } else {
                 String::new()
             },
@@ -1248,7 +1248,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                     if !crop.x.is_multiple_of(sx) || !crop.y.is_multiple_of(sy) {
                         return Err("crop origin must be chroma-aligned".into());
                     }
-                    pixel_format = string(av_get_pix_fmt_name(f.format));
+                    pixel_format = string(pixel_format_name_raw(f.format));
                     format_validated = true;
                 }
                 if f.width <= 0
@@ -2452,7 +2452,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                     if let Some(args) = transform.zscale.as_deref() {
                                         let fmt =
                                             target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                                        let name = string(av_get_pix_fmt_name(fmt));
+                                        let name = string(pixel_format_name_raw(fmt));
                                         if name.is_empty() {
                                             return Err("unknown zscale output pixel format".into());
                                         }
@@ -2467,7 +2467,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                 {
                                     let fmt =
                                         target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                                    let name = string(av_get_pix_fmt_name(fmt));
+                                    let name = string(pixel_format_name_raw(fmt));
                                     if name.is_empty() {
                                         return Err("unknown tonemap output pixel format".into());
                                     }
@@ -2778,7 +2778,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                             let (out, format_done) = if let Some(args) = transform.zscale.as_deref()
                             {
                                 let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                                let name = string(av_get_pix_fmt_name(fmt));
+                                let name = string(pixel_format_name_raw(fmt));
                                 if name.is_empty() {
                                     return Err("unknown zscale output pixel format".into());
                                 }
@@ -2792,7 +2792,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                 transform.tonemap.as_deref()
                             {
                                 let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                                let name = string(av_get_pix_fmt_name(fmt));
+                                let name = string(pixel_format_name_raw(fmt));
                                 if name.is_empty() {
                                     return Err("unknown tonemap output pixel format".into());
                                 }
@@ -3101,7 +3101,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                     if let Some(args) = transform.zscale.as_deref() {
                                         let fmt =
                                             target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                                        let name = string(av_get_pix_fmt_name(fmt));
+                                        let name = string(pixel_format_name_raw(fmt));
                                         if name.is_empty() {
                                             return Err("unknown zscale output pixel format".into());
                                         }
@@ -3116,7 +3116,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                 {
                                     let fmt =
                                         target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                                    let name = string(av_get_pix_fmt_name(fmt));
+                                    let name = string(pixel_format_name_raw(fmt));
                                     if name.is_empty() {
                                         return Err("unknown tonemap output pixel format".into());
                                     }
@@ -3387,7 +3387,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
                             let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown zscale output pixel format".into());
                             }
@@ -3399,7 +3399,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
                             let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown tonemap output pixel format".into());
                             }
@@ -3653,7 +3653,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                             let (out, format_done) = if let Some(args) = transform.zscale.as_deref()
                             {
                                 let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                                let name = string(av_get_pix_fmt_name(fmt));
+                                let name = string(pixel_format_name_raw(fmt));
                                 if name.is_empty() {
                                     return Err("unknown zscale output pixel format".into());
                                 }
@@ -3667,7 +3667,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                 transform.tonemap.as_deref()
                             {
                                 let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                                let name = string(av_get_pix_fmt_name(fmt));
+                                let name = string(pixel_format_name_raw(fmt));
                                 if name.is_empty() {
                                     return Err("unknown tonemap output pixel format".into());
                                 }
@@ -3900,7 +3900,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
                             let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown zscale output pixel format".into());
                             }
@@ -3912,7 +3912,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
                             let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown tonemap output pixel format".into());
                             }
@@ -4132,7 +4132,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
                             let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown zscale output pixel format".into());
                             }
@@ -4144,7 +4144,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
                             let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown tonemap output pixel format".into());
                             }
@@ -4339,7 +4339,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
                             let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown zscale output pixel format".into());
                             }
@@ -4351,7 +4351,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
                             let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown tonemap output pixel format".into());
                             }
@@ -4863,7 +4863,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                                                     {
                                                                         let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
                                                                         let name = string(
-                                                                            av_get_pix_fmt_name(
+                                                                            pixel_format_name_raw(
                                                                                 fmt,
                                                                             ),
                                                                         );
@@ -4888,7 +4888,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                                                     {
                                                                         let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
                                                                         let name = string(
-                                                                            av_get_pix_fmt_name(
+                                                                            pixel_format_name_raw(
                                                                                 fmt,
                                                                             ),
                                                                         );
@@ -5092,7 +5092,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                                                 "--zscale requires --pix-fmt",
                                                             )?;
                                                             let name =
-                                                                string(av_get_pix_fmt_name(fmt));
+                                                                string(pixel_format_name_raw(fmt));
                                                             if name.is_empty() {
                                                                 return Err("unknown zscale output pixel format".into());
                                                             }
@@ -5117,7 +5117,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                                                                 "--tonemap requires --pix-fmt",
                                                             )?;
                                                             let name =
-                                                                string(av_get_pix_fmt_name(fmt));
+                                                                string(pixel_format_name_raw(fmt));
                                                             if name.is_empty() {
                                                                 return Err("unknown tonemap output pixel format".into());
                                                             }
@@ -5284,7 +5284,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let (out, format_done) = if let Some(args) = transform.zscale.as_deref() {
                             let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown zscale output pixel format".into());
                             }
@@ -5296,7 +5296,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                         };
                         let (out, format_done) = if let Some(args) = transform.tonemap.as_deref() {
                             let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                            let name = string(av_get_pix_fmt_name(fmt));
+                            let name = string(pixel_format_name_raw(fmt));
                             if name.is_empty() {
                                 return Err("unknown tonemap output pixel format".into());
                             }
@@ -5394,7 +5394,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                 };
                 let (output, format_done) = if let Some(args) = transform.zscale.as_deref() {
                     let fmt = target_pix_fmt.ok_or("--zscale requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown zscale output pixel format".into());
                     }
@@ -5406,7 +5406,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                 };
                 let (output, format_done) = if let Some(args) = transform.tonemap.as_deref() {
                     let fmt = target_pix_fmt.ok_or("--tonemap requires --pix-fmt")?;
-                    let name = string(av_get_pix_fmt_name(fmt));
+                    let name = string(pixel_format_name_raw(fmt));
                     if name.is_empty() {
                         return Err("unknown tonemap output pixel format".into());
                     }
@@ -5427,7 +5427,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
                     output
                 };
                 if let Some(fmt) = target_pix_fmt {
-                    pixel_format = string(av_get_pix_fmt_name(fmt));
+                    pixel_format = string(pixel_format_name_raw(fmt));
                 }
                 if transform.minterpolate.is_some() || transform.fps.is_some() {
                     let scratch = temporal_scratch.as_mut().ok_or("temporal frame missing")?;

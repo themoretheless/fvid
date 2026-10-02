@@ -129,7 +129,7 @@ impl DualXfade {
             )?;
             // Lock output to the source pixel format (xfade otherwise prefers yuv444).
             let mut format_ctx = ptr::null_mut();
-            let pix_name = string(av_get_pix_fmt_name(format));
+            let pix_name = string(pixel_format_name_raw(format));
             if pix_name.is_empty() {
                 return Err("xfade pixel format name unavailable".into());
             }
@@ -511,7 +511,7 @@ pub fn xfade_video(
             avcodec_parameters_from_context(parameters.0, encoder.0),
             "export FFV1 parameters",
         )?;
-        (encoder, parameters, string(av_get_pix_fmt_name(pix_fmt)))
+        (encoder, parameters, string(pixel_format_name_raw(pix_fmt)))
     };
 
     let main_idx = main.index;

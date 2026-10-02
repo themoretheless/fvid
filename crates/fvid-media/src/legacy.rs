@@ -364,11 +364,67 @@ fn check(code: i32, operation: &str) -> Result<()> {
     let detail = unsafe { CStr::from_ptr(buffer.as_ptr()) }.to_string_lossy();
     Err(format!("{operation}: {detail} ({code})"))
 }
+fn owned_pixel_format_from_legacy(format: AVPixelFormat) -> Option<crate::owned_pixel_format::PixelFormat> {
+    use crate::owned_pixel_format::PixelFormat;
+    match format {
+        AVPixelFormat_AV_PIX_FMT_YUV420P => Some(PixelFormat::Yuv420p),
+        AVPixelFormat_AV_PIX_FMT_YUV422P => Some(PixelFormat::Yuv422p),
+        AVPixelFormat_AV_PIX_FMT_YUV444P => Some(PixelFormat::Yuv444p),
+        AVPixelFormat_AV_PIX_FMT_GRAY8 => Some(PixelFormat::Gray8),
+        AVPixelFormat_AV_PIX_FMT_RGB24 => Some(PixelFormat::Rgb24),
+        AVPixelFormat_AV_PIX_FMT_BGR24 => Some(PixelFormat::Bgr24),
+        AVPixelFormat_AV_PIX_FMT_RGBA => Some(PixelFormat::Rgba),
+        AVPixelFormat_AV_PIX_FMT_BGRA => Some(PixelFormat::Bgra),
+        AVPixelFormat_AV_PIX_FMT_NV12 => Some(PixelFormat::Nv12),
+        AVPixelFormat_AV_PIX_FMT_NV21 => Some(PixelFormat::Nv21),
+        AVPixelFormat_AV_PIX_FMT_YUV420P9LE => Some(PixelFormat::Yuv420p9Le),
+        AVPixelFormat_AV_PIX_FMT_YUV420P9BE => Some(PixelFormat::Yuv420p9Be),
+        AVPixelFormat_AV_PIX_FMT_YUV420P10LE => Some(PixelFormat::Yuv420p10Le),
+        AVPixelFormat_AV_PIX_FMT_YUV420P10BE => Some(PixelFormat::Yuv420p10Be),
+        AVPixelFormat_AV_PIX_FMT_YUV420P12LE => Some(PixelFormat::Yuv420p12Le),
+        AVPixelFormat_AV_PIX_FMT_YUV420P12BE => Some(PixelFormat::Yuv420p12Be),
+        AVPixelFormat_AV_PIX_FMT_YUV420P14LE => Some(PixelFormat::Yuv420p14Le),
+        AVPixelFormat_AV_PIX_FMT_YUV420P14BE => Some(PixelFormat::Yuv420p14Be),
+        AVPixelFormat_AV_PIX_FMT_YUV420P16LE => Some(PixelFormat::Yuv420p16Le),
+        AVPixelFormat_AV_PIX_FMT_YUV420P16BE => Some(PixelFormat::Yuv420p16Be),
+        AVPixelFormat_AV_PIX_FMT_YUV422P9LE => Some(PixelFormat::Yuv422p9Le),
+        AVPixelFormat_AV_PIX_FMT_YUV422P9BE => Some(PixelFormat::Yuv422p9Be),
+        AVPixelFormat_AV_PIX_FMT_YUV422P10LE => Some(PixelFormat::Yuv422p10Le),
+        AVPixelFormat_AV_PIX_FMT_YUV422P10BE => Some(PixelFormat::Yuv422p10Be),
+        AVPixelFormat_AV_PIX_FMT_YUV422P12LE => Some(PixelFormat::Yuv422p12Le),
+        AVPixelFormat_AV_PIX_FMT_YUV422P12BE => Some(PixelFormat::Yuv422p12Be),
+        AVPixelFormat_AV_PIX_FMT_YUV422P14LE => Some(PixelFormat::Yuv422p14Le),
+        AVPixelFormat_AV_PIX_FMT_YUV422P14BE => Some(PixelFormat::Yuv422p14Be),
+        AVPixelFormat_AV_PIX_FMT_YUV422P16LE => Some(PixelFormat::Yuv422p16Le),
+        AVPixelFormat_AV_PIX_FMT_YUV422P16BE => Some(PixelFormat::Yuv422p16Be),
+        AVPixelFormat_AV_PIX_FMT_YUV444P9LE => Some(PixelFormat::Yuv444p9Le),
+        AVPixelFormat_AV_PIX_FMT_YUV444P9BE => Some(PixelFormat::Yuv444p9Be),
+        AVPixelFormat_AV_PIX_FMT_YUV444P10LE => Some(PixelFormat::Yuv444p10Le),
+        AVPixelFormat_AV_PIX_FMT_YUV444P10BE => Some(PixelFormat::Yuv444p10Be),
+        AVPixelFormat_AV_PIX_FMT_YUV444P12LE => Some(PixelFormat::Yuv444p12Le),
+        AVPixelFormat_AV_PIX_FMT_YUV444P12BE => Some(PixelFormat::Yuv444p12Be),
+        AVPixelFormat_AV_PIX_FMT_YUV444P14LE => Some(PixelFormat::Yuv444p14Le),
+        AVPixelFormat_AV_PIX_FMT_YUV444P14BE => Some(PixelFormat::Yuv444p14Be),
+        AVPixelFormat_AV_PIX_FMT_YUV444P16LE => Some(PixelFormat::Yuv444p16Le),
+        AVPixelFormat_AV_PIX_FMT_YUV444P16BE => Some(PixelFormat::Yuv444p16Be),
+        AVPixelFormat_AV_PIX_FMT_GRAY16LE => Some(PixelFormat::Gray16Le),
+        AVPixelFormat_AV_PIX_FMT_GRAY16BE => Some(PixelFormat::Gray16Be),
+        _ => None,
+    }
+}
+fn pixel_format_name_raw(format: AVPixelFormat) -> *const std::ffi::c_char {
+    if let Some(format) = owned_pixel_format_from_legacy(format) {
+        return format.nul_name().as_ptr().cast();
+    }
+    // SAFETY: libav returns a static format name or NULL. Unmigrated formats
+    // retain their existing metadata route until their descriptions are owned.
+    unsafe { av_get_pix_fmt_name(format) }
+}
 fn string(pointer: *const std::ffi::c_char) -> String {
     if pointer.is_null() {
         return String::new();
     }
-    // SAFETY: Internal callers pass live FFmpeg-owned, NUL-terminated strings.
+    // SAFETY: Internal callers pass live backend-owned or static owned NUL-terminated strings.
     unsafe { CStr::from_ptr(pointer).to_string_lossy().into_owned() }
 }
 struct Input(*mut AVFormatContext);

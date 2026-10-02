@@ -2257,7 +2257,7 @@ pub(crate) unsafe fn epx_frame(
     args: &str,
 ) -> Result<()> {
     validate_epx_args(args)?;
-    let src_fmt = string(av_get_pix_fmt_name((*src).format));
+    let src_fmt = string(pixel_format_name_raw((*src).format));
     if src_fmt.is_empty() {
         return Err("epx requires a known source pixel format".into());
     }
@@ -2319,7 +2319,7 @@ pub(crate) unsafe fn hqx_frame(
     args: &str,
 ) -> Result<()> {
     validate_hqx_args(args)?;
-    let src_fmt = string(av_get_pix_fmt_name((*src).format));
+    let src_fmt = string(pixel_format_name_raw((*src).format));
     if src_fmt.is_empty() {
         return Err("hqx requires a known source pixel format".into());
     }
@@ -2381,7 +2381,7 @@ pub(crate) unsafe fn xbr_frame(
     args: &str,
 ) -> Result<()> {
     validate_xbr_args(args)?;
-    let src_fmt = string(av_get_pix_fmt_name((*src).format));
+    let src_fmt = string(pixel_format_name_raw((*src).format));
     if src_fmt.is_empty() {
         return Err("xbr requires a known source pixel format".into());
     }
@@ -2426,7 +2426,7 @@ pub(crate) unsafe fn super2xsai_frame(
     args: &str,
 ) -> Result<()> {
     validate_super2xsai_args(args)?;
-    let src_fmt = string(av_get_pix_fmt_name((*src).format));
+    let src_fmt = string(pixel_format_name_raw((*src).format));
     if src_fmt.is_empty() {
         return Err("super2xsai requires a known source pixel format".into());
     }

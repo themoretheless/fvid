@@ -163,3 +163,18 @@ separately afterwards, including the same empty-PATH Cargo runner. Feature-gated
 legacy tests compile to empty suites in this mode, so this does not qualify the
 remaining production `media`/CUDA legacy operations. Full local run evidence:
 `/tmp/fvid-root-tests-isolated.json` and `/tmp/fvid-root-tests-isolated.log`.
+
+### Owned pixel descriptions in production adapters
+
+Pixel names and tightly packed frame storage for 42 existing representations
+now come from the owned `PixelFormat` table. Production decode, filtering,
+lossless export and transitions use this table for their 101 previous name
+lookups. The legacy adapter retains its original name lookup for unmigrated
+formats and NULL results; remaining libav operations are not removed by this
+change. Memory estimates use the same owned format descriptions.
+
+An explicit libavutil reference check verified all 42 enum mappings and names,
+252 frame sizes (including odd chroma dimensions), and three unmigrated/null
+routes. The legacy backend compiled successfully. Source comparison verified
+that the four operation files changed only their name lookups and unnecessary
+unsafe wrappers; their pixel-processing and scheduling bodies were retained.
