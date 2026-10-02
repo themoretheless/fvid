@@ -3727,6 +3727,7 @@ pub fn plan_loudnorm(
     dual_pass: bool,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
+    if crate::owned_container_loudnorm::supports_plan(source,args,options) { return crate::owned_container_loudnorm::plan_loudnorm(source,args,dual_pass,options); }
     if crate::owned_adts_loudnorm::supports_plan(source, args, options) {
         return crate::owned_adts_loudnorm::plan_loudnorm(source, args, dual_pass, options);
     }

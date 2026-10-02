@@ -61,7 +61,10 @@ pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
             options,
         )
 }
-pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
+pub(crate) fn decode_to_wave(
+    source: &Path,
+    options: &CopyOptions,
+) -> Result<crate::owned_adts_export::DecodedSpool> {
     let (rate, channels, mask, codec) = geometry(source, options)?;
     let mp4 = crate::owned_mp4_audio_export::recognizes(source, options)?;
     let precise = codec.starts_with("A_PCM/");
@@ -85,6 +88,10 @@ pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<Loudness
             result.map_err(|e| e.to_string())
         },
     )?;
+    Ok(spool)
+}
+pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
+    let spool = decode_to_wave(source, options)?;
     let mut pcm_options = options.clone();
     pcm_options.streams = vec![0];
     pcm_options.max_packets = None;

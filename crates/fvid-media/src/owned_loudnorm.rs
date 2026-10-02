@@ -170,6 +170,7 @@ pub fn plan_loudnorm(
     dual_pass: bool,
     options: &CopyOptions,
 ) -> Result<fvid_media_info::MediaPlan> {
+    if crate::owned_container_loudness::recognizes(source)? { return crate::owned_container_loudnorm::plan_loudnorm(source,args,dual_pass,options); }
     if crate::owned_adts_export::recognizes(source)? {
         return crate::owned_adts_loudnorm::plan_loudnorm(source, args, dual_pass, options);
     }
@@ -234,6 +235,7 @@ pub fn apply_loudnorm(
     args: Option<&str>,
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
+    if crate::owned_container_loudness::recognizes(source)? { return crate::owned_container_loudnorm::apply(source,destination,args,false,options); }
     if crate::owned_adts_export::recognizes(source)? {
         return crate::owned_adts_loudnorm::apply(source, destination, args, false, options);
     }
@@ -260,6 +262,7 @@ pub fn apply_loudnorm_dual(
     args: Option<&str>,
     options: &CopyOptions,
 ) -> Result<LoudnormStats> {
+    if crate::owned_container_loudness::recognizes(source)? { return crate::owned_container_loudnorm::apply(source,destination,args,true,options); }
     if crate::owned_adts_export::recognizes(source)? {
         return crate::owned_adts_loudnorm::apply(source, destination, args, true, options);
     }
