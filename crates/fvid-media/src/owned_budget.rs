@@ -121,11 +121,9 @@ mod tests {
             assert!(rss > 0);
             check_rss_budget(&unlimited).unwrap();
         } else {
-            assert!(
-                check_rss_budget(&unlimited)
-                    .unwrap_err()
-                    .contains("unavailable")
-            );
+            assert!(check_rss_budget(&unlimited)
+                .unwrap_err()
+                .contains("unavailable"));
         }
         assert_eq!(parse_max_memory_mib("1").unwrap(), 1024 * 1024);
         assert_eq!(parse_max_rss_mib("65536").unwrap(), 65536 * 1024 * 1024);
@@ -148,12 +146,14 @@ pub fn estimate_float_wave_export_bytes(
     transform: fvid_media_info::AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<usize> {
-    if !info.float
-        || !matches!(info.bits_per_sample, 32 | 64)
-        || !(1..=64).contains(&info.channels)
+    if !(if info.float {
+        matches!(info.bits_per_sample, 32 | 64)
+    } else {
+        matches!(info.bits_per_sample, 8 | 16 | 24 | 32)
+    }) || !(1..=64).contains(&info.channels)
         || info.sample_rate == 0
     {
-        return Err("invalid float WAVE memory geometry".into());
+        return Err("invalid WAVE memory geometry".into());
     }
     let width = u128::from(info.bits_per_sample / 8);
     let frame_bytes = u128::from(info.channels) * width;
@@ -167,7 +167,8 @@ pub fn estimate_float_wave_export_bytes(
     }
     let frames = input_bytes as u128 / frame_bytes;
     let output_frames = (frames * rate as u128).div_ceil(u128::from(info.sample_rate));
-    let output_bytes = output_frames * channels as u128 * width;
+    let dsp_width = if info.float { width } else { 8 };
+    let output_bytes = output_frames * channels as u128 * dsp_width;
     let history = if rate as u32 == info.sample_rate {
         0
     } else {
@@ -183,9 +184,10 @@ pub fn estimate_float_wave_export_bytes(
             .checked_next_power_of_two()
             .ok_or("sinc history estimate overflow")?
             .max(4);
-        2 * slots * 64 * width
+        2 * slots * 64 * dsp_width
     };
-    let retains_metadata = info.bits_per_sample == 64
+    let retains_metadata = !info.float
+        || info.bits_per_sample == 64
         || !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty();
     let metadata = if retains_metadata {
@@ -200,7 +202,17 @@ pub fn estimate_float_wave_export_bytes(
     } else {
         0
     };
-    let total = input_bytes as u128 + 3 * output_bytes + history + metadata + 16 * 1024;
+    let normalization_scratch = if info.float {
+        0
+    } else {
+        frames.min(4096) * u128::from(info.channels) * 8
+    };
+    let total = input_bytes as u128
+        + 3 * output_bytes
+        + history
+        + metadata
+        + normalization_scratch
+        + 16 * 1024;
     usize::try_from(total).map_err(|_| "controlled memory estimate exceeds address space".into())
 }
 

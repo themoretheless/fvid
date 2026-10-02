@@ -1,4 +1,4 @@
-//! Owned float WAVE PCM extraction and DSP, independent of libav.
+//! Owned WAVE PCM extraction and DSP, independent of libav.
 use fvid_control::CopyOptions;
 use fvid_media_info::{AudioDecodeStats, AudioDecodeTransform};
 use std::{io::Write, path::Path};
@@ -28,7 +28,7 @@ pub(crate) fn supports(
             || (info.channels <= 2 && info.channel_mask == 0)
             || crate::owned_pcm_channels::standard_mask(info.channels)
                 .is_some_and(|mask| mask == u64::from(info.channel_mask));
-        info.float && matches!(info.bits_per_sample, 32 | 64) && conversion && layout
+        conversion && layout
     })
 }
 fn simple_options(options: &CopyOptions) -> bool {
@@ -44,7 +44,10 @@ fn simple_options(options: &CopyOptions) -> bool {
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
 }
-/// Export float WAVE samples through the owned resampler/rematrix and WAV writer.
+/// Export WAVE samples through the owned resampler/rematrix and WAV writer.
+/// Integer PCM retains its decoded precision: packed 24-bit input exports as
+/// left-aligned signed 32-bit PCM. Integer DSP uses double precision and
+/// saturating ties-to-even quantization.
 /// For WAVE, packet limits apply to frame-aligned input I/O blocks (up to
 /// 4096 sample frames); `max_packets` exports the prefix read before that limit.
 pub fn decode_audio_transformed(
@@ -55,11 +58,11 @@ pub fn decode_audio_transformed(
 ) -> Result<AudioDecodeStats> {
     if !simple_options(options) {
         return Err(
-            "owned float WAVE export does not yet implement these control/metadata policies".into(),
+            "owned WAVE export does not yet implement these control/metadata policies".into(),
         );
     }
     if destination.extension().and_then(|s| s.to_str()) != Some("wav") {
-        return Err("owned float WAVE export requires .wav output".into());
+        return Err("owned WAVE export requires .wav output".into());
     }
     if transform
         .interval
@@ -114,9 +117,10 @@ pub fn decode_audio_transformed(
         hook.emit(event);
     }
     check()?;
-    let (input, pcm) = crate::owned_audio_mix::read_float_wave_with_admission(
+    let (input, pcm) = crate::owned_audio_mix::read_wave_with_admission(
         source,
         None,
+        false,
         options.cancel.as_ref(),
         options.max_packet_bytes,
         options.max_packets,
@@ -154,6 +158,16 @@ pub fn decode_audio_transformed(
             check()
         },
     )?;
+    let integer = match input.sample_format.as_str() {
+        "u8" => Some(crate::owned_pcm_integer::Format::U8),
+        "s16" => Some(crate::owned_pcm_integer::Format::I16),
+        "s32" => Some(crate::owned_pcm_integer::Format::I32),
+        _ => None,
+    };
+    let mut source_file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+    let source_info = crate::owned_wave_inspect::inspect(&mut source_file, options.cancel.as_ref())
+        .map_err(|e| e.to_string())?;
+    let input_width = usize::from(source_info.bits_per_sample / 8);
     let rate = transform.sample_rate.unwrap_or(input.sample_rate);
     let channels = transform.channels.unwrap_or(input.channels);
     if channels != input.channels {
@@ -167,7 +181,8 @@ pub fn decode_audio_transformed(
             return Err("owned rematrix requires a standard explicit speaker layout".into());
         }
     }
-    let (output_mask, info_chunks) = if input.sample_format == "dbl"
+    let (output_mask, info_chunks) = if integer.is_some()
+        || input.sample_format == "dbl"
         || !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty()
     {
@@ -191,7 +206,11 @@ pub fn decode_audio_transformed(
         &options.metadata_delete,
         &options.metadata_set,
     )?;
-    let width = if input.sample_format == "dbl" { 8 } else { 4 };
+    let width = if integer.is_some() || input.sample_format == "dbl" {
+        8
+    } else {
+        4
+    };
     let bytes = if width == 8 {
         let mut resampler = crate::owned_resample_f64::Resampler::new(
             Vec::new(),
@@ -206,12 +225,26 @@ pub fn decode_audio_transformed(
             input.channels as u16,
             channels as u16,
         )?;
-        for block in pcm.chunks(4096 * input.channels as usize * 8) {
+        for block in pcm.chunks(4096 * input.channels as usize * input_width) {
             if let Some(hook) = &options.progress {
                 hook.emit(event);
             }
             check()?;
-            matrix.write_all(block).map_err(|e| e.to_string())?;
+            if let Some(format) = integer {
+                let mut normalized = Vec::with_capacity(block.len() / input_width * 8);
+                for sample in block.chunks_exact(input_width) {
+                    let value = if input_width == 3 {
+                        // Packed signed 24-bit PCM is decoded as left-aligned S32.
+                        format.decode(&[0, sample[0], sample[1], sample[2]])?
+                    } else {
+                        format.decode(sample)?
+                    };
+                    normalized.extend_from_slice(&value.to_le_bytes());
+                }
+                matrix.write_all(&normalized).map_err(|e| e.to_string())?;
+            } else {
+                matrix.write_all(block).map_err(|e| e.to_string())?;
+            }
         }
         if !matrix.frame_complete() {
             return Err("incomplete PCM channel frame".into());
@@ -267,7 +300,30 @@ pub fn decode_audio_transformed(
     if let Some(hook) = &options.progress {
         hook.emit(event);
     }
-    if width == 8 {
+    if let Some(format) = integer {
+        let mut samples = Vec::with_capacity(selected.len() / 8 * format.bytes());
+        for block in selected.chunks(4096 * channels as usize * 8) {
+            check()?;
+            for sample in block.chunks_exact(8) {
+                let mut encoded = [0u8; 8];
+                format.encode(
+                    f64::from_le_bytes(sample.try_into().unwrap()) * gain,
+                    &mut encoded[..format.bytes()],
+                )?;
+                samples.extend_from_slice(&encoded[..format.bytes()]);
+            }
+        }
+        crate::owned_wav_file::write_wav_integer_le_checked(
+            destination,
+            rate,
+            channels,
+            (format.bytes() * 8) as u16,
+            &samples,
+            output_mask,
+            &info_chunks,
+            check,
+        )?;
+    } else if width == 8 {
         let samples: Vec<_> = selected
             .chunks_exact(8)
             .map(|b| f64::from_le_bytes(b.try_into().unwrap()) * gain)
@@ -390,15 +446,13 @@ mod tests {
             assert!((f32::from_le_bytes(sample.try_into().unwrap()) - 0.25).abs() < 1e-6);
         }
         let absent = files.0.join("absent.wav");
-        assert!(
-            decode_audio_interval(
-                &source,
-                &absent,
-                Some((1_000_000, 2_000_000)),
-                &CopyOptions::default()
-            )
-            .is_err()
-        );
+        assert!(decode_audio_interval(
+            &source,
+            &absent,
+            Some((1_000_000, 2_000_000)),
+            &CopyOptions::default()
+        )
+        .is_err());
         assert!(!absent.exists());
         let limited = CopyOptions {
             stream_metadata_set: vec![(0, "title".into(), "unmapped".into())],
@@ -894,13 +948,11 @@ mod admission_tests {
             let error = crate::decode_audio(&source, &absent, &options).unwrap_err();
             assert!(error.contains("controlled memory budget exceeded"));
             assert!(!absent.exists());
-            assert!(
-                events
-                    .lock()
-                    .unwrap()
-                    .iter()
-                    .all(|event| event.packets == 0 && event.payload_bytes == 0 && !event.done)
-            );
+            assert!(events
+                .lock()
+                .unwrap()
+                .iter()
+                .all(|event| event.packets == 0 && event.payload_bytes == 0 && !event.done));
             let output = dir.join(format!("output-{bits}.wav"));
             let options = CopyOptions {
                 max_controlled_bytes: Some(64 * 1024),
@@ -911,6 +963,146 @@ mod admission_tests {
                 std::fs::read(&source).unwrap(),
                 std::fs::read(output).unwrap()
             );
+        }
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod integer_tests {
+    use super::*;
+    #[test]
+    fn integer_public_export_retains_precision_and_transforms_without_libav() {
+        let dir = std::env::temp_dir().join(format!("fvid-int-export-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        for bits in [8u16, 16, 24, 32] {
+            let source = dir.join(format!("source-{bits}.wav"));
+            let width = usize::from(bits / 8);
+            let raw: Vec<u8> = (0..15 * width).map(|i| (i * 73 + 17) as u8).collect();
+            crate::owned_wav_file::write_wav_integer_le(&source, 48000, 1, bits, &raw, 4).unwrap();
+            let output = dir.join(format!("identity-{bits}.wav"));
+            assert!(supports(
+                &source,
+                &output,
+                Default::default(),
+                &CopyOptions::default()
+            ));
+            let stats = crate::decode_audio(&source, &output, &CopyOptions::default()).unwrap();
+            let mut file = std::fs::File::open(&output).unwrap();
+            let info = crate::owned_wave_inspect::inspect(&mut file, None).unwrap();
+            assert!(!info.float);
+            assert_eq!(info.bits_per_sample, if bits == 24 { 32 } else { bits });
+            assert_eq!(info.channel_mask, 4);
+            assert_eq!(stats.sample_frames, 15);
+            let bytes = std::fs::read(&output).unwrap();
+            let expected = if bits == 24 {
+                raw.chunks_exact(3)
+                    .flat_map(|s| [0, s[0], s[1], s[2]])
+                    .collect()
+            } else {
+                raw.clone()
+            };
+            assert_eq!(
+                &bytes[info.data_offset as usize..info.data_offset as usize + expected.len()],
+                expected
+            );
+            let output = dir.join(format!("interval-{bits}.wav"));
+            let stats = crate::decode_audio_interval(
+                &source,
+                &output,
+                Some((21, 105)),
+                &CopyOptions::default(),
+            )
+            .unwrap();
+            assert_eq!(stats.sample_frames, 4); // ceil(1.008)=2 .. ceil(5.04)=6
+            let bytes = std::fs::read(&output).unwrap();
+            let mut cursor = std::io::Cursor::new(&bytes);
+            let info = crate::owned_wave_inspect::inspect(&mut cursor, None).unwrap();
+            let out_width = usize::from(info.bits_per_sample / 8);
+            assert_eq!(
+                &bytes[info.data_offset as usize..info.data_offset as usize + 4 * out_width],
+                &expected[2 * out_width..6 * out_width]
+            );
+            let limited = dir.join(format!("limited-{bits}.wav"));
+            let stats = crate::decode_audio(
+                &source,
+                &limited,
+                &CopyOptions {
+                    max_packet_bytes: width * 3,
+                    max_packets: Some(2),
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            assert_eq!(stats.sample_frames, 6);
+            assert_eq!(stats.decoded_frames, 2);
+            let raw_limited = std::fs::read(&limited).unwrap();
+            let mut cursor = std::io::Cursor::new(&raw_limited);
+            let info = crate::owned_wave_inspect::inspect(&mut cursor, None).unwrap();
+            assert_eq!(
+                &raw_limited[info.data_offset as usize..info.data_offset as usize + 6 * out_width],
+                &expected[..6 * out_width]
+            );
+            let tagged = dir.join(format!("tagged-{bits}.wav"));
+            crate::decode_audio(
+                &source,
+                &tagged,
+                &CopyOptions {
+                    metadata_set: vec![("title".into(), "own PCM".into())],
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            assert_eq!(
+                crate::owned_probe::probe_wave(&tagged)
+                    .unwrap()
+                    .metadata
+                    .get("title")
+                    .map(String::as_str),
+                Some("own PCM")
+            );
+            let rejected = dir.join(format!("budget-{bits}.wav"));
+            assert!(crate::decode_audio(
+                &source,
+                &rejected,
+                &CopyOptions {
+                    max_controlled_bytes: Some(1),
+                    ..Default::default()
+                }
+            )
+            .unwrap_err()
+            .contains("controlled memory"));
+            assert!(!rejected.exists());
+        }
+        let source = dir.join("dc.wav");
+        let raw: Vec<u8> = (0..480).flat_map(|_| 8192i16.to_le_bytes()).collect();
+        crate::owned_wav_file::write_wav_integer_le(&source, 48000, 1, 16, &raw, 4).unwrap();
+        let output = dir.join("dc-transformed.wav");
+        let stats = crate::decode_audio_transformed(
+            &source,
+            &output,
+            AudioDecodeTransform {
+                sample_rate: Some(16000),
+                channels: Some(2),
+                volume: Some(2.),
+                ..Default::default()
+            },
+            &CopyOptions::default(),
+        )
+        .unwrap();
+        assert_eq!(stats.sample_frames, 160);
+        assert_eq!(stats.sample_format, "s16");
+        let bytes = std::fs::read(&output).unwrap();
+        let mut cursor = std::io::Cursor::new(&bytes);
+        let info = crate::owned_wave_inspect::inspect(&mut cursor, None).unwrap();
+        assert_eq!(info.channels, 2);
+        assert_eq!(info.channel_mask, 3);
+        for sample in bytes
+            [info.data_offset as usize..info.data_offset as usize + info.data_bytes as usize]
+            .chunks_exact(2)
+        {
+            assert_eq!(i16::from_le_bytes(sample.try_into().unwrap()), 16384);
         }
         std::fs::remove_dir_all(dir).unwrap();
     }

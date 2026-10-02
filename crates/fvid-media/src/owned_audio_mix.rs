@@ -61,6 +61,31 @@ pub(crate) fn read_float_wave_with_admission<F, A>(
     cancel: Option<&fvid_control::CancelFlag>,
     max_packet_bytes: usize,
     max_packets: Option<u64>,
+    admit: A,
+    block: F,
+) -> Result<(AudioDecodeStats, Vec<u8>)>
+where
+    F: FnMut(usize) -> Result<()>,
+    A: FnMut(&mut std::fs::File, &crate::owned_wave_inspect::WaveInfo, usize) -> Result<()>,
+{
+    read_wave_with_admission(
+        source,
+        bits,
+        true,
+        cancel,
+        max_packet_bytes,
+        max_packets,
+        admit,
+        block,
+    )
+}
+pub(crate) fn read_wave_with_admission<F, A>(
+    source: &Path,
+    bits: Option<u16>,
+    float_only: bool,
+    cancel: Option<&fvid_control::CancelFlag>,
+    max_packet_bytes: usize,
+    max_packets: Option<u64>,
     mut admit: A,
     mut block: F,
 ) -> Result<(AudioDecodeStats, Vec<u8>)>
@@ -79,7 +104,7 @@ where
     use std::io::{Read, Seek, SeekFrom};
     let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
     let info = crate::owned_wave_inspect::inspect(&mut file, cancel).map_err(|e| e.to_string())?;
-    if !info.float || bits.is_some_and(|bits| info.bits_per_sample != bits) {
+    if (float_only && !info.float) || bits.is_some_and(|bits| info.bits_per_sample != bits) {
         return Err(
             "mix-audio requires float PCM inputs (flt); integer formats are not qualified".into(),
         );
@@ -115,13 +140,15 @@ where
     for bytes in pcm.chunks_mut(capacity) {
         check()?;
         file.read_exact(bytes).map_err(|e| e.to_string())?;
-        if bytes.chunks_exact(width).any(|sample| {
-            if width == 4 {
-                !f32::from_le_bytes(sample.try_into().unwrap()).is_finite()
-            } else {
-                !f64::from_le_bytes(sample.try_into().unwrap()).is_finite()
-            }
-        }) {
+        if info.float
+            && bytes.chunks_exact(width).any(|sample| {
+                if width == 4 {
+                    !f32::from_le_bytes(sample.try_into().unwrap()).is_finite()
+                } else {
+                    !f64::from_le_bytes(sample.try_into().unwrap()).is_finite()
+                }
+            })
+        {
             return Err("non-finite PCM sample".into());
         }
         blocks += 1;
@@ -134,7 +161,20 @@ where
             decoded_frames: blocks,
             sample_rate: rate,
             channels: i32::from(info.channels),
-            sample_format: if width == 4 { "flt" } else { "dbl" }.into(),
+            sample_format: if info.float {
+                if width == 4 {
+                    "flt"
+                } else {
+                    "dbl"
+                }
+            } else {
+                match width {
+                    1 => "u8",
+                    2 => "s16",
+                    _ => "s32",
+                }
+            }
+            .into(),
             planar_interleave_bytes: 0,
             decode_errors: 0,
         },

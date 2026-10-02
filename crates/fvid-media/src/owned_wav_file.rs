@@ -113,6 +113,27 @@ pub fn write_wav_integer_le(
     samples: &[u8],
     mask: u32,
 ) -> Result<()> {
+    write_wav_integer_le_checked(
+        destination,
+        sample_rate,
+        channels,
+        bits,
+        samples,
+        mask,
+        &[],
+        || Ok(()),
+    )
+}
+pub(crate) fn write_wav_integer_le_checked<F: FnMut() -> Result<()>>(
+    destination: &Path,
+    sample_rate: i32,
+    channels: i32,
+    bits: u16,
+    samples: &[u8],
+    mask: u32,
+    info_chunks: &[u8],
+    check: F,
+) -> Result<()> {
     macro_rules! write {
         ($width:literal) => {{
             if samples.len() % $width != 0 {
@@ -126,8 +147,8 @@ pub fn write_wav_integer_le(
                 true,
                 samples.chunks_exact($width).map(|s| s.try_into().unwrap()),
                 mask,
-                &[],
-                || Ok(()),
+                info_chunks,
+                check,
             )
         }};
     }
