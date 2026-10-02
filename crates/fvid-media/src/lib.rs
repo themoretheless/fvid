@@ -149,3 +149,5 @@ pub fn convert_subtitles(source: &std::path::Path, destination: &std::path::Path
     owned_subtitle::try_convert_with_options(source, destination, options)
         .map_err(|e| e.to_string())?.ok_or_else(|| "subtitle source is not supported by owned conversion".into())
 }
+
+pub mod owned_alac;

@@ -570,3 +570,5 @@ External multi-ALAC and mixed AAC/ALAC trim fixture construction and selection/C
 The inline synthetic SRT in `tests/owned_subtitle.rs` verifies public owned-library conversion against frontend output bytes, ASS cue clock, no-overwrite and invalid stream refusal. The shared SRT/ASS conversion implementation is library-owned; no external fixture generation is needed.
 
 The library subtitle acceptance test also constructs a fully synthetic Matroska SubRip track and standalone ASS input inline. It checks selected-track conversion, cue clock, styling, name/language, identical frontend bytes and ASS-to-ASS packet preservation in both feature modes. No external fixture generator or private subtitle data is used.
+
+`owned_alac_decoder` verifies the library-owned ALAC reconstruction against frontend PCM for every packet of seven checked-in mono/stereo 16/24-bit fixtures and repeated packet decoding. The shared computational body is unchanged apart from exposing `decode_pcm`; existing wider-channel refusal remains. This is decoder ownership migration, not new ALAC profile or library container/export support.
