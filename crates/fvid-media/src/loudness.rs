@@ -337,6 +337,7 @@ fn open_audio_decoder(input: &Input, index: usize) -> Result<Codec> {
 /// Supported PCM WAVE rates uses the owned streaming meter; other inputs
 /// temporarily retain the legacy backend during migration.
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
+    if crate::owned_container_loudness::supports(source, options) { return crate::owned_container_loudness::measure_loudness(source,options); }
     if crate::owned_adts_loudness::supports(source, options) {
         return crate::owned_adts_loudness::measure_loudness(source, options);
     }

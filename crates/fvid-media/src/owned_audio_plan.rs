@@ -8,7 +8,7 @@ use std::{
 };
 type Result<T> = std::result::Result<T, String>;
 
-fn matroska_descriptor(
+pub(crate) fn matroska_descriptor(
     source: &Path,
     options: &CopyOptions,
 ) -> Result<Option<(usize, u32, u16, u32, String, String)>> {

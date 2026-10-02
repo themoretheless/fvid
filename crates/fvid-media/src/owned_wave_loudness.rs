@@ -147,6 +147,7 @@ fn preflight(source: &Path, options: &CopyOptions) -> Result<Input> {
 /// True peak uses the owned Annex-2 FIR at >=48 kHz and sinc FIR below. Transient peaks may differ
 /// from another implementation's interpolation filter; bit equivalence is not promised.
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
+    if crate::owned_container_loudness::recognizes(source)? { return crate::owned_container_loudness::measure_loudness(source,options); }
     if crate::owned_adts_export::recognizes(source)? {
         return crate::owned_adts_loudness::measure_loudness(source, options);
     }
@@ -254,6 +255,7 @@ pub(crate) fn measure_for_normalization(
     })
 }
 pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
+    if crate::owned_container_loudness::recognizes(source)? { return crate::owned_container_loudness::plan_loudness(source,options); }
     if crate::owned_adts_export::recognizes(source)? {
         return crate::owned_adts_loudness::plan_loudness(source, options);
     }

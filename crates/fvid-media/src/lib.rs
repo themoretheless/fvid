@@ -174,3 +174,5 @@ pub mod owned_mp4_audio_schedule;
 pub mod owned_mp4_audio;
 
 mod owned_mp4_audio_export;
+
+pub mod owned_container_loudness;
