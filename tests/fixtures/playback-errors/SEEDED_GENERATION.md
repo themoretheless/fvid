@@ -209,3 +209,10 @@ then mux/decode synthetic integer patterns to check losslessness across supporte
 sample depths and chroma layouts. Existing export tests retain frontend coverage.
 This exposes the codec without libav; complete library file export/container
 migration remains separate work and is not implied by the kernel move.
+
+The FFV1 threaded-playback/seek regression accepts the retained packed planar
+presentation path as well as RGB. For packed frames it independently transposes
+each source plane, checks every 12-bit sample and 4:2:2 -> 4:4:0 axes, then verifies
+CPU RGB against the original reader reference. Seek repeats those checks for the
+selected timestamp/generation. The existing short five-frame synthetic clip is
+encoded/muxed in memory by owned code; no external tools or private video are used.

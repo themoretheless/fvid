@@ -251,6 +251,36 @@ fn threaded_playback_and_seek_render_identical_rotated_frames() {
     while reference.read_frame().unwrap() {
         expected.push(reference.rgb().to_vec());
     }
+    let packed_expected: Vec<Vec<u8>> = frames
+        .iter()
+        .map(|frame| {
+            let mut pixels = Vec::new();
+            let mut offset = 0;
+            for (w, h) in [(18, 12), (9, 12), (9, 12)] {
+                for row in 0..w {
+                    for col in 0..h {
+                        let at = offset + ((h - 1 - col) * w + row) * 2;
+                        pixels.extend_from_slice(&frame.data[at..at + 2]);
+                    }
+                }
+                offset += w * h * 2;
+            }
+            pixels
+        })
+        .collect();
+    let presented = |pixels: Pixels, index: usize| match pixels {
+        Pixels::Rgb(rgb) => rgb,
+        Pixels::Packed(packed, grade) => {
+            assert!(grade.is_none());
+            assert_eq!(packed.depth, 12);
+            assert_eq!(packed.frame.subsampling, Some([1, 2]));
+            assert_eq!(packed.frame.data, packed_expected[index]);
+            let mut rgb = Vec::new();
+            packed.to_rgb(&mut rgb, 2 << 20).unwrap();
+            rgb
+        }
+        _ => panic!("unexpected FFV1 presentation storage"),
+    };
     let mut reader = NativeReader::software(Cursor::new(data), 2 << 20).unwrap();
     assert!(reader.read_frame().unwrap());
     let mut player = Playback::start(reader, None);
@@ -261,9 +291,7 @@ fn threaded_playback_and_seek_render_identical_rotated_frames() {
         match player.poll() {
             Some(Event::Frame(f)) => {
                 assert_eq!(f.dimensions, [12, 18]);
-                let Pixels::Rgb(rgb) = f.pixels else {
-                    panic!("generic planar needs exact CPU presentation")
-                };
+                let rgb = presented(f.pixels, index);
                 assert_eq!(rgb, expected[index]);
                 index += 1;
             }
@@ -280,9 +308,7 @@ fn threaded_playback_and_seek_render_identical_rotated_frames() {
         assert!(Instant::now() < deadline, "FFV1 seek stalled");
         match player.poll() {
             Some(Event::Frame(f)) if f.generation == generation => {
-                let Pixels::Rgb(rgb) = f.pixels else {
-                    panic!("packed seek")
-                };
+                let rgb = presented(f.pixels, 2);
                 assert_eq!(rgb, expected[2]);
                 assert_eq!(f.interval.unwrap().0, 80_000_000);
                 break;
