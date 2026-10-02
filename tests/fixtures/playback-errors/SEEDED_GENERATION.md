@@ -412,3 +412,14 @@ fixtures now also exercise the library's byte and packet-count results. The
 synthetic multitrack control checks exact output, payload counts and rejection
 of video input for audio-only output before writing. Caller-owned publication
 and final completion notification remain separate from streaming copy.
+
+### Library atomic Matroska remux
+
+The public remux API selects owned byte-preserving Matroska identity copy for
+.mkv/.mka output and unedited all-track requests in both feature modes. It
+validates before creating private temporary output, flushes/syncs, publishes
+without overwriting and emits completion only after publication. The synthetic
+multitrack test covers exact bytes/counts, no overwrite, pre-cancel, cancellation
+during copy, audio-only refusal and removal of temporary files. Selection, tag
+editing, packet-count caps and memory/RSS policies remain unsupported by this
+adapter; legacy mode retains its existing route for those requests.

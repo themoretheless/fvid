@@ -56,6 +56,53 @@ fn library_multitrack_mux_matches_frontend_bytes() {
     b.write_packet(1, 0, 1_000_000, true, &[0; 192]).unwrap();
     b.finish().unwrap();
     assert_eq!(actual.get_ref(), expected.get_ref());
+    let dir = std::env::temp_dir().join(format!(
+        "fvid-library-matroska-remux-{}",
+        std::process::id()
+    ));
+    std::fs::create_dir(&dir).unwrap();
+    let source = dir.join("source.mkv");
+    let destination = dir.join("copy.mkv");
+    std::fs::write(&source, actual.get_ref()).unwrap();
+    let options = fvid_control::CopyOptions::default();
+    let stats = fvid_media::remux(&source, &destination, &options).unwrap();
+    assert_eq!(stats.backend, "owned Matroska");
+    assert_eq!(stats.packets, 2);
+    assert_eq!(std::fs::read(&destination).unwrap(), *actual.get_ref());
+    assert!(fvid_media::remux(&source, &destination, &options).is_err());
+    let cancelled = dir.join("cancelled.mkv");
+    let cancel = fvid_control::CancelFlag::default();
+    cancel.cancel();
+    let options = fvid_control::CopyOptions {
+        cancel: Some(cancel),
+        ..Default::default()
+    };
+    assert!(fvid_media::remux(&source, &cancelled, &options).is_err());
+    assert!(!cancelled.exists());
+    let during = dir.join("during.mkv");
+    let cancel = fvid_control::CancelFlag::default();
+    let captured = cancel.clone();
+    let options = fvid_control::CopyOptions {
+        cancel: Some(cancel),
+        progress: Some(fvid_control::ProgressHook::new(move |event| {
+            assert!(!event.done);
+            if event.packets > 0 {
+                captured.cancel();
+            }
+        })),
+        ..Default::default()
+    };
+    assert!(fvid_media::remux(&source, &during, &options).is_err());
+    assert!(!during.exists());
+
+    let audio = dir.join("audio.mka");
+    assert!(fvid_media::remux(&source, &audio, &Default::default()).is_err());
+    assert!(!audio.exists());
+    assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 2);
+    std::fs::remove_file(source).unwrap();
+    std::fs::remove_file(destination).unwrap();
+    std::fs::remove_dir(dir).unwrap();
+
     let mut copied = Vec::new();
     let copied_stats = fvid_media::owned_matroska_copy::copy(
         &mut Cursor::new(actual.get_ref()),
