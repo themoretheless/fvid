@@ -8,25 +8,22 @@ fn invalid(message: &str) -> Error {
 include!("owned_avc_impl.rs");
 
 fn profile_label(profile: u8, constraints: u8) -> Option<&'static str> {
-    // Canonical interoperability names; flags are in SPS byte order.
-    // Reference vocabulary: https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/profiles.c
-    match (profile, constraints & 0x10 != 0) {
-        (66, _) if constraints & 0x40 != 0 => Some("Constrained Baseline"),
-        (66, _) => Some("Baseline"),
-        (77, _) => Some("Main"),
-        (88, _) => Some("Extended"),
-        (100, _) => Some("High"),
-        (110, false) => Some("High 10"),
-        (110, true) => Some("High 10 Intra"),
-        (122, false) => Some("High 4:2:2"),
-        (122, true) => Some("High 4:2:2 Intra"),
-        (244, false) => Some("High 4:4:4 Predictive"),
-        (244, true) => Some("High 4:4:4 Intra"),
-        (44, _) => Some("CAVLC 4:4:4"),
-        (118, _) => Some("Multiview High"),
-        (128, _) => Some("Stereo High"),
-        _ => None,
+    // Preserve the profiles admitted by this SPS-only probe. Metadata naming
+    // does not expand the parser or decoder's supported profiles.
+    if !matches!(
+        profile,
+        44 | 66 | 77 | 88 | 100 | 110 | 118 | 122 | 128 | 244
+    ) {
+        return None;
     }
+    let mut identifier = i32::from(profile);
+    if profile == 66 && constraints & 0x40 != 0 {
+        identifier |= 512;
+    }
+    if matches!(profile, 110 | 122 | 244) && constraints & 0x10 != 0 {
+        identifier |= 2048;
+    }
+    crate::owned_codec_metadata::descriptor("h264")?.profile_name(identifier)
 }
 
 /// Describe consistent SPS profile/level declarations, without decoding frames.

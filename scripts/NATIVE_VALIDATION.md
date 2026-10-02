@@ -262,3 +262,28 @@ integration tests passed with an empty test PATH. The library binary's direct
 Mach-O dependencies contain no libav, swscale or swresample. Legacy/player
 compilation passed. The source/fixture/validator policy and four supported
 native dependency graphs passed; these graphs exclude production legacy media.
+
+## Owned codec metadata catalog
+
+Probe and operation-plan descriptions use an owned catalog for 44 codec names:
+AVC, HEVC, AV1, VP8/VP9, FFV1, AAC/LATM, Opus, Vorbis, FLAC, ALAC, MPEG audio,
+AC-3/E-AC-3, PCM representations, image and subtitle/data codecs. The catalog
+contains 52 profile labels. AVC SPS-only profile descriptions share this
+vocabulary while preserving their previous profile admission rules.
+All production media-type string descriptions now use a static FVid mapping.
+Unmigrated codec names and profiles retain the legacy metadata route.
+Describing a codec/profile is not evidence that its decoder tools are supported.
+
+An explicit local libavcodec/libavutil reference verified all 44 codec names,
+180,400 profile queries (including missing profiles and integer bounds), three
+unmigrated codec routes and ten media-type values. Every result matched.
+A separate old/new owned comparison verified all 65,536 AVC profile/constraint
+combinations, with no changes to naming or refusal. No compressed-media parsing,
+packet decoding or profile admission was changed by this metadata migration.
+
+Validation: 139 owned library tests and three public/library MP4-probe tests
+passed with an empty test PATH. The owned library test executable had no direct
+libav/swscale/swresample linkage. Legacy/player compilation, diff checks and
+all four supported native dependency graphs passed. This completes only the
+catalogued metadata routes; demuxing, filtering, encoding, muxing, unmigrated
+metadata and production legacy feature coupling remain incomplete.

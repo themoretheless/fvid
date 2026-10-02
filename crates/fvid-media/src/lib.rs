@@ -132,6 +132,7 @@ pub mod owned_webm;
 pub mod owned_webm_probe;
 
 pub mod owned_codec_config;
+pub mod owned_codec_metadata;
 
 pub mod owned_hevc_nal;
 

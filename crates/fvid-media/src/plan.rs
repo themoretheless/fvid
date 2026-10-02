@@ -14,8 +14,8 @@ fn stream_plans(input: &Input, selected: &[usize]) -> Result<Vec<PlanStream>> {
             let disposition = "copy";
             out.push(PlanStream {
                 index,
-                media_type: string(av_get_media_type_string(p.codec_type)),
-                codec: string(avcodec_get_name(p.codec_id)),
+                media_type: media_type_name_owned(p.codec_type).into(),
+                codec: codec_name_owned(p.codec_id),
                 disposition: disposition.into(),
             });
         }

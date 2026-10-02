@@ -449,6 +449,81 @@ unsafe fn channel_layout_copy_owned(destination: *mut AVChannelLayout, source: *
         0
     }
 }
+#[allow(non_upper_case_globals)] // Generated backend constant names.
+fn codec_descriptor_owned(codec: AVCodecID) -> Option<crate::owned_codec_metadata::CodecDescriptor> {
+    let name = match codec {
+        AVCodecID_AV_CODEC_ID_H264 => "h264",
+        AVCodecID_AV_CODEC_ID_HEVC => "hevc",
+        AVCodecID_AV_CODEC_ID_AV1 => "av1",
+        AVCodecID_AV_CODEC_ID_VP8 => "vp8",
+        AVCodecID_AV_CODEC_ID_VP9 => "vp9",
+        AVCodecID_AV_CODEC_ID_FFV1 => "ffv1",
+        AVCodecID_AV_CODEC_ID_AAC => "aac",
+        AVCodecID_AV_CODEC_ID_AAC_LATM => "aac_latm",
+        AVCodecID_AV_CODEC_ID_OPUS => "opus",
+        AVCodecID_AV_CODEC_ID_VORBIS => "vorbis",
+        AVCodecID_AV_CODEC_ID_FLAC => "flac",
+        AVCodecID_AV_CODEC_ID_ALAC => "alac",
+        AVCodecID_AV_CODEC_ID_MP3 => "mp3",
+        AVCodecID_AV_CODEC_ID_MP2 => "mp2",
+        AVCodecID_AV_CODEC_ID_AC3 => "ac3",
+        AVCodecID_AV_CODEC_ID_EAC3 => "eac3",
+        AVCodecID_AV_CODEC_ID_PCM_U8 => "pcm_u8",
+        AVCodecID_AV_CODEC_ID_PCM_S8 => "pcm_s8",
+        AVCodecID_AV_CODEC_ID_PCM_S16LE => "pcm_s16le",
+        AVCodecID_AV_CODEC_ID_PCM_S16BE => "pcm_s16be",
+        AVCodecID_AV_CODEC_ID_PCM_S24LE => "pcm_s24le",
+        AVCodecID_AV_CODEC_ID_PCM_S24BE => "pcm_s24be",
+        AVCodecID_AV_CODEC_ID_PCM_S32LE => "pcm_s32le",
+        AVCodecID_AV_CODEC_ID_PCM_S32BE => "pcm_s32be",
+        AVCodecID_AV_CODEC_ID_PCM_S64LE => "pcm_s64le",
+        AVCodecID_AV_CODEC_ID_PCM_S64BE => "pcm_s64be",
+        AVCodecID_AV_CODEC_ID_PCM_F32LE => "pcm_f32le",
+        AVCodecID_AV_CODEC_ID_PCM_F32BE => "pcm_f32be",
+        AVCodecID_AV_CODEC_ID_PCM_F64LE => "pcm_f64le",
+        AVCodecID_AV_CODEC_ID_PCM_F64BE => "pcm_f64be",
+        AVCodecID_AV_CODEC_ID_PCM_ALAW => "pcm_alaw",
+        AVCodecID_AV_CODEC_ID_PCM_MULAW => "pcm_mulaw",
+        AVCodecID_AV_CODEC_ID_RAWVIDEO => "rawvideo",
+        AVCodecID_AV_CODEC_ID_MJPEG => "mjpeg",
+        AVCodecID_AV_CODEC_ID_PNG => "png",
+        AVCodecID_AV_CODEC_ID_BMP => "bmp",
+        AVCodecID_AV_CODEC_ID_TIFF => "tiff",
+        AVCodecID_AV_CODEC_ID_GIF => "gif",
+        AVCodecID_AV_CODEC_ID_WEBP => "webp",
+        AVCodecID_AV_CODEC_ID_MOV_TEXT => "mov_text",
+        AVCodecID_AV_CODEC_ID_SUBRIP => "subrip",
+        AVCodecID_AV_CODEC_ID_ASS => "ass",
+        AVCodecID_AV_CODEC_ID_SSA => "ssa",
+        AVCodecID_AV_CODEC_ID_BIN_DATA => "bin_data",
+        _ => return None,
+    };
+    crate::owned_codec_metadata::descriptor(name)
+}
+fn codec_name_owned(codec: AVCodecID) -> String {
+    match codec_descriptor_owned(codec) {
+        Some(description) => description.name.into(),
+        None => string(unsafe { avcodec_get_name(codec) }),
+    }
+}
+fn codec_profile_name_owned(codec: AVCodecID, profile: i32) -> Option<String> {
+    if let Some(description) = codec_descriptor_owned(codec) {
+        return description.profile_name(profile).map(String::from);
+    }
+    let name = unsafe { avcodec_profile_name(codec, profile) };
+    (!name.is_null()).then(|| string(name))
+}
+#[allow(non_upper_case_globals)] // Generated backend constant names.
+fn media_type_name_owned(kind: AVMediaType) -> &'static str {
+    match kind {
+        AVMediaType_AVMEDIA_TYPE_VIDEO => "video",
+        AVMediaType_AVMEDIA_TYPE_AUDIO => "audio",
+        AVMediaType_AVMEDIA_TYPE_DATA => "data",
+        AVMediaType_AVMEDIA_TYPE_SUBTITLE => "subtitle",
+        AVMediaType_AVMEDIA_TYPE_ATTACHMENT => "attachment",
+        _ => "",
+    }
+}
 fn owned_pixel_format_from_legacy(format: AVPixelFormat) -> Option<crate::owned_pixel_format::PixelFormat> {
     use crate::owned_pixel_format::PixelFormat;
     match format {
@@ -813,17 +888,14 @@ fn describe(path: &Path, input: &Input) -> Result<MediaInfo> {
             let p = &*s.codecpar;
             streams.push(StreamInfo {
                 index,
-                media_type: string(av_get_media_type_string(p.codec_type)),
-                codec: string(avcodec_get_name(p.codec_id)),
+                media_type: media_type_name_owned(p.codec_type).into(),
+                codec: codec_name_owned(p.codec_id),
                 time_base: [s.time_base.num, s.time_base.den],
                 start: (s.start_time != NOPTS).then_some(s.start_time),
                 duration: (s.duration != NOPTS).then_some(s.duration),
                 bit_rate: (p.bit_rate > 0).then_some(p.bit_rate),
                 average_frame_rate: [s.avg_frame_rate.num, s.avg_frame_rate.den],
-                profile: {
-                    let name = avcodec_profile_name(p.codec_id, p.profile);
-                    (!name.is_null()).then(|| string(name))
-                },
+                profile: codec_profile_name_owned(p.codec_id, p.profile),
                 level: (p.level >= 0).then_some(p.level),
                 disposition: s.disposition,
                 metadata: dictionary(s.metadata),
