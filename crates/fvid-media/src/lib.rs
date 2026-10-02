@@ -78,7 +78,9 @@ pub use owned_remux::remux;
 
 pub mod owned_wave_plan;
 #[cfg(not(feature = "legacy-ffmpeg"))]
-pub use owned_wave_plan::{plan_trim, plan_trim_pcm, plan_concat};
+pub use owned_wave_plan::{plan_trim, plan_trim_pcm};
+#[cfg(not(feature = "legacy-ffmpeg"))]
+pub use owned_concat::plan_concat;
 #[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_remux_plan::plan_remux;
 

@@ -511,3 +511,9 @@ native AAC export, checks segment/packet counts and rejects a changed sample
 rate without output or remaining temporary files. Track/tag edits and packet
 count/memory/RSS policies still require further implementation. ADTS concat
 planning is not yet connected to this library route.
+
+ADTS concat planning now selects the owned library route in both feature modes.
+It shares file/packet admission with execution and walks the complete compatible
+sequence without output or execution progress. The synthetic concat control
+checks all input paths, packet summary and identical configuration refusal in
+plan/execution. Existing WAVE planning remains available through owned dispatch.

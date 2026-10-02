@@ -104,6 +104,22 @@ fn synthetic_adts_concat_cli_copies_aac_instead_of_decoding_pcm() {
     let actual = dir.join("actual.mkv");
     fvid::native_export::concat_adts_aac(&sources, &expected, None, None).unwrap();
     let library = dir.join("library.mka");
+    let dry = fvid_control::CopyOptions {
+        progress: Some(fvid_control::ProgressHook::new(|_| {
+            panic!("concat plan emitted execution progress")
+        })),
+        ..Default::default()
+    };
+    let plan = fvid_media::plan_concat(&sources, &dry).unwrap();
+    assert_eq!(plan.command, "concat");
+    assert_eq!(plan.inputs, sources);
+    assert!(
+        plan.steps
+            .iter()
+            .any(|step| step.detail.contains("2 unchanged AAC packets"))
+    );
+    assert!(!library.exists());
+
     let stats = fvid_media::concat(&sources, &library, &Default::default()).unwrap();
     assert_eq!(stats.backend, "owned Matroska");
     assert_eq!(stats.segments, 2);
@@ -118,6 +134,11 @@ fn synthetic_adts_concat_cli_copies_aac_instead_of_decoding_pcm() {
     altered[2] = (altered[2] & 0xc3) | (3 << 2);
     std::fs::write(&incompatible, altered).unwrap();
     let failed = dir.join("incompatible.mka");
+    assert!(
+        fvid_media::plan_concat(&[sources[0].clone(), incompatible.clone()], &dry)
+            .unwrap_err()
+            .contains("configuration")
+    );
     let error = fvid_media::concat(
         &[sources[0].clone(), incompatible],
         &failed,

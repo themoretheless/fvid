@@ -3457,6 +3457,9 @@ pub fn plan_trim_pcm(
 
 /// Plan a strict stream-copy concat without writing output.
 pub fn plan_concat(sources: &[PathBuf], options: &CopyOptions) -> Result<MediaPlan> {
+    if crate::owned_concat::supports(sources, Path::new("planned.mka"), options) {
+        return crate::owned_concat::plan_concat(sources, options);
+    }
     if sources.len() < 2 || sources.len() > 256 {
         return Err("plan concat requires 2..=256 inputs".into());
     }
