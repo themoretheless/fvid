@@ -18,6 +18,48 @@ pub(crate) fn write_wav_f32le_checked<F: FnMut() -> Result<()>>(
     sample_rate: i32,
     channels: i32,
     samples: &[f32],
+    check: F,
+) -> Result<()> {
+    write_float_wave::<4, _>(
+        destination,
+        sample_rate,
+        channels,
+        samples.len(),
+        samples.iter().map(|sample| sample.to_le_bytes()),
+        check,
+    )
+}
+/// Write IEEE float64 WAV, retaining all sample bits.
+pub fn write_wav_f64le(
+    destination: &Path,
+    sample_rate: i32,
+    channels: i32,
+    samples: &[f64],
+) -> Result<()> {
+    write_wav_f64le_checked(destination, sample_rate, channels, samples, || Ok(()))
+}
+pub(crate) fn write_wav_f64le_checked<F: FnMut() -> Result<()>>(
+    destination: &Path,
+    sample_rate: i32,
+    channels: i32,
+    samples: &[f64],
+    check: F,
+) -> Result<()> {
+    write_float_wave::<8, _>(
+        destination,
+        sample_rate,
+        channels,
+        samples.len(),
+        samples.iter().map(|sample| sample.to_le_bytes()),
+        check,
+    )
+}
+fn write_float_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
+    destination: &Path,
+    sample_rate: i32,
+    channels: i32,
+    count: usize,
+    samples: impl Iterator<Item = [u8; WIDTH]>,
     mut check: F,
 ) -> Result<()> {
     check()?;
@@ -27,11 +69,11 @@ pub(crate) fn write_wav_f32le_checked<F: FnMut() -> Result<()>>(
     if sample_rate <= 0 || !(1..=64).contains(&channels) {
         return Err("invalid wav rate/channel count".into());
     }
-    if samples.len() % channels as usize != 0 {
+    if count % channels as usize != 0 {
         return Err("incomplete WAV channel frame".into());
     }
-    let data_bytes = (samples.len() as u64)
-        .checked_mul(4)
+    let data_bytes = (count as u64)
+        .checked_mul(WIDTH as u64)
         .ok_or("wav data size overflow")?;
     let riff_size = data_bytes.checked_add(36).ok_or("wav riff size overflow")?;
     if riff_size > u32::MAX as u64 || data_bytes > u32::MAX as u64 {
@@ -65,7 +107,7 @@ pub(crate) fn write_wav_f32le_checked<F: FnMut() -> Result<()>>(
             .open(&temporary)
             .map_err(|e| e.to_string())?;
         let block_align = (channels as u16)
-            .checked_mul(4)
+            .checked_mul(WIDTH as u16)
             .ok_or("wav block align overflow")?;
         let byte_rate = (sample_rate as u32)
             .checked_mul(u32::from(block_align))
@@ -81,18 +123,16 @@ pub(crate) fn write_wav_f32le_checked<F: FnMut() -> Result<()>>(
         header[24..28].copy_from_slice(&(sample_rate as u32).to_le_bytes());
         header[28..32].copy_from_slice(&byte_rate.to_le_bytes());
         header[32..34].copy_from_slice(&block_align.to_le_bytes());
-        header[34..36].copy_from_slice(&32u16.to_le_bytes());
+        header[34..36].copy_from_slice(&((WIDTH * 8) as u16).to_le_bytes());
         header[36..40].copy_from_slice(b"data");
         header[40..44].copy_from_slice(&(data_bytes as u32).to_le_bytes());
         file.write_all(&header).map_err(|e| e.to_string())?;
         let mut output = std::io::BufWriter::new(file);
-        for (index, sample) in samples.iter().enumerate() {
+        for (index, sample) in samples.enumerate() {
             if index % 16384 == 0 {
                 check()?;
             }
-            output
-                .write_all(&sample.to_le_bytes())
-                .map_err(|e| e.to_string())?;
+            output.write_all(&sample).map_err(|e| e.to_string())?;
         }
         output.flush().map_err(|e| e.to_string())?;
         Ok(())
@@ -143,5 +183,34 @@ mod tests {
         assert!(write_wav_f32le(&invalid, 48000, 2, &[1.]).is_err());
         assert!(!invalid.exists());
         std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod double_tests {
+    use super::*;
+    #[test]
+    fn writer_retains_all_ieee_double_bits_and_sizes() {
+        let dir =
+            std::env::temp_dir().join(format!("fvid-double-wav-writer-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir(&dir).unwrap();
+        let path = dir.join("samples.wav");
+        let samples = [
+            0.12345678901234567,
+            -0.0,
+            f64::from_bits(1),
+            f64::from_bits(0x7ff8000012345678),
+        ];
+        write_wav_f64le(&path, 48000, 2, &samples).unwrap();
+        let bytes = std::fs::read(&path).unwrap();
+        assert_eq!(bytes.len(), 44 + samples.len() * 8);
+        assert_eq!(u16::from_le_bytes(bytes[34..36].try_into().unwrap()), 64);
+        assert_eq!(u32::from_le_bytes(bytes[40..44].try_into().unwrap()), 32);
+        for (sample, actual) in samples.iter().zip(bytes[44..].chunks_exact(8)) {
+            assert_eq!(actual, sample.to_le_bytes());
+        }
+        assert!(write_wav_f64le(&path, 48000, 2, &samples).is_err());
+        std::fs::remove_dir_all(dir).unwrap();
     }
 }

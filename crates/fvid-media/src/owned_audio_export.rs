@@ -28,7 +28,18 @@ pub(crate) fn supports(
             || (info.channels <= 2 && info.channel_mask == 0)
             || crate::owned_pcm_channels::standard_mask(info.channels)
                 .is_some_and(|mask| mask == u64::from(info.channel_mask));
-        info.float && info.bits_per_sample == 32 && conversion && layout
+        // The legacy double WAV muxer also retains tags and explicit surround
+        // masks. Keep those cases there until the owned writer retains them.
+        let precision = info.bits_per_sample == 32
+            || (info.bits_per_sample == 64
+                && info.channels <= 2
+                && channels <= 2
+                && (info.channel_mask == 0
+                    || crate::owned_pcm_channels::standard_mask(info.channels)
+                        .is_some_and(|mask| mask == u64::from(info.channel_mask)))
+                && crate::owned_probe::probe_wave(source)
+                    .is_ok_and(|info| info.metadata.is_empty()));
+        info.float && precision && conversion && layout
     })
 }
 fn simple_options(options: &CopyOptions) -> bool {
@@ -100,8 +111,9 @@ pub fn decode_audio_transformed(
         hook.emit(event);
     }
     check()?;
-    let (input, pcm) = crate::owned_audio_mix::decode_float_wave_controlled(
+    let (input, pcm) = crate::owned_audio_mix::read_float_wave_controlled(
         source,
+        None,
         options.cancel.as_ref(),
         |bytes| {
             event.packets = event
@@ -131,34 +143,65 @@ pub fn decode_audio_transformed(
             return Err("owned rematrix requires a standard explicit speaker layout".into());
         }
     }
-    let mut resampler = crate::owned_resample::Resampler::new(
-        Vec::new(),
-        input.sample_rate as u32,
-        rate as u32,
-        channels as u16,
-    )
-    .map_err(|e| e.to_string())?;
-    let mut matrix = crate::owned_pcm_gain::PcmGain::new(
-        &mut resampler,
-        1.,
-        input.channels as u16,
-        channels as u16,
-    )?;
-    for block in pcm.chunks(4096 * input.channels as usize * 4) {
-        if let Some(hook) = &options.progress {
-            hook.emit(event);
+    let width = if input.sample_format == "dbl" { 8 } else { 4 };
+    let bytes = if width == 8 {
+        let mut resampler = crate::owned_resample_f64::Resampler::new(
+            Vec::new(),
+            input.sample_rate as u32,
+            rate as u32,
+            channels as u16,
+        )
+        .map_err(|e| e.to_string())?;
+        let mut matrix = crate::owned_pcm_gain_f64::PcmGain::new(
+            &mut resampler,
+            1.,
+            input.channels as u16,
+            channels as u16,
+        )?;
+        for block in pcm.chunks(4096 * input.channels as usize * 8) {
+            if let Some(hook) = &options.progress {
+                hook.emit(event);
+            }
+            check()?;
+            matrix.write_all(block).map_err(|e| e.to_string())?;
+        }
+        if !matrix.frame_complete() {
+            return Err("incomplete PCM channel frame".into());
         }
         check()?;
-        matrix.write_all(block).map_err(|e| e.to_string())?;
-    }
-    if !matrix.frame_complete() {
-        return Err("incomplete PCM channel frame".into());
-    }
-    check()?;
-    resampler.finish().map_err(|e| e.to_string())?;
-    check()?;
-    let bytes = resampler.take_output();
-    let frames = bytes.len() / (channels as usize * 4);
+        resampler.finish().map_err(|e| e.to_string())?;
+        check()?;
+        resampler.take_output()
+    } else {
+        let mut resampler = crate::owned_resample::Resampler::new(
+            Vec::new(),
+            input.sample_rate as u32,
+            rate as u32,
+            channels as u16,
+        )
+        .map_err(|e| e.to_string())?;
+        let mut matrix = crate::owned_pcm_gain::PcmGain::new(
+            &mut resampler,
+            1.,
+            input.channels as u16,
+            channels as u16,
+        )?;
+        for block in pcm.chunks(4096 * input.channels as usize * 4) {
+            if let Some(hook) = &options.progress {
+                hook.emit(event);
+            }
+            check()?;
+            matrix.write_all(block).map_err(|e| e.to_string())?;
+        }
+        if !matrix.frame_complete() {
+            return Err("incomplete PCM channel frame".into());
+        }
+        check()?;
+        resampler.finish().map_err(|e| e.to_string())?;
+        check()?;
+        resampler.take_output()
+    };
+    let frames = bytes.len() / (channels as usize * width);
     let boundary = |time: i64| -> Result<usize> {
         usize::try_from((time as u128 * rate as u128).div_ceil(1_000_000))
             .map(|n| n.min(frames))
@@ -171,18 +214,42 @@ pub fn decode_audio_transformed(
     if last <= first {
         return Err("no decoded audio samples".into());
     }
-    let samples: Vec<_> = bytes[first * channels as usize * 4..last * channels as usize * 4]
-        .chunks_exact(4)
-        .map(|b| f32::from_le_bytes(b.try_into().unwrap()) * gain as f32)
-        .collect();
-    if samples.iter().any(|s| !s.is_finite()) {
-        return Err("PCM gain overflow".into());
-    }
+    let selected = &bytes[first * channels as usize * width..last * channels as usize * width];
     check()?;
     if let Some(hook) = &options.progress {
         hook.emit(event);
     }
-    crate::owned_wav_file::write_wav_f32le_checked(destination, rate, channels, &samples, check)?;
+    if width == 8 {
+        let samples: Vec<_> = selected
+            .chunks_exact(8)
+            .map(|b| f64::from_le_bytes(b.try_into().unwrap()) * gain)
+            .collect();
+        if samples.iter().any(|s| !s.is_finite()) {
+            return Err("PCM gain overflow".into());
+        }
+        crate::owned_wav_file::write_wav_f64le_checked(
+            destination,
+            rate,
+            channels,
+            &samples,
+            check,
+        )?;
+    } else {
+        let samples: Vec<_> = selected
+            .chunks_exact(4)
+            .map(|b| f32::from_le_bytes(b.try_into().unwrap()) * gain as f32)
+            .collect();
+        if samples.iter().any(|s| !s.is_finite()) {
+            return Err("PCM gain overflow".into());
+        }
+        crate::owned_wav_file::write_wav_f32le_checked(
+            destination,
+            rate,
+            channels,
+            &samples,
+            check,
+        )?;
+    }
     if let Some(hook) = &options.progress {
         hook.emit(fvid_control::ProgressEvent {
             done: true,
@@ -194,7 +261,7 @@ pub fn decode_audio_transformed(
         decoded_frames: input.decoded_frames,
         sample_rate: rate,
         channels,
-        sample_format: "flt".into(),
+        sample_format: input.sample_format,
         planar_interleave_bytes: 0,
         decode_errors: 0,
     })
@@ -377,5 +444,86 @@ mod control_tests {
                 .ends_with(".tmp")
         }));
         std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod double_tests {
+    use super::*;
+    #[test]
+    fn double_wave_identity_and_transformed_export_retain_sub_float32_precision() {
+        let dir =
+            std::env::temp_dir().join(format!("fvid-double-wave-export-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir(&dir).unwrap();
+        let source = dir.join("source.wav");
+        let identity = dir.join("identity.wav");
+        let value = 0.12345678901234567f64;
+        assert_ne!(value, value as f32 as f64);
+        crate::owned_wav_file::write_wav_f64le(&source, 48000, 2, &vec![value; 997 * 2]).unwrap();
+        assert!(supports(
+            &source,
+            &identity,
+            Default::default(),
+            &CopyOptions::default()
+        ));
+        let stats = crate::decode_audio(&source, &identity, &CopyOptions::default()).unwrap();
+        assert_eq!(stats.sample_format, "dbl");
+        assert_eq!(
+            std::fs::read(&source).unwrap(),
+            std::fs::read(&identity).unwrap()
+        );
+        let output = dir.join("output.wav");
+        let transform = AudioDecodeTransform {
+            interval: Some((63, 10125)),
+            sample_rate: Some(16000),
+            channels: Some(1),
+            volume: Some(0.5),
+        };
+        let stats =
+            crate::decode_audio_transformed(&source, &output, transform, &CopyOptions::default())
+                .unwrap();
+        assert_eq!(stats.sample_frames, 160);
+        assert_eq!(stats.sample_format, "dbl");
+        let mut file = std::fs::File::open(&output).unwrap();
+        let info = crate::owned_wave_inspect::inspect(&mut file, None).unwrap();
+        assert_eq!(info.bits_per_sample, 64);
+        assert_eq!(info.channels, 1);
+        let (_, pcm) =
+            crate::owned_audio_mix::read_float_wave_controlled(&output, None, None, |_| Ok(()))
+                .unwrap();
+        for sample in pcm.chunks_exact(8) {
+            let actual = f64::from_le_bytes(sample.try_into().unwrap());
+            assert!((actual - value * 0.5).abs() < 1e-14);
+            assert_ne!(actual, actual as f32 as f64);
+        }
+        let mut file = std::fs::File::open(&source).unwrap();
+        assert_eq!(
+            crate::owned_wave_inspect::inspect(&mut file, None)
+                .unwrap()
+                .bits_per_sample,
+            64
+        );
+        assert!(crate::owned_audio_mix::decode_float_wave(&source).is_err());
+        let mut bytes = std::fs::read(&source).unwrap();
+        bytes.extend_from_slice(b"LIST");
+        bytes.extend_from_slice(&18u32.to_le_bytes());
+        bytes.extend_from_slice(b"INFOINAM");
+        bytes.extend_from_slice(&6u32.to_le_bytes());
+        bytes.extend_from_slice(b"title\0");
+        let size = (bytes.len() - 8) as u32;
+        bytes[4..8].copy_from_slice(&size.to_le_bytes());
+        std::fs::write(&source, bytes).unwrap();
+        assert_eq!(
+            crate::owned_probe::probe_wave(&source).unwrap().metadata["title"],
+            "title"
+        );
+        assert!(!supports(
+            &source,
+            &output,
+            Default::default(),
+            &CopyOptions::default()
+        ));
+        std::fs::remove_dir_all(dir).unwrap();
     }
 }
