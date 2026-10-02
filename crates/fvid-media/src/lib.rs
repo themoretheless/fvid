@@ -178,3 +178,5 @@ mod owned_mp4_audio_export;
 pub mod owned_container_loudness;
 
 pub mod owned_container_loudnorm;
+
+pub mod owned_mp4_probe;

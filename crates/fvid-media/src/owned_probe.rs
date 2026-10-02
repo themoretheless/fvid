@@ -17,6 +17,7 @@ pub fn probe(path: &Path) -> Result<MediaInfo, String> {
 /// Format hints never override the signature or bypass container validation.
 pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> {
     match format {
+        Some("mov" | "mp4" | "m4a") => return crate::owned_mp4_probe::probe_mp4(path),
         Some("webm" | "matroska") => return crate::owned_webm_probe::probe_webm(path),
         Some("wav") => return probe_wave(path).map_err(|e| e.to_string()),
         Some("aac") => return probe_adts(path),
@@ -32,6 +33,7 @@ pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> 
     if signature_file.read_exact(&mut signature).is_ok() && &signature == b"YUV4MPEG2" {
         return crate::owned_y4m_probe::probe_y4m(path);
     }
+    if crate::owned_mp4::recognizes_prefix(&signature[..8]) { return crate::owned_mp4_probe::probe_mp4(path); }
     if signature[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
         return crate::owned_webm_probe::probe_webm(path);
     }
