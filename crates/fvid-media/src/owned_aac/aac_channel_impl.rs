@@ -70,13 +70,8 @@ impl ChannelData {
         {
             return Err(invalid("AAC reconstruction band layout mismatch"));
         }
-        let mut ordered = vec![0.0; n];
-        self.info.deinterleave(
-            offsets,
-            &self.quantized.iter().map(|&q| q as f32).collect::<Vec<_>>(),
-            &mut ordered,
-        )?;
-        let mut quantized: Vec<i16> = ordered.iter().map(|&q| q as i16).collect();
+        let mut quantized = vec![0; n];
+        self.info.deinterleave_quantized(offsets, &self.quantized, &mut quantized)?;
         if let Some(pulse) = &self.pulse {
             if self.info.sequence == WindowSequence::EightShort {
                 return Err(invalid("pulse on short AAC window"));
@@ -91,7 +86,7 @@ impl ChannelData {
                 ));
             }
         }
-        ordered.fill(0.0);
+        let mut ordered = vec![0.0; n];
         let size = *offsets.last().unwrap();
         let mut first_window = 0;
         for (group, &length) in self.info.group_lengths.iter().enumerate() {

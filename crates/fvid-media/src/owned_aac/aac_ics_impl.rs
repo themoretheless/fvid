@@ -66,6 +66,26 @@ impl IcsInfo {
         grouped: &[f32],
         output: &mut [f32],
     ) -> Result<()> {
+        self.deinterleave_values(offsets, grouped, output, 0.0, |value| value.is_finite())
+    }
+
+    pub(crate) fn deinterleave_quantized(
+        &self,
+        offsets: &[usize],
+        grouped: &[i16],
+        output: &mut [i16],
+    ) -> Result<()> {
+        self.deinterleave_values(offsets, grouped, output, 0, |_| true)
+    }
+
+    fn deinterleave_values<T: Copy>(
+        &self,
+        offsets: &[usize],
+        grouped: &[T],
+        output: &mut [T],
+        zero: T,
+        valid: impl Fn(&T) -> bool,
+    ) -> Result<()> {
         if !matches!(output.len(), 960 | 1024) {
             return Err(invalid("AAC spectrum requires 960 or 1024 samples"));
         }
@@ -95,11 +115,11 @@ impl IcsInfo {
             return Err(invalid("invalid AAC scale-factor band offsets"));
         }
         let coded = offsets[self.max_sfb as usize];
-        if grouped.len() != coded * windows || grouped.iter().any(|x| !x.is_finite()) {
+        if grouped.len() != coded * windows || grouped.iter().any(|x| !valid(x)) {
             return Err(invalid("AAC grouped spectrum size or value is invalid"));
         }
         // All geometry is checked before touching the caller's output.
-        output.fill(0.0);
+        output.fill(zero);
         let mut source = 0;
         let mut first_window = 0;
         for &count in &self.group_lengths {
@@ -154,5 +174,76 @@ impl IcsInfo {
         }
         *bits = cursor;
         Ok(groups)
+    }
+}
+
+#[cfg(test)]
+mod quantized_deinterleave_tests {
+    use super::*;
+
+    #[test]
+    fn quantized_mapping_matches_independent_window_coordinates() {
+        for samples in [960, 1024] {
+            for groups in [vec![1, 3, 4], vec![8]] {
+                let size = samples / 8;
+                let offsets = [0, 4, 12, size];
+                let info = IcsInfo {
+                    sequence: WindowSequence::EightShort,
+                    shape: WindowShape::Sine,
+                    max_sfb: 2,
+                    group_lengths: groups,
+                };
+                let mut grouped = Vec::new();
+                let mut expected = vec![0i16; samples];
+                let mut first = 0;
+                for &count in &info.group_lengths {
+                    for band in offsets.windows(2).take(2) {
+                        for window in first..first + usize::from(count) {
+                            for coefficient in band[0]..band[1] {
+                                let value = if coefficient == 0 {
+                                    i16::MIN
+                                } else if coefficient == 1 {
+                                    i16::MAX
+                                } else {
+                                    -(window as i16 * 100 + coefficient as i16)
+                                };
+                                grouped.push(value);
+                                expected[window * size + coefficient] = value;
+                            }
+                        }
+                    }
+                    first += usize::from(count);
+                }
+                let mut output = vec![123; samples];
+                info.deinterleave_quantized(&offsets, &grouped, &mut output)
+                    .unwrap();
+                assert_eq!(output, expected);
+                let mut floating = vec![123.0; samples];
+                let grouped_float: Vec<_> = grouped.iter().map(|&value| f32::from(value)).collect();
+                info.deinterleave(&offsets, &grouped_float, &mut floating)
+                    .unwrap();
+                assert_eq!(
+                    floating,
+                    expected
+                        .iter()
+                        .map(|&value| f32::from(value))
+                        .collect::<Vec<_>>()
+                );
+                info.deinterleave_quantized(&offsets, &grouped[..grouped.len() - 1], &mut output)
+                    .unwrap_err();
+                assert_eq!(output, expected);
+                let mut invalid = grouped_float;
+                invalid[0] = f32::NAN;
+                info.deinterleave(&offsets, &invalid, &mut floating)
+                    .unwrap_err();
+                assert_eq!(
+                    floating,
+                    expected
+                        .iter()
+                        .map(|&value| f32::from(value))
+                        .collect::<Vec<_>>()
+                );
+            }
+        }
     }
 }
