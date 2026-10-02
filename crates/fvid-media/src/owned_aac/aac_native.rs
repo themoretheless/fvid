@@ -92,34 +92,43 @@ impl NativeAacDecoder {
 #[cfg(test)]
 mod retained_memory_tests {
     use super::*;
+    fn scratch_payload(samples: usize) -> usize {
+        (3 * samples + samples / 4) * std::mem::size_of::<f64>()
+            + (2 * samples - 1).next_power_of_two() * std::mem::size_of::<[f64; 2]>()
+    }
     #[test]
     fn occupied_coupling_slot_counts_its_independent_scratch() {
-        let mut decoder = NativeAacDecoder::new(&[0x12, 0x08]).unwrap();
-        let before = decoder.retained_payload_bytes().unwrap();
-        // Ownership accounting only: this does not claim coupling profile acceptance.
-        decoder.coupling_synthesis[0] = Some(decoder.synthesis[0].clone());
-        assert_eq!(
-            decoder.retained_payload_bytes().unwrap() - before,
-            1024 * 58
-        );
+        for (samples, flag) in [(1024, 0), (960, 4)] {
+            let mut decoder = NativeAacDecoder::new(&[0x12, 0x08 | flag]).unwrap();
+            assert_eq!(usize::from(decoder.config.frame_samples), samples);
+            let before = decoder.retained_payload_bytes().unwrap();
+            // Ownership accounting only: this does not claim coupling profile acceptance.
+            decoder.coupling_synthesis[0] = Some(decoder.synthesis[0].clone());
+            assert_eq!(
+                decoder.retained_payload_bytes().unwrap() - before,
+                scratch_payload(samples)
+            );
+        }
     }
     #[test]
     fn channels_and_checkpoints_count_mutable_capacity_but_share_tables() {
-        let mono = NativeAacDecoder::new(&[0x12, 0x08]).unwrap();
-        let stereo = NativeAacDecoder::new(&[0x12, 0x10]).unwrap();
-        let state = std::mem::size_of::<LongSineSynthesis>() + 1024 * 58;
-        assert_eq!(
-            stereo.retained_payload_bytes().unwrap() - mono.retained_payload_bytes().unwrap(),
-            state + std::mem::size_of::<usize>()
-        );
-        let checkpoint = mono.checkpoint();
-        let added = state
-            + std::mem::size_of::<usize>()
-            + 16 * std::mem::size_of::<Option<LongSineSynthesis>>();
-        assert_eq!(
-            mono.retained_payload_bytes_with_checkpoint(Some(&checkpoint))
-                .unwrap(),
-            mono.retained_payload_bytes().unwrap() + added
-        );
+        for (samples, flag) in [(1024, 0), (960, 4)] {
+            let mono = NativeAacDecoder::new(&[0x12, 0x08 | flag]).unwrap();
+            let stereo = NativeAacDecoder::new(&[0x12, 0x10 | flag]).unwrap();
+            assert_eq!(usize::from(mono.config.frame_samples), samples);
+            let state = std::mem::size_of::<LongSineSynthesis>() + scratch_payload(samples);
+            assert_eq!(
+                stereo.retained_payload_bytes().unwrap() - mono.retained_payload_bytes().unwrap(),
+                state + std::mem::size_of::<usize>()
+            );
+            let checkpoint = mono.checkpoint();
+            let added = state
+                + std::mem::size_of::<usize>()
+                + 16 * std::mem::size_of::<Option<LongSineSynthesis>>();
+            assert_eq!(
+                mono.retained_payload_bytes_with_checkpoint(Some(&checkpoint)).unwrap(),
+                mono.retained_payload_bytes().unwrap() + added
+            );
+        }
     }
 }
