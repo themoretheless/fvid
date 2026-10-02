@@ -21,12 +21,7 @@ pub struct Resampler<W> {
     filled: usize,
 }
 impl<W: Write> Resampler<W> {
-    pub fn new(
-        output: W,
-        input_rate: u32,
-        output_rate: u32,
-        channels: u16,
-    ) -> io::Result<Self> {
+    pub fn new(output: W, input_rate: u32, output_rate: u32, channels: u16) -> io::Result<Self> {
         if input_rate == 0 || output_rate == 0 || !(1..=64).contains(&channels) {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
@@ -125,7 +120,9 @@ impl<W: Write> Resampler<W> {
 }
 /// Drain produced PCM without disturbing the filter history or rational clock.
 impl Resampler<Vec<u8>> {
-    pub fn take_output(&mut self) -> Vec<u8> { std::mem::take(&mut self.output) }
+    pub fn take_output(&mut self) -> Vec<u8> {
+        std::mem::take(&mut self.output)
+    }
 }
 
 impl<W: Write> Write for Resampler<W> {
@@ -218,5 +215,14 @@ mod tests {
         let high = convert(&tone(12000.0), 48000, 16000, 1, 17);
         assert!((rms(&low) - std::f64::consts::FRAC_1_SQRT_2).abs() < 0.002);
         assert!(rms(&high) < 0.0001, "aliased RMS {}", rms(&high));
+    }
+}
+
+#[cfg(test)]
+impl Resampler<Vec<u8>> {
+    pub(crate) fn retained_storage_bytes(&self) -> usize {
+        std::mem::size_of_val(self)
+            + self.queue.capacity() * std::mem::size_of::<[f32; 64]>()
+            + self.output.capacity()
     }
 }

@@ -237,3 +237,35 @@ pub fn info_chunks<R: Read + Seek>(
     }
     Ok(output)
 }
+
+/// INFO chunk storage required by an export, counted without allocating payloads.
+pub fn info_chunks_bytes<R: Read + Seek>(
+    input: &mut R,
+    info: &WaveInfo,
+    cancel: Option<&CancelFlag>,
+) -> Result<usize> {
+    let mut total = 0usize;
+    let mut at = 12;
+    while at < info.end {
+        check(cancel)?;
+        let (tag, size, next) = chunk(input, at, info.end)?;
+        if &tag == b"LIST" {
+            if size < 4 {
+                return Err(invalid("short WAVE INFO list"));
+            }
+            let mut kind = [0; 4];
+            input.read_exact(&mut kind)?;
+            if &kind != b"INFO" {
+                return Err(invalid("WAVE metadata is not an INFO list"));
+            }
+            total = total
+                .checked_add(
+                    usize::try_from(next - at)
+                        .map_err(|_| invalid("WAVE metadata exceeds address space"))?,
+                )
+                .ok_or_else(|| invalid("WAVE metadata size overflow"))?;
+        }
+        at = next;
+    }
+    Ok(total)
+}

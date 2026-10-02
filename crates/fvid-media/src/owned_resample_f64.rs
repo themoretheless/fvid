@@ -240,3 +240,12 @@ mod precision_tests {
         assert!(filter.take_output().is_empty());
     }
 }
+
+#[cfg(test)]
+impl Resampler<Vec<u8>> {
+    pub(crate) fn retained_storage_bytes(&self) -> usize {
+        std::mem::size_of_val(self)
+            + self.queue.capacity() * std::mem::size_of::<[f64; 64]>()
+            + self.output.capacity()
+    }
+}

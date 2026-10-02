@@ -137,3 +137,151 @@ mod tests {
         }
     }
 }
+
+/// Conservative admission estimate for the current owned WAVE export pipeline.
+/// Counts retained input, output vector growth/quantization, sinc history,
+/// INFO rewrite buffers and fixed I/O/stack scratch. This is not process RSS.
+pub fn estimate_float_wave_export_bytes(
+    info: &crate::owned_wave_inspect::WaveInfo,
+    input_bytes: usize,
+    metadata_bytes: usize,
+    transform: fvid_media_info::AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<usize> {
+    if !info.float
+        || !matches!(info.bits_per_sample, 32 | 64)
+        || !(1..=64).contains(&info.channels)
+        || info.sample_rate == 0
+    {
+        return Err("invalid float WAVE memory geometry".into());
+    }
+    let width = u128::from(info.bits_per_sample / 8);
+    let frame_bytes = u128::from(info.channels) * width;
+    if u128::from(info.block) != frame_bytes || input_bytes as u128 % frame_bytes != 0 {
+        return Err("partial WAVE frame in memory estimate".into());
+    }
+    let rate = transform.sample_rate.unwrap_or(info.sample_rate as i32);
+    let channels = transform.channels.unwrap_or(i32::from(info.channels));
+    if rate <= 0 || !(1..=64).contains(&channels) {
+        return Err("invalid output memory geometry".into());
+    }
+    let frames = input_bytes as u128 / frame_bytes;
+    let output_frames = (frames * rate as u128).div_ceil(u128::from(info.sample_rate));
+    let output_bytes = output_frames * channels as u128 * width;
+    let history = if rate as u32 == info.sample_rate {
+        0
+    } else {
+        // +1 radius protects against the floating-point ceil in the filter;
+        // the deque grows geometrically and may transiently retain old storage.
+        let radius = (32 * u128::from(info.sample_rate))
+            .div_ceil(rate as u128)
+            .max(32)
+            + 1;
+        let step = u128::from(info.sample_rate).div_ceil(rate as u128);
+        let held = frames.min(2 * radius + step + 2);
+        let slots = held
+            .checked_next_power_of_two()
+            .ok_or("sinc history estimate overflow")?
+            .max(4);
+        2 * slots * 64 * width
+    };
+    let retains_metadata = info.bits_per_sample == 64
+        || !options.metadata_set.is_empty()
+        || !options.metadata_delete.is_empty();
+    let metadata = if retains_metadata {
+        let assignments = options
+            .metadata_set
+            .iter()
+            .try_fold(0u128, |sum, (_, value)| {
+                sum.checked_add(value.len() as u128 + 10)
+                    .ok_or("metadata estimate overflow")
+            })?;
+        8 * (metadata_bytes as u128 + assignments + 12)
+    } else {
+        0
+    };
+    let total = input_bytes as u128 + 3 * output_bytes + history + metadata + 16 * 1024;
+    usize::try_from(total).map_err(|_| "controlled memory estimate exceeds address space".into())
+}
+
+#[cfg(test)]
+mod wave_estimate_tests {
+    use super::*;
+    use std::io::Write;
+    #[test]
+    fn admission_covers_observed_sinc_history_and_output_capacities() {
+        for bits in [32u16, 64] {
+            for (rate, out) in [
+                (48000, 48000),
+                (48000, 16000),
+                (44100, 48000),
+                (96000, 8000),
+            ] {
+                let width = usize::from(bits / 8);
+                let frames = 257;
+                let info = crate::owned_wave_inspect::WaveInfo {
+                    sample_rate: rate,
+                    channels: 2,
+                    bits_per_sample: bits,
+                    float: true,
+                    valid_bits: bits,
+                    channel_mask: 3,
+                    data_offset: 44,
+                    sample_frames: frames,
+                    block: (2 * width) as u16,
+                    data_bytes: (frames as usize * 2 * width) as u32,
+                    end: 44 + frames * 2 * width as u64,
+                };
+                let input_bytes = frames as usize * 2 * width;
+                let transform = fvid_media_info::AudioDecodeTransform {
+                    sample_rate: Some(out as i32),
+                    ..Default::default()
+                };
+                let estimate = estimate_float_wave_export_bytes(
+                    &info,
+                    input_bytes,
+                    0,
+                    transform,
+                    &CopyOptions::default(),
+                )
+                .unwrap();
+                if bits == 32 {
+                    let mut engine =
+                        crate::owned_resample::Resampler::new(Vec::new(), rate, out, 2).unwrap();
+                    for _ in 0..frames {
+                        engine
+                            .write_all(&[0.25f32.to_le_bytes(), 0.5f32.to_le_bytes()].concat())
+                            .unwrap();
+                        assert!(input_bytes + engine.retained_storage_bytes() <= estimate);
+                    }
+                    engine.finish().unwrap();
+                    assert!(input_bytes + engine.retained_storage_bytes() <= estimate);
+                } else {
+                    let mut engine =
+                        crate::owned_resample_f64::Resampler::new(Vec::new(), rate, out, 2)
+                            .unwrap();
+                    for _ in 0..frames {
+                        engine
+                            .write_all(&[0.25f64.to_le_bytes(), 0.5f64.to_le_bytes()].concat())
+                            .unwrap();
+                        assert!(input_bytes + engine.retained_storage_bytes() <= estimate);
+                    }
+                    engine.finish().unwrap();
+                    assert!(input_bytes + engine.retained_storage_bytes() <= estimate);
+                }
+                let with_tags = estimate_float_wave_export_bytes(
+                    &info,
+                    input_bytes,
+                    100,
+                    transform,
+                    &CopyOptions {
+                        metadata_set: vec![("title".into(), "new".into())],
+                        ..Default::default()
+                    },
+                )
+                .unwrap();
+                assert!(with_tags > estimate);
+            }
+        }
+    }
+}

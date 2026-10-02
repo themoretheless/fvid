@@ -43,8 +43,31 @@ pub(crate) fn read_float_wave_with_limits<F: FnMut(usize) -> Result<()>>(
     cancel: Option<&fvid_control::CancelFlag>,
     max_packet_bytes: usize,
     max_packets: Option<u64>,
-    mut block: F,
+    block: F,
 ) -> Result<(AudioDecodeStats, Vec<u8>)> {
+    read_float_wave_with_admission(
+        source,
+        bits,
+        cancel,
+        max_packet_bytes,
+        max_packets,
+        |_, _, _| Ok(()),
+        block,
+    )
+}
+pub(crate) fn read_float_wave_with_admission<F, A>(
+    source: &Path,
+    bits: Option<u16>,
+    cancel: Option<&fvid_control::CancelFlag>,
+    max_packet_bytes: usize,
+    max_packets: Option<u64>,
+    mut admit: A,
+    mut block: F,
+) -> Result<(AudioDecodeStats, Vec<u8>)>
+where
+    F: FnMut(usize) -> Result<()>,
+    A: FnMut(&mut std::fs::File, &crate::owned_wave_inspect::WaveInfo, usize) -> Result<()>,
+{
     let check = || {
         if cancel.is_some_and(|flag| flag.is_cancelled()) {
             Err("media operation cancelled".to_owned())
@@ -79,6 +102,8 @@ pub(crate) fn read_float_wave_with_limits<F: FnMut(usize) -> Result<()>>(
     if size == 0 {
         return Err("packet limit leaves no decoded audio samples".into());
     }
+    admit(&mut file, &info, size)?;
+    check()?;
     let mut pcm = Vec::new();
     pcm.try_reserve_exact(size)
         .map_err(|_| "cannot allocate WAVE PCM payload")?;

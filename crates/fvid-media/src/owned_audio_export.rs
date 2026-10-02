@@ -33,7 +33,6 @@ pub(crate) fn supports(
 }
 fn simple_options(options: &CopyOptions) -> bool {
     (options.streams.is_empty() || options.streams == [0])
-        && options.max_controlled_bytes.is_none()
         && options
             .metadata_set
             .iter()
@@ -80,6 +79,16 @@ pub fn decode_audio_transformed(
     {
         return Err("channels must be within 1..=64".into());
     }
+    if options.metadata_set.len() + options.metadata_delete.len() > 64 {
+        return Err("at most 64 container metadata mutations".into());
+    }
+    if options
+        .metadata_set
+        .iter()
+        .any(|(_, value)| value.contains('\0'))
+    {
+        return Err("embedded NUL in metadata value".into());
+    }
     let gain = transform.volume.unwrap_or(1.0);
     if !gain.is_finite() || !(0.0..=64.0).contains(&gain) {
         return Err("volume must be a finite linear gain within 0..=64".into());
@@ -105,12 +114,31 @@ pub fn decode_audio_transformed(
         hook.emit(event);
     }
     check()?;
-    let (input, pcm) = crate::owned_audio_mix::read_float_wave_with_limits(
+    let (input, pcm) = crate::owned_audio_mix::read_float_wave_with_admission(
         source,
         None,
         options.cancel.as_ref(),
         options.max_packet_bytes,
         options.max_packets,
+        |file, info, size| {
+            if let Some(max) = options.max_controlled_bytes {
+                let metadata = crate::owned_wave_inspect::info_chunks_bytes(
+                    file,
+                    info,
+                    options.cancel.as_ref(),
+                )
+                .map_err(|e| e.to_string())?;
+                let estimated = crate::owned_budget::estimate_float_wave_export_bytes(
+                    info, size, metadata, transform, options,
+                )?;
+                if estimated > max {
+                    return Err(format!(
+                        "controlled memory budget exceeded: need {estimated} bytes, limit {max}"
+                    ));
+                }
+            }
+            Ok(())
+        },
         |bytes| {
             event.packets = event
                 .packets
@@ -373,7 +401,7 @@ mod tests {
         );
         assert!(!absent.exists());
         let limited = CopyOptions {
-            max_controlled_bytes: Some(1),
+            stream_metadata_set: vec![(0, "title".into(), "unmapped".into())],
             ..Default::default()
         };
         assert!(!supports(&source, &absent, transform, &limited));
@@ -830,6 +858,58 @@ mod rss_tests {
             assert_eq!(
                 std::fs::read(&source).unwrap(),
                 std::fs::read(&output).unwrap()
+            );
+        }
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod admission_tests {
+    use super::*;
+    use std::sync::{Arc, Mutex};
+    #[test]
+    fn requested_controlled_limit_is_checked_before_pcm_reads_and_large_buffers() {
+        let dir = std::env::temp_dir().join(format!("fvid-wave-admission-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir(&dir).unwrap();
+        for bits in [32, 64] {
+            let source = dir.join(format!("source-{bits}.wav"));
+            let absent = dir.join(format!("absent-{bits}.wav"));
+            if bits == 32 {
+                crate::owned_wav_file::write_wav_f32le(&source, 48000, 2, &[0.25; 34]).unwrap();
+            } else {
+                crate::owned_wav_file::write_wav_f64le(&source, 48000, 2, &[0.25; 34]).unwrap();
+            }
+            let events = Arc::new(Mutex::new(Vec::new()));
+            let recorded = events.clone();
+            let options = CopyOptions {
+                max_controlled_bytes: Some(1),
+                progress: Some(fvid_control::ProgressHook::new(move |event| {
+                    recorded.lock().unwrap().push(event)
+                })),
+                ..Default::default()
+            };
+            assert!(supports(&source, &absent, Default::default(), &options));
+            let error = crate::decode_audio(&source, &absent, &options).unwrap_err();
+            assert!(error.contains("controlled memory budget exceeded"));
+            assert!(!absent.exists());
+            assert!(
+                events
+                    .lock()
+                    .unwrap()
+                    .iter()
+                    .all(|event| event.packets == 0 && event.payload_bytes == 0 && !event.done)
+            );
+            let output = dir.join(format!("output-{bits}.wav"));
+            let options = CopyOptions {
+                max_controlled_bytes: Some(64 * 1024),
+                ..Default::default()
+            };
+            crate::decode_audio(&source, &output, &options).unwrap();
+            assert_eq!(
+                std::fs::read(&source).unwrap(),
+                std::fs::read(output).unwrap()
             );
         }
         std::fs::remove_dir_all(dir).unwrap();
