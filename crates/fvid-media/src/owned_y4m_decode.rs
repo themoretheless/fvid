@@ -597,7 +597,7 @@ fn decode_reader_frames(
         let selected = transform
             .interval
             .is_none_or(|(from, _)| clock >= from as u128 * rate_n as u128);
-        if selected && max_frames.is_some_and(|limit| frames >= limit) {
+        if max_frames.is_some_and(|limit| index >= limit) {
             return Err("Y4M input packet count exceeds limit".into());
         }
         let mut remaining = frame_bytes;

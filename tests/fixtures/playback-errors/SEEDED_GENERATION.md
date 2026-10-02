@@ -277,8 +277,8 @@ The existing library `transcode_lossless` API now dispatches qualified Y4M
 geometry/filter exports through owned FFV1/Matroska code. Without the legacy
 feature the same API is exported directly. Structural admission checks every
 transform field, so unsupported options are never silently dropped; unsupported
-legacy requests retain their previous backend during migration. Intervals/seek,
-metadata editing and allocation/RSS budgets are not qualified by this adapter.
+legacy requests retain their previous backend during migration. At that stage intervals/seek,
+metadata editing and allocation/RSS budgets were not qualified by this adapter.
 The public API regression uses the committed synthetic aspect/range fixture,
 checks complete output against owned writer bytes, and verifies that a one-byte
 encoded-packet limit refuses publication and cleans the temporary output.
@@ -297,3 +297,13 @@ fixture is cropped at x=1: the test independently lists every selected sample
 in Y, Cb and Cr, decodes the published FFV1 packets and checks exact precision,
 chroma axes, aspect and FULL range. An unaligned vertical crop is refused
 without publication. No external fixture generation is part of the test.
+
+The subsequent owned public lossless interval path follows the existing API:
+boundaries must be exact in the video's rational time base, PTS are rebased
+by the interval start and input packet limits include pre-interval frames.
+`y4m-interval-25-10.y4m` is a separately generated two-frame synthetic 25 fps
+control. Selecting 40–80 ms verifies the second frame's exact ten-bit planes,
+PTS zero, 40 ms duration and two consumed input frames. A one-packet budget,
+non-exact/negative/empty interval and interval beyond EOF refuse publication
+and clean temporary output. Writer-level streaming APIs retain their original
+absolute source timeline; `seek=true` remains unqualified pending real seeking.

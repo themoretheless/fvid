@@ -10,6 +10,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         scale: t.scale.clone(),
         transpose: t.transpose.clone(),
         pad: t.pad.clone(),
+        interval: t.interval,
         avgblur: t.avgblur.clone(),
         boxblur: t.boxblur.clone(),
         negate: t.negate.clone(),
@@ -35,6 +36,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         scale: t.scale.clone(),
         transpose: t.transpose.clone(),
         pad: t.pad.clone(),
+        interval: t.interval,
         avgblur: t.avgblur.clone(),
         boxblur: t.boxblur.clone(),
         negate: t.negate.clone(),
@@ -95,6 +97,27 @@ pub fn transcode_lossless(
     }
     let request = request(&transform)
         .ok_or("owned Y4M lossless export does not yet implement requested transforms")?;
+    let skipped = if let Some((from, to)) = request.interval {
+        if from < 0 || to <= from {
+            return Err("lossless interval requires 0 <= from < to".into());
+        }
+        let mut reader =
+            std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
+        let mut line = Vec::new();
+        crate::owned_y4m::line(&mut reader, &mut line)?;
+        let header = crate::owned_y4m::Header::parse(&line)?;
+        let [n, d] = header.frame_rate()?;
+        let denominator = d as u128 * 1_000_000;
+        for time in [from, to] {
+            if time as u128 * n as u128 % denominator != 0 {
+                return Err("interval boundary is not exact in video time base".into());
+            }
+        }
+        u64::try_from(from as u128 * n as u128 / denominator)
+            .map_err(|_| "interval timestamp overflow")?
+    } else {
+        0
+    };
     let (stats, event) = crate::owned_matroska::export_y4m_ffv1_policy(
         source,
         destination,
@@ -103,12 +126,16 @@ pub fn transcode_lossless(
         options.progress.as_ref(),
         options.max_packet_bytes,
         options.max_packets,
+        true,
     )
     .map_err(|e| e.to_string())?;
     Ok(LosslessStats {
         backend: "fvid",
         video_frames: stats.video_frames,
-        decoded_frames: stats.video_frames,
+        decoded_frames: stats
+            .video_frames
+            .checked_add(skipped)
+            .ok_or("frame count overflow")?,
         seek_used: false,
         video_packets: event.packets,
         copied_packets: 0,

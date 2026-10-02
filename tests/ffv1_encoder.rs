@@ -814,3 +814,102 @@ fn public_crop_lossless_preserves_exact_high_depth_planes_and_aspect() {
     );
     assert!(!invalid.exists());
 }
+
+#[test]
+fn public_lossless_interval_rebases_clock_and_counts_preroll_packets() {
+    let directory =
+        std::env::temp_dir().join(format!("fvid-owned-interval-{}", std::process::id()));
+    std::fs::create_dir(&directory).unwrap();
+    struct Clean(std::path::PathBuf);
+    impl Drop for Clean {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _clean = Clean(directory.clone());
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/y4m-interval-25-10.y4m");
+    let transform = fvid_media::LosslessTransform {
+        interval: Some((40_000, 80_000)),
+        ..Default::default()
+    };
+    let output = directory.join("interval.mkv");
+    let stats = fvid_media::transcode_lossless(
+        &source,
+        &output,
+        transform.clone(),
+        &fvid_media::CopyOptions {
+            max_packets: Some(2),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    assert_eq!(stats.video_frames, 1);
+    assert_eq!(stats.decoded_frames, 2);
+    assert!(!stats.seek_used);
+    let mut reader = fvid::container::webm::WebmReader::open(
+        Cursor::new(std::fs::read(&output).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    reader.scan_all().unwrap();
+    assert_eq!(reader.packets.len(), 1);
+    assert_eq!(reader.packets[0].pts_ns, 0);
+    assert_eq!(reader.duration_ns, Some(40_000_000));
+    let packet = reader.read_packet(0).unwrap();
+    let mut decoder = fvid::codec::ffv1_decoder::Decoder::new(4, 2, 1 << 20).unwrap();
+    let expected: Vec<_> = (0..16)
+        .flat_map(|i| (i * 17u16 + 31).to_le_bytes())
+        .collect();
+    assert_eq!(decoder.decode(&packet).unwrap().frame.data, expected);
+    let limited = directory.join("limited.mkv");
+    assert!(
+        fvid_media::transcode_lossless(
+            &source,
+            &limited,
+            transform,
+            &fvid_media::CopyOptions {
+                max_packets: Some(1),
+                ..Default::default()
+            }
+        )
+        .unwrap_err()
+        .contains("packet count exceeds limit")
+    );
+    assert!(!limited.exists());
+    for (i, interval) in [
+        (1, 80_000),
+        (-1, 80_000),
+        (40_000, 40_000),
+        (80_000, 120_000),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let output = directory.join(format!("invalid-{i}.mkv"));
+        let error = fvid_media::transcode_lossless(
+            &source,
+            &output,
+            fvid_media::LosslessTransform {
+                interval: Some(interval),
+                ..Default::default()
+            },
+            &Default::default(),
+        )
+        .unwrap_err();
+        if i == 0 {
+            assert!(error.contains("not exact in video time base"));
+        }
+        if i == 3 {
+            assert!(error.contains("no selected frames"));
+        }
+        assert!(!output.exists());
+    }
+    assert!(std::fs::read_dir(&directory).unwrap().all(|entry| {
+        !entry
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with(".fvid-matroska-")
+    }));
+}

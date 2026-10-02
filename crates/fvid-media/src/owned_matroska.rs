@@ -139,6 +139,7 @@ pub fn write_y4m_ffv1_controlled<W: Write + Seek>(
         progress,
         usize::MAX,
         None,
+        false,
     )
 }
 fn write_y4m_ffv1_policy<W: Write + Seek>(
@@ -149,6 +150,7 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
     progress: Option<&fvid_control::ProgressHook>,
     max_packet_bytes: usize,
     max_packets: Option<u64>,
+    rebase_interval: bool,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
     check(cancel)?;
     let mut output = Some(output);
@@ -189,7 +191,23 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
             }
             let writer = writer.as_mut().unwrap();
             writer
-                .write_packet(0, pts, duration, true, packet)
+                .write_packet(
+                    0,
+                    if rebase_interval {
+                        let origin = transform
+                            .interval
+                            .map_or(0, |(from, _)| from as u128 * 1000);
+                        pts.checked_sub(
+                            u64::try_from(origin).map_err(|_| "interval timestamp overflow")?,
+                        )
+                        .ok_or("interval timestamp underflow")?
+                    } else {
+                        pts
+                    },
+                    duration,
+                    true,
+                    packet,
+                )
                 .map_err(|e| e.to_string())?;
             if let Some(hook) = progress {
                 hook.emit(writer.event());
@@ -239,6 +257,7 @@ pub fn export_y4m_ffv1(
         progress,
         usize::MAX,
         None,
+        false,
     )
 }
 pub(crate) fn export_y4m_ffv1_policy(
@@ -249,6 +268,7 @@ pub(crate) fn export_y4m_ffv1_policy(
     progress: Option<&fvid_control::ProgressHook>,
     max_packet_bytes: usize,
     max_packets: Option<u64>,
+    rebase_interval: bool,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
     check(cancel)?;
     if destination
@@ -300,6 +320,7 @@ pub(crate) fn export_y4m_ffv1_policy(
         progress,
         max_packet_bytes,
         max_packets,
+        rebase_interval,
     )?;
     file.flush()?;
     file.sync_all()?;

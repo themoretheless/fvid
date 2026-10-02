@@ -12,3 +12,5 @@ for frame in range(2):
 
 metadata = output.replace(b"F30:1 Ip", b"F30:1 Ip A16:15 XCOLORRANGE=FULL", 1)
 (root / "y4m-aspect-full-10.y4m").write_bytes(metadata)
+
+(root / "y4m-interval-25-10.y4m").write_bytes(metadata.replace(b"F30:1", b"F25:1", 1))
