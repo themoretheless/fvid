@@ -281,3 +281,133 @@ fn scale_known_samples_and_public_dispatch() {
     assert_eq!((stats.width, stats.height, stats.video_frames), (2, 2, 3));
     assert_eq!(stats.backend, "owned Y4M planar decode");
 }
+
+#[test]
+fn transpose_compositions_match_sample_planes() {
+    use fvid_media::TransposeMode;
+    for layout in ["420", "422", "444"] {
+        for depth in [8u8, 10, 16] {
+            let chroma = if depth == 8 {
+                layout.into()
+            } else {
+                format!("{layout}p{depth}")
+            };
+            let text = format!("YUV4MPEG2 W8 H6 F30:1 Ip C{chroma}\n");
+            let header = fvid_media::owned_y4m::Header::parse(text.as_bytes()).unwrap();
+            let step = if depth == 8 { 1 } else { 2 };
+            let pixels: Vec<u8> = (0..header.frame_len().unwrap() / step)
+                .flat_map(|i| {
+                    let v = ((i * 43 + 91) & ((1usize << depth) - 1)) as u16;
+                    if step == 1 {
+                        vec![v as u8]
+                    } else {
+                        v.to_le_bytes().to_vec()
+                    }
+                })
+                .collect();
+            let source = [text.as_bytes(), b"FRAME\n", &pixels].concat();
+            let mut reader =
+                fvid::playback_native::NativeReader::software(Cursor::new(&source), 64 << 20)
+                    .unwrap();
+            let frame = reader.read_frame_raw().unwrap().unwrap();
+            for mode in [
+                TransposeMode::Clock,
+                TransposeMode::CClock,
+                TransposeMode::ClockFlip,
+                TransposeMode::CClockFlip,
+            ] {
+                for scale in [
+                    None,
+                    Some(fvid_media::ScaleSize {
+                        width: 6,
+                        height: 8,
+                    }),
+                ] {
+                    for (h, v) in [(false, false), (true, false), (false, true), (true, true)] {
+                        let t = DecodeTransform {
+                            crop: Some(CropRect {
+                                x: 2,
+                                y: 2,
+                                width: 4,
+                                height: 2,
+                            }),
+                            transpose: Some(mode),
+                            scale,
+                            horizontal_flip: h,
+                            vertical_flip: v,
+                            ..Default::default()
+                        };
+                        let actual = fvid_media::owned_y4m_decode::transform_frame_requested(
+                            &header, &pixels, &t,
+                        )
+                        .unwrap();
+                        let expected = fvid::native_geometry::VideoGeometry {
+                            crop: Some([2, 2, 4, 2]),
+                            transpose: Some(
+                                fvid::native_geometry::Transpose::parse(mode.as_str()).unwrap(),
+                            ),
+                            scale: scale.map(|s| [s.width as usize, s.height as usize]),
+                            horizontal_flip: h,
+                            vertical_flip: v,
+                            ..Default::default()
+                        }
+                        .apply_media(&frame, 8, 6)
+                        .unwrap();
+                        assert_eq!(actual, expected.data, "{chroma} {mode:?} {h} {v}");
+                        let stats = fvid_media::owned_y4m_decode::decode_reader_transformed(
+                            Cursor::new(&source),
+                            &t,
+                        )
+                        .unwrap();
+                        assert_eq!(
+                            (stats.width as usize, stats.height as usize),
+                            (expected.width, expected.height)
+                        );
+                    }
+                }
+            }
+        }
+    }
+}
+#[test]
+fn transpose_known_pixels_and_output_chroma_are_exact() {
+    use fvid_media::TransposeMode;
+    let header = fvid_media::owned_y4m::Header::parse(b"YUV4MPEG2 W4 H2 C444\n").unwrap();
+    let pixels: Vec<u8> = (0..24).collect();
+    for (mode, order) in [
+        (TransposeMode::Clock, [4, 0, 5, 1, 6, 2, 7, 3]),
+        (TransposeMode::CClock, [3, 7, 2, 6, 1, 5, 0, 4]),
+        (TransposeMode::ClockFlip, [7, 3, 6, 2, 5, 1, 4, 0]),
+        (TransposeMode::CClockFlip, [0, 4, 1, 5, 2, 6, 3, 7]),
+    ] {
+        let t = DecodeTransform {
+            transpose: Some(mode),
+            ..Default::default()
+        };
+        let actual =
+            fvid_media::owned_y4m_decode::transform_frame_requested(&header, &pixels, &t).unwrap();
+        let expected: Vec<u8> = (0..3).flat_map(|p| order.map(|i| i + p * 8)).collect();
+        assert_eq!(actual, expected);
+    }
+    let header = fvid_media::owned_y4m::Header::parse(b"YUV4MPEG2 W4 H2 C422\n").unwrap();
+    let t = DecodeTransform {
+        transpose: Some(TransposeMode::Clock),
+        ..Default::default()
+    };
+    let bytes = [b"YUV4MPEG2 W4 H2 C422\nFRAME\n".as_slice(), &[0; 16]].concat();
+    let stats =
+        fvid_media::owned_y4m_decode::decode_reader_transformed(Cursor::new(bytes), &t).unwrap();
+    assert_eq!((stats.width, stats.height), (2, 4));
+    assert_eq!(stats.pixel_format, "yuv440p");
+    assert_eq!(
+        fvid_media::owned_y4m_decode::transform_frame_requested(&header, &[0; 16], &t)
+            .unwrap()
+            .len(),
+        16
+    );
+    let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/wave-probe-info.y4m");
+    let stats = fvid_media::decode_video_transformed(&source, t).unwrap();
+    assert_eq!(stats.backend, "owned Y4M planar decode");
+    assert_eq!(stats.video_frames, 3);
+}

@@ -1,6 +1,6 @@
 //! Owned raw planar Y4M decode-and-discard, with bounded scratch storage.
 use crate::owned_y4m::{Header, PixelFormat, line};
-use fvid_media_info::{CropRect, DecodeStats, DecodeTransform, ScaleSize};
+use fvid_media_info::{CropRect, DecodeStats, DecodeTransform, ScaleSize, TransposeMode};
 use std::{
     fs::File,
     io::{BufRead, BufReader},
@@ -38,6 +38,7 @@ fn supported_request(transform: &DecodeTransform) -> bool {
             == DecodeTransform {
                 crop: transform.crop,
                 scale: transform.scale,
+                transpose: transform.transpose,
                 horizontal_flip: transform.horizontal_flip,
                 vertical_flip: transform.vertical_flip,
                 interval: transform.interval,
@@ -97,10 +98,14 @@ fn output_geometry(
     header: &Header,
     crop: CropRect,
     scale: Option<ScaleSize>,
+    transpose: Option<TransposeMode>,
 ) -> Result<(usize, usize, usize)> {
-    let (w, h) = scale.map_or((crop.width, crop.height), |s| {
-        (s.width as usize, s.height as usize)
-    });
+    let (cw, ch) = if transpose.is_some() {
+        (crop.height, crop.width)
+    } else {
+        (crop.width, crop.height)
+    };
+    let (w, h) = scale.map_or((cw, ch), |s| (s.width as usize, s.height as usize));
     if scale.is_some() && (w == 0 || h == 0 || w > 8192 || h > 4320 || w % 2 != 0 || h % 2 != 0) {
         return Err("scale must be even and within 1..=8192 x 1..=4320".into());
     }
@@ -137,6 +142,7 @@ pub fn transform_frame_requested(
         transform.horizontal_flip,
         transform.vertical_flip,
         transform.scale,
+        transform.transpose,
         &mut output,
     )?;
     Ok(output)
@@ -150,7 +156,16 @@ pub fn transform_frame(
     vertical: bool,
 ) -> Result<Vec<u8>> {
     let mut output = Vec::new();
-    transform_frame_into(header, frame, crop, horizontal, vertical, None, &mut output)?;
+    transform_frame_into(
+        header,
+        frame,
+        crop,
+        horizontal,
+        vertical,
+        None,
+        None,
+        &mut output,
+    )?;
     Ok(output)
 }
 fn transform_frame_into(
@@ -160,13 +175,14 @@ fn transform_frame_into(
     horizontal: bool,
     vertical: bool,
     scale: Option<ScaleSize>,
+    transpose: Option<TransposeMode>,
     output: &mut Vec<u8>,
 ) -> Result<()> {
     if frame.len() != header.frame_len()? {
         return Err("Y4M frame size mismatch".into());
     }
     let (crop, _) = crop_geometry(header, crop)?;
-    let (ow, oh, output_size) = output_geometry(header, crop, scale)?;
+    let (ow, oh, output_size) = output_geometry(header, crop, scale, transpose)?;
     let (sx, sy) = header.format.subsampling();
     let step = if header.depth() == 8 { 1 } else { 2 };
     output.clear();
@@ -176,15 +192,32 @@ fn transform_frame_into(
     let mut offset = 0;
     for (dx, dy) in [(1, 1), (sx, sy), (sx, sy)] {
         let stride = header.width / dx * step;
-        if scale.is_some() {
-            let (iw, ih, dw, dh) = (crop.width / dx, crop.height / dy, ow / dx, oh / dy);
+        if scale.is_some() || transpose.is_some() {
+            let (odx, ody) = if transpose.is_some() {
+                (dy, dx)
+            } else {
+                (dx, dy)
+            };
+            let (iw, ih, dw, dh) = (crop.width / dx, crop.height / dy, ow / odx, oh / ody);
+            let (tw, th) = if transpose.is_some() {
+                (ih, iw)
+            } else {
+                (iw, ih)
+            };
             for row in 0..dh {
-                let mut y = point_sample(row, ih, dh);
-                if vertical {
-                    y = ih - 1 - y;
-                }
+                let ty = point_sample(row, th, dh);
                 for col in 0..dw {
-                    let mut x = point_sample(col, iw, dw);
+                    let tx = point_sample(col, tw, dw);
+                    let (mut x, mut y) = match transpose {
+                        None => (tx, ty),
+                        Some(TransposeMode::Clock) => (ty, ih - 1 - tx),
+                        Some(TransposeMode::CClock) => (iw - 1 - ty, tx),
+                        Some(TransposeMode::ClockFlip) => (iw - 1 - ty, ih - 1 - tx),
+                        Some(TransposeMode::CClockFlip) => (ty, tx),
+                    };
+                    if vertical {
+                        y = ih - 1 - y;
+                    }
                     if horizontal {
                         x = iw - 1 - x;
                     }
@@ -233,14 +266,15 @@ pub fn decode_reader_transformed(
     let header = Header::parse(&bytes)?;
     let [rate_n, rate_d] = header.frame_rate()?;
     let (crop, _) = crop_geometry(&header, transform.crop)?;
-    let (ow, oh, _) = output_geometry(&header, crop, transform.scale)?;
+    let (ow, oh, _) = output_geometry(&header, crop, transform.scale, transform.transpose)?;
     let width = u32::try_from(ow).map_err(|_| "Y4M width exceeds decode API range")?;
     let height = u32::try_from(oh).map_err(|_| "Y4M height exceeds decode API range")?;
     let frame_bytes = header.frame_len()?;
     let geometry = transform.crop.is_some()
         || transform.horizontal_flip
         || transform.vertical_flip
-        || transform.scale.is_some();
+        || transform.scale.is_some()
+        || transform.transpose.is_some();
     let mut input = Vec::new();
     if geometry {
         input
@@ -296,6 +330,7 @@ pub fn decode_reader_transformed(
                     transform.horizontal_flip,
                     transform.vertical_flip,
                     transform.scale,
+                    transform.transpose,
                     &mut output,
                 )?;
                 std::hint::black_box(&output);
@@ -306,6 +341,7 @@ pub fn decode_reader_transformed(
     }
     let layout = match header.format {
         PixelFormat::Yuv420 => "420",
+        PixelFormat::Yuv422 if transform.transpose.is_some() => "440",
         PixelFormat::Yuv422 => "422",
         PixelFormat::Yuv444 => "444",
     };

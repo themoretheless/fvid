@@ -82,3 +82,11 @@ crates/fvid-media/Cargo.toml --bench ffmpeg_y4m_probe_reference --offline`.
 It creates its own tiny synthetic Y4M inputs at runtime and removes them on exit.
 Ordinary `native_y4m_probe` tests validate the same 15 frequency/frame-count
 combinations using exact integer timestamp expectations without external tools.
+
+Owned Y4M decode now handles all four transpose modes after crop/reflections and
+before point scaling. The single output buffer keeps 8/10/16-bit sample bytes
+intact. Transposing 4:2:2 swaps chroma axes and reports 4:4:0 output rather than
+silently relabeling the samples. The integration suite compares 288 compositions
+against existing sample-plane geometry and independently checks four known
+three-plane matrices, swapped dimensions, output chroma and public dispatch.
+Existing synthetic Y4M controls are reused; no private samples or FFmpeg are used.
