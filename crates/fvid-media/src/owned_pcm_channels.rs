@@ -55,9 +55,27 @@ pub fn default_layout_name(channels: i32) -> String {
     }
 }
 
+/// Compare speaker assignments; an unspecified layout is distinct from a mask.
+pub fn layouts_equal(
+    a_channels: i32,
+    a_mask: Option<u64>,
+    b_channels: i32,
+    b_mask: Option<u64>,
+) -> bool {
+    a_channels == b_channels && a_mask == b_mask
+}
+
 #[cfg(test)]
 mod default_tests {
     use super::*;
+    #[test]
+    fn layout_identity_preserves_speaker_assignment_and_unspecified_order() {
+        assert!(layouts_equal(2, Some(3), 2, Some(3)));
+        assert!(!layouts_equal(3, Some(7), 3, Some(11)));
+        assert!(!layouts_equal(2, None, 2, Some(3)));
+        assert!(!layouts_equal(2, None, 3, None));
+        assert!(layouts_equal(2, None, 2, None));
+    }
     #[test]
     fn unknown_counts_remain_unspecified_in_descriptions() {
         for channels in [i32::MIN, -1, 0, 9, 11, 65536, i32::MAX] {

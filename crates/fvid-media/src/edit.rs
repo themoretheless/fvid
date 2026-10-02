@@ -27,7 +27,7 @@ fn compatible(a: &Input, b: &Input, selected: &[usize]) -> Result<()> {
             let sb = &*b.streams()[index];
             let x = &*sa.codecpar;
             let y = &*sb.codecpar;
-            let layout = av_channel_layout_compare(&x.ch_layout, &y.ch_layout);
+            let layout = channel_layout_compare_owned(&x.ch_layout, &y.ch_layout);
             if x.codec_type != y.codec_type
                 || x.codec_id != y.codec_id
                 || x.format != y.format

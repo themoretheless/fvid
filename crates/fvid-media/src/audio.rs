@@ -544,7 +544,7 @@ impl AudioSink {
             let channels = self.stats.channels as usize;
             if super::pcm_format_adapter::packed(f.format) != self.format
                 || f.sample_rate != self.stats.sample_rate
-                || av_channel_layout_compare(&f.ch_layout, &(*self.parameters.0).ch_layout) != 0
+                || channel_layout_compare_owned(&f.ch_layout, &(*self.parameters.0).ch_layout) != 0
                 || f.nb_samples <= 0
             {
                 return Err("dynamic audio format/rate/layout is not supported".into());

@@ -193,3 +193,11 @@ and descriptions for 70 counts (1 through 64 plus zero, negatives and large
 integer bounds). The owned library passed 135 tests, and the legacy/player
 configuration compiled. These checks cover utility migration, not full codec
 or backend equivalence.
+
+Audio resampling identity checks and stream compatibility comparisons now use
+owned speaker-mask/unspecified-layout equality. Equal counts with different
+speaker assignments remain different; unspecified layouts do not implicitly
+match a native mask. Custom and ambisonic layouts retain the legacy comparison.
+An explicit libavutil reference checked 3,600 pairs spanning both migrated
+orders, channel-count boundaries and distinct masks; all results matched.
+The owned library passed 136 tests and legacy/player compilation passed.

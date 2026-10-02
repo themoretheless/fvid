@@ -383,6 +383,29 @@ unsafe fn channel_layout_default_owned(layout: *mut AVChannelLayout, channels: i
         });
     }
 }
+/// # Safety
+/// Both pointers must refer to valid initialized channel layouts.
+unsafe fn channel_layout_compare_owned(a: *const AVChannelLayout, b: *const AVChannelLayout) -> i32 {
+    unsafe {
+        let a_layout = &*a;
+        let b_layout = &*b;
+        let mask = |layout: &AVChannelLayout| {
+            if layout.order == AVChannelOrder_AV_CHANNEL_ORDER_UNSPEC {
+                Some(None)
+            } else if layout.order == AVChannelOrder_AV_CHANNEL_ORDER_NATIVE {
+                Some(Some(layout.u.mask))
+            } else {
+                None
+            }
+        };
+        match (mask(a_layout), mask(b_layout)) {
+            (Some(a_mask), Some(b_mask)) => i32::from(!crate::owned_pcm_channels::layouts_equal(
+                a_layout.nb_channels, a_mask, b_layout.nb_channels, b_mask,
+            )),
+            _ => av_channel_layout_compare(a, b),
+        }
+    }
+}
 fn owned_pixel_format_from_legacy(format: AVPixelFormat) -> Option<crate::owned_pixel_format::PixelFormat> {
     use crate::owned_pixel_format::PixelFormat;
     match format {
