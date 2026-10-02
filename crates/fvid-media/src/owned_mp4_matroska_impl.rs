@@ -254,6 +254,18 @@ pub(crate) fn selection(count: usize, requested: &[usize]) -> Result<Vec<usize>>
     Ok(selected)
 }
 
+/// Optional name/language replacements keyed by the original source index.
+#[derive(Clone, Copy, Debug)]
+pub struct TrackMetadataOverride<'a> {
+    pub index: usize,
+    pub name: Option<&'a str>,
+    pub language: Option<&'a str>,
+}
+pub struct RemuxMetadata<'a> {
+    pub file: &'a FileMetadata,
+    pub tracks: &'a [TrackMetadataOverride<'a>],
+}
+
 /// Preserve requested output track order while copying a global source-DTS prefix.
 pub fn write_selected<R: Read + Seek, W: Write + Seek>(
     input: &mut Mp4Reader<R>,
@@ -278,6 +290,17 @@ pub fn write_selected_with_metadata<R: Read + Seek, W: Write + Seek>(
     requested: &[usize],
     metadata: &FileMetadata,
 ) -> Result<ProgressEvent> {
+    write_selected_with_metadata_overrides(input, output, cancel, progress, max_packets,
+        requested, RemuxMetadata { file: metadata, tracks: &[] })
+}
+
+/// Replace represented track names/languages before emitting a container header.
+/// Empty strings delete a field; absent values retain the source field.
+pub fn write_selected_with_metadata_overrides<R: Read + Seek, W: Write + Seek>(
+    input: &mut Mp4Reader<R>, output: &mut W,
+    cancel: Option<&CancelFlag>, progress: Option<&ProgressHook>,
+    max_packets: Option<u64>, requested: &[usize], metadata: RemuxMetadata<'_>,
+) -> Result<ProgressEvent> {
     check(cancel)?;
     if !eligible(input) {
         return Err(invalid(
@@ -285,7 +308,23 @@ pub fn write_selected_with_metadata<R: Read + Seek, W: Write + Seek>(
         ));
     }
     let selected = selection(input.tracks().len(), requested)?;
-    let tracks: Vec<_> = selected.iter().map(|&index| input.tracks()[index].clone()).collect();
+    for (position, edit) in metadata.tracks.iter().enumerate() {
+        if !selected.contains(&edit.index)
+            || metadata.tracks[..position].iter().any(|previous| previous.index == edit.index)
+            || edit.name.is_some_and(|value| value.contains('\0'))
+            || edit.language.is_some_and(|value| value.contains('\0'))
+        {
+            return Err(invalid("invalid MP4 track metadata override"));
+        }
+    }
+    let tracks: Vec<_> = selected.iter().map(|&index| {
+        let mut track = input.tracks()[index].clone();
+        if let Some(edit) = metadata.tracks.iter().find(|edit| edit.index == index) {
+            if let Some(name) = edit.name { track.name = name.to_owned(); }
+            if let Some(language) = edit.language { track.language = language.to_owned(); }
+        }
+        track
+    }).collect();
     let plans: Vec<_> = tracks
         .iter()
         .map(|t| plan(t, input.movie_timescale(), cancel))
@@ -293,7 +332,7 @@ pub fn write_selected_with_metadata<R: Read + Seek, W: Write + Seek>(
     let specs: Vec<_> = tracks.iter().map(spec).collect::<Result<_>>()?;
     let options: Vec<_> = plans.iter().map(|p| p.options.clone()).collect();
     let mut writer =
-        PacketWriter::new_with_metadata(output, &specs, &options, metadata)?;
+        PacketWriter::new_with_metadata(output, &specs, &options, metadata.file)?;
     if let Some(hook) = progress {
         hook.emit(writer.event());
     }

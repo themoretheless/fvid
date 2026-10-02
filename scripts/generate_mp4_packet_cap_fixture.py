@@ -61,6 +61,37 @@ def main():
             body += box(b'udta', box(b'meta', bytes(4) + box(b'ilst', entries)))
         tagged += box(tag, body)
     (ROOT / 'mp4-container-tag-edits.mp4').write_bytes(tagged)
+    track_tagged = bytearray()
+    for tag, body in boxes(tagged):
+        if tag == b'moov':
+            children = bytearray()
+            index = 0
+            for child, payload in boxes(body):
+                if child == b'trak':
+                    rebuilt = bytearray()
+                    for field, value in boxes(payload):
+                        if field == b'udta':
+                            continue
+                        if field == b'mdia':
+                            media = bytearray()
+                            for kind, contents in boxes(value):
+                                if kind == b'mdhd':
+                                    contents = bytearray(contents)
+                                    code = 0
+                                    for letter in ['eng', 'fra'][index]:
+                                        code = (code << 5) | (ord(letter) - 96)
+                                    struct.pack_into('>H', contents, 20 if contents[0] == 0 else 32, code)
+                                media += box(kind, contents)
+                            value = media
+                        rebuilt += box(field, value)
+                    rebuilt += box(b'udta', box(b'name', f'Synthetic track {index}'.encode()))
+                    payload = rebuilt
+                    index += 1
+                children += box(child, payload)
+            assert index == 2
+            body = children
+        track_tagged += box(tag, body)
+    (ROOT / 'mp4-track-tag-edits.mp4').write_bytes(track_tagged)
 
 
 if __name__ == '__main__':
