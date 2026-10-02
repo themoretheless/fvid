@@ -69,6 +69,13 @@ pub fn try_plan(
 ) -> Result<Option<fvid_media_info::MediaPlan>> {
     use fvid_media_info::PlanStep;
     let resolved = fvid_media::owned_loudnorm::validate_request(args)?;
+    if crate::native_export::is_adts_source(source)?
+        && fvid_media::owned_adts_loudnorm::supports_plan(source, Some(&resolved), options)
+    {
+        return Ok(Some(fvid_media::owned_adts_loudnorm::plan_loudnorm(
+            source, Some(&resolved), dual_pass, options,
+        )?));
+    }
     let wave = crate::native_pcm::is_wave(source)?;
     if wave {
         if !fvid_media::owned_loudnorm::supports_request(
@@ -190,6 +197,14 @@ pub fn try_apply(
         if header.frame_bytes - header.header_bytes > options.max_packet_bytes {
             return Err("ADTS packet exceeds budget".into());
         }
+    }
+    if adts_source
+        && destination.extension().and_then(|s| s.to_str()) == Some("wav")
+        && fvid_media::owned_adts_loudnorm::supports_plan(source, args, options)
+    {
+        return Ok(Some(fvid_media::owned_adts_loudnorm::apply(
+            source, destination, args, dual_pass, options,
+        )?));
     }
     if !crate::native_media::is_owned_audio_trim_source(source)? {
         return Ok(None);

@@ -108,7 +108,7 @@ fn public_adts_normalization_matches_independent_owned_wave_in_both_pass_modes()
                 fs::read(expected).unwrap(),
                 "{name} dual={dual}"
             );
-            assert_eq!(result.backend, "owned ADTS AAC-LC loudnorm");
+            assert_eq!(result.backend, expected_stats.backend);
             assert_eq!(result.args, expected_stats.args);
             assert_eq!(result.sample_frames, expected_stats.sample_frames);
             assert_eq!(result.dual_pass, dual);
@@ -134,6 +134,19 @@ fn owned_adts_plan_is_read_only_and_bad_tail_never_publishes() {
     };
     let plan = fvid_media::plan_loudnorm(&source, None, true, &options).unwrap();
     assert_eq!(plan.command, "loudnorm");
+    let report_plan = fvid_media::owned_adts_loudnorm::plan_loudnorm(
+        &source,
+        Some("I=-16:print_format=json"),
+        true,
+        &options,
+    )
+    .unwrap();
+    assert!(
+        report_plan
+            .steps
+            .iter()
+            .any(|s| s.action == "analyze-output")
+    );
     assert!(plan.graph.is_none());
     assert!(plan.steps.iter().any(|s| s.action == "filter"));
     assert!(plan.steps.iter().any(|s| s.action == "write"));

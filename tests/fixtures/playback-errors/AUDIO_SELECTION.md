@@ -179,3 +179,17 @@ tests read the generated fixture, not the generator. Tests compare normalized
 WAVE bytes and resolved args with independently decoded WAVE in single and dual
 passes, including JSON reports, mono/stereo/PCE, encoded packet-prefix limits,
 read-only plans, truncated tail refusal and no-overwrite publication.
+
+The frontend/CLI now delegates qualified ADTS normalization and its read-only
+plans directly to `owned_adts_loudnorm`; MP4/Matroska bridges remain separate.
+The normalization backend field retains the existing DSP mode (linear, short
+dynamic or long dynamic), rather than hiding mode behind a generic AAC label.
+PCM, resolved arguments, packet controls and publication behavior are compared
+against the independent WAVE normalizer and the existing CLI acceptance tests.
+
+Integration exposed a plan-only omission for JSON/summary reports: the ADTS
+plan lacked the `analyze-output` step even though execution measured/reported
+output correctly. The existing synthetic AAC-prefix/paired-Y4M regression failed
+for exactly that missing step. It is now required alongside the retained
+`normalization backend: fvid` note. No additional codec execution is introduced
+into planning, and ordinary tests do not invoke FFmpeg or the generator.

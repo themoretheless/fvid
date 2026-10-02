@@ -13,7 +13,8 @@ pub(crate) fn supports(
         && crate::owned_loudnorm::validate_request(args).is_ok()
         && crate::owned_adts_loudness::supports(source, options)
 }
-pub(crate) fn supports_plan(source: &Path, args: Option<&str>, options: &CopyOptions) -> bool {
+/// Metadata-only qualification for frontend dispatch; packet tools are checked during execution.
+pub fn supports_plan(source: &Path, args: Option<&str>, options: &CopyOptions) -> bool {
     crate::owned_loudnorm::validate_request(args).is_ok()
         && crate::owned_adts_loudness::supports_plan(source, options)
 }
@@ -46,7 +47,7 @@ pub fn apply(
             hook.emit(event);
         })
     });
-    let mut stats = if dual_pass {
+    let stats = if dual_pass {
         crate::owned_loudnorm::apply_loudnorm_dual(
             &spool.wave,
             destination,
@@ -61,7 +62,6 @@ pub fn apply(
             &pcm_options,
         )?
     };
-    stats.backend = "owned ADTS AAC-LC loudnorm";
     Ok(stats)
 }
 pub fn plan_loudnorm(
@@ -90,6 +90,10 @@ pub fn plan_loudnorm(
             }
         ),
     });
+    if crate::owned_loudnorm::report_requested(Some(&resolved))? {
+        plan.steps.push(PlanStep{action:"analyze-output".into(),detail:"owned output loudness/true-peak measurement before publication; print JSON/summary after successful publication".into()});
+    }
+    plan.notes.push("normalization backend: fvid; owned AAC decode and WAVE normalization; dynamic PCM is not claimed equivalent to libavfilter".into());
     plan.steps.push(PlanStep{action:"write".into(),detail:"owned float32 .wav writer; no overwrite; completion after publication; remove private spool on every outcome".into()});
     Ok(plan)
 }
