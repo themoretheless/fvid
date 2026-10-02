@@ -283,6 +283,17 @@ pub fn overlay_video(
     y: i32,
     options: &CopyOptions,
 ) -> Result<LosslessStats> {
+    let transform = LosslessTransform {
+        overlay: Some(fvid_media_info::OverlaySpec {
+            path: overlay.into(),
+            x,
+            y,
+        }),
+        ..Default::default()
+    };
+    if crate::owned_lossless::supports(source, &transform, options) {
+        return crate::owned_lossless::overlay_video(source, overlay, destination, x, y, options);
+    }
     let input = Input::open(source)?;
     let video = input
         .streams()

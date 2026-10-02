@@ -108,6 +108,7 @@ pub mod owned_gradient;
 pub mod owned_morphology;
 
 pub mod owned_overlay;
+mod owned_y4m_overlay;
 
 pub mod owned_ffv1_encoder;
 
@@ -115,7 +116,9 @@ pub mod owned_matroska;
 
 pub mod owned_lossless;
 #[cfg(not(feature = "legacy-ffmpeg"))]
-pub use owned_lossless::{crop_lossless, plan_transcode_lossless, transcode, transcode_lossless};
+pub use owned_lossless::{
+    crop_lossless, overlay_video, plan_overlay, plan_transcode_lossless, transcode, transcode_lossless,
+};
 
 pub mod owned_file_tags;
 

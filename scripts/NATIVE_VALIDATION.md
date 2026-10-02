@@ -90,3 +90,25 @@ native build graphs. The production audit still failed all three legacy media/
 CUDA graphs. The external K-Lite corpus was not executed in this verification;
 its computational source was compared against the original, with only CLI
 entrypoint, description and generated-command provenance adaptations allowed.
+
+### Owned scheduled Y4M overlay
+
+The owned streaming frame pipeline and lossless export now accept opaque overlay
+from a second progressive Y4M source. The primary presentation timestamp chooses
+the latest foreground frame at or before that time; foreground EOF repeats the
+last complete frame. Interval selection retains the original clock. The owned
+`overlay_video` and `plan_overlay` entrypoints are also selected by the production
+legacy-enabled API before opening its libav input.
+
+This route currently requires 8-bit JPEG-sited YUV420 on both inputs, matching
+colour range and chroma-aligned placement. Alpha, other colour conversions,
+compressed inputs and shuffleplanes combinations retain their previous route.
+The general FFmpeg dependency removal is not complete.
+
+`generate_y4m_overlay_fixtures.py` writes wholly synthetic primary/foreground
+fixtures separately from test execution. The automated scheduling test checks
+all planes, different frame rates, EOF repetition and interval timestamps; the
+export test calls the public overlay and plan APIs. Restoring the old admission
+condition reproduced the specific unsupported-transform refusal. An explicit
+external reference comparison matched all six synthetic frames against FFmpeg;
+ordinary tests use only owned code and committed fixture bytes.

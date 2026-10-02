@@ -86,14 +86,36 @@ fn supported_request(transform: &DecodeTransform) -> bool {
                 horizontal_flip: transform.horizontal_flip,
                 vertical_flip: transform.vertical_flip,
                 interval: transform.interval,
+                overlay: transform.overlay.clone(),
                 input_format: transform.input_format.clone(),
                 ..Default::default()
             }
 }
 pub(crate) fn supports_transformed(source: &Path, transform: &DecodeTransform) -> bool {
     supported_request(transform)
+        && overlay_supported(source, transform)
         && supports(source)
         && (transform.transpose.is_none() || header_format(source) != Some(PixelFormat::Yuv411))
+}
+fn overlay_supported(source: &Path, transform: &DecodeTransform) -> bool {
+    let Some(spec) = &transform.overlay else {
+        return true;
+    };
+    if transform.shuffleplanes.is_some() {
+        return false;
+    }
+    let Ok(file) = File::open(source) else {
+        return false;
+    };
+    let mut reader = BufReader::new(file);
+    let mut bytes = Vec::new();
+    if !line(&mut reader, &mut bytes).is_ok_and(|present| present) {
+        return false;
+    }
+    let Ok(header) = Header::parse(&bytes) else {
+        return false;
+    };
+    crate::owned_y4m_overlay::OverlayReader::open(&header, spec).is_ok()
 }
 fn header_format(source: &Path) -> Option<PixelFormat> {
     let mut r = BufReader::new(File::open(source).ok()?);
@@ -204,6 +226,9 @@ pub fn transform_frame_requested(
 ) -> Result<Vec<u8>> {
     if !supported_request(transform) {
         return Err("owned Y4M decoder does not yet implement requested transform options".into());
+    }
+    if transform.overlay.is_some() {
+        return Err("scheduled overlay requires the streaming frame API".into());
     }
     let mut output = Vec::new();
     transform_frame_into(
@@ -554,8 +579,14 @@ fn decode_reader_frames(
     presented_header
         .tokens
         .push(format!("A{}:{}", aspect.0, aspect.1));
+    let mut overlay = transform
+        .overlay
+        .as_ref()
+        .map(|spec| crate::owned_y4m_overlay::OverlayReader::open(&presented_header, spec))
+        .transpose()?;
     let frame_bytes = header.frame_len()?;
-    let geometry = transform.crop.is_some()
+    let geometry = transform.overlay.is_some()
+        || transform.crop.is_some()
         || transform.horizontal_flip
         || transform.vertical_flip
         || transform.scale.is_some()
@@ -631,14 +662,15 @@ fn decode_reader_frames(
                     transform.pad,
                     &mut output,
                 )?;
+                if let Some(overlay) = overlay.as_mut() {
+                    overlay.apply(&presented_header, &mut output, index)?;
+                }
                 apply_pixel_filters(&header, transform, &mut output)?;
                 std::hint::black_box(&output);
             }
             if let Some(callback) = visit.as_deref_mut() {
-                let start = u128::from(index) * rate_d as u128 * 1_000_000_000
-                    / rate_n as u128;
-                let end = (u128::from(index) + 1) * rate_d as u128 * 1_000_000_000
-                    / rate_n as u128;
+                let start = u128::from(index) * rate_d as u128 * 1_000_000_000 / rate_n as u128;
+                let end = (u128::from(index) + 1) * rate_d as u128 * 1_000_000_000 / rate_n as u128;
                 callback(
                     &presented_header,
                     if geometry { &output } else { &input },

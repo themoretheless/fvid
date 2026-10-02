@@ -11,6 +11,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         transpose: t.transpose.clone(),
         pad: t.pad.clone(),
         interval: t.interval,
+        overlay: t.overlay.clone(),
         avgblur: t.avgblur.clone(),
         boxblur: t.boxblur.clone(),
         negate: t.negate.clone(),
@@ -37,6 +38,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         transpose: t.transpose.clone(),
         pad: t.pad.clone(),
         interval: t.interval,
+        overlay: t.overlay.clone(),
         avgblur: t.avgblur.clone(),
         boxblur: t.boxblur.clone(),
         negate: t.negate.clone(),
@@ -265,7 +267,7 @@ pub fn plan_transcode_lossless(
         detail: "write Matroska with the owned muxer".into(),
     });
     Ok(MediaPlan {
-        command: "transcode-lossless".into(), input: source.into(), inputs: vec![source.into()],
+        command: "transcode-lossless".into(), input: source.into(), inputs: std::iter::once(source.to_path_buf()).chain(transform.overlay.iter().map(|spec| spec.path.clone())).collect(),
         streams: info.streams.into_iter().map(|stream| PlanStream {
             index: stream.index, media_type: stream.media_type, codec: stream.codec, disposition: "primary_video".into(),
         }).collect(),
@@ -343,4 +345,47 @@ mod plan_tests {
         };
         assert!(plan_transcode_lossless(&source, &unsupported, &options, None).is_err());
     }
+}
+
+/// Composite a scheduled Y4M foreground, then export with owned FFV1/Matroska.
+pub fn overlay_video(
+    source: &Path,
+    overlay: &Path,
+    destination: &Path,
+    x: i32,
+    y: i32,
+    options: &CopyOptions,
+) -> Result<LosslessStats, String> {
+    transcode_lossless(
+        source,
+        destination,
+        LosslessTransform {
+            overlay: Some(fvid_media_info::OverlaySpec {
+                path: overlay.into(),
+                x,
+                y,
+            }),
+            ..Default::default()
+        },
+        options,
+    )
+}
+pub fn plan_overlay(
+    source: &Path,
+    overlay: &Path,
+    x: i32,
+    y: i32,
+    options: &CopyOptions,
+) -> Result<fvid_media_info::MediaPlan, String> {
+    let transform = LosslessTransform {
+        overlay: Some(fvid_media_info::OverlaySpec {
+            path: overlay.into(),
+            x,
+            y,
+        }),
+        ..Default::default()
+    };
+    let mut plan = plan_transcode_lossless(source, &transform, options, None)?;
+    plan.command = "overlay".into();
+    Ok(plan)
 }

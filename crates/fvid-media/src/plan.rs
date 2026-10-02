@@ -3543,6 +3543,19 @@ pub fn plan_overlay(
     y: i32,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
+    let transform = LosslessTransform {
+        overlay: Some(fvid_media_info::OverlaySpec {
+            path: overlay.into(),
+            x,
+            y,
+        }),
+        ..Default::default()
+    };
+    if crate::owned_lossless::supports(source, &transform, options) {
+        let mut plan = crate::owned_lossless::plan_overlay(source, overlay, x, y, options)?;
+        plan.graph = Some(overlay_cli_vf(overlay, x, y)?);
+        return Ok(plan);
+    }
     let input = Input::open_fast(source)?;
     let video = input
         .streams()
