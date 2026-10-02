@@ -809,6 +809,9 @@ pub fn decode_audio_transformed(
     if let Some(gain) = transform.volume {
         validate_volume(gain)?;
     }
+    if crate::owned_audio_export::supports(source, destination, transform, options) {
+        return crate::owned_audio_export::decode_audio_transformed(source, destination, transform, options);
+    }
     let mut input = Input::open_fast(source)?;
     // SAFETY: Input owns a live format context. A contiguous sample extraction
     // cannot carry arbitrary source chapter times without a separate clock mapping.
