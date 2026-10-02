@@ -81,3 +81,19 @@ to that implementation. Probing counts bounded packets without PCM decoding.
 Library acceptance compares streaming/indexed packets on committed synthetic
 mono, stereo, 5.1, 96 kHz and PCE wide8 fixtures; the incomplete ADTS tail is
 still refused by the owned probe. AAC-LC is the currently owned ADTS profile.
+
+`fvid_media::owned_aac::NativeAacDecoder` now exposes the owned AAC-LC packet
+decoder directly, including reset, channel-mask reporting and opaque complete
+packet-boundary checkpoints. Its Huffman, channel/pair, PNS, pulse, inverse
+quantization, spectral, TNS syntax and coupling syntax implementations live in
+`fvid-media`; frontend compatibility entrypoints use the same source bodies.
+Protocol codeword tables retain their original MPL notice and are static data,
+not a runtime dependency on another codec implementation.
+
+Standalone library tests compare mono PCM against the committed synthetic
+reference and restore checkpoints across mono/stereo/5.1/PCE/TNS packets.
+Frontend/library parity checks exact PCM for mono, stereo, 5.1, 96 kHz, PCE
+wide8 and TNS fixtures. Existing tool/invalid-packet tests remain enabled in
+the frontend and compile those same implementations. No test runs FFmpeg.
+This moves the AAC-LC decoder ownership; remaining profiles/tools and legacy
+container/export operations are separate migration work.
