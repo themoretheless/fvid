@@ -334,8 +334,12 @@ fn open_audio_decoder(input: &Input, index: usize) -> Result<Codec> {
 }
 
 /// Measure EBU R128 loudness of the selected audio stream (default: first audio).
-/// Fair-pairs FFmpeg `-af ebur128=peak=true:framelog=info` summary metrics.
+/// Supported 48 kHz PCM WAVE uses the owned streaming meter; other inputs
+/// temporarily retain the legacy backend during migration.
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
+    if crate::owned_wave_loudness::supports(source, options) {
+        return crate::owned_wave_loudness::measure_loudness(source, options);
+    }
     let mut input = Input::open_fast(source)?;
     let index = select_audio_index(&input, options, "loudness")?;
     let decoder = open_audio_decoder(&input, index)?;

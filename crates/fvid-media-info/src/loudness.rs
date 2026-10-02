@@ -13,7 +13,7 @@ pub struct LoudnessStats {
     pub range_lu: f64,
     pub lra_low_lufs: f64,
     pub lra_high_lufs: f64,
-    /// True peak (dBFS); requires ebur128 peak=true.
+    /// True peak relative to full scale, measured with intersample reconstruction.
     pub true_peak_dbfs: f64,
     pub sample_peak_dbfs: f64,
 }

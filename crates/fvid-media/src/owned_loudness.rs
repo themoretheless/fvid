@@ -135,22 +135,8 @@ impl LoudnessMeter {
         }
         Ok(())
     }
-    pub fn report(&self) -> IntegratedLoudness {
-        let count: u64 = self.energies.values().map(|e| e.0).sum();
-        let total: f64 = self.energies.values().map(|e| e.1).sum();
-        let threshold = if count > 0 {
-            total / count as f64 / 10.0
-        } else {
-            f64::INFINITY
-        };
-        let mut gated_count = 0u64;
-        let mut gated_sum = 0.0;
-        for (count, sum) in self.energies.values() {
-            if sum / (*count as f64) >= threshold {
-                gated_count += count;
-                gated_sum += sum;
-            }
-        }
+    /// Lower and upper gated short-term percentiles used for loudness range.
+    pub fn range_bounds(&self) -> Option<(f64, f64)> {
         let short_count: u64 = self.short_energies.values().map(|e| e.0).sum();
         let short_sum: f64 = self.short_energies.values().map(|e| e.1).sum();
         let threshold = if short_count > 0 {
@@ -175,8 +161,27 @@ impl LoudnessMeter {
             }
             0.0
         };
+        (count > 0).then(|| (percentile(0.1), percentile(0.95)))
+    }
+    pub fn report(&self) -> IntegratedLoudness {
+        let count: u64 = self.energies.values().map(|e| e.0).sum();
+        let total: f64 = self.energies.values().map(|e| e.1).sum();
+        let threshold = if count > 0 {
+            total / count as f64 / 10.0
+        } else {
+            f64::INFINITY
+        };
+        let mut gated_count = 0u64;
+        let mut gated_sum = 0.0;
+        for (count, sum) in self.energies.values() {
+            if sum / (*count as f64) >= threshold {
+                gated_count += count;
+                gated_sum += sum;
+            }
+        }
+        let range = self.range_bounds();
         IntegratedLoudness {
-            range_lu: (count > 0).then(|| percentile(0.95) - percentile(0.1)),
+            range_lu: range.map(|(low, high)| high - low),
             sample_peak_dbfs: (self.sample_peak > 0.0).then(|| 20.0 * self.sample_peak.log10()),
             sample_frames: self.frames,
             measured_blocks: self.blocks,

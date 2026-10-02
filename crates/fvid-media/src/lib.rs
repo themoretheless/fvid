@@ -62,3 +62,7 @@ pub mod owned_wave_plan;
 pub use owned_wave_plan::{plan_remux, plan_trim, plan_trim_pcm, plan_concat};
 
 pub mod owned_true_peak;
+
+pub mod owned_wave_loudness;
+#[cfg(not(feature = "legacy-ffmpeg"))]
+pub use owned_wave_loudness::{measure_loudness, plan_loudness};

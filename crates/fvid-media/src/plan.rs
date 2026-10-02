@@ -3673,6 +3673,9 @@ pub fn plan_burn_subtitles(source: &Path, subs: &Path, options: &CopyOptions) ->
 
 /// Plan an ebur128 loudness measure without executing.
 pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> {
+    if crate::owned_wave_loudness::supports(source, options) {
+        return crate::owned_wave_loudness::plan_loudness(source, options);
+    }
     let input = Input::open_fast(source)?;
     let audio = input
         .streams()
