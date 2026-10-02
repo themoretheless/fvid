@@ -120,3 +120,21 @@ pub fn transcode_lossless(
         horizontal_flip: transform.horizontal_flip,
     })
 }
+
+/// Preserve the library crop API without a libav decoder or encoder.
+pub fn crop_lossless(
+    source: &Path,
+    destination: &Path,
+    crop: fvid_media_info::CropRect,
+    options: &CopyOptions,
+) -> Result<LosslessStats, String> {
+    transcode_lossless(
+        source,
+        destination,
+        LosslessTransform {
+            crop: Some(crop),
+            ..Default::default()
+        },
+        options,
+    )
+}

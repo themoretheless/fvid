@@ -290,3 +290,10 @@ cleanup after rejection. A truncated second frame with a one-packet limit
 must report the count limit rather than a truncation error, proving rejection
 before reading/encoding that frame's payload. Ordinary decode without a limit
 retains its existing bounded streaming behavior.
+
+The public `crop_lossless` API is also exported without the legacy feature and
+uses the same owned lossless adapter. Its committed synthetic 4:4:0 ten-bit
+fixture is cropped at x=1: the test independently lists every selected sample
+in Y, Cb and Cr, decodes the published FFV1 packets and checks exact precision,
+chroma axes, aspect and FULL range. An unaligned vertical crop is refused
+without publication. No external fixture generation is part of the test.

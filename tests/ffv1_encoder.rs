@@ -747,3 +747,70 @@ fn lossless_packet_count_limit_rejects_before_reading_extra_frame_payload() {
             .starts_with(".fvid-matroska-")
     }));
 }
+
+#[test]
+fn public_crop_lossless_preserves_exact_high_depth_planes_and_aspect() {
+    let directory =
+        std::env::temp_dir().join(format!("fvid-owned-crop-api-{}", std::process::id()));
+    std::fs::create_dir(&directory).unwrap();
+    struct Clean(std::path::PathBuf);
+    impl Drop for Clean {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _clean = Clean(directory.clone());
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/y4m-aspect-full-10.y4m");
+    let destination = directory.join("crop.mkv");
+    let stats = fvid_media::crop_lossless(
+        &source,
+        &destination,
+        fvid_media::CropRect {
+            x: 1,
+            y: 0,
+            width: 2,
+            height: 2,
+        },
+        &Default::default(),
+    )
+    .unwrap();
+    assert_eq!(stats.backend, "fvid");
+    assert_eq!(stats.video_frames, 2);
+    let mut reader = fvid::container::webm::WebmReader::open(
+        Cursor::new(std::fs::read(&destination).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    reader.scan_all().unwrap();
+    assert_eq!(reader.tracks[0].pixel_aspect(), (16, 15));
+    assert!(reader.tracks[0].colour.full_range);
+    let mut decoder = fvid::codec::ffv1_decoder::Decoder::new(2, 2, 1 << 20).unwrap();
+    for frame in 0..2 {
+        let packet = reader.read_packet(frame).unwrap();
+        let expected: Vec<_> = [1, 2, 5, 6, 9, 10, 13, 14]
+            .into_iter()
+            .flat_map(|i| (i * 17u16 + frame as u16 * 31).to_le_bytes())
+            .collect();
+        let decoded = decoder.decode(&packet).unwrap();
+        assert_eq!(decoded.frame.data, expected);
+        assert_eq!(decoded.depth, 10);
+        assert_eq!(decoded.frame.subsampling, Some([1, 2]));
+    }
+    let invalid = directory.join("invalid.mkv");
+    assert!(
+        fvid_media::crop_lossless(
+            &source,
+            &invalid,
+            fvid_media::CropRect {
+                x: 0,
+                y: 1,
+                width: 2,
+                height: 1
+            },
+            &Default::default()
+        )
+        .is_err()
+    );
+    assert!(!invalid.exists());
+}
