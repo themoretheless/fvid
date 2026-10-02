@@ -53,7 +53,9 @@ impl Imdct {
         let mut tables = Tables {
             coefficients,
             chirp,
-            kernel: vec![[0.0; 2]; size],
+            // FFT initialization only reads roots/reverse, so no placeholder
+            // kernel allocation is needed before installing the transformed data.
+            kernel: Vec::new(),
             roots,
             reverse,
         };

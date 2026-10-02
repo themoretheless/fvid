@@ -287,3 +287,26 @@ libav/swscale/swresample linkage. Legacy/player compilation, diff checks and
 all four supported native dependency graphs passed. This completes only the
 catalogued metadata routes; demuxing, filtering, encoding, muxing, unmigrated
 metadata and production legacy feature coupling remain incomplete.
+
+## AAC initialization transient allocation reduction
+
+The owned KBD window builder now normalizes and mirrors within one preallocated
+buffer. IMDCT setup no longer allocates a placeholder kernel before constructing
+the real FFT kernel; its setup FFT only reads roots and reversal indices.
+Retained windows, transforms and decoded PCM are unchanged.
+
+`scripts/bench_aac_initialization_allocations.py` is an explicit offline own-code
+benchmark against Git baseline 4ccf4852. It needs Git/rustc but no FFmpeg or
+network and checks bitwise KBD/IMDCT output for 120, 128, 960 and 1024 samples.
+On the current macOS arm64 runtime, KBD-1024 peak outstanding requested heap
+payload decreased from 24,576 to 16,384 bytes (three allocation/reallocation
+calls to one); IMDCT-1024 decreased from 114,688 to 82,040 bytes (six calls to
+five). All four geometries improved and produced bitwise-identical output.
+The meter excludes allocator overhead/RSS and cannot observe hidden temporary
+allocations within system realloc; it is not a full decoder/export peak proof.
+
+139 owned library tests passed, as did 32 AAC/ADTS integration tests with empty
+test PATH (960 frames, PCE, coupling, decoder, streaming and file export).
+Legacy/player compilation and supported native dependency/source policy passed.
+ADTS aggregate allocation admission remains explicitly unsupported: these
+initialization measurements do not justify enabling its complete export budget.

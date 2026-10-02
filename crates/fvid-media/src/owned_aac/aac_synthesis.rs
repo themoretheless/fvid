@@ -32,20 +32,23 @@ fn kbd_window(n: usize, alpha: f64) -> Vec<f64> {
         }
         sum
     }
-    let mut cumulative = Vec::with_capacity(n);
+    // Build both halves in one allocation; mirror after normalization.
+    let mut full = Vec::with_capacity(2 * n);
     let mut total = 0.0;
     for i in 0..=n {
         let x = 2.0 * i as f64 / n as f64 - 1.0;
         total += i0(PI * alpha * (1.0 - x * x).max(0.0).sqrt());
         if i < n {
-            cumulative.push(total);
+            full.push(total);
         }
     }
-    for value in &mut cumulative {
+    for value in &mut full {
         *value = (*value / total).sqrt();
     }
-    let mut full = cumulative.clone();
-    full.extend(cumulative.into_iter().rev());
+    for i in (0..n).rev() {
+        let value = full[i];
+        full.push(value);
+    }
     full
 }
 
