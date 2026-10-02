@@ -465,3 +465,11 @@ unchanged to `cargo bench --bench ffmpeg_matroska_video_reference`. Only this
 explicit benchmark requires FVID_REFERENCE_FFMPEG. The ordinary native Matroska
 video suite retains its eight owned playback/seek/reference/poisoning checks and
 no longer has external-tool tests or ignored reference comparisons.
+
+The remaining ignored external Matroska AAC edit-boundary comparison moved
+unchanged to `cargo bench --bench ffmpeg_matroska_aac_edit_reference`, explicitly
+requiring FVID_REFERENCE_FFMPEG. Ordinary native mux tests retain all their
+owned checks and no external-tool reference test. Two pre-existing native mux
+failures (concat CLI container bytes and codec-delay/padding PCM) remain active
+and unresolved; selected validation excludes them explicitly, not as proof of
+the entire suite passing.

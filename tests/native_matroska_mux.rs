@@ -404,56 +404,6 @@ fn mp4_aac_edits_and_960_sample_frames_survive_packet_remux() {
 }
 
 #[test]
-#[ignore = "requires FVID_REFERENCE_FFMPEG"]
-fn independent_decoder_reads_mp4_aac_edit_boundaries() {
-    let ffmpeg = std::env::var_os("FVID_REFERENCE_FFMPEG").unwrap();
-    let d = dir("mp4-edit-reference");
-    let bytes = std::fs::read(fixture("aac-native-edit.m4a")).unwrap();
-    let mut input =
-        fvid::container::mp4::Mp4Reader::open(std::io::Cursor::new(&bytes), Default::default())
-            .unwrap();
-    let index = input
-        .tracks()
-        .iter()
-        .position(|t| t.codec == *b"mp4a")
-        .unwrap();
-    let mut out = std::io::Cursor::new(Vec::new());
-    matroska_write::write_mp4_aac(&mut input, index, &mut out, None, None).unwrap();
-    let destination = d.0.join("edited.mka");
-    std::fs::write(&destination, out.into_inner()).unwrap();
-    let decode = |path: &Path| {
-        let run = std::process::Command::new(&ffmpeg)
-            .args(["-v", "error", "-i"])
-            .arg(path)
-            .args([
-                "-map",
-                "0:a:0",
-                "-f",
-                "f32le",
-                "-c:a",
-                "pcm_f32le",
-                "pipe:1",
-            ])
-            .output()
-            .unwrap();
-        assert!(
-            run.status.success(),
-            "{}",
-            String::from_utf8_lossy(&run.stderr)
-        );
-        run.stdout
-    };
-    let source_pcm = decode(&fixture("aac-native-edit.m4a"));
-    let output_pcm = decode(&destination);
-    let mut owned = Vec::new();
-    let stats = fvid::native_media::decode_mp4_aac_pcm(&bytes, &mut owned).unwrap();
-    let length = stats.sample_frames as usize * 4;
-    assert_eq!(output_pcm.len(), length);
-    assert!(source_pcm.len() >= length);
-    assert!(output_pcm == source_pcm[..length], "reference PCM differs");
-}
-
-#[test]
 fn mp4_aac_invalid_edits_and_cancellation_never_report_completion() {
     let original = std::fs::read(fixture("aac-native-edit.m4a")).unwrap();
     let elst = original.windows(4).position(|v| v == b"elst").unwrap();

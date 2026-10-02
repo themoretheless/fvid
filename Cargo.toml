@@ -139,3 +139,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_matroska_video_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_matroska_aac_edit_reference"
+harness = false
