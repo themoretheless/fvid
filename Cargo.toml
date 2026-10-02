@@ -183,3 +183,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_mp4_concat_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_mp4_remux_reference"
+harness = false
