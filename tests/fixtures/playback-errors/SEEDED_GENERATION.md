@@ -316,3 +316,13 @@ synthetic frame compares complete container bytes with the frontend, parses
 all thirteen tag fields and Unicode chapter titles/boundaries back, and checks
 NUL/reversed-boundary refusals. This owns writer metadata; source-container
 inspection and public metadata-edit policy migration remain separate work.
+
+Public owned Y4M lossless export now applies known container tag edits:
+deletions first, then ordered sets with last-value wins (including clearing by
+an empty value). The committed synthetic fixture checks Unicode title, artist
+clearing, track/album-artist aliases and reader roundtrip. Unknown keys, NUL and
+more than 64 edits are explicit owned-path refusals before publication. Legacy
+admission retains unsupported key/stream-tag operations on their existing path;
+this is not an assertion that all metadata policies or source formats migrated.
+The parser's first-value `FileTags::insert` semantics remain unchanged; explicit
+editing uses the separate `set` method.

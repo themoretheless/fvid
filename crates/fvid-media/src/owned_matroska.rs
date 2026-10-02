@@ -178,6 +178,7 @@ pub fn write_y4m_ffv1_controlled<W: Write + Seek>(
         usize::MAX,
         None,
         false,
+        &FileMetadata::default(),
     )
 }
 fn write_y4m_ffv1_policy<W: Write + Seek>(
@@ -189,6 +190,7 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
     max_packet_bytes: usize,
     max_packets: Option<u64>,
     rebase_interval: bool,
+    file_metadata: &FileMetadata,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
     check(cancel)?;
     let mut output = Some(output);
@@ -207,7 +209,7 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
                 let height =
                     u32::try_from(header.height).map_err(|_| "Matroska height overflow")?;
                 writer = Some(
-                    PacketWriter::new_ffv1_with_metadata(
+                    PacketWriter::new_ffv1_with_file_metadata(
                         output.take().unwrap(),
                         width,
                         height,
@@ -223,6 +225,7 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
                         }),
                         0,
                         0,
+                        file_metadata,
                     )
                     .map_err(|e| e.to_string())?,
                 );
@@ -296,6 +299,7 @@ pub fn export_y4m_ffv1(
         usize::MAX,
         None,
         false,
+        &FileMetadata::default(),
     )
 }
 pub(crate) fn export_y4m_ffv1_policy(
@@ -307,6 +311,7 @@ pub(crate) fn export_y4m_ffv1_policy(
     max_packet_bytes: usize,
     max_packets: Option<u64>,
     rebase_interval: bool,
+    file_metadata: &FileMetadata,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
     check(cancel)?;
     if destination
@@ -359,6 +364,7 @@ pub(crate) fn export_y4m_ffv1_policy(
         max_packet_bytes,
         max_packets,
         rebase_interval,
+        file_metadata,
     )?;
     file.flush()?;
     file.sync_all()?;

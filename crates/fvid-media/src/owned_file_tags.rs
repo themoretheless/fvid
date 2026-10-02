@@ -45,7 +45,27 @@ impl FileTags {
         if value.is_empty() {
             return false;
         }
-        let field = match name.to_ascii_uppercase().as_str() {
+        let Some(field) = self.field(name) else {
+            return false;
+        };
+        if field.is_empty() {
+            *field = value.to_owned();
+        }
+        true
+    }
+    /// Explicit metadata editing replaces the previous value, including empty.
+    pub fn set(&mut self, name: &str, value: &str) -> bool {
+        let Some(field) = self.field(name) else {
+            return false;
+        };
+        *field = value.to_owned();
+        true
+    }
+    pub fn supports_key(name: &str) -> bool {
+        Self::default().field(name).is_some()
+    }
+    fn field(&mut self, name: &str) -> Option<&mut String> {
+        Some(match name.to_ascii_uppercase().as_str() {
             "TITLE" => &mut self.title,
             "ARTIST" => &mut self.artist,
             "ALBUM" => &mut self.album,
@@ -59,11 +79,7 @@ impl FileTags {
             "COPYRIGHT" => &mut self.copyright,
             "DESCRIPTION" => &mut self.description,
             "RATING" => &mut self.rating,
-            _ => return false,
-        };
-        if field.is_empty() {
-            *field = value.to_owned();
-        }
-        true
+            _ => return None,
+        })
     }
 }

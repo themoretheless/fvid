@@ -913,3 +913,74 @@ fn public_lossless_interval_rebases_clock_and_counts_preroll_packets() {
             .starts_with(".fvid-matroska-")
     }));
 }
+
+#[test]
+fn public_lossless_metadata_edits_are_ordered_and_never_drop_unknown_keys() {
+    let directory =
+        std::env::temp_dir().join(format!("fvid-owned-tags-policy-{}", std::process::id()));
+    std::fs::create_dir(&directory).unwrap();
+    struct Clean(std::path::PathBuf);
+    impl Drop for Clean {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    let _clean = Clean(directory.clone());
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/y4m-aspect-full-10.y4m");
+    let output = directory.join("tags.mkv");
+    let options = fvid_media::CopyOptions {
+        metadata_delete: vec!["title".into()],
+        metadata_set: vec![
+            ("TITLE".into(), "first".into()),
+            ("title".into(), "Последний 🎬".into()),
+            ("artist".into(), "removed".into()),
+            ("ARTIST".into(), "".into()),
+            ("TRACKNUMBER".into(), "3/12".into()),
+            ("albumartist".into(), "Album artist".into()),
+        ],
+        ..Default::default()
+    };
+    let stats =
+        fvid_media::transcode_lossless(&source, &output, Default::default(), &options).unwrap();
+    assert_eq!(stats.backend, "fvid");
+    let mut reader = fvid::container::webm::WebmReader::open(
+        Cursor::new(std::fs::read(&output).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    reader.scan_all().unwrap();
+    assert_eq!(reader.tags.title, "Последний 🎬");
+    assert!(reader.tags.artist.is_empty());
+    assert_eq!(reader.tags.track, "3/12");
+    assert_eq!(reader.tags.album_artist, "Album artist");
+    for (index, entries) in [
+        vec![("unknown".into(), "keep me".into())],
+        vec![("title".into(), "bad\0value".into())],
+        vec![("title".into(), "x".into()); 65],
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let output = directory.join(format!("invalid-{index}.mkv"));
+        let options = fvid_media::CopyOptions {
+            metadata_set: entries,
+            ..Default::default()
+        };
+        let error = fvid_media::owned_lossless::transcode_lossless(
+            &source,
+            &output,
+            Default::default(),
+            &options,
+        )
+        .unwrap_err();
+        assert!(!output.exists());
+        assert!(error.contains(if index == 0 {
+            "unsupported"
+        } else if index == 1 {
+            "NUL"
+        } else {
+            "at most 64"
+        }));
+    }
+}

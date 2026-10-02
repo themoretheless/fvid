@@ -53,13 +53,40 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         ..Default::default()
     })
 }
+fn metadata(o: &CopyOptions) -> Result<crate::owned_matroska::FileMetadata, String> {
+    if o.metadata_set.len() + o.metadata_delete.len() > 64 {
+        return Err("at most 64 container metadata mutations".into());
+    }
+    let mut file = crate::owned_matroska::FileMetadata::default();
+    for key in &o.metadata_delete {
+        if key.contains('\0') || !file.tags.set(key, "") {
+            return Err("unsupported owned container metadata key".into());
+        }
+    }
+    for (key, value) in &o.metadata_set {
+        if key.contains('\0') || value.contains('\0') {
+            return Err("NUL in container metadata".into());
+        }
+        if !file.tags.set(key, value) {
+            return Err("unsupported owned container metadata key".into());
+        }
+    }
+    Ok(file)
+}
 fn policy(o: &CopyOptions) -> bool {
     (o.streams.is_empty() || o.streams == [0])
         && o.max_packet_bytes != 0
         && o.max_controlled_bytes.is_none()
         && o.max_rss_bytes.is_none()
-        && o.metadata_set.is_empty()
-        && o.metadata_delete.is_empty()
+        && o.metadata_set.len() + o.metadata_delete.len() <= 64
+        && o.metadata_set.iter().all(|(k, v)| {
+            !k.contains('\0')
+                && !v.contains('\0')
+                && crate::owned_file_tags::FileTags::supports_key(k)
+        })
+        && o.metadata_delete
+            .iter()
+            .all(|k| !k.contains('\0') && crate::owned_file_tags::FileTags::supports_key(k))
         && o.stream_metadata_set.is_empty()
         && o.stream_metadata_delete.is_empty()
 }
@@ -92,6 +119,7 @@ pub fn transcode_lossless(
     transform: LosslessTransform,
     options: &CopyOptions,
 ) -> Result<LosslessStats, String> {
+    let file_metadata = metadata(options)?;
     if !policy(options) {
         return Err("owned Y4M lossless export does not yet implement requested policy".into());
     }
@@ -127,6 +155,7 @@ pub fn transcode_lossless(
         options.max_packet_bytes,
         options.max_packets,
         true,
+        &file_metadata,
     )
     .map_err(|e| e.to_string())?;
     Ok(LosslessStats {
