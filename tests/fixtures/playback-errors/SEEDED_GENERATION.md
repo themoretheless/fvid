@@ -363,3 +363,13 @@ ordinary checks use neither FFmpeg nor network access.
 The library also owns the unchanged lenient file-tag and flat chapter-atom
 reader, shared with the frontend. A synthetic in-memory Tags/Chapters control
 checks the public API; full track/index parsing still remains in the frontend.
+
+### Library WebM/Matroska reader
+
+`fvid-media::owned_webm::WebmReader` now owns the complete bounded incremental
+container reader, including tracks, packet indexing, clocks, colour/HDR and
+file metadata. The frontend includes the same unchanged reader body with its
+existing colour/error types. The library API has a synthetic in-memory VP9
+packet-index control; this checks container framing, not VP9 decoding.
+The frontend reader unit and native Matroska playback regressions remain active.
+Unsupported lacing and other existing reader refusals are unchanged.

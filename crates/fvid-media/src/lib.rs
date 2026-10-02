@@ -112,3 +112,5 @@ pub mod owned_file_tags;
 pub mod owned_ffv1_decoder;
 
 pub mod owned_ebml;
+
+pub mod owned_webm;

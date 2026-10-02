@@ -40,7 +40,7 @@ pub struct FileMetadata {
 include!("owned_matroska_file_impl.rs");
 
 /// Container colour codes, independent of a decoder or colour converter.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct ColourDescription {
     pub primaries: u8,
     pub transfer: u8,
@@ -377,4 +377,34 @@ pub(crate) fn export_y4m_ffv1_policy(
         hook.emit(event);
     }
     Ok((stats, event))
+}
+
+impl MasteringDisplay {
+    pub fn from_corners(
+        red: (f64, f64),
+        green: (f64, f64),
+        blue: (f64, f64),
+        white: (f64, f64),
+        max_luminance: f32,
+        min_luminance: f32,
+    ) -> Option<Self> {
+        let point = |(x, y): (f64, f64)| {
+            (x.is_finite() && y.is_finite() && (0.0..=1.0).contains(&x) && (0.0..=1.0).contains(&y))
+                .then_some(Chromaticity { x, y })
+        };
+        let display = Some(Self {
+            red: point(red)?,
+            green: point(green)?,
+            blue: point(blue)?,
+            white: point(white)?,
+            max_luminance,
+            min_luminance,
+        })?;
+        (display.max_luminance.is_finite()
+            && display.min_luminance.is_finite()
+            && display.max_luminance >= 0.0
+            && display.min_luminance >= 0.0)
+            .then_some(display)
+    }
+
 }
