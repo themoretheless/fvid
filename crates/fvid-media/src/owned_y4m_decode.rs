@@ -447,8 +447,28 @@ fn transform_frame_into(
     Ok(())
 }
 pub fn decode_reader_transformed(
+    source: impl BufRead,
+    transform: &DecodeTransform,
+) -> Result<DecodeStats> {
+    decode_reader_frames(source, transform, None)
+}
+
+/// Deliver transformed planar frames without retaining the video. Timestamps
+/// stay on the source timeline, including interval selection. Callback failure
+/// stops processing immediately; callers must discard partial exports.
+pub fn visit_reader_transformed(
+    source: impl BufRead,
+    transform: &DecodeTransform,
+    mut visit: impl FnMut(&Header, &[u8], u64, u64) -> Result<()>,
+) -> Result<DecodeStats> {
+    decode_reader_frames(source, transform, Some(&mut visit))
+}
+
+type FrameVisitor<'a> = dyn FnMut(&Header, &[u8], u64, u64) -> Result<()> + 'a;
+fn decode_reader_frames(
     mut source: impl BufRead,
     transform: &DecodeTransform,
+    mut visit: Option<&mut FrameVisitor<'_>>,
 ) -> Result<DecodeStats> {
     if !supported_request(transform) {
         return Err("owned Y4M decoder does not yet implement requested transform options".into());
@@ -475,6 +495,21 @@ pub fn decode_reader_transformed(
     )?;
     let width = u32::try_from(ow).map_err(|_| "Y4M width exceeds decode API range")?;
     let height = u32::try_from(oh).map_err(|_| "Y4M height exceeds decode API range")?;
+    let promote = transform
+        .shuffleplanes
+        .as_deref()
+        .map(crate::owned_shuffleplanes::ShufflePlanes::parse)
+        .transpose()?
+        .is_some_and(|f| f.mapping[0] != 0 || f.mapping[1] == 0 || f.mapping[2] == 0);
+    let mut presented_header = header.clone();
+    presented_header.width = ow;
+    presented_header.height = oh;
+    presented_header.format = match header.format {
+        _ if promote => PixelFormat::Yuv444,
+        PixelFormat::Yuv422 if transform.transpose.is_some() => PixelFormat::Yuv440,
+        PixelFormat::Yuv440 if transform.transpose.is_some() => PixelFormat::Yuv422,
+        format => format,
+    };
     let frame_bytes = header.frame_len()?;
     let geometry = transform.crop.is_some()
         || transform.horizontal_flip
@@ -491,7 +526,7 @@ pub fn decode_reader_transformed(
         || gradients(transform).iter().any(|(_, a)| a.is_some())
         || morphology(transform).iter().any(|(_, a)| a.is_some());
     let mut input = Vec::new();
-    if geometry {
+    if geometry || visit.is_some() {
         input
             .try_reserve_exact(frame_bytes)
             .map_err(|e| e.to_string())?;
@@ -521,7 +556,7 @@ pub fn decode_reader_transformed(
         let mut remaining = frame_bytes;
         while remaining != 0 {
             let count = remaining.min(scratch.len());
-            let buffer = if geometry && selected {
+            let buffer = if (geometry || visit.is_some()) && selected {
                 let at = frame_bytes - remaining;
                 &mut input[at..at + count]
             } else {
@@ -552,23 +587,26 @@ pub fn decode_reader_transformed(
                 apply_pixel_filters(&header, transform, &mut output)?;
                 std::hint::black_box(&output);
             }
+            if let Some(callback) = visit.as_deref_mut() {
+                let start = u128::from(index) * rate_d as u128 * 1_000_000_000
+                    / rate_n as u128;
+                let end = (u128::from(index) + 1) * rate_d as u128 * 1_000_000_000
+                    / rate_n as u128;
+                callback(
+                    &presented_header,
+                    if geometry { &output } else { &input },
+                    u64::try_from(start).map_err(|_| "Y4M timestamp overflow")?,
+                    u64::try_from(end - start).map_err(|_| "Y4M duration overflow")?,
+                )?;
+            }
             frames = frames.checked_add(1).ok_or("Y4M frame count overflow")?;
         }
         index = index.checked_add(1).ok_or("Y4M frame count overflow")?;
     }
-    let promote = transform
-        .shuffleplanes
-        .as_deref()
-        .map(crate::owned_shuffleplanes::ShufflePlanes::parse)
-        .transpose()?
-        .is_some_and(|f| f.mapping[0] != 0 || f.mapping[1] == 0 || f.mapping[2] == 0);
-    let layout = match header.format {
-        _ if promote => "444",
+    let layout = match presented_header.format {
         PixelFormat::Yuv420 => "420",
-        PixelFormat::Yuv422 if transform.transpose.is_some() => "440",
         PixelFormat::Yuv422 => "422",
         PixelFormat::Yuv444 => "444",
-        PixelFormat::Yuv440 if transform.transpose.is_some() => "422",
         PixelFormat::Yuv440 => "440",
         PixelFormat::Yuv411 => "411",
         PixelFormat::Yuv410 => "410",

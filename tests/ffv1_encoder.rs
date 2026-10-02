@@ -406,3 +406,112 @@ fn malformed_packets_never_panic_or_poison_keyframe_recovery() {
     }
     assert_eq!(decoder.decode(&packet).unwrap().frame.data, original.data);
 }
+
+#[test]
+fn library_streams_y4m_to_ffv1_with_exact_samples_and_rational_timing() {
+    use fvid::codec::ffv1_decoder::Decoder;
+    for (layout, sx, sy) in [
+        ("420", 2, 2),
+        ("422", 2, 1),
+        ("444", 1, 1),
+        ("440", 1, 2),
+        ("411", 4, 1),
+        ("410", 4, 4),
+    ] {
+        for depth in [8, 10, 16] {
+            if sx == 4 && depth != 8 {
+                continue;
+            }
+            let chroma = if depth == 8 {
+                layout.into()
+            } else {
+                format!("{layout}p{depth}")
+            };
+            let mut input = format!("YUV4MPEG2 W4 H4 F3:2 Ip C{chroma}\n").into_bytes();
+            let frames: Vec<_> = (0..3).map(|p| image(4, 4, sx, sy, depth, p)).collect();
+            for frame in &frames {
+                input.extend_from_slice(b"FRAME\n");
+                input.extend_from_slice(&frame.data);
+            }
+            let transform = fvid_media::DecodeTransform {
+                interval: Some((600_000, 1_400_000)),
+                ..Default::default()
+            };
+            let mut decoder = Decoder::new(4, 4, 1 << 20).unwrap();
+            let mut seen = 0;
+            let stats = ffv1_encoder::encode_y4m(
+                Cursor::new(input),
+                &transform,
+                |header, packet, pts, duration| {
+                    assert_eq!((header.width, header.height), (4, 4));
+                    let index = seen + 1;
+                    let decoded = decoder.decode(packet).unwrap();
+                    assert_eq!(decoded.frame.data, frames[index].data);
+                    assert_eq!(decoded.frame.subsampling, Some([sx, sy]));
+                    assert_eq!(decoded.depth, depth);
+                    assert_eq!(pts, (index as u64 * 2_000_000_000) / 3);
+                    assert_eq!(duration, ((index as u64 + 1) * 2_000_000_000) / 3 - pts);
+                    seen += 1;
+                    Ok(())
+                },
+            )
+            .unwrap();
+            assert_eq!(seen, 2);
+            assert_eq!(stats.video_frames, 2);
+        }
+    }
+}
+
+#[test]
+fn library_ffv1_stream_transposes_filters_and_stops_on_sink_error() {
+    use fvid::codec::ffv1_decoder::Decoder;
+    let source = image(4, 2, 2, 1, 10, 2);
+    let mut input = b"YUV4MPEG2 W4 H2 F25:1 Ip C422p10\nFRAME\n".to_vec();
+    input.extend_from_slice(&source.data);
+    let transform = fvid_media::DecodeTransform {
+        transpose: Some(fvid_media::TransposeMode::Clock),
+        negate: Some("".into()),
+        ..Default::default()
+    };
+    let mut expected = Vec::new();
+    let mut offset = 0;
+    for (w, h) in [(4, 2), (2, 2), (2, 2)] {
+        for row in 0..w {
+            for col in 0..h {
+                let at = offset + ((h - 1 - col) * w + row) * 2;
+                let sample = u16::from_le_bytes(source.data[at..at + 2].try_into().unwrap());
+                expected.extend_from_slice(&(1023 - sample).to_le_bytes());
+            }
+        }
+        offset += w * h * 2;
+    }
+    let mut decoder = Decoder::new(2, 4, 1 << 20).unwrap();
+    let stats = ffv1_encoder::encode_y4m(
+        Cursor::new(&input),
+        &transform,
+        |header, packet, pts, duration| {
+            assert_eq!((header.width, header.height), (2, 4));
+            let frame = decoder.decode(packet).unwrap();
+            assert_eq!(frame.frame.subsampling, Some([1, 2]));
+            assert_eq!(frame.frame.data, expected);
+            assert_eq!((pts, duration), (0, 40_000_000));
+            Ok(())
+        },
+    )
+    .unwrap();
+    assert_eq!((stats.width, stats.height), (2, 4));
+    let error = ffv1_encoder::encode_y4m(Cursor::new(&input), &transform, |_, _, _, _| {
+        Err("sink stopped".into())
+    })
+    .unwrap_err();
+    assert_eq!(error, "sink stopped");
+    input.pop();
+    let mut called = false;
+    let error = ffv1_encoder::encode_y4m(Cursor::new(input), &transform, |_, _, _, _| {
+        called = true;
+        Ok(())
+    })
+    .unwrap_err();
+    assert!(error.contains("truncated Y4M"));
+    assert!(!called);
+}

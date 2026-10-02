@@ -216,3 +216,13 @@ each source plane, checks every 12-bit sample and 4:2:2 -> 4:4:0 axes, then veri
 CPU RGB against the original reader reference. Seek repeats those checks for the
 selected timestamp/generation. The existing short five-frame synthetic clip is
 encoded/muxed in memory by owned code; no external tools or private video are used.
+
+The owned library's `encode_y4m` streaming API is covered by short synthetic
+in-memory Y4M clips in `tests/ffv1_encoder.rs`. Three frames at 3:2 fps check
+interval selection, absolute rational nanosecond timestamps and exact decoded
+samples for supported 8/10/16-bit chroma layouts. A separate 4x2 ten-bit 4:2:2
+clip checks independent clockwise sample indexing plus negate, 4:4:0 output,
+sink-error propagation and a truncated-payload refusal before packet delivery.
+Generation uses integer patterns, the owned encoder and decoder only. This API
+emits packets to a caller-owned sink; it does not claim a completed library
+Matroska/file-export migration or removal of the legacy backend.
