@@ -33,3 +33,6 @@ pub mod owned_pcm_integer;
 pub mod owned_pcm_format;
 
 pub mod owned_time;
+
+pub mod owned_wave_inspect;
+pub mod owned_probe;

@@ -643,6 +643,13 @@ pub fn probe(path: &Path) -> Result<MediaInfo> {
 /// what ffmpeg's `-f` states. Without that name the file opens as nothing, so a demuxer that
 /// probes for no signature is only reachable through here.
 pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo> {
+    if format.is_none_or(|name| name == "wav")
+        && crate::owned_wave_inspect::is_wave(path).unwrap_or(false)
+    {
+        if let Ok(info) = crate::owned_probe::probe_wave(path) {
+            return Ok(info);
+        }
+    }
     let input = Input::open_hinted(path, true, format)?;
     describe(path, &input)
 }
