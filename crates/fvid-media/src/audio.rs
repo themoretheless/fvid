@@ -108,7 +108,7 @@ fn integer_format(format: i32) -> Option<crate::owned_pcm_integer::Format> {
     }
 }
 
-struct Resampler {
+pub(super) struct Resampler {
     owned_identity: bool,
     owned: Option<crate::owned_resample::Resampler<Vec<u8>>>,
     owned_f64: Option<crate::owned_resample_f64::Resampler<Vec<u8>>>,
@@ -133,9 +133,10 @@ impl Drop for Resampler {
 }
 
 impl Resampler {
+    pub(super) fn owns_float_pipeline(&self) -> bool { self.owned.is_some() }
     /// Open libswresample for rate and/or channel rematrix. `out_channels == source`
     /// keeps the decoded layout; otherwise uses FFmpeg's default layout for N (`-ac N`).
-    unsafe fn open(frame: *const AVFrame, out_rate: i32, out_channels: i32) -> Result<Self> {
+    pub(super) unsafe fn open(frame: *const AVFrame, out_rate: i32, out_channels: i32) -> Result<Self> {
         unsafe {
             let f = &*frame;
             let out_format = super::pcm_format_adapter::packed(f.format);
@@ -225,7 +226,7 @@ impl Resampler {
     }
 
     /// Convert one input frame (or flush with null). Returns output sample count.
-    unsafe fn convert(&mut self, dst: *mut AVFrame, src: *const AVFrame) -> Result<i32> {
+    pub(super) unsafe fn convert(&mut self, dst: *mut AVFrame, src: *const AVFrame) -> Result<i32> {
         unsafe {
             av_frame_unref(dst);
             if self.owned_identity {

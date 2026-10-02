@@ -15896,6 +15896,7 @@ impl Scaler {
 }
 
 struct PlayResampler {
+    owned: Option<crate::audio::Resampler>,
     swr: *mut SwrContext,
     layout: AVChannelLayout,
     rate: i32,
@@ -15927,11 +15928,23 @@ impl PlayResampler {
             }
             let mut swr = ptr::null_mut();
             let mut built = Self {
+                owned: None,
                 swr: ptr::null_mut(),
                 layout,
                 rate,
                 channels,
             };
+            let matching_layout = source.ch_layout.order == AVChannelOrder_AV_CHANNEL_ORDER_NATIVE
+                && built.layout.order == AVChannelOrder_AV_CHANNEL_ORDER_NATIVE
+                && (source.ch_layout.u.mask == built.layout.u.mask
+                    || (matches!(channels, 1 | 2) && source.ch_layout.nb_channels <= 6));
+            if matching_layout && matches!(source.format, AVSampleFormat_AV_SAMPLE_FMT_FLT | AVSampleFormat_AV_SAMPLE_FMT_FLTP) {
+                let owned = crate::audio::Resampler::open(frame, rate, channels)?;
+                if owned.owns_float_pipeline() {
+                    built.owned = Some(owned);
+                    return Ok(built);
+                }
+            }
             check(
                 swr_alloc_set_opts2(
                     &mut swr,
@@ -15963,6 +15976,16 @@ impl PlayResampler {
     fn convert_inner(&mut self, frame: *const AVFrame) -> Result<Vec<f32>> {
         unsafe {
             let dst = Frame::new()?;
+            if let Some(owned) = &mut self.owned {
+                let frames = owned.convert(dst.0, frame)?;
+                let count = usize::try_from(frames).map_err(|_| "invalid owned playback frame count")?
+                    .checked_mul(self.channels as usize).ok_or("audio frame too large")?;
+                if count == 0 { return Ok(Vec::new()); }
+                let data = (*dst.0).data[0].cast::<f32>();
+                if data.is_null() { return Err("owned playback audio has no samples".into()); }
+                return Ok(std::slice::from_raw_parts(data, count).to_vec());
+            }
+
             let out_samples = if frame.is_null() {
                 let delay = swr_get_delay(self.swr, i64::from(self.rate));
                 if delay <= 0 {
@@ -16008,6 +16031,45 @@ impl PlayResampler {
         }
     }
 }
+#[cfg(test)]
+mod owned_playback_audio_tests {
+    use super::*;
+    #[test]
+    fn packed_and_planar_playback_use_owned_filter_and_rematrix() {
+        use std::io::Write;
+        for (planar, input_channels, output_channels) in [(false, 2, 1), (true, 2, 1), (false, 6, 2), (true, 6, 2)] {
+            let input = Frame::new().unwrap();
+            let pcm: Vec<f32> = (0..997).flat_map(|i| [(i as f32 * 0.07).sin(), -0.25, 0.5, 1.0, 0.1, 0.2].into_iter().take(input_channels as usize)).collect();
+            let mut reference = crate::owned_resample::Resampler::new(Vec::new(), 48000, 16000, output_channels).unwrap();
+            crate::owned_pcm_gain::PcmGain::new(&mut reference, 1.0, input_channels, output_channels).unwrap()
+                .write_all(&pcm.iter().flat_map(|s| s.to_le_bytes()).collect::<Vec<_>>()).unwrap();
+            reference.finish().unwrap();
+            // SAFETY: RAII frame owns checked 997xN float planes.
+            unsafe {
+                (*input.0).format = if planar { AVSampleFormat_AV_SAMPLE_FMT_FLTP } else { AVSampleFormat_AV_SAMPLE_FMT_FLT };
+                (*input.0).sample_rate = 48000;
+                (*input.0).nb_samples = 997;
+                av_channel_layout_default(&mut (*input.0).ch_layout, i32::from(input_channels));
+                check(av_frame_get_buffer(input.0, 0), "playback test input").unwrap();
+                for sample in 0..997 {
+                    for channel in 0..input_channels as usize {
+                        let plane = *(*input.0).extended_data.add(if planar {channel} else {0});
+                        ptr::write_unaligned(plane.cast::<f32>().add(if planar {sample} else {sample * input_channels as usize + channel}), pcm[sample * input_channels as usize + channel]);
+                    }
+                }
+                let mut adapter = PlayResampler::open(input.0,16000,i32::from(output_channels)).unwrap();
+                assert!(adapter.owned.is_some());
+                assert!(adapter.swr.is_null());
+                let mut output = adapter.convert(input.0).unwrap();
+                output.extend(adapter.flush().unwrap());
+                assert!(adapter.flush().unwrap().is_empty());
+                assert_eq!(output.len(),333 * output_channels as usize);
+                assert_eq!(output.iter().flat_map(|s| s.to_le_bytes()).collect::<Vec<_>>(),reference.take_output());
+            }
+        }
+    }
+}
+
 }
 
 #[cfg(feature = "player")]
