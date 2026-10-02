@@ -500,3 +500,14 @@ The explicit `ffmpeg_matroska_padding_reference` benchmark compares sample count
 for codec delay and negative head padding against an external decoder; ordinary
 tests do not require it. Specification: Matroska DiscardPadding element,
 https://www.matroska.org/technical/elements.html#DiscardPadding.
+
+### Library ADTS file concat
+
+The public concat API now selects owned compatible ADTS-to-Matroska concatenation
+in both feature modes, retaining WAVE dispatch for PCM files. It reuses strict
+packet-size admission, streaming sequence framing and atomic no-overwrite
+publication. The synthetic two-segment control compares entire output against
+native AAC export, checks segment/packet counts and rejects a changed sample
+rate without output or remaining temporary files. Track/tag edits and packet
+count/memory/RSS policies still require further implementation. ADTS concat
+planning is not yet connected to this library route.

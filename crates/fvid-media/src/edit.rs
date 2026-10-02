@@ -292,6 +292,9 @@ pub fn trim(
     }
 }
 pub fn concat(sources: &[PathBuf], destination: &Path, options: &CopyOptions) -> Result<CopyStats> {
+    if crate::owned_concat::supports(sources, destination, options) {
+        return crate::owned_concat::concat(sources, destination, options);
+    }
     if sources.len() < 2 || sources.len() > 256 {
         return Err("concat requires 2..=256 inputs".into());
     }

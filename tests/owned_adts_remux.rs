@@ -103,6 +103,37 @@ fn synthetic_adts_concat_cli_copies_aac_instead_of_decoding_pcm() {
     let expected = dir.join("expected.mka");
     let actual = dir.join("actual.mkv");
     fvid::native_export::concat_adts_aac(&sources, &expected, None, None).unwrap();
+    let library = dir.join("library.mka");
+    let stats = fvid_media::concat(&sources, &library, &Default::default()).unwrap();
+    assert_eq!(stats.backend, "owned Matroska");
+    assert_eq!(stats.segments, 2);
+    assert_eq!(stats.packets, 2);
+    assert_eq!(
+        std::fs::read(&library).unwrap(),
+        std::fs::read(&expected).unwrap()
+    );
+    assert!(fvid_media::concat(&sources, &library, &Default::default()).is_err());
+    let incompatible = dir.join("different-rate.aac");
+    let mut altered = std::fs::read(&sources[1]).unwrap();
+    altered[2] = (altered[2] & 0xc3) | (3 << 2);
+    std::fs::write(&incompatible, altered).unwrap();
+    let failed = dir.join("incompatible.mka");
+    let error = fvid_media::concat(
+        &[sources[0].clone(), incompatible],
+        &failed,
+        &Default::default(),
+    )
+    .unwrap_err();
+    assert!(error.contains("configuration"), "{error}");
+    assert!(!failed.exists());
+    assert!(!std::fs::read_dir(&dir).unwrap().any(|entry| {
+        entry
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with(".fvid-")
+    }));
+
     let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
         .args(["media", "concat"])
         .arg(&actual)

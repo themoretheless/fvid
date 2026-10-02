@@ -70,7 +70,9 @@ pub use owned_budget::{parse_max_memory_mib, parse_max_rss_mib};
 
 pub mod owned_wave_remux;
 #[cfg(not(feature = "legacy-ffmpeg"))]
-pub use owned_wave_remux::{concat, trim, trim_pcm};
+pub use owned_wave_remux::{trim, trim_pcm};
+#[cfg(not(feature = "legacy-ffmpeg"))]
+pub use owned_concat::concat;
 #[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_remux::remux;
 
@@ -135,3 +137,5 @@ pub mod owned_remux;
 pub mod owned_remux_plan;
 
 pub mod owned_adts_remux;
+
+pub mod owned_concat;
