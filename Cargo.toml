@@ -155,3 +155,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_pcm_matroska_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_pcm_concat_reference"
+harness = false

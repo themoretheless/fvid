@@ -84,16 +84,7 @@ fn independent_aac_edits_and_mixed_containers_concatenate_exact_samples() {
             std::fs::read(&output).unwrap()
         );
     }
-    if let Some(ffmpeg) = std::env::var_os("FVID_REFERENCE_FFMPEG") {
-        let result = std::process::Command::new(ffmpeg)
-            .args(["-v", "error", "-i"])
-            .arg(&output)
-            .args(["-f", "f32le", "-"])
-            .output()
-            .unwrap();
-        assert!(result.status.success());
-        assert_eq!(result.stdout, original.repeat(3));
-    }
+
 }
 #[test]
 fn concat_cancellation_no_overwrite_and_done_follow_publication() {
