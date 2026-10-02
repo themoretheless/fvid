@@ -159,3 +159,10 @@ canonical dilation -> erosion order. Twenty-seven depth/layout/compositions and
 both public decoder options exercise integration. Existing morphology tests
 retain known threshold/edge pixels and invalid-storage atomicity checks; ordinary
 execution requires neither FFmpeg nor regenerated fixtures.
+
+External edge-filter and morphology references are exclusively explicit root
+benchmarks `ffmpeg_gradients_reference` and `ffmpeg_morphology_reference`, selected
+with cargo bench and FVID_REFERENCE_FFMPEG. Their original synthetic matrices
+retain all 90 gradient and 220 morphology comparisons (including RGB morphology).
+Ordinary tests retain masks, thresholds, rounding, atomic validation, pipeline
+order, API and CLI checks without starting FFmpeg, even under --ignored.

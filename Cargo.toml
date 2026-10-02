@@ -115,3 +115,11 @@ harness = false
 [[bench]]
 name = "ffmpeg_chromashift_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_gradients_reference"
+harness = false
+
+[[bench]]
+name = "ffmpeg_morphology_reference"
+harness = false
