@@ -85,7 +85,7 @@ fn rejects_invalid_storage_and_encodes_independent_packets() {
 }
 #[test]
 fn owned_decoder_roundtrips_all_depths_and_subsampling() {
-    use fvid::codec::ffv1_decoder::Decoder;
+    use fvid_media::owned_ffv1_decoder::Decoder;
     for depth in 8..=16 {
         for (sx, sy) in [(1, 1), (2, 1), (2, 2), (1, 2), (4, 1), (4, 4)] {
             for (w, h) in [(1, 1), (8, 6), (17, 13)] {
@@ -109,7 +109,7 @@ fn owned_decoder_roundtrips_all_depths_and_subsampling() {
 
 #[test]
 fn decoder_enforces_storage_and_recovers_at_keyframe() {
-    use fvid::codec::ffv1_decoder::Decoder;
+    use fvid_media::owned_ffv1_decoder::Decoder;
     let source = image(17, 13, 2, 2, 10, 3);
     let packet = ffv1_encoder::encode(&source, 10).unwrap();
     let mut decoder = Decoder::new(17, 13, 1 << 20).unwrap();
@@ -125,7 +125,7 @@ fn decoder_enforces_storage_and_recovers_at_keyframe() {
 
 #[test]
 fn malformed_packets_never_panic_or_poison_keyframe_recovery() {
-    use fvid::codec::ffv1_decoder::Decoder;
+    use fvid_media::owned_ffv1_decoder::Decoder;
     let original = image(8, 6, 2, 2, 10, 4);
     let packet = ffv1_encoder::encode(&original, 10).unwrap();
     let mut decoder = Decoder::new(8, 6, 1 << 20).unwrap();
@@ -155,7 +155,7 @@ fn malformed_packets_never_panic_or_poison_keyframe_recovery() {
 
 #[test]
 fn library_streams_y4m_to_ffv1_with_exact_samples_and_rational_timing() {
-    use fvid::codec::ffv1_decoder::Decoder;
+    use fvid_media::owned_ffv1_decoder::Decoder;
     for (layout, sx, sy) in [
         ("420", 2, 2),
         ("422", 2, 1),
@@ -210,7 +210,7 @@ fn library_streams_y4m_to_ffv1_with_exact_samples_and_rational_timing() {
 
 #[test]
 fn library_ffv1_stream_transposes_filters_and_stops_on_sink_error() {
-    use fvid::codec::ffv1_decoder::Decoder;
+    use fvid_media::owned_ffv1_decoder::Decoder;
     let source = image(4, 2, 2, 1, 10, 2);
     let mut input = b"YUV4MPEG2 W4 H2 F25:1 Ip C422p10\nFRAME\n".to_vec();
     input.extend_from_slice(&source.data);
@@ -264,7 +264,7 @@ fn library_ffv1_stream_transposes_filters_and_stops_on_sink_error() {
 
 #[test]
 fn library_matroska_writer_matches_frontend_and_exports_filtered_y4m() {
-    use fvid::codec::ffv1_decoder::Decoder;
+    use fvid_media::owned_ffv1_decoder::Decoder;
     use fvid::container::webm::WebmReader;
     let frame = image(4, 2, 2, 1, 10, 2);
     let packet = ffv1_encoder::encode(&frame, 10).unwrap();
@@ -421,7 +421,7 @@ fn library_file_export_publishes_after_sync_and_cleans_cancel_errors_and_races()
     let mut reader =
         fvid::container::webm::WebmReader::open(Cursor::new(&bytes), Default::default()).unwrap();
     reader.scan_all().unwrap();
-    let mut decoder = fvid::codec::ffv1_decoder::Decoder::new(4, 2, 1 << 20).unwrap();
+    let mut decoder = fvid_media::owned_ffv1_decoder::Decoder::new(4, 2, 1 << 20).unwrap();
     for frame in 0..2 {
         let packet = reader.read_packet(frame).unwrap();
         let decoded = decoder.decode(&packet).unwrap();
@@ -577,7 +577,7 @@ fn y4m_metadata_survives_export_and_geometry_without_float_rounding() {
         assert!(reader.tracks[0].colour.full_range);
         assert_eq!(reader.tracks[0].colour.matrix, 6);
         if transform == DecodeTransform::default() {
-            let mut decoder = fvid::codec::ffv1_decoder::Decoder::new(
+            let mut decoder = fvid_media::owned_ffv1_decoder::Decoder::new(
                 stats.width as usize,
                 stats.height as usize,
                 1 << 20,
@@ -820,7 +820,7 @@ fn public_crop_lossless_preserves_exact_high_depth_planes_and_aspect() {
     reader.scan_all().unwrap();
     assert_eq!(reader.tracks[0].pixel_aspect(), (16, 15));
     assert!(reader.tracks[0].colour.full_range);
-    let mut decoder = fvid::codec::ffv1_decoder::Decoder::new(2, 2, 1 << 20).unwrap();
+    let mut decoder = fvid_media::owned_ffv1_decoder::Decoder::new(2, 2, 1 << 20).unwrap();
     for frame in 0..2 {
         let packet = reader.read_packet(frame).unwrap();
         let expected: Vec<_> = [1, 2, 5, 6, 9, 10, 13, 14]
@@ -892,7 +892,7 @@ fn public_lossless_interval_rebases_clock_and_counts_preroll_packets() {
     assert_eq!(reader.packets[0].pts_ns, 0);
     assert_eq!(reader.duration_ns, Some(40_000_000));
     let packet = reader.read_packet(0).unwrap();
-    let mut decoder = fvid::codec::ffv1_decoder::Decoder::new(4, 2, 1 << 20).unwrap();
+    let mut decoder = fvid_media::owned_ffv1_decoder::Decoder::new(4, 2, 1 << 20).unwrap();
     let expected: Vec<_> = (0..16)
         .flat_map(|i| (i * 17u16 + 31).to_le_bytes())
         .collect();

@@ -340,3 +340,12 @@ legacy feature. Its public API regression compares the entire result with
 owned `transcode_lossless`. Explicit unsupported encoder settings (such as
 level 3) are refused by the owned adapter, while legacy admission retains those
 requests on their previous backend; no encoder option is silently ignored.
+
+The complete FFV1 v0/v1 decoder core now belongs to `fvid-media`, shared with
+the frontend through its typed-error wrapper. `tests/ffv1_encoder.rs` consumes
+the public library decoder directly for all depth/chroma roundtrips, malformed
+packet recovery, storage admission and exported planar-frame checks. Existing
+native playback tests retain frontend coverage. The explicit FFV1 benchmark
+retains independent coded contexts/non-keyframes and encoder/decoder references.
+No decoding algorithm changed in this ownership move; FFV1 versions/tools not
+supported previously are not claimed supported by relocating the core.
