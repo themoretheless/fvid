@@ -66,3 +66,5 @@ mod decoder_tests;
 
 pub mod stream;
 pub use stream::{decode_adts_pcm, AudioDecodeStats as AdtsPcmStats};
+
+mod memory;

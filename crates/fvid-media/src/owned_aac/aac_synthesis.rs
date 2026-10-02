@@ -64,6 +64,29 @@ pub struct LongSineSynthesis {
     overlap: Vec<f64>,
 }
 impl LongSineSynthesis {
+    pub(crate) fn visit_retained(
+        &self,
+        footprint: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        for window in [
+            &self.kbd_long,
+            &self.kbd_short,
+            &self.short_window,
+            &self.window,
+        ] {
+            if footprint.shared(window)? {
+                footprint.vector(window)?;
+            }
+        }
+        self.transform.visit_retained(footprint)?;
+        self.short_transform.visit_retained(footprint)?;
+        footprint.vector(&self.short_scratch)?;
+        footprint.vector(&self.transform_scratch)?;
+        footprint.vector(&self.scratch)?;
+        footprint.vector(&self.overlap)?;
+        Ok(())
+    }
+
     #[cfg(test)]
     pub(crate) fn shares_windows_with(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.kbd_long, &other.kbd_long)

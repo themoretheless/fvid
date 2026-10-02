@@ -1,6 +1,6 @@
 //! Owned inverse MDCT via a chirp convolution and radix-2 FFT.
 //! Windowed normalization is 2/N; windowing and overlap-add belong to the caller.
-use super::{Result, invalid};
+use super::{invalid, Result};
 use std::{f64::consts::PI, sync::Arc};
 type Complex = [f64; 2];
 fn mul(a: Complex, b: Complex) -> Complex {
@@ -22,6 +22,19 @@ pub struct Imdct {
     tables: Arc<Tables>,
 }
 impl Imdct {
+    pub(crate) fn visit_retained(
+        &self,
+        footprint: &mut super::memory::Footprint,
+    ) -> std::result::Result<(), String> {
+        if footprint.shared(&self.tables)? {
+            footprint.vector(&self.tables.chirp)?;
+            footprint.vector(&self.tables.kernel)?;
+            footprint.vector(&self.tables.roots)?;
+            footprint.vector(&self.tables.reverse)?;
+        }
+        Ok(())
+    }
+
     /// AAC-LC long/short transforms, including the alternate 960/120 geometry.
     pub fn new(coefficients: usize) -> Result<Self> {
         if !matches!(coefficients, 120 | 128 | 960 | 1024) {
@@ -205,10 +218,9 @@ mod tests {
                 .unwrap();
             assert!(output.iter().all(|&x| x == 0.0));
             output.fill(123.0);
-            assert!(
-                plan.inverse_with_scratch(&spectrum, &mut output, &mut scratch[..1])
-                    .is_err()
-            );
+            assert!(plan
+                .inverse_with_scratch(&spectrum, &mut output, &mut scratch[..1])
+                .is_err());
             assert!(output.iter().all(|&x| x == 123.0));
         }
     }
