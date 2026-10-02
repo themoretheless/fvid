@@ -37,6 +37,14 @@ fn exact_bytes_and_packet_counts_for_audio_and_video() {
         let mut output = Vec::new();
         let stats =
             matroska_copy::copy(&mut Cursor::new(&bytes), &mut output, false, None, None).unwrap();
+        let mut library_output = Vec::new();
+        let library_stats = fvid_media::owned_matroska_copy::copy(
+            &mut Cursor::new(&bytes), &mut library_output, false, None, None,
+        ).unwrap();
+        assert_eq!(library_output, bytes);
+        assert_eq!(library_stats.packets, stats.packets);
+        assert_eq!(library_stats.payload_bytes, stats.payload_bytes);
+        assert!(!library_stats.done);
         assert_eq!(output, bytes);
         assert_eq!(stats.packets, reader.packets.len() as u64);
         assert_eq!(

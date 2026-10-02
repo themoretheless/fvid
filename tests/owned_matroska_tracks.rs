@@ -56,6 +56,31 @@ fn library_multitrack_mux_matches_frontend_bytes() {
     b.write_packet(1, 0, 1_000_000, true, &[0; 192]).unwrap();
     b.finish().unwrap();
     assert_eq!(actual.get_ref(), expected.get_ref());
+    let mut copied = Vec::new();
+    let copied_stats = fvid_media::owned_matroska_copy::copy(
+        &mut Cursor::new(actual.get_ref()),
+        &mut copied,
+        false,
+        None,
+        None,
+    )
+    .unwrap();
+    assert_eq!(copied, *actual.get_ref());
+    assert_eq!(copied_stats.packets, 2);
+    assert_eq!(copied_stats.payload_bytes, 195);
+    let mut refused_copy = Vec::new();
+    assert!(
+        fvid_media::owned_matroska_copy::copy(
+            &mut Cursor::new(actual.get_ref()),
+            &mut refused_copy,
+            true,
+            None,
+            None,
+        )
+        .is_err()
+    );
+    assert!(refused_copy.is_empty());
+
     let mut parsed = fvid_media::owned_webm::WebmReader::open(actual, Default::default()).unwrap();
     parsed.scan_all().unwrap();
     assert_eq!(parsed.tracks.len(), 2);

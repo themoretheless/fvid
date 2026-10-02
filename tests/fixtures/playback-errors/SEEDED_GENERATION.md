@@ -402,3 +402,13 @@ packets verify byte-identical frontend/library output, parsed track metadata and
 payload preservation; invalid AVC setup must refuse before writing output.
 This container-only control is not a codec acceptance test. Existing native
 metadata/video regressions remain active. File remux dispatch is not yet switched.
+
+### Library Matroska identity copy
+
+The validated container-preserving copy implementation is shared with the
+library. It retains every source EBML byte, including unknown metadata and
+attachments; it does not reconstruct or select tracks. Existing identity-copy
+fixtures now also exercise the library's byte and packet-count results. The
+synthetic multitrack control checks exact output, payload counts and rejection
+of video input for audio-only output before writing. Caller-owned publication
+and final completion notification remain separate from streaming copy.
