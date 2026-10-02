@@ -152,3 +152,14 @@ https://datatracker.ietf.org/doc/html/rfc9043
 Local verification passed all 132 owned-library tests and all seven native FFV1
 playback tests, including luma/depth, timestamps, rewind and seek. These results
 do not establish equivalence of the remaining production operations.
+
+The complete local headless root isolation run also finished: 122 Cargo test
+executables, 1234 passed tests, one ignored test and no failures. Each executable
+was inspected with `otool -L` before running with an empty external-program
+PATH; none linked libav. The artifacts were collected with
+`cargo test --offline --no-default-features --lib --tests --no-run --message-format=json`
+before the monochrome addition; the new seven-test FFV1 playback suite passed
+separately afterwards, including the same empty-PATH Cargo runner. Feature-gated
+legacy tests compile to empty suites in this mode, so this does not qualify the
+remaining production `media`/CUDA legacy operations. Full local run evidence:
+`/tmp/fvid-root-tests-isolated.json` and `/tmp/fvid-root-tests-isolated.log`.
