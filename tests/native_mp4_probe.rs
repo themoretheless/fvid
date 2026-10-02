@@ -20,7 +20,12 @@ fn owned_probe_describes_avc_hevc_aac_and_fragmented_tracks() {
         assert_eq!(info.streams[0].time_base[0], 1);
         assert!(info.streams[0].extradata_bytes > 0);
         assert_eq!(info.streams[0].pixel_format, -1);
-        assert!(info.streams[0].profile.is_none());
+        if codec == "h264" {
+            assert!(info.streams[0].profile.is_some());
+            assert!(info.streams[0].level.unwrap() > 0);
+        } else {
+            assert!(info.streams[0].profile.is_none());
+        }
         assert_eq!(
             fvid::native_probe::probe_as(&path, Some("mov")).unwrap().streams,
             info.streams

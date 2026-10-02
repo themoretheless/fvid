@@ -39,6 +39,7 @@ fn tags(tags: &crate::container::FileTags) -> BTreeMap<String, String> {
 
 use crate::container::mp4::Mp4Reader as Mp4ProbeReader;
 use crate::codec::config::aac_specific_config as aac_probe_config;
+use fvid_media::owned_avc::configuration_profile_level as avc_probe_config;
 include!("../crates/fvid-media/src/owned_mp4_probe_impl.rs");
 
 pub(crate) fn matroska(path: &Path) -> Result<MediaInfo> {

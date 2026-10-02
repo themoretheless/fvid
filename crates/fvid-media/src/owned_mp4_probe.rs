@@ -1,4 +1,5 @@
-//! Owned MP4 container descriptions; no codec inference or libav.
+//! Owned MP4 container descriptions and optional AVC SPS metadata, without libav.
+use crate::owned_avc::configuration_profile_level as avc_probe_config;
 use crate::owned_codec_config::aac_specific_config as aac_probe_config;
 use crate::owned_mp4::Mp4Reader as Mp4ProbeReader;
 use fvid_media_info::{ChapterInfo, MediaInfo, StreamInfo};

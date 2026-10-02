@@ -14,6 +14,7 @@ pub mod owned_y4m_decode;
 #[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_y4m_decode::{decode_video, decode_video_transformed};
 pub mod owned_aac;
+pub mod owned_avc;
 
 pub mod owned_shuffleplanes;
 

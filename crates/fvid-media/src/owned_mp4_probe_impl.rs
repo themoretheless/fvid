@@ -122,6 +122,9 @@ pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
         } else {
             track.configuration.len()
         };
+        let avc_description = if matches!(&track.codec, b"avc1" | b"avc3") {
+            avc_probe_config(&track.configuration)
+        } else { None };
         streams.push(StreamInfo {
             index,
             media_type: if track.codec == *b"text" {
@@ -152,8 +155,8 @@ pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
             } else {
                 [0, 1]
             },
-            profile: None,
-            level: None,
+            profile: avc_description.map(|(name, _)| name.into()),
+            level: avc_description.map(|(_, level)| i32::from(level)),
             disposition: 0,
             metadata,
             width: i32::from(track.width),
