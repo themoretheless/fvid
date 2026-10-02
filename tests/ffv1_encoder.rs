@@ -486,3 +486,129 @@ fn library_file_export_publishes_after_sync_and_cleans_cancel_errors_and_races()
             .starts_with(".fvid-matroska-")
     }));
 }
+
+#[test]
+fn y4m_metadata_survives_export_and_geometry_without_float_rounding() {
+    use fvid_media::{CropRect, DecodeTransform, PadRect, ScaleSize, TransposeMode};
+    let input = include_bytes!("fixtures/playback-errors/y4m-aspect-full-10.y4m");
+    for (transform, ratio) in [
+        (DecodeTransform::default(), (16, 15)),
+        (
+            DecodeTransform {
+                transpose: Some(TransposeMode::Clock),
+                ..Default::default()
+            },
+            (15, 16),
+        ),
+        (
+            DecodeTransform {
+                scale: Some(ScaleSize {
+                    width: 8,
+                    height: 2,
+                }),
+                ..Default::default()
+            },
+            (8, 15),
+        ),
+        (
+            DecodeTransform {
+                transpose: Some(TransposeMode::Clock),
+                scale: Some(ScaleSize {
+                    width: 4,
+                    height: 4,
+                }),
+                ..Default::default()
+            },
+            (15, 32),
+        ),
+        (
+            DecodeTransform {
+                crop: Some(CropRect {
+                    x: 0,
+                    y: 0,
+                    width: 2,
+                    height: 2,
+                }),
+                ..Default::default()
+            },
+            (16, 15),
+        ),
+        (
+            DecodeTransform {
+                pad: Some(PadRect {
+                    width: 6,
+                    height: 4,
+                    x: 0,
+                    y: 0,
+                }),
+                ..Default::default()
+            },
+            (16, 15),
+        ),
+        (
+            DecodeTransform {
+                pad: Some(PadRect {
+                    width: 6,
+                    height: 4,
+                    x: 0,
+                    y: 0,
+                }),
+                scale: Some(ScaleSize {
+                    width: 4,
+                    height: 4,
+                }),
+                ..Default::default()
+            },
+            (8, 5),
+        ),
+    ] {
+        let mut output = Cursor::new(Vec::new());
+        let (stats, event) =
+            fvid_media::owned_matroska::write_y4m_ffv1(Cursor::new(input), &mut output, &transform)
+                .unwrap();
+        assert_eq!(event.packets, 2);
+        let mut reader = fvid::container::webm::WebmReader::open(
+            Cursor::new(output.into_inner()),
+            Default::default(),
+        )
+        .unwrap();
+        reader.scan_all().unwrap();
+        assert_eq!(reader.tracks[0].pixel_aspect(), ratio);
+        assert!(reader.tracks[0].colour.full_range);
+        assert_eq!(reader.tracks[0].colour.matrix, 6);
+        if transform == DecodeTransform::default() {
+            let mut decoder = fvid::codec::ffv1_decoder::Decoder::new(
+                stats.width as usize,
+                stats.height as usize,
+                1 << 20,
+            )
+            .unwrap();
+            for frame in 0..2 {
+                let packet = reader.read_packet(frame).unwrap();
+                let expected: Vec<_> = (0..16)
+                    .flat_map(|i| (i * 17u16 + frame as u16 * 31).to_le_bytes())
+                    .collect();
+                assert_eq!(decoder.decode(&packet).unwrap().frame.data, expected);
+            }
+        }
+    }
+    for bad in [
+        "A16:0 XCOLORRANGE=FULL",
+        "A16:15 A1:1 XCOLORRANGE=FULL",
+        "A16:15 XCOLORRANGE=INVALID",
+        "A16:15 XCOLORRANGE=FULL XCOLORRANGE=LIMITED",
+    ] {
+        let mut source = format!("YUV4MPEG2 W4 H2 F30:1 Ip C440p10 {bad}\nFRAME\n").into_bytes();
+        source.extend_from_slice(&[0; 32]);
+        let mut output = Cursor::new(Vec::new());
+        assert!(
+            fvid_media::owned_matroska::write_y4m_ffv1(
+                Cursor::new(source),
+                &mut output,
+                &Default::default()
+            )
+            .is_err()
+        );
+        assert!(output.get_ref().is_empty());
+    }
+}

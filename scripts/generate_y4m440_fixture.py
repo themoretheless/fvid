@@ -9,3 +9,6 @@ for frame in range(2):
     for value in range(16):
         output.extend(struct.pack("<H", value * 17 + frame * 31))
 (root / "y4m-vertical-chroma-10.y4m").write_bytes(output)
+
+metadata = output.replace(b"F30:1 Ip", b"F30:1 Ip A16:15 XCOLORRANGE=FULL", 1)
+(root / "y4m-aspect-full-10.y4m").write_bytes(metadata)

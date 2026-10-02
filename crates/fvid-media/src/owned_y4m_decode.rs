@@ -510,6 +510,40 @@ fn decode_reader_frames(
         PixelFormat::Yuv440 if transform.transpose.is_some() => PixelFormat::Yuv422,
         format => format,
     };
+    header.full_range()?;
+    let (n, d) = header.pixel_aspect()?;
+    let (mut n, mut d) = (u128::from(n), u128::from(d));
+    let (mut w, mut h) = (crop.width as u128, crop.height as u128);
+    if transform.transpose.is_some() {
+        std::mem::swap(&mut n, &mut d);
+        std::mem::swap(&mut w, &mut h);
+    }
+    if let Some(pad) = transform.pad {
+        w = u128::from(pad.width);
+        h = u128::from(pad.height);
+    }
+    if transform.scale.is_some() {
+        n = n
+            .checked_mul(w)
+            .and_then(|v| v.checked_mul(oh as u128))
+            .ok_or("pixel aspect overflow")?;
+        d = d
+            .checked_mul(h)
+            .and_then(|v| v.checked_mul(ow as u128))
+            .ok_or("pixel aspect overflow")?;
+    }
+    let (mut a, mut b) = (n, d);
+    while b != 0 {
+        (a, b) = (b, a % b);
+    }
+    let aspect = (
+        u32::try_from(n / a).map_err(|_| "pixel aspect overflow")?,
+        u32::try_from(d / a).map_err(|_| "pixel aspect overflow")?,
+    );
+    presented_header.tokens.retain(|t| !t.starts_with('A'));
+    presented_header
+        .tokens
+        .push(format!("A{}:{}", aspect.0, aspect.1));
     let frame_bytes = header.frame_len()?;
     let geometry = transform.crop.is_some()
         || transform.horizontal_flip

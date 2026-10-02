@@ -244,7 +244,7 @@ checks pre-cancel, cancellation after the first packet, an independently created
 destination during progress, and truncation of the second frame: no overwrite,
 no partial published file and no remaining temporary output. These checks never
 invoke fixture generation or FFmpeg. The specialized video-only API does not
-claim general legacy lossless API parity or Y4M colour/file metadata mapping.
+claim general legacy lossless API parity or general file metadata mapping.
 
 The FFV1 external encoder/decoder comparisons now live exclusively in
 `benches/ffmpeg_ffv1_reference.rs`, invoked explicitly through `cargo bench`
@@ -261,4 +261,14 @@ one wholly synthetic FFV1 frame, compares complete container bytes for all four
 rotations and parses colour/HDR/crop/aspect back. Invalid rotation, empty crop,
 zero aspect, fractional content light and NaN chromaticity are refused before
 any output bytes. Y4M tag mapping and general file metadata are still separate
-work; the plain Y4M export does not acquire those mappings merely from this API.
+work at that stage; aspect/range mapping is covered by the subsequent fixture below.
+
+`y4m-aspect-full-10.y4m` is the same two-frame synthetic ten-bit control with
+A16:15 and FULL range tags. Its generator remains separate from ordinary tests.
+Owned FFV1 export now maps those declarations to Matroska, preserving exact
+samples and rational pixel aspect through crop, transpose, pad and scale.
+Seven geometry combinations check known fractions; invalid/duplicate aspect
+and colour-range tags are refused before writing output. The native converter's
+BT.601 matrix assumption is retained; primaries, transfer and HDR are not
+inferred from Y4M. General file tags and unsupported extensions remain outside
+this mapping.

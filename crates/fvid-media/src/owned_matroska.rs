@@ -113,7 +113,7 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
 }
 
 /// Encode and mux transformed Y4M frames into one FFV1/Matroska stream.
-/// No audio, metadata synthesis, external codecs or retained packet index.
+/// Preserve exact pixel aspect and colour range; no external codecs or packet index.
 /// Output must begin at offset zero. `done` stays false until caller publication.
 pub fn write_y4m_ffv1<W: Write + Seek>(
     source: impl std::io::BufRead,
@@ -144,8 +144,24 @@ pub fn write_y4m_ffv1_controlled<W: Write + Seek>(
                 let height =
                     u32::try_from(header.height).map_err(|_| "Matroska height overflow")?;
                 writer = Some(
-                    PacketWriter::new_ffv1(output.take().unwrap(), width, height)
-                        .map_err(|e| e.to_string())?,
+                    PacketWriter::new_ffv1_with_metadata(
+                        output.take().unwrap(),
+                        width,
+                        height,
+                        Some(&VideoMetadata {
+                            pixel_aspect: header.pixel_aspect()?,
+                            colour: Some(ColourDescription {
+                                primaries: 0,
+                                transfer: 0,
+                                matrix: 6,
+                                full_range: header.full_range()?,
+                            }),
+                            ..Default::default()
+                        }),
+                        0,
+                        0,
+                    )
+                    .map_err(|e| e.to_string())?,
                 );
             }
             let writer = writer.as_mut().unwrap();
@@ -183,7 +199,8 @@ impl Drop for Temporary {
 /// Export owned progressive Y4M transforms to FFV1 in `.mkv`. No overwrite:
 /// a same-directory temporary file is synced, then linked atomically. Failure
 /// or cancellation removes the temporary; done is emitted only after linking.
-/// This video-only API declares coded geometry without importing Y4M tags.
+/// This video-only API preserves Y4M aspect and colour range. The matrix follows
+/// the native Y4M converter (BT.601); no primaries/transfer or HDR are inferred.
 pub fn export_y4m_ffv1(
     source: &std::path::Path,
     destination: &std::path::Path,

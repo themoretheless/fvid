@@ -139,6 +139,48 @@ impl Header {
         }
         Ok([n / a, d / a])
     }
+    /// Y4M's 0:0 aspect is unspecified and defaults to square pixels.
+    pub fn pixel_aspect(&self) -> Result<(u32, u32)> {
+        let mut aspect = None;
+        for token in &self.tokens {
+            if let Some(value) = token.strip_prefix('A') {
+                if aspect.is_some() {
+                    return Err(invalid("duplicate pixel aspect"));
+                }
+                let (n, d) = value
+                    .split_once(':')
+                    .ok_or_else(|| invalid("invalid pixel aspect"))?;
+                let n = n
+                    .parse::<u32>()
+                    .map_err(|_| invalid("invalid pixel aspect"))?;
+                let d = d
+                    .parse::<u32>()
+                    .map_err(|_| invalid("invalid pixel aspect"))?;
+                aspect = Some(match (n, d) {
+                    (0, 0) => (1, 1),
+                    (0, _) | (_, 0) => return Err(invalid("invalid pixel aspect")),
+                    pair => pair,
+                });
+            }
+        }
+        Ok(aspect.unwrap_or((1, 1)))
+    }
+    pub fn full_range(&self) -> Result<bool> {
+        let mut range = None;
+        for token in &self.tokens {
+            if let Some(value) = token.strip_prefix("XCOLORRANGE=") {
+                if range.is_some() {
+                    return Err(invalid("duplicate Y4M colour range"));
+                }
+                range = Some(match value {
+                    "FULL" => true,
+                    "LIMITED" => false,
+                    _ => return Err(invalid("invalid Y4M colour range")),
+                });
+            }
+        }
+        Ok(range.unwrap_or(false))
+    }
     pub fn depth(&self) -> u8 {
         self.tokens
             .iter()
