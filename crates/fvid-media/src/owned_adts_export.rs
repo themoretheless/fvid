@@ -112,7 +112,7 @@ impl Drop for Spool {
         let _ = std::fs::remove_dir_all(&self.0);
     }
 }
-struct PcmSpool {
+pub(crate) struct PcmSpool {
     output: BufWriter<File>,
     bytes: u64,
 }
@@ -156,6 +156,15 @@ pub(crate) fn apply(
         )
     });
     let spool = decode_to_wave(source, prefix, options)?;
+    export_spool(spool, destination, transform, options)
+}
+
+pub(crate) fn export_spool(
+    spool: DecodedSpool,
+    destination: &Path,
+    transform: AudioDecodeTransform,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
     let base = spool.progress;
     let original = options.progress.clone();
     let mut pcm_options = options.clone();
@@ -207,14 +216,35 @@ pub(crate) fn decode_to_wave(
         .map_err(|e| e.to_string())?
         .channel_mask();
     drop(reader);
+    spool_decoded(
+        config.sample_rate,
+        config.channels,
+        mask,
+        options,
+        |writer, options| {
+            crate::owned_aac::decode_adts_pcm(
+                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+                writer,
+                interval,
+                options,
+            )
+            .map_err(|e| e.to_string())
+        },
+    )
+}
+
+pub(crate) fn spool_decoded(
+    rate: u32,
+    channels: u16,
+    mask: u32,
+    options: &CopyOptions,
+    decode: impl FnOnce(&mut PcmSpool, &CopyOptions) -> Result<crate::owned_aac::AdtsPcmStats>,
+) -> Result<DecodedSpool> {
     let spool = Spool::create()?;
     let wave = spool.0.join("decoded.wav");
     let mut file = File::create(&wave).map_err(|e| e.to_string())?;
     file.write_all(&crate::owned_wav::float_wav_header_with_mask(
-        config.sample_rate,
-        config.channels,
-        0,
-        mask,
+        rate, channels, 0, mask,
     )?)
     .map_err(|e| e.to_string())?;
     let mut writer = PcmSpool {
@@ -239,20 +269,10 @@ pub(crate) fn decode_to_wave(
             hook.emit(event);
         }
     }));
-    let decoded = crate::owned_aac::decode_adts_pcm(
-        BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        &mut writer,
-        interval,
-        &decode_options,
-    )
-    .map_err(|e| e.to_string())?;
+    let decoded = decode(&mut writer, &decode_options)?;
     writer.flush().map_err(|e| e.to_string())?;
-    let header = crate::owned_wav::float_wav_header_with_mask(
-        config.sample_rate,
-        config.channels,
-        decoded.sample_frames,
-        mask,
-    )?;
+    let header =
+        crate::owned_wav::float_wav_header_with_mask(rate, channels, decoded.sample_frames, mask)?;
     writer
         .output
         .seek(SeekFrom::Start(0))
