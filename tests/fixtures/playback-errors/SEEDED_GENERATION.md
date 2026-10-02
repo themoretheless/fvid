@@ -114,3 +114,11 @@ Y4M integration tests cover 54 layout/depth/option combinations, geometry order,
 malformed-storage atomicity and public dispatch. Unsupported options still reject
 owned admission. The previous generic unsupported-option test now uses unsharp,
 as negate has an acceptance path rather than a refusal expectation.
+
+Average blur and box blur now share library-owned implementations with the
+frontend, using a common GeometryFrame storage type. Owned Y4M decode applies
+these filters after geometry in the existing avgblur -> boxblur -> negate order.
+The integration suite checks nine depth/filter compositions and public dispatch;
+existing standalone filter tests retain independent known-pixel and direct-sum
+expectations, invalid-storage atomicity, parameter validation and CLI intervals.
+Explicit reference benchmarks preserve their complete external comparison matrix.

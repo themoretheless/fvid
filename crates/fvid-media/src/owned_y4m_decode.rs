@@ -31,9 +31,17 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
 }
 fn supported_request(transform: &DecodeTransform) -> bool {
     transform
-        .negate
+        .avgblur
         .as_deref()
-        .is_none_or(|args| crate::owned_negate::Negate::parse(args).is_ok())
+        .is_none_or(|args| crate::owned_avgblur::AverageBlur::parse(args).is_ok())
+        && transform
+            .boxblur
+            .as_deref()
+            .is_none_or(|args| crate::owned_boxblur::BoxBlur::parse(args).is_ok())
+        && transform
+            .negate
+            .as_deref()
+            .is_none_or(|args| crate::owned_negate::Negate::parse(args).is_ok())
         && transform
             .input_format
             .as_deref()
@@ -45,6 +53,8 @@ fn supported_request(transform: &DecodeTransform) -> bool {
                 transpose: transform.transpose,
                 pad: transform.pad,
                 negate: transform.negate.clone(),
+                avgblur: transform.avgblur.clone(),
+                boxblur: transform.boxblur.clone(),
                 horizontal_flip: transform.horizontal_flip,
                 vertical_flip: transform.vertical_flip,
                 interval: transform.interval,
@@ -160,10 +170,52 @@ pub fn transform_frame_requested(
         transform.pad,
         &mut output,
     )?;
-    if let Some(args) = transform.negate.as_deref() {
-        crate::owned_negate::Negate::parse(args)?.apply(&mut output, header.depth())?;
-    }
+    apply_pixel_filters(header, transform, &mut output)?;
     Ok(output)
+}
+fn apply_pixel_filters(
+    header: &Header,
+    transform: &DecodeTransform,
+    output: &mut Vec<u8>,
+) -> Result<()> {
+    if transform.avgblur.is_some() || transform.boxblur.is_some() {
+        let (crop, _) = crop_geometry(header, transform.crop)?;
+        let (width, height, _) = output_geometry(
+            header,
+            crop,
+            transform.scale,
+            transform.transpose,
+            transform.pad,
+        )?;
+        let (sx, sy) = header.format.subsampling();
+        let subsampling = if transform.transpose.is_some() {
+            [sy, sx]
+        } else {
+            [sx, sy]
+        };
+        let mut frame = crate::owned_frame::GeometryFrame {
+            width,
+            height,
+            subsampling: Some(subsampling),
+            data: std::mem::take(output),
+        };
+        let result: Result<()> = (|| {
+            if let Some(args) = transform.avgblur.as_deref() {
+                crate::owned_avgblur::AverageBlur::parse(args)?
+                    .apply(&mut frame, header.depth())?;
+            }
+            if let Some(args) = transform.boxblur.as_deref() {
+                crate::owned_boxblur::BoxBlur::parse(args)?.apply(&mut frame, header.depth())?;
+            }
+            Ok(())
+        })();
+        *output = frame.data;
+        result?;
+    }
+    if let Some(args) = transform.negate.as_deref() {
+        crate::owned_negate::Negate::parse(args)?.apply(output, header.depth())?;
+    }
+    Ok(())
 }
 /// Apply crop and reflections to each plane, keeping multibyte samples intact.
 pub fn transform_frame(
@@ -327,7 +379,9 @@ pub fn decode_reader_transformed(
         || transform.scale.is_some()
         || transform.transpose.is_some()
         || transform.pad.is_some()
-        || transform.negate.is_some();
+        || transform.negate.is_some()
+        || transform.avgblur.is_some()
+        || transform.boxblur.is_some();
     let mut input = Vec::new();
     if geometry {
         input
@@ -387,9 +441,7 @@ pub fn decode_reader_transformed(
                     transform.pad,
                     &mut output,
                 )?;
-                if let Some(args) = transform.negate.as_deref() {
-                    crate::owned_negate::Negate::parse(args)?.apply(&mut output, header.depth())?;
-                }
+                apply_pixel_filters(&header, transform, &mut output)?;
                 std::hint::black_box(&output);
             }
             frames = frames.checked_add(1).ok_or("Y4M frame count overflow")?;

@@ -46,17 +46,7 @@ pub struct VideoGeometry {
     pub pad: Option<[usize; 4]>,
 }
 
-#[derive(Debug)]
-pub struct GeometryFrame {
-    pub width: usize,
-    pub height: usize,
-    /// Horizontal/vertical luma samples per chroma sample; None for RGB.
-    /// A quarter-turn swaps the axes (4:2:2 becomes 4:4:0).
-    pub subsampling: Option<[usize; 2]>,
-    /// Packed RGB or packed Y, Cb, Cr. Sample depth is unchanged;
-    /// chroma axes follow `subsampling`.
-    pub data: Vec<u8>,
-}
+pub use fvid_media::owned_frame::GeometryFrame;
 
 impl VideoGeometry {
     pub fn is_identity(&self) -> bool {

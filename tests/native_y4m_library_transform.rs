@@ -692,3 +692,75 @@ fn owned_negate_preserves_depth_and_runs_after_geometry() {
     assert_eq!(stats.backend, "owned Y4M planar decode");
     assert_eq!(stats.video_frames, 3);
 }
+
+#[test]
+fn library_blur_composition_preserves_frontend_order_and_public_dispatch() {
+    for depth in [8u8, 10, 16] {
+        let chroma = if depth == 8 {
+            "420".into()
+        } else {
+            format!("420p{depth}")
+        };
+        let header = fvid_media::owned_y4m::Header::parse(
+            format!("YUV4MPEG2 W8 H6 F30:1 C{chroma}\n").as_bytes(),
+        )
+        .unwrap();
+        let step = if depth == 8 { 1 } else { 2 };
+        let input: Vec<u8> = (0..header.frame_len().unwrap() / step)
+            .flat_map(|i| {
+                let v = (i * 97 % (1usize << depth)) as u16;
+                if step == 1 {
+                    vec![v as u8]
+                } else {
+                    v.to_le_bytes().to_vec()
+                }
+            })
+            .collect();
+        for (avg, boxblur) in [
+            (Some("2:7:1"), None),
+            (None, Some("1:2")),
+            (Some("1:7:2"), Some("1:2")),
+        ] {
+            let t = DecodeTransform {
+                avgblur: avg.map(str::to_owned),
+                boxblur: boxblur.map(str::to_owned),
+                negate: Some("".into()),
+                horizontal_flip: true,
+                ..Default::default()
+            };
+            let actual =
+                fvid_media::owned_y4m_decode::transform_frame_requested(&header, &input, &t)
+                    .unwrap();
+            let pixels =
+                fvid_media::owned_y4m_decode::transform_frame(&header, &input, None, true, false)
+                    .unwrap();
+            let mut expected = fvid::native_geometry::GeometryFrame {
+                width: 8,
+                height: 6,
+                subsampling: Some([2, 2]),
+                data: pixels,
+            };
+            fvid::native_pixels::PixelFilters::from_request(&t)
+                .unwrap()
+                .apply(&mut expected, depth)
+                .unwrap();
+            assert_eq!(actual, expected.data);
+        }
+    }
+    let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/wave-probe-info.y4m");
+    for t in [
+        DecodeTransform {
+            avgblur: Some("".into()),
+            ..Default::default()
+        },
+        DecodeTransform {
+            boxblur: Some("1:2".into()),
+            ..Default::default()
+        },
+    ] {
+        let stats = fvid_media::decode_video_transformed(&source, t).unwrap();
+        assert_eq!(stats.backend, "owned Y4M planar decode");
+        assert_eq!(stats.video_frames, 3);
+    }
+}
