@@ -188,6 +188,35 @@ impl LoudnessMeter {
                 .then(|| -0.691 + 10.0 * (gated_sum / gated_count as f64).log10()),
         }
     }
+    /// Compatibility measurement for normalizers whose gain decisions use a
+    /// 0.1 LU histogram (bin centers), rather than the exact accumulated power.
+    /// The ordinary report retains its higher precision and existing semantics.
+    pub(crate) fn histogram_integrated_lufs(&self) -> Option<f64> {
+        let mut count = 0u64;
+        let mut sum = 0.;
+        let power = |level: i32| {
+            let center = level.div_euclid(10).min(299) as f64 / 10. + 0.05;
+            10f64.powf((center + 0.691) / 10.)
+        };
+        for (&level, &(n, _)) in &self.energies {
+            count += n;
+            sum += n as f64 * power(level);
+        }
+        if count == 0 {
+            return None;
+        }
+        let threshold = sum / count as f64 / 10.;
+        let mut kept = 0u64;
+        let mut energy = 0.;
+        for (&level, &(n, _)) in &self.energies {
+            let value = power(level);
+            if value >= threshold {
+                kept += n;
+                energy += n as f64 * value;
+            }
+        }
+        (kept > 0).then(|| -0.691 + 10. * (energy / kept as f64).log10())
+    }
 }
 #[cfg(test)]
 mod tests {

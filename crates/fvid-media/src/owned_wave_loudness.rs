@@ -38,7 +38,7 @@ fn check(options: &CopyOptions) -> Result<()> {
     }
     crate::owned_budget::check_rss_budget(options)
 }
-fn weights(info: &crate::owned_wave_inspect::WaveInfo) -> Result<Vec<f64>> {
+pub(crate) fn weights(info: &crate::owned_wave_inspect::WaveInfo) -> Result<Vec<f64>> {
     let mask = if info.channel_mask == 0 {
         match info.channels {
             1 => 4,
