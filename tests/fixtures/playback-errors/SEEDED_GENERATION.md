@@ -550,3 +550,5 @@ The synthetic Matroska PCM signed-padding and gap external presentation-clock co
 External ALAC MP4 fixture and Matroska PCM comparisons run only in `ffmpeg_alac_reference`. Ordinary ALAC tests retain owned decoding, intervals, gain, mixing, damaged input and signed-padding checks without invoking FFmpeg.
 
 Synthetic Y4M 420/422/444 external FFV1 pixel and filter-chain comparisons run only in `ffmpeg_y4m_lossless_reference`. Ordinary Y4M lossless tests retain native pixel, clock, aspect, CLI/API, filter and publication checks without FFmpeg.
+
+External MP4 lossless-export video/copied-audio and spatial-transform comparisons run only in `ffmpeg_lossless_export_reference`. Ordinary lossless tests retain owned frame, timing, metadata, CLI/API, crop, plan and publication checks without invoking FFmpeg.

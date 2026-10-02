@@ -175,3 +175,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_y4m_lossless_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_lossless_export_reference"
+harness = false
