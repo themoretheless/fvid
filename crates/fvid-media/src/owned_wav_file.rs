@@ -1,4 +1,4 @@
-//! Direct IEEE float WAV writer (no lavf muxer).
+//! Owned PCM WAV writers, independent of libav.
 type Result<T> = std::result::Result<T, String>;
 use std::io::Write;
 use std::path::Path;
@@ -20,11 +20,12 @@ pub(crate) fn write_wav_f32le_checked<F: FnMut() -> Result<()>>(
     samples: &[f32],
     check: F,
 ) -> Result<()> {
-    write_float_wave::<4, _>(
+    write_pcm_wave::<4, _>(
         destination,
         sample_rate,
         channels,
         samples.len(),
+        false,
         samples.iter().map(|sample| sample.to_le_bytes()),
         0,
         &[],
@@ -47,11 +48,12 @@ pub(crate) fn write_wav_f64le_checked<F: FnMut() -> Result<()>>(
     samples: &[f64],
     check: F,
 ) -> Result<()> {
-    write_float_wave::<8, _>(
+    write_pcm_wave::<8, _>(
         destination,
         sample_rate,
         channels,
         samples.len(),
+        false,
         samples.iter().map(|sample| sample.to_le_bytes()),
         0,
         &[],
@@ -67,11 +69,12 @@ pub(crate) fn write_wav_f32le_with_side_data_checked<F: FnMut() -> Result<()>>(
     info_chunks: &[u8],
     check: F,
 ) -> Result<()> {
-    write_float_wave::<4, _>(
+    write_pcm_wave::<4, _>(
         destination,
         sample_rate,
         channels,
         samples.len(),
+        false,
         samples.iter().map(|s| s.to_le_bytes()),
         mask,
         info_chunks,
@@ -87,22 +90,62 @@ pub(crate) fn write_wav_f64le_with_side_data_checked<F: FnMut() -> Result<()>>(
     info_chunks: &[u8],
     check: F,
 ) -> Result<()> {
-    write_float_wave::<8, _>(
+    write_pcm_wave::<8, _>(
         destination,
         sample_rate,
         channels,
         samples.len(),
+        false,
         samples.iter().map(|s| s.to_le_bytes()),
         mask,
         info_chunks,
         check,
     )
 }
-fn write_float_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
+
+/// Write packed little-endian integer PCM without changing sample bits.
+/// Eight-bit samples are unsigned; 16/24/32-bit samples are signed.
+pub fn write_wav_integer_le(
+    destination: &Path,
+    sample_rate: i32,
+    channels: i32,
+    bits: u16,
+    samples: &[u8],
+    mask: u32,
+) -> Result<()> {
+    macro_rules! write {
+        ($width:literal) => {{
+            if samples.len() % $width != 0 {
+                return Err("incomplete PCM sample".into());
+            }
+            write_pcm_wave::<$width, _>(
+                destination,
+                sample_rate,
+                channels,
+                samples.len() / $width,
+                true,
+                samples.chunks_exact($width).map(|s| s.try_into().unwrap()),
+                mask,
+                &[],
+                || Ok(()),
+            )
+        }};
+    }
+    match bits {
+        8 => write!(1),
+        16 => write!(2),
+        24 => write!(3),
+        32 => write!(4),
+        _ => Err("unsupported integer WAVE precision".into()),
+    }
+}
+
+fn write_pcm_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
     destination: &Path,
     sample_rate: i32,
     channels: i32,
     count: usize,
+    integer: bool,
     samples: impl Iterator<Item = [u8; WIDTH]>,
     mask: u32,
     info_chunks: &[u8],
@@ -125,9 +168,10 @@ fn write_float_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
         return Err("invalid WAV channel mask".into());
     }
     let extensible = mask != 0 || (WIDTH == 8 && channels > 2);
+    let padding = data_bytes % 2;
     let header_bytes = if extensible { 80u64 } else { 44 };
     let riff_size = data_bytes
-        .checked_add(header_bytes - 8)
+        .checked_add(header_bytes - 8 + padding)
         .and_then(|n| n.checked_add(info_chunks.len() as u64))
         .ok_or("wav riff size overflow")?;
     if riff_size > u32::MAX as u64 || data_bytes > u32::MAX as u64 {
@@ -172,7 +216,7 @@ fn write_float_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
         header[8..12].copy_from_slice(b"WAVE");
         header[12..16].copy_from_slice(b"fmt ");
         header[16..20].copy_from_slice(&16u32.to_le_bytes());
-        header[20..22].copy_from_slice(&3u16.to_le_bytes()); // IEEE float
+        header[20..22].copy_from_slice(&(if integer { 1u16 } else { 3 }).to_le_bytes());
         header[22..24].copy_from_slice(&(channels as u16).to_le_bytes());
         header[24..28].copy_from_slice(&(sample_rate as u32).to_le_bytes());
         header[28..32].copy_from_slice(&byte_rate.to_le_bytes());
@@ -181,12 +225,13 @@ fn write_float_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
         header[36..40].copy_from_slice(b"data");
         header[40..44].copy_from_slice(&(data_bytes as u32).to_le_bytes());
         let mut header = if extensible {
-            crate::owned_wav::float_wav_header_with_precision(
+            crate::owned_wav::pcm_wav_header(
                 sample_rate as u32,
                 channels as u16,
                 count as u64 / channels as u64,
                 mask,
                 (WIDTH * 8) as u16,
+                integer,
             )?
         } else {
             header.to_vec()
@@ -201,6 +246,9 @@ fn write_float_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
             output.write_all(&sample).map_err(|e| e.to_string())?;
         }
         check()?;
+        if padding != 0 {
+            output.write_all(&[0]).map_err(|e| e.to_string())?;
+        }
         output.write_all(info_chunks).map_err(|e| e.to_string())?;
         output.flush().map_err(|e| e.to_string())?;
         Ok(())
@@ -279,6 +327,48 @@ mod double_tests {
             assert_eq!(actual, sample.to_le_bytes());
         }
         assert!(write_wav_f64le(&path, 48000, 2, &samples).is_err());
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod integer_tests {
+    use super::*;
+    #[test]
+    fn integer_precision_padding_and_masks_roundtrip() {
+        let dir = std::env::temp_dir().join(format!("fvid-integer-writer-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        for bits in [8u16, 16, 24, 32] {
+            for mask in [0, 4] {
+                let path = dir.join(format!("{bits}-{mask}.wav"));
+                let _ = std::fs::remove_file(&path);
+                let payload: Vec<u8> = (0..3 * usize::from(bits / 8))
+                    .map(|i| (i * 73) as u8)
+                    .collect();
+                write_wav_integer_le(&path, 48000, 1, bits, &payload, mask).unwrap();
+                let raw = std::fs::read(&path).unwrap();
+                let mut input = std::io::Cursor::new(&raw);
+                let info = crate::owned_wave_inspect::inspect(&mut input, None).unwrap();
+                assert!(!info.float);
+                assert_eq!(info.bits_per_sample, bits);
+                assert_eq!(info.valid_bits, bits);
+                assert_eq!(info.channel_mask, mask);
+                assert_eq!(info.sample_frames, 3);
+                assert_eq!(
+                    &raw[info.data_offset as usize..info.data_offset as usize + payload.len()],
+                    payload
+                );
+                assert_eq!(raw.len() % 2, 0);
+                assert_eq!(
+                    u32::from_le_bytes(raw[4..8].try_into().unwrap()) as usize + 8,
+                    raw.len()
+                );
+                assert!(write_wav_integer_le(&path, 48000, 1, bits, &payload, mask).is_err());
+            }
+        }
+        let path = dir.join("invalid.wav");
+        assert!(write_wav_integer_le(&path, 48000, 2, 16, &[1, 2], 0).is_err());
+        assert!(!path.exists());
         std::fs::remove_dir_all(dir).unwrap();
     }
 }

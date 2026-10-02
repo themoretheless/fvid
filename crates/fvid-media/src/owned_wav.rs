@@ -1,4 +1,4 @@
-//! Owned WAVE extensible float-PCM headers, independent of libav.
+//! Owned WAVE extensible PCM headers, independent of libav.
 fn error(message: &str) -> String {
     message.into()
 }
@@ -30,8 +30,22 @@ pub fn float_wav_header_with_precision(
     mask: u32,
     bits: u16,
 ) -> Result<Vec<u8>, String> {
-    if !matches!(bits, 32 | 64) {
-        return Err(error("unsupported float WAVE precision"));
+    pcm_wav_header(sample_rate, channels, sample_frames, mask, bits, false)
+}
+pub(crate) fn pcm_wav_header(
+    sample_rate: u32,
+    channels: u16,
+    sample_frames: u64,
+    mask: u32,
+    bits: u16,
+    integer: bool,
+) -> Result<Vec<u8>, String> {
+    if !(if integer {
+        matches!(bits, 8 | 16 | 24 | 32)
+    } else {
+        matches!(bits, 32 | 64)
+    }) {
+        return Err(error("unsupported WAVE precision"));
     }
     if !(1..=64).contains(&channels) || (mask != 0 && mask.count_ones() != u32::from(channels)) {
         return Err(error("invalid WAV channel mask"));
@@ -60,7 +74,22 @@ pub fn float_wav_header_with_precision(
     header.extend_from_slice(&bits.to_le_bytes());
     header.extend_from_slice(&mask.to_le_bytes());
     header.extend_from_slice(&[
-        3, 0, 0, 0, 0, 0, 0x10, 0, 0x80, 0, 0, 0xaa, 0, 0x38, 0x9b, 0x71,
+        if integer { 1 } else { 3 },
+        0,
+        0,
+        0,
+        0,
+        0,
+        0x10,
+        0,
+        0x80,
+        0,
+        0,
+        0xaa,
+        0,
+        0x38,
+        0x9b,
+        0x71,
     ]);
     header.extend_from_slice(b"fact");
     header.extend_from_slice(&4u32.to_le_bytes());
