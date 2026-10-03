@@ -689,13 +689,13 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         if args.len() < 3 {
             return Err("usage: fvid media export-y4m INPUT OUTPUT.y4m [--crop X:Y:W:H] [--hflip] [--vflip] [--transpose MODE] [--pad W:H:X:Y] [--scale W:H] [--from SECONDS --to SECONDS]".into());
         }
-        let mut geometry_args = vec!["decode".to_owned()];
+        let mut geometry_args = vec!["decode".to_owned(), args[1].clone()];
         geometry_args.extend_from_slice(&args[3..]);
         let (geometry_args, mut filters) = pixel_decode_args(&geometry_args)?;
         filters.canonicalize_option_order();
         let (geometry_args, geometry) = geometry_decode_args(&geometry_args)?;
         let (mut from, mut to) = (None, None);
-        let mut options = geometry_args[1..].iter();
+        let mut options = geometry_args[2..].iter();
         while let Some(option) = options.next() {
             let slot = match option.as_str() {
                 "--from" => &mut from,
@@ -955,6 +955,20 @@ fn pixel_decode_args(
             }
             result.push(arg.clone());
             result.push(value.clone());
+            continue;
+        }
+        if arg == "--gblur" {
+            let value = args.next().ok_or("missing gblur args")?;
+            let eligible = match result.get(1) {
+                Some(path) => fvid::native_lossless::eligible(std::path::Path::new(path))?,
+                None => false,
+            };
+            if eligible {
+                if filters.gblur.is_some() { return Err("duplicate gblur".into()); }
+                filters.gblur = Some(fvid_media::owned_gblur::GaussianBlur::parse(value)?);
+                continue;
+            }
+            result.push(arg.clone()); result.push(value.clone());
             continue;
         }
         if arg == "--avgblur" {
@@ -4691,6 +4705,7 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--eq" => &mut transform.eq,
             "--unsharp" => &mut transform.unsharp,
             "--hue" => &mut transform.hue,
+            "--gblur" => &mut transform.gblur,
             "--avgblur" => &mut transform.avgblur,
             "--boxblur" => &mut transform.boxblur,
             "--negate" => &mut transform.negate,

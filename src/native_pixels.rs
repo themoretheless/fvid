@@ -26,7 +26,7 @@ impl Negate {
 include!("../crates/fvid-media/src/owned_gradient_impl.rs");
 
 /// Native filter order matches the public media request, independent of CLI
-/// flag order: equalization, unsharp, hue, average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, pixelize, dilation, erosion, chroma shift, plane shuffle.
+/// flag order: equalization, unsharp, hue, Gaussian blur, average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, pixelize, dilation, erosion, chroma shift, plane shuffle.
 #[derive(Default)]
 pub struct PixelFilters {
     pub unsharp: Option<fvid_media::owned_unsharp::Unsharp>,
@@ -34,6 +34,7 @@ pub struct PixelFilters {
     pub hue: Option<fvid_media::owned_hue::Hue>,
     pub pixelize: Option<crate::native_pixelize::Pixelize>,
     pub boxblur: Option<crate::native_boxblur::BoxBlur>,
+    pub gblur: Option<fvid_media::owned_gblur::GaussianBlur>,
     pub avgblur: Option<crate::native_avgblur::AverageBlur>,
     pub negate: Option<Negate>,
     pub chromashift: Option<crate::native_chromashift::ChromaShift>,
@@ -68,6 +69,7 @@ impl PixelFilters {
                 .as_deref()
                 .map(crate::native_boxblur::BoxBlur::parse)
                 .transpose()?,
+            gblur: request.gblur.as_deref().map(fvid_media::owned_gblur::GaussianBlur::parse).transpose().map_err(|e| invalid(&e))?,
             avgblur: request
                 .avgblur
                 .as_deref()
@@ -118,6 +120,7 @@ impl PixelFilters {
             && self.hue.is_none()
             && self.pixelize.is_none()
             && self.boxblur.is_none()
+            && self.gblur.is_none()
             && self.avgblur.is_none()
             && self.chromashift.is_none()
             && self.negate.is_none()
@@ -134,6 +137,9 @@ impl PixelFilters {
         }
         if let Some(filter) = self.hue {
             filter.apply(frame, depth).map_err(|error| invalid(&error))?;
+        }
+        if let Some(filter) = self.gblur {
+            filter.apply(frame, depth).map_err(|e| invalid(&e))?;
         }
         if let Some(filter) = self.avgblur {
             filter.apply(frame, depth)?;
