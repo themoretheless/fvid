@@ -5,11 +5,8 @@ use std::io::BufRead;
 
 fn default_policy(options: &fvid_control::CopyOptions) -> bool {
     options.streams.is_empty()
-        && options.max_packets.is_none()
         && options.max_controlled_bytes.is_none()
         && options.max_rss_bytes.is_none()
-        && options.metadata_set.is_empty()
-        && options.metadata_delete.is_empty()
         && options.stream_metadata_set.is_empty()
         && options.stream_metadata_delete.is_empty()
 }
@@ -87,6 +84,7 @@ pub struct SecondaryReader<R> {
     last_target: Option<u64>,
     eof: bool,
     failed: bool,
+    remaining_frames: Option<std::rc::Rc<std::cell::Cell<u64>>>,
 }
 impl<R: BufRead> SecondaryReader<R> {
     pub fn new(mut input: R, primary: &Header) -> Result<Self, String> {
@@ -112,6 +110,7 @@ impl<R: BufRead> SecondaryReader<R> {
             last_target: None,
             eof: false,
             failed: false,
+            remaining_frames: None,
         })
     }
     pub fn frame_at(&mut self, pts_ns: u64) -> Result<Option<&GeometryFrame>, String> {
@@ -145,6 +144,13 @@ impl<R: BufRead> SecondaryReader<R> {
             }
             if marker != b"FRAME\n" && !marker.starts_with(b"FRAME ") {
                 return Err("expected cross-fade Y4M FRAME marker".into());
+            }
+            if let Some(remaining) = &self.remaining_frames {
+                let count = remaining.get();
+                if count == 0 {
+                    return Err("cross-fade input packet count exceeds limit".into());
+                }
+                remaining.set(count - 1);
             }
             let size = self.header.frame_len()?;
             if self.current.is_none() {
@@ -221,17 +227,21 @@ pub fn visit_y4m(
     timeline: FadeTimeline,
     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
 ) -> Result<u64, String> {
-    visit_y4m_counted(main, other, header, timeline, visit).map(|counts| counts.0)
+    visit_y4m_counted(main, other, header, timeline, None, visit).map(|counts| counts.0)
 }
 fn visit_y4m_counted(
     main: impl BufRead,
     other: impl BufRead,
     header: &Header,
     timeline: FadeTimeline,
+    max_packets: Option<u64>,
     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
 ) -> Result<(u64, u64), String> {
     let mut primary = SecondaryReader::new(main, header)?;
     let mut secondary = SecondaryReader::new(other, header)?;
+    let remaining = max_packets.map(|count| std::rc::Rc::new(std::cell::Cell::new(count)));
+    primary.remaining_frames = remaining.clone();
+    secondary.remaining_frames = remaining;
     let rate = header.frame_rate()?;
     if primary.header.frame_rate()? != rate || secondary.header.frame_rate()? != rate {
         return Err("cross-fade inputs require matching frame rates".into());
@@ -313,39 +323,62 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
         }),
         ..Default::default()
     };
-    let mut writer =
-        PacketWriter::new_ffv1_with_metadata(output, width, height, Some(&metadata), 0, 0)
-            .map_err(|e| e.to_string())?;
+    let file_metadata = crate::owned_lossless::metadata(options)?;
+    let mut text_tags = std::collections::BTreeMap::new();
+    for (key, value) in &options.metadata_set {
+        text_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+        if !crate::owned_file_tags::FileTags::supports_key(key) && !value.is_empty() {
+            text_tags.insert(key.to_ascii_uppercase(), value.clone());
+        }
+    }
+    let mut writer = PacketWriter::new_ffv1_with_text_tags(
+        output,
+        width,
+        height,
+        Some(&metadata),
+        0,
+        0,
+        &file_metadata,
+        &text_tags,
+    )
+    .map_err(|e| e.to_string())?;
     let mut event = fvid_control::ProgressEvent {
         packets: 0,
         payload_bytes: 0,
         done: false,
     };
-    let count = visit_y4m_counted(main, other, header, timeline, |frame, pts, duration| {
-        if options
-            .cancel
-            .as_ref()
-            .is_some_and(|flag| flag.is_cancelled())
-        {
-            return Err("operation cancelled".into());
-        }
-        let packet = crate::owned_ffv1_encoder::encode(frame, header.depth())?;
-        if packet.len() > options.max_packet_bytes {
-            return Err("encoded cross-fade packet exceeds byte limit".into());
-        }
-        writer
-            .write_packet(0, pts, duration, true, &packet)
-            .map_err(|e| e.to_string())?;
-        event.packets += 1;
-        event.payload_bytes = event
-            .payload_bytes
-            .checked_add(packet.len() as u64)
-            .ok_or("cross-fade payload count overflow")?;
-        if let Some(progress) = &options.progress {
-            progress.emit(event);
-        }
-        Ok(())
-    })?;
+    let count = visit_y4m_counted(
+        main,
+        other,
+        header,
+        timeline,
+        options.max_packets,
+        |frame, pts, duration| {
+            if options
+                .cancel
+                .as_ref()
+                .is_some_and(|flag| flag.is_cancelled())
+            {
+                return Err("operation cancelled".into());
+            }
+            let packet = crate::owned_ffv1_encoder::encode(frame, header.depth())?;
+            if packet.len() > options.max_packet_bytes {
+                return Err("encoded cross-fade packet exceeds byte limit".into());
+            }
+            writer
+                .write_packet(0, pts, duration, true, &packet)
+                .map_err(|e| e.to_string())?;
+            event.packets += 1;
+            event.payload_bytes = event
+                .payload_bytes
+                .checked_add(packet.len() as u64)
+                .ok_or("cross-fade payload count overflow")?;
+            if let Some(progress) = &options.progress {
+                progress.emit(event);
+            }
+            Ok(())
+        },
+    )?;
     writer.finish().map_err(|e| e.to_string())?;
     Ok((count.0, count.1, event))
 }
@@ -530,6 +563,10 @@ mod tests {
         let observed = successful_events.clone();
         let published = output.clone();
         let successful_options = fvid_control::CopyOptions {
+            metadata_set: vec![
+                ("title".into(), "Synthetic fade".into()),
+                ("custom".into(), "kept".into()),
+            ],
             progress: Some(fvid_control::ProgressHook::new(move |event| {
                 if event.done {
                     assert!(published.is_file());
@@ -558,12 +595,38 @@ mod tests {
         assert_eq!(observed[0].payload_bytes, observed[1].payload_bytes);
         drop(observed);
         let original = std::fs::read(&output).unwrap();
+        let tagged = crate::owned_webm::WebmReader::open(
+            std::io::Cursor::new(&original),
+            Default::default(),
+        )
+        .unwrap();
+        assert_eq!(tagged.tags.title, "Synthetic fade");
+        assert!(original.windows(6).any(|bytes| bytes == b"CUSTOM"));
         assert!(
             export_y4m_ffv1(&main, &other, &output, 0, 500000)
                 .unwrap_err()
                 .contains("already exists")
         );
         assert_eq!(std::fs::read(&output).unwrap(), original);
+        std::fs::remove_file(&output).unwrap();
+        let options = fvid_control::CopyOptions {
+            max_packets: Some(1),
+            ..Default::default()
+        };
+        assert!(
+            crate::xfade_video(&main, &other, &output, "fade", 500000, 0, &options)
+                .unwrap_err()
+                .contains("input packet count exceeds limit")
+        );
+        assert!(!output.exists());
+        let options = fvid_control::CopyOptions {
+            max_packets: Some(2),
+            ..Default::default()
+        };
+        let stats =
+            crate::xfade_video(&main, &other, &output, "fade", 500000, 0, &options).unwrap();
+        assert_eq!(stats.decoded_frames, 2);
+        assert_eq!(stats.video_frames, 1);
         std::fs::remove_file(&output).unwrap();
         let cancelled = fvid_control::CancelFlag::new();
         let hook_flag = cancelled.clone();

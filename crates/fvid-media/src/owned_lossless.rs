@@ -67,7 +67,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         ..Default::default()
     })
 }
-fn metadata(o: &CopyOptions) -> Result<crate::owned_matroska::FileMetadata, String> {
+pub(crate) fn metadata(o: &CopyOptions) -> Result<crate::owned_matroska::FileMetadata, String> {
     if o.metadata_set.len() + o.metadata_delete.len() > 64 {
         return Err("at most 64 container metadata mutations".into());
     }
