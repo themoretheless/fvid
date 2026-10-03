@@ -2767,13 +2767,7 @@ impl Player {
                 }
     }
 
-    fn change_spherical(&mut self, cycle: bool) {
-        if cycle {
-            self.spherical.projection = fvid_media::cycle_spherical_projection(self.spherical.projection);
-            self.spherical.enabled = true;
-        } else {
-            self.spherical.enabled = !self.spherical.enabled;
-        }
+    fn redraw_view(&mut self) {
         if let Some(mut frame) = self.presented_source.clone() {
             let result = stereo_frame(&mut frame, self.stereo3d)
                 .and_then(|()| spherical_frame(&mut frame, self.spherical));
@@ -2786,6 +2780,23 @@ impl Player {
                 Err(error) => self.error = Some(error.to_string()),
             }
         }
+    }
+
+    fn look_spherical(&mut self, yaw: i32, pitch: i32, roll: i32) {
+        self.spherical.yaw = ((i64::from(self.spherical.yaw) + i64::from(yaw) + 180_000).rem_euclid(360_000) - 180_000) as i32;
+        self.spherical.pitch = (i64::from(self.spherical.pitch) + i64::from(pitch)).clamp(-90_000, 90_000) as i32;
+        self.spherical.roll = ((i64::from(self.spherical.roll) + i64::from(roll) + 180_000).rem_euclid(360_000) - 180_000) as i32;
+        self.redraw_view();
+    }
+
+    fn change_spherical(&mut self, cycle: bool) {
+        if cycle {
+            self.spherical.projection = fvid_media::cycle_spherical_projection(self.spherical.projection);
+            self.spherical.enabled = true;
+        } else {
+            self.spherical.enabled = !self.spherical.enabled;
+        }
+        self.redraw_view();
         self.show_osd(if self.spherical.enabled {
             fvid_media::format_spherical_projection_osd(self.spherical.projection)
         } else { "360° Off".into() });
@@ -5152,6 +5163,23 @@ fn listed(
 /// the picture along VLC's Zoom menu; a picture a magnification has grown past
 /// the frame can then be dragged to the part of it the frame cannot show. `i`
 /// opens the panel of what the item on screen is, and closes it again.
+/// Consume view arrows before transport controls can interpret them as seeks.
+fn spherical_look_pressed(ctx: &egui::Context, enabled: bool) -> Option<(i32, i32, i32)> {
+    if !enabled { return None; }
+    ctx.input_mut(|input| {
+        let modifiers = input.modifiers;
+        if modifiers.ctrl || modifiers.command || modifiers.alt { return None; }
+        let left = input.consume_key(modifiers, egui::Key::ArrowLeft);
+        let right = input.consume_key(modifiers, egui::Key::ArrowRight);
+        let up = input.consume_key(modifiers, egui::Key::ArrowUp);
+        let down = input.consume_key(modifiers, egui::Key::ArrowDown);
+        if !(left || right || up || down) { return None; }
+        let horizontal = (i32::from(right) - i32::from(left)) * 5_000;
+        let vertical = (i32::from(up) - i32::from(down)) * 5_000;
+        Some(if modifiers.shift { (0, 0, horizontal) } else { (horizontal, vertical, 0) })
+    })
+}
+
 fn controls_pressed(ctx: &egui::Context) -> Vec<Control> {
     use egui::Key;
     let mut out = Vec::new();
@@ -5360,6 +5388,9 @@ impl eframe::App for Player {
         }
         if ctx.input(|i| i.key_pressed(egui::Key::O) && i.modifiers.command) {
             self.pick_file(if ctx.input(|i| i.modifiers.shift) { Pick::Folder } else { Pick::Item });
+        }
+        if let Some((yaw, pitch, roll)) = spherical_look_pressed(ctx, self.spherical.enabled) {
+            self.look_spherical(yaw, pitch, roll);
         }
         for control in controls_pressed(ctx) {
             self.apply(control);
@@ -6229,6 +6260,44 @@ mod tests {
                 .map(|word| word.to_string())
                 .collect::<Vec<_>>(),
         )
+    }
+
+    #[test]
+    fn spherical_arrow_is_consumed_before_transport_seek() {
+        use eframe::egui::{self, Event, Key, Modifiers, RawInput};
+        for enabled in [false, true] {
+            let ctx = egui::Context::default();
+            let input = RawInput { events: vec![Event::Key {
+                key: Key::ArrowRight, physical_key: None, pressed: true, repeat: false, modifiers: Modifiers::NONE,
+            }], ..Default::default() };
+            let mut output = ctx.run_ui(input, |ui| {
+                let look = super::spherical_look_pressed(ui.ctx(), enabled);
+                assert_eq!(look, enabled.then_some((5000,0,0)));
+                let transport = super::controls_pressed(ui.ctx());
+                assert_eq!(transport.iter().any(|c| matches!(c, Control::Jump(_, true))), !enabled);
+            });
+            output.textures_delta.clear();
+        }
+    }
+
+    #[test]
+    fn spherical_look_on_pause_preserves_clock_and_bounds_angles() {
+        let rgb: Vec<u8> = (0..96).map(|n| (n * 2) as u8).collect();
+        let frame = Frame { pixels: Pixels::Rgb(rgb), dimensions: [8,4], period: Duration::from_millis(17),
+            interval: Some((2,3,60)), pts: Some((2,60)), generation: 7, serial: 9 };
+        let mut player = Player { paused: true, presented_source: Some(frame.clone()), presented: Some(frame), ..Default::default() };
+        player.spherical.enabled = true;
+        player.redraw_view();
+        let before = super::display_rgb(player.presented.as_ref().unwrap()).unwrap();
+        player.look_spherical(90_000, 0, 0);
+        let after = super::display_rgb(player.presented.as_ref().unwrap()).unwrap();
+        assert_ne!(before, after);
+        assert_eq!(player.presented.as_ref().unwrap().pts, Some((2,60)));
+        assert!(player.paused);
+        player.look_spherical(i32::MAX, i32::MAX, i32::MIN);
+        assert!((-180_000..180_000).contains(&player.spherical.yaw));
+        assert!((-180_000..180_000).contains(&player.spherical.roll));
+        assert_eq!(player.spherical.pitch, 90_000);
     }
 
     #[test]
