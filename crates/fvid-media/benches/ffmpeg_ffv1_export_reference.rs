@@ -381,6 +381,45 @@ fn main() {
         "Named synthetic video"
     );
     std::fs::remove_file(output).unwrap();
+    let chapter_output = std::env::temp_dir().join(format!(
+        "fvid-ffv1-chapters-reference-{}.mkv",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_file(&chapter_output);
+    fvid_media::transcode_lossless(
+        &root.join("ffv1-chapters.mkv"),
+        &chapter_output,
+        fvid_media_info::LosslessTransform {
+            interval: Some((60_000, 180_000)),
+            ..Default::default()
+        },
+        &CopyOptions::default(),
+    )
+    .unwrap();
+    let result = Command::new(&ffprobe)
+        .args(["-v", "error", "-show_chapters", "-of", "json"])
+        .arg(&chapter_output)
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let chapters: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    let chapters = chapters["chapters"].as_array().unwrap();
+    assert_eq!(chapters.len(), 3);
+    for (chapter, start, title) in [
+        (0, "0.000000", "First"),
+        (1, "0.040000", "Second"),
+        (2, "0.090000", "Point"),
+    ] {
+        assert_eq!(chapters[chapter]["start_time"], start);
+        assert_eq!(chapters[chapter]["tags"]["title"], title);
+    }
+    assert_eq!(chapters[0]["end_time"], "0.040000");
+    assert_eq!(chapters[1]["end_time"], "0.120000");
+    std::fs::remove_file(chapter_output).unwrap();
     println!(
         "owned FFV1 export: 20 pixel/timing references and independent file/track metadata checks passed"
     );

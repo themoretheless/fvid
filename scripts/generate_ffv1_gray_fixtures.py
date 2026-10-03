@@ -77,17 +77,18 @@ fn main() {
                    (8, 40_000_000, "ffv1-six-frames.mkv"),
                    (8, 40_000_000, "ffv1-custom-tags.mkv"),
                    (8, 40_000_000, "ffv1-track-tags.mkv"),
-                   (8, 40_000_000, "ffv1-track-description.mkv")])
+                   (8, 40_000_000, "ffv1-track-description.mkv"),
+                   (8, 40_000_000, "ffv1-chapters.mkv")])
     for depth, frame_duration, name in videos:
         header = element(0x1A45DFA3, uint(0x4286, 1) + uint(0x42F7, 1) + uint(0x42F2, 4) + uint(0x42F3, 8) + element(0x4282, b"matroska") + uint(0x4287, 4) + uint(0x4285, 2))
-        info = element(0x1549A966, uint(0x2AD7B1, 1_000_000) + element(0x4D80, b"fvid-synthetic") + element(0x5741, b"fvid-synthetic") + element(0x4489, struct.pack(">d", 100 if name == "ffv1-vfr.mkv" else (6 if name == "ffv1-six-frames.mkv" else 2) * frame_duration / 1_000_000)))
+        info = element(0x1549A966, uint(0x2AD7B1, 1_000_000) + element(0x4D80, b"fvid-synthetic") + element(0x5741, b"fvid-synthetic") + element(0x4489, struct.pack(">d", 100 if name == "ffv1-vfr.mkv" else (6 if name in ["ffv1-six-frames.mkv", "ffv1-chapters.mkv"] else 2) * frame_duration / 1_000_000)))
         track = uint(0xD7, 1) + uint(0x73C5, 37 if name == "ffv1-track-tags.mkv" else 1) + uint(0x83, 1) + element(0x86, b"V_FFV1") + uint(0x23E383, 0 if name == "ffv1-vfr.mkv" else frame_duration) + element(0xE0, uint(0xB0, 4) + uint(0xBA, 3) + (uint(0x54B0, 8) + uint(0x54BA, 3) if name == "ffv1-vfr.mkv" else b""))
         if name == "ffv1-track-description.mkv":
             track += element(0x536E, b"Named synthetic video") + element(0x22B59D, b"en-US") + element(0x22B59C, b"fra")
             track += uint(0x88, 0) + b"".join(uint(identifier, 1) for identifier in [0x55AA, 0x55AB, 0x55AC, 0x55AD, 0x55AE, 0x55AF])
         tracks = element(0x1654AE6B, element(0xAE, track))
         cluster = uint(0xE7, 200 if name == "ffv1-positive-start.mkv" else 0)
-        for index in range(6 if name == "ffv1-six-frames.mkv" else 2):
+        for index in range(6 if name in ["ffv1-six-frames.mkv", "ffv1-chapters.mkv"] else 2):
             packet = extra_packets[index-2] if index >= 2 else (args.output / f"ffv1-gray-{depth}-{index}.packet").read_bytes()
             if name == "ffv1-invalid-range-header.mkv" and index == 1:
                 packet = b"\xff\xff" + packet[2:]
@@ -102,7 +103,13 @@ fn main() {
             global_tag = element(0x7373, simple(b"TITLE", b"Synthetic tags") + simple(b"FVID_TEST_NOTE", b"own container metadata") + simple(b"ENCODER", b"synthetic source"))
             track_tag = element(0x7373, simple(b"PRIVATE_TRACK_NOTE", b"not file metadata") + element(0x63C0, uint(0x63C5, 37)))
             tags = element(0x1254C367, global_tag + (track_tag if name == "ffv1-track-tags.mkv" else b""))
-        (args.output / name).write_bytes(header + element(0x18538067, info + tracks + element(0x1F43B675, cluster) + tags))
+        chapters = b""
+        if name == "ffv1-chapters.mkv":
+            atoms = b""
+            for uid, start, end, title in [(1, 0, 100_000_000, b"First"), (2, 100_000_000, 220_000_000, b"Second"), (3, 150_000_000, None, b"Point"), (4, 230_000_000, 240_000_000, b"Outside")]:
+                atoms += element(0xB6, uint(0x73C4, uid) + uint(0x91, start) + (uint(0x92, end) if end is not None else b"") + element(0x80, element(0x85, title)))
+            chapters = element(0x1043A770, element(0x45B9, atoms))
+        (args.output / name).write_bytes(header + element(0x18538067, info + tracks + element(0x1F43B675, cluster) + tags + chapters))
 
     info = element(0x1549A966, uint(0x2AD7B1, 1_000_000) + element(0x4D80, b"fvid-synthetic") + element(0x5741, b"fvid-synthetic") + element(0x4489, struct.pack(">d", 1600)))
     track = uint(0xD7, 1) + uint(0x73C5, 1) + uint(0x83, 1) + element(0x86, b"V_FFV1") + element(0xE0, uint(0xB0, 8) + uint(0xBA, 8))

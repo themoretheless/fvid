@@ -34,7 +34,6 @@ pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
         || !track.codec_private.is_empty()
         || track.crop != [0; 4]
         || track.rotation != 0
-        || (transform.interval.is_some() && !input.chapters.is_empty())
         || input.packets.iter().any(|p| {
             p.invisible
                 || p.pts_ns < 0
@@ -90,6 +89,43 @@ fn aspect(
         u32::try_from(d / a).map_err(|_| "pixel aspect overflow")?,
     ))
 }
+fn export_chapters(
+    chapters: &[mkv::Chapter],
+    origin: i64,
+    interval: Option<(i64, i64)>,
+) -> Result<Vec<mkv::Chapter>> {
+    let Some((from, to)) = interval else {
+        return Ok(chapters.to_vec());
+    };
+    let start = i128::from(origin) + i128::from(from) * 1000;
+    let end = i128::from(origin) + i128::from(to) * 1000;
+    chapters
+        .iter()
+        .filter_map(|chapter| {
+            let chapter_start = i128::from(chapter.start_ns);
+            let chapter_end = chapter.end_ns.map(i128::from);
+            if chapter_start >= end
+                || chapter_end.is_some_and(|value| value <= start)
+                || (chapter_end.is_none() && chapter_start < start)
+            {
+                return None;
+            }
+            Some((|| {
+                Ok(mkv::Chapter {
+                    start_ns: u64::try_from(chapter_start.max(start) - start)
+                        .map_err(|_| "chapter start overflow")?,
+                    end_ns: chapter_end
+                        .map(|value| {
+                            u64::try_from(value.min(end) - start)
+                                .map_err(|_| "chapter end overflow")
+                        })
+                        .transpose()?,
+                    title: chapter.title.clone(),
+                })
+            })())
+        })
+        .collect()
+}
 pub(crate) fn export(
     source: &Path,
     destination: &Path,
@@ -125,7 +161,7 @@ pub(crate) fn export(
     let origin = input.packets.iter().map(|p| p.pts_ns).min().unwrap_or(0);
     let mut metadata = mkv::FileMetadata {
         tags: input.tags.clone(),
-        chapters: input.chapters.clone(),
+        chapters: export_chapters(&input.chapters, origin, transform.interval)?,
     };
     for key in &options.metadata_delete {
         if !metadata.tags.set(key, "") {
@@ -770,6 +806,51 @@ mod tests {
             assert_eq!(info.streams[0].disposition, 4 | 8 | 64 | 128 | 256 | 131072);
             assert!(!info.metadata.contains_key("title"));
         }
+        std::fs::remove_file(output).unwrap();
+    }
+    #[test]
+    fn owned_interval_export_clips_and_rebases_chapters() {
+        let source = root().join("ffv1-chapters.mkv");
+        let transform = LosslessTransform {
+            interval: Some((60_000, 180_000)),
+            ..Default::default()
+        };
+        assert!(supports(
+            &source,
+            &DecodeTransform {
+                interval: transform.interval,
+                ..Default::default()
+            }
+        ));
+        let output =
+            std::env::temp_dir().join(format!("fvid-ffv1-chapters-{}.mkv", std::process::id()));
+        let _ = std::fs::remove_file(&output);
+        crate::transcode_lossless(&source, &output, transform, &Default::default()).unwrap();
+        let reader = input(&output).unwrap();
+        assert_eq!(
+            reader.chapters,
+            vec![
+                mkv::Chapter {
+                    start_ns: 0,
+                    end_ns: Some(40_000_000),
+                    title: "First".into()
+                },
+                mkv::Chapter {
+                    start_ns: 40_000_000,
+                    end_ns: Some(120_000_000),
+                    title: "Second".into()
+                },
+                mkv::Chapter {
+                    start_ns: 90_000_000,
+                    end_ns: None,
+                    title: "Point".into()
+                },
+            ]
+        );
+        assert_eq!(
+            reader.packets.iter().map(|p| p.pts_ns).collect::<Vec<_>>(),
+            vec![20_000_000, 60_000_000, 100_000_000]
+        );
         std::fs::remove_file(output).unwrap();
     }
 }
