@@ -55,6 +55,11 @@ three 16x16 Y4M frames use a 44100/1024 frame clock, matching the valid AAC
 packet durations. Unbounded decode must refuse the specific incomplete-header
 error; `max_packets=3` must accept without reading it. `max_packets=0` must
 refuse without a destination. Tests do not run any generator or external tool.
+The public ADTS probe regression also checks the incomplete-header error
+through `probe` and `probe_as`, including the temporary legacy build. A valid
+AAC-LC header selects owned inspection; malformed later packets must not
+trigger a retry through libav. This is a malformed-input refusal assertion.
+
 
 Additional acceptance cases compare normalization with an independently cut
 full-decode PCM prefix: three 44.1 kHz ADTS packets yield 3072 frames; three

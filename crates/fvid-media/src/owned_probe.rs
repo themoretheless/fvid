@@ -91,6 +91,28 @@ pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<Me
     crate::owned_webm_probe::try_probe_webm(path)
 }
 
+/// Select supported AAC-LC ADTS framing before legacy inspection. Once a
+/// supported header selects this parser, packet errors cannot trigger fallback.
+pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    if format.is_some_and(|hint| hint != "aac") {
+        return Ok(None);
+    }
+    let mut prefix = [0; 7];
+    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    match file.read_exact(&mut prefix) {
+        Ok(()) => {}
+        Err(error) if error.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
+        Err(error) => return Err(error.to_string()),
+    }
+    let Some(header) = crate::owned_aac::adts::header(&prefix) else {
+        return Ok(None);
+    };
+    if header.asc[0] >> 3 != 2 {
+        return Ok(None);
+    }
+    probe_adts(path).map(Some)
+}
+
 /// Count AAC-LC ADTS packets using owned framing, without decoding PCM.
 /// The streaming reader retains only one bounded ADTS packet at a time.
 pub fn probe_adts(path: &Path) -> Result<MediaInfo, String> {
@@ -323,6 +345,14 @@ mod tests {
             super::probe_adts(&truncated)
                 .unwrap_err()
                 .contains("fill whole buffer")
+        );
+        let expected = super::probe_adts(&truncated).unwrap_err();
+        assert_eq!(crate::probe(&truncated).unwrap_err(), expected);
+        assert_eq!(crate::probe_as(&truncated, Some("aac")).unwrap_err(), expected);
+        assert!(
+            super::try_adts_as(&fixtures.join("audio/aac-mono-44k.aac"), Some("wav"))
+                .unwrap()
+                .is_none()
         );
         let mono = fixtures.join("audio/aac-mono-44k.aac");
         let info = super::probe_adts(&mono).unwrap();

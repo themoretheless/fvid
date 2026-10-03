@@ -866,10 +866,8 @@ pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo> {
             return Ok(info);
         }
     }
-    if format.is_none_or(|name| name == "aac") {
-        if let Ok(info) = crate::owned_probe::probe_adts(path) {
-            return Ok(info);
-        }
+    if let Some(info) = crate::owned_probe::try_adts_as(path, format)? {
+        return Ok(info);
     }
     if format.is_none_or(|name| matches!(name,"y4m"|"yuv4mpegpipe")) {
         if let Some(info) = crate::owned_y4m_probe::try_y4m(path)? {
