@@ -88,7 +88,12 @@ pub fn plan_decode_audio(
         let (index, rate, channels, mask, codec) =
             crate::owned_mp4_audio_export::descriptor(source, options)?;
         stream_index = index;
-        (rate, channels, mask, codec, "float32".to_owned())
+        let precision = if codec.starts_with("pcm_") {
+            "float64"
+        } else {
+            "float32"
+        };
+        (rate, channels, mask, codec, precision.to_owned())
     } else if let Some((index, rate, channels, mask, codec, precision)) = matroska {
         stream_index = index;
         (rate, channels, mask, codec, precision)
@@ -155,7 +160,7 @@ pub fn plan_decode_audio(
     let mut steps = vec![PlanStep {
         action: "decode".into(),
         detail: if mp4 {
-            format!("owned MP4 {codec} decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private float32 WAVE disk spool")
+            format!("owned MP4 {codec} decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private {precision} WAVE disk spool")
         } else if is_matroska {
             format!("owned Matroska {codec} decoder and presentation scheduler; preserve CodecDelay, signed padding and gaps; private {precision} WAVE disk spool")
         } else if adts {

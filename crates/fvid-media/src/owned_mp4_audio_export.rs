@@ -1,4 +1,4 @@
-//! Owned MP4 AAC/ALAC file export through presentation decoding and WAVE DSP.
+//! Owned MP4 AAC/ALAC/PCM file export through presentation decoding and WAVE DSP.
 use fvid_control::CopyOptions;
 use fvid_media_info::{AudioDecodeStats, AudioDecodeTransform};
 use std::{
@@ -30,7 +30,18 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
     Ok(reader.tracks().iter().enumerate().any(|(index, t)| {
         (options.streams.is_empty() || options.streams.contains(&index))
             && t.handler == *b"soun"
-            && matches!(&t.codec, b"mp4a" | b"alac")
+            && matches!(
+                &t.codec,
+                b"mp4a"
+                    | b"alac"
+                    | b"raw "
+                    | b"sowt"
+                    | b"twos"
+                    | b"in24"
+                    | b"in32"
+                    | b"fl32"
+                    | b"fl64"
+            )
     }))
 }
 pub(crate) fn descriptor(
@@ -48,7 +59,8 @@ pub(crate) fn descriptor(
     };
     let index =
         crate::owned_mp4_audio::mp4_audio_index(&reader, selected).map_err(|e| e.to_string())?;
-    crate::owned_mp4_audio::admit_audio_reader(&reader, index, options).map_err(|e| e.to_string())?;
+    crate::owned_mp4_audio::admit_audio_reader(&reader, index, options)
+        .map_err(|e| e.to_string())?;
     let track = &reader.tracks()[index];
     let decoder =
         crate::owned_mp4_audio::Mp4TimelineDecoder::new(track).map_err(|e| e.to_string())?;
@@ -63,17 +75,28 @@ pub(crate) fn descriptor(
         decoder.sample_rate(),
         decoder.channels(),
         decoder.channel_mask(),
-        if track.codec == *b"mp4a" {
-            "aac"
-        } else {
-            "alac"
+        match &track.codec {
+            b"mp4a" => "aac",
+            b"alac" => "alac",
+            b"raw " => "pcm_u8",
+            b"sowt" => "pcm_sle",
+            b"twos" => "pcm_sbe",
+            b"in24" | b"in32" => {
+                if track.configuration.first() == Some(&1) {
+                    "pcm_sle"
+                } else {
+                    "pcm_sbe"
+                }
+            }
+            b"fl32" | b"fl64" => "pcm_float",
+            _ => return Err("selected MP4 audio codec is not owned".into()),
         }
         .into(),
     ))
 }
-fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
-    let (_, rate, channels, mask, _) = descriptor(source, options)?;
-    Ok((rate, channels, mask))
+fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, bool)> {
+    let (_, rate, channels, mask, codec) = descriptor(source, options)?;
+    Ok((rate, channels, mask, codec.starts_with("pcm_")))
 }
 use crate::owned_adts_export::decoded_prefix as prefix;
 pub(crate) fn supports(
@@ -81,7 +104,7 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    let (rate, channels, mask) = match geometry(source, options) {
+    let (rate, channels, mask, precise) = match geometry(source, options) {
         Ok(value) => value,
         Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
@@ -103,13 +126,22 @@ pub(crate) fn supports(
     probe.metadata_delete.clear();
     probe.stream_metadata_set.clear();
     probe.stream_metadata_delete.clear();
-    crate::owned_mp4_audio::decode_mp4_audio_pcm(
-        BufReader::new(file),
-        &mut std::io::sink(),
-        prefix(transform, rate),
-        &probe,
-    )
-    .is_ok()
+    let result = if precise {
+        crate::owned_mp4_audio::decode_mp4_pcm_f64(
+            BufReader::new(file),
+            &mut std::io::sink(),
+            prefix(transform, rate),
+            &probe,
+        )
+    } else {
+        crate::owned_mp4_audio::decode_mp4_audio_pcm(
+            BufReader::new(file),
+            &mut std::io::sink(),
+            prefix(transform, rate),
+            &probe,
+        )
+    };
+    result.is_ok()
 }
 pub(crate) fn apply(
     source: &Path,
@@ -124,20 +156,31 @@ pub(crate) fn apply(
         return Err("media operation cancelled".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let (rate, channels, mask) = geometry(source, options)?;
-    let spool = crate::owned_adts_export::spool_decoded(
+    let (rate, channels, mask, precise) = geometry(source, options)?;
+    let spool = crate::owned_adts_export::spool_decoded_with_precision(
         rate,
         channels,
         mask,
+        if precise { 64 } else { 32 },
         options,
         |writer, options| {
-            crate::owned_mp4_audio::decode_mp4_audio_pcm(
-                BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-                writer,
-                prefix(transform, rate),
-                options,
-            )
-            .map_err(|e| e.to_string())
+            let file = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+            let result = if precise {
+                crate::owned_mp4_audio::decode_mp4_pcm_f64(
+                    file,
+                    writer,
+                    prefix(transform, rate),
+                    options,
+                )
+            } else {
+                crate::owned_mp4_audio::decode_mp4_audio_pcm(
+                    file,
+                    writer,
+                    prefix(transform, rate),
+                    options,
+                )
+            };
+            result.map_err(|e| e.to_string())
         },
     )?;
     crate::owned_adts_export::export_spool(spool, destination, transform, options)
@@ -153,6 +196,62 @@ mod admission_tests {
     #[test]
     fn mp4_alac_export_loudness_and_normalization_keep_owned_budget() {
         check_budget("../../tests/fixtures/playback-errors/alac-resample-window.m4a");
+    }
+    #[test]
+    fn mp4_pcm_export_loudness_and_normalization_keep_owned_budget() {
+        check_budget("../../tests/fixtures/audio/pcm-screen.mov");
+    }
+    #[test]
+    fn quicktime_pcm_precision_export_preserves_silence_and_repeated_edits() {
+        let doubles = [
+            0.12345678901234567,
+            -0.9876543210987654,
+            0.5000000000000001,
+            -0.5000000000000001,
+            1e-100,
+            -1e-100,
+        ];
+        let integers = [2147483647, -2147483647, 16777217, -16777217, 1, -1];
+        let normalized: Vec<f64> = integers
+            .iter()
+            .map(|&n| f64::from(n) / 2147483648.0)
+            .collect();
+        for (name, values) in [
+            ("pcm64-precision-edits.mov", doubles.as_slice()),
+            ("pcm32-precision-edits.mov", normalized.as_slice()),
+        ] {
+            assert!(values.iter().any(|&x| f64::from(x as f32) != x));
+            let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("../../tests/fixtures/playback-errors")
+                .join(name);
+            let options = CopyOptions {
+                max_controlled_bytes: Some(32 * 1024 * 1024),
+                ..Default::default()
+            };
+            let plan = crate::plan_decode_audio(&source, &Default::default(), &options).unwrap();
+            assert!(plan.steps.iter().any(|s| s.detail.contains("float64")));
+            let output = std::env::temp_dir()
+                .join(format!("fvid-precision-{name}-{}.wav", std::process::id()));
+            let _ = std::fs::remove_file(&output);
+            let stats = crate::decode_audio(&source, &output, &options).unwrap();
+            assert_eq!(stats.sample_frames, 12);
+            let bytes = std::fs::read(&output).unwrap();
+            std::fs::remove_file(&output).unwrap();
+            let info = crate::owned_wave_inspect::inspect(&mut std::io::Cursor::new(&bytes), None)
+                .unwrap();
+            assert_eq!(info.bits_per_sample, 64);
+            let expected: Vec<u8> = [0f64, 0.0]
+                .iter()
+                .chain(values)
+                .chain(&values[2..])
+                .flat_map(|v| v.to_le_bytes())
+                .collect();
+            assert_eq!(
+                &bytes[info.data_offset as usize
+                    ..info.data_offset as usize + info.data_bytes as usize],
+                expected
+            );
+        }
     }
     fn check_budget(fixture: &str) {
         let source = Path::new(env!("CARGO_MANIFEST_DIR")).join(fixture);

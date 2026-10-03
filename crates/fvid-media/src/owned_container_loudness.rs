@@ -73,7 +73,7 @@ pub(crate) fn decode_to_wave(
 ) -> Result<crate::owned_adts_export::DecodedSpool> {
     let (rate, channels, mask, codec) = geometry(source, options)?;
     let mp4 = crate::owned_mp4_audio_export::recognizes(source, options)?;
-    let precise = codec.starts_with("A_PCM/");
+    let precise = codec.starts_with("A_PCM/") || codec.starts_with("pcm_");
     let spool = crate::owned_adts_export::spool_decoded_with_precision(
         rate,
         channels,
@@ -82,7 +82,9 @@ pub(crate) fn decode_to_wave(
         options,
         |writer, options| {
             let file = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
-            let result = if mp4 {
+            let result = if mp4 && precise {
+                crate::owned_mp4_audio::decode_mp4_pcm_f64(file, writer, None, options)
+            } else if mp4 {
                 crate::owned_mp4_audio::decode_mp4_audio_pcm(file, writer, None, options)
             } else if codec == "aac" {
                 crate::owned_matroska_aac::decode_matroska_aac_pcm(file, writer, None, options)
