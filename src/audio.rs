@@ -924,7 +924,6 @@ mod tests {
     }
 
     #[test]
-    #[test]
     fn all_known_codecs_have_a_display_name() {
         let tags_and_names = [
             ("A_VORBIS", "Vorbis"),
