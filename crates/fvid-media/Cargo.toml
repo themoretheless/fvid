@@ -88,3 +88,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_lacing_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_hue_reference"
+harness = false

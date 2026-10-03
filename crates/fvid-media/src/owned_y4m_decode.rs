@@ -30,7 +30,11 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
-    transform.reverse.as_deref().is_none_or(str::is_empty)
+    transform
+        .hue
+        .as_deref()
+        .is_none_or(|args| crate::owned_hue::Hue::parse(args).is_ok())
+        && transform.reverse.as_deref().is_none_or(str::is_empty)
         && transform
             .shuffleframes
             .as_deref()
@@ -81,6 +85,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 scale: transform.scale,
                 transpose: transform.transpose,
                 pad: transform.pad,
+                hue: transform.hue.clone(),
                 negate: transform.negate.clone(),
                 avgblur: transform.avgblur.clone(),
                 boxblur: transform.boxblur.clone(),
@@ -107,10 +112,20 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
 }
 pub(crate) fn supports_transformed(source: &Path, transform: &DecodeTransform) -> bool {
     supported_request(transform)
+        && (transform.hue.is_none() || hue_depth_supported(source))
         && overlay_supported(source, transform)
         && supports(source)
         && framestep_clock_supported(source, transform)
         && (transform.transpose.is_none() || header_format(source) != Some(PixelFormat::Yuv411))
+}
+fn hue_depth_supported(source: &Path) -> bool {
+    let read = || -> Result<bool> {
+        let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+        let mut bytes = Vec::new();
+        line(&mut input, &mut bytes)?;
+        Ok(matches!(Header::parse(&bytes)?.depth(), 8 | 10))
+    };
+    read().unwrap_or(false)
 }
 fn framestep_clock_supported(source: &Path, transform: &DecodeTransform) -> bool {
     let Some(args) = transform.framestep.as_deref() else {
@@ -303,7 +318,8 @@ pub(crate) fn apply_pixel_filters(
     transform: &DecodeTransform,
     output: &mut Vec<u8>,
 ) -> Result<()> {
-    if transform.avgblur.is_some()
+    if transform.hue.is_some()
+        || transform.avgblur.is_some()
         || transform.boxblur.is_some()
         || transform.pixelize.is_some()
         || transform.chromashift.is_some()
@@ -332,6 +348,9 @@ pub(crate) fn apply_pixel_filters(
             data: std::mem::take(output),
         };
         let result: Result<()> = (|| {
+            if let Some(args) = transform.hue.as_deref() {
+                crate::owned_hue::Hue::parse(args)?.apply(&mut frame, header.depth())?;
+            }
             if let Some(args) = transform.avgblur.as_deref() {
                 crate::owned_avgblur::AverageBlur::parse(args)?
                     .apply(&mut frame, header.depth())?;
@@ -661,6 +680,7 @@ fn decode_reader_frames(
         || transform.scale.is_some()
         || transform.transpose.is_some()
         || transform.pad.is_some()
+        || transform.hue.is_some()
         || transform.negate.is_some()
         || transform.avgblur.is_some()
         || transform.boxblur.is_some()
