@@ -259,6 +259,15 @@ pub fn transform_frame_requested(
     if transform.overlay.is_some() {
         return Err("scheduled overlay requires the streaming frame API".into());
     }
+    let mut output = transform_frame_geometry_requested(header, frame, transform)?;
+    apply_pixel_filters(header, transform, &mut output)?;
+    Ok(output)
+}
+pub(crate) fn transform_frame_geometry_requested(
+    header: &Header,
+    frame: &[u8],
+    transform: &DecodeTransform,
+) -> Result<Vec<u8>> {
     let mut output = Vec::new();
     transform_frame_into(
         header,
@@ -271,7 +280,6 @@ pub fn transform_frame_requested(
         transform.pad,
         &mut output,
     )?;
-    apply_pixel_filters(header, transform, &mut output)?;
     Ok(output)
 }
 fn gradients(t: &DecodeTransform) -> [(crate::owned_gradient::GradientKind, &Option<String>); 5] {
@@ -290,7 +298,7 @@ fn morphology(
     use crate::owned_morphology::MorphologyKind::*;
     [(Dilation, &t.dilation), (Erosion, &t.erosion)]
 }
-fn apply_pixel_filters(
+pub(crate) fn apply_pixel_filters(
     header: &Header,
     transform: &DecodeTransform,
     output: &mut Vec<u8>,

@@ -48,6 +48,7 @@ pub(crate) fn decode_ffv1(
     frame_transform.framestep = None;
     frame_transform.reverse = None;
     frame_transform.shuffleframes = None;
+    frame_transform.overlay = None;
     if transform
         .reverse
         .as_deref()
@@ -65,7 +66,6 @@ pub(crate) fn decode_ffv1(
         Err(_) => return Ok(None),
     };
     if !crate::owned_y4m_decode::supported_request(&frame_transform)
-        || frame_transform.overlay.is_some()
         || !transform
             .input_format
             .as_deref()
@@ -141,6 +141,7 @@ pub(crate) fn decode_ffv1(
     } else {
         None
     };
+    let mut overlay = None;
     let mut frame_metadata = None;
     let mut temporal_format = None;
     let mut consumed = 0u64;
@@ -208,18 +209,21 @@ pub(crate) fn decode_ffv1(
                 .ok_or("FFV1 frame count overflow")?;
         }
         let mut transformed = None;
-        if frame_transform == DecodeTransform::default() {
+        if frame_transform == DecodeTransform::default() && transform.overlay.is_none() {
             stats.pixel_format = if decoded.depth == 8 {
                 base.into()
             } else {
                 format!("{base}{}le", decoded.depth)
             };
         } else if emit || stats.pixel_format.is_empty() {
-            let Some((width, height, format, pixels)) = process_frame(
+            let Some((width, height, format, pixels)) = process_frame_with_overlay(
                 &decoded,
                 decoder.monochrome() == Some(true),
                 full_range,
                 &frame_transform,
+                transform.overlay.as_ref(),
+                &mut overlay,
+                pts_ns,
             )?
             else {
                 return Ok(None);
@@ -335,11 +339,25 @@ fn subsampling(format: &str) -> [usize; 2] {
     }
 }
 
+#[cfg(test)]
 fn process_frame(
     decoded: &crate::owned_ffv1_decoder::Decoded,
     monochrome: bool,
     full_range: bool,
     transform: &DecodeTransform,
+) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
+    process_frame_with_overlay(
+        decoded, monochrome, full_range, transform, None, &mut None, 0,
+    )
+}
+fn process_frame_with_overlay(
+    decoded: &crate::owned_ffv1_decoder::Decoded,
+    monochrome: bool,
+    full_range: bool,
+    transform: &DecodeTransform,
+    spec: Option<&fvid_media_info::OverlaySpec>,
+    overlay: &mut Option<crate::owned_y4m_overlay::OverlayReader>,
+    pts_ns: i64,
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
     use crate::owned_y4m::{Header, PixelFormat};
     let (format, layout) = match decoded.frame.subsampling {
@@ -411,11 +429,35 @@ fn process_frame(
     } else {
         format!("{base}{}le", decoded.depth)
     };
-    let pixels = crate::owned_y4m_decode::transform_frame_requested(
-        &header,
-        &decoded.frame.data,
-        transform,
-    )?;
+    let pixels = if let Some(spec) = spec {
+        if pts_ns < 0 || format != PixelFormat::Yuv420 || decoded.depth != 8 {
+            return Ok(None);
+        }
+        let mut pixels = crate::owned_y4m_decode::transform_frame_geometry_requested(
+            &header,
+            &decoded.frame.data,
+            transform,
+        )?;
+        let mut presented = header.clone();
+        presented.width = width;
+        presented.height = height;
+        // The scheduler's index represents nanoseconds, rather than frame ordinals.
+        presented.tokens.push("F1000000000:1".into());
+        if overlay.is_none() {
+            *overlay = match crate::owned_y4m_overlay::OverlayReader::open(&presented, spec) {
+                Ok(reader) => Some(reader),
+                Err(_) => return Ok(None),
+            };
+        }
+        overlay
+            .as_mut()
+            .unwrap()
+            .apply(&presented, &mut pixels, pts_ns as u64)?;
+        crate::owned_y4m_decode::apply_pixel_filters(&header, transform, &mut pixels)?;
+        pixels
+    } else {
+        crate::owned_y4m_decode::transform_frame_requested(&header, &decoded.frame.data, transform)?
+    };
     Ok(Some((
         u32::try_from(width).map_err(|_| "FFV1 output width overflow")?,
         u32::try_from(height).map_err(|_| "FFV1 output height overflow")?,

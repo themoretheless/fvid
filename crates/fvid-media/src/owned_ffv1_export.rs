@@ -644,4 +644,88 @@ mod tests {
         assert!(!info.metadata.contains_key("PRIVATE_TRACK_NOTE"));
         std::fs::remove_file(output).unwrap();
     }
+    #[test]
+    fn compressed_overlay_uses_presentation_times_through_ranges_steps_and_reverse() {
+        let source = root().join("ffv1-overlay-vfr.mkv");
+        for (case, interval, step, reverse, indices, times) in [
+            (
+                "full",
+                None,
+                None,
+                false,
+                vec![0, 1, 2, 3],
+                vec![0, 300, 950, 1350],
+            ),
+            (
+                "range",
+                Some((250_000, 1_000_000)),
+                None,
+                false,
+                vec![1, 2],
+                vec![50, 700],
+            ),
+            (
+                "step",
+                None,
+                Some("2".into()),
+                false,
+                vec![0, 2],
+                vec![0, 950],
+            ),
+            (
+                "reverse",
+                None,
+                None,
+                true,
+                vec![3, 2, 1, 0],
+                vec![0, 300, 950, 1350],
+            ),
+        ] {
+            let output = std::env::temp_dir().join(format!(
+                "fvid-ffv1-overlay-{}-{case}.mkv",
+                std::process::id()
+            ));
+            let _ = std::fs::remove_file(&output);
+            let transform = LosslessTransform {
+                overlay: Some(fvid_media_info::OverlaySpec {
+                    path: root().join("overlay-secondary-clock.y4m"),
+                    x: 3,
+                    y: 3,
+                }),
+                interval,
+                framestep: step,
+                reverse: reverse.then(String::new),
+                ..Default::default()
+            };
+            assert!(supports(
+                &source,
+                &DecodeTransform {
+                    overlay: transform.overlay.clone(),
+                    ..Default::default()
+                }
+            ));
+            let stats = crate::transcode_lossless(&source, &output, transform, &Default::default())
+                .unwrap();
+            assert_eq!(stats.video_frames, indices.len() as u64);
+            let mut mux = input(&output).unwrap();
+            let mut decoder = crate::owned_ffv1_decoder::Decoder::new(8, 8, usize::MAX).unwrap();
+            for (position, index) in indices.into_iter().enumerate() {
+                assert_eq!(mux.packets[position].pts_ns, times[position] * 1_000_000);
+                let frame = decoder.decode(&mux.read_packet(position).unwrap()).unwrap();
+                let secondary = if index < 2 { 0 } else { 1 };
+                let mut expected = vec![20 + index * 10; 64];
+                expected.extend_from_slice(&[110 + index; 16]);
+                expected.extend_from_slice(&[140 - index; 16]);
+                for y in 2..4 {
+                    for x in 2..4 {
+                        expected[y * 8 + x] = if secondary == 0 { 50 } else { 100 };
+                    }
+                }
+                expected[64 + 5] = if secondary == 0 { 80 } else { 90 };
+                expected[80 + 5] = if secondary == 0 { 160 } else { 170 };
+                assert_eq!(frame.frame.data, expected, "{case} frame {position}");
+            }
+            std::fs::remove_file(output).unwrap();
+        }
+    }
 }

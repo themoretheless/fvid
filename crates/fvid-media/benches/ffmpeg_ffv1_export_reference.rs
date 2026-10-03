@@ -238,7 +238,96 @@ fn main() {
         );
     }
     std::fs::remove_file(output).unwrap();
+
+    for (case, interval, step, reverse, tail) in [
+        ("full", None, None, false, ""),
+        (
+            "range",
+            Some((250_000, 1_000_000)),
+            None,
+            false,
+            ",trim=start=0.25:end=1,setpts=PTS-0.25/TB",
+        ),
+        ("step", None, Some("2".into()), false, ",framestep=2"),
+        ("reverse", None, None, true, ",reverse"),
+    ] {
+        let output = std::env::temp_dir().join(format!(
+            "fvid-ffv1-overlay-reference-{}-{case}.mkv",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_file(&output);
+        let source = root.join("ffv1-overlay-vfr.mkv");
+        let secondary = root.join("overlay-secondary-clock.y4m");
+        fvid_media::transcode_lossless(
+            &source,
+            &output,
+            LosslessTransform {
+                overlay: Some(fvid_media::OverlaySpec {
+                    path: secondary.clone(),
+                    x: 3,
+                    y: 3,
+                }),
+                interval,
+                framestep: step,
+                reverse: reverse.then(String::new),
+                ..Default::default()
+            },
+            &CopyOptions::default(),
+        )
+        .unwrap();
+        let read = |owned: bool| {
+            let mut command = Command::new(&ffmpeg);
+            command
+                .args(["-hide_banner", "-nostdin", "-copyts", "-v", "info", "-i"])
+                .arg(if owned { &output } else { &source });
+            if owned {
+                command.args(["-vf", "showinfo"]);
+            } else {
+                command
+                    .arg("-i")
+                    .arg(&secondary)
+                    .arg("-filter_complex")
+                    .arg(format!(
+                        "[0:v][1:v]overlay=x=3:y=3:format=yuv420{tail},showinfo[out]"
+                    ))
+                    .args(["-map", "[out]"]);
+            }
+            let result = command
+                .args([
+                    "-fps_mode",
+                    "passthrough",
+                    "-pix_fmt",
+                    "yuv420p",
+                    "-f",
+                    "rawvideo",
+                    "pipe:1",
+                ])
+                .output()
+                .unwrap();
+            assert!(
+                result.status.success(),
+                "{}",
+                String::from_utf8_lossy(&result.stderr)
+            );
+            let log = String::from_utf8_lossy(&result.stderr);
+            let times: Vec<f64> = log
+                .lines()
+                .filter_map(|line| {
+                    line.split_once("pts_time:")
+                        .and_then(|(_, s)| s.split_whitespace().next())
+                        .and_then(|s| s.parse().ok())
+                })
+                .collect();
+            (result.stdout, times)
+        };
+        assert_eq!(
+            read(true),
+            read(false),
+            "overlay pixels and presentation times: {case}"
+        );
+        std::fs::remove_file(output).unwrap();
+    }
     println!(
-        "owned FFV1 export: 16 pixel/timing references and independent file tag checks passed"
+        "owned FFV1 export: 20 pixel/timing references and independent file tag checks passed"
     );
 }
