@@ -128,7 +128,6 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
 }
 pub(crate) fn supports_transformed(source: &Path, transform: &DecodeTransform) -> bool {
     supported_request(transform)
-        && (transform.hue.is_none() || pixel_depth_supported(source, &[8, 10]))
         && (transform.eq.is_none() || pixel_depth_supported(source, &[8]))
         && overlay_supported(source, transform)
         && supports(source)
