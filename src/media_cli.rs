@@ -4479,13 +4479,76 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
 fn owned_filter_plan(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
     if args.first().map(String::as_str) != Some("plan")
         || args.get(1).map(String::as_str) != Some("transcode-lossless")
-        || args.len() < 3 {
+        || args.len() < 3
+    {
         return Ok(false);
     }
     let mut transform = fvid::media_info::LosslessTransform::default();
     let mut options = args[3..].iter();
     let mut seen = std::collections::BTreeSet::new();
     while let Some(option) = options.next() {
+        if !seen.insert(option) {
+            return Err(format!("duplicate option: {option}").into());
+        }
+        match option.as_str() {
+            "--hflip" => {
+                transform.horizontal_flip = true;
+                continue;
+            }
+            "--vflip" => {
+                transform.vertical_flip = true;
+                continue;
+            }
+            "--transpose" => {
+                transform.transpose = Some(fvid::media_info::TransposeMode::parse(
+                    options.next().ok_or("missing transpose mode")?,
+                )?);
+                continue;
+            }
+            "--crop" | "--scale" | "--pad" => {
+                let fields = options
+                    .next()
+                    .ok_or("missing geometry value")?
+                    .split(':')
+                    .map(str::parse::<usize>)
+                    .collect::<Result<Vec<_>, _>>()?;
+                match option.as_str() {
+                    "--crop" => {
+                        let [x, y, width, height]: [usize; 4] = fields
+                            .try_into()
+                            .map_err(|_| "crop requires X:Y:WIDTH:HEIGHT")?;
+                        transform.crop = Some(fvid::media_info::CropRect {
+                            x,
+                            y,
+                            width,
+                            height,
+                        });
+                    }
+                    "--scale" => {
+                        let [width, height]: [usize; 2] = fields
+                            .try_into()
+                            .map_err(|_| "scale requires WIDTH:HEIGHT")?;
+                        transform.scale = Some(fvid::media_info::ScaleSize {
+                            width: width.try_into()?,
+                            height: height.try_into()?,
+                        });
+                    }
+                    _ => {
+                        let [width, height, x, y]: [usize; 4] = fields
+                            .try_into()
+                            .map_err(|_| "pad requires WIDTH:HEIGHT:X:Y")?;
+                        transform.pad = Some(fvid::media_info::PadRect {
+                            width: width.try_into()?,
+                            height: height.try_into()?,
+                            x: x.try_into()?,
+                            y: y.try_into()?,
+                        });
+                    }
+                }
+                continue;
+            }
+            _ => {}
+        }
         let slot = match option.as_str() {
             "--eq" => &mut transform.eq,
             "--unsharp" => &mut transform.unsharp,
@@ -4505,14 +4568,15 @@ fn owned_filter_plan(args: &[String]) -> Result<bool, Box<dyn std::error::Error>
             "--shuffleplanes" => &mut transform.shuffleplanes,
             _ => return Ok(false),
         };
-        if !seen.insert(option) {return Err(format!("duplicate option: {option}").into());}
         *slot = Some(options.next().ok_or("missing filter parameters")?.clone());
     }
     if !fvid::native_lossless::supports(&transform) {
         return Ok(false);
     }
     let source = std::path::Path::new(&args[2]);
-    if !fvid::native_lossless::eligible(source)? {return Ok(false);}
+    if !fvid::native_lossless::eligible(source)? {
+        return Ok(false);
+    }
     let plan = fvid::native_plan::transcode_lossless(source, &transform)?;
     println!("{}", serde_json::to_string_pretty(&plan)?);
     Ok(true)

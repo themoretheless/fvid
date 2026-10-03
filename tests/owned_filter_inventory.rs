@@ -134,3 +134,96 @@ fn existing_owned_filter_cli_plan_does_not_require_legacy() {
         serde_json::to_value(expected).unwrap()
     );
 }
+
+#[test]
+fn geometry_and_filter_cli_plan_is_owned() {
+    use fvid::media_info::{CropRect, LosslessTransform, PadRect, ScaleSize, TransposeMode};
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4");
+    let request = LosslessTransform {
+        crop: Some(CropRect {
+            x: 0,
+            y: 0,
+            width: 16,
+            height: 16,
+        }),
+        horizontal_flip: true,
+        vertical_flip: true,
+        transpose: Some(TransposeMode::Clock),
+        pad: Some(PadRect {
+            width: 32,
+            height: 32,
+            x: 2,
+            y: 2,
+        }),
+        scale: Some(ScaleSize {
+            width: 16,
+            height: 16,
+        }),
+        hue: Some("h=90".into()),
+        ..Default::default()
+    };
+    let expected = fvid::native_plan::transcode_lossless(&source, &request).unwrap();
+    let geometry = expected
+        .steps
+        .iter()
+        .position(|step| step.action == "geometry")
+        .unwrap();
+    let filter = expected
+        .steps
+        .iter()
+        .position(|step| step.action == "filter")
+        .unwrap();
+    assert!(geometry < filter);
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "transcode-lossless"])
+        .arg(source)
+        .args([
+            "--hue",
+            "h=90",
+            "--crop",
+            "0:0:16:16",
+            "--hflip",
+            "--vflip",
+            "--transpose",
+            "clock",
+            "--pad",
+            "32:32:2:2",
+            "--scale",
+            "16:16",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(
+        serde_json::from_slice::<serde_json::Value>(&output.stdout).unwrap(),
+        serde_json::to_value(expected).unwrap()
+    );
+}
+
+#[test]
+fn geometry_plan_rejects_invalid_fields_duplicates_and_overflow() {
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4");
+    for (options, error) in [
+        (vec!["--crop", "0:16:16"], "crop requires X:Y:WIDTH:HEIGHT"),
+        (vec!["--hflip", "--hflip"], "duplicate option: --hflip"),
+        (vec!["--transpose", "invalid"], "transpose must be"),
+        (vec!["--scale", "4294967296:16"], "out of range"),
+    ] {
+        let output = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "plan", "transcode-lossless"])
+            .arg(&source)
+            .args(options)
+            .output()
+            .unwrap();
+        assert!(!output.status.success());
+        assert!(
+            String::from_utf8_lossy(&output.stderr).contains(error),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+    }
+}
