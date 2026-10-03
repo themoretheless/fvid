@@ -417,6 +417,11 @@ pub fn xfade_video(
     offset_us: i64,
     options: &CopyOptions,
 ) -> Result<LosslessStats> {
+    if let Some(stats) = crate::owned_xfade::try_xfade_video(
+        source, other, destination, transition, duration_us, offset_us, options,
+    )? {
+        return Ok(stats);
+    }
     validate_xfade_transition(transition)?;
     if duration_us <= 0 {
         return Err("xfade --duration must be > 0".into());

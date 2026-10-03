@@ -3,6 +3,83 @@ use crate::owned_y4m::{Header, line};
 use crate::{owned_frame::GeometryFrame, owned_overlay::validate_frame};
 use std::io::BufRead;
 
+fn default_policy(options: &fvid_control::CopyOptions) -> bool {
+    options.streams.is_empty()
+        && options.max_packet_bytes == 64 * 1024 * 1024
+        && options.max_packets.is_none()
+        && options.max_controlled_bytes.is_none()
+        && options.max_rss_bytes.is_none()
+        && options.cancel.is_none()
+        && options.progress.is_none()
+        && options.metadata_set.is_empty()
+        && options.metadata_delete.is_empty()
+        && options.stream_metadata_set.is_empty()
+        && options.stream_metadata_delete.is_empty()
+}
+pub(crate) fn try_xfade_video(
+    source: &std::path::Path,
+    other: &std::path::Path,
+    destination: &std::path::Path,
+    transition: &str,
+    duration_us: i64,
+    offset_us: i64,
+    options: &fvid_control::CopyOptions,
+) -> Result<Option<fvid_media_info::LosslessStats>, String> {
+    if transition != "fade" || !default_policy(options) {
+        return Ok(None);
+    }
+    let read_header = |path: &std::path::Path| -> Option<Header> {
+        let mut input = std::io::BufReader::new(std::fs::File::open(path).ok()?);
+        let mut bytes = Vec::new();
+        line(&mut input, &mut bytes)
+            .ok()?
+            .then(|| Header::parse(&bytes).ok())
+            .flatten()
+    };
+    let Some(header) = read_header(source) else {
+        return Ok(None);
+    };
+    if read_header(other).is_none() {
+        return Ok(None);
+    }
+    let (count, decoded_frames) =
+        export_y4m_ffv1_counted(source, other, destination, offset_us, duration_us)?;
+    Ok(Some(fvid_media_info::LosslessStats {
+        backend: "owned Y4M cross-fade FFV1 export",
+        video_frames: count,
+        decoded_frames,
+        seek_used: false,
+        video_packets: count,
+        copied_packets: 0,
+        trimmed_audio_sample_frames: 0,
+        pixel_format: format!("{:?}/{}", header.format, header.depth()),
+        encoder: "ffv1".into(),
+        fvid_crop_payload_copies: 0,
+        vertical_flip: false,
+        horizontal_flip: false,
+    }))
+}
+pub fn xfade_video(
+    source: &std::path::Path,
+    other: &std::path::Path,
+    destination: &std::path::Path,
+    transition: &str,
+    duration_us: i64,
+    offset_us: i64,
+    options: &fvid_control::CopyOptions,
+) -> Result<fvid_media_info::LosslessStats, String> {
+    try_xfade_video(
+        source,
+        other,
+        destination,
+        transition,
+        duration_us,
+        offset_us,
+        options,
+    )?
+    .ok_or_else(|| "cross-fade request is not supported by the owned backend".into())
+}
+
 /// Forward-only secondary video reader. Retains one frame and selects the most
 /// recent frame on its own clock; callers decide how to handle a short source.
 pub struct SecondaryReader<R> {
@@ -138,6 +215,170 @@ pub enum Phase {
         secondary_ns: u64,
     },
 }
+/// Compose matching-rate Y4M streams, including the secondary tail. At most
+/// three decoded frame buffers are retained. The callback owns publication.
+pub fn visit_y4m(
+    main: impl BufRead,
+    other: impl BufRead,
+    header: &Header,
+    timeline: FadeTimeline,
+    mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+) -> Result<u64, String> {
+    visit_y4m_counted(main, other, header, timeline, visit).map(|counts| counts.0)
+}
+fn visit_y4m_counted(
+    main: impl BufRead,
+    other: impl BufRead,
+    header: &Header,
+    timeline: FadeTimeline,
+    mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+) -> Result<(u64, u64), String> {
+    let mut primary = SecondaryReader::new(main, header)?;
+    let mut secondary = SecondaryReader::new(other, header)?;
+    let rate = header.frame_rate()?;
+    if primary.header.frame_rate()? != rate || secondary.header.frame_rate()? != rate {
+        return Err("cross-fade inputs require matching frame rates".into());
+    }
+    let mut count = 0u64;
+    loop {
+        let tick = u128::from(count) * rate[1] as u128 * 1_000_000_000;
+        let end = (u128::from(count) + 1) * rate[1] as u128 * 1_000_000_000;
+        let pts =
+            u64::try_from(tick / rate[0] as u128).map_err(|_| "cross-fade timestamp overflow")?;
+        let sample_pts = u64::try_from(tick.div_ceil(rate[0] as u128))
+            .map_err(|_| "cross-fade timestamp overflow")?;
+        let duration = u64::try_from(end / rate[0] as u128 - tick / rate[0] as u128)
+            .map_err(|_| "cross-fade duration overflow")?;
+        let phase = timeline.phase(sample_pts);
+        let current = primary
+            .frame_at(sample_pts)?
+            .ok_or("cross-fade primary source has no frames")?;
+        let mut output = GeometryFrame {
+            width: current.width,
+            height: current.height,
+            subsampling: current.subsampling,
+            data: current.data.clone(),
+        };
+        if matches!(phase, Phase::Primary) && primary.eof {
+            return Err("cross-fade offset is beyond the primary source".into());
+        }
+        secondary.apply(&mut output, header.depth(), sample_pts, timeline)?;
+        if let Phase::Secondary { secondary_ns } = phase {
+            if secondary.eof
+                && u128::from(secondary_ns) * rate[0] as u128
+                    >= u128::from(secondary.next_index) * rate[1] as u128 * 1_000_000_000
+            {
+                break;
+            }
+        }
+        visit(&output, pts, duration)?;
+        count = count
+            .checked_add(1)
+            .ok_or("cross-fade output frame count overflow")?;
+    }
+    Ok((
+        count,
+        primary
+            .next_index
+            .checked_add(secondary.next_index)
+            .ok_or("cross-fade decoded count overflow")?,
+    ))
+}
+/// Encode and mux a fade without libav. Discard output on any error; file
+/// publication and cancellation policy belong to the higher-level exporter.
+pub fn write_y4m_ffv1<W: std::io::Write + std::io::Seek>(
+    main: impl BufRead,
+    other: impl BufRead,
+    header: &Header,
+    timeline: FadeTimeline,
+    output: &mut W,
+) -> Result<u64, String> {
+    write_y4m_ffv1_counted(main, other, header, timeline, output).map(|counts| counts.0)
+}
+fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
+    main: impl BufRead,
+    other: impl BufRead,
+    header: &Header,
+    timeline: FadeTimeline,
+    output: &mut W,
+) -> Result<(u64, u64), String> {
+    use crate::owned_matroska::{ColourDescription, PacketWriter, VideoMetadata};
+    let width = u32::try_from(header.width).map_err(|_| "cross-fade width overflow")?;
+    let height = u32::try_from(header.height).map_err(|_| "cross-fade height overflow")?;
+    let metadata = VideoMetadata {
+        pixel_aspect: header.pixel_aspect()?,
+        colour: Some(ColourDescription {
+            matrix: 6,
+            full_range: header.full_range()?,
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let mut writer =
+        PacketWriter::new_ffv1_with_metadata(output, width, height, Some(&metadata), 0, 0)
+            .map_err(|e| e.to_string())?;
+    let count = visit_y4m_counted(main, other, header, timeline, |frame, pts, duration| {
+        let packet = crate::owned_ffv1_encoder::encode(frame, header.depth())?;
+        writer
+            .write_packet(0, pts, duration, true, &packet)
+            .map_err(|e| e.to_string())
+    })?;
+    writer.finish().map_err(|e| e.to_string())?;
+    Ok(count)
+}
+/// Publish a Y4M fade as FFV1/Matroska without replacing an existing file.
+/// Failed decoding or muxing removes the private temporary output.
+pub fn export_y4m_ffv1(
+    main: &std::path::Path,
+    other: &std::path::Path,
+    destination: &std::path::Path,
+    offset_us: i64,
+    duration_us: i64,
+) -> Result<u64, String> {
+    export_y4m_ffv1_counted(main, other, destination, offset_us, duration_us).map(|counts| counts.0)
+}
+fn export_y4m_ffv1_counted(
+    main: &std::path::Path,
+    other: &std::path::Path,
+    destination: &std::path::Path,
+    offset_us: i64,
+    duration_us: i64,
+) -> Result<(u64, u64), String> {
+    use std::{fs::File, io::BufReader};
+    let timeline = FadeTimeline::new(offset_us, duration_us)?;
+    let mut probe = BufReader::new(File::open(main).map_err(|e| e.to_string())?);
+    let mut bytes = Vec::new();
+    if !line(&mut probe, &mut bytes)? {
+        return Err("empty cross-fade primary source".into());
+    }
+    let header = Header::parse(&bytes)?;
+    let input = BufReader::new(File::open(main).map_err(|e| e.to_string())?);
+    let other = BufReader::new(File::open(other).map_err(|e| e.to_string())?);
+    let (stats, _, decoded_frames) =
+        crate::owned_matroska::export_atomic(destination, None, None, |file| {
+            let (frames, decoded_frames) =
+                write_y4m_ffv1_counted(input, other, &header, timeline, file)
+                    .map_err(crate::owned_matroska::Error)?;
+            Ok((
+                fvid_media_info::DecodeStats {
+                    backend: "owned Y4M cross-fade FFV1 export",
+                    video_frames: frames,
+                    width: header.width as u32,
+                    height: header.height as u32,
+                    pixel_format: format!("{:?}/{}", header.format, header.depth()),
+                    decode_errors: 0,
+                },
+                fvid_control::ProgressEvent {
+                    packets: frames,
+                    payload_bytes: 0,
+                    done: false,
+                },
+                decoded_frames,
+            ))
+        })
+        .map_err(|e| e.to_string())?;
+    Ok((stats.video_frames, decoded_frames))
+}
 impl FadeTimeline {
     pub fn new(offset_us: i64, duration_us: i64) -> Result<Self, String> {
         if offset_us < 0 || duration_us <= 0 {
@@ -225,6 +466,148 @@ pub fn fade(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn atomic_export_preserves_existing_output_and_cleans_failed_decode() {
+        let directory = std::env::temp_dir().join(format!(
+            "fvid-xfade-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        std::fs::create_dir(&directory).unwrap();
+        struct Cleanup(std::path::PathBuf);
+        impl Drop for Cleanup {
+            fn drop(&mut self) {
+                let _ = std::fs::remove_dir_all(&self.0);
+            }
+        }
+        let _cleanup = Cleanup(directory.clone());
+        let main = directory.join("main.y4m");
+        let other = directory.join("other.y4m");
+        let output = directory.join("output.mkv");
+        let source = [
+            b"YUV4MPEG2 W2 H2 F2:1 Ip A1:1 C420\nFRAME\n".as_slice(),
+            &[0; 6],
+        ]
+        .concat();
+        std::fs::write(&main, &source).unwrap();
+        std::fs::write(&other, &source).unwrap();
+        let stats = crate::xfade_video(
+            &main,
+            &other,
+            &output,
+            "fade",
+            500000,
+            0,
+            &Default::default(),
+        )
+        .unwrap();
+        assert_eq!(stats.video_frames, 1);
+        assert_eq!(stats.decoded_frames, 2);
+        assert_eq!(stats.backend, "owned Y4M cross-fade FFV1 export");
+        let original = std::fs::read(&output).unwrap();
+        assert!(
+            export_y4m_ffv1(&main, &other, &output, 0, 500000)
+                .unwrap_err()
+                .contains("already exists")
+        );
+        assert_eq!(std::fs::read(&output).unwrap(), original);
+        std::fs::remove_file(&output).unwrap();
+        std::fs::write(
+            &main,
+            [
+                b"YUV4MPEG2 W2 H2 F3:1 Ip A1:1 C420\nFRAME\n".as_slice(),
+                &[0; 6],
+            ]
+            .concat(),
+        )
+        .unwrap();
+        std::fs::write(
+            &other,
+            include_bytes!("../../../tests/fixtures/playback-errors/xfade-secondary-truncated.y4m"),
+        )
+        .unwrap();
+        assert!(
+            export_y4m_ffv1(&main, &other, &output, 0, 500000)
+                .unwrap_err()
+                .contains("secondary payload")
+        );
+        assert!(!output.exists());
+        assert_eq!(std::fs::read_dir(&directory).unwrap().count(), 2);
+    }
+    #[test]
+    fn matroska_export_roundtrips_transition_pixels_and_secondary_tail() {
+        let header_bytes = b"YUV4MPEG2 W2 H2 F2:1 Ip A1:1 C420\n";
+        let header = Header::parse(header_bytes).unwrap();
+        let make = |values: &[u8]| {
+            let mut bytes = header_bytes.to_vec();
+            for &value in values {
+                bytes.extend_from_slice(b"FRAME\n");
+                bytes.extend_from_slice(&[value; 6]);
+            }
+            std::io::Cursor::new(bytes)
+        };
+        let mut output = std::io::Cursor::new(Vec::new());
+        assert_eq!(
+            write_y4m_ffv1(
+                make(&[0, 0]),
+                make(&[100, 200, 240]),
+                &header,
+                FadeTimeline::new(500000, 500000).unwrap(),
+                &mut output
+            )
+            .unwrap(),
+            4
+        );
+        output.set_position(0);
+        let mut reader = crate::owned_webm::WebmReader::open(output, Default::default()).unwrap();
+        reader.scan_all().unwrap();
+        assert_eq!(reader.packets.len(), 4);
+        let mut decoder = crate::owned_ffv1_decoder::Decoder::new(2, 2, 1 << 20).unwrap();
+        for (index, expected) in [0, 0, 200, 240].into_iter().enumerate() {
+            assert_eq!(reader.packets[index].pts_ns, index as i64 * 500000000);
+            assert_eq!(reader.packets[index].duration_ns, Some(500000000));
+            let packet = reader.read_packet(index).unwrap();
+            assert_eq!(decoder.decode(&packet).unwrap().frame.data, [expected; 6]);
+        }
+    }
+    #[test]
+    fn composed_stream_keeps_secondary_tail_and_exact_frame_clock() {
+        let header_bytes = b"YUV4MPEG2 W2 H2 F2:1 Ip A1:1 C420\n";
+        let header = Header::parse(header_bytes).unwrap();
+        let make = |values: &[u8]| {
+            let mut bytes = header_bytes.to_vec();
+            for &value in values {
+                bytes.extend_from_slice(b"FRAME\n");
+                bytes.extend_from_slice(&[value; 6]);
+            }
+            std::io::Cursor::new(bytes)
+        };
+        let mut result = Vec::new();
+        let count = visit_y4m(
+            make(&[0, 0]),
+            make(&[100, 200, 240]),
+            &header,
+            FadeTimeline::new(500000, 500000).unwrap(),
+            |frame, pts, duration| {
+                result.push((frame.data[0], pts, duration));
+                Ok(())
+            },
+        )
+        .unwrap();
+        assert_eq!(count, 4);
+        assert_eq!(
+            result,
+            [
+                (0, 0, 500000000),
+                (0, 500000000, 500000000),
+                (200, 1000000000, 500000000),
+                (240, 1500000000, 500000000)
+            ]
+        );
+    }
     #[test]
     fn streaming_transition_blends_on_primary_clock_then_uses_secondary_pixels() {
         let primary = Header::parse(b"YUV4MPEG2 W2 H2 F3:1 Ip A1:1 C420\n").unwrap();
