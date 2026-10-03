@@ -31,3 +31,6 @@ for name, w, h, rate, count, base in [
 
 # Six indexed frames for temporal selection and interval-origin regression.
 (root / "framestep-six-frames.y4m").write_bytes(main)
+
+# Truncate the last, discarded frame to verify temporal filters still validate it.
+(root / "framestep-discarded-truncated.y4m").write_bytes(main[:-1])

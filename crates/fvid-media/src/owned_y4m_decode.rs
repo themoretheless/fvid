@@ -497,7 +497,7 @@ pub fn decode_reader_transformed(
     source: impl BufRead,
     transform: &DecodeTransform,
 ) -> Result<DecodeStats> {
-    decode_reader_frames(source, transform, None, None)
+    decode_reader_frames(source, transform, None, None).map(|(stats, _)| stats)
 }
 
 /// Deliver transformed planar frames without retaining the video. Timestamps
@@ -517,6 +517,17 @@ pub(crate) fn visit_reader_transformed_limited(
     max_frames: Option<u64>,
     visit: &mut FrameVisitor<'_>,
 ) -> Result<DecodeStats> {
+    visit_reader_transformed_counted(source, transform, max_frames, visit).map(|(stats, _)| stats)
+}
+
+/// Internal accounting retains every completely consumed frame, including
+/// interval preroll and frames discarded by temporal selection.
+pub(crate) fn visit_reader_transformed_counted(
+    source: impl BufRead,
+    transform: &DecodeTransform,
+    max_frames: Option<u64>,
+    visit: &mut FrameVisitor<'_>,
+) -> Result<(DecodeStats, u64)> {
     decode_reader_frames(source, transform, Some(visit), max_frames)
 }
 
@@ -526,7 +537,7 @@ fn decode_reader_frames(
     transform: &DecodeTransform,
     mut visit: Option<&mut FrameVisitor<'_>>,
     max_frames: Option<u64>,
-) -> Result<DecodeStats> {
+) -> Result<(DecodeStats, u64)> {
     if !supported_request(transform) {
         return Err("owned Y4M decoder does not yet implement requested transform options".into());
     }
@@ -735,18 +746,21 @@ fn decode_reader_frames(
     } else {
         format!("yuv{layout}p{}le", header.depth())
     };
-    Ok(DecodeStats {
-        backend: if geometry {
-            "owned Y4M planar decode"
-        } else {
-            "owned Y4M raw decode"
+    Ok((
+        DecodeStats {
+            backend: if geometry {
+                "owned Y4M planar decode"
+            } else {
+                "owned Y4M raw decode"
+            },
+            video_frames: frames,
+            width,
+            height,
+            pixel_format,
+            decode_errors: 0,
         },
-        video_frames: frames,
-        width,
-        height,
-        pixel_format,
-        decode_errors: 0,
-    })
+        index,
+    ))
 }
 
 #[cfg(test)]

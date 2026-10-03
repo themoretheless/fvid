@@ -446,3 +446,35 @@ unrepresentable exact output rates and other codec/filter gaps remain open.
 Final verification repeated all 146 own tests with an empty external PATH
 after the header preservation adjustment. All 13 native geometry integration
 tests also passed with the empty-PATH Cargo runner and invalid FFmpeg SDK prefix.
+
+
+Owned framestep lossless file operation
+-------------------------------------
+
+The native lossless request now includes framestep and dispatches before
+legacy input opening. Internal reader/encoder/mux accounting carries the
+number of fully consumed source frames separately from selected output frames;
+public existing result types remain unchanged. Full six-frame input exports
+three FFV1 packets and reports six decoded frames. The exact 0.25..1 s interval
+exports indices [1,3], rebases their PTS to [0,0.5] s and reports four consumed
+frames, including origin/preroll. Durations remain the source 0.25 s values.
+
+The file-operation acceptance failed before this fix at owned route admission
+using the committed six-frame synthetic fixture. It now verifies public own
+planning/export, counts, every pixel, packet timestamps/durations and independent
+owned FFV1 decoding. The new framestep-discarded-truncated.y4m fixture truncates
+the final discarded frame and is generated without external tools. Refusal
+checks demonstrate that discarded payloads and source packet limits still
+validate before publication; they are preservation checks, not successful
+playback of a damaged input. Existing temporal artifacts remain byte-identical.
+
+The explicit ffmpeg_framestep_reference benchmark independently decoded both
+own files with FFmpeg and compared every pixel to the reference filter. Its
+showinfo assertions also verified container PTS and source frame durations.
+FFmpeg is called only by this benchmark, not fixture generation or tests.
+
+All 148 own unit tests and 13 native geometry integrations passed with empty
+external-program PATH. The own test binary links no libav; legacy/player
+compilation, native source/dependency guards and diff checks passed. This
+removes the Y4M framestep file-export fallback. General expressions, other
+sources and the rest of production codec/filter migration remain incomplete.

@@ -180,6 +180,7 @@ pub fn write_y4m_ffv1_controlled<W: Write + Seek>(
         false,
         &FileMetadata::default(),
     )
+    .map(|(stats, event, _)| (stats, event))
 }
 fn write_y4m_ffv1_policy<W: Write + Seek>(
     source: impl std::io::BufRead,
@@ -191,11 +192,11 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
     max_packets: Option<u64>,
     rebase_interval: bool,
     file_metadata: &FileMetadata,
-) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
+) -> Result<(fvid_media_info::DecodeStats, ProgressEvent, u64)> {
     check(cancel)?;
     let mut output = Some(output);
     let mut writer = None;
-    let stats = crate::owned_ffv1_encoder::encode_y4m_limited(
+    let (stats, consumed) = crate::owned_ffv1_encoder::encode_y4m_counted(
         source,
         transform,
         max_packets,
@@ -260,7 +261,7 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
     let event = writer
         .ok_or_else(|| invalid("Matroska has no selected frames"))?
         .finish()?;
-    Ok((stats, event))
+    Ok((stats, event, consumed))
 }
 
 fn check(cancel: Option<&fvid_control::CancelFlag>) -> Result<()> {
@@ -301,6 +302,7 @@ pub fn export_y4m_ffv1(
         false,
         &FileMetadata::default(),
     )
+    .map(|(stats, event, _)| (stats, event))
 }
 pub(crate) fn export_y4m_ffv1_policy(
     source: &std::path::Path,
@@ -312,7 +314,7 @@ pub(crate) fn export_y4m_ffv1_policy(
     max_packets: Option<u64>,
     rebase_interval: bool,
     file_metadata: &FileMetadata,
-) -> Result<(fvid_media_info::DecodeStats, ProgressEvent)> {
+) -> Result<(fvid_media_info::DecodeStats, ProgressEvent, u64)> {
     check(cancel)?;
     if destination
         .extension()
@@ -355,7 +357,7 @@ pub(crate) fn export_y4m_ffv1_policy(
     }
     let (temporary, mut file) =
         reserved.ok_or_else(|| invalid("cannot reserve Matroska output"))?;
-    let (stats, mut event) = write_y4m_ffv1_policy(
+    let (stats, mut event, consumed) = write_y4m_ffv1_policy(
         input,
         &mut file,
         transform,
@@ -376,7 +378,7 @@ pub(crate) fn export_y4m_ffv1_policy(
     if let Some(hook) = progress {
         hook.emit(event);
     }
-    Ok((stats, event))
+    Ok((stats, event, consumed))
 }
 
 impl MasteringDisplay {

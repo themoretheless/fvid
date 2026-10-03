@@ -11,6 +11,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         transpose: t.transpose.clone(),
         pad: t.pad.clone(),
         interval: t.interval,
+        framestep: t.framestep.clone(),
         overlay: t.overlay.clone(),
         avgblur: t.avgblur.clone(),
         boxblur: t.boxblur.clone(),
@@ -38,6 +39,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         transpose: t.transpose.clone(),
         pad: t.pad.clone(),
         interval: t.interval,
+        framestep: t.framestep.clone(),
         overlay: t.overlay.clone(),
         avgblur: t.avgblur.clone(),
         boxblur: t.boxblur.clone(),
@@ -127,7 +129,7 @@ pub fn transcode_lossless(
     }
     let request = request(&transform)
         .ok_or("owned Y4M lossless export does not yet implement requested transforms")?;
-    let skipped = if let Some((from, to)) = request.interval {
+    if let Some((from, to)) = request.interval {
         if from < 0 || to <= from {
             return Err("lossless interval requires 0 <= from < to".into());
         }
@@ -144,11 +146,9 @@ pub fn transcode_lossless(
             }
         }
         u64::try_from(from as u128 * n as u128 / denominator)
-            .map_err(|_| "interval timestamp overflow")?
-    } else {
-        0
-    };
-    let (stats, event) = crate::owned_matroska::export_y4m_ffv1_policy(
+            .map_err(|_| "interval timestamp overflow")?;
+    }
+    let (stats, event, consumed) = crate::owned_matroska::export_y4m_ffv1_policy(
         source,
         destination,
         &request,
@@ -163,10 +163,7 @@ pub fn transcode_lossless(
     Ok(LosslessStats {
         backend: "fvid",
         video_frames: stats.video_frames,
-        decoded_frames: stats
-            .video_frames
-            .checked_add(skipped)
-            .ok_or("frame count overflow")?,
+        decoded_frames: consumed,
         seek_used: false,
         video_packets: event.packets,
         copied_packets: 0,
@@ -388,4 +385,102 @@ pub fn plan_overlay(
     let mut plan = plan_transcode_lossless(source, &transform, options, None)?;
     plan.command = "overlay".into();
     Ok(plan)
+}
+
+#[cfg(test)]
+mod framestep_tests {
+    use super::*;
+    #[test]
+    fn stepped_file_export_counts_consumed_frames_and_preserves_packet_timing() {
+        let root =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/playback-errors");
+        let source = root.join("framestep-six-frames.y4m");
+        for (case, interval, indices, consumed) in [
+            ("full", None, vec![0u8, 2, 4], 6),
+            ("range", Some((250_000, 1_000_000)), vec![1u8, 3], 4),
+        ] {
+            let transform = LosslessTransform {
+                framestep: Some("step=2".into()),
+                interval,
+                ..Default::default()
+            };
+            let options = CopyOptions::default();
+            assert!(supports(&source, &transform, &options));
+            let plan = crate::plan_transcode_lossless(&source, &transform, &options, None).unwrap();
+            assert!(plan.notes[0].starts_with("backend: owned"));
+            let output = std::env::temp_dir().join(format!(
+                "fvid-framestep-export-{}-{case}.mkv",
+                std::process::id()
+            ));
+            let stats = crate::transcode_lossless(&source, &output, transform, &options).unwrap();
+            assert_eq!(stats.backend, "fvid");
+            assert_eq!(stats.decoded_frames, consumed);
+            assert_eq!(stats.video_frames, indices.len() as u64);
+            assert_eq!(stats.video_packets, indices.len() as u64);
+            let mut reader = crate::owned_webm::WebmReader::open(
+                std::io::BufReader::new(std::fs::File::open(&output).unwrap()),
+                Default::default(),
+            )
+            .unwrap();
+            reader.scan_all().unwrap();
+            assert_eq!(reader.packets.len(), indices.len());
+            let origin = interval.map_or(0, |(from, _)| from as i64 * 1000);
+            let mut decoder = crate::owned_ffv1_decoder::Decoder::new(4, 4, 1 << 20).unwrap();
+            for (slot, index) in indices.into_iter().enumerate() {
+                let packet = &reader.packets[slot];
+                assert_eq!(packet.pts_ns, i64::from(index) * 250_000_000 - origin);
+                assert_eq!(packet.duration_ns, Some(250_000_000));
+                let mut expected = vec![10 + index; 16];
+                expected.extend([128; 8]);
+                assert_eq!(
+                    decoder
+                        .decode(&reader.read_packet(slot).unwrap())
+                        .unwrap()
+                        .frame
+                        .data,
+                    expected
+                );
+            }
+            drop(reader);
+            std::fs::remove_file(output).unwrap();
+        }
+    }
+    #[test]
+    fn stepped_export_checks_discarded_payloads_and_input_packet_limit() {
+        let root =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/playback-errors");
+        for (case, name, max_packets, message) in [
+            (
+                "truncated",
+                "framestep-discarded-truncated.y4m",
+                None,
+                "truncated Y4M frame payload",
+            ),
+            (
+                "limit",
+                "framestep-six-frames.y4m",
+                Some(5),
+                "Y4M input packet count exceeds limit",
+            ),
+        ] {
+            let source = root.join(name);
+            let output = std::env::temp_dir().join(format!(
+                "fvid-framestep-refusal-{}-{case}.mkv",
+                std::process::id()
+            ));
+            let transform = LosslessTransform {
+                framestep: Some("2".into()),
+                ..Default::default()
+            };
+            let options = CopyOptions {
+                max_packets,
+                ..Default::default()
+            };
+            assert!(supports(&source, &transform, &options));
+            let error =
+                crate::transcode_lossless(&source, &output, transform, &options).unwrap_err();
+            assert!(error.contains(message), "{error}");
+            assert!(!output.exists());
+        }
+    }
 }
