@@ -3,12 +3,23 @@ use crate::owned_webm::{Limits, WebmReader};
 use fvid_media_info::{ChapterInfo, MediaInfo, StreamInfo};
 use std::{collections::BTreeMap, fs::File, io::BufReader, path::Path};
 pub fn probe_webm(path: &Path) -> Result<MediaInfo, String> {
-    let mut reader = WebmReader::open(
-        BufReader::new(File::open(path).map_err(|e| e.to_string())?),
-        Limits::default(),
-    )
-    .map_err(|e| e.to_string())?;
-    reader.scan_all().map_err(|e| e.to_string())?;
+    try_probe_webm(path)?.ok_or_else(|| "Matroska probe requires supported content encoding and block lacing".into())
+}
+/// None marks content encodings or block lacing that need parser support; malformed
+/// container data stays an error and cannot request a fallback.
+pub fn try_probe_webm(path: &Path) -> Result<Option<MediaInfo>, String> {
+    let mut reader = match WebmReader::open(
+        BufReader::new(File::open(path).map_err(|e| e.to_string())?), Limits::default(),
+    ) {
+        Ok(reader) => reader,
+        Err(error) if error.is_unsupported() => return Ok(None),
+        Err(error) => return Err(error.to_string()),
+    };
+    match reader.scan_all() {
+        Ok(()) => {},
+        Err(error) if error.is_unsupported() => return Ok(None),
+        Err(error) => return Err(error.to_string()),
+    }
     let checked = |n: u64| {
         i64::try_from(n).map_err(|_| "Matroska metadata timestamp exceeds API range".to_string())
     };
@@ -60,6 +71,8 @@ pub fn probe_webm(path: &Path) -> Result<MediaInfo, String> {
             "A_AAC" => "aac",
             "A_OPUS" => "opus",
             "A_VORBIS" => "vorbis",
+            "A_ALAC" => "alac",
+            "A_FLAC" => "flac",
             other => other,
         };
         let narrow = |n| {
@@ -94,7 +107,13 @@ pub fn probe_webm(path: &Path) -> Result<MediaInfo, String> {
                 _ => "unknown",
             }
             .into(),
-            codec: codec.into(),
+            codec: match (track.codec.as_str(),track.bit_depth) {
+                ("A_PCM/INT/LIT" | "A_PCM/INT/BIG",8) => "pcm_u8".into(),
+                ("A_PCM/INT/LIT",bits @ (16|24|32)) => format!("pcm_s{bits}le"),
+                ("A_PCM/INT/BIG",bits @ (16|24|32)) => format!("pcm_s{bits}be"),
+                ("A_PCM/FLOAT/IEEE",bits @ (32|64)) => format!("pcm_f{bits}le"),
+                _ => codec.into(),
+            },
             time_base: [1, 1_000_000_000],
             start,
             duration: None,
@@ -135,7 +154,7 @@ pub fn probe_webm(path: &Path) -> Result<MediaInfo, String> {
             metadata,
         });
     }
-    Ok(MediaInfo {
+    Ok(Some(MediaInfo {
         path: path.into(),
         format: "matroska,webm".into(),
         start_us: streams
@@ -148,11 +167,63 @@ pub fn probe_webm(path: &Path) -> Result<MediaInfo, String> {
         metadata,
         chapters,
         streams,
-    })
+    }))
 }
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn public_probe_routes_clear_metadata_and_preserves_encoding_gap() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/playback-errors");
+        for (name, codec) in [
+            ("webm-probe-clear.mkv", "ffv1"),
+            ("pcm64-precision.mka", "pcm_f64le"),
+            ("pcm32-precision-little.mka", "pcm_s32le"),
+            ("pcm32-precision-big.mka", "pcm_s32be"),
+        ] {
+            let path = root.join(name);
+            let expected = probe_webm(&path).unwrap();
+            assert_eq!(expected.streams[0].codec, codec);
+            for hint in [None, Some("webm"), Some("matroska"), Some("matroska,webm")] {
+                let selected = crate::owned_probe::try_webm_as(&path, hint)
+                    .unwrap()
+                    .unwrap();
+                let public = crate::probe_as(&path, hint).unwrap();
+                assert_eq!(
+                    serde_json::to_value(selected).unwrap(),
+                    serde_json::to_value(&expected).unwrap()
+                );
+                assert_eq!(
+                    serde_json::to_value(public).unwrap(),
+                    serde_json::to_value(&expected).unwrap()
+                );
+            }
+            assert!(
+                crate::owned_probe::try_webm_as(&path, Some("mov"))
+                    .unwrap()
+                    .is_none()
+            );
+        }
+        let encoded = root.join("webm-probe-content-encoding.mkv");
+        assert!(try_probe_webm(&encoded).unwrap().is_none());
+        assert!(
+            probe_webm(&encoded)
+                .unwrap_err()
+                .contains("content encoding")
+        );
+        let laced = root.join("webm-probe-laced.mkv");
+        assert!(try_probe_webm(&laced).unwrap().is_none());
+        let broken = root.join("webm-probe-segment-beyond-file.mkv");
+        let error = probe_webm(&broken).unwrap_err();
+        assert_eq!(error, "EBML element exceeds parent");
+        for hint in [None, Some("matroska")] {
+            assert_eq!(
+                crate::owned_probe::try_webm_as(&broken, hint).unwrap_err(),
+                error
+            );
+            assert_eq!(crate::probe_as(&broken, hint).unwrap_err(), error);
+        }
+    }
     #[test]
     fn synthetic_container_reaches_owned_probe_dispatch() {
         use crate::owned_matroska::{Chapter, FileMetadata, PacketWriter};
@@ -180,6 +251,8 @@ mod tests {
             probe_webm(&path).unwrap(),
             crate::owned_probe::probe(&path).unwrap(),
             crate::owned_probe::probe_as(&path, Some("matroska")).unwrap(),
+            crate::probe(&path).unwrap(),
+            crate::probe_as(&path, Some("webm")).unwrap(),
         ] {
             assert_eq!(info.metadata["title"], "Synthetic container");
             assert_eq!(info.streams[0].codec, "ffv1");

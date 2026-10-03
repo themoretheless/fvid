@@ -22,3 +22,7 @@ fn is_matroska_source(source: &std::path::Path) -> Result<bool> {
     }
 }
 include!("owned_subtitle_impl.rs");
+
+impl From<crate::owned_webm::Error> for Error {
+    fn from(error: crate::owned_webm::Error) -> Self { Self(error.to_string()) }
+}

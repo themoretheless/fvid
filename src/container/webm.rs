@@ -1,7 +1,7 @@
 //! Bounded seekable WebM/Matroska indexing, without an external demultiplexer.
 use crate::color::hdr::{ColourDescription, HdrMetadata, MasteringDisplay};
 use crate::color::tonemap::ContentLight;
-use crate::{Result, container::FileTags, invalid};
+use crate::{Result, container::FileTags, invalid, unsupported};
 use std::io::{Read, Seek, SeekFrom};
 pub use fvid_media::owned_matroska::Chapter;
 include!("../../crates/fvid-media/src/owned_webm_reader_impl.rs");

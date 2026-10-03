@@ -1,12 +1,58 @@
 //! Owned bounded, incrementally indexed WebM/Matroska reader.
-pub use crate::owned_ebml::{Error, Result};
+#[derive(Debug)]
+pub struct Error {
+    message: String,
+    unsupported: bool,
+}
+pub type Result<T> = std::result::Result<T, Error>;
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.message)
+    }
+}
+impl std::error::Error for Error {}
+impl Error {
+    pub fn is_unsupported(&self) -> bool {
+        self.unsupported
+    }
+}
+impl From<std::io::Error> for Error {
+    fn from(e: std::io::Error) -> Self {
+        Self {
+            message: e.to_string(),
+            unsupported: false,
+        }
+    }
+}
+impl From<crate::owned_ebml::Error> for Error {
+    fn from(e: crate::owned_ebml::Error) -> Self {
+        Self {
+            message: e.to_string(),
+            unsupported: false,
+        }
+    }
+}
+impl From<Error> for crate::owned_ebml::Error {
+    fn from(error: Error) -> Self {
+        Self(error.to_string())
+    }
+}
 use crate::owned_file_tags::FileTags;
 use crate::owned_matroska::{
     Chapter, ColourDescription, ContentLight, HdrMetadata, MasteringDisplay,
 };
 use std::io::{Read, Seek, SeekFrom};
 fn invalid(message: &str) -> Error {
-    Error(message.into())
+    Error {
+        message: message.into(),
+        unsupported: false,
+    }
+}
+fn unsupported(message: &str) -> Error {
+    Error {
+        message: message.into(),
+        unsupported: true,
+    }
 }
 include!("owned_webm_reader_impl.rs");
 #[cfg(test)]

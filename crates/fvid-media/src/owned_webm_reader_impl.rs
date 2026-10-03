@@ -537,7 +537,7 @@ impl<R: Read + Seek> WebmReader<R> {
                                     }
                                 }
                                 0x6d80 => {
-                                    return Err(invalid(
+                                    return Err(unsupported(
                                         "encoded/encrypted WebM tracks not supported",
                                     ));
                                 }
@@ -933,7 +933,7 @@ fn read_block<R: Read + Seek>(
         return Err(invalid("truncated WebM block"));
     }
     if h[2] & 6 != 0 {
-        return Err(invalid("WebM laced blocks are not yet supported"));
+        return Err(unsupported("WebM laced blocks are not yet supported"));
     }
     let pts =
         i128::from(timestamp.ok_or_else(|| invalid("WebM block precedes Cluster timestamp"))?)

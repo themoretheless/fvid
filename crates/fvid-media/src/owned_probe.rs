@@ -18,7 +18,7 @@ pub fn probe(path: &Path) -> Result<MediaInfo, String> {
 pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> {
     match format {
         Some("mov" | "mp4" | "m4a" | "3gp" | "3g2" | "mj2" | "mov,mp4,m4a,3gp,3g2,mj2") => return crate::owned_mp4_probe::probe_mp4(path),
-        Some("webm" | "matroska") => return crate::owned_webm_probe::probe_webm(path),
+        Some("webm" | "matroska" | "matroska,webm") => return crate::owned_webm_probe::probe_webm(path),
         Some("wav") => return probe_wave(path).map_err(|e| e.to_string()),
         Some("aac") => return probe_adts(path),
         Some("y4m" | "yuv4mpegpipe") => return crate::owned_y4m_probe::probe_y4m(path),
@@ -71,6 +71,24 @@ pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Option<Med
         }
     }
     crate::owned_mp4_probe::try_probe_mp4(path)
+}
+
+pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    if let Some(hint) = format {
+        if !matches!(hint, "webm" | "matroska" | "matroska,webm") {
+            return Ok(None);
+        }
+    } else {
+        let mut prefix = [0; 4];
+        let mut file = File::open(path).map_err(|e| e.to_string())?;
+        match file.read_exact(&mut prefix) {
+            Ok(()) if prefix == [0x1a, 0x45, 0xdf, 0xa3] => {}
+            Ok(()) => return Ok(None),
+            Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
+            Err(e) => return Err(e.to_string()),
+        }
+    }
+    crate::owned_webm_probe::try_probe_webm(path)
 }
 
 /// Count AAC-LC ADTS packets using owned framing, without decoding PCM.

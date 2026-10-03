@@ -229,7 +229,7 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
     reader
         .scan_all_with_admission(|reader| {
             if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
-                return Err(crate::owned_ebml::Error("media operation cancelled".into()));
+                return Err(crate::owned_ebml::Error("media operation cancelled".into()).into());
             }
             crate::owned_budget::check_rss_budget(options).map_err(crate::owned_ebml::Error)?;
             let track = reader.tracks.get(index).ok_or_else(|| {
@@ -271,7 +271,7 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
             {
                 return Err(crate::owned_ebml::Error(format!(
                     "controlled memory budget exceeded: need {estimated} bytes"
-                )));
+                )).into());
             }
             Ok(())
         })
@@ -358,3 +358,7 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
     decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)
 }
 include!("owned_matroska_audio_timeline_impl.rs");
+
+impl From<crate::owned_webm::Error> for Error {
+    fn from(error: crate::owned_webm::Error) -> Self { Self(error.to_string()) }
+}

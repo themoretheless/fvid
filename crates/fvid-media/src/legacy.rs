@@ -856,6 +856,9 @@ pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo> {
     if let Some(info) = crate::owned_probe::try_mp4_as(path, format)? {
         return Ok(info);
     }
+    if let Some(info) = crate::owned_probe::try_webm_as(path, format)? {
+        return Ok(info);
+    }
     if format.is_none_or(|name| name == "wav")
         && crate::owned_wave_inspect::is_wave(path).unwrap_or(false)
     {
