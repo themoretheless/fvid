@@ -125,7 +125,11 @@ pub struct WebmReader<R> {
     pub metadata: std::collections::BTreeMap<String, String>,
     /// Segment WritingApp, independent of a tag named ENCODER.
     pub writing_app: String,
-    /// False for scoped, nested or oversized tags requiring a richer exporter.
+    /// Track number to TrackUID, independent of element ordering.
+    pub track_uids: std::collections::BTreeMap<u64,u64>,
+    /// Text tags scoped to TrackUID (zero denotes all tracks).
+    pub track_metadata: std::collections::BTreeMap<u64,std::collections::BTreeMap<String,String>>,
+    /// False for unsupported scopes, nested or oversized tags requiring a richer exporter.
     pub metadata_complete: bool,
     limits: Limits,
     read_packet_bytes: usize,
@@ -279,6 +283,8 @@ impl<R: Read + Seek> WebmReader<R> {
             tags: FileTags::default(),
             metadata: Default::default(),
             writing_app: String::new(),
+            track_uids: Default::default(),
+            track_metadata: Default::default(),
             metadata_complete: true,
             limits,
             read_packet_bytes: limits.packet_bytes,
@@ -326,6 +332,8 @@ impl<R: Read + Seek> WebmReader<R> {
             tags,
             metadata,
             writing_app,
+            track_uids,
+            track_metadata,
             metadata_complete,
             elements,
             scanned,
@@ -396,11 +404,13 @@ impl<R: Read + Seek> WebmReader<R> {
                         // the same place. Whichever the newer spelling is wins, in
                         // either writing order, so a track that carries both does
                         // not read as two different languages.
+                        let mut uid = None;
                         let mut older = String::new();
                         let mut current = String::new();
                         for f in fields(&mut *reader, entry, &mut *elements, limits.elements)? {
                             match f.id {
                                 0xd7 => track.number = uint(&mut *reader, f)?,
+                                0x73c5 => uid = Some(uint(&mut *reader,f)?),
                                 0x83 => track.kind = uint(&mut *reader, f)?,
                                 0x86 => {
                                     // Some muxers NUL-terminate the CodecID string.
@@ -506,6 +516,7 @@ impl<R: Read + Seek> WebmReader<R> {
                         {
                             return Err(invalid("invalid WebM track"));
                         }
+                        if let Some(uid) = uid {track_uids.insert(track.number,uid);}
                         tracks.push(track);
                     }
                 }
@@ -513,12 +524,11 @@ impl<R: Read + Seek> WebmReader<R> {
                     let mut exceeded = false;
                     *metadata_complete &= read_tags_collect(
                         &mut *reader, e, &mut *elements, limits.elements, &mut *tags,
-                        &mut |name, value| {
-                            if metadata.len() >= 256 && !metadata.contains_key(name) {
-                                exceeded = true;
-                                return;
-                            }
-                            metadata.entry(name.to_owned()).or_insert_with(|| value.to_owned());
+                        &mut |uid, name, value| {
+                            let count = metadata.len() + track_metadata.values().map(|m|m.len()).sum::<usize>();
+                            if count >= 256 {exceeded=true;return;}
+                            let target = if let Some(uid) = uid {track_metadata.entry(uid).or_default()} else {&mut *metadata};
+                            target.entry(name.to_owned()).or_insert_with(||value.to_owned());
                         },
                     );
                     if exceeded {

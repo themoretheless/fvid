@@ -148,8 +148,33 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         file: &FileMetadata,
         text_tags: &std::collections::BTreeMap<String, String>,
     ) -> Result<Self> {
+        Self::new_ffv1_with_scoped_tags(
+            output,
+            width,
+            height,
+            metadata,
+            rotation,
+            default_duration_ns,
+            file,
+            text_tags,
+            &Default::default(),
+        )
+    }
+    /// Write file tags and tags scoped to the new video TrackUID (one).
+    pub fn new_ffv1_with_scoped_tags(
+        output: &'a mut W,
+        width: u32,
+        height: u32,
+        metadata: Option<&VideoMetadata>,
+        rotation: u16,
+        default_duration_ns: u64,
+        file: &FileMetadata,
+        text_tags: &std::collections::BTreeMap<String, String>,
+        track_tags: &std::collections::BTreeMap<String, String>,
+    ) -> Result<Self> {
         let mut file_elements = file_metadata(file)?;
         file_elements.extend(extra_text_tags(text_tags)?);
+        file_elements.extend(text_tags_element(track_tags, Some(1))?);
         let geometry = video_element(width, height, metadata, rotation)?;
         let entries = element(
             0xae,
@@ -174,6 +199,12 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
 }
 
 fn extra_text_tags(tags: &std::collections::BTreeMap<String, String>) -> Result<Vec<u8>> {
+    text_tags_element(tags,None)
+}
+fn text_tags_element(
+    tags: &std::collections::BTreeMap<String, String>,
+    uid: Option<u64>,
+) -> Result<Vec<u8>> {
     if tags.len() > 256 {
         return Err(invalid("Matroska text tag count exceeds limit"));
     }
@@ -187,7 +218,7 @@ fn extra_text_tags(tags: &std::collections::BTreeMap<String, String>) -> Result<
         {
             return Err(invalid("invalid Matroska text tag"));
         }
-        if crate::owned_file_tags::FileTags::supports_key(name) {
+        if uid.is_none() && crate::owned_file_tags::FileTags::supports_key(name) {
             continue;
         }
         let simple = element(
@@ -198,7 +229,11 @@ fn extra_text_tags(tags: &std::collections::BTreeMap<String, String>) -> Result<
             ]
             .concat(),
         )?;
-        entries.extend(element(0x7373, &simple)?);
+        let targets = uid
+            .map(|uid| element(0x63c0, &uint(0x63c5, uid)?))
+            .transpose()?
+            .unwrap_or_default();
+        entries.extend(element(0x7373, &[targets, simple].concat())?);
     }
     if entries.is_empty() {
         Ok(Vec::new())

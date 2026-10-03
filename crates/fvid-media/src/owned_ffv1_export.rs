@@ -21,6 +21,14 @@ pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
         return false;
     }
     let track = &input.tracks[0];
+    let uid = input.track_uids.get(&track.number).copied();
+    if input
+        .track_metadata
+        .keys()
+        .any(|&target| target != 0 && Some(target) != uid)
+    {
+        return false;
+    }
     if track.kind != 1
         || track.codec != "V_FFV1"
         || !track.codec_private.is_empty()
@@ -92,6 +100,12 @@ pub(crate) fn export(
 ) -> Result<(DecodeStats, fvid_control::ProgressEvent, u64)> {
     let input = input(source)?;
     let track = input.tracks.first().ok_or("input has no video stream")?;
+    let mut track_tags = input.track_metadata.get(&0).cloned().unwrap_or_default();
+    if let Some(uid) = input.track_uids.get(&track.number) {
+        if let Some(scoped) = input.track_metadata.get(uid) {
+            track_tags.extend(scoped.clone());
+        }
+    }
     let origin = input.packets.iter().map(|p| p.pts_ns).min().unwrap_or(0);
     let mut metadata = mkv::FileMetadata {
         tags: input.tags.clone(),
@@ -150,7 +164,7 @@ pub(crate) fn export(
                         ..Default::default()
                     };
                     writer = Some(
-                        mkv::PacketWriter::new_ffv1_with_text_tags(
+                        mkv::PacketWriter::new_ffv1_with_scoped_tags(
                             output.take().unwrap(),
                             view.width,
                             view.height,
@@ -159,6 +173,7 @@ pub(crate) fn export(
                             0,
                             &metadata,
                             &input.metadata,
+                            &track_tags,
                         )
                         .map_err(|e| e.to_string())?,
                     );
@@ -600,11 +615,33 @@ mod tests {
         std::fs::remove_file(output).unwrap();
     }
     #[test]
-    fn scoped_tags_are_an_explicit_export_refusal_until_preserved_by_owned_writer() {
+    fn scoped_tags_survive_owned_export_with_track_uid_remapping() {
         let source = root().join("ffv1-track-tags.mkv");
         let reader = input(&source).unwrap();
-        assert!(!reader.metadata_complete);
-        assert!(!supports(&source, &Default::default()));
-        // Refusal preserves the existing backend; this is not acceptance for scoped-tag export.
+        assert!(reader.metadata_complete);
+        assert_eq!(reader.track_uids[&1], 37);
+        assert_eq!(
+            reader.track_metadata[&37]["PRIVATE_TRACK_NOTE"],
+            "not file metadata"
+        );
+        assert!(supports(&source, &Default::default()));
+        let output =
+            std::env::temp_dir().join(format!("fvid-ffv1-track-tags-{}.mkv", std::process::id()));
+        let _ = std::fs::remove_file(&output);
+        crate::transcode_lossless(&source, &output, Default::default(), &Default::default())
+            .unwrap();
+        let reader = input(&output).unwrap();
+        assert_eq!(reader.track_uids[&1], 1);
+        assert_eq!(
+            reader.track_metadata[&1]["PRIVATE_TRACK_NOTE"],
+            "not file metadata"
+        );
+        let info = crate::owned_probe::probe(&output).unwrap();
+        assert_eq!(
+            info.streams[0].metadata["PRIVATE_TRACK_NOTE"],
+            "not file metadata"
+        );
+        assert!(!info.metadata.contains_key("PRIVATE_TRACK_NOTE"));
+        std::fs::remove_file(output).unwrap();
     }
 }

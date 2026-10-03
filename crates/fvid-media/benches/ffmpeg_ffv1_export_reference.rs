@@ -204,7 +204,7 @@ fn main() {
     ));
     let _ = std::fs::remove_file(&output);
     fvid_media::transcode_lossless(
-        &root.join("ffv1-custom-tags.mkv"),
+        &root.join("ffv1-track-tags.mkv"),
         &output,
         Default::default(),
         &CopyOptions {
@@ -225,6 +225,7 @@ fn main() {
         ("FVID_TEST_NOTE", "own container metadata"),
         ("TITLE", "New title"),
         ("ENCODER", "synthetic source"),
+        ("PRIVATE_TRACK_NOTE", "not file metadata"),
     ] {
         assert!(
             log.lines().any(|line| line

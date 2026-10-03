@@ -65,7 +65,12 @@ pub fn probe_webm(path: &Path) -> Result<MediaInfo, String> {
         let narrow = |n| {
             i32::try_from(n).map_err(|_| "Matroska track dimensions exceed API range".to_string())
         };
-        let mut tags = BTreeMap::new();
+        let mut tags = reader.track_metadata.get(&0).cloned().unwrap_or_default();
+        if let Some(uid) = reader.track_uids.get(&track.number) {
+            if let Some(scoped) = reader.track_metadata.get(uid) {
+                tags.extend(scoped.clone());
+            }
+        }
         for (key, value) in [("title", &track.name), ("language", &track.language)] {
             if !value.is_empty() {
                 tags.insert(key.into(), value.clone());

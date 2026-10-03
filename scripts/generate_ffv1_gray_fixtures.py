@@ -71,7 +71,7 @@ fn main() {
     for depth, frame_duration, name in videos:
         header = element(0x1A45DFA3, uint(0x4286, 1) + uint(0x42F7, 1) + uint(0x42F2, 4) + uint(0x42F3, 8) + element(0x4282, b"matroska") + uint(0x4287, 4) + uint(0x4285, 2))
         info = element(0x1549A966, uint(0x2AD7B1, 1_000_000) + element(0x4D80, b"fvid-synthetic") + element(0x5741, b"fvid-synthetic") + element(0x4489, struct.pack(">d", 100 if name == "ffv1-vfr.mkv" else (6 if name == "ffv1-six-frames.mkv" else 2) * frame_duration / 1_000_000)))
-        track = uint(0xD7, 1) + uint(0x73C5, 1) + uint(0x83, 1) + element(0x86, b"V_FFV1") + uint(0x23E383, 0 if name == "ffv1-vfr.mkv" else frame_duration) + element(0xE0, uint(0xB0, 4) + uint(0xBA, 3) + (uint(0x54B0, 8) + uint(0x54BA, 3) if name == "ffv1-vfr.mkv" else b""))
+        track = uint(0xD7, 1) + uint(0x73C5, 37 if name == "ffv1-track-tags.mkv" else 1) + uint(0x83, 1) + element(0x86, b"V_FFV1") + uint(0x23E383, 0 if name == "ffv1-vfr.mkv" else frame_duration) + element(0xE0, uint(0xB0, 4) + uint(0xBA, 3) + (uint(0x54B0, 8) + uint(0x54BA, 3) if name == "ffv1-vfr.mkv" else b""))
         tracks = element(0x1654AE6B, element(0xAE, track))
         cluster = uint(0xE7, 200 if name == "ffv1-positive-start.mkv" else 0)
         for index in range(6 if name == "ffv1-six-frames.mkv" else 2):
@@ -87,7 +87,7 @@ fn main() {
         if name in ["ffv1-custom-tags.mkv", "ffv1-track-tags.mkv"]:
             simple = lambda key, value: element(0x67C8, element(0x45A3, key) + element(0x4487, value))
             global_tag = element(0x7373, simple(b"TITLE", b"Synthetic tags") + simple(b"FVID_TEST_NOTE", b"own container metadata") + simple(b"ENCODER", b"synthetic source"))
-            track_tag = element(0x7373, element(0x63C0, uint(0x63C5, 1)) + simple(b"PRIVATE_TRACK_NOTE", b"not file metadata"))
+            track_tag = element(0x7373, simple(b"PRIVATE_TRACK_NOTE", b"not file metadata") + element(0x63C0, uint(0x63C5, 37)))
             tags = element(0x1254C367, global_tag + (track_tag if name == "ffv1-track-tags.mkv" else b""))
         (args.output / name).write_bytes(header + element(0x18538067, info + tracks + element(0x1F43B675, cluster) + tags))
 

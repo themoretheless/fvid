@@ -51,7 +51,7 @@ fn read_tags<R: Read + Seek>(
     max: usize,
     out: &mut FileTags,
 ) {
-    read_tags_collect(r, e, count, max, out, &mut |_, _| {});
+    read_tags_collect(r, e, count, max, out, &mut |_, _, _| {});
 }
 fn read_tags_collect<R: Read + Seek>(
     r: &mut R,
@@ -59,7 +59,7 @@ fn read_tags_collect<R: Read + Seek>(
     count: &mut usize,
     max: usize,
     out: &mut FileTags,
-    collect: &mut impl FnMut(&str, &str),
+    collect: &mut impl FnMut(Option<u64>, &str, &str),
 ) -> bool {
     let mut complete = true;
     for tag in fields_to_first_gap(r, e, count, max) {
@@ -73,14 +73,35 @@ fn read_tags_collect<R: Read + Seek>(
         // Either order the two parts come in is settled before the tag is kept,
         // so a `SimpleTag` written before its `Targets` still has them.
         let mut names_a_part = false;
+        let mut track_uid = None;
+        let mut unsupported_scope = false;
         let mut stated: Vec<(String, String)> = Vec::new();
         for part in parts {
             match part.id {
                 0x63c0 => {
-                    let entries = fields(r, part, count, max).unwrap_or_default();
-                    names_a_part = entries
-                        .iter()
-                        .any(|entry| matches!(entry.id, 0x63c4 | 0x63c5 | 0x63c6 | 0x63c9));
+                    let entries = match fields(r, part, count, max) {
+                        Ok(entries) => entries,
+                        Err(_) => {
+                            complete = false;
+                            continue;
+                        }
+                    };
+                    for entry in entries {
+                        match entry.id {
+                            0x63c5 => {
+                                names_a_part = true;
+                                match uint(r, entry) {
+                                    Ok(uid) if track_uid.is_none() => track_uid = Some(uid),
+                                    _ => unsupported_scope = true,
+                                }
+                            }
+                            0x63c4 | 0x63c6 | 0x63c9 => {
+                                names_a_part = true;
+                                unsupported_scope = true;
+                            }
+                            _ => {}
+                        }
+                    }
                 }
                 0x67c8 => {
                     let Ok(fields_of_tag) = fields(r, part, count, max) else {
@@ -109,13 +130,15 @@ fn read_tags_collect<R: Read + Seek>(
                 _ => {}
             }
         }
-        if names_a_part {
+        if unsupported_scope {
             complete = false;
         }
-        if !names_a_part {
+        if !names_a_part || (track_uid.is_some() && !unsupported_scope) {
             for (name, value) in stated {
-                out.insert(&name, &value);
-                collect(&name, &value);
+                if !names_a_part {
+                    out.insert(&name, &value);
+                }
+                collect(track_uid, &name, &value);
             }
         }
     }
