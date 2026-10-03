@@ -68,10 +68,7 @@ impl DecodeProgress<'_> {
 /// reserve includes bounded ADTS/ASC/PCE storage, vector headers and file I/O.
 /// This is an admission estimate, not a process RSS or allocator-header limit.
 /// Keep these bounds in sync when adding larger frame sizes or new AAC tools.
-pub(crate) fn check_decode_admission(channels: u16, options: &CopyOptions) -> Result<()> {
-    let Some(limit) = options.max_controlled_bytes else {
-        return Ok(());
-    };
+pub(crate) fn decode_admission_bytes(channels: u16) -> Result<usize> {
     let states = usize::from(channels)
         .checked_add(18)
         .ok_or_else(|| invalid("AAC memory estimate overflow"))?;
@@ -79,6 +76,13 @@ pub(crate) fn check_decode_admission(channels: u16, options: &CopyOptions) -> Re
         .checked_mul((204 + 128) * 1024)
         .and_then(|bytes| bytes.checked_add(256 * 1024))
         .ok_or_else(|| invalid("AAC memory estimate overflow"))?;
+    Ok(estimated)
+}
+pub(crate) fn check_decode_admission(channels: u16, options: &CopyOptions) -> Result<()> {
+    let Some(limit) = options.max_controlled_bytes else {
+        return Ok(());
+    };
+    let estimated = decode_admission_bytes(channels)?;
     if estimated > limit {
         return Err(invalid(&format!(
             "controlled memory budget exceeded: need {estimated} bytes, limit {limit}"

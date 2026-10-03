@@ -126,17 +126,37 @@ fn synthetic_aac_matroska_public_file_export_uses_owned_dsp() {
         fvid_media::owned_audio_export::decode_audio(&matroska, &limited, &options).unwrap();
     assert_eq!((prefix.sample_frames, prefix.decoded_frames), (1024, 1));
     let refused = dir.join("budget.wav");
-    assert!(fvid_media::owned_audio_export::decode_audio(
-        &matroska,
-        &refused,
-        &fvid_control::CopyOptions {
-            max_controlled_bytes: Some(1024),
-            ..Default::default()
-        }
-    )
-    .unwrap_err()
-    .contains("allocation admission"));
+    assert!(
+        fvid_media::owned_audio_export::decode_audio(
+            &matroska,
+            &refused,
+            &fvid_control::CopyOptions {
+                max_controlled_bytes: Some(1024),
+                ..Default::default()
+            }
+        )
+        .unwrap_err()
+        .contains("controlled memory budget exceeded")
+    );
     assert!(!refused.exists());
+    let admitted = dir.join("admitted.wav");
+    fvid_media::decode_audio_transformed(
+        &matroska,
+        &admitted,
+        fvid_media_info::AudioDecodeTransform {
+            interval: Some((2000, 10000)),
+            volume: Some(0.5),
+            channels: Some(2),
+            sample_rate: Some(48000),
+        },
+        &fvid_control::CopyOptions {
+            max_controlled_bytes: Some(32 * 1024 * 1024),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    assert_eq!(std::fs::read(&admitted).unwrap(), bytes);
+
     let cancelled = dir.join("cancelled.wav");
     let token = fvid_control::CancelFlag::default();
     token.cancel();

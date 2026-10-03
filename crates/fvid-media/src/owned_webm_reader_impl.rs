@@ -772,7 +772,6 @@ impl<R: Read + Seek> WebmReader<R> {
     pub fn fully_indexed(&self) -> bool {
         self.scanned
     }
-    /// Tighten encoded payload reads without treating codec metadata as packets.
     /// Conservative retained index payload estimate. Vector/string capacities
     /// are counted, including duplicated canonical/raw metadata and chapter
     /// titles. Each BTreeMap record reserves 4 KiB for node slots/branches;
@@ -861,6 +860,23 @@ impl<R: Read + Seek> WebmReader<R> {
         }
         Ok(total)
     }
+    /// Check retained-index admission initially and after each indexed cluster.
+    /// The callback runs before a caller constructs its decoder or emits PCM.
+    pub fn scan_all_with_admission(
+        &mut self,
+        mut admission: impl FnMut(&Self) -> Result<()>,
+    ) -> Result<()> {
+        admission(self)?;
+        if self.scanned {
+            return Ok(());
+        }
+        while !self.scanned {
+            self.walk(true)?;
+            admission(self)?;
+        }
+        self.settle()?;
+        admission(self)
+    }
     /// Retained packet index payload including spare capacity, excluding the
     /// reader, tracks, metadata, allocator headers and packet data buffers.
     pub fn packet_index_payload_bytes(&self) -> Result<usize> {
@@ -869,6 +885,7 @@ impl<R: Read + Seek> WebmReader<R> {
             .checked_mul(std::mem::size_of::<Packet>())
             .ok_or_else(|| invalid("WebM packet index allocation overflow"))
     }
+    /// Tighten encoded payload reads without treating codec metadata as packets.
     pub fn restrict_packet_bytes(&mut self, maximum: usize) {
         self.read_packet_bytes = self.read_packet_bytes.min(maximum);
     }

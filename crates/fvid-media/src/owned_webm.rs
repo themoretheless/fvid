@@ -116,4 +116,37 @@ mod index_allocation_tests {
             growth
         );
     }
+    #[test]
+    fn admitted_scan_preserves_full_scan_metadata_and_timestamps() {
+        let fixture =
+            include_bytes!("../../../tests/fixtures/playback-errors/ffv1-custom-tags.mkv");
+        let mut expected =
+            WebmReader::open(std::io::Cursor::new(fixture), Default::default()).unwrap();
+        expected.scan_all().unwrap();
+        let mut admitted =
+            WebmReader::open(std::io::Cursor::new(fixture), Default::default()).unwrap();
+        admitted
+            .scan_all_with_admission(|reader| {
+                reader.estimated_index_payload_bytes()?;
+                Ok(())
+            })
+            .unwrap();
+        assert_eq!(admitted.tags, expected.tags);
+        assert_eq!(admitted.metadata, expected.metadata);
+        assert_eq!(admitted.track_metadata, expected.track_metadata);
+        assert_eq!(admitted.chapters, expected.chapters);
+        assert_eq!(admitted.duration_ns, expected.duration_ns);
+        assert_eq!(
+            admitted
+                .packets
+                .iter()
+                .map(|packet| (packet.pts_ns, packet.size))
+                .collect::<Vec<_>>(),
+            expected
+                .packets
+                .iter()
+                .map(|packet| (packet.pts_ns, packet.size))
+                .collect::<Vec<_>>()
+        );
+    }
 }

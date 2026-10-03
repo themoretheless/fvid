@@ -25,11 +25,12 @@ pub(crate) fn matroska_descriptor(
     let selected = options.streams.first().copied();
     let index = crate::owned_matroska_audio::matroska_audio_index(&reader, selected)
         .map_err(|e| e.to_string())?;
-    let track = &reader.tracks[index];
-    if options.max_controlled_bytes.is_some() {
+    let source_codec = reader.tracks[index].codec.clone();
+    drop(reader);
+    if options.max_controlled_bytes.is_some() && source_codec != "A_AAC" {
         return Err("Matroska audio aggregate allocation admission is not yet implemented".into());
     }
-    let (rate, channels, mask, codec, precision) = match track.codec.as_str() {
+    let (rate, channels, mask, codec, precision) = match source_codec.as_str() {
         "A_AAC" => {
             let (rate, channels, mask) =
                 crate::owned_matroska_aac_export::geometry(source, options)?;
@@ -51,7 +52,7 @@ pub(crate) fn matroska_descriptor(
                 rate,
                 channels,
                 crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
-                track.codec.clone(),
+                source_codec.clone(),
                 "float64".into(),
             )
         }

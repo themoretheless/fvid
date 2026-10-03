@@ -50,6 +50,9 @@ fn matroska_audio_plans_use_owned_metadata_and_preserve_precision() {
         assert!(public.steps[0].detail.contains("owned Matroska"));
         assert!(public.steps[0].detail.contains(precision));
         assert!(public.steps.last().unwrap().detail.contains(precision));
+        assert!(public.steps[0].detail.contains("owned Matroska"));
+        assert!(public.steps[0].detail.contains(precision));
+        assert!(public.steps.last().unwrap().detail.contains(precision));
         assert!(public
             .notes
             .iter()
@@ -64,7 +67,20 @@ fn matroska_audio_plans_use_owned_metadata_and_preserve_precision() {
             },
         )
         .unwrap_err();
-        assert!(error.contains("aggregate allocation admission"));
+        if codec == "aac" {
+            assert!(error.contains("controlled memory budget exceeded"));
+            fvid_media::owned_audio_plan::plan_decode_audio(
+                &source,
+                &transform,
+                &CopyOptions {
+                    max_controlled_bytes: Some(32 * 1024 * 1024),
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+        } else {
+            assert!(error.contains("aggregate allocation admission"));
+        }
         assert!(fvid_media::owned_audio_plan::plan_decode_audio(
             &source,
             &transform,

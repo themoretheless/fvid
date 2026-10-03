@@ -148,10 +148,111 @@ pub(crate) fn matroska_audio_index<R: Read + Seek>(
     };
     Ok(index)
 }
+pub(crate) fn open_aac_reader<R: Read + Seek>(
+    source: R,
+    options: &CopyOptions,
+    packet_bytes: usize,
+) -> Result<MatroskaTimelineReader<R>> {
+    crate::owned_aac::stream::check_decode_admission(1, options)?;
+    let mut limits = crate::owned_webm::Limits {
+        packet_bytes,
+        ..Default::default()
+    };
+    let memory_packets = options
+        .max_controlled_bytes
+        .map(|bytes| bytes / std::mem::size_of::<crate::owned_webm::Packet>());
+    if let Some(maximum) = memory_packets {
+        limits.packets = limits.packets.min(maximum);
+    }
+    MatroskaTimelineReader::open(source, limits).map_err(|error| {
+        if memory_packets.is_some_and(|max| max < crate::owned_webm::Limits::default().packets)
+            && error
+                .to_string()
+                .contains("WebM packet count exceeds limit")
+        {
+            invalid("controlled memory budget exceeded: Matroska packet index limit")
+        } else {
+            error.into()
+        }
+    })
+}
+pub(crate) fn admit_aac_reader<R: Read + Seek>(
+    reader: &mut MatroskaTimelineReader<R>,
+    index: usize,
+    options: &CopyOptions,
+) -> Result<()> {
+    if options.max_controlled_bytes.is_none() {
+        return Ok(());
+    }
+    let track = reader.tracks.get(index)
+        .ok_or_else(|| invalid("selected audio stream is absent"))?;
+    let config = crate::owned_aac::config::AacConfig::parse(&track.codec_private)?;
+    let decoder = crate::owned_aac::stream::decode_admission_bytes(u16::from(config.channels))?;
+    let mut visited_packets = 0;
+    let mut largest_packet = 0;
+    reader
+        .scan_all_with_admission(|reader| {
+            if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
+                return Err(crate::owned_ebml::Error("media operation cancelled".into()));
+            }
+            crate::owned_budget::check_rss_budget(options).map_err(crate::owned_ebml::Error)?;
+            let track = reader.tracks.get(index).ok_or_else(|| {
+                crate::owned_ebml::Error("selected audio stream is absent".into())
+            })?;
+            for packet in &reader.packets[visited_packets..] {
+                if packet.track == track.number {
+                    largest_packet = largest_packet.max(packet.size);
+                }
+            }
+            visited_packets = reader.packets.len();
+            let packet = largest_packet;
+            let cloned_track = track
+                .codec
+                .len()
+                .checked_add(track.name.len())
+                .and_then(|bytes| bytes.checked_add(track.language.len()))
+                .and_then(|bytes| bytes.checked_add(track.codec_private.len()))
+                .ok_or_else(|| {
+                    crate::owned_ebml::Error("Matroska memory estimate overflow".into())
+                })?;
+            let estimated = reader
+                .estimated_index_payload_bytes()?
+                .checked_add(decoder)
+                .and_then(|bytes| bytes.checked_add(packet))
+                .and_then(|bytes| bytes.checked_add(cloned_track))
+                .ok_or_else(|| {
+                    crate::owned_ebml::Error("Matroska memory estimate overflow".into())
+                })?;
+            if options
+                .max_controlled_bytes
+                .is_some_and(|max| estimated > max)
+            {
+                return Err(crate::owned_ebml::Error(format!(
+                    "controlled memory budget exceeded: need {estimated} bytes"
+                )));
+            }
+            Ok(())
+        })
+        .map_err(|error| {
+            if options.max_controlled_bytes.is_some_and(|max| {
+                max / std::mem::size_of::<crate::owned_webm::Packet>()
+                    < crate::owned_webm::Limits::default().packets
+            }) && error
+                .to_string()
+                .contains("WebM packet count exceeds limit")
+            {
+                invalid("controlled memory budget exceeded: Matroska packet index limit")
+            } else {
+                error.into()
+            }
+        })?;
+    Ok(())
+}
 /// Decode the presentation timeline, including delay, signed padding, gaps and
 /// ceil-rounded interval boundaries. An error may leave partial caller-owned PCM.
-/// Progress never reports publication/completion. Aggregate allocation admission
-/// and metadata mutation are explicitly unsupported by this raw-stream API.
+/// Progress never reports publication/completion. AAC controlled admission is
+/// checked before decoder construction; other codec admission and metadata
+/// mutation remain unsupported by this raw-stream API.
 pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
     source: R,
     output: &mut impl Write,
@@ -159,7 +260,7 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
     options: &CopyOptions,
     codec: &str,
 ) -> Result<AudioDecodeStats> {
-    if options.max_controlled_bytes.is_some() {
+    if options.max_controlled_bytes.is_some() && codec != "A_AAC" {
         return Err(invalid(
             "Matroska audio aggregate allocation admission is not yet implemented",
         ));
@@ -189,13 +290,17 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
         hook.emit(control.event);
     }
     control.check()?;
-    let reader = MatroskaTimelineReader::open(
-        source,
-        crate::owned_webm::Limits {
-            packet_bytes: options.max_packet_bytes,
-            ..Default::default()
-        },
-    )?;
+    let mut reader = if codec == "A_AAC" {
+        open_aac_reader(source, options, options.max_packet_bytes)?
+    } else {
+        MatroskaTimelineReader::open(
+            source,
+            crate::owned_webm::Limits {
+                packet_bytes: options.max_packet_bytes,
+                ..Default::default()
+            },
+        )?
+    };
     let index = matroska_audio_index(&reader, selected)?;
     if if codec == "PCM" {
         !matches!(
@@ -208,6 +313,9 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
         return Err(invalid(
             "selected Matroska audio stream has a different codec",
         ));
+    }
+    if codec == "A_AAC" {
+        admit_aac_reader(&mut reader, index, options)?;
     }
     decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)
 }
