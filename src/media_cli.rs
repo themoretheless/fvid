@@ -940,6 +940,16 @@ fn pixel_decode_args(
             result.push(value.clone());
             continue;
         }
+        if arg == "--unsharp" {
+            let value = args.next().ok_or("missing unsharp args")?;
+            if filters.unsharp.is_some() {return Err("duplicate unsharp".into());}
+            if let Ok(filter) = fvid_media::owned_unsharp::Unsharp::parse(value) {
+                filters.unsharp = Some(filter);
+            } else {
+                result.push(arg.clone()); result.push(value.clone());
+            }
+            continue;
+        }
         if arg == "--eq" {
             let value = args.next().ok_or("missing eq args")?;
             if filters.eq.is_some() {return Err("duplicate eq".into());}
@@ -4381,7 +4391,7 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
                 if items.next().map(String::as_str)!=Some("ffv1") {return Ok(false);}
             },
             "--hflip"|"--vflip"=>processing.push(item.clone()),
-            "--crop"|"--scale"|"--pad"|"--transpose"|"--eq"|"--hue"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"=> {
+            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"=> {
                 processing.push(item.clone());processing.push(items.next().ok_or("missing overlay processing value")?.clone());
             },
             "--from"|"--to" if operation==Some("decode")=> {

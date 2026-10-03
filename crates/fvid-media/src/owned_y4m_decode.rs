@@ -31,9 +31,13 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
     transform
-        .eq
+        .unsharp
         .as_deref()
-        .is_none_or(|args| crate::owned_eq::Equalizer::parse(args).is_ok())
+        .is_none_or(|args| crate::owned_unsharp::Unsharp::parse(args).is_ok())
+        && transform
+            .eq
+            .as_deref()
+            .is_none_or(|args| crate::owned_eq::Equalizer::parse(args).is_ok())
         && transform
             .hue
             .as_deref()
@@ -89,6 +93,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 scale: transform.scale,
                 transpose: transform.transpose,
                 pad: transform.pad,
+                unsharp: transform.unsharp.clone(),
                 eq: transform.eq.clone(),
                 hue: transform.hue.clone(),
                 negate: transform.negate.clone(),
@@ -324,7 +329,9 @@ pub(crate) fn apply_pixel_filters(
     transform: &DecodeTransform,
     output: &mut Vec<u8>,
 ) -> Result<()> {
-    if transform.eq.is_some()
+    if transform.unsharp.is_some()
+        || transform.unsharp.is_some()
+        || transform.eq.is_some()
         || transform.hue.is_some()
         || transform.avgblur.is_some()
         || transform.boxblur.is_some()
@@ -357,6 +364,9 @@ pub(crate) fn apply_pixel_filters(
         let result: Result<()> = (|| {
             if let Some(args) = transform.eq.as_deref() {
                 crate::owned_eq::Equalizer::parse(args)?.apply(&mut frame, header.depth())?;
+            }
+            if let Some(args) = transform.unsharp.as_deref() {
+                crate::owned_unsharp::Unsharp::parse(args)?.apply(&mut frame, header.depth())?;
             }
             if let Some(args) = transform.hue.as_deref() {
                 crate::owned_hue::Hue::parse(args)?.apply(&mut frame, header.depth())?;
@@ -690,6 +700,7 @@ fn decode_reader_frames(
         || transform.scale.is_some()
         || transform.transpose.is_some()
         || transform.pad.is_some()
+        || transform.unsharp.is_some()
         || transform.eq.is_some()
         || transform.hue.is_some()
         || transform.negate.is_some()

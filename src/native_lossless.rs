@@ -364,7 +364,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             hqdn3d: None,
             gblur: None,
             eq: _,
-            unsharp: None,
+            unsharp: _,
             hue: _,
             avgblur: _,
             boxblur: _,
@@ -492,6 +492,7 @@ pub fn configuration(
         }),
     };
     let request = crate::media_info::DecodeTransform {
+        unsharp: transform.unsharp.clone(),
         eq: transform.eq.clone(),
         hue: transform.hue.clone(),
         pixelize: transform.pixelize.clone(),

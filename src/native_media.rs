@@ -556,7 +556,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         hqdn3d: None,
         gblur: None,
         eq: _,
-        unsharp: None,
+        unsharp: _,
         hue: _,
         avgblur: _,
         boxblur: _,

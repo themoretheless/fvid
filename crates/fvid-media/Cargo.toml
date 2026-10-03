@@ -96,3 +96,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_eq_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_unsharp_reference"
+harness = false
