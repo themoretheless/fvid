@@ -84,3 +84,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_ima_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_lacing_reference"
+harness = false

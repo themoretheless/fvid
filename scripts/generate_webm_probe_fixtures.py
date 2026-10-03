@@ -18,4 +18,4 @@ if __name__ == '__main__':
     (ROOT/'webm-probe-segment-beyond-file.mkv').write_bytes(clear[:len(header)+4]+b'\x10\0\x01\0'+clear[len(header)+8:])
 
     lace = element('1f43b675',element('e7',b'\0')+element('a3',b'\x81\0\0\x82\x01\x01\x01\x02'))
-    (ROOT/'webm-probe-laced.mkv').write_bytes(header+element('18538067',element('1654ae6b',element('ae',base))+lace))
+    (ROOT/'webm-probe-laced.mkv').write_bytes(header+element('18538067',element('1654ae6b',element('ae',base+element('23e383',(40000000).to_bytes(4,'big'))))+lace))

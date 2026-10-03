@@ -196,3 +196,16 @@ mod index_allocation_tests {
         );
     }
 }
+
+#[cfg(test)]
+mod lace_integer_tests {
+    use super::*;
+    #[test]
+    fn lace_integers_keep_all_ones_data_and_obey_block_boundary() {
+        assert_eq!(lace_vint(&mut Cursor::new([255]),1).unwrap(),(127,1));
+        assert_eq!(lace_vint(&mut Cursor::new([127,255]),2).unwrap(),(16383,2));
+        assert!(lace_vint(&mut Cursor::new([127,255]),1).unwrap_err().to_string().contains("truncated"));
+        assert!(lace_vint(&mut Cursor::new([0]),1).unwrap_err().to_string().contains("zero"));
+    }
+    use std::io::Cursor;
+}

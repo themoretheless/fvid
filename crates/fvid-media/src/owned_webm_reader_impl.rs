@@ -354,6 +354,7 @@ impl<R: Read + Seek> WebmReader<R> {
             read_packet_bytes: _,
         } = self;
         let indexed = packets.len();
+        let mut lace_groups = Vec::new();
         while *at < *segment_end {
             goto(&mut *reader, *at)?;
             let e = element(&mut *reader, *segment_end, &mut *elements, limits.elements)?;
@@ -622,6 +623,7 @@ impl<R: Read + Seek> WebmReader<R> {
                                 true,
                                 &mut *packets,
                                 *limits,
+                                &mut lace_groups,
                             )?,
                             0xa0 => {
                                 let fs = fields(&mut *reader, child, &mut *elements, limits.elements)?;
@@ -649,12 +651,16 @@ impl<R: Read + Seek> WebmReader<R> {
                                             key,
                                             &mut *packets,
                                             *limits,
+                                            &mut lace_groups,
                                         )?;
                                     }
                                 }
                                 for packet in &mut packets[first..] {
-                                    packet.discard_padding_ns = padding.unwrap_or(0);
                                     packet.duration_ns = duration;
+                                }
+                                if let Some(padding) = padding.filter(|_| packets.len() > first) {
+                                    let position = if padding < 0 { first } else { packets.len()-1 };
+                                    packets[position].discard_padding_ns = padding;
                                 }
                             }
                             _ => {}
@@ -691,6 +697,25 @@ impl<R: Read + Seek> WebmReader<R> {
             *tail_ns = (*tail_ns).max(p.pts_ns);
             if !tracks.iter().any(|t: &Track| t.number == p.track) {
                 return Err(invalid("WebM packet references missing track"));
+            }
+        }
+        for group in lace_groups {
+            let first = &packets[group.start];
+            let origin = i128::from(first.pts_ns);
+            let count = (group.end-group.start) as u128;
+            let default = tracks.iter().find(|t| t.number == first.track).unwrap().default_duration_ns;
+            let total = first.duration_ns.map(u128::from)
+                .or_else(|| (default != 0).then_some(u128::from(default)*count))
+                .ok_or_else(|| unsupported("Matroska lacing requires declared frame or block duration"))?;
+            for (index, packet) in packets[group].iter_mut().enumerate() {
+                let start = total * index as u128 / count;
+                let finish = total * (index+1) as u128 / count;
+                packet.pts_ns = i64::try_from(origin + i128::try_from(start)
+                    .map_err(|_| invalid("WebM lace timestamp overflow"))?)
+                    .map_err(|_| invalid("WebM lace timestamp overflow"))?;
+                packet.duration_ns = Some(u64::try_from(finish-start)
+                    .map_err(|_| invalid("WebM lace duration overflow"))?);
+                *tail_ns = (*tail_ns).max(packet.pts_ns);
             }
         }
         *scanned = *at >= *segment_end;
@@ -908,6 +933,27 @@ impl<R: Read + Seek> WebmReader<R> {
     }
 }
 include!("owned_matroska_metadata_read_impl.rs");
+// Lace VINTs use every data value, including the all-ones bit pattern.
+fn lace_vint<R: Read + Seek>(r: &mut R, limit: u64) -> Result<(u64, u32)> {
+    let mut byte = [0];
+    if r.stream_position()? >= limit {
+        return Err(invalid("truncated Matroska lace header"));
+    }
+    r.read_exact(&mut byte)?;
+    if byte[0] == 0 {
+        return Err(invalid("zero Matroska lace integer"));
+    }
+    let width = byte[0].leading_zeros() + 1;
+    let mut value = u64::from(byte[0] & ((1u8 << (8 - width)) - 1));
+    for _ in 1..width {
+        if r.stream_position()? >= limit {
+            return Err(invalid("truncated Matroska lace header"));
+        }
+        r.read_exact(&mut byte)?;
+        value = (value << 8) | u64::from(byte[0]);
+    }
+    Ok((value, width))
+}
 fn read_block<R: Read + Seek>(
     r: &mut R,
     e: Element,
@@ -916,49 +962,125 @@ fn read_block<R: Read + Seek>(
     key: bool,
     out: &mut Vec<Packet>,
     limits: Limits,
+    groups: &mut Vec<std::ops::Range<usize>>,
 ) -> Result<()> {
-    if out.len() >= limits.packets {
-        return Err(invalid("WebM packet count exceeds limit"));
-    }
     goto(r, e.data)?;
-    let (track, unknown) = vint(r, false)?;
-    if track == 0 || unknown {
+    let limit = end(e)?;
+    let (track, width) = lace_vint(r, limit)?;
+    if track == 0 || track == (1u64 << (7 * width)) - 1 {
         return Err(invalid("invalid WebM block track"));
+    }
+    if limit.saturating_sub(r.stream_position()?) < 4 {
+        return Err(invalid("truncated WebM block"));
     }
     let mut h = [0; 3];
     r.read_exact(&mut h)?;
-    let offset = r.stream_position()?;
-    let limit = end(e)?;
-    if offset >= limit {
-        return Err(invalid("truncated WebM block"));
+    let mode = h[2] & 6;
+    let mut count = 1usize;
+    let mut sizes = [0u64; 256];
+    if mode != 0 {
+        let mut n = [0];
+        r.read_exact(&mut n)?;
+        count = usize::from(n[0]) + 1;
+        if count == 1 {
+            return Err(invalid("Matroska lacing requires multiple frames"));
+        }
+        match mode {
+            2 => {
+                for size in &mut sizes[..count - 1] {
+                    loop {
+                        if r.stream_position()? >= limit {
+                            return Err(invalid("truncated Matroska lace header"));
+                        }
+                        r.read_exact(&mut n)?;
+                        *size = size
+                            .checked_add(u64::from(n[0]))
+                            .ok_or_else(|| invalid("Matroska lace size overflow"))?;
+                        if *size > limits.packet_bytes as u64 {
+                            return Err(invalid("WebM packet exceeds budget"));
+                        }
+                        if n[0] != 255 {
+                            break;
+                        }
+                    }
+                }
+            }
+            6 => {
+                sizes[0] = lace_vint(r, limit)?.0;
+                for index in 1..count - 1 {
+                    let (delta, width) = lace_vint(r, limit)?;
+                    let signed = i128::from(delta) - ((1i128 << (7 * width - 1)) - 1);
+                    sizes[index] = u64::try_from(i128::from(sizes[index - 1]) + signed)
+                        .map_err(|_| invalid("invalid Matroska lace size difference"))?;
+                }
+            }
+            _ => {}
+        }
     }
-    if h[2] & 6 != 0 {
-        return Err(unsupported("WebM laced blocks are not yet supported"));
+    let mut offset = r.stream_position()?;
+    let remaining = limit
+        .checked_sub(offset)
+        .ok_or_else(|| invalid("Matroska lace header exceeds block"))?;
+    if mode == 4 {
+        if !remaining.is_multiple_of(count as u64) {
+            return Err(invalid("fixed Matroska lace has unequal frame sizes"));
+        }
+        sizes[..count].fill(remaining / count as u64);
+    } else {
+        let known = sizes[..count - 1]
+            .iter()
+            .try_fold(0u64, |a, &b| a.checked_add(b))
+            .ok_or_else(|| invalid("Matroska lace size overflow"))?;
+        sizes[count - 1] = remaining
+            .checked_sub(known)
+            .ok_or_else(|| invalid("Matroska lace sizes exceed block"))?;
     }
-    let pts =
-        i128::from(timestamp.ok_or_else(|| invalid("WebM block precedes Cluster timestamp"))?)
-            + i128::from(i16::from_be_bytes([h[0], h[1]]));
-    let size = usize::try_from(limit - offset)
-        .ok()
-        .filter(|&n| n <= limits.packet_bytes)
-        .ok_or_else(|| invalid("WebM packet exceeds budget"))?;
-    if out.len() == out.capacity() {
-        let capacity = out.capacity().checked_mul(2)
-            .unwrap_or(limits.packets)
+    if sizes[..count]
+        .iter()
+        .any(|&n| n == 0 || n > limits.packet_bytes as u64)
+    {
+        return Err(invalid(
+            "WebM packet exceeds budget or has empty lace frame",
+        ));
+    }
+    let required = out
+        .len()
+        .checked_add(count)
+        .filter(|&n| n <= limits.packets)
+        .ok_or_else(|| invalid("WebM packet count exceeds limit"))?;
+    if required > out.capacity() {
+        let capacity = out
+            .capacity()
+            .saturating_mul(2)
+            .max(required)
             .max(4)
             .min(limits.packets);
         out.try_reserve_exact(capacity - out.len())
             .map_err(|_| invalid("WebM packet index allocation failed"))?;
     }
-    out.push(Packet {
-        track,
-        pts_ns: i64::try_from(pts).map_err(|_| invalid("WebM timestamp overflow"))?,
-        keyframe: if simple { h[2] & 0x80 != 0 } else { key },
-        invisible: h[2] & 0x08 != 0,
-        offset,
-        size,
-        discard_padding_ns: 0,
-        duration_ns: None,
-    });
+    let pts =
+        i128::from(timestamp.ok_or_else(|| invalid("WebM block precedes Cluster timestamp"))?)
+            + i128::from(i16::from_be_bytes([h[0], h[1]]));
+    let pts_ns = i64::try_from(pts).map_err(|_| invalid("WebM timestamp overflow"))?;
+    let first = out.len();
+    for &size in &sizes[..count] {
+        out.push(Packet {
+            track,
+            pts_ns,
+            keyframe: if simple { h[2] & 0x80 != 0 } else { key },
+            invisible: h[2] & 8 != 0,
+            offset,
+            size: usize::try_from(size).map_err(|_| invalid("WebM packet size overflow"))?,
+            discard_padding_ns: 0,
+            duration_ns: None,
+        });
+        offset += size;
+    }
+    if count > 1 {
+        groups
+            .try_reserve(1)
+            .map_err(|_| invalid("Matroska lace index allocation failed"))?;
+        groups.push(first..out.len());
+    }
     Ok(())
 }

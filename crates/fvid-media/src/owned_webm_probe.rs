@@ -60,7 +60,10 @@ pub fn try_probe_webm(path: &Path) -> Result<Option<MediaInfo>, String> {
             .iter()
             .filter(|p| p.track == track.number)
             .map(|p| p.pts_ns)
-            .min();
+            .min()
+            .map(|pts| i64::try_from(i128::from(pts)-i128::from(track.codec_delay_ns))
+                .map_err(|_| "Matroska start exceeds API range".to_string()))
+            .transpose()?;
         let codec = match track.codec.as_str() {
             "V_VP8" => "vp8",
             "V_VP9" => "vp9",
@@ -212,7 +215,7 @@ mod tests {
                 .contains("content encoding")
         );
         let laced = root.join("webm-probe-laced.mkv");
-        assert!(try_probe_webm(&laced).unwrap().is_none());
+        assert_eq!(try_probe_webm(&laced).unwrap().unwrap().streams[0].codec, "ffv1");
         let broken = root.join("webm-probe-segment-beyond-file.mkv");
         let error = probe_webm(&broken).unwrap_err();
         assert_eq!(error, "EBML element exceeds parent");
