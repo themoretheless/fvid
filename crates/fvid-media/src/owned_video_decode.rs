@@ -22,6 +22,26 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
 /// No output is published while qualifying an unsupported stream for legacy callers.
 /// Corrupt packets propagate errors; only explicit capability refusals permit fallback.
 pub(crate) fn try_ffv1(source: &Path, transform: &DecodeTransform) -> Result<Option<DecodeStats>> {
+    decode_ffv1(source, transform, None, None).map(|result| result.map(|(stats, _)| stats))
+}
+
+pub(crate) struct FrameView<'a> {
+    pub pixels: &'a [u8],
+    pub width: u32,
+    pub height: u32,
+    pub depth: u8,
+    pub subsampling: [usize; 2],
+    pub monochrome: bool,
+    pub pts_ns: i64,
+    pub duration_ns: Option<u64>,
+}
+type Visitor<'a> = dyn FnMut(FrameView<'_>) -> Result<()> + 'a;
+pub(crate) fn decode_ffv1(
+    source: &Path,
+    transform: &DecodeTransform,
+    mut visit: Option<&mut Visitor<'_>>,
+    options: Option<&fvid_control::CopyOptions>,
+) -> Result<Option<(DecodeStats, u64)>> {
     let mut frame_transform = transform.clone();
     frame_transform.input_format = None;
     frame_transform.interval = None;
@@ -61,6 +81,16 @@ pub(crate) fn try_ffv1(source: &Path, transform: &DecodeTransform) -> Result<Opt
         Default::default(),
     )
     .map_err(|e| e.to_string())?;
+    if let Some(options) = options {
+        reader.restrict_packet_bytes(options.max_packet_bytes);
+        if options
+            .cancel
+            .as_ref()
+            .is_some_and(fvid_control::CancelFlag::is_cancelled)
+        {
+            return Err("media operation cancelled".into());
+        }
+    }
     reader.scan_all().map_err(|e| e.to_string())?;
     let Some(track) = reader.tracks.iter().find(|t| t.kind == 1) else {
         return Err("input has no video stream".into());
@@ -74,6 +104,7 @@ pub(crate) fn try_ffv1(source: &Path, transform: &DecodeTransform) -> Result<Opt
     }
     let number = track.number;
     let full_range = track.colour.full_range;
+    let default_duration = track.default_duration_ns;
     let width = u32::try_from(track.width).map_err(|_| "FFV1 width exceeds API range")?;
     let height = u32::try_from(track.height).map_err(|_| "FFV1 height exceeds API range")?;
     // No implicit policy ceiling: allocation sizes are checked by the decoder.
@@ -88,8 +119,15 @@ pub(crate) fn try_ffv1(source: &Path, transform: &DecodeTransform) -> Result<Opt
         pixel_format: String::new(),
         decode_errors: 0,
     };
+    let mut consumed = 0u64;
     let mut selected_inputs = 0u64;
     for index in 0..reader.packets.len() {
+        if options
+            .and_then(|o| o.cancel.as_ref())
+            .is_some_and(fvid_control::CancelFlag::is_cancelled)
+        {
+            return Err("media operation cancelled".into());
+        }
         let p = &reader.packets[index];
         if p.track != number {
             continue;
@@ -105,6 +143,19 @@ pub(crate) fn try_ffv1(source: &Path, transform: &DecodeTransform) -> Result<Opt
         let selected = transform
             .interval
             .is_none_or(|(from, _)| time >= i128::from(from) * 1000);
+        let pts_ns = p.pts_ns;
+        let duration_ns = p
+            .duration_ns
+            .or((default_duration != 0).then_some(default_duration));
+        if options
+            .and_then(|o| o.max_packets)
+            .is_some_and(|limit| consumed >= limit)
+        {
+            return Err("FFV1 input packet count exceeds limit".into());
+        }
+        consumed = consumed
+            .checked_add(1)
+            .ok_or("FFV1 input packet count overflow")?;
         let packet = reader.read_packet(index).map_err(|e| e.to_string())?;
         let decoded = match decoder.decode(&packet) {
             Ok(frame) => frame,
@@ -132,6 +183,7 @@ pub(crate) fn try_ffv1(source: &Path, transform: &DecodeTransform) -> Result<Opt
                 .checked_add(1)
                 .ok_or("FFV1 frame count overflow")?;
         }
+        let mut transformed = None;
         if frame_transform == DecodeTransform::default() {
             stats.pixel_format = if decoded.depth == 8 {
                 base.into()
@@ -151,19 +203,48 @@ pub(crate) fn try_ffv1(source: &Path, transform: &DecodeTransform) -> Result<Opt
             stats.width = width;
             stats.height = height;
             stats.pixel_format = format;
-            std::hint::black_box(pixels);
+            transformed = Some(pixels);
         }
         if past_end {
             break;
         }
         if emit {
+            if let Some(callback) = visit.as_deref_mut() {
+                let monochrome = stats.pixel_format.starts_with("gray");
+                let subsampling = if monochrome {
+                    [1, 1]
+                } else if stats.pixel_format.starts_with("yuv420") {
+                    [2, 2]
+                } else if stats.pixel_format.starts_with("yuv422") {
+                    [2, 1]
+                } else if stats.pixel_format.starts_with("yuv440") {
+                    [1, 2]
+                } else if stats.pixel_format.starts_with("yuv411") {
+                    [4, 1]
+                } else if stats.pixel_format.starts_with("yuv410") {
+                    [4, 4]
+                } else {
+                    [1, 1]
+                };
+                callback(FrameView {
+                    pixels: transformed.as_deref().unwrap_or(&decoded.frame.data),
+                    width: stats.width,
+                    height: stats.height,
+                    depth: decoded.depth,
+                    subsampling,
+                    monochrome,
+                    pts_ns,
+                    duration_ns,
+                })?;
+            }
+            std::hint::black_box(&transformed);
             stats.video_frames = stats
                 .video_frames
                 .checked_add(1)
                 .ok_or("FFV1 frame count overflow")?;
         }
     }
-    Ok(Some(stats))
+    Ok(Some((stats, consumed)))
 }
 
 fn process_frame(

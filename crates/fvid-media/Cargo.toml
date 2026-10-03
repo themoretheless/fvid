@@ -76,3 +76,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_reverse_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_ffv1_export_reference"
+harness = false

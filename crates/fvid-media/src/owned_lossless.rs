@@ -99,6 +99,9 @@ fn policy(o: &CopyOptions) -> bool {
         && o.stream_metadata_delete.is_empty()
 }
 pub(crate) fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) -> bool {
+    if policy(o) && request(t).is_some_and(|r| crate::owned_ffv1_export::supports(source, &r)) {
+        return true;
+    }
     let mut reader = match std::fs::File::open(source) {
         Ok(file) => std::io::BufReader::new(file),
         Err(_) => return false,
@@ -127,12 +130,33 @@ pub fn transcode_lossless(
     transform: LosslessTransform,
     options: &CopyOptions,
 ) -> Result<LosslessStats, String> {
+    if options.cancel.as_ref().is_some_and(fvid_control::CancelFlag::is_cancelled) {
+        return Err("media operation cancelled".into());
+    }
     let file_metadata = metadata(options)?;
     if !policy(options) {
         return Err("owned Y4M lossless export does not yet implement requested policy".into());
     }
     let request = request(&transform)
         .ok_or("owned Y4M lossless export does not yet implement requested transforms")?;
+    if crate::owned_ffv1_export::supports(source, &request) {
+        let (stats, event, consumed) =
+            crate::owned_ffv1_export::export(source, destination, &request, options)?;
+        return Ok(LosslessStats {
+            backend: "fvid",
+            video_frames: stats.video_frames,
+            decoded_frames: consumed,
+            seek_used: false,
+            video_packets: event.packets,
+            copied_packets: 0,
+            trimmed_audio_sample_frames: 0,
+            pixel_format: stats.pixel_format,
+            encoder: "ffv1".into(),
+            fvid_crop_payload_copies: 0,
+            vertical_flip: transform.vertical_flip,
+            horizontal_flip: transform.horizontal_flip,
+        });
+    }
     if let Some((from, to)) = request.interval {
         if from < 0 || to <= from {
             return Err("lossless interval requires 0 <= from < to".into());
@@ -226,26 +250,28 @@ pub fn plan_transcode_lossless(
         return Err("request has no owned lossless export plan".into());
     }
     metadata(options)?;
-    let info = crate::owned_y4m_probe::probe_y4m(source)?;
+    let info = crate::owned_probe::probe(source)?;
     let mut steps = vec![PlanStep {
         action: "decode".into(),
-        detail: "read progressive Y4M planar frames with the owned parser".into(),
+        detail: "read source video frames with the owned container parser and decoder".into(),
     }];
     if let Some((from, to)) = transform.interval {
         if from < 0 || to <= from {
             return Err("lossless interval requires 0 <= from < to".into());
         }
-        let mut input =
-            std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
-        let mut bytes = Vec::new();
-        crate::owned_y4m::line(&mut input, &mut bytes)?;
-        let header = crate::owned_y4m::Header::parse(&bytes)?;
-        let [n, d] = header.frame_rate()?;
-        if [from, to]
-            .into_iter()
-            .any(|time| time as u128 * n as u128 % (d as u128 * 1_000_000) != 0)
-        {
-            return Err("interval boundary is not exact in video time base".into());
+        if crate::owned_y4m_decode::supports(source) {
+            let mut input =
+                std::io::BufReader::new(std::fs::File::open(source).map_err(|e| e.to_string())?);
+            let mut bytes = Vec::new();
+            crate::owned_y4m::line(&mut input, &mut bytes)?;
+            let header = crate::owned_y4m::Header::parse(&bytes)?;
+            let [n, d] = header.frame_rate()?;
+            if [from, to]
+                .into_iter()
+                .any(|time| time as u128 * n as u128 % (d as u128 * 1_000_000) != 0)
+            {
+                return Err("interval boundary is not exact in video time base".into());
+            }
         }
         steps.push(PlanStep {
             action: "interval".into(),
@@ -273,7 +299,7 @@ pub fn plan_transcode_lossless(
             index: stream.index, media_type: stream.media_type, codec: stream.codec, disposition: "primary_video".into(),
         }).collect(),
         steps, graph: None,
-        notes: vec!["backend: owned Y4M/FFV1/Matroska; no external demuxer, filter graph or encoder".into(),
+        notes: vec!["backend: owned video/FFV1/Matroska; no external demuxer, filter graph or encoder".into(),
             "destination must support the owned Matroska export; packet, cancellation and publication checks also run during execution".into()],
     })
 }

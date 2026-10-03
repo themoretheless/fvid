@@ -336,6 +336,21 @@ pub(crate) fn export_y4m_ffv1_policy(
     rebase_interval: bool,
     file_metadata: &FileMetadata,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent, u64)> {
+    let input = std::io::BufReader::new(std::fs::File::open(source)?);
+    export_atomic(destination, cancel, progress, |file| {
+        write_y4m_ffv1_policy(
+            input, file, transform, cancel, progress, max_packet_bytes,
+            max_packets, rebase_interval, file_metadata,
+        )
+    })
+}
+
+pub(crate) fn export_atomic(
+    destination: &std::path::Path,
+    cancel: Option<&fvid_control::CancelFlag>,
+    progress: Option<&fvid_control::ProgressHook>,
+    write: impl FnOnce(&mut std::fs::File) -> Result<(fvid_media_info::DecodeStats, ProgressEvent, u64)>,
+) -> Result<(fvid_media_info::DecodeStats, ProgressEvent, u64)> {
     check(cancel)?;
     if destination
         .extension()
@@ -347,7 +362,6 @@ pub(crate) fn export_y4m_ffv1_policy(
     if destination.symlink_metadata().is_ok() {
         return Err(invalid("output already exists"));
     }
-    let input = std::io::BufReader::new(std::fs::File::open(source)?);
     let directory = destination
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -378,17 +392,7 @@ pub(crate) fn export_y4m_ffv1_policy(
     }
     let (temporary, mut file) =
         reserved.ok_or_else(|| invalid("cannot reserve Matroska output"))?;
-    let (stats, mut event, consumed) = write_y4m_ffv1_policy(
-        input,
-        &mut file,
-        transform,
-        cancel,
-        progress,
-        max_packet_bytes,
-        max_packets,
-        rebase_interval,
-        file_metadata,
-    )?;
+    let (stats, mut event, consumed) = write(&mut file)?;
     file.flush()?;
     file.sync_all()?;
     drop(file);
