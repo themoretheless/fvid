@@ -9,6 +9,7 @@ pub(crate) fn decode_adts_aac_reader_controlled<R: std::io::Read>(
         return Err(invalid("audio interval requires from < to"));
     }
     let config = reader.configuration();
+    check_decode_admission(config.channels, control.options)?;
     let boundary = |time: Duration| -> Result<u64> {
         let ticks = time.as_nanos().checked_mul(u128::from(config.sample_rate))
             .ok_or_else(|| invalid("audio interval overflow"))?;

@@ -98,15 +98,13 @@ pub fn plan_decode_audio(
         if !crate::owned_audio_export::simple_options(options) {
             return Err("ADTS has only stream 0".into());
         }
-        if options.max_controlled_bytes.is_some() {
-            return Err("ADTS file allocation admission is not yet implemented".into());
-        }
         let reader = crate::owned_aac::adts::StreamReader::open_with_packet_limit(
             BufReader::new(File::open(source).map_err(|e| e.to_string())?),
             options.max_packet_bytes,
         )
         .map_err(|e| e.to_string())?;
         let config = reader.configuration();
+        crate::owned_aac::stream::check_decode_admission(config.channels, options).map_err(|e| e.to_string())?;
         let decoder = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
             .map_err(|e| e.to_string())?;
         (

@@ -55,6 +55,35 @@ impl DecodeProgress<'_> {
     }
 }
 
+/// Conservative admission estimate for AAC-LC decoder payload and packet scratch.
+/// Each channel/coupling reserves 204 KiB at the largest 1024-sample geometry:
+/// 126 bytes/sample of immutable tables/windows, 58 of synthesis scratch and
+/// overlap, 8 of rollback history, 8 of mono PCM and 4 of interleaved PCM.
+/// Another 128 KiB per state covers nested channel/TNS
+/// syntax and coupling gain lists. 16 coupling slots and two temporary states
+/// cover construction and parsing before duplicate/layout validation. The fixed
+/// reserve includes bounded ADTS/ASC/PCE storage, vector headers and file I/O.
+/// This is an admission estimate, not a process RSS or allocator-header limit.
+/// Keep these bounds in sync when adding larger frame sizes or new AAC tools.
+pub(crate) fn check_decode_admission(channels: u16, options: &CopyOptions) -> Result<()> {
+    let Some(limit) = options.max_controlled_bytes else {
+        return Ok(());
+    };
+    let states = usize::from(channels)
+        .checked_add(18)
+        .ok_or_else(|| invalid("AAC memory estimate overflow"))?;
+    let estimated = states
+        .checked_mul((204 + 128) * 1024)
+        .and_then(|bytes| bytes.checked_add(256 * 1024))
+        .ok_or_else(|| invalid("AAC memory estimate overflow"))?;
+    if estimated > limit {
+        return Err(invalid(&format!(
+            "controlled memory budget exceeded: need {estimated} bytes, limit {limit}"
+        )));
+    }
+    Ok(())
+}
+
 /// Decode ADTS without a file index or full PCM buffer. ADTS priming/padding is
 /// retained. Ranges use ceil-rounded sample boundaries and retain preroll.
 /// Packet counts include preroll; reaching the count/range stops before reading
@@ -62,19 +91,15 @@ impl DecodeProgress<'_> {
 ///
 /// The caller owns publication and flushing; failures can leave partial PCM in
 /// its writer. Progress never emits completion for a caller-owned destination.
-/// Metadata mutation and aggregate allocation admission are not implemented
-/// by this raw-stream API and are rejected explicitly rather than ignored.
+/// Metadata mutations are rejected by this raw-stream API. The controlled
+/// memory policy admits estimated AAC decoder and packet scratch before
+/// constructing the decoder; caller-owned readers/writers are excluded.
 pub fn decode_adts_pcm<R: Read>(
     source: R,
     output: &mut impl Write,
     interval: Option<(Duration, Duration)>,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    if options.max_controlled_bytes.is_some() {
-        return Err(invalid(
-            "ADTS stream allocation admission is not yet implemented",
-        ));
-    }
     if !(options.streams.is_empty() || options.streams == [0]) {
         return Err(invalid("ADTS has only stream 0"));
     }

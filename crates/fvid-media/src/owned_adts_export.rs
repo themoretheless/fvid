@@ -47,9 +47,6 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    if options.max_controlled_bytes.is_some() {
-        return false;
-    }
     let qualify = || -> Result<()> {
         if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
             return Err("cancelled".into());
@@ -61,6 +58,8 @@ pub(crate) fn supports(
         )
         .map_err(|e| e.to_string())?;
         let config = reader.configuration();
+        crate::owned_aac::stream::check_decode_admission(config.channels, options)
+            .map_err(|e| e.to_string())?;
         let mask = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
             .map_err(|e| e.to_string())?
             .channel_mask();
@@ -90,7 +89,11 @@ pub(crate) fn supports(
         .map_err(|e| e.to_string())?;
         Ok(())
     };
-    qualify().is_ok()
+    match qualify() {
+        Ok(()) => true,
+        // Policy exhaustion is an owned execution error, never a codec fallback.
+        Err(error) => error.starts_with("controlled memory budget exceeded:"),
+    }
 }
 fn resample_lookahead(input_rate: u32, output_rate: Option<i32>) -> std::time::Duration {
     let Some(output_rate) = output_rate
@@ -174,9 +177,6 @@ pub(crate) fn apply(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    if options.max_controlled_bytes.is_some() {
-        return Err("ADTS file allocation admission is not yet implemented".into());
-    }
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
@@ -242,9 +242,6 @@ fn decode_to_wave_with_rate(
     output_rate: Option<i32>,
     options: &CopyOptions,
 ) -> Result<DecodedSpool> {
-    if options.max_controlled_bytes.is_some() {
-        return Err("ADTS file allocation admission is not yet implemented".into());
-    }
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
     }
@@ -255,6 +252,8 @@ fn decode_to_wave_with_rate(
     )
     .map_err(|e| e.to_string())?;
     let config = reader.configuration();
+    crate::owned_aac::stream::check_decode_admission(config.channels, options)
+        .map_err(|e| e.to_string())?;
     let interval = interval.map(|(from, to)| {
         (
             from,
@@ -350,4 +349,59 @@ pub(crate) fn spool_decoded_with_precision(
         stats: decoded,
         progress: base,
     })
+}
+
+#[cfg(test)]
+mod admission_tests {
+    use super::*;
+    #[test]
+    fn adts_export_admits_large_policy_and_rejects_small_without_publication() {
+        let source =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/audio/aac-stereo.aac");
+        let output =
+            std::env::temp_dir().join(format!("fvid-adts-admission-{}.wav", std::process::id()));
+        let _ = std::fs::remove_file(&output);
+        let transform = AudioDecodeTransform::default();
+        let too_small = CopyOptions {
+            max_controlled_bytes: Some(1),
+            ..Default::default()
+        };
+        assert!(supports(&source, transform, &too_small));
+        let error =
+            crate::decode_audio_transformed(&source, &output, transform, &too_small).unwrap_err();
+        assert!(
+            error.contains("controlled memory budget exceeded"),
+            "{error}"
+        );
+        assert!(!output.exists());
+        let options = CopyOptions {
+            max_controlled_bytes: Some(16 * 1024 * 1024),
+            ..Default::default()
+        };
+        assert!(supports(&source, transform, &options));
+        crate::plan_decode_audio(&source, &transform, &options).unwrap();
+        let result =
+            crate::decode_audio_transformed(&source, &output, transform, &options).unwrap();
+        assert!(result.decoded_frames > 0);
+        let admitted = std::fs::read(&output).unwrap();
+        std::fs::remove_file(&output).unwrap();
+        crate::decode_audio_transformed(&source, &output, transform, &CopyOptions::default())
+            .unwrap();
+        assert_eq!(std::fs::read(&output).unwrap(), admitted);
+        std::fs::remove_file(output).unwrap();
+        let mut bytes = Vec::new();
+        let error = crate::owned_aac::decode_adts_pcm(
+            BufReader::new(File::open(source).unwrap()),
+            &mut bytes,
+            None,
+            &too_small,
+        )
+        .unwrap_err();
+        assert!(
+            error
+                .to_string()
+                .contains("controlled memory budget exceeded")
+        );
+        assert!(bytes.is_empty());
+    }
 }
