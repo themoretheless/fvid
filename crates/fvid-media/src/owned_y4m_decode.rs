@@ -29,7 +29,7 @@ pub fn decode_video(source: &Path) -> Result<DecodeStats> {
 pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
-fn supported_request(transform: &DecodeTransform) -> bool {
+pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
     transform.reverse.as_deref().is_none_or(str::is_empty)
         && transform
             .shuffleframes
@@ -158,7 +158,7 @@ pub fn decode_video_transformed(source: &Path, transform: DecodeTransform) -> Re
         &transform,
     )
 }
-fn crop_geometry(header: &Header, crop: Option<CropRect>) -> Result<(CropRect, usize)> {
+pub(crate) fn crop_geometry(header: &Header, crop: Option<CropRect>) -> Result<(CropRect, usize)> {
     let crop = crop.unwrap_or(CropRect {
         x: 0,
         y: 0,
@@ -197,7 +197,7 @@ fn crop_geometry(header: &Header, crop: Option<CropRect>) -> Result<(CropRect, u
         .ok_or("Y4M crop size overflow")?;
     Ok((crop, size))
 }
-fn output_geometry(
+pub(crate) fn output_geometry(
     header: &Header,
     crop: CropRect,
     scale: Option<ScaleSize>,
