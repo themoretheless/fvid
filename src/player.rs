@@ -94,6 +94,7 @@ impl Panel {
 #[derive(Clone, Debug, Default)]
 struct Grading {
     content_light: Option<crate::color::ContentLight>,
+    mastering_luminance: Option<(f32, f32)>,
     /// Camera log curve the coded values carry.
     log: Option<Log>,
     /// Highlight compression to run in place of the one the plan picks for the
@@ -118,6 +119,22 @@ struct Grading {
 }
 
 impl Grading {
+    fn metadata_for(&self, signal: ColourDescription, hdr: &HdrMetadata) -> HdrMetadata {
+        let mut metadata = hdr.clone();
+        if let Some(light) = self.content_light { metadata.light = light; }
+        if let Some((min_luminance, max_luminance)) = self.mastering_luminance {
+            let primaries = signal.primary_set().unwrap_or(Primaries::BT709);
+            let mut volume = metadata.mastering.unwrap_or(MasteringDisplay {
+                red: primaries.r, green: primaries.g, blue: primaries.b, white: primaries.white,
+                min_luminance, max_luminance,
+            });
+            volume.min_luminance = min_luminance;
+            volume.max_luminance = max_luminance;
+            metadata.mastering = Some(volume);
+        }
+        metadata
+    }
+
     /// Whether the command line named no colour change at all.
     fn silent(&self) -> bool {
         self.log.is_none()
@@ -126,6 +143,7 @@ impl Grading {
             && self.tone_map.is_none()
             && self.lut.is_none()
             && self.content_light.is_none()
+            && self.mastering_luminance.is_none()
     }
 
     /// Bake what this session asks for against the signal `signal` and the
@@ -173,8 +191,7 @@ impl Grading {
             settings.to = transfer;
             settings.dest = primaries;
         }
-        let mut metadata = hdr.clone();
-        if let Some(light) = self.content_light { metadata.light = light; }
+        let metadata = self.metadata_for(signal, hdr);
         Some(Grade::new(signal, &metadata, settings, self.lut.clone()))
     }
 }
@@ -466,6 +483,13 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
             "--gamut" => {
                 let value = option_value(args, &mut index, flag, inline)?;
                 grading.gamut = Some(parse_gamut(&value)?);
+            }
+            "--hdr-mastering" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                let (min_milli, max_nits) = fvid_media::parse_hdr_mastering_nits(&value).map_err(|e| crate::invalid(&e))?;
+                let min_nits = min_milli as f32 / 1000.0;
+                if max_nits as f32 <= min_nits { return Err(crate::invalid("HDR mastering maximum must exceed minimum")); }
+                grading.mastering_luminance = Some((min_nits, max_nits as f32));
             }
             "--hdr-nits" => {
                 let value = option_value(args, &mut index, flag, inline)?;
@@ -1020,7 +1044,7 @@ fn parse_media_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         } else {
             native.push(arg.clone());
             if inline.is_none() && matches!(flag,
-                "--hdr-nits" | "--hdr-maxcll" | "--spherical-stereo" | "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
+                "--hdr-mastering" | "--hdr-nits" | "--hdr-maxcll" | "--spherical-stereo" | "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
                 | "--backend" | "--device" | "--shader" | "--skin" | "--start-time" | "--stop-time"
                 | "--rate" | "--audio-delay" | "--subtitle-delay" | "--volume" | "--zoom"
                 | "--crop" | "--aspect" | "--brightness" | "--gamma" | "--saturation" | "--contrast"
@@ -6168,6 +6192,27 @@ mod tests {
                 .map(|word| word.to_string())
                 .collect::<Vec<_>>(),
         )
+    }
+
+    #[test]
+    fn native_hdr_mastering_preserves_corners_and_changes_content_peak() {
+        let parsed = super::parse_media_play_args(&["--hdr-mastering=0.005,4000".into(), "clip.mp4".into()]).unwrap();
+        let signal = ColourDescription { primaries: 9, transfer: 16, matrix: 9, full_range: false };
+        let original = MasteringDisplay { red: Primaries::BT709.r, green: Primaries::BT709.g, blue: Primaries::BT709.b, white: Primaries::BT709.white, min_luminance: 0.1, max_luminance: 1000.0 };
+        let metadata = parsed.grading.metadata_for(signal, &HdrMetadata { mastering: Some(original), light: ContentLight::default() });
+        let volume = metadata.mastering.unwrap();
+        assert_eq!(volume.red, original.red);
+        assert_eq!(volume.green, original.green);
+        assert_eq!(volume.blue, original.blue);
+        assert_eq!(volume.white, original.white);
+        assert_eq!(volume.min_luminance, 0.005);
+        assert_eq!(metadata.content_light(100.0).max_cll, 4000.0);
+        let mut high = vec![200,180,160];
+        let mut low = high.clone();
+        parsed.grading.grade_for(signal, &HdrMetadata::default()).unwrap().apply(&mut high);
+        Grading::default().grade_for(signal, &HdrMetadata { mastering: Some(original), light: ContentLight::default() }).unwrap().apply(&mut low);
+        assert_ne!(high, low);
+        assert!(parse_play_args(&["--hdr-mastering=10,1".into()]).is_err());
     }
 
     #[test]
