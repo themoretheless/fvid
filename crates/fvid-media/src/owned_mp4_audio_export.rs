@@ -41,6 +41,7 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
                     | b"in32"
                     | b"fl32"
                     | b"fl64"
+                    | b"ima4"
             )
     }))
 }
@@ -78,6 +79,7 @@ pub(crate) fn descriptor(
         match &track.codec {
             b"mp4a" => "aac",
             b"alac" => "alac",
+            b"ima4" => "adpcm_ima_qt",
             b"raw " => "pcm_u8",
             b"sowt" => "pcm_sle",
             b"twos" => "pcm_sbe",
@@ -252,6 +254,52 @@ mod admission_tests {
                 expected
             );
         }
+    }
+    #[test]
+    fn ima4_export_keeps_owned_backend_and_budget_policy() {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/ima4-ramp-edits.mov");
+        let tiny = CopyOptions {
+            max_controlled_bytes: Some(1),
+            ..Default::default()
+        };
+        assert!(supports(&source, Default::default(), &tiny));
+        let output = std::env::temp_dir().join(format!(
+            "fvid-ima4-owned-dispatch-{}.wav",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_file(&output);
+        assert!(
+            crate::decode_audio(&source, &output, &tiny)
+                .unwrap_err()
+                .contains("controlled memory budget exceeded")
+        );
+        assert!(!output.exists());
+        let stats = crate::decode_audio(
+            &source,
+            &output,
+            &CopyOptions {
+                max_controlled_bytes: Some(32 * 1024 * 1024),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(stats.sample_frames, 128);
+        let bytes = std::fs::read(&output).unwrap();
+        std::fs::remove_file(&output).unwrap();
+        let info =
+            crate::owned_wave_inspect::inspect(&mut std::io::Cursor::new(&bytes), None).unwrap();
+        let ramp: Vec<f32> = (1..=64).map(|n| (n * 2) as f32 / 32768.0).collect();
+        let expected: Vec<u8> = [0f32, 0.0]
+            .iter()
+            .chain(&ramp)
+            .chain(&ramp[2..])
+            .flat_map(|x| x.to_le_bytes())
+            .collect();
+        assert_eq!(
+            &bytes[info.data_offset as usize..info.data_offset as usize + info.data_bytes as usize],
+            expected
+        );
     }
     fn check_budget(fixture: &str) {
         let source = Path::new(env!("CARGO_MANIFEST_DIR")).join(fixture);

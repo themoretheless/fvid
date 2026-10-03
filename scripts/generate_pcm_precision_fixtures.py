@@ -14,7 +14,7 @@ def container(codec, bits, payload):
     cluster = element('1f43b675', element('e7', b'\0') + element('a3', b'\x81\0\0\x80' + payload))
     return element('1a45dfa3', element('4282', b'matroska')) + element('18538067', element('1654ae6b', track) + cluster)
 
-def quicktime_pcm(codec, bits, payload):
+def quicktime_pcm(codec, bits, payload, samples=None):
     """One mono packet, two silent samples, then source and a repeated tail."""
     def box(kind, data):
         return struct.pack('>I4s', len(data) + 8, kind) + data
@@ -22,7 +22,7 @@ def quicktime_pcm(codec, bits, payload):
         data = bytearray(24)
         struct.pack_into('>II', data, 12, 48000, length)
         return bytes(data)
-    samples = len(payload) // (bits // 8)
+    samples = len(payload) // (bits // 8) if samples is None else samples
     mdat = box(b'mdat', payload)
     entry = bytearray(28)
     struct.pack_into('>H', entry, 6, 1)

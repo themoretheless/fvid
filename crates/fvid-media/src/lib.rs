@@ -199,3 +199,5 @@ mod owned_reverse;
 mod owned_video_decode;
 
 mod owned_ffv1_export;
+
+pub mod owned_ima4;
