@@ -2,7 +2,7 @@
 use crate::owned_frame::{GeometryFrame, buffer};
 type Result<T> = std::result::Result<T, String>;
 
-/// Rotate clockwise, fitting the entire source in a chroma-aligned canvas.
+/// Rotate clockwise, using the public truncated bounding-canvas convention.
 pub fn rotate(
     frame: &GeometryFrame,
     degrees: f64,
@@ -32,23 +32,16 @@ pub fn rotate(
     } else {
         angle.to_radians().sin_cos()
     };
-    let align = |extent: f64, divisor: usize| -> Result<usize> {
-        if !extent.is_finite() || extent >= usize::MAX as f64 {
+    let extent = |value: f64| -> Result<usize> {
+        if !value.is_finite() || value >= usize::MAX as f64 {
             return Err("rotation canvas overflow".into());
         }
-        (extent.ceil() as usize)
-            .div_ceil(divisor)
-            .checked_mul(divisor)
-            .ok_or("rotation canvas overflow".into())
+        Ok((value as usize).max(1))
     };
-    let width = align(
-        frame.width as f64 * cos.abs() + frame.height as f64 * sin.abs(),
-        sx,
-    )?;
-    let height = align(
-        frame.width as f64 * sin.abs() + frame.height as f64 * cos.abs(),
-        sy,
-    )?;
+    // Match the public rotw/roth contract: truncate, without chroma alignment.
+    // Plane storage independently rounds chroma dimensions upwards.
+    let width = extent(frame.width as f64 * cos.abs() + frame.height as f64 * sin.abs())?;
+    let height = extent(frame.width as f64 * sin.abs() + frame.height as f64 * cos.abs())?;
     let bytes = if depth == 8 { 1 } else { 2 };
     let sizes = |w: usize, h: usize| {
         [
@@ -221,15 +214,15 @@ mod tests {
                 .collect(),
         };
         let output = rotate(&frame, 45.0, 10, false).unwrap();
-        assert_eq!((output.width, output.height), (12, 12));
+        assert_eq!((output.width, output.height), (11, 11));
         assert_eq!(u16::from_le_bytes([output.data[0], output.data[1]]), 64);
-        let center = (6 * 12 + 6) * 2;
+        let center = (5 * 11 + 5) * 2;
         assert_eq!(
             u16::from_le_bytes([output.data[center], output.data[center + 1]]),
             940
         );
         assert!(
-            output.data[12 * 12 * 2..]
+            output.data[11 * 11 * 2..]
                 .chunks_exact(2)
                 .all(|p| u16::from_le_bytes([p[0], p[1]]) == 512)
         );

@@ -367,14 +367,15 @@ impl VideoGeometry {
         {
             return Err(invalid("crop or scale lies outside video geometry"));
         }
+        let partial_chroma = !width.is_multiple_of(sx) || !height.is_multiple_of(sy);
         if x % sx != 0
             || y % sy != 0
-            || w % sx != 0
-            || h % sy != 0
-            || ow % out_sx != 0
-            || oh % out_sy != 0
-            || canvas_w % out_sx != 0
-            || canvas_h % out_sy != 0
+            || (!partial_chroma && w % sx != 0)
+            || (!partial_chroma && h % sy != 0)
+            || (!partial_chroma && ow % out_sx != 0)
+            || (!partial_chroma && oh % out_sy != 0)
+            || (!partial_chroma && canvas_w % out_sx != 0)
+            || (!partial_chroma && canvas_h % out_sy != 0)
             || pad_x % out_sx != 0
             || pad_y % out_sy != 0
         {
@@ -405,7 +406,7 @@ impl VideoGeometry {
             } else {
                 (dx, dy)
             };
-            let (cw, ch, dw, dh) = (w / dx, h / dy, ow / odx, oh / ody);
+            let (cw, ch, dw, dh) = (w.div_ceil(dx), h.div_ceil(dy), ow.div_ceil(odx), oh.div_ceil(ody));
             let out_size = dw
                 .checked_mul(dh)
                 .and_then(|n| n.checked_mul(bytes))
@@ -432,13 +433,13 @@ impl VideoGeometry {
                 [b[0], b[1], 0]
             };
             for row in 0..dh {
-                let py = sample_index(row, canvas_h / ody, dh, media);
+                let py = sample_index(row, canvas_h.div_ceil(ody), dh, media);
                 for col in 0..dw {
-                    let px = sample_index(col, canvas_w / odx, dw, media);
+                    let px = sample_index(col, canvas_w.div_ceil(odx), dw, media);
                     if px < pad_x / odx
                         || py < pad_y / ody
-                        || px - pad_x / odx >= tw / odx
-                        || py - pad_y / ody >= th / ody
+                        || px - pad_x / odx >= tw.div_ceil(odx)
+                        || py - pad_y / ody >= th.div_ceil(ody)
                     {
                         result.extend_from_slice(&fill[..bytes]);
                         continue;
