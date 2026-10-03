@@ -27,7 +27,7 @@ pub(crate) fn matroska_descriptor(
         .map_err(|e| e.to_string())?;
     let source_codec = reader.tracks[index].codec.clone();
     drop(reader);
-    if options.max_controlled_bytes.is_some() && source_codec != "A_AAC" {
+    if options.max_controlled_bytes.is_some() && !matches!(source_codec.as_str(), "A_AAC" | "A_ALAC") {
         return Err("Matroska audio aggregate allocation admission is not yet implemented".into());
     }
     let (rate, channels, mask, codec, precision) = match source_codec.as_str() {

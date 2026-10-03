@@ -154,6 +154,13 @@ pub(crate) fn open_aac_reader<R: Read + Seek>(
     packet_bytes: usize,
 ) -> Result<MatroskaTimelineReader<R>> {
     crate::owned_aac::stream::check_decode_admission(1, options)?;
+    open_audio_reader(source, options, packet_bytes)
+}
+pub(crate) fn open_audio_reader<R: Read + Seek>(
+    source: R,
+    options: &CopyOptions,
+    packet_bytes: usize,
+) -> Result<MatroskaTimelineReader<R>> {
     let mut limits = crate::owned_webm::Limits {
         packet_bytes,
         ..Default::default()
@@ -176,7 +183,7 @@ pub(crate) fn open_aac_reader<R: Read + Seek>(
         }
     })
 }
-pub(crate) fn admit_aac_reader<R: Read + Seek>(
+pub(crate) fn admit_audio_reader<R: Read + Seek>(
     reader: &mut MatroskaTimelineReader<R>,
     index: usize,
     options: &CopyOptions,
@@ -184,10 +191,29 @@ pub(crate) fn admit_aac_reader<R: Read + Seek>(
     if options.max_controlled_bytes.is_none() {
         return Ok(());
     }
-    let track = reader.tracks.get(index)
+    let track = reader
+        .tracks
+        .get(index)
         .ok_or_else(|| invalid("selected audio stream is absent"))?;
-    let config = crate::owned_aac::config::AacConfig::parse(&track.codec_private)?;
-    let decoder = crate::owned_aac::stream::decode_admission_bytes(u16::from(config.channels))?;
+    let decoder = match track.codec.as_str() {
+        "A_AAC" => {
+            let config = crate::owned_aac::config::AacConfig::parse(&track.codec_private)?;
+            crate::owned_aac::stream::decode_admission_bytes(u16::from(config.channels))?
+        }
+        "A_ALAC" => crate::owned_alac::AlacDecoder::decode_admission_bytes(
+            &track.codec_private,
+            u32::try_from(track.sample_rate)
+                .map_err(|_| invalid("ALAC sample rate exceeds decoder geometry"))?,
+            u16::try_from(track.channels)
+                .map_err(|_| invalid("ALAC channel count exceeds decoder geometry"))?,
+        )
+        .map_err(|e| invalid(&e.to_string()))?,
+        _ => {
+            return Err(invalid(
+                "Matroska audio aggregate allocation admission is not yet implemented",
+            ));
+        }
+    };
     let mut visited_packets = 0;
     let mut largest_packet = 0;
     reader
@@ -250,7 +276,7 @@ pub(crate) fn admit_aac_reader<R: Read + Seek>(
 }
 /// Decode the presentation timeline, including delay, signed padding, gaps and
 /// ceil-rounded interval boundaries. An error may leave partial caller-owned PCM.
-/// Progress never reports publication/completion. AAC controlled admission is
+/// Progress never reports publication/completion. AAC/ALAC controlled admission is
 /// checked before decoder construction; other codec admission and metadata
 /// mutation remain unsupported by this raw-stream API.
 pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
@@ -260,7 +286,7 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
     options: &CopyOptions,
     codec: &str,
 ) -> Result<AudioDecodeStats> {
-    if options.max_controlled_bytes.is_some() && codec != "A_AAC" {
+    if options.max_controlled_bytes.is_some() && !matches!(codec, "A_AAC" | "A_ALAC") {
         return Err(invalid(
             "Matroska audio aggregate allocation admission is not yet implemented",
         ));
@@ -292,6 +318,8 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
     control.check()?;
     let mut reader = if codec == "A_AAC" {
         open_aac_reader(source, options, options.max_packet_bytes)?
+    } else if codec == "A_ALAC" {
+        open_audio_reader(source, options, options.max_packet_bytes)?
     } else {
         MatroskaTimelineReader::open(
             source,
@@ -314,8 +342,8 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
             "selected Matroska audio stream has a different codec",
         ));
     }
-    if codec == "A_AAC" {
-        admit_aac_reader(&mut reader, index, options)?;
+    if matches!(codec, "A_AAC" | "A_ALAC") {
+        admit_audio_reader(&mut reader, index, options)?;
     }
     decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)
 }

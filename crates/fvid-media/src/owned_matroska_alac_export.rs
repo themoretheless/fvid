@@ -38,11 +38,9 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    if options.max_controlled_bytes.is_some() {
-        return false;
-    }
-    let Ok((rate, _)) = geometry(source, options) else {
-        return false;
+    let (rate, _) = match geometry(source, options) {
+        Ok(value) => value,
+        Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
     let mut probe = decode_options(options);
     probe.progress = None;
@@ -67,9 +65,6 @@ pub(crate) fn apply(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    if options.max_controlled_bytes.is_some() {
-        return Err("Matroska ALAC aggregate allocation admission is not yet implemented".into());
-    }
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
@@ -97,9 +92,10 @@ pub(crate) fn apply(
 }
 
 pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
-    let reader = crate::owned_webm::WebmReader::open(
+    let mut reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        Default::default(),
+        options,
+        crate::owned_webm::Limits::default().packet_bytes,
     )
     .map_err(|e| e.to_string())?;
     let index = match options.streams.as_slice() {
@@ -118,6 +114,8 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
         }
         _ => return Err("select exactly one audio stream".into()),
     };
+    crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)
+        .map_err(|e| e.to_string())?;
     let track = reader
         .tracks
         .get(index)
@@ -126,4 +124,75 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
         crate::owned_alac::AlacDecoder::from_matroska(track).map_err(|e| e.to_string())?;
     let (rate, channels) = (decoder.sample_rate(), decoder.channels());
     Ok((rate, channels))
+}
+
+#[cfg(test)]
+mod admission_tests {
+    use super::*;
+    #[test]
+    fn matroska_alac_workflows_keep_owned_budget() {
+        check_budget("../../tests/fixtures/playback-errors/alac-resample-window.mka");
+    }
+    fn check_budget(fixture: &str) {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR")).join(fixture);
+        let tiny = CopyOptions {
+            max_controlled_bytes: Some(1),
+            ..Default::default()
+        };
+        let admitted = CopyOptions {
+            max_controlled_bytes: Some(32 * 1024 * 1024),
+            ..Default::default()
+        };
+        assert!(supports(&source, Default::default(), &tiny));
+        assert!(crate::owned_audio_plan::supports(
+            &source,
+            &Default::default(),
+            &tiny
+        ));
+        assert!(crate::owned_container_loudness::supports(&source, &tiny));
+        assert!(
+            crate::plan_decode_audio(&source, &Default::default(), &tiny)
+                .unwrap_err()
+                .contains("controlled memory budget exceeded")
+        );
+        crate::plan_decode_audio(&source, &Default::default(), &admitted).unwrap();
+        assert!(
+            crate::measure_loudness(&source, &tiny)
+                .unwrap_err()
+                .contains("controlled memory budget exceeded")
+        );
+        let expected = crate::measure_loudness(&source, &Default::default()).unwrap();
+        let actual = crate::measure_loudness(&source, &admitted).unwrap();
+        assert_eq!(
+            serde_json::to_value(actual).unwrap(),
+            serde_json::to_value(expected).unwrap()
+        );
+        for mode in 0..3 {
+            let output = std::env::temp_dir().join(format!(
+                "fvid-matroska-alac-budget-{}-{mode}-{}.wav",
+                source.file_stem().unwrap().to_string_lossy(),
+                std::process::id()
+            ));
+            let _ = std::fs::remove_file(&output);
+            let apply = |options: &CopyOptions| -> Result<()> {
+                match mode {
+                    0 => crate::decode_audio(&source, &output, options).map(|_| ()),
+                    1 => crate::apply_loudnorm(&source, &output, None, options).map(|_| ()),
+                    _ => crate::apply_loudnorm_dual(&source, &output, None, options).map(|_| ()),
+                }
+            };
+            assert!(
+                apply(&tiny)
+                    .unwrap_err()
+                    .contains("controlled memory budget exceeded")
+            );
+            assert!(!output.exists());
+            apply(&admitted).unwrap();
+            let bytes = std::fs::read(&output).unwrap();
+            std::fs::remove_file(&output).unwrap();
+            apply(&CopyOptions::default()).unwrap();
+            assert_eq!(std::fs::read(&output).unwrap(), bytes);
+            std::fs::remove_file(&output).unwrap();
+        }
+    }
 }

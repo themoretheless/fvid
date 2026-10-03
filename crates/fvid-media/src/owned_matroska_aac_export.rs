@@ -125,7 +125,7 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
     {
         return Err("selected Matroska audio stream has a different codec".into());
     }
-    crate::owned_matroska_audio::admit_aac_reader(&mut reader, index, options)
+    crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)
         .map_err(|e| e.to_string())?;
     let track = reader
         .tracks

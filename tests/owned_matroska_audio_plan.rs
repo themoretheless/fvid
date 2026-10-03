@@ -67,7 +67,7 @@ fn matroska_audio_plans_use_owned_metadata_and_preserve_precision() {
             },
         )
         .unwrap_err();
-        if codec == "aac" {
+        if matches!(codec, "aac" | "alac") {
             assert!(error.contains("controlled memory budget exceeded"));
             fvid_media::owned_audio_plan::plan_decode_audio(
                 &source,
