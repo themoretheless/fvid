@@ -131,7 +131,8 @@ impl NativeAacDecoder {
         let mut bits = BitReader::new(packet);
         let mut noise = self.noise.clone();
         let mut channels = Vec::new();
-        let mut decoded_elements=Vec::new();let mut couplings=Vec::new();
+        let mut decoded_elements = Vec::new();
+        let mut couplings = Vec::new();
         let elements: &[u32] = match self.config.channel_configuration {
             1 => &[0],
             2 => &[1],
@@ -171,10 +172,9 @@ impl NativeAacDecoder {
                         }
                         offset += if configured.pair { 2 } else { 1 };
                     }
-                    target_offset =
-                        found.ok_or_else(|| invalid("AAC element is absent from PCE"))?;
+                    target_offset = found.ok_or_else(|| invalid("AAC element is absent from PCE"))?;
                 }
-                decoded_elements.push((element,tag,target_offset));
+                decoded_elements.push((element, tag, target_offset));
                 if !tags.insert(element, tag) {
                     return Err(invalid("duplicate AAC element tag"));
                 }
@@ -192,12 +192,22 @@ impl NativeAacDecoder {
                     channels.push((pair.right, right, self.mapping[target_offset + 1]));
                 }
                 2 => {
-                    let coupling=Coupling::read(&mut bits,&self.config)?;
-                    if self.program.as_ref().is_none_or(|p|!p.coupling.contains(&(coupling.point == 3,coupling.tag))) {return Err(invalid("AAC coupling is absent from configured PCE"));}
-                    if !tags.insert(2, u32::from(coupling.tag)) {return Err(invalid("duplicate AAC coupling tag"));}
-                    let spectrum=coupling.channel.spectrum_with_noise(&self.config,&mut noise)?;
-                    let spectrum=coupling.channel.apply_tns(&self.config,spectrum)?;
-                    couplings.push((coupling,spectrum));
+                    let coupling = Coupling::read(&mut bits, &self.config)?;
+                    if self
+                        .program
+                        .as_ref()
+                        .is_none_or(|p| !p.coupling.contains(&(coupling.point == 3, coupling.tag)))
+                    {
+                        return Err(invalid("AAC coupling is absent from configured PCE"));
+                    }
+                    if !tags.insert(2, u32::from(coupling.tag)) {
+                        return Err(invalid("duplicate AAC coupling tag"));
+                    }
+                    let spectrum = coupling
+                        .channel
+                        .spectrum_with_noise(&self.config, &mut noise)?;
+                    let spectrum = coupling.channel.apply_tns(&self.config, spectrum)?;
+                    couplings.push((coupling, spectrum));
                 }
                 4 => super::aac_pce::skip_data_stream(&mut bits)?,
                 5 => {
@@ -205,7 +215,8 @@ impl NativeAacDecoder {
                     let expected = self.program.as_ref().ok_or_else(|| {
                         unsupported("in-band PCE needs an explicit configured program")
                     })?;
-                    if program.coupling != expected.coupling || program.elements != expected.elements
+                    if program.coupling != expected.coupling
+                        || program.elements != expected.elements
                         || program.sample_rate != expected.sample_rate
                         || program.object_type != expected.object_type
                         || program.pcm_layout()?.0 != self.channel_mask
@@ -231,11 +242,21 @@ impl NativeAacDecoder {
                 }
             }
             for (coupling, source) in &couplings {
-                if coupling.point != point {continue;}
+                if coupling.point != point {
+                    continue;
+                }
                 for target in &coupling.targets {
-                    let (_, _, offset) = decoded_elements.iter().find(|(kind,tag,_)| *kind == u32::from(target.pair) && *tag == u32::from(target.tag)).ok_or_else(||invalid("AAC coupling target is absent"))?;
+                    let (_, _, offset) = decoded_elements
+                        .iter()
+                        .find(|(kind, tag, _)| {
+                            *kind == u32::from(target.pair) && *tag == u32::from(target.tag)
+                        })
+                        .ok_or_else(|| invalid("AAC coupling target is absent"))?;
                     let mapped = self.mapping[*offset + target.channel as usize];
-                    let (channel, destination, _) = channels.iter_mut().find(|(_,_,index)| *index == mapped).ok_or_else(||invalid("AAC coupling target is absent"))?;
+                    let (channel, destination, _) = channels
+                        .iter_mut()
+                        .find(|(_, _, index)| *index == mapped)
+                        .ok_or_else(|| invalid("AAC coupling target is absent"))?;
                     if channel.info.sequence != coupling.channel.info.sequence {
                         return Err(invalid("AAC coupling target window sequence mismatch"));
                     }
@@ -245,31 +266,79 @@ impl NativeAacDecoder {
         }
         // byte_alignment bits have no audio payload.
         let n = self.config.frame_samples as usize;
-        let mut synthesis = self.synthesis.clone();
-        let mut output = vec![0.0; n * channels.len()];
-        let mut pcm = vec![0.0; n];
-        for (channel, spectrum, target) in &channels {
-            synthesis[*target].synthesize_pcm(channel.info.sequence, channel.info.shape, spectrum, &mut pcm)?;
-            for i in 0..n {
-                output[i * channels.len() + target] = pcm[i] as f32;
+        let history: Vec<_> = self
+            .synthesis
+            .iter()
+            .map(LongSineSynthesis::history)
+            .collect();
+        let coupling_history: Vec<_> = self
+            .coupling_synthesis
+            .iter()
+            .map(|state| state.as_ref().map(LongSineSynthesis::history))
+            .collect();
+        let result = (|| -> Result<Vec<f32>> {
+            let mut output = vec![0.0; n * channels.len()];
+            let mut pcm = vec![0.0; n];
+            for (channel, spectrum, target) in &channels {
+                self.synthesis[*target].synthesize_pcm(
+                    channel.info.sequence,
+                    channel.info.shape,
+                    spectrum,
+                    &mut pcm,
+                )?;
+                for i in 0..n {
+                    output[i * channels.len() + target] = pcm[i] as f32;
+                }
+            }
+            for (coupling, spectrum) in couplings {
+                if coupling.point != 3 {
+                    continue;
+                }
+                let state = &mut self.coupling_synthesis[coupling.tag as usize];
+                if state.is_none() {
+                    *state = Some(LongSineSynthesis::new(n)?);
+                }
+                state.as_mut().unwrap().synthesize_pcm(
+                    coupling.channel.info.sequence,
+                    coupling.channel.info.shape,
+                    &spectrum,
+                    &mut pcm,
+                )?;
+                for target in coupling.targets {
+                    let kind = u32::from(target.pair);
+                    let (_, _, offset) = decoded_elements
+                        .iter()
+                        .find(|(k, t, _)| *k == kind && *t == u32::from(target.tag))
+                        .ok_or_else(|| invalid("AAC coupling target is absent"))?;
+                    let channel = self.mapping[*offset + target.channel as usize];
+                    for i in 0..n {
+                        output[i * channels.len() + channel] += pcm[i] as f32 * target.gain;
+                    }
+                }
+            }
+            Ok(output)
+        })();
+        match result {
+            Ok(output) => {
+                self.noise = noise;
+                Ok(output)
+            }
+            Err(error) => {
+                for (state, saved) in self.synthesis.iter_mut().zip(&history) {
+                    state.restore_history(saved)?;
+                }
+                for (state, saved) in self.coupling_synthesis.iter_mut().zip(&coupling_history) {
+                    if let Some(saved) = saved {
+                        state
+                            .as_mut()
+                            .ok_or_else(|| invalid("AAC coupling rollback state missing"))?
+                            .restore_history(saved)?;
+                    } else {
+                        *state = None;
+                    }
+                }
+                Err(error)
             }
         }
-        let mut coupling_synthesis=self.coupling_synthesis.clone();
-        for (coupling,spectrum) in couplings {
-            if coupling.point != 3 {continue;}
-            let state=&mut coupling_synthesis[coupling.tag as usize];
-            if state.is_none() {*state=Some(LongSineSynthesis::new(n)?);}
-            state.as_mut().unwrap().synthesize_pcm(coupling.channel.info.sequence,coupling.channel.info.shape,&spectrum,&mut pcm)?;
-            for target in coupling.targets {
-                let kind=u32::from(target.pair);
-                let (_,_,offset)=decoded_elements.iter().find(|(k,t,_)|*k==kind && *t==u32::from(target.tag)).ok_or_else(||invalid("AAC coupling target is absent"))?;
-                let channel=self.mapping[*offset+target.channel as usize];
-                for i in 0..n {output[i*channels.len()+channel]+=pcm[i] as f32*target.gain;}
-            }
-        }
-        self.coupling_synthesis=coupling_synthesis;
-        self.synthesis = synthesis;
-        self.noise = noise;
-        Ok(output)
     }
 }

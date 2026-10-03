@@ -66,7 +66,30 @@ pub struct LongSineSynthesis {
     scratch: Vec<f64>,
     overlap: Vec<f64>,
 }
+/// Packet-boundary synthesis history, without transform/window scratch buffers.
+#[derive(Clone)]
+pub struct SynthesisHistory {
+    previous_shape: WindowShape,
+    overlap: Vec<f64>,
+}
 impl LongSineSynthesis {
+    pub fn history(&self) -> SynthesisHistory {
+        SynthesisHistory {
+            previous_shape: self.previous_shape,
+            overlap: self.overlap.clone(),
+        }
+    }
+    /// Restore matching history without allocating or copying scratch buffers.
+    /// A frame-size mismatch leaves this synthesis state unchanged.
+    pub fn restore_history(&mut self, history: &SynthesisHistory) -> Result<()> {
+        if history.overlap.len() != self.overlap.len() {
+            return Err(invalid("AAC synthesis history frame-size mismatch"));
+        }
+        self.overlap.copy_from_slice(&history.overlap);
+        self.previous_shape = history.previous_shape;
+        Ok(())
+    }
+
     pub(crate) fn visit_retained(
         &self,
         footprint: &mut super::memory::Footprint,
@@ -505,6 +528,49 @@ mod shared_window_tests {
             assert_eq!(original.scratch[0], 0.0);
             assert_eq!(original.short_scratch[0], 0.0);
             assert_eq!(original.transform_scratch[0], [0.0, 0.0]);
+        }
+    }
+}
+
+#[cfg(test)]
+mod history_tests {
+    use super::*;
+    #[test]
+    fn history_restore_repeats_pcm_across_shapes_and_window_sequences() {
+        for n in [960, 1024] {
+            let mut state = LongSineSynthesis::new(n).unwrap();
+            let spectrum: Vec<f32> = (0..n).map(|i| (i % 29) as f32 / 29.0).collect();
+            let mut pcm = vec![0.0; n];
+            for (sequence, shape) in [
+                (WindowSequence::OnlyLong, WindowShape::Kbd),
+                (WindowSequence::LongStart, WindowShape::Sine),
+                (WindowSequence::EightShort, WindowShape::Kbd),
+                (WindowSequence::LongStop, WindowShape::Sine),
+            ] {
+                let history = state.history();
+                let mut reference = state.clone();
+                state
+                    .synthesize_pcm(sequence, shape, &spectrum, &mut pcm)
+                    .unwrap();
+                state.restore_history(&history).unwrap();
+                state
+                    .synthesize_pcm(sequence, shape, &spectrum, &mut pcm)
+                    .unwrap();
+                let mut expected = vec![0.0; n];
+                reference
+                    .synthesize_pcm(sequence, shape, &spectrum, &mut expected)
+                    .unwrap();
+                assert_eq!(pcm, expected);
+                assert_eq!(state.overlap, reference.overlap);
+                assert_eq!(state.previous_shape, reference.previous_shape);
+            }
+            let wrong = LongSineSynthesis::new(if n == 960 { 1024 } else { 960 })
+                .unwrap()
+                .history();
+            let before = state.history();
+            assert!(state.restore_history(&wrong).is_err());
+            assert_eq!(state.overlap, before.overlap);
+            assert_eq!(state.previous_shape, before.previous_shape);
         }
     }
 }
