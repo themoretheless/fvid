@@ -107,3 +107,30 @@ fn plain_lossless_cli_plan_is_also_owned() {
         serde_json::to_value(expected).unwrap()
     );
 }
+
+#[test]
+fn existing_owned_filter_cli_plan_does_not_require_legacy() {
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4");
+    let request = fvid::media_info::LosslessTransform {
+        avgblur: Some("1:1".into()),
+        negate: Some("".into()),
+        chromashift: Some("cbh=1".into()),
+        ..Default::default()
+    };
+    let expected = fvid::native_plan::transcode_lossless(&source, &request).unwrap();
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "transcode-lossless"])
+        .arg(source)
+        .args(["--chromashift", "cbh=1", "--negate", "", "--avgblur", "1:1"])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(
+        serde_json::from_slice::<serde_json::Value>(&output.stdout).unwrap(),
+        serde_json::to_value(expected).unwrap()
+    );
+}
