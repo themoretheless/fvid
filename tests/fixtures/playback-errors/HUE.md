@@ -21,3 +21,8 @@ The native MP4 frontend and `media decode --hue` also use this shared filter.
 `native_hue` verifies the shared request and CLI with the committed synthetic
 MP4 control, and checks hue-before-negate ordering with literal pixel values.
 Ordinary tests run with no external codec executable.
+
+Native MP4-to-FFV1 lossless configuration also retains `hue`. The CLI export
+regression compares every one of the synthetic MP4 control's 25 decoded
+frames with independently filtered source frames, checks the owned backend
+and output EOF, and verifies that a hue request is not classified as identity.
