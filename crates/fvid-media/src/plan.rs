@@ -3607,6 +3607,11 @@ pub fn plan_xfade(
     offset_us: i64,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
+    if let Some(plan) = crate::owned_xfade::try_plan_xfade(
+        main, other, transition, duration_us, offset_us, options,
+    )? {
+        return Ok(plan);
+    }
     crate::filter::validate_xfade_transition(transition)?;
     if duration_us <= 0 {
         return Err("xfade duration must be > 0".into());

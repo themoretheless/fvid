@@ -31,6 +31,29 @@ fn valid_track_key(key: &str) -> bool {
             "rotate" | "stereo_mode" | "alpha_mode"
         )
 }
+/// Admit the same inputs and policy as execution before building a native plan.
+pub fn try_plan_xfade(
+    main: &std::path::Path,
+    other: &std::path::Path,
+    transition: &str,
+    duration_us: i64,
+    offset_us: i64,
+    options: &fvid_control::CopyOptions,
+) -> Result<Option<fvid_media_info::MediaPlan>, String> {
+    if transition != "fade" || !default_policy(options)
+        || read_header(main).is_none() || read_header(other).is_none()
+    {
+        return Ok(None);
+    }
+    plan_xfade(main, other, transition, duration_us, offset_us, options).map(Some)
+}
+
+fn read_header(path: &std::path::Path) -> Option<Header> {
+    let mut input = std::io::BufReader::new(std::fs::File::open(path).ok()?);
+    let mut bytes = Vec::new();
+    line(&mut input, &mut bytes).ok()?.then(|| Header::parse(&bytes).ok()).flatten()
+}
+
 pub fn plan_xfade(
     main: &std::path::Path,
     other: &std::path::Path,
@@ -104,14 +127,6 @@ pub fn try_xfade_video(
     if transition != "fade" || !default_policy(options) {
         return Ok(None);
     }
-    let read_header = |path: &std::path::Path| -> Option<Header> {
-        let mut input = std::io::BufReader::new(std::fs::File::open(path).ok()?);
-        let mut bytes = Vec::new();
-        line(&mut input, &mut bytes)
-            .ok()?
-            .then(|| Header::parse(&bytes).ok())
-            .flatten()
-    };
     let Some(header) = read_header(source) else {
         return Ok(None);
     };

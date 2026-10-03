@@ -4760,13 +4760,16 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
 }
 
 fn owned_xfade_command(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
-    if args.first().map(String::as_str) != Some("xfade") || args.len() < 4 { return Ok(false); }
+    let planning = args.first().map(String::as_str) == Some("plan");
+    let args = if planning { &args[1..] } else { args };
+    let required = if planning { 3 } else { 4 };
+    if args.first().map(String::as_str) != Some("xfade") || args.len() < required { return Ok(false); }
     let mut options = fvid::media_control::CopyOptions::default();
     let mut duration = None;
     let mut offset = 0;
     let mut transition = "fade";
     let mut quiet = false;
-    let mut values = args[4..].iter();
+    let mut values = args[required..].iter();
     while let Some(flag) = values.next() {
         match flag.as_str() {
             "--quiet" => quiet = true,
@@ -4795,6 +4798,14 @@ fn owned_xfade_command(args: &[String]) -> Result<bool, Box<dyn std::error::Erro
         }
     }
     let duration = duration.ok_or("xfade requires --xfade-duration")?;
+    if planning {
+        let Some(plan) = fvid_media::owned_xfade::try_plan_xfade(
+            std::path::Path::new(&args[1]), std::path::Path::new(&args[2]),
+            transition, duration, offset, &options,
+        )? else { return Ok(false); };
+        if !quiet { println!("{}", serde_json::to_string_pretty(&plan)?); }
+        return Ok(true);
+    }
     let stats = fvid_media::owned_xfade::try_xfade_video(
         std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), std::path::Path::new(&args[3]),
         transition, duration, offset, &options,
