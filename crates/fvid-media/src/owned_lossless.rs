@@ -16,6 +16,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         reverse: t.reverse.clone(),
         overlay: t.overlay.clone(),
         avgblur: t.avgblur.clone(),
+        gblur: t.gblur.clone(),
         boxblur: t.boxblur.clone(),
         unsharp: t.unsharp.clone(),
         eq: t.eq.clone(),
@@ -49,6 +50,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         reverse: t.reverse.clone(),
         overlay: t.overlay.clone(),
         avgblur: t.avgblur.clone(),
+        gblur: t.gblur.clone(),
         boxblur: t.boxblur.clone(),
         unsharp: t.unsharp.clone(),
         eq: t.eq.clone(),
@@ -409,7 +411,7 @@ mod plan_tests {
                 .contains("not exact")
         );
         let unsupported = LosslessTransform {
-            gblur: Some("sigma=1".into()),
+            gblur: Some("sigma=NaN".into()),
             ..Default::default()
         };
         assert!(plan_transcode_lossless(&source, &unsupported, &options, None).is_err());

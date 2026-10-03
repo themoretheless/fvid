@@ -30,6 +30,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
+    if transform.gblur.as_deref().is_some_and(|a| crate::owned_gblur::GaussianBlur::parse(a).is_err()) { return false; }
     transform
         .unsharp
         .as_deref()
@@ -98,6 +99,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 hue: transform.hue.clone(),
                 negate: transform.negate.clone(),
                 avgblur: transform.avgblur.clone(),
+                gblur: transform.gblur.clone(),
                 boxblur: transform.boxblur.clone(),
                 pixelize: transform.pixelize.clone(),
                 chromashift: transform.chromashift.clone(),
@@ -333,6 +335,7 @@ pub(crate) fn apply_pixel_filters(
         || transform.unsharp.is_some()
         || transform.eq.is_some()
         || transform.hue.is_some()
+        || transform.gblur.is_some()
         || transform.avgblur.is_some()
         || transform.boxblur.is_some()
         || transform.pixelize.is_some()
@@ -370,6 +373,9 @@ pub(crate) fn apply_pixel_filters(
             }
             if let Some(args) = transform.hue.as_deref() {
                 crate::owned_hue::Hue::parse(args)?.apply(&mut frame, header.depth())?;
+            }
+            if let Some(args) = transform.gblur.as_deref() {
+                crate::owned_gblur::GaussianBlur::parse(args)?.apply(&mut frame, header.depth())?;
             }
             if let Some(args) = transform.avgblur.as_deref() {
                 crate::owned_avgblur::AverageBlur::parse(args)?
@@ -704,6 +710,7 @@ fn decode_reader_frames(
         || transform.eq.is_some()
         || transform.hue.is_some()
         || transform.negate.is_some()
+        || transform.gblur.is_some()
         || transform.avgblur.is_some()
         || transform.boxblur.is_some()
         || transform.pixelize.is_some()

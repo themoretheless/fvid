@@ -104,6 +104,7 @@ pub mod owned_frame;
 pub mod owned_frame_layout;
 pub mod owned_pixel_format;
 pub mod owned_avgblur;
+pub mod owned_gblur;
 pub mod owned_boxblur;
 
 pub mod owned_pixelize;
