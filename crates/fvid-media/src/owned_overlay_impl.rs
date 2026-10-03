@@ -63,6 +63,9 @@ fn planes(frame: &GeometryFrame, depth: u8) -> Result<Vec<Plane>> {
     }
     Ok(result)
 }
+pub(crate) fn validate_frame(frame: &GeometryFrame, depth: u8) -> Result<()> {
+    planes(frame, depth).map(|_| ())
+}
 
 /// Replace the covered destination samples with an opaque foreground.
 /// Inputs must already share colour encoding, range, depth and chroma sampling.
