@@ -5,7 +5,6 @@ use std::{fs::File, io::BufReader, path::Path};
 type Result<T> = std::result::Result<T, String>;
 fn policies(options: &CopyOptions) -> bool {
     (options.streams.is_empty() || options.streams == [0])
-        && options.max_controlled_bytes.is_none()
         && options.metadata_set.is_empty()
         && options.metadata_delete.is_empty()
         && options.stream_metadata_set.is_empty()
@@ -13,7 +12,7 @@ fn policies(options: &CopyOptions) -> bool {
 }
 fn rate(source: &Path, options: &CopyOptions) -> Result<u32> {
     if !policies(options) {
-        return Err("owned ADTS loudness requires stream 0, no metadata edits and no aggregate admission policy".into());
+        return Err("owned ADTS loudness requires stream 0 and no metadata edits".into());
     }
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
@@ -24,7 +23,10 @@ fn rate(source: &Path, options: &CopyOptions) -> Result<u32> {
         options.max_packet_bytes,
     )
     .map_err(|e| e.to_string())?;
-    let rate = reader.configuration().sample_rate;
+    let config = reader.configuration();
+    crate::owned_aac::stream::check_decode_admission(config.channels, options)
+        .map_err(|e| e.to_string())?;
+    let rate = config.sample_rate;
     let decoder = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
         .map_err(|e| e.to_string())?;
     if decoder.channel_mask() & !0x7ff != 0 {
@@ -38,12 +40,18 @@ fn rate(source: &Path, options: &CopyOptions) -> Result<u32> {
     Ok(rate)
 }
 pub(crate) fn supports_plan(source: &Path, options: &CopyOptions) -> bool {
-    rate(source, options).is_ok()
-        && crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options).is_ok()
+    match rate(source, options) {
+        Ok(_) => {
+            crate::owned_audio_plan::plan_decode_audio(source, &Default::default(), options).is_ok()
+        }
+        Err(error) => error.starts_with("controlled memory budget exceeded:"),
+    }
 }
 pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
-    rate(source, options).is_ok()
-        && crate::owned_adts_export::supports(source, Default::default(), options)
+    match rate(source, options) {
+        Ok(_) => crate::owned_adts_export::supports(source, Default::default(), options),
+        Err(error) => error.starts_with("controlled memory budget exceeded:"),
+    }
 }
 pub fn measure_loudness(source: &Path, options: &CopyOptions) -> Result<LoudnessStats> {
     rate(source, options)?;
@@ -76,4 +84,65 @@ pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> 
     plan.steps.push(PlanStep{action:"analyze".into(),detail:"owned streaming K-weighting, integrated loudness gates, LRA and true-peak FIR; no published output".into()});
     plan.notes.push("private decoded WAVE is removed on success or failure; measurement completion is emitted once after analysis".into());
     Ok(plan)
+}
+
+#[cfg(test)]
+mod admission_tests {
+    use super::*;
+    #[test]
+    fn aac_loudness_and_normalization_keep_owned_budget_policy() {
+        let source =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/audio/aac-stereo.aac");
+        let small = CopyOptions {
+            max_controlled_bytes: Some(1),
+            ..Default::default()
+        };
+        let admitted = CopyOptions {
+            max_controlled_bytes: Some(32 * 1024 * 1024),
+            ..Default::default()
+        };
+        assert!(supports(&source, &small));
+        assert!(supports_plan(&source, &small));
+        assert!(
+            crate::measure_loudness(&source, &small)
+                .unwrap_err()
+                .contains("controlled memory budget exceeded")
+        );
+        let expected = crate::measure_loudness(&source, &Default::default()).unwrap();
+        let actual = crate::measure_loudness(&source, &admitted).unwrap();
+        assert_eq!(
+            serde_json::to_value(actual).unwrap(),
+            serde_json::to_value(expected).unwrap()
+        );
+        crate::plan_loudness(&source, &admitted).unwrap();
+        for dual in [false, true] {
+            let output = std::env::temp_dir().join(format!(
+                "fvid-aac-loudnorm-budget-{dual}-{}.wav",
+                std::process::id()
+            ));
+            let _ = std::fs::remove_file(&output);
+            assert!(crate::owned_adts_loudnorm::supports(
+                &source, &output, None, &small
+            ));
+            let apply = |options: &CopyOptions| {
+                if dual {
+                    crate::apply_loudnorm_dual(&source, &output, None, options)
+                } else {
+                    crate::apply_loudnorm(&source, &output, None, options)
+                }
+            };
+            assert!(
+                apply(&small)
+                    .unwrap_err()
+                    .contains("controlled memory budget exceeded")
+            );
+            assert!(!output.exists());
+            apply(&admitted).unwrap();
+            let with_budget = std::fs::read(&output).unwrap();
+            std::fs::remove_file(&output).unwrap();
+            apply(&CopyOptions::default()).unwrap();
+            assert_eq!(std::fs::read(&output).unwrap(), with_budget);
+            std::fs::remove_file(&output).unwrap();
+        }
+    }
 }
