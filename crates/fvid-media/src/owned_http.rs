@@ -31,6 +31,7 @@ pub struct DownloadedInput {
     directory: PathBuf,
     path: PathBuf,
     bytes: u64,
+    source_url: Option<reqwest::Url>,
 }
 impl Drop for DownloadedInput {
     fn drop(&mut self) {
@@ -81,8 +82,9 @@ impl DownloadedInput {
         {
             return Err("HTTP media input requires an unencoded response body".into());
         }
+        let effective_url = response.url().clone();
         let length = response.content_length();
-        let extension = Path::new(url.path())
+        let extension = Path::new(effective_url.path())
             .extension()
             .and_then(|e| e.to_str())
             .unwrap_or("media");
@@ -92,21 +94,119 @@ impl DownloadedInput {
             } else {
                 "media"
             };
-        Self::from_body(response, length, extension, options)
+        let mut input = Self::from_body(response, length, extension, options)?;
+        input.source_url = Some(effective_url);
+        Ok(input)
     }
-    fn from_body(
-        mut body: impl Read,
-        length: Option<u64>,
-        extension: &str,
-        options: &DownloadOptions,
-    ) -> Result<Self> {
-        cancelled(options)?;
-        if length
-            .zip(options.max_bytes)
-            .is_some_and(|(length, limit)| length > limit)
-        {
-            return Err("HTTP media input exceeds download byte limit".into());
+    /// Download finite media, resolving finite fMP4 HLS manifests when present.
+    pub fn download_media(url: &str, options: &DownloadOptions) -> Result<std::sync::Arc<Self>> {
+        use crate::owned_hls::{self, Playlist};
+        use std::{
+            collections::{HashMap, HashSet},
+            sync::Arc,
+        };
+        let mut cache = HashMap::<String, Arc<Self>>::new();
+        let mut downloaded = 0u64;
+        let mut fetch = |url: &reqwest::Url| -> Result<Arc<Self>> {
+            cancelled(options)?;
+            if let Some(input) = cache.get(url.as_str()) {
+                return Ok(input.clone());
+            }
+            let mut child = options.clone();
+            child.max_bytes = options
+                .max_bytes
+                .map(|limit| limit.saturating_sub(downloaded));
+            let before = downloaded;
+            let progress = options.progress.clone();
+            child.progress = progress.map(|progress| {
+                ProgressHook::new(move |event| {
+                    progress.emit(ProgressEvent {
+                        payload_bytes: before.saturating_add(event.payload_bytes),
+                        done: false,
+                        ..event
+                    });
+                })
+            });
+            let input = Arc::new(Self::download(url.as_str(), &child)?);
+            downloaded = downloaded
+                .checked_add(input.bytes)
+                .ok_or("HTTP aggregate byte count overflow")?;
+            cache.insert(url.as_str().to_owned(), input.clone());
+            Ok(input)
+        };
+        let mut current = reqwest::Url::parse(url).map_err(|_| "invalid HTTP media URL")?;
+        let mut visited = HashSet::new();
+        let result = loop {
+            if !visited.insert(current.as_str().to_owned()) {
+                return Err("cyclic HLS master playlist".into());
+            }
+            let input = fetch(&current)?;
+            let mut file = File::open(input.path()).map_err(|e| e.to_string())?;
+            let mut prefix = [0u8; 7];
+            let count = file.read(&mut prefix).map_err(|e| e.to_string())?;
+            if count != 7 || &prefix != b"#EXTM3U" {
+                if visited.len() > 1 {
+                    return Err("HLS variant response is not a playlist".into());
+                }
+                break input;
+            }
+            let text = std::fs::read_to_string(input.path())
+                .map_err(|e| format!("HLS manifest text: {e}"))?;
+            let base = input
+                .source_url
+                .as_ref()
+                .ok_or("HLS input lacks effective response URL")?;
+            match owned_hls::parse(&text)? {
+                Playlist::Master(variants) => {
+                    let variant = variants
+                        .iter()
+                        .max_by_key(|variant| variant.bandwidth)
+                        .ok_or("empty HLS master")?;
+                    if variant.external_renditions {
+                        return Err("HLS external renditions are not yet supported".into());
+                    }
+                    current = base
+                        .join(variant.uri)
+                        .map_err(|_| "invalid HLS variant URL")?;
+                }
+                Playlist::Media(playlist) => {
+                    let (mut output, mut file) = Self::create_file("mp4")?;
+                    let assembled = owned_hls::assemble_fmp4(
+                        &playlist,
+                        &mut file,
+                        |resource| {
+                            let url = base
+                                .join(resource.uri)
+                                .map_err(|_| "invalid HLS resource URL")?;
+                            let asset = fetch(&url)?;
+                            Ok(Box::new(
+                                File::open(asset.path()).map_err(|e| e.to_string())?,
+                            ))
+                        },
+                        options.max_bytes,
+                        options.cancel.as_ref(),
+                    );
+                    let flushed = file.flush().map_err(|e| e.to_string());
+                    drop(file);
+                    output.bytes = assembled?;
+                    flushed?;
+                    output.source_url = Some(base.clone());
+                    break Arc::new(output);
+                }
+            }
+        };
+        // Release the borrowing fetch closure before reporting aggregate completion.
+        drop(fetch);
+        if let Some(progress) = &options.progress {
+            progress.emit(ProgressEvent {
+                packets: 0,
+                payload_bytes: downloaded,
+                done: true,
+            });
         }
+        Ok(result)
+    }
+    fn create_file(extension: &str) -> Result<(Self, File)> {
         static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
         let nonce = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -124,12 +224,29 @@ impl DownloadedInput {
             builder.mode(0o700);
         }
         builder.create(&directory).map_err(|e| e.to_string())?;
-        let mut input = Self {
+        let input = Self {
             path: directory.join(format!("source.{extension}")),
             directory,
             bytes: 0,
+            source_url: None,
         };
-        let mut file = File::create(&input.path).map_err(|e| e.to_string())?;
+        let file = File::create(&input.path).map_err(|e| e.to_string())?;
+        Ok((input, file))
+    }
+    fn from_body(
+        mut body: impl Read,
+        length: Option<u64>,
+        extension: &str,
+        options: &DownloadOptions,
+    ) -> Result<Self> {
+        cancelled(options)?;
+        if length
+            .zip(options.max_bytes)
+            .is_some_and(|(length, limit)| length > limit)
+        {
+            return Err("HTTP media input exceeds download byte limit".into());
+        }
+        let (mut input, mut file) = Self::create_file(extension)?;
         let mut scratch = [0u8; 64 * 1024];
         let result: Result<()> = (|| {
             loop {
@@ -244,11 +361,9 @@ mod tests {
             max_bytes: Some(1),
             ..Default::default()
         };
-        assert!(
-            DownloadedInput::from_body(VIDEO, None, "y4m", &limited)
-                .unwrap_err()
-                .contains("byte limit")
-        );
+        assert!(DownloadedInput::from_body(VIDEO, None, "y4m", &limited)
+            .unwrap_err()
+            .contains("byte limit"));
         let flag = CancelFlag::new();
         let trigger = flag.clone();
         let options = DownloadOptions {
@@ -256,11 +371,9 @@ mod tests {
             progress: Some(ProgressHook::new(move |_| trigger.cancel())),
             ..Default::default()
         };
-        assert!(
-            DownloadedInput::from_body(VIDEO, None, "y4m", &options)
-                .unwrap_err()
-                .contains("cancelled")
-        );
+        assert!(DownloadedInput::from_body(VIDEO, None, "y4m", &options)
+            .unwrap_err()
+            .contains("cancelled"));
     }
     #[test]
     fn standalone_scope_refuses_before_network_and_other_schemes_are_excluded() {
@@ -319,10 +432,114 @@ mod tests {
                 3
             );
         }
-        assert!(
-            DownloadedInput::download(&format!("http://{address}/truncated"), &Default::default())
-                .is_err()
-        );
+        assert!(DownloadedInput::download(
+            &format!("http://{address}/truncated"),
+            &Default::default()
+        )
+        .is_err());
         server.join().unwrap();
+    }
+}
+
+#[cfg(test)]
+mod hls_tests {
+    use super::*;
+    #[test]
+    #[ignore = "explicit loopback HTTP integration; ordinary tests do not use networking"]
+    fn redirect_master_and_byte_ranges_open_owned_fragmented_media() {
+        use std::{
+            io::{BufRead, BufReader},
+            net::TcpListener,
+            thread,
+        };
+        let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/hls");
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        listener.set_nonblocking(true).unwrap();
+        let address = listener.local_addr().unwrap();
+        let server = thread::spawn(move || {
+            let deadline = std::time::Instant::now() + Duration::from_secs(20);
+            let mut requests = Vec::new();
+            while requests.len() < 4 {
+                let (mut stream, _) = match listener.accept() {
+                    Ok(pair) => pair,
+                    Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                        assert!(
+                            std::time::Instant::now() < deadline,
+                            "server request timeout"
+                        );
+                        thread::sleep(Duration::from_millis(10));
+                        continue;
+                    }
+                    Err(e) => panic!("{e}"),
+                };
+                stream
+                    .set_read_timeout(Some(Duration::from_secs(5)))
+                    .unwrap();
+                let mut reader = BufReader::new(stream.try_clone().unwrap());
+                let mut request = String::new();
+                reader.read_line(&mut request).unwrap();
+                let path = request.split_whitespace().nth(1).unwrap().to_owned();
+                requests.push(path.clone());
+                loop {
+                    let mut line = String::new();
+                    reader.read_line(&mut line).unwrap();
+                    if line == "\r\n" || line.is_empty() {
+                        break;
+                    }
+                }
+                if path == "/start" {
+                    stream.write_all(b"HTTP/1.1 302 Found\r\nLocation: /nested/master.m3u8\r\nContent-Length: 0\r\nConnection: close\r\n\r\n").unwrap();
+                } else {
+                    let body = if path == "/nested/master.m3u8" {
+                        b"#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=100\nbyterange.m3u8\n".to_vec()
+                    } else {
+                        std::fs::read(fixtures.join(path.strip_prefix("/nested/").unwrap()))
+                            .unwrap()
+                    };
+                    write!(
+                        stream,
+                        "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                        body.len()
+                    )
+                    .unwrap();
+                    stream.write_all(&body).unwrap();
+                }
+            }
+            requests
+        });
+        let events = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let report = events.clone();
+        let options = DownloadOptions {
+            progress: Some(ProgressHook::new(move |event| {
+                report.lock().unwrap().push(event)
+            })),
+            ..Default::default()
+        };
+        let input =
+            DownloadedInput::download_media(&format!("http://{address}/start"), &options).unwrap();
+        let reader = crate::owned_mp4::Mp4Reader::open(
+            File::open(input.path()).unwrap(),
+            Default::default(),
+        )
+        .unwrap();
+        assert_eq!(reader.tracks()[0].samples.len(), 25);
+        assert_eq!(
+            server.join().unwrap(),
+            [
+                "/start",
+                "/nested/master.m3u8",
+                "/nested/byterange.m3u8",
+                "/nested/objects.mp4"
+            ]
+        );
+        let events = events.lock().unwrap();
+        assert_eq!(events.iter().filter(|event| event.done).count(), 1);
+        assert!(events
+            .windows(2)
+            .all(|pair| pair[0].payload_bytes <= pair[1].payload_bytes));
+        let path = input.path().to_owned();
+        drop(input);
+        assert!(!path.exists());
     }
 }

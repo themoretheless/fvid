@@ -3298,8 +3298,9 @@ byte limits, cancellation and empty input, and removes partial files on failure.
 the player currently uses a 120-second total request timeout. Input-policy
 standalone scopes refuse HTTP before making a request.
 
-This is download-before-playback, not progressive playback. HLS/DASH manifests,
-live streams, and FTP/RTMP/RTSP/UDP transports still need owned implementations.
+This is download-before-playback, not progressive playback. Finite fMP4 HLS manifests are assembled through the owned HLS module described
+below. DASH manifests, live streams, and FTP/RTMP/RTSP/UDP transports still need
+owned implementations.
 HTTPS certificate validation is provided by Rustls; the current live regression
 checks HTTP loopback, not a live HTTPS server.
 
@@ -3323,5 +3324,16 @@ verify all 25 packets and timestamps against the fragmented MP4 source. Fixture
 regeneration uses Python to split the committed synthetic file; ordinary tests
 use local files only. Live reload, encryption, discontinuities, gaps and MPEG-TS
 assembly are explicitly refused. External rendition declarations are retained
-for the transport to handle. This library is not yet connected to the player's
-HTTP entrypoint; opening an HLS URL in the player is still unsupported.
+for the transport to handle; the HTTP entrypoint currently refuses them. The
+player HTTP entrypoint follows master manifests, selects the highest bandwidth
+variant, resolves relative URIs against each effective response URL and caches
+repeated resources for byte-range assembly. Progress counts aggregate network
+bytes with one final completion event. Both the aggregate download and assembled
+output honor the optional byte limit. This remains download-before-playback.
+
+Explicit loopback integration tests (not run by ordinary tests):
+
+```sh
+cargo test --manifest-path crates/fvid-media/Cargo.toml --offline --no-default-features --features http-input --lib hls_tests:: -- --ignored
+FVID_SOFTWARE_DECODE=1 cargo test --offline --no-default-features --features player --lib native_player_hls_decodes_all_frames_and_seeks -- --ignored
+```

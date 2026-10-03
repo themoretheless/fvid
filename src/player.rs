@@ -2145,8 +2145,8 @@ impl Player {
                 let _ = send.send(OpenProgress::Download(event.payload_bytes));
             }));
             let options = fvid_media::owned_http::DownloadOptions { progress, cancel: self.network_cancel.as_ref().map(|cancel|cancel.0.clone()), ..Default::default() };
-            Some(Arc::new(fvid_media::owned_http::DownloadedInput::download(path.to_str().unwrap(), &options)
-                .map_err(|error| crate::invalid(&error))?))
+            Some(fvid_media::owned_http::DownloadedInput::download_media(path.to_str().unwrap(), &options)
+                .map_err(|error| crate::invalid(&error))?)
         } else {
             self.network_input.as_ref().filter(|input|input.path() == path).cloned()
         };
@@ -11436,6 +11436,76 @@ mod http_input_tests {
         );
         let (start, _, scale) = reader.frame_interval().unwrap();
         assert_eq!(start * 1000 / u128::from(scale), 40);
+        reader.rewind().unwrap();
+        assert!(reader.read_frame_raw().unwrap().is_some());
+        drop(reader);
+        drop(player);
+        assert!(!path.exists());
+    }
+    #[test]
+    #[ignore = "explicit loopback HLS playback; ordinary tests need no network"]
+    fn native_player_hls_decodes_all_frames_and_seeks() {
+        use std::io::{Read, Write};
+        let manifest = include_bytes!("../tests/fixtures/playback-errors/hls/byterange.m3u8");
+        let object = include_bytes!("../tests/fixtures/playback-errors/hls/objects.mp4");
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        listener.set_nonblocking(true).unwrap();
+        let address = listener.local_addr().unwrap();
+        let server = std::thread::spawn(move || {
+            let deadline = std::time::Instant::now() + Duration::from_secs(20);
+            for body in [manifest.as_slice(), object.as_slice()] {
+                let mut socket = loop {
+                    match listener.accept() {
+                        Ok((socket, _)) => break socket,
+                        Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                            assert!(std::time::Instant::now() < deadline);
+                            std::thread::sleep(Duration::from_millis(10));
+                        }
+                        Err(e) => panic!("{e}"),
+                    }
+                };
+                socket
+                    .set_read_timeout(Some(Duration::from_secs(5)))
+                    .unwrap();
+                let mut request = Vec::new();
+                let mut byte = [0];
+                while !request.ends_with(b"\r\n\r\n") {
+                    socket.read_exact(&mut byte).unwrap();
+                    request.push(byte[0]);
+                }
+                write!(
+                    socket,
+                    "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                    body.len()
+                )
+                .unwrap();
+                socket.write_all(body).unwrap();
+            }
+        });
+        let mut player = Player {
+            no_audio: true,
+            ..Default::default()
+        };
+        player
+            .open(format!("http://{address}/video.m3u8").into())
+            .unwrap();
+        server.join().unwrap();
+        assert_eq!(player.dimensions, [320, 240]);
+        assert!(player.seekable);
+        let path = player.opened.clone().unwrap();
+        let mut reader = NativeReader::without_memory_limit(std::io::BufReader::new(
+            std::fs::File::open(&path).unwrap(),
+        ))
+        .unwrap();
+        let mut count = 0;
+        while reader.read_frame_raw().unwrap().is_some() {
+            count += 1;
+        }
+        assert_eq!(count, 25);
+        assert!(reader
+            .seek_raw(Duration::from_millis(400))
+            .unwrap()
+            .is_some());
         reader.rewind().unwrap();
         assert!(reader.read_frame_raw().unwrap().is_some());
         drop(reader);
