@@ -39,3 +39,8 @@ for name, w, h, rate, count, base in [
 (root / "shuffleframes-seven-frames.y4m").write_bytes(main + b"FRAME\n" + bytes([16])*16 + bytes([128])*8)
 
 (root / "shuffleframes-discarded-truncated.y4m").write_bytes(main + b"FRAME\n" + bytes([16])*16 + bytes([128])*7)
+
+# Indexed six-frame clip for reverse playback/export acceptance.
+(root / "reverse-six-frames.y4m").write_bytes(main)
+
+(root / "reverse-truncated-last-frame.y4m").write_bytes(main[:-1])

@@ -515,3 +515,39 @@ modes, legacy/player compilation, native source/dependency guards and diff
 checks passed. Previously committed temporal artifacts retain their bytes.
 General mapping option expressions and other unmigrated codecs/filters remain
 on the previous adapter; no production feature was detached to mask that work.
+
+
+Owned Y4M reverse decode and lossless file operation
+--------------------------------------------------
+
+The own reverse stage stores fixed-size timing/payload records in a private
+same-operation temporary file rather than retaining every decoded frame or a
+per-frame metadata array in memory. Replay uses one payload buffer; upstream
+frame/group buffers are released before replay. File handles close before
+removal, including callback/read failures. Unix spool creation uses mode 0600.
+Payloads replay backward; both PTS and duration replay in original forward
+position order. Discard-only decoding without a frame consumer does not create a spool.
+
+The synthetic six-frame and truncated-last-frame Y4M fixtures come from the
+Python generator without external codecs or private data. Before the fix the
+acceptance failed specifically because reverse was unsupported. Acceptance
+now covers full and interval pixels/timing, owned public plan/export, exact
+consumed counts, framestep/shuffle composition, independently decoded FFV1
+packets, callback-error cleanup and damaged-source refusal without publication.
+A scalar replay test checks deliberately unequal forward durations. The file
+reader now checks cancellation on input reads/fill_buf, so reverse stops after
+the first input frame in the controlled test, before replay or packet writing.
+
+The explicit ffmpeg_reverse_reference benchmark independently decoded four
+own outputs and verified filter pixels plus container PTS/durations. Its optional
+legacy feature forces the original FFV1 adapter for the simple full-reverse
+case with a nonempty level=1 encoder option; that case also matched. This does
+not establish parity for other legacy temporal combinations. Contract source:
+https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/f_reverse.c
+
+All 159 own unit tests and 13 native geometry integrations passed with empty
+external-program PATH. The own test binary has no libav linkage. Both benchmark
+modes, legacy/player compilation, native dependency/source guards and diff
+checks passed. Existing generated temporal artifacts remain byte-identical.
+This migrates Y4M reverse; other source codecs and unimplemented production
+filters still require their existing adapter and the overall migration is open.

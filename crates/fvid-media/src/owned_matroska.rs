@@ -182,6 +182,27 @@ pub fn write_y4m_ffv1_controlled<W: Write + Seek>(
     )
     .map(|(stats, event, _)| (stats, event))
 }
+// Check cancellation while buffering temporal filters, before they emit packets.
+struct CancelReader<'a, R> {
+    source: R,
+    cancel: Option<&'a fvid_control::CancelFlag>,
+}
+impl<R: std::io::BufRead> std::io::Read for CancelReader<'_, R> {
+    fn read(&mut self, bytes: &mut [u8]) -> std::io::Result<usize> {
+        check(self.cancel).map_err(std::io::Error::other)?;
+        self.source.read(bytes)
+    }
+}
+impl<R: std::io::BufRead> std::io::BufRead for CancelReader<'_, R> {
+    fn fill_buf(&mut self) -> std::io::Result<&[u8]> {
+        check(self.cancel).map_err(std::io::Error::other)?;
+        self.source.fill_buf()
+    }
+    fn consume(&mut self, bytes: usize) {
+        self.source.consume(bytes);
+    }
+}
+
 fn write_y4m_ffv1_policy<W: Write + Seek>(
     source: impl std::io::BufRead,
     output: &mut W,
@@ -197,7 +218,7 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
     let mut output = Some(output);
     let mut writer = None;
     let (stats, consumed) = crate::owned_ffv1_encoder::encode_y4m_counted(
-        source,
+        CancelReader { source, cancel },
         transform,
         max_packets,
         |header, packet, pts, duration| {
@@ -457,5 +478,67 @@ include!("owned_mp4_aac_plan_impl.rs");
 impl FileMetadata {
     pub fn from_mp4<R: Read + Seek>(input: &crate::owned_mp4::Mp4Reader<R>) -> Self {
         Self { tags: input.tags().clone(), chapters: input.chapters().iter().map(|c| Chapter { start_ns: c.start_ns, end_ns: None, title: c.title.clone() }).collect() }
+    }
+}
+
+
+#[cfg(test)]
+mod reverse_cancel_tests {
+    #[test]
+    fn cancellation_stops_reverse_input_before_any_replay_or_packet_write() {
+        use std::io::{BufRead, Cursor, Read};
+        use std::sync::{
+            Arc,
+            atomic::{AtomicU64, Ordering},
+        };
+        struct Input {
+            cursor: Cursor<&'static [u8]>,
+            flag: fvid_control::CancelFlag,
+            at: Arc<AtomicU64>,
+            cutoff: u64,
+        }
+        impl Read for Input {
+            fn read(&mut self, bytes: &mut [u8]) -> std::io::Result<usize> {
+                let n = self.cursor.read(bytes)?;
+                self.at.store(self.cursor.position(), Ordering::Relaxed);
+                if self.cursor.position() >= self.cutoff {
+                    self.flag.cancel();
+                }
+                Ok(n)
+            }
+        }
+        impl BufRead for Input {
+            fn fill_buf(&mut self) -> std::io::Result<&[u8]> {
+                self.cursor.fill_buf()
+            }
+            fn consume(&mut self, n: usize) {
+                self.cursor.consume(n);
+            }
+        }
+        let bytes: &'static [u8] =
+            include_bytes!("../../../tests/fixtures/playback-errors/reverse-six-frames.y4m");
+        let cutoff = (bytes.iter().position(|&b| b == b'\n').unwrap() + 1 + 6 + 24) as u64;
+        let flag = fvid_control::CancelFlag::new();
+        let at = Arc::new(AtomicU64::new(0));
+        let input = Input {
+            cursor: Cursor::new(bytes),
+            flag: flag.clone(),
+            at: at.clone(),
+            cutoff,
+        };
+        let mut output = Cursor::new(Vec::new());
+        let transform = fvid_media_info::DecodeTransform {
+            reverse: Some(String::new()),
+            ..Default::default()
+        };
+        let error =
+            super::write_y4m_ffv1_controlled(input, &mut output, &transform, Some(&flag), None)
+                .unwrap_err();
+        assert!(
+            error.to_string().contains("media operation cancelled"),
+            "{error}"
+        );
+        assert_eq!(at.load(Ordering::Relaxed), cutoff);
+        assert!(output.into_inner().is_empty());
     }
 }

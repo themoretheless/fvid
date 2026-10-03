@@ -13,6 +13,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         interval: t.interval,
         framestep: t.framestep.clone(),
         shuffleframes: t.shuffleframes.clone(),
+        reverse: t.reverse.clone(),
         overlay: t.overlay.clone(),
         avgblur: t.avgblur.clone(),
         boxblur: t.boxblur.clone(),
@@ -42,6 +43,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         interval: t.interval,
         framestep: t.framestep.clone(),
         shuffleframes: t.shuffleframes.clone(),
+        reverse: t.reverse.clone(),
         overlay: t.overlay.clone(),
         avgblur: t.avgblur.clone(),
         boxblur: t.boxblur.clone(),
@@ -607,6 +609,118 @@ mod shuffleframes_tests {
             std::env::temp_dir().join(format!("fvid-shuffle-truncated-{}.mkv", std::process::id()));
         let transform = LosslessTransform {
             shuffleframes: Some("2 1 0".into()),
+            ..Default::default()
+        };
+        assert!(supports(&source, &transform, &CopyOptions::default()));
+        let error = crate::transcode_lossless(&source, &output, transform, &CopyOptions::default())
+            .unwrap_err();
+        assert!(error.contains("truncated Y4M frame payload"), "{error}");
+        assert!(!output.exists());
+    }
+}
+
+#[cfg(test)]
+mod reverse_tests {
+    use super::*;
+    #[test]
+    fn reversed_files_preserve_forward_packet_timing_and_source_counts() {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/reverse-six-frames.y4m");
+        for (case, interval, step, shuffle, values, positions, consumed) in [
+            (
+                "full",
+                None,
+                None,
+                None,
+                vec![5u8, 4, 3, 2, 1, 0],
+                vec![0u64, 1, 2, 3, 4, 5],
+                6,
+            ),
+            (
+                "range",
+                Some((250_000, 1_000_000)),
+                None,
+                None,
+                vec![3, 2, 1],
+                vec![1, 2, 3],
+                4,
+            ),
+            (
+                "step",
+                None,
+                Some("2"),
+                None,
+                vec![4, 2, 0],
+                vec![0, 2, 4],
+                6,
+            ),
+            (
+                "shuffle",
+                None,
+                None,
+                Some("2 1 0"),
+                vec![3, 4, 5, 0, 1, 2],
+                vec![0, 1, 2, 3, 4, 5],
+                6,
+            ),
+        ] {
+            let transform = LosslessTransform {
+                reverse: Some(String::new()),
+                interval,
+                framestep: step.map(String::from),
+                shuffleframes: shuffle.map(String::from),
+                ..Default::default()
+            };
+            let options = CopyOptions::default();
+            assert!(supports(&source, &transform, &options));
+            let plan = crate::plan_transcode_lossless(&source, &transform, &options, None).unwrap();
+            assert!(plan.notes[0].starts_with("backend: owned"));
+            let output = std::env::temp_dir().join(format!(
+                "fvid-reverse-export-{}-{case}.mkv",
+                std::process::id()
+            ));
+            let stats = crate::transcode_lossless(&source, &output, transform, &options).unwrap();
+            assert_eq!(stats.backend, "fvid");
+            assert_eq!(stats.decoded_frames, consumed);
+            assert_eq!(stats.video_frames, values.len() as u64);
+            let mut reader = crate::owned_webm::WebmReader::open(
+                std::io::BufReader::new(std::fs::File::open(&output).unwrap()),
+                Default::default(),
+            )
+            .unwrap();
+            reader.scan_all().unwrap();
+            assert_eq!(reader.packets.len(), values.len());
+            let origin = interval.map_or(0, |(from, _)| from as i64 * 1000);
+            let mut decoder = crate::owned_ffv1_decoder::Decoder::new(4, 4, 1 << 20).unwrap();
+            for (slot, (value, position)) in values.into_iter().zip(positions).enumerate() {
+                assert_eq!(
+                    reader.packets[slot].pts_ns,
+                    position as i64 * 250_000_000 - origin
+                );
+                assert_eq!(reader.packets[slot].duration_ns, Some(250_000_000));
+                let mut expected = vec![10 + value; 16];
+                expected.extend([128; 8]);
+                assert_eq!(
+                    decoder
+                        .decode(&reader.read_packet(slot).unwrap())
+                        .unwrap()
+                        .frame
+                        .data,
+                    expected
+                );
+            }
+            drop(reader);
+            std::fs::remove_file(output).unwrap();
+        }
+    }
+    #[test]
+    fn reverse_rejects_damaged_input_before_any_final_file_is_published() {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/reverse-truncated-last-frame.y4m");
+        let output =
+            std::env::temp_dir().join(format!("fvid-reverse-damaged-{}.mkv", std::process::id()));
+        let transform = LosslessTransform {
+            reverse: Some(String::new()),
             ..Default::default()
         };
         assert!(supports(&source, &transform, &CopyOptions::default()));

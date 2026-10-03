@@ -30,10 +30,11 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 fn supported_request(transform: &DecodeTransform) -> bool {
-    transform
-        .shuffleframes
-        .as_deref()
-        .is_none_or(|args| crate::owned_shuffleframes::ShuffleFrames::parse(args).is_ok())
+    transform.reverse.as_deref().is_none_or(str::is_empty)
+        && transform
+            .shuffleframes
+            .as_deref()
+            .is_none_or(|args| crate::owned_shuffleframes::ShuffleFrames::parse(args).is_ok())
         && transform
             .framestep
             .as_deref()
@@ -100,6 +101,7 @@ fn supported_request(transform: &DecodeTransform) -> bool {
                 input_format: transform.input_format.clone(),
                 framestep: transform.framestep.clone(),
                 shuffleframes: transform.shuffleframes.clone(),
+                reverse: transform.reverse.clone(),
                 ..Default::default()
             }
 }
@@ -638,6 +640,11 @@ fn decode_reader_frames(
         .as_deref()
         .map(crate::owned_shuffleframes::ShuffleFrames::parse)
         .transpose()?;
+    let mut reverse = if transform.reverse.is_some() && visit.is_some() {
+        Some(crate::owned_reverse::Reverse::new()?)
+    } else {
+        None
+    };
     let frame_bytes = header.frame_len()?;
     let geometry = transform.overlay.is_some()
         || transform.crop.is_some()
@@ -742,7 +749,9 @@ fn decode_reader_frames(
             let pixels = if geometry { &output } else { &input };
             let retain_pixels = visit.is_some();
             let mut emit = |data: &[u8], pts, duration| -> Result<()> {
-                if let Some(callback) = visit.as_deref_mut() {
+                if let Some(reverse) = reverse.as_mut() {
+                    reverse.push(data, pts, duration)?;
+                } else if let Some(callback) = visit.as_deref_mut() {
                     callback(&presented_header, data, pts, duration)?;
                 }
                 Ok(())
@@ -763,6 +772,18 @@ fn decode_reader_frames(
                 .ok_or("Y4M frame count overflow")?;
         }
         index = index.checked_add(1).ok_or("Y4M frame count overflow")?;
+    }
+    // Release upstream frame/group storage before the single-buffer replay.
+    drop(input);
+    drop(output);
+    drop(shuffle);
+    if let Some(reverse) = reverse.as_mut() {
+        reverse.flush(&mut |data, pts, duration| {
+            if let Some(callback) = visit.as_deref_mut() {
+                callback(&presented_header, data, pts, duration)?;
+            }
+            Ok(())
+        })?;
     }
     let layout = match presented_header.format {
         PixelFormat::Yuv420 => "420",
@@ -932,6 +953,43 @@ mod shuffleframes_tests {
             .unwrap();
             assert_eq!(stats.video_frames, expected.len() as u64);
             assert_eq!(seen, expected);
+        }
+    }
+}
+
+#[cfg(test)]
+mod reverse_tests {
+    use super::*;
+    #[test]
+    fn reversed_payloads_keep_forward_timing_in_full_and_interval_decode() {
+        let bytes =
+            include_bytes!("../../../tests/fixtures/playback-errors/reverse-six-frames.y4m");
+        for (interval, values, positions) in [
+            (None, vec![5u8, 4, 3, 2, 1, 0], vec![0u64, 1, 2, 3, 4, 5]),
+            (Some((250_000, 1_000_000)), vec![3, 2, 1], vec![1, 2, 3]),
+        ] {
+            let transform = DecodeTransform {
+                reverse: Some(String::new()),
+                interval,
+                ..Default::default()
+            };
+            let mut seen = Vec::new();
+            let stats = visit_reader_transformed(
+                std::io::Cursor::new(bytes),
+                &transform,
+                |_, pixels, pts, duration| {
+                    let value = pixels[0] - 10;
+                    let mut expected = vec![value + 10; 16];
+                    expected.extend([128; 8]);
+                    assert_eq!(pixels, expected);
+                    assert_eq!(duration, 250_000_000);
+                    seen.push((value, pts / 250_000_000));
+                    Ok(())
+                },
+            )
+            .unwrap();
+            assert_eq!(seen, values.into_iter().zip(positions).collect::<Vec<_>>());
+            assert_eq!(stats.video_frames, seen.len() as u64);
         }
     }
 }
