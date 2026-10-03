@@ -928,58 +928,6 @@ fn describe(path: &Path, input: &Input) -> Result<MediaInfo> {
     }
 }
 pub use fvid_media_info::Capabilities;
-pub fn capabilities() -> Capabilities {
-    // SAFETY: Iterators use library-owned static descriptors, each with its own opaque cursor.
-    unsafe {
-        let mut result = Capabilities {
-            library_version: string(av_version_info()),
-            demuxers: vec![],
-            muxers: vec![],
-            decoders: vec![],
-            encoders: vec![],
-            filters: vec![],
-        };
-        let mut opaque = ptr::null_mut();
-        loop {
-            let p = av_demuxer_iterate(&mut opaque);
-            if p.is_null() {
-                break;
-            }
-            result.demuxers.push(string((*p).name));
-        }
-        opaque = ptr::null_mut();
-        loop {
-            let p = av_muxer_iterate(&mut opaque);
-            if p.is_null() {
-                break;
-            }
-            result.muxers.push(string((*p).name));
-        }
-        opaque = ptr::null_mut();
-        loop {
-            let p = av_codec_iterate(&mut opaque);
-            if p.is_null() {
-                break;
-            }
-            if av_codec_is_decoder(p) != 0 {
-                result.decoders.push(string((*p).name));
-            }
-            if av_codec_is_encoder(p) != 0 {
-                result.encoders.push(string((*p).name));
-            }
-        }
-        opaque = ptr::null_mut();
-        loop {
-            let p = av_filter_iterate(&mut opaque);
-            if p.is_null() {
-                break;
-            }
-            result.filters.push(string((*p).name));
-        }
-        result
-    }
-}
-
 pub use fvid_control::{CancelFlag, ProgressEvent, ProgressHook};
 
 pub use fvid_control::CopyOptions;

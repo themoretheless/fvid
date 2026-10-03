@@ -3391,3 +3391,18 @@ The initial five-option-set × three-depth reference matrix matched all 765
 samples exactly, including after computing the gain once per chroma cell.
 This is sample equality for the selected cases, not a global performance claim
 or proof for every floating-point parameter.
+
+### Public library capability inventory
+
+`fvid_media::capabilities()` is available with no features and always reports
+owned components, including when the temporary legacy feature is selected.
+It no longer calls libav codec, format or filter iterators. Shared demuxer,
+muxer, encoder and filter lists live in `owned_capabilities`; the root native
+inventory extends that list with its AVC/HEVC/AV1/VP9/Opus decoders. The media
+crate reports only decoder implementations actually present there, not the
+root crate's decoders or FFmpeg plugins installed on the host. Inventory names
+are sorted and unique. Component presence does not qualify all profiles or
+operation combinations. Root API/CLI output remains unchanged by this move.
+
+This removes the capability-query dependency, not the remaining legacy backend
+or its production feature wiring.

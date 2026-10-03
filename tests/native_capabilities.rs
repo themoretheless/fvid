@@ -47,3 +47,19 @@ fn cli_and_public_api_report_owned_components() {
     assert!(!invalid.status.success());
     assert!(invalid.stdout.is_empty());
 }
+
+#[test]
+fn root_inventory_extends_library_without_duplicating_shared_components() {
+    let library = fvid_media::capabilities();
+    let root = fvid::native_capabilities::inventory();
+    assert_eq!(root.filters, library.filters);
+    assert_eq!(root.demuxers, library.demuxers);
+    assert_eq!(root.muxers, library.muxers);
+    assert_eq!(root.encoders, library.encoders);
+    for decoder in library.decoders {
+        assert!(root.decoders.contains(&decoder));
+    }
+    for decoder in ["h264", "hevc", "av1", "vp9", "opus"] {
+        assert!(root.decoders.iter().any(|name| name == decoder));
+    }
+}
