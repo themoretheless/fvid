@@ -3,6 +3,26 @@ use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if owned_filter_plan(args)? { return Ok(()); }
+    if args.first().map(String::as_str) == Some("transcode") && args.len() >= 3 {
+        let mut owned = vec!["transcode-lossless".to_owned(), args[1].clone(), args[2].clone()];
+        let mut encoder = None;
+        let mut options = args[3..].iter();
+        while let Some(option) = options.next() {
+            if option == "--encoder" {
+                if encoder.is_some() { return Err("duplicate encoder".into()); }
+                encoder = Some(options.next().ok_or("missing encoder name")?.as_str());
+            } else {
+                owned.push(option.clone());
+                // Keep parameter values together, including strings resembling flags.
+                if !matches!(option.as_str(), "--hflip" | "--vflip" | "--quiet" | "--progress" | "--seek") {
+                    if let Some(value) = options.next() { owned.push(value.clone()); }
+                }
+            }
+        }
+        if encoder == Some("ffv1") && !owned.iter().any(|arg| arg == "--encoder-option") {
+            return run(&owned);
+        }
+    }
     if args.first().map(String::as_str) == Some("plan")
         && args.get(1).map(String::as_str) == Some("loudnorm")
     {

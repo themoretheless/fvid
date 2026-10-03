@@ -675,3 +675,43 @@ fn crop_lossless_cli_uses_owned_export_and_keeps_command_constraints() {
         assert!(!rejected.exists());
     }
 }
+
+#[test]
+fn explicit_ffv1_transcode_cli_uses_owned_encoder() {
+    let dir = directory("ffv1-transcode");
+    let source = fixture("video.mp4");
+    let destination = dir.0.join("generic.mkv");
+    let baseline = dir.0.join("lossless.mkv");
+    for (command, output, options) in [
+        (
+            "transcode",
+            &destination,
+            vec!["--encoder", "ffv1", "--crop", "0:0:16:16", "--hue", "h=90"],
+        ),
+        (
+            "transcode-lossless",
+            &baseline,
+            vec!["--crop", "0:0:16:16", "--hue", "h=90"],
+        ),
+    ] {
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", command])
+            .arg(&source)
+            .arg(output)
+            .args(options)
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        let stats: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+        assert_eq!(stats["backend"], "fvid");
+        assert_eq!(stats["video_frames"], 25);
+    }
+    assert_eq!(
+        std::fs::read(destination).unwrap(),
+        std::fs::read(baseline).unwrap()
+    );
+}
