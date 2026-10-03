@@ -7,8 +7,30 @@ fn default_policy(options: &fvid_control::CopyOptions) -> bool {
     options.streams.is_empty()
         && options.max_controlled_bytes.is_none()
         && options.max_rss_bytes.is_none()
-        && options.stream_metadata_set.is_empty()
-        && options.stream_metadata_delete.is_empty()
+        && options.stream_metadata_set.len() + options.stream_metadata_delete.len() <= 64
+        && options
+            .stream_metadata_set
+            .iter()
+            .all(|(index, key, value)| {
+                *index == 0
+                    && valid_track_key(key)
+                    && !value.contains('\0')
+                    && value.len() <= 1024
+                    && (!key.eq_ignore_ascii_case("language") || value.len() <= 128)
+            })
+        && options
+            .stream_metadata_delete
+            .iter()
+            .all(|(index, key)| *index == 0 && valid_track_key(key))
+}
+fn valid_track_key(key: &str) -> bool {
+    !key.is_empty()
+        && key.len() <= 128
+        && !key.contains('\0')
+        && !matches!(
+            key.to_ascii_lowercase().as_str(),
+            "rotate" | "stereo_mode" | "alpha_mode"
+        )
 }
 pub(crate) fn try_xfade_video(
     source: &std::path::Path,
@@ -331,7 +353,22 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
             text_tags.insert(key.to_ascii_uppercase(), value.clone());
         }
     }
-    let mut writer = PacketWriter::new_ffv1_with_text_tags(
+    let mut description = crate::owned_matroska::VideoTrackDescription {
+        name: String::new(),
+        language: "und".into(),
+        legacy_language: "und".into(),
+        disposition: 1,
+    };
+    let mut track_tags = std::collections::BTreeMap::new();
+    for (_, key, value) in &options.stream_metadata_set {
+        track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+        if !crate::owned_ffv1_export::edit_track_description(&mut description, key, value)
+            && !value.is_empty()
+        {
+            track_tags.insert(key.to_ascii_uppercase(), value.clone());
+        }
+    }
+    let mut writer = PacketWriter::new_ffv1_with_track_description(
         output,
         width,
         height,
@@ -340,6 +377,8 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
         0,
         &file_metadata,
         &text_tags,
+        &track_tags,
+        &description,
     )
     .map_err(|e| e.to_string())?;
     let mut event = fvid_control::ProgressEvent {
@@ -563,6 +602,10 @@ mod tests {
         let observed = successful_events.clone();
         let published = output.clone();
         let successful_options = fvid_control::CopyOptions {
+            stream_metadata_set: vec![
+                (0, "title".into(), "Fade video".into()),
+                (0, "language".into(), "rus".into()),
+            ],
             metadata_set: vec![
                 ("title".into(), "Synthetic fade".into()),
                 ("custom".into(), "kept".into()),
@@ -601,6 +644,8 @@ mod tests {
         )
         .unwrap();
         assert_eq!(tagged.tags.title, "Synthetic fade");
+        assert_eq!(tagged.tracks[0].name, "Fade video");
+        assert_eq!(tagged.tracks[0].language, "rus");
         assert!(original.windows(6).any(|bytes| bytes == b"CUSTOM"));
         assert!(
             export_y4m_ffv1(&main, &other, &output, 0, 500000)
