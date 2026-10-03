@@ -178,6 +178,7 @@ impl Grading {
 /// What `fvid play` was asked for: the inputs to queue, and how the first of
 /// them starts, stops and runs at.
 struct PlayArgs {
+    stereo3d: fvid_media::PlayStereo3D,
     no_subtitles: bool,
     embedded_subtitle: Option<usize>,
     audio_device: Option<String>,
@@ -237,6 +238,7 @@ struct PlayArgs {
 /// Read the options `fvid play` answers, in either `--flag VALUE` or
 /// `--flag=VALUE` form. Everything that is not an option joins the queue.
 fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
+    let mut stereo3d = fvid_media::PlayStereo3D::Off;
     let mut gpu_backend = crate::Backend::Auto;
     let mut gpu_device = 0;
     let mut shader = None;
@@ -370,6 +372,10 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
                 let value = option_value(args, &mut index, flag, inline)?;
                 subtitle_file = Some(PathBuf::from(value));
             }
+            "--play-stereo3d" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                stereo3d = fvid_media::parse_play_stereo3d(&value).map_err(|error| crate::invalid(&error))?;
+            }
             "--zoom" => {
                 let value = option_value(args, &mut index, flag, inline)?;
                 zoom_milli = parse_zoom(&value)?;
@@ -450,6 +456,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         return Err(crate::invalid("--device requires an explicit player backend when not zero"));
     }
     Ok(PlayArgs {
+        stereo3d,
         no_subtitles,
         embedded_subtitle: None,
         audio_device,
@@ -955,7 +962,7 @@ fn parse_media_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         } else {
             native.push(arg.clone());
             if inline.is_none() && matches!(flag,
-                "--audio-device" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
+                "--play-stereo3d" | "--audio-device" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
                 | "--backend" | "--device" | "--shader" | "--skin" | "--start-time" | "--stop-time"
                 | "--rate" | "--audio-delay" | "--subtitle-delay" | "--volume" | "--zoom"
                 | "--crop" | "--aspect" | "--brightness" | "--gamma" | "--saturation" | "--contrast"
@@ -978,6 +985,7 @@ fn run_parsed(parsed: PlayArgs) -> Result<(), Box<dyn std::error::Error>> {
     let gpu_configuration = crate::player_gpu::configuration(parsed.gpu_backend, parsed.gpu_device)?;
     let shader = parsed.shader;
     let mut app = Player {
+        stereo3d: parsed.stereo3d,
         subtitle_shown: !parsed.no_subtitles,
         preferred_embedded_subtitle: parsed.embedded_subtitle,
         preferred_output: parsed.audio_device,
@@ -1630,7 +1638,56 @@ fn prepare_source(path: &Path, cancelled: &std::sync::atomic::AtomicBool) -> Pre
     Ok((crate::playback_spool::Source::Spooled(spool), Some(handle)))
 }
 
+fn display_rgb(frame: &Frame) -> crate::Result<Vec<u8>> {
+        match &frame.pixels {
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            Pixels::Surface(surface) => {
+                let packed = crate::playback_native::surface_to_packed(&surface.surface, surface.colour)?.rotated(surface.rotation)?;
+                let mut rgb = Vec::new();
+                packed.to_rgb(&mut rgb, frame.dimensions[0] * frame.dimensions[1] * 3)?;
+                if let Some(grade) = &surface.grade { grade.apply(&mut rgb); }
+                Ok(rgb)
+            },
+            Pixels::Packed(planes, grade) => {
+                let mut rgb = Vec::new();
+                planes.to_rgb(&mut rgb, planes.frame.width * planes.frame.height * 3)?;
+                if let Some(grade) = grade { grade.apply(&mut rgb); }
+                Ok(rgb)
+            }
+            Pixels::Planar(planes, grade) => {
+                let mut rgb = Vec::new();
+                crate::playback_native::planar8_to_rgb(
+                    planes,
+                    &mut rgb,
+                    planes.width * planes.height * 3,
+                )?;
+                // The grade a plane picture kept for the shader is applied here
+                // instead, and it is the same table read the same way: both
+                // routes land on these bytes, which is what lets the snapshot
+                // stand for what is on screen.
+                if let Some(grade) = grade {
+                    grade.apply(&mut rgb);
+                }
+                Ok(rgb)
+            }
+            Pixels::Rgb(rgb) => Ok(rgb.clone()),
+        }
+}
+
+fn stereo_frame(frame: &mut Frame, mode: fvid_media::PlayStereo3D) -> crate::Result<()> {
+    if mode == fvid_media::PlayStereo3D::Off { return Ok(()); }
+    let rgb = display_rgb(frame)?;
+    let packed: Vec<u32> = rgb.chunks_exact(3).map(|p| (u32::from(p[0]) << 16) | (u32::from(p[1]) << 8) | u32::from(p[2])).collect();
+    let width = u32::try_from(frame.dimensions[0]).map_err(|_| crate::invalid("stereo width overflow"))?;
+    let height = u32::try_from(frame.dimensions[1]).map_err(|_| crate::invalid("stereo height overflow"))?;
+    let (width, height, pixels) = fvid_media::apply_play_stereo3d(width, height, &packed, mode);
+    frame.dimensions = [width as usize, height as usize];
+    frame.pixels = Pixels::Rgb(pixels.into_iter().flat_map(|p| [(p >> 16) as u8, (p >> 8) as u8, p as u8]).collect());
+    Ok(())
+}
+
 struct Player {
+    stereo3d: fvid_media::PlayStereo3D,
     preferred_embedded_subtitle: Option<usize>,
     preferred_output: Option<String>,
     quit_at_end: bool,
@@ -1849,6 +1906,7 @@ struct Player {
 impl Default for Player {
     fn default() -> Self {
         Self {
+            stereo3d: fvid_media::PlayStereo3D::Off,
             preferred_embedded_subtitle: None,
             preferred_output: None,
             quit_at_end: false,
@@ -2566,39 +2624,8 @@ impl Player {
             .presented
             .as_ref()
             .ok_or_else(|| crate::invalid("nothing has been shown yet"))?;
-        match &frame.pixels {
-            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-            Pixels::Surface(surface) => {
-                let packed = crate::playback_native::surface_to_packed(&surface.surface, surface.colour)?.rotated(surface.rotation)?;
-                let mut rgb = Vec::new();
-                packed.to_rgb(&mut rgb, frame.dimensions[0] * frame.dimensions[1] * 3)?;
-                if let Some(grade) = &surface.grade { grade.apply(&mut rgb); }
-                crate::snapshot::png(frame.dimensions[0], frame.dimensions[1], &rgb)
-            },
-            Pixels::Packed(planes, grade) => {
-                let mut rgb = Vec::new();
-                planes.to_rgb(&mut rgb, planes.frame.width * planes.frame.height * 3)?;
-                if let Some(grade) = grade { grade.apply(&mut rgb); }
-                crate::snapshot::png(planes.frame.width, planes.frame.height, &rgb)
-            }
-            Pixels::Planar(planes, grade) => {
-                let mut rgb = Vec::new();
-                crate::playback_native::planar8_to_rgb(
-                    planes,
-                    &mut rgb,
-                    planes.width * planes.height * 3,
-                )?;
-                // The grade a plane picture kept for the shader is applied here
-                // instead, and it is the same table read the same way: both
-                // routes land on these bytes, which is what lets the snapshot
-                // stand for what is on screen.
-                if let Some(grade) = grade {
-                    grade.apply(&mut rgb);
-                }
-                crate::snapshot::png(planes.width, planes.height, &rgb)
-            }
-            Pixels::Rgb(rgb) => crate::snapshot::png(frame.dimensions[0], frame.dimensions[1], rgb),
-        }
+        let rgb = display_rgb(frame)?;
+        crate::snapshot::png(frame.dimensions[0], frame.dimensions[1], &rgb)
     }
 
     /// The line to paint over the picture at a media time, if one is live.
@@ -3646,7 +3673,14 @@ impl Player {
                 || now + tolerance >= self.deadline;
             let av_ready = self.frame_ready_for_sync(frame);
             if time_ready && av_ready {
-                let frame = self.queued.take().unwrap();
+                let mut frame = self.queued.take().unwrap();
+                if let Err(error) = stereo_frame(&mut frame, self.stereo3d) {
+                    self.error = Some(error.to_string());
+                    self.paused = true;
+                    if let Some(playback) = &self.playback { playback.pause(); }
+                    if let Some(audio) = &self.audio { audio.pause(); }
+                    return;
+                }
                 self.seek_preview = false;
                 self.seek_target = None;
                 match &frame.pixels {
@@ -6050,6 +6084,28 @@ mod tests {
                 .map(|word| word.to_string())
                 .collect::<Vec<_>>(),
         )
+    }
+
+    #[test]
+    fn native_stereo_preserves_timing_and_selects_eye_channels() {
+        let parsed = super::parse_media_play_args(&["--play-stereo3d=sbsl".into(), "clip.y4m".into()]).unwrap();
+        assert_eq!(parsed.stereo3d, fvid_media::PlayStereo3D::SbslAnaglyph);
+        assert!(parse_play_args(&["--play-stereo3d=bad".into()]).is_err());
+        let mut frame = Frame {
+            pixels: Pixels::Rgb(vec![10,20,30,40,50,60,70,80,90,100,110,120]),
+            dimensions: [4,1], period: Duration::from_millis(17),
+            interval: Some((2,3,60)), pts: Some((2,60)), generation: 7, serial: 9,
+        };
+        super::stereo_frame(&mut frame, parsed.stereo3d).unwrap();
+        assert_eq!(frame.dimensions, [2,1]);
+        let Pixels::Rgb(rgb) = &frame.pixels else { panic!("expected RGB") };
+        assert_eq!(rgb, &[10,80,90,40,110,120]);
+        assert_eq!(frame.pts, Some((2,60)));
+        assert_eq!(frame.interval, Some((2,3,60)));
+        assert_eq!(frame.serial, 9);
+        assert_eq!(frame.generation, 7);
+        super::stereo_frame(&mut frame, fvid_media::PlayStereo3D::Off).unwrap();
+        assert_eq!(frame.dimensions, [2,1]);
     }
 
     #[test]
