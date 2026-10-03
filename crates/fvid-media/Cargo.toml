@@ -19,8 +19,11 @@ fvid-cpu = { path = "../fvid-cpu" }
 eframe = { version = "0.36", optional = true }
 rfd = { version = "0.17.2", optional = true }
 
+reqwest = { version = "=0.12.28", optional = true, default-features = false, features = ["blocking", "rustls-tls"] }
+
 [features]
 default = []
+http-input = ["dep:reqwest"]
 legacy-ffmpeg = ["dep:bindgen"]
 cuda-hw = ["legacy-ffmpeg", "dep:fvid-cuda"]
 # Windowed playback: pulls the egui/eframe window, cpal audio output, and the

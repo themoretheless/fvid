@@ -133,6 +133,7 @@ def main():
                       if line.startswith("host: "))
     cases = [
         ("owned media library", ROOT / "crates/fvid-media/Cargo.toml", []),
+        ("owned HTTP media library", ROOT / "crates/fvid-media/Cargo.toml", ["--no-default-features", "--features", "http-input"]),
         ("headless", ROOT / "Cargo.toml", ["--no-default-features"]),
         ("player", ROOT / "Cargo.toml", ["--no-default-features", "--features", "player"]),
         ("camera bridge", ROOT / "crates/fvid-camera-ffi/Cargo.toml", []),

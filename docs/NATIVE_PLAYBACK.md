@@ -3279,3 +3279,34 @@ zero-based; explicit subtitle indices name embedded tracks and are not shifted
 by sidecars. `--subtitle-track=-1` and `--no-subtitles` start captions hidden;
 the normal subtitle toggle can enable them later. Advanced legacy-only playback
 options still require migration before the legacy feature can be removed.
+
+### Finite HTTP inputs
+
+With `player`, native `fvid play` and the native `fvid media play` adapter can
+open finite `http://` and `https://` media files without libav. The optional
+`fvid-media/http-input` feature exposes `owned_http::DownloadedInput` for Rust
+callers. HTTP/TLS uses reqwest with Rustls; demuxing and decoding use the
+existing FVid readers after the download completes.
+
+Input is streamed into a private temporary directory with a 64 KiB copy buffer.
+The file remains available for audio-track reopen and arbitrary seek while its
+owner exists. The player displays downloaded megabytes while opening. Switching
+items or closing the download owner cancels it cooperatively between reads.
+The downloader checks status, content encoding, declared body length, optional
+byte limits, cancellation and empty input, and removes partial files on failure.
+`DownloadOptions` provides timeout, optional byte limit and progress callbacks;
+the player currently uses a 120-second total request timeout. Input-policy
+standalone scopes refuse HTTP before making a request.
+
+This is download-before-playback, not progressive playback. HLS/DASH manifests,
+live streams, and FTP/RTMP/RTSP/UDP transports still need owned implementations.
+HTTPS certificate validation is provided by Rustls; the current live regression
+checks HTTP loopback, not a live HTTPS server.
+
+Ordinary HTTP unit tests use in-memory response bodies and the committed
+`rotate-grid.y4m` synthetic fixture, with no network access. Explicit integration:
+
+```sh
+cargo test --manifest-path crates/fvid-media/Cargo.toml --offline --no-default-features --features http-input --lib live_loopback_download -- --ignored
+cargo test --offline --no-default-features --features player --lib native_player_http_input -- --ignored
+```

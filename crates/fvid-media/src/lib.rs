@@ -1,6 +1,8 @@
 //! FVid media layer. Owned operation contracts are available without libav.
 //! The temporary legacy backend retains existing operations during migration.
 mod input_policy;
+#[cfg(feature = "http-input")]
+pub mod owned_http;
 pub use input_policy::with_standalone_inputs;
 #[cfg(feature = "legacy-ffmpeg")]
 include!("legacy.rs");

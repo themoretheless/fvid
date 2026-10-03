@@ -1657,6 +1657,12 @@ enum Pick {
     Subtitles,
 }
 
+#[derive(Clone)]
+struct NetworkDownloadCancel(fvid_media::CancelFlag);
+impl Drop for NetworkDownloadCancel {
+    fn drop(&mut self) { self.0.cancel(); }
+}
+
 struct OpenedItem {
     cache_packets: Vec<(u64, u64, Duration, Duration)>,
     playback: Option<Playback>,
@@ -1693,9 +1699,11 @@ struct OpenedItem {
     ended: bool,
     stop_time: Option<Duration>,
     buffering: bool,
+    network_input: Option<Arc<fvid_media::owned_http::DownloadedInput>>,
 }
 
 enum OpenProgress {
+    Download(u64),
     Buffer(Arc<std::sync::atomic::AtomicUsize>),
     Spool(Option<SpoolHandle>),
     Ready(crate::Result<OpenedItem>),
@@ -2009,11 +2017,17 @@ struct Player {
     /// `--sub-file`: cues from this file lead every item's own list, since a
     /// named file is a likelier choice than the one guessed from its name.
     subtitle_file: Option<PathBuf>,
+    network_input: Option<Arc<fvid_media::owned_http::DownloadedInput>>,
+    network_downloaded: Option<u64>,
+    network_cancel: Option<NetworkDownloadCancel>,
 }
 
 impl Default for Player {
     fn default() -> Self {
         Self {
+            network_input: None,
+            network_downloaded: None,
+            network_cancel: None,
             spherical: SphericalView::default(),
             stereo3d: fvid_media::PlayStereo3D::Off,
             preferred_embedded_subtitle: None,
@@ -2125,6 +2139,27 @@ impl Default for Player {
 
 impl Player {
     fn open(&mut self, path: PathBuf) -> crate::Result<()> {
+        let remote = path.to_str().is_some_and(fvid_media::owned_http::recognizes);
+        let input = if remote {
+            let progress = self.open_progress.clone().map(|send| fvid_media::ProgressHook::new(move |event| {
+                let _ = send.send(OpenProgress::Download(event.payload_bytes));
+            }));
+            let options = fvid_media::owned_http::DownloadOptions { progress, cancel: self.network_cancel.as_ref().map(|cancel|cancel.0.clone()), ..Default::default() };
+            Some(Arc::new(fvid_media::owned_http::DownloadedInput::download(path.to_str().unwrap(), &options)
+                .map_err(|error| crate::invalid(&error))?))
+        } else {
+            self.network_input.as_ref().filter(|input|input.path() == path).cloned()
+        };
+        let local = input.as_ref().map_or_else(||path.clone(),|input|input.path().to_owned());
+        self.open_local(local)?;
+        self.network_input = input;
+        if remote {
+            self.name = path.file_name().unwrap_or_default().to_string_lossy().into_owned();
+        }
+        Ok(())
+    }
+
+    fn open_local(&mut self, path: PathBuf) -> crate::Result<()> {
         // A cloud drive answers in bursts no frame clock can wait inside, so
         // the source is measured before it is read: what cannot keep up with
         // its own item is copied to local disk while it plays.
@@ -2969,6 +3004,7 @@ impl Player {
         }
         self.clear_prefetch();
         let Some(path) = path else { return; };
+        if path.to_str().is_some_and(fvid_media::is_playback_url) { return; }
         let (send, source) = std::sync::mpsc::channel();
         let cancelled = Arc::new(std::sync::atomic::AtomicBool::new(false));
         self.next_file = Some(NextFile { path: path.clone(), source, cancelled: cancelled.clone() });
@@ -3161,6 +3197,9 @@ impl Player {
     }
 
     fn begin_open(&mut self, path: PathBuf) {
+        self.network_cancel = None;
+        let network_cancel = NetworkDownloadCancel(fvid_media::CancelFlag::new());
+        self.network_cancel = Some(network_cancel.clone());
         let preferred_embedded_subtitle = self.preferred_embedded_subtitle;
         let preferred_output = self.preferred_output.clone();
         let prepared_source = self.prepared_source.take();
@@ -3193,11 +3232,16 @@ impl Player {
         let old_video = self.playback.take();
         let old_audio = self.audio.take();
         let old_open = self.opening.take();
+        let old_network_input = self.network_input.take();
+        let old_spool = self.spool.take();
+        self.network_downloaded = None;
         // Joining a reader blocked on a cloud mount belongs off the UI thread.
         std::thread::spawn(move || {
             drop(old_video);
             drop(old_audio);
             drop(old_open);
+            drop(old_spool);
+            drop(old_network_input);
         });
         self.opening = Some(receive);
         self.loading_buffer = None;
@@ -3237,6 +3281,7 @@ impl Player {
         self.activity = Instant::now();
         std::thread::spawn(move || {
             let mut prepared = Player {
+                network_cancel: Some(network_cancel),
                 preferred_embedded_subtitle,
                 preferred_output,
                 grading,
@@ -3293,6 +3338,7 @@ impl Player {
                 ended: prepared.ended,
                 stop_time: prepared.stop_time,
                 buffering: prepared.buffering,
+                network_input: prepared.network_input,
             });
             let _ = send.send(OpenProgress::Ready(result));
         });
@@ -3308,9 +3354,11 @@ impl Player {
                 return;
             };
             match progress {
-                OpenProgress::Spool(spool) => self.spool = spool,
+                OpenProgress::Download(bytes) => self.network_downloaded = Some(bytes),
+                OpenProgress::Spool(spool) => { self.spool = spool; self.network_downloaded = None; },
                 OpenProgress::Buffer(counter) => self.loading_buffer = Some(counter),
                 OpenProgress::Ready(result) => {
+                    self.network_cancel = None;
                     self.opening = None;
                     self.loading_buffer = None;
                     match result {
@@ -3334,6 +3382,8 @@ impl Player {
                             std::mem::swap(&mut self.spool, &mut ready.spool);
                             std::mem::swap(&mut self.spool_wait, &mut ready.spool_wait);
                             std::mem::swap(&mut self.opened, &mut ready.opened);
+                            std::mem::swap(&mut self.network_input, &mut ready.network_input);
+                            self.network_downloaded = None;
                             std::mem::swap(&mut self.audio_tracks, &mut ready.audio_tracks);
                             std::mem::swap(&mut self.audio_track, &mut ready.audio_track);
                             std::mem::swap(&mut self.sound_codec, &mut ready.sound_codec);
@@ -5546,10 +5596,14 @@ impl eframe::App for Player {
             if self.opening.is_some() || (self.playback.is_some() && self.buffering && self.presented.is_none() && self.error.is_none()) {
                 ctx.request_repaint_after(Duration::from_millis(16));
                 ui.put(Rect::from_center_size(frame.center() - Vec2::new(0.0, 52.0), Vec2::splat(24.0)), egui::Spinner::new());
-                painter.text(frame.center(), Align2::CENTER_CENTER,
+                let loading = if let Some(bytes) = self.network_downloaded {
+                    format!("Загрузка {}\nHTTP: {:.1} МБ", self.name, bytes as f64 / 1048576.0)
+                } else {
                     format!("Загрузка {}\nБуфер: {} кадров · Swap: {:.1} МБ", self.name,
                         self.playback.as_ref().map_or_else(|| self.loading_buffer.as_ref().map_or(0, |counter| counter.load(std::sync::atomic::Ordering::Relaxed)), |playback| playback.filled()),
-                        self.spool.as_ref().map_or(0.0, |spool| spool.copied() as f64 / 1048576.0)),
+                        self.spool.as_ref().map_or(0.0, |spool| spool.copied() as f64 / 1048576.0))
+                };
+                painter.text(frame.center(), Align2::CENTER_CENTER, loading,
                     FontId::proportional(18.0), TEXT);
             }
             // An item that is only sound has no picture to show, so the stage
@@ -11316,4 +11370,76 @@ mod gpu_option_tests {
         assert_eq!(player.presented.as_ref().unwrap().serial, serial);
     }
 
+}
+
+#[cfg(test)]
+mod http_input_tests {
+    use super::*;
+    #[test]
+    fn closing_download_owner_cancels_the_worker_flag() {
+        let flag = fvid_media::CancelFlag::new();
+        let owner = NetworkDownloadCancel(flag.clone());
+        assert!(!flag.is_cancelled());
+        drop(owner);
+        assert!(flag.is_cancelled());
+    }
+    #[test]
+    #[ignore = "explicit loopback HTTP player acceptance; ordinary tests need no network"]
+    fn native_player_http_input_retains_file_for_reopen_and_seek() {
+        use std::io::{Read, Write};
+        let fixture = include_bytes!("../tests/fixtures/playback-errors/ffv1-gray-8.mkv");
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let server = std::thread::spawn(move || {
+            let (mut socket, _) = listener.accept().unwrap();
+            let mut request = Vec::new();
+            let mut byte = [0];
+            while !request.ends_with(b"\r\n\r\n") {
+                socket.read_exact(&mut byte).unwrap();
+                request.push(byte[0]);
+            }
+            write!(
+                socket,
+                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                fixture.len()
+            )
+            .unwrap();
+            socket.write_all(fixture).unwrap();
+        });
+        let mut player = Player {
+            no_audio: true,
+            ..Default::default()
+        };
+        player
+            .open(format!("http://{address}/video.mkv").into())
+            .unwrap();
+        server.join().unwrap();
+        assert_eq!(player.name, "video.mkv");
+        assert_eq!(player.dimensions, [4, 3]);
+        assert!(player.seekable);
+        let path = player.opened.clone().unwrap();
+        assert!(path.exists());
+        assert_eq!(std::fs::read(&path).unwrap(), fixture);
+        // Reopen the downloaded path without contacting the server or losing ownership.
+        player.open(path.clone()).unwrap();
+        assert!(player.network_input.is_some());
+        let mut reader = NativeReader::without_memory_limit(std::io::BufReader::new(
+            std::fs::File::open(&path).unwrap(),
+        ))
+        .unwrap();
+        assert!(reader.read_frame_raw().unwrap().is_some());
+        assert!(
+            reader
+                .seek_raw(Duration::from_millis(40))
+                .unwrap()
+                .is_some()
+        );
+        let (start, _, scale) = reader.frame_interval().unwrap();
+        assert_eq!(start * 1000 / u128::from(scale), 40);
+        reader.rewind().unwrap();
+        assert!(reader.read_frame_raw().unwrap().is_some());
+        drop(reader);
+        drop(player);
+        assert!(!path.exists());
+    }
 }
