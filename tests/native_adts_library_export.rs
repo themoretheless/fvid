@@ -223,15 +223,12 @@ fn interval_stops_before_bad_tail_and_failures_never_publish() {
                 max_controlled_bytes: Some(1),
                 ..Default::default()
             },
-            "allocation admission",
+            "controlled memory budget exceeded",
         ),
     ] {
         let failed = directory.0.join(name);
-        assert!(
-            fvid_media::owned_audio_export::decode_audio(&source, &failed, &options)
-                .unwrap_err()
-                .contains(expected)
-        );
+        let error = fvid_media::owned_audio_export::decode_audio(&source, &failed, &options).unwrap_err();
+        assert!(error.contains(expected), "{name}: expected {expected:?}, got {error:?}");
         assert!(!failed.exists());
     }
 }
