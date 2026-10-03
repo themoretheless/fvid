@@ -163,14 +163,15 @@ pub(crate) fn export(
         tags: input.tags.clone(),
         chapters: export_chapters(&input.chapters, origin, transform.interval)?,
     };
+    let mut text_tags = input.metadata.clone();
     for key in &options.metadata_delete {
-        if !metadata.tags.set(key, "") {
-            return Err("unsupported owned container metadata key".into());
-        }
+        metadata.tags.set(key, "");
+        text_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
     }
     for (key, value) in &options.metadata_set {
-        if !metadata.tags.set(key, value) {
-            return Err("unsupported owned container metadata key".into());
+        text_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
+        if !metadata.tags.set(key, value) && !value.is_empty() {
+            text_tags.insert(key.to_ascii_uppercase(), value.clone());
         }
     }
     mkv::export_atomic(
@@ -224,7 +225,7 @@ pub(crate) fn export(
                             0,
                             0,
                             &metadata,
-                            &input.metadata,
+                            &text_tags,
                             &track_tags,
                             &description,
                         )
@@ -852,5 +853,65 @@ mod tests {
             vec![20_000_000, 60_000_000, 100_000_000]
         );
         std::fs::remove_file(output).unwrap();
+    }
+    #[test]
+    fn owned_export_edits_and_deletes_custom_file_tags_case_insensitively() {
+        let source = root().join("ffv1-custom-tags.mkv");
+        for (case, options, note, extra) in [
+            (
+                "edit",
+                CopyOptions {
+                    metadata_set: vec![
+                        ("fvid_test_note".into(), "edited".into()),
+                        ("new_note".into(), "new".into()),
+                    ],
+                    ..Default::default()
+                },
+                Some("edited"),
+                Some("new"),
+            ),
+            (
+                "delete",
+                CopyOptions {
+                    metadata_delete: vec!["fvid_test_note".into()],
+                    ..Default::default()
+                },
+                None,
+                None,
+            ),
+            (
+                "empty",
+                CopyOptions {
+                    metadata_set: vec![("fvid_test_note".into(), "".into())],
+                    ..Default::default()
+                },
+                None,
+                None,
+            ),
+        ] {
+            assert!(crate::owned_lossless::supports(
+                &source,
+                &Default::default(),
+                &options
+            ));
+            let output = std::env::temp_dir().join(format!(
+                "fvid-ffv1-custom-edit-{case}-{}.mkv",
+                std::process::id()
+            ));
+            let _ = std::fs::remove_file(&output);
+            let stats =
+                crate::transcode_lossless(&source, &output, Default::default(), &options).unwrap();
+            assert_eq!(stats.backend, "fvid");
+            let reader = input(&output).unwrap();
+            assert_eq!(
+                reader.metadata.get("FVID_TEST_NOTE").map(String::as_str),
+                note
+            );
+            assert_eq!(reader.metadata.get("NEW_NOTE").map(String::as_str), extra);
+            assert_eq!(reader.tags.title, "Synthetic tags");
+            assert_eq!(reader.metadata["ENCODER"], "synthetic source");
+            assert_eq!(reader.packets.len(), 2);
+            std::fs::remove_file(output).unwrap();
+        }
     }
 }

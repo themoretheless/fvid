@@ -81,7 +81,7 @@ fn metadata(o: &CopyOptions) -> Result<crate::owned_matroska::FileMetadata, Stri
     }
     Ok(file)
 }
-fn policy(o: &CopyOptions) -> bool {
+fn policy(o: &CopyOptions, text_tags: bool) -> bool {
     (o.streams.is_empty() || o.streams == [0])
         && o.max_packet_bytes != 0
         && o.max_controlled_bytes.is_none()
@@ -90,16 +90,19 @@ fn policy(o: &CopyOptions) -> bool {
         && o.metadata_set.iter().all(|(k, v)| {
             !k.contains('\0')
                 && !v.contains('\0')
-                && crate::owned_file_tags::FileTags::supports_key(k)
+                && (crate::owned_file_tags::FileTags::supports_key(k)
+                    || (text_tags && !k.is_empty() && k.len() <= 128 && v.len() <= 1024))
         })
-        && o.metadata_delete
-            .iter()
-            .all(|k| !k.contains('\0') && crate::owned_file_tags::FileTags::supports_key(k))
+        && o.metadata_delete.iter().all(|k| {
+            !k.contains('\0')
+                && (crate::owned_file_tags::FileTags::supports_key(k)
+                    || (text_tags && !k.is_empty() && k.len() <= 128))
+        })
         && o.stream_metadata_set.is_empty()
         && o.stream_metadata_delete.is_empty()
 }
 pub(crate) fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) -> bool {
-    if policy(o) && request(t).is_some_and(|r| crate::owned_ffv1_export::supports(source, &r)) {
+    if policy(o, true) && request(t).is_some_and(|r| crate::owned_ffv1_export::supports(source, &r)) {
         return true;
     }
     let mut reader = match std::fs::File::open(source) {
@@ -121,7 +124,7 @@ pub(crate) fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) ->
     {
         return false;
     }
-    policy(o)
+    policy(o, false)
         && request(t).is_some_and(|r| crate::owned_y4m_decode::supports_transformed(source, &r))
 }
 pub fn transcode_lossless(
@@ -130,16 +133,16 @@ pub fn transcode_lossless(
     transform: LosslessTransform,
     options: &CopyOptions,
 ) -> Result<LosslessStats, String> {
-    if options.cancel.as_ref().is_some_and(fvid_control::CancelFlag::is_cancelled) {
+    if options
+        .cancel
+        .as_ref()
+        .is_some_and(fvid_control::CancelFlag::is_cancelled)
+    {
         return Err("media operation cancelled".into());
-    }
-    let file_metadata = metadata(options)?;
-    if !policy(options) {
-        return Err("owned Y4M lossless export does not yet implement requested policy".into());
     }
     let request = request(&transform)
         .ok_or("owned Y4M lossless export does not yet implement requested transforms")?;
-    if crate::owned_ffv1_export::supports(source, &request) {
+    if policy(options, true) && crate::owned_ffv1_export::supports(source, &request) {
         let (stats, event, consumed) =
             crate::owned_ffv1_export::export(source, destination, &request, options)?;
         return Ok(LosslessStats {
@@ -156,6 +159,10 @@ pub fn transcode_lossless(
             vertical_flip: transform.vertical_flip,
             horizontal_flip: transform.horizontal_flip,
         });
+    }
+    let file_metadata = metadata(options)?;
+    if !policy(options, false) {
+        return Err("owned Y4M lossless export does not yet implement requested policy".into());
     }
     if let Some((from, to)) = request.interval {
         if from < 0 || to <= from {

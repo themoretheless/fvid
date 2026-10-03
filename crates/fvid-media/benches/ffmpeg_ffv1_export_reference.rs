@@ -420,6 +420,53 @@ fn main() {
     assert_eq!(chapters[0]["end_time"], "0.040000");
     assert_eq!(chapters[1]["end_time"], "0.120000");
     std::fs::remove_file(chapter_output).unwrap();
+    for delete in [false, true] {
+        let output = std::env::temp_dir().join(format!(
+            "fvid-ffv1-custom-edit-reference-{delete}-{}.mkv",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_file(&output);
+        let options = if delete {
+            CopyOptions {
+                metadata_delete: vec!["fvid_test_note".into()],
+                ..Default::default()
+            }
+        } else {
+            CopyOptions {
+                metadata_set: vec![
+                    ("fvid_test_note".into(), "edited".into()),
+                    ("new_note".into(), "new".into()),
+                ],
+                ..Default::default()
+            }
+        };
+        fvid_media::transcode_lossless(
+            &root.join("ffv1-custom-tags.mkv"),
+            &output,
+            Default::default(),
+            &options,
+        )
+        .unwrap();
+        let result = Command::new(&ffprobe)
+            .args(["-v", "error", "-show_entries", "format_tags", "-of", "json"])
+            .arg(&output)
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let value: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        let tags = &value["format"]["tags"];
+        if delete {
+            assert!(tags["FVID_TEST_NOTE"].is_null());
+        } else {
+            assert_eq!(tags["FVID_TEST_NOTE"], "edited");
+            assert_eq!(tags["NEW_NOTE"], "new");
+        }
+        std::fs::remove_file(output).unwrap();
+    }
     println!(
         "owned FFV1 export: 20 pixel/timing references and independent file/track metadata checks passed"
     );
