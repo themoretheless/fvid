@@ -132,3 +132,21 @@ mod retained_memory_tests {
         }
     }
 }
+
+#[cfg(test)]
+mod element_tag_tests {
+    use super::ElementTags;
+    #[test]
+    fn bounded_tags_distinguish_element_kinds_and_reject_repeats() {
+        let mut tags = ElementTags::default();
+        for kind in 0..4 {
+            for tag in 0..16 {
+                assert!(tags.insert(kind, tag));
+                assert!(!tags.insert(kind, tag));
+            }
+        }
+        assert!(!tags.insert(4, 0));
+        assert!(!tags.insert(0, 16));
+        assert_eq!(std::mem::size_of::<ElementTags>(), 8);
+    }
+}

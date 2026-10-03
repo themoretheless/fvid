@@ -3,6 +3,23 @@ use super::{
     aac_synthesis::LongSineSynthesis, bits::BitReader, config::AacConfig,
 };
 
+// Element kinds 0..=3 and their four-bit instance tags form a fixed domain.
+// Keep duplicate detection on stack instead of allocating a hash table per packet.
+#[derive(Default)]
+struct ElementTags([u16; 4]);
+impl ElementTags {
+    fn insert(&mut self, kind: u32, tag: u32) -> bool {
+        let Some(slot) = self.0.get_mut(kind as usize) else {
+            return false;
+        };
+        let Some(bit) = 1u16.checked_shl(tag) else {
+            return false;
+        };
+        let fresh = *slot & bit == 0;
+        *slot |= bit;
+        fresh
+    }
+}
 pub struct NativeAacDecoder {
     config: AacConfig,
     synthesis: Vec<LongSineSynthesis>,
@@ -127,7 +144,7 @@ impl NativeAacDecoder {
             _ => &[],
         };
         let mut element_index = 0;
-        let mut tags = std::collections::HashSet::new();
+        let mut tags = ElementTags::default();
         loop {
             let element = bits.read(3)?;
             let mut target_offset = channels.len();
@@ -158,7 +175,7 @@ impl NativeAacDecoder {
                         found.ok_or_else(|| invalid("AAC element is absent from PCE"))?;
                 }
                 decoded_elements.push((element,tag,target_offset));
-                if !tags.insert((element, tag)) {
+                if !tags.insert(element, tag) {
                     return Err(invalid("duplicate AAC element tag"));
                 }
             }
@@ -177,7 +194,7 @@ impl NativeAacDecoder {
                 2 => {
                     let coupling=Coupling::read(&mut bits,&self.config)?;
                     if self.program.as_ref().is_none_or(|p|!p.coupling.contains(&(coupling.point == 3,coupling.tag))) {return Err(invalid("AAC coupling is absent from configured PCE"));}
-                    if !tags.insert((2,u32::from(coupling.tag))) {return Err(invalid("duplicate AAC coupling tag"));}
+                    if !tags.insert(2, u32::from(coupling.tag)) {return Err(invalid("duplicate AAC coupling tag"));}
                     let spectrum=coupling.channel.spectrum_with_noise(&self.config,&mut noise)?;
                     let spectrum=coupling.channel.apply_tns(&self.config,spectrum)?;
                     couplings.push((coupling,spectrum));
