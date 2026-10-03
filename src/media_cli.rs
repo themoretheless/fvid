@@ -2,6 +2,7 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if owned_filter_plan(args)? { return Ok(()); }
     if args.first().map(String::as_str) == Some("plan")
         && args.get(1).map(String::as_str) == Some("loudnorm")
     {
@@ -4471,5 +4472,35 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
         let stats=fvid::native_export::overlay_video_transformed(source,overlay,destination.unwrap(),x,y,None,hook.as_ref(),&geometry,&filters)?;
         if !quiet {println!("{}",serde_json::to_string_pretty(&stats)?);}
     }
+    Ok(true)
+}
+
+
+fn owned_filter_plan(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str) != Some("plan")
+        || args.get(1).map(String::as_str) != Some("transcode-lossless")
+        || args.len() < 3 {
+        return Ok(false);
+    }
+    let mut transform = fvid::media_info::LosslessTransform::default();
+    let mut options = args[3..].iter();
+    let mut seen = std::collections::BTreeSet::new();
+    while let Some(option) = options.next() {
+        let slot = match option.as_str() {
+            "--eq" => &mut transform.eq,
+            "--unsharp" => &mut transform.unsharp,
+            "--hue" => &mut transform.hue,
+            _ => return Ok(false),
+        };
+        if !seen.insert(option) {return Err(format!("duplicate option: {option}").into());}
+        *slot = Some(options.next().ok_or("missing filter parameters")?.clone());
+    }
+    if !fvid::native_lossless::supports(&transform) {
+        return Ok(false);
+    }
+    let source = std::path::Path::new(&args[2]);
+    if !fvid::native_lossless::eligible(source)? {return Ok(false);}
+    let plan = fvid::native_plan::transcode_lossless(source, &transform)?;
+    println!("{}", serde_json::to_string_pretty(&plan)?);
     Ok(true)
 }

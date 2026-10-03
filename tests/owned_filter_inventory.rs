@@ -53,3 +53,57 @@ fn owned_lossless_plan_lists_migrated_filters_in_execution_order() {
         .iter()
         .any(|step| step.action == "encode" && step.detail.contains("FFV1")));
 }
+
+#[test]
+fn migrated_filter_cli_plan_matches_owned_api_without_legacy() {
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4");
+    let request = fvid::media_info::LosslessTransform {
+        eq: Some("brightness=0.06".into()),
+        unsharp: Some("3:3:0.5".into()),
+        hue: Some("h=90".into()),
+        ..Default::default()
+    };
+    let expected = fvid::native_plan::transcode_lossless(&source, &request).unwrap();
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "transcode-lossless"])
+        .arg(&source)
+        .args([
+            "--eq",
+            "brightness=0.06",
+            "--unsharp",
+            "3:3:0.5",
+            "--hue",
+            "h=90",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(
+        serde_json::from_slice::<serde_json::Value>(&output.stdout).unwrap(),
+        serde_json::to_value(expected).unwrap()
+    );
+}
+
+#[test]
+fn plain_lossless_cli_plan_is_also_owned() {
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4");
+    let expected = fvid::native_plan::transcode_lossless(&source, &Default::default()).unwrap();
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "plan", "transcode-lossless"])
+        .arg(source)
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(
+        serde_json::from_slice::<serde_json::Value>(&output.stdout).unwrap(),
+        serde_json::to_value(expected).unwrap()
+    );
+}
