@@ -178,6 +178,10 @@ impl Grading {
 /// What `fvid play` was asked for: the inputs to queue, and how the first of
 /// them starts, stops and runs at.
 struct PlayArgs {
+    fullscreen: bool,
+    on_top: bool,
+    quit_at_end: bool,
+    snapshot_dir: Option<PathBuf>,
     gpu_backend: crate::Backend,
     gpu_device: usize,
     shader: Option<crate::player_gpu::ColorShader>,
@@ -238,6 +242,10 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
     let mut stop = None;
     let mut rate_milli = 1_000;
     let mut start_paused = false;
+    let mut fullscreen = false;
+    let mut on_top = false;
+    let mut quit_at_end = false;
+    let mut snapshot_dir = None;
     let mut no_audio = false;
     let mut audio_track = None;
     let mut subtitle_track = None;
@@ -262,6 +270,10 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         };
         index += 1;
         match flag {
+            "--fullscreen" => { no_value(inline, flag)?; fullscreen = true; }
+            "--on-top" => { no_value(inline, flag)?; on_top = true; }
+            "--play-and-exit" => { no_value(inline, flag)?; quit_at_end = true; }
+            "--snapshot-path" => { snapshot_dir = Some(PathBuf::from(option_value(args, &mut index, flag, inline)?)); }
             "--backend" => {
                 gpu_backend = option_value(args, &mut index, flag, inline)?.parse()?;
                 if matches!(gpu_backend, crate::Backend::Cpu | crate::Backend::Cuda) {
@@ -340,7 +352,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
                 let value = option_value(args, &mut index, flag, inline)?;
                 subtitle_delay_ms = parse_delay(&value, flag)?;
             }
-            "--sub-file" => {
+            "--sub-file" | "--subtitles" => {
                 let value = option_value(args, &mut index, flag, inline)?;
                 subtitle_file = Some(PathBuf::from(value));
             }
@@ -424,6 +436,10 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         return Err(crate::invalid("--device requires an explicit player backend when not zero"));
     }
     Ok(PlayArgs {
+        fullscreen,
+        on_top,
+        quit_at_end,
+        snapshot_dir,
         gpu_backend,
         gpu_device,
         shader,
@@ -900,6 +916,8 @@ pub fn run(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
             start: parsed.start,
             stop: parsed.stop,
         },
+        quit_at_end: parsed.quit_at_end,
+        snapshot_dir: parsed.snapshot_dir,
         rate_milli: parsed.rate_milli,
         start_paused: parsed.start_paused,
         no_audio: parsed.no_audio,
@@ -929,14 +947,7 @@ pub fn run(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
     let options = eframe::NativeOptions {
         renderer: eframe::Renderer::Wgpu,
         wgpu_options: gpu_configuration,
-        viewport: egui::ViewportBuilder::default()
-            .with_inner_size([1280.0, 800.0])
-            .with_min_inner_size([480.0, 320.0])
-            .with_title("FVid")
-            .with_title_shown(false)
-            .with_titlebar_shown(false)
-            .with_fullsize_content_view(true)
-            .with_drag_and_drop(true),
+        viewport: play_viewport(parsed.fullscreen, parsed.on_top),
         persist_window: false,
         ..Default::default()
     };
@@ -959,6 +970,19 @@ pub fn run(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
     )
     .map_err(|error| error.to_string())?;
     Ok(())
+}
+
+fn play_viewport(fullscreen: bool, on_top: bool) -> egui::ViewportBuilder {
+    let viewport = egui::ViewportBuilder::default()
+        .with_inner_size([1280.0, 800.0])
+        .with_min_inner_size([480.0, 320.0])
+        .with_title("FVid")
+        .with_title_shown(false)
+        .with_titlebar_shown(false)
+        .with_fullsize_content_view(true)
+        .with_drag_and_drop(true)
+        .with_fullscreen(fullscreen);
+    if on_top { viewport.with_always_on_top() } else { viewport }
 }
 
 // Palette from the design canvas: warm off-white type and one orange accent
@@ -1537,6 +1561,8 @@ fn prepare_source(path: &Path, cancelled: &std::sync::atomic::AtomicBool) -> Pre
 }
 
 struct Player {
+    quit_at_end: bool,
+    snapshot_dir: Option<PathBuf>,
     next_file: Option<NextFile>,
     cache_pressure: bool,
     memory_check: Option<Instant>,
@@ -1751,6 +1777,8 @@ struct Player {
 impl Default for Player {
     fn default() -> Self {
         Self {
+            quit_at_end: false,
+            snapshot_dir: None,
             skin: player_skin::Skin::default(),
             playback: None,
             audio: None,
@@ -2426,7 +2454,10 @@ impl Player {
             self.show_osd("Nothing to save");
             return;
         }
-        let target = snapshot_name(&path, self.timeline().0.unwrap_or_default());
+        let beside = snapshot_name(&path, self.timeline().0.unwrap_or_default());
+        let target = self.snapshot_dir.as_ref().map_or_else(|| beside.clone(), |directory| {
+            directory.join(beside.file_name().expect("snapshot name has a file component"))
+        });
         let bytes = match self.picture() {
             Ok(bytes) => bytes,
             Err(error) => {
@@ -2434,6 +2465,12 @@ impl Player {
                 return;
             }
         };
+        if let Some(directory) = &self.snapshot_dir
+            && let Err(error) = std::fs::create_dir_all(directory)
+        {
+            self.show_osd(format!("Snapshot failed: {error}"));
+            return;
+        }
         match std::fs::write(&target, bytes) {
             Ok(()) => self.show_osd(format!(
                 "Saved {}",
@@ -2771,6 +2808,11 @@ impl Player {
 
     /// Carry playback into the next item when the picture runs out, the way a
     /// playlist continues by itself; a shuffled list continues along its cycle.
+    fn should_quit(&self) -> bool {
+        self.quit_at_end && self.ended && self.error.is_none()
+            && self.opening.is_none() && !self.queue.is_empty()
+    }
+
     fn continue_queue(&mut self) {
         let target = match self.repeat {
             Repeat::One => Some(self.index),
@@ -5092,6 +5134,7 @@ impl eframe::App for Player {
             }
         }
         self.present(ctx);
+        if self.should_quit() { ctx.send_viewport_cmd(egui::ViewportCommand::Close); }
         if self.playback.is_some() && !self.paused && !self.ended {
             self.playback_activity
                 .get_or_insert_with(fvid_platform::PlaybackActivity::new);
@@ -5923,6 +5966,36 @@ mod tests {
                 .map(|word| word.to_string())
                 .collect::<Vec<_>>(),
         )
+    }
+
+    #[test]
+    fn native_startup_honors_window_exit_and_subtitle_alias_options() {
+        let parsed = play_args(&["--fullscreen", "--on-top", "--play-and-exit", "--snapshot-path=shots", "--subtitles", "captions.srt", "clip.y4m"]).unwrap();
+        assert!(parsed.fullscreen && parsed.on_top && parsed.quit_at_end);
+        assert_eq!(parsed.snapshot_dir, Some(PathBuf::from("shots")));
+        assert_eq!(parsed.subtitle_file, Some(PathBuf::from("captions.srt")));
+        let viewport = super::play_viewport(parsed.fullscreen, parsed.on_top);
+        assert_eq!(viewport.fullscreen, Some(true));
+        assert_eq!(viewport.window_level, Some(super::egui::WindowLevel::AlwaysOnTop));
+        assert!(play_args(&["--fullscreen=false", "clip.y4m"]).is_err());
+    }
+
+    #[test]
+    fn play_and_exit_waits_for_the_playlist_and_keeps_errors_visible() {
+        let directory = scratch("fvid-player-exit", &[]);
+        for name in ["a.y4m", "b.y4m"] { std::fs::write(directory.join(name), y4m(1)).unwrap(); }
+        let mut player = Player { queue: vec![directory.join("a.y4m"), directory.join("b.y4m")], quit_at_end: true, ..Default::default() };
+        player.play_index(0);
+        assert!(!player.should_quit());
+        player.continue_queue();
+        assert_eq!(player.index, 1);
+        assert!(!player.should_quit());
+        player.continue_queue();
+        assert!(player.should_quit());
+        player.error = Some("decode error".into());
+        assert!(!player.should_quit());
+        drop(player);
+        std::fs::remove_dir_all(directory).unwrap();
     }
 
     #[test]
@@ -7447,7 +7520,7 @@ mod tests {
 
     /// A temporary directory holding `files`, for the list tests.
     fn scratch(name: &str, files: &[&str]) -> PathBuf {
-        let directory = std::env::temp_dir().join(name);
+        let directory = std::env::temp_dir().join(format!("{name}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&directory);
         std::fs::create_dir_all(&directory).unwrap();
         for file in files {
@@ -8193,6 +8266,11 @@ mod tests {
         );
         // IHDR starts at the tenth byte with the two 32-bit dimensions.
         assert_eq!(&file[16..24], &[0, 0, 0, 2, 0, 0, 0, 2]);
+        let alternate = directory.join("shots/nested");
+        player.snapshot_dir = Some(alternate.clone());
+        player.take_snapshot();
+        assert_eq!(std::fs::read(alternate.join("clip-00h00m00s000.png")).unwrap(), file);
+
         drop(player);
         std::fs::remove_dir_all(&directory).unwrap();
     }

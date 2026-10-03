@@ -3259,3 +3259,9 @@ This path does not yet cover ASS styling, complex-script shaping, other compress
 or metadata/control-memory policies; those gaps remain part of the migration.
 
 The FFV1 burn-in path retains input timing, color signal, chapters and text metadata through the existing owned exporter. Synthetic acceptance compares its output packets with the equivalent Y4M input.
+
+Native player startup also accepts `--fullscreen`, `--on-top`,
+`--play-and-exit`, `--snapshot-path DIR` and the `--subtitles FILE` alias.
+Exit waits for the complete playlist and leaves decoding errors visible.
+Snapshot directories are created only when saving a picture. These options
+are covered by native viewport, queue and PNG acceptance tests without libav.
