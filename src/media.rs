@@ -56,7 +56,7 @@ pub fn decode_video_interval(
 /// operations retain their existing adapter until their native migration.
 pub fn decode_video_transformed(source: &std::path::Path, transform: DecodeTransform) -> Result<DecodeStats> {
     if !crate::native_media::supports_video_request(&transform)
-        || ((transform.gblur.is_some() || transform.pixelize.is_some() || transform.chromashift.is_some() || transform.avgblur.is_some() || transform.boxblur.is_some()) && !crate::native_media::supports_plane_filter_source(source).map_err(|e|e.to_string())?) {
+        || ((transform.bilateral.is_some() || transform.gblur.is_some() || transform.pixelize.is_some() || transform.chromashift.is_some() || transform.avgblur.is_some() || transform.boxblur.is_some()) && !crate::native_media::supports_plane_filter_source(source).map_err(|e|e.to_string())?) {
         return fvid_media::decode_video_transformed(source, transform);
     }
     crate::native_media::decode_video_request(source, &transform).map_err(|e|e.to_string())

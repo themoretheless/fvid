@@ -38,6 +38,7 @@ pub fn inventory() -> Capabilities {
         encoders: names(&["ass", "ffv1", "pcm_f32le", "rawvideo"]),
         filters: names(&[
             "gblur",
+            "bilateral",
             "avgblur",
             "boxblur",
             "chromashift",

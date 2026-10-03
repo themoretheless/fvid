@@ -576,7 +576,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         fftdnoiz: None,
         smartblur: None,
         sab: None,
-        bilateral: None,
+        bilateral: _,
         cas: None,
         vignette: None,
         curves: None,

@@ -34,6 +34,7 @@ pub struct PixelFilters {
     pub hue: Option<fvid_media::owned_hue::Hue>,
     pub pixelize: Option<crate::native_pixelize::Pixelize>,
     pub boxblur: Option<crate::native_boxblur::BoxBlur>,
+    pub bilateral: Option<fvid_media::owned_bilateral::Bilateral>,
     pub gblur: Option<fvid_media::owned_gblur::GaussianBlur>,
     pub avgblur: Option<crate::native_avgblur::AverageBlur>,
     pub negate: Option<Negate>,
@@ -69,6 +70,7 @@ impl PixelFilters {
                 .as_deref()
                 .map(crate::native_boxblur::BoxBlur::parse)
                 .transpose()?,
+            bilateral: request.bilateral.as_deref().map(fvid_media::owned_bilateral::Bilateral::parse).transpose().map_err(|e| invalid(&e))?,
             gblur: request.gblur.as_deref().map(fvid_media::owned_gblur::GaussianBlur::parse).transpose().map_err(|e| invalid(&e))?,
             avgblur: request
                 .avgblur
@@ -120,6 +122,7 @@ impl PixelFilters {
             && self.hue.is_none()
             && self.pixelize.is_none()
             && self.boxblur.is_none()
+            && self.bilateral.is_none()
             && self.gblur.is_none()
             && self.avgblur.is_none()
             && self.chromashift.is_none()
@@ -152,6 +155,9 @@ impl PixelFilters {
         }
         for filter in &self.gradients {
             filter.apply(frame, depth)?;
+        }
+        if let Some(filter) = self.bilateral {
+            filter.apply(frame, depth).map_err(|e| invalid(&e))?;
         }
         if let Some(filter)=self.pixelize {filter.apply(frame,depth)?;}
         for filter in &self.morphology {

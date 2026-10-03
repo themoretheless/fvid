@@ -957,6 +957,20 @@ fn pixel_decode_args(
             result.push(value.clone());
             continue;
         }
+        if arg == "--bilateral" {
+            let value = args.next().ok_or("missing bilateral args")?;
+            let eligible = match result.get(1) {
+                Some(path) => fvid::native_lossless::eligible(std::path::Path::new(path))?,
+                None => false,
+            };
+            if eligible {
+                if filters.bilateral.is_some() { return Err("duplicate bilateral".into()); }
+                filters.bilateral = Some(fvid_media::owned_bilateral::Bilateral::parse(value)?);
+                continue;
+            }
+            result.push(arg.clone()); result.push(value.clone());
+            continue;
+        }
         if arg == "--gblur" {
             let value = args.next().ok_or("missing gblur args")?;
             let eligible = match result.get(1) {
@@ -4715,6 +4729,7 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--unsharp" => &mut transform.unsharp,
             "--hue" => &mut transform.hue,
             "--gblur" => &mut transform.gblur,
+            "--bilateral" => &mut transform.bilateral,
             "--avgblur" => &mut transform.avgblur,
             "--boxblur" => &mut transform.boxblur,
             "--negate" => &mut transform.negate,

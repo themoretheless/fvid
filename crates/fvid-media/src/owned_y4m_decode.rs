@@ -30,6 +30,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
+    if transform.bilateral.as_deref().is_some_and(|a| crate::owned_bilateral::Bilateral::parse(a).is_err()) { return false; }
     if transform.rotate.is_some_and(|a| fvid_media_info::RotateAngle::parse(&a.degrees.to_string()).is_err()) { return false; }
     if transform.gblur.as_deref().is_some_and(|a| crate::owned_gblur::GaussianBlur::parse(a).is_err()) { return false; }
     transform
@@ -102,6 +103,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 negate: transform.negate.clone(),
                 avgblur: transform.avgblur.clone(),
                 gblur: transform.gblur.clone(),
+                bilateral: transform.bilateral.clone(),
                 boxblur: transform.boxblur.clone(),
                 pixelize: transform.pixelize.clone(),
                 chromashift: transform.chromashift.clone(),
@@ -423,6 +425,7 @@ pub(crate) fn apply_pixel_filters(
         || transform.eq.is_some()
         || transform.hue.is_some()
         || transform.gblur.is_some()
+        || transform.bilateral.is_some()
         || transform.avgblur.is_some()
         || transform.boxblur.is_some()
         || transform.pixelize.is_some()
@@ -472,6 +475,9 @@ pub(crate) fn apply_pixel_filters(
                     crate::owned_gradient::Gradient::parse(kind, args)?
                         .apply(&mut frame, header.depth())?;
                 }
+            }
+            if let Some(args) = transform.bilateral.as_deref() {
+                crate::owned_bilateral::Bilateral::parse(args)?.apply(&mut frame, header.depth())?;
             }
             if let Some(args) = transform.pixelize.as_deref() {
                 crate::owned_pixelize::Pixelize::parse(args)?.apply(&mut frame, header.depth())?;
@@ -790,6 +796,7 @@ fn decode_reader_frames(
         || transform.hue.is_some()
         || transform.negate.is_some()
         || transform.gblur.is_some()
+        || transform.bilateral.is_some()
         || transform.avgblur.is_some()
         || transform.boxblur.is_some()
         || transform.pixelize.is_some()
