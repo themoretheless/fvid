@@ -674,17 +674,15 @@ fn public_lossless_api_uses_owned_y4m_export_and_enforces_packet_policy() {
         options: vec![("level".into(), "3".into())],
     };
     let refused = directory.join("unsupported.mkv");
-    assert!(
-        fvid_media::owned_lossless::transcode(
-            &source,
-            &refused,
-            transform.clone(),
-            &Default::default(),
-            &unsupported
-        )
-        .unwrap_err()
-        .contains("encoder/settings")
-    );
+    assert!(fvid_media::owned_lossless::transcode(
+        &source,
+        &refused,
+        transform.clone(),
+        &Default::default(),
+        &unsupported
+    )
+    .unwrap_err()
+    .contains("encoder/settings"));
     assert!(!refused.exists());
     let limited = directory.join("limited.mkv");
     let options = fvid_media::CopyOptions {
@@ -705,13 +703,40 @@ fn public_lossless_api_uses_owned_y4m_export_and_enforces_packet_policy() {
             .starts_with(".fvid-matroska-")
     }));
     let stats = fvid_media::owned_lossless::transcode_lossless(
-        &source, &limited,
-        fvid_media::LosslessTransform { hue: Some("h=90".into()), ..Default::default() },
+        &source,
+        &limited,
+        fvid_media::LosslessTransform {
+            hue: Some("h=90".into()),
+            ..Default::default()
+        },
         &Default::default(),
-    ).unwrap();
+    )
+    .unwrap();
     assert_eq!(stats.backend, "fvid");
-    assert!(stats.video_frames > 0);
-
+    let mut original = fvid::playback_native::NativeReader::software(
+        Cursor::new(std::fs::read(&source).unwrap()),
+        usize::MAX,
+    )
+    .unwrap();
+    let mut output = fvid::playback_native::NativeReader::software(
+        Cursor::new(std::fs::read(&limited).unwrap()),
+        usize::MAX,
+    )
+    .unwrap();
+    let geometry = fvid::native_geometry::VideoGeometry::default();
+    let hue = fvid_media::owned_hue::Hue::parse("h=90").unwrap();
+    let mut count = 0;
+    while let Some(frame) = original.read_frame_raw().unwrap() {
+        let [w, h] = original.dimensions();
+        let mut expected = geometry.apply_display(&frame, w, h, 0).unwrap();
+        hue.apply(&mut expected, 10).unwrap();
+        let frame = output.read_frame_raw().unwrap().unwrap();
+        let actual = geometry.apply_display(&frame, w, h, 0).unwrap();
+        assert_eq!(actual.data, expected.data, "frame {count}");
+        count += 1;
+    }
+    assert_eq!(stats.video_frames, count);
+    assert!(output.read_frame_raw().unwrap().is_none());
 }
 
 #[test]
