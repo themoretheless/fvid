@@ -81,6 +81,15 @@ fn metadata(o: &CopyOptions) -> Result<crate::owned_matroska::FileMetadata, Stri
     }
     Ok(file)
 }
+fn stream_tag_key(key: &str) -> bool {
+    !key.is_empty()
+        && key.len() <= 128
+        && !key.contains('\0')
+        && !matches!(
+            key.to_ascii_lowercase().as_str(),
+            "title" | "language" | "rotate" | "stereo_mode" | "alpha_mode"
+        )
+}
 fn policy(o: &CopyOptions, text_tags: bool) -> bool {
     (o.streams.is_empty() || o.streams == [0])
         && o.max_packet_bytes != 0
@@ -98,8 +107,20 @@ fn policy(o: &CopyOptions, text_tags: bool) -> bool {
                 && (crate::owned_file_tags::FileTags::supports_key(k)
                     || (text_tags && !k.is_empty() && k.len() <= 128))
         })
-        && o.stream_metadata_set.is_empty()
-        && o.stream_metadata_delete.is_empty()
+        && if text_tags {
+            o.stream_metadata_set.len() + o.stream_metadata_delete.len() <= 64
+                && o.stream_metadata_set.iter().all(|(index, key, value)| {
+                    *index == 0
+                        && stream_tag_key(key)
+                        && !value.contains('\0')
+                        && value.len() <= 1024
+                })
+                && o.stream_metadata_delete
+                    .iter()
+                    .all(|(index, key)| *index == 0 && stream_tag_key(key))
+        } else {
+            o.stream_metadata_set.is_empty() && o.stream_metadata_delete.is_empty()
+        }
 }
 pub(crate) fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) -> bool {
     if policy(o, true) && request(t).is_some_and(|r| crate::owned_ffv1_export::supports(source, &r)) {

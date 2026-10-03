@@ -467,6 +467,57 @@ fn main() {
         }
         std::fs::remove_file(output).unwrap();
     }
+    for delete in [false, true] {
+        let output = std::env::temp_dir().join(format!(
+            "fvid-ffv1-track-edit-reference-{delete}-{}.mkv",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_file(&output);
+        let options = if delete {
+            CopyOptions {
+                stream_metadata_delete: vec![(0, "private_track_note".into())],
+                ..Default::default()
+            }
+        } else {
+            CopyOptions {
+                stream_metadata_set: vec![(0, "private_track_note".into(), "edited track".into())],
+                ..Default::default()
+            }
+        };
+        fvid_media::transcode_lossless(
+            &root.join("ffv1-track-tags.mkv"),
+            &output,
+            Default::default(),
+            &options,
+        )
+        .unwrap();
+        let result = Command::new(&ffprobe)
+            .args([
+                "-v",
+                "error",
+                "-show_entries",
+                "stream_tags:format_tags",
+                "-of",
+                "json",
+            ])
+            .arg(&output)
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let value: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        let note = &value["streams"][0]["tags"]["PRIVATE_TRACK_NOTE"];
+        if delete {
+            assert!(note.is_null());
+        } else {
+            assert_eq!(note, "edited track");
+        }
+        assert!(value["format"]["tags"]["PRIVATE_TRACK_NOTE"].is_null());
+        std::fs::remove_file(output).unwrap();
+    }
     println!(
         "owned FFV1 export: 20 pixel/timing references and independent file/track metadata checks passed"
     );

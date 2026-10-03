@@ -158,6 +158,15 @@ pub(crate) fn export(
             track_tags.extend(scoped.clone());
         }
     }
+    for (_, key) in &options.stream_metadata_delete {
+        track_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
+    }
+    for (_, key, value) in &options.stream_metadata_set {
+        track_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
+        if !value.is_empty() {
+            track_tags.insert(key.to_ascii_uppercase(), value.clone());
+        }
+    }
     let origin = input.packets.iter().map(|p| p.pts_ns).min().unwrap_or(0);
     let mut metadata = mkv::FileMetadata {
         tags: input.tags.clone(),
@@ -913,5 +922,74 @@ mod tests {
             assert_eq!(reader.packets.len(), 2);
             std::fs::remove_file(output).unwrap();
         }
+    }
+    #[test]
+    fn own_export_mutates_track_tags_without_leaking_to_file_metadata() {
+        let source = root().join("ffv1-track-tags.mkv");
+        for (case, options, expected) in [
+            (
+                "set",
+                CopyOptions {
+                    stream_metadata_set: vec![
+                        (0, "private_track_note".into(), "edited track".into()),
+                        (0, "new_track_note".into(), "new track".into()),
+                    ],
+                    ..Default::default()
+                },
+                Some("edited track"),
+            ),
+            (
+                "delete",
+                CopyOptions {
+                    stream_metadata_delete: vec![(0, "private_track_note".into())],
+                    ..Default::default()
+                },
+                None,
+            ),
+            (
+                "empty",
+                CopyOptions {
+                    stream_metadata_set: vec![(0, "private_track_note".into(), "".into())],
+                    ..Default::default()
+                },
+                None,
+            ),
+        ] {
+            assert!(crate::owned_lossless::supports(
+                &source,
+                &Default::default(),
+                &options
+            ));
+            let output = std::env::temp_dir().join(format!(
+                "fvid-ffv1-track-edit-{case}-{}.mkv",
+                std::process::id()
+            ));
+            let _ = std::fs::remove_file(&output);
+            crate::transcode_lossless(&source, &output, Default::default(), &options).unwrap();
+            let info = crate::owned_probe::probe(&output).unwrap();
+            assert_eq!(
+                info.streams[0]
+                    .metadata
+                    .get("PRIVATE_TRACK_NOTE")
+                    .map(String::as_str),
+                expected
+            );
+            assert!(!info.metadata.contains_key("PRIVATE_TRACK_NOTE"));
+            assert!(!info.metadata.contains_key("NEW_TRACK_NOTE"));
+            if case == "set" {
+                assert_eq!(info.streams[0].metadata["NEW_TRACK_NOTE"], "new track");
+            }
+            assert_eq!(info.metadata["FVID_TEST_NOTE"], "own container metadata");
+            std::fs::remove_file(output).unwrap();
+        }
+        let unmapped = CopyOptions {
+            stream_metadata_set: vec![(1, "note".into(), "bad index".into())],
+            ..Default::default()
+        };
+        assert!(!crate::owned_lossless::supports(
+            &source,
+            &Default::default(),
+            &unmapped
+        ));
     }
 }
