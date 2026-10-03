@@ -2,7 +2,7 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
-    if owned_filter_plan(args)? { return Ok(()); }
+    if owned_lossless_command(args)? { return Ok(()); }
     if args.first().map(String::as_str) == Some("transcode") && args.len() >= 3 {
         let mut owned = vec!["transcode-lossless".to_owned(), args[1].clone(), args[2].clone()];
         let mut encoder = None;
@@ -4526,13 +4526,14 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
 }
 
 
-fn owned_filter_plan(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
-    if args.first().map(String::as_str) != Some("plan")
-        || args.get(1).map(String::as_str) != Some("transcode-lossless")
-        || args.len() < 3
-    {
+fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let planning = args.first().map(String::as_str) == Some("plan");
+    let command = usize::from(planning);
+    if args.get(command).map(String::as_str) != Some("transcode-lossless") || args.len() < 3 {
         return Ok(false);
     }
+    let mut quiet = false;
+    let mut report = false;
     let mut transform = fvid::media_info::LosslessTransform::default();
     let mut options = args[3..].iter();
     let mut seen = std::collections::BTreeSet::new();
@@ -4541,6 +4542,14 @@ fn owned_filter_plan(args: &[String]) -> Result<bool, Box<dyn std::error::Error>
             return Err(format!("duplicate option: {option}").into());
         }
         match option.as_str() {
+            "--quiet" => {
+                quiet = true;
+                continue;
+            }
+            "--progress" if !planning => {
+                report = true;
+                continue;
+            }
             "--hflip" => {
                 transform.horizontal_flip = true;
                 continue;
@@ -4623,20 +4632,46 @@ fn owned_filter_plan(args: &[String]) -> Result<bool, Box<dyn std::error::Error>
         };
         *slot = Some(options.next().ok_or("missing filter parameters")?.clone());
     }
-    let source = std::path::Path::new(&args[2]);
-    if !fvid::native_lossless::supports(&transform) {
-        let options = Default::default();
-        if fvid_media::owned_lossless::supports(source, &transform, &options) {
-            let plan = fvid_media::owned_lossless::plan_transcode_lossless(source, &transform, &options, None)?;
+    let source = std::path::Path::new(&args[command + 1]);
+    if fvid::native_lossless::supports(&transform) && fvid::native_lossless::eligible(source)? {
+        if !planning {
+            return Ok(false);
+        } // The controlled native exporter below owns this path.
+        let plan = fvid::native_plan::transcode_lossless(source, &transform)?;
+        if !quiet {
             println!("{}", serde_json::to_string_pretty(&plan)?);
-            return Ok(true);
         }
+        return Ok(true);
+    }
+    let mut options = fvid::media_control::CopyOptions::default();
+    if report {
+        options.progress = Some(fvid::media_control::ProgressHook::new(|event| {
+            eprintln!(
+                "{}",
+                serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done})
+            );
+        }));
+    }
+    if !fvid_media::owned_lossless::supports(source, &transform, &options) {
         return Ok(false);
     }
-    if !fvid::native_lossless::eligible(source)? {
-        return Ok(false);
+    if planning {
+        let plan = fvid_media::owned_lossless::plan_transcode_lossless(
+            source, &transform, &options, None,
+        )?;
+        if !quiet {
+            println!("{}", serde_json::to_string_pretty(&plan)?);
+        }
+    } else {
+        let stats = fvid_media::owned_lossless::transcode_lossless(
+            source,
+            std::path::Path::new(&args[2]),
+            transform,
+            &options,
+        )?;
+        if !quiet {
+            println!("{}", serde_json::to_string(&stats)?);
+        }
     }
-    let plan = fvid::native_plan::transcode_lossless(source, &transform)?;
-    println!("{}", serde_json::to_string_pretty(&plan)?);
     Ok(true)
 }

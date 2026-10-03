@@ -724,3 +724,57 @@ fn explicit_ffv1_transcode_cli_uses_owned_encoder() {
         std::fs::read(baseline).unwrap()
     );
 }
+
+#[test]
+fn temporal_cli_export_preserves_expected_frame_order_without_legacy() {
+    let dir = directory("temporal-cli");
+    let source = fixture("playback-errors/framestep-six-frames.y4m");
+    for (option, value, indices) in [
+        ("--framestep", "2", vec![0u8, 2, 4]),
+        ("--reverse", "", vec![5, 4, 3, 2, 1, 0]),
+        ("--shuffleframes", "2 1 0", vec![2, 1, 0, 5, 4, 3]),
+    ] {
+        let output = dir.0.join(format!("{}.mkv", &option[2..]));
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "transcode-lossless"])
+            .arg(&source)
+            .arg(&output)
+            .args([option, value, "--progress"])
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        let stats: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+        assert_eq!(stats["backend"], "fvid");
+        assert_eq!(stats["video_frames"], indices.len());
+        assert!(String::from_utf8_lossy(&out.stderr).contains("\"done\":true"));
+        let mut source_reader =
+            NativeReader::software(Cursor::new(std::fs::read(&source).unwrap()), usize::MAX)
+                .unwrap();
+        let mut frames = Vec::new();
+        while let Some(frame) = source_reader.read_frame_raw().unwrap() {
+            let [w, h] = source_reader.dimensions();
+            frames.push(
+                fvid::native_geometry::VideoGeometry::default()
+                    .apply_display(&frame, w, h, 0)
+                    .unwrap()
+                    .data,
+            );
+        }
+        let mut result =
+            NativeReader::software(Cursor::new(std::fs::read(output).unwrap()), usize::MAX)
+                .unwrap();
+        for index in indices {
+            let frame = result.read_frame_raw().unwrap().unwrap();
+            let [w, h] = result.dimensions();
+            let actual = fvid::native_geometry::VideoGeometry::default()
+                .apply_display(&frame, w, h, 0)
+                .unwrap();
+            assert_eq!(actual.data, frames[index as usize]);
+        }
+        assert!(result.read_frame_raw().unwrap().is_none());
+    }
+}
