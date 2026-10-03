@@ -31,6 +31,10 @@ fn cli_xfade_runs_without_libav_and_retains_secondary_tail() {
             "--progress",
             "--max-packets",
             "5",
+            "--stream-metadata",
+            "0:title=Native fade",
+            "--metadata-delete",
+            "title",
         ])
         .env("PATH", "/nonexistent")
         .output()
@@ -52,4 +56,5 @@ fn cli_xfade_runs_without_libav_and_retains_secondary_tail() {
     .unwrap();
     reader.scan_all().unwrap();
     assert_eq!(reader.packets.len(), 4);
+    assert_eq!(reader.tracks[0].name, "Native fade");
 }

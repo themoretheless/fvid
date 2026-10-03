@@ -4781,7 +4781,16 @@ fn owned_xfade_command(args: &[String]) -> Result<bool, Box<dyn std::error::Erro
                 let (key, value) = values.next().ok_or("missing metadata")?.split_once('=').ok_or("metadata requires KEY=VALUE")?;
                 options.metadata_set.push((key.into(), value.into()));
             }
-            "--delete-metadata" => options.metadata_delete.push(values.next().ok_or("missing metadata key")?.clone()),
+            "--metadata-delete" => options.metadata_delete.push(values.next().ok_or("missing metadata key")?.clone()),
+            "--max-rss-mib" => options.max_rss_bytes = Some(fvid_media::parse_max_rss_mib(values.next().ok_or("missing RSS limit")?)?),
+            "--stream-metadata" | "--stream-metadata-delete" => {
+                let (index, text) = values.next().ok_or("missing stream metadata")?.split_once(':').ok_or("stream metadata requires INDEX:KEY")?;
+                let index = index.parse()?;
+                if flag == "--stream-metadata" {
+                    let (key, value) = text.split_once('=').ok_or("stream metadata requires INDEX:KEY=VALUE")?;
+                    options.stream_metadata_set.push((index, key.into(), value.into()));
+                } else { options.stream_metadata_delete.push((index, text.into())); }
+            }
             _ => return Ok(false),
         }
     }

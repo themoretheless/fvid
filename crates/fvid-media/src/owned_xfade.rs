@@ -6,7 +6,6 @@ use std::io::BufRead;
 fn default_policy(options: &fvid_control::CopyOptions) -> bool {
     options.streams.is_empty()
         && options.max_controlled_bytes.is_none()
-        && options.max_rss_bytes.is_none()
         && options.stream_metadata_set.len() + options.stream_metadata_delete.len() <= 64
         && options
             .stream_metadata_set
@@ -345,6 +344,7 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
         }),
         ..Default::default()
     };
+    crate::owned_budget::check_rss_budget(options)?;
     let file_metadata = crate::owned_lossless::metadata(options)?;
     let mut text_tags = std::collections::BTreeMap::new();
     for (key, value) in &options.metadata_set {
@@ -400,6 +400,7 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
             {
                 return Err("operation cancelled".into());
             }
+            crate::owned_budget::check_rss_budget(options)?;
             let packet = crate::owned_ffv1_encoder::encode(frame, header.depth())?;
             if packet.len() > options.max_packet_bytes {
                 return Err("encoded cross-fade packet exceeds byte limit".into());
@@ -673,6 +674,14 @@ mod tests {
         assert_eq!(stats.decoded_frames, 2);
         assert_eq!(stats.video_frames, 1);
         std::fs::remove_file(&output).unwrap();
+        let options = fvid_control::CopyOptions {
+            max_rss_bytes: Some(1),
+            ..Default::default()
+        };
+        let error =
+            crate::xfade_video(&main, &other, &output, "fade", 500000, 0, &options).unwrap_err();
+        assert!(error.contains("rss budget exceeded"), "{error}");
+        assert!(!output.exists());
         let cancelled = fvid_control::CancelFlag::new();
         let hook_flag = cancelled.clone();
         let events = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
