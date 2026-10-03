@@ -175,9 +175,25 @@ impl Grading {
     }
 }
 
-/// What `fvid play` was asked for: the inputs to queue, and how the first of
-/// them starts, stops and runs at.
+/// Owned source projection and initial viewing direction.
+#[derive(Clone, Copy)]
+struct SphericalView {
+    enabled: bool,
+    projection: fvid_media::SphericalProjection,
+    yaw: i32,
+    pitch: i32,
+    roll: i32,
+    fov: i32,
+}
+impl Default for SphericalView {
+    fn default() -> Self {
+        Self { enabled: false, projection: fvid_media::SphericalProjection::Equirect, yaw: 0, pitch: 0, roll: 0, fov: 80_000 }
+    }
+}
+
+/// Inputs and startup controls for the native player.
 struct PlayArgs {
+    spherical: SphericalView,
     stereo3d: fvid_media::PlayStereo3D,
     no_subtitles: bool,
     embedded_subtitle: Option<usize>,
@@ -238,6 +254,7 @@ struct PlayArgs {
 /// Read the options `fvid play` answers, in either `--flag VALUE` or
 /// `--flag=VALUE` form. Everything that is not an option joins the queue.
 fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
+    let mut spherical = SphericalView::default();
     let mut stereo3d = fvid_media::PlayStereo3D::Off;
     let mut gpu_backend = crate::Backend::Auto;
     let mut gpu_device = 0;
@@ -372,6 +389,25 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
                 let value = option_value(args, &mut index, flag, inline)?;
                 subtitle_file = Some(PathBuf::from(value));
             }
+            "--spherical" | "--360" => {
+                no_value(inline, flag)?;
+                spherical.enabled = true;
+            }
+            "--spherical-projection" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                spherical.projection = fvid_media::parse_spherical_projection(&value).map_err(|e| crate::invalid(&e))?;
+                spherical.enabled = true;
+            }
+            "--yaw" | "--pitch" | "--roll" | "--fov" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                let degrees = fvid_media::parse_degrees_milli(&value).map_err(|e| crate::invalid(&e))?;
+                match flag {
+                    "--yaw" => spherical.yaw = degrees,
+                    "--pitch" => spherical.pitch = degrees,
+                    "--roll" => spherical.roll = degrees,
+                    _ => spherical.fov = degrees,
+                }
+            }
             "--play-stereo3d" => {
                 let value = option_value(args, &mut index, flag, inline)?;
                 stereo3d = fvid_media::parse_play_stereo3d(&value).map_err(|error| crate::invalid(&error))?;
@@ -456,6 +492,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         return Err(crate::invalid("--device requires an explicit player backend when not zero"));
     }
     Ok(PlayArgs {
+        spherical,
         stereo3d,
         no_subtitles,
         embedded_subtitle: None,
@@ -962,7 +999,7 @@ fn parse_media_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         } else {
             native.push(arg.clone());
             if inline.is_none() && matches!(flag,
-                "--play-stereo3d" | "--audio-device" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
+                "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
                 | "--backend" | "--device" | "--shader" | "--skin" | "--start-time" | "--stop-time"
                 | "--rate" | "--audio-delay" | "--subtitle-delay" | "--volume" | "--zoom"
                 | "--crop" | "--aspect" | "--brightness" | "--gamma" | "--saturation" | "--contrast"
@@ -985,6 +1022,7 @@ fn run_parsed(parsed: PlayArgs) -> Result<(), Box<dyn std::error::Error>> {
     let gpu_configuration = crate::player_gpu::configuration(parsed.gpu_backend, parsed.gpu_device)?;
     let shader = parsed.shader;
     let mut app = Player {
+        spherical: parsed.spherical,
         stereo3d: parsed.stereo3d,
         subtitle_shown: !parsed.no_subtitles,
         preferred_embedded_subtitle: parsed.embedded_subtitle,
@@ -1686,7 +1724,19 @@ fn stereo_frame(frame: &mut Frame, mode: fvid_media::PlayStereo3D) -> crate::Res
     Ok(())
 }
 
+fn spherical_frame(frame: &mut Frame, view: SphericalView) -> crate::Result<()> {
+    if !view.enabled { return Ok(()); }
+    let rgb = display_rgb(frame)?;
+    let source: Vec<u32> = rgb.chunks_exact(3).map(|p| (u32::from(p[0]) << 16) | (u32::from(p[1]) << 8) | u32::from(p[2])).collect();
+    let width = u32::try_from(frame.dimensions[0]).map_err(|_| crate::invalid("spherical width overflow"))?;
+    let height = u32::try_from(frame.dimensions[1]).map_err(|_| crate::invalid("spherical height overflow"))?;
+    let pixels = fvid_media::project_spherical_view(width, height, &source, width, height, view.projection, view.yaw, view.pitch, view.roll, view.fov);
+    frame.pixels = Pixels::Rgb(pixels.into_iter().flat_map(|p| [(p >> 16) as u8, (p >> 8) as u8, p as u8]).collect());
+    Ok(())
+}
+
 struct Player {
+    spherical: SphericalView,
     stereo3d: fvid_media::PlayStereo3D,
     preferred_embedded_subtitle: Option<usize>,
     preferred_output: Option<String>,
@@ -1906,6 +1956,7 @@ struct Player {
 impl Default for Player {
     fn default() -> Self {
         Self {
+            spherical: SphericalView::default(),
             stereo3d: fvid_media::PlayStereo3D::Off,
             preferred_embedded_subtitle: None,
             preferred_output: None,
@@ -3674,7 +3725,7 @@ impl Player {
             let av_ready = self.frame_ready_for_sync(frame);
             if time_ready && av_ready {
                 let mut frame = self.queued.take().unwrap();
-                if let Err(error) = stereo_frame(&mut frame, self.stereo3d) {
+                if let Err(error) = stereo_frame(&mut frame, self.stereo3d).and_then(|()| spherical_frame(&mut frame, self.spherical)) {
                     self.error = Some(error.to_string());
                     self.paused = true;
                     if let Some(playback) = &self.playback { playback.pause(); }
@@ -6084,6 +6135,27 @@ mod tests {
                 .map(|word| word.to_string())
                 .collect::<Vec<_>>(),
         )
+    }
+
+    #[test]
+    fn native_spherical_projection_uses_owned_mapping_and_keeps_clock() {
+        let parsed = super::parse_media_play_args(&["--spherical-projection=equirect".into(), "--yaw=90".into(), "--fov=80".into(), "clip.y4m".into()]).unwrap();
+        assert!(parsed.spherical.enabled);
+        assert_eq!(parsed.spherical.yaw, 90_000);
+        let source: Vec<u32> = (0..32).map(|n| n * 0x070503).collect();
+        let mut frame = Frame {
+            pixels: Pixels::Rgb(source.iter().flat_map(|p| [(p >> 16) as u8, (p >> 8) as u8, *p as u8]).collect()),
+            dimensions: [8,4], period: Duration::from_millis(17), interval: Some((2,3,60)),
+            pts: Some((2,60)), generation: 7, serial: 9,
+        };
+        super::spherical_frame(&mut frame, parsed.spherical).unwrap();
+        let original: Vec<u8> = source.iter().flat_map(|p| [(p >> 16) as u8, (p >> 8) as u8, *p as u8]).collect();
+        let Pixels::Rgb(rgb) = &frame.pixels else { panic!("expected RGB") };
+        assert_eq!(rgb.len(), original.len());
+        assert_ne!(rgb, &original, "the viewing direction must change the image");
+        assert_eq!(frame.pts, Some((2,60)));
+        assert_eq!(frame.dimensions, [8,4]);
+        assert!(parse_play_args(&["--spherical-projection=bad".into()]).is_err());
     }
 
     #[test]
