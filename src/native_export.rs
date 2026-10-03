@@ -51,7 +51,19 @@ pub fn export_y4m_transformed(
     interval: Option<(std::time::Duration, std::time::Duration)>,
     geometry: &crate::native_geometry::VideoGeometry,
 ) -> Result<u64> {
-    Ok(export_y4m_sources(&[source.to_owned()],destination,interval,geometry,false,None,None)?.packets)
+    Ok(export_y4m_sources(&[source.to_owned()],destination,interval,geometry,&Default::default(),false,None,None)?.packets)
+}
+
+/// Export owned spatial and pixel processing while retaining frame timing and depth.
+pub fn export_y4m_pipeline(
+    source: &Path,
+    destination: &Path,
+    interval: Option<(std::time::Duration, std::time::Duration)>,
+    geometry: &crate::native_geometry::VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
+) -> Result<u64> {
+    Ok(export_y4m_sources(&[source.to_owned()], destination, interval, geometry,
+        filters, false, None, None)?.packets)
 }
 
 /// Decode compatible video segments in order into one constant-rate Y4M stream.
@@ -65,7 +77,7 @@ pub fn concat_y4m(sources: &[PathBuf], destination: &Path, selected: Option<usiz
         if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
         validate_video_selection(source,selected)?;
     }
-    export_y4m_sources(sources,destination,None,&Default::default(),false,cancel,progress)
+    export_y4m_sources(sources,destination,None,&Default::default(),&Default::default(),false,cancel,progress)
 }
 
 pub(crate) fn validate_video_selection(source: &Path, selected: Option<usize>) -> Result<()> {
@@ -87,6 +99,7 @@ pub(crate) fn validate_video_selection(source: &Path, selected: Option<usize>) -
 
 fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
     interval: Option<(std::time::Duration,std::time::Duration)>, geometry: &crate::native_geometry::VideoGeometry,
+    filters: &crate::native_pixels::PixelFilters,
     relative_interval: bool, cancel: Option<&crate::media_control::CancelFlag>, progress: Option<&crate::media_control::ProgressHook>,
 ) -> Result<crate::media_control::ProgressEvent> {
     let mut control=crate::native_media::DecodeProgress::new(cancel,progress)?;
@@ -201,11 +214,14 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
             _ => false,
         };
         let aspect = transformed_aspect(reader.pixel_aspect(), width, height, geometry)?;
-        let transformed = if geometry.is_identity() && rotation == 0 {
+        let mut transformed = if geometry.is_identity() && rotation == 0 && filters.is_empty() {
             None
         } else {
             Some(geometry.apply_display(&frame, width, height, rotation)?)
         };
+        if let Some(picture) = &mut transformed {
+            filters.apply(picture, depth)?;
+        }
         let (width, height) = if let Some(picture) = &transformed {
             chroma = match picture.subsampling {
                 Some([2, 2]) => "420",
@@ -786,7 +802,7 @@ pub fn trim_y4m(source: &Path, destination: &Path, from: i64, to: i64, selected:
     if destination.extension().and_then(|s|s.to_str())!=Some("y4m") {return Err(invalid("native video trim output requires .y4m"));}
     if cancel.is_some_and(|c|c.is_cancelled()) {return Err(invalid("media operation cancelled"));}
     validate_video_selection(source,selected)?;
-    export_y4m_sources(&[source.to_owned()],destination,Some((std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64))),&Default::default(),true,cancel,progress)
+    export_y4m_sources(&[source.to_owned()],destination,Some((std::time::Duration::from_micros(from as u64),std::time::Duration::from_micros(to as u64))),&Default::default(),&Default::default(),true,cancel,progress)
 }
 
 /// Whether the MP4 contains exactly one AAC track and no omitted tracks.

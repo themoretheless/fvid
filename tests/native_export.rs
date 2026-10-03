@@ -478,3 +478,55 @@ fn user_turn_can_undo_container_display_rotation_before_export() {
         (turned.width, turned.height, turned.video_frames)
     );
 }
+
+#[test]
+fn owned_pixel_filters_export_y4m_through_cli() {
+    let dir = directory();
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4");
+    let output = dir.0.join("filtered.y4m");
+    let run = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "export-y4m"])
+        .arg(&source)
+        .arg(&output)
+        .args(["--crop", "0:0:16:16", "--negate", "", "--hue", "h=90"])
+        .output()
+        .unwrap();
+    assert!(
+        run.status.success(),
+        "{}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    let geometry = fvid::native_geometry::VideoGeometry {
+        crop: Some([0, 0, 16, 16]),
+        ..Default::default()
+    };
+    let mut filters = fvid::native_pixels::PixelFilters::default();
+    filters.hue = Some(fvid_media::owned_hue::Hue::parse("h=90").unwrap());
+    filters.negate = Some(fvid::native_pixels::Negate::parse("").unwrap());
+    let mut original = fvid::playback_native::NativeReader::software(
+        std::io::Cursor::new(std::fs::read(&source).unwrap()),
+        usize::MAX,
+    )
+    .unwrap();
+    let mut result = fvid::playback_native::NativeReader::software(
+        std::io::Cursor::new(std::fs::read(&output).unwrap()),
+        usize::MAX,
+    )
+    .unwrap();
+    let mut count = 0;
+    while let Some(frame) = original.read_frame_raw().unwrap() {
+        let [w, h] = original.dimensions();
+        let mut expected = geometry
+            .apply_display(&frame, w, h, original.rotation())
+            .unwrap();
+        filters.apply(&mut expected, 8).unwrap();
+        let actual = result.read_frame_raw().unwrap().unwrap();
+        let actual = fvid::native_geometry::VideoGeometry::default()
+            .apply_display(&actual, 16, 16, 0)
+            .unwrap();
+        assert_eq!(actual.data, expected.data, "frame {count}");
+        count += 1;
+    }
+    assert_eq!(count, 25);
+    assert!(result.read_frame_raw().unwrap().is_none());
+}

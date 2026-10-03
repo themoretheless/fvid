@@ -657,6 +657,8 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         }
         let mut geometry_args = vec!["decode".to_owned()];
         geometry_args.extend_from_slice(&args[3..]);
+        let (geometry_args, mut filters) = pixel_decode_args(&geometry_args)?;
+        filters.canonicalize_option_order();
         let (geometry_args, geometry) = geometry_decode_args(&geometry_args)?;
         let (mut from, mut to) = (None, None);
         let mut options = geometry_args[1..].iter();
@@ -678,11 +680,12 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
             (Some(from), Some(to)) if from < to => Some((from, to)),
             _ => return Err("export interval requires both --from and --to with from < to".into()),
         };
-        let frames = fvid::native_export::export_y4m_transformed(
+        let frames = fvid::native_export::export_y4m_pipeline(
             std::path::Path::new(&args[1]),
             std::path::Path::new(&args[2]),
             interval,
             &geometry,
+            &filters,
         )?;
         println!("{{\"backend\":\"fvid\",\"video_frames\":{frames}}}");
         return Ok(());
