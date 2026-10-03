@@ -686,7 +686,16 @@ fn explicit_ffv1_transcode_cli_uses_owned_encoder() {
         (
             "transcode",
             &destination,
-            vec!["--encoder", "ffv1", "--crop", "0:0:16:16", "--hue", "h=90"],
+            vec![
+                "--encoder",
+                "ffv1",
+                "--encoder-option",
+                "level=1",
+                "--crop",
+                "0:0:16:16",
+                "--hue",
+                "h=90",
+            ],
         ),
         (
             "transcode-lossless",

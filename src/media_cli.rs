@@ -6,11 +6,16 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if args.first().map(String::as_str) == Some("transcode") && args.len() >= 3 {
         let mut owned = vec!["transcode-lossless".to_owned(), args[1].clone(), args[2].clone()];
         let mut encoder = None;
+        let mut encoder_options = Vec::new();
         let mut options = args[3..].iter();
         while let Some(option) = options.next() {
             if option == "--encoder" {
                 if encoder.is_some() { return Err("duplicate encoder".into()); }
                 encoder = Some(options.next().ok_or("missing encoder name")?.as_str());
+            } else if option == "--encoder-option" {
+                let (key, value) = options.next().ok_or("missing encoder option")?
+                    .split_once('=').ok_or("encoder option requires KEY=VALUE")?;
+                encoder_options.push((key.to_owned(), value.to_owned()));
             } else {
                 owned.push(option.clone());
                 // Keep parameter values together, including strings resembling flags.
@@ -19,8 +24,11 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
         }
-        if encoder == Some("ffv1") && !owned.iter().any(|arg| arg == "--encoder-option") {
-            return run(&owned);
+        if let Some(name) = encoder {
+            let settings = fvid::media_info::EncoderSettings { name: name.to_owned(), options: encoder_options };
+            if fvid_media::owned_lossless::supports_encoder(&settings) {
+                return run(&owned);
+            }
         }
     }
     if args.first().map(String::as_str) == Some("plan")

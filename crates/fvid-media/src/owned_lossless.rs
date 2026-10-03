@@ -257,6 +257,13 @@ pub fn crop_lossless(
     )
 }
 
+/// Settings implemented by the owned version-1 FFV1 encoder.
+/// Unknown options never become silently ignored codec requests.
+pub fn supports_encoder(settings: &fvid_media_info::EncoderSettings) -> bool {
+    settings.validate().is_ok() && settings.name == "ffv1"
+        && settings.options.iter().all(|(key, value)| key == "level" && value == "1")
+}
+
 /// Explicit FFV1 encoding through the owned lossless pipeline.
 pub fn transcode(
     source: &Path,
@@ -266,7 +273,7 @@ pub fn transcode(
     settings: &fvid_media_info::EncoderSettings,
 ) -> Result<LosslessStats, String> {
     settings.validate()?;
-    if settings.name != "ffv1" || !settings.options.is_empty() {
+    if !supports_encoder(settings) {
         return Err("owned transcode does not yet implement requested encoder/settings".into());
     }
     transcode_lossless(source, destination, transform, options)

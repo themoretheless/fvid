@@ -227,3 +227,26 @@ fn geometry_plan_rejects_invalid_fields_duplicates_and_overflow() {
         );
     }
 }
+
+#[test]
+fn owned_encoder_settings_admit_only_implemented_level() {
+    for (name, options, accepted) in [
+        ("ffv1", vec![], true),
+        ("ffv1", vec![("level", "1")], true),
+        ("ffv1", vec![("level", "3")], false),
+        ("ffv1", vec![("level", "1"), ("coder", "1")], false),
+        ("h264", vec![], false),
+    ] {
+        let settings = fvid::media_info::EncoderSettings {
+            name: name.into(),
+            options: options
+                .into_iter()
+                .map(|(key, value)| (key.into(), value.into()))
+                .collect(),
+        };
+        assert_eq!(
+            fvid_media::owned_lossless::supports_encoder(&settings),
+            accepted
+        );
+    }
+}
