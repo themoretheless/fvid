@@ -52,3 +52,50 @@ pub(crate) fn reduce_ratio(numerator: u64, denominator: u64) -> (u32, u32) {
 }
 
 include!("owned_mp4_impl.rs");
+
+#[cfg(test)]
+mod admission_tests {
+    use super::*;
+    #[test]
+    fn index_payload_accounts_for_spare_capacity_and_both_sample_forms() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/audio/aac-native-edit.m4a");
+        let mut reader = Mp4Reader::open(
+            std::io::BufReader::new(std::fs::File::open(path).unwrap()),
+            Limits::default(),
+        )
+        .unwrap();
+        let before = reader.estimated_index_payload_bytes().unwrap();
+        let old = reader.tracks[0].configuration.capacity();
+        reader.tracks[0].configuration.reserve_exact(16384);
+        let growth = reader.tracks[0].configuration.capacity() - old;
+        assert_eq!(
+            reader.estimated_index_payload_bytes().unwrap(),
+            before + growth
+        );
+        let before = reader.estimated_index_payload_bytes().unwrap();
+        let old = reader.tags.comment.capacity();
+        reader.tags.comment.reserve_exact(128);
+        assert_eq!(
+            reader.estimated_index_payload_bytes().unwrap(),
+            before + reader.tags.comment.capacity() - old
+        );
+        let old = match &reader.tracks[0].samples {
+            SampleIndex::Expanded(samples) => samples.capacity() * std::mem::size_of::<Sample>(),
+            _ => panic!("fixture must have expanded samples"),
+        };
+        let before = reader.estimated_index_payload_bytes().unwrap();
+        let runs = Vec::with_capacity(7);
+        let expected = runs.capacity() * std::mem::size_of::<FrameRun>();
+        reader.tracks[0].samples = SampleIndex::Uniform(UniformIndex {
+            bytes_per_frame: 4,
+            duration: 1,
+            count: 1_000_000,
+            runs,
+        });
+        assert_eq!(
+            reader.estimated_index_payload_bytes().unwrap(),
+            before - old + expected
+        );
+    }
+}

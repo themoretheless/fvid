@@ -553,6 +553,77 @@ impl<R: Read + Seek> Mp4Reader<R> {
     pub fn tags(&self) -> &FileTags {
         &self.tags
     }
+    /// Retained container-owned heap payload, including spare vector/string
+    /// capacity. Excludes caller I/O buffers, packet payloads and allocator
+    /// headers; this is an admission component, not a process memory limit.
+    pub fn estimated_index_payload_bytes(&self) -> Result<usize> {
+        fn add(total: &mut usize, count: usize, width: usize) -> Result<()> {
+            *total = count
+                .checked_mul(width)
+                .and_then(|bytes| total.checked_add(bytes))
+                .ok_or_else(|| invalid("MP4 index payload size overflow"))?;
+            Ok(())
+        }
+        let mut total = 0;
+        add(
+            &mut total,
+            self.tracks.capacity(),
+            std::mem::size_of::<Track>(),
+        )?;
+        add(
+            &mut total,
+            self.refused.capacity(),
+            std::mem::size_of::<SkippedTrack>(),
+        )?;
+        add(
+            &mut total,
+            self.chapters.capacity(),
+            std::mem::size_of::<Chapter>(),
+        )?;
+        for chapter in &self.chapters {
+            add(&mut total, chapter.title.capacity(), 1)?;
+        }
+        for text in [
+            &self.tags.title,
+            &self.tags.artist,
+            &self.tags.album,
+            &self.tags.genre,
+            &self.tags.date,
+            &self.tags.comment,
+            &self.tags.track,
+            &self.tags.album_artist,
+            &self.tags.disc,
+            &self.tags.publisher,
+            &self.tags.copyright,
+            &self.tags.description,
+            &self.tags.rating,
+        ] {
+            add(&mut total, text.capacity(), 1)?;
+        }
+        for track in &self.tracks {
+            add(&mut total, track.name.capacity(), 1)?;
+            add(&mut total, track.language.capacity(), 1)?;
+            add(&mut total, track.configuration.capacity(), 1)?;
+            add(
+                &mut total,
+                track.edits.capacity(),
+                std::mem::size_of::<Edit>(),
+            )?;
+            match &track.samples {
+                SampleIndex::Expanded(samples) => add(
+                    &mut total,
+                    samples.capacity(),
+                    std::mem::size_of::<Sample>(),
+                )?,
+                SampleIndex::Uniform(index) => add(
+                    &mut total,
+                    index.runs.capacity(),
+                    std::mem::size_of::<FrameRun>(),
+                )?,
+            }
+        }
+        Ok(total)
+    }
     /// Reads exactly one indexed packet; the caller may reuse the buffer.
     pub fn read_packet(&mut self, track: usize, sample: usize, output: &mut Vec<u8>) -> Result<()> {
         let sample = self
