@@ -3820,6 +3820,7 @@ pub fn plan_loudnorm(
 
 /// Plan multi-input amix without executing.
 pub fn plan_mix_audio(sources: &[PathBuf], options: &crate::MixAudioOptions) -> Result<MediaPlan> {
+    if let Ok(plan) = crate::owned_audio_mix::plan_mix_audio(sources, options) { return Ok(plan); }
     if !(2..=16).contains(&sources.len()) {
         return Err("plan mix-audio requires 2..=16 inputs".into());
     }
@@ -4034,6 +4035,7 @@ pub fn plan_decode_audio(
 
 /// Plan two-input amerge without executing.
 pub fn plan_merge_audio(sources: &[PathBuf]) -> Result<MediaPlan> {
+    if let Ok(plan) = crate::owned_audio_mix::plan_merge_audio(sources) { return Ok(plan); }
     if sources.len() != 2 {
         return Err("plan merge-audio requires exactly two inputs".into());
     }

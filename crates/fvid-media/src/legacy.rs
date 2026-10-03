@@ -12,12 +12,10 @@ mod ffi {
 }
 mod budget;
 mod edit;
-mod input_policy;
 mod plan;
 pub use budget::{estimate_path_controlled_bytes, parse_max_memory_mib, parse_max_rss_mib};
 pub use edit::{concat, trim};
 pub use fvid_media_info::parse_time;
-pub use input_policy::with_standalone_inputs;
 pub use plan::{
     MediaPlan, PlanStep, PlanStream, plan_burn_subtitles, plan_concat, plan_decode_audio,
     plan_loudness, plan_loudnorm, plan_merge_audio, plan_mix_audio, plan_overlay, plan_remux,

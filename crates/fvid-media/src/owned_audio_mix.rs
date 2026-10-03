@@ -18,6 +18,89 @@ pub fn merge_audio(sources: &[PathBuf], destination: &Path) -> Result<MergeAudio
     merge_with_decoder(sources, destination, decode_float_wave)
 }
 
+/// Build a read-only plan using the same PCM geometry required by execution.
+pub fn plan_mix_audio(
+    sources: &[PathBuf],
+    options: &MixAudioOptions,
+) -> Result<fvid_media_info::MediaPlan> {
+    if !(2..=16).contains(&sources.len()) {
+        return Err("mix-audio requires 2..=16 inputs".into());
+    }
+    let weights = expand_weights(sources.len(), &options.weights)?;
+    let sum: f32 = weights.iter().sum();
+    if !sum.is_finite() || sum <= 0.0 {
+        return Err("mix-audio weight sum must be finite and > 0".into());
+    }
+    audio_plan(
+        sources,
+        false,
+        format!(
+            "weighted float mix, duration={}, normalize={}, weights={weights:?}",
+            options.duration.as_str(),
+            options.normalize
+        ),
+    )
+}
+pub fn plan_merge_audio(sources: &[PathBuf]) -> Result<fvid_media_info::MediaPlan> {
+    if sources.len() != 2 {
+        return Err("merge-audio v1 requires exactly two inputs".into());
+    }
+    audio_plan(
+        sources,
+        true,
+        "concatenate channel vectors, shortest input duration".into(),
+    )
+}
+fn audio_plan(
+    sources: &[PathBuf],
+    merge: bool,
+    detail: String,
+) -> Result<fvid_media_info::MediaPlan> {
+    use fvid_media_info::{MediaPlan, PlanStep};
+    let mut geometry = None;
+    for source in sources {
+        let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
+        let info =
+            crate::owned_wave_inspect::inspect(&mut file, None).map_err(|e| e.to_string())?;
+        if !info.float
+            || info.bits_per_sample != 32
+            || info.sample_frames == 0
+            || !(1..=64).contains(&info.channels)
+        {
+            return Err("audio mix/merge requires nonempty float32 WAVE inputs".into());
+        }
+        if let Some((rate, channels)) = geometry {
+            if rate != info.sample_rate || (!merge && channels != info.channels) {
+                return Err("audio inputs must share sample rate and mixing channel count".into());
+            }
+        } else {
+            geometry = Some((info.sample_rate, info.channels));
+        }
+    }
+    Ok(MediaPlan {
+        command: if merge { "merge-audio" } else { "mix-audio" }.into(),
+        input: sources[0].clone(),
+        inputs: sources.to_vec(),
+        streams: Vec::new(),
+        steps: vec![
+            PlanStep {
+                action: "decode".into(),
+                detail: "owned float32 WAVE reader".into(),
+            },
+            PlanStep {
+                action: if merge { "merge" } else { "mix" }.into(),
+                detail,
+            },
+            PlanStep {
+                action: "encode".into(),
+                detail: "owned float32 WAVE writer".into(),
+            },
+        ],
+        graph: None,
+        notes: vec!["no FFmpeg or libav execution".into()],
+    })
+}
+
 pub(crate) fn decode_float_wave(source: &Path) -> Result<(AudioDecodeStats, Vec<u8>)> {
     decode_float_wave_controlled(source, None, |_| Ok(()))
 }
@@ -162,11 +245,7 @@ where
             sample_rate: rate,
             channels: i32::from(info.channels),
             sample_format: if info.float {
-                if width == 4 {
-                    "flt"
-                } else {
-                    "dbl"
-                }
+                if width == 4 { "flt" } else { "dbl" }
             } else {
                 match width {
                     1 => "u8",
@@ -387,6 +466,21 @@ mod tests {
         write_wav_f32le(&first, 48000, 2, &[0.25, -0.5, 0.5, 0.25, 1., 1.]).unwrap();
         write_wav_f32le(&second, 48000, 2, &[0.75, 0.5, -0.25, 0.75]).unwrap();
         let sources = [first, second];
+        let plan = plan_mix_audio(&sources, &MixAudioOptions::default()).unwrap();
+        assert_eq!(plan.command, "mix-audio");
+        assert!(plan.graph.is_none());
+        assert_eq!(plan_merge_audio(&sources).unwrap().command, "merge-audio");
+        assert!(
+            plan_mix_audio(
+                &sources,
+                &MixAudioOptions {
+                    weights: vec![-1.0],
+                    ..Default::default()
+                }
+            )
+            .is_err()
+        );
+
         let mixed = files.0.join("mix.wav");
         let stats = crate::mix_audio(&sources, &mixed, &MixAudioOptions::default()).unwrap();
         assert_eq!(stats.sample_frames, 2);

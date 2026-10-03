@@ -1,5 +1,7 @@
 //! FVid media layer. Owned operation contracts are available without libav.
 //! The temporary legacy backend retains existing operations during migration.
+mod input_policy;
+pub use input_policy::with_standalone_inputs;
 #[cfg(feature = "legacy-ffmpeg")]
 include!("legacy.rs");
 #[cfg(not(feature = "legacy-ffmpeg"))]
@@ -53,7 +55,7 @@ pub mod owned_pcm_channels;
 
 pub mod owned_audio_mix;
 #[cfg(not(feature = "legacy-ffmpeg"))]
-pub use owned_audio_mix::{mix_audio, merge_audio};
+pub use owned_audio_mix::{mix_audio, merge_audio, plan_mix_audio, plan_merge_audio};
 
 pub mod owned_audio_export;
 pub mod owned_audio_plan;

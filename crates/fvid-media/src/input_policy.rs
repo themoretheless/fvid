@@ -14,6 +14,25 @@ pub fn with_standalone_inputs<T>(operation: impl FnOnce() -> T) -> T {
     let _restore = Restore(STANDALONE.replace(true));
     operation()
 }
+#[cfg_attr(not(feature = "legacy-ffmpeg"), allow(dead_code))]
 pub(super) fn active() -> bool {
     STANDALONE.get()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn standalone_scope_restores_nested_state_and_unwind() {
+        assert!(!active());
+        with_standalone_inputs(|| {
+            assert!(active());
+            with_standalone_inputs(|| assert!(active()));
+            assert!(active());
+            let result = std::panic::catch_unwind(|| with_standalone_inputs(|| panic!("fixture")));
+            assert!(result.is_err());
+            assert!(active());
+        });
+        assert!(!active());
+    }
 }
