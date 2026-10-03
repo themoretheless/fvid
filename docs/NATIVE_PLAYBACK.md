@@ -3251,3 +3251,9 @@ long cloud files. Nonstandard family-1 mappings and other mapping families are s
 checks actual packet modes, exact sample counts and seeks. FFmpeg/libopus are
 used only to generate test references; running the tests requires neither.
 The previous Opus regression refusal test now verifies successful playback.
+
+Plain SRT burn-in now has an owned Y4M → YUV composition → FFV1/Matroska path,
+including `media plan burn-subtitles` without the `media` feature. It uses the
+bundled Ubuntu font and portable glyph rasterization, with centered white text.
+This path does not yet cover ASS styling, complex-script shaping, non-Y4M sources,
+or metadata/control-memory policies; those gaps remain part of the migration.

@@ -247,6 +247,9 @@ pub fn burn_subtitles(
     subs: &Path,
     options: &CopyOptions,
 ) -> Result<LosslessStats> {
+    if crate::owned_subtitle_burn::supports(source, subs, options) {
+        return crate::owned_subtitle_burn::burn_subtitles(source, destination, subs, options);
+    }
     let input = Input::open(source)?;
     let video = input
         .streams()

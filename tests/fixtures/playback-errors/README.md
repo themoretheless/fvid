@@ -92,3 +92,9 @@ Audio audit fixtures (run with `--features player`):
 ```sh
 cargo test --locked --offline --no-default-features --features player --test playback_error_samples
 ```
+
+- `subtitle-burn.y4m` / `subtitle-burn.srt`: three constant 96×64 YUV420
+  frames at 2 fps, with a plain SRT cue active on `[0.5, 1.0)` seconds.
+  Native burn-in acceptance verifies unchanged first/final pixels, changed middle
+  pixels and preserved timestamps. Regenerate with
+  `python3 scripts/generate_subtitle_burn_fixtures.py` (no external tools).

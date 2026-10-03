@@ -3661,6 +3661,10 @@ pub fn plan_xfade(
 
 /// Plan external SRT burn-in without executing.
 pub fn plan_burn_subtitles(source: &Path, subs: &Path, options: &CopyOptions) -> Result<MediaPlan> {
+    if crate::owned_subtitle_burn::supports(source, subs, options) {
+        return crate::owned_subtitle_burn::plan_burn_subtitles(source, subs, options);
+    }
+
     let input = Input::open_fast(source)?;
     let video = input
         .streams()

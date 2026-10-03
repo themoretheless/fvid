@@ -2,6 +2,7 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if owned_subtitle_burn_command(args)? { return Ok(()); }
     if owned_xfade_command(args)? { return Ok(()); }
     if owned_lossless_command(args)? { return Ok(()); }
     if args.first().map(String::as_str) == Some("transcode") && args.len() >= 3 {
@@ -4812,5 +4813,38 @@ fn owned_xfade_command(args: &[String]) -> Result<bool, Box<dyn std::error::Erro
     )?;
     let Some(stats) = stats else { return Ok(false); };
     if !quiet { println!("{}", serde_json::to_string_pretty(&stats)?); }
+    Ok(true)
+}
+
+fn owned_subtitle_burn_command(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    let planning = args.first().map(String::as_str) == Some("plan");
+    let args = if planning { &args[1..] } else { args };
+    let required = if planning { 2 } else { 3 };
+    if args.first().map(String::as_str) != Some("burn-subtitles") || args.len() < required { return Ok(false); }
+    let mut options = fvid::media_control::CopyOptions::default();
+    let mut subs = None;
+    let mut quiet = false;
+    let mut values = args[required..].iter();
+    while let Some(flag) = values.next() {
+        match flag.as_str() {
+            "--subs" => subs = Some(values.next().ok_or("missing subtitle path")?),
+            "--quiet" => quiet = true,
+            "--max-packets" => options.max_packets = Some(values.next().ok_or("missing packet limit")?.parse()?),
+            "--streams" => options.streams = values.next().ok_or("missing streams")?.split(',').map(str::parse).collect::<Result<_,_>>()?,
+            "--progress" => options.progress = Some(fvid::media_control::ProgressHook::new(|event| {
+                eprintln!("{}", serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
+            })),
+            _ => return Ok(false),
+        }
+    }
+    let subs = std::path::Path::new(subs.ok_or("burn-subtitles requires --subs FILE")?);
+    let source = std::path::Path::new(&args[1]);
+    if !fvid_media::owned_subtitle_burn::supports(source, subs, &options) { return Ok(false); }
+    let json = if planning {
+        serde_json::to_string_pretty(&fvid_media::owned_subtitle_burn::plan_burn_subtitles(source, subs, &options)?)?
+    } else {
+        serde_json::to_string_pretty(&fvid_media::owned_subtitle_burn::burn_subtitles(source, std::path::Path::new(&args[2]), subs, &options)?)?
+    };
+    if !quiet { println!("{json}"); }
     Ok(true)
 }

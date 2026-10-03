@@ -217,3 +217,9 @@ pub mod owned_ms_adpcm;
 pub mod owned_play_controls;
 #[cfg(not(feature = "legacy-ffmpeg"))]
 pub use owned_play_controls::*;
+
+pub mod owned_text_raster;
+
+pub mod owned_subtitle_burn;
+#[cfg(not(feature = "legacy-ffmpeg"))]
+pub use owned_subtitle_burn::{burn_subtitles, plan_burn_subtitles};

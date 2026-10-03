@@ -1320,9 +1320,11 @@ dependencies = [
 name = "fvid-media"
 version = "0.1.0"
 dependencies = [
+ "ab_glyph",
  "bindgen",
  "cpal",
  "eframe",
+ "epaint_default_fonts",
  "fvid-control",
  "fvid-cpu",
  "fvid-cuda",
