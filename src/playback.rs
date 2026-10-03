@@ -152,7 +152,7 @@ impl<R: BufRead + Seek> Y4mReader<R> {
         }
         let (sx, sy) = self.header.format.subsampling();
         let luma_len = self.header.width * self.header.height;
-        let chroma_len = luma_len / sx / sy;
+        let chroma_len = self.width().div_ceil(sx) * self.height().div_ceil(sy);
         yuv_to_rgb_range(
             &self.yuv,
             luma_len,

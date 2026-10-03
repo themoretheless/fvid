@@ -112,7 +112,42 @@ fn owned_rotation_runs_without_libav_and_preserves_timing() {
     assert_eq!(resized.data.len(), 36 + 2 * 9);
     assert!(resized.data[36..].iter().all(|v| *v == 128));
     drop(scaled);
+    let y4m_output = directory.join("oblique.y4m");
+    run(&[
+        "media",
+        "export-y4m",
+        oblique_source.to_str().unwrap(),
+        y4m_output.to_str().unwrap(),
+        "--rotate",
+        "45",
+    ]);
+    let roundtrip = run(&["media", "decode", y4m_output.to_str().unwrap()]);
+    let roundtrip: serde_json::Value = serde_json::from_str(&roundtrip).unwrap();
+    assert_eq!(roundtrip["video_frames"], 3);
+    assert_eq!(roundtrip["width"], 11);
+    assert_eq!(roundtrip["height"], 11);
+    let direct =
+        fvid_media::owned_y4m_decode::decode_video_transformed(&y4m_output, Default::default())
+            .unwrap();
+    assert_eq!(direct.video_frames, 3);
+    assert_eq!((direct.width, direct.height), (11, 11));
     drop(oblique);
     drop(reader);
     std::fs::remove_dir_all(directory).unwrap();
+}
+
+#[test]
+fn odd_y4m_reproducer_reads_all_frames_and_edge_pixels() {
+    let bytes = include_bytes!("fixtures/playback-errors/rotate-odd420.y4m");
+    let header =
+        fvid::Header::parse(bytes.split_inclusive(|b| *b == b'\n').next().unwrap()).unwrap();
+    assert_eq!(header.frame_len().unwrap(), 121 + 2 * 36);
+    let mut reader = fvid::playback::Y4mReader::new(std::io::Cursor::new(bytes), 1 << 20).unwrap();
+    let mut frames = 0;
+    while reader.read_frame().unwrap() {
+        assert_eq!(reader.rgb().len(), 11 * 11 * 3);
+        assert!(reader.rgb().iter().all(|v| *v == 255));
+        frames += 1;
+    }
+    assert_eq!(frames, 3);
 }

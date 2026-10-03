@@ -193,20 +193,17 @@ impl Header {
     }
     pub fn frame_len(&self) -> Result<usize> {
         let (sx, sy) = self.format.subsampling();
-        if self.width == 0
-            || self.height == 0
-            || !self.width.is_multiple_of(sx)
-            || !self.height.is_multiple_of(sy)
-        {
-            return Err(invalid("dimensions must be positive and chroma-aligned"));
+        if self.width == 0 || self.height == 0 {
+            return Err(invalid("dimensions must be positive"));
         }
         let y = self
             .width
             .checked_mul(self.height)
             .ok_or_else(|| invalid("dimensions overflow"))?;
         y.checked_add(
-            (y / sx / sy)
-                .checked_mul(2)
+            self.width.div_ceil(sx)
+                .checked_mul(self.height.div_ceil(sy))
+                .and_then(|n| n.checked_mul(2))
                 .ok_or_else(|| invalid("dimensions overflow"))?,
         )
         .and_then(|n| n.checked_mul(if self.depth() == 8 { 1 } else { 2 }))

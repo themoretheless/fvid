@@ -196,8 +196,8 @@ pub(crate) fn crop_geometry(header: &Header, crop: Option<CropRect>) -> Result<(
     let (sx, sy) = header.format.subsampling();
     if crop.width == 0
         || crop.height == 0
-        || crop.width % sx != 0
-        || crop.height % sy != 0
+        || (crop.width % sx != 0 && crop.x.checked_add(crop.width) != Some(header.width))
+        || (crop.height % sy != 0 && crop.y.checked_add(crop.height) != Some(header.height))
         || crop.x % sx != 0
         || crop.y % sy != 0
         || crop
@@ -217,8 +217,9 @@ pub(crate) fn crop_geometry(header: &Header, crop: Option<CropRect>) -> Result<(
         .ok_or("Y4M crop size overflow")?;
     let size = area
         .checked_add(
-            (area / sx / sy)
-                .checked_mul(2)
+            crop.width.div_ceil(sx)
+                .checked_mul(crop.height.div_ceil(sy))
+                .and_then(|n| n.checked_mul(2))
                 .ok_or("Y4M crop size overflow")?,
         )
         .and_then(|n| n.checked_mul(if header.depth() == 8 { 1 } else { 2 }))
@@ -257,14 +258,12 @@ pub(crate) fn output_geometry(
     } else {
         (sx, sy)
     };
-    if w % ox != 0 || h % oy != 0 {
-        return Err("Y4M output must align with chroma samples".into());
-    }
     let area = w.checked_mul(h).ok_or("Y4M scale size overflow")?;
     let size = area
         .checked_add(
-            (area / sx / sy)
-                .checked_mul(2)
+            w.div_ceil(ox)
+                .checked_mul(h.div_ceil(oy))
+                .and_then(|n| n.checked_mul(2))
                 .ok_or("Y4M scale size overflow")?,
         )
         .and_then(|n| n.checked_mul(if header.depth() == 8 { 1 } else { 2 }))
@@ -473,14 +472,14 @@ fn transform_frame_into(
         .map_err(|e| e.to_string())?;
     let mut offset = 0;
     for (plane, (dx, dy)) in [(1, 1), (sx, sy), (sx, sy)].into_iter().enumerate() {
-        let stride = header.width / dx * step;
+        let stride = header.width.div_ceil(dx) * step;
         if scale.is_some() || transpose.is_some() || pad.is_some() {
             let (odx, ody) = if transpose.is_some() {
                 (dy, dx)
             } else {
                 (dx, dy)
             };
-            let (iw, ih, dw, dh) = (crop.width / dx, crop.height / dy, ow / odx, oh / ody);
+            let (iw, ih, dw, dh) = (crop.width.div_ceil(dx), crop.height.div_ceil(dy), ow.div_ceil(odx), oh.div_ceil(ody));
             let (tw, th) = if transpose.is_some() {
                 (ih, iw)
             } else {
@@ -532,13 +531,13 @@ fn transform_frame_into(
                     output.extend_from_slice(&frame[at..at + step]);
                 }
             }
-            offset += stride * (header.height / dy);
+            offset += stride * (header.height.div_ceil(dy));
             continue;
         }
-        let row_bytes = crop.width / dx * step;
-        for row in 0..crop.height / dy {
+        let row_bytes = crop.width.div_ceil(dx) * step;
+        for row in 0..crop.height.div_ceil(dy) {
             let row = if vertical {
-                crop.height / dy - 1 - row
+                crop.height.div_ceil(dy) - 1 - row
             } else {
                 row
             };
@@ -546,10 +545,10 @@ fn transform_frame_into(
             let at = output.len();
             output.extend_from_slice(&frame[start..start + row_bytes]);
             if horizontal {
-                fvid_cpu::hflip_row(&mut output[at..], crop.width / dx, step);
+                fvid_cpu::hflip_row(&mut output[at..], crop.width.div_ceil(dx), step);
             }
         }
-        offset += stride * (header.height / dy);
+        offset += stride * (header.height.div_ceil(dy));
     }
     Ok(())
 }

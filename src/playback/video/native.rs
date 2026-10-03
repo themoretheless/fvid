@@ -709,9 +709,9 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 let width = reader.width();
                 let height = reader.height();
                 let luma_len = width * height;
-                let chroma_len = luma_len / sx / sy;
-                let chroma_width = width / sx;
-                let chroma_height = height / sy;
+                let chroma_len = width.div_ceil(sx) * height.div_ceil(sy);
+                let chroma_width = width.div_ceil(sx);
+                let chroma_height = height.div_ceil(sy);
                 // Split the contiguous YUV buffer into separate planes so the
                 // GPU shader can do the colour conversion without a CPU pass.
                 let yuv = reader.yuv();
@@ -1000,7 +1000,7 @@ pub(crate) fn yuv_to_rgb_range(
         out.resize(len, 0);
     }
     for (py, line) in out.chunks_exact_mut(width * 3).enumerate() {
-        let uv_row = (py / sy) * (width / sx);
+        let uv_row = (py / sy) * width.div_ceil(sx);
         for (px, pixel) in line.chunks_exact_mut(3).enumerate() {
             let uv = uv_row + px / sx;
             let y = i32::from(data[py * width + px]) - 16;

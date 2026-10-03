@@ -7,3 +7,6 @@ frame = bytes([1,2,3,4,5,6]) + bytes([128] * 12)
 
 frame = bytes([235] * 64) + bytes([128] * 32)
 (root / "rotate-white420.y4m").write_bytes(b"YUV4MPEG2 W8 H8 F2:1 Ip A1:1 C420jpeg\n" + (b"FRAME\n" + frame) * 3)
+
+frame = bytes([235] * 121) + bytes([128] * 72)
+(root / "rotate-odd420.y4m").write_bytes(b"YUV4MPEG2 W11 H11 F2:1 Ip A1:1 C420jpeg\n" + (b"FRAME\n" + frame) * 3)
