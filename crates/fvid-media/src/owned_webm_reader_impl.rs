@@ -773,6 +773,94 @@ impl<R: Read + Seek> WebmReader<R> {
         self.scanned
     }
     /// Tighten encoded payload reads without treating codec metadata as packets.
+    /// Conservative retained index payload estimate. Vector/string capacities
+    /// are counted, including duplicated canonical/raw metadata and chapter
+    /// titles. Each BTreeMap record reserves 4 KiB for node slots/branches;
+    /// reader-owned I/O buffers, packet payloads and allocator headers are excluded.
+    /// Successful inspection allocates no heap memory. This does not impose a limit.
+    pub fn estimated_index_payload_bytes(&self) -> Result<usize> {
+        fn add(total: &mut usize, bytes: usize) -> Result<()> {
+            *total = total
+                .checked_add(bytes)
+                .ok_or_else(|| invalid("WebM index memory estimate overflow"))?;
+            Ok(())
+        }
+        fn vector<T>(total: &mut usize, values: &Vec<T>) -> Result<()> {
+            add(
+                total,
+                values
+                    .capacity()
+                    .checked_mul(std::mem::size_of::<T>())
+                    .ok_or_else(|| invalid("WebM index memory estimate overflow"))?,
+            )
+        }
+        fn records(total: &mut usize, count: usize) -> Result<()> {
+            add(
+                total,
+                count
+                    .checked_mul(4096)
+                    .ok_or_else(|| invalid("WebM index memory estimate overflow"))?,
+            )
+        }
+        fn tags(total: &mut usize, tags: &std::collections::BTreeMap<String, String>) -> Result<()> {
+            records(total, tags.len())?;
+            for (key, value) in tags {
+                add(total, key.capacity())?;
+                add(total, value.capacity())?;
+            }
+            Ok(())
+        }
+        let mut total = 0;
+        vector(&mut total, &self.packets)?;
+        vector(&mut total, &self.tracks)?;
+        for track in &self.tracks {
+            for text in [&track.codec, &track.name, &track.language] {
+                add(&mut total, text.capacity())?;
+            }
+            vector(&mut total, &track.codec_private)?;
+        }
+        vector(&mut total, &self.chapters)?;
+        for chapter in &self.chapters {
+            add(&mut total, chapter.title.capacity())?;
+        }
+        vector(&mut total, &self.chapter_runs)?;
+        for (_, _, title) in &self.chapter_runs {
+            add(&mut total, title.capacity())?;
+        }
+        for text in [
+            &self.writing_app,
+            &self.block_title,
+            &self.tags.title,
+            &self.tags.artist,
+            &self.tags.album,
+            &self.tags.genre,
+            &self.tags.date,
+            &self.tags.comment,
+            &self.tags.track,
+            &self.tags.album_artist,
+            &self.tags.disc,
+            &self.tags.publisher,
+            &self.tags.copyright,
+            &self.tags.description,
+            &self.tags.rating,
+        ] {
+            add(&mut total, text.capacity())?;
+        }
+        tags(&mut total, &self.metadata)?;
+        records(&mut total, self.track_uids.len())?;
+        records(&mut total, self.track_dispositions.len())?;
+        for languages in [&self.track_languages, &self.track_legacy_languages] {
+            records(&mut total, languages.len())?;
+            for language in languages.values() {
+                add(&mut total, language.capacity())?;
+            }
+        }
+        records(&mut total, self.track_metadata.len())?;
+        for scoped in self.track_metadata.values() {
+            tags(&mut total, scoped)?;
+        }
+        Ok(total)
+    }
     /// Retained packet index payload including spare capacity, excluding the
     /// reader, tracks, metadata, allocator headers and packet data buffers.
     pub fn packet_index_payload_bytes(&self) -> Result<usize> {

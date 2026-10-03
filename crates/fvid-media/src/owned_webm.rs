@@ -89,4 +89,31 @@ mod index_allocation_tests {
                 .contains("WebM packet count exceeds limit")
         );
     }
+    #[test]
+    fn index_estimate_counts_metadata_and_codec_private_spare_capacity() {
+        let fixture = include_bytes!("../../../tests/fixtures/playback-errors/ffv1-six-frames.mkv");
+        let mut reader =
+            WebmReader::open(std::io::Cursor::new(fixture), Default::default()).unwrap();
+        reader.scan_all().unwrap();
+        let before = reader.estimated_index_payload_bytes().unwrap();
+        assert!(before >= reader.packet_index_payload_bytes().unwrap());
+        let mut key = String::with_capacity(64);
+        key.push_str("NOTE");
+        let mut value = String::with_capacity(128);
+        value.push_str("synthetic");
+        let metadata_bytes = key.capacity() + value.capacity();
+        reader.metadata.insert(key, value);
+        assert_eq!(
+            reader.estimated_index_payload_bytes().unwrap() - before,
+            4096 + metadata_bytes
+        );
+        let before = reader.estimated_index_payload_bytes().unwrap();
+        let old = reader.tracks[0].codec_private.capacity();
+        reader.tracks[0].codec_private.reserve(16384);
+        let growth = reader.tracks[0].codec_private.capacity() - old;
+        assert_eq!(
+            reader.estimated_index_payload_bytes().unwrap() - before,
+            growth
+        );
+    }
 }
