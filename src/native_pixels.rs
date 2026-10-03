@@ -26,12 +26,13 @@ impl Negate {
 include!("../crates/fvid-media/src/owned_gradient_impl.rs");
 
 /// Native filter order matches the public media request, independent of CLI
-/// flag order: equalization, unsharp, hue, Gaussian blur, average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, pixelize, dilation, erosion, colorize, chroma shift, plane shuffle.
+/// flag order: equalization, unsharp, hue, Gaussian blur, average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, monochrome, pixelize, dilation, erosion, colorize, chroma shift, plane shuffle.
 #[derive(Default)]
 pub struct PixelFilters {
     pub unsharp: Option<fvid_media::owned_unsharp::Unsharp>,
     pub eq: Option<fvid_media::owned_eq::Equalizer>,
     pub hue: Option<fvid_media::owned_hue::Hue>,
+    pub monochrome: Option<fvid_media::owned_monochrome::Monochrome>,
     pub colorize: Option<fvid_media::owned_colorize::Colorize>,
     pub pixelize: Option<crate::native_pixelize::Pixelize>,
     pub boxblur: Option<crate::native_boxblur::BoxBlur>,
@@ -47,6 +48,7 @@ pub struct PixelFilters {
 impl PixelFilters {
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
         let mut result = Self {
+            monochrome: request.monochrome.as_deref().map(fvid_media::owned_monochrome::Monochrome::parse).transpose().map_err(|e| invalid(&e))?,
             colorize: request.colorize.as_deref().map(fvid_media::owned_colorize::Colorize::parse).transpose().map_err(|e| invalid(&e))?,
             unsharp: request
                 .unsharp
@@ -124,6 +126,7 @@ impl PixelFilters {
             && self.hue.is_none()
             && self.pixelize.is_none()
             && self.boxblur.is_none()
+            && self.monochrome.is_none()
             && self.colorize.is_none()
             && self.bilateral.is_none()
             && self.gblur.is_none()
@@ -162,6 +165,7 @@ impl PixelFilters {
         if let Some(filter) = self.bilateral {
             filter.apply(frame, depth).map_err(|e| invalid(&e))?;
         }
+        if let Some(filter) = self.monochrome {filter.apply(frame,depth).map_err(|e|invalid(&e))?;}
         if let Some(filter)=self.pixelize {filter.apply(frame,depth)?;}
         for filter in &self.morphology {
             filter.apply(frame, depth)?;
@@ -241,6 +245,77 @@ mod colorize_tests {
                 let v = ((0.5 + 0.5 * 224.0 / 255.0) * maximum as f64) as u16;
                 assert_eq!(&samples[9..13], &[u; 4]);
                 assert_eq!(&samples[13..], &[v; 4]);
+                index += 1;
+            }
+            assert_eq!(index, 3);
+        }
+    }
+}
+
+#[cfg(test)]
+mod monochrome_tests {
+    use super::*;
+    #[test]
+    fn monochrome_native_decode_and_lossless_export_accept_high_depth_odd_frames() {
+        use crate::playback_native::NativeReader;
+        use std::io::{BufReader, Cursor};
+        for depth in [8u8, 12, 16] {
+            let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
+                "tests/fixtures/playback-errors/monochrome-grid-{depth}.y4m"
+            ));
+            let request = crate::media_info::DecodeTransform {
+                monochrome: Some("cb=0.5:cr=-0.5:size=0.2:high=0.75".into()),
+                ..Default::default()
+            };
+            assert!(crate::native_media::supports_video_request(&request));
+            let lossless = crate::media_info::LosslessTransform {
+                monochrome: request.monochrome.clone(),
+                ..Default::default()
+            };
+            assert!(crate::native_lossless::supports(&lossless));
+            let (geometry, filters) = crate::native_lossless::configuration(&lossless).unwrap();
+            assert!(!filters.is_empty());
+            assert_eq!(
+                crate::native_media::decode_video_pipeline(&source, None, &geometry, &filters)
+                    .unwrap()
+                    .video_frames,
+                3
+            );
+            let mut output = Cursor::new(Vec::new());
+            let (stats, _) = crate::native_lossless_y4m::write_processed(
+                &source,
+                &mut output,
+                &geometry,
+                &filters,
+                None,
+                None,
+                None,
+            )
+            .unwrap();
+            assert_eq!(stats.video_frames, 3);
+            output.set_position(0);
+            let mut reader = NativeReader::software(BufReader::new(output), usize::MAX).unwrap();
+            let mut index = 0u64;
+            while let Some(raw) = reader.read_frame_raw().unwrap() {
+                let frame = geometry.apply(&raw, 3, 3).unwrap();
+                let samples: Vec<u16> = if depth == 8 {
+                    frame.data.iter().map(|s| *s as u16).collect()
+                } else {
+                    frame
+                        .data
+                        .chunks_exact(2)
+                        .map(|s| u16::from_le_bytes([s[0], s[1]]))
+                        .collect()
+                };
+                let maximum = (1u64 << depth) - 1;
+                let expected: Vec<u16> = (0..9)
+                    .map(|n| ((maximum * n / 8 + index) % (maximum + 1)) as u16)
+                    .collect();
+                assert!(samples[..9].iter().zip(&expected).all(|(a, b)| a <= b));
+                assert!(samples[..9].iter().zip(&expected).any(|(a, b)| a < b));
+                let center = 1u16 << (depth - 1);
+                assert_eq!(&samples[9..13], &[center; 4]);
+                assert_eq!(&samples[13..], &[center; 4]);
                 index += 1;
             }
             assert_eq!(index, 3);

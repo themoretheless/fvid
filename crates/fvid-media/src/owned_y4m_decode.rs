@@ -30,6 +30,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
+    if transform.monochrome.as_deref().is_some_and(|a| crate::owned_monochrome::Monochrome::parse(a).is_err()) { return false; }
     if transform.colorize.as_deref().is_some_and(|a| crate::owned_colorize::Colorize::parse(a).is_err()) { return false; }
     if transform.bilateral.as_deref().is_some_and(|a| crate::owned_bilateral::Bilateral::parse(a).is_err()) { return false; }
     if transform.rotate.is_some_and(|a| fvid_media_info::RotateAngle::parse(&a.degrees.to_string()).is_err()) { return false; }
@@ -102,6 +103,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 eq: transform.eq.clone(),
                 hue: transform.hue.clone(),
                 colorize: transform.colorize.clone(),
+                monochrome: transform.monochrome.clone(),
                 negate: transform.negate.clone(),
                 avgblur: transform.avgblur.clone(),
                 gblur: transform.gblur.clone(),
@@ -416,6 +418,7 @@ pub(crate) fn apply_pixel_filters(
         || transform.eq.is_some()
         || transform.hue.is_some()
         || transform.colorize.is_some()
+        || transform.monochrome.is_some()
         || transform.gblur.is_some()
         || transform.bilateral.is_some()
         || transform.avgblur.is_some()
@@ -470,6 +473,9 @@ pub(crate) fn apply_pixel_filters(
             }
             if let Some(args) = transform.bilateral.as_deref() {
                 crate::owned_bilateral::Bilateral::parse(args)?.apply(&mut frame, header.depth())?;
+            }
+            if let Some(args) = transform.monochrome.as_deref() {
+                crate::owned_monochrome::Monochrome::parse(args)?.apply(&mut frame, header.depth())?;
             }
             if let Some(args) = transform.pixelize.as_deref() {
                 crate::owned_pixelize::Pixelize::parse(args)?.apply(&mut frame, header.depth())?;
@@ -790,6 +796,7 @@ fn decode_reader_frames(
         || transform.eq.is_some()
         || transform.hue.is_some()
         || transform.colorize.is_some()
+        || transform.monochrome.is_some()
         || transform.negate.is_some()
         || transform.gblur.is_some()
         || transform.bilateral.is_some()

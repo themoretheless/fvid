@@ -1045,6 +1045,13 @@ fn pixel_decode_args(
             }
             continue;
         }
+        if arg == "--monochrome" {
+            let value = args.next().ok_or("missing monochrome args")?;
+            if filters.monochrome.is_some() { return Err("duplicate monochrome".into()); }
+            if let Ok(filter) = fvid_media::owned_monochrome::Monochrome::parse(value) { filters.monochrome = Some(filter); }
+            else { result.push(arg.clone()); result.push(value.clone()); }
+            continue;
+        }
         if arg == "--colorize" {
             let value = args.next().ok_or("missing colorize args")?;
             if filters.colorize.is_some() { return Err("duplicate colorize".into()); }
@@ -4487,7 +4494,7 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
                 if items.next().map(String::as_str)!=Some("ffv1") {return Ok(false);}
             },
             "--hflip"|"--vflip"=>processing.push(item.clone()),
-            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--colorize"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"=> {
+            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--colorize"|"--monochrome"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"=> {
                 processing.push(item.clone());processing.push(items.next().ok_or("missing overlay processing value")?.clone());
             },
             "--from"|"--to" if operation==Some("decode")=> {
@@ -4736,6 +4743,7 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--unsharp" => &mut transform.unsharp,
             "--hue" => &mut transform.hue,
             "--colorize" => &mut transform.colorize,
+            "--monochrome" => &mut transform.monochrome,
             "--gblur" => &mut transform.gblur,
             "--bilateral" => &mut transform.bilateral,
             "--avgblur" => &mut transform.avgblur,
@@ -4929,6 +4937,47 @@ mod colorize_cli_tests {
                     source,
                     output.to_str().unwrap(),
                     "--colorize",
+                    tint,
+                    "--quiet",
+                ],
+            ] {
+                super::run(&args.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();
+            }
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames, 3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod monochrome_cli_tests {
+    #[test]
+    fn owned_monochrome_cli_decode_plan_and_export_need_no_legacy_feature() {
+        let directory =
+            std::env::temp_dir().join(format!("fvid-monochrome-cli-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8, 12, 16] {
+            let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
+                "tests/fixtures/playback-errors/monochrome-grid-{depth}.y4m"
+            ));
+            let output = directory.join(format!("monochromed-{depth}.mkv"));
+            let source = source.to_str().unwrap();
+            let tint = "cb=0.5:cr=-0.5:size=0.2:high=0.75";
+            for args in [
+                vec!["decode", source, "--monochrome", tint, "--quiet"],
+                vec![
+                    "plan",
+                    "transcode-lossless",
+                    source,
+                    "--monochrome",
+                    tint,
+                    "--quiet",
+                ],
+                vec![
+                    "transcode-lossless",
+                    source,
+                    output.to_str().unwrap(),
+                    "--monochrome",
                     tint,
                     "--quiet",
                 ],

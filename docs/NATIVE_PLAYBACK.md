@@ -3365,3 +3365,29 @@ python3 benches/colorize_reference.py --fvid target/debug/fvid
 The initial matrix (five parameter sets × three depths) matched all 765 samples
 exactly. This qualifies those cases, not every floating-point parameter value.
 Ordinary acceptance tests do not run this external reference.
+
+### Owned monochrome
+
+`monochrome` runs without libav in native/library decode, CLI plans and FFV1
+lossless export for planar YUV at 8–16 bits. Named or positional options are
+`cb` and `cr` (-1–1), `size` (0.1–10) and `high` (0–1); defaults are 0, 0, 1, 0.
+It weights luma by chroma distance from the selected spot and a highlight
+envelope, then sets chroma to the depth's neutral midpoint. It runs before
+pixelize and morphology, retaining the existing public operation order. No
+extra whole-frame allocation is required. Parameter and mathematical behavior
+can be compared with the [reference filter](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_monochrome.c).
+
+Synthetic `monochrome-grid-{8,12,16}.y4m` inputs qualify odd-size chroma indexing,
+precision, source selection, timestamps and Y4M/FFV1 round trips. Ordinary tests
+need neither FFmpeg nor networking. RGB/alpha format conversion remains a
+separate gap; these tests qualify planar YUV input only. Explicit comparison:
+
+```sh
+cargo build --offline --no-default-features --features player --bin fvid
+python3 benches/monochrome_reference.py --fvid target/debug/fvid
+```
+
+The initial five-option-set × three-depth reference matrix matched all 765
+samples exactly, including after computing the gain once per chroma cell.
+This is sample equality for the selected cases, not a global performance claim
+or proof for every floating-point parameter.

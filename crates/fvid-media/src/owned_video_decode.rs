@@ -363,7 +363,7 @@ fn process_frame_with_overlay(
     if transform.eq.is_some() && !(8..=16).contains(&decoded.depth) {
         return Ok(None);
     }
-    if (transform.hue.is_some() || transform.colorize.is_some()) && (monochrome || !(8..=16).contains(&decoded.depth)) {
+    if (transform.hue.is_some() || transform.colorize.is_some() || transform.monochrome.is_some()) && (monochrome || !(8..=16).contains(&decoded.depth)) {
         return Ok(None);
     }
     let (format, layout) = match decoded.frame.subsampling {

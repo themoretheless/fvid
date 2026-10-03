@@ -142,3 +142,9 @@ three 3×3 YUV420 frames with changing luma ramps and non-neutral chroma. Genera
 with `python3 scripts/generate_colorize_fixtures.py`, without FFmpeg or network.
 Owned `colorize` acceptance tests require luma preservation at mix=1, exact
 constant red chroma at each depth, all three timestamps and FFV1 round trips.
+
+`monochrome-grid-{8,12,16}.y4m`: three 3×3 YUV420 frames with changing luma
+ramps and four different chroma cells, generated without FFmpeg by
+`scripts/generate_monochrome_fixtures.py`. Acceptance tests check chroma-driven
+luma changes, neutral output chroma, precision, all timestamps and Y4M/FFV1
+export and decode through the owned library and CLI.
