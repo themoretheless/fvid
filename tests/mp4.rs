@@ -609,15 +609,29 @@ fn a_movies_own_chapter_list_names_its_parts() {
             (3_000_000_000, "End"),
         ]
     );
-    // The chapter track the same muxer writes is not a track there is a decoder
-    // for, so it is left out of the list the player walks.
+    // The supported QuickTime text track is retained. Video dispatch must
+    // select the picture track instead of treating chapter text as video.
     assert_eq!(
         mp4.tracks()
             .iter()
             .map(|track| track.handler)
             .collect::<Vec<_>>(),
-        [*b"vide"]
+        [*b"vide", *b"text"]
     );
+    chapter_movie_plays(FIXTURE);
+}
+
+fn chapter_movie_plays(data: &[u8]) {
+    let mut reader =
+        fvid::playback_native::NativeReader::software(Cursor::new(data), 16 << 20).unwrap();
+    assert!(reader.read_frame_raw().unwrap().is_some());
+    let target = std::time::Duration::from_millis(1500);
+    assert!(reader.seek_raw(target).unwrap().is_some());
+    let (start, end, scale) = reader.frame_interval().unwrap();
+    assert!(start * 1000 <= 1500 * u128::from(scale));
+    assert!(1500 * u128::from(scale) < end * 1000);
+    reader.rewind().unwrap();
+    assert!(reader.read_frame_raw().unwrap().is_some());
 }
 
 /// The very same list, written in the movie timescale the file itself states
@@ -658,9 +672,13 @@ fn a_truncated_chapter_list_leaves_the_movie_playable() {
         .position(|window| window == b"chpl")
         .expect("fixture states chapters");
     data[at + 4 + 8] = 40;
-    let mp4 = Mp4Reader::open(Cursor::new(data), Limits::default()).unwrap();
+    let mp4 = Mp4Reader::open(Cursor::new(&data), Limits::default()).unwrap();
     assert_eq!(mp4.chapters().len(), 3, "what fits is still read");
-    assert_eq!(mp4.tracks().len(), 1);
+    assert_eq!(
+        mp4.tracks().iter().map(|t| t.handler).collect::<Vec<_>>(),
+        [*b"vide", *b"text"]
+    );
+    chapter_movie_plays(&data);
 }
 
 /// `tests/fixtures/tracks/named.mp4`, written by ffmpeg with a title on the
