@@ -4371,7 +4371,7 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
                 if items.next().map(String::as_str)!=Some("ffv1") {return Ok(false);}
             },
             "--hflip"|"--vflip"=>processing.push(item.clone()),
-            "--crop"|"--scale"|"--pad"|"--transpose"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"=> {
+            "--crop"|"--scale"|"--pad"|"--transpose"|"--hue"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"=> {
                 processing.push(item.clone());processing.push(items.next().ok_or("missing overlay processing value")?.clone());
             },
             "--from"|"--to" if operation==Some("decode")=> {

@@ -26,3 +26,8 @@ Native MP4-to-FFV1 lossless configuration also retains `hue`. The CLI export
 regression compares every one of the synthetic MP4 control's 25 decoded
 frames with independently filtered source frames, checks the owned backend
 and output EOF, and verifies that a hue request is not classified as identity.
+
+The CLI overlay acceptance test reuses `hue-8.y4m` as both primary and
+foreground, checks owned decode/export and one retained frame, then decodes
+the resulting FFV1 packet and compares explicit rotated chroma samples.
+This covers composition before hue without a legacy compositor.

@@ -115,3 +115,44 @@ fn mp4_lossless_export_applies_hue_and_preserves_every_frame() {
         }
     ));
 }
+
+#[test]
+fn overlay_cli_keeps_constant_hue_on_owned_decode_and_export() {
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/hue-8.y4m");
+    let output = std::env::temp_dir().join(format!("fvid-overlay-hue-{}.mkv", std::process::id()));
+    for operation in ["decode", "transcode-lossless"] {
+        let mut command = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"));
+        command.args(["media", operation]).arg(&source);
+        if operation == "transcode-lossless" {
+            command.arg(&output);
+        }
+        let result = command
+            .arg("--overlay")
+            .arg(&source)
+            .args(["--hue", "h=90"])
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{operation}: {}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let stats: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        assert_eq!(stats["backend"], "fvid");
+        assert_eq!(stats["video_frames"], 1);
+    }
+    let mut reader = fvid_media::owned_webm::WebmReader::open(
+        std::io::Cursor::new(std::fs::read(&output).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    reader.scan_all().unwrap();
+    assert_eq!(reader.packets.len(), 1);
+    let frame = fvid_media::owned_ffv1_decoder::Decoder::new(2, 2, 1 << 20)
+        .unwrap()
+        .decode(&reader.read_packet(0).unwrap())
+        .unwrap();
+    assert_eq!(frame.frame.data, [16, 64, 128, 235, 160, 160]);
+    std::fs::remove_file(output).unwrap();
+}
