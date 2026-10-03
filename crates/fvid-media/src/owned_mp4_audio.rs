@@ -91,20 +91,92 @@ pub(crate) fn mp4_audio_index<R: Read + Seek>(
         _ => Err(invalid("select exactly one audio stream")),
     }
 }
+/// Admit retained MP4/AAC decode payload before cloning the track or creating
+/// decoder/checkpoint state. Container parsing has its own bounded limits;
+/// parser temporaries and caller-owned I/O are outside this retained estimate.
+pub(crate) fn admit_aac_reader<R: Read + Seek>(
+    reader: &Mp4TimelineReader<R>,
+    index: usize,
+    options: &CopyOptions,
+) -> Result<()> {
+    let Some(limit) = options.max_controlled_bytes else {
+        return Ok(());
+    };
+    let track = reader
+        .tracks()
+        .get(index)
+        .ok_or_else(|| invalid("selected audio stream is absent"))?;
+    if track.codec != *b"mp4a" {
+        return Err(invalid(
+            "MP4 audio aggregate allocation admission is not yet implemented",
+        ));
+    }
+    let config = crate::owned_aac::config::AacConfig::parse(
+        crate::owned_codec_config::aac_specific_config(&track.configuration)?,
+    )?;
+    // Decoder plus saved boundary checkpoint plus replacement/restore scratch.
+    // Charge complete decoder estimates even though immutable tables are shared.
+    let decoder = crate::owned_aac::stream::decode_admission_bytes(u16::from(config.channels))?;
+    let overflow = || invalid("MP4 audio memory estimate overflow");
+    let mut estimated = reader.estimated_index_payload_bytes()?;
+    let mut add = |bytes: usize| -> Result<()> {
+        estimated = estimated.checked_add(bytes).ok_or_else(overflow)?;
+        Ok(())
+    };
+    add(decoder.checked_mul(3).ok_or_else(overflow)?)?;
+    for bytes in [
+        track.name.len(),
+        track.language.len(),
+        track.configuration.len(),
+    ] {
+        add(bytes)?;
+    }
+    add(track
+        .edits
+        .len()
+        .checked_mul(std::mem::size_of::<crate::owned_mp4::Edit>())
+        .ok_or_else(overflow)?)?;
+    add(track
+        .edits
+        .len()
+        .max(1)
+        .checked_mul(std::mem::size_of::<crate::owned_mp4_audio_schedule::Segment>())
+        .ok_or_else(overflow)?)?;
+    let (records, width) = match &track.samples {
+        crate::owned_mp4::SampleIndex::Expanded(samples) => (
+            samples.len(),
+            std::mem::size_of::<crate::owned_mp4::Sample>(),
+        ),
+        crate::owned_mp4::SampleIndex::Uniform(index) => (
+            index.runs.len(),
+            std::mem::size_of::<crate::owned_mp4::FrameRun>(),
+        ),
+    };
+    add(records.checked_mul(width).ok_or_else(overflow)?)?;
+    let largest_packet = (0..track.samples.len())
+        .filter_map(|i| track.samples.get(i))
+        .map(|s| s.size as usize)
+        .max()
+        .unwrap_or(0);
+    // The reusable packet Vec may grow geometrically while reading larger packets.
+    add(largest_packet.checked_mul(2).ok_or_else(overflow)?)?;
+    if estimated > limit {
+        return Err(invalid(&format!(
+            "controlled memory budget exceeded: need {estimated} bytes, limit {limit}"
+        )));
+    }
+    Ok(())
+}
 /// Decode normalized float32 PCM. Errors may leave partial caller-owned output;
-/// progress never reports publication. Aggregate admission and metadata edits
-/// are unsupported here. Encoded packet limits include required preroll.
+/// progress never reports publication. AAC retained allocation admission is
+/// checked before decoding; ALAC admission and metadata edits remain unsupported.
+/// Encoded packet limits include required preroll.
 pub fn decode_mp4_audio_pcm<R: Read + Seek>(
     source: R,
     output: &mut impl Write,
     interval: Option<(Duration, Duration)>,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    if options.max_controlled_bytes.is_some() {
-        return Err(invalid(
-            "MP4 audio aggregate allocation admission is not yet implemented",
-        ));
-    }
     if !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty()
         || !options.stream_metadata_set.is_empty()
@@ -137,6 +209,51 @@ pub fn decode_mp4_audio_pcm<R: Read + Seek>(
             ..Default::default()
         },
     )?;
+    let index = mp4_audio_index(&reader, selected)?;
+    admit_aac_reader(&reader, index, options)?;
     decode_mp4_audio_reader_controlled(reader, output, interval, selected, &mut control)
 }
 include!("owned_mp4_audio_timeline_impl.rs");
+
+#[cfg(test)]
+mod admission_tests {
+    use super::*;
+    #[test]
+    fn mp4_aac_pcm_admits_index_decoder_and_edit_checkpoint() {
+        let source = std::fs::read(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("../../tests/fixtures/audio/aac-native-edit.m4a"),
+        )
+        .unwrap();
+        let decode = |options: &CopyOptions| {
+            let mut pcm = Vec::new();
+            let stats =
+                decode_mp4_audio_pcm(std::io::Cursor::new(&source), &mut pcm, None, options);
+            (stats, pcm)
+        };
+        let (expected, pcm) = decode(&CopyOptions::default());
+        let expected = expected.unwrap();
+        let (actual, admitted) = decode(&CopyOptions {
+            max_controlled_bytes: Some(32 * 1024 * 1024),
+            ..Default::default()
+        });
+        assert_eq!(actual.unwrap(), expected);
+        assert_eq!(admitted, pcm);
+        for limit in [
+            1,
+            crate::owned_aac::stream::decode_admission_bytes(expected.channels).unwrap(),
+        ] {
+            let (error, output) = decode(&CopyOptions {
+                max_controlled_bytes: Some(limit),
+                ..Default::default()
+            });
+            assert!(
+                error
+                    .unwrap_err()
+                    .to_string()
+                    .contains("controlled memory budget exceeded")
+            );
+            assert!(output.is_empty());
+        }
+    }
+}
