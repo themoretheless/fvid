@@ -6,7 +6,7 @@ fn constant_hue_exports_owned_ffv1_with_expected_pixels() {
             .join(format!("tests/fixtures/playback-errors/hue-{depth}.y4m"));
         let output =
             std::env::temp_dir().join(format!("fvid-hue-{}-{depth}.mkv", std::process::id()));
-        let stats = fvid_media::transcode_lossless(
+        let stats = fvid_media::transcode(
             &source,
             &output,
             fvid::media_info::LosslessTransform {
@@ -14,6 +14,10 @@ fn constant_hue_exports_owned_ffv1_with_expected_pixels() {
                 ..Default::default()
             },
             &Default::default(),
+            &fvid::media_info::EncoderSettings {
+                name: "ffv1".into(),
+                options: vec![("level".into(), "1".into())],
+            },
         )
         .unwrap();
         assert_eq!(stats.backend, "fvid");

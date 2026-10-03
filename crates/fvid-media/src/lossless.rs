@@ -5158,7 +5158,7 @@ pub fn transcode(
     settings: &EncoderSettings,
 ) -> Result<LosslessStats> {
     settings.validate()?;
-    if settings.name == "ffv1" && settings.options.is_empty()
+    if crate::owned_lossless::supports_encoder(settings)
         && crate::owned_lossless::supports(source, &transform, options)
     {
         return crate::owned_lossless::transcode(source, destination, transform, options, settings);
