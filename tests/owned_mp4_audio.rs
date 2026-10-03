@@ -518,3 +518,86 @@ fn explicit_mp4_audio_selection_keeps_source_index_in_plan_and_export() {
         expected
     );
 }
+
+#[test]
+fn mp4_pcm_raw_api_matches_frontend_with_retained_budget() {
+    for name in ["pcm-screen.mov", "pcm-tags.mov"] {
+        let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/audio")
+            .join(name);
+        let bytes = std::fs::read(&source).unwrap();
+        let reader =
+            fvid_media::owned_mp4::Mp4Reader::open(Cursor::new(&bytes), Default::default())
+                .unwrap();
+        let indices: Vec<_> = reader
+            .tracks()
+            .iter()
+            .enumerate()
+            .filter_map(|(index, t)| {
+                (t.handler == *b"soun"
+                    && matches!(
+                        &t.codec,
+                        b"sowt" | b"twos" | b"fl32" | b"fl64" | b"in24" | b"in32" | b"raw "
+                    ))
+                .then_some(index)
+            })
+            .collect();
+        assert!(!indices.is_empty(), "{name}");
+        for index in indices {
+            let output = std::env::temp_dir().join(format!(
+                "fvid-mp4-pcm-{name}-{index}-{}.f32le",
+                std::process::id()
+            ));
+            let _ = std::fs::remove_file(&output);
+            for interval in [
+                None,
+                Some((Duration::from_micros(2000), Duration::from_micros(10000))),
+            ] {
+                let mut actual = Vec::new();
+                fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+                    Cursor::new(&bytes),
+                    &mut actual,
+                    interval,
+                    &fvid_control::CopyOptions {
+                        streams: vec![index],
+                        max_controlled_bytes: Some(32 * 1024 * 1024),
+                        ..Default::default()
+                    },
+                )
+                .unwrap();
+                fvid::native_export::export_audio_pcm_selected(
+                    &source,
+                    &output,
+                    interval,
+                    1.0,
+                    None,
+                    None,
+                    Some(index),
+                    None,
+                    None,
+                )
+                .unwrap();
+                assert_eq!(actual, std::fs::read(&output).unwrap(), "{name}");
+                std::fs::remove_file(&output).unwrap();
+            }
+            let mut refused = Vec::new();
+            let error = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+                Cursor::new(&bytes),
+                &mut refused,
+                None,
+                &fvid_control::CopyOptions {
+                    streams: vec![index],
+                    max_controlled_bytes: Some(1),
+                    ..Default::default()
+                },
+            )
+            .unwrap_err();
+            assert!(
+                error
+                    .to_string()
+                    .contains("controlled memory budget exceeded")
+            );
+            assert!(refused.is_empty());
+        }
+    }
+}

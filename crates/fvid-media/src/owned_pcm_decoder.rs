@@ -45,3 +45,27 @@ impl PcmDecoder {
         Self::new(format, rate, channels)
     }
 }
+
+impl PcmDecoder {
+    /// Validate QuickTime PCM width and normalized `enda` byte order.
+    pub(crate) fn from_mp4(track: &crate::owned_mp4::Track) -> Result<Self> {
+        if track.handler != *b"soun" || !(1..=64).contains(&track.channels) {
+            return Err(invalid("PCM requires an audio track with 1..64 channels"));
+        }
+        let format = match &track.codec {
+            b"raw " if track.bit_depth == 8 => PcmFormat::Unsigned8,
+            b"fl32" => PcmFormat::Float { bits: 32 },
+            b"fl64" => PcmFormat::Float { bits: 64 },
+            b"sowt" | b"twos" | b"in24" | b"in32" => PcmFormat::Int {
+                bits: u8::try_from(track.bit_depth).map_err(|_| invalid("PCM bit depth overflow"))?,
+                big_endian: track.codec == *b"twos"
+                    || (matches!(&track.codec, b"in24" | b"in32")
+                        && track.configuration.first() != Some(&1)),
+            },
+            _ => return Err(invalid("selected MP4 audio stream is not supported PCM")),
+        };
+        let mut decoder = Self::new(format, track.sample_rate, track.channels)?;
+        decoder.set_float_big_endian(track.configuration.first() != Some(&1));
+        Ok(decoder)
+    }
+}
