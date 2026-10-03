@@ -173,6 +173,8 @@ pub mod pcm_decoder;
 #[cfg(feature = "player")]
 pub mod symphonia_decoder;
 #[cfg(feature = "player")]
+pub mod opus_decoder;
+#[cfg(feature = "player")]
 pub mod truespeech_decoder;
 #[cfg(feature = "player")]
 pub mod vorbis_decoder;
@@ -204,6 +206,7 @@ pub fn make_audio_decoder(
             sample_rate,
             channels,
         )?),
+        "A_OPUS" => Box::new(opus_decoder::OpusDecoder::new(extra_data, sample_rate, channels)?),
         "A_VORBIS" => Box::new(vorbis_decoder::VorbisDecoder::new(
             extra_data,
             sample_rate,

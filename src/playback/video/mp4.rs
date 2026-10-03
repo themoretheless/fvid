@@ -598,7 +598,9 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             .iter()
             .enumerate()
             .filter(|(_, s)| s.sync && s.pts <= pts)
-            .max_by_key(|(_, s)| s.pts)
+            // Start before the entire equal-PTS group so seek agrees with
+            // sequential playback, including its accumulated final interval.
+            .max_by_key(|(index, s)| (s.pts, std::cmp::Reverse(*index)))
             .map_or(0, |(i, _)| i);
         self.rewind();
         self.sample_index = index;
@@ -621,7 +623,9 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                 .min_by_key(|(_, frame)| (frame.presentation_time.ticks, frame.sample_index))
             {
                 let future = self.future_pts.get(self.sample_index).copied();
-                if future.is_none_or(|pts| frame.presentation_time.ticks <= pts) {
+                // Decode every equal-PTS picture before publishing the last
+                // one at that time. Earlier duplicates still serve as references.
+                if future.is_none_or(|pts| frame.presentation_time.ticks < pts) {
                     let mut frame = self.pending.swap_remove(index);
                     self.pending_bytes -= frame_storage(&frame)?;
                     let next = self
@@ -647,7 +651,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             let picture = self.decode_packet()?;
             self.sample_index += 1;
             if let Some((picture, planes8)) = picture {
-                let frame = VideoFrame {
+                let mut frame = VideoFrame {
                     picture,
                     planes8,
                     #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
@@ -662,6 +666,21 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     },
                     sample_index: index,
                 };
+                while let Some(duplicate) = self
+                    .pending
+                    .iter()
+                    .position(|old| old.presentation_time.ticks == frame.presentation_time.ticks)
+                {
+                    let old = self.pending.swap_remove(duplicate);
+                    self.pending_bytes -= frame_storage(&old)?;
+                    // If this group is at EOF there is no following PTS to
+                    // establish its endpoint. Retain its nominal total span.
+                    frame.duration.ticks = frame
+                        .duration
+                        .ticks
+                        .checked_add(old.duration.ticks)
+                        .ok_or_else(|| invalid("duplicate-PTS duration overflow"))?;
+                }
                 let bytes = frame_storage(&frame)?;
                 let total = self
                     .pending_bytes

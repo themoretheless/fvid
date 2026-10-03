@@ -1640,6 +1640,7 @@ dependencies = [
  "fvid-cuda",
  "fvid-media",
  "fvid-media-info",
+ "fvid-opus",
  "fvid-platform",
  "fvid-vt",
  "naga",
@@ -1691,6 +1692,10 @@ version = "0.1.0"
 dependencies = [
  "serde",
 ]
+
+[[package]]
+name = "fvid-opus"
+version = "0.1.0"
 
 [[package]]
 name = "fvid-platform"

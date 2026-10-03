@@ -19,8 +19,7 @@ fn cli_and_public_api_report_owned_components() {
     assert!(inventory.decoders.contains(&"h264".into()));
     assert!(inventory.decoders.contains(&"hevc".into()));
     assert!(inventory.decoders.contains(&"aac".into()));
-    // Opus transport copies compressed packets; there is no owned sample decoder.
-    assert!(!inventory.decoders.contains(&"opus".into()));
+    assert!(inventory.decoders.contains(&"opus".into()));
     assert!(!inventory.encoders.contains(&"libx264".into()));
     let expected = serde_json::to_value(&inventory).unwrap();
     let result = Command::new(env!("CARGO_BIN_EXE_fvid"))

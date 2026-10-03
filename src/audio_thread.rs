@@ -295,7 +295,7 @@ impl Worker {
                 (decoded,Some(packet.pts.max(0).saturating_add(packet.duration.max(0))))
             }
         };
-        let frontier = if self.stream.codec() == "mp4a" || source_end.is_none() {
+        let frontier = if matches!(self.stream.codec(), "mp4a" | "A_OPUS") || source_end.is_none() {
             let stride = usize::from(self.stream.channels()) * 4;
             let rate = self.stream.sample_rate();
             if stride == 0 || rate == 0 || !decoded.data.len().is_multiple_of(stride) {

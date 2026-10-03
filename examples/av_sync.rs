@@ -77,9 +77,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut measured = Measured::default();
     let mut deadline = Instant::now();
     let slack = fvid::player::AUDIO_SYNC_SLACK;
+    let mut audio_ended = false;
+    let mut waited = 0usize;
+    let mut dropped = 0usize;
+    let mut video_ended = false;
     'present: loop {
         std::thread::sleep(deadline.saturating_duration_since(Instant::now()));
-        let frame = loop {
+        let mut frame = loop {
             match video.poll() {
                 Some(Event::Frame(frame)) => break frame,
                 Some(Event::Ended(_)) => break 'present,
@@ -87,8 +91,55 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 None => std::thread::sleep(Duration::from_micros(200)),
             }
         };
+        // Follow the player's presentation gate and stale-frame drain. Merely
+        // pacing by frame duration presents future pictures early after a seek
+        // and retains obsolete pictures after a decoder/cloud-read stall.
+        for _ in 0..64 {
+            let expired = seconds(frame.pts).is_some_and(|pts| {
+                audio.position().as_secs_f64() >= pts + frame.period.as_secs_f64()
+            });
+            if !expired || audio_ended {
+                break;
+            }
+            match video.poll() {
+                Some(Event::Frame(next)) => {
+                    frame = next;
+                    dropped += 1;
+                }
+                Some(Event::Error(error)) => return Err(error.into()),
+                Some(Event::Ended(_)) => {
+                    video_ended = true;
+                    break;
+                }
+                None => break,
+            }
+        }
+        let waiting_since = Instant::now();
+        let mut held = false;
+        loop {
+            match audio.poll() {
+                Some(fvid::audio_thread::AudioEvent::Error(error)) => return Err(error.into()),
+                Some(fvid::audio_thread::AudioEvent::Ended(_)) => audio_ended = true,
+                _ => {}
+            }
+            if audio_ended
+                || seconds(frame.pts)
+                    .is_none_or(|pts| audio.position().as_secs_f64() >= pts - slack)
+            {
+                break;
+            }
+            held = true;
+            if waiting_since.elapsed() > Duration::from_secs(10) {
+                return Err("audio clock did not reach video presentation time".into());
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        waited += usize::from(held);
         deadline = (deadline + frame.period).max(Instant::now());
         present(frame, &audio, slack, &mut measured);
+        if video_ended {
+            break;
+        }
         if count > 0 && measured.skew.len() >= count {
             break;
         }
@@ -105,6 +156,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         skew.iter().fold(f64::NEG_INFINITY, |a, &b| a.max(b)),
     );
     println!("frames={frames} seek={seek}s period={period:?} slack={slack:.3}s");
+    println!("presentation_gate_waits={waited} expired_frames_dropped={dropped}");
     println!(
         "skew mean={:+.3}s min={:+.3}s max={:+.3}s",
         mean(skew),

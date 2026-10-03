@@ -1069,6 +1069,11 @@ fn parse_track(
                     audio_entry(entry.data, &mut result)?;
                     (28, Some(b"esds"))
                 }
+                1 => {
+                    audio_entry(entry.data, &mut result)?;
+                    if entry.data.len() < 44 { return Err(invalid("truncated AAC version-1 sample description")); }
+                    (44, Some(b"esds"))
+                }
                 2 => {
                     if u32be(entry.data, 28)? != 72 || u32be(entry.data, 44)? != 0x7f000000 {
                         return Err(invalid("invalid AAC version-2 sample description"));
@@ -1187,11 +1192,25 @@ fn parse_track(
             .ok_or_else(|| invalid("truncated sample entry"))?,
     )?;
     if let Some(kind) = config_kind {
-        let atom = required(&configs, kind)?;
+        let nested;
+        let atom = if kind == b"esds" && optional(&configs, kind)?.is_none() {
+            nested = atoms(required(&configs, b"wave")?)?;
+            required(&nested, kind)?
+        } else { required(&configs, kind)? };
         // An ALAC cookie opens with four bytes of its own version, which a Matroska
         // track leaves out; past them both spell the same fields.
         let at = usize::from(kind == b"alac") * 4;
         result.configuration = atom.get(at..).unwrap_or_default().to_vec();
+        // The AAC bitstream config defines decoded geometry. QuickTime/ISO
+        // sample entries may retain a generic stereo declaration for mono AAC.
+        if result.codec == *b"mp4a" {
+            if let Ok(asc) = crate::codec::config::aac_specific_config(&result.configuration) {
+                if let Ok(config) = crate::codec::config::AacConfig::parse(asc) {
+                    result.sample_rate = config.sample_rate;
+                    result.channels = u16::from(config.channels);
+                }
+            }
+        }
     }
     // A fragmented track describes its coding here and its samples nowhere: the
     // tables beside this entry either are absent or hold one entry each at zero,

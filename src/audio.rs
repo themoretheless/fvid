@@ -618,6 +618,7 @@ pub struct CodecEntry {
 
 // Registry of known audio codec tags with their display names.
 const CODEC_ENTRIES: &[CodecEntry] = &[
+    CodecEntry { tags: &["A_OPUS"], name: "Opus" },
     CodecEntry { tags: &["A_VORBIS"], name: "Vorbis" },
     CodecEntry { tags: &["A_MPEG/L3"], name: "MP3" },
     CodecEntry { tags: &["A_MPEG/L2"], name: "MP2" },

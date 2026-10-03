@@ -1,0 +1,15 @@
+[package]
+name = "fvid-opus"
+version = "0.1.0"
+edition = "2024"
+license = "BSD-3-Clause"
+description = "Vendored native Rust Opus core for FVid; derived from opus-pure"
+
+[lib]
+name = "fvid_opus"
+
+[features]
+probe = []
+
+[lints.rust]
+unsafe_code = "forbid"

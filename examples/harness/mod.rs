@@ -9,8 +9,8 @@
 use fvid::audio::{AudioBackend, AudioError, AudioPacket, AudioSpec, AudioStream};
 use std::fs::File;
 use std::io::BufReader;
-use std::sync::Arc;
 use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 /// One reader of the chain: it either hands over a track or says why this file is

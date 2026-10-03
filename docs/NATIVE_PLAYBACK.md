@@ -834,9 +834,10 @@ Release-сборка обязательна для практического и
   перемотки. `tests/native_container_audio.rs` проверяет это на 32 кадрах `.mp4`, где ffprobe
   называет `initial_padding` тем же числом. Там же лежит объёмный ряд (`ac3-51.mka`): шесть
   каналов приходят из Matroska тем же декодером и возвращаются каждый со своей амплитудой, так что
-  порядок L R C LFE LS RS в этом тесте проверяется числом, а не порядком слов. Opus и E-AC-3 не поддержаны
-  (у symphonia декодера Opus нет, а собственный код читает только первый шестнадцатиричный syncword
-  `0x0B77`, которым начинается AC-3, и ряд со `0x16` оставляет без кадра). HE-AAC не раскодируется из контейнера: `AacConfig::parse`
+  порядок L R C LFE LS RS в этом тесте проверяется числом, а не порядком слов. Opus теперь
+  декодируется локальным Rust-модулем (см. раздел ниже). E-AC-3 не поддержан: собственный код
+  читает только первый шестнадцатиричный syncword
+  `0x0B77`, которым начинается AC-3, и ряд со `0x16` оставляет без кадра. HE-AAC не раскодируется из контейнера: `AacConfig::parse`
   отказывает по флагу расширения в блоке настройки. Первичный ряд этого профиля наружу не называет
   ничего — два бита ADTS-профиля одинаковы у LC и у HE, — а эта сборка FFmpeg профиль HE не пишет
   (`-profile:a aac_he` падает на открывании кодировщика), так что проверить тут нечем.
@@ -2874,7 +2875,7 @@ packet identity, timestamps and equal independently decoded float PCM.
 Owned VP9/AV1-to-FFV1 export can retain Opus companions with version-1
 `OpusHead`, mapping family zero and a nonzero declared input rate. The owned
 transport parser checks frame packing and packet duration using RFC 6716;
-it does not implement an Opus sample decoder. `CodecPrivate`, packet payloads,
+sample decoding is separately provided by the native Rust playback adapter. `CodecPrivate`, packet payloads,
 PTS, codec delay and discard padding are preserved. The muxer writes the
 Matroska recommended 80 ms seek preroll and requires the codec delay to match
 header pre-skip. For Opus, full packet duration comes from TOC framing, since
@@ -2903,8 +2904,8 @@ owned FFV1 encoder's accepted subsampling layouts.
 `fvid media capabilities` report the same deterministic owned component
 inventory. The CLI works with no default features and no `media` feature.
 The existing JSON shape is retained; `library_version` identifies FVid.
-The MCP endpoint also uses this inventory. Opus packet transport is not
-listed as an audio decoder, and foreign encoders/filters are not advertised.
+The MCP endpoint also uses this inventory. Opus is listed as a decoder after
+adding the native Rust playback core; foreign encoders/filters are not advertised.
 A listed component does not establish every codec profile, option or combined
 workflow: consult owned operation plans and codec coverage documentation.
 This change removes the legacy inventory call; it does not yet remove other
@@ -3224,3 +3225,29 @@ before erosion). Permuting option flags does not change the transform.
 The explicit native `PixelFilters` vector API retains caller-selected order
 unless `canonicalize_option_order` is requested. Integration tests compare
 forward/reversed CLI flag lists with the native exporter and public media API.
+
+
+### Native Rust Opus playback (2026-10-01)
+
+`src/codec/opus_decoder.rs` adapts the local `crates/fvid-opus` core for WebM/
+Matroska playback. That core is adapted from opus-pure revision
+`cf954a76381ae8968b2bc35bb5d578b3a2311d53`; BSD-3-Clause copyrights and
+provenance are retained. It is not original FVid codec authorship. The scalar
+safe Rust build uses no C, libopus, FFmpeg, dynamic loading or external service.
+
+Playback accepts OpusHead major version 0, mapping family 0 mono/stereo and
+standard family-1 surround layouts up to eight channels. It produces 48 kHz
+interleaved float PCM in WAVE speaker order for CELT, SILK and hybrid packets. Header gain is
+applied by the decoder. The WebM reader subtracts CodecDelay (header pre-skip
+when no CodecDelay is declared), removes header pre-skip even when the first
+packet has a positive timestamp, discards negative-time priming, applies signed
+DiscardPadding, and clips seek preroll. Packet TOC durations reconstruct the
+sample clock across timestamp quantization while preserving larger gaps.
+Seeking currently reconstructs decoder history from the beginning of the track;
+this gives the same PCM suffix as uninterrupted decoding but can be slower on
+long cloud files. Nonstandard family-1 mappings and other mapping families are still refused.
+
+`tests/opus_playback.rs` compares short synthetic videos with saved libopus PCM,
+checks actual packet modes, exact sample counts and seeks. FFmpeg/libopus are
+used only to generate test references; running the tests requires neither.
+The previous Opus regression refusal test now verifies successful playback.

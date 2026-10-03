@@ -17,6 +17,15 @@ use std::{
 mod packed;
 pub use packed::PackedPlanar;
 
+/// A rate-one media range placed on the playable movie timeline.
+#[derive(Clone, Copy, Debug)]
+pub struct PlaybackEdit {
+    media_start: i64,
+    media_end: i64,
+    movie_start: i64,
+    movie_end: i64,
+}
+
 pub enum NativeReader<R> {
     Webm(crate::playback_webm::WebmVideoReader<R>),
     Y4m(Y4mReader<R>),
@@ -31,6 +40,9 @@ pub enum NativeReader<R> {
         rgb_budget: usize,
         media_start: i64,
         media_end: Option<i64>,
+        edits: Vec<PlaybackEdit>,
+        edit_index: usize,
+        movie_start: i64,
         /// After a seek the next decoded frame defines the timeline position
         /// instead of having to continue the previous frame exactly.
         resync: bool,
@@ -208,7 +220,9 @@ impl<R: BufRead + Seek> NativeReader<R> {
             Mp4VideoReader::open_software(reader, Limits::default(), budget - rgb_budget)?
         };
         let track = source.track();
-        let (media_start, media_end) = playback_window(track, source.movie_timescale())?;
+        let edits = playback_edits(track, source.movie_timescale())?;
+        let media_start = edits.first().map_or(0, |edit| edit.media_start);
+        let media_end = edits.first().map(|edit| edit.media_end);
         let rotation = track.rotation;
         Ok(Self::Avc {
             source,
@@ -221,6 +235,9 @@ impl<R: BufRead + Seek> NativeReader<R> {
             rgb_budget,
             media_start,
             media_end,
+            edits,
+            edit_index: 0,
+            movie_start: 0,
             resync: false,
             rotation,
         })
@@ -406,24 +423,69 @@ impl<R: BufRead + Seek> NativeReader<R> {
     /// duration, clipped by its edit window, or the WebM timeline). Y4M
     /// streams carry no up-front length, so they report `None`.
     pub fn cache_packet_count(&self) -> usize {
-        match self { Self::Avc { source, .. } => source.track().samples.expanded().map_or(0, |samples| samples.len()),
-            Self::Webm(reader) => reader.cache_packet_count(), Self::Y4m(_) => 0 }
+        match self {
+            Self::Avc { source, .. } => source
+                .track()
+                .samples
+                .expanded()
+                .map_or(0, |samples| samples.len()),
+            Self::Webm(reader) => reader.cache_packet_count(),
+            Self::Y4m(_) => 0,
+        }
     }
 
     /// Indexed packet bytes and their presentation intervals. Container headers
     /// never become video time merely because they are cached near EOF.
     pub fn cache_packets(&self) -> Vec<(u64, u64, Duration, Duration)> {
         match self {
-            Self::Avc { source, media_start, .. } => {
+            Self::Avc { source, edits, .. } => {
                 let track = source.track();
-                if track.timescale == 0 { return Vec::new(); }
-                track.samples.expanded().unwrap_or(&[]).iter().filter_map(|sample| {
-                    let start = sample.pts.checked_sub(*media_start)?;
-                    let end = start.checked_add(i64::from(sample.duration))?;
-                    if end <= 0 { return None; }
-                    let time = |ticks: i64| Duration::from_secs_f64(ticks.max(0) as f64 / track.timescale as f64);
-                    Some((sample.offset, sample.offset.saturating_add(u64::from(sample.size)), time(start), time(end)))
-                }).collect()
+                if track.timescale == 0 {
+                    return Vec::new();
+                }
+                let default = [PlaybackEdit {
+                    media_start: 0,
+                    media_end: i64::MAX,
+                    movie_start: 0,
+                    movie_end: i64::MAX,
+                }];
+                let ranges = if edits.is_empty() {
+                    &default[..]
+                } else {
+                    edits.as_slice()
+                };
+                let time = |ticks: i64| {
+                    Duration::from_secs_f64(ticks.max(0) as f64 / track.timescale as f64)
+                };
+                track
+                    .samples
+                    .expanded()
+                    .unwrap_or(&[])
+                    .iter()
+                    .flat_map(|sample| {
+                        ranges.iter().filter_map(move |edit| {
+                            let start = sample.pts.max(edit.media_start);
+                            let end = sample
+                                .pts
+                                .checked_add(i64::from(sample.duration))?
+                                .min(edit.media_end);
+                            if end <= start {
+                                return None;
+                            }
+                            let movie = |ticks: i64| {
+                                ticks
+                                    .checked_sub(edit.media_start)?
+                                    .checked_add(edit.movie_start)
+                            };
+                            Some((
+                                sample.offset,
+                                sample.offset.saturating_add(u64::from(sample.size)),
+                                time(movie(start)?),
+                                time(movie(end)?),
+                            ))
+                        })
+                    })
+                    .collect()
             }
             Self::Webm(reader) => reader.cache_packets(),
             Self::Y4m(_) => Vec::new(),
@@ -438,6 +500,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 source,
                 media_start,
                 media_end,
+                edits,
                 ..
             } => {
                 let track = source.track();
@@ -445,7 +508,9 @@ impl<R: BufRead + Seek> NativeReader<R> {
                     return None;
                 }
                 let end = media_end.map_or(i128::from(track.duration), |end| i128::from(end));
-                let ticks = end - i128::from(*media_start);
+                let ticks = edits.last().map_or(end - i128::from(*media_start), |edit| {
+                    i128::from(edit.movie_end)
+                });
                 if ticks <= 0 {
                     return None;
                 }
@@ -467,9 +532,18 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 frame_start,
                 frames,
                 resync,
+                edits,
+                edit_index,
+                media_start,
+                media_end,
+                movie_start,
                 ..
             } => {
                 source.rewind();
+                *edit_index = 0;
+                *media_start = edits.first().map_or(0, |edit| edit.media_start);
+                *media_end = edits.first().map(|edit| edit.media_end);
+                *movie_start = 0;
                 *next_pts = 0;
                 *frame_start = 0;
                 *frames = 0;
@@ -539,6 +613,10 @@ impl<R: BufRead + Seek> NativeReader<R> {
         let Self::Avc {
             source,
             media_start,
+            media_end,
+            movie_start,
+            edits,
+            edit_index,
             resync,
             ..
         } = self
@@ -546,12 +624,35 @@ impl<R: BufRead + Seek> NativeReader<R> {
             return Err(invalid("seeking is only implemented for MP4 and Matroska"));
         };
         let timescale = source.track().timescale;
-        let ticks = i128::from(timescale) * target.as_nanos() as i128 / 1_000_000_000;
-        let ticks = i64::try_from(ticks)
-            .ok()
+        let nanos =
+            i128::try_from(target.as_nanos()).map_err(|_| invalid("seek target overflow"))?;
+        let ticks = i64::try_from(
+            i128::from(timescale)
+                .checked_mul(nanos)
+                .ok_or_else(|| invalid("seek target overflow"))?
+                / 1_000_000_000,
+        )
+        .map_err(|_| invalid("seek target overflow"))?;
+        let ticks = if let Some(last) = edits.last() {
+            ticks.min(last.movie_end - 1)
+        } else {
+            ticks
+        };
+        if !edits.is_empty() {
+            *edit_index = edits
+                .iter()
+                .position(|edit| edit.movie_end > ticks)
+                .unwrap_or(edits.len() - 1);
+            let edit = edits[*edit_index];
+            *media_start = edit.media_start;
+            *media_end = Some(edit.media_end);
+            *movie_start = edit.movie_start;
+        }
+        let media_ticks = ticks
+            .checked_sub(*movie_start)
             .and_then(|t| t.checked_add(*media_start))
             .ok_or_else(|| invalid("seek target overflow"))?;
-        source.seek_to_sync(ticks);
+        source.seek_to_sync(media_ticks);
         *resync = true;
         let result = (|| {
             let mut last = None;
@@ -560,15 +661,10 @@ impl<R: BufRead + Seek> NativeReader<R> {
                     return Ok(last);
                 };
                 last = Some(raw);
-                let Self::Avc {
-                    next_pts,
-                    media_start,
-                    ..
-                } = self
-                else {
+                let Self::Avc { next_pts, .. } = self else {
                     unreachable!()
                 };
-                if i128::from(*next_pts) + i128::from(*media_start) > i128::from(ticks) {
+                if *next_pts > ticks {
                     return Ok(last);
                 }
             }
@@ -654,6 +750,9 @@ impl<R: BufRead + Seek> NativeReader<R> {
             frames,
             media_start,
             media_end,
+            edits,
+            edit_index,
+            movie_start,
             resync,
             rotation,
             ..
@@ -661,14 +760,24 @@ impl<R: BufRead + Seek> NativeReader<R> {
         else {
             return Ok(None);
         };
-        if !*resync
-            && media_end.is_some_and(|end| {
-                i128::from(*next_pts) + i128::from(*media_start) >= i128::from(end)
-            })
-        {
-            return Ok(None);
-        }
         let frame = loop {
+            let finished = !*resync
+                && media_end.is_some_and(|end| {
+                    i128::from(*next_pts) - i128::from(*movie_start) + i128::from(*media_start)
+                        >= i128::from(end)
+                });
+            if finished {
+                if *edit_index + 1 >= edits.len() {
+                    return Ok(None);
+                }
+                *edit_index += 1;
+                let edit = edits[*edit_index];
+                *media_start = edit.media_start;
+                *media_end = Some(edit.media_end);
+                *movie_start = edit.movie_start;
+                source.seek_to_sync(edit.media_start);
+                *resync = true;
+            }
             let Some(mut frame) = source.read_frame()? else {
                 return Ok(None);
             };
@@ -680,12 +789,15 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 continue;
             }
             if media_end.is_some_and(|limit| begin >= limit) {
-                return Ok(None);
+                *next_pts = media_end.unwrap() - *media_start + *movie_start;
+                *resync = false;
+                continue;
             }
             let clipped_begin = begin.max(*media_start);
             let clipped_end = media_end.map_or(end, |limit| end.min(limit));
             frame.presentation_time.ticks = clipped_begin
                 .checked_sub(*media_start)
+                .and_then(|t| t.checked_add(*movie_start))
                 .ok_or_else(|| invalid("video edit timestamp overflow"))?;
             frame.duration.ticks = clipped_end
                 .checked_sub(clipped_begin)
@@ -1180,55 +1292,66 @@ fn rgb_from_planes<T: Copy + Into<f32> + Sync>(
     });
     Ok(())
 }
-/// A single rate-one edit can trim/offset the media timeline without changing
-/// the decode sequence. Empty edits and repeated ranges need a richer scheduler.
-fn playback_window(
+/// Map every rate-one media edit onto a continuous movie timeline. Leading
+/// empty edits retain the existing start-at-first-picture behavior; an empty
+/// edit inside playback still requires an explicit blank-frame policy.
+fn playback_edits(
     track: &crate::container::mp4::Track,
     movie_scale: u32,
-) -> Result<(i64, Option<i64>)> {
-    // Leading empty edits only delay the track's start; QuickTime writers
-    // emit them routinely. Playback starts at the first media edit instead.
+) -> Result<Vec<PlaybackEdit>> {
     let edits: Vec<_> = track
         .edits
         .iter()
         .skip_while(|edit| edit.media_time < 0)
         .collect();
     if edits.is_empty() {
-        return Ok((0, None));
+        return Ok(Vec::new());
     }
     if movie_scale == 0 {
         return Err(invalid("MP4 movie timescale is zero"));
     }
-    let ticks = |duration: u64| {
-        u128::from(duration) * u128::from(track.timescale) / u128::from(movie_scale)
-    };
-    // Back-to-back edits that continue the media timeline play as one window.
-    for pair in edits.windows(2) {
-        let expected = i128::from(pair[0].media_time) + ticks(pair[0].duration) as i128;
-        if pair[1].media_time < 0 || (i128::from(pair[1].media_time) - expected).abs() > 1 {
-            return Err(invalid(
-                "non-contiguous MP4 playback edits are not implemented",
-            ));
+    let mut timeline = 0u128;
+    let mut movie_start = 0i64;
+    let mut result = Vec::new();
+    for edit in edits {
+        if edit.media_time < 0 {
+            return Err(invalid("empty MP4 edit inside playback is not implemented"));
         }
-    }
-    let edit = crate::container::mp4::Edit {
-        duration: edits.iter().map(|edit| edit.duration).sum(),
-        media_time: edits[0].media_time,
-    };
-    let numerator = u128::from(edit.duration) * u128::from(track.timescale);
-    // The scheduler uses integral track ticks. Round the exclusive endpoint
-    // upward so a positive fractional interval retains its final sample.
-    // The extension is strictly less than one media tick, never a full frame.
-    let duration = i64::try_from(numerator.div_ceil(u128::from(movie_scale)))
+        timeline = timeline
+            .checked_add(u128::from(edit.duration))
+            .ok_or_else(|| invalid("MP4 edit duration overflow"))?;
+        let movie_end = i64::try_from(
+            (timeline * u128::from(track.timescale)).div_ceil(u128::from(movie_scale)),
+        )
         .map_err(|_| invalid("MP4 edit duration overflow"))?;
-    if duration <= 0 {
-        return Err(invalid("empty MP4 playback edit"));
+        let duration = movie_end - movie_start;
+        if duration <= 0 {
+            return Err(invalid("empty MP4 playback edit"));
+        }
+        let media_end = edit
+            .media_time
+            .checked_add(duration)
+            .ok_or_else(|| invalid("MP4 edit endpoint overflow"))?;
+        result.push(PlaybackEdit {
+            media_start: edit.media_time,
+            media_end,
+            movie_start,
+            movie_end,
+        });
+        movie_start = movie_end;
     }
-    let end = edit
-        .media_time
-        .checked_add(duration)
-        .ok_or_else(|| invalid("MP4 edit endpoint overflow"))?;
-    Ok((edit.media_time, Some(end)))
+    Ok(result)
+}
+
+#[cfg(test)]
+fn playback_window(
+    track: &crate::container::mp4::Track,
+    movie_scale: u32,
+) -> Result<(i64, Option<i64>)> {
+    let edits = playback_edits(track, movie_scale)?;
+    Ok(edits.first().map_or((0, None), |first| {
+        (first.media_start, edits.last().map(|last| last.media_end))
+    }))
 }
 
 #[cfg(test)]
@@ -1373,7 +1496,9 @@ mod tests {
         assert!(playback_window(&track, 1000).is_err());
         track.edits[0].media_time = 0;
         track.edits.push(track.edits[0].clone());
-        assert!(playback_window(&track, 1000).is_err());
+        let edits = playback_edits(&track, 1000).unwrap();
+        assert_eq!(edits.len(), 2);
+        assert_eq!(edits[1].movie_start, edits[0].movie_end);
     }
     #[test]
     fn format_detection_handles_small_buffers_and_y4m_rewind() {

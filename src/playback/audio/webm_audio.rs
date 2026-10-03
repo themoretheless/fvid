@@ -14,7 +14,8 @@ const TIMESCALE_NS: u32 = 1_000_000_000;
 /// `A_PCM/*` IDs are uncompressed audio, whose width the track states in
 /// `BitDepth`. `A_AAC` is spelled `mp4a` by the decoder dispatch, whichever
 /// container named it, and needs its setup block rebuilt (see `aac_setup`).
-const CODECS: [&str; 10] = [
+const CODECS: [&str; 11] = [
+    "A_OPUS",
     "A_VORBIS",
     "A_MPEG/L3",
     "A_MPEG/L2",
@@ -34,6 +35,13 @@ const CODECS: [&str; 10] = [
 /// frames and want nothing.
 fn setup_data(track: &Track) -> Result<Vec<u8>> {
     match track.codec.as_str() {
+        "A_OPUS" => {
+            let channels = crate::codec::opus_decoder::header(&track.codec_private)?.channel_count;
+            if track.channels != u64::from(channels) {
+                return Err(invalid("Opus header disagrees with Matroska channels"));
+            }
+            Ok(track.codec_private.clone())
+        }
         "A_VORBIS" => vorbis_setup_headers(&track.codec_private),
         "A_FLAC" => Ok(flac_stream_info(&track.codec_private)),
         "A_ALAC" => Ok(track.codec_private.clone()),
@@ -93,6 +101,11 @@ pub struct WebmAudioReader<R> {
     /// The name the decoder dispatch answers: the container's own tag for every
     /// coding but AAC, which dispatches as `mp4a` whichever container named it.
     codec_tag: String,
+    discard_padding_ns: i64,
+    opus_end_ns: Option<u64>,
+    opus_next_pts: Option<i64>,
+    opus_samples_seen: u64,
+    opus_packet_preskip: usize,
 }
 
 impl<R: Read + Seek> WebmAudioReader<R> {
@@ -160,6 +173,11 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             presentation_floor: None,
             extra_data,
             codec_tag,
+            discard_padding_ns: 0,
+            opus_end_ns: None,
+            opus_next_pts: None,
+            opus_samples_seen: 0,
+            opus_packet_preskip: 0,
         })
     }
 
@@ -180,6 +198,24 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             }
 
             let data = self.demuxer.read_packet(idx)?;
+            self.discard_padding_ns = self.demuxer.packets[idx].discard_padding_ns;
+            let pts_ns = if self.codec_tag == "A_OPUS" {
+                let delay_ns = if self.track().codec_delay_ns != 0 {
+                    self.track().codec_delay_ns
+                } else {
+                    u64::from(
+                        crate::codec::opus_decoder::header(&self.track().codec_private)?.pre_skip,
+                    ) * 1_000_000_000
+                        / 48000
+                };
+                let delay =
+                    i64::try_from(delay_ns).map_err(|_| invalid("Opus codec delay overflow"))?;
+                pts_ns
+                    .checked_sub(delay)
+                    .ok_or_else(|| invalid("Opus timestamp overflow"))?
+            } else {
+                pts_ns
+            };
 
             return Ok(Some(AudioPacket {
                 data,
@@ -203,6 +239,9 @@ impl<R: Read + Seek> WebmAudioReader<R> {
     pub fn rewind(&mut self) {
         self.packet_index = 0;
         self.presentation_floor = None;
+        self.opus_next_pts = None;
+        self.opus_samples_seen = 0;
+        self.opus_packet_preskip = 0;
     }
 
     /// Seek to the packet with the greatest PTS at or before `pts_ns`.
@@ -491,23 +530,28 @@ mod tests {
         assert!((0.28..=0.30).contains(&peak), "peak={peak}");
     }
 
-    /// A track in a coding with no decoder is left out of the list entirely, so the
-    /// keys the player is handed count only what it can actually play:
-    /// ffmpeg -f lavfi -i 'aevalsrc=0.3*sin(880*PI*t)|0.3*sin(880*PI*t):d=0.25:s=44100' \
-    ///   -vn -map 0:a -c:a:0 libopus -b:a:0 32k -map 0:a -c:a:1 flac \
-    ///   tests/fixtures/audio/opus-flac.mkv
-    /// Opus is the file's first track and absent from the list, so the one track
-    /// there is to choose is numbered zero.
+    /// Both Opus and FLAC are now offered in container order.
     #[test]
-    fn the_track_list_skips_a_codec_there_is_no_decoder_for() {
+    fn the_track_list_includes_opus_alongside_flac() {
         const FIXTURE: &[u8] = include_bytes!("../../../tests/fixtures/audio/opus-flac.mkv");
-        let stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default())
-            .expect("fixture has audio tracks");
-        assert_eq!(stream.audio_tracks().len(), 1, "the Opus track is not offered");
-        let chosen = WebmAudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 0)
-            .unwrap_or_else(|error| panic!("track 0: {error}"));
+        let stream = WebmAudioReader::open(Cursor::new(FIXTURE), Limits::default()).unwrap();
+        assert_eq!(stream.audio_tracks().len(), 2);
+        assert_eq!(stream.codec(), "A_OPUS");
+        assert_eq!((stream.sample_rate(), stream.channels()), (48000, 2));
+        let chosen = WebmAudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 1).unwrap();
         assert_eq!(chosen.codec(), "A_FLAC");
-        assert!(WebmAudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 1).is_err());
+        assert_eq!((chosen.sample_rate(), chosen.channels()), (44100, 2));
+        assert!(WebmAudioReader::open_at(Cursor::new(FIXTURE), Limits::default(), 2).is_err());
+    }
+
+    #[test]
+    fn the_track_list_still_skips_unknown_audio() {
+        let mut bytes = include_bytes!("../../../tests/fixtures/audio/opus-flac.mkv").to_vec();
+        let at = bytes.windows(6).position(|p| p == b"A_OPUS").unwrap();
+        bytes[at..at + 6].copy_from_slice(b"A_NOPE");
+        let stream = WebmAudioReader::open(Cursor::new(bytes), Limits::default()).unwrap();
+        assert_eq!(stream.audio_tracks().len(), 1);
+        assert_eq!(stream.codec(), "A_FLAC");
     }
 
     /// Three audio tracks from one source, every one of them decodable:
@@ -731,13 +775,23 @@ mod tests {
 }
 
 impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
-    fn preroll_target(&self)->Option<i64> {
-        (self.codec_tag=="mp4a").then(||self.presentation_floor.unwrap_or(0))
+    fn preroll_target(&self) -> Option<i64> {
+        (self.codec_tag == "mp4a").then(|| self.presentation_floor.unwrap_or(0))
     }
-    fn resume_preroll(&mut self,pts:i64)->bool {
-        if self.preroll_target().is_none_or(|target|pts>target) {return false;}
-        let Some(index)=self.demuxer.packets.iter().position(|p|p.track==self.track_number && p.pts_ns==pts) else {return false;};
-        self.packet_index=index;true
+    fn resume_preroll(&mut self, pts: i64) -> bool {
+        if self.preroll_target().is_none_or(|target| pts > target) {
+            return false;
+        }
+        let Some(index) = self
+            .demuxer
+            .packets
+            .iter()
+            .position(|p| p.track == self.track_number && p.pts_ns == pts)
+        else {
+            return false;
+        };
+        self.packet_index = index;
+        true
     }
 
     fn codec(&self) -> &str {
@@ -749,7 +803,11 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     }
 
     fn sample_rate(&self) -> u32 {
-        self.track().sample_rate as u32
+        if self.codec_tag == "A_OPUS" {
+            48000
+        } else {
+            self.track().sample_rate as u32
+        }
     }
 
     fn channels(&self) -> u16 {
@@ -761,6 +819,11 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     /// where the writer declared one. A lone block states nothing about its
     /// length, so the total stays unknown rather than guessed.
     fn duration(&self) -> Option<std::time::Duration> {
+        if self.codec_tag == "A_OPUS" && self.demuxer.fully_indexed() {
+            if let Some(end) = self.opus_end_ns {
+                return Some(std::time::Duration::from_nanos(end));
+            }
+        }
         // Blocks are indexed a cluster at a time, so an index that has not met
         // the file's tail has no last block to measure against. What the muxer
         // stated for the whole item is the only answer such an index can give,
@@ -817,7 +880,11 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
                     .find(|t| t.number == number)
                     .expect("supported lists existing tracks");
                 crate::audio::AudioTrack {
-                    sample_rate: track.sample_rate as u32,
+                    sample_rate: if track.codec == "A_OPUS" {
+                        48000
+                    } else {
+                        track.sample_rate as u32
+                    },
                     channels: track.channels as u16,
                     name: track.name.clone(),
                     language: track.language.clone(),
@@ -827,10 +894,59 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     }
 
     fn next_packet(&mut self) -> Result<Option<EncodedPacket>> {
-        Ok(WebmAudioReader::read_packet(self)?.map(|p| EncodedPacket {
+        let Some(mut p) = WebmAudioReader::read_packet(self)? else {
+            return Ok(None);
+        };
+        let duration = if self.codec_tag == "A_OPUS" {
+            let duration = crate::codec::opus_decoder::duration_ns(&p.data)?;
+            let samples = duration * 48000 / 1_000_000_000;
+            let preskip = u64::from(
+                crate::codec::opus_decoder::header(&self.track().codec_private)?.pre_skip,
+            );
+            self.opus_packet_preskip =
+                preskip.saturating_sub(self.opus_samples_seen).min(samples) as usize;
+            self.opus_samples_seen = self
+                .opus_samples_seen
+                .checked_add(samples)
+                .ok_or_else(|| invalid("Opus sample counter overflow"))?;
+            if self.opus_next_pts.is_none() && p.pts_ns >= 0 {
+                // Some muxers timestamp the first *presented* sample rather
+                // than encoder preroll. Reconstruct the decoded packet's start
+                // before trimming that preroll, including tick rounding at zero.
+                if p.pts_ns as u64 <= self.demuxer.timestamp_scale_ns() {
+                    p.pts_ns = 0;
+                }
+                p.pts_ns = p
+                    .pts_ns
+                    .checked_sub((preskip * 1_000_000_000 / 48000) as i64)
+                    .ok_or_else(|| invalid("Opus priming clock overflow"))?;
+            }
+            // Segment ticks quantize packet PTS (usually to milliseconds), while
+            // Opus gives exact sample durations. Keep consecutive packets on
+            // that sample clock; retain actual gaps larger than one segment tick.
+            if let Some(next) = self.opus_next_pts {
+                if p.pts_ns.abs_diff(next) <= self.demuxer.timestamp_scale_ns() {
+                    p.pts_ns = next;
+                }
+            }
+            self.opus_next_pts = Some(
+                p.pts_ns
+                    .checked_add(duration as i64)
+                    .ok_or_else(|| invalid("Opus packet clock overflow"))?,
+            );
+            let end = i128::from(p.pts_ns) + i128::from(duration)
+                - i128::from(self.discard_padding_ns.max(0));
+            self.opus_end_ns = Some(
+                u64::try_from(end.max(0)).map_err(|_| invalid("Opus presentation end overflow"))?,
+            );
+            duration as i64
+        } else {
+            0
+        };
+        Ok(Some(EncodedPacket {
             data: p.data,
             pts: p.pts_ns,
-            duration: 0,
+            duration,
         }))
     }
 
@@ -839,6 +955,13 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
+        if self.codec_tag == "A_OPUS" {
+            // Rebuild decoder history from the stream's beginning so even a
+            // short or mode-switching track seeks to the same PCM as playback.
+            self.rewind();
+            self.presentation_floor = Some(pts.max(0));
+            return pts.max(0);
+        }
         let landed = WebmAudioReader::seek(self, pts);
         if self.codec_tag == "mp4a" {
             self.rewind();
@@ -847,9 +970,58 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
         landed
     }
 
-    fn present_decoded(&self, mut packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
+    fn present_decoded(
+        &self,
+        mut packet: crate::audio::AudioPacket,
+        source_pts: i64,
+    ) -> Result<Option<crate::audio::AudioPacket>> {
+        if self.codec_tag == "A_OPUS" {
+            let stride = usize::from(self.channels()) * 4;
+            if stride == 0 || !packet.data.len().is_multiple_of(stride) {
+                return Err(invalid("invalid Opus PCM stride"));
+            }
+            let frames = packet.data.len() / stride;
+            let padding = (u128::from(self.discard_padding_ns.unsigned_abs()) * 48000)
+                .div_ceil(1_000_000_000);
+            let padding =
+                usize::try_from(padding).map_err(|_| invalid("Opus discard padding overflow"))?;
+            if padding > frames {
+                return Err(invalid("Opus discard padding exceeds decoded packet"));
+            }
+            let floor = self.presentation_floor.unwrap_or(0).max(0);
+            let skip = (i128::from(floor) - i128::from(source_pts)).max(0) as u128;
+            let skip = (skip * 48000).div_ceil(1_000_000_000).min(frames as u128) as usize;
+            let first = skip
+                .max(self.opus_packet_preskip)
+                .max(if self.discard_padding_ns < 0 {
+                    padding
+                } else {
+                    0
+                });
+            let last = frames
+                - if self.discard_padding_ns > 0 {
+                    padding
+                } else {
+                    0
+                };
+            if first >= last {
+                return Ok(None);
+            }
+            packet.data.copy_within(first * stride..last * stride, 0);
+            packet.data.truncate((last - first) * stride);
+            let at = i128::from(source_pts) + (first as i128 * 1_000_000_000 / 48000);
+            packet.pts =
+                u64::try_from(at).map_err(|_| invalid("negative Opus presentation time"))?;
+            packet.timebase_num = 1;
+            packet.timebase_den = TIMESCALE_NS;
+        }
         if self.codec_tag == "mp4a" {
-            if self.presentation_floor.is_some_and(|floor| source_pts < floor) { return Ok(None); }
+            if self
+                .presentation_floor
+                .is_some_and(|floor| source_pts < floor)
+            {
+                return Ok(None);
+            }
             // AAC decoder timestamps use a sample clock; Matroska supplies ns.
             packet.pts = source_pts.max(0) as u64;
             packet.timebase_num = 1;

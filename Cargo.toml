@@ -15,7 +15,7 @@ unsafe_code = "forbid"
 
 [features]
 default = ["gpu", "cuda"]
-player = ["dep:pollster", "dep:naga", "dep:eframe", "dep:rfd", "dep:fvid-platform", "dep:cpal", "dep:symphonia", "videotoolbox", "fvid-vt?/metal", "fvid-media/player"]
+player = ["dep:fvid-opus", "dep:pollster", "dep:naga", "dep:eframe", "dep:rfd", "dep:fvid-platform", "dep:cpal", "dep:symphonia", "videotoolbox", "fvid-vt?/metal", "fvid-media/player"]
 # Hardware decode and H.264/HEVC encode through VideoToolbox; a no-op off macOS.
 videotoolbox = ["dep:fvid-vt"]
 cuda = ["dep:fvid-cuda"]
@@ -31,6 +31,7 @@ angle = ["gpu", "wgpu/angle"]
 vulkan-portability = ["gpu", "wgpu/vulkan-portability"]
 
 [dependencies]
+fvid-opus = { path = "crates/fvid-opus", optional = true }
 fvid-media-info = { path = "crates/fvid-media-info" }
 fvid-control = { path = "crates/fvid-control" }
 fvid-platform = { path = "crates/fvid-platform", optional = true }

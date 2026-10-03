@@ -114,7 +114,7 @@ pub mod owned_morphology;
 pub mod owned_overlay;
 pub mod owned_xfade;
 #[cfg(not(feature = "legacy-ffmpeg"))]
-pub use owned_xfade::xfade_video;
+pub use owned_xfade::{plan_xfade, xfade_video};
 mod owned_y4m_overlay;
 
 pub mod owned_ffv1_encoder;

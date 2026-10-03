@@ -31,6 +31,67 @@ fn valid_track_key(key: &str) -> bool {
             "rotate" | "stereo_mode" | "alpha_mode"
         )
 }
+pub fn plan_xfade(
+    main: &std::path::Path,
+    other: &std::path::Path,
+    transition: &str,
+    duration_us: i64,
+    offset_us: i64,
+    options: &fvid_control::CopyOptions,
+) -> Result<fvid_media_info::MediaPlan, String> {
+    use fvid_media_info::{MediaPlan, PlanStep, PlanStream};
+    if transition != "fade" || !default_policy(options) {
+        return Err("cross-fade plan is not supported by the owned backend".into());
+    }
+    FadeTimeline::new(offset_us, duration_us)?;
+    let mut primary =
+        std::io::BufReader::new(std::fs::File::open(main).map_err(|e| e.to_string())?);
+    let mut bytes = Vec::new();
+    if !line(&mut primary, &mut bytes)? {
+        return Err("empty cross-fade primary source".into());
+    }
+    let header = Header::parse(&bytes)?;
+    let secondary = SecondaryReader::new(
+        std::io::BufReader::new(std::fs::File::open(other).map_err(|e| e.to_string())?),
+        &header,
+    )?;
+    if header.frame_rate()? != secondary.header.frame_rate()? {
+        return Err("cross-fade inputs require matching frame rates".into());
+    }
+    crate::owned_lossless::metadata(options)?;
+    Ok(MediaPlan {
+        command: "xfade".into(),
+        input: main.into(),
+        inputs: vec![main.into(), other.into()],
+        streams: vec![PlanStream {
+            index: 0,
+            media_type: "video".into(),
+            codec: "rawvideo".into(),
+            disposition: "default".into(),
+        }],
+        steps: vec![
+            PlanStep {
+                action: "decode".into(),
+                detail: "read two Y4M streams with owned parsers".into(),
+            },
+            PlanStep {
+                action: "materialize".into(),
+                detail: format!(
+                    "owned fade offset_us={offset_us} duration_us={duration_us}, followed by secondary tail"
+                ),
+            },
+            PlanStep {
+                action: "encode".into(),
+                detail: "owned FFV1 version 1 and Matroska writer".into(),
+            },
+        ],
+        graph: None,
+        notes: vec![
+            "no FFmpeg or libav execution".into(),
+            "partial outputs are not published on failure".into(),
+        ],
+    })
+}
 pub fn try_xfade_video(
     source: &std::path::Path,
     other: &std::path::Path,
@@ -599,6 +660,10 @@ mod tests {
         .concat();
         std::fs::write(&main, &source).unwrap();
         std::fs::write(&other, &source).unwrap();
+        let plan = plan_xfade(&main, &other, "fade", 500000, 0, &Default::default()).unwrap();
+        assert_eq!(plan.inputs, [main.clone(), other.clone()]);
+        assert!(plan.steps[2].detail.contains("owned FFV1"));
+        assert!(!output.exists());
         let successful_events = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
         let observed = successful_events.clone();
         let published = output.clone();

@@ -1,5 +1,5 @@
 //! Decode a file's audio track and report what the playback pipeline sees.
-//! Usage: audio_probe [--play] [--pcm FILE] INPUT
+//! Usage: audio_probe [--play] [--pcm FILE] [--packets COUNT] INPUT
 //!
 //! `--pcm` appends the decoded interleaved f32 bytes to FILE, which is how a
 //! decoder's output gets compared byte for byte with a reference renderer of the
@@ -69,9 +69,48 @@ fn play_through_device(path: &str) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-/// Decode every packet and report the counts, without a device in the loop.
-fn probe(path: &str, pcm_to: Option<&str>) -> Result<(), Box<dyn std::error::Error>> {
-    let (found, refused) = harness::open_stream_reason(path);
+/// Decode the requested packet prefix and validate presented PCM without a device.
+fn probe(
+    path: &str,
+    pcm_to: Option<&str>,
+    packet_limit: usize,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let (found, refused): (Option<Box<dyn fvid::audio::AudioStream>>, Option<String>) =
+        if std::path::Path::new(path)
+            .extension()
+            .and_then(|s| s.to_str())
+            .is_some_and(|s| {
+                ["mp4", "mov", "m4a"]
+                    .iter()
+                    .any(|e| s.eq_ignore_ascii_case(e))
+            })
+        {
+            (
+                Some(Box::new(fvid::playback_mp4_audio::Mp4AudioReader::open(
+                    std::io::BufReader::new(File::open(path)?),
+                    fvid::container::mp4::Limits::default(),
+                )?)),
+                None,
+            )
+        } else if std::path::Path::new(path)
+            .extension()
+            .and_then(|s| s.to_str())
+            .is_some_and(|s| {
+                ["webm", "mkv", "mka"]
+                    .iter()
+                    .any(|e| s.eq_ignore_ascii_case(e))
+            })
+        {
+            (
+                Some(Box::new(fvid::playback_webm_audio::WebmAudioReader::open(
+                    std::io::BufReader::new(File::open(path)?),
+                    fvid::container::webm::Limits::default(),
+                )?)),
+                None,
+            )
+        } else {
+            harness::open_stream_reason(path)
+        };
     let Some(mut stream) = found else {
         // Which half of the pipeline is missing is the answer, not that one of them
         // is: a container no reader opens and a container whose coding has no arm
@@ -120,7 +159,7 @@ fn probe(path: &str, pcm_to: Option<&str>) -> Result<(), Box<dyn std::error::Err
         let at = stream.time_of(packet.pts);
         first = first.or(Some(at));
         last = Some(at);
-        let Some(pcm) = decoder.decode_encoded(
+        let Some(mut pcm) = decoder.decode_encoded(
             &packet.data,
             packet.pts.max(0) as u64,
             packet.duration.max(0) as u64,
@@ -128,14 +167,43 @@ fn probe(path: &str, pcm_to: Option<&str>) -> Result<(), Box<dyn std::error::Err
         else {
             continue;
         };
+        if let Some(limit) = stream.packet_sample_limit(packet.duration.max(0) as u64)? {
+            let bytes = limit
+                .checked_mul(channels as usize)
+                .and_then(|n| n.checked_mul(4))
+                .ok_or("audio sample window overflow")?;
+            if bytes > pcm.data.len() {
+                return Err("audio presentation window exceeds decoded PCM".into());
+            }
+            pcm.data.truncate(bytes);
+        }
+        let Some(pcm) = stream.present_decoded(pcm, packet.pts)? else {
+            continue;
+        };
+        if channels == 0 || !pcm.data.len().is_multiple_of(channels as usize * 4) {
+            return Err("invalid PCM geometry".into());
+        }
+        if pcm
+            .data
+            .chunks_exact(4)
+            .any(|s| !f32::from_le_bytes(s.try_into().unwrap()).is_finite())
+        {
+            return Err("non-finite PCM sample".into());
+        }
         decoded += 1;
         frames += (pcm.data.len() as u64 / 4) / channels;
         if let Some(file) = &mut dump {
             file.write_all(&pcm.data)?;
         }
+        if encoded >= packet_limit {
+            break;
+        }
     }
 
     let seconds = frames as f64 / f64::from(sample_rate);
+    if frames == 0 {
+        return Err("no presented audio samples".into());
+    }
     println!("codec={codec} rate={sample_rate} channels={channels}");
     println!("packets={encoded} decoded={decoded} frames={frames}");
     // What the container's own stamps add up to, beside what the decoder handed
@@ -152,21 +220,41 @@ fn probe(path: &str, pcm_to: Option<&str>) -> Result<(), Box<dyn std::error::Err
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut play = false;
+    let mut check_device = false;
     let mut pcm = None;
     let mut path = None;
+    let mut packet_limit = usize::MAX;
     let mut args = std::env::args().skip(1);
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "--play" => play = true,
+            "--check-device" => check_device = true,
             "--pcm" => pcm = Some(args.next().ok_or("--pcm needs a path")?),
+            "--packets" => packet_limit = args.next().ok_or("--packets needs a count")?.parse()?,
             _ if path.is_none() => path = Some(arg),
             other => return Err(format!("unexpected argument: {other}").into()),
         }
     }
-    let path = path.ok_or("usage: audio_probe [--play] [--pcm FILE] INPUT")?;
-    if play {
+    let path = path.ok_or("usage: audio_probe [--play] [--pcm FILE] [--packets COUNT] INPUT")?;
+    if check_device {
+        use fvid::audio::AudioBackend;
+        let stream = harness::open_stream(&path).ok_or("no decodable audio track")?;
+        let mut backend = fvid::audio::PlatformBackend::new();
+        backend.start(fvid::audio::AudioSpec {
+            sample_rate: stream.sample_rate(),
+            channels: stream.channels(),
+            format: fvid::audio::SampleFormat::F32,
+        })?;
+        backend.stop()?;
+        println!(
+            "device=ready source_channels={} rate={} no PCM sent",
+            stream.channels(),
+            stream.sample_rate()
+        );
+        Ok(())
+    } else if play {
         play_through_device(&path)
     } else {
-        probe(&path, pcm.as_deref())
+        probe(&path, pcm.as_deref(), packet_limit)
     }
 }

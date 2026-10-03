@@ -20,6 +20,7 @@ pub fn inventory() -> Capabilities {
             "ffv1",
             "h264",
             "hevc",
+            "opus",
             "vp9",
             "subrip",
             "pcm_u8",
