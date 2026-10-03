@@ -17,13 +17,14 @@ pub(crate) fn recognizes(source: &Path) -> Result<bool> {
 }
 fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, String)> {
     if options.streams.len() > 1
-        || options.max_controlled_bytes.is_some()
         || !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty()
         || !options.stream_metadata_set.is_empty()
         || !options.stream_metadata_delete.is_empty()
     {
-        return Err("owned container loudness requires one audio stream, no metadata edits and no aggregate admission policy".into());
+        return Err(
+            "owned container loudness requires one audio stream and no metadata edits".into(),
+        );
     }
     if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
         return Err("media operation cancelled".into());
@@ -34,6 +35,11 @@ fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, Stri
     }
     let (_, rate, channels, mask, codec) =
         if crate::owned_mp4_audio_export::recognizes(source, options)? {
+            if options.max_controlled_bytes.is_some() {
+                return Err(
+                    "MP4 audio aggregate allocation admission is not yet implemented".into(),
+                );
+            }
             crate::owned_mp4_audio_export::descriptor(source, options)?
         } else {
             let (index, rate, channels, mask, codec, _) =
@@ -50,16 +56,21 @@ fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, Stri
     Ok((rate, channels, mask, codec))
 }
 pub(crate) fn supports_plan(source: &Path, options: &CopyOptions) -> bool {
-    geometry(source, options).is_ok()
+    match geometry(source, options) {
+        Ok(_) => true,
+        Err(error) => error.starts_with("controlled memory budget exceeded:"),
+    }
 }
 pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
-    geometry(source, options).is_ok()
-        && crate::owned_audio_export::supports(
+    match geometry(source, options) {
+        Ok(_) => crate::owned_audio_export::supports(
             source,
             Path::new("owned.wav"),
             Default::default(),
             options,
-        )
+        ),
+        Err(error) => error.starts_with("controlled memory budget exceeded:"),
+    }
 }
 pub(crate) fn decode_to_wave(
     source: &Path,
@@ -121,4 +132,65 @@ pub fn plan_loudness(source: &Path, options: &CopyOptions) -> Result<MediaPlan> 
     plan.steps.push(PlanStep { action:"analyze".into(),detail:"owned streaming K-weighting, integrated gates, LRA and true-peak FIR; no published output".into() });
     plan.notes.push("private decoded WAVE is removed on success or failure; completion is emitted once after analysis".into());
     Ok(plan)
+}
+
+#[cfg(test)]
+mod admission_tests {
+    use super::*;
+    #[test]
+    fn matroska_aac_loudness_and_normalization_keep_owned_budget_policy() {
+        let source =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/audio/aac-stereo.mka");
+        let small = CopyOptions {
+            max_controlled_bytes: Some(1),
+            ..Default::default()
+        };
+        let admitted = CopyOptions {
+            max_controlled_bytes: Some(32 * 1024 * 1024),
+            ..Default::default()
+        };
+        assert!(supports(&source, &small));
+        assert!(supports_plan(&source, &small));
+        assert!(
+            crate::measure_loudness(&source, &small)
+                .unwrap_err()
+                .contains("controlled memory budget exceeded")
+        );
+        let expected = crate::measure_loudness(&source, &Default::default()).unwrap();
+        let actual = crate::measure_loudness(&source, &admitted).unwrap();
+        assert_eq!(
+            serde_json::to_value(actual).unwrap(),
+            serde_json::to_value(expected).unwrap()
+        );
+        crate::plan_loudness(&source, &admitted).unwrap();
+        for dual in [false, true] {
+            let output = std::env::temp_dir().join(format!(
+                "fvid-matroska-loudnorm-budget-{dual}-{}.wav",
+                std::process::id()
+            ));
+            let _ = std::fs::remove_file(&output);
+            assert!(crate::owned_container_loudnorm::supports(
+                &source, &output, None, &small
+            ));
+            let apply = |options: &CopyOptions| {
+                if dual {
+                    crate::apply_loudnorm_dual(&source, &output, None, options)
+                } else {
+                    crate::apply_loudnorm(&source, &output, None, options)
+                }
+            };
+            assert!(
+                apply(&small)
+                    .unwrap_err()
+                    .contains("controlled memory budget exceeded")
+            );
+            assert!(!output.exists());
+            apply(&admitted).unwrap();
+            let bytes = std::fs::read(&output).unwrap();
+            std::fs::remove_file(&output).unwrap();
+            apply(&CopyOptions::default()).unwrap();
+            assert_eq!(std::fs::read(&output).unwrap(), bytes);
+            std::fs::remove_file(&output).unwrap();
+        }
+    }
 }
