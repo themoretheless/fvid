@@ -153,7 +153,7 @@ pub fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) -> bool {
     {
         return false;
     }
-    policy(o, false)
+    policy(o, true) && metadata(o).is_ok()
         && request(t).is_some_and(|r| crate::owned_y4m_decode::supports_transformed(source, &r))
 }
 pub fn transcode_lossless(
@@ -190,7 +190,7 @@ pub fn transcode_lossless(
         });
     }
     let file_metadata = metadata(options)?;
-    if !policy(options, false) {
+    if !policy(options, true) {
         return Err("owned Y4M lossless export does not yet implement requested policy".into());
     }
     if let Some((from, to)) = request.interval {
@@ -222,6 +222,7 @@ pub fn transcode_lossless(
         options.max_packets,
         true,
         &file_metadata,
+        Some(options),
     )
     .map_err(|e| e.to_string())?;
     Ok(LosslessStats {

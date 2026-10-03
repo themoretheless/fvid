@@ -126,7 +126,7 @@ fn export_chapters(
         })
         .collect()
 }
-fn edit_track_description(
+pub(crate) fn edit_track_description(
     description: &mut mkv::VideoTrackDescription,
     key: &str,
     value: &str,

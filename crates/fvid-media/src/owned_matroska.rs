@@ -366,6 +366,7 @@ pub fn write_y4m_ffv1_controlled<W: Write + Seek>(
         None,
         false,
         &FileMetadata::default(),
+        None,
     )
     .map(|(stats, event, _)| (stats, event))
 }
@@ -400,6 +401,7 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
     max_packets: Option<u64>,
     rebase_interval: bool,
     file_metadata: &FileMetadata,
+    track_options: Option<&fvid_control::CopyOptions>,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent, u64)> {
     check(cancel)?;
     let mut output = Some(output);
@@ -417,8 +419,18 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
                 let width = u32::try_from(header.width).map_err(|_| "Matroska width overflow")?;
                 let height =
                     u32::try_from(header.height).map_err(|_| "Matroska height overflow")?;
+                let mut description = VideoTrackDescription { name: String::new(), language: "und".into(), legacy_language: "und".into(), disposition: 1 };
+                let mut track_tags = std::collections::BTreeMap::new();
+                if let Some(options) = track_options {
+                    for (_, key, value) in &options.stream_metadata_set {
+                        track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+                        if !crate::owned_ffv1_export::edit_track_description(&mut description, key, value) && !value.is_empty() {
+                            track_tags.insert(key.to_ascii_uppercase(), value.clone());
+                        }
+                    }
+                }
                 writer = Some(
-                    PacketWriter::new_ffv1_with_file_metadata(
+                    PacketWriter::new_ffv1_described(
                         output.take().unwrap(),
                         width,
                         height,
@@ -435,6 +447,9 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
                         0,
                         0,
                         file_metadata,
+                        &Default::default(),
+                        &track_tags,
+                        track_options.filter(|options| !options.stream_metadata_set.is_empty()).map(|_| &description),
                     )
                     .map_err(|e| e.to_string())?,
                 );
@@ -509,6 +524,7 @@ pub fn export_y4m_ffv1(
         None,
         false,
         &FileMetadata::default(),
+        None,
     )
     .map(|(stats, event, _)| (stats, event))
 }
@@ -522,12 +538,13 @@ pub(crate) fn export_y4m_ffv1_policy(
     max_packets: Option<u64>,
     rebase_interval: bool,
     file_metadata: &FileMetadata,
+    track_options: Option<&fvid_control::CopyOptions>,
 ) -> Result<(fvid_media_info::DecodeStats, ProgressEvent, u64)> {
     let input = std::io::BufReader::new(std::fs::File::open(source)?);
     export_atomic(destination, cancel, progress, |file| {
         write_y4m_ffv1_policy(
             input, file, transform, cancel, progress, max_packet_bytes,
-            max_packets, rebase_interval, file_metadata,
+            max_packets, rebase_interval, file_metadata, track_options,
         )
     })
 }
