@@ -39,7 +39,17 @@ fn tags(tags: &crate::owned_file_tags::FileTags) -> BTreeMap<String, String> {
     .collect()
 }
 
+fn mp4_unrepresented_error(error: &crate::owned_mp4::Error) -> bool {
+    error.is_unsupported()
+}
 include!("owned_mp4_probe_impl.rs");
 pub fn probe_mp4(path: &Path) -> Result<MediaInfo> {
     mp4(path)
+}
+
+/// Describe represented MP4/MOV tracks. `None` means the valid container
+/// includes a sample entry this parser cannot yet describe; malformed input
+/// returns an error and must not trigger another parser.
+pub fn try_probe_mp4(path: &Path) -> Result<Option<MediaInfo>> {
+    try_mp4(path)
 }

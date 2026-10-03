@@ -13,11 +13,11 @@ pub fn probe(path: &Path) -> Result<MediaInfo, String> {
     probe_as(path, None)
 }
 
-/// Inspect owned RIFF/WAVE PCM, AAC-LC ADTS or Y4M, optionally requiring a format.
+/// Inspect owned MP4/MOV, Matroska/WebM, RIFF/WAVE PCM, AAC-LC ADTS or Y4M.
 /// Format hints never override the signature or bypass container validation.
 pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> {
     match format {
-        Some("mov" | "mp4" | "m4a") => return crate::owned_mp4_probe::probe_mp4(path),
+        Some("mov" | "mp4" | "m4a" | "3gp" | "3g2" | "mj2" | "mov,mp4,m4a,3gp,3g2,mj2") => return crate::owned_mp4_probe::probe_mp4(path),
         Some("webm" | "matroska") => return crate::owned_webm_probe::probe_webm(path),
         Some("wav") => return probe_wave(path).map_err(|e| e.to_string()),
         Some("aac") => return probe_adts(path),
@@ -47,6 +47,30 @@ pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> 
         }
         Err(error) => Err(error.to_string()),
     }
+}
+
+/// Select owned MP4 inspection before the remaining legacy container paths.
+/// A hint selects the parser even for malformed input; without a hint the
+/// opening atom selects it. Explicit hints for other formats are preserved.
+pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    if let Some(hint) = format {
+        if !matches!(
+            hint,
+            "mov" | "mp4" | "m4a" | "3gp" | "3g2" | "mj2" | "mov,mp4,m4a,3gp,3g2,mj2"
+        ) {
+            return Ok(None);
+        }
+    } else {
+        let mut prefix = [0; 8];
+        let mut file = File::open(path).map_err(|e| e.to_string())?;
+        match file.read_exact(&mut prefix) {
+            Ok(()) if crate::owned_mp4::recognizes_prefix(&prefix) => {}
+            Ok(()) => return Ok(None),
+            Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
+            Err(e) => return Err(e.to_string()),
+        }
+    }
+    crate::owned_mp4_probe::try_probe_mp4(path)
 }
 
 /// Count AAC-LC ADTS packets using owned framing, without decoding PCM.
@@ -195,6 +219,48 @@ pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn public_mp4_probe_keeps_owned_metadata_and_explicit_gap_selection() {
+        let fixtures = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors");
+        for (name, codec) in [
+            ("pcm32-precision-edits.mov", "pcm_s32le"),
+            ("pcm64-precision-edits.mov", "pcm_f64le"),
+            ("ima4-ramp-edits.mov", "adpcm_ima_qt"),
+            ("ima-wav-stereo-edits.mov", "adpcm_ima_wav"),
+            ("ms-adpcm-stereo-edits.mov", "adpcm_ms"),
+        ] {
+            let path = fixtures.join(name);
+            let owned = super::try_mp4_as(&path, None).unwrap().unwrap();
+            assert_eq!(owned.streams[0].codec, codec);
+            for hint in [None, Some("mov"), Some("mp4"), Some("3gp")] {
+                let actual = crate::probe_as(&path, hint).unwrap();
+                assert_eq!(
+                    serde_json::to_value(actual).unwrap(),
+                    serde_json::to_value(&owned).unwrap()
+                );
+            }
+            assert!(super::try_mp4_as(&path, Some("aac")).unwrap().is_none());
+        }
+        let unknown = fixtures.join("probe-unknown-entry.mov");
+        assert!(super::try_mp4_as(&unknown, None).unwrap().is_none());
+        assert!(crate::owned_mp4_probe::probe_mp4(&unknown).is_err());
+        let mixed = fixtures.join("probe-mixed-unknown-entry.mov");
+        let reader =
+            crate::owned_mp4::Mp4Reader::open(std::fs::File::open(&mixed).unwrap(), Default::default())
+                .unwrap();
+        assert_eq!(reader.tracks().len(), 1);
+        assert_eq!(reader.refused().len(), 1);
+        assert!(super::try_mp4_as(&mixed, None).unwrap().is_none());
+        let broken = fixtures.join("probe-mdat-beyond-file.mov");
+        let expected = crate::owned_mp4_probe::probe_mp4(&broken).unwrap_err();
+        assert!(expected.contains("Invalid MP4 box") && expected.contains("mdat"));
+        for hint in [None, Some("mov")] {
+            assert_eq!(super::try_mp4_as(&broken, hint).unwrap_err(), expected);
+            assert_eq!(crate::probe_as(&broken, hint).unwrap_err(), expected);
+        }
+    }
+
     #[test]
     fn public_adts_probe_and_reader_use_owned_synthetic_packets() {
         let fixtures =

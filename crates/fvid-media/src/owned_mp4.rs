@@ -7,24 +7,42 @@ use crate::owned_matroska::{ColourDescription, HdrMetadata};
 use std::io::{Read, Seek, SeekFrom};
 use std::ops::Range;
 #[derive(Debug)]
-pub struct Error(String);
+pub struct Error {
+    message: String,
+    unsupported: bool,
+}
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.0)
+        f.write_str(&self.message)
     }
 }
 impl std::error::Error for Error {}
+impl Error {
+    /// The container was understood but its sample entry has no parser arm.
+    pub fn is_unsupported(&self) -> bool {
+        self.unsupported
+    }
+}
 impl From<std::io::Error> for Error {
     fn from(e: std::io::Error) -> Self {
-        Self(e.to_string())
+        Self {
+            message: e.to_string(),
+            unsupported: false,
+        }
     }
 }
 pub type Result<T> = std::result::Result<T, Error>;
 pub(crate) fn invalid(message: &str) -> Error {
-    Error(message.into())
+    Error {
+        message: message.into(),
+        unsupported: false,
+    }
 }
 fn unsupported(message: &str) -> Error {
-    Error(message.into())
+    Error {
+        message: message.into(),
+        unsupported: true,
+    }
 }
 pub(crate) fn buffer(size: usize) -> Result<Vec<u8>> {
     let mut result = Vec::new();

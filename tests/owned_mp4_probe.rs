@@ -25,7 +25,6 @@ fn library_mp4_probe_matches_frontend_container_metadata() {
             serde_json::to_value(front).unwrap(),
             "{name}"
         );
-        #[cfg(not(feature = "media"))]
         assert_eq!(
             serde_json::to_value(fvid_media::probe(&source).unwrap()).unwrap(),
             serde_json::to_value(&own).unwrap()

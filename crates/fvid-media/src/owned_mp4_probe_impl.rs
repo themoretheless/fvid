@@ -47,14 +47,25 @@ fn mp4_payload_rate(samples: impl Iterator<Item = Option<(u32, u32)>>, scale: u3
 }
 
 pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
+    try_mp4(path)?.ok_or_else(|| {
+        "native MP4 probe cannot yet describe every sample entry in this file".into()
+    })
+}
+
+// None denotes valid tracks whose sample entries are not represented yet.
+// Parser errors remain errors, rather than requesting a permissive fallback.
+pub(crate) fn try_mp4(path: &Path) -> Result<Option<MediaInfo>> {
     let file = File::open(path).map_err(|e| e.to_string())?;
     let file_bytes = file.metadata().map_err(|e| e.to_string())?.len();
-    let reader = Mp4ProbeReader::open(BufReader::new(file), Default::default())
-        .map_err(|e| e.to_string())?;
+    let reader = match Mp4ProbeReader::open(BufReader::new(file), Default::default()) {
+        Ok(reader) => reader,
+        Err(error) if mp4_unrepresented_error(&error) => return Ok(None),
+        Err(error) => return Err(error.to_string()),
+    };
     // The reader keeps unsupported sample entries separately, without their
     // original stream positions. Do not return an incomplete/reindexed inventory.
     if !reader.refused().is_empty() {
-        return Err("native MP4 probe cannot yet describe every sample entry in this file".into());
+        return Ok(None);
     }
     let mut streams = Vec::new();
     let mut duration_us = None::<i64>;
@@ -110,6 +121,29 @@ pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
             b"av01" => "av1".into(),
             b"text" => "bin_data".into(),
             b"raw " => "pcm_u8".into(),
+            b"sowt" | b"twos" | b"in24" | b"in32" => {
+                let little = track.codec == *b"sowt"
+                    || (track.codec != *b"twos" && track.configuration.first() == Some(&1));
+                format!(
+                    "pcm_s{}{}",
+                    track.bit_depth,
+                    if little { "le" } else { "be" }
+                )
+            }
+            b"fl32" | b"fl64" => format!(
+                "pcm_f{}{}",
+                if track.codec == *b"fl32" { 32 } else { 64 },
+                if track.configuration.first() == Some(&1) {
+                    "le"
+                } else {
+                    "be"
+                }
+            ),
+            b"ima4" => "adpcm_ima_qt".into(),
+            b"ms\x00\x11" => "adpcm_ima_wav".into(),
+            b"ms\x00\x02" => "adpcm_ms".into(),
+            b"MAC3" => "mace3".into(),
+            b"MAC6" => "mace6".into(),
             b"tx3g" => "mov_text".into(),
             b"ac-3" => "ac3".into(),
             b"ec-3" => "eac3".into(),
@@ -192,7 +226,7 @@ pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
             })
         })
         .collect::<Result<Vec<_>>>()?;
-    Ok(MediaInfo {
+    Ok(Some(MediaInfo {
         path: path.to_path_buf(),
         format: "mov,mp4,m4a,3gp,3g2,mj2".into(),
         start_us,
@@ -205,7 +239,7 @@ pub(crate) fn mp4(path: &Path) -> Result<MediaInfo> {
         metadata: tags(reader.tags()),
         chapters,
         streams,
-    })
+    }))
 }
 
 #[cfg(test)]
