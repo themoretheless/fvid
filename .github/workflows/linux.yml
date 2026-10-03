@@ -26,7 +26,10 @@ jobs:
           CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: /usr/bin/env PATH=/fvid/no-external-programs
           FVID_FFMPEG_PREFIX: /fvid/no-ffmpeg
         run: cargo test --locked --manifest-path crates/fvid-media/Cargo.toml --no-default-features
-      - name: Test default features
+      - name: Test default features without external programs
+        env:
+          CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: /usr/bin/env PATH=/fvid/no-external-programs
+          FVID_FFMPEG_PREFIX: /fvid/no-ffmpeg
         run: cargo test --lib --bins --tests
       - name: Test CPU-only
         # Cargo/build tools keep their normal PATH; test executables cannot find external programs.
@@ -34,7 +37,10 @@ jobs:
           CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: /usr/bin/env PATH=/fvid/no-external-programs
           FVID_FFMPEG_PREFIX: /fvid/no-ffmpeg
         run: cargo test --no-default-features
-      - name: Test player
+      - name: Test player without external programs
+        env:
+          CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER: /usr/bin/env PATH=/fvid/no-external-programs
+          FVID_FFMPEG_PREFIX: /fvid/no-ffmpeg
         run: cargo test --no-default-features --features player --lib --bins --tests
       - name: Guard native graphs and ordinary tests against FFmpeg
         run: |

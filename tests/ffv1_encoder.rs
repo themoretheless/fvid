@@ -704,18 +704,14 @@ fn public_lossless_api_uses_owned_y4m_export_and_enforces_packet_policy() {
             .to_string_lossy()
             .starts_with(".fvid-matroska-")
     }));
-    assert!(
-        fvid_media::owned_lossless::transcode_lossless(
-            &source,
-            &limited,
-            fvid_media::LosslessTransform {
-                hue: Some("h=90".into()),
-                ..Default::default()
-            },
-            &Default::default()
-        )
-        .is_err()
-    );
+    let stats = fvid_media::owned_lossless::transcode_lossless(
+        &source, &limited,
+        fvid_media::LosslessTransform { hue: Some("h=90".into()), ..Default::default() },
+        &Default::default(),
+    ).unwrap();
+    assert_eq!(stats.backend, "fvid");
+    assert!(stats.video_frames > 0);
+
 }
 
 #[test]
@@ -989,8 +985,13 @@ fn public_lossless_metadata_edits_are_ordered_and_never_drop_unknown_keys() {
     assert!(reader.tags.artist.is_empty());
     assert_eq!(reader.tags.track, "3/12");
     assert_eq!(reader.tags.album_artist, "Album artist");
+    let custom = directory.join("custom.mkv");
+    fvid_media::owned_lossless::transcode_lossless(&source, &custom, Default::default(),
+        &fvid_media::CopyOptions { metadata_set: vec![("unknown".into(), "keep me".into())], ..Default::default() }).unwrap();
+    let mut reader = fvid_media::owned_webm::WebmReader::open(Cursor::new(std::fs::read(custom).unwrap()), Default::default()).unwrap();
+    reader.scan_all().unwrap();
+    assert_eq!(reader.metadata["UNKNOWN"], "keep me");
     for (index, entries) in [
-        vec![("unknown".into(), "keep me".into())],
         vec![("title".into(), "bad\0value".into())],
         vec![("title".into(), "x".into()); 65],
     ]
@@ -1010,12 +1011,6 @@ fn public_lossless_metadata_edits_are_ordered_and_never_drop_unknown_keys() {
         )
         .unwrap_err();
         assert!(!output.exists());
-        assert!(error.contains(if index == 0 {
-            "unsupported"
-        } else if index == 1 {
-            "NUL"
-        } else {
-            "at most 64"
-        }));
+        assert!(error.contains(if index == 0 { "NUL" } else { "at most 64" }));
     }
 }
