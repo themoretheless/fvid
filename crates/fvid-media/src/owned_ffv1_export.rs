@@ -64,6 +64,10 @@ fn aspect(
         std::mem::swap(&mut n, &mut d);
         std::mem::swap(&mut w, &mut h);
     }
+    if let Some(angle) = transform.rotate {
+        let (rw, rh) = angle.size(u32::try_from(w).map_err(|_| "rotation width overflow")?, u32::try_from(h).map_err(|_| "rotation height overflow")?);
+        (w, h) = (u128::from(rw), u128::from(rh));
+    }
     if let Some(p) = transform.pad {
         (w, h) = (u128::from(p.width), u128::from(p.height));
     }

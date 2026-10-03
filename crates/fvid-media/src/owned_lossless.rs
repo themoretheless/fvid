@@ -9,6 +9,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         horizontal_flip: t.horizontal_flip.clone(),
         scale: t.scale.clone(),
         transpose: t.transpose.clone(),
+        rotate: t.rotate,
         pad: t.pad.clone(),
         interval: t.interval,
         framestep: t.framestep.clone(),
@@ -43,6 +44,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         horizontal_flip: t.horizontal_flip.clone(),
         scale: t.scale.clone(),
         transpose: t.transpose.clone(),
+        rotate: t.rotate,
         pad: t.pad.clone(),
         interval: t.interval,
         framestep: t.framestep.clone(),
@@ -392,6 +394,108 @@ mod plan_tests {
             assert_eq!(public.steps, plan.steps);
             assert_eq!(public.notes, plan.notes);
         }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+    #[test]
+    fn rotation_library_export_and_reexport_preserve_pixels_and_timing() {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/rotate-grid.y4m");
+        let directory =
+            std::env::temp_dir().join(format!("fvid-library-rotate-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        let options = CopyOptions::default();
+        let turn = LosslessTransform {
+            rotate: Some(fvid_media_info::RotateAngle::parse("90").unwrap()),
+            ..Default::default()
+        };
+        assert!(supports(&source, &turn, &options));
+        plan_transcode_lossless(&source, &turn, &options, None).unwrap();
+        let first = directory.join("first.mkv");
+        let second = directory.join("second.mkv");
+        assert_eq!(
+            transcode_lossless(&source, &first, turn.clone(), &options)
+                .unwrap()
+                .video_frames,
+            3
+        );
+        assert!(supports(&first, &turn, &options));
+        transcode_lossless(&first, &second, turn, &options).unwrap();
+        let mut frames = 0;
+        crate::owned_video_decode::decode_ffv1(
+            &second,
+            &Default::default(),
+            Some(&mut |frame| {
+                assert_eq!((frame.width, frame.height), (3, 2));
+                assert_eq!(&frame.pixels[..6], &[6, 5, 4, 3, 2, 1]);
+                assert_eq!(&frame.pixels[6..], &[128; 12]);
+                assert_eq!(frame.pts_ns, frames * 500_000_000);
+                assert_eq!(frame.duration_ns, Some(500_000_000));
+                frames += 1;
+                Ok(())
+            }),
+            None,
+        )
+        .unwrap()
+        .unwrap();
+        assert_eq!(frames, 3);
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/rotate-white420.y4m");
+        let turn = LosslessTransform {
+            rotate: Some(fvid_media_info::RotateAngle::parse("45").unwrap()),
+            ..Default::default()
+        };
+        std::fs::remove_file(&first).unwrap();
+        transcode_lossless(&source, &first, turn, &options).unwrap();
+        let mut frames = 0;
+        crate::owned_video_decode::decode_ffv1(
+            &first,
+            &Default::default(),
+            Some(&mut |frame| {
+                assert_eq!((frame.width, frame.height), (11, 11));
+                assert_eq!(frame.pixels.len(), 193);
+                assert_eq!(frame.pixels[0], 16);
+                assert_eq!(frame.pixels[60], 235);
+                assert!(frame.pixels[121..].iter().all(|&sample| sample == 128));
+                frames += 1;
+                Ok(())
+            }),
+            None,
+        )
+        .unwrap()
+        .unwrap();
+        assert_eq!(frames, 3);
+        std::fs::remove_file(&first).unwrap();
+        let transform = LosslessTransform {
+            rotate: Some(fvid_media_info::RotateAngle::parse("45").unwrap()),
+            pad: Some(fvid_media_info::PadRect {
+                width: 12,
+                height: 12,
+                x: 0,
+                y: 0,
+            }),
+            scale: Some(fvid_media_info::ScaleSize {
+                width: 6,
+                height: 6,
+            }),
+            ..Default::default()
+        };
+        transcode_lossless(&source, &first, transform, &options).unwrap();
+        let mut frames = 0;
+        crate::owned_video_decode::decode_ffv1(
+            &first,
+            &Default::default(),
+            Some(&mut |frame| {
+                assert_eq!((frame.width, frame.height), (6, 6));
+                assert_eq!(frame.pixels.len(), 54);
+                assert!(frame.pixels[36..].iter().all(|&sample| sample == 128));
+                frames += 1;
+                Ok(())
+            }),
+            None,
+        )
+        .unwrap()
+        .unwrap();
+        assert_eq!(frames, 3);
         std::fs::remove_dir_all(directory).unwrap();
     }
     #[test]

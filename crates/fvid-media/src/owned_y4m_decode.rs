@@ -30,6 +30,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
+    if transform.rotate.is_some_and(|a| fvid_media_info::RotateAngle::parse(&a.degrees.to_string()).is_err()) { return false; }
     if transform.gblur.as_deref().is_some_and(|a| crate::owned_gblur::GaussianBlur::parse(a).is_err()) { return false; }
     transform
         .unsharp
@@ -93,6 +94,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 crop: transform.crop,
                 scale: transform.scale,
                 transpose: transform.transpose,
+                rotate: transform.rotate,
                 pad: transform.pad,
                 unsharp: transform.unsharp.clone(),
                 eq: transform.eq.clone(),
@@ -270,6 +272,49 @@ pub(crate) fn output_geometry(
         .ok_or("Y4M scale size overflow")?;
     Ok((w, h, size))
 }
+pub(crate) fn requested_geometry(
+    header: &Header,
+    transform: &DecodeTransform,
+) -> Result<(usize, usize, usize)> {
+    let (crop, _) = crop_geometry(header, transform.crop)?;
+    if let Some(angle) = transform.rotate {
+        let (w, h, _) = output_geometry(header, crop, None, transform.transpose, None)?;
+        let (w, h) = angle.size(
+            u32::try_from(w).map_err(|_| "rotation width overflow")?,
+            u32::try_from(h).map_err(|_| "rotation height overflow")?,
+        );
+        let mut rotated = header.clone();
+        rotated.width = w as usize;
+        rotated.height = h as usize;
+        if transform.transpose.is_some() {
+            rotated.format = match rotated.format {
+                PixelFormat::Yuv422 => PixelFormat::Yuv440,
+                PixelFormat::Yuv440 => PixelFormat::Yuv422,
+                format => format,
+            };
+        }
+        output_geometry(
+            &rotated,
+            CropRect {
+                x: 0,
+                y: 0,
+                width: rotated.width,
+                height: rotated.height,
+            },
+            transform.scale,
+            None,
+            transform.pad,
+        )
+    } else {
+        output_geometry(
+            header,
+            crop,
+            transform.scale,
+            transform.transpose,
+            transform.pad,
+        )
+    }
+}
 fn point_sample(index: usize, input: usize, output: usize) -> usize {
     let increment = (((input as u128) << 16) + output as u128 / 2) / output as u128;
     (((index as u128 * increment + increment / 2) >> 16) as usize).min(input - 1)
@@ -295,6 +340,49 @@ pub(crate) fn transform_frame_geometry_requested(
     frame: &[u8],
     transform: &DecodeTransform,
 ) -> Result<Vec<u8>> {
+    if let Some(angle) = transform.rotate {
+        let before = DecodeTransform {
+            rotate: None,
+            pad: None,
+            scale: None,
+            ..transform.clone()
+        };
+        let pixels = transform_frame_geometry_requested(header, frame, &before)?;
+        let (w, h, _) = requested_geometry(header, &before)?;
+        let mut intermediate = header.clone();
+        intermediate.width = w;
+        intermediate.height = h;
+        if transform.transpose.is_some() {
+            intermediate.format = match intermediate.format {
+                PixelFormat::Yuv422 => PixelFormat::Yuv440,
+                PixelFormat::Yuv440 => PixelFormat::Yuv422,
+                format => format,
+            };
+        }
+        let (sx, sy) = intermediate.format.subsampling();
+        let rotated = crate::owned_rotate::rotate(
+            &crate::owned_frame::GeometryFrame {
+                width: w,
+                height: h,
+                subsampling: Some([sx, sy]),
+                data: pixels,
+            },
+            angle.degrees,
+            header.depth(),
+            header.full_range()?,
+        )?;
+        intermediate.width = rotated.width;
+        intermediate.height = rotated.height;
+        return transform_frame_geometry_requested(
+            &intermediate,
+            &rotated.data,
+            &DecodeTransform {
+                pad: transform.pad,
+                scale: transform.scale,
+                ..Default::default()
+            },
+        );
+    }
     let mut output = Vec::new();
     transform_frame_into(
         header,
@@ -343,14 +431,7 @@ pub(crate) fn apply_pixel_filters(
         || gradients(transform).iter().any(|(_, a)| a.is_some())
         || morphology(transform).iter().any(|(_, a)| a.is_some())
     {
-        let (crop, _) = crop_geometry(header, transform.crop)?;
-        let (width, height, _) = output_geometry(
-            header,
-            crop,
-            transform.scale,
-            transform.transpose,
-            transform.pad,
-        )?;
+        let (width, height, _) = requested_geometry(header, transform)?;
         let (sx, sy) = header.format.subsampling();
         let subsampling = if transform.transpose.is_some() {
             [sy, sx]
@@ -613,13 +694,7 @@ fn decode_reader_frames(
     let header = Header::parse(&bytes)?;
     let [rate_n, rate_d] = header.frame_rate()?;
     let (crop, _) = crop_geometry(&header, transform.crop)?;
-    let (ow, oh, _) = output_geometry(
-        &header,
-        crop,
-        transform.scale,
-        transform.transpose,
-        transform.pad,
-    )?;
+    let (ow, oh, _) = requested_geometry(&header, transform)?;
     let width = u32::try_from(ow).map_err(|_| "Y4M width exceeds decode API range")?;
     let height = u32::try_from(oh).map_err(|_| "Y4M height exceeds decode API range")?;
     let promote = transform
@@ -644,6 +719,10 @@ fn decode_reader_frames(
     if transform.transpose.is_some() {
         std::mem::swap(&mut n, &mut d);
         std::mem::swap(&mut w, &mut h);
+    }
+    if let Some(angle) = transform.rotate {
+        let (rw, rh) = angle.size(u32::try_from(w).map_err(|_| "rotation width overflow")?, u32::try_from(h).map_err(|_| "rotation height overflow")?);
+        (w, h) = (u128::from(rw), u128::from(rh));
     }
     if let Some(pad) = transform.pad {
         w = u128::from(pad.width);
@@ -704,6 +783,7 @@ fn decode_reader_frames(
         || transform.vertical_flip
         || transform.scale.is_some()
         || transform.transpose.is_some()
+        || transform.rotate.is_some()
         || transform.pad.is_some()
         || transform.unsharp.is_some()
         || transform.eq.is_some()
@@ -775,17 +855,13 @@ fn decode_reader_frames(
         }
         if selected {
             if geometry {
-                transform_frame_into(
-                    &header,
-                    &input,
-                    transform.crop,
-                    transform.horizontal_flip,
-                    transform.vertical_flip,
-                    transform.scale,
-                    transform.transpose,
-                    transform.pad,
-                    &mut output,
-                )?;
+                if transform.rotate.is_some() {
+                    output = transform_frame_geometry_requested(&header, &input, transform)?;
+                } else {
+                    transform_frame_into(&header, &input, transform.crop,
+                        transform.horizontal_flip, transform.vertical_flip, transform.scale,
+                        transform.transpose, transform.pad, &mut output)?;
+                }
                 if let Some(overlay) = overlay.as_mut() {
                     overlay.apply(&presented_header, &mut output, index)?;
                 }

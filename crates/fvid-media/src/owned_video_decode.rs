@@ -400,14 +400,7 @@ fn process_frame_with_overlay(
             ),
         ],
     };
-    let (crop, _) = crate::owned_y4m_decode::crop_geometry(&header, transform.crop)?;
-    let (width, height, _) = crate::owned_y4m_decode::output_geometry(
-        &header,
-        crop,
-        transform.scale,
-        transform.transpose,
-        transform.pad,
-    )?;
+    let (width, height, _) = crate::owned_y4m_decode::requested_geometry(&header, transform)?;
     let promote = transform
         .shuffleplanes
         .as_deref()
