@@ -128,20 +128,10 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
 }
 pub(crate) fn supports_transformed(source: &Path, transform: &DecodeTransform) -> bool {
     supported_request(transform)
-        && (transform.eq.is_none() || pixel_depth_supported(source, &[8]))
         && overlay_supported(source, transform)
         && supports(source)
         && framestep_clock_supported(source, transform)
         && (transform.transpose.is_none() || header_format(source) != Some(PixelFormat::Yuv411))
-}
-fn pixel_depth_supported(source: &Path, depths: &[u8]) -> bool {
-    let read = || -> Result<bool> {
-        let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
-        let mut bytes = Vec::new();
-        line(&mut input, &mut bytes)?;
-        Ok(depths.contains(&Header::parse(&bytes)?.depth()))
-    };
-    read().unwrap_or(false)
 }
 fn framestep_clock_supported(source: &Path, transform: &DecodeTransform) -> bool {
     let Some(args) = transform.framestep.as_deref() else {
