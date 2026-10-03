@@ -208,12 +208,22 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
                 .map_err(|_| invalid("ALAC channel count exceeds decoder geometry"))?,
         )
         .map_err(|e| invalid(&e.to_string()))?,
+        "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" => {
+            // Geometry validation allocates no heap. Widened samples are charged
+            // against each packet below, using f64 even for the f32 API.
+            crate::owned_pcm_decoder::PcmDecoder::from_matroska(track)?;
+            16 * 1024
+        }
         _ => {
             return Err(invalid(
                 "Matroska audio aggregate allocation admission is not yet implemented",
             ));
         }
     };
+    let pcm = matches!(
+        track.codec.as_str(),
+        "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE"
+    );
     let mut visited_packets = 0;
     let mut largest_packet = 0;
     reader
@@ -231,7 +241,13 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
                 }
             }
             visited_packets = reader.packets.len();
-            let packet = largest_packet;
+            // One encoded packet plus at most eight bytes per input byte for
+            // f64 conversion of unsigned 8-bit PCM; wider formats cost less.
+            let packet = largest_packet
+                .checked_mul(if pcm { 9 } else { 1 })
+                .ok_or_else(|| {
+                    crate::owned_ebml::Error("Matroska memory estimate overflow".into())
+                })?;
             let cloned_track = track
                 .codec
                 .len()
@@ -276,9 +292,8 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
 }
 /// Decode the presentation timeline, including delay, signed padding, gaps and
 /// ceil-rounded interval boundaries. An error may leave partial caller-owned PCM.
-/// Progress never reports publication/completion. AAC/ALAC controlled admission is
-/// checked before decoder construction; other codec admission and metadata
-/// mutation remain unsupported by this raw-stream API.
+/// Progress never reports publication/completion. Controlled admission is checked
+/// before decoding; metadata mutation remains unsupported by this raw-stream API.
 pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
     source: R,
     output: &mut impl Write,
@@ -286,11 +301,6 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
     options: &CopyOptions,
     codec: &str,
 ) -> Result<AudioDecodeStats> {
-    if options.max_controlled_bytes.is_some() && !matches!(codec, "A_AAC" | "A_ALAC") {
-        return Err(invalid(
-            "Matroska audio aggregate allocation admission is not yet implemented",
-        ));
-    }
     if !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty()
         || !options.stream_metadata_set.is_empty()
@@ -318,7 +328,7 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
     control.check()?;
     let mut reader = if codec == "A_AAC" {
         open_aac_reader(source, options, options.max_packet_bytes)?
-    } else if codec == "A_ALAC" {
+    } else if matches!(codec, "A_ALAC" | "PCM") {
         open_audio_reader(source, options, options.max_packet_bytes)?
     } else {
         MatroskaTimelineReader::open(
@@ -342,7 +352,7 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
             "selected Matroska audio stream has a different codec",
         ));
     }
-    if matches!(codec, "A_AAC" | "A_ALAC") {
+    if matches!(codec, "A_AAC" | "A_ALAC" | "PCM") {
         admit_audio_reader(&mut reader, index, options)?;
     }
     decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)

@@ -7,7 +7,7 @@ use std::{
 };
 /// Decode delay, signed padding, gaps and ceil-rounded interval boundaries.
 /// Errors may leave partial caller-owned PCM; progress never reports publication.
-/// Aggregate allocation admission and metadata mutations remain unsupported.
+/// Retained allocation admission is checked before decoding; metadata edits are unsupported.
 pub fn decode_matroska_pcm<R: Read + Seek>(
     source: R,
     output: &mut impl Write,
@@ -56,11 +56,6 @@ mod precise {
         interval: Option<(Duration, Duration)>,
         options: &CopyOptions,
     ) -> Result<AudioDecodeStats> {
-        if options.max_controlled_bytes.is_some() {
-            return Err(invalid(
-                "Matroska PCM aggregate allocation admission is not yet implemented",
-            ));
-        }
         if !options.metadata_set.is_empty()
             || !options.metadata_delete.is_empty()
             || !options.stream_metadata_set.is_empty()
@@ -86,13 +81,10 @@ mod precise {
             hook.emit(control.event);
         }
         control.check()?;
-        let reader = MatroskaTimelineReader::open(
-            source,
-            crate::owned_webm::Limits {
-                packet_bytes: options.max_packet_bytes,
-                ..Default::default()
-            },
-        )?;
+        let mut reader =
+            crate::owned_matroska_audio::open_audio_reader(source, options, options.max_packet_bytes)?;
+        let index = matroska_audio_index(&reader, selected)?;
+        crate::owned_matroska_audio::admit_audio_reader(&mut reader, index, options)?;
         decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)
     }
     include!("owned_matroska_audio_timeline_impl.rs");

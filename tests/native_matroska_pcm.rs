@@ -143,8 +143,21 @@ fn owned_matroska_pcm_formats_intervals_and_failures() {
         )
         .unwrap_err()
         .to_string()
-        .contains("allocation admission"));
+        .contains("controlled memory budget exceeded"));
         assert!(refused.is_empty());
+        let mut admitted = Vec::new();
+        let admitted_stats = fvid_media::owned_matroska_pcm::decode_matroska_pcm(
+            std::io::Cursor::new(&encoded),
+            &mut admitted,
+            None,
+            &fvid_control::CopyOptions {
+                max_controlled_bytes: Some(32 * 1024 * 1024),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(admitted_stats, own_stats);
+        assert_eq!(admitted, baseline);
 
         let plan =
             fvid::native_plan::decode_audio_selected(&source, &Default::default(), None).unwrap();
