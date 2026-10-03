@@ -3406,3 +3406,34 @@ operation combinations. Root API/CLI output remains unchanged by this move.
 
 This removes the capability-query dependency, not the remaining legacy backend
 or its production feature wiring.
+
+### Owned scalar expressions
+
+`owned_expression` provides deterministic arithmetic with constants, variables,
+mathematical functions, comparisons and lazy `if`/`ifnot`. Scalar parameters in
+`eq`, `hue`, `colorize` and `monochrome` use it, so expressions such as `1/2`,
+`90*2`, `sqrt(4)` and `sin(PI/2)` no longer force those requests into legacy.
+Existing parameter ranges and float precision remain unchanged. Unknown variables,
+unsupported functions, malformed syntax, excessive recursive/tree depth and
+non-finite filter parameters are refused. Stateful, random, time-dependent
+expressions and AVExpr unit suffixes remain gaps. This evaluator is a foundation
+for `lutyuv`; the channel LUT operation is not yet connected.
+
+Synthetic `colorize-grid-{8,12,16}.y4m` CLI regressions verify decode, plan and
+export, requiring expression parameters to produce the same frames/timestamps
+as their corresponding numeric values. Ordinary tests require no FFmpeg/network.
+Explicit reference qualification:
+
+```sh
+cargo build --offline --no-default-features --bin fvid
+python3 benches/scalar_expression_reference.py --fvid target/debug/fvid
+```
+
+The benchmark checks sample equality in compatible formats. FFmpeg's
+[`eq`](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_eq.c) admits only
+8-bit formats, while [`hue`](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_hue.c)
+admits 8/10-bit formats. For higher-depth inputs, the benchmark explicitly checks
+that reference output is quantized by the inserted conversion and that FVid
+retains low-order sample bits, rather than asserting equality between different
+format pipelines. High-depth expression/numeric equivalence remains covered by
+the ordinary CLI regression for all four filters.

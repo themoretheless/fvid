@@ -22,10 +22,7 @@ impl Hue {
                     (key, entry)
                 }
             };
-            let value = value
-                .trim()
-                .parse::<f32>()
-                .map_err(|_| "owned hue requires constant numeric parameters")?;
+            let value = crate::owned_expression::constant(value.trim())? as f32;
             if !value.is_finite() {
                 return Err("hue parameters must be finite".into());
             }

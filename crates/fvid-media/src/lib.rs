@@ -2,6 +2,7 @@
 //! The temporary legacy backend retains existing operations during migration.
 mod input_policy;
 pub mod owned_capabilities;
+pub mod owned_expression;
 pub use owned_capabilities::capabilities;
 #[cfg(feature = "http-input")]
 pub mod owned_http;

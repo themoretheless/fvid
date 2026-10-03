@@ -25,10 +25,7 @@ impl Monochrome {
                 .iter()
                 .position(|name| *name == key.trim())
                 .ok_or("unknown monochrome option")?;
-            let value = value
-                .trim()
-                .parse::<f32>()
-                .map_err(|_| "monochrome requires numeric parameters")?;
+            let value = crate::owned_expression::constant(value.trim())? as f32;
             let (minimum, maximum) = match index {
                 0 | 1 => (-1.0, 1.0),
                 2 => (0.1, 10.0),

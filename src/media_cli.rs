@@ -4989,3 +4989,89 @@ mod monochrome_cli_tests {
         std::fs::remove_dir_all(directory).unwrap();
     }
 }
+
+#[cfg(test)]
+mod scalar_expression_tests {
+    #[test]
+    fn arithmetic_filter_parameters_decode_plan_and_export_without_legacy() {
+        let directory =
+            std::env::temp_dir().join(format!("fvid-scalar-expression-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8, 12, 16] {
+            let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
+                "tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"
+            ));
+            let source = source.to_str().unwrap();
+            for (filter, expression, numeric) in [
+                (
+                    "--colorize",
+                    "hue=60*2:saturation=1/2:lightness=1/2:mix=1/2",
+                    "hue=120:saturation=0.5:lightness=0.5:mix=0.5",
+                ),
+                (
+                    "--monochrome",
+                    "cb=1/2:cr=-1/2:size=1/5:high=3/4",
+                    "cb=0.5:cr=-0.5:size=0.2:high=0.75",
+                ),
+                (
+                    "--eq",
+                    "gamma=sqrt(4):brightness=1/10",
+                    "gamma=2:brightness=0.1",
+                ),
+                ("--hue", "h=90*2:s=1/2", "h=180:s=0.5"),
+            ] {
+                for command in [
+                    vec!["decode", source, filter, expression, "--quiet"],
+                    vec![
+                        "plan",
+                        "transcode-lossless",
+                        source,
+                        filter,
+                        expression,
+                        "--quiet",
+                    ],
+                ] {
+                    super::run(&command.into_iter().map(str::to_owned).collect::<Vec<_>>())
+                        .unwrap();
+                }
+                let mut outputs = Vec::new();
+                for (index, args) in [expression, numeric].into_iter().enumerate() {
+                    let output = directory.join(format!(
+                        "{}-{depth}-{index}.mkv",
+                        filter.trim_start_matches('-')
+                    ));
+                    super::run(
+                        &[
+                            "transcode-lossless",
+                            source,
+                            output.to_str().unwrap(),
+                            filter,
+                            args,
+                            "--quiet",
+                        ]
+                        .into_iter()
+                        .map(str::to_owned)
+                        .collect::<Vec<_>>(),
+                    )
+                    .unwrap();
+                    let mut reader = fvid::playback_native::NativeReader::software(
+                        std::io::BufReader::new(std::fs::File::open(&output).unwrap()),
+                        usize::MAX,
+                    )
+                    .unwrap();
+                    let mut frames = Vec::new();
+                    while let Some(raw) = reader.read_frame_raw().unwrap() {
+                        let frame = fvid::native_geometry::VideoGeometry::default()
+                            .apply(&raw, 3, 3)
+                            .unwrap();
+                        frames.push((frame.data, reader.frame_interval()));
+                    }
+                    assert_eq!(frames.len(), 3);
+                    outputs.push(frames);
+                }
+                assert_eq!(outputs[0], outputs[1], "filter={filter} depth={depth}");
+            }
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}

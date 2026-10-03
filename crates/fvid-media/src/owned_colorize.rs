@@ -24,10 +24,7 @@ impl Colorize {
                 .iter()
                 .position(|name| *name == key.trim())
                 .ok_or("unknown colorize option")?;
-            let value = value
-                .trim()
-                .parse::<f32>()
-                .map_err(|_| "colorize requires numeric parameters")?;
+            let value = crate::owned_expression::constant(value.trim())? as f32;
             let maximum = if index == 0 { 360.0 } else { 1.0 };
             if !value.is_finite() || !(0.0..=maximum).contains(&value) {
                 return Err(

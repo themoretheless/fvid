@@ -40,10 +40,7 @@ impl Equalizer {
                 }
                 continue;
             }
-            let value = text
-                .trim()
-                .parse::<f64>()
-                .map_err(|_| "owned eq requires constant numeric parameters")?;
+            let value = crate::owned_expression::constant(text.trim())?;
             if !value.is_finite() {
                 return Err("eq parameters must be finite".into());
             }
