@@ -5,12 +5,9 @@ use std::io::BufRead;
 
 fn default_policy(options: &fvid_control::CopyOptions) -> bool {
     options.streams.is_empty()
-        && options.max_packet_bytes == 64 * 1024 * 1024
         && options.max_packets.is_none()
         && options.max_controlled_bytes.is_none()
         && options.max_rss_bytes.is_none()
-        && options.cancel.is_none()
-        && options.progress.is_none()
         && options.metadata_set.is_empty()
         && options.metadata_delete.is_empty()
         && options.stream_metadata_set.is_empty()
@@ -43,7 +40,7 @@ pub(crate) fn try_xfade_video(
         return Ok(None);
     }
     let (count, decoded_frames) =
-        export_y4m_ffv1_counted(source, other, destination, offset_us, duration_us)?;
+        export_y4m_ffv1_counted(source, other, destination, offset_us, duration_us, options)?;
     Ok(Some(fvid_media_info::LosslessStats {
         backend: "owned Y4M cross-fade FFV1 export",
         video_frames: count,
@@ -293,7 +290,8 @@ pub fn write_y4m_ffv1<W: std::io::Write + std::io::Seek>(
     timeline: FadeTimeline,
     output: &mut W,
 ) -> Result<u64, String> {
-    write_y4m_ffv1_counted(main, other, header, timeline, output).map(|counts| counts.0)
+    write_y4m_ffv1_counted(main, other, header, timeline, output, &Default::default())
+        .map(|counts| counts.0)
 }
 fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
     main: impl BufRead,
@@ -301,7 +299,8 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
     header: &Header,
     timeline: FadeTimeline,
     output: &mut W,
-) -> Result<(u64, u64), String> {
+    options: &fvid_control::CopyOptions,
+) -> Result<(u64, u64, fvid_control::ProgressEvent), String> {
     use crate::owned_matroska::{ColourDescription, PacketWriter, VideoMetadata};
     let width = u32::try_from(header.width).map_err(|_| "cross-fade width overflow")?;
     let height = u32::try_from(header.height).map_err(|_| "cross-fade height overflow")?;
@@ -317,14 +316,38 @@ fn write_y4m_ffv1_counted<W: std::io::Write + std::io::Seek>(
     let mut writer =
         PacketWriter::new_ffv1_with_metadata(output, width, height, Some(&metadata), 0, 0)
             .map_err(|e| e.to_string())?;
+    let mut event = fvid_control::ProgressEvent {
+        packets: 0,
+        payload_bytes: 0,
+        done: false,
+    };
     let count = visit_y4m_counted(main, other, header, timeline, |frame, pts, duration| {
+        if options
+            .cancel
+            .as_ref()
+            .is_some_and(|flag| flag.is_cancelled())
+        {
+            return Err("operation cancelled".into());
+        }
         let packet = crate::owned_ffv1_encoder::encode(frame, header.depth())?;
+        if packet.len() > options.max_packet_bytes {
+            return Err("encoded cross-fade packet exceeds byte limit".into());
+        }
         writer
             .write_packet(0, pts, duration, true, &packet)
-            .map_err(|e| e.to_string())
+            .map_err(|e| e.to_string())?;
+        event.packets += 1;
+        event.payload_bytes = event
+            .payload_bytes
+            .checked_add(packet.len() as u64)
+            .ok_or("cross-fade payload count overflow")?;
+        if let Some(progress) = &options.progress {
+            progress.emit(event);
+        }
+        Ok(())
     })?;
     writer.finish().map_err(|e| e.to_string())?;
-    Ok(count)
+    Ok((count.0, count.1, event))
 }
 /// Publish a Y4M fade as FFV1/Matroska without replacing an existing file.
 /// Failed decoding or muxing removes the private temporary output.
@@ -335,7 +358,15 @@ pub fn export_y4m_ffv1(
     offset_us: i64,
     duration_us: i64,
 ) -> Result<u64, String> {
-    export_y4m_ffv1_counted(main, other, destination, offset_us, duration_us).map(|counts| counts.0)
+    export_y4m_ffv1_counted(
+        main,
+        other,
+        destination,
+        offset_us,
+        duration_us,
+        &Default::default(),
+    )
+    .map(|counts| counts.0)
 }
 fn export_y4m_ffv1_counted(
     main: &std::path::Path,
@@ -343,6 +374,7 @@ fn export_y4m_ffv1_counted(
     destination: &std::path::Path,
     offset_us: i64,
     duration_us: i64,
+    options: &fvid_control::CopyOptions,
 ) -> Result<(u64, u64), String> {
     use std::{fs::File, io::BufReader};
     let timeline = FadeTimeline::new(offset_us, duration_us)?;
@@ -354,10 +386,13 @@ fn export_y4m_ffv1_counted(
     let header = Header::parse(&bytes)?;
     let input = BufReader::new(File::open(main).map_err(|e| e.to_string())?);
     let other = BufReader::new(File::open(other).map_err(|e| e.to_string())?);
-    let (stats, _, decoded_frames) =
-        crate::owned_matroska::export_atomic(destination, None, None, |file| {
-            let (frames, decoded_frames) =
-                write_y4m_ffv1_counted(input, other, &header, timeline, file)
+    let (stats, _, decoded_frames) = crate::owned_matroska::export_atomic(
+        destination,
+        options.cancel.as_ref(),
+        options.progress.as_ref(),
+        |file| {
+            let (frames, decoded_frames, event) =
+                write_y4m_ffv1_counted(input, other, &header, timeline, file, options)
                     .map_err(crate::owned_matroska::Error)?;
             Ok((
                 fvid_media_info::DecodeStats {
@@ -368,15 +403,12 @@ fn export_y4m_ffv1_counted(
                     pixel_format: format!("{:?}/{}", header.format, header.depth()),
                     decode_errors: 0,
                 },
-                fvid_control::ProgressEvent {
-                    packets: frames,
-                    payload_bytes: 0,
-                    done: false,
-                },
+                event,
                 decoded_frames,
             ))
-        })
-        .map_err(|e| e.to_string())?;
+        },
+    )
+    .map_err(|e| e.to_string())?;
     Ok((stats.video_frames, decoded_frames))
 }
 impl FadeTimeline {
@@ -494,6 +526,18 @@ mod tests {
         .concat();
         std::fs::write(&main, &source).unwrap();
         std::fs::write(&other, &source).unwrap();
+        let successful_events = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let observed = successful_events.clone();
+        let published = output.clone();
+        let successful_options = fvid_control::CopyOptions {
+            progress: Some(fvid_control::ProgressHook::new(move |event| {
+                if event.done {
+                    assert!(published.is_file());
+                }
+                observed.lock().unwrap().push(event);
+            })),
+            ..Default::default()
+        };
         let stats = crate::xfade_video(
             &main,
             &other,
@@ -501,12 +545,18 @@ mod tests {
             "fade",
             500000,
             0,
-            &Default::default(),
+            &successful_options,
         )
         .unwrap();
         assert_eq!(stats.video_frames, 1);
         assert_eq!(stats.decoded_frames, 2);
         assert_eq!(stats.backend, "owned Y4M cross-fade FFV1 export");
+        let observed = successful_events.lock().unwrap();
+        assert_eq!(observed.len(), 2);
+        assert!(!observed[0].done);
+        assert!(observed[1].done);
+        assert_eq!(observed[0].payload_bytes, observed[1].payload_bytes);
+        drop(observed);
         let original = std::fs::read(&output).unwrap();
         assert!(
             export_y4m_ffv1(&main, &other, &output, 0, 500000)
@@ -515,6 +565,40 @@ mod tests {
         );
         assert_eq!(std::fs::read(&output).unwrap(), original);
         std::fs::remove_file(&output).unwrap();
+        let cancelled = fvid_control::CancelFlag::new();
+        let hook_flag = cancelled.clone();
+        let events = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let hook_events = events.clone();
+        let options = fvid_control::CopyOptions {
+            cancel: Some(cancelled),
+            progress: Some(fvid_control::ProgressHook::new(move |event| {
+                hook_events.lock().unwrap().push(event);
+                hook_flag.cancel();
+            })),
+            ..Default::default()
+        };
+        assert!(
+            crate::xfade_video(&main, &other, &output, "fade", 500000, 0, &options)
+                .unwrap_err()
+                .contains("cancelled")
+        );
+        assert!(!output.exists());
+        let events = events.lock().unwrap();
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].packets, 1);
+        assert!(events[0].payload_bytes > 0);
+        assert!(!events[0].done);
+        drop(events);
+        let options = fvid_control::CopyOptions {
+            max_packet_bytes: 1,
+            ..Default::default()
+        };
+        assert!(
+            crate::xfade_video(&main, &other, &output, "fade", 500000, 0, &options)
+                .unwrap_err()
+                .contains("packet exceeds byte limit")
+        );
+        assert!(!output.exists());
         std::fs::write(
             &main,
             [
