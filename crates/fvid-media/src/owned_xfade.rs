@@ -1,5 +1,124 @@
 //! Integer cross-fade of matching decoded frames, without a media backend.
+use crate::owned_y4m::{Header, line};
 use crate::{owned_frame::GeometryFrame, owned_overlay::validate_frame};
+use std::io::BufRead;
+
+/// Forward-only secondary video reader. Retains one frame and selects the most
+/// recent frame on its own clock; callers decide how to handle a short source.
+pub struct SecondaryReader<R> {
+    input: R,
+    header: Header,
+    current: Option<GeometryFrame>,
+    next_index: u64,
+    last_target: Option<u64>,
+    eof: bool,
+    failed: bool,
+}
+impl<R: BufRead> SecondaryReader<R> {
+    pub fn new(mut input: R, primary: &Header) -> Result<Self, String> {
+        let mut bytes = Vec::new();
+        if !line(&mut input, &mut bytes)? {
+            return Err("empty cross-fade secondary source".into());
+        }
+        let header = Header::parse(&bytes)?;
+        header.frame_rate()?;
+        if header.width != primary.width
+            || header.height != primary.height
+            || header.format != primary.format
+            || header.depth() != primary.depth()
+            || header.full_range()? != primary.full_range()?
+        {
+            return Err("cross-fade inputs require matching geometry, format and range".into());
+        }
+        Ok(Self {
+            input,
+            header,
+            current: None,
+            next_index: 0,
+            last_target: None,
+            eof: false,
+            failed: false,
+        })
+    }
+    pub fn frame_at(&mut self, pts_ns: u64) -> Result<Option<&GeometryFrame>, String> {
+        if self.failed {
+            return Err("cross-fade secondary reader requires reset after error".into());
+        }
+        if let Err(error) = self.advance(pts_ns) {
+            self.failed = true;
+            self.current = None;
+            return Err(error);
+        }
+        Ok(self.current.as_ref())
+    }
+    fn advance(&mut self, pts_ns: u64) -> Result<(), String> {
+        if self.last_target.is_some_and(|last| pts_ns < last) {
+            return Err("cross-fade secondary clock cannot rewind".into());
+        }
+        self.last_target = Some(pts_ns);
+        let [num, den] = self.header.frame_rate()?;
+        let mut marker = Vec::new();
+        while !self.eof {
+            // Compare rationals directly, without rounding the secondary PTS.
+            if u128::from(self.next_index) * den as u128 * 1_000_000_000
+                > u128::from(pts_ns) * num as u128
+            {
+                break;
+            }
+            if !line(&mut self.input, &mut marker)? {
+                self.eof = true;
+                break;
+            }
+            if marker != b"FRAME\n" && !marker.starts_with(b"FRAME ") {
+                return Err("expected cross-fade Y4M FRAME marker".into());
+            }
+            let size = self.header.frame_len()?;
+            if self.current.is_none() {
+                let (sx, sy) = self.header.format.subsampling();
+                self.current = Some(GeometryFrame {
+                    width: self.header.width,
+                    height: self.header.height,
+                    subsampling: Some([sx, sy]),
+                    data: crate::owned_frame::buffer(size)?,
+                });
+            }
+            self.input
+                .read_exact(&mut self.current.as_mut().unwrap().data)
+                .map_err(|e| format!("cross-fade secondary payload: {e}"))?;
+            self.next_index = self
+                .next_index
+                .checked_add(1)
+                .ok_or("cross-fade frame count overflow")?;
+        }
+        Ok(())
+    }
+    pub fn exhausted(&self) -> bool {
+        self.eof
+    }
+    /// Apply a transition on the primary presentation clock. A missing first
+    /// secondary frame is an error; a nonempty short source repeats its tail.
+    pub fn apply(
+        &mut self,
+        frame: &mut GeometryFrame,
+        depth: u8,
+        pts_ns: u64,
+        timeline: FadeTimeline,
+    ) -> Result<(), String> {
+        let (secondary_ns, elapsed, duration) = match timeline.phase(pts_ns) {
+            Phase::Primary => return Ok(()),
+            Phase::Blend {
+                secondary_ns,
+                elapsed_ns,
+                duration_ns,
+            } => (secondary_ns, elapsed_ns, duration_ns),
+            Phase::Secondary { secondary_ns } => (secondary_ns, 1, 1),
+        };
+        let next = self
+            .frame_at(secondary_ns)?
+            .ok_or("cross-fade secondary source has no frames")?;
+        fade(frame, next, depth, elapsed, duration)
+    }
+}
 
 /// Exact nanosecond timeline for a fade into a secondary source starting at zero.
 #[derive(Clone, Copy, Debug)]
@@ -106,6 +225,68 @@ pub fn fade(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn streaming_transition_blends_on_primary_clock_then_uses_secondary_pixels() {
+        let primary = Header::parse(b"YUV4MPEG2 W2 H2 F3:1 Ip A1:1 C420\n").unwrap();
+        let mut bytes = b"YUV4MPEG2 W2 H2 F3:1 Ip A1:1 C420\n".to_vec();
+        for value in [100, 200] {
+            bytes.extend_from_slice(b"FRAME\n");
+            bytes.extend_from_slice(&[value; 6]);
+        }
+        let mut reader = SecondaryReader::new(std::io::Cursor::new(bytes), &primary).unwrap();
+        let timeline = FadeTimeline::new(100000, 400000).unwrap();
+        for (pts, expected) in [(0, 0), (100000000, 0), (300000000, 50), (500000000, 200)] {
+            let mut frame = GeometryFrame {
+                width: 2,
+                height: 2,
+                subsampling: Some([2, 2]),
+                data: vec![0; 6],
+            };
+            reader.apply(&mut frame, 8, pts, timeline).unwrap();
+            assert_eq!(frame.data, [expected; 6]);
+        }
+    }
+    #[test]
+    fn truncated_secondary_frame_poison_is_specific_and_persistent() {
+        let primary = Header::parse(b"YUV4MPEG2 W2 H2 F3:1 Ip A1:1 C420\n").unwrap();
+        let source =
+            include_bytes!("../../../tests/fixtures/playback-errors/xfade-secondary-truncated.y4m");
+        let mut reader = SecondaryReader::new(std::io::Cursor::new(source), &primary).unwrap();
+        assert!(
+            reader
+                .frame_at(0)
+                .unwrap_err()
+                .contains("cross-fade secondary payload")
+        );
+        assert!(
+            reader
+                .frame_at(0)
+                .unwrap_err()
+                .contains("requires reset after error")
+        );
+        assert!(reader.current.is_none());
+    }
+    #[test]
+    fn secondary_reader_selects_exact_fractional_clock_and_retains_last_frame() {
+        let primary = Header::parse(b"YUV4MPEG2 W2 H2 F3:1 Ip A1:1 C420\n").unwrap();
+        let mut bytes = b"YUV4MPEG2 W2 H2 F3:1 Ip A1:1 C420\n".to_vec();
+        for value in [10, 20, 30] {
+            bytes.extend_from_slice(b"FRAME\n");
+            bytes.extend_from_slice(&[value; 6]);
+        }
+        let mut reader = SecondaryReader::new(std::io::Cursor::new(bytes), &primary).unwrap();
+        for (pts, value) in [
+            (0, 10),
+            (333333333, 10),
+            (333333334, 20),
+            (666666667, 30),
+            (1000000000, 30),
+        ] {
+            assert_eq!(reader.frame_at(pts).unwrap().unwrap().data, [value; 6]);
+        }
+        assert!(reader.exhausted());
+        assert!(reader.frame_at(0).is_err());
+    }
     #[test]
     fn timeline_preserves_submicrosecond_pts_and_secondary_clock() {
         let timeline = FadeTimeline::new(2, 3).unwrap();
