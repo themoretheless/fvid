@@ -1,5 +1,3 @@
-#![cfg(feature = "media")]
-
 use std::path::{Path, PathBuf};
 
 #[test]

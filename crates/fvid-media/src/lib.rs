@@ -213,3 +213,7 @@ pub mod owned_ima4;
 pub mod owned_ima_wav;
 
 pub mod owned_ms_adpcm;
+
+pub mod owned_play_controls;
+#[cfg(not(feature = "legacy-ffmpeg"))]
+pub use owned_play_controls::*;
