@@ -4534,6 +4534,8 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
     }
     let mut quiet = false;
     let mut report = false;
+    let mut policy = fvid::media_control::CopyOptions::default();
+    let mut custom_policy = false;
     let (mut from, mut to) = (None, None);
     let mut transform = fvid::media_info::LosslessTransform::default();
     let mut options = args[3..].iter();
@@ -4543,6 +4545,21 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             return Err(format!("duplicate option: {option}").into());
         }
         match option.as_str() {
+            "--streams" => {
+                policy.streams = options
+                    .next()
+                    .ok_or("missing stream selection")?
+                    .split(',')
+                    .map(str::parse::<usize>)
+                    .collect::<Result<Vec<_>, _>>()?;
+                custom_policy = true;
+                continue;
+            }
+            "--max-packets" => {
+                policy.max_packets = Some(options.next().ok_or("missing packet limit")?.parse()?);
+                custom_policy = true;
+                continue;
+            }
             "--from" | "--to" => {
                 let value = fvid::media_info::parse_time(
                     options.next().ok_or("missing interval boundary")?,
@@ -4654,7 +4671,10 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
         }
     };
     let source = std::path::Path::new(&args[command + 1]);
-    if fvid::native_lossless::supports(&transform) && fvid::native_lossless::eligible(source)? {
+    if !custom_policy
+        && fvid::native_lossless::supports(&transform)
+        && fvid::native_lossless::eligible(source)?
+    {
         if !planning {
             return Ok(false);
         } // The controlled native exporter below owns this path.
@@ -4664,7 +4684,7 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
         }
         return Ok(true);
     }
-    let mut options = fvid::media_control::CopyOptions::default();
+    let mut options = policy;
     if report {
         options.progress = Some(fvid::media_control::ProgressHook::new(|event| {
             eprintln!(

@@ -832,3 +832,41 @@ fn owned_temporal_cli_interval_matches_api_and_rejects_incomplete_ranges() {
         assert!(!rejected.exists());
     }
 }
+
+#[test]
+fn owned_temporal_cli_enforces_input_packet_limit_and_stream_selection() {
+    let dir = directory("temporal-policy");
+    let source = fixture("playback-errors/framestep-six-frames.y4m");
+    for (limit, success) in [("6", true), ("5", false)] {
+        let output = dir.0.join(format!("limit-{limit}.mkv"));
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "transcode-lossless"])
+            .arg(&source)
+            .arg(&output)
+            .args([
+                "--framestep",
+                "2",
+                "--streams",
+                "0",
+                "--max-packets",
+                limit,
+            ])
+            .output()
+            .unwrap();
+        assert_eq!(
+            out.status.success(),
+            success,
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        if success {
+            let stats: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+            assert_eq!(stats["backend"], "fvid");
+            assert_eq!(stats["video_frames"], 3);
+        } else {
+            assert!(!output.exists());
+            assert!(String::from_utf8_lossy(&out.stderr).contains("packet"));
+        }
+    }
+    assert_eq!(std::fs::read_dir(&dir.0).unwrap().count(), 1);
+}
