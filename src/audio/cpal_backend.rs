@@ -1,6 +1,6 @@
 //! Cross-platform audio backend using cpal.
 //!
-//! The backend opens the default output device, configures it for the stream's
+//! The backend opens the default or explicitly selected output device, configures it for the stream's
 //! sample rate and channel count, and runs a callback that fills the audio
 //! buffer from a ring of decoded samples. The ring absorbs jitter between the
 //! decoder thread and the audio hardware clock.
@@ -205,7 +205,25 @@ impl Shared {
     }
 }
 
+fn select_named_output<T>(
+    devices: impl Iterator<Item = (String, T)>,
+    wanted: &str,
+) -> Result<T, AudioError> {
+    let wanted = wanted.trim();
+    if !wanted.is_empty() {
+        for (name, device) in devices {
+            if name.eq_ignore_ascii_case(wanted) {
+                return Ok(device);
+            }
+        }
+    }
+    Err(AudioError::InitFailed(format!(
+        "audio output device not found: {wanted:?}"
+    )))
+}
+
 pub struct CpalBackend {
+    output_device: Option<String>,
     shared: Arc<Shared>,
     stream: Option<Stream>,
     sample_rate: u32,
@@ -216,7 +234,12 @@ pub struct CpalBackend {
 
 impl CpalBackend {
     pub fn new() -> Self {
+        Self::with_output_device(None)
+    }
+
+    pub fn with_output_device(output_device: Option<String>) -> Self {
         Self {
+            output_device,
             shared: Arc::new(Shared {
                 ring: Mutex::new(Ring::new(2)),
                 volume: AtomicU32::new(1000),
@@ -229,11 +252,27 @@ impl CpalBackend {
         }
     }
 
+    pub fn output_devices() -> Vec<String> {
+        cpal::default_host()
+            .output_devices()
+            .map(|devices| devices.filter_map(|device| device.name().ok()).collect())
+            .unwrap_or_default()
+    }
+
     fn create_stream(&mut self, spec: AudioSpec) -> Result<(), AudioError> {
         let host = cpal::default_host();
-        let device = host
-            .default_output_device()
-            .ok_or_else(|| AudioError::InitFailed("no output device".into()))?;
+        let device = if let Some(name) = &self.output_device {
+            let devices = host
+                .output_devices()
+                .map_err(|error| AudioError::InitFailed(error.to_string()))?;
+            select_named_output(
+                devices.filter_map(|device| device.name().ok().map(|name| (name, device))),
+                name,
+            )?
+        } else {
+            host.default_output_device()
+                .ok_or_else(|| AudioError::InitFailed("no output device".into()))?
+        };
 
         let config = StreamConfig {
             channels: spec.channels as cpal::ChannelCount,
@@ -378,6 +417,17 @@ impl AudioBackend for CpalBackend {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn explicit_output_selection_matches_names_and_never_falls_back() {
+        let devices = || vec![("Speakers".to_owned(), 1), ("USB DAC".to_owned(), 2)].into_iter();
+        assert_eq!(
+            super::select_named_output(devices(), " usb dac ").unwrap(),
+            2
+        );
+        assert!(super::select_named_output(devices(), "missing").is_err());
+        assert!(super::select_named_output(devices(), "").is_err());
+    }
+
     use super::Ring;
     use crate::audio::scaled_frames;
 

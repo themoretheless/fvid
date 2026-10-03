@@ -178,6 +178,8 @@ impl Grading {
 /// What `fvid play` was asked for: the inputs to queue, and how the first of
 /// them starts, stops and runs at.
 struct PlayArgs {
+    audio_device: Option<String>,
+    list_audio_devices: bool,
     fullscreen: bool,
     on_top: bool,
     quit_at_end: bool,
@@ -246,6 +248,8 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
     let mut on_top = false;
     let mut quit_at_end = false;
     let mut snapshot_dir = None;
+    let mut audio_device = None;
+    let mut list_audio_devices = false;
     let mut no_audio = false;
     let mut audio_track = None;
     let mut subtitle_track = None;
@@ -270,6 +274,12 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         };
         index += 1;
         match flag {
+            "--audio-device" => {
+                let name = option_value(args, &mut index, flag, inline)?;
+                if name.trim().is_empty() { return Err(crate::invalid("--audio-device requires a nonempty name")); }
+                audio_device = Some(name);
+            }
+            "--list-audio-devices" => { no_value(inline, flag)?; list_audio_devices = true; }
             "--fullscreen" => { no_value(inline, flag)?; fullscreen = true; }
             "--on-top" => { no_value(inline, flag)?; on_top = true; }
             "--play-and-exit" => { no_value(inline, flag)?; quit_at_end = true; }
@@ -436,6 +446,8 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         return Err(crate::invalid("--device requires an explicit player backend when not zero"));
     }
     Ok(PlayArgs {
+        audio_device,
+        list_audio_devices,
         fullscreen,
         on_top,
         quit_at_end,
@@ -907,10 +919,15 @@ fn read_lut(path: &str) -> crate::Result<Lut> {
 
 pub fn run(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
     let parsed = parse_play_args(&args)?;
+    if parsed.list_audio_devices {
+        for name in crate::audio::PlatformBackend::output_devices() { println!("{name}"); }
+        return Ok(());
+    }
     crate::playback_spool::reserve_startup_buffer();
     let gpu_configuration = crate::player_gpu::configuration(parsed.gpu_backend, parsed.gpu_device)?;
     let shader = parsed.shader;
     let mut app = Player {
+        preferred_output: parsed.audio_device,
         queue: expand_inputs(&parsed.paths),
         bounds: PlayBounds {
             start: parsed.start,
@@ -1561,6 +1578,7 @@ fn prepare_source(path: &Path, cancelled: &std::sync::atomic::AtomicBool) -> Pre
 }
 
 struct Player {
+    preferred_output: Option<String>,
     quit_at_end: bool,
     snapshot_dir: Option<PathBuf>,
     next_file: Option<NextFile>,
@@ -1777,6 +1795,7 @@ struct Player {
 impl Default for Player {
     fn default() -> Self {
         Self {
+            preferred_output: None,
             quit_at_end: false,
             snapshot_dir: None,
             skin: player_skin::Skin::default(),
@@ -2157,8 +2176,9 @@ impl Player {
         // sounding, which is what the panel is asked to name.
         self.sound_codec = sound_codec(stream.codec());
         self.audio_track = nth;
-        self.audio = Some(crate::audio_thread::AudioPlayback::start(stream, || {
-            Box::new(crate::audio::PlatformBackend::new())
+        let output = self.preferred_output.clone();
+        self.audio = Some(crate::audio_thread::AudioPlayback::start(stream, move || {
+            Box::new(crate::audio::PlatformBackend::with_output_device(output))
         }));
         true
     }
@@ -2870,6 +2890,7 @@ impl Player {
     }
 
     fn begin_open(&mut self, path: PathBuf) {
+        let preferred_output = self.preferred_output.clone();
         let prepared_source = self.prepared_source.take();
         let (send, receive) = std::sync::mpsc::channel();
         let (
@@ -2943,6 +2964,7 @@ impl Player {
         self.activity = Instant::now();
         std::thread::spawn(move || {
             let mut prepared = Player {
+                preferred_output,
                 grading,
                 bounds,
                 no_audio,
@@ -5966,6 +5988,17 @@ mod tests {
                 .map(|word| word.to_string())
                 .collect::<Vec<_>>(),
         )
+    }
+
+    #[test]
+    fn native_audio_device_options_work_without_an_input_or_window() {
+        let parsed = play_args(&["--list-audio-devices"]).unwrap();
+        assert!(parsed.list_audio_devices);
+        assert!(parsed.paths.is_empty());
+        let parsed = play_args(&["--audio-device=USB DAC", "clip.y4m"]).unwrap();
+        assert_eq!(parsed.audio_device.as_deref(), Some("USB DAC"));
+        assert!(play_args(&["--audio-device=", "clip.y4m"]).is_err());
+        assert!(play_args(&["--list-audio-devices=true"]).is_err());
     }
 
     #[test]

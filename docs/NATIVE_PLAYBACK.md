@@ -3265,3 +3265,9 @@ Native player startup also accepts `--fullscreen`, `--on-top`,
 Exit waits for the complete playlist and leaves decoding errors visible.
 Snapshot directories are created only when saving a picture. These options
 are covered by native viewport, queue and PNG acceptance tests without libav.
+
+`fvid play --list-audio-devices` enumerates CPAL outputs before GPU/window
+initialization. `--audio-device NAME` selects an output by case-insensitive
+exact name, retained across background opens and track changes. A requested
+device that cannot be found reports an initialization error; it does not fall
+back to the default output. Enumeration and selection do not use libav.
