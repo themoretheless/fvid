@@ -4541,10 +4541,27 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
     let mut options = args[3..].iter();
     let mut seen = std::collections::BTreeSet::new();
     while let Some(option) = options.next() {
-        if !seen.insert(option) {
+        if !matches!(option.as_str(), "--metadata" | "--metadata-delete") && !seen.insert(option) {
             return Err(format!("duplicate option: {option}").into());
         }
         match option.as_str() {
+            "--metadata" => {
+                let (key, value) = options
+                    .next()
+                    .ok_or("missing metadata")?
+                    .split_once('=')
+                    .ok_or("metadata requires KEY=VALUE")?;
+                policy.metadata_set.push((key.to_owned(), value.to_owned()));
+                custom_policy = true;
+                continue;
+            }
+            "--metadata-delete" => {
+                policy
+                    .metadata_delete
+                    .push(options.next().ok_or("missing metadata key")?.clone());
+                custom_policy = true;
+                continue;
+            }
             "--streams" => {
                 policy.streams = options
                     .next()

@@ -870,3 +870,43 @@ fn owned_temporal_cli_enforces_input_packet_limit_and_stream_selection() {
     }
     assert_eq!(std::fs::read_dir(&dir.0).unwrap().count(), 1);
 }
+
+#[test]
+fn owned_cli_export_writes_multiple_container_tags() {
+    let dir = directory("owned-tags-cli");
+    let source = fixture("playback-errors/framestep-six-frames.y4m");
+    let output = dir.0.join("tagged.mkv");
+    let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "transcode-lossless"])
+        .arg(&source)
+        .arg(&output)
+        .args([
+            "--framestep",
+            "2",
+            "--metadata",
+            "title=Synthetic title",
+            "--metadata",
+            "artist=FVid regression",
+            "--metadata-delete",
+            "album",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let stats: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(stats["backend"], "fvid");
+    assert_eq!(stats["video_frames"], 3);
+    let mut reader = fvid_media::owned_webm::WebmReader::open(
+        Cursor::new(std::fs::read(output).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    reader.scan_all().unwrap();
+    assert_eq!(reader.tags.title, "Synthetic title");
+    assert_eq!(reader.tags.artist, "FVid regression");
+    assert!(reader.tags.album.is_empty());
+}
