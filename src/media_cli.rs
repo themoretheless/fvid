@@ -940,6 +940,19 @@ fn pixel_decode_args(
             result.push(value.clone());
             continue;
         }
+        if arg == "--hue" {
+            let value = args.next().ok_or("missing hue args")?;
+            if filters.hue.is_some() {
+                return Err("duplicate hue".into());
+            }
+            if let Ok(filter) = fvid_media::owned_hue::Hue::parse(value) {
+                filters.hue = Some(filter);
+            } else {
+                result.push(arg.clone());
+                result.push(value.clone());
+            }
+            continue;
+        }
         if arg == "--negate" {
             if filters.negate.is_some() {
                 return Err("duplicate negate".into());

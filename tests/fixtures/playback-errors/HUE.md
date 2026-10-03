@@ -16,3 +16,8 @@ Owned production admission covers constant numeric parameters and 8/10-bit
 planar YUV. Expressions involving timestamps or other variables, RGB,
 monochrome, and other bit depths still require implementation. This does not
 claim full replacement of the expression-based legacy filter.
+
+The native MP4 frontend and `media decode --hue` also use this shared filter.
+`native_hue` verifies the shared request and CLI with the committed synthetic
+MP4 control, and checks hue-before-negate ordering with literal pixel values.
+Ordinary tests run with no external codec executable.
