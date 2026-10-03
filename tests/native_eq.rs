@@ -81,3 +81,46 @@ fn mp4_decode_eq_request_and_cli_do_not_require_external_codec() {
         "fvid"
     );
 }
+
+#[test]
+fn owned_eq_preserves_monochrome_ffv1_and_packet_clock() {
+    let source = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/ffv1-gray-8.mkv");
+    let output = std::env::temp_dir().join(format!("fvid-gray-eq-{}.mkv", std::process::id()));
+    let request = fvid::media_info::LosslessTransform {
+        eq: Some("contrast=0:gamma_r=2:gamma_b=2".into()),
+        ..Default::default()
+    };
+    let stats =
+        fvid_media::transcode_lossless(&source, &output, request, &Default::default()).unwrap();
+    assert_eq!(stats.backend, "fvid");
+    assert_eq!(stats.pixel_format, "gray");
+    assert_eq!(stats.video_frames, 2);
+    let mut original = fvid_media::owned_webm::WebmReader::open(
+        Cursor::new(std::fs::read(&source).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    original.scan_all().unwrap();
+    let mut exported = fvid_media::owned_webm::WebmReader::open(
+        Cursor::new(std::fs::read(&output).unwrap()),
+        Default::default(),
+    )
+    .unwrap();
+    exported.scan_all().unwrap();
+    assert_eq!(exported.packets.len(), original.packets.len());
+    let mut decoder = fvid_media::owned_ffv1_decoder::Decoder::new(4, 3, 1 << 20).unwrap();
+    for index in 0..exported.packets.len() {
+        assert_eq!(
+            exported.packets[index].pts_ns,
+            original.packets[index].pts_ns
+        );
+        let frame = decoder
+            .decode(&exported.read_packet(index).unwrap())
+            .unwrap();
+        assert_eq!(decoder.monochrome(), Some(true));
+        assert_eq!(&frame.frame.data[..12], &[127; 12]);
+        assert_eq!(&frame.frame.data[12..], &[128; 24]);
+    }
+    std::fs::remove_file(output).unwrap();
+}
