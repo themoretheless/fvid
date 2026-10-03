@@ -4600,6 +4600,9 @@ fn owned_filter_plan(args: &[String]) -> Result<bool, Box<dyn std::error::Error>
             _ => {}
         }
         let slot = match option.as_str() {
+            "--framestep" => &mut transform.framestep,
+            "--reverse" => &mut transform.reverse,
+            "--shuffleframes" => &mut transform.shuffleframes,
             "--eq" => &mut transform.eq,
             "--unsharp" => &mut transform.unsharp,
             "--hue" => &mut transform.hue,
@@ -4620,10 +4623,16 @@ fn owned_filter_plan(args: &[String]) -> Result<bool, Box<dyn std::error::Error>
         };
         *slot = Some(options.next().ok_or("missing filter parameters")?.clone());
     }
+    let source = std::path::Path::new(&args[2]);
     if !fvid::native_lossless::supports(&transform) {
+        let options = Default::default();
+        if fvid_media::owned_lossless::supports(source, &transform, &options) {
+            let plan = fvid_media::owned_lossless::plan_transcode_lossless(source, &transform, &options, None)?;
+            println!("{}", serde_json::to_string_pretty(&plan)?);
+            return Ok(true);
+        }
         return Ok(false);
     }
-    let source = std::path::Path::new(&args[2]);
     if !fvid::native_lossless::eligible(source)? {
         return Ok(false);
     }

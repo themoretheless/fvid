@@ -250,3 +250,43 @@ fn owned_encoder_settings_admit_only_implemented_level() {
         );
     }
 }
+
+#[test]
+fn temporal_lossless_cli_plans_use_owned_export_backend() {
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/framestep-six-frames.y4m");
+    for (option, value) in [
+        ("--framestep", "2"),
+        ("--reverse", ""),
+        ("--shuffleframes", "2 1 0"),
+    ] {
+        let mut request = fvid::media_info::LosslessTransform::default();
+        match option {
+            "--framestep" => request.framestep = Some(value.into()),
+            "--reverse" => request.reverse = Some(value.into()),
+            _ => request.shuffleframes = Some(value.into()),
+        }
+        let expected = fvid_media::owned_lossless::plan_transcode_lossless(
+            &source,
+            &request,
+            &Default::default(),
+            None,
+        )
+        .unwrap();
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "plan", "transcode-lossless"])
+            .arg(&source)
+            .args([option, value])
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        assert_eq!(
+            serde_json::from_slice::<serde_json::Value>(&out.stdout).unwrap(),
+            serde_json::to_value(expected).unwrap()
+        );
+    }
+}

@@ -129,7 +129,8 @@ fn policy(o: &CopyOptions, text_tags: bool) -> bool {
             o.stream_metadata_set.is_empty() && o.stream_metadata_delete.is_empty()
         }
 }
-pub(crate) fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) -> bool {
+/// Whether the owned export pipeline admits this source, transform and policy.
+pub fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) -> bool {
     if policy(o, true) && request(t).is_some_and(|r| crate::owned_ffv1_export::supports(source, &r)) {
         return true;
     }
