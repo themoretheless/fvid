@@ -333,7 +333,7 @@ pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_inf
     if !geometry.is_identity() {steps.push(PlanStep{action:"geometry".into(),detail:format!("crop {:?}; horizontal flip {}; vertical flip {}; transpose {:?}; pad {:?}; scale {:?}; normalize stored rotation first",geometry.crop,geometry.horizontal_flip,geometry.vertical_flip,geometry.transpose,geometry.pad,geometry.scale)});}
     if !filters.is_empty() {
         for (name,args) in [("eq",&transform.eq),("unsharp",&transform.unsharp),("hue",&transform.hue),
-            ("avgblur",&transform.avgblur),("boxblur",&transform.boxblur),
+            ("gblur",&transform.gblur),("avgblur",&transform.avgblur),("boxblur",&transform.boxblur),
             ("negate",&transform.negate),("sobel",&transform.sobel),("prewitt",&transform.prewitt),
             ("roberts",&transform.roberts),("kirsch",&transform.kirsch),("scharr",&transform.scharr),
             ("pixelize",&transform.pixelize),("dilation",&transform.dilation),("erosion",&transform.erosion),("chromashift",&transform.chromashift),("shuffleplanes",&transform.shuffleplanes)] {

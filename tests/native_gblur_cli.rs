@@ -19,6 +19,29 @@ fn decode_plan_and_export_gaussian_without_ffmpeg() {
         );
         String::from_utf8(result.stdout).unwrap()
     };
+    let owned_plan = fvid::native_plan::transcode_lossless(
+        &source,
+        &fvid::media_info::LosslessTransform {
+            gblur: Some("sigma=1:sigmaV=0:planes=1".into()),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    assert!(
+        owned_plan
+            .steps
+            .iter()
+            .any(|step| step.action == "filter" && step.detail.contains("gblur"))
+    );
+    let capabilities = run(vec!["media".into(), "capabilities".into()]);
+    let capabilities: serde_json::Value = serde_json::from_str(&capabilities).unwrap();
+    assert!(
+        capabilities["filters"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|name| name == "gblur")
+    );
     let source = source.to_str().unwrap().to_owned();
     let filter = "sigma=1:sigmaV=0:planes=1".to_owned();
     let decoded = run(vec![
