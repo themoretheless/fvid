@@ -94,6 +94,10 @@ pub struct Decoder {
     state: Option<State>,
 }
 impl Decoder {
+    /// Source chroma presence after a successfully decoded frame.
+    pub fn monochrome(&self) -> Option<bool> {
+        self.state.as_ref().map(|state| !state.has_chroma)
+    }
     pub fn new(width: usize, height: usize, budget: usize) -> Result<Self> {
         if width == 0
             || height == 0

@@ -6,8 +6,9 @@ type Result<T> = std::result::Result<T, String>;
 fn invalid(message: &str) -> String {
     message.into()
 }
+pub(crate) const UNSUPPORTED_PREFIX: &str = "unsupported FFV1 capability: ";
 fn unsupported(message: &str) -> String {
-    message.into()
+    format!("{UNSUPPORTED_PREFIX}{message}")
 }
 include!("owned_ffv1_decoder_impl.rs");
 

@@ -59,14 +59,18 @@ fn main() {
         subprocess.run([str(binary), str(args.output.resolve())], check=True)
     videos = [(depth, 40_000_000, f"ffv1-gray-{depth}.mkv") for depth in [8, 10, 16]]
     videos.append((8, 16_666_667, "matroska-default-duration-60fps.mkv"))
+    videos.extend([(8, 40_000_000, "ffv1-positive-start.mkv"),
+                   (8, 40_000_000, "ffv1-invalid-range-header.mkv")])
     for depth, frame_duration, name in videos:
         header = element(0x1A45DFA3, uint(0x4286, 1) + uint(0x42F7, 1) + uint(0x42F2, 4) + uint(0x42F3, 8) + element(0x4282, b"matroska") + uint(0x4287, 4) + uint(0x4285, 2))
         info = element(0x1549A966, uint(0x2AD7B1, 1_000_000) + element(0x4D80, b"fvid-synthetic") + element(0x5741, b"fvid-synthetic") + element(0x4489, struct.pack(">d", 2 * frame_duration / 1_000_000)))
         track = uint(0xD7, 1) + uint(0x73C5, 1) + uint(0x83, 1) + element(0x86, b"V_FFV1") + uint(0x23E383, frame_duration) + element(0xE0, uint(0xB0, 4) + uint(0xBA, 3))
         tracks = element(0x1654AE6B, element(0xAE, track))
-        cluster = uint(0xE7, 0)
+        cluster = uint(0xE7, 200 if name == "ffv1-positive-start.mkv" else 0)
         for index in range(2):
             packet = (args.output / f"ffv1-gray-{depth}-{index}.packet").read_bytes()
+            if name == "ffv1-invalid-range-header.mkv" and index == 1:
+                packet = b"\xff\xff" + packet[2:]
             cluster += element(0xA3, b"\x81" + ((index * frame_duration + 500_000) // 1_000_000).to_bytes(2, "big") + b"\x80" + packet)
         (args.output / name).write_bytes(header + element(0x18538067, info + tracks + element(0x1F43B675, cluster)))
 
