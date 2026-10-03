@@ -90,7 +90,7 @@ fn plan_refuses_requests_the_owned_writer_cannot_execute() {
     assert!(
         fvid_media::owned_audio_plan::plan_decode_audio(&adts, &Default::default(), &options)
             .unwrap_err()
-            .contains("allocation admission")
+            .contains("controlled memory budget exceeded")
     );
     let options = CopyOptions {
         metadata_set: vec![("title".into(), "bad\0value".into())],
