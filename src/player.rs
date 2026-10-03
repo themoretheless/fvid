@@ -180,6 +180,7 @@ impl Grading {
 struct SphericalView {
     enabled: bool,
     projection: fvid_media::SphericalProjection,
+    stereo: fvid_media::SphericalStereoLayout,
     yaw: i32,
     pitch: i32,
     roll: i32,
@@ -187,7 +188,7 @@ struct SphericalView {
 }
 impl Default for SphericalView {
     fn default() -> Self {
-        Self { enabled: false, projection: fvid_media::SphericalProjection::Equirect, yaw: 0, pitch: 0, roll: 0, fov: 80_000 }
+        Self { stereo: fvid_media::SphericalStereoLayout::Mono, enabled: false, projection: fvid_media::SphericalProjection::Equirect, yaw: 0, pitch: 0, roll: 0, fov: 80_000 }
     }
 }
 
@@ -391,6 +392,11 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
             }
             "--spherical" | "--360" => {
                 no_value(inline, flag)?;
+                spherical.enabled = true;
+            }
+            "--spherical-stereo" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                spherical.stereo = fvid_media::parse_spherical_stereo(&value).map_err(|e| crate::invalid(&e))?;
                 spherical.enabled = true;
             }
             "--spherical-projection" => {
@@ -999,7 +1005,7 @@ fn parse_media_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         } else {
             native.push(arg.clone());
             if inline.is_none() && matches!(flag,
-                "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
+                "--spherical-stereo" | "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
                 | "--backend" | "--device" | "--shader" | "--skin" | "--start-time" | "--stop-time"
                 | "--rate" | "--audio-delay" | "--subtitle-delay" | "--volume" | "--zoom"
                 | "--crop" | "--aspect" | "--brightness" | "--gamma" | "--saturation" | "--contrast"
@@ -1730,7 +1736,19 @@ fn spherical_frame(frame: &mut Frame, view: SphericalView) -> crate::Result<()> 
     let source: Vec<u32> = rgb.chunks_exact(3).map(|p| (u32::from(p[0]) << 16) | (u32::from(p[1]) << 8) | u32::from(p[2])).collect();
     let width = u32::try_from(frame.dimensions[0]).map_err(|_| crate::invalid("spherical width overflow"))?;
     let height = u32::try_from(frame.dimensions[1]).map_err(|_| crate::invalid("spherical height overflow"))?;
-    let pixels = fvid_media::project_spherical_view(width, height, &source, width, height, view.projection, view.yaw, view.pitch, view.roll, view.fov);
+    // A monoscopic display reads the left eye, retaining the display canvas.
+    // Split rows before projection so longitude wraps within that eye only.
+    let (eye_width, eye_height) = match view.stereo {
+        fvid_media::SphericalStereoLayout::Mono => (width, height),
+        fvid_media::SphericalStereoLayout::SideBySide => (width / 2, height),
+        fvid_media::SphericalStereoLayout::TopBottom => (width, height / 2),
+    };
+    if eye_width == 0 || eye_height == 0 {
+        return Err(crate::invalid("spherical stereo frame has no complete eye"));
+    }
+    let eye: Vec<u32> = source.chunks_exact(width as usize).take(eye_height as usize)
+        .flat_map(|row| row[..eye_width as usize].iter().copied()).collect();
+    let pixels = fvid_media::project_spherical_view(eye_width, eye_height, &eye, width, height, view.projection, view.yaw, view.pitch, view.roll, view.fov);
     frame.pixels = Pixels::Rgb(pixels.into_iter().flat_map(|p| [(p >> 16) as u8, (p >> 8) as u8, p as u8]).collect());
     Ok(())
 }
@@ -6135,6 +6153,28 @@ mod tests {
                 .map(|word| word.to_string())
                 .collect::<Vec<_>>(),
         )
+    }
+
+    #[test]
+    fn spherical_stereo_never_samples_the_other_eye() {
+        for layout in ["sbs", "tb"] {
+            let parsed = super::parse_media_play_args(&[format!("--spherical-stereo={layout}"), "clip.y4m".into()]).unwrap();
+            assert!(parsed.spherical.enabled);
+            let rgb: Vec<u8> = (0..4).flat_map(|y| (0..8).flat_map(move |x| {
+                if (layout == "sbs" && x < 4) || (layout == "tb" && y < 2) { [20,40,60] } else { [200,180,160] }
+            })).collect();
+            let mut frame = Frame {
+                pixels: Pixels::Rgb(rgb), dimensions: [8,4], period: Duration::from_millis(17),
+                interval: Some((2,3,60)), pts: Some((2,60)), generation: 7, serial: 9,
+            };
+            super::spherical_frame(&mut frame, parsed.spherical).unwrap();
+            let Pixels::Rgb(rgb) = &frame.pixels else { panic!("expected RGB") };
+            assert_eq!(rgb, &vec![20,40,60].repeat(32));
+            assert_eq!(frame.dimensions, [8,4]);
+            assert_eq!(frame.interval, Some((2,3,60)));
+            assert_eq!(frame.pts, Some((2,60)));
+        }
+        assert!(parse_play_args(&["--spherical-stereo=bad".into()]).is_err());
     }
 
     #[test]
