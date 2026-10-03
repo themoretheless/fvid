@@ -2,6 +2,7 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    if owned_xfade_command(args)? { return Ok(()); }
     if owned_lossless_command(args)? { return Ok(()); }
     if args.first().map(String::as_str) == Some("transcode") && args.len() >= 3 {
         let mut owned = vec!["transcode-lossless".to_owned(), args[1].clone(), args[2].clone()];
@@ -4755,5 +4756,41 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             println!("{}", serde_json::to_string(&stats)?);
         }
     }
+    Ok(true)
+}
+
+fn owned_xfade_command(args: &[String]) -> Result<bool, Box<dyn std::error::Error>> {
+    if args.first().map(String::as_str) != Some("xfade") || args.len() < 4 { return Ok(false); }
+    let mut options = fvid::media_control::CopyOptions::default();
+    let mut duration = None;
+    let mut offset = 0;
+    let mut transition = "fade";
+    let mut quiet = false;
+    let mut values = args[4..].iter();
+    while let Some(flag) = values.next() {
+        match flag.as_str() {
+            "--quiet" => quiet = true,
+            "--progress" => options.progress = Some(fvid::media_control::ProgressHook::new(|event| {
+                eprintln!("{}", serde_json::json!({"packets":event.packets,"payload_bytes":event.payload_bytes,"done":event.done}));
+            })),
+            "--transition" => transition = values.next().ok_or("missing transition")?,
+            "--xfade-duration" => duration = Some(fvid::media_info::parse_time(values.next().ok_or("missing xfade duration")?)?),
+            "--xfade-offset" => offset = fvid::media_info::parse_time(values.next().ok_or("missing xfade offset")?)?,
+            "--max-packets" => options.max_packets = Some(values.next().ok_or("missing max packets")?.parse()?),
+            "--metadata" => {
+                let (key, value) = values.next().ok_or("missing metadata")?.split_once('=').ok_or("metadata requires KEY=VALUE")?;
+                options.metadata_set.push((key.into(), value.into()));
+            }
+            "--delete-metadata" => options.metadata_delete.push(values.next().ok_or("missing metadata key")?.clone()),
+            _ => return Ok(false),
+        }
+    }
+    let duration = duration.ok_or("xfade requires --xfade-duration")?;
+    let stats = fvid_media::owned_xfade::try_xfade_video(
+        std::path::Path::new(&args[1]), std::path::Path::new(&args[2]), std::path::Path::new(&args[3]),
+        transition, duration, offset, &options,
+    )?;
+    let Some(stats) = stats else { return Ok(false); };
+    if !quiet { println!("{}", serde_json::to_string_pretty(&stats)?); }
     Ok(true)
 }

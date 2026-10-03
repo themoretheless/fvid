@@ -32,7 +32,7 @@ fn valid_track_key(key: &str) -> bool {
             "rotate" | "stereo_mode" | "alpha_mode"
         )
 }
-pub(crate) fn try_xfade_video(
+pub fn try_xfade_video(
     source: &std::path::Path,
     other: &std::path::Path,
     destination: &std::path::Path,
