@@ -145,3 +145,71 @@ fn matroska_probe_subtracts_codec_delay_without_changing_packet_clock() {
     .unwrap();
     assert_eq!(reader.packets[0].pts_ns, 5000000);
 }
+
+#[test]
+fn opus_laces_without_default_duration_use_each_packet_clock() {
+    for name in [
+        "opus-lace-xiph.mka",
+        "opus-lace-ebml.mka",
+        "opus-lace-xiph-group.mka",
+        "opus-lace-ebml-group.mka",
+    ] {
+        let source = fixture(name);
+        let bytes = std::fs::read(&source).unwrap();
+        let mut reader =
+            fvid_media::owned_webm::WebmReader::open(Cursor::new(&bytes), Default::default())
+                .unwrap();
+        reader.scan_all().unwrap();
+        assert_eq!(reader.packets.len(), 4);
+        assert_eq!(reader.tracks[0].default_duration_ns, 0);
+        let clocks = if name.contains("group") {
+            [
+                (0, 22500000),
+                (22500000, 22500000),
+                (45000000, 22500000),
+                (67500000, 22500000),
+            ]
+        } else {
+            [
+                (0, 20000000),
+                (20000000, 40000000),
+                (60000000, 10000000),
+                (70000000, 20000000),
+            ]
+        };
+        for (i, (pts, duration)) in clocks.into_iter().enumerate() {
+            assert_eq!(
+                (reader.packets[i].pts_ns, reader.packets[i].duration_ns),
+                (pts, Some(duration))
+            );
+            let coded = fvid_media::owned_opus_packet::duration_ns(&reader.read_packet(i).unwrap())
+                .unwrap();
+            assert_eq!(coded, [20000000, 40000000, 10000000, 20000000][i]);
+        }
+        let mut native =
+            fvid::container::webm::WebmReader::open(Cursor::new(&bytes), Default::default())
+                .unwrap();
+        native.scan_all().unwrap();
+        for (owned, front) in reader.packets.iter().zip(&native.packets) {
+            assert_eq!(
+                (owned.pts_ns, owned.duration_ns),
+                (front.pts_ns, front.duration_ns)
+            );
+        }
+        assert_eq!(fvid_media::probe(&source).unwrap().streams[0].codec, "opus");
+    }
+}
+
+#[test]
+fn invalid_opus_lace_framing_is_not_a_codec_timing_fallback() {
+    let source = fixture("opus-lace-invalid-packet.mka");
+    let error = fvid_media::owned_webm::WebmReader::open(
+        std::fs::File::open(&source).unwrap(),
+        Default::default(),
+    )
+    .err()
+    .unwrap();
+    assert!(!error.is_unsupported());
+    assert_eq!(error.to_string(), "invalid Opus packet duration");
+    assert_eq!(fvid_media::probe(&source).unwrap_err(), error.to_string());
+}

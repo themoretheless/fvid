@@ -17,9 +17,18 @@ The regression failed with +5 ms before the probe correction.
 
 The invalid-size fixtures are malformed-container refusal tests.
 `matroska-lace-no-clock.mkv` is a **capability refusal**, not a playback
-acceptance: codec-derived lace duration without DefaultDuration/BlockDuration
+acceptance: FFV1 codec-derived lace duration without DefaultDuration/BlockDuration
 still needs implementation. Content encoding is also not implemented here.
 
 Ordinary `matroska_lacing` tests require no external codec executable. The
 separate optional `ffmpeg_lacing_reference` benchmark compares decoded pixels
 with FFmpeg. Lacing follows https://www.matroska.org/technical/notes.html.
+
+Generate the Opus controls with `python3 scripts/generate_opus_lacing_fixtures.py`.
+Literal synthetic DTX packets exercise 20/40/10/20 ms codec durations in Xiph
+and EBML laces without DefaultDuration. Explicit BlockDuration takes precedence
+and distributes 90 ms equally across four packets. Tests verify both reader
+implementations and public probe dispatch; invalid packet framing is a malformed
+input refusal, not an unsupported-codec fallback. These are timing acceptance
+tests, not acceptance of an Opus PCM decoder. The optional reference benchmark
+checks container ticks and independently decodes 4320 samples per valid fixture.

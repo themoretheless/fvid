@@ -54,6 +54,7 @@ fn unsupported(message: &str) -> Error {
         unsupported: true,
     }
 }
+use crate::owned_opus_packet::{duration_ns as opus_lace_duration, header_channels as opus_lace_channels};
 include!("owned_webm_reader_impl.rs");
 #[cfg(test)]
 mod tests {

@@ -703,7 +703,27 @@ impl<R: Read + Seek> WebmReader<R> {
             let first = &packets[group.start];
             let origin = i128::from(first.pts_ns);
             let count = (group.end-group.start) as u128;
-            let default = tracks.iter().find(|t| t.number == first.track).unwrap().default_duration_ns;
+            let track = tracks.iter().find(|t| t.number == first.track).unwrap();
+            let default = track.default_duration_ns;
+            if default == 0 && first.duration_ns.is_none() && track.codec == "A_OPUS" {
+                opus_lace_channels(&track.codec_private).map_err(|_| unsupported(
+                    "Opus lace timing requires mono/stereo mapping family 0"))?;
+                let mut elapsed = 0i128;
+                let mut data = Vec::new();
+                for packet in &mut packets[group] {
+                    goto(&mut *reader, packet.offset)?;
+                    data.clear();
+                    data.try_reserve_exact(packet.size).map_err(|_| invalid("Opus lace timing allocation failed"))?;
+                    data.resize(packet.size,0);
+                    reader.read_exact(&mut data)?;
+                    let duration = opus_lace_duration(&data).map_err(|e| invalid(&e.to_string()))?;
+                    packet.pts_ns = i64::try_from(origin+elapsed).map_err(|_| invalid("WebM lace timestamp overflow"))?;
+                    packet.duration_ns = Some(duration);
+                    elapsed += i128::from(duration);
+                    *tail_ns = (*tail_ns).max(packet.pts_ns);
+                }
+                continue;
+            }
             let total = first.duration_ns.map(u128::from)
                 .or_else(|| (default != 0).then_some(u128::from(default)*count))
                 .ok_or_else(|| unsupported("Matroska lacing requires declared frame or block duration"))?;
