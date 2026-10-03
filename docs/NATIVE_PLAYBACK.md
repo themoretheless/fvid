@@ -3310,3 +3310,18 @@ Ordinary HTTP unit tests use in-memory response bodies and the committed
 cargo test --manifest-path crates/fvid-media/Cargo.toml --offline --no-default-features --features http-input --lib live_loopback_download -- --ignored
 cargo test --offline --no-default-features --features player --lib native_player_http_input -- --ignored
 ```
+
+### Finite HLS assembly library
+
+`fvid_media::owned_hls` parses master/media manifests and assembles finite fMP4
+resources through a caller-provided seekable fetch callback. Initialization and
+segment byte ranges are copied in playlist order with cancellation and an optional
+aggregate output byte limit. The module itself needs neither HTTP nor FFmpeg.
+
+Committed synthetic separate-resource and single-resource byte-range fixtures
+verify all 25 packets and timestamps against the fragmented MP4 source. Fixture
+regeneration uses Python to split the committed synthetic file; ordinary tests
+use local files only. Live reload, encryption, discontinuities, gaps and MPEG-TS
+assembly are explicitly refused. External rendition declarations are retained
+for the transport to handle. This library is not yet connected to the player's
+HTTP entrypoint; opening an HLS URL in the player is still unsupported.
