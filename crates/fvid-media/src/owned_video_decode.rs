@@ -46,10 +46,26 @@ pub(crate) fn decode_ffv1(
     frame_transform.input_format = None;
     frame_transform.interval = None;
     frame_transform.framestep = None;
+    frame_transform.reverse = None;
+    frame_transform.shuffleframes = None;
+    if transform
+        .reverse
+        .as_deref()
+        .is_some_and(|args| !args.is_empty())
+    {
+        return Ok(None);
+    }
+    let mut shuffle = match transform
+        .shuffleframes
+        .as_deref()
+        .map(crate::owned_shuffleframes::ShuffleFrames::parse)
+        .transpose()
+    {
+        Ok(filter) => filter,
+        Err(_) => return Ok(None),
+    };
     if !crate::owned_y4m_decode::supported_request(&frame_transform)
         || frame_transform.overlay.is_some()
-        || frame_transform.reverse.is_some()
-        || frame_transform.shuffleframes.is_some()
         || !transform
             .input_format
             .as_deref()
@@ -119,6 +135,14 @@ pub(crate) fn decode_ffv1(
         pixel_format: String::new(),
         decode_errors: 0,
     };
+    let temporal = transform.reverse.is_some() || shuffle.is_some();
+    let mut reverse = if transform.reverse.is_some() && visit.is_some() {
+        Some(crate::owned_reverse::Reverse::new()?)
+    } else {
+        None
+    };
+    let mut frame_metadata = None;
+    let mut temporal_format = None;
     let mut consumed = 0u64;
     let mut selected_inputs = 0u64;
     for index in 0..reader.packets.len() {
@@ -209,42 +233,106 @@ pub(crate) fn decode_ffv1(
             break;
         }
         if emit {
-            if let Some(callback) = visit.as_deref_mut() {
-                let monochrome = stats.pixel_format.starts_with("gray");
-                let subsampling = if monochrome {
-                    [1, 1]
-                } else if stats.pixel_format.starts_with("yuv420") {
-                    [2, 2]
-                } else if stats.pixel_format.starts_with("yuv422") {
-                    [2, 1]
-                } else if stats.pixel_format.starts_with("yuv440") {
-                    [1, 2]
-                } else if stats.pixel_format.starts_with("yuv411") {
-                    [4, 1]
-                } else if stats.pixel_format.starts_with("yuv410") {
-                    [4, 4]
-                } else {
-                    [1, 1]
-                };
-                callback(FrameView {
-                    pixels: transformed.as_deref().unwrap_or(&decoded.frame.data),
-                    width: stats.width,
-                    height: stats.height,
-                    depth: decoded.depth,
-                    subsampling,
-                    monochrome,
-                    pts_ns,
-                    duration_ns,
-                })?;
+            let monochrome = stats.pixel_format.starts_with("gray");
+            let subsampling = subsampling(&stats.pixel_format);
+            let metadata = (
+                stats.width,
+                stats.height,
+                decoded.depth,
+                subsampling,
+                monochrome,
+            );
+            if temporal && frame_metadata.is_some_and(|previous| previous != metadata) {
+                return Ok(None);
             }
+            frame_metadata = Some(metadata);
+            temporal_format = Some(stats.pixel_format.clone());
+            let pixels = transformed.as_deref().unwrap_or(&decoded.frame.data);
+            let retain = visit.is_some();
+            let mut sink = |data: &[u8], pts: u64, duration: u64| -> Result<()> {
+                if let Some(reverse) = reverse.as_mut() {
+                    reverse.push(data, pts, duration)?;
+                } else if let Some(callback) = visit.as_deref_mut() {
+                    callback(FrameView {
+                        pixels: data,
+                        width: metadata.0,
+                        height: metadata.1,
+                        depth: metadata.2,
+                        subsampling: metadata.3,
+                        monochrome: metadata.4,
+                        pts_ns: pts as i64,
+                        duration_ns: (duration != 0).then_some(duration),
+                    })?;
+                }
+                Ok(())
+            };
+            // The queue only stores timestamp bits; it performs no unsigned clock arithmetic.
+            let emitted = if let Some(shuffle) = shuffle.as_mut() {
+                shuffle.push(
+                    if retain { pixels } else { &[] },
+                    pts_ns as u64,
+                    duration_ns.unwrap_or(0),
+                    &mut sink,
+                )?
+            } else {
+                sink(pixels, pts_ns as u64, duration_ns.unwrap_or(0))?;
+                1
+            };
             std::hint::black_box(&transformed);
             stats.video_frames = stats
                 .video_frames
-                .checked_add(1)
+                .checked_add(emitted)
                 .ok_or("FFV1 frame count overflow")?;
         }
     }
+    drop(shuffle);
+    drop(decoder);
+    drop(reader);
+    if temporal {
+        if let Some(format) = temporal_format {
+            stats.pixel_format = format;
+        }
+    }
+    if let (Some(reverse), Some(metadata)) = (reverse.as_mut(), frame_metadata) {
+        reverse.flush(&mut |data, pts, duration| {
+            if options
+                .and_then(|o| o.cancel.as_ref())
+                .is_some_and(fvid_control::CancelFlag::is_cancelled)
+            {
+                return Err("media operation cancelled".into());
+            }
+            if let Some(callback) = visit.as_deref_mut() {
+                callback(FrameView {
+                    pixels: data,
+                    width: metadata.0,
+                    height: metadata.1,
+                    depth: metadata.2,
+                    subsampling: metadata.3,
+                    monochrome: metadata.4,
+                    pts_ns: pts as i64,
+                    duration_ns: (duration != 0).then_some(duration),
+                })?;
+            }
+            Ok(())
+        })?;
+    }
     Ok(Some((stats, consumed)))
+}
+
+fn subsampling(format: &str) -> [usize; 2] {
+    if format.starts_with("yuv420") {
+        [2, 2]
+    } else if format.starts_with("yuv422") {
+        [2, 1]
+    } else if format.starts_with("yuv440") {
+        [1, 2]
+    } else if format.starts_with("yuv411") {
+        [4, 1]
+    } else if format.starts_with("yuv410") {
+        [4, 4]
+    } else {
+        [1, 1]
+    }
 }
 
 fn process_frame(

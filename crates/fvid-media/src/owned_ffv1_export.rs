@@ -327,7 +327,10 @@ mod tests {
             let error = crate::transcode_lossless(
                 &root().join(fixture),
                 &destination,
-                Default::default(),
+                LosslessTransform {
+                    reverse: Some(String::new()),
+                    ..Default::default()
+                },
                 &options,
             )
             .unwrap_err();
@@ -349,7 +352,10 @@ mod tests {
         let error = crate::transcode_lossless(
             &root().join("ffv1-gray-8.mkv"),
             &destination,
-            Default::default(),
+            LosslessTransform {
+                reverse: Some(String::new()),
+                ..Default::default()
+            },
             &options,
         )
         .unwrap_err();
@@ -406,6 +412,171 @@ mod tests {
                 (mux.tracks[0].width, mux.tracks[0].height),
                 if scale.is_some() { (8, 6) } else { (4, 3) }
             );
+            std::fs::remove_file(output).unwrap();
+        }
+    }
+    #[test]
+    fn compressed_temporal_export_preserves_source_payload_order_and_forward_positions() {
+        let source = root().join("ffv1-six-frames.mkv");
+        for (case, reverse, shuffle, step, interval, indices, times) in [
+            (
+                "reverse",
+                true,
+                None,
+                None,
+                None,
+                vec![5, 4, 3, 2, 1, 0],
+                vec![0, 40, 80, 120, 160, 200],
+            ),
+            (
+                "range",
+                true,
+                None,
+                None,
+                Some((40_000, 200_000)),
+                vec![4, 3, 2, 1],
+                vec![0, 40, 80, 120],
+            ),
+            (
+                "compose",
+                true,
+                Some("2|1|0".into()),
+                Some("2".into()),
+                None,
+                vec![0, 2, 4],
+                vec![0, 80, 160],
+            ),
+            (
+                "shuffle",
+                false,
+                Some("2|0|1".into()),
+                None,
+                None,
+                vec![2, 0, 1, 5, 3, 4],
+                vec![0, 40, 80, 120, 160, 200],
+            ),
+            (
+                "tail",
+                true,
+                Some("2|1|0".into()),
+                None,
+                Some((40_000, 240_000)),
+                vec![1, 2, 3],
+                vec![0, 40, 80],
+            ),
+            (
+                "drops",
+                true,
+                Some("2|-1|2".into()),
+                None,
+                None,
+                vec![5, 5, 2, 2],
+                vec![0, 80, 120, 200],
+            ),
+        ] {
+            let output = std::env::temp_dir().join(format!(
+                "fvid-ffv1-temporal-{}-{case}.mkv",
+                std::process::id()
+            ));
+            let _ = std::fs::remove_file(&output);
+            let transform = LosslessTransform {
+                reverse: reverse.then(String::new),
+                shuffleframes: shuffle,
+                framestep: step,
+                interval,
+                ..Default::default()
+            };
+            let decoded = crate::decode_video_transformed(
+                &source,
+                DecodeTransform {
+                    reverse: transform.reverse.clone(),
+                    shuffleframes: transform.shuffleframes.clone(),
+                    framestep: transform.framestep.clone(),
+                    interval: transform.interval,
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            assert_eq!(decoded.backend, "owned Matroska FFV1 decode");
+            assert_eq!(decoded.video_frames, indices.len() as u64);
+            let plan =
+                crate::plan_transcode_lossless(&source, &transform, &Default::default(), None)
+                    .unwrap();
+            assert!(plan.notes[0].starts_with("backend: owned"));
+            let stats = crate::transcode_lossless(&source, &output, transform, &Default::default())
+                .unwrap();
+            assert_eq!(stats.video_frames, indices.len() as u64);
+            assert_eq!(stats.decoded_frames, if case == "range" { 5 } else { 6 });
+            let mut mux = input(&output).unwrap();
+            let mut decoder = crate::owned_ffv1_decoder::Decoder::new(4, 3, usize::MAX).unwrap();
+            for (i, index) in indices.into_iter().enumerate() {
+                assert_eq!(mux.packets[i].pts_ns, times[i] * 1_000_000);
+                assert_eq!(mux.packets[i].duration_ns, Some(40_000_000));
+                let frame = decoder.decode(&mux.read_packet(i).unwrap()).unwrap();
+                let expected: Vec<u8> = (0..12u32)
+                    .map(|pixel| match pixel {
+                        0 => 0,
+                        1 => 255,
+                        2 => 128,
+                        _ => ((pixel * 977 + index * 1237) & 255) as u8,
+                    })
+                    .collect();
+                assert_eq!(&frame.frame.data[..12], expected, "{case} frame {i}");
+            }
+            std::fs::remove_file(output).unwrap();
+        }
+    }
+    #[test]
+    fn variable_duration_reverse_keeps_position_timing_while_shuffle_maps_source_duration() {
+        let source = root().join("ffv1-vfr.mkv");
+        for (case, reverse, shuffle, durations) in [
+            (
+                "reverse",
+                Some(String::new()),
+                None,
+                [73_000_000, 27_000_000],
+            ),
+            (
+                "shuffle",
+                None,
+                Some("1|0".into()),
+                [27_000_000, 73_000_000],
+            ),
+        ] {
+            let output = std::env::temp_dir().join(format!(
+                "fvid-ffv1-temporal-vfr-{}-{case}.mkv",
+                std::process::id()
+            ));
+            let _ = std::fs::remove_file(&output);
+            crate::transcode_lossless(
+                &source,
+                &output,
+                LosslessTransform {
+                    reverse,
+                    shuffleframes: shuffle,
+                    ..Default::default()
+                },
+                &Default::default(),
+            )
+            .unwrap();
+            let mut mux = input(&output).unwrap();
+            assert_eq!(
+                mux.packets.iter().map(|p| p.pts_ns).collect::<Vec<_>>(),
+                [0, 73_000_000]
+            );
+            assert_eq!(
+                mux.packets
+                    .iter()
+                    .map(|p| p.duration_ns.unwrap())
+                    .collect::<Vec<_>>(),
+                durations
+            );
+            let mut decoder = crate::owned_ffv1_decoder::Decoder::new(4, 3, usize::MAX).unwrap();
+            for (i, index) in [1, 0].into_iter().enumerate() {
+                let frame = decoder.decode(&mux.read_packet(i).unwrap()).unwrap();
+                let raw = std::fs::read(root().join(format!("ffv1-gray-8-{index}.gray"))).unwrap();
+                assert_eq!(&frame.frame.data[..12], raw);
+            }
             std::fs::remove_file(output).unwrap();
         }
     }

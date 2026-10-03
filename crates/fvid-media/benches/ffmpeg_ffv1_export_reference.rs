@@ -91,5 +91,111 @@ fn main() {
             std::fs::remove_file(output).unwrap();
         }
     }
-    println!("owned FFV1 export: 10 independent pixel and presentation-time references passed");
+
+    let source = root.join("ffv1-six-frames.mkv");
+    for (case, reverse, shuffle, step, interval, filter) in [
+        ("reverse", true, None, None, None, "reverse"),
+        (
+            "range",
+            true,
+            None,
+            None,
+            Some((40_000, 200_000)),
+            "trim=start=0.04:end=0.20,setpts=PTS-0.04/TB,reverse",
+        ),
+        (
+            "compose",
+            true,
+            Some("2|1|0".into()),
+            Some("2".into()),
+            None,
+            "framestep=2,shuffleframes=mapping=2|1|0,reverse",
+        ),
+        (
+            "shuffle",
+            false,
+            Some("2|0|1".into()),
+            None,
+            None,
+            "shuffleframes=mapping=2|0|1",
+        ),
+        (
+            "tail",
+            true,
+            Some("2|1|0".into()),
+            None,
+            Some((40_000, 240_000)),
+            "trim=start=0.04:end=0.24,setpts=PTS-0.04/TB,shuffleframes=mapping=2|1|0,reverse",
+        ),
+        (
+            "drops",
+            true,
+            Some("2|-1|2".into()),
+            None,
+            None,
+            "shuffleframes=mapping=2|-1|2,reverse",
+        ),
+    ] {
+        let output = std::env::temp_dir().join(format!(
+            "fvid-ffv1-temporal-reference-{}-{case}.mkv",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_file(&output);
+        fvid_media::transcode_lossless(
+            &source,
+            &output,
+            LosslessTransform {
+                reverse: reverse.then(String::new),
+                shuffleframes: shuffle,
+                framestep: step,
+                interval,
+                ..Default::default()
+            },
+            &CopyOptions::default(),
+        )
+        .unwrap();
+        let read = |path: &Path, filter: Option<&str>| {
+            let mut command = Command::new(&ffmpeg);
+            command
+                .args(["-hide_banner", "-nostdin", "-v", "info", "-i"])
+                .arg(path);
+            let graph = filter.map_or("showinfo".into(), |f| format!("{f},showinfo"));
+            let result = command
+                .args([
+                    "-map",
+                    "0:v:0",
+                    "-vf",
+                    &graph,
+                    "-fps_mode",
+                    "passthrough",
+                    "-pix_fmt",
+                    "gray",
+                    "-f",
+                    "rawvideo",
+                    "pipe:1",
+                ])
+                .output()
+                .unwrap();
+            assert!(
+                result.status.success(),
+                "{}",
+                String::from_utf8_lossy(&result.stderr)
+            );
+            let log = String::from_utf8_lossy(&result.stderr);
+            let times: Vec<f64> = log
+                .lines()
+                .filter_map(|line| {
+                    line.split_once("pts_time:")
+                        .and_then(|(_, s)| s.split_whitespace().next())
+                        .and_then(|s| s.parse().ok())
+                })
+                .collect();
+            (result.stdout, times)
+        };
+        let actual = read(&output, None);
+        let reference = read(&source, Some(filter));
+        assert_eq!(actual, reference, "temporal pixels and positions: {case}");
+        std::fs::remove_file(output).unwrap();
+    }
+    println!("owned FFV1 export: 16 independent pixel and presentation-time references passed");
 }

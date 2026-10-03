@@ -37,8 +37,9 @@ mod encoder {
 }
 fn main() {
     let output = std::path::PathBuf::from(std::env::args_os().nth(1).unwrap());
+    let extras = std::path::PathBuf::from(std::env::args_os().nth(2).unwrap());
     for depth in [8u8, 10, 16] {
-        for index in 0..2 {
+        for index in 0..if depth == 8 { 6 } else { 2 } {
             let mut samples = Vec::new();
             let maximum = (1u32 << depth) - 1;
             for pixel in 0..12u32 {
@@ -47,8 +48,9 @@ fn main() {
                 samples.extend_from_slice(&bytes[..if depth == 8 { 1 } else { 2 }]);
             }
             let packet = encoder::encode_gray(4, 3, &samples, depth).unwrap();
-            std::fs::write(output.join(format!("ffv1-gray-{depth}-{index}.packet")), packet).unwrap();
-            std::fs::write(output.join(format!("ffv1-gray-{depth}-{index}.gray")), samples).unwrap();
+            let target = if index < 2 { &output } else { &extras };
+            std::fs::write(target.join(format!("ffv1-gray-{depth}-{index}.packet")), packet).unwrap();
+            std::fs::write(target.join(format!("ffv1-gray-{depth}-{index}.gray")), samples).unwrap();
         }
     }
 }
@@ -56,20 +58,22 @@ fn main() {
         source, binary = temp / "generate.rs", temp / "generate"
         source.write_text(code)
         subprocess.run(["rustc", "--edition=2024", str(source), "-o", str(binary)], check=True)
-        subprocess.run([str(binary), str(args.output.resolve())], check=True)
+        subprocess.run([str(binary), str(args.output.resolve()), str(temp)], check=True)
+        extra_packets = [(temp / f"ffv1-gray-8-{index}.packet").read_bytes() for index in range(2, 6)]
     videos = [(depth, 40_000_000, f"ffv1-gray-{depth}.mkv") for depth in [8, 10, 16]]
     videos.append((8, 16_666_667, "matroska-default-duration-60fps.mkv"))
     videos.extend([(8, 40_000_000, "ffv1-positive-start.mkv"),
                    (8, 40_000_000, "ffv1-invalid-range-header.mkv"),
-                   (8, 40_000_000, "ffv1-vfr.mkv")])
+                   (8, 40_000_000, "ffv1-vfr.mkv"),
+                   (8, 40_000_000, "ffv1-six-frames.mkv")])
     for depth, frame_duration, name in videos:
         header = element(0x1A45DFA3, uint(0x4286, 1) + uint(0x42F7, 1) + uint(0x42F2, 4) + uint(0x42F3, 8) + element(0x4282, b"matroska") + uint(0x4287, 4) + uint(0x4285, 2))
-        info = element(0x1549A966, uint(0x2AD7B1, 1_000_000) + element(0x4D80, b"fvid-synthetic") + element(0x5741, b"fvid-synthetic") + element(0x4489, struct.pack(">d", 100 if name == "ffv1-vfr.mkv" else 2 * frame_duration / 1_000_000)))
+        info = element(0x1549A966, uint(0x2AD7B1, 1_000_000) + element(0x4D80, b"fvid-synthetic") + element(0x5741, b"fvid-synthetic") + element(0x4489, struct.pack(">d", 100 if name == "ffv1-vfr.mkv" else (6 if name == "ffv1-six-frames.mkv" else 2) * frame_duration / 1_000_000)))
         track = uint(0xD7, 1) + uint(0x73C5, 1) + uint(0x83, 1) + element(0x86, b"V_FFV1") + uint(0x23E383, 0 if name == "ffv1-vfr.mkv" else frame_duration) + element(0xE0, uint(0xB0, 4) + uint(0xBA, 3) + (uint(0x54B0, 8) + uint(0x54BA, 3) if name == "ffv1-vfr.mkv" else b""))
         tracks = element(0x1654AE6B, element(0xAE, track))
         cluster = uint(0xE7, 200 if name == "ffv1-positive-start.mkv" else 0)
-        for index in range(2):
-            packet = (args.output / f"ffv1-gray-{depth}-{index}.packet").read_bytes()
+        for index in range(6 if name == "ffv1-six-frames.mkv" else 2):
+            packet = extra_packets[index-2] if index >= 2 else (args.output / f"ffv1-gray-{depth}-{index}.packet").read_bytes()
             if name == "ffv1-invalid-range-header.mkv" and index == 1:
                 packet = b"\xff\xff" + packet[2:]
             if name == "ffv1-vfr.mkv":
