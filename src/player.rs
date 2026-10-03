@@ -1910,6 +1910,7 @@ struct Player {
     /// writes this, so nothing is copied to keep it: the frame is moved here
     /// once its pixels have reached the screen.
     presented: Option<Frame>,
+    presented_source: Option<Frame>,
     name: String,
     error: Option<String>,
     paused: bool,
@@ -2071,6 +2072,7 @@ impl Default for Player {
             shared_surfaces: false,
             texture: None,
             presented: None,
+            presented_source: None,
             name: String::new(),
             error: None,
             paused: false,
@@ -2239,6 +2241,7 @@ impl Player {
         }
         // The picture of the item before this one is no longer on screen.
         self.presented = None;
+        self.presented_source = None;
         // Try to start audio playback if the file has an audio track.
         self.opened = Some(path.clone());
         // The track list belongs to the file, so it starts empty again here; a
@@ -2292,6 +2295,7 @@ impl Player {
         self.seek_preview = false;
         self.seek_target = None;
         self.presented = None;
+        self.presented_source = None;
         self.video = None;
         self.video_packed = None;
                         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
@@ -2727,6 +2731,66 @@ impl Player {
     }
 
     /// PNG bytes of the frame last shown, in whichever layout it arrived.
+    fn upload_frame(&mut self, frame: &Frame) {
+                match &frame.pixels {
+                    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                    Pixels::Surface(surface) => {
+                        self.video_packed = None; self.video = None; self.texture = None; self.rgb_frame = None;
+                        self.video_surface = Some((surface.clone(), frame.serial));
+                    },
+                    Pixels::Packed(planes, grade) => {
+                        self.video_packed = Some((planes.clone(), frame.serial, grade.clone()));
+                        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                        { self.video_surface = None; }
+                        self.video = None;
+                        self.texture = None;
+                        self.rgb_frame = None;
+                    }
+                    Pixels::Planar(planes, grade) => {
+                        self.video = Some((planes.clone(), frame.serial, grade.clone()));
+                        self.video_packed = None;
+                        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                        { self.video_surface = None; }
+                        self.texture = None;
+                        self.rgb_frame = None;
+                    }
+                    Pixels::Rgb(rgb) => {
+                        // Keep immutable display codes; picture settings and
+                        // custom effects run in the GPU callback on redraw.
+                        self.texture = None;
+                        self.rgb_frame = Some((Arc::new(rgb.clone()), frame.dimensions));
+                        self.video = None;
+                        self.video_packed = None;
+                        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+                        { self.video_surface = None; }
+                    }
+                }
+    }
+
+    fn change_spherical(&mut self, cycle: bool) {
+        if cycle {
+            self.spherical.projection = fvid_media::cycle_spherical_projection(self.spherical.projection);
+            self.spherical.enabled = true;
+        } else {
+            self.spherical.enabled = !self.spherical.enabled;
+        }
+        if let Some(mut frame) = self.presented_source.clone() {
+            let result = stereo_frame(&mut frame, self.stereo3d)
+                .and_then(|()| spherical_frame(&mut frame, self.spherical));
+            match result {
+                Ok(()) => {
+                    self.upload_frame(&frame);
+                    self.dimensions = frame.dimensions;
+                    self.presented = Some(frame);
+                }
+                Err(error) => self.error = Some(error.to_string()),
+            }
+        }
+        self.show_osd(if self.spherical.enabled {
+            fvid_media::format_spherical_projection_osd(self.spherical.projection)
+        } else { "360° Off".into() });
+    }
+
     fn picture(&self) -> crate::Result<Vec<u8>> {
         let frame = self
             .presented
@@ -2755,6 +2819,7 @@ impl Player {
     /// Carry one keyboard control through to playback state.
     fn apply(&mut self, control: Control) {
         match control {
+            Control::Spherical(cycle) => self.change_spherical(cycle),
             Control::Volume(up) => self.change_volume(up),
             Control::Mute => self.toggle_mute(),
             Control::Rate(up) => self.change_rate(up),
@@ -3134,6 +3199,7 @@ impl Player {
         self.chapters.clear();
         self.cues.clear();
         self.presented = None;
+        self.presented_source = None;
         self.video = None;
         self.video_packed = None;
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
@@ -3782,6 +3848,7 @@ impl Player {
             let av_ready = self.frame_ready_for_sync(frame);
             if time_ready && av_ready {
                 let mut frame = self.queued.take().unwrap();
+                self.presented_source = Some(frame.clone());
                 if let Err(error) = stereo_frame(&mut frame, self.stereo3d).and_then(|()| spherical_frame(&mut frame, self.spherical)) {
                     self.error = Some(error.to_string());
                     self.paused = true;
@@ -3791,39 +3858,7 @@ impl Player {
                 }
                 self.seek_preview = false;
                 self.seek_target = None;
-                match &frame.pixels {
-                    #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-                    Pixels::Surface(surface) => {
-                        self.video_packed = None; self.video = None; self.texture = None; self.rgb_frame = None;
-                        self.video_surface = Some((surface.clone(), frame.serial));
-                    },
-                    Pixels::Packed(planes, grade) => {
-                        self.video_packed = Some((planes.clone(), frame.serial, grade.clone()));
-                        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-                        { self.video_surface = None; }
-                        self.video = None;
-                        self.texture = None;
-                        self.rgb_frame = None;
-                    }
-                    Pixels::Planar(planes, grade) => {
-                        self.video = Some((planes.clone(), frame.serial, grade.clone()));
-                        self.video_packed = None;
-                        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-                        { self.video_surface = None; }
-                        self.texture = None;
-                        self.rgb_frame = None;
-                    }
-                    Pixels::Rgb(rgb) => {
-                        // Keep immutable display codes; picture settings and
-                        // custom effects run in the GPU callback on redraw.
-                        self.texture = None;
-                        self.rgb_frame = Some((Arc::new(rgb.clone()), frame.dimensions));
-                        self.video = None;
-                        self.video_packed = None;
-                        #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-                        { self.video_surface = None; }
-                    }
-                }
+                self.upload_frame(&frame);
                 if let Some((start, count)) = &mut self.presentation_stats {
                     if *count == 0 {
                         *start = Instant::now();
@@ -4634,6 +4669,7 @@ fn icon_close(painter: &egui::Painter, c: Pos2, s: f32, color: Color32) {
 /// A control the keyboard asked for.
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum Control {
+    Spherical(bool),
     /// Up or down one volume step.
     Volume(bool),
     Mute,
@@ -5124,6 +5160,7 @@ fn controls_pressed(ctx: &egui::Context) -> Vec<Control> {
         let modifiers = input.modifiers;
         let held = modifiers.command || modifiers.ctrl;
 
+        if held && key(Key::Num3) { out.push(Control::Spherical(modifiers.shift)); }
         if held {
             match (key(Key::ArrowUp), key(Key::ArrowDown)) {
                 (true, _) => out.push(Control::Volume(true)),
@@ -5288,7 +5325,7 @@ fn controls_pressed(ctx: &egui::Context) -> Vec<Control> {
                 8 => Key::Num8,
                 _ => Key::Num9,
             };
-            if input.key_pressed(key)
+            if !held && input.key_pressed(key)
                 && let Some(fraction) = position_from_digit(digit)
             {
                 out.push(Control::Position(fraction));
@@ -6192,6 +6229,23 @@ mod tests {
                 .map(|word| word.to_string())
                 .collect::<Vec<_>>(),
         )
+    }
+
+    #[test]
+    fn spherical_toggle_redraws_a_paused_frame_from_original_codes() {
+        let rgb: Vec<u8> = (0..96).map(|n| (n * 2) as u8).collect();
+        let frame = Frame { pixels: Pixels::Rgb(rgb.clone()), dimensions: [8,4],
+            period: Duration::from_millis(17), interval: Some((2,3,60)),
+            pts: Some((2,60)), generation: 7, serial: 9 };
+        let mut player = Player { paused: true, presented_source: Some(frame.clone()), presented: Some(frame), ..Default::default() };
+        player.change_spherical(false);
+        let Pixels::Rgb(projected) = &player.presented.as_ref().unwrap().pixels else { panic!("expected RGB") };
+        assert_ne!(projected, &rgb);
+        player.change_spherical(false);
+        let Pixels::Rgb(restored) = &player.presented.as_ref().unwrap().pixels else { panic!("expected RGB") };
+        assert_eq!(restored, &rgb);
+        assert_eq!(player.presented.as_ref().unwrap().pts, Some((2,60)));
+        assert!(player.paused);
     }
 
     #[test]

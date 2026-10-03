@@ -72,6 +72,7 @@ pub struct SurfacePixels {
     pub colour: crate::playback_native::AvcColour,
     pub grade: Option<Arc<Grade>>,
 }
+#[derive(Clone)]
 pub enum Pixels {
     #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
     Surface(SurfacePixels),
@@ -88,6 +89,7 @@ pub enum Pixels {
     Planar(Arc<Planar8>, Option<Arc<Grade>>),
 }
 
+#[derive(Clone)]
 pub struct Frame {
     pub pixels: Pixels,
     pub dimensions: [usize; 2],
