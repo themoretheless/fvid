@@ -872,7 +872,7 @@ pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo> {
         }
     }
     if format.is_none_or(|name| matches!(name,"y4m"|"yuv4mpegpipe")) {
-        if let Ok(Some(info)) = crate::owned_y4m_probe::try_y4m(path) {
+        if let Some(info) = crate::owned_y4m_probe::try_y4m(path)? {
             return Ok(info);
         }
     }

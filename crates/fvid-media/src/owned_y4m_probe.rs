@@ -1,10 +1,23 @@
 //! Container-only Y4M inspection, sharing the frontend parser implementation.
 use fvid_media_info::{MediaInfo, StreamInfo};
-use std::{fs::File, io::BufReader, path::Path};
+use std::{
+    fs::File,
+    io::{BufReader, Read, Seek, SeekFrom},
+    path::Path,
+};
 type Result<T> = std::result::Result<T, String>;
-/// Inspect only with FVid-owned parsers. Unknown containers return an error.
+/// Select supported Y4M for owned inspection. Unknown signatures and
+/// unsupported layouts return None; malformed recognized input returns an error.
 pub fn try_y4m(source: &Path) -> Result<Option<MediaInfo>> {
     let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+    let mut signature = [0; 9];
+    match input.read_exact(&mut signature) {
+        Ok(()) if &signature == b"YUV4MPEG2" => {}
+        Ok(()) => return Ok(None),
+        Err(error) if error.kind() == std::io::ErrorKind::UnexpectedEof => return Ok(None),
+        Err(error) => return Err(error.to_string()),
+    }
+    input.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
     let mut header = Vec::new();
     crate::owned_y4m::line(&mut input, &mut header).map_err(|e| e.to_string())?;
     let text = std::str::from_utf8(&header).map_err(|_| "Y4M header is not UTF-8")?;
@@ -12,7 +25,15 @@ pub fn try_y4m(source: &Path) -> Result<Option<MediaInfo>> {
         if token.starts_with('C')
             && !matches!(
                 token,
-                "C420" | "C420jpeg" | "C420mpeg2" | "C420paldv" | "C422" | "C444" | "C440" | "C411" | "C410"
+                "C420"
+                    | "C420jpeg"
+                    | "C420mpeg2"
+                    | "C420paldv"
+                    | "C422"
+                    | "C444"
+                    | "C440"
+                    | "C411"
+                    | "C410"
             )
             && !token
                 .strip_prefix('C')
