@@ -544,7 +544,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         scale: _,
         epx: None,
         transpose: _,
-        rotate: None,
+        rotate: _,
         pad: _,
         burn_subs: None,
         overlay: _,
@@ -664,6 +664,7 @@ pub fn decode_video_request(source: &Path, transform: &DecodeTransform) -> Resul
         Ok((std::time::Duration::from_micros(from as u64), std::time::Duration::from_micros(to as u64)))
     }).transpose()?;
     let geometry = crate::native_geometry::VideoGeometry {
+        rotate: transform.rotate,
         crop: transform.crop.map(|r| [r.x, r.y, r.width, r.height]),
         horizontal_flip: transform.horizontal_flip,
         vertical_flip: transform.vertical_flip,

@@ -53,6 +53,7 @@ pub fn inventory() -> Capabilities {
             "pixelize",
             "prewitt",
             "roberts",
+            "rotate",
             "scale",
             "scharr",
             "shuffleplanes",

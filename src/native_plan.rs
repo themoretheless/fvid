@@ -330,7 +330,7 @@ pub fn transcode_lossless(source: &std::path::Path, transform: &crate::media_inf
         }).collect()
     };
     let mut steps=vec![PlanStep{action:"decode".into(),detail:"FVid owned demuxer and video decoder; retain supported companion audio packets without audio re-encoding".into()}];
-    if !geometry.is_identity() {steps.push(PlanStep{action:"geometry".into(),detail:format!("crop {:?}; horizontal flip {}; vertical flip {}; transpose {:?}; pad {:?}; scale {:?}; normalize stored rotation first",geometry.crop,geometry.horizontal_flip,geometry.vertical_flip,geometry.transpose,geometry.pad,geometry.scale)});}
+    if !geometry.is_identity() {steps.push(PlanStep{action:"geometry".into(),detail:format!("crop {:?}; horizontal flip {}; vertical flip {}; transpose {:?}; rotate {:?}; pad {:?}; scale {:?}; normalize stored rotation first",geometry.crop,geometry.horizontal_flip,geometry.vertical_flip,geometry.transpose,geometry.rotate,geometry.pad,geometry.scale)});}
     if !filters.is_empty() {
         for (name,args) in [("eq",&transform.eq),("unsharp",&transform.unsharp),("hue",&transform.hue),
             ("gblur",&transform.gblur),("avgblur",&transform.avgblur),("boxblur",&transform.boxblur),

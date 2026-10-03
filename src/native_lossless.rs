@@ -351,7 +351,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             scale: _,
             epx: None,
             transpose: _,
-            rotate: None,
+            rotate: _,
             pad: _,
             burn_subs: None,
             overlay: None,
@@ -472,6 +472,7 @@ pub fn configuration(
     crate::native_pixels::PixelFilters,
 )> {
     let geometry = crate::native_geometry::VideoGeometry {
+        rotate: transform.rotate,
         crop: transform.crop.map(|r| [r.x, r.y, r.width, r.height]),
         horizontal_flip: transform.horizontal_flip,
         vertical_flip: transform.vertical_flip,

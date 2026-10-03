@@ -41,6 +41,7 @@ pub struct VideoGeometry {
     pub vertical_flip: bool,
     pub scale: Option<[usize; 2]>,
     pub transpose: Option<Transpose>,
+    pub rotate: Option<crate::media_info::RotateAngle>,
     /// Canvas width, height, x, y after transpose and before scale.
     /// Padding is black in the source range, with neutral chroma.
     pub pad: Option<[usize; 4]>,
@@ -53,12 +54,13 @@ impl VideoGeometry {
         self.crop.is_none()
             && self.scale.is_none()
             && self.transpose.is_none()
+            && self.rotate.is_none()
             && self.pad.is_none()
             && !self.horizontal_flip
             && !self.vertical_flip
     }
 
-    /// Crop, reflect, transpose, pad, then resize, in that order. Nearest sampling maps output
+    /// Crop, reflect, transpose, rotate, pad, then resize, in that order. Nearest sampling maps output
     /// pixel centres to the containing input pixel; ties choose the higher index.
     pub fn apply(&self, frame: &RawFrame, width: usize, height: usize) -> Result<GeometryFrame> {
         self.apply_with_sampling(frame, width, height, false)
@@ -320,6 +322,15 @@ impl VideoGeometry {
         full: bool,
         media: bool,
     ) -> Result<GeometryFrame> {
+        if let Some(rotation) = self.rotate {
+            let before = Self { pad: None, scale: None, rotate: None, ..*self };
+            let source = before.apply_samples(data, width, height, subsampling, depth, full, media)?;
+            let rotated = fvid_media::owned_rotate::rotate(&source, rotation.degrees, depth, full)
+                .map_err(|e| invalid(&e))?;
+            let after = Self { pad: self.pad, scale: self.scale, ..Default::default() };
+            if after.is_identity() { return Ok(rotated); }
+            return after.apply_samples(&rotated.data, rotated.width, rotated.height, rotated.subsampling, depth, full, media);
+        }
         let rgb = subsampling.is_none();
         let [sx, sy] = subsampling.unwrap_or([1, 1]);
         let bytes = if rgb {

@@ -1151,6 +1151,10 @@ fn geometry_decode_args(
                 }
                 geometry.vertical_flip = true;
             }
+            "--rotate" => {
+                if geometry.rotate.is_some() { return Err("duplicate rotate".into()); }
+                geometry.rotate = Some(fvid::media_info::RotateAngle::parse(args.next().ok_or("missing rotate degrees")?)?);
+            }
             "--transpose" => {
                 if geometry.transpose.is_some() {
                     return Err("duplicate transpose".into());
@@ -4646,6 +4650,11 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             }
             "--vflip" => {
                 transform.vertical_flip = true;
+                continue;
+            }
+            "--rotate" => {
+                if transform.rotate.is_some() { return Err("duplicate rotate".into()); }
+                transform.rotate = Some(fvid::media_info::RotateAngle::parse(options.next().ok_or("missing rotate degrees")?)?);
                 continue;
             }
             "--transpose" => {

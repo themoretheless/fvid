@@ -262,6 +262,7 @@ fn full_range_padding_and_operation_order_keep_black_and_neutral_chroma() {
         horizontal_flip: true,
         vertical_flip: false,
         transpose: Some(Transpose::Clock),
+        rotate: None,
         pad: Some([8, 4, 2, 2]),
         scale: Some([4, 2]),
     };
@@ -455,4 +456,18 @@ fn transformed_decode_uses_the_stored_visible_area() {
         &VideoGeometry { horizontal_flip: true, ..Default::default() }).unwrap();
     assert_eq!((stats.width as usize, stats.height as usize), (w-(l+r) as usize,h-(t+b) as usize));
     assert!(stats.video_frames > 0);
+}
+
+#[test]
+fn rotation_runs_between_transpose_and_padding() {
+    let frame = fvid::playback_native::RawFrame::Rgb(vec![10,20,30,40,50,60]);
+    let geometry = VideoGeometry {
+        transpose: Some(fvid::native_geometry::Transpose::Clock),
+        rotate: Some(fvid::media_info::RotateAngle { degrees: 90.0 }),
+        pad: Some([4,1,1,0]),
+        ..Default::default()
+    };
+    let output = geometry.apply(&frame,2,1).unwrap();
+    assert_eq!((output.width, output.height),(4,1));
+    assert_eq!(output.data,vec![0,0,0,40,50,60,10,20,30,0,0,0]);
 }

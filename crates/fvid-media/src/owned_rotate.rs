@@ -1,4 +1,4 @@
-//! Owned inverse-mapped planar YUV rotation with bilinear sample interpolation.
+//! Owned inverse-mapped planar YUV and packed RGB rotation with bilinear sample interpolation.
 use crate::owned_frame::{GeometryFrame, buffer};
 type Result<T> = std::result::Result<T, String>;
 
@@ -12,7 +12,11 @@ pub fn rotate(
     if !degrees.is_finite() || !(8..=16).contains(&depth) || frame.width == 0 || frame.height == 0 {
         return Err("invalid rotation geometry, angle or depth".into());
     }
-    let [sx, sy] = frame.subsampling.ok_or("rotation requires planar YUV")?;
+    let rgb = frame.subsampling.is_none();
+    if rgb && depth != 8 {
+        return Err("RGB rotation requires 8-bit samples".into());
+    }
+    let [sx, sy] = frame.subsampling.unwrap_or([1, 1]);
     if sx == 0 || sy == 0 {
         return Err("invalid rotation chroma geometry".into());
     }
@@ -89,7 +93,9 @@ pub fn rotate(
         .zip(sizes(width, height))
         .enumerate()
     {
-        let fill = if plane > 0 {
+        let fill = if rgb {
+            0
+        } else if plane > 0 {
             128u32 << (depth - 8)
         } else if full_range {
             0
@@ -100,7 +106,11 @@ pub fn rotate(
             if x < 0 || y < 0 || x >= iw as i64 || y >= ih as i64 {
                 return f64::from(fill);
             }
-            let offset = source_base + (y as usize * iw + x as usize) * bytes;
+            let offset = if rgb {
+                (y as usize * iw + x as usize) * 3 + plane
+            } else {
+                source_base + (y as usize * iw + x as usize) * bytes
+            };
             if bytes == 1 {
                 f64::from(frame.data[offset])
             } else {
@@ -125,7 +135,11 @@ pub fn rotate(
                 let value = (top * (1.0 - ty) + bottom * ty)
                     .round()
                     .clamp(0.0, f64::from(maximum)) as u16;
-                let offset = dest_base + (y * ow + x) * bytes;
+                let offset = if rgb {
+                    (y * ow + x) * 3 + plane
+                } else {
+                    dest_base + (y * ow + x) * bytes
+                };
                 if bytes == 1 {
                     output.data[offset] = value as u8;
                 } else {
@@ -141,6 +155,19 @@ pub fn rotate(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn packed_rgb_keeps_channels_in_their_pixels() {
+        let frame = GeometryFrame {
+            width: 2,
+            height: 1,
+            subsampling: None,
+            data: vec![10, 20, 30, 40, 50, 60],
+        };
+        let turned = rotate(&frame, 180.0, 8, true).unwrap();
+        assert_eq!(turned.data, vec![40, 50, 60, 10, 20, 30]);
+        assert!(turned.subsampling.is_none());
+    }
+
     #[test]
     fn synthetic_video_rotates_each_frame_without_changing_source_clock() {
         let bytes = include_bytes!("../../../tests/fixtures/playback-errors/rotate-grid.y4m");
