@@ -69,3 +69,47 @@ impl PcmDecoder {
         Ok(decoder)
     }
 }
+
+#[cfg(test)]
+mod precision_tests {
+    use super::*;
+    #[test]
+    fn quicktime_float64_byte_orders_preserve_bits_beyond_f32() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/audio/pcm-screen.mov");
+        let reader = crate::owned_mp4::Mp4Reader::open(
+            std::fs::File::open(path).unwrap(),
+            Default::default(),
+        )
+        .unwrap();
+        let mut track = reader
+            .tracks()
+            .iter()
+            .find(|t| t.handler == *b"soun")
+            .unwrap()
+            .clone();
+        track.codec = *b"fl64";
+        track.bit_depth = 64;
+        track.channels = 1;
+        let values = [0.123456789012345, -0.987654321012345, 2f64.powi(-40)];
+        assert!(values.iter().any(|&x| f64::from(x as f32) != x));
+        for little in [false, true] {
+            track.configuration = vec![u8::from(little)];
+            let packet: Vec<_> = values
+                .iter()
+                .flat_map(|x| {
+                    if little {
+                        x.to_le_bytes()
+                    } else {
+                        x.to_be_bytes()
+                    }
+                })
+                .collect();
+            let actual = PcmDecoder::from_mp4(&track)
+                .unwrap()
+                .decode_pcm_f64(&packet)
+                .unwrap();
+            assert_eq!(actual, values);
+        }
+    }
+}

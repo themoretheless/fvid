@@ -21,6 +21,23 @@ pub(crate) enum Mp4TimelineDecoder {
     Pcm(crate::owned_pcm_decoder::PcmDecoder),
 }
 impl Mp4TimelineDecoder {
+    const SAMPLE_BYTES: usize = 4;
+    pub(crate) fn checkpoint(&self) -> Option<Mp4AacCheckpoint> {
+        if let Self::Aac(d) = self {
+            Some(d.checkpoint())
+        } else {
+            None
+        }
+    }
+    pub(crate) fn restore_checkpoint(&mut self, state: &Mp4AacCheckpoint) -> Result<bool> {
+        if let Self::Aac(d) = self {
+            d.restore(state)?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
     pub(crate) fn new(track: &crate::owned_mp4::Track) -> Result<Self> {
         match &track.codec {
             b"mp4a" => Ok(Self::Aac(crate::owned_aac::NativeAacDecoder::new(
@@ -187,10 +204,10 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
         &track.codec,
         b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64"
     );
-    // PCM output widens each byte into at most one f32 sample; retain room for
+    // PCM output widens each byte into at most one f64 sample; retain room for
     // geometric input buffer growth and output allocation together.
     add(largest_packet
-        .checked_mul(if pcm { 6 } else { 2 })
+        .checked_mul(if pcm { 10 } else { 2 })
         .ok_or_else(overflow)?)?;
     if estimated > limit {
         return Err(invalid(&format!(
@@ -288,4 +305,89 @@ mod admission_tests {
             assert!(output.is_empty());
         }
     }
+}
+
+/// Decode QuickTime PCM without narrowing integer32 or IEEE float64 samples.
+/// Encoded timelines and controls match the normalized f32 API.
+pub fn decode_mp4_pcm_f64<R: Read + Seek>(
+    source: R,
+    output: &mut impl Write,
+    interval: Option<(Duration, Duration)>,
+    options: &CopyOptions,
+) -> Result<AudioDecodeStats> {
+    precise::decode(source, output, interval, options)
+}
+mod precise {
+    use super::*;
+    struct Mp4TimelineDecoder(crate::owned_pcm_decoder::PcmDecoder);
+    impl Mp4TimelineDecoder {
+        const SAMPLE_BYTES: usize = 8;
+        fn new(track: &crate::owned_mp4::Track) -> Result<Self> {
+            Ok(Self(
+                crate::owned_pcm_decoder::PcmDecoder::from_mp4(track)
+                    .map_err(|e| invalid(&e.to_string()))?,
+            ))
+        }
+        fn sample_rate(&self) -> u32 {
+            self.0.sample_rate()
+        }
+        fn channels(&self) -> u16 {
+            self.0.channels()
+        }
+        fn reset(&mut self) {}
+        fn checkpoint(&self) -> Option<Mp4AacCheckpoint> {
+            None
+        }
+        fn restore_checkpoint(&mut self, _: &Mp4AacCheckpoint) -> Result<bool> {
+            Ok(false)
+        }
+        fn decode(&mut self, bytes: &[u8]) -> Result<Vec<f64>> {
+            self.0
+                .decode_pcm_f64(bytes)
+                .map_err(|e| invalid(&e.to_string()))
+        }
+    }
+    pub(super) fn decode<R: Read + Seek>(
+        source: R,
+        output: &mut impl Write,
+        interval: Option<(Duration, Duration)>,
+        options: &CopyOptions,
+    ) -> Result<AudioDecodeStats> {
+        if !options.metadata_set.is_empty()
+            || !options.metadata_delete.is_empty()
+            || !options.stream_metadata_set.is_empty()
+            || !options.stream_metadata_delete.is_empty()
+        {
+            return Err(invalid("raw PCM stream cannot apply metadata mutations"));
+        }
+        let selected = match options.streams.as_slice() {
+            [] => None,
+            [index] => Some(*index),
+            _ => return Err(invalid("select exactly one audio stream")),
+        };
+        let mut control = DecodeProgress {
+            options,
+            event: fvid_control::ProgressEvent {
+                packets: 0,
+                payload_bytes: 0,
+                done: false,
+            },
+        };
+        control.check()?;
+        if let Some(hook) = &options.progress {
+            hook.emit(control.event);
+        }
+        control.check()?;
+        let reader = Mp4TimelineReader::open(
+            source,
+            crate::owned_mp4::Limits {
+                packet_bytes: options.max_packet_bytes,
+                ..Default::default()
+            },
+        )?;
+        let index = mp4_audio_index(&reader, selected)?;
+        admit_audio_reader(&reader, index, options)?;
+        decode_mp4_audio_reader_controlled(reader, output, interval, selected, &mut control)
+    }
+    include!("owned_mp4_audio_timeline_impl.rs");
 }

@@ -578,6 +578,32 @@ fn mp4_pcm_raw_api_matches_frontend_with_retained_budget() {
                 )
                 .unwrap();
                 assert_eq!(actual, std::fs::read(&output).unwrap(), "{name}");
+                // These synthetic 16/24-bit integer and float32 tracks are all
+                // exactly representable in f32, providing an independent oracle.
+                assert!(
+                    reader.tracks()[index].bit_depth <= 24
+                        || reader.tracks()[index].codec == *b"fl32"
+                );
+                let expected_f64: Vec<u8> = actual
+                    .chunks_exact(4)
+                    .flat_map(|bytes| {
+                        f64::from(f32::from_le_bytes(bytes.try_into().unwrap())).to_le_bytes()
+                    })
+                    .collect();
+                let mut precise = Vec::new();
+                fvid_media::owned_mp4_audio::decode_mp4_pcm_f64(
+                    Cursor::new(&bytes),
+                    &mut precise,
+                    interval,
+                    &fvid_control::CopyOptions {
+                        streams: vec![index],
+                        max_controlled_bytes: Some(32 * 1024 * 1024),
+                        ..Default::default()
+                    },
+                )
+                .unwrap();
+                assert_eq!(precise, expected_f64, "{name} stream {index}");
+
                 std::fs::remove_file(&output).unwrap();
             }
             let mut refused = Vec::new();

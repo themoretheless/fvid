@@ -10,6 +10,25 @@ pub(crate) enum PacketPcmDecoder {
     },
 }
 impl PacketPcmDecoder {
+    pub(crate) fn checkpoint(&self) -> Option<crate::codec::aac_native::AacCheckpoint> {
+        if let Self::Aac(d) = self {
+            Some(d.checkpoint())
+        } else {
+            None
+        }
+    }
+    pub(crate) fn restore_checkpoint(
+        &mut self,
+        state: &crate::codec::aac_native::AacCheckpoint,
+    ) -> Result<bool> {
+        if let Self::Aac(d) = self {
+            d.restore(state)?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
     pub(crate) const SAMPLE_BYTES: usize = 4;
     pub(crate) fn new(track: &Track) -> Result<Self> {
         match &track.codec {

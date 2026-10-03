@@ -73,7 +73,7 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
         let Some(source) = source else {
             let zeros = [0u8; 4096];
             let mut bytes = length
-                .checked_mul(u64::from(channels) * 4)
+                .checked_mul(u64::from(channels) * Mp4TimelineDecoder::SAMPLE_BYTES as u64)
                 .ok_or_else(|| invalid("audio silence size overflow"))?;
             while bytes != 0 {
                 control.check()?;
@@ -93,8 +93,11 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
         decoder.reset();
         let mut first_sample=0;
         let mut expected=None;
-        if let (Some((index,start,previous,state)),Mp4TimelineDecoder::Aac(aac))=(&checkpoint,&mut decoder) {
-            if *start<=from {aac.restore(state)?;first_sample=*index;expected=*previous;}
+        if let Some((index,start,previous,state)) = &checkpoint {
+            if *start <= from && decoder.restore_checkpoint(state)? {
+                first_sample = *index;
+                expected = *previous;
+            }
         }
         let mut captured=false;
         let mut written = 0u64;
@@ -116,8 +119,8 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
                 break;
             }
             if !captured && start.checked_add(duration).ok_or_else(||invalid("audio timestamp overflow"))?>from {
-                if let Mp4TimelineDecoder::Aac(aac)=&decoder {
-                    checkpoint=Some((sample_index,start,expected,aac.checkpoint()));
+                if let Some(state) = decoder.checkpoint() {
+                    checkpoint=Some((sample_index,start,expected,state));
                 }
                 captured=true;
             }
