@@ -34,3 +34,8 @@ for name, w, h, rate, count, base in [
 
 # Truncate the last, discarded frame to verify temporal filters still validate it.
 (root / "framestep-discarded-truncated.y4m").write_bytes(main[:-1])
+
+# Seven indexed frames exercise full shuffle groups and an incomplete tail.
+(root / "shuffleframes-seven-frames.y4m").write_bytes(main + b"FRAME\n" + bytes([16])*16 + bytes([128])*8)
+
+(root / "shuffleframes-discarded-truncated.y4m").write_bytes(main + b"FRAME\n" + bytes([16])*16 + bytes([128])*7)

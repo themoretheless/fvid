@@ -191,3 +191,5 @@ pub mod owned_mp4_probe;
 mod owned_backend_error;
 
 mod owned_framestep;
+
+mod owned_shuffleframes;

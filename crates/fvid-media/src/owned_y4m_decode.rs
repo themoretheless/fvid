@@ -31,9 +31,13 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
 }
 fn supported_request(transform: &DecodeTransform) -> bool {
     transform
-        .framestep
+        .shuffleframes
         .as_deref()
-        .is_none_or(|args| crate::owned_framestep::FrameStep::parse(args).is_ok())
+        .is_none_or(|args| crate::owned_shuffleframes::ShuffleFrames::parse(args).is_ok())
+        && transform
+            .framestep
+            .as_deref()
+            .is_none_or(|args| crate::owned_framestep::FrameStep::parse(args).is_ok())
         && morphology(transform).into_iter().all(|(kind, args)| {
             args.as_deref()
                 .is_none_or(|a| crate::owned_morphology::Morphology::parse(kind, a).is_ok())
@@ -95,6 +99,7 @@ fn supported_request(transform: &DecodeTransform) -> bool {
                 overlay: transform.overlay.clone(),
                 input_format: transform.input_format.clone(),
                 framestep: transform.framestep.clone(),
+                shuffleframes: transform.shuffleframes.clone(),
                 ..Default::default()
             }
 }
@@ -628,6 +633,11 @@ fn decode_reader_frames(
             .tokens
             .push(format!("F{}:{}", output_rate[0], output_rate[1]));
     }
+    let mut shuffle = transform
+        .shuffleframes
+        .as_deref()
+        .map(crate::owned_shuffleframes::ShuffleFrames::parse)
+        .transpose()?;
     let frame_bytes = header.frame_len()?;
     let geometry = transform.overlay.is_some()
         || transform.crop.is_some()
@@ -719,17 +729,38 @@ fn decode_reader_frames(
                 apply_pixel_filters(&header, transform, &mut output)?;
                 std::hint::black_box(&output);
             }
-            if let Some(callback) = visit.as_deref_mut() {
+            let (pts, duration) = if visit.is_some() {
                 let start = u128::from(index) * rate_d as u128 * 1_000_000_000 / rate_n as u128;
                 let end = (u128::from(index) + 1) * rate_d as u128 * 1_000_000_000 / rate_n as u128;
-                callback(
-                    &presented_header,
-                    if geometry { &output } else { &input },
+                (
                     u64::try_from(start).map_err(|_| "Y4M timestamp overflow")?,
                     u64::try_from(end - start).map_err(|_| "Y4M duration overflow")?,
-                )?;
-            }
-            frames = frames.checked_add(1).ok_or("Y4M frame count overflow")?;
+                )
+            } else {
+                (0, 0)
+            };
+            let pixels = if geometry { &output } else { &input };
+            let retain_pixels = visit.is_some();
+            let mut emit = |data: &[u8], pts, duration| -> Result<()> {
+                if let Some(callback) = visit.as_deref_mut() {
+                    callback(&presented_header, data, pts, duration)?;
+                }
+                Ok(())
+            };
+            let emitted = if let Some(shuffle) = shuffle.as_mut() {
+                shuffle.push(
+                    if retain_pixels { pixels } else { &[] },
+                    pts,
+                    duration,
+                    &mut emit,
+                )?
+            } else {
+                emit(pixels, pts, duration)?;
+                1
+            };
+            frames = frames
+                .checked_add(emitted)
+                .ok_or("Y4M frame count overflow")?;
         }
         index = index.checked_add(1).ok_or("Y4M frame count overflow")?;
     }
@@ -853,5 +884,54 @@ mod framestep_tests {
         .unwrap();
         assert_eq!(seen, [0, 2, 4]);
         assert_eq!(stats.video_frames, 3);
+    }
+}
+
+#[cfg(test)]
+mod shuffleframes_tests {
+    use super::*;
+    use std::io::Cursor;
+    #[test]
+    fn shuffled_group_pixels_keep_position_timestamps_and_discard_incomplete_tail() {
+        let bytes = include_bytes!(
+            "../../../tests/fixtures/playback-errors/shuffleframes-seven-frames.y4m"
+        );
+        for (mapping, interval, expected) in [
+            (
+                "2 1 0",
+                None,
+                vec![(2u8, 0u64), (1, 1), (0, 2), (5, 3), (4, 4), (3, 5)],
+            ),
+            ("mapping=2|-1|2", None, vec![(2, 0), (2, 2), (5, 3), (5, 5)]),
+            (
+                "2 1 0",
+                Some((250_000, 1_500_000)),
+                vec![(3, 1), (2, 2), (1, 3)],
+            ),
+        ] {
+            let transform = DecodeTransform {
+                shuffleframes: Some(mapping.into()),
+                interval,
+                ..Default::default()
+            };
+            let mut seen = Vec::new();
+            let stats = visit_reader_transformed(
+                Cursor::new(bytes),
+                &transform,
+                |header, pixels, pts, duration| {
+                    let index = pixels[0] - 10;
+                    let mut expected = vec![10 + index; 16];
+                    expected.extend([128; 8]);
+                    assert_eq!(pixels, expected);
+                    assert_eq!(header.frame_rate().unwrap(), [4, 1]);
+                    assert_eq!(duration, 250_000_000);
+                    seen.push((index, pts / 250_000_000));
+                    Ok(())
+                },
+            )
+            .unwrap();
+            assert_eq!(stats.video_frames, expected.len() as u64);
+            assert_eq!(seen, expected);
+        }
     }
 }

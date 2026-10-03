@@ -68,3 +68,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_framestep_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_shuffleframes_reference"
+harness = false

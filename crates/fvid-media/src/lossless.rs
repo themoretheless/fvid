@@ -3446,72 +3446,83 @@ fn drain_decoder(
             if let Some(args) = shuffleframes {
                 let src_fmt = (*send).format;
                 let mut emitted = 0u64;
-                filter::shuffleframes_push_frame(
-                    shuffleframes_graph,
-                    shuffled.0,
+                // Preserve the declared temporal order when shuffleframes is
+                // the first buffering stage: framestep must run before it.
+                let mut apply_shuffle = |selected| {
+                    filter::shuffleframes_push_frame(
+                        shuffleframes_graph,
+                        shuffled.0,
+                        selected,
+                        args,
+                        |out| unsafe {
+                            filter::push_reverse_or_emit(
+                                reverse_graph,
+                                reversed.0,
+                                out,
+                                reverse.as_deref(),
+                                |out| unsafe {
+                                    filter::push_loop_or_emit(
+                                        loop_graph,
+                                        looped.0,
+                                        out,
+                                        r#loop.as_deref(),
+                                        |out| unsafe {
+                                            filter::push_thumbnail_or_emit(
+                                                thumbnail_graph,
+                                                thumbnailed.0,
+                                                out,
+                                                thumbnail.as_deref(),
+                                                |mut out| {
+                                                    let mut out = out;
+                                                    if (*out).format != src_fmt {
+                                                        convert_pix_fmt_frame(
+                                                            fmt_sws,
+                                                            converted.0,
+                                                            out,
+                                                            src_fmt,
+                                                        )?;
+                                                        out = converted.0;
+                                                    }
+                                                    if minterpolate.is_some() || fps.is_some() {
+                                                        filter::temporal_push_frame(
+                                                            minterpolate_graph,
+                                                            minterpolate_dst.0,
+                                                            minterpolate,
+                                                            fps_graph,
+                                                            fps_dst.0,
+                                                            fps,
+                                                            out,
+                                                            |o| {
+                                                                send_encoder_frame(
+                                                                    encoder, output, packet, index, o,
+                                                                    stats,
+                                                                )?;
+                                                                emitted += 1;
+                                                                Ok(())
+                                                            },
+                                                        )?;
+                                                    } else {
+                                                        send_encoder_frame(
+                                                            encoder, output, packet, index, out, stats,
+                                                        )?;
+                                                        emitted += 1;
+                                                    }
+                                                    Ok(())
+                                                },
+                                            )
+                                        },
+                                    )
+                                },
+                            )
+                        },
+                    )
+                };
+                filter::push_framestep_or_emit(
+                    framestep_graph,
+                    framestepped.0,
                     send,
-                    args,
-                    |out| unsafe {
-                        filter::push_reverse_or_emit(
-                            reverse_graph,
-                            reversed.0,
-                            out,
-                            reverse.as_deref(),
-                            |out| unsafe {
-                                filter::push_loop_or_emit(
-                                    loop_graph,
-                                    looped.0,
-                                    out,
-                                    r#loop.as_deref(),
-                                    |out| unsafe {
-                                        filter::push_thumbnail_or_emit(
-                                            thumbnail_graph,
-                                            thumbnailed.0,
-                                            out,
-                                            thumbnail.as_deref(),
-                                            |mut out| {
-                                                let mut out = out;
-                                                if (*out).format != src_fmt {
-                                                    convert_pix_fmt_frame(
-                                                        fmt_sws,
-                                                        converted.0,
-                                                        out,
-                                                        src_fmt,
-                                                    )?;
-                                                    out = converted.0;
-                                                }
-                                                if minterpolate.is_some() || fps.is_some() {
-                                                    filter::temporal_push_frame(
-                                                        minterpolate_graph,
-                                                        minterpolate_dst.0,
-                                                        minterpolate,
-                                                        fps_graph,
-                                                        fps_dst.0,
-                                                        fps,
-                                                        out,
-                                                        |o| {
-                                                            send_encoder_frame(
-                                                                encoder, output, packet, index, o,
-                                                                stats,
-                                                            )?;
-                                                            emitted += 1;
-                                                            Ok(())
-                                                        },
-                                                    )?;
-                                                } else {
-                                                    send_encoder_frame(
-                                                        encoder, output, packet, index, out, stats,
-                                                    )?;
-                                                    emitted += 1;
-                                                }
-                                                Ok(())
-                                            },
-                                        )
-                                    },
-                                )
-                            },
-                        )
-                    },
+                    framestep,
+                    &mut apply_shuffle,
                 )?;
                 stats.video_frames += emitted;
                 av_frame_unref(frame.0);

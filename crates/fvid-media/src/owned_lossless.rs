@@ -12,6 +12,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         pad: t.pad.clone(),
         interval: t.interval,
         framestep: t.framestep.clone(),
+        shuffleframes: t.shuffleframes.clone(),
         overlay: t.overlay.clone(),
         avgblur: t.avgblur.clone(),
         boxblur: t.boxblur.clone(),
@@ -40,6 +41,7 @@ fn request(t: &LosslessTransform) -> Option<DecodeTransform> {
         pad: t.pad.clone(),
         interval: t.interval,
         framestep: t.framestep.clone(),
+        shuffleframes: t.shuffleframes.clone(),
         overlay: t.overlay.clone(),
         avgblur: t.avgblur.clone(),
         boxblur: t.boxblur.clone(),
@@ -482,5 +484,135 @@ mod framestep_tests {
             assert!(error.contains(message), "{error}");
             assert!(!output.exists());
         }
+    }
+}
+
+#[cfg(test)]
+mod shuffleframes_tests {
+    use super::*;
+    #[test]
+    fn shuffled_files_preserve_samples_timing_and_consumed_counts() {
+        let root =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/playback-errors");
+        let source = root.join("shuffleframes-seven-frames.y4m");
+        for (case, mapping, interval, step, expected, consumed) in [
+            (
+                "inverse",
+                "2 1 0",
+                None,
+                None,
+                vec![(2u8, 0u64), (1, 1), (0, 2), (5, 3), (4, 4), (3, 5)],
+                7,
+            ),
+            (
+                "drops",
+                "mapping=2|-1|2",
+                None,
+                None,
+                vec![(2, 0), (2, 2), (5, 3), (5, 5)],
+                7,
+            ),
+            (
+                "range",
+                "2 1 0",
+                Some((250_000, 1_500_000)),
+                None,
+                vec![(3, 1), (2, 2), (1, 3)],
+                6,
+            ),
+            (
+                "step",
+                "2 1 0",
+                None,
+                Some("2"),
+                vec![(4, 0), (2, 2), (0, 4)],
+                7,
+            ),
+        ] {
+            let transform = LosslessTransform {
+                shuffleframes: Some(mapping.into()),
+                interval,
+                framestep: step.map(String::from),
+                ..Default::default()
+            };
+            let options = CopyOptions::default();
+            assert!(supports(&source, &transform, &options));
+            let plan = crate::plan_transcode_lossless(&source, &transform, &options, None).unwrap();
+            assert!(plan.notes[0].starts_with("backend: owned"));
+            let output = std::env::temp_dir().join(format!(
+                "fvid-shuffle-export-{}-{case}.mkv",
+                std::process::id()
+            ));
+            let stats = crate::transcode_lossless(&source, &output, transform, &options).unwrap();
+            assert_eq!(stats.backend, "fvid");
+            assert_eq!(stats.decoded_frames, consumed);
+            assert_eq!(stats.video_frames, expected.len() as u64);
+            assert_eq!(stats.video_packets, expected.len() as u64);
+            let mut reader = crate::owned_webm::WebmReader::open(
+                std::io::BufReader::new(std::fs::File::open(&output).unwrap()),
+                Default::default(),
+            )
+            .unwrap();
+            reader.scan_all().unwrap();
+            assert_eq!(reader.packets.len(), expected.len());
+            let mut decoder = crate::owned_ffv1_decoder::Decoder::new(4, 4, 1 << 20).unwrap();
+            let origin = interval.map_or(0, |(from, _)| from as i64 * 1000);
+            for (slot, (value, position)) in expected.into_iter().enumerate() {
+                assert_eq!(
+                    reader.packets[slot].pts_ns,
+                    position as i64 * 250_000_000 - origin
+                );
+                assert_eq!(reader.packets[slot].duration_ns, Some(250_000_000));
+                let mut pixels = vec![10 + value; 16];
+                pixels.extend([128; 8]);
+                assert_eq!(
+                    decoder
+                        .decode(&reader.read_packet(slot).unwrap())
+                        .unwrap()
+                        .frame
+                        .data,
+                    pixels
+                );
+            }
+            drop(reader);
+            std::fs::remove_file(output).unwrap();
+        }
+    }
+    #[test]
+    fn all_dropped_or_incomplete_groups_do_not_publish_empty_video() {
+        let root =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/playback-errors");
+        let source = root.join("shuffleframes-seven-frames.y4m");
+        for (case, mapping) in [("all-drop", "-1"), ("partial", "0 1 2 3 4 5 6 7")] {
+            let transform = LosslessTransform {
+                shuffleframes: Some(mapping.into()),
+                ..Default::default()
+            };
+            let output = std::env::temp_dir().join(format!(
+                "fvid-shuffle-empty-{}-{case}.mkv",
+                std::process::id()
+            ));
+            let error =
+                crate::transcode_lossless(&source, &output, transform, &CopyOptions::default())
+                    .unwrap_err();
+            assert!(error.contains("Matroska has no selected frames"), "{error}");
+            assert!(!output.exists());
+        }
+    }
+    #[test]
+    fn discarded_shuffle_tail_still_validates_payload_before_publication() {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/shuffleframes-discarded-truncated.y4m");
+        let output =
+            std::env::temp_dir().join(format!("fvid-shuffle-truncated-{}.mkv", std::process::id()));
+        let transform = LosslessTransform {
+            shuffleframes: Some("2 1 0".into()),
+            ..Default::default()
+        };
+        assert!(supports(&source, &transform, &CopyOptions::default()));
+        let error = crate::transcode_lossless(&source, &output, transform, &CopyOptions::default())
+            .unwrap_err();
+        assert!(error.contains("truncated Y4M frame payload"), "{error}");
+        assert!(!output.exists());
     }
 }

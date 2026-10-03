@@ -478,3 +478,40 @@ external-program PATH. The own test binary links no libav; legacy/player
 compilation, native source/dependency guards and diff checks passed. This
 removes the Y4M framestep file-export fallback. General expressions, other
 sources and the rest of production codec/filter migration remain incomplete.
+
+
+Owned shuffleframes decode and lossless file operation
+-----------------------------------------------------
+
+The own temporal stage accepts decimal positional/named mapping lists with
+spaces or pipes, duplicates and -1 dropped output positions. It retains only
+one mapping-sized group and reuses its buffers; identity needs no copied frame.
+Discard-only decoding does not retain pixel payloads. Output PTS comes from the
+output position, while payload and duration come from the mapped source frame.
+An incomplete group at EOF or interval end produces no output, matching the
+reference filter. All source payloads, including discarded tails, still validate.
+
+The seven-frame and truncated-tail Y4M fixtures come from the deterministic
+Python generator without external codecs or private media. The initial native
+acceptance failed specifically at unsupported transform admission. Passing
+acceptance now covers reordered pixels, duplicated/dropped positions, interval
+origin, framestep composition, consumed source counts, own public planning/file
+export and independent own FFV1 packet decoding. Empty output is a passing
+refusal/publication test, not an acceptance of an empty playable video.
+
+The explicit ffmpeg_shuffleframes_reference benchmark matched four own exports
+against independent FFV1 decoding, showinfo PTS/durations and reference filter
+pixels. Its optional legacy feature forces the previous adapter with an
+explicit level=1 encoder option, avoiding accidental use of the own route.
+This discovered that the old standalone shuffle branch bypassed framestep:
+it emitted six frames [2,1,0,5,4,3] instead of [4,2,0]. The branch now feeds
+framestep before shuffle; the same synthetic regression and benchmark pass.
+The optional benchmark also confirms legacy refusal when every group is empty.
+Reference contract: https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_shuffleframes.c
+
+All 153 own unit tests and 13 native geometry integrations passed with empty
+external-program PATH. The own test binary has no libav linkage. Both benchmark
+modes, legacy/player compilation, native source/dependency guards and diff
+checks passed. Previously committed temporal artifacts retain their bytes.
+General mapping option expressions and other unmigrated codecs/filters remain
+on the previous adapter; no production feature was detached to mask that work.
