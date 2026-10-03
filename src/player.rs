@@ -93,6 +93,7 @@ impl Panel {
 /// the whole session.
 #[derive(Clone, Debug, Default)]
 struct Grading {
+    content_light: Option<crate::color::ContentLight>,
     /// Camera log curve the coded values carry.
     log: Option<Log>,
     /// Highlight compression to run in place of the one the plan picks for the
@@ -124,6 +125,7 @@ impl Grading {
             && self.panel.is_none()
             && self.tone_map.is_none()
             && self.lut.is_none()
+            && self.content_light.is_none()
     }
 
     /// Bake what this session asks for against the signal `signal` and the
@@ -171,7 +173,9 @@ impl Grading {
             settings.to = transfer;
             settings.dest = primaries;
         }
-        Some(Grade::new(signal, hdr, settings, self.lut.clone()))
+        let mut metadata = hdr.clone();
+        if let Some(light) = self.content_light { metadata.light = light; }
+        Some(Grade::new(signal, &metadata, settings, self.lut.clone()))
     }
 }
 
@@ -462,6 +466,17 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
             "--gamut" => {
                 let value = option_value(args, &mut index, flag, inline)?;
                 grading.gamut = Some(parse_gamut(&value)?);
+            }
+            "--hdr-nits" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                let nits: u32 = value.parse().map_err(|_| crate::invalid("--hdr-nits requires positive integer nits"))?;
+                if nits == 0 { return Err(crate::invalid("--hdr-nits requires positive integer nits")); }
+                grading.panel = Some(Panel::Sdr(nits as f32));
+            }
+            "--hdr-maxcll" => {
+                let value = option_value(args, &mut index, flag, inline)?;
+                let (cll, fall) = fvid_media::parse_hdr_maxcll_maxfall(&value).map_err(|e| crate::invalid(&e))?;
+                grading.content_light = Some(crate::color::ContentLight { max_cll: cll as f32, max_fall: fall as f32 });
             }
             "--display" => {
                 let value = option_value(args, &mut index, flag, inline)?;
@@ -1005,7 +1020,7 @@ fn parse_media_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         } else {
             native.push(arg.clone());
             if inline.is_none() && matches!(flag,
-                "--spherical-stereo" | "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
+                "--hdr-nits" | "--hdr-maxcll" | "--spherical-stereo" | "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
                 | "--backend" | "--device" | "--shader" | "--skin" | "--start-time" | "--stop-time"
                 | "--rate" | "--audio-delay" | "--subtitle-delay" | "--volume" | "--zoom"
                 | "--crop" | "--aspect" | "--brightness" | "--gamma" | "--saturation" | "--contrast"
@@ -6153,6 +6168,28 @@ mod tests {
                 .map(|word| word.to_string())
                 .collect::<Vec<_>>(),
         )
+    }
+
+    #[test]
+    fn native_hdr_display_and_content_limits_change_highlight_mapping() {
+        let parse = |nits: &str, cll: &str| super::parse_media_play_args(&[
+            format!("--hdr-nits={nits}"), "--hdr-maxcll".into(), cll.into(), "clip.mp4".into()
+        ]).unwrap();
+        let signal = ColourDescription { primaries: 9, transfer: 16, matrix: 9, full_range: false };
+        let hdr = HdrMetadata::default();
+        let apply = |grading: &Grading| {
+            let mut rgb = vec![200,180,160,240,230,220];
+            grading.grade_for(signal, &hdr).unwrap().apply(&mut rgb);
+            rgb
+        };
+        let low = parse("100", "4000,1000");
+        let high = parse("400", "4000,1000");
+        assert_ne!(apply(&low.grading), apply(&high.grading), "display luminance must affect HDR mapping");
+        let other_content = parse("100", "1000,400");
+        assert_ne!(apply(&low.grading), apply(&other_content.grading), "content peak must affect the shoulder");
+        assert_eq!(low.grading.content_light.unwrap().max_fall, 1000.0);
+        assert!(parse_play_args(&["--hdr-nits=0".into()]).is_err());
+        assert!(parse_play_args(&["--hdr-maxcll=bad".into()]).is_err());
     }
 
     #[test]
