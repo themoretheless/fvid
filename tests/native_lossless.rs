@@ -598,3 +598,80 @@ fn owned_lossless_plans_show_filter_order_and_y4m_without_audio() {
         assert!(stats.video_frames > 0);
     }
 }
+
+#[test]
+fn crop_lossless_cli_uses_owned_export_and_keeps_command_constraints() {
+    let dir = directory("crop-cli");
+    let source = fixture("video.mp4");
+    let destination = dir.0.join("crop.mkv");
+    let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "crop-lossless"])
+        .arg(&source)
+        .arg(&destination)
+        .args(["--crop", "0:0:16:16", "--hflip", "--progress"])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let stats: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(stats["backend"], "fvid");
+    assert_eq!(stats["video_frames"], 25);
+    let mut reader = NativeReader::software(
+        Cursor::new(std::fs::read(&destination).unwrap()),
+        usize::MAX,
+    )
+    .unwrap();
+    let mut original =
+        NativeReader::software(Cursor::new(std::fs::read(&source).unwrap()), usize::MAX).unwrap();
+    let geometry = fvid::native_geometry::VideoGeometry {
+        crop: Some([0, 0, 16, 16]),
+        horizontal_flip: true,
+        ..Default::default()
+    };
+    let mut count = 0;
+    while let Some(frame) = reader.read_frame_raw().unwrap() {
+        assert_eq!(reader.dimensions(), [16, 16]);
+        let input = original.read_frame_raw().unwrap().unwrap();
+        let [w, h] = original.dimensions();
+        let expected = geometry
+            .apply_display(&input, w, h, original.rotation())
+            .unwrap();
+        let actual = fvid::native_geometry::VideoGeometry::default()
+            .apply_display(&frame, 16, 16, reader.rotation())
+            .unwrap();
+        assert_eq!(actual.data, expected.data, "frame {count}");
+        count += 1;
+    }
+    assert!(original.read_frame_raw().unwrap().is_none());
+    assert_eq!(count, 25);
+    for (options, error) in [
+        (vec![], "--crop required"),
+        (
+            vec!["--crop", "0:0:16:16", "--scale", "8:8"],
+            "does not take --scale",
+        ),
+        (
+            vec!["--crop", "0:0:16:16", "--hue", "h=90"],
+            "does not take pixel filters",
+        ),
+    ] {
+        let rejected = dir.0.join("rejected.mkv");
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "crop-lossless"])
+            .arg(&source)
+            .arg(&rejected)
+            .args(options)
+            .output()
+            .unwrap();
+        assert!(!out.status.success());
+        assert!(
+            String::from_utf8_lossy(&out.stderr).contains(error),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        assert!(!rejected.exists());
+    }
+}

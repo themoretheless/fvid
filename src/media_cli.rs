@@ -275,11 +275,30 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     if native_mix(args)? || native_merge(args)? {
         return Ok(());
     }
-    if args.first().map(String::as_str) == Some("transcode-lossless") && args.len() >= 3 {
+    if matches!(args.first().map(String::as_str), Some("transcode-lossless" | "crop-lossless"))
+        && args.len() >= 3
+    {
         let mut owned = args.to_vec();
         owned[0] = "decode".into();
         let (pixel_args, filters) = pixel_decode_args(&owned)?;
         let (remaining, geometry) = geometry_decode_args(&pixel_args)?;
+        if args[0] == "crop-lossless" {
+            if geometry.crop.is_none() {
+                return Err("--crop required".into());
+            }
+            for (present, option) in [
+                (geometry.scale.is_some(), "--scale"),
+                (geometry.transpose.is_some(), "--transpose"),
+                (geometry.pad.is_some(), "--pad"),
+            ] {
+                if present {
+                    return Err(format!("crop-lossless does not take {option}; use transcode-lossless").into());
+                }
+            }
+            if !filters.is_empty() {
+                return Err("crop-lossless does not take pixel filters; use transcode-lossless".into());
+            }
+        }
         if remaining.len() >= 3
             && remaining[3..]
                 .iter()
