@@ -130,6 +130,18 @@ fn format(bytes: &[u8]) -> Result<(u32, u16, u16, bool, u16, u16, u32)> {
 /// Strict RIFF bounds; only metadata safe to retain unchanged is admitted.
 /// Timed cue/loop/broadcast metadata needs its own retiming before it can be copied.
 pub fn inspect<R: Read + Seek>(input: &mut R, cancel: Option<&CancelFlag>) -> Result<WaveInfo> {
+    inspect_impl(input, cancel, true)
+}
+/// Read PCM geometry without copying or retiming opaque ancillary chunks.
+/// All chunk extents and audio geometry remain strictly validated.
+pub(crate) fn inspect_probe<R: Read + Seek>(input: &mut R) -> Result<WaveInfo> {
+    inspect_impl(input, None, false)
+}
+fn inspect_impl<R: Read + Seek>(
+    input: &mut R,
+    cancel: Option<&CancelFlag>,
+    preserve: bool,
+) -> Result<WaveInfo> {
     check(cancel)?;
     let length = input.seek(SeekFrom::End(0))?;
     input.seek(SeekFrom::Start(0))?;
@@ -179,19 +191,20 @@ pub fn inspect<R: Read + Seek>(input: &mut R, cancel: Option<&CancelFlag>) -> Re
                     return Err(invalid("short WAVE LIST chunk"));
                 }
                 input.read_exact(&mut kind)?;
-                if &kind != b"INFO" {
+                if preserve && &kind != b"INFO" {
                     return Err(invalid(
                         "native PCM trim requires retiming for non-INFO WAVE lists",
                     ));
                 }
             }
             b"JUNK" | b"PAD " => (),
-            _ => {
+            _ if preserve => {
                 return Err(invalid(&format!(
                     "native PCM trim cannot yet preserve WAVE chunk {:?}",
                     String::from_utf8_lossy(&tag)
                 )));
             }
+            _ => (),
         }
         at = next;
     }

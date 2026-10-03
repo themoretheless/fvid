@@ -19,6 +19,15 @@ def generate(output):
     data += b'LIST' + struct.pack('<I', len(payload)) + payload
     data[4:8] = struct.pack('<I', len(data) - 8)
     audio.write_bytes(data)
+    opaque = bytearray(data)
+    opaque += b'xtra' + struct.pack('<I', 3) + b'abc\0'
+    opaque += b'LIST' + struct.pack('<I', 4) + b'adtl'
+    opaque[4:8] = struct.pack('<I', len(opaque) - 8)
+    (output / 'wave-probe-ancillary.wav').write_bytes(opaque)
+    invalid = bytearray(opaque)
+    invalid[-8:-4] = struct.pack('<I', 100)
+    (output / 'wave-probe-ancillary-overflow.wav').write_bytes(invalid)
+
     with wave.open(str(output / 'wave-rematrix-implicit.wav'), 'wb') as writer:
         writer.setparams((2, 2, 48000, 4800, 'NONE', 'not compressed'))
         writer.writeframes(struct.pack('<hh', 4096, 12288) * 4800)

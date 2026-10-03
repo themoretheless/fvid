@@ -50,3 +50,15 @@ Y4M runs at 3000 fps. The same Python generator creates both. The previous
 shared DSP output dropped this explicit mask for float32 inputs: the regression
 failed specifically with mask 0 instead of 255 while retaining eight channels
 and 16 frames. The acceptance test now requires all three values to survive.
+
+## Read-only ancillary chunk inspection
+
+`wave-probe-ancillary.wav` adds an odd-length synthetic opaque `xtra` chunk
+and an empty `LIST/adtl` to the PCM control. Regenerate with
+`generate_wave_probe_sample.py`; its matching short video is
+`wave-probe-info.y4m`. Read-only probe must retain the original INFO metadata
+and audio geometry while skipping these bounded ancillary chunks. Editing
+still refuses unknown chunks whose metadata cannot yet be safely retimed.
+`wave-probe-ancillary-overflow.wav` changes the LIST length to exceed RIFF:
+this malformed-input refusal must remain `WAVE chunk exceeds RIFF extent`.
+Tests use neither external codecs nor runtime fixture generation.

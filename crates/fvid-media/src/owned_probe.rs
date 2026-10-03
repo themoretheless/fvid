@@ -163,7 +163,7 @@ pub fn probe_adts(path: &Path) -> Result<MediaInfo, String> {
 /// Inspect supported uncompressed RIFF/WAVE without loading its sample payload.
 pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
     let mut file = File::open(path)?;
-    let wave = crate::owned_wave_inspect::inspect(&mut file, None)?;
+    let wave = crate::owned_wave_inspect::inspect_probe(&mut file)?;
     let invalid = |message| std::io::Error::new(std::io::ErrorKind::InvalidData, message);
     let rate = i32::try_from(wave.sample_rate)
         .map_err(|_| invalid("WAVE sample rate exceeds metadata range"))?;
@@ -182,6 +182,10 @@ pub fn probe_wave(path: &Path) -> std::io::Result<MediaInfo> {
         if &header[..4] == b"LIST" {
             let mut kind = [0; 4];
             file.read_exact(&mut kind)?;
+            if &kind != b"INFO" {
+                at += 8 + u64::from(size) + u64::from(size & 1);
+                continue;
+            }
             let mut cursor = at + 12;
             let end = at + 8 + u64::from(size);
             while cursor < end {
