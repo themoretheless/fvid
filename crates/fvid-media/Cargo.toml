@@ -60,3 +60,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_y4m_probe_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_error_reference"
+harness = false

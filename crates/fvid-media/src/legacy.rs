@@ -355,13 +355,7 @@ fn check(code: i32, operation: &str) -> Result<()> {
     if code >= 0 {
         return Ok(());
     }
-    let mut buffer = [0i8; 256];
-    // SAFETY: The error formatter writes at most the supplied buffer length.
-    unsafe {
-        av_strerror(code, buffer.as_mut_ptr(), buffer.len());
-    }
-    // SAFETY: buffer starts zeroed; av_strerror always terminates within its bound.
-    let detail = unsafe { CStr::from_ptr(buffer.as_ptr()) }.to_string_lossy();
+    let detail = crate::owned_backend_error::describe(code);
     Err(format!("{operation}: {detail} ({code})"))
 }
 /// # Safety

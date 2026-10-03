@@ -384,3 +384,28 @@ All 142 owned unit tests passed with an empty external-program PATH and no
 libav linkage. Legacy/player compilation and native dependency/source guards
 passed. Other overlay colour conversions and remaining production backend
 operations still need migration; no feature was detached to hide them.
+
+
+Owned backend error descriptions
+--------------------------------
+
+The shared legacy operation checker no longer calls av_strerror. It formats
+ABI-tagged errors with an owned catalog and uses POSIX strerror_r for errno
+messages on Unix. Unknown codes retain the numeric diagnostic, including
+signed i32 extremes. Platforms without POSIX strerror_r use the portable
+errno catalog rather than treating errno values as Win32 error numbers.
+The surrounding operation label, code and success handling remain unchanged.
+
+The explicit ffmpeg_error_reference benchmark is the only call site of
+av_strerror in media sources. On macOS it matched 4130 descriptions covering
+-2048..2048, tagged decoder/container/network codes, configuration changes,
+unknown codes and signed extremes. The combined input/output-change bitmask
+aliases input-change in this ABI; the benchmark verifies its actual reference
+message rather than inventing a separate code. Other-platform runtime parity
+has not been measured. ABI/reference source:
+https://github.com/FFmpeg/FFmpeg/blob/master/libavutil/error.c
+
+All 143 owned unit tests passed with empty external-program PATH; the test
+binary links system libraries only, without libav. Legacy/player compilation,
+native dependency/source guards and diff checks passed. Formatting diagnostics
+is now independent; demux, codec and filter migrations are still incomplete.
