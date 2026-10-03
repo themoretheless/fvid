@@ -70,9 +70,9 @@ impl Plan {
             return Err(invalid("crop is empty or outside the input frame"));
         }
         if !c.x.is_multiple_of(sx)
-            || !c.width.is_multiple_of(sx)
+            || (!c.width.is_multiple_of(sx) && c.x + c.width != header.width)
             || !c.y.is_multiple_of(sy)
-            || !c.height.is_multiple_of(sy)
+            || (!c.height.is_multiple_of(sy) && c.y + c.height != header.height)
         {
             return Err(invalid("crop must be chroma-aligned"));
         }
@@ -92,7 +92,11 @@ impl Plan {
         let (mut input_offset, mut output_offset) = (0, 0);
         let mut planes = Vec::with_capacity(3);
         for (dx, dy) in [(1, 1), (sx, sy), (sx, sy)] {
-            let (width, height, stride) = (c.width / dx, c.height / dy, header.width / dx);
+            let (width, height, stride) = (
+                c.width.div_ceil(dx),
+                c.height.div_ceil(dy),
+                header.width.div_ceil(dx),
+            );
             planes.push(Plane {
                 input_offset,
                 output_offset,
@@ -102,7 +106,7 @@ impl Plan {
                 width,
                 height,
             });
-            input_offset += stride * (header.height / dy);
+            input_offset += stride * header.height.div_ceil(dy);
             output_offset += width * height;
         }
         Ok(Self {

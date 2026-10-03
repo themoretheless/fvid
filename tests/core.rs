@@ -45,7 +45,6 @@ fn rejects_invalid_inputs_without_panicking() {
         b"YUV4MPEG2 W0 H4\n",
         b"YUV4MPEG2 W4 H4 C420p10\n",
         b"YUV4MPEG2 W4 H4 It\n",
-        b"YUV4MPEG2 W3 H3\n",
         b"YUV4MPEG2 W4 W4 H4\n",
         b"YUV4MPEG2 W4 H4\nFRAME\n\x00",
         b"YUV4MPEG2 W4 H4\nBAD\n",
@@ -142,4 +141,54 @@ fn deterministic_malformed_corpus_never_panics() {
         data.push(b'\n');
         let _ = process(Cursor::new(data), Vec::new(), Transform::default(), 1024);
     }
+}
+
+#[test]
+fn odd_y4m_identity_and_edge_crop_preserve_rounded_chroma() {
+    let src = include_bytes!("fixtures/playback-errors/rotate-odd420.y4m");
+    let mut out = Vec::new();
+    let stats = process(Cursor::new(src), &mut out, Transform::default(), 4096).unwrap();
+    assert_eq!(stats.frames, 3);
+    assert_eq!(out, src);
+    let header = Header::parse(b"YUV4MPEG2 W11 H11 C420jpeg\n").unwrap();
+    let payload: Vec<u8> = (0..193).map(|n| n as u8).collect();
+    let plan = Plan::new(
+        &header,
+        Transform {
+            crop: Some(Crop {
+                x: 8,
+                y: 8,
+                width: 3,
+                height: 3,
+            }),
+            horizontal: true,
+            vertical: true,
+        },
+        4096,
+    )
+    .unwrap();
+    let mut cropped = vec![0; 17];
+    plan.apply(&payload, &mut cropped).unwrap();
+    assert_eq!(
+        cropped,
+        [
+            120, 119, 118, 109, 108, 107, 98, 97, 96, 156, 155, 150, 149, 192, 191, 186, 185
+        ]
+    );
+    assert!(
+        Plan::new(
+            &header,
+            Transform {
+                crop: Some(Crop {
+                    x: 0,
+                    y: 0,
+                    width: 3,
+                    height: 3
+                }),
+                ..Default::default()
+            },
+            4096
+        )
+        .is_err()
+    );
 }
