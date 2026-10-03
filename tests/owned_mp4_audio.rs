@@ -449,7 +449,7 @@ fn mp4_audio_plan_uses_owned_metadata_without_decoding_or_callbacks() {
         },
     )
     .unwrap_err();
-    assert!(error.contains("aggregate allocation admission"));
+    assert!(error.contains("controlled memory budget exceeded"));
 }
 
 #[test]

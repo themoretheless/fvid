@@ -113,6 +113,23 @@ impl AlacDecoder {
     /// the cookie's fields; a track that carries no setup data states no geometry
     /// and cannot be read.
     pub fn new(configuration: &[u8], sample_rate: u32, channels: u16) -> Result<Self> {
+        let params = Self::validated_params(configuration, sample_rate, channels)?;
+        let length = params.frame_length;
+        Ok(Self {
+            params,
+            sample_rate,
+            channels: usize::from(channels),
+            channel: (0..usize::from(channels))
+                .map(|_| Channel {
+                    residual: vec![0; length],
+                    samples: vec![0; length],
+                    low: vec![0; length],
+                })
+                .collect(),
+        })
+    }
+
+    fn validated_params(configuration: &[u8], sample_rate: u32, channels: u16) -> Result<Params> {
         let params = Params::read(configuration)?;
         if channels == 0 || u32::from(channels) != params.channels {
             return Err(invalid(&format!(
@@ -134,19 +151,24 @@ impl AlacDecoder {
                 "ALAC track of {channels} channels has no element map here"
             )));
         }
-        let length = params.frame_length;
-        Ok(Self {
-            params,
-            sample_rate,
-            channels: usize::from(channels),
-            channel: (0..usize::from(channels))
-                .map(|_| Channel {
-                    residual: vec![0; length],
-                    samples: vec![0; length],
-                    low: vec![0; length],
-                })
-                .collect(),
-        })
+        Ok(params)
+    }
+    /// Conservative retained decoder and interleaved PCM payload estimate.
+    /// Includes three i32/u32 scratch planes and up to twice the output length
+    /// for Vec growth. Excludes caller packet/I/O buffers and allocator headers.
+    pub(crate) fn decode_admission_bytes(
+        configuration: &[u8],
+        sample_rate: u32,
+        channels: u16,
+    ) -> Result<usize> {
+        let params = Self::validated_params(configuration, sample_rate, channels)?;
+        params
+            .frame_length
+            .checked_mul(usize::from(channels))
+            .and_then(|samples| samples.checked_mul(20))
+            .and_then(|bytes| bytes.checked_add(usize::from(channels) * std::mem::size_of::<Channel>()))
+            .and_then(|bytes| bytes.checked_add(16 * 1024))
+            .ok_or_else(|| invalid("ALAC memory estimate overflow"))
     }
 
     /// Current audio specification (sample rate, channels).

@@ -48,7 +48,7 @@ pub(crate) fn descriptor(
     };
     let index =
         crate::owned_mp4_audio::mp4_audio_index(&reader, selected).map_err(|e| e.to_string())?;
-    crate::owned_mp4_audio::admit_aac_reader(&reader, index, options).map_err(|e| e.to_string())?;
+    crate::owned_mp4_audio::admit_audio_reader(&reader, index, options).map_err(|e| e.to_string())?;
     let track = &reader.tracks()[index];
     let decoder =
         crate::owned_mp4_audio::Mp4TimelineDecoder::new(track).map_err(|e| e.to_string())?;
@@ -148,8 +148,14 @@ mod admission_tests {
     use super::*;
     #[test]
     fn mp4_aac_export_loudness_and_normalization_keep_owned_budget() {
-        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../../tests/fixtures/audio/aac-native-edit.m4a");
+        check_budget("../../tests/fixtures/audio/aac-native-edit.m4a");
+    }
+    #[test]
+    fn mp4_alac_export_loudness_and_normalization_keep_owned_budget() {
+        check_budget("../../tests/fixtures/playback-errors/alac-resample-window.m4a");
+    }
+    fn check_budget(fixture: &str) {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR")).join(fixture);
         let tiny = CopyOptions {
             max_controlled_bytes: Some(1),
             ..Default::default()
@@ -184,7 +190,8 @@ mod admission_tests {
         );
         for mode in 0..3 {
             let output = std::env::temp_dir().join(format!(
-                "fvid-mp4-aac-budget-{mode}-{}.wav",
+                "fvid-mp4-audio-budget-{}-{mode}-{}.wav",
+                source.file_stem().unwrap().to_string_lossy(),
                 std::process::id()
             ));
             let _ = std::fs::remove_file(&output);

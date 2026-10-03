@@ -91,10 +91,10 @@ pub(crate) fn mp4_audio_index<R: Read + Seek>(
         _ => Err(invalid("select exactly one audio stream")),
     }
 }
-/// Admit retained MP4/AAC decode payload before cloning the track or creating
+/// Admit retained MP4 AAC/ALAC decode payload before cloning the track or creating
 /// decoder/checkpoint state. Container parsing has its own bounded limits;
 /// parser temporaries and caller-owned I/O are outside this retained estimate.
-pub(crate) fn admit_aac_reader<R: Read + Seek>(
+pub(crate) fn admit_audio_reader<R: Read + Seek>(
     reader: &Mp4TimelineReader<R>,
     index: usize,
     options: &CopyOptions,
@@ -106,24 +106,36 @@ pub(crate) fn admit_aac_reader<R: Read + Seek>(
         .tracks()
         .get(index)
         .ok_or_else(|| invalid("selected audio stream is absent"))?;
-    if track.codec != *b"mp4a" {
-        return Err(invalid(
-            "MP4 audio aggregate allocation admission is not yet implemented",
-        ));
-    }
-    let config = crate::owned_aac::config::AacConfig::parse(
-        crate::owned_codec_config::aac_specific_config(&track.configuration)?,
-    )?;
-    // Decoder plus saved boundary checkpoint plus replacement/restore scratch.
-    // Charge complete decoder estimates even though immutable tables are shared.
-    let decoder = crate::owned_aac::stream::decode_admission_bytes(u16::from(config.channels))?;
+    let decoder = match &track.codec {
+        b"mp4a" => {
+            let config = crate::owned_aac::config::AacConfig::parse(
+                crate::owned_codec_config::aac_specific_config(&track.configuration)?,
+            )?;
+            // Decoder plus checkpoint and replacement/restore scratch. Immutable
+            // tables are shared, but charging full estimates is conservative.
+            crate::owned_aac::stream::decode_admission_bytes(u16::from(config.channels))?
+                .checked_mul(3)
+                .ok_or_else(|| invalid("MP4 audio memory estimate overflow"))?
+        }
+        b"alac" => crate::owned_alac::AlacDecoder::decode_admission_bytes(
+            &track.configuration,
+            track.sample_rate,
+            track.channels,
+        )
+        .map_err(|e| invalid(&e.to_string()))?,
+        _ => {
+            return Err(invalid(
+                "selected MP4 audio codec is not owned by this export path",
+            ));
+        }
+    };
     let overflow = || invalid("MP4 audio memory estimate overflow");
     let mut estimated = reader.estimated_index_payload_bytes()?;
     let mut add = |bytes: usize| -> Result<()> {
         estimated = estimated.checked_add(bytes).ok_or_else(overflow)?;
         Ok(())
     };
-    add(decoder.checked_mul(3).ok_or_else(overflow)?)?;
+    add(decoder)?;
     for bytes in [
         track.name.len(),
         track.language.len(),
@@ -168,8 +180,8 @@ pub(crate) fn admit_aac_reader<R: Read + Seek>(
     Ok(())
 }
 /// Decode normalized float32 PCM. Errors may leave partial caller-owned output;
-/// progress never reports publication. AAC retained allocation admission is
-/// checked before decoding; ALAC admission and metadata edits remain unsupported.
+/// progress never reports publication. Retained allocation admission is checked
+/// before decoding; metadata edits remain unsupported.
 /// Encoded packet limits include required preroll.
 pub fn decode_mp4_audio_pcm<R: Read + Seek>(
     source: R,
@@ -210,7 +222,7 @@ pub fn decode_mp4_audio_pcm<R: Read + Seek>(
         },
     )?;
     let index = mp4_audio_index(&reader, selected)?;
-    admit_aac_reader(&reader, index, options)?;
+    admit_audio_reader(&reader, index, options)?;
     decode_mp4_audio_reader_controlled(reader, output, interval, selected, &mut control)
 }
 include!("owned_mp4_audio_timeline_impl.rs");
