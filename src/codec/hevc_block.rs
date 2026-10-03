@@ -65,7 +65,7 @@ pub(crate) fn read_with_rotation(
     c: Config,
     rotation_enabled: bool,
 ) -> Result<Coefficients> {
-    read_with_tools(b, c, rotation_enabled, false, false, false, 2)
+    read_with_tools(b, c, rotation_enabled, false, false, false, 2, false)
 }
 pub(crate) fn read_with_tools(
     b: &mut impl ResidualBins,
@@ -75,6 +75,7 @@ pub(crate) fn read_with_tools(
     rdpcm_enabled: bool,
     explicit_rdpcm_enabled: bool,
     max_skip_log2: u8,
+    persistent_rice: bool,
 ) -> Result<Coefficients> {
     let scan = c.scan()?;
     if !(2..=5).contains(&max_skip_log2) {
@@ -99,13 +100,14 @@ pub(crate) fn read_with_tools(
             10
         });
     }
-    let coefficients = hevc_residual::read_block_with_skip_context(
+    let coefficients = hevc_residual::read_block_with_rice(
         b,
         c.log2_size,
         c.component != 0,
         scan,
         c.sign_hiding && !c.transquant_bypass && rdpcm.is_none(),
         context_enabled && (skip || c.transquant_bypass),
+        persistent_rice.then_some(usize::from(c.component != 0) * 2 + usize::from(skip || c.transquant_bypass)),
     )?;
     let transform = if c.transquant_bypass {
         Transform::Bypass
@@ -249,7 +251,7 @@ mod tests {
             ]));
             let mut scratch = Vec::new();
             let mut out = Vec::new();
-            read_with_tools(&mut b, c, false, false, false, false, log).unwrap()
+            read_with_tools(&mut b, c, false, false, false, false, log, false).unwrap()
                 .reconstruct(&ScalingLists::default(), &mut scratch, &mut out).unwrap();
             assert_eq!(out[0], -1);
             assert!(out[1..].iter().all(|&v| v == 0));
@@ -305,7 +307,7 @@ mod tests {
                 ]);
                 let mut scratch = Vec::new();
                 let mut out = Vec::new();
-                read_with_tools(&mut b, c, false, false, true, false, 2)
+                read_with_tools(&mut b, c, false, false, true, false, 2, false)
                     .unwrap()
                     .reconstruct(&ScalingLists::flat(), &mut scratch, &mut out)
                     .unwrap();
@@ -347,7 +349,7 @@ mod tests {
                     ]);
                     let mut scratch = Vec::new();
                     let mut out = Vec::new();
-                    read_with_tools(&mut b, c, false, false, false, true, 2)
+                    read_with_tools(&mut b, c, false, false, false, true, 2, false)
                         .unwrap()
                         .reconstruct(&ScalingLists::flat(), &mut scratch, &mut out)
                         .unwrap();

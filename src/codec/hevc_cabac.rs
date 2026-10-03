@@ -180,6 +180,7 @@ impl std::ops::Index<usize> for Bank {
 pub struct HevcCabac<'a> {
     arithmetic: Cabac<'a>,
     contexts: [Bank; 30],
+    pub(crate) rice_statistics: [super::hevc_residual::PersistentRiceStatistic; 4],
     failed: bool,
 }
 fn index(s: Syntax) -> usize {
@@ -218,7 +219,10 @@ fn index(s: Syntax) -> usize {
 }
 /// Probability states transferred at the second CTU of a WPP row.
 #[derive(Clone, Copy)]
-pub struct Contexts([Bank; 30]);
+pub struct Contexts(
+    [Bank; 30],
+    [super::hevc_residual::PersistentRiceStatistic; 4],
+);
 impl<'a> HevcCabac<'a> {
     pub fn new(
         rbsp: &'a [u8],
@@ -275,6 +279,7 @@ impl<'a> HevcCabac<'a> {
         Ok(Self {
             arithmetic: Cabac::new(rbsp, bit_offset)?,
             contexts,
+            rice_statistics: Default::default(),
             failed: false,
         })
     }
@@ -283,6 +288,7 @@ impl<'a> HevcCabac<'a> {
         Ok(Self {
             arithmetic: Cabac::new(rbsp, bit_offset)?,
             contexts: saved.0,
+            rice_statistics: saved.1,
             failed: false,
         })
     }
@@ -290,10 +296,11 @@ impl<'a> HevcCabac<'a> {
         if self.failed {
             return Err(invalid("cannot save failed HEVC CABAC state"));
         }
-        Ok(Contexts(self.contexts))
+        Ok(Contexts(self.contexts, self.rice_statistics))
     }
     pub fn restore_contexts(&mut self, saved: &Contexts) {
         self.contexts = saved.0;
+        self.rice_statistics = saved.1;
     }
     pub fn decision(&mut self, syntax: Syntax, increment: usize) -> Result<bool> {
         if self.failed {
@@ -329,6 +336,22 @@ impl<'a> HevcCabac<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn persistent_rice_statistics_follow_entropy_context_snapshots() {
+        let data = [0u8; 8];
+        let mut original = HevcCabac::new(&data, 0, SliceType::I, false, 33).unwrap();
+        for _ in 0..4 {
+            original.rice_statistics[3].observe_first_remainder(3);
+        }
+        let saved = original.contexts().unwrap();
+        let resumed = HevcCabac::from_contexts(&data, 0, &saved).unwrap();
+        assert_eq!(resumed.rice_statistics[3].parameter(), 1);
+        assert_eq!(resumed.rice_statistics[0].parameter(), 0);
+        let mut fresh = HevcCabac::new(&data, 0, SliceType::I, false, 33).unwrap();
+        assert_eq!(fresh.rice_statistics[3].parameter(), 0);
+        fresh.restore_contexts(&saved);
+        assert_eq!(fresh.rice_statistics, original.rice_statistics);
+    }
     #[test]
     fn residual_bank_layout_and_xy_adaptation_are_independent() {
         let data = [0; 32];

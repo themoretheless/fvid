@@ -147,7 +147,7 @@ fn unsupported_range_tools_are_not_silently_ignored() {
         .rev()
         .find(|&i| rbsp[i / 8] & (1 << (7 - i % 8)) != 0)
         .unwrap();
-    for flag in (0..9).filter(|&i| i != 0 && i != 1 && i != 2 && i != 3 && i != 5 && i != 6) {
+    for flag in (0..9).filter(|&i| i != 0 && i != 1 && i != 2 && i != 3 && i != 5 && i != 6 && i != 7) {
         let mut bytes = rbsp.clone();
         let bit = stop - 9 + flag;
         bytes[bit / 8] |= 1 << (7 - bit % 8);
@@ -574,47 +574,23 @@ fn multislice_bypass_with_filters_matches_oracle() {
 }
 
 #[test]
-fn persistent_rice_current_refusal_is_specific() {
+fn persistent_rice_disabled_controls_match_oracle() {
     {
-        let source = include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-skip-enabled.mp4");
-        let input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
-        let config = HevcConfig::parse(&input.tracks()[0].configuration).unwrap();
-        let sps = config.arrays.iter().find(|a| a.nal_type == 33).unwrap().units[0];
-        let error = Sps::parse(sps, 16 << 20).err().unwrap();
-        assert!(error.to_string().contains("remaining HEVC SPS range-extension tools"));
         compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-skip-disabled.mp4"),
             include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-skip-disabled.yuv"),
             8, false, false, Some(false), false, false, false);
     }
     {
-        let source = include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-bypass-enabled.mp4");
-        let input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
-        let config = HevcConfig::parse(&input.tracks()[0].configuration).unwrap();
-        let sps = config.arrays.iter().find(|a| a.nal_type == 33).unwrap().units[0];
-        let error = Sps::parse(sps, 16 << 20).err().unwrap();
-        assert!(error.to_string().contains("remaining HEVC SPS range-extension tools"));
         compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-bypass-disabled.mp4"),
             include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-bypass-disabled.yuv"),
             8, false, false, Some(true), false, false, false);
     }
     {
-        let source = include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-skip-enabled.mp4");
-        let input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
-        let config = HevcConfig::parse(&input.tracks()[0].configuration).unwrap();
-        let sps = config.arrays.iter().find(|a| a.nal_type == 33).unwrap().units[0];
-        let error = Sps::parse(sps, 16 << 20).err().unwrap();
-        assert!(error.to_string().contains("remaining HEVC SPS range-extension tools"));
         compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-skip-disabled.mp4"),
             include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-skip-disabled.yuv"),
             10, false, false, Some(false), false, false, false);
     }
     {
-        let source = include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-bypass-enabled.mp4");
-        let input = Mp4Reader::open(Cursor::new(source), Default::default()).unwrap();
-        let config = HevcConfig::parse(&input.tracks()[0].configuration).unwrap();
-        let sps = config.arrays.iter().find(|a| a.nal_type == 33).unwrap().units[0];
-        let error = Sps::parse(sps, 16 << 20).err().unwrap();
-        assert!(error.to_string().contains("remaining HEVC SPS range-extension tools"));
         compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-bypass-disabled.mp4"),
             include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-10-bypass-disabled.yuv"),
             10, false, false, Some(true), false, false, false);
@@ -622,7 +598,6 @@ fn persistent_rice_current_refusal_is_specific() {
 }
 
 #[test]
-#[ignore = "persistent Rice decoding not implemented; refusal coverage is not acceptance"]
 fn persistent_rice_acceptance_matches_oracle() {
     compare(include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-skip-enabled.mp4"),
         include_bytes!("fixtures/playback-errors/hevc-rext-persistent-rice-8-skip-enabled.yuv"),

@@ -4,8 +4,12 @@ use crate::{Result, invalid};
 pub trait ResidualBins {
     fn decision(&mut self, syntax: Syntax, increment: usize) -> Result<bool>;
     fn bypass(&mut self) -> Result<bool>;
+    fn rice_statistic(&self, _class: usize) -> PersistentRiceStatistic { Default::default() }
+    fn set_rice_statistic(&mut self, _class: usize, _value: PersistentRiceStatistic) {}
 }
 impl ResidualBins for HevcCabac<'_> {
+    fn rice_statistic(&self, class: usize) -> PersistentRiceStatistic { self.rice_statistics[class] }
+    fn set_rice_statistic(&mut self, class: usize, value: PersistentRiceStatistic) { self.rice_statistics[class] = value; }
     fn decision(&mut self, syntax: Syntax, increment: usize) -> Result<bool> {
         HevcCabac::decision(self, syntax, increment)
     }
@@ -61,11 +65,11 @@ pub fn last_position(
     }
     Ok(position)
 }
-/// coeff_abs_level_remaining for Main/Main10 (extended precision disabled).
-/// Range-extension persistent adaptation supplies different state and is separate.
+/// coeff_abs_level_remaining with extended precision disabled.
+/// Persistent adaptation may supply Rice parameters above the base-profile cap.
 pub fn remaining_level(b: &mut impl ResidualBins, rice: u8) -> Result<u32> {
-    if rice > 4 {
-        return Err(invalid("base HEVC Rice parameter exceeds four"));
+    if rice > 31 {
+        return Err(invalid("HEVC Rice parameter exceeds coefficient storage"));
     }
     let mut prefix = 0u32;
     while prefix < 4 && b.bypass()? {
@@ -102,6 +106,25 @@ pub fn remaining_level(b: &mut impl ResidualBins, rice: u8) -> Result<u32> {
 pub struct RiceState {
     parameter: u8,
     previous_absolute: u32,
+}
+/// Persistent range-extension statistic for one component/transform class.
+/// The caller updates it only for the first coded remainder in a coefficient
+/// group and resets all classes when initializing slice entropy contexts.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct PersistentRiceStatistic(u8);
+impl PersistentRiceStatistic {
+    pub fn parameter(self) -> u8 {
+        self.0 / 4
+    }
+    pub fn observe_first_remainder(&mut self, remainder: u32) {
+        let threshold = 1u64 << self.parameter();
+        if u64::from(remainder) >= 3 * threshold {
+            // u32 remainders cannot meet the increment threshold at k >= 31.
+            self.0 += 1;
+        } else if u64::from(remainder) * 2 < threshold && self.0 > 0 {
+            self.0 -= 1;
+        }
+    }
 }
 impl RiceState {
     pub fn parameter(&self) -> u8 {
@@ -188,6 +211,12 @@ pub fn read_block_with_skip_context(
     scan: Scan,
     hide_sign: bool,
     skip_context: bool,
+) -> Result<Vec<i32>> {
+    read_block_with_rice(b, log2_size, chroma, scan, hide_sign, skip_context, None)
+}
+pub(crate) fn read_block_with_rice(
+    b: &mut impl ResidualBins, log2_size: u8, chroma: bool, scan: Scan,
+    hide_sign: bool, skip_context: bool, persistent_class: Option<usize>,
 ) -> Result<Vec<i32>> {
     let last = last_position(b, log2_size, chroma, scan)?;
     let side = 1usize << log2_size;
@@ -294,7 +323,10 @@ pub fn read_block_with_skip_context(
                 negative[n] = b.bypass()?;
             }
         }
+        let mut statistic = persistent_class.map(|class| b.rice_statistic(class));
+        let mut first_remainder = true;
         let mut rice = RiceState::default();
+        if let Some(statistic) = statistic { rice.parameter = statistic.parameter(); }
         let mut sum = 0u64;
         for (ordinal, &n) in indices.iter().enumerate() {
             let threshold = if ordinal >= 8 {
@@ -305,7 +337,13 @@ pub fn read_block_with_skip_context(
                 2
             };
             if levels[n] == threshold {
-                levels[n] = rice.decode(b, levels[n])?;
+                if let Some(ref mut statistic) = statistic {
+                    let remainder = remaining_level(b, rice.parameter)?;
+                    levels[n] = levels[n].checked_add(remainder)
+                        .ok_or_else(|| invalid("HEVC absolute coefficient overflow"))?;
+                    if first_remainder { statistic.observe_first_remainder(remainder); first_remainder = false; }
+                    if u64::from(levels[n]) > (3u64 << rice.parameter) { rice.parameter += 1; }
+                } else { levels[n] = rice.decode(b, levels[n])?; }
             }
             sum += u64::from(levels[n]);
             if hidden && n == lowest {
@@ -316,6 +354,7 @@ pub fn read_block_with_skip_context(
             let [x, y] = inner[n];
             output[(gy * 4 + y) * side + gx * 4 + x] = if negative[n] { -level } else { level };
         }
+        if let (Some(class), Some(statistic)) = (persistent_class, statistic) { b.set_rice_statistic(class, statistic); }
     }
     Ok(output)
 }
@@ -446,7 +485,8 @@ mod tests {
     }
     fn encoded_remainder(value: u32, rice: u8) -> Script {
         let mut output = VecDeque::new();
-        let limit = 4u32 << rice;
+        let value = u64::from(value);
+        let limit = 4u64 << rice;
         let prefix = value.min(limit) >> rice;
         for _ in 0..prefix {
             output.push_back(Bin::Bypass(true));
@@ -457,9 +497,9 @@ mod tests {
         } else {
             let mut remainder = value - limit;
             let mut order = rice + 1;
-            while u64::from(remainder) >= (1u64 << order) {
+            while remainder >= (1u64 << order) {
                 output.push_back(Bin::Bypass(true));
-                remainder -= 1u32 << order;
+                remainder -= 1u64 << order;
                 order += 1;
             }
             output.push_back(Bin::Bypass(false));
@@ -578,7 +618,7 @@ mod tests {
     }
     #[test]
     fn rice_remainders_cross_prefix_escape_and_integer_boundaries() {
-        for rice in 0..=4 {
+        for rice in 0..=31 {
             for value in (0..4096).chain([65535, 1 << 20, u32::MAX - 3, u32::MAX]) {
                 let mut bins = encoded_remainder(value, rice);
                 assert_eq!(remaining_level(&mut bins, rice).unwrap(), value);
@@ -591,7 +631,7 @@ mod tests {
                 .collect(),
         );
         assert!(remaining_level(&mut too_long, 0).is_err());
-        assert!(remaining_level(&mut Script(VecDeque::new()), 5).is_err());
+        assert!(remaining_level(&mut Script(VecDeque::new()), 32).is_err());
     }
     #[test]
     fn rice_adaptation_uses_previous_absolute_level_and_caps_at_four() {
@@ -620,6 +660,28 @@ mod tests {
                 .is_err()
         );
         assert_eq!(state, saved);
+    }
+    #[test]
+    fn persistent_statistic_uses_remainders_and_four_observations_per_parameter() {
+        let mut statistic = PersistentRiceStatistic::default();
+        for _ in 0..3 {
+            statistic.observe_first_remainder(3);
+            assert_eq!(statistic.parameter(), 0);
+        }
+        statistic.observe_first_remainder(3);
+        assert_eq!(statistic.parameter(), 1);
+        statistic.observe_first_remainder(1);
+        assert_eq!(statistic.parameter(), 1);
+        statistic.observe_first_remainder(0);
+        assert_eq!(statistic.parameter(), 0);
+        for _ in 0..1000 {
+            statistic.observe_first_remainder(u32::MAX);
+        }
+        assert_eq!(statistic.parameter(), 31);
+        for _ in 0..1000 {
+            statistic.observe_first_remainder(0);
+        }
+        assert_eq!(statistic, PersistentRiceStatistic::default());
     }
     #[test]
     fn significance_contexts_obey_group_edges_and_component_banks() {
