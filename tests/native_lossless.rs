@@ -778,3 +778,57 @@ fn temporal_cli_export_preserves_expected_frame_order_without_legacy() {
         assert!(result.read_frame_raw().unwrap().is_none());
     }
 }
+
+#[test]
+fn owned_temporal_cli_interval_matches_api_and_rejects_incomplete_ranges() {
+    let dir = directory("temporal-interval");
+    let source = fixture("playback-errors/framestep-six-frames.y4m");
+    let output = dir.0.join("cli.mkv");
+    let baseline = dir.0.join("api.mkv");
+    let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+        .args(["media", "transcode-lossless"])
+        .arg(&source)
+        .arg(&output)
+        .args(["--reverse", "", "--from", "0.25", "--to", "1.0", "--quiet"])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert!(out.stdout.is_empty());
+    let stats = fvid_media::owned_lossless::transcode_lossless(
+        &source,
+        &baseline,
+        fvid::media_info::LosslessTransform {
+            reverse: Some(String::new()),
+            interval: Some((250_000, 1_000_000)),
+            ..Default::default()
+        },
+        &Default::default(),
+    )
+    .unwrap();
+    assert_eq!(stats.video_frames, 3);
+    assert_eq!(
+        std::fs::read(output).unwrap(),
+        std::fs::read(baseline).unwrap()
+    );
+    for options in [
+        vec!["--from", "0.25"],
+        vec!["--from", "1.0", "--to", "0.25"],
+    ] {
+        let rejected = dir.0.join("rejected.mkv");
+        let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media", "transcode-lossless"])
+            .arg(&source)
+            .arg(&rejected)
+            .args(["--reverse", ""])
+            .args(options)
+            .output()
+            .unwrap();
+        assert!(!out.status.success());
+        assert!(String::from_utf8_lossy(&out.stderr).contains("lossless interval requires"));
+        assert!(!rejected.exists());
+    }
+}

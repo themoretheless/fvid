@@ -4534,6 +4534,7 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
     }
     let mut quiet = false;
     let mut report = false;
+    let (mut from, mut to) = (None, None);
     let mut transform = fvid::media_info::LosslessTransform::default();
     let mut options = args[3..].iter();
     let mut seen = std::collections::BTreeSet::new();
@@ -4542,6 +4543,17 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             return Err(format!("duplicate option: {option}").into());
         }
         match option.as_str() {
+            "--from" | "--to" => {
+                let value = fvid::media_info::parse_time(
+                    options.next().ok_or("missing interval boundary")?,
+                )?;
+                if option == "--from" {
+                    from = Some(value);
+                } else {
+                    to = Some(value);
+                }
+                continue;
+            }
             "--quiet" => {
                 quiet = true;
                 continue;
@@ -4632,6 +4644,15 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
         };
         *slot = Some(options.next().ok_or("missing filter parameters")?.clone());
     }
+    transform.interval = match (from, to) {
+        (None, None) => None,
+        (Some(from), Some(to)) if from >= 0 && from < to => Some((from, to)),
+        _ => {
+            return Err(
+                "lossless interval requires both --from and --to with 0 <= from < to".into(),
+            )
+        }
+    };
     let source = std::path::Path::new(&args[command + 1]);
     if fvid::native_lossless::supports(&transform) && fvid::native_lossless::eligible(source)? {
         if !planning {
