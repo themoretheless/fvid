@@ -197,5 +197,47 @@ fn main() {
         assert_eq!(actual, reference, "temporal pixels and positions: {case}");
         std::fs::remove_file(output).unwrap();
     }
-    println!("owned FFV1 export: 16 independent pixel and presentation-time references passed");
+
+    let output = std::env::temp_dir().join(format!(
+        "fvid-ffv1-tags-reference-{}.mkv",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_file(&output);
+    fvid_media::transcode_lossless(
+        &root.join("ffv1-custom-tags.mkv"),
+        &output,
+        Default::default(),
+        &CopyOptions {
+            metadata_set: vec![("title".into(), "New title".into())],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let result = Command::new(&ffmpeg)
+        .args(["-hide_banner", "-nostdin", "-v", "info", "-i"])
+        .arg(&output)
+        .args(["-f", "null", "-"])
+        .output()
+        .unwrap();
+    assert!(result.status.success());
+    let log = String::from_utf8_lossy(&result.stderr);
+    for (key, value) in [
+        ("FVID_TEST_NOTE", "own container metadata"),
+        ("TITLE", "New title"),
+        ("ENCODER", "synthetic source"),
+    ] {
+        assert!(
+            log.lines().any(|line| line
+                .trim()
+                .split_once(':')
+                .is_some_and(
+                    |(name, text)| name.trim().eq_ignore_ascii_case(key) && text.trim() == value
+                )),
+            "missing tag {key}={value}: {log}"
+        );
+    }
+    std::fs::remove_file(output).unwrap();
+    println!(
+        "owned FFV1 export: 16 pixel/timing references and independent file tag checks passed"
+    );
 }

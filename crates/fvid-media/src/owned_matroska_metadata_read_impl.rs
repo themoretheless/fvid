@@ -51,11 +51,23 @@ fn read_tags<R: Read + Seek>(
     max: usize,
     out: &mut FileTags,
 ) {
+    read_tags_collect(r, e, count, max, out, &mut |_, _| {});
+}
+fn read_tags_collect<R: Read + Seek>(
+    r: &mut R,
+    e: Element,
+    count: &mut usize,
+    max: usize,
+    out: &mut FileTags,
+    collect: &mut impl FnMut(&str, &str),
+) -> bool {
+    let mut complete = true;
     for tag in fields_to_first_gap(r, e, count, max) {
         if tag.id != 0x7373 {
             continue;
         }
         let Ok(parts) = fields(r, tag, count, max) else {
+            complete = false;
             continue;
         };
         // Either order the two parts come in is settled before the tag is kept,
@@ -72,13 +84,21 @@ fn read_tags<R: Read + Seek>(
                 }
                 0x67c8 => {
                     let Ok(fields_of_tag) = fields(r, part, count, max) else {
+                        complete = false;
                         continue;
                     };
                     let (mut name, mut value) = (String::new(), String::new());
                     for field in fields_of_tag {
                         match field.id {
-                            0x45a3 => name = lenient_text(r, field, 128).unwrap_or_default(),
-                            0x4487 => value = lenient_text(r, field, 1024).unwrap_or_default(),
+                            0x45a3 => match lenient_text(r, field, 128) {
+                                Some(text) => name = text,
+                                None => complete = false,
+                            },
+                            0x4487 => match lenient_text(r, field, 1024) {
+                                Some(text) => value = text,
+                                None => complete = false,
+                            },
+                            0x67c8 => complete = false,
                             _ => {}
                         }
                     }
@@ -89,12 +109,17 @@ fn read_tags<R: Read + Seek>(
                 _ => {}
             }
         }
+        if names_a_part {
+            complete = false;
+        }
         if !names_a_part {
             for (name, value) in stated {
                 out.insert(&name, &value);
+                collect(&name, &value);
             }
         }
     }
+    complete
 }
 
 /// The chapter atoms of one `Chapters` master, kept in the units the file's
@@ -156,7 +181,9 @@ fn read_chapters<R: Read + Seek>(
                     _ => {}
                 }
             }
-            if let Some(start) = start { out.push((start, end, title)); }
+            if let Some(start) = start {
+                out.push((start, end, title));
+            }
         }
     }
 }

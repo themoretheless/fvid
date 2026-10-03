@@ -13,7 +13,15 @@ pub fn probe_webm(path: &Path) -> Result<MediaInfo, String> {
         i64::try_from(n).map_err(|_| "Matroska metadata timestamp exceeds API range".to_string())
     };
     let duration = reader.duration_ns.map(checked).transpose()?;
-    let mut metadata = BTreeMap::new();
+    let mut metadata = reader.metadata.clone();
+    let encoder = metadata
+        .iter()
+        .find(|(key, _)| key.eq_ignore_ascii_case("encoder"))
+        .map(|(_, value)| value.clone())
+        .or_else(|| (!reader.writing_app.is_empty()).then(|| reader.writing_app.clone()));
+    if let Some(encoder) = encoder {
+        metadata.entry("encoder".into()).or_insert(encoder);
+    }
     let t = &reader.tags;
     for (key, value) in [
         ("title", &t.title),
@@ -165,6 +173,25 @@ mod tests {
         assert!(crate::owned_probe::probe_as(&path, Some("wav")).is_err());
         std::fs::remove_file(path).unwrap();
     }
+    #[test]
+    fn arbitrary_file_tags_and_writing_app_reach_owned_probe_without_track_tag_leakage() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/playback-errors");
+        for name in ["ffv1-custom-tags.mkv", "ffv1-track-tags.mkv"] {
+            let info = crate::owned_probe::probe(&root.join(name)).unwrap();
+            assert_eq!(info.metadata["FVID_TEST_NOTE"], "own container metadata");
+            assert_eq!(info.metadata["ENCODER"], "synthetic source");
+            assert_eq!(info.metadata["encoder"], "synthetic source");
+            assert_eq!(info.metadata["title"], "Synthetic tags");
+            assert!(!info.metadata.contains_key("PRIVATE_TRACK_NOTE"));
+            let reader = WebmReader::open(
+                BufReader::new(File::open(root.join(name)).unwrap()),
+                Limits::default(),
+            )
+            .unwrap();
+            assert_eq!(reader.writing_app, "fvid-synthetic");
+        }
+    }
+
 }
 
 /// Read a Matroska video's declared nominal cadence, separately from measured average FPS.

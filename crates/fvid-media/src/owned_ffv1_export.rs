@@ -17,7 +17,7 @@ pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
     let Ok(input) = input(source) else {
         return false;
     };
-    if input.tracks.len() != 1 {
+    if input.tracks.len() != 1 || !input.metadata_complete {
         return false;
     }
     let track = &input.tracks[0];
@@ -150,7 +150,7 @@ pub(crate) fn export(
                         ..Default::default()
                     };
                     writer = Some(
-                        mkv::PacketWriter::new_ffv1_with_file_metadata(
+                        mkv::PacketWriter::new_ffv1_with_text_tags(
                             output.take().unwrap(),
                             view.width,
                             view.height,
@@ -158,6 +158,7 @@ pub(crate) fn export(
                             0,
                             0,
                             &metadata,
+                            &input.metadata,
                         )
                         .map_err(|e| e.to_string())?,
                     );
@@ -579,5 +580,31 @@ mod tests {
             }
             std::fs::remove_file(output).unwrap();
         }
+    }
+    #[test]
+    fn owned_export_preserves_unlisted_file_tags_and_applies_canonical_overrides() {
+        let source = root().join("ffv1-custom-tags.mkv");
+        let output =
+            std::env::temp_dir().join(format!("fvid-ffv1-custom-tags-{}.mkv", std::process::id()));
+        let _ = std::fs::remove_file(&output);
+        let options = CopyOptions {
+            metadata_set: vec![("title".into(), "New title".into())],
+            ..Default::default()
+        };
+        assert!(supports(&source, &Default::default()));
+        crate::transcode_lossless(&source, &output, Default::default(), &options).unwrap();
+        let info = crate::owned_probe::probe(&output).unwrap();
+        assert_eq!(info.metadata["FVID_TEST_NOTE"], "own container metadata");
+        assert_eq!(info.metadata["ENCODER"], "synthetic source");
+        assert_eq!(info.metadata["title"], "New title");
+        std::fs::remove_file(output).unwrap();
+    }
+    #[test]
+    fn scoped_tags_are_an_explicit_export_refusal_until_preserved_by_owned_writer() {
+        let source = root().join("ffv1-track-tags.mkv");
+        let reader = input(&source).unwrap();
+        assert!(!reader.metadata_complete);
+        assert!(!supports(&source, &Default::default()));
+        // Refusal preserves the existing backend; this is not acceptance for scoped-tag export.
     }
 }

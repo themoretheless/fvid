@@ -121,6 +121,12 @@ pub struct WebmReader<R> {
     /// either of the two places a writer can put it: the `Title` of a tag of the
     /// whole segment and the older `Title` of the information block.
     pub tags: FileTags,
+    /// File-wide text tags, retaining names beyond the player tag catalog.
+    pub metadata: std::collections::BTreeMap<String, String>,
+    /// Segment WritingApp, independent of a tag named ENCODER.
+    pub writing_app: String,
+    /// False for scoped, nested or oversized tags requiring a richer exporter.
+    pub metadata_complete: bool,
     limits: Limits,
     read_packet_bytes: usize,
     /// Where the walk of the Segment's children stands. Blocks are indexed a
@@ -271,6 +277,9 @@ impl<R: Read + Seek> WebmReader<R> {
             duration_ns: None,
             chapters: Vec::new(),
             tags: FileTags::default(),
+            metadata: Default::default(),
+            writing_app: String::new(),
+            metadata_complete: true,
             limits,
             read_packet_bytes: limits.packet_bytes,
             segment_end: segment.end.unwrap_or(file_end),
@@ -315,6 +324,9 @@ impl<R: Read + Seek> WebmReader<R> {
             chapter_runs,
             block_title,
             tags,
+            metadata,
+            writing_app,
+            metadata_complete,
             elements,
             scanned,
             tail_ns,
@@ -337,6 +349,8 @@ impl<R: Read + Seek> WebmReader<R> {
                             *duration_ticks = Some(value);
                         } else if f.id == 0x7ba9 {
                             *block_title = lenient_text(&mut *reader, f, 1024).unwrap_or_default();
+                        } else if f.id == 0x5741 {
+                            *writing_app = lenient_text(&mut *reader, f, 1024).unwrap_or_default();
                         } else if f.id == 0x2ad7b1 {
                             *scale = uint(&mut *reader, f)?;
                             if *scale == 0 {
@@ -496,7 +510,20 @@ impl<R: Read + Seek> WebmReader<R> {
                     }
                 }
                 0x1254c367 => {
-                    read_tags(&mut *reader, e, &mut *elements, limits.elements, &mut *tags);
+                    let mut exceeded = false;
+                    *metadata_complete &= read_tags_collect(
+                        &mut *reader, e, &mut *elements, limits.elements, &mut *tags,
+                        &mut |name, value| {
+                            if metadata.len() >= 256 && !metadata.contains_key(name) {
+                                exceeded = true;
+                                return;
+                            }
+                            metadata.entry(name.to_owned()).or_insert_with(|| value.to_owned());
+                        },
+                    );
+                    if exceeded {
+                        *metadata_complete = false;
+                    }
                 }
                 0x1043a770 => {
                     read_chapters(

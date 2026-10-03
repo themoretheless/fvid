@@ -65,7 +65,9 @@ fn main() {
     videos.extend([(8, 40_000_000, "ffv1-positive-start.mkv"),
                    (8, 40_000_000, "ffv1-invalid-range-header.mkv"),
                    (8, 40_000_000, "ffv1-vfr.mkv"),
-                   (8, 40_000_000, "ffv1-six-frames.mkv")])
+                   (8, 40_000_000, "ffv1-six-frames.mkv"),
+                   (8, 40_000_000, "ffv1-custom-tags.mkv"),
+                   (8, 40_000_000, "ffv1-track-tags.mkv")])
     for depth, frame_duration, name in videos:
         header = element(0x1A45DFA3, uint(0x4286, 1) + uint(0x42F7, 1) + uint(0x42F2, 4) + uint(0x42F3, 8) + element(0x4282, b"matroska") + uint(0x4287, 4) + uint(0x4285, 2))
         info = element(0x1549A966, uint(0x2AD7B1, 1_000_000) + element(0x4D80, b"fvid-synthetic") + element(0x5741, b"fvid-synthetic") + element(0x4489, struct.pack(">d", 100 if name == "ffv1-vfr.mkv" else (6 if name == "ffv1-six-frames.mkv" else 2) * frame_duration / 1_000_000)))
@@ -81,7 +83,13 @@ fn main() {
                 cluster += element(0xA0, element(0xA1, block) + uint(0x9B, 73 if index == 0 else 27))
             else:
                 cluster += element(0xA3, b"\x81" + ((index * frame_duration + 500_000) // 1_000_000).to_bytes(2, "big") + b"\x80" + packet)
-        (args.output / name).write_bytes(header + element(0x18538067, info + tracks + element(0x1F43B675, cluster)))
+        tags = b""
+        if name in ["ffv1-custom-tags.mkv", "ffv1-track-tags.mkv"]:
+            simple = lambda key, value: element(0x67C8, element(0x45A3, key) + element(0x4487, value))
+            global_tag = element(0x7373, simple(b"TITLE", b"Synthetic tags") + simple(b"FVID_TEST_NOTE", b"own container metadata") + simple(b"ENCODER", b"synthetic source"))
+            track_tag = element(0x7373, element(0x63C0, uint(0x63C5, 1)) + simple(b"PRIVATE_TRACK_NOTE", b"not file metadata"))
+            tags = element(0x1254C367, global_tag + (track_tag if name == "ffv1-track-tags.mkv" else b""))
+        (args.output / name).write_bytes(header + element(0x18538067, info + tracks + element(0x1F43B675, cluster) + tags))
 
 if __name__ == "__main__":
     main()

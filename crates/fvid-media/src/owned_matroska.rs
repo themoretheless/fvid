@@ -126,7 +126,30 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         default_duration_ns: u64,
         file: &FileMetadata,
     ) -> Result<Self> {
-        let file_elements = file_metadata(file)?;
+        Self::new_ffv1_with_text_tags(
+            output,
+            width,
+            height,
+            metadata,
+            rotation,
+            default_duration_ns,
+            file,
+            &Default::default(),
+        )
+    }
+    /// Preserve file-wide text tags outside the canonical player tag catalog.
+    pub fn new_ffv1_with_text_tags(
+        output: &'a mut W,
+        width: u32,
+        height: u32,
+        metadata: Option<&VideoMetadata>,
+        rotation: u16,
+        default_duration_ns: u64,
+        file: &FileMetadata,
+        text_tags: &std::collections::BTreeMap<String, String>,
+    ) -> Result<Self> {
+        let mut file_elements = file_metadata(file)?;
+        file_elements.extend(extra_text_tags(text_tags)?);
         let geometry = video_element(width, height, metadata, rotation)?;
         let entries = element(
             0xae,
@@ -147,6 +170,40 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
             .concat(),
         )?;
         Self::new_prepared(output, &entries, &file_elements, vec![0], vec![None])
+    }
+}
+
+fn extra_text_tags(tags: &std::collections::BTreeMap<String, String>) -> Result<Vec<u8>> {
+    if tags.len() > 256 {
+        return Err(invalid("Matroska text tag count exceeds limit"));
+    }
+    let mut entries = Vec::new();
+    for (name, value) in tags {
+        if name.is_empty()
+            || name.len() > 128
+            || value.len() > 1024
+            || name.contains('\0')
+            || value.contains('\0')
+        {
+            return Err(invalid("invalid Matroska text tag"));
+        }
+        if crate::owned_file_tags::FileTags::supports_key(name) {
+            continue;
+        }
+        let simple = element(
+            0x67c8,
+            &[
+                element(0x45a3, name.as_bytes())?,
+                element(0x4487, value.as_bytes())?,
+            ]
+            .concat(),
+        )?;
+        entries.extend(element(0x7373, &simple)?);
+    }
+    if entries.is_empty() {
+        Ok(Vec::new())
+    } else {
+        element(0x1254c367, &entries)
     }
 }
 
