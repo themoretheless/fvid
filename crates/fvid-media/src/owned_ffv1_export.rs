@@ -126,6 +126,28 @@ fn export_chapters(
         })
         .collect()
 }
+fn edit_track_description(
+    description: &mut mkv::VideoTrackDescription,
+    key: &str,
+    value: &str,
+) -> bool {
+    if key.eq_ignore_ascii_case("title") {
+        description.name = value.into();
+        true
+    } else if key.eq_ignore_ascii_case("language") {
+        let value = if value.is_empty() { "und" } else { value };
+        description.language = value.into();
+        description.legacy_language =
+            if value.len() == 3 && value.bytes().all(|byte| byte.is_ascii_alphabetic()) {
+                value.into()
+            } else {
+                "und".into()
+            };
+        true
+    } else {
+        false
+    }
+}
 pub(crate) fn export(
     source: &Path,
     destination: &Path,
@@ -134,7 +156,7 @@ pub(crate) fn export(
 ) -> Result<(DecodeStats, fvid_control::ProgressEvent, u64)> {
     let input = input(source)?;
     let track = input.tracks.first().ok_or("input has no video stream")?;
-    let description = mkv::VideoTrackDescription {
+    let mut description = mkv::VideoTrackDescription {
         name: track.name.clone(),
         language: input
             .track_languages
@@ -160,10 +182,11 @@ pub(crate) fn export(
     }
     for (_, key) in &options.stream_metadata_delete {
         track_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
+        edit_track_description(&mut description, key, "");
     }
     for (_, key, value) in &options.stream_metadata_set {
         track_tags.retain(|name, _| !name.eq_ignore_ascii_case(key));
-        if !value.is_empty() {
+        if !edit_track_description(&mut description, key, value) && !value.is_empty() {
             track_tags.insert(key.to_ascii_uppercase(), value.clone());
         }
     }
@@ -991,5 +1014,82 @@ mod tests {
             &Default::default(),
             &unmapped
         ));
+    }
+    #[test]
+    fn own_export_edits_and_removes_track_name_and_language() {
+        let source = root().join("ffv1-track-description.mkv");
+        for (case, options, name, language) in [
+            (
+                "set",
+                CopyOptions {
+                    stream_metadata_set: vec![
+                        (0, "TITLE".into(), "New track".into()),
+                        (0, "Language".into(), "deu".into()),
+                    ],
+                    ..Default::default()
+                },
+                "New track",
+                "deu",
+            ),
+            (
+                "delete",
+                CopyOptions {
+                    stream_metadata_delete: vec![(0, "title".into()), (0, "language".into())],
+                    ..Default::default()
+                },
+                "",
+                "und",
+            ),
+            (
+                "empty",
+                CopyOptions {
+                    stream_metadata_set: vec![
+                        (0, "title".into(), "".into()),
+                        (0, "language".into(), "".into()),
+                    ],
+                    ..Default::default()
+                },
+                "",
+                "und",
+            ),
+            (
+                "bcp47",
+                CopyOptions {
+                    stream_metadata_set: vec![
+                        (0, "title".into(), "New track".into()),
+                        (0, "language".into(), "de-DE".into()),
+                    ],
+                    ..Default::default()
+                },
+                "New track",
+                "de-DE",
+            ),
+        ] {
+            assert!(crate::owned_lossless::supports(
+                &source,
+                &Default::default(),
+                &options
+            ));
+            let output = std::env::temp_dir().join(format!(
+                "fvid-track-description-edit-{case}-{}.mkv",
+                std::process::id()
+            ));
+            let _ = std::fs::remove_file(&output);
+            crate::transcode_lossless(&source, &output, Default::default(), &options).unwrap();
+            let reader = input(&output).unwrap();
+            assert_eq!(reader.tracks[0].name, name);
+            assert_eq!(reader.track_languages[&1], language);
+            assert_eq!(
+                reader.track_legacy_languages[&1],
+                if language == "de-DE" { "und" } else { language }
+            );
+            assert_eq!(
+                reader.track_dispositions[&1],
+                4 | 8 | 64 | 128 | 256 | 131072
+            );
+            assert!(!reader.metadata.contains_key("TITLE"));
+            assert!(!reader.metadata.contains_key("LANGUAGE"));
+            std::fs::remove_file(output).unwrap();
+        }
     }
 }

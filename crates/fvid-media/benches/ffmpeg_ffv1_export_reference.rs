@@ -518,6 +518,48 @@ fn main() {
         assert!(value["format"]["tags"]["PRIVATE_TRACK_NOTE"].is_null());
         std::fs::remove_file(output).unwrap();
     }
+    for delete in [false, true] {
+        let output = std::env::temp_dir().join(format!(
+            "fvid-track-label-reference-{delete}-{}.mkv",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_file(&output);
+        let options = if delete {
+            CopyOptions {
+                stream_metadata_delete: vec![(0, "title".into()), (0, "language".into())],
+                ..Default::default()
+            }
+        } else {
+            CopyOptions {
+                stream_metadata_set: vec![
+                    (0, "title".into(), "New track".into()),
+                    (0, "language".into(), "deu".into()),
+                ],
+                ..Default::default()
+            }
+        };
+        fvid_media::transcode_lossless(
+            &root.join("ffv1-track-description.mkv"),
+            &output,
+            Default::default(),
+            &options,
+        )
+        .unwrap();
+        let value = inspect(&output);
+        let tags = &value["streams"][0]["tags"];
+        if delete {
+            assert!(tags["title"].is_null());
+            assert!(tags["language"].is_null() || tags["language"] == "und");
+        } else {
+            assert_eq!(tags["title"], "New track");
+            assert_eq!(tags["language"], "deu");
+        }
+        assert_eq!(
+            value["streams"][0]["disposition"],
+            before["streams"][0]["disposition"]
+        );
+        std::fs::remove_file(output).unwrap();
+    }
     println!(
         "owned FFV1 export: 20 pixel/timing references and independent file/track metadata checks passed"
     );

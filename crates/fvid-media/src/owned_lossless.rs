@@ -87,7 +87,7 @@ fn stream_tag_key(key: &str) -> bool {
         && !key.contains('\0')
         && !matches!(
             key.to_ascii_lowercase().as_str(),
-            "title" | "language" | "rotate" | "stereo_mode" | "alpha_mode"
+            "rotate" | "stereo_mode" | "alpha_mode"
         )
 }
 fn policy(o: &CopyOptions, text_tags: bool) -> bool {
@@ -114,6 +114,7 @@ fn policy(o: &CopyOptions, text_tags: bool) -> bool {
                         && stream_tag_key(key)
                         && !value.contains('\0')
                         && value.len() <= 1024
+                        && (!key.eq_ignore_ascii_case("language") || value.len() <= 128)
                 })
                 && o.stream_metadata_delete
                     .iter()
