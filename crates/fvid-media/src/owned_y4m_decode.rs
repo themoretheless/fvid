@@ -30,6 +30,7 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
+    if transform.colorize.as_deref().is_some_and(|a| crate::owned_colorize::Colorize::parse(a).is_err()) { return false; }
     if transform.bilateral.as_deref().is_some_and(|a| crate::owned_bilateral::Bilateral::parse(a).is_err()) { return false; }
     if transform.rotate.is_some_and(|a| fvid_media_info::RotateAngle::parse(&a.degrees.to_string()).is_err()) { return false; }
     if transform.gblur.as_deref().is_some_and(|a| crate::owned_gblur::GaussianBlur::parse(a).is_err()) { return false; }
@@ -100,6 +101,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 unsharp: transform.unsharp.clone(),
                 eq: transform.eq.clone(),
                 hue: transform.hue.clone(),
+                colorize: transform.colorize.clone(),
                 negate: transform.negate.clone(),
                 avgblur: transform.avgblur.clone(),
                 gblur: transform.gblur.clone(),
@@ -413,6 +415,7 @@ pub(crate) fn apply_pixel_filters(
         || transform.unsharp.is_some()
         || transform.eq.is_some()
         || transform.hue.is_some()
+        || transform.colorize.is_some()
         || transform.gblur.is_some()
         || transform.bilateral.is_some()
         || transform.avgblur.is_some()
@@ -476,6 +479,9 @@ pub(crate) fn apply_pixel_filters(
                     crate::owned_morphology::Morphology::parse(kind, args)?
                         .apply(&mut frame, header.depth())?;
                 }
+            }
+            if let Some(args) = transform.colorize.as_deref() {
+                crate::owned_colorize::Colorize::parse(args)?.apply(&mut frame, header.depth())?;
             }
             if let Some(args) = transform.chromashift.as_deref() {
                 crate::owned_chromashift::ChromaShift::parse(args)?
@@ -783,6 +789,7 @@ fn decode_reader_frames(
         || transform.unsharp.is_some()
         || transform.eq.is_some()
         || transform.hue.is_some()
+        || transform.colorize.is_some()
         || transform.negate.is_some()
         || transform.gblur.is_some()
         || transform.bilateral.is_some()

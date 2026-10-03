@@ -3337,3 +3337,31 @@ Explicit loopback integration tests (not run by ordinary tests):
 cargo test --manifest-path crates/fvid-media/Cargo.toml --offline --no-default-features --features http-input --lib hls_tests:: -- --ignored
 FVID_SOFTWARE_DECODE=1 cargo test --offline --no-default-features --features player --lib native_player_hls_decodes_all_frames_and_seeks -- --ignored
 ```
+
+### Owned colorize
+
+`colorize` now runs in both the native pipeline and `fvid-media` owned decode /
+lossless export for planar YUV samples at 8–16 bits. Named or positional options
+are `hue` (0–360), `saturation` (0–1), `lightness` (0–1), and `mix` (0–1), with
+defaults 0, 0.5, 0.5, 1. Constant HSL tint supplies chroma; `mix` retains the
+selected fraction of original luma. It runs after morphology and before chroma
+shift, matching the existing operation order. No whole-frame scratch allocation
+or libav filter graph is needed. The coefficients and parameter contract can be
+compared with the [reference filter](https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_colorize.c).
+
+`colorize-grid-{8,12,16}.y4m` are three-frame, odd-size synthetic inputs generated
+by `scripts/generate_colorize_fixtures.py` without FFmpeg. Acceptance tests cover
+Y4M and FFV1 decode/export, high-depth luma preservation, chroma replacement,
+frame timestamps, option admission and rejection before mutation. RGB, alpha
+and monochrome inputs still need appropriate owned format handling.
+
+Explicit reference qualification stays in `benches/`:
+
+```sh
+cargo build --offline --no-default-features --features player --bin fvid
+python3 benches/colorize_reference.py --fvid target/debug/fvid
+```
+
+The initial matrix (five parameter sets × three depths) matched all 765 samples
+exactly. This qualifies those cases, not every floating-point parameter value.
+Ordinary acceptance tests do not run this external reference.

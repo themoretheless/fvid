@@ -1045,6 +1045,13 @@ fn pixel_decode_args(
             }
             continue;
         }
+        if arg == "--colorize" {
+            let value = args.next().ok_or("missing colorize args")?;
+            if filters.colorize.is_some() { return Err("duplicate colorize".into()); }
+            if let Ok(filter) = fvid_media::owned_colorize::Colorize::parse(value) { filters.colorize = Some(filter); }
+            else { result.push(arg.clone()); result.push(value.clone()); }
+            continue;
+        }
         if arg == "--hue" {
             let value = args.next().ok_or("missing hue args")?;
             if filters.hue.is_some() {
@@ -4480,7 +4487,7 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
                 if items.next().map(String::as_str)!=Some("ffv1") {return Ok(false);}
             },
             "--hflip"|"--vflip"=>processing.push(item.clone()),
-            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"=> {
+            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--colorize"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"=> {
                 processing.push(item.clone());processing.push(items.next().ok_or("missing overlay processing value")?.clone());
             },
             "--from"|"--to" if operation==Some("decode")=> {
@@ -4728,6 +4735,7 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--eq" => &mut transform.eq,
             "--unsharp" => &mut transform.unsharp,
             "--hue" => &mut transform.hue,
+            "--colorize" => &mut transform.colorize,
             "--gblur" => &mut transform.gblur,
             "--bilateral" => &mut transform.bilateral,
             "--avgblur" => &mut transform.avgblur,
@@ -4890,4 +4898,45 @@ fn owned_subtitle_burn_command(args: &[String]) -> Result<bool, Box<dyn std::err
     };
     if !quiet { println!("{json}"); }
     Ok(true)
+}
+
+#[cfg(test)]
+mod colorize_cli_tests {
+    #[test]
+    fn owned_colorize_cli_decode_plan_and_export_need_no_legacy_feature() {
+        let directory =
+            std::env::temp_dir().join(format!("fvid-colorize-cli-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8, 12, 16] {
+            let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
+                "tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"
+            ));
+            let output = directory.join(format!("colorized-{depth}.mkv"));
+            let source = source.to_str().unwrap();
+            let tint = "hue=120:saturation=0.5:lightness=0.5:mix=0.5";
+            for args in [
+                vec!["decode", source, "--colorize", tint, "--quiet"],
+                vec![
+                    "plan",
+                    "transcode-lossless",
+                    source,
+                    "--colorize",
+                    tint,
+                    "--quiet",
+                ],
+                vec![
+                    "transcode-lossless",
+                    source,
+                    output.to_str().unwrap(),
+                    "--colorize",
+                    tint,
+                    "--quiet",
+                ],
+            ] {
+                super::run(&args.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();
+            }
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames, 3);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
 }

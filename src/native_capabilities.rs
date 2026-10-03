@@ -42,6 +42,7 @@ pub fn inventory() -> Capabilities {
             "avgblur",
             "boxblur",
             "chromashift",
+            "colorize",
             "crop",
             "dilation",
             "erosion",

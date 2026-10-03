@@ -136,3 +136,9 @@ URL-as-local-file opening failures. Ordinary tests feed its bytes directly into
 the temporary-input copier and owned decoder. Explicit ignored loopback tests
 verify redirect/chunked/truncated HTTP responses and native player reopen/rewind;
 network integration is separate from ordinary test execution.
+
+`colorize-grid-8.y4m`, `colorize-grid-12.y4m`, and `colorize-grid-16.y4m`:
+three 3×3 YUV420 frames with changing luma ramps and non-neutral chroma. Generate
+with `python3 scripts/generate_colorize_fixtures.py`, without FFmpeg or network.
+Owned `colorize` acceptance tests require luma preservation at mix=1, exact
+constant red chroma at each depth, all three timestamps and FFV1 round trips.
