@@ -80,3 +80,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_ffv1_export_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_ima_reference"
+harness = false

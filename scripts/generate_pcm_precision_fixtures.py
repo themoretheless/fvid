@@ -14,21 +14,21 @@ def container(codec, bits, payload):
     cluster = element('1f43b675', element('e7', b'\0') + element('a3', b'\x81\0\0\x80' + payload))
     return element('1a45dfa3', element('4282', b'matroska')) + element('18538067', element('1654ae6b', track) + cluster)
 
-def quicktime_pcm(codec, bits, payload, samples=None):
-    """One mono packet, two silent samples, then source and a repeated tail."""
+def quicktime_pcm(codec, bits, payload, samples=None, channels=1, configuration=None):
+    """One packet, two silent frames, then source and a repeated tail."""
     def box(kind, data):
         return struct.pack('>I4s', len(data) + 8, kind) + data
     def clock(length):
         data = bytearray(24)
         struct.pack_into('>II', data, 12, 48000, length)
         return bytes(data)
-    samples = len(payload) // (bits // 8) if samples is None else samples
+    samples = len(payload) // (bits // 8 * channels) if samples is None else samples
     mdat = box(b'mdat', payload)
     entry = bytearray(28)
     struct.pack_into('>H', entry, 6, 1)
-    struct.pack_into('>HH', entry, 16, 1, bits)
+    struct.pack_into('>HH', entry, 16, channels, bits)
     struct.pack_into('>I', entry, 24, 48000 << 16)
-    entry += box(b'enda', struct.pack('>H', 1))
+    entry += box(b'enda', struct.pack('>H', 1)) if configuration is None else box(b'wave', box(codec, configuration))
     stsd = box(b'stsd', struct.pack('>II', 0, 1) + box(codec, entry))
     stts = box(b'stts', struct.pack('>IIII', 0, 1, 1, samples))
     stsc = box(b'stsc', struct.pack('>IIIII', 0, 1, 1, 1, 1))

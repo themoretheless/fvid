@@ -201,3 +201,5 @@ mod owned_video_decode;
 mod owned_ffv1_export;
 
 pub mod owned_ima4;
+
+pub mod owned_ima_wav;

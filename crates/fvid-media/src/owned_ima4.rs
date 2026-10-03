@@ -63,21 +63,43 @@ impl Ima4Decoder {
                 let mut index = i32::from(header & 127).min(88);
                 for sample in 0..64 {
                     let code = (block[2 + sample / 2] >> ((sample % 2) * 4)) & 15;
-                    let change = ((2 * i32::from(code & 7) + 1) * STEPS[index as usize]) >> 3;
-                    predictor = (predictor + if code & 8 == 0 { change } else { -change })
-                        .clamp(-32768, 32767);
-                    index = (index + ADAPT[(code & 7) as usize]).clamp(0, 88);
                     output[(group_index * 64 + sample) * channels + channel] =
-                        predictor as f32 / 32768.0;
+                        expand_sample(&mut predictor, &mut index, code);
                 }
             }
         }
         Ok(output)
     }
 }
+pub(crate) fn expand_sample(predictor: &mut i32, index: &mut i32, code: u8) -> f32 {
+    // IMA rounds each contribution before summing; multiplying first changes PCM.
+    let step = STEPS[*index as usize];
+    let mut change = step >> 3;
+    if code & 1 != 0 {
+        change += step >> 2;
+    }
+    if code & 2 != 0 {
+        change += step >> 1;
+    }
+    if code & 4 != 0 {
+        change += step;
+    }
+    *predictor = (*predictor + if code & 8 == 0 { change } else { -change }).clamp(-32768, 32767);
+    *index = (*index + ADAPT[(code & 7) as usize]).clamp(0, 88);
+    *predictor as f32 / 32768.0
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn low_step_delta_rounds_each_term_before_summing() {
+        let mut predictor = 0;
+        let mut index = 0;
+        assert_eq!(expand_sample(&mut predictor, &mut index, 1), 1.0 / 32768.0);
+        assert_eq!(expand_sample(&mut predictor, &mut index, 9), 0.0);
+        assert_eq!(index, 0);
+    }
     #[test]
     fn block_headers_nibble_order_channels_and_restart_have_exact_samples() {
         let mut packet = vec![0, 0];
@@ -89,7 +111,7 @@ mod tests {
         for frame in 0..64 {
             assert_eq!(
                 &actual[frame * 2..frame * 2 + 2],
-                &[((frame + 1) * 2) as f32 / 32768.0, -128.0 / 32768.0]
+                &[(frame + 1) as f32 / 32768.0, -128.0 / 32768.0]
             );
         }
         packet.extend_from_within(..);
@@ -102,7 +124,7 @@ mod tests {
         let samples = mono.decode_pcm(&alternating).unwrap();
         assert_eq!(
             &samples[..4],
-            &[2.0 / 32768.0, 2.0 / 32768.0, 4.0 / 32768.0, 4.0 / 32768.0]
+            &[1.0 / 32768.0, 1.0 / 32768.0, 2.0 / 32768.0, 2.0 / 32768.0]
         );
         let mut saturated = vec![0, 127];
         saturated.extend([0x77; 32]);
