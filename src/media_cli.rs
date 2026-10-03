@@ -2,6 +2,10 @@
 use std::path::PathBuf;
 
 pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(feature = "player")]
+    if args.first().map(String::as_str) == Some("play") && fvid::player::accepts_media_play(&args[1..]) {
+        return fvid::player::run_media(args[1..].to_vec());
+    }
     if owned_subtitle_burn_command(args)? { return Ok(()); }
     if owned_xfade_command(args)? { return Ok(()); }
     if owned_lossless_command(args)? { return Ok(()); }

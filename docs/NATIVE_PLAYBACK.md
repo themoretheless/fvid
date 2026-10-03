@@ -3271,3 +3271,11 @@ initialization. `--audio-device NAME` selects an output by case-insensitive
 exact name, retained across background opens and track changes. A requested
 device that cannot be found reports an initialization error; it does not fall
 back to the default output. Enumeration and selection do not use libav.
+
+`fvid media play` now dispatches requests accepted by the native player parser
+before the optional legacy media backend. It works with `--features player`
+alone, including device listing without a GUI. Its audio indices remain
+zero-based; explicit subtitle indices name embedded tracks and are not shifted
+by sidecars. `--subtitle-track=-1` and `--no-subtitles` start captions hidden;
+the normal subtitle toggle can enable them later. Advanced legacy-only playback
+options still require migration before the legacy feature can be removed.

@@ -178,6 +178,8 @@ impl Grading {
 /// What `fvid play` was asked for: the inputs to queue, and how the first of
 /// them starts, stops and runs at.
 struct PlayArgs {
+    no_subtitles: bool,
+    embedded_subtitle: Option<usize>,
     audio_device: Option<String>,
     list_audio_devices: bool,
     fullscreen: bool,
@@ -250,6 +252,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
     let mut snapshot_dir = None;
     let mut audio_device = None;
     let mut list_audio_devices = false;
+    let mut no_subtitles = false;
     let mut no_audio = false;
     let mut audio_track = None;
     let mut subtitle_track = None;
@@ -274,6 +277,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         };
         index += 1;
         match flag {
+            "--no-subtitles" => { no_value(inline, flag)?; no_subtitles = true; }
             "--audio-device" => {
                 let name = option_value(args, &mut index, flag, inline)?;
                 if name.trim().is_empty() { return Err(crate::invalid("--audio-device requires a nonempty name")); }
@@ -362,7 +366,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
                 let value = option_value(args, &mut index, flag, inline)?;
                 subtitle_delay_ms = parse_delay(&value, flag)?;
             }
-            "--sub-file" | "--subtitles" => {
+            "--sub-file" | "--subtitles" | "--subs" => {
                 let value = option_value(args, &mut index, flag, inline)?;
                 subtitle_file = Some(PathBuf::from(value));
             }
@@ -446,6 +450,8 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         return Err(crate::invalid("--device requires an explicit player backend when not zero"));
     }
     Ok(PlayArgs {
+        no_subtitles,
+        embedded_subtitle: None,
         audio_device,
         list_audio_devices,
         fullscreen,
@@ -918,7 +924,52 @@ fn read_lut(path: &str) -> crate::Result<Lut> {
 }
 
 pub fn run(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
-    let parsed = parse_play_args(&args)?;
+    run_parsed(parse_play_args(&args)?)
+}
+/// Whether the legacy CLI request is completely handled by the native parser.
+pub fn accepts_media_play(args: &[String]) -> bool { parse_media_play_args(args).is_ok() }
+/// Native entry for `media play`, retaining its zero-based track indices.
+pub fn run_media(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
+    run_parsed(parse_media_play_args(&args)?)
+}
+fn parse_media_play_args(args: &[String]) -> crate::Result<PlayArgs> {
+    let mut native = Vec::new();
+    let mut embedded = None;
+    let mut index = 0;
+    while index < args.len() {
+        let arg = &args[index];
+        let (flag, inline) = arg.split_once('=').map_or((arg.as_str(), None), |(flag, value)| (flag, Some(value)));
+        index += 1;
+        if flag == "--audio-track" {
+            let value = option_value(args, &mut index, flag, inline)?;
+            let track = value.parse::<usize>().map_err(|_| crate::invalid("invalid media audio track"))?;
+            native.push(format!("--audio-track={}", track.checked_add(1).ok_or_else(|| crate::invalid("media audio track overflow"))?));
+        } else if flag == "--subtitle-track" {
+            let value = option_value(args, &mut index, flag, inline)?;
+            let track = value.parse::<i32>().map_err(|_| crate::invalid("invalid media subtitle track"))?;
+            if track == -1 { native.push("--no-subtitles".into()); embedded = None; }
+            else if track >= 0 {
+                embedded = Some(track as usize);
+                native.retain(|arg| arg != "--no-subtitles");
+            } else { return Err(crate::invalid("media subtitle track must be -1 or nonnegative")); }
+        } else {
+            native.push(arg.clone());
+            if inline.is_none() && matches!(flag,
+                "--audio-device" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
+                | "--backend" | "--device" | "--shader" | "--skin" | "--start-time" | "--stop-time"
+                | "--rate" | "--audio-delay" | "--subtitle-delay" | "--volume" | "--zoom"
+                | "--crop" | "--aspect" | "--brightness" | "--gamma" | "--saturation" | "--contrast"
+                | "--hue" | "--log" | "--gamut" | "--display" | "--tonemap" | "--lut" | "--grid" | "--interp")
+            {
+                native.push(option_value(args, &mut index, flag, None)?);
+            }
+        }
+    }
+    let mut parsed = parse_play_args(&native)?;
+    parsed.embedded_subtitle = embedded;
+    Ok(parsed)
+}
+fn run_parsed(parsed: PlayArgs) -> Result<(), Box<dyn std::error::Error>> {
     if parsed.list_audio_devices {
         for name in crate::audio::PlatformBackend::output_devices() { println!("{name}"); }
         return Ok(());
@@ -927,6 +978,8 @@ pub fn run(args: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
     let gpu_configuration = crate::player_gpu::configuration(parsed.gpu_backend, parsed.gpu_device)?;
     let shader = parsed.shader;
     let mut app = Player {
+        subtitle_shown: !parsed.no_subtitles,
+        preferred_embedded_subtitle: parsed.embedded_subtitle,
         preferred_output: parsed.audio_device,
         queue: expand_inputs(&parsed.paths),
         bounds: PlayBounds {
@@ -1578,6 +1631,7 @@ fn prepare_source(path: &Path, cancelled: &std::sync::atomic::AtomicBool) -> Pre
 }
 
 struct Player {
+    preferred_embedded_subtitle: Option<usize>,
     preferred_output: Option<String>,
     quit_at_end: bool,
     snapshot_dir: Option<PathBuf>,
@@ -1795,6 +1849,7 @@ struct Player {
 impl Default for Player {
     fn default() -> Self {
         Self {
+            preferred_embedded_subtitle: None,
             preferred_output: None,
             quit_at_end: false,
             snapshot_dir: None,
@@ -2383,6 +2438,7 @@ impl Player {
                 break;
             }
         }
+        let embedded_start = self.subtitle_sources.len();
         self.subtitle_sources.extend(embedded_subtitles(path));
         if let Some(nth) = self
             .preferred_subtitle
@@ -2390,6 +2446,10 @@ impl Player {
         {
             self.subtitle_source = nth;
         }
+        if let Some(nth) = self.preferred_embedded_subtitle
+            && let Some(selected) = embedded_start.checked_add(nth)
+            && selected < self.subtitle_sources.len()
+        { self.subtitle_source = selected; }
         self.apply_subtitle_source();
         if let Some(named) = unread {
             // The name that was typed out loud outranks the list it fell back
@@ -2890,6 +2950,7 @@ impl Player {
     }
 
     fn begin_open(&mut self, path: PathBuf) {
+        let preferred_embedded_subtitle = self.preferred_embedded_subtitle;
         let preferred_output = self.preferred_output.clone();
         let prepared_source = self.prepared_source.take();
         let (send, receive) = std::sync::mpsc::channel();
@@ -2964,6 +3025,7 @@ impl Player {
         self.activity = Instant::now();
         std::thread::spawn(move || {
             let mut prepared = Player {
+                preferred_embedded_subtitle,
                 preferred_output,
                 grading,
                 bounds,
@@ -5988,6 +6050,36 @@ mod tests {
                 .map(|word| word.to_string())
                 .collect::<Vec<_>>(),
         )
+    }
+
+    #[test]
+    fn media_play_indices_keep_their_zero_based_meaning() {
+        let words: Vec<String> = ["--audio-track=0", "--subtitle-track", "1", "clip.mp4"].into_iter().map(str::to_owned).collect();
+        let parsed = super::parse_media_play_args(&words).unwrap();
+        assert_eq!(parsed.audio_track, Some(0));
+        assert_eq!(parsed.embedded_subtitle, Some(1));
+        let literal = super::parse_media_play_args(&["--subtitles".into(), "--audio-track".into(), "clip.mp4".into()]).unwrap();
+        assert_eq!(literal.subtitle_file, Some(PathBuf::from("--audio-track")));
+
+        let off = super::parse_media_play_args(&["--subtitle-track=-1".into(), "clip.mp4".into()]).unwrap();
+        assert!(off.no_subtitles);
+        assert!(super::parse_media_play_args(&["--subtitle-track=-2".into()]).is_err());
+    }
+
+    #[test]
+    fn embedded_selection_is_not_shifted_by_a_sidecar_and_can_start_hidden() {
+        let directory = scratch("fvid-media-subtitle-selection", &[]);
+        let path = directory.join("clip.mkv");
+        std::fs::write(&path, include_bytes!("../tests/fixtures/subtitles/text-tracks.mkv")).unwrap();
+        std::fs::write(directory.join("clip.srt"), "1\n00:00:00,000 --> 00:00:02,000\nsidecar\n").unwrap();
+        let mut player = Player { preferred_embedded_subtitle: Some(0), subtitle_shown: false, ..Default::default() };
+        player.load_subtitles(&path);
+        assert_eq!(player.subtitle_source, 1);
+        assert!(player.subtitle_line(Duration::from_millis(700)).is_none());
+        player.apply(Control::Subtitles);
+        assert_eq!(player.subtitle_line(Duration::from_millis(700)), Some("plain first"));
+        drop(player);
+        std::fs::remove_dir_all(directory).unwrap();
     }
 
     #[test]
