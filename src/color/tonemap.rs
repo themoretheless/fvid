@@ -73,6 +73,8 @@ impl ContentLight {
 /// two can be compared sample for sample.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ToneMap {
+    /// Preserve linear light without a compression shoulder.
+    Off,
     /// Divide through by the content peak.
     Linear,
     /// Power-law shoulder above an adaptive break.
@@ -85,39 +87,52 @@ pub enum ToneMap {
     Hable,
     /// Möbius transform: linear below the joint, rational shoulder above.
     Mobius,
+    /// Fitted ACES filmic response, normalised to the content peak.
+    Aces,
+    /// Compress by the brightest channel while preserving channel ratios.
+    MaxRgb,
 }
 
 impl ToneMap {
     pub fn label(self) -> &'static str {
         match self {
+            Self::Off => "off",
             Self::Linear => "linear",
             Self::Gamma => "gamma",
             Self::Clip => "clip",
             Self::Reinhard => "reinhard",
             Self::Hable => "hable",
             Self::Mobius => "mobius",
+            Self::Aces => "aces",
+            Self::MaxRgb => "maxrgb",
         }
     }
 
     pub fn from_label(label: &str) -> Option<Self> {
         Some(match label {
+            "off" | "none" | "0" => Self::Off,
             "linear" => Self::Linear,
             "gamma" => Self::Gamma,
             "clip" => Self::Clip,
             "reinhard" => Self::Reinhard,
             "hable" => Self::Hable,
             "mobius" => Self::Mobius,
+            "aces" => Self::Aces,
+            "maxrgb" | "max-rgb" => Self::MaxRgb,
             _ => return None,
         })
     }
 
-    pub const ALL: [ToneMap; 6] = [
+    pub const ALL: [ToneMap; 9] = [
+        Self::Off,
         Self::Linear,
         Self::Gamma,
         Self::Clip,
         Self::Reinhard,
         Self::Hable,
         Self::Mobius,
+        Self::Aces,
+        Self::MaxRgb,
     ];
 }
 
@@ -132,6 +147,12 @@ pub fn curve(mode: ToneMap, x: f32, param: f32, peak: f32) -> f32 {
     let x = x.max(0.0);
     let peak = peak.max(1.0);
     match mode {
+        ToneMap::Off => x.clamp(0.0, 1.0),
+        ToneMap::Aces => {
+            let fitted = |v: f32| ((v * (2.51 * v + 0.03)) / (v * (2.43 * v + 0.59) + 0.14)).clamp(0.0, 1.0);
+            (fitted(x) / fitted(peak)).clamp(0.0, 1.0)
+        }
+        ToneMap::MaxRgb => (x / (1.0 + x) * (1.0 + peak) / peak).clamp(0.0, 1.0),
         ToneMap::Linear => x * param / peak,
         ToneMap::Gamma => {
             let e = 1.0 / param.max(0.01);
@@ -188,13 +209,17 @@ pub fn tone_map_rgb(
     let luma = luma_nits(unit, kr, kb);
     let desat = (target.paper_white_nits / range).max(1e-3);
     let overbright = (luma - desat).max(1e-6) / luma.max(1e-6);
-    let mixed = unit.map(|v| v + (luma - v) * overbright);
+    let mixed = if matches!(mode, ToneMap::MaxRgb | ToneMap::Off) {
+        unit
+    } else {
+        unit.map(|v| v + (luma - v) * overbright)
+    };
     let peak = (content.peak_or(range) / range).max(1.0);
     let param = match mode {
         ToneMap::Linear | ToneMap::Clip => 1.0,
         ToneMap::Gamma => 0.5,
         ToneMap::Reinhard => 1.0,
-        ToneMap::Hable => 0.0,
+        ToneMap::Off | ToneMap::Hable | ToneMap::Aces | ToneMap::MaxRgb => 0.0,
         ToneMap::Mobius => 0.3,
     };
     let sig = mixed.into_iter().fold(0.0f32, f32::max).max(1e-6);
@@ -241,6 +266,15 @@ mod tests {
 
     fn close(a: f32, b: f32, eps: f32) -> bool {
         (a - b).abs() <= eps
+    }
+
+    #[test]
+    fn maxrgb_preserves_saturated_highlight_ratios() {
+        let out = tone_map_rgb([2000.0, 1000.0, 500.0], ToneMap::MaxRgb,
+            DisplayTarget::sdr(100.0), ContentLight { max_cll: 4000.0, max_fall: 1000.0 }, Primaries::BT2020);
+        assert!(out[0] < 1.0 && out[0] > 0.9);
+        assert!(close(out[0] / out[1], 2.0, 1e-5));
+        assert!(close(out[1] / out[2], 2.0, 1e-5));
     }
 
     #[test]

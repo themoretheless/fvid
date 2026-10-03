@@ -506,7 +506,7 @@ fn parse_play_args(args: &[String]) -> crate::Result<PlayArgs> {
                 let value = option_value(args, &mut index, flag, inline)?;
                 grading.panel = Some(parse_panel(&value)?);
             }
-            "--tonemap" => {
+            "--hdr-tonemap" | "--tonemap" => {
                 let value = option_value(args, &mut index, flag, inline)?;
                 grading.tone_map = Some(parse_tone_map(&value)?);
             }
@@ -1044,7 +1044,7 @@ fn parse_media_play_args(args: &[String]) -> crate::Result<PlayArgs> {
         } else {
             native.push(arg.clone());
             if inline.is_none() && matches!(flag,
-                "--hdr-mastering" | "--hdr-nits" | "--hdr-maxcll" | "--spherical-stereo" | "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
+                "--hdr-tonemap" | "--hdr-mastering" | "--hdr-nits" | "--hdr-maxcll" | "--spherical-stereo" | "--spherical-projection" | "--yaw" | "--pitch" | "--roll" | "--fov" | "--play-stereo3d" | "--audio-device" | "--snapshot-path" | "--subtitles" | "--sub-file" | "--subs"
                 | "--backend" | "--device" | "--shader" | "--skin" | "--start-time" | "--stop-time"
                 | "--rate" | "--audio-delay" | "--subtitle-delay" | "--volume" | "--zoom"
                 | "--crop" | "--aspect" | "--brightness" | "--gamma" | "--saturation" | "--contrast"
@@ -6192,6 +6192,17 @@ mod tests {
                 .map(|word| word.to_string())
                 .collect::<Vec<_>>(),
         )
+    }
+
+    #[test]
+    fn native_media_hdr_operator_names_reach_the_owned_grade() {
+        let signal = ColourDescription { primaries: 9, transfer: 16, matrix: 9, full_range: false };
+        for mode in ["off", "clip", "reinhard", "hable", "mobius", "aces", "maxrgb"] {
+            let parsed = super::parse_media_play_args(&[format!("--hdr-tonemap={mode}"), "clip.mp4".into()]).unwrap();
+            let grade = parsed.grading.grade_for(signal, &HdrMetadata::default()).unwrap();
+            assert_eq!(grade.plan().tone_map.unwrap().label(), mode);
+        }
+        assert!(parse_play_args(&["--hdr-tonemap=bad".into()]).is_err());
     }
 
     #[test]
