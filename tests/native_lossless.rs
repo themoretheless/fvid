@@ -875,6 +875,9 @@ fn owned_temporal_cli_enforces_input_packet_limit_and_stream_selection() {
 fn owned_cli_export_writes_multiple_container_tags() {
     let dir = directory("owned-tags-cli");
     let source = fixture("playback-errors/framestep-six-frames.y4m");
+    let container = dir.0.join("input.mkv");
+    fvid_media::owned_lossless::transcode_lossless(&source, &container, Default::default(), &Default::default()).unwrap();
+    let source = container;
     let output = dir.0.join("tagged.mkv");
     let out = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
         .args(["media", "transcode-lossless"])
@@ -889,6 +892,12 @@ fn owned_cli_export_writes_multiple_container_tags() {
             "artist=FVid regression",
             "--metadata-delete",
             "album",
+            "--stream-metadata",
+            "0:title=Synthetic video",
+            "--stream-metadata",
+            "0:language=rus",
+            "--stream-metadata-delete",
+            "0:comment",
         ])
         .output()
         .unwrap();
@@ -909,4 +918,6 @@ fn owned_cli_export_writes_multiple_container_tags() {
     assert_eq!(reader.tags.title, "Synthetic title");
     assert_eq!(reader.tags.artist, "FVid regression");
     assert!(reader.tags.album.is_empty());
+    assert_eq!(reader.tracks[0].name, "Synthetic video");
+    assert_eq!(reader.tracks[0].language, "rus");
 }
