@@ -327,7 +327,61 @@ fn main() {
         );
         std::fs::remove_file(output).unwrap();
     }
+
+    let source = root.join("ffv1-track-description.mkv");
+    let output = std::env::temp_dir().join(format!(
+        "fvid-ffv1-description-reference-{}.mkv",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_file(&output);
+    fvid_media::transcode_lossless(
+        &source,
+        &output,
+        Default::default(),
+        &CopyOptions::default(),
+    )
+    .unwrap();
+    let ffprobe = std::env::var_os("FVID_FFPROBE").unwrap_or_else(|| "ffprobe".into());
+    let inspect = |path: &Path| {
+        let result = Command::new(&ffprobe)
+            .args([
+                "-v",
+                "error",
+                "-show_entries",
+                "stream_tags=title,language:stream_disposition",
+                "-of",
+                "json",
+            ])
+            .arg(path)
+            .output()
+            .expect("explicit metadata reference requires ffprobe");
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        serde_json::from_slice::<serde_json::Value>(&result.stdout).unwrap()
+    };
+    let before = inspect(&source);
+    let after = inspect(&output);
+    assert_eq!(before, after, "independent track labels and dispositions");
+    let flags = &after["streams"][0]["disposition"];
+    assert_eq!(flags["default"], 0);
+    for flag in [
+        "forced",
+        "original",
+        "comment",
+        "hearing_impaired",
+        "visual_impaired",
+    ] {
+        assert_eq!(flags[flag], 1, "{flag}");
+    }
+    assert_eq!(
+        after["streams"][0]["tags"]["title"],
+        "Named synthetic video"
+    );
+    std::fs::remove_file(output).unwrap();
     println!(
-        "owned FFV1 export: 20 pixel/timing references and independent file tag checks passed"
+        "owned FFV1 export: 20 pixel/timing references and independent file/track metadata checks passed"
     );
 }

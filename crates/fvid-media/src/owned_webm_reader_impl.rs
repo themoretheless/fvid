@@ -127,6 +127,11 @@ pub struct WebmReader<R> {
     pub writing_app: String,
     /// Track number to TrackUID, independent of element ordering.
     pub track_uids: std::collections::BTreeMap<u64,u64>,
+    /// Original language declaration, retaining und and the container default.
+    pub track_languages: std::collections::BTreeMap<u64,String>,
+    pub track_legacy_languages: std::collections::BTreeMap<u64,String>,
+    /// Default/forced/original/commentary/accessibility disposition bits.
+    pub track_dispositions: std::collections::BTreeMap<u64,i32>,
     /// Text tags scoped to TrackUID (zero denotes all tracks).
     pub track_metadata: std::collections::BTreeMap<u64,std::collections::BTreeMap<String,String>>,
     /// False for unsupported scopes, nested or oversized tags requiring a richer exporter.
@@ -284,6 +289,9 @@ impl<R: Read + Seek> WebmReader<R> {
             metadata: Default::default(),
             writing_app: String::new(),
             track_uids: Default::default(),
+            track_languages: Default::default(),
+            track_legacy_languages: Default::default(),
+            track_dispositions: Default::default(),
             track_metadata: Default::default(),
             metadata_complete: true,
             limits,
@@ -333,6 +341,9 @@ impl<R: Read + Seek> WebmReader<R> {
             metadata,
             writing_app,
             track_uids,
+            track_languages,
+            track_legacy_languages,
+            track_dispositions,
             track_metadata,
             metadata_complete,
             elements,
@@ -405,6 +416,10 @@ impl<R: Read + Seek> WebmReader<R> {
                         // either writing order, so a track that carries both does
                         // not read as two different languages.
                         let mut uid = None;
+                        let mut ietf = None;
+                        let mut disposition = 1i32;
+                        let mut language_present = false;
+                        let mut legacy_language = None;
                         let mut older = String::new();
                         let mut current = String::new();
                         for f in fields(&mut *reader, entry, &mut *elements, limits.elements)? {
@@ -422,8 +437,36 @@ impl<R: Read + Seek> WebmReader<R> {
                                 0x536e => {
                                     track.name = text(&mut *reader, f, 1024)?;
                                 }
-                                0x22b59c => current = text(&mut *reader, f, 128)?,
-                                0x447a => older = text(&mut *reader, f, 128)?,
+                                0x22b59c => {
+                                    language_present = true;
+                                    current = text(&mut *reader, f, 128)?;
+                                    legacy_language = Some(current.clone());
+                                }
+                                0x22b59d => {
+                                    language_present = true;
+                                    ietf = Some(text(&mut *reader, f, 128)?);
+                                }
+                                // Keep the historical TagLanguage-in-TrackEntry alias lenient.
+                                0x447a => {
+                                    language_present = true;
+                                    older = text(&mut *reader, f, 128)?;
+                                }
+                                0x88 | 0x55aa | 0x55ab | 0x55ac | 0x55ad | 0x55ae | 0x55af => {
+                                    let bit = match f.id {
+                                        0x88 => 1,
+                                        0x55aa => 64,
+                                        0x55ab => 128,
+                                        0x55ac => 256,
+                                        0x55ad => 131072,
+                                        0x55ae => 4,
+                                        _ => 8,
+                                    };
+                                    if uint(&mut *reader, f)? != 0 {
+                                        disposition |= bit;
+                                    } else {
+                                        disposition &= !bit;
+                                    }
+                                }
                                 0x23e383 => track.default_duration_ns = uint(&mut *reader, f)?,
                                 0x56aa => track.codec_delay_ns = uint(&mut *reader, f)?,
                                 0x63a2 => {
@@ -504,7 +547,10 @@ impl<R: Read + Seek> WebmReader<R> {
                         // A track whose only statement is the `und` writers use
                         // for "nothing was said" leaves the player knowing no
                         // more than one that states nothing at all.
-                        let stated = if current.is_empty() { older } else { current };
+                        let stated = ietf.unwrap_or_else(|| if current.is_empty() {older} else {current});
+                        track_languages.insert(track.number,if language_present {stated.clone()} else {"eng".into()});
+                        track_dispositions.insert(track.number,disposition);
+                        track_legacy_languages.insert(track.number,legacy_language.unwrap_or_else(||"eng".into()));
                         track.language = if stated == "und" {
                             String::new()
                         } else {

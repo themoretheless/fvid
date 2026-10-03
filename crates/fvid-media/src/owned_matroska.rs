@@ -91,6 +91,15 @@ impl Default for VideoMetadata {
 }
 include!("owned_matroska_video_impl.rs");
 
+/// Descriptive track fields preserved independently of file-wide text tags.
+#[derive(Clone, Debug)]
+pub struct VideoTrackDescription {
+    pub name: String,
+    pub language: String,
+    pub legacy_language: String,
+    pub disposition: i32,
+}
+
 impl<'a, W: Write + Seek> PacketWriter<'a, W> {
     /// Open one FFV1 v1 video track. Codec configuration lives in its keyframes.
     /// This constructor declares coded geometry without colour/rotation tags.
@@ -172,6 +181,56 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         text_tags: &std::collections::BTreeMap<String, String>,
         track_tags: &std::collections::BTreeMap<String, String>,
     ) -> Result<Self> {
+        Self::new_ffv1_described(
+            output,
+            width,
+            height,
+            metadata,
+            rotation,
+            default_duration_ns,
+            file,
+            text_tags,
+            track_tags,
+            None,
+        )
+    }
+    pub fn new_ffv1_with_track_description(
+        output: &'a mut W,
+        width: u32,
+        height: u32,
+        metadata: Option<&VideoMetadata>,
+        rotation: u16,
+        default_duration_ns: u64,
+        file: &FileMetadata,
+        text_tags: &std::collections::BTreeMap<String, String>,
+        track_tags: &std::collections::BTreeMap<String, String>,
+        description: &VideoTrackDescription,
+    ) -> Result<Self> {
+        Self::new_ffv1_described(
+            output,
+            width,
+            height,
+            metadata,
+            rotation,
+            default_duration_ns,
+            file,
+            text_tags,
+            track_tags,
+            Some(description),
+        )
+    }
+    fn new_ffv1_described(
+        output: &'a mut W,
+        width: u32,
+        height: u32,
+        metadata: Option<&VideoMetadata>,
+        rotation: u16,
+        default_duration_ns: u64,
+        file: &FileMetadata,
+        text_tags: &std::collections::BTreeMap<String, String>,
+        track_tags: &std::collections::BTreeMap<String, String>,
+        description: Option<&VideoTrackDescription>,
+    ) -> Result<Self> {
         let mut file_elements = file_metadata(file)?;
         file_elements.extend(extra_text_tags(text_tags)?);
         file_elements.extend(text_tags_element(track_tags, Some(1))?);
@@ -190,12 +249,48 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
                 } else {
                     uint(0x23e383, default_duration_ns)?
                 },
-                element(0x22b59c, b"und")?,
+                track_description_elements(description)?,
             ]
             .concat(),
         )?;
         Self::new_prepared(output, &entries, &file_elements, vec![0], vec![None])
     }
+}
+
+fn track_description_elements(description: Option<&VideoTrackDescription>) -> Result<Vec<u8>> {
+    let Some(description) = description else {
+        return element(0x22b59c, b"und");
+    };
+    if description.name.len() > 1024
+        || description.language.is_empty()
+        || description.language.len() > 128
+        || description.name.contains('\0')
+        || description.language.contains('\0')
+        || description.legacy_language.is_empty()
+        || description.legacy_language.len() > 128
+        || description.legacy_language.contains('\0')
+        || description.disposition & !(1 | 4 | 8 | 64 | 128 | 256 | 131072) != 0
+    {
+        return Err(invalid("unsupported Matroska track description"));
+    }
+    let mut data = Vec::new();
+    if !description.name.is_empty() {
+        data.extend(element(0x536e, description.name.as_bytes())?);
+    }
+    data.extend(element(0x22b59c, description.legacy_language.as_bytes())?);
+    data.extend(element(0x22b59d, description.language.as_bytes())?);
+    for (id, bit) in [
+        (0x88, 1),
+        (0x55aa, 64),
+        (0x55ab, 128),
+        (0x55ac, 256),
+        (0x55ad, 131072),
+        (0x55ae, 4),
+        (0x55af, 8),
+    ] {
+        data.extend(uint(id, u64::from(description.disposition & bit != 0))?);
+    }
+    Ok(data)
 }
 
 fn extra_text_tags(tags: &std::collections::BTreeMap<String, String>) -> Result<Vec<u8>> {

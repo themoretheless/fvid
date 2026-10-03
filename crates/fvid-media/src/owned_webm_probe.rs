@@ -71,7 +71,16 @@ pub fn probe_webm(path: &Path) -> Result<MediaInfo, String> {
                 tags.extend(scoped.clone());
             }
         }
-        for (key, value) in [("title", &track.name), ("language", &track.language)] {
+        for (key, value) in [
+            ("title", &track.name),
+            (
+                "language",
+                reader
+                    .track_languages
+                    .get(&track.number)
+                    .unwrap_or(&track.language),
+            ),
+        ] {
             if !value.is_empty() {
                 tags.insert(key.into(), value.clone());
             }
@@ -93,7 +102,11 @@ pub fn probe_webm(path: &Path) -> Result<MediaInfo, String> {
             average_frame_rate: [0, 1],
             profile: None,
             level: None,
-            disposition: 0,
+            disposition: reader
+                .track_dispositions
+                .get(&track.number)
+                .copied()
+                .unwrap_or(1),
             metadata: tags,
             width: narrow(track.width)?,
             height: narrow(track.height)?,

@@ -34,8 +34,6 @@ pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
         || !track.codec_private.is_empty()
         || track.crop != [0; 4]
         || track.rotation != 0
-        || !track.name.is_empty()
-        || !matches!(track.language.as_str(), "" | "und")
         || (transform.interval.is_some() && !input.chapters.is_empty())
         || input.packets.iter().any(|p| {
             p.invisible
@@ -100,6 +98,24 @@ pub(crate) fn export(
 ) -> Result<(DecodeStats, fvid_control::ProgressEvent, u64)> {
     let input = input(source)?;
     let track = input.tracks.first().ok_or("input has no video stream")?;
+    let description = mkv::VideoTrackDescription {
+        name: track.name.clone(),
+        language: input
+            .track_languages
+            .get(&track.number)
+            .cloned()
+            .unwrap_or_else(|| "eng".into()),
+        legacy_language: input
+            .track_legacy_languages
+            .get(&track.number)
+            .cloned()
+            .unwrap_or_else(|| "eng".into()),
+        disposition: input
+            .track_dispositions
+            .get(&track.number)
+            .copied()
+            .unwrap_or(1),
+    };
     let mut track_tags = input.track_metadata.get(&0).cloned().unwrap_or_default();
     if let Some(uid) = input.track_uids.get(&track.number) {
         if let Some(scoped) = input.track_metadata.get(uid) {
@@ -164,7 +180,7 @@ pub(crate) fn export(
                         ..Default::default()
                     };
                     writer = Some(
-                        mkv::PacketWriter::new_ffv1_with_scoped_tags(
+                        mkv::PacketWriter::new_ffv1_with_track_description(
                             output.take().unwrap(),
                             view.width,
                             view.height,
@@ -174,6 +190,7 @@ pub(crate) fn export(
                             &metadata,
                             &input.metadata,
                             &track_tags,
+                            &description,
                         )
                         .map_err(|e| e.to_string())?,
                     );
@@ -727,5 +744,32 @@ mod tests {
             }
             std::fs::remove_file(output).unwrap();
         }
+    }
+    #[test]
+    fn owned_export_preserves_track_name_ietf_language_and_disposition_flags() {
+        let source = root().join("ffv1-track-description.mkv");
+        let reader = input(&source).unwrap();
+        assert_eq!(reader.tracks[0].language, "en-US");
+        assert_eq!(
+            reader.track_dispositions[&1],
+            4 | 8 | 64 | 128 | 256 | 131072
+        );
+        assert!(supports(&source, &Default::default()));
+        let output = std::env::temp_dir().join(format!(
+            "fvid-ffv1-track-description-{}.mkv",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_file(&output);
+        crate::transcode_lossless(&source, &output, Default::default(), &Default::default())
+            .unwrap();
+        let before = crate::owned_probe::probe(&source).unwrap();
+        let after = crate::owned_probe::probe(&output).unwrap();
+        for info in [&before, &after] {
+            assert_eq!(info.streams[0].metadata["title"], "Named synthetic video");
+            assert_eq!(info.streams[0].metadata["language"], "en-US");
+            assert_eq!(info.streams[0].disposition, 4 | 8 | 64 | 128 | 256 | 131072);
+            assert!(!info.metadata.contains_key("title"));
+        }
+        std::fs::remove_file(output).unwrap();
     }
 }
