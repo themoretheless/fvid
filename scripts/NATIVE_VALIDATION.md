@@ -409,3 +409,40 @@ All 143 owned unit tests passed with empty external-program PATH; the test
 binary links system libraries only, without libav. Legacy/player compilation,
 native dependency/source guards and diff checks passed. Formatting diagnostics
 is now independent; demux, codec and filter migrations are still incomplete.
+
+
+Owned Y4M framestep decode and packet encoding
+--------------------------------------------
+
+The own streaming video reader now accepts decimal framestep steps 1..INT_MAX,
+including default, positional and named options. It selects the first and every
+Nth frame after interval admission, updates the declared output frame rate,
+and retains each selected source presentation timestamp and duration. Skipped
+payloads are still read and validated. Only a counter is added; no frame queue
+or full-file PCM/video allocation is introduced. Overlay compares its original
+source clock before output rate metadata changes.
+
+framestep-six-frames.y4m is a six-frame indexed synthetic Y4M artifact produced
+without FFmpeg by generate_y4m_overlay_fixtures.py. The acceptance initially
+failed specifically because the requested transform was unsupported. It now
+selects [0,2,4] for full input and [1,3,5] for the interval starting at 0.25 s.
+Explicit framestep/showinfo reference checks matched all pixels, source PTS,
+0.25 s frame durations and the 2/1 output rate. Option-order experiments also
+confirmed that unnamed values after named options are invalid. Contract source:
+https://github.com/FFmpeg/FFmpeg/blob/master/libavfilter/vf_framestep.c
+
+Acceptance also exercises public transformed decode and owned FFV1 packet
+encoding combined with overlay; independently decoded packets match every
+expected sample and timestamp. All 146 own unit tests passed with empty test
+PATH and no libav linkage, followed by three focused framestep tests after
+preserving original header tokens for requests without this filter. Native
+dependency/source guards and legacy/player compilation passed.
+
+This enables own decode and direct packet encoding. The public lossless file
+operation still requires separate consumed-frame accounting before accepting
+framestep; its previous legacy route was preserved. General option expressions,
+unrepresentable exact output rates and other codec/filter gaps remain open.
+
+Final verification repeated all 146 own tests with an empty external PATH
+after the header preservation adjustment. All 13 native geometry integration
+tests also passed with the empty-PATH Cargo runner and invalid FFmpeg SDK prefix.

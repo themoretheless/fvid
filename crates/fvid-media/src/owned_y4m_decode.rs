@@ -30,16 +30,22 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
     decode_reader_transformed(source, &Default::default())
 }
 fn supported_request(transform: &DecodeTransform) -> bool {
-    morphology(transform).into_iter().all(|(kind, args)| {
-        args.as_deref()
-            .is_none_or(|a| crate::owned_morphology::Morphology::parse(kind, a).is_ok())
-    }) && gradients(transform).into_iter().all(|(kind, args)| {
-        args.as_deref()
-            .is_none_or(|a| crate::owned_gradient::Gradient::parse(kind, a).is_ok())
-    }) && transform
-        .shuffleplanes
+    transform
+        .framestep
         .as_deref()
-        .is_none_or(|a| crate::owned_shuffleplanes::ShufflePlanes::parse(a).is_ok())
+        .is_none_or(|args| crate::owned_framestep::FrameStep::parse(args).is_ok())
+        && morphology(transform).into_iter().all(|(kind, args)| {
+            args.as_deref()
+                .is_none_or(|a| crate::owned_morphology::Morphology::parse(kind, a).is_ok())
+        })
+        && gradients(transform).into_iter().all(|(kind, args)| {
+            args.as_deref()
+                .is_none_or(|a| crate::owned_gradient::Gradient::parse(kind, a).is_ok())
+        })
+        && transform
+            .shuffleplanes
+            .as_deref()
+            .is_none_or(|a| crate::owned_shuffleplanes::ShufflePlanes::parse(a).is_ok())
         && transform
             .pixelize
             .as_deref()
@@ -88,6 +94,7 @@ fn supported_request(transform: &DecodeTransform) -> bool {
                 interval: transform.interval,
                 overlay: transform.overlay.clone(),
                 input_format: transform.input_format.clone(),
+                framestep: transform.framestep.clone(),
                 ..Default::default()
             }
 }
@@ -95,7 +102,22 @@ pub(crate) fn supports_transformed(source: &Path, transform: &DecodeTransform) -
     supported_request(transform)
         && overlay_supported(source, transform)
         && supports(source)
+        && framestep_clock_supported(source, transform)
         && (transform.transpose.is_none() || header_format(source) != Some(PixelFormat::Yuv411))
+}
+fn framestep_clock_supported(source: &Path, transform: &DecodeTransform) -> bool {
+    let Some(args) = transform.framestep.as_deref() else {
+        return true;
+    };
+    let qualify = || -> Result<()> {
+        let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+        let mut bytes = Vec::new();
+        line(&mut input, &mut bytes)?;
+        let rate = Header::parse(&bytes)?.frame_rate()?;
+        crate::owned_framestep::FrameStep::parse(args)?.frame_rate(rate)?;
+        Ok(())
+    };
+    qualify().is_ok()
 }
 fn overlay_supported(source: &Path, transform: &DecodeTransform) -> bool {
     let Some(spec) = &transform.overlay else {
@@ -584,6 +606,17 @@ fn decode_reader_frames(
         .as_ref()
         .map(|spec| crate::owned_y4m_overlay::OverlayReader::open(&presented_header, spec))
         .transpose()?;
+    let step =
+        crate::owned_framestep::FrameStep::parse(transform.framestep.as_deref().unwrap_or(""))?;
+    if transform.framestep.is_some() {
+        let output_rate = step.frame_rate([rate_n, rate_d])?;
+        presented_header
+            .tokens
+            .retain(|token| !token.starts_with('F'));
+        presented_header
+            .tokens
+            .push(format!("F{}:{}", output_rate[0], output_rate[1]));
+    }
     let frame_bytes = header.frame_len()?;
     let geometry = transform.overlay.is_some()
         || transform.crop.is_some()
@@ -611,6 +644,7 @@ fn decode_reader_frames(
     let mut scratch = [0u8; 8192];
     let mut index = 0u64;
     let mut frames = 0u64;
+    let mut selected_inputs = 0u64;
     loop {
         let clock = u128::from(index) * rate_d as u128 * 1_000_000;
         if transform
@@ -625,9 +659,15 @@ fn decode_reader_frames(
         if bytes != b"FRAME\n" && !bytes.starts_with(b"FRAME ") {
             return Err("expected Y4M FRAME marker".into());
         }
-        let selected = transform
+        let in_interval = transform
             .interval
             .is_none_or(|(from, _)| clock >= from as u128 * rate_n as u128);
+        let selected = in_interval && step.emits(selected_inputs);
+        if in_interval {
+            selected_inputs = selected_inputs
+                .checked_add(1)
+                .ok_or("Y4M frame count overflow")?;
+        }
         if max_frames.is_some_and(|limit| index >= limit) {
             return Err("Y4M input packet count exceeds limit".into());
         }
@@ -707,4 +747,97 @@ fn decode_reader_frames(
         pixel_format,
         decode_errors: 0,
     })
+}
+
+#[cfg(test)]
+mod framestep_tests {
+    use super::*;
+    use std::io::Cursor;
+    #[test]
+    fn selects_frames_and_restarts_count_at_the_selected_interval() {
+        let source =
+            include_bytes!("../../../tests/fixtures/playback-errors/framestep-six-frames.y4m");
+        for (interval, expected) in [
+            (None, vec![0, 2, 4]),
+            (Some((250_000, 1_500_000)), vec![1, 3, 5]),
+        ] {
+            let transform = DecodeTransform {
+                framestep: Some("step=2".into()),
+                interval,
+                ..Default::default()
+            };
+            let mut seen = Vec::new();
+            let stats = visit_reader_transformed(
+                Cursor::new(source),
+                &transform,
+                |header, pixels, pts, duration| {
+                    let index = pixels[0] - 10;
+                    let mut expected_pixels = vec![10 + index; 16];
+                    expected_pixels.extend([128; 8]);
+                    assert_eq!(pixels, expected_pixels);
+                    assert_eq!(header.frame_rate().unwrap(), [2, 1]);
+                    assert_eq!(pts, u64::from(index) * 250_000_000);
+                    assert_eq!(duration, 250_000_000);
+                    seen.push(index);
+                    Ok(())
+                },
+            )
+            .unwrap();
+            assert_eq!(seen, expected);
+            assert_eq!(stats.video_frames, 3);
+        }
+    }
+    #[test]
+    fn stepped_overlay_reaches_owned_ffv1_encoder_on_the_source_clock() {
+        let root =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/playback-errors");
+        let source = root.join("framestep-six-frames.y4m");
+        let transform = DecodeTransform {
+            framestep: Some("2".into()),
+            overlay: Some(fvid_media_info::OverlaySpec {
+                path: root.join("overlay-secondary-clock.y4m"),
+                x: 2,
+                y: 2,
+            }),
+            ..Default::default()
+        };
+        assert!(supports_transformed(&source, &transform));
+        assert_eq!(
+            crate::decode_video_transformed(&source, transform.clone())
+                .unwrap()
+                .video_frames,
+            3
+        );
+        let mut decoded = crate::owned_ffv1_decoder::Decoder::new(4, 4, 1 << 20).unwrap();
+        let mut seen = Vec::new();
+        let stats = crate::owned_ffv1_encoder::encode_y4m(
+            BufReader::new(File::open(source).unwrap()),
+            &transform,
+            |header, packet, pts, duration| {
+                assert_eq!(header.frame_rate().unwrap(), [2, 1]);
+                let frame = decoded.decode(packet).unwrap().frame;
+                let index = frame.data[0] - 10;
+                let (luma, u, v) = if index == 0 {
+                    (50, 80, 160)
+                } else {
+                    (100, 90, 170)
+                };
+                let mut expected = vec![10 + index; 16];
+                for at in [10, 11, 14, 15] {
+                    expected[at] = luma;
+                }
+                expected.extend([128, 128, 128, u, 128, 128, 128, v]);
+                assert_eq!(frame.data, expected);
+                assert_eq!(
+                    (pts, duration),
+                    (u64::from(index) * 250_000_000, 250_000_000)
+                );
+                seen.push(index);
+                Ok(())
+            },
+        )
+        .unwrap();
+        assert_eq!(seen, [0, 2, 4]);
+        assert_eq!(stats.video_frames, 3);
+    }
 }

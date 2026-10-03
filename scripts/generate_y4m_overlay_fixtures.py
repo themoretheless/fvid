@@ -28,3 +28,6 @@ for name, w, h, rate, count, base in [
 # Dedicated reproducer for legacy-compatible chroma placement rounding.
 (root / "overlay-unaligned-primary.y4m").write_bytes(main)
 (root / "overlay-unaligned-secondary.y4m").write_bytes(foreground)
+
+# Six indexed frames for temporal selection and interval-origin regression.
+(root / "framestep-six-frames.y4m").write_bytes(main)
