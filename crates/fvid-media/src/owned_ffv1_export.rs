@@ -154,6 +154,16 @@ pub(crate) fn export(
     transform: &DecodeTransform,
     options: &CopyOptions,
 ) -> Result<(DecodeStats, fvid_control::ProgressEvent, u64)> {
+    export_processed(source, destination, transform, options, None)
+}
+/// Process each decoded frame inside the existing atomic metadata-preserving exporter.
+pub(crate) fn export_processed(
+    source: &Path,
+    destination: &Path,
+    transform: &DecodeTransform,
+    options: &CopyOptions,
+    mut process: Option<&mut dyn FnMut(&mut crate::owned_frame::GeometryFrame, u8, i64, bool) -> Result<()>>,
+) -> Result<(DecodeStats, fvid_control::ProgressEvent, u64)> {
     let input = input(source)?;
     let track = input.tracks.first().ok_or("input has no video stream")?;
     let mut description = mkv::VideoTrackDescription {
@@ -214,7 +224,7 @@ pub(crate) fn export(
             let mut output = Some(file);
             let mut writer = None;
             let mut visitor = |view: decode::FrameView<'_>| -> Result<()> {
-                let packet = if view.monochrome {
+                let packet = if view.monochrome && process.is_none() {
                     let samples = (view.width as usize)
                         .checked_mul(view.height as usize)
                         .and_then(|v| v.checked_mul(if view.depth == 8 { 1 } else { 2 }))
@@ -228,15 +238,16 @@ pub(crate) fn export(
                 } else {
                     let mut data = crate::owned_frame::buffer(view.pixels.len())?;
                     data.copy_from_slice(view.pixels);
-                    crate::owned_ffv1_encoder::encode(
-                        &crate::owned_frame::GeometryFrame {
-                            width: view.width as usize,
-                            height: view.height as usize,
-                            subsampling: Some(view.subsampling),
-                            data,
-                        },
-                        view.depth,
-                    )?
+                    let mut frame = crate::owned_frame::GeometryFrame {
+                        width: view.width as usize,
+                        height: view.height as usize,
+                        subsampling: Some(view.subsampling),
+                        data,
+                    };
+                    if let Some(callback) = process.as_deref_mut() {
+                        callback(&mut frame, view.depth, view.pts_ns, track.colour.full_range)?;
+                    }
+                    crate::owned_ffv1_encoder::encode(&frame, view.depth)?
                 };
                 if packet.len() > options.max_packet_bytes {
                     return Err("encoded FFV1 packet exceeds byte limit".into());

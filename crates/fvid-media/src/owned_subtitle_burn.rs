@@ -7,13 +7,36 @@ fn prepare(
     source: &Path,
     subs: &Path,
 ) -> Result<(y4m::Header, Vec<crate::owned_play_controls::SubtitleCue>)> {
-    let mut reader = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
-    let mut line = Vec::new();
-    if !y4m::line(&mut reader, &mut line)? {
-        return Err("empty subtitle burn input".into());
-    }
-    let header = y4m::Header::parse(&line)?;
-    header.frame_rate()?;
+    let header = if crate::owned_y4m_decode::supports(source) {
+        let mut reader = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
+        let mut line = Vec::new();
+        if !y4m::line(&mut reader, &mut line)? {
+            return Err("empty subtitle burn input".into());
+        }
+        let header = y4m::Header::parse(&line)?;
+        header.frame_rate()?;
+        header
+    } else {
+        let reader = crate::owned_webm::WebmReader::open(
+            BufReader::new(File::open(source).map_err(|e| e.to_string())?),
+            Default::default(),
+        )
+        .map_err(|e| e.to_string())?;
+        let track = reader
+            .tracks
+            .first()
+            .ok_or("subtitle burn source has no video")?;
+        if track.codec != "V_FFV1" || reader.tracks.len() != 1 {
+            return Err("owned subtitle burn requires Y4M or single-track FFV1".into());
+        }
+        y4m::Header::parse(
+            format!(
+                "YUV4MPEG2 W{} H{} F25:1 Ip C420\n",
+                track.width, track.height
+            )
+            .as_bytes(),
+        )?
+    };
     if std::fs::metadata(subs).map_err(|e| e.to_string())?.len() > 1 << 20 {
         return Err("subtitle text exceeds 1 MiB".into());
     }
@@ -40,7 +63,8 @@ fn policy(options: &CopyOptions) -> Result<()> {
 }
 pub fn supports(source: &Path, subs: &Path, options: &CopyOptions) -> bool {
     policy(options).is_ok()
-        && crate::owned_y4m_decode::supports(source)
+        && (crate::owned_y4m_decode::supports(source)
+            || crate::owned_ffv1_export::supports(source, &Default::default()))
         && subs
             .extension()
             .is_some_and(|ext| ext.eq_ignore_ascii_case("srt"))
@@ -74,6 +98,43 @@ pub fn burn_subtitles(
     policy(options)?;
     let (header, cues) = prepare(source, subs)?;
     let font_size = (header.height as f32 / 18.0).clamp(12.0, 64.0);
+    if !crate::owned_y4m_decode::supports(source) {
+        let mut process =
+            |frame: &mut crate::owned_frame::GeometryFrame, depth, pts, full_range| -> Result<()> {
+                let text = active_text(&cues, pts);
+                if !text.is_empty() {
+                    let mask = crate::owned_text_raster::rasterize(
+                        &text,
+                        frame.width,
+                        frame.height,
+                        font_size,
+                    )?;
+                    crate::owned_text_raster::composite_white(frame, depth, full_range, &mask)?;
+                }
+                Ok(())
+            };
+        let (stats, event, consumed) = crate::owned_ffv1_export::export_processed(
+            source,
+            destination,
+            &Default::default(),
+            options,
+            Some(&mut process),
+        )?;
+        return Ok(fvid_media_info::LosslessStats {
+            backend: "owned SRT burn-in FFV1 export",
+            video_frames: stats.video_frames,
+            decoded_frames: consumed,
+            seek_used: false,
+            video_packets: event.packets,
+            copied_packets: 0,
+            trimmed_audio_sample_frames: 0,
+            pixel_format: stats.pixel_format,
+            encoder: "ffv1".into(),
+            fvid_crop_payload_copies: 0,
+            vertical_flip: false,
+            horizontal_flip: false,
+        });
+    }
     let input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
     let (stats, event, consumed) = mkv::export_atomic(
         destination,
@@ -221,5 +282,50 @@ mod tests {
             }
         }
         assert!(burn_subtitles(&source, &output, &subs, &Default::default()).is_err());
+        let compressed = output.with_extension("source.mkv");
+        let second = output.with_extension("second.mkv");
+        let _compressed_cleanup = Cleanup(compressed.clone());
+        let _second_cleanup = Cleanup(second.clone());
+        crate::owned_lossless::transcode_lossless(
+            &source,
+            &compressed,
+            Default::default(),
+            &Default::default(),
+        )
+        .unwrap();
+        assert!(supports(&compressed, &subs, &Default::default()));
+        assert!(
+            plan_burn_subtitles(&compressed, &subs, &Default::default())
+                .unwrap()
+                .graph
+                .is_none()
+        );
+        burn_subtitles(&compressed, &second, &subs, &Default::default()).unwrap();
+        let mut compressed_reader =
+            crate::owned_webm::WebmReader::open(File::open(&second).unwrap(), Default::default())
+                .unwrap();
+        compressed_reader.scan_all().unwrap();
+        assert_eq!(compressed_reader.packets.len(), 3);
+        for index in 0..3 {
+            assert_eq!(
+                compressed_reader.packets[index].pts_ns,
+                reader.packets[index].pts_ns
+            );
+            assert_eq!(
+                compressed_reader.read_packet(index).unwrap(),
+                reader.read_packet(index).unwrap()
+            );
+        }
     }
+}
+
+fn active_text(cues: &[crate::owned_play_controls::SubtitleCue], pts_ns: i64) -> String {
+    cues.iter()
+        .filter(|cue| {
+            i128::from(pts_ns) >= i128::from(cue.start_us) * 1000
+                && i128::from(pts_ns) < i128::from(cue.end_us) * 1000
+        })
+        .map(|cue| cue.text.as_str())
+        .collect::<Vec<_>>()
+        .join("\n")
 }

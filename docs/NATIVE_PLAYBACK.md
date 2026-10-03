@@ -3252,8 +3252,10 @@ checks actual packet modes, exact sample counts and seeks. FFmpeg/libopus are
 used only to generate test references; running the tests requires neither.
 The previous Opus regression refusal test now verifies successful playback.
 
-Plain SRT burn-in now has an owned Y4M → YUV composition → FFV1/Matroska path,
+Plain SRT burn-in now has owned Y4M and single-track FFV1/Matroska → YUV composition → FFV1/Matroska paths,
 including `media plan burn-subtitles` without the `media` feature. It uses the
 bundled Ubuntu font and portable glyph rasterization, with centered white text.
-This path does not yet cover ASS styling, complex-script shaping, non-Y4M sources,
+This path does not yet cover ASS styling, complex-script shaping, other compressed sources,
 or metadata/control-memory policies; those gaps remain part of the migration.
+
+The FFV1 burn-in path retains input timing, color signal, chapters and text metadata through the existing owned exporter. Synthetic acceptance compares its output packets with the equivalent Y4M input.
