@@ -26,9 +26,10 @@ impl Negate {
 include!("../crates/fvid-media/src/owned_gradient_impl.rs");
 
 /// Native filter order matches the public media request, independent of CLI
-/// flag order: hue, average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, pixelize, dilation, erosion, chroma shift, plane shuffle.
+/// flag order: equalization, hue, average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, pixelize, dilation, erosion, chroma shift, plane shuffle.
 #[derive(Default)]
 pub struct PixelFilters {
+    pub eq: Option<fvid_media::owned_eq::Equalizer>,
     pub hue: Option<fvid_media::owned_hue::Hue>,
     pub pixelize: Option<crate::native_pixelize::Pixelize>,
     pub boxblur: Option<crate::native_boxblur::BoxBlur>,
@@ -42,6 +43,12 @@ pub struct PixelFilters {
 impl PixelFilters {
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
         let mut result = Self {
+            eq: request
+                .eq
+                .as_deref()
+                .map(fvid_media::owned_eq::Equalizer::parse)
+                .transpose()
+                .map_err(|error| invalid(&error))?,
             hue: request
                 .hue
                 .as_deref()
@@ -99,7 +106,8 @@ impl PixelFilters {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.hue.is_none()
+        self.eq.is_none()
+            && self.hue.is_none()
             && self.pixelize.is_none()
             && self.boxblur.is_none()
             && self.avgblur.is_none()
@@ -110,6 +118,9 @@ impl PixelFilters {
             && self.shuffleplanes.is_none()
     }
     pub fn apply(&self, frame: &mut GeometryFrame, depth: u8) -> Result<()> {
+        if let Some(filter) = &self.eq {
+            filter.apply(frame, depth).map_err(|error| invalid(&error))?;
+        }
         if let Some(filter) = self.hue {
             filter.apply(frame, depth).map_err(|error| invalid(&error))?;
         }

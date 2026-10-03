@@ -92,3 +92,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_hue_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_eq_reference"
+harness = false

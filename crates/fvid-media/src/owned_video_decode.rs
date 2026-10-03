@@ -360,6 +360,9 @@ fn process_frame_with_overlay(
     pts_ns: i64,
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
     use crate::owned_y4m::{Header, PixelFormat};
+    if transform.eq.is_some() && (monochrome || decoded.depth != 8) {
+        return Ok(None);
+    }
     if transform.hue.is_some() && (monochrome || !matches!(decoded.depth, 8 | 10)) {
         return Ok(None);
     }

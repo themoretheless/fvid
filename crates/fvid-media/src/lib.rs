@@ -95,6 +95,7 @@ pub use owned_wave_loudness::{measure_loudness, plan_loudness};
 
 pub mod owned_negate;
 pub mod owned_hue;
+pub mod owned_eq;
 
 pub mod owned_frame;
 pub mod owned_frame_layout;

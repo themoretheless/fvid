@@ -31,9 +31,13 @@ pub fn decode_reader(source: impl BufRead) -> Result<DecodeStats> {
 }
 pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
     transform
-        .hue
+        .eq
         .as_deref()
-        .is_none_or(|args| crate::owned_hue::Hue::parse(args).is_ok())
+        .is_none_or(|args| crate::owned_eq::Equalizer::parse(args).is_ok())
+        && transform
+            .hue
+            .as_deref()
+            .is_none_or(|args| crate::owned_hue::Hue::parse(args).is_ok())
         && transform.reverse.as_deref().is_none_or(str::is_empty)
         && transform
             .shuffleframes
@@ -85,6 +89,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 scale: transform.scale,
                 transpose: transform.transpose,
                 pad: transform.pad,
+                eq: transform.eq.clone(),
                 hue: transform.hue.clone(),
                 negate: transform.negate.clone(),
                 avgblur: transform.avgblur.clone(),
@@ -112,18 +117,19 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
 }
 pub(crate) fn supports_transformed(source: &Path, transform: &DecodeTransform) -> bool {
     supported_request(transform)
-        && (transform.hue.is_none() || hue_depth_supported(source))
+        && (transform.hue.is_none() || pixel_depth_supported(source, &[8, 10]))
+        && (transform.eq.is_none() || pixel_depth_supported(source, &[8]))
         && overlay_supported(source, transform)
         && supports(source)
         && framestep_clock_supported(source, transform)
         && (transform.transpose.is_none() || header_format(source) != Some(PixelFormat::Yuv411))
 }
-fn hue_depth_supported(source: &Path) -> bool {
+fn pixel_depth_supported(source: &Path, depths: &[u8]) -> bool {
     let read = || -> Result<bool> {
         let mut input = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
         let mut bytes = Vec::new();
         line(&mut input, &mut bytes)?;
-        Ok(matches!(Header::parse(&bytes)?.depth(), 8 | 10))
+        Ok(depths.contains(&Header::parse(&bytes)?.depth()))
     };
     read().unwrap_or(false)
 }
@@ -318,7 +324,8 @@ pub(crate) fn apply_pixel_filters(
     transform: &DecodeTransform,
     output: &mut Vec<u8>,
 ) -> Result<()> {
-    if transform.hue.is_some()
+    if transform.eq.is_some()
+        || transform.hue.is_some()
         || transform.avgblur.is_some()
         || transform.boxblur.is_some()
         || transform.pixelize.is_some()
@@ -348,6 +355,9 @@ pub(crate) fn apply_pixel_filters(
             data: std::mem::take(output),
         };
         let result: Result<()> = (|| {
+            if let Some(args) = transform.eq.as_deref() {
+                crate::owned_eq::Equalizer::parse(args)?.apply(&mut frame, header.depth())?;
+            }
             if let Some(args) = transform.hue.as_deref() {
                 crate::owned_hue::Hue::parse(args)?.apply(&mut frame, header.depth())?;
             }
@@ -680,6 +690,7 @@ fn decode_reader_frames(
         || transform.scale.is_some()
         || transform.transpose.is_some()
         || transform.pad.is_some()
+        || transform.eq.is_some()
         || transform.hue.is_some()
         || transform.negate.is_some()
         || transform.avgblur.is_some()
