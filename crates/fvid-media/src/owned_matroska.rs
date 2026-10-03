@@ -421,7 +421,14 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
                     u32::try_from(header.height).map_err(|_| "Matroska height overflow")?;
                 let mut description = VideoTrackDescription { name: String::new(), language: "und".into(), legacy_language: "und".into(), disposition: 1 };
                 let mut track_tags = std::collections::BTreeMap::new();
+                let mut text_tags = std::collections::BTreeMap::new();
                 if let Some(options) = track_options {
+                    for (key, value) in &options.metadata_set {
+                        text_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
+                        if !crate::owned_file_tags::FileTags::supports_key(key) && !value.is_empty() {
+                            text_tags.insert(key.to_ascii_uppercase(), value.clone());
+                        }
+                    }
                     for (_, key, value) in &options.stream_metadata_set {
                         track_tags.retain(|name: &String, _| !name.eq_ignore_ascii_case(key));
                         if !crate::owned_ffv1_export::edit_track_description(&mut description, key, value) && !value.is_empty() {
@@ -447,7 +454,7 @@ fn write_y4m_ffv1_policy<W: Write + Seek>(
                         0,
                         0,
                         file_metadata,
-                        &Default::default(),
+                        &text_tags,
                         &track_tags,
                         track_options.filter(|options| !options.stream_metadata_set.is_empty()).map(|_| &description),
                     )

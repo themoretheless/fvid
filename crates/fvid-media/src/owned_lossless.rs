@@ -73,17 +73,15 @@ fn metadata(o: &CopyOptions) -> Result<crate::owned_matroska::FileMetadata, Stri
     }
     let mut file = crate::owned_matroska::FileMetadata::default();
     for key in &o.metadata_delete {
-        if key.contains('\0') || !file.tags.set(key, "") {
-            return Err("unsupported owned container metadata key".into());
-        }
+        if key.contains('\0') { return Err("NUL in container metadata".into()); }
+        file.tags.set(key, "");
     }
     for (key, value) in &o.metadata_set {
         if key.contains('\0') || value.contains('\0') {
             return Err("NUL in container metadata".into());
         }
-        if !file.tags.set(key, value) {
-            return Err("unsupported owned container metadata key".into());
-        }
+        // Nonstandard text tags are written alongside these standard fields.
+        file.tags.set(key, value);
     }
     Ok(file)
 }

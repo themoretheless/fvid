@@ -889,6 +889,12 @@ fn owned_cli_export_writes_multiple_container_tags() {
             "artist=FVid regression",
             "--metadata-delete",
             "album",
+            "--metadata",
+            "custom_note=First value",
+            "--metadata",
+            "CUSTOM_NOTE=Replacement value",
+            "--metadata",
+            "empty_note=",
             "--stream-metadata",
             "0:title=Synthetic video",
             "--stream-metadata",
@@ -914,6 +920,8 @@ fn owned_cli_export_writes_multiple_container_tags() {
     reader.scan_all().unwrap();
     assert_eq!(reader.tags.title, "Synthetic title");
     assert_eq!(reader.tags.artist, "FVid regression");
+    assert_eq!(reader.metadata["CUSTOM_NOTE"], "Replacement value");
+    assert!(!reader.metadata.contains_key("EMPTY_NOTE"));
     assert!(reader.tags.album.is_empty());
     assert_eq!(reader.tracks[0].name, "Synthetic video");
     assert_eq!(reader.tracks[0].language, "rus");
