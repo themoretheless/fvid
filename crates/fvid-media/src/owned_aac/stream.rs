@@ -21,6 +21,9 @@ pub(crate) struct DecodeProgress<'a> {
     event: ProgressEvent,
 }
 impl DecodeProgress<'_> {
+    fn check_admission(&self, channels: u16) -> Result<()> {
+        check_decode_admission(channels, self.options)
+    }
     fn check(&self) -> Result<()> {
         if self
             .options

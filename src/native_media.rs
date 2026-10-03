@@ -192,6 +192,11 @@ impl<'a> DecodeProgress<'a> {
         state.check()?;
         Ok(state)
     }
+    // This core streaming API exposes RSS/packet controls, not a controlled
+    // allocation limit. The media-file adapter supplies admission separately.
+    pub(crate) fn check_admission(&self, _channels: u16) -> Result<()> {
+        Ok(())
+    }
     pub(crate) fn check(&self) -> Result<()> {
         if self.cancel.is_some_and(|flag| flag.is_cancelled()) { return Err(invalid("media operation cancelled")); }
         if self.max_rss_bytes.is_some() {
