@@ -51,3 +51,42 @@ mod tests {
         assert_eq!(reader.read_packet(0).unwrap(), [0x82, 0x49]);
     }
 }
+
+#[cfg(test)]
+mod index_allocation_tests {
+    use super::*;
+    #[test]
+    fn packet_capacity_respects_non_power_of_two_index_limit() {
+        let fixture = include_bytes!("../../../tests/fixtures/playback-errors/ffv1-six-frames.mkv");
+        let mut reader = WebmReader::open(
+            std::io::Cursor::new(fixture),
+            Limits {
+                packets: 6,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        reader.scan_all().unwrap();
+        assert_eq!(reader.packets.len(), 6);
+        assert_eq!(reader.packets.capacity(), 6);
+        assert_eq!(
+            reader.packet_index_payload_bytes().unwrap(),
+            6 * std::mem::size_of::<Packet>()
+        );
+        let error = match WebmReader::open(
+            std::io::Cursor::new(fixture),
+            Limits {
+                packets: 5,
+                ..Default::default()
+            },
+        ) {
+            Ok(_) => panic!("index limit must refuse the sixth packet"),
+            Err(error) => error,
+        };
+        assert!(
+            error
+                .to_string()
+                .contains("WebM packet count exceeds limit")
+        );
+    }
+}

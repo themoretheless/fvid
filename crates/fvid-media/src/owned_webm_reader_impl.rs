@@ -773,6 +773,14 @@ impl<R: Read + Seek> WebmReader<R> {
         self.scanned
     }
     /// Tighten encoded payload reads without treating codec metadata as packets.
+    /// Retained packet index payload including spare capacity, excluding the
+    /// reader, tracks, metadata, allocator headers and packet data buffers.
+    pub fn packet_index_payload_bytes(&self) -> Result<usize> {
+        self.packets
+            .capacity()
+            .checked_mul(std::mem::size_of::<Packet>())
+            .ok_or_else(|| invalid("WebM packet index allocation overflow"))
+    }
     pub fn restrict_packet_bytes(&mut self, maximum: usize) {
         self.read_packet_bytes = self.read_packet_bytes.min(maximum);
     }
@@ -829,6 +837,14 @@ fn read_block<R: Read + Seek>(
         .ok()
         .filter(|&n| n <= limits.packet_bytes)
         .ok_or_else(|| invalid("WebM packet exceeds budget"))?;
+    if out.len() == out.capacity() {
+        let capacity = out.capacity().checked_mul(2)
+            .unwrap_or(limits.packets)
+            .max(4)
+            .min(limits.packets);
+        out.try_reserve_exact(capacity - out.len())
+            .map_err(|_| invalid("WebM packet index allocation failed"))?;
+    }
     out.push(Packet {
         track,
         pts_ns: i64::try_from(pts).map_err(|_| invalid("WebM timestamp overflow"))?,
