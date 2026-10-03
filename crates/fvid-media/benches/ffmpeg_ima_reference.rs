@@ -7,6 +7,8 @@ fn main() {
         "ima4-ramp-edits.mov",
         "ima4-adaptive-stereo-edits.mov",
         "ima-wav-stereo-edits.mov",
+        "ms-adpcm-stereo-edits.mov",
+        "ms-adpcm-adaptive-mono-edits.mov",
     ] {
         let source = root.join(name);
         let mut reader = fvid_media::owned_mp4::Mp4Reader::open(
@@ -23,6 +25,15 @@ fn main() {
                     .unwrap()
                     .decode_pcm(&packet)
                     .unwrap()
+            } else if track.codec == *b"ms\x00\x02" {
+                fvid_media::owned_ms_adpcm::MsAdpcmDecoder::new(
+                    &track.configuration,
+                    track.sample_rate,
+                    track.channels,
+                )
+                .unwrap()
+                .decode_pcm(&packet)
+                .unwrap()
             } else {
                 fvid_media::owned_ima_wav::ImaWavDecoder::new(
                     &track.configuration,

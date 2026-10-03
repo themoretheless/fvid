@@ -203,3 +203,5 @@ mod owned_ffv1_export;
 pub mod owned_ima4;
 
 pub mod owned_ima_wav;
+
+pub mod owned_ms_adpcm;

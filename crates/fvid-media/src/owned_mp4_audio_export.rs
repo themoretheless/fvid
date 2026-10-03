@@ -1,4 +1,4 @@
-//! Owned MP4 AAC/ALAC/PCM file export through presentation decoding and WAVE DSP.
+//! Owned MP4 AAC/ALAC/PCM/ADPCM file export through presentation decoding and WAVE DSP.
 use fvid_control::CopyOptions;
 use fvid_media_info::{AudioDecodeStats, AudioDecodeTransform};
 use std::{
@@ -43,6 +43,7 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
                     | b"fl64"
                     | b"ima4"
                     | b"ms\x00\x11"
+                    | b"ms\x00\x02"
             )
     }))
 }
@@ -82,6 +83,7 @@ pub(crate) fn descriptor(
             b"alac" => "alac",
             b"ima4" => "adpcm_ima_qt",
             b"ms\x00\x11" => "adpcm_ima_wav",
+            b"ms\x00\x02" => "adpcm_ms",
             b"raw " => "pcm_u8",
             b"sowt" => "pcm_sle",
             b"twos" => "pcm_sbe",
@@ -331,6 +333,36 @@ mod admission_tests {
         )
         .unwrap();
         assert_eq!((stats.sample_frames, stats.channels), (18, 2));
+        std::fs::remove_file(&output).unwrap();
+    }
+    #[test]
+    fn ms_adpcm_export_keeps_owned_backend_and_budget_policy() {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/ms-adpcm-stereo-edits.mov");
+        let tiny = CopyOptions {
+            max_controlled_bytes: Some(1),
+            ..Default::default()
+        };
+        assert!(supports(&source, Default::default(), &tiny));
+        let output =
+            std::env::temp_dir().join(format!("fvid-ms-adpcm-dispatch-{}.wav", std::process::id()));
+        let _ = std::fs::remove_file(&output);
+        assert!(
+            crate::decode_audio(&source, &output, &tiny)
+                .unwrap_err()
+                .contains("controlled memory budget exceeded")
+        );
+        assert!(!output.exists());
+        let stats = crate::decode_audio(
+            &source,
+            &output,
+            &CopyOptions {
+                max_controlled_bytes: Some(32 * 1024 * 1024),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        assert_eq!((stats.sample_frames, stats.channels), (12, 2));
         std::fs::remove_file(&output).unwrap();
     }
     fn check_budget(fixture: &str) {

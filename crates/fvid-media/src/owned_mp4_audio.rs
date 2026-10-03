@@ -21,6 +21,7 @@ pub(crate) enum Mp4TimelineDecoder {
     Pcm(crate::owned_pcm_decoder::PcmDecoder),
     Ima4(crate::owned_ima4::Ima4Decoder),
     ImaWav(crate::owned_ima_wav::ImaWavDecoder),
+    MsAdpcm(crate::owned_ms_adpcm::MsAdpcmDecoder),
 }
 impl Mp4TimelineDecoder {
     const SAMPLE_BYTES: usize = 4;
@@ -74,6 +75,14 @@ impl Mp4TimelineDecoder {
                 )
                 .map_err(|e| invalid(&e.to_string()))?,
             )),
+            b"ms\x00\x02" => Ok(Self::MsAdpcm(
+                crate::owned_ms_adpcm::MsAdpcmDecoder::new(
+                    &track.configuration,
+                    track.sample_rate,
+                    track.channels,
+                )
+                .map_err(|e| invalid(&e.to_string()))?,
+            )),
             _ => Err(invalid(
                 "selected MP4 audio codec is not owned by this export path",
             )),
@@ -86,6 +95,7 @@ impl Mp4TimelineDecoder {
             Self::Pcm(d) => d.sample_rate(),
             Self::Ima4(d) => d.sample_rate(),
             Self::ImaWav(d) => d.sample_rate(),
+            Self::MsAdpcm(d) => d.sample_rate(),
         }
     }
     pub(crate) fn channels(&self) -> u16 {
@@ -95,6 +105,7 @@ impl Mp4TimelineDecoder {
             Self::Pcm(d) => d.channels(),
             Self::Ima4(d) => d.channels(),
             Self::ImaWav(d) => d.channels(),
+            Self::MsAdpcm(d) => d.channels(),
         }
     }
     pub(crate) fn channel_mask(&self) -> u32 {
@@ -103,6 +114,7 @@ impl Mp4TimelineDecoder {
             Self::ImaWav(d) => {
                 crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32
             }
+            Self::MsAdpcm(d) => crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32,
             Self::Ima4(d) => crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32,
             Self::Pcm(d) => crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32,
             Self::Alac(d) => crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32,
@@ -120,6 +132,7 @@ impl Mp4TimelineDecoder {
             Self::Pcm(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string())),
             Self::Ima4(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string())),
             Self::ImaWav(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string())),
+            Self::MsAdpcm(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string())),
         }
     }
 }
@@ -139,7 +152,7 @@ pub(crate) fn mp4_audio_index<R: Read + Seek>(
         _ => Err(invalid("select exactly one audio stream")),
     }
 }
-/// Admit retained MP4 AAC/ALAC/PCM/IMA4 decode payload before cloning the track or creating
+/// Admit retained MP4 AAC/ALAC/PCM/ADPCM decode payload before cloning the track or creating
 /// decoder/checkpoint state. Container parsing has its own bounded limits;
 /// parser temporaries and caller-owned I/O are outside this retained estimate.
 pub(crate) fn admit_audio_reader<R: Read + Seek>(
@@ -183,6 +196,15 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
         }
         b"ms\x00\x11" => {
             crate::owned_ima_wav::ImaWavDecoder::new(
+                &track.configuration,
+                track.sample_rate,
+                track.channels,
+            )
+            .map_err(|e| invalid(&e.to_string()))?;
+            16 * 1024
+        }
+        b"ms\x00\x02" => {
+            crate::owned_ms_adpcm::MsAdpcmDecoder::new(
                 &track.configuration,
                 track.sample_rate,
                 track.channels,
@@ -242,11 +264,11 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
         &track.codec,
         b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64"
     );
-    // PCM widens each byte into at most one f64 sample. IMA4 expands 34 input
-    // bytes into 64 f32 samples. A factor of ten covers either output together
+    // PCM widens each byte into at most one f64 sample. ADPCM expands
+    // each coded byte into at most two f32 samples. A factor of ten covers output together
     // with geometric growth of the reusable encoded packet buffer.
     add(largest_packet
-        .checked_mul(if pcm || matches!(&track.codec, b"ima4" | b"ms\x00\x11") {
+        .checked_mul(if pcm || matches!(&track.codec, b"ima4" | b"ms\x00\x11" | b"ms\x00\x02") {
             10
         } else {
             2
