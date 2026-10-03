@@ -48,6 +48,7 @@ pub(crate) fn descriptor(
     };
     let index =
         crate::owned_mp4_audio::mp4_audio_index(&reader, selected).map_err(|e| e.to_string())?;
+    crate::owned_mp4_audio::admit_aac_reader(&reader, index, options).map_err(|e| e.to_string())?;
     let track = &reader.tracks()[index];
     let decoder =
         crate::owned_mp4_audio::Mp4TimelineDecoder::new(track).map_err(|e| e.to_string())?;
@@ -80,11 +81,9 @@ pub(crate) fn supports(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    if options.max_controlled_bytes.is_some() {
-        return false;
-    }
-    let Ok((rate, channels, mask)) = geometry(source, options) else {
-        return false;
+    let (rate, channels, mask) = match geometry(source, options) {
+        Ok(value) => value,
+        Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
     let output = transform.channels.unwrap_or(i32::from(channels));
     if output != i32::from(channels)
@@ -118,9 +117,6 @@ pub(crate) fn apply(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    if options.max_controlled_bytes.is_some() {
-        return Err("MP4 audio aggregate allocation admission is not yet implemented".into());
-    }
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
@@ -145,4 +141,72 @@ pub(crate) fn apply(
         },
     )?;
     crate::owned_adts_export::export_spool(spool, destination, transform, options)
+}
+
+#[cfg(test)]
+mod admission_tests {
+    use super::*;
+    #[test]
+    fn mp4_aac_export_loudness_and_normalization_keep_owned_budget() {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/audio/aac-native-edit.m4a");
+        let tiny = CopyOptions {
+            max_controlled_bytes: Some(1),
+            ..Default::default()
+        };
+        let admitted = CopyOptions {
+            max_controlled_bytes: Some(32 * 1024 * 1024),
+            ..Default::default()
+        };
+        assert!(supports(&source, Default::default(), &tiny));
+        assert!(crate::owned_audio_plan::supports(
+            &source,
+            &Default::default(),
+            &tiny
+        ));
+        assert!(crate::owned_container_loudness::supports(&source, &tiny));
+        assert!(
+            crate::plan_decode_audio(&source, &Default::default(), &tiny)
+                .unwrap_err()
+                .contains("controlled memory budget exceeded")
+        );
+        crate::plan_decode_audio(&source, &Default::default(), &admitted).unwrap();
+        assert!(
+            crate::measure_loudness(&source, &tiny)
+                .unwrap_err()
+                .contains("controlled memory budget exceeded")
+        );
+        let expected = crate::measure_loudness(&source, &Default::default()).unwrap();
+        let actual = crate::measure_loudness(&source, &admitted).unwrap();
+        assert_eq!(
+            serde_json::to_value(actual).unwrap(),
+            serde_json::to_value(expected).unwrap()
+        );
+        for mode in 0..3 {
+            let output = std::env::temp_dir().join(format!(
+                "fvid-mp4-aac-budget-{mode}-{}.wav",
+                std::process::id()
+            ));
+            let _ = std::fs::remove_file(&output);
+            let apply = |options: &CopyOptions| -> Result<()> {
+                match mode {
+                    0 => crate::decode_audio(&source, &output, options).map(|_| ()),
+                    1 => crate::apply_loudnorm(&source, &output, None, options).map(|_| ()),
+                    _ => crate::apply_loudnorm_dual(&source, &output, None, options).map(|_| ()),
+                }
+            };
+            assert!(
+                apply(&tiny)
+                    .unwrap_err()
+                    .contains("controlled memory budget exceeded")
+            );
+            assert!(!output.exists());
+            apply(&admitted).unwrap();
+            let bytes = std::fs::read(&output).unwrap();
+            std::fs::remove_file(&output).unwrap();
+            apply(&CopyOptions::default()).unwrap();
+            assert_eq!(std::fs::read(&output).unwrap(), bytes);
+            std::fs::remove_file(&output).unwrap();
+        }
+    }
 }

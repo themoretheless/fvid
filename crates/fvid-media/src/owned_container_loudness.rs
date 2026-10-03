@@ -35,11 +35,6 @@ fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, Stri
     }
     let (_, rate, channels, mask, codec) =
         if crate::owned_mp4_audio_export::recognizes(source, options)? {
-            if options.max_controlled_bytes.is_some() {
-                return Err(
-                    "MP4 audio aggregate allocation admission is not yet implemented".into(),
-                );
-            }
             crate::owned_mp4_audio_export::descriptor(source, options)?
         } else {
             let (index, rate, channels, mask, codec, _) =

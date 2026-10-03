@@ -67,7 +67,10 @@ pub(crate) fn supports(
     transform: &AudioDecodeTransform,
     options: &CopyOptions,
 ) -> bool {
-    plan_decode_audio(source, transform, options).is_ok()
+    match plan_decode_audio(source, transform, options) {
+        Ok(_) => true,
+        Err(error) => error.starts_with("controlled memory budget exceeded:"),
+    }
 }
 pub fn plan_decode_audio(
     source: &Path,
@@ -85,9 +88,6 @@ pub fn plan_decode_audio(
     let is_matroska = matroska.is_some();
     let mut stream_index = 0;
     let (rate, channels, mask, codec, precision) = if mp4 {
-        if options.max_controlled_bytes.is_some() {
-            return Err("MP4 audio aggregate allocation admission is not yet implemented".into());
-        }
         let (index, rate, channels, mask, codec) =
             crate::owned_mp4_audio_export::descriptor(source, options)?;
         stream_index = index;
