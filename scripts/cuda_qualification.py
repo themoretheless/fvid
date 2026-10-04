@@ -32,6 +32,7 @@ def qualify_native_tests(root, run):
         ], ["--no-default-features", "--features", "native-cuda"]),
         ("fvid-media", "owned_hw_filter", [
             "production_hw_filter_routes_synthetic_avc_without_libav",
+            "production_hw_filter_routes_sps_crop_without_libav",
         ], ["--no-default-features", "--features", "native-cuda"]),
         ("fvid-media", "owned_nvenc_movie", [
             "synthetic_movie_encodes_and_muxes_without_libav",

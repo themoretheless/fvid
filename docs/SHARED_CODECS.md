@@ -495,7 +495,7 @@ atomic Matroska publication. No libav retry occurs after native execution starts
 The standalone `native-cuda` feature exports the same operation contracts and
 `hw_filter` API without enabling any legacy dependency.
 
-The native route currently excludes host bounce and nonzero SPS crop
+The native route currently excludes host bounce
 from automatic selection to retain existing command semantics until qualified;
 other codecs/containers remain on the legacy route. This is not yet elimination
 of `cuda-hw`'s build dependency. The legacy operation exports video only, and the
@@ -524,3 +524,17 @@ origin handling is qualified. The duplicate-PTS synthetic fixture checks whole
 frame selection, repeated timestamps and preserved durations. GPU production
 acceptance now requests a half-second cut from the one-second control fixture
 and verifies six output packets using FVid; execution remains unverified.
+
+Native production AVC routing now accepts SPS display crop. CLI crop coordinates
+refer to the visible image: the source SPS left/top offsets are added before the
+CUDA transform, and right/bottom padding is excluded from its default output.
+The renderer therefore removes source padding rather than encoding it as visible
+content. A further crop is bounded against visible dimensions, and metadata crop
+is cleared when the output window lies wholly inside the visible source.
+
+`avc-display-crop.mp4` is a 62x46 synthetic I/P/B sequence with coded 64x48 and
+right/bottom crop 2. Own software decoding and production admission accept all
+8 pictures; host tests reject a crop that includes padding. NVIDIA qualification
+adds default visible-size export and nested crop with both flips, then checks
+mux dimensions, absent container crop and every FVid-decoded output picture.
+These GPU checks have only been cross-compiled here.

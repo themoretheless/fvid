@@ -58,23 +58,44 @@ fn plan<R: Read + Seek>(
         }
     }
     let metadata = source.video_metadata();
-    if metadata.options.video.is_some_and(|v| v.crop != [0; 4]) {
-        return Ok(None);
-    }
     if source.qualify_packets().is_err() {
         return Ok(None);
     }
     let (width, height) = source.coded_dimensions();
+    let [left, right, top, bottom] = metadata.options.video.map_or([0; 4], |video| video.crop);
+    let visible_width = width
+        .checked_sub(left)
+        .and_then(|width| width.checked_sub(right))
+        .ok_or("invalid AVC horizontal display crop")?;
+    let visible_height = height
+        .checked_sub(top)
+        .and_then(|height| height.checked_sub(bottom))
+        .ok_or("invalid AVC vertical display crop")?;
     let crop = options.crop.unwrap_or(fvid_media_info::CropRect {
         x: 0,
         y: 0,
-        width: width as usize,
-        height: height as usize,
+        width: visible_width as usize,
+        height: visible_height as usize,
     });
+    if crop
+        .x
+        .checked_add(crop.width)
+        .is_none_or(|end| end > visible_width as usize)
+        || crop
+            .y
+            .checked_add(crop.height)
+            .is_none_or(|end| end > visible_height as usize)
+    {
+        return Err("CUDA crop exceeds the visible source image".into());
+    }
     let convert = |v| u32::try_from(v).map_err(|_| "CUDA crop exceeds u32");
     let transform = fvid_cuda::Nv12Transform {
-        crop_x: convert(crop.x)?,
-        crop_y: convert(crop.y)?,
+        crop_x: convert(crop.x)?
+            .checked_add(left)
+            .ok_or("CUDA crop x overflow")?,
+        crop_y: convert(crop.y)?
+            .checked_add(top)
+            .ok_or("CUDA crop y overflow")?,
         out_width: convert(crop.width)?,
         out_height: convert(crop.height)?,
         hflip: options.horizontal_flip,
@@ -270,6 +291,154 @@ mod tests {
             );
         }
         std::fs::remove_file(destination).unwrap();
+    }
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    #[test]
+    #[ignore = "requires NVIDIA NVDEC and NVENC"]
+    fn production_hw_filter_routes_sps_crop_without_libav() {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/avc-display-crop.mp4");
+        for crop in [
+            None,
+            Some(fvid_media_info::CropRect {
+                x: 2,
+                y: 4,
+                width: 58,
+                height: 40,
+            }),
+        ] {
+            let destination = std::env::temp_dir().join(format!(
+                "fvid-owned-crop-{}-{}.mkv",
+                std::process::id(),
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap()
+                    .as_nanos()
+            ));
+            let dimensions = crop.map_or((62, 46), |crop| (crop.width as u32, crop.height as u32));
+            let stats = hw_filter(
+                &source,
+                &destination,
+                &HwFilterOptions {
+                    crop,
+                    horizontal_flip: true,
+                    vertical_flip: true,
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            assert_eq!(stats.backend, "owned-cuda-nvdec-nvenc");
+            assert_eq!((stats.width, stats.height), dimensions);
+            assert_eq!(stats.host_frame_copies, 0);
+            assert_eq!(stats.video_frames, 8);
+            let mut input = crate::owned_webm::WebmReader::open(
+                BufReader::new(std::fs::File::open(&destination).unwrap()),
+                Default::default(),
+            )
+            .unwrap();
+            assert_eq!(
+                (input.tracks[0].width, input.tracks[0].height),
+                (u64::from(dimensions.0), u64::from(dimensions.1))
+            );
+            assert_eq!(input.tracks[0].crop, [0; 4]);
+            assert_eq!(input.packets.len(), 8);
+            let mut decoder = fvid_codecs::codec::avc_decoder::AvcDecoder::new(
+                &input.tracks[0].codec_private,
+                16 << 20,
+            )
+            .unwrap();
+            for index in 0..input.packets.len() {
+                assert_eq!(
+                    decoder
+                        .decode_order(&input.read_packet(index).unwrap())
+                        .unwrap()
+                        .unwrap()
+                        .dimensions(),
+                    (dimensions.0 as usize, dimensions.1 as usize)
+                );
+            }
+            std::fs::remove_file(destination).unwrap();
+        }
+    }
+    #[test]
+    fn synthetic_sps_crop_is_removed_before_native_encoding() {
+        let mut source = AvcMp4Input::open(
+            std::io::Cursor::new(
+                include_bytes!("../../../tests/fixtures/playback-errors/avc-display-crop.mp4")
+                    .as_slice(),
+            ),
+            Default::default(),
+        )
+        .unwrap();
+        assert_eq!(source.coded_dimensions(), (64, 48));
+        assert_eq!(
+            source.video_metadata().options.video.unwrap().crop,
+            [0, 2, 0, 2]
+        );
+        // This specific nonzero SPS crop triggered the old production refusal.
+        let plan = plan(&mut source, &HwFilterOptions::default())
+            .unwrap()
+            .unwrap();
+        assert_eq!(
+            (plan.transform.out_width, plan.transform.out_height),
+            (62, 46)
+        );
+        assert_eq!((plan.transform.crop_x, plan.transform.crop_y), (0, 0));
+        let nested = super::plan(
+            &mut source,
+            &HwFilterOptions {
+                crop: Some(fvid_media_info::CropRect {
+                    x: 2,
+                    y: 4,
+                    width: 58,
+                    height: 40,
+                }),
+                horizontal_flip: true,
+                ..Default::default()
+            },
+        )
+        .unwrap()
+        .unwrap();
+        assert_eq!(
+            (
+                nested.transform.crop_x,
+                nested.transform.crop_y,
+                nested.transform.out_width,
+                nested.transform.out_height
+            ),
+            (2, 4, 58, 40)
+        );
+        assert!(
+            super::plan(
+                &mut source,
+                &HwFilterOptions {
+                    crop: Some(fvid_media_info::CropRect {
+                        x: 0,
+                        y: 0,
+                        width: 64,
+                        height: 48
+                    }),
+                    ..Default::default()
+                }
+            )
+            .is_err()
+        );
+        let mut decoder = fvid_codecs::codec::avc_decoder::AvcDecoder::new(
+            &source.track().configuration,
+            16 << 20,
+        )
+        .unwrap();
+        source.rewind_packets();
+        let mut packet = Vec::new();
+        let mut count = 0;
+        while source.read_next(&mut packet).unwrap().is_some() {
+            assert_eq!(
+                decoder.decode_order(&packet).unwrap().unwrap().dimensions(),
+                (62, 46)
+            );
+            count += 1;
+        }
+        assert_eq!(count, 8);
     }
     #[test]
     fn empty_edit_interval_stays_on_legacy_until_origin_is_qualified() {
