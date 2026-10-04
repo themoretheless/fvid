@@ -151,3 +151,23 @@ respective SDK codec GUID and the driver's default preset. HEVC has its own
 ignored NVIDIA submission/drain test using the same synthetic surfaces and
 resource lifecycle. No HEVC hardware execution is claimed; P010/Main10 and
 native NVDEC remain separate unfinished work.
+
+
+## Direct NVDEC capability negotiation
+
+`fvid-cuda::NvdecApi` loads the fixed NVIDIA driver library and queries
+`cuvidGetDecoderCaps` with the selected `CodecDevice` context bound to the
+calling thread. The typed request covers H.264, HEVC, VP8 and VP9, chroma
+formats and 8/10/12-bit inputs. Driver errors and inconsistent supported
+limits refuse explicitly; unsupported capabilities remain ordinary results.
+Geometry admission checks minimum/maximum coded dimensions and macroblock
+capacity with overflow-safe arithmetic before future surface allocation.
+
+The layout comes from the pinned NVIDIA
+[cuviddec.h](https://github.com/NVIDIA/video-sdk-samples/blob/aa3544dcea2fe63122e4feb83bf805ea40e58dbe/Samples/NvCodec/NvDecoder/cuviddec.h):
+C verification gives size/alignment 88/4 and support/max-width/min-width/
+reserved-tail offsets 24/28/40/44. Four host tests cover the ABI, initialized
+requests, error handling and geometry admission. Linux/Windows test compilation
+passes. An ignored NVIDIA test queries actual H.264 device capabilities without
+libav. It has not been executed here. This creates no decoder, processes no
+compressed packets and does not yet replace production NVDEC.
