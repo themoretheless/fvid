@@ -914,6 +914,11 @@ fn pixel_decode_args(
             result.extend(args.cloned());
             break;
         }
+        if arg == "--lutyuv" {
+            if filters.lutyuv.is_some() {return Err("duplicate lutyuv".into());}
+            filters.lutyuv=Some(fvid_media::owned_lutyuv::LutYuv::parse(args.next().ok_or("missing lutyuv args")?)?);
+            continue;
+        }
         if arg == "--shuffleplanes" {
             if filters.shuffleplanes.is_some() {return Err("duplicate shuffleplanes".into());}
             filters.shuffleplanes=Some(fvid::native_shuffleplanes::ShufflePlanes::parse(args.next().ok_or("missing shuffleplanes args")?)?);
@@ -4494,7 +4499,7 @@ fn try_owned_overlay(args:&[String])->Result<bool,Box<dyn std::error::Error>> {
                 if items.next().map(String::as_str)!=Some("ffv1") {return Ok(false);}
             },
             "--hflip"|"--vflip"=>processing.push(item.clone()),
-            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--colorize"|"--monochrome"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"=> {
+            "--crop"|"--scale"|"--pad"|"--transpose"|"--unsharp"|"--eq"|"--hue"|"--colorize"|"--monochrome"|"--negate"|"--avgblur"|"--boxblur"|"--pixelize"|"--chromashift"|"--sobel"|"--prewitt"|"--roberts"|"--kirsch"|"--scharr"|"--dilation"|"--erosion"|"--shuffleplanes"|"--lutyuv"=> {
                 processing.push(item.clone());processing.push(items.next().ok_or("missing overlay processing value")?.clone());
             },
             "--from"|"--to" if operation==Some("decode")=> {
@@ -4744,6 +4749,7 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--hue" => &mut transform.hue,
             "--colorize" => &mut transform.colorize,
             "--monochrome" => &mut transform.monochrome,
+            "--lutyuv" => &mut transform.lutyuv,
             "--gblur" => &mut transform.gblur,
             "--bilateral" => &mut transform.bilateral,
             "--avgblur" => &mut transform.avgblur,
@@ -5071,6 +5077,117 @@ mod scalar_expression_tests {
                 }
                 assert_eq!(outputs[0], outputs[1], "filter={filter} depth={depth}");
             }
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod lutyuv_cli_tests {
+    #[test]
+    fn owned_lutyuv_cli_decode_plan_and_export_need_no_legacy_feature() {
+        let directory =
+            std::env::temp_dir().join(format!("fvid-lutyuv-cli-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        for depth in [8, 12, 16] {
+            let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
+                "tests/fixtures/playback-errors/colorize-grid-{depth}.y4m"
+            ));
+            let output = directory.join(format!("lutyuvd-{depth}.mkv"));
+            let source = source.to_str().unwrap();
+            let tint = "y=minval:u=maxval:v=minval";
+            for args in [
+                vec!["decode", source, "--lutyuv", tint, "--quiet"],
+                vec![
+                    "plan",
+                    "transcode-lossless",
+                    source,
+                    "--lutyuv",
+                    tint,
+                    "--quiet",
+                ],
+                vec![
+                    "transcode-lossless",
+                    source,
+                    output.to_str().unwrap(),
+                    "--lutyuv",
+                    tint,
+                    "--quiet",
+                ],
+            ] {
+                super::run(&args.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();
+            }
+            assert_eq!(fvid_media::decode_video(&output).unwrap().video_frames, 3);
+            let mut reader = fvid::playback_native::NativeReader::software(
+                std::io::BufReader::new(std::fs::File::open(&output).unwrap()),
+                usize::MAX,
+            )
+            .unwrap();
+            while let Some(frame) = reader.read_frame_raw().unwrap() {
+                let pixels = fvid::native_geometry::VideoGeometry::default()
+                    .apply(&frame, 3, 3)
+                    .unwrap();
+                let samples: Vec<u16> = if depth == 8 {
+                    pixels.data.iter().map(|s| *s as u16).collect()
+                } else {
+                    pixels
+                        .data
+                        .chunks_exact(2)
+                        .map(|s| u16::from_le_bytes([s[0], s[1]]))
+                        .collect()
+                };
+                assert_eq!(&samples[..9], &[16u16 << (depth - 8); 9]);
+                assert_eq!(&samples[9..13], &[240u16 << (depth - 8); 4]);
+                assert_eq!(&samples[13..], &[16u16 << (depth - 8); 4]);
+            }
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod lutyuv_full_range_tests {
+    #[test]
+    fn full_range_y4m_lut_exports_keep_black_and_white() {
+        let directory = std::env::temp_dir().join(format!("fvid-lut-full-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/lutyuv-full-range.y4m");
+        for extension in ["mkv", "y4m"] {
+            let output = directory.join(format!("filtered.{extension}"));
+            let command = if extension == "mkv" {
+                "transcode-lossless"
+            } else {
+                "export-y4m"
+            };
+            let mut args = vec![
+                command,
+                source.to_str().unwrap(),
+                output.to_str().unwrap(),
+                "--lutyuv",
+                "y=minval:u=maxval:v=minval",
+            ];
+            if extension == "mkv" {
+                args.push("--quiet");
+            }
+            super::run(&args.into_iter().map(str::to_owned).collect::<Vec<_>>()).unwrap();
+            let mut reader = fvid::playback_native::NativeReader::software(
+                std::io::BufReader::new(std::fs::File::open(&output).unwrap()),
+                usize::MAX,
+            )
+            .unwrap();
+            assert!(reader.colour().full_range);
+            let mut count = 0;
+            while let Some(frame) = reader.read_frame_raw().unwrap() {
+                let pixels = fvid::native_geometry::VideoGeometry::default()
+                    .apply(&frame, 3, 3)
+                    .unwrap();
+                assert_eq!(&pixels.data[..9], &[0; 9]);
+                assert_eq!(&pixels.data[9..13], &[255; 4]);
+                assert_eq!(&pixels.data[13..], &[0; 4]);
+                count += 1;
+            }
+            assert_eq!(count, 3);
         }
         std::fs::remove_dir_all(directory).unwrap();
     }

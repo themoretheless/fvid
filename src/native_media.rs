@@ -142,7 +142,7 @@ pub fn decode_video_pipeline_overlay(
                 _ => 8,
             };
             if let Some(compositor) = compositor.as_mut() { compositor.apply(&mut output, depth, overlay_pts.unwrap(), None)?; }
-            filters.apply(&mut output, depth)?;
+            filters.apply_range(&mut output, depth, reader.colour().full_range)?;
             std::hint::black_box(output);
         }
         stats.video_frames = stats
@@ -610,7 +610,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         colorcorrect: None,
         histeq: None,
         shuffleplanes: _,
-        lutyuv: None,
+        lutyuv: _,
         colorhold: None,
         fade: None,
         perspective: None,

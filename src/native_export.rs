@@ -211,7 +211,7 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
             RawFrame::Avc { colour, .. } => colour.full,
             RawFrame::Planar8(p) => p.colour.full,
             RawFrame::Planar(p) => p.colour.full,
-            _ => false,
+            _ => reader.colour().full_range,
         };
         let aspect = transformed_aspect(reader.pixel_aspect(), width, height, geometry)?;
         let mut transformed = if geometry.is_identity() && rotation == 0 && filters.is_empty() {
@@ -220,7 +220,7 @@ fn export_y4m_sources(sources: &[PathBuf], destination: &Path,
             Some(geometry.apply_display(&frame, width, height, rotation)?)
         };
         if let Some(picture) = &mut transformed {
-            filters.apply(picture, depth)?;
+            filters.apply_range(picture, depth, full)?;
         }
         let (width, height) = if let Some(picture) = &transformed {
             chroma = match picture.subsampling {

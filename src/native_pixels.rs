@@ -29,6 +29,7 @@ include!("../crates/fvid-media/src/owned_gradient_impl.rs");
 /// flag order: equalization, unsharp, hue, Gaussian blur, average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, monochrome, pixelize, dilation, erosion, colorize, chroma shift, plane shuffle.
 #[derive(Default)]
 pub struct PixelFilters {
+    pub lutyuv: Option<fvid_media::owned_lutyuv::LutYuv>,
     pub unsharp: Option<fvid_media::owned_unsharp::Unsharp>,
     pub eq: Option<fvid_media::owned_eq::Equalizer>,
     pub hue: Option<fvid_media::owned_hue::Hue>,
@@ -48,6 +49,7 @@ pub struct PixelFilters {
 impl PixelFilters {
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
         let mut result = Self {
+            lutyuv: request.lutyuv.as_deref().map(fvid_media::owned_lutyuv::LutYuv::parse).transpose().map_err(|e| invalid(&e))?,
             monochrome: request.monochrome.as_deref().map(fvid_media::owned_monochrome::Monochrome::parse).transpose().map_err(|e| invalid(&e))?,
             colorize: request.colorize.as_deref().map(fvid_media::owned_colorize::Colorize::parse).transpose().map_err(|e| invalid(&e))?,
             unsharp: request
@@ -127,6 +129,7 @@ impl PixelFilters {
             && self.pixelize.is_none()
             && self.boxblur.is_none()
             && self.monochrome.is_none()
+            && self.lutyuv.is_none()
             && self.colorize.is_none()
             && self.bilateral.is_none()
             && self.gblur.is_none()
@@ -138,6 +141,9 @@ impl PixelFilters {
             && self.shuffleplanes.is_none()
     }
     pub fn apply(&self, frame: &mut GeometryFrame, depth: u8) -> Result<()> {
+        self.apply_range(frame, depth, false)
+    }
+    pub fn apply_range(&self, frame: &mut GeometryFrame, depth: u8, full_range: bool) -> Result<()> {
         if let Some(filter) = &self.eq {
             filter.apply(frame, depth).map_err(|error| invalid(&error))?;
         }
@@ -177,6 +183,7 @@ impl PixelFilters {
             filter.apply(frame, depth)?;
         }
         if let Some(filter)=self.shuffleplanes {crate::native_shuffleplanes::apply(filter,frame,depth)?;}
+        if let Some(filter) = &self.lutyuv {filter.apply(frame,depth,full_range).map_err(|e|invalid(&e))?;}
         Ok(())
     }
 }
@@ -269,7 +276,8 @@ mod monochrome_tests {
             };
             assert!(crate::native_media::supports_video_request(&request));
             let lossless = crate::media_info::LosslessTransform {
-                monochrome: request.monochrome.clone(),
+                lutyuv: request.lutyuv.as_deref().map(fvid_media::owned_lutyuv::LutYuv::parse).transpose().map_err(|e| invalid(&e))?,
+            monochrome: request.monochrome.clone(),
                 ..Default::default()
             };
             assert!(crate::native_lossless::supports(&lossless));
