@@ -13,6 +13,8 @@ cargo run --release --no-default-features --features player -- play --start-time
 `fvid::media` доступен без feature `media`; собственные маршруты чтения,
 декодирования, преобразования, экспорта и remux доступны через общий API.
 Их acceptance-тесты запускаются с `--no-default-features` без libav.
+Sobel, Prewitt, Roberts, Kirsch и Scharr вычисляют постоянные выражения
+для `scale` и `delta` собственным parser/evaluator, включая `PI` и арифметику.
 Feature `media` пока включает legacy backend для ещё не перенесённых операций;
 `mcp` и `media-cuda` также сохраняют эту зависимость. Полное удаление FFmpeg
 из production ещё не завершено.

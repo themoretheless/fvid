@@ -202,17 +202,18 @@ fn hevc_main10_pipeline_retains_depth() {
     );
 }
 
-#[cfg(feature = "media")]
 #[test]
-fn unmigrated_expression_options_keep_existing_media_support() {
+fn constant_expression_options_use_owned_media_support() {
     let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/video.mp4");
     let request = fvid::media_info::DecodeTransform {
         sobel: Some("scale=PI".into()),
         ..Default::default()
     };
-    assert!(fvid::native_media::decode_video_request(&path, &request).is_err());
+    let native = fvid::native_media::decode_video_request(&path, &request).unwrap();
+    assert_eq!(native.backend, "fvid");
     let actual = fvid::media::decode_video_transformed(&path, request).unwrap();
-    assert!(actual.video_frames > 0);
+    assert_eq!(actual.backend, "fvid");
+    assert_eq!(actual.video_frames, native.video_frames);
     let output = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
         .args([
             "media",
@@ -228,4 +229,22 @@ fn unmigrated_expression_options_keep_existing_media_support() {
         "{}",
         String::from_utf8_lossy(&output.stderr)
     );
+}
+
+#[test]
+fn owned_constant_gradient_expressions_preserve_pixels_and_validation() {
+    for kind in KINDS {
+        for depth in [8, 10, 16] {
+            let mut expression = frame(depth);
+            let mut literal = frame(depth);
+            Gradient::parse(kind, "planes=7:scale=1/8:delta=2^3")
+                .unwrap().apply(&mut expression, depth).unwrap();
+            Gradient::parse(kind, "7:0.125:8")
+                .unwrap().apply(&mut literal, depth).unwrap();
+            assert_eq!(expression.data, literal.data);
+        }
+        for invalid in ["scale=n", "scale=1/0", "scale=-1", "delta=65536"] {
+            assert!(Gradient::parse(kind, invalid).is_err(), "{invalid}");
+        }
+    }
 }

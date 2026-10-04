@@ -26,8 +26,8 @@ pub struct Gradient {
     delta: f32,
 }
 impl Gradient {
-    /// Literal `planes:scale:delta` or named options. Numeric expressions are
-    /// not evaluated here; the full media adapter retains its expression path.
+    /// `planes:scale:delta` or named options, with owned constant expressions
+    /// for scale and delta.
     pub fn parse(kind: GradientKind, args: &str) -> Result<Self> {
         let mut result = Self {
             kind,
@@ -64,9 +64,8 @@ impl Gradient {
                     result.planes = parsed;
                 }
                 "scale" | "delta" => {
-                    let number = value
-                        .parse::<f32>()
-                        .map_err(|_| invalid("gradient options require numeric literals"))?;
+                    let number = gradient_constant(value)
+                        .map_err(|_| invalid("gradient options require constant numeric expressions"))? as f32;
                     let lower = if key.trim() == "scale" { 0.0 } else { -65535.0 };
                     if !number.is_finite() || !(lower..=65535.0).contains(&number) {
                         return Err(invalid("gradient option outside supported range"));
