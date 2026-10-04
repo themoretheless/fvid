@@ -3751,3 +3751,11 @@ frame APIs require explicit clock evaluation for temporal configurations. WebM
 uses the reader timeline relative to its first displayed frame. The benchmark
 now checks 120 exact pixel pairs, including 42 time-based RGB/YUV cases at 25 and
 30000/1001 fps. Ordinary regression tests use generated Y4M inputs and no FFmpeg.
+
+Fade duration options additionally accept `s`, `ms` and `us` suffixes, optional
+leading `+`, and longer decimal fractions. The owned parser uses checked integer
+microseconds and discards sub-microsecond precision; it does not invoke libavutil.
+Public root/direct-library exports and CLI decode are qualified by synthetic
+numeric acceptance. HH:MM:SS option syntax still requires separate migration.
+The explicit fade benchmark includes these forms at both qualified frame rates;
+its time parsing oracle is [av_parse_time](https://github.com/FFmpeg/FFmpeg/blob/master/libavutil/parseutils.c).

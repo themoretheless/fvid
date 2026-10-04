@@ -144,12 +144,7 @@ impl Fade {
                 }
                 "start_time" | "st" | "duration" | "d" => {
 
-                    let text = if value.starts_with('.') {
-                        format!("0{value}")
-                    } else {
-                        value.to_owned()
-                    };
-                    let number = fvid_media_info::parse_time(&text)? as u64;
+                    let number = parse_control_time(value)?;
                     if matches!(name.trim(), "start_time" | "st") {
                         result.start_us = number;
                     } else {
@@ -470,5 +465,55 @@ impl Fade {
             }
         }
         Ok(())
+    }
+}
+
+/// Filter durations use integer microseconds; precision below a microsecond is
+/// discarded, including fractional microsecond suffix values.
+fn parse_control_time(text: &str) -> Result<u64> {
+    let (number, scale, digits) = if let Some(number) = text.strip_suffix("ms") {
+        (number, 1_000u64, 3usize)
+    } else if let Some(number) = text.strip_suffix("us") {
+        (number, 1u64, 0usize)
+    } else {
+        (text.strip_suffix('s').unwrap_or(text), 1_000_000u64, 6usize)
+    };
+    let number = number.strip_prefix('+').unwrap_or(number);
+    let (whole, fraction) = number.split_once('.').unwrap_or((number, ""));
+    if number.is_empty() || number == "."
+        || !whole.bytes().all(|b| b.is_ascii_digit())
+        || !fraction.bytes().all(|b| b.is_ascii_digit())
+    {
+        return Err("fade time must be nonnegative seconds, milliseconds or microseconds".into());
+    }
+    let whole = if whole.is_empty() { 0 } else {
+        whole.parse::<u64>().map_err(|_| "fade time overflow")?
+    };
+    let used = fraction.len().min(digits);
+    let fraction = if used == 0 { 0 } else {
+        fraction[..used].parse::<u64>().map_err(|_| "invalid fade time fraction")?
+            * 10u64.pow((digits - used) as u32)
+    };
+    whole.checked_mul(scale).and_then(|v| v.checked_add(fraction))
+        .filter(|&v| v <= i64::MAX as u64)
+        .ok_or_else(|| "fade time overflow".into())
+}
+
+#[cfg(test)]
+mod duration_tests {
+    use super::parse_control_time;
+    #[test]
+    fn units_precision_and_checked_bounds() {
+        for (text, expected) in [
+            ("0.1s",100000), ("100ms",100000), ("100000us",100000),
+            ("+100.9999ms",100999), ("1.9us",1), ("0.1000009",100000),
+            (".1",100000), ("1.",1000000),
+            ("9223372036854775807us",i64::MAX as u64),
+            ("9223372036854.775807s",i64::MAX as u64),
+        ] { assert_eq!(parse_control_time(text).unwrap(),expected,"{text}"); }
+        for text in ["", ".", "s", "ms", "-1us", "1e3", "NaN", "1.2.3", "1m", "1MS",
+            "9223372036854775808us", "9223372036854.775808s", "18446744073709551615s"] {
+            assert!(parse_control_time(text).is_err(),"{text}");
+        }
     }
 }

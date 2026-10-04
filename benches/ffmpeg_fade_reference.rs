@@ -178,6 +178,11 @@ fn main() {
                 "out:st=0.1:n=2",
                 "in:d=0.000001",
                 "out:s=1:st=0.02:n=3",
+                "out:s=1:d=100ms",
+                "out:st=100000us:d=0.1s",
+                "in:st=50.9999ms:d=120.9999ms",
+                "in:d=0.1000009",
+                "out:d=1.9us",
             ] {
                 let fade = fvid_media::owned_fade::FadeClock::parse(args).unwrap();
                 let (sub, depth) = if format == "rgb24" {

@@ -301,3 +301,11 @@ rounding in the source quantum, filtering discarded framestep inputs, and
 retained timestamps/durations. A separate state test verifies rewind and explicit
 missing/changed clock refusal. Time options previously failed own-filter admission;
 these tests now require successful playback/export rather than refusal.
+
+`duration_units_use_owned_stream_exports_and_cli` reuses the nine-frame
+`fade-time-25.y4m` synthetic reproducer for previously refused duration syntax:
+100ms, 100000us, 0.1s and equivalent longer decimal fractions. Acceptance compares
+every root/direct-library FFV1 frame against stored numeric values and requires
+CLI decode success without a legacy feature. Parser tests distinguish malformed
+units, negative values and overflow from accepted precision truncation. No new
+private material or external fixture generator is involved.

@@ -522,3 +522,29 @@ fn time_fade_stream_state_errors_and_rewind_are_explicit() {
     );
     assert_eq!(rgb, [255; 3]);
 }
+#[test]
+fn duration_units_use_owned_stream_exports_and_cli() {
+    let source = fixture("playback-errors/fade-time-25.y4m");
+    let expected = [(64,100,150),(72,100,150),(59,109,143),(40,119,135),
+        (16,128,128),(16,128,128),(16,128,128),(16,128,128),(16,128,128)];
+    for (case, args) in ["out:s=1:d=100ms", "out:s=1:d=100000us", "out:s=1:d=0.1s",
+        "out:s=1:d=0.1000009", "out:s=1:d=100.0009ms"].iter().enumerate() {
+        for library in [false,true] {
+            let output = std::env::temp_dir().join(format!("fvid-duration-units-{}-{case}-{library}.mkv", std::process::id()));
+            let transform = LosslessTransform {fade:Some((*args).into()), ..Default::default()};
+            let stats = if library { fvid_media::transcode_lossless(&source,&output,transform,&CopyOptions::default()) }
+                else { fvid::media::transcode_lossless(&source,&output,transform,&CopyOptions::default()) }.unwrap();
+            assert_eq!(stats.backend,"fvid");assert_eq!(stats.video_frames,9);
+            let mut reader = NativeReader::software(Cursor::new(std::fs::read(&output).unwrap()),usize::MAX).unwrap();
+            for (y,u,v) in expected {
+                let frame = reader.read_frame_raw().unwrap().unwrap();
+                assert_eq!(VideoGeometry::default().apply(&frame,4,4).unwrap().data,
+                    [vec![y;16],vec![u;4],vec![v;4]].concat(),"{args} library={library}");
+            }
+            assert!(reader.read_frame_raw().unwrap().is_none());std::fs::remove_file(output).unwrap();
+        }
+        let result = std::process::Command::new(env!("CARGO_BIN_EXE_fvid"))
+            .args(["media","decode"]).arg(&source).args(["--fade",args]).output().unwrap();
+        assert!(result.status.success(),"{}",String::from_utf8_lossy(&result.stderr));
+    }
+}
