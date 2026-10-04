@@ -4099,3 +4099,30 @@ Codec routing acceptance uses the root API for AVC/HEVC/VP9/AV1. Standalone
 `fvid-media` dispatch currently accepts Y4M/FFV1; other native codec dispatch there
 remains an explicit refusal, not a qualified acceptance. Both decode APIs accept
 coupled FFV1 sources produced by the owned export.
+
+### Owned perspective mapping
+
+`perspective` now runs through root/library decode and FFV1 export and the native
+CLI, after fade in the existing option order. An owned projective solver maps the
+four source/destination corners. Linear and cubic interpolation use quantized
+coordinates and clamped borders; chroma planes share the full-image projection
+with their subsampling. Options include all eight coordinates, positional
+arguments, source/destination sense, init/frame evaluation and timeline enable.
+`W`, `H`, `in` and `on` are evaluated by the owned scalar expression parser. Init
+maps are reused across frames and rewind; frame evaluation uses the input clock.
+
+264 complete four-frame explicit reference comparisons qualify 8-bit gray,
+YUV/YUVA, planar GBR/GBRA and packed RGB/RGBA, including tiny/odd frames, external
+corners, subpixel translation and both interpolation modes. Saved synthetic
+expectations cover the two interpolations, inverse sense and per-frame expressions.
+Ordinary tests use them without FFmpeg or network access. Precision 9..16 is an
+owned extension: independent half-sample expectations and a 16-bit export round
+trip qualify it; the reference filter accepts only 8-bit layouts, so this is not
+high-depth legacy equivalence. A partial-pivot solve and wide sample sums avoid
+unsafe matrix conversion or narrow arithmetic. Singular/nonfinite corners and
+out-of-range projection coordinates are rejected before modifying pixels; their
+refusal tests do not claim acceptance of undefined geometry.
+
+Root codec-routing acceptance includes AVC/HEVC/VP9/AV1; standalone `fvid-media`
+remains limited to Y4M/FFV1 dispatch. Other production operations and media/CUDA
+features still require legacy migration before full FFmpeg independence is proven.

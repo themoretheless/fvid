@@ -36,6 +36,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
     if transform.sab.as_deref().is_some_and(|a|crate::owned_sab::Sab::parse(a).is_err()) {return false;}
     if transform.bitplanenoise.as_deref().is_some_and(|a|crate::owned_bitplanenoise::BitPlaneNoise::parse(a).is_err()) {return false;}
     if transform.deband.as_deref().is_some_and(|a|crate::owned_deband::Deband::parse(a).is_err()) {return false;}
+    if transform.perspective.as_deref().is_some_and(|a|crate::owned_perspective::Perspective::parse(a).is_err()) {return false;}
     if transform.gradfun.as_deref().is_some_and(|a|crate::owned_gradfun::GradFun::parse(a).is_err()) {return false;}
     if transform.lenscorrection.as_deref().is_some_and(|a|crate::owned_lenscorrection::LensCorrection::parse(a).is_err()) {return false;}
     if transform.drawbox.as_deref().is_some_and(|a|crate::owned_draw::Draw::box_filter(a).is_err()) {return false;}
@@ -149,6 +150,7 @@ pub(crate) fn supported_request(transform: &DecodeTransform) -> bool {
                 sab: transform.sab.clone(),
                 bitplanenoise: transform.bitplanenoise.clone(),
                 deband: transform.deband.clone(),
+                perspective: transform.perspective.clone(),
                 gradfun: transform.gradfun.clone(),
                 lenscorrection: transform.lenscorrection.clone(),
                 drawbox: transform.drawbox.clone(),
@@ -555,6 +557,7 @@ pub(crate) fn apply_pixel_filters_clock(
         || transform.sab.is_some()
         || transform.bitplanenoise.is_some()
         || transform.deband.is_some()
+        || transform.perspective.is_some()
         || transform.gradfun.is_some()
         || transform.lenscorrection.is_some()
         || transform.drawbox.is_some()
@@ -780,6 +783,10 @@ pub(crate) fn apply_pixel_filters_clock(
                     crate::owned_fade::Fade::parse(args)?
                 };
                 filter.apply_colour(&mut frame,header.depth(),header.full_range()?,matrix,n)?;}
+            if let Some(args)=transform.perspective.as_deref() {
+                if let Some(filter)=history.and_then(|h|h.perspective.as_ref()){filter.apply(&mut frame,header.depth(),n,t)?;}
+                else {crate::owned_perspective::Perspective::parse(args)?.apply(&mut frame,header.depth(),n,t)?;}
+            }
             Ok(())
         })();
         *output = frame.data;
@@ -1093,6 +1100,7 @@ fn decode_reader_frames(
         || transform.sab.is_some()
         || transform.bitplanenoise.is_some()
         || transform.deband.is_some()
+        || transform.perspective.is_some()
         || transform.gradfun.is_some()
         || transform.lenscorrection.is_some()
         || transform.drawbox.is_some()

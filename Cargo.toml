@@ -280,3 +280,7 @@ harness = false
 [[bench]]
 name = "ffmpeg_deband_reference"
 harness = false
+
+[[bench]]
+name = "ffmpeg_perspective_reference"
+harness = false

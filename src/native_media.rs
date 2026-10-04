@@ -568,6 +568,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
     if transform.sab.as_deref().is_some_and(|a| fvid_media::owned_sab::Sab::parse(a).is_err()) {return false;}
     if transform.bitplanenoise.as_deref().is_some_and(|a| fvid_media::owned_bitplanenoise::BitPlaneNoise::parse(a).is_err()) {return false;}
     if transform.deband.as_deref().is_some_and(|a| fvid_media::owned_deband::Deband::parse(a).is_err()) {return false;}
+    if transform.perspective.as_deref().is_some_and(|a| fvid_media::owned_perspective::Perspective::parse(a).is_err()) {return false;}
     if transform.gradfun.as_deref().is_some_and(|a| fvid_media::owned_gradfun::GradFun::parse(a).is_err()) {return false;}
     if transform.lenscorrection.as_deref().is_some_and(|a| fvid_media::owned_lenscorrection::LensCorrection::parse(a).is_err()) {return false;}
     if transform.drawbox.as_deref().is_some_and(|a| fvid_media::owned_draw::Draw::box_filter(a).is_err()) {return false;}
@@ -617,6 +618,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         sab: _,
         bitplanenoise: _,
         deband: _,
+        perspective: _,
         gradfun: _,
         lenscorrection: _,
         removegrain: _,
@@ -650,7 +652,6 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         lutyuv: _,
         colorhold: _,
         fade: _,
-        perspective: None,
         lumakey: None,
         chromakey: None,
         colorkey: None,

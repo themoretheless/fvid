@@ -1168,6 +1168,13 @@ fn pixel_decode_args(
             else {result.push(arg.clone());result.push(value.clone());}
             continue;
         }
+        if arg == "--perspective" {
+            let value=args.next().ok_or("missing perspective options")?;
+            if filters.perspective.is_some() {return Err("duplicate perspective".into());}
+            if let Ok(filter)=fvid_media::owned_perspective::Perspective::parse(value) {filters.perspective=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
         if arg == "--gradfun" {
             let value=args.next().ok_or("missing gradfun options")?;
             if filters.gradfun.is_some() {return Err("duplicate gradfun".into());}
@@ -4955,6 +4962,10 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--deband" => {
                 if transform.deband.is_some() {return Err("duplicate deband".into());}
                 &mut transform.deband
+            },
+            "--perspective" => {
+                if transform.perspective.is_some() {return Err("duplicate perspective".into());}
+                &mut transform.perspective
             },
             "--gradfun" => {
                 if transform.gradfun.is_some() {return Err("duplicate gradfun".into());}

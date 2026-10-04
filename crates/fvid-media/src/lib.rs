@@ -32,6 +32,7 @@ pub mod owned_smartblur;
 pub mod owned_sab;
 pub mod owned_bitplanenoise;
 pub mod owned_deband;
+pub mod owned_perspective;
 pub mod owned_gradfun;
 pub mod owned_lenscorrection;
 pub mod owned_draw;

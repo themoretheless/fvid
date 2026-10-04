@@ -758,3 +758,15 @@ SHA256:
 - `deband-small.y4m`: `e32f837192b6924ee95adc93f1b2a1db5ff59a043f8f63ea6b7867862af74a13`
 - `deband-strong.expected.raw`: `7d5ff3e413dd6676e490f9d5c4d1f3f8e59824e56233814f80db9dcb78aeace2`
 - `deband.y4m`: `1f4ed15d6d43d81eadb89cfa298e5ce0f0307f7290a31cbecb1e4edacfe4644c`
+
+### Perspective projection
+
+`generate-perspective.py` creates four coordinate/component ramps at 25 fps, with odd 4:2:0, full-resolution 16-bit and tiny geometry, using Python alone. `ffmpeg_perspective_reference` separately qualified 264 complete four-frame comparisons and saved linear/cubic/source-destination/frame-expression outputs after own-kernel comparison. Reference definitions: https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavfilter/vf_perspective.c . No private media or codec parameter sets are used. Tests never run generators or FFmpeg. Init/frame evaluation, rewind, source timeline before frame selection and both owned FFV1 exports have acceptance tests. High precision uses an independent half-sample model instead of an unsupported legacy-format oracle. Singular/nonfinite/unrepresentable projections have explicit transactional refusal tests, not playback acceptance claims.
+
+- `perspective-cubic.expected.raw`: `7200d14aa0bf4fce2fb0adc1040838d00b9d1eef347087938160a1b3c5e4bf18`
+- `perspective-depth.y4m`: `306c4c19648860af2ee85d91bb773eb5b652649f6146d248bf47f07a5fefe691`
+- `perspective-destination.expected.raw`: `afc3e4eb02bfc8af77f0df66bd911aca381fc4d12ae6a59aad410a52b7450b0d`
+- `perspective-frame.expected.raw`: `706d1c07f839d503751159e47405399db8556dff5075b1ebe4476a941046cb25`
+- `perspective-linear.expected.raw`: `686e122686d9520f6d58a4e67c658ff415e8f6b2e5c387fced8af0affd22325c`
+- `perspective-small.y4m`: `e32f837192b6924ee95adc93f1b2a1db5ff59a043f8f63ea6b7867862af74a13`
+- `perspective.y4m`: `1f4ed15d6d43d81eadb89cfa298e5ce0f0307f7290a31cbecb1e4edacfe4644c`

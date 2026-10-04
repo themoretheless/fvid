@@ -48,6 +48,7 @@ pub struct PixelFilters {
     pub sab: Option<fvid_media::owned_sab::Sab>,
     pub bitplanenoise: Option<fvid_media::owned_bitplanenoise::BitPlaneNoise>,
     pub deband: Option<fvid_media::owned_deband::Deband>,
+    pub perspective: Option<fvid_media::owned_perspective::Perspective>,
     pub gradfun: Option<fvid_media::owned_gradfun::GradFun>,
     pub lenscorrection: Option<fvid_media::owned_lenscorrection::LensCorrection>,
     pub drawbox: Option<fvid_media::owned_draw::Draw>,
@@ -99,6 +100,7 @@ impl PixelFilters {
             sab: request.sab.as_deref().map(fvid_media::owned_sab::Sab::parse).transpose().map_err(|e|invalid(&e))?,
             bitplanenoise: request.bitplanenoise.as_deref().map(fvid_media::owned_bitplanenoise::BitPlaneNoise::parse).transpose().map_err(|e|invalid(&e))?,
             deband: request.deband.as_deref().map(fvid_media::owned_deband::Deband::parse).transpose().map_err(|e|invalid(&e))?,
+            perspective: request.perspective.as_deref().map(fvid_media::owned_perspective::Perspective::parse).transpose().map_err(|e|invalid(&e))?,
             gradfun: request.gradfun.as_deref().map(fvid_media::owned_gradfun::GradFun::parse).transpose().map_err(|e|invalid(&e))?,
             lenscorrection: request.lenscorrection.as_deref().map(fvid_media::owned_lenscorrection::LensCorrection::parse).transpose().map_err(|e|invalid(&e))?,
             drawbox: request.drawbox.as_deref().map(fvid_media::owned_draw::Draw::box_filter).transpose().map_err(|e|invalid(&e))?,
@@ -207,6 +209,7 @@ impl PixelFilters {
             && self.sab.is_none()
             && self.bitplanenoise.is_none()
             && self.deband.is_none()
+            && self.perspective.is_none()
             && self.gradfun.is_none()
             && self.lenscorrection.is_none()
             && self.drawbox.is_none()
@@ -365,6 +368,7 @@ impl PixelFilters {
             evaluated
                 .apply_colour(frame,depth,full_range,matrix_code,n).map_err(|e|invalid(&e))?;
             self.fade_state.set(state); }
+        if let Some(filter)=&self.perspective {filter.apply(frame,depth,n,t).map_err(|e|invalid(&e))?;}
         Ok(())
     }
 }
