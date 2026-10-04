@@ -1146,6 +1146,13 @@ fn pixel_decode_args(
             else {result.push(arg.clone());result.push(value.clone());}
             continue;
         }
+        if arg == "--gradfun" {
+            let value=args.next().ok_or("missing gradfun options")?;
+            if filters.gradfun.is_some() {return Err("duplicate gradfun".into());}
+            if let Ok(filter)=fvid_media::owned_gradfun::GradFun::parse(value) {filters.gradfun=Some(filter);}
+            else {result.push(arg.clone());result.push(value.clone());}
+            continue;
+        }
         if arg == "--smartblur" {
             let value=args.next().ok_or("missing smartblur options")?;
             if filters.smartblur.is_some() {return Err("duplicate smartblur".into());}
@@ -4887,6 +4894,10 @@ fn owned_lossless_command(args: &[String]) -> Result<bool, Box<dyn std::error::E
             "--bitplanenoise" => {
                 if transform.bitplanenoise.is_some() {return Err("duplicate bitplanenoise".into());}
                 &mut transform.bitplanenoise
+            },
+            "--gradfun" => {
+                if transform.gradfun.is_some() {return Err("duplicate gradfun".into());}
+                &mut transform.gradfun
             },
             "--smartblur" => {
                 if transform.smartblur.is_some() {return Err("duplicate smartblur".into());}

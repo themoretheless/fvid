@@ -31,6 +31,7 @@ pub mod owned_vignette;
 pub mod owned_smartblur;
 pub mod owned_sab;
 pub mod owned_bitplanenoise;
+pub mod owned_gradfun;
 pub mod owned_colorcorrect;
 pub mod owned_cas;
 pub mod owned_grayworld;

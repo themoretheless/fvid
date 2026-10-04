@@ -3983,3 +3983,25 @@ The legacy CLI's duplicate SAB/SmartBlur match arms referencing an unavailable
 transform were removed; both native and legacy feature configurations compile.
 The production `media` and `media-cuda` features still contain legacy libav
 workflows. This migration does not establish whole-project independence.
+
+`gradfun` now runs in owned decode, Y4M export and FFV1 lossless export, after
+bitplanenoise and before pixelize. `owned_gradfun::GradFun` uses sliding box sums,
+thresholded detail preservation and an arithmetic Bayer dither. Strength/radius,
+positional options, even-radius normalization, chroma radius and timeline enable
+are supported. Scratch history is retained across planes/frames where the legacy
+2r+1-row behavior depends on it; n=0 resets history, including disabled rewind.
+Planar YUV8 is qualified for all six layouts. Standalone gray8/planar GBR8 are
+also qualified; packed RGB8 and scaled 9–16-bit integer arithmetic are owned
+extensions, not a claim of legacy format negotiation equivalence.
+
+The explicit `ffmpeg_gradfun_reference` benchmark passed 328 complete four-frame
+pixel comparisons across small/odd/large dimensions, threshold/radius boundaries,
+all planar layouts, grayscale/GBR and timeline enable. Eight further cases prove
+32-bit signed overflow in the legacy 9x9/radius4/minimum-strength path using an
+independent wrapping-arithmetic model. FVid uses wide arithmetic instead: the
+first differing synthetic sample stays 174 rather than overflowing to 255.
+These safe results are acceptance tests for the owned correction, separately
+identified from exact legacy matches. Stored 65x65/radius32 and 9x9 fixtures
+prevent a fresh-scratch approximation or a no-op from passing unnoticed. General
+library/filter/CLI tests and player/dependency checks remain FFmpeg-free; the
+optional production media/CUDA adapter still needs further migration.

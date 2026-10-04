@@ -33,7 +33,7 @@ pub fn capabilities() -> Capabilities {
         ]),
         encoders: names(&["ass", "ffv1", "pcm_f32le", "rawvideo"]),
         filters: names(&[
-            "bitplanenoise", "sab", "smartblur", "vignette", "curves", "hqdn3d", "tmix", "lagfun", "fade",
+            "gradfun", "bitplanenoise", "sab", "smartblur", "vignette", "curves", "hqdn3d", "tmix", "lagfun", "fade",
             "gblur",
             "bilateral",
             "avgblur",

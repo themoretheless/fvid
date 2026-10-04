@@ -585,3 +585,36 @@ SHA-256:
 - `bitplanenoise.y4m`: `a4dac6e971dd3f192494a7a96ec4bddc64513d74fc7077d1b981d4adc9f6be04`
 - `bitplanenoise.expected.raw`: `4cf9816ed1062189ff0c8d427fba5e912cc68fc9af76cf7f08fd255977de3b33`
 - `bitplanenoise.expected.txt`: `dd98b27da3f7208d300802586d0e2eefb6f344a5a03756613d911fa9ae9cc39f`
+
+## Owned gradfun
+
+`generate-gradfun.py` creates four frames per file using `(37*i + 23*n + 101)
+% 256`: 96x80 YUV420 (`gradfun.y4m`), 65x65 YUV444 (`gradfun-edge.y4m`),
+9x9 YUV444 (`gradfun-overflow.y4m`) and 1x1 YUV420 (`gradfun-small.y4m`).
+There is no private media. Generation is separate from ordinary tests.
+
+The explicit `ffmpeg_gradfun_reference` benchmark saved default/strong/edge
+expected bytes only after exact owned/reference equality. The edge fixture
+reproduces the cross-plane/frame scratch-state dependency at height 2r+1.
+`gradfun-overflow-legacy.expected.raw` reproduces the signed 32-bit overflow
+with an independent wrapping model; `gradfun-overflow-safe.expected.raw` stores
+the owned wide-arithmetic correction, NOT reference-equivalent playback.
+Sample 85 stays 174 with owned arithmetic, versus 255 after legacy overflow.
+Both overflow reproduction and intended safe acceptance are checked explicitly.
+
+Tests cover rewind, clip clocks before framestep, both lossless APIs, Y4M/FFV1
+sources, CLI decode/Y4M/FFV1 export and existing synthetic AVC/HEVC/VP9/AV1
+routes. Small-frame passthrough, high-depth flat fields and invalid storage
+are separate acceptance/refusal tests. No ordinary test invokes FFmpeg/network.
+
+SHA-256:
+
+- `gradfun.y4m`: `fd8880f23d60c2500ffdd17185ac8bd283c2c13fb68af19f8f98495a55e432c7`
+- `gradfun-edge.y4m`: `be15e8f81ba3fd69d20f726399e62fe3619e6ec2225a729298d324e23b6278b1`
+- `gradfun-overflow.y4m`: `9e271be4e1283fc7fd687c8672c3c046b3dfac52d2183e6a52d1580d4552664b`
+- `gradfun-small.y4m`: `589c21477e12ea09c0025900d303ed4b3dfe2b339f28b316d9738a55d19bddde`
+- `gradfun-default.expected.raw`: `2929680c57e5a67a7d9e207320b5694c4a9e85c725ea919ecf7d5e9bfa95a866`
+- `gradfun-strong.expected.raw`: `c6d80f87a1c3e1d2998e776a15fe529305d0cf71aa9d78efa524bc056819d80f`
+- `gradfun-edge.expected.raw`: `f16d59b00fd32872b244c40e9ead88386a2258c323bb525d6aa1443cc61fcb63`
+- `gradfun-overflow-safe.expected.raw`: `6a5b5652a183636852dc1b5805dd7d20778929598fdfaa406e18e334ec959447`
+- `gradfun-overflow-legacy.expected.raw`: `28aa7be7a5426a0618701c84fc16f7338e457a6194e4b78dec595bc84e903aea`

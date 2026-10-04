@@ -567,6 +567,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
     if transform.smartblur.as_deref().is_some_and(|a| fvid_media::owned_smartblur::SmartBlur::parse(a).is_err()) {return false;}
     if transform.sab.as_deref().is_some_and(|a| fvid_media::owned_sab::Sab::parse(a).is_err()) {return false;}
     if transform.bitplanenoise.as_deref().is_some_and(|a| fvid_media::owned_bitplanenoise::BitPlaneNoise::parse(a).is_err()) {return false;}
+    if transform.gradfun.as_deref().is_some_and(|a| fvid_media::owned_gradfun::GradFun::parse(a).is_err()) {return false;}
     if transform.hqdn3d.as_deref().is_some_and(|a| fvid_media::owned_hqdn3d::HqDn3d::parse(a).is_err()) {return false;}
     if transform.boxblur.as_deref().is_some_and(|args| crate::native_boxblur::BoxBlurProgram::parse(args).is_err()) { return false; }
     matches!(transform, DecodeTransform {
@@ -609,6 +610,7 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         smartblur: _,
         sab: _,
         bitplanenoise: _,
+        gradfun: _,
         bilateral: _,
         cas: _,
         vignette: _,
@@ -625,7 +627,6 @@ pub(crate) fn supports_video_request(transform: &DecodeTransform) -> bool {
         lagfun: _,
         amplify: None,
         deband: None,
-        gradfun: None,
         lenscorrection: None,
         pixelize: _,
         removegrain: None,
