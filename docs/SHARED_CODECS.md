@@ -372,3 +372,20 @@ acceptance checks the two blanks, duplicated source frame, six-second endpoint
 and event-count refusal. Four shared-clock tests and three native-input tests
 pass without hardware or external tools. Hardware rendering/export remains
 unexecuted and production CUDA migration is incomplete.
+
+
+## Device black frames for empty movie spans
+
+Owned NV12 outputs can now fill black directly with stream-ordered CUDA memset:
+limited range uses Y=16, full range Y=0, and both use neutral interleaved UV=128.
+Both complete pitched planes, including padding, are covered. The operation
+synchronizes before returning and performs no host pixel allocation/upload.
+
+An ignored NVIDIA test downloads the synthetic result only for qualification,
+checking every Y/UV/padding byte in both ranges. The existing qualification
+runner now requires this test. Three host layout/admission tests and Linux/
+Windows test compilation pass; the physical fill test remains unexecuted here.
+
+This supplies the black-frame primitive needed by the existing synthetic
+empty-edit timeline fixture. The movie event rendering/export loop still needs
+to connect it, and production CUDA still has the legacy backend.

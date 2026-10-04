@@ -1,7 +1,7 @@
 //! Owned CUDA NV12 output allocation for direct codec/filter pipelines.
 use crate::Nv12View;
 #[cfg(any(target_os = "linux", target_os = "windows"))]
-use cudarc::driver::DevicePtr;
+use cudarc::driver::{DevicePtr, DevicePtrMut};
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 use std::sync::Arc;
 
@@ -42,6 +42,45 @@ impl Nv12Buffer {
         #[cfg(not(any(target_os = "linux", target_os = "windows")))]
         {
             let _ = (pitch, bytes);
+            Err(crate::unsupported())
+        }
+    }
+
+    /// Fill both pitched planes on the device. Limited black uses Y=16;
+    /// full-range black uses Y=0. Chroma is neutral 128 in both cases.
+    /// Synchronizes before returning so direct codec registration sees completed
+    /// writes. No host pixel allocation/upload is performed.
+    pub fn fill_black(&mut self, full_range: bool) -> Result<(), String> {
+        #[cfg(any(target_os = "linux", target_os = "windows"))]
+        {
+            self.device
+                .context
+                .bind_to_thread()
+                .map_err(|e| e.to_string())?;
+            let (y_bytes, uv_bytes) = plane_bytes(self.pitch, self.height)?;
+            let (pointer, _guard) = self.buffer.device_ptr_mut(&self.stream);
+            let uv = pointer
+                .checked_add(y_bytes as u64)
+                .ok_or("CUDA black UV pointer overflow")?;
+            // SAFETY: Owned u8 allocation has both checked plane extents;
+            // writes use the allocation's own live stream. The mutable pointer
+            // guard records completion before later cudarc users observe it.
+            unsafe {
+                cudarc::driver::result::memset_d8_async(
+                    pointer,
+                    if full_range { 0 } else { 16 },
+                    y_bytes,
+                    self.stream.cu_stream(),
+                )
+                .map_err(|e| e.to_string())?;
+                cudarc::driver::result::memset_d8_async(uv, 128, uv_bytes, self.stream.cu_stream())
+                    .map_err(|e| e.to_string())?;
+            }
+            self.stream.synchronize().map_err(|e| e.to_string())
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+        {
+            let _ = full_range;
             Err(crate::unsupported())
         }
     }
@@ -93,13 +132,29 @@ impl Nv12Buffer {
         }
     }
 }
+fn plane_bytes(pitch: u32, height: u32) -> Result<(usize, usize), String> {
+    if pitch == 0 || height == 0 || height % 2 != 0 {
+        return Err("CUDA NV12 planes require nonzero pitch and even height".into());
+    }
+    let y = usize::try_from(u64::from(pitch) * u64::from(height))
+        .map_err(|_| "CUDA Y extent overflow")?;
+    let uv = y / 2;
+    if y.checked_add(uv)
+        .is_none_or(|bytes| bytes > isize::MAX as usize)
+    {
+        return Err("CUDA NV12 plane extent exceeds pointer range".into());
+    }
+    Ok((y, uv))
+}
 fn layout(width: u32, height: u32) -> Result<(u32, usize), String> {
     if width == 0 || height == 0 || width % 2 != 0 || height % 2 != 0 {
         return Err("CUDA NV12 dimensions must be nonzero and even".into());
     }
     let pitch = width.checked_add(255).ok_or("CUDA NV12 pitch overflow")? & !255;
-    let bytes = u64::from(pitch) * (u64::from(height) + u64::from(height) / 2);
-    let bytes = usize::try_from(bytes).map_err(|_| "CUDA NV12 allocation extent overflow")?;
+    let (y, uv) = plane_bytes(pitch, height)?;
+    let bytes = y
+        .checked_add(uv)
+        .ok_or("CUDA NV12 allocation extent overflow")?;
     if bytes > isize::MAX as usize {
         return Err("CUDA NV12 allocation exceeds pointer extent".into());
     }
@@ -125,6 +180,32 @@ fn make_view(pointer: u64, width: u32, height: u32, pitch: u32) -> Result<Nv12Vi
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn black_plane_extents_cover_padding_without_overlapping_chroma() {
+        assert_eq!(plane_bytes(256, 72).unwrap(), (18432, 9216));
+        assert!(plane_bytes(0, 72).is_err());
+        assert!(plane_bytes(256, 71).is_err());
+        assert!(plane_bytes(u32::MAX, u32::MAX - 1).is_err());
+    }
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    #[test]
+    #[ignore = "requires an NVIDIA CUDA device"]
+    fn device_black_fill_has_correct_luma_chroma_and_padding() {
+        let mut output = Nv12Buffer::new(0, 128, 72).unwrap();
+        for full_range in [false, true] {
+            output.fill_black(full_range).unwrap();
+            let bytes = output.stream.clone_dtoh(&output.buffer).unwrap();
+            let (y, uv) = plane_bytes(output.pitch, output.height).unwrap();
+            assert_eq!(bytes.len(), y + uv);
+            assert!(
+                bytes[..y]
+                    .iter()
+                    .all(|value| *value == if full_range { 0 } else { 16 })
+            );
+            assert!(bytes[y..].iter().all(|value| *value == 128));
+        }
+    }
     #[test]
     fn allocation_layout_covers_both_pitched_planes_and_rejects_overflow() {
         assert_eq!(layout(128, 72).unwrap(), (256, 27648));

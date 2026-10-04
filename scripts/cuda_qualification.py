@@ -18,6 +18,9 @@ def require_executed_tests(stdout, minimum, required=()):
 def qualify_native_tests(root, run):
     suites = [
         ("fvid-cuda", "pipeline::tests", ["resident_cuda_shaders_fuse_geometry_and_keep_one_host_roundtrip", "sampling_shader_matches_independent_crop_and_reflection_reference"], []),
+        ("fvid-cuda", "nv12_buffer::tests", [
+            "device_black_fill_has_correct_luma_chroma_and_padding",
+        ], []),
         ("fvid-cuda", "nv12::native_nv12::shader_tests", ["native_nv12_sampling_shader_preserves_pitches_and_matches_cpu", "native_p010_sampling_shader_preserves_pitches_and_matches_cpu", "followed_stream_survives_parameter_changes_and_processor_drop"], []),
         ("fvid-media", "owned_nvdec_avc", [
             "synthetic_owned_avc_picture_decodes_and_maps_on_nvidia",
