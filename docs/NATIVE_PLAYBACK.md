@@ -3517,6 +3517,12 @@ cell averaging by default and exposes both modes explicitly.
 Limited-range conversion represents nominal RGB white as 65280 (`255 << 8`)
 with saturation headroom through 65535. Full-range conversion retains 65535
 as white. Both conversion directions use the matching scale, and tests check
-neutral nominal white at 8/12/16-bit YUV precision. In the synthetic qualification,
-12-bit hard grayscale matches all 51 reference samples exactly; this does not
-establish parity for other selections, depths, matrices or resampling modes.
+neutral nominal white at 8/12/16-bit YUV precision. The point-sampling compatibility path quantizes forward conversion
+coefficients to Q13 before applying source samples. All 81 RGB16 components
+of the first synthetic frames at 8/12/16 bits match the reference exactly;
+committed raw reference planes drive an ordinary acceptance test. This does
+not establish whole-pipeline or general swscale parity. The latest YUV
+qualification still reports maximum deltas 1/1/8 for blended selection and
+1/1/2 for hard grayscale. The prior 12-bit grayscale exact match depended on
+compensating errors between analytical forward and reverse stages; it is no
+longer a current parity claim.

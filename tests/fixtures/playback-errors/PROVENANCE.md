@@ -22,3 +22,13 @@ acceptance requires exact reference parity and must be enabled with the fix.
 The colorhold reproduction additionally requires differences no greater than
 one 8-bit level after point-sampling correction. Exact acceptance remains
 ignored pending coefficient and rounding compatibility.
+
+### colorhold-rgb-stage-{8,12,16}.raw
+
+Each 54-byte RGB16 reference contains the first frame of the corresponding
+committed synthetic `colorize-grid` video, converted by `format=rgba64le`
+with alpha stripped. Generation is explicitly benchmark-only:
+`FVID_WRITE_SYNTHETIC_REFERENCES=1 cargo bench --manifest-path crates/fvid-media/Cargo.toml --no-default-features --bench ffmpeg_colorhold_reference`.
+No private input is used. Ordinary forward-conversion acceptance reads the
+committed files and matches all 81 component samples without FFmpeg/network.
+The full colorhold YUV acceptance remains ignored pending reverse conversion.

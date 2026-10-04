@@ -98,6 +98,14 @@ pub fn filter_rgb16_sampled(
         Matrix::Bt2020 => (0.2627, 0.0593),
     };
     let kg = 1.0 - kr - kb;
+    let quantize = |coefficient: f64| (coefficient * 8192.0).round() / 8192.0;
+    let quantized = [
+        quantize(255.0 / 219.0),
+        quantize(2.0 * (1.0 - kr) * 255.0 / 224.0),
+        quantize(2.0 * (1.0 - kb) * 255.0 / 224.0),
+        quantize(2.0 * kb * (1.0 - kb) * 255.0 / (224.0 * kg)),
+        quantize(2.0 * kr * (1.0 - kr) * 255.0 / (224.0 * kg)),
+    ];
     let mut output = Vec::new();
     output
         .try_reserve_exact(frame.data.len())
@@ -123,6 +131,23 @@ pub fn filter_rgb16_sampled(
                     let r = luma + 2.0 * (1.0 - kr) * v;
                     let b = luma + 2.0 * (1.0 - kb) * u;
                     let g = (luma - kr * r - kb * b) / kg;
+                    let (r, g, b) = if !full && matches!(sampling, ChromaSampling::Point) {
+                        // Compatibility RGB conversion quantizes matrix coefficients
+                        // to 13 fractional bits, before combining source samples.
+                        let raw_y = (read(&frame.data, row * frame.width + col) as f64 - black)
+                            * 256.0
+                            / scale;
+                        let raw_u = (read(&frame.data, y + cell) as f64 - center) * 256.0 / scale;
+                        let raw_v =
+                            (read(&frame.data, y + c + cell) as f64 - center) * 256.0 / scale;
+                        let base = raw_y * quantized[0];
+                        let red = base + raw_v * quantized[1];
+                        let blue = base + raw_u * quantized[2];
+                        let green = base - raw_u * quantized[3] - raw_v * quantized[4];
+                        (red / rgb_white, green / rgb_white, blue / rgb_white)
+                    } else {
+                        (r, g, b)
+                    };
                     for sample in [r, g, b] {
                         rgb.extend_from_slice(
                             &((sample * rgb_white).round().clamp(0.0, 65535.0) as u16)
@@ -264,6 +289,49 @@ mod nominal_range_tests {
                 assert_eq!(calls, 1);
                 assert_eq!(frame.data, original);
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod forward_acceptance_tests {
+    use super::*;
+    #[test]
+    fn quantized_forward_stage_matches_committed_synthetic_rgb_references() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors");
+        for depth in [8, 12, 16] {
+            let bytes = std::fs::read(root.join(format!("colorize-grid-{depth}.y4m"))).unwrap();
+            let start = bytes.iter().position(|v| *v == b'\n').unwrap() + 7;
+            let mut frame = GeometryFrame {
+                width: 3,
+                height: 3,
+                subsampling: Some([2, 2]),
+                data: bytes[start..start + 17 * if depth == 8 { 1 } else { 2 }].to_vec(),
+            };
+            let locations: [&[usize]; 4] = [&[0, 1, 3, 4], &[2, 5], &[6, 7], &[8]];
+            let mut cell = 0;
+            let mut actual = vec![0u8; 54];
+            filter_rgb16_sampled(
+                &mut frame,
+                depth,
+                false,
+                Matrix::Bt601,
+                ChromaSampling::Point,
+                |rgb| {
+                    for (pixel, index) in rgb.chunks_exact(6).zip(locations[cell]) {
+                        actual[index * 6..index * 6 + 6].copy_from_slice(pixel);
+                    }
+                    cell += 1;
+                    Ok(())
+                },
+            )
+            .unwrap();
+            let expected =
+                std::fs::read(root.join(format!("colorhold-rgb-stage-{depth}.raw"))).unwrap();
+            assert_eq!(expected.len(), 54);
+            assert_eq!(actual, expected, "depth={depth}");
+            assert_eq!(cell, 4);
         }
     }
 }
