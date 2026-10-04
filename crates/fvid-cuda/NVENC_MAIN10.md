@@ -17,6 +17,12 @@ P010 row/plane footprints. The ignored NVIDIA test submits four P010 frames and
 drains timestamped encoded packets. It is a driver/resource smoke test; it has
 not run here and does not verify encoded SPS or pixels.
 
-This does not yet enable production Main10 export: the movie encoder still
-needs P010 retained pools/copies, plus an owned HEVC Annex B/configuration writer.
-The production CUDA features still include legacy libav.
+The owned movie encoder now retains typed P010 pools until output is drained,
+uses P010 device copies, and selects Main10 session registration/submission.
+Its owned HEVC Annex B writer builds hvcC and Matroska packets. The production
+MP4-to-Matroska CUDA route admits qualified Main10 and preserves ten-bit output.
+An ignored end-to-end NVIDIA test covers blank/repeated movie occurrences,
+encoded hvcC depth, timestamps and decoding by FVid. It has not run here.
+CPU tests prove bit-exact Annex B conversion on synthetic Main/Main10 I/P/B
+fixtures; they do not prove NVENC output or NVIDIA performance.
+The production CUDA features still include legacy libav for remaining routes.

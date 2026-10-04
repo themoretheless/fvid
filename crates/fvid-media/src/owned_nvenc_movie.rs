@@ -1,8 +1,8 @@
 //! Bounded GPU input ownership for native movie encoding, without libav.
 use crate::owned_nvdec_movie::MovieRenderer;
 use fvid_cuda::{
-    CodecDevice, Nv12Buffer, Nv12Processor, Nv12Transform, NvencCodec, NvencPacket, NvencSession,
-    NvencSubmit,
+    CodecDevice, Nv12Transform, NvencCodec, NvencPacket, NvencSession, NvencSubmit, Yuv420Buffer,
+    Yuv420Processor, Yuv420View,
 };
 use std::{
     collections::VecDeque,
@@ -44,11 +44,11 @@ impl Pool {
 /// Encodes movie occurrences with their original track-clock timestamps.
 /// Each accepted input retains its own GPU allocation until output is drained;
 /// rendering the next event never overwrites an in-flight NVENC input.
-pub struct AvcMovieEncoder<R: Read + Seek> {
+pub struct MovieEncoder<R: Read + Seek> {
     renderer: ManuallyDrop<MovieRenderer<R>>,
     encoder: ManuallyDrop<NvencSession>,
-    copy: ManuallyDrop<Nv12Processor>,
-    buffers: ManuallyDrop<Vec<Nv12Buffer>>,
+    copy: ManuallyDrop<Yuv420Processor>,
+    buffers: ManuallyDrop<Vec<Yuv420Buffer>>,
     handles: Vec<(usize, usize)>,
     pool: Pool,
     eos: bool,
@@ -56,7 +56,9 @@ pub struct AvcMovieEncoder<R: Read + Seek> {
     wait: Duration,
     codec: NvencCodec,
 }
-impl<R: Read + Seek> AvcMovieEncoder<R> {
+/// Compatibility name for callers encoding AVC.
+pub type AvcMovieEncoder<R> = MovieEncoder<R>;
+impl<R: Read + Seek> MovieEncoder<R> {
     pub fn new(
         renderer: MovieRenderer<R>,
         codec: NvencCodec,
@@ -65,19 +67,15 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
         slots: usize,
         wait: Duration,
     ) -> Result<Self, String> {
-        if renderer.buffer().bit_depth() != 8 {
-            return Err(
-                "native movie encoder still requires NV12; P010 pools/HEVC export are pending"
-                    .into(),
-            );
-        }
+        let depth = renderer.buffer().bit_depth();
+        validate_format(codec, depth)?;
         let pool = Pool::new(slots)?;
         if wait.is_zero() {
             return Err("movie encoder wait must be positive".into());
         }
         let ordinal = renderer.ordinal();
         let encoder = NvencSession::open(CodecDevice::new(ordinal)?)?;
-        let copy = Nv12Processor::new(ordinal)?;
+        let copy = Yuv420Processor::new(ordinal, depth, None)?;
         let mut this = Self {
             renderer: ManuallyDrop::new(renderer),
             encoder: ManuallyDrop::new(encoder),
@@ -103,17 +101,31 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
                 matrix: if c.matrix == 0 { 2 } else { c.matrix },
                 full_range: c.full_range,
             });
-        this.encoder
-            .initialize_nv12_with_colour(codec, width, height, fps_num, fps_den, colour)?;
+        if depth == 10 {
+            this.encoder
+                .initialize_p010_with_colour(width, height, fps_num, fps_den, colour)?;
+        } else {
+            this.encoder
+                .initialize_nv12_with_colour(codec, width, height, fps_num, fps_den, colour)?;
+        }
         for _ in 0..slots {
-            this.buffers.push(Nv12Buffer::new(ordinal, width, height)?);
+            this.buffers
+                .push(Yuv420Buffer::new(ordinal, width, height, depth)?);
             let buffer = this.buffers.last().unwrap();
             let view = buffer.view()?;
             // SAFETY: Allocation uses the same primary context and is retained
             // until encoder close succeeds, including construction failures.
             let input = unsafe {
-                this.encoder
-                    .register_nv12(view.y, view.pitch_y, buffer.byte_len() as u64)
+                match view {
+                    Yuv420View::Nv12(view) => {
+                        this.encoder
+                            .register_nv12(view.y, view.pitch_y, buffer.byte_len() as u64)
+                    }
+                    Yuv420View::P010(view) => {
+                        this.encoder
+                            .register_p010(view.y, view.pitch_y, buffer.byte_len() as u64)
+                    }
+                }
             }?;
             let output = this.encoder.create_output()?;
             this.handles.push((input, output));
@@ -178,7 +190,7 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
                     let (width, height) = buffer.dimensions();
                     self.copy.follow_stream(buffer.stream_handle()?);
                     let copied = self.copy.apply(
-                        self.renderer.buffer().nv12_view()?,
+                        self.renderer.buffer().view()?,
                         buffer.view()?,
                         Nv12Transform {
                             out_width: width,
@@ -191,10 +203,15 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
                     copied?;
                     let (input, output) = self.handles[slot];
                     loop {
-                        match self
-                            .encoder
-                            .submit_nv12(input, output, timestamp, duration)?
-                        {
+                        let submitted = match buffer {
+                            Yuv420Buffer::Nv12(_) => {
+                                self.encoder.submit_nv12(input, output, timestamp, duration)
+                            }
+                            Yuv420Buffer::P010(_) => {
+                                self.encoder.submit_p010(input, output, timestamp, duration)
+                            }
+                        }?;
+                        match submitted {
                             NvencSubmit::Busy => wait_until(deadline, cancel)?,
                             NvencSubmit::Ready | NvencSubmit::Queued => {
                                 self.pool.accepted(slot)?;
@@ -221,15 +238,23 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
         if self.codec != NvencCodec::H264 {
             return Err("AVC Matroska export requires H.264 encoding".into());
         }
+        self.write_matroska(output, max_packet_bytes)
+    }
+    /// Write H.264 or HEVC using the owned Matroska writer.
+    pub fn write_matroska<W: std::io::Write + Seek>(
+        &mut self,
+        output: &mut W,
+        max_packet_bytes: usize,
+    ) -> Result<u64, String> {
         let result = self
-            .write_avc_inner(output, max_packet_bytes, None, None)
+            .write_inner(output, max_packet_bytes, None, None)
             .map(|event| event.packets);
         if result.is_err() {
             self.failed = true;
         }
         result
     }
-    fn write_avc_inner<W: std::io::Write + Seek>(
+    fn write_inner<W: std::io::Write + Seek>(
         &mut self,
         output: &mut W,
         max_packet_bytes: usize,
@@ -240,17 +265,24 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
         let first = self
             .next_packet_controlled(cancel)?
             .ok_or("movie encoder returned no video")?;
-        let first_sample = crate::owned_avc_annexb::convert(&first.bytes, max_packet_bytes)?;
+        let first_sample = convert_packet(self.codec, &first.bytes, max_packet_bytes)?;
         let configuration = first_sample
             .configuration
             .as_ref()
-            .ok_or("first AVC output lacks SPS/PPS")?;
+            .ok_or("first encoder output lacks complete codec parameters")?;
         let (width, height) = self.renderer.buffer().dimensions();
         let tracks = [crate::owned_matroska::TrackSpec {
-            encoding: crate::owned_matroska::Encoding::Avc {
-                configuration,
-                width,
-                height,
+            encoding: match self.codec {
+                NvencCodec::H264 => crate::owned_matroska::Encoding::Avc {
+                    configuration,
+                    width,
+                    height,
+                },
+                NvencCodec::Hevc => crate::owned_matroska::Encoding::Hevc {
+                    configuration,
+                    width,
+                    height,
+                },
             },
             name: &self.renderer.metadata().name,
             language: if self.renderer.metadata().language.is_empty() {
@@ -280,13 +312,13 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
             hook.emit(writer.event());
         }
         while let Some(packet) = self.next_packet_controlled(cancel)? {
-            let sample = crate::owned_avc_annexb::convert(&packet.bytes, max_packet_bytes)?;
+            let sample = convert_packet(self.codec, &packet.bytes, max_packet_bytes)?;
             if sample
                 .configuration
                 .as_ref()
                 .is_some_and(|config| config != configuration)
             {
-                return Err("AVC configuration changed during movie export".into());
+                return Err("codec configuration changed during movie export".into());
             }
             writer
                 .write_packet(
@@ -316,10 +348,25 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
         if self.codec != NvencCodec::H264 {
             return Err("AVC Matroska export requires H.264 encoding".into());
         }
+        self.export_matroska(destination, max_packet_bytes, cancel, progress)
+    }
+    /// Publish a native H.264 or HEVC Matroska file after encoder close.
+    pub fn export_matroska(
+        &mut self,
+        destination: &std::path::Path,
+        max_packet_bytes: usize,
+        cancel: Option<&fvid_control::CancelFlag>,
+        progress: Option<&fvid_control::ProgressHook>,
+    ) -> Result<fvid_media_info::DecodeStats, String> {
         let (width, height) = self.renderer.buffer().dimensions();
+        let pixel_format = if self.renderer.buffer().bit_depth() == 10 {
+            "p010"
+        } else {
+            "nv12"
+        };
         let result = crate::owned_matroska::export_atomic(destination, cancel, progress, |file| {
             let event = self
-                .write_avc_inner(file, max_packet_bytes, cancel, progress)
+                .write_inner(file, max_packet_bytes, cancel, progress)
                 .map_err(crate::owned_matroska::Error)?;
             self.close().map_err(crate::owned_matroska::Error)?;
             Ok((
@@ -328,7 +375,7 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
                     video_frames: event.packets,
                     width,
                     height,
-                    pixel_format: "nv12".into(),
+                    pixel_format: pixel_format.into(),
                     decode_errors: 0,
                 },
                 event,
@@ -348,7 +395,7 @@ impl<R: Read + Seek> AvcMovieEncoder<R> {
         self.renderer.close()
     }
 }
-impl<R: Read + Seek> Drop for AvcMovieEncoder<R> {
+impl<R: Read + Seek> Drop for MovieEncoder<R> {
     fn drop(&mut self) {
         // Keep registered allocations alive if driver cleanup cannot finish.
         if self.close().is_err() {
@@ -360,6 +407,29 @@ impl<R: Read + Seek> Drop for AvcMovieEncoder<R> {
             ManuallyDrop::drop(&mut self.buffers);
             ManuallyDrop::drop(&mut self.renderer);
         }
+    }
+}
+fn convert_packet(
+    codec: NvencCodec,
+    bytes: &[u8],
+    limit: usize,
+) -> Result<crate::owned_avc_annexb::Packet, String> {
+    match codec {
+        NvencCodec::H264 => crate::owned_avc_annexb::convert(bytes, limit),
+        NvencCodec::Hevc => {
+            let packet = crate::owned_hevc_annexb::convert(bytes, limit)?;
+            Ok(crate::owned_avc_annexb::Packet {
+                configuration: packet.configuration,
+                sample: packet.sample,
+                sync: packet.sync,
+            })
+        }
+    }
+}
+fn validate_format(codec: NvencCodec, depth: u8) -> Result<(), String> {
+    match (codec, depth) {
+        (NvencCodec::H264 | NvencCodec::Hevc, 8) | (NvencCodec::Hevc, 10) => Ok(()),
+        _ => Err("native movie encoder requires NV12 H.264/HEVC or P010 HEVC Main10".into()),
     }
 }
 fn ticks_ns(ticks: u64, timescale: u32) -> Result<u64, String> {
@@ -387,6 +457,14 @@ fn wait_until(deadline: Instant, cancel: Option<&fvid_control::CancelFlag>) -> R
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn encoder_format_admission_preserves_ten_bit_hevc() {
+        assert!(validate_format(NvencCodec::Hevc, 10).is_ok());
+        assert!(validate_format(NvencCodec::Hevc, 8).is_ok());
+        assert!(validate_format(NvencCodec::H264, 8).is_ok());
+        assert!(validate_format(NvencCodec::H264, 10).is_err());
+        assert!(validate_format(NvencCodec::Hevc, 12).is_err());
+    }
     #[test]
     fn cancellation_interrupts_waits_before_timeout() {
         let flag = fvid_control::CancelFlag::new();
@@ -510,6 +588,7 @@ mod tests {
             let mut saved =
                 crate::owned_webm::WebmReader::open(Cursor::new(before), Default::default())
                     .unwrap();
+            saved.scan_all().unwrap();
             assert_eq!(saved.tags, metadata.file.tags);
             assert_eq!(saved.chapters.len(), metadata.file.chapters.len());
             assert_eq!(saved.tracks[0].rotation, metadata.options.rotation);
@@ -561,6 +640,85 @@ mod tests {
                     );
                 }
             }
+        }
+    }
+
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    #[test]
+    #[ignore = "requires NVIDIA NVDEC and Main10 NVENC"]
+    fn synthetic_main10_movie_encodes_and_muxes_without_libav() {
+        use crate::owned_nvdec_hevc_mp4::HevcMp4Input;
+        use std::io::Cursor;
+        let bytes = include_bytes!(
+            "../../../tests/fixtures/playback-errors/hevc-main10-cuda-edit-repeat.mp4"
+        );
+        let source = HevcMp4Input::open(Cursor::new(bytes.as_slice()), Default::default()).unwrap();
+        let scale = source.track().timescale;
+        let expected = source.movie_presentations(1000).unwrap();
+        let reader = crate::owned_nvdec_movie::MovieReader::new(source, 0, 32, 2, 1000, 8).unwrap();
+        let renderer = MovieRenderer::new(
+            reader,
+            Nv12Transform {
+                out_width: 64,
+                out_height: 64,
+                ..Default::default()
+            },
+            false,
+        )
+        .unwrap();
+        let mut encoder = MovieEncoder::new(
+            renderer,
+            NvencCodec::Hevc,
+            30,
+            1,
+            32,
+            Duration::from_secs(30),
+        )
+        .unwrap();
+        let mut output = Cursor::new(Vec::new());
+        assert_eq!(
+            encoder.write_matroska(&mut output, 1 << 20).unwrap(),
+            expected.len() as u64
+        );
+        encoder.close().unwrap();
+        let mut saved = crate::owned_webm::WebmReader::open(
+            Cursor::new(output.into_inner()),
+            Default::default(),
+        )
+        .unwrap();
+        let config =
+            fvid_codecs::codec::config::HevcConfig::parse(&saved.tracks[0].codec_private).unwrap();
+        assert_eq!(config.bit_depth_luma, 10);
+        assert_eq!(config.bit_depth_chroma, 10);
+        let mut software = fvid_codecs::codec::hevc_decoder::HevcDecoder::from_configuration(
+            &saved.tracks[0].codec_private,
+            64 << 20,
+        )
+        .unwrap();
+        let mut actual: Vec<_> = saved
+            .packets
+            .iter()
+            .map(|p| (p.pts_ns as u64, p.duration_ns.unwrap()))
+            .collect();
+        let mut times: Vec<_> = expected
+            .iter()
+            .map(|e| {
+                (
+                    ticks_ns(e.start as u64, scale).unwrap(),
+                    ticks_ns((e.end - e.start) as u64, scale).unwrap(),
+                )
+            })
+            .collect();
+        actual.sort_unstable();
+        times.sort_unstable();
+        assert_eq!(actual, times);
+        for index in 0..saved.packets.len() {
+            let frame = software
+                .decode_packet(&saved.read_packet(index).unwrap())
+                .unwrap()
+                .unwrap();
+            assert_eq!(frame.picture.depth, [10, 10]);
+            assert_eq!(frame.picture.dimensions, [64, 64]);
         }
     }
 

@@ -3,7 +3,7 @@ use crate::{
     HwFilterOptions, HwFilterStats,
     owned_nvdec_movie::{MovieReader, MovieRenderer},
     owned_nvdec_source::MovieSource,
-    owned_nvenc_movie::AvcMovieEncoder,
+    owned_nvenc_movie::MovieEncoder,
 };
 use std::{
     io::{BufReader, Read, Seek},
@@ -24,7 +24,7 @@ fn plan<R: Read + Seek>(
         return Err("sampling shader mode requires shader source".into());
     }
     // Keep remaining legacy option semantics until they have owned acceptance.
-    if options.host_bounce || source.bit_depth() != 8 {
+    if options.host_bounce || !matches!(source.bit_depth(), 8 | 10) {
         return Ok(None);
     }
     let interval = options
@@ -207,15 +207,20 @@ pub fn try_filter(
     let renderer =
         MovieRenderer::new_with_shader(reader, plan.transform, plan.full_range, shader.as_ref())?;
     let device = renderer.device_name().to_owned();
-    let mut encoder = AvcMovieEncoder::new(
+    let codec = if renderer.buffer().bit_depth() == 10 {
+        fvid_cuda::NvencCodec::Hevc
+    } else {
+        fvid_cuda::NvencCodec::H264
+    };
+    let mut encoder = MovieEncoder::new(
         renderer,
-        fvid_cuda::NvencCodec::H264,
+        codec,
         plan.fps.0,
         plan.fps.1,
         32,
         Duration::from_secs(30),
     )?;
-    let stats = encoder.export_avc_matroska(destination, 32 << 20, None, None)?;
+    let stats = encoder.export_matroska(destination, 32 << 20, None, None)?;
     Ok(Some(HwFilterStats {
         filter: if shader.is_some() {
             "cuda-shader"
@@ -229,7 +234,11 @@ pub fn try_filter(
         height: stats.height,
         host_frame_copies: 0,
         device_filter_passes: encoder.device_filter_passes(),
-        encoder: "native-h264-nvenc",
+        encoder: if codec == fvid_cuda::NvencCodec::Hevc {
+            "native-hevc-nvenc"
+        } else {
+            "native-h264-nvenc"
+        },
         host_bounce: false,
     }))
 }
@@ -239,6 +248,11 @@ mod tests {
     fn synthetic_hevc_main_and_repeated_edits_enter_native_production_route() {
         for bytes in [
             include_bytes!("../../../tests/fixtures/hevc/main-ipb.mp4").as_slice(),
+            include_bytes!("../../../tests/fixtures/hevc/main10-ipb.mp4").as_slice(),
+            include_bytes!(
+                "../../../tests/fixtures/playback-errors/hevc-main10-cuda-edit-repeat.mp4"
+            )
+            .as_slice(),
             include_bytes!("../../../tests/fixtures/playback-errors/hevc-cuda-edit-repeat.mp4")
                 .as_slice(),
         ] {
@@ -255,19 +269,53 @@ mod tests {
             );
             assert!(source.read_next(&mut Vec::new()).unwrap().unwrap().sync);
         }
-        let mut source = MovieSource::open(
-            std::io::Cursor::new(
-                include_bytes!("../../../tests/fixtures/hevc/main10-ipb.mp4").as_slice(),
-            ),
+    }
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    #[test]
+    #[ignore = "requires NVIDIA HEVC Main10 NVDEC and NVENC"]
+    fn production_hw_filter_routes_main10_movie_without_libav() {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/hevc-main10-cuda-edit-repeat.mp4");
+        struct Output(std::path::PathBuf);
+        impl Drop for Output {
+            fn drop(&mut self) {
+                let _ = std::fs::remove_file(&self.0);
+            }
+        }
+        let output = Output(std::env::temp_dir().join(format!(
+                "fvid-main10-{}-{}.mkv",
+                std::process::id(),
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap()
+                    .as_nanos()
+            )));
+        let stats = hw_filter(&source, &output.0, &HwFilterOptions::default()).unwrap();
+        assert_eq!(stats.backend, "owned-cuda-nvdec-nvenc");
+        assert_eq!(stats.encoder, "native-hevc-nvenc");
+        assert_eq!(stats.host_frame_copies, 0);
+        assert_eq!(stats.video_frames, 14);
+        let mut saved = crate::owned_webm::WebmReader::open(
+            BufReader::new(std::fs::File::open(&output.0).unwrap()),
             Default::default(),
         )
         .unwrap();
-        assert!(
-            plan(&mut source, &HwFilterOptions::default())
+        let config =
+            fvid_codecs::codec::config::HevcConfig::parse(&saved.tracks[0].codec_private).unwrap();
+        assert_eq!((config.bit_depth_luma, config.bit_depth_chroma), (10, 10));
+        let mut decoder = fvid_codecs::codec::hevc_decoder::HevcDecoder::from_configuration(
+            &saved.tracks[0].codec_private,
+            64 << 20,
+        )
+        .unwrap();
+        for index in 0..saved.packets.len() {
+            let frame = decoder
+                .decode_packet(&saved.read_packet(index).unwrap())
                 .unwrap()
-                .is_none(),
-            "Main10 requires P010 renderer qualification"
-        );
+                .unwrap();
+            assert_eq!(frame.picture.depth, [10, 10]);
+        }
+        assert_eq!(saved.packets.len(), 14);
     }
     #[cfg(any(target_os = "linux", target_os = "windows"))]
     #[test]
@@ -302,6 +350,7 @@ mod tests {
                 Default::default(),
             )
             .unwrap();
+            input.scan_all().unwrap();
             assert_eq!(input.packets.len(), events.len());
             let mut decoder = fvid_codecs::codec::avc_decoder::AvcDecoder::new(
                 &input.tracks[0].codec_private,

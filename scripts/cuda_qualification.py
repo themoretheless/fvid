@@ -45,9 +45,11 @@ def qualify_native_tests(root, run):
             "production_hw_filter_routes_synthetic_avc_without_libav",
             "production_hw_filter_routes_sps_crop_without_libav",
             "production_hw_filter_routes_hevc_movie_without_libav",
+            "production_hw_filter_routes_main10_movie_without_libav",
         ], ["--no-default-features", "--features", "native-cuda"]),
         ("fvid-media", "owned_nvenc_movie", [
             "synthetic_movie_encodes_and_muxes_without_libav",
+            "synthetic_main10_movie_encodes_and_muxes_without_libav",
         ], ["--no-default-features", "--features", "native-cuda"]),
         ("fvid-media", "owned_nvdec_movie", [
             "synthetic_movie_blanks_and_repeated_ranges_present_on_nvidia",

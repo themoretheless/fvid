@@ -488,7 +488,7 @@ both originally blank spans. NVIDIA execution remains unverified.
 ## Production CUDA routing
 
 The existing `hw-filter` entrypoint now tries the owned CUDA route first for
-AVC or qualified eight-bit HEVC MP4 input and `.mkv` output. CPU qualification parses every access unit using
+AVC or qualified Main/Main10 HEVC MP4 input and `.mkv` output. CPU qualification parses every access unit using
 the same owned POC/DPB/parameter adapter before GPU selection. Accepted files run
 through owned MP4 input, movie reader, filter/shader, retained NVENC slots and
 atomic Matroska publication. No libav retry occurs after native execution starts.
@@ -497,9 +497,10 @@ The standalone `native-cuda` feature exports the same operation contracts and
 
 The native route currently excludes host bounce
 from automatic selection to retain existing command semantics until qualified;
-Main10 now has owned P010 buffers/rendering and direct NVENC Main10 API support,
-but still needs retained P010 movie-encoder pools and HEVC bitstream/container
-export; other codecs/containers remain on
+Main10 uses retained P010 encoder pools/copies, Main10 NVENC registration and
+submission, and owned HEVC Annex B/hvcC/Matroska export. Its hardware acceptance
+test remains ignored until run on NVIDIA; host tests qualify source syntax,
+clock and bit-exact Annex B conversion. Other codecs/containers remain on
 the legacy route. This is not yet elimination
 of `cuda-hw`'s build dependency. The legacy operation exports video only, and the
 owned route preserves that track scope while retaining metadata and exact movie

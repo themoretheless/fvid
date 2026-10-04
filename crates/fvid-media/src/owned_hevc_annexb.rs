@@ -166,6 +166,8 @@ mod tests {
                 HevcDecoder::from_configuration(&original_configuration, 64 << 20).unwrap();
             let mut actual = None;
             let mut decoded = 0;
+            let mut packets = Vec::new();
+            let mut saved_configuration = Vec::new();
             for index in 0..count {
                 let mut original = Vec::new();
                 reader.read_packet(0, index, &mut original).unwrap();
@@ -188,6 +190,7 @@ mod tests {
                 if index == 0 {
                     assert!(packet.sync);
                     let configuration = packet.configuration.as_ref().unwrap();
+                    saved_configuration = configuration.clone();
                     let parsed = HevcConfig::parse(configuration).unwrap();
                     assert_eq!(parsed.bit_depth_luma, depth);
                     assert_eq!(parsed.length_size, 4);
@@ -208,9 +211,45 @@ mod tests {
                 for (a, b) in a.picture.planes.iter().zip(&b.picture.planes) {
                     assert_eq!(a.samples(), b.samples());
                 }
+                packets.push(packet);
                 decoded += 1;
             }
             assert_eq!(decoded, 17);
+            let mut output = Cursor::new(Vec::new());
+            let tracks = [crate::owned_matroska::TrackSpec {
+                encoding: crate::owned_matroska::Encoding::Hevc {
+                    configuration: &saved_configuration,
+                    width: 64,
+                    height: 64,
+                },
+                name: "",
+                language: "und",
+            }];
+            let mut writer =
+                crate::owned_matroska::PacketWriter::new(&mut output, &tracks).unwrap();
+            for (index, packet) in packets.iter().enumerate() {
+                writer
+                    .write_packet(
+                        0,
+                        index as u64 * 33_333_333,
+                        33_333_333,
+                        packet.sync,
+                        &packet.sample,
+                    )
+                    .unwrap();
+            }
+            writer.finish().unwrap();
+            let mut saved = crate::owned_webm::WebmReader::open(
+                Cursor::new(output.into_inner()),
+                Default::default(),
+            )
+            .unwrap();
+            saved.scan_all().unwrap();
+            assert_eq!(saved.tracks[0].codec_private, saved_configuration);
+            assert_eq!(saved.packets.len(), 17);
+            for (index, packet) in packets.iter().enumerate() {
+                assert_eq!(saved.read_packet(index).unwrap(), packet.sample);
+            }
         }
     }
 
