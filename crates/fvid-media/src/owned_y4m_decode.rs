@@ -324,13 +324,14 @@ pub fn transform_frame_requested(
     frame: &[u8],
     transform: &DecodeTransform,
 ) -> Result<Vec<u8>> {
-    transform_frame_requested_cached(header, frame, transform, None)
+    transform_frame_requested_cached(header, frame, transform, None, 6)
 }
 pub(crate) fn transform_frame_requested_cached(
     header: &Header,
     frame: &[u8],
     transform: &DecodeTransform,
     lut: Option<&crate::owned_lutyuv::LutYuv>,
+    matrix: u8,
 ) -> Result<Vec<u8>> {
     if !supported_request(transform) {
         return Err("owned Y4M decoder does not yet implement requested transform options".into());
@@ -339,7 +340,7 @@ pub(crate) fn transform_frame_requested_cached(
         return Err("scheduled overlay requires the streaming frame API".into());
     }
     let mut output = transform_frame_geometry_requested(header, frame, transform)?;
-    apply_pixel_filters_cached(header, transform, &mut output, lut)?;
+    apply_pixel_filters_cached(header, transform, &mut output, lut, matrix)?;
     Ok(output)
 }
 pub(crate) fn transform_frame_geometry_requested(
@@ -425,13 +426,14 @@ pub(crate) fn apply_pixel_filters(
     transform: &DecodeTransform,
     output: &mut Vec<u8>,
 ) -> Result<()> {
-    apply_pixel_filters_cached(header, transform, output, None)
+    apply_pixel_filters_cached(header, transform, output, None, 6)
 }
 pub(crate) fn apply_pixel_filters_cached(
     header: &Header,
     transform: &DecodeTransform,
     output: &mut Vec<u8>,
     lut: Option<&crate::owned_lutyuv::LutYuv>,
+    matrix: u8,
 ) -> Result<()> {
     if transform.unsharp.is_some()
         || transform.unsharp.is_some()
@@ -531,7 +533,7 @@ pub(crate) fn apply_pixel_filters_cached(
                 else {crate::owned_lutyuv::LutYuv::parse(args)?.apply(&mut frame, header.depth(), header.full_range()?)?;}
             }
             if let Some(args) = transform.colorhold.as_deref() {
-                crate::owned_colorhold::ColorHold::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::Bt601)?;
+                crate::owned_colorhold::ColorHold::parse(args)?.apply_yuv(&mut frame,header.depth(),header.full_range()?,crate::owned_yuv_rgb::Matrix::from_code(matrix)?)?;
             }
             Ok(())
         })();
@@ -907,7 +909,7 @@ fn decode_reader_frames(
                 if let Some(overlay) = overlay.as_mut() {
                     overlay.apply(&presented_header, &mut output, index)?;
                 }
-                apply_pixel_filters_cached(&header, transform, &mut output, lut.as_ref())?;
+                apply_pixel_filters_cached(&header, transform, &mut output, lut.as_ref(), 6)?;
                 std::hint::black_box(&output);
             }
             let (pts, duration) = if visit.is_some() {

@@ -7,6 +7,16 @@ pub enum Matrix {
     Bt709,
     Bt2020,
 }
+impl Matrix {
+    pub fn from_code(code: u8) -> Result<Self> {
+        match code {
+            1 => Ok(Self::Bt709),
+            2 | 5 | 6 => Ok(Self::Bt601),
+            9 => Ok(Self::Bt2020),
+            _ => Err("RGB filter colour matrix is not implemented".into()),
+        }
+    }
+}
 /// Run an RGB16 filter per chroma cell, preserving source precision and layout.
 /// Chroma reconstruction uses the shared source cell; output chroma is averaged
 /// over the actual luma samples, including partial cells at odd frame edges.

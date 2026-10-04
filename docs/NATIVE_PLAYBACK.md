@@ -3478,10 +3478,11 @@ colour names and RRGGBB hex keys. Invalid options and packed sample lengths
 refuse before mutation. The explicit `ffmpeg_colorhold_reference` benchmark
 matches all 2,048 component samples across hard and blended selections at both
 depths; ordinary tests invoke no external codec. Owned planar YUV conversion and library Y4M/FFV1 decode/lossless export now
-accept `colorhold`, using BT.601 by default. Native CLI wiring, metadata-driven
-matrix selection and complete named colour syntax remain outstanding, so
-capability inventory does not yet advertise this filter and other legacy
-workflows are retained.
+accept `colorhold`, using BT.601 by default. Native CLI decode, plan, lossless export and `export-y4m` now accept
+`--colorhold`. Native readers and library FFV1 decode pass matrix metadata to
+the converter (BT.601/709/2020 nonconstant-luminance); Y4M defaults to BT.601.
+Unsupported matrix codes refuse conversion. Complete named colour syntax and
+swscale conversion parity remain outstanding; other legacy workflows remain.
 
 The reusable `owned_yuv_rgb::filter_rgb16` converter accepts BT.601/709/2020,
 limited/full range, 8–16-bit planar samples and arbitrary valid subsampling.

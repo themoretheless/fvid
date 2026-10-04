@@ -121,6 +121,7 @@ pub(crate) fn decode_ffv1(
     }
     let number = track.number;
     let full_range = track.colour.full_range;
+    let matrix = if track.colour.matrix == 0 {6} else {track.colour.matrix};
     let default_duration = track.default_duration_ns;
     let width = u32::try_from(track.width).map_err(|_| "FFV1 width exceeds API range")?;
     let height = u32::try_from(track.height).map_err(|_| "FFV1 height exceeds API range")?;
@@ -226,6 +227,7 @@ pub(crate) fn decode_ffv1(
                 &mut overlay,
                 pts_ns,
                 lut.as_ref(),
+                matrix,
             )?
             else {
                 return Ok(None);
@@ -349,7 +351,7 @@ fn process_frame(
     transform: &DecodeTransform,
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
     process_frame_with_overlay(
-        decoded, monochrome, full_range, transform, None, &mut None, 0, None,
+        decoded, monochrome, full_range, transform, None, &mut None, 0, None, 6,
     )
 }
 fn process_frame_with_overlay(
@@ -361,6 +363,7 @@ fn process_frame_with_overlay(
     overlay: &mut Option<crate::owned_y4m_overlay::OverlayReader>,
     pts_ns: i64,
     lut: Option<&crate::owned_lutyuv::LutYuv>,
+    matrix: u8,
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
     use crate::owned_y4m::{Header, PixelFormat};
     if transform.eq.is_some() && !(8..=16).contains(&decoded.depth) {
@@ -455,10 +458,10 @@ fn process_frame_with_overlay(
             .as_mut()
             .unwrap()
             .apply(&presented, &mut pixels, pts_ns as u64)?;
-        crate::owned_y4m_decode::apply_pixel_filters_cached(&header, transform, &mut pixels, lut)?;
+        crate::owned_y4m_decode::apply_pixel_filters_cached(&header, transform, &mut pixels, lut, matrix)?;
         pixels
     } else {
-        crate::owned_y4m_decode::transform_frame_requested_cached(&header, &decoded.frame.data, transform, lut)?
+        crate::owned_y4m_decode::transform_frame_requested_cached(&header, &decoded.frame.data, transform, lut, matrix)?
     };
     Ok(Some((
         u32::try_from(width).map_err(|_| "FFV1 output width overflow")?,

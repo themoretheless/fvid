@@ -39,6 +39,7 @@ pub fn capabilities() -> Capabilities {
             "boxblur",
             "chromashift",
             "colorize",
+            "colorhold",
             "monochrome",
             "lutyuv",
             "crop",
@@ -92,7 +93,8 @@ mod tests {
         for decoder in ["h264", "hevc", "av1", "vp9", "opus"] {
             assert!(!inventory.decoders.iter().any(|name| name == decoder));
         }
-        for filter in ["colorize", "monochrome",
+        for filter in ["colorize",
+            "colorhold", "monochrome",
             "lutyuv", "eq", "hue", "bilateral"] {
             assert!(inventory.filters.iter().any(|name| name == filter));
         }

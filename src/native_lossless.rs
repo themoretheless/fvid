@@ -105,7 +105,8 @@ pub fn write_mp4_processed<W: Write + Seek>(
         .read_frame_raw()?
         .ok_or_else(|| invalid("input has no decoded video frames"))?;
     check(cancel)?;
-    let source_full_range = reader.colour().full_range;
+    let source_colour = reader.colour();
+    let source_full_range = source_colour.full_range;
     let processed = processor.is_some();
     let bake_rotation = processor.is_some() || !geometry.is_identity() || !filters.is_empty();
     let prepare = |frame: &RawFrame, display: [usize; 2]| -> Result<_> {
@@ -122,7 +123,7 @@ pub fn write_mp4_processed<W: Write + Seek>(
         } else {
             geometry.apply(frame, w, h)?
         };
-        if !processed {filters.apply_range(&mut samples, depth, source_full_range)?;}
+        if !processed {filters.apply_colour(&mut samples, depth, source_full_range, source_colour.matrix)?;}
         Ok(samples)
     };
     let first_samples = prepare(&first, reader.dimensions())?;
@@ -285,7 +286,7 @@ pub fn write_mp4_processed<W: Write + Seek>(
         {
             return Err(invalid("FFV1 transformed geometry changed"));
         }
-        if processed {filters.apply_range(&mut samples,bit_depth,source_full_range)?;}
+        if processed {filters.apply_colour(&mut samples,bit_depth,source_full_range,source_colour.matrix)?;}
         let packet = crate::codec::ffv1_encoder::encode(&samples, bit_depth)?;
         check(cancel)?;
         let (pts, duration) = time.unwrap();
@@ -418,7 +419,7 @@ pub fn supports(transform: &crate::media_info::LosslessTransform) -> bool {
             histeq: None,
             shuffleplanes: _,
             lutyuv: _,
-            colorhold: None,
+            colorhold: _,
             fade: None,
             perspective: None,
             lumakey: None,
@@ -500,6 +501,7 @@ pub fn configuration(
         colorize: transform.colorize.clone(),
         monochrome: transform.monochrome.clone(),
         lutyuv: transform.lutyuv.clone(),
+        colorhold: transform.colorhold.clone(),
         pixelize: transform.pixelize.clone(),
         boxblur: transform.boxblur.clone(),
         gblur: transform.gblur.clone(),

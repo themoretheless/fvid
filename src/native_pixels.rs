@@ -29,6 +29,7 @@ include!("../crates/fvid-media/src/owned_gradient_impl.rs");
 /// flag order: equalization, unsharp, hue, Gaussian blur, average blur, box blur, inversion, Sobel, Prewitt, Roberts, Kirsch, Scharr, monochrome, pixelize, dilation, erosion, colorize, chroma shift, plane shuffle.
 #[derive(Default)]
 pub struct PixelFilters {
+    pub colorhold: Option<fvid_media::owned_colorhold::ColorHold>,
     pub lutyuv: Option<fvid_media::owned_lutyuv::LutYuv>,
     pub unsharp: Option<fvid_media::owned_unsharp::Unsharp>,
     pub eq: Option<fvid_media::owned_eq::Equalizer>,
@@ -49,6 +50,7 @@ pub struct PixelFilters {
 impl PixelFilters {
     pub fn from_request(request: &crate::media_info::DecodeTransform) -> Result<Self> {
         let mut result = Self {
+            colorhold: request.colorhold.as_deref().map(fvid_media::owned_colorhold::ColorHold::parse).transpose().map_err(|e| invalid(&e))?,
             lutyuv: request.lutyuv.as_deref().map(fvid_media::owned_lutyuv::LutYuv::parse).transpose().map_err(|e| invalid(&e))?,
             monochrome: request.monochrome.as_deref().map(fvid_media::owned_monochrome::Monochrome::parse).transpose().map_err(|e| invalid(&e))?,
             colorize: request.colorize.as_deref().map(fvid_media::owned_colorize::Colorize::parse).transpose().map_err(|e| invalid(&e))?,
@@ -130,6 +132,7 @@ impl PixelFilters {
             && self.boxblur.is_none()
             && self.monochrome.is_none()
             && self.lutyuv.is_none()
+            && self.colorhold.is_none()
             && self.colorize.is_none()
             && self.bilateral.is_none()
             && self.gblur.is_none()
@@ -144,6 +147,9 @@ impl PixelFilters {
         self.apply_range(frame, depth, false)
     }
     pub fn apply_range(&self, frame: &mut GeometryFrame, depth: u8, full_range: bool) -> Result<()> {
+        self.apply_colour(frame, depth, full_range, 6)
+    }
+    pub fn apply_colour(&self, frame: &mut GeometryFrame, depth: u8, full_range: bool, matrix_code:u8) -> Result<()> {
         if let Some(filter) = &self.eq {
             filter.apply(frame, depth).map_err(|error| invalid(&error))?;
         }
@@ -184,6 +190,10 @@ impl PixelFilters {
         }
         if let Some(filter)=self.shuffleplanes {crate::native_shuffleplanes::apply(filter,frame,depth)?;}
         if let Some(filter) = &self.lutyuv {filter.apply(frame,depth,full_range).map_err(|e|invalid(&e))?;}
+        if let Some(filter) = &self.colorhold {
+            if frame.subsampling.is_none() {filter.apply_rgb(&mut frame.data,depth,3).map_err(|e|invalid(&e))?;}
+            else {let matrix=fvid_media::owned_yuv_rgb::Matrix::from_code(matrix_code).map_err(|e|invalid(&e))?;filter.apply_yuv(frame,depth,full_range,matrix).map_err(|e|invalid(&e))?;}
+        }
         Ok(())
     }
 }
@@ -276,7 +286,7 @@ mod monochrome_tests {
             };
             assert!(crate::native_media::supports_video_request(&request));
             let lossless = crate::media_info::LosslessTransform {
-                lutyuv: request.lutyuv.as_deref().map(fvid_media::owned_lutyuv::LutYuv::parse).transpose().map_err(|e| invalid(&e))?,
+                lutyuv: request.lutyuv.clone(),
             monochrome: request.monochrome.clone(),
                 ..Default::default()
             };
@@ -328,5 +338,20 @@ mod monochrome_tests {
             }
             assert_eq!(index, 3);
         }
+    }
+}
+
+#[cfg(test)]
+mod colorhold_tests {
+    use super::*;
+    #[test]
+    fn native_colour_metadata_selects_matrix_and_preserves_selected_samples() {
+        let request=crate::media_info::DecodeTransform{colorhold:Some("red:0.02".into()),..Default::default()};
+        assert!(crate::native_media::supports_video_request(&request));
+        let filters=PixelFilters::from_request(&request).unwrap();
+        let mut frame=GeometryFrame{width:1,height:1,subsampling:Some([1,1]),data:vec![63,102,240]};
+        filters.apply_colour(&mut frame,8,false,1).unwrap();assert_eq!(frame.data,[63,102,240]);
+        filters.apply_colour(&mut frame,8,false,6).unwrap();assert_eq!(&frame.data[1..],&[128,128]);
+        let before=frame.data.clone();assert!(filters.apply_colour(&mut frame,8,false,10).is_err());assert_eq!(frame.data,before);
     }
 }
