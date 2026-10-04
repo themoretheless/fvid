@@ -558,3 +558,17 @@ right/bottom crop 2. Own software decoding and production admission accept all
 adds default visible-size export and nested crop with both flips, then checks
 mux dimensions, absent container crop and every FVid-decoded output picture.
 These GPU checks have only been cross-compiled here.
+
+## Production CUDA decode-only routing
+
+`decode --device` now admits qualified AVC and HEVC Main/Main10 MP4 inputs to
+owned MP4 demux, POC/DPB scheduling and direct NVDEC submission. Each visible
+picture is mapped/unmapped to wait for device reconstruction without copying
+pixels to CPU. Statistics report visible dimensions after SPS cropping and `cuda/nv12` or `cuda/p010`.
+The standalone `native-cuda` feature exports `decode_video_cuda` without libav.
+The temporary `cuda-hw` entrypoint calls this route before its legacy fallback;
+unsupported admission happens before device creation, and execution errors never
+retry through libav. CPU tests prove synthetic source admission and rewind.
+An ignored NVIDIA acceptance test covers AVC crop, HEVC Main and Main10 output
+counts/dimensions/formats. It has not run here. Other codecs/containers still
+need owned device adapters before the `cuda-hw` legacy feature edge is removed.
